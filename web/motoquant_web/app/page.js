@@ -1,0 +1,182 @@
+import { Zap, TrendingUp, BarChart3, Github } from 'lucide-react';
+
+export default function HomePage() {
+  return (
+    <div className="min-h-screen bg-black text-white">
+
+      {/* Nav */}
+      <nav className="border-b border-gray-800 sticky top-0 bg-black/95 backdrop-blur z-50">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="text-2xl font-bold tracking-tight">
+            <span className="text-orange-500">Moto</span>Quant Pro
+          </div>
+          <div className="flex gap-6 items-center text-sm">
+            <a href="#physics" className="hover:text-orange-500 transition-colors">Physics</a>
+            <a href="#validation" className="hover:text-orange-500 transition-colors">Validation</a>
+            <a href="#cta" className="hover:text-orange-500 transition-colors">Get Started</a>
+            <a href="https://github.com/da25mem5s02-debug/MotoQuant_v1" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+              <Github size={20} />
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero */}
+      <section className="max-w-6xl mx-auto px-6 py-24 text-center">
+        <div className="mb-6 inline-block px-4 py-2 bg-orange-500/10 border border-orange-500/30 rounded-full text-orange-400 text-sm font-medium">
+          Open Source Drag Racing Physics Engine
+        </div>
+        <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+          The Physics of Faster
+        </h1>
+        <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-6">
+          First-principles physics simulation for quarter-mile drag racing. Predict ET, optimize builds, and understand what actually moves the needle on the strip.
+        </p>
+        <p className="text-gray-500 text-sm">
+          Built for the Indian drag racing community. Validated on real bikes at Aamby Valley, MMRT, and beyond.
+        </p>
+      </section>
+
+      {/* Validation */}
+      <section id="validation" className="bg-gray-950 border-t border-gray-800 py-24">
+        <div className="max-w-6xl mx-auto px-6">
+          <h2 className="text-3xl font-bold mb-3">Validated on Real Data</h2>
+          <p className="text-gray-400 mb-12 max-w-2xl">
+            Our 15-submodel physics engine is tested against real drag racing telemetry and dyno data.
+          </p>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { name: 'Suzuki GSX-R 1000 K5', cc: '1000cc Superbike', target: '9.97s', sim: '10.04s', accuracy: '±0.07s (0.7%)', check: true },
+              { name: 'Yamaha YZF-R1 4C8', cc: '1000cc Superbike', target: '10.2–10.4s', sim: '~10.3s', accuracy: 'In-range ✓', check: true },
+              { name: 'Suzuki Hayabusa Gen1', cc: '1300cc Hyperbike', target: '10.1–10.7s', sim: 'In range', accuracy: 'Validated ✓', check: true },
+            ].map((bike) => (
+              <div key={bike.name} className="bg-black border border-gray-800 rounded-xl p-8">
+                <h3 className="font-semibold mb-1">{bike.name}</h3>
+                <p className="text-sm text-gray-500 mb-6">{bike.cc}</p>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1">Target ET</p>
+                    <p className="text-2xl font-bold text-orange-400">{bike.target}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1">Simulated ET</p>
+                    <p className="text-2xl font-bold">{bike.sim}</p>
+                  </div>
+                  <div className="border-t border-gray-800 pt-4">
+                    <p className="text-sm font-semibold text-green-400">{bike.accuracy}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Physics */}
+      <section id="physics" className="max-w-6xl mx-auto px-6 py-24">
+        <h2 className="text-3xl font-bold mb-12">15 Physics Sub-Models</h2>
+        <div className="grid md:grid-cols-2 gap-10">
+          {[
+            {
+              icon: <Zap className="text-orange-500" size={20} />,
+              title: 'Engine & Drivetrain',
+              items: ['3D engine torque curves (Willans friction model)', 'Forced induction — turbo, supercharger, nitrous', 'Gear shifting and clutch engagement dynamics', 'Chain drive losses and sprocket ratios'],
+            },
+            {
+              icon: <BarChart3 className="text-orange-500" size={20} />,
+              title: 'Aerodynamics & Grip',
+              items: ['Drag coefficient and frontal area per-model', 'Tire slip dynamics (Pacejka + thermal model)', 'Weight transfer and traction limits', 'Rider CoG shift and wheelie physics'],
+            },
+            {
+              icon: <TrendingUp className="text-orange-500" size={20} />,
+              title: 'Environment & Setup',
+              items: ['Air density, altitude and temperature correction', 'Rolling resistance and surface grip multipliers', 'Staging, reaction time, two-step launch control', 'Wind and live weather effects'],
+            },
+            {
+              icon: <Github className="text-orange-500" size={20} />,
+              title: 'Integration & Validation',
+              items: ['RK4 fixed-step integrator at 1 ms timestep', 'Adaptive step-size solver (RK45)', '245+ passing test cases', 'Validated against real telemetry data'],
+            },
+          ].map((block) => (
+            <div key={block.title}>
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                {block.icon} {block.title}
+              </h3>
+              <ul className="space-y-2 text-gray-300 text-sm">
+                {block.items.map((item) => (
+                  <li key={item}>• {item}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Stats */}
+      <section className="bg-gray-950 border-t border-gray-800 py-24">
+        <div className="max-w-6xl mx-auto px-6">
+          <h2 className="text-3xl font-bold mb-12">Curated Bike Library</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { num: '81', label: 'Bikes', note: '15 manufacturers' },
+              { num: '29', label: 'Tires', note: 'Pacejka + thermal model' },
+              { num: '58', label: 'Parts', note: 'Sprockets, exhaust, ECU, nitrous' },
+              { num: '12', label: 'Venues', note: 'India + international' },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center">
+                <div className="text-4xl font-bold text-orange-400 mb-1">{stat.num}</div>
+                <p className="text-gray-300 font-medium">{stat.label}</p>
+                <p className="text-gray-500 text-xs mt-1">{stat.note}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section id="cta" className="max-w-6xl mx-auto px-6 py-24">
+        <div className="bg-gradient-to-br from-orange-600/20 to-orange-500/10 border border-orange-500/30 rounded-2xl p-12 text-center">
+          <h2 className="text-3xl font-bold mb-4">Ready to Optimize Your Build?</h2>
+          <p className="text-gray-300 mb-10 max-w-xl mx-auto">
+            MotoQuant Pro is in active development. Try the CLI today — the web simulator is coming Q3 2026.
+          </p>
+          <div className="grid sm:grid-cols-2 gap-4 max-w-xl mx-auto mb-10">
+            <div className="text-left p-5 bg-black/50 rounded-xl border border-gray-800">
+              <h3 className="font-semibold mb-1">Use the CLI</h3>
+              <p className="text-sm text-gray-400">Run full simulations from your terminal. Fork it, contribute, or build your own analysis on top.</p>
+            </div>
+            <div className="text-left p-5 bg-black/50 rounded-xl border border-gray-800">
+              <h3 className="font-semibold mb-1">Web Simulator <span className="text-orange-400 text-xs">Q3 2026</span></h3>
+              <p className="text-sm text-gray-400">Interactive browser-based simulator with live tuning and real-time ET prediction.</p>
+            </div>
+          </div>
+          <div className="flex gap-4 justify-center flex-wrap">
+            <a
+              href="https://github.com/da25mem5s02-debug/MotoQuant_v1"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-8 py-3 bg-orange-600 hover:bg-orange-700 rounded-lg font-semibold transition-colors"
+            >
+              <Github size={20} /> View on GitHub
+            </a>
+            <a
+              href="https://github.com/da25mem5s02-debug/MotoQuant_v1#readme"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-8 py-3 border border-orange-500 text-orange-400 hover:bg-orange-500/10 rounded-lg font-semibold transition-colors"
+            >
+              Quick Start
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-800 py-10 text-center text-gray-500 text-sm">
+        <p>Built for the Indian drag racing community. Validated physics, open source.</p>
+        <p className="mt-2">motoquant.in · <a href="https://github.com/da25mem5s02-debug/MotoQuant_v1" className="text-orange-500 hover:text-orange-400">GitHub</a> · Made with ❤️ for the strip</p>
+      </footer>
+
+    </div>
+  );
+}
