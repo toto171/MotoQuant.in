@@ -1,0 +1,353 @@
+"""
+MotoQuant Pro — BikeConfig ↔ Database Bridge
+============================================
+Lossless conversion between the in-memory dataclass hierarchy (BikeConfig)
+and the relational database representation.
+
+Guarantees:
+  - config → DB → config round-trip is bit-exact for all scalar params
+  - Dyno curves preserved to full float64 precision
+  - Gear ratios preserved as ordered lists
+  - Environment params handled separately (venue + weather records)
+"""
+
+import json
+import dataclasses
+from typing import Dict, Any, Optional, Tuple
+
+import numpy as np
+
+from ..models import (
+    BikeConfig, ChassisParams, EngineParams, ForcedInductionParams,
+    DrivetrainParams, ClutchParams, TireParams, AeroParams,
+    SuspensionParams, BrakingParams, WheelieParams, RiderParams,
+    ParasiticParams, StagingParams, EnvironmentParams, DynoCurve,
+)
+from ..config_io import _dataclass_to_dict, _dyno_to_dict, _dyno_from_dict
+
+
+# Section name → dataclass class (excludes environment — that comes from venue/weather)
+PARAM_SECTIONS = {
+    "chassis":           ChassisParams,
+    "engine":            EngineParams,
+    "forced_induction":  ForcedInductionParams,
+    "drivetrain":        DrivetrainParams,
+    "clutch":            ClutchParams,
+    "tires":             TireParams,
+    "aero":              AeroParams,
+    "suspension":        SuspensionParams,
+    "braking":           BrakingParams,
+    "wheelie":           WheelieParams,
+    "rider":             RiderParams,
+    "parasitic":         ParasiticParams,
+    "staging":           StagingParams,
+}
+
+# DB column name → PARAM_SECTIONS key
+DB_COLUMN_TO_SECTION = {
+    "chassis_params":          "chassis",
+    "engine_params":           "engine",
+    "forced_induction_params": "forced_induction",
+    "drivetrain_params":       "drivetrain",
+    "clutch_params":           "clutch",
+    "tire_params":             "tires",
+    "aero_params":             "aero",
+    "suspension_params":       "suspension",
+    "braking_params":          "braking",
+    "wheelie_params":          "wheelie",
+    "rider_params":            "rider",
+    "parasitic_params":        "parasitic",
+    "staging_params":          "staging",
+}
+
+
+def _serialize_section(section_obj) -> str:
+    """Serialize a dataclass section to JSON string, handling DynoCurve + numpy."""
+    d = _dataclass_to_dict(section_obj)
+    return json.dumps(d, default=_json_default)
+
+
+def _json_default(obj):
+    """JSON serializer for numpy types."""
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    if isinstance(obj, (np.integer,)):
+        return int(obj)
+    if isinstance(obj, (np.floating,)):
+        return float(obj)
+    raise TypeError(f"Not JSON serializable: {type(obj)}")
+
+
+def _deserialize_section(json_str: str, section_name: str):
+    """Deserialize JSON string back to the appropriate dataclass."""
+    d = json.loads(json_str)
+    cls = PARAM_SECTIONS[section_name]
+
+    # Special handling: DynoCurve in engine params
+    if section_name == "engine" and "dyno_curve" in d:
+        dc = d.pop("dyno_curve")
+        if dc is not None:
+            d["dyno_curve"] = _dyno_from_dict(dc)
+
+    # Filter to known fields only
+    field_names = {f.name for f in dataclasses.fields(cls)}
+    filtered = {k: v for k, v in d.items() if k in field_names}
+
+    return cls(**filtered)
+
+
+# ────────────────────────────────────────────
+# BikeConfig → DB row data
+# ────────────────────────────────────────────
+
+def config_to_db_row(config: BikeConfig) -> Dict[str, Any]:
+    """
+    Convert a BikeConfig to a dict suitable for INSERT into bike_configs.
+
+    Returns a dict with keys matching bike_configs columns:
+      chassis_params, engine_params, ... staging_params  (all JSON strings)
+
+    Does NOT include: bike_model_id, version, is_current, etc.
+    Those are set by the repository.
+    """
+    row = {}
+    for db_col, section_key in DB_COLUMN_TO_SECTION.items():
+        section_obj = getattr(config, section_key)
+        row[db_col] = _serialize_section(section_obj)
+    return row
+
+
+def extract_dyno_curve(config: BikeConfig) -> Optional[Dict[str, Any]]:
+    """
+    Extract dyno curve data from a BikeConfig for the dyno_curves table.
+
+    Returns None if no dyno curve is present.
+    """
+    if config.engine.dyno_curve is None:
+        return None
+    dc = config.engine.dyno_curve
+    return {
+        "curve_type": "torque",
+        "is_at_wheel": 1 if dc.is_at_wheel else 0,
+        "rpm_points": json.dumps(dc.rpm.tolist()),
+        "torque_values": json.dumps(dc.torque_nm.tolist()),
+        "num_points": len(dc.rpm),
+    }
+
+
+def extract_headline_specs(config: BikeConfig) -> Dict[str, Any]:
+    """
+    Extract searchable headline specs from a BikeConfig
+    for the bike_models table.
+    """
+    return {
+        "displacement_cc":   config.engine.displacement_cc,
+        "bore_mm":           config.engine.bore_mm,
+        "stroke_mm":         config.engine.stroke_mm,
+        "compression_ratio": config.engine.compression_ratio,
+        "peak_power_hp":     config.engine.peak_power_hp,
+        "peak_power_rpm":    config.engine.peak_power_rpm,
+        "peak_torque_nm":    config.engine.peak_torque_nm,
+        "peak_torque_rpm":   config.engine.peak_torque_rpm,
+        "dry_mass_kg":       config.chassis.dry_mass_kg,
+        "wheelbase_mm":      config.chassis.wheelbase_mm,
+        "seat_height_mm":    config.chassis.seat_height_mm,
+    }
+
+
+# ────────────────────────────────────────────
+# DB row → BikeConfig
+# ────────────────────────────────────────────
+
+def db_row_to_config(
+    row: dict,
+    name: str = "DB Bike",
+    environment: Optional[EnvironmentParams] = None,
+    dyno_override: Optional[DynoCurve] = None,
+) -> BikeConfig:
+    """
+    Reconstruct a BikeConfig from a bike_configs DB row.
+
+    Parameters
+    ----------
+    row : dict
+        A dict-like row from the bike_configs table.
+    name : str
+        Bike display name (from bike_models table).
+    environment : EnvironmentParams, optional
+        Environment to apply (from venue + weather). If None, uses defaults.
+    dyno_override : DynoCurve, optional
+        If provided, overrides the dyno curve stored in engine_params JSON.
+        Useful when loading from the dedicated dyno_curves table.
+    """
+    kwargs = {"name": name}
+
+    for db_col, section_key in DB_COLUMN_TO_SECTION.items():
+        json_str = row[db_col] if db_col in row.keys() else row[db_col]
+        section = _deserialize_section(json_str, section_key)
+        kwargs[section_key] = section
+
+    # Override dyno curve if provided separately
+    if dyno_override is not None:
+        kwargs["engine"].dyno_curve = dyno_override
+
+    # Apply environment
+    if environment is not None:
+        kwargs["environment"] = environment
+    else:
+        kwargs["environment"] = EnvironmentParams()
+
+    return BikeConfig(**kwargs)
+
+
+def venue_row_to_environment(
+    venue_row: dict,
+    weather_row: Optional[dict] = None,
+) -> EnvironmentParams:
+    """
+    Build an EnvironmentParams from a venues row + optional weather_records row.
+    """
+    env = EnvironmentParams(
+        venue_name=venue_row["name"],
+        altitude_m=venue_row["altitude_m"],
+        track_surface=venue_row["surface_type"] or "asphalt",
+        track_gradient_pct=venue_row["track_gradient_pct"] or 0.0,
+        track_heading_deg=venue_row["track_heading_deg"] or 0.0,
+    )
+
+    if weather_row is not None:
+        env.ambient_temp_c = weather_row["ambient_temp_c"] or 25.0
+        env.relative_humidity_pct = weather_row["relative_humidity_pct"] or 50.0
+        env.barometric_pressure_hpa = weather_row["barometric_pressure_hpa"] or 1013.25
+        env.wind_speed_ms = weather_row["wind_speed_ms"] or 0.0
+        env.wind_direction_deg = weather_row["wind_direction_deg"] or 0.0
+        env.track_temp_c = weather_row["track_temp_c"] or 30.0
+
+    return env
+
+
+def seasonal_to_environment(
+    venue_row: dict,
+    seasonal_row: dict,
+) -> EnvironmentParams:
+    """
+    Build EnvironmentParams from venue + seasonal average data.
+    Used for offline what-if analysis.
+    """
+    return EnvironmentParams(
+        venue_name=venue_row["name"],
+        altitude_m=venue_row["altitude_m"],
+        ambient_temp_c=seasonal_row["avg_temp_c"],
+        relative_humidity_pct=seasonal_row["avg_humidity_pct"],
+        barometric_pressure_hpa=seasonal_row["avg_pressure_hpa"],
+        wind_speed_ms=seasonal_row["avg_wind_speed_ms"],
+        wind_direction_deg=seasonal_row["prevailing_wind_deg"],
+        track_temp_c=seasonal_row["avg_track_temp_c"],
+        track_surface=venue_row["surface_type"] or "asphalt",
+        track_gradient_pct=venue_row["track_gradient_pct"] or 0.0,
+        track_heading_deg=venue_row["track_heading_deg"] or 0.0,
+    )
+
+
+# ────────────────────────────────────────────
+# Parts → param modification
+# ────────────────────────────────────────────
+
+def apply_part_to_config(config: BikeConfig, part_row: dict) -> BikeConfig:
+    """
+    Apply a part's parameter modifications to a BikeConfig.
+
+    Parts can specify:
+      - param_overrides: absolute values  {"drivetrain.rear_sprocket": 45}
+      - param_deltas:    additive changes {"engine.peak_power_hp": 15}
+      - param_multipliers: factors        {"tires.mu_peak": 1.08}
+
+    Returns a NEW BikeConfig (does not mutate the original).
+    """
+    import copy
+    new_config = copy.deepcopy(config)
+
+    def _set_nested(obj, path: str, value):
+        """Set a nested attribute via dotted path."""
+        parts = path.split(".")
+        for part in parts[:-1]:
+            obj = getattr(obj, part)
+        setattr(obj, parts[-1], value)
+
+    def _get_nested(obj, path: str):
+        """Get a nested attribute via dotted path."""
+        for part in path.split("."):
+            obj = getattr(obj, part)
+        return obj
+
+    # Apply overrides
+    overrides = part_row.get("param_overrides")
+    if overrides:
+        if isinstance(overrides, str):
+            overrides = json.loads(overrides)
+        for path, val in overrides.items():
+            _set_nested(new_config, path, val)
+
+    # Apply deltas (additive)
+    deltas = part_row.get("param_deltas")
+    if deltas:
+        if isinstance(deltas, str):
+            deltas = json.loads(deltas)
+        for path, delta in deltas.items():
+            current = _get_nested(new_config, path)
+            _set_nested(new_config, path, current + delta)
+
+    # Apply multipliers
+    multipliers = part_row.get("param_multipliers")
+    if multipliers:
+        if isinstance(multipliers, str):
+            multipliers = json.loads(multipliers)
+        for path, factor in multipliers.items():
+            current = _get_nested(new_config, path)
+            _set_nested(new_config, path, current * factor)
+
+    return new_config
+
+
+def compute_data_completeness(config: BikeConfig) -> float:
+    """
+    Compute what fraction of simulation-critical parameters are
+    populated (non-default) in a BikeConfig.
+
+    Returns 0.0–1.0.
+    """
+    # Critical fields for drag simulation accuracy
+    critical_fields = [
+        ("engine", "dyno_curve"),
+        ("engine", "displacement_cc"),
+        ("engine", "peak_power_hp"),
+        ("engine", "peak_torque_nm"),
+        ("engine", "redline_rpm"),
+        ("chassis", "dry_mass_kg"),
+        ("chassis", "wheelbase_mm"),
+        ("chassis", "cog_height_mm"),
+        ("chassis", "front_weight_pct"),
+        ("drivetrain", "primary_ratio"),
+        ("drivetrain", "gear_ratios"),
+        ("drivetrain", "front_sprocket"),
+        ("drivetrain", "rear_sprocket"),
+        ("tires", "rear_rolling_radius_m"),
+        ("tires", "mu_peak"),
+        ("tires", "pacejka_B"),
+        ("tires", "pacejka_C"),
+        ("tires", "pacejka_D"),
+        ("aero", "cd"),
+        ("aero", "frontal_area_m2"),
+    ]
+
+    defaults = BikeConfig()
+    filled = 0
+    for section, field_name in critical_fields:
+        current_val = getattr(getattr(config, section), field_name)
+        default_val = getattr(getattr(defaults, section), field_name)
+        if current_val != default_val:
+            filled += 1
+        elif field_name == "dyno_curve" and current_val is not None:
+            filled += 1
+
+    return filled / len(critical_fields)

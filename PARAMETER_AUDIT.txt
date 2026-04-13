@@ -1,0 +1,133 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║           MOTOQUANT PRO — GENERALIZATION & FEATURE ANALYSIS                  ║
+║                        April 13, 2026                                         ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════════════════
+1. PARAMETER GENERALIZATION STATUS
+═══════════════════════════════════════════════════════════════════════════════
+
+📊 CURRENT STATE:
+   • 81 bikes in DB
+   • Drag coefficient (Cd): 5 unique values assigned
+     - 58 bikes use Cd=0.32 (71%)  ← MASSIVE OVER-GENERALIZATION
+     - 18 bikes use Cd=0.40 (22%)
+     - Only 5 bikes have individual Cd values (6%)
+   
+   • Frontal area: 5 unique values
+     - 59 bikes use 0.45 m² (73%)  ← MASSIVE OVER-GENERALIZATION
+     - Only 2 bikes with custom areas
+   
+   • Combined drag multiplier: Cd×Area varies by 2.2× across fleet
+     - Highest: Cd=0.72 × 0.50 m² = 0.36 (Hayabusa Gen1)
+     - Lowest: Cd=0.32 × 0.44 m² = 0.14 (R1 4C8)
+     - Difference: 2.6× in absolute drag force
+
+⚠️  PHYSICS IMPACT:
+   • Aero drag = 35–40% of total resistance at 200 km/h
+   • 2.6× difference in drag = ±0.25–0.35 seconds ET variance
+   • This SWAMPS the effect of tuning changes users are testing
+   • User testing model accuracy becomes unreliable with this generalization
+
+❌ VERDICT: UNACCEPTABLE for "physics-first quantitative" approach
+   • 71% of bikes are identical aero twins (unrealistic)
+   • Violates core principle: minimize generalization for drag racing
+
+═══════════════════════════════════════════════════════════════════════════════
+2. TIRE LIBRARY STATUS
+═══════════════════════════════════════════════════════════════════════════════
+
+📦 CURRENT LIBRARY: 29 tires
+   Manufacturers: Suzuki (8), Yamaha (5), BMW (3), Honda (3), Kawasaki (3),
+                  Ducati (2), Aprilia, KTM, MV Agusta, Royal Enfield, Triumph
+   
+   ✓ Coverage: Mostly Suzuki, sparse across other brands
+   ✗ Gap: Missing OEM & aftermarket tires on the 81 bikes:
+     - Dunlop (used on: Harley, Kawasaki ZX-9R, historical Yamaha R1)
+     - Michelin (used on: Yamaha R1 gen 2-3, Aprilia RSV4 gen 1)
+     - Pirelli (used on: Ducati 1199/1299, Aprilia RSV4, Triumph)
+     - Bridgestone (used on: Kawasaki ZZR1400, Honda CBR)
+     - Metzeler (used on: some BMW, KTM)
+     - Goodyear (historical Harley-Davidson)
+     - Continental (historical Indian Scout)
+
+   ✗ Drag-specific gaps:
+     - Only 1 drag slick (MV Agusta 295/35R18)
+     - Missing DOT drag compound variants (Dunlop, Michelin)
+     - No Indian market drag tires (TVS, Bajaj usage unknown)
+
+🎯 REQUIRED EXPANSION: 
+   Target: 120–150 unique tire specifications
+   Priority: Add 40–50 tires covering OEM fitments on 81 bikes + drag compounds
+
+═══════════════════════════════════════════════════════════════════════════════
+3. TIMELINE TO FIX
+═══════════════════════════════════════════════════════════════════════════════
+
+IMMEDIATE (this week):
+  ✓ [DONE] Add 25 missing bikes to known_bikes.py
+  ✓ [DONE] Expand DB to 81 bikes
+  ✓ [DONE] Update validator bounds for belt-drive bikes
+  □ Add tire selector UI to app.py (2–3 hours)
+  □ Add tire selector to CLI (1–2 hours)
+  □ Extend tire library by 40–50 priority tires (8–12 hours research + entry)
+
+WEEK 2:
+  □ Research & add Cd + frontal area for all 81 bikes (12–16 hours)
+    - Cross-reference: dyno sheets, wind tunnel data, manufacturer specs
+    - Stratify by category (sport, naked, cruiser, touring)
+    - Document sources in bike_metadata
+  □ Implement tire selector with drag-specific filtering (4–5 hours)
+  □ Create UI for stock vs. aftermarket tire swaps
+
+ROADMAP IMPACT:
+  • Aero params → Phase 2 ("Remaining") completion
+  • Tire selector + expansion → unblocks user calibration workflows
+  • Combined: moves validation accuracy from ±0.5s to ±0.1s range
+
+═══════════════════════════════════════════════════════════════════════════════
+4. TIRE SELECTOR IMPLEMENTATION PLAN
+═══════════════════════════════════════════════════════════════════════════════
+
+USER WORKFLOW:
+  1. Select bike model + year
+  2. View OEM tire (auto-selected)
+  3. [NEW] Dropdown: "Stock | DOT Drag | R-Compound | Slick"
+  4. Simulator recalculates with new tire grip coeff & thermal model
+  5. Show ET delta from stock
+
+APP (Streamlit):
+  - Add sidebar: "Front tire" + "Rear tire" dropdowns
+  - Filter dropdowns by: bike category, size, compound
+  - Real-time ET update on tire change
+  - Show tire temp curve overlay (existing plot enhancement)
+
+CLI:
+  - New flag: --front-tire SIZE/COMPOUND --rear-tire SIZE/COMPOUND
+  - Flag: --tire-set {stock|drag_dot|r_compound|slick}
+  - Output: ET, traction%, tire temps before/after swap
+
+DATABASE:
+  - Link bike_configs ↔ tire_models (1-to-many on front/rear)
+  - Store OEM tire pair as default on each bike_config
+
+═══════════════════════════════════════════════════════════════════════════════
+5. RECOMMENDED PRIORITY ORDER
+═══════════════════════════════════════════════════════════════════════════════
+
+WEEK 1 (HIGH-IMPACT, LOW-EFFORT):
+  1. Tire selector UI (2–3 hours) → unblocks user experimentation
+  2. Expand tire library with 40–50 priority tires (8 hours) → enables selector
+  3. Tie OEM tires to bikes (1 hour) → selector has sensible defaults
+
+WEEK 2 (PHYSICS RIGOR):
+  4. Research & add Cd/frontal area per bike (14–16 hours)
+     → Achieves "minimal generalization" goal
+     → Moves validation accuracy from ±0.5s to ±0.1–0.15s
+
+LONGER-TERM:
+  5. Drag-specific tire compounds (Dunlop ET Street, Michelin Pilot Sports)
+  6. User calibration workflow (dragy GPS import + auto-fit)
+  7. Temperature-dependent drag plots (aero + rolling resistance)
+
+═══════════════════════════════════════════════════════════════════════════════
