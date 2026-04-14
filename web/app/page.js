@@ -71,7 +71,7 @@ export default function HomePage() {
               { num: '565',   label: 'Tests passing' },
               { num: '108',   label: 'Bikes seeded' },
               { num: '15',    label: 'Physics models' },
-              { num: '±0.07s', label: 'Validated accuracy' },
+              { num: '10',    label: 'Bikes validated' },
             ].map(({ num, label }) => (
               <div key={label} className="px-6 py-4 text-center">
                 <div className="font-bold text-orange-400 text-lg">{num}</div>
@@ -117,40 +117,58 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-6">
           <p className="text-xs font-semibold uppercase tracking-widest text-orange-500 mb-3">Ground Truth</p>
           <h2 className="text-3xl font-bold mb-3">Validated on Real Data</h2>
-          <p className="text-white/50 mb-12 max-w-xl text-sm leading-relaxed">
-            15-submodel physics engine tested against real drag telemetry and dyno data
-            at Indian and international strips.
+          <p className="text-white/50 mb-4 max-w-xl text-sm leading-relaxed">
+            15-submodel physics engine benchmarked against published quarter-mile data from
+            Cycle World, Motorcyclist, MCN, and Indian sources. All runs at ISA standard
+            atmosphere — 15 °C, sea level, 75 kg rider.
           </p>
-          <div className="grid md:grid-cols-3 gap-5">
+
+          {/* Summary strip */}
+          <div className="flex flex-wrap gap-6 mb-12 text-sm">
+            <div><span className="text-orange-400 font-bold text-lg">10</span> <span className="text-white/40">bikes validated</span></div>
+            <div><span className="text-green-400 font-bold text-lg">10/10</span> <span className="text-white/40">within ±0.20s of reference</span></div>
+            <div><span className="text-green-400 font-bold text-lg">8/10</span> <span className="text-white/40">within ±0.10s</span></div>
+            <div><span className="text-orange-400 font-bold text-lg">6</span> <span className="text-white/40">manufacturers</span></div>
+          </div>
+
+          {/* Bike grid — 5 col on large, 2 col on small */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {[
-              { name: 'Suzuki GSX-R 1000 K5', cc: '1000cc Superbike', target: '9.97s',     sim: '10.04s',   accuracy: '±0.07s — 0.7%' },
-              { name: 'Yamaha YZF-R1 4C8',    cc: '1000cc Superbike', target: '10.2–10.4s', sim: '~10.3s',  accuracy: 'In range ✓' },
-              { name: 'Suzuki Hayabusa Gen1', cc: '1300cc Hyperbike', target: '10.1–10.7s', sim: 'In range', accuracy: 'Validated ✓' },
+              { name: 'Suzuki GSX-R 1000 K5',    cc: '999cc · Superbike',    target: '9.97s',      sim: '10.04s',  delta: '±0.07s' },
+              { name: 'Yamaha YZF-R1 4C8',        cc: '998cc · Superbike',    target: '10.2–10.4s', sim: '~10.3s',  delta: 'In range' },
+              { name: 'Kawasaki ZX-14R \'12',     cc: '1441cc · Hypersport',  target: '9.91–10.10s',sim: '9.95s',   delta: 'In range' },
+              { name: 'Yamaha MT-09 \'21',         cc: '890cc · Naked',        target: '11.22–11.45s',sim: '11.32s', delta: 'In range' },
+              { name: 'Kawasaki ZX-10RR \'21',    cc: '998cc · Superbike',    target: '10.28–10.45s',sim: '10.20s', delta: '−0.08s' },
+              { name: 'Kawasaki ZZR1400 \'06',    cc: '1352cc · Hypersport',  target: '10.05–10.25s',sim: '10.01s', delta: '−0.04s' },
+              { name: 'BMW M1000RR \'21',          cc: '999cc · Superbike',    target: '10.22–10.40s',sim: '10.17s', delta: '−0.05s' },
+              { name: 'Honda CBR1000RR-R \'20',   cc: '999cc · Superbike',    target: '10.30–10.50s',sim: '10.23s', delta: '−0.07s' },
+              { name: 'Suzuki GSX-R750 K8',       cc: '750cc · Supersport',   target: '10.92–11.12s',sim: '10.85s', delta: '−0.07s' },
+              { name: 'RE Continental GT 650',    cc: '648cc · Sport Tourer', target: '14.90–15.50s',sim: '14.88s', delta: '−0.02s' },
             ].map((bike) => (
-              <div key={bike.name} className="bg-white/5 backdrop-blur-md border border-white/8 rounded-2xl p-7 hover:border-orange-500/30 transition-colors">
-                <div className="flex items-start justify-between mb-5">
-                  <div>
-                    <h3 className="font-semibold text-sm">{bike.name}</h3>
-                    <p className="text-white/40 text-xs mt-0.5">{bike.cc}</p>
-                  </div>
-                  <CheckCircle2 size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
+              <div key={bike.name} className="bg-white/5 backdrop-blur-md border border-white/8 rounded-xl p-4 hover:border-green-500/30 transition-colors">
+                <div className="flex items-start justify-between mb-3">
+                  <CheckCircle2 size={14} className="text-green-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-xs font-bold text-green-400 ml-auto">{bike.delta}</span>
                 </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-xs text-white/40">Target ET</span>
-                    <span className="text-xl font-bold text-orange-400">{bike.target}</span>
+                <p className="text-xs font-semibold text-white leading-snug mb-1">{bike.name}</p>
+                <p className="text-xs text-white/30 mb-3">{bike.cc}</p>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-white/30">Ref</span>
+                    <span className="text-orange-400 font-medium">{bike.target}</span>
                   </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-xs text-white/40">Simulated ET</span>
-                    <span className="text-xl font-bold">{bike.sim}</span>
-                  </div>
-                  <div className="border-t border-white/8 pt-3">
-                    <span className="text-xs font-semibold text-green-400">{bike.accuracy}</span>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-white/30">Sim</span>
+                    <span className="text-white font-medium">{bike.sim}</span>
                   </div>
                 </div>
               </div>
             ))}
           </div>
+
+          <p className="mt-6 text-xs text-white/25">
+            Sources: Cycle World, Motorcyclist, MCN, Visordown, xBhp, overdrive.in · Validation ongoing — more bikes being added
+          </p>
         </div>
       </section>
 
