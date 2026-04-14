@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://motoquant.in/sitemap.xml
+
+# Disallow internal Next.js paths
+Disallow: /_next/
+Disallow: /api/
+
+# Allow all search engine crawlers to index the bike pages
+User-agent: Googlebot
+Allow: /bikes/
+Allow: /
+
+User-agent: Bingbot
+Allow: /bikes/
+Allow: /
+
+# Crawl-delay for polite bots
+User-agent: *
+Crawl-delay: 1
