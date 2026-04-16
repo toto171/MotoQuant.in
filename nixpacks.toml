@@ -1,8 +1,13 @@
 # Railway Nixpacks build config for MotoQuant Pro API
-# Let nixpacks auto-detect Python from requirements-api.txt
 
 [phases.setup]
-nixPkgs = ["gcc"]
+nixPkgs = ["python311", "gcc"]
+
+[phases.install]
+cmds = [
+    "python3 -m pip install --upgrade pip",
+    "python3 -m pip install -r requirements-api.txt",
+]
 
 [start]
-cmd = "uvicorn motoquant.api:app --host 0.0.0.0 --port ${PORT:-8000}"
+cmd = "python3 -m uvicorn motoquant.api:app --host 0.0.0.0 --port ${PORT:-8000}"
