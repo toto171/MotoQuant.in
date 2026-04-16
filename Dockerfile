@@ -16,4 +16,4 @@ ENV PORT=8000
 ENV MOTOQUANT_DB=/app/motoquant.db
 
 # Startup
-CMD ["/bin/sh", "-c", "echo '=== MOTOQUANT STARTING ===' && echo PORT=$PORT && python -c 'print(\"Python OK\")' && python -c 'import motoquant; print(\"Import OK\")' && exec uvicorn motoquant.api:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["/bin/sh", "-c", "exec uvicorn motoquant.api:app --host 0.0.0.0 --port ${PORT:-8000}"]

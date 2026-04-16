@@ -7,6 +7,3 @@ healthcheckPath = "/api/health"
 healthcheckTimeout = 120
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
-
-[environments.production.deploy]
-numReplicas = 1
