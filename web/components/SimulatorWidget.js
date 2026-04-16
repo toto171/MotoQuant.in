@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Zap } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-de6eb.up.railway.app';
@@ -19,21 +19,28 @@ export default function SimulatorWidget() {
   const [result,      setResult]      = useState(null);
   const [loading,     setLoading]     = useState(false);
   const [error,       setError]       = useState(null);
+  const debounceRef = useRef(null);
+  const abortRef    = useRef(null);
 
-  async function runSim() {
+  const runSim = useCallback(async (b, r, p, m) => {
+    // Cancel any in-flight request
+    if (abortRef.current) abortRef.current.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     setError(null);
-    setResult(null);
     try {
       const res = await fetch(`${API_URL}/api/simulate/quick`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          bike_preset:     bike,
-          rider_mass_kg:   riderKg,
-          power_boost_pct: powerBoost,
-          mass_delta_kg:   massChange,
+          bike_preset:     b,
+          rider_mass_kg:   r,
+          power_boost_pct: p,
+          mass_delta_kg:   m,
         }),
+        signal: controller.signal,
       });
       if (!res.ok) {
         const msg = await res.text();
@@ -41,11 +48,20 @@ export default function SimulatorWidget() {
       }
       setResult(await res.json());
     } catch (e) {
-      setError(e.message);
+      if (e.name !== 'AbortError') setError(e.message);
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
+
+  // Auto-simulate on any parameter change (300ms debounce)
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      runSim(bike, riderKg, powerBoost, massChange);
+    }, 300);
+    return () => clearTimeout(debounceRef.current);
+  }, [bike, riderKg, powerBoost, massChange, runSim]);
 
   const selectedBike = BIKES.find(b => b.id === bike);
 
@@ -54,6 +70,12 @@ export default function SimulatorWidget() {
       <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
         <Zap className="text-orange-500" size={20} />
         Live Quarter-Mile Simulator
+        {loading && (
+          <svg className="animate-spin h-4 w-4 text-orange-500 ml-2" viewBox="0 0 24 24" fill="none">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+          </svg>
+        )}
       </h3>
 
       {/* Bike select */}
@@ -109,35 +131,16 @@ export default function SimulatorWidget() {
         </div>
       </div>
 
-      {/* Run button */}
-      <button
-        onClick={runSim}
-        disabled={loading}
-        className="w-full py-3 bg-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-semibold text-white transition-colors flex items-center justify-center gap-2"
-      >
-        {loading ? (
-          <>
-            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
-            </svg>
-            Simulating…
-          </>
-        ) : (
-          <><Zap size={16} /> Run Simulation</>
-        )}
-      </button>
-
       {/* Error */}
       {error && (
-        <div className="mt-4 p-3 bg-red-900/30 border border-red-700/50 rounded-lg text-red-400 text-sm">
+        <div className="mb-4 p-3 bg-red-900/30 border border-red-700/50 rounded-lg text-red-400 text-sm">
           {error}
         </div>
       )}
 
       {/* Result */}
       {result && (
-        <div className="mt-6 grid grid-cols-2 gap-4 animate-in fade-in duration-500">
+        <div className="grid grid-cols-2 gap-4 animate-in fade-in duration-500">
           <div className="bg-gray-950 rounded-xl p-5 text-center border border-gray-800">
             <p className="text-xs text-gray-400 mb-1">Quarter-Mile ET</p>
             <p className="text-4xl font-bold text-orange-400">{result.et_quarter_s.toFixed(3)}s</p>
@@ -169,7 +172,7 @@ export default function SimulatorWidget() {
       )}
 
       <p className="text-xs text-gray-600 text-center mt-4">
-        First-principles RK4 physics · 15 sub-models · 1 ms timestep
+        First-principles RK4 physics · 15 sub-models · 1 ms timestep · updates live
       </p>
     </div>
   );
