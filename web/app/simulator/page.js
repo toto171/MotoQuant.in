@@ -585,21 +585,13 @@ export default function SimulatorPage() {
               )}
             </div>
 
-            {/* Quick Actions */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => { setSelectedParts([]); setFrontTire(null); setRearTire(null); setVenue(null); setPowerBoost(0); setMassChange(0); setRiderKg(75); }}
-                className="flex-1 py-2 px-3 text-xs border border-gray-800 hover:border-gray-600 rounded-lg text-gray-400 hover:text-white transition-colors"
-              >
-                Reset All
-              </button>
-              <button
-                onClick={runSim}
-                className="flex-1 py-2 px-3 text-xs bg-orange-600 hover:bg-orange-700 rounded-lg text-white font-medium transition-colors flex items-center justify-center gap-1.5"
-              >
-                <Zap size={12} /> Re-run Simulation
-              </button>
-            </div>
+            {/* Reset */}
+            <button
+              onClick={() => { setSelectedParts([]); setFrontTire(null); setRearTire(null); setVenue(null); setPowerBoost(0); setMassChange(0); setRiderKg(75); }}
+              className="w-full py-2 px-3 text-xs border border-gray-800 hover:border-gray-600 rounded-lg text-gray-400 hover:text-white transition-colors"
+            >
+              Reset All to Stock
+            </button>
 
           </div>
         </div>
