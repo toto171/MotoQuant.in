@@ -134,6 +134,10 @@ class QuickSimRequest(BaseModel):
     power_boost_pct: float = 0.0
     mass_delta_kg: float = 0.0
     rider_mass_kg: float = 75.0
+    part_ids: list[int] = Field(default_factory=list, description="Part IDs to apply")
+    front_tire_id: int | None = None
+    rear_tire_id: int | None = None
+    venue_id: int | None = None
 
 
 # ─── Config builder ────────────────────────────────────────────────────────
@@ -441,9 +445,54 @@ def simulate_quick(req: QuickSimRequest):
             power_boost_pct=req.power_boost_pct,
             mass_delta_kg=req.mass_delta_kg,
             rider_mass_kg=req.rider_mass_kg,
+            venue_id=req.venue_id,
+            front_tire_id=req.front_tire_id,
+            rear_tire_id=req.rear_tire_id,
         )
     except Exception as exc:
         raise HTTPException(400, f"Config error: {exc}")
+
+    # Apply selected parts
+    build_cost_inr = 0.0
+    parts_applied = []
+    if req.part_ids:
+        db = _get_db()
+        if db:
+            try:
+                from .database.bridge import apply_part_to_config
+
+                for pid in req.part_ids:
+                    row = db.execute("SELECT * FROM parts WHERE id=?", (pid,)).fetchone()
+                    if row:
+                        part_dict = dict(row)
+                        cfg = apply_part_to_config(cfg, part_dict)
+                        parts_applied.append({
+                            "id": part_dict["id"],
+                            "name": part_dict.get("model_name", ""),
+                            "brand": part_dict.get("brand", ""),
+                            "price_inr": part_dict.get("price_inr"),
+                        })
+                        if part_dict.get("price_inr"):
+                            build_cost_inr += float(part_dict["price_inr"])
+            except Exception:
+                pass
+
+    # Run stock sim for comparison if parts are applied
+    stock_et = None
+    if parts_applied:
+        try:
+            stock_cfg = _build_config(
+                bike_id=req.bike_id,
+                bike_preset=req.bike_preset,
+                power_boost_pct=0.0,
+                mass_delta_kg=0.0,
+                rider_mass_kg=req.rider_mass_kg,
+                venue_id=req.venue_id,
+            )
+            stock_sim = MotoQuantEngine(stock_cfg).run()
+            stock_et = round(float(stock_sim.time_quarter), 4)
+        except Exception:
+            pass
 
     try:
         engine = MotoQuantEngine(cfg)
@@ -451,7 +500,7 @@ def simulate_quick(req: QuickSimRequest):
     except Exception as exc:
         raise HTTPException(500, f"Simulation error: {exc}")
 
-    return {
+    result = {
         "et_quarter_s": round(float(sim.time_quarter), 4),
         "trap_speed_kmh": round(float(sim.speed_quarter) * 3.6, 2),
         "et_60ft_s": round(float(sim.time_60ft), 4),
@@ -459,7 +508,79 @@ def simulate_quick(req: QuickSimRequest):
         "bike_name": cfg.name,
         "peak_power_hp": round(float(cfg.engine.peak_power_hp), 1),
         "total_mass_kg": round(float(cfg.chassis.dry_mass_kg + req.rider_mass_kg), 1),
+        "parts_applied": parts_applied,
+        "build_cost_inr": round(build_cost_inr, 0),
+        "stock_et_s": stock_et,
+        "et_delta_s": round(float(sim.time_quarter) - stock_et, 4) if stock_et else None,
     }
+    return result
+
+
+@app.get("/api/parts/categories")
+def list_parts_categories():
+    """Return all parts categories."""
+    db = _get_db()
+    if not db:
+        raise HTTPException(503, "Database unavailable")
+    try:
+        rows = db.execute(
+            "SELECT * FROM parts_categories ORDER BY display_name"
+        ).fetchall()
+        return {"categories": [dict(r) for r in rows]}
+    except Exception as exc:
+        raise HTTPException(500, f"Database error: {exc}")
+
+
+@app.get("/api/parts")
+def list_parts(
+    category: str | None = Query(None, description="Filter by category name"),
+    category_id: int | None = Query(None, description="Filter by category ID"),
+    bike_id: int | None = Query(None, description="Show compatibility for this bike"),
+    search: str | None = Query(None),
+    limit: int = Query(100, le=200),
+):
+    """Return parts catalog, optionally filtered by category and bike compatibility."""
+    db = _get_db()
+    if not db:
+        raise HTTPException(503, "Database unavailable")
+    try:
+        query = """SELECT p.*, pc.name as category_name, pc.display_name as category_display
+                   FROM parts p
+                   JOIN parts_categories pc ON p.category_id = pc.id
+                   WHERE 1=1"""
+        params: list[Any] = []
+
+        if category:
+            query += " AND LOWER(pc.name) = LOWER(?)"
+            params.append(category)
+        if category_id:
+            query += " AND p.category_id = ?"
+            params.append(category_id)
+        if search:
+            query += " AND (p.brand LIKE ? OR p.model_name LIKE ?)"
+            params += [f"%{search}%", f"%{search}%"]
+
+        query += " ORDER BY pc.display_name, p.brand, p.model_name LIMIT ?"
+        params.append(limit)
+
+        rows = db.execute(query, params).fetchall()
+        parts = []
+        for r in rows:
+            d = dict(r)
+            # Parse JSON fields for frontend
+            import json
+            for field in ("param_overrides", "param_deltas", "param_multipliers",
+                          "specifications", "compatible_bikes"):
+                if d.get(field) and isinstance(d[field], str):
+                    try:
+                        d[field] = json.loads(d[field])
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+            parts.append(d)
+
+        return {"parts": parts, "total": len(parts)}
+    except Exception as exc:
+        raise HTTPException(500, f"Database error: {exc}")
 
 
 @app.get("/api/leaderboard")

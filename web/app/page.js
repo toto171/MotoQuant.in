@@ -12,11 +12,11 @@ export default function HomePage() {
             <span className="text-orange-500">Moto</span>Quant Pro
           </div>
           <div className="flex gap-6 items-center text-sm">
-            <a href="#simulator" className="hover:text-orange-500 transition-colors">Simulator</a>
+            <a href="#simulator" className="hover:text-orange-500 transition-colors">Quick Sim</a>
+            <a href="/simulator" className="hover:text-orange-500 transition-colors font-semibold text-orange-400">Full Dashboard</a>
             <a href="#physics"   className="hover:text-orange-500 transition-colors">Physics</a>
             <a href="#validation" className="hover:text-orange-500 transition-colors">Validation</a>
             <a href="#cta"       className="hover:text-orange-500 transition-colors">Get Started</a>
-            {/* GitHub link hidden until repo is public */}
           </div>
         </div>
       </nav>
@@ -36,8 +36,11 @@ export default function HomePage() {
           Built for the Indian drag racing community. Validated on real bikes at Aamby Valley, MMRT, and beyond.
         </p>
         <div className="mt-10 flex gap-4 justify-center">
-          <a href="#simulator" className="px-6 py-3 bg-orange-600 hover:bg-orange-700 rounded-lg font-semibold transition-colors">
-            Try the Simulator
+          <a href="/simulator" className="px-6 py-3 bg-orange-600 hover:bg-orange-700 rounded-lg font-semibold transition-colors">
+            Open Full Dashboard
+          </a>
+          <a href="#simulator" className="px-6 py-3 border border-gray-700 hover:border-gray-500 rounded-lg font-semibold transition-colors">
+            Quick Simulator
           </a>
           <a href="#physics"
             className="px-6 py-3 border border-gray-700 hover:border-gray-500 rounded-lg font-semibold transition-colors flex items-center gap-2">
