@@ -16,9 +16,7 @@ export default function HomePage() {
             <a href="#physics"   className="hover:text-orange-500 transition-colors">Physics</a>
             <a href="#validation" className="hover:text-orange-500 transition-colors">Validation</a>
             <a href="#cta"       className="hover:text-orange-500 transition-colors">Get Started</a>
-            <a href="https://github.com/da25mem5s02-debug/MotoQuant_v1" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
-              <Github size={20} />
-            </a>
+            {/* GitHub link hidden until repo is public */}
           </div>
         </div>
       </nav>
@@ -41,9 +39,9 @@ export default function HomePage() {
           <a href="#simulator" className="px-6 py-3 bg-orange-600 hover:bg-orange-700 rounded-lg font-semibold transition-colors">
             Try the Simulator
           </a>
-          <a href="https://github.com/da25mem5s02-debug/MotoQuant_v1" target="_blank" rel="noopener noreferrer"
+          <a href="#physics"
             className="px-6 py-3 border border-gray-700 hover:border-gray-500 rounded-lg font-semibold transition-colors flex items-center gap-2">
-            <Github size={16} /> GitHub
+            How It Works
           </a>
         </div>
       </section>
@@ -120,7 +118,7 @@ export default function HomePage() {
               {
                 icon: <Github className="text-orange-500" size={20} />,
                 title: 'Integration & Validation',
-                items: ['RK4 fixed-step integrator at 1 ms timestep', 'Adaptive step-size solver (RK45)', '413+ passing test cases', 'Validated against real GPS and ECU telemetry'],
+                items: ['RK4 fixed-step integrator at 1 ms timestep', 'Adaptive step-size solver (RK45)', '559+ passing test cases', 'Validated against real GPS and ECU telemetry'],
               },
             ].map((block) => (
               <div key={block.title}>
@@ -144,7 +142,7 @@ export default function HomePage() {
           <h2 className="text-3xl font-bold mb-12">Curated Bike Library</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { num: '108', label: 'Bikes',  note: '17 manufacturers incl. KTM, Bajaj, TVS, RE' },
+              { num: '135', label: 'Bikes',  note: '20 manufacturers incl. KTM, Bajaj, TVS, RE' },
               { num: '69',  label: 'Tires',  note: 'Pacejka + thermal model, 15 brands' },
               { num: '70',  label: 'Parts',  note: 'Sprockets, exhaust, ECU flash, nitrous' },
               { num: '12',  label: 'Venues', note: '5 Indian + 7 international strips' },
@@ -181,20 +179,16 @@ export default function HomePage() {
             </div>
             <div className="flex gap-4 justify-center flex-wrap">
               <a
-                href="https://github.com/da25mem5s02-debug/MotoQuant_v1"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#simulator"
                 className="inline-flex items-center gap-2 px-8 py-3 bg-orange-600 hover:bg-orange-700 rounded-lg font-semibold transition-colors"
               >
-                <Github size={20} /> View on GitHub
+                <Zap size={20} /> Try the Simulator
               </a>
               <a
-                href="https://github.com/da25mem5s02-debug/MotoQuant_v1#readme"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="mailto:dhisetu@gmail.com"
                 className="inline-flex items-center gap-2 px-8 py-3 border border-orange-500 text-orange-400 hover:bg-orange-500/10 rounded-lg font-semibold transition-colors"
               >
-                Quick Start
+                Get in Touch
               </a>
             </div>
           </div>
@@ -204,7 +198,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t border-gray-800 py-10 text-center text-gray-500 text-sm">
         <p>Built for the Indian drag racing community. Validated physics, open source.</p>
-        <p className="mt-2">motoquant.in · <a href="https://github.com/da25mem5s02-debug/MotoQuant_v1" className="text-orange-500 hover:text-orange-400">GitHub</a> · Made with ❤️ for the strip</p>
+        <p className="mt-2">motoquant.in · Made with ❤️ for the strip</p>
       </footer>
 
     </div>

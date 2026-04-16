@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Zap } from 'lucide-react';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://motoquant-api.railway.app';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-de6eb.up.railway.app';
 
 const BIKES = [
   { id: 'gsxr1000_k5',   label: 'Suzuki GSX-R 1000 K5',   cc: '999cc',  hp: 178 },

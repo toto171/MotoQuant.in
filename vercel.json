@@ -1,7 +1,7 @@
 {
   "version": 2,
   "env": {
-    "NEXT_PUBLIC_API_URL": "https://motoquant-api.railway.app"
+    "NEXT_PUBLIC_API_URL": "https://web-production-de6eb.up.railway.app"
   },
   "headers": [
     {
