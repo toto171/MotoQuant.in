@@ -13,7 +13,5 @@ COPY app.py .
 # Railway injects PORT at runtime
 ENV PORT=8000
 
-# Startup: log the port, then launch uvicorn
-CMD echo "Starting MotoQuant API on port ${PORT}..." && \
-    python -c "import motoquant; print('motoquant package imported OK')" && \
-    uvicorn motoquant.api:app --host 0.0.0.0 --port ${PORT}
+# Startup
+CMD ["/bin/sh", "-c", "echo Starting on port $PORT && uvicorn motoquant.api:app --host 0.0.0.0 --port $PORT"]
