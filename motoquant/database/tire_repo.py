@@ -7,9 +7,7 @@ Pacejka coefficients, thermal models, and friction data are the #1 driver
 of simulation accuracy. This repo enforces confidence tracking rigorously.
 """
 
-import json
 import sqlite3
-from typing import List, Optional, Dict, Any
 
 from ..models import TireParams
 
@@ -57,8 +55,13 @@ class TireRepository:
         """
         mfr_id = self.get_or_create_manufacturer(manufacturer_name)
 
-        cols = ["manufacturer_id", "model_name", "size_designation",
-                "compound_type", "position"]
+        cols = [
+            "manufacturer_id",
+            "model_name",
+            "size_designation",
+            "compound_type",
+            "position",
+        ]
         vals = [mfr_id, model_name, size_designation, compound_type, position]
 
         # Parse size designation
@@ -93,7 +96,7 @@ class TireRepository:
         self._conn.commit()
         return cur.lastrowid
 
-    def get(self, tire_id: int) -> Optional[dict]:
+    def get(self, tire_id: int) -> dict | None:
         row = self._conn.execute(
             """SELECT tm.*, tmfr.name as manufacturer_name
                FROM tire_models tm
@@ -112,7 +115,7 @@ class TireRepository:
         min_mu_peak: float = None,
         available_india: bool = None,
         limit: int = 50,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """Search tire models with filters."""
         conditions = []
         params = []
@@ -154,7 +157,7 @@ class TireRepository:
         tire_id: int,
         is_rear: bool = True,
         pressure_psi: float = None,
-    ) -> Optional[TireParams]:
+    ) -> TireParams | None:
         """
         Convert a tire_models row to a TireParams dataclass
         suitable for injection into a BikeConfig.
@@ -194,14 +197,26 @@ class TireRepository:
                 kwargs["front_inertia_kgm2"] = row["inertia_kgm2"]
 
         # Friction and Pacejka
-        for field in ["mu_peak", "mu_slide", "load_sensitivity_k",
-                      "pacejka_B", "pacejka_C", "pacejka_D", "pacejka_E"]:
+        for field in [
+            "mu_peak",
+            "mu_slide",
+            "load_sensitivity_k",
+            "pacejka_B",
+            "pacejka_C",
+            "pacejka_D",
+            "pacejka_E",
+        ]:
             if row.get(field) is not None:
                 kwargs[field] = row[field]
 
         # Thermal
-        for field in ["optimal_temp_c", "reversion_temp_c", "thermal_conductivity",
-                      "tread_mass_kg", "specific_heat"]:
+        for field in [
+            "optimal_temp_c",
+            "reversion_temp_c",
+            "thermal_conductivity",
+            "tread_mass_kg",
+            "specific_heat",
+        ]:
             if row.get(field) is not None:
                 mapped = "specific_heat_rubber" if field == "specific_heat" else field
                 kwargs[mapped] = row[field]
@@ -228,7 +243,7 @@ class TireRepository:
         position: str = "rear",
         compound_type: str = None,
         limit: int = 20,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """
         Rank tires by effective grip potential (mu_peak weighted by confidence).
         """
@@ -264,7 +279,7 @@ class TireRepository:
         self,
         position: str = "rear",
         limit: int = 20,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """
         Rank tires by grip-per-rupee (value metric for Indian market).
         """
@@ -285,6 +300,150 @@ class TireRepository:
         ).fetchall()
         return [dict(r) for r in rows]
 
-    def count(self) -> int:
-        row = self._conn.execute("SELECT COUNT(*) as c FROM tire_models").fetchone()
-        return row["c"]
+    # ────────────────────────────────────────────
+    # Bike-tire fitments
+    # ────────────────────────────────────────────
+
+    def link_bike_fitment(
+        self,
+        bike_model_id: int,
+        tire_model_id: int,
+        position: str,
+        fitment_type: str = "oem",
+        is_default: bool = False,
+        notes: str = None,
+    ) -> int:
+        """Link a tire to a bike as OEM or recommended fitment."""
+        cur = self._conn.execute(
+            """INSERT OR REPLACE INTO bike_tire_fitments
+               (bike_model_id, tire_model_id, position, fitment_type, is_default, notes)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (
+                bike_model_id,
+                tire_model_id,
+                position,
+                fitment_type,
+                1 if is_default else 0,
+                notes,
+            ),
+        )
+        self._conn.commit()
+        return cur.lastrowid
+
+    def tire_to_params(self, tire_model_id: int) -> TireParams | None:
+        """
+        Convert a tire_model DB row to a TireParams object ready for simulation.
+
+        Fetches the tire by ID, builds a TireParams using DB values.
+        For missing fields (rolling_radius_m is nullable), computes from size_designation
+        or falls back to base defaults.
+
+        Returns None if tire not found.
+        """
+        row = self.get(tire_model_id)
+        if row is None:
+            return None
+
+        # Compute rolling radius if missing
+        rolling_radius_m = row.get("rolling_radius_m")
+        if rolling_radius_m is None:
+            # Compute from size_designation: e.g. "190/55ZR17"
+            # width_mm, aspect_ratio, rim_diameter_inch
+            # rolling_radius_m = (rim_in * 25.4/2 + width_mm * aspect) / 1000
+            try:
+                width_mm = row.get("width_mm")
+                aspect_ratio = row.get("aspect_ratio")
+                rim_in = row.get("rim_diameter_inch")
+
+                if width_mm and aspect_ratio and rim_in:
+                    # rolling_radius_m = (rim_in * 25.4/2 + width_mm * aspect/100) / 1000
+                    rim_radius_mm = rim_in * 25.4 / 2
+                    sidewall_mm = width_mm * (aspect_ratio / 100.0)
+                    rolling_radius_m = (rim_radius_mm + sidewall_mm) / 1000.0
+            except (TypeError, ZeroDivisionError):
+                rolling_radius_m = None
+
+        # Build kwargs for TireParams, all fields optional
+        kwargs = {}
+
+        # Rear-focused fields (since drag is rear-biased)
+        kwargs["rear_model"] = f"{row['manufacturer_name']} {row['model_name']}"
+        kwargs["rear_size"] = row["size_designation"]
+        if rolling_radius_m:
+            kwargs["rear_rolling_radius_m"] = rolling_radius_m
+
+        # Pressure: prefer drag_pressure_psi, then recommended_psi
+        if row.get("drag_pressure_psi"):
+            kwargs["rear_pressure_psi"] = row["drag_pressure_psi"]
+        elif row.get("recommended_psi"):
+            kwargs["rear_pressure_psi"] = row["recommended_psi"]
+
+        # Mass and inertia
+        if row.get("mass_kg"):
+            kwargs["rear_mass_kg"] = row["mass_kg"]
+        if row.get("inertia_kgm2"):
+            kwargs["rear_inertia_kgm2"] = row["inertia_kgm2"]
+
+        # Friction and Pacejka
+        for field in [
+            "mu_peak",
+            "mu_slide",
+            "load_sensitivity_k",
+            "pacejka_B",
+            "pacejka_C",
+            "pacejka_D",
+            "pacejka_E",
+        ]:
+            if row.get(field) is not None:
+                kwargs[field] = row[field]
+
+        # Thermal
+        for field in [
+            "optimal_temp_c",
+            "reversion_temp_c",
+            "thermal_conductivity",
+            "tread_mass_kg",
+        ]:
+            if row.get(field) is not None:
+                kwargs[field] = row[field]
+
+        # Special mapping for specific_heat
+        if row.get("specific_heat") is not None:
+            kwargs["specific_heat_rubber"] = row["specific_heat"]
+
+        # Rolling resistance
+        for field in ["crr_base", "crr_speed_coeff", "crr_temp_coeff"]:
+            if row.get(field) is not None:
+                kwargs[field] = row[field]
+
+        # Growth and construction
+        if row.get("growth_coeff") is not None:
+            kwargs["growth_coeff"] = row["growth_coeff"]
+        if row.get("construction"):
+            kwargs["tire_construction"] = row["construction"]
+
+        return TireParams(**kwargs)
+
+    def get_bike_fitments(
+        self, bike_model_id: int, position: str = None, fitment_type: str = None
+    ) -> list:
+        """Get all tire fitments for a bike model."""
+        sql = """
+            SELECT btf.*, tm.manufacturer_id, tm.model_name, tm.compound_type,
+                   tm.size_designation, tm.mu_peak, tm.price_inr,
+                   tmfr.name as tire_manufacturer
+            FROM bike_tire_fitments btf
+            JOIN tire_models tm ON btf.tire_model_id = tm.id
+            JOIN tire_manufacturers tmfr ON tm.manufacturer_id = tmfr.id
+            WHERE btf.bike_model_id = ?
+        """
+        params = [bike_model_id]
+        if position:
+            sql += " AND btf.position = ?"
+            params.append(position)
+        if fitment_type:
+            sql += " AND btf.fitment_type = ?"
+            params.append(fitment_type)
+        sql += " ORDER BY btf.fitment_type, btf.position"
+        rows = self._conn.execute(sql, params).fetchall()
+        return [dict(r) for r in rows]

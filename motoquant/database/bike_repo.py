@@ -7,15 +7,16 @@ Handles BikeConfig ↔ DB conversion via the bridge module.
 
 import json
 import sqlite3
-from typing import List, Optional, Dict, Any, Tuple
-from datetime import datetime
 
 import numpy as np
 
 from ..models import BikeConfig, DynoCurve, EnvironmentParams
 from .bridge import (
-    config_to_db_row, extract_dyno_curve, extract_headline_specs,
-    db_row_to_config, compute_data_completeness,
+    compute_data_completeness,
+    config_to_db_row,
+    db_row_to_config,
+    extract_dyno_curve,
+    extract_headline_specs,
 )
 
 
@@ -53,7 +54,7 @@ class BikeRepository:
         self._conn.commit()
         return cur.lastrowid
 
-    def list_manufacturers(self) -> List[dict]:
+    def list_manufacturers(self) -> list[dict]:
         """List all manufacturers with bike counts."""
         rows = self._conn.execute("""
             SELECT m.id, m.name, m.country, COUNT(b.id) as bike_count
@@ -81,12 +82,22 @@ class BikeRepository:
     ) -> int:
         """Create a new bike model entry. Returns model ID."""
         cols = [
-            "manufacturer_id", "model_name", "model_code",
-            "year_from", "year_to", "category", "subcategory",
+            "manufacturer_id",
+            "model_name",
+            "model_code",
+            "year_from",
+            "year_to",
+            "category",
+            "subcategory",
         ]
         vals = [
-            manufacturer_id, model_name, model_code,
-            year_from, year_to, category, subcategory,
+            manufacturer_id,
+            model_name,
+            model_code,
+            year_from,
+            year_to,
+            category,
+            subcategory,
         ]
 
         for k, v in headline_specs.items():
@@ -114,7 +125,7 @@ class BikeRepository:
 
         return cur.lastrowid
 
-    def get_model(self, model_id: int) -> Optional[dict]:
+    def get_model(self, model_id: int) -> dict | None:
         """Get a bike model by ID."""
         row = self._conn.execute(
             """SELECT bm.*, m.name as manufacturer_name
@@ -138,7 +149,7 @@ class BikeRepository:
         data_quality: str = None,
         limit: int = 50,
         offset: int = 0,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """
         Search bike models with filters.
 
@@ -235,7 +246,9 @@ class BikeRepository:
                 source, source_url, confidence, notes)
                VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
-                bike_model_id, next_version, config_name,
+                bike_model_id,
+                next_version,
+                config_name,
                 row_data["chassis_params"],
                 row_data["engine_params"],
                 row_data["forced_induction_params"],
@@ -249,7 +262,10 @@ class BikeRepository:
                 row_data["rider_params"],
                 row_data["parasitic_params"],
                 row_data["staging_params"],
-                source, source_url, confidence, notes,
+                source,
+                source_url,
+                confidence,
+                notes,
             ),
         )
         config_id = cur.lastrowid
@@ -263,10 +279,14 @@ class BikeRepository:
                     rpm_points, torque_values, num_points, source, confidence)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
-                    config_id, dyno_data["curve_type"],
-                    dyno_data["is_at_wheel"], dyno_data["rpm_points"],
-                    dyno_data["torque_values"], dyno_data["num_points"],
-                    source, confidence,
+                    config_id,
+                    dyno_data["curve_type"],
+                    dyno_data["is_at_wheel"],
+                    dyno_data["rpm_points"],
+                    dyno_data["torque_values"],
+                    dyno_data["num_points"],
+                    source,
+                    confidence,
                 ),
             )
 
@@ -280,7 +300,7 @@ class BikeRepository:
         self._conn.commit()
         return config_id
 
-    def get_config(self, config_id: int) -> Optional[dict]:
+    def get_config(self, config_id: int) -> dict | None:
         """Get a bike config row by ID."""
         row = self._conn.execute(
             "SELECT * FROM bike_configs WHERE id = ?", (config_id,)
@@ -289,7 +309,7 @@ class BikeRepository:
 
     def get_current_config(
         self, bike_model_id: int, config_name: str = "stock"
-    ) -> Optional[dict]:
+    ) -> dict | None:
         """Get the current (latest) config for a model."""
         row = self._conn.execute(
             """SELECT * FROM bike_configs
@@ -301,8 +321,8 @@ class BikeRepository:
     def to_config(
         self,
         config_id: int,
-        environment: Optional[EnvironmentParams] = None,
-    ) -> Optional[BikeConfig]:
+        environment: EnvironmentParams | None = None,
+    ) -> BikeConfig | None:
         """
         Load a bike_configs row and reconstruct a full BikeConfig
         ready for simulation.
@@ -356,7 +376,7 @@ class BikeRepository:
         category: str = "sport",
         source: str = "spec_sheet",
         confidence: float = 0.7,
-    ) -> Tuple[int, int]:
+    ) -> tuple[int, int]:
         """
         High-level: store a BikeConfig, auto-creating manufacturer and model.
 
@@ -373,7 +393,7 @@ class BikeRepository:
         # Derive model name from config.name minus manufacturer
         model_name = config.name
         if config.name.lower().startswith(manufacturer_name.lower()):
-            model_name = config.name[len(manufacturer_name):].strip()
+            model_name = config.name[len(manufacturer_name) :].strip()
 
         # Extract headline specs
         specs = extract_headline_specs(config)
@@ -401,7 +421,7 @@ class BikeRepository:
     # Dyno curve analysis
     # ────────────────────────────────────────────
 
-    def get_dyno_curve(self, config_id: int) -> Optional[DynoCurve]:
+    def get_dyno_curve(self, config_id: int) -> DynoCurve | None:
         """Load the dyno curve for a config."""
         row = self._conn.execute(
             """SELECT * FROM dyno_curves
@@ -418,7 +438,7 @@ class BikeRepository:
             is_at_wheel=bool(row["is_at_wheel"]),
         )
 
-    def compare_dyno_curves(self, config_ids: List[int]) -> Dict[int, DynoCurve]:
+    def compare_dyno_curves(self, config_ids: list[int]) -> dict[int, DynoCurve]:
         """Load dyno curves for multiple configs (for comparison plots)."""
         result = {}
         for cid in config_ids:
@@ -447,8 +467,15 @@ class BikeRepository:
                (entity_type, entity_id, field_path, source_type,
                 source_url, confidence, notes)
                VALUES (?, ?, ?, ?, ?, ?, ?)""",
-            (entity_type, entity_id, field_path, source_type,
-             source_url, confidence, notes),
+            (
+                entity_type,
+                entity_id,
+                field_path,
+                source_type,
+                source_url,
+                confidence,
+                notes,
+            ),
         )
         self._conn.commit()
 

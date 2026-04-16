@@ -11,53 +11,64 @@ Guarantees:
   - Environment params handled separately (venue + weather records)
 """
 
-import json
 import dataclasses
-from typing import Dict, Any, Optional, Tuple
+import json
+from typing import Any
 
 import numpy as np
 
+from ..config_io import _dataclass_to_dict, _dyno_from_dict
 from ..models import (
-    BikeConfig, ChassisParams, EngineParams, ForcedInductionParams,
-    DrivetrainParams, ClutchParams, TireParams, AeroParams,
-    SuspensionParams, BrakingParams, WheelieParams, RiderParams,
-    ParasiticParams, StagingParams, EnvironmentParams, DynoCurve,
+    AeroParams,
+    BikeConfig,
+    BrakingParams,
+    ChassisParams,
+    ClutchParams,
+    DrivetrainParams,
+    DynoCurve,
+    EngineParams,
+    EnvironmentParams,
+    ForcedInductionParams,
+    ParasiticParams,
+    RiderParams,
+    StagingParams,
+    SuspensionParams,
+    TireParams,
+    WheelieParams,
 )
-from ..config_io import _dataclass_to_dict, _dyno_to_dict, _dyno_from_dict
-
 
 # Section name → dataclass class (excludes environment — that comes from venue/weather)
 PARAM_SECTIONS = {
-    "chassis":           ChassisParams,
-    "engine":            EngineParams,
-    "forced_induction":  ForcedInductionParams,
-    "drivetrain":        DrivetrainParams,
-    "clutch":            ClutchParams,
-    "tires":             TireParams,
-    "aero":              AeroParams,
-    "suspension":        SuspensionParams,
-    "braking":           BrakingParams,
-    "wheelie":           WheelieParams,
-    "rider":             RiderParams,
-    "parasitic":         ParasiticParams,
-    "staging":           StagingParams,
+    "chassis": ChassisParams,
+    "engine": EngineParams,
+    "forced_induction": ForcedInductionParams,
+    "drivetrain": DrivetrainParams,
+    "clutch": ClutchParams,
+    "tires": TireParams,
+    "aero": AeroParams,
+    "suspension": SuspensionParams,
+    "braking": BrakingParams,
+    "wheelie": WheelieParams,
+    "rider": RiderParams,
+    "parasitic": ParasiticParams,
+    "staging": StagingParams,
 }
 
 # DB column name → PARAM_SECTIONS key
 DB_COLUMN_TO_SECTION = {
-    "chassis_params":          "chassis",
-    "engine_params":           "engine",
+    "chassis_params": "chassis",
+    "engine_params": "engine",
     "forced_induction_params": "forced_induction",
-    "drivetrain_params":       "drivetrain",
-    "clutch_params":           "clutch",
-    "tire_params":             "tires",
-    "aero_params":             "aero",
-    "suspension_params":       "suspension",
-    "braking_params":          "braking",
-    "wheelie_params":          "wheelie",
-    "rider_params":            "rider",
-    "parasitic_params":        "parasitic",
-    "staging_params":          "staging",
+    "drivetrain_params": "drivetrain",
+    "clutch_params": "clutch",
+    "tire_params": "tires",
+    "aero_params": "aero",
+    "suspension_params": "suspension",
+    "braking_params": "braking",
+    "wheelie_params": "wheelie",
+    "rider_params": "rider",
+    "parasitic_params": "parasitic",
+    "staging_params": "staging",
 }
 
 
@@ -100,7 +111,8 @@ def _deserialize_section(json_str: str, section_name: str):
 # BikeConfig → DB row data
 # ────────────────────────────────────────────
 
-def config_to_db_row(config: BikeConfig) -> Dict[str, Any]:
+
+def config_to_db_row(config: BikeConfig) -> dict[str, Any]:
     """
     Convert a BikeConfig to a dict suitable for INSERT into bike_configs.
 
@@ -117,7 +129,7 @@ def config_to_db_row(config: BikeConfig) -> Dict[str, Any]:
     return row
 
 
-def extract_dyno_curve(config: BikeConfig) -> Optional[Dict[str, Any]]:
+def extract_dyno_curve(config: BikeConfig) -> dict[str, Any] | None:
     """
     Extract dyno curve data from a BikeConfig for the dyno_curves table.
 
@@ -135,23 +147,23 @@ def extract_dyno_curve(config: BikeConfig) -> Optional[Dict[str, Any]]:
     }
 
 
-def extract_headline_specs(config: BikeConfig) -> Dict[str, Any]:
+def extract_headline_specs(config: BikeConfig) -> dict[str, Any]:
     """
     Extract searchable headline specs from a BikeConfig
     for the bike_models table.
     """
     return {
-        "displacement_cc":   config.engine.displacement_cc,
-        "bore_mm":           config.engine.bore_mm,
-        "stroke_mm":         config.engine.stroke_mm,
+        "displacement_cc": config.engine.displacement_cc,
+        "bore_mm": config.engine.bore_mm,
+        "stroke_mm": config.engine.stroke_mm,
         "compression_ratio": config.engine.compression_ratio,
-        "peak_power_hp":     config.engine.peak_power_hp,
-        "peak_power_rpm":    config.engine.peak_power_rpm,
-        "peak_torque_nm":    config.engine.peak_torque_nm,
-        "peak_torque_rpm":   config.engine.peak_torque_rpm,
-        "dry_mass_kg":       config.chassis.dry_mass_kg,
-        "wheelbase_mm":      config.chassis.wheelbase_mm,
-        "seat_height_mm":    config.chassis.seat_height_mm,
+        "peak_power_hp": config.engine.peak_power_hp,
+        "peak_power_rpm": config.engine.peak_power_rpm,
+        "peak_torque_nm": config.engine.peak_torque_nm,
+        "peak_torque_rpm": config.engine.peak_torque_rpm,
+        "dry_mass_kg": config.chassis.dry_mass_kg,
+        "wheelbase_mm": config.chassis.wheelbase_mm,
+        "seat_height_mm": config.chassis.seat_height_mm,
     }
 
 
@@ -159,11 +171,12 @@ def extract_headline_specs(config: BikeConfig) -> Dict[str, Any]:
 # DB row → BikeConfig
 # ────────────────────────────────────────────
 
+
 def db_row_to_config(
     row: dict,
     name: str = "DB Bike",
-    environment: Optional[EnvironmentParams] = None,
-    dyno_override: Optional[DynoCurve] = None,
+    environment: EnvironmentParams | None = None,
+    dyno_override: DynoCurve | None = None,
 ) -> BikeConfig:
     """
     Reconstruct a BikeConfig from a bike_configs DB row.
@@ -183,7 +196,9 @@ def db_row_to_config(
     kwargs = {"name": name}
 
     for db_col, section_key in DB_COLUMN_TO_SECTION.items():
-        json_str = row[db_col] if db_col in row.keys() else row[db_col]
+        json_str = row.get(db_col) if hasattr(row, "get") else row[db_col]
+        if json_str is None:
+            continue  # skip missing optional sections
         section = _deserialize_section(json_str, section_key)
         kwargs[section_key] = section
 
@@ -202,7 +217,7 @@ def db_row_to_config(
 
 def venue_row_to_environment(
     venue_row: dict,
-    weather_row: Optional[dict] = None,
+    weather_row: dict | None = None,
 ) -> EnvironmentParams:
     """
     Build an EnvironmentParams from a venues row + optional weather_records row.
@@ -253,26 +268,69 @@ def seasonal_to_environment(
 # Parts → param modification
 # ────────────────────────────────────────────
 
+
 def apply_part_to_config(config: BikeConfig, part_row: dict) -> BikeConfig:
     """
     Apply a part's parameter modifications to a BikeConfig.
 
     Parts can specify:
-      - param_overrides: absolute values  {"drivetrain.rear_sprocket": 45}
-      - param_deltas:    additive changes {"engine.peak_power_hp": 15}
-      - param_multipliers: factors        {"tires.mu_peak": 1.08}
+      - param_overrides:   absolute values  {"drivetrain.rear_sprocket": 45}
+      - param_deltas:      additive changes {"engine.peak_power_hp": 15}
+      - param_multipliers: factors          {"tires.mu_peak": 1.08}
+
+    Dyno curve scaling
+    ------------------
+    If a part changes engine.peak_power_hp (via delta or multiplier) and the
+    config has a stored dyno curve, the dyno curve's torque array is scaled by
+    the same power ratio. This ensures NA power mods (exhaust, air filter, ECU
+    flash) work correctly for bikes that have measured dyno data.
+
+    Forced-induction parts (turbo, SC, N2O) set forced_induction.* params
+    directly. The physics model then applies the boost multiplier on top of the
+    base dyno torque — no dyno scaling needed or applied for those.
+
+    Path validation
+    ---------------
+    Invalid dotted paths (e.g. typos, removed fields) emit a warnings.warn()
+    rather than silently doing nothing. This makes bugs visible in the CLI/app
+    output without crashing the simulation.
 
     Returns a NEW BikeConfig (does not mutate the original).
     """
     import copy
-    new_config = copy.deepcopy(config)
+    import logging
+    import warnings
 
-    def _set_nested(obj, path: str, value):
-        """Set a nested attribute via dotted path."""
+    _log = logging.getLogger(__name__)
+    new_config = copy.deepcopy(config)
+    part_name = part_row.get("model_name", "unknown part")
+
+    # Snapshot power before any changes (for dyno curve scaling)
+    old_peak_hp = new_config.engine.peak_power_hp
+
+    def _set_nested(obj, path: str, value) -> bool:
+        """Set a nested attribute via dotted path. Returns False if path is invalid."""
         parts = path.split(".")
         for part in parts[:-1]:
+            if not hasattr(obj, part):
+                msg = (
+                    f"apply_part_to_config [{part_name}]: "
+                    f"invalid param path '{path}' — no attribute '{part}'. Skipped."
+                )
+                _log.warning(msg)
+                warnings.warn(msg)
+                return False
             obj = getattr(obj, part)
+        if not hasattr(obj, parts[-1]):
+            msg = (
+                f"apply_part_to_config [{part_name}]: "
+                f"invalid param path '{path}' — no attribute '{parts[-1]}'. Skipped."
+            )
+            _log.warning(msg)
+            warnings.warn(msg)
+            return False
         setattr(obj, parts[-1], value)
+        return True
 
     def _get_nested(obj, path: str):
         """Get a nested attribute via dotted path."""
@@ -280,31 +338,62 @@ def apply_part_to_config(config: BikeConfig, part_row: dict) -> BikeConfig:
             obj = getattr(obj, part)
         return obj
 
-    # Apply overrides
-    overrides = part_row.get("param_overrides")
-    if overrides:
-        if isinstance(overrides, str):
-            overrides = json.loads(overrides)
-        for path, val in overrides.items():
-            _set_nested(new_config, path, val)
+    # Apply overrides (absolute set)
+    overrides = part_row.get("param_overrides") or {}
+    if isinstance(overrides, str):
+        overrides = json.loads(overrides)
+    for path, val in overrides.items():
+        _set_nested(new_config, path, val)
 
     # Apply deltas (additive)
-    deltas = part_row.get("param_deltas")
-    if deltas:
-        if isinstance(deltas, str):
-            deltas = json.loads(deltas)
-        for path, delta in deltas.items():
+    deltas = part_row.get("param_deltas") or {}
+    if isinstance(deltas, str):
+        deltas = json.loads(deltas)
+    for path, delta in deltas.items():
+        try:
             current = _get_nested(new_config, path)
             _set_nested(new_config, path, current + delta)
+        except AttributeError:
+            warnings.warn(
+                f"apply_part_to_config [{part_name}]: "
+                f"invalid delta path '{path}'. Skipped."
+            )
 
-    # Apply multipliers
-    multipliers = part_row.get("param_multipliers")
-    if multipliers:
-        if isinstance(multipliers, str):
-            multipliers = json.loads(multipliers)
-        for path, factor in multipliers.items():
+    # Apply multipliers (scale current value)
+    multipliers = part_row.get("param_multipliers") or {}
+    if isinstance(multipliers, str):
+        multipliers = json.loads(multipliers)
+    for path, factor in multipliers.items():
+        try:
             current = _get_nested(new_config, path)
             _set_nested(new_config, path, current * factor)
+        except AttributeError:
+            warnings.warn(
+                f"apply_part_to_config [{part_name}]: "
+                f"invalid multiplier path '{path}'. Skipped."
+            )
+
+    # ── Dyno curve scaling for NA power mods ─────────────────────────────────
+    # If this part changed engine.peak_power_hp AND the config has a dyno curve
+    # AND the engine is still naturally aspirated, scale the dyno curve torque
+    # array by the same ratio so the physics engine sees the power delta.
+    #
+    # Forced-induction parts (turbo/SC/N2O) set forced_induction.boost_type ≠ NA,
+    # so is_boosted → True after overrides are applied. Those parts must NOT also
+    # change peak_power_hp — the boost model handles the torque increase directly.
+    new_peak_hp = new_config.engine.peak_power_hp
+    hp_changed = abs(new_peak_hp - old_peak_hp) > 0.05
+    has_dyno = new_config.engine.dyno_curve is not None
+    is_na = not new_config.forced_induction.is_boosted
+
+    if hp_changed and has_dyno and is_na and old_peak_hp > 1.0:
+        ratio = new_peak_hp / old_peak_hp
+        dc = new_config.engine.dyno_curve
+        new_config.engine.dyno_curve = DynoCurve(
+            rpm=dc.rpm.copy(),
+            torque_nm=dc.torque_nm * ratio,
+            is_at_wheel=dc.is_at_wheel,
+        )
 
     return new_config
 

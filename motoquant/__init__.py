@@ -18,6 +18,6 @@ Usage:
 
 __version__ = "0.2.0"
 
+from .defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 from .models import BikeConfig
 from .physics import MotoQuantEngine, SimResult
-from .defaults import gsxr1000_k5, yzfr1_4c8, hayabusa_gen1

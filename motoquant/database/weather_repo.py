@@ -14,20 +14,17 @@ or pass directly to fetch_live().
 """
 
 import json
-import sqlite3
-import os
 import math
+import os
+import sqlite3
 from datetime import datetime, timezone
-from typing import List, Optional, Dict, Any
-
-import numpy as np
 
 from ..models import EnvironmentParams
-
 
 # ────────────────────────────────────────────
 # Atmospheric physics (standalone, no external deps)
 # ────────────────────────────────────────────
+
 
 def compute_air_density(
     temp_c: float,
@@ -119,7 +116,7 @@ class WeatherRepository:
         venue_id: int,
         api_key: str = None,
         track_temp_c: float = None,
-    ) -> Optional[int]:
+    ) -> int | None:
         """
         Fetch current weather for a venue from OpenWeatherMap API.
 
@@ -244,22 +241,29 @@ class WeatherRepository:
             dew_point_c = compute_dew_point(ambient_temp_c, relative_humidity_pct)
         if air_density_kgm3 is None:
             air_density_kgm3 = compute_air_density(
-                ambient_temp_c, relative_humidity_pct,
-                barometric_pressure_hpa, altitude_m,
+                ambient_temp_c,
+                relative_humidity_pct,
+                barometric_pressure_hpa,
+                altitude_m,
             )
         if density_altitude_ft is None:
             density_altitude_ft = compute_density_altitude(
-                ambient_temp_c, relative_humidity_pct,
-                barometric_pressure_hpa, altitude_m,
+                ambient_temp_c,
+                relative_humidity_pct,
+                barometric_pressure_hpa,
+                altitude_m,
             )
         if vapor_pressure_hpa is None:
             vapor_pressure_hpa = compute_vapor_pressure(
-                ambient_temp_c, relative_humidity_pct,
+                ambient_temp_c,
+                relative_humidity_pct,
             )
         if power_correction_factor is None:
             power_correction_factor = compute_power_correction(
-                ambient_temp_c, barometric_pressure_hpa,
-                relative_humidity_pct, altitude_m,
+                ambient_temp_c,
+                barometric_pressure_hpa,
+                relative_humidity_pct,
+                altitude_m,
             )
         if track_temp_c is None:
             track_temp_c = ambient_temp_c + 5.0
@@ -273,11 +277,22 @@ class WeatherRepository:
                 vapor_pressure_hpa, power_correction_factor, raw_response)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
-                venue_id, recorded_at, source,
-                ambient_temp_c, relative_humidity_pct, barometric_pressure_hpa,
-                dew_point_c, wind_speed_ms, wind_direction_deg, wind_gust_ms,
-                track_temp_c, density_altitude_ft, air_density_kgm3,
-                vapor_pressure_hpa, power_correction_factor, raw_response,
+                venue_id,
+                recorded_at,
+                source,
+                ambient_temp_c,
+                relative_humidity_pct,
+                barometric_pressure_hpa,
+                dew_point_c,
+                wind_speed_ms,
+                wind_direction_deg,
+                wind_gust_ms,
+                track_temp_c,
+                density_altitude_ft,
+                air_density_kgm3,
+                vapor_pressure_hpa,
+                power_correction_factor,
+                raw_response,
             ),
         )
         self._conn.commit()
@@ -287,13 +302,13 @@ class WeatherRepository:
     # Queries
     # ────────────────────────────────────────────
 
-    def get(self, record_id: int) -> Optional[dict]:
+    def get(self, record_id: int) -> dict | None:
         row = self._conn.execute(
             "SELECT * FROM weather_records WHERE id = ?", (record_id,)
         ).fetchone()
         return dict(row) if row else None
 
-    def latest(self, venue_id: int) -> Optional[dict]:
+    def latest(self, venue_id: int) -> dict | None:
         """Get the most recent weather record for a venue."""
         row = self._conn.execute(
             """SELECT * FROM weather_records
@@ -309,7 +324,7 @@ class WeatherRepository:
         from_date: str = None,
         to_date: str = None,
         limit: int = 100,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """Query historical weather records for a venue."""
         conditions = ["venue_id = ?"]
         params = [venue_id]
@@ -331,7 +346,7 @@ class WeatherRepository:
         ).fetchall()
         return [dict(r) for r in rows]
 
-    def da_trend(self, venue_id: int, limit: int = 365) -> List[Dict]:
+    def da_trend(self, venue_id: int, limit: int = 365) -> list[dict]:
         """
         Get density altitude trend data for plotting.
         Returns [{recorded_at, density_altitude_ft, power_correction_factor}].
@@ -347,7 +362,7 @@ class WeatherRepository:
         ).fetchall()
         return [dict(r) for r in rows]
 
-    def to_environment(self, record_id: int) -> Optional[EnvironmentParams]:
+    def to_environment(self, record_id: int) -> EnvironmentParams | None:
         """Convert a weather record to EnvironmentParams for simulation."""
         wr = self.get(record_id)
         if wr is None:
@@ -360,6 +375,7 @@ class WeatherRepository:
             return None
 
         from .bridge import venue_row_to_environment
+
         return venue_row_to_environment(dict(venue), wr)
 
     def count(self, venue_id: int = None) -> int:

@@ -21,21 +21,23 @@ class AeroModel:
         v_rel = v + self.v_wind
         if v_rel <= 0:
             return 0.0
-        return 0.5 * self.rho * v_rel ** 2 * self.cd_a
+        return 0.5 * self.rho * v_rel**2 * self.cd_a
 
     def lift(self, v: float) -> float:
         """Aerodynamic lift force (N). Reduces wheel loads."""
         v_rel = v + self.v_wind
         if v_rel <= 0:
             return 0.0
-        return 0.5 * self.rho * v_rel ** 2 * self.cfg.aero.cl * self.cfg.aero.frontal_area_m2
+        return (
+            0.5 * self.rho * v_rel**2 * self.cfg.aero.cl * self.cfg.aero.frontal_area_m2
+        )
 
     def ram_air_power_mult(self, v: float) -> float:
         """Power multiplier from ram air effect. Significant above 100 km/h."""
         eta = self.cfg.aero.ram_air_efficiency
         if eta <= 0 or v < 20.0:
             return 1.0
-        P_ram = 0.5 * self.rho * v ** 2 * eta
+        P_ram = 0.5 * self.rho * v**2 * eta
         P_atm = self.rho * 287.058 * (self.cfg.environment.ambient_temp_c + 273.15)
         if P_atm <= 0:
             P_atm = 101325.0

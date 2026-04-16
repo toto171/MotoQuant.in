@@ -5,7 +5,7 @@ Gear ratios, wheel torque, effective mass (rotational inertia),
 RPM-speed mapping, and optimal shift point calculation.
 """
 
-from ..constants import RADS_TO_RPM, RPM_TO_RADS
+from ..constants import RADS_TO_RPM
 from ..models import BikeConfig
 
 
@@ -28,9 +28,11 @@ class DrivetrainModel:
         eng = self.cfg.engine
         r_w = tire.rear_rolling_radius_m
         i_total = dt_params.overall_ratio(gear)
-        m_rot_engine = (eng.engine_inertia_kgm2 + self.cfg.clutch.basket_inertia_kgm2) * (i_total / r_w) ** 2
-        m_rot_rear = tire.rear_inertia_kgm2 / r_w ** 2
-        m_rot_front = tire.front_inertia_kgm2 / r_w ** 2
+        m_rot_engine = (
+            eng.engine_inertia_kgm2 + self.cfg.clutch.basket_inertia_kgm2
+        ) * (i_total / r_w) ** 2
+        m_rot_rear = tire.rear_inertia_kgm2 / r_w**2
+        m_rot_front = tire.front_inertia_kgm2 / r_w**2
         return m_total + m_rot_engine + m_rot_rear + m_rot_front
 
     def engine_rpm_from_speed(self, v: float, gear: int, r_eff: float) -> float:
@@ -50,7 +52,11 @@ class DrivetrainModel:
         i_to = self.cfg.drivetrain.overall_ratio(gear_to)
         ratio = i_to / i_from
         best_rpm = self.cfg.engine.redline_rpm
-        for rpm_test in range(int(self.cfg.engine.peak_torque_rpm), int(self.cfg.engine.redline_rpm) + 1, 50):
+        for rpm_test in range(
+            int(self.cfg.engine.peak_torque_rpm),
+            int(self.cfg.engine.redline_rpm) + 1,
+            50,
+        ):
             T_current = self.cfg.engine.get_torque(rpm_test) * i_from
             T_next = self.cfg.engine.get_torque(rpm_test * ratio) * i_to
             if T_next > T_current:

@@ -26,13 +26,13 @@ Categories mapping (bikez raw → our internal):
   "Super motard" → "naked"  (treated as naked for drag purposes)
 """
 
-from typing import TypedDict, List
+from typing import TypedDict
 
 
 class ManufacturerEntry(TypedDict, total=False):
     manufacturer: str
     bikez_slug: str
-    categories: List[str]
+    categories: list[str]
     min_cc: int
     year_from: int
     year_to: int
@@ -41,7 +41,7 @@ class ManufacturerEntry(TypedDict, total=False):
 
 
 # ── Japanese Big 4 ────────────────────────────────────────────────────────────
-_JP4: List[ManufacturerEntry] = [
+_JP4: list[ManufacturerEntry] = [
     {
         "manufacturer": "Suzuki",
         "bikez_slug": "suzuki",
@@ -85,7 +85,7 @@ _JP4: List[ManufacturerEntry] = [
 ]
 
 # ── European ─────────────────────────────────────────────────────────────────
-_EUR: List[ManufacturerEntry] = [
+_EUR: list[ManufacturerEntry] = [
     {
         "manufacturer": "Aprilia",
         "bikez_slug": "aprilia",
@@ -159,7 +159,7 @@ _EUR: List[ManufacturerEntry] = [
 ]
 
 # ── American ──────────────────────────────────────────────────────────────────
-_AMR: List[ManufacturerEntry] = [
+_AMR: list[ManufacturerEntry] = [
     {
         "manufacturer": "Harley-Davidson",
         "bikez_slug": "harley-davidson",
@@ -183,7 +183,7 @@ _AMR: List[ManufacturerEntry] = [
 ]
 
 # ── Others relevant to Indian market ─────────────────────────────────────────
-_OTHER: List[ManufacturerEntry] = [
+_OTHER: list[ManufacturerEntry] = [
     {
         "manufacturer": "Royal Enfield",
         "bikez_slug": "royal_enfield",
@@ -227,9 +227,10 @@ _OTHER: List[ManufacturerEntry] = [
 ]
 
 # ── Master catalog (in priority order) ───────────────────────────────────────
-SCRAPE_CATALOG: List[ManufacturerEntry] = _JP4 + _EUR + _AMR + _OTHER
+SCRAPE_CATALOG: list[ManufacturerEntry] = _JP4 + _EUR + _AMR + _OTHER
 
 # ── Convenience lookups ───────────────────────────────────────────────────────
+
 
 def get_entry(manufacturer: str) -> ManufacturerEntry | None:
     """Return the catalog entry for a manufacturer (case-insensitive)."""
@@ -258,5 +259,7 @@ if __name__ == "__main__":
     print(f"Total catalog entries: {len(SCRAPE_CATALOG)}")
     for e in SCRAPE_CATALOG:
         cats = "/".join(e["categories"])
-        print(f"  [{e['priority']}] {e['manufacturer']:<20}  "
-              f"{e['min_cc']}cc+  {e['year_from']}-{e['year_to']}  ({cats})")
+        print(
+            f"  [{e['priority']}] {e['manufacturer']:<20}  "
+            f"{e['min_cc']}cc+  {e['year_from']}-{e['year_to']}  ({cats})"
+        )

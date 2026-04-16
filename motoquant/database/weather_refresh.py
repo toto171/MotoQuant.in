@@ -17,11 +17,10 @@ Design:
   - Returns a RefreshSummary with per-venue status.
 """
 
-import os
 import logging
-from datetime import datetime, timezone, timedelta
+import os
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from datetime import datetime, timedelta, timezone
 
 logger = logging.getLogger(__name__)
 
@@ -30,10 +29,10 @@ logger = logging.getLogger(__name__)
 class VenueRefreshStatus:
     venue_id: int
     venue_name: str
-    status: str          # "refreshed" | "skipped_fresh" | "no_coords" | "api_error" | "no_key"
-    record_id: Optional[int] = None
-    density_altitude_ft: Optional[float] = None
-    power_correction: Optional[float] = None
+    status: str  # "refreshed" | "skipped_fresh" | "no_coords" | "api_error" | "no_key"
+    record_id: int | None = None
+    density_altitude_ft: float | None = None
+    power_correction: float | None = None
     message: str = ""
 
 
@@ -43,7 +42,7 @@ class RefreshSummary:
     skipped_fresh: int = 0
     no_coords: int = 0
     errors: int = 0
-    venue_results: List[VenueRefreshStatus] = field(default_factory=list)
+    venue_results: list[VenueRefreshStatus] = field(default_factory=list)
     run_at: str = ""
 
     def __post_init__(self):
@@ -63,16 +62,23 @@ class RefreshSummary:
             f"  API errors:    {self.errors}",
         ]
         for v in self.venue_results:
-            icon = {"refreshed": "✓", "skipped_fresh": "—",
-                    "no_coords": "?", "api_error": "✗", "no_key": "✗"}.get(v.status, "·")
+            icon = {
+                "refreshed": "✓",
+                "skipped_fresh": "—",
+                "no_coords": "?",
+                "api_error": "✗",
+                "no_key": "✗",
+            }.get(v.status, "·")
             detail = ""
             if v.density_altitude_ft is not None:
-                detail = f"  DA={v.density_altitude_ft:.0f}ft  PCF={v.power_correction:.4f}"
+                detail = (
+                    f"  DA={v.density_altitude_ft:.0f}ft  PCF={v.power_correction:.4f}"
+                )
             lines.append(f"  {icon} [{v.venue_id}] {v.venue_name}: {v.status}{detail}")
         return "\n".join(lines)
 
 
-def _is_stale(latest_record: Optional[dict], stale_minutes: int) -> bool:
+def _is_stale(latest_record: dict | None, stale_minutes: int) -> bool:
     """Return True if the record is older than stale_minutes (or missing)."""
     if latest_record is None:
         return True
@@ -100,7 +106,7 @@ def refresh_all_venues(
     db,
     api_key: str = None,
     stale_minutes: int = 60,
-    venue_ids: List[int] = None,
+    venue_ids: list[int] = None,
 ) -> RefreshSummary:
     """
     Poll OpenWeatherMap for all active venues and store fresh weather records.
@@ -140,7 +146,8 @@ def refresh_all_venues(
         if lat is None or lon is None:
             logger.debug(f"Venue {vname}: no coordinates, skipping")
             status = VenueRefreshStatus(
-                venue_id=vid, venue_name=vname,
+                venue_id=vid,
+                venue_name=vname,
                 status="no_coords",
                 message="No latitude/longitude configured",
             )
@@ -161,14 +168,18 @@ def refresh_all_venues(
                         recorded_at = datetime.fromisoformat(recorded_str[:19])
                         recorded_at = recorded_at.replace(tzinfo=timezone.utc)
                     age_min = int(
-                        (datetime.now(timezone.utc) -
-                         recorded_at.astimezone(timezone.utc)).total_seconds() / 60
+                        (
+                            datetime.now(timezone.utc)
+                            - recorded_at.astimezone(timezone.utc)
+                        ).total_seconds()
+                        / 60
                     )
                 except Exception:
                     pass
             logger.debug(f"Venue {vname}: data fresh ({age_min}min old), skipping")
             status = VenueRefreshStatus(
-                venue_id=vid, venue_name=vname,
+                venue_id=vid,
+                venue_name=vname,
                 status="skipped_fresh",
                 message=f"Last record {age_min}min ago (< {stale_minutes}min threshold)",
             )
@@ -180,7 +191,8 @@ def refresh_all_venues(
         if not api_key:
             logger.warning(f"Venue {vname}: no API key, skipping")
             status = VenueRefreshStatus(
-                venue_id=vid, venue_name=vname,
+                venue_id=vid,
+                venue_name=vname,
                 status="no_key",
                 message="OPENWEATHERMAP_API_KEY not set",
             )
@@ -198,7 +210,8 @@ def refresh_all_venues(
             if record_id is not None:
                 wr = db.weather.get(record_id)
                 status = VenueRefreshStatus(
-                    venue_id=vid, venue_name=vname,
+                    venue_id=vid,
+                    venue_name=vname,
                     status="refreshed",
                     record_id=record_id,
                     density_altitude_ft=wr.get("density_altitude_ft"),
@@ -216,7 +229,8 @@ def refresh_all_venues(
         except Exception as e:
             logger.error(f"  {vname}: fetch failed — {e}")
             status = VenueRefreshStatus(
-                venue_id=vid, venue_name=vname,
+                venue_id=vid,
+                venue_name=vname,
                 status="api_error",
                 message=str(e),
             )
@@ -230,22 +244,35 @@ def refresh_all_venues(
 # Standalone entry point  (python -m motoquant.database.weather_refresh)
 # ────────────────────────────────────────────────────────────────────
 
+
 def _main():
     import argparse
+
     from ..database import MotoQuantDB
 
     parser = argparse.ArgumentParser(
         prog="weather_refresh",
         description="Poll OpenWeatherMap for all MotoQuant venues and store results.",
     )
-    parser.add_argument("--db", default="motoquant.db",
-                        help="Path to MotoQuant DB (default: motoquant.db)")
-    parser.add_argument("--api-key", default=None,
-                        help="OpenWeatherMap API key (or set OPENWEATHERMAP_API_KEY env var)")
-    parser.add_argument("--stale-minutes", type=int, default=60,
-                        help="Skip venues with data newer than N minutes (default: 60)")
-    parser.add_argument("--venue-ids", type=int, nargs="+",
-                        help="Only refresh specific venue IDs")
+    parser.add_argument(
+        "--db",
+        default="motoquant.db",
+        help="Path to MotoQuant DB (default: motoquant.db)",
+    )
+    parser.add_argument(
+        "--api-key",
+        default=None,
+        help="OpenWeatherMap API key (or set OPENWEATHERMAP_API_KEY env var)",
+    )
+    parser.add_argument(
+        "--stale-minutes",
+        type=int,
+        default=60,
+        help="Skip venues with data newer than N minutes (default: 60)",
+    )
+    parser.add_argument(
+        "--venue-ids", type=int, nargs="+", help="Only refresh specific venue IDs"
+    )
     parser.add_argument("--verbose", "-v", action="store_true")
     args = parser.parse_args()
 

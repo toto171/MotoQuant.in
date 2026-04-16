@@ -5,11 +5,14 @@ Turbocharger, supercharger (roots/centrifugal), and N2O models.
 Computes torque multiplier and boost pressure dynamics.
 """
 
-import numpy as np
 
 from ..constants import RPM_TO_RADS
 from ..models import (
-    BikeConfig, BOOST_TURBO, BOOST_SC_ROOTS, BOOST_SC_CENTRIFUGAL, BOOST_N2O,
+    BOOST_N2O,
+    BOOST_SC_CENTRIFUGAL,
+    BOOST_SC_ROOTS,
+    BOOST_TURBO,
+    BikeConfig,
 )
 
 
@@ -65,7 +68,7 @@ class ForcedInductionModel:
 
         elif fi.boost_type == BOOST_SC_CENTRIFUGAL:
             rpm_frac = rpm / max(1.0, self.cfg.engine.redline_rpm)
-            P_target = fi.target_boost_bar * 1e5 * rpm_frac ** 2
+            P_target = fi.target_boost_bar * 1e5 * rpm_frac**2
             return (P_target - P_boost) / 0.1
 
         elif fi.boost_type == BOOST_SC_ROOTS:

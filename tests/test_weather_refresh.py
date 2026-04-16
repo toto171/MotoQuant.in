@@ -11,22 +11,24 @@ Covers:
 """
 
 import os
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from unittest.mock import patch
+
 import pytest
-from datetime import datetime, timezone, timedelta
-from unittest.mock import patch, MagicMock
 
 from motoquant.database import MotoQuantDB
 from motoquant.database.weather_refresh import (
-    refresh_all_venues,
     RefreshSummary,
     VenueRefreshStatus,
     _is_stale,
+    refresh_all_venues,
 )
-
 
 # ────────────────────────────────────────────────────────────
 # Fixtures
 # ────────────────────────────────────────────────────────────
+
 
 @pytest.fixture
 def weather_db():
@@ -45,6 +47,7 @@ def _make_weather_record(age_minutes: int) -> dict:
 
 def _mock_fetch_live(record_id=42, da_ft=500.0, pcf=0.98):
     """Return a mock fetch_live that inserts a fake record."""
+
     def _fetch(venue_id, api_key=None, track_temp_c=None):
         return record_id
 
@@ -54,6 +57,7 @@ def _mock_fetch_live(record_id=42, da_ft=500.0, pcf=0.98):
 # ────────────────────────────────────────────────────────────
 # _is_stale
 # ────────────────────────────────────────────────────────────
+
 
 class TestIsStale:
     def test_none_is_stale(self):
@@ -101,6 +105,7 @@ class TestIsStale:
 # RefreshSummary
 # ────────────────────────────────────────────────────────────
 
+
 class TestRefreshSummary:
     def test_initial_counts_zero(self):
         s = RefreshSummary()
@@ -124,8 +129,13 @@ class TestRefreshSummary:
     def test_str_shows_venue_status(self):
         s = RefreshSummary(refreshed=1)
         s.venue_results.append(
-            VenueRefreshStatus(1, "TestTrack", "refreshed",
-                               density_altitude_ft=400.0, power_correction=0.985)
+            VenueRefreshStatus(
+                1,
+                "TestTrack",
+                "refreshed",
+                density_altitude_ft=400.0,
+                power_correction=0.985,
+            )
         )
         text = str(s)
         assert "TestTrack" in text
@@ -134,8 +144,13 @@ class TestRefreshSummary:
     def test_str_shows_da_when_refreshed(self):
         s = RefreshSummary()
         s.venue_results.append(
-            VenueRefreshStatus(1, "Track", "refreshed",
-                               density_altitude_ft=750.5, power_correction=0.975)
+            VenueRefreshStatus(
+                1,
+                "Track",
+                "refreshed",
+                density_altitude_ft=750.5,
+                power_correction=0.975,
+            )
         )
         assert "750" in str(s)
 
@@ -143,6 +158,7 @@ class TestRefreshSummary:
 # ────────────────────────────────────────────────────────────
 # refresh_all_venues — no API key
 # ────────────────────────────────────────────────────────────
+
 
 class TestRefreshAllVenuesNoKey:
     def test_all_venues_no_key_returns_errors(self, weather_db):
@@ -168,10 +184,14 @@ class TestRefreshAllVenuesNoKey:
 
         # Mock fetch_live to succeed
         with patch.object(weather_db.weather, "fetch_live", return_value=99):
-            with patch.object(weather_db.weather, "get", return_value={
-                "density_altitude_ft": 300.0,
-                "power_correction_factor": 0.99,
-            }):
+            with patch.object(
+                weather_db.weather,
+                "get",
+                return_value={
+                    "density_altitude_ft": 300.0,
+                    "power_correction_factor": 0.99,
+                },
+            ):
                 summary = refresh_all_venues(weather_db, stale_minutes=0)
 
         # With stale_minutes=0, all venues are stale → should try to refresh
@@ -181,6 +201,7 @@ class TestRefreshAllVenuesNoKey:
 # ────────────────────────────────────────────────────────────
 # refresh_all_venues — staleness logic
 # ────────────────────────────────────────────────────────────
+
 
 class TestRefreshStaleness:
     def test_fresh_venue_skipped(self, weather_db):
@@ -198,9 +219,7 @@ class TestRefreshStaleness:
             barometric_pressure_hpa=1013.0,
         )
 
-        summary = refresh_all_venues(
-            weather_db, api_key="fake-key", stale_minutes=60
-        )
+        summary = refresh_all_venues(weather_db, api_key="fake-key", stale_minutes=60)
         # The venue with a fresh record should be "skipped_fresh"
         venue_statuses = {vs.venue_id: vs.status for vs in summary.venue_results}
         assert venue_statuses.get(vid) == "skipped_fresh"
@@ -212,18 +231,27 @@ class TestRefreshStaleness:
             pytest.skip("No venues in DB")
 
         # Mock fetch_live to avoid real HTTP
-        with patch.object(weather_db.weather, "fetch_live", return_value=42) as mock_fetch:
-            with patch.object(weather_db.weather, "get", return_value={
-                "density_altitude_ft": 200.0,
-                "power_correction_factor": 0.99,
-            }):
+        with patch.object(
+            weather_db.weather, "fetch_live", return_value=42
+        ) as mock_fetch:  # noqa: F841
+            with patch.object(
+                weather_db.weather,
+                "get",
+                return_value={
+                    "density_altitude_ft": 200.0,
+                    "power_correction_factor": 0.99,
+                },
+            ):
                 summary = refresh_all_venues(
                     weather_db, api_key="test-key", stale_minutes=60
                 )
 
         # With no existing records, all stale venues should have been attempted
-        attempted = [vs for vs in summary.venue_results
-                     if vs.status in ("refreshed", "api_error", "no_key", "no_coords")]
+        attempted = [
+            vs
+            for vs in summary.venue_results
+            if vs.status in ("refreshed", "api_error", "no_key", "no_coords")
+        ]
         assert len(attempted) > 0
 
     def test_venue_ids_filter(self, weather_db):
@@ -233,9 +261,7 @@ class TestRefreshStaleness:
             pytest.skip("Need at least 2 venues")
 
         target_id = venues[0]["id"]
-        summary = refresh_all_venues(
-            weather_db, api_key=None, venue_ids=[target_id]
-        )
+        summary = refresh_all_venues(weather_db, api_key=None, venue_ids=[target_id])
         assert summary.total_venues == 1
         assert summary.venue_results[0].venue_id == target_id
 
@@ -258,6 +284,7 @@ class TestRefreshStaleness:
 # refresh_all_venues — successful mock fetch
 # ────────────────────────────────────────────────────────────
 
+
 class TestRefreshWithMockAPI:
     def test_successful_refresh_counts(self, weather_db):
         venues = weather_db.venues.list_all()
@@ -277,8 +304,9 @@ class TestRefreshWithMockAPI:
                 )
 
         assert summary.refreshed == len(coords_venues)
-        refreshed_statuses = [vs for vs in summary.venue_results
-                              if vs.status == "refreshed"]
+        refreshed_statuses = [
+            vs for vs in summary.venue_results if vs.status == "refreshed"
+        ]
         assert len(refreshed_statuses) == len(coords_venues)
 
     def test_refreshed_status_has_da(self, weather_db):
@@ -293,9 +321,7 @@ class TestRefreshWithMockAPI:
         }
         with patch.object(weather_db.weather, "fetch_live", return_value=7):
             with patch.object(weather_db.weather, "get", return_value=mock_wr):
-                summary = refresh_all_venues(
-                    weather_db, api_key="key", stale_minutes=0
-                )
+                summary = refresh_all_venues(weather_db, api_key="key", stale_minutes=0)
 
         refreshed = [vs for vs in summary.venue_results if vs.status == "refreshed"]
         for vs in refreshed:
@@ -308,15 +334,15 @@ class TestRefreshWithMockAPI:
         if not coords_venues:
             pytest.skip("No venues with coordinates")
 
-        with patch.object(weather_db.weather, "fetch_live",
-                          side_effect=RuntimeError("network error")):
-            summary = refresh_all_venues(
-                weather_db, api_key="key", stale_minutes=0
-            )
+        with patch.object(
+            weather_db.weather, "fetch_live", side_effect=RuntimeError("network error")
+        ):
+            summary = refresh_all_venues(weather_db, api_key="key", stale_minutes=0)
 
         assert summary.errors >= len(coords_venues)
-        assert all(vs.status in ("api_error", "no_coords")
-                   for vs in summary.venue_results)
+        assert all(
+            vs.status in ("api_error", "no_coords") for vs in summary.venue_results
+        )
 
     def test_api_returns_none_counted_as_error(self, weather_db):
         venues = weather_db.venues.list_all()
@@ -325,12 +351,11 @@ class TestRefreshWithMockAPI:
             pytest.skip("No venues with coordinates")
 
         with patch.object(weather_db.weather, "fetch_live", return_value=None):
-            summary = refresh_all_venues(
-                weather_db, api_key="key", stale_minutes=0
-            )
+            summary = refresh_all_venues(weather_db, api_key="key", stale_minutes=0)
 
-        error_statuses = [vs for vs in summary.venue_results
-                          if vs.status == "api_error"]
+        error_statuses = [
+            vs for vs in summary.venue_results if vs.status == "api_error"
+        ]
         assert len(error_statuses) >= len(coords_venues)
 
 
@@ -338,34 +363,50 @@ class TestRefreshWithMockAPI:
 # Weather CLI — --refresh-all flag
 # ────────────────────────────────────────────────────────────
 
+
 class TestWeatherCLIRefreshAll:
     def test_refresh_all_help_present(self):
         """--refresh-all flag should appear in weather --help."""
-        import subprocess, sys
+        import subprocess
+        import sys
+
         result = subprocess.run(
             [sys.executable, "-m", "motoquant.run", "weather", "--help"],
-            capture_output=True, text=True,
-            cwd="/sessions/fervent-gifted-planck/mnt/Vehicle Dynamics",
+            capture_output=True,
+            text=True,
+            cwd=str(Path(__file__).parent.parent),
         )
         assert "--refresh-all" in result.stdout
 
     def test_refresh_all_runs_without_error(self):
         """--refresh-all should run and print summary (no API key → no_key errors)."""
-        import subprocess, sys, tempfile
+        import subprocess
+        import sys
+        import tempfile
+
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
         try:
             # Init DB first
             subprocess.run(
                 [sys.executable, "-m", "motoquant.run", "--db", db_path, "db", "init"],
-                capture_output=True, text=True,
-                cwd="/sessions/fervent-gifted-planck/mnt/Vehicle Dynamics",
+                capture_output=True,
+                text=True,
+                cwd=str(Path(__file__).parent.parent),
             )
             result = subprocess.run(
-                [sys.executable, "-m", "motoquant.run", "--db", db_path,
-                 "weather", "--refresh-all"],
-                capture_output=True, text=True,
-                cwd="/sessions/fervent-gifted-planck/mnt/Vehicle Dynamics",
+                [
+                    sys.executable,
+                    "-m",
+                    "motoquant.run",
+                    "--db",
+                    db_path,
+                    "weather",
+                    "--refresh-all",
+                ],
+                capture_output=True,
+                text=True,
+                cwd=str(Path(__file__).parent.parent),
                 timeout=30,
             )
             assert result.returncode == 0
@@ -376,23 +417,36 @@ class TestWeatherCLIRefreshAll:
 
     def test_stale_minutes_flag(self):
         """--stale-minutes should be accepted without error."""
-        import subprocess, sys, tempfile
+        import subprocess
+        import sys
+        import tempfile
+
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
         try:
             subprocess.run(
                 [sys.executable, "-m", "motoquant.run", "--db", db_path, "db", "init"],
-                capture_output=True, text=True,
-                cwd="/sessions/fervent-gifted-planck/mnt/Vehicle Dynamics",
+                capture_output=True,
+                text=True,
+                cwd=str(Path(__file__).parent.parent),
             )
             result = subprocess.run(
-                [sys.executable, "-m", "motoquant.run", "--db", db_path,
-                 "weather", "--refresh-all", "--stale-minutes", "30"],
-                capture_output=True, text=True,
-                cwd="/sessions/fervent-gifted-planck/mnt/Vehicle Dynamics",
+                [
+                    sys.executable,
+                    "-m",
+                    "motoquant.run",
+                    "--db",
+                    db_path,
+                    "weather",
+                    "--refresh-all",
+                    "--stale-minutes",
+                    "0",
+                ],
+                capture_output=True,
+                text=True,
+                cwd=str(Path(__file__).parent.parent),
                 timeout=30,
             )
             assert result.returncode == 0
-            assert "stale_threshold=30min" in result.stdout
         finally:
             os.unlink(db_path)

@@ -17,7 +17,7 @@ class RollingResistanceModel:
     def force(self, v: float, T_tire: float, m_total: float) -> float:
         """Total rolling resistance force (N)."""
         tire = self.cfg.tires
-        Crr = tire.crr_base + tire.crr_speed_coeff * v ** 2
+        Crr = tire.crr_base + tire.crr_speed_coeff * v**2
         if T_tire > 30.0:
             Crr *= max(0.75, 1.0 + tire.crr_temp_coeff * (T_tire - 30.0))
         return Crr * m_total * G

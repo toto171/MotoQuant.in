@@ -11,24 +11,29 @@ import io
 import json
 import os
 import sys
-import pytest
-from contextlib import redirect_stdout, redirect_stderr
+from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
-from datetime import datetime
+
+import pytest
 
 # Add parent to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from motoquant.run import (
-    main, legacy_main, build_parser,
-    cmd_db, cmd_bikes, cmd_sim, cmd_venues,
-    cmd_tires, cmd_parts, cmd_leaderboard, cmd_history,
-    resolve_bike, run_bike, print_table,
-    BIKE_REGISTRY, VENUE_REGISTRY,
-)
 from motoquant.database import MotoQuantDB
-
+from motoquant.run import (
+    cmd_bikes,
+    cmd_db,
+    cmd_history,
+    cmd_leaderboard,
+    cmd_parts,
+    cmd_sim,
+    cmd_tires,
+    cmd_venues,
+    legacy_main,
+    print_table,
+    resolve_bike,
+)
 
 # ─────────────────────────────────────────
 # Helpers
@@ -40,8 +45,10 @@ TEST_DB = f"/tmp/test_cli_{os.getpid()}.db"
 
 class _TestDB(MotoQuantDB):
     """MotoQuantDB subclass that skips WAL pragma (for test FS compat)."""
+
     def connect(self):
         import sqlite3
+
         if self._conn is not None:
             return self._conn
         self._conn = sqlite3.connect(str(self._db_path))
@@ -78,6 +85,7 @@ def capture_output(fn, *args, **kwargs):
 # Fixtures
 # ─────────────────────────────────────────
 
+
 @pytest.fixture(scope="module")
 def db():
     """Create and seed a test database once for all CLI tests."""
@@ -86,6 +94,7 @@ def db():
     _db = _TestDB(TEST_DB)
     _db.initialize()
     from motoquant.database.seed import seed_all
+
     seed_all(_db)
     yield _db
     _db.close()
@@ -108,6 +117,7 @@ def _patch_ensure_db(db):
 # ═══════════════════════════════════════════
 # Unit: resolve_bike
 # ═══════════════════════════════════════════
+
 
 class TestResolveBike:
     def test_direct_key(self):
@@ -133,6 +143,7 @@ class TestResolveBike:
 # Unit: print_table
 # ═══════════════════════════════════════════
 
+
 class TestPrintTable:
     def test_basic_table(self):
         _, out = capture_output(
@@ -156,6 +167,7 @@ class TestPrintTable:
 # ═══════════════════════════════════════════
 # Phase 2: cmd_db
 # ═══════════════════════════════════════════
+
 
 class TestCmdDb:
     def test_db_init(self, db):
@@ -183,11 +195,16 @@ class TestCmdDb:
 # Phase 2: cmd_bikes
 # ═══════════════════════════════════════════
 
+
 class TestCmdBikes:
     def test_list_all(self, db):
         args = make_args(
-            search=None, manufacturer=None, category=None,
-            displacement=None, power_min=None, quality=None,
+            search=None,
+            manufacturer=None,
+            category=None,
+            displacement=None,
+            power_min=None,
+            quality=None,
         )
         with _patch_ensure_db(db):
             _, out = capture_output(cmd_bikes, args)
@@ -195,8 +212,12 @@ class TestCmdBikes:
 
     def test_search_by_name(self, db):
         args = make_args(
-            search="Hayabusa", manufacturer=None, category=None,
-            displacement=None, power_min=None, quality=None,
+            search="Hayabusa",
+            manufacturer=None,
+            category=None,
+            displacement=None,
+            power_min=None,
+            quality=None,
         )
         with _patch_ensure_db(db):
             _, out = capture_output(cmd_bikes, args)
@@ -204,8 +225,12 @@ class TestCmdBikes:
 
     def test_search_no_results(self, db):
         args = make_args(
-            search="NonexistentBike999", manufacturer=None, category=None,
-            displacement=None, power_min=None, quality=None,
+            search="NonexistentBike999",
+            manufacturer=None,
+            category=None,
+            displacement=None,
+            power_min=None,
+            quality=None,
         )
         with _patch_ensure_db(db):
             _, out = capture_output(cmd_bikes, args)
@@ -213,8 +238,12 @@ class TestCmdBikes:
 
     def test_search_by_manufacturer(self, db):
         args = make_args(
-            search=None, manufacturer="Suzuki", category=None,
-            displacement=None, power_min=None, quality=None,
+            search=None,
+            manufacturer="Suzuki",
+            category=None,
+            displacement=None,
+            power_min=None,
+            quality=None,
         )
         with _patch_ensure_db(db):
             _, out = capture_output(cmd_bikes, args)
@@ -222,8 +251,12 @@ class TestCmdBikes:
 
     def test_search_by_displacement_range(self, db):
         args = make_args(
-            search=None, manufacturer=None, category=None,
-            displacement="900-1100", power_min=None, quality=None,
+            search=None,
+            manufacturer=None,
+            category=None,
+            displacement="900-1100",
+            power_min=None,
+            quality=None,
         )
         with _patch_ensure_db(db):
             _, out = capture_output(cmd_bikes, args)
@@ -231,8 +264,12 @@ class TestCmdBikes:
 
     def test_json_output(self, db):
         args = make_args(
-            search=None, manufacturer=None, category=None,
-            displacement=None, power_min=None, quality=None,
+            search=None,
+            manufacturer=None,
+            category=None,
+            displacement=None,
+            power_min=None,
+            quality=None,
             json_out=True,
         )
         with _patch_ensure_db(db):
@@ -247,13 +284,22 @@ class TestCmdBikes:
 # Phase 2: cmd_sim
 # ═══════════════════════════════════════════
 
+
 class TestCmdSim:
     def test_sim_by_bike_id(self, db):
         args = make_args(
-            bike_id=1, bike_legacy=None, config_file=None,
-            venue_id=None, venue_legacy=None, month=None,
-            weather_live=False, api_key=None, track_temp=None,
-            apply_parts=None, compare_stock=False, save_run=False,
+            bike_id=1,
+            bike_legacy=None,
+            config_file=None,
+            venue_id=None,
+            venue_legacy=None,
+            month=None,
+            weather_live=False,
+            api_key=None,
+            track_temp=None,
+            apply_parts=None,
+            compare_stock=False,
+            save_run=False,
             quiet=True,
         )
         with _patch_ensure_db(db):
@@ -261,10 +307,18 @@ class TestCmdSim:
 
     def test_sim_with_venue_and_month(self, db):
         args = make_args(
-            bike_id=1, bike_legacy=None, config_file=None,
-            venue_id=1, venue_legacy=None, month=1,
-            weather_live=False, api_key=None, track_temp=None,
-            apply_parts=None, compare_stock=False, save_run=False,
+            bike_id=1,
+            bike_legacy=None,
+            config_file=None,
+            venue_id=1,
+            venue_legacy=None,
+            month=1,
+            weather_live=False,
+            api_key=None,
+            track_temp=None,
+            apply_parts=None,
+            compare_stock=False,
+            save_run=False,
             quiet=False,
         )
         with _patch_ensure_db(db):
@@ -274,11 +328,20 @@ class TestCmdSim:
 
     def test_sim_json_output(self, db):
         args = make_args(
-            bike_id=1, bike_legacy=None, config_file=None,
-            venue_id=None, venue_legacy=None, month=None,
-            weather_live=False, api_key=None, track_temp=None,
-            apply_parts=None, compare_stock=False, save_run=False,
-            quiet=False, json_out=True,
+            bike_id=1,
+            bike_legacy=None,
+            config_file=None,
+            venue_id=None,
+            venue_legacy=None,
+            month=None,
+            weather_live=False,
+            api_key=None,
+            track_temp=None,
+            apply_parts=None,
+            compare_stock=False,
+            save_run=False,
+            quiet=False,
+            json_out=True,
         )
         with _patch_ensure_db(db):
             result, out = capture_output(cmd_sim, args)
@@ -290,11 +353,20 @@ class TestCmdSim:
     def test_sim_with_parts(self, db):
         # Stock run
         args_stock = make_args(
-            bike_id=1, bike_legacy=None, config_file=None,
-            venue_id=None, venue_legacy=None, month=None,
-            weather_live=False, api_key=None, track_temp=None,
-            apply_parts=None, compare_stock=False, save_run=False,
-            quiet=False, json_out=True,
+            bike_id=1,
+            bike_legacy=None,
+            config_file=None,
+            venue_id=None,
+            venue_legacy=None,
+            month=None,
+            weather_live=False,
+            api_key=None,
+            track_temp=None,
+            apply_parts=None,
+            compare_stock=False,
+            save_run=False,
+            quiet=False,
+            json_out=True,
         )
         with _patch_ensure_db(db):
             _, out_stock = capture_output(cmd_sim, args_stock)
@@ -302,11 +374,20 @@ class TestCmdSim:
 
         # Modified run (parts 4,5 = sprocket changes)
         args_mod = make_args(
-            bike_id=1, bike_legacy=None, config_file=None,
-            venue_id=None, venue_legacy=None, month=None,
-            weather_live=False, api_key=None, track_temp=None,
-            apply_parts="4,5", compare_stock=False, save_run=False,
-            quiet=False, json_out=True,
+            bike_id=1,
+            bike_legacy=None,
+            config_file=None,
+            venue_id=None,
+            venue_legacy=None,
+            month=None,
+            weather_live=False,
+            api_key=None,
+            track_temp=None,
+            apply_parts="4,5",
+            compare_stock=False,
+            save_run=False,
+            quiet=False,
+            json_out=True,
         )
         with _patch_ensure_db(db):
             _, out_mod = capture_output(cmd_sim, args_mod)
@@ -317,10 +398,18 @@ class TestCmdSim:
 
     def test_sim_compare_stock(self, db):
         args = make_args(
-            bike_id=1, bike_legacy=None, config_file=None,
-            venue_id=None, venue_legacy=None, month=None,
-            weather_live=False, api_key=None, track_temp=None,
-            apply_parts="4,5", compare_stock=True, save_run=False,
+            bike_id=1,
+            bike_legacy=None,
+            config_file=None,
+            venue_id=None,
+            venue_legacy=None,
+            month=None,
+            weather_live=False,
+            api_key=None,
+            track_temp=None,
+            apply_parts="4,5",
+            compare_stock=True,
+            save_run=False,
             quiet=False,
         )
         with _patch_ensure_db(db):
@@ -331,10 +420,18 @@ class TestCmdSim:
 
     def test_sim_save_run(self, db):
         args = make_args(
-            bike_id=1, bike_legacy=None, config_file=None,
-            venue_id=1, venue_legacy=None, month=1,
-            weather_live=False, api_key=None, track_temp=None,
-            apply_parts=None, compare_stock=False, save_run=True,
+            bike_id=1,
+            bike_legacy=None,
+            config_file=None,
+            venue_id=1,
+            venue_legacy=None,
+            month=1,
+            weather_live=False,
+            api_key=None,
+            track_temp=None,
+            apply_parts=None,
+            compare_stock=False,
+            save_run=True,
             quiet=False,
         )
         with _patch_ensure_db(db):
@@ -345,11 +442,20 @@ class TestCmdSim:
         csv_path = f"/tmp/test_cli_csv_{os.getpid()}.csv"
         try:
             args = make_args(
-                bike_id=1, bike_legacy=None, config_file=None,
-                venue_id=None, venue_legacy=None, month=None,
-                weather_live=False, api_key=None, track_temp=None,
-                apply_parts=None, compare_stock=False, save_run=False,
-                quiet=True, csv=csv_path,
+                bike_id=1,
+                bike_legacy=None,
+                config_file=None,
+                venue_id=None,
+                venue_legacy=None,
+                month=None,
+                weather_live=False,
+                api_key=None,
+                track_temp=None,
+                apply_parts=None,
+                compare_stock=False,
+                save_run=False,
+                quiet=True,
+                csv=csv_path,
             )
             with _patch_ensure_db(db):
                 _, out = capture_output(cmd_sim, args)
@@ -364,10 +470,18 @@ class TestCmdSim:
 
     def test_sim_no_bike_errors(self, db):
         args = make_args(
-            bike_id=None, bike_legacy=None, config_file=None,
-            venue_id=None, venue_legacy=None, month=None,
-            weather_live=False, api_key=None, track_temp=None,
-            apply_parts=None, compare_stock=False, save_run=False,
+            bike_id=None,
+            bike_legacy=None,
+            config_file=None,
+            venue_id=None,
+            venue_legacy=None,
+            month=None,
+            weather_live=False,
+            api_key=None,
+            track_temp=None,
+            apply_parts=None,
+            compare_stock=False,
+            save_run=False,
             quiet=False,
         )
         with _patch_ensure_db(db), pytest.raises(SystemExit):
@@ -375,10 +489,18 @@ class TestCmdSim:
 
     def test_sim_invalid_bike_id(self, db):
         args = make_args(
-            bike_id=9999, bike_legacy=None, config_file=None,
-            venue_id=None, venue_legacy=None, month=None,
-            weather_live=False, api_key=None, track_temp=None,
-            apply_parts=None, compare_stock=False, save_run=False,
+            bike_id=9999,
+            bike_legacy=None,
+            config_file=None,
+            venue_id=None,
+            venue_legacy=None,
+            month=None,
+            weather_live=False,
+            api_key=None,
+            track_temp=None,
+            apply_parts=None,
+            compare_stock=False,
+            save_run=False,
             quiet=False,
         )
         with _patch_ensure_db(db), pytest.raises(SystemExit):
@@ -387,11 +509,20 @@ class TestCmdSim:
     def test_sim_deterministic(self, db):
         """Two identical sims should produce identical ET."""
         args = make_args(
-            bike_id=1, bike_legacy=None, config_file=None,
-            venue_id=None, venue_legacy=None, month=None,
-            weather_live=False, api_key=None, track_temp=None,
-            apply_parts=None, compare_stock=False, save_run=False,
-            quiet=False, json_out=True,
+            bike_id=1,
+            bike_legacy=None,
+            config_file=None,
+            venue_id=None,
+            venue_legacy=None,
+            month=None,
+            weather_live=False,
+            api_key=None,
+            track_temp=None,
+            apply_parts=None,
+            compare_stock=False,
+            save_run=False,
+            quiet=False,
+            json_out=True,
         )
         with _patch_ensure_db(db):
             _, out1 = capture_output(cmd_sim, args)
@@ -406,6 +537,7 @@ class TestCmdSim:
 # ═══════════════════════════════════════════
 # Phase 2: cmd_venues
 # ═══════════════════════════════════════════
+
 
 class TestCmdVenues:
     def test_list_venues(self, db):
@@ -434,11 +566,15 @@ class TestCmdVenues:
 # Phase 2: cmd_tires
 # ═══════════════════════════════════════════
 
+
 class TestCmdTires:
     def test_grip_rank(self, db):
         args = make_args(
-            grip_rank=True, value_rank=False,
-            compound=None, position=None, manufacturer=None,
+            grip_rank=True,
+            value_rank=False,
+            compound=None,
+            position=None,
+            manufacturer=None,
             india_only=False,
         )
         with _patch_ensure_db(db):
@@ -447,8 +583,11 @@ class TestCmdTires:
 
     def test_value_rank(self, db):
         args = make_args(
-            grip_rank=False, value_rank=True,
-            compound=None, position=None, manufacturer=None,
+            grip_rank=False,
+            value_rank=True,
+            compound=None,
+            position=None,
+            manufacturer=None,
             india_only=False,
         )
         with _patch_ensure_db(db):
@@ -460,11 +599,16 @@ class TestCmdTires:
 # Phase 2: cmd_parts
 # ═══════════════════════════════════════════
 
+
 class TestCmdParts:
     def test_list_parts(self, db):
         args = make_args(
-            category=None, brand=None, search=None,
-            max_price=None, available=False, build_cost=None,
+            category=None,
+            brand=None,
+            search=None,
+            max_price=None,
+            available=False,
+            build_cost=None,
         )
         with _patch_ensure_db(db):
             _, out = capture_output(cmd_parts, args)
@@ -473,8 +617,12 @@ class TestCmdParts:
 
     def test_build_cost(self, db):
         args = make_args(
-            category=None, brand=None, search=None,
-            max_price=None, available=False, build_cost="4,5,6",
+            category=None,
+            brand=None,
+            search=None,
+            max_price=None,
+            available=False,
+            build_cost="4,5,6",
         )
         with _patch_ensure_db(db):
             _, out = capture_output(cmd_parts, args)
@@ -485,14 +633,23 @@ class TestCmdParts:
 # Phase 2: Leaderboard & History
 # ═══════════════════════════════════════════
 
+
 class TestLeaderboardHistory:
     def test_leaderboard(self, db):
         # Ensure at least one saved run exists
         args_sim = make_args(
-            bike_id=1, bike_legacy=None, config_file=None,
-            venue_id=1, venue_legacy=None, month=1,
-            weather_live=False, api_key=None, track_temp=None,
-            apply_parts=None, compare_stock=False, save_run=True,
+            bike_id=1,
+            bike_legacy=None,
+            config_file=None,
+            venue_id=1,
+            venue_legacy=None,
+            month=1,
+            weather_live=False,
+            api_key=None,
+            track_temp=None,
+            apply_parts=None,
+            compare_stock=False,
+            save_run=True,
             quiet=True,
         )
         with _patch_ensure_db(db):
@@ -514,6 +671,7 @@ class TestLeaderboardHistory:
 # ═══════════════════════════════════════════
 # Phase 1: Legacy Mode
 # ═══════════════════════════════════════════
+
 
 class TestLegacyMode:
     def test_list(self):
@@ -537,7 +695,9 @@ class TestLegacyMode:
 
     def test_with_venue(self):
         """--bike k5 --venue should apply venue env."""
-        _, out = capture_output(legacy_main, ["--bike", "k5", "--venue", "aamby-winter"])
+        _, out = capture_output(
+            legacy_main, ["--bike", "k5", "--venue", "aamby-winter"]
+        )
         assert "Aamby Valley" in out
 
     def test_json_output(self):
@@ -561,9 +721,7 @@ class TestLegacyMode:
         """--export-config should write JSON config file."""
         cfg_path = f"/tmp/test_cli_export_{os.getpid()}.json"
         try:
-            _, out = capture_output(
-                legacy_main, ["--export-config", "k5", cfg_path]
-            )
+            _, out = capture_output(legacy_main, ["--export-config", "k5", cfg_path])
             assert os.path.exists(cfg_path)
             with open(cfg_path) as f:
                 data = json.load(f)
@@ -588,9 +746,7 @@ class TestLegacyMode:
         """--csv should write time-history data."""
         csv_path = f"/tmp/test_cli_csv_{os.getpid()}.csv"
         try:
-            capture_output(
-                legacy_main, ["--bike", "k5", "--csv", csv_path, "--quiet"]
-            )
+            capture_output(legacy_main, ["--bike", "k5", "--csv", csv_path, "--quiet"])
             assert os.path.exists(csv_path)
             with open(csv_path) as f:
                 header = f.readline()
@@ -610,11 +766,21 @@ class TestLegacyMode:
 # Routing: main() dispatching
 # ═══════════════════════════════════════════
 
+
 class TestRouting:
     def test_subcommand_detected(self):
         """main() should detect Phase 2 subcommands in argv."""
-        known = {"db", "bikes", "sim", "venues", "tires", "parts",
-                 "weather", "leaderboard", "history"}
+        known = {
+            "db",
+            "bikes",
+            "sim",
+            "venues",
+            "tires",
+            "parts",
+            "weather",
+            "leaderboard",
+            "history",
+        }
         for cmd in known:
             # Just verify the detection logic
             args = ["prog", cmd]
@@ -624,16 +790,34 @@ class TestRouting:
     def test_db_flag_before_subcommand(self):
         """--db path before subcommand should still detect subcommand."""
         args = ["prog", "--db", "/some/path.db", "db", "stats"]
-        known = {"db", "bikes", "sim", "venues", "tires", "parts",
-                 "weather", "leaderboard", "history"}
+        known = {
+            "db",
+            "bikes",
+            "sim",
+            "venues",
+            "tires",
+            "parts",
+            "weather",
+            "leaderboard",
+            "history",
+        }
         has_sub = any(a in known for a in args[1:])
         assert has_sub
 
     def test_legacy_no_subcommand(self):
         """No subcommand should route to legacy mode."""
         args = ["prog", "--bike", "k5"]
-        known = {"db", "bikes", "sim", "venues", "tires", "parts",
-                 "weather", "leaderboard", "history"}
+        known = {
+            "db",
+            "bikes",
+            "sim",
+            "venues",
+            "tires",
+            "parts",
+            "weather",
+            "leaderboard",
+            "history",
+        }
         has_sub = any(a in known for a in args[1:])
         assert not has_sub
 
@@ -641,6 +825,7 @@ class TestRouting:
 # ═══════════════════════════════════════════
 # End-to-End Pipeline
 # ═══════════════════════════════════════════
+
 
 class TestEndToEndPipeline:
     def test_full_pipeline(self, db):
@@ -650,8 +835,12 @@ class TestEndToEndPipeline:
         """
         # 1. Search for K5
         args_search = make_args(
-            search="GSX-R", manufacturer=None, category=None,
-            displacement=None, power_min=None, quality=None,
+            search="GSX-R",
+            manufacturer=None,
+            category=None,
+            displacement=None,
+            power_min=None,
+            quality=None,
             json_out=True,
         )
         with _patch_ensure_db(db):
@@ -662,10 +851,18 @@ class TestEndToEndPipeline:
 
         # 2. Run sim with venue, month, parts, compare, save
         args_sim = make_args(
-            bike_id=bike_id, bike_legacy=None, config_file=None,
-            venue_id=1, venue_legacy=None, month=1,
-            weather_live=False, api_key=None, track_temp=None,
-            apply_parts="4,5", compare_stock=True, save_run=True,
+            bike_id=bike_id,
+            bike_legacy=None,
+            config_file=None,
+            venue_id=1,
+            venue_legacy=None,
+            month=1,
+            weather_live=False,
+            api_key=None,
+            track_temp=None,
+            apply_parts="4,5",
+            compare_stock=True,
+            save_run=True,
             quiet=False,
         )
         with _patch_ensure_db(db):
@@ -685,11 +882,20 @@ class TestEndToEndPipeline:
         ets = {}
         for bike_id in [1, 2, 3]:
             args = make_args(
-                bike_id=bike_id, bike_legacy=None, config_file=None,
-                venue_id=None, venue_legacy=None, month=None,
-                weather_live=False, api_key=None, track_temp=None,
-                apply_parts=None, compare_stock=False, save_run=False,
-                quiet=False, json_out=True,
+                bike_id=bike_id,
+                bike_legacy=None,
+                config_file=None,
+                venue_id=None,
+                venue_legacy=None,
+                month=None,
+                weather_live=False,
+                api_key=None,
+                track_temp=None,
+                apply_parts=None,
+                compare_stock=False,
+                save_run=False,
+                quiet=False,
+                json_out=True,
             )
             with _patch_ensure_db(db):
                 _, out = capture_output(cmd_sim, args)
@@ -705,11 +911,20 @@ class TestEndToEndPipeline:
         ets = {}
         for month in [1, 5]:  # Jan (best DA) vs May (worst DA)
             args = make_args(
-                bike_id=1, bike_legacy=None, config_file=None,
-                venue_id=1, venue_legacy=None, month=month,
-                weather_live=False, api_key=None, track_temp=None,
-                apply_parts=None, compare_stock=False, save_run=False,
-                quiet=False, json_out=True,
+                bike_id=1,
+                bike_legacy=None,
+                config_file=None,
+                venue_id=1,
+                venue_legacy=None,
+                month=month,
+                weather_live=False,
+                api_key=None,
+                track_temp=None,
+                apply_parts=None,
+                compare_stock=False,
+                save_run=False,
+                quiet=False,
+                json_out=True,
             )
             with _patch_ensure_db(db):
                 _, out = capture_output(cmd_sim, args)

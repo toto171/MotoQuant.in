@@ -19,10 +19,10 @@ Entry points:
     run_pipeline    end-to-end: crawl → validate → import → report
 """
 
+from .bikez import crawl_bikez, scrape_bikez
+from .importer import import_batch, import_spec
 from .spec import BikeSpec, ValidationResult
-from .bikez import scrape_bikez, crawl_bikez
-from .validator import validate_spec, score_spec
-from .importer import import_spec, import_batch
+from .validator import score_spec, validate_spec
 
 __all__ = [
     "BikeSpec",

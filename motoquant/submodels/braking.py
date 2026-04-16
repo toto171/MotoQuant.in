@@ -5,7 +5,6 @@ Maximum braking deceleration with iterative weight transfer.
 Not used in acceleration simulation, available for future modes.
 """
 
-from ..constants import G
 from ..models import BikeConfig
 
 

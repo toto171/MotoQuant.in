@@ -1,0 +1,14 @@
+# Railway Nixpacks build config for MotoQuant Pro API
+# Railway auto-detects this file when deploying from the repo root.
+
+[phases.setup]
+nixPkgs = ["python311", "gcc"]
+
+[phases.install]
+cmds = [
+    "pip install --upgrade pip",
+    "pip install -r requirements-api.txt",
+]
+
+[start]
+cmd = "uvicorn motoquant.api:app --host 0.0.0.0 --port $PORT"

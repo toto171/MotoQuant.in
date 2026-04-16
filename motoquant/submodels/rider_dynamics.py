@@ -15,7 +15,8 @@ AeroModel; this module does NOT duplicate their logic.
 """
 
 import math
-from ..models import BikeConfig, RIDER_TUCK, RIDER_UPRIGHT, RIDER_RACE
+
+from ..models import BikeConfig
 
 
 class RiderDynamicsModel:
@@ -43,28 +44,28 @@ class RiderDynamicsModel:
 
         # Rider mass fraction of total
         self.m_rider = r.mass_kg + r.gear_mass_kg
-        self.m_total = c.total_mass_kg            # bike + rider + fluids
+        self.m_total = c.total_mass_kg  # bike + rider + fluids
 
         # Nominal (static/tuck) combined CoG height — from ChassisParams
-        self.h_nominal = c.cog_height_m           # metres
+        self.h_nominal = c.cog_height_m  # metres
 
         # Rider CoG height change between upright staging and full tuck.
         # Heuristic: rider lowers CoG by ~15 % of their seated height when
         # going from upright to full race tuck.
         seated_h_m = r.cog_height_seated_mm / 1000.0
         self._rider_upright_h = seated_h_m
-        self._rider_tuck_h    = seated_h_m * 0.85  # 15 % reduction in tuck
+        self._rider_tuck_h = seated_h_m * 0.85  # 15 % reduction in tuck
 
         # Forward lean at launch
         self._launch_shift_m = r.launch_forward_shift_mm / 1000.0
-        self._transition_s   = max(0.01, r.tuck_transition_time_s)
+        self._transition_s = max(0.01, r.tuck_transition_time_s)
 
         # Aero: rider contribution at different positions
         # Values derived from AeroParams; we scale the full bike Cd*A
         a = cfg.aero
-        self._cd_a_full   = a.cd_a_effective          # tuck (baseline)
+        self._cd_a_full = a.cd_a_effective  # tuck (baseline)
         self._cd_a_upright = a.cd_a_effective * 1.18  # staging upright ~18 % more
-        self._cd_a_race    = a.cd_a_effective * 0.92  # race crouch ~8 % less
+        self._cd_a_race = a.cd_a_effective * 0.92  # race crouch ~8 % less
 
     # ─────────────────────────────────────────
     # PUBLIC API
@@ -117,7 +118,7 @@ class RiderDynamicsModel:
         # New front weight percentage
         # Front load = m*g*(L_r + cog_x_shift) / L  [standard 2-axle formula]
         # where L_r is distance from CoG to rear axle
-        L_r_new = c.L_r - cog_x_shift   # shift forward → L_r shrinks
+        L_r_new = c.L_r - cog_x_shift  # shift forward → L_r shrinks
         front_pct = L_r_new / L
         front_pct = max(0.30, min(0.70, front_pct))  # physical bounds
         return front_pct, 1.0 - front_pct

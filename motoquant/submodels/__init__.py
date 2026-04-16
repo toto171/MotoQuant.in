@@ -4,21 +4,21 @@ MotoQuant Pro — Sub-Model Registry
 Individual physics sub-models, composed by the main MotoQuantEngine.
 """
 
-from .engine import EngineModel
-from .forced_induction import ForcedInductionModel
-from .drivetrain import DrivetrainModel
-from .clutch import ClutchModel
-from .chain import ChainModel
-from .tire import TireModel
 from .aero import AeroModel
-from .weight_transfer import WeightTransferModel
 from .braking import BrakingModel
-from .wheelie import WheelieModel
-from .parasitic import ParasiticModel
-from .rolling_resistance import RollingResistanceModel
-from .rider_dynamics import RiderDynamicsModel
-from .staging import StagingModel
+from .chain import ChainModel
+from .clutch import ClutchModel
+from .drivetrain import DrivetrainModel
+from .engine import EngineModel
 from .environmental import EnvironmentalModel
+from .forced_induction import ForcedInductionModel
+from .parasitic import ParasiticModel
+from .rider_dynamics import RiderDynamicsModel
+from .rolling_resistance import RollingResistanceModel
+from .staging import StagingModel
+from .tire import TireModel
+from .weight_transfer import WeightTransferModel
+from .wheelie import WheelieModel
 
 __all__ = [
     "EngineModel",

@@ -8,19 +8,30 @@ Also importable by pytest if available.
 Run: python tests/run_tests.py
 """
 
-import sys
 import os
-import unittest
+import sys
 import tempfile
+import unittest
+
 import numpy as np
 
 # Ensure package is importable
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from motoquant.physics import MotoQuantEngine, QUARTER_MILE_M, G
-from motoquant.defaults import gsxr1000_k5, yzfr1_4c8, hayabusa_gen1
-from motoquant.defaults import aamby_valley_winter, aamby_valley_summer
-from motoquant.config_io import save_config, load_config, config_to_dict, config_from_dict
+from motoquant.config_io import (
+    config_from_dict,
+    config_to_dict,
+    load_config,
+    save_config,
+)
+from motoquant.defaults import (
+    aamby_valley_summer,
+    aamby_valley_winter,
+    gsxr1000_k5,
+    hayabusa_gen1,
+    yzfr1_4c8,
+)
+from motoquant.physics import QUARTER_MILE_M, G, MotoQuantEngine
 
 
 def _run(config, distance=QUARTER_MILE_M):
@@ -31,13 +42,14 @@ def _run(config, distance=QUARTER_MILE_M):
 # QUARTER-MILE VALIDATION
 # ═══════════════════════════════════════════
 
-class TestQuarterMileValidation(unittest.TestCase):
 
+class TestQuarterMileValidation(unittest.TestCase):
     def test_k5_et(self):
         """K5 within ±0.10s of 9.97s."""
         r = _run(gsxr1000_k5())
-        self.assertAlmostEqual(r.time_quarter, 9.97, delta=0.10,
-            msg=f"K5 ET {r.time_quarter:.3f}s")
+        self.assertAlmostEqual(
+            r.time_quarter, 9.97, delta=0.10, msg=f"K5 ET {r.time_quarter:.3f}s"
+        )
 
     def test_k5_trap_speed(self):
         """K5 trap within ±10 km/h of 233."""
@@ -47,8 +59,9 @@ class TestQuarterMileValidation(unittest.TestCase):
     def test_r1_et(self):
         """R1 within ±0.10s of 10.3s."""
         r = _run(yzfr1_4c8())
-        self.assertAlmostEqual(r.time_quarter, 10.3, delta=0.10,
-            msg=f"R1 ET {r.time_quarter:.3f}s")
+        self.assertAlmostEqual(
+            r.time_quarter, 10.3, delta=0.10, msg=f"R1 ET {r.time_quarter:.3f}s"
+        )
 
     def test_busa_et_in_typical_range(self):
         """Busa within typical owner range 10.1-10.7s."""
@@ -75,26 +88,30 @@ class TestQuarterMileValidation(unittest.TestCase):
 # ENVIRONMENTAL CORRECTION
 # ═══════════════════════════════════════════
 
-class TestEnvironment(unittest.TestCase):
 
+class TestEnvironment(unittest.TestCase):
     def test_aamby_winter_penalty(self):
         """Winter Aamby adds 0.05-0.25s penalty."""
         cfg_sl = gsxr1000_k5()
-        cfg_aw = gsxr1000_k5(); aamby_valley_winter(cfg_aw)
+        cfg_aw = gsxr1000_k5()
+        aamby_valley_winter(cfg_aw)
         penalty = _run(cfg_aw).time_quarter - _run(cfg_sl).time_quarter
         self.assertGreater(penalty, 0.05)
         self.assertLess(penalty, 0.25)
 
     def test_summer_worse_than_winter(self):
         """Summer hotter/humid → slower."""
-        cfg_w = gsxr1000_k5(); aamby_valley_winter(cfg_w)
-        cfg_s = gsxr1000_k5(); aamby_valley_summer(cfg_s)
+        cfg_w = gsxr1000_k5()
+        aamby_valley_winter(cfg_w)
+        cfg_s = gsxr1000_k5()
+        aamby_valley_summer(cfg_s)
         self.assertGreater(_run(cfg_s).time_quarter, _run(cfg_w).time_quarter)
 
     def test_altitude_reduces_power(self):
         """1500m altitude loses 3-20% power for NA engine."""
         cfg_sl = gsxr1000_k5()
-        cfg_alt = gsxr1000_k5(); cfg_alt.environment.altitude_m = 1500.0
+        cfg_alt = gsxr1000_k5()
+        cfg_alt.environment.altitude_m = 1500.0
         p_sl = np.max(_run(cfg_sl).power_kw)
         p_alt = np.max(_run(cfg_alt).power_kw)
         loss = (1 - p_alt / p_sl) * 100
@@ -106,8 +123,8 @@ class TestEnvironment(unittest.TestCase):
 # PHYSICS CONSERVATION & SANITY
 # ═══════════════════════════════════════════
 
-class TestPhysicsSanity(unittest.TestCase):
 
+class TestPhysicsSanity(unittest.TestCase):
     def test_monotonic_position(self):
         r = _run(gsxr1000_k5())
         self.assertTrue(np.all(np.diff(r.x) >= 0), "Position must never decrease")
@@ -157,15 +174,19 @@ class TestPhysicsSanity(unittest.TestCase):
 # SUB-MODEL UNIT TESTS
 # ═══════════════════════════════════════════
 
-class TestSubModels(unittest.TestCase):
 
+class TestSubModels(unittest.TestCase):
     def _eng(self):
         return MotoQuantEngine(gsxr1000_k5(), dt=0.001)
 
     def test_torque_positive_in_band(self):
         eng = self._eng()
-        for rpm in range(int(eng.cfg.engine.idle_rpm), int(eng.cfg.engine.redline_rpm), 500):
-            self.assertGreater(eng.engine_torque(rpm, 0), 0, f"Zero torque at {rpm} RPM")
+        for rpm in range(
+            int(eng.cfg.engine.idle_rpm), int(eng.cfg.engine.redline_rpm), 500
+        ):
+            self.assertGreater(
+                eng.engine_torque(rpm, 0), 0, f"Zero torque at {rpm} RPM"
+            )
 
     def test_torque_zero_above_limiter(self):
         eng = self._eng()
@@ -211,8 +232,8 @@ class TestSubModels(unittest.TestCase):
 # CONFIG I/O ROUND-TRIP
 # ═══════════════════════════════════════════
 
-class TestConfigIO(unittest.TestCase):
 
+class TestConfigIO(unittest.TestCase):
     def test_json_round_trip(self):
         cfg1 = gsxr1000_k5()
         with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as f:

@@ -5,7 +5,7 @@ Chain slack dead-zone at launch.
 Shaft-drive bikes bypass this model.
 """
 
-from ..models import BikeConfig, DRIVE_CHAIN
+from ..models import DRIVE_CHAIN, BikeConfig
 
 
 class ChainModel:

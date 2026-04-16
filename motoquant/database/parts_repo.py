@@ -9,7 +9,7 @@ multipliers) so the sim can compute the ET impact of any modification.
 
 import json
 import sqlite3
-from typing import List, Optional, Dict, Any
+from typing import Any
 
 from ..models import BikeConfig
 from .bridge import apply_part_to_config
@@ -32,7 +32,7 @@ class PartsRepository:
         model_name: str,
         specifications: dict,
         part_number: str = None,
-        compatible_bike_ids: List[int] = None,
+        compatible_bike_ids: list[int] = None,
         fitment_universal: bool = False,
         fitment_notes: str = None,
         param_overrides: dict = None,
@@ -65,7 +65,10 @@ class PartsRepository:
                 estimated_delivery_days, last_price_check)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, date('now'))""",
             (
-                category_id, brand, model_name, part_number,
+                category_id,
+                brand,
+                model_name,
+                part_number,
                 json.dumps(compatible_bike_ids) if compatible_bike_ids else None,
                 1 if fitment_universal else 0,
                 fitment_notes,
@@ -73,15 +76,19 @@ class PartsRepository:
                 json.dumps(param_overrides) if param_overrides else None,
                 json.dumps(param_deltas) if param_deltas else None,
                 json.dumps(param_multipliers) if param_multipliers else None,
-                price_inr, price_usd, mrp_inr,
-                retailer, retailer_url, availability,
+                price_inr,
+                price_usd,
+                mrp_inr,
+                retailer,
+                retailer_url,
+                availability,
                 estimated_delivery_days,
             ),
         )
         self._conn.commit()
         return cur.lastrowid
 
-    def get(self, part_id: int) -> Optional[dict]:
+    def get(self, part_id: int) -> dict | None:
         row = self._conn.execute(
             """SELECT p.*, pc.name as category_name, pc.display_name as category_display
                FROM parts p
@@ -100,7 +107,7 @@ class PartsRepository:
         max_price_inr: float = None,
         available_only: bool = False,
         limit: int = 50,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """Search parts with filters."""
         conditions = []
         params = []
@@ -116,9 +123,7 @@ class PartsRepository:
             params.extend([f"%{name_contains}%", f"%{name_contains}%"])
         if bike_model_id is not None:
             # JSON array contains check
-            conditions.append(
-                "(p.fitment_universal = 1 OR p.compatible_bikes LIKE ?)"
-            )
+            conditions.append("(p.fitment_universal = 1 OR p.compatible_bikes LIKE ?)")
             params.append(f"%{bike_model_id}%")
         if max_price_inr is not None:
             conditions.append("p.price_inr <= ?")
@@ -139,7 +144,7 @@ class PartsRepository:
         ).fetchall()
         return [dict(r) for r in rows]
 
-    def list_categories(self) -> List[dict]:
+    def list_categories(self) -> list[dict]:
         """List all parts categories."""
         rows = self._conn.execute(
             "SELECT * FROM parts_categories ORDER BY name"
@@ -160,9 +165,7 @@ class PartsRepository:
             raise ValueError(f"Part {part_id} not found")
         return apply_part_to_config(config, part)
 
-    def apply_multiple(
-        self, part_ids: List[int], config: BikeConfig
-    ) -> BikeConfig:
+    def apply_multiple(self, part_ids: list[int], config: BikeConfig) -> BikeConfig:
         """Apply multiple parts sequentially. Returns modified config."""
         for pid in part_ids:
             config = self.apply_to_config(pid, config)
@@ -170,9 +173,9 @@ class PartsRepository:
 
     def estimate_build_cost(
         self,
-        part_ids: List[int],
+        part_ids: list[int],
         currency: str = "inr",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Calculate total cost of a parts list.
 
@@ -198,13 +201,15 @@ class PartsRepository:
             available = part.get("availability", "unknown") == "in_stock"
             if not available:
                 unavailable += 1
-            parts_list.append({
-                "id": pid,
-                "name": f"{part['brand']} {part['model_name']}",
-                "category": part["category_display"],
-                "price": price,
-                "available": available,
-            })
+            parts_list.append(
+                {
+                    "id": pid,
+                    "name": f"{part['brand']} {part['model_name']}",
+                    "category": part["category_display"],
+                    "price": price,
+                    "available": available,
+                }
+            )
 
         return {
             "total": total,
@@ -222,21 +227,21 @@ class PartsRepository:
         bike_model_id: int = None,
         target_ratio_min: float = None,
         target_ratio_max: float = None,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """
         Find available front+rear sprocket combinations.
         Useful for gearing optimization.
         """
-        front_parts = self.search(
-            category="sprocket", bike_model_id=bike_model_id
-        )
-        rear_parts = self.search(
-            category="sprocket", bike_model_id=bike_model_id
-        )
+        front_parts = self.search(category="sprocket", bike_model_id=bike_model_id)
+        rear_parts = self.search(category="sprocket", bike_model_id=bike_model_id)
 
         combos = []
         for fp in front_parts:
-            specs_f = json.loads(fp["specifications"]) if isinstance(fp["specifications"], str) else fp["specifications"]
+            specs_f = (
+                json.loads(fp["specifications"])
+                if isinstance(fp["specifications"], str)
+                else fp["specifications"]
+            )
             if specs_f.get("position") != "front":
                 continue
             teeth_f = specs_f.get("teeth")
@@ -244,7 +249,11 @@ class PartsRepository:
                 continue
 
             for rp in rear_parts:
-                specs_r = json.loads(rp["specifications"]) if isinstance(rp["specifications"], str) else rp["specifications"]
+                specs_r = (
+                    json.loads(rp["specifications"])
+                    if isinstance(rp["specifications"], str)
+                    else rp["specifications"]
+                )
                 if specs_r.get("position") != "rear":
                     continue
                 teeth_r = specs_r.get("teeth")
@@ -258,14 +267,16 @@ class PartsRepository:
                     continue
 
                 cost = (fp.get("price_inr") or 0) + (rp.get("price_inr") or 0)
-                combos.append({
-                    "front_teeth": teeth_f,
-                    "rear_teeth": teeth_r,
-                    "ratio": round(ratio, 3),
-                    "front_part": fp["brand"] + " " + fp["model_name"],
-                    "rear_part": rp["brand"] + " " + rp["model_name"],
-                    "total_cost_inr": cost,
-                })
+                combos.append(
+                    {
+                        "front_teeth": teeth_f,
+                        "rear_teeth": teeth_r,
+                        "ratio": round(ratio, 3),
+                        "front_part": fp["brand"] + " " + fp["model_name"],
+                        "rear_part": rp["brand"] + " " + rp["model_name"],
+                        "total_cost_inr": cost,
+                    }
+                )
 
         combos.sort(key=lambda x: x["ratio"])
         return combos

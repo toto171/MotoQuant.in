@@ -6,9 +6,10 @@ Carries provenance (source URL, scrape timestamp) and per-field confidence.
 """
 
 from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any
 from datetime import datetime
+from typing import Any
 
 
 @dataclass
@@ -27,64 +28,66 @@ class BikeSpec:
     # ── Identity ──────────────────────────────────────────────────────────
     manufacturer: str = ""
     model_name: str = ""
-    model_code: Optional[str] = None
-    year_from: Optional[int] = None
-    year_to: Optional[int] = None
-    category: str = "sport"           # sport / naked / cruiser / adventure / touring
+    model_code: str | None = None
+    year_from: int | None = None
+    year_to: int | None = None
+    category: str = "sport"  # sport / naked / cruiser / adventure / touring
 
     # ── Engine ────────────────────────────────────────────────────────────
-    displacement_cc: Optional[float] = None
-    bore_mm: Optional[float] = None
-    stroke_mm: Optional[float] = None
-    compression_ratio: Optional[float] = None
+    displacement_cc: float | None = None
+    bore_mm: float | None = None
+    stroke_mm: float | None = None
+    compression_ratio: float | None = None
     # Power: prefer crank HP; convert from kW if needed
-    peak_power_hp: Optional[float] = None
-    peak_power_rpm: Optional[int] = None
-    peak_torque_nm: Optional[float] = None
-    peak_torque_rpm: Optional[int] = None
-    fuel_system: Optional[str] = None   # carb / fi / tbi
-    cooling: Optional[str] = None       # air / liquid / oil
-    valve_config: Optional[str] = None  # dohc / sohc / ohv
-    cylinders: Optional[int] = None
+    peak_power_hp: float | None = None
+    peak_power_rpm: int | None = None
+    peak_torque_nm: float | None = None
+    peak_torque_rpm: int | None = None
+    fuel_system: str | None = None  # carb / fi / tbi
+    cooling: str | None = None  # air / liquid / oil
+    valve_config: str | None = None  # dohc / sohc / ohv
+    cylinders: int | None = None
 
     # ── Drivetrain ────────────────────────────────────────────────────────
-    gears: Optional[int] = None
-    gear_ratios: Optional[List[float]] = None
-    primary_ratio: Optional[float] = None       # crank → gearbox input shaft
-    front_sprocket: Optional[int] = None
-    rear_sprocket: Optional[int] = None
-    final_drive: Optional[str] = None           # chain / shaft / belt
-    chain_pitch: Optional[str] = None           # 520 / 525 / 530
+    gears: int | None = None
+    gear_ratios: list[float] | None = None
+    primary_ratio: float | None = None  # crank → gearbox input shaft
+    front_sprocket: int | None = None
+    rear_sprocket: int | None = None
+    final_drive: str | None = None  # chain / shaft / belt
+    chain_pitch: str | None = None  # 520 / 525 / 530
 
     # ── Chassis / Mass ────────────────────────────────────────────────────
-    dry_mass_kg: Optional[float] = None
-    wet_mass_kg: Optional[float] = None
-    wheelbase_mm: Optional[float] = None
-    seat_height_mm: Optional[float] = None
-    fuel_capacity_l: Optional[float] = None
-    cog_height_mm: Optional[float] = None       # centre of gravity height (static, laden)
-    weight_dist_front_pct: Optional[float] = None  # % of weight on front wheel (static)
-    swingarm_length_mm: Optional[float] = None  # pivot to axle, used for anti-squat calc
+    dry_mass_kg: float | None = None
+    wet_mass_kg: float | None = None
+    wheelbase_mm: float | None = None
+    seat_height_mm: float | None = None
+    fuel_capacity_l: float | None = None
+    cog_height_mm: float | None = None  # centre of gravity height (static, laden)
+    weight_dist_front_pct: float | None = None  # % of weight on front wheel (static)
+    swingarm_length_mm: float | None = (
+        None  # pivot to axle, used for anti-squat calc
+    )
 
     # ── Engine dynamics ───────────────────────────────────────────────────
-    engine_inertia_kgm2: Optional[float] = None # rotating assembly inertia
+    engine_inertia_kgm2: float | None = None  # rotating assembly inertia
 
     # ── Aerodynamics (per-model; estimated from category if not available) ─
-    cd: Optional[float] = None
-    frontal_area_m2: Optional[float] = None
+    cd: float | None = None
+    frontal_area_m2: float | None = None
 
     # ── Tires ─────────────────────────────────────────────────────────────
-    front_tire_size: Optional[str] = None   # e.g. "120/70ZR17"
-    rear_tire_size: Optional[str] = None    # e.g. "190/55ZR17"
+    front_tire_size: str | None = None  # e.g. "120/70ZR17"
+    rear_tire_size: str | None = None  # e.g. "190/55ZR17"
 
     # ── Provenance ────────────────────────────────────────────────────────
-    source_name: str = "unknown"            # bikez / bikeswiki / manufacturer / manual
-    source_url: Optional[str] = None
-    scraped_at: Optional[str] = None        # ISO datetime string
-    raw_data: Optional[Dict[str, Any]] = None   # original key→value from source
+    source_name: str = "unknown"  # bikez / bikeswiki / manufacturer / manual
+    source_url: str | None = None
+    scraped_at: str | None = None  # ISO datetime string
+    raw_data: dict[str, Any] | None = None  # original key→value from source
 
     # Per-field confidence scores (0.0–1.0)
-    field_confidence: Dict[str, float] = field(default_factory=dict)
+    field_confidence: dict[str, float] = field(default_factory=dict)
 
     def __post_init__(self):
         if self.scraped_at is None:
@@ -96,9 +99,9 @@ class ValidationResult:
     """Result of validating a BikeSpec against physical bounds."""
 
     is_valid: bool
-    warnings: List[str] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
-    corrected_fields: Dict[str, Any] = field(default_factory=dict)
+    warnings: list[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    corrected_fields: dict[str, Any] = field(default_factory=dict)
     overall_confidence: float = 0.0
 
     def __str__(self):

@@ -15,34 +15,51 @@ State vector: [x, v, omega_e, T_tire, T_clutch, P_boost]
 After clutch locks, omega_e is derived from v and gear ratio.
 """
 
-import numpy as np
 from dataclasses import dataclass, field
-from typing import List, Optional, Tuple
 
-from .models import (
-    BikeConfig, BOOST_NA, BOOST_TURBO, BOOST_SC_ROOTS, BOOST_SC_CENTRIFUGAL, BOOST_N2O,
-    CLUTCH_LOCKUP, CLUTCH_SLIDER, CLUTCH_MULTISTAGE, DRIVE_CHAIN, DRIVE_SHAFT,
-    TRACK_NONE, TRACK_VHT, TRACK_PJ1,
-)
+import numpy as np
+
 from .constants import (
-    G, RPM_TO_RADS, RADS_TO_RPM, KMH_TO_MS, MS_TO_KMH, MS_TO_MPH,
-    QUARTER_MILE_M, EIGHTH_MILE_M, SIXTY_FOOT_M, THOUSAND_FT_M, THREE30_FT_M,
+    EIGHTH_MILE_M,
+    QUARTER_MILE_M,
+    RADS_TO_RPM,
+    RPM_TO_RADS,
+    SIXTY_FOOT_M,
+    THOUSAND_FT_M,
+    THREE30_FT_M,
+    G,
+)
+from .models import (
+    CLUTCH_SLIDER,
+    BikeConfig,
 )
 from .submodels import (
-    EngineModel, ForcedInductionModel, DrivetrainModel, ClutchModel,
-    ChainModel, TireModel, AeroModel, WeightTransferModel,
-    BrakingModel, WheelieModel, ParasiticModel, RollingResistanceModel,
-    RiderDynamicsModel, StagingModel, EnvironmentalModel,
+    AeroModel,
+    BrakingModel,
+    ChainModel,
+    ClutchModel,
+    DrivetrainModel,
+    EngineModel,
+    EnvironmentalModel,
+    ForcedInductionModel,
+    ParasiticModel,
+    RiderDynamicsModel,
+    RollingResistanceModel,
+    StagingModel,
+    TireModel,
+    WeightTransferModel,
+    WheelieModel,
 )
-
 
 # ═══════════════════════════════════════════
 # SIMULATION STATE
 # ═══════════════════════════════════════════
 
+
 @dataclass
 class SimState:
     """Instantaneous simulation state."""
+
     t: float = 0.0
     x: float = 0.0
     v: float = 0.0
@@ -70,6 +87,7 @@ class SimState:
 @dataclass
 class SimResult:
     """Complete simulation output — all channels at every timestep."""
+
     dt: float = 0.001
     t: np.ndarray = field(default_factory=lambda: np.array([]))
     x: np.ndarray = field(default_factory=lambda: np.array([]))
@@ -105,19 +123,27 @@ class SimResult:
     def extract_splits(self):
         """Extract split times from position array."""
         splits = [
-            (SIXTY_FOOT_M, 'time_60ft', 'speed_60ft'),
-            (THREE30_FT_M, 'time_330ft', 'speed_330ft'),
-            (EIGHTH_MILE_M, 'time_eighth', 'speed_eighth'),
-            (THOUSAND_FT_M, 'time_1000ft', 'speed_1000ft'),
-            (QUARTER_MILE_M, 'time_quarter', 'speed_quarter'),
+            (SIXTY_FOOT_M, "time_60ft", "speed_60ft"),
+            (THREE30_FT_M, "time_330ft", "speed_330ft"),
+            (EIGHTH_MILE_M, "time_eighth", "speed_eighth"),
+            (THOUSAND_FT_M, "time_1000ft", "speed_1000ft"),
+            (QUARTER_MILE_M, "time_quarter", "speed_quarter"),
         ]
         for dist, t_attr, s_attr in splits:
             idx = np.searchsorted(self.x, dist)
             if idx < len(self.t):
-                if idx > 0 and self.x[idx] != self.x[idx-1]:
-                    frac = (dist - self.x[idx-1]) / (self.x[idx] - self.x[idx-1])
-                    setattr(self, t_attr, self.t[idx-1] + frac * (self.t[idx] - self.t[idx-1]))
-                    setattr(self, s_attr, self.v[idx-1] + frac * (self.v[idx] - self.v[idx-1]))
+                if idx > 0 and self.x[idx] != self.x[idx - 1]:
+                    frac = (dist - self.x[idx - 1]) / (self.x[idx] - self.x[idx - 1])
+                    setattr(
+                        self,
+                        t_attr,
+                        self.t[idx - 1] + frac * (self.t[idx] - self.t[idx - 1]),
+                    )
+                    setattr(
+                        self,
+                        s_attr,
+                        self.v[idx - 1] + frac * (self.v[idx] - self.v[idx - 1]),
+                    )
                 else:
                     setattr(self, t_attr, self.t[idx])
                     setattr(self, s_attr, self.v[idx])
@@ -126,6 +152,7 @@ class SimResult:
 # ═══════════════════════════════════════════
 # PHYSICS ENGINE (orchestrator)
 # ═══════════════════════════════════════════
+
 
 class MotoQuantEngine:
     """
@@ -158,9 +185,9 @@ class MotoQuantEngine:
 
         # ── EnvironmentalModel: single source for ambient corrections ────────
         self._env_model = EnvironmentalModel(c)
-        self.rho            = self._env_model.rho
-        self.cd_a           = c.aero.cd_a_effective        # static reference Cd*A
-        self.v_wind         = self._env_model.v_headwind
+        self.rho = self._env_model.rho
+        self.cd_a = c.aero.cd_a_effective  # static reference Cd*A
+        self.v_wind = self._env_model.v_headwind
         self.power_correction = self._env_model.power_correction
 
     def _init_submodels(self):
@@ -178,7 +205,7 @@ class MotoQuantEngine:
         self._parasitic = ParasiticModel(self.cfg)
         self._rr = RollingResistanceModel(self.cfg)
         # Phase-1 Remaining: three extracted inline sub-models
-        self._rider   = RiderDynamicsModel(self.cfg)
+        self._rider = RiderDynamicsModel(self.cfg)
         self._staging = StagingModel(self.cfg)
         # _env_model already built in _precompute; alias for symmetry
         self._env = self._env_model
@@ -191,7 +218,9 @@ class MotoQuantEngine:
     def engine_torque(self, rpm: float, t: float) -> float:
         return self._engine.torque(rpm, t)
 
-    def forced_induction_torque_mult(self, rpm: float, t: float, P_boost: float) -> float:
+    def forced_induction_torque_mult(
+        self, rpm: float, t: float, P_boost: float
+    ) -> float:
         return self._fi.torque_mult(rpm, t, P_boost)
 
     def boost_dynamics(self, P_boost: float, rpm: float, t: float) -> float:
@@ -209,8 +238,9 @@ class MotoQuantEngine:
     def optimal_shift_rpm(self, gear_from: int, gear_to: int) -> float:
         return self._drivetrain.optimal_shift_rpm(gear_from, gear_to)
 
-    def clutch_torque(self, omega_e: float, omega_input: float,
-                      T_clutch_temp: float, t: float) -> Tuple[float, float]:
+    def clutch_torque(
+        self, omega_e: float, omega_input: float, T_clutch_temp: float, t: float
+    ) -> tuple[float, float]:
         return self._clutch.torque(omega_e, omega_input, T_clutch_temp, t)
 
     def chain_torque_modifier(self, T_wheel: float, v: float, t: float) -> float:
@@ -225,8 +255,9 @@ class MotoQuantEngine:
     def pacejka_force(self, slip_ratio: float, N_rear: float, T_tire: float) -> float:
         return self._tire.pacejka_force(slip_ratio, N_rear, T_tire)
 
-    def tire_thermal_rate(self, F_x: float, v: float, slip_ratio: float,
-                          T_tire: float, T_ambient: float) -> float:
+    def tire_thermal_rate(
+        self, F_x: float, v: float, slip_ratio: float, T_tire: float, T_ambient: float
+    ) -> float:
         return self._tire.thermal_rate(F_x, v, slip_ratio, T_tire, T_ambient)
 
     def tire_effective_radius(self, omega_w: float) -> float:
@@ -241,7 +272,7 @@ class MotoQuantEngine:
     def ram_air_power_mult(self, v: float) -> float:
         return self._aero.ram_air_power_mult(v)
 
-    def weight_transfer(self, accel: float, v: float, t: float) -> Tuple[float, float]:
+    def weight_transfer(self, accel: float, v: float, t: float) -> tuple[float, float]:
         return self._wt.compute(accel, v, t, self.m_total)
 
     def braking_decel(self, v: float) -> float:
@@ -285,8 +316,12 @@ class MotoQuantEngine:
     # MAIN SIMULATION LOOP
     # ═══════════════════════════════════════════
 
-    def run(self, distance: float = QUARTER_MILE_M, max_time: float = 20.0,
-            use_adaptive_dt: bool = False) -> SimResult:
+    def run(
+        self,
+        distance: float = QUARTER_MILE_M,
+        max_time: float = 20.0,
+        use_adaptive_dt: bool = False,
+    ) -> SimResult:
         """
         Run the quarter-mile simulation.
 
@@ -310,9 +345,9 @@ class MotoQuantEngine:
         cfg = self.cfg
 
         # Adaptive step-size bounds
-        _dt_min = 0.0005   # 0.5 ms — used during clutch slip / shifting
-        _dt_max = 0.005    # 5 ms  — used during stable locked-clutch cruise
-        _v_atol = 0.005    # m/s absolute tolerance for adaptive error estimate
+        _dt_min = 0.0005  # 0.5 ms — used during clutch slip / shifting
+        _dt_max = 0.005  # 5 ms  — used during stable locked-clutch cruise
+        _v_atol = 0.005  # m/s absolute tolerance for adaptive error estimate
 
         # Pre-compute shift points for all gears
         shift_rpms = []
@@ -326,8 +361,12 @@ class MotoQuantEngine:
         gear = 0
         T_tire = self.T_tire_launch
         T_clutch = cfg.engine.coolant_temp_c
-        P_boost = cfg.forced_induction.prespool_boost_bar * 1e5 if cfg.forced_induction.is_boosted else 0.0
-        omega_e = self._staging.initial_omega_e()   # uses two-step / peak-torque logic
+        P_boost = (
+            cfg.forced_induction.prespool_boost_bar * 1e5
+            if cfg.forced_induction.is_boosted
+            else 0.0
+        )
+        omega_e = self._staging.initial_omega_e()  # uses two-step / peak-torque logic
         r_eff = cfg.tires.rear_rolling_radius_m
         clutch_locked = False
         shifting = False
@@ -361,9 +400,9 @@ class MotoQuantEngine:
 
         while x < distance and t < max_time and step < n_max - 1:
             # ── Current RPM and wheel speed ──
-            omega_w = v / max(r_eff, 0.01)
+            omega_w = v / max(r_eff, 0.15)  # 0.15m = min realistic motorcycle tire radius
             r_eff = self.tire_effective_radius(omega_w)
-            omega_w = v / max(r_eff, 0.01)
+            omega_w = v / max(r_eff, 0.15)
 
             if clutch_locked:
                 rpm = self.engine_rpm_from_speed(v, gear, r_eff)
@@ -393,7 +432,10 @@ class MotoQuantEngine:
                 T_e = self.engine_torque(rpm, t)
                 T_e *= self.ram_air_power_mult(v)
                 T_e *= self.forced_induction_torque_mult(rpm, t, P_boost)
-                if cfg.engine.dyno_curve is None or not cfg.engine.dyno_curve.is_at_wheel:
+                if (
+                    cfg.engine.dyno_curve is None
+                    or not cfg.engine.dyno_curve.is_at_wheel
+                ):
                     P_parasitic = self.parasitic_power_loss(rpm)
                     if omega_e > 10:
                         T_e -= P_parasitic / omega_e
@@ -413,7 +455,9 @@ class MotoQuantEngine:
                 else:
                     T_clutch_max = cfg.clutch.max_torque()
                     if T_clutch > cfg.clutch.fade_temp_c:
-                        fade = max(0.3, 1.0 - 0.003 * (T_clutch - cfg.clutch.fade_temp_c))
+                        fade = max(
+                            0.3, 1.0 - 0.003 * (T_clutch - cfg.clutch.fade_temp_c)
+                        )
                         T_clutch_max *= fade
 
                     if cfg.clutch.clutch_type == CLUTCH_SLIDER:
@@ -421,21 +465,34 @@ class MotoQuantEngine:
                         if rpm_e < cfg.clutch.engage_rpm:
                             T_clutch_max = 0.0
                         else:
-                            ramp = min(1.0, ((rpm_e - cfg.clutch.engage_rpm) /
-                                             max(1.0, cfg.engine.redline_rpm - cfg.clutch.engage_rpm)) ** 2)
+                            ramp = min(
+                                1.0,
+                                (
+                                    (rpm_e - cfg.clutch.engage_rpm)
+                                    / max(
+                                        1.0,
+                                        cfg.engine.redline_rpm - cfg.clutch.engage_rpm,
+                                    )
+                                )
+                                ** 2,
+                            )
                             T_clutch_max *= ramp
 
                     T_e_crank = self.engine_torque(omega_e * RADS_TO_RPM, t)
                     T_transmitted = min(abs(T_e_crank), T_clutch_max)
                     T_e = T_transmitted
 
-                    I_e = cfg.engine.engine_inertia_kgm2 + cfg.clutch.basket_inertia_kgm2
+                    I_e = (
+                        cfg.engine.engine_inertia_kgm2 + cfg.clutch.basket_inertia_kgm2
+                    )
                     T_net_engine = T_e_crank - T_transmitted
                     d_omega_e = T_net_engine / max(I_e, 0.001)
                     omega_e += d_omega_e * dt
-                    omega_e = np.clip(omega_e,
-                                      cfg.engine.idle_rpm * RPM_TO_RADS,
-                                      cfg.engine.redline_rpm * 1.02 * RPM_TO_RADS)
+                    omega_e = np.clip(
+                        omega_e,
+                        cfg.engine.idle_rpm * RPM_TO_RADS,
+                        cfg.engine.redline_rpm * 1.02 * RPM_TO_RADS,
+                    )
                     Q_clutch = T_transmitted * abs(slip_speed)
 
                 dT_clutch = Q_clutch / max(1.0, cfg.clutch.thermal_mass_jk)
@@ -455,7 +512,7 @@ class MotoQuantEngine:
 
             # ── Weight transfer (iterative) ──
             m_eff = self.effective_mass(gear)
-            F_aero = self.aero_drag(v)          # uses self._aero (fixed cd_a)
+            F_aero = self.aero_drag(v)  # uses self._aero (fixed cd_a)
             # Override with rider-dynamic Cd*A for this timestep:
             v_rel = v + self.v_wind
             F_aero = 0.5 * self.rho * max(0.0, v_rel) ** 2 * cd_a_t
@@ -466,7 +523,9 @@ class MotoQuantEngine:
             # ── Traction limit ──
             F_max_tire = self.tire_max_force(N_r, T_tire, v)
             if F_drive > F_max_tire:
-                slip_ratio = min(0.3, (F_drive - F_max_tire) / max(F_max_tire, 1.0) * 0.1)
+                slip_ratio = min(
+                    0.3, (F_drive - F_max_tire) / max(F_max_tire, 1.0) * 0.1
+                )
                 F_drive = F_max_tire
             else:
                 slip_ratio = abs(F_drive) / max(F_max_tire, 1.0) * 0.05
@@ -483,7 +542,9 @@ class MotoQuantEngine:
             a_net = max(0.0, a_net)
 
             # ── Tire thermal update ──
-            dT_tire = self.tire_thermal_rate(F_drive, v, slip_ratio, T_tire, cfg.environment.ambient_temp_c)
+            dT_tire = self.tire_thermal_rate(
+                F_drive, v, slip_ratio, T_tire, cfg.environment.ambient_temp_c
+            )
             T_tire += dT_tire * dt
 
             # ── Boost dynamics ──
@@ -517,7 +578,9 @@ class MotoQuantEngine:
                 return 0.5 * self.rho * max(0.0, vr) ** 2 * cd_a_t
 
             def _a_at(v_q):
-                return max(0.0, (F_drive - _aero_at(v_q) - F_rr - self.F_gradient) / m_eff)
+                return max(
+                    0.0, (F_drive - _aero_at(v_q) - F_rr - self.F_gradient) / m_eff
+                )
 
             k1 = _a_at(v)
             k2 = _a_at(v + 0.5 * dt * k1)
@@ -525,8 +588,12 @@ class MotoQuantEngine:
             k4 = _a_at(v + dt * k3)
             v_new = v + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
             # Position uses the velocity Simpsons-rule estimate
-            x_new = x + (dt / 6.0) * (v + 2.0 * (v + 0.5*dt*k1) +
-                                        2.0 * (v + 0.5*dt*k2) + (v + dt*k3))
+            x_new = x + (dt / 6.0) * (
+                v
+                + 2.0 * (v + 0.5 * dt * k1)
+                + 2.0 * (v + 0.5 * dt * k2)
+                + (v + dt * k3)
+            )
 
             # ── Store outputs ──
             out_t[step] = t
@@ -548,8 +615,17 @@ class MotoQuantEngine:
             out_power[step] = F_drive * v / 1000.0
             out_reff[step] = r_eff
 
-            # Advance state
-            v = max(0.001, v_new)
+            # Advance state — guard against NaN/inf from numerical issues
+            if not (np.isfinite(v_new) and np.isfinite(x_new)):
+                import logging
+                logging.getLogger(__name__).error(
+                    "NaN/inf in physics state at t=%.4fs, step=%d. "
+                    "v_new=%.6f, x_new=%.6f, F_drive=%.2f, F_aero=%.2f. "
+                    "Breaking simulation early.",
+                    t, step, v_new, x_new, F_drive, F_aero,
+                )
+                break
+            v = max(0.05, v_new)  # 0.05 m/s = 0.18 km/h minimum (avoids RPM divergence)
             x = x_new
             t += dt
             step += 1
@@ -584,13 +660,23 @@ class MotoQuantEngine:
 
         result = SimResult(
             dt=dt,
-            t=out_t, x=out_x, v=out_v, a=out_a,
-            rpm=out_rpm[:step], gear=out_gear[:step],
-            slip=out_slip[:step], traction_pct=out_trac[:step],
-            N_front=out_Nf[:step], N_rear=out_Nr[:step],
-            F_drive=out_Fd[:step], F_drag=out_Fdrag[:step], F_rr=out_Frr[:step],
-            T_tire=out_Ttire[:step], T_clutch=out_Tclutch[:step],
-            P_boost=out_Pboost[:step], power_kw=out_power[:step],
+            t=out_t,
+            x=out_x,
+            v=out_v,
+            a=out_a,
+            rpm=out_rpm[:step],
+            gear=out_gear[:step],
+            slip=out_slip[:step],
+            traction_pct=out_trac[:step],
+            N_front=out_Nf[:step],
+            N_rear=out_Nr[:step],
+            F_drive=out_Fd[:step],
+            F_drag=out_Fdrag[:step],
+            F_rr=out_Frr[:step],
+            T_tire=out_Ttire[:step],
+            T_clutch=out_Tclutch[:step],
+            P_boost=out_Pboost[:step],
+            power_kw=out_power[:step],
             r_eff=out_reff[:step],
         )
         result.extract_splits()

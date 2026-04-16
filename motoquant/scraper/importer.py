@@ -15,16 +15,19 @@ Mapping strategy:
 """
 
 import logging
-from typing import List, Optional, Tuple, Dict
 
-from .spec import BikeSpec, ValidationResult
-from .validator import validate_spec, score_spec, _source_confidence
-from .gear_ratios import lookup_gear_ratios
-from ..models import (
-    BikeConfig, EngineParams, ChassisParams, DrivetrainParams,
-    TireParams, AeroParams, EnvironmentParams, StagingParams,
-)
 from ..defaults import gsxr1000_k5  # used to get default sub-configs
+from ..models import (
+    AeroParams,
+    BikeConfig,
+    ChassisParams,
+    DrivetrainParams,
+    EngineParams,
+    TireParams,
+)
+from .gear_ratios import lookup_gear_ratios
+from .spec import BikeSpec, ValidationResult
+from .validator import score_spec, validate_spec
 
 logger = logging.getLogger(__name__)
 
@@ -34,24 +37,30 @@ logger = logging.getLogger(__name__)
 # ────────────────────────────────────────────────────────
 
 CATEGORY_AERO = {
-    "sport":     {"cd": 0.32, "frontal_area_m2": 0.45, "wheelie_tendency": 1.2},
-    "naked":     {"cd": 0.40, "frontal_area_m2": 0.52, "wheelie_tendency": 0.8},
-    "cruiser":   {"cd": 0.50, "frontal_area_m2": 0.58, "wheelie_tendency": 0.4},
-    "adventure": {"cd": 0.46, "frontal_area_m2": 0.55, "wheelie_tendency": 0.6},
-    "touring":   {"cd": 0.52, "frontal_area_m2": 0.60, "wheelie_tendency": 0.3},
-    "scooter":   {"cd": 0.44, "frontal_area_m2": 0.38, "wheelie_tendency": 0.2},
+    "sport": {"cd": 0.65, "frontal_area_m2": 0.45, "wheelie_tendency": 1.2},
+    "naked": {"cd": 0.80, "frontal_area_m2": 0.54, "wheelie_tendency": 0.8},
+    "cruiser": {"cd": 0.90, "frontal_area_m2": 0.62, "wheelie_tendency": 0.4},
+    "adventure": {"cd": 0.85, "frontal_area_m2": 0.58, "wheelie_tendency": 0.6},
+    "touring": {"cd": 0.78, "frontal_area_m2": 0.65, "wheelie_tendency": 0.3},
+    "scooter": {"cd": 0.70, "frontal_area_m2": 0.42, "wheelie_tendency": 0.2},
 }
 
 # Category-based inertia estimates for engine rotating mass
 CATEGORY_ENGINE_INERTIA = {
-    "sport": 0.040, "naked": 0.042, "cruiser": 0.060,
-    "adventure": 0.045, "touring": 0.055,
+    "sport": 0.040,
+    "naked": 0.042,
+    "cruiser": 0.060,
+    "adventure": 0.045,
+    "touring": 0.055,
 }
 
 # Category-based CoG height estimate (mm)
 CATEGORY_COG_HEIGHT = {
-    "sport": 540, "naked": 560, "cruiser": 620,
-    "adventure": 580, "touring": 600,
+    "sport": 540,
+    "naked": 560,
+    "cruiser": 620,
+    "adventure": 580,
+    "touring": 600,
 }
 
 
@@ -59,12 +68,15 @@ CATEGORY_COG_HEIGHT = {
 # Synthetic torque curve builder
 # ────────────────────────────────────────────────────────
 
+
 def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
     """
     Build an EngineParams from a BikeSpec.
-    Uses _synthetic_torque_curve for the dyno curve when no dyno data is available.
+    First checks for a known dyno curve from the dyno_curves library.
+    Falls back to synthetic curve generation if no known curve exists.
     """
     from ..defaults import _synthetic_torque_curve
+    from .dyno_curves import get_dyno_curve
 
     # Start with K5 defaults as a base (reasonable sport bike values)
     base = gsxr1000_k5().engine
@@ -74,18 +86,50 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
     peak_tq = spec.peak_torque_nm or base.peak_torque_nm
     peak_hp_rpm = spec.peak_power_rpm or base.peak_power_rpm
     peak_tq_rpm = spec.peak_torque_rpm or base.peak_torque_rpm
-    redline = int(peak_hp_rpm * 1.08) if spec.peak_power_rpm else base.redline_rpm
+    if spec.peak_power_rpm:
+        # Peak power RPM is not the redline; engines continue to rev above it.
+        # The headroom varies strongly with engine type:
+        #   Large inline-4 / V4 / L-twin (1000cc+): peak at ~93% of redline → ×1.08
+        #   600cc inline-4 (R6, CBR600, ZX-6R): peak at ~88% → ×1.14
+        #   Mid-size parallel twin (<700cc, 2-cyl): peak at ~82% → ×1.22
+        #   Small parallel twin / single (<500cc, ≤2-cyl): peak at ~77% → ×1.30
+        # This replaces the previous flat 1.08 factor which caused severe redline
+        # under-estimation for small-displacement bikes (e.g. Ninja 400 → 10 800 rpm
+        # instead of the real ~13 000 rpm, trapping at 119 km/h instead of 150+ km/h).
+        cc = spec.displacement_cc or 1000
+        cyls = spec.cylinders or 4
+        if cc < 500 and cyls <= 2:
+            redline_factor = 1.30   # small singles / parallel twins
+        elif cc < 700 and cyls <= 2:
+            redline_factor = 1.22   # mid-size twins (MT-07, Z650, Dominar 400)
+        elif cc < 700:
+            redline_factor = 1.14   # 600cc-class inline-4 (R6, CBR600RR, ZX-6R)
+        else:
+            redline_factor = 1.10   # large inline-4, V4, L-twin (≥ 1000cc class)
+        redline = int(peak_hp_rpm * redline_factor)
+    else:
+        redline = base.redline_rpm
     idle = 1200
 
-    dyno = _synthetic_torque_curve(
-        peak_torque_nm=float(peak_tq),
-        peak_rpm=float(peak_tq_rpm),
-        redline_rpm=float(redline),
-        idle_rpm=float(idle),
-        peak_power_hp=float(peak_hp),
-        peak_power_rpm=float(peak_hp_rpm),
-        points=100,
+    # Try to find a known dyno curve for this bike
+    dyno = get_dyno_curve(
+        manufacturer=spec.manufacturer,
+        model=spec.model_name,
+        year=spec.year_from,
+        model_code=spec.model_code,
     )
+
+    # If no known curve found, generate a synthetic one based on peak power/torque
+    if dyno is None:
+        dyno = _synthetic_torque_curve(
+            peak_torque_nm=float(peak_tq),
+            peak_rpm=float(peak_tq_rpm),
+            redline_rpm=float(redline),
+            idle_rpm=float(idle),
+            peak_power_hp=float(peak_hp),
+            peak_power_rpm=float(peak_hp_rpm),
+            points=100,
+        )
 
     return EngineParams(
         dyno_curve=dyno,
@@ -124,7 +168,9 @@ def _build_chassis_from_spec(spec: BikeSpec) -> ChassisParams:
     )
 
 
-def _build_drivetrain_from_spec(spec: BikeSpec, engine: EngineParams) -> DrivetrainParams:
+def _build_drivetrain_from_spec(
+    spec: BikeSpec, engine: EngineParams
+) -> DrivetrainParams:
     """
     Build DrivetrainParams from BikeSpec.
 
@@ -138,7 +184,7 @@ def _build_drivetrain_from_spec(spec: BikeSpec, engine: EngineParams) -> Drivetr
 
     ratios = spec.gear_ratios
     front = spec.front_sprocket
-    rear  = spec.rear_sprocket
+    rear = spec.rear_sprocket
     primary = spec.primary_ratio
 
     if not ratios:
@@ -151,13 +197,13 @@ def _build_drivetrain_from_spec(spec: BikeSpec, engine: EngineParams) -> Drivetr
             displacement_cc=spec.displacement_cc,
             gears=spec.gears,
         )
-        ratios  = lu_ratios
-        front   = front or lu_front
-        rear    = rear  or lu_rear
+        ratios = lu_ratios
+        front = front or lu_front
+        rear = rear or lu_rear
         primary = primary or lu_primary
 
-    front   = front   or base.front_sprocket
-    rear    = rear    or base.rear_sprocket
+    front = front or base.front_sprocket
+    rear = rear or base.rear_sprocket
     primary = primary or base.primary_ratio
 
     return DrivetrainParams(
@@ -171,14 +217,43 @@ def _build_drivetrain_from_spec(spec: BikeSpec, engine: EngineParams) -> Drivetr
 
 
 def _build_tires_from_spec(spec: BikeSpec) -> TireParams:
-    """Build basic TireParams from tire size strings."""
+    """Build basic TireParams from tire size strings.
+
+    Uses category-aware mu_peak defaults:
+    - Sport/superbike race tires: mu_peak=1.40 (Pirelli SC / Michelin Power GP)
+    - Naked/streetfighter: mu_peak=1.35 (sport-touring compounds)
+    - Indian-market entry-level (<300cc): mu_peak=1.15 (MRF/CEAT budget rubber)
+    - Indian-market mid (300-500cc): mu_peak=1.25 (MRF Zapper-C / Pirelli Angel)
+    - Cruiser: mu_peak=1.20 (touring compounds, heavier)
+    - Adventure: mu_peak=1.15 (knobby/trail rubber)
+    """
     base = gsxr1000_k5().tires
+
+    # Category + displacement-aware mu_peak selection
+    # Sport superbikes keep the K5 default (1.4) — validated against real data.
+    # Only lower mu for genuinely lower-compound tires.
+    disp = spec.displacement_cc or 1000
+    cat = (spec.category or "sport").lower()
+
+    if cat in ("sport", "naked") and disp >= 600:
+        mu = base.mu_peak  # 1.4 — race/sport compound (validated for superbikes)
+    elif cat in ("sport", "naked") and disp >= 300:
+        mu = 1.30  # middleweight sport (Ninja 400, R3, RC 390)
+    elif cat in ("sport", "naked") and disp < 300:
+        mu = 1.15  # entry-level budget tires (R15, Duke 200, Pulsar)
+    elif cat == "cruiser":
+        mu = 1.20  # touring compound, heavier loads
+    elif cat == "adventure":
+        mu = 1.15  # knobby/trail rubber
+    elif cat == "touring":
+        mu = 1.18  # touring compound
+    else:
+        mu = base.mu_peak  # fallback to K5 default
 
     result = TireParams(
         front_size=spec.front_tire_size or base.front_size,
         rear_size=spec.rear_tire_size or base.rear_size,
-        # Keep all friction params at defaults — these are not scraped
-        mu_peak=base.mu_peak,
+        mu_peak=mu,
         pacejka_B=base.pacejka_B,
         pacejka_C=base.pacejka_C,
         pacejka_D=base.pacejka_D,
@@ -189,6 +264,7 @@ def _build_tires_from_spec(spec: BikeSpec) -> TireParams:
     # Estimate rolling radius from rear tire size
     if spec.rear_tire_size:
         import re
+
         m = re.match(r"(\d{3})/(\d{2})", spec.rear_tire_size)
         if m:
             width_mm = float(m.group(1))
@@ -275,12 +351,13 @@ def spec_to_bike_config(spec: BikeSpec) -> BikeConfig:
 # DB import
 # ────────────────────────────────────────────────────────
 
+
 def import_spec(
-    db,          # MotoQuantDB
+    db,  # MotoQuantDB
     spec: BikeSpec,
-    validation_result: Optional[ValidationResult] = None,
+    validation_result: ValidationResult | None = None,
     dry_run: bool = False,
-) -> Optional[Tuple[int, int]]:
+) -> tuple[int, int] | None:
     """
     Import a BikeSpec into MotoQuantDB.
 
@@ -357,20 +434,21 @@ def import_spec(
         return model_id, config_id
 
     except Exception as e:
-        logger.error(
-            f"Import failed for {spec.manufacturer} {spec.model_name}: {e}"
-        )
+        logger.error(f"Import failed for {spec.manufacturer} {spec.model_name}: {e}")
         return None
 
 
 def import_batch(
     db,
-    specs: List[BikeSpec],
+    specs: list[BikeSpec],
     dry_run: bool = False,
     stop_on_error: bool = False,
-) -> Dict[str, int]:
+) -> dict[str, int]:
     """
     Import a list of BikeSpec objects into the database.
+
+    Delegates each spec to import_spec() so that callers (and tests) can
+    monkeypatch import_spec without needing to replace the whole batch function.
 
     Returns summary counts:
         {"imported": N, "skipped_invalid": N, "errors": N, "dry_run": bool}
@@ -392,13 +470,20 @@ def import_batch(
             skipped += 1
             continue
 
-        ret = import_spec(db, spec, result, dry_run=dry_run)
-        if ret is None and not dry_run:
+        try:
+            ids = import_spec(db, spec, result, dry_run)
+            if ids is None and not dry_run:
+                # import_spec returns None on failure (invalid spec or DB error)
+                errors += 1
+                if stop_on_error:
+                    break
+            else:
+                imported += 1
+        except Exception as e:
+            logger.error(f"Error importing {spec.manufacturer} {spec.model_name}: {e}")
             errors += 1
             if stop_on_error:
-                break
-        else:
-            imported += 1
+                raise
 
     return {
         "imported": imported,

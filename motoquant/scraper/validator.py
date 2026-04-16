@@ -24,7 +24,6 @@ Confidence scoring (0.0–1.0):
 import math
 import re
 from datetime import datetime
-from typing import Optional
 
 from .spec import BikeSpec, ValidationResult
 
@@ -33,45 +32,43 @@ from .spec import BikeSpec, ValidationResult
 # ────────────────────────────────────────────────────────
 
 BOUNDS = {
-    "displacement_cc":   (50,    3000),
-    "bore_mm":           (35,    120),
-    "stroke_mm":         (30,    100),
-    "compression_ratio": (7.5,   16.5),
-    "peak_power_hp":     (5,     500),
-    "peak_power_rpm":    (3000,  18000),
-    "peak_torque_nm":    (5,     400),
-    "peak_torque_rpm":   (2000,  14000),
-    "dry_mass_kg":       (80,    500),
-    "wet_mass_kg":       (90,    550),
-    "wheelbase_mm":      (1000,  2000),
-    "seat_height_mm":    (600,   1100),
-    "fuel_capacity_l":   (5,     60),
-    "year_from":         (1965,  datetime.now().year + 2),
-    "gears":             (4,     7),
-    "front_sprocket":    (12,    38),   # chain 12-22; belt drive up to 38
-    "rear_sprocket":     (30,    80),   # chain 30-60; belt drive up to 80
-    "frontal_area_m2":   (0.25,  0.90),
+    "displacement_cc": (50, 3000),
+    "bore_mm": (35, 120),
+    "stroke_mm": (30, 120),  # Harley Milwaukee-Eight is 111.1mm
+    "compression_ratio": (7.5, 16.5),
+    "peak_power_hp": (5, 500),
+    "peak_power_rpm": (3000, 18000),
+    "peak_torque_nm": (5, 400),
+    "peak_torque_rpm": (2000, 14000),
+    "dry_mass_kg": (80, 500),
+    "wet_mass_kg": (90, 550),
+    "wheelbase_mm": (1000, 2000),
+    "seat_height_mm": (600, 1100),
+    "fuel_capacity_l": (5, 60),
+    "year_from": (1965, datetime.now().year + 2),
+    "gears": (4, 7),
+    "front_sprocket": (0, 38),  # 0 = shaft/belt drive; chain 12-22; belt pulley up to 38
+    "rear_sprocket": (0, 80),  # 0 = shaft/belt drive; chain 30-60; belt pulley up to 80
+    "frontal_area_m2": (0.25, 0.90),
 }
 
 # HP per cc sanity range (naturally aspirated)
-HP_PER_CC_MIN = 0.05   # lawnmower / scooter
-HP_PER_CC_MAX = 3.0    # highly tuned race engine
+HP_PER_CC_MIN = 0.05  # lawnmower / scooter
+HP_PER_CC_MAX = 3.0  # highly tuned race engine
 
 # Expected torque at peak-power RPM: T_Nm = HP × 9550 / RPM
 # Allow 30% tolerance (cam timing, measurement variation)
 TORQUE_CONSISTENCY_TOLERANCE = 0.30
 
-TIRE_SIZE_RE = re.compile(
-    r"^\d{2,3}[/\\]\d{2,3}[ZR]?R?\d{2}[WH]?$", re.IGNORECASE
-)
+TIRE_SIZE_RE = re.compile(r"^\d{2,3}[/\\]\d{2,3}[ZR]?R?\d{2}[WH]?$", re.IGNORECASE)
 
 CATEGORY_AERO_DEFAULTS = {
-    "sport":     (0.32, 0.45),
-    "naked":     (0.40, 0.52),
-    "cruiser":   (0.50, 0.55),
+    "sport": (0.32, 0.45),
+    "naked": (0.40, 0.52),
+    "cruiser": (0.50, 0.55),
     "adventure": (0.45, 0.55),
-    "touring":   (0.52, 0.58),
-    "scooter":   (0.45, 0.35),
+    "touring": (0.52, 0.58),
+    "scooter": (0.45, 0.35),
 }
 
 # Default gear ratios for inline-4 sport bikes (close-ratio)
@@ -82,6 +79,7 @@ DEFAULT_GEAR_RATIOS_5 = [2.600, 2.000, 1.650, 1.400, 1.250]
 # Helpers
 # ────────────────────────────────────────────────────────
 
+
 def _in_bounds(val, lo, hi) -> bool:
     return lo <= val <= hi
 
@@ -91,12 +89,11 @@ def _power_to_torque_nm(hp: float, rpm: int) -> float:
     return (hp * 745.7) / (rpm * 2 * math.pi / 60)
 
 
-def _bore_stroke_to_cc(bore_mm: float, stroke_mm: float,
-                       cylinders: int = 4) -> float:
+def _bore_stroke_to_cc(bore_mm: float, stroke_mm: float, cylinders: int = 4) -> float:
     return (math.pi / 4) * (bore_mm / 1000) ** 2 * (stroke_mm / 1000) * cylinders * 1e6
 
 
-def _parse_tire_width(size: str) -> Optional[int]:
+def _parse_tire_width(size: str) -> int | None:
     """Extract width from '190/55ZR17' → 190."""
     if not size:
         return None
@@ -107,6 +104,7 @@ def _parse_tire_width(size: str) -> Optional[int]:
 # ────────────────────────────────────────────────────────
 # Main validator
 # ────────────────────────────────────────────────────────
+
 
 def validate_spec(spec: BikeSpec) -> ValidationResult:
     """
@@ -160,16 +158,11 @@ def validate_spec(spec: BikeSpec) -> ValidationResult:
                     f"{val * 0.4536:.1f} kg"
                 )
             else:
-                errors.append(
-                    f"{field_name}={val} out of bounds [{lo}, {hi}]"
-                )
+                errors.append(f"{field_name}={val} out of bounds [{lo}, {hi}]")
 
     # ── Displacement consistency ───────────────────────────────────────
-    if (spec.bore_mm and spec.stroke_mm and spec.cylinders and
-            spec.displacement_cc):
-        calc_cc = _bore_stroke_to_cc(
-            spec.bore_mm, spec.stroke_mm, spec.cylinders
-        )
+    if spec.bore_mm and spec.stroke_mm and spec.cylinders and spec.displacement_cc:
+        calc_cc = _bore_stroke_to_cc(spec.bore_mm, spec.stroke_mm, spec.cylinders)
         if abs(calc_cc - spec.displacement_cc) / spec.displacement_cc > 0.05:
             warnings.append(
                 f"Bore×Stroke×{spec.cylinders} yields {calc_cc:.0f}cc, "
@@ -186,9 +179,7 @@ def validate_spec(spec: BikeSpec) -> ValidationResult:
                 f"(max ~{HP_PER_CC_MAX} for NA). Possibly forced induction?"
             )
         elif ratio < HP_PER_CC_MIN:
-            warnings.append(
-                f"Power/displacement ratio {ratio:.2f} HP/cc is very low"
-            )
+            warnings.append(f"Power/displacement ratio {ratio:.2f} HP/cc is very low")
 
     # ── Torque/power cross-check ───────────────────────────────────────
     if spec.peak_power_hp and spec.peak_power_rpm and spec.peak_torque_nm:
@@ -270,18 +261,18 @@ def score_spec(spec: BikeSpec, result: ValidationResult) -> float:
     # Critical fields and their weights
     CRITICAL = [
         ("displacement_cc", 0.15),
-        ("peak_power_hp",   0.12),
-        ("peak_torque_nm",  0.08),
-        ("dry_mass_kg",     0.10),
-        ("gear_ratios",     0.10),
-        ("front_sprocket",  0.07),
-        ("rear_sprocket",   0.07),
-        ("gears",           0.05),
-        ("bore_mm",         0.05),
-        ("stroke_mm",       0.05),
+        ("peak_power_hp", 0.12),
+        ("peak_torque_nm", 0.08),
+        ("dry_mass_kg", 0.10),
+        ("gear_ratios", 0.10),
+        ("front_sprocket", 0.07),
+        ("rear_sprocket", 0.07),
+        ("gears", 0.05),
+        ("bore_mm", 0.05),
+        ("stroke_mm", 0.05),
         ("front_tire_size", 0.04),
-        ("rear_tire_size",  0.04),
-        ("wheelbase_mm",    0.04),
+        ("rear_tire_size", 0.04),
+        ("wheelbase_mm", 0.04),
         ("compression_ratio", 0.04),
     ]
 
@@ -291,8 +282,7 @@ def score_spec(spec: BikeSpec, result: ValidationResult) -> float:
         if val is not None:
             # Use field-specific confidence if available, else source default
             field_conf = spec.field_confidence.get(
-                field_name,
-                _source_confidence(spec.source_name)
+                field_name, _source_confidence(spec.source_name)
             )
             base += weight * field_conf
 
@@ -310,16 +300,16 @@ def score_spec(spec: BikeSpec, result: ValidationResult) -> float:
 def _source_confidence(source_name: str) -> float:
     """Map source name to base confidence for any field from that source."""
     CONF = {
-        "manufacturer":      0.92,
-        "service_manual":    0.95,
-        "spec_sheet":        0.88,
-        "dyno_validated":    0.90,
+        "manufacturer": 0.92,
+        "service_manual": 0.95,
+        "spec_sheet": 0.88,
+        "dyno_validated": 0.90,
         "scraped_confirmed": 0.70,
-        "bikez":             0.58,
-        "bikeswiki":         0.55,
-        "wikispeed":         0.50,
-        "scraped":           0.52,
-        "estimated":         0.38,
-        "default_fallback":  0.25,
+        "bikez": 0.58,
+        "bikeswiki": 0.55,
+        "wikispeed": 0.50,
+        "scraped": 0.52,
+        "estimated": 0.38,
+        "default_fallback": 0.25,
     }
     return CONF.get(source_name, 0.50)

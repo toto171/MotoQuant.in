@@ -39,51 +39,51 @@ Typical use
 import json
 import logging
 import os
-import time
-from dataclasses import dataclass, field, asdict
-from datetime import datetime
-from typing import Dict, List, Optional, Set, Tuple, Any
-import urllib.request
 import urllib.parse
-import re
+import urllib.request
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
 
-from .catalog import SCRAPE_CATALOG, ManufacturerEntry, get_entry
-from .spec import BikeSpec
-from .validator import validate_spec, score_spec
+from .catalog import SCRAPE_CATALOG, get_entry
 from .importer import import_spec
+from .spec import BikeSpec
+from .validator import score_spec, validate_spec
 
 logger = logging.getLogger(__name__)
 
 # Default checkpoint file (lives next to motoquant.db)
 DEFAULT_CHECKPOINT = "motoquant_scrape_checkpoint.json"
-DEFAULT_RATE_LIMIT_S = 1.5   # polite default
-MIN_RATE_LIMIT_S    = 0.8    # floor — any faster risks blocking
-MAX_BATCH_PER_MFR   = 300    # safety cap per manufacturer
+DEFAULT_RATE_LIMIT_S = 1.5  # polite default
+MIN_RATE_LIMIT_S = 0.8  # floor — any faster risks blocking
+MAX_BATCH_PER_MFR = 300  # safety cap per manufacturer
 
 
 # ══════════════════════════════════════════════════════════════════
 # DATA STRUCTURES
 # ══════════════════════════════════════════════════════════════════
 
+
 @dataclass
 class MfrProgress:
     """Per-manufacturer scrape progress record."""
+
     manufacturer: str
-    status: str = "pending"          # pending / in_progress / done / failed
+    status: str = "pending"  # pending / in_progress / done / failed
     total_found: int = 0
     scraped: int = 0
     imported: int = 0
     skipped_dup: int = 0
     skipped_filter: int = 0
     errors: int = 0
-    started_at: Optional[str] = None
-    finished_at: Optional[str] = None
-    failed_urls: List[str] = field(default_factory=list)
+    started_at: str | None = None
+    finished_at: str | None = None
+    failed_urls: list[str] = field(default_factory=list)
 
 
 @dataclass
 class BulkScrapeResult:
     """Aggregate result from a completed (or interrupted) bulk run."""
+
     started_at: str = ""
     finished_at: str = ""
     total_imported: int = 0
@@ -92,12 +92,12 @@ class BulkScrapeResult:
     total_errors: int = 0
     manufacturers_done: int = 0
     manufacturers_total: int = 0
-    per_manufacturer: Dict[str, MfrProgress] = field(default_factory=dict)
+    per_manufacturer: dict[str, MfrProgress] = field(default_factory=dict)
 
-    def summary_lines(self) -> List[str]:
+    def summary_lines(self) -> list[str]:
         lines = [
-            f"  Bulk scrape summary",
-            f"  ─────────────────────────────────────────────",
+            "  Bulk scrape summary",
+            "  ─────────────────────────────────────────────",
             f"  Imported     : {self.total_imported}",
             f"  Skipped (dup): {self.total_skipped_dup}",
             f"  Skipped (flt): {self.total_skipped_filter}",
@@ -111,6 +111,7 @@ class BulkScrapeResult:
 # CHECKPOINT SAVE / LOAD
 # ══════════════════════════════════════════════════════════════════
 
+
 def _save_checkpoint(path: str, result: BulkScrapeResult) -> None:
     """Persist BulkScrapeResult to a JSON checkpoint file."""
     try:
@@ -121,7 +122,7 @@ def _save_checkpoint(path: str, result: BulkScrapeResult) -> None:
         logger.warning(f"Could not save checkpoint to {path}: {e}")
 
 
-def _load_checkpoint(path: str) -> Optional[BulkScrapeResult]:
+def _load_checkpoint(path: str) -> BulkScrapeResult | None:
     """Load a previously saved BulkScrapeResult from JSON. Returns None if missing."""
     if not os.path.exists(path):
         return None
@@ -171,11 +172,13 @@ class _StdlibSession:
     Drop-in replacement so bikez.py works without the 'requests' package.
     Automatically falls back to the real requests library if available.
     """
+
     _requests_session = None
 
     def __init__(self):
         try:
             import requests
+
             self._requests_session = requests.Session()
             self._requests_session.headers.update(_HEADERS)
         except ImportError:
@@ -192,15 +195,23 @@ class _StdlibSession:
 
                 class _R:
                     status_code = resp.status
-                    def raise_for_status(self): pass
+
+                    def raise_for_status(self):
+                        pass
+
                 r = _R()
                 r.text = text
                 return r
-        except Exception as e:
+        except Exception as err:
+
             class _Err:
                 status_code = 0
                 text = ""
-                def raise_for_status(self): raise IOError(str(e))
+                error = err
+
+                def raise_for_status(self):
+                    raise OSError(str(self.error))
+
             return _Err()
 
 
@@ -208,12 +219,13 @@ class _StdlibSession:
 # DEDUPLICATION
 # ══════════════════════════════════════════════════════════════════
 
-def _existing_bike_keys(db) -> Set[str]:
+
+def _existing_bike_keys(db) -> set[str]:
     """
     Return a set of "manufacturer|model|year" strings for bikes already in
     the DB, so we can skip re-scraping them.
     """
-    keys: Set[str] = set()
+    keys: set[str] = set()
     try:
         conn = db.connect()
         rows = conn.execute("""
@@ -240,13 +252,14 @@ def _spec_key(spec: BikeSpec) -> str:
 # MAIN ORCHESTRATOR
 # ══════════════════════════════════════════════════════════════════
 
+
 def run_bulk_scrape(
     db,
     checkpoint_path: str = DEFAULT_CHECKPOINT,
     resume: bool = True,
     dry_run: bool = False,
     priority: int = 3,
-    only_manufacturer: Optional[str] = None,
+    only_manufacturer: str | None = None,
     rate_limit_s: float = DEFAULT_RATE_LIMIT_S,
     per_mfr_limit: int = MAX_BATCH_PER_MFR,
     min_confidence: float = 0.30,
@@ -274,13 +287,11 @@ def run_bulk_scrape(
     session = _StdlibSession()
 
     # ── Filter catalog ────────────────────────────────────────────────────────
-    catalog = [
-        e for e in SCRAPE_CATALOG
-        if e.get("priority", 3) <= priority
-    ]
+    catalog = [e for e in SCRAPE_CATALOG if e.get("priority", 3) <= priority]
     if only_manufacturer:
-        catalog = [e for e in catalog
-                   if e["manufacturer"].lower() == only_manufacturer.lower()]
+        catalog = [
+            e for e in catalog if e["manufacturer"].lower() == only_manufacturer.lower()
+        ]
         if not catalog:
             entry = get_entry(only_manufacturer)
             if entry:
@@ -294,8 +305,10 @@ def run_bulk_scrape(
             result = BulkScrapeResult()
         if verbose:
             print(f"\n  Resuming from checkpoint: {checkpoint_path}")
-            print(f"  (Previously: {result.total_imported} imported, "
-                  f"{result.manufacturers_done}/{len(catalog)} done)")
+            print(
+                f"  (Previously: {result.total_imported} imported, "
+                f"{result.manufacturers_done}/{len(catalog)} done)"
+            )
     else:
         result = BulkScrapeResult(
             started_at=datetime.utcnow().isoformat(),
@@ -312,7 +325,6 @@ def run_bulk_scrape(
     # ── Iterate manufacturers ─────────────────────────────────────────────────
     for entry in catalog:
         mfr = entry["manufacturer"]
-        slug = entry["bikez_slug"]
         categories = entry.get("categories", ["sport", "naked"])
         min_cc = entry.get("min_cc", 600)
         year_from = entry.get("year_from", 2000)
@@ -322,12 +334,16 @@ def run_bulk_scrape(
         prev = result.per_manufacturer.get(mfr)
         if prev and prev.status == "done" and resume:
             if verbose:
-                print(f"\n  [{mfr}] ✓ already done ({prev.imported} imported) — skipping")
+                print(
+                    f"\n  [{mfr}] ✓ already done ({prev.imported} imported) — skipping"
+                )
             continue
 
         if verbose:
-            print(f"\n  ── {mfr} ──  "
-                  f"({'/'.join(categories)}, ≥{min_cc}cc, {year_from}–{year_to})")
+            print(
+                f"\n  ── {mfr} ──  "
+                f"({'/'.join(categories)}, ≥{min_cc}cc, {year_from}–{year_to})"
+            )
 
         prog = MfrProgress(
             manufacturer=mfr,
@@ -337,16 +353,20 @@ def run_bulk_scrape(
         result.per_manufacturer[mfr] = prog
 
         try:
-            specs = list(crawl_bikez(
-                manufacturer=mfr,
-                session=session,
-                limit=per_mfr_limit,
-                min_displacement_cc=float(min_cc),
-                rate_limit_s=rate_limit_s,
-            ))
+            specs = list(
+                crawl_bikez(
+                    manufacturer=mfr,
+                    session=session,
+                    limit=per_mfr_limit,
+                    min_displacement_cc=float(min_cc),
+                    rate_limit_s=rate_limit_s,
+                )
+            )
             if verbose and len(specs) == 0:
-                print(f"    ⚠  No bikes fetched for {mfr} — "
-                      f"check network/bikez.com access")
+                print(
+                    f"    ⚠  No bikes fetched for {mfr} — "
+                    f"check network/bikez.com access"
+                )
             for spec in specs:
                 prog.total_found += 1
 
@@ -366,8 +386,10 @@ def run_bulk_scrape(
                 if key in existing_keys:
                     prog.skipped_dup += 1
                     if verbose:
-                        print(f"    ∘ skip (dup): {spec.manufacturer} {spec.model_name} "
-                              f"({spec.year_from})")
+                        print(
+                            f"    ∘ skip (dup): {spec.manufacturer} {spec.model_name} "
+                            f"({spec.year_from})"
+                        )
                     continue
 
                 # ── Validate ──────────────────────────────────────────────────
@@ -376,13 +398,17 @@ def run_bulk_scrape(
 
                 status_char = "✓" if v_result.is_valid else "?"
                 if verbose:
-                    warn_str = f" [{len(v_result.warnings)}W]" if v_result.warnings else ""
-                    print(f"    {status_char} {spec.manufacturer} {spec.model_name} "
-                          f"({spec.year_from or '?'})  "
-                          f"conf={conf:.2f}  "
-                          f"{spec.displacement_cc or '?'}cc  "
-                          f"{spec.peak_power_hp or '?'}hp"
-                          f"{warn_str}")
+                    warn_str = (
+                        f" [{len(v_result.warnings)}W]" if v_result.warnings else ""
+                    )
+                    print(
+                        f"    {status_char} {spec.manufacturer} {spec.model_name} "
+                        f"({spec.year_from or '?'})  "
+                        f"conf={conf:.2f}  "
+                        f"{spec.displacement_cc or '?'}cc  "
+                        f"{spec.peak_power_hp or '?'}hp"
+                        f"{warn_str}"
+                    )
 
                 if not v_result.is_valid or conf < min_confidence:
                     prog.errors += 1
@@ -401,7 +427,7 @@ def run_bulk_scrape(
                         prog.errors += 1
                         result.total_errors += 1
                 else:
-                    prog.imported += 1   # count as-if imported in dry run
+                    prog.imported += 1  # count as-if imported in dry run
                     result.total_imported += 1
 
         except KeyboardInterrupt:
@@ -424,10 +450,12 @@ def run_bulk_scrape(
         result.per_manufacturer[mfr] = prog
 
         if verbose:
-            print(f"  {mfr}: {prog.imported} imported, "
-                  f"{prog.skipped_dup} dups, "
-                  f"{prog.skipped_filter} filtered, "
-                  f"{prog.errors} errors")
+            print(
+                f"  {mfr}: {prog.imported} imported, "
+                f"{prog.skipped_dup} dups, "
+                f"{prog.skipped_filter} filtered, "
+                f"{prog.errors} errors"
+            )
 
         # Save checkpoint after every manufacturer
         _save_checkpoint(checkpoint_path, result)
@@ -441,6 +469,7 @@ def run_bulk_scrape(
 # CHECKPOINT STATUS DISPLAY
 # ══════════════════════════════════════════════════════════════════
 
+
 def print_checkpoint_status(checkpoint_path: str = DEFAULT_CHECKPOINT) -> None:
     """Print a human-readable summary of the current checkpoint file."""
     result = _load_checkpoint(checkpoint_path)
@@ -450,15 +479,23 @@ def print_checkpoint_status(checkpoint_path: str = DEFAULT_CHECKPOINT) -> None:
 
     print(f"\n  Bulk scrape checkpoint: {checkpoint_path}")
     print(f"  Started  : {result.started_at}")
-    print(f"  Progress : {result.manufacturers_done}/{result.manufacturers_total} manufacturers done")
+    print(
+        f"  Progress : {result.manufacturers_done}/{result.manufacturers_total} manufacturers done"
+    )
     print(f"  Imported : {result.total_imported}")
     print(f"  Dup skip : {result.total_skipped_dup}")
     print(f"  Filtered : {result.total_skipped_filter}")
     print(f"  Errors   : {result.total_errors}")
     print()
-    print(f"  {'Manufacturer':<22} {'Status':<12} {'Imported':>8} {'Dups':>6} {'Errors':>7}")
-    print(f"  {'─'*22} {'─'*12} {'─'*8} {'─'*6} {'─'*7}")
+    print(
+        f"  {'Manufacturer':<22} {'Status':<12} {'Imported':>8} {'Dups':>6} {'Errors':>7}"
+    )
+    print(f"  {'─' * 22} {'─' * 12} {'─' * 8} {'─' * 6} {'─' * 7}")
     for mfr, mp in result.per_manufacturer.items():
-        status_sym = {"done": "✓", "failed": "✗", "in_progress": "…"}.get(mp.status, "?")
-        print(f"  {mfr:<22} {status_sym} {mp.status:<10} "
-              f"{mp.imported:>8} {mp.skipped_dup:>6} {mp.errors:>7}")
+        status_sym = {"done": "✓", "failed": "✗", "in_progress": "…"}.get(
+            mp.status, "?"
+        )
+        print(
+            f"  {mfr:<22} {status_sym} {mp.status:<10} "
+            f"{mp.imported:>8} {mp.skipped_dup:>6} {mp.errors:>7}"
+        )

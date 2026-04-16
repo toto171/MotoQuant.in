@@ -5,19 +5,30 @@ JSON serialization for BikeConfig and all sub-parameter dataclasses.
 Enables saving, loading, and sharing bike configurations.
 """
 
-import json
 import dataclasses
+import json
 from pathlib import Path
-from typing import Union
+
 import numpy as np
 
 from .models import (
-    BikeConfig, ChassisParams, EngineParams, ForcedInductionParams,
-    DrivetrainParams, ClutchParams, TireParams, AeroParams,
-    SuspensionParams, BrakingParams, WheelieParams, RiderParams,
-    ParasiticParams, StagingParams, EnvironmentParams, DynoCurve,
+    AeroParams,
+    BikeConfig,
+    BrakingParams,
+    ChassisParams,
+    ClutchParams,
+    DrivetrainParams,
+    DynoCurve,
+    EngineParams,
+    EnvironmentParams,
+    ForcedInductionParams,
+    ParasiticParams,
+    RiderParams,
+    StagingParams,
+    SuspensionParams,
+    TireParams,
+    WheelieParams,
 )
-
 
 # Map of section name → dataclass type
 _SECTION_MAP = {
@@ -40,6 +51,7 @@ _SECTION_MAP = {
 
 class _NumpyEncoder(json.JSONEncoder):
     """JSON encoder that handles numpy arrays and types."""
+
     def default(self, obj):
         if isinstance(obj, np.ndarray):
             return obj.tolist()
@@ -53,8 +65,12 @@ class _NumpyEncoder(json.JSONEncoder):
 def _dyno_to_dict(dyno: DynoCurve) -> dict:
     """Serialize a DynoCurve to a JSON-safe dict."""
     return {
-        "rpm": dyno.rpm.tolist() if isinstance(dyno.rpm, np.ndarray) else list(dyno.rpm),
-        "torque_nm": dyno.torque_nm.tolist() if isinstance(dyno.torque_nm, np.ndarray) else list(dyno.torque_nm),
+        "rpm": dyno.rpm.tolist()
+        if isinstance(dyno.rpm, np.ndarray)
+        else list(dyno.rpm),
+        "torque_nm": dyno.torque_nm.tolist()
+        if isinstance(dyno.torque_nm, np.ndarray)
+        else list(dyno.torque_nm),
         "is_at_wheel": dyno.is_at_wheel,
     }
 
@@ -124,7 +140,7 @@ def config_from_dict(d: dict) -> BikeConfig:
     return BikeConfig(**kwargs)
 
 
-def save_config(config: BikeConfig, path: Union[str, Path]) -> Path:
+def save_config(config: BikeConfig, path: str | Path) -> Path:
     """Save a BikeConfig to a JSON file."""
     path = Path(path)
     d = config_to_dict(config)
@@ -133,9 +149,9 @@ def save_config(config: BikeConfig, path: Union[str, Path]) -> Path:
     return path
 
 
-def load_config(path: Union[str, Path]) -> BikeConfig:
+def load_config(path: str | Path) -> BikeConfig:
     """Load a BikeConfig from a JSON file."""
     path = Path(path)
-    with open(path, "r") as f:
+    with open(path) as f:
         d = json.load(f)
     return config_from_dict(d)

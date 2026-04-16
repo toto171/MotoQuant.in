@@ -7,7 +7,6 @@ bike config, venue, weather conditions, and applied parts.
 
 import json
 import sqlite3
-from typing import List, Optional, Dict, Any
 
 
 class SimRunRepository:
@@ -34,7 +33,7 @@ class SimRunRepository:
         distance_m: float = 402.336,
         split_times: dict = None,
         time_series_path: str = None,
-        applied_parts: List[int] = None,
+        applied_parts: list[int] = None,
         notes: str = None,
     ) -> int:
         """Store a simulation result."""
@@ -47,10 +46,20 @@ class SimRunRepository:
                 split_times_json, time_series_path, applied_parts, notes)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
-                bike_config_id, venue_id, weather_record_id,
-                et_quarter_s, trap_speed_kmh, et_eighth_s, speed_eighth_kmh,
-                time_60ft_s, speed_60ft_kmh, time_330ft_s, time_1000ft_s,
-                sim_version, dt_s, distance_m,
+                bike_config_id,
+                venue_id,
+                weather_record_id,
+                et_quarter_s,
+                trap_speed_kmh,
+                et_eighth_s,
+                speed_eighth_kmh,
+                time_60ft_s,
+                speed_60ft_kmh,
+                time_330ft_s,
+                time_1000ft_s,
+                sim_version,
+                dt_s,
+                distance_m,
                 json.dumps(split_times) if split_times else None,
                 time_series_path,
                 json.dumps(applied_parts) if applied_parts else None,
@@ -60,7 +69,7 @@ class SimRunRepository:
         self._conn.commit()
         return cur.lastrowid
 
-    def get(self, run_id: int) -> Optional[dict]:
+    def get(self, run_id: int) -> dict | None:
         row = self._conn.execute(
             "SELECT * FROM sim_runs WHERE id = ?", (run_id,)
         ).fetchone()
@@ -71,7 +80,7 @@ class SimRunRepository:
         bike_config_id: int = None,
         venue_id: int = None,
         limit: int = 50,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """Query run history with optional filters."""
         conditions = []
         params = []
@@ -90,7 +99,7 @@ class SimRunRepository:
         ).fetchall()
         return [dict(r) for r in rows]
 
-    def best_et(self, bike_config_id: int) -> Optional[dict]:
+    def best_et(self, bike_config_id: int) -> dict | None:
         """Get the best (lowest) ET run for a config."""
         row = self._conn.execute(
             """SELECT * FROM sim_runs
@@ -104,7 +113,7 @@ class SimRunRepository:
         self,
         venue_id: int = None,
         limit: int = 20,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """
         Overall leaderboard (best ET per config).
         """

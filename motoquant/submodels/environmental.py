@@ -22,32 +22,31 @@ All values are computed once at construction and are read-only during the
 simulation loop.
 """
 
-import math
 from ..models import BikeConfig
 
 # ── Track surface grip multipliers (baseline, no prep compound) ──────────────
 # Values are relative to clean dry asphalt = 1.00
 _SURFACE_GRIP: dict = {
-    "asphalt":   1.00,
-    "concrete":  0.94,   # slightly less bite on concrete
-    "prepped":   1.18,   # track prep compound on asphalt
-    "wet":       0.55,   # rain
-    "damp":      0.72,
-    "dusty":     0.80,
+    "asphalt": 1.00,
+    "concrete": 0.94,  # slightly less bite on concrete
+    "prepped": 1.18,  # track prep compound on asphalt
+    "wet": 0.55,  # rain
+    "damp": 0.72,
+    "dusty": 0.80,
 }
 
 # ── Track surface rolling-resistance multipliers ──────────────────────────────
 _SURFACE_RR: dict = {
-    "asphalt":   1.00,
-    "concrete":  1.05,
-    "prepped":   0.97,
-    "wet":       1.15,
-    "damp":      1.08,
-    "dusty":     1.12,
+    "asphalt": 1.00,
+    "concrete": 1.05,
+    "prepped": 0.97,
+    "wet": 1.15,
+    "damp": 1.08,
+    "dusty": 1.12,
 }
 
 # ── Power correction denominator at standard conditions (ISO 1585) ────────────
-_RHO_SL_STD = 1.2250   # kg/m³  (sea level, 15 °C, 0 % RH)
+_RHO_SL_STD = 1.2250  # kg/m³  (sea level, 15 °C, 0 % RH)
 
 
 class EnvironmentalModel:
@@ -93,7 +92,7 @@ class EnvironmentalModel:
         # ── Track surface ────────────────────────────────────────────────────
         surface = env.track_surface.lower().strip()
         self.grip_multiplier: float = _SURFACE_GRIP.get(surface, 1.00)
-        self.rr_multiplier: float   = _SURFACE_RR.get(surface, 1.00)
+        self.rr_multiplier: float = _SURFACE_RR.get(surface, 1.00)
 
         # ── Tyre launch-temperature adjustment ───────────────────────────────
         # Cold ambient → tyre stays cooler longer → slightly less grip early
@@ -105,8 +104,8 @@ class EnvironmentalModel:
         self.ambient_temp_grip_delta: float = dt_clamped * 0.005
 
         # Cache ambient for downstream models
-        self.ambient_temp_c: float  = env.ambient_temp_c
-        self.track_temp_c: float    = env.track_temp_c
+        self.ambient_temp_c: float = env.ambient_temp_c
+        self.track_temp_c: float = env.track_temp_c
 
     # ─────────────────────────────────────────
     # CONVENIENCE METHODS
@@ -129,14 +128,14 @@ class EnvironmentalModel:
     def summary(self) -> dict:
         """Return key environmental conditions as a plain dict (for CLI display)."""
         return {
-            "rho_kg_m3":         round(self.rho, 4),
-            "density_alt_ft":    round(self.density_alt_ft, 0),
-            "power_correction":  round(self.power_correction, 4),
+            "rho_kg_m3": round(self.rho, 4),
+            "density_alt_ft": round(self.density_alt_ft, 0),
+            "power_correction": round(self.power_correction, 4),
             "da_power_loss_pct": round(self.da_power_loss_pct, 2),
-            "v_headwind_ms":     round(self.v_headwind, 2),
-            "v_crosswind_ms":    round(self.v_crosswind, 2),
-            "grip_multiplier":   round(self.total_grip_multiplier(), 4),
-            "rr_multiplier":     round(self.rr_multiplier, 4),
-            "ambient_temp_c":    self.ambient_temp_c,
-            "track_temp_c":      self.track_temp_c,
+            "v_headwind_ms": round(self.v_headwind, 2),
+            "v_crosswind_ms": round(self.v_crosswind, 2),
+            "grip_multiplier": round(self.total_grip_multiplier(), 4),
+            "rr_multiplier": round(self.rr_multiplier, 4),
+            "ambient_temp_c": self.ambient_temp_c,
+            "track_temp_c": self.track_temp_c,
         }

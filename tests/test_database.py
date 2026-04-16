@@ -10,28 +10,30 @@ Tests for the Phase 2 database layer:
   - Venue seasonal data
 """
 
-import os
 import json
-import tempfile
-import pytest
-import numpy as np
+import os
 
 # Ensure the parent package is importable
 import sys
+
+import numpy as np
+import pytest
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from motoquant.database import MotoQuantDB
+from motoquant.database.bridge import (
+    apply_part_to_config,
+    compute_data_completeness,
+)
 from motoquant.database.seed import seed_all
 from motoquant.database.weather_repo import (
-    compute_air_density, compute_density_altitude,
-    compute_dew_point, compute_power_correction,
+    compute_air_density,
+    compute_density_altitude,
+    compute_dew_point,
+    compute_power_correction,
 )
-from motoquant.database.bridge import (
-    config_to_db_row, db_row_to_config, extract_headline_specs,
-    compute_data_completeness, apply_part_to_config,
-)
-from motoquant.defaults import gsxr1000_k5, yzfr1_4c8, hayabusa_gen1
-from motoquant.models import BikeConfig, EnvironmentParams
+from motoquant.defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 
 
 @pytest.fixture
@@ -59,6 +61,7 @@ def seeded_db(db):
 # Schema & Initialization
 # ════════════════════════════════════════════════
 
+
 class TestSchemaInit:
     """Verify schema creation and seeding."""
 
@@ -70,13 +73,24 @@ class TestSchemaInit:
         table_names = {r["name"] for r in tables}
 
         expected = {
-            "schema_meta", "manufacturers", "bike_models", "bike_configs",
-            "dyno_curves", "tire_manufacturers", "tire_models", "venues",
-            "weather_records", "venue_seasonal", "parts_categories", "parts",
-            "sim_runs", "data_provenance",
+            "schema_meta",
+            "manufacturers",
+            "bike_models",
+            "bike_configs",
+            "dyno_curves",
+            "tire_manufacturers",
+            "tire_models",
+            "venues",
+            "weather_records",
+            "venue_seasonal",
+            "parts_categories",
+            "parts",
+            "sim_runs",
+            "data_provenance",
         }
-        assert expected.issubset(table_names), \
+        assert expected.issubset(table_names), (
             f"Missing tables: {expected - table_names}"
+        )
 
     def test_schema_version(self, db):
         """Schema version is set correctly."""
@@ -123,17 +137,21 @@ class TestSchemaInit:
 # BikeConfig Round-Trip (THE critical test)
 # ════════════════════════════════════════════════
 
+
 class TestBikeConfigRoundTrip:
     """
     Verify bit-exact round-trip: BikeConfig → DB → BikeConfig.
     This is the single most important test in the database layer.
     """
 
-    @pytest.mark.parametrize("factory,name", [
-        (gsxr1000_k5, "K5"),
-        (yzfr1_4c8, "R1"),
-        (hayabusa_gen1, "Busa"),
-    ])
+    @pytest.mark.parametrize(
+        "factory,name",
+        [
+            (gsxr1000_k5, "K5"),
+            (yzfr1_4c8, "R1"),
+            (hayabusa_gen1, "Busa"),
+        ],
+    )
     def test_roundtrip_scalars(self, db, factory, name):
         """All scalar params survive round-trip through the database."""
         original = factory()
@@ -147,9 +165,19 @@ class TestBikeConfigRoundTrip:
 
         # Compare every scalar field in every section
         sections = [
-            "chassis", "engine", "drivetrain", "clutch", "tires",
-            "aero", "suspension", "braking", "wheelie", "rider",
-            "parasitic", "staging", "forced_induction",
+            "chassis",
+            "engine",
+            "drivetrain",
+            "clutch",
+            "tires",
+            "aero",
+            "suspension",
+            "braking",
+            "wheelie",
+            "rider",
+            "parasitic",
+            "staging",
+            "forced_induction",
         ]
 
         for section in sections:
@@ -157,6 +185,7 @@ class TestBikeConfigRoundTrip:
             rest_section = getattr(restored, section)
 
             import dataclasses
+
             for f in dataclasses.fields(orig_section):
                 orig_val = getattr(orig_section, f.name)
                 rest_val = getattr(rest_section, f.name)
@@ -167,20 +196,26 @@ class TestBikeConfigRoundTrip:
                 if f.name == "dyno_curve":
                     continue
                 if isinstance(orig_val, list):
-                    assert orig_val == rest_val, \
+                    assert orig_val == rest_val, (
                         f"{name}.{section}.{f.name}: {orig_val} != {rest_val}"
+                    )
                 elif isinstance(orig_val, float):
-                    assert abs(orig_val - rest_val) < 1e-10, \
+                    assert abs(orig_val - rest_val) < 1e-10, (
                         f"{name}.{section}.{f.name}: {orig_val} != {rest_val}"
+                    )
                 else:
-                    assert orig_val == rest_val, \
+                    assert orig_val == rest_val, (
                         f"{name}.{section}.{f.name}: {orig_val} != {rest_val}"
+                    )
 
-    @pytest.mark.parametrize("factory,name", [
-        (gsxr1000_k5, "K5"),
-        (yzfr1_4c8, "R1"),
-        (hayabusa_gen1, "Busa"),
-    ])
+    @pytest.mark.parametrize(
+        "factory,name",
+        [
+            (gsxr1000_k5, "K5"),
+            (yzfr1_4c8, "R1"),
+            (hayabusa_gen1, "Busa"),
+        ],
+    )
     def test_roundtrip_dyno_curve(self, db, factory, name):
         """Dyno curve survives round-trip with full float64 precision."""
         original = factory()
@@ -202,33 +237,41 @@ class TestBikeConfigRoundTrip:
             decimal=6,
             err_msg=f"{name}: Torque array mismatch",
         )
-        assert original.engine.dyno_curve.is_at_wheel == \
-               restored.engine.dyno_curve.is_at_wheel
+        assert (
+            original.engine.dyno_curve.is_at_wheel
+            == restored.engine.dyno_curve.is_at_wheel
+        )
 
-    @pytest.mark.parametrize("factory,name", [
-        (gsxr1000_k5, "K5"),
-        (yzfr1_4c8, "R1"),
-        (hayabusa_gen1, "Busa"),
-    ])
+    @pytest.mark.parametrize(
+        "factory,name",
+        [
+            (gsxr1000_k5, "K5"),
+            (yzfr1_4c8, "R1"),
+            (hayabusa_gen1, "Busa"),
+        ],
+    )
     def test_roundtrip_gear_ratios(self, db, factory, name):
         """Gear ratios (critical for ET) survive round-trip."""
         original = factory()
         _, config_id = db.bikes.upsert_from_config(original)
         restored = db.bikes.to_config(config_id)
 
-        assert len(original.drivetrain.gear_ratios) == \
-               len(restored.drivetrain.gear_ratios)
-        for i, (o, r) in enumerate(zip(
-            original.drivetrain.gear_ratios,
-            restored.drivetrain.gear_ratios,
-        )):
-            assert abs(o - r) < 1e-10, \
-                f"{name} gear {i}: {o} != {r}"
+        assert len(original.drivetrain.gear_ratios) == len(
+            restored.drivetrain.gear_ratios
+        )
+        for i, (o, r) in enumerate(
+            zip(
+                original.drivetrain.gear_ratios,
+                restored.drivetrain.gear_ratios,
+            )
+        ):
+            assert abs(o - r) < 1e-10, f"{name} gear {i}: {o} != {r}"
 
 
 # ════════════════════════════════════════════════
 # Bike Repository
 # ════════════════════════════════════════════════
+
 
 class TestBikeRepository:
     """Test bike CRUD and search."""
@@ -308,8 +351,8 @@ class TestBikeRepository:
 # Tire Repository
 # ════════════════════════════════════════════════
 
-class TestTireRepository:
 
+class TestTireRepository:
     def test_create_and_get(self, db):
         tire_id = db.tires.create(
             manufacturer_name="Michelin",
@@ -357,8 +400,8 @@ class TestTireRepository:
 # Venue Repository
 # ════════════════════════════════════════════════
 
-class TestVenueRepository:
 
+class TestVenueRepository:
     def test_list_indian_venues(self, db):
         venues = db.venues.list_indian_venues()
         assert len(venues) >= 4
@@ -399,6 +442,7 @@ class TestVenueRepository:
 # ════════════════════════════════════════════════
 # Weather Repository & Atmospheric Physics
 # ════════════════════════════════════════════════
+
 
 class TestWeatherPhysics:
     """Test atmospheric computation accuracy."""
@@ -448,7 +492,6 @@ class TestWeatherPhysics:
 
 
 class TestWeatherRepository:
-
     def test_record_manual_weather(self, db):
         aamby = db.venues.get_by_name("aamby")
         record_id = db.weather.record(
@@ -500,8 +543,8 @@ class TestWeatherRepository:
 # Parts Repository
 # ════════════════════════════════════════════════
 
-class TestPartsRepository:
 
+class TestPartsRepository:
     def test_create_and_search(self, seeded_db):
         sprockets = seeded_db.parts.search(category="sprocket")
         assert len(sprockets) >= 2
@@ -531,7 +574,7 @@ class TestPartsRepository:
 
     def test_ecu_flash_deltas(self, seeded_db):
         """ECU flash applies power delta correctly for each part found."""
-        import json
+
         config = gsxr1000_k5()
         ecu_parts = seeded_db.parts.search(category="ecu")
         assert len(ecu_parts) >= 1
@@ -555,8 +598,8 @@ class TestPartsRepository:
 # Simulation Run Repository
 # ════════════════════════════════════════════════
 
-class TestSimRunRepository:
 
+class TestSimRunRepository:
     def test_record_and_retrieve(self, seeded_db):
         config = gsxr1000_k5()
         _, config_id = seeded_db.bikes.upsert_from_config(config)
@@ -589,8 +632,8 @@ class TestSimRunRepository:
 # Database Statistics
 # ════════════════════════════════════════════════
 
-class TestDatabaseStats:
 
+class TestDatabaseStats:
     def test_stats_after_seed(self, seeded_db):
         """Verify stats report correct counts after full seed."""
         stats = seeded_db.stats()

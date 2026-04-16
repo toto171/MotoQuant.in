@@ -25,8 +25,8 @@ All values are read from StagingParams and EngineParams at construction;
 no mutable state is stored so this model is stateless per timestep.
 """
 
-from ..models import BikeConfig
 from ..constants import RPM_TO_RADS
+from ..models import BikeConfig
 
 
 class StagingModel:
@@ -54,14 +54,14 @@ class StagingModel:
         s = cfg.staging
         e = cfg.engine
 
-        self._rollout_m    = s.rollout_distance_mm / 1000.0
-        self._reaction_s   = s.reaction_time_ms / 1000.0
-        self._vehicle_s    = s.vehicle_response_ms / 1000.0
-        self._two_step     = s.two_step
-        self._launch_rpm   = s.launch_rpm
+        self._rollout_m = s.rollout_distance_mm / 1000.0
+        self._reaction_s = s.reaction_time_ms / 1000.0
+        self._vehicle_s = s.vehicle_response_ms / 1000.0
+        self._two_step = s.two_step
+        self._launch_rpm = s.launch_rpm
         self._peak_torque_rpm = e.peak_torque_rpm
-        self._idle_rpm     = e.idle_rpm
-        self._redline_rpm  = e.redline_rpm
+        self._idle_rpm = e.idle_rpm
+        self._redline_rpm = e.redline_rpm
 
         # Pro tree interval = 0.400 s per amber; sportsman = 0.500 s
         self._tree_interval_s = 0.400 if s.tree_type == "pro" else 0.500
@@ -130,7 +130,7 @@ class StagingModel:
             )
         if self._reaction_s < 0.050:
             warnings.append(
-                f"reaction_time_ms {self._reaction_s*1000:.0f} ms seems unrealistically fast "
+                f"reaction_time_ms {self._reaction_s * 1000:.0f} ms seems unrealistically fast "
                 "(world-class pro-stock is ~100 ms)."
             )
         return warnings

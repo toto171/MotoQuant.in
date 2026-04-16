@@ -6,20 +6,44 @@ All data from manufacturer service manuals and published dyno results.
 """
 
 import numpy as np
+
 from .models import (
-    BikeConfig, ChassisParams, EngineParams, ForcedInductionParams,
-    DrivetrainParams, ClutchParams, TireParams, AeroParams,
-    SuspensionParams, BrakingParams, WheelieParams, RiderParams,
-    ParasiticParams, StagingParams, EnvironmentParams, DynoCurve,
-    CLUTCH_LOCKUP, CLUTCH_SLIPPER, BOOST_NA, DRIVE_CHAIN,
-    STAGING_SHALLOW, TRACK_NONE, TRACK_VHT, RIDER_TUCK, FUEL_GASOLINE,
+    BOOST_NA,
+    CLUTCH_LOCKUP,
+    DRIVE_CHAIN,
+    FUEL_GASOLINE,
+    RIDER_TUCK,
+    STAGING_SHALLOW,
+    TRACK_NONE,
+    TRACK_VHT,
+    AeroParams,
+    BikeConfig,
+    BrakingParams,
+    ChassisParams,
+    ClutchParams,
+    DrivetrainParams,
+    DynoCurve,
+    EngineParams,
+    EnvironmentParams,
+    ForcedInductionParams,
+    ParasiticParams,
+    RiderParams,
+    StagingParams,
+    SuspensionParams,
+    TireParams,
+    WheelieParams,
 )
 
 
-def _synthetic_torque_curve(peak_torque_nm: float, peak_rpm: float,
-                            redline_rpm: float, idle_rpm: float = 2000,
-                            peak_power_hp: float = None, peak_power_rpm: float = None,
-                            points: int = 100) -> DynoCurve:
+def _synthetic_torque_curve(
+    peak_torque_nm: float,
+    peak_rpm: float,
+    redline_rpm: float,
+    idle_rpm: float = 2000,
+    peak_power_hp: float = None,
+    peak_power_rpm: float = None,
+    points: int = 100,
+) -> DynoCurve:
     """
     Generate a realistic inline-4 sportbike torque curve.
 
@@ -47,7 +71,7 @@ def _synthetic_torque_curve(peak_torque_nm: float, peak_rpm: float,
             # Below peak torque: Gaussian rise from low RPM
             x = (rpm - peak_rpm) / (peak_rpm - idle_rpm)
             # Broad Gaussian (sigma ~0.6 of the distance)
-            T = peak_torque_nm * np.exp(-1.8 * x ** 2)
+            T = peak_torque_nm * np.exp(-1.8 * x**2)
             # Low-RPM ramp: torque builds progressively from idle
             if rpm < peak_rpm * 0.6:
                 ramp = max(0.25, (rpm - idle_rpm) / max(1.0, peak_rpm * 0.6 - idle_rpm))
@@ -57,16 +81,17 @@ def _synthetic_torque_curve(peak_torque_nm: float, peak_rpm: float,
             # At peak_rpm: T = peak_torque_nm
             # At peak_power_rpm: T = T_at_peak_power (constrained by rated power)
             # At redline: T drops to ~60% of T_at_peak_power (typical rev limiter approach)
-            frac = (rpm - peak_rpm) / max(1.0, redline_rpm - peak_rpm)
             if rpm <= peak_power_rpm:
                 # Interpolate peak_torque → T_at_peak_power (gentle decline)
                 frac_pp = (rpm - peak_rpm) / max(1.0, peak_power_rpm - peak_rpm)
                 T = peak_torque_nm + (T_at_peak_power - peak_torque_nm) * frac_pp
             else:
                 # Beyond peak power RPM: steeper decline toward redline
-                frac_rl = (rpm - peak_power_rpm) / max(1.0, redline_rpm - peak_power_rpm)
+                frac_rl = (rpm - peak_power_rpm) / max(
+                    1.0, redline_rpm - peak_power_rpm
+                )
                 T_at_redline = T_at_peak_power * 0.55  # Steep falloff near limiter
-                T = T_at_peak_power + (T_at_redline - T_at_peak_power) * frac_rl ** 1.5
+                T = T_at_peak_power + (T_at_redline - T_at_peak_power) * frac_rl**1.5
             T = max(0.0, T)
         torque[i] = T
 
@@ -85,19 +110,19 @@ def gsxr1000_k5() -> BikeConfig:
         peak_rpm=9500,
         redline_rpm=13000,
         idle_rpm=1200,
-        peak_power_hp=160.0,   # 160 HP at wheel
+        peak_power_hp=160.0,  # 160 HP at wheel
         peak_power_rpm=11500,
     )
 
     return BikeConfig(
         name="Suzuki GSX-R 1000 K5/K6",
         chassis=ChassisParams(
-            dry_mass_kg=166.0,        # Dry weight
+            dry_mass_kg=166.0,  # Dry weight
             rider_mass_kg=75.0,
-            fluid_mass_kg=17.0,       # Full fuel + fluids
-            fuel_mass_kg=18.0,        # 17.5L tank
+            fluid_mass_kg=17.0,  # Full fuel + fluids
+            fuel_mass_kg=18.0,  # 17.5L tank
             wheelbase_mm=1405.0,
-            cog_height_mm=540.0,      # Estimated bike+rider
+            cog_height_mm=540.0,  # Estimated bike+rider
             front_weight_pct=0.52,
             rake_deg=23.4,
             trail_mm=97.0,
@@ -105,8 +130,8 @@ def gsxr1000_k5() -> BikeConfig:
         ),
         engine=EngineParams(
             dyno_curve=dyno,
-            peak_power_hp=160.0,      # At wheel (chassis dyno)
-            peak_torque_nm=115.0,     # At wheel
+            peak_power_hp=160.0,  # At wheel (chassis dyno)
+            peak_torque_nm=115.0,  # At wheel
             peak_power_rpm=11500,
             peak_torque_rpm=9500,
             redline_rpm=13000,
@@ -126,12 +151,12 @@ def gsxr1000_k5() -> BikeConfig:
         ),
         forced_induction=ForcedInductionParams(boost_type=BOOST_NA),
         drivetrain=DrivetrainParams(
-            primary_ratio=1.553,      # 73/47
+            primary_ratio=1.553,  # 73/47
             gear_ratios=[2.562, 1.947, 1.565, 1.350, 1.208, 1.064],
             final_drive_ratio=2.471,  # 42/17
             front_sprocket=17,
             rear_sprocket=42,
-            chain_pitch_mm=15.875,    # 530 chain
+            chain_pitch_mm=15.875,  # 530 chain
             chain_links=110,
             chain_slack_mm=25.0,
             drive_type=DRIVE_CHAIN,
@@ -156,7 +181,7 @@ def gsxr1000_k5() -> BikeConfig:
             basket_inertia_kgm2=0.01,
             thermal_mass_jk=500,
             fade_temp_c=250,
-            slipper_ratio=0.0,       # No slipper on K5
+            slipper_ratio=0.0,  # No slipper on K5
         ),
         tires=TireParams(
             rear_model="Stock Bridgestone BT014R",
@@ -170,7 +195,7 @@ def gsxr1000_k5() -> BikeConfig:
             front_pressure_psi=33.0,
             front_mass_kg=4.0,
             front_inertia_kgm2=0.35,
-            mu_peak=1.40,             # Sport radial on prepped surface
+            mu_peak=1.40,  # Sport radial on prepped surface
             mu_slide=1.05,
             load_sensitivity_k=0.00003,  # Low for modern radial sport compound
             pacejka_B=10.0,
@@ -182,9 +207,9 @@ def gsxr1000_k5() -> BikeConfig:
             growth_coeff=2e-9,
             crr_base=0.012,
             crr_speed_coeff=5e-6,
-            burnout_end_temp_c=80.0,   # Proper burnout heats tire significantly
+            burnout_end_temp_c=80.0,  # Proper burnout heats tire significantly
             time_burnout_to_launch_s=8.0,  # Quick staging after burnout
-            track_prep_type=TRACK_VHT,     # Prepped drag strip surface
+            track_prep_type=TRACK_VHT,  # Prepped drag strip surface
         ),
         aero=AeroParams(
             cd=0.70,
@@ -207,7 +232,7 @@ def gsxr1000_k5() -> BikeConfig:
             front_disc_dia_mm=310.0,
             front_caliper_pistons=4,
             rear_disc_dia_mm=220.0,
-            abs_equipped=False,       # No ABS on K5
+            abs_equipped=False,  # No ABS on K5
         ),
         wheelie=WheelieParams(wheelie_bar=False),
         rider=RiderParams(
@@ -244,7 +269,7 @@ def yzfr1_4c8() -> BikeConfig:
         peak_rpm=9000,
         redline_rpm=12500,
         idle_rpm=1100,
-        peak_power_hp=155.0,   # 155 HP at wheel
+        peak_power_hp=155.0,  # 155 HP at wheel
         peak_power_rpm=11000,
     )
 
@@ -277,16 +302,16 @@ def yzfr1_4c8() -> BikeConfig:
             compression_ratio=12.7,
             engine_inertia_kgm2=0.04,
             crank_rotation_cw=True,
-            counter_rotating=True,     # Crossplane crank!
+            counter_rotating=True,  # Crossplane crank!
             fuel_type=FUEL_GASOLINE,
             afr_wot=12.5,
             motoring_torque_nm=38.0,
         ),
         forced_induction=ForcedInductionParams(boost_type=BOOST_NA),
         drivetrain=DrivetrainParams(
-            primary_ratio=1.512,       # 65/43
+            primary_ratio=1.512,  # 65/43
             gear_ratios=[2.533, 2.063, 1.762, 1.522, 1.348, 1.208],
-            final_drive_ratio=2.529,   # 43/17
+            final_drive_ratio=2.529,  # 43/17
             front_sprocket=17,
             rear_sprocket=43,
             chain_pitch_mm=15.875,
@@ -312,7 +337,7 @@ def yzfr1_4c8() -> BikeConfig:
             basket_inertia_kgm2=0.012,
             thermal_mass_jk=550,
             fade_temp_c=250,
-            slipper_ratio=0.4,        # Has slipper clutch
+            slipper_ratio=0.4,  # Has slipper clutch
         ),
         tires=TireParams(
             rear_model="Stock Dunlop Sportmax",
@@ -356,23 +381,23 @@ def hayabusa_gen1() -> BikeConfig:
     Heavier but more powerful, geared for top speed.
     """
     dyno = _synthetic_torque_curve(
-        peak_torque_nm=130.0,         # More torque than the 1000s
+        peak_torque_nm=130.0,  # More torque than the 1000s
         peak_rpm=8500,
         redline_rpm=11000,
         idle_rpm=1100,
-        peak_power_hp=170.0,   # 170 HP at wheel (Gen1 with ram air)
+        peak_power_hp=170.0,  # 170 HP at wheel (Gen1 with ram air)
         peak_power_rpm=10000,
     )
 
     return BikeConfig(
         name="Suzuki Hayabusa GSX1300R Gen1",
         chassis=ChassisParams(
-            dry_mass_kg=215.0,        # Heavier than litre bikes
+            dry_mass_kg=215.0,  # Heavier than litre bikes
             rider_mass_kg=75.0,
-            fluid_mass_kg=22.0,       # Bigger tank
+            fluid_mass_kg=22.0,  # Bigger tank
             fuel_mass_kg=21.0,
-            wheelbase_mm=1485.0,      # Longer wheelbase
-            cog_height_mm=530.0,      # Lower CoG (touring geometry)
+            wheelbase_mm=1485.0,  # Longer wheelbase
+            cog_height_mm=530.0,  # Lower CoG (touring geometry)
             front_weight_pct=0.51,
             rake_deg=25.0,
             trail_mm=107.0,
@@ -380,7 +405,7 @@ def hayabusa_gen1() -> BikeConfig:
         ),
         engine=EngineParams(
             dyno_curve=dyno,
-            peak_power_hp=170.0,      # Stock at wheel
+            peak_power_hp=170.0,  # Stock at wheel
             peak_torque_nm=130.0,
             peak_power_rpm=10000,
             peak_torque_rpm=8500,
@@ -391,7 +416,7 @@ def hayabusa_gen1() -> BikeConfig:
             bore_mm=81.0,
             stroke_mm=63.0,
             compression_ratio=11.0,
-            engine_inertia_kgm2=0.055, # Bigger engine
+            engine_inertia_kgm2=0.055,  # Bigger engine
             crank_rotation_cw=True,
             counter_rotating=False,
             fuel_type=FUEL_GASOLINE,
@@ -400,12 +425,12 @@ def hayabusa_gen1() -> BikeConfig:
         ),
         forced_induction=ForcedInductionParams(boost_type=BOOST_NA),
         drivetrain=DrivetrainParams(
-            primary_ratio=1.596,       # 83/52 (actually varies by source)
+            primary_ratio=1.596,  # 83/52 (actually varies by source)
             gear_ratios=[2.615, 1.937, 1.526, 1.285, 1.136, 1.043],
-            final_drive_ratio=2.353,   # 40/17
+            final_drive_ratio=2.353,  # 40/17
             front_sprocket=17,
             rear_sprocket=40,
-            chain_pitch_mm=15.875,     # 530 chain
+            chain_pitch_mm=15.875,  # 530 chain
             chain_links=114,
             chain_slack_mm=30.0,
             drive_type=DRIVE_CHAIN,
@@ -445,11 +470,11 @@ def hayabusa_gen1() -> BikeConfig:
             track_prep_type=TRACK_VHT,
         ),
         aero=AeroParams(
-            cd=0.62,                   # More aerodynamic (full fairing)
-            frontal_area_m2=0.50,      # Wider
+            cd=0.62,  # More aerodynamic (full fairing)
+            frontal_area_m2=0.50,  # Wider
             cl=0.06,
             rider_position=RIDER_TUCK,
-            ram_air_efficiency=0.70,   # Good ram air system
+            ram_air_efficiency=0.70,  # Good ram air system
             ram_air_area_cm2=30.0,
         ),
         wheelie=WheelieParams(wheelie_bar=False),

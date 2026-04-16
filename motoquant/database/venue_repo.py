@@ -6,10 +6,9 @@ Handles seasonal weather normals and environment construction.
 """
 
 import sqlite3
-from typing import List, Optional, Dict
 
 from ..models import EnvironmentParams
-from .bridge import venue_row_to_environment, seasonal_to_environment
+from .bridge import seasonal_to_environment, venue_row_to_environment
 
 
 class VenueRepository:
@@ -43,13 +42,13 @@ class VenueRepository:
             return row["id"] if row else 0
         return cur.lastrowid
 
-    def get(self, venue_id: int) -> Optional[dict]:
+    def get(self, venue_id: int) -> dict | None:
         row = self._conn.execute(
             "SELECT * FROM venues WHERE id = ?", (venue_id,)
         ).fetchone()
         return dict(row) if row else None
 
-    def get_by_name(self, name: str) -> Optional[dict]:
+    def get_by_name(self, name: str) -> dict | None:
         """Look up by name or short_name."""
         row = self._conn.execute(
             "SELECT * FROM venues WHERE name = ? OR short_name = ?",
@@ -57,7 +56,7 @@ class VenueRepository:
         ).fetchone()
         return dict(row) if row else None
 
-    def list_all(self, country: str = None, active_only: bool = True) -> List[dict]:
+    def list_all(self, country: str = None, active_only: bool = True) -> list[dict]:
         """List all venues, optionally filtered."""
         conditions = []
         params = []
@@ -73,7 +72,7 @@ class VenueRepository:
         ).fetchall()
         return [dict(r) for r in rows]
 
-    def list_indian_venues(self) -> List[dict]:
+    def list_indian_venues(self) -> list[dict]:
         """Shorthand for Indian venues."""
         return self.list_all(country="India")
 
@@ -81,7 +80,7 @@ class VenueRepository:
     # Seasonal data
     # ────────────────────────────────────────────
 
-    def get_seasonal(self, venue_id: int, month: int) -> Optional[dict]:
+    def get_seasonal(self, venue_id: int, month: int) -> dict | None:
         """Get seasonal weather normals for a venue and month."""
         row = self._conn.execute(
             "SELECT * FROM venue_seasonal WHERE venue_id = ? AND month = ?",
@@ -89,7 +88,7 @@ class VenueRepository:
         ).fetchone()
         return dict(row) if row else None
 
-    def get_all_seasonal(self, venue_id: int) -> List[dict]:
+    def get_all_seasonal(self, venue_id: int) -> list[dict]:
         """Get all 12 months of seasonal data for a venue."""
         rows = self._conn.execute(
             "SELECT * FROM venue_seasonal WHERE venue_id = ? ORDER BY month",
@@ -123,10 +122,20 @@ class VenueRepository:
                 avg_track_temp_c, avg_density_alt_ft,
                 temp_std_c, humidity_std_pct, pressure_std_hpa)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (venue_id, month, avg_temp_c, avg_humidity_pct,
-             avg_pressure_hpa, avg_wind_speed_ms, prevailing_wind_deg,
-             avg_track_temp_c, avg_density_alt_ft,
-             temp_std_c, humidity_std_pct, pressure_std_hpa),
+            (
+                venue_id,
+                month,
+                avg_temp_c,
+                avg_humidity_pct,
+                avg_pressure_hpa,
+                avg_wind_speed_ms,
+                prevailing_wind_deg,
+                avg_track_temp_c,
+                avg_density_alt_ft,
+                temp_std_c,
+                humidity_std_pct,
+                pressure_std_hpa,
+            ),
         )
         self._conn.commit()
 
@@ -139,7 +148,7 @@ class VenueRepository:
         venue_id: int,
         month: int = None,
         weather_record_id: int = None,
-    ) -> Optional[EnvironmentParams]:
+    ) -> EnvironmentParams | None:
         """
         Build an EnvironmentParams for a venue.
 
@@ -173,13 +182,19 @@ class VenueRepository:
         if all_seasonal:
             # Average across all available months
             avg = {
-                "avg_temp_c": sum(s["avg_temp_c"] for s in all_seasonal) / len(all_seasonal),
-                "avg_humidity_pct": sum(s["avg_humidity_pct"] for s in all_seasonal) / len(all_seasonal),
-                "avg_pressure_hpa": sum(s["avg_pressure_hpa"] for s in all_seasonal) / len(all_seasonal),
-                "avg_wind_speed_ms": sum(s["avg_wind_speed_ms"] for s in all_seasonal) / len(all_seasonal),
+                "avg_temp_c": sum(s["avg_temp_c"] for s in all_seasonal)
+                / len(all_seasonal),
+                "avg_humidity_pct": sum(s["avg_humidity_pct"] for s in all_seasonal)
+                / len(all_seasonal),
+                "avg_pressure_hpa": sum(s["avg_pressure_hpa"] for s in all_seasonal)
+                / len(all_seasonal),
+                "avg_wind_speed_ms": sum(s["avg_wind_speed_ms"] for s in all_seasonal)
+                / len(all_seasonal),
                 "prevailing_wind_deg": all_seasonal[0]["prevailing_wind_deg"],
-                "avg_track_temp_c": sum(s["avg_track_temp_c"] for s in all_seasonal) / len(all_seasonal),
-                "avg_density_alt_ft": sum(s["avg_density_alt_ft"] for s in all_seasonal) / len(all_seasonal),
+                "avg_track_temp_c": sum(s["avg_track_temp_c"] for s in all_seasonal)
+                / len(all_seasonal),
+                "avg_density_alt_ft": sum(s["avg_density_alt_ft"] for s in all_seasonal)
+                / len(all_seasonal),
             }
             return seasonal_to_environment(venue, avg)
 
@@ -189,7 +204,7 @@ class VenueRepository:
             altitude_m=venue["altitude_m"],
         )
 
-    def best_da_month(self, venue_id: int) -> Optional[dict]:
+    def best_da_month(self, venue_id: int) -> dict | None:
         """
         Find the month with the lowest density altitude (best for performance)
         at a given venue.
@@ -203,7 +218,7 @@ class VenueRepository:
         ).fetchone()
         return dict(row) if row else None
 
-    def worst_da_month(self, venue_id: int) -> Optional[dict]:
+    def worst_da_month(self, venue_id: int) -> dict | None:
         """
         Find the month with the highest density altitude (worst for performance).
         """

@@ -17,12 +17,12 @@ Rate limiting: 1.5 seconds between requests (polite scraping).
 Uses a persistent requests.Session with realistic browser headers.
 """
 
+import logging
 import re
 import time
-import logging
 import urllib.parse
-from datetime import datetime
-from typing import Iterator, List, Optional, Tuple, Dict, Any
+from collections.abc import Iterator
+from typing import Any
 
 from .spec import BikeSpec
 
@@ -43,7 +43,7 @@ DEFAULT_HEADERS = {
 }
 
 BASE_URL = "https://bikez.com"
-RATE_LIMIT_S = 1.5    # seconds between requests
+RATE_LIMIT_S = 1.5  # seconds between requests
 REQUEST_TIMEOUT = 20  # seconds
 
 
@@ -60,7 +60,7 @@ def _make_session():
     return session
 
 
-def _fetch(session, url: str, retries: int = 3, backoff: float = 2.0) -> Optional[str]:
+def _fetch(session, url: str, retries: int = 3, backoff: float = 2.0) -> str | None:
     """
     Fetch a URL with retry and exponential backoff.
     Returns HTML text or None on failure.
@@ -71,7 +71,7 @@ def _fetch(session, url: str, retries: int = 3, backoff: float = 2.0) -> Optiona
             resp.raise_for_status()
             return resp.text
         except Exception as exc:
-            wait = backoff ** attempt
+            wait = backoff**attempt
             logger.warning(
                 f"Fetch failed (attempt {attempt + 1}/{retries}): {url} — {exc}. "
                 f"Retrying in {wait:.1f}s..."
@@ -86,6 +86,7 @@ def _fetch(session, url: str, retries: int = 3, backoff: float = 2.0) -> Optiona
 # HTML parsers (no external BS4 dependency - pure stdlib)
 # ────────────────────────────────────────────────────────
 
+
 def _strip_tags(html: str) -> str:
     """Remove HTML tags from a string."""
     return re.sub(r"<[^>]+>", "", html)
@@ -94,9 +95,15 @@ def _strip_tags(html: str) -> str:
 def _html_decode(s: str) -> str:
     """Decode basic HTML entities."""
     entities = {
-        "&amp;": "&", "&lt;": "<", "&gt;": ">",
-        "&nbsp;": " ", "&quot;": '"', "&#39;": "'",
-        "&rsquo;": "'", "&lsquo;": "'", "&mdash;": "—",
+        "&amp;": "&",
+        "&lt;": "<",
+        "&gt;": ">",
+        "&nbsp;": " ",
+        "&quot;": '"',
+        "&#39;": "'",
+        "&rsquo;": "'",
+        "&lsquo;": "'",
+        "&mdash;": "—",
     }
     for ent, char in entities.items():
         s = s.replace(ent, char)
@@ -105,14 +112,16 @@ def _html_decode(s: str) -> str:
     return s
 
 
-def _parse_table_rows(html: str) -> Dict[str, str]:
+def _parse_table_rows(html: str) -> dict[str, str]:
     """
     Extract key→value pairs from a simple HTML table.
     Returns {cleaned_header: cleaned_value} dict.
     """
     rows = {}
     # Match <tr>...</tr> blocks
-    for tr_match in re.finditer(r"<tr[^>]*>(.*?)</tr>", html, re.DOTALL | re.IGNORECASE):
+    for tr_match in re.finditer(
+        r"<tr[^>]*>(.*?)</tr>", html, re.DOTALL | re.IGNORECASE
+    ):
         tr = tr_match.group(1)
         tds = re.findall(r"<td[^>]*>(.*?)</td>", tr, re.DOTALL | re.IGNORECASE)
         if len(tds) >= 2:
@@ -123,7 +132,9 @@ def _parse_table_rows(html: str) -> Dict[str, str]:
     return rows
 
 
-def _find_links_matching(html: str, pattern: str, base_url: str = BASE_URL) -> List[str]:
+def _find_links_matching(
+    html: str, pattern: str, base_url: str = BASE_URL
+) -> list[str]:
     """Find all href links matching a regex pattern."""
     links = []
     for m in re.finditer(r'href=["\']([^"\']+)["\']', html, re.IGNORECASE):
@@ -142,7 +153,8 @@ def _find_links_matching(html: str, pattern: str, base_url: str = BASE_URL) -> L
 # Value parsers — extract numeric values from raw strings
 # ────────────────────────────────────────────────────────
 
-def _parse_float(s: str) -> Optional[float]:
+
+def _parse_float(s: str) -> float | None:
     """Extract first float from a string like '999 ccm (60.96 cubic inches)'."""
     m = re.search(r"[\d,]+\.?\d*", s.replace(",", ""))
     if m:
@@ -153,12 +165,12 @@ def _parse_float(s: str) -> Optional[float]:
     return None
 
 
-def _parse_int(s: str) -> Optional[int]:
+def _parse_int(s: str) -> int | None:
     f = _parse_float(s)
     return int(f) if f is not None else None
 
 
-def _parse_power(s: str) -> Tuple[Optional[float], Optional[int]]:
+def _parse_power(s: str) -> tuple[float | None, int | None]:
     """
     Parse power string like '178 HP @ 12000 RPM' or '132.0 kW / 13500 rpm'.
     Returns (hp, rpm).
@@ -186,7 +198,7 @@ def _parse_power(s: str) -> Tuple[Optional[float], Optional[int]]:
     return hp, rpm
 
 
-def _parse_torque(s: str) -> Tuple[Optional[float], Optional[int]]:
+def _parse_torque(s: str) -> tuple[float | None, int | None]:
     """
     Parse torque string like '113 Nm @ 9000 RPM' or '79.5 ft-lbs @ 9500 rpm'.
     Returns (nm, rpm).
@@ -211,7 +223,7 @@ def _parse_torque(s: str) -> Tuple[Optional[float], Optional[int]]:
     return nm, rpm
 
 
-def _parse_mass(s: str) -> Optional[float]:
+def _parse_mass(s: str) -> float | None:
     """Parse mass, convert lbs to kg if needed."""
     # Try kg first
     kg_match = re.search(r"([\d.]+)\s*kg", s, re.IGNORECASE)
@@ -228,11 +240,9 @@ def _parse_mass(s: str) -> Optional[float]:
     return None
 
 
-def _parse_tire(s: str) -> Optional[str]:
+def _parse_tire(s: str) -> str | None:
     """Extract tire size string like '120/70ZR17'."""
-    m = re.search(
-        r"\d{2,3}[/\\]\d{2,3}\s*[ZR]?R?\s*\d{2}", s, re.IGNORECASE
-    )
+    m = re.search(r"\d{2,3}[/\\]\d{2,3}\s*[ZR]?R?\s*\d{2}", s, re.IGNORECASE)
     if m:
         return re.sub(r"\s+", "", m.group())
     return None
@@ -261,47 +271,51 @@ def _classify_category(s: str) -> str:
 # Bikez field name → our field name + parser
 FIELD_MAP = {
     # Engine
-    "Displacement":         ("displacement_cc",     _parse_float),
-    "Bore x Stroke":        ("bore_x_stroke_raw",   lambda s: s),
-    "Compression":          ("compression_ratio",   _parse_float),
-    "Power":                ("power_raw",            lambda s: s),
-    "Torque":               ("torque_raw",           lambda s: s),
-    "Fuel System":          ("fuel_system",          lambda s: s.split()[0].lower()),
-    "Cooling System":       ("cooling",              lambda s: s.split()[0].lower()),
-    "Valves Per Cylinder":  ("valves_per_cyl_raw",  _parse_int),
-    "Number of Cylinders":  ("cylinders",            _parse_int),
-    "Engine Type":          ("engine_type_raw",      lambda s: s.lower()),
-
+    "Displacement": ("displacement_cc", _parse_float),
+    "Bore x Stroke": ("bore_x_stroke_raw", lambda s: s),
+    "Compression": ("compression_ratio", _parse_float),
+    "Power": ("power_raw", lambda s: s),
+    "Torque": ("torque_raw", lambda s: s),
+    "Fuel System": ("fuel_system", lambda s: s.split()[0].lower()),
+    "Cooling System": ("cooling", lambda s: s.split()[0].lower()),
+    "Valves Per Cylinder": ("valves_per_cyl_raw", _parse_int),
+    "Number of Cylinders": ("cylinders", _parse_int),
+    "Engine Type": ("engine_type_raw", lambda s: s.lower()),
     # Drivetrain
-    "Number of Gears":      ("gears",                _parse_int),
-    "Drive":                ("final_drive",          lambda s: s.lower().split()[0]),
-
+    "Number of Gears": ("gears", _parse_int),
+    "Drive": ("final_drive", lambda s: s.lower().split()[0]),
     # Chassis
-    "Dry weight":           ("dry_mass_kg",          _parse_mass),
-    "Wet weight":           ("wet_mass_kg",           _parse_mass),
-    "Wheelbase":            ("wheelbase_mm",          lambda s: (
-        _parse_float(s) * 1000 if re.search(r"\d\.\d{2,3}\s*m", s, re.I)
-        else _parse_float(s)
-    )),
-    "Seat Height":          ("seat_height_mm",        lambda s: (
-        _parse_float(s) * 1000 if re.search(r"\d\.\d{2,3}\s*m", s, re.I)
-        else _parse_float(s)
-    )),
-    "Fuel Capacity":        ("fuel_capacity_l",       _parse_float),
-
+    "Dry weight": ("dry_mass_kg", _parse_mass),
+    "Wet weight": ("wet_mass_kg", _parse_mass),
+    "Wheelbase": (
+        "wheelbase_mm",
+        lambda s: (
+            _parse_float(s) * 1000
+            if re.search(r"\d\.\d{2,3}\s*m", s, re.I)
+            else _parse_float(s)
+        ),
+    ),
+    "Seat Height": (
+        "seat_height_mm",
+        lambda s: (
+            _parse_float(s) * 1000
+            if re.search(r"\d\.\d{2,3}\s*m", s, re.I)
+            else _parse_float(s)
+        ),
+    ),
+    "Fuel Capacity": ("fuel_capacity_l", _parse_float),
     # Tires
-    "Front Tires":          ("front_tire_size",       _parse_tire),
-    "Rear Tires":           ("rear_tire_size",         _parse_tire),
-
+    "Front Tires": ("front_tire_size", _parse_tire),
+    "Rear Tires": ("rear_tire_size", _parse_tire),
     # Category
-    "Category":             ("category_raw",           lambda s: s),
-    "Year":                 ("year_raw",               lambda s: s),
+    "Category": ("category_raw", lambda s: s),
+    "Year": ("year_raw", lambda s: s),
 }
 
 
-def _parse_bikez_spec_table(html: str, url: str,
-                             manufacturer: str = "",
-                             model_name: str = "") -> BikeSpec:
+def _parse_bikez_spec_table(
+    html: str, url: str, manufacturer: str = "", model_name: str = ""
+) -> BikeSpec:
     """
     Parse a Bikez.com detail page HTML into a BikeSpec.
     """
@@ -407,10 +421,20 @@ def _parse_bikez_spec_table(html: str, url: str,
 
     # Set per-field confidence to "bikez" level
     for field_name in [
-        "displacement_cc", "bore_mm", "stroke_mm", "compression_ratio",
-        "peak_power_hp", "peak_power_rpm", "peak_torque_nm", "peak_torque_rpm",
-        "dry_mass_kg", "wet_mass_kg", "gears", "wheelbase_mm",
-        "front_tire_size", "rear_tire_size",
+        "displacement_cc",
+        "bore_mm",
+        "stroke_mm",
+        "compression_ratio",
+        "peak_power_hp",
+        "peak_power_rpm",
+        "peak_torque_nm",
+        "peak_torque_rpm",
+        "dry_mass_kg",
+        "wet_mass_kg",
+        "gears",
+        "wheelbase_mm",
+        "front_tire_size",
+        "rear_tire_size",
     ]:
         if getattr(spec, field_name, None) is not None:
             spec.field_confidence[field_name] = 0.58
@@ -422,7 +446,8 @@ def _parse_bikez_spec_table(html: str, url: str,
 # Public API
 # ────────────────────────────────────────────────────────
 
-def scrape_bikez(url: str, session=None) -> Optional[BikeSpec]:
+
+def scrape_bikez(url: str, session=None) -> BikeSpec | None:
     """
     Scrape a single Bikez.com detail page.
 
@@ -473,7 +498,7 @@ def crawl_bikez(
     manufacturer: str,
     session=None,
     limit: int = 100,
-    category_filter: Optional[str] = None,
+    category_filter: str | None = None,
     min_displacement_cc: float = 400.0,
     rate_limit_s: float = RATE_LIMIT_S,
 ) -> Iterator[BikeSpec]:
@@ -521,7 +546,8 @@ def crawl_bikez(
 
     # Deduplicate and filter out listing pages
     detail_links = [
-        lnk for lnk in detail_links
+        lnk
+        for lnk in detail_links
         if re.search(r"\d{4}\.php$", lnk)  # year at end means detail page
     ]
 
@@ -567,7 +593,8 @@ def crawl_bikez(
 # Manual data entry helper (no network needed)
 # ────────────────────────────────────────────────────────
 
-def spec_from_dict(data: Dict[str, Any], source_name: str = "spec_sheet") -> BikeSpec:
+
+def spec_from_dict(data: dict[str, Any], source_name: str = "spec_sheet") -> BikeSpec:
     """
     Create a BikeSpec from a manually curated dict.
     Useful for known-good data that doesn't need scraping.

@@ -31,7 +31,7 @@ class TireModel:
         # Thermal modifier
         sigma_T = 25.0
         T_opt = tire.optimal_temp_c
-        thermal_factor = np.exp(-((T_tire - T_opt) / sigma_T) ** 2)
+        thermal_factor = np.exp(-(((T_tire - T_opt) / sigma_T) ** 2))
         if T_tire > tire.reversion_temp_c:
             reversion_penalty = 1.0 - 0.01 * (T_tire - tire.reversion_temp_c)
             thermal_factor *= max(0.3, reversion_penalty)
@@ -62,8 +62,9 @@ class TireModel:
         F = D * np.sin(C * np.arctan(x - E * (x - np.arctan(x))))
         return F
 
-    def thermal_rate(self, F_x: float, v: float, slip_ratio: float,
-                     T_tire: float, T_ambient: float) -> float:
+    def thermal_rate(
+        self, F_x: float, v: float, slip_ratio: float, T_tire: float, T_ambient: float
+    ) -> float:
         """dT_tire/dt -- rate of temperature change of the tire surface (C/s)."""
         tire = self.cfg.tires
         v_slip = abs(v * slip_ratio)
@@ -71,8 +72,15 @@ class TireModel:
         h_conv = 10.0 + 0.5 * v
         A_surface = 0.15
         Q_conv = h_conv * A_surface * (T_tire - T_ambient)
-        Q_cond = tire.thermal_conductivity * (tire.contact_patch_cm2 * 1e-4) * (T_tire - (T_tire - 5.0)) / 0.005
-        dT = (Q_friction - Q_conv - Q_cond) / max(1.0, tire.tread_mass_kg * tire.specific_heat_rubber)
+        Q_cond = (
+            tire.thermal_conductivity
+            * (tire.contact_patch_cm2 * 1e-4)
+            * (T_tire - (T_tire - 5.0))
+            / 0.005
+        )
+        dT = (Q_friction - Q_conv - Q_cond) / max(
+            1.0, tire.tread_mass_kg * tire.specific_heat_rubber
+        )
         return dT
 
     def effective_radius(self, omega_w: float) -> float:

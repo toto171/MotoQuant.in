@@ -6,11 +6,15 @@ and provides a single entry-point (MotoQuantDB) for all repository access.
 """
 
 import sqlite3
-import json
 from pathlib import Path
-from typing import Optional
 
-from .schema import SCHEMA_VERSION, TABLES_DDL, SEED_PARTS_CATEGORIES, SEED_VENUES, SEED_SEASONAL_DATA
+from .schema import (
+    SCHEMA_VERSION,
+    SEED_PARTS_CATEGORIES,
+    SEED_SEASONAL_DATA,
+    SEED_VENUES,
+    TABLES_DDL,
+)
 
 
 class MotoQuantDB:
@@ -29,7 +33,7 @@ class MotoQuantDB:
 
     def __init__(self, db_path: str = "motoquant.db"):
         self._db_path = Path(db_path)
-        self._conn: Optional[sqlite3.Connection] = None
+        self._conn: sqlite3.Connection | None = None
 
         # Repositories (lazy-initialized after connect)
         self._bikes = None
@@ -127,7 +131,6 @@ class MotoQuantDB:
     def _run_migrations(self, from_version: int, to_version: int):
         """Run incremental migrations. Currently only v0 → v1."""
         # Future migrations go here as elif blocks
-        pass
 
     def _seed_parts_categories(self):
         """Insert parts categories if not present."""
@@ -161,8 +164,18 @@ class MotoQuantDB:
                 continue
             venue_id = row["id"]
             for month, vals in months.items():
-                (avg_t, avg_h, avg_p, avg_w, pw_deg, trk_t,
-                 da_ft, t_std, h_std, p_std) = vals
+                (
+                    avg_t,
+                    avg_h,
+                    avg_p,
+                    avg_w,
+                    pw_deg,
+                    trk_t,
+                    da_ft,
+                    t_std,
+                    h_std,
+                    p_std,
+                ) = vals
                 conn.execute(
                     """INSERT OR IGNORE INTO venue_seasonal
                        (venue_id, month, avg_temp_c, avg_humidity_pct,
@@ -170,8 +183,20 @@ class MotoQuantDB:
                         avg_track_temp_c, avg_density_alt_ft,
                         temp_std_c, humidity_std_pct, pressure_std_hpa)
                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                    (venue_id, month, avg_t, avg_h, avg_p, avg_w, pw_deg,
-                     trk_t, da_ft, t_std, h_std, p_std),
+                    (
+                        venue_id,
+                        month,
+                        avg_t,
+                        avg_h,
+                        avg_p,
+                        avg_w,
+                        pw_deg,
+                        trk_t,
+                        da_ft,
+                        t_std,
+                        h_std,
+                        p_std,
+                    ),
                 )
 
     # ────────────────────────────────────────────
@@ -183,6 +208,7 @@ class MotoQuantDB:
         """Bike model & config repository."""
         if self._bikes is None:
             from .bike_repo import BikeRepository
+
             self._bikes = BikeRepository(self.conn)
         return self._bikes
 
@@ -191,6 +217,7 @@ class MotoQuantDB:
         """Tire library repository."""
         if self._tires is None:
             from .tire_repo import TireRepository
+
             self._tires = TireRepository(self.conn)
         return self._tires
 
@@ -199,6 +226,7 @@ class MotoQuantDB:
         """Venue repository."""
         if self._venues is None:
             from .venue_repo import VenueRepository
+
             self._venues = VenueRepository(self.conn)
         return self._venues
 
@@ -207,6 +235,7 @@ class MotoQuantDB:
         """Weather data repository (live + historical)."""
         if self._weather is None:
             from .weather_repo import WeatherRepository
+
             self._weather = WeatherRepository(self.conn)
         return self._weather
 
@@ -215,6 +244,7 @@ class MotoQuantDB:
         """Parts pricing repository."""
         if self._parts is None:
             from .parts_repo import PartsRepository
+
             self._parts = PartsRepository(self.conn)
         return self._parts
 
@@ -223,6 +253,7 @@ class MotoQuantDB:
         """Simulation run archive."""
         if self._sim_runs is None:
             from .sim_repo import SimRunRepository
+
             self._sim_runs = SimRunRepository(self.conn)
         return self._sim_runs
 
@@ -233,9 +264,18 @@ class MotoQuantDB:
     def stats(self) -> dict:
         """Return row counts for all major tables."""
         tables = [
-            "manufacturers", "bike_models", "bike_configs", "dyno_curves",
-            "tire_manufacturers", "tire_models", "venues", "weather_records",
-            "venue_seasonal", "parts", "sim_runs", "data_provenance",
+            "manufacturers",
+            "bike_models",
+            "bike_configs",
+            "dyno_curves",
+            "tire_manufacturers",
+            "tire_models",
+            "venues",
+            "weather_records",
+            "venue_seasonal",
+            "parts",
+            "sim_runs",
+            "data_provenance",
         ]
         counts = {}
         for t in tables:
