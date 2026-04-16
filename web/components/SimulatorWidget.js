@@ -79,7 +79,7 @@ export default function SimulatorWidget() {
         mass_delta_kg:   m,
       };
       // Use bike_id for DB bikes, bike_preset for fallback presets
-      if (bike.id) {
+      if (bike.id != null) {
         body.bike_id = bike.id;
       } else if (bike.preset) {
         body.bike_preset = bike.preset;
@@ -103,15 +103,13 @@ export default function SimulatorWidget() {
     }
   }, []);
 
-  // Auto-simulate on any change (300ms debounce)
+  // Run once on first bike selection
   useEffect(() => {
-    if (!selected) return;
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
+    if (selected && !result) {
       runSim(selected, riderKg, powerBoost, massChange);
-    }, 300);
-    return () => clearTimeout(debounceRef.current);
-  }, [selected, riderKg, powerBoost, massChange, runSim]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected]);
 
   // Filter bikes by search
   const filtered = bikes.filter(b => {
@@ -247,6 +245,27 @@ export default function SimulatorWidget() {
             className="w-full accent-orange-500" />
         </div>
       </div>
+
+      {/* Run button */}
+      <button
+        onClick={() => runSim(selected, riderKg, powerBoost, massChange)}
+        disabled={!selected || loading}
+        className="w-full mb-6 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-800 disabled:text-gray-600 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+      >
+        {loading ? (
+          <>
+            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+            </svg>
+            Simulating...
+          </>
+        ) : (
+          <>
+            <Zap size={16} /> Run Simulation
+          </>
+        )}
+      </button>
 
       {/* Error */}
       {error && (

@@ -160,11 +160,11 @@ export default function SimulatorPage() {
         mass_delta_kg: massChange,
         part_ids: selectedParts.map(p => p.id),
       };
-      if (bike.id) body.bike_id = bike.id;
+      if (bike.id != null) body.bike_id = bike.id;
       else if (bike.preset) body.bike_preset = bike.preset;
-      if (frontTire?.id) body.front_tire_id = frontTire.id;
-      if (rearTire?.id) body.rear_tire_id = rearTire.id;
-      if (venue?.id) body.venue_id = venue.id;
+      if (frontTire?.id != null) body.front_tire_id = frontTire.id;
+      if (rearTire?.id != null) body.rear_tire_id = rearTire.id;
+      if (venue?.id != null) body.venue_id = venue.id;
 
       const res = await fetch(`${API}/api/simulate/quick`, {
         method: 'POST',
@@ -499,11 +499,11 @@ export default function SimulatorPage() {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-black rounded-xl p-4 text-center border border-gray-800">
                       <p className="text-[10px] text-gray-500 mb-1 uppercase tracking-wider">Quarter-Mile ET</p>
-                      <p className="text-3xl font-bold text-orange-400">{result.et_quarter_s.toFixed(3)}<span className="text-lg">s</span></p>
+                      <p className="text-3xl font-bold text-orange-400">{result.et_quarter_s?.toFixed(3) ?? '—'}<span className="text-lg">s</span></p>
                     </div>
                     <div className="bg-black rounded-xl p-4 text-center border border-gray-800">
                       <p className="text-[10px] text-gray-500 mb-1 uppercase tracking-wider">Trap Speed</p>
-                      <p className="text-3xl font-bold text-white">{result.trap_speed_kmh.toFixed(1)}</p>
+                      <p className="text-3xl font-bold text-white">{result.trap_speed_kmh?.toFixed(1) ?? '—'}</p>
                       <p className="text-[10px] text-gray-600">km/h</p>
                     </div>
                   </div>
@@ -537,10 +537,10 @@ export default function SimulatorPage() {
                   <div className="bg-black rounded-xl p-3 border border-gray-800">
                     <p className="text-[10px] text-gray-500 mb-2 uppercase tracking-wider">Splits</p>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
-                      <div className="flex justify-between"><span className="text-gray-500">60 ft</span><span className="text-white font-medium">{result.et_60ft_s.toFixed(3)}s</span></div>
-                      <div className="flex justify-between"><span className="text-gray-500">1/8 mile</span><span className="text-white font-medium">{result.et_eighth_s.toFixed(3)}s</span></div>
-                      <div className="flex justify-between"><span className="text-gray-500">Power</span><span className="text-white font-medium">{result.peak_power_hp.toFixed(0)} hp</span></div>
-                      <div className="flex justify-between"><span className="text-gray-500">Total mass</span><span className="text-white font-medium">{result.total_mass_kg.toFixed(0)} kg</span></div>
+                      <div className="flex justify-between"><span className="text-gray-500">60 ft</span><span className="text-white font-medium">{result.et_60ft_s?.toFixed(3) ?? '—'}s</span></div>
+                      <div className="flex justify-between"><span className="text-gray-500">1/8 mile</span><span className="text-white font-medium">{result.et_eighth_s?.toFixed(3) ?? '—'}s</span></div>
+                      <div className="flex justify-between"><span className="text-gray-500">Power</span><span className="text-white font-medium">{result.peak_power_hp?.toFixed(0) ?? '—'} hp</span></div>
+                      <div className="flex justify-between"><span className="text-gray-500">Total mass</span><span className="text-white font-medium">{result.total_mass_kg?.toFixed(0) ?? '—'} kg</span></div>
                     </div>
                   </div>
                 </div>

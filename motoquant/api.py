@@ -27,6 +27,8 @@ Deploy (Railway / Render / DigitalOcean App Platform)
 """
 
 import copy
+import json
+import logging
 import os
 from typing import Any
 
@@ -59,15 +61,32 @@ app.add_middleware(
 
 # ─── DB helper ────────────────────────────────────────────────────────────
 
+_db_conn = None  # module-level singleton — one connection, reused across requests
+
 
 def _get_db():
-    """Return a live DB connection or None if DB unavailable."""
+    """Return a live DB connection or None if DB unavailable.
+
+    Uses a module-level singleton to avoid creating (and leaking) a new
+    connection on every request.  SQLite is single-writer anyway, so a
+    shared connection is the correct approach for a read-heavy API.
+    """
+    global _db_conn
+    if _db_conn is not None:
+        try:
+            # Quick liveness check — will throw if connection is closed/broken
+            _db_conn.execute("SELECT 1")
+            return _db_conn
+        except Exception:
+            _db_conn = None  # stale — reconnect below
+
     try:
         from .database.connection import MotoQuantDB
 
         db_path = os.environ.get("MOTOQUANT_DB", "motoquant.db")
         db = MotoQuantDB(db_path)
-        return db.conn
+        _db_conn = db.conn
+        return _db_conn
     except Exception:
         return None
 
@@ -75,9 +94,9 @@ def _get_db():
 def _bike_row_to_summary(row: dict) -> dict:
     return {
         "id": row.get("id"),
-        "manufacturer": row.get("manufacturer"),
-        "model": row.get("model"),
-        "year": row.get("year"),
+        "manufacturer": row.get("manufacturer"),  # from JOIN alias
+        "model": row.get("model_name"),
+        "year": row.get("year_from"),
         "category": row.get("category"),
         "displacement_cc": row.get("displacement_cc"),
         "peak_power_hp": row.get("peak_power_hp"),
@@ -162,15 +181,34 @@ def _build_config(
         db = _get_db()
         if db:
             try:
-                from .database.bridge import bike_row_to_config
+                from .database.bridge import db_row_to_config
 
-                row = db.execute(
-                    "SELECT * FROM bike_models WHERE id=?", (bike_id,)
+                # Get bike name from bike_models + manufacturers
+                name_row = db.execute(
+                    """SELECT bm.model_name, m.name AS manufacturer
+                       FROM bike_models bm
+                       JOIN manufacturers m ON bm.manufacturer_id = m.id
+                       WHERE bm.id = ?""",
+                    (bike_id,),
                 ).fetchone()
-                if row:
-                    cfg = bike_row_to_config(dict(row))
-            except Exception:
-                pass
+                bike_name = "DB Bike"
+                if name_row:
+                    nr = dict(name_row)
+                    bike_name = f"{nr['manufacturer']} {nr['model_name']}"
+
+                # Get the full physics config from bike_configs table
+                cfg_row = db.execute(
+                    """SELECT * FROM bike_configs
+                       WHERE bike_model_id = ? AND is_current = 1
+                       ORDER BY version DESC LIMIT 1""",
+                    (bike_id,),
+                ).fetchone()
+                if cfg_row:
+                    cfg = db_row_to_config(dict(cfg_row), name=bike_name)
+            except Exception as exc:
+                logging.getLogger(__name__).warning(
+                    "Failed to load config for bike_id=%s: %s", bike_id, exc
+                )
 
     if cfg is None and bike_preset:
         presets = {
@@ -189,12 +227,19 @@ def _build_config(
 
     # ── Apply overrides ──────────────────────────────────────────────────
     if power_boost_pct != 0.0:
-        cfg.engine.peak_power_hp *= 1.0 + power_boost_pct / 100.0
+        scale = 1.0 + power_boost_pct / 100.0
+        cfg.engine.peak_power_hp *= scale
+        cfg.engine.peak_torque_nm *= scale
+        # Scale dyno curve too — the engine reads torque from here, not peak_power_hp
+        if cfg.engine.dyno_curve is not None:
+            cfg.engine.dyno_curve.torque_nm = cfg.engine.dyno_curve.torque_nm * scale
 
     if mass_delta_kg != 0.0:
         cfg.chassis.dry_mass_kg += mass_delta_kg
 
+    # Set rider mass in both places — physics engine reads from chassis.rider_mass_kg
     cfg.rider.mass_kg = rider_mass_kg
+    cfg.chassis.rider_mass_kg = rider_mass_kg
 
     # ── Venue conditions ────────────────────────────────────────────────
     if venue_id is not None:
@@ -214,6 +259,25 @@ def _build_config(
                         )
             except Exception:
                 pass
+
+    # ── Tire overrides ──────────────────────────────────────────────────
+    # If a tire ID is provided, look up the tire's mu_peak and apply it
+    for tire_id in (front_tire_id, rear_tire_id):
+        if tire_id is not None:
+            db = _get_db()
+            if db:
+                try:
+                    trow = db.execute(
+                        "SELECT pacejka_D, mu_peak FROM tire_models WHERE id=?",
+                        (tire_id,),
+                    ).fetchone()
+                    if trow:
+                        td = dict(trow)
+                        mu = td.get("mu_peak") or td.get("pacejka_D")
+                        if mu and float(mu) > 0:
+                            cfg.tires.mu_peak = float(mu)
+                except Exception:
+                    pass
 
     return cfg
 
@@ -263,28 +327,36 @@ def list_bikes(
         raise HTTPException(503, "Database unavailable")
 
     try:
-        query = "SELECT * FROM bike_models WHERE 1=1"
+        query = """SELECT bm.*, m.name AS manufacturer
+                   FROM bike_models bm
+                   JOIN manufacturers m ON bm.manufacturer_id = m.id
+                   WHERE 1=1"""
         params: list[Any] = []
 
         if search:
-            query += " AND (manufacturer LIKE ? OR model LIKE ?)"
+            query += " AND (m.name LIKE ? OR bm.model_name LIKE ?)"
             params += [f"%{search}%", f"%{search}%"]
         if manufacturer:
-            query += " AND LOWER(manufacturer) = LOWER(?)"
+            query += " AND LOWER(m.name) = LOWER(?)"
             params.append(manufacturer)
         if category:
-            query += " AND LOWER(category) = LOWER(?)"
+            query += " AND LOWER(bm.category) = LOWER(?)"
             params.append(category)
 
-        query += " ORDER BY manufacturer, model LIMIT ? OFFSET ?"
+        query += " ORDER BY m.name, bm.model_name LIMIT ? OFFSET ?"
         params += [limit, offset]
 
         rows = db.execute(query, params).fetchall()
-        total = db.execute(
-            "SELECT COUNT(*) FROM bike_models WHERE 1=1"
-            + (" AND (manufacturer LIKE ? OR model LIKE ?)" if search else ""),
-            [f"%{search}%", f"%{search}%"] if search else [],
-        ).fetchone()[0]
+
+        count_query = """SELECT COUNT(*) FROM bike_models bm
+                         JOIN manufacturers m ON bm.manufacturer_id = m.id
+                         WHERE 1=1"""
+        count_params: list[Any] = []
+        if search:
+            count_query += " AND (m.name LIKE ? OR bm.model_name LIKE ?)"
+            count_params += [f"%{search}%", f"%{search}%"]
+
+        total = db.execute(count_query, count_params).fetchone()[0]
 
         return {
             "total": total,
@@ -303,22 +375,30 @@ def get_bike(bike_id: int):
         raise HTTPException(503, "Database unavailable")
 
     try:
-        row = db.execute("SELECT * FROM bike_models WHERE id=?", (bike_id,)).fetchone()
+        row = db.execute(
+            """SELECT bm.*, m.name AS manufacturer
+               FROM bike_models bm
+               JOIN manufacturers m ON bm.manufacturer_id = m.id
+               WHERE bm.id = ?""",
+            (bike_id,),
+        ).fetchone()
     except Exception as exc:
         raise HTTPException(500, f"Database error: {exc}")
 
     if not row:
         raise HTTPException(404, f"Bike {bike_id} not found")
 
-    d = dict(row)
+    d = _bike_row_to_summary(dict(row))
     # Attach OEM tire fitments
     try:
         fitments = db.execute(
             """SELECT tf.position, tf.fitment_type,
-                      tm.manufacturer, tm.model, tm.size_front, tm.size_rear,
-                      tm.id as tire_id
+                      tmfr.name AS manufacturer, tm.model_name AS model,
+                      tm.size_designation, tm.compound_type,
+                      tm.id AS tire_id
                FROM bike_tire_fitments tf
                JOIN tire_models tm ON tf.tire_model_id = tm.id
+               JOIN tire_manufacturers tmfr ON tm.manufacturer_id = tmfr.id
                WHERE tf.bike_model_id = ?""",
             (bike_id,),
         ).fetchall()
@@ -351,18 +431,27 @@ def list_tires(
     if not db:
         raise HTTPException(503, "Database unavailable")
     try:
-        query = "SELECT * FROM tire_models WHERE 1=1"
+        query = """SELECT tm.*, tmfr.name AS manufacturer
+                   FROM tire_models tm
+                   JOIN tire_manufacturers tmfr ON tm.manufacturer_id = tmfr.id
+                   WHERE 1=1"""
         params: list[Any] = []
         if compound:
-            query += " AND LOWER(compound_type) = LOWER(?)"
+            query += " AND LOWER(tm.compound_type) = LOWER(?)"
             params.append(compound)
         if manufacturer:
-            query += " AND LOWER(manufacturer) LIKE LOWER(?)"
+            query += " AND LOWER(tmfr.name) LIKE LOWER(?)"
             params.append(f"%{manufacturer}%")
-        query += " ORDER BY manufacturer, model LIMIT ?"
+        query += " ORDER BY tmfr.name, tm.model_name LIMIT ?"
         params.append(limit)
         rows = db.execute(query, params).fetchall()
-        return {"tires": [dict(r) for r in rows]}
+        # Reshape to frontend-friendly format
+        tires = []
+        for r in rows:
+            d = dict(r)
+            d["model"] = d.get("model_name", "")
+            tires.append(d)
+        return {"tires": tires}
     except Exception as exc:
         raise HTTPException(500, f"Database error: {exc}")
 
@@ -478,16 +567,19 @@ def simulate_quick(req: QuickSimRequest):
                 pass
 
     # Run stock sim for comparison if parts are applied
+    # "Stock" means same slider overrides but NO parts — shows parts-only delta
     stock_et = None
     if parts_applied:
         try:
             stock_cfg = _build_config(
                 bike_id=req.bike_id,
                 bike_preset=req.bike_preset,
-                power_boost_pct=0.0,
-                mass_delta_kg=0.0,
+                power_boost_pct=req.power_boost_pct,
+                mass_delta_kg=req.mass_delta_kg,
                 rider_mass_kg=req.rider_mass_kg,
                 venue_id=req.venue_id,
+                front_tire_id=req.front_tire_id,
+                rear_tire_id=req.rear_tire_id,
             )
             stock_sim = MotoQuantEngine(stock_cfg).run()
             stock_et = round(float(stock_sim.time_quarter), 4)
@@ -507,7 +599,7 @@ def simulate_quick(req: QuickSimRequest):
         "et_eighth_s": round(float(sim.time_eighth), 4),
         "bike_name": cfg.name,
         "peak_power_hp": round(float(cfg.engine.peak_power_hp), 1),
-        "total_mass_kg": round(float(cfg.chassis.dry_mass_kg + req.rider_mass_kg), 1),
+        "total_mass_kg": round(float(cfg.chassis.total_mass_kg), 1),
         "parts_applied": parts_applied,
         "build_cost_inr": round(build_cost_inr, 0),
         "stock_et_s": stock_et,
@@ -568,7 +660,6 @@ def list_parts(
         for r in rows:
             d = dict(r)
             # Parse JSON fields for frontend
-            import json
             for field in ("param_overrides", "param_deltas", "param_multipliers",
                           "specifications", "compatible_bikes"):
                 if d.get(field) and isinstance(d[field], str):
