@@ -63,10 +63,11 @@ app.add_middleware(
 def _get_db():
     """Return a live DB connection or None if DB unavailable."""
     try:
-        from .database.connection import connect
+        from .database.connection import MotoQuantDB
 
         db_path = os.environ.get("MOTOQUANT_DB", "motoquant.db")
-        return connect(db_path)
+        db = MotoQuantDB(db_path)
+        return db.conn
     except Exception:
         return None
 
