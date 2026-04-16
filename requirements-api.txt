@@ -1,4 +1,4 @@
-# MotoQuant Pro — API server dependencies
+# MotoQuant Pro — API server dependencies (production)
 # Install with: pip install -r requirements-api.txt
 
 # Web framework
@@ -10,15 +10,5 @@ pydantic>=2.0.0
 numpy>=1.24.0
 scipy>=1.10.0
 
-# Phase 4 — Sobol global sensitivity analysis
-SALib>=1.4.7
-
 # Database
 # (sqlite3 is stdlib — no extra package needed)
-
-# Streamlit UI (for app.py — optional, not required for API)
-# streamlit>=1.32.0
-
-# Dev/test
-pytest>=7.4.0
-ruff>=0.3.0
