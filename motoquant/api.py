@@ -692,6 +692,217 @@ def simulate_quick(req: QuickSimRequest):
     return result
 
 
+class TopSpeedRequest(BaseModel):
+    """POST /api/simulate/top-speed — runs until terminal velocity."""
+
+    bike_id: int | None = None
+    bike_preset: str | None = None
+    power_boost_pct: float = 0.0
+    mass_delta_kg: float = 0.0
+    rider_mass_kg: float = 75.0
+    part_ids: list[int] = Field(default_factory=list)
+    front_tire_id: int | None = None
+    rear_tire_id: int | None = None
+    venue_id: int | None = None
+    ambient_temp_c: float | None = None
+    track_temp_c: float | None = None
+    humidity_pct: float | None = None
+    headwind_kmh: float | None = None
+    # LSR-specific: optional override for max time/distance
+    max_time_s: float = 120.0
+    include_timeseries: bool = False
+
+
+@app.post("/api/simulate/top-speed")
+def simulate_top_speed(req: TopSpeedRequest):
+    """
+    Run the simulation until terminal velocity is reached.
+
+    Returns terminal velocity (km/h + mph), time/distance to reach it,
+    power at terminal, gear, RPM, and LSR split times (1/4 mi, 1/2 mi,
+    1 km, 1 mi, 2 mi). Ideal for top-speed runs and land speed record
+    events.
+    """
+    try:
+        cfg = _build_config(
+            bike_id=req.bike_id,
+            bike_preset=req.bike_preset,
+            power_boost_pct=req.power_boost_pct,
+            mass_delta_kg=req.mass_delta_kg,
+            rider_mass_kg=req.rider_mass_kg,
+            venue_id=req.venue_id,
+            front_tire_id=req.front_tire_id,
+            rear_tire_id=req.rear_tire_id,
+            ambient_temp_c=req.ambient_temp_c,
+            track_temp_c=req.track_temp_c,
+            humidity_pct=req.humidity_pct,
+            headwind_kmh=req.headwind_kmh,
+        )
+    except Exception as exc:
+        raise HTTPException(400, f"Config error: {exc}")
+
+    build_cost_inr = 0.0
+    parts_applied = []
+    if req.part_ids:
+        db = _get_db()
+        if db:
+            try:
+                from .database.bridge import apply_part_to_config
+                for pid in req.part_ids:
+                    row = db.execute("SELECT * FROM parts WHERE id=?", (pid,)).fetchone()
+                    if row:
+                        part_dict = dict(row)
+                        cfg = apply_part_to_config(cfg, part_dict)
+                        parts_applied.append({
+                            "id": part_dict["id"],
+                            "name": part_dict.get("model_name", ""),
+                            "brand": part_dict.get("brand", ""),
+                            "price_inr": part_dict.get("price_inr"),
+                        })
+                        if part_dict.get("price_inr"):
+                            build_cost_inr += float(part_dict["price_inr"])
+            except Exception as e:
+                logging.getLogger(__name__).warning(
+                    "Failed to apply parts %s: %s", req.part_ids, e
+                )
+
+    try:
+        engine = MotoQuantEngine(cfg)
+        ts = engine.run_top_speed(max_time=req.max_time_s)
+    except Exception as exc:
+        raise HTTPException(500, f"Top-speed simulation error: {exc}")
+
+    # Format LSR splits with km/h + mph for convenience
+    splits_fmt = {}
+    for k, v in ts.lsr_splits.items():
+        splits_fmt[k] = {
+            "time_s": round(v["time_s"], 3),
+            "speed_ms": round(v["speed_ms"], 2),
+            "speed_kmh": round(v["speed_ms"] * 3.6, 1),
+            "speed_mph": round(v["speed_ms"] * 2.23694, 1),
+        }
+
+    response = {
+        "terminal_velocity_ms": round(ts.terminal_velocity_ms, 2),
+        "terminal_velocity_kmh": round(ts.terminal_velocity_kmh, 1),
+        "terminal_velocity_mph": round(ts.terminal_velocity_mph, 1),
+        "time_to_terminal_s": round(ts.time_to_terminal_s, 2),
+        "distance_to_terminal_m": round(ts.distance_to_terminal_m, 1),
+        "terminal_power_kw": round(ts.terminal_power_kw, 1),
+        "terminal_power_hp": round(ts.terminal_power_kw * 1.341, 1),
+        "terminal_gear": ts.terminal_gear,
+        "terminal_rpm": round(ts.terminal_rpm, 0),
+        "reached_plateau": ts.reached_plateau,
+        "lsr_splits": splits_fmt,
+        "bike_name": cfg.name,
+        "peak_power_hp": round(float(cfg.engine.peak_power_hp), 1),
+        "total_mass_kg": round(float(cfg.chassis.total_mass_kg), 1),
+        "parts_applied": parts_applied,
+        "build_cost_inr": round(build_cost_inr, 0),
+    }
+
+    if req.include_timeseries:
+        # Downsample to 100 Hz (every 10 ms) for web payload sanity
+        sim = ts.full_sim
+        stride = max(1, int(0.01 / max(sim.dt, 0.0001)))
+        response["timeseries"] = {
+            "t": sim.t[::stride].tolist(),
+            "v_ms": sim.v[::stride].tolist(),
+            "v_kmh": (sim.v[::stride] * 3.6).tolist(),
+            "rpm": sim.rpm[::stride].tolist(),
+            "gear": sim.gear[::stride].tolist(),
+            "power_kw": sim.power_kw[::stride].tolist(),
+            "x_m": sim.x[::stride].tolist(),
+        }
+
+    return response
+
+
+class DistanceRunRequest(BaseModel):
+    """POST /api/simulate/distance — arbitrary distance for LSR events."""
+
+    bike_id: int | None = None
+    bike_preset: str | None = None
+    distance_m: float = Field(..., gt=0, le=20000, description="Target distance in meters")
+    power_boost_pct: float = 0.0
+    mass_delta_kg: float = 0.0
+    rider_mass_kg: float = 75.0
+    part_ids: list[int] = Field(default_factory=list)
+    front_tire_id: int | None = None
+    rear_tire_id: int | None = None
+    venue_id: int | None = None
+    ambient_temp_c: float | None = None
+    track_temp_c: float | None = None
+    humidity_pct: float | None = None
+    headwind_kmh: float | None = None
+    max_time_s: float = 120.0
+
+
+@app.post("/api/simulate/distance")
+def simulate_distance(req: DistanceRunRequest):
+    """
+    Run the simulation to an arbitrary target distance.
+
+    Use for LSR events: standing mile (1609.344 m), standing kilo (1000 m),
+    1/2 mile (804.672 m), Bonneville short course (3218 m), etc.
+    """
+    try:
+        cfg = _build_config(
+            bike_id=req.bike_id,
+            bike_preset=req.bike_preset,
+            power_boost_pct=req.power_boost_pct,
+            mass_delta_kg=req.mass_delta_kg,
+            rider_mass_kg=req.rider_mass_kg,
+            venue_id=req.venue_id,
+            front_tire_id=req.front_tire_id,
+            rear_tire_id=req.rear_tire_id,
+            ambient_temp_c=req.ambient_temp_c,
+            track_temp_c=req.track_temp_c,
+            humidity_pct=req.humidity_pct,
+            headwind_kmh=req.headwind_kmh,
+        )
+    except Exception as exc:
+        raise HTTPException(400, f"Config error: {exc}")
+
+    if req.part_ids:
+        db = _get_db()
+        if db:
+            try:
+                from .database.bridge import apply_part_to_config
+                for pid in req.part_ids:
+                    row = db.execute("SELECT * FROM parts WHERE id=?", (pid,)).fetchone()
+                    if row:
+                        cfg = apply_part_to_config(cfg, dict(row))
+            except Exception as e:
+                logging.getLogger(__name__).warning("Parts apply failed: %s", e)
+
+    try:
+        engine = MotoQuantEngine(cfg)
+        sim = engine.run_distance(req.distance_m, max_time=req.max_time_s)
+    except Exception as exc:
+        raise HTTPException(500, f"Distance run error: {exc}")
+
+    # Terminal/trap values at the target distance
+    import numpy as np
+    target_idx = int(np.searchsorted(sim.x, req.distance_m))
+    if target_idx >= len(sim.t):
+        target_idx = len(sim.t) - 1
+    trap_time = float(sim.t[target_idx])
+    trap_v = float(sim.v[target_idx])
+
+    return {
+        "distance_m": req.distance_m,
+        "time_s": round(trap_time, 3),
+        "trap_speed_ms": round(trap_v, 2),
+        "trap_speed_kmh": round(trap_v * 3.6, 1),
+        "trap_speed_mph": round(trap_v * 2.23694, 1),
+        "peak_velocity_kmh": round(float(max(sim.v)) * 3.6, 1),
+        "bike_name": cfg.name,
+        "peak_power_hp": round(float(cfg.engine.peak_power_hp), 1),
+        "total_mass_kg": round(float(cfg.chassis.total_mass_kg), 1),
+    }
+
+
 @app.get("/api/parts/categories")
 def list_parts_categories():
     """Return all parts categories."""

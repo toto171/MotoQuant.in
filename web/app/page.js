@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { Zap, TrendingUp, BarChart3, Github, ChevronDown, Cpu, Wind, Gauge, Menu, X } from 'lucide-react';
+import { Zap, TrendingUp, BarChart3, ChevronDown, Cpu, Wind, Gauge, Menu, X } from 'lucide-react';
 import SimulatorWidget from '../components/SimulatorWidget';
 
 const containerVariants = {
@@ -54,32 +54,26 @@ function StatsStrip() {
     { num: '135', label: 'BIKES' },
     { num: '69', label: 'TIRES' },
     { num: '70', label: 'PARTS' },
-    { num: '12', label: 'VENUES' },
+    { num: '20', label: 'VENUES' },
     { num: '583', label: 'TESTS' },
     { num: '15', label: 'SUB-MODELS' },
   ];
 
   return (
     <div className="bg-gradient-to-r from-ink-1 via-ink-0 to-ink-1 border-y border-brand-orange/20 py-8 overflow-hidden">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="flex justify-between items-center gap-4 md:gap-8 flex-wrap">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-y-6 gap-x-3 sm:gap-x-6">
           {stats.map((stat, idx) => (
-            <div key={idx} className="flex items-center gap-3">
-              <div className="text-center">
-                <div className="font-display font-bold text-2xl md:text-3xl text-brand-orange">
-                  {stat.num}
-                </div>
-                <div className="font-mono text-xs text-white/60 tracking-widest">
-                  {stat.label}
-                </div>
+            <div
+              key={idx}
+              className={`text-center ${idx < stats.length - 1 ? 'md:border-r md:border-brand-orange/20' : ''}`}
+            >
+              <div className="font-display font-bold text-2xl sm:text-3xl text-brand-orange">
+                {stat.num}
               </div>
-              {idx < stats.length - 1 && (
-                <motion.div
-                  className="w-0.5 h-8 bg-brand-orange/30"
-                  animate={{ opacity: [0.3, 0.7, 0.3] }}
-                  transition={{ duration: 2, delay: idx * 0.1, repeat: Infinity }}
-                />
-              )}
+              <div className="font-mono text-[10px] sm:text-xs text-white/60 tracking-widest mt-1">
+                {stat.label}
+              </div>
             </div>
           ))}
         </div>
@@ -476,9 +470,9 @@ export default function HomePage() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="text-lg md:text-xl text-white/80 mb-6 max-w-2xl mx-auto leading-relaxed"
           >
-            A first-principles physics engine predicting quarter-mile ET within{' '}
-            <span className="text-brand-accent font-semibold">±0.07s</span>. Validated on real Dragy GPS telemetry at
-            Aamby Valley, MMRT, and beyond.
+            A first-principles physics engine for quarter-mile ET within{' '}
+            <span className="text-brand-accent font-semibold">±0.07s</span>, terminal velocity, and land-speed-record
+            runs. Validated on real Dragy GPS telemetry at Aamby Valley, MMRT, Texas Mile, and Bonneville.
           </motion.p>
 
           {/* Secondary text */}
@@ -507,14 +501,12 @@ export default function HomePage() {
               Run a Simulation
             </motion.a>
             <motion.a
-              href="https://github.com/da25mem5s02-debug/MotoQuant_v1"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="#validation"
               whileHover={{ scale: 1.05, borderColor: 'rgb(255, 94, 31)' }}
               whileTap={{ scale: 0.95 }}
               className="px-8 py-4 border-2 border-brand-orange/40 hover:border-brand-orange text-brand-orange font-display font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
             >
-              <Github size={20} /> View on GitHub
+              See Validation
             </motion.a>
           </motion.div>
         </div>
@@ -599,9 +591,9 @@ export default function HomePage() {
               title="Environment & Setup"
               items={[
                 'Air density, altitude and temperature correction',
-                'Rolling resistance and surface grip multipliers',
+                'Surface grip for asphalt, concrete, salt & dry lake',
                 'Staging, reaction time, two-step launch control',
-                'Wind and live weather effects',
+                '20 venues including Bonneville, El Mirage, Texas Mile',
               ]}
             />
             <PhysicsCard
@@ -764,24 +756,20 @@ export default function HomePage() {
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <motion.a
-                  href="https://github.com/da25mem5s02-debug/MotoQuant_v1"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="/simulator"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-brand-orange text-black font-display font-bold rounded-lg transition-all glow-orange"
                 >
-                  <Github size={20} /> View on GitHub
+                  Launch Simulator
                 </motion.a>
                 <motion.a
-                  href="https://github.com/da25mem5s02-debug/MotoQuant_v1#readme"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="mailto:dhisetu@gmail.com?subject=MotoQuant%20Pro%20—%20Early%20Access"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="inline-flex items-center justify-center gap-2 px-8 py-3 border-2 border-brand-orange text-brand-orange font-display font-bold rounded-lg transition-colors"
                 >
-                  Quick Start Docs
+                  Request Early Access
                 </motion.a>
               </div>
             </div>
@@ -794,15 +782,12 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="mb-6">
             <p className="mb-2">
-              Built in India for the Indian drag racing community. Validated physics, open source, made for the strip.
+              Built in India for drag racers and land-speed record hunters. Validated physics, made for the strip and the salt.
             </p>
             <p>
               motoquant.in{' '}
               <span className="text-brand-orange/50">·</span>{' '}
-              <a href="https://github.com/da25mem5s02-debug/MotoQuant_v1" className="text-brand-orange hover:text-brand-orangeLight transition-colors">
-                GitHub
-              </a>{' '}
-              <span className="text-brand-orange/50">·</span> Not affiliated with any manufacturer
+              Not affiliated with any manufacturer
             </p>
           </div>
         </div>

@@ -33,6 +33,9 @@ _SURFACE_GRIP: dict = {
     "wet": 0.55,  # rain
     "damp": 0.72,
     "dusty": 0.80,
+    # ── Land speed record surfaces ──
+    "salt": 0.62,  # Bonneville / Uyuni — wet salt = lower μ, gets worse late season
+    "dry_lake_bed": 0.70,  # El Mirage — cracked playa, more bite than salt
 }
 
 # ── Track surface rolling-resistance multipliers ──────────────────────────────
@@ -43,6 +46,9 @@ _SURFACE_RR: dict = {
     "wet": 1.15,
     "damp": 1.08,
     "dusty": 1.12,
+    # ── Land speed record surfaces ──
+    "salt": 1.35,  # Bonneville / Uyuni — salt crust absorbs energy
+    "dry_lake_bed": 1.20,  # El Mirage — mild crust resistance
 }
 
 # ── Power correction denominator at standard conditions (ISO 1585) ────────────

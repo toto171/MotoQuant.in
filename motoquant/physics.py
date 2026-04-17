@@ -28,6 +28,12 @@ from .constants import (
     THOUSAND_FT_M,
     THREE30_FT_M,
     G,
+    ONE_MILE_M,
+    ONE_KM_M,
+    TOPSPEED_PLATEAU_ACCEL,
+    TOPSPEED_PLATEAU_WINDOW_S,
+    TOPSPEED_MAX_TIME_S,
+    TOPSPEED_MAX_DISTANCE_M,
 )
 from .models import (
     CLUTCH_SLIDER,
@@ -683,3 +689,126 @@ class MotoQuantEngine:
         # Restore original mass for engine reuse
         self.m_total = self.cfg.chassis.total_mass_kg
         return result
+
+    # ═══════════════════════════════════════════
+    # TOP SPEED / LAND SPEED RECORD MODE
+    # ═══════════════════════════════════════════
+
+    def run_top_speed(
+        self,
+        max_time: float = TOPSPEED_MAX_TIME_S,
+        max_distance: float = TOPSPEED_MAX_DISTANCE_M,
+        plateau_accel: float = TOPSPEED_PLATEAU_ACCEL,
+        plateau_window_s: float = TOPSPEED_PLATEAU_WINDOW_S,
+    ) -> "TopSpeedResult":
+        """
+        Run simulation until terminal velocity is reached.
+
+        Terminal = longitudinal acceleration stays below ``plateau_accel``
+        (m/s^2) for at least ``plateau_window_s`` seconds. Hard-bounded by
+        ``max_time`` and ``max_distance`` to catch degenerate cases.
+
+        Returns a TopSpeedResult with terminal velocity, time/distance to
+        reach it, and the full trajectory for plotting.
+        """
+        sim = self.run(distance=max_distance, max_time=max_time, use_adaptive_dt=True)
+
+        # Convert |a| (in g) back to m/s^2
+        a_ms2 = np.abs(sim.a) * G
+
+        # Find first index where acceleration has been below threshold for
+        # plateau_window_s continuously
+        dt = sim.dt if sim.dt > 0 else self.dt
+        window_steps = max(1, int(plateau_window_s / dt))
+
+        terminal_idx = len(sim.v) - 1  # fallback: last sample
+        if len(a_ms2) >= window_steps:
+            # Rolling max: if the MAX accel over the next window_steps is
+            # below plateau_accel, we've terminaled.
+            for i in range(len(a_ms2) - window_steps):
+                if np.max(a_ms2[i : i + window_steps]) < plateau_accel:
+                    terminal_idx = i
+                    break
+
+        # Peak velocity across the entire run (the number we quote as "top speed")
+        peak_idx = int(np.argmax(sim.v))
+        terminal_v = float(sim.v[peak_idx])
+
+        # Time / distance to *first enter* the plateau (when acceleration
+        # first falls below the threshold and stays there). Falls back to
+        # peak-V time if no plateau was detected.
+        reached = terminal_idx < len(sim.v) - 1
+        reach_idx = terminal_idx if reached else peak_idx
+        terminal_t = float(sim.t[reach_idx])
+        terminal_x = float(sim.x[reach_idx])
+        terminal_power_kw = float(sim.power_kw[peak_idx]) if len(sim.power_kw) > peak_idx else 0.0
+        terminal_gear = int(sim.gear[peak_idx]) if len(sim.gear) > peak_idx else 0
+        terminal_rpm = float(sim.rpm[peak_idx]) if len(sim.rpm) > peak_idx else 0.0
+
+        # Split times at standard LSR distances (1/4, 1/2, 1 km, 1 mile, 2 mile)
+        lsr_splits = {}
+        for label, d in [
+            ("quarter_mile", QUARTER_MILE_M),
+            ("half_mile", 804.672),
+            ("one_km", ONE_KM_M),
+            ("one_mile", ONE_MILE_M),
+            ("two_mile", 3218.688),
+        ]:
+            idx = int(np.searchsorted(sim.x, d))
+            if 0 < idx < len(sim.t):
+                # Linear interpolation
+                frac = (d - sim.x[idx - 1]) / max(1e-9, sim.x[idx] - sim.x[idx - 1])
+                t_at = sim.t[idx - 1] + frac * (sim.t[idx] - sim.t[idx - 1])
+                v_at = sim.v[idx - 1] + frac * (sim.v[idx] - sim.v[idx - 1])
+                lsr_splits[label] = {"time_s": float(t_at), "speed_ms": float(v_at)}
+
+        return TopSpeedResult(
+            terminal_velocity_ms=terminal_v,
+            time_to_terminal_s=terminal_t,
+            distance_to_terminal_m=terminal_x,
+            terminal_power_kw=terminal_power_kw,
+            terminal_gear=terminal_gear,
+            terminal_rpm=terminal_rpm,
+            lsr_splits=lsr_splits,
+            reached_plateau=reached,
+            full_sim=sim,
+        )
+
+    def run_distance(
+        self,
+        distance_m: float,
+        max_time: float = TOPSPEED_MAX_TIME_S,
+    ) -> SimResult:
+        """
+        Run simulation to an arbitrary target distance — used for LSR
+        events: standing mile (1609 m), standing km (1000 m), 1/2 mile (804 m),
+        Bonneville short course (3218 m), etc.
+        """
+        return self.run(distance=distance_m, max_time=max_time, use_adaptive_dt=True)
+
+
+@dataclass
+class TopSpeedResult:
+    """
+    Output of MotoQuantEngine.run_top_speed().
+
+    All velocities in m/s; multiply by 3.6 for km/h, 2.23694 for mph.
+    """
+
+    terminal_velocity_ms: float
+    time_to_terminal_s: float
+    distance_to_terminal_m: float
+    terminal_power_kw: float
+    terminal_gear: int
+    terminal_rpm: float
+    lsr_splits: dict  # {"one_mile": {"time_s":..., "speed_ms":...}, ...}
+    reached_plateau: bool  # False = hit max_time/distance before terminaling
+    full_sim: SimResult  # for plotting v(t), RPM(t), etc.
+
+    @property
+    def terminal_velocity_kmh(self) -> float:
+        return self.terminal_velocity_ms * 3.6
+
+    @property
+    def terminal_velocity_mph(self) -> float:
+        return self.terminal_velocity_ms * 2.23694

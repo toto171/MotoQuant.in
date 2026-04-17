@@ -240,6 +240,11 @@ export default function SimulatorPage() {
   const fileInputRef = useRef(null);
   const dynoInputRef = useRef(null);
 
+  // ─── Top Speed / LSR ────────────────────────────────────────────────
+  const [topSpeedResult, setTopSpeedResult] = useState(null);
+  const [topSpeedLoading, setTopSpeedLoading] = useState(false);
+  const [topSpeedError, setTopSpeedError] = useState(null);
+
   // ─── Fetch all data on mount ─────────────────────────────────────────
   useEffect(() => {
     async function load() {
@@ -359,6 +364,44 @@ export default function SimulatorPage() {
       setSimLoading(false);
     }
   }, [bike, frontTire, rearTire, venue, riderKg, powerBoost, massChange, ambientTemp, trackTemp, humidity, headwind]);
+
+  // ─── Top Speed / LSR runner ─────────────────────────────────────────
+  const runTopSpeed = useCallback(async () => {
+    if (!bike) return;
+    setTopSpeedLoading(true);
+    setTopSpeedError(null);
+    try {
+      const body = {
+        rider_mass_kg: riderKg,
+        power_boost_pct: powerBoost,
+        mass_delta_kg: massChange,
+        part_ids: selectedParts.map(p => p.id),
+        ambient_temp_c: ambientTemp,
+        track_temp_c: trackTemp,
+        humidity_pct: humidity,
+        headwind_kmh: headwind,
+        include_timeseries: true,
+      };
+      if (bike.id != null) body.bike_id = bike.id;
+      else if (bike.preset) body.bike_preset = bike.preset;
+      if (frontTire?.id != null) body.front_tire_id = frontTire.id;
+      if (rearTire?.id != null) body.rear_tire_id = rearTire.id;
+      if (venue?.id != null) body.venue_id = venue.id;
+
+      const res = await fetch(`${API}/api/simulate/top-speed`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      setTopSpeedResult(await res.json());
+      setActiveTab('topspeed');
+    } catch (e) {
+      setTopSpeedError(e.message);
+    } finally {
+      setTopSpeedLoading(false);
+    }
+  }, [bike, selectedParts, frontTire, rearTire, venue, riderKg, powerBoost, massChange, ambientTemp, trackTemp, humidity, headwind]);
 
   // ─── Computed ────────────────────────────────────────────────────────
   const buildCost = selectedParts.reduce((s, p) => s + (p.price_inr || 0), 0);
@@ -759,7 +802,9 @@ export default function SimulatorPage() {
 
             {/* Tab bar */}
             <div className="flex items-center gap-2 flex-wrap">
-              <Tab active={activeTab === 'results'} onClick={() => setActiveTab('results')} icon={<Zap size={12} />} label="Results" />
+              <Tab active={activeTab === 'results'} onClick={() => setActiveTab('results')} icon={<Zap size={12} />} label="1/4 Mile" />
+              <Tab active={activeTab === 'topspeed'} onClick={() => { if (!topSpeedResult) runTopSpeed(); else setActiveTab('topspeed'); }}
+                icon={<Gauge size={12} />} label="Top Speed" />
               <Tab active={activeTab === 'charts'} onClick={() => { if (!fullResult) runFullSim(); else setActiveTab('charts'); }}
                 icon={<BarChart3 size={12} />} label="Charts" />
               <Tab active={activeTab === 'splits'} onClick={() => setActiveTab('splits')} icon={<Table2 size={12} />} label="Splits" />
@@ -838,6 +883,154 @@ export default function SimulatorPage() {
                   <div className="text-center py-12 text-gray-700 text-xs">
                     <Gauge size={32} className="mx-auto mb-3 opacity-20" />
                     Select a bike to start simulating
+                  </div>
+                )}
+              </Card>
+            )}
+
+            {/* ─── Top Speed Tab ─────────────────────────────────────── */}
+            {activeTab === 'topspeed' && (
+              <Card className="p-5" glow={!!topSpeedResult}>
+                {topSpeedLoading ? (
+                  <div className="text-center py-12 text-gray-500 text-xs">
+                    <Gauge size={32} className="mx-auto mb-3 opacity-20 animate-pulse" />
+                    Running top speed simulation…
+                    <div className="text-[10px] text-gray-700 mt-1">Simulating up to 120 s of terminal velocity</div>
+                  </div>
+                ) : topSpeedError ? (
+                  <div className="text-center py-12 text-xs">
+                    <div className="text-red-400 mb-3">Top speed simulation failed</div>
+                    <div className="text-gray-600 text-[10px] mb-4">{topSpeedError}</div>
+                    <button onClick={runTopSpeed} disabled={!bike}
+                      className="px-4 py-2 text-xs bg-orange-600 hover:bg-orange-700 rounded-lg font-medium transition-colors disabled:opacity-50 inline-flex items-center gap-1.5">
+                      <Play size={12} /> Retry
+                    </button>
+                  </div>
+                ) : topSpeedResult ? (
+                  <div className="space-y-4">
+                    {/* Primary terminal velocity */}
+                    <div className="bg-gradient-to-br from-orange-500/10 via-orange-500/5 to-transparent rounded-xl p-6 text-center border border-orange-500/20">
+                      <div className="text-[10px] uppercase tracking-widest text-orange-400/80 mb-2">Terminal Velocity</div>
+                      <div className="font-display font-bold text-5xl text-orange-400 tabular-nums leading-none">
+                        {topSpeedResult.terminal_velocity_kmh?.toFixed(1) ?? '—'}
+                        <span className="text-xl text-orange-400/60 ml-2 font-mono">km/h</span>
+                      </div>
+                      <div className="text-sm text-gray-400 mt-2 tabular-nums">
+                        {topSpeedResult.terminal_velocity_mph?.toFixed(1)} mph
+                        <span className="text-gray-600 mx-2">·</span>
+                        {topSpeedResult.terminal_velocity_ms?.toFixed(1)} m/s
+                      </div>
+                      {topSpeedResult.reached_plateau ? (
+                        <div className="inline-flex items-center gap-1.5 mt-3 px-2.5 py-1 bg-green-500/10 border border-green-500/20 rounded-full text-[10px] text-green-400">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                          Plateau reached
+                        </div>
+                      ) : (
+                        <div className="inline-flex items-center gap-1.5 mt-3 px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-[10px] text-amber-400">
+                          Still accelerating at sim end — extend max_time
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Time / distance / power grid */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
+                        <div className="text-[10px] uppercase tracking-widest text-gray-500 mb-1">Time to terminal</div>
+                        <div className="font-display text-2xl text-white tabular-nums">{topSpeedResult.time_to_terminal_s?.toFixed(2)}<span className="text-sm text-gray-500 ml-1">s</span></div>
+                      </div>
+                      <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
+                        <div className="text-[10px] uppercase tracking-widest text-gray-500 mb-1">Distance to terminal</div>
+                        <div className="font-display text-2xl text-white tabular-nums">
+                          {topSpeedResult.distance_to_terminal_m >= 1000
+                            ? `${(topSpeedResult.distance_to_terminal_m / 1000).toFixed(2)}`
+                            : topSpeedResult.distance_to_terminal_m?.toFixed(0)}
+                          <span className="text-sm text-gray-500 ml-1">{topSpeedResult.distance_to_terminal_m >= 1000 ? 'km' : 'm'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Terminal power / gear / rpm */}
+                    <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
+                      <div className="grid grid-cols-3 gap-3 text-center">
+                        <div>
+                          <div className="text-[10px] uppercase tracking-widest text-gray-500 mb-1">Power @ terminal</div>
+                          <div className="font-display text-lg text-white tabular-nums">{topSpeedResult.terminal_power_hp?.toFixed(0)}<span className="text-[10px] text-gray-500 ml-1">hp</span></div>
+                          <div className="text-[10px] text-gray-600 tabular-nums">{topSpeedResult.terminal_power_kw?.toFixed(1)} kW</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] uppercase tracking-widest text-gray-500 mb-1">Gear</div>
+                          <div className="font-display text-lg text-white tabular-nums">{topSpeedResult.terminal_gear}</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] uppercase tracking-widest text-gray-500 mb-1">Engine RPM</div>
+                          <div className="font-display text-lg text-white tabular-nums">{topSpeedResult.terminal_rpm?.toLocaleString('en-US')}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* LSR splits table */}
+                    {topSpeedResult.lsr_splits && Object.keys(topSpeedResult.lsr_splits).length > 0 && (
+                      <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="text-[10px] uppercase tracking-widest text-gray-400 font-medium">Land Speed Splits</div>
+                          <div className="text-[9px] text-gray-600">SAE J1349</div>
+                        </div>
+                        <div className="space-y-1.5">
+                          {[
+                            { key: 'quarter_mile', label: '¼ mile', sub: '402 m' },
+                            { key: 'half_mile', label: '½ mile', sub: '805 m' },
+                            { key: 'one_km', label: '1 km', sub: '1000 m' },
+                            { key: 'one_mile', label: '1 mile', sub: '1609 m' },
+                            { key: 'two_mile', label: '2 miles', sub: '3219 m' },
+                          ].filter(s => topSpeedResult.lsr_splits[s.key]).map(s => {
+                            const v = topSpeedResult.lsr_splits[s.key];
+                            return (
+                              <div key={s.key} className="grid grid-cols-4 gap-2 text-xs items-center py-1.5 border-b border-white/[0.03] last:border-0">
+                                <div>
+                                  <div className="text-white font-medium">{s.label}</div>
+                                  <div className="text-[9px] text-gray-600">{s.sub}</div>
+                                </div>
+                                <div className="text-right tabular-nums text-gray-300">{v.time_s?.toFixed(3)}<span className="text-gray-600 ml-0.5">s</span></div>
+                                <div className="text-right tabular-nums text-orange-400/90">{v.speed_kmh?.toFixed(1)}<span className="text-gray-600 ml-0.5 text-[9px]">km/h</span></div>
+                                <div className="text-right tabular-nums text-gray-400 text-[10px]">{v.speed_mph?.toFixed(1)} mph</div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Velocity chart if timeseries present */}
+                    {topSpeedResult.timeseries?.t?.length > 0 && (
+                      <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
+                        <SimChart
+                          data={topSpeedResult.timeseries.t.map((t, i) => ({
+                            t: +t.toFixed(2),
+                            speed: +topSpeedResult.timeseries.v_kmh[i].toFixed(1),
+                          }))}
+                          dataKey="speed"
+                          label="Velocity vs Time"
+                          unit="km/h"
+                          color="#fb923c"
+                        />
+                      </div>
+                    )}
+
+                    {/* Re-run button */}
+                    <button onClick={runTopSpeed} disabled={topSpeedLoading}
+                      className="w-full py-2.5 text-xs bg-white/[0.04] hover:bg-orange-500/10 border border-white/[0.06] hover:border-orange-500/30 rounded-xl text-gray-400 hover:text-orange-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+                      <Play size={12} /> Re-run Top Speed Simulation
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-center py-12 text-xs">
+                    <Gauge size={32} className="mx-auto mb-3 text-gray-800" />
+                    <p className="text-gray-600 mb-1">Top Speed &amp; Land Speed Record mode</p>
+                    <p className="text-gray-700 text-[10px] mb-4 max-w-xs mx-auto">Simulates until terminal velocity is reached. Returns ¼ mi / ½ mi / 1 km / 1 mi / 2 mi splits for LSR events at Bonneville, El Mirage, Texas Mile, and more.</p>
+                    <button onClick={runTopSpeed} disabled={!bike}
+                      className="px-4 py-2 text-xs bg-orange-600 hover:bg-orange-700 rounded-lg font-medium transition-colors disabled:opacity-50 inline-flex items-center gap-1.5">
+                      <Play size={12} /> Run Top Speed
+                    </button>
                   </div>
                 )}
               </Card>
