@@ -19,11 +19,12 @@ const API = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-de6eb.up.
 
 // ─── Glass Card ──────────────────────────────────────────────────────────
 function Card({ children, className = '', glow = false }) {
+  const hasOverflowVisible = className.includes('overflow-visible');
   return (
     <div className={`
       relative rounded-2xl border border-white/[0.06]
       bg-gradient-to-br from-white/[0.04] to-white/[0.01]
-      backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.3)]
+      ${hasOverflowVisible ? '' : 'backdrop-blur-xl'} shadow-[0_0_30px_rgba(0,0,0,0.3)]
       ${glow ? 'shadow-orange-500/5 border-orange-500/20' : ''}
       ${className}
     `}>
@@ -545,8 +546,8 @@ export default function SimulatorPage() {
              ═══════════════════════════════════════════════════════════ */}
           <div className="col-span-12 lg:col-span-3 space-y-4">
 
-            {/* Bike Selector */}
-            <Card className="p-4">
+            {/* Bike Selector — z-10 so dropdown overlaps cards below */}
+            <Card className="p-4 relative z-10 overflow-visible">
               <h3 className="text-xs font-semibold mb-3 flex items-center gap-2 uppercase tracking-widest text-gray-400">
                 <Gauge size={13} className="text-orange-500" /> Motorcycle
               </h3>
@@ -589,8 +590,8 @@ export default function SimulatorPage() {
               </div>
             </Card>
 
-            {/* Environment (collapsible) */}
-            <Card className="p-4">
+            {/* Environment (collapsible) — z-[8] so venue dropdown overlaps cards below */}
+            <Card className="p-4 relative z-[8] overflow-visible">
               <button onClick={() => setShowEnv(!showEnv)}
                 className="w-full flex items-center justify-between text-xs font-semibold uppercase tracking-widest text-gray-400">
                 <span className="flex items-center gap-2"><Thermometer size={13} className="text-orange-500" /> Environment</span>
@@ -622,8 +623,8 @@ export default function SimulatorPage() {
               )}
             </Card>
 
-            {/* Tires */}
-            <Card className="p-4">
+            {/* Tires — z-[6] so tire dropdowns overlap cards/buttons below */}
+            <Card className="p-4 relative z-[6] overflow-visible">
               <h3 className="text-xs font-semibold mb-3 flex items-center gap-2 uppercase tracking-widest text-gray-400">
                 <CircleDot size={13} className="text-orange-500" /> Tires
               </h3>
@@ -923,7 +924,7 @@ export default function SimulatorPage() {
 
             {/* ─── A vs B Compare Tab ────────────────────────────────── */}
             {activeTab === 'compare' && (
-              <Card className="p-5">
+              <Card className="p-5 overflow-visible">
                 <h4 className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-4 flex items-center gap-2">
                   <Layers size={13} className="text-orange-500" /> A vs B Comparison
                 </h4>

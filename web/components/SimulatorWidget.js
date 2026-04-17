@@ -142,8 +142,8 @@ export default function SimulatorWidget() {
         )}
       </h3>
 
-      {/* Bike selector */}
-      <div className="mb-5 relative" ref={dropRef}>
+      {/* Bike selector — z-10 so dropdown overlaps sliders below */}
+      <div className="mb-5 relative z-10" ref={dropRef}>
         <label className="block text-sm text-gray-400 mb-2">
           Bike {!bikesLoading && <span className="text-gray-600">({bikes.length} available)</span>}
         </label>
