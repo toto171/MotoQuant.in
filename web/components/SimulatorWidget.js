@@ -1,95 +1,68 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { Zap, Search, ChevronDown } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Zap, AlertCircle } from 'lucide-react';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-de6eb.up.railway.app';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://motoquant-api.railway.app';
 
-// Fallback presets if DB bikes aren't available
-const PRESET_BIKES = [
-  { id: null, preset: 'gsxr1000_k5',   manufacturer: 'Suzuki',  model: 'GSX-R 1000 K5',  year: 2005, displacement_cc: 999,  peak_power_hp: 178, category: 'sport' },
-  { id: null, preset: 'yzfr1_4c8',     manufacturer: 'Yamaha',  model: 'YZF-R1 (4C8)',    year: 2007, displacement_cc: 998,  peak_power_hp: 180, category: 'sport' },
-  { id: null, preset: 'hayabusa_gen1', manufacturer: 'Suzuki',  model: 'Hayabusa Gen1',   year: 2006, displacement_cc: 1299, peak_power_hp: 175, category: 'sport' },
+const BIKES = [
+  { id: 'gsxr1000_k5',   label: 'Suzuki GSX-R 1000 K5',   cc: '999cc',  hp: 178 },
+  { id: 'yzfr1_4c8',     label: 'Yamaha YZF-R1 (4C8)',     cc: '998cc',  hp: 180 },
+  { id: 'hayabusa_gen1', label: 'Suzuki Hayabusa Gen1',     cc: '1299cc', hp: 175 },
 ];
 
+// Animated counter component
+function AnimatedCounter({ target, decimals = 3 }) {
+  const [count, setCount] = useState(0);
+  const intervalRef = useRef(null);
+
+  useEffect(() => {
+    const duration = 1200;
+    const frameRate = 60;
+    const frames = duration / (1000 / frameRate);
+    const increment = target / frames;
+    let current = 0;
+
+    intervalRef.current = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        setCount(target);
+        clearInterval(intervalRef.current);
+      } else {
+        setCount(current);
+      }
+    }, 1000 / frameRate);
+
+    return () => clearInterval(intervalRef.current);
+  }, [target]);
+
+  return count.toFixed(decimals);
+}
+
 export default function SimulatorWidget() {
-  const [bikes,       setBikes]       = useState(PRESET_BIKES);
-  const [selected,    setSelected]    = useState(null);
-  const [search,      setSearch]      = useState('');
-  const [dropOpen,    setDropOpen]    = useState(false);
-  const [riderKg,     setRiderKg]     = useState(75);
-  const [powerBoost,  setPowerBoost]  = useState(0);
-  const [massChange,  setMassChange]  = useState(0);
-  const [result,      setResult]      = useState(null);
-  const [loading,     setLoading]     = useState(false);
-  const [error,       setError]       = useState(null);
-  const [bikesLoading, setBikesLoading] = useState(true);
-  const debounceRef = useRef(null);
-  const abortRef    = useRef(null);
-  const dropRef     = useRef(null);
+  const [bike, setBike] = useState('gsxr1000_k5');
+  const [riderKg, setRiderKg] = useState(75);
+  const [powerBoost, setPowerBoost] = useState(0);
+  const [massChange, setMassChange] = useState(0);
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Fetch all bikes from API on mount
-  useEffect(() => {
-    async function loadBikes() {
-      try {
-        const res = await fetch(`${API_URL}/api/bikes?limit=200`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.bikes && data.bikes.length > 0) {
-            setBikes(data.bikes);
-            setSelected(data.bikes[0]);
-          } else {
-            setSelected(PRESET_BIKES[0]);
-          }
-        } else {
-          setSelected(PRESET_BIKES[0]);
-        }
-      } catch {
-        setSelected(PRESET_BIKES[0]);
-      } finally {
-        setBikesLoading(false);
-      }
-    }
-    loadBikes();
-  }, []);
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    function handleClick(e) {
-      if (dropRef.current && !dropRef.current.contains(e.target)) {
-        setDropOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, []);
-
-  const runSim = useCallback(async (bike, r, p, m) => {
-    if (!bike) return;
-    if (abortRef.current) abortRef.current.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
-
+  async function runSim() {
     setLoading(true);
     setError(null);
+    setResult(null);
     try {
-      const body = {
-        rider_mass_kg:   r,
-        power_boost_pct: p,
-        mass_delta_kg:   m,
-      };
-      // Use bike_id for DB bikes, bike_preset for fallback presets
-      if (bike.id != null) {
-        body.bike_id = bike.id;
-      } else if (bike.preset) {
-        body.bike_preset = bike.preset;
-      }
-
       const res = await fetch(`${API_URL}/api/simulate/quick`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-        signal: controller.signal,
+        body: JSON.stringify({
+          bike_preset: bike,
+          rider_mass_kg: riderKg,
+          power_boost_pct: powerBoost,
+          mass_delta_kg: massChange,
+        }),
       });
       if (!res.ok) {
         const msg = await res.text();
@@ -97,219 +70,305 @@ export default function SimulatorWidget() {
       }
       setResult(await res.json());
     } catch (e) {
-      if (e.name !== 'AbortError') setError(e.message);
+      setError(e.message);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }
 
-  // Run once on first bike selection
-  useEffect(() => {
-    if (selected && !result) {
-      runSim(selected, riderKg, powerBoost, massChange);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selected]);
-
-  // Filter bikes by search
-  const filtered = bikes.filter(b => {
-    const q = search.toLowerCase();
-    if (!q) return true;
-    const text = `${b.manufacturer} ${b.model} ${b.year} ${b.category || ''}`.toLowerCase();
-    return text.includes(q);
-  });
-
-  // Group filtered bikes by manufacturer
-  const grouped = {};
-  filtered.forEach(b => {
-    const mfr = b.manufacturer || 'Other';
-    if (!grouped[mfr]) grouped[mfr] = [];
-    grouped[mfr].push(b);
-  });
-
-  const bikeLabel = (b) => `${b.manufacturer} ${b.model}${b.year ? ` (${b.year})` : ''}`;
+  const selectedBike = BIKES.find(b => b.id === bike);
 
   return (
-    <div className="bg-black border border-gray-800 rounded-2xl p-8 max-w-2xl mx-auto">
-      <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-        <Zap className="text-orange-500" size={20} />
-        Live Quarter-Mile Simulator
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="relative bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl p-5 sm:p-8 max-w-2xl mx-auto overflow-hidden"
+    >
+      {/* Animated border shimmer when loading */}
+      <AnimatePresence>
         {loading && (
-          <svg className="animate-spin h-4 w-4 text-orange-500 ml-2" viewBox="0 0 24 24" fill="none">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
-          </svg>
+          <motion.div
+            className="absolute inset-0 rounded-2xl pointer-events-none"
+            style={{
+              background: 'conic-gradient(from 0deg, transparent, #FF5E1F, transparent)',
+              opacity: 0.3,
+            }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+          />
         )}
+      </AnimatePresence>
+
+      <h3 className="text-xl font-bold mb-6 flex items-center gap-2 relative z-10">
+        <motion.div whileHover={{ scale: 1.1 }} transition={{ type: 'spring', stiffness: 400 }}>
+          <Zap className="text-[#FF5E1F]" size={20} />
+        </motion.div>
+        <span className="bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
+          Live Quarter-Mile Simulator
+        </span>
       </h3>
 
-      {/* Bike selector — z-10 so dropdown overlaps sliders below */}
-      <div className="mb-5 relative z-10" ref={dropRef}>
-        <label className="block text-sm text-gray-400 mb-2">
-          Bike {!bikesLoading && <span className="text-gray-600">({bikes.length} available)</span>}
+      {/* Bike select — premium chip grid */}
+      <div className="mb-6 relative z-10">
+        <label className="block text-xs font-semibold text-white/60 mb-3 uppercase tracking-wide">
+          Select Bike
         </label>
-        <button
-          onClick={() => setDropOpen(!dropOpen)}
-          className="w-full p-3 rounded-lg border border-gray-700 bg-gray-950 text-left flex items-center justify-between hover:border-gray-500 transition-colors"
-        >
-          <span className="text-sm">
-            {selected ? (
-              <>
-                <span className="text-white font-medium">{bikeLabel(selected)}</span>
-                <span className="text-gray-500 ml-2">
-                  {selected.displacement_cc}cc · {selected.peak_power_hp ? `${Math.round(selected.peak_power_hp)} hp` : ''}
-                </span>
-              </>
-            ) : (
-              <span className="text-gray-500">Select a bike...</span>
-            )}
-          </span>
-          <ChevronDown size={16} className={`text-gray-500 transition-transform ${dropOpen ? 'rotate-180' : ''}`} />
-        </button>
-
-        {dropOpen && (
-          <div className="absolute z-50 mt-1 w-full bg-gray-950 border border-gray-700 rounded-lg shadow-2xl max-h-80 overflow-hidden">
-            {/* Search */}
-            <div className="p-2 border-b border-gray-800">
-              <div className="relative">
-                <Search size={14} className="absolute left-2.5 top-2.5 text-gray-500" />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  placeholder="Search by make, model, or category..."
-                  className="w-full pl-8 pr-3 py-2 bg-black border border-gray-800 rounded text-sm text-white placeholder-gray-600 focus:outline-none focus:border-orange-500"
-                  autoFocus
-                />
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          {BIKES.map(b => (
+            <motion.button
+              key={b.id}
+              onClick={() => setBike(b.id)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className={`relative p-3 sm:p-4 rounded-xl border transition-all duration-300 text-left group ${
+                bike === b.id
+                  ? 'bg-white/[0.08] border-[#FF5E1F] shadow-[0_0_30px_rgba(255,94,31,0.2)]'
+                  : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-white/10'
+              }`}
+            >
+              <div className="font-semibold text-sm leading-tight text-white">
+                {b.label.split(' ').slice(1).slice(0, 2).join(' ')}
               </div>
+              <div className="text-xs text-white/40 mt-2 group-hover:text-white/60 transition-colors">
+                {b.cc} · {b.hp} hp
+              </div>
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
+      {/* Sliders with enhanced styling */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-4 mb-8 relative z-10">
+        {[
+          {
+            label: 'Rider weight',
+            value: riderKg,
+            onChange: setRiderKg,
+            min: 50,
+            max: 130,
+            format: v => `${v} kg`,
+          },
+          {
+            label: 'Power boost',
+            value: powerBoost,
+            onChange: setPowerBoost,
+            min: -10,
+            max: 30,
+            format: v => `${v > 0 ? '+' : ''}${v}%`,
+            highlight: powerBoost > 0,
+          },
+          {
+            label: 'Mass change',
+            value: massChange,
+            onChange: setMassChange,
+            min: -15,
+            max: 15,
+            format: v => `${v > 0 ? '+' : ''}${v} kg`,
+            highlight: massChange !== 0,
+          },
+        ].map((slider, idx) => (
+          <div key={idx} className="space-y-2">
+            <label className="block text-xs font-semibold text-white/60 uppercase tracking-wide">
+              {slider.label}
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="range"
+                min={slider.min}
+                max={slider.max}
+                value={slider.value}
+                onChange={e => slider.onChange(Number(e.target.value))}
+                className="flex-1 h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-[#FF5E1F] slider-thumb"
+              />
+            </div>
+            <div className={`text-sm font-mono text-right transition-colors ${
+              slider.highlight ? 'text-[#00FFB2]' : 'text-white'
+            }`}>
+              {slider.format(slider.value)}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <style jsx>{`
+        input[type='range']::-webkit-slider-thumb {
+          appearance: none;
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #FF5E1F, #FF7A00);
+          cursor: pointer;
+          box-shadow: 0 0 20px rgba(255, 94, 31, 0.5);
+          transition: box-shadow 0.2s;
+        }
+        input[type='range']::-webkit-slider-thumb:hover {
+          box-shadow: 0 0 30px rgba(255, 94, 31, 0.8);
+        }
+        input[type='range']::-moz-range-thumb {
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #FF5E1F, #FF7A00);
+          cursor: pointer;
+          border: none;
+          box-shadow: 0 0 20px rgba(255, 94, 31, 0.5);
+        }
+        input[type='range']::-moz-range-thumb:hover {
+          box-shadow: 0 0 30px rgba(255, 94, 31, 0.8);
+        }
+      `}</style>
+
+      {/* Run button with magnetic hover effect */}
+      <motion.button
+        onClick={runSim}
+        disabled={loading}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        className="relative w-full py-3 bg-gradient-to-r from-[#FF5E1F] to-[#FF7A00] hover:shadow-[0_0_40px_rgba(255,94,31,0.4)] disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-semibold text-white transition-all flex items-center justify-center gap-2 group overflow-hidden z-10"
+      >
+        <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors" />
+        <div className="relative flex items-center gap-2">
+          {loading ? (
+            <>
+              <motion.div
+                animate={{ opacity: [1, 0.5, 1] }}
+                transition={{ duration: 1.2, repeat: Infinity }}
+                className="flex gap-1"
+              >
+                <span className="w-1.5 h-1.5 bg-white rounded-full" />
+                <span className="w-1.5 h-1.5 bg-white rounded-full" />
+                <span className="w-1.5 h-1.5 bg-white rounded-full" />
+              </motion.div>
+              <span>Simulating…</span>
+            </>
+          ) : (
+            <>
+              <Zap size={16} />
+              <span>Run Simulation</span>
+            </>
+          )}
+        </div>
+      </motion.button>
+
+      {/* Error state */}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-300 text-sm flex items-center gap-2 relative z-10"
+          >
+            <AlertCircle size={16} />
+            {error}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Result reveal with animated counter */}
+      <AnimatePresence>
+        {result && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.4 }}
+            className="mt-8 space-y-4 relative z-10"
+          >
+            {/* Main metrics */}
+            <div className="grid grid-cols-2 gap-4">
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.1 }}
+                className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-6 text-center backdrop-blur"
+              >
+                <p className="text-[10px] sm:text-xs font-semibold text-white/50 mb-2 uppercase tracking-wide">
+                  Quarter-Mile ET
+                </p>
+                <p className="text-3xl sm:text-5xl font-mono font-bold text-[#FF5E1F]">
+                  <AnimatedCounter target={result.et_quarter_s} decimals={3} />
+                  <span className="text-xl sm:text-3xl ml-1">s</span>
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-6 text-center backdrop-blur"
+              >
+                <p className="text-[10px] sm:text-xs font-semibold text-white/50 mb-2 uppercase tracking-wide">
+                  Trap Speed
+                </p>
+                <p className="text-3xl sm:text-5xl font-mono font-bold text-white">
+                  <AnimatedCounter target={result.trap_speed_kmh} decimals={1} />
+                </p>
+                <p className="text-xs text-white/40 mt-2">km/h</p>
+              </motion.div>
             </div>
 
-            {/* Bike list */}
-            <div className="overflow-y-auto max-h-60">
-              {Object.keys(grouped).sort().map(mfr => (
-                <div key={mfr}>
-                  <div className="px-3 py-1.5 text-xs text-gray-500 font-semibold uppercase tracking-wider bg-gray-900/50 sticky top-0">
-                    {mfr}
-                  </div>
-                  {grouped[mfr].map((b, i) => (
-                    <button
-                      key={b.id || b.preset || i}
-                      onClick={() => { setSelected(b); setDropOpen(false); setSearch(''); }}
-                      className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-800 transition-colors flex justify-between items-center ${
-                        selected && (b.id === selected.id && b.model === selected.model) ? 'bg-orange-500/10 text-orange-300' : 'text-gray-300'
-                      }`}
-                    >
-                      <span>{b.model} {b.year ? `(${b.year})` : ''}</span>
-                      <span className="text-xs text-gray-600">
-                        {b.displacement_cc}cc{b.peak_power_hp ? ` · ${Math.round(b.peak_power_hp)} hp` : ''}
-                      </span>
-                    </button>
+            {/* Timeline splits */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-6 backdrop-blur"
+            >
+              <p className="text-xs font-semibold text-white/50 mb-4 uppercase tracking-wide">Split Timeline</p>
+              <div className="relative">
+                {/* Glowing progress line */}
+                <div className="absolute top-8 left-0 right-0 h-0.5 bg-gradient-to-r from-[#FF5E1F] via-[#FF7A00] to-transparent opacity-40" />
+
+                <div className="grid grid-cols-4 gap-1 sm:gap-2 relative">
+                  {[
+                    { label: '0 ft', val: 0 },
+                    { label: '60 ft', val: result.et_60ft_s },
+                    { label: '⅛ mile', val: result.et_eighth_s },
+                    { label: '¼ mile', val: result.et_quarter_s },
+                  ].map((split, idx) => (
+                    <div key={idx} className="text-center">
+                      <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-[#FF5E1F] shadow-[0_0_15px_rgba(255,94,31,0.5)] mx-auto mb-3" />
+                      <p className="text-[10px] sm:text-xs text-white/40 mb-1">{split.label}</p>
+                      <p className="text-xs sm:text-sm font-mono font-semibold text-white">
+                        {split.val === 0 ? '0.000s' : `${split.val.toFixed(3)}s`}
+                      </p>
+                    </div>
                   ))}
                 </div>
-              ))}
-              {filtered.length === 0 && (
-                <div className="px-3 py-6 text-center text-sm text-gray-600">No bikes match "{search}"</div>
-              )}
+              </div>
+            </motion.div>
+
+            {/* Bike info footer */}
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="text-sm"
+              >
+                <p className="text-white/40 text-xs mb-1">Bike</p>
+                <p className="font-semibold text-white">{result.bike_name?.split(' ').slice(-2).join(' ')}</p>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="text-sm"
+              >
+                <p className="text-white/40 text-xs mb-1">Peak Power</p>
+                <p className="font-semibold text-[#00FFB2]">{result.peak_power_hp.toFixed(0)} hp</p>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
 
-      {/* Sliders */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div>
-          <label className="block text-xs text-gray-400 mb-1">
-            Rider weight: <span className="text-white font-medium">{riderKg} kg</span>
-          </label>
-          <input type="range" min={50} max={130} value={riderKg}
-            onChange={e => setRiderKg(Number(e.target.value))}
-            className="w-full accent-orange-500" />
-        </div>
-        <div>
-          <label className="block text-xs text-gray-400 mb-1">
-            Power boost: <span className={`font-medium ${powerBoost > 0 ? 'text-green-400' : 'text-white'}`}>
-              {powerBoost > 0 ? `+${powerBoost}%` : `${powerBoost}%`}
-            </span>
-          </label>
-          <input type="range" min={-10} max={30} value={powerBoost}
-            onChange={e => setPowerBoost(Number(e.target.value))}
-            className="w-full accent-orange-500" />
-        </div>
-        <div>
-          <label className="block text-xs text-gray-400 mb-1">
-            Mass change: <span className={`font-medium ${massChange < 0 ? 'text-green-400' : massChange > 0 ? 'text-red-400' : 'text-white'}`}>
-              {massChange > 0 ? `+${massChange}` : massChange} kg
-            </span>
-          </label>
-          <input type="range" min={-15} max={15} value={massChange}
-            onChange={e => setMassChange(Number(e.target.value))}
-            className="w-full accent-orange-500" />
-        </div>
-      </div>
-
-      {/* Run button */}
-      <button
-        onClick={() => runSim(selected, riderKg, powerBoost, massChange)}
-        disabled={!selected || loading}
-        className="w-full mb-6 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-800 disabled:text-gray-600 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
-      >
-        {loading ? (
-          <>
-            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
-            </svg>
-            Simulating...
-          </>
-        ) : (
-          <>
-            <Zap size={16} /> Run Simulation
-          </>
-        )}
-      </button>
-
-      {/* Error */}
-      {error && (
-        <div className="mb-4 p-3 bg-red-900/30 border border-red-700/50 rounded-lg text-red-400 text-sm">
-          {error}
-        </div>
-      )}
-
-      {/* Result */}
-      {result && (
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-gray-950 rounded-xl p-5 text-center border border-gray-800">
-            <p className="text-xs text-gray-400 mb-1">Quarter-Mile ET</p>
-            <p className="text-4xl font-bold text-orange-400">{result.et_quarter_s?.toFixed(3) ?? '—'}s</p>
-          </div>
-          <div className="bg-gray-950 rounded-xl p-5 text-center border border-gray-800">
-            <p className="text-xs text-gray-400 mb-1">Trap Speed</p>
-            <p className="text-4xl font-bold text-white">{result.trap_speed_kmh?.toFixed(1) ?? '—'}</p>
-            <p className="text-xs text-gray-500 mt-1">km/h</p>
-          </div>
-          <div className="col-span-2 bg-gray-950 rounded-xl p-4 border border-gray-800">
-            <p className="text-xs text-gray-400 mb-3">Splits</p>
-            <div className="grid grid-cols-4 gap-2 text-center">
-              {[
-                { label: '60 ft',  val: result.et_60ft_s },
-                { label: '⅛ mile', val: result.et_eighth_s },
-                { label: 'Bike',   val: null, text: (typeof result.bike_name === 'string' ? result.bike_name.split(' ').slice(-2).join(' ') : null) || selected?.model || '—' },
-                { label: 'Power',  val: null, text: `${result.peak_power_hp?.toFixed(0) ?? '—'} hp` },
-              ].map(s => (
-                <div key={s.label}>
-                  <p className="text-xs text-gray-500 mb-1">{s.label}</p>
-                  <p className="text-sm font-semibold text-white">
-                    {s.val != null ? `${s.val.toFixed(3)}s` : (s.text || '—')}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      <p className="text-xs text-gray-600 text-center mt-4">
-        First-principles RK4 physics · 15 sub-models · 1 ms timestep · updates live as you adjust
+      {/* Subtitle */}
+      <p className="text-xs text-white/30 text-center mt-6 relative z-10">
+        First-principles RK4 physics · 15 sub-models · 1 ms timestep
       </p>
-    </div>
+    </motion.div>
   );
 }
