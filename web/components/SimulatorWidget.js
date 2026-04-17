@@ -279,11 +279,11 @@ export default function SimulatorWidget() {
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-gray-950 rounded-xl p-5 text-center border border-gray-800">
             <p className="text-xs text-gray-400 mb-1">Quarter-Mile ET</p>
-            <p className="text-4xl font-bold text-orange-400">{result.et_quarter_s.toFixed(3)}s</p>
+            <p className="text-4xl font-bold text-orange-400">{result.et_quarter_s?.toFixed(3) ?? '—'}s</p>
           </div>
           <div className="bg-gray-950 rounded-xl p-5 text-center border border-gray-800">
             <p className="text-xs text-gray-400 mb-1">Trap Speed</p>
-            <p className="text-4xl font-bold text-white">{result.trap_speed_kmh.toFixed(1)}</p>
+            <p className="text-4xl font-bold text-white">{result.trap_speed_kmh?.toFixed(1) ?? '—'}</p>
             <p className="text-xs text-gray-500 mt-1">km/h</p>
           </div>
           <div className="col-span-2 bg-gray-950 rounded-xl p-4 border border-gray-800">
@@ -292,13 +292,13 @@ export default function SimulatorWidget() {
               {[
                 { label: '60 ft',  val: result.et_60ft_s },
                 { label: '⅛ mile', val: result.et_eighth_s },
-                { label: 'Bike',   val: null, text: result.bike_name?.split(' ').slice(-2).join(' ') || selected?.model },
-                { label: 'Power',  val: null, text: `${result.peak_power_hp?.toFixed(0) || '—'} hp` },
+                { label: 'Bike',   val: null, text: (typeof result.bike_name === 'string' ? result.bike_name.split(' ').slice(-2).join(' ') : null) || selected?.model || '—' },
+                { label: 'Power',  val: null, text: `${result.peak_power_hp?.toFixed(0) ?? '—'} hp` },
               ].map(s => (
                 <div key={s.label}>
                   <p className="text-xs text-gray-500 mb-1">{s.label}</p>
                   <p className="text-sm font-semibold text-white">
-                    {s.val != null ? `${s.val.toFixed(3)}s` : s.text}
+                    {s.val != null ? `${s.val.toFixed(3)}s` : (s.text || '—')}
                   </p>
                 </div>
               ))}

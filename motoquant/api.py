@@ -77,7 +77,10 @@ def _get_db():
             # Quick liveness check — will throw if connection is closed/broken
             _db_conn.execute("SELECT 1")
             return _db_conn
-        except Exception:
+        except Exception as e:
+            logging.getLogger(__name__).warning(
+                "DB liveness check failed, reconnecting: %s", e
+            )
             _db_conn = None  # stale — reconnect below
 
     try:
@@ -87,7 +90,10 @@ def _get_db():
         db = MotoQuantDB(db_path)
         _db_conn = db.conn
         return _db_conn
-    except Exception:
+    except Exception as e:
+        logging.getLogger(__name__).error(
+            "Failed to initialize database at %s: %s", db_path, e, exc_info=True
+        )
         return None
 
 
@@ -129,6 +135,12 @@ class SimulateRequest(BaseModel):
         None, description="Venue for DA and surface conditions"
     )
 
+    # Environment overrides (applied on top of venue defaults if set)
+    ambient_temp_c: float | None = Field(None, description="Ambient temperature °C")
+    track_temp_c: float | None = Field(None, description="Track surface temperature °C")
+    humidity_pct: float | None = Field(None, description="Relative humidity 0-100%")
+    headwind_kmh: float | None = Field(None, description="Headwind km/h (negative = tailwind)")
+
     # Simulation options
     use_adaptive_dt: bool = Field(
         False, description="Use adaptive RK4 timestep (slower)"
@@ -157,6 +169,11 @@ class QuickSimRequest(BaseModel):
     front_tire_id: int | None = None
     rear_tire_id: int | None = None
     venue_id: int | None = None
+    # Environment overrides
+    ambient_temp_c: float | None = None
+    track_temp_c: float | None = None
+    humidity_pct: float | None = None
+    headwind_kmh: float | None = None
 
 
 # ─── Config builder ────────────────────────────────────────────────────────
@@ -171,6 +188,10 @@ def _build_config(
     venue_id: int | None = None,
     front_tire_id: int | None = None,
     rear_tire_id: int | None = None,
+    ambient_temp_c: float | None = None,
+    track_temp_c: float | None = None,
+    humidity_pct: float | None = None,
+    headwind_kmh: float | None = None,
 ) -> BikeConfig:
     """Assemble a BikeConfig from request parameters."""
 
@@ -253,12 +274,31 @@ def _build_config(
                     d = dict(row)
                     if d.get("altitude_m") is not None:
                         cfg.environment.altitude_m = float(d["altitude_m"])
-                    if d.get("surface_grip_multiplier") is not None:
-                        cfg.environment.surface_grip_multiplier = float(
-                            d["surface_grip_multiplier"]
-                        )
-            except Exception:
-                pass
+                    # Derive grip multiplier from surface_type
+                    surface = (d.get("surface_type") or "asphalt").lower()
+                    grip_map = {
+                        "concrete": 1.05,   # prepped concrete (NHRA-style)
+                        "asphalt": 1.00,     # baseline
+                        "prepped": 1.10,     # VHT-prepped
+                    }
+                    cfg.environment.surface_grip_multiplier = grip_map.get(
+                        surface, 1.00
+                    )
+            except Exception as e:
+                logging.getLogger(__name__).warning(
+                    "Failed to load venue %s: %s", venue_id, e
+                )
+
+    # ── Environment overrides (on top of venue) ──────────────────────────
+    if ambient_temp_c is not None:
+        cfg.environment.ambient_temp_c = ambient_temp_c
+    if track_temp_c is not None:
+        cfg.environment.track_temp_c = track_temp_c
+    if humidity_pct is not None:
+        cfg.environment.relative_humidity_pct = humidity_pct
+    if headwind_kmh is not None:
+        cfg.environment.wind_speed_ms = headwind_kmh / 3.6
+        cfg.environment.wind_direction_deg = 0.0  # 0 = headwind
 
     # ── Tire overrides ──────────────────────────────────────────────────
     # If a tire ID is provided, look up the tire's mu_peak and apply it
@@ -276,8 +316,10 @@ def _build_config(
                         mu = td.get("mu_peak") or td.get("pacejka_D")
                         if mu and float(mu) > 0:
                             cfg.tires.mu_peak = float(mu)
-                except Exception:
-                    pass
+                except Exception as e:
+                    logging.getLogger(__name__).warning(
+                        "Failed to load tire_id=%s: %s", tire_id, e
+                    )
 
     return cfg
 
@@ -476,6 +518,10 @@ def simulate(req: SimulateRequest):
             venue_id=req.venue_id,
             front_tire_id=req.front_tire_id,
             rear_tire_id=req.rear_tire_id,
+            ambient_temp_c=req.ambient_temp_c,
+            track_temp_c=req.track_temp_c,
+            humidity_pct=req.humidity_pct,
+            headwind_kmh=req.headwind_kmh,
         )
     except Exception as exc:
         raise HTTPException(400, f"Config error: {exc}")
@@ -488,7 +534,19 @@ def simulate(req: SimulateRequest):
 
     # Down-sample to ~100 Hz (every 10th point at 1 ms default dt)
     step = max(1, len(sim.t) // 1000)
-    idx = range(0, len(sim.t), step)
+    idx = list(range(0, len(sim.t), step))
+
+    def _safe_array(arr, transform, fallback=None):
+        """Safely extract + transform a sim array, guarding against None/empty."""
+        if arr is None or (hasattr(arr, '__len__') and len(arr) == 0):
+            return [] if fallback is None else fallback
+        return [transform(arr[i]) for i in idx if i < len(arr)]
+
+    # Robust manufacturer extraction
+    _mfr = "Unknown"
+    if cfg.name:
+        parts = cfg.name.split(" ", 1)
+        _mfr = parts[0] if parts else cfg.name
 
     # Build response — convert numpy to Python floats for JSON
     return {
@@ -503,20 +561,34 @@ def simulate(req: SimulateRequest):
             "1320ft_s": round(float(sim.time_quarter), 4),
         },
         "bike": {
-            "manufacturer": cfg.name.split(" ")[0] if cfg.name else "Unknown",
-            "model": cfg.name,
+            "manufacturer": _mfr,
+            "model": cfg.name or "Unknown",
             "peak_power_hp": round(float(cfg.engine.peak_power_hp), 1),
             "dry_mass_kg": round(float(cfg.chassis.dry_mass_kg), 1),
         },
+        "config": {
+            "peak_power_hp": round(float(cfg.engine.peak_power_hp), 1),
+            "peak_torque_nm": round(float(cfg.engine.peak_torque_nm), 1),
+            "total_mass_kg": round(float(cfg.chassis.total_mass_kg), 1),
+            "dry_mass_kg": round(float(cfg.chassis.dry_mass_kg), 1),
+            "displacement_cc": cfg.engine.displacement_cc,
+            "redline_rpm": cfg.engine.redline_rpm,
+            "gear_count": len(cfg.drivetrain.gear_ratios) if cfg.drivetrain.gear_ratios else 0,
+            "cd": round(float(cfg.aero.cd), 3) if hasattr(cfg, 'aero') and cfg.aero else None,
+            "rider_mass_kg": round(float(cfg.chassis.rider_mass_kg), 1),
+        },
         "timeseries": {
-            "t_s": [round(float(sim.t[i]), 4) for i in idx],
-            "v_kmh": [round(float(sim.v[i]) * 3.6, 2) for i in idx],
-            "x_m": [round(float(sim.x[i]), 2) for i in idx],
-            "rpm": [round(float(sim.rpm[i]), 0) for i in idx]
-            if hasattr(sim, "rpm")
-            else [],
-            "gear": [int(sim.gear[i]) for i in idx] if hasattr(sim, "gear") else [],
-            "accel_g": [round(float(sim.a[i]) / 9.81, 3) for i in idx],
+            "t_s": _safe_array(sim.t, lambda v: round(float(v), 4)),
+            "v_kmh": _safe_array(sim.v, lambda v: round(float(v) * 3.6, 2)),
+            "x_m": _safe_array(sim.x, lambda v: round(float(v), 2)),
+            "rpm": _safe_array(sim.rpm, lambda v: round(float(v), 0)),
+            "gear": _safe_array(sim.gear, lambda v: int(v)),
+            "accel_g": _safe_array(sim.a, lambda v: round(float(v) / 9.81, 3)),
+            "traction_pct": _safe_array(sim.traction_pct, lambda v: round(float(v) * 100, 1)),
+            "tire_temp_c": _safe_array(sim.T_tire, lambda v: round(float(v), 1)),
+            "power_kw": _safe_array(sim.power_kw, lambda v: round(float(v), 1)),
+            "F_drive_N": _safe_array(sim.F_drive, lambda v: round(float(v), 0)),
+            "F_drag_N": _safe_array(sim.F_drag, lambda v: round(float(v), 0)),
         },
     }
 
@@ -537,6 +609,10 @@ def simulate_quick(req: QuickSimRequest):
             venue_id=req.venue_id,
             front_tire_id=req.front_tire_id,
             rear_tire_id=req.rear_tire_id,
+            ambient_temp_c=req.ambient_temp_c,
+            track_temp_c=req.track_temp_c,
+            humidity_pct=req.humidity_pct,
+            headwind_kmh=req.headwind_kmh,
         )
     except Exception as exc:
         raise HTTPException(400, f"Config error: {exc}")
@@ -563,8 +639,10 @@ def simulate_quick(req: QuickSimRequest):
                         })
                         if part_dict.get("price_inr"):
                             build_cost_inr += float(part_dict["price_inr"])
-            except Exception:
-                pass
+            except Exception as e:
+                logging.getLogger(__name__).warning(
+                    "Failed to apply parts %s: %s", req.part_ids, e
+                )
 
     # Run stock sim for comparison if parts are applied
     # "Stock" means same slider overrides but NO parts — shows parts-only delta
@@ -580,6 +658,10 @@ def simulate_quick(req: QuickSimRequest):
                 venue_id=req.venue_id,
                 front_tire_id=req.front_tire_id,
                 rear_tire_id=req.rear_tire_id,
+                ambient_temp_c=req.ambient_temp_c,
+                track_temp_c=req.track_temp_c,
+                humidity_pct=req.humidity_pct,
+                headwind_kmh=req.headwind_kmh,
             )
             stock_sim = MotoQuantEngine(stock_cfg).run()
             stock_et = round(float(stock_sim.time_quarter), 4)
@@ -685,10 +767,12 @@ def leaderboard(limit: int = Query(20, le=100)):
         # sim_runs table stores saved runs from the CLI `sim save-run` command
         rows = db.execute(
             """SELECT sr.id, sr.et_quarter_s, sr.trap_speed_kmh,
-                      bm.manufacturer, bm.model, bm.year,
-                      sr.created_at
+                      m.name AS manufacturer, bm.model_name AS model,
+                      bm.year_from AS year, sr.created_at
                FROM sim_runs sr
-               LEFT JOIN bike_models bm ON sr.bike_model_id = bm.id
+               LEFT JOIN bike_configs bc ON sr.bike_config_id = bc.id
+               LEFT JOIN bike_models bm ON bc.bike_model_id = bm.id
+               LEFT JOIN manufacturers m ON bm.manufacturer_id = m.id
                ORDER BY sr.et_quarter_s ASC
                LIMIT ?""",
             (limit,),

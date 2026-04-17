@@ -145,7 +145,7 @@ export default function HomePage() {
           <h2 className="text-3xl font-bold mb-12">Curated Bike Library</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { num: '135', label: 'Bikes',  note: '20 manufacturers incl. KTM, Bajaj, TVS, RE' },
+              { num: '111', label: 'Bikes',  note: '17 manufacturers incl. KTM, Bajaj, TVS, RE' },
               { num: '69',  label: 'Tires',  note: 'Pacejka + thermal model, 15 brands' },
               { num: '70',  label: 'Parts',  note: 'Sprockets, exhaust, ECU flash, nitrous' },
               { num: '12',  label: 'Venues', note: '5 Indian + 7 international strips' },
@@ -188,7 +188,7 @@ export default function HomePage() {
                 <Zap size={20} /> Try the Simulator
               </a>
               <a
-                href="mailto:dhisetu@gmail.com"
+                href="mailto:motoquant@gmail.com"
                 className="inline-flex items-center gap-2 px-8 py-3 border border-orange-500 text-orange-400 hover:bg-orange-500/10 rounded-lg font-semibold transition-colors"
               >
                 Get in Touch
