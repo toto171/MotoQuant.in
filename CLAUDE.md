@@ -1,6 +1,6 @@
 # MotoQuant Pro — Persistent Project Context
 > Read this file at the start of every session. It is the single source of truth for project state, roadmap, and working instructions.
-> Last updated: April 16, 2026 (Phase 4A DNN surrogate + Phase 4B XGBoost + Smart Recommendations Engine; international bike expansion to 135 bikes/20 mfrs; Kaizen code hardening; 559+ tests passing)
+> Last updated: April 17, 2026 (Phase 3 API: A-vs-B compare, Dragy upload, Dyno upload endpoints + 24 API tests; bugfix v_rmse_ms→rmse_ms in overlay route; 583+ tests passing)
 
 ---
 
@@ -70,7 +70,7 @@ Self-imposed rules to maximise useful work per context window:
 ## CURRENT STATE (as of April 14, 2026)
 
 ### Test suite
-- **559+ tests passing** across 12 test files — zero failures (244 Phase 1/2 + 56 Phase 3 Dragy + 68 Phase 3 dyno/overlay/calibrator/multi-run + 69 Phase 3 ECU import + 69 Phase 4 analysis: ROI + Sobol + 84 Phase 4A/4B surrogate models + 65 Phase 4 recommendations: 38 unit + 27 integration)
+- **583+ tests passing** across 13 test files — zero failures (244 Phase 1/2 + 56 Phase 3 Dragy + 68 Phase 3 dyno/overlay/calibrator/multi-run + 69 Phase 3 ECU import + 24 Phase 3 API endpoints + 69 Phase 4 analysis: ROI + Sobol + 84 Phase 4A/4B surrogate models + 65 Phase 4 recommendations: 38 unit + 27 integration)
 - Integration tests for recommendations engine gated behind `MOTOQUANT_SLOW_TESTS=1` (each runs full physics engine on ~70 parts; ~45s per test)
 - Run with: `python -m pytest tests/ -q` from the project root
 
@@ -192,7 +192,8 @@ Vehicle Dynamics/
     ├── test_dragy.py            ← 56 tests — Dragy GPS parser
     ├── test_calibration.py      ← 44 tests — dyno, overlay, calibrator end-to-end
     ├── test_ecu.py              ← 69 tests — ECU log import (Woolich/PC-Link/MoTeC)
-    └── test_recommendations.py  ← 65 tests — Smart Recommendations Engine (38 unit + 27 integration)
+    ├── test_recommendations.py  ← 65 tests — Smart Recommendations Engine (38 unit + 27 integration)
+    └── test_api.py              ← 24 tests — FastAPI endpoints (health, quick/full sim, compare, dragy upload, dyno upload)
 ```
 
 ---
@@ -323,9 +324,13 @@ Vehicle Dynamics/
   - `GET /api/tires` — tire library (filter by compound/manufacturer)
   - `POST /api/simulate` — full simulation with timeseries (v, RPM, gear, accel)
   - `POST /api/simulate/quick` — ET-only, ~50 ms, for slider-driven UI
+  - `POST /api/simulate/compare` — A vs B head-to-head (two bikes/configs), returns delta ET/trap/cost + both timeseries
+  - `POST /api/calibrate/dragy` — Dragy CSV upload, run-boundary detection, best-run ET/trap/splits; optional sim overlay with bike_preset
+  - `POST /api/calibrate/dyno` — Dyno CSV upload (DynoJet/generic/MoTeC), SAE J1349 correction, peak power/torque + full curve
   - `GET /api/leaderboard` — top runs from DB
   - CORS-open for Next.js frontend; Pydantic v2 request validation
   - Validated: K5 → 10.039s, Hayabusa → 10.477s via API ✓
+  - **Bugfix (April 17):** `comparison.v_rmse_ms` → `comparison.rmse_ms` in Dragy overlay route (RunComparison field name mismatch — would have caused 500 errors)
 - [x] **Deployment configs**
   - `Procfile` — `uvicorn motoquant.api:app --host 0.0.0.0 --port $PORT`
   - `requirements-api.txt` — fastapi, uvicorn[standard], pydantic, numpy, scipy
@@ -342,6 +347,10 @@ Vehicle Dynamics/
   - Integrated into `web/app/page.js` with new "Simulator" nav item
   - Updated stats section (135 bikes, 69 tires, 70 parts, 12 venues)
   - Updated test count (413 → 437), updated feature list
+- [x] **API test suite** — `tests/test_api.py` (April 17, 2026)
+  - 24 tests: health (3), quick sim (4), full sim (2), A-vs-B compare (5), Dragy upload (5), Dyno upload (5)
+  - Uses FastAPI TestClient (starlette/httpx); synthetic Dragy CSV + DynoJet CSV generators
+  - **583 total tests passing** across 13 test files
 - [x] **Deployment configs** (all three ready)
   - `Procfile` — uvicorn start command
   - `nixpacks.toml` — Railway build config (Python 3.11, pip from requirements-api.txt)
