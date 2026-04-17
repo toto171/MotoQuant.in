@@ -364,112 +364,73 @@ export default function HomePage() {
             </svg>
           </motion.div>
 
-          {/* Hayabusa-inspired silhouette — scroll-parallax streak */}
+          {/* Headlight focal point — pulsing orange core streaking across the hero */}
           <motion.div
             style={{ x: motoX, scale: motoScale }}
-            className="absolute inset-x-0 bottom-[18%] pointer-events-none flex justify-start pl-[12%]"
+            className="absolute inset-y-0 left-0 w-full pointer-events-none flex items-center"
             aria-hidden="true"
           >
-            <svg
-              width="620"
-              height="180"
-              viewBox="0 0 620 180"
-              className="drop-shadow-[0_0_40px_rgba(255,94,31,0.55)] opacity-60"
-            >
-              <defs>
-                <linearGradient id="bikeGrad" x1="0" x2="1" y1="0" y2="0">
-                  <stop offset="0" stopColor="#FF5E1F" stopOpacity="0.1" />
-                  <stop offset="0.25" stopColor="#FF5E1F" stopOpacity="0.95" />
-                  <stop offset="1" stopColor="#FFB070" stopOpacity="1" />
-                </linearGradient>
-                <filter id="bikeGlow">
-                  <feGaussianBlur stdDeviation="1.5" />
-                </filter>
-              </defs>
-
-              {/* Main body — aggressive sport-bike profile (fairing → tank → hump → tapered tail) */}
-              <path
-                d="
-                  M 80 130
-                  Q 100 118 140 102
-                  Q 180 88 215 72
-                  Q 245 58 285 50
-                  Q 330 44 375 50
-                  Q 415 58 445 72
-                  Q 470 84 495 98
-                  L 520 112
-                  L 550 122
-                  Q 562 126 568 132
-                  L 540 138
-                  L 460 138
-                  L 420 140
-                  L 220 140
-                  L 150 138
-                  L 90 134
-                  Z
-                "
-                fill="url(#bikeGrad)"
+            <div className="relative w-[14%] aspect-square">
+              {/* Hot core */}
+              <div className="absolute inset-[38%] rounded-full bg-brand-orange blur-[1px] opacity-90" />
+              {/* Mid glow */}
+              <div className="absolute inset-[22%] rounded-full bg-brand-orange/60 blur-xl" />
+              {/* Outer halo */}
+              <div className="absolute inset-0 rounded-full bg-brand-orange/25 blur-3xl" />
+              {/* Forward motion cone — trailing light */}
+              <div
+                className="absolute top-1/2 -translate-y-1/2 left-[55%] h-[3px] w-[420px] bg-gradient-to-r from-brand-orange via-brand-orange/60 to-transparent blur-[1px]"
               />
-
-              {/* Windshield — aggressive front peak */}
-              <path
-                d="M 200 72 Q 240 55 270 50 L 275 62 Q 255 70 220 82 Z"
-                fill="#FFB070"
-                opacity="0.7"
+              <div
+                className="absolute top-1/2 -translate-y-1/2 left-[55%] h-[1px] w-[520px] bg-gradient-to-r from-brand-accent/80 via-brand-orange/40 to-transparent"
               />
-
-              {/* Tail hump */}
-              <path
-                d="M 420 62 Q 450 58 478 72 L 475 82 Q 450 76 425 78 Z"
-                fill="#FFB070"
-                opacity="0.6"
-              />
-
-              {/* Rider silhouette — tucked */}
-              <path
-                d="M 280 54 Q 305 36 335 34 Q 352 34 358 44 L 358 60 Q 350 68 332 74 L 305 80 L 292 78 Z"
-                fill="#000"
-                opacity="0.9"
-              />
-              <circle cx="345" cy="38" r="8" fill="#000" opacity="0.9" />
-
-              {/* Front wheel */}
-              <circle cx="140" cy="140" r="32" fill="#000" stroke="#FF5E1F" strokeWidth="1.8" />
-              <circle cx="140" cy="140" r="14" fill="none" stroke="#FF5E1F" strokeWidth="1" opacity="0.7" />
-              <circle cx="140" cy="140" r="4" fill="#FF5E1F" />
-
-              {/* Rear wheel */}
-              <circle cx="495" cy="140" r="34" fill="#000" stroke="#FF5E1F" strokeWidth="1.8" />
-              <circle cx="495" cy="140" r="15" fill="none" stroke="#FF5E1F" strokeWidth="1" opacity="0.7" />
-              <circle cx="495" cy="140" r="4" fill="#FF5E1F" />
-
-              {/* Exhaust flick */}
-              <path d="M 540 125 L 585 130 L 580 138 L 538 134 Z" fill="#FF5E1F" opacity="0.85" />
-
-              {/* Motion trails off the tail */}
-              <g filter="url(#bikeGlow)" opacity="0.8">
-                <rect x="568" y="118" width="42" height="2" fill="#FF5E1F" />
-                <rect x="578" y="124" width="34" height="1.5" fill="#FFB070" />
-                <rect x="574" y="130" width="40" height="2" fill="#FF5E1F" opacity="0.7" />
-              </g>
-            </svg>
+            </div>
           </motion.div>
 
-          {/* Animated horizontal speed lines — now scroll-reactive */}
-          <motion.div style={{ x: streakX }} className="absolute inset-0 opacity-40" aria-hidden="true">
-            {[...Array(7)].map((_, i) => (
+          {/* Scroll-reactive neon speed streaks — varied widths & opacities for depth */}
+          <motion.div style={{ x: streakX }} className="absolute inset-0 pointer-events-none" aria-hidden="true">
+            {[
+              { top: 14, width: 62, opacity: 0.55, duration: 2.2, delay: 0.0 },
+              { top: 22, width: 78, opacity: 0.35, duration: 2.8, delay: 0.3 },
+              { top: 34, width: 44, opacity: 0.7,  duration: 1.9, delay: 0.1 },
+              { top: 46, width: 88, opacity: 0.4,  duration: 3.1, delay: 0.5 },
+              { top: 58, width: 56, opacity: 0.6,  duration: 2.4, delay: 0.2 },
+              { top: 68, width: 72, opacity: 0.45, duration: 2.7, delay: 0.4 },
+              { top: 78, width: 50, opacity: 0.55, duration: 2.1, delay: 0.15 },
+              { top: 88, width: 66, opacity: 0.35, duration: 2.9, delay: 0.35 },
+            ].map((s, i) => (
               <div
                 key={i}
                 className="absolute h-px bg-gradient-to-r from-transparent via-brand-orange to-transparent speedline"
                 style={{
-                  top: `${12 + i * 11}%`,
-                  width: '100%',
-                  animationDuration: `${2.4 + i * 0.35}s`,
-                  animationDelay: `${i * 0.22}s`,
+                  top: `${s.top}%`,
+                  left: `${Math.random() * 20}%`,
+                  width: `${s.width}%`,
+                  opacity: s.opacity,
+                  animationDuration: `${s.duration}s`,
+                  animationDelay: `${s.delay}s`,
                 }}
               />
             ))}
           </motion.div>
+
+          {/* Floating telemetry callouts — physics flavor that matches the tagline */}
+          <div className="absolute inset-0 pointer-events-none hidden md:block" aria-hidden="true">
+            <div className="absolute top-[18%] left-[8%] font-mono text-[10px] text-brand-orange/40 tracking-wider">
+              <div>μ = 0.92</div>
+              <div className="text-white/30">// peak grip</div>
+            </div>
+            <div className="absolute top-[72%] right-[10%] font-mono text-[10px] text-brand-orange/40 tracking-wider text-right">
+              <div>Cd·A = 0.34</div>
+              <div className="text-white/30">// tucked</div>
+            </div>
+            <div className="absolute top-[30%] right-[14%] font-mono text-[10px] text-brand-accent/60 tracking-wider">
+              <div>ET → 9.97s</div>
+            </div>
+            <div className="absolute top-[60%] left-[12%] font-mono text-[10px] text-white/35 tracking-wider">
+              <div>v_trap = 239.8 km/h</div>
+            </div>
+          </div>
 
           {/* Animated glow orbs */}
           <motion.div
