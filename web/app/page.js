@@ -434,8 +434,7 @@ export default function HomePage() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="text-lg md:text-xl text-white/80 mb-6 max-w-2xl mx-auto leading-relaxed"
           >
-            A first-principles physics engine for quarter-mile ET within{' '}
-            <span className="text-brand-accent font-semibold">±0.07s</span>, terminal velocity, and land-speed-record
+            A first-principles physics engine for quarter-mile ET, terminal velocity, and land-speed-record
             runs. Validated on real Dragy GPS telemetry at Aamby Valley, MMRT, Texas Mile, and Bonneville.
           </motion.p>
 
