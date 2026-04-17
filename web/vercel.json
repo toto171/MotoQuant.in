@@ -22,8 +22,5 @@
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
     }
-  ],
-  "env": {
-    "NEXT_PUBLIC_API_URL": "@motoquant_api_url"
-  }
+  ]
 }

@@ -156,6 +156,13 @@ export default function HomePage() {
   const { scrollYProgress } = useScroll();
   const heroOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
   const navBackground = useTransform(scrollYProgress, [0, 0.1], ['rgba(0,0,0,0.5)', 'rgba(0,0,0,0.95)']);
+
+  // Parallax transforms for the Hayabusa silhouette and road
+  const motoX = useTransform(scrollYProgress, [0, 0.35], ['-18%', '130%']);
+  const motoScale = useTransform(scrollYProgress, [0, 0.35], [1, 1.12]);
+  const roadY = useTransform(scrollYProgress, [0, 0.3], ['0%', '-35%']);
+  const streakX = useTransform(scrollYProgress, [0, 0.35], ['0%', '-60%']);
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -204,7 +211,7 @@ export default function HomePage() {
           </motion.div>
 
           <div className="hidden md:flex gap-8 items-center text-sm font-mono">
-            <a href="#simulator" className="text-white/60 hover:text-white transition-colors duration-300">
+            <a href="/simulator" className="text-white/60 hover:text-white transition-colors duration-300">
               Simulator
             </a>
             <a href="#physics" className="text-white/60 hover:text-white transition-colors duration-300">
@@ -220,7 +227,7 @@ export default function HomePage() {
 
           <div className="flex items-center gap-2 sm:gap-3">
             <motion.a
-              href="#simulator"
+              href="/simulator"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="px-3 sm:px-4 py-2 bg-brand-orange hover:bg-brand-orangeLight text-black font-semibold rounded-lg text-xs sm:text-sm font-display transition-colors whitespace-nowrap"
@@ -255,7 +262,7 @@ export default function HomePage() {
             >
               <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1 font-mono text-sm">
                 {[
-                  { href: '#simulator', label: 'Simulator' },
+                  { href: '/simulator', label: 'Simulator' },
                   { href: '#physics', label: 'Physics' },
                   { href: '#validation', label: 'Validation' },
                   { href: '#cta', label: 'Get Started' },
@@ -309,21 +316,160 @@ export default function HomePage() {
           {/* Grid underlay */}
           <div className="absolute inset-0 bg-grid-fade opacity-20" />
 
-          {/* Animated speed lines */}
-          <div className="absolute inset-0 opacity-30">
-            {[...Array(5)].map((_, i) => (
+          {/* Road perspective lines — slide upward on scroll */}
+          <motion.div
+            style={{ y: roadY }}
+            className="absolute inset-x-0 bottom-0 h-2/3 pointer-events-none opacity-[0.18]"
+            aria-hidden="true"
+          >
+            <svg viewBox="0 0 1600 600" className="w-full h-full" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="roadFade" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0" stopColor="#FF5E1F" stopOpacity="0" />
+                  <stop offset="0.5" stopColor="#FF5E1F" stopOpacity="0.4" />
+                  <stop offset="1" stopColor="#FF5E1F" stopOpacity="1" />
+                </linearGradient>
+              </defs>
+              {[...Array(11)].map((_, i) => {
+                const x = 800 + (i - 5) * 240;
+                return (
+                  <line
+                    key={i}
+                    x1={x}
+                    y1="600"
+                    x2="800"
+                    y2="60"
+                    stroke="url(#roadFade)"
+                    strokeWidth="1.4"
+                  />
+                );
+              })}
+              {/* Horizontal distance marks */}
+              {[0.55, 0.72, 0.85, 0.93, 0.97].map((t, i) => {
+                const y = 60 + (600 - 60) * t;
+                const w = 1600 * (0.1 + t * 0.9);
+                return (
+                  <line
+                    key={`h-${i}`}
+                    x1={800 - w / 2}
+                    y1={y}
+                    x2={800 + w / 2}
+                    y2={y}
+                    stroke="#FF5E1F"
+                    strokeOpacity={0.15 + t * 0.35}
+                    strokeWidth="0.8"
+                  />
+                );
+              })}
+            </svg>
+          </motion.div>
+
+          {/* Hayabusa-inspired silhouette — scroll-parallax streak */}
+          <motion.div
+            style={{ x: motoX, scale: motoScale }}
+            className="absolute inset-x-0 bottom-[18%] pointer-events-none flex justify-start pl-[12%]"
+            aria-hidden="true"
+          >
+            <svg
+              width="620"
+              height="180"
+              viewBox="0 0 620 180"
+              className="drop-shadow-[0_0_40px_rgba(255,94,31,0.55)] opacity-60"
+            >
+              <defs>
+                <linearGradient id="bikeGrad" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0" stopColor="#FF5E1F" stopOpacity="0.1" />
+                  <stop offset="0.25" stopColor="#FF5E1F" stopOpacity="0.95" />
+                  <stop offset="1" stopColor="#FFB070" stopOpacity="1" />
+                </linearGradient>
+                <filter id="bikeGlow">
+                  <feGaussianBlur stdDeviation="1.5" />
+                </filter>
+              </defs>
+
+              {/* Main body — aggressive sport-bike profile (fairing → tank → hump → tapered tail) */}
+              <path
+                d="
+                  M 80 130
+                  Q 100 118 140 102
+                  Q 180 88 215 72
+                  Q 245 58 285 50
+                  Q 330 44 375 50
+                  Q 415 58 445 72
+                  Q 470 84 495 98
+                  L 520 112
+                  L 550 122
+                  Q 562 126 568 132
+                  L 540 138
+                  L 460 138
+                  L 420 140
+                  L 220 140
+                  L 150 138
+                  L 90 134
+                  Z
+                "
+                fill="url(#bikeGrad)"
+              />
+
+              {/* Windshield — aggressive front peak */}
+              <path
+                d="M 200 72 Q 240 55 270 50 L 275 62 Q 255 70 220 82 Z"
+                fill="#FFB070"
+                opacity="0.7"
+              />
+
+              {/* Tail hump */}
+              <path
+                d="M 420 62 Q 450 58 478 72 L 475 82 Q 450 76 425 78 Z"
+                fill="#FFB070"
+                opacity="0.6"
+              />
+
+              {/* Rider silhouette — tucked */}
+              <path
+                d="M 280 54 Q 305 36 335 34 Q 352 34 358 44 L 358 60 Q 350 68 332 74 L 305 80 L 292 78 Z"
+                fill="#000"
+                opacity="0.9"
+              />
+              <circle cx="345" cy="38" r="8" fill="#000" opacity="0.9" />
+
+              {/* Front wheel */}
+              <circle cx="140" cy="140" r="32" fill="#000" stroke="#FF5E1F" strokeWidth="1.8" />
+              <circle cx="140" cy="140" r="14" fill="none" stroke="#FF5E1F" strokeWidth="1" opacity="0.7" />
+              <circle cx="140" cy="140" r="4" fill="#FF5E1F" />
+
+              {/* Rear wheel */}
+              <circle cx="495" cy="140" r="34" fill="#000" stroke="#FF5E1F" strokeWidth="1.8" />
+              <circle cx="495" cy="140" r="15" fill="none" stroke="#FF5E1F" strokeWidth="1" opacity="0.7" />
+              <circle cx="495" cy="140" r="4" fill="#FF5E1F" />
+
+              {/* Exhaust flick */}
+              <path d="M 540 125 L 585 130 L 580 138 L 538 134 Z" fill="#FF5E1F" opacity="0.85" />
+
+              {/* Motion trails off the tail */}
+              <g filter="url(#bikeGlow)" opacity="0.8">
+                <rect x="568" y="118" width="42" height="2" fill="#FF5E1F" />
+                <rect x="578" y="124" width="34" height="1.5" fill="#FFB070" />
+                <rect x="574" y="130" width="40" height="2" fill="#FF5E1F" opacity="0.7" />
+              </g>
+            </svg>
+          </motion.div>
+
+          {/* Animated horizontal speed lines — now scroll-reactive */}
+          <motion.div style={{ x: streakX }} className="absolute inset-0 opacity-40" aria-hidden="true">
+            {[...Array(7)].map((_, i) => (
               <div
                 key={i}
                 className="absolute h-px bg-gradient-to-r from-transparent via-brand-orange to-transparent speedline"
                 style={{
-                  top: `${20 + i * 15}%`,
+                  top: `${12 + i * 11}%`,
                   width: '100%',
-                  animationDuration: `${3 + i * 0.5}s`,
-                  animationDelay: `${i * 0.3}s`,
+                  animationDuration: `${2.4 + i * 0.35}s`,
+                  animationDelay: `${i * 0.22}s`,
                 }}
               />
             ))}
-          </div>
+          </motion.div>
 
           {/* Animated glow orbs */}
           <motion.div
@@ -392,7 +538,7 @@ export default function HomePage() {
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
             <motion.a
-              href="#simulator"
+              href="/simulator"
               whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(255, 94, 31, 0.4)' }}
               whileTap={{ scale: 0.95 }}
               className="px-8 py-4 bg-brand-orange text-black font-display font-bold rounded-lg transition-all glow-orange"
@@ -698,8 +844,6 @@ export default function HomePage() {
               <span className="text-brand-orange/50">·</span> Not affiliated with any manufacturer
             </p>
           </div>
-          <p className="text-white/40">Made with{' '}
-            <span className="text-brand-accent">physics</span> by Hritwik Mudhai</p>
         </div>
       </footer>
     </div>
