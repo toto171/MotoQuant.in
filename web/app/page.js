@@ -110,42 +110,6 @@ function PhysicsCard({ icon: Icon, title, items }) {
   );
 }
 
-function ValidationCard({ bike }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-50px' });
-
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.5 }}
-      whileHover={cardHover}
-      className="glass rounded-xl p-8 border border-brand-orange/20 hover:border-brand-orange/50 transition-all"
-    >
-      <h3 className="font-display font-bold text-white mb-2">{bike.name}</h3>
-      <p className="text-white/60 text-sm mb-8 font-mono">{bike.cc}</p>
-
-      <div className="space-y-6">
-        <div className="pb-6 border-b border-ink-1">
-          <p className="text-white/40 text-xs mb-2 font-mono uppercase tracking-widest">Target ET</p>
-          <p className="text-3xl font-display font-bold text-brand-orange">{bike.target}</p>
-        </div>
-
-        <div className="pb-6 border-b border-ink-1">
-          <p className="text-white/40 text-xs mb-2 font-mono uppercase tracking-widest">Simulated ET</p>
-          <p className="text-3xl font-display font-bold text-white">{bike.sim}</p>
-        </div>
-
-        <div>
-          <p className="text-xs font-mono uppercase tracking-widest mb-2 text-white/40">Accuracy</p>
-          <p className="font-display font-bold text-brand-accent text-lg">{bike.accuracy}</p>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
 export default function HomePage() {
   const { scrollYProgress } = useScroll();
   const heroOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
@@ -614,45 +578,100 @@ export default function HomePage() {
       <section id="validation" className="py-24 md:py-32 px-6 border-t border-brand-orange/10">
         <div className="max-w-6xl mx-auto">
           <RevealSection>
-            <div className="mb-16">
+            <div className="mb-12">
               <h2 className="font-display font-bold text-4xl md:text-5xl mb-4">
                 Validated on Real Telemetry
               </h2>
-              <p className="text-white/80 text-lg">
-                We don't just predict — we measure. Here's how the engine stacks up against real quarter-mile runs.
+              <p className="text-white/80 text-lg max-w-3xl">
+                We don't just predict — we measure. Top 10 most accurate bikes out of 43 benchmarked against published Cycle World, Sport Rider, MCN, and Motorcyclist quarter-mile test results.
               </p>
             </div>
           </RevealSection>
 
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
-            <ValidationCard
-              bike={{
-                name: 'Suzuki GSX-R 1000 K5',
-                cc: '999cc Superbike',
-                target: '9.97s',
-                sim: '10.04s',
-                accuracy: '±0.07s (0.7%)',
-              }}
-            />
-            <ValidationCard
-              bike={{
-                name: 'Yamaha YZF-R1 4C8',
-                cc: '998cc Superbike',
-                target: '10.2–10.4s',
-                sim: '~10.3s',
-                accuracy: 'In-range ✓',
-              }}
-            />
-            <ValidationCard
-              bike={{
-                name: 'Suzuki Hayabusa Gen1',
-                cc: '1299cc Hyperbike',
-                target: '10.1–10.7s',
-                sim: '10.477s',
-                accuracy: 'Validated ✓',
-              }}
-            />
-          </div>
+          {/* Aggregate stats strip */}
+          <RevealSection>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+              {[
+                { num: '43', label: 'Bikes benchmarked' },
+                { num: '8', label: 'Within ±0.10s' },
+                { num: '23', label: 'Within ±0.20s' },
+                { num: '±0.08s', label: 'Top 10 mean error' },
+              ].map((s, i) => (
+                <div key={i} className="glass rounded-xl p-4 border border-brand-orange/20 text-center">
+                  <div className="font-display font-bold text-2xl md:text-3xl text-brand-orange tabular-nums">{s.num}</div>
+                  <div className="font-mono text-[10px] text-white/60 tracking-widest mt-1 uppercase">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </RevealSection>
+
+          {/* Top 10 most accurate bikes — table layout */}
+          <RevealSection>
+            <div className="glass rounded-xl border border-brand-orange/20 overflow-hidden mb-6">
+              {/* Table header — desktop only */}
+              <div className="hidden md:grid grid-cols-[40px_1fr_120px_120px_120px_140px] gap-4 px-5 py-3 border-b border-brand-orange/20 bg-white/[0.02] text-[10px] font-mono uppercase tracking-widest text-white/50">
+                <div>#</div>
+                <div>Bike</div>
+                <div className="text-right">Published ET</div>
+                <div className="text-right">Simulated ET</div>
+                <div className="text-right">Δ</div>
+                <div className="text-right">Source</div>
+              </div>
+
+              {[
+                { rank: 1, name: 'Aprilia RSV4 Factory', year: 2021, cc: '1077cc V4', target: 10.05, sim: 10.05, delta: 0.000, source: 'Cycle World 2021' },
+                { rank: 2, name: 'Yamaha YZF-R1 4C8', year: 2007, cc: '998cc I4 CF', target: 10.30, sim: 10.29, delta: -0.014, source: 'Sport Rider 2007' },
+                { rank: 3, name: 'Honda CBR1000RR SC59', year: 2008, cc: '999cc I4', target: 10.20, sim: 10.22, delta: 0.024, source: 'Sport Rider 2008' },
+                { rank: 4, name: 'KTM 1290 Super Duke R', year: 2022, cc: '1301cc V-twin', target: 10.15, sim: 10.09, delta: -0.060, source: 'Cycle World 2022' },
+                { rank: 5, name: 'Suzuki GSX-R 1000 K5', year: 2005, cc: '999cc I4', target: 9.97, sim: 10.03, delta: 0.064, source: 'Cycle World 2005' },
+                { rank: 6, name: 'Suzuki Hayabusa Gen1', year: 1999, cc: '1299cc I4', target: 10.40, sim: 10.47, delta: 0.072, source: 'Cycle World 1999' },
+                { rank: 7, name: 'Ducati 1299 Panigale', year: 2015, cc: '1285cc V-twin', target: 9.95, sim: 9.87, delta: -0.082, source: 'Sport Rider 2015' },
+                { rank: 8, name: 'Suzuki GSX-R 1000 K1', year: 2001, cc: '988cc I4', target: 10.20, sim: 10.28, delta: 0.084, source: 'Sport Rider 2001' },
+                { rank: 9, name: 'Suzuki GSX-R 1000 K3', year: 2003, cc: '988cc I4', target: 10.10, sim: 10.20, delta: 0.100, source: 'Sport Rider 2003' },
+                { rank: 10, name: 'Kawasaki Ninja ZX-10R', year: 2011, cc: '998cc I4', target: 10.10, sim: 10.20, delta: 0.100, source: 'Sport Rider 2011' },
+              ].map((b) => {
+                const abs = Math.abs(b.delta);
+                const deltaColor = abs < 0.05 ? 'text-brand-accent' : abs < 0.10 ? 'text-green-400' : 'text-amber-400';
+                const deltaSign = b.delta === 0 ? '±' : b.delta > 0 ? '+' : '';
+                return (
+                  <div
+                    key={b.rank}
+                    className="md:grid md:grid-cols-[40px_1fr_120px_120px_120px_140px] md:gap-4 px-5 py-4 border-b border-white/[0.04] last:border-0 hover:bg-brand-orange/[0.03] transition-colors"
+                  >
+                    {/* Mobile layout */}
+                    <div className="md:hidden flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <span className="font-display font-bold text-brand-orange text-lg tabular-nums">#{b.rank}</span>
+                        <span className="font-display font-bold text-white text-sm">{b.name}</span>
+                      </div>
+                      <span className={`font-display font-bold text-sm tabular-nums ${deltaColor}`}>
+                        {deltaSign}{b.delta.toFixed(3)}s
+                      </span>
+                    </div>
+                    <div className="md:hidden grid grid-cols-3 gap-2 text-xs">
+                      <div><div className="text-white/40 text-[10px] font-mono uppercase tracking-wider mb-0.5">Year</div><div className="text-white/80 font-mono">{b.year}</div></div>
+                      <div><div className="text-white/40 text-[10px] font-mono uppercase tracking-wider mb-0.5">Target</div><div className="text-white/80 font-mono tabular-nums">{b.target.toFixed(2)}s</div></div>
+                      <div><div className="text-white/40 text-[10px] font-mono uppercase tracking-wider mb-0.5">Sim</div><div className="text-white/80 font-mono tabular-nums">{b.sim.toFixed(2)}s</div></div>
+                    </div>
+                    <div className="md:hidden mt-2 text-[10px] font-mono text-white/40">{b.cc} · {b.source}</div>
+
+                    {/* Desktop layout */}
+                    <div className="hidden md:block font-display font-bold text-brand-orange text-lg tabular-nums">{b.rank}</div>
+                    <div className="hidden md:block">
+                      <div className="font-display font-bold text-white">{b.name}</div>
+                      <div className="font-mono text-xs text-white/50">{b.year} · {b.cc}</div>
+                    </div>
+                    <div className="hidden md:block text-right font-mono text-white/80 tabular-nums">{b.target.toFixed(2)}s</div>
+                    <div className="hidden md:block text-right font-mono text-white tabular-nums font-semibold">{b.sim.toFixed(2)}s</div>
+                    <div className={`hidden md:block text-right font-display font-bold tabular-nums ${deltaColor}`}>
+                      {deltaSign}{b.delta.toFixed(3)}s
+                    </div>
+                    <div className="hidden md:block text-right font-mono text-[10px] text-white/40 self-center">{b.source}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </RevealSection>
 
           <RevealSection className="text-center text-sm text-white/60 font-mono">
             <p>
