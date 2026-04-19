@@ -745,19 +745,17 @@ export default function HomePage() {
                 Start Predicting Your Quarter Mile
               </h2>
               <p className="text-white/80 text-lg text-center mb-12 max-w-2xl mx-auto">
-                Choose your path: CLI for deep analysis, REST API for integration, or the web simulator for quick runs.
+                Free web simulator for every rider. API access and custom integrations for racing teams and tuning shops.
               </p>
 
               <div className="grid md:grid-cols-2 gap-6 mb-10">
                 <div className="bg-ink-0/60 rounded-xl p-6 sm:p-8 border border-brand-orange/20">
-                  <h3 className="font-display font-bold text-xl mb-3 text-white">CLI & Python API</h3>
+                  <h3 className="font-display font-bold text-xl mb-3 text-white">Racing Teams & Tuning Shops</h3>
                   <p className="text-white/60 text-sm mb-6">
-                    Full simulation from your terminal. Import Dragy GPS, dyno curves, and Woolich ECU logs for
-                    calibration. Analyze parts ROI, optimize builds, and generate detailed reports.
-                  </p>
-                  <code className="block text-xs text-brand-accent bg-ink-1 px-4 py-3 rounded font-mono border border-brand-orange/20">
-                    pip install motoquant
-                  </code>
+                    Dragy GPS calibration, dyno + ECU log import, parts ROI, Bayesian build optimization, and private client data. Licensed access for professional workflows.</p>
+                  <a href="mailto:dhisetu@gmail.com?subject=MotoQuant%20Pro%20%E2%80%94%20Professional%20License" className="block text-xs text-brand-accent bg-ink-1 px-4 py-3 rounded font-mono border border-brand-orange/20 hover:border-brand-orange/60 transition-colors">
+                    &rarr; Request pricing
+                  </a>
                 </div>
 
                 <div className="bg-ink-0/60 rounded-xl p-6 sm:p-8 border border-brand-orange/20">
