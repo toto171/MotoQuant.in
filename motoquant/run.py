@@ -1116,7 +1116,112 @@ def cmd_tires(args):
 
 def cmd_parts(args):
     """Handle 'parts' subcommand."""
+    import json as _json
     db = ensure_db(args)
+
+    # ── --impact MODE: show ET/trap delta for a single part ─────────────
+    if getattr(args, "impact", None):
+        if not args.bike_id:
+            print("  Error: --impact requires --bike-id")
+            db.close()
+            return 1
+        part_id = args.impact
+        bike_id = args.bike_id
+
+        part = db.parts.get(part_id)
+        if part is None:
+            print(f"  Error: part {part_id} not found")
+            db.close()
+            return 1
+        config_row = db.bikes.get_current_config(bike_id)
+        if config_row is None:
+            print(f"  Error: no config for bike {bike_id}")
+            db.close()
+            return 1
+        config = db.bikes.to_config(config_row["id"])
+        model_row = db.bikes.get_model(bike_id)
+        bike_name = (
+            f"{model_row['manufacturer_name']} {model_row['model_name']}"
+            if model_row
+            else f"Bike {bike_id}"
+        )
+
+        # Compatibility check via existing engine
+        from .parts.compatibility import is_compatible
+        from .database.parts_repo import _enrich_bike_row_for_fitment
+        bike_row = dict(model_row) if model_row else {"id": bike_id}
+        _enrich_bike_row_for_fitment(db._conn, bike_row)
+        compatible, reason = is_compatible(part, bike_row)
+
+        # Run base + modified simulations (venue bakes into config via env params)
+        from .physics import MotoQuantEngine
+
+        base_result = MotoQuantEngine(config).run()
+        modified_config = db.parts.apply_to_config(part_id, config)
+        mod_result = MotoQuantEngine(modified_config).run()
+
+        delta_et = mod_result.time_quarter - base_result.time_quarter
+        delta_trap = mod_result.speed_quarter - base_result.speed_quarter
+        price = part.get("price_inr") or 0.0
+        cost_per_tenth = (
+            (price / abs(delta_et * 10)) if abs(delta_et) > 1e-6 else float("inf")
+        )
+
+        if getattr(args, "output_json", False):
+            out = {
+                "bike": bike_name,
+                "part": f"{part['brand']} {part['model_name']}",
+                "part_id": part_id,
+                "category": part.get("category_display") or part.get("category_name"),
+                "compatible": compatible,
+                "fitment_reason": reason,
+                "price_inr": price,
+                "base_et_s": round(base_result.time_quarter, 4),
+                "modified_et_s": round(mod_result.time_quarter, 4),
+                "delta_et_s": round(delta_et, 4),
+                "base_trap_ms": round(base_result.speed_quarter, 3),
+                "modified_trap_ms": round(mod_result.speed_quarter, 3),
+                "delta_trap_ms": round(delta_trap, 3),
+                "cost_per_tenth_inr": (
+                    round(cost_per_tenth, 0) if cost_per_tenth < 1e9 else None
+                ),
+            }
+            print(_json.dumps(out, indent=2))
+        else:
+            print(f"\n  MOD IMPACT — {bike_name}")
+            print(f"  Part: [{part_id}] {part['brand']} {part['model_name']}")
+            cat = part.get("category_display") or part.get("category_name") or "?"
+            print(f"  Category: {cat}")
+            print(f"  Price: ₹{price:,.0f}" if price else "  Price: —")
+            print(
+                f"  Fitment: {'✓ compatible' if compatible else '✗ INCOMPATIBLE'} — {reason}"
+            )
+            print(f"  {'─' * 60}")
+            print(
+                f"  Base ET:      {base_result.time_quarter:7.4f}s   "
+                f"Trap: {base_result.speed_quarter * 3.6:6.2f} km/h"
+            )
+            print(
+                f"  Modified ET:  {mod_result.time_quarter:7.4f}s   "
+                f"Trap: {mod_result.speed_quarter * 3.6:6.2f} km/h"
+            )
+            sign = "+" if delta_et >= 0 else ""
+            sign_t = "+" if delta_trap >= 0 else ""
+            print(
+                f"  Δ ET:         {sign}{delta_et:7.4f}s   "
+                f"Δ Trap: {sign_t}{delta_trap * 3.6:.2f} km/h"
+            )
+            if cost_per_tenth < 1e9:
+                print(f"  Cost / tenth: ₹{cost_per_tenth:,.0f}")
+            else:
+                print(f"  Cost / tenth: — (no measurable gain)")
+            if not compatible:
+                print(
+                    f"\n  ⚠  Part is not compatible with this bike. "
+                    f"Delta shown is theoretical only."
+                )
+        db.close()
+        return 0
 
     if args.build_cost:
         part_ids = [int(p.strip()) for p in args.build_cost.split(",")]
@@ -1145,10 +1250,32 @@ def cmd_parts(args):
             search_kwargs["max_price_inr"] = args.max_price
         if args.available:
             search_kwargs["available_only"] = True
+        # Bike-id compat filter (handled inside parts_repo.search)
+        bike_id_filter = getattr(args, "bike_id", None)
+        if bike_id_filter:
+            search_kwargs["bike_model_id"] = bike_id_filter
 
         results = db.parts.search(**search_kwargs)
         if not results:
-            print("  No parts found. Run: python -m motoquant.run db seed")
+            hint = (
+                " (no parts compatible with this bike — try a different --category)"
+                if bike_id_filter
+                else " — run: python -m motoquant.run db seed"
+            )
+            print(f"  No parts found.{hint}")
+        elif getattr(args, "output_json", False):
+            out = [
+                {
+                    "id": p["id"],
+                    "category": p.get("category_display") or p.get("category_name"),
+                    "brand": p["brand"],
+                    "model": p["model_name"],
+                    "price_inr": p.get("price_inr"),
+                    "availability": p.get("availability"),
+                }
+                for p in results
+            ]
+            print(_json.dumps(out, indent=2))
         else:
             headers = ["ID", "Category", "Brand", "Model", "INR", "Avail"]
             rows = []
@@ -1163,7 +1290,12 @@ def cmd_parts(args):
                         p.get("availability", "-"),
                     ]
                 )
-            print(f"\n  Parts ({len(results)} results):")
+            title = (
+                f"\n  Parts compatible with bike {bike_id_filter} ({len(results)} results):"
+                if bike_id_filter
+                else f"\n  Parts ({len(results)} results):"
+            )
+            print(title)
             print_table(headers, rows)
 
     db.close()
@@ -1596,6 +1728,13 @@ def cmd_import(args):
     if not dry_run:
         total = db.bikes.count_models()
         print(f"    Total in DB:     {total}")
+        # Re-seed tire fitments so newly-imported bikes get OEM tire links
+        try:
+            from .database.seed import seed_bike_tire_fitments
+            n_fits = seed_bike_tire_fitments(db)
+            print(f"    Tire fitments:   {n_fits} (rebuilt for new bikes)")
+        except Exception as e:
+            print(f"    Tire fitment refresh skipped: {e}")
 
     db.close()
 
@@ -2792,10 +2931,27 @@ def build_parser() -> argparse.ArgumentParser:
     p_parts.add_argument("--max-price", type=float, help="Max price in INR")
     p_parts.add_argument("--available", action="store_true", help="Only in-stock items")
     p_parts.add_argument(
+        "--bike-id",
+        type=int,
+        help="Filter parts to those compatible with a specific bike (by bike_model_id)",
+    )
+    p_parts.add_argument(
         "--build-cost",
         type=str,
         metavar="IDS",
         help="Calculate total cost for part IDs (e.g., 3,5,8,12)",
+    )
+    p_parts.add_argument(
+        "--impact",
+        type=int,
+        metavar="PART_ID",
+        help="Show ET/trap impact of applying a single part to --bike-id (requires --bike-id)",
+    )
+    p_parts.add_argument(
+        "--json",
+        action="store_true",
+        dest="output_json",
+        help="Output JSON instead of human-readable table",
     )
 
     # ── weather ──

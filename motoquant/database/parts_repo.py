@@ -15,6 +15,62 @@ from ..models import BikeConfig
 from .bridge import apply_part_to_config
 
 
+def _enrich_bike_row_for_fitment(conn: sqlite3.Connection, bike_row: dict) -> dict:
+    """
+    Populate bike_row fields that the compatibility engine needs but which
+    aren't on the bike_models row alone:
+      - manufacturer name (joined from manufacturers table)
+      - cylinder_config, chain_pitch (from bike_configs JSON blobs,
+        for legacy rows that pre-date the cylinder_config column)
+
+    Mutates and returns bike_row. Safe to call multiple times — each lookup
+    is skipped when the field is already populated.
+    """
+    bike_id = bike_row.get("id")
+    if bike_id is None:
+        return bike_row
+
+    # Manufacturer name lookup
+    if not bike_row.get("manufacturer") and not bike_row.get("manufacturer_name"):
+        mfr_id = bike_row.get("manufacturer_id")
+        if mfr_id is not None:
+            mfr_row = conn.execute(
+                "SELECT name FROM manufacturers WHERE id = ?", (mfr_id,)
+            ).fetchone()
+            if mfr_row is not None:
+                bike_row["manufacturer"] = mfr_row["name"]
+
+    # Only dig into bike_configs JSON if cylinder_config / chain_pitch missing
+    needs_cyl = bike_row.get("cylinder_config") in (None, "")
+    needs_pitch = bike_row.get("chain_pitch") in (None, "")
+    if not (needs_cyl or needs_pitch):
+        return bike_row
+
+    cfg_row = conn.execute(
+        """SELECT engine_params, drivetrain_params
+           FROM bike_configs
+           WHERE bike_model_id = ? AND is_current = 1
+           LIMIT 1""",
+        (bike_id,),
+    ).fetchone()
+    if cfg_row is None:
+        return bike_row
+
+    if needs_cyl and cfg_row["engine_params"]:
+        try:
+            ep = json.loads(cfg_row["engine_params"])
+            bike_row["cylinder_config"] = ep.get("cylinder_config")
+        except (json.JSONDecodeError, TypeError):
+            pass
+    if needs_pitch and cfg_row["drivetrain_params"]:
+        try:
+            dp = json.loads(cfg_row["drivetrain_params"])
+            bike_row["chain_pitch"] = dp.get("chain_pitch")
+        except (json.JSONDecodeError, TypeError):
+            pass
+    return bike_row
+
+
 class PartsRepository:
     """Repository for performance parts with sim-parameter impact tracking."""
 
@@ -32,6 +88,7 @@ class PartsRepository:
         model_name: str,
         specifications: dict,
         part_number: str = None,
+        fitment_rules: dict = None,
         compatible_bike_ids: list[int] = None,
         fitment_universal: bool = False,
         fitment_notes: str = None,
@@ -58,17 +115,18 @@ class PartsRepository:
         cur = self._conn.execute(
             """INSERT OR REPLACE INTO parts
                (category_id, brand, model_name, part_number,
-                compatible_bikes, fitment_universal, fitment_notes,
+                fitment_rules, compatible_bikes, fitment_universal, fitment_notes,
                 specifications, param_overrides, param_deltas, param_multipliers,
                 price_inr, price_usd, mrp_inr,
                 retailer, retailer_url, availability,
                 estimated_delivery_days, last_price_check)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, date('now'))""",
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, date('now'))""",
             (
                 category_id,
                 brand,
                 model_name,
                 part_number,
+                json.dumps(fitment_rules) if fitment_rules else None,
                 json.dumps(compatible_bike_ids) if compatible_bike_ids else None,
                 1 if fitment_universal else 0,
                 fitment_notes,
@@ -106,9 +164,13 @@ class PartsRepository:
         bike_model_id: int = None,
         max_price_inr: float = None,
         available_only: bool = False,
+        include_incompatible: bool = False,
         limit: int = 50,
     ) -> list[dict]:
-        """Search parts with filters."""
+        """
+        Search parts with filters.
+        If bike_model_id is given, filters by compatibility (unless include_incompatible=True).
+        """
         conditions = []
         params = []
 
@@ -121,10 +183,6 @@ class PartsRepository:
         if name_contains:
             conditions.append("(p.model_name LIKE ? OR p.brand LIKE ?)")
             params.extend([f"%{name_contains}%", f"%{name_contains}%"])
-        if bike_model_id is not None:
-            # JSON array contains check
-            conditions.append("(p.fitment_universal = 1 OR p.compatible_bikes LIKE ?)")
-            params.append(f"%{bike_model_id}%")
         if max_price_inr is not None:
             conditions.append("p.price_inr <= ?")
             params.append(max_price_inr)
@@ -142,7 +200,21 @@ class PartsRepository:
                 LIMIT ?""",
             params + [limit],
         ).fetchall()
-        return [dict(r) for r in rows]
+
+        result = [dict(r) for r in rows]
+
+        # If bike_model_id given, filter by compatibility
+        if bike_model_id is not None and not include_incompatible:
+            from ..parts.compatibility import is_compatible
+            bike_row = self._conn.execute(
+                "SELECT * FROM bike_models WHERE id = ?", (bike_model_id,)
+            ).fetchone()
+            if bike_row:
+                bike_row = dict(bike_row)
+                _enrich_bike_row_for_fitment(self._conn, bike_row)
+                result = [r for r in result if is_compatible(r, bike_row)[0]]
+
+        return result
 
     def list_categories(self) -> list[dict]:
         """List all parts categories."""
@@ -150,6 +222,54 @@ class PartsRepository:
             "SELECT * FROM parts_categories ORDER BY name"
         ).fetchall()
         return [dict(r) for r in rows]
+
+    def list_compatible_for_bike(
+        self,
+        bike_model_id: int,
+        category: str = None,
+    ) -> list[dict]:
+        """
+        List all parts compatible with a given bike.
+        Each row includes 'fitment_reason' key explaining why it fits.
+        """
+        from ..parts.compatibility import is_compatible
+
+        # Load bike
+        bike_row = self._conn.execute(
+            "SELECT * FROM bike_models WHERE id = ?", (bike_model_id,)
+        ).fetchone()
+        if bike_row is None:
+            return []
+        bike_row = dict(bike_row)
+        _enrich_bike_row_for_fitment(self._conn, bike_row)
+
+        # Search parts
+        conditions = []
+        params = []
+        if category:
+            conditions.append("pc.name = ?")
+            params.append(category)
+
+        where = " AND ".join(conditions) if conditions else "1=1"
+
+        rows = self._conn.execute(
+            f"""SELECT p.*, pc.name as category_name, pc.display_name as category_display
+                FROM parts p
+                JOIN parts_categories pc ON pc.id = p.category_id
+                WHERE {where}
+                ORDER BY p.brand, p.model_name""",
+            params,
+        ).fetchall()
+
+        result = []
+        for row in rows:
+            row_dict = dict(row)
+            compatible, reason = is_compatible(row_dict, bike_row)
+            if compatible:
+                row_dict["fitment_reason"] = reason
+                result.append(row_dict)
+
+        return result
 
     # ────────────────────────────────────────────
     # Simulation impact

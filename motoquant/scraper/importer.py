@@ -65,6 +65,182 @@ CATEGORY_COG_HEIGHT = {
 
 
 # ────────────────────────────────────────────────────────
+# Cylinder-config inference for parts-compatibility fitment
+# ────────────────────────────────────────────────────────
+# Manufacturers whose 2-cylinder engines are V-twins (90° or 45°/60° V)
+# rather than parallel twins. Used when a spec lists cylinders=2 without
+# an explicit engine_config.
+_V_TWIN_2CYL_MAKES = {
+    "Ducati", "Harley-Davidson", "Harley Davidson", "Harley", "HD",
+    "Indian Motorcycle", "Indian",  # DB stores as plain "Indian"
+    "Moto Guzzi", "Buell", "Victory", "Hyosung",
+}
+
+# Specific 2-cylinder bikes whose manufacturer isn't exclusively V-twin but
+# the named model is (e.g. Suzuki SV650, Honda's Shadow line, KTM's LC8 series).
+_V_TWIN_MODEL_TOKENS = {
+    "SV650", "SV1000", "Shadow", "VT750", "VT1100", "VT1300",
+    "1190", "1290", "LC8", "RC8", "Ducati",  # Ducati as fallback
+    "V7", "V9", "California",  # Moto Guzzi (also covered by make)
+}
+
+# 4-cylinder V4 models (rest are assumed I4).
+_V4_MODEL_TOKENS = {
+    "Panigale V4", "Streetfighter V4", "Multistrada V4",
+    "Diavel V4", "RSV4", "Tuono V4",
+    "VFR1200", "VFR800",
+    "RC8",
+}
+
+
+def _infer_cylinder_config(spec: "BikeSpec") -> str | None:
+    """
+    Infer the cylinder configuration (I4/V4/V2/I2/I1/I3/I6) from a BikeSpec.
+
+    Used to populate EngineParams.cylinder_config at import time so the
+    parts-compatibility engine can filter fitment by engine family.
+    Returns None if the cylinder count isn't known — callers should leave
+    the field unset rather than guess.
+    """
+    cyls = spec.cylinders
+    if cyls is None:
+        return None
+
+    make = (spec.manufacturer or "").strip()
+    model = (spec.model_name or "")
+
+    if cyls == 1:
+        return "I1"
+    if cyls == 2:
+        # V-twin vs parallel twin discrimination
+        if make in _V_TWIN_2CYL_MAKES:
+            return "V2"
+        for tok in _V_TWIN_MODEL_TOKENS:
+            if tok in model:
+                return "V2"
+        return "I2"
+    if cyls == 3:
+        return "I3"
+    if cyls == 4:
+        for tok in _V4_MODEL_TOKENS:
+            if tok in model:
+                return "V4"
+        return "I4"
+    if cyls == 6:
+        # Honda Gold Wing / BMW K1600 are flat-6 / I6 respectively;
+        # not critical for drag compatibility, best-guess I6.
+        if make == "Honda" and "Gold Wing" in model:
+            return "flat_6"
+        return "I6"
+    return None
+
+
+# ────────────────────────────────────────────────────────
+# Chain pitch inference (428 / 520 / 525 / 530 / None=belt/shaft)
+# ────────────────────────────────────────────────────────
+
+# Makes that predominantly ship belt on larger models (whole-fleet exclusion)
+_BELT_DRIVE_MAKES = {"Indian Motorcycle", "Victory"}
+# Harley-Davidson is belt drive EXCEPT for Bajaj-built single-cylinder X440 (chain)
+# and Buell uses belt.
+_HD_CHAIN_MODELS = {"X440"}
+
+# BMW-specific: R-series boxer and K-series inline-4 are shaft drive;
+# S1000/F-series parallel-twin/G-series are chain drive.
+_BMW_SHAFT_MODELS = {
+    "R 1250", "R1250", "R 1200", "R1200", "R nineT",
+    "K 1600", "K1600", "K 1300", "K1300",
+}
+# Moto Guzzi V-twins are shaft drive
+_MG_SHAFT_MODELS = {"V7", "V9", "V85", "California", "Griso", "Stelvio"}
+
+# Individual chain-drive-excluded models from chain-drive makes (edge cases)
+_NON_CHAIN_MODELS = {
+    "VMAX",  # Yamaha VMAX 1700 — shaft drive
+    "Gold Wing",  # Honda Gold Wing — shaft drive
+    "1125R",  # Buell 1125R — belt drive
+    "CB1100",  # Honda CB1100 — shaft drive (the retro 4)
+}
+# Models with explicit 530 pitch (mostly 1300cc+ drag platforms, older litre sport)
+_530_PITCH_MODELS = {"Hayabusa", "ZX-14R", "ZZR1400", "ZRX1200"}
+# Models with explicit 428 pitch (SE Asia cubs / underbones / <150cc)
+_428_PITCH_MODELS = {
+    "RS150R", "Winner X", "Supra GTR", "Sonic 150R",
+    "Y15ZR", "Exciter 150", "Exciter 155",
+    "Xpulse 200",  # Hero Xpulse uses 428 stock
+}
+
+
+def _infer_chain_pitch(spec: "BikeSpec") -> str | None:
+    """
+    Infer the standard chain pitch code (428 / 520 / 525 / 530) from a BikeSpec.
+
+    Returns None for belt or shaft drive bikes, and for bikes with unknown
+    displacement. Chain pitch is needed by the parts compatibility engine so
+    sprocket/chain fitment rules can target the correct bikes.
+
+    Rules (coarse but accurate for drag-relevant catalogs):
+      • Belt/shaft drive makes → None (Harley, Indian, BMW boxer, Moto Guzzi)
+      • Explicit model hits (Hayabusa/ZX-14R → "530"; SE Asia 150s → "428")
+      • ≤165cc → "428" (most Indian/SE Asia small-cc)
+      • 166–499cc → "520"
+      • 500–999cc → "520" (modern sport) / "525" (older litre)
+      • 1000–1299cc → "525"
+      • ≥1300cc → "530"
+    """
+    make = (spec.manufacturer or "").strip()
+    model = (spec.model_name or "")
+    cc = spec.displacement_cc
+
+    # Belt / shaft drive exclusions
+    if make in _BELT_DRIVE_MAKES:
+        return None
+    if make == "Harley-Davidson":
+        # Harley is belt drive except chain-drive exceptions (Bajaj-built X440)
+        if not any(tok in model for tok in _HD_CHAIN_MODELS):
+            return None
+    if make == "Buell":
+        return None  # Buell is belt drive
+    if make == "BMW":
+        for tok in _BMW_SHAFT_MODELS:
+            if tok in model:
+                return None
+        # BMW chain-drive fleet (S1000/F/G/M series) falls through to disp rules
+    if make == "Moto Guzzi":
+        for tok in _MG_SHAFT_MODELS:
+            if tok in model:
+                return None
+    for tok in _NON_CHAIN_MODELS:
+        if tok in model:
+            return None
+
+    # Explicit model overrides
+    for tok in _530_PITCH_MODELS:
+        if tok in model:
+            return "530"
+    for tok in _428_PITCH_MODELS:
+        if tok in model:
+            return "428"
+
+    if cc is None:
+        return None
+
+    # Displacement-based rules
+    if cc <= 165:
+        return "428"
+    if cc < 500:
+        return "520"
+    if cc < 1000:
+        # Most modern 600–1000cc sport bikes use 520; older litre 525
+        if spec.year_from is not None and spec.year_from < 2005 and cc >= 900:
+            return "525"
+        return "520"
+    if cc < 1300:
+        return "525"
+    return "530"
+
+
+# ────────────────────────────────────────────────────────
 # Synthetic torque curve builder
 # ────────────────────────────────────────────────────────
 
@@ -145,6 +321,8 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
         stroke_mm=spec.stroke_mm or base.stroke_mm,
         compression_ratio=spec.compression_ratio or base.compression_ratio,
         engine_inertia_kgm2=CATEGORY_ENGINE_INERTIA.get(spec.category, 0.042),
+        cylinder_count=spec.cylinders,
+        cylinder_config=_infer_cylinder_config(spec),
     )
 
 
@@ -206,11 +384,21 @@ def _build_drivetrain_from_spec(
     rear = rear or base.rear_sprocket
     primary = primary or base.primary_ratio
 
+    pitch = _infer_chain_pitch(spec)
+    # Pitch in mm: 428 = 12.7, 520 = 15.875, 525 = 15.875, 530 = 15.875.
+    # Only the nominal roller width differs materially for mass/drag — map to
+    # the most common mm values so sim consumers that read chain_pitch_mm stay
+    # accurate. Use 12.7 for 428, 15.875 for 520/525/530 (the differences are
+    # roller width, not pitch).
+    chain_pitch_mm = 12.7 if pitch == "428" else base.chain_pitch_mm
+
     return DrivetrainParams(
         gear_ratios=list(ratios),
         final_drive_ratio=float(rear) / float(front),
         front_sprocket=int(front),
         rear_sprocket=int(rear),
+        chain_pitch_mm=chain_pitch_mm,
+        chain_pitch=pitch,
         chain_links=base.chain_links,
         primary_ratio=float(primary),
     )

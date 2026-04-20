@@ -2,12 +2,19 @@
 Tests for motoquant.api -- FastAPI endpoints.
 
 Uses FastAPI's TestClient (starlette) for synchronous endpoint testing.
-Does NOT require a running server or database; presets handle all sim calls.
+Does NOT require a running server.
+
+DB-backed endpoints (bike suggest, venue resolve) use an isolated temporary
+SQLite database seeded with minimal reference data; the module-level setup
+below creates it and patches motoquant.api so the production `motoquant.db`
+is never touched.
 """
 
 import io
 import json
 import math
+import os
+import tempfile
 import unittest
 
 import numpy as np
@@ -15,9 +22,47 @@ import numpy as np
 # FastAPI TestClient
 from fastapi.testclient import TestClient
 
-from motoquant.api import app
+# ---------------------------------------------------------------------------
+# Isolated DB setup -- runs before `from motoquant.api import app` imports
+# cache any state, so we point the API at a fresh tmp DB first.
+# ---------------------------------------------------------------------------
+
+_tmp_db_file = tempfile.NamedTemporaryFile(
+    prefix="motoquant_test_", suffix=".db", delete=False
+)
+_tmp_db_file.close()
+_TMP_DB_PATH = _tmp_db_file.name
+os.environ["MOTOQUANT_DB"] = _TMP_DB_PATH
+
+# Initialize schema + seeded reference data in the tmp DB
+from motoquant.database.connection import MotoQuantDB as _SetupDB  # noqa: E402
+_setup_db = _SetupDB(_TMP_DB_PATH)
+_setup_db.initialize()
+_setup_db.close()
+
+# Now safe to import the API -- it'll pick up the env var on first DB access
+from motoquant.api import app  # noqa: E402
+import motoquant.api as _api_mod  # noqa: E402
+
+# Force any cached connection (singleton) to use the tmp DB
+_api_mod._db_conn = None
 
 client = TestClient(app)
+
+
+def tearDownModule():
+    """Remove the tmp DB after all tests finish."""
+    try:
+        if _api_mod._db_conn is not None:
+            try:
+                _api_mod._db_conn.close()
+            except Exception:
+                pass
+            _api_mod._db_conn = None
+        if os.path.exists(_TMP_DB_PATH):
+            os.unlink(_TMP_DB_PATH)
+    except Exception:
+        pass
 
 
 # ---------------------------------------------------------------------------
@@ -339,6 +384,137 @@ class TestDynoUpload(unittest.TestCase):
             files={"file": ("bad.csv", io.BytesIO(bad), "text/csv")},
         )
         self.assertIn(r.status_code, [422, 400])
+
+
+# ===========================================================================
+# POST /api/bikes/suggest
+# ===========================================================================
+
+class TestBikeSuggestEndpoint(unittest.TestCase):
+    def test_minimal_valid_submission(self):
+        """Accept a submission with only required fields (make + model)."""
+        r = client.post("/api/bikes/suggest", json={
+            "make": "TestMakeXYZ",
+            "model": "Phantom 500R Test",
+        })
+        self.assertEqual(r.status_code, 201, r.text)
+        body = r.json()
+        self.assertIn("id", body)
+        self.assertIsInstance(body["id"], int)
+        self.assertEqual(body["flagged_out_of_bounds"], False)
+        self.assertEqual(body["issues"], [])
+
+    def test_full_submission_not_flagged(self):
+        """Plausible full submission should NOT be flagged."""
+        r = client.post("/api/bikes/suggest", json={
+            "make": "TestBrand",
+            "model": "Test Sport 750",
+            "year": 2024,
+            "displacement_cc": 749.0,
+            "peak_power_hp": 95.0,
+            "dry_mass_kg": 190.0,
+            "category": "sport",
+            "notes": "Rare spec variant",
+        })
+        self.assertEqual(r.status_code, 201, r.text)
+        body = r.json()
+        self.assertFalse(body["flagged_out_of_bounds"])
+
+    def test_out_of_bounds_displacement_flagged(self):
+        """Plausible-range violations are stored but flagged."""
+        r = client.post("/api/bikes/suggest", json={
+            "make": "TestBrand",
+            "model": "Flag Test Model",
+            "displacement_cc": 4500.0,  # Above 3500 ceiling in BOUNDS
+        })
+        # Pydantic range allows up to 5000, repo plausibility caps at 3500
+        self.assertEqual(r.status_code, 201, r.text)
+        body = r.json()
+        self.assertTrue(body["flagged_out_of_bounds"])
+        self.assertTrue(any("displacement_cc" in s for s in body["issues"]))
+
+    def test_empty_make_rejected(self):
+        """Empty make field returns 422."""
+        r = client.post("/api/bikes/suggest", json={
+            "make": "",
+            "model": "Should not store",
+        })
+        self.assertEqual(r.status_code, 422)
+
+    def test_missing_model_rejected(self):
+        """Missing model field returns 422."""
+        r = client.post("/api/bikes/suggest", json={
+            "make": "TestMake",
+        })
+        self.assertEqual(r.status_code, 422)
+
+    def test_extreme_value_rejected_by_pydantic(self):
+        """Values outside even the lenient Pydantic range return 422."""
+        r = client.post("/api/bikes/suggest", json={
+            "make": "TestMake",
+            "model": "Extreme",
+            "year": 1800,  # below 1900 Pydantic lower bound
+        })
+        self.assertEqual(r.status_code, 422)
+
+
+# ===========================================================================
+# POST /api/venues/resolve
+# ===========================================================================
+
+class TestVenueResolveEndpoint(unittest.TestCase):
+    def test_missing_input_returns_422(self):
+        """Neither location nor lat/lon provided → 422."""
+        r = client.post("/api/venues/resolve", json={})
+        self.assertEqual(r.status_code, 422)
+
+    def test_lat_without_lon_returns_422(self):
+        """Partial GPS (lat only) → 422."""
+        r = client.post("/api/venues/resolve", json={"lat": 18.5})
+        self.assertEqual(r.status_code, 422)
+
+    def test_nonexistent_location_graceful(self):
+        """Unknown location falls through to OWM; without API key returns 503."""
+        r = client.post("/api/venues/resolve", json={
+            "location": "Nowhere Place XYZ Never Existed 999",
+        })
+        # In a CI environment without OPENWEATHERMAP_API_KEY this is 503.
+        # In a configured environment it may be 422 ("could not resolve").
+        # Either way it should not be a 5xx that indicates a crash.
+        self.assertIn(r.status_code, [422, 502, 503])
+
+    def test_seeded_venue_match_shape(self):
+        """
+        If the DB has seeded venues, a known name should resolve to a seeded venue.
+        If not, the test is a no-op (resolve endpoint falls through to OWM).
+        Shape check only; does not require live network.
+        """
+        r = client.post("/api/venues/resolve", json={"location": "Aamby"})
+        # If database is seeded and Aamby matches, expect 200 + flat env payload
+        if r.status_code == 200:
+            body = r.json()
+            # Response should contain top-level environment fields
+            self.assertIn("matched_venue_id", body)
+            self.assertIn("temperature_c", body)
+            self.assertIn("humidity_pct", body)
+            self.assertIn("pressure_hpa", body)
+            self.assertIn("altitude_m", body)
+            self.assertIn("density_altitude_m", body)
+            self.assertIn("source", body)
+            # When a seeded venue matched, the canonical `source` must be the
+            # resolution-path marker (not the underlying weather provenance).
+            # The raw weather provenance, if any, is preserved under
+            # `weather_source` so the UI can still show it separately.
+            if body["matched_venue_id"] is not None:
+                self.assertEqual(body["source"], "seeded_venue")
+                self.assertIsInstance(body["matched_venue_id"], int)
+            else:
+                # Fallthrough path — OWM live fetch
+                self.assertEqual(body["source"], "openweathermap")
+        else:
+            # In test environments without seeded data, fall through to OWM,
+            # which returns 503 (no key) / 502 (network) / 422 (not found).
+            self.assertIn(r.status_code, [422, 502, 503])
 
 
 if __name__ == "__main__":
