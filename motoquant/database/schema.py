@@ -528,9 +528,10 @@ CREATE INDEX IF NOT EXISTS idx_bike_sugg_make    ON bike_suggestions(make);
 
 # Categories seeded on first init
 SEED_PARTS_CATEGORIES = [
+    # Note: "tire" is intentionally NOT a parts category — tires live in the
+    # dedicated tire_models table and are selected via the sidebar Tires menu.
     ("sprocket", "Sprocket", '["drivetrain"]'),
     ("chain", "Chain / Belt", '["drivetrain"]'),
-    ("tire", "Tire", '["tires"]'),
     ("exhaust", "Exhaust System", '["engine", "aero"]'),
     ("ecu", "ECU / Flash", '["engine", "staging"]'),
     ("clutch_kit", "Clutch Kit", '["clutch", "drivetrain"]'),

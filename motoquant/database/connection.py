@@ -148,7 +148,9 @@ class MotoQuantDB:
         # but we bump the version so older DB files get their schema_meta updated.
 
     def _seed_parts_categories(self):
-        """Insert parts categories if not present."""
+        """Insert parts categories if not present. Also prunes the retired
+        'tire' pseudo-category from older DBs (tires are managed in tire_models,
+        not parts — the category was only ever empty)."""
         conn = self.conn
         for name, display, affects in SEED_PARTS_CATEGORIES:
             conn.execute(
@@ -156,6 +158,21 @@ class MotoQuantDB:
                    VALUES (?, ?, ?)""",
                 (name, display, affects),
             )
+        # Retire stale "tire" category if it exists AND is empty (parts in it
+        # would block the delete via FK — that scenario is impossible by design
+        # but we still guard against it rather than silently dropping data).
+        tire_row = conn.execute(
+            "SELECT id FROM parts_categories WHERE name = 'tire'"
+        ).fetchone()
+        if tire_row is not None:
+            n_parts = conn.execute(
+                "SELECT COUNT(*) FROM parts WHERE category_id = ?",
+                (tire_row["id"],),
+            ).fetchone()[0]
+            if n_parts == 0:
+                conn.execute(
+                    "DELETE FROM parts_categories WHERE id = ?", (tire_row["id"],)
+                )
 
     def _seed_venues(self):
         """Insert Indian drag venues if not present."""
