@@ -289,13 +289,21 @@ def fetch_db_stats():
 
 @st.cache_data
 def fetch_parts_catalog():
-    """All parts grouped by category, sorted by price."""
+    """All parts grouped by category, sorted by price.
+
+    Each part dict carries the raw fitment inputs (`fitment_rules`,
+    `fitment_universal`, `compatible_bikes`) alongside the parsed effect
+    deltas, so `filter_parts_for_bike()` can delegate to the authoritative
+    `motoquant.parts.compatibility.is_compatible()` engine instead of
+    reimplementing chain-pitch / stroke-type logic here.
+    """
     conn = _conn()
     rows = conn.execute("""
         SELECT p.id, pc.name AS category, p.brand, p.model_name,
                p.price_inr, p.availability,
                p.param_overrides, p.param_deltas, p.param_multipliers,
-               p.specifications
+               p.specifications,
+               p.fitment_rules, p.fitment_universal, p.compatible_bikes
         FROM   parts p
         JOIN   parts_categories pc ON pc.id = p.category_id
         ORDER  BY pc.name, p.price_inr
@@ -321,6 +329,10 @@ def fetch_parts_catalog():
             "param_multipliers": mults,
             "effects":     effects,
             "label":       f"{r['brand']} {r['model_name']}",
+            # Raw fitment inputs for is_compatible()
+            "fitment_rules":     r["fitment_rules"],
+            "fitment_universal": r["fitment_universal"],
+            "compatible_bikes":  r["compatible_bikes"],
         })
     return catalog
 
@@ -329,52 +341,34 @@ def filter_parts_for_bike(catalog: dict, bike: dict) -> dict:
     """
     Return a copy of catalog with only parts that are compatible with the given bike.
 
-    Filtering rules (in priority order):
-    1. Sprockets / chains: 520-pitch parts excluded for Hayabusa (530 bike);
-       530-pitch parts excluded for everything else.
-    2. ECU flashes from Woolich: shown only if the part name contains words from
-       the bike's model name (e.g. "K5/K6", "Hayabusa", "YZF-R1").
-    3. Everything else: show always (exhausts, clutch, suspension etc. are either
-       labelled universal or can be adapted; user can verify fitment).
+    Delegates to `motoquant.parts.compatibility.is_compatible()` — the single
+    source of truth for fitment rules (tier, manufacturers, engine_configs,
+    displacement bounds, chain_pitch, stroke_type, excluded_bike_ids).
+
+    This replaces an earlier ad-hoc filter that only knew about 520/530 chain
+    pitch and Woolich ECU flashes. That filter never checked stroke_type, so
+    2-stroke expansion chambers would surface on 4-stroke bikes. The engine
+    below handles the full rule set, and any future rule additions (e.g.
+    bore/stroke checks) flow here automatically.
     """
-    label_lc = bike["label"].lower()
-    model_lc = bike["model"].lower()
-    mfr_lc   = bike["mfr"].lower()
+    from motoquant.parts.compatibility import is_compatible
+    from motoquant.database.parts_repo import _enrich_bike_row_for_fitment
 
-    # Bikes that use 530-pitch chain (add more if catalog grows)
-    is_530_bike = "hayabusa" in label_lc
-
-    # Significant model keywords for ECU-flash matching (≥4 chars, non-generic)
-    _stop = {"racing","stage","flash","flash","full","system","the","and","for"}
-    model_kws = [w for w in model_lc.replace("/","  ").replace("-"," ").split()
-                 if len(w) >= 3 and w not in _stop]
+    conn = _conn()
+    bike_row_raw = conn.execute(
+        "SELECT * FROM bike_models WHERE id = ?", (bike["model_id"],)
+    ).fetchone()
+    if bike_row_raw is None:
+        # Bike not in DB — fall back to returning everything (fail-open for UX).
+        return {cat: list(parts) for cat, parts in catalog.items()}
+    bike_row = dict(bike_row_raw)
+    _enrich_bike_row_for_fitment(conn, bike_row)
 
     filtered = {}
     for cat, parts in catalog.items():
-        kept = []
-        for p in parts:
-            pname_lc = p["model_name"].lower()
-            brand_lc = p["brand"].lower()
-
-            # ── Chain-pitch filtering ──────────────────────────────────────
-            if cat in ("sprocket", "chain"):
-                has_520 = "520" in pname_lc
-                has_530 = "530" in pname_lc
-                if has_530 and not is_530_bike:
-                    continue   # 530 part on a non-530 bike
-                if has_520 and is_530_bike:
-                    continue   # 520 part on a 530 bike
-
-            # ── ECU flash: model-specific Woolich flashes ──────────────────
-            if cat == "ecu" and "woolich" in brand_lc:
-                if not any(kw in pname_lc for kw in model_kws):
-                    continue   # This Woolich flash is for a different bike model
-
-            kept.append(p)
-
+        kept = [p for p in parts if is_compatible(p, bike_row)[0]]
         if kept:
             filtered[cat] = kept
-
     return filtered
 
 

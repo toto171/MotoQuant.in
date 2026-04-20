@@ -578,11 +578,18 @@ class TestKnownBikes:
             assert spec.manufacturer, f"Missing manufacturer: {spec.model_name}"
 
     def test_all_known_bikes_have_gear_ratios(self):
+        # Most modern motorcycles are 5- or 6-speed. Historical 2-stroke
+        # commuters (Yamaha RX100 1V1 1985-96) and some small-cc cubs shipped
+        # with 4-speed gearboxes and we ship them as such — historically
+        # accurate is better than padded-fifth-gear fiction. Minimum is 4.
         for spec in ALL_KNOWN_BIKES:
             assert spec.gear_ratios is not None, (
                 f"{spec.manufacturer} {spec.model_name} has no gear_ratios"
             )
-            assert len(spec.gear_ratios) >= 5
+            assert len(spec.gear_ratios) >= 4, (
+                f"{spec.manufacturer} {spec.model_name}: "
+                f"only {len(spec.gear_ratios)} gears"
+            )
 
     def test_all_known_bikes_validate(self):
         failures = []
@@ -630,10 +637,12 @@ class TestKnownBikes:
         assert missing == set(), f"Missing manufacturers: {missing}"
 
     def test_displacement_range(self):
+        # Range covers historical Indian/Asian 2-stroke commuters (Yamaha RX100
+        # at 98cc, Aprilia RS125 at 124cc, Yamaha RX135/RXZ135 at 132-133cc) up
+        # through 2500cc cruisers (Triumph Rocket 3 at 2458cc).
         for spec in ALL_KNOWN_BIKES:
             if spec.displacement_cc:
-                # Range covers entry-level 150cc Indian bikes up to 2500cc cruisers (Rocket 3)
-                assert 149 <= spec.displacement_cc <= 2500, (
+                assert 95 <= spec.displacement_cc <= 2500, (
                     f"{spec.model_name}: displacement {spec.displacement_cc} out of range"
                 )
 

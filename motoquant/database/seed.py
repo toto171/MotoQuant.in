@@ -7320,15 +7320,18 @@ def seed_all(db: MotoQuantDB) -> dict:
     from .seed_catalogs.adv_cruiser_exhausts import seed_adv_cruiser_exhausts
     from .seed_catalogs.drag_specific import seed_drag_specific
     from .seed_catalogs.premium_universal import seed_premium_universal
+    from .seed_catalogs.two_stroke import seed_two_stroke
 
     seed_reference_bikes(db)
     n_tires = seed_tire_library(db)
     n_parts = seed_parts_catalog(db)
     # Expansion catalogs (April 2026): bike-specific mod libraries across
-    # ADV/cruiser exhausts, drag-specific mods, and premium universal options.
+    # ADV/cruiser exhausts, drag-specific mods, premium universal options,
+    # and 2-stroke-specific parts (pipes, reeds, powervalve controllers).
     n_parts += seed_adv_cruiser_exhausts(db)
     n_parts += seed_drag_specific(db)
     n_parts += seed_premium_universal(db)
+    n_parts += seed_two_stroke(db)
     n_fitments = seed_bike_tire_fitments(db)
     summary = {
         "bikes": 3,

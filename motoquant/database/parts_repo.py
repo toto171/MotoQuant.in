@@ -40,10 +40,11 @@ def _enrich_bike_row_for_fitment(conn: sqlite3.Connection, bike_row: dict) -> di
             if mfr_row is not None:
                 bike_row["manufacturer"] = mfr_row["name"]
 
-    # Only dig into bike_configs JSON if cylinder_config / chain_pitch missing
+    # Only dig into bike_configs JSON if cylinder_config / chain_pitch / stroke_type missing
     needs_cyl = bike_row.get("cylinder_config") in (None, "")
     needs_pitch = bike_row.get("chain_pitch") in (None, "")
-    if not (needs_cyl or needs_pitch):
+    needs_stroke = bike_row.get("stroke_type") in (None, "")
+    if not (needs_cyl or needs_pitch or needs_stroke):
         return bike_row
 
     cfg_row = conn.execute(
@@ -56,12 +57,19 @@ def _enrich_bike_row_for_fitment(conn: sqlite3.Connection, bike_row: dict) -> di
     if cfg_row is None:
         return bike_row
 
-    if needs_cyl and cfg_row["engine_params"]:
+    ep = None
+    if cfg_row["engine_params"]:
         try:
             ep = json.loads(cfg_row["engine_params"])
-            bike_row["cylinder_config"] = ep.get("cylinder_config")
         except (json.JSONDecodeError, TypeError):
-            pass
+            ep = None
+
+    if needs_cyl and ep is not None:
+        bike_row["cylinder_config"] = ep.get("cylinder_config")
+    if needs_stroke and ep is not None:
+        # stroke_type defaults to 4 (canonical 4-stroke) if unset, so that
+        # legacy 4T fitment rules without stroke_type filters still match.
+        bike_row["stroke_type"] = ep.get("stroke_type", 4)
     if needs_pitch and cfg_row["drivetrain_params"]:
         try:
             dp = json.loads(cfg_row["drivetrain_params"])

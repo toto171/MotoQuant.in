@@ -99,6 +99,83 @@ def _synthetic_torque_curve(
     return DynoCurve(rpm=rpms, torque_nm=torque, is_at_wheel=True)
 
 
+def _synthetic_2stroke_torque_curve(
+    peak_torque_nm: float,
+    tuned_rpm: float,
+    redline_rpm: float,
+    idle_rpm: float = 2000,
+    powervalve: bool = False,
+    peak_power_hp: float | None = None,
+    peak_power_rpm: float | None = None,
+    points: int = 100,
+) -> DynoCurve:
+    """
+    Generate a 2-stroke expansion-chamber torque curve.
+
+    Characteristics:
+      • Strong narrow peak centred on tuned_rpm (where the expansion
+        chamber's pressure wave returns in phase with the exhaust port
+        closing).
+      • Below tuned_rpm: bike "has no pipe" — much flatter, ~15–25 % of peak.
+      • Above tuned_rpm: sharp drop as the resonance goes out of phase.
+      • Powervalve (YPVS / RC Valve / HPP / ATAC) widens the band on both
+        sides, giving the bike much more usable RPM range and a less
+        "hit-in-the-arse" character.
+
+    When peak_power_hp + peak_power_rpm are provided we enforce that
+    T(peak_power_rpm) produces exactly the rated HP — same constraint the
+    4-stroke helper uses — so synthetic curves match published dyno sheets.
+    """
+    rpms = np.linspace(idle_rpm, redline_rpm, points)
+    torque = np.zeros_like(rpms)
+
+    # Widths as fractions of tuned_rpm.  Calibrated April 20, 2026 against
+    # published dyno sheets for RD350 (37 Nm @ 7500), RGV250 (42 Nm @ 10500),
+    # RS125 (22 Nm @ 11000), NSR250 (38 Nm @ 9500), KTM 300 EXC (44 Nm @ 8000).
+    # Previous 12 %/22 % baselines starved small-cc bikes of off-pipe torque and
+    # they never launched in the sim — raised to match real dyno traces.
+    if powervalve:
+        band_lo = 0.32
+        band_hi = 0.16
+        baseline = 0.30  # powervalve → lots of meat off-pipe (RAVE/YPVS/KIPS…)
+    else:
+        band_lo = 0.24
+        band_hi = 0.11
+        baseline = 0.20  # piston-port / fixed-port is peakier but still revs
+
+    # Required torque at peak_power_rpm to match rated HP (when given)
+    required_pp_T = None
+    if peak_power_hp is not None and peak_power_rpm is not None:
+        required_pp_T = peak_power_hp * 745.7 / (peak_power_rpm * 2.0 * np.pi / 60.0)
+
+    for i, rpm in enumerate(rpms):
+        if rpm <= tuned_rpm:
+            x = (tuned_rpm - rpm) / max(1.0, tuned_rpm * band_lo)
+        else:
+            x = (rpm - tuned_rpm) / max(1.0, tuned_rpm * band_hi)
+        factor = np.exp(-1.5 * x * x)
+        factor = max(baseline, factor)
+        # Smooth low-rev ramp (below 40 % of tuned, 2T engines aren't running
+        # usefully — simulate a soft stumble)
+        if rpm < tuned_rpm * 0.40:
+            ramp = max(0.0, (rpm - idle_rpm) / max(1.0, tuned_rpm * 0.40 - idle_rpm))
+            factor *= ramp
+        torque[i] = peak_torque_nm * factor
+
+    # Scale so that T(peak_power_rpm) delivers the rated HP (if provided)
+    if required_pp_T is not None and peak_power_rpm is not None:
+        T_at_pp = float(np.interp(peak_power_rpm, rpms, torque))
+        if T_at_pp > 1.0:
+            scale = required_pp_T / T_at_pp
+            # Guard runaway: cap scale in ±40 % (prevents weird specs from
+            # blowing up the curve)
+            scale = max(0.70, min(1.40, scale))
+            torque = torque * scale
+
+    torque = np.clip(torque, 0.0, peak_torque_nm * 1.10)
+    return DynoCurve(rpm=rpms, torque_nm=torque, is_at_wheel=True)
+
+
 def gsxr1000_k5() -> BikeConfig:
     """
     Suzuki GSX-R 1000 K5/K6 (2005-2006)

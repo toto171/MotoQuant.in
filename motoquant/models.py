@@ -151,16 +151,85 @@ class EngineParams:
     # configs (handled by enrich-on-read fallback).
     cylinder_count: int | None = None  # 1, 2, 3, 4, 6
     cylinder_config: str | None = None  # I1, I2, I3, I4, I6, V2, V4, flat_6
+    # ── 2-stroke / 4-stroke discriminator ──────────────────────────────
+    # stroke_type = 2 flips several physics branches:
+    #   • get_torque() uses expansion-chamber resonance (narrow band)
+    #   • parasitic oil-pump + valvetrain losses collapse (no valvetrain,
+    #     pre-mix or separate oil-injection = tiny pump load)
+    #   • engine braking torque is effectively zero (no compression braking)
+    stroke_type: int = 4  # 2 or 4
+    # Expansion chamber tuned RPM (2-stroke only). If None, defaults to
+    # peak_power_rpm at get_torque() call time.
+    tuned_rpm: float | None = None
+    expansion_chamber: bool = False  # True = tuned pipe fitted (2T only)
+    reed_valve: bool = False  # Reed-valve induction (2T only; adds ~3%)
+    powervalve: bool = False  # YPVS/RC Valve/HPP etc. — widens 2T band
+    # Induction type — useful for parts compatibility on carb jets etc.
+    induction_type: str | None = None  # "carb" / "efi" / "tbi" / None = unknown
 
     def get_torque(self, rpm: float) -> float:
         """Get engine torque at given RPM."""
         if self.dyno_curve is not None:
             return self.dyno_curve.interpolate(rpm)
-        # Synthetic curve: parabolic approximation from peak torque
+        # 2-stroke: expansion-chamber resonance envelope
+        if self.stroke_type == 2:
+            return self._two_stroke_torque(rpm)
+        # 4-stroke: parabolic synthetic curve from peak torque
         # T(rpm) = T_peak * [1 - ((rpm - rpm_peak) / (rpm_range/2))^2] (clamped > 0)
         rpm_range = self.redline_rpm - self.idle_rpm
+        if rpm_range <= 0:
+            return 0.0
         x = (rpm - self.peak_torque_rpm) / (rpm_range * 0.6)
         return max(0.0, self.peak_torque_nm * (1.0 - x * x))
+
+    # ─────────────────────────────────────────
+    # 2-STROKE SYNTHETIC TORQUE CURVE
+    # ─────────────────────────────────────────
+    def _two_stroke_torque(self, rpm: float) -> float:
+        """
+        Expansion-chamber resonance envelope for 2-stroke engines.
+
+        Model:
+          • Strong narrow peak centred on `tuned_rpm` (falls back to
+            peak_power_rpm, which for 2-strokes is ~ peak_torque_rpm).
+          • Asymmetric: rises gradually below the pipe (bike "comes on pipe"),
+            drops sharply above (pulse returns out of phase).
+          • Powervalve (YPVS / RC Valve / HPP / ATAC) roughly doubles the
+            usable width of the band.
+          • Non-powervalve bikes still make some base torque off-pipe — 15%
+            of peak, enough to pull through gears but clearly flat.
+        """
+        import math
+
+        if rpm < self.idle_rpm * 1.05:
+            return 0.0
+
+        tuned = self.tuned_rpm or self.peak_power_rpm
+        # Widths as fractions of the tuned RPM.  Kept in sync with
+        # `_synthetic_2stroke_torque_curve` in defaults.py.  April 20, 2026
+        # calibration widened these after small-cc 2T bikes failed to launch
+        # in-sim because off-pipe torque was unrealistically low.
+        if self.powervalve:
+            band_lo = 0.32
+            band_hi = 0.16
+            baseline = 0.30  # powervalve → lots of meat off-pipe
+        else:
+            band_lo = 0.24
+            band_hi = 0.11
+            baseline = 0.20  # piston-port / fixed-port — peakier but workable
+
+        if rpm <= tuned:
+            x = (tuned - rpm) / max(1.0, tuned * band_lo)
+        else:
+            x = (rpm - tuned) / max(1.0, tuned * band_hi)
+        factor = math.exp(-1.5 * x * x)
+        factor = max(baseline, factor)
+
+        # Rev-limiter cliff above redline (already handled in engine sub-model
+        # but we also clamp here for direct callers)
+        if rpm > self.redline_rpm * 1.02:
+            return 0.0
+        return self.peak_torque_nm * factor
 
 
 # ═══════════════════════════════════════════

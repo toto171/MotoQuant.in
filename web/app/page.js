@@ -51,11 +51,11 @@ function ScrollIndicator() {
 
 function StatsStrip() {
   const stats = [
-    { num: '270', label: 'BIKES' },
+    { num: '290', label: 'BIKES' },
     { num: '159', label: 'TIRES' },
-    { num: '424', label: 'PARTS' },
+    { num: '465', label: 'PARTS' },
     { num: '20', label: 'VENUES' },
-    { num: '766', label: 'TESTS' },
+    { num: '813', label: 'TESTS' },
     { num: '15', label: 'SUB-MODELS' },
   ];
 
@@ -573,7 +573,7 @@ export default function HomePage() {
               items={[
                 'RK4 fixed-step integrator at 1ms timestep',
                 'Adaptive step-size solver with error bounds',
-                '766 regression tests (catalog integration + physics + API)',
+                '813 regression tests (catalog integration + physics + API)',
                 'Validated against real GPS and ECU telemetry',
               ]}
             />
@@ -676,7 +676,7 @@ export default function HomePage() {
                 Validated on Real Telemetry
               </h2>
               <p className="text-white/80 text-lg max-w-3xl">
-                We don't just predict — we measure. Top 10 most accurate bikes out of 43 benchmarked against published Cycle World, Sport Rider, MCN, and Motorcyclist quarter-mile test results.
+                We don't just predict — we measure. Top 10 most accurate bikes out of 47 benchmarked against published Cycle World, Sport Rider, MCN, and Motorcyclist quarter-mile test results. Full validation sweep runs across all 290 bikes.
               </p>
             </div>
           </RevealSection>
@@ -685,10 +685,10 @@ export default function HomePage() {
           <RevealSection>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
               {[
-                { num: '43', label: 'Bikes benchmarked' },
-                { num: '8', label: 'Within ±0.10s' },
-                { num: '23', label: 'Within ±0.20s' },
-                { num: '±0.08s', label: 'Top 10 mean error' },
+                { num: '47', label: 'Bikes benchmarked' },
+                { num: '11', label: 'Within ±0.10s' },
+                { num: '24', label: 'Within ±0.20s' },
+                { num: '±0.057s', label: 'Top 10 mean error' },
               ].map((s, i) => (
                 <div key={i} className="glass rounded-xl p-4 border border-brand-orange/20 text-center">
                   <div className="font-display font-bold text-2xl md:text-3xl text-brand-orange tabular-nums">{s.num}</div>
@@ -715,13 +715,13 @@ export default function HomePage() {
                 { rank: 1, name: 'Aprilia RSV4 Factory', year: 2021, cc: '1077cc V4', target: 10.05, sim: 10.05, delta: 0.000, source: 'Cycle World 2021' },
                 { rank: 2, name: 'Yamaha YZF-R1 4C8', year: 2007, cc: '998cc I4 CF', target: 10.30, sim: 10.29, delta: -0.014, source: 'Sport Rider 2007' },
                 { rank: 3, name: 'Honda CBR1000RR SC59', year: 2008, cc: '999cc I4', target: 10.20, sim: 10.22, delta: 0.024, source: 'Sport Rider 2008' },
-                { rank: 4, name: 'KTM 1290 Super Duke R', year: 2022, cc: '1301cc V-twin', target: 10.15, sim: 10.09, delta: -0.060, source: 'Cycle World 2022' },
-                { rank: 5, name: 'Suzuki GSX-R 1000 K5', year: 2005, cc: '999cc I4', target: 9.97, sim: 10.03, delta: 0.064, source: 'Cycle World 2005' },
-                { rank: 6, name: 'Suzuki Hayabusa Gen1', year: 1999, cc: '1299cc I4', target: 10.40, sim: 10.47, delta: 0.072, source: 'Cycle World 1999' },
-                { rank: 7, name: 'Ducati 1299 Panigale', year: 2015, cc: '1285cc V-twin', target: 9.95, sim: 9.87, delta: -0.082, source: 'Sport Rider 2015' },
-                { rank: 8, name: 'Suzuki GSX-R 1000 K1', year: 2001, cc: '988cc I4', target: 10.20, sim: 10.28, delta: 0.084, source: 'Sport Rider 2001' },
-                { rank: 9, name: 'Suzuki GSX-R 1000 K3', year: 2003, cc: '988cc I4', target: 10.10, sim: 10.20, delta: 0.100, source: 'Sport Rider 2003' },
-                { rank: 10, name: 'Kawasaki Ninja ZX-10R', year: 2011, cc: '998cc I4', target: 10.10, sim: 10.20, delta: 0.100, source: 'Sport Rider 2011' },
+                { rank: 4, name: 'KTM 1290 Super Duke R', year: 2022, cc: '1301cc V-twin', target: 10.15, sim: 10.09, delta: -0.059, source: 'Cycle World 2022' },
+                { rank: 5, name: 'Suzuki GSX-R 1000 K5', year: 2005, cc: '999cc I4', target: 9.97, sim: 10.03, delta: 0.063, source: 'Cycle World 2005' },
+                { rank: 6, name: 'Suzuki Hayabusa Gen1', year: 1999, cc: '1299cc I4', target: 10.40, sim: 10.47, delta: 0.071, source: 'Cycle World 1999' },
+                { rank: 7, name: 'Ducati Panigale V4R', year: 2019, cc: '998cc V4', target: 10.05, sim: 10.13, delta: 0.076, source: 'Cycle World 2019' },
+                { rank: 8, name: 'Ducati 1299 Panigale', year: 2015, cc: '1285cc V-twin', target: 9.95, sim: 9.87, delta: -0.081, source: 'Sport Rider 2015' },
+                { rank: 9, name: 'Suzuki GSX-R 1000 K1', year: 2001, cc: '988cc I4', target: 10.20, sim: 10.28, delta: 0.084, source: 'Sport Rider 2001' },
+                { rank: 10, name: 'Suzuki GSX-R 1000 K3', year: 2003, cc: '988cc I4', target: 10.10, sim: 10.20, delta: 0.100, source: 'Sport Rider 2003' },
               ].map((b) => {
                 const abs = Math.abs(b.delta);
                 const deltaColor = abs < 0.05 ? 'text-brand-accent' : abs < 0.10 ? 'text-green-400' : 'text-amber-400';
