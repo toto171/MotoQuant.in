@@ -364,7 +364,7 @@ def list_bikes(
     search: str | None = Query(None, description="Search by model/manufacturer"),
     manufacturer: str | None = Query(None),
     category: str | None = Query(None),
-    limit: int = Query(50, le=200),
+    limit: int = Query(100, le=1000),
     offset: int = Query(0),
 ):
     db = _get_db()
@@ -552,7 +552,7 @@ def list_venues():
 def list_tires(
     compound: str | None = Query(None),
     manufacturer: str | None = Query(None),
-    limit: int = Query(50, le=200),
+    limit: int = Query(200, le=1000),
 ):
     db = _get_db()
     if not db:
@@ -1007,9 +1007,13 @@ def list_parts(
     category_id: int | None = Query(None, description="Filter by category ID"),
     bike_id: int | None = Query(None, description="Show compatibility for this bike"),
     search: str | None = Query(None),
-    limit: int = Query(100, le=200),
+    limit: int = Query(500, le=1000),
 ):
-    """Return parts catalog, optionally filtered by category and bike compatibility."""
+    """Return parts catalog, optionally filtered by category and bike compatibility.
+
+    Default limit raised from 100→500 so the full 424-part catalog fits in one
+    page. Cap raised to 1000 to leave headroom as the catalog grows.
+    """
     db = _get_db()
     if not db:
         raise HTTPException(503, "Database unavailable")

@@ -51,11 +51,11 @@ function ScrollIndicator() {
 
 function StatsStrip() {
   const stats = [
-    { num: '267', label: 'BIKES' },
-    { num: '69', label: 'TIRES' },
+    { num: '270', label: 'BIKES' },
+    { num: '159', label: 'TIRES' },
     { num: '424', label: 'PARTS' },
-    { num: '12', label: 'VENUES' },
-    { num: '739', label: 'TESTS' },
+    { num: '20', label: 'VENUES' },
+    { num: '766', label: 'TESTS' },
     { num: '15', label: 'SUB-MODELS' },
   ];
 
@@ -564,7 +564,7 @@ export default function HomePage() {
                 'Air density, altitude and temperature correction',
                 'Surface grip for asphalt, concrete, salt & dry lake',
                 'Staging, reaction time, two-step launch control',
-                '12 venues: Aamby Valley, MMRT, BIC, Santa Pod, Pomona, and more',
+                '20 venues: Aamby Valley, MMRT, BIC, Santa Pod, Pomona, and more',
               ]}
             />
             <PhysicsCard
@@ -573,7 +573,7 @@ export default function HomePage() {
               items={[
                 'RK4 fixed-step integrator at 1ms timestep',
                 'Adaptive step-size solver with error bounds',
-                '739+ regression tests (zero failures)',
+                '766 regression tests (catalog integration + physics + API)',
                 'Validated against real GPS and ECU telemetry',
               ]}
             />

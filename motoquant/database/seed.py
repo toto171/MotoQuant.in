@@ -7311,6 +7311,11 @@ def seed_all(db: MotoQuantDB) -> dict:
     """
     Master seeding function: initialise all reference data in order.
     Returns a summary dict of rows inserted.
+
+    NOTE: `seed_bike_tire_fitments(db)` only links bikes that exist at seed
+    time (the 3 reference bikes). Callers that also run `import_batch(...)`
+    afterwards should re-run `seed_bike_tire_fitments(db)` once all bikes are
+    present — otherwise fitments will only cover reference bikes.
     """
     from .seed_catalogs.adv_cruiser_exhausts import seed_adv_cruiser_exhausts
     from .seed_catalogs.drag_specific import seed_drag_specific

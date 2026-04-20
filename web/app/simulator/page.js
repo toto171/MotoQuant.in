@@ -254,10 +254,10 @@ export default function SimulatorPage() {
           catch (e) { console.warn('JSON parse error:', e); return fallback; }
         };
         const [bikesRes, catsRes, partsRes, tiresRes, venuesRes] = await Promise.all([
-          fetch(`${API}/api/bikes?limit=200`),
+          fetch(`${API}/api/bikes?limit=500`),
           fetch(`${API}/api/parts/categories`),
-          fetch(`${API}/api/parts?limit=200`),
-          fetch(`${API}/api/tires?limit=200`),
+          fetch(`${API}/api/parts?limit=500`),
+          fetch(`${API}/api/tires?limit=500`),
           fetch(`${API}/api/venues`),
         ]);
         const [bikesData, catsData, partsData, tiresData, venuesData] = await Promise.all([
