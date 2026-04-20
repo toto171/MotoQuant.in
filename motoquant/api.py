@@ -505,10 +505,24 @@ def get_bike(bike_id: int):
                     if v is not None:
                         d[k] = v
             if chassis:
-                for k in ("cog_height_m",):
-                    v = chassis.get(k)
-                    if v is not None:
-                        d[k] = v
+                # CoG height is stored as mm in chassis_params (matches
+                # wheelbase_mm / seat_height_mm convention). Expose both units
+                # so the detail page can format consistently.
+                cog_mm = chassis.get("cog_height_mm")
+                if cog_mm is None and chassis.get("cog_height_m") is not None:
+                    cog_mm = chassis["cog_height_m"] * 1000.0
+                if cog_mm is not None:
+                    d["cog_height_mm"] = cog_mm
+                    d["cog_height_m"] = cog_mm / 1000.0
+                # Derived: wet mass = dry + fluids + fuel (bike_models.wet_mass_kg
+                # is rarely populated by the scraper; config has the components).
+                if d.get("wet_mass_kg") in (None, 0):
+                    dry = chassis.get("dry_mass_kg")
+                    fluid = chassis.get("fluid_mass_kg") or 0.0
+                    fuel = chassis.get("fuel_mass_kg") or 0.0
+                    if dry is not None:
+                        d["wet_mass_kg"] = round(dry + fluid + fuel, 1)
+                        d["wet_mass_derived"] = True
             # Derived: wheelbase in meters for display
             if d.get("wheelbase_mm") is not None:
                 d["wheelbase_m"] = d["wheelbase_mm"] / 1000.0
@@ -1006,13 +1020,25 @@ def list_parts(
     category: str | None = Query(None, description="Filter by category name"),
     category_id: int | None = Query(None, description="Filter by category ID"),
     bike_id: int | None = Query(None, description="Show compatibility for this bike"),
+    compatible_only: bool = Query(
+        True,
+        description="When bike_id is set: if True (default) only return compatible "
+        "parts; if False, return all parts with a 'compatible' + 'fitment_reason' "
+        "annotation per row.",
+    ),
     search: str | None = Query(None),
     limit: int = Query(500, le=1000),
 ):
     """Return parts catalog, optionally filtered by category and bike compatibility.
 
-    Default limit raised from 100→500 so the full 424-part catalog fits in one
+    Default limit raised from 100→500 so the full 465-part catalog fits in one
     page. Cap raised to 1000 to leave headroom as the catalog grows.
+
+    When ``bike_id`` is provided, each returned part is evaluated against the
+    bike's fitment rules (stroke_type, manufacturer, engine_config, displacement,
+    chain_pitch). Set ``compatible_only=false`` to receive every part with an
+    annotation instead of a hard filter (useful for the Streamlit/Next.js UI
+    which greys-out incompatible options).
     """
     db = _get_db()
     if not db:
@@ -1038,12 +1064,37 @@ def list_parts(
         params.append(limit)
 
         rows = db.execute(query, params).fetchall()
+
+        # ── Bike compatibility annotation / filter ─────────────────────────
+        bike_row: dict | None = None
+        if bike_id is not None:
+            from .database.parts_repo import _enrich_bike_row_for_fitment
+            from .parts.compatibility import is_compatible  # noqa: F401
+
+            raw = db.execute(
+                "SELECT * FROM bike_models WHERE id = ?", (bike_id,)
+            ).fetchone()
+            if raw is None:
+                raise HTTPException(404, f"Bike {bike_id} not found")
+            bike_row = dict(raw)
+            _enrich_bike_row_for_fitment(db, bike_row)
+
         parts = []
         for r in rows:
             d = dict(r)
+            # Evaluate compatibility BEFORE parsing JSON fields in-place
+            # (is_compatible expects the raw fitment_rules JSON string).
+            if bike_row is not None:
+                from .parts.compatibility import is_compatible
+                compat, reason = is_compatible(d, bike_row)
+                if compatible_only and not compat:
+                    continue
+                d["compatible"] = bool(compat)
+                d["fitment_reason"] = reason
+
             # Parse JSON fields for frontend
             for field in ("param_overrides", "param_deltas", "param_multipliers",
-                          "specifications", "compatible_bikes"):
+                          "specifications", "compatible_bikes", "fitment_rules"):
                 if d.get(field) and isinstance(d[field], str):
                     try:
                         d[field] = json.loads(d[field])
@@ -1051,7 +1102,14 @@ def list_parts(
                         pass
             parts.append(d)
 
-        return {"parts": parts, "total": len(parts)}
+        return {
+            "parts": parts,
+            "total": len(parts),
+            "bike_id": bike_id,
+            "compatible_only": bool(bike_id is not None and compatible_only),
+        }
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(500, f"Database error: {exc}")
 

@@ -282,6 +282,38 @@ export default function SimulatorPage() {
     load();
   }, []);
 
+  // ─── Re-annotate parts whenever the selected bike changes ────────────
+  // Hits `/api/parts?bike_id=X&compatible_only=false` so every row comes back
+  // with a `compatible` + `fitment_reason` annotation. The UI uses this to
+  // grey-out parts that don't fit the selected bike (instead of hiding them,
+  // so the user can still discover what's available for other bikes).
+  useEffect(() => {
+    if (!bike?.id) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(
+          `${API}/api/parts?bike_id=${bike.id}&compatible_only=false&limit=1000`,
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled && Array.isArray(data.parts)) {
+          setAllParts(data.parts);
+          // Drop any already-selected parts that are now incompatible with the
+          // newly-picked bike -- silently, because the UI already cleared
+          // selectedParts on bike change, but belt-and-braces for other paths.
+          setSelectedParts(prev => prev.filter(p => {
+            const hit = data.parts.find(x => x.id === p.id);
+            return !hit || hit.compatible !== false;
+          }));
+        }
+      } catch (e) {
+        console.warn('parts re-annotation failed:', e);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [bike?.id]);
+
   // ─── Quick sim (auto-run on changes) ─────────────────────────────────
   const runQuickSim = useCallback(async () => {
     if (!bike) return;
@@ -727,6 +759,7 @@ export default function SimulatorPage() {
               <div className="flex-1 overflow-y-auto space-y-0.5 scrollbar-thin">
                 {categories.map(cat => {
                   const catParts = allParts.filter(p => p.category_id === cat.id);
+                  const compatInCat = catParts.filter(p => p.compatible !== false).length;
                   const isActive = activeCategory?.id === cat.id;
                   const selectedInCat = selectedParts.filter(p => p.category_id === cat.id).length;
                   return (
@@ -739,7 +772,9 @@ export default function SimulatorPage() {
                         <div className="flex items-center gap-2">
                           <ChevronRight size={11} className={`transition-transform ${isActive ? 'rotate-90' : ''}`} />
                           <span className="font-medium">{cat.display_name || cat.name}</span>
-                          <span className="text-[10px] text-gray-600">({catParts.length})</span>
+                          <span className="text-[10px] text-gray-600">
+                            ({compatInCat}{catParts.length !== compatInCat ? `/${catParts.length}` : ''})
+                          </span>
                         </div>
                         {selectedInCat > 0 && (
                           <span className="text-[9px] bg-orange-500 text-black px-1.5 py-0.5 rounded-full font-bold">{selectedInCat}</span>
@@ -752,14 +787,31 @@ export default function SimulatorPage() {
                             <p className="text-[10px] text-gray-700 py-2">No parts in this category</p>
                           ) : catParts.map(part => {
                             const sel = isPartSelected(part);
+                            // Compatibility annotation comes from /api/parts?bike_id=X&compatible_only=false.
+                            // Backwards-compat: if the field is missing (e.g. stale fetch), treat as compatible.
+                            const compat = part.compatible !== false;
+                            const disabled = !compat && !sel;
                             return (
-                              <button key={part.id} onClick={() => togglePart(part)}
+                              <button key={part.id} onClick={() => { if (!disabled) togglePart(part); }}
+                                disabled={disabled}
+                                title={compat ? undefined : `Not compatible: ${part.fitment_reason || 'does not fit this bike'}`}
                                 className={`w-full px-3 py-2.5 rounded-xl text-left text-xs transition-all border ${
-                                  sel ? 'bg-orange-500/10 border-orange-500/30 text-orange-200' : 'border-white/[0.04] hover:border-white/[0.08] text-gray-400 hover:text-gray-300'
+                                  sel
+                                    ? 'bg-orange-500/10 border-orange-500/30 text-orange-200'
+                                    : disabled
+                                      ? 'border-white/[0.03] text-gray-600 opacity-50 cursor-not-allowed'
+                                      : 'border-white/[0.04] hover:border-white/[0.08] text-gray-400 hover:text-gray-300'
                                 }`}>
                                 <div className="flex justify-between items-start">
                                   <div>
-                                    <div className="font-medium text-[11px]">{part.brand} {part.model_name}</div>
+                                    <div className="font-medium text-[11px] flex items-center gap-1.5">
+                                      {part.brand} {part.model_name}
+                                      {!compat && (
+                                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-400 font-normal">
+                                          no fit
+                                        </span>
+                                      )}
+                                    </div>
                                     {part.fitment_notes && <div className="text-[10px] text-gray-600 mt-0.5">{part.fitment_notes}</div>}
                                   </div>
                                   <div className="text-right shrink-0 ml-2">

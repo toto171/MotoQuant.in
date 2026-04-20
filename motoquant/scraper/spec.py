@@ -45,8 +45,17 @@ class BikeSpec:
     peak_torque_rpm: int | None = None
     fuel_system: str | None = None  # carb / fi / tbi
     cooling: str | None = None  # air / liquid / oil
-    valve_config: str | None = None  # dohc / sohc / ohv
+    valve_config: str | None = None  # dohc / sohc / ohv / 2T_reed / 2T_piston
     cylinders: int | None = None
+    # 2-stroke / 4-stroke discriminator. 2 = two-stroke cycle (expansion-chamber
+    # resonance physics kicks in), 4 = four-stroke (default). Set explicitly for
+    # 2T bikes (RD350, RGV250, RS125, KTM 300 EXC, etc.) so the importer wires
+    # in the right torque curve, parasitic losses, and parts fitment rules.
+    stroke_type: int | None = None  # 2 or 4 (None → inferred as 4-stroke)
+    expansion_chamber: bool = False
+    reed_valve: bool = False
+    powervalve: bool = False
+    tuned_rpm: int | None = None
 
     # ── Drivetrain ────────────────────────────────────────────────────────
     gears: int | None = None

@@ -36,8 +36,13 @@ os.environ["MOTOQUANT_DB"] = _TMP_DB_PATH
 
 # Initialize schema + seeded reference data in the tmp DB
 from motoquant.database.connection import MotoQuantDB as _SetupDB  # noqa: E402
+from motoquant.database.seed import seed_all as _seed_all  # noqa: E402
 _setup_db = _SetupDB(_TMP_DB_PATH)
 _setup_db.initialize()
+# Seed reference bikes + tires + parts so compatibility / parts endpoints
+# have realistic data to filter against. Fast (~100 ms) because the catalog
+# lives in Python source, not a network fetch.
+_seed_all(_setup_db)
 _setup_db.close()
 
 # Now safe to import the API -- it'll pick up the env var on first DB access
@@ -515,6 +520,120 @@ class TestVenueResolveEndpoint(unittest.TestCase):
             # In test environments without seeded data, fall through to OWM,
             # which returns 503 (no key) / 502 (network) / 422 (not found).
             self.assertIn(r.status_code, [422, 502, 503])
+
+
+class TestPartsEndpoint(unittest.TestCase):
+    """
+    Coverage for GET /api/parts, including the bike_id compatibility filter.
+
+    The tmp DB is seeded via seed_all() at module load, so we have:
+      - 3 reference bikes (K5 I4 1000, R1 I4 1000, Hayabusa I4 1300) — all 4-stroke
+      - 465-part catalog including 2T-only parts (expansion chambers, reed valves)
+        whose fitment rules require stroke_type=2
+    """
+
+    def test_list_all_parts(self):
+        """Without bike_id, returns the full catalog (up to limit)."""
+        r = client.get("/api/parts")
+        self.assertEqual(r.status_code, 200)
+        body = r.json()
+        self.assertIn("parts", body)
+        self.assertIn("total", body)
+        self.assertGreaterEqual(body["total"], 400, "catalog should be seeded")
+        # Default: no compatibility annotation
+        self.assertFalse(body.get("compatible_only", False))
+        for p in body["parts"][:5]:
+            self.assertNotIn("compatible", p,
+                             "compatibility flag should only appear when bike_id is set")
+
+    def test_category_filter_independent_of_bike_id(self):
+        """Category filter alone narrows results without touching compatibility."""
+        r = client.get("/api/parts", params={"category": "exhaust"})
+        self.assertEqual(r.status_code, 200)
+        body = r.json()
+        self.assertGreater(body["total"], 0, "expected at least one exhaust")
+        for p in body["parts"]:
+            self.assertEqual(
+                str(p.get("category_name", "")).lower(), "exhaust",
+                f"non-exhaust leaked: {p.get('category_name')}"
+            )
+
+    def test_unknown_bike_id_returns_404(self):
+        """bike_id pointing at a nonexistent row should 404, not 500."""
+        r = client.get("/api/parts", params={"bike_id": 99999})
+        self.assertEqual(r.status_code, 404)
+
+    def test_bike_id_filters_out_2stroke_parts(self):
+        """
+        Kaizen guard: the 2T catalog has stroke_type=2 in its fitment rules.
+        A 4-stroke superbike (K5, bike_id=1 in seed) must NOT see 2T-only parts
+        like a JL ZX expansion chamber or a VForce reed block.
+        """
+        # GSX-R 1000 K5 is the first seeded reference bike -> id=1
+        bike_row = client.get("/api/bikes/1").json()
+        self.assertEqual(bike_row.get("id"), 1)
+        # Filter request
+        r = client.get("/api/parts", params={"bike_id": 1, "limit": 1000})
+        self.assertEqual(r.status_code, 200, r.text)
+        body = r.json()
+        self.assertTrue(body["compatible_only"])
+        self.assertEqual(body["bike_id"], 1)
+        self.assertGreater(body["total"], 0, "K5 should match at least some parts")
+        # No 2T parts should appear
+        for p in body["parts"]:
+            brand = (p.get("brand") or "").lower()
+            model = (p.get("model_name") or "").lower()
+            # These 2T brand/model tokens should never surface for a 4T bike
+            for token in ("expansion chamber", "reed valve", "powervalve",
+                          "ypvs", "rave valve"):
+                self.assertNotIn(
+                    token, f"{brand} {model}",
+                    f"2T part leaked into 4T bike_id=1: {brand} {model}"
+                )
+
+    def test_bike_id_compatible_only_false_annotates(self):
+        """
+        compatible_only=false returns the full catalog with a per-row
+        'compatible' + 'fitment_reason' annotation instead of filtering.
+        Used by UIs that want to grey-out incompatible options.
+        """
+        r = client.get(
+            "/api/parts",
+            params={"bike_id": 1, "compatible_only": "false", "limit": 1000},
+        )
+        self.assertEqual(r.status_code, 200)
+        body = r.json()
+        self.assertFalse(body["compatible_only"])
+        self.assertGreater(body["total"], 400, "expected full catalog")
+        # Every row should have the compatibility annotation
+        n_compat = 0
+        n_incompat = 0
+        for p in body["parts"]:
+            self.assertIn("compatible", p)
+            self.assertIn("fitment_reason", p)
+            self.assertIsInstance(p["compatible"], bool)
+            self.assertIsInstance(p["fitment_reason"], str)
+            if p["compatible"]:
+                n_compat += 1
+            else:
+                n_incompat += 1
+        # Mixed outcome expected: some parts compatible, some not
+        self.assertGreater(n_compat, 0, "expected at least one compatible part")
+        self.assertGreater(n_incompat, 0,
+                           "expected at least one incompatible part (e.g. 2T-only)")
+
+    def test_bike_id_with_category_combines(self):
+        """bike_id + category should combine as AND, not OR."""
+        r = client.get(
+            "/api/parts",
+            params={"bike_id": 1, "category": "exhaust", "limit": 1000},
+        )
+        self.assertEqual(r.status_code, 200)
+        body = r.json()
+        for p in body["parts"]:
+            self.assertEqual(
+                str(p.get("category_name", "")).lower(), "exhaust"
+            )
 
 
 if __name__ == "__main__":

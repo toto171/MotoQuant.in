@@ -35,7 +35,12 @@ BOUNDS = {
     "displacement_cc": (50, 3000),
     "bore_mm": (35, 120),
     "stroke_mm": (30, 120),  # Harley Milwaukee-Eight is 111.1mm
-    "compression_ratio": (7.5, 16.5),
+    # compression_ratio: 4T range 8.5–16.5 (car/bike gasoline). 2-strokes run
+    # much lower corrected (trapped) CR — 6.0–8.5 is realistic (RD350=6.6,
+    # RGV250=7.5, RS125=12.5 uncorrected / ~7.8 corrected). We widen the
+    # lower bound to 6.0 so 2T bikes import cleanly; 2T-specific sanity is
+    # handled after the core bounds pass.
+    "compression_ratio": (6.0, 16.5),
     "peak_power_hp": (5, 500),
     "peak_power_rpm": (3000, 18000),
     "peak_torque_nm": (5, 400),
@@ -44,12 +49,14 @@ BOUNDS = {
     "wet_mass_kg": (90, 550),
     "wheelbase_mm": (1000, 2000),
     "seat_height_mm": (600, 1100),
-    "fuel_capacity_l": (5, 60),
+    "fuel_capacity_l": (3, 60),  # lowered — small-cc 2T like RD350 carry ~16L but racers carry 4–6L
     "year_from": (1965, datetime.now().year + 2),
     "gears": (4, 7),
     "front_sprocket": (0, 38),  # 0 = shaft/belt drive; chain 12-22; belt pulley up to 38
     "rear_sprocket": (0, 80),  # 0 = shaft/belt drive; chain 30-60; belt pulley up to 80
     "frontal_area_m2": (0.25, 0.90),
+    "stroke_type": (2, 4),
+    "tuned_rpm": (3000, 18000),
 }
 
 # HP per cc sanity range (naturally aspirated)
@@ -173,10 +180,16 @@ def validate_spec(spec: BikeSpec) -> ValidationResult:
     # ── Power/displacement ratio ───────────────────────────────────────
     if spec.peak_power_hp and spec.displacement_cc:
         ratio = spec.peak_power_hp / spec.displacement_cc
-        if ratio > HP_PER_CC_MAX:
+        # 2-strokes make roughly 2× the power of same-displacement 4T (power
+        # stroke every rev). Top-end race 2T (TZ250, RS125 GP) easily exceed
+        # HP_PER_CC_MAX; widen the upper sanity bound for them.
+        hp_cc_max = HP_PER_CC_MAX * (1.8 if spec.stroke_type == 2 else 1.0)
+        if ratio > hp_cc_max:
             warnings.append(
                 f"Power/displacement ratio {ratio:.2f} HP/cc is very high "
-                f"(max ~{HP_PER_CC_MAX} for NA). Possibly forced induction?"
+                f"(max ~{hp_cc_max} for "
+                f"{'2T NA' if spec.stroke_type == 2 else '4T NA'}). "
+                "Possibly forced induction?"
             )
         elif ratio < HP_PER_CC_MIN:
             warnings.append(f"Power/displacement ratio {ratio:.2f} HP/cc is very low")

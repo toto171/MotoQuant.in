@@ -182,8 +182,18 @@ export default function BikeDetailPage() {
                   <SpecRow label="Cd" value={formatCell(bike.cd, '', 2)} />
                   <SpecRow label="Frontal Area" value={formatCell(bike.frontal_area_m2, ' m²', 2)} />
                   <SpecRow label="Wheelbase" value={formatCell(bike.wheelbase_m, ' m', 3)} />
-                  <SpecRow label="CoG Height" value={formatCell(bike.cog_height_m, ' m', 2)} />
-                  <SpecRow label="Wet Mass" value={formatCell(bike.wet_mass_kg, ' kg', 0)} />
+                  <SpecRow
+                    label="CoG Height"
+                    value={
+                      bike.cog_height_mm != null
+                        ? `${Number(bike.cog_height_mm).toFixed(0)} mm`
+                        : formatCell(bike.cog_height_m, ' m', 2)
+                    }
+                  />
+                  <SpecRow
+                    label={bike.wet_mass_derived ? 'Wet Mass (est.)' : 'Wet Mass'}
+                    value={formatCell(bike.wet_mass_kg, ' kg', 0)}
+                  />
                   <SpecRow label="Chain Pitch" value={formatCell(bike.chain_pitch)} />
                   <SpecRow label="Front Sprocket" value={formatCell(bike.front_sprocket)} />
                   <SpecRow label="Rear Sprocket" value={formatCell(bike.rear_sprocket)} />

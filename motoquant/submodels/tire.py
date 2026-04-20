@@ -65,17 +65,39 @@ class TireModel:
     def thermal_rate(
         self, F_x: float, v: float, slip_ratio: float, T_tire: float, T_ambient: float
     ) -> float:
-        """dT_tire/dt -- rate of temperature change of the tire surface (C/s)."""
+        """dT_tire/dt -- rate of temperature change of the tire surface (C/s).
+
+        Heat balance:
+          Q_friction = |F_x| × |v_slip|            (slip generates heat)
+          Q_conv     = h × A × (T_tire − T_air)    (forced convection, speed-dep)
+          Q_cond     = k × A × (T_tire − T_road) / Δx   (conduction to road)
+
+        Kaizen fix (April 2026): the old formula computed
+        ``k × A × (T_tire − (T_tire − 5.0)) / 0.005`` which simplifies to a
+        constant 5 K ΔT regardless of actual temperatures — a silent bug
+        that made road conduction temperature-independent.  Now uses
+        ``T_road ≈ T_ambient + 5 °C`` (track surface is typically warmer
+        than ambient by a few °C in Indian track conditions).
+        """
         tire = self.cfg.tires
         v_slip = abs(v * slip_ratio)
         Q_friction = abs(F_x) * v_slip
         h_conv = 10.0 + 0.5 * v
         A_surface = 0.15
         Q_conv = h_conv * A_surface * (T_tire - T_ambient)
+        # Road-surface temperature proxy.  If the config carries an explicit
+        # track_temp_c on env, use it; otherwise fall back to ambient+5.
+        env = getattr(self.cfg, "environment", None)
+        T_road = (
+            getattr(env, "track_temp_c", None) if env is not None else None
+        )
+        if T_road is None:
+            T_road = T_ambient + 5.0
+        # Conduction through ~5 mm of rubber to the road surface.
         Q_cond = (
             tire.thermal_conductivity
             * (tire.contact_patch_cm2 * 1e-4)
-            * (T_tire - (T_tire - 5.0))
+            * (T_tire - T_road)
             / 0.005
         )
         dT = (Q_friction - Q_conv - Q_cond) / max(

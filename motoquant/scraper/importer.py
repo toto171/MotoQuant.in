@@ -250,9 +250,16 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
     Build an EngineParams from a BikeSpec.
     First checks for a known dyno curve from the dyno_curves library.
     Falls back to synthetic curve generation if no known curve exists.
+
+    For 2-stroke bikes (spec.stroke_type == 2), uses the expansion-chamber
+    resonance synthetic curve so the characteristic narrow powerband around
+    tuned_rpm is preserved — a 4-stroke parabolic curve would massively
+    over-predict low-RPM torque on a 2T.
     """
-    from ..defaults import _synthetic_torque_curve
+    from ..defaults import _synthetic_2stroke_torque_curve, _synthetic_torque_curve
     from .dyno_curves import get_dyno_curve
+
+    is_two_stroke = (spec.stroke_type == 2)
 
     # Start with K5 defaults as a base (reasonable sport bike values)
     base = gsxr1000_k5().engine
@@ -269,12 +276,21 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
         #   600cc inline-4 (R6, CBR600, ZX-6R): peak at ~88% → ×1.14
         #   Mid-size parallel twin (<700cc, 2-cyl): peak at ~82% → ×1.22
         #   Small parallel twin / single (<500cc, ≤2-cyl): peak at ~77% → ×1.30
+        #   Two-stroke: peak at ~90–92% of redline → ×1.10 (narrow band; over-rev
+        #     kills power fast once out of expansion-chamber resonance)
         # This replaces the previous flat 1.08 factor which caused severe redline
         # under-estimation for small-displacement bikes (e.g. Ninja 400 → 10 800 rpm
         # instead of the real ~13 000 rpm, trapping at 119 km/h instead of 150+ km/h).
         cc = spec.displacement_cc or 1000
         cyls = spec.cylinders or 4
-        if cc < 500 and cyls <= 2:
+        if is_two_stroke:
+            # 2T over-rev varies strongly with powervalve presence. Power-
+            # valved bikes (YPVS/RAVE/HPP/KIPS) have more usable band above
+            # peak (NSR250 peak 9500 → redline 12000 = 1.26); naked-pipe bikes
+            # fall off fast (RD350 peak 7500 → redline 9500 = 1.27 but
+            # power-wise falls into noise by 8500). We split the difference.
+            redline_factor = 1.26 if (spec.powervalve) else 1.18
+        elif cc < 500 and cyls <= 2:
             redline_factor = 1.30   # small singles / parallel twins
         elif cc < 700 and cyls <= 2:
             redline_factor = 1.22   # mid-size twins (MT-07, Z650, Dominar 400)
@@ -285,7 +301,11 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
         redline = int(peak_hp_rpm * redline_factor)
     else:
         redline = base.redline_rpm
-    idle = 1200
+    # 2-strokes idle higher (needs transfer port gas velocity to sustain firing)
+    idle = 1800 if is_two_stroke else 1200
+
+    # Tuned RPM for 2T: prefer explicit, else default to peak_power_rpm
+    tuned_rpm = spec.tuned_rpm or (peak_hp_rpm if is_two_stroke else None)
 
     # Try to find a known dyno curve for this bike
     dyno = get_dyno_curve(
@@ -297,15 +317,32 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
 
     # If no known curve found, generate a synthetic one based on peak power/torque
     if dyno is None:
-        dyno = _synthetic_torque_curve(
-            peak_torque_nm=float(peak_tq),
-            peak_rpm=float(peak_tq_rpm),
-            redline_rpm=float(redline),
-            idle_rpm=float(idle),
-            peak_power_hp=float(peak_hp),
-            peak_power_rpm=float(peak_hp_rpm),
-            points=100,
-        )
+        if is_two_stroke:
+            dyno = _synthetic_2stroke_torque_curve(
+                peak_torque_nm=float(peak_tq),
+                tuned_rpm=float(tuned_rpm or peak_hp_rpm),
+                redline_rpm=float(redline),
+                idle_rpm=float(idle),
+                powervalve=bool(spec.powervalve),
+                peak_power_hp=float(peak_hp),
+                peak_power_rpm=float(peak_hp_rpm),
+                points=100,
+            )
+        else:
+            dyno = _synthetic_torque_curve(
+                peak_torque_nm=float(peak_tq),
+                peak_rpm=float(peak_tq_rpm),
+                redline_rpm=float(redline),
+                idle_rpm=float(idle),
+                peak_power_hp=float(peak_hp),
+                peak_power_rpm=float(peak_hp_rpm),
+                points=100,
+            )
+
+    # 2-strokes have much lower rotating inertia (no valvetrain, lighter crank)
+    # — use ~60% of the category default, which changes launch RPM-drop behaviour.
+    base_inertia = CATEGORY_ENGINE_INERTIA.get(spec.category, 0.042)
+    engine_inertia = base_inertia * 0.60 if is_two_stroke else base_inertia
 
     return EngineParams(
         dyno_curve=dyno,
@@ -320,9 +357,14 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
         bore_mm=spec.bore_mm or base.bore_mm,
         stroke_mm=spec.stroke_mm or base.stroke_mm,
         compression_ratio=spec.compression_ratio or base.compression_ratio,
-        engine_inertia_kgm2=CATEGORY_ENGINE_INERTIA.get(spec.category, 0.042),
+        engine_inertia_kgm2=engine_inertia,
         cylinder_count=spec.cylinders,
         cylinder_config=_infer_cylinder_config(spec),
+        stroke_type=(2 if is_two_stroke else 4),
+        tuned_rpm=(float(tuned_rpm) if tuned_rpm else None),
+        expansion_chamber=bool(spec.expansion_chamber),
+        reed_valve=bool(spec.reed_valve),
+        powervalve=bool(spec.powervalve),
     )
 
 
@@ -506,6 +548,31 @@ def spec_to_bike_config(spec: BikeSpec) -> BikeConfig:
     tires = _build_tires_from_spec(spec)
     aero = _build_aero_from_spec(spec)
 
+    # ── Staging: override for 2-strokes ─────────────────────────────────
+    # K5-default launch_rpm=7000 is fine for a litre I4 (peak torque ~10k,
+    # 7k is a sensible clutch-dump RPM). For a 2-stroke it's a disaster —
+    # RD350 at 7000 rpm is off-pipe (≈ 40% of peak torque) and the sim
+    # simply cannot get the bike moving from the staging window. In real
+    # drag racing, 2T riders launch with the clutch slipping at or above
+    # the pipe's tuned RPM. We reproduce that by setting launch_rpm to
+    # tuned_rpm × 0.92 (gives slight headroom before the pipe comes on).
+    import copy
+    staging = copy.deepcopy(base_config.staging)
+    if spec.stroke_type == 2:
+        tuned = spec.tuned_rpm or spec.peak_power_rpm or engine.peak_power_rpm
+        staging.launch_rpm = float(int(tuned * 0.92))
+        staging.two_step = True  # 2T drag launches almost always use a limiter
+
+    # Parasitic: 2-strokes have no valvetrain; pre-mix bikes have no oil
+    # pump at all, oil-injected 2Ts have a tiny one. Collapse those losses.
+    parasitic = copy.deepcopy(base_config.parasitic)
+    if spec.stroke_type == 2:
+        parasitic.valve_train_power_w = 0.0   # no cams
+        parasitic.oil_pump_power_w = 60.0      # Autolube-style micro pump
+        # Small 2Ts often have no water pump either (air-cooled RD/RX)
+        if spec.cooling == "air":
+            parasitic.water_pump_electric = True
+
     # Compose model name
     year_tag = ""
     if spec.year_from:
@@ -529,8 +596,8 @@ def spec_to_bike_config(spec: BikeSpec) -> BikeConfig:
         braking=base_config.braking,
         wheelie=base_config.wheelie,
         rider=base_config.rider,
-        parasitic=base_config.parasitic,
-        staging=base_config.staging,
+        parasitic=parasitic,
+        staging=staging,
         environment=base_config.environment,
     )
 

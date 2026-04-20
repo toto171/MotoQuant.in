@@ -17,11 +17,23 @@ class BrakingModel:
         self.N_r_static = N_r_static
 
     def max_decel(self, v: float, m_total: float) -> float:
-        """Maximum braking deceleration (m/s2) at given speed."""
+        """Maximum braking deceleration (m/s2) at given speed.
+
+        Uses the actual tire peak friction coefficient from the config
+        (``cfg.tires.mu_peak``) rather than hardcoded defaults.  Kaizen
+        fix (April 2026): the old model had ``mu_front = 1.2`` and
+        ``mu_rear = 1.0`` baked in, so a bike on CEAT Zoom Rad (mu ≈ 1.05)
+        produced the same braking deceleration as a bike on Pirelli Diablo
+        Supercorsa SP (mu ≈ 1.45) — a 40% mismatch that was invisible.
+        Front tires typically carry slightly more braking load so we bias
+        mu_front up 5% (a reasonable approximation: braking transfers
+        weight forward, front tire runs at ideal slip while rear unloads).
+        """
         h = self.cfg.chassis.cog_height_m
         L = self.cfg.chassis.wheelbase_m
-        mu_front = 1.2
-        mu_rear = 1.0
+        mu_peak = getattr(self.cfg.tires, "mu_peak", 1.1)
+        mu_front = mu_peak * 1.05   # front carries most braking load
+        mu_rear = mu_peak * 0.90    # rear unloads under deceleration
         a_est = 10.0
         for _ in range(5):
             N_f = self.N_f_static + m_total * a_est * h / L
