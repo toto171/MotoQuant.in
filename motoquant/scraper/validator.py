@@ -39,7 +39,7 @@ BOUNDS = {
     "peak_power_hp": (5, 500),
     "peak_power_rpm": (3000, 18000),
     "peak_torque_nm": (5, 400),
-    "peak_torque_rpm": (2000, 14000),
+    "peak_torque_rpm": (2000, 15000),  # upper raised April 2026 for Kawasaki ZX-25R (I4, 14500 rpm peak torque, ~17k redline)
     "dry_mass_kg": (80, 500),
     "wet_mass_kg": (90, 550),
     "wheelbase_mm": (1000, 2000),

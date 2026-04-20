@@ -32,6 +32,7 @@ import json
 import logging
 import os
 import tempfile
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
@@ -432,7 +433,89 @@ def get_bike(bike_id: int):
     if not row:
         raise HTTPException(404, f"Bike {bike_id} not found")
 
-    d = _bike_row_to_summary(dict(row))
+    # Expose all bike_models columns (not just the summary subset)
+    full = dict(row)
+    d = _bike_row_to_summary(full)
+    # Merge in remaining headline columns that detail pages need
+    for extra in (
+        "model_code",
+        "year_to",
+        "subcategory",
+        "cylinder_count",
+        "cylinder_config",
+        "bore_mm",
+        "stroke_mm",
+        "compression_ratio",
+        "peak_power_rpm",
+        "peak_torque_nm",
+        "peak_torque_rpm",
+        "wet_mass_kg",
+        "wheelbase_mm",
+        "seat_height_mm",
+        "fuel_capacity_l",
+        "validation_et_s",
+        "validation_trap_kmh",
+        "validation_source",
+    ):
+        if extra in full:
+            d[extra] = full[extra]
+
+    # Attach latest bike_config JSON sub-blocks (aero, drivetrain, engine extras, tire)
+    try:
+        cfg_row = db.execute(
+            """SELECT engine_params, aero_params, drivetrain_params, tire_params,
+                      chassis_params, config_name
+               FROM bike_configs
+               WHERE bike_model_id = ? AND is_current = 1
+               ORDER BY version DESC
+               LIMIT 1""",
+            (bike_id,),
+        ).fetchone()
+        if cfg_row:
+            import json as _json
+
+            def _safe_parse(blob):
+                if not blob:
+                    return {}
+                try:
+                    return _json.loads(blob)
+                except Exception:
+                    return {}
+
+            engine = _safe_parse(cfg_row["engine_params"])
+            aero = _safe_parse(cfg_row["aero_params"])
+            drive = _safe_parse(cfg_row["drivetrain_params"])
+            tire = _safe_parse(cfg_row["tire_params"])
+            chassis = _safe_parse(cfg_row["chassis_params"])
+
+            # Expose common simulation-relevant fields at top level
+            if engine:
+                for k in ("redline_rpm", "cylinder_count", "cylinder_config"):
+                    v = engine.get(k)
+                    if v is not None and d.get(k) in (None, ""):
+                        d[k] = v
+            if aero:
+                for k in ("cd", "frontal_area_m2"):
+                    v = aero.get(k)
+                    if v is not None:
+                        d[k] = v
+            if drive:
+                for k in ("front_sprocket", "rear_sprocket", "chain_pitch"):
+                    v = drive.get(k)
+                    if v is not None:
+                        d[k] = v
+            if chassis:
+                for k in ("cog_height_m",):
+                    v = chassis.get(k)
+                    if v is not None:
+                        d[k] = v
+            # Derived: wheelbase in meters for display
+            if d.get("wheelbase_mm") is not None:
+                d["wheelbase_m"] = d["wheelbase_mm"] / 1000.0
+    except Exception:
+        # Detail page degrades gracefully if JSON blobs are malformed.
+        pass
+
     # Attach OEM tire fitments
     try:
         fitments = db.execute(
@@ -1288,4 +1371,380 @@ async def upload_dyno(
             "power_hp": [round(float(dyno_result.power_kw[i]) * 1.34102, 2) for i in idx],
             "torque_nm": [round(float(dyno_result.torque_nm[i]), 2) for i in idx],
         },
+    }
+
+
+# --- Bike Suggestions (user submissions) ---------------------------------
+
+
+class BikeSuggestionRequest(BaseModel):
+    """POST /api/bikes/suggest -- user-submitted bike addition request."""
+
+    make: str = Field(..., min_length=1, max_length=60, description="Manufacturer (e.g. 'Kawasaki')")
+    model: str = Field(..., min_length=1, max_length=80, description="Model name (e.g. 'ZX-6R 636')")
+    year: int | None = Field(None, ge=1960, le=2099, description="Model year")
+    displacement_cc: float | None = Field(None, gt=0, le=5000, description="Engine displacement in cc")
+    peak_power_hp: float | None = Field(None, gt=0, le=600, description="Peak power (hp)")
+    dry_mass_kg: float | None = Field(None, gt=0, le=800, description="Dry mass (kg)")
+    category: str | None = Field(None, max_length=40, description="sport / naked / cruiser / adv / drag / touring")
+    notes: str | None = Field(None, max_length=2000, description="Free-form rider context")
+    submitter_email: str | None = Field(None, max_length=254, description="Optional -- reply address")
+    source_url: str | None = Field(None, max_length=500, description="Optional spec-sheet URL")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "make": "Kawasaki",
+                "model": "ZX-6R 636",
+                "year": 2024,
+                "displacement_cc": 636,
+                "peak_power_hp": 128,
+                "dry_mass_kg": 196,
+                "category": "sport",
+                "notes": "Would love to see this in the simulator",
+                "submitter_email": "rider@example.com",
+            }
+        }
+
+
+@app.post("/api/bikes/suggest", status_code=201)
+def suggest_bike(req: BikeSuggestionRequest):
+    """
+    Submit a bike to be added to the catalog.
+
+    Returns `201 Created` with the suggestion id on success. Plausibility
+    violations (displacement > 3500cc, etc.) are stored anyway but flagged for
+    manual review; the `flagged_out_of_bounds` field in the response tells the
+    client whether the submission was accepted as-is or flagged.
+    """
+    db = _get_db()
+    if not db:
+        raise HTTPException(503, "Database unavailable")
+
+    try:
+        # Reuse the shared DB connection directly -- the repo only needs a
+        # connection-like object, so we skip the MotoQuantDB facade here.
+        from .database.bike_suggestions_repo import BikeSuggestionsRepository
+
+        repo = BikeSuggestionsRepository(db)
+        result = repo.create(
+            make=req.make,
+            model=req.model,
+            year=req.year,
+            displacement_cc=req.displacement_cc,
+            peak_power_hp=req.peak_power_hp,
+            dry_mass_kg=req.dry_mass_kg,
+            category=req.category,
+            notes=req.notes,
+            submitter_email=req.submitter_email,
+            source_url=req.source_url,
+        )
+    except ValueError as exc:
+        # Empty make/model -- shouldn't happen thanks to Pydantic min_length, but belt-and-braces
+        raise HTTPException(422, str(exc))
+    except Exception as exc:
+        logging.getLogger(__name__).error(
+            "Failed to store bike suggestion: %s", exc, exc_info=True
+        )
+        raise HTTPException(500, f"Database error: {exc}")
+
+    return {
+        "id": result["id"],
+        "status": "pending",
+        "flagged_out_of_bounds": result["flagged_out_of_bounds"],
+        "issues": result["issues"],
+        "message": (
+            "Thanks! Your submission is queued for review."
+            if not result["flagged_out_of_bounds"]
+            else "Submission stored, but some fields are out of expected range and will be manually verified."
+        ),
+    }
+
+
+# --- Venue Resolve (auto race-environment setup) -------------------------
+
+
+class VenueResolveRequest(BaseModel):
+    """POST /api/venues/resolve -- resolve a location to a race environment."""
+
+    location: str | None = Field(
+        None,
+        max_length=200,
+        description="City, venue name, or 'City, Country' (e.g. 'Pune, IN')",
+    )
+    lat: float | None = Field(None, ge=-90, le=90, description="Latitude (decimal degrees)")
+    lon: float | None = Field(None, ge=-180, le=180, description="Longitude (decimal degrees)")
+    altitude_m: float | None = Field(
+        None,
+        ge=-500,
+        le=8000,
+        description="Elevation above sea level [m]. Overrides OWM's estimate if provided.",
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {"location": "Pune, IN"}
+        }
+
+
+def _match_seeded_venue(db, location: str) -> dict | None:
+    """Return a seeded venue dict if `location` matches name/short_name/city (case-insensitive)."""
+    if not location:
+        return None
+    needle = f"%{location.strip()}%"
+    try:
+        row = db.execute(
+            """SELECT * FROM venues
+               WHERE LOWER(name) LIKE LOWER(?)
+                  OR LOWER(short_name) LIKE LOWER(?)
+                  OR LOWER(city) LIKE LOWER(?)
+               ORDER BY
+                 CASE
+                   WHEN LOWER(short_name) = LOWER(?) THEN 0
+                   WHEN LOWER(name) = LOWER(?) THEN 1
+                   WHEN LOWER(city) = LOWER(?) THEN 2
+                   ELSE 3
+                 END
+               LIMIT 1""",
+            (needle, needle, needle,
+             location.strip(), location.strip(), location.strip()),
+        ).fetchone()
+        return dict(row) if row else None
+    except Exception as e:
+        logging.getLogger(__name__).warning("Venue match query failed: %s", e)
+        return None
+
+
+def _fetch_owm_for_location(
+    *,
+    location: str | None,
+    lat: float | None,
+    lon: float | None,
+    altitude_m: float | None,
+) -> dict | None:
+    """
+    Fetch current conditions via OpenWeatherMap for either a city name or
+    lat/lon. Returns a dict of computed environment params, or None if the
+    API key is missing or the upstream request fails.
+
+    Uses the same HTTP path as `motoquant.database.weather_repo` so we stay
+    consistent with the offline weather refresh pipeline.
+    """
+    api_key = os.environ.get("OPENWEATHERMAP_API_KEY")
+    if not api_key:
+        return {"_error": "no_api_key"}
+
+    try:
+        import requests  # type: ignore
+    except ImportError:
+        return {"_error": "requests_not_installed"}
+
+    params: dict[str, Any] = {
+        "appid": api_key,
+        "units": "metric",
+    }
+    if lat is not None and lon is not None:
+        params["lat"] = lat
+        params["lon"] = lon
+    elif location:
+        params["q"] = location
+    else:
+        return {"_error": "missing_location"}
+
+    try:
+        resp = requests.get(
+            "https://api.openweathermap.org/data/2.5/weather",
+            params=params,
+            timeout=10,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception as exc:
+        logging.getLogger(__name__).warning(
+            "OWM fetch failed for location=%r lat=%s lon=%s: %s",
+            location, lat, lon, exc,
+        )
+        return {"_error": f"owm_error: {exc}"}
+
+    # Parse response -- OWM returns Celsius + hPa + m/s when units=metric
+    main = data.get("main", {}) or {}
+    wind = data.get("wind", {}) or {}
+    coord = data.get("coord", {}) or {}
+
+    temp_c = float(main.get("temp", 25.0))
+    humidity = float(main.get("humidity", 50.0))
+    pressure_hpa = float(main.get("pressure", 1013.25))
+    wind_ms = float(wind.get("speed", 0.0))
+    wind_deg = float(wind.get("deg", 0.0))
+
+    resolved_lat = float(coord.get("lat", lat)) if coord.get("lat") is not None else lat
+    resolved_lon = float(coord.get("lon", lon)) if coord.get("lon") is not None else lon
+
+    # Use caller-provided altitude if given, else assume sea-level (OWM free tier
+    # doesn't return elevation; users should pass it if their venue is high-altitude).
+    alt = float(altitude_m) if altitude_m is not None else 0.0
+
+    # Reuse the atmospheric helpers from weather_repo to keep logic in one place
+    from .database.weather_repo import (
+        compute_air_density,
+        compute_density_altitude,
+        compute_power_correction,
+    )
+
+    air_density = compute_air_density(temp_c, humidity, pressure_hpa, alt)
+    da_ft = compute_density_altitude(temp_c, humidity, pressure_hpa, alt)
+    pcf = compute_power_correction(temp_c, pressure_hpa, humidity, alt)
+
+    return {
+        "location_name": data.get("name") or location or "Unknown",
+        "country": (data.get("sys") or {}).get("country"),
+        "latitude": resolved_lat,
+        "longitude": resolved_lon,
+        "altitude_m": alt,
+        "temperature_c": round(temp_c, 2),
+        "humidity_pct": round(humidity, 1),
+        "pressure_hpa": round(pressure_hpa, 2),
+        "pressure_kpa": round(pressure_hpa / 10.0, 3),
+        "wind_speed_ms": round(wind_ms, 2),
+        "wind_direction_deg": round(wind_deg, 1),
+        "air_density_kgm3": round(float(air_density), 4),
+        "density_altitude_ft": round(float(da_ft), 0),
+        "density_altitude_m": round(float(da_ft) * 0.3048, 0),
+        "power_correction_factor": round(float(pcf), 4),
+    }
+
+
+@app.post("/api/venues/resolve")
+def resolve_venue(req: VenueResolveRequest):
+    """
+    Resolve a race location into ready-to-simulate environment parameters.
+
+    Resolution order:
+      1. If `location` matches a seeded venue (by name, short_name, or city),
+         return the seeded venue's environment data plus the most recent
+         weather record if available.
+      2. Otherwise, fall back to OpenWeatherMap for live conditions
+         (requires `OPENWEATHERMAP_API_KEY` env var). Computes air density,
+         density altitude, and SAE power correction locally.
+
+    The response shape is identical for both paths so the frontend can always
+    read `temperature_c`, `humidity_pct`, etc., without branching.
+    """
+    if not (req.location or (req.lat is not None and req.lon is not None)):
+        raise HTTPException(
+            422,
+            "Provide either `location` (city/venue name) or both `lat` and `lon`.",
+        )
+
+    log = logging.getLogger(__name__)
+    db = _get_db()
+
+    # ─── Path 1: seeded venue match ──────────────────────────────────────
+    if db and req.location:
+        venue = _match_seeded_venue(db, req.location)
+        if venue:
+            alt = float(venue.get("altitude_m") or 0.0)
+
+            # Try to attach the most recent weather record for richer data
+            latest = None
+            try:
+                wr = db.execute(
+                    """SELECT * FROM weather_records
+                       WHERE venue_id = ?
+                       ORDER BY recorded_at DESC LIMIT 1""",
+                    (venue["id"],),
+                ).fetchone()
+                latest = dict(wr) if wr else None
+            except Exception as exc:
+                log.warning("weather lookup for venue %s failed: %s", venue["id"], exc)
+
+            if latest:
+                temp_c = float(latest.get("ambient_temp_c") or 25.0)
+                humidity = float(latest.get("relative_humidity_pct") or 50.0)
+                pressure = float(latest.get("barometric_pressure_hpa") or 1013.25)
+                air_density = float(latest.get("air_density_kgm3") or 0.0)
+                da_ft = float(latest.get("density_altitude_ft") or 0.0)
+                pcf = float(latest.get("power_correction_factor") or 1.0)
+                fetched_at = latest.get("recorded_at")
+                weather_source = latest.get("source") or "seeded_weather"
+            else:
+                # No weather record -- compute ISA-standard defaults at this altitude
+                temp_c, humidity, pressure = 25.0, 50.0, 1013.25
+                from .database.weather_repo import (
+                    compute_air_density,
+                    compute_density_altitude,
+                    compute_power_correction,
+                )
+                air_density = compute_air_density(temp_c, humidity, pressure, alt)
+                da_ft = compute_density_altitude(temp_c, humidity, pressure, alt)
+                pcf = compute_power_correction(temp_c, pressure, humidity, alt)
+                fetched_at = None
+                weather_source = "isa_standard"
+            # Canonical resolution source -- UI keys off this to label the banner.
+            # The underlying weather provenance is preserved separately in `weather_source`.
+            source = "seeded_venue"
+
+            return {
+                "matched_venue_id": venue["id"],
+                "venue_name": venue.get("name"),
+                "location_name": venue.get("name"),
+                "city": venue.get("city"),
+                "country": venue.get("country"),
+                "latitude": venue.get("latitude"),
+                "longitude": venue.get("longitude"),
+                "altitude_m": alt,
+                "temperature_c": round(temp_c, 2),
+                "humidity_pct": round(humidity, 1),
+                "pressure_hpa": round(pressure, 2),
+                "pressure_kpa": round(pressure / 10.0, 3),
+                "air_density_kgm3": round(air_density, 4),
+                "density_altitude_ft": round(da_ft, 0),
+                "density_altitude_m": round(da_ft * 0.3048, 0),
+                "power_correction_factor": round(pcf, 4),
+                "fetched_at": fetched_at,
+                "source": source,
+                "weather_source": weather_source,
+            }
+
+    # ─── Path 2: live OWM fetch ──────────────────────────────────────────
+    owm = _fetch_owm_for_location(
+        location=req.location,
+        lat=req.lat,
+        lon=req.lon,
+        altitude_m=req.altitude_m,
+    )
+    if owm is None or owm.get("_error"):
+        err = (owm or {}).get("_error", "unknown")
+        if err == "no_api_key":
+            raise HTTPException(
+                503,
+                "Live weather unavailable: OPENWEATHERMAP_API_KEY is not configured on the server.",
+            )
+        if err == "requests_not_installed":
+            raise HTTPException(503, "Live weather unavailable: `requests` package missing.")
+        if err.startswith("owm_error"):
+            raise HTTPException(502, f"OpenWeatherMap upstream error: {err[11:]}")
+        raise HTTPException(422, f"Could not resolve location: {err}")
+
+    return {
+        "matched_venue_id": None,
+        "venue_name": None,
+        "location_name": owm["location_name"],
+        "city": owm["location_name"],
+        "country": owm.get("country"),
+        "latitude": owm["latitude"],
+        "longitude": owm["longitude"],
+        "altitude_m": owm["altitude_m"],
+        "temperature_c": owm["temperature_c"],
+        "humidity_pct": owm["humidity_pct"],
+        "pressure_hpa": owm["pressure_hpa"],
+        "pressure_kpa": owm["pressure_kpa"],
+        "wind_speed_ms": owm["wind_speed_ms"],
+        "wind_direction_deg": owm["wind_direction_deg"],
+        "air_density_kgm3": owm["air_density_kgm3"],
+        "density_altitude_ft": owm["density_altitude_ft"],
+        "density_altitude_m": owm["density_altitude_m"],
+        "power_correction_factor": owm["power_correction_factor"],
+        "fetched_at": datetime.now(timezone.utc).isoformat(),
+        "source": "openweathermap",
     }

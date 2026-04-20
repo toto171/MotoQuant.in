@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { Zap, TrendingUp, BarChart3, ChevronDown, Cpu, Wind, Gauge, Menu, X } from 'lucide-react';
+import { Zap, TrendingUp, BarChart3, ChevronDown, Cpu, Wind, Gauge, Menu, X, Brain, Target, MessageSquare, Upload } from 'lucide-react';
 import SimulatorWidget from '../components/SimulatorWidget';
 
 const containerVariants = {
@@ -51,11 +51,11 @@ function ScrollIndicator() {
 
 function StatsStrip() {
   const stats = [
-    { num: '135', label: 'BIKES' },
+    { num: '267', label: 'BIKES' },
     { num: '69', label: 'TIRES' },
-    { num: '70', label: 'PARTS' },
-    { num: '20', label: 'VENUES' },
-    { num: '583', label: 'TESTS' },
+    { num: '424', label: 'PARTS' },
+    { num: '12', label: 'VENUES' },
+    { num: '739', label: 'TESTS' },
     { num: '15', label: 'SUB-MODELS' },
   ];
 
@@ -172,8 +172,14 @@ export default function HomePage() {
             <a href="/simulator" className="text-white/60 hover:text-white transition-colors duration-300">
               Simulator
             </a>
+            <a href="/bikes" className="text-white/60 hover:text-white transition-colors duration-300">
+              Bikes
+            </a>
             <a href="#physics" className="text-white/60 hover:text-white transition-colors duration-300">
               Physics
+            </a>
+            <a href="#intelligence" className="text-white/60 hover:text-white transition-colors duration-300">
+              Intelligence
             </a>
             <a href="#validation" className="text-white/60 hover:text-white transition-colors duration-300">
               Validation
@@ -221,7 +227,9 @@ export default function HomePage() {
               <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1 font-mono text-sm">
                 {[
                   { href: '/simulator', label: 'Simulator' },
+                  { href: '/bikes', label: 'Bikes' },
                   { href: '#physics', label: 'Physics' },
+                  { href: '#intelligence', label: 'Intelligence' },
                   { href: '#validation', label: 'Validation' },
                   { href: '#cta', label: 'Get Started' },
                 ].map(link => (
@@ -556,7 +564,7 @@ export default function HomePage() {
                 'Air density, altitude and temperature correction',
                 'Surface grip for asphalt, concrete, salt & dry lake',
                 'Staging, reaction time, two-step launch control',
-                '20 venues including Bonneville, El Mirage, Texas Mile',
+                '12 venues: Aamby Valley, MMRT, BIC, Santa Pod, Pomona, and more',
               ]}
             />
             <PhysicsCard
@@ -565,8 +573,94 @@ export default function HomePage() {
               items={[
                 'RK4 fixed-step integrator at 1ms timestep',
                 'Adaptive step-size solver with error bounds',
-                '583+ regression tests (zero failures)',
+                '739+ regression tests (zero failures)',
                 'Validated against real GPS and ECU telemetry',
+              ]}
+            />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Intelligence layer — Phase 4 AI features */}
+      <section id="intelligence" className="py-24 md:py-32 px-6 border-t border-brand-orange/10">
+        <div className="max-w-6xl mx-auto">
+          <RevealSection>
+            <div className="mb-16">
+              <h2 className="font-display font-bold text-4xl md:text-5xl mb-4">
+                Intelligence Layer
+              </h2>
+              <p className="text-white/80 text-lg max-w-3xl">
+                Physics is the floor, not the ceiling. MotoQuant Pro ships a full analysis stack on top of the solver —
+                so you spend less time sweeping sliders and more time building the right bike.
+              </p>
+            </div>
+          </RevealSection>
+
+          <motion.div
+            className="grid md:grid-cols-2 gap-6"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-100px' }}
+          >
+            <PhysicsCard
+              icon={Target}
+              title="Smart Recommendations"
+              items={[
+                'Parts ROI knapsack — best ET delta per ₹',
+                'Build profiles: Street / Drag Prep / Full Race',
+                'Synergy detection (exhaust + ECU, turbo + fuel)',
+                'Upgrade path: Budget → Mid → Performance → Full Send',
+              ]}
+            />
+            <PhysicsCard
+              icon={Brain}
+              title="Bayesian Optimization"
+              items={[
+                'BoTorch Gaussian-process build optimizer',
+                '7-parameter continuous search (power, mass, aero, grip, gearing)',
+                'Budget-aware penalty with INR cost estimates',
+                'Converges in 30–50 iterations — no grid search',
+              ]}
+            />
+            <PhysicsCard
+              icon={MessageSquare}
+              title="Natural Language Queries"
+              items={[
+                '"Optimize my Hayabusa for 35°C at Aamby Valley, budget 50k"',
+                'Regex-based parser extracts bike, venue, weather, budget',
+                'Resolves against the live catalog and runs the sim end-to-end',
+                'Ollama / Mistral 7B hook for Phase 5 conversational tuning',
+              ]}
+            />
+            <PhysicsCard
+              icon={Cpu}
+              title="Surrogate Predictors"
+              items={[
+                'XGBoost & PyTorch DNN models trained on Sobol-sampled sims',
+                'Sub-millisecond ET predictions for slider-driven UIs',
+                'R² > 0.99, within-50ms accuracy on held-out bikes',
+                'Feature importance + uncertainty for every prediction',
+              ]}
+            />
+            <PhysicsCard
+              icon={Upload}
+              title="Import & Auto-Calibrate"
+              items={[
+                'Dragy GPS CSV / JSON / VBO with run-boundary detection',
+                'Dyno curves: DynoJet, generic metric, MoTeC (SAE J1349)',
+                'ECU logs: Woolich, Power Commander, MoTeC i2',
+                'Auto-calibrator fits Cd + μ via DE + Nelder-Mead',
+              ]}
+            />
+            <PhysicsCard
+              icon={TrendingUp}
+              title="Sensitivity & Overlay"
+              items={[
+                'Sobol global sensitivity indices (S1 + ST)',
+                'Multi-run statistical model — CV, 95% CI, recommended N',
+                'Sim-vs-real v(t) overlay with RMSE, MAE, split errors',
+                'Composite cost function ready for any optimizer',
               ]}
             />
           </motion.div>

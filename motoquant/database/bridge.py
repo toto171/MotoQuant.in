@@ -151,6 +151,10 @@ def extract_headline_specs(config: BikeConfig) -> dict[str, Any]:
     """
     Extract searchable headline specs from a BikeConfig
     for the bike_models table.
+
+    Includes cylinder_count + cylinder_config so downstream consumers
+    (e.g. parts compatibility engine) can filter on engine family without
+    having to crack open the JSON engine_params blob.
     """
     return {
         "displacement_cc": config.engine.displacement_cc,
@@ -161,6 +165,8 @@ def extract_headline_specs(config: BikeConfig) -> dict[str, Any]:
         "peak_power_rpm": config.engine.peak_power_rpm,
         "peak_torque_nm": config.engine.peak_torque_nm,
         "peak_torque_rpm": config.engine.peak_torque_rpm,
+        "cylinder_count": getattr(config.engine, "cylinder_count", None),
+        "cylinder_config": getattr(config.engine, "cylinder_config", None),
         "dry_mass_kg": config.chassis.dry_mass_kg,
         "wheelbase_mm": config.chassis.wheelbase_mm,
         "seat_height_mm": config.chassis.seat_height_mm,

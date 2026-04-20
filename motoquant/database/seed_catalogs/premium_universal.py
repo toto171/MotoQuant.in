@@ -1,0 +1,1677 @@
+"""
+MotoQuant Pro — Premium Universal Parts Catalog
+===============================================
+Brakes, suspension, batteries, ECU piggybacks, wheelie bars, and rearsets
+with cross-manufacturer fitment rules. ~60 parts organized by category.
+
+All parts use explicit fitment constraints to avoid leaks:
+  - Drag-specific parts (wheelie bars, ISR, Orient Express) → I4 1300cc+ or Hayabusa/ZX-14R exact
+  - Small-cc commuter parts (YSS Eco, EJK, Aracer miniS) → displacement caps + Indian market categories
+  - Sport 600cc+ universal → tier="family" with manufacturers=[] + engine_configs + displacement bounds
+  - Cruiser/ADV → categories constraint or specific manufacturer lists
+"""
+
+from ..connection import MotoQuantDB
+
+
+def seed_premium_universal(db: MotoQuantDB) -> int:
+    """
+    Seed premium universal parts across 6 categories:
+      - brakes (18 parts)
+      - suspension (18 parts)
+      - battery (8 parts)
+      - ecu (10 piggyback brands)
+      - wheelie_bar (4 drag-specific)
+      - bodywork (4 rearsets/winglets)
+
+    Returns count of parts created.
+    """
+
+    parts = [
+        # ═══════════════════════════════════════════════════════════════
+        # BRAKES (18 parts)
+        # ═══════════════════════════════════════════════════════════════
+
+        # Brembo RCS master cylinders
+        {
+            "category": "brakes",
+            "brand": "Brembo",
+            "model_name": "RCS 19x18 Master Cylinder",
+            "part_number": "BR-RCS-1918",
+            "specs": {
+                "type": "master_cylinder",
+                "bore_mm": 19,
+                "travel_mm": 18,
+                "material": "aluminum",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1500,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.3},
+            "price_inr": 28000,
+            "retailer": "Brembo India",
+            "availability": "order",
+        },
+        {
+            "category": "brakes",
+            "brand": "Brembo",
+            "model_name": "RCS 15x16 Master Cylinder",
+            "part_number": "BR-RCS-1516",
+            "specs": {
+                "type": "master_cylinder",
+                "bore_mm": 15,
+                "travel_mm": 16,
+                "material": "aluminum",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I2", "I4"],
+                    "displacement_min_cc": 300,
+                    "displacement_max_cc": 600,
+                    "categories": ["sport", "naked"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.25},
+            "price_inr": 18000,
+            "retailer": "Brembo India",
+        },
+        # Brembo calipers
+        {
+            "category": "brakes",
+            "brand": "Brembo",
+            "model_name": "M4.34 Caliper Pair",
+            "part_number": "BR-M434-PAIR",
+            "specs": {
+                "type": "caliper",
+                "pistons": 4,
+                "material": "aluminum",
+                "position": "front",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 900,
+                    "displacement_max_cc": 1500,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -1.2},
+            "price_inr": 65000,
+            "retailer": "Superbike India",
+            "availability": "order",
+        },
+        # Accossato premium race
+        {
+            "category": "brakes",
+            "brand": "Accossato",
+            "model_name": "PRS 19x20 Master Cylinder",
+            "part_number": "AC-PRS-1920",
+            "specs": {
+                "type": "master_cylinder",
+                "bore_mm": 19,
+                "travel_mm": 20,
+                "material": "billet_aluminum",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 900,
+                    "displacement_max_cc": 1500,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.4},
+            "price_inr": 45000,
+            "retailer": "Brembo India",
+            "availability": "import_only",
+        },
+        # ISR drag-specific
+        {
+            "category": "brakes",
+            "brand": "ISR",
+            "model_name": "Billet Caliper Pair",
+            "part_number": "ISR-DRAG-CAL",
+            "specs": {
+                "type": "caliper",
+                "pistons": 6,
+                "material": "billet_aluminum",
+                "position": "front",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": ["Suzuki", "Kawasaki"],
+                    "engine_configs": ["I4"],
+                    "displacement_min_cc": 1299,
+                    "displacement_max_cc": 1350,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -2.5},
+            "price_inr": 85000,
+            "retailer": "Grand Pitstop",
+            "availability": "import_only",
+        },
+        # Galfer rotors
+        {
+            "category": "brakes",
+            "brand": "Galfer",
+            "model_name": "DF Wave Rotor Front Pair",
+            "part_number": "GF-DF-WAVE-F",
+            "specs": {
+                "type": "rotor",
+                "diameter_mm": 330,
+                "material": "stainless_steel",
+                "position": "front",
+                "pattern": "wave",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1500,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.8},
+            "price_inr": 32000,
+            "retailer": "MotoParts India",
+        },
+        {
+            "category": "brakes",
+            "brand": "Galfer",
+            "model_name": "SD Solid Rotor",
+            "part_number": "GF-SD-SOLID",
+            "specs": {
+                "type": "rotor",
+                "diameter_mm": 240,
+                "material": "stainless_steel",
+                "position": "front",
+                "pattern": "solid",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I1", "I2"],
+                    "displacement_min_cc": 150,
+                    "displacement_max_cc": 500,
+                    "categories": ["commuter", "naked"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.4},
+            "price_inr": 8500,
+            "retailer": "MotoParts India",
+        },
+        # EBC pads
+        {
+            "category": "brakes",
+            "brand": "EBC",
+            "model_name": "HH Sintered Pads",
+            "part_number": "EBC-HH-PAD",
+            "specs": {
+                "type": "pad",
+                "material": "sintered_metal",
+                "position": "front_rear",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 400,
+                    "displacement_max_cc": 1500,
+                    "categories": ["sport", "supersport", "naked"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.15},
+            "price_inr": 12000,
+            "retailer": "MotoParts India",
+        },
+        {
+            "category": "brakes",
+            "brand": "EBC",
+            "model_name": "GG Organic Pads",
+            "part_number": "EBC-GG-PAD",
+            "specs": {
+                "type": "pad",
+                "material": "organic",
+                "position": "front_rear",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I1", "I2", "V2"],
+                    "displacement_min_cc": 150,
+                    "displacement_max_cc": 500,
+                    "categories": ["commuter", "naked", "cruiser"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.1},
+            "price_inr": 5500,
+            "retailer": "MotoParts India",
+        },
+        # SBS / Ferodo race
+        {
+            "category": "brakes",
+            "brand": "SBS",
+            "model_name": "Evo Sintered Pads",
+            "part_number": "SBS-EVO-PAD",
+            "specs": {
+                "type": "pad",
+                "material": "sintered_metal",
+                "position": "front_rear",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1500,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.2},
+            "price_inr": 18000,
+            "retailer": "Grand Pitstop",
+        },
+        {
+            "category": "brakes",
+            "brand": "Ferodo",
+            "model_name": "Race Pad XRAC",
+            "part_number": "FD-XRAC-PAD",
+            "specs": {
+                "type": "pad",
+                "material": "carbon_ceramic",
+                "position": "front_rear",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1500,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.25},
+            "price_inr": 22000,
+            "retailer": "Grand Pitstop",
+            "availability": "order",
+        },
+        {
+            "category": "brakes",
+            "brand": "Vesrah",
+            "model_name": "RJL Race Pads",
+            "part_number": "VS-RJL-PAD",
+            "specs": {
+                "type": "pad",
+                "material": "sintered_metal",
+                "position": "front_rear",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": ["Honda", "Yamaha", "Suzuki", "Kawasaki"],
+                    "engine_configs": ["I4"],
+                    "displacement_min_cc": 400,
+                    "displacement_max_cc": 1100,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.15},
+            "price_inr": 16000,
+            "retailer": "MotoParts India",
+        },
+        # HEL braided lines
+        {
+            "category": "brakes",
+            "brand": "HEL",
+            "model_name": "Braided Steel Lines Front",
+            "part_number": "HEL-BRAID-F",
+            "specs": {
+                "type": "line",
+                "material": "stainless_braided",
+                "position": "front",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1500,
+                    "categories": ["sport", "supersport", "naked"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.15},
+            "price_inr": 14000,
+            "retailer": "MotoParts India",
+        },
+        {
+            "category": "brakes",
+            "brand": "HEL",
+            "model_name": "Braided Steel Lines Rear",
+            "part_number": "HEL-BRAID-R",
+            "specs": {
+                "type": "line",
+                "material": "stainless_braided",
+                "position": "rear",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1500,
+                    "categories": ["sport", "supersport", "naked"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.1},
+            "price_inr": 11000,
+            "retailer": "MotoParts India",
+        },
+        {
+            "category": "brakes",
+            "brand": "HEL",
+            "model_name": "Braided Lines Small-CC",
+            "part_number": "HEL-BRAID-SMALLCC",
+            "specs": {
+                "type": "line",
+                "material": "stainless_braided",
+                "position": "front_rear",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I1", "I2"],
+                    "displacement_min_cc": 150,
+                    "displacement_max_cc": 400,
+                    "categories": ["commuter", "sport", "naked"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.08},
+            "price_inr": 7500,
+            "retailer": "MotoParts India",
+        },
+        # Moto-Master / Beringer premium
+        {
+            "category": "brakes",
+            "brand": "Moto-Master",
+            "model_name": "Flame Rotor ADV",
+            "part_number": "MM-FLAME-ADV",
+            "specs": {
+                "type": "rotor",
+                "diameter_mm": 310,
+                "material": "stainless_steel",
+                "position": "front",
+                "pattern": "flame",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I2", "V2"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1300,
+                    "categories": ["adventure", "touring"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.6},
+            "price_inr": 28000,
+            "retailer": "Grand Pitstop",
+            "availability": "order",
+        },
+        {
+            "category": "brakes",
+            "brand": "Beringer",
+            "model_name": "Aerotec Caliper Pair",
+            "part_number": "BG-AEROTEC-CAL",
+            "specs": {
+                "type": "caliper",
+                "pistons": 6,
+                "material": "billet_aluminum",
+                "position": "front",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 900,
+                    "displacement_max_cc": 1500,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -1.8},
+            "price_inr": 75000,
+            "retailer": "Brembo India",
+            "availability": "import_only",
+        },
+        # Magura clutch
+        {
+            "category": "brakes",
+            "brand": "Magura",
+            "model_name": "HC1 Hydraulic Clutch",
+            "part_number": "MG-HC1-CLUTCH",
+            "specs": {
+                "type": "hydraulic_clutch_master",
+                "bore_mm": 12.7,
+                "material": "billet_aluminum",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1500,
+                    "categories": ["sport", "supersport", "naked"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.2},
+            "price_inr": 24000,
+            "retailer": "Superbike India",
+            "availability": "order",
+        },
+
+        # ═══════════════════════════════════════════════════════════════
+        # SUSPENSION (18 parts)
+        # ═══════════════════════════════════════════════════════════════
+
+        # Öhlins (track/race focus)
+        {
+            "category": "suspension",
+            "brand": "Öhlins",
+            "model_name": "TTX36 Rear Shock",
+            "part_number": "OL-TTX36-R",
+            "specs": {
+                "type": "rear_shock",
+                "range": "track",
+                "adjustments": ["compression", "rebound", "spring_preload"],
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1100,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -1.2},
+            "param_multipliers": {"chassis.cog_height_mm": 0.98},
+            "price_inr": 180000,
+            "retailer": "Superbike India",
+            "availability": "order",
+        },
+        {
+            "category": "suspension",
+            "brand": "Öhlins",
+            "model_name": "NIX30 Fork Cartridge",
+            "part_number": "OL-NIX30-F",
+            "specs": {
+                "type": "fork_internals",
+                "range": "track",
+                "adjustments": ["compression", "rebound"],
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1100,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.8},
+            "price_inr": 165000,
+            "retailer": "Superbike India",
+            "availability": "order",
+        },
+        {
+            "category": "suspension",
+            "brand": "Öhlins",
+            "model_name": "FG424 Gas-Charged Fork",
+            "part_number": "OL-FG424",
+            "specs": {
+                "type": "fork_internals",
+                "range": "race",
+                "adjustments": ["compression", "rebound", "gas_pressure"],
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 900,
+                    "displacement_max_cc": 1500,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -1.0},
+            "price_inr": 220000,
+            "retailer": "Superbike India",
+            "availability": "import_only",
+        },
+
+        # K-Tech
+        {
+            "category": "suspension",
+            "brand": "K-Tech",
+            "model_name": "DDS Razor Rear Shock",
+            "part_number": "KT-DDS-RAZOR",
+            "specs": {
+                "type": "rear_shock",
+                "range": "street",
+                "adjustments": ["compression", "rebound"],
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4"],
+                    "displacement_min_cc": 400,
+                    "displacement_max_cc": 1000,
+                    "categories": ["sport", "naked"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -1.1},
+            "price_inr": 95000,
+            "retailer": "MotoParts India",
+            "availability": "order",
+        },
+        {
+            "category": "suspension",
+            "brand": "K-Tech",
+            "model_name": "RDS Fork Springs",
+            "part_number": "KT-RDS-SPRING",
+            "specs": {
+                "type": "fork_internals",
+                "range": "street",
+                "adjustments": ["spring_preload"],
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4"],
+                    "displacement_min_cc": 400,
+                    "displacement_max_cc": 1000,
+                    "categories": ["sport", "naked"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.6},
+            "price_inr": 52000,
+            "retailer": "MotoParts India",
+        },
+
+        # Bitubo
+        {
+            "category": "suspension",
+            "brand": "Bitubo",
+            "model_name": "XXF31 Fork Kit",
+            "part_number": "BT-XXF31",
+            "specs": {
+                "type": "fork_internals",
+                "range": "street",
+                "adjustments": ["compression", "rebound"],
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1000,
+                    "categories": ["sport", "naked"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.7},
+            "price_inr": 68000,
+            "retailer": "Grand Pitstop",
+        },
+        {
+            "category": "suspension",
+            "brand": "Bitubo",
+            "model_name": "WMT Rear Shock",
+            "part_number": "BT-WMT",
+            "specs": {
+                "type": "rear_shock",
+                "range": "street",
+                "adjustments": ["compression", "rebound", "spring_preload"],
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1100,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -1.3},
+            "price_inr": 110000,
+            "retailer": "MotoParts India",
+        },
+
+        # Wilbers adventure/touring
+        {
+            "category": "suspension",
+            "brand": "Wilbers",
+            "model_name": "640 Rear Shock",
+            "part_number": "WB-640",
+            "specs": {
+                "type": "rear_shock",
+                "range": "adventure",
+                "adjustments": ["compression", "rebound"],
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I2", "I3", "V2"],
+                    "displacement_min_cc": 800,
+                    "displacement_max_cc": 1300,
+                    "categories": ["adventure", "touring"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -1.5},
+            "price_inr": 145000,
+            "retailer": "Grand Pitstop",
+            "availability": "order",
+        },
+
+        # Andreani
+        {
+            "category": "suspension",
+            "brand": "Andreani",
+            "model_name": "Misano Fork Kit",
+            "part_number": "AN-MISANO-FK",
+            "specs": {
+                "type": "fork_internals",
+                "range": "street",
+                "adjustments": ["compression", "rebound"],
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1000,
+                    "categories": ["sport", "naked"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.8},
+            "price_inr": 85000,
+            "retailer": "Superbike India",
+            "availability": "order",
+        },
+
+        # YSS Indian commuter focus
+        {
+            "category": "suspension",
+            "brand": "YSS",
+            "model_name": "Eco Rear Shock",
+            "part_number": "YSS-ECO-R",
+            "specs": {
+                "type": "rear_shock",
+                "range": "street",
+                "adjustments": ["spring_preload"],
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I1", "I2"],
+                    "displacement_min_cc": 150,
+                    "displacement_max_cc": 400,
+                    "categories": ["commuter", "naked"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.5},
+            "price_inr": 18000,
+            "retailer": "MotoParts India",
+        },
+        {
+            "category": "suspension",
+            "brand": "YSS",
+            "model_name": "MX456 Rear Shock",
+            "part_number": "YSS-MX456",
+            "specs": {
+                "type": "rear_shock",
+                "range": "street",
+                "adjustments": ["compression", "rebound"],
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1000,
+                    "categories": ["sport", "naked"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.9},
+            "price_inr": 55000,
+            "retailer": "MotoParts India",
+        },
+
+        # Progressive (cruiser)
+        {
+            "category": "suspension",
+            "brand": "Progressive Suspension",
+            "model_name": "465 Rear Shock",
+            "part_number": "PS-465",
+            "specs": {
+                "type": "rear_shock",
+                "range": "street",
+                "adjustments": ["spring_preload"],
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": ["Harley-Davidson", "Royal Enfield", "Indian"],
+                    "engine_configs": ["V2", "I2"],
+                    "displacement_min_cc": 500,
+                    "displacement_max_cc": 1800,
+                    "categories": ["cruiser"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -1.4},
+            "price_inr": 62000,
+            "retailer": "MotoParts India",
+        },
+
+        # Race Tech / HyperPro
+        {
+            "category": "suspension",
+            "brand": "Race Tech",
+            "model_name": "Cartridge Kit",
+            "part_number": "RT-CARTRIDGE",
+            "specs": {
+                "type": "fork_internals",
+                "range": "street",
+                "adjustments": ["compression", "rebound"],
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I1", "I2"],
+                    "displacement_min_cc": 150,
+                    "displacement_max_cc": 400,
+                    "categories": ["commuter", "sport", "naked"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.5},
+            "price_inr": 28000,
+            "retailer": "MotoParts India",
+        },
+        {
+            "category": "suspension",
+            "brand": "HyperPro",
+            "model_name": "Streetbox Suspension",
+            "part_number": "HP-STREETBOX",
+            "specs": {
+                "type": "rear_shock",
+                "range": "street",
+                "adjustments": ["spring_preload"],
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4"],
+                    "displacement_min_cc": 400,
+                    "displacement_max_cc": 1000,
+                    "categories": ["sport", "naked"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.8},
+            "price_inr": 42000,
+            "retailer": "MotoParts India",
+        },
+
+        # Drag-specific
+        {
+            "category": "suspension",
+            "brand": "SKF",
+            "model_name": "Low-Friction Fork Seals",
+            "part_number": "SKF-FORK-SEAL",
+            "specs": {
+                "type": "fork_internals",
+                "range": "street",
+                "material": "ptfe",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1500,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.15},
+            "price_inr": 8500,
+            "retailer": "MotoParts India",
+        },
+        {
+            "category": "suspension",
+            "brand": "Galfer",
+            "model_name": "Lowering Kit Rear",
+            "part_number": "GF-LOWER-KIT",
+            "specs": {
+                "type": "lowering_kit",
+                "drop_mm": 30,
+                "material": "aluminum",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1500,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_multipliers": {"chassis.cog_height_mm": 0.90},
+            "param_deltas": {"chassis.dry_mass_kg": 0.2},
+            "price_inr": 35000,
+            "retailer": "MotoParts India",
+        },
+        {
+            "category": "suspension",
+            "brand": "MaxRace",
+            "model_name": "Drag Fork Valves",
+            "part_number": "MR-DRAG-VALVE",
+            "specs": {
+                "type": "fork_internals",
+                "range": "drag",
+                "adjustments": ["compression"],
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": ["Suzuki", "Kawasaki"],
+                    "engine_configs": ["I4"],
+                    "displacement_min_cc": 1299,
+                    "displacement_max_cc": 1350,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.6},
+            "price_inr": 65000,
+            "retailer": "Grand Pitstop",
+            "availability": "import_only",
+        },
+        {
+            "category": "suspension",
+            "brand": "Brock's",
+            "model_name": "Lowering Linkage",
+            "part_number": "BR-LOWER-LINK",
+            "specs": {
+                "type": "lowering_kit",
+                "drop_mm": 25,
+                "material": "chromoly_steel",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": ["Suzuki"],
+                    "engine_configs": ["I4"],
+                    "displacement_min_cc": 1299,
+                    "displacement_max_cc": 1350,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_multipliers": {"chassis.cog_height_mm": 0.88},
+            "param_deltas": {"chassis.dry_mass_kg": 0.3},
+            "price_inr": 45000,
+            "retailer": "Grand Pitstop",
+            "availability": "import_only",
+        },
+
+        # ═══════════════════════════════════════════════════════════════
+        # BATTERY (8 parts)
+        # ═══════════════════════════════════════════════════════════════
+
+        # Shorai LiFePO4
+        {
+            "category": "battery",
+            "brand": "Shorai",
+            "model_name": "LFX21A6-BS12",
+            "part_number": "SH-LFX21A6",
+            "specs": {
+                "chemistry": "lithium_iron_phosphate",
+                "capacity_ah": 5.5,
+                "voltage": 12,
+                "weight_kg": 0.63,
+                "cca": 360,
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1100,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -3.2},
+            "price_inr": 24000,
+            "retailer": "MotoParts India",
+            "availability": "order",
+        },
+        {
+            "category": "battery",
+            "brand": "Shorai",
+            "model_name": "LFX14A5-BS12",
+            "part_number": "SH-LFX14A5",
+            "specs": {
+                "chemistry": "lithium_iron_phosphate",
+                "capacity_ah": 3.5,
+                "voltage": 12,
+                "weight_kg": 0.41,
+                "cca": 220,
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I2", "I4"],
+                    "displacement_min_cc": 300,
+                    "displacement_max_cc": 600,
+                    "categories": ["sport", "naked"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -2.8},
+            "price_inr": 18000,
+            "retailer": "MotoParts India",
+        },
+        {
+            "category": "battery",
+            "brand": "Shorai",
+            "model_name": "LFX09A2-BS12",
+            "part_number": "SH-LFX09A2",
+            "specs": {
+                "chemistry": "lithium_iron_phosphate",
+                "capacity_ah": 2.4,
+                "voltage": 12,
+                "weight_kg": 0.28,
+                "cca": 135,
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I1", "I2"],
+                    "displacement_min_cc": 150,
+                    "displacement_max_cc": 250,
+                    "categories": ["commuter"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -2.2},
+            "price_inr": 12000,
+            "retailer": "MotoParts India",
+        },
+
+        # Antigravity
+        {
+            "category": "battery",
+            "brand": "Antigravity",
+            "model_name": "ATX-20 Lithium",
+            "part_number": "AG-ATX20",
+            "specs": {
+                "chemistry": "lithium_iron_phosphate",
+                "capacity_ah": 8.0,
+                "voltage": 12,
+                "weight_kg": 0.55,
+                "cca": 480,
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 900,
+                    "displacement_max_cc": 1500,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -3.8},
+            "price_inr": 28000,
+            "retailer": "Grand Pitstop",
+            "availability": "import_only",
+        },
+        {
+            "category": "battery",
+            "brand": "Antigravity",
+            "model_name": "ATX-12 Lithium",
+            "part_number": "AG-ATX12",
+            "specs": {
+                "chemistry": "lithium_iron_phosphate",
+                "capacity_ah": 5.0,
+                "voltage": 12,
+                "weight_kg": 0.42,
+                "cca": 320,
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4"],
+                    "displacement_min_cc": 400,
+                    "displacement_max_cc": 800,
+                    "categories": ["sport", "naked"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -3.2},
+            "price_inr": 20000,
+            "retailer": "MotoParts India",
+            "availability": "order",
+        },
+        {
+            "category": "battery",
+            "brand": "Antigravity",
+            "model_name": "Small-Case Lithium",
+            "part_number": "AG-SMALL",
+            "specs": {
+                "chemistry": "lithium_iron_phosphate",
+                "capacity_ah": 2.0,
+                "voltage": 12,
+                "weight_kg": 0.32,
+                "cca": 160,
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I1", "I2"],
+                    "displacement_min_cc": 150,
+                    "displacement_max_cc": 300,
+                    "categories": ["commuter"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -2.5},
+            "price_inr": 15000,
+            "retailer": "MotoParts India",
+        },
+
+        # Drag race / ultra-light
+        {
+            "category": "battery",
+            "brand": "Ballistic",
+            "model_name": "EVO3 Lithium",
+            "part_number": "BL-EVO3",
+            "specs": {
+                "chemistry": "lithium_iron_phosphate",
+                "capacity_ah": 4.2,
+                "voltage": 12,
+                "weight_kg": 0.38,
+                "cca": 280,
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 800,
+                    "displacement_max_cc": 1500,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -3.5},
+            "price_inr": 22000,
+            "retailer": "Grand Pitstop",
+            "availability": "order",
+        },
+        {
+            "category": "battery",
+            "brand": "Earthx",
+            "model_name": "ETX36A Ultra-Light",
+            "part_number": "EX-ETX36A",
+            "specs": {
+                "chemistry": "lithium_iron_phosphate",
+                "capacity_ah": 3.0,
+                "voltage": 12,
+                "weight_kg": 0.25,
+                "cca": 200,
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": ["Suzuki", "Kawasaki"],
+                    "engine_configs": ["I4"],
+                    "displacement_min_cc": 1299,
+                    "displacement_max_cc": 1350,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -3.9},
+            "price_inr": 25000,
+            "retailer": "Grand Pitstop",
+            "availability": "import_only",
+        },
+
+        # ═══════════════════════════════════════════════════════════════
+        # ECU PIGGYBACK (10 parts — brand-level, not model-specific)
+        # ═══════════════════════════════════════════════════════════════
+
+        {
+            "category": "ecu",
+            "brand": "Bazzaz",
+            "model_name": "Z-Fi Piggyback ECU",
+            "part_number": "BZ-ZFI",
+            "specs": {
+                "type": "piggyback",
+                "features": ["fuel_map", "ignition_map", "throttle_response"],
+                "connectivity": "plug_and_play",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1100,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_multipliers": {"engine.peak_power_hp": 1.03},
+            "price_inr": 35000,
+            "retailer": "Superbike India",
+            "availability": "order",
+        },
+        {
+            "category": "ecu",
+            "brand": "Dynojet",
+            "model_name": "Power Commander 6 (PC6)",
+            "part_number": "DJ-PC6",
+            "specs": {
+                "type": "piggyback",
+                "features": ["fuel_map", "ignition_map", "launch_control"],
+                "connectivity": "plug_and_play",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 400,
+                    "displacement_max_cc": 1100,
+                    "categories": ["sport", "supersport", "naked"],
+                },
+            },
+            "param_multipliers": {"engine.peak_power_hp": 1.04},
+            "price_inr": 32000,
+            "retailer": "MotoParts India",
+            "availability": "in_stock",
+        },
+        {
+            "category": "ecu",
+            "brand": "Two Brothers",
+            "model_name": "Juice Box Pro",
+            "part_number": "TB-JUICE-PRO",
+            "specs": {
+                "type": "piggyback",
+                "features": ["fuel_map", "ignition_map"],
+                "connectivity": "plug_and_play",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1100,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_multipliers": {"engine.peak_power_hp": 1.03},
+            "price_inr": 28000,
+            "retailer": "MotoParts India",
+            "availability": "order",
+        },
+        {
+            "category": "ecu",
+            "brand": "Rapid Bike",
+            "model_name": "Evo Piggyback",
+            "part_number": "RB-EVO",
+            "specs": {
+                "type": "piggyback",
+                "features": ["fuel_map", "ignition_map", "traction_control_ready"],
+                "connectivity": "plug_and_play",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I1", "I2", "I4"],
+                    "displacement_min_cc": 150,
+                    "displacement_max_cc": 400,
+                    "categories": ["commuter", "sport"],
+                },
+            },
+            "param_multipliers": {"engine.peak_power_hp": 1.02},
+            "price_inr": 18000,
+            "retailer": "MotoParts India",
+            "availability": "in_stock",
+        },
+        {
+            "category": "ecu",
+            "brand": "Rapid Bike",
+            "model_name": "Racing Piggyback",
+            "part_number": "RB-RACING",
+            "specs": {
+                "type": "piggyback",
+                "features": ["fuel_map", "ignition_map", "launch_control", "wheelie_control"],
+                "connectivity": "plug_and_play",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1100,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_multipliers": {"engine.peak_power_hp": 1.04},
+            "price_inr": 35000,
+            "retailer": "Grand Pitstop",
+            "availability": "order",
+        },
+        {
+            "category": "ecu",
+            "brand": "Aracer",
+            "model_name": "miniS Piggyback",
+            "part_number": "AR-MINIS",
+            "specs": {
+                "type": "piggyback",
+                "features": ["fuel_map", "ignition_map"],
+                "connectivity": "plug_and_play",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I1", "I2"],
+                    "displacement_min_cc": 150,
+                    "displacement_max_cc": 155,
+                    "categories": ["commuter"],
+                },
+            },
+            "param_multipliers": {"engine.peak_power_hp": 1.01},
+            "price_inr": 12000,
+            "retailer": "MotoParts India",
+        },
+        {
+            "category": "ecu",
+            "brand": "Aracer",
+            "model_name": "RC Super-2 Piggyback",
+            "part_number": "AR-RC-SUPER2",
+            "specs": {
+                "type": "piggyback",
+                "features": ["fuel_map", "ignition_map"],
+                "connectivity": "plug_and_play",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I2", "I4"],
+                    "displacement_min_cc": 200,
+                    "displacement_max_cc": 400,
+                    "categories": ["commuter", "sport"],
+                },
+            },
+            "param_multipliers": {"engine.peak_power_hp": 1.02},
+            "price_inr": 16000,
+            "retailer": "MotoParts India",
+            "availability": "in_stock",
+        },
+        {
+            "category": "ecu",
+            "brand": "Cobra",
+            "model_name": "Fi2000R Piggyback",
+            "part_number": "CB-FI2000R",
+            "specs": {
+                "type": "piggyback",
+                "features": ["fuel_map", "ignition_map"],
+                "connectivity": "plug_and_play",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": ["Harley-Davidson"],
+                    "engine_configs": ["V2"],
+                    "displacement_min_cc": 1000,
+                    "displacement_max_cc": 2500,
+                    "categories": ["cruiser"],
+                },
+            },
+            "param_multipliers": {"engine.peak_power_hp": 1.05},
+            "price_inr": 42000,
+            "retailer": "Harley India",
+            "availability": "order",
+        },
+        {
+            "category": "ecu",
+            "brand": "EJK",
+            "model_name": "Electronic Jet Kit",
+            "part_number": "EJK-KIT",
+            "specs": {
+                "type": "piggyback",
+                "features": ["fuel_map", "throttle_response"],
+                "connectivity": "bolt_on",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I1", "I2"],
+                    "displacement_min_cc": 150,
+                    "displacement_max_cc": 400,
+                    "categories": ["commuter", "sport"],
+                },
+            },
+            "param_multipliers": {"engine.peak_power_hp": 1.01},
+            "price_inr": 9500,
+            "retailer": "MotoParts India",
+            "availability": "in_stock",
+        },
+        {
+            "category": "ecu",
+            "brand": "Woolich Racing",
+            "model_name": "RTune Universal Piggyback",
+            "part_number": "WR-RTUNE",
+            "specs": {
+                "type": "piggyback",
+                "features": ["fuel_map", "ignition_map", "rev_limiter"],
+                "connectivity": "plug_and_play",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": ["Honda", "Yamaha", "Suzuki", "Kawasaki"],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1100,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_multipliers": {"engine.peak_power_hp": 1.03},
+            "price_inr": 38000,
+            "retailer": "Woolich Racing India",
+            "availability": "order",
+        },
+
+        # ═══════════════════════════════════════════════════════════════
+        # WHEELIE BAR (4 parts — drag-specific)
+        # ═══════════════════════════════════════════════════════════════
+
+        {
+            "category": "wheelie_bar",
+            "brand": "MPS Racing",
+            "model_name": "Hayabusa Wheelie Bar",
+            "part_number": "MPS-HBUSA-WB",
+            "specs": {
+                "length_in": 16,
+                "material": "chromoly_steel",
+                "position": "rear",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": ["Suzuki"],
+                    "engine_configs": ["I4"],
+                    "displacement_min_cc": 1299,
+                    "displacement_max_cc": 1350,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_overrides": {"wheelie.wheelie_bar": True},
+            "param_deltas": {"chassis.dry_mass_kg": 4.5},
+            "price_inr": 65000,
+            "retailer": "Grand Pitstop",
+            "availability": "order",
+        },
+        {
+            "category": "wheelie_bar",
+            "brand": "Schnitz",
+            "model_name": "RS-3 Wheelie Bar (GSX-R 1000)",
+            "part_number": "SCH-RS3-GSX",
+            "specs": {
+                "length_in": 15,
+                "material": "chromoly_steel",
+                "position": "rear",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": ["Suzuki"],
+                    "engine_configs": ["I4"],
+                    "displacement_min_cc": 999,
+                    "displacement_max_cc": 1100,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_overrides": {"wheelie.wheelie_bar": True},
+            "param_deltas": {"chassis.dry_mass_kg": 4.2},
+            "price_inr": 55000,
+            "retailer": "Grand Pitstop",
+            "availability": "order",
+        },
+        {
+            "category": "wheelie_bar",
+            "brand": "Brock's",
+            "model_name": "Drag Bar 14-inch",
+            "part_number": "BR-DRAG-14",
+            "specs": {
+                "length_in": 14,
+                "material": "chromoly_steel",
+                "position": "rear",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": ["Suzuki", "Kawasaki"],
+                    "engine_configs": ["I4"],
+                    "displacement_min_cc": 1299,
+                    "displacement_max_cc": 1350,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_overrides": {"wheelie.wheelie_bar": True},
+            "param_deltas": {"chassis.dry_mass_kg": 5.5},
+            "price_inr": 75000,
+            "retailer": "Grand Pitstop",
+            "availability": "import_only",
+        },
+        {
+            "category": "wheelie_bar",
+            "brand": "Orient Express",
+            "model_name": "Wheelie Bar (R1/V-Max)",
+            "part_number": "OE-WHEELIE-RV",
+            "specs": {
+                "length_in": 16,
+                "material": "chromoly_steel",
+                "position": "rear",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": ["Yamaha"],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 900,
+                    "displacement_max_cc": 1500,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_overrides": {"wheelie.wheelie_bar": True},
+            "param_deltas": {"chassis.dry_mass_kg": 4.8},
+            "price_inr": 60000,
+            "retailer": "Grand Pitstop",
+            "availability": "import_only",
+        },
+
+        # ═══════════════════════════════════════════════════════════════
+        # BODYWORK — REARSETS/CLIP-ONS/CARBON (4 parts)
+        # ═══════════════════════════════════════════════════════════════
+
+        {
+            "category": "bodywork",
+            "brand": "Woodcraft",
+            "model_name": "Clip-On Bars Universal",
+            "part_number": "WC-CLIP-UNI",
+            "specs": {
+                "type": "clip_on",
+                "material": "billet_aluminum",
+                "position": "handlebar",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 400,
+                    "displacement_max_cc": 1100,
+                    "categories": ["sport", "supersport", "naked"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.3},
+            "price_inr": 28000,
+            "retailer": "MotoParts India",
+            "availability": "order",
+        },
+        {
+            "category": "bodywork",
+            "brand": "Sato Racing",
+            "model_name": "Rearsets (Universal)",
+            "part_number": "SR-REARSETS-UNI",
+            "specs": {
+                "type": "rearsets",
+                "material": "billet_aluminum",
+                "adjustable": True,
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1100,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_deltas": {"chassis.dry_mass_kg": -0.5},
+            "price_inr": 48000,
+            "retailer": "Superbike India",
+            "availability": "order",
+        },
+        {
+            "category": "bodywork",
+            "brand": "Puig",
+            "model_name": "Carbon Winglets",
+            "part_number": "PG-WING-CARBON",
+            "specs": {
+                "type": "winglets",
+                "material": "carbon_fiber",
+                "position": "front_fender",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1500,
+                    "categories": ["sport", "supersport"],
+                },
+            },
+            "param_multipliers": {"aero.cd": 1.01, "aero.frontal_area_m2": 0.97},
+            "param_deltas": {"chassis.dry_mass_kg": -0.4},
+            "price_inr": 32000,
+            "retailer": "MotoParts India",
+            "availability": "order",
+        },
+        {
+            "category": "bodywork",
+            "brand": "Rizoma",
+            "model_name": "Mirror Delete Plates",
+            "part_number": "RZ-MIRROR-DELETE",
+            "specs": {
+                "type": "mirror_delete",
+                "material": "aluminum",
+                "position": "handlebar",
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [],
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 300,
+                    "displacement_max_cc": 1500,
+                    "categories": ["sport", "supersport", "naked"],
+                },
+            },
+            "param_multipliers": {"aero.frontal_area_m2": 0.98},
+            "param_deltas": {"chassis.dry_mass_kg": -0.2},
+            "price_inr": 12000,
+            "retailer": "MotoParts India",
+        },
+    ]
+
+    count = 0
+    for p in parts:
+        db.parts.create(
+            category_name=p["category"],
+            brand=p["brand"],
+            model_name=p["model_name"],
+            specifications=p["specs"],
+            part_number=p.get("part_number"),
+            fitment_rules=p.get("fitment_rules"),
+            fitment_universal=p.get("universal", False),
+            fitment_notes=p.get("fitment_notes"),
+            param_overrides=p.get("param_overrides"),
+            param_deltas=p.get("param_deltas"),
+            param_multipliers=p.get("param_multipliers"),
+            price_inr=p.get("price_inr"),
+            retailer=p.get("retailer"),
+            availability=p.get("availability", "in_stock"),
+            estimated_delivery_days=p.get("delivery_days"),
+        )
+        count += 1
+
+    return count

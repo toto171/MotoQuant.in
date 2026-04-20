@@ -42,6 +42,7 @@ class MotoQuantDB:
         self._weather = None
         self._parts = None
         self._sim_runs = None
+        self._bike_suggestions = None
 
     # ────────────────────────────────────────────
     # Connection lifecycle
@@ -80,6 +81,7 @@ class MotoQuantDB:
         self._weather = None
         self._parts = None
         self._sim_runs = None
+        self._bike_suggestions = None
 
     def __enter__(self):
         self.connect()
@@ -129,8 +131,21 @@ class MotoQuantDB:
         conn.commit()
 
     def _run_migrations(self, from_version: int, to_version: int):
-        """Run incremental migrations. Currently only v0 → v1."""
-        # Future migrations go here as elif blocks
+        """Run incremental migrations."""
+        conn = self.conn
+
+        # v1 → v2: Add fitment_rules column to parts table
+        if from_version < 2:
+            try:
+                conn.execute("ALTER TABLE parts ADD COLUMN fitment_rules TEXT")
+            except sqlite3.OperationalError as e:
+                # Column already exists (idempotent)
+                if "duplicate column name" not in str(e).lower():
+                    raise
+
+        # v2 → v3: bike_suggestions table (added for /api/bikes/suggest endpoint)
+        # The CREATE TABLE statement is idempotent in TABLES_DDL, so no-op here —
+        # but we bump the version so older DB files get their schema_meta updated.
 
     def _seed_parts_categories(self):
         """Insert parts categories if not present."""
@@ -256,6 +271,15 @@ class MotoQuantDB:
 
             self._sim_runs = SimRunRepository(self.conn)
         return self._sim_runs
+
+    @property
+    def bike_suggestions(self):
+        """User-submitted bike suggestion repository."""
+        if self._bike_suggestions is None:
+            from .bike_suggestions_repo import BikeSuggestionsRepository
+
+            self._bike_suggestions = BikeSuggestionsRepository(self.conn)
+        return self._bike_suggestions
 
     # ────────────────────────────────────────────
     # Utility

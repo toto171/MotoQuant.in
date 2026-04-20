@@ -148,6 +148,8 @@ def gsxr1000_k5() -> BikeConfig:
             afr_wot=12.5,
             coolant_temp_c=85.0,
             motoring_torque_nm=40.0,
+            cylinder_count=4,
+            cylinder_config="I4",
         ),
         forced_induction=ForcedInductionParams(boost_type=BOOST_NA),
         drivetrain=DrivetrainParams(
@@ -157,6 +159,7 @@ def gsxr1000_k5() -> BikeConfig:
             front_sprocket=17,
             rear_sprocket=42,
             chain_pitch_mm=15.875,  # 530 chain
+            chain_pitch="530",
             chain_links=110,
             chain_slack_mm=25.0,
             drive_type=DRIVE_CHAIN,
@@ -306,6 +309,8 @@ def yzfr1_4c8() -> BikeConfig:
             fuel_type=FUEL_GASOLINE,
             afr_wot=12.5,
             motoring_torque_nm=38.0,
+            cylinder_count=4,
+            cylinder_config="I4",
         ),
         forced_induction=ForcedInductionParams(boost_type=BOOST_NA),
         drivetrain=DrivetrainParams(
@@ -315,6 +320,7 @@ def yzfr1_4c8() -> BikeConfig:
             front_sprocket=17,
             rear_sprocket=43,
             chain_pitch_mm=15.875,
+            chain_pitch="530",
             chain_links=114,
             chain_slack_mm=28.0,
             drive_type=DRIVE_CHAIN,
@@ -422,6 +428,8 @@ def hayabusa_gen1() -> BikeConfig:
             fuel_type=FUEL_GASOLINE,
             afr_wot=12.5,
             motoring_torque_nm=50.0,  # More engine braking
+            cylinder_count=4,
+            cylinder_config="I4",
         ),
         forced_induction=ForcedInductionParams(boost_type=BOOST_NA),
         drivetrain=DrivetrainParams(
@@ -431,6 +439,7 @@ def hayabusa_gen1() -> BikeConfig:
             front_sprocket=17,
             rear_sprocket=40,
             chain_pitch_mm=15.875,  # 530 chain
+            chain_pitch="530",
             chain_links=114,
             chain_slack_mm=30.0,
             drive_type=DRIVE_CHAIN,

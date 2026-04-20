@@ -98,7 +98,10 @@ class TestSchemaInit:
             "SELECT value FROM schema_meta WHERE key = 'schema_version'"
         ).fetchone()
         assert row is not None
-        assert int(row["value"]) == 1
+        # v1 → v2: fitment_rules column; v2 → v3: bike_suggestions table
+        from motoquant.database.schema import SCHEMA_VERSION
+
+        assert int(row["value"]) == SCHEMA_VERSION
 
     def test_venues_seeded(self, db):
         """Indian venues are seeded on initialize()."""
@@ -645,3 +648,133 @@ class TestDatabaseStats:
         assert stats["venues"] >= 4
         assert stats["venue_seasonal"] >= 48  # 4 venues × 12 months
         assert stats["parts"] >= 8
+
+
+# ════════════════════════════════════════════════
+# Bike Suggestions Schema + Repository
+# ════════════════════════════════════════════════
+
+
+class TestBikeSuggestionsSchema:
+    def test_table_exists_after_initialize(self, db):
+        """v3 migration creates the bike_suggestions table."""
+        row = db.conn.execute(
+            "SELECT name FROM sqlite_master "
+            "WHERE type='table' AND name='bike_suggestions'"
+        ).fetchone()
+        assert row is not None
+        assert row["name"] == "bike_suggestions"
+
+    def test_schema_version_at_least_3(self, db):
+        """After initialize(), schema_meta records version >= 3."""
+        row = db.conn.execute(
+            "SELECT value FROM schema_meta WHERE key = 'schema_version'"
+        ).fetchone()
+        assert row is not None
+        assert int(row["value"]) >= 3
+
+    def test_status_check_constraint(self, db):
+        """Only valid status values are accepted at the SQL layer."""
+        import sqlite3
+        with pytest.raises(sqlite3.IntegrityError):
+            db.conn.execute(
+                """INSERT INTO bike_suggestions (make, model, status)
+                   VALUES (?, ?, ?)""",
+                ("X", "Y", "INVALID_STATUS"),
+            )
+
+
+class TestBikeSuggestionsRepo:
+    def test_create_minimal(self, db):
+        """create() with just make + model stores a clean row."""
+        result = db.bike_suggestions.create(make="Testerson", model="Alpha 100")
+        assert isinstance(result["id"], int)
+        assert result["flagged_out_of_bounds"] is False
+        assert result["issues"] == []
+
+        row = db.bike_suggestions.get(result["id"])
+        assert row is not None
+        assert row["make"] == "Testerson"
+        assert row["model"] == "Alpha 100"
+        assert row["status"] == "pending"
+        assert row["flagged_out_of_bounds"] == 0
+
+    def test_create_flags_out_of_bounds(self, db):
+        """Values outside plausibility bounds get flagged but still stored."""
+        result = db.bike_suggestions.create(
+            make="Testerson",
+            model="Extreme",
+            displacement_cc=4500.0,  # > 3500 upper bound
+            peak_power_hp=500.0,     # > 450 upper bound
+        )
+        assert result["flagged_out_of_bounds"] is True
+        assert any("displacement_cc" in m for m in result["issues"])
+        assert any("peak_power_hp" in m for m in result["issues"])
+
+        row = db.bike_suggestions.get(result["id"])
+        assert row["flagged_out_of_bounds"] == 1
+
+    def test_create_empty_make_raises(self, db):
+        """Empty make raises ValueError (before DB write)."""
+        with pytest.raises(ValueError, match="make"):
+            db.bike_suggestions.create(make="", model="ok")
+
+    def test_create_empty_model_raises(self, db):
+        """Empty model raises ValueError."""
+        with pytest.raises(ValueError, match="model"):
+            db.bike_suggestions.create(make="ok", model="   ")
+
+    def test_list_filters_by_status(self, db):
+        """list(status=...) filters correctly."""
+        db.bike_suggestions.create(make="A", model="1")
+        id2 = db.bike_suggestions.create(make="B", model="2")["id"]
+        db.bike_suggestions.create(make="C", model="3")
+
+        # All pending by default
+        pending = db.bike_suggestions.list(status="pending")
+        assert len(pending) == 3
+
+        # Mark one reviewed
+        assert db.bike_suggestions.mark_reviewed(id2) is True
+        pending_after = db.bike_suggestions.list(status="pending")
+        reviewed = db.bike_suggestions.list(status="reviewed")
+        assert len(pending_after) == 2
+        assert len(reviewed) == 1
+        assert reviewed[0]["id"] == id2
+
+    def test_list_flagged_only(self, db):
+        """flagged_only=True returns only rows with plausibility issues."""
+        db.bike_suggestions.create(make="Clean", model="Good")
+        db.bike_suggestions.create(
+            make="Sketchy", model="Too big", displacement_cc=9999.0
+        )
+
+        flagged = db.bike_suggestions.list(flagged_only=True)
+        assert len(flagged) == 1
+        assert flagged[0]["make"] == "Sketchy"
+
+    def test_status_transitions(self, db):
+        """mark_added / mark_rejected update status and timestamp."""
+        sid = db.bike_suggestions.create(make="T", model="M")["id"]
+        assert db.bike_suggestions.mark_added(sid) is True
+        row = db.bike_suggestions.get(sid)
+        assert row["status"] == "added"
+        assert row["reviewed_at"] is not None
+
+        assert db.bike_suggestions.mark_rejected(sid) is True
+        row = db.bike_suggestions.get(sid)
+        assert row["status"] == "rejected"
+
+    def test_invalid_status_raises(self, db):
+        """Calling list() or _set_status with bad status raises ValueError."""
+        with pytest.raises(ValueError):
+            db.bike_suggestions.list(status="garbage")
+
+    def test_count(self, db):
+        """count() matches the number of rows."""
+        assert db.bike_suggestions.count() == 0
+        db.bike_suggestions.create(make="A", model="1")
+        db.bike_suggestions.create(make="B", model="2")
+        assert db.bike_suggestions.count() == 2
+        assert db.bike_suggestions.count(status="pending") == 2
+        assert db.bike_suggestions.count(status="added") == 0

@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, AlertCircle } from 'lucide-react';
+import { Zap, AlertCircle, MapPin } from 'lucide-react';
+import LocationPicker, { environmentOverridesFromLocation } from './LocationPicker';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://motoquant-api.railway.app';
 
@@ -45,6 +46,8 @@ export default function SimulatorWidget() {
   const [riderKg, setRiderKg] = useState(75);
   const [powerBoost, setPowerBoost] = useState(0);
   const [massChange, setMassChange] = useState(0);
+  const [location, setLocation] = useState(null); // resolved /api/venues/resolve payload
+  const [locationOpen, setLocationOpen] = useState(false);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -54,6 +57,7 @@ export default function SimulatorWidget() {
     setError(null);
     setResult(null);
     try {
+      const envOverrides = environmentOverridesFromLocation(location);
       const res = await fetch(`${API_URL}/api/simulate/quick`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -62,6 +66,7 @@ export default function SimulatorWidget() {
           rider_mass_kg: riderKg,
           power_boost_pct: powerBoost,
           mass_delta_kg: massChange,
+          ...envOverrides,
         }),
       });
       if (!res.ok) {
@@ -218,6 +223,53 @@ export default function SimulatorWidget() {
           box-shadow: 0 0 30px rgba(255, 94, 31, 0.8);
         }
       `}</style>
+
+      {/* Location picker — optional race-environment auto-setup */}
+      <div className="mb-6 relative z-10">
+        <button
+          type="button"
+          onClick={() => setLocationOpen(v => !v)}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-white/10 hover:border-brand-orange/40 bg-black/20 text-left transition-colors"
+        >
+          <div className="flex items-center gap-2 text-sm min-w-0 flex-1">
+            <MapPin size={14} className="text-brand-orange shrink-0" />
+            {location ? (
+              <span className="font-mono text-white/80 truncate">
+                {location.venue_name || location.location_name || location._label}
+                {location.density_altitude_m != null && (
+                  <span className="ml-2 text-brand-accent text-xs tabular-nums">
+                    DA {Math.round(location.density_altitude_m)} m
+                  </span>
+                )}
+              </span>
+            ) : (
+              <span className="font-mono text-white/50">Race location (optional)</span>
+            )}
+          </div>
+          <span className="text-[10px] font-mono text-white/40 ml-2 shrink-0">
+            {locationOpen ? 'CLOSE' : location ? 'CHANGE' : 'ADD'}
+          </span>
+        </button>
+
+        <AnimatePresence>
+          {locationOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="mt-2 overflow-hidden"
+            >
+              <LocationPicker
+                value={location}
+                onResolved={(env) => { setLocation(env); setLocationOpen(false); }}
+                onCleared={() => { setLocation(null); setLocationOpen(false); }}
+                compact
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Run button with magnetic hover effect */}
       <motion.button

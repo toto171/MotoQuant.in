@@ -11,7 +11,7 @@ Design principles for quantitative accuracy:
   5. Schema version tracked for forward-compatible migrations.
 """
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 3
 
 # ────────────────────────────────────────────────────────
 # Full DDL executed on db.initialize()
@@ -373,8 +373,9 @@ CREATE TABLE IF NOT EXISTS parts (
     part_number         TEXT,
 
     -- Compatibility
-    compatible_bikes    TEXT,                   -- JSON array of bike_model_ids
-    fitment_universal   INTEGER DEFAULT 0,     -- 1 = fits many bikes
+    fitment_rules       TEXT,                   -- JSON: {tier, bike_ids, match, excluded_bike_ids, description} (new in v2)
+    compatible_bikes    TEXT,                   -- JSON array of bike_model_ids (legacy, nullable)
+    fitment_universal   INTEGER DEFAULT 0,     -- 1 = fits many bikes (legacy)
     fitment_notes       TEXT,
 
     -- Category-specific specs
@@ -494,6 +495,35 @@ CREATE TABLE IF NOT EXISTS bike_tire_fitments (
 CREATE INDEX IF NOT EXISTS idx_fitments_bike     ON bike_tire_fitments(bike_model_id);
 CREATE INDEX IF NOT EXISTS idx_fitments_tire     ON bike_tire_fitments(tire_model_id);
 CREATE INDEX IF NOT EXISTS idx_fitments_position ON bike_tire_fitments(position);
+
+-- ═══════════════════════════════════════════════════════════
+-- 15. BIKE SUGGESTIONS  (user-submitted additions via web form)
+--     Users can request bikes missing from the catalog. Entries
+--     are reviewed manually before being promoted to bike_models.
+-- ═══════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS bike_suggestions (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    make                TEXT    NOT NULL,
+    model               TEXT    NOT NULL,
+    year                INTEGER,
+    displacement_cc     REAL,
+    peak_power_hp       REAL,
+    dry_mass_kg         REAL,
+    category            TEXT,               -- sport / naked / cruiser / adv / drag / touring
+    notes               TEXT,               -- free-form rider context
+    submitter_email     TEXT,               -- optional
+    source_url          TEXT,               -- user-supplied spec page, optional
+    flagged_out_of_bounds INTEGER NOT NULL DEFAULT 0,
+        -- 1 = failed plausibility checks; still stored but marked for review
+    status              TEXT    NOT NULL DEFAULT 'pending'
+                                   CHECK(status IN ('pending','reviewed','added','rejected')),
+    created_at          TEXT    DEFAULT (datetime('now','utc')),
+    reviewed_at         TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_bike_sugg_status  ON bike_suggestions(status);
+CREATE INDEX IF NOT EXISTS idx_bike_sugg_make    ON bike_suggestions(make);
 """
 
 # Categories seeded on first init

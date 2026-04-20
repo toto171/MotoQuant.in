@@ -1,6 +1,6 @@
 # MotoQuant Pro — Persistent Project Context
 > Read this file at the start of every session. It is the single source of truth for project state, roadmap, and working instructions.
-> Last updated: April 17, 2026 (Phase 3 API: A-vs-B compare, Dragy upload, Dyno upload endpoints + 24 API tests; bugfix v_rmse_ms→rmse_ms in overlay route; 583+ tests passing)
+> Last updated: April 20, 2026 (Parts catalog re-expansion: 296 → **424 parts** via new `seed_catalogs/` sub-package — 32 ADV/cruiser exhausts (filled 22-bike exhaust gap), 34 drag-specific (nitrous / boost / clutch / fuel / filter / QS), 62 universal premium (brakes / suspension / batteries / ECU / wheelie bars / bodywork); new `parts --bike-id --impact PART_ID [--json]` CLI shows per-part ET/trap deltas + cost-per-tenth; 27 dedicated catalog integration tests guarantee no cross-brand leaks and ≥20 parts/bike; min parts/bike 24, avg 95 → **106.8**, max 152 → **192**)
 
 ---
 
@@ -67,26 +67,37 @@ Self-imposed rules to maximise useful work per context window:
 
 ---
 
-## CURRENT STATE (as of April 14, 2026)
+## CURRENT STATE (as of April 20, 2026)
 
 ### Test suite
-- **583+ tests passing** across 13 test files — zero failures (244 Phase 1/2 + 56 Phase 3 Dragy + 68 Phase 3 dyno/overlay/calibrator/multi-run + 69 Phase 3 ECU import + 24 Phase 3 API endpoints + 69 Phase 4 analysis: ROI + Sobol + 84 Phase 4A/4B surrogate models + 65 Phase 4 recommendations: 38 unit + 27 integration)
+- **739+ tests passing** across 15 test files — 27 integration gated behind `MOTOQUANT_SLOW_TESTS=1`. Breakdown: 244 Phase 1/2 + 56 Phase 3 Dragy + 68 Phase 3 dyno/overlay/calibrator/multi-run + 69 Phase 3 ECU import + Phase 3 API endpoints (~34 with /api/bikes/suggest + /api/venues/resolve coverage) + 69 Phase 4 analysis: ROI + Sobol + 84 Phase 4A/4B surrogate models + 65 Phase 4 recommendations: 38 unit + 27 integration + 27 Phase 4 catalog integration + new Apr 20 web-launch tests (`/api/bikes/suggest`, `/api/venues/resolve`, `bike_suggestions` schema + repo) + test_compatibility + test_tire_fitments
+- **April 20, 2026 web-launch additions:** POST `/api/bikes/suggest` (user-submitted bike requests → `bike_suggestions` table, plausibility-flagged), POST `/api/venues/resolve` (location → race-environment; seeded-venue match first, OWM live fallback with local ρ/DA/PCF compute), `BikeSuggestionsRepository`, `/bikes` Next.js browser (paginated with manufacturer/category filters + detail page with OEM tire fitments), `SuggestBikeForm` component, `LocationPicker` component (text + browser geolocation) wired into `SimulatorWidget` with matched-venue/live-weather status badge. New landing page "Intelligence Layer" section surfaces Phase 4 AI features. Stats strip updated: 267 bikes / 69 tires / 296 parts / 12 venues / 674 tests / 15 sub-models.
 - Integration tests for recommendations engine gated behind `MOTOQUANT_SLOW_TESTS=1` (each runs full physics engine on ~70 parts; ~45s per test)
+- `tests/test_catalog_integration.py` seeds full catalog + all 267 bikes in-memory and asserts: no RE 350 ↔ Harley/RE 650 leak, no Hayabusa ↔ Panigale/RSV4 leak, no Panigale V4 ↔ RSV4 leak, every bike has at least one exhaust, every bike has ≥20 parts, catalog ≥400 parts, `_enrich_bike_row_for_fitment` idempotent + hydrates manufacturer/chain_pitch, `_infer_cylinder_config` + `_infer_chain_pitch` produce expected values for representative specs
+- Scraper + validator tests (78) cover the full 267-bike `ALL_KNOWN_BIKES` catalog end-to-end
 - Run with: `python -m pytest tests/ -q` from the project root
+- **Optional deps** for surrogate/sobol/roi: `pip install scikit-learn SALib --break-system-packages`
 
 ### Production database (`motoquant.db`)
-- Bikes: **138** (3 seeded reference + 135 curated known bikes across 20 manufacturers)
+- Bikes: **270** (3 seeded reference + 267 curated known bikes across 25+ manufacturers)
 - Tires: **69** (full Pacejka + thermal coefficients, 15 manufacturers, 5 compound types)
-- Parts: **70** across 16 categories (sprockets, chains, exhaust, ECU flashes, clutch kits, weight reduction, nitrous, air filters, fuel system, suspension, brakes, wheelie bars, turbo/supercharger kits, quickshifters, batteries, bodywork, swingarm extensions)
+- Parts: **424** across 17 categories with **bike-specific mod libraries** — min 24 / max 192 / avg 106.8 parts per bike. **91 exhausts** covering every seeded bike (ADV big-bore, cruiser/muscle V-twin, parallel twin, V4 litre, small-cc Indian + SE Asia). Catalog lives in `motoquant/database/seed.py` (core ~296) plus modular expansion in `motoquant/database/seed_catalogs/`:
+  - `adv_cruiser_exhausts.py` — 32 parts (Akra / SC-Project / Arrow / Termignoni / LeoVince / HP Corse / Remus / S&S / Vance & Hines / Two Brothers / Cobra / Rinehart / Agency Power / Toce / Agostini) — closed 22-bike ADV/cruiser exhaust gap
+  - `drag_specific.py` — 34 parts (7 nitrous / 6 boost kits / 5 clutch kits / 5 fuel system / 5 air filter / 6 quickshifter)
+  - `premium_universal.py` — 62 parts (18 brakes / 18 suspension / 8 batteries / 10 ECU piggybacks / 4 wheelie bars / 4 bodywork)
+  Small-cc Indian + SE Asia underbones still get full sprocket (428/520-pitch) / chain / ECU / filter / slipper / QS / platform-specific exhaust coverage. Fitment uses tight `family`-tier rules with `manufacturers` + `engine_configs` + displacement bounds + `chain_pitch` — verified no cross-brand or cross-segment leaks by 27 catalog-integration tests.
 - Venues: **12** (5 Indian + 7 international: Santa Pod, Pomona, Gainesville, Sydney, Dubai, Al-Ain, Jerez)
-- Bike-tire fitments: **209** OEM links (bike_model_id ↔ tire_model_id, front/rear)
+- Bike-tire fitments: **209** OEM links (bike_model_id ↔ tire_model_id, front/rear) — needs extension for new 132 bikes
 
-### Bike catalog coverage (ALL_KNOWN_BIKES = 135 bikes)
+### Bike catalog coverage (ALL_KNOWN_BIKES = 267 bikes)
 - **Sport/superbike fleet (78 bikes):** Suzuki, Yamaha, Honda, Kawasaki, BMW, Ducati, Aprilia
 - **Indian-market additions (30 bikes, April 2026):** KTM (Duke 200/250/390, RC 200/390), Bajaj (Pulsar NS200/RS200/220F, Dominar 250/400), TVS (Apache RR 310, RTR 200/160 4V), Royal Enfield (Continental GT 650, Interceptor 650, Himalayan 450), Yamaha India (R15 V4, MT-15 V2, FZ-X), Honda India (CBR 250R, CB 300R, Hornet 2.0), Kawasaki India (Ninja 300/400, Z650), Triumph (Speed 400, Speed Twin 900), Husqvarna (Svartpilen 401, Vitpilen 401), Hero (Xtreme 160R)
 - **International expansion (27 bikes, April 2026):** Yamaha (R7, XSR900, VMAX 1700), Honda (CB650R, CBR500R, Rebel 1100), Kawasaki (ZX-4RR, Z H2, Vulcan S), Suzuki (SV650, GSX-8S, Katana), Ducati (Panigale V4R, Diavel V4, Scrambler 1100), Triumph (Rocket 3, Trident 660, Tiger 900), BMW (R1250GS, M1000R), Aprilia (RS 660, Tuono 660), MV Agusta (F3 800), Harley-Davidson (Low Rider ST, Road Glide), CFMoto (700CL-X Sport), Benelli (TNT 600i, Leoncino 500), QJ Motor (SRK 400)
-- **All 135 bikes have individual Cd (0.55–0.90) and frontal_area_m2 (0.38–0.60)** — zero over-generalization
-- **3 new manufacturers added:** CFMoto, Benelli, QJ Motor
+- **Phase 4+ Indian market 200cc+ expansion (57 bikes, April 20, 2026):** Bajaj (Pulsar 200/NS200/N250/F250/NS400Z, Avenger Cruise/Street 220), TVS (Apache RTR 200, Ronin 225), Yamaha India (FZ25, R15 V1/V2/V3, R3, MT-03), Honda India (CB350 H'ness, CB350RS, CB300F), Suzuki India (Gixxer SF 250, Gixxer 250, Intruder 250), Mahindra (Mojo XT300), Hyosung (GT250R, GT650R), Hero (Karizma R, Karizma XMR 210, XPulse 200), Royal Enfield (Classic 350 J, Meteor 350, Hunter 350, Thunderbird 350, Bullet 500, Himalayan 411, Scram 411, Shotgun 650, Guerrilla 450), Jawa (42, Perak), Yezdi (Roadster, Scrambler, Adventure), Benelli India (302R, TNT 300, Imperiale 400, 502C), CFMoto India (300NK, 450NK, 650NK, 300SR), BMW India (G310R, G310GS, G310RR), Harley India (X440), Aprilia India (RS457, Tuono 457), Triumph India (Scrambler 400X), KTM India (Duke 390 early, 390 Adventure)
+- **Phase 4+ Worldwide 300cc+ expansion (45 bikes, April 20, 2026):** Broader Honda/Yamaha/Kawasaki/Suzuki/BMW/Ducati/Aprilia/Triumph/MV Agusta/Harley/Indian/KTM/Moto Guzzi/Husqvarna/Buell lineup covering previously-missed 300–1300cc platforms
+- **Phase 4+ SE Asia small-cc drag bikes (15 bikes, April 20, 2026, ≥149cc):** Honda (RS150R, Winner X, Supra GTR 150, Sonic 150R, CB150R Streetfire, CBR150R, CBR250RR), Yamaha (Y15ZR, Y15ZR V2, Exciter 150, Exciter 155 VVA, Aerox 155, R25), Kawasaki (ZX-25R I4, Ninja RR Mono 250)
+- **All 267 bikes have individual Cd (0.55–0.95) and frontal_area_m2 (0.35–0.68)** — zero over-generalization
+- **New manufacturers added in April 2026:** CFMoto, Benelli, QJ Motor, Mahindra, Hyosung, Jawa, Yezdi, Indian Motorcycle, Moto Guzzi, Buell
 
 ### Aero accuracy (fixed April 2026)
 - Previous state: 71% of bikes shared cd=0.32 (car-level, wrong for motorcycles)
@@ -126,7 +137,8 @@ bikes       list/search with --json output; --fitments BIKE_ID for tire fitments
 sim         run simulation, compare-stock, save-run, leaderboard
 venues      list, seasonal detail
 tires       list by compound/manufacturer, --grip-rank, --value-rank
-parts       list/search by category
+parts       list/search by category; --bike-id N filters to bike-compatible only;
+            --impact PART_ID --bike-id N shows ET/trap delta + cost-per-tenth + compat warning (supports --json)
 weather     fetch live OWM, DA trend, --refresh-all
 scrape      crawl bikez.com for a manufacturer
 import      --known-bikes (108 curated) or --spec-json FILE
@@ -161,6 +173,10 @@ Vehicle Dynamics/
 │   │   ├── connection.py        ← MotoQuantDB class, WAL-fallback connect()
 │   │   ├── schema.py            ← DDL, SEED_PARTS_CATEGORIES, SEED_VENUES
 │   │   ├── seed.py              ← seed_all(), seed_tire_library(), seed_parts_catalog()
+│   │   ├── seed_catalogs/       ← Phase 4 modular expansion sub-package
+│   │   │   ├── adv_cruiser_exhausts.py   ← 32 ADV + cruiser/muscle exhausts
+│   │   │   ├── drag_specific.py          ← 34 nitrous / boost / clutch / fuel / filter / QS
+│   │   │   └── premium_universal.py      ← 62 brakes / suspension / battery / ECU / wheelie / bodywork
 │   │   ├── bike_repo.py         ← upsert_from_config(), search(), add_provenance()
 │   │   ├── tire_repo.py, parts_repo.py, venue_repo.py, sim_repo.py, weather_repo.py
 │   │   ├── bridge.py            ← BikeConfig ↔ DB row converters
@@ -179,7 +195,7 @@ Vehicle Dynamics/
 │       ├── validator.py         ← physical bounds, unit auto-correction, confidence scoring
 │       ├── bikez.py             ← bikez.com crawler (stdlib-only, no BS4)
 │       ├── importer.py          ← spec_to_bike_config(), import_batch() — uses gear_ratios
-│       ├── known_bikes.py       ← ALL_KNOWN_BIKES (135 bikes — 78 sport + 30 Indian-market + 27 intl expansion)
+│       ├── known_bikes.py       ← ALL_KNOWN_BIKES (267 bikes — 78 sport + 30 Indian + 27 intl + 57 Indian 200cc+ + 45 worldwide 300cc+ + 15 SE Asia small-cc)
 │       ├── catalog.py           ← SCRAPE_CATALOG — 17 manufacturers, categories, year ranges
 │       ├── gear_ratios.py       ← Tier-1 named-model lookup (150+ families) + Tier-2 defaults (incl. adventure/touring)
 │       └── bulk_scrape.py       ← BulkScrapeOrchestrator — checkpoint/resume/dedup
@@ -193,7 +209,8 @@ Vehicle Dynamics/
     ├── test_calibration.py      ← 44 tests — dyno, overlay, calibrator end-to-end
     ├── test_ecu.py              ← 69 tests — ECU log import (Woolich/PC-Link/MoTeC)
     ├── test_recommendations.py  ← 65 tests — Smart Recommendations Engine (38 unit + 27 integration)
-    └── test_api.py              ← 24 tests — FastAPI endpoints (health, quick/full sim, compare, dragy upload, dyno upload)
+    ├── test_api.py              ← 24+ tests — FastAPI endpoints (health, quick/full sim, compare, dragy upload, dyno upload, bike suggest)
+    └── test_catalog_integration.py  ← 27 tests — no cross-brand leaks, ≥400 parts, every bike has exhaust + ≥20 parts, enrich idempotent, infer helpers
 ```
 
 ---
@@ -219,6 +236,43 @@ Vehicle Dynamics/
 ### ✅ RESOLVED: Validator Bounds for International Bikes (April 15, 2026)
 **Previously:** Validator rejected shaft/belt drive bikes (front_sprocket=0) and long-stroke V-twins (stroke>100mm).
 **Fixed:** `front_sprocket`/`rear_sprocket` lower bound 0 (shaft/belt drive); `stroke_mm` upper bound 120mm (Harley Milwaukee-Eight = 111.1mm); `displacement_cc` test bound raised to 2500cc (Triumph Rocket 3 = 2458cc).
+
+### ✅ RESOLVED: Parts Catalog Bike-Specificity + Chain-Pitch Infrastructure (April 20, 2026)
+**Previously:** Parts catalog had major compatibility leaks — "Arrow RE 650 Full System" matched RE Classic 350 (wrong; Arrow RE 650 is a parallel twin exhaust); "Akrapovic Full System Panigale" matched Hayabusa; many 200-400cc Indian commuters (Pulsar, Apache, R15, Duke, Hornet, Xtreme) had only 6-11 parts because family-tier rules using `engine_configs` and `chain_pitch` silently matched nothing — the compatibility engine's `manufacturers` check was a TODO no-op, `EngineParams` had no `cylinder_config` field, and `DrivetrainParams` had no `chain_pitch` string code (only `chain_pitch_mm`). Result: family-tier constraints never filtered and everything leaked.
+**Fixed (three-layer fix):**
+1. **Compatibility engine** (`parts/compatibility.py`): Implemented the `manufacturers` constraint with case-insensitive name match and warning-on-missing-field fallback.
+2. **Data model + importer**:
+   - Added `cylinder_count` + `cylinder_config` fields to `EngineParams`; added `chain_pitch` string field to `DrivetrainParams`.
+   - Added `_infer_cylinder_config(spec)` in `importer.py` (V-twin makes, V4 model tokens, cyl-count fallback).
+   - Added `_infer_chain_pitch(spec)` in `importer.py` (HD/Indian/Victory belt; BMW R/K-series + Moto Guzzi V-twins shaft; model tokens for Hayabusa/ZX-14R=530, SE Asia cubs=428; displacement-banded for 150-1300cc). Chain-drive bikes correctly get 428/520/525/530; 14 genuinely belt/shaft bikes get `None`.
+   - `extract_headline_specs` now populates `cylinder_count`/`cylinder_config` on `bike_models`.
+   - Reference bikes (GSX-R K5, YZF-R1 4C8, Hayabusa Gen1) in `defaults.py` now set `cylinder_count=4, cylinder_config="I4", chain_pitch="530"` explicitly.
+3. **Parts catalog** (`seed.py`): 56 new bike-specific parts organized by segment (Indian 150-250 commuters, SE Asia 150cc cubs, Indian 250-400 mid-sport, cruiser small/mid, RE 650 twin, adventure, entry twins 300-500, scooter). Each uses tight `family`-tier `fitment_rules` with `manufacturers` + `engine_configs` + displacement bounds + `chain_pitch`. Existing exhaust fitment rules also tightened: RE 650 Arrow now requires I2 parallel twin (no leak to RE 350 single); Hayabusa Akra requires I4 1299-1341cc; Panigale V4 and RSV4 are separated with ordering-safe check.
+**Leak scan:** All 45 exhausts scanned against 270 bikes — no cross-brand or cross-segment leaks.
+**Coverage impact:** min 6 → 24 parts/bike, avg 70 → 95, max 133 → 152.
+
+### ✅ RESOLVED: Validator Bound for High-Revving I4 (April 20, 2026)
+**Previously:** Validator rejected Kawasaki ZX-25R (peak_torque_rpm=14500, redline ~17000) because `peak_torque_rpm` upper bound was 14000 rpm — tuned around inline-4 superbikes that peak torque ~10–12k rpm.
+**Fixed:** `peak_torque_rpm` upper bound raised from 14000 → 15000 in `validator.py` line 42, enabling the SE Asia small-cc drag catalog expansion. No known production motorcycle peaks torque above 15000 rpm, so the envelope remains physically meaningful.
+
+### ✅ RESOLVED: Bike Catalog Small-cc & Indian Coverage (April 20, 2026)
+**Previously:** 135 bikes total, heavily weighted toward international 600cc+ sport; most Indian 200–400cc commuters and SE Asia small-cc underbones/cubs (active drag scene in Malaysia/Thailand) were missing.
+**Fixed:** ALL_KNOWN_BIKES grew from 135 → 267 (+132) across three curated batches:
+- **+57 Indian 200cc+ since 2000** — Bajaj/TVS/Yamaha India/Honda India/Suzuki India/Mahindra/Hyosung/Hero/RE/Jawa/Yezdi/Benelli India/CFMoto India/BMW India/Harley India/Aprilia India/Triumph India/KTM India full lineup
+- **+45 worldwide 300cc+ since 2000** — completing Honda/Yamaha/Kawasaki/Suzuki/BMW/Ducati/Aprilia/Triumph/MV Agusta/Harley/Indian/KTM/Moto Guzzi/Husqvarna/Buell previously-missed platforms
+- **+15 SE Asia enthusiast drag bikes (≥149cc)** — Honda underbones/cubs/Thai sport (RS150R, Winner X, Supra GTR, Sonic 150R, CB150R, CBR150R, CBR250RR), Yamaha (Y15ZR/V2, Exciter 150/155, Aerox 155, R25), Kawasaki (ZX-25R I4, Ninja RR Mono 250)
+All 132 new bikes pass scraper/validator tests (78 tests). Indian-market small-cc sim ETs remain pre-existing `+1.0–3.0s slow` per documented traction model limitation — not a data-quality issue.
+
+### ✅ RESOLVED: Catalog Coverage + Mod-Impact CLI + Integration Tests (April 20, 2026)
+**Previously (after April 20 earlier work):** Catalog at 296 parts with 22 bikes (ADV/cruiser big-bore, Indian Motorcycle V-twins) still missing any exhaust match; no ergonomic way for a user to answer "what will *this* part do to *my* bike?"; zero automated guard against future cross-brand compatibility leaks.
+**Fixed (three-phase):**
+1. **Catalog expansion via `seed_catalogs/` sub-package** (+128 parts → **424 total**):
+   - `adv_cruiser_exhausts.py` — 32 parts closed the ADV + cruiser/muscle exhaust gap; also widened FTR 1200 S fitment (accepts `cruiser`, `muscle`, `naked`, `sport`; disp 1190-1220cc). Importer `_V_TWIN_2CYL_MAKES` gained the bare short-form manufacturer names (`"Indian"`, `"Harley"`, `"HD"`, `"Harley Davidson"`) so DB-stored short names still infer V2.
+   - `drag_specific.py` — 34 drag-oriented parts (7 nitrous, 6 boost kit, 5 clutch kit, 5 fuel system, 5 air filter, 6 quickshifter) with correctly mapped param paths: `drivetrain.total_shift_time_ms`, `forced_induction.boost_type`, `clutch.spring_preload_n`, scaled `engine.peak_power_hp` multipliers (1.45/2.0 replaced by physically-meaningful 1.03/1.04).
+   - `premium_universal.py` — 62 universal premium options (Brembo/Accossato brakes, Öhlins/K-Tech/Bitubo suspension, Shorai/Antigravity batteries, Bazzaz/Dynojet/Rapid Bike ECUs, MPS/Brock's wheelie bars, Woodcraft/Sato/Puig bodywork) with corrected param paths (`chassis.cog_height_mm`, `wheelie.wheelie_bar`).
+2. **Mod-impact CLI** — `parts --bike-id N --impact PART_ID [--json]` runs baseline + modified sims in-process, prints ET delta (s), trap delta (km/h), cost-per-tenth (₹), and compatibility warning if fitment fails. `parts --bike-id N` alone filters the list to parts compatible with that bike. Both surfaces use `getattr(args, "bike_id", None)` so older tests with partial Namespaces still work.
+3. **Dedicated integration tests** — `tests/test_catalog_integration.py` (27 tests across 6 classes): TestNoLeaks (RE 350 / Hayabusa / Panigale V4 / RSV4 isolation), TestCoverage (every bike has exhaust, ≥20 parts/bike, ≥400 catalog parts), TestEnrichBikeRow (manufacturer join, chain_pitch fallback, idempotency), TestInferCylinderConfig (I1/I2/I3/I4/V2/V4 across Ducati/HD/Indian short/SV650/Panigale/RSV4), TestInferChainPitch (HD belt → None, Hayabusa → 530, sub-200cc → 428, mid-range → 520), TestFamilySeparation (RE 650 twin-only, Indian Scout V2).
+**Coverage after:** 270 bikes × 424 parts, min 24 / avg 106.8 / max 192 parts per bike, 0 bikes missing exhaust, 0 invalid-param-path UserWarnings. K5 smoke test still 10.034s (validated baseline preserved).
 
 ### ✅ RESOLVED: Catalog Duplicates (April 15, 2026)
 **Previously:** TVS Apache RR 310 and Bajaj Dominar 400 appeared twice in ALL_KNOWN_BIKES (older + newer entries).

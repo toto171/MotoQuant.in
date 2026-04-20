@@ -145,6 +145,12 @@ class EngineParams:
     afr_wot: float = 12.5  # Air-fuel ratio at WOT
     coolant_temp_c: float = 85.0  # At launch
     motoring_torque_nm: float = 40.0  # Engine braking torque
+    # Cylinder metadata — used by parts compatibility engine to narrow
+    # fitment to specific engine families (e.g. I4 vs V4 for exhaust systems).
+    # Populated from BikeSpec at import time; None for pre-compatibility-era
+    # configs (handled by enrich-on-read fallback).
+    cylinder_count: int | None = None  # 1, 2, 3, 4, 6
+    cylinder_config: str | None = None  # I1, I2, I3, I4, I6, V2, V4, flat_6
 
     def get_torque(self, rpm: float) -> float:
         """Get engine torque at given RPM."""
@@ -203,6 +209,7 @@ class DrivetrainParams:
     front_sprocket: int = 17  # Front teeth
     rear_sprocket: int = 42  # Rear teeth (overrides final_drive_ratio if set)
     chain_pitch_mm: float = 15.875  # 530 chain
+    chain_pitch: str | None = None  # Standard pitch code: "428", "520", "525", "530" (used by parts fitment)
     chain_links: int = 110  # Number of links
     chain_slack_mm: float = 30.0  # Free play
     drive_type: str = DRIVE_CHAIN  # chain / belt / shaft
