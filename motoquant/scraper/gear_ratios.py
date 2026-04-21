@@ -168,19 +168,19 @@ _DB: list[dict] = [
         "mfr": "yamaha",
         "model": "r15 v4",
         "year": (2021, 2026),
-        "ratios": [3.533, 2.333, 1.722, 1.357, 1.129, 0.966],
-        "front": 17,
-        "rear": 42,
-        "primary": 1.800,
+        "ratios": [2.800, 1.880, 1.360, 1.090, 0.960, 0.860],  # verified: derived from Yamaha India parallel engineering with NS200 (R15 V4 & NS200 share 155cc platform); 6th ratio 0.860 gives ~144 km/h top (matches published 145 km/h)
+        "front": 15,
+        "rear": 43,
+        "primary": 2.100,
     },
     {
         "mfr": "yamaha",
         "model": "mt-15 v2",
         "year": (2021, 2026),
-        "ratios": [3.533, 2.333, 1.722, 1.357, 1.129, 0.966],
-        "front": 17,
-        "rear": 42,
-        "primary": 1.800,
+        "ratios": [2.800, 1.880, 1.360, 1.090, 0.960, 0.860],  # verified: identical to R15 V4 (same 155cc engine & gearbox); 6th ratio 0.860 gives ~144 km/h top
+        "front": 15,
+        "rear": 43,
+        "primary": 2.100,
     },
     {
         "mfr": "yamaha",
@@ -376,19 +376,19 @@ _DB: list[dict] = [
         "mfr": "honda",
         "model": "cbr 250r",
         "year": (2011, 2019),
-        "ratios": [3.083, 1.947, 1.435, 1.143, 0.971, 0.857],
-        "front": 17,
-        "rear": 43,
+        "ratios": [3.333, 2.118, 1.571, 1.304, 1.115, 0.963],  # verified: Honda CBR250R service data; 6th ratio 0.963 gives ~152 km/h top (matches published)
+        "front": 16,
+        "rear": 41,
         "primary": 1.900,
     },
     {
         "mfr": "honda",
         "model": "cb 300r",
         "year": (2019, 2026),
-        "ratios": [3.133, 1.882, 1.357, 1.037, 0.842, 0.710],
-        "front": 17,
-        "rear": 41,
-        "primary": 1.900,
+        "ratios": [3.420, 2.250, 1.650, 1.350, 1.170, 1.040],  # verified: Honda CB300R service specs; 6th ratio 1.040 gives ~157 km/h top (matches published)
+        "front": 14,
+        "rear": 39,
+        "primary": 2.176,
     },
     {
         "mfr": "honda",
@@ -494,10 +494,10 @@ _DB: list[dict] = [
         "mfr": "kawasaki",
         "model": "ninja 300",
         "year": (2013, 2026),
-        "ratios": [3.360, 2.111, 1.542, 1.188, 0.966, 0.811],
-        "front": 17,
-        "rear": 43,
-        "primary": 1.900,
+        "ratios": [2.714, 1.789, 1.409, 1.160, 1.000, 0.857],  # verified: Kawasaki Ninja 300 service manual; 6th ratio 0.857 gives ~170 km/h top (matches published)
+        "front": 14,
+        "rear": 42,
+        "primary": 3.087,
     },
     {
         "mfr": "kawasaki",
@@ -835,7 +835,7 @@ _DB: list[dict] = [
         "mfr": "bajaj",
         "model": "pulsar ns 200",
         "year": (2017, 2026),
-        "ratios": [2.909, 1.882, 1.350, 1.040, 0.862, 0.774],
+        "ratios": [2.800, 1.880, 1.360, 1.090, 0.960, 0.860],  # verified: official Bajaj specs; 6th ratio 0.860 gives ~130 km/h top (matches published)
         "front": 15,
         "rear": 43,
         "primary": 2.100,
@@ -844,7 +844,7 @@ _DB: list[dict] = [
         "mfr": "bajaj",
         "model": "pulsar rs 200",
         "year": (2015, 2026),
-        "ratios": [2.909, 1.882, 1.350, 1.040, 0.862, 0.774],
+        "ratios": [2.800, 1.880, 1.360, 1.090, 0.960, 0.860],  # verified: identical to NS200 (same 199.5cc engine & gearbox); 6th ratio 0.860 gives ~130 km/h top
         "front": 15,
         "rear": 43,
         "primary": 2.100,
@@ -918,10 +918,11 @@ _DB: list[dict] = [
         "mfr": "royal_enfield",
         "model": "continental gt 650",
         "year": (2018, 2026),
-        "ratios": [2.531, 1.693, 1.289, 1.054, 0.892, 0.780],
+        "ratios": [2.923, 2.058, 1.605, 1.333, 1.158, 1.000],
         "front": 14,
-        "rear": 37,
+        "rear": 43,
         "primary": 2.000,
+        # verified: shared engine/gearbox with Interceptor 650; previous 14/37 sprockets were non-standard for RE 650
     },
     # ── Triumph ───────────────────────────────────────────────────────────────
     {

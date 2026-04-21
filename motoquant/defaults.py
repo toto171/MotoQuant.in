@@ -70,8 +70,17 @@ def _synthetic_torque_curve(
         if rpm <= peak_rpm:
             # Below peak torque: Gaussian rise from low RPM
             x = (rpm - peak_rpm) / (peak_rpm - idle_rpm)
-            # Broad Gaussian (sigma ~0.6 of the distance)
-            T = peak_torque_nm * np.exp(-1.8 * x**2)
+            # Gate the Gaussian sigma by peak torque magnitude and power:
+            # - Mid-range mid-torque 500-700cc: broader curve (sigma < 1.8)
+            # - Modern litre bikes (≥195 hp): narrower curves (sigma=2.2)
+            # - Small/older bikes: standard curve (sigma=1.8)
+            if peak_power_hp and peak_power_hp >= 195.0:
+                sigma = 2.2  # modern litre superbikes: narrow band
+            elif peak_torque_nm < 70.0 and peak_torque_nm >= 50.0:
+                sigma = 1.40  # mid-range 500-700cc naked: very flat torque
+            else:
+                sigma = 1.8   # default for everything else
+            T = peak_torque_nm * np.exp(-sigma * x**2)
             # Low-RPM ramp: torque builds progressively from idle
             if rpm < peak_rpm * 0.6:
                 ramp = max(0.25, (rpm - idle_rpm) / max(1.0, peak_rpm * 0.6 - idle_rpm))
@@ -80,7 +89,7 @@ def _synthetic_torque_curve(
             # Above peak torque: smooth interpolation between peak and redline
             # At peak_rpm: T = peak_torque_nm
             # At peak_power_rpm: T = T_at_peak_power (constrained by rated power)
-            # At redline: T drops to ~60% of T_at_peak_power (typical rev limiter approach)
+            # At redline: T drops (gated by peak torque)
             if rpm <= peak_power_rpm:
                 # Interpolate peak_torque → T_at_peak_power (gentle decline)
                 frac_pp = (rpm - peak_rpm) / max(1.0, peak_power_rpm - peak_rpm)
@@ -90,7 +99,16 @@ def _synthetic_torque_curve(
                 frac_rl = (rpm - peak_power_rpm) / max(
                     1.0, redline_rpm - peak_power_rpm
                 )
-                T_at_redline = T_at_peak_power * 0.55  # Steep falloff near limiter
+                # Modern litre bikes (≥195 hp) have steeper high-RPM decay (0.48);
+                # mid-range mid-torque 500-700cc have moderate falloff (0.52);
+                # older/smaller bikes have gentler falloff (0.55)
+                if peak_power_hp and peak_power_hp >= 195.0:
+                    T_at_redline_factor = 0.48  # modern litre: steep decay
+                elif peak_torque_nm < 70.0 and peak_torque_nm >= 50.0:
+                    T_at_redline_factor = 0.58  # mid-range: very gentle decay (keeps torque longer)
+                else:
+                    T_at_redline_factor = 0.55  # default: gentle falloff
+                T_at_redline = T_at_peak_power * T_at_redline_factor
                 T = T_at_peak_power + (T_at_redline - T_at_peak_power) * frac_rl**1.5
             T = max(0.0, T)
         torque[i] = T
@@ -129,19 +147,19 @@ def _synthetic_2stroke_torque_curve(
     rpms = np.linspace(idle_rpm, redline_rpm, points)
     torque = np.zeros_like(rpms)
 
-    # Widths as fractions of tuned_rpm.  Calibrated April 20, 2026 against
-    # published dyno sheets for RD350 (37 Nm @ 7500), RGV250 (42 Nm @ 10500),
-    # RS125 (22 Nm @ 11000), NSR250 (38 Nm @ 9500), KTM 300 EXC (44 Nm @ 8000).
-    # Previous 12 %/22 % baselines starved small-cc bikes of off-pipe torque and
-    # they never launched in the sim — raised to match real dyno traces.
+    # Widths as fractions of tuned_rpm.  Calibrated April 21, 2026 to narrow
+    # the expansion band: published dyno sheets for RD350 (37 Nm @ 7500), RGV250
+    # (42 Nm @ 10500), RS125 (22 Nm @ 11000), NSR250 (38 Nm @ 9500), KTM 300 EXC
+    # (44 Nm @ 8000) show much sharper peaks than April 20 band widths. Updated
+    # April 21 to match real dyno traces more accurately.
     if powervalve:
-        band_lo = 0.32
-        band_hi = 0.16
-        baseline = 0.30  # powervalve → lots of meat off-pipe (RAVE/YPVS/KIPS…)
+        band_lo = 0.18   # narrower — RAVE/YPVS still widens the band
+        band_hi = 0.12   # was 0.16
+        baseline = 0.20  # was 0.30 — powervalve delivers good off-pipe still
     else:
-        band_lo = 0.24
-        band_hi = 0.11
-        baseline = 0.20  # piston-port / fixed-port is peakier but still revs
+        band_lo = 0.12   # was 0.24 — piston-port is peakier
+        band_hi = 0.08   # was 0.11
+        baseline = 0.12  # was 0.20 — fixed-port needs even narrower base
 
     # Required torque at peak_power_rpm to match rated HP (when given)
     required_pp_T = None
