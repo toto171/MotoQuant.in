@@ -126,8 +126,19 @@ class SimResult:
     time_quarter: float = 0.0
     speed_quarter: float = 0.0
 
+    # Completion tracking
+    finished_quarter: bool = False  # True if bike reached QUARTER_MILE_M within simulation
+    max_distance_m: float = 0.0  # Furthest distance reached (m)
+    elapsed_time_s: float = 0.0  # Time elapsed at end of simulation (s)
+
     def extract_splits(self):
-        """Extract split times from position array."""
+        """Extract split times from position array. Track completion status."""
+        # Record max distance and elapsed time
+        if len(self.x) > 0:
+            self.max_distance_m = float(self.x[-1])
+        if len(self.t) > 0:
+            self.elapsed_time_s = float(self.t[-1])
+
         splits = [
             (SIXTY_FOOT_M, "time_60ft", "speed_60ft"),
             (THREE30_FT_M, "time_330ft", "speed_330ft"),
@@ -153,6 +164,9 @@ class SimResult:
                 else:
                     setattr(self, t_attr, self.t[idx])
                     setattr(self, s_attr, self.v[idx])
+
+        # Mark as finished if quarter-mile ET was actually set (not left at default 0.0)
+        self.finished_quarter = self.time_quarter > 0.0
 
 
 # ═══════════════════════════════════════════
@@ -325,7 +339,7 @@ class MotoQuantEngine:
     def run(
         self,
         distance: float = QUARTER_MILE_M,
-        max_time: float = 20.0,
+        max_time: float = 26.0,
         use_adaptive_dt: bool = False,
     ) -> SimResult:
         """
@@ -337,6 +351,7 @@ class MotoQuantEngine:
             Distance to simulate (m). Default = QUARTER_MILE_M.
         max_time : float
             Abort after this many seconds even if distance not reached.
+            Default 26.0 s to accommodate small-cc bikes (under 200cc).
         use_adaptive_dt : bool
             When True, use variable-step-size integration (dt_min=0.5 ms,
             dt_max=5 ms) for a 3–5× speed-up during the locked-clutch phase.

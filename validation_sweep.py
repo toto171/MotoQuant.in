@@ -109,6 +109,38 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     ("KTM", "Duke 390", 2019, 14.20, 150, "Community runs 2019"),
     ("Royal Enfield", "Continental GT 650", 2019, 14.50, 140, "MCN 2019"),
     ("Yamaha", "R15 V3", 2020, 16.20, 125, "Community runs 2020"),
+    # Indian-market 150-400cc expansion (April 2026)
+    ("Bajaj", "Pulsar RS 200", 2015, 15.70, 132, "Derived from 0-100 (autoX 2015)"),
+    ("Bajaj", "Pulsar N250", 2021, 15.45, 135, "Derived from 0-100 (autoX 2021)"),
+    ("Bajaj", "Pulsar NS400Z", 2024, 14.10, 155, "Derived from 0-100 (autoX 2024)"),
+    ("KTM", "Duke 250", 2017, 15.20, 140, "Derived from 0-100 (motorbeam 2017)"),
+    ("KTM", "RC 390", 2017, 13.16, 159, "ZeroTo60Times 2017"),
+    ("TVS", "Apache RR 310", 2020, 14.80, 145, "Derived from 0-100 (bikewale 2020)"),
+    ("TVS", "Apache RTR 200 4V", 2016, 15.90, 128, "Derived from 0-100 (bikewale 2016)"),
+    ("Yamaha", "R15 V4", 2021, 16.40, 123, "Derived from 0-100 (autocar 2021)"),
+    ("Yamaha", "MT-15", 2019, 15.80, 130, "Derived from 0-100 (bikewale 2019)"),
+    ("Yamaha", "R3", 2015, 15.80, 125, "MotoStatz 2015"),
+    ("Yamaha", "MT-03", 2020, 14.05, 92, "AccelerationTimes 2020"),
+    ("Honda", "CB350RS", 2021, 15.50, 138, "Derived from 0-100 (bikewale 2021)"),
+    ("Honda", "CBR500R", 2022, 13.51, 98, "MotoStatz 2022"),
+    ("Honda", "CB650R", 2021, 11.80, 115, "AccelerationTimes 2021"),
+    ("Suzuki", "Gixxer 250", 2018, 16.10, 126, "Derived from 0-100 (bikewale 2018)"),
+    # Mid-range global expansion (April 2026)
+    ("Suzuki", "SV650", 2016, 11.82, 115, "FastestLaps 2016"),
+    ("Kawasaki", "Ninja 300", 2013, 14.60, 102, "MotoStatz 2013"),
+    ("Kawasaki", "Ninja 400", 2018, 12.98, 102, "MotoStatz 2018"),
+    ("Kawasaki", "Ninja 650", 2020, 12.30, 111, "MotoStatz 2020"),
+    ("Kawasaki", "Z 650", 2017, 12.40, 110, "MotoStatz 2017"),
+    ("Harley-Davidson", "Sportster S", 2021, 11.10, 122, "HDForums timeslip 2021"),
+    ("Royal Enfield", "Continental GT 650", 2020, 13.90, 97, "FastestLaps 2020"),
+    ("Triumph", "Trident 660", 2021, 12.00, 111, "MotoStatz 2021"),
+    ("Triumph", "Speed 400", 2023, 14.50, 140, "Derived from 0-100 (bikewale 2023)"),
+    ("Benelli", "302R", 2017, 15.80, 120, "MotorbikeCatalog 2017"),
+    ("Benelli", "TNT 600i", 2014, 12.60, 108, "MotorbikeCatalog 2014"),
+    ("Aprilia", "RS 457", 2024, 13.30, 97, "FastestLaps 2024"),
+    # SE Asia enthusiast 150cc expansion (April 2026)
+    ("Yamaha", "YZF-R7", 2022, 11.64, 116, "MotoStatz 2022"),
+    ("Yamaha", "FZ25", 2018, 16.00, 127, "Derived from 0-100 (bikewale 2018)"),
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [
@@ -148,13 +180,23 @@ def _sim_spec(spec) -> dict:
     try:
         cfg = spec_to_bike_config(spec)
         result = MotoQuantEngine(cfg).run()
-        sim_et = float(result.time_quarter)
-        sim_trap = float(result.speed_quarter) * 3.6
         took = time.time() - t0
-        status = "ok"
-        if sim_et > 14.9:  # didn't reach quarter within 15s window
+
+        # Determine status and ET
+        if not result.finished_quarter:
+            status = "did-not-finish"
+            sim_et_s = None
+            sim_trap_kmh = None
+        elif result.time_quarter > 14.9:  # finished but over 15s threshold
             status = "over-time"
-        return {
+            sim_et_s = round(float(result.time_quarter), 3)
+            sim_trap_kmh = round(float(result.speed_quarter) * 3.6, 1)
+        else:
+            status = "ok"
+            sim_et_s = round(float(result.time_quarter), 3)
+            sim_trap_kmh = round(float(result.speed_quarter) * 3.6, 1)
+
+        record = {
             "manufacturer": spec.manufacturer,
             "model": spec.model_name,
             "year_from": spec.year_from,
@@ -162,11 +204,19 @@ def _sim_spec(spec) -> dict:
             "category": getattr(spec, "category", None),
             "displacement_cc": spec.displacement_cc,
             "stroke_type": getattr(spec, "stroke_type", None) or 4,
-            "sim_et_s": round(sim_et, 3),
-            "sim_trap_kmh": round(sim_trap, 1),
             "status": status,
             "wall_time_s": round(took, 3),
         }
+
+        if sim_et_s is not None:
+            record["sim_et_s"] = sim_et_s
+            record["sim_trap_kmh"] = sim_trap_kmh
+        else:
+            # For did-not-finish, record max distance and elapsed time
+            record["max_distance_m"] = round(result.max_distance_m, 1)
+            record["elapsed_time_s"] = round(result.elapsed_time_s, 2)
+
+        return record
     except Exception as exc:
         return {
             "manufacturer": spec.manufacturer,
@@ -268,6 +318,7 @@ def run_sweep(verbose: bool = True) -> dict:
     n_total = len(results)
     n_ok = sum(1 for r in results if r["status"] == "ok")
     n_over = sum(1 for r in results if r["status"] == "over-time")
+    n_dnf = sum(1 for r in results if r["status"] == "did-not-finish")
     n_err = sum(1 for r in results if r["status"] == "error")
     n_bench = len(benchmark_hits)
     abs_deltas = [abs(b["delta_et_s"]) for b in benchmark_hits]
@@ -290,6 +341,7 @@ def run_sweep(verbose: bool = True) -> dict:
         "bikes_total": n_total,
         "bikes_ok": n_ok,
         "bikes_over_time": n_over,
+        "bikes_did_not_finish": n_dnf,
         "bikes_error": n_err,
         "benchmark_matches": n_bench,
         "mean_abs_delta_s": round(mean_abs, 3),
@@ -337,6 +389,7 @@ def main() -> None:
         print(f"  Bikes total:            {s['bikes_total']}")
         print(f"    ok:                   {s['bikes_ok']}")
         print(f"    over-time (>14.9s):   {s['bikes_over_time']}")
+        print(f"    did-not-finish:       {s['bikes_did_not_finish']}")
         print(f"    error:                {s['bikes_error']}")
         print(f"  Benchmark matches:      {s['benchmark_matches']}")
         print(f"  Mean |ΔET|:             {s['mean_abs_delta_s']:.3f}s")

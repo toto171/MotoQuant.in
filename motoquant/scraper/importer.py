@@ -266,8 +266,18 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
 
     # Peak power and torque
     peak_hp = spec.peak_power_hp or base.peak_power_hp
-    peak_tq = spec.peak_torque_nm or base.peak_torque_nm
     peak_hp_rpm = spec.peak_power_rpm or base.peak_power_rpm
+
+    # Derive peak torque from power if available; else use spec or fallback
+    if spec.peak_torque_nm:
+        peak_tq = spec.peak_torque_nm
+    elif spec.peak_power_hp and spec.peak_power_rpm:
+        # T = P / ω, where ω = RPM × 2π / 60
+        import math
+        peak_tq = spec.peak_power_hp * 745.7 / (spec.peak_power_rpm * 2.0 * math.pi / 60.0)
+    else:
+        peak_tq = base.peak_torque_nm
+
     peak_tq_rpm = spec.peak_torque_rpm or base.peak_torque_rpm
     if spec.peak_power_rpm:
         # Peak power RPM is not the redline; engines continue to rev above it.
@@ -296,6 +306,15 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
             redline_factor = 1.22   # mid-size twins (MT-07, Z650, Dominar 400)
         elif cc < 700:
             redline_factor = 1.14   # 600cc-class inline-4 (R6, CBR600RR, ZX-6R)
+        elif spec.category in ("cruiser", "touring", "muscle"):
+            # Big-bore V-twins and muscled-up engines (VMAX 1700, Rocket 3, etc)
+            # peak power at ~60% of redline — strong off-boost character
+            if cc >= 1400:
+                redline_factor = 1.30   # VMAX 1700, Rocket 3 — peak power lower
+            elif cc >= 1200:
+                redline_factor = 1.22   # Panigale V4, larger cruiser V-twins
+            else:
+                redline_factor = 1.10   # fallback
         else:
             redline_factor = 1.10   # large inline-4, V4, L-twin (≥ 1000cc class)
         redline = int(peak_hp_rpm * redline_factor)
@@ -304,8 +323,14 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
     # 2-strokes idle higher (needs transfer port gas velocity to sustain firing)
     idle = 1800 if is_two_stroke else 1200
 
-    # Tuned RPM for 2T: prefer explicit, else default to peak_power_rpm
-    tuned_rpm = spec.tuned_rpm or (peak_hp_rpm if is_two_stroke else None)
+    # Tuned RPM for 2T: prefer explicit, else compute from peak_power_rpm
+    # Expansion chambers peak below peak-power RPM (~0.82 factor)
+    if spec.tuned_rpm:
+        tuned_rpm = spec.tuned_rpm
+    elif is_two_stroke and spec.peak_power_rpm:
+        tuned_rpm = int(spec.peak_power_rpm * 0.82)
+    else:
+        tuned_rpm = peak_hp_rpm if is_two_stroke else None
 
     # Try to find a known dyno curve for this bike
     dyno = get_dyno_curve(
@@ -434,6 +459,14 @@ def _build_drivetrain_from_spec(
     # roller width, not pitch).
     chain_pitch_mm = 12.7 if pitch == "428" else base.chain_pitch_mm
 
+    # Naked bikes across 500-700cc have thinner chains and efficiency losses
+    # similar to small-cc despite larger displacement
+    cc = spec.displacement_cc or 1000
+    if cc < 700 and (spec.category or "sport").lower() in ("sport", "naked"):
+        chain_eff = 0.95  # aggressive for small/mid naked bikes
+    else:
+        chain_eff = base.chain_efficiency  # full-size default (0.97)
+
     return DrivetrainParams(
         gear_ratios=list(ratios),
         final_drive_ratio=float(rear) / float(front),
@@ -443,6 +476,7 @@ def _build_drivetrain_from_spec(
         chain_pitch=pitch,
         chain_links=base.chain_links,
         primary_ratio=float(primary),
+        chain_efficiency=chain_eff,
     )
 
 
@@ -480,6 +514,14 @@ def _build_tires_from_spec(spec: BikeSpec) -> TireParams:
     else:
         mu = base.mu_peak  # fallback to K5 default
 
+    # Small-cc bikes have higher rolling resistance (skinnier tires, higher pressure)
+    # 500-700cc naked bikes also need elevated rolling resistance (not as much as <500 though)
+    crr = base.crr_base  # base is 0.012
+    if disp < 500:
+        crr = 0.013  # small-cc aggressive bump
+    elif disp < 700 and cat in ("sport", "naked"):
+        crr = 0.0135  # 500-700cc naked/sport: higher CRR (fatter tires at lower pressures)
+
     result = TireParams(
         front_size=spec.front_tire_size or base.front_size,
         rear_size=spec.rear_tire_size or base.rear_size,
@@ -489,6 +531,7 @@ def _build_tires_from_spec(spec: BikeSpec) -> TireParams:
         pacejka_D=base.pacejka_D,
         pacejka_E=base.pacejka_E,
         optimal_temp_c=base.optimal_temp_c,
+        crr_base=crr,
     )
 
     # Estimate rolling radius from rear tire size
@@ -512,9 +555,22 @@ def _build_tires_from_spec(spec: BikeSpec) -> TireParams:
 
 
 def _build_aero_from_spec(spec: BikeSpec) -> AeroParams:
-    """Build AeroParams from spec or category defaults."""
+    """Build AeroParams from spec or category defaults.
+
+    For small-cc bikes (<500cc), apply sub-gates: naked bikes sit up higher,
+    sport bikes are more tucked. This reflects the physical reality that
+    small-cc aero drag is geometry-driven, not RPM-driven like larger bikes.
+    """
     aero_defaults = CATEGORY_AERO.get(spec.category, CATEGORY_AERO["sport"])
     base = gsxr1000_k5().aero
+    cc = spec.displacement_cc or 1000
+
+    # Small-cc sub-gate: adjust aero for <500cc bikes by category
+    if cc < 500:
+        if spec.category == "naked":
+            aero_defaults = {"cd": 0.86, "frontal_area_m2": 0.55, "wheelie_tendency": 0.8}
+        elif spec.category == "sport":
+            aero_defaults = {"cd": 0.72, "frontal_area_m2": 0.48, "wheelie_tendency": 1.2}
 
     return AeroParams(
         cd=spec.cd or aero_defaults["cd"],
@@ -565,6 +621,8 @@ def spec_to_bike_config(spec: BikeSpec) -> BikeConfig:
 
     # Parasitic: 2-strokes have no valvetrain; pre-mix bikes have no oil
     # pump at all, oil-injected 2Ts have a tiny one. Collapse those losses.
+    # Small-cc 4-strokes (<500cc) and mid-range 4-strokes (<700cc) have smaller
+    # alternators and oil pumps (relative to full-size litre bikes).
     parasitic = copy.deepcopy(base_config.parasitic)
     if spec.stroke_type == 2:
         parasitic.valve_train_power_w = 0.0   # no cams
@@ -572,6 +630,17 @@ def spec_to_bike_config(spec: BikeSpec) -> BikeConfig:
         # Small 2Ts often have no water pump either (air-cooled RD/RX)
         if spec.cooling == "air":
             parasitic.water_pump_electric = True
+    elif spec.displacement_cc and spec.displacement_cc < 500:
+        # Small-cc 4-strokes have smaller alternators and oil pumps
+        parasitic.alternator_power_w = 60.0   # small magneto/alternator
+        parasitic.oil_pump_power_w = 300.0    # smaller pump
+        parasitic.valve_train_power_w = 150.0 # less valvetrain mass
+    elif spec.displacement_cc and spec.displacement_cc < 700:
+        # Mid-range 4-strokes (500-700cc) get lighter touch than sub-500cc
+        # These naked bikes still have substantial parasitic losses (smaller alternators/water pumps)
+        parasitic.alternator_power_w = 80.0   # slightly smaller than K5 (150W)
+        parasitic.oil_pump_power_w = 320.0    # slightly smaller pump
+        parasitic.valve_train_power_w = 170.0 # slightly less valvetrain
 
     # Compose model name
     year_tag = ""
