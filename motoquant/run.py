@@ -2721,6 +2721,124 @@ def _cmd_analysis_surrogate(args) -> int:
 # ═══════════════════════════════════════════
 
 
+def cmd_pricing(args):
+    """
+    Indian-market parts pricing refresh / health-check.
+
+    Verbs:
+      refresh  — fill `retailer_url` + bump `last_price_check` for every part
+      status   — coverage snapshot (what fraction of parts have price/URL/recent check)
+      stale    — list parts whose last_price_check is older than --days (default 30)
+    """
+    from .database.pricing_refresh import (
+        refresh_retailer_urls,
+        coverage_report,
+        stale_parts,
+        estimate_landing_cost_inr,
+    )
+
+    verb = getattr(args, "pricing_action", None)
+    output_json = getattr(args, "output_json", False)
+
+    db = ensure_db(args)
+    conn = db.conn
+
+    if verb == "refresh":
+        summary = refresh_retailer_urls(
+            conn,
+            only_missing=not getattr(args, "overwrite", False),
+            dry_run=getattr(args, "dry_run", False),
+        )
+        payload = {
+            "total": summary.total,
+            "urls_filled": summary.urls_filled,
+            "check_stamps_updated": summary.check_stamps_updated,
+            "skipped_no_retailer": summary.skipped_no_retailer,
+            "dry_run": bool(getattr(args, "dry_run", False)),
+        }
+        if output_json:
+            print(json.dumps(payload, indent=2))
+        else:
+            print()
+            print(f"  Pricing refresh ({'dry-run' if payload['dry_run'] else 'committed'}):")
+            print(f"    Total parts .............. {summary.total}")
+            print(f"    URLs filled .............. {summary.urls_filled}")
+            print(f"    Check-stamps updated ..... {summary.check_stamps_updated}")
+            print(f"    Skipped (no retailer) .... {summary.skipped_no_retailer}")
+        db.close()
+        return 0
+
+    if verb == "status":
+        report = coverage_report(conn)
+        # Add a sample landing-cost projection so the user can eyeball the
+        # GST+courier+duty math on a "typical" ₹25k part at a click.
+        report["sample_25000_domestic_inr"] = estimate_landing_cost_inr(
+            25_000.0, retailer="MotoParts India"
+        )
+        report["sample_25000_imported_inr"] = estimate_landing_cost_inr(
+            25_000.0, retailer="Akrapovic EU"
+        )
+        if output_json:
+            print(json.dumps(report, indent=2))
+        else:
+            print()
+            print("  Parts pricing coverage:")
+            print(f"    Total parts ............... {report['total_parts']}")
+            print(
+                f"    With retailer ............. {report['with_retailer']}"
+                f" ({report['retailer_coverage_pct']} %)"
+            )
+            print(
+                f"    With retailer_url ......... {report['with_retailer_url']}"
+                f" ({report['url_coverage_pct']} %)"
+            )
+            print(
+                f"    With price_inr ............ {report['with_price_inr']}"
+                f" ({report['price_coverage_pct']} %)"
+            )
+            print(
+                f"    Refreshed last 30 days .... {report['refreshed_last_30_days']}"
+                f" ({report['freshness_pct']} %)"
+            )
+            print()
+            print("  Landing-cost sample (₹25 000 sticker):")
+            print(f"    Domestic (GST+courier) .... ₹{report['sample_25000_domestic_inr']:,.0f}")
+            print(f"    Imported (+30 % duty) ..... ₹{report['sample_25000_imported_inr']:,.0f}")
+        db.close()
+        return 0
+
+    if verb == "stale":
+        days = getattr(args, "days", None) or 30
+        rows = stale_parts(conn, days_threshold=days)
+        if output_json:
+            print(
+                json.dumps(
+                    [
+                        {"id": r[0], "brand": r[1], "model_name": r[2], "last_check": r[3]}
+                        for r in rows
+                    ],
+                    indent=2,
+                )
+            )
+        else:
+            if not rows:
+                print(f"  No parts stale beyond {days} days. ✓")
+            else:
+                print(f"  Parts needing refresh (>{days} days old): {len(rows)}")
+                print_table(
+                    ["ID", "Brand", "Model", "Last check"],
+                    [(r[0], (r[1] or "-")[:24], (r[2] or "-")[:40], r[3]) for r in rows[:50]],
+                )
+                if len(rows) > 50:
+                    print(f"  ... and {len(rows) - 50} more (run with --json for the full list)")
+        db.close()
+        return 0
+
+    print("  Error: no pricing action specified. Use: refresh | status | stale")
+    db.close()
+    return 1
+
+
 def cmd_nl(args):
     """
     Natural language tuning interface.
@@ -3494,6 +3612,52 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     # ── nl (Natural Language) ────────────────────────────────────────
+    # ── pricing ──
+    p_pricing = subparsers.add_parser(
+        "pricing",
+        help="Indian-market parts pricing refresh + coverage reports",
+    )
+    p_pricing_sub = p_pricing.add_subparsers(
+        dest="pricing_action", help="refresh | status | stale"
+    )
+
+    p_pricing_refresh = p_pricing_sub.add_parser(
+        "refresh",
+        help="Populate retailer_url + last_price_check for every part",
+    )
+    p_pricing_refresh.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Overwrite existing retailer_url (default: only fill if NULL)",
+    )
+    p_pricing_refresh.add_argument(
+        "--dry-run",
+        action="store_true",
+        dest="dry_run",
+        help="Show what would change; do not commit",
+    )
+    p_pricing_refresh.add_argument(
+        "--json", action="store_true", dest="output_json", help="Machine-readable output"
+    )
+
+    p_pricing_status = p_pricing_sub.add_parser(
+        "status", help="Coverage report (price / retailer / URL / freshness %s)"
+    )
+    p_pricing_status.add_argument(
+        "--json", action="store_true", dest="output_json"
+    )
+
+    p_pricing_stale = p_pricing_sub.add_parser(
+        "stale", help="List parts whose last_price_check is > --days old"
+    )
+    p_pricing_stale.add_argument(
+        "--days", type=int, default=30,
+        help="Staleness threshold in days (default: 30)",
+    )
+    p_pricing_stale.add_argument(
+        "--json", action="store_true", dest="output_json"
+    )
+
     p_nl = subparsers.add_parser(
         "nl",
         help="Phase 4C: Natural language tuning interface",
@@ -3533,6 +3697,7 @@ SUBCOMMAND_MAP = {
     "calibrate": cmd_calibrate,
     "analysis": cmd_analysis,
     "nl": cmd_nl,
+    "pricing": cmd_pricing,
 }
 
 

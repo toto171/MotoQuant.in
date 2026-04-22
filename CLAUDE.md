@@ -145,6 +145,8 @@ import      --known-bikes (108 curated) or --spec-json FILE
 history     simulation run history
 leaderboard best ETs across all runs
 analysis    roi, sobol, optimize, recommend, surrogate (generate/train/evaluate/predict/train-dnn)
+pricing     refresh / status / stale — Indian-market retailer URL seeding + coverage reports
+            (GST 18 % + ₹250 courier + 30 % import duty landing-cost math)
 ```
 
 ---
@@ -180,7 +182,10 @@ Vehicle Dynamics/
 │   │   ├── bike_repo.py         ← upsert_from_config(), search(), add_provenance()
 │   │   ├── tire_repo.py, parts_repo.py, venue_repo.py, sim_repo.py, weather_repo.py
 │   │   ├── bridge.py            ← BikeConfig ↔ DB row converters
-│   │   └── weather_refresh.py   ← refresh_all_venues(), staleness checks, RefreshSummary
+│   │   ├── weather_refresh.py   ← refresh_all_venues(), staleness checks, RefreshSummary
+│   │   └── pricing_refresh.py   ← retailer URL templates (~50 Indian + import retailers),
+│   │                              estimate_landing_cost_inr (GST+courier+duty),
+│   │                              refresh_retailer_urls, stale_parts, coverage_report
 │   ├── api.py                       ← FastAPI web server (Phase 3 web launch)
 │   │   ├── recommendations.py    ← Smart Build Recommender (profiles, synergies, upgrade paths)
 │   ├── calibration/               ← Phase 3 — real run data import & calibration
@@ -205,6 +210,8 @@ Vehicle Dynamics/
     ├── test_cli.py              ← all CLI subcommands, in-process via redirect_stdout
     ├── test_scraper.py          ← BikeSpec, validate_spec, import_batch, ALL_KNOWN_BIKES
     ├── test_weather_refresh.py  ← _is_stale, refresh_all_venues, CLI --refresh-all
+    ├── test_pricing.py          ← 33 tests — URL templates, brand-dedup search,
+    │                              landing-cost math, refresh idempotency, stale thresholds
     ├── test_dragy.py            ← 56 tests — Dragy GPS parser
     ├── test_calibration.py      ← 44 tests — dyno, overlay, calibrator end-to-end
     ├── test_ecu.py              ← 69 tests — ECU log import (Woolich/PC-Link/MoTeC)

@@ -279,6 +279,9 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
         peak_tq = base.peak_torque_nm
 
     peak_tq_rpm = spec.peak_torque_rpm or base.peak_torque_rpm
+    cc = spec.displacement_cc or 1000
+    cyls = spec.cylinders or 4
+
     if spec.peak_power_rpm:
         # Peak power RPM is not the redline; engines continue to rev above it.
         # The headroom varies strongly with engine type:
@@ -291,8 +294,6 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
         # This replaces the previous flat 1.08 factor which caused severe redline
         # under-estimation for small-displacement bikes (e.g. Ninja 400 → 10 800 rpm
         # instead of the real ~13 000 rpm, trapping at 119 km/h instead of 150+ km/h).
-        cc = spec.displacement_cc or 1000
-        cyls = spec.cylinders or 4
         if is_two_stroke:
             # 2T over-rev varies strongly with powervalve presence. Power-
             # valved bikes (YPVS/RAVE/HPP/KIPS) have more usable band above
@@ -432,20 +433,26 @@ def _build_drivetrain_from_spec(
     rear = spec.rear_sprocket
     primary = spec.primary_ratio
 
+    # ALWAYS run the gear-ratio lookup — not just when ratios are missing.
+    # A bike can ship real service-manual gear ratios but no primary_ratio
+    # field, in which case falling back to the K5 base primary (1.553) is
+    # catastrophic for non-superbikes: CB650R's real 2.176 primary becomes
+    # 1.553, which makes gear 1 top-out at ~145 km/h instead of ~95 km/h
+    # and the sim lugs the entire quarter in first gear. See the April 22
+    # mid-range audit (CLAUDE.md) for the full diagnosis.
+    lu_ratios, lu_front, lu_rear, lu_primary, _conf = lookup_gear_ratios(
+        manufacturer=spec.manufacturer,
+        model_name=spec.model_name,
+        year=spec.year_from,
+        category=spec.category,
+        displacement_cc=spec.displacement_cc,
+        gears=spec.gears,
+    )
     if not ratios:
-        # Use the gear-ratio lookup library (much better than a single fallback)
-        lu_ratios, lu_front, lu_rear, lu_primary, _conf = lookup_gear_ratios(
-            manufacturer=spec.manufacturer,
-            model_name=spec.model_name,
-            year=spec.year_from,
-            category=spec.category,
-            displacement_cc=spec.displacement_cc,
-            gears=spec.gears,
-        )
         ratios = lu_ratios
-        front = front or lu_front
-        rear = rear or lu_rear
-        primary = primary or lu_primary
+    front = front or lu_front
+    rear = rear or lu_rear
+    primary = primary or lu_primary
 
     front = front or base.front_sprocket
     rear = rear or base.rear_sprocket
