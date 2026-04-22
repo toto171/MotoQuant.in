@@ -1456,7 +1456,21 @@ def lookup_gear_ratios(
     mfr_slug = manufacturer.lower().strip().replace(" ", "_")
 
     # ── Tier 1: named model match ─────────────────────────────────────────────
+    # Whitespace/hyphen-agnostic match so "CB650R" matches the "cb 650r"
+    # pattern key and "CBR-1000RR" matches "cbr 1000rr".  Service-manual
+    # and owner-forum sources use inconsistent spacing/hyphenation; the
+    # lookup must not be brittle to that.
+    def _norm(s: str) -> str:
+        return (
+            s.lower()
+            .replace("-", "")
+            .replace("_", "")
+            .replace(".", "")
+            .replace(" ", "")
+        )
+
     model_lower = model_name.lower()
+    model_norm = _norm(model_name)
 
     # Collect all matching entries, prefer longest pattern match
     candidates = []
@@ -1464,7 +1478,10 @@ def lookup_gear_ratios(
         if entry["mfr"] != mfr_slug:
             continue
         pattern = entry["model"].lower()
-        if pattern not in model_lower:
+        pattern_norm = _norm(entry["model"])
+        # Accept either a direct substring match (legacy behaviour) or a
+        # whitespace-normalised match (handles "CB650R" vs "cb 650r").
+        if pattern not in model_lower and pattern_norm not in model_norm:
             continue
         # Check year range
         if year is not None:

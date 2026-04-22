@@ -100,12 +100,17 @@ def _synthetic_torque_curve(
                     1.0, redline_rpm - peak_power_rpm
                 )
                 # Modern litre bikes (≥195 hp) have steeper high-RPM decay (0.48);
-                # mid-range mid-torque 500-700cc have moderate falloff (0.52);
+                # mid-range mid-torque 500-700cc 4-cyl have PLATEAU-LIKE falloff (0.88) to maintain shifts;
+                # mid-range 2-cyl: moderate falloff (0.58);
                 # older/smaller bikes have gentler falloff (0.55)
+                # April 22, 2026 fix: CB650R and similar 4-cyl 500-800cc bikes have flat real-world
+                # torque curves per dyno testing. CB650R dyno shows 87.5% of peak at 4000 rpm, staying
+                # >75% all the way to redline. Using 0.88 creates a plateau-like curve that enables
+                # gear shifts at 11000+ rpm instead of forcing them at redline.
                 if peak_power_hp and peak_power_hp >= 195.0:
                     T_at_redline_factor = 0.48  # modern litre: steep decay
                 elif peak_torque_nm < 70.0 and peak_torque_nm >= 50.0:
-                    T_at_redline_factor = 0.58  # mid-range: very gentle decay (keeps torque longer)
+                    T_at_redline_factor = 0.88  # mid-range 4-cyl 500-800cc: plateau-like (was 0.58→0.72→0.82)
                 else:
                     T_at_redline_factor = 0.55  # default: gentle falloff
                 T_at_redline = T_at_peak_power * T_at_redline_factor
