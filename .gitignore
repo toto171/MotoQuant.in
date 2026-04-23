@@ -22,6 +22,11 @@ lib64/
 !desktop/src/lib/
 !desktop/src/lib/**
 parts/
+# motoquant/parts/ is first-party source (compatibility engine), not a
+# Python build artifact. Must be tracked — otherwise /api/parts with a
+# bike_id filter 500s in production because the module isn't in the wheel.
+!motoquant/parts/
+!motoquant/parts/**
 sdist/
 var/
 wheels/
