@@ -540,20 +540,44 @@ All 132 new bikes pass scraper/validator tests (78 tests). Indian-market small-c
   - **65 new tests** in `tests/test_recommendations.py` (38 unit + 27 integration, integration gated behind `MOTOQUANT_SLOW_TESTS=1`)
 
 **Phase 4 — Remaining:**
-- [ ] Indian market pricing API integration (auto-refresh parts pricing from online retailers)
-- **Surrogate model — remaining phases:**
-  - ✅ **Phase 4A — DNN surrogate:** COMPLETE (April 2026). 4-layer MLP (21→256→512→512→256→2 heads) in `surrogate_dnn.py`; PyTorch primary, sklearn fallback. CLI: `analysis surrogate train-dnn`. Huber loss, batch norm, dropout, feature/target normalisation baked in.
-  - ✅ **Phase 4B — BDT baseline:** COMPLETE (April 2026). XGBoost surrogate in `surrogate_xgb.py`; use `analysis surrogate generate/train/evaluate` CLI.
-  - **Phase 4C — PINN (if needed):** Physics-Informed Neural Network only if DNN shows poor extrapolation outside training distribution. PINN bakes physics constraints into loss function for better generalization at distribution edges. Higher implementation complexity — justify with DNN failure evidence before building.
+- [ ] **Indian market pricing API integration** — `motoquant/database/pricing_refresh.py` has the retailer URL templates (~50 Indian + import retailers) and GST 18 % + ₹250 courier + 30 % import-duty landing-cost math, but there's no live retailer-scraping layer yet. WIP edits to `pricing_refresh.py` sit in the working tree uncommitted as of Apr 22 — those likely start the per-retailer adapter work.
+- [ ] **Live surrogate preview in desktop BuildPage** — BuildPage currently re-runs `/api/simulate/quick` on every toggle (~50 ms full sim). Adding a `/api/surrogate/predict` FastAPI route that loads `surrogate_dnn.pkl` or `surrogate.pkl` once at startup and scores one vector per call would drop BuildPage slider ticks to ~1 ms. Needs: API route + a `useSurrogate()` React Query hook + BuildPage wiring behind a toggle (so the user can still run the "real" sim on demand).
+- **Surrogate model — status of all three phases:**
+  - ✅ **Phase 4A — DNN surrogate:** COMPLETE (Apr 15, 2026). 4-layer MLP (21 → 256 → 512 → 512 → 256 → 2 heads) in `motoquant/analysis/surrogate_dnn.py`; PyTorch primary, sklearn fallback. CLI: `analysis surrogate train-dnn`. Huber loss + batch norm + dropout + feature/target normalisation baked in. Trained pickle ships in repo root as `surrogate_dnn.pkl` (10.8 MB).
+  - ✅ **Phase 4B — BDT baseline:** COMPLETE (Apr 15, 2026). XGBoost surrogate in `motoquant/analysis/surrogate_xgb.py`. CLI: `analysis surrogate generate/train/evaluate`. Pickles: `surrogate.pkl` (4.4 MB) + `surrogate_v2.pkl` / `_v3.pkl` / `_sport.pkl` variants.
+  - **Phase 4C — PINN:** Deferred. Physics-Informed Neural Network justified only when DNN shows poor extrapolation outside its training distribution. Bakes physics constraints into the loss function for edge-of-distribution generalisation. No measured DNN failure to justify the complexity yet — keep on the shelf.
+- **No new Phase 4 code since Apr 16, 2026** (Smart Recommendations Engine) — logged so future-me doesn't re-add these items as "must do" without fresh evidence.
 
-### 🔲 Phase 5 — Desktop Application (v1.0 Release)
-- Tauri 2.0 shell + React 19 / TypeScript frontend
-- Simulation output charts: v(t), RPM(t), gear(t), tire temp(t), traction%(t)
-- Comparison mode: A vs B overlay (stock vs. modified build)
-- Interactive parameter sliders with live surrogate model preview (DNN or PINN — whichever Phase 4 lands on)
-- 3D bike visualisation (Three.js)
-- PDF report export
-- **Closed beta** with Pune/Narhe tuning garages before public release (from Gemini review — validates against professional tuners)
+### 🔄 Phase 5 — Desktop Application (v1.0 Release) [IN PROGRESS]
+
+**Phase 5 — Completed items:**
+- [x] **Tauri 2 + React 19 + TypeScript 5.6 + Vite 5 scaffold** (Apr 22, 2026) — `desktop/` at repo root. Rust side (`desktop/src-tauri/src/lib.rs`): `pick_free_port()` binds a throw-away `TcpListener` to grab an ephemeral port, then `spawn_sidecar()` launches the PyInstaller binary with `--host 127.0.0.1 --port <N> --log-level info`; stdout/stderr piped into Rust's `log` crate. 8 s startup deadline with polling for `get_backend_url` Tauri command. `MOTOQUANT_DEV_BACKEND_URL` env-var override lets devs run `uvicorn --reload` manually instead of spawning the binary. CSP allows `http://127.0.0.1:*` so the React frontend can reach the sidecar. 1440×900 dark-theme window, resizable down to 1200×760.
+- [x] **Typed API client** — `desktop/src/types/api.ts` (Pydantic mirrors for all endpoints incl. Bike/Venue/Tire/Part/Simulate/QuickSim/**Compare**/**Leaderboard**), `desktop/src/lib/api.ts` (typed fetch with `ApiRequestError` + Tauri-invoke base-URL resolution with VITE_API_URL + `http://127.0.0.1:8000` fallback), `desktop/src/hooks/useApi.ts` (React Query hooks: `useBikes`, `useBike`, `useVenues`, `usePartsCategories`, `useParts`, `useSimulate`, `useQuickSimulate`, **`useCompare`**, **`useLeaderboard`**).
+- [x] **Shell components** (`desktop/src/components/`) — `Layout` + `Sidebar` (6 nav entries: Simulate · Bikes · Build · Compare · History · Settings) + `TopBar` (live engine-online chip polling `/api/health` every 15 s) + `BikePicker` (fuzzy-search 290-bike dropdown) + `StatTile` + `SimChart` (recharts, 4 default channels: speed/RPM/accel-g/power-kW with ET reference line).
+- [x] **Pages — 6 complete:**
+  - **SimulatePage** — bike + venue picker + rider/power/mass sliders + adaptive-dt toggle + 4-panel chart grid.
+  - **BikesPage** — paginated search/filter table, 40 bikes per page.
+  - **BuildPage** — bike + parts catalog composer with Map-keyed selection so filter changes don't drop parts; re-runs `/api/simulate/quick` on every toggle; build cost in ₹ + stock-vs-modded ET delta chip.
+  - **ComparePage** (Apr 23, 2026) — *NEW*. Two bike pickers, shared venue + conditions, Run Compare button; side-by-side ET/trap/60ft/1-8-mile tiles with A-vs-B delta banner (winner pill + ΔET/ΔTrap/ΔCost strip); overlay v(t) chart that resamples both timeseries onto a common 160-point grid via linear interpolation. Uses `/api/simulate/compare`.
+  - **HistoryPage** (Apr 23, 2026) — fleshed out from the Apr 22 stub. Live leaderboard table from `/api/leaderboard` with trophy badge on the fastest run, formatted timestamps, handles loading / error / empty states cleanly. Shows total-runs count in header when populated.
+  - **SettingsPage** — read-only runtime info panel (backend URL, DB location, physics engine version + validated baselines, app version).
+- [x] **Sidecar packaging scaffold** (Apr 23, 2026) — *NEW*. `desktop/sidecar/` with:
+  - `sidecar_entry.py` — uvicorn launcher that auto-resolves the bundled DB via `sys._MEIPASS` at startup and sets `MOTOQUANT_DB` before importing `motoquant.api`, so no Tauri-side env plumbing is required.
+  - `motoquant-backend.spec` — PyInstaller one-file spec with tight `excludes` list (matplotlib/torch/tensorflow/sklearn/xgboost/SALib/streamlit) to keep binary size down since those are only used by offline training/analysis flows. `datas` bundles `motoquant.db`. Collects all `motoquant.*` + `uvicorn.*` submodules as `hiddenimports`.
+  - `build.sh` (Linux/macOS) + `build.ps1` (Windows) — venv bootstrap + dep install + clean build + smoke test that spawns the binary on an ephemeral port and hits `/api/health`.
+  - `requirements-sidecar.txt` — runtime deps pinned in sync with `requirements-api.txt` plus `pyinstaller>=6.5.0`.
+  - `README.md` — cross-platform build flow, target-triple naming table (what to rename to before dropping into `desktop/src-tauri/bin/`), DB-bundling trade-offs, dev-mode override guide, troubleshooting table.
+- [x] **Build validation** — `npx tsc --noEmit` passes cleanly across all 17 TS/TSX files. Vite build (per Apr 22 entry) produces a 2433-module bundle at ~195 kB gzipped in 44 s.
+
+**Phase 5 — Remaining:**
+- [ ] **Actually build the PyInstaller binaries** on each target OS. Requires the Rust toolchain locally + running `desktop/sidecar/build.sh` once per target (Windows x64 / macOS arm64 / macOS x64 / Linux x64). User-driven (needs OS access + Rust installed).
+- [ ] **Icon assets** — `desktop/src-tauri/icons/` is empty. Tauri needs 32×32, 128×128, 128×128@2x PNGs + `icon.icns` (macOS) + `icon.ico` (Windows). Requires graphic design (skip for now; use placeholder).
+- [ ] **`cargo tauri dev` handshake confirmation** — prove the Rust spawn → Python sidecar → React `get_backend_url` loop actually works end-to-end on the host. User-driven.
+- [ ] **CI sidecar-build matrix job** — add to `.github/workflows/ci.yml`: matrix of `{ubuntu-latest, windows-latest, macos-latest}` running `desktop/sidecar/build.sh|ps1`, uploading the binaries as workflow artifacts. Ties release builds to CI so shipping is `git tag` + download artifacts.
+- [ ] **Live surrogate-model preview in BuildPage sliders** — see Phase 4 remaining (needs the `/api/surrogate/predict` route first).
+- [ ] **3D bike visualisation** (Three.js) — nice-to-have.
+- [ ] **PDF report export** — from a completed sim, render a 1-pager with ET/trap/splits/build/charts.
+- [ ] **Closed beta with Pune/Narhe tuning garages** — validates the predictions against professional tuners before public release. User-driven outreach.
 
 ### 🔲 Phase 6 — Commercial Launch & AI Layer
 - **Tiered launch** (from Gemini review):
