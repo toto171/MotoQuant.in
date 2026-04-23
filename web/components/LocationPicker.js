@@ -3,8 +3,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Loader2, AlertCircle, Check, Locate, X } from 'lucide-react';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://motoquant-api.railway.app';
+import { API_URL } from '../lib/api';
 
 /**
  * LocationPicker — asks the backend to resolve a race venue from text
