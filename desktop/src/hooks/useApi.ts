@@ -1,6 +1,8 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import type {
+  CompareRequest,
+  CompareResponse,
   QuickSimRequest,
   QuickSimResponse,
   SimulateRequest,
@@ -66,5 +68,19 @@ export function useSimulate() {
 export function useQuickSimulate() {
   return useMutation<QuickSimResponse, Error, QuickSimRequest>({
     mutationFn: (req) => api.simulateQuick(req),
+  });
+}
+
+export function useCompare() {
+  return useMutation<CompareResponse, Error, CompareRequest>({
+    mutationFn: (req) => api.simulateCompare(req),
+  });
+}
+
+export function useLeaderboard(limit = 20) {
+  return useQuery({
+    queryKey: ["leaderboard", limit],
+    queryFn: () => api.leaderboard({ limit }),
+    staleTime: 30_000, // sim_runs doesn't update often; 30s is fine
   });
 }

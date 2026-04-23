@@ -15,10 +15,12 @@ eggs/
 .eggs/
 lib/
 lib64/
-# ...but the Next.js shared module under web/lib/ is first-party source, not
-# a Python build artifact, and must be tracked.
+# ...but these first-party `lib/` folders under the JS/TS frontends are
+# source, not Python build artifacts, and must be tracked.
 !web/lib/
 !web/lib/**
+!desktop/src/lib/
+!desktop/src/lib/**
 parts/
 sdist/
 var/
