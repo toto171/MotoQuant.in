@@ -1,0 +1,104 @@
+name: Vercel Deploy
+
+# Refined from Gemini's starter template:
+#   - Production deploys only fire after CI succeeds on main (workflow_run),
+#     so a red test suite never reaches Vercel.
+#   - Preview deploys run on every PR so collaborators get a shareable URL.
+#   - All Vercel CLI commands run inside `web/` because that is the frontend
+#     root (Next.js app). Don't change this unless you also change vercel.json.
+#   - Concurrency group prevents two deploys from racing when PRs land
+#     back-to-back.
+#
+# Required repo secrets (Settings → Secrets and variables → Actions):
+#   VERCEL_TOKEN         — Account Settings → Tokens → "Full Access" scope
+#   VERCEL_ORG_ID        — Account Settings → General → "Your ID"
+#   VERCEL_PROJECT_ID    — Project → Settings → General → "Project ID"
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  deploy-production:
+    # Only when CI passed AND the trigger was a push to main.
+    if: >
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: vercel-production
+      cancel-in-progress: false
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel environment (production)
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build project artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel (production)
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+  deploy-preview:
+    # Preview deploys on every PR so reviewers get a clickable URL.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: vercel-preview-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel environment (preview)
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build project artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy preview
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "preview_url=$url" >> "$GITHUB_OUTPUT"
+          echo "Preview deployed: $url"
+
+      - name: Comment preview URL on PR
+        if: steps.deploy.outputs.preview_url != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = "${{ steps.deploy.outputs.preview_url }}";
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `Vercel preview deployed: ${url}`
+            });

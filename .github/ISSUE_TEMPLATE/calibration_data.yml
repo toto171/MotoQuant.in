@@ -1,0 +1,55 @@
+name: Calibration data upload
+description: Submit a real Dragy run, dyno sheet, or ECU log to improve the model.
+title: "[calibration] "
+labels: ["calibration", "data"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for capturing data. Real runs are the main ingredient that takes the model from "conservative synthetic" to "calibrated per bike".
+        **Do not attach** raw files in this issue. Open a PR that adds them under `calibration_data/<bike-slug>/<date>/` and link it here.
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Data type
+      options:
+        - Dragy GPS (CSV or VBO-derived CSV)
+        - Dyno sheet (DynoJet CSV, generic metric CSV, MoTeC export)
+        - ECU log (Woolich, Power Commander PC-Link, MoTeC i2)
+        - Multiple of the above
+    validations:
+      required: true
+
+  - type: input
+    id: bike
+    attributes:
+      label: Bike (make / model / year / any mods)
+    validations:
+      required: true
+
+  - type: input
+    id: venue
+    attributes:
+      label: Venue
+      placeholder: e.g. Aamby Valley, MMRT, private strip
+
+  - type: textarea
+    id: conditions
+    attributes:
+      label: Track conditions
+      description: Temperature, humidity, pressure (or altitude), surface condition. The more detail, the better the calibration.
+
+  - type: textarea
+    id: runs
+    attributes:
+      label: Run summary
+      description: Best ET, trap speed, notable splits, anything unusual (tyre spin, mis-shift, aborted launch).
+    validations:
+      required: true
+
+  - type: input
+    id: pr_link
+    attributes:
+      label: Linked PR with the raw files
+      placeholder: "#123"

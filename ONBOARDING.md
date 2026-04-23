@@ -99,7 +99,7 @@ These are the things that will cause a PR to be rejected even if the code works.
 
 - **Standup:** informal, async via GitHub Issues or DM. The `engineering:standup` skill can generate one from recent commits.
 - **Planning:** roadmap lives in `CLAUDE.md` → "Full project roadmap". Reprioritise quarterly.
-- **Reviews:** PRs reviewed within 48h by the other co-owner for physics / schema changes; self-merge OK for docs, data, isolated bugfixes after tests pass.
+- **Reviews:** all PRs require at least one approving review + green CI before merge — no self-merge, enforced by branch protection. Physics / schema / API / infra paths require CODEOWNER approval (auto-requested via `.github/CODEOWNERS`). Turnaround target is 48h; ping the other owner if a PR has been idle longer.
 - **Model selection:** when using AI assistants (Claude, Cursor), follow `CLAUDE.md` → "Model Selection" rules. Sonnet for coding, Opus for architecture, Haiku for quick lookups.
 
 ---
