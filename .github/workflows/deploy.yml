@@ -1,6 +1,27 @@
 name: Vercel Deploy
 
-# Refined from Gemini's starter template:
+# Why this workflow exists:
+#   On the Vercel Hobby (Free) plan, only the project-owner account can trigger
+#   Git-integration deploys. Collaborators pushing to main don't auto-deploy.
+#   This workflow works around that by calling `vercel deploy` via the CLI
+#   using a stored token, so any merge to main (post-CI) produces a
+#   production deploy regardless of who authored it.
+#
+#   Additionally it keeps the CI-gated deploy property: a red test suite
+#   never reaches production, which Vercel's native Git integration does
+#   not give you on any plan.
+#
+# When MotoQuant upgrades to Vercel Pro:
+#   Pro lets all team members trigger deploys via Git integration, so the
+#   "collaborators can't deploy" reason goes away. You can either:
+#     (a) Keep this workflow — it still adds the CI-pass gate, which is
+#         valuable (Vercel otherwise deploys any push, red tests or not).
+#     (b) Delete this workflow and use Vercel's native integration with
+#         an "Ignored Build Step" script that skips deploy if CI failed.
+#   Recommendation: keep (a). The workflow is already written; the CI gate
+#   is worth the ~30s it adds.
+#
+# Refinements from the starter template:
 #   - Production deploys only fire after CI succeeds on main (workflow_run),
 #     so a red test suite never reaches Vercel.
 #   - Preview deploys run on every PR so collaborators get a shareable URL.
@@ -13,6 +34,10 @@ name: Vercel Deploy
 #   VERCEL_TOKEN         — Account Settings → Tokens → "Full Access" scope
 #   VERCEL_ORG_ID        — Account Settings → General → "Your ID"
 #   VERCEL_PROJECT_ID    — Project → Settings → General → "Project ID"
+#
+# Rotate VERCEL_TOKEN quarterly. The token has full account access; anyone
+# who can land a PR can effectively deploy to prod (gated by the review
+# policy in CONTRIBUTING.md §6).
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
