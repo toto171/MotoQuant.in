@@ -40,7 +40,10 @@
     ],
     "category": "Utility",
     "shortDescription": "Motorcycle drag-racing physics simulator",
-    "longDescription": "MotoQuant Pro — The physics of faster. First-principles quarter-mile simulator for motorcycle drag racing, with a 290-bike catalog, 465-part mod library, 15-submodel physics engine, and data-driven build recommendations.",
+    "longDescription": "MotoQuant Pro — The physics of faster. First-principles quarter-mile simulator for motorcycle drag racing, with a 290-bike catalog, 465-part mod library, 15-submodel physics engine, and data-driven build recommendations."
+  },
+  "_productionBundleTodo": {
+    "_comment": "Re-add the keys below under `bundle` once the PyInstaller sidecar binary exists at bin/ and the seeded DB is copied to resources/. See desktop/sidecar/README.md for the build + naming steps.",
     "externalBin": ["bin/motoquant-backend"],
     "resources": ["resources/motoquant.db"]
   },
