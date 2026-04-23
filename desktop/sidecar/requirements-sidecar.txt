@@ -1,0 +1,20 @@
+# Everything the FastAPI sidecar needs at runtime, plus PyInstaller itself.
+# Install + build:
+#     cd desktop/sidecar
+#     python -m venv .venv && source .venv/bin/activate  (or .\.venv\Scripts\activate on Windows)
+#     pip install -r requirements-sidecar.txt
+#     pip install -e ../..      # install motoquant package editable from repo root
+#     pyinstaller motoquant-backend.spec --clean --noconfirm
+
+# ── Build tool ────────────────────────────────────────────────────────────
+pyinstaller>=6.5.0
+
+# ── Runtime deps (mirror requirements-api.txt; keep in sync) ─────────────
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.6
+numpy>=1.26
+scipy>=1.12
+# email_validator is a transitive dep of Pydantic's EmailStr — safer to pin
+# explicitly since PyInstaller's static analysis can miss it.
+email_validator>=2.1
