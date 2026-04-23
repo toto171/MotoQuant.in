@@ -223,6 +223,16 @@ class EngineParams:
             band_lo = 0.55
             band_hi = 0.30
             baseline = 0.50
+        elif cyls == 2:
+            # Two-cylinder piston-port (RD350, RD400, NSR250 non-RC-valve,
+            # RGV250 non-RAVE, H1 Mach III). Two independent pipes fired
+            # 180° apart give much better cycle-to-cycle smoothing than a
+            # single-cyl race pipe. Published RD350 dyno shows ~40 % of
+            # peak at 2 500 rpm. Kept in sync with the scraper-side helper
+            # in `_synthetic_2stroke_torque_curve` (defaults.py).
+            band_lo = 0.30
+            band_hi = 0.15
+            baseline = 0.25
         else:
             band_lo = 0.12
             band_hi = 0.08
