@@ -17,15 +17,25 @@ const API_BASE =
   SITE_URL; // Same-origin via Vercel rewrite in production
 
 async function fetchBike(id) {
+  // Give the Railway backend a longer rope for SSR: its free tier can cold-
+  // start at 10-30s. Vercel's default fetch has no explicit timeout, but we
+  // add our own AbortController so generateMetadata doesn't hang a render
+  // if Railway is genuinely down. 20s is safe — Vercel caps function
+  // execution at 60s on hobby plans, 300s on pro, so 20s leaves headroom.
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20_000);
   try {
     const res = await fetch(`${API_BASE}/api/bikes/${id}`, {
       // Revalidate every 24h — bike specs don't churn; cheap to keep fresh.
       next: { revalidate: 86400 },
+      signal: controller.signal,
     });
     if (!res.ok) return null;
     return await res.json();
   } catch {
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -44,13 +54,33 @@ export async function generateMetadata({ params }) {
   const bike = await fetchBike(id);
 
   if (!bike) {
-    // Still return sensible metadata so 404s aren't completely bare.
+    // The API fetch failed — most likely the Railway backend is on a cold
+    // start (free tier sleeps after inactivity) and Vercel's SSR fetch
+    // timed out. We have NO WAY to distinguish "bike doesn't exist" from
+    // "backend momentarily unreachable" at this layer, and the client-side
+    // page.js will re-fetch and render the bike correctly once the backend
+    // wakes up.
+    //
+    // DO NOT emit noindex here — an API hiccup at Googlebot crawl time
+    // would permanently mark the page non-indexable and we'd lose 287
+    // URLs from the index. Emit neutral-but-indexable metadata instead;
+    // Google re-crawls periodically and will pick up the full metadata
+    // once the API is responsive again.
+    const fallbackTitle =
+      'Motorcycle Quarter-Mile Drag Simulator — MotoQuant Pro';
+    const fallbackDesc =
+      'Physics-based quarter-mile drag-racing simulator for this motorcycle. 287 bikes in the catalog. Free and in-browser.';
     return {
-      title: 'Bike not found',
-      description:
-        'This bike is not in the MotoQuant Pro catalog. Browse all 287 supported bikes or suggest one to be added.',
-      robots: { index: false, follow: true },
-      alternates: { canonical: `/bikes` },
+      title: fallbackTitle,
+      description: fallbackDesc,
+      alternates: { canonical: `/bikes/${id}` },
+      openGraph: {
+        title: fallbackTitle,
+        description: fallbackDesc,
+        url: `${SITE_URL}/bikes/${id}`,
+        type: 'website',
+      },
+      robots: { index: true, follow: true },
     };
   }
 
