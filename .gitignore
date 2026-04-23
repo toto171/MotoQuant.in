@@ -15,6 +15,10 @@ eggs/
 .eggs/
 lib/
 lib64/
+# ...but the Next.js shared module under web/lib/ is first-party source, not
+# a Python build artifact, and must be tracked.
+!web/lib/
+!web/lib/**
 parts/
 sdist/
 var/
@@ -50,6 +54,11 @@ Thumbs.db
 *.db
 *.db-shm
 *.db-wal
+# Rotational DB backups (e.g. motoquant.db.bak.20260420) -- the suffix
+# means the plain *.db rule doesn't catch them.
+*.db.bak*
+*.db-shm.bak*
+*.db-wal.bak*
 
 # Temporary files
 .tmp
