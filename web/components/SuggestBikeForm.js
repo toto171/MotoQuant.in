@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Check, AlertCircle, Info } from 'lucide-react';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://motoquant-api.railway.app';
+import { API_URL } from '../lib/api';
 
 /**
  * Modal form for submitting a "please add this bike" request.

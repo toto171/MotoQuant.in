@@ -1,8 +1,14 @@
 {
   "version": 2,
   "env": {
-    "NEXT_PUBLIC_API_URL": "https://web-production-de6eb.up.railway.app"
+    "NEXT_PUBLIC_API_URL": ""
   },
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://web-production-de6eb.up.railway.app/api/:path*"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

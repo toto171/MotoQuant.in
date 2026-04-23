@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, X, Plus, ChevronLeft, ChevronRight, AlertCircle, Check } from 'lucide-react';
 import Link from 'next/link';
 import SuggestBikeForm from '../../components/SuggestBikeForm';
+import { API_URL } from '../../lib/api';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://motoquant-api.railway.app';
 const PAGE_SIZE = 24;
 
 function useDebounce(value, delay = 300) {

@@ -5,8 +5,7 @@ import { motion } from 'framer-motion';
 import { ChevronLeft, Gauge, Zap, Wind, CircleDot, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://motoquant-api.railway.app';
+import { API_URL } from '../../../lib/api';
 
 function formatCell(value, suffix = '', decimals = null) {
   if (value === null || value === undefined || value === '') return '—';

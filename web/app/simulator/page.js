@@ -10,8 +10,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area
 } from 'recharts';
-
-const API = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-de6eb.up.railway.app';
+import { API_URL as API } from '../../lib/api';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    REUSABLE COMPONENTS
@@ -198,6 +197,7 @@ export default function SimulatorPage() {
   const [allTires, setAllTires] = useState([]);
   const [venues, setVenues] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   // ─── User selections ────────────────────────────────────────────────
   const [bike, setBike] = useState(null);
@@ -273,8 +273,16 @@ export default function SimulatorPage() {
         setAllTires(tiresData.tires || []);
         setVenues(venuesData.venues || []);
         if (bikesData.bikes?.length) setBike(bikesData.bikes[0]);
+        // If /api/bikes came back empty, the backend is reachable but
+        // either unseeded or filtering killed the request body -- either
+        // way the user deserves to see *something* instead of an empty
+        // dropdown with no explanation.
+        if (!(bikesData.bikes?.length > 0)) {
+          setLoadError('Backend reachable but returned zero bikes. Check that the API is pointing at a seeded DB.');
+        }
       } catch (e) {
         console.error('Failed to load data:', e);
+        setLoadError(e.message || 'Could not reach the MotoQuant backend.');
       } finally {
         setLoading(false);
       }
@@ -614,6 +622,11 @@ export default function SimulatorPage() {
       </nav>
 
       <div className="max-w-[1440px] mx-auto px-5 py-5">
+        {loadError && (
+          <div className="mb-4 p-3 rounded-xl border border-red-500/30 bg-red-500/5 text-red-300 text-xs">
+            {loadError}
+          </div>
+        )}
         <div className="grid grid-cols-12 gap-5">
 
           {/* ═══════════════════════════════════════════════════════════

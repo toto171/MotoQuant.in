@@ -4,8 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, AlertCircle, MapPin } from 'lucide-react';
 import LocationPicker, { environmentOverridesFromLocation } from './LocationPicker';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://motoquant-api.railway.app';
+import { API_URL } from '../lib/api';
 
 const BIKES = [
   { id: 'gsxr1000_k5',   label: 'Suzuki GSX-R 1000 K5',   cc: '999cc',  hp: 178 },
