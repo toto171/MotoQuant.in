@@ -130,6 +130,7 @@ def _synthetic_2stroke_torque_curve(
     powervalve: bool = False,
     peak_power_hp: float | None = None,
     peak_power_rpm: float | None = None,
+    cylinders: int = 1,
     points: int = 100,
 ) -> DynoCurve:
     """
@@ -144,6 +145,11 @@ def _synthetic_2stroke_torque_curve(
       • Powervalve (YPVS / RC Valve / HPP / ATAC) widens the band on both
         sides, giving the bike much more usable RPM range and a less
         "hit-in-the-arse" character.
+      • Multi-cylinder piston-port (vintage triples like Suzuki GT750,
+        Kawasaki 750 H2 Mach IV) have overlapping firing pulses and
+        individual-per-cylinder pipes that significantly smooth the
+        resonance, yielding a much wider, more 4-stroke-like curve than
+        a single with one big pipe.
 
     When peak_power_hp + peak_power_rpm are provided we enforce that
     T(peak_power_rpm) produces exactly the rated HP — same constraint the
@@ -157,10 +163,25 @@ def _synthetic_2stroke_torque_curve(
     # (42 Nm @ 10500), RS125 (22 Nm @ 11000), NSR250 (38 Nm @ 9500), KTM 300 EXC
     # (44 Nm @ 8000) show much sharper peaks than April 20 band widths. Updated
     # April 21 to match real dyno traces more accurately.
+    # April 22, 2026: added vintage multi-cylinder branch for triples (GT750,
+    # H2 Mach IV) — three-cylinder piston-port 2T with individual pipes have
+    # ~120° overlap that smooths the pressure-wave resonance into a much
+    # wider curve than a single-cylinder race 2T. Published GT750 dyno sheets
+    # show ~50 % of peak from 3 500 rpm and >75 % from 4 500 rpm — nothing
+    # like a YZ125's hit-in-the-arse pipe.
     if powervalve:
         band_lo = 0.18   # narrower — RAVE/YPVS still widens the band
         band_hi = 0.12   # was 0.16
         baseline = 0.20  # was 0.30 — powervalve delivers good off-pipe still
+    elif cylinders >= 3:
+        # Vintage multi-cylinder piston-port triple (GT750, H2 Mach IV):
+        # overlapping pipes smooth the resonance, so the curve is much
+        # wider and looks more like a 4-stroke. Without this branch the
+        # sim delivers 9 Nm flat from 3 000-5 000 rpm on these bikes, which
+        # makes them unable to complete the quarter in 26 s.
+        band_lo = 0.55   # very wide below-peak shoulder
+        band_hi = 0.30   # moderate above-peak fall
+        baseline = 0.50  # strong off-pipe, multi-cyl smoothing
     else:
         band_lo = 0.12   # was 0.24 — piston-port is peakier
         band_hi = 0.08   # was 0.11

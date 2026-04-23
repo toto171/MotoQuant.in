@@ -1940,9 +1940,13 @@ KAWASAKI_NINJA_650 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        "gear_ratios": [2.933, 2.200, 1.755, 1.476, 1.296, 1.148],
-        "front_sprocket": 14,
-        "rear_sprocket": 43,
+        # April 22, 2026: corrected per Kawasaki ER650H service manual.
+        # Old ratios [2.933, 2.200, 1.755, 1.476, 1.296, 1.148] had 6th > 1
+        # (not overdriven) and F14/R43 — both wrong. Real ER650 box is
+        # fully overdriven and runs F15/R46.
+        "gear_ratios": [2.438, 1.714, 1.333, 1.111, 0.966, 0.852],
+        "front_sprocket": 15,
+        "rear_sprocket": 46,
         "chain_pitch": "520",
         "dry_mass_kg": 178.0,
         "wheelbase_mm": 1410.0,

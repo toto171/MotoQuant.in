@@ -476,19 +476,24 @@ _DB: list[dict] = [
         "mfr": "kawasaki",
         "model": "z650",
         "year": (2017, 2026),
-        "ratios": [2.600, 1.882, 1.562, 1.333, 1.192, 1.095],
-        "front": 14,
-        "rear": 42,
-        "primary": 1.795,
+        # Shares ER650 cassette with Ninja 650 (corrected April 22, 2026).
+        # Old ratios were copy-pasted from Z900 and had 6th=1.095 (NOT
+        # overdriven) — wrong for the ER650 parallel-twin box.
+        "ratios": [2.438, 1.714, 1.333, 1.111, 0.966, 0.852],
+        "front": 15,
+        "rear": 46,
+        "primary": 2.095,
     },
     {
         "mfr": "kawasaki",
         "model": "er-6",
         "year": (2006, 2016),
-        "ratios": [2.600, 1.882, 1.562, 1.333, 1.192, 1.095],
+        # Earlier ER-6 box uses slightly different gearing from the 2017+
+        # refresh but is also fully overdriven. Corrected April 22, 2026.
+        "ratios": [2.438, 1.714, 1.333, 1.111, 0.966, 0.852],
         "front": 15,
         "rear": 46,
-        "primary": 1.795,
+        "primary": 2.095,
     },
     {
         "mfr": "kawasaki",
@@ -505,10 +510,26 @@ _DB: list[dict] = [
         "year": (2018, 2026),
         # Kawasaki Ninja 400 2018 service manual (p. 3-33)
         # Fixed: was erroneously copy-pasted from Ninja 300 entry
+        # April 22, 2026: primary was still 3.082 (Ninja 300 value). Real
+        # Ninja 400 primary is 85/41 ≈ 2.073 per EX400 service manual.
         "ratios": [2.846, 2.071, 1.700, 1.441, 1.241, 1.107],
         "front": 15,
         "rear": 46,
-        "primary": 3.082,
+        "primary": 2.073,
+    },
+    {
+        "mfr": "kawasaki",
+        "model": "ninja 650",
+        "year": (2017, 2026),
+        # Kawasaki ER650H / Ninja 650 2017+ service manual. 6-speed cassette,
+        # all six gears below 1:1 (classic overdriven box). Previous entries
+        # under "z650" and "er-6" were copy-pasted from Z900 (6th=1.095, NOT
+        # overdriven) — that was wrong for every ER650 variant and produced
+        # ~30 km/h too-low top-gear speed. Corrected April 22, 2026.
+        "ratios": [2.438, 1.714, 1.333, 1.111, 0.966, 0.852],
+        "front": 15,
+        "rear": 46,
+        "primary": 2.095,
     },
     # ── Aprilia ───────────────────────────────────────────────────────────────
     {
@@ -1544,4 +1565,4 @@ def _pick_default_key(
         if gears == 5:
             return "generic_5"
         else:
-            return "generic_6"
+            return "generic_6"

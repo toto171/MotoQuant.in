@@ -1,21 +1,21 @@
 {
   "summary": {
-    "generated_at": "2026-04-22T05:13:36",
-    "wall_time_s": 130.7,
+    "generated_at": "2026-04-22T12:14:09",
+    "wall_time_s": 130.5,
     "bikes_total": 290,
-    "bikes_ok": 167,
-    "bikes_over_time": 119,
+    "bikes_ok": 172,
+    "bikes_over_time": 114,
     "bikes_did_not_finish": 4,
     "bikes_error": 0,
-    "benchmark_matches": 53,
-    "mean_abs_delta_s": 0.351,
-    "median_abs_delta_s": 0.242,
-    "bias_s": 0.325,
-    "within_0p10s": 10,
-    "within_0p20s": 23,
-    "within_0p50s": 42,
-    "within_1p00s": 50,
-    "pass_rate_0p20s": 0.434
+    "benchmark_matches": 55,
+    "mean_abs_delta_s": 0.335,
+    "median_abs_delta_s": 0.238,
+    "bias_s": 0.31,
+    "within_0p10s": 11,
+    "within_0p20s": 25,
+    "within_0p50s": 45,
+    "within_1p00s": 53,
+    "pass_rate_0p20s": 0.455
   },
   "benchmark_hits": [
     {
@@ -47,7 +47,7 @@
       "sim_et_s": 10.286,
       "sim_trap_kmh": 232.9,
       "status": "ok",
-      "wall_time_s": 0.315,
+      "wall_time_s": 0.314,
       "is_reference": true,
       "target_et_s": 10.3,
       "target_trap_kmh": 240,
@@ -65,7 +65,7 @@
       "sim_et_s": 10.471,
       "sim_trap_kmh": 232.3,
       "status": "ok",
-      "wall_time_s": 0.321,
+      "wall_time_s": 0.316,
       "is_reference": true,
       "target_et_s": 10.4,
       "target_trap_kmh": 235,
@@ -81,7 +81,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.321,
+      "wall_time_s": 0.315,
       "sim_et_s": 10.291,
       "sim_trap_kmh": 242.1,
       "benchmark_year": 2001,
@@ -117,7 +117,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.325,
+      "wall_time_s": 0.322,
       "sim_et_s": 10.205,
       "sim_trap_kmh": 243.8,
       "benchmark_year": 2007,
@@ -153,7 +153,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.324,
+      "wall_time_s": 0.322,
       "sim_et_s": 10.118,
       "sim_trap_kmh": 252.2,
       "benchmark_year": 2017,
@@ -171,7 +171,7 @@
       "displacement_cc": 1340,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.301,
+      "wall_time_s": 0.305,
       "sim_et_s": 10.153,
       "sim_trap_kmh": 239.6,
       "benchmark_year": 2008,
@@ -189,7 +189,7 @@
       "displacement_cc": 1340,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.311,
+      "wall_time_s": 0.313,
       "sim_et_s": 10.371,
       "sim_trap_kmh": 233.4,
       "benchmark_year": 2021,
@@ -225,7 +225,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.33,
+      "wall_time_s": 0.329,
       "sim_et_s": 10.461,
       "sim_trap_kmh": 236.0,
       "benchmark_year": 2004,
@@ -243,7 +243,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.327,
+      "wall_time_s": 0.329,
       "sim_et_s": 10.483,
       "sim_trap_kmh": 235.4,
       "benchmark_year": 2009,
@@ -261,7 +261,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.324,
+      "wall_time_s": 0.329,
       "sim_et_s": 10.274,
       "sim_trap_kmh": 247.2,
       "benchmark_year": 2015,
@@ -279,7 +279,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.321,
+      "wall_time_s": 0.327,
       "sim_et_s": 10.241,
       "sim_trap_kmh": 250.2,
       "benchmark_year": 2015,
@@ -297,7 +297,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.325,
+      "wall_time_s": 0.332,
       "sim_et_s": 10.688,
       "sim_trap_kmh": 224.1,
       "benchmark_year": 2016,
@@ -315,7 +315,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.313,
+      "wall_time_s": 0.323,
       "sim_et_s": 10.484,
       "sim_trap_kmh": 238.4,
       "benchmark_year": 2004,
@@ -333,7 +333,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.311,
+      "wall_time_s": 0.319,
       "sim_et_s": 10.29,
       "sim_trap_kmh": 243.2,
       "benchmark_year": 2008,
@@ -351,7 +351,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.323,
+      "wall_time_s": 0.328,
       "sim_et_s": 10.338,
       "sim_trap_kmh": 244.0,
       "benchmark_year": 2017,
@@ -369,7 +369,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.324,
+      "wall_time_s": 0.329,
       "sim_et_s": 10.306,
       "sim_trap_kmh": 252.4,
       "benchmark_year": 2020,
@@ -387,7 +387,7 @@
       "displacement_cc": 899,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.325,
+      "wall_time_s": 0.334,
       "sim_et_s": 10.948,
       "sim_trap_kmh": 224.0,
       "benchmark_year": 2000,
@@ -405,7 +405,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.325,
+      "wall_time_s": 0.33,
       "sim_et_s": 10.125,
       "sim_trap_kmh": 247.9,
       "benchmark_year": 2004,
@@ -423,7 +423,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.337,
+      "wall_time_s": 0.341,
       "sim_et_s": 10.211,
       "sim_trap_kmh": 249.0,
       "benchmark_year": 2011,
@@ -441,7 +441,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.341,
+      "wall_time_s": 0.35,
       "sim_et_s": 10.314,
       "sim_trap_kmh": 247.0,
       "benchmark_year": 2021,
@@ -459,7 +459,7 @@
       "displacement_cc": 1441,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.295,
+      "wall_time_s": 0.298,
       "sim_et_s": 9.916,
       "sim_trap_kmh": 247.0,
       "benchmark_year": 2012,
@@ -495,7 +495,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.347,
+      "wall_time_s": 0.345,
       "sim_et_s": 10.055,
       "sim_trap_kmh": 265.7,
       "benchmark_year": 2015,
@@ -513,13 +513,13 @@
       "displacement_cc": 649,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.368,
-      "sim_et_s": 13.011,
-      "sim_trap_kmh": 174.7,
+      "wall_time_s": 0.37,
+      "sim_et_s": 12.709,
+      "sim_trap_kmh": 187.1,
       "benchmark_year": 2020,
       "target_et_s": 12.3,
       "target_trap_kmh": 111,
-      "delta_et_s": 0.711,
+      "delta_et_s": 0.409,
       "source": "MotoStatz 2020"
     },
     {
@@ -531,7 +531,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.322,
+      "wall_time_s": 0.325,
       "sim_et_s": 10.294,
       "sim_trap_kmh": 247.0,
       "benchmark_year": 2015,
@@ -549,7 +549,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.324,
+      "wall_time_s": 0.326,
       "sim_et_s": 10.272,
       "sim_trap_kmh": 249.8,
       "benchmark_year": 2019,
@@ -567,7 +567,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.321,
+      "wall_time_s": 0.326,
       "sim_et_s": 10.178,
       "sim_trap_kmh": 254.0,
       "benchmark_year": 2021,
@@ -585,7 +585,7 @@
       "displacement_cc": 1099,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.308,
+      "wall_time_s": 0.309,
       "sim_et_s": 10.314,
       "sim_trap_kmh": 237.1,
       "benchmark_year": 2007,
@@ -603,7 +603,7 @@
       "displacement_cc": 1198,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.32,
+      "wall_time_s": 0.322,
       "sim_et_s": 9.866,
       "sim_trap_kmh": 257.1,
       "benchmark_year": 2012,
@@ -621,7 +621,7 @@
       "displacement_cc": 1285,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.315,
+      "wall_time_s": 0.316,
       "sim_et_s": 9.866,
       "sim_trap_kmh": 256.2,
       "benchmark_year": 2015,
@@ -639,7 +639,7 @@
       "displacement_cc": 1103,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.324,
+      "wall_time_s": 0.327,
       "sim_et_s": 10.174,
       "sim_trap_kmh": 250.2,
       "benchmark_year": 2018,
@@ -657,7 +657,7 @@
       "displacement_cc": 1103,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.316,
+      "wall_time_s": 0.317,
       "sim_et_s": 10.274,
       "sim_trap_kmh": 240.3,
       "benchmark_year": 2020,
@@ -675,7 +675,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.315,
+      "wall_time_s": 0.318,
       "sim_et_s": 10.4,
       "sim_trap_kmh": 244.3,
       "benchmark_year": 2009,
@@ -693,7 +693,7 @@
       "displacement_cc": 1099,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.319,
+      "wall_time_s": 0.323,
       "sim_et_s": 10.133,
       "sim_trap_kmh": 255.0,
       "benchmark_year": 2021,
@@ -701,6 +701,24 @@
       "target_trap_kmh": 238,
       "delta_et_s": 0.083,
       "source": "Cycle World 2021"
+    },
+    {
+      "manufacturer": "Royal Enfield",
+      "model": "Continental GT 650",
+      "year_from": 2018,
+      "year_to": 2024,
+      "category": "naked",
+      "displacement_cc": 648,
+      "stroke_type": 4,
+      "status": "ok",
+      "wall_time_s": 0.436,
+      "sim_et_s": 14.837,
+      "sim_trap_kmh": 154.0,
+      "benchmark_year": 2019,
+      "target_et_s": 14.5,
+      "target_trap_kmh": 140,
+      "delta_et_s": 0.337,
+      "source": "MCN 2019"
     },
     {
       "manufacturer": "Kawasaki",
@@ -711,13 +729,13 @@
       "displacement_cc": 649,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.382,
-      "sim_et_s": 13.005,
-      "sim_trap_kmh": 176.4,
+      "wall_time_s": 0.389,
+      "sim_et_s": 13.079,
+      "sim_trap_kmh": 180.2,
       "benchmark_year": 2017,
       "target_et_s": 12.4,
       "target_trap_kmh": 110,
-      "delta_et_s": 0.605,
+      "delta_et_s": 0.679,
       "source": "MotoStatz 2017"
     },
     {
@@ -729,7 +747,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.323,
+      "wall_time_s": 0.331,
       "sim_et_s": 10.338,
       "sim_trap_kmh": 243.6,
       "benchmark_year": 2019,
@@ -747,13 +765,13 @@
       "displacement_cc": 648,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.406,
-      "sim_et_s": 14.215,
-      "sim_trap_kmh": 161.1,
+      "wall_time_s": 0.415,
+      "sim_et_s": 14.064,
+      "sim_trap_kmh": 164.0,
       "benchmark_year": 2020,
       "target_et_s": 13.9,
       "target_trap_kmh": 97,
-      "delta_et_s": 0.315,
+      "delta_et_s": 0.164,
       "source": "FastestLaps 2020"
     },
     {
@@ -765,7 +783,7 @@
       "displacement_cc": 1252,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.332,
+      "wall_time_s": 0.337,
       "sim_et_s": 11.342,
       "sim_trap_kmh": 201.7,
       "benchmark_year": 2021,
@@ -783,7 +801,7 @@
       "displacement_cc": 1301,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.315,
+      "wall_time_s": 0.325,
       "sim_et_s": 10.054,
       "sim_trap_kmh": 242.4,
       "benchmark_year": 2022,
@@ -801,13 +819,13 @@
       "displacement_cc": 689,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.372,
-      "sim_et_s": 12.596,
-      "sim_trap_kmh": 187.1,
+      "wall_time_s": 0.374,
+      "sim_et_s": 12.477,
+      "sim_trap_kmh": 189.8,
       "benchmark_year": 2022,
       "target_et_s": 11.64,
       "target_trap_kmh": 116,
-      "delta_et_s": 0.956,
+      "delta_et_s": 0.837,
       "source": "MotoStatz 2022"
     },
     {
@@ -819,7 +837,7 @@
       "displacement_cc": 1679,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.346,
+      "wall_time_s": 0.349,
       "sim_et_s": 11.38,
       "sim_trap_kmh": 220.3,
       "benchmark_year": 2009,
@@ -837,7 +855,7 @@
       "displacement_cc": 649,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.383,
+      "wall_time_s": 0.387,
       "sim_et_s": 12.638,
       "sim_trap_kmh": 189.0,
       "benchmark_year": 2021,
@@ -855,7 +873,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.335,
+      "wall_time_s": 0.339,
       "sim_et_s": 10.413,
       "sim_trap_kmh": 232.2,
       "benchmark_year": 2020,
@@ -873,13 +891,13 @@
       "displacement_cc": 645,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.39,
-      "sim_et_s": 12.893,
-      "sim_trap_kmh": 179.5,
+      "wall_time_s": 0.386,
+      "sim_et_s": 12.766,
+      "sim_trap_kmh": 183.2,
       "benchmark_year": 2016,
       "target_et_s": 11.82,
       "target_trap_kmh": 115,
-      "delta_et_s": 1.073,
+      "delta_et_s": 0.946,
       "source": "FastestLaps 2016"
     },
     {
@@ -909,7 +927,7 @@
       "displacement_cc": 2458,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.332,
+      "wall_time_s": 0.333,
       "sim_et_s": 11.234,
       "sim_trap_kmh": 210.5,
       "benchmark_year": 2020,
@@ -927,7 +945,7 @@
       "displacement_cc": 660,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.383,
+      "wall_time_s": 0.384,
       "sim_et_s": 12.792,
       "sim_trap_kmh": 181.4,
       "benchmark_year": 2021,
@@ -945,7 +963,7 @@
       "displacement_cc": 600,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.417,
+      "wall_time_s": 0.41,
       "sim_et_s": 13.31,
       "sim_trap_kmh": 178.3,
       "benchmark_year": 2014,
@@ -963,7 +981,7 @@
       "displacement_cc": 457.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.441,
+      "wall_time_s": 0.431,
       "sim_et_s": 14.663,
       "sim_trap_kmh": 159.3,
       "benchmark_year": 2024,
@@ -971,6 +989,24 @@
       "target_trap_kmh": 97,
       "delta_et_s": 1.363,
       "source": "FastestLaps 2024"
+    },
+    {
+      "manufacturer": "Suzuki",
+      "model": "RG500 Gamma",
+      "year_from": 1985,
+      "year_to": 1987,
+      "category": "sport",
+      "displacement_cc": 498.0,
+      "stroke_type": 2,
+      "status": "ok",
+      "wall_time_s": 0.367,
+      "sim_et_s": 11.681,
+      "sim_trap_kmh": 204.6,
+      "benchmark_year": 1985,
+      "target_et_s": 11.6,
+      "target_trap_kmh": 180,
+      "delta_et_s": 0.081,
+      "source": "Cycle World 1985"
     }
   ],
   "bikes": [
@@ -999,7 +1035,7 @@
       "sim_et_s": 10.286,
       "sim_trap_kmh": 232.9,
       "status": "ok",
-      "wall_time_s": 0.315,
+      "wall_time_s": 0.314,
       "is_reference": true
     },
     {
@@ -1013,7 +1049,7 @@
       "sim_et_s": 10.471,
       "sim_trap_kmh": 232.3,
       "status": "ok",
-      "wall_time_s": 0.321,
+      "wall_time_s": 0.316,
       "is_reference": true
     },
     {
@@ -1025,7 +1061,7 @@
       "displacement_cc": 599,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.387,
+      "wall_time_s": 0.378,
       "sim_et_s": 12.086,
       "sim_trap_kmh": 207.9
     },
@@ -1038,7 +1074,7 @@
       "displacement_cc": 750,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.345,
+      "wall_time_s": 0.338,
       "sim_et_s": 10.96,
       "sim_trap_kmh": 228.9
     },
@@ -1051,7 +1087,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.321,
+      "wall_time_s": 0.315,
       "sim_et_s": 10.291,
       "sim_trap_kmh": 242.1
     },
@@ -1077,7 +1113,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.325,
+      "wall_time_s": 0.322,
       "sim_et_s": 10.205,
       "sim_trap_kmh": 243.8
     },
@@ -1103,7 +1139,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.324,
+      "wall_time_s": 0.322,
       "sim_et_s": 10.118,
       "sim_trap_kmh": 252.2
     },
@@ -1116,7 +1152,7 @@
       "displacement_cc": 1340,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.301,
+      "wall_time_s": 0.305,
       "sim_et_s": 10.153,
       "sim_trap_kmh": 239.6
     },
@@ -1129,7 +1165,7 @@
       "displacement_cc": 1340,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.311,
+      "wall_time_s": 0.313,
       "sim_et_s": 10.371,
       "sim_trap_kmh": 233.4
     },
@@ -1155,7 +1191,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.327,
+      "wall_time_s": 0.331,
       "sim_et_s": 10.678,
       "sim_trap_kmh": 229.0
     },
@@ -1168,7 +1204,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.32,
+      "wall_time_s": 0.324,
       "sim_et_s": 10.499,
       "sim_trap_kmh": 232.9
     },
@@ -1181,7 +1217,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.33,
+      "wall_time_s": 0.329,
       "sim_et_s": 10.461,
       "sim_trap_kmh": 236.0
     },
@@ -1194,7 +1230,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.327,
+      "wall_time_s": 0.331,
       "sim_et_s": 10.516,
       "sim_trap_kmh": 233.4
     },
@@ -1207,7 +1243,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.327,
+      "wall_time_s": 0.329,
       "sim_et_s": 10.483,
       "sim_trap_kmh": 235.4
     },
@@ -1220,7 +1256,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.324,
+      "wall_time_s": 0.329,
       "sim_et_s": 10.274,
       "sim_trap_kmh": 247.2
     },
@@ -1233,7 +1269,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.321,
+      "wall_time_s": 0.327,
       "sim_et_s": 10.241,
       "sim_trap_kmh": 250.2
     },
@@ -1246,7 +1282,7 @@
       "displacement_cc": 599,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.364,
+      "wall_time_s": 0.373,
       "sim_et_s": 12.007,
       "sim_trap_kmh": 210.1
     },
@@ -1259,7 +1295,7 @@
       "displacement_cc": 599,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.37,
+      "wall_time_s": 0.377,
       "sim_et_s": 12.264,
       "sim_trap_kmh": 205.9
     },
@@ -1272,7 +1308,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.325,
+      "wall_time_s": 0.332,
       "sim_et_s": 10.688,
       "sim_trap_kmh": 224.1
     },
@@ -1285,7 +1321,7 @@
       "displacement_cc": 889,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.335,
+      "wall_time_s": 0.34,
       "sim_et_s": 11.482,
       "sim_trap_kmh": 207.2
     },
@@ -1298,9 +1334,9 @@
       "displacement_cc": 689,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.367,
-      "sim_et_s": 12.736,
-      "sim_trap_kmh": 183.3
+      "wall_time_s": 0.372,
+      "sim_et_s": 12.625,
+      "sim_trap_kmh": 186.2
     },
     {
       "manufacturer": "Honda",
@@ -1311,7 +1347,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.313,
+      "wall_time_s": 0.323,
       "sim_et_s": 10.484,
       "sim_trap_kmh": 238.4
     },
@@ -1324,7 +1360,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.311,
+      "wall_time_s": 0.319,
       "sim_et_s": 10.29,
       "sim_trap_kmh": 243.2
     },
@@ -1337,7 +1373,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.323,
+      "wall_time_s": 0.328,
       "sim_et_s": 10.338,
       "sim_trap_kmh": 244.0
     },
@@ -1350,7 +1386,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.324,
+      "wall_time_s": 0.329,
       "sim_et_s": 10.306,
       "sim_trap_kmh": 252.4
     },
@@ -1363,7 +1399,7 @@
       "displacement_cc": 599,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.373,
+      "wall_time_s": 0.379,
       "sim_et_s": 12.187,
       "sim_trap_kmh": 213.4
     },
@@ -1376,7 +1412,7 @@
       "displacement_cc": 649,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.365,
+      "wall_time_s": 0.374,
       "sim_et_s": 12.269,
       "sim_trap_kmh": 197.6
     },
@@ -1389,7 +1425,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.327,
+      "wall_time_s": 0.334,
       "sim_et_s": 11.015,
       "sim_trap_kmh": 217.9
     },
@@ -1402,7 +1438,7 @@
       "displacement_cc": 636,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.36,
+      "wall_time_s": 0.366,
       "sim_et_s": 11.903,
       "sim_trap_kmh": 211.7
     },
@@ -1415,7 +1451,7 @@
       "displacement_cc": 636,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.357,
+      "wall_time_s": 0.364,
       "sim_et_s": 11.663,
       "sim_trap_kmh": 216.0
     },
@@ -1428,7 +1464,7 @@
       "displacement_cc": 636,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.36,
+      "wall_time_s": 0.366,
       "sim_et_s": 11.835,
       "sim_trap_kmh": 213.7
     },
@@ -1441,7 +1477,7 @@
       "displacement_cc": 899,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.325,
+      "wall_time_s": 0.334,
       "sim_et_s": 10.948,
       "sim_trap_kmh": 224.0
     },
@@ -1454,7 +1490,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.325,
+      "wall_time_s": 0.33,
       "sim_et_s": 10.125,
       "sim_trap_kmh": 247.9
     },
@@ -1467,7 +1503,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.325,
+      "wall_time_s": 0.33,
       "sim_et_s": 10.116,
       "sim_trap_kmh": 247.9
     },
@@ -1480,7 +1516,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.331,
+      "wall_time_s": 0.339,
       "sim_et_s": 10.125,
       "sim_trap_kmh": 246.9
     },
@@ -1493,7 +1529,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.337,
+      "wall_time_s": 0.341,
       "sim_et_s": 10.211,
       "sim_trap_kmh": 249.0
     },
@@ -1506,7 +1542,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.341,
+      "wall_time_s": 0.35,
       "sim_et_s": 10.314,
       "sim_trap_kmh": 247.0
     },
@@ -1519,7 +1555,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.342,
+      "wall_time_s": 0.34,
       "sim_et_s": 10.198,
       "sim_trap_kmh": 250.0
     },
@@ -1532,7 +1568,7 @@
       "displacement_cc": 1441,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.295,
+      "wall_time_s": 0.298,
       "sim_et_s": 9.916,
       "sim_trap_kmh": 247.0
     },
@@ -1558,7 +1594,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.347,
+      "wall_time_s": 0.345,
       "sim_et_s": 10.055,
       "sim_trap_kmh": 265.7
     },
@@ -1571,7 +1607,7 @@
       "displacement_cc": 1043,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.328,
+      "wall_time_s": 0.331,
       "sim_et_s": 10.913,
       "sim_trap_kmh": 216.7
     },
@@ -1584,7 +1620,7 @@
       "displacement_cc": 948,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.329,
+      "wall_time_s": 0.335,
       "sim_et_s": 11.243,
       "sim_trap_kmh": 209.8
     },
@@ -1597,9 +1633,9 @@
       "displacement_cc": 649,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.368,
-      "sim_et_s": 13.011,
-      "sim_trap_kmh": 174.7
+      "wall_time_s": 0.37,
+      "sim_et_s": 12.709,
+      "sim_trap_kmh": 187.1
     },
     {
       "manufacturer": "BMW",
@@ -1610,7 +1646,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.322,
+      "wall_time_s": 0.325,
       "sim_et_s": 10.294,
       "sim_trap_kmh": 247.0
     },
@@ -1623,7 +1659,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.324,
+      "wall_time_s": 0.326,
       "sim_et_s": 10.272,
       "sim_trap_kmh": 249.8
     },
@@ -1636,7 +1672,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.321,
+      "wall_time_s": 0.326,
       "sim_et_s": 10.178,
       "sim_trap_kmh": 254.0
     },
@@ -1649,7 +1685,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.321,
+      "wall_time_s": 0.322,
       "sim_et_s": 10.483,
       "sim_trap_kmh": 232.9
     },
@@ -1662,7 +1698,7 @@
       "displacement_cc": 849,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.322,
+      "wall_time_s": 0.326,
       "sim_et_s": 10.828,
       "sim_trap_kmh": 226.4
     },
@@ -1675,7 +1711,7 @@
       "displacement_cc": 1099,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.308,
+      "wall_time_s": 0.309,
       "sim_et_s": 10.314,
       "sim_trap_kmh": 237.1
     },
@@ -1688,7 +1724,7 @@
       "displacement_cc": 955,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.323,
+      "wall_time_s": 0.321,
       "sim_et_s": 10.559,
       "sim_trap_kmh": 234.9
     },
@@ -1701,7 +1737,7 @@
       "displacement_cc": 1198,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.32,
+      "wall_time_s": 0.322,
       "sim_et_s": 9.866,
       "sim_trap_kmh": 257.1
     },
@@ -1714,7 +1750,7 @@
       "displacement_cc": 1285,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.315,
+      "wall_time_s": 0.316,
       "sim_et_s": 9.866,
       "sim_trap_kmh": 256.2
     },
@@ -1727,7 +1763,7 @@
       "displacement_cc": 1103,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.324,
+      "wall_time_s": 0.327,
       "sim_et_s": 10.174,
       "sim_trap_kmh": 250.2
     },
@@ -1740,7 +1776,7 @@
       "displacement_cc": 955,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.324,
+      "wall_time_s": 0.328,
       "sim_et_s": 10.519,
       "sim_trap_kmh": 234.7
     },
@@ -1753,7 +1789,7 @@
       "displacement_cc": 1103,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.316,
+      "wall_time_s": 0.317,
       "sim_et_s": 10.274,
       "sim_trap_kmh": 240.3
     },
@@ -1766,7 +1802,7 @@
       "displacement_cc": 1198,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.314,
+      "wall_time_s": 0.315,
       "sim_et_s": 10.487,
       "sim_trap_kmh": 227.1
     },
@@ -1779,7 +1815,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.315,
+      "wall_time_s": 0.318,
       "sim_et_s": 10.4,
       "sim_trap_kmh": 244.3
     },
@@ -1792,7 +1828,7 @@
       "displacement_cc": 1099,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.319,
+      "wall_time_s": 0.323,
       "sim_et_s": 10.133,
       "sim_trap_kmh": 255.0
     },
@@ -1805,7 +1841,7 @@
       "displacement_cc": 1077,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.312,
+      "wall_time_s": 0.313,
       "sim_et_s": 10.494,
       "sim_trap_kmh": 234.5
     },
@@ -1818,7 +1854,7 @@
       "displacement_cc": 199,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.581,
+      "wall_time_s": 0.588,
       "sim_et_s": 19.92,
       "sim_trap_kmh": 122.1
     },
@@ -1831,7 +1867,7 @@
       "displacement_cc": 373,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.45,
+      "wall_time_s": 0.462,
       "sim_et_s": 15.609,
       "sim_trap_kmh": 153.0
     },
@@ -1844,7 +1880,7 @@
       "displacement_cc": 373,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.446,
+      "wall_time_s": 0.456,
       "sim_et_s": 15.363,
       "sim_trap_kmh": 157.8
     },
@@ -1857,7 +1893,7 @@
       "displacement_cc": 248,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.522,
+      "wall_time_s": 0.536,
       "sim_et_s": 17.993,
       "sim_trap_kmh": 132.6
     },
@@ -1870,7 +1906,7 @@
       "displacement_cc": 199,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.57,
+      "wall_time_s": 0.583,
       "sim_et_s": 19.567,
       "sim_trap_kmh": 126.8
     },
@@ -1883,7 +1919,7 @@
       "displacement_cc": 199,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.602,
+      "wall_time_s": 0.614,
       "sim_et_s": 20.376,
       "sim_trap_kmh": 119.7
     },
@@ -1896,7 +1932,7 @@
       "displacement_cc": 199,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.597,
+      "wall_time_s": 0.608,
       "sim_et_s": 20.181,
       "sim_trap_kmh": 122.6
     },
@@ -1909,7 +1945,7 @@
       "displacement_cc": 373,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.471,
+      "wall_time_s": 0.476,
       "sim_et_s": 16.101,
       "sim_trap_kmh": 145.9
     },
@@ -1922,7 +1958,7 @@
       "displacement_cc": 248,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.544,
+      "wall_time_s": 0.55,
       "sim_et_s": 18.531,
       "sim_trap_kmh": 126.9
     },
@@ -1935,7 +1971,7 @@
       "displacement_cc": 220,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.609,
+      "wall_time_s": 0.611,
       "sim_et_s": 20.675,
       "sim_trap_kmh": 114.6
     },
@@ -1948,7 +1984,7 @@
       "displacement_cc": 312,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.527,
+      "wall_time_s": 0.522,
       "sim_et_s": 17.053,
       "sim_trap_kmh": 140.7
     },
@@ -1961,7 +1997,7 @@
       "displacement_cc": 197,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.635,
+      "wall_time_s": 0.631,
       "sim_et_s": 21.132,
       "sim_trap_kmh": 112.8
     },
@@ -1986,10 +2022,10 @@
       "category": "naked",
       "displacement_cc": 648,
       "stroke_type": 4,
-      "status": "over-time",
-      "wall_time_s": 0.439,
-      "sim_et_s": 14.978,
-      "sim_trap_kmh": 152.0
+      "status": "ok",
+      "wall_time_s": 0.436,
+      "sim_et_s": 14.837,
+      "sim_trap_kmh": 154.0
     },
     {
       "manufacturer": "Royal Enfield",
@@ -1999,10 +2035,10 @@
       "category": "naked",
       "displacement_cc": 648,
       "stroke_type": 4,
-      "status": "over-time",
-      "wall_time_s": 0.44,
-      "sim_et_s": 15.0,
-      "sim_trap_kmh": 151.3
+      "status": "ok",
+      "wall_time_s": 0.431,
+      "sim_et_s": 14.858,
+      "sim_trap_kmh": 153.4
     },
     {
       "manufacturer": "Royal Enfield",
@@ -2013,7 +2049,7 @@
       "displacement_cc": 452,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.483,
+      "wall_time_s": 0.484,
       "sim_et_s": 16.416,
       "sim_trap_kmh": 139.2
     },
@@ -2026,7 +2062,7 @@
       "displacement_cc": 155,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.688,
+      "wall_time_s": 0.695,
       "sim_et_s": 22.429,
       "sim_trap_kmh": 111.5
     },
@@ -2039,7 +2075,7 @@
       "displacement_cc": 155,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.692,
+      "wall_time_s": 0.701,
       "sim_et_s": 22.776,
       "sim_trap_kmh": 108.4
     },
@@ -2052,7 +2088,7 @@
       "displacement_cc": 149,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.718,
+      "wall_time_s": 0.715,
       "sim_et_s": 24.902,
       "sim_trap_kmh": 93.8
     },
@@ -2065,7 +2101,7 @@
       "displacement_cc": 249,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.567,
+      "wall_time_s": 0.564,
       "sim_et_s": 18.922,
       "sim_trap_kmh": 127.0
     },
@@ -2078,7 +2114,7 @@
       "displacement_cc": 286,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.525,
+      "wall_time_s": 0.522,
       "sim_et_s": 17.809,
       "sim_trap_kmh": 130.8
     },
@@ -2091,7 +2127,7 @@
       "displacement_cc": 184,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.653,
+      "wall_time_s": 0.652,
       "sim_et_s": 22.047,
       "sim_trap_kmh": 108.5
     },
@@ -2104,7 +2140,7 @@
       "displacement_cc": 296,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.54,
+      "wall_time_s": 0.549,
       "sim_et_s": 18.22,
       "sim_trap_kmh": 142.4
     },
@@ -2117,7 +2153,7 @@
       "displacement_cc": 399,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.483,
+      "wall_time_s": 0.492,
       "sim_et_s": 16.653,
       "sim_trap_kmh": 146.2
     },
@@ -2130,9 +2166,9 @@
       "displacement_cc": 649,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.382,
-      "sim_et_s": 13.005,
-      "sim_trap_kmh": 176.4
+      "wall_time_s": 0.389,
+      "sim_et_s": 13.079,
+      "sim_trap_kmh": 180.2
     },
     {
       "manufacturer": "Triumph",
@@ -2143,7 +2179,7 @@
       "displacement_cc": 398,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.473,
+      "wall_time_s": 0.478,
       "sim_et_s": 16.069,
       "sim_trap_kmh": 143.8
     },
@@ -2156,7 +2192,7 @@
       "displacement_cc": 900,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.391,
+      "wall_time_s": 0.395,
       "sim_et_s": 13.464,
       "sim_trap_kmh": 168.9
     },
@@ -2169,7 +2205,7 @@
       "displacement_cc": 373,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.462,
+      "wall_time_s": 0.456,
       "sim_et_s": 15.609,
       "sim_trap_kmh": 152.9
     },
@@ -2182,7 +2218,7 @@
       "displacement_cc": 373,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.453,
+      "wall_time_s": 0.447,
       "sim_et_s": 15.356,
       "sim_trap_kmh": 157.9
     },
@@ -2195,7 +2231,7 @@
       "displacement_cc": 163,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.681,
+      "wall_time_s": 0.684,
       "sim_et_s": 23.192,
       "sim_trap_kmh": 103.0
     },
@@ -2208,7 +2244,7 @@
       "displacement_cc": 675,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.357,
+      "wall_time_s": 0.366,
       "sim_et_s": 11.529,
       "sim_trap_kmh": 215.6
     },
@@ -2221,7 +2257,7 @@
       "displacement_cc": 765,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.347,
+      "wall_time_s": 0.355,
       "sim_et_s": 11.637,
       "sim_trap_kmh": 210.5
     },
@@ -2234,7 +2270,7 @@
       "displacement_cc": 1160,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.311,
+      "wall_time_s": 0.321,
       "sim_et_s": 10.399,
       "sim_trap_kmh": 235.3
     },
@@ -2247,7 +2283,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.323,
+      "wall_time_s": 0.331,
       "sim_et_s": 10.338,
       "sim_trap_kmh": 243.6
     },
@@ -2260,9 +2296,9 @@
       "displacement_cc": 648,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.42,
-      "sim_et_s": 14.431,
-      "sim_trap_kmh": 157.9
+      "wall_time_s": 0.421,
+      "sim_et_s": 14.278,
+      "sim_trap_kmh": 160.5
     },
     {
       "manufacturer": "Royal Enfield",
@@ -2273,9 +2309,9 @@
       "displacement_cc": 648,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.406,
-      "sim_et_s": 14.215,
-      "sim_trap_kmh": 161.1
+      "wall_time_s": 0.415,
+      "sim_et_s": 14.064,
+      "sim_trap_kmh": 164.0
     },
     {
       "manufacturer": "Royal Enfield",
@@ -2286,9 +2322,9 @@
       "displacement_cc": 648,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.456,
-      "sim_et_s": 15.729,
-      "sim_trap_kmh": 148.9
+      "wall_time_s": 0.461,
+      "sim_et_s": 15.604,
+      "sim_trap_kmh": 151.8
     },
     {
       "manufacturer": "Harley-Davidson",
@@ -2299,7 +2335,7 @@
       "displacement_cc": 1252,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.332,
+      "wall_time_s": 0.337,
       "sim_et_s": 11.342,
       "sim_trap_kmh": 201.7
     },
@@ -2312,7 +2348,7 @@
       "displacement_cc": 1247,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.341,
+      "wall_time_s": 0.35,
       "sim_et_s": 11.533,
       "sim_trap_kmh": 198.3
     },
@@ -2325,7 +2361,7 @@
       "displacement_cc": 1133,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.374,
+      "wall_time_s": 0.382,
       "sim_et_s": 12.736,
       "sim_trap_kmh": 187.7
     },
@@ -2338,7 +2374,7 @@
       "displacement_cc": 1203,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.328,
+      "wall_time_s": 0.335,
       "sim_et_s": 11.194,
       "sim_trap_kmh": 210.7
     },
@@ -2351,7 +2387,7 @@
       "displacement_cc": 373,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.442,
+      "wall_time_s": 0.454,
       "sim_et_s": 15.071,
       "sim_trap_kmh": 155.9
     },
@@ -2364,7 +2400,7 @@
       "displacement_cc": 889,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.334,
+      "wall_time_s": 0.341,
       "sim_et_s": 11.087,
       "sim_trap_kmh": 212.2
     },
@@ -2377,7 +2413,7 @@
       "displacement_cc": 1148,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.308,
+      "wall_time_s": 0.315,
       "sim_et_s": 10.154,
       "sim_trap_kmh": 242.4
     },
@@ -2390,7 +2426,7 @@
       "displacement_cc": 1301,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.315,
+      "wall_time_s": 0.325,
       "sim_et_s": 10.054,
       "sim_trap_kmh": 242.4
     },
@@ -2403,9 +2439,9 @@
       "displacement_cc": 689,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.372,
-      "sim_et_s": 12.596,
-      "sim_trap_kmh": 187.1
+      "wall_time_s": 0.374,
+      "sim_et_s": 12.477,
+      "sim_trap_kmh": 189.8
     },
     {
       "manufacturer": "Yamaha",
@@ -2416,7 +2452,7 @@
       "displacement_cc": 890,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.348,
+      "wall_time_s": 0.35,
       "sim_et_s": 11.633,
       "sim_trap_kmh": 203.2
     },
@@ -2429,7 +2465,7 @@
       "displacement_cc": 1679,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.346,
+      "wall_time_s": 0.349,
       "sim_et_s": 11.38,
       "sim_trap_kmh": 220.3
     },
@@ -2442,7 +2478,7 @@
       "displacement_cc": 649,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.383,
+      "wall_time_s": 0.387,
       "sim_et_s": 12.638,
       "sim_trap_kmh": 189.0
     },
@@ -2455,7 +2491,7 @@
       "displacement_cc": 471,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.442,
+      "wall_time_s": 0.448,
       "sim_et_s": 15.043,
       "sim_trap_kmh": 156.8
     },
@@ -2468,7 +2504,7 @@
       "displacement_cc": 1084,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.384,
+      "wall_time_s": 0.386,
       "sim_et_s": 12.886,
       "sim_trap_kmh": 178.0
     },
@@ -2481,7 +2517,7 @@
       "displacement_cc": 399,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.449,
+      "wall_time_s": 0.45,
       "sim_et_s": 14.576,
       "sim_trap_kmh": 176.4
     },
@@ -2494,7 +2530,7 @@
       "displacement_cc": 998,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.335,
+      "wall_time_s": 0.339,
       "sim_et_s": 10.413,
       "sim_trap_kmh": 232.2
     },
@@ -2507,9 +2543,9 @@
       "displacement_cc": 649,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.436,
-      "sim_et_s": 14.691,
-      "sim_trap_kmh": 160.8
+      "wall_time_s": 0.437,
+      "sim_et_s": 14.582,
+      "sim_trap_kmh": 163.2
     },
     {
       "manufacturer": "Suzuki",
@@ -2520,9 +2556,9 @@
       "displacement_cc": 645,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.39,
-      "sim_et_s": 12.893,
-      "sim_trap_kmh": 179.5
+      "wall_time_s": 0.386,
+      "sim_et_s": 12.766,
+      "sim_trap_kmh": 183.2
     },
     {
       "manufacturer": "Suzuki",
@@ -2533,7 +2569,7 @@
       "displacement_cc": 776,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.379,
+      "wall_time_s": 0.376,
       "sim_et_s": 12.729,
       "sim_trap_kmh": 181.7
     },
@@ -2546,7 +2582,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.346,
+      "wall_time_s": 0.343,
       "sim_et_s": 10.971,
       "sim_trap_kmh": 216.9
     },
@@ -2572,7 +2608,7 @@
       "displacement_cc": 1158,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.355,
+      "wall_time_s": 0.359,
       "sim_et_s": 11.536,
       "sim_trap_kmh": 218.4
     },
@@ -2585,7 +2621,7 @@
       "displacement_cc": 1079,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.366,
+      "wall_time_s": 0.367,
       "sim_et_s": 12.512,
       "sim_trap_kmh": 180.4
     },
@@ -2598,7 +2634,7 @@
       "displacement_cc": 2458,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.332,
+      "wall_time_s": 0.333,
       "sim_et_s": 11.234,
       "sim_trap_kmh": 210.5
     },
@@ -2611,7 +2647,7 @@
       "displacement_cc": 660,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.383,
+      "wall_time_s": 0.384,
       "sim_et_s": 12.792,
       "sim_trap_kmh": 181.4
     },
@@ -2624,7 +2660,7 @@
       "displacement_cc": 888,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.396,
+      "wall_time_s": 0.394,
       "sim_et_s": 12.89,
       "sim_trap_kmh": 182.9
     },
@@ -2637,7 +2673,7 @@
       "displacement_cc": 1254,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.36,
+      "wall_time_s": 0.366,
       "sim_et_s": 11.716,
       "sim_trap_kmh": 203.4
     },
@@ -2650,7 +2686,7 @@
       "displacement_cc": 999,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.343,
+      "wall_time_s": 0.346,
       "sim_et_s": 10.427,
       "sim_trap_kmh": 239.7
     },
@@ -2663,9 +2699,9 @@
       "displacement_cc": 659,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.363,
-      "sim_et_s": 11.977,
-      "sim_trap_kmh": 207.9
+      "wall_time_s": 0.36,
+      "sim_et_s": 11.892,
+      "sim_trap_kmh": 210.9
     },
     {
       "manufacturer": "Aprilia",
@@ -2676,9 +2712,9 @@
       "displacement_cc": 659,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.37,
-      "sim_et_s": 12.26,
-      "sim_trap_kmh": 197.0
+      "wall_time_s": 0.365,
+      "sim_et_s": 12.17,
+      "sim_trap_kmh": 200.9
     },
     {
       "manufacturer": "MV Agusta",
@@ -2689,7 +2725,7 @@
       "displacement_cc": 798,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.34,
+      "wall_time_s": 0.337,
       "sim_et_s": 10.864,
       "sim_trap_kmh": 231.3
     },
@@ -2702,7 +2738,7 @@
       "displacement_cc": 1923,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.375,
+      "wall_time_s": 0.374,
       "sim_et_s": 12.781,
       "sim_trap_kmh": 174.1
     },
@@ -2715,7 +2751,7 @@
       "displacement_cc": 1923,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.395,
+      "wall_time_s": 0.394,
       "sim_et_s": 13.321,
       "sim_trap_kmh": 170.7
     },
@@ -2728,9 +2764,9 @@
       "displacement_cc": 693,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.382,
-      "sim_et_s": 12.801,
-      "sim_trap_kmh": 178.1
+      "wall_time_s": 0.373,
+      "sim_et_s": 12.672,
+      "sim_trap_kmh": 181.1
     },
     {
       "manufacturer": "Benelli",
@@ -2741,7 +2777,7 @@
       "displacement_cc": 600,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.417,
+      "wall_time_s": 0.41,
       "sim_et_s": 13.31,
       "sim_trap_kmh": 178.3
     },
@@ -2754,9 +2790,9 @@
       "displacement_cc": 500,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.463,
-      "sim_et_s": 15.329,
-      "sim_trap_kmh": 148.2
+      "wall_time_s": 0.455,
+      "sim_et_s": 15.293,
+      "sim_trap_kmh": 148.8
     },
     {
       "manufacturer": "QJ Motor",
@@ -2767,7 +2803,7 @@
       "displacement_cc": 400,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.481,
+      "wall_time_s": 0.482,
       "sim_et_s": 15.864,
       "sim_trap_kmh": 146.1
     },
@@ -2780,7 +2816,7 @@
       "displacement_cc": 199,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.68,
+      "wall_time_s": 0.667,
       "sim_et_s": 21.661,
       "sim_trap_kmh": 108.4
     },
@@ -2793,7 +2829,7 @@
       "displacement_cc": 199.5,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.653,
+      "wall_time_s": 0.643,
       "sim_et_s": 20.392,
       "sim_trap_kmh": 117.1
     },
@@ -2806,7 +2842,7 @@
       "displacement_cc": 219.9,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.739,
+      "wall_time_s": 0.724,
       "sim_et_s": 22.885,
       "sim_trap_kmh": 104.4
     },
@@ -2819,7 +2855,7 @@
       "displacement_cc": 219.9,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.727,
+      "wall_time_s": 0.737,
       "sim_et_s": 22.748,
       "sim_trap_kmh": 105.5
     },
@@ -2832,7 +2868,7 @@
       "displacement_cc": 249.07,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.605,
+      "wall_time_s": 0.596,
       "sim_et_s": 19.695,
       "sim_trap_kmh": 119.3
     },
@@ -2845,7 +2881,7 @@
       "displacement_cc": 249.07,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.602,
+      "wall_time_s": 0.592,
       "sim_et_s": 19.523,
       "sim_trap_kmh": 121.3
     },
@@ -2858,7 +2894,7 @@
       "displacement_cc": 373.3,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.507,
+      "wall_time_s": 0.501,
       "sim_et_s": 16.33,
       "sim_trap_kmh": 142.8
     },
@@ -2884,7 +2920,7 @@
       "displacement_cc": 225.9,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.631,
+      "wall_time_s": 0.624,
       "sim_et_s": 20.804,
       "sim_trap_kmh": 111.6
     },
@@ -2897,7 +2933,7 @@
       "displacement_cc": 249.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.636,
+      "wall_time_s": 0.623,
       "sim_et_s": 20.353,
       "sim_trap_kmh": 114.0
     },
@@ -2910,7 +2946,7 @@
       "displacement_cc": 149.8,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.734,
+      "wall_time_s": 0.718,
       "sim_et_s": 22.216,
       "sim_trap_kmh": 112.2
     },
@@ -2923,7 +2959,7 @@
       "displacement_cc": 149.8,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.712,
+      "wall_time_s": 0.694,
       "sim_et_s": 22.023,
       "sim_trap_kmh": 111.9
     },
@@ -2936,7 +2972,7 @@
       "displacement_cc": 155.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.727,
+      "wall_time_s": 0.718,
       "sim_et_s": 22.034,
       "sim_trap_kmh": 114.7
     },
@@ -2949,7 +2985,7 @@
       "displacement_cc": 321.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.523,
+      "wall_time_s": 0.513,
       "sim_et_s": 16.413,
       "sim_trap_kmh": 148.7
     },
@@ -2962,7 +2998,7 @@
       "displacement_cc": 321.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.528,
+      "wall_time_s": 0.525,
       "sim_et_s": 16.693,
       "sim_trap_kmh": 144.1
     },
@@ -2975,7 +3011,7 @@
       "displacement_cc": 348.36,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.573,
+      "wall_time_s": 0.585,
       "sim_et_s": 19.871,
       "sim_trap_kmh": 111.4
     },
@@ -2988,7 +3024,7 @@
       "displacement_cc": 348.36,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.559,
+      "wall_time_s": 0.574,
       "sim_et_s": 19.264,
       "sim_trap_kmh": 113.9
     },
@@ -3001,7 +3037,7 @@
       "displacement_cc": 293.52,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.564,
+      "wall_time_s": 0.567,
       "sim_et_s": 18.745,
       "sim_trap_kmh": 122.7
     },
@@ -3014,7 +3050,7 @@
       "displacement_cc": 249.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.576,
+      "wall_time_s": 0.579,
       "sim_et_s": 18.878,
       "sim_trap_kmh": 128.0
     },
@@ -3027,7 +3063,7 @@
       "displacement_cc": 249.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.582,
+      "wall_time_s": 0.585,
       "sim_et_s": 19.151,
       "sim_trap_kmh": 123.2
     },
@@ -3040,7 +3076,7 @@
       "displacement_cc": 249.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.622,
+      "wall_time_s": 0.626,
       "sim_et_s": 20.377,
       "sim_trap_kmh": 116.7
     },
@@ -3053,7 +3089,7 @@
       "displacement_cc": 294.72,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.534,
+      "wall_time_s": 0.536,
       "sim_et_s": 17.937,
       "sim_trap_kmh": 125.3
     },
@@ -3066,7 +3102,7 @@
       "displacement_cc": 249.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.599,
+      "wall_time_s": 0.603,
       "sim_et_s": 19.192,
       "sim_trap_kmh": 127.7
     },
@@ -3079,9 +3115,9 @@
       "displacement_cc": 647.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.386,
-      "sim_et_s": 12.838,
-      "sim_trap_kmh": 183.5
+      "wall_time_s": 0.39,
+      "sim_et_s": 12.715,
+      "sim_trap_kmh": 186.3
     },
     {
       "manufacturer": "Hero",
@@ -3092,7 +3128,7 @@
       "displacement_cc": 223.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.659,
+      "wall_time_s": 0.66,
       "sim_et_s": 21.471,
       "sim_trap_kmh": 109.3
     },
@@ -3105,7 +3141,7 @@
       "displacement_cc": 210.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.597,
+      "wall_time_s": 0.598,
       "sim_et_s": 19.537,
       "sim_trap_kmh": 125.8
     },
@@ -3131,7 +3167,7 @@
       "displacement_cc": 349.34,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.62,
+      "wall_time_s": 0.625,
       "sim_et_s": 20.854,
       "sim_trap_kmh": 107.8
     },
@@ -3144,7 +3180,7 @@
       "displacement_cc": 349.34,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.61,
+      "wall_time_s": 0.624,
       "sim_et_s": 20.721,
       "sim_trap_kmh": 108.5
     },
@@ -3157,7 +3193,7 @@
       "displacement_cc": 349.34,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.581,
+      "wall_time_s": 0.586,
       "sim_et_s": 19.814,
       "sim_trap_kmh": 113.4
     },
@@ -3170,7 +3206,7 @@
       "displacement_cc": 346.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.611,
+      "wall_time_s": 0.627,
       "sim_et_s": 20.64,
       "sim_trap_kmh": 107.7
     },
@@ -3183,7 +3219,7 @@
       "displacement_cc": 499.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.52,
+      "wall_time_s": 0.533,
       "sim_et_s": 17.937,
       "sim_trap_kmh": 121.3
     },
@@ -3196,7 +3232,7 @@
       "displacement_cc": 411.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.56,
+      "wall_time_s": 0.571,
       "sim_et_s": 19.044,
       "sim_trap_kmh": 116.4
     },
@@ -3209,7 +3245,7 @@
       "displacement_cc": 411.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.547,
+      "wall_time_s": 0.557,
       "sim_et_s": 18.679,
       "sim_trap_kmh": 119.3
     },
@@ -3222,9 +3258,9 @@
       "displacement_cc": 648.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.468,
-      "sim_et_s": 15.676,
-      "sim_trap_kmh": 143.9
+      "wall_time_s": 0.473,
+      "sim_et_s": 15.543,
+      "sim_trap_kmh": 147.0
     },
     {
       "manufacturer": "Royal Enfield",
@@ -3235,7 +3271,7 @@
       "displacement_cc": 452.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.466,
+      "wall_time_s": 0.475,
       "sim_et_s": 15.956,
       "sim_trap_kmh": 143.4
     },
@@ -3248,7 +3284,7 @@
       "displacement_cc": 293.9,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.548,
+      "wall_time_s": 0.557,
       "sim_et_s": 18.52,
       "sim_trap_kmh": 124.3
     },
@@ -3261,7 +3297,7 @@
       "displacement_cc": 334.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.534,
+      "wall_time_s": 0.546,
       "sim_et_s": 18.066,
       "sim_trap_kmh": 126.0
     },
@@ -3274,7 +3310,7 @@
       "displacement_cc": 334.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.545,
+      "wall_time_s": 0.562,
       "sim_et_s": 18.267,
       "sim_trap_kmh": 126.5
     },
@@ -3287,7 +3323,7 @@
       "displacement_cc": 334.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.564,
+      "wall_time_s": 0.575,
       "sim_et_s": 18.514,
       "sim_trap_kmh": 124.8
     },
@@ -3300,7 +3336,7 @@
       "displacement_cc": 334.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.554,
+      "wall_time_s": 0.559,
       "sim_et_s": 18.332,
       "sim_trap_kmh": 125.1
     },
@@ -3313,7 +3349,7 @@
       "displacement_cc": 300.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.548,
+      "wall_time_s": 0.551,
       "sim_et_s": 17.581,
       "sim_trap_kmh": 140.0
     },
@@ -3339,7 +3375,7 @@
       "displacement_cc": 374.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.606,
+      "wall_time_s": 0.61,
       "sim_et_s": 20.489,
       "sim_trap_kmh": 109.4
     },
@@ -3352,9 +3388,9 @@
       "displacement_cc": 500.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.47,
-      "sim_et_s": 15.996,
-      "sim_trap_kmh": 142.2
+      "wall_time_s": 0.474,
+      "sim_et_s": 15.962,
+      "sim_trap_kmh": 143.3
     },
     {
       "manufacturer": "CFMoto",
@@ -3365,7 +3401,7 @@
       "displacement_cc": 292.4,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.541,
+      "wall_time_s": 0.54,
       "sim_et_s": 18.053,
       "sim_trap_kmh": 129.4
     },
@@ -3378,7 +3414,7 @@
       "displacement_cc": 449.5,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.466,
+      "wall_time_s": 0.471,
       "sim_et_s": 15.344,
       "sim_trap_kmh": 150.8
     },
@@ -3391,9 +3427,9 @@
       "displacement_cc": 649.3,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.426,
-      "sim_et_s": 13.914,
-      "sim_trap_kmh": 163.9
+      "wall_time_s": 0.424,
+      "sim_et_s": 13.808,
+      "sim_trap_kmh": 165.9
     },
     {
       "manufacturer": "CFMoto",
@@ -3404,7 +3440,7 @@
       "displacement_cc": 292.4,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.535,
+      "wall_time_s": 0.539,
       "sim_et_s": 17.842,
       "sim_trap_kmh": 133.4
     },
@@ -3417,7 +3453,7 @@
       "displacement_cc": 313.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.569,
+      "wall_time_s": 0.555,
       "sim_et_s": 17.771,
       "sim_trap_kmh": 135.6
     },
@@ -3430,7 +3466,7 @@
       "displacement_cc": 313.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.603,
+      "wall_time_s": 0.586,
       "sim_et_s": 18.441,
       "sim_trap_kmh": 129.1
     },
@@ -3443,7 +3479,7 @@
       "displacement_cc": 312.2,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.537,
+      "wall_time_s": 0.523,
       "sim_et_s": 17.307,
       "sim_trap_kmh": 138.9
     },
@@ -3456,7 +3492,7 @@
       "displacement_cc": 440.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.531,
+      "wall_time_s": 0.522,
       "sim_et_s": 18.176,
       "sim_trap_kmh": 120.3
     },
@@ -3469,7 +3505,7 @@
       "displacement_cc": 457.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.441,
+      "wall_time_s": 0.431,
       "sim_et_s": 14.663,
       "sim_trap_kmh": 159.3
     },
@@ -3482,7 +3518,7 @@
       "displacement_cc": 457.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.452,
+      "wall_time_s": 0.443,
       "sim_et_s": 14.903,
       "sim_trap_kmh": 153.2
     },
@@ -3495,7 +3531,7 @@
       "displacement_cc": 398.15,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.496,
+      "wall_time_s": 0.483,
       "sim_et_s": 16.166,
       "sim_trap_kmh": 140.7
     },
@@ -3508,7 +3544,7 @@
       "displacement_cc": 373.2,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.471,
+      "wall_time_s": 0.46,
       "sim_et_s": 15.359,
       "sim_trap_kmh": 150.6
     },
@@ -3521,7 +3557,7 @@
       "displacement_cc": 373.2,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.486,
+      "wall_time_s": 0.47,
       "sim_et_s": 15.91,
       "sim_trap_kmh": 144.9
     },
@@ -3534,7 +3570,7 @@
       "displacement_cc": 929.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.335,
+      "wall_time_s": 0.325,
       "sim_et_s": 10.588,
       "sim_trap_kmh": 232.4
     },
@@ -3547,7 +3583,7 @@
       "displacement_cc": 954.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.334,
+      "wall_time_s": 0.323,
       "sim_et_s": 10.546,
       "sim_trap_kmh": 235.2
     },
@@ -3560,7 +3596,7 @@
       "displacement_cc": 999.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.338,
+      "wall_time_s": 0.327,
       "sim_et_s": 10.949,
       "sim_trap_kmh": 219.8
     },
@@ -3573,7 +3609,7 @@
       "displacement_cc": 782.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.38,
+      "wall_time_s": 0.372,
       "sim_et_s": 12.112,
       "sim_trap_kmh": 194.9
     },
@@ -3586,7 +3622,7 @@
       "displacement_cc": 471.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.47,
+      "wall_time_s": 0.463,
       "sim_et_s": 15.228,
       "sim_trap_kmh": 151.9
     },
@@ -3599,7 +3635,7 @@
       "displacement_cc": 1084.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.386,
+      "wall_time_s": 0.381,
       "sim_et_s": 12.504,
       "sim_trap_kmh": 187.2
     },
@@ -3612,7 +3648,7 @@
       "displacement_cc": 1140.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.39,
+      "wall_time_s": 0.387,
       "sim_et_s": 12.707,
       "sim_trap_kmh": 179.4
     },
@@ -3625,7 +3661,7 @@
       "displacement_cc": 599.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.382,
+      "wall_time_s": 0.386,
       "sim_et_s": 11.798,
       "sim_trap_kmh": 218.5
     },
@@ -3638,7 +3674,7 @@
       "displacement_cc": 599.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.377,
+      "wall_time_s": 0.382,
       "sim_et_s": 11.814,
       "sim_trap_kmh": 218.8
     },
@@ -3651,7 +3687,7 @@
       "displacement_cc": 998.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.336,
+      "wall_time_s": 0.34,
       "sim_et_s": 10.872,
       "sim_trap_kmh": 220.7
     },
@@ -3664,7 +3700,7 @@
       "displacement_cc": 600.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.384,
+      "wall_time_s": 0.391,
       "sim_et_s": 12.283,
       "sim_trap_kmh": 193.8
     },
@@ -3677,7 +3713,7 @@
       "displacement_cc": 1298.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.355,
+      "wall_time_s": 0.362,
       "sim_et_s": 11.81,
       "sim_trap_kmh": 205.3
     },
@@ -3690,7 +3726,7 @@
       "displacement_cc": 1670.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.354,
+      "wall_time_s": 0.359,
       "sim_et_s": 12.039,
       "sim_trap_kmh": 179.9
     },
@@ -3703,7 +3739,7 @@
       "displacement_cc": 1199.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.38,
+      "wall_time_s": 0.382,
       "sim_et_s": 12.396,
       "sim_trap_kmh": 187.9
     },
@@ -3716,7 +3752,7 @@
       "displacement_cc": 748.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.355,
+      "wall_time_s": 0.361,
       "sim_et_s": 11.551,
       "sim_trap_kmh": 211.5
     },
@@ -3729,7 +3765,7 @@
       "displacement_cc": 748.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.362,
+      "wall_time_s": 0.364,
       "sim_et_s": 12.004,
       "sim_trap_kmh": 196.3
     },
@@ -3742,7 +3778,7 @@
       "displacement_cc": 806.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.357,
+      "wall_time_s": 0.363,
       "sim_et_s": 11.913,
       "sim_trap_kmh": 196.1
     },
@@ -3755,9 +3791,9 @@
       "displacement_cc": 649.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.422,
-      "sim_et_s": 13.838,
-      "sim_trap_kmh": 168.0
+      "wall_time_s": 0.424,
+      "sim_et_s": 13.734,
+      "sim_trap_kmh": 171.5
     },
     {
       "manufacturer": "Kawasaki",
@@ -3768,7 +3804,7 @@
       "displacement_cc": 1043.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.379,
+      "wall_time_s": 0.384,
       "sim_et_s": 12.362,
       "sim_trap_kmh": 193.4
     },
@@ -3781,7 +3817,7 @@
       "displacement_cc": 1043.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.332,
+      "wall_time_s": 0.337,
       "sim_et_s": 11.055,
       "sim_trap_kmh": 215.7
     },
@@ -3794,7 +3830,7 @@
       "displacement_cc": 773.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.442,
+      "wall_time_s": 0.454,
       "sim_et_s": 14.726,
       "sim_trap_kmh": 152.3
     },
@@ -3807,7 +3843,7 @@
       "displacement_cc": 399.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.453,
+      "wall_time_s": 0.461,
       "sim_et_s": 15.309,
       "sim_trap_kmh": 150.4
     },
@@ -3820,7 +3856,7 @@
       "displacement_cc": 1255.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.346,
+      "wall_time_s": 0.348,
       "sim_et_s": 12.017,
       "sim_trap_kmh": 187.8
     },
@@ -3833,9 +3869,9 @@
       "displacement_cc": 645.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.422,
-      "sim_et_s": 13.875,
-      "sim_trap_kmh": 170.2
+      "wall_time_s": 0.419,
+      "sim_et_s": 13.77,
+      "sim_trap_kmh": 174.1
     },
     {
       "manufacturer": "Suzuki",
@@ -3846,7 +3882,7 @@
       "displacement_cc": 1037.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.38,
+      "wall_time_s": 0.382,
       "sim_et_s": 12.583,
       "sim_trap_kmh": 188.1
     },
@@ -3859,7 +3895,7 @@
       "displacement_cc": 1340.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.314,
+      "wall_time_s": 0.321,
       "sim_et_s": 10.435,
       "sim_trap_kmh": 230.1
     },
@@ -3872,7 +3908,7 @@
       "displacement_cc": 749.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.339,
+      "wall_time_s": 0.344,
       "sim_et_s": 10.869,
       "sim_trap_kmh": 232.8
     },
@@ -3885,7 +3921,7 @@
       "displacement_cc": 1293.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.341,
+      "wall_time_s": 0.339,
       "sim_et_s": 10.654,
       "sim_trap_kmh": 229.3
     },
@@ -3898,7 +3934,7 @@
       "displacement_cc": 1170.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.365,
+      "wall_time_s": 0.363,
       "sim_et_s": 11.939,
       "sim_trap_kmh": 197.4
     },
@@ -3911,7 +3947,7 @@
       "displacement_cc": 1170.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.341,
+      "wall_time_s": 0.347,
       "sim_et_s": 11.461,
       "sim_trap_kmh": 197.0
     },
@@ -3924,7 +3960,7 @@
       "displacement_cc": 895.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.351,
+      "wall_time_s": 0.36,
       "sim_et_s": 11.932,
       "sim_trap_kmh": 193.9
     },
@@ -3937,7 +3973,7 @@
       "displacement_cc": 853.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.386,
+      "wall_time_s": 0.395,
       "sim_et_s": 12.844,
       "sim_trap_kmh": 181.5
     },
@@ -3950,7 +3986,7 @@
       "displacement_cc": 999.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.373,
+      "wall_time_s": 0.378,
       "sim_et_s": 11.71,
       "sim_trap_kmh": 216.4
     },
@@ -3963,7 +3999,7 @@
       "displacement_cc": 998.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.326,
+      "wall_time_s": 0.331,
       "sim_et_s": 10.733,
       "sim_trap_kmh": 227.0
     },
@@ -3976,7 +4012,7 @@
       "displacement_cc": 849.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.333,
+      "wall_time_s": 0.337,
       "sim_et_s": 10.856,
       "sim_trap_kmh": 228.0
     },
@@ -3989,7 +4025,7 @@
       "displacement_cc": 937.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.343,
+      "wall_time_s": 0.344,
       "sim_et_s": 11.493,
       "sim_trap_kmh": 202.9
     },
@@ -4015,7 +4051,7 @@
       "displacement_cc": 821.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.352,
+      "wall_time_s": 0.349,
       "sim_et_s": 11.741,
       "sim_trap_kmh": 201.6
     },
@@ -4028,7 +4064,7 @@
       "displacement_cc": 937.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.343,
+      "wall_time_s": 0.339,
       "sim_et_s": 11.488,
       "sim_trap_kmh": 205.9
     },
@@ -4041,7 +4077,7 @@
       "displacement_cc": 803.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.388,
+      "wall_time_s": 0.387,
       "sim_et_s": 12.902,
       "sim_trap_kmh": 174.6
     },
@@ -4067,7 +4103,7 @@
       "displacement_cc": 998.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.329,
+      "wall_time_s": 0.337,
       "sim_et_s": 10.888,
       "sim_trap_kmh": 217.3
     },
@@ -4080,7 +4116,7 @@
       "displacement_cc": 955.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.347,
+      "wall_time_s": 0.352,
       "sim_et_s": 11.417,
       "sim_trap_kmh": 205.7
     },
@@ -4093,7 +4129,7 @@
       "displacement_cc": 1200.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.359,
+      "wall_time_s": 0.365,
       "sim_et_s": 12.542,
       "sim_trap_kmh": 175.0
     },
@@ -4106,7 +4142,7 @@
       "displacement_cc": 1200.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.342,
+      "wall_time_s": 0.347,
       "sim_et_s": 11.688,
       "sim_trap_kmh": 193.3
     },
@@ -4119,7 +4155,7 @@
       "displacement_cc": 1200.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.341,
+      "wall_time_s": 0.345,
       "sim_et_s": 11.783,
       "sim_trap_kmh": 191.8
     },
@@ -4132,7 +4168,7 @@
       "displacement_cc": 1160.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.36,
+      "wall_time_s": 0.367,
       "sim_et_s": 11.733,
       "sim_trap_kmh": 206.2
     },
@@ -4145,7 +4181,7 @@
       "displacement_cc": 998.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.321,
+      "wall_time_s": 0.322,
       "sim_et_s": 10.309,
       "sim_trap_kmh": 244.6
     },
@@ -4158,7 +4194,7 @@
       "displacement_cc": 798.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.346,
+      "wall_time_s": 0.347,
       "sim_et_s": 11.031,
       "sim_trap_kmh": 220.7
     },
@@ -4171,7 +4207,7 @@
       "displacement_cc": 1130.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.393,
+      "wall_time_s": 0.396,
       "sim_et_s": 13.001,
       "sim_trap_kmh": 186.0
     },
@@ -4184,7 +4220,7 @@
       "displacement_cc": 1252.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.367,
+      "wall_time_s": 0.37,
       "sim_et_s": 11.846,
       "sim_trap_kmh": 204.6
     },
@@ -4197,7 +4233,7 @@
       "displacement_cc": 1890.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.366,
+      "wall_time_s": 0.371,
       "sim_et_s": 12.798,
       "sim_trap_kmh": 174.7
     },
@@ -4210,9 +4246,9 @@
       "displacement_cc": 690.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.37,
-      "sim_et_s": 12.439,
-      "sim_trap_kmh": 183.8
+      "wall_time_s": 0.372,
+      "sim_et_s": 12.395,
+      "sim_trap_kmh": 185.6
     },
     {
       "manufacturer": "KTM",
@@ -4223,7 +4259,7 @@
       "displacement_cc": 799.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.349,
+      "wall_time_s": 0.353,
       "sim_et_s": 11.719,
       "sim_trap_kmh": 201.2
     },
@@ -4236,7 +4272,7 @@
       "displacement_cc": 1301.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.347,
+      "wall_time_s": 0.355,
       "sim_et_s": 11.562,
       "sim_trap_kmh": 210.8
     },
@@ -4249,7 +4285,7 @@
       "displacement_cc": 853.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.402,
+      "wall_time_s": 0.398,
       "sim_et_s": 13.386,
       "sim_trap_kmh": 170.4
     },
@@ -4262,7 +4298,7 @@
       "displacement_cc": 889.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.373,
+      "wall_time_s": 0.368,
       "sim_et_s": 12.414,
       "sim_trap_kmh": 190.6
     },
@@ -4275,9 +4311,9 @@
       "displacement_cc": 693.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.372,
-      "sim_et_s": 12.426,
-      "sim_trap_kmh": 185.0
+      "wall_time_s": 0.368,
+      "sim_et_s": 12.398,
+      "sim_trap_kmh": 185.5
     },
     {
       "manufacturer": "Buell",
@@ -4288,7 +4324,7 @@
       "displacement_cc": 1125.0,
       "stroke_type": 4,
       "status": "ok",
-      "wall_time_s": 0.326,
+      "wall_time_s": 0.322,
       "sim_et_s": 10.499,
       "sim_trap_kmh": 230.2
     },
@@ -4301,7 +4337,7 @@
       "displacement_cc": 149.16,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.71,
+      "wall_time_s": 0.69,
       "sim_et_s": 22.425,
       "sim_trap_kmh": 109.9
     },
@@ -4314,7 +4350,7 @@
       "displacement_cc": 149.16,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.717,
+      "wall_time_s": 0.705,
       "sim_et_s": 23.006,
       "sim_trap_kmh": 106.5
     },
@@ -4327,7 +4363,7 @@
       "displacement_cc": 149.16,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.708,
+      "wall_time_s": 0.691,
       "sim_et_s": 22.719,
       "sim_trap_kmh": 108.0
     },
@@ -4340,7 +4376,7 @@
       "displacement_cc": 149.16,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.713,
+      "wall_time_s": 0.702,
       "sim_et_s": 22.743,
       "sim_trap_kmh": 108.6
     },
@@ -4353,7 +4389,7 @@
       "displacement_cc": 149.16,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.745,
+      "wall_time_s": 0.731,
       "sim_et_s": 23.384,
       "sim_trap_kmh": 104.5
     },
@@ -4366,7 +4402,7 @@
       "displacement_cc": 149.16,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.719,
+      "wall_time_s": 0.712,
       "sim_et_s": 22.59,
       "sim_trap_kmh": 110.6
     },
@@ -4379,7 +4415,7 @@
       "displacement_cc": 249.7,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.568,
+      "wall_time_s": 0.57,
       "sim_et_s": 17.423,
       "sim_trap_kmh": 146.2
     },
@@ -4392,7 +4428,7 @@
       "displacement_cc": 149.7,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.692,
+      "wall_time_s": 0.712,
       "sim_et_s": 22.399,
       "sim_trap_kmh": 108.0
     },
@@ -4418,7 +4454,7 @@
       "displacement_cc": 149.7,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.691,
+      "wall_time_s": 0.693,
       "sim_et_s": 22.385,
       "sim_trap_kmh": 108.2
     },
@@ -4431,7 +4467,7 @@
       "displacement_cc": 155.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.688,
+      "wall_time_s": 0.69,
       "sim_et_s": 21.782,
       "sim_trap_kmh": 113.3
     },
@@ -4444,7 +4480,7 @@
       "displacement_cc": 155.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.694,
+      "wall_time_s": 0.696,
       "sim_et_s": 22.759,
       "sim_trap_kmh": 104.9
     },
@@ -4457,7 +4493,7 @@
       "displacement_cc": 249.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.598,
+      "wall_time_s": 0.597,
       "sim_et_s": 18.45,
       "sim_trap_kmh": 138.3
     },
@@ -4470,7 +4506,7 @@
       "displacement_cc": 249.8,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.608,
+      "wall_time_s": 0.607,
       "sim_et_s": 17.896,
       "sim_trap_kmh": 147.3
     },
@@ -4483,7 +4519,7 @@
       "displacement_cc": 249.0,
       "stroke_type": 4,
       "status": "over-time",
-      "wall_time_s": 0.575,
+      "wall_time_s": 0.576,
       "sim_et_s": 18.461,
       "sim_trap_kmh": 132.0
     },
@@ -4496,7 +4532,7 @@
       "displacement_cc": 347.0,
       "stroke_type": 2,
       "status": "over-time",
-      "wall_time_s": 0.731,
+      "wall_time_s": 0.73,
       "sim_et_s": 22.395,
       "sim_trap_kmh": 90.6
     },
@@ -4522,7 +4558,7 @@
       "displacement_cc": 499.0,
       "stroke_type": 2,
       "status": "ok",
-      "wall_time_s": 0.466,
+      "wall_time_s": 0.461,
       "sim_et_s": 14.785,
       "sim_trap_kmh": 156.1
     },
@@ -4535,7 +4571,7 @@
       "displacement_cc": 499.0,
       "stroke_type": 2,
       "status": "over-time",
-      "wall_time_s": 0.544,
+      "wall_time_s": 0.531,
       "sim_et_s": 16.803,
       "sim_trap_kmh": 121.7
     },
@@ -4548,7 +4584,7 @@
       "displacement_cc": 98.0,
       "stroke_type": 2,
       "status": "did-not-finish",
-      "wall_time_s": 0.847,
+      "wall_time_s": 0.827,
       "max_distance_m": 251.6,
       "elapsed_time_s": 26.0
     },
@@ -4561,7 +4597,7 @@
       "displacement_cc": 132.0,
       "stroke_type": 2,
       "status": "did-not-finish",
-      "wall_time_s": 0.854,
+      "wall_time_s": 0.841,
       "max_distance_m": 287.1,
       "elapsed_time_s": 26.0
     },
@@ -4587,7 +4623,7 @@
       "displacement_cc": 249.0,
       "stroke_type": 2,
       "status": "over-time",
-      "wall_time_s": 0.557,
+      "wall_time_s": 0.563,
       "sim_et_s": 17.896,
       "sim_trap_kmh": 131.3
     },
@@ -4600,7 +4636,7 @@
       "displacement_cc": 249.0,
       "stroke_type": 2,
       "status": "over-time",
-      "wall_time_s": 0.522,
+      "wall_time_s": 0.521,
       "sim_et_s": 16.426,
       "sim_trap_kmh": 138.8
     },
@@ -4612,10 +4648,10 @@
       "category": "sport",
       "displacement_cc": 498.0,
       "stroke_type": 2,
-      "status": "over-time",
-      "wall_time_s": 0.528,
-      "sim_et_s": 16.526,
-      "sim_trap_kmh": 119.9
+      "status": "ok",
+      "wall_time_s": 0.367,
+      "sim_et_s": 11.681,
+      "sim_trap_kmh": 204.6
     },
     {
       "manufacturer": "Suzuki",
@@ -4625,10 +4661,10 @@
       "category": "sport",
       "displacement_cc": 738.0,
       "stroke_type": 2,
-      "status": "over-time",
-      "wall_time_s": 0.63,
-      "sim_et_s": 21.172,
-      "sim_trap_kmh": 101.4
+      "status": "ok",
+      "wall_time_s": 0.39,
+      "sim_et_s": 13.072,
+      "sim_trap_kmh": 173.2
     },
     {
       "manufacturer": "Kawasaki",
@@ -4639,7 +4675,7 @@
       "displacement_cc": 249.0,
       "stroke_type": 2,
       "status": "over-time",
-      "wall_time_s": 0.511,
+      "wall_time_s": 0.515,
       "sim_et_s": 16.615,
       "sim_trap_kmh": 140.3
     },
@@ -4651,10 +4687,10 @@
       "category": "sport",
       "displacement_cc": 748.0,
       "stroke_type": 2,
-      "status": "over-time",
-      "wall_time_s": 0.565,
-      "sim_et_s": 18.865,
-      "sim_trap_kmh": 106.4
+      "status": "ok",
+      "wall_time_s": 0.37,
+      "sim_et_s": 12.427,
+      "sim_trap_kmh": 181.2
     },
     {
       "manufacturer": "Honda",
@@ -4665,7 +4701,7 @@
       "displacement_cc": 249.0,
       "stroke_type": 2,
       "status": "over-time",
-      "wall_time_s": 0.57,
+      "wall_time_s": 0.586,
       "sim_et_s": 18.606,
       "sim_trap_kmh": 111.6
     },
@@ -4678,7 +4714,7 @@
       "displacement_cc": 491.0,
       "stroke_type": 2,
       "status": "ok",
-      "wall_time_s": 0.406,
+      "wall_time_s": 0.419,
       "sim_et_s": 13.81,
       "sim_trap_kmh": 162.2
     },
@@ -4691,7 +4727,7 @@
       "displacement_cc": 249.0,
       "stroke_type": 2,
       "status": "over-time",
-      "wall_time_s": 0.487,
+      "wall_time_s": 0.488,
       "sim_et_s": 15.575,
       "sim_trap_kmh": 152.7
     },
@@ -4704,7 +4740,7 @@
       "displacement_cc": 124.0,
       "stroke_type": 2,
       "status": "over-time",
-      "wall_time_s": 0.703,
+      "wall_time_s": 0.698,
       "sim_et_s": 20.453,
       "sim_trap_kmh": 118.9
     },
@@ -4717,7 +4753,7 @@
       "displacement_cc": 293.0,
       "stroke_type": 2,
       "status": "over-time",
-      "wall_time_s": 0.461,
+      "wall_time_s": 0.465,
       "sim_et_s": 15.489,
       "sim_trap_kmh": 146.6
     },
@@ -4730,7 +4766,7 @@
       "displacement_cc": 249.0,
       "stroke_type": 2,
       "status": "over-time",
-      "wall_time_s": 0.478,
+      "wall_time_s": 0.487,
       "sim_et_s": 15.793,
       "sim_trap_kmh": 141.8
     },
@@ -4743,7 +4779,7 @@
       "displacement_cc": 246.0,
       "stroke_type": 2,
       "status": "did-not-finish",
-      "wall_time_s": 0.754,
+      "wall_time_s": 0.766,
       "max_distance_m": 274.8,
       "elapsed_time_s": 26.0
     }
