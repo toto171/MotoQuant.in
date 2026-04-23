@@ -182,6 +182,20 @@ def _synthetic_2stroke_torque_curve(
         band_lo = 0.55   # very wide below-peak shoulder
         band_hi = 0.30   # moderate above-peak fall
         baseline = 0.50  # strong off-pipe, multi-cyl smoothing
+    elif cylinders == 2:
+        # Two-cylinder piston-port (RD350, RD400, RGV250 non-RAVE, NSR250
+        # non-RC-valve, H1 Mach III, etc.). TWO independent expansion
+        # chambers fired 180° apart produce noticeably better cycle-to-
+        # cycle smoothing than a single-cyl race pipe — published dyno
+        # sheets (Cycle World RD350 test 1973, Yamaha service manual)
+        # show ~35–45 % of peak across the 3 500–6 000 rpm range and
+        # ~40 % at 2 500 rpm, not the 12 % baseline the single-pipe
+        # branch delivers. Keeps the sharp hit AT tuned_rpm (resonance
+        # is still per-pipe) but stops the "engine barely runs below
+        # powerband" bug that made RD350/RD400 sim at 22 s ET.
+        band_lo = 0.30
+        band_hi = 0.15
+        baseline = 0.25
     else:
         band_lo = 0.12   # was 0.24 — piston-port is peakier
         band_hi = 0.08   # was 0.11

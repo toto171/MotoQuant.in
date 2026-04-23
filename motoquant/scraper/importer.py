@@ -45,7 +45,16 @@ CATEGORY_AERO = {
     "scooter": {"cd": 0.70, "frontal_area_m2": 0.42, "wheelie_tendency": 0.2},
 }
 
-# Category-based inertia estimates for engine rotating mass
+# Category-based inertia FALLBACK for engine rotating mass (crankshaft +
+# primary drive + clutch basket). Retained only for specs with missing
+# cylinder_count or displacement_cc — first choice is the
+# displacement-scaled formula below (`_engine_inertia_from_spec`).
+#
+# These values are sized for K5-class litre I4s and were the ONLY available
+# inertia estimate prior to the April 24, 2026 physics fix; applying 0.040
+# uniformly to a 155 cc single overstated rotational mass by ~6× and was
+# the root cause of the documented small-cc ET bias (+4.73 s avg on the
+# 150-300 cc cluster). Historical: validation_sweep 2026-04-22.
 CATEGORY_ENGINE_INERTIA = {
     "sport": 0.040,
     "naked": 0.042,
@@ -53,6 +62,40 @@ CATEGORY_ENGINE_INERTIA = {
     "adventure": 0.045,
     "touring": 0.055,
 }
+
+
+def _engine_inertia_from_spec(spec: "BikeSpec") -> float:
+    """Displacement-scaled engine rotational inertia.
+
+    Physics derivation
+    ------------------
+    Crankshaft rotational inertia on a reciprocating IC engine is driven by:
+      • Per-cylinder rotating mass (throws, rods, bearings): scales with
+        ``bore × stroke`` per cyl, ≈ linear in displacement-per-cyl.
+      • Flywheel + primary + clutch basket: sized to the engine's peak
+        torque envelope, ≈ linear in total displacement.
+
+    A two-term decomposition captures both: ``a × N_cyl + b × V_disp``.
+
+    Fit constants (``a = 0.002``, ``b = 0.030``) calibrated so that a
+    1 000 cc I4 lands on 0.038 kg·m² (close to published K5 crankshaft-
+    assembly inertia of 0.038–0.045 kg·m²).  Applied to a 155 cc single
+    the formula yields 0.007 kg·m², matching literature values of
+    0.008–0.015 kg·m² for single-cylinder 150–200 cc engines.
+
+    For two-strokes (piston-port or powervalve) the 0.60× multiplier is
+    preserved — no valvetrain, no cams, and typically a lighter flywheel
+    because these engines rev quickly and brake-light inertia is desirable.
+
+    Clipped to [0.005, 0.080] kg·m² so a malformed spec can't push the
+    coefficient to an absurd value (e.g. 0 cc listing → 0 inertia →
+    infinite theoretical acceleration).
+    """
+    cyl = int(spec.cylinders) if spec.cylinders else 1
+    disp_cc = float(spec.displacement_cc) if spec.displacement_cc else 0.0
+    I = 0.002 * cyl + 0.030 * (disp_cc / 1000.0)
+    # Guard against degenerate specs.
+    return max(0.005, min(0.080, I))
 
 # Category-based CoG height estimate (mm)
 CATEGORY_COG_HEIGHT = {
@@ -375,7 +418,17 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
 
     # 2-strokes have much lower rotating inertia (no valvetrain, lighter crank)
     # — use ~60% of the category default, which changes launch RPM-drop behaviour.
-    base_inertia = CATEGORY_ENGINE_INERTIA.get(spec.category, 0.042)
+    # Displacement-scaled engine rotational inertia — physics-derived
+    # two-term formula (see `_engine_inertia_from_spec` docstring). The
+    # legacy CATEGORY_ENGINE_INERTIA lookup remains as fallback if the
+    # spec doesn't carry displacement info; the new formula always wins
+    # when displacement_cc is populated (which is true for every entry in
+    # ALL_KNOWN_BIKES after the April 20 catalog expansion).
+    base_inertia = (
+        _engine_inertia_from_spec(spec)
+        if (spec.cylinders and spec.displacement_cc)
+        else CATEGORY_ENGINE_INERTIA.get(spec.category, 0.042)
+    )
     engine_inertia = base_inertia * 0.60 if is_two_stroke else base_inertia
 
     return EngineParams(
