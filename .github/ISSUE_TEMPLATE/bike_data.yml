@@ -1,0 +1,64 @@
+name: Bike / part / tire data contribution
+description: Add or correct bike specs, parts, or tire data in the catalog.
+title: "[data] "
+labels: ["data", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is the primary issue type for domain contributors. Once accepted, the data lands in one of:
+        - `motoquant/scraper/known_bikes.py` (new bike)
+        - `motoquant/database/seed_catalogs/*.py` (new part)
+        - `motoquant/scraper/gear_ratios.py` (new gear-ratio family)
+        - `motoquant/database/seed.py` → `seed_tire_library()` (new tire)
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What are you adding / correcting?
+      options:
+        - New bike
+        - Correction to existing bike specs
+        - New part (exhaust, ECU, sprocket, nitrous, etc.)
+        - Correction to existing part
+        - New tire model
+        - Gear-ratio correction
+        - OEM tire fitment correction
+    validations:
+      required: true
+
+  - type: input
+    id: bike_name
+    attributes:
+      label: Bike make / model / year (if applicable)
+      placeholder: e.g. Kawasaki ZX-10R 2021
+
+  - type: textarea
+    id: data
+    attributes:
+      label: The data
+      description: |
+        Paste the spec(s) in the same dataclass format you see in `known_bikes.py` / `seed_catalogs/*.py`.
+        For parts, include `fitment_rules` with `family`, `manufacturers`, `engine_configs`, `chain_pitch`, `stroke_type` where relevant — catalog-integration tests will reject cross-brand leaks.
+      render: python
+    validations:
+      required: true
+
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources / citations
+      description: |
+        Non-negotiable. Service manual, magazine test, manufacturer spec sheet, retailer page, dyno chart. Link or cite.
+        Data without sources will be closed.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission checks
+      options:
+        - label: I ran `python -m pytest tests/test_scraper.py tests/test_catalog_integration.py -q` locally and it's green with my addition.
+        - label: If this is a part, I verified its `fitment_rules` don't leak to other brands (ran `tests/test_catalog_integration.py`).
+        - label: If this is a bike, I ran `python -m motoquant.run sim --bike-id <new_id>` and the ET is within the validation envelope for its class.

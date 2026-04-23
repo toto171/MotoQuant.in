@@ -144,12 +144,17 @@ git commit -m "Short imperative subject line"
 git push -u origin feature/<short-name>
 ```
 
-**PR requirements:**
+**PR requirements (strict — enforced by branch protection on `main`):**
 - Tests pass locally (`python -m pytest tests/ -q`).
 - Ruff clean (`ruff check . && ruff format --check .`).
-- For physics changes: include the benchmark ET deltas in the PR description.
+- CI workflow green on the PR (pytest + ruff + desktop tsc/vite build + web Next.js build).
+- **At least one approving review** from someone other than the PR author.
+- For files owned via `.github/CODEOWNERS` (physics, schema, calibration, API, infra): the listed **CODEOWNER's approval is required** — GitHub will auto-request it.
+- For physics changes: include the benchmark ET deltas in the PR description (template has a table for this).
 - For schema changes: include the migration path (even if manual) and update `CLAUDE.md` → "Current State" section.
-- Both co-owners can merge their own PRs after self-review. For any change touching `motoquant/physics.py`, `submodels/`, or DB schema: request a review before merging.
+- **No self-merge.** Even the repo owner goes through review on anything touching a CODEOWNER-protected path.
+- `main` is protected: no direct pushes, no force-push, no deletion.
+- Once merged, a successful CI run on `main` triggers the Vercel production deploy (`.github/workflows/deploy.yml`). A red CI never reaches Vercel.
 
 **Commit message style** (look at `git log --oneline` for examples):
 - Imperative mood, present tense: "Add …", "Fix …", "Refactor …"

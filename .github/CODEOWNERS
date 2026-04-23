@@ -1,0 +1,62 @@
+# CODEOWNERS for MotoQuant Pro
+#
+# Every PR touching a matched path will auto-request review from the listed
+# owner(s). Combined with branch protection ("Require review from Code Owners"),
+# this enforces the "physics + schema changes need an explicit review" rule
+# from CONTRIBUTING.md.
+#
+# When a new co-developer joins, add their GitHub handle here on the areas they
+# own. Until then @da25mem5s02-debug (Hritwik) owns everything.
+
+# ---- Default owner (fallback) ----
+*                                   @da25mem5s02-debug
+
+# ---- Physics engine + sub-models (most sensitive) ----
+/motoquant/physics.py               @da25mem5s02-debug
+/motoquant/submodels/               @da25mem5s02-debug
+/motoquant/models.py                @da25mem5s02-debug
+/motoquant/defaults.py              @da25mem5s02-debug
+/motoquant/constants.py             @da25mem5s02-debug
+
+# ---- Database schema + migrations ----
+/motoquant/database/schema.py       @da25mem5s02-debug
+/motoquant/database/connection.py   @da25mem5s02-debug
+/motoquant/database/bridge.py       @da25mem5s02-debug
+
+# ---- Calibration pipeline ----
+/motoquant/calibration/             @da25mem5s02-debug
+
+# ---- Analysis / optimisation / surrogates ----
+/motoquant/analysis/                @da25mem5s02-debug
+
+# ---- Public API surfaces ----
+/motoquant/api.py                   @da25mem5s02-debug
+/motoquant/run.py                   @da25mem5s02-debug
+
+# ---- Data catalogs (lighter review — any collaborator can approve) ----
+# Add a second handle here once a data-lead joins:
+/motoquant/scraper/known_bikes.py   @da25mem5s02-debug
+/motoquant/scraper/gear_ratios.py   @da25mem5s02-debug
+/motoquant/database/seed.py         @da25mem5s02-debug
+/motoquant/database/seed_catalogs/  @da25mem5s02-debug
+
+# ---- Desktop app (Tauri + React) ----
+/desktop/                           @da25mem5s02-debug
+
+# ---- Web (Next.js marketing + simulator) ----
+/web/                               @da25mem5s02-debug
+
+# ---- CI / infra / deploy configs ----
+/.github/                           @da25mem5s02-debug
+/Dockerfile                         @da25mem5s02-debug
+/nixpacks.toml                      @da25mem5s02-debug
+/railway.toml                       @da25mem5s02-debug
+/vercel.json                        @da25mem5s02-debug
+/Procfile                           @da25mem5s02-debug
+/requirements-api.txt               @da25mem5s02-debug
+/pyproject.toml                     @da25mem5s02-debug
+
+# ---- Project docs (any maintainer can approve) ----
+/CLAUDE.md                          @da25mem5s02-debug
+/CONTRIBUTING.md                    @da25mem5s02-debug
+/ONBOARDING.md                      @da25mem5s02-debug

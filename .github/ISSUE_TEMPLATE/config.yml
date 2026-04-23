@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a question
+    url: https://github.com/da25mem5s02-debug/MotoQuant_v1/discussions
+    about: For open-ended questions and design discussions, use GitHub Discussions instead of an issue.
+  - name: Read the onboarding doc
+    url: https://github.com/da25mem5s02-debug/MotoQuant_v1/blob/main/ONBOARDING.md
+    about: New collaborator? Start here.

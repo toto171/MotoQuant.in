@@ -1,0 +1,127 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: Python tests + lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements-api.txt
+            pyproject.toml
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-api.txt
+          pip install -e .
+          pip install ruff pytest
+
+      - name: Ruff lint
+        run: ruff check .
+
+      - name: Ruff format check
+        run: ruff format --check .
+
+      - name: Seed dev database
+        run: |
+          python -m motoquant.run --db /tmp/ci.db db init
+          python -m motoquant.run --db /tmp/ci.db import --known-bikes
+          python -m motoquant.run --db /tmp/ci.db db seed
+
+      - name: Run pytest (fast suite)
+        env:
+          MOTOQUANT_DB: /tmp/ci.db
+        run: pytest tests/ -q --maxfail=5
+
+      - name: Physics benchmark sanity check
+        run: |
+          python - <<'PY'
+          import motoquant
+          tol = 0.15
+          cases = {
+              "K5":       (motoquant.gsxr1000_k5(),  10.034),
+              "R1":       (motoquant.yzfr1_4c8(),    10.286),
+              "Hayabusa": (motoquant.hayabusa_gen1(),10.472),
+          }
+          failed = []
+          for name, (cfg, target) in cases.items():
+              et = motoquant.MotoQuantEngine(cfg).run().time_quarter
+              delta = et - target
+              print(f"{name:10s} sim={et:.3f}s  target={target:.3f}s  delta={delta:+.3f}s")
+              if abs(delta) > tol:
+                  failed.append(name)
+          if failed:
+              raise SystemExit(f"Benchmark regression on: {failed}")
+          PY
+
+  desktop:
+    name: Desktop (Tauri + React) typecheck + build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: TypeScript typecheck
+        run: npx tsc --noEmit
+
+      - name: Vite build
+        run: npx vite build
+
+  web:
+    name: Web (Next.js) build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Next.js build
+        env:
+          NEXT_PUBLIC_API_URL: https://api.motoquant.in
+        run: npm run build

@@ -1,0 +1,82 @@
+name: Bug report
+description: Something is broken, crashing, or producing the wrong numbers.
+title: "[bug] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Before filing, check CLAUDE.md → "Current State" to confirm the area you're reporting is supposed to be working.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One sentence — what's broken?
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Exact commands or code that reproduce the bug. Include bike ID, venue ID, flags — we need to reproduce locally.
+      placeholder: |
+        python -m motoquant.run sim --bike-id 23 --venue-id 1 --use-adaptive-dt
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: Paste full error output / stack trace / wrong numbers.
+      render: shell
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - physics / submodels
+        - database / schema
+        - CLI
+        - FastAPI backend
+        - Streamlit UI
+        - Desktop (Tauri + React)
+        - Web (Next.js)
+        - Calibration (Dragy / dyno / ECU)
+        - Parts catalog / fitment
+        - Scraper / importer
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: OS, Python version, relevant package versions.
+      placeholder: macOS 14.4, Python 3.11.7, latest main
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: benchmarks
+    attributes:
+      label: Physics baseline still green?
+      description: If you suspect a physics regression, run the three reference benchmarks.
+      options:
+        - label: K5 sim is within 10.034s ± 0.07 (or I confirmed this bug moves it)
+        - label: R1 sim is within 10.286s ± 0.10 (or I confirmed this bug moves it)
+        - label: Hayabusa sim is in 10.1–10.7s range (or I confirmed this bug moves it)
