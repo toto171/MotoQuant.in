@@ -332,11 +332,46 @@ class TestSubBuilders:
         # Known dyno curves have ~20-30 points; synthetic curves have 100
         assert len(engine.dyno_curve.rpm) >= 10
 
-    def test_engine_inertia_by_category(self):
-        for cat, expected in CATEGORY_ENGINE_INERTIA.items():
-            spec = _make_spec(category=cat)
-            engine = _build_engine_from_spec(spec)
-            assert engine.engine_inertia_kgm2 == pytest.approx(expected)
+    def test_engine_inertia_displacement_scaled(self):
+        """April 24, 2026: CATEGORY_ENGINE_INERTIA replaced with
+        displacement-scaled formula I = 0.002·cyl + 0.030·(disp/1000).
+        Verifies the formula applies correctly across displacement classes
+        (small-cc singles, mid-cc twins, litre-class I4s)."""
+        from motoquant.scraper.importer import _engine_inertia_from_spec
+
+        # 1 000cc I4 sportbike (K5 ref): 0.002*4 + 0.030*1.000 = 0.038
+        spec_litre = _make_spec(displacement_cc=999.0, cylinders=4)
+        assert _build_engine_from_spec(spec_litre).engine_inertia_kgm2 == pytest.approx(0.038, abs=0.003)
+
+        # 155cc single (R15 V3): 0.002*1 + 0.030*0.155 = 0.00665
+        spec_small = _make_spec(displacement_cc=155.0, cylinders=1)
+        assert 0.005 <= _build_engine_from_spec(spec_small).engine_inertia_kgm2 <= 0.010
+
+        # 399cc twin (Ninja 400): 0.002*2 + 0.030*0.399 = 0.01597
+        spec_mid = _make_spec(displacement_cc=399.0, cylinders=2)
+        assert 0.013 <= _build_engine_from_spec(spec_mid).engine_inertia_kgm2 <= 0.020
+
+        # 1340cc I4 (Hayabusa): 0.002*4 + 0.030*1.340 = 0.0482
+        spec_hyper = _make_spec(displacement_cc=1340.0, cylinders=4)
+        assert 0.045 <= _build_engine_from_spec(spec_hyper).engine_inertia_kgm2 <= 0.055
+
+        # Monotonic in displacement for same cyl count
+        specs = [_make_spec(displacement_cc=d, cylinders=4) for d in (600, 1000, 1400)]
+        inertias = [_build_engine_from_spec(s).engine_inertia_kgm2 for s in specs]
+        assert inertias == sorted(inertias)
+
+        # Physics clip: degenerate spec (0 disp, 0 cyl) falls back to floor
+        spec_zero = _make_spec(displacement_cc=100.0, cylinders=1)
+        assert _engine_inertia_from_spec(spec_zero) >= 0.005
+
+    def test_engine_inertia_2t_reduced(self):
+        """2-stroke engines should have ~0.60× inertia (no valvetrain)."""
+        spec_4t = _make_spec(displacement_cc=347.0, cylinders=2)
+        spec_2t = _make_spec(displacement_cc=347.0, cylinders=2, stroke_type=2,
+                             reed_valve=True)
+        i_4t = _build_engine_from_spec(spec_4t).engine_inertia_kgm2
+        i_2t = _build_engine_from_spec(spec_2t).engine_inertia_kgm2
+        assert i_2t == pytest.approx(i_4t * 0.60, abs=0.002)
 
     def test_chassis_dry_mass(self, good_spec):
         chassis = _build_chassis_from_spec(good_spec)
