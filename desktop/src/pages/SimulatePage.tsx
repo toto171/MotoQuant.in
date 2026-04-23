@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { Play, Loader2, AlertTriangle } from "lucide-react";
-import { useSimulate, useVenues } from "@/hooks/useApi";
+import { useState, useEffect } from "react";
+import { Play, Loader2, AlertTriangle, Save, Check } from "lucide-react";
+import { useSimulate, useVenues, useSaveRun } from "@/hooks/useApi";
 import { BikePicker } from "@/components/BikePicker";
 import { StatTile } from "@/components/StatTile";
 import { SimChart, SIM_CHANNELS } from "@/components/SimChart";
@@ -13,14 +13,17 @@ export function SimulatePage() {
   const [powerBoost, setPowerBoost] = useState(0);
   const [massDelta, setMassDelta] = useState(0);
   const [adaptive, setAdaptive] = useState(false);
+  const [savedRunId, setSavedRunId] = useState<number | null>(null);
 
   const venues = useVenues();
   const sim = useSimulate();
+  const save = useSaveRun();
 
   const canRun = bike != null && !sim.isPending;
 
   const onRun = () => {
     if (!bike) return;
+    setSavedRunId(null); // reset save-indicator when starting a new sim
     sim.mutate({
       bike_id: bike.id,
       venue_id: venueId ?? undefined,
@@ -32,6 +35,28 @@ export function SimulatePage() {
   };
 
   const result = sim.data;
+
+  // Whenever a fresh sim result arrives, clear the "saved" indicator so the
+  // user can save this new run too. (Mutation data replaces on success.)
+  useEffect(() => {
+    if (sim.isPending) setSavedRunId(null);
+  }, [sim.isPending]);
+
+  const onSave = () => {
+    if (!result || !bike) return;
+    save.mutate(
+      {
+        bike_id: bike.id,
+        venue_id: venueId,
+        et_quarter_s: result.et_quarter_s,
+        trap_speed_kmh: result.trap_speed_kmh,
+        et_60ft_s: result.splits["60ft_s"],
+        et_eighth_s: result.splits["660ft_s"],
+        et_1000ft_s: result.splits["1000ft_s"],
+      },
+      { onSuccess: (data) => setSavedRunId(data.run_id) },
+    );
+  };
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -172,6 +197,36 @@ export function SimulatePage() {
               value={result.splits["660ft_s"].toFixed(3)}
               unit="s"
             />
+          </section>
+
+          {/* Save-run strip — lands the current result into sim_runs so it
+              shows up on the History tab + /api/leaderboard. */}
+          <section className="flex items-center justify-end gap-3 text-sm">
+            {save.isError && (
+              <span className="text-stop-500 text-xs">
+                Save failed: {save.error?.message || "unknown error"}
+              </span>
+            )}
+            {savedRunId != null ? (
+              <span className="inline-flex items-center gap-1.5 text-go-500">
+                <Check className="w-4 h-4" />
+                Saved to history (run #{savedRunId})
+              </span>
+            ) : (
+              <button
+                onClick={onSave}
+                disabled={save.isPending}
+                className="btn btn-ghost inline-flex items-center gap-2"
+                title="Persist this result to the local sim_runs table"
+              >
+                {save.isPending ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Save className="w-3.5 h-3.5" />
+                )}
+                Save this run
+              </button>
+            )}
           </section>
 
           <section className="card p-5">
