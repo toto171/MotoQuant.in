@@ -1,0 +1,11 @@
+# PyInstaller build artifacts
+build/
+dist/
+__pycache__/
+*.pyc
+
+# Build venv
+.venv/
+
+# Runtime smoke-test output
+/tmp/mq-health.json
