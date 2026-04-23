@@ -6,6 +6,7 @@ import {
   Filter,
   AlertCircle,
   IndianRupee,
+  ArrowLeftRight,
 } from "lucide-react";
 import { BikePicker } from "@/components/BikePicker";
 import { StatTile } from "@/components/StatTile";
@@ -16,6 +17,43 @@ import {
 } from "@/hooks/useApi";
 import type { BikeSummary, Part } from "@/types/api";
 import clsx from "clsx";
+
+// Categories where picking one part should DE-select any other part in the
+// same category — you can't realistically run two exhausts or two ECUs on the
+// same bike. Check by lowercased category name so seed variants
+// ("exhaust-full-system" vs "exhaust") all collapse to the same prefix.
+//
+// Anything NOT in this list (e.g. bodywork, accessories, lighting) stays
+// additive — you can stack a tail tidy + a windscreen + a seat cowl.
+const EXCLUSIVE_CATEGORY_PREFIXES = [
+  "exhaust",
+  "air-filter",
+  "air_filter",
+  "ecu",
+  "piggyback",
+  "fuel-system",
+  "fuel_system",
+  "battery",
+  "chain",
+  "front-sprocket",
+  "front_sprocket",
+  "rear-sprocket",
+  "rear_sprocket",
+  "slipper",
+  "clutch",
+  "quickshifter",
+  "boost",
+  "turbo",
+  "supercharger",
+  "nitrous",
+  "wheelie",
+] as const;
+
+function isExclusiveCategory(name: string | null | undefined): boolean {
+  if (!name) return false;
+  const n = name.toLowerCase();
+  return EXCLUSIVE_CATEGORY_PREFIXES.some((p) => n.startsWith(p) || n.includes(p));
+}
 
 export function BuildPage() {
   const [bike, setBike] = useState<BikeSummary | null>(null);
@@ -60,11 +98,49 @@ export function BuildPage() {
     0,
   );
 
+  // Belt-and-braces client filter on top of the server's compatible_only=true.
+  // If the server ever leaks an incompatible row (it shouldn't — the server's
+  // is_compatible() already filters), we still hide it. Also annotates parts
+  // in their exclusive category where a swap would happen on click.
+  const visibleParts = useMemo(() => {
+    const serverParts = parts.data?.parts ?? [];
+    return serverParts.filter((p) => p.compatible !== false);
+  }, [parts.data]);
+
+  // For each exclusive category, find the currently-selected part in it (so
+  // the UI can show "Selecting this will replace X" hints).
+  const selectedByExclusiveCategory = useMemo(() => {
+    const m = new Map<number, Part>(); // category_id → selected part
+    for (const p of selectedParts) {
+      if (isExclusiveCategory(p.category_name)) {
+        m.set(p.category_id, p);
+      }
+    }
+    return m;
+  }, [selectedParts]);
+
   const toggle = (part: Part) =>
     setSelectedMap((prev) => {
       const next = new Map(prev);
-      if (next.has(part.id)) next.delete(part.id);
-      else next.set(part.id, part);
+
+      // Deselect if already picked.
+      if (next.has(part.id)) {
+        next.delete(part.id);
+        return next;
+      }
+
+      // Enforce category exclusivity: if this part is in a category marked
+      // exclusive, kick out any other selected part in the same category
+      // before adding this one. Prevents the "two exhausts at once" bug.
+      if (isExclusiveCategory(part.category_name)) {
+        for (const [otherId, otherPart] of next) {
+          if (otherPart.category_id === part.category_id) {
+            next.delete(otherId);
+          }
+        }
+      }
+
+      next.set(part.id, part);
       return next;
     });
 
@@ -75,7 +151,9 @@ export function BuildPage() {
           <h1 className="text-2xl font-semibold">Build-a-bike</h1>
           <p className="text-sm text-carbon-400 mt-1">
             Pick a base. Add parts. See the ET and trap speed update live —
-            every pick runs the physics engine end to end.
+            every pick runs the physics engine end to end. Only parts that
+            fit the chosen bike are shown, and exclusive categories (exhaust,
+            ECU, chain, etc.) swap rather than stack.
           </p>
         </header>
 
@@ -147,21 +225,41 @@ export function BuildPage() {
                 </div>
               </div>
             )}
-            {parts.data && parts.data.parts.length === 0 && (
+            {!parts.isLoading && visibleParts.length === 0 && (
               <div className="p-8 text-center text-carbon-500 text-sm">
                 No compatible parts for this bike + filter combo.
               </div>
             )}
-            <ul className="divide-y divide-carbon-800">
-              {parts.data?.parts.map((p) => (
-                <PartRow
-                  key={p.id}
-                  part={p}
-                  selected={selectedMap.has(p.id)}
-                  onToggle={() => toggle(p)}
-                />
-              ))}
-            </ul>
+            {visibleParts.length > 0 && (
+              <>
+                <div className="px-4 py-2 text-[10px] uppercase tracking-wider text-carbon-500 bg-carbon-900/40 border-b border-carbon-800">
+                  {visibleParts.length} compatible part
+                  {visibleParts.length === 1 ? "" : "s"} for{" "}
+                  <span className="text-carbon-300">
+                    {bike.manufacturer} {bike.model}
+                  </span>
+                </div>
+                <ul className="divide-y divide-carbon-800">
+                  {visibleParts.map((p) => {
+                    const exclusiveSwap =
+                      isExclusiveCategory(p.category_name) &&
+                      !selectedMap.has(p.id) &&
+                      selectedByExclusiveCategory.has(p.category_id)
+                        ? selectedByExclusiveCategory.get(p.category_id) || null
+                        : null;
+                    return (
+                      <PartRow
+                        key={p.id}
+                        part={p}
+                        selected={selectedMap.has(p.id)}
+                        swapsOut={exclusiveSwap}
+                        onToggle={() => toggle(p)}
+                      />
+                    );
+                  })}
+                </ul>
+              </>
+            )}
           </div>
         )}
       </section>
@@ -280,10 +378,12 @@ export function BuildPage() {
 function PartRow({
   part,
   selected,
+  swapsOut,
   onToggle,
 }: {
   part: Part;
   selected: boolean;
+  swapsOut: Part | null;
   onToggle: () => void;
 }) {
   return (
@@ -322,12 +422,23 @@ function PartRow({
             {part.model_name}
           </span>
         </div>
-        <div className="text-[10px] uppercase tracking-wider text-carbon-500 mt-0.5">
-          {part.category_display}
-          {typeof part.power_delta_hp === "number" &&
-            ` · +${part.power_delta_hp} hp`}
-          {typeof part.mass_delta_kg === "number" &&
-            ` · ${part.mass_delta_kg > 0 ? "+" : ""}${part.mass_delta_kg} kg`}
+        <div className="text-[10px] uppercase tracking-wider text-carbon-500 mt-0.5 flex items-center gap-2">
+          <span>{part.category_display}</span>
+          {typeof part.power_delta_hp === "number" && (
+            <span>· +{part.power_delta_hp} hp</span>
+          )}
+          {typeof part.mass_delta_kg === "number" && (
+            <span>
+              · {part.mass_delta_kg > 0 ? "+" : ""}
+              {part.mass_delta_kg} kg
+            </span>
+          )}
+          {swapsOut && (
+            <span className="inline-flex items-center gap-1 text-warn-500">
+              <ArrowLeftRight className="w-3 h-3" />
+              replaces {swapsOut.brand}
+            </span>
+          )}
         </div>
       </div>
       <div className="text-right text-sm shrink-0">
