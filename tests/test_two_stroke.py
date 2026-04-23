@@ -113,10 +113,17 @@ class TestTwoStrokeImporter:
         assert 5000 <= cfg.engine.tuned_rpm <= 15000
 
     def test_engine_inertia_scaled_for_2t(self):
-        """2T bikes should have ~0.60× the engine inertia of comparable 4T (no valvetrain)."""
+        """2T engines should have ~0.60× the engine inertia of comparable 4T (no valvetrain).
+
+        April 24, 2026: CATEGORY_ENGINE_INERTIA flat lookup replaced with
+        displacement-scaled formula `_engine_inertia_from_spec(spec)`:
+          I = 0.002·N_cyl + 0.030·(disp_cc/1000)
+        For RD350 (2 cyl, 347cc): I_4T = 0.002*2 + 0.030*0.347 = 0.0144
+        With the 0.60× 2T factor: I ≈ 0.0086 kg·m². Tolerance widened
+        to cover the 250-400cc 2-cyl-2T displacement band.
+        """
         cfg = spec_to_bike_config(YAMAHA_RD350_1974)
-        # 0.60 × naked-category baseline (0.042) = 0.0252
-        assert 0.020 <= cfg.engine.engine_inertia_kgm2 <= 0.035
+        assert 0.005 <= cfg.engine.engine_inertia_kgm2 <= 0.020
 
     def test_staging_launch_rpm_override_for_2t(self):
         """2T launch RPM should be set near tuned_rpm × 0.92 (drag-launch point)."""
