@@ -31,6 +31,7 @@ import io
 import json
 import logging
 import os
+import sqlite3
 import tempfile
 from datetime import datetime, timezone
 from typing import Any
@@ -1112,6 +1113,82 @@ def list_parts(
         raise
     except Exception as exc:
         raise HTTPException(500, f"Database error: {exc}")
+
+
+class SaveRunRequest(BaseModel):
+    """POST /api/simulate/save — persist a sim result to the sim_runs table
+    so it surfaces on /api/leaderboard and the desktop History tab."""
+
+    bike_id: int
+    venue_id: int | None = None
+    et_quarter_s: float
+    trap_speed_kmh: float
+    et_60ft_s: float | None = None
+    et_eighth_s: float | None = None
+    et_1000ft_s: float | None = None
+    notes: str | None = None
+
+
+@app.post("/api/simulate/save", status_code=201)
+def save_simulation(req: SaveRunRequest):
+    """Persist a single sim result to sim_runs. Resolves the incoming
+    bike_models.id to a bike_configs.id using the seed's 1:1 mapping."""
+    from . import __version__
+
+    db = _get_db()
+    if not db:
+        raise HTTPException(503, "Database unavailable")
+
+    row = db.execute(
+        "SELECT id FROM bike_configs WHERE bike_model_id = ? "
+        "ORDER BY is_current DESC LIMIT 1",
+        (req.bike_id,),
+    ).fetchone()
+    if not row:
+        raise HTTPException(
+            404,
+            f"No bike_config found for bike_model_id={req.bike_id}. "
+            "Re-seed with `python -m motoquant.run import --known-bikes`.",
+        )
+    bike_config_id = row["id"]
+
+    split_times = {
+        "time_60ft": req.et_60ft_s,
+        "time_eighth": req.et_eighth_s,
+        "time_1000ft": req.et_1000ft_s,
+        "time_quarter": req.et_quarter_s,
+        "speed_quarter_kmh": req.trap_speed_kmh,
+    }
+
+    try:
+        cur = db.execute(
+            """INSERT INTO sim_runs
+               (bike_config_id, venue_id, et_quarter_s, trap_speed_kmh,
+                et_eighth_s, time_60ft_s, time_1000ft_s,
+                sim_version, split_times_json, notes)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                bike_config_id,
+                req.venue_id,
+                req.et_quarter_s,
+                req.trap_speed_kmh,
+                req.et_eighth_s,
+                req.et_60ft_s,
+                req.et_1000ft_s,
+                __version__,
+                json.dumps(split_times),
+                req.notes,
+            ),
+        )
+        db.commit()
+    except sqlite3.Error as exc:
+        raise HTTPException(500, f"Failed to persist run: {exc}")
+
+    return {
+        "run_id": cur.lastrowid,
+        "bike_id": req.bike_id,
+        "bike_config_id": bike_config_id,
+    }
 
 
 @app.get("/api/leaderboard")

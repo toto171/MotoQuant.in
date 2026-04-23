@@ -17,6 +17,8 @@ import type {
   PartsResponse,
   QuickSimRequest,
   QuickSimResponse,
+  SaveRunRequest,
+  SaveRunResponse,
   SimulateRequest,
   SimulateResponse,
   TiresResponse,
@@ -173,6 +175,15 @@ export const api = {
 
   simulateCompare: (req: CompareRequest) =>
     request<CompareResponse>("/api/simulate/compare", {
+      method: "POST",
+      body: JSON.stringify(req),
+    }),
+
+  // Persist a single simulation result to sim_runs (shows up on the
+  // leaderboard + History tab). bike_id is bike_models.id; the server
+  // resolves it to bike_configs.id internally.
+  saveRun: (req: SaveRunRequest) =>
+    request<SaveRunResponse>("/api/simulate/save", {
       method: "POST",
       body: JSON.stringify(req),
     }),

@@ -253,6 +253,25 @@ export interface QuickSimResponse {
   et_delta_s: number | null;
 }
 
+// ─── Save run ────────────────────────────────────────────────────────────
+
+export interface SaveRunRequest {
+  bike_id: number;
+  venue_id?: number | null;
+  et_quarter_s: number;
+  trap_speed_kmh: number;
+  et_60ft_s?: number | null;
+  et_eighth_s?: number | null;
+  et_1000ft_s?: number | null;
+  notes?: string | null;
+}
+
+export interface SaveRunResponse {
+  run_id: number;
+  bike_id: number;
+  bike_config_id: number;
+}
+
 // ─── Leaderboard ─────────────────────────────────────────────────────────
 
 export interface LeaderboardEntry {

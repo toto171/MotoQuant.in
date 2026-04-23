@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { useBikes } from "@/hooks/useApi";
 import type { BikeSummary } from "@/types/api";
@@ -12,12 +12,33 @@ interface Props {
 export function BikePicker({ value, onChange }: Props) {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
+  // Sticky copy of the last-picked summary — prevents the display from
+  // losing its label when search clears after a pick. Without this, picking
+  // e.g. "Suzuki Hayabusa" would select id=114 correctly, but then
+  // `setSearch("")` causes the next /api/bikes fetch to return the first 60
+  // bikes alphabetically (Aprilia, BMW, ...) which doesn't contain Hayabusa
+  // — so the `selected` lookup returned null and the picker fell back to
+  // the empty-search input state even though `value` was still set.
+  // Bug only manifested for bikes past the first 60 alphabetically
+  // (Harley, Suzuki, Triumph, Yamaha, etc.).
+  const [pickedSummary, setPickedSummary] = useState<BikeSummary | null>(null);
+
   const { data, isLoading } = useBikes({ search, limit: 60 });
 
-  const selected = useMemo(
-    () => data?.bikes.find((b) => b.id === value) || null,
-    [data, value],
-  );
+  // Mirror external clears (e.g. parent resets the form).
+  useEffect(() => {
+    if (value === null) setPickedSummary(null);
+  }, [value]);
+
+  const selected = useMemo(() => {
+    if (value == null) return null;
+    // Prefer a fresh match from the current search fetch (keeps data up to
+    // date if the catalog ever changes); fall back to the sticky local copy.
+    const fresh = data?.bikes.find((b) => b.id === value);
+    if (fresh) return fresh;
+    if (pickedSummary && pickedSummary.id === value) return pickedSummary;
+    return null;
+  }, [data, value, pickedSummary]);
 
   return (
     <div className="relative">
@@ -39,6 +60,7 @@ export function BikePicker({ value, onChange }: Props) {
               onClick={(e) => {
                 e.stopPropagation();
                 onChange(null, null);
+                setPickedSummary(null);
                 setSearch("");
               }}
               className="ml-auto text-carbon-500 hover:text-carbon-100"
@@ -75,6 +97,7 @@ export function BikePicker({ value, onChange }: Props) {
               key={b.id}
               onClick={() => {
                 onChange(b.id, b);
+                setPickedSummary(b); // sticky for display (see comment above)
                 setOpen(false);
                 setSearch("");
               }}

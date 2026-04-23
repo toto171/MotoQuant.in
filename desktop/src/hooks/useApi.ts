@@ -1,10 +1,12 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import type {
   CompareRequest,
   CompareResponse,
   QuickSimRequest,
   QuickSimResponse,
+  SaveRunRequest,
+  SaveRunResponse,
   SimulateRequest,
   SimulateResponse,
 } from "@/types/api";
@@ -82,5 +84,17 @@ export function useLeaderboard(limit = 20) {
     queryKey: ["leaderboard", limit],
     queryFn: () => api.leaderboard({ limit }),
     staleTime: 30_000, // sim_runs doesn't update often; 30s is fine
+  });
+}
+
+export function useSaveRun() {
+  const qc = useQueryClient();
+  return useMutation<SaveRunResponse, Error, SaveRunRequest>({
+    mutationFn: (req) => api.saveRun(req),
+    onSuccess: () => {
+      // Refresh the leaderboard so the newly-saved run shows up immediately
+      // on the History tab without waiting for staleTime to expire.
+      qc.invalidateQueries({ queryKey: ["leaderboard"] });
+    },
   });
 }
