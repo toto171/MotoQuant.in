@@ -51,9 +51,9 @@ function ScrollIndicator() {
 
 function StatsStrip() {
   const stats = [
-    { num: '290', label: 'BIKES' },
+    { num: '287', label: 'BIKES' },
     { num: '159', label: 'TIRES' },
-    { num: '465', label: 'PARTS' },
+    { num: '424', label: 'PARTS' },
     { num: '20', label: 'VENUES' },
     { num: '838', label: 'TESTS' },
     { num: '15', label: 'SUB-MODELS' },
@@ -676,7 +676,7 @@ export default function HomePage() {
                 Validated on Real Telemetry
               </h2>
               <p className="text-white/80 text-lg max-w-3xl">
-                We don't just predict — we measure. Top 10 most accurate bikes out of 53 matched benchmarks (78 total curated) against published Cycle World, Sport Rider, MCN, and Motorcyclist quarter-mile test results. Full validation sweep runs across all 290 bikes — zero silent failures.
+                We don't just predict — we measure. Top 10 most accurate bikes out of 78 matched benchmarks (ET) plus 39 top-speed benchmarks, against published Cycle World, Sport Rider, MCN, and Motorcyclist tests plus factory specs. Full validation sweep runs across all 287 bikes — zero silent failures.
               </p>
             </div>
           </RevealSection>
