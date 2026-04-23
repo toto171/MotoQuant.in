@@ -54,6 +54,17 @@ Copy-Item dist\motoquant-backend.exe `
 
 You can discover your host's triple with `rustc -vV | grep host`.
 
+## Wiring the sidecar back into `tauri.conf.json`
+
+The Tauri config currently **does not** declare `externalBin` or `resources`, because those paths are validated at build time and we didn't want `npx tauri dev` to fail on a fresh clone before anyone has built a sidecar. Once you've produced `desktop/src-tauri/bin/motoquant-backend-<TRIPLE>[.exe]` and copied the seeded DB to `desktop/src-tauri/resources/motoquant.db`, add these two keys back under `"bundle"` in `desktop/src-tauri/tauri.conf.json`:
+
+```json
+"externalBin": ["bin/motoquant-backend"],
+"resources": ["resources/motoquant.db"]
+```
+
+Tauri resolves `externalBin` paths per-target: the `bin/motoquant-backend` prefix + your host's target triple (e.g. `motoquant-backend-x86_64-pc-windows-msvc.exe` on Windows). After re-adding, `npx tauri build` produces an installer that bundles both.
+
 ## Database bundling
 
 The seeded `motoquant.db` (~5 MB, 270 bikes / 424 parts / 159 tires / 20 venues) is bundled **inside** the PyInstaller binary via `datas` in the spec file. `sidecar_entry.py` resolves `sys._MEIPASS/motoquant.db` at startup and sets `MOTOQUANT_DB` so `motoquant/api.py:92` finds it.
@@ -84,4 +95,4 @@ Then in another terminal run `uvicorn motoquant.api:app --reload`. Tauri's `setu
 
 ## CI integration
 
-This spec is designed to be CI-buildable. A `sidecar` job added to [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) would run on a matrix of `{ubuntu-latest, windows-latest, macos-latest}` and upload the artifacts. Not yet wired — logged as Phase 5 remaining work.
+This spec is designed to be CI-buildable. A `sidecar` job added to [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) would run on a matrix of `{ubuntu-latest, windows-latest, macos-l
