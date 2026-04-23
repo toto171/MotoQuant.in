@@ -253,6 +253,92 @@ export interface QuickSimResponse {
   et_delta_s: number | null;
 }
 
+// ─── Leaderboard ─────────────────────────────────────────────────────────
+
+export interface LeaderboardEntry {
+  id: number;
+  et_quarter_s: number;
+  trap_speed_kmh: number;
+  manufacturer: string | null;
+  model: string | null;
+  year: number | null;
+  created_at: string | null;
+}
+
+export interface LeaderboardResponse {
+  leaderboard: LeaderboardEntry[];
+  total: number;
+}
+
+// ─── Compare (A vs B) ────────────────────────────────────────────────────
+
+export interface CompareRequest {
+  // Build A (baseline)
+  a_bike_id?: number | null;
+  a_bike_preset?: string | null;
+  a_power_boost_pct?: number;
+  a_mass_delta_kg?: number;
+  a_rider_mass_kg?: number;
+  a_part_ids?: number[];
+  a_front_tire_id?: number | null;
+  a_rear_tire_id?: number | null;
+
+  // Build B (modified)
+  b_bike_id?: number | null;
+  b_bike_preset?: string | null;
+  b_power_boost_pct?: number;
+  b_mass_delta_kg?: number;
+  b_rider_mass_kg?: number;
+  b_part_ids?: number[];
+  b_front_tire_id?: number | null;
+  b_rear_tire_id?: number | null;
+
+  // Shared conditions
+  venue_id?: number | null;
+  ambient_temp_c?: number | null;
+  track_temp_c?: number | null;
+  humidity_pct?: number | null;
+  headwind_kmh?: number | null;
+}
+
+// Compare timeseries is a subset of SimTimeseries — no x_m / tire_temp / forces.
+export interface CompareTimeseries {
+  t_s: number[];
+  v_kmh: number[];
+  rpm: number[];
+  gear: number[];
+  accel_g: number[];
+  traction_pct: number[];
+  power_kw: number[];
+}
+
+export interface CompareBuildSummary {
+  label: "A" | "B";
+  et_quarter_s: number;
+  trap_speed_kmh: number;
+  et_60ft_s: number;
+  et_eighth_s: number;
+  bike_name: string;
+  peak_power_hp: number;
+  total_mass_kg: number;
+  parts_applied: AppliedPart[];
+  build_cost_inr: number;
+  timeseries?: CompareTimeseries;
+}
+
+export interface CompareDelta {
+  et_s: number;
+  trap_kmh: number;
+  faster: "A" | "B" | "tie";
+  cost_diff_inr: number;
+}
+
+export interface CompareResponse {
+  a: CompareBuildSummary;
+  b: CompareBuildSummary;
+  delta: CompareDelta;
+}
+
 // ─── Generic error ───────────────────────────────────────────────────────
 
 export interface ApiError {

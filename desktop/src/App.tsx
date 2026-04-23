@@ -3,6 +3,7 @@ import { Layout } from "@/components/Layout";
 import { SimulatePage } from "@/pages/SimulatePage";
 import { BikesPage } from "@/pages/BikesPage";
 import { BuildPage } from "@/pages/BuildPage";
+import { ComparePage } from "@/pages/ComparePage";
 import { HistoryPage } from "@/pages/HistoryPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 
@@ -14,6 +15,7 @@ export function App() {
         <Route path="/simulate" element={<SimulatePage />} />
         <Route path="/bikes" element={<BikesPage />} />
         <Route path="/build" element={<BuildPage />} />
+        <Route path="/compare" element={<ComparePage />} />
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<Navigate to="/simulate" replace />} />
