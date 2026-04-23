@@ -304,7 +304,14 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
         elif cc < 500 and cyls <= 2:
             redline_factor = 1.30   # small singles / parallel twins
         elif cc < 700 and cyls <= 2:
-            redline_factor = 1.22   # mid-size twins (MT-07, Z650, Dominar 400)
+            # April 22, 2026: raised 1.22 → 1.32 to close systematic slowness
+            # bias on 500-700cc parallel twins (SV650, Z650, Ninja 650, MT-07,
+            # CB650R, Trident 660, YZF-R7, RS 457, TNT 600i). Real redlines on
+            # this class sit at 10 500 – 11 000 rpm with peak power at 8 000–
+            # 8 500 rpm, giving a ratio of ~1.30–1.35. The old 1.22 under-
+            # estimated top-gear pull and forced premature upshifts that
+            # truncated trap-speed and pushed validation deltas +0.5 to +1.25 s.
+            redline_factor = 1.32   # mid-size twins (MT-07, Z650, Dominar 400)
         elif cc < 700:
             redline_factor = 1.14   # 600cc-class inline-4 (R6, CBR600RR, ZX-6R)
         elif spec.category in ("cruiser", "touring", "muscle"):
@@ -352,6 +359,7 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
                 powervalve=bool(spec.powervalve),
                 peak_power_hp=float(peak_hp),
                 peak_power_rpm=float(peak_hp_rpm),
+                cylinders=int(cyls or 1),
                 points=100,
             )
         else:

@@ -206,17 +206,27 @@ class EngineParams:
 
         tuned = self.tuned_rpm or self.peak_power_rpm
         # Widths as fractions of the tuned RPM.  Kept in sync with
-        # `_synthetic_2stroke_torque_curve` in defaults.py.  April 20, 2026
-        # calibration widened these after small-cc 2T bikes failed to launch
-        # in-sim because off-pipe torque was unrealistically low.
+        # `_synthetic_2stroke_torque_curve` in defaults.py.  April 22, 2026:
+        # re-synced to match the April 21 narrowed bands in defaults.py — the
+        # two curves must produce identical values or hand-built configs
+        # diverge silently from scraped configs.  Also added the cylinders>=3
+        # vintage-triple branch introduced alongside the GT750 / H2 Mach IV
+        # fix.
+        cyls = self.cylinder_count or 1
         if self.powervalve:
-            band_lo = 0.32
-            band_hi = 0.16
-            baseline = 0.30  # powervalve → lots of meat off-pipe
+            band_lo = 0.18
+            band_hi = 0.12
+            baseline = 0.20  # powervalve: good off-pipe
+        elif cyls >= 3:
+            # Vintage multi-cylinder piston-port triple (GT750, H2 Mach IV):
+            # overlapping firing smooths the resonance into a wide, flat curve.
+            band_lo = 0.55
+            band_hi = 0.30
+            baseline = 0.50
         else:
-            band_lo = 0.24
-            band_hi = 0.11
-            baseline = 0.20  # piston-port / fixed-port — peakier but workable
+            band_lo = 0.12
+            band_hi = 0.08
+            baseline = 0.12  # piston-port: peakier, narrower base
 
         if rpm <= tuned:
             x = (tuned - rpm) / max(1.0, tuned * band_lo)
