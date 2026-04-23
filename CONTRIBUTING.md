@@ -9,6 +9,7 @@ If you're a new collaborator joining for the first time, also read `ONBOARDING.m
 ## 1. Repository
 
 - **GitHub:** https://github.com/da25mem5s02-debug/MotoQuant_v1
+  - Planned move: once the GitHub Organization `motoquant-labs` is created (see `docs/TEAM_SCALING.md`), the repo transfers to `github.com/motoquant-labs/motoquant`. Update your remote with `git remote set-url origin <new-url>` after the transfer.
 - **Package name:** `motoquant` (formerly `dragsim` — do not reintroduce that string anywhere)
 - **Python:** 3.10 or newer (tested on 3.10, 3.11, 3.12)
 - **Primary DB:** SQLite (`motoquant.db`) — Supabase PostgreSQL is deferred to Phase 6
