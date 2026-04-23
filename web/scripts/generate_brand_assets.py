@@ -176,7 +176,7 @@ def render_og_image(path: Path) -> None:
 
     # ----- Left side: brand lockup -----
     pill_font = ImageFont.truetype(FONT_MONO_B, 22)
-    pill_text = "Free  ·  Open Source  ·  India"
+    pill_text = "Proudly Built in India"
     pill_bbox = d.textbbox((0, 0), pill_text, font=pill_font)
     pill_w = pill_bbox[2] - pill_bbox[0] + 72
     pill_h = 48

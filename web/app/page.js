@@ -420,7 +420,7 @@ export default function HomePage() {
           >
             <div className="px-4 py-2 rounded-full border border-brand-orange/50 bg-brand-orange/10 backdrop-blur-sm">
               <p className="text-xs font-mono text-brand-orange uppercase tracking-widest">
-                v1.0 · Open Source · Built in India
+                Proudly Built in India
               </p>
             </div>
           </motion.div>
