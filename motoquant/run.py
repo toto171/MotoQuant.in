@@ -1117,6 +1117,7 @@ def cmd_tires(args):
 def cmd_parts(args):
     """Handle 'parts' subcommand."""
     import json as _json
+
     db = ensure_db(args)
 
     # ── --impact MODE: show ET/trap delta for a single part ─────────────
@@ -1147,8 +1148,9 @@ def cmd_parts(args):
         )
 
         # Compatibility check via existing engine
-        from .parts.compatibility import is_compatible
         from .database.parts_repo import _enrich_bike_row_for_fitment
+        from .parts.compatibility import is_compatible
+
         bike_row = dict(model_row) if model_row else {"id": bike_id}
         _enrich_bike_row_for_fitment(db._conn, bike_row)
         compatible, reason = is_compatible(part, bike_row)
@@ -1214,11 +1216,11 @@ def cmd_parts(args):
             if cost_per_tenth < 1e9:
                 print(f"  Cost / tenth: ₹{cost_per_tenth:,.0f}")
             else:
-                print(f"  Cost / tenth: — (no measurable gain)")
+                print("  Cost / tenth: — (no measurable gain)")
             if not compatible:
                 print(
-                    f"\n  ⚠  Part is not compatible with this bike. "
-                    f"Delta shown is theoretical only."
+                    "\n  ⚠  Part is not compatible with this bike. "
+                    "Delta shown is theoretical only."
                 )
         db.close()
         return 0
@@ -1731,6 +1733,7 @@ def cmd_import(args):
         # Re-seed tire fitments so newly-imported bikes get OEM tire links
         try:
             from .database.seed import seed_bike_tire_fitments
+
             n_fits = seed_bike_tire_fitments(db)
             print(f"    Tire fitments:   {n_fits} (rebuilt for new bikes)")
         except Exception as e:
@@ -2355,13 +2358,16 @@ def cmd_analysis(args):
             )
         except ImportError as exc:
             print(f"  Error: BoTorch not installed — {exc}")
-            print("  Install with: pip install botorch gpytorch --break-system-packages")
+            print(
+                "  Install with: pip install botorch gpytorch --break-system-packages"
+            )
             return 1
 
         if getattr(args, "output_json", False):
             out = result.to_dict()
             out["bike"] = bike_name
             import json as _json
+
             print(_json.dumps(out, indent=2))
         else:
             print(f"\n  ╔══ BAYESIAN BUILD OPTIMIZER — {bike_name} ══╗")
@@ -2410,7 +2416,9 @@ def cmd_analysis(args):
         try:
             profile = BuildProfile(profile_name)
         except ValueError:
-            print(f"  Error: unknown profile '{profile_name}'. Use: all, street_legal, drag_prep, full_race")
+            print(
+                f"  Error: unknown profile '{profile_name}'. Use: all, street_legal, drag_prep, full_race"
+            )
             return 1
 
         budget = getattr(args, "budget", 100_000)
@@ -2485,12 +2493,10 @@ def cmd_analysis(args):
 def _cmd_analysis_surrogate(args) -> int:
     """Handle 'analysis surrogate' sub-commands: generate, train, predict, evaluate."""
     from .analysis.surrogate_data import (
-        FEATURE_NAMES,
         SurrogateDataset,
-        config_to_feature_vector,
         generate_training_data,
     )
-    from .analysis.surrogate_xgb import SurrogateMetrics, XGBSurrogate, train_surrogate
+    from .analysis.surrogate_xgb import XGBSurrogate, train_surrogate
 
     sub2 = getattr(args, "surrogate_command", None)
     db_path = getattr(args, "db", None) or "motoquant.db"
@@ -2498,8 +2504,8 @@ def _cmd_analysis_surrogate(args) -> int:
     def _load_config(bike_id):
         """Load BikeConfig from DB by ID, or fall back to K5 default."""
         if bike_id is not None:
-            from .database.connection import MotoQuantDB
             from .database.bridge import db_row_to_config
+            from .database.connection import MotoQuantDB
 
             db = MotoQuantDB(db_path)
             with db.connect() as conn:
@@ -2511,12 +2517,11 @@ def _cmd_analysis_surrogate(args) -> int:
                 return None
             return db_row_to_config(dict(row))
         from .defaults import gsxr1000_k5
+
         return gsxr1000_k5()
 
     # ── generate ─────────────────────────────────────────────────
     if sub2 == "generate":
-        import sys
-
         n = args.n_samples
         seed = args.seed
         out = args.output
@@ -2552,7 +2557,7 @@ def _cmd_analysis_surrogate(args) -> int:
         print(f"    Elapsed : {dataset.elapsed_s:.1f}s  ({rate:.0f} sims/s)")
 
         if getattr(args, "output_json", False):
-            import json, sys
+            import json
 
             print(
                 json.dumps(
@@ -2614,7 +2619,9 @@ def _cmd_analysis_surrogate(args) -> int:
         X_te, y_et_te, y_trap_te = test_ds.to_arrays()
 
         print(f"  Model   : {model_path}  (trained on {model.n_train:,} samples)")
-        print(f"  Dataset : {data_path}  ({len(dataset):,} total → {len(test_ds):,} test)")
+        print(
+            f"  Dataset : {data_path}  ({len(dataset):,} total → {len(test_ds):,} test)"
+        )
         metrics = model.evaluate(X_te, y_et_te, y_trap_te)
         metrics.print_report()
 
@@ -2646,15 +2653,19 @@ def _cmd_analysis_surrogate(args) -> int:
             print("  Run: analysis surrogate generate --output <file.npz>")
             return 1
 
-        backend = "torch" if __import__("importlib").util.find_spec("torch") else "sklearn"
-        print(f"  Backend         : {backend} ({'GPU available' if backend == 'torch' and __import__('torch').cuda.is_available() else 'CPU'})")
+        backend = (
+            "torch" if __import__("importlib").util.find_spec("torch") else "sklearn"
+        )
+        print(
+            f"  Backend         : {backend} ({'GPU available' if backend == 'torch' and __import__('torch').cuda.is_available() else 'CPU'})"
+        )
         print(f"  Loading dataset : {data_path}")
         dataset = SurrogateDataset.load(data_path)
         if filter_pw > 0:
             dataset = dataset.filter(min_power_to_weight=filter_pw)
         print(f"  Samples         : {len(dataset):,}")
         print(f"  Epochs          : up to {epochs} (early stopping patience=25)")
-        print(f"  Architecture    : 21 → 256 → 512 → 512 → 256 → 2 (ET + trap)")
+        print("  Architecture    : 21 → 256 → 512 → 512 → 256 → 2 (ET + trap)")
         print()
 
         model, metrics = train_dnn_surrogate(
@@ -2669,8 +2680,16 @@ def _cmd_analysis_surrogate(args) -> int:
 
         if getattr(args, "output_json", False):
             import json
-            print(json.dumps({"model": model_path, "backend": model.backend,
-                              "metrics": metrics.to_dict()}))
+
+            print(
+                json.dumps(
+                    {
+                        "model": model_path,
+                        "backend": model.backend,
+                        "metrics": metrics.to_dict(),
+                    }
+                )
+            )
         return 0
 
     # ── predict ──────────────────────────────────────────────────
@@ -2689,11 +2708,15 @@ def _cmd_analysis_surrogate(args) -> int:
 
         # Auto-detect model type from saved payload
         import joblib as _jl
+
         _payload = _jl.load(model_path)
-        if "torch_state_dict" in _payload or (
-            "backend" in _payload and _payload["backend"] == "torch"
-        ) or "sklearn_et" in _payload:
+        if (
+            "torch_state_dict" in _payload
+            or ("backend" in _payload and _payload["backend"] == "torch")
+            or "sklearn_et" in _payload
+        ):
             from .analysis.surrogate_dnn import DNNSurrogate
+
             model = DNNSurrogate.load(model_path)
         else:
             model = XGBSurrogate.load(model_path)
@@ -2731,10 +2754,10 @@ def cmd_pricing(args):
       stale    — list parts whose last_price_check is older than --days (default 30)
     """
     from .database.pricing_refresh import (
-        refresh_retailer_urls,
         coverage_report,
-        stale_parts,
         estimate_landing_cost_inr,
+        refresh_retailer_urls,
+        stale_parts,
     )
 
     verb = getattr(args, "pricing_action", None)
@@ -2760,7 +2783,9 @@ def cmd_pricing(args):
             print(json.dumps(payload, indent=2))
         else:
             print()
-            print(f"  Pricing refresh ({'dry-run' if payload['dry_run'] else 'committed'}):")
+            print(
+                f"  Pricing refresh ({'dry-run' if payload['dry_run'] else 'committed'}):"
+            )
             print(f"    Total parts .............. {summary.total}")
             print(f"    URLs filled .............. {summary.urls_filled}")
             print(f"    Check-stamps updated ..... {summary.check_stamps_updated}")
@@ -2802,8 +2827,12 @@ def cmd_pricing(args):
             )
             print()
             print("  Landing-cost sample (₹25 000 sticker):")
-            print(f"    Domestic (GST+courier) .... ₹{report['sample_25000_domestic_inr']:,.0f}")
-            print(f"    Imported (+30 % duty) ..... ₹{report['sample_25000_imported_inr']:,.0f}")
+            print(
+                f"    Domestic (GST+courier) .... ₹{report['sample_25000_domestic_inr']:,.0f}"
+            )
+            print(
+                f"    Imported (+30 % duty) ..... ₹{report['sample_25000_imported_inr']:,.0f}"
+            )
         db.close()
         return 0
 
@@ -2814,7 +2843,12 @@ def cmd_pricing(args):
             print(
                 json.dumps(
                     [
-                        {"id": r[0], "brand": r[1], "model_name": r[2], "last_check": r[3]}
+                        {
+                            "id": r[0],
+                            "brand": r[1],
+                            "model_name": r[2],
+                            "last_check": r[3],
+                        }
                         for r in rows
                     ],
                     indent=2,
@@ -2827,10 +2861,15 @@ def cmd_pricing(args):
                 print(f"  Parts needing refresh (>{days} days old): {len(rows)}")
                 print_table(
                     ["ID", "Brand", "Model", "Last check"],
-                    [(r[0], (r[1] or "-")[:24], (r[2] or "-")[:40], r[3]) for r in rows[:50]],
+                    [
+                        (r[0], (r[1] or "-")[:24], (r[2] or "-")[:40], r[3])
+                        for r in rows[:50]
+                    ],
                 )
                 if len(rows) > 50:
-                    print(f"  ... and {len(rows) - 50} more (run with --json for the full list)")
+                    print(
+                        f"  ... and {len(rows) - 50} more (run with --json for the full list)"
+                    )
         db.close()
         return 0
 
@@ -2862,6 +2901,7 @@ def cmd_nl(args):
 
         if getattr(args, "output_json", False):
             import json as _json
+
             # Remove non-JSON-serializable objects if present
             json_result = {k: v for k, v in result.items() if k != "config"}
             print(_json.dumps(json_result, indent=2))
@@ -2871,6 +2911,7 @@ def cmd_nl(args):
     except Exception as e:
         print(f"  Error running query: {e}")
         import traceback
+
         if getattr(args, "verbose", False):
             traceback.print_exc()
         return 1
@@ -3407,29 +3448,42 @@ def build_parser() -> argparse.ArgumentParser:
         help="Smart build recommendation with synergy/compatibility analysis and upgrade paths",
     )
     p_rec.add_argument(
-        "--bike-id", type=int, metavar="ID",
+        "--bike-id",
+        type=int,
+        metavar="ID",
         help="Bike DB ID to use as baseline (default: GSX-R 1000 K5)",
     )
     p_rec.add_argument(
-        "--budget", type=float, default=100_000, metavar="INR",
+        "--budget",
+        type=float,
+        default=100_000,
+        metavar="INR",
         help="Budget in rupees (default: 100000)",
     )
     p_rec.add_argument(
-        "--profile", default="all",
+        "--profile",
+        default="all",
         choices=["all", "street_legal", "drag_prep", "full_race"],
         help="Build profile filter (default: all)",
     )
     p_rec.add_argument(
-        "--mode", default="recommend",
+        "--mode",
+        default="recommend",
         choices=["recommend", "upgrade-path", "category-order"],
         help="Output mode: recommend (single build), upgrade-path (tiered), category-order (priority list)",
     )
     p_rec.add_argument(
-        "--tiers", type=int, default=3, metavar="N",
+        "--tiers",
+        type=int,
+        default=3,
+        metavar="N",
         help="Number of tiers for upgrade-path mode (default: 3)",
     )
     p_rec.add_argument(
-        "--json", action="store_true", dest="output_json", help="Output as JSON",
+        "--json",
+        action="store_true",
+        dest="output_json",
+        help="Output as JSON",
     )
 
     # ── analysis optimize ────────────────────────────────────────
@@ -3466,7 +3520,9 @@ def build_parser() -> argparse.ArgumentParser:
         "surrogate",
         help="Phase 4B: XGBoost surrogate model — generate training data, train, evaluate, predict",
     )
-    p_surr_sub = p_surr.add_subparsers(dest="surrogate_command", help="Surrogate sub-commands")
+    p_surr_sub = p_surr.add_subparsers(
+        dest="surrogate_command", help="Surrogate sub-commands"
+    )
 
     # analysis surrogate generate
     p_sg = p_surr_sub.add_parser(
@@ -3498,7 +3554,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="DB bike ID to use as structural template (default: GSX-R 1000 K5)",
     )
     p_sg.add_argument(
-        "--json", action="store_true", dest="output_json", help="Also print summary as JSON"
+        "--json",
+        action="store_true",
+        dest="output_json",
+        help="Also print summary as JSON",
     )
 
     # analysis surrogate train
@@ -3528,7 +3587,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Fraction of data held out for test evaluation (default: 0.15)",
     )
     p_st.add_argument(
-        "--json", action="store_true", dest="output_json", help="Also print metrics as JSON"
+        "--json",
+        action="store_true",
+        dest="output_json",
+        help="Also print metrics as JSON",
     )
 
     # analysis surrogate evaluate
@@ -3557,7 +3619,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Fraction used for test evaluation (default: 0.15)",
     )
     p_se.add_argument(
-        "--json", action="store_true", dest="output_json", help="Also print metrics as JSON"
+        "--json",
+        action="store_true",
+        dest="output_json",
+        help="Also print metrics as JSON",
     )
 
     # analysis surrogate train-dnn
@@ -3566,27 +3631,46 @@ def build_parser() -> argparse.ArgumentParser:
         help="Phase 4A: Train a 4-layer MLP surrogate (PyTorch if available, else sklearn)",
     )
     p_sdnn.add_argument(
-        "--data", default="surrogate_data.npz", metavar="FILE",
+        "--data",
+        default="surrogate_data.npz",
+        metavar="FILE",
         help="Input .npz training data file (default: surrogate_data.npz)",
     )
     p_sdnn.add_argument(
-        "--model-out", default="surrogate_dnn.pkl", metavar="FILE", dest="model_out",
+        "--model-out",
+        default="surrogate_dnn.pkl",
+        metavar="FILE",
+        dest="model_out",
         help="Output .pkl model file (default: surrogate_dnn.pkl)",
     )
     p_sdnn.add_argument(
-        "--epochs", type=int, default=300, metavar="N",
+        "--epochs",
+        type=int,
+        default=300,
+        metavar="N",
         help="Maximum training epochs (default: 300; early stopping applies)",
     )
     p_sdnn.add_argument(
-        "--test-fraction", type=float, default=0.15, metavar="F", dest="test_fraction",
+        "--test-fraction",
+        type=float,
+        default=0.15,
+        metavar="F",
+        dest="test_fraction",
         help="Fraction held out for evaluation (default: 0.15)",
     )
     p_sdnn.add_argument(
-        "--filter-min-pw", type=float, default=0.12, metavar="HP/KG", dest="filter_min_pw",
+        "--filter-min-pw",
+        type=float,
+        default=0.12,
+        metavar="HP/KG",
+        dest="filter_min_pw",
         help="Minimum power/weight ratio to keep (default: 0.12 hp/kg)",
     )
     p_sdnn.add_argument(
-        "--json", action="store_true", dest="output_json", help="Also print metrics as JSON"
+        "--json",
+        action="store_true",
+        dest="output_json",
+        help="Also print metrics as JSON",
     )
 
     # analysis surrogate predict
@@ -3608,7 +3692,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="DB bike ID to predict (default: GSX-R 1000 K5)",
     )
     p_sp.add_argument(
-        "--json", action="store_true", dest="output_json", help="Output prediction as JSON"
+        "--json",
+        action="store_true",
+        dest="output_json",
+        help="Output prediction as JSON",
     )
 
     # ── nl (Natural Language) ────────────────────────────────────────
@@ -3637,26 +3724,27 @@ def build_parser() -> argparse.ArgumentParser:
         help="Show what would change; do not commit",
     )
     p_pricing_refresh.add_argument(
-        "--json", action="store_true", dest="output_json", help="Machine-readable output"
+        "--json",
+        action="store_true",
+        dest="output_json",
+        help="Machine-readable output",
     )
 
     p_pricing_status = p_pricing_sub.add_parser(
         "status", help="Coverage report (price / retailer / URL / freshness %s)"
     )
-    p_pricing_status.add_argument(
-        "--json", action="store_true", dest="output_json"
-    )
+    p_pricing_status.add_argument("--json", action="store_true", dest="output_json")
 
     p_pricing_stale = p_pricing_sub.add_parser(
         "stale", help="List parts whose last_price_check is > --days old"
     )
     p_pricing_stale.add_argument(
-        "--days", type=int, default=30,
+        "--days",
+        type=int,
+        default=30,
         help="Staleness threshold in days (default: 30)",
     )
-    p_pricing_stale.add_argument(
-        "--json", action="store_true", dest="output_json"
-    )
+    p_pricing_stale.add_argument("--json", action="store_true", dest="output_json")
 
     p_nl = subparsers.add_parser(
         "nl",

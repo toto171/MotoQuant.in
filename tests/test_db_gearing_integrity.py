@@ -17,6 +17,7 @@ If this test ever fails, run:
 
 and commit the resulting motoquant.db.
 """
+
 from __future__ import annotations
 
 import json
@@ -44,8 +45,9 @@ def _reference_config_for(model_name: str):
     return None
 
 
-@pytest.mark.skipif(not DB_PATH.exists(),
-                    reason="production motoquant.db not present in this checkout")
+@pytest.mark.skipif(
+    not DB_PATH.exists(), reason="production motoquant.db not present in this checkout"
+)
 class TestDBGearingIntegrity:
     """DB gear ratios must agree with the canonical source."""
 
@@ -174,9 +176,13 @@ class TestDBGearingIntegrity:
             m = re.match(r"(\d+)/(\d+)[ZRB]*R(\d+)", rear_size)
             if m:
                 circ = (
-                    int(m.group(3)) * 25.4
-                    + 2 * int(m.group(1)) * int(m.group(2)) / 100
-                ) * math.pi / 1000.0
+                    (
+                        int(m.group(3)) * 25.4
+                        + 2 * int(m.group(1)) * int(m.group(2)) / 100
+                    )
+                    * math.pi
+                    / 1000.0
+                )
             else:
                 circ = 1.98
 

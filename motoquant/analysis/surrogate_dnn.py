@@ -63,13 +63,12 @@ import logging
 import time
 import warnings
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 
-from .surrogate_data import FEATURE_NAMES, config_to_feature_vector
-from .surrogate_xgb import SurrogateMetrics, _check_array_shapes
 from ..models import BikeConfig
+from .surrogate_data import FEATURE_NAMES, SurrogateDataset, config_to_feature_vector
+from .surrogate_xgb import SurrogateMetrics, _check_array_shapes
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +79,7 @@ logger = logging.getLogger(__name__)
 try:
     import torch
     import torch.nn as nn
+
     _TORCH_AVAILABLE = True
 except ImportError:
     _TORCH_AVAILABLE = False
@@ -94,6 +94,7 @@ except ImportError:
 # ─────────────────────────────────────────────────────────────────
 
 if _TORCH_AVAILABLE:
+
     class _MLPBackbone(nn.Module):
         """Shared feature-extraction backbone for the two-head MLP."""
 
@@ -118,7 +119,7 @@ if _TORCH_AVAILABLE:
             self.head_et = nn.Linear(prev, 1)
             self.head_trap = nn.Linear(prev, 1)
 
-        def forward(self, x: "torch.Tensor") -> tuple["torch.Tensor", "torch.Tensor"]:
+        def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
             feat = self.backbone(x)
             return self.head_et(feat).squeeze(-1), self.head_trap(feat).squeeze(-1)
 
@@ -146,7 +147,7 @@ class DNNSurrogate:
         self,
         hidden_dims: tuple[int, ...] = (256, 512, 512, 256),
         dropout: float = 0.15,
-        device: Optional[str] = None,
+        device: str | None = None,
     ) -> None:
         self.hidden_dims = hidden_dims
         self.dropout = dropout
@@ -157,8 +158,8 @@ class DNNSurrogate:
         self._backend: str = "torch" if _TORCH_AVAILABLE else "sklearn"
 
         # Normalisation stats (set during fit)
-        self._X_mean: Optional[np.ndarray] = None
-        self._X_std: Optional[np.ndarray] = None
+        self._X_mean: np.ndarray | None = None
+        self._X_std: np.ndarray | None = None
         self._et_mean: float = 0.0
         self._et_std: float = 1.0
         self._trap_mean: float = 0.0
@@ -168,12 +169,14 @@ class DNNSurrogate:
             if device is None:
                 if torch.cuda.is_available():
                     device = "cuda"
-                elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+                elif (
+                    hasattr(torch.backends, "mps") and torch.backends.mps.is_available()
+                ):
                     device = "mps"
                 else:
                     device = "cpu"
             self._device = torch.device(device)
-            self._model: Optional["_MLPBackbone"] = None
+            self._model: _MLPBackbone | None = None
         else:
             self._device = None
             self._model = None
@@ -192,7 +195,7 @@ class DNNSurrogate:
         lr: float = 1e-3,
         patience: int = 25,
         verbose: bool = True,
-    ) -> "DNNSurrogate":
+    ) -> DNNSurrogate:
         """
         Train the DNN surrogate.
 
@@ -212,7 +215,9 @@ class DNNSurrogate:
 
         # Normalise features
         self._X_mean = X.mean(axis=0).astype(np.float32)
-        self._X_std = np.where(X.std(axis=0) > 1e-8, X.std(axis=0), 1.0).astype(np.float32)
+        self._X_std = np.where(X.std(axis=0) > 1e-8, X.std(axis=0), 1.0).astype(
+            np.float32
+        )
         X_n = ((X - self._X_mean) / self._X_std).astype(np.float32)
 
         # Normalise targets (Z-score)
@@ -232,8 +237,16 @@ class DNNSurrogate:
 
         if _TORCH_AVAILABLE:
             self._fit_torch(
-                X_n, y_et_n, y_trap_n, train_mask, val_idx,
-                epochs, batch_size, lr, patience, verbose,
+                X_n,
+                y_et_n,
+                y_trap_n,
+                train_mask,
+                val_idx,
+                epochs,
+                batch_size,
+                lr,
+                patience,
+                verbose,
             )
         else:
             self._fit_sklearn(X_n, y_et_n, y_trap_n, train_mask, val_idx)
@@ -243,20 +256,34 @@ class DNNSurrogate:
         self._train_elapsed_s = time.perf_counter() - t0
         logger.info(
             "DNNSurrogate (%s) fitted on %d samples in %.1fs",
-            self._backend, self._n_train, self._train_elapsed_s,
+            self._backend,
+            self._n_train,
+            self._train_elapsed_s,
         )
         return self
 
     def _fit_torch(
-        self, X_n, y_et_n, y_trap_n, train_mask, val_idx,
-        epochs, batch_size, lr, patience, verbose,
+        self,
+        X_n,
+        y_et_n,
+        y_trap_n,
+        train_mask,
+        val_idx,
+        epochs,
+        batch_size,
+        lr,
+        patience,
+        verbose,
     ) -> None:
         """PyTorch training loop."""
-        import torch, torch.nn as nn
-        from torch.utils.data import TensorDataset, DataLoader
+        import torch
+        import torch.nn as nn
+        from torch.utils.data import DataLoader, TensorDataset
 
         n_in = X_n.shape[1]
-        self._model = _MLPBackbone(n_in, self.hidden_dims, self.dropout).to(self._device)
+        self._model = _MLPBackbone(n_in, self.hidden_dims, self.dropout).to(
+            self._device
+        )
 
         X_tr = torch.tensor(X_n[train_mask]).to(self._device)
         et_tr = torch.tensor(y_et_n[train_mask]).to(self._device)
@@ -269,7 +296,9 @@ class DNNSurrogate:
         loader = DataLoader(ds, batch_size=batch_size, shuffle=True)
 
         opt = torch.optim.Adam(self._model.parameters(), lr=lr, weight_decay=1e-4)
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=epochs, eta_min=lr * 0.01)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            opt, T_max=epochs, eta_min=lr * 0.01
+        )
         huber = nn.HuberLoss(delta=0.5)
 
         best_val = float("inf")
@@ -324,19 +353,19 @@ class DNNSurrogate:
         from sklearn.neural_network import MLPRegressor
 
         X_tr = X_n[train_mask]
-        params = dict(
-            hidden_layer_sizes=self.hidden_dims,
-            activation="relu",
-            solver="adam",
-            alpha=5e-4,          # L2 regularisation
-            learning_rate_init=1e-3,
-            max_iter=500,
-            early_stopping=True,
-            validation_fraction=0.10,
-            n_iter_no_change=25,
-            random_state=0,
-            verbose=True,
-        )
+        params = {
+            "hidden_layer_sizes": self.hidden_dims,
+            "activation": "relu",
+            "solver": "adam",
+            "alpha": 5e-4,  # L2 regularisation
+            "learning_rate_init": 1e-3,
+            "max_iter": 500,
+            "early_stopping": True,
+            "validation_fraction": 0.10,
+            "n_iter_no_change": 25,
+            "random_state": 0,
+            "verbose": True,
+        }
         self._sklearn_et = MLPRegressor(**params)
         self._sklearn_trap = MLPRegressor(**params)
 
@@ -362,6 +391,7 @@ class DNNSurrogate:
 
         if _TORCH_AVAILABLE and self._backend == "torch":
             import torch
+
             self._model.eval()
             with torch.no_grad():
                 xt = torch.tensor(X_n).to(self._device)
@@ -395,7 +425,7 @@ class DNNSurrogate:
         t_start = time.perf_counter()
         n_inf = min(200, len(X))
         for i in range(n_inf):
-            self.predict(X[i: i + 1])
+            self.predict(X[i : i + 1])
         inf_us = (time.perf_counter() - t_start) / n_inf * 1e6
 
         et_pred, trap_pred = self.predict(X)
@@ -433,24 +463,26 @@ class DNNSurrogate:
         path.parent.mkdir(parents=True, exist_ok=True)
 
         payload: dict = {
-            "backend":        self._backend,
-            "hidden_dims":    self.hidden_dims,
-            "dropout":        self.dropout,
-            "feature_names":  self._feature_names,
-            "n_train":        self._n_train,
+            "backend": self._backend,
+            "hidden_dims": self.hidden_dims,
+            "dropout": self.dropout,
+            "feature_names": self._feature_names,
+            "n_train": self._n_train,
             "train_elapsed_s": self._train_elapsed_s,
-            "X_mean":         self._X_mean,
-            "X_std":          self._X_std,
-            "et_mean":        self._et_mean,
-            "et_std":         self._et_std,
-            "trap_mean":      self._trap_mean,
-            "trap_std":       self._trap_std,
-            "version":        "1.0",
+            "X_mean": self._X_mean,
+            "X_std": self._X_std,
+            "et_mean": self._et_mean,
+            "et_std": self._et_std,
+            "trap_mean": self._trap_mean,
+            "trap_std": self._trap_std,
+            "version": "1.0",
         }
 
         if self._backend == "torch" and _TORCH_AVAILABLE:
-            import torch
             import io
+
+            import torch
+
             buf = io.BytesIO()
             torch.save(self._model.state_dict(), buf)
             payload["torch_state_dict"] = buf.getvalue()
@@ -463,7 +495,7 @@ class DNNSurrogate:
         logger.info("DNNSurrogate (%s) saved to %s", self._backend, path)
 
     @classmethod
-    def load(cls, path: str | Path) -> "DNNSurrogate":
+    def load(cls, path: str | Path) -> DNNSurrogate:
         """Load a DNNSurrogate saved by :meth:`save`."""
         import joblib
 
@@ -499,7 +531,10 @@ class DNNSurrogate:
                 inst._device = None
                 inst._is_fitted = False
             else:
-                import torch, io
+                import io
+
+                import torch
+
                 n_in = int(payload["n_in"])
                 inst._model = _MLPBackbone(n_in, inst.hidden_dims, inst.dropout)
                 buf = io.BytesIO(payload["torch_state_dict"])
@@ -517,7 +552,9 @@ class DNNSurrogate:
 
         logger.info(
             "DNNSurrogate (%s) loaded from %s (trained on %d samples)",
-            inst._backend, path, inst._n_train,
+            inst._backend,
+            path,
+            inst._n_train,
         )
         return inst
 
@@ -525,7 +562,9 @@ class DNNSurrogate:
 
     def _check_fitted(self) -> None:
         if not self._is_fitted:
-            raise RuntimeError("DNNSurrogate is not fitted. Call fit() or load() first.")
+            raise RuntimeError(
+                "DNNSurrogate is not fitted. Call fit() or load() first."
+            )
 
     @property
     def is_fitted(self) -> bool:
@@ -544,7 +583,11 @@ class DNNSurrogate:
         return self._train_elapsed_s
 
     def __repr__(self) -> str:
-        status = f"fitted on {self._n_train:,} samples [{self._backend}]" if self._is_fitted else "not fitted"
+        status = (
+            f"fitted on {self._n_train:,} samples [{self._backend}]"
+            if self._is_fitted
+            else "not fitted"
+        )
         return f"DNNSurrogate(hidden={self.hidden_dims}, {status})"
 
 
@@ -554,7 +597,7 @@ class DNNSurrogate:
 
 
 def train_dnn_surrogate(
-    dataset: "SurrogateDataset",
+    dataset: SurrogateDataset,
     test_fraction: float = 0.15,
     hidden_dims: tuple[int, ...] = (256, 512, 512, 256),
     dropout: float = 0.15,
@@ -564,20 +607,27 @@ def train_dnn_surrogate(
     patience: int = 25,
     verbose: bool = True,
     seed: int = 0,
-) -> tuple["DNNSurrogate", "SurrogateMetrics"]:
+) -> tuple[DNNSurrogate, SurrogateMetrics]:
     """
     One-shot pipeline: split → fit DNNSurrogate → return (model, metrics).
 
     Parameters match ``DNNSurrogate.__init__`` and ``DNNSurrogate.fit``.
     """
-    from .surrogate_data import SurrogateDataset  # avoid circular at module level
 
     train_ds, test_ds = dataset.split(test_fraction=test_fraction, seed=seed)
     X_tr, y_et_tr, y_trap_tr = train_ds.to_arrays()
     X_te, y_et_te, y_trap_te = test_ds.to_arrays()
 
     model = DNNSurrogate(hidden_dims=hidden_dims, dropout=dropout)
-    model.fit(X_tr, y_et_tr, y_trap_tr, epochs=epochs, batch_size=batch_size,
-              lr=lr, patience=patience, verbose=verbose)
+    model.fit(
+        X_tr,
+        y_et_tr,
+        y_trap_tr,
+        epochs=epochs,
+        batch_size=batch_size,
+        lr=lr,
+        patience=patience,
+        verbose=verbose,
+    )
     metrics = model.evaluate(X_te, y_et_te, y_trap_te)
     return model, metrics

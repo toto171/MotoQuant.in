@@ -13,28 +13,26 @@ Covers:
 """
 
 import json
+
 import pytest
 
-from motoquant.scraper.importer import spec_to_bike_config, import_batch
-from motoquant.scraper.known_bikes import (
-    ALL_KNOWN_BIKES,
-    YAMAHA_RD350_1974,
-    YAMAHA_RX100_1985,
-    APRILIA_RS125_2006,
-    KTM_300_EXC_2020,
-    HONDA_CR500R_1996,
-)
-from motoquant.scraper.validator import validate_spec
 from motoquant.database.connection import MotoQuantDB
-from motoquant.database.seed import seed_all
 from motoquant.database.parts_repo import _enrich_bike_row_for_fitment
+from motoquant.database.seed import seed_all
 from motoquant.parts.compatibility import (
     FitmentMatch,
-    FitmentRules,
-    FitmentTier,
     is_compatible,
 )
-
+from motoquant.scraper.importer import import_batch, spec_to_bike_config
+from motoquant.scraper.known_bikes import (
+    ALL_KNOWN_BIKES,
+    APRILIA_RS125_2006,
+    HONDA_CR500R_1996,
+    KTM_300_EXC_2020,
+    YAMAHA_RD350_1974,
+    YAMAHA_RX100_1985,
+)
+from motoquant.scraper.validator import validate_spec
 
 # ════════════════════════════════════════════════════════════════════════
 # Fixtures
@@ -63,16 +61,26 @@ class TestTwoStrokeSpecs:
 
     @pytest.mark.parametrize(
         "spec",
-        [YAMAHA_RD350_1974, YAMAHA_RX100_1985, APRILIA_RS125_2006,
-         KTM_300_EXC_2020, HONDA_CR500R_1996],
+        [
+            YAMAHA_RD350_1974,
+            YAMAHA_RX100_1985,
+            APRILIA_RS125_2006,
+            KTM_300_EXC_2020,
+            HONDA_CR500R_1996,
+        ],
     )
     def test_is_two_stroke(self, spec):
         assert spec.stroke_type == 2
 
     @pytest.mark.parametrize(
         "spec",
-        [YAMAHA_RD350_1974, YAMAHA_RX100_1985, APRILIA_RS125_2006,
-         KTM_300_EXC_2020, HONDA_CR500R_1996],
+        [
+            YAMAHA_RD350_1974,
+            YAMAHA_RX100_1985,
+            APRILIA_RS125_2006,
+            KTM_300_EXC_2020,
+            HONDA_CR500R_1996,
+        ],
     )
     def test_validates(self, spec):
         result = validate_spec(spec)
@@ -166,19 +174,24 @@ class TestStrokeTypeFilter:
     def test_2t_part_rejects_4t_bike(self):
         """A 2T-only part should NOT match a 4T bike of same config/disp."""
         part = {
-            "fitment_rules": json.dumps({
-                "tier": "family",
-                "match": {
-                    "engine_configs": ["I1"],
-                    "displacement_min_cc": 200,
-                    "displacement_max_cc": 400,
-                    "stroke_type": 2,
-                },
-            }),
+            "fitment_rules": json.dumps(
+                {
+                    "tier": "family",
+                    "match": {
+                        "engine_configs": ["I1"],
+                        "displacement_min_cc": 200,
+                        "displacement_max_cc": 400,
+                        "stroke_type": 2,
+                    },
+                }
+            ),
         }
         four_stroke_bike = {
-            "id": 1, "manufacturer": "KTM", "displacement_cc": 250,
-            "cylinder_config": "I1", "stroke_type": 4,
+            "id": 1,
+            "manufacturer": "KTM",
+            "displacement_cc": 250,
+            "cylinder_config": "I1",
+            "stroke_type": 4,
         }
         ok, reason = is_compatible(part, four_stroke_bike)
         assert ok is False
@@ -186,19 +199,24 @@ class TestStrokeTypeFilter:
 
     def test_2t_part_matches_2t_bike(self):
         part = {
-            "fitment_rules": json.dumps({
-                "tier": "family",
-                "match": {
-                    "engine_configs": ["I1"],
-                    "displacement_min_cc": 200,
-                    "displacement_max_cc": 400,
-                    "stroke_type": 2,
-                },
-            }),
+            "fitment_rules": json.dumps(
+                {
+                    "tier": "family",
+                    "match": {
+                        "engine_configs": ["I1"],
+                        "displacement_min_cc": 200,
+                        "displacement_max_cc": 400,
+                        "stroke_type": 2,
+                    },
+                }
+            ),
         }
         two_stroke_bike = {
-            "id": 2, "manufacturer": "KTM", "displacement_cc": 293,
-            "cylinder_config": "I1", "stroke_type": 2,
+            "id": 2,
+            "manufacturer": "KTM",
+            "displacement_cc": 293,
+            "cylinder_config": "I1",
+            "stroke_type": 2,
         }
         ok, _ = is_compatible(part, two_stroke_bike)
         assert ok is True
@@ -206,16 +224,20 @@ class TestStrokeTypeFilter:
     def test_missing_stroke_type_defaults_to_4t(self):
         """A bike row without stroke_type is treated as 4T for backwards compat."""
         part = {
-            "fitment_rules": json.dumps({
-                "tier": "family",
-                "match": {
-                    "engine_configs": ["I1"],
-                    "stroke_type": 4,
-                },
-            }),
+            "fitment_rules": json.dumps(
+                {
+                    "tier": "family",
+                    "match": {
+                        "engine_configs": ["I1"],
+                        "stroke_type": 4,
+                    },
+                }
+            ),
         }
         legacy_bike = {
-            "id": 3, "manufacturer": "Honda", "displacement_cc": 300,
+            "id": 3,
+            "manufacturer": "Honda",
+            "displacement_cc": 300,
             "cylinder_config": "I1",
             # no stroke_type — defaults to 4
         }
@@ -248,7 +270,8 @@ class TestTwoStrokeCatalogIntegrity:
             )
             all_parts = [dict(r) for r in cur.fetchall()]
             ts_parts = [
-                p for p in all_parts
+                p
+                for p in all_parts
                 if p["specifications"] and '"stroke_type": 2' in p["specifications"]
             ]
             cur.execute(
@@ -280,8 +303,9 @@ class TestTwoStrokeCatalogIntegrity:
                 _enrich_bike_row_for_fitment(seeded_db._conn, bike_row)
                 ok, _ = is_compatible(p, bike_row)
                 if ok:
-                    leaks.append((p["brand"], p["model_name"],
-                                  b["manufacturer"], b["model"]))
+                    leaks.append(
+                        (p["brand"], p["model_name"], b["manufacturer"], b["model"])
+                    )
         assert leaks == [], f"2T→4T leaks detected: {leaks[:10]}"
 
     def test_every_two_stroke_bike_has_at_least_one_part(
@@ -290,7 +314,8 @@ class TestTwoStrokeCatalogIntegrity:
         """Every 2T bike in the catalog must have ≥1 compatible 2T part."""
         ts_parts, bikes = ts_parts_and_bikes
         two_stroke_bikes = [
-            b for b in bikes
+            b
+            for b in bikes
             if json.loads(b["engine_params"]).get("stroke_type", 4) == 2
         ]
         uncovered = []
@@ -321,7 +346,8 @@ class TestTwoStrokeCatalogIntegrity:
             )
             ts_exhausts = [dict(r) for r in cur.fetchall()]
         two_stroke_bikes = [
-            b for b in bikes
+            b
+            for b in bikes
             if json.loads(b["engine_params"]).get("stroke_type", 4) == 2
         ]
         uncovered = []
@@ -331,9 +357,7 @@ class TestTwoStrokeCatalogIntegrity:
             hits = sum(1 for p in ts_exhausts if is_compatible(p, bike_row)[0])
             if hits == 0:
                 uncovered.append(f"{b['manufacturer']} {b['model']}")
-        assert uncovered == [], (
-            f"2T bikes with no matching exhaust: {uncovered}"
-        )
+        assert uncovered == [], f"2T bikes with no matching exhaust: {uncovered}"
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -344,6 +368,7 @@ class TestTwoStrokeCatalogIntegrity:
 class TestReferenceBaselinesPreserved:
     def test_k5_baseline(self):
         import motoquant
+
         e = motoquant.MotoQuantEngine(motoquant.gsxr1000_k5())
         r = e.run()
         # Allow ±0.010s drift from the canonical 10.034s baseline
@@ -353,6 +378,7 @@ class TestReferenceBaselinesPreserved:
 
     def test_hayabusa_baseline(self):
         import motoquant
+
         e = motoquant.MotoQuantEngine(motoquant.hayabusa_gen1())
         r = e.run()
         assert 10.45 <= r.time_quarter <= 10.50, (

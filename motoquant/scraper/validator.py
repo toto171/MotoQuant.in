@@ -44,15 +44,24 @@ BOUNDS = {
     "peak_power_hp": (5, 500),
     "peak_power_rpm": (3000, 18000),
     "peak_torque_nm": (5, 400),
-    "peak_torque_rpm": (2000, 15000),  # upper raised April 2026 for Kawasaki ZX-25R (I4, 14500 rpm peak torque, ~17k redline)
+    "peak_torque_rpm": (
+        2000,
+        15000,
+    ),  # upper raised April 2026 for Kawasaki ZX-25R (I4, 14500 rpm peak torque, ~17k redline)
     "dry_mass_kg": (80, 500),
     "wet_mass_kg": (90, 550),
     "wheelbase_mm": (1000, 2000),
     "seat_height_mm": (600, 1100),
-    "fuel_capacity_l": (3, 60),  # lowered — small-cc 2T like RD350 carry ~16L but racers carry 4–6L
+    "fuel_capacity_l": (
+        3,
+        60,
+    ),  # lowered — small-cc 2T like RD350 carry ~16L but racers carry 4–6L
     "year_from": (1965, datetime.now().year + 2),
     "gears": (4, 7),
-    "front_sprocket": (0, 38),  # 0 = shaft/belt drive; chain 12-22; belt pulley up to 38
+    "front_sprocket": (
+        0,
+        38,
+    ),  # 0 = shaft/belt drive; chain 12-22; belt pulley up to 38
     "rear_sprocket": (0, 80),  # 0 = shaft/belt drive; chain 30-60; belt pulley up to 80
     "frontal_area_m2": (0.25, 0.90),
     "stroke_type": (2, 4),

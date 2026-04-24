@@ -33,13 +33,13 @@ Tier-2 (importer / order channels):
     Brembo India, Woolich Racing India — smaller SKU lists but deep
     in their vertical.
 """
+
 from __future__ import annotations
 
 import datetime
 import logging
 import urllib.parse
 from dataclasses import dataclass
-from typing import Iterable
 
 log = logging.getLogger(__name__)
 
@@ -51,51 +51,51 @@ log = logging.getLogger(__name__)
 
 RETAILER_SEARCH_TEMPLATES: dict[str, str] = {
     # Tier-1 Indian aftermarket
-    "MotoParts India":         "https://www.mototorque.in/search?q={q}",
-    "Grand Pitstop":           "https://www.grandpitstop.com/search?q={q}",
-    "Superbike India":         "https://www.superbikestore.com/search?q={q}",
-    "Motowheels":              "https://motowheels.com/?s={q}",
+    "MotoParts India": "https://www.mototorque.in/search?q={q}",
+    "Grand Pitstop": "https://www.grandpitstop.com/search?q={q}",
+    "Superbike India": "https://www.superbikestore.com/search?q={q}",
+    "Motowheels": "https://motowheels.com/?s={q}",
     # Category-specialty Indian retailers
-    "Air Filter Pro":          "https://www.mototorque.in/collections/air-filters?q={q}",
-    "Woolich Racing India":    "https://woolichracing.in/?s={q}",
-    "Dynojet India":           "https://www.dynojetindia.com/search?q={q}",
-    "ClutchCo India":          "https://www.grandpitstop.com/search?q={q}+clutch",
-    "Brembo India":            "https://www.superbikestore.com/search?q=brembo+{q}",
-    "TurboKit India":          "https://www.mototorque.in/search?q=turbo+{q}",
-    "HM India":                "https://www.superbikestore.com/search?q=HM+{q}",
-    "Race Dynamics":           "https://racedynamics.in/?s={q}",
+    "Air Filter Pro": "https://www.mototorque.in/collections/air-filters?q={q}",
+    "Woolich Racing India": "https://woolichracing.in/?s={q}",
+    "Dynojet India": "https://www.dynojetindia.com/search?q={q}",
+    "ClutchCo India": "https://www.grandpitstop.com/search?q={q}+clutch",
+    "Brembo India": "https://www.superbikestore.com/search?q=brembo+{q}",
+    "TurboKit India": "https://www.mototorque.in/search?q=turbo+{q}",
+    "HM India": "https://www.superbikestore.com/search?q=HM+{q}",
+    "Race Dynamics": "https://racedynamics.in/?s={q}",
     "Performance Parts India": "https://www.mototorque.in/search?q={q}",
-    "NX India":                "https://www.superbikestore.com/search?q=NX+{q}",
-    "Fuel Systems Pro":        "https://www.mototorque.in/collections/fuel-system?q={q}",
-    "Fuel System Pro":         "https://www.mototorque.in/collections/fuel-system?q={q}",
-    "Battery Pro India":       "https://www.batterybhai.com/search/?q={q}",
-    "Drag Parts India":        "https://www.dragbikeaccessories.com/search?q={q}",
-    "HealTech India":          "https://healtech-india.com/?s={q}",
-    "Healtech EU":             "https://healtech-electronics.com/?s={q}",
-    "GPR India":               "https://www.gprindia.com/?s={q}",
-    "GPR Racing":              "https://www.gpr-racing.com/?s={q}",
-    "EBC India":               "https://www.superbikestore.com/search?q=ebc+{q}",
-    "EBC Brakes India":        "https://www.superbikestore.com/search?q=ebc+{q}",
-    "Chain Pro India":         "https://www.mototorque.in/collections/chain-sprocket?q={q}",
-    "K&N India":               "https://www.mototorque.in/collections/air-filters?q=kn+{q}",
-    "Bazzaz India":            "https://www.mototorque.in/search?q=bazzaz+{q}",
-    "Akrapovic EU":            "https://www.akrapovic.com/en/motorcycle/search?search={q}",
-    "Rapid Bike India":        "https://rapidbike-india.com/?s={q}",
-    "RapidBike EU":            "https://www.dimsport.it/en/catalogsearch/result/?q={q}",
-    "Hyperpro India":          "https://www.superbikestore.com/search?q=hyperpro+{q}",
-    "Galfer India":            "https://www.superbikestore.com/search?q=galfer+{q}",
-    "DNA India":               "https://www.mototorque.in/search?q=dna+{q}",
-    "BMC India":               "https://www.mototorque.in/search?q=bmc+{q}",
-    "Amaron India":            "https://www.amaron.com/search?q={q}",
+    "NX India": "https://www.superbikestore.com/search?q=NX+{q}",
+    "Fuel Systems Pro": "https://www.mototorque.in/collections/fuel-system?q={q}",
+    "Fuel System Pro": "https://www.mototorque.in/collections/fuel-system?q={q}",
+    "Battery Pro India": "https://www.batterybhai.com/search/?q={q}",
+    "Drag Parts India": "https://www.dragbikeaccessories.com/search?q={q}",
+    "HealTech India": "https://healtech-india.com/?s={q}",
+    "Healtech EU": "https://healtech-electronics.com/?s={q}",
+    "GPR India": "https://www.gprindia.com/?s={q}",
+    "GPR Racing": "https://www.gpr-racing.com/?s={q}",
+    "EBC India": "https://www.superbikestore.com/search?q=ebc+{q}",
+    "EBC Brakes India": "https://www.superbikestore.com/search?q=ebc+{q}",
+    "Chain Pro India": "https://www.mototorque.in/collections/chain-sprocket?q={q}",
+    "K&N India": "https://www.mototorque.in/collections/air-filters?q=kn+{q}",
+    "Bazzaz India": "https://www.mototorque.in/search?q=bazzaz+{q}",
+    "Akrapovic EU": "https://www.akrapovic.com/en/motorcycle/search?search={q}",
+    "Rapid Bike India": "https://rapidbike-india.com/?s={q}",
+    "RapidBike EU": "https://www.dimsport.it/en/catalogsearch/result/?q={q}",
+    "Hyperpro India": "https://www.superbikestore.com/search?q=hyperpro+{q}",
+    "Galfer India": "https://www.superbikestore.com/search?q=galfer+{q}",
+    "DNA India": "https://www.mototorque.in/search?q=dna+{q}",
+    "BMC India": "https://www.mototorque.in/search?q=bmc+{q}",
+    "Amaron India": "https://www.amaron.com/search?q={q}",
     # Common importers / tier-2 retailers
-    "Öhlins India":            "https://www.superbikestore.com/search?q=ohlins+{q}",
-    "Öhlins (Japan)":          "https://ohlins.com/?s={q}",
-    "SC-Project EU":           "https://www.sc-project.com/search?q={q}",
-    "Zard India":              "https://www.zardmotorcycle.com/?s={q}",
-    "YSS India":                "https://yssindia.in/?s={q}",
-    "Vance & Hines India":     "https://www.vanceandhines.com/search?q={q}",
-    "K-Tech UK":               "https://ktechsuspension.co.uk/?s={q}",
-    "K-Tech India":            "https://www.superbikestore.com/search?q=k-tech+{q}",
+    "Öhlins India": "https://www.superbikestore.com/search?q=ohlins+{q}",
+    "Öhlins (Japan)": "https://ohlins.com/?s={q}",
+    "SC-Project EU": "https://www.sc-project.com/search?q={q}",
+    "Zard India": "https://www.zardmotorcycle.com/?s={q}",
+    "YSS India": "https://yssindia.in/?s={q}",
+    "Vance & Hines India": "https://www.vanceandhines.com/search?q={q}",
+    "K-Tech UK": "https://ktechsuspension.co.uk/?s={q}",
+    "K-Tech India": "https://www.superbikestore.com/search?q=k-tech+{q}",
     # Fallback — everything else maps to Moto Torque search
 }
 
@@ -147,8 +147,8 @@ def _search_url(retailer: str, brand: str, model_name: str) -> str:
 # Landing-cost helper (sticker → out-the-door for Indian buyers)
 # ──────────────────────────────────────────────────────────────────
 
-GST_RATE = 0.18          # 18 % GST on motorcycle parts as of 2025-26 budget
-COURIER_INR = 250.0      # typical DTDC/Ekart/Shiprocket motorcycle-parts shipping
+GST_RATE = 0.18  # 18 % GST on motorcycle parts as of 2025-26 budget
+COURIER_INR = 250.0  # typical DTDC/Ekart/Shiprocket motorcycle-parts shipping
 IMPORT_DUTY_RATE = 0.30  # ~30 % landed cost bump for directly-imported SKUs
 
 
@@ -169,7 +169,17 @@ def estimate_landing_cost_inr(
         rlow = retailer.lower()
         if any(
             tag in rlow
-            for tag in ("usa", "(us)", " us ", "eu", "uk", "jp", "japan", "germany", "thailand")
+            for tag in (
+                "usa",
+                "(us)",
+                " us ",
+                "eu",
+                "uk",
+                "jp",
+                "japan",
+                "germany",
+                "thailand",
+            )
         ):
             out *= 1.0 + IMPORT_DUTY_RATE
     if availability == "import_only":
@@ -208,9 +218,7 @@ def refresh_retailer_urls(
     dry_run     : if True, do not commit.  Returns counts only.
     """
     cur = conn.cursor()
-    rows = cur.execute(
-        "SELECT id, brand, model_name, retailer FROM parts"
-    ).fetchall()
+    rows = cur.execute("SELECT id, brand, model_name, retailer FROM parts").fetchall()
 
     today = datetime.date.today().isoformat()
 
@@ -315,7 +323,10 @@ def coverage_report(conn) -> dict[str, int | float]:
            AND last_price_check >= date('now', '-30 days')
         """
     ).fetchone()
-    pct = lambda n: round(100.0 * n / max(1, total), 1)
+
+    def pct(n):
+        return round(100.0 * n / max(1, total), 1)
+
     return {
         "total_parts": total,
         "with_price_inr": with_price,

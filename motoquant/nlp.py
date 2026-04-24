@@ -11,10 +11,9 @@ Future: --use-ollama flag will enable LLM-powered parsing (Phase 5).
 
 import re
 from dataclasses import dataclass, field
-from typing import Optional
 
 from .database.connection import MotoQuantDB
-from .models import BikeConfig, EnvironmentParams
+from .models import BikeConfig
 from .physics import MotoQuantEngine, SimResult
 
 __all__ = ["ParsedQuery", "NLQueryParser", "NLSimRunner", "format_nl_result"]
@@ -59,15 +58,15 @@ class ParsedQuery:
 
     raw_query: str
     bike_query: str
-    venue_query: Optional[str] = None
-    temperature_c: Optional[float] = None
-    humidity_pct: Optional[float] = None
-    altitude_m: Optional[float] = None
-    budget_inr: Optional[int] = None
+    venue_query: str | None = None
+    temperature_c: float | None = None
+    humidity_pct: float | None = None
+    altitude_m: float | None = None
+    budget_inr: int | None = None
     parts_mentioned: list[str] = field(default_factory=list)
     optimization_goal: str = "minimize_et"  # minimize_et | maximize_trap | best_budget
-    headwind_ms: Optional[float] = None
-    track_prep_type: Optional[str] = None
+    headwind_ms: float | None = None
+    track_prep_type: str | None = None
 
 
 # ═══════════════════════════════════════════
@@ -132,7 +131,13 @@ class NLQueryParser:
         "ecu": ["ecu", "flash", "tune", "map"],
         "clutch": ["clutch", "slipper", "wet"],
         "chain": ["chain", "sprocket"],
-        "weight_reduction": ["weight reduction", "carbon", "lightweight", "ti-6al", "aluminum"],
+        "weight_reduction": [
+            "weight reduction",
+            "carbon",
+            "lightweight",
+            "ti-6al",
+            "aluminum",
+        ],
         "fuel_system": ["fuel pump", "injector", "rail"],
         "suspension": ["suspension", "coilover", "spring"],
         "brakes": ["brake", "pad", "disc", "rotor"],
@@ -144,7 +149,6 @@ class NLQueryParser:
 
     def __init__(self):
         """Initialize the parser."""
-        pass
 
     def parse(self, query: str) -> ParsedQuery:
         """
@@ -216,14 +220,14 @@ class NLQueryParser:
                     return candidate
         return ""
 
-    def _extract_venue(self, query_lower: str) -> Optional[str]:
+    def _extract_venue(self, query_lower: str) -> str | None:
         """Extract venue reference from query."""
         for alias, standard in self.VENUE_ALIASES.items():
             if alias in query_lower:
                 return standard
         return None
 
-    def _extract_temperature(self, query_lower: str) -> Optional[float]:
+    def _extract_temperature(self, query_lower: str) -> float | None:
         """Extract temperature (°C or C) from query."""
         # Patterns: "35°C", "35C", "35 C", "temp 35C", "temperature 35°C", "35 degrees celsius"
         patterns = [
@@ -237,7 +241,7 @@ class NLQueryParser:
                 return float(match.group(1))
         return None
 
-    def _extract_humidity(self, query_lower: str) -> Optional[float]:
+    def _extract_humidity(self, query_lower: str) -> float | None:
         """Extract relative humidity (%) from query."""
         patterns = [
             r"(\d+)\s*%\s*(?:humidity|rh)",  # 50% humidity or 50% RH
@@ -249,7 +253,7 @@ class NLQueryParser:
                 return float(match.group(1))
         return None
 
-    def _extract_altitude(self, query_lower: str) -> Optional[float]:
+    def _extract_altitude(self, query_lower: str) -> float | None:
         """Extract altitude (meters) from query."""
         patterns = [
             r"(\d+)\s*m\b(?:\s+altitude)?",  # 1000m or 1000m altitude
@@ -261,7 +265,7 @@ class NLQueryParser:
                 return float(match.group(1))
         return None
 
-    def _extract_headwind(self, query_lower: str) -> Optional[float]:
+    def _extract_headwind(self, query_lower: str) -> float | None:
         """Extract headwind speed (m/s) from query."""
         patterns = [
             r"(\d+(?:\.\d+)?)\s*(?:m/s|m\/s)\s+(?:wind|headwind)",
@@ -273,7 +277,7 @@ class NLQueryParser:
                 return float(match.group(1))
         return None
 
-    def _extract_budget(self, query_lower: str) -> Optional[int]:
+    def _extract_budget(self, query_lower: str) -> int | None:
         """Extract budget in INR from query."""
         patterns = [
             r"(?:budget|spend)\s+(?:of\s+)?₹?(\d+)(?:\s*(?:inr|rupees?))?",
@@ -295,7 +299,7 @@ class NLQueryParser:
                     break  # Only add category once
         return mentioned
 
-    def _extract_track_prep(self, query_lower: str) -> Optional[str]:
+    def _extract_track_prep(self, query_lower: str) -> str | None:
         """Extract track prep type from query."""
         prep_map = {
             "vht": ["vht", "victor"],
@@ -412,7 +416,11 @@ class NLSimRunner:
                 if parts:
                     # Take the first part in that category
                     best_part = parts[0]
-                    part_display = best_part.get("model_name") or best_part.get("name") or "Unknown Part"
+                    part_display = (
+                        best_part.get("model_name")
+                        or best_part.get("name")
+                        or "Unknown Part"
+                    )
                     applied_parts.append(part_display)
                     # Apply the part's overrides to config
                     self._apply_part_overrides(config, best_part)
@@ -516,17 +524,24 @@ class NLSimRunner:
 
         # ET-based suggestions
         if result.time_quarter > 10.5:
-            if "turbo" not in parsed.parts_mentioned and "supercharger" not in parsed.parts_mentioned:
+            if (
+                "turbo" not in parsed.parts_mentioned
+                and "supercharger" not in parsed.parts_mentioned
+            ):
                 suggestions.append(
                     "Consider turbocharger or supercharger for ET improvement (0.3-0.5s typical)"
                 )
         if result.time_quarter > 10.0:
             if "weight_reduction" not in parsed.parts_mentioned:
-                suggestions.append("Weight reduction parts could improve acceleration by 0.1-0.2s")
+                suggestions.append(
+                    "Weight reduction parts could improve acceleration by 0.1-0.2s"
+                )
 
         # Traction suggestions
         if parsed.temperature_c and parsed.temperature_c > 30:
-            suggestions.append("High ambient temperature reduces tire grip. Consider slick tires or track prep.")
+            suggestions.append(
+                "High ambient temperature reduces tire grip. Consider slick tires or track prep."
+            )
 
         # Budget suggestions
         if parsed.budget_inr and applied_parts:
@@ -541,9 +556,13 @@ class NLSimRunner:
 
                 remaining = parsed.budget_inr - applied_cost
                 if remaining > 0:
-                    suggestions.append(f"₹{remaining:,} remaining in budget. Explore additional parts.")
+                    suggestions.append(
+                        f"₹{remaining:,} remaining in budget. Explore additional parts."
+                    )
                 elif remaining < 0:
-                    suggestions.append(f"Budget exceeded by ₹{abs(remaining):,}. Consider lower-cost alternatives.")
+                    suggestions.append(
+                        f"Budget exceeded by ₹{abs(remaining):,}. Consider lower-cost alternatives."
+                    )
             except Exception:
                 # Silently fail on budget calculation
                 pass
@@ -564,7 +583,7 @@ def format_nl_result(result: dict) -> str:
         return f"  Error: {result['error']}"
 
     lines = []
-    lines.append(f"\n  ╔══ NL QUERY RESULT ══╗")
+    lines.append("\n  ╔══ NL QUERY RESULT ══╗")
     lines.append(f"\n  Bike: {result['bike_name']}")
     lines.append(f"  Venue: {result['environment']['venue']}")
     lines.append(
@@ -576,14 +595,16 @@ def format_nl_result(result: dict) -> str:
     if result["applied_parts"]:
         lines.append(f"  Parts: {', '.join(result['applied_parts'])}")
 
-    lines.append(f"\n  Results:")
+    lines.append("\n  Results:")
     lines.append(f"    ET:           {result['et_s']:.3f}s")
-    lines.append(f"    Trap Speed:   {result['trap_speed_kmh']:.1f} km/h ({result['trap_speed_mph']:.1f} mph)")
+    lines.append(
+        f"    Trap Speed:   {result['trap_speed_kmh']:.1f} km/h ({result['trap_speed_mph']:.1f} mph)"
+    )
     lines.append(f"    60-ft:        {result['sixty_foot_s']:.3f}s")
     lines.append(f"    Peak Accel:   {result['peak_accel_g']:.2f}g")
 
     if result["suggestions"]:
-        lines.append(f"\n  Suggestions:")
+        lines.append("\n  Suggestions:")
         for sugg in result["suggestions"]:
             lines.append(f"    • {sugg}")
 

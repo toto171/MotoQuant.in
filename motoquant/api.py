@@ -27,7 +27,6 @@ Deploy (Railway / Render / DigitalOcean App Platform)
 """
 
 import copy
-import io
 import json
 import logging
 import os
@@ -143,7 +142,9 @@ class SimulateRequest(BaseModel):
     ambient_temp_c: float | None = Field(None, description="Ambient temperature C")
     track_temp_c: float | None = Field(None, description="Track surface temperature C")
     humidity_pct: float | None = Field(None, description="Relative humidity 0-100%")
-    headwind_kmh: float | None = Field(None, description="Headwind km/h (negative = tailwind)")
+    headwind_kmh: float | None = Field(
+        None, description="Headwind km/h (negative = tailwind)"
+    )
 
     # Simulation options
     use_adaptive_dt: bool = Field(
@@ -281,9 +282,9 @@ def _build_config(
                     # Derive grip multiplier from surface_type
                     surface = (d.get("surface_type") or "asphalt").lower()
                     grip_map = {
-                        "concrete": 1.05,   # prepped concrete (NHRA-style)
-                        "asphalt": 1.00,     # baseline
-                        "prepped": 1.10,     # VHT-prepped
+                        "concrete": 1.05,  # prepped concrete (NHRA-style)
+                        "asphalt": 1.00,  # baseline
+                        "prepped": 1.10,  # VHT-prepped
                     }
                     cfg.environment.surface_grip_multiplier = grip_map.get(
                         surface, 1.00
@@ -505,6 +506,13 @@ def get_bike(bike_id: int):
                     v = drive.get(k)
                     if v is not None:
                         d[k] = v
+            if tire:
+                # Expose mu_peak so the bike-detail UI can show grip class
+                # alongside the raw tire model. Other tire fields stay
+                # tucked inside tire_params for the detail-card expander.
+                v = tire.get("mu_peak")
+                if v is not None:
+                    d["tire_mu_peak"] = v
             if chassis:
                 # CoG height is stored as mm in chassis_params (matches
                 # wheelbase_mm / seat_height_mm convention). Expose both units
@@ -638,7 +646,7 @@ def simulate(req: SimulateRequest):
 
     def _safe_array(arr, transform, fallback=None):
         """Safely extract + transform a sim array, guarding against None/empty."""
-        if arr is None or (hasattr(arr, '__len__') and len(arr) == 0):
+        if arr is None or (hasattr(arr, "__len__") and len(arr) == 0):
             return [] if fallback is None else fallback
         return [transform(arr[i]) for i in idx if i < len(arr)]
 
@@ -673,8 +681,12 @@ def simulate(req: SimulateRequest):
             "dry_mass_kg": round(float(cfg.chassis.dry_mass_kg), 1),
             "displacement_cc": cfg.engine.displacement_cc,
             "redline_rpm": cfg.engine.redline_rpm,
-            "gear_count": len(cfg.drivetrain.gear_ratios) if cfg.drivetrain.gear_ratios else 0,
-            "cd": round(float(cfg.aero.cd), 3) if hasattr(cfg, 'aero') and cfg.aero else None,
+            "gear_count": len(cfg.drivetrain.gear_ratios)
+            if cfg.drivetrain.gear_ratios
+            else 0,
+            "cd": round(float(cfg.aero.cd), 3)
+            if hasattr(cfg, "aero") and cfg.aero
+            else None,
             "rider_mass_kg": round(float(cfg.chassis.rider_mass_kg), 1),
         },
         "timeseries": {
@@ -684,7 +696,9 @@ def simulate(req: SimulateRequest):
             "rpm": _safe_array(sim.rpm, lambda v: round(float(v), 0)),
             "gear": _safe_array(sim.gear, lambda v: int(v)),
             "accel_g": _safe_array(sim.a, lambda v: round(float(v) / 9.81, 3)),
-            "traction_pct": _safe_array(sim.traction_pct, lambda v: round(float(v) * 100, 1)),
+            "traction_pct": _safe_array(
+                sim.traction_pct, lambda v: round(float(v) * 100, 1)
+            ),
             "tire_temp_c": _safe_array(sim.T_tire, lambda v: round(float(v), 1)),
             "power_kw": _safe_array(sim.power_kw, lambda v: round(float(v), 1)),
             "F_drive_N": _safe_array(sim.F_drive, lambda v: round(float(v), 0)),
@@ -727,16 +741,20 @@ def simulate_quick(req: QuickSimRequest):
                 from .database.bridge import apply_part_to_config
 
                 for pid in req.part_ids:
-                    row = db.execute("SELECT * FROM parts WHERE id=?", (pid,)).fetchone()
+                    row = db.execute(
+                        "SELECT * FROM parts WHERE id=?", (pid,)
+                    ).fetchone()
                     if row:
                         part_dict = dict(row)
                         cfg = apply_part_to_config(cfg, part_dict)
-                        parts_applied.append({
-                            "id": part_dict["id"],
-                            "name": part_dict.get("model_name", ""),
-                            "brand": part_dict.get("brand", ""),
-                            "price_inr": part_dict.get("price_inr"),
-                        })
+                        parts_applied.append(
+                            {
+                                "id": part_dict["id"],
+                                "name": part_dict.get("model_name", ""),
+                                "brand": part_dict.get("brand", ""),
+                                "price_inr": part_dict.get("price_inr"),
+                            }
+                        )
                         if part_dict.get("price_inr"):
                             build_cost_inr += float(part_dict["price_inr"])
             except Exception as e:
@@ -785,7 +803,9 @@ def simulate_quick(req: QuickSimRequest):
         "parts_applied": parts_applied,
         "build_cost_inr": round(build_cost_inr, 0),
         "stock_et_s": stock_et,
-        "et_delta_s": round(float(sim.time_quarter) - stock_et, 4) if stock_et else None,
+        "et_delta_s": round(float(sim.time_quarter) - stock_et, 4)
+        if stock_et
+        else None,
     }
     return result
 
@@ -846,17 +866,22 @@ def simulate_top_speed(req: TopSpeedRequest):
         if db:
             try:
                 from .database.bridge import apply_part_to_config
+
                 for pid in req.part_ids:
-                    row = db.execute("SELECT * FROM parts WHERE id=?", (pid,)).fetchone()
+                    row = db.execute(
+                        "SELECT * FROM parts WHERE id=?", (pid,)
+                    ).fetchone()
                     if row:
                         part_dict = dict(row)
                         cfg = apply_part_to_config(cfg, part_dict)
-                        parts_applied.append({
-                            "id": part_dict["id"],
-                            "name": part_dict.get("model_name", ""),
-                            "brand": part_dict.get("brand", ""),
-                            "price_inr": part_dict.get("price_inr"),
-                        })
+                        parts_applied.append(
+                            {
+                                "id": part_dict["id"],
+                                "name": part_dict.get("model_name", ""),
+                                "brand": part_dict.get("brand", ""),
+                                "price_inr": part_dict.get("price_inr"),
+                            }
+                        )
                         if part_dict.get("price_inr"):
                             build_cost_inr += float(part_dict["price_inr"])
             except Exception as e:
@@ -921,7 +946,9 @@ class DistanceRunRequest(BaseModel):
 
     bike_id: int | None = None
     bike_preset: str | None = None
-    distance_m: float = Field(..., gt=0, le=20000, description="Target distance in meters")
+    distance_m: float = Field(
+        ..., gt=0, le=20000, description="Target distance in meters"
+    )
     power_boost_pct: float = 0.0
     mass_delta_kg: float = 0.0
     rider_mass_kg: float = 75.0
@@ -967,8 +994,11 @@ def simulate_distance(req: DistanceRunRequest):
         if db:
             try:
                 from .database.bridge import apply_part_to_config
+
                 for pid in req.part_ids:
-                    row = db.execute("SELECT * FROM parts WHERE id=?", (pid,)).fetchone()
+                    row = db.execute(
+                        "SELECT * FROM parts WHERE id=?", (pid,)
+                    ).fetchone()
                     if row:
                         cfg = apply_part_to_config(cfg, dict(row))
             except Exception as e:
@@ -982,6 +1012,7 @@ def simulate_distance(req: DistanceRunRequest):
 
     # Terminal/trap values at the target distance
     import numpy as np
+
     target_idx = int(np.searchsorted(sim.x, req.distance_m))
     if target_idx >= len(sim.t):
         target_idx = len(sim.t) - 1
@@ -1087,6 +1118,7 @@ def list_parts(
             # (is_compatible expects the raw fitment_rules JSON string).
             if bike_row is not None:
                 from .parts.compatibility import is_compatible
+
                 compat, reason = is_compatible(d, bike_row)
                 if compatible_only and not compat:
                     continue
@@ -1094,8 +1126,14 @@ def list_parts(
                 d["fitment_reason"] = reason
 
             # Parse JSON fields for frontend
-            for field in ("param_overrides", "param_deltas", "param_multipliers",
-                          "specifications", "compatible_bikes", "fitment_rules"):
+            for field in (
+                "param_overrides",
+                "param_deltas",
+                "param_multipliers",
+                "specifications",
+                "compatible_bikes",
+                "fitment_rules",
+            ):
                 if d.get(field) and isinstance(d[field], str):
                     try:
                         d[field] = json.loads(d[field])
@@ -1256,18 +1294,34 @@ class CompareRequest(BaseModel):
 
 
 def _run_build(
-    bike_id, bike_preset, power_boost_pct, mass_delta_kg, rider_mass_kg,
-    part_ids, front_tire_id, rear_tire_id, venue_id,
-    ambient_temp_c, track_temp_c, humidity_pct, headwind_kmh,
+    bike_id,
+    bike_preset,
+    power_boost_pct,
+    mass_delta_kg,
+    rider_mass_kg,
+    part_ids,
+    front_tire_id,
+    rear_tire_id,
+    venue_id,
+    ambient_temp_c,
+    track_temp_c,
+    humidity_pct,
+    headwind_kmh,
 ):
     """Build config, apply parts, run sim, return (sim, cfg, parts_applied, cost)."""
     cfg = _build_config(
-        bike_id=bike_id, bike_preset=bike_preset,
-        power_boost_pct=power_boost_pct, mass_delta_kg=mass_delta_kg,
-        rider_mass_kg=rider_mass_kg, venue_id=venue_id,
-        front_tire_id=front_tire_id, rear_tire_id=rear_tire_id,
-        ambient_temp_c=ambient_temp_c, track_temp_c=track_temp_c,
-        humidity_pct=humidity_pct, headwind_kmh=headwind_kmh,
+        bike_id=bike_id,
+        bike_preset=bike_preset,
+        power_boost_pct=power_boost_pct,
+        mass_delta_kg=mass_delta_kg,
+        rider_mass_kg=rider_mass_kg,
+        venue_id=venue_id,
+        front_tire_id=front_tire_id,
+        rear_tire_id=rear_tire_id,
+        ambient_temp_c=ambient_temp_c,
+        track_temp_c=track_temp_c,
+        humidity_pct=humidity_pct,
+        headwind_kmh=headwind_kmh,
     )
     build_cost = 0.0
     parts_applied = []
@@ -1276,12 +1330,21 @@ def _run_build(
         if db:
             try:
                 from .database.bridge import apply_part_to_config
+
                 for pid in part_ids:
-                    row = db.execute("SELECT * FROM parts WHERE id=?", (pid,)).fetchone()
+                    row = db.execute(
+                        "SELECT * FROM parts WHERE id=?", (pid,)
+                    ).fetchone()
                     if row:
                         pd = dict(row)
                         cfg = apply_part_to_config(cfg, pd)
-                        parts_applied.append({"id": pd["id"], "name": pd.get("model_name", ""), "brand": pd.get("brand", "")})
+                        parts_applied.append(
+                            {
+                                "id": pd["id"],
+                                "name": pd.get("model_name", ""),
+                                "brand": pd.get("brand", ""),
+                            }
+                        )
                         if pd.get("price_inr"):
                             build_cost += float(pd["price_inr"])
             except Exception as e:
@@ -1297,7 +1360,7 @@ def _build_summary(sim, cfg, parts_applied, build_cost, label, include_timeserie
     idx = list(range(0, len(sim.t), step))
 
     def _sa(arr, transform):
-        if arr is None or (hasattr(arr, '__len__') and len(arr) == 0):
+        if arr is None or (hasattr(arr, "__len__") and len(arr) == 0):
             return []
         return [transform(arr[i]) for i in idx if i < len(arr)]
 
@@ -1331,16 +1394,34 @@ def simulate_compare(req: CompareRequest):
     """Run two builds side-by-side and return full results for both."""
     try:
         sim_a, cfg_a, parts_a, cost_a = _run_build(
-            req.a_bike_id, req.a_bike_preset, req.a_power_boost_pct,
-            req.a_mass_delta_kg, req.a_rider_mass_kg, req.a_part_ids,
-            req.a_front_tire_id, req.a_rear_tire_id, req.venue_id,
-            req.ambient_temp_c, req.track_temp_c, req.humidity_pct, req.headwind_kmh,
+            req.a_bike_id,
+            req.a_bike_preset,
+            req.a_power_boost_pct,
+            req.a_mass_delta_kg,
+            req.a_rider_mass_kg,
+            req.a_part_ids,
+            req.a_front_tire_id,
+            req.a_rear_tire_id,
+            req.venue_id,
+            req.ambient_temp_c,
+            req.track_temp_c,
+            req.humidity_pct,
+            req.headwind_kmh,
         )
         sim_b, cfg_b, parts_b, cost_b = _run_build(
-            req.b_bike_id, req.b_bike_preset, req.b_power_boost_pct,
-            req.b_mass_delta_kg, req.b_rider_mass_kg, req.b_part_ids,
-            req.b_front_tire_id, req.b_rear_tire_id, req.venue_id,
-            req.ambient_temp_c, req.track_temp_c, req.humidity_pct, req.headwind_kmh,
+            req.b_bike_id,
+            req.b_bike_preset,
+            req.b_power_boost_pct,
+            req.b_mass_delta_kg,
+            req.b_rider_mass_kg,
+            req.b_part_ids,
+            req.b_front_tire_id,
+            req.b_rear_tire_id,
+            req.venue_id,
+            req.ambient_temp_c,
+            req.track_temp_c,
+            req.humidity_pct,
+            req.headwind_kmh,
         )
     except Exception as exc:
         raise HTTPException(500, f"Simulation error: {exc}")
@@ -1381,7 +1462,9 @@ async def upload_dragy(
 
     try:
         content = await file.read()
-        suffix = ".json" if file.filename and file.filename.endswith(".json") else ".csv"
+        suffix = (
+            ".json" if file.filename and file.filename.endswith(".json") else ".csv"
+        )
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
             tmp.write(content)
             tmp_path = tmp.name
@@ -1389,7 +1472,8 @@ async def upload_dragy(
         raise HTTPException(400, f"Failed to read upload: {exc}")
 
     try:
-        from .calibration.dragy import parse_dragy_file, best_run as dragy_best
+        from .calibration.dragy import best_run as dragy_best, parse_dragy_file
+
         runs = parse_dragy_file(tmp_path)
     except Exception as exc:
         log.warning("Dragy parse error: %s", exc)
@@ -1416,9 +1500,18 @@ async def upload_dragy(
             "n_samples": len(run.timestamps),
             "duration_s": round(float(run.timestamps[-1]), 2),
             "timeseries": {
-                "t_s": [round(float(run.timestamps[i]), 4) for i in range(0, len(run.timestamps), step)],
-                "v_kmh": [round(float(run.velocity_ms[i]) * 3.6, 2) for i in range(0, len(run.velocity_ms), step)],
-                "x_m": [round(float(run.distance_m[i]), 2) for i in range(0, len(run.distance_m), step)],
+                "t_s": [
+                    round(float(run.timestamps[i]), 4)
+                    for i in range(0, len(run.timestamps), step)
+                ],
+                "v_kmh": [
+                    round(float(run.velocity_ms[i]) * 3.6, 2)
+                    for i in range(0, len(run.velocity_ms), step)
+                ],
+                "x_m": [
+                    round(float(run.distance_m[i]), 2)
+                    for i in range(0, len(run.distance_m), step)
+                ],
             },
         }
 
@@ -1432,11 +1525,15 @@ async def upload_dragy(
     if bike_id is not None or bike_preset is not None:
         try:
             cfg = _build_config(
-                bike_id=bike_id, bike_preset=bike_preset,
-                power_boost_pct=0, mass_delta_kg=0, rider_mass_kg=75,
+                bike_id=bike_id,
+                bike_preset=bike_preset,
+                power_boost_pct=0,
+                mass_delta_kg=0,
+                rider_mass_kg=75,
             )
             sim = MotoQuantEngine(cfg).run()
             from .calibration.overlay import compare_runs
+
             comparison = compare_runs(best, sim)
             result["overlay"] = {
                 "sim_et_s": round(float(sim.time_quarter), 4),
@@ -1447,8 +1544,14 @@ async def upload_dragy(
                 "v_rmse_kmh": round(float(comparison.rmse_ms) * 3.6, 2),
                 "bike_name": cfg.name,
                 "sim_timeseries": {
-                    "t_s": [round(float(sim.t[i]), 4) for i in range(0, len(sim.t), max(1, len(sim.t) // 200))],
-                    "v_kmh": [round(float(sim.v[i]) * 3.6, 2) for i in range(0, len(sim.v), max(1, len(sim.v) // 200))],
+                    "t_s": [
+                        round(float(sim.t[i]), 4)
+                        for i in range(0, len(sim.t), max(1, len(sim.t) // 200))
+                    ],
+                    "v_kmh": [
+                        round(float(sim.v[i]) * 3.6, 2)
+                        for i in range(0, len(sim.v), max(1, len(sim.v) // 200))
+                    ],
                 },
             }
         except Exception as exc:
@@ -1460,7 +1563,9 @@ async def upload_dragy(
 
 @app.post("/api/calibrate/dyno")
 async def upload_dyno(
-    file: UploadFile = File(..., description="Dyno CSV export (DynoJet, generic, or MoTeC)"),
+    file: UploadFile = File(
+        ..., description="Dyno CSV export (DynoJet, generic, or MoTeC)"
+    ),
     temp_c: float | None = Form(None, description="Ambient temperature during run [C]"),
     pressure_kpa: float | None = Form(None, description="Barometric pressure [kPa]"),
     rh_pct: float = Form(0.0, description="Relative humidity [%]"),
@@ -1479,8 +1584,12 @@ async def upload_dyno(
 
     try:
         from .calibration.dyno import parse_dyno_file
+
         dyno_result = parse_dyno_file(
-            tmp_path, temp_c=temp_c, pressure_kpa=pressure_kpa, rh_pct=rh_pct,
+            tmp_path,
+            temp_c=temp_c,
+            pressure_kpa=pressure_kpa,
+            rh_pct=rh_pct,
         )
     except Exception as exc:
         log.warning("Dyno parse error: %s", exc)
@@ -1507,7 +1616,9 @@ async def upload_dyno(
         "filename": file.filename,
         "curve": {
             "rpm": [round(float(dyno_result.rpm[i]), 0) for i in idx],
-            "power_hp": [round(float(dyno_result.power_kw[i]) * 1.34102, 2) for i in idx],
+            "power_hp": [
+                round(float(dyno_result.power_kw[i]) * 1.34102, 2) for i in idx
+            ],
             "torque_nm": [round(float(dyno_result.torque_nm[i]), 2) for i in idx],
         },
     }
@@ -1519,16 +1630,34 @@ async def upload_dyno(
 class BikeSuggestionRequest(BaseModel):
     """POST /api/bikes/suggest -- user-submitted bike addition request."""
 
-    make: str = Field(..., min_length=1, max_length=60, description="Manufacturer (e.g. 'Kawasaki')")
-    model: str = Field(..., min_length=1, max_length=80, description="Model name (e.g. 'ZX-6R 636')")
+    make: str = Field(
+        ..., min_length=1, max_length=60, description="Manufacturer (e.g. 'Kawasaki')"
+    )
+    model: str = Field(
+        ..., min_length=1, max_length=80, description="Model name (e.g. 'ZX-6R 636')"
+    )
     year: int | None = Field(None, ge=1960, le=2099, description="Model year")
-    displacement_cc: float | None = Field(None, gt=0, le=5000, description="Engine displacement in cc")
-    peak_power_hp: float | None = Field(None, gt=0, le=600, description="Peak power (hp)")
+    displacement_cc: float | None = Field(
+        None, gt=0, le=5000, description="Engine displacement in cc"
+    )
+    peak_power_hp: float | None = Field(
+        None, gt=0, le=600, description="Peak power (hp)"
+    )
     dry_mass_kg: float | None = Field(None, gt=0, le=800, description="Dry mass (kg)")
-    category: str | None = Field(None, max_length=40, description="sport / naked / cruiser / adv / drag / touring")
-    notes: str | None = Field(None, max_length=2000, description="Free-form rider context")
-    submitter_email: str | None = Field(None, max_length=254, description="Optional -- reply address")
-    source_url: str | None = Field(None, max_length=500, description="Optional spec-sheet URL")
+    category: str | None = Field(
+        None,
+        max_length=40,
+        description="sport / naked / cruiser / adv / drag / touring",
+    )
+    notes: str | None = Field(
+        None, max_length=2000, description="Free-form rider context"
+    )
+    submitter_email: str | None = Field(
+        None, max_length=254, description="Optional -- reply address"
+    )
+    source_url: str | None = Field(
+        None, max_length=500, description="Optional spec-sheet URL"
+    )
 
     class Config:
         json_schema_extra = {
@@ -1611,8 +1740,12 @@ class VenueResolveRequest(BaseModel):
         max_length=200,
         description="City, venue name, or 'City, Country' (e.g. 'Pune, IN')",
     )
-    lat: float | None = Field(None, ge=-90, le=90, description="Latitude (decimal degrees)")
-    lon: float | None = Field(None, ge=-180, le=180, description="Longitude (decimal degrees)")
+    lat: float | None = Field(
+        None, ge=-90, le=90, description="Latitude (decimal degrees)"
+    )
+    lon: float | None = Field(
+        None, ge=-180, le=180, description="Longitude (decimal degrees)"
+    )
     altitude_m: float | None = Field(
         None,
         ge=-500,
@@ -1621,9 +1754,7 @@ class VenueResolveRequest(BaseModel):
     )
 
     class Config:
-        json_schema_extra = {
-            "example": {"location": "Pune, IN"}
-        }
+        json_schema_extra = {"example": {"location": "Pune, IN"}}
 
 
 def _match_seeded_venue(db, location: str) -> dict | None:
@@ -1645,8 +1776,14 @@ def _match_seeded_venue(db, location: str) -> dict | None:
                    ELSE 3
                  END
                LIMIT 1""",
-            (needle, needle, needle,
-             location.strip(), location.strip(), location.strip()),
+            (
+                needle,
+                needle,
+                needle,
+                location.strip(),
+                location.strip(),
+                location.strip(),
+            ),
         ).fetchone()
         return dict(row) if row else None
     except Exception as e:
@@ -1701,7 +1838,10 @@ def _fetch_owm_for_location(
     except Exception as exc:
         logging.getLogger(__name__).warning(
             "OWM fetch failed for location=%r lat=%s lon=%s: %s",
-            location, lat, lon, exc,
+            location,
+            lat,
+            lon,
+            exc,
         )
         return {"_error": f"owm_error: {exc}"}
 
@@ -1814,6 +1954,7 @@ def resolve_venue(req: VenueResolveRequest):
                     compute_density_altitude,
                     compute_power_correction,
                 )
+
                 air_density = compute_air_density(temp_c, humidity, pressure, alt)
                 da_ft = compute_density_altitude(temp_c, humidity, pressure, alt)
                 pcf = compute_power_correction(temp_c, pressure, humidity, alt)
@@ -1860,7 +2001,9 @@ def resolve_venue(req: VenueResolveRequest):
                 "Live weather unavailable: OPENWEATHERMAP_API_KEY is not configured on the server.",
             )
         if err == "requests_not_installed":
-            raise HTTPException(503, "Live weather unavailable: `requests` package missing.")
+            raise HTTPException(
+                503, "Live weather unavailable: `requests` package missing."
+            )
         if err.startswith("owm_error"):
             raise HTTPException(502, f"OpenWeatherMap upstream error: {err[11:]}")
         raise HTTPException(422, f"Could not resolve location: {err}")

@@ -74,9 +74,7 @@ class BikeSpec:
     fuel_capacity_l: float | None = None
     cog_height_mm: float | None = None  # centre of gravity height (static, laden)
     weight_dist_front_pct: float | None = None  # % of weight on front wheel (static)
-    swingarm_length_mm: float | None = (
-        None  # pivot to axle, used for anti-squat calc
-    )
+    swingarm_length_mm: float | None = None  # pivot to axle, used for anti-squat calc
 
     # ── Engine dynamics ───────────────────────────────────────────────────
     engine_inertia_kgm2: float | None = None  # rotating assembly inertia

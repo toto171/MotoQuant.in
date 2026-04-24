@@ -32,8 +32,8 @@ class BrakingModel:
         h = self.cfg.chassis.cog_height_m
         L = self.cfg.chassis.wheelbase_m
         mu_peak = getattr(self.cfg.tires, "mu_peak", 1.1)
-        mu_front = mu_peak * 1.05   # front carries most braking load
-        mu_rear = mu_peak * 0.90    # rear unloads under deceleration
+        mu_front = mu_peak * 1.05  # front carries most braking load
+        mu_rear = mu_peak * 0.90  # rear unloads under deceleration
         a_est = 10.0
         for _ in range(5):
             N_f = self.N_f_static + m_total * a_est * h / L

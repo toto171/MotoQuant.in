@@ -5,7 +5,6 @@ Turbocharger, supercharger (roots/centrifugal), and N2O models.
 Computes torque multiplier and boost pressure dynamics.
 """
 
-
 from ..constants import RPM_TO_RADS
 from ..models import (
     BOOST_N2O,

@@ -39,9 +39,9 @@ import copy
 import logging
 import time
 import warnings
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, Optional
 
 import numpy as np
 
@@ -59,33 +59,33 @@ BASE_FEATURE_NAMES: list[str] = [
     "peak_power_hp",
     "peak_torque_nm",
     "redline_rpm",
-    "total_mass_kg",         # bike dry mass + rider weight
+    "total_mass_kg",  # bike dry mass + rider weight
     "aero_cd",
     "frontal_area_m2",
     "tire_mu_peak",
     "rear_rolling_radius_m",
     "primary_ratio",
     "final_drive_ratio",
-    "gear_ratio_1st",        # raw gearbox 1st gear ratio
-    "gear_ratio_top",        # raw gearbox top gear ratio
+    "gear_ratio_1st",  # raw gearbox 1st gear ratio
+    "gear_ratio_top",  # raw gearbox top gear ratio
     "reaction_time_ms",
-    "altitude_m",            # venue density-altitude proxy
+    "altitude_m",  # venue density-altitude proxy
 ]
 
 #: 7 derived features computed from base features (not independently sampled).
 #: Encoding these multiplicative relationships dramatically improves accuracy.
 DERIVED_FEATURE_NAMES: list[str] = [
     "power_to_weight_hp_kg",  # peak_power_hp / total_mass_kg
-    "effective_1st_ratio",    # primary × final × gear_ratio_1st
-    "effective_top_ratio",    # primary × final × gear_ratio_top
+    "effective_1st_ratio",  # primary × final × gear_ratio_1st
+    "effective_top_ratio",  # primary × final × gear_ratio_top
     # Intermediate gear ratios (linearly interpolated between 1st and top,
     # matching _apply_features_to_config's gear scaling). The generator uses a
     # 6-speed gearbox, so 2nd–5th fill the gear stack between 1st and top.
     # These ratios heavily influence shift timing and therefore ET.
-    "gear_ratio_2nd",         # interpolated 2nd gear ratio
-    "gear_ratio_3rd",         # interpolated 3rd gear ratio
-    "gear_ratio_4th",         # interpolated 4th gear ratio
-    "gear_ratio_5th",         # interpolated 5th gear ratio
+    "gear_ratio_2nd",  # interpolated 2nd gear ratio
+    "gear_ratio_3rd",  # interpolated 3rd gear ratio
+    "gear_ratio_4th",  # interpolated 4th gear ratio
+    "gear_ratio_5th",  # interpolated 5th gear ratio
 ]
 
 #: All 17 features in order — this is what the model sees.
@@ -94,20 +94,20 @@ FEATURE_NAMES: list[str] = BASE_FEATURE_NAMES + DERIVED_FEATURE_NAMES
 #: Sampling bounds for each BASE feature: (low, high).
 #: Covers the full range from 125 cc learner bikes to 1300 cc superbikes.
 FEATURE_BOUNDS: dict[str, tuple[float, float]] = {
-    "peak_power_hp":         (15.0,   230.0),
-    "peak_torque_nm":        (12.0,   155.0),
-    "redline_rpm":           (7500.0, 16500.0),
-    "total_mass_kg":         (140.0,  380.0),
-    "aero_cd":               (0.55,   0.95),
-    "frontal_area_m2":       (0.36,   0.64),
-    "tire_mu_peak":          (0.80,   1.50),
-    "rear_rolling_radius_m": (0.265,  0.345),
-    "primary_ratio":         (1.40,   3.10),
-    "final_drive_ratio":     (2.30,   4.20),
-    "gear_ratio_1st":        (2.20,   4.20),
-    "gear_ratio_top":        (0.80,   1.90),
-    "reaction_time_ms":      (0.0,    600.0),
-    "altitude_m":            (0.0,    2000.0),
+    "peak_power_hp": (15.0, 230.0),
+    "peak_torque_nm": (12.0, 155.0),
+    "redline_rpm": (7500.0, 16500.0),
+    "total_mass_kg": (140.0, 380.0),
+    "aero_cd": (0.55, 0.95),
+    "frontal_area_m2": (0.36, 0.64),
+    "tire_mu_peak": (0.80, 1.50),
+    "rear_rolling_radius_m": (0.265, 0.345),
+    "primary_ratio": (1.40, 3.10),
+    "final_drive_ratio": (2.30, 4.20),
+    "gear_ratio_1st": (2.20, 4.20),
+    "gear_ratio_top": (0.80, 1.90),
+    "reaction_time_ms": (0.0, 600.0),
+    "altitude_m": (0.0, 2000.0),
 }
 
 # Sanity check — base feature names and bounds must be in sync
@@ -154,12 +154,12 @@ def _compute_derived_features(base: dict[str, float]) -> dict[str, float]:
     gears = [gt + (g1 - gt) * (n - k) / (n - 1) for k in range(1, n + 1)]
     return {
         "power_to_weight_hp_kg": pw,
-        "effective_1st_ratio":   eff1,
-        "effective_top_ratio":   efft,
-        "gear_ratio_2nd":        gears[1],  # 2nd gear
-        "gear_ratio_3rd":        gears[2],  # 3rd gear
-        "gear_ratio_4th":        gears[3],  # 4th gear
-        "gear_ratio_5th":        gears[4],  # 5th gear
+        "effective_1st_ratio": eff1,
+        "effective_top_ratio": efft,
+        "gear_ratio_2nd": gears[1],  # 2nd gear
+        "gear_ratio_3rd": gears[2],  # 3rd gear
+        "gear_ratio_4th": gears[3],  # 4th gear
+        "gear_ratio_5th": gears[4],  # 5th gear
     }
 
 
@@ -177,9 +177,9 @@ def _full_features(base: dict[str, float]) -> dict[str, float]:
 class SurrogateDataPoint:
     """One training sample: feature vector (17-dim) + physics engine outputs."""
 
-    features: dict[str, float]   # {feature_name: value} — all 17 features
-    et_s: float                   # quarter-mile elapsed time (seconds)
-    trap_speed_mps: float         # trap speed at 402.336 m (m/s)
+    features: dict[str, float]  # {feature_name: value} — all 17 features
+    et_s: float  # quarter-mile elapsed time (seconds)
+    trap_speed_mps: float  # trap speed at 402.336 m (m/s)
 
     @property
     def trap_speed_kmh(self) -> float:
@@ -243,7 +243,7 @@ class SurrogateDataset:
         logger.info("Saved %d samples to %s", len(self), path)
 
     @classmethod
-    def load(cls, path: str | Path) -> "SurrogateDataset":
+    def load(cls, path: str | Path) -> SurrogateDataset:
         """
         Load dataset from a .npz file.
 
@@ -265,13 +265,16 @@ class SurrogateDataset:
         if stored_names == BASE_FEATURE_NAMES and X.shape[1] == len(BASE_FEATURE_NAMES):
             logger.info(
                 "Loading v1 dataset (%d features); computing %d derived features.",
-                len(BASE_FEATURE_NAMES), len(DERIVED_FEATURE_NAMES),
+                len(BASE_FEATURE_NAMES),
+                len(DERIVED_FEATURE_NAMES),
             )
             base_array = X  # (n, 14)
             derived_cols = []
             for i in range(len(base_array)):
-                base_dict = {BASE_FEATURE_NAMES[j]: float(base_array[i, j])
-                             for j in range(len(BASE_FEATURE_NAMES))}
+                base_dict = {
+                    BASE_FEATURE_NAMES[j]: float(base_array[i, j])
+                    for j in range(len(BASE_FEATURE_NAMES))
+                }
                 d = _compute_derived_features(base_dict)
                 derived_cols.append([d[k] for k in DERIVED_FEATURE_NAMES])
             derived_array = np.array(derived_cols, dtype=np.float32)
@@ -279,18 +282,20 @@ class SurrogateDataset:
             stored_names = FEATURE_NAMES
         elif stored_names != FEATURE_NAMES:
             warnings.warn(
-                f"Stored feature names differ from current FEATURE_NAMES. "
-                f"Model may produce incorrect predictions — consider retraining."
+                "Stored feature names differ from current FEATURE_NAMES. "
+                "Model may produce incorrect predictions — consider retraining."
             )
 
         points = []
         for i in range(len(X)):
             feat = {FEATURE_NAMES[j]: float(X[i, j]) for j in range(len(FEATURE_NAMES))}
-            points.append(SurrogateDataPoint(
-                features=feat,
-                et_s=float(y_et[i]),
-                trap_speed_mps=float(y_trap[i]),
-            ))
+            points.append(
+                SurrogateDataPoint(
+                    features=feat,
+                    et_s=float(y_et[i]),
+                    trap_speed_mps=float(y_trap[i]),
+                )
+            )
 
         return cls(
             points=points,
@@ -301,7 +306,7 @@ class SurrogateDataset:
 
     def split(
         self, test_fraction: float = 0.15, seed: int = 0
-    ) -> tuple["SurrogateDataset", "SurrogateDataset"]:
+    ) -> tuple[SurrogateDataset, SurrogateDataset]:
         """Random train/test split. Returns (train_ds, test_ds)."""
         rng = np.random.default_rng(seed)
         n = len(self.points)
@@ -313,11 +318,15 @@ class SurrogateDataset:
         test_pts = [p for i, p in enumerate(self.points) if i in test_idx]
 
         return (
-            SurrogateDataset(points=train_pts, n_samples=len(train_pts), seed=self.seed),
+            SurrogateDataset(
+                points=train_pts, n_samples=len(train_pts), seed=self.seed
+            ),
             SurrogateDataset(points=test_pts, n_samples=len(test_pts), seed=self.seed),
         )
 
-    def filter(self, min_power_to_weight: float = MIN_POWER_TO_WEIGHT) -> "SurrogateDataset":
+    def filter(
+        self, min_power_to_weight: float = MIN_POWER_TO_WEIGHT
+    ) -> SurrogateDataset:
         """
         Return a new dataset with degenerate configs removed.
 
@@ -334,16 +343,21 @@ class SurrogateDataset:
         New SurrogateDataset containing only the kept points.
         """
         kept = [
-            p for p in self.points
-            if p.features.get("power_to_weight_hp_kg",
-                               p.features["peak_power_hp"] / max(p.features["total_mass_kg"], 1.0))
+            p
+            for p in self.points
+            if p.features.get(
+                "power_to_weight_hp_kg",
+                p.features["peak_power_hp"] / max(p.features["total_mass_kg"], 1.0),
+            )
             >= min_power_to_weight
         ]
         n_removed = len(self.points) - len(kept)
         if n_removed:
             logger.info(
                 "filter: removed %d / %d degenerate samples (pw < %.3f hp/kg)",
-                n_removed, len(self.points), min_power_to_weight,
+                n_removed,
+                len(self.points),
+                min_power_to_weight,
             )
         return SurrogateDataset(
             points=kept,
@@ -369,25 +383,27 @@ def _extract_nominal_features(config: BikeConfig) -> dict[str, float]:
     total_mass = config.chassis.dry_mass_kg + rider_mass
 
     base = {
-        "peak_power_hp":         float(config.engine.peak_power_hp),
-        "peak_torque_nm":        float(config.engine.peak_torque_nm),
-        "redline_rpm":           float(config.engine.redline_rpm),
-        "total_mass_kg":         float(total_mass),
-        "aero_cd":               float(config.aero.cd),
-        "frontal_area_m2":       float(config.aero.frontal_area_m2),
-        "tire_mu_peak":          float(config.tires.mu_peak),
+        "peak_power_hp": float(config.engine.peak_power_hp),
+        "peak_torque_nm": float(config.engine.peak_torque_nm),
+        "redline_rpm": float(config.engine.redline_rpm),
+        "total_mass_kg": float(total_mass),
+        "aero_cd": float(config.aero.cd),
+        "frontal_area_m2": float(config.aero.frontal_area_m2),
+        "tire_mu_peak": float(config.tires.mu_peak),
         "rear_rolling_radius_m": float(config.tires.rear_rolling_radius_m),
-        "primary_ratio":         float(config.drivetrain.primary_ratio),
-        "final_drive_ratio":     float(config.drivetrain.final_drive_ratio),
-        "gear_ratio_1st":        float(gear_ratios[0]),
-        "gear_ratio_top":        float(gear_ratios[-1]),
-        "reaction_time_ms":      float(config.staging.reaction_time_ms),
-        "altitude_m":            float(getattr(config.environment, "altitude_m", 0.0)),
+        "primary_ratio": float(config.drivetrain.primary_ratio),
+        "final_drive_ratio": float(config.drivetrain.final_drive_ratio),
+        "gear_ratio_1st": float(gear_ratios[0]),
+        "gear_ratio_top": float(gear_ratios[-1]),
+        "reaction_time_ms": float(config.staging.reaction_time_ms),
+        "altitude_m": float(getattr(config.environment, "altitude_m", 0.0)),
     }
     return _full_features(base)
 
 
-def _apply_features_to_config(base: BikeConfig, features: dict[str, float]) -> BikeConfig:
+def _apply_features_to_config(
+    base: BikeConfig, features: dict[str, float]
+) -> BikeConfig:
     """
     Deep-copy base config and override the 14 base feature parameters.
 
@@ -445,7 +461,8 @@ def _apply_features_to_config(base: BikeConfig, features: dict[str, float]) -> B
             target_top = target_1st * 0.70
         if orig_1st != orig_top:
             new_gr = [
-                target_top + (target_1st - target_top) * (g - orig_top) / (orig_1st - orig_top)
+                target_top
+                + (target_1st - target_top) * (g - orig_top) / (orig_1st - orig_top)
                 for g in gr
             ]
         else:
@@ -475,11 +492,16 @@ def _sobol_sample_features(n: int, seed: int = 0) -> list[dict[str, float]]:
     Falls back to uniform random if scipy is unavailable.
     """
     d = len(BASE_FEATURE_NAMES)
-    lows = np.array([FEATURE_BOUNDS[k][0] for k in BASE_FEATURE_NAMES], dtype=np.float64)
-    highs = np.array([FEATURE_BOUNDS[k][1] for k in BASE_FEATURE_NAMES], dtype=np.float64)
+    lows = np.array(
+        [FEATURE_BOUNDS[k][0] for k in BASE_FEATURE_NAMES], dtype=np.float64
+    )
+    highs = np.array(
+        [FEATURE_BOUNDS[k][1] for k in BASE_FEATURE_NAMES], dtype=np.float64
+    )
 
     try:
         from scipy.stats.qmc import Sobol
+
         m = int(np.ceil(np.log2(max(n, 2))))
         sampler = Sobol(d=d, scramble=True, seed=seed)
         raw = sampler.random_base2(m=m)
@@ -505,7 +527,7 @@ def generate_training_data(
     base_config: BikeConfig,
     n_samples: int = 2048,
     seed: int = 42,
-    progress_callback: Optional[Callable[[int, int], None]] = None,
+    progress_callback: Callable[[int, int], None] | None = None,
     max_retries_factor: float = 2.0,
     min_power_to_weight: float = MIN_POWER_TO_WEIGHT,
 ) -> SurrogateDataset:
@@ -562,11 +584,13 @@ def generate_training_data(
                 failures += 1
                 continue
 
-            points.append(SurrogateDataPoint(
-                features=feat,
-                et_s=float(result.time_quarter),
-                trap_speed_mps=float(result.speed_quarter),
-            ))
+            points.append(
+                SurrogateDataPoint(
+                    features=feat,
+                    et_s=float(result.time_quarter),
+                    trap_speed_mps=float(result.speed_quarter),
+                )
+            )
 
             if progress_callback is not None:
                 progress_callback(len(points), n_samples)
@@ -579,13 +603,17 @@ def generate_training_data(
     if failures > 0:
         logger.info(
             "generate_training_data: %d valid / %d attempts (%.1f%% failure rate) in %.1fs",
-            len(points), len(points) + failures,
+            len(points),
+            len(points) + failures,
             100.0 * failures / max(1, len(points) + failures),
             elapsed,
         )
 
     return SurrogateDataset(
-        points=points, n_samples=n_samples, seed=seed, elapsed_s=elapsed,
+        points=points,
+        n_samples=n_samples,
+        seed=seed,
+        elapsed_s=elapsed,
     )
 
 

@@ -51,9 +51,8 @@ from __future__ import annotations
 import logging
 import time
 import warnings
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 
@@ -71,19 +70,19 @@ logger = logging.getLogger(__name__)
 # ─────────────────────────────────────────────────────────────────
 
 DEFAULT_XGB_PARAMS: dict = {
-    "n_estimators":       1500,
-    "max_depth":          8,
-    "learning_rate":      0.03,
-    "subsample":          0.85,
-    "colsample_bytree":   0.80,
-    "min_child_weight":   2,
-    "gamma":              0.05,    # min split loss — reduces overfitting
-    "reg_alpha":          0.02,    # L1
-    "reg_lambda":         1.0,     # L2
-    "objective":          "reg:squarederror",
-    "tree_method":        "hist",  # CPU-optimised; uses GPU if available
-    "random_state":       42,
-    "n_jobs":             -1,
+    "n_estimators": 1500,
+    "max_depth": 8,
+    "learning_rate": 0.03,
+    "subsample": 0.85,
+    "colsample_bytree": 0.80,
+    "min_child_weight": 2,
+    "gamma": 0.05,  # min split loss — reduces overfitting
+    "reg_alpha": 0.02,  # L1
+    "reg_lambda": 1.0,  # L2
+    "objective": "reg:squarederror",
+    "tree_method": "hist",  # CPU-optimised; uses GPU if available
+    "random_state": 42,
+    "n_jobs": -1,
 }
 
 
@@ -101,12 +100,12 @@ class SurrogateMetrics:
     """
 
     # ET metrics
-    et_mae_s: float       # mean absolute error
-    et_rmse_s: float      # root-mean-square error
-    et_r2: float          # R² coefficient of determination
-    et_within_50ms: float # fraction of predictions within ±0.050 s of truth (0–1)
+    et_mae_s: float  # mean absolute error
+    et_rmse_s: float  # root-mean-square error
+    et_r2: float  # R² coefficient of determination
+    et_within_50ms: float  # fraction of predictions within ±0.050 s of truth (0–1)
     et_within_100ms: float
-    et_max_error_s: float # worst-case absolute error
+    et_max_error_s: float  # worst-case absolute error
 
     # Trap speed metrics
     trap_mae_mps: float
@@ -116,7 +115,7 @@ class SurrogateMetrics:
 
     # Dataset size
     n_test: int
-    inference_us: float   # microseconds per prediction (single sample)
+    inference_us: float  # microseconds per prediction (single sample)
 
     def print_report(self) -> None:
         """Print a formatted accuracy report to stdout."""
@@ -133,12 +132,12 @@ class SurrogateMetrics:
         print(f"  Inference latency  : {self.inference_us:.1f} µs/prediction")
         print()
         print("  ── Elapsed Time (ET) ──────────────────────────────")
-        print(f"  MAE                : {self.et_mae_s*1000:.1f} ms")
-        print(f"  RMSE               : {self.et_rmse_s*1000:.1f} ms")
+        print(f"  MAE                : {self.et_mae_s * 1000:.1f} ms")
+        print(f"  RMSE               : {self.et_rmse_s * 1000:.1f} ms")
         print(f"  R²                 : {self.et_r2:.4f}")
         print(f"  Within ±50 ms      : {tol_50:.1f}%")
         print(f"  Within ±100 ms     : {tol_100:.1f}%")
-        print(f"  Max error          : {self.et_max_error_s*1000:.1f} ms")
+        print(f"  Max error          : {self.et_max_error_s * 1000:.1f} ms")
         print()
         print("  ── Trap Speed ─────────────────────────────────────")
         print(f"  MAE                : {trap_mae_kmh:.2f} km/h")
@@ -149,18 +148,18 @@ class SurrogateMetrics:
 
     def to_dict(self) -> dict:
         return {
-            "et_mae_ms":         round(self.et_mae_s * 1000, 2),
-            "et_rmse_ms":        round(self.et_rmse_s * 1000, 2),
-            "et_r2":             round(self.et_r2, 4),
-            "et_within_50ms_pct":  round(self.et_within_50ms * 100, 1),
+            "et_mae_ms": round(self.et_mae_s * 1000, 2),
+            "et_rmse_ms": round(self.et_rmse_s * 1000, 2),
+            "et_r2": round(self.et_r2, 4),
+            "et_within_50ms_pct": round(self.et_within_50ms * 100, 1),
             "et_within_100ms_pct": round(self.et_within_100ms * 100, 1),
-            "et_max_error_ms":   round(self.et_max_error_s * 1000, 2),
-            "trap_mae_kmh":      round(self.trap_mae_mps * 3.6, 2),
-            "trap_rmse_kmh":     round(self.trap_rmse_mps * 3.6, 2),
-            "trap_r2":           round(self.trap_r2, 4),
+            "et_max_error_ms": round(self.et_max_error_s * 1000, 2),
+            "trap_mae_kmh": round(self.trap_mae_mps * 3.6, 2),
+            "trap_rmse_kmh": round(self.trap_rmse_mps * 3.6, 2),
+            "trap_r2": round(self.trap_r2, 4),
             "trap_within_1kmh_pct": round(self.trap_within_1kmh * 100, 1),
-            "n_test":            self.n_test,
-            "inference_us":      round(self.inference_us, 2),
+            "n_test": self.n_test,
+            "inference_us": round(self.inference_us, 2),
         }
 
 
@@ -185,7 +184,7 @@ class XGBSurrogate:
 
     def __init__(
         self,
-        xgb_params: Optional[dict] = None,
+        xgb_params: dict | None = None,
         log_transform_et: bool = False,
     ) -> None:
         """
@@ -211,7 +210,7 @@ class XGBSurrogate:
         self._model_trap = XGBRegressor(**params)
         self._is_fitted = False
         self._log_transform_et = log_transform_et
-        self._feature_names = FEATURE_NAMES[:]   # snapshot at init
+        self._feature_names = FEATURE_NAMES[:]  # snapshot at init
         self._n_train: int = 0
         self._train_elapsed_s: float = 0.0
 
@@ -225,7 +224,7 @@ class XGBSurrogate:
         eval_set_fraction: float = 0.10,
         early_stopping_rounds: int = 100,
         verbose: bool = False,
-    ) -> "XGBSurrogate":
+    ) -> XGBSurrogate:
         """
         Train both surrogate models.
 
@@ -256,21 +255,27 @@ class XGBSurrogate:
 
         # Log-transform ET: ET ≈ k·(mass/power)^α is a power law.
         # Working in log-space linearises it, dramatically reducing MAE.
-        y_et_fit = np.log(y_et_tr.astype(np.float64)) if self._log_transform_et else y_et_tr
-        y_et_val_fit = np.log(y_et_val.astype(np.float64)) if self._log_transform_et else y_et_val
+        y_et_fit = (
+            np.log(y_et_tr.astype(np.float64)) if self._log_transform_et else y_et_tr
+        )
+        y_et_val_fit = (
+            np.log(y_et_val.astype(np.float64)) if self._log_transform_et else y_et_val
+        )
 
-        fit_kwargs_et = dict(eval_set=[(X_val, y_et_val_fit)], verbose=verbose)
-        fit_kwargs_tr = dict(eval_set=[(X_val, y_trap_val)], verbose=verbose)
+        fit_kwargs_et = {"eval_set": [(X_val, y_et_val_fit)], "verbose": verbose}
+        fit_kwargs_tr = {"eval_set": [(X_val, y_trap_val)], "verbose": verbose}
 
         # Early stopping: XGBoost >=1.6 uses early_stopping_rounds in fit()
         try:
             self._model_et.fit(
-                X_tr, y_et_fit,
+                X_tr,
+                y_et_fit,
                 early_stopping_rounds=early_stopping_rounds,
                 **fit_kwargs_et,
             )
             self._model_trap.fit(
-                X_tr, y_trap_tr,
+                X_tr,
+                y_trap_tr,
                 early_stopping_rounds=early_stopping_rounds,
                 **fit_kwargs_tr,
             )
@@ -284,7 +289,8 @@ class XGBSurrogate:
         self._train_elapsed_s = time.perf_counter() - t0
         logger.info(
             "XGBSurrogate fitted on %d samples in %.1fs",
-            self._n_train, self._train_elapsed_s,
+            self._n_train,
+            self._train_elapsed_s,
         )
         return self
 
@@ -416,19 +422,19 @@ class XGBSurrogate:
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         payload = {
-            "model_et":          self._model_et,
-            "model_trap":        self._model_trap,
-            "feature_names":     self._feature_names,
-            "n_train":           self._n_train,
-            "train_elapsed_s":   self._train_elapsed_s,
-            "log_transform_et":  self._log_transform_et,
-            "version":           "2.0",
+            "model_et": self._model_et,
+            "model_trap": self._model_trap,
+            "feature_names": self._feature_names,
+            "n_train": self._n_train,
+            "train_elapsed_s": self._train_elapsed_s,
+            "log_transform_et": self._log_transform_et,
+            "version": "2.0",
         }
         joblib.dump(payload, path, compress=3)
         logger.info("XGBSurrogate saved to %s", path)
 
     @classmethod
-    def load(cls, path: str | Path) -> "XGBSurrogate":
+    def load(cls, path: str | Path) -> XGBSurrogate:
         """
         Load a surrogate model saved by :meth:`save`.
 
@@ -465,7 +471,8 @@ class XGBSurrogate:
         inst._is_fitted = True
         logger.info(
             "XGBSurrogate loaded from %s (trained on %d samples)",
-            path, inst._n_train,
+            path,
+            inst._n_train,
         )
         return inst
 
@@ -492,7 +499,9 @@ class XGBSurrogate:
         return self._train_elapsed_s
 
     def __repr__(self) -> str:
-        status = f"fitted on {self._n_train:,} samples" if self._is_fitted else "not fitted"
+        status = (
+            f"fitted on {self._n_train:,} samples" if self._is_fitted else "not fitted"
+        )
         return f"XGBSurrogate({status})"
 
 
@@ -504,10 +513,10 @@ class XGBSurrogate:
 def train_surrogate(
     dataset: SurrogateDataset,
     test_fraction: float = 0.15,
-    xgb_params: Optional[dict] = None,
+    xgb_params: dict | None = None,
     verbose: bool = False,
     seed: int = 0,
-) -> tuple["XGBSurrogate", "SurrogateMetrics"]:
+) -> tuple[XGBSurrogate, SurrogateMetrics]:
     """
     One-shot pipeline: split dataset, fit XGBSurrogate, return metrics.
 
@@ -538,9 +547,7 @@ def train_surrogate(
 # ─────────────────────────────────────────────────────────────────
 
 
-def _check_array_shapes(
-    X: np.ndarray, y_et: np.ndarray, y_trap: np.ndarray
-) -> None:
+def _check_array_shapes(X: np.ndarray, y_et: np.ndarray, y_trap: np.ndarray) -> None:
     """Validate array shapes; raise ValueError on mismatch."""
     if X.ndim != 2:
         raise ValueError(f"X must be 2D, got shape {X.shape}")
@@ -550,9 +557,7 @@ def _check_array_shapes(
             f"got {X.shape[1]}. Features: {FEATURE_NAMES}"
         )
     if y_et.shape != (X.shape[0],):
-        raise ValueError(
-            f"y_et shape {y_et.shape} doesn't match X rows {X.shape[0]}"
-        )
+        raise ValueError(f"y_et shape {y_et.shape} doesn't match X rows {X.shape[0]}")
     if y_trap.shape != (X.shape[0],):
         raise ValueError(
             f"y_trap shape {y_trap.shape} doesn't match X rows {X.shape[0]}"

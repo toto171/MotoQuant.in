@@ -5,6 +5,7 @@ Unit tests for the fitment rules engine (no DB required).
 """
 
 import json
+
 import pytest
 
 from motoquant.parts.compatibility import (
@@ -13,7 +14,6 @@ from motoquant.parts.compatibility import (
     FitmentTier,
     is_compatible,
 )
-
 
 # ═══════════════════════════════════════════════════════════
 # FitmentMatch tests
@@ -178,14 +178,16 @@ class TestIsCompatible:
     def test_excluded_bike_ids_blocks(self):
         part = {
             "id": 1,
-            "fitment_rules": json.dumps({
-                "tier": "family",
-                "excluded_bike_ids": [5, 6],
-                "match": {
-                    "displacement_min_cc": 500,
-                    "displacement_max_cc": 1000,
+            "fitment_rules": json.dumps(
+                {
+                    "tier": "family",
+                    "excluded_bike_ids": [5, 6],
+                    "match": {
+                        "displacement_min_cc": 500,
+                        "displacement_max_cc": 1000,
+                    },
                 }
-            }),
+            ),
             "compatible_bikes": None,
             "fitment_universal": 0,
         }
@@ -204,10 +206,9 @@ class TestIsCompatible:
     def test_family_engine_config_hit(self):
         part = {
             "id": 1,
-            "fitment_rules": json.dumps({
-                "tier": "family",
-                "match": {"engine_configs": ["I4", "I2"]}
-            }),
+            "fitment_rules": json.dumps(
+                {"tier": "family", "match": {"engine_configs": ["I4", "I2"]}}
+            ),
             "compatible_bikes": None,
             "fitment_universal": 0,
         }
@@ -218,10 +219,9 @@ class TestIsCompatible:
     def test_family_engine_config_miss(self):
         part = {
             "id": 1,
-            "fitment_rules": json.dumps({
-                "tier": "family",
-                "match": {"engine_configs": ["I4"]}
-            }),
+            "fitment_rules": json.dumps(
+                {"tier": "family", "match": {"engine_configs": ["I4"]}}
+            ),
             "compatible_bikes": None,
             "fitment_universal": 0,
         }
@@ -233,10 +233,9 @@ class TestIsCompatible:
     def test_family_displacement_min_boundary(self):
         part = {
             "id": 1,
-            "fitment_rules": json.dumps({
-                "tier": "family",
-                "match": {"displacement_min_cc": 600}
-            }),
+            "fitment_rules": json.dumps(
+                {"tier": "family", "match": {"displacement_min_cc": 600}}
+            ),
             "compatible_bikes": None,
             "fitment_universal": 0,
         }
@@ -253,10 +252,9 @@ class TestIsCompatible:
     def test_family_displacement_max_boundary(self):
         part = {
             "id": 1,
-            "fitment_rules": json.dumps({
-                "tier": "family",
-                "match": {"displacement_max_cc": 1000}
-            }),
+            "fitment_rules": json.dumps(
+                {"tier": "family", "match": {"displacement_max_cc": 1000}}
+            ),
             "compatible_bikes": None,
             "fitment_universal": 0,
         }
@@ -273,10 +271,9 @@ class TestIsCompatible:
     def test_family_category_hit(self):
         part = {
             "id": 1,
-            "fitment_rules": json.dumps({
-                "tier": "family",
-                "match": {"categories": ["sport", "naked"]}
-            }),
+            "fitment_rules": json.dumps(
+                {"tier": "family", "match": {"categories": ["sport", "naked"]}}
+            ),
             "compatible_bikes": None,
             "fitment_universal": 0,
         }
@@ -287,10 +284,9 @@ class TestIsCompatible:
     def test_family_category_miss(self):
         part = {
             "id": 1,
-            "fitment_rules": json.dumps({
-                "tier": "family",
-                "match": {"categories": ["cruiser"]}
-            }),
+            "fitment_rules": json.dumps(
+                {"tier": "family", "match": {"categories": ["cruiser"]}}
+            ),
             "compatible_bikes": None,
             "fitment_universal": 0,
         }
@@ -301,10 +297,9 @@ class TestIsCompatible:
     def test_family_year_min_boundary(self):
         part = {
             "id": 1,
-            "fitment_rules": json.dumps({
-                "tier": "family",
-                "match": {"year_min": 2000}
-            }),
+            "fitment_rules": json.dumps(
+                {"tier": "family", "match": {"year_min": 2000}}
+            ),
             "compatible_bikes": None,
             "fitment_universal": 0,
         }
@@ -319,10 +314,9 @@ class TestIsCompatible:
     def test_family_year_max_boundary(self):
         part = {
             "id": 1,
-            "fitment_rules": json.dumps({
-                "tier": "family",
-                "match": {"year_max": 2020}
-            }),
+            "fitment_rules": json.dumps(
+                {"tier": "family", "match": {"year_max": 2020}}
+            ),
             "compatible_bikes": None,
             "fitment_universal": 0,
         }
@@ -337,10 +331,9 @@ class TestIsCompatible:
     def test_family_chain_pitch_case_sensitive(self):
         part = {
             "id": 1,
-            "fitment_rules": json.dumps({
-                "tier": "family",
-                "match": {"chain_pitch": "525"}
-            }),
+            "fitment_rules": json.dumps(
+                {"tier": "family", "match": {"chain_pitch": "525"}}
+            ),
             "compatible_bikes": None,
             "fitment_universal": 0,
         }
@@ -356,16 +349,18 @@ class TestIsCompatible:
         """If multiple constraints, all must pass."""
         part = {
             "id": 1,
-            "fitment_rules": json.dumps({
-                "tier": "family",
-                "match": {
-                    "engine_configs": ["I4"],
-                    "displacement_min_cc": 600,
-                    "displacement_max_cc": 1000,
-                    "categories": ["sport"],
-                    "chain_pitch": "525"
+            "fitment_rules": json.dumps(
+                {
+                    "tier": "family",
+                    "match": {
+                        "engine_configs": ["I4"],
+                        "displacement_min_cc": 600,
+                        "displacement_max_cc": 1000,
+                        "categories": ["sport"],
+                        "chain_pitch": "525",
+                    },
                 }
-            }),
+            ),
             "compatible_bikes": None,
             "fitment_universal": 0,
         }
@@ -398,13 +393,15 @@ class TestIsCompatible:
     def test_category_tier_basic(self):
         part = {
             "id": 1,
-            "fitment_rules": json.dumps({
-                "tier": "category",
-                "match": {
-                    "categories": ["cruiser"],
-                    "displacement_min_cc": 300,
+            "fitment_rules": json.dumps(
+                {
+                    "tier": "category",
+                    "match": {
+                        "categories": ["cruiser"],
+                        "displacement_min_cc": 300,
+                    },
                 }
-            }),
+            ),
             "compatible_bikes": None,
             "fitment_universal": 0,
         }

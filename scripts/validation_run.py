@@ -5,12 +5,13 @@ reports per-bike delta and picks the top N most accurate.
 
 Usage: python validation_run.py
 """
+
 from __future__ import annotations
 
 from motoquant import MotoQuantEngine
-from motoquant.defaults import gsxr1000_k5, yzfr1_4c8, hayabusa_gen1
-from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
+from motoquant.defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 from motoquant.scraper.importer import spec_to_bike_config
+from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
 
 # Additional benchmarks via defaults.py reference bikes
 DEFAULT_BENCHMARKS = [
@@ -128,19 +129,21 @@ def run():
             sim_et = float(r.time_quarter)
             sim_trap = float(r.speed_quarter) * 3.6
             delta = sim_et - target_et
-            results.append({
-                "mfr": name.split()[0],
-                "model": " ".join(name.split()[1:]),
-                "year": year,
-                "spec_name": cfg.name,
-                "target_et": target_et,
-                "sim_et": round(sim_et, 3),
-                "delta": round(delta, 3),
-                "abs_delta": round(abs(delta), 3),
-                "target_trap": trap_kmh,
-                "sim_trap": round(sim_trap, 1),
-                "source": source,
-            })
+            results.append(
+                {
+                    "mfr": name.split()[0],
+                    "model": " ".join(name.split()[1:]),
+                    "year": year,
+                    "spec_name": cfg.name,
+                    "target_et": target_et,
+                    "sim_et": round(sim_et, 3),
+                    "delta": round(delta, 3),
+                    "abs_delta": round(abs(delta), 3),
+                    "target_trap": trap_kmh,
+                    "sim_trap": round(sim_trap, 1),
+                    "source": source,
+                }
+            )
         except Exception as e:
             print(f"ERR   {name}: {e}")
 
@@ -155,38 +158,46 @@ def run():
             sim_et = float(r.time_quarter)
             sim_trap = float(r.speed_quarter) * 3.6
             delta = sim_et - target_et
-            results.append({
-                "mfr": mfr,
-                "model": model,
-                "year": year,
-                "spec_name": cfg.name,
-                "target_et": target_et,
-                "sim_et": round(sim_et, 3),
-                "delta": round(delta, 3),
-                "abs_delta": round(abs(delta), 3),
-                "target_trap": trap_kmh,
-                "sim_trap": round(sim_trap, 1),
-                "source": source,
-            })
+            results.append(
+                {
+                    "mfr": mfr,
+                    "model": model,
+                    "year": year,
+                    "spec_name": cfg.name,
+                    "target_et": target_et,
+                    "sim_et": round(sim_et, 3),
+                    "delta": round(delta, 3),
+                    "abs_delta": round(abs(delta), 3),
+                    "target_trap": trap_kmh,
+                    "sim_trap": round(sim_trap, 1),
+                    "source": source,
+                }
+            )
         except Exception as e:
             print(f"ERR   {mfr} {model} {year}: {e}")
 
     # Sort by absolute delta
     results.sort(key=lambda x: x["abs_delta"])
 
-    print(f"\n{'Rank':<5}{'Bike':<40}{'Year':<6}{'Target':<10}{'Sim':<10}{'ΔET':<10}{'Trap':<10}")
+    print(
+        f"\n{'Rank':<5}{'Bike':<40}{'Year':<6}{'Target':<10}{'Sim':<10}{'ΔET':<10}{'Trap':<10}"
+    )
     print("─" * 90)
     for i, r in enumerate(results, 1):
         marker = "★" if i <= 10 else " "
         sign = "+" if r["delta"] >= 0 else ""
         name = f"{r['mfr']} {r['model']}"[:38]
-        print(f"{marker}{i:<4}{name:<40}{r['year']:<6}{r['target_et']:<10}{r['sim_et']:<10}{sign}{r['delta']:<9}{r['sim_trap']:<10}")
+        print(
+            f"{marker}{i:<4}{name:<40}{r['year']:<6}{r['target_et']:<10}{r['sim_et']:<10}{sign}{r['delta']:<9}{r['sim_trap']:<10}"
+        )
 
     # Top 10 as JSON-ready dict for web
     top10 = results[:10]
     print("\n// ── Top 10 as JS array ───────────────────────────────")
     for r in top10:
-        print(f"  {{ name: '{r['mfr']} {r['model']}', year: {r['year']}, target: '{r['target_et']:.2f}s', sim: '{r['sim_et']:.2f}s', delta: {r['delta']:+.3f}, source: '{r['source']}' }},")
+        print(
+            f"  {{ name: '{r['mfr']} {r['model']}', year: {r['year']}, target: '{r['target_et']:.2f}s', sim: '{r['sim_et']:.2f}s', delta: {r['delta']:+.3f}, source: '{r['source']}' }},"
+        )
 
     # Summary stats
     n = len(results)
@@ -194,7 +205,9 @@ def run():
     mean_bias = sum(r["delta"] for r in results) / n
     within_01 = sum(1 for r in results if r["abs_delta"] < 0.10)
     within_02 = sum(1 for r in results if r["abs_delta"] < 0.20)
-    print(f"\nN={n}  mean|Δ|={mean_abs:.3f}s  bias={mean_bias:+.3f}s  within±0.10={within_01}  within±0.20={within_02}")
+    print(
+        f"\nN={n}  mean|Δ|={mean_abs:.3f}s  bias={mean_bias:+.3f}s  within±0.10={within_01}  within±0.20={within_02}"
+    )
 
 
 if __name__ == "__main__":

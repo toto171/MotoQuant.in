@@ -8,8 +8,10 @@ Tests that:
    or is explicitly flagged as did-not-finish (never 0.0 ET with status=ok).
 2. Reference bikes still produce baseline ETs within tolerance.
 """
+
 import pytest
-from motoquant import MotoQuantEngine, gsxr1000_k5, yzfr1_4c8, hayabusa_gen1
+
+from motoquant import MotoQuantEngine, gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 from motoquant.scraper.importer import spec_to_bike_config
 from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
 
@@ -41,7 +43,10 @@ class TestNoSilentFailures:
             result = MotoQuantEngine(cfg).run()
 
             # Check: either finished or whitelisted
-            is_whitelisted = (spec.manufacturer, spec.model_name) in self.KNOWN_DNF_WHITELIST
+            is_whitelisted = (
+                spec.manufacturer,
+                spec.model_name,
+            ) in self.KNOWN_DNF_WHITELIST
             if not bool(result.finished_quarter) and not is_whitelisted:
                 failures.append(
                     f"{spec.manufacturer} {spec.model_name}: "
@@ -51,8 +56,8 @@ class TestNoSilentFailures:
 
         if failures:
             pytest.fail(
-                f"Found {len(failures)} bikes that did not finish:\n" +
-                "\n".join(failures)
+                f"Found {len(failures)} bikes that did not finish:\n"
+                + "\n".join(failures)
             )
 
     def test_reference_baselines_preserved(self):
@@ -68,9 +73,7 @@ class TestNoSilentFailures:
             actual_et = result.time_quarter
 
             assert bool(result.finished_quarter), f"{name} did not finish quarter-mile"
-            assert (
-                abs(actual_et - expected_et) <= tolerance
-            ), (
+            assert abs(actual_et - expected_et) <= tolerance, (
                 f"{name}: ET={actual_et:.3f}s, expected {expected_et:.3f}s "
                 f"±{tolerance:.3f}s"
             )

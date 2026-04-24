@@ -11,13 +11,10 @@ is never touched.
 """
 
 import io
-import json
 import math
 import os
 import tempfile
 import unittest
-
-import numpy as np
 
 # FastAPI TestClient
 from fastapi.testclient import TestClient
@@ -37,6 +34,7 @@ os.environ["MOTOQUANT_DB"] = _TMP_DB_PATH
 # Initialize schema + seeded reference data in the tmp DB
 from motoquant.database.connection import MotoQuantDB as _SetupDB  # noqa: E402
 from motoquant.database.seed import seed_all as _seed_all  # noqa: E402
+
 _setup_db = _SetupDB(_TMP_DB_PATH)
 _setup_db.initialize()
 # Seed reference bikes + tires + parts so compatibility / parts endpoints
@@ -46,8 +44,8 @@ _seed_all(_setup_db)
 _setup_db.close()
 
 # Now safe to import the API -- it'll pick up the env var on first DB access
-from motoquant.api import app  # noqa: E402
 import motoquant.api as _api_mod  # noqa: E402
+from motoquant.api import app  # noqa: E402
 
 # Force any cached connection (singleton) to use the tmp DB
 _api_mod._db_conn = None
@@ -74,6 +72,7 @@ def tearDownModule():
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _dragy_csv_bytes(n_run_points=400, peak_mph=160.0, duration_s=12.0):
     """Generate a minimal Dragy-style CSV in memory (imperial, with distance).
 
@@ -90,7 +89,7 @@ def _dragy_csv_bytes(n_run_points=400, peak_mph=160.0, duration_s=12.0):
     for i in range(n_run_points):
         t = (n_stage + i) * dt
         frac = i / n_run_points
-        v_mph = peak_mph * (frac ** 0.7)
+        v_mph = peak_mph * (frac**0.7)
         v_ms = v_mph * 0.44704
         dist_ft += v_ms * dt / 0.3048
         lines.append(f"{t:.3f},{v_mph:.4f},{dist_ft:.4f}")
@@ -112,6 +111,7 @@ def _dyno_csv_bytes(n_points=50):
 # ===========================================================================
 # Existing endpoint smoke tests
 # ===========================================================================
+
 
 class TestHealthEndpoints(unittest.TestCase):
     def test_root(self):
@@ -135,10 +135,13 @@ class TestHealthEndpoints(unittest.TestCase):
 
 class TestQuickSim(unittest.TestCase):
     def test_preset_gsxr(self):
-        r = client.post("/api/simulate/quick", json={
-            "bike_preset": "gsxr1000_k5",
-            "rider_mass_kg": 75,
-        })
+        r = client.post(
+            "/api/simulate/quick",
+            json={
+                "bike_preset": "gsxr1000_k5",
+                "rider_mass_kg": 75,
+            },
+        )
         self.assertEqual(r.status_code, 200)
         body = r.json()
         self.assertIn("et_quarter_s", body)
@@ -146,41 +149,59 @@ class TestQuickSim(unittest.TestCase):
         self.assertLess(body["et_quarter_s"], 12.0)
 
     def test_preset_hayabusa(self):
-        r = client.post("/api/simulate/quick", json={
-            "bike_preset": "hayabusa_gen1",
-            "rider_mass_kg": 80,
-        })
+        r = client.post(
+            "/api/simulate/quick",
+            json={
+                "bike_preset": "hayabusa_gen1",
+                "rider_mass_kg": 80,
+            },
+        )
         self.assertEqual(r.status_code, 200)
         body = r.json()
         self.assertGreater(body["trap_speed_kmh"], 180)
 
     def test_power_boost_makes_faster(self):
-        stock = client.post("/api/simulate/quick", json={
-            "bike_preset": "gsxr1000_k5",
-        }).json()
-        boosted = client.post("/api/simulate/quick", json={
-            "bike_preset": "gsxr1000_k5",
-            "power_boost_pct": 20,
-        }).json()
+        stock = client.post(
+            "/api/simulate/quick",
+            json={
+                "bike_preset": "gsxr1000_k5",
+            },
+        ).json()
+        boosted = client.post(
+            "/api/simulate/quick",
+            json={
+                "bike_preset": "gsxr1000_k5",
+                "power_boost_pct": 20,
+            },
+        ).json()
         self.assertLess(boosted["et_quarter_s"], stock["et_quarter_s"])
 
     def test_heavier_rider_slower(self):
-        light = client.post("/api/simulate/quick", json={
-            "bike_preset": "gsxr1000_k5",
-            "rider_mass_kg": 60,
-        }).json()
-        heavy = client.post("/api/simulate/quick", json={
-            "bike_preset": "gsxr1000_k5",
-            "rider_mass_kg": 120,
-        }).json()
+        light = client.post(
+            "/api/simulate/quick",
+            json={
+                "bike_preset": "gsxr1000_k5",
+                "rider_mass_kg": 60,
+            },
+        ).json()
+        heavy = client.post(
+            "/api/simulate/quick",
+            json={
+                "bike_preset": "gsxr1000_k5",
+                "rider_mass_kg": 120,
+            },
+        ).json()
         self.assertLess(light["et_quarter_s"], heavy["et_quarter_s"])
 
 
 class TestFullSim(unittest.TestCase):
     def test_returns_timeseries(self):
-        r = client.post("/api/simulate", json={
-            "bike_preset": "yzfr1_4c8",
-        })
+        r = client.post(
+            "/api/simulate",
+            json={
+                "bike_preset": "yzfr1_4c8",
+            },
+        )
         self.assertEqual(r.status_code, 200)
         body = r.json()
         self.assertIn("timeseries", body)
@@ -191,9 +212,12 @@ class TestFullSim(unittest.TestCase):
         self.assertGreater(len(ts["t_s"]), 10)
 
     def test_splits_present(self):
-        r = client.post("/api/simulate", json={
-            "bike_preset": "gsxr1000_k5",
-        })
+        r = client.post(
+            "/api/simulate",
+            json={
+                "bike_preset": "gsxr1000_k5",
+            },
+        )
         body = r.json()
         self.assertIn("splits", body)
         splits = body["splits"]
@@ -205,14 +229,18 @@ class TestFullSim(unittest.TestCase):
 # A vs B Comparison
 # ===========================================================================
 
+
 class TestCompareEndpoint(unittest.TestCase):
     def test_basic_compare_same_bike(self):
-        r = client.post("/api/simulate/compare", json={
-            "a_bike_preset": "gsxr1000_k5",
-            "a_power_boost_pct": 0,
-            "b_bike_preset": "gsxr1000_k5",
-            "b_power_boost_pct": 15,
-        })
+        r = client.post(
+            "/api/simulate/compare",
+            json={
+                "a_bike_preset": "gsxr1000_k5",
+                "a_power_boost_pct": 0,
+                "b_bike_preset": "gsxr1000_k5",
+                "b_power_boost_pct": 15,
+            },
+        )
         self.assertEqual(r.status_code, 200)
         body = r.json()
         self.assertIn("a", body)
@@ -222,10 +250,13 @@ class TestCompareEndpoint(unittest.TestCase):
         self.assertEqual(body["delta"]["faster"], "B")
 
     def test_compare_returns_timeseries(self):
-        r = client.post("/api/simulate/compare", json={
-            "a_bike_preset": "gsxr1000_k5",
-            "b_bike_preset": "hayabusa_gen1",
-        })
+        r = client.post(
+            "/api/simulate/compare",
+            json={
+                "a_bike_preset": "gsxr1000_k5",
+                "b_bike_preset": "hayabusa_gen1",
+            },
+        )
         self.assertEqual(r.status_code, 200)
         body = r.json()
         self.assertIn("timeseries", body["a"])
@@ -233,10 +264,13 @@ class TestCompareEndpoint(unittest.TestCase):
         self.assertGreater(len(body["a"]["timeseries"]["t_s"]), 10)
 
     def test_compare_different_bikes(self):
-        r = client.post("/api/simulate/compare", json={
-            "a_bike_preset": "gsxr1000_k5",
-            "b_bike_preset": "hayabusa_gen1",
-        })
+        r = client.post(
+            "/api/simulate/compare",
+            json={
+                "a_bike_preset": "gsxr1000_k5",
+                "b_bike_preset": "hayabusa_gen1",
+            },
+        )
         self.assertEqual(r.status_code, 200)
         body = r.json()
         self.assertGreater(body["a"]["et_quarter_s"], 8)
@@ -245,19 +279,25 @@ class TestCompareEndpoint(unittest.TestCase):
         self.assertAlmostEqual(body["delta"]["et_s"], expected_delta, places=3)
 
     def test_compare_cost_diff(self):
-        r = client.post("/api/simulate/compare", json={
-            "a_bike_preset": "gsxr1000_k5",
-            "b_bike_preset": "gsxr1000_k5",
-            "b_power_boost_pct": 10,
-        })
+        r = client.post(
+            "/api/simulate/compare",
+            json={
+                "a_bike_preset": "gsxr1000_k5",
+                "b_bike_preset": "gsxr1000_k5",
+                "b_power_boost_pct": 10,
+            },
+        )
         body = r.json()
         self.assertEqual(body["delta"]["cost_diff_inr"], 0)
 
     def test_compare_labels(self):
-        r = client.post("/api/simulate/compare", json={
-            "a_bike_preset": "gsxr1000_k5",
-            "b_bike_preset": "gsxr1000_k5",
-        })
+        r = client.post(
+            "/api/simulate/compare",
+            json={
+                "a_bike_preset": "gsxr1000_k5",
+                "b_bike_preset": "gsxr1000_k5",
+            },
+        )
         body = r.json()
         self.assertEqual(body["a"]["label"], "A")
         self.assertEqual(body["b"]["label"], "B")
@@ -266,6 +306,7 @@ class TestCompareEndpoint(unittest.TestCase):
 # ===========================================================================
 # Dragy Upload
 # ===========================================================================
+
 
 class TestDragyUpload(unittest.TestCase):
     def test_upload_csv_parses_run(self):
@@ -332,6 +373,7 @@ class TestDragyUpload(unittest.TestCase):
 # Dyno Upload
 # ===========================================================================
 
+
 class TestDynoUpload(unittest.TestCase):
     def test_upload_dyno_csv(self):
         csv_bytes = _dyno_csv_bytes()
@@ -395,13 +437,17 @@ class TestDynoUpload(unittest.TestCase):
 # POST /api/bikes/suggest
 # ===========================================================================
 
+
 class TestBikeSuggestEndpoint(unittest.TestCase):
     def test_minimal_valid_submission(self):
         """Accept a submission with only required fields (make + model)."""
-        r = client.post("/api/bikes/suggest", json={
-            "make": "TestMakeXYZ",
-            "model": "Phantom 500R Test",
-        })
+        r = client.post(
+            "/api/bikes/suggest",
+            json={
+                "make": "TestMakeXYZ",
+                "model": "Phantom 500R Test",
+            },
+        )
         self.assertEqual(r.status_code, 201, r.text)
         body = r.json()
         self.assertIn("id", body)
@@ -411,27 +457,33 @@ class TestBikeSuggestEndpoint(unittest.TestCase):
 
     def test_full_submission_not_flagged(self):
         """Plausible full submission should NOT be flagged."""
-        r = client.post("/api/bikes/suggest", json={
-            "make": "TestBrand",
-            "model": "Test Sport 750",
-            "year": 2024,
-            "displacement_cc": 749.0,
-            "peak_power_hp": 95.0,
-            "dry_mass_kg": 190.0,
-            "category": "sport",
-            "notes": "Rare spec variant",
-        })
+        r = client.post(
+            "/api/bikes/suggest",
+            json={
+                "make": "TestBrand",
+                "model": "Test Sport 750",
+                "year": 2024,
+                "displacement_cc": 749.0,
+                "peak_power_hp": 95.0,
+                "dry_mass_kg": 190.0,
+                "category": "sport",
+                "notes": "Rare spec variant",
+            },
+        )
         self.assertEqual(r.status_code, 201, r.text)
         body = r.json()
         self.assertFalse(body["flagged_out_of_bounds"])
 
     def test_out_of_bounds_displacement_flagged(self):
         """Plausible-range violations are stored but flagged."""
-        r = client.post("/api/bikes/suggest", json={
-            "make": "TestBrand",
-            "model": "Flag Test Model",
-            "displacement_cc": 4500.0,  # Above 3500 ceiling in BOUNDS
-        })
+        r = client.post(
+            "/api/bikes/suggest",
+            json={
+                "make": "TestBrand",
+                "model": "Flag Test Model",
+                "displacement_cc": 4500.0,  # Above 3500 ceiling in BOUNDS
+            },
+        )
         # Pydantic range allows up to 5000, repo plausibility caps at 3500
         self.assertEqual(r.status_code, 201, r.text)
         body = r.json()
@@ -440,32 +492,42 @@ class TestBikeSuggestEndpoint(unittest.TestCase):
 
     def test_empty_make_rejected(self):
         """Empty make field returns 422."""
-        r = client.post("/api/bikes/suggest", json={
-            "make": "",
-            "model": "Should not store",
-        })
+        r = client.post(
+            "/api/bikes/suggest",
+            json={
+                "make": "",
+                "model": "Should not store",
+            },
+        )
         self.assertEqual(r.status_code, 422)
 
     def test_missing_model_rejected(self):
         """Missing model field returns 422."""
-        r = client.post("/api/bikes/suggest", json={
-            "make": "TestMake",
-        })
+        r = client.post(
+            "/api/bikes/suggest",
+            json={
+                "make": "TestMake",
+            },
+        )
         self.assertEqual(r.status_code, 422)
 
     def test_extreme_value_rejected_by_pydantic(self):
         """Values outside even the lenient Pydantic range return 422."""
-        r = client.post("/api/bikes/suggest", json={
-            "make": "TestMake",
-            "model": "Extreme",
-            "year": 1800,  # below 1900 Pydantic lower bound
-        })
+        r = client.post(
+            "/api/bikes/suggest",
+            json={
+                "make": "TestMake",
+                "model": "Extreme",
+                "year": 1800,  # below 1900 Pydantic lower bound
+            },
+        )
         self.assertEqual(r.status_code, 422)
 
 
 # ===========================================================================
 # POST /api/venues/resolve
 # ===========================================================================
+
 
 class TestVenueResolveEndpoint(unittest.TestCase):
     def test_missing_input_returns_422(self):
@@ -480,9 +542,12 @@ class TestVenueResolveEndpoint(unittest.TestCase):
 
     def test_nonexistent_location_graceful(self):
         """Unknown location falls through to OWM; without API key returns 503."""
-        r = client.post("/api/venues/resolve", json={
-            "location": "Nowhere Place XYZ Never Existed 999",
-        })
+        r = client.post(
+            "/api/venues/resolve",
+            json={
+                "location": "Nowhere Place XYZ Never Existed 999",
+            },
+        )
         # In a CI environment without OPENWEATHERMAP_API_KEY this is 503.
         # In a configured environment it may be 422 ("could not resolve").
         # Either way it should not be a 5xx that indicates a crash.
@@ -543,8 +608,11 @@ class TestPartsEndpoint(unittest.TestCase):
         # Default: no compatibility annotation
         self.assertFalse(body.get("compatible_only", False))
         for p in body["parts"][:5]:
-            self.assertNotIn("compatible", p,
-                             "compatibility flag should only appear when bike_id is set")
+            self.assertNotIn(
+                "compatible",
+                p,
+                "compatibility flag should only appear when bike_id is set",
+            )
 
     def test_category_filter_independent_of_bike_id(self):
         """Category filter alone narrows results without touching compatibility."""
@@ -554,8 +622,9 @@ class TestPartsEndpoint(unittest.TestCase):
         self.assertGreater(body["total"], 0, "expected at least one exhaust")
         for p in body["parts"]:
             self.assertEqual(
-                str(p.get("category_name", "")).lower(), "exhaust",
-                f"non-exhaust leaked: {p.get('category_name')}"
+                str(p.get("category_name", "")).lower(),
+                "exhaust",
+                f"non-exhaust leaked: {p.get('category_name')}",
             )
 
     def test_unknown_bike_id_returns_404(self):
@@ -584,11 +653,17 @@ class TestPartsEndpoint(unittest.TestCase):
             brand = (p.get("brand") or "").lower()
             model = (p.get("model_name") or "").lower()
             # These 2T brand/model tokens should never surface for a 4T bike
-            for token in ("expansion chamber", "reed valve", "powervalve",
-                          "ypvs", "rave valve"):
+            for token in (
+                "expansion chamber",
+                "reed valve",
+                "powervalve",
+                "ypvs",
+                "rave valve",
+            ):
                 self.assertNotIn(
-                    token, f"{brand} {model}",
-                    f"2T part leaked into 4T bike_id=1: {brand} {model}"
+                    token,
+                    f"{brand} {model}",
+                    f"2T part leaked into 4T bike_id=1: {brand} {model}",
                 )
 
     def test_bike_id_compatible_only_false_annotates(self):
@@ -619,8 +694,9 @@ class TestPartsEndpoint(unittest.TestCase):
                 n_incompat += 1
         # Mixed outcome expected: some parts compatible, some not
         self.assertGreater(n_compat, 0, "expected at least one compatible part")
-        self.assertGreater(n_incompat, 0,
-                           "expected at least one incompatible part (e.g. 2T-only)")
+        self.assertGreater(
+            n_incompat, 0, "expected at least one incompatible part (e.g. 2T-only)"
+        )
 
     def test_bike_id_with_category_combines(self):
         """bike_id + category should combine as AND, not OR."""
@@ -631,9 +707,7 @@ class TestPartsEndpoint(unittest.TestCase):
         self.assertEqual(r.status_code, 200)
         body = r.json()
         for p in body["parts"]:
-            self.assertEqual(
-                str(p.get("category_name", "")).lower(), "exhaust"
-            )
+            self.assertEqual(str(p.get("category_name", "")).lower(), "exhaust")
 
 
 if __name__ == "__main__":

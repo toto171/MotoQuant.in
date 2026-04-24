@@ -298,7 +298,9 @@ class DrivetrainParams:
     front_sprocket: int = 17  # Front teeth
     rear_sprocket: int = 42  # Rear teeth (overrides final_drive_ratio if set)
     chain_pitch_mm: float = 15.875  # 530 chain
-    chain_pitch: str | None = None  # Standard pitch code: "428", "520", "525", "530" (used by parts fitment)
+    chain_pitch: str | None = (
+        None  # Standard pitch code: "428", "520", "525", "530" (used by parts fitment)
+    )
     chain_links: int = 110  # Number of links
     chain_slack_mm: float = 30.0  # Free play
     drive_type: str = DRIVE_CHAIN  # chain / belt / shaft

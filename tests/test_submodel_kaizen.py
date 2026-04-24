@@ -27,7 +27,7 @@ reference-bike quarter-mile baselines (K5, R1, Hayabusa).
 import unittest
 
 import motoquant
-from motoquant.models import CLUTCH_LOCKUP, CLUTCH_SLIPPER
+from motoquant.models import CLUTCH_SLIPPER
 from motoquant.submodels.braking import BrakingModel
 from motoquant.submodels.clutch import ClutchModel
 from motoquant.submodels.tire import TireModel
@@ -47,9 +47,12 @@ class TestClutchSlipperBranch(unittest.TestCase):
         model = ClutchModel(cfg, self._engine_torque_stub)
         T_max = cfg.clutch.max_torque()
         # slip > 0 → drive direction
-        T, Q = model.torque(omega_e=1000.0, omega_input=500.0, T_clutch_temp=50.0, t=0.5)
-        self.assertAlmostEqual(T, T_max, delta=1.0,
-                               msg="Slipper in drive direction should pass full T_max")
+        T, Q = model.torque(
+            omega_e=1000.0, omega_input=500.0, T_clutch_temp=50.0, t=0.5
+        )
+        self.assertAlmostEqual(
+            T, T_max, delta=1.0, msg="Slipper in drive direction should pass full T_max"
+        )
         self.assertGreater(Q, 0.0, "Heat generated while slipping")
 
     def test_slipper_overrun_caps_backtorque(self):
@@ -60,13 +63,22 @@ class TestClutchSlipperBranch(unittest.TestCase):
         model = ClutchModel(cfg, self._engine_torque_stub)
         T_max = cfg.clutch.max_torque()
         # Engine slower than input → slip < 0 → overrun
-        T, Q = model.torque(omega_e=500.0, omega_input=1000.0, T_clutch_temp=50.0, t=0.5)
+        T, Q = model.torque(
+            omega_e=500.0, omega_input=1000.0, T_clutch_temp=50.0, t=0.5
+        )
         # Magnitude of back-torque should be ≤ slipper_ratio × T_max (plus tiny tolerance)
-        self.assertLess(abs(T), T_max,
-                        msg="Overrun back-torque must be limited below T_max")
-        self.assertAlmostEqual(abs(T), T_max * 0.4, delta=1.0,
-                               msg="Overrun back-torque should equal slipper_ratio × T_max")
-        self.assertLess(T, 0.0, msg="Back-torque should be negative (opposing direction)")
+        self.assertLess(
+            abs(T), T_max, msg="Overrun back-torque must be limited below T_max"
+        )
+        self.assertAlmostEqual(
+            abs(T),
+            T_max * 0.4,
+            delta=1.0,
+            msg="Overrun back-torque should equal slipper_ratio × T_max",
+        )
+        self.assertLess(
+            T, 0.0, msg="Back-torque should be negative (opposing direction)"
+        )
 
     def test_slipper_no_silent_fallthrough(self):
         """
@@ -78,17 +90,24 @@ class TestClutchSlipperBranch(unittest.TestCase):
         cfg.clutch.clutch_type = CLUTCH_SLIPPER
         model = ClutchModel(cfg, self._engine_torque_stub)
         # Slipping in drive direction — must produce heat
-        _, Q = model.torque(omega_e=1200.0, omega_input=400.0, T_clutch_temp=60.0, t=0.3)
-        self.assertGreater(Q, 0.0,
-                           "Slipper clutch while slipping MUST produce heat "
-                           "(previous fallthrough silently said Q=0)")
+        _, Q = model.torque(
+            omega_e=1200.0, omega_input=400.0, T_clutch_temp=60.0, t=0.3
+        )
+        self.assertGreater(
+            Q,
+            0.0,
+            "Slipper clutch while slipping MUST produce heat "
+            "(previous fallthrough silently said Q=0)",
+        )
 
     def test_unknown_clutch_type_does_not_crash(self):
         """Unknown clutch_type still falls back to lockup (with a warning, not crash)."""
         cfg = motoquant.gsxr1000_k5()
         cfg.clutch.clutch_type = "some_future_clutch_type"
         model = ClutchModel(cfg, self._engine_torque_stub)
-        T, Q = model.torque(omega_e=1000.0, omega_input=1000.1, T_clutch_temp=50.0, t=0.5)
+        T, Q = model.torque(
+            omega_e=1000.0, omega_input=1000.1, T_clutch_temp=50.0, t=0.5
+        )
         # Near-zero slip → returns the lockup-style 1e6
         self.assertGreater(T, 0.0)
 
@@ -106,14 +125,19 @@ class TestTireConduction(unittest.TestCase):
         cfg.environment.track_temp_c = 30.0  # typical Indian drag strip
         model = TireModel(cfg, mu_prep=1.0, T_tire_ref_K=298.15)
         # Zero slip, zero velocity — isolate conduction term
-        dT_cool = model.thermal_rate(F_x=0.0, v=0.0, slip_ratio=0.0,
-                                     T_tire=40.0, T_ambient=25.0)
-        dT_hot = model.thermal_rate(F_x=0.0, v=0.0, slip_ratio=0.0,
-                                    T_tire=100.0, T_ambient=25.0)
+        dT_cool = model.thermal_rate(
+            F_x=0.0, v=0.0, slip_ratio=0.0, T_tire=40.0, T_ambient=25.0
+        )
+        dT_hot = model.thermal_rate(
+            F_x=0.0, v=0.0, slip_ratio=0.0, T_tire=100.0, T_ambient=25.0
+        )
         # Hot tire loses more heat → dT more negative than cool tire
-        self.assertLess(dT_hot, dT_cool,
-                        "Hotter tire must cool faster than cooler tire "
-                        "(conduction + convection both temperature-dependent)")
+        self.assertLess(
+            dT_hot,
+            dT_cool,
+            "Hotter tire must cool faster than cooler tire "
+            "(conduction + convection both temperature-dependent)",
+        )
 
     def test_tire_at_road_temp_has_zero_conduction(self):
         """
@@ -127,11 +151,16 @@ class TestTireConduction(unittest.TestCase):
         # ≈ 0 and convection is also zero (set T_tire = T_ambient), and no
         # friction heat, then dT should be zero.
         cfg.environment.track_temp_c = 45.0
-        dT = model.thermal_rate(F_x=0.0, v=0.0, slip_ratio=0.0,
-                                T_tire=45.0, T_ambient=45.0)
+        dT = model.thermal_rate(
+            F_x=0.0, v=0.0, slip_ratio=0.0, T_tire=45.0, T_ambient=45.0
+        )
         # Road temp = tire temp = ambient temp → all three heat fluxes zero
-        self.assertAlmostEqual(dT, 0.0, places=4,
-                               msg="Tire at equilibrium with road and air must have dT≈0")
+        self.assertAlmostEqual(
+            dT,
+            0.0,
+            places=4,
+            msg="Tire at equilibrium with road and air must have dT≈0",
+        )
 
 
 class TestBrakingUsesActualMu(unittest.TestCase):
@@ -149,19 +178,27 @@ class TestBrakingUsesActualMu(unittest.TestCase):
         N_r_static = m_total * 9.81 * 0.5
 
         cfg.tires.mu_peak = 0.9
-        touring_decel = BrakingModel(cfg, N_f_static, N_r_static).max_decel(30.0, m_total)
+        touring_decel = BrakingModel(cfg, N_f_static, N_r_static).max_decel(
+            30.0, m_total
+        )
 
         cfg.tires.mu_peak = 1.5
         slick_decel = BrakingModel(cfg, N_f_static, N_r_static).max_decel(30.0, m_total)
 
-        self.assertGreater(slick_decel, touring_decel,
-                           "Stickier tire must give more braking deceleration "
-                           "(hardcoded mu bug would make them equal)")
+        self.assertGreater(
+            slick_decel,
+            touring_decel,
+            "Stickier tire must give more braking deceleration "
+            "(hardcoded mu bug would make them equal)",
+        )
         # Ballpark: slick should be ~1.5/0.9 ≈ 1.67× the touring number
         ratio = slick_decel / max(1e-3, touring_decel)
-        self.assertGreater(ratio, 1.3,
-                           f"Slick/touring braking ratio {ratio:.2f} too low — "
-                           "mu_peak may not be flowing through")
+        self.assertGreater(
+            ratio,
+            1.3,
+            f"Slick/touring braking ratio {ratio:.2f} too low — "
+            "mu_peak may not be flowing through",
+        )
 
     def test_braking_scales_with_mu_peak(self):
         """Monotonic: doubling mu_peak roughly doubles peak braking force."""
@@ -177,8 +214,9 @@ class TestBrakingUsesActualMu(unittest.TestCase):
         a_high = BrakingModel(cfg, N_f, N_r).max_decel(25.0, m_total)
 
         ratio = a_high / max(1e-3, a_low)
-        self.assertGreater(ratio, 1.5,
-                           f"2× mu_peak should give ~2× braking, got {ratio:.2f}×")
+        self.assertGreater(
+            ratio, 1.5, f"2× mu_peak should give ~2× braking, got {ratio:.2f}×"
+        )
 
 
 class TestReferenceBaselinesIntact(unittest.TestCase):
@@ -186,18 +224,30 @@ class TestReferenceBaselinesIntact(unittest.TestCase):
 
     def test_k5_baseline(self):
         r = motoquant.MotoQuantEngine(motoquant.gsxr1000_k5()).run()
-        self.assertAlmostEqual(r.time_quarter, 10.03, delta=0.05,
-                               msg=f"K5 drifted: {r.time_quarter:.3f}s vs 10.03s target")
+        self.assertAlmostEqual(
+            r.time_quarter,
+            10.03,
+            delta=0.05,
+            msg=f"K5 drifted: {r.time_quarter:.3f}s vs 10.03s target",
+        )
 
     def test_r1_baseline(self):
         r = motoquant.MotoQuantEngine(motoquant.yzfr1_4c8()).run()
-        self.assertAlmostEqual(r.time_quarter, 10.30, delta=0.05,
-                               msg=f"R1 drifted: {r.time_quarter:.3f}s vs 10.30s target")
+        self.assertAlmostEqual(
+            r.time_quarter,
+            10.30,
+            delta=0.05,
+            msg=f"R1 drifted: {r.time_quarter:.3f}s vs 10.30s target",
+        )
 
     def test_hayabusa_baseline(self):
         r = motoquant.MotoQuantEngine(motoquant.hayabusa_gen1()).run()
-        self.assertAlmostEqual(r.time_quarter, 10.47, delta=0.05,
-                               msg=f"Hayabusa drifted: {r.time_quarter:.3f}s vs 10.47s target")
+        self.assertAlmostEqual(
+            r.time_quarter,
+            10.47,
+            delta=0.05,
+            msg=f"Hayabusa drifted: {r.time_quarter:.3f}s vs 10.47s target",
+        )
 
 
 if __name__ == "__main__":
