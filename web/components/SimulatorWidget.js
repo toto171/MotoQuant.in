@@ -93,11 +93,13 @@ function AnimatedCounter({ target, decimals = 3 }) {
 }
 
 export default function SimulatorWidget() {
-  // Default to "Indian Sport" tab + KTM RC 390 (one of the most-recognized
-  // Indian-market sport bikes; mid-pack performance so it's a good demo
-  // bike that doesn't oversell or undersell the simulator).
-  const [activeTab, setActiveTab] = useState(0);
-  const [selectedBike, setSelectedBike] = useState(BIKE_CATEGORIES[0].bikes[0]);
+  // Default to "Dream Bikes" tab + Hayabusa Gen1 — the crowd-favourite and
+  // our best-validated reference bike. Visitors immediately see the famous
+  // 10.47s in the result tile which matches published magazine times.
+  const hayabusaDefaultIdx = BIKE_CATEGORIES.findIndex(c => c.name === 'Dream Bikes');
+  const hayabusaDefault = BIKE_CATEGORIES[hayabusaDefaultIdx]?.bikes.find(b => b.presetId === 'hayabusa_gen1') || BIKE_CATEGORIES[0].bikes[0];
+  const [activeTab, setActiveTab] = useState(hayabusaDefaultIdx >= 0 ? hayabusaDefaultIdx : 0);
+  const [selectedBike, setSelectedBike] = useState(hayabusaDefault);
   const [riderKg, setRiderKg] = useState(75);
   const [powerBoost, setPowerBoost] = useState(0);
   const [massChange, setMassChange] = useState(0);
@@ -165,14 +167,23 @@ export default function SimulatorWidget() {
         )}
       </AnimatePresence>
 
-      <h3 className="text-xl font-bold mb-6 flex items-center gap-2 relative z-10">
-        <motion.div whileHover={{ scale: 1.1 }} transition={{ type: 'spring', stiffness: 400 }}>
-          <Zap className="text-[#FF5E1F]" size={20} />
-        </motion.div>
-        <span className="bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
-          Live Quarter-Mile Simulator
-        </span>
-      </h3>
+      <div className="flex items-center justify-between mb-6 relative z-10">
+        <h3 className="text-xl font-bold flex items-center gap-2">
+          <motion.div whileHover={{ scale: 1.1 }} transition={{ type: 'spring', stiffness: 400 }}>
+            <Zap className="text-[#FF5E1F]" size={20} />
+          </motion.div>
+          <span className="bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
+            Live Quarter-Mile Simulator
+          </span>
+        </h3>
+        {/* "Powered by MotoQuant" badge — links to /features */}
+        <a
+          href="/features"
+          className="shrink-0 ml-3 px-2 py-1 rounded-md border border-[#FF5E1F]/30 bg-[#FF5E1F]/5 text-[10px] font-mono text-[#FF5E1F]/70 hover:text-[#FF5E1F] hover:border-[#FF5E1F]/60 transition-colors whitespace-nowrap"
+        >
+          Powered by MotoQuant ↗
+        </a>
+      </div>
 
       {/* Bike selector — category tabs + chip grid */}
       <div className="mb-6 relative z-10">
@@ -490,25 +501,4 @@ export default function SimulatorWidget() {
                 className="text-sm"
               >
                 <p className="text-white/40 text-xs mb-1">Bike</p>
-                <p className="font-semibold text-white">{result.bike_name?.split(' ').slice(-2).join(' ')}</p>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="text-sm"
-              >
-                <p className="text-white/40 text-xs mb-1">Peak Power</p>
-                <p className="font-semibold text-[#00FFB2]">{result.peak_power_hp.toFixed(0)} hp</p>
-              </motion.div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <p className="text-xs text-white/30 text-center mt-6 relative z-10">
-        First-principles RK4 physics · 15 sub-models · 1 ms timestep · 287 bikes
-      </p>
-    </motion.div>
-  );
-}
+                <p className="font-semibold text-white">{result.bike_name?.spl

@@ -15,8 +15,9 @@ export const dynamic = 'force-static';
 // if the static file is ever removed.
 export default function robots() {
   return {
-    rules: [{ userAgent: '*', allow: '/', disallow: ['/_next/', '/api/'] }],
-    sitemap: 'https://motoquant.in/sitemap.xml',
-    host: 'https://motoquant.in',
-  };
-}
+    rules: [
+      {
+        userAgent: '*',
+        allow: '/',
+        // Block private user pages and server internals.
+        // /api/ excluded so bots don't hamm
