@@ -292,4 +292,19 @@ export default function BikesPage() {
                 className="inline-flex items-center gap-1 px-3 py-2 rounded-lg border border-white/10 hover:border-brand-orange/50 disabled:opacity-30 disabled:cursor-not-allowed text-sm font-mono text-white/80 transition-colors"
               >
                 Next <ChevronRight size={14} />
+              </button>
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* Suggest modal */}
+      <AnimatePresence>
+        {suggestOpen && (
+          <SuggestBikeForm onClose={() => setSuggestOpen(false)} />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
            

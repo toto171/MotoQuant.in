@@ -185,6 +185,7 @@ export function faqSchema() {
   };
 }
 
+
 // ─── Product schema — for /pricing page (Schema.org rich result eligibility) ──
 // Surfaced in layout.js or the pricing page itself once Stream 5 lands.
 export function productSchema() {
@@ -194,4 +195,68 @@ export function productSchema() {
     '@id': `${SITE_URL}/#product`,
     name: 'MotoQuant Pro',
     description:
-      'Physics-accurate motorcycle quarter-mile drag racing simulator. 287 bi
+      'Physics-accurate motorcycle quarter-mile drag racing simulator. 287 bikes, 465 parts, 15 physics sub-models. Predict ET, trap speed, and split times. Validated against real Dragy GPS data.',
+    brand: {
+      '@type': 'Brand',
+      name: 'MotoQuant',
+    },
+    offers: [
+      {
+        '@type': 'Offer',
+        name: 'Free',
+        price: '0',
+        priceCurrency: 'INR',
+        availability: 'https://schema.org/InStock',
+        url: `${SITE_URL}/pricing`,
+      },
+      {
+        '@type': 'Offer',
+        name: 'Pro',
+        price: '499',
+        priceCurrency: 'INR',
+        availability: 'https://schema.org/InStock',
+        url: `${SITE_URL}/pricing`,
+      },
+    ],
+  };
+}
+
+// ─── Article schema — for /blog posts (NewsArticle-compatible) ──
+export function articleSchema({ title, description, slug, datePublished, dateModified }) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    '@id': `${SITE_URL}/blog/${slug}#article`,
+    headline: title,
+    description,
+    url: `${SITE_URL}/blog/${slug}`,
+    datePublished,
+    dateModified: dateModified || datePublished,
+    author: {
+      '@type': 'Person',
+      name: 'Hritwik Mudhai',
+      url: SITE_URL,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'MotoQuant Pro',
+      url: SITE_URL,
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${SITE_URL}/blog/${slug}`,
+    },
+  };
+}
+
+export default function StructuredData({ data }) {
+  // Injected via a plain <script> tag — crawlers parse this even though React
+  // normally reserves <script> for client-side execution. Next.js is happy to
+  // serialise it as-is because we're passing JSON through dangerouslySetInnerHTML.
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
+  );
+}

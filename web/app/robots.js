@@ -1,12 +1,9 @@
-// INTENTIONALLY EMPTY (module export default required by App Router if the
-// file exists at all). The real robots policy lives in /public/robots.txt
-// which Next.js serves at the same URL and which takes precedence over any
-// app/robots.{js,ts} route. The static file was preferred because we can't
-// delete files in the Cowork sandbox.
-//
-// If you ever move robots policy to be dynamic, delete /public/robots.txt
-// first, then export a default function from this file returning a
-// MetadataRoute.Robots object.
+/**
+ * MotoQuant Pro — robots.txt route
+ * =================================
+ * Generates /robots.txt via Next.js metadata convention. Returned as a
+ * MetadataRoute.Robots object.
+ */
 
 export const dynamic = 'force-static';
 
@@ -20,4 +17,11 @@ export default function robots() {
         userAgent: '*',
         allow: '/',
         // Block private user pages and server internals.
-        // /api/ excluded so bots don't hamm
+        // /api/ excluded so bots don't hammer the backend.
+        disallow: ['/account', '/login', '/signup', '/api/'],
+      },
+    ],
+    sitemap: 'https://www.motoquant.in/sitemap.xml',
+    host: 'https://www.motoquant.in',
+  };
+}

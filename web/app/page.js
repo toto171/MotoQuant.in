@@ -912,5 +912,25 @@ export default function HomePage() {
               </div>
             </RevealSection>
 
-            <RevealSection>
-        
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-brand-orange/10 py-12 px-6 text-center text-white/60 text-sm font-mono">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-6">
+            <p className="mb-2">
+              Built in India for drag racers and land-speed record hunters. Validated physics, made for the strip and the salt.
+            </p>
+            <p>
+              motoquant.in{' '}
+              <span className="text-brand-orange/50">·</span>{' '}
+              Not affiliated with any manufacturer
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

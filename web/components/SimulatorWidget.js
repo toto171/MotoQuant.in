@@ -501,4 +501,22 @@ export default function SimulatorWidget() {
                 className="text-sm"
               >
                 <p className="text-white/40 text-xs mb-1">Bike</p>
-                <p className="font-semibold text-white">{result.bike_name?.spl
+                <p className="font-semibold text-white">{result.bike_name?.split(' ').slice(-2).join(' ')}</p>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="text-sm"
+              >
+                <p className="text-white/40 text-xs mb-1">Peak Power</p>
+                <p className="font-semibold text-[#00FFB2]">{result.peak_power_hp.toFixed(0)} hp</p>
+              </motion.div>
+            </div>
+
+            {/* Post-sim CTA — nudge toward signup */}
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.65 }}
+              className
