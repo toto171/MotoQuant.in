@@ -1,0 +1,63 @@
+You are working on MotoQuant Pro at C:\Users\astro\Documents\Claude\Projects\Vehicle Dynamics.
+
+FIRST: Read CLAUDE.md in full. Focus on the Apr-24-AM entry — top-speed sweep metrics and the "gearing audit" bullet flagging ~30 sport bikes with top gear >1.05 ratio.
+
+Your workstream: Gear cassette service-manual audit + top-speed bias reduction.
+
+Context: Top-speed sweep (scripts/topspeed_sweep.py, 39 benchmarks) currently runs:
+  - Mean |Δ| = 26.2 km/h, median = 23.7 km/h, bias = +7.3 km/h
+  - Good (±20 km/h): 16/39
+  - Modern litre superbikes: overshoot +20-40 km/h (sim hits 320-340 km/h vs factory 299)
+  - Vintage 2T triples (GT750, H2 Mach IV): undershoot badly
+  - Ninja 400: sim 146 km/h vs target 185 km/h
+
+Also, the Apr-24-AM gearing audit (scripts/gearing_audit.py) flagged these as likely-wrong top gears:
+  Suzuki Katana 1.136, Panigale V4R 1.260, M1000R 1.173, GSX-R750 1.208, CBR929RR 1.150, R6 5SL 1.150, ZX-7R 1.200
+Most sport bikes top out at 0.85-0.95 (overdriven). Ratios >1.0 mean the top cog is actually smaller than the input cog, which is almost never right on a sport bike.
+
+File ownership (you MAY edit):
+  - motoquant/scraper/gear_ratios.py (Tier-1 lookup table)
+  - motoquant/scraper/known_bikes.py — ONLY gear cassette fields: gear_ratios, front_sprocket, rear_sprocket, primary_ratio. DO NOT touch engine_inertia_kgm2, cd, frontal_area_m2, peak power/torque (Stream 1 owns those).
+  - scripts/topspeed_sweep.py
+  - scripts/gearing_audit.py
+  - tests/test_scraper.py — gear-ratio-specific assertions
+
+DO NOT TOUCH:
+  - motoquant/scraper/importer.py physics (Stream 1)
+  - motoquant/defaults.py (Stream 1)
+  - motoquant/submodels/* (Stream 1)
+  - motoquant/api.py (Stream 4)
+  - desktop/**, web/** (Streams 3, 7)
+  - CLAUDE.md (write SESSION_LOG_ws-gear-topspeed.md instead)
+
+Task list:
+1. Run `python scripts/gearing_audit.py > reports/gearing_audit_2026-04-24_v2.txt`. Triage the flagged ~30 bikes. For each with top gear >1.05, look up the ACTUAL service-manual ratios. Sources, in order of preference:
+   a) Partzilla / cmsnl.com parts diagrams (authoritative — part numbers tied to tooth counts)
+   b) Official factory service manuals (often on archive.org)
+   c) OwnersManual.com / ManualsLib
+   d) Sport Rider / MCN dyno-and-gearing articles (good for high-level ratios)
+   Avoid: random forum posts, YouTube video descriptions, motorcyclespecs.co.za unless confirmed elsewhere.
+   
+2. Fix the wrong cassettes in known_bikes.py (spec-side) AND gear_ratios.py (Tier-1 table). Both must match — the Apr-24-PM stale-DB lesson applies: changes must flow through both paths.
+
+3. For the top-speed biases:
+   a) Litre-superbike +40 km/h overshoot is probably aero (Cd*A too low in top gear crouch). Coordinate with Stream 1 on whether aero.cd + frontal_area_m2 need raising for tuck position (NOT static upright Cd) — if Stream 1 isn't touching aero you can propose a Cd_tuck field on AeroParams; if they are, leave it.
+   b) Ninja 400 undershoot is most likely a small-cc physics issue (Stream 1's problem) — log it and move on.
+   c) Vintage 2T triples (GT750, H2 Mach IV) undershoot is 2T top-gear torque curve — Stream 1's problem. Log and move on.
+   d) Focus on gear-cassette-driven top-speed errors: if you see a bike overshooting by >20 km/h and the gear audit flagged it, fixing the cassette should resolve both.
+
+4. Extend scripts/topspeed_sweep.py benchmark list from 39 to ≥60 entries. Priorities: add missing Indian market 200-400cc bikes (Pulsar NS200 170 km/h, Duke 390 175 km/h, R15 V4 140 km/h) where factory-spec top speed is readily available. Cite source in a comment next to each benchmark.
+
+5. Re-run `python scripts/reseed_configs_from_specs.py` after any known_bikes.py change so /api/simulate matches spec path. Do NOT commit motoquant.db.
+
+6. Validate:
+   - K5/R1/Hayabusa ET still ±0.02s.
+   - ET sweep mean |Δ| unchanged or better.
+   - Top-speed sweep mean |Δ| improves by ≥30% (from 26.2 → ≤18 km/h).
+   - At least 25/60 benchmarks within ±20 km/h (was 16/39 ≈ 41%; target ≥42% on the expanded set).
+
+7. Write tests/test_gearing_sanity.py (NEW) — parametrize over ALL_KNOWN_BIKES, assert every top-gear ratio <1.10 (with 5 hand-documented exceptions if any genuine ones exist), every 1st-gear ratio >1.8, every gear count 4-6.
+
+8. Git: branch `ws/gear-topspeed`, explicit file adds, push branch, open PR.
+
+9. SESSION_LOG_ws-gear-topspeed.md — list every bike you fixed with before/after ratios and the service-manual source URL.

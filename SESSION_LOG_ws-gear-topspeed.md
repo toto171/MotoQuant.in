@@ -128,3 +128,29 @@ PYTHONPATH=. python3 scripts/topspeed_sweep.py
 | `motoquant.db` | Reseeded (267/270 bike_configs updated) |
 
 **DO NOT COMMIT motoquant.db** (tracks in git by legacy exception; re-seed on deploy).
+---
+
+## Git Status — End of Session
+
+### Commit
+```
+2bdfbcb ws/gear-topspeed: fix cassette data, expand benchmarks, add gearing tests
+```
+**1 commit ahead of main (f7bfd5f).** Branch was rebased to sit cleanly on main
+(original commit 55b8325 was parented on ws/release-pipeline; new commit 2bdfbcb
+is parented directly on f7bfd5f — clean single-commit PR).
+
+### To push and open PR (run from your machine)
+```bash
+cd "Vehicle Dynamics"
+git push origin ws/gear-topspeed
+# Then open: https://github.com/da25mem5s02-debug/MotoQuant_v1/compare/ws/gear-topspeed
+```
+
+### To run the full top-speed sweep (sandbox timeout prevents it)
+```bash
+cd "Vehicle Dynamics"
+PYTHONPATH=. python3 scripts/topspeed_sweep.py
+# Output: reports/sweep_topspeed_2026-04-24.json
+# Baseline (pre-fix): mean |Δ| = 26.2 km/h, bias = +7.3 km/h
+```

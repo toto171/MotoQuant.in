@@ -1,0 +1,76 @@
+You are working on MotoQuant Pro at C:\Users\astro\Documents\Claude\Projects\Vehicle Dynamics.
+
+FIRST: Read CLAUDE.md. Focus on Phase 5 Remaining section. Everything in that section is your to-do list.
+
+Your workstream: Build the release pipeline for the desktop app.
+
+File ownership (you MAY edit / CREATE):
+  - desktop/src-tauri/** (Rust side, icons, tauri.conf.json)
+  - desktop/sidecar/** (PyInstaller spec + build scripts)
+  - .github/workflows/release.yml (NEW)
+  - .github/workflows/ci.yml (extend with sidecar build on PRs)
+  - docs/RELEASE.md (NEW)
+  - docs/INSTALL.md (NEW) — end-user install guide for Windows/macOS/Linux
+  - README.md — extend with download links section
+
+DO NOT TOUCH:
+  - desktop/src/** (Stream 3)
+  - motoquant/** (Streams 1, 2, 4, 5)
+  - web/** (Streams 5, 7)
+  - CLAUDE.md (write SESSION_LOG_ws-release-pipeline.md)
+
+Task list:
+
+1. Icon set. Generate from a simple vector source (a speedometer-needle mark or a stylized "MQ"). Required sizes:
+   - 32x32, 128x128, 128x128@2x PNGs in desktop/src-tauri/icons/
+   - icon.icns (macOS) — use `png2icns` or `iconutil` equivalent
+   - icon.ico (Windows) — multi-resolution
+   - StoreLogo.png (for Windows packaging)
+   If you can't do real design work, generate a readable placeholder (ImageMagick: orange "MQ" on carbon-black field, rounded corners). Commit placeholder + mark as "replace before 1.0 launch" in SESSION_LOG.
+
+2. PyInstaller sidecar build. Per-target-triple:
+   - Linux x64: `x86_64-unknown-linux-gnu`
+   - macOS arm64: `aarch64-apple-darwin`
+   - macOS x64: `x86_64-apple-darwin`
+   - Windows x64: `x86_64-pc-windows-msvc`
+   The existing desktop/sidecar/build.sh / build.ps1 are close but untested. Verify each step manually once, document expected binary size (<80MB target given the `excludes` list in the .spec), and add a smoke-test step that spawns the binary on an ephemeral port + hits /api/health.
+
+3. Rename sidecar binaries to Tauri convention: `motoquant-backend-<target-triple>` and drop into desktop/src-tauri/bin/. tauri.conf.json's `externalBin` field must match.
+
+4. Tauri config:
+   - `productName`: "MotoQuant Pro"
+   - `version`: from package.json (wire up via build script)
+   - `identifier`: "in.motoquant.desktop"
+   - Bundle targets: `msi, nsis` (Windows), `dmg, app` (macOS), `deb, appimage` (Linux).
+   - Signing placeholder: keep `signingIdentity` env-var-driven. For now unsigned builds ship; document code-signing cert acquisition in RELEASE.md.
+   - Updater: enable tauri-plugin-updater, point to a GitHub Releases update endpoint. Sign with a generated Ed25519 key for updates (separate from binary code-signing).
+
+5. CI — .github/workflows/release.yml:
+   - Trigger: `on: push: tags: v*`
+   - Matrix: `{os: [ubuntu-latest, windows-latest, macos-14 (arm64)]}` — macOS x64 via macos-13 runner if needed.
+   - Steps: checkout, setup Python 3.11, setup Node 20, setup Rust stable, `bash desktop/sidecar/build.sh`, `cd desktop && npm ci && npx tauri build`, upload artifacts to the GitHub release.
+   - Secrets needed: `TAURI_SIGNING_PRIVATE_KEY`, `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` (for updater signing).
+
+6. CI — .github/workflows/ci.yml extension:
+   - Add a `sidecar-smoke` job that runs on every PR: build the sidecar binary on one OS (ubuntu-latest for speed), spawn it, curl /api/health, fail if non-200. Keeps the PyInstaller spec from rotting.
+
+7. RELEASE.md:
+   - Step-by-step tag-and-ship: `git tag v0.1.0 && git push --tags` → wait for CI → approve the release draft → GitHub auto-publishes binaries.
+   - Code-signing instructions for Windows (EV cert from Sectigo, ~$400/yr; document both signed + unsigned paths) and macOS (Apple Developer ID, $99/yr; `codesign` + `notarytool` steps).
+   - Rollback: delete the release, re-tag from previous known-good.
+
+8. INSTALL.md (end-user):
+   - Windows: download .msi, run, if SmartScreen warns click "More info > Run anyway" (unsigned caveat).
+   - macOS: download .dmg, drag to Applications, first-launch right-click > Open (unsigned caveat).
+   - Linux: .appimage or .deb. AppImage: `chmod +x && ./MotoQuantPro.AppImage`.
+   - First-run: the app auto-starts the Python backend; firewall may prompt — allow.
+
+9. Auto-update. The Tauri updater plugin checks https://github.com/da25mem5s02-debug/MotoQuant_v1/releases/latest for a `latest.json` manifest. Generate that manifest in the release workflow.
+
+10. README.md: add a "Download" section with current-release badges and links, plus a screenshot/GIF of the app.
+
+11. Validate end-to-end by actually doing a local build once (on whatever OS you have access to — document if you can't do all 4 targets). A successful build produces: sidecar binary + tauri bundle + the tauri build doesn't error when it spawns the sidecar as externalBin.
+
+12. Git: branch `ws/release-pipeline`, explicit adds, push, PR.
+
+13. SESSION_LOG_ws-release-pipeline.md — what works, what's manual, what needs human follow-up (certs, API keys).
