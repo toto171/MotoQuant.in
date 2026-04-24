@@ -7,7 +7,7 @@ import Link from 'next/link';
 import SuggestBikeForm from '../../components/SuggestBikeForm';
 import { API_URL } from '../../lib/api';
 
-const PAGE_SIZE = 24;
+const PAGE_SIZE = 40;
 
 function useDebounce(value, delay = 300) {
   const [debounced, setDebounced] = useState(value);
@@ -148,8 +148,10 @@ export default function BikesPage() {
           <div className="hidden md:flex gap-8 items-center text-sm font-mono">
             <Link href="/simulator" className="text-white/60 hover:text-white transition-colors">Simulator</Link>
             <Link href="/bikes" className="text-brand-orange transition-colors">Bikes</Link>
-            <Link href="/#physics" className="text-white/60 hover:text-white transition-colors">Physics</Link>
-            <Link href="/#validation" className="text-white/60 hover:text-white transition-colors">Validation</Link>
+            <Link href="/features" className="text-white/60 hover:text-white transition-colors">Features</Link>
+            <Link href="/docs/getting-started" className="text-white/60 hover:text-white transition-colors">Docs</Link>
+            <Link href="/blog" className="text-white/60 hover:text-white transition-colors">Blog</Link>
+            <Link href="/pricing" className="text-white/60 hover:text-white transition-colors">Pricing</Link>
           </div>
           <Link
             href="/simulator"
@@ -183,8 +185,8 @@ export default function BikesPage() {
             </div>
           </div>
 
-          {/* Filters */}
-          <div className="glass rounded-xl border border-white/10 p-4 mb-6">
+          {/* Filters — sticky below nav */}
+          <div className="sticky top-16 z-40 glass rounded-xl border border-white/10 p-4 mb-6 backdrop-blur-xl">
             <div className="grid grid-cols-1 md:grid-cols-[1fr_180px_180px_auto] gap-3">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
@@ -290,18 +292,4 @@ export default function BikesPage() {
                 className="inline-flex items-center gap-1 px-3 py-2 rounded-lg border border-white/10 hover:border-brand-orange/50 disabled:opacity-30 disabled:cursor-not-allowed text-sm font-mono text-white/80 transition-colors"
               >
                 Next <ChevronRight size={14} />
-              </button>
-            </div>
-          )}
-        </div>
-      </main>
-
-      {/* Suggest modal */}
-      <AnimatePresence>
-        {suggestOpen && (
-          <SuggestBikeForm onClose={() => setSuggestOpen(false)} />
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
+           
