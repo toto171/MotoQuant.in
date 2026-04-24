@@ -406,4 +406,16 @@ def me(user: dict = Depends(get_current_user)) -> MeResponse:
 
     conn = _get_conn()
     try:
-        sub = _subs.get_active
+        sub = _subs.get_active_subscription(conn, user["id"])
+        keys = _subs.list_license_keys(conn, user["id"])
+    finally:
+        conn.close()
+
+    return MeResponse(
+        id=user["id"],
+        email=user["email"],
+        tier=user["tier"],
+        is_active=bool(user["is_active"]),
+        subscription_status=sub["status"] if sub else None,
+        license_keys=keys,
+    )

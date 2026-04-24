@@ -468,4 +468,5 @@ def subscription_status(user: dict = Depends(get_current_user)) -> StatusRespons
         subscription_status=sub["status"] if sub else None,
         current_period_end=sub["current_period_end"] if sub else None,
         billing_cycle=sub["billing_cycle"] if sub else None,
-   
+        license_key_count=key_count,
+    )
