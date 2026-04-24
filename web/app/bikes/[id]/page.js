@@ -79,8 +79,10 @@ export default function BikeDetailPage() {
           <div className="hidden md:flex gap-8 items-center text-sm font-mono">
             <Link href="/simulator" className="text-white/60 hover:text-white transition-colors">Simulator</Link>
             <Link href="/bikes" className="text-brand-orange transition-colors">Bikes</Link>
-            <Link href="/#physics" className="text-white/60 hover:text-white transition-colors">Physics</Link>
-            <Link href="/#validation" className="text-white/60 hover:text-white transition-colors">Validation</Link>
+            <Link href="/features" className="text-white/60 hover:text-white transition-colors">Features</Link>
+            <Link href="/docs/getting-started" className="text-white/60 hover:text-white transition-colors">Docs</Link>
+            <Link href="/blog" className="text-white/60 hover:text-white transition-colors">Blog</Link>
+            <Link href="/pricing" className="text-white/60 hover:text-white transition-colors">Pricing</Link>
           </div>
           <Link
             href="/simulator"
@@ -117,30 +119,39 @@ export default function BikeDetailPage() {
               transition={{ duration: 0.4 }}
             >
               {/* Header */}
-              <div className="mb-8">
-                <p className="font-mono text-xs text-brand-orange uppercase tracking-widest mb-2">
-                  {bike.manufacturer}
-                </p>
-                <h1 className="font-display font-bold text-3xl sm:text-5xl text-white leading-tight">
-                  {bike.model}
-                </h1>
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {bike.year && (
-                    <span className="px-2 py-1 rounded border border-white/10 bg-white/5 text-xs font-mono text-white/70">
-                      {bike.year}
-                    </span>
-                  )}
-                  {bike.category && (
-                    <span className="px-2 py-1 rounded border border-brand-orange/30 bg-brand-orange/5 text-xs font-mono text-brand-orange uppercase">
-                      {bike.category}
-                    </span>
-                  )}
-                  {bike.data_quality && (
-                    <span className="px-2 py-1 rounded border border-brand-accent/30 bg-brand-accent/5 text-xs font-mono text-brand-accent uppercase">
-                      Data · {bike.data_quality}
-                    </span>
-                  )}
+              <div className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6">
+                <div>
+                  <p className="font-mono text-xs text-brand-orange uppercase tracking-widest mb-2">
+                    {bike.manufacturer}
+                  </p>
+                  <h1 className="font-display font-bold text-3xl sm:text-5xl text-white leading-tight">
+                    {bike.model}
+                  </h1>
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {bike.year && (
+                      <span className="px-2 py-1 rounded border border-white/10 bg-white/5 text-xs font-mono text-white/70">
+                        {bike.year}
+                      </span>
+                    )}
+                    {bike.category && (
+                      <span className="px-2 py-1 rounded border border-brand-orange/30 bg-brand-orange/5 text-xs font-mono text-brand-orange uppercase">
+                        {bike.category}
+                      </span>
+                    )}
+                    {bike.data_quality && (
+                      <span className="px-2 py-1 rounded border border-brand-accent/30 bg-brand-accent/5 text-xs font-mono text-brand-accent uppercase">
+                        Data · {bike.data_quality}
+                      </span>
+                    )}
+                  </div>
                 </div>
+                {/* Prominent simulate CTA beside the title */}
+                <Link
+                  href={`/simulator?bike_id=${bike.id}`}
+                  className="shrink-0 inline-flex items-center gap-2 px-5 py-3 bg-brand-orange text-black font-display font-bold rounded-xl transition-all hover:shadow-[0_0_30px_rgba(255,94,31,0.4)] text-sm"
+                >
+                  <Gauge size={16} /> Simulate this bike →
+                </Link>
               </div>
 
               {/* Headline stats */}
@@ -230,23 +241,4 @@ export default function BikeDetailPage() {
 
               {/* CTA */}
               <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
-                <Link
-                  href={`/simulator?bike_id=${bike.id}`}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-orange text-black font-display font-bold rounded-lg transition-all hover:shadow-[0_0_30px_rgba(255,94,31,0.4)]"
-                >
-                  <Gauge size={16} /> Simulate this bike
-                </Link>
-                <Link
-                  href="/bikes"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-white/20 hover:border-brand-orange/60 text-white/80 font-display font-semibold rounded-lg transition-colors"
-                >
-                  Back to catalog
-                </Link>
-              </div>
-            </motion.div>
-          )}
-        </div>
-      </main>
-    </div>
-  );
-}
+  

@@ -69,14 +69,6 @@ export default async function sitemap() {
       changeFrequency: 'weekly',
       priority: 0.9,
     },
-  ];
-
-  const bikeRoutes = bikes.map((bike) => ({
-    url: `${SITE_URL}/bikes/${bike.id}`,
-    lastModified: now,
-    changeFrequency: 'monthly',
-    priority: 0.7,
-  }));
-
-  return [...staticRoutes, ...bikeRoutes];
-}
+    { url: `${SITE_URL}/features`,      lastModified: now, changeFrequency: 'monthly', priority: 0.85 },
+    { url: `${SITE_URL}/about`,         lastModified: now, changeFrequency: 'monthly', priority: 0.70 },
+    { ur
