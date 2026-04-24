@@ -37,7 +37,7 @@ export function organizationSchema() {
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'customer support',
-      email: 'hello@motoquant.in',
+      email: 'motoquant@gmail.com',
       areaServed: ['IN', 'MY', 'TH', 'ID', 'PH', 'AE', 'US', 'GB'],
       availableLanguage: ['English'],
     },

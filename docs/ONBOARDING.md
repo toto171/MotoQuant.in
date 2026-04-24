@@ -108,7 +108,7 @@ These are the things that will cause a PR to be rejected even if the code works.
 
 | Role | Owner | Notes |
 |---|---|---|
-| Project lead / founder | Hritwik Mudhai (hello@motoquant.in) | Original author, primary account holder |
+| Project lead / founder | Hritwik Mudhai (motoquant@gmail.com) | Original author, primary account holder |
 | Co-developer | *(you — fill in)* | Equal admin on GitHub; coordinate on deployment credentials |
 
 Shared credentials (do not commit):

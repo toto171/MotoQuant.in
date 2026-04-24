@@ -88,7 +88,7 @@ export default function PrivacyPage() {
             <li><strong>Portability:</strong> Request your sim runs and build history in JSON format.</li>
           </ul>
           <p className="text-gray-300 text-sm leading-relaxed mt-3">
-            To exercise any right, email <a href="mailto:hello@motoquant.in" className="text-orange-400">hello@motoquant.in</a>.
+            To exercise any right, email <a href="mailto:motoquant@gmail.com" className="text-orange-400">motoquant@gmail.com</a>.
             We respond within 14 business days.
           </p>
         </Section>
@@ -121,7 +121,7 @@ export default function PrivacyPage() {
 
         <div className="mt-12 border-t border-gray-800 pt-8 text-sm text-gray-500">
           <p>MotoQuant Pro · Pune, Maharashtra, India</p>
-          <p>Contact: <a href="mailto:hello@motoquant.in" className="text-orange-400">hello@motoquant.in</a></p>
+          <p>Contact: <a href="mailto:motoquant@gmail.com" className="text-orange-400">motoquant@gmail.com</a></p>
           <div className="mt-4 flex gap-4">
             <a href="/terms" className="text-orange-400 hover:text-orange-300">Terms of Service</a>
             <a href="/pricing" className="text-orange-400 hover:text-orange-300">Pricing</a>

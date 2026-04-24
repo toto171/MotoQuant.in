@@ -261,7 +261,7 @@ export default function AccountPage() {
         <div className="flex gap-4 text-xs text-gray-600">
           <a href="/terms" className="hover:text-gray-400">Terms of Service</a>
           <a href="/privacy" className="hover:text-gray-400">Privacy Policy</a>
-          <a href="mailto:hello@motoquant.in" className="hover:text-gray-400">Support</a>
+          <a href="mailto:motoquant@gmail.com" className="hover:text-gray-400">Support</a>
         </div>
       </div>
     </main>

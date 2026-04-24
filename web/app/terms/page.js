@@ -66,7 +66,7 @@ export default function TermsPage() {
           </p>
           <p>
             <strong>7-day refund policy: </strong>If you are not satisfied within 7 calendar
-            days of your first payment, contact us at hello@motoquant.in for a full refund.
+            days of your first payment, contact us at motoquant@gmail.com for a full refund.
             Refunds are not available after the 7-day window or for renewals.
           </p>
         </Section>
@@ -104,7 +104,7 @@ export default function TermsPage() {
           </p>
           <p>
             <strong>Right to delete: </strong>You may request account deletion at any time
-            by emailing hello@motoquant.in. We will soft-delete your account within 7
+            by emailing motoquant@gmail.com. We will soft-delete your account within 7
             business days and permanently purge all personal data within 30 days.
           </p>
         </Section>
@@ -145,7 +145,7 @@ export default function TermsPage() {
 
         <div className="mt-12 border-t border-gray-800 pt-8 text-sm text-gray-500">
           <p>MotoQuant Pro · Pune, Maharashtra, India</p>
-          <p>Contact: <a href="mailto:hello@motoquant.in" className="text-orange-400">hello@motoquant.in</a></p>
+          <p>Contact: <a href="mailto:motoquant@gmail.com" className="text-orange-400">motoquant@gmail.com</a></p>
           <div className="mt-4 flex gap-4">
             <a href="/privacy" className="text-orange-400 hover:text-orange-300">Privacy Policy</a>
             <a href="/pricing" className="text-orange-400 hover:text-orange-300">Pricing</a>
