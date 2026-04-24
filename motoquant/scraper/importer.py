@@ -737,26 +737,53 @@ def spec_to_bike_config(spec: BikeSpec) -> BikeConfig:
 
     # Parasitic: 2-strokes have no valvetrain; pre-mix bikes have no oil
     # pump at all, oil-injected 2Ts have a tiny one. Collapse those losses.
-    # Small-cc 4-strokes (<500cc) and mid-range 4-strokes (<700cc) have smaller
-    # alternators and oil pumps (relative to full-size litre bikes).
+    # Displacement-scaled parasitic losses.
+    #
+    # Oil-pump and valve-train power loss both scale ≈ linearly with
+    # engine displacement: oil-pump volumetric flow ≈ Vd × N (pump
+    # displacement per crank turn × rpm), valve-train friction ≈
+    # cylinder count × valve count × spring force × peak velocity.
+    # K5 baseline (1000cc I4) is the calibration point:
+    #   oil_pump_power_w  = 500  → coefficient 0.50 W/cc
+    #   valve_train_power = 250  → coefficient 0.25 W/cc
+    # Alternator power is dominated by ELECTRICAL LOAD (lights, ECU,
+    # ignition, accessories), not engine size — kept roughly flat
+    # across displacement classes with a mild downscale for the
+    # smallest commuter electrics (no quickshifter motor, no heated
+    # grips, simpler ECU).
+    #
+    # Pre-fix the small-cc 4T branch hardcoded oil_pump=300, valve=150
+    # — that's 60 % and 60 % of the K5 values applied to a 155 cc
+    # engine that displaces 15 % of K5's volume. Net: parasitic
+    # losses on a 155 cc R15 were 510 W out of 14 400 W peak power
+    # (3.5 %), vs the physically-correct ~150 W (1.0 %). The extra
+    # 360 W = 0.48 hp robbed from a small-cc bike's quarter-mile pull.
     parasitic = copy.deepcopy(base_config.parasitic)
     if spec.stroke_type == 2:
-        parasitic.valve_train_power_w = 0.0   # no cams
-        parasitic.oil_pump_power_w = 60.0      # Autolube-style micro pump
-        # Small 2Ts often have no water pump either (air-cooled RD/RX)
+        # 2T: no valvetrain (port timing in cylinder walls), no oil
+        # pump on Autolube/premix systems, possibly no water pump on
+        # air-cooled vintage 2Ts.
+        parasitic.valve_train_power_w = 0.0
+        parasitic.oil_pump_power_w = 60.0       # micro premix pump
         if spec.cooling == "air":
             parasitic.water_pump_electric = True
-    elif spec.displacement_cc and spec.displacement_cc < 500:
-        # Small-cc 4-strokes have smaller alternators and oil pumps
-        parasitic.alternator_power_w = 60.0   # small magneto/alternator
-        parasitic.oil_pump_power_w = 300.0    # smaller pump
-        parasitic.valve_train_power_w = 150.0 # less valvetrain mass
-    elif spec.displacement_cc and spec.displacement_cc < 700:
-        # Mid-range 4-strokes (500-700cc) get lighter touch than sub-500cc
-        # These naked bikes still have substantial parasitic losses (smaller alternators/water pumps)
-        parasitic.alternator_power_w = 80.0   # slightly smaller than K5 (150W)
-        parasitic.oil_pump_power_w = 320.0    # slightly smaller pump
-        parasitic.valve_train_power_w = 170.0 # slightly less valvetrain
+    elif spec.displacement_cc:
+        disp = float(spec.displacement_cc)
+        # Linear scaling with K5 calibration. Floor at 30 / 20 W keeps
+        # the smallest 100 cc cubs from having near-zero (which would
+        # be physically wrong — an oil pump still has to overcome
+        # spring + bearing drag at minimum).
+        parasitic.oil_pump_power_w = max(30.0, 0.50 * disp)
+        parasitic.valve_train_power_w = max(20.0, 0.25 * disp)
+        # Alternator: K5 default 150 W. Small-cc commuters typically
+        # 60-80 W, mid-size 80-120 W, litre and up 150 W.
+        if disp < 300:
+            parasitic.alternator_power_w = 60.0
+        elif disp < 700:
+            parasitic.alternator_power_w = 80.0
+        elif disp < 1000:
+            parasitic.alternator_power_w = 120.0
+        # else: leave at K5 base default 150 W
 
     # Compose model name
     year_tag = ""
