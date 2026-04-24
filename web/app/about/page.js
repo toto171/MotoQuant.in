@@ -189,10 +189,10 @@ export default function AboutPage() {
                   The physics + software side. Built the 15-sub-model drag simulation engine, the 287-bike catalog, the ROI knapsack, and the calibration pipeline that fits sim output to real Dragy traces within ±0.05 s.
                 </p>
                 <p>
-                  Wrote the RK4 integrator, the Pacejka tire model, the expansion-chamber 2-stroke curve, and the clutch-slip thermal model from the ground up. Cares more about which terms actually survive the force balance than about chasing a good-looking regression.
+                  AI engineer by trade — currently building a separate AI startup in parallel. That expertise is baked into MotoQuant&apos;s machine-learning layer: the DNN surrogate (1 ms per ET prediction), the XGBoost-backed ROI ranker, the Bayesian build optimiser, and the natural-language tuning interface.
                 </p>
                 <p>
-                  Wants MotoQuant to be the tool every serious tuner already has open on a second monitor.
+                  Wrote the RK4 integrator, the Pacejka tire model, the expansion-chamber 2-stroke curve, and the clutch-slip thermal model from the ground up. Cares more about which terms actually survive the force balance than about chasing a good-looking regression. Wants MotoQuant to be the tool every serious tuner already has open on a second monitor.
                 </p>
               </div>
               <a
@@ -317,9 +317,4 @@ export default function AboutPage() {
                       className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-brand-orange/60 transition-colors resize-none"
                       placeholder="Tell us what you want to know, build, or break."
                     />
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-brand-orange text-black font-display font-bold rounded-lg hover:bg-brand-orangeLight transition-colors"
-                  >
-  
+           
