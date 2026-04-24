@@ -156,13 +156,13 @@ export default function AboutPage() {
               </div>
               <div className="space-y-3 text-white/70 text-sm leading-relaxed">
                 <p>
-                  Automobile engineer — M.Tech at NIT Warangal, B.Tech from Manipal Institute of Technology (Automotive System Design). The hands-on side of MotoQuant.
+                  Automobile engineer — M.Tech at NIT Warangal, B.Tech from Manipal Institute of Technology (Automotive System Design). The physics-and-shop-floor side of MotoQuant.
                 </p>
                 <p>
-                  Diagnosed, serviced, and performance-tuned 25+ luxury and performance vehicles at Power Solutions Pune — Mercedes AMG, BMW, Audi, Jaguar Land Rover, Lincoln — including a flagship Mercedes AMG SLS valvetronic exhaust install. ECU-tuning certified (Techmaghi / ReynLab).
+                  At NIT-W his research runs close to MotoQuant&apos;s core stack: a CFD validation study of split-injection strategy in a single-cylinder diesel engine (ANSYS Forte, 28-species n-heptane kinetics, 60° sector mesh, peak-pressure match within 1.6% on the optimal case); a semi-active MR suspension paper that uses six-seed Monte Carlo on ISO 8608 roads to show comfort-optimised skyhook controllers actually lose 18–23% in ride comfort once realistic bump-stops engage — with a full reproducibility artefact; and a design patent filed with NIT-W&apos;s IP Cell.
                 </p>
                 <p>
-                  Research on polyurethane-based magnetorheological elastomers at NIT-W delivered a 22% improvement in vibration damping under magnetic excitation — the kind of first-principles work that shapes how MotoQuant models tire and chassis dynamics.
+                  Hands-on side: diagnosed and performance-tuned 25+ luxury and performance vehicles at Power Solutions Pune — Mercedes AMG, BMW, Audi, Jaguar Land Rover, Lincoln — including a flagship Mercedes AMG SLS valvetronic exhaust install. ECU-tuning certified (Techmaghi / ReynLab). Undergrad research at MIT Manipal on PU-based magnetorheological elastomers delivered a 22% improvement in vibration damping.
                 </p>
               </div>
               <a
@@ -322,21 +322,4 @@ export default function AboutPage() {
                     type="submit"
                     className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-brand-orange text-black font-display font-bold rounded-lg hover:bg-brand-orangeLight transition-colors"
                   >
-                    <Send size={14} /> Send message
-                  </button>
-                </form>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="py-10 px-6 text-center text-white/40 text-xs font-mono">
-        <div className="max-w-6xl mx-auto">
-          <p>MotoQuant Pro · Built by engineers, for racers · motoquant.in</p>
-        </div>
-      </footer>
-    </div>
-  );
-}
+  
