@@ -475,7 +475,7 @@ export default function HomePage() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="text-lg md:text-xl text-white/80 mb-6 max-w-2xl mx-auto leading-relaxed"
           >
-            287 bikes. 465 parts. 15 physics sub-models. Predict your quarter-mile within ±0.5s
+            287 bikes. 424 parts. 15 physics sub-models. Predict your quarter-mile within ±0.5s
             before you buy a single part.
           </motion.p>
 
