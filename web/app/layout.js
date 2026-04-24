@@ -1,6 +1,6 @@
 import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
-import AuthProvider from '../components/AuthProvider';
+import { AuthProvider } from '../components/AuthProvider';
 import StructuredData, {
   organizationSchema,
   websiteSchema,
