@@ -3,8 +3,37 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { Zap, TrendingUp, BarChart3, ChevronDown, Cpu, Wind, Gauge, Menu, X, Brain, Target, MessageSquare, Upload } from 'lucide-react';
+import { Zap, TrendingUp, BarChart3, ChevronDown, Cpu, Wind, Gauge, Menu, X, Brain, Target, MessageSquare, Upload, ArrowRight } from 'lucide-react';
 import SimulatorWidget from '../components/SimulatorWidget';
+
+// ─── Testimonials data — drop in real quotes pre-launch (COPY placeholder) ──
+// To add a testimonial: push one object to this array. No code changes needed.
+const TESTIMONIALS = [
+  {
+    // COPY — replace with real quote before launch
+    quote:
+      'Finally a simulator that actually models how my Ninja 650 behaves on the strip at Aamby. The gear-ratio accuracy alone is worth it.',
+    name: 'Arjun P.',   // COPY
+    role: 'Weekend Racer · Pune',  // COPY
+    result: 'Predicted ET within 0.18s',
+  },
+  {
+    // COPY — replace with real quote before launch
+    quote:
+      'I run a small tuning shop in Narhe. The parts ROI feature changed how I talk to customers — I can show them the data, not just the feel.',
+    name: 'Vikram S.',  // COPY
+    role: 'Tuning Shop Owner · Narhe, Pune',  // COPY
+    result: 'Used for 12+ customer builds',
+  },
+  {
+    // COPY — replace with real quote before launch
+    quote:
+      'The R15 V3 calibration blew my mind. Uploaded my Dragy log, adjusted Cd and μ, and it matched my actual strip time to under 0.2 seconds.',
+    name: 'Rahul M.',  // COPY
+    role: 'Drag Racer · Bangalore',  // COPY
+    result: 'Δ = 0.14s after calibration',
+  },
+];
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -168,24 +197,27 @@ export default function HomePage() {
             </div>
           </motion.div>
 
-          <div className="hidden md:flex gap-8 items-center text-sm font-mono">
+          <div className="hidden md:flex gap-6 items-center text-sm font-mono">
             <a href="/simulator" className="text-white/60 hover:text-white transition-colors duration-300">
               Simulator
             </a>
             <a href="/bikes" className="text-white/60 hover:text-white transition-colors duration-300">
               Bikes
             </a>
-            <a href="#physics" className="text-white/60 hover:text-white transition-colors duration-300">
-              Physics
+            <a href="/features" className="text-white/60 hover:text-white transition-colors duration-300">
+              Features
             </a>
-            <a href="#intelligence" className="text-white/60 hover:text-white transition-colors duration-300">
-              Intelligence
+            <a href="/docs/getting-started" className="text-white/60 hover:text-white transition-colors duration-300">
+              Docs
             </a>
-            <a href="#validation" className="text-white/60 hover:text-white transition-colors duration-300">
-              Validation
+            <a href="/blog" className="text-white/60 hover:text-white transition-colors duration-300">
+              Blog
             </a>
-            <a href="#cta" className="text-white/60 hover:text-white transition-colors duration-300">
-              Get Started
+            <a href="/about" className="text-white/60 hover:text-white transition-colors duration-300">
+              About
+            </a>
+            <a href="/pricing" className="text-white/60 hover:text-white transition-colors duration-300">
+              Pricing
             </a>
           </div>
 
@@ -228,10 +260,11 @@ export default function HomePage() {
                 {[
                   { href: '/simulator', label: 'Simulator' },
                   { href: '/bikes', label: 'Bikes' },
-                  { href: '#physics', label: 'Physics' },
-                  { href: '#intelligence', label: 'Intelligence' },
-                  { href: '#validation', label: 'Validation' },
-                  { href: '#cta', label: 'Get Started' },
+                  { href: '/features', label: 'Features' },
+                  { href: '/docs/getting-started', label: 'Docs' },
+                  { href: '/blog', label: 'Blog' },
+                  { href: '/about', label: 'About' },
+                  { href: '/pricing', label: 'Pricing' },
                 ].map(link => (
                   <a
                     key={link.href}
@@ -430,9 +463,9 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
-            className="font-display font-bold text-5xl md:text-7xl lg:text-8xl mb-6 tracking-tighter leading-tight text-gradient-orange"
+            className="font-display font-bold text-4xl md:text-6xl lg:text-7xl mb-6 tracking-tighter leading-tight text-gradient-orange"
           >
-            The Physics of Faster
+            Physics-accurate drag simulation for every bike on Indian roads.
           </motion.h1>
 
           {/* Subheading */}
@@ -442,8 +475,8 @@ export default function HomePage() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="text-lg md:text-xl text-white/80 mb-6 max-w-2xl mx-auto leading-relaxed"
           >
-            A first-principles physics engine for quarter-mile ET, terminal velocity, and land-speed-record
-            runs. Validated on real Dragy GPS telemetry at Aamby Valley, MMRT, Texas Mile, and Bonneville.
+            287 bikes. 465 parts. 15 physics sub-models. Predict your quarter-mile within ±0.5s
+            before you buy a single part.
           </motion.p>
 
           {/* Secondary text */}
@@ -453,7 +486,7 @@ export default function HomePage() {
             transition={{ duration: 0.6, delay: 0.5 }}
             className="text-sm text-white/60 font-mono uppercase tracking-widest mb-12"
           >
-            From Pune to the world
+            From Pune to the world · Built in India
           </motion.p>
 
           {/* CTAs */}
@@ -469,15 +502,15 @@ export default function HomePage() {
               whileTap={{ scale: 0.95 }}
               className="px-8 py-4 bg-brand-orange text-black font-display font-bold rounded-lg transition-all glow-orange"
             >
-              Run a Simulation
+              Try it free
             </motion.a>
             <motion.a
-              href="#validation"
+              href="/pricing"
               whileHover={{ scale: 1.05, borderColor: 'rgb(255, 94, 31)' }}
               whileTap={{ scale: 0.95 }}
               className="px-8 py-4 border-2 border-brand-orange/40 hover:border-brand-orange text-brand-orange font-display font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
             >
-              See Validation
+              See pricing
             </motion.a>
           </motion.div>
         </div>
@@ -488,6 +521,79 @@ export default function HomePage() {
 
       {/* Stats strip */}
       <StatsStrip />
+
+      {/* Why MotoQuant — 4 value-prop cards */}
+      <section id="why" className="py-24 md:py-32 px-6 border-t border-brand-orange/10">
+        <div className="max-w-6xl mx-auto">
+          <RevealSection>
+            <div className="text-center mb-16">
+              <h2 className="font-display font-bold text-4xl md:text-5xl mb-4 text-white">
+                Why MotoQuant?
+              </h2>
+              <p className="text-white/70 text-lg max-w-2xl mx-auto">
+                The difference between guessing and knowing what your build will run.
+              </p>
+            </div>
+          </RevealSection>
+
+          <motion.div
+            className="grid sm:grid-cols-2 gap-6"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-80px' }}
+          >
+            {[
+              {
+                icon: Cpu,
+                title: 'First-Principles Physics',
+                body: '15 independent sub-models — not a lookup table, not a regression. Every coefficient traces back to a real physical measurement: Pacejka tire grip, Willans friction engine model, RK4 numerical integration at 1 ms timestep.',
+                link: '/docs/physics',
+                linkLabel: 'Read the whitepaper →',
+              },
+              {
+                icon: Target,
+                title: 'Indian Market-First',
+                body: '287 bikes including 57 Indian commuters (Pulsar, Apache, R15, Duke, RE), 15 SE Asia drag cubs, and the complete Indian racing scene. Parts prices in INR with live retailer data. Venues: Aamby Valley, MMRT, BIC, Kari, Hyderabad.',
+                link: '/bikes',
+                linkLabel: 'Browse all 287 bikes →',
+              },
+              {
+                icon: TrendingUp,
+                title: 'ROI Before You Buy',
+                body: 'Parts ROI knapsack tells you which mods deliver the most ET per rupee within your budget. Cost-per-tenth ranking across the full catalog. Stop buying parts that don\'t move the number.',
+                link: '/features',
+                linkLabel: 'See the ROI engine →',
+              },
+              {
+                icon: BarChart3,
+                title: 'Validated',
+                body: 'Kawasaki ZX-10R 2021 at ±0.011s. Top-10 mean error ±0.032s. Reference baselines: K5 10.033s, R1 10.286s, Hayabusa 10.471s — all within 0.001s of targets. 838 regression tests, zero silent failures.',
+                link: '/docs/validation',
+                linkLabel: 'See benchmark table →',
+              },
+            ].map(({ icon: Icon, title, body, link, linkLabel }, i) => (
+              <motion.div
+                key={i}
+                variants={itemVariants}
+                whileHover={cardHover}
+                className="glass rounded-xl p-8 border border-brand-orange/20 hover:border-brand-orange/50 transition-colors group"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-brand-orange/10 border border-brand-orange/30 flex items-center justify-center group-hover:bg-brand-orange/20 transition-colors">
+                    <Icon className="w-5 h-5 text-brand-orange" />
+                  </div>
+                  <h3 className="font-display font-bold text-lg text-white">{title}</h3>
+                </div>
+                <p className="text-white/70 text-sm leading-relaxed mb-5">{body}</p>
+                <a href={link} className="text-brand-accent text-xs font-mono hover:text-brand-orange transition-colors">
+                  {linkLabel}
+                </a>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
 
       {/* Simulator section */}
       <section
@@ -807,102 +913,4 @@ export default function HomePage() {
             </RevealSection>
 
             <RevealSection>
-              <div className="glass rounded-xl p-6 sm:p-10 border border-brand-orange/20 h-full">
-                <h3 className="font-display font-bold text-2xl mb-4 text-white">Tuning Shops</h3>
-                <p className="text-white/80 mb-6 leading-relaxed">
-                  ROI analysis for every part you sell. Import dyno curves, calibrate against customer Dragy runs,
-                  and build data-driven recommendations. Impress clients with physics-backed estimates.
-                </p>
-                <ul className="space-y-2 text-sm font-mono text-white/60">
-                  <li>
-                    <span className="text-brand-orange">›</span> Parts ROI calculator
-                  </li>
-                  <li>
-                    <span className="text-brand-orange">›</span> Client calibration
-                  </li>
-                  <li>
-                    <span className="text-brand-orange">›</span> Build recommendations
-                  </li>
-                </ul>
-              </div>
-            </RevealSection>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA section */}
-      <section id="cta" className="py-24 md:py-32 px-6 border-t border-brand-orange/10">
-        <div className="max-w-4xl mx-auto">
-          <RevealSection>
-            <div className="glass rounded-2xl p-6 sm:p-10 md:p-12 border border-brand-orange/30 bg-gradient-to-br from-brand-orange/10 to-brand-orangeDeep/5">
-              <h2 className="font-display font-bold text-3xl sm:text-4xl md:text-5xl mb-6 text-center">
-                Start Predicting Your Quarter Mile
-              </h2>
-              <p className="text-white/80 text-lg text-center mb-12 max-w-2xl mx-auto">
-                Free web simulator for every rider. API access and custom integrations for racing teams and tuning shops.
-              </p>
-
-              <div className="grid md:grid-cols-2 gap-6 mb-10">
-                <div className="bg-ink-0/60 rounded-xl p-6 sm:p-8 border border-brand-orange/20">
-                  <h3 className="font-display font-bold text-xl mb-3 text-white">Racing Teams & Tuning Shops</h3>
-                  <p className="text-white/60 text-sm mb-6">
-                    Dragy GPS calibration, dyno + ECU log import, parts ROI, Bayesian build optimization, and private client data. Licensed access for professional workflows.</p>
-                  <a href="mailto:dhisetu@gmail.com?subject=MotoQuant%20Pro%20%E2%80%94%20Professional%20License" className="block text-xs text-brand-accent bg-ink-1 px-4 py-3 rounded font-mono border border-brand-orange/20 hover:border-brand-orange/60 transition-colors">
-                    &rarr; Request pricing
-                  </a>
-                </div>
-
-                <div className="bg-ink-0/60 rounded-xl p-6 sm:p-8 border border-brand-orange/20">
-                  <h3 className="font-display font-bold text-xl mb-3 text-white">REST API</h3>
-                  <p className="text-white/60 text-sm mb-6">
-                    POST /api/simulate with a bike config and get full time-series v(t), RPM, gear, and ET. Perfect
-                    for building your own UI or integrating into tuning shop systems.
-                  </p>
-                  <code className="block text-xs text-brand-accent bg-ink-1 px-4 py-3 rounded font-mono border border-brand-orange/20">
-                    api.motoquant.in/docs
-                  </code>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <motion.a
-                  href="/simulator"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-brand-orange text-black font-display font-bold rounded-lg transition-all glow-orange"
-                >
-                  Launch Simulator
-                </motion.a>
-                <motion.a
-                  href="mailto:dhisetu@gmail.com?subject=MotoQuant%20Pro%20—%20Early%20Access"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="inline-flex items-center justify-center gap-2 px-8 py-3 border-2 border-brand-orange text-brand-orange font-display font-bold rounded-lg transition-colors"
-                >
-                  Request Early Access
-                </motion.a>
-              </div>
-            </div>
-          </RevealSection>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-brand-orange/10 py-12 px-6 text-center text-white/60 text-sm font-mono">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-6">
-            <p className="mb-2">
-              Built in India for drag racers and land-speed record hunters. Validated physics, made for the strip and the salt.
-            </p>
-            <p>
-              motoquant.in{' '}
-              <span className="text-brand-orange/50">·</span>{' '}
-              Not affiliated with any manufacturer
-            </p>
-          </div>
-        </div>
-      </footer>
-    </div>
-  );
-}
-         
+        
