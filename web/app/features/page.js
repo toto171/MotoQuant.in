@@ -127,7 +127,7 @@ Five pages ship in the current build: Simulate (bike + venue + sliders + 4-panel
 
 The physics sidecar is the same code that powers the web API — same importer, same gear-ratio library, same 15 sub-models. Results are deterministic across web and desktop.
 
-Desktop beta access is available to tuning shops and racing teams. Contact dhisetu@gmail.com to apply.`,
+Desktop beta access is available to tuning shops and racing teams. Contact hello@motoquant.in to apply.`,
     docsLink: '/docs/getting-started',
     docsLabel: 'Desktop beta access',
     mockup: null, // TODO: screenshot of desktop app

@@ -465,7 +465,7 @@ export default function HomePage() {
             transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
             className="font-display font-bold text-4xl md:text-6xl lg:text-7xl mb-6 tracking-tighter leading-tight text-gradient-orange"
           >
-            Physics-accurate drag simulation for every bike on Indian roads.
+            Physics-accurate drag simulation for every production motorcycle.
           </motion.h1>
 
           {/* Subheading */}
