@@ -351,3 +351,195 @@ __all__ = [
     "COURIER_INR",
     "IMPORT_DUTY_RATE",
 ]
+
+
+# ──────────────────────────────────────────────────────────────────
+# Live-scrape integration (wired to retail_adapters)
+# ──────────────────────────────────────────────────────────────────
+
+STALE_DAYS: int = 14  # prices older than this are considered stale
+
+
+def fetch_live_price(
+    conn,
+    part_id: int,
+    *,
+    force: bool = False,
+) -> "PriceResult | None":
+    """
+    Fetch a live price for *part_id* and persist it into ``part_prices``.
+
+    Parameters
+    ----------
+    conn      : sqlite3 connection
+    part_id   : parts.id to refresh
+    force     : if False (default), skip if a fresh price exists (<14 days old)
+
+    Returns the :class:`PriceResult` on success, None on failure or skip.
+    """
+    try:
+        from .retail_adapters import PriceResult, fetch_price  # lazy import
+    except ImportError:
+        log.error("retail_adapters not available — cannot fetch live price")
+        return None
+
+    cur = conn.cursor()
+
+    # Load part record
+    row = cur.execute(
+        "SELECT brand, model_name, retailer, retailer_url FROM parts WHERE id = ?",
+        (part_id,),
+    ).fetchone()
+    if row is None:
+        log.warning("fetch_live_price: part_id=%d not found", part_id)
+        return None
+
+    brand, model_name, retailer, retailer_url = (
+        row["brand"], row["model_name"], row["retailer"], row["retailer_url"]
+    )
+
+    if not retailer_url:
+        log.debug("part_id=%d has no retailer_url — skipping live fetch", part_id)
+        return None
+
+    if not force:
+        # Check if we already have a fresh price in part_prices
+        existing = cur.execute(
+            """
+            SELECT fetched_at FROM part_prices
+             WHERE part_id = ? AND retailer = ?
+               AND fetched_at >= datetime('now', ?, 'utc')
+            """,
+            (part_id, retailer or "", f"-{STALE_DAYS} days"),
+        ).fetchone()
+        if existing:
+            log.debug(
+                "part_id=%d retailer=%s — price fresh (fetched %s), skipping",
+                part_id, retailer, existing["fetched_at"],
+            )
+            return None
+
+    # Hit the retailer
+    result: "PriceResult | None" = fetch_price(retailer_url)
+    if result is None:
+        log.info("part_id=%d: live fetch returned None for %s", part_id, retailer_url)
+        return None
+
+    # Persist into part_prices (upsert on part_id + retailer)
+    cur.execute(
+        """
+        INSERT INTO part_prices (part_id, retailer, source_url, price_inr, in_stock, fetched_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(part_id, retailer) DO UPDATE SET
+            source_url = excluded.source_url,
+            price_inr  = excluded.price_inr,
+            in_stock   = excluded.in_stock,
+            fetched_at = excluded.fetched_at
+        """,
+        (
+            part_id,
+            result.retailer,
+            result.source_url,
+            result.price_inr,
+            int(result.in_stock),
+            result.fetched_at.isoformat(),
+        ),
+    )
+    conn.commit()
+    log.info(
+        "part_id=%d: fetched ₹%.0f in_stock=%s from %s",
+        part_id,
+        result.price_inr or 0,
+        result.in_stock,
+        result.retailer,
+    )
+    return result
+
+
+def get_cheapest_prices(
+    conn,
+    part_id: int,
+    *,
+    limit: int = 3,
+    stale_days: int = STALE_DAYS,
+) -> list[dict]:
+    """
+    Return the *limit* cheapest live prices for *part_id* from ``part_prices``.
+    Each dict has: retailer, price_inr, in_stock, fetched_at, source_url, is_stale.
+    Sorted by price_inr ASC (NULLs last).
+    """
+    cutoff = (
+        datetime.date.today() - datetime.timedelta(days=stale_days)
+    ).isoformat()
+    cur = conn.cursor()
+    rows = cur.execute(
+        """
+        SELECT retailer, price_inr, in_stock, fetched_at, source_url
+          FROM part_prices
+         WHERE part_id = ?
+         ORDER BY CASE WHEN price_inr IS NULL THEN 1 ELSE 0 END,
+                  price_inr ASC
+         LIMIT ?
+        """,
+        (part_id, limit),
+    ).fetchall()
+    return [
+        {
+            "retailer":   r["retailer"],
+            "price_inr":  r["price_inr"],
+            "in_stock":   bool(r["in_stock"]),
+            "fetched_at": r["fetched_at"],
+            "source_url": r["source_url"],
+            "is_stale":   (r["fetched_at"] or "1970-01-01") < cutoff,
+        }
+        for r in rows
+    ]
+
+
+def stale_live_prices(
+    conn,
+    *,
+    days_threshold: int = STALE_DAYS,
+) -> list[tuple[int, str, str, str]]:
+    """
+    Return (part_id, brand, model_name, fetched_at) for every part whose live
+    price in ``part_prices`` is older than *days_threshold* days, OR has no
+    entry at all.  Sorted oldest-first.
+    """
+    cutoff = (
+        datetime.date.today() - datetime.timedelta(days=days_threshold)
+    ).isoformat()
+    cur = conn.cursor()
+    rows = cur.execute(
+        """
+        SELECT p.id,
+               p.brand,
+               p.model_name,
+               COALESCE(MAX(pp.fetched_at), '1970-01-01') AS last_fetched
+          FROM parts p
+          LEFT JOIN part_prices pp ON pp.part_id = p.id
+         GROUP BY p.id
+        HAVING last_fetched < ?
+         ORDER BY last_fetched ASC
+        """,
+        (cutoff,),
+    ).fetchall()
+    return [(r[0], r[1], r[2], r[3]) for r in rows]
+
+
+__all__ = [
+    "RETAILER_SEARCH_TEMPLATES",
+    "estimate_landing_cost_inr",
+    "refresh_retailer_urls",
+    "stale_parts",
+    "coverage_report",
+    "RefreshSummary",
+    "GST_RATE",
+    "COURIER_INR",
+    "IMPORT_DUTY_RATE",
+    # Live-scrape additions
+    "STALE_DAYS",
+    "fetch_live_price",
+    "get_cheapest_prices",
+    "stale_live_prices",
+]
