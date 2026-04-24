@@ -6,10 +6,62 @@ import { Zap, AlertCircle, MapPin } from 'lucide-react';
 import LocationPicker, { environmentOverridesFromLocation } from './LocationPicker';
 import { API_URL } from '../lib/api';
 
-const BIKES = [
-  { id: 'gsxr1000_k5',   label: 'Suzuki GSX-R 1000 K5',   cc: '999cc',  hp: 178 },
-  { id: 'yzfr1_4c8',     label: 'Yamaha YZF-R1 (4C8)',     cc: '998cc',  hp: 180 },
-  { id: 'hayabusa_gen1', label: 'Suzuki Hayabusa Gen1',     cc: '1299cc', hp: 175 },
+// Curated bike list — popular India-market machines first, then global
+// dream bikes. Each entry uses bike_id (catalog primary key) so we can
+// hit the full physics catalog rather than the legacy bike_preset path
+// that only knows three reference bikes. IDs validated against
+// motoquant.db on April 24, 2026; if a re-seed renumbers the catalog
+// these IDs need re-verification (see scripts/validation_sweep.py for
+// model-name lookup by manufacturer + substring).
+const BIKE_CATEGORIES = [
+  {
+    name: 'Indian Sport',
+    bikes: [
+      { id: 178, label: 'KTM RC 390',           cc: '373cc', hp: 43 },
+      { id: 177, label: 'KTM Duke 390',         cc: '373cc', hp: 43 },
+      { id: 192, label: 'Yamaha YZF-R15 V4',    cc: '155cc', hp: 18 },
+      { id: 186, label: 'TVS Apache RR 310',    cc: '312cc', hp: 34 },
+      { id: 303, label: 'Aprilia RS 457',       cc: '457cc', hp: 48 },
+      { id: 268, label: 'Suzuki Gixxer SF 250', cc: '249cc', hp: 27 },
+    ],
+  },
+  {
+    name: 'Indian Naked',
+    bikes: [
+      { id: 251, label: 'Bajaj Pulsar NS200',     cc: '200cc', hp: 24 },
+      { id: 254, label: 'Bajaj Pulsar N250',      cc: '249cc', hp: 25 },
+      { id: 256, label: 'Bajaj Pulsar NS400Z',    cc: '373cc', hp: 40 },
+      { id: 187, label: 'TVS Apache RTR 200 4V',  cc: '197cc', hp: 20 },
+      { id: 193, label: 'Yamaha MT-15 V2',        cc: '155cc', hp: 18 },
+      { id: 201, label: 'Triumph Speed 400',      cc: '398cc', hp: 40 },
+      { id: 203, label: 'Husqvarna Svartpilen 401', cc: '373cc', hp: 43 },
+      { id: 275, label: 'Hero Karizma XMR 210',   cc: '210cc', hp: 25 },
+    ],
+  },
+  {
+    name: 'Royal Enfield',
+    bikes: [
+      { id: 211, label: 'Continental GT 650', cc: '648cc', hp: 47 },
+      { id: 210, label: 'Interceptor 650',    cc: '648cc', hp: 47 },
+      { id: 277, label: 'Classic 350',        cc: '349cc', hp: 20 },
+      { id: 279, label: 'Hunter 350',         cc: '349cc', hp: 20 },
+    ],
+  },
+  {
+    name: 'Dream Bikes',
+    bikes: [
+      // Reference bikes — exact-validated against magazine timeslips
+      { id: null, presetId: 'gsxr1000_k5',   label: 'Suzuki GSX-R 1000 K5', cc: '999cc', hp: 178 },
+      { id: null, presetId: 'hayabusa_gen1', label: 'Suzuki Hayabusa Gen1', cc: '1299cc', hp: 175 },
+      { id: null, presetId: 'yzfr1_4c8',     label: 'Yamaha YZF-R1 (4C8)',  cc: '998cc', hp: 180 },
+      // Catalog dream bikes
+      { id: 123, label: 'Suzuki Hayabusa (2021)',  cc: '1340cc', hp: 190 },
+      { id: 161, label: 'BMW S 1000 RR',           cc: '999cc',  hp: 210 },
+      { id: 156, label: 'Kawasaki Ninja H2',       cc: '998cc',  hp: 310 },
+      { id: 233, label: 'Ducati Panigale V4R',     cc: '998cc',  hp: 221 },
+      { id: 228, label: 'Kawasaki Z H2',           cc: '998cc',  hp: 197 },
+    ],
+  },
 ];
 
 // Animated counter component
@@ -41,11 +93,15 @@ function AnimatedCounter({ target, decimals = 3 }) {
 }
 
 export default function SimulatorWidget() {
-  const [bike, setBike] = useState('gsxr1000_k5');
+  // Default to "Indian Sport" tab + KTM RC 390 (one of the most-recognized
+  // Indian-market sport bikes; mid-pack performance so it's a good demo
+  // bike that doesn't oversell or undersell the simulator).
+  const [activeTab, setActiveTab] = useState(0);
+  const [selectedBike, setSelectedBike] = useState(BIKE_CATEGORIES[0].bikes[0]);
   const [riderKg, setRiderKg] = useState(75);
   const [powerBoost, setPowerBoost] = useState(0);
   const [massChange, setMassChange] = useState(0);
-  const [location, setLocation] = useState(null); // resolved /api/venues/resolve payload
+  const [location, setLocation] = useState(null);
   const [locationOpen, setLocationOpen] = useState(false);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -57,16 +113,24 @@ export default function SimulatorWidget() {
     setResult(null);
     try {
       const envOverrides = environmentOverridesFromLocation(location);
+      const body = {
+        rider_mass_kg: riderKg,
+        power_boost_pct: powerBoost,
+        mass_delta_kg: massChange,
+        ...envOverrides,
+      };
+      // Reference bikes use bike_preset (legacy path that hits hand-built
+      // BikeConfig from defaults.py); catalog bikes use bike_id (resolves
+      // to the importer-built BikeConfig from the seeded SQLite catalog).
+      if (selectedBike.presetId) {
+        body.bike_preset = selectedBike.presetId;
+      } else {
+        body.bike_id = selectedBike.id;
+      }
       const res = await fetch(`${API_URL}/api/simulate/quick`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          bike_preset: bike,
-          rider_mass_kg: riderKg,
-          power_boost_pct: powerBoost,
-          mass_delta_kg: massChange,
-          ...envOverrides,
-        }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) {
         const msg = await res.text();
@@ -80,8 +144,6 @@ export default function SimulatorWidget() {
     }
   }
 
-  const selectedBike = BIKES.find(b => b.id === bike);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -89,7 +151,6 @@ export default function SimulatorWidget() {
       transition={{ duration: 0.6 }}
       className="relative bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl p-5 sm:p-8 max-w-2xl mx-auto overflow-hidden"
     >
-      {/* Animated border shimmer when loading */}
       <AnimatePresence>
         {loading && (
           <motion.div
@@ -113,36 +174,67 @@ export default function SimulatorWidget() {
         </span>
       </h3>
 
-      {/* Bike select — premium chip grid */}
+      {/* Bike selector — category tabs + chip grid */}
       <div className="mb-6 relative z-10">
-        <label className="block text-xs font-semibold text-white/60 mb-3 uppercase tracking-wide">
-          Select Bike
-        </label>
-        <div className="grid grid-cols-3 gap-2 sm:gap-3">
-          {BIKES.map(b => (
-            <motion.button
-              key={b.id}
-              onClick={() => setBike(b.id)}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className={`relative p-3 sm:p-4 rounded-xl border transition-all duration-300 text-left group ${
-                bike === b.id
-                  ? 'bg-white/[0.08] border-[#FF5E1F] shadow-[0_0_30px_rgba(255,94,31,0.2)]'
-                  : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-white/10'
+        <div className="flex items-center justify-between mb-3">
+          <label className="text-xs font-semibold text-white/60 uppercase tracking-wide">
+            Select Bike
+          </label>
+          <span className="text-[10px] font-mono text-white/30">
+            {selectedBike.label} · {selectedBike.cc} · {selectedBike.hp} hp
+          </span>
+        </div>
+
+        {/* Category tabs */}
+        <div className="flex gap-1 sm:gap-2 mb-3 overflow-x-auto scrollbar-thin">
+          {BIKE_CATEGORIES.map((cat, idx) => (
+            <button
+              key={cat.name}
+              onClick={() => setActiveTab(idx)}
+              className={`shrink-0 px-3 py-1.5 rounded-md text-xs font-semibold transition-all whitespace-nowrap ${
+                activeTab === idx
+                  ? 'bg-[#FF5E1F] text-white shadow-[0_0_15px_rgba(255,94,31,0.3)]'
+                  : 'bg-white/[0.04] text-white/60 hover:bg-white/[0.08] hover:text-white/90'
               }`}
             >
-              <div className="font-semibold text-sm leading-tight text-white">
-                {b.label.split(' ').slice(1).slice(0, 2).join(' ')}
-              </div>
-              <div className="text-xs text-white/40 mt-2 group-hover:text-white/60 transition-colors">
-                {b.cc} · {b.hp} hp
-              </div>
-            </motion.button>
+              {cat.name}
+            </button>
           ))}
+        </div>
+
+        {/* Bike chip grid for active tab */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5">
+          {BIKE_CATEGORIES[activeTab].bikes.map((b) => {
+            const key = b.presetId || `id${b.id}`;
+            const isSelected =
+              (b.presetId && selectedBike.presetId === b.presetId) ||
+              (b.id != null && selectedBike.id === b.id);
+            return (
+              <motion.button
+                key={key}
+                onClick={() => setSelectedBike(b)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`relative p-2.5 sm:p-3 rounded-xl border transition-all duration-300 text-left group ${
+                  isSelected
+                    ? 'bg-white/[0.08] border-[#FF5E1F] shadow-[0_0_20px_rgba(255,94,31,0.2)]'
+                    : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-white/10'
+                }`}
+              >
+                <div className="font-semibold text-xs sm:text-sm leading-tight text-white">
+                  {/* Strip the manufacturer prefix on small chips for tighter layout */}
+                  {b.label}
+                </div>
+                <div className="text-[10px] text-white/40 mt-1.5 group-hover:text-white/60 transition-colors">
+                  {b.cc} · {b.hp} hp
+                </div>
+              </motion.button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Sliders with enhanced styling */}
+      {/* Sliders */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-4 mb-8 relative z-10">
         {[
           {
@@ -221,9 +313,14 @@ export default function SimulatorWidget() {
         input[type='range']::-moz-range-thumb:hover {
           box-shadow: 0 0 30px rgba(255, 94, 31, 0.8);
         }
+        .scrollbar-thin::-webkit-scrollbar { height: 4px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 2px;
+        }
       `}</style>
 
-      {/* Location picker — optional race-environment auto-setup */}
+      {/* Location picker */}
       <div className="mb-6 relative z-10">
         <button
           type="button"
@@ -270,7 +367,6 @@ export default function SimulatorWidget() {
         </AnimatePresence>
       </div>
 
-      {/* Run button with magnetic hover effect */}
       <motion.button
         onClick={runSim}
         disabled={loading}
@@ -302,7 +398,6 @@ export default function SimulatorWidget() {
         </div>
       </motion.button>
 
-      {/* Error state */}
       <AnimatePresence>
         {error && (
           <motion.div
@@ -317,7 +412,6 @@ export default function SimulatorWidget() {
         )}
       </AnimatePresence>
 
-      {/* Result reveal with animated counter */}
       <AnimatePresence>
         {result && (
           <motion.div
@@ -327,7 +421,6 @@ export default function SimulatorWidget() {
             transition={{ duration: 0.4 }}
             className="mt-8 space-y-4 relative z-10"
           >
-            {/* Main metrics */}
             <div className="grid grid-cols-2 gap-4">
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
@@ -360,7 +453,6 @@ export default function SimulatorWidget() {
               </motion.div>
             </div>
 
-            {/* Timeline splits */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -369,7 +461,6 @@ export default function SimulatorWidget() {
             >
               <p className="text-xs font-semibold text-white/50 mb-4 uppercase tracking-wide">Split Timeline</p>
               <div className="relative">
-                {/* Glowing progress line */}
                 <div className="absolute top-8 left-0 right-0 h-0.5 bg-gradient-to-r from-[#FF5E1F] via-[#FF7A00] to-transparent opacity-40" />
 
                 <div className="grid grid-cols-4 gap-1 sm:gap-2 relative">
@@ -391,7 +482,6 @@ export default function SimulatorWidget() {
               </div>
             </motion.div>
 
-            {/* Bike info footer */}
             <div className="grid grid-cols-2 gap-4 text-center">
               <motion.div
                 initial={{ opacity: 0 }}
@@ -416,9 +506,8 @@ export default function SimulatorWidget() {
         )}
       </AnimatePresence>
 
-      {/* Subtitle */}
       <p className="text-xs text-white/30 text-center mt-6 relative z-10">
-        First-principles RK4 physics · 15 sub-models · 1 ms timestep
+        First-principles RK4 physics · 15 sub-models · 1 ms timestep · 287 bikes
       </p>
     </motion.div>
   );
