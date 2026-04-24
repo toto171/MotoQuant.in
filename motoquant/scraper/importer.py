@@ -355,6 +355,18 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
     base = gsxr1000_k5().engine
 
     # Peak power and torque
+    #
+    # Convention: spec.peak_power_hp is interpreted as WHEEL power (the
+    # value the synthetic dyno curve is constrained against). This is
+    # the implicit assumption the rest of the physics — particularly the
+    # chain efficiency, parasitic loss model, and tire-grip thresholds —
+    # has been calibrated around since the original K5 reference baseline
+    # was set. Apr-24 experiment with applying a 12 % wheel-loss factor
+    # to all catalog crank/marketing values made cluster averages
+    # uniformly WORSE (litre +0.14, twin +0.67, 150-300cc +3.49) — the
+    # other physics layers were already accounting for drivetrain losses
+    # implicitly. Reverted; logged as a potential follow-up if a
+    # full physics-stack re-calibration is undertaken.
     peak_hp = spec.peak_power_hp or base.peak_power_hp
     peak_hp_rpm = spec.peak_power_rpm or base.peak_power_rpm
 
