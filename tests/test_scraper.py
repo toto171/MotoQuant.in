@@ -333,36 +333,53 @@ class TestSubBuilders:
         assert len(engine.dyno_curve.rpm) >= 10
 
     def test_engine_inertia_displacement_scaled(self):
-        """April 24, 2026: CATEGORY_ENGINE_INERTIA replaced with
-        displacement-scaled formula I = 0.002·cyl + 0.030·(disp/1000).
-        Verifies the formula applies correctly across displacement classes
-        (small-cc singles, mid-cc twins, litre-class I4s)."""
+        """April 24-PM 2026: formula recalibrated to fit Hayabusa
+        crank-assembly inertia (0.040 kg·m² published) with cruiser
+        flywheel-character multiplier:
+            I = (0.002·cyl + 0.024·(disp/1000)) · k_category
+        K5 catalog (sport, 4 cyl, 999cc) → 0.032
+        Hayabusa 1340cc 4cyl, sport → 0.040 (matches reference)
+        VMAX 1700cc 4cyl, naked → 0.048 (was cruiser → got 1.35× bonus)
+        Cruiser/touring multiplier captures heavy-flywheel character.
+        """
         from motoquant.scraper.importer import _engine_inertia_from_spec
 
-        # 1 000cc I4 sportbike (K5 ref): 0.002*4 + 0.030*1.000 = 0.038
-        spec_litre = _make_spec(displacement_cc=999.0, cylinders=4)
-        assert _build_engine_from_spec(spec_litre).engine_inertia_kgm2 == pytest.approx(0.038, abs=0.003)
+        # K5-class: sport 999cc 4cyl → 0.032
+        spec_k5 = _make_spec(displacement_cc=999.0, cylinders=4, category="sport")
+        assert _build_engine_from_spec(spec_k5).engine_inertia_kgm2 == pytest.approx(0.032, abs=0.003)
 
-        # 155cc single (R15 V3): 0.002*1 + 0.030*0.155 = 0.00665
-        spec_small = _make_spec(displacement_cc=155.0, cylinders=1)
+        # Hayabusa-class: sport 1340cc 4cyl → 0.040 (reference target)
+        spec_hyper = _make_spec(displacement_cc=1340.0, cylinders=4, category="sport")
+        assert _build_engine_from_spec(spec_hyper).engine_inertia_kgm2 == pytest.approx(0.040, abs=0.003)
+
+        # Small-cc single: sport 155cc 1cyl → 0.0057
+        spec_small = _make_spec(displacement_cc=155.0, cylinders=1, category="sport")
         assert 0.005 <= _build_engine_from_spec(spec_small).engine_inertia_kgm2 <= 0.010
 
-        # 399cc twin (Ninja 400): 0.002*2 + 0.030*0.399 = 0.01597
-        spec_mid = _make_spec(displacement_cc=399.0, cylinders=2)
-        assert 0.013 <= _build_engine_from_spec(spec_mid).engine_inertia_kgm2 <= 0.020
+        # Mid-cc twin: sport 399cc 2cyl → 0.0136
+        spec_mid = _make_spec(displacement_cc=399.0, cylinders=2, category="sport")
+        assert 0.012 <= _build_engine_from_spec(spec_mid).engine_inertia_kgm2 <= 0.018
 
-        # 1340cc I4 (Hayabusa): 0.002*4 + 0.030*1.340 = 0.0482
-        spec_hyper = _make_spec(displacement_cc=1340.0, cylinders=4)
-        assert 0.045 <= _build_engine_from_spec(spec_hyper).engine_inertia_kgm2 <= 0.055
+        # Cruiser big-bore: 1700cc 4cyl cruiser → 0.048 × 1.35 = 0.065
+        spec_cruiser = _make_spec(displacement_cc=1700.0, cylinders=4, category="cruiser")
+        assert 0.060 <= _build_engine_from_spec(spec_cruiser).engine_inertia_kgm2 <= 0.075
 
-        # Monotonic in displacement for same cyl count
-        specs = [_make_spec(displacement_cc=d, cylinders=4) for d in (600, 1000, 1400)]
+        # Same engine as "naked" → no cruiser bonus, just 0.048
+        spec_naked = _make_spec(displacement_cc=1700.0, cylinders=4, category="naked")
+        i_n = _build_engine_from_spec(spec_naked).engine_inertia_kgm2
+        i_c = _build_engine_from_spec(spec_cruiser).engine_inertia_kgm2
+        assert i_c > i_n  # cruiser flywheel heavier than naked
+
+        # Monotonic in displacement for same cyl count + category
+        specs = [_make_spec(displacement_cc=d, cylinders=4, category="sport") for d in (600, 1000, 1400)]
         inertias = [_build_engine_from_spec(s).engine_inertia_kgm2 for s in specs]
         assert inertias == sorted(inertias)
 
-        # Physics clip: degenerate spec (0 disp, 0 cyl) falls back to floor
+        # Physics clip: degenerate spec floor at 0.005, ceiling at 0.090
         spec_zero = _make_spec(displacement_cc=100.0, cylinders=1)
         assert _engine_inertia_from_spec(spec_zero) >= 0.005
+        spec_max = _make_spec(displacement_cc=3000.0, cylinders=4, category="cruiser")
+        assert _engine_inertia_from_spec(spec_max) <= 0.090
 
     def test_engine_inertia_2t_reduced(self):
         """2-stroke engines should have ~0.60× inertia (no valvetrain)."""

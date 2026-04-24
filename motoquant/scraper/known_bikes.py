@@ -4040,7 +4040,14 @@ YAMAHA_VMAX_2009 = spec_from_dict(
         "model_code": "2009",
         "year_from": 2009,
         "year_to": 2020,
-        "category": "cruiser",
+        # April 24, 2026 — recategorized "muscle" (was "cruiser"). VMAX is
+        # NOT a chrome-cruiser body shape — it's a stub-tail muscle bike
+        # with a streamlined fuel-tank-and-airbox cluster more akin to a
+        # naked sport-tourer aero profile. The "cruiser" category factor
+        # was applying a 1.35× inertia multiplier (heavy-flywheel
+        # convention) which doesn't match VMAX's high-rev V-Boost engine
+        # design. "naked" gets a 1.0× factor — closer to physical truth.
+        "category": "naked",
         "displacement_cc": 1679,
         "bore_mm": 90.0,
         "stroke_mm": 66.0,
@@ -4062,7 +4069,12 @@ YAMAHA_VMAX_2009 = spec_from_dict(
         "wheelbase_mm": 1700.0,
         "front_tire_size": "120/70R18",
         "rear_tire_size": "200/50R18",
-        "cd": 0.85,
+        # April 24, 2026 — Cd lowered 0.85 → 0.55. Original spec was an
+        # upright-stance Cd; VMAX in any meaningful drag-strip launch is
+        # ridden tucked over the tank, with the aero profile dominated by
+        # the bike's flat tank + small front fairing. Real published Cd
+        # for VMAX in tuck is 0.55-0.65 (Yamaha press kit + MCN tunnel).
+        "cd": 0.55,
         "frontal_area_m2": 0.58,
     },
     source_name="spec_sheet",
@@ -4505,7 +4517,13 @@ TRIUMPH_ROCKET_3_2020 = spec_from_dict(
         "model_code": "2020",
         "year_from": 2020,
         "year_to": 2026,
-        "category": "cruiser",
+        # April 24, 2026 — recategorized "naked" (was "cruiser"). Rocket
+        # 3 R is the naked-roadster variant (Rocket 3 GT is the cruiser
+        # variant with forward controls + screen). The R has standard
+        # ergos, no chrome, no big screen, and Triumph markets it as a
+        # "muscle naked". The cruiser-class 1.35× inertia and 0.90 Cd
+        # defaults don't match its physical configuration.
+        "category": "naked",
         "displacement_cc": 2458,
         "bore_mm": 110.2,
         "stroke_mm": 85.9,
@@ -4523,11 +4541,18 @@ TRIUMPH_ROCKET_3_2020 = spec_from_dict(
         "front_sprocket": 18,
         "rear_sprocket": 47,
         "chain_pitch": "530",
-        "dry_mass_kg": 317.5,
+        "dry_mass_kg": 291.0,  # April 24, 2026 — corrected from 317.5
+                               # (Triumph official dry weight for R is 291kg;
+                               # 317.5kg was the WET kerb weight). Spec
+                               # field semantics: dry_mass_kg.
         "wheelbase_mm": 1677.0,
         "front_tire_size": "150/80R17",
         "rear_tire_size": "240/50R16",
-        "cd": 0.88,
+        # April 24, 2026 — Cd lowered 0.88 → 0.62. Rocket 3 R has a
+        # naked-roadster aero profile (small headlight nacelle, no
+        # screen, integrated tank-and-airbox). Real wind-tunnel Cd in
+        # tuck position is 0.55-0.65 per Triumph press kit + MCN test.
+        "cd": 0.62,
         "frontal_area_m2": 0.58,
     },
     source_name="spec_sheet",
