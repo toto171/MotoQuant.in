@@ -23,6 +23,39 @@ Before marking any task complete, run this mental checklist on every file you re
 
 ---
 
+
+## 🛡️ SESSION HYGIENE — GOTCHAS FROM PAST SESSIONS
+
+> *"Fix the same mistake twice, and it is a rule. Fix it three times, and it is a section in CLAUDE.md."*
+
+These rules exist because every one of them got broken at least once and cost meaningful time to unbreak. Treat them as load-bearing, not advisory.
+
+### CLAUDE.md edits are surgical prepends, never rewrites
+Line 3 holds a nested chain of every historical session wrapped in a single paragraph. When adding a new session entry, INSERT one new line at the top of that chain — do NOT regenerate the file. If you ever end up with a CLAUDE.md shorter than 670 lines, you lost the trailing sections (KEY ARCHITECTURAL / PHYSICS ENGINE / DEVELOPMENT WORKFLOW / GEMINI ROADMAP / NOTES FOR FUTURE SELF). Restore with `git show HEAD:CLAUDE.md > CLAUDE.md` and retry with an Edit/Python-insert, not a Write.
+
+### Regression tests must exercise the production path
+A test that applies the fix inside the test and then asserts the test is own scaling logic worked is tautological — it passes even after the real bug returns. Every regression test must hit the exact code path the bug hit: DB round-trip for `/api/simulate?bike_id=N`, CLI subcommand for CLI bugs, HTTP request for API bugs. Rule of thumb: the test must fail if you revert the production fix.
+
+### Commits are staged by explicit file list
+Never `git add -A` or `git add .` in this repo. The working tree routinely holds unrelated WIP from prior sessions (truncated files, CRLF artefacts, parallel-machine edits, scratch scripts). Pass explicit paths to `git add`. If you are not sure what to stage, `git status --short` first and decide file by file.
+
+### Pull first, push early
+Parallel sessions on multiple machines are common here. At session start: `git fetch && git log --oneline HEAD..origin/main`. If that is non-empty, pull/rebase BEFORE touching shared files (CLAUDE.md, importer.py, known_bikes.py, validation_sweep.py, web/app/page.js). At session end, push immediately — a 10-commit gap produces ugly rebase conflicts on exactly the files everyone edits.
+
+### Suspect CRLF/LF drift on Windows
+The repo uses CRLF for Python source (legacy from Windows editing). If `git diff --stat` shows thousands of delta lines on a file you barely touched, it is almost certainly line endings. Verify: `file <path>` shows LF vs CRLF; `diff <(git show HEAD:path) <(tr -d '\r' < path) | wc -l` shows real content diff. Do not normalise to LF mid-session — that will silently fail the rebase and hide actual changes.
+
+### Verify agent work before trusting the summary
+Agents (and humans mid-flow) sometimes declare "production ready" while: (a) rewriting CLAUDE.md destructively, (b) writing tautological tests, (c) skipping the sweep they claimed to run, (d) never testing the code path where the bug actually lives. Before trusting any agent summary: `git diff` the files it touched, `wc -l` to catch truncation, `cat` the test to confirm it drives real code, `ls reports/` for new JSON, and check whether the documented sweep metrics match what is committed.
+
+### After `spec_to_bike_config` changes, re-seed the DB
+See the standing-tool note at the top of this file. `scripts/reseed_configs_from_specs.py` propagates physics changes into `bike_configs`. Without it, `/api/simulate?bike_id=N` silently diverges from the sweep path by 2–5 seconds per bike — invisible until someone does a DB-vs-spec diff.
+
+### File-write tools can truncate; verify length
+The Cowork Write/Edit tools occasionally truncate at ~5-6 KB when rewriting existing files. After any Write/Edit on a Python source or CLAUDE.md, run `wc -l <path>` and eyeball `tail -3 <path>` to confirm the last line is what you intended. If truncated, re-write via `cat > file << EOF` in bash, which has no such limit.
+
+---
+
 ## ⚠️ BEFORE STARTING ANY TASK — MODEL SELECTION
 
 **Always check which model the user is on and advise if it's wrong. Do not proceed with a mismatched model without explicit acknowledgement.**
