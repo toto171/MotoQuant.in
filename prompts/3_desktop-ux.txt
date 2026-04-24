@@ -1,0 +1,69 @@
+You are working on MotoQuant Pro at C:\Users\astro\Documents\Claude\Projects\Vehicle Dynamics.
+
+FIRST: Read CLAUDE.md. Focus on the Apr-22 (desktop scaffold) and Apr-23 (ComparePage/HistoryPage completion) entries.
+
+Your workstream: Desktop UI/UX polish + filling in the gaps. The goal is "a Pro-tier paying user can click around for an hour without hitting anything rough."
+
+File ownership (you MAY edit):
+  - desktop/src/** (all TS/TSX)
+  - desktop/package.json (add new libs if justified — prefer existing: tailwind, lucide-react, recharts, react-query, react-router)
+  - desktop/postcss.config.js, desktop/tailwind.config.js, desktop/index.html
+  - desktop/vite.config.ts
+
+DO NOT TOUCH:
+  - motoquant/api.py (Streams 4, 5)
+  - motoquant/** (backend, Streams 1, 2, 4, 5)
+  - desktop/src-tauri/** (Stream 6)
+  - desktop/sidecar/** (Stream 6)
+  - web/** (Streams 5, 7)
+  - CLAUDE.md (write SESSION_LOG_ws-desktop-ux.md)
+
+Task list:
+1. Loading skeletons. Every page that hits an API currently flashes empty then populates. Add skeleton UIs (gray shimmer blocks, tailwind `animate-pulse`) that match the final layout. Most important: BikesPage table, SimulatePage stat tiles + charts, BuildPage parts list, ComparePage twin panels.
+
+2. Error states. Every page should handle (a) backend offline (TopBar chip already polls /api/health — wire pages to show "Engine offline — start the backend or reconnect" when it's red), (b) API 500, (c) 404 on bike_id, (d) network timeout. Friendly copy, never "Error: undefined".
+
+3. Empty states.
+   - HistoryPage empty leaderboard: "No runs saved yet — hit 'Save run' on SimulatePage to start tracking."
+   - BuildPage 0 parts selected: illustration + "Pick parts from the left to see their impact."
+   - BikesPage filtered to 0 results: "No bikes match these filters. Clear filters."
+
+4. Keyboard shortcuts. Document in a `?`-triggered modal. Minimum set:
+   - `g s` → Simulate, `g b` → Bikes, `g u` → Build, `g c` → Compare, `g h` → History
+   - `/` → focus search / bike picker
+   - `r` on Simulate → rerun
+   - `s` on Simulate → save run
+   - `esc` → close modal / clear search
+
+5. BuildPage polish. Fix the visible-but-still-unchecked "exclusive category" logic — when a user picks a new exhaust and an old one is auto-removed, show a toast: "Replaced Akrapovic Evolution with SC-Project CR-T". Toasts live ≤3s, stack max 3. Use sonner or a 30-line custom implementation.
+
+6. SimulatePage: Add "Save run" button (backend already has POST /api/simulate/save — check motoquant/api.py line 1170). On success: toast "Saved as run #N" + invalidate leaderboard query. On failure: toast red with retry.
+
+7. SettingsPage: Replace the read-only runtime panel with actual settings:
+   - Units: Metric (km/h, kg, Nm) vs Imperial (mph, lb, ft·lb) — persist to localStorage and plumb through the display components. Physics engine stays SI internally.
+   - Theme: Dark (current) / Light / Auto — implement light mode with tailwind `dark:` prefix audit.
+   - Default venue dropdown (pulls /api/venues).
+   - Sim engine dropdown: Fixed-RK4 1ms (default) / Adaptive RK4 — plumbs `use_adaptive_dt` through /api/simulate.
+   - About section with app version, backend URL, DB path, reference baselines (K5/R1/Hayabusa ETs).
+
+8. PDF export from a completed sim. Add a "Export report" button on SimulatePage that generates a 1-pager PDF: bike hero + config summary + ET/trap/splits table + 4 charts + build cost (if any parts selected on BuildPage were applied). Use `jspdf` + `html2canvas` or `react-to-pdf`. Target <2s generation on a 2019-era laptop.
+
+9. Responsive + accessibility pass:
+   - Window resizes below 1200px should still be usable (collapse sidebar to hamburger on <900px).
+   - All interactive elements focus-visible with a 2px outline.
+   - All icons have aria-labels.
+   - Tab order through SimulatePage form is sensible.
+
+10. BikePicker upgrade. The current fuzzy search is simple substring. Upgrade to fuse.js with fields [manufacturer, model_name, year_start, category] — so "2023 Ninja" narrows to kawasaki ninjas from 2023.
+
+11. Tests. Add desktop/src/__tests__/ with Vitest + React Testing Library:
+   - BikePicker returns expected match for "R15 V3".
+   - BuildPage exclusive-category logic removes old exhaust on new exhaust pick.
+   - SimulatePage handles backend-offline state.
+   - Minimum 12 tests total.
+
+12. `npx tsc --noEmit` must pass. `vite build` must produce a working bundle.
+
+13. Git: branch `ws/desktop-ux`, explicit file adds, push, PR.
+
+14. SESSION_LOG_ws-desktop-ux.md with a screenshot-by-screenshot before/after if possible (or a text summary of each page's UX improvements).

@@ -1,0 +1,114 @@
+You are working on MotoQuant Pro at C:\Users\astro\Documents\Claude\Projects\Vehicle Dynamics.
+
+FIRST: Read CLAUDE.md, especially Phase 6 (Commercial Launch & AI Layer). The product is an Indian-market motorcycle drag-racing physics simulator with ~270 bikes, 465 parts, live surrogate ML model, desktop + web app, and FastAPI backend deployed on Railway with frontend on Vercel.
+
+Your workstream: Build the subscription, auth, and commercial-launch plumbing.
+
+Design decisions already made:
+- Payment provider: Razorpay (Indian user base; Razorpay supports UPI, cards, net banking, international cards).
+- Auth: JWT with refresh tokens, magic-link email signup (simpler than password), optional Google OAuth add-on later.
+- Tiers: Free / Pro (₹499/mo or ₹4,999/yr) / Studio (₹2,999/mo or ₹29,999/yr).
+- Storage: extend the existing SQLite (motoquant.db) with new tables: users, subscriptions, license_keys, sessions. Plan to migrate to Postgres in Phase 6.
+
+Tier gating — first pass:
+  Free: 10 sims/day, 3 parts per build, no Sobol/optimize/recommend, no PDF export, no live pricing, no leaderboard save.
+  Pro: unlimited sims, unlimited parts, full analysis suite (ROI, Sobol, optimize, recommend), PDF export, live pricing, leaderboard save, 1 desktop license.
+  Studio: everything in Pro + calibration suite (Dragy/dyno/ECU import), A-vs-B compare, priority support, 5 desktop licenses.
+
+File ownership (you MAY CREATE / edit):
+  - motoquant/auth.py (NEW) — JWT issuance, magic-link email, session verification, dependency for FastAPI routes
+  - motoquant/subscriptions.py (NEW) — Razorpay webhook handlers, tier resolution, license key generation + validation
+  - motoquant/database/schema.py — add user/subscription/license_key/session tables + seed logic
+  - motoquant/database/users_repo.py (NEW)
+  - motoquant/database/subscriptions_repo.py (NEW)
+  - motoquant/api.py — ONLY the bottom of the file (insert mount point after line 1950-ish). Add two lines:
+      ```
+      from motoquant.auth import router as auth_router
+      from motoquant.subscriptions import router as sub_router
+      app.include_router(auth_router, prefix="/api/auth")
+      app.include_router(sub_router, prefix="/api/subscriptions")
+      ```
+    Add a FastAPI dependency `require_tier("pro")` in motoquant/auth.py and apply it as a decorator to the following existing routes:
+      - POST /api/simulate/save (tier: pro)
+      - Anything under /api/calibrate/* (tier: studio)
+      - GET /api/analysis/* (tier: pro)
+      - POST /api/surrogate/compare (tier: pro) — coordinate with Stream 4; if they haven't merged yet, just document this dependency in SESSION_LOG.
+  - web/app/pricing/page.js (NEW)
+  - web/app/login/page.js (NEW)
+  - web/app/signup/page.js (NEW)
+  - web/app/account/page.js (NEW)
+  - web/app/terms/page.js (NEW)
+  - web/app/privacy/page.js (NEW)
+  - web/components/AuthProvider.js (NEW)
+  - web/components/TierBadge.js (NEW)
+  - tests/test_auth.py (NEW), tests/test_subscriptions.py (NEW)
+
+DO NOT TOUCH:
+  - motoquant/api.py existing routes (Stream 4 owns the middle of this file)
+  - motoquant/scraper/**, physics.py, submodels/** (Streams 1, 2)
+  - desktop/** (Stream 3 — they'll integrate auth later once your routes exist)
+  - web/app/page.js hero / stats tiles (orchestrator)
+  - web/app/bikes/, web/app/simulator/ (Stream 7)
+  - CLAUDE.md (write SESSION_LOG_ws-subscription-auth.md)
+
+Task list:
+
+1. DB schema (motoquant/database/schema.py):
+   - `users`: id, email (unique), created_at, tier (free|pro|studio), stripe_customer_id (unused; keep for future), razorpay_customer_id, is_active
+   - `sessions`: id, user_id, jwt_id, expires_at, created_at, revoked
+   - `magic_links`: id, email, token_hash, expires_at, consumed
+   - `subscriptions`: id, user_id, razorpay_subscription_id, tier, status (active|past_due|cancelled), current_period_end, created_at
+   - `license_keys`: id, user_id, key_hash, device_id, activated_at, last_seen_at, revoked
+   Write migration logic in schema.py that checks for table existence and creates on the fly — same pattern as existing tables.
+
+2. motoquant/auth.py:
+   - `POST /api/auth/magic-link` — accept email, create magic_link row with 10-minute TTL, send email via a pluggable backend (for dev: print to stdout; for prod: SMTP via env vars or Resend.com API). Idempotent on repeat requests within 60s (rate limit).
+   - `POST /api/auth/verify` — accept token from magic link, create session, return JWT (15-min access + 30-day refresh).
+   - `POST /api/auth/refresh` — new access token from valid refresh.
+   - `POST /api/auth/logout` — revoke session.
+   - `GET /api/auth/me` — returns {email, tier, subscription_status, license_keys: [...]}.
+   - `require_tier(tier_name)` FastAPI dependency — reads JWT from Authorization header, looks up user, verifies tier >= required. Returns 402 Payment Required (not 401) if authenticated but wrong tier — this lets the client show an upgrade CTA.
+
+3. motoquant/subscriptions.py:
+   - `POST /api/subscriptions/checkout` — creates a Razorpay subscription (plan_id from env), returns the hosted payment URL. Use the razorpay Python SDK (add to requirements-api.txt).
+   - `POST /api/subscriptions/webhook` — verifies Razorpay signature, updates subscriptions table, upgrades user tier on `subscription.activated`, downgrades on `subscription.cancelled`. Idempotent on duplicate webhook deliveries.
+   - `POST /api/subscriptions/license-key` — generates a new license key for the user's desktop app (UUID v4, stored hashed). Returns plaintext ONCE. Max keys per tier: pro=1, studio=5.
+   - `POST /api/subscriptions/license-key/validate` — desktop app calls this on startup. Verifies key_hash matches, updates last_seen_at. Returns tier.
+   - `POST /api/subscriptions/cancel` — cancels at period end via Razorpay.
+
+4. Env var plan (document in SESSION_LOG):
+   - RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET
+   - JWT_SECRET (HS256), JWT_ALGORITHM
+   - SMTP_HOST, SMTP_USER, SMTP_PASS, SMTP_FROM (or RESEND_API_KEY)
+   - PLAN_ID_PRO_MONTHLY, PLAN_ID_PRO_YEARLY, PLAN_ID_STUDIO_MONTHLY, PLAN_ID_STUDIO_YEARLY
+   Update requirements-api.txt: add `razorpay`, `python-jose[cryptography]`, `passlib[bcrypt]`.
+
+5. Web pricing page (web/app/pricing/page.js):
+   - Three-tier comparison table with feature matrix.
+   - Price toggle: Monthly / Yearly (yearly saves ~17%).
+   - CTAs per tier — Free: "Start free", Pro/Studio: "Subscribe" (calls POST /api/subscriptions/checkout, redirects to Razorpay).
+   - Money-back guarantee language (7-day refund, industry-standard).
+   - FAQ: "Can I switch tiers?", "What happens if I cancel?", "Do I need an internet connection?" (desktop app works offline for 7 days on cached license).
+   - India-specific: GST line item note.
+   - Trust signals: "Built in Pune. Serving the Indian drag community." + logo strip of partner garages if available (leave placeholder).
+
+6. Login / signup / account pages:
+   - Login = enter email → magic link sent. No password.
+   - Account = show email, current tier, billing status, "Upgrade" / "Cancel" CTAs, license keys list with "Copy" + "Revoke" actions.
+
+7. Terms + Privacy. Use the standard SaaS starter template, customize for India. Include:
+   - Data stored: email, build history, simulation runs, optional Dragy/dyno/ECU uploads.
+   - Data residency: Railway (US-West currently; flag India migration as future).
+   - Right to delete: account deletion endpoint, 30-day soft-delete window.
+   - Cookies: session cookie only, no analytics cookies without consent.
+   - Disclaimers: "MotoQuant simulations are for informational purposes only. Do not rely on predicted ET for race strategy in a life-safety context."
+
+8. Tests:
+   - tests/test_auth.py: magic link issuance, verification, JWT expiry, refresh, logout, require_tier 402 vs 200, rate limit on magic-link endpoint.
+   - tests/test_subscriptions.py: checkout creates subscription, webhook updates tier, license key generate + validate + revoke, max-keys-per-tier enforcement.
+   - Mock Razorpay SDK; do NOT hit real Razorpay in tests.
+   - Target: 30+ tests total.
+
+9. Git: branch `ws/subscription-auth`, explicit adds, push, PR.
+
+10. SESSION_LOG_ws-subscription-auth.md — record: schema migration path, env var list, Razorpay plan IDs (if created in dashboard), any manual config steps required before deployment.
