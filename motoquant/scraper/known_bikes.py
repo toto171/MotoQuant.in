@@ -3708,9 +3708,9 @@ KAWASAKI_NINJA_400_2018 = spec_from_dict(
         "stroke_mm": 80.0,
         "compression_ratio": 10.8,
         "cylinders": 2,
-        "peak_power_hp": 44.8,  # 44.8 hp at wheel (Cycle World dyno, US spec)
+        "peak_power_hp": 44.8,       # 44.8 hp at wheel (Cycle World dyno, US spec)
         "peak_power_rpm": 10000,
-        "peak_torque_nm": 38.5,  # 38.5 Nm at 8000 rpm (service manual / dyno)
+        "peak_torque_nm": 38.5,       # 38.5 Nm at 8000 rpm (service manual / dyno)
         "peak_torque_rpm": 8000,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -3718,17 +3718,10 @@ KAWASAKI_NINJA_400_2018 = spec_from_dict(
         "gears": 6,
         # Kawasaki Ninja 400 2018 service manual — DIFFERENT from Ninja 300
         # Previous entry erroneously used Ninja 300 gear data
-        "gear_ratios": [
-            2.846,
-            2.071,
-            1.700,
-            1.441,
-            1.241,
-            1.107,
-        ],  # internal ratios (SM p. 3-33)
-        "primary_ratio": 3.082,  # crank → main shaft (SM p. 3-33)
-        "front_sprocket": 15,  # OEM: 15T (was 17 — Ninja 300 data)
-        "rear_sprocket": 46,  # OEM: 46T (was 43 — Ninja 300 data)
+        "gear_ratios": [2.846, 2.071, 1.700, 1.441, 1.241, 1.107],  # internal ratios (SM p. 3-33)
+        "primary_ratio": 3.082,        # crank → main shaft (SM p. 3-33)
+        "front_sprocket": 15,          # OEM: 15T (was 17 — Ninja 300 data)
+        "rear_sprocket": 46,           # OEM: 46T (was 43 — Ninja 300 data)
         "chain_pitch": "520",
         "dry_mass_kg": 168.0,
         "wheelbase_mm": 1345.0,
@@ -4549,9 +4542,9 @@ TRIUMPH_ROCKET_3_2020 = spec_from_dict(
         "rear_sprocket": 47,
         "chain_pitch": "530",
         "dry_mass_kg": 291.0,  # April 24, 2026 — corrected from 317.5
-        # (Triumph official dry weight for R is 291kg;
-        # 317.5kg was the WET kerb weight). Spec
-        # field semantics: dry_mass_kg.
+                               # (Triumph official dry weight for R is 291kg;
+                               # 317.5kg was the WET kerb weight). Spec
+                               # field semantics: dry_mass_kg.
         "wheelbase_mm": 1677.0,
         "front_tire_size": "150/80R17",
         "rear_tire_size": "240/50R16",
