@@ -87,7 +87,7 @@ export const metadata = {
         secureUrl: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'MotoQuant Pro — quarter-mile drag racing simulator covering 287 motorcycles, 465 parts, 159 tires, 20 venues',
+        alt: 'MotoQuant Pro — quarter-mile drag racing simulator covering 287 motorcycles, 424 parts, 159 tires, 20 venues',
         type: 'image/png',
       },
     ],
@@ -103,7 +103,7 @@ export const metadata = {
     images: [
       {
         url: `${SITE_URL}/og-image.png`,
-        alt: 'MotoQuant Pro — quarter-mile drag racing simulator covering 287 motorcycles, 465 parts, 159 tires, 20 venues',
+        alt: 'MotoQuant Pro — quarter-mile drag racing simulator covering 287 motorcycles, 424 parts, 159 tires, 20 venues',
       },
     ],
     site: '@motoquant',
