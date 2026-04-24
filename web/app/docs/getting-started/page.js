@@ -88,8 +88,8 @@ export default function GettingStartedPage() {
           <div className="font-mono text-xs text-brand-orange/70 uppercase tracking-wide mb-3">Beta access</div>
           <p className="text-white/60 text-sm">
             Desktop beta is currently available to tuning shops and racing teams. Email{' '}
-            <a href="mailto:hello@motoquant.in?subject=MotoQuant%20Desktop%20Beta" className="text-brand-accent hover:text-brand-orange transition-colors">
-              hello@motoquant.in
+            <a href="mailto:motoquant@gmail.com?subject=MotoQuant%20Desktop%20Beta" className="text-brand-accent hover:text-brand-orange transition-colors">
+              motoquant@gmail.com
             </a>{' '}
             with your use case to apply.
           </p>

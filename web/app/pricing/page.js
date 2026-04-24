@@ -64,7 +64,7 @@ const FAQ = [
   },
   {
     q: "Is there a refund policy?",
-    a: "Yes. If you're not satisfied within 7 days of your first payment, contact hello@motoquant.in for a full refund — no questions asked.",
+    a: "Yes. If you're not satisfied within 7 days of your first payment, contact motoquant@gmail.com for a full refund — no questions asked.",
   },
 ];
 
@@ -356,7 +356,7 @@ export default function PricingPage() {
           <a href="/" className="hover:text-gray-400">← Back to home</a>
           <a href="/terms" className="hover:text-gray-400">Terms</a>
           <a href="/privacy" className="hover:text-gray-400">Privacy</a>
-          <a href="mailto:hello@motoquant.in" className="hover:text-gray-400">Contact</a>
+          <a href="mailto:motoquant@gmail.com" className="hover:text-gray-400">Contact</a>
         </div>
       </div>
     </main>
