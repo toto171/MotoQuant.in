@@ -214,6 +214,7 @@ class PartsRepository:
         # If bike_model_id given, filter by compatibility
         if bike_model_id is not None and not include_incompatible:
             from ..parts.compatibility import is_compatible
+
             bike_row = self._conn.execute(
                 "SELECT * FROM bike_models WHERE id = ?", (bike_model_id,)
             ).fetchone()

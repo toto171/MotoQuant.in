@@ -676,6 +676,7 @@ class TestBikeSuggestionsSchema:
     def test_status_check_constraint(self, db):
         """Only valid status values are accepted at the SQL layer."""
         import sqlite3
+
         with pytest.raises(sqlite3.IntegrityError):
             db.conn.execute(
                 """INSERT INTO bike_suggestions (make, model, status)
@@ -705,7 +706,7 @@ class TestBikeSuggestionsRepo:
             make="Testerson",
             model="Extreme",
             displacement_cc=4500.0,  # > 3500 upper bound
-            peak_power_hp=500.0,     # > 450 upper bound
+            peak_power_hp=500.0,  # > 450 upper bound
         )
         assert result["flagged_out_of_bounds"] is True
         assert any("displacement_cc" in m for m in result["issues"])

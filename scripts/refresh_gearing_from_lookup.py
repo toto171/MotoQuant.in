@@ -21,6 +21,7 @@ Run on demand whenever gear_ratios.py changes:
 
     python -m scripts.refresh_gearing_from_lookup
 """
+
 from __future__ import annotations
 
 import json
@@ -35,7 +36,6 @@ if str(REPO_ROOT) not in sys.path:
 
 from motoquant import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8  # noqa: E402
 from motoquant.scraper.gear_ratios import lookup_gear_ratios  # noqa: E402
-
 
 REFERENCE_NAME_PATTERNS: dict[str, callable] = {
     "GSX-R 1000 K5": gsxr1000_k5,
@@ -65,8 +65,13 @@ def refresh(db_path: str = "motoquant.db") -> dict:
         """
     )
     rows = cur.fetchall()
-    stats = {"total": len(rows), "updated": 0, "unchanged": 0,
-             "reference_locked": 0, "no_tier1": 0}
+    stats = {
+        "total": len(rows),
+        "updated": 0,
+        "unchanged": 0,
+        "reference_locked": 0,
+        "no_tier1": 0,
+    }
 
     for cid, bmid, mfr, mdl, yf, yt, dp in rows:
         drv = json.loads(dp)

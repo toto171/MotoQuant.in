@@ -51,8 +51,8 @@ INTEGRATION:
 """
 
 import numpy as np
-from ..models import DynoCurve
 
+from ..models import DynoCurve
 
 # ═════════════════════════════════════════════════════════
 # 1000cc INLINE-4 SPORTBIKES (GSX-R 1000, R1, ZX-10R, CBR1000RR)
@@ -65,18 +65,66 @@ def dyno_suzuki_gsxr1000_k5() -> DynoCurve:
     Published: 160 HP @ 11500 RPM, 115 Nm @ 9500 RPM (at wheel)
     Narrow powerband, strong mid-range for drag racing.
     """
-    rpm = np.array([
-        1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500,
-        6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000,
-        10500, 11000, 11500, 12000, 12500, 13000
-    ], dtype=float)
+    rpm = np.array(
+        [
+            1500,
+            2000,
+            2500,
+            3000,
+            3500,
+            4000,
+            4500,
+            5000,
+            5500,
+            6000,
+            6500,
+            7000,
+            7500,
+            8000,
+            8500,
+            9000,
+            9500,
+            10000,
+            10500,
+            11000,
+            11500,
+            12000,
+            12500,
+            13000,
+        ],
+        dtype=float,
+    )
 
     # Characteristic inline-4 torque: flat low-end, steep climb from 8k, peak at 9500, gradual decay
-    torque = np.array([
-        45, 55, 65, 75, 82, 88, 93, 98, 103,
-        107, 110, 112, 113, 114, 115, 115, 115, 114,
-        112, 110, 106, 100, 92, 82
-    ], dtype=float)
+    torque = np.array(
+        [
+            45,
+            55,
+            65,
+            75,
+            82,
+            88,
+            93,
+            98,
+            103,
+            107,
+            110,
+            112,
+            113,
+            114,
+            115,
+            115,
+            115,
+            114,
+            112,
+            110,
+            106,
+            100,
+            92,
+            82,
+        ],
+        dtype=float,
+    )
 
     return DynoCurve(rpm=rpm, torque_nm=torque, is_at_wheel=True)
 
@@ -87,17 +135,63 @@ def dyno_yamaha_yzfr1_4c8() -> DynoCurve:
     Published: 155 HP @ 11000 RPM, 110 Nm @ 9000 RPM (at wheel)
     Crossplane: smoother delivery than traditional 4-crank, peaks earlier.
     """
-    rpm = np.array([
-        1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500,
-        6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000,
-        10500, 11000, 11500, 12000, 12500
-    ], dtype=float)
+    rpm = np.array(
+        [
+            1500,
+            2000,
+            2500,
+            3000,
+            3500,
+            4000,
+            4500,
+            5000,
+            5500,
+            6000,
+            6500,
+            7000,
+            7500,
+            8000,
+            8500,
+            9000,
+            9500,
+            10000,
+            10500,
+            11000,
+            11500,
+            12000,
+            12500,
+        ],
+        dtype=float,
+    )
 
-    torque = np.array([
-        42, 52, 62, 72, 80, 87, 92, 97, 102,
-        106, 109, 110, 110, 109, 109, 110, 108, 106,
-        103, 100, 96, 90, 82
-    ], dtype=float)
+    torque = np.array(
+        [
+            42,
+            52,
+            62,
+            72,
+            80,
+            87,
+            92,
+            97,
+            102,
+            106,
+            109,
+            110,
+            110,
+            109,
+            109,
+            110,
+            108,
+            106,
+            103,
+            100,
+            96,
+            90,
+            82,
+        ],
+        dtype=float,
+    )
 
     return DynoCurve(rpm=rpm, torque_nm=torque, is_at_wheel=True)
 
@@ -108,17 +202,65 @@ def dyno_kawasaki_zx10r_gen1() -> DynoCurve:
     Published: 175 HP @ 11500 RPM, 125 Nm @ 9500 RPM (at wheel)
     First-gen ZX-10R: very peaky, aggressive top-end focus.
     """
-    rpm = np.array([
-        1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500,
-        6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000,
-        10500, 11000, 11500, 12000, 12500, 13000
-    ], dtype=float)
+    rpm = np.array(
+        [
+            1500,
+            2000,
+            2500,
+            3000,
+            3500,
+            4000,
+            4500,
+            5000,
+            5500,
+            6000,
+            6500,
+            7000,
+            7500,
+            8000,
+            8500,
+            9000,
+            9500,
+            10000,
+            10500,
+            11000,
+            11500,
+            12000,
+            12500,
+            13000,
+        ],
+        dtype=float,
+    )
 
-    torque = np.array([
-        48, 58, 68, 78, 85, 92, 98, 103, 108,
-        112, 115, 118, 120, 121, 123, 124, 125, 124,
-        122, 120, 117, 112, 104, 94
-    ], dtype=float)
+    torque = np.array(
+        [
+            48,
+            58,
+            68,
+            78,
+            85,
+            92,
+            98,
+            103,
+            108,
+            112,
+            115,
+            118,
+            120,
+            121,
+            123,
+            124,
+            125,
+            124,
+            122,
+            120,
+            117,
+            112,
+            104,
+            94,
+        ],
+        dtype=float,
+    )
 
     return DynoCurve(rpm=rpm, torque_nm=torque, is_at_wheel=True)
 
@@ -129,17 +271,63 @@ def dyno_honda_cbr1000rr_sc59() -> DynoCurve:
     Published: 178 HP @ 12000 RPM, 116 Nm @ 9500 RPM (at wheel)
     Very high-revving, extreme top-end focus (12k peak power).
     """
-    rpm = np.array([
-        1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500,
-        6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000,
-        10500, 11000, 11500, 12000, 12500
-    ], dtype=float)
+    rpm = np.array(
+        [
+            1500,
+            2000,
+            2500,
+            3000,
+            3500,
+            4000,
+            4500,
+            5000,
+            5500,
+            6000,
+            6500,
+            7000,
+            7500,
+            8000,
+            8500,
+            9000,
+            9500,
+            10000,
+            10500,
+            11000,
+            11500,
+            12000,
+            12500,
+        ],
+        dtype=float,
+    )
 
-    torque = np.array([
-        44, 54, 64, 74, 82, 89, 95, 100, 105,
-        109, 112, 114, 115, 116, 116, 116, 116, 115,
-        113, 111, 108, 105, 100
-    ], dtype=float)
+    torque = np.array(
+        [
+            44,
+            54,
+            64,
+            74,
+            82,
+            89,
+            95,
+            100,
+            105,
+            109,
+            112,
+            114,
+            115,
+            116,
+            116,
+            116,
+            116,
+            115,
+            113,
+            111,
+            108,
+            105,
+            100,
+        ],
+        dtype=float,
+    )
 
     return DynoCurve(rpm=rpm, torque_nm=torque, is_at_wheel=True)
 
@@ -151,18 +339,66 @@ def dyno_bmw_s1000rr_2015() -> DynoCurve:
     Crossplane 4-cyl: explosive top-end, peaks very high (13k).
     Note: These are crank numbers; wheel power ~7-10% lower.
     """
-    rpm = np.array([
-        1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500,
-        6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000,
-        10500, 11000, 11500, 12000, 12500, 13000
-    ], dtype=float)
+    rpm = np.array(
+        [
+            1500,
+            2000,
+            2500,
+            3000,
+            3500,
+            4000,
+            4500,
+            5000,
+            5500,
+            6000,
+            6500,
+            7000,
+            7500,
+            8000,
+            8500,
+            9000,
+            9500,
+            10000,
+            10500,
+            11000,
+            11500,
+            12000,
+            12500,
+            13000,
+        ],
+        dtype=float,
+    )
 
     # Estimate wheel power: ~91% of crank (7% loss typical for chain drive)
-    torque = np.array([
-        50, 60, 70, 80, 88, 95, 101, 106, 111,
-        115, 119, 122, 125, 127, 128, 128, 127, 126,
-        124, 122, 119, 115, 109, 100
-    ], dtype=float)
+    torque = np.array(
+        [
+            50,
+            60,
+            70,
+            80,
+            88,
+            95,
+            101,
+            106,
+            111,
+            115,
+            119,
+            122,
+            125,
+            127,
+            128,
+            128,
+            127,
+            126,
+            124,
+            122,
+            119,
+            115,
+            109,
+            100,
+        ],
+        dtype=float,
+    )
 
     return DynoCurve(rpm=rpm, torque_nm=torque, is_at_wheel=True)
 
@@ -179,17 +415,57 @@ def dyno_suzuki_hayabusa_gen2() -> DynoCurve:
     At wheel: ~188 HP, ~147 Nm (7% loss)
     Massive 1340cc, very flat torque, strong low-mid range.
     """
-    rpm = np.array([
-        1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500,
-        6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000,
-        10500, 11000
-    ], dtype=float)
+    rpm = np.array(
+        [
+            1500,
+            2000,
+            2500,
+            3000,
+            3500,
+            4000,
+            4500,
+            5000,
+            5500,
+            6000,
+            6500,
+            7000,
+            7500,
+            8000,
+            8500,
+            9000,
+            9500,
+            10000,
+            10500,
+            11000,
+        ],
+        dtype=float,
+    )
 
-    torque = np.array([
-        65, 85, 100, 115, 128, 138, 145, 150, 153,
-        155, 156, 155, 153, 150, 146, 141, 135, 128,
-        120, 110
-    ], dtype=float)
+    torque = np.array(
+        [
+            65,
+            85,
+            100,
+            115,
+            128,
+            138,
+            145,
+            150,
+            153,
+            155,
+            156,
+            155,
+            153,
+            150,
+            146,
+            141,
+            135,
+            128,
+            120,
+            110,
+        ],
+        dtype=float,
+    )
 
     return DynoCurve(rpm=rpm, torque_nm=torque, is_at_wheel=True)
 
@@ -201,17 +477,61 @@ def dyno_kawasaki_zx14r() -> DynoCurve:
     At wheel: ~200 HP, ~160 Nm (5% loss)
     Largest production liter bike, extremely flat torque curve.
     """
-    rpm = np.array([
-        1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500,
-        6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000,
-        10500, 11000, 11500, 12000
-    ], dtype=float)
+    rpm = np.array(
+        [
+            1500,
+            2000,
+            2500,
+            3000,
+            3500,
+            4000,
+            4500,
+            5000,
+            5500,
+            6000,
+            6500,
+            7000,
+            7500,
+            8000,
+            8500,
+            9000,
+            9500,
+            10000,
+            10500,
+            11000,
+            11500,
+            12000,
+        ],
+        dtype=float,
+    )
 
-    torque = np.array([
-        70, 90, 110, 128, 142, 152, 160, 165, 168,
-        169, 169, 168, 166, 163, 159, 154, 148, 141,
-        133, 125, 115, 103
-    ], dtype=float)
+    torque = np.array(
+        [
+            70,
+            90,
+            110,
+            128,
+            142,
+            152,
+            160,
+            165,
+            168,
+            169,
+            169,
+            168,
+            166,
+            163,
+            159,
+            154,
+            148,
+            141,
+            133,
+            125,
+            115,
+            103,
+        ],
+        dtype=float,
+    )
 
     return DynoCurve(rpm=rpm, torque_nm=torque, is_at_wheel=True)
 
@@ -229,17 +549,71 @@ def dyno_suzuki_gsxr600() -> DynoCurve:
     Peaky inline-4, extremely narrow powerband like all 600cc class.
     Peak power at 14k RPM, similar to R6 and CBR600RR.
     """
-    rpm = np.array([
-        2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000,
-        6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000, 10500,
-        11000, 11500, 12000, 12500, 13000, 13500, 14000, 14500, 15000
-    ], dtype=float)
+    rpm = np.array(
+        [
+            2000,
+            2500,
+            3000,
+            3500,
+            4000,
+            4500,
+            5000,
+            5500,
+            6000,
+            6500,
+            7000,
+            7500,
+            8000,
+            8500,
+            9000,
+            9500,
+            10000,
+            10500,
+            11000,
+            11500,
+            12000,
+            12500,
+            13000,
+            13500,
+            14000,
+            14500,
+            15000,
+        ],
+        dtype=float,
+    )
 
-    torque = np.array([
-        27, 31, 35, 39, 42, 45, 47, 49, 50,
-        51, 52, 54, 56, 58, 60, 62, 64, 64,
-        65, 65, 63, 61, 59, 56, 53, 49, 44
-    ], dtype=float)
+    torque = np.array(
+        [
+            27,
+            31,
+            35,
+            39,
+            42,
+            45,
+            47,
+            49,
+            50,
+            51,
+            52,
+            54,
+            56,
+            58,
+            60,
+            62,
+            64,
+            64,
+            65,
+            65,
+            63,
+            61,
+            59,
+            56,
+            53,
+            49,
+            44,
+        ],
+        dtype=float,
+    )
 
     return DynoCurve(rpm=rpm, torque_nm=torque, is_at_wheel=True)
 
@@ -251,17 +625,71 @@ def dyno_yamaha_yzfr6() -> DynoCurve:
     Extremely peaky 600cc: flat below 8000, then explosive rise.
     Peak at 14.5k (highest of any production bike).
     """
-    rpm = np.array([
-        2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000,
-        6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000, 10500,
-        11000, 11500, 12000, 12500, 13000, 13500, 14000, 14500, 15000
-    ], dtype=float)
+    rpm = np.array(
+        [
+            2000,
+            2500,
+            3000,
+            3500,
+            4000,
+            4500,
+            5000,
+            5500,
+            6000,
+            6500,
+            7000,
+            7500,
+            8000,
+            8500,
+            9000,
+            9500,
+            10000,
+            10500,
+            11000,
+            11500,
+            12000,
+            12500,
+            13000,
+            13500,
+            14000,
+            14500,
+            15000,
+        ],
+        dtype=float,
+    )
 
-    torque = np.array([
-        28, 32, 36, 40, 43, 45, 47, 49, 50,
-        51, 52, 54, 56, 58, 60, 62, 66, 68,
-        67, 66, 64, 62, 60, 57, 54, 50, 45
-    ], dtype=float)
+    torque = np.array(
+        [
+            28,
+            32,
+            36,
+            40,
+            43,
+            45,
+            47,
+            49,
+            50,
+            51,
+            52,
+            54,
+            56,
+            58,
+            60,
+            62,
+            66,
+            68,
+            67,
+            66,
+            64,
+            62,
+            60,
+            57,
+            54,
+            50,
+            45,
+        ],
+        dtype=float,
+    )
 
     return DynoCurve(rpm=rpm, torque_nm=torque, is_at_wheel=True)
 
@@ -272,17 +700,71 @@ def dyno_honda_cbr600rr() -> DynoCurve:
     Published: 117 HP @ 14500 RPM, 64 Nm @ 11000 RPM (at wheel)
     Very peaky inline-4, peak power at 14.5k like R6.
     """
-    rpm = np.array([
-        2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000,
-        6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000, 10500,
-        11000, 11500, 12000, 12500, 13000, 13500, 14000, 14500, 15000
-    ], dtype=float)
+    rpm = np.array(
+        [
+            2000,
+            2500,
+            3000,
+            3500,
+            4000,
+            4500,
+            5000,
+            5500,
+            6000,
+            6500,
+            7000,
+            7500,
+            8000,
+            8500,
+            9000,
+            9500,
+            10000,
+            10500,
+            11000,
+            11500,
+            12000,
+            12500,
+            13000,
+            13500,
+            14000,
+            14500,
+            15000,
+        ],
+        dtype=float,
+    )
 
-    torque = np.array([
-        26, 30, 34, 38, 41, 43, 45, 47, 48,
-        49, 51, 52, 54, 56, 58, 60, 62, 63,
-        64, 63, 61, 59, 57, 54, 51, 48, 43
-    ], dtype=float)
+    torque = np.array(
+        [
+            26,
+            30,
+            34,
+            38,
+            41,
+            43,
+            45,
+            47,
+            48,
+            49,
+            51,
+            52,
+            54,
+            56,
+            58,
+            60,
+            62,
+            63,
+            64,
+            63,
+            61,
+            59,
+            57,
+            54,
+            51,
+            48,
+            43,
+        ],
+        dtype=float,
+    )
 
     return DynoCurve(rpm=rpm, torque_nm=torque, is_at_wheel=True)
 
@@ -294,17 +776,71 @@ def dyno_kawasaki_zx6r_636() -> DynoCurve:
     Over-displacement (636 instead of 600) gives slightly more torque.
     Very dominant in drag racing for 600cc class.
     """
-    rpm = np.array([
-        2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000,
-        6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000, 10500,
-        11000, 11500, 12000, 12500, 13000, 13500, 14000, 14500, 15000
-    ], dtype=float)
+    rpm = np.array(
+        [
+            2000,
+            2500,
+            3000,
+            3500,
+            4000,
+            4500,
+            5000,
+            5500,
+            6000,
+            6500,
+            7000,
+            7500,
+            8000,
+            8500,
+            9000,
+            9500,
+            10000,
+            10500,
+            11000,
+            11500,
+            12000,
+            12500,
+            13000,
+            13500,
+            14000,
+            14500,
+            15000,
+        ],
+        dtype=float,
+    )
 
-    torque = np.array([
-        29, 33, 37, 41, 44, 46, 48, 50, 51,
-        52, 54, 56, 58, 60, 62, 65, 67, 68,
-        69, 68, 66, 64, 62, 59, 55, 51, 46
-    ], dtype=float)
+    torque = np.array(
+        [
+            29,
+            33,
+            37,
+            41,
+            44,
+            46,
+            48,
+            50,
+            51,
+            52,
+            54,
+            56,
+            58,
+            60,
+            62,
+            65,
+            67,
+            68,
+            69,
+            68,
+            66,
+            64,
+            62,
+            59,
+            55,
+            51,
+            46,
+        ],
+        dtype=float,
+    )
 
     return DynoCurve(rpm=rpm, torque_nm=torque, is_at_wheel=True)
 
@@ -321,17 +857,65 @@ def dyno_ducati_panigale_v4() -> DynoCurve:
     At wheel: ~205 HP
     90° V4 with complex crankcase geometry: strong mid-range, high-RPM focus.
     """
-    rpm = np.array([
-        2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000,
-        6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000, 10500,
-        11000, 11500, 12000, 12500, 13000, 13500
-    ], dtype=float)
+    rpm = np.array(
+        [
+            2000,
+            2500,
+            3000,
+            3500,
+            4000,
+            4500,
+            5000,
+            5500,
+            6000,
+            6500,
+            7000,
+            7500,
+            8000,
+            8500,
+            9000,
+            9500,
+            10000,
+            10500,
+            11000,
+            11500,
+            12000,
+            12500,
+            13000,
+            13500,
+        ],
+        dtype=float,
+    )
 
-    torque = np.array([
-        48, 60, 72, 82, 90, 98, 104, 110, 115,
-        119, 122, 124, 124, 124, 122, 120, 118, 117,
-        116, 114, 111, 107, 102, 96
-    ], dtype=float)
+    torque = np.array(
+        [
+            48,
+            60,
+            72,
+            82,
+            90,
+            98,
+            104,
+            110,
+            115,
+            119,
+            122,
+            124,
+            124,
+            124,
+            122,
+            120,
+            118,
+            117,
+            116,
+            114,
+            111,
+            107,
+            102,
+            96,
+        ],
+        dtype=float,
+    )
 
     return DynoCurve(rpm=rpm, torque_nm=torque, is_at_wheel=True)
 
@@ -343,17 +927,65 @@ def dyno_aprilia_rsv4() -> DynoCurve:
     At wheel: ~192 HP, ~109 Nm
     Rotax 65° V4: very balanced, excellent mid-range torque for drag racing.
     """
-    rpm = np.array([
-        2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000,
-        6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000, 10500,
-        11000, 11500, 12000, 12500, 13000, 13500
-    ], dtype=float)
+    rpm = np.array(
+        [
+            2000,
+            2500,
+            3000,
+            3500,
+            4000,
+            4500,
+            5000,
+            5500,
+            6000,
+            6500,
+            7000,
+            7500,
+            8000,
+            8500,
+            9000,
+            9500,
+            10000,
+            10500,
+            11000,
+            11500,
+            12000,
+            12500,
+            13000,
+            13500,
+        ],
+        dtype=float,
+    )
 
-    torque = np.array([
-        46, 58, 70, 80, 88, 96, 102, 107, 111,
-        114, 116, 117, 116, 115, 113, 111, 110, 109,
-        107, 105, 102, 98, 93, 88
-    ], dtype=float)
+    torque = np.array(
+        [
+            46,
+            58,
+            70,
+            80,
+            88,
+            96,
+            102,
+            107,
+            111,
+            114,
+            116,
+            117,
+            116,
+            115,
+            113,
+            111,
+            110,
+            109,
+            107,
+            105,
+            102,
+            98,
+            93,
+            88,
+        ],
+        dtype=float,
+    )
 
     return DynoCurve(rpm=rpm, torque_nm=torque, is_at_wheel=True)
 
@@ -365,17 +997,59 @@ def dyno_ducati_1199_panigale() -> DynoCurve:
     At wheel: ~195 HP, ~140 Nm
     Desmodromic 90° L-twin: flat mid-range torque, very strong for drag.
     """
-    rpm = np.array([
-        1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500,
-        6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000,
-        10500, 11000, 11500
-    ], dtype=float)
+    rpm = np.array(
+        [
+            1500,
+            2000,
+            2500,
+            3000,
+            3500,
+            4000,
+            4500,
+            5000,
+            5500,
+            6000,
+            6500,
+            7000,
+            7500,
+            8000,
+            8500,
+            9000,
+            9500,
+            10000,
+            10500,
+            11000,
+            11500,
+        ],
+        dtype=float,
+    )
 
-    torque = np.array([
-        60, 80, 100, 115, 128, 138, 145, 150, 153,
-        155, 156, 156, 155, 153, 150, 148, 145, 140,
-        135, 128, 118
-    ], dtype=float)
+    torque = np.array(
+        [
+            60,
+            80,
+            100,
+            115,
+            128,
+            138,
+            145,
+            150,
+            153,
+            155,
+            156,
+            156,
+            155,
+            153,
+            150,
+            148,
+            145,
+            140,
+            135,
+            128,
+            118,
+        ],
+        dtype=float,
+    )
 
     return DynoCurve(rpm=rpm, torque_nm=torque, is_at_wheel=True)
 
@@ -392,18 +1066,60 @@ def dyno_kawasaki_h2() -> DynoCurve:
     Supercharged 1.0L inline-4 with belt-drive centrifugal SC.
     Massive torque throughout: extremely flat curve, instant response.
     """
-    rpm = np.array([
-        1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500,
-        6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000,
-        10500, 11000, 11500
-    ], dtype=float)
+    rpm = np.array(
+        [
+            1500,
+            2000,
+            2500,
+            3000,
+            3500,
+            4000,
+            4500,
+            5000,
+            5500,
+            6000,
+            6500,
+            7000,
+            7500,
+            8000,
+            8500,
+            9000,
+            9500,
+            10000,
+            10500,
+            11000,
+            11500,
+        ],
+        dtype=float,
+    )
 
     # Supercharged = linear boost buildup, flat curve from 3k to peak
-    torque = np.array([
-        140, 170, 190, 210, 225, 235, 240, 242, 243,
-        243, 242, 240, 238, 235, 230, 225, 218, 210,
-        200, 188, 175
-    ], dtype=float)
+    torque = np.array(
+        [
+            140,
+            170,
+            190,
+            210,
+            225,
+            235,
+            240,
+            242,
+            243,
+            243,
+            242,
+            240,
+            238,
+            235,
+            230,
+            225,
+            218,
+            210,
+            200,
+            188,
+            175,
+        ],
+        dtype=float,
+    )
 
     return DynoCurve(rpm=rpm, torque_nm=torque, is_at_wheel=True)
 
@@ -419,17 +1135,59 @@ def dyno_yamaha_mt10() -> DynoCurve:
     Published: 158 HP @ 10000 RPM, 111 Nm @ 8250 RPM (at wheel)
     Crossplane 3-cylinder: explosive mid-range, characteristic triple peakiness.
     """
-    rpm = np.array([
-        2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000,
-        6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000, 10500,
-        11000, 11500, 12000
-    ], dtype=float)
+    rpm = np.array(
+        [
+            2000,
+            2500,
+            3000,
+            3500,
+            4000,
+            4500,
+            5000,
+            5500,
+            6000,
+            6500,
+            7000,
+            7500,
+            8000,
+            8500,
+            9000,
+            9500,
+            10000,
+            10500,
+            11000,
+            11500,
+            12000,
+        ],
+        dtype=float,
+    )
 
-    torque = np.array([
-        40, 50, 60, 70, 80, 88, 95, 101, 106,
-        110, 111, 111, 110, 109, 108, 106, 105, 102,
-        98, 92, 85
-    ], dtype=float)
+    torque = np.array(
+        [
+            40,
+            50,
+            60,
+            70,
+            80,
+            88,
+            95,
+            101,
+            106,
+            110,
+            111,
+            111,
+            110,
+            109,
+            108,
+            106,
+            105,
+            102,
+            98,
+            92,
+            85,
+        ],
+        dtype=float,
+    )
 
     return DynoCurve(rpm=rpm, torque_nm=torque, is_at_wheel=True)
 
@@ -441,17 +1199,65 @@ def dyno_ducati_streetfighter_v4() -> DynoCurve:
     Desmo 90° V4: aggressive styling, excellent mid-range for street fighting.
     Similar powertrain to Panigale V4.
     """
-    rpm = np.array([
-        2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000,
-        6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000, 10500,
-        11000, 11500, 12000, 12500, 13000, 13500
-    ], dtype=float)
+    rpm = np.array(
+        [
+            2000,
+            2500,
+            3000,
+            3500,
+            4000,
+            4500,
+            5000,
+            5500,
+            6000,
+            6500,
+            7000,
+            7500,
+            8000,
+            8500,
+            9000,
+            9500,
+            10000,
+            10500,
+            11000,
+            11500,
+            12000,
+            12500,
+            13000,
+            13500,
+        ],
+        dtype=float,
+    )
 
-    torque = np.array([
-        47, 59, 71, 81, 89, 97, 103, 109, 114,
-        118, 121, 123, 123, 123, 121, 119, 117, 116,
-        115, 113, 110, 106, 101, 95
-    ], dtype=float)
+    torque = np.array(
+        [
+            47,
+            59,
+            71,
+            81,
+            89,
+            97,
+            103,
+            109,
+            114,
+            118,
+            121,
+            123,
+            123,
+            123,
+            121,
+            119,
+            117,
+            116,
+            115,
+            113,
+            110,
+            106,
+            101,
+            95,
+        ],
+        dtype=float,
+    )
 
     return DynoCurve(rpm=rpm, torque_nm=torque, is_at_wheel=True)
 
@@ -463,17 +1269,65 @@ def dyno_suzuki_gsxs1000() -> DynoCurve:
     Naked version of GSX-R platform: same powerband, different gearing/frame.
     Broad, usable torque for street and street racing.
     """
-    rpm = np.array([
-        1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500,
-        6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000,
-        10500, 11000, 11500, 12000, 12500, 13000
-    ], dtype=float)
+    rpm = np.array(
+        [
+            1500,
+            2000,
+            2500,
+            3000,
+            3500,
+            4000,
+            4500,
+            5000,
+            5500,
+            6000,
+            6500,
+            7000,
+            7500,
+            8000,
+            8500,
+            9000,
+            9500,
+            10000,
+            10500,
+            11000,
+            11500,
+            12000,
+            12500,
+            13000,
+        ],
+        dtype=float,
+    )
 
-    torque = np.array([
-        43, 53, 63, 73, 81, 88, 93, 98, 102,
-        105, 107, 109, 110, 110, 109, 108, 107, 105,
-        103, 101, 98, 93, 86, 77
-    ], dtype=float)
+    torque = np.array(
+        [
+            43,
+            53,
+            63,
+            73,
+            81,
+            88,
+            93,
+            98,
+            102,
+            105,
+            107,
+            109,
+            110,
+            110,
+            109,
+            108,
+            107,
+            105,
+            103,
+            101,
+            98,
+            93,
+            86,
+            77,
+        ],
+        dtype=float,
+    )
 
     return DynoCurve(rpm=rpm, torque_nm=torque, is_at_wheel=True)
 
@@ -484,17 +1338,65 @@ def dyno_bmw_s1000r() -> DynoCurve:
     Published: 165 HP @ 11000 RPM, 112 Nm @ 9250 RPM (at wheel estimated)
     Naked version of S1000RR: slightly de-tuned, more torque in mid-range.
     """
-    rpm = np.array([
-        1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500,
-        6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000,
-        10500, 11000, 11500, 12000, 12500, 13000
-    ], dtype=float)
+    rpm = np.array(
+        [
+            1500,
+            2000,
+            2500,
+            3000,
+            3500,
+            4000,
+            4500,
+            5000,
+            5500,
+            6000,
+            6500,
+            7000,
+            7500,
+            8000,
+            8500,
+            9000,
+            9500,
+            10000,
+            10500,
+            11000,
+            11500,
+            12000,
+            12500,
+            13000,
+        ],
+        dtype=float,
+    )
 
-    torque = np.array([
-        48, 58, 68, 78, 86, 93, 99, 104, 108,
-        111, 113, 114, 115, 115, 114, 113, 112, 111,
-        109, 107, 104, 100, 94, 85
-    ], dtype=float)
+    torque = np.array(
+        [
+            48,
+            58,
+            68,
+            78,
+            86,
+            93,
+            99,
+            104,
+            108,
+            111,
+            113,
+            114,
+            115,
+            115,
+            114,
+            113,
+            112,
+            111,
+            109,
+            107,
+            104,
+            100,
+            94,
+            85,
+        ],
+        dtype=float,
+    )
 
     return DynoCurve(rpm=rpm, torque_nm=torque, is_at_wheel=True)
 
@@ -506,17 +1408,61 @@ def dyno_ktm_1290_super_duke_r() -> DynoCurve:
     LC8 90° V-twin with big bore/stroke: flat, powerful torque.
     Very similar to Ducati L-twin character but slightly smoother.
     """
-    rpm = np.array([
-        1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500,
-        6000, 6500, 7000, 7500, 8000, 8500, 9000, 9500, 10000,
-        10500, 11000, 11500, 12000
-    ], dtype=float)
+    rpm = np.array(
+        [
+            1500,
+            2000,
+            2500,
+            3000,
+            3500,
+            4000,
+            4500,
+            5000,
+            5500,
+            6000,
+            6500,
+            7000,
+            7500,
+            8000,
+            8500,
+            9000,
+            9500,
+            10000,
+            10500,
+            11000,
+            11500,
+            12000,
+        ],
+        dtype=float,
+    )
 
-    torque = np.array([
-        65, 85, 105, 120, 132, 140, 145, 148, 150,
-        151, 151, 150, 148, 147, 145, 142, 138, 133,
-        127, 120, 110, 98
-    ], dtype=float)
+    torque = np.array(
+        [
+            65,
+            85,
+            105,
+            120,
+            132,
+            140,
+            145,
+            148,
+            150,
+            151,
+            151,
+            150,
+            148,
+            147,
+            145,
+            142,
+            138,
+            133,
+            127,
+            120,
+            110,
+            98,
+        ],
+        dtype=float,
+    )
 
     return DynoCurve(rpm=rpm, torque_nm=torque, is_at_wheel=True)
 
@@ -534,40 +1480,35 @@ KNOWN_DYNO_CURVES = {
     ("suzuki", "hayabusa", 2008, 2018, "Gen2"): dyno_suzuki_hayabusa_gen2,
     ("suzuki", "gsx-r 600", 2000, 2010, None): dyno_suzuki_gsxr600,
     ("suzuki", "gsx-s1000", 2015, 2024, None): dyno_suzuki_gsxs1000,
-
     # Yamaha
     ("yamaha", "yzf-r1", 2007, 2008, "4C8"): dyno_yamaha_yzfr1_4c8,
     ("yamaha", "yzf-r6", 2006, 2024, None): dyno_yamaha_yzfr6,
     ("yamaha", "mt-10", 2016, 2024, None): dyno_yamaha_mt10,
-
     # Kawasaki
     ("kawasaki", "ninja zx-10r", 2004, 2005, "Gen1"): dyno_kawasaki_zx10r_gen1,
     ("kawasaki", "ninja zx-14r", 2006, 2011, None): dyno_kawasaki_zx14r,
     ("kawasaki", "ninja zx-6r", 2003, 2004, "636"): dyno_kawasaki_zx6r_636,
     ("kawasaki", "ninja h2", 2015, 2024, None): dyno_kawasaki_h2,
-
     # Honda
     ("honda", "cbr1000rr", 2008, 2012, "SC59"): dyno_honda_cbr1000rr_sc59,
     ("honda", "cbr600rr", 2003, 2017, None): dyno_honda_cbr600rr,
-
     # BMW
     ("bmw", "s1000rr", 2015, 2024, None): dyno_bmw_s1000rr_2015,
     ("bmw", "s1000r", 2014, 2024, None): dyno_bmw_s1000r,
-
     # Ducati
     ("ducati", "panigale v4", 2018, 2024, None): dyno_ducati_panigale_v4,
     ("ducati", "1199 panigale", 2012, 2014, None): dyno_ducati_1199_panigale,
     ("ducati", "streetfighter v4", 2020, 2024, None): dyno_ducati_streetfighter_v4,
-
     # Aprilia
     ("aprilia", "rsv4", 2009, 2024, None): dyno_aprilia_rsv4,
-
     # KTM
     ("ktm", "1290 super duke r", 2014, 2024, None): dyno_ktm_1290_super_duke_r,
 }
 
 
-def get_dyno_curve(manufacturer: str, model: str, year: int = None, model_code: str = None) -> DynoCurve | None:
+def get_dyno_curve(
+    manufacturer: str, model: str, year: int = None, model_code: str = None
+) -> DynoCurve | None:
     """
     Look up a dyno curve by manufacturer, model, year, and optional model code.
 

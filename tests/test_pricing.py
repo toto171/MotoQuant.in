@@ -15,7 +15,6 @@ Covers :mod:`motoquant.database.pricing_refresh`:
 from __future__ import annotations
 
 import os
-import sqlite3
 import sys
 
 import pytest
@@ -36,7 +35,6 @@ from motoquant.database.pricing_refresh import (
     refresh_retailer_urls,
     stale_parts,
 )
-
 
 # ─────────────────────────────────────────────────────────────────
 # Unit tests — pure helpers (no DB)
@@ -135,7 +133,9 @@ class TestLandingCostINR:
             10_000.0, retailer="MotoParts India", availability="import_only"
         )
         # even domestic retailer + import_only adds duty
-        assert with_flag > estimate_landing_cost_inr(10_000.0, retailer="MotoParts India")
+        assert with_flag > estimate_landing_cost_inr(
+            10_000.0, retailer="MotoParts India"
+        )
 
     def test_zero_sticker(self):
         # 0 × 1.18 + 250 = 250
@@ -169,14 +169,37 @@ def seeded_db(tmp_path):
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
         [
-            (cat_id, "Akrapovic", "Evolution Line Ti", "AK-EL-TI-001", "{}",
-             "MotoParts India", None, None),
-            (cat_id, "SBS", "SBS Carbon Pad V9", "SBS-V9-001", "{}",
-             "Grand Pitstop", None, None),
-            (cat_id, "SC-Project", "CR-T Carbon", "SCP-CRT-001", "{}",
-             "Superbike India", "https://existing.example.com/foo", "2020-01-01"),
-            (cat_id, "NoRetailer", "Orphan Part", "ORPH-001", "{}",
-             None, None, None),
+            (
+                cat_id,
+                "Akrapovic",
+                "Evolution Line Ti",
+                "AK-EL-TI-001",
+                "{}",
+                "MotoParts India",
+                None,
+                None,
+            ),
+            (
+                cat_id,
+                "SBS",
+                "SBS Carbon Pad V9",
+                "SBS-V9-001",
+                "{}",
+                "Grand Pitstop",
+                None,
+                None,
+            ),
+            (
+                cat_id,
+                "SC-Project",
+                "CR-T Carbon",
+                "SCP-CRT-001",
+                "{}",
+                "Superbike India",
+                "https://existing.example.com/foo",
+                "2020-01-01",
+            ),
+            (cat_id, "NoRetailer", "Orphan Part", "ORPH-001", "{}", None, None, None),
         ],
     )
     conn.commit()
@@ -304,8 +327,12 @@ class TestCoverageReport:
 
     def test_coverage_percentages_never_negative_or_above_100(self, seeded_db):
         report = coverage_report(seeded_db.conn)
-        for k in ("price_coverage_pct", "retailer_coverage_pct",
-                  "url_coverage_pct", "freshness_pct"):
+        for k in (
+            "price_coverage_pct",
+            "retailer_coverage_pct",
+            "url_coverage_pct",
+            "freshness_pct",
+        ):
             assert 0.0 <= report[k] <= 100.0
 
     def test_after_refresh_url_coverage_jumps(self, seeded_db):

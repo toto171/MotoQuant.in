@@ -79,7 +79,7 @@ def _synthetic_torque_curve(
             elif peak_torque_nm < 70.0 and peak_torque_nm >= 50.0:
                 sigma = 1.40  # mid-range 500-700cc naked: very flat torque
             else:
-                sigma = 1.8   # default for everything else
+                sigma = 1.8  # default for everything else
             T = peak_torque_nm * np.exp(-sigma * x**2)
             # Low-RPM ramp: torque builds progressively from idle
             if rpm < peak_rpm * 0.6:
@@ -170,8 +170,8 @@ def _synthetic_2stroke_torque_curve(
     # show ~50 % of peak from 3 500 rpm and >75 % from 4 500 rpm — nothing
     # like a YZ125's hit-in-the-arse pipe.
     if powervalve:
-        band_lo = 0.18   # narrower — RAVE/YPVS still widens the band
-        band_hi = 0.12   # was 0.16
+        band_lo = 0.18  # narrower — RAVE/YPVS still widens the band
+        band_hi = 0.12  # was 0.16
         baseline = 0.20  # was 0.30 — powervalve delivers good off-pipe still
     elif cylinders >= 3:
         # Vintage multi-cylinder piston-port triple (GT750, H2 Mach IV):
@@ -179,8 +179,8 @@ def _synthetic_2stroke_torque_curve(
         # wider and looks more like a 4-stroke. Without this branch the
         # sim delivers 9 Nm flat from 3 000-5 000 rpm on these bikes, which
         # makes them unable to complete the quarter in 26 s.
-        band_lo = 0.55   # very wide below-peak shoulder
-        band_hi = 0.30   # moderate above-peak fall
+        band_lo = 0.55  # very wide below-peak shoulder
+        band_hi = 0.30  # moderate above-peak fall
         baseline = 0.50  # strong off-pipe, multi-cyl smoothing
     elif cylinders == 2:
         # Two-cylinder piston-port (RD350, RD400, RGV250 non-RAVE, NSR250
@@ -197,8 +197,8 @@ def _synthetic_2stroke_torque_curve(
         band_hi = 0.15
         baseline = 0.25
     else:
-        band_lo = 0.12   # was 0.24 — piston-port is peakier
-        band_hi = 0.08   # was 0.11
+        band_lo = 0.12  # was 0.24 — piston-port is peakier
+        band_hi = 0.08  # was 0.11
         baseline = 0.12  # was 0.20 — fixed-port needs even narrower base
 
     # Required torque at peak_power_rpm to match rated HP (when given)

@@ -37,6 +37,14 @@ from .bayesian_opt import (
     OptimizationResult,
     optimize_build,
 )
+from .recommendations import (
+    BuildProfile,
+    BuildRecommendation,
+    UpgradePath,
+    generate_upgrade_path,
+    get_category_upgrade_order,
+    recommend_build,
+)
 from .roi import (
     BuildROIResult,
     PartROIResult,
@@ -55,22 +63,14 @@ from .surrogate_data import (
     config_to_feature_vector,
     generate_training_data,
 )
-from .surrogate_xgb import (
-    SurrogateMetrics,
-    XGBSurrogate,
-    train_surrogate,
-)
 from .surrogate_dnn import (
     DNNSurrogate,
     train_dnn_surrogate,
 )
-from .recommendations import (
-    BuildProfile,
-    BuildRecommendation,
-    UpgradePath,
-    recommend_build,
-    generate_upgrade_path,
-    get_category_upgrade_order,
+from .surrogate_xgb import (
+    SurrogateMetrics,
+    XGBSurrogate,
+    train_surrogate,
 )
 
 __all__ = [

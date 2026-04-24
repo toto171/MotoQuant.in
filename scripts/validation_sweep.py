@@ -25,6 +25,7 @@ Run with::
     python validation_sweep.py              # writes report for today
     python validation_sweep.py --json-only  # only writes JSON, no stdout
 """
+
 from __future__ import annotations
 
 import argparse
@@ -112,16 +113,44 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # an order-of-magnitude estimate from a 0-100 multiplier and carries
     # ±0.5-1.0 s uncertainty.
     ("Bajaj", "Pulsar NS200", 2019, 16.90, 130, "MotorBikeCatalog 2012 (verified)"),
-    ("KTM", "Duke 390", 2019, 14.00, 150, "Motorcycle Consumer News (Duke 390 14.02 @ 91.88 mph)"),
-    ("Royal Enfield", "Continental GT 650", 2019, 13.90, 155, "FastestLaps + Mantra Racing (verified)"),
+    (
+        "KTM",
+        "Duke 390",
+        2019,
+        14.00,
+        150,
+        "Motorcycle Consumer News (Duke 390 14.02 @ 91.88 mph)",
+    ),
+    (
+        "Royal Enfield",
+        "Continental GT 650",
+        2019,
+        13.90,
+        155,
+        "FastestLaps + Mantra Racing (verified)",
+    ),
     ("Yamaha", "R15 V3", 2020, 16.20, 125, "DERIVED (no real timeslip found)"),
     # Indian-market 150-400cc expansion (April 2026)
     ("Bajaj", "Pulsar RS 200", 2015, 15.70, 132, "DERIVED (0-100 × 1.6, ±0.7s)"),
     ("Bajaj", "Pulsar N250", 2021, 15.45, 135, "DERIVED (0-100 × 1.6, ±0.7s)"),
     ("Bajaj", "Pulsar NS400Z", 2024, 14.10, 155, "DERIVED (0-100 × 1.6, ±0.7s)"),
     ("KTM", "Duke 250", 2017, 15.20, 140, "DERIVED (0-100 × 1.6, ±0.7s)"),
-    ("KTM", "RC 390", 2017, 13.85, 159, "Duke 390 baseline (Motorcycle Consumer News, RC adds ~−0.15s for fairing)"),
-    ("TVS", "Apache RR 310", 2020, 15.46, 135, "FastestLaps + BikeWale (verified stock)"),
+    (
+        "KTM",
+        "RC 390",
+        2017,
+        13.85,
+        159,
+        "Duke 390 baseline (Motorcycle Consumer News, RC adds ~−0.15s for fairing)",
+    ),
+    (
+        "TVS",
+        "Apache RR 310",
+        2020,
+        15.46,
+        135,
+        "FastestLaps + BikeWale (verified stock)",
+    ),
     ("TVS", "Apache RTR 200 4V", 2016, 15.90, 128, "DERIVED (0-100 × 1.6, ±0.7s)"),
     ("Yamaha", "R15 V4", 2021, 16.40, 123, "DERIVED (0-100 × 1.6, ±0.7s)"),
     ("Yamaha", "MT-15", 2019, 15.80, 130, "DERIVED (0-100 × 1.6, ±0.7s)"),
@@ -130,7 +159,14 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     ("Honda", "CB350RS", 2021, 15.50, 138, "DERIVED (0-100 × 1.6, ±0.7s)"),
     ("Honda", "CBR500R", 2022, 13.51, 98, "MotoStatz 2022 (DERIVED)"),
     ("Honda", "CB650R", 2021, 11.80, 115, "AccelerationTimes 2021 (DERIVED)"),
-    ("Honda", "CBR250R", 2011, 15.86, 130, "MotorBikeCatalog 2011 (verified, 81.2 mph)"),
+    (
+        "Honda",
+        "CBR250R",
+        2011,
+        15.86,
+        130,
+        "MotorBikeCatalog 2011 (verified, 81.2 mph)",
+    ),
     ("Suzuki", "Gixxer 250", 2018, 16.10, 126, "DERIVED (0-100 × 1.6, ±0.7s)"),
     ("Kawasaki", "Ninja 300", 2013, 14.10, 150, "FastestLaps (verified, 93 mph)"),
     # Mid-range global expansion (April 2026)
@@ -164,8 +200,9 @@ def _model_match(pattern: str, spec_model: str) -> bool:
     every pattern token appears as a standalone token in the spec string.
     """
     import re as _re
+
     tokens = [t for t in _re.split(r"[\s\-]+", pattern) if t]
-    spec_tokens = set(t for t in _re.split(r"[\s\-]+", spec_model) if t)
+    spec_tokens = {t for t in _re.split(r"[\s\-]+", spec_model) if t}
     return all(t in spec_tokens for t in tokens)
 
 
@@ -270,23 +307,27 @@ def run_sweep(verbose: bool = True) -> dict:
                 "is_reference": True,
             }
             results.append(rec)
-            benchmark_hits.append({
-                **rec,
-                "target_et_s": target_et,
-                "target_trap_kmh": trap_kmh,
-                "delta_et_s": round(sim_et - target_et, 3),
-                "source": source,
-            })
+            benchmark_hits.append(
+                {
+                    **rec,
+                    "target_et_s": target_et,
+                    "target_trap_kmh": trap_kmh,
+                    "delta_et_s": round(sim_et - target_et, 3),
+                    "source": source,
+                }
+            )
         except Exception as exc:
-            results.append({
-                "manufacturer": name.split()[0],
-                "model": " ".join(name.split()[1:]),
-                "year_from": year,
-                "year_to": year,
-                "status": "error",
-                "error": str(exc),
-                "is_reference": True,
-            })
+            results.append(
+                {
+                    "manufacturer": name.split()[0],
+                    "model": " ".join(name.split()[1:]),
+                    "year_from": year,
+                    "year_to": year,
+                    "status": "error",
+                    "error": str(exc),
+                    "is_reference": True,
+                }
+            )
 
     # 2. Full catalog sweep
     n = len(ALL_KNOWN_BIKES)
@@ -310,14 +351,16 @@ def run_sweep(verbose: bool = True) -> dict:
                 continue
             if rec["status"] != "ok":
                 break
-            benchmark_hits.append({
-                **rec,
-                "benchmark_year": byear,
-                "target_et_s": tgt_et,
-                "target_trap_kmh": tgt_trap,
-                "delta_et_s": round(rec["sim_et_s"] - tgt_et, 3),
-                "source": src,
-            })
+            benchmark_hits.append(
+                {
+                    **rec,
+                    "benchmark_year": byear,
+                    "target_et_s": tgt_et,
+                    "target_trap_kmh": tgt_trap,
+                    "delta_et_s": round(rec["sim_et_s"] - tgt_et, 3),
+                    "source": src,
+                }
+            )
             break
 
     t_elapsed = time.time() - t_start
@@ -377,8 +420,10 @@ def main() -> None:
 
     verbose = not args.json_only
     if verbose:
-        print(f"Validation sweep — {len(ALL_KNOWN_BIKES)} known bikes + "
-              f"{len(REFERENCE_BIKES)} reference bikes")
+        print(
+            f"Validation sweep — {len(ALL_KNOWN_BIKES)} known bikes + "
+            f"{len(REFERENCE_BIKES)} reference bikes"
+        )
         print("─" * 70)
 
     report = run_sweep(verbose=verbose)

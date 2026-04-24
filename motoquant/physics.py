@@ -21,19 +21,19 @@ import numpy as np
 
 from .constants import (
     EIGHTH_MILE_M,
+    ONE_KM_M,
+    ONE_MILE_M,
     QUARTER_MILE_M,
     RADS_TO_RPM,
     RPM_TO_RADS,
     SIXTY_FOOT_M,
     THOUSAND_FT_M,
     THREE30_FT_M,
-    G,
-    ONE_MILE_M,
-    ONE_KM_M,
+    TOPSPEED_MAX_DISTANCE_M,
+    TOPSPEED_MAX_TIME_S,
     TOPSPEED_PLATEAU_ACCEL,
     TOPSPEED_PLATEAU_WINDOW_S,
-    TOPSPEED_MAX_TIME_S,
-    TOPSPEED_MAX_DISTANCE_M,
+    G,
 )
 from .models import (
     CLUTCH_SLIDER,
@@ -127,7 +127,9 @@ class SimResult:
     speed_quarter: float = 0.0
 
     # Completion tracking
-    finished_quarter: bool = False  # True if bike reached QUARTER_MILE_M within simulation
+    finished_quarter: bool = (
+        False  # True if bike reached QUARTER_MILE_M within simulation
+    )
     max_distance_m: float = 0.0  # Furthest distance reached (m)
     elapsed_time_s: float = 0.0  # Time elapsed at end of simulation (s)
 
@@ -421,7 +423,9 @@ class MotoQuantEngine:
 
         while x < distance and t < max_time and step < n_max - 1:
             # ── Current RPM and wheel speed ──
-            omega_w = v / max(r_eff, 0.15)  # 0.15m = min realistic motorcycle tire radius
+            omega_w = v / max(
+                r_eff, 0.15
+            )  # 0.15m = min realistic motorcycle tire radius
             r_eff = self.tire_effective_radius(omega_w)
             omega_w = v / max(r_eff, 0.15)
 
@@ -639,11 +643,17 @@ class MotoQuantEngine:
             # Advance state — guard against NaN/inf from numerical issues
             if not (np.isfinite(v_new) and np.isfinite(x_new)):
                 import logging
+
                 logging.getLogger(__name__).error(
                     "NaN/inf in physics state at t=%.4fs, step=%d. "
                     "v_new=%.6f, x_new=%.6f, F_drive=%.2f, F_aero=%.2f. "
                     "Breaking simulation early.",
-                    t, step, v_new, x_new, F_drive, F_aero,
+                    t,
+                    step,
+                    v_new,
+                    x_new,
+                    F_drive,
+                    F_aero,
                 )
                 break
             v = max(0.05, v_new)  # 0.05 m/s = 0.18 km/h minimum (avoids RPM divergence)
@@ -756,7 +766,9 @@ class MotoQuantEngine:
         reach_idx = terminal_idx if reached else peak_idx
         terminal_t = float(sim.t[reach_idx])
         terminal_x = float(sim.x[reach_idx])
-        terminal_power_kw = float(sim.power_kw[peak_idx]) if len(sim.power_kw) > peak_idx else 0.0
+        terminal_power_kw = (
+            float(sim.power_kw[peak_idx]) if len(sim.power_kw) > peak_idx else 0.0
+        )
         terminal_gear = int(sim.gear[peak_idx]) if len(sim.gear) > peak_idx else 0
         terminal_rpm = float(sim.rpm[peak_idx]) if len(sim.rpm) > peak_idx else 0.0
 

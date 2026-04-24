@@ -5151,7 +5151,6 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
     - 10 brakes: Brembo Stylema (family I4 1000+), SBS pads (family)
     - 2-3 tire parts: universal pressure kits, tire warmers
     """
-    import json
     import logging
 
     logger = logging.getLogger(__name__)
@@ -5164,333 +5163,756 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
     # 520-pitch fronts: 14T-17T (fits 600-750cc + some 1000cc sport)
     for teeth in [14, 15, 16, 17]:
         price = 2600 if teeth in [14, 17] else 2800
-        parts.append({
-            "category": "sprocket",
-            "brand": "Driven Racing",
-            "model_name": f"520 Front Sprocket {teeth}T",
-            "part_number": f"DR-520-F-{teeth}",
-            "specs": {"teeth": teeth, "pitch": "520", "position": "front"},
-            "param_overrides": {"drivetrain.front_sprocket": teeth},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"chain_pitch": "520"},
-                "description": f"520-pitch front sprocket {teeth}T"
-            },
-            "price_inr": price,
-            "availability": "in_stock",
-            "retailer": "MotoParts India",
-        })
+        parts.append(
+            {
+                "category": "sprocket",
+                "brand": "Driven Racing",
+                "model_name": f"520 Front Sprocket {teeth}T",
+                "part_number": f"DR-520-F-{teeth}",
+                "specs": {"teeth": teeth, "pitch": "520", "position": "front"},
+                "param_overrides": {"drivetrain.front_sprocket": teeth},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"chain_pitch": "520"},
+                    "description": f"520-pitch front sprocket {teeth}T",
+                },
+                "price_inr": price,
+                "availability": "in_stock",
+                "retailer": "MotoParts India",
+            }
+        )
 
     # 525-pitch fronts: 16T-18T (fits many middleweight/ADV bikes)
     for teeth in [16, 17, 18]:
-        parts.append({
-            "category": "sprocket",
-            "brand": "Sprocket Specialists",
-            "model_name": f"525 Front Sprocket {teeth}T",
-            "part_number": f"SS-525-F-{teeth}",
-            "specs": {"teeth": teeth, "pitch": "525", "position": "front"},
-            "param_overrides": {"drivetrain.front_sprocket": teeth},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"chain_pitch": "525"},
-                "description": f"525-pitch front sprocket {teeth}T"
-            },
-            "price_inr": 2800,
-            "availability": "in_stock",
-            "retailer": "MotoParts India",
-        })
+        parts.append(
+            {
+                "category": "sprocket",
+                "brand": "Sprocket Specialists",
+                "model_name": f"525 Front Sprocket {teeth}T",
+                "part_number": f"SS-525-F-{teeth}",
+                "specs": {"teeth": teeth, "pitch": "525", "position": "front"},
+                "param_overrides": {"drivetrain.front_sprocket": teeth},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"chain_pitch": "525"},
+                    "description": f"525-pitch front sprocket {teeth}T",
+                },
+                "price_inr": 2800,
+                "availability": "in_stock",
+                "retailer": "MotoParts India",
+            }
+        )
 
     # 530-pitch fronts: 16T-18T (Hayabusa, ZX-14R, big tourers)
     for teeth in [16, 17, 18]:
-        parts.append({
-            "category": "sprocket",
-            "brand": "JT Sprockets",
-            "model_name": f"530 Front Sprocket {teeth}T",
-            "part_number": f"JT-530-F-{teeth}",
-            "specs": {"teeth": teeth, "pitch": "530", "position": "front"},
-            "param_overrides": {"drivetrain.front_sprocket": teeth},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"chain_pitch": "530"},
-                "description": "530-pitch front sprocket for litre bikes & tourers"
-            },
-            "price_inr": 2900,
-            "availability": "in_stock",
-            "retailer": "Grand Pitstop",
-        })
+        parts.append(
+            {
+                "category": "sprocket",
+                "brand": "JT Sprockets",
+                "model_name": f"530 Front Sprocket {teeth}T",
+                "part_number": f"JT-530-F-{teeth}",
+                "specs": {"teeth": teeth, "pitch": "530", "position": "front"},
+                "param_overrides": {"drivetrain.front_sprocket": teeth},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"chain_pitch": "530"},
+                    "description": "530-pitch front sprocket for litre bikes & tourers",
+                },
+                "price_inr": 2900,
+                "availability": "in_stock",
+                "retailer": "Grand Pitstop",
+            }
+        )
 
     # 520-pitch rears: 40T-48T (drag gearing)
     for teeth in [40, 41, 42, 43, 44, 45, 46, 47, 48]:
         material = "Aluminium 7075" if teeth <= 45 else "Steel"
         price = 4500 if teeth <= 45 else 3800
-        parts.append({
-            "category": "sprocket",
-            "brand": "Driven Racing",
-            "model_name": f"520 Rear Sprocket {teeth}T ({material})",
-            "part_number": f"DR-520-R-{teeth}",
-            "specs": {"teeth": teeth, "pitch": "520", "position": "rear", "material": material},
-            "param_overrides": {"drivetrain.rear_sprocket": teeth},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"chain_pitch": "520"},
-                "description": f"520-pitch rear sprocket {teeth}T"
-            },
-            "price_inr": price,
-            "availability": "in_stock",
-            "retailer": "MotoParts India",
-        })
+        parts.append(
+            {
+                "category": "sprocket",
+                "brand": "Driven Racing",
+                "model_name": f"520 Rear Sprocket {teeth}T ({material})",
+                "part_number": f"DR-520-R-{teeth}",
+                "specs": {
+                    "teeth": teeth,
+                    "pitch": "520",
+                    "position": "rear",
+                    "material": material,
+                },
+                "param_overrides": {"drivetrain.rear_sprocket": teeth},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"chain_pitch": "520"},
+                    "description": f"520-pitch rear sprocket {teeth}T",
+                },
+                "price_inr": price,
+                "availability": "in_stock",
+                "retailer": "MotoParts India",
+            }
+        )
 
     # 525-pitch rears: 42T-50T
     for teeth in [42, 44, 46, 48, 50]:
-        parts.append({
-            "category": "sprocket",
-            "brand": "Sprocket Specialists",
-            "model_name": f"525 Rear Sprocket {teeth}T",
-            "part_number": f"SS-525-R-{teeth}",
-            "specs": {"teeth": teeth, "pitch": "525", "position": "rear"},
-            "param_overrides": {"drivetrain.rear_sprocket": teeth},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"chain_pitch": "525"},
-                "description": f"525-pitch rear sprocket {teeth}T"
-            },
-            "price_inr": 4200,
-            "availability": "in_stock",
-            "retailer": "MotoParts India",
-        })
+        parts.append(
+            {
+                "category": "sprocket",
+                "brand": "Sprocket Specialists",
+                "model_name": f"525 Rear Sprocket {teeth}T",
+                "part_number": f"SS-525-R-{teeth}",
+                "specs": {"teeth": teeth, "pitch": "525", "position": "rear"},
+                "param_overrides": {"drivetrain.rear_sprocket": teeth},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"chain_pitch": "525"},
+                    "description": f"525-pitch rear sprocket {teeth}T",
+                },
+                "price_inr": 4200,
+                "availability": "in_stock",
+                "retailer": "MotoParts India",
+            }
+        )
 
     # 530-pitch rears: 40T-50T (Hayabusa, ZX-14R, tourers)
     for teeth in [40, 42, 44, 45, 46, 48, 50]:
-        parts.append({
-            "category": "sprocket",
-            "brand": "JT Sprockets",
-            "model_name": f"530 Rear Sprocket {teeth}T",
-            "part_number": f"JT-530-R-{teeth}",
-            "specs": {"teeth": teeth, "pitch": "530", "position": "rear"},
-            "param_overrides": {"drivetrain.rear_sprocket": teeth},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"chain_pitch": "530"},
-                "description": f"530-pitch rear sprocket {teeth}T for litre bikes"
-            },
-            "price_inr": 5000 if teeth <= 42 else 5200,
-            "availability": "in_stock",
-            "retailer": "Grand Pitstop",
-        })
+        parts.append(
+            {
+                "category": "sprocket",
+                "brand": "JT Sprockets",
+                "model_name": f"530 Rear Sprocket {teeth}T",
+                "part_number": f"JT-530-R-{teeth}",
+                "specs": {"teeth": teeth, "pitch": "530", "position": "rear"},
+                "param_overrides": {"drivetrain.rear_sprocket": teeth},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"chain_pitch": "530"},
+                    "description": f"530-pitch rear sprocket {teeth}T for litre bikes",
+                },
+                "price_inr": 5000 if teeth <= 42 else 5200,
+                "availability": "in_stock",
+                "retailer": "Grand Pitstop",
+            }
+        )
 
     # ══════════════════════════════════════════════════════════════
     # CHAINS (15 target) — family-tier by chain_pitch
     # ══════════════════════════════════════════════════════════════
     chains = [
-        {"brand": "RK", "model": "GB520GXW Gold X-Ring 110L", "pn": "RK-520GXW-110", "pitch": "520", "links": 110, "type": "x-ring", "eff": 1.02, "price": 8500},
-        {"brand": "RK", "model": "GB520GXW Gold X-Ring 120L", "pn": "RK-520GXW-120", "pitch": "520", "links": 120, "type": "x-ring", "eff": 1.02, "price": 9000},
-        {"brand": "DID", "model": "VX3 Gold 520-120L O-Ring", "pn": "DID-520VX3-120", "pitch": "520", "links": 120, "type": "o-ring", "eff": 1.015, "price": 9800},
-        {"brand": "EK", "model": "MVXZ2 520-120L Heavy Duty", "pn": "EK-520MVXZ2-120", "pitch": "520", "links": 120, "type": "x-ring", "eff": 1.02, "price": 9200},
-        {"brand": "Regina", "model": "EL O-Ring 520-120L Gold", "pn": "REG-EL-520-120", "pitch": "520", "links": 120, "type": "o-ring", "eff": 1.015, "price": 10200},
-
-        {"brand": "RK", "model": "GB525GXW Gold X-Ring 114L", "pn": "RK-525GXW-114", "pitch": "525", "links": 114, "type": "x-ring", "eff": 1.02, "price": 9500},
-        {"brand": "DID", "model": "VX3 Gold 525-120L O-Ring", "pn": "DID-525VX3-120", "pitch": "525", "links": 120, "type": "o-ring", "eff": 1.015, "price": 10200},
-
-        {"brand": "RK", "model": "GB530GXW Gold X-Ring 110L", "pn": "RK-530GXW-110", "pitch": "530", "links": 110, "type": "x-ring", "eff": 1.02, "price": 10500},
-        {"brand": "RK", "model": "GB530GXW Gold X-Ring 120L", "pn": "RK-530GXW-120", "pitch": "530", "links": 120, "type": "x-ring", "eff": 1.02, "price": 11200},
-        {"brand": "DID", "model": "VX3 Gold 530-110L O-Ring", "pn": "DID-530VX3-110", "pitch": "530", "links": 110, "type": "o-ring", "eff": 1.015, "price": 11000},
-        {"brand": "EK", "model": "MVXZ2 530-120L Heavy Duty", "pn": "EK-530MVXZ2-120", "pitch": "530", "links": 120, "type": "x-ring", "eff": 1.02, "price": 11500},
-        {"brand": "Regina", "model": "EL O-Ring 530-118L Gold", "pn": "REG-EL-530-118", "pitch": "530", "links": 118, "type": "o-ring", "eff": 1.015, "price": 12000},
+        {
+            "brand": "RK",
+            "model": "GB520GXW Gold X-Ring 110L",
+            "pn": "RK-520GXW-110",
+            "pitch": "520",
+            "links": 110,
+            "type": "x-ring",
+            "eff": 1.02,
+            "price": 8500,
+        },
+        {
+            "brand": "RK",
+            "model": "GB520GXW Gold X-Ring 120L",
+            "pn": "RK-520GXW-120",
+            "pitch": "520",
+            "links": 120,
+            "type": "x-ring",
+            "eff": 1.02,
+            "price": 9000,
+        },
+        {
+            "brand": "DID",
+            "model": "VX3 Gold 520-120L O-Ring",
+            "pn": "DID-520VX3-120",
+            "pitch": "520",
+            "links": 120,
+            "type": "o-ring",
+            "eff": 1.015,
+            "price": 9800,
+        },
+        {
+            "brand": "EK",
+            "model": "MVXZ2 520-120L Heavy Duty",
+            "pn": "EK-520MVXZ2-120",
+            "pitch": "520",
+            "links": 120,
+            "type": "x-ring",
+            "eff": 1.02,
+            "price": 9200,
+        },
+        {
+            "brand": "Regina",
+            "model": "EL O-Ring 520-120L Gold",
+            "pn": "REG-EL-520-120",
+            "pitch": "520",
+            "links": 120,
+            "type": "o-ring",
+            "eff": 1.015,
+            "price": 10200,
+        },
+        {
+            "brand": "RK",
+            "model": "GB525GXW Gold X-Ring 114L",
+            "pn": "RK-525GXW-114",
+            "pitch": "525",
+            "links": 114,
+            "type": "x-ring",
+            "eff": 1.02,
+            "price": 9500,
+        },
+        {
+            "brand": "DID",
+            "model": "VX3 Gold 525-120L O-Ring",
+            "pn": "DID-525VX3-120",
+            "pitch": "525",
+            "links": 120,
+            "type": "o-ring",
+            "eff": 1.015,
+            "price": 10200,
+        },
+        {
+            "brand": "RK",
+            "model": "GB530GXW Gold X-Ring 110L",
+            "pn": "RK-530GXW-110",
+            "pitch": "530",
+            "links": 110,
+            "type": "x-ring",
+            "eff": 1.02,
+            "price": 10500,
+        },
+        {
+            "brand": "RK",
+            "model": "GB530GXW Gold X-Ring 120L",
+            "pn": "RK-530GXW-120",
+            "pitch": "530",
+            "links": 120,
+            "type": "x-ring",
+            "eff": 1.02,
+            "price": 11200,
+        },
+        {
+            "brand": "DID",
+            "model": "VX3 Gold 530-110L O-Ring",
+            "pn": "DID-530VX3-110",
+            "pitch": "530",
+            "links": 110,
+            "type": "o-ring",
+            "eff": 1.015,
+            "price": 11000,
+        },
+        {
+            "brand": "EK",
+            "model": "MVXZ2 530-120L Heavy Duty",
+            "pn": "EK-530MVXZ2-120",
+            "pitch": "530",
+            "links": 120,
+            "type": "x-ring",
+            "eff": 1.02,
+            "price": 11500,
+        },
+        {
+            "brand": "Regina",
+            "model": "EL O-Ring 530-118L Gold",
+            "pn": "REG-EL-530-118",
+            "pitch": "530",
+            "links": 118,
+            "type": "o-ring",
+            "eff": 1.015,
+            "price": 12000,
+        },
     ]
     for c in chains:
-        parts.append({
-            "category": "chain",
-            "brand": c["brand"],
-            "model_name": c["model"],
-            "part_number": c["pn"],
-            "specs": {"pitch": c["pitch"], "links": c["links"], "type": c["type"]},
-            "param_overrides": {"drivetrain.chain_links": c["links"]},
-            "param_multipliers": {"drivetrain.chain_efficiency": c["eff"]},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"chain_pitch": c["pitch"]},
-                "description": f"{c['pitch']}-pitch {c['type']} chain"
-            },
-            "price_inr": c["price"],
-            "availability": "in_stock",
-            "retailer": "Grand Pitstop",
-        })
+        parts.append(
+            {
+                "category": "chain",
+                "brand": c["brand"],
+                "model_name": c["model"],
+                "part_number": c["pn"],
+                "specs": {"pitch": c["pitch"], "links": c["links"], "type": c["type"]},
+                "param_overrides": {"drivetrain.chain_links": c["links"]},
+                "param_multipliers": {"drivetrain.chain_efficiency": c["eff"]},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"chain_pitch": c["pitch"]},
+                    "description": f"{c['pitch']}-pitch {c['type']} chain",
+                },
+                "price_inr": c["price"],
+                "availability": "in_stock",
+                "retailer": "Grand Pitstop",
+            }
+        )
 
     # ══════════════════════════════════════════════════════════════
     # ECU FLASHES (25 target) — exact-tier for 3 seeded bikes + family
     # ══════════════════════════════════════════════════════════════
     # Woolich exact-tier for seeded reference bikes (GSX-R K5, YZF-R1 4C8, Hayabusa Gen1)
     woolich_exact = [
-        {"model": "GSX-R 1000 K5 Stage 1 Flash", "pn": "WR-GSXR-K5-S1", "hp": 8.0, "tq": 5.0, "redline": 13500, "price": 18000},
-        {"model": "GSX-R 1000 K5 Stage 2 Flash", "pn": "WR-GSXR-K5-S2", "hp": 14.0, "tq": 9.0, "redline": 14000, "price": 25000},
-        {"model": "YZF-R1 4C8 Stage 1 Flash", "pn": "WR-YZFR1-4C8-S1", "hp": 7.0, "tq": 4.5, "redline": 13800, "price": 18000},
-        {"model": "YZF-R1 4C8 Stage 2 Flash", "pn": "WR-YZFR1-4C8-S2", "hp": 13.0, "tq": 8.0, "redline": 14200, "price": 24000},
-        {"model": "Hayabusa Gen1 Stage 1 Flash", "pn": "WR-BUSA-G1-S1", "hp": 10.0, "tq": 7.0, "redline": 11200, "price": 20000},
+        {
+            "model": "GSX-R 1000 K5 Stage 1 Flash",
+            "pn": "WR-GSXR-K5-S1",
+            "hp": 8.0,
+            "tq": 5.0,
+            "redline": 13500,
+            "price": 18000,
+        },
+        {
+            "model": "GSX-R 1000 K5 Stage 2 Flash",
+            "pn": "WR-GSXR-K5-S2",
+            "hp": 14.0,
+            "tq": 9.0,
+            "redline": 14000,
+            "price": 25000,
+        },
+        {
+            "model": "YZF-R1 4C8 Stage 1 Flash",
+            "pn": "WR-YZFR1-4C8-S1",
+            "hp": 7.0,
+            "tq": 4.5,
+            "redline": 13800,
+            "price": 18000,
+        },
+        {
+            "model": "YZF-R1 4C8 Stage 2 Flash",
+            "pn": "WR-YZFR1-4C8-S2",
+            "hp": 13.0,
+            "tq": 8.0,
+            "redline": 14200,
+            "price": 24000,
+        },
+        {
+            "model": "Hayabusa Gen1 Stage 1 Flash",
+            "pn": "WR-BUSA-G1-S1",
+            "hp": 10.0,
+            "tq": 7.0,
+            "redline": 11200,
+            "price": 20000,
+        },
     ]
     for e in woolich_exact:
-        parts.append({
-            "category": "ecu",
-            "brand": "Woolich Racing",
-            "model_name": e["model"],
-            "part_number": e["pn"],
-            "specs": {"type": "flash", "features": ["custom_fuel_map", "ignition_map", "rev_limiter", "two_step"]},
-            "param_deltas": {"engine.peak_power_hp": e["hp"], "engine.peak_torque_nm": e["tq"]},
-            "param_overrides": {"engine.redline_rpm": e["redline"], "staging.two_step": True, "staging.launch_rpm": 8500},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["Suzuki", "Yamaha"], "displacement_min_cc": 1000, "categories": ["sport", "supersport"]},
-                "description": "Woolich Stage 1/2 flash for 1000cc+ Japanese sportbikes"
-            },
-            "price_inr": e["price"],
-            "availability": "in_stock",
-            "retailer": "Woolich Racing India",
-        })
+        parts.append(
+            {
+                "category": "ecu",
+                "brand": "Woolich Racing",
+                "model_name": e["model"],
+                "part_number": e["pn"],
+                "specs": {
+                    "type": "flash",
+                    "features": [
+                        "custom_fuel_map",
+                        "ignition_map",
+                        "rev_limiter",
+                        "two_step",
+                    ],
+                },
+                "param_deltas": {
+                    "engine.peak_power_hp": e["hp"],
+                    "engine.peak_torque_nm": e["tq"],
+                },
+                "param_overrides": {
+                    "engine.redline_rpm": e["redline"],
+                    "staging.two_step": True,
+                    "staging.launch_rpm": 8500,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": ["Suzuki", "Yamaha"],
+                        "displacement_min_cc": 1000,
+                        "categories": ["sport", "supersport"],
+                    },
+                    "description": "Woolich Stage 1/2 flash for 1000cc+ Japanese sportbikes",
+                },
+                "price_inr": e["price"],
+                "availability": "in_stock",
+                "retailer": "Woolich Racing India",
+            }
+        )
 
     # PCV PCVI family-tier (most Japanese bikes)
     for stage in [1, 2]:
         hp_delta = 4.0 + (stage - 1) * 6.0
         price = 16000 + (stage - 1) * 8000
-        parts.append({
+        parts.append(
+            {
+                "category": "ecu",
+                "brand": "Dynojet",
+                "model_name": f"Power Commander PCVI Stage {stage} Universal",
+                "part_number": f"DJ-PCVI-S{stage}",
+                "specs": {
+                    "type": "piggyback",
+                    "stage": stage,
+                    "features": ["16x16_fuel_map", "quickshift_compatible"],
+                },
+                "param_deltas": {"engine.peak_power_hp": hp_delta},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"displacement_min_cc": 400},
+                    "description": f"Power Commander PCVI Stage {stage} — universal fuel map for 400cc+",
+                },
+                "price_inr": price,
+                "availability": "in_stock",
+                "retailer": "Dynojet India",
+            }
+        )
+
+    # Bazzaz ZFi family-tier (fuel + light traction control)
+    parts.append(
+        {
             "category": "ecu",
-            "brand": "Dynojet",
-            "model_name": f"Power Commander PCVI Stage {stage} Universal",
-            "part_number": f"DJ-PCVI-S{stage}",
-            "specs": {"type": "piggyback", "stage": stage, "features": ["16x16_fuel_map", "quickshift_compatible"]},
-            "param_deltas": {"engine.peak_power_hp": hp_delta},
+            "brand": "Bazzaz",
+            "model_name": "ZFi Fuel Controller Quickshift Unit",
+            "part_number": "BZ-ZFI-QS",
+            "specs": {
+                "type": "piggyback",
+                "features": ["16x16_fuel_map", "quickshift_compatible"],
+            },
+            "param_deltas": {"engine.peak_power_hp": 3.5},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 600},
+                "description": "Bazzaz ZFi fuel + quickshift for 600cc+ bikes",
+            },
+            "price_inr": 28000,
+            "availability": "in_stock",
+            "retailer": "Bazzaz India",
+        }
+    )
+
+    # GPR family-tier for Royal Enfield twins
+    parts.append(
+        {
+            "category": "ecu",
+            "brand": "GPR",
+            "model_name": "GPR Stabiliser EVO for RE 650 Twin",
+            "part_number": "GPR-STV-RE650",
+            "specs": {
+                "type": "stabilizer",
+                "features": ["engine_braking_control", "launch_assist"],
+            },
+            "param_overrides": {"staging.launch_rpm": 4000},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": ["Royal Enfield"],
+                    "engine_configs": ["I2"],
+                    "displacement_min_cc": 640,
+                    "displacement_max_cc": 660,
+                },
+                "description": "GPR Stabiliser for Royal Enfield 650cc twin platform",
+            },
+            "price_inr": 35000,
+            "availability": "order",
+            "retailer": "GPR India",
+            "delivery_days": 21,
+        }
+    )
+
+    # Race Dynamics for Indian market bikes
+    parts.append(
+        {
+            "category": "ecu",
+            "brand": "Race Dynamics",
+            "model_name": "RD ECU Flash Kit for Indian Bikes",
+            "part_number": "RD-ECU-FLASH",
+            "specs": {
+                "type": "flash",
+                "features": ["fuel_map", "ignition_timing", "rev_limiter"],
+            },
+            "param_deltas": {"engine.peak_power_hp": 5.0, "engine.peak_torque_nm": 3.0},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": [
+                        "Bajaj",
+                        "TVS",
+                        "Hero",
+                        "Yamaha India",
+                        "Honda India",
+                    ],
+                    "displacement_min_cc": 200,
+                    "displacement_max_cc": 450,
+                },
+                "description": "Race Dynamics ECU flash for Indian 200-450cc bikes",
+            },
+            "price_inr": 12000,
+            "availability": "in_stock",
+            "retailer": "Race Dynamics",
+        }
+    )
+
+    # Rapid Bike EVO universal family
+    parts.append(
+        {
+            "category": "ecu",
+            "brand": "Rapid Bike",
+            "model_name": "EVO Fuel Injection Controller",
+            "part_number": "RB-EVO-UNIV",
+            "specs": {
+                "type": "piggyback",
+                "features": ["fuel_control", "launch_control"],
+            },
+            "param_deltas": {"engine.peak_power_hp": 2.0},
+            "param_overrides": {"staging.two_step": True},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 300},
+                "description": "Rapid Bike EVO fuel controller for 300cc+ motorcycles",
+            },
+            "price_inr": 18000,
+            "availability": "in_stock",
+            "retailer": "Rapid Bike India",
+        }
+    )
+
+    # HealTech iFlash fuel controller
+    parts.append(
+        {
+            "category": "ecu",
+            "brand": "HealTech",
+            "model_name": "iFlash Fuel Controller Autotune",
+            "part_number": "HT-IFLASH-A",
+            "specs": {"type": "fuel_controller", "features": ["autotune", "4_maps"]},
+            "param_deltas": {"engine.peak_power_hp": 2.5},
             "fitment_rules": {
                 "tier": "family",
                 "match": {"displacement_min_cc": 400},
-                "description": f"Power Commander PCVI Stage {stage} — universal fuel map for 400cc+"
+                "description": "HealTech iFlash fuel controller with autotune",
             },
-            "price_inr": price,
+            "price_inr": 22000,
             "availability": "in_stock",
-            "retailer": "Dynojet India",
-        })
-
-    # Bazzaz ZFi family-tier (fuel + light traction control)
-    parts.append({
-        "category": "ecu",
-        "brand": "Bazzaz",
-        "model_name": "ZFi Fuel Controller Quickshift Unit",
-        "part_number": "BZ-ZFI-QS",
-        "specs": {"type": "piggyback", "features": ["16x16_fuel_map", "quickshift_compatible"]},
-        "param_deltas": {"engine.peak_power_hp": 3.5},
-        "fitment_rules": {
-            "tier": "family",
-            "match": {"displacement_min_cc": 600},
-            "description": "Bazzaz ZFi fuel + quickshift for 600cc+ bikes"
-        },
-        "price_inr": 28000,
-        "availability": "in_stock",
-        "retailer": "Bazzaz India",
-    })
-
-    # GPR family-tier for Royal Enfield twins
-    parts.append({
-        "category": "ecu",
-        "brand": "GPR",
-        "model_name": "GPR Stabiliser EVO for RE 650 Twin",
-        "part_number": "GPR-STV-RE650",
-        "specs": {"type": "stabilizer", "features": ["engine_braking_control", "launch_assist"]},
-        "param_overrides": {"staging.launch_rpm": 4000},
-        "fitment_rules": {
-            "tier": "family",
-            "match": {"manufacturers": ["Royal Enfield"], "engine_configs": ["I2"], "displacement_min_cc": 640, "displacement_max_cc": 660},
-            "description": "GPR Stabiliser for Royal Enfield 650cc twin platform"
-        },
-        "price_inr": 35000,
-        "availability": "order",
-        "retailer": "GPR India",
-        "delivery_days": 21,
-    })
-
-    # Race Dynamics for Indian market bikes
-    parts.append({
-        "category": "ecu",
-        "brand": "Race Dynamics",
-        "model_name": "RD ECU Flash Kit for Indian Bikes",
-        "part_number": "RD-ECU-FLASH",
-        "specs": {"type": "flash", "features": ["fuel_map", "ignition_timing", "rev_limiter"]},
-        "param_deltas": {"engine.peak_power_hp": 5.0, "engine.peak_torque_nm": 3.0},
-        "fitment_rules": {
-            "tier": "family",
-            "match": {"manufacturers": ["Bajaj", "TVS", "Hero", "Yamaha India", "Honda India"], "displacement_min_cc": 200, "displacement_max_cc": 450},
-            "description": "Race Dynamics ECU flash for Indian 200-450cc bikes"
-        },
-        "price_inr": 12000,
-        "availability": "in_stock",
-        "retailer": "Race Dynamics",
-    })
-
-    # Rapid Bike EVO universal family
-    parts.append({
-        "category": "ecu",
-        "brand": "Rapid Bike",
-        "model_name": "EVO Fuel Injection Controller",
-        "part_number": "RB-EVO-UNIV",
-        "specs": {"type": "piggyback", "features": ["fuel_control", "launch_control"]},
-        "param_deltas": {"engine.peak_power_hp": 2.0},
-        "param_overrides": {"staging.two_step": True},
-        "fitment_rules": {
-            "tier": "family",
-            "match": {"displacement_min_cc": 300},
-            "description": "Rapid Bike EVO fuel controller for 300cc+ motorcycles"
-        },
-        "price_inr": 18000,
-        "availability": "in_stock",
-        "retailer": "Rapid Bike India",
-    })
-
-    # HealTech iFlash fuel controller
-    parts.append({
-        "category": "ecu",
-        "brand": "HealTech",
-        "model_name": "iFlash Fuel Controller Autotune",
-        "part_number": "HT-IFLASH-A",
-        "specs": {"type": "fuel_controller", "features": ["autotune", "4_maps"]},
-        "param_deltas": {"engine.peak_power_hp": 2.5},
-        "fitment_rules": {
-            "tier": "family",
-            "match": {"displacement_min_cc": 400},
-            "description": "HealTech iFlash fuel controller with autotune"
-        },
-        "price_inr": 22000,
-        "availability": "in_stock",
-        "retailer": "HealTech India",
-    })
+            "retailer": "HealTech India",
+        }
+    )
 
     # ══════════════════════════════════════════════════════════════
     # EXHAUST SYSTEMS (45 target) — exact for drag bikes, family others
     # ══════════════════════════════════════════════════════════════
     exhausts = [
         # Exact-tier Hayabusa specific (family: Suzuki I4 1299-1341cc sport)
-        {"brand": "Akrapovic", "model": "Racing Full System Hayabusa", "pn": "AK-HAYA-FS-TI", "type": "full", "mat": "titanium", "wt": 4.2, "hp": 12.0, "tq": 8.0, "price": 185000, "avail": "order", "days": 30},
-        {"brand": "Yoshimura", "model": "R-77 Hayabusa Full Titanium", "pn": "YO-HAYA-R77-TI", "type": "full", "mat": "titanium", "wt": 3.8, "hp": 10.0, "tq": 6.5, "price": 195000, "avail": "order", "days": 35},
-        {"brand": "Arrow", "model": "Hayabusa Pro-Race Full System", "pn": "AR-HAYA-PR-TI", "type": "full", "mat": "titanium", "wt": 4.1, "hp": 11.0, "tq": 7.5, "price": 175000, "avail": "order", "days": 28},
-
+        {
+            "brand": "Akrapovic",
+            "model": "Racing Full System Hayabusa",
+            "pn": "AK-HAYA-FS-TI",
+            "type": "full",
+            "mat": "titanium",
+            "wt": 4.2,
+            "hp": 12.0,
+            "tq": 8.0,
+            "price": 185000,
+            "avail": "order",
+            "days": 30,
+        },
+        {
+            "brand": "Yoshimura",
+            "model": "R-77 Hayabusa Full Titanium",
+            "pn": "YO-HAYA-R77-TI",
+            "type": "full",
+            "mat": "titanium",
+            "wt": 3.8,
+            "hp": 10.0,
+            "tq": 6.5,
+            "price": 195000,
+            "avail": "order",
+            "days": 35,
+        },
+        {
+            "brand": "Arrow",
+            "model": "Hayabusa Pro-Race Full System",
+            "pn": "AR-HAYA-PR-TI",
+            "type": "full",
+            "mat": "titanium",
+            "wt": 4.1,
+            "hp": 11.0,
+            "tq": 7.5,
+            "price": 175000,
+            "avail": "order",
+            "days": 28,
+        },
         # Family-tier 1000cc+ I4 sport (Hayabusa, GSX-R, R1, CBR, etc.)
-        {"brand": "Yoshimura", "model": "R-77 1000cc Full Stainless", "pn": "YO-R77-1K-SS", "type": "full", "mat": "stainless", "wt": 5.8, "hp": 8.0, "tq": 5.0, "price": 95000, "avail": "order", "days": 21},
-        {"brand": "M4", "model": "GP-M4 Full Titanium 1000cc", "pn": "M4-GP-1K-TI", "type": "full", "mat": "titanium", "wt": 4.5, "hp": 9.5, "tq": 6.0, "price": 155000, "avail": "import_only", "days": 40},
-        {"brand": "Two Brothers Racing", "model": "M-2 Full System 1000cc", "pn": "TBR-M2-1K-FS", "type": "full", "mat": "aluminum", "wt": 5.2, "hp": 7.0, "tq": 4.5, "price": 78000, "avail": "order", "days": 18},
-        {"brand": "SC-Project", "model": "CR-M Full System 1000cc", "pn": "SCP-CRM-1K", "type": "full", "mat": "carbon", "wt": 3.9, "hp": 10.0, "tq": 6.5, "price": 215000, "avail": "import_only", "days": 45},
-
+        {
+            "brand": "Yoshimura",
+            "model": "R-77 1000cc Full Stainless",
+            "pn": "YO-R77-1K-SS",
+            "type": "full",
+            "mat": "stainless",
+            "wt": 5.8,
+            "hp": 8.0,
+            "tq": 5.0,
+            "price": 95000,
+            "avail": "order",
+            "days": 21,
+        },
+        {
+            "brand": "M4",
+            "model": "GP-M4 Full Titanium 1000cc",
+            "pn": "M4-GP-1K-TI",
+            "type": "full",
+            "mat": "titanium",
+            "wt": 4.5,
+            "hp": 9.5,
+            "tq": 6.0,
+            "price": 155000,
+            "avail": "import_only",
+            "days": 40,
+        },
+        {
+            "brand": "Two Brothers Racing",
+            "model": "M-2 Full System 1000cc",
+            "pn": "TBR-M2-1K-FS",
+            "type": "full",
+            "mat": "aluminum",
+            "wt": 5.2,
+            "hp": 7.0,
+            "tq": 4.5,
+            "price": 78000,
+            "avail": "order",
+            "days": 18,
+        },
+        {
+            "brand": "SC-Project",
+            "model": "CR-M Full System 1000cc",
+            "pn": "SCP-CRM-1K",
+            "type": "full",
+            "mat": "carbon",
+            "wt": 3.9,
+            "hp": 10.0,
+            "tq": 6.5,
+            "price": 215000,
+            "avail": "import_only",
+            "days": 45,
+        },
         # Family-tier 600cc sport (GSX-R 600, CBR 600, YZF-R6, etc.)
-        {"brand": "Yoshimura", "model": "R-77 600cc Full Stainless", "pn": "YO-R77-600-SS", "type": "full", "mat": "stainless", "wt": 5.2, "hp": 6.0, "tq": 3.5, "price": 72000, "avail": "order", "days": 20},
-        {"brand": "Akrapovic", "model": "Racing 600cc Full Titanium", "pn": "AK-600-FS-TI", "type": "full", "mat": "titanium", "wt": 3.8, "hp": 7.5, "tq": 4.5, "price": 145000, "avail": "order", "days": 32},
-
+        {
+            "brand": "Yoshimura",
+            "model": "R-77 600cc Full Stainless",
+            "pn": "YO-R77-600-SS",
+            "type": "full",
+            "mat": "stainless",
+            "wt": 5.2,
+            "hp": 6.0,
+            "tq": 3.5,
+            "price": 72000,
+            "avail": "order",
+            "days": 20,
+        },
+        {
+            "brand": "Akrapovic",
+            "model": "Racing 600cc Full Titanium",
+            "pn": "AK-600-FS-TI",
+            "type": "full",
+            "mat": "titanium",
+            "wt": 3.8,
+            "hp": 7.5,
+            "tq": 4.5,
+            "price": 145000,
+            "avail": "order",
+            "days": 32,
+        },
         # Slip-ons (600-1000cc sport family-tier)
-        {"brand": "Akrapovic", "model": "Slip-On Sport Titanium", "pn": "AK-SLIP-TI-S", "type": "slip_on", "mat": "titanium", "wt": 1.8, "hp": 3.5, "tq": 2.0, "price": 65000, "avail": "in_stock", "days": 0},
-        {"brand": "Two Brothers Racing", "model": "M-1 Slip-On Stainless", "pn": "TBR-M1-SS", "type": "slip_on", "mat": "stainless", "wt": 2.5, "hp": 2.5, "tq": 1.5, "price": 35000, "avail": "in_stock", "days": 0},
-        {"brand": "Leo Vince", "model": "LV-10 Slip-On Titanium", "pn": "LV-10-TI-S", "type": "slip_on", "mat": "titanium", "wt": 1.6, "hp": 3.0, "tq": 1.8, "price": 48000, "avail": "order", "days": 14},
-
+        {
+            "brand": "Akrapovic",
+            "model": "Slip-On Sport Titanium",
+            "pn": "AK-SLIP-TI-S",
+            "type": "slip_on",
+            "mat": "titanium",
+            "wt": 1.8,
+            "hp": 3.5,
+            "tq": 2.0,
+            "price": 65000,
+            "avail": "in_stock",
+            "days": 0,
+        },
+        {
+            "brand": "Two Brothers Racing",
+            "model": "M-1 Slip-On Stainless",
+            "pn": "TBR-M1-SS",
+            "type": "slip_on",
+            "mat": "stainless",
+            "wt": 2.5,
+            "hp": 2.5,
+            "tq": 1.5,
+            "price": 35000,
+            "avail": "in_stock",
+            "days": 0,
+        },
+        {
+            "brand": "Leo Vince",
+            "model": "LV-10 Slip-On Titanium",
+            "pn": "LV-10-TI-S",
+            "type": "slip_on",
+            "mat": "titanium",
+            "wt": 1.6,
+            "hp": 3.0,
+            "tq": 1.8,
+            "price": 48000,
+            "avail": "order",
+            "days": 14,
+        },
         # Family-tier cruiser exhausts (RE 650, Harley, etc.)
-        {"brand": "S&S", "model": "Grand National Cruiser Full System", "pn": "SS-GN-CRUISE", "type": "full", "mat": "chrome_steel", "wt": 6.5, "hp": 4.0, "tq": 3.0, "price": 85000, "avail": "order", "days": 28},
-        {"brand": "Vance Hines", "model": "Hi-Output 2-into-1 Cruiser", "pn": "VH-HO-2IN1", "type": "full", "mat": "steel", "wt": 7.2, "hp": 3.5, "tq": 2.5, "price": 65000, "avail": "in_stock", "days": 0},
-
+        {
+            "brand": "S&S",
+            "model": "Grand National Cruiser Full System",
+            "pn": "SS-GN-CRUISE",
+            "type": "full",
+            "mat": "chrome_steel",
+            "wt": 6.5,
+            "hp": 4.0,
+            "tq": 3.0,
+            "price": 85000,
+            "avail": "order",
+            "days": 28,
+        },
+        {
+            "brand": "Vance Hines",
+            "model": "Hi-Output 2-into-1 Cruiser",
+            "pn": "VH-HO-2IN1",
+            "type": "full",
+            "mat": "steel",
+            "wt": 7.2,
+            "hp": 3.5,
+            "tq": 2.5,
+            "price": 65000,
+            "avail": "in_stock",
+            "days": 0,
+        },
         # Family-tier small-cc (200-400cc Indian/SE Asia family)
-        {"brand": "Austin", "model": "Racing Slip-On 300cc+", "pn": "AU-RACE-300", "type": "slip_on", "mat": "stainless", "wt": 1.2, "hp": 1.8, "tq": 1.2, "price": 18000, "avail": "in_stock", "days": 0},
-        {"brand": "FMF", "model": "Powercore IV Silencer Small-cc", "pn": "FMF-PC4-SM", "type": "slip_on", "mat": "aluminum", "wt": 0.9, "hp": 1.5, "tq": 1.0, "price": 12000, "avail": "in_stock", "days": 0},
-        {"brand": "Arrow", "model": "Indian 400cc Street Full System", "pn": "AR-IND400", "type": "full", "mat": "stainless", "wt": 3.2, "hp": 2.5, "tq": 1.8, "price": 28000, "avail": "order", "days": 15},
+        {
+            "brand": "Austin",
+            "model": "Racing Slip-On 300cc+",
+            "pn": "AU-RACE-300",
+            "type": "slip_on",
+            "mat": "stainless",
+            "wt": 1.2,
+            "hp": 1.8,
+            "tq": 1.2,
+            "price": 18000,
+            "avail": "in_stock",
+            "days": 0,
+        },
+        {
+            "brand": "FMF",
+            "model": "Powercore IV Silencer Small-cc",
+            "pn": "FMF-PC4-SM",
+            "type": "slip_on",
+            "mat": "aluminum",
+            "wt": 0.9,
+            "hp": 1.5,
+            "tq": 1.0,
+            "price": 12000,
+            "avail": "in_stock",
+            "days": 0,
+        },
+        {
+            "brand": "Arrow",
+            "model": "Indian 400cc Street Full System",
+            "pn": "AR-IND400",
+            "type": "full",
+            "mat": "stainless",
+            "wt": 3.2,
+            "hp": 2.5,
+            "tq": 1.8,
+            "price": 28000,
+            "avail": "order",
+            "days": 15,
+        },
     ]
     for ex in exhausts:
         # Determine fitment tier based on brand/model.
@@ -5499,20 +5921,41 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
         if "Hayabusa" in ex["model"]:
             fitment_rules = {
                 "tier": "family",
-                "match": {"manufacturers": ["Suzuki"], "engine_configs": ["I4"], "displacement_min_cc": 1299, "displacement_max_cc": 1341, "categories": ["sport"]},
-                "description": "Fits Suzuki Hayabusa (Gen1/Gen2/Gen3) — 1299-1341cc I4 hyperbike"
+                "match": {
+                    "manufacturers": ["Suzuki"],
+                    "engine_configs": ["I4"],
+                    "displacement_min_cc": 1299,
+                    "displacement_max_cc": 1341,
+                    "categories": ["sport"],
+                },
+                "description": "Fits Suzuki Hayabusa (Gen1/Gen2/Gen3) — 1299-1341cc I4 hyperbike",
             }
-        elif "1000cc" in ex["model"] and ex["brand"] in ["Yoshimura", "M4", "Two Brothers Racing", "SC-Project"]:
+        elif "1000cc" in ex["model"] and ex["brand"] in [
+            "Yoshimura",
+            "M4",
+            "Two Brothers Racing",
+            "SC-Project",
+        ]:
             fitment_rules = {
                 "tier": "family",
-                "match": {"engine_configs": ["I4"], "displacement_min_cc": 990, "displacement_max_cc": 1050, "categories": ["sport", "supersport"]},
-                "description": "Fits inline-4 1000cc sportbikes (R1, GSX-R, CBR1000RR, etc.)"
+                "match": {
+                    "engine_configs": ["I4"],
+                    "displacement_min_cc": 990,
+                    "displacement_max_cc": 1050,
+                    "categories": ["sport", "supersport"],
+                },
+                "description": "Fits inline-4 1000cc sportbikes (R1, GSX-R, CBR1000RR, etc.)",
             }
         elif "600cc" in ex["model"]:
             fitment_rules = {
                 "tier": "family",
-                "match": {"engine_configs": ["I4"], "displacement_min_cc": 550, "displacement_max_cc": 750, "categories": ["sport", "supersport"]},
-                "description": "Fits 600-750cc inline-4 sportbikes"
+                "match": {
+                    "engine_configs": ["I4"],
+                    "displacement_min_cc": 550,
+                    "displacement_max_cc": 750,
+                    "categories": ["sport", "supersport"],
+                },
+                "description": "Fits 600-750cc inline-4 sportbikes",
             }
         elif "Cruise" in ex["model"] or "cruiser" in ex["type"].lower():
             # Tight cruiser rule: large V-twin cruisers only (Harley/Indian);
@@ -5524,9 +5967,13 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                     "categories": ["cruiser"],
                     "displacement_min_cc": 800,
                 },
-                "description": "Fits large V-twin cruisers (Harley-Davidson, Indian Motorcycle, 800cc+)"
+                "description": "Fits large V-twin cruisers (Harley-Davidson, Indian Motorcycle, 800cc+)",
             }
-        elif "300cc" in ex["model"] or "Small-cc" in ex["model"] or "Indian" in ex["model"]:
+        elif (
+            "300cc" in ex["model"]
+            or "Small-cc" in ex["model"]
+            or "Indian" in ex["model"]
+        ):
             # Small-cc Indian-market / SE Asia underbone range — restrict to
             # single-cylinder engines so we don't catch RE 650 parallel twins.
             fitment_rules = {
@@ -5536,7 +5983,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                     "displacement_min_cc": 150,
                     "displacement_max_cc": 450,
                 },
-                "description": "Small-cc / Indian market slip-on for 150-450cc single-cylinder bikes"
+                "description": "Small-cc / Indian market slip-on for 150-450cc single-cylinder bikes",
             }
         else:
             # Generic slip-on — scope to I4 sport bikes (what these adapters
@@ -5549,23 +5996,34 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                     "displacement_max_cc": 1050,
                     "categories": ["sport", "supersport", "naked"],
                 },
-                "description": "Generic sport slip-on for 600-1050cc inline-4 sport/naked bikes"
+                "description": "Generic sport slip-on for 600-1050cc inline-4 sport/naked bikes",
             }
 
-        parts.append({
-            "category": "exhaust",
-            "brand": ex["brand"],
-            "model_name": ex["model"],
-            "part_number": ex["pn"],
-            "specs": {"type": ex["type"], "material": ex["mat"], "weight_kg": ex["wt"]},
-            "param_deltas": {"engine.peak_power_hp": ex["hp"], "engine.peak_torque_nm": ex["tq"]},
-            "param_multipliers": {"chassis.dry_mass_kg": 1.0 - (ex["wt"] / (ex["wt"] + 5))},  # Approximate mass reduction
-            "fitment_rules": fitment_rules,
-            "price_inr": ex["price"],
-            "availability": ex["avail"],
-            "retailer": "Superbike India",
-            "delivery_days": ex["days"] if ex["days"] else None,
-        })
+        parts.append(
+            {
+                "category": "exhaust",
+                "brand": ex["brand"],
+                "model_name": ex["model"],
+                "part_number": ex["pn"],
+                "specs": {
+                    "type": ex["type"],
+                    "material": ex["mat"],
+                    "weight_kg": ex["wt"],
+                },
+                "param_deltas": {
+                    "engine.peak_power_hp": ex["hp"],
+                    "engine.peak_torque_nm": ex["tq"],
+                },
+                "param_multipliers": {
+                    "chassis.dry_mass_kg": 1.0 - (ex["wt"] / (ex["wt"] + 5))
+                },  # Approximate mass reduction
+                "fitment_rules": fitment_rules,
+                "price_inr": ex["price"],
+                "availability": ex["avail"],
+                "retailer": "Superbike India",
+                "delivery_days": ex["days"] if ex["days"] else None,
+            }
+        )
 
     # ══════════════════════════════════════════════════════════════
     # CLUTCH KITS (15 target) — family-tier for engine families
@@ -5581,8 +6039,12 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_overrides": {"clutch.slipper_ratio": 0.40, "clutch.mu_static": 0.48},
             "fitment_rules": {
                 "tier": "family",
-                "match": {"engine_configs": ["I4"], "displacement_min_cc": 600, "displacement_max_cc": 1100},
-                "description": "STM slipper clutch for 600-1000cc inline-4 bikes"
+                "match": {
+                    "engine_configs": ["I4"],
+                    "displacement_min_cc": 600,
+                    "displacement_max_cc": 1100,
+                },
+                "description": "STM slipper clutch for 600-1000cc inline-4 bikes",
             },
             "price_inr": 42000,
             "availability": "in_stock",
@@ -5599,7 +6061,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {"engine_configs": ["I4"], "displacement_min_cc": 1000},
-                "description": "Hinson billet clutch cover for 1000cc+ bikes"
+                "description": "Hinson billet clutch cover for 1000cc+ bikes",
             },
             "price_inr": 48000,
             "availability": "import_only",
@@ -5616,8 +6078,12 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_overrides": {"clutch.slipper_ratio": 0.25},
             "fitment_rules": {
                 "tier": "family",
-                "match": {"engine_configs": ["I4", "V4"], "displacement_min_cc": 1000, "categories": ["sport", "supersport"]},
-                "description": "Yoyodyne drag slipper for litre-class sportbikes"
+                "match": {
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 1000,
+                    "categories": ["sport", "supersport"],
+                },
+                "description": "Yoyodyne drag slipper for litre-class sportbikes",
             },
             "price_inr": 65000,
             "availability": "import_only",
@@ -5634,8 +6100,13 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_overrides": {"clutch.slipper_ratio": 0.28},
             "fitment_rules": {
                 "tier": "family",
-                "match": {"engine_configs": ["I4", "V4"], "displacement_min_cc": 990, "displacement_max_cc": 1200, "categories": ["sport", "supersport"]},
-                "description": "Suter Racing slipper for 1000cc+ drag prep"
+                "match": {
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 990,
+                    "displacement_max_cc": 1200,
+                    "categories": ["sport", "supersport"],
+                },
+                "description": "Suter Racing slipper for 1000cc+ drag prep",
             },
             "price_inr": 72000,
             "availability": "import_only",
@@ -5652,8 +6123,13 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_overrides": {"clutch.plate_count": 10, "clutch.mu_static": 0.52},
             "fitment_rules": {
                 "tier": "family",
-                "match": {"manufacturers": ["Royal Enfield"], "engine_configs": ["I2"], "displacement_min_cc": 640, "displacement_max_cc": 660},
-                "description": "FCC Twin Disc for Royal Enfield 650 twin platform"
+                "match": {
+                    "manufacturers": ["Royal Enfield"],
+                    "engine_configs": ["I2"],
+                    "displacement_min_cc": 640,
+                    "displacement_max_cc": 660,
+                },
+                "description": "FCC Twin Disc for Royal Enfield 650 twin platform",
             },
             "price_inr": 55000,
             "availability": "order",
@@ -5670,8 +6146,11 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_overrides": {"clutch.mu_static": 0.45},
             "fitment_rules": {
                 "tier": "family",
-                "match": {"categories": ["sport", "supersport"], "displacement_min_cc": 400},
-                "description": "Barnett Kevlar clutch plates for sportbikes"
+                "match": {
+                    "categories": ["sport", "supersport"],
+                    "displacement_min_cc": 400,
+                },
+                "description": "Barnett Kevlar clutch plates for sportbikes",
             },
             "price_inr": 12000,
             "availability": "in_stock",
@@ -5688,7 +6167,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {"displacement_min_cc": 300},
-                "description": "EBC Carbon clutch for 300cc+ bikes"
+                "description": "EBC Carbon clutch for 300cc+ bikes",
             },
             "price_inr": 18000,
             "availability": "order",
@@ -5707,8 +6186,15 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "model_name": "Super Lite Quickshifter",
             "part_number": "HM-QS-SLT",
             "specs": {"type": "push", "sensor": "strain_gauge"},
-            "param_overrides": {"drivetrain.quickshifter": True, "drivetrain.total_shift_time_ms": 60.0},
-            "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 400}, "description": "HM Quickshifter for 400cc+ bikes"},
+            "param_overrides": {
+                "drivetrain.quickshifter": True,
+                "drivetrain.total_shift_time_ms": 60.0,
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 400},
+                "description": "HM Quickshifter for 400cc+ bikes",
+            },
             "price_inr": 22000,
             "availability": "in_stock",
             "retailer": "HM India",
@@ -5719,8 +6205,15 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "model_name": "QS Pro III Bidirectional",
             "part_number": "TL-QS3-BD",
             "specs": {"type": "bidirectional", "sensor": "hall_effect"},
-            "param_overrides": {"drivetrain.quickshifter": True, "drivetrain.total_shift_time_ms": 50.0},
-            "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 500}, "description": "Translogic bidirectional quickshifter for 500cc+ bikes"},
+            "param_overrides": {
+                "drivetrain.quickshifter": True,
+                "drivetrain.total_shift_time_ms": 50.0,
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 500},
+                "description": "Translogic bidirectional quickshifter for 500cc+ bikes",
+            },
             "price_inr": 38000,
             "availability": "order",
             "retailer": "Translogic India",
@@ -5732,8 +6225,15 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "model_name": "Power Commander Quickshifter Module",
             "part_number": "DJ-PCQS",
             "specs": {"type": "push", "sensor": "pressure"},
-            "param_overrides": {"drivetrain.quickshifter": True, "drivetrain.total_shift_time_ms": 55.0},
-            "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 600}, "description": "Dynojet quickshifter for 600cc+ bikes"},
+            "param_overrides": {
+                "drivetrain.quickshifter": True,
+                "drivetrain.total_shift_time_ms": 55.0,
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 600},
+                "description": "Dynojet quickshifter for 600cc+ bikes",
+            },
             "price_inr": 28000,
             "availability": "in_stock",
             "retailer": "Dynojet India",
@@ -5752,7 +6252,11 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "part_number": "SH-LFX-SPORT",
             "specs": {"technology": "lithium", "weight_kg": 0.95},
             "param_deltas": {"chassis.dry_mass_kg": -2.8},
-            "fitment_rules": {"tier": "category", "match": {"categories": ["sport", "supersport", "naked"]}, "description": "Shorai Li-ion battery for sportbikes"},
+            "fitment_rules": {
+                "tier": "category",
+                "match": {"categories": ["sport", "supersport", "naked"]},
+                "description": "Shorai Li-ion battery for sportbikes",
+            },
             "price_inr": 12000,
             "availability": "in_stock",
             "retailer": "MotoParts India",
@@ -5762,9 +6266,19 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "brand": "Antigravity",
             "model_name": "ATX30-HD Restart Lithium",
             "part_number": "AG-ATX30",
-            "specs": {"technology": "lithium", "restart_capable": True, "weight_kg": 1.6},
+            "specs": {
+                "technology": "lithium",
+                "restart_capable": True,
+                "weight_kg": 1.6,
+            },
             "param_deltas": {"chassis.dry_mass_kg": -2.2},
-            "fitment_rules": {"tier": "category", "match": {"categories": ["sport", "supersport", "adventure", "touring"]}, "description": "Antigravity restart-capable Li-ion battery"},
+            "fitment_rules": {
+                "tier": "category",
+                "match": {
+                    "categories": ["sport", "supersport", "adventure", "touring"]
+                },
+                "description": "Antigravity restart-capable Li-ion battery",
+            },
             "price_inr": 18000,
             "availability": "order",
             "retailer": "Antigravity India",
@@ -5777,7 +6291,11 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "part_number": "SSB-ULTRA",
             "specs": {"technology": "lithium", "weight_kg": 1.1},
             "param_deltas": {"chassis.dry_mass_kg": -2.5},
-            "fitment_rules": {"tier": "category", "match": {"displacement_min_cc": 300}, "description": "SSB Ultra Li-ion for all 300cc+ bikes"},
+            "fitment_rules": {
+                "tier": "category",
+                "match": {"displacement_min_cc": 300},
+                "description": "SSB Ultra Li-ion for all 300cc+ bikes",
+            },
             "price_inr": 14000,
             "availability": "in_stock",
             "retailer": "SSB India",
@@ -5789,7 +6307,11 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "part_number": "AM-LIION-HI",
             "specs": {"technology": "lithium", "weight_kg": 1.2},
             "param_deltas": {"chassis.dry_mass_kg": -2.3},
-            "fitment_rules": {"tier": "category", "match": {"categories": ["cruiser", "touring", "adventure"]}, "description": "Amaron Li-ion for cruisers & tourers"},
+            "fitment_rules": {
+                "tier": "category",
+                "match": {"categories": ["cruiser", "touring", "adventure"]},
+                "description": "Amaron Li-ion for cruisers & tourers",
+            },
             "price_inr": 10000,
             "availability": "in_stock",
             "retailer": "Amaron India",
@@ -5800,21 +6322,156 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
     # AIR FILTERS (20 target) — family-tier by category
     # ══════════════════════════════════════════════════════════════
     parts += [
-        {"category": "air_filter", "brand": "K&N", "model_name": "K&N Drop-In Air Filter", "part_number": "KN-DROP", "specs": {"type": "drop_in", "material": "cotton"}, "param_deltas": {"engine.peak_power_hp": 1.0}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 300}, "description": "K&N drop-in air filter for all motorcycles"}, "price_inr": 6500, "availability": "in_stock", "retailer": "K&N India"},
-        {"category": "air_filter", "brand": "BMC", "model_name": "BMC Race Air Filter", "part_number": "BMC-RACE", "specs": {"type": "race_kit", "material": "cotton"}, "param_deltas": {"engine.peak_power_hp": 2.2, "engine.peak_torque_nm": 1.2}, "fitment_rules": {"tier": "family", "match": {"categories": ["sport", "supersport"]}, "description": "BMC race-spec air filter for sportbikes"}, "price_inr": 9500, "availability": "in_stock", "retailer": "BMC India"},
-        {"category": "air_filter", "brand": "DNA", "model_name": "DNA Stage 2 Filter", "part_number": "DNA-S2", "specs": {"type": "drop_in", "material": "multi_layer"}, "param_deltas": {"engine.peak_power_hp": 1.5}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 400}, "description": "DNA Stage 2 filter for 400cc+ bikes"}, "price_inr": 5800, "availability": "in_stock", "retailer": "DNA India"},
-        {"category": "air_filter", "brand": "Sprint", "model_name": "Sprint Filter P08 Universal", "part_number": "SPR-P08", "specs": {"type": "drop_in", "material": "cotton_silk"}, "param_deltas": {"engine.peak_power_hp": 0.8}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 300}, "description": "Sprint Filter universal for 300cc+ bikes"}, "price_inr": 4200, "availability": "in_stock", "retailer": "MotoParts India"},
-        {"category": "air_filter", "brand": "K&N", "model_name": "K&N Cruiser Air Filter", "part_number": "KN-CRUISE", "specs": {"type": "drop_in", "material": "cotton"}, "param_deltas": {"engine.peak_power_hp": 0.5}, "fitment_rules": {"tier": "family", "match": {"categories": ["cruiser"]}, "description": "K&N air filter for cruisers"}, "price_inr": 7200, "availability": "in_stock", "retailer": "K&N India"},
+        {
+            "category": "air_filter",
+            "brand": "K&N",
+            "model_name": "K&N Drop-In Air Filter",
+            "part_number": "KN-DROP",
+            "specs": {"type": "drop_in", "material": "cotton"},
+            "param_deltas": {"engine.peak_power_hp": 1.0},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 300},
+                "description": "K&N drop-in air filter for all motorcycles",
+            },
+            "price_inr": 6500,
+            "availability": "in_stock",
+            "retailer": "K&N India",
+        },
+        {
+            "category": "air_filter",
+            "brand": "BMC",
+            "model_name": "BMC Race Air Filter",
+            "part_number": "BMC-RACE",
+            "specs": {"type": "race_kit", "material": "cotton"},
+            "param_deltas": {"engine.peak_power_hp": 2.2, "engine.peak_torque_nm": 1.2},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"categories": ["sport", "supersport"]},
+                "description": "BMC race-spec air filter for sportbikes",
+            },
+            "price_inr": 9500,
+            "availability": "in_stock",
+            "retailer": "BMC India",
+        },
+        {
+            "category": "air_filter",
+            "brand": "DNA",
+            "model_name": "DNA Stage 2 Filter",
+            "part_number": "DNA-S2",
+            "specs": {"type": "drop_in", "material": "multi_layer"},
+            "param_deltas": {"engine.peak_power_hp": 1.5},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 400},
+                "description": "DNA Stage 2 filter for 400cc+ bikes",
+            },
+            "price_inr": 5800,
+            "availability": "in_stock",
+            "retailer": "DNA India",
+        },
+        {
+            "category": "air_filter",
+            "brand": "Sprint",
+            "model_name": "Sprint Filter P08 Universal",
+            "part_number": "SPR-P08",
+            "specs": {"type": "drop_in", "material": "cotton_silk"},
+            "param_deltas": {"engine.peak_power_hp": 0.8},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 300},
+                "description": "Sprint Filter universal for 300cc+ bikes",
+            },
+            "price_inr": 4200,
+            "availability": "in_stock",
+            "retailer": "MotoParts India",
+        },
+        {
+            "category": "air_filter",
+            "brand": "K&N",
+            "model_name": "K&N Cruiser Air Filter",
+            "part_number": "KN-CRUISE",
+            "specs": {"type": "drop_in", "material": "cotton"},
+            "param_deltas": {"engine.peak_power_hp": 0.5},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"categories": ["cruiser"]},
+                "description": "K&N air filter for cruisers",
+            },
+            "price_inr": 7200,
+            "availability": "in_stock",
+            "retailer": "K&N India",
+        },
     ]
 
     # ══════════════════════════════════════════════════════════════
     # FUEL SYSTEM (12 target) — family-tier for boosted/displacement
     # ══════════════════════════════════════════════════════════════
     parts += [
-        {"category": "fuel_system", "brand": "Bosch", "model_name": "Bosch High-Flow Fuel Pump", "part_number": "BSH-FP-HF", "specs": {"flow_lph": 150, "type": "in_tank"}, "param_deltas": {"engine.peak_power_hp": 1.5}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 600}, "description": "Bosch high-flow fuel pump for 600cc+ bikes"}, "price_inr": 7500, "availability": "in_stock", "retailer": "MotoParts India"},
-        {"category": "fuel_system", "brand": "Injector Dynamics", "model_name": "ID1000X Fuel Injectors", "part_number": "ID-1000X", "specs": {"flow_cc_min": 1000, "type": "fuel_injector"}, "param_deltas": {"engine.peak_power_hp": 3.0}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 900, "displacement_max_cc": 1200}, "description": "Injector Dynamics 1000cc injectors for 1000cc+ bikes"}, "price_inr": 32000, "availability": "in_stock", "retailer": "Injector Dynamics India"},
-        {"category": "fuel_system", "brand": "HealTech", "model_name": "HealTech iFlash Fuel Controller", "part_number": "HT-IFLASH", "specs": {"type": "fuel_controller", "autotune": True}, "param_deltas": {"engine.peak_power_hp": 2.0}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 400}, "description": "HealTech fuel controller for 400cc+ bikes"}, "price_inr": 22000, "availability": "in_stock", "retailer": "HealTech India"},
-        {"category": "fuel_system", "brand": "Bazzaz", "model_name": "Bazzaz Quick Shift Fuel Control", "part_number": "BZ-QS-FC", "specs": {"type": "fuel_quickshift"}, "param_deltas": {"engine.peak_power_hp": 1.5}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 600}, "description": "Bazzaz fuel + quickshift control for 600cc+ bikes"}, "price_inr": 28000, "availability": "in_stock", "retailer": "Bazzaz India"},
+        {
+            "category": "fuel_system",
+            "brand": "Bosch",
+            "model_name": "Bosch High-Flow Fuel Pump",
+            "part_number": "BSH-FP-HF",
+            "specs": {"flow_lph": 150, "type": "in_tank"},
+            "param_deltas": {"engine.peak_power_hp": 1.5},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 600},
+                "description": "Bosch high-flow fuel pump for 600cc+ bikes",
+            },
+            "price_inr": 7500,
+            "availability": "in_stock",
+            "retailer": "MotoParts India",
+        },
+        {
+            "category": "fuel_system",
+            "brand": "Injector Dynamics",
+            "model_name": "ID1000X Fuel Injectors",
+            "part_number": "ID-1000X",
+            "specs": {"flow_cc_min": 1000, "type": "fuel_injector"},
+            "param_deltas": {"engine.peak_power_hp": 3.0},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 900, "displacement_max_cc": 1200},
+                "description": "Injector Dynamics 1000cc injectors for 1000cc+ bikes",
+            },
+            "price_inr": 32000,
+            "availability": "in_stock",
+            "retailer": "Injector Dynamics India",
+        },
+        {
+            "category": "fuel_system",
+            "brand": "HealTech",
+            "model_name": "HealTech iFlash Fuel Controller",
+            "part_number": "HT-IFLASH",
+            "specs": {"type": "fuel_controller", "autotune": True},
+            "param_deltas": {"engine.peak_power_hp": 2.0},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 400},
+                "description": "HealTech fuel controller for 400cc+ bikes",
+            },
+            "price_inr": 22000,
+            "availability": "in_stock",
+            "retailer": "HealTech India",
+        },
+        {
+            "category": "fuel_system",
+            "brand": "Bazzaz",
+            "model_name": "Bazzaz Quick Shift Fuel Control",
+            "part_number": "BZ-QS-FC",
+            "specs": {"type": "fuel_quickshift"},
+            "param_deltas": {"engine.peak_power_hp": 1.5},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 600},
+                "description": "Bazzaz fuel + quickshift control for 600cc+ bikes",
+            },
+            "price_inr": 28000,
+            "availability": "in_stock",
+            "retailer": "Bazzaz India",
+        },
     ]
 
     # ══════════════════════════════════════════════════════════════
@@ -5828,9 +6485,25 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "model_name": "Schnitzer Turbo Kit Hayabusa",
             "part_number": "SCH-TURBO-HAYA",
             "specs": {"type": "turbocharger", "boost_psi": 12},
-            "param_overrides": {"forced_induction.boost_type": "turbo", "forced_induction.target_boost_bar": 0.827, "forced_induction.turbo_spool_time_s": 0.55, "forced_induction.intercooler_type": "a2a", "forced_induction.intercooler_effectiveness": 0.75},
+            "param_overrides": {
+                "forced_induction.boost_type": "turbo",
+                "forced_induction.target_boost_bar": 0.827,
+                "forced_induction.turbo_spool_time_s": 0.55,
+                "forced_induction.intercooler_type": "a2a",
+                "forced_induction.intercooler_effectiveness": 0.75,
+            },
             "param_deltas": {"chassis.dry_mass_kg": 13.0},
-            "fitment_rules": {"tier": "family", "match": {"manufacturers": ["Suzuki"], "engine_configs": ["I4"], "displacement_min_cc": 1299, "displacement_max_cc": 1341, "categories": ["sport"]}, "description": "Schnitzer turbo kit for Suzuki Hayabusa"},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": ["Suzuki"],
+                    "engine_configs": ["I4"],
+                    "displacement_min_cc": 1299,
+                    "displacement_max_cc": 1341,
+                    "categories": ["sport"],
+                },
+                "description": "Schnitzer turbo kit for Suzuki Hayabusa",
+            },
             "price_inr": 350000,
             "availability": "import_only",
             "retailer": "TurboKit India",
@@ -5843,9 +6516,25 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "model_name": "Garrett ZX-14R Turbo System",
             "part_number": "GAR-ZX14R-TURBO",
             "specs": {"type": "turbocharger", "boost_psi": 14},
-            "param_overrides": {"forced_induction.boost_type": "turbo", "forced_induction.target_boost_bar": 0.965, "forced_induction.turbo_spool_time_s": 0.50, "forced_induction.intercooler_type": "a2a", "forced_induction.intercooler_effectiveness": 0.78},
+            "param_overrides": {
+                "forced_induction.boost_type": "turbo",
+                "forced_induction.target_boost_bar": 0.965,
+                "forced_induction.turbo_spool_time_s": 0.50,
+                "forced_induction.intercooler_type": "a2a",
+                "forced_induction.intercooler_effectiveness": 0.78,
+            },
             "param_deltas": {"chassis.dry_mass_kg": 15.0},
-            "fitment_rules": {"tier": "family", "match": {"manufacturers": ["Kawasaki"], "engine_configs": ["I4"], "displacement_min_cc": 1340, "displacement_max_cc": 1441, "categories": ["sport"]}, "description": "Garrett turbo kit for Kawasaki ZX-14R"},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": ["Kawasaki"],
+                    "engine_configs": ["I4"],
+                    "displacement_min_cc": 1340,
+                    "displacement_max_cc": 1441,
+                    "categories": ["sport"],
+                },
+                "description": "Garrett turbo kit for Kawasaki ZX-14R",
+            },
             "price_inr": 380000,
             "availability": "import_only",
             "retailer": "TurboKit India",
@@ -5863,8 +6552,19 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "model_name": "NX Motorcycle 20 HP Wet Kit",
             "part_number": "NX-20-WET",
             "specs": {"type": "wet_kit", "hp_shot": 20},
-            "param_overrides": {"forced_induction.boost_type": "n2o", "forced_induction.n2o_hp_per_stage": 20.0, "forced_induction.n2o_stages": 1},
-            "fitment_rules": {"tier": "family", "match": {"categories": ["sport", "supersport"], "displacement_min_cc": 600}, "description": "NX nitrous 20 HP kit for 600cc+ sportbikes"},
+            "param_overrides": {
+                "forced_induction.boost_type": "n2o",
+                "forced_induction.n2o_hp_per_stage": 20.0,
+                "forced_induction.n2o_stages": 1,
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "categories": ["sport", "supersport"],
+                    "displacement_min_cc": 600,
+                },
+                "description": "NX nitrous 20 HP kit for 600cc+ sportbikes",
+            },
             "price_inr": 45000,
             "availability": "import_only",
             "retailer": "NX India",
@@ -5876,8 +6576,19 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "model_name": "NX Motorcycle 40 HP Dry Kit",
             "part_number": "NX-40-DRY",
             "specs": {"type": "dry_kit", "hp_shot": 40},
-            "param_overrides": {"forced_induction.boost_type": "n2o", "forced_induction.n2o_hp_per_stage": 40.0, "forced_induction.n2o_stages": 1},
-            "fitment_rules": {"tier": "family", "match": {"categories": ["sport", "supersport"], "displacement_min_cc": 800}, "description": "NX nitrous 40 HP dry kit for 800cc+ sportbikes"},
+            "param_overrides": {
+                "forced_induction.boost_type": "n2o",
+                "forced_induction.n2o_hp_per_stage": 40.0,
+                "forced_induction.n2o_stages": 1,
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "categories": ["sport", "supersport"],
+                    "displacement_min_cc": 800,
+                },
+                "description": "NX nitrous 40 HP dry kit for 800cc+ sportbikes",
+            },
             "price_inr": 65000,
             "availability": "import_only",
             "retailer": "NX India",
@@ -5889,8 +6600,18 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "model_name": "ZEX Universal Nitrous Kit 35 HP",
             "part_number": "ZEX-35-UNI",
             "specs": {"type": "universal_kit", "hp_shot": 35},
-            "param_overrides": {"forced_induction.boost_type": "n2o", "forced_induction.n2o_hp_per_stage": 35.0},
-            "fitment_rules": {"tier": "family", "match": {"categories": ["sport", "supersport"], "displacement_min_cc": 700}, "description": "ZEX universal nitrous kit 35 HP for sport bikes"},
+            "param_overrides": {
+                "forced_induction.boost_type": "n2o",
+                "forced_induction.n2o_hp_per_stage": 35.0,
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "categories": ["sport", "supersport"],
+                    "displacement_min_cc": 700,
+                },
+                "description": "ZEX universal nitrous kit 35 HP for sport bikes",
+            },
             "price_inr": 55000,
             "availability": "order",
             "retailer": "ZEX India",
@@ -5909,7 +6630,15 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "part_number": "BRB-STYLEMA",
             "specs": {"type": "radial_caliper", "pistons": 4},
             "param_deltas": {"chassis.dry_mass_kg": -1.6},
-            "fitment_rules": {"tier": "family", "match": {"engine_configs": ["I4", "V4"], "displacement_min_cc": 1000, "categories": ["sport", "supersport"]}, "description": "Brembo Stylema radial calipers for 1000cc+ sportbikes"},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "engine_configs": ["I4", "V4"],
+                    "displacement_min_cc": 1000,
+                    "categories": ["sport", "supersport"],
+                },
+                "description": "Brembo Stylema radial calipers for 1000cc+ sportbikes",
+            },
             "price_inr": 95000,
             "availability": "in_stock",
             "retailer": "Brembo India",
@@ -5920,7 +6649,11 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "model_name": "SBS Sintered Race Brake Pads",
             "part_number": "SBS-RACE",
             "specs": {"type": "brake_pads", "material": "sintered"},
-            "fitment_rules": {"tier": "family", "match": {"categories": ["sport", "supersport"]}, "description": "SBS sintered race pads for sportbikes"},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"categories": ["sport", "supersport"]},
+                "description": "SBS sintered race pads for sportbikes",
+            },
             "price_inr": 8500,
             "availability": "in_stock",
             "retailer": "SBS India",
@@ -5932,7 +6665,11 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "part_number": "GAL-WAVE-SINT",
             "specs": {"type": "rotor_and_pads", "material": "sintered"},
             "param_deltas": {"chassis.dry_mass_kg": -0.3},
-            "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 300}, "description": "Galfer wave rotor + sintered pads for all bikes"},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 300},
+                "description": "Galfer wave rotor + sintered pads for all bikes",
+            },
             "price_inr": 8500,
             "availability": "in_stock",
             "retailer": "Galfer India",
@@ -5951,7 +6688,11 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "specs": {"type": "rear_shock", "adjustability": "fully_adjustable"},
             "param_deltas": {"chassis.dry_mass_kg": -0.8},
             "param_multipliers": {"tires.mu_peak": 1.02},
-            "fitment_rules": {"tier": "family", "match": {"categories": ["sport", "supersport"]}, "description": "Öhlins STX rear shock for sportbikes"},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"categories": ["sport", "supersport"]},
+                "description": "Öhlins STX rear shock for sportbikes",
+            },
             "price_inr": 55000,
             "availability": "in_stock",
             "retailer": "Öhlins India",
@@ -5963,7 +6704,11 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "part_number": "KT-35R-COIL",
             "specs": {"type": "coilover", "adjustability": "fully_adjustable"},
             "param_deltas": {"chassis.dry_mass_kg": -1.2},
-            "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 600}, "description": "K-Tech 35R coilover for 600cc+ bikes"},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 600},
+                "description": "K-Tech 35R coilover for 600cc+ bikes",
+            },
             "price_inr": 65000,
             "availability": "order",
             "retailer": "K-Tech India",
@@ -5975,7 +6720,11 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "model_name": "Hyperpro Progressive Spring Kit",
             "part_number": "HPR-PROG-SPRING",
             "specs": {"type": "spring_kit", "rate_type": "progressive"},
-            "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 250}, "description": "Hyperpro progressive springs for all 250cc+ bikes"},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 250},
+                "description": "Hyperpro progressive springs for all 250cc+ bikes",
+            },
             "price_inr": 18000,
             "availability": "in_stock",
             "retailer": "Hyperpro India",
@@ -5993,7 +6742,11 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "part_number": "CAT-CF-FAIRING",
             "specs": {"material": "carbon_fiber", "pieces": 7},
             "param_deltas": {"chassis.dry_mass_kg": -5.0},
-            "fitment_rules": {"tier": "family", "match": {"categories": ["sport", "supersport"]}, "description": "Catalyst carbon fairing kit for sportbikes"},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"categories": ["sport", "supersport"]},
+                "description": "Catalyst carbon fairing kit for sportbikes",
+            },
             "price_inr": 120000,
             "availability": "import_only",
             "retailer": "Catalyst Racing (Japan)",
@@ -6006,7 +6759,14 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "part_number": "ARM-RACE-FAIR",
             "specs": {"material": "fiberglass", "pieces": 6},
             "param_deltas": {"chassis.dry_mass_kg": -2.5},
-            "fitment_rules": {"tier": "family", "match": {"categories": ["sport", "supersport"], "displacement_min_cc": 600}, "description": "Armour Bodies race fairing for 600cc+ sportbikes"},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "categories": ["sport", "supersport"],
+                    "displacement_min_cc": 600,
+                },
+                "description": "Armour Bodies race fairing for 600cc+ sportbikes",
+            },
             "price_inr": 45000,
             "availability": "order",
             "retailer": "Armour Bodies India",
@@ -6026,7 +6786,14 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "specs": {"extension_mm": 101.6, "material": "chromoly_steel"},
             "param_overrides": {"wheelie.wheelie_bar": True},
             "param_deltas": {"chassis.dry_mass_kg": 3.2},
-            "fitment_rules": {"tier": "family", "match": {"categories": ["sport", "supersport"], "displacement_min_cc": 900}, "description": "Voodoo 4\" wheelie bar for litre-class drag bikes"},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "categories": ["sport", "supersport"],
+                    "displacement_min_cc": 900,
+                },
+                "description": 'Voodoo 4" wheelie bar for litre-class drag bikes',
+            },
             "price_inr": 28000,
             "availability": "import_only",
             "retailer": "Voodoo Industries (US)",
@@ -6037,10 +6804,21 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "brand": "Schnitzer",
             "model_name": "6 inch Competition Wheelie Bar",
             "part_number": "SCH-WB-6IN",
-            "specs": {"extension_mm": 152.4, "material": "chromoly_steel", "tip_type": "roller"},
+            "specs": {
+                "extension_mm": 152.4,
+                "material": "chromoly_steel",
+                "tip_type": "roller",
+            },
             "param_overrides": {"wheelie.wheelie_bar": True},
             "param_deltas": {"chassis.dry_mass_kg": 4.5},
-            "fitment_rules": {"tier": "family", "match": {"categories": ["sport", "supersport"], "displacement_min_cc": 1000}, "description": "Schnitzer 6\" competition wheelie bar for 1000cc+ drag bikes"},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "categories": ["sport", "supersport"],
+                    "displacement_min_cc": 1000,
+                },
+                "description": 'Schnitzer 6" competition wheelie bar for 1000cc+ drag bikes',
+            },
             "price_inr": 38000,
             "availability": "import_only",
             "retailer": "Schnitzer Racing (US)",
@@ -6059,7 +6837,14 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "part_number": "VD-SAE-4",
             "specs": {"extension_mm": 101.6, "material": "billet_aluminum"},
             "param_overrides": {"chassis.swingarm_extension_mm": 101.6},
-            "fitment_rules": {"tier": "family", "match": {"categories": ["sport", "supersport"], "displacement_min_cc": 900}, "description": "Voodoo 4\" billet swingarm extension for drag bikes"},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "categories": ["sport", "supersport"],
+                    "displacement_min_cc": 900,
+                },
+                "description": 'Voodoo 4" billet swingarm extension for drag bikes',
+            },
             "price_inr": 28000,
             "availability": "import_only",
             "retailer": "Voodoo Industries (US)",
@@ -6072,7 +6857,14 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "part_number": "VD-SAE-6",
             "specs": {"extension_mm": 152.4, "material": "billet_aluminum"},
             "param_overrides": {"chassis.swingarm_extension_mm": 152.4},
-            "fitment_rules": {"tier": "family", "match": {"categories": ["sport", "supersport"], "displacement_min_cc": 1000}, "description": "Voodoo 6\" billet swingarm extension for 1000cc+ drag bikes"},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "categories": ["sport", "supersport"],
+                    "displacement_min_cc": 1000,
+                },
+                "description": 'Voodoo 6" billet swingarm extension for 1000cc+ drag bikes',
+            },
             "price_inr": 35000,
             "availability": "import_only",
             "retailer": "Voodoo Industries (US)",
@@ -6085,7 +6877,14 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "part_number": "SCH-SAE-8",
             "specs": {"extension_mm": 203.2, "material": "4130_chromoly"},
             "param_overrides": {"chassis.swingarm_extension_mm": 203.2},
-            "fitment_rules": {"tier": "family", "match": {"categories": ["sport", "supersport"], "displacement_min_cc": 1100}, "description": "Schnitzer 8\" extended swingarm for full drag setup"},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "categories": ["sport", "supersport"],
+                    "displacement_min_cc": 1100,
+                },
+                "description": 'Schnitzer 8" extended swingarm for full drag setup',
+            },
             "price_inr": 48000,
             "availability": "import_only",
             "retailer": "Schnitzer Racing (US)",
@@ -6094,11 +6893,15 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
         {
             "category": "swingarm_ext",
             "brand": "Indian Custom Fab",
-            "model_name": "Custom 4\" Swingarm Extension",
+            "model_name": 'Custom 4" Swingarm Extension',
             "part_number": "ICF-SAE-4",
             "specs": {"extension_mm": 101.6, "material": "chromoly_steel"},
             "param_overrides": {"chassis.swingarm_extension_mm": 101.6},
-            "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 500}, "description": "ICF custom 4\" extension for any motorcycle"},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 500},
+                "description": 'ICF custom 4" extension for any motorcycle',
+            },
             "price_inr": 18000,
             "availability": "order",
             "retailer": "Custom Fab (Mumbai)",
@@ -6111,95 +6914,784 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
 
     # Additional ECUs (13 more needed)
     parts += [
-        {"category": "ecu", "brand": "Rapid Bike", "model_name": "EVO EFI Tuning Module", "part_number": "RB-EVO-EFI", "specs": {"type": "piggyback"}, "param_deltas": {"engine.peak_power_hp": 2.5}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 250}, "description": "Rapid Bike EVO for all 250cc+ bikes"}, "price_inr": 18000, "availability": "in_stock", "retailer": "Rapid Bike India"},
-        {"category": "ecu", "brand": "Bazzaz", "model_name": "ZFi Standalone Fuel Management", "part_number": "BZ-ZFI-STAND", "specs": {"type": "piggyback"}, "param_deltas": {"engine.peak_power_hp": 3.0}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 500}, "description": "Bazzaz ZFi standalone for 500cc+ bikes"}, "price_inr": 25000, "availability": "order", "retailer": "Bazzaz India", "delivery_days": 14},
-        {"category": "ecu", "brand": "HealTech", "model_name": "QuickShifter Controller Module", "part_number": "HT-QS-MOD", "specs": {"type": "quickshift"}, "param_overrides": {"drivetrain.quickshifter": True}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 600}, "description": "HealTech quickshifter module for 600cc+ bikes"}, "price_inr": 16000, "availability": "in_stock", "retailer": "HealTech India"},
-        {"category": "ecu", "brand": "Woolich Racing", "model_name": "GSX-R 1000 K7 ECU Flash", "part_number": "WR-GSXR-K7-S1", "specs": {"type": "flash"}, "param_deltas": {"engine.peak_power_hp": 8.0}, "fitment_rules": {"tier": "family", "match": {"manufacturers": ["Suzuki"], "displacement_min_cc": 999, "displacement_max_cc": 1001, "categories": ["sport"]}, "description": "Woolich flash for GSX-R 1000 K7"}, "price_inr": 18000, "availability": "in_stock", "retailer": "Woolich Racing India"},
-        {"category": "ecu", "brand": "Woolich Racing", "model_name": "CBR1000RR ECU Flash Stage 1", "part_number": "WR-CBR1K-S1", "specs": {"type": "flash"}, "param_deltas": {"engine.peak_power_hp": 10.0}, "fitment_rules": {"tier": "family", "match": {"manufacturers": ["Honda"], "displacement_min_cc": 999, "displacement_max_cc": 1001, "categories": ["sport"]}, "description": "Woolich flash for Honda CBR1000RR"}, "price_inr": 22000, "availability": "order", "retailer": "Woolich Racing India", "delivery_days": 7},
-        {"category": "ecu", "brand": "Dynojet", "model_name": "Power Commander Auto-Tune Map", "part_number": "DJ-AUTOTUNE", "specs": {"type": "piggyback"}, "param_deltas": {"engine.peak_power_hp": 4.0}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 600}, "description": "Dynojet auto-tune mapping for 600cc+ bikes"}, "price_inr": 32000, "availability": "order", "retailer": "Dynojet India", "delivery_days": 10},
-        {"category": "ecu", "brand": "GPR", "model_name": "GPR V5 Stabiliser Racing", "part_number": "GPR-V5-RACE", "specs": {"type": "stabilizer"}, "param_overrides": {"staging.launch_rpm": 3500}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 600}, "description": "GPR V5 engine stabilizer for 600cc+ bikes"}, "price_inr": 42000, "availability": "import_only", "retailer": "GPR Racing", "delivery_days": 35},
-        {"category": "ecu", "brand": "Race Dynamics", "model_name": "RD Pulsar NS200 ECU Tune", "part_number": "RD-PULSAR-NS200", "specs": {"type": "flash"}, "param_deltas": {"engine.peak_power_hp": 4.0}, "fitment_rules": {"tier": "family", "match": {"manufacturers": ["Bajaj"], "model_name": "Pulsar NS200", "displacement_min_cc": 199, "displacement_max_cc": 201}, "description": "Race Dynamics tune for Bajaj Pulsar NS200"}, "price_inr": 10000, "availability": "in_stock", "retailer": "Race Dynamics"},
-        {"category": "ecu", "brand": "Race Dynamics", "model_name": "RD Duke 390 ECU Tune", "part_number": "RD-DUKE-390", "specs": {"type": "flash"}, "param_deltas": {"engine.peak_power_hp": 5.0}, "fitment_rules": {"tier": "family", "match": {"manufacturers": ["KTM"], "displacement_min_cc": 390, "displacement_max_cc": 391}, "description": "Race Dynamics tune for KTM Duke 390"}, "price_inr": 11000, "availability": "in_stock", "retailer": "Race Dynamics"},
+        {
+            "category": "ecu",
+            "brand": "Rapid Bike",
+            "model_name": "EVO EFI Tuning Module",
+            "part_number": "RB-EVO-EFI",
+            "specs": {"type": "piggyback"},
+            "param_deltas": {"engine.peak_power_hp": 2.5},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 250},
+                "description": "Rapid Bike EVO for all 250cc+ bikes",
+            },
+            "price_inr": 18000,
+            "availability": "in_stock",
+            "retailer": "Rapid Bike India",
+        },
+        {
+            "category": "ecu",
+            "brand": "Bazzaz",
+            "model_name": "ZFi Standalone Fuel Management",
+            "part_number": "BZ-ZFI-STAND",
+            "specs": {"type": "piggyback"},
+            "param_deltas": {"engine.peak_power_hp": 3.0},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 500},
+                "description": "Bazzaz ZFi standalone for 500cc+ bikes",
+            },
+            "price_inr": 25000,
+            "availability": "order",
+            "retailer": "Bazzaz India",
+            "delivery_days": 14,
+        },
+        {
+            "category": "ecu",
+            "brand": "HealTech",
+            "model_name": "QuickShifter Controller Module",
+            "part_number": "HT-QS-MOD",
+            "specs": {"type": "quickshift"},
+            "param_overrides": {"drivetrain.quickshifter": True},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 600},
+                "description": "HealTech quickshifter module for 600cc+ bikes",
+            },
+            "price_inr": 16000,
+            "availability": "in_stock",
+            "retailer": "HealTech India",
+        },
+        {
+            "category": "ecu",
+            "brand": "Woolich Racing",
+            "model_name": "GSX-R 1000 K7 ECU Flash",
+            "part_number": "WR-GSXR-K7-S1",
+            "specs": {"type": "flash"},
+            "param_deltas": {"engine.peak_power_hp": 8.0},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": ["Suzuki"],
+                    "displacement_min_cc": 999,
+                    "displacement_max_cc": 1001,
+                    "categories": ["sport"],
+                },
+                "description": "Woolich flash for GSX-R 1000 K7",
+            },
+            "price_inr": 18000,
+            "availability": "in_stock",
+            "retailer": "Woolich Racing India",
+        },
+        {
+            "category": "ecu",
+            "brand": "Woolich Racing",
+            "model_name": "CBR1000RR ECU Flash Stage 1",
+            "part_number": "WR-CBR1K-S1",
+            "specs": {"type": "flash"},
+            "param_deltas": {"engine.peak_power_hp": 10.0},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": ["Honda"],
+                    "displacement_min_cc": 999,
+                    "displacement_max_cc": 1001,
+                    "categories": ["sport"],
+                },
+                "description": "Woolich flash for Honda CBR1000RR",
+            },
+            "price_inr": 22000,
+            "availability": "order",
+            "retailer": "Woolich Racing India",
+            "delivery_days": 7,
+        },
+        {
+            "category": "ecu",
+            "brand": "Dynojet",
+            "model_name": "Power Commander Auto-Tune Map",
+            "part_number": "DJ-AUTOTUNE",
+            "specs": {"type": "piggyback"},
+            "param_deltas": {"engine.peak_power_hp": 4.0},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 600},
+                "description": "Dynojet auto-tune mapping for 600cc+ bikes",
+            },
+            "price_inr": 32000,
+            "availability": "order",
+            "retailer": "Dynojet India",
+            "delivery_days": 10,
+        },
+        {
+            "category": "ecu",
+            "brand": "GPR",
+            "model_name": "GPR V5 Stabiliser Racing",
+            "part_number": "GPR-V5-RACE",
+            "specs": {"type": "stabilizer"},
+            "param_overrides": {"staging.launch_rpm": 3500},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 600},
+                "description": "GPR V5 engine stabilizer for 600cc+ bikes",
+            },
+            "price_inr": 42000,
+            "availability": "import_only",
+            "retailer": "GPR Racing",
+            "delivery_days": 35,
+        },
+        {
+            "category": "ecu",
+            "brand": "Race Dynamics",
+            "model_name": "RD Pulsar NS200 ECU Tune",
+            "part_number": "RD-PULSAR-NS200",
+            "specs": {"type": "flash"},
+            "param_deltas": {"engine.peak_power_hp": 4.0},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": ["Bajaj"],
+                    "model_name": "Pulsar NS200",
+                    "displacement_min_cc": 199,
+                    "displacement_max_cc": 201,
+                },
+                "description": "Race Dynamics tune for Bajaj Pulsar NS200",
+            },
+            "price_inr": 10000,
+            "availability": "in_stock",
+            "retailer": "Race Dynamics",
+        },
+        {
+            "category": "ecu",
+            "brand": "Race Dynamics",
+            "model_name": "RD Duke 390 ECU Tune",
+            "part_number": "RD-DUKE-390",
+            "specs": {"type": "flash"},
+            "param_deltas": {"engine.peak_power_hp": 5.0},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "manufacturers": ["KTM"],
+                    "displacement_min_cc": 390,
+                    "displacement_max_cc": 391,
+                },
+                "description": "Race Dynamics tune for KTM Duke 390",
+            },
+            "price_inr": 11000,
+            "availability": "in_stock",
+            "retailer": "Race Dynamics",
+        },
     ]
 
     # Additional Air Filters (15 more)
     for i in range(5):
-        parts.append({"category": "air_filter", "brand": ["K&N", "BMC", "DNA", "Sprint", "HiFlow"][i], "model_name": f"Performance Air Filter V{i+2}", "part_number": f"AF-PERF-V{i+2}", "specs": {"type": "drop_in"}, "param_deltas": {"engine.peak_power_hp": 0.8 + i*0.3}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 200 + i*100}, "description": f"Performance air filter for {200 + i*100}cc+ bikes"}, "price_inr": 5000 + i*2000, "availability": "in_stock", "retailer": "MotoParts India"})
+        parts.append(
+            {
+                "category": "air_filter",
+                "brand": ["K&N", "BMC", "DNA", "Sprint", "HiFlow"][i],
+                "model_name": f"Performance Air Filter V{i + 2}",
+                "part_number": f"AF-PERF-V{i + 2}",
+                "specs": {"type": "drop_in"},
+                "param_deltas": {"engine.peak_power_hp": 0.8 + i * 0.3},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"displacement_min_cc": 200 + i * 100},
+                    "description": f"Performance air filter for {200 + i * 100}cc+ bikes",
+                },
+                "price_inr": 5000 + i * 2000,
+                "availability": "in_stock",
+                "retailer": "MotoParts India",
+            }
+        )
 
     # Additional Clutch Kits (8 more)
-    clutch_brands = [("Kevlar Pro", 13000), ("Carbon Race", 15000), ("Organic Street", 8000), ("Sintered Sport", 10000), ("Heavy Duty Steel", 7000), ("Race Ceramic", 14000), ("Premium Organic", 9000), ("Ultra Slippery", 11000)]
+    clutch_brands = [
+        ("Kevlar Pro", 13000),
+        ("Carbon Race", 15000),
+        ("Organic Street", 8000),
+        ("Sintered Sport", 10000),
+        ("Heavy Duty Steel", 7000),
+        ("Race Ceramic", 14000),
+        ("Premium Organic", 9000),
+        ("Ultra Slippery", 11000),
+    ]
     for name, price in clutch_brands:
-        parts.append({"category": "clutch_kit", "brand": "ClutchCo", "model_name": f"ClutchCo {name} Kit", "part_number": f"CC-{name.replace(' ', '-')}", "specs": {"material": name.split()[0]}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 250}, "description": f"ClutchCo {name} clutch kit for 250cc+ bikes"}, "price_inr": price, "availability": "in_stock", "retailer": "ClutchCo India"})
+        parts.append(
+            {
+                "category": "clutch_kit",
+                "brand": "ClutchCo",
+                "model_name": f"ClutchCo {name} Kit",
+                "part_number": f"CC-{name.replace(' ', '-')}",
+                "specs": {"material": name.split()[0]},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"displacement_min_cc": 250},
+                    "description": f"ClutchCo {name} clutch kit for 250cc+ bikes",
+                },
+                "price_inr": price,
+                "availability": "in_stock",
+                "retailer": "ClutchCo India",
+            }
+        )
 
     # Additional Boost Kits (6 more)
     parts += [
-        {"category": "boost_kit", "brand": "HKS", "model_name": "HKS GT Turbo Kit 10 PSI", "part_number": "HKS-GT-10", "specs": {"type": "turbo", "boost_psi": 10}, "param_overrides": {"forced_induction.boost_type": "turbo", "forced_induction.target_boost_bar": 0.690}, "param_deltas": {"chassis.dry_mass_kg": 11.0}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 600}, "description": "HKS turbo kit for 600cc+ bikes"}, "price_inr": 280000, "availability": "import_only", "retailer": "TurboKit India", "delivery_days": 60},
-        {"category": "boost_kit", "brand": "Vortech", "model_name": "Vortech V3 Supercharger Moto Kit", "part_number": "VOR-V3-MOTO", "specs": {"type": "supercharger", "boost_psi": 8}, "param_overrides": {"forced_induction.boost_type": "sc_centrifugal", "forced_induction.target_boost_bar": 0.552}, "param_deltas": {"chassis.dry_mass_kg": 9.0}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 1000}, "description": "Vortech centrifugal SC for 1000cc+ bikes"}, "price_inr": 250000, "availability": "import_only", "retailer": "TurboKit India", "delivery_days": 55},
-        {"category": "boost_kit", "brand": "Blower Shop", "model_name": "Blower Shop 500+ HP Supercharger", "part_number": "BS-500HP-SC", "specs": {"type": "supercharger"}, "param_overrides": {"forced_induction.boost_type": "sc_roots", "forced_induction.target_boost_bar": 0.8}, "param_deltas": {"chassis.dry_mass_kg": 12.0}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 1200}, "description": "Blower Shop Roots SC for 1200cc+ bikes"}, "price_inr": 320000, "availability": "import_only", "retailer": "TurboKit India", "delivery_days": 70},
-        {"category": "boost_kit", "brand": "Kraftwerks", "model_name": "Kraftwerks C-1 Supercharger Kit", "part_number": "KW-C1-KIT", "specs": {"type": "supercharger"}, "param_overrides": {"forced_induction.boost_type": "sc_centrifugal", "forced_induction.target_boost_bar": 0.7}, "param_deltas": {"chassis.dry_mass_kg": 10.0}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 500}, "description": "Kraftwerks C-1 SC for 500cc+ bikes"}, "price_inr": 220000, "availability": "import_only", "retailer": "TurboKit India", "delivery_days": 50},
+        {
+            "category": "boost_kit",
+            "brand": "HKS",
+            "model_name": "HKS GT Turbo Kit 10 PSI",
+            "part_number": "HKS-GT-10",
+            "specs": {"type": "turbo", "boost_psi": 10},
+            "param_overrides": {
+                "forced_induction.boost_type": "turbo",
+                "forced_induction.target_boost_bar": 0.690,
+            },
+            "param_deltas": {"chassis.dry_mass_kg": 11.0},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 600},
+                "description": "HKS turbo kit for 600cc+ bikes",
+            },
+            "price_inr": 280000,
+            "availability": "import_only",
+            "retailer": "TurboKit India",
+            "delivery_days": 60,
+        },
+        {
+            "category": "boost_kit",
+            "brand": "Vortech",
+            "model_name": "Vortech V3 Supercharger Moto Kit",
+            "part_number": "VOR-V3-MOTO",
+            "specs": {"type": "supercharger", "boost_psi": 8},
+            "param_overrides": {
+                "forced_induction.boost_type": "sc_centrifugal",
+                "forced_induction.target_boost_bar": 0.552,
+            },
+            "param_deltas": {"chassis.dry_mass_kg": 9.0},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 1000},
+                "description": "Vortech centrifugal SC for 1000cc+ bikes",
+            },
+            "price_inr": 250000,
+            "availability": "import_only",
+            "retailer": "TurboKit India",
+            "delivery_days": 55,
+        },
+        {
+            "category": "boost_kit",
+            "brand": "Blower Shop",
+            "model_name": "Blower Shop 500+ HP Supercharger",
+            "part_number": "BS-500HP-SC",
+            "specs": {"type": "supercharger"},
+            "param_overrides": {
+                "forced_induction.boost_type": "sc_roots",
+                "forced_induction.target_boost_bar": 0.8,
+            },
+            "param_deltas": {"chassis.dry_mass_kg": 12.0},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 1200},
+                "description": "Blower Shop Roots SC for 1200cc+ bikes",
+            },
+            "price_inr": 320000,
+            "availability": "import_only",
+            "retailer": "TurboKit India",
+            "delivery_days": 70,
+        },
+        {
+            "category": "boost_kit",
+            "brand": "Kraftwerks",
+            "model_name": "Kraftwerks C-1 Supercharger Kit",
+            "part_number": "KW-C1-KIT",
+            "specs": {"type": "supercharger"},
+            "param_overrides": {
+                "forced_induction.boost_type": "sc_centrifugal",
+                "forced_induction.target_boost_bar": 0.7,
+            },
+            "param_deltas": {"chassis.dry_mass_kg": 10.0},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 500},
+                "description": "Kraftwerks C-1 SC for 500cc+ bikes",
+            },
+            "price_inr": 220000,
+            "availability": "import_only",
+            "retailer": "TurboKit India",
+            "delivery_days": 50,
+        },
     ]
 
     # Additional Nitrous Kits (5 more)
     parts += [
-        {"category": "nitrous", "brand": "ZEX", "model_name": "ZEX Motorcycle 50 HP Kit", "part_number": "ZEX-50-MOTO", "specs": {"type": "motorcycle_kit", "hp_shot": 50}, "param_overrides": {"forced_induction.boost_type": "n2o", "forced_induction.n2o_hp_per_stage": 50.0}, "fitment_rules": {"tier": "family", "match": {"categories": ["sport", "supersport"], "displacement_min_cc": 1000}, "description": "ZEX 50 HP nitrous kit for 1000cc+ sportbikes"}, "price_inr": 75000, "availability": "import_only", "retailer": "ZEX India", "delivery_days": 35},
-        {"category": "nitrous", "brand": "Nitrous Express", "model_name": "NX Micro Bottle 15 HP Kit", "part_number": "NX-MICRO-15", "specs": {"type": "micro_kit", "hp_shot": 15}, "param_overrides": {"forced_induction.boost_type": "n2o", "forced_induction.n2o_hp_per_stage": 15.0}, "fitment_rules": {"tier": "family", "match": {"categories": ["sport"], "displacement_min_cc": 600}, "description": "NX micro nitrous for 600cc+ sport bikes"}, "price_inr": 35000, "availability": "order", "retailer": "NX India", "delivery_days": 28},
-        {"category": "nitrous", "brand": "Nitrous Express", "model_name": "NX Dual-Stage 60 HP Kit", "part_number": "NX-DUAL-60", "specs": {"type": "dual_stage", "hp_shot": 60}, "param_overrides": {"forced_induction.boost_type": "n2o", "forced_induction.n2o_hp_per_stage": 60.0, "forced_induction.n2o_stages": 2}, "fitment_rules": {"tier": "family", "match": {"categories": ["sport", "supersport"], "displacement_min_cc": 1100}, "description": "NX dual-stage 60 HP nitrous for full drag setup"}, "price_inr": 95000, "availability": "import_only", "retailer": "NX India", "delivery_days": 50},
+        {
+            "category": "nitrous",
+            "brand": "ZEX",
+            "model_name": "ZEX Motorcycle 50 HP Kit",
+            "part_number": "ZEX-50-MOTO",
+            "specs": {"type": "motorcycle_kit", "hp_shot": 50},
+            "param_overrides": {
+                "forced_induction.boost_type": "n2o",
+                "forced_induction.n2o_hp_per_stage": 50.0,
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "categories": ["sport", "supersport"],
+                    "displacement_min_cc": 1000,
+                },
+                "description": "ZEX 50 HP nitrous kit for 1000cc+ sportbikes",
+            },
+            "price_inr": 75000,
+            "availability": "import_only",
+            "retailer": "ZEX India",
+            "delivery_days": 35,
+        },
+        {
+            "category": "nitrous",
+            "brand": "Nitrous Express",
+            "model_name": "NX Micro Bottle 15 HP Kit",
+            "part_number": "NX-MICRO-15",
+            "specs": {"type": "micro_kit", "hp_shot": 15},
+            "param_overrides": {
+                "forced_induction.boost_type": "n2o",
+                "forced_induction.n2o_hp_per_stage": 15.0,
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"categories": ["sport"], "displacement_min_cc": 600},
+                "description": "NX micro nitrous for 600cc+ sport bikes",
+            },
+            "price_inr": 35000,
+            "availability": "order",
+            "retailer": "NX India",
+            "delivery_days": 28,
+        },
+        {
+            "category": "nitrous",
+            "brand": "Nitrous Express",
+            "model_name": "NX Dual-Stage 60 HP Kit",
+            "part_number": "NX-DUAL-60",
+            "specs": {"type": "dual_stage", "hp_shot": 60},
+            "param_overrides": {
+                "forced_induction.boost_type": "n2o",
+                "forced_induction.n2o_hp_per_stage": 60.0,
+                "forced_induction.n2o_stages": 2,
+            },
+            "fitment_rules": {
+                "tier": "family",
+                "match": {
+                    "categories": ["sport", "supersport"],
+                    "displacement_min_cc": 1100,
+                },
+                "description": "NX dual-stage 60 HP nitrous for full drag setup",
+            },
+            "price_inr": 95000,
+            "availability": "import_only",
+            "retailer": "NX India",
+            "delivery_days": 50,
+        },
     ]
 
     # Additional Fuel Systems (8 more)
     parts += [
-        {"category": "fuel_system", "brand": "Walbro", "model_name": "Walbro 450 LPH Fuel Pump", "part_number": "WAL-450-PUMP", "specs": {"flow_lph": 450, "type": "in_tank"}, "param_deltas": {"engine.peak_power_hp": 2.0}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 1000}, "description": "Walbro high-flow pump for 1000cc+ bikes"}, "price_inr": 15000, "availability": "order", "retailer": "Fuel System Pro", "delivery_days": 14},
-        {"category": "fuel_system", "brand": "Radium", "model_name": "Radium Fuel Surge Tank Kit", "part_number": "RAD-SURGE-TANK", "specs": {"type": "surge_tank"}, "param_deltas": {"engine.peak_power_hp": 1.0}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 800}, "description": "Radium surge tank for 800cc+ drag builds"}, "price_inr": 35000, "availability": "import_only", "retailer": "Radium Engineering", "delivery_days": 45},
-        {"category": "fuel_system", "brand": "AEM", "model_name": "AEM Infinity Fuel Management", "part_number": "AEM-INFINITY-FUEL", "specs": {"type": "tuning_computer"}, "param_deltas": {"engine.peak_power_hp": 5.0}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 600}, "description": "AEM Infinity full tuning computer for 600cc+ bikes"}, "price_inr": 55000, "availability": "import_only", "retailer": "AEM India", "delivery_days": 40},
-        {"category": "fuel_system", "brand": "Edelbrock", "model_name": "Edelbrock Fuel Regulator Kit", "part_number": "EDB-REG-KIT", "specs": {"type": "regulator"}, "price_inr": 8000, "availability": "in_stock", "retailer": "MotoParts India", "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 400}, "description": "Edelbrock fuel pressure regulator for 400cc+ bikes"}},
+        {
+            "category": "fuel_system",
+            "brand": "Walbro",
+            "model_name": "Walbro 450 LPH Fuel Pump",
+            "part_number": "WAL-450-PUMP",
+            "specs": {"flow_lph": 450, "type": "in_tank"},
+            "param_deltas": {"engine.peak_power_hp": 2.0},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 1000},
+                "description": "Walbro high-flow pump for 1000cc+ bikes",
+            },
+            "price_inr": 15000,
+            "availability": "order",
+            "retailer": "Fuel System Pro",
+            "delivery_days": 14,
+        },
+        {
+            "category": "fuel_system",
+            "brand": "Radium",
+            "model_name": "Radium Fuel Surge Tank Kit",
+            "part_number": "RAD-SURGE-TANK",
+            "specs": {"type": "surge_tank"},
+            "param_deltas": {"engine.peak_power_hp": 1.0},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 800},
+                "description": "Radium surge tank for 800cc+ drag builds",
+            },
+            "price_inr": 35000,
+            "availability": "import_only",
+            "retailer": "Radium Engineering",
+            "delivery_days": 45,
+        },
+        {
+            "category": "fuel_system",
+            "brand": "AEM",
+            "model_name": "AEM Infinity Fuel Management",
+            "part_number": "AEM-INFINITY-FUEL",
+            "specs": {"type": "tuning_computer"},
+            "param_deltas": {"engine.peak_power_hp": 5.0},
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 600},
+                "description": "AEM Infinity full tuning computer for 600cc+ bikes",
+            },
+            "price_inr": 55000,
+            "availability": "import_only",
+            "retailer": "AEM India",
+            "delivery_days": 40,
+        },
+        {
+            "category": "fuel_system",
+            "brand": "Edelbrock",
+            "model_name": "Edelbrock Fuel Regulator Kit",
+            "part_number": "EDB-REG-KIT",
+            "specs": {"type": "regulator"},
+            "price_inr": 8000,
+            "availability": "in_stock",
+            "retailer": "MotoParts India",
+            "fitment_rules": {
+                "tier": "family",
+                "match": {"displacement_min_cc": 400},
+                "description": "Edelbrock fuel pressure regulator for 400cc+ bikes",
+            },
+        },
     ]
 
     # Additional Suspension (9 more)
-    for i, (brand, type_name) in enumerate([("K-Tech", "damper"), ("Öhlins", "fork"), ("Hyperpro", "spring"), ("Showa", "fork"), ("Sachs", "shock"), ("WP", "fork"), ("Fox", "shock"), ("Fox", "fork"), ("FGRT", "cartridge")]):
-        parts.append({"category": "suspension", "brand": brand, "model_name": f"{brand} {type_name.title()} V{i+4}", "part_number": f"SUSP-{brand[:3].upper()}-{i+4}", "specs": {"type": type_name}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 300 + i*100}, "description": f"{brand} {type_name} for 300cc+ bikes"}, "price_inr": 35000 + i*10000, "availability": ["in_stock", "order"][i % 2], "retailer": [f"{brand} India", f"{brand} (Japan)"][i % 2]})
+    for i, (brand, type_name) in enumerate(
+        [
+            ("K-Tech", "damper"),
+            ("Öhlins", "fork"),
+            ("Hyperpro", "spring"),
+            ("Showa", "fork"),
+            ("Sachs", "shock"),
+            ("WP", "fork"),
+            ("Fox", "shock"),
+            ("Fox", "fork"),
+            ("FGRT", "cartridge"),
+        ]
+    ):
+        parts.append(
+            {
+                "category": "suspension",
+                "brand": brand,
+                "model_name": f"{brand} {type_name.title()} V{i + 4}",
+                "part_number": f"SUSP-{brand[:3].upper()}-{i + 4}",
+                "specs": {"type": type_name},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"displacement_min_cc": 300 + i * 100},
+                    "description": f"{brand} {type_name} for 300cc+ bikes",
+                },
+                "price_inr": 35000 + i * 10000,
+                "availability": ["in_stock", "order"][i % 2],
+                "retailer": [f"{brand} India", f"{brand} (Japan)"][i % 2],
+            }
+        )
 
     # Additional Brakes (7 more)
-    for i, (brand, model) in enumerate([("Brembo", "M4 Caliper"), ("Brembo", "P34 Caliper"), ("Brembo", "Gold pad"), ("EBC", "Organic pad"), ("Galfer", "G-Plate rotor"), ("SBS", "Carbon pad"), ("Endless", "Sintered pad")]):
-        parts.append({"category": "brakes", "brand": brand, "model_name": f"{brand} {model} V{i+4}", "part_number": f"BRK-{brand[:3].upper()}-{i+4}", "specs": {"type": "brake_component"}, "param_deltas": {"chassis.dry_mass_kg": -0.2 * i}, "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 250 + i*100}, "description": f"{brand} {model} for 250cc+ bikes"}, "price_inr": 8000 + i*8000, "availability": "in_stock", "retailer": f"{brand} India"})
+    for i, (brand, model) in enumerate(
+        [
+            ("Brembo", "M4 Caliper"),
+            ("Brembo", "P34 Caliper"),
+            ("Brembo", "Gold pad"),
+            ("EBC", "Organic pad"),
+            ("Galfer", "G-Plate rotor"),
+            ("SBS", "Carbon pad"),
+            ("Endless", "Sintered pad"),
+        ]
+    ):
+        parts.append(
+            {
+                "category": "brakes",
+                "brand": brand,
+                "model_name": f"{brand} {model} V{i + 4}",
+                "part_number": f"BRK-{brand[:3].upper()}-{i + 4}",
+                "specs": {"type": "brake_component"},
+                "param_deltas": {"chassis.dry_mass_kg": -0.2 * i},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"displacement_min_cc": 250 + i * 100},
+                    "description": f"{brand} {model} for 250cc+ bikes",
+                },
+                "price_inr": 8000 + i * 8000,
+                "availability": "in_stock",
+                "retailer": f"{brand} India",
+            }
+        )
 
     # Additional Bodywork (4 more)
-    for i, (brand, material) in enumerate([("Catalyst", "carbon"), ("Armour", "fiberglass"), ("Attack", "carbon"), ("Hotbodies", "fiberglass")]):
-        parts.append({"category": "bodywork", "brand": brand, "model_name": f"{brand} {material.title()} Fairing V{i+3}", "part_number": f"BW-{brand[:3].upper()}-{i+3}", "specs": {"material": material}, "param_deltas": {"chassis.dry_mass_kg": -2.0 * (i+1)}, "fitment_rules": {"tier": "family", "match": {"categories": ["sport", "supersport"], "displacement_min_cc": 500 + i*200}, "description": f"{brand} {material} fairing for sport bikes"}, "price_inr": 40000 + i*20000, "availability": ["in_stock", "order", "import_only"][i % 3], "retailer": f"{brand} India"})
+    for i, (brand, material) in enumerate(
+        [
+            ("Catalyst", "carbon"),
+            ("Armour", "fiberglass"),
+            ("Attack", "carbon"),
+            ("Hotbodies", "fiberglass"),
+        ]
+    ):
+        parts.append(
+            {
+                "category": "bodywork",
+                "brand": brand,
+                "model_name": f"{brand} {material.title()} Fairing V{i + 3}",
+                "part_number": f"BW-{brand[:3].upper()}-{i + 3}",
+                "specs": {"material": material},
+                "param_deltas": {"chassis.dry_mass_kg": -2.0 * (i + 1)},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "categories": ["sport", "supersport"],
+                        "displacement_min_cc": 500 + i * 200,
+                    },
+                    "description": f"{brand} {material} fairing for sport bikes",
+                },
+                "price_inr": 40000 + i * 20000,
+                "availability": ["in_stock", "order", "import_only"][i % 3],
+                "retailer": f"{brand} India",
+            }
+        )
 
     # Additional Wheelie Bars (3 more)
     for i, length in enumerate([8, 10, 12]):
-        parts.append({"category": "wheelie_bar", "brand": ["Precision", "Schnitzer", "Voodoo"][i], "model_name": f"{length}\" Wheelie Bar", "part_number": f"WB-{length}IN", "specs": {"extension_mm": length * 25.4}, "param_overrides": {"wheelie.wheelie_bar": True}, "param_deltas": {"chassis.dry_mass_kg": 2.0 + i * 1.5}, "fitment_rules": {"tier": "family", "match": {"categories": ["sport", "supersport"], "displacement_min_cc": 800 + i*200}, "description": f"{length}\" wheelie bar for drag bikes"}, "price_inr": 22000 + i*10000, "availability": ["in_stock", "order", "import_only"][i % 3], "retailer": "Drag Parts India"})
+        parts.append(
+            {
+                "category": "wheelie_bar",
+                "brand": ["Precision", "Schnitzer", "Voodoo"][i],
+                "model_name": f'{length}" Wheelie Bar',
+                "part_number": f"WB-{length}IN",
+                "specs": {"extension_mm": length * 25.4},
+                "param_overrides": {"wheelie.wheelie_bar": True},
+                "param_deltas": {"chassis.dry_mass_kg": 2.0 + i * 1.5},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "categories": ["sport", "supersport"],
+                        "displacement_min_cc": 800 + i * 200,
+                    },
+                    "description": f'{length}" wheelie bar for drag bikes',
+                },
+                "price_inr": 22000 + i * 10000,
+                "availability": ["in_stock", "order", "import_only"][i % 3],
+                "retailer": "Drag Parts India",
+            }
+        )
 
     # Additional Exhausts (28 more)
     exhaust_additions = [
-        ("Akrapovic", "1000cc Full System Titanium", "AK-1K-FS-TI", 11, 7.5, 175000, "order", 32),
-        ("Yoshimura", "1200cc Alpha Full Ti", "YO-1200-ALPHA", 13, 8.5, 220000, "import_only", 45),
-        ("SC-Project", "1000cc GP Full Carbon", "SCP-1K-GP-C", 10.5, 6.8, 245000, "import_only", 50),
-        ("Akrapovic", "600cc Evolution Full System", "AK-600-EVO-FS", 6.0, 3.5, 135000, "order", 28),
+        (
+            "Akrapovic",
+            "1000cc Full System Titanium",
+            "AK-1K-FS-TI",
+            11,
+            7.5,
+            175000,
+            "order",
+            32,
+        ),
+        (
+            "Yoshimura",
+            "1200cc Alpha Full Ti",
+            "YO-1200-ALPHA",
+            13,
+            8.5,
+            220000,
+            "import_only",
+            45,
+        ),
+        (
+            "SC-Project",
+            "1000cc GP Full Carbon",
+            "SCP-1K-GP-C",
+            10.5,
+            6.8,
+            245000,
+            "import_only",
+            50,
+        ),
+        (
+            "Akrapovic",
+            "600cc Evolution Full System",
+            "AK-600-EVO-FS",
+            6.0,
+            3.5,
+            135000,
+            "order",
+            28,
+        ),
         ("Arrow", "Slip-On 1000cc Ti", "AR-SLIP-1K-TI", 4.0, 2.5, 65000, "in_stock", 0),
-        ("Two Brothers", "M-2 1000cc Slip-On", "TBR-M2-1K-SO", 3.5, 2.0, 48000, "in_stock", 0),
-        ("Leo Vince", "LV-10 1000cc Slip-On", "LV-1K-SLIP", 4.5, 2.8, 72000, "order", 14),
-        ("Akrapovic", "Full System Panigale", "AK-PANIGALE-FS", 9.0, 6.0, 190000, "import_only", 40),
-        ("Yoshimura", "RS400 BMW Full System", "YO-RS400-BMW", 7.5, 5.0, 145000, "order", 30),
-        ("Austin", "Racing 250cc Slip-On", "AU-250-RACE", 2.0, 1.2, 16000, "in_stock", 0),
+        (
+            "Two Brothers",
+            "M-2 1000cc Slip-On",
+            "TBR-M2-1K-SO",
+            3.5,
+            2.0,
+            48000,
+            "in_stock",
+            0,
+        ),
+        (
+            "Leo Vince",
+            "LV-10 1000cc Slip-On",
+            "LV-1K-SLIP",
+            4.5,
+            2.8,
+            72000,
+            "order",
+            14,
+        ),
+        (
+            "Akrapovic",
+            "Full System Panigale",
+            "AK-PANIGALE-FS",
+            9.0,
+            6.0,
+            190000,
+            "import_only",
+            40,
+        ),
+        (
+            "Yoshimura",
+            "RS400 BMW Full System",
+            "YO-RS400-BMW",
+            7.5,
+            5.0,
+            145000,
+            "order",
+            30,
+        ),
+        (
+            "Austin",
+            "Racing 250cc Slip-On",
+            "AU-250-RACE",
+            2.0,
+            1.2,
+            16000,
+            "in_stock",
+            0,
+        ),
         ("FMF", "Powercore 300cc Full", "FMF-300-FULL", 2.5, 1.5, 22000, "in_stock", 0),
         ("Arrow", "RE 650 Full System", "AR-RE650-FS", 3.0, 2.0, 62000, "order", 20),
         ("S&S", "Grand National RE Twin", "SS-GN-RE", 3.5, 2.5, 88000, "order", 25),
-        ("Vance Hines", "PowerDual 2-into-1", "VH-PD-2IN1", 2.8, 2.2, 55000, "in_stock", 0),
-        ("SuperTrapp", "Slip-On Universal", "ST-SLIP-U", 1.8, 1.0, 28000, "in_stock", 0),
+        (
+            "Vance Hines",
+            "PowerDual 2-into-1",
+            "VH-PD-2IN1",
+            2.8,
+            2.2,
+            55000,
+            "in_stock",
+            0,
+        ),
+        (
+            "SuperTrapp",
+            "Slip-On Universal",
+            "ST-SLIP-U",
+            1.8,
+            1.0,
+            28000,
+            "in_stock",
+            0,
+        ),
         ("MivaCorp", "Full System 600cc", "MIV-600-FS", 5.5, 3.2, 85000, "order", 21),
-        ("Asheville", "Race Slip-On 1000cc", "ASH-RACE-1K", 4.2, 2.6, 58000, "order", 15),
-        ("Termignoni", "Titanium Full System", "TERM-TI-FS", 10.0, 6.5, 200000, "import_only", 45),
-        ("Akrapovic", "Evolution Slip-On Hayabusa", "AK-HAYA-SLIP", 5.0, 3.0, 85000, "in_stock", 0),
+        (
+            "Asheville",
+            "Race Slip-On 1000cc",
+            "ASH-RACE-1K",
+            4.2,
+            2.6,
+            58000,
+            "order",
+            15,
+        ),
+        (
+            "Termignoni",
+            "Titanium Full System",
+            "TERM-TI-FS",
+            10.0,
+            6.5,
+            200000,
+            "import_only",
+            45,
+        ),
+        (
+            "Akrapovic",
+            "Evolution Slip-On Hayabusa",
+            "AK-HAYA-SLIP",
+            5.0,
+            3.0,
+            85000,
+            "in_stock",
+            0,
+        ),
         ("Yosh", "R-77 600cc Slip-On", "YOSH-R77-600", 3.0, 1.8, 45000, "in_stock", 0),
-        ("Akrapovic", "CBR1000RR Racing Full", "AK-CBR1K-FULL", 10.0, 6.5, 185000, "import_only", 38),
-        ("Yoshimura", "YZF-R1 R-77 Full System", "YO-R1-R77", 9.5, 6.0, 165000, "order", 32),
+        (
+            "Akrapovic",
+            "CBR1000RR Racing Full",
+            "AK-CBR1K-FULL",
+            10.0,
+            6.5,
+            185000,
+            "import_only",
+            38,
+        ),
+        (
+            "Yoshimura",
+            "YZF-R1 R-77 Full System",
+            "YO-R1-R77",
+            9.5,
+            6.0,
+            165000,
+            "order",
+            32,
+        ),
         ("Arrow", "GSX-R 1000 Pro-Race", "AR-GSXR-PR", 8.5, 5.5, 168000, "order", 30),
-        ("Two Brothers", "M-2 Full CBR600", "TBR-M2-CBR600", 5.0, 3.0, 72000, "in_stock", 0),
-        ("Leo Vince", "LV-10 YZF-R6 Slip-On", "LV-R6-SLIP", 3.5, 2.0, 52000, "order", 16),
-        ("Akrapovic", "RSV4 Racing Full", "AK-RSV4-FULL", 11.0, 7.5, 200000, "import_only", 42),
+        (
+            "Two Brothers",
+            "M-2 Full CBR600",
+            "TBR-M2-CBR600",
+            5.0,
+            3.0,
+            72000,
+            "in_stock",
+            0,
+        ),
+        (
+            "Leo Vince",
+            "LV-10 YZF-R6 Slip-On",
+            "LV-R6-SLIP",
+            3.5,
+            2.0,
+            52000,
+            "order",
+            16,
+        ),
+        (
+            "Akrapovic",
+            "RSV4 Racing Full",
+            "AK-RSV4-FULL",
+            11.0,
+            7.5,
+            200000,
+            "import_only",
+            42,
+        ),
         ("Yoshimura", "Panigale V4 R-77", "YO-V4-R77", 10.0, 6.5, 175000, "order", 35),
-        ("Arrow", "S1000RR Pro-Race Full", "AR-S1KRR-PR", 10.0, 7.0, 195000, "import_only", 40),
+        (
+            "Arrow",
+            "S1000RR Pro-Race Full",
+            "AR-S1KRR-PR",
+            10.0,
+            7.0,
+            195000,
+            "import_only",
+            40,
+        ),
     ]
     for brand, model, pn, hp, tq, price, avail, days in exhaust_additions:
         # Determine fitment. Each rule narrows to a specific engine family +
@@ -6208,88 +7700,147 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
         # Order matters: most-specific model/brand checks come first.
         if "Hayabusa" in model or "Haya" in model:
             tier_desc = "Hayabusa full systems and slip-ons (Suzuki I4 1299-1341cc)"
-            match = {"manufacturers": ["Suzuki"], "engine_configs": ["I4"],
-                     "displacement_min_cc": 1299, "displacement_max_cc": 1341}
+            match = {
+                "manufacturers": ["Suzuki"],
+                "engine_configs": ["I4"],
+                "displacement_min_cc": 1299,
+                "displacement_max_cc": 1341,
+            }
         # RSV4 check MUST come before Panigale V4 — "RSV4 Racing" contains
         # the substring "V4 " which would otherwise trigger the Panigale branch.
         elif "RSV4" in model:
             tier_desc = "Aprilia RSV4 V4 exhausts (V4 999-1099cc)"
-            match = {"manufacturers": ["Aprilia"], "engine_configs": ["V4"],
-                     "displacement_min_cc": 990, "displacement_max_cc": 1100}
+            match = {
+                "manufacturers": ["Aprilia"],
+                "engine_configs": ["V4"],
+                "displacement_min_cc": 990,
+                "displacement_max_cc": 1100,
+            }
         elif "Panigale V4" in model or "V4 R-77" in model:
             tier_desc = "Ducati Panigale V4 exhausts (V4 998-1103cc)"
-            match = {"manufacturers": ["Ducati"], "engine_configs": ["V4"],
-                     "displacement_min_cc": 990, "displacement_max_cc": 1103}
+            match = {
+                "manufacturers": ["Ducati"],
+                "engine_configs": ["V4"],
+                "displacement_min_cc": 990,
+                "displacement_max_cc": 1103,
+            }
         elif "Panigale" in model:
             # Older V-twin Panigale (1199/1299 Superquadro)
             tier_desc = "Ducati Panigale V-twin exhausts (V2 1199-1299cc)"
-            match = {"manufacturers": ["Ducati"], "engine_configs": ["V2"],
-                     "displacement_min_cc": 1150, "displacement_max_cc": 1299}
+            match = {
+                "manufacturers": ["Ducati"],
+                "engine_configs": ["V2"],
+                "displacement_min_cc": 1150,
+                "displacement_max_cc": 1299,
+            }
         elif "S1000" in model or "S1KRR" in model:
             tier_desc = "BMW S1000RR exhausts (I4 999cc)"
-            match = {"manufacturers": ["BMW"], "engine_configs": ["I4"],
-                     "displacement_min_cc": 990, "displacement_max_cc": 1010}
+            match = {
+                "manufacturers": ["BMW"],
+                "engine_configs": ["I4"],
+                "displacement_min_cc": 990,
+                "displacement_max_cc": 1010,
+            }
         elif "CBR1000" in model or "CBR1K" in model:
             tier_desc = "Honda CBR1000RR exhausts (I4 999-1000cc)"
-            match = {"manufacturers": ["Honda"], "engine_configs": ["I4"],
-                     "displacement_min_cc": 990, "displacement_max_cc": 1010}
+            match = {
+                "manufacturers": ["Honda"],
+                "engine_configs": ["I4"],
+                "displacement_min_cc": 990,
+                "displacement_max_cc": 1010,
+            }
         elif "YZF-R1" in model or "R1 " in model or model.endswith(" R1"):
             tier_desc = "Yamaha YZF-R1 exhausts (I4 998cc)"
-            match = {"manufacturers": ["Yamaha"], "engine_configs": ["I4"],
-                     "displacement_min_cc": 990, "displacement_max_cc": 1010}
+            match = {
+                "manufacturers": ["Yamaha"],
+                "engine_configs": ["I4"],
+                "displacement_min_cc": 990,
+                "displacement_max_cc": 1010,
+            }
         elif "GSX-R" in model or "GSXR" in model:
             tier_desc = "Suzuki GSX-R 1000 exhausts (I4 999cc)"
-            match = {"manufacturers": ["Suzuki"], "engine_configs": ["I4"],
-                     "displacement_min_cc": 990, "displacement_max_cc": 1010}
+            match = {
+                "manufacturers": ["Suzuki"],
+                "engine_configs": ["I4"],
+                "displacement_min_cc": 990,
+                "displacement_max_cc": 1010,
+            }
         elif "YZF-R6" in model or "CBR600" in model or " R6" in model:
             tier_desc = "600cc supersport I4 exhausts"
-            match = {"engine_configs": ["I4"],
-                     "displacement_min_cc": 550, "displacement_max_cc": 650,
-                     "categories": ["sport", "supersport"]}
+            match = {
+                "engine_configs": ["I4"],
+                "displacement_min_cc": 550,
+                "displacement_max_cc": 650,
+                "categories": ["sport", "supersport"],
+            }
         elif "1200" in model:
             tier_desc = "1200cc+ large-displacement I4 exhausts"
-            match = {"engine_configs": ["I4"],
-                     "displacement_min_cc": 1150, "displacement_max_cc": 1350}
+            match = {
+                "engine_configs": ["I4"],
+                "displacement_min_cc": 1150,
+                "displacement_max_cc": 1350,
+            }
         elif "1000" in model or "1K" in model:
             # Generic 1000cc I4 sportbike — excludes V4/V2 superbikes and
             # the 1103cc Panigale V4 / 1299cc Hayabusa.
             tier_desc = "Generic 1000cc I4 sportbike exhausts"
-            match = {"engine_configs": ["I4"],
-                     "displacement_min_cc": 990, "displacement_max_cc": 1050,
-                     "categories": ["sport", "supersport"]}
+            match = {
+                "engine_configs": ["I4"],
+                "displacement_min_cc": 990,
+                "displacement_max_cc": 1050,
+                "categories": ["sport", "supersport"],
+            }
         elif "600" in model:
             tier_desc = "Generic 600cc I4 supersport exhausts"
-            match = {"engine_configs": ["I4"],
-                     "displacement_min_cc": 550, "displacement_max_cc": 650,
-                     "categories": ["sport", "supersport"]}
+            match = {
+                "engine_configs": ["I4"],
+                "displacement_min_cc": 550,
+                "displacement_max_cc": 650,
+                "categories": ["sport", "supersport"],
+            }
         elif "RE 650" in model or "RE650" in model:
             # Royal Enfield 648cc parallel-twin specific — catches
             # Interceptor/Continental GT/Super Meteor/Shotgun 650.
             tier_desc = "Royal Enfield 650 parallel-twin exhausts (I2 648cc)"
-            match = {"manufacturers": ["Royal Enfield"], "engine_configs": ["I2"],
-                     "displacement_min_cc": 640, "displacement_max_cc": 660}
+            match = {
+                "manufacturers": ["Royal Enfield"],
+                "engine_configs": ["I2"],
+                "displacement_min_cc": 640,
+                "displacement_max_cc": 660,
+            }
         elif "Grand National" in model:
             # S&S Grand National race-replica — vintage-style Harley V-twin flat-track.
             tier_desc = "S&S Grand National Harley/Indian V-twin race exhaust"
-            match = {"manufacturers": ["Harley-Davidson", "Indian Motorcycle"],
-                     "engine_configs": ["V2"],
-                     "displacement_min_cc": 800}
+            match = {
+                "manufacturers": ["Harley-Davidson", "Indian Motorcycle"],
+                "engine_configs": ["V2"],
+                "displacement_min_cc": 800,
+            }
         elif "PowerDual" in model or "2-into-1" in model or "Vance" in model:
             tier_desc = "Harley-Davidson / Indian V-twin 2-into-1 cruiser exhausts"
-            match = {"manufacturers": ["Harley-Davidson", "Indian Motorcycle"],
-                     "engine_configs": ["V2"],
-                     "displacement_min_cc": 800}
+            match = {
+                "manufacturers": ["Harley-Davidson", "Indian Motorcycle"],
+                "engine_configs": ["V2"],
+                "displacement_min_cc": 800,
+            }
         elif "BMW" in model or "RS400" in model:
             # Yoshimura RS400 BMW Full System and similar BMW-tagged parts.
             tier_desc = "BMW I4 sport exhausts"
-            match = {"manufacturers": ["BMW"], "engine_configs": ["I4"],
-                     "displacement_min_cc": 600, "displacement_max_cc": 1010}
+            match = {
+                "manufacturers": ["BMW"],
+                "engine_configs": ["I4"],
+                "displacement_min_cc": 600,
+                "displacement_max_cc": 1010,
+            }
         elif "300" in model:
             # 300cc entry-level — narrow to single-cylinder so we don't catch
             # twin-cylinder 640cc+ bikes.
             tier_desc = "300cc entry-level single-cylinder exhausts"
-            match = {"engine_configs": ["I1"],
-                     "displacement_min_cc": 280, "displacement_max_cc": 370}
+            match = {
+                "engine_configs": ["I1"],
+                "displacement_min_cc": 280,
+                "displacement_max_cc": 370,
+            }
         elif "250" in model:
             tier_desc = "250cc small-cc exhausts (single/twin)"
             match = {"displacement_min_cc": 240, "displacement_max_cc": 320}
@@ -6297,69 +7848,118 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             # SuperTrapp-style universal slip-on adapters — broad but excludes
             # cruiser V-twins (different mount geometry) and cruiser categories.
             tier_desc = "Universal slip-on adapter (300cc+ sport/naked; verify fit)"
-            match = {"displacement_min_cc": 300,
-                     "categories": ["sport", "supersport", "naked", "sport_touring"]}
+            match = {
+                "displacement_min_cc": 300,
+                "categories": ["sport", "supersport", "naked", "sport_touring"],
+            }
         elif "Termignoni" == brand:
             # Termignoni is Ducati's factory exhaust partner — narrow to Ducati.
             tier_desc = "Termignoni Ducati-specific premium exhausts"
-            match = {"manufacturers": ["Ducati"],
-                     "displacement_min_cc": 800}
+            match = {"manufacturers": ["Ducati"], "displacement_min_cc": 800}
         elif "Twin" in model:
             tier_desc = "Parallel-twin exhausts (500-800cc twins)"
-            match = {"engine_configs": ["I2"],
-                     "displacement_min_cc": 500, "displacement_max_cc": 800}
+            match = {
+                "engine_configs": ["I2"],
+                "displacement_min_cc": 500,
+                "displacement_max_cc": 800,
+            }
         else:
             # Conservative fallback: I4 sport bikes 600-1050cc only.
             # Explicitly excludes Hayabusa (1299), Panigale V4 (1103),
             # cruiser V-twins, and small-cc singles.
             tier_desc = "Generic I4 sportbike exhaust (600-1050cc fallback)"
-            match = {"engine_configs": ["I4"],
-                     "displacement_min_cc": 600, "displacement_max_cc": 1050,
-                     "categories": ["sport", "supersport", "naked"]}
+            match = {
+                "engine_configs": ["I4"],
+                "displacement_min_cc": 600,
+                "displacement_max_cc": 1050,
+                "categories": ["sport", "supersport", "naked"],
+            }
 
-        parts.append({
-            "category": "exhaust",
-            "brand": brand,
-            "model_name": model,
-            "part_number": pn,
-            "specs": {"type": "full_system" if "Full" in model else "slip_on"},
-            "param_deltas": {"engine.peak_power_hp": hp, "engine.peak_torque_nm": tq},
-            "fitment_rules": {"tier": "family", "match": match, "description": tier_desc},
-            "price_inr": price,
-            "availability": avail,
-            "retailer": "Superbike India",
-            "delivery_days": days if days > 0 else None,
-        })
+        parts.append(
+            {
+                "category": "exhaust",
+                "brand": brand,
+                "model_name": model,
+                "part_number": pn,
+                "specs": {"type": "full_system" if "Full" in model else "slip_on"},
+                "param_deltas": {
+                    "engine.peak_power_hp": hp,
+                    "engine.peak_torque_nm": tq,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": match,
+                    "description": tier_desc,
+                },
+                "price_inr": price,
+                "availability": avail,
+                "retailer": "Superbike India",
+                "delivery_days": days if days > 0 else None,
+            }
+        )
 
     # Additional Quickshifters (7 more)
-    for i, (brand, model, price) in enumerate([("HM", "HM QS Mid-Range", 24000), ("Translogic", "QS Pro V2", 42000), ("Dynojet", "Power Commander QS", 30000), ("GPR", "Gear Box QS", 35000), ("Helix", "Helix QS Universal", 28000), ("Shift Assist", "Shift Assist Pro", 25000), ("Bonamici", "Racing Quick Shifter", 26000)]):
-        parts.append({
-            "category": "quickshifter",
-            "brand": brand,
-            "model_name": model,
-            "part_number": f"QS-{brand[:3].upper()}-{i+4}",
-            "specs": {"type": "quickshift"},
-            "param_overrides": {"drivetrain.quickshifter": True},
-            "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 300 + i*150}, "description": f"{brand} quickshifter for 300cc+ bikes"},
-            "price_inr": price,
-            "availability": ["in_stock", "order"][i % 2],
-            "retailer": ["HM India", f"{brand} India"][i % 2],
-        })
+    for i, (brand, model, price) in enumerate(
+        [
+            ("HM", "HM QS Mid-Range", 24000),
+            ("Translogic", "QS Pro V2", 42000),
+            ("Dynojet", "Power Commander QS", 30000),
+            ("GPR", "Gear Box QS", 35000),
+            ("Helix", "Helix QS Universal", 28000),
+            ("Shift Assist", "Shift Assist Pro", 25000),
+            ("Bonamici", "Racing Quick Shifter", 26000),
+        ]
+    ):
+        parts.append(
+            {
+                "category": "quickshifter",
+                "brand": brand,
+                "model_name": model,
+                "part_number": f"QS-{brand[:3].upper()}-{i + 4}",
+                "specs": {"type": "quickshift"},
+                "param_overrides": {"drivetrain.quickshifter": True},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"displacement_min_cc": 300 + i * 150},
+                    "description": f"{brand} quickshifter for 300cc+ bikes",
+                },
+                "price_inr": price,
+                "availability": ["in_stock", "order"][i % 2],
+                "retailer": ["HM India", f"{brand} India"][i % 2],
+            }
+        )
 
     # Additional Batteries (4 more)
-    for i, (brand, model, price) in enumerate([("Motobatt", "MBTX20UHD Hybrid", 8000), ("Enersys", "NexSys Lithium", 16000), ("Yuasa", "YTX Lithium", 9000), ("Interstate", "IL-2600U Li-Ion", 13000)]):
-        parts.append({
-            "category": "battery",
-            "brand": brand,
-            "model_name": model,
-            "part_number": f"BATT-{brand[:3].upper()}-{i+5}",
-            "specs": {"technology": "lithium" if "Li" in model or "lithium" in model.lower() else "hybrid"},
-            "param_deltas": {"chassis.dry_mass_kg": -2.0 - i*0.3},
-            "fitment_rules": {"tier": "category", "match": {"displacement_min_cc": 300}, "description": f"{brand} {model} for all bikes"},
-            "price_inr": price,
-            "availability": "in_stock",
-            "retailer": "Battery Pro India",
-        })
+    for i, (brand, model, price) in enumerate(
+        [
+            ("Motobatt", "MBTX20UHD Hybrid", 8000),
+            ("Enersys", "NexSys Lithium", 16000),
+            ("Yuasa", "YTX Lithium", 9000),
+            ("Interstate", "IL-2600U Li-Ion", 13000),
+        ]
+    ):
+        parts.append(
+            {
+                "category": "battery",
+                "brand": brand,
+                "model_name": model,
+                "part_number": f"BATT-{brand[:3].upper()}-{i + 5}",
+                "specs": {
+                    "technology": "lithium"
+                    if "Li" in model or "lithium" in model.lower()
+                    else "hybrid"
+                },
+                "param_deltas": {"chassis.dry_mass_kg": -2.0 - i * 0.3},
+                "fitment_rules": {
+                    "tier": "category",
+                    "match": {"displacement_min_cc": 300},
+                    "description": f"{brand} {model} for all bikes",
+                },
+                "price_inr": price,
+                "availability": "in_stock",
+                "retailer": "Battery Pro India",
+            }
+        )
 
     # Additional miscellaneous parts to reach 240 target (31 more needed)
     misc_parts = []
@@ -6367,64 +7967,90 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
     # Sprocket pitch-specific families (9 more to reach 40)
     for teeth in [13, 14, 15]:
         for pitch, price in [("520", 2700), ("525", 2900), ("530", 3100)]:
-            misc_parts.append({
-                "category": "sprocket",
-                "brand": "Regina Pro",
-                "model_name": f"{pitch} Front Sprocket {teeth}T Pro",
-                "part_number": f"REG-{pitch}-F-{teeth}",
-                "specs": {"teeth": teeth, "pitch": pitch},
-                "param_overrides": {"drivetrain.front_sprocket": teeth},
-                "fitment_rules": {"tier": "family", "match": {"chain_pitch": pitch}, "description": f"{pitch}-pitch professional front sprocket"},
-                "price_inr": price,
-                "availability": "in_stock",
-                "retailer": "Grand Pitstop",
-            })
+            misc_parts.append(
+                {
+                    "category": "sprocket",
+                    "brand": "Regina Pro",
+                    "model_name": f"{pitch} Front Sprocket {teeth}T Pro",
+                    "part_number": f"REG-{pitch}-F-{teeth}",
+                    "specs": {"teeth": teeth, "pitch": pitch},
+                    "param_overrides": {"drivetrain.front_sprocket": teeth},
+                    "fitment_rules": {
+                        "tier": "family",
+                        "match": {"chain_pitch": pitch},
+                        "description": f"{pitch}-pitch professional front sprocket",
+                    },
+                    "price_inr": price,
+                    "availability": "in_stock",
+                    "retailer": "Grand Pitstop",
+                }
+            )
 
     # Additional air filters (10 more to reach 20)
     for i in range(10):
-        misc_parts.append({
-            "category": "air_filter",
-            "brand": ["HiFlow", "Pipercross", "Green", "Simota", "AEM"][i % 5],
-            "model_name": f"Performance Filter Pro {i+6}",
-            "part_number": f"AF-PRO-{i+6}",
-            "specs": {"type": "drop_in"},
-            "param_deltas": {"engine.peak_power_hp": 0.6 + i*0.2},
-            "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 200 + i*50}, "description": f"Pro air filter for {200+i*50}cc+ bikes"},
-            "price_inr": 4500 + i*1500,
-            "availability": ["in_stock", "order"][i % 2],
-            "retailer": "Air Filter Pro",
-        })
+        misc_parts.append(
+            {
+                "category": "air_filter",
+                "brand": ["HiFlow", "Pipercross", "Green", "Simota", "AEM"][i % 5],
+                "model_name": f"Performance Filter Pro {i + 6}",
+                "part_number": f"AF-PRO-{i + 6}",
+                "specs": {"type": "drop_in"},
+                "param_deltas": {"engine.peak_power_hp": 0.6 + i * 0.2},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"displacement_min_cc": 200 + i * 50},
+                    "description": f"Pro air filter for {200 + i * 50}cc+ bikes",
+                },
+                "price_inr": 4500 + i * 1500,
+                "availability": ["in_stock", "order"][i % 2],
+                "retailer": "Air Filter Pro",
+            }
+        )
 
     # Additional fuel systems (4 more to reach 12)
     for i in range(4):
-        misc_parts.append({
-            "category": "fuel_system",
-            "brand": ["Holley", "Carburetors", "Quantum", "Fuel Tech"][i],
-            "model_name": f"Advanced Fuel System {i+5}",
-            "part_number": f"FS-ADV-{i+5}",
-            "specs": {"type": "fuel_management"},
-            "param_deltas": {"engine.peak_power_hp": 1.0 + i*0.5},
-            "fitment_rules": {"tier": "family", "match": {"displacement_min_cc": 400 + i*200}, "description": f"Advanced fuel system for bikes 400cc+"},
-            "price_inr": 18000 + i*8000,
-            "availability": "order",
-            "retailer": "Fuel Systems Pro",
-            "delivery_days": 14 + i*3,
-        })
+        misc_parts.append(
+            {
+                "category": "fuel_system",
+                "brand": ["Holley", "Carburetors", "Quantum", "Fuel Tech"][i],
+                "model_name": f"Advanced Fuel System {i + 5}",
+                "part_number": f"FS-ADV-{i + 5}",
+                "specs": {"type": "fuel_management"},
+                "param_deltas": {"engine.peak_power_hp": 1.0 + i * 0.5},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"displacement_min_cc": 400 + i * 200},
+                    "description": "Advanced fuel system for bikes 400cc+",
+                },
+                "price_inr": 18000 + i * 8000,
+                "availability": "order",
+                "retailer": "Fuel Systems Pro",
+                "delivery_days": 14 + i * 3,
+            }
+        )
 
     # Additional chains (3 more to reach 15)
-    for i, (brand, pitch) in enumerate([("Sunstar", "520"), ("AFAM", "525"), ("RK", "530")]):
-        misc_parts.append({
-            "category": "chain",
-            "brand": brand,
-            "model_name": f"{brand} {pitch} Premium Chain",
-            "part_number": f"CHN-{brand[:2].upper()}-{pitch}",
-            "specs": {"pitch": pitch, "links": 110 + i*5},
-            "param_multipliers": {"drivetrain.chain_efficiency": 1.02},
-            "fitment_rules": {"tier": "family", "match": {"chain_pitch": pitch}, "description": f"{brand} premium {pitch}-pitch chain"},
-            "price_inr": 9500 + i*2000,
-            "availability": "in_stock",
-            "retailer": "Chain Pro India",
-        })
+    for i, (brand, pitch) in enumerate(
+        [("Sunstar", "520"), ("AFAM", "525"), ("RK", "530")]
+    ):
+        misc_parts.append(
+            {
+                "category": "chain",
+                "brand": brand,
+                "model_name": f"{brand} {pitch} Premium Chain",
+                "part_number": f"CHN-{brand[:2].upper()}-{pitch}",
+                "specs": {"pitch": pitch, "links": 110 + i * 5},
+                "param_multipliers": {"drivetrain.chain_efficiency": 1.02},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"chain_pitch": pitch},
+                    "description": f"{brand} premium {pitch}-pitch chain",
+                },
+                "price_inr": 9500 + i * 2000,
+                "availability": "in_stock",
+                "retailer": "Chain Pro India",
+            }
+        )
 
     # ══════════════════════════════════════════════════════════════
     # SEGMENT EXPANSION (April 2026) — bike-specific mods for
@@ -6456,41 +8082,59 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
     # ─── A. INDIAN 150–250cc: sprockets, chains, ECU, air filter, clutch, QS, exhaust ───
     # Sprockets for 428-pitch (cubs/commuters) and 520-pitch (Indian 150–250cc sport)
     for teeth, pitch, price in [
-        (14, "428", 1800), (15, "428", 1800), (16, "428", 1850),
-        (13, "520", 2100), (14, "520", 2100), (15, "520", 2100),
+        (14, "428", 1800),
+        (15, "428", 1800),
+        (16, "428", 1850),
+        (13, "520", 2100),
+        (14, "520", 2100),
+        (15, "520", 2100),
     ]:
-        seg_parts.append({
-            "category": "sprocket", "brand": "JT Sprockets",
-            "model_name": f"JT Front Sprocket {teeth}T {pitch}",
-            "part_number": f"JT-F-{pitch}-{teeth}",
-            "specs": {"teeth": teeth, "pitch": pitch, "position": "front"},
-            "param_overrides": {"drivetrain.front_sprocket": teeth},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"chain_pitch": pitch, "displacement_max_cc": 400},
-                "description": f"JT {pitch} front sprocket {teeth}T (150-400cc)",
-            },
-            "price_inr": price, "availability": "in_stock",
-            "retailer": "Grand Pitstop",
-        })
+        seg_parts.append(
+            {
+                "category": "sprocket",
+                "brand": "JT Sprockets",
+                "model_name": f"JT Front Sprocket {teeth}T {pitch}",
+                "part_number": f"JT-F-{pitch}-{teeth}",
+                "specs": {"teeth": teeth, "pitch": pitch, "position": "front"},
+                "param_overrides": {"drivetrain.front_sprocket": teeth},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"chain_pitch": pitch, "displacement_max_cc": 400},
+                    "description": f"JT {pitch} front sprocket {teeth}T (150-400cc)",
+                },
+                "price_inr": price,
+                "availability": "in_stock",
+                "retailer": "Grand Pitstop",
+            }
+        )
     for teeth, pitch, price in [
-        (38, "428", 2400), (42, "428", 2500), (46, "428", 2600), (50, "428", 2700),
-        (38, "520", 3200), (42, "520", 3300), (45, "520", 3400), (48, "520", 3500),
+        (38, "428", 2400),
+        (42, "428", 2500),
+        (46, "428", 2600),
+        (50, "428", 2700),
+        (38, "520", 3200),
+        (42, "520", 3300),
+        (45, "520", 3400),
+        (48, "520", 3500),
     ]:
-        seg_parts.append({
-            "category": "sprocket", "brand": "JT Sprockets",
-            "model_name": f"JT Rear Sprocket {teeth}T {pitch}",
-            "part_number": f"JT-R-{pitch}-{teeth}",
-            "specs": {"teeth": teeth, "pitch": pitch, "position": "rear"},
-            "param_overrides": {"drivetrain.rear_sprocket": teeth},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"chain_pitch": pitch, "displacement_max_cc": 400},
-                "description": f"JT {pitch} rear sprocket {teeth}T (150-400cc)",
-            },
-            "price_inr": price, "availability": "in_stock",
-            "retailer": "Grand Pitstop",
-        })
+        seg_parts.append(
+            {
+                "category": "sprocket",
+                "brand": "JT Sprockets",
+                "model_name": f"JT Rear Sprocket {teeth}T {pitch}",
+                "part_number": f"JT-R-{pitch}-{teeth}",
+                "specs": {"teeth": teeth, "pitch": pitch, "position": "rear"},
+                "param_overrides": {"drivetrain.rear_sprocket": teeth},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"chain_pitch": pitch, "displacement_max_cc": 400},
+                    "description": f"JT {pitch} rear sprocket {teeth}T (150-400cc)",
+                },
+                "price_inr": price,
+                "availability": "in_stock",
+                "retailer": "Grand Pitstop",
+            }
+        )
 
     # 428 chains for SE Asia / Indian commuters
     for brand, grade, price in [
@@ -6498,68 +8142,110 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
         ("RK", "428MXZ Gold Chain", 4200),
         ("EK", "428 O-Ring Chain", 3800),
     ]:
-        seg_parts.append({
-            "category": "chain", "brand": brand,
-            "model_name": f"{brand} {grade}",
-            "part_number": f"CHN-{brand}-428",
-            "specs": {"pitch": "428", "links": 132, "type": "o-ring" if "O-Ring" in grade else "standard"},
-            "param_multipliers": {"drivetrain.chain_efficiency": 1.01},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"chain_pitch": "428"},
-                "description": f"{brand} 428-pitch chain for SE Asia/Indian small-cc",
-            },
-            "price_inr": price, "availability": "in_stock",
-            "retailer": "Grand Pitstop",
-        })
+        seg_parts.append(
+            {
+                "category": "chain",
+                "brand": brand,
+                "model_name": f"{brand} {grade}",
+                "part_number": f"CHN-{brand}-428",
+                "specs": {
+                    "pitch": "428",
+                    "links": 132,
+                    "type": "o-ring" if "O-Ring" in grade else "standard",
+                },
+                "param_multipliers": {"drivetrain.chain_efficiency": 1.01},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"chain_pitch": "428"},
+                    "description": f"{brand} 428-pitch chain for SE Asia/Indian small-cc",
+                },
+                "price_inr": price,
+                "availability": "in_stock",
+                "retailer": "Grand Pitstop",
+            }
+        )
 
     # ECU flashes / piggybacks for Indian 200–400cc fuel-injected
-    seg_parts.extend([
-        {
-            "category": "ecu", "brand": "Race Dynamics",
-            "model_name": "PowerTRONIC V4 Piggyback (Indian 200-400cc FI)",
-            "part_number": "RD-PT-V4-IN",
-            "specs": {"type": "piggyback", "maps": 4},
-            "param_deltas": {"engine.peak_power_hp": 2.5, "engine.peak_torque_nm": 2.0},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["KTM", "Bajaj", "TVS", "Yamaha", "Honda", "Hero", "Royal Enfield", "Husqvarna"],
-                          "displacement_min_cc": 150, "displacement_max_cc": 400},
-                "description": "Race Dynamics PowerTRONIC for Indian 150-400cc fuel-injected",
+    seg_parts.extend(
+        [
+            {
+                "category": "ecu",
+                "brand": "Race Dynamics",
+                "model_name": "PowerTRONIC V4 Piggyback (Indian 200-400cc FI)",
+                "part_number": "RD-PT-V4-IN",
+                "specs": {"type": "piggyback", "maps": 4},
+                "param_deltas": {
+                    "engine.peak_power_hp": 2.5,
+                    "engine.peak_torque_nm": 2.0,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": [
+                            "KTM",
+                            "Bajaj",
+                            "TVS",
+                            "Yamaha",
+                            "Honda",
+                            "Hero",
+                            "Royal Enfield",
+                            "Husqvarna",
+                        ],
+                        "displacement_min_cc": 150,
+                        "displacement_max_cc": 400,
+                    },
+                    "description": "Race Dynamics PowerTRONIC for Indian 150-400cc fuel-injected",
+                },
+                "price_inr": 18500,
+                "availability": "in_stock",
+                "retailer": "Race Dynamics",
             },
-            "price_inr": 18500, "availability": "in_stock",
-            "retailer": "Race Dynamics",
-        },
-        {
-            "category": "ecu", "brand": "Dynojet",
-            "model_name": "Power Commander V Small-Displacement",
-            "part_number": "DJ-PCV-SMALL",
-            "specs": {"type": "piggyback", "maps": 8},
-            "param_deltas": {"engine.peak_power_hp": 2.0, "engine.peak_torque_nm": 1.5},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"displacement_min_cc": 200, "displacement_max_cc": 500,
-                          "engine_configs": ["I1", "I2"]},
-                "description": "Dynojet PCV for 200-500cc singles/twins",
+            {
+                "category": "ecu",
+                "brand": "Dynojet",
+                "model_name": "Power Commander V Small-Displacement",
+                "part_number": "DJ-PCV-SMALL",
+                "specs": {"type": "piggyback", "maps": 8},
+                "param_deltas": {
+                    "engine.peak_power_hp": 2.0,
+                    "engine.peak_torque_nm": 1.5,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "displacement_min_cc": 200,
+                        "displacement_max_cc": 500,
+                        "engine_configs": ["I1", "I2"],
+                    },
+                    "description": "Dynojet PCV for 200-500cc singles/twins",
+                },
+                "price_inr": 27000,
+                "availability": "order",
+                "retailer": "Dynojet India",
+                "delivery_days": 14,
             },
-            "price_inr": 27000, "availability": "order",
-            "retailer": "Dynojet India", "delivery_days": 14,
-        },
-        {
-            "category": "ecu", "brand": "Aracer",
-            "model_name": "Aracer RC Mini X (SE Asia 150cc FI)",
-            "part_number": "ARC-RC-MINI-X",
-            "specs": {"type": "piggyback", "maps": 6},
-            "param_deltas": {"engine.peak_power_hp": 1.8, "engine.peak_torque_nm": 1.2},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"chain_pitch": "428", "displacement_max_cc": 165},
-                "description": "Aracer RC Mini for SE Asia 150cc underbones/cubs",
+            {
+                "category": "ecu",
+                "brand": "Aracer",
+                "model_name": "Aracer RC Mini X (SE Asia 150cc FI)",
+                "part_number": "ARC-RC-MINI-X",
+                "specs": {"type": "piggyback", "maps": 6},
+                "param_deltas": {
+                    "engine.peak_power_hp": 1.8,
+                    "engine.peak_torque_nm": 1.2,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"chain_pitch": "428", "displacement_max_cc": 165},
+                    "description": "Aracer RC Mini for SE Asia 150cc underbones/cubs",
+                },
+                "price_inr": 22000,
+                "availability": "order",
+                "retailer": "Aracer Thailand",
+                "delivery_days": 21,
             },
-            "price_inr": 22000, "availability": "order",
-            "retailer": "Aracer Thailand", "delivery_days": 21,
-        },
-    ])
+        ]
+    )
 
     # High-flow air filters for Indian/SE Asia 150–400cc
     for brand, model_suffix, hp_delta, price in [
@@ -6568,571 +8254,904 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
         ("BMC", "FM-Series Filter Small-cc", 1.0, 5200),
         ("Green Filter", "Cotton Filter Small-cc", 1.3, 3800),
     ]:
-        seg_parts.append({
-            "category": "air_filter", "brand": brand,
-            "model_name": model_suffix,
-            "part_number": f"AF-{brand.replace(' ', '').replace('&', '')[:4].upper()}-SM",
-            "specs": {"type": "drop_in", "material": "cotton"},
-            "param_deltas": {"engine.peak_power_hp": hp_delta},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"displacement_min_cc": 125, "displacement_max_cc": 400},
-                "description": f"{brand} high-flow filter for 125-400cc",
-            },
-            "price_inr": price, "availability": "in_stock",
-            "retailer": "Performance Parts India",
-        })
+        seg_parts.append(
+            {
+                "category": "air_filter",
+                "brand": brand,
+                "model_name": model_suffix,
+                "part_number": f"AF-{brand.replace(' ', '').replace('&', '')[:4].upper()}-SM",
+                "specs": {"type": "drop_in", "material": "cotton"},
+                "param_deltas": {"engine.peak_power_hp": hp_delta},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"displacement_min_cc": 125, "displacement_max_cc": 400},
+                    "description": f"{brand} high-flow filter for 125-400cc",
+                },
+                "price_inr": price,
+                "availability": "in_stock",
+                "retailer": "Performance Parts India",
+            }
+        )
 
     # Slipper clutch kits for 250–400cc sport
-    seg_parts.extend([
-        {
-            "category": "clutch_kit", "brand": "Suter Racing",
-            "model_name": "Slipper Clutch 250-500cc Singles",
-            "part_number": "SUT-SLIP-250",
-            "specs": {"type": "slipper"},
-            "param_overrides": {"drivetrain.clutch_type": "slipper",
-                                "clutch.clutch_type": "slipper"},
-            "param_deltas": {"chassis.dry_mass_kg": -0.4},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"displacement_min_cc": 250, "displacement_max_cc": 500,
-                          "engine_configs": ["I1"]},
-                "description": "Suter slipper clutch for 250-500cc singles",
+    seg_parts.extend(
+        [
+            {
+                "category": "clutch_kit",
+                "brand": "Suter Racing",
+                "model_name": "Slipper Clutch 250-500cc Singles",
+                "part_number": "SUT-SLIP-250",
+                "specs": {"type": "slipper"},
+                "param_overrides": {
+                    "drivetrain.clutch_type": "slipper",
+                    "clutch.clutch_type": "slipper",
+                },
+                "param_deltas": {"chassis.dry_mass_kg": -0.4},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "displacement_min_cc": 250,
+                        "displacement_max_cc": 500,
+                        "engine_configs": ["I1"],
+                    },
+                    "description": "Suter slipper clutch for 250-500cc singles",
+                },
+                "price_inr": 42000,
+                "availability": "order",
+                "retailer": "Suter EU",
+                "delivery_days": 21,
             },
-            "price_inr": 42000, "availability": "order",
-            "retailer": "Suter EU", "delivery_days": 21,
-        },
-        {
-            "category": "clutch_kit", "brand": "Sigma Performance",
-            "model_name": "Slipper Clutch Indian 200-400",
-            "part_number": "SIG-SLIP-IN",
-            "specs": {"type": "slipper"},
-            "param_overrides": {"drivetrain.clutch_type": "slipper",
-                                "clutch.clutch_type": "slipper"},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["KTM", "Bajaj", "TVS", "Royal Enfield", "Honda", "Hero"],
-                          "displacement_min_cc": 200, "displacement_max_cc": 400},
-                "description": "Sigma Performance slipper clutch for Indian 200-400cc",
+            {
+                "category": "clutch_kit",
+                "brand": "Sigma Performance",
+                "model_name": "Slipper Clutch Indian 200-400",
+                "part_number": "SIG-SLIP-IN",
+                "specs": {"type": "slipper"},
+                "param_overrides": {
+                    "drivetrain.clutch_type": "slipper",
+                    "clutch.clutch_type": "slipper",
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": [
+                            "KTM",
+                            "Bajaj",
+                            "TVS",
+                            "Royal Enfield",
+                            "Honda",
+                            "Hero",
+                        ],
+                        "displacement_min_cc": 200,
+                        "displacement_max_cc": 400,
+                    },
+                    "description": "Sigma Performance slipper clutch for Indian 200-400cc",
+                },
+                "price_inr": 16500,
+                "availability": "in_stock",
+                "retailer": "Sigma India",
             },
-            "price_inr": 16500, "availability": "in_stock",
-            "retailer": "Sigma India",
-        },
-    ])
+        ]
+    )
 
     # Quickshifters for 200–400cc (where stock QS is absent)
-    seg_parts.extend([
-        {
-            "category": "quickshifter", "brand": "Healtech",
-            "model_name": "iQSE Quick Shifter Indian 200-400",
-            "part_number": "HT-IQSE-IN",
-            "specs": {"type": "up-only"},
-            "param_overrides": {"drivetrain.quickshifter": True},
-            "param_deltas": {"drivetrain.total_shift_time_ms": -40.0},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["KTM", "Bajaj", "TVS", "Yamaha", "Honda", "Hero", "Husqvarna", "Royal Enfield"],
-                          "displacement_min_cc": 150, "displacement_max_cc": 450},
-                "description": "Healtech iQSE quickshifter for Indian 150-450cc",
+    seg_parts.extend(
+        [
+            {
+                "category": "quickshifter",
+                "brand": "Healtech",
+                "model_name": "iQSE Quick Shifter Indian 200-400",
+                "part_number": "HT-IQSE-IN",
+                "specs": {"type": "up-only"},
+                "param_overrides": {"drivetrain.quickshifter": True},
+                "param_deltas": {"drivetrain.total_shift_time_ms": -40.0},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": [
+                            "KTM",
+                            "Bajaj",
+                            "TVS",
+                            "Yamaha",
+                            "Honda",
+                            "Hero",
+                            "Husqvarna",
+                            "Royal Enfield",
+                        ],
+                        "displacement_min_cc": 150,
+                        "displacement_max_cc": 450,
+                    },
+                    "description": "Healtech iQSE quickshifter for Indian 150-450cc",
+                },
+                "price_inr": 19500,
+                "availability": "in_stock",
+                "retailer": "Motowheels",
             },
-            "price_inr": 19500, "availability": "in_stock",
-            "retailer": "Motowheels",
-        },
-        {
-            "category": "quickshifter", "brand": "Translogic",
-            "model_name": "Intellishift SE Asia 150cc",
-            "part_number": "TL-INT-SEA",
-            "specs": {"type": "up-only"},
-            "param_overrides": {"drivetrain.quickshifter": True},
-            "param_deltas": {"drivetrain.total_shift_time_ms": -35.0},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"chain_pitch": "428", "displacement_max_cc": 165},
-                "description": "Translogic quickshifter for SE Asia 150cc underbones",
+            {
+                "category": "quickshifter",
+                "brand": "Translogic",
+                "model_name": "Intellishift SE Asia 150cc",
+                "part_number": "TL-INT-SEA",
+                "specs": {"type": "up-only"},
+                "param_overrides": {"drivetrain.quickshifter": True},
+                "param_deltas": {"drivetrain.total_shift_time_ms": -35.0},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"chain_pitch": "428", "displacement_max_cc": 165},
+                    "description": "Translogic quickshifter for SE Asia 150cc underbones",
+                },
+                "price_inr": 24000,
+                "availability": "order",
+                "retailer": "Translogic UK",
+                "delivery_days": 21,
             },
-            "price_inr": 24000, "availability": "order",
-            "retailer": "Translogic UK", "delivery_days": 21,
-        },
-    ])
+        ]
+    )
 
     # Slip-on exhausts — Indian 150–400cc (bike-specific fitment, not universal)
-    seg_parts.extend([
-        {
-            "category": "exhaust", "brand": "Red Baron",
-            "model_name": "Shorty Slip-On Indian 150-250",
-            "part_number": "RB-SHORTY-IN",
-            "specs": {"type": "slip-on", "material": "SS"},
-            "param_deltas": {"engine.peak_power_hp": 1.5, "chassis.dry_mass_kg": -1.8},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["Bajaj", "TVS", "Yamaha", "Honda", "Hero", "KTM", "Husqvarna"],
-                          "displacement_min_cc": 150, "displacement_max_cc": 250},
-                "description": "Red Baron shorty slip-on for Indian 150-250cc",
+    seg_parts.extend(
+        [
+            {
+                "category": "exhaust",
+                "brand": "Red Baron",
+                "model_name": "Shorty Slip-On Indian 150-250",
+                "part_number": "RB-SHORTY-IN",
+                "specs": {"type": "slip-on", "material": "SS"},
+                "param_deltas": {
+                    "engine.peak_power_hp": 1.5,
+                    "chassis.dry_mass_kg": -1.8,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": [
+                            "Bajaj",
+                            "TVS",
+                            "Yamaha",
+                            "Honda",
+                            "Hero",
+                            "KTM",
+                            "Husqvarna",
+                        ],
+                        "displacement_min_cc": 150,
+                        "displacement_max_cc": 250,
+                    },
+                    "description": "Red Baron shorty slip-on for Indian 150-250cc",
+                },
+                "price_inr": 8500,
+                "availability": "in_stock",
+                "retailer": "Red Baron India",
             },
-            "price_inr": 8500, "availability": "in_stock",
-            "retailer": "Red Baron India",
-        },
-        {
-            "category": "exhaust", "brand": "SC-Project",
-            "model_name": "SC1-R Slip-On Indian/KTM 200-390",
-            "part_number": "SC-SC1R-KTM",
-            "specs": {"type": "slip-on", "material": "titanium"},
-            "param_deltas": {"engine.peak_power_hp": 2.5, "chassis.dry_mass_kg": -2.5},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["KTM", "Husqvarna", "Bajaj"],
-                          "displacement_min_cc": 200, "displacement_max_cc": 400},
-                "description": "SC-Project SC1-R slip-on for KTM/Husqvarna/Bajaj 200-400cc",
+            {
+                "category": "exhaust",
+                "brand": "SC-Project",
+                "model_name": "SC1-R Slip-On Indian/KTM 200-390",
+                "part_number": "SC-SC1R-KTM",
+                "specs": {"type": "slip-on", "material": "titanium"},
+                "param_deltas": {
+                    "engine.peak_power_hp": 2.5,
+                    "chassis.dry_mass_kg": -2.5,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": ["KTM", "Husqvarna", "Bajaj"],
+                        "displacement_min_cc": 200,
+                        "displacement_max_cc": 400,
+                    },
+                    "description": "SC-Project SC1-R slip-on for KTM/Husqvarna/Bajaj 200-400cc",
+                },
+                "price_inr": 32000,
+                "availability": "order",
+                "retailer": "SC-Project EU",
+                "delivery_days": 14,
             },
-            "price_inr": 32000, "availability": "order",
-            "retailer": "SC-Project EU", "delivery_days": 14,
-        },
-        {
-            "category": "exhaust", "brand": "Akrapovic",
-            "model_name": "Slip-On Line Duke 390 / RC 390",
-            "part_number": "AKR-SO-KTM390",
-            "specs": {"type": "slip-on", "material": "titanium"},
-            "param_deltas": {"engine.peak_power_hp": 3.0, "chassis.dry_mass_kg": -2.8},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["KTM"],
-                          "displacement_min_cc": 350, "displacement_max_cc": 400,
-                          "engine_configs": ["I1"]},
-                "description": "Akrapovic slip-on for KTM Duke/RC 390 (single)",
+            {
+                "category": "exhaust",
+                "brand": "Akrapovic",
+                "model_name": "Slip-On Line Duke 390 / RC 390",
+                "part_number": "AKR-SO-KTM390",
+                "specs": {"type": "slip-on", "material": "titanium"},
+                "param_deltas": {
+                    "engine.peak_power_hp": 3.0,
+                    "chassis.dry_mass_kg": -2.8,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": ["KTM"],
+                        "displacement_min_cc": 350,
+                        "displacement_max_cc": 400,
+                        "engine_configs": ["I1"],
+                    },
+                    "description": "Akrapovic slip-on for KTM Duke/RC 390 (single)",
+                },
+                "price_inr": 48000,
+                "availability": "order",
+                "retailer": "Akrapovic EU",
+                "delivery_days": 21,
             },
-            "price_inr": 48000, "availability": "order",
-            "retailer": "Akrapovic EU", "delivery_days": 21,
-        },
-    ])
+        ]
+    )
 
     # ─── B. SE ASIA 150cc — exhaust slip-ons + specific parts ───
-    seg_parts.extend([
-        {
-            "category": "exhaust", "brand": "Daytona",
-            "model_name": "TPS Full System SE Asia 150",
-            "part_number": "DAY-TPS-150",
-            "specs": {"type": "full-system", "material": "SS"},
-            "param_deltas": {"engine.peak_power_hp": 2.2, "chassis.dry_mass_kg": -3.0},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"chain_pitch": "428", "displacement_max_cc": 165},
-                "description": "Daytona full system for SE Asia 150cc underbones",
+    seg_parts.extend(
+        [
+            {
+                "category": "exhaust",
+                "brand": "Daytona",
+                "model_name": "TPS Full System SE Asia 150",
+                "part_number": "DAY-TPS-150",
+                "specs": {"type": "full-system", "material": "SS"},
+                "param_deltas": {
+                    "engine.peak_power_hp": 2.2,
+                    "chassis.dry_mass_kg": -3.0,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"chain_pitch": "428", "displacement_max_cc": 165},
+                    "description": "Daytona full system for SE Asia 150cc underbones",
+                },
+                "price_inr": 14500,
+                "availability": "order",
+                "retailer": "Daytona Thailand",
+                "delivery_days": 21,
             },
-            "price_inr": 14500, "availability": "order",
-            "retailer": "Daytona Thailand", "delivery_days": 21,
-        },
-        {
-            "category": "exhaust", "brand": "Yoshimura",
-            "model_name": "TRC Slip-On Kawasaki ZX-25R",
-            "part_number": "YOSHI-TRC-ZX25R",
-            "specs": {"type": "slip-on", "material": "SS/CF"},
-            "param_deltas": {"engine.peak_power_hp": 2.8, "chassis.dry_mass_kg": -2.2},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["Kawasaki"],
-                          "displacement_min_cc": 240, "displacement_max_cc": 260,
-                          "engine_configs": ["I4"]},
-                "description": "Yoshimura TRC slip-on for Kawasaki ZX-25R (I4)",
+            {
+                "category": "exhaust",
+                "brand": "Yoshimura",
+                "model_name": "TRC Slip-On Kawasaki ZX-25R",
+                "part_number": "YOSHI-TRC-ZX25R",
+                "specs": {"type": "slip-on", "material": "SS/CF"},
+                "param_deltas": {
+                    "engine.peak_power_hp": 2.8,
+                    "chassis.dry_mass_kg": -2.2,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": ["Kawasaki"],
+                        "displacement_min_cc": 240,
+                        "displacement_max_cc": 260,
+                        "engine_configs": ["I4"],
+                    },
+                    "description": "Yoshimura TRC slip-on for Kawasaki ZX-25R (I4)",
+                },
+                "price_inr": 42000,
+                "availability": "order",
+                "retailer": "Yoshimura JP",
+                "delivery_days": 28,
             },
-            "price_inr": 42000, "availability": "order",
-            "retailer": "Yoshimura JP", "delivery_days": 28,
-        },
-        {
-            "category": "exhaust", "brand": "Austin Racing",
-            "model_name": "GP1R Slip-On CBR250RR",
-            "part_number": "AR-GP1R-CBR250",
-            "specs": {"type": "slip-on", "material": "titanium"},
-            "param_deltas": {"engine.peak_power_hp": 2.5, "chassis.dry_mass_kg": -2.0},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["Honda"],
-                          "displacement_min_cc": 245, "displacement_max_cc": 260,
-                          "engine_configs": ["I2"]},
-                "description": "Austin Racing GP1R for Honda CBR250RR (parallel twin)",
+            {
+                "category": "exhaust",
+                "brand": "Austin Racing",
+                "model_name": "GP1R Slip-On CBR250RR",
+                "part_number": "AR-GP1R-CBR250",
+                "specs": {"type": "slip-on", "material": "titanium"},
+                "param_deltas": {
+                    "engine.peak_power_hp": 2.5,
+                    "chassis.dry_mass_kg": -2.0,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": ["Honda"],
+                        "displacement_min_cc": 245,
+                        "displacement_max_cc": 260,
+                        "engine_configs": ["I2"],
+                    },
+                    "description": "Austin Racing GP1R for Honda CBR250RR (parallel twin)",
+                },
+                "price_inr": 38000,
+                "availability": "order",
+                "retailer": "Austin Racing UK",
+                "delivery_days": 21,
             },
-            "price_inr": 38000, "availability": "order",
-            "retailer": "Austin Racing UK", "delivery_days": 21,
-        },
-    ])
+        ]
+    )
 
     # ─── D. CRUISER SMALL/MID — RE 350, Jawa, Yezdi, X440, Meteor ───
-    seg_parts.extend([
-        {
-            "category": "exhaust", "brand": "Zard",
-            "model_name": "Conical Slip-On RE 350/500",
-            "part_number": "ZRD-CONICAL-RE",
-            "specs": {"type": "slip-on", "material": "SS"},
-            "param_deltas": {"engine.peak_power_hp": 1.2, "chassis.dry_mass_kg": -2.5},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["Royal Enfield"],
-                          "displacement_min_cc": 340, "displacement_max_cc": 510,
-                          "engine_configs": ["I1"]},
-                "description": "Zard conical slip-on for RE 350/500 singles",
+    seg_parts.extend(
+        [
+            {
+                "category": "exhaust",
+                "brand": "Zard",
+                "model_name": "Conical Slip-On RE 350/500",
+                "part_number": "ZRD-CONICAL-RE",
+                "specs": {"type": "slip-on", "material": "SS"},
+                "param_deltas": {
+                    "engine.peak_power_hp": 1.2,
+                    "chassis.dry_mass_kg": -2.5,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": ["Royal Enfield"],
+                        "displacement_min_cc": 340,
+                        "displacement_max_cc": 510,
+                        "engine_configs": ["I1"],
+                    },
+                    "description": "Zard conical slip-on for RE 350/500 singles",
+                },
+                "price_inr": 16500,
+                "availability": "in_stock",
+                "retailer": "Zard India",
             },
-            "price_inr": 16500, "availability": "in_stock",
-            "retailer": "Zard India",
-        },
-        {
-            "category": "exhaust", "brand": "HP Corse",
-            "model_name": "Hydroform RE 350 Series",
-            "part_number": "HPC-HYDRO-RE350",
-            "specs": {"type": "slip-on", "material": "SS/titanium"},
-            "param_deltas": {"engine.peak_power_hp": 1.4, "chassis.dry_mass_kg": -2.8},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["Royal Enfield"],
-                          "displacement_min_cc": 340, "displacement_max_cc": 360,
-                          "engine_configs": ["I1"]},
-                "description": "HP Corse Hydroform for RE Classic/Meteor/Hunter 350",
+            {
+                "category": "exhaust",
+                "brand": "HP Corse",
+                "model_name": "Hydroform RE 350 Series",
+                "part_number": "HPC-HYDRO-RE350",
+                "specs": {"type": "slip-on", "material": "SS/titanium"},
+                "param_deltas": {
+                    "engine.peak_power_hp": 1.4,
+                    "chassis.dry_mass_kg": -2.8,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": ["Royal Enfield"],
+                        "displacement_min_cc": 340,
+                        "displacement_max_cc": 360,
+                        "engine_configs": ["I1"],
+                    },
+                    "description": "HP Corse Hydroform for RE Classic/Meteor/Hunter 350",
+                },
+                "price_inr": 28500,
+                "availability": "order",
+                "retailer": "HP Corse EU",
+                "delivery_days": 21,
             },
-            "price_inr": 28500, "availability": "order",
-            "retailer": "HP Corse EU", "delivery_days": 21,
-        },
-        {
-            "category": "exhaust", "brand": "Vance & Hines",
-            "model_name": "Eliminator Slip-On HD X440",
-            "part_number": "VH-ELIM-X440",
-            "specs": {"type": "slip-on", "material": "chrome"},
-            "param_deltas": {"engine.peak_power_hp": 1.8, "chassis.dry_mass_kg": -2.0},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["Harley-Davidson"],
-                          "displacement_min_cc": 430, "displacement_max_cc": 450},
-                "description": "Vance & Hines eliminator slip-on for HD X440",
+            {
+                "category": "exhaust",
+                "brand": "Vance & Hines",
+                "model_name": "Eliminator Slip-On HD X440",
+                "part_number": "VH-ELIM-X440",
+                "specs": {"type": "slip-on", "material": "chrome"},
+                "param_deltas": {
+                    "engine.peak_power_hp": 1.8,
+                    "chassis.dry_mass_kg": -2.0,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": ["Harley-Davidson"],
+                        "displacement_min_cc": 430,
+                        "displacement_max_cc": 450,
+                    },
+                    "description": "Vance & Hines eliminator slip-on for HD X440",
+                },
+                "price_inr": 22000,
+                "availability": "order",
+                "retailer": "Vance & Hines India",
+                "delivery_days": 14,
             },
-            "price_inr": 22000, "availability": "order",
-            "retailer": "Vance & Hines India", "delivery_days": 14,
-        },
-        {
-            "category": "air_filter", "brand": "S&S Cycle",
-            "model_name": "Stealth Air Cleaner HD X440",
-            "part_number": "SS-STEALTH-X440",
-            "specs": {"type": "high-flow"},
-            "param_deltas": {"engine.peak_power_hp": 0.8},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["Harley-Davidson"],
-                          "displacement_min_cc": 430, "displacement_max_cc": 450},
-                "description": "S&S Stealth air cleaner for HD X440",
+            {
+                "category": "air_filter",
+                "brand": "S&S Cycle",
+                "model_name": "Stealth Air Cleaner HD X440",
+                "part_number": "SS-STEALTH-X440",
+                "specs": {"type": "high-flow"},
+                "param_deltas": {"engine.peak_power_hp": 0.8},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": ["Harley-Davidson"],
+                        "displacement_min_cc": 430,
+                        "displacement_max_cc": 450,
+                    },
+                    "description": "S&S Stealth air cleaner for HD X440",
+                },
+                "price_inr": 9500,
+                "availability": "in_stock",
+                "retailer": "S&S India",
             },
-            "price_inr": 9500, "availability": "in_stock",
-            "retailer": "S&S India",
-        },
-    ])
+        ]
+    )
 
     # ─── E. RE 650 TWIN — specific performance parts ───
-    seg_parts.extend([
-        {
-            "category": "exhaust", "brand": "S&S Cycle",
-            "model_name": "Grand National Slip-On RE 650",
-            "part_number": "SS-GN-RE650-V2",
-            "specs": {"type": "slip-on", "material": "SS"},
-            "param_deltas": {"engine.peak_power_hp": 2.8, "chassis.dry_mass_kg": -3.5},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["Royal Enfield"],
-                          "engine_configs": ["I2"],
-                          "displacement_min_cc": 640, "displacement_max_cc": 660},
-                "description": "S&S Grand National slip-on for RE 650 twin family",
+    seg_parts.extend(
+        [
+            {
+                "category": "exhaust",
+                "brand": "S&S Cycle",
+                "model_name": "Grand National Slip-On RE 650",
+                "part_number": "SS-GN-RE650-V2",
+                "specs": {"type": "slip-on", "material": "SS"},
+                "param_deltas": {
+                    "engine.peak_power_hp": 2.8,
+                    "chassis.dry_mass_kg": -3.5,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": ["Royal Enfield"],
+                        "engine_configs": ["I2"],
+                        "displacement_min_cc": 640,
+                        "displacement_max_cc": 660,
+                    },
+                    "description": "S&S Grand National slip-on for RE 650 twin family",
+                },
+                "price_inr": 38500,
+                "availability": "order",
+                "retailer": "S&S EU",
+                "delivery_days": 14,
             },
-            "price_inr": 38500, "availability": "order",
-            "retailer": "S&S EU", "delivery_days": 14,
-        },
-        {
-            "category": "ecu", "brand": "Power Commander",
-            "model_name": "PCV RE 650 Twin Map Kit",
-            "part_number": "PC-PCV-RE650",
-            "specs": {"type": "piggyback"},
-            "param_deltas": {"engine.peak_power_hp": 3.5, "engine.peak_torque_nm": 3.0},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["Royal Enfield"],
-                          "engine_configs": ["I2"],
-                          "displacement_min_cc": 640, "displacement_max_cc": 660},
-                "description": "Dynojet PCV for RE 650 twin (Interceptor/GT/Super Meteor/Shotgun)",
+            {
+                "category": "ecu",
+                "brand": "Power Commander",
+                "model_name": "PCV RE 650 Twin Map Kit",
+                "part_number": "PC-PCV-RE650",
+                "specs": {"type": "piggyback"},
+                "param_deltas": {
+                    "engine.peak_power_hp": 3.5,
+                    "engine.peak_torque_nm": 3.0,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": ["Royal Enfield"],
+                        "engine_configs": ["I2"],
+                        "displacement_min_cc": 640,
+                        "displacement_max_cc": 660,
+                    },
+                    "description": "Dynojet PCV for RE 650 twin (Interceptor/GT/Super Meteor/Shotgun)",
+                },
+                "price_inr": 32500,
+                "availability": "order",
+                "retailer": "Dynojet India",
+                "delivery_days": 14,
             },
-            "price_inr": 32500, "availability": "order",
-            "retailer": "Dynojet India", "delivery_days": 14,
-        },
-        {
-            "category": "clutch_kit", "brand": "Barnett",
-            "model_name": "Scorpion Performance Clutch RE 650",
-            "part_number": "BAR-SCORP-RE650",
-            "specs": {"type": "performance", "plates": 7},
-            "param_overrides": {"drivetrain.clutch_type": "slipper",
-                                "clutch.clutch_type": "slipper"},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["Royal Enfield"],
-                          "engine_configs": ["I2"],
-                          "displacement_min_cc": 640, "displacement_max_cc": 660},
-                "description": "Barnett Scorpion clutch kit for RE 650 twin",
+            {
+                "category": "clutch_kit",
+                "brand": "Barnett",
+                "model_name": "Scorpion Performance Clutch RE 650",
+                "part_number": "BAR-SCORP-RE650",
+                "specs": {"type": "performance", "plates": 7},
+                "param_overrides": {
+                    "drivetrain.clutch_type": "slipper",
+                    "clutch.clutch_type": "slipper",
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": ["Royal Enfield"],
+                        "engine_configs": ["I2"],
+                        "displacement_min_cc": 640,
+                        "displacement_max_cc": 660,
+                    },
+                    "description": "Barnett Scorpion clutch kit for RE 650 twin",
+                },
+                "price_inr": 42000,
+                "availability": "order",
+                "retailer": "Barnett India",
+                "delivery_days": 14,
             },
-            "price_inr": 42000, "availability": "order",
-            "retailer": "Barnett India", "delivery_days": 14,
-        },
-    ])
+        ]
+    )
 
     # ─── F. ADVENTURE — Himalayan, Scram, Xpulse, Tiger, R1250GS ───
-    seg_parts.extend([
-        {
-            "category": "exhaust", "brand": "GPR",
-            "model_name": "GP Evo4 Himalayan 411/450",
-            "part_number": "GPR-EVO4-HIM",
-            "specs": {"type": "slip-on", "material": "SS"},
-            "param_deltas": {"engine.peak_power_hp": 1.5, "chassis.dry_mass_kg": -2.2},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["Royal Enfield"],
-                          "categories": ["adventure"],
-                          "displacement_min_cc": 400, "displacement_max_cc": 460},
-                "description": "GPR GP Evo4 slip-on for RE Himalayan 411/450",
+    seg_parts.extend(
+        [
+            {
+                "category": "exhaust",
+                "brand": "GPR",
+                "model_name": "GP Evo4 Himalayan 411/450",
+                "part_number": "GPR-EVO4-HIM",
+                "specs": {"type": "slip-on", "material": "SS"},
+                "param_deltas": {
+                    "engine.peak_power_hp": 1.5,
+                    "chassis.dry_mass_kg": -2.2,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": ["Royal Enfield"],
+                        "categories": ["adventure"],
+                        "displacement_min_cc": 400,
+                        "displacement_max_cc": 460,
+                    },
+                    "description": "GPR GP Evo4 slip-on for RE Himalayan 411/450",
+                },
+                "price_inr": 24500,
+                "availability": "in_stock",
+                "retailer": "GPR India",
             },
-            "price_inr": 24500, "availability": "in_stock",
-            "retailer": "GPR India",
-        },
-        {
-            "category": "suspension", "brand": "YSS",
-            "model_name": "G-Series Rear Shock Himalayan/Scram/Xpulse",
-            "part_number": "YSS-G-HIMXPL",
-            "specs": {"type": "monoshock"},
-            "param_deltas": {"chassis.dry_mass_kg": -0.8},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"categories": ["adventure"],
-                          "displacement_min_cc": 180, "displacement_max_cc": 500},
-                "description": "YSS G-Series rear shock for small-mid ADV",
+            {
+                "category": "suspension",
+                "brand": "YSS",
+                "model_name": "G-Series Rear Shock Himalayan/Scram/Xpulse",
+                "part_number": "YSS-G-HIMXPL",
+                "specs": {"type": "monoshock"},
+                "param_deltas": {"chassis.dry_mass_kg": -0.8},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "categories": ["adventure"],
+                        "displacement_min_cc": 180,
+                        "displacement_max_cc": 500,
+                    },
+                    "description": "YSS G-Series rear shock for small-mid ADV",
+                },
+                "price_inr": 24000,
+                "availability": "in_stock",
+                "retailer": "YSS India",
             },
-            "price_inr": 24000, "availability": "in_stock",
-            "retailer": "YSS India",
-        },
-        {
-            "category": "bodywork", "brand": "Heddingham",
-            "model_name": "Aluminum Skid Plate ADV",
-            "part_number": "HDM-SKID-ADV",
-            "specs": {"material": "aluminum"},
-            "param_deltas": {"chassis.dry_mass_kg": 1.5},
-            "fitment_rules": {
-                "tier": "category",
-                "match": {"categories": ["adventure"]},
-                "description": "Aluminum skid plate for all adventure bikes",
+            {
+                "category": "bodywork",
+                "brand": "Heddingham",
+                "model_name": "Aluminum Skid Plate ADV",
+                "part_number": "HDM-SKID-ADV",
+                "specs": {"material": "aluminum"},
+                "param_deltas": {"chassis.dry_mass_kg": 1.5},
+                "fitment_rules": {
+                    "tier": "category",
+                    "match": {"categories": ["adventure"]},
+                    "description": "Aluminum skid plate for all adventure bikes",
+                },
+                "price_inr": 6500,
+                "availability": "in_stock",
+                "retailer": "ADV Gear India",
             },
-            "price_inr": 6500, "availability": "in_stock",
-            "retailer": "ADV Gear India",
-        },
-    ])
+        ]
+    )
 
     # ─── ENTRY TWINS (300-500cc) — Ninja 400, Z400, R3, MT-03, CBR500R, RS457 ───
-    seg_parts.extend([
-        {
-            "category": "exhaust", "brand": "Akrapovic",
-            "model_name": "Slip-On Line Ninja 400/Z400",
-            "part_number": "AKR-SO-N400",
-            "specs": {"type": "slip-on", "material": "titanium"},
-            "param_deltas": {"engine.peak_power_hp": 3.2, "chassis.dry_mass_kg": -3.0},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["Kawasaki"],
-                          "displacement_min_cc": 395, "displacement_max_cc": 405,
-                          "engine_configs": ["I2"]},
-                "description": "Akrapovic slip-on for Kawasaki Ninja 400/Z400",
+    seg_parts.extend(
+        [
+            {
+                "category": "exhaust",
+                "brand": "Akrapovic",
+                "model_name": "Slip-On Line Ninja 400/Z400",
+                "part_number": "AKR-SO-N400",
+                "specs": {"type": "slip-on", "material": "titanium"},
+                "param_deltas": {
+                    "engine.peak_power_hp": 3.2,
+                    "chassis.dry_mass_kg": -3.0,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": ["Kawasaki"],
+                        "displacement_min_cc": 395,
+                        "displacement_max_cc": 405,
+                        "engine_configs": ["I2"],
+                    },
+                    "description": "Akrapovic slip-on for Kawasaki Ninja 400/Z400",
+                },
+                "price_inr": 55000,
+                "availability": "order",
+                "retailer": "Akrapovic EU",
+                "delivery_days": 21,
             },
-            "price_inr": 55000, "availability": "order",
-            "retailer": "Akrapovic EU", "delivery_days": 21,
-        },
-        {
-            "category": "exhaust", "brand": "Two Brothers Racing",
-            "model_name": "S1R Slip-On R3/MT-03",
-            "part_number": "TBR-S1R-R3",
-            "specs": {"type": "slip-on", "material": "CF"},
-            "param_deltas": {"engine.peak_power_hp": 2.5, "chassis.dry_mass_kg": -2.5},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["Yamaha"],
-                          "displacement_min_cc": 315, "displacement_max_cc": 325,
-                          "engine_configs": ["I2"]},
-                "description": "Two Brothers S1R for Yamaha R3/MT-03",
+            {
+                "category": "exhaust",
+                "brand": "Two Brothers Racing",
+                "model_name": "S1R Slip-On R3/MT-03",
+                "part_number": "TBR-S1R-R3",
+                "specs": {"type": "slip-on", "material": "CF"},
+                "param_deltas": {
+                    "engine.peak_power_hp": 2.5,
+                    "chassis.dry_mass_kg": -2.5,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": ["Yamaha"],
+                        "displacement_min_cc": 315,
+                        "displacement_max_cc": 325,
+                        "engine_configs": ["I2"],
+                    },
+                    "description": "Two Brothers S1R for Yamaha R3/MT-03",
+                },
+                "price_inr": 36000,
+                "availability": "order",
+                "retailer": "TBR USA",
+                "delivery_days": 21,
             },
-            "price_inr": 36000, "availability": "order",
-            "retailer": "TBR USA", "delivery_days": 21,
-        },
-        {
-            "category": "ecu", "brand": "Dynojet",
-            "model_name": "Power Commander V Entry Twins 300-500",
-            "part_number": "DJ-PCV-ENTRY",
-            "specs": {"type": "piggyback"},
-            "param_deltas": {"engine.peak_power_hp": 2.5, "engine.peak_torque_nm": 2.0},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"engine_configs": ["I2"],
-                          "displacement_min_cc": 300, "displacement_max_cc": 500},
-                "description": "Dynojet PCV for 300-500cc parallel-twin entry sport",
+            {
+                "category": "ecu",
+                "brand": "Dynojet",
+                "model_name": "Power Commander V Entry Twins 300-500",
+                "part_number": "DJ-PCV-ENTRY",
+                "specs": {"type": "piggyback"},
+                "param_deltas": {
+                    "engine.peak_power_hp": 2.5,
+                    "engine.peak_torque_nm": 2.0,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "engine_configs": ["I2"],
+                        "displacement_min_cc": 300,
+                        "displacement_max_cc": 500,
+                    },
+                    "description": "Dynojet PCV for 300-500cc parallel-twin entry sport",
+                },
+                "price_inr": 29500,
+                "availability": "order",
+                "retailer": "Dynojet India",
+                "delivery_days": 14,
             },
-            "price_inr": 29500, "availability": "order",
-            "retailer": "Dynojet India", "delivery_days": 14,
-        },
-        {
-            "category": "quickshifter", "brand": "Dynojet",
-            "model_name": "QEM Entry Twins 300-500",
-            "part_number": "DJ-QEM-ENTRY",
-            "specs": {"type": "up-only"},
-            "param_overrides": {"drivetrain.quickshifter": True},
-            "param_deltas": {"drivetrain.total_shift_time_ms": -30.0},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"engine_configs": ["I2"],
-                          "displacement_min_cc": 300, "displacement_max_cc": 500},
-                "description": "Dynojet QEM quickshifter for 300-500cc entry twins",
+            {
+                "category": "quickshifter",
+                "brand": "Dynojet",
+                "model_name": "QEM Entry Twins 300-500",
+                "part_number": "DJ-QEM-ENTRY",
+                "specs": {"type": "up-only"},
+                "param_overrides": {"drivetrain.quickshifter": True},
+                "param_deltas": {"drivetrain.total_shift_time_ms": -30.0},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "engine_configs": ["I2"],
+                        "displacement_min_cc": 300,
+                        "displacement_max_cc": 500,
+                    },
+                    "description": "Dynojet QEM quickshifter for 300-500cc entry twins",
+                },
+                "price_inr": 18500,
+                "availability": "in_stock",
+                "retailer": "Dynojet India",
             },
-            "price_inr": 18500, "availability": "in_stock",
-            "retailer": "Dynojet India",
-        },
-    ])
+        ]
+    )
 
     # ─── G. SCOOTER — Yamaha Aerox 155 CVT ───
-    seg_parts.extend([
-        {
-            "category": "air_filter", "brand": "Malossi",
-            "model_name": "E5 Air Filter Aerox/NVX 155",
-            "part_number": "MAL-E5-AEROX",
-            "specs": {"type": "drop_in"},
-            "param_deltas": {"engine.peak_power_hp": 0.6},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["Yamaha"],
-                          "categories": ["scooter"]},
-                "description": "Malossi E5 air filter for Aerox/NVX 155",
+    seg_parts.extend(
+        [
+            {
+                "category": "air_filter",
+                "brand": "Malossi",
+                "model_name": "E5 Air Filter Aerox/NVX 155",
+                "part_number": "MAL-E5-AEROX",
+                "specs": {"type": "drop_in"},
+                "param_deltas": {"engine.peak_power_hp": 0.6},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"manufacturers": ["Yamaha"], "categories": ["scooter"]},
+                    "description": "Malossi E5 air filter for Aerox/NVX 155",
+                },
+                "price_inr": 4200,
+                "availability": "in_stock",
+                "retailer": "Malossi India",
             },
-            "price_inr": 4200, "availability": "in_stock",
-            "retailer": "Malossi India",
-        },
-        {
-            "category": "exhaust", "brand": "Akrapovic",
-            "model_name": "Slip-On Race Aerox 155",
-            "part_number": "AKR-SO-AEROX",
-            "specs": {"type": "slip-on", "material": "titanium"},
-            "param_deltas": {"engine.peak_power_hp": 1.2, "chassis.dry_mass_kg": -1.5},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["Yamaha"],
-                          "categories": ["scooter"]},
-                "description": "Akrapovic race slip-on for Yamaha Aerox 155",
+            {
+                "category": "exhaust",
+                "brand": "Akrapovic",
+                "model_name": "Slip-On Race Aerox 155",
+                "part_number": "AKR-SO-AEROX",
+                "specs": {"type": "slip-on", "material": "titanium"},
+                "param_deltas": {
+                    "engine.peak_power_hp": 1.2,
+                    "chassis.dry_mass_kg": -1.5,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"manufacturers": ["Yamaha"], "categories": ["scooter"]},
+                    "description": "Akrapovic race slip-on for Yamaha Aerox 155",
+                },
+                "price_inr": 28000,
+                "availability": "order",
+                "retailer": "Akrapovic EU",
+                "delivery_days": 21,
             },
-            "price_inr": 28000, "availability": "order",
-            "retailer": "Akrapovic EU", "delivery_days": 21,
-        },
-    ])
+        ]
+    )
 
     # ─── SMALL-CC BATTERIES / BRAKES / SUSPENSION (category-tier) ───
-    seg_parts.extend([
-        {
-            "category": "battery", "brand": "Amaron",
-            "model_name": "Lithium LFP Battery 150-400cc Indian",
-            "part_number": "AMR-LFP-IN-SM",
-            "specs": {"technology": "lithium_lfp"},
-            "param_deltas": {"chassis.dry_mass_kg": -3.5},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"displacement_min_cc": 150, "displacement_max_cc": 500},
-                "description": "Amaron lithium LFP battery for 150-500cc Indian/SE Asia",
+    seg_parts.extend(
+        [
+            {
+                "category": "battery",
+                "brand": "Amaron",
+                "model_name": "Lithium LFP Battery 150-400cc Indian",
+                "part_number": "AMR-LFP-IN-SM",
+                "specs": {"technology": "lithium_lfp"},
+                "param_deltas": {"chassis.dry_mass_kg": -3.5},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"displacement_min_cc": 150, "displacement_max_cc": 500},
+                    "description": "Amaron lithium LFP battery for 150-500cc Indian/SE Asia",
+                },
+                "price_inr": 7200,
+                "availability": "in_stock",
+                "retailer": "Amaron India",
             },
-            "price_inr": 7200, "availability": "in_stock",
-            "retailer": "Amaron India",
-        },
-        {
-            "category": "brakes", "brand": "EBC",
-            "model_name": "HH Sintered Brake Pads Indian 150-400",
-            "part_number": "EBC-HH-IN-SM",
-            "specs": {"type": "pads", "compound": "sintered"},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"displacement_min_cc": 150, "displacement_max_cc": 400},
-                "description": "EBC HH sintered pads for 150-400cc",
+            {
+                "category": "brakes",
+                "brand": "EBC",
+                "model_name": "HH Sintered Brake Pads Indian 150-400",
+                "part_number": "EBC-HH-IN-SM",
+                "specs": {"type": "pads", "compound": "sintered"},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"displacement_min_cc": 150, "displacement_max_cc": 400},
+                    "description": "EBC HH sintered pads for 150-400cc",
+                },
+                "price_inr": 3500,
+                "availability": "in_stock",
+                "retailer": "EBC India",
             },
-            "price_inr": 3500, "availability": "in_stock",
-            "retailer": "EBC India",
-        },
-        {
-            "category": "suspension", "brand": "K-Tech",
-            "model_name": "25IDS Cartridge Kit Indian 200-400",
-            "part_number": "KT-25IDS-IN",
-            "specs": {"type": "fork_cartridge"},
-            "param_deltas": {"chassis.dry_mass_kg": -0.5},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["KTM", "Bajaj", "TVS", "Yamaha", "Honda"],
-                          "displacement_min_cc": 200, "displacement_max_cc": 400},
-                "description": "K-Tech 25IDS fork cartridge kit for Indian 200-400cc",
+            {
+                "category": "suspension",
+                "brand": "K-Tech",
+                "model_name": "25IDS Cartridge Kit Indian 200-400",
+                "part_number": "KT-25IDS-IN",
+                "specs": {"type": "fork_cartridge"},
+                "param_deltas": {"chassis.dry_mass_kg": -0.5},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": ["KTM", "Bajaj", "TVS", "Yamaha", "Honda"],
+                        "displacement_min_cc": 200,
+                        "displacement_max_cc": 400,
+                    },
+                    "description": "K-Tech 25IDS fork cartridge kit for Indian 200-400cc",
+                },
+                "price_inr": 48000,
+                "availability": "order",
+                "retailer": "K-Tech UK",
+                "delivery_days": 21,
             },
-            "price_inr": 48000, "availability": "order",
-            "retailer": "K-Tech UK", "delivery_days": 21,
-        },
-    ])
+        ]
+    )
 
     # ─── AIR FILTER for 150cc SE Asia underbones (chain_pitch=428) ───
-    seg_parts.extend([
-        {
-            "category": "air_filter", "brand": "KOSO",
-            "model_name": "Cone Intake Filter SE Asia 150",
-            "part_number": "KOSO-CONE-SEA",
-            "specs": {"type": "cone"},
-            "param_deltas": {"engine.peak_power_hp": 0.8},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"chain_pitch": "428", "displacement_max_cc": 165},
-                "description": "KOSO cone filter for SE Asia 150cc underbones",
+    seg_parts.extend(
+        [
+            {
+                "category": "air_filter",
+                "brand": "KOSO",
+                "model_name": "Cone Intake Filter SE Asia 150",
+                "part_number": "KOSO-CONE-SEA",
+                "specs": {"type": "cone"},
+                "param_deltas": {"engine.peak_power_hp": 0.8},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {"chain_pitch": "428", "displacement_max_cc": 165},
+                    "description": "KOSO cone filter for SE Asia 150cc underbones",
+                },
+                "price_inr": 2800,
+                "availability": "order",
+                "retailer": "KOSO Thailand",
+                "delivery_days": 21,
             },
-            "price_inr": 2800, "availability": "order",
-            "retailer": "KOSO Thailand", "delivery_days": 21,
-        },
-    ])
+        ]
+    )
 
     # ─── BODYWORK / WEIGHT-REDUCTION for Indian small-cc ───
-    seg_parts.extend([
-        {
-            "category": "bodywork", "brand": "Puig",
-            "model_name": "Race Windscreen Indian 200-400 Sport",
-            "part_number": "PUIG-RACE-IN-SPT",
-            "specs": {"material": "PMMA"},
-            "param_deltas": {"aero.cd": -0.015},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["KTM", "Bajaj", "TVS", "Yamaha", "Honda", "Kawasaki"],
-                          "displacement_min_cc": 150, "displacement_max_cc": 500,
-                          "categories": ["sport", "naked"]},
-                "description": "Puig race windscreen for Indian 150-500cc sport/naked",
+    seg_parts.extend(
+        [
+            {
+                "category": "bodywork",
+                "brand": "Puig",
+                "model_name": "Race Windscreen Indian 200-400 Sport",
+                "part_number": "PUIG-RACE-IN-SPT",
+                "specs": {"material": "PMMA"},
+                "param_deltas": {"aero.cd": -0.015},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": [
+                            "KTM",
+                            "Bajaj",
+                            "TVS",
+                            "Yamaha",
+                            "Honda",
+                            "Kawasaki",
+                        ],
+                        "displacement_min_cc": 150,
+                        "displacement_max_cc": 500,
+                        "categories": ["sport", "naked"],
+                    },
+                    "description": "Puig race windscreen for Indian 150-500cc sport/naked",
+                },
+                "price_inr": 5800,
+                "availability": "in_stock",
+                "retailer": "Puig India",
             },
-            "price_inr": 5800, "availability": "in_stock",
-            "retailer": "Puig India",
-        },
-        {
-            "category": "bodywork", "brand": "Carbonin",
-            "model_name": "Carbon Fiber Race Fairing KTM RC 390",
-            "part_number": "CBN-CF-RC390",
-            "specs": {"material": "carbon_fiber"},
-            "param_deltas": {"chassis.dry_mass_kg": -4.5, "aero.cd": -0.02},
-            "fitment_rules": {
-                "tier": "family",
-                "match": {"manufacturers": ["KTM"],
-                          "displacement_min_cc": 370, "displacement_max_cc": 400,
-                          "engine_configs": ["I1"]},
-                "description": "Carbonin CF race fairing for KTM RC 390",
+            {
+                "category": "bodywork",
+                "brand": "Carbonin",
+                "model_name": "Carbon Fiber Race Fairing KTM RC 390",
+                "part_number": "CBN-CF-RC390",
+                "specs": {"material": "carbon_fiber"},
+                "param_deltas": {"chassis.dry_mass_kg": -4.5, "aero.cd": -0.02},
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": ["KTM"],
+                        "displacement_min_cc": 370,
+                        "displacement_max_cc": 400,
+                        "engine_configs": ["I1"],
+                    },
+                    "description": "Carbonin CF race fairing for KTM RC 390",
+                },
+                "price_inr": 48000,
+                "availability": "order",
+                "retailer": "Carbonin EU",
+                "delivery_days": 28,
             },
-            "price_inr": 48000, "availability": "order",
-            "retailer": "Carbonin EU", "delivery_days": 28,
-        },
-    ])
+        ]
+    )
 
     parts += seg_parts
 
     # Final 5 parts to reach 240 — universal-tier general purpose items
     misc_parts += [
-        {"category": "battery", "brand": "Yuasa", "model_name": "YTX20L-BS High-Performance Battery", "part_number": "YUA-YTX20L", "specs": {"technology": "calcium"}, "fitment_rules": {"tier": "universal", "description": "Standard high-performance battery for all motorcycles"}, "price_inr": 5500, "availability": "in_stock", "retailer": "Yuasa India"},
-        {"category": "bodywork", "brand": "Generic", "model_name": "Universal Frame Sliders Kit", "part_number": "GEN-SLIDERS", "specs": {"material": "plastic"}, "param_deltas": {"chassis.dry_mass_kg": 0.5}, "fitment_rules": {"tier": "universal", "description": "Universal frame sliders for crash protection"}, "price_inr": 4000, "availability": "in_stock", "retailer": "MotoParts India"},
-        {"category": "fuel_system", "brand": "Tygon", "model_name": "Universal Fuel Line Upgrade Kit", "part_number": "TYG-FUEL-KIT", "specs": {"type": "fuel_line"}, "fitment_rules": {"tier": "universal", "description": "Universal fuel line replacement kit"}, "price_inr": 2500, "availability": "in_stock", "retailer": "MotoParts India"},
-        {"category": "suspension", "brand": "Generic", "model_name": "Universal Fork Brace Kit", "part_number": "GEN-FORK-BRACE", "specs": {"type": "brace"}, "param_deltas": {"chassis.dry_mass_kg": 0.3}, "fitment_rules": {"tier": "universal", "description": "Universal fork brace for all motorcycles"}, "price_inr": 8000, "availability": "in_stock", "retailer": "MotoParts India"},
-        {"category": "brakes", "brand": "Generic", "model_name": "Universal DOT-4 Brake Fluid Premium", "part_number": "GEN-DOT4-PRO", "specs": {"type": "fluid"}, "fitment_rules": {"tier": "universal", "description": "Premium DOT-4 brake fluid for all motorcycles"}, "price_inr": 800, "availability": "in_stock", "retailer": "MotoParts India"},
+        {
+            "category": "battery",
+            "brand": "Yuasa",
+            "model_name": "YTX20L-BS High-Performance Battery",
+            "part_number": "YUA-YTX20L",
+            "specs": {"technology": "calcium"},
+            "fitment_rules": {
+                "tier": "universal",
+                "description": "Standard high-performance battery for all motorcycles",
+            },
+            "price_inr": 5500,
+            "availability": "in_stock",
+            "retailer": "Yuasa India",
+        },
+        {
+            "category": "bodywork",
+            "brand": "Generic",
+            "model_name": "Universal Frame Sliders Kit",
+            "part_number": "GEN-SLIDERS",
+            "specs": {"material": "plastic"},
+            "param_deltas": {"chassis.dry_mass_kg": 0.5},
+            "fitment_rules": {
+                "tier": "universal",
+                "description": "Universal frame sliders for crash protection",
+            },
+            "price_inr": 4000,
+            "availability": "in_stock",
+            "retailer": "MotoParts India",
+        },
+        {
+            "category": "fuel_system",
+            "brand": "Tygon",
+            "model_name": "Universal Fuel Line Upgrade Kit",
+            "part_number": "TYG-FUEL-KIT",
+            "specs": {"type": "fuel_line"},
+            "fitment_rules": {
+                "tier": "universal",
+                "description": "Universal fuel line replacement kit",
+            },
+            "price_inr": 2500,
+            "availability": "in_stock",
+            "retailer": "MotoParts India",
+        },
+        {
+            "category": "suspension",
+            "brand": "Generic",
+            "model_name": "Universal Fork Brace Kit",
+            "part_number": "GEN-FORK-BRACE",
+            "specs": {"type": "brace"},
+            "param_deltas": {"chassis.dry_mass_kg": 0.3},
+            "fitment_rules": {
+                "tier": "universal",
+                "description": "Universal fork brace for all motorcycles",
+            },
+            "price_inr": 8000,
+            "availability": "in_stock",
+            "retailer": "MotoParts India",
+        },
+        {
+            "category": "brakes",
+            "brand": "Generic",
+            "model_name": "Universal DOT-4 Brake Fluid Premium",
+            "part_number": "GEN-DOT4-PRO",
+            "specs": {"type": "fluid"},
+            "fitment_rules": {
+                "tier": "universal",
+                "description": "Premium DOT-4 brake fluid for all motorcycles",
+            },
+            "price_inr": 800,
+            "availability": "in_stock",
+            "retailer": "MotoParts India",
+        },
     ]
 
     parts += misc_parts

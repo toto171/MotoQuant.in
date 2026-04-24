@@ -852,9 +852,7 @@ def _integrate_distance(t: np.ndarray, v: np.ndarray) -> np.ndarray:
     return np.concatenate([[0.0], np.cumsum(v_mid * dt)])
 
 
-def _interpolate_et(
-    t: np.ndarray, dist: np.ndarray, target_m: float
-) -> float | None:
+def _interpolate_et(t: np.ndarray, dist: np.ndarray, target_m: float) -> float | None:
     """Linear interpolation: time when cumulative distance hits target_m."""
     idx = np.searchsorted(dist, target_m)
     if idx == 0 or idx >= len(dist):

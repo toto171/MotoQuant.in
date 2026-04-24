@@ -61,7 +61,6 @@ from __future__ import annotations
 import copy
 import warnings
 from dataclasses import dataclass
-from typing import Callable
 
 import numpy as np
 
@@ -295,7 +294,9 @@ class BayesianBuildOptimizer:
         # Apply budget penalty: if cost > budget, add a large penalty to ET
         if cost > self.budget_inr:
             overage = cost - self.budget_inr
-            penalty = 0.5 * (overage / self.budget_inr)  # 50% penalty per budget overrun
+            penalty = 0.5 * (
+                overage / self.budget_inr
+            )  # 50% penalty per budget overrun
             et_penalised = et + penalty
         else:
             et_penalised = et
@@ -316,7 +317,6 @@ class BayesianBuildOptimizer:
         try:
             import torch
             from botorch.fit import fit_gpytorch_mll
-            from botorch.generation import get_samples
             from botorch.models import SingleTaskGP
             from botorch.optim import optimize_acqf
             from botorch.utils.sampling import draw_sobol_samples
@@ -329,8 +329,10 @@ class BayesianBuildOptimizer:
 
         param_names = list(self.PARAM_BOUNDS.keys())
         bounds = torch.tensor(
-            [[self.PARAM_BOUNDS[k][0] for k in param_names],
-             [self.PARAM_BOUNDS[k][1] for k in param_names]],
+            [
+                [self.PARAM_BOUNDS[k][0] for k in param_names],
+                [self.PARAM_BOUNDS[k][1] for k in param_names],
+            ],
             dtype=torch.float32,
         )
 
@@ -365,14 +367,14 @@ class BayesianBuildOptimizer:
                 self.best_idx = len(self.X_samples) - 1
 
             if self.verbose and (i + 1) % max(1, n_init // 3) == 0:
-                print(f"  {i+1}/{n_init} initial samples: best ET={self.best_et_s:.3f}s")
+                print(
+                    f"  {i + 1}/{n_init} initial samples: best ET={self.best_et_s:.3f}s"
+                )
 
         # BO loop: fit GP, sample next point via EI
         for iteration in range(n_init, self.n_iterations):
             # Convert to torch tensors
-            X_tensor = torch.tensor(
-                np.array(self.X_samples), dtype=torch.float32
-            )
+            X_tensor = torch.tensor(np.array(self.X_samples), dtype=torch.float32)
             Y_tensor = torch.tensor(
                 np.array(self.Y_samples).reshape(-1, 1), dtype=torch.float32
             )
@@ -410,12 +412,12 @@ class BayesianBuildOptimizer:
             if self.verbose and (iteration + 1) % max(1, self.n_iterations // 10) == 0:
                 pct = 100 * (iteration + 1) / self.n_iterations
                 print(
-                    f"  {pct:5.1f}%  ({iteration+1}/{self.n_iterations} iters): "
+                    f"  {pct:5.1f}%  ({iteration + 1}/{self.n_iterations} iters): "
                     f"best ET={self.best_et_s:.3f}s"
                 )
 
         if self.verbose:
-            print(f"  100.0%  done — compilation of results...")
+            print("  100.0%  done — compilation of results...")
 
         # Extract best result
         best_params_arr = self.X_samples[self.best_idx]

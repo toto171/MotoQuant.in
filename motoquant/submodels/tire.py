@@ -88,9 +88,7 @@ class TireModel:
         # Road-surface temperature proxy.  If the config carries an explicit
         # track_temp_c on env, use it; otherwise fall back to ambient+5.
         env = getattr(self.cfg, "environment", None)
-        T_road = (
-            getattr(env, "track_temp_c", None) if env is not None else None
-        )
+        T_road = getattr(env, "track_temp_c", None) if env is not None else None
         if T_road is None:
             T_road = T_ambient + 5.0
         # Conduction through ~5 mm of rubber to the road surface.

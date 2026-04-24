@@ -20,6 +20,13 @@ exclude = [
     "*.egg-info",
     ".ruff_cache",
     "node_modules",
+    # Legacy Streamlit single-file UI being phased out by the Tauri/React
+    # desktop app under desktop/. Uses condensed multi-statement-per-line
+    # patterns and dict() literals that are intentional for the tabular
+    # tire/parts param-binding code; rewriting to ruff-clean form would
+    # hurt readability without functional benefit. Skipped from lint
+    # until the desktop app fully replaces it (Phase 5 post-launch).
+    "app.py",
 ]
 
 [tool.ruff.lint]

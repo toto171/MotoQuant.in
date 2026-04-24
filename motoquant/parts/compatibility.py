@@ -9,35 +9,37 @@ import json
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 _logger = logging.getLogger(__name__)
 
 
 class FitmentTier(str, Enum):
     """Fitment tier model: how specifically a part is matched to bikes."""
-    EXACT = "exact"          # Fits only specific bike_ids
-    FAMILY = "family"        # Fits engine family (config, displacement range, category)
-    CATEGORY = "category"    # Fits broad category + displacement
+
+    EXACT = "exact"  # Fits only specific bike_ids
+    FAMILY = "family"  # Fits engine family (config, displacement range, category)
+    CATEGORY = "category"  # Fits broad category + displacement
     UNIVERSAL = "universal"  # Fits virtually every motorcycle
 
 
 @dataclass
 class FitmentMatch:
     """Constraints for family/category tier matching."""
+
     manufacturers: list[str] = field(default_factory=list)
     engine_configs: list[str] = field(default_factory=list)
-    displacement_min_cc: Optional[float] = None
-    displacement_max_cc: Optional[float] = None
+    displacement_min_cc: float | None = None
+    displacement_max_cc: float | None = None
     categories: list[str] = field(default_factory=list)
-    year_min: Optional[int] = None
-    year_max: Optional[int] = None
-    chain_pitch: Optional[str] = None
+    year_min: int | None = None
+    year_max: int | None = None
+    chain_pitch: str | None = None
     # Stroke cycle: 2 or 4. When set, only bikes whose engine_params.stroke_type
     # matches will satisfy the rule. Prevents 2T-part → 4T-bike leaks (and vice
     # versa) in the same displacement / cylinder-config window. Introduced
     # April 20, 2026 alongside the 2-stroke expansion catalog.
-    stroke_type: Optional[int] = None
+    stroke_type: int | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to JSON-serializable dict."""
@@ -83,6 +85,7 @@ class FitmentRules:
     """
     Complete fitment rules for a part, matching the spec exactly.
     """
+
     tier: FitmentTier
     bike_ids: list[int] = field(default_factory=list)
     match: FitmentMatch = field(default_factory=FitmentMatch)
@@ -185,7 +188,9 @@ def is_compatible(part_row: dict, bike_row: dict) -> tuple[bool, str]:
     try:
         rules = FitmentRules.from_json(fitment_rules_str)
     except (json.JSONDecodeError, ValueError) as e:
-        _logger.warning(f"Invalid fitment_rules JSON for part {part_row.get('id')}: {e}")
+        _logger.warning(
+            f"Invalid fitment_rules JSON for part {part_row.get('id')}: {e}"
+        )
         return False, f"invalid fitment_rules: {e}"
 
     # ───────────────────────────────────────────────────
@@ -217,7 +222,10 @@ def is_compatible(part_row: dict, bike_row: dict) -> tuple[bool, str]:
             _logger.warning(
                 f"Part fitment tier '{rules.tier.value}' has no match constraints; treating as universal"
             )
-            return True, f"tier {rules.tier.value} without constraints (treated as universal)"
+            return (
+                True,
+                f"tier {rules.tier.value} without constraints (treated as universal)",
+            )
 
         # Test each constraint
         result, reason = _test_match_constraints(rules.match, bike_row)
@@ -253,9 +261,7 @@ def _test_match_constraints(match: FitmentMatch, bike_row: dict) -> tuple[bool, 
     # enrich the row before calling is_compatible().
     if match.manufacturers:
         bike_mfr = (
-            bike_row.get("manufacturer")
-            or bike_row.get("manufacturer_name")
-            or ""
+            bike_row.get("manufacturer") or bike_row.get("manufacturer_name") or ""
         )
         bike_mfr_lc = bike_mfr.strip().lower()
         allowed = {m.strip().lower() for m in match.manufacturers}
@@ -279,9 +285,15 @@ def _test_match_constraints(match: FitmentMatch, bike_row: dict) -> tuple[bool, 
     disp = bike_row.get("displacement_cc")
     if disp is not None:
         if match.displacement_min_cc is not None and disp < match.displacement_min_cc:
-            return False, f"displacement {disp}cc below min {match.displacement_min_cc}cc"
+            return (
+                False,
+                f"displacement {disp}cc below min {match.displacement_min_cc}cc",
+            )
         if match.displacement_max_cc is not None and disp > match.displacement_max_cc:
-            return False, f"displacement {disp}cc above max {match.displacement_max_cc}cc"
+            return (
+                False,
+                f"displacement {disp}cc above max {match.displacement_max_cc}cc",
+            )
 
     # Categories
     if match.categories:
@@ -310,9 +322,7 @@ def _test_match_constraints(match: FitmentMatch, bike_row: dict) -> tuple[bool, 
     # declared a stroke_type filter.
     if match.stroke_type is not None:
         bike_stroke = (
-            bike_row.get("stroke_type")
-            or bike_row.get("engine_stroke_type")
-            or 4
+            bike_row.get("stroke_type") or bike_row.get("engine_stroke_type") or 4
         )
         try:
             bike_stroke_int = int(bike_stroke)

@@ -47,12 +47,11 @@ from ..models import BikeConfig
 from .roi import (
     BuildROIResult,
     PartROIResult,
+    _run_et,
     compute_parts_roi,
     find_best_build,
     rank_categories,
-    _run_et,
 )
-
 
 # ─────────────────────────────────────────────────────────────────
 # Build profiles — restrict which part categories are eligible
@@ -130,34 +129,81 @@ _PROFILE_CATEGORIES: dict[BuildProfile, set[str]] = {
 
 # Only one part per exclusive-group can be selected.
 EXCLUSIVE_GROUPS: list[set[str]] = [
-    {"exhaust"},          # can only have one exhaust system
-    {"ecu"},              # can only have one ECU flash
-    {"clutch_kit"},       # one clutch kit
-    {"air_filter"},       # one air filter
-    {"quickshifter"},     # one quickshifter
-    {"battery"},          # one battery
+    {"exhaust"},  # can only have one exhaust system
+    {"ecu"},  # can only have one ECU flash
+    {"clutch_kit"},  # one clutch kit
+    {"air_filter"},  # one air filter
+    {"quickshifter"},  # one quickshifter
+    {"battery"},  # one battery
 ]
 
 # Synergy pairs: categories that gain more when combined.
 # The multiplier is applied to the *combined* delta_et prediction
 # in the tiered build output (informational, not used in DP).
 SYNERGIES: list[tuple[str, str, float, str]] = [
-    ("exhaust", "ecu", 1.10, "Full exhaust + ECU flash unlocks ~10% more power than either alone"),
-    ("exhaust", "air_filter", 1.05, "Better breathing: exhaust + high-flow filter complement each other"),
-    ("boost_kit", "fuel_system", 1.15, "Forced induction demands upgraded fuel delivery"),
-    ("boost_kit", "clutch_kit", 1.05, "Extra power benefits from a lock-up or slipper clutch upgrade"),
-    ("sprocket", "chain", 1.02, "Matched gearing + chain ensures drivetrain reliability"),
-    ("wheelie_bar", "swingarm_ext", 1.03, "Combined launch stability: bar + extended swingarm"),
-    ("nitrous", "fuel_system", 1.12, "Nitrous requires adequate fuel flow to avoid lean detonation"),
+    (
+        "exhaust",
+        "ecu",
+        1.10,
+        "Full exhaust + ECU flash unlocks ~10% more power than either alone",
+    ),
+    (
+        "exhaust",
+        "air_filter",
+        1.05,
+        "Better breathing: exhaust + high-flow filter complement each other",
+    ),
+    (
+        "boost_kit",
+        "fuel_system",
+        1.15,
+        "Forced induction demands upgraded fuel delivery",
+    ),
+    (
+        "boost_kit",
+        "clutch_kit",
+        1.05,
+        "Extra power benefits from a lock-up or slipper clutch upgrade",
+    ),
+    (
+        "sprocket",
+        "chain",
+        1.02,
+        "Matched gearing + chain ensures drivetrain reliability",
+    ),
+    (
+        "wheelie_bar",
+        "swingarm_ext",
+        1.03,
+        "Combined launch stability: bar + extended swingarm",
+    ),
+    (
+        "nitrous",
+        "fuel_system",
+        1.12,
+        "Nitrous requires adequate fuel flow to avoid lean detonation",
+    ),
 ]
 
 # Dependency rules: if you install A, you SHOULD also install B.
 # These are soft warnings, not hard blocks.
 SOFT_DEPENDENCIES: list[tuple[str, str, str]] = [
-    ("boost_kit", "fuel_system", "Turbo/SC kit strongly recommends upgraded fuel system to avoid lean conditions"),
+    (
+        "boost_kit",
+        "fuel_system",
+        "Turbo/SC kit strongly recommends upgraded fuel system to avoid lean conditions",
+    ),
     ("nitrous", "fuel_system", "Nitrous kit strongly recommends upgraded fuel system"),
-    ("boost_kit", "ecu", "Forced induction needs an ECU retune to be safe and effective"),
-    ("nitrous", "ecu", "Nitrous benefits greatly from ECU flash for ignition timing adjustment"),
+    (
+        "boost_kit",
+        "ecu",
+        "Forced induction needs an ECU retune to be safe and effective",
+    ),
+    (
+        "nitrous",
+        "ecu",
+        "Nitrous benefits greatly from ECU flash for ignition timing adjustment",
+    ),
 ]
 
 
@@ -247,7 +293,7 @@ class BuildRecommendation:
     def summary(self) -> str:
         """Human-readable recommendation summary."""
         lines = [
-            f"═══ MotoQuant Smart Build Recommendation ═══",
+            "═══ MotoQuant Smart Build Recommendation ═══",
             f"Bike: {self.bike_name}",
             f"Profile: {self.profile.value}",
             f"Budget: ₹{self.budget_inr:,.0f}",
@@ -299,7 +345,9 @@ class BuildRecommendation:
                     "category": p.category,
                     "price_inr": p.price_inr,
                     "delta_et_s": round(p.delta_et_s, 4),
-                    "roi_score": round(p.roi_score, 4) if not math.isinf(p.roi_score) else None,
+                    "roi_score": round(p.roi_score, 4)
+                    if not math.isinf(p.roi_score)
+                    else None,
                 }
                 for p in self.build.selected_parts
             ],
@@ -657,20 +705,19 @@ def generate_upgrade_path(
     # Auto-generate budget tiers from catalog prices
     if budget_tiers is None:
         prices = sorted(
-            [p.get("price_inr", 0) or 0 for p in filtered_parts if (p.get("price_inr") or 0) > 0]
+            [
+                p.get("price_inr", 0) or 0
+                for p in filtered_parts
+                if (p.get("price_inr") or 0) > 0
+            ]
         )
         if not prices:
             return UpgradePath(bike_name=base_config.name, tiers=[])
 
         total_value = sum(prices)
         # Generate percentile breakpoints
-        fractions = [
-            (i + 1) / n_tiers for i in range(n_tiers)
-        ]
-        budget_tiers = [
-            max(min(prices), total_value * frac)
-            for frac in fractions
-        ]
+        fractions = [(i + 1) / n_tiers for i in range(n_tiers)]
+        budget_tiers = [max(min(prices), total_value * frac) for frac in fractions]
 
     # Tier names
     _TIER_NAMES = ["Budget", "Mid-Range", "Performance", "Full Send", "No Limits"]

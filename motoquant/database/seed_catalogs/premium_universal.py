@@ -31,7 +31,6 @@ def seed_premium_universal(db: MotoQuantDB) -> int:
         # ═══════════════════════════════════════════════════════════════
         # BRAKES (18 parts)
         # ═══════════════════════════════════════════════════════════════
-
         # Brembo RCS master cylinders
         {
             "category": "brakes",
@@ -494,11 +493,9 @@ def seed_premium_universal(db: MotoQuantDB) -> int:
             "retailer": "Superbike India",
             "availability": "order",
         },
-
         # ═══════════════════════════════════════════════════════════════
         # SUSPENSION (18 parts)
         # ═══════════════════════════════════════════════════════════════
-
         # Öhlins (track/race focus)
         {
             "category": "suspension",
@@ -576,7 +573,6 @@ def seed_premium_universal(db: MotoQuantDB) -> int:
             "retailer": "Superbike India",
             "availability": "import_only",
         },
-
         # K-Tech
         {
             "category": "suspension",
@@ -627,7 +623,6 @@ def seed_premium_universal(db: MotoQuantDB) -> int:
             "price_inr": 52000,
             "retailer": "MotoParts India",
         },
-
         # Bitubo
         {
             "category": "suspension",
@@ -677,7 +672,6 @@ def seed_premium_universal(db: MotoQuantDB) -> int:
             "price_inr": 110000,
             "retailer": "MotoParts India",
         },
-
         # Wilbers adventure/touring
         {
             "category": "suspension",
@@ -704,7 +698,6 @@ def seed_premium_universal(db: MotoQuantDB) -> int:
             "retailer": "Grand Pitstop",
             "availability": "order",
         },
-
         # Andreani
         {
             "category": "suspension",
@@ -731,7 +724,6 @@ def seed_premium_universal(db: MotoQuantDB) -> int:
             "retailer": "Superbike India",
             "availability": "order",
         },
-
         # YSS Indian commuter focus
         {
             "category": "suspension",
@@ -781,7 +773,6 @@ def seed_premium_universal(db: MotoQuantDB) -> int:
             "price_inr": 55000,
             "retailer": "MotoParts India",
         },
-
         # Progressive (cruiser)
         {
             "category": "suspension",
@@ -807,7 +798,6 @@ def seed_premium_universal(db: MotoQuantDB) -> int:
             "price_inr": 62000,
             "retailer": "MotoParts India",
         },
-
         # Race Tech / HyperPro
         {
             "category": "suspension",
@@ -857,7 +847,6 @@ def seed_premium_universal(db: MotoQuantDB) -> int:
             "price_inr": 42000,
             "retailer": "MotoParts India",
         },
-
         # Drag-specific
         {
             "category": "suspension",
@@ -959,11 +948,9 @@ def seed_premium_universal(db: MotoQuantDB) -> int:
             "retailer": "Grand Pitstop",
             "availability": "import_only",
         },
-
         # ═══════════════════════════════════════════════════════════════
         # BATTERY (8 parts)
         # ═══════════════════════════════════════════════════════════════
-
         # Shorai LiFePO4
         {
             "category": "battery",
@@ -1044,7 +1031,6 @@ def seed_premium_universal(db: MotoQuantDB) -> int:
             "price_inr": 12000,
             "retailer": "MotoParts India",
         },
-
         # Antigravity
         {
             "category": "battery",
@@ -1126,7 +1112,6 @@ def seed_premium_universal(db: MotoQuantDB) -> int:
             "price_inr": 15000,
             "retailer": "MotoParts India",
         },
-
         # Drag race / ultra-light
         {
             "category": "battery",
@@ -1182,11 +1167,9 @@ def seed_premium_universal(db: MotoQuantDB) -> int:
             "retailer": "Grand Pitstop",
             "availability": "import_only",
         },
-
         # ═══════════════════════════════════════════════════════════════
         # ECU PIGGYBACK (10 parts — brand-level, not model-specific)
         # ═══════════════════════════════════════════════════════════════
-
         {
             "category": "ecu",
             "brand": "Bazzaz",
@@ -1294,7 +1277,12 @@ def seed_premium_universal(db: MotoQuantDB) -> int:
             "part_number": "RB-RACING",
             "specs": {
                 "type": "piggyback",
-                "features": ["fuel_map", "ignition_map", "launch_control", "wheelie_control"],
+                "features": [
+                    "fuel_map",
+                    "ignition_map",
+                    "launch_control",
+                    "wheelie_control",
+                ],
                 "connectivity": "plug_and_play",
             },
             "fitment_rules": {
@@ -1436,11 +1424,9 @@ def seed_premium_universal(db: MotoQuantDB) -> int:
             "retailer": "Woolich Racing India",
             "availability": "order",
         },
-
         # ═══════════════════════════════════════════════════════════════
         # WHEELIE BAR (4 parts — drag-specific)
         # ═══════════════════════════════════════════════════════════════
-
         {
             "category": "wheelie_bar",
             "brand": "MPS Racing",
@@ -1545,11 +1531,9 @@ def seed_premium_universal(db: MotoQuantDB) -> int:
             "retailer": "Grand Pitstop",
             "availability": "import_only",
         },
-
         # ═══════════════════════════════════════════════════════════════
         # BODYWORK — REARSETS/CLIP-ONS/CARBON (4 parts)
         # ═══════════════════════════════════════════════════════════════
-
         {
             "category": "bodywork",
             "brand": "Woodcraft",

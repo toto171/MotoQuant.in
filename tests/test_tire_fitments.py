@@ -4,15 +4,12 @@ Verify that every bike in the catalog has OEM tire fitments.
 """
 
 import json
-import sqlite3
 import tempfile
-from pathlib import Path
 
 import pytest
 
 from motoquant.database.connection import MotoQuantDB
-from motoquant.database.seed import seed_all, seed_bike_tire_fitments
-from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
+from motoquant.database.seed import seed_all
 
 
 class TestTireFitments:
@@ -28,6 +25,7 @@ class TestTireFitments:
         yield db
         # Cleanup
         import os
+
         if os.path.exists(path):
             os.remove(path)
 
@@ -105,7 +103,9 @@ class TestTireFitments:
             """
         )
         orphaned_bikes = cursor.fetchone()[0]
-        assert orphaned_bikes == 0, f"{orphaned_bikes} fitments with invalid bike_model_id"
+        assert orphaned_bikes == 0, (
+            f"{orphaned_bikes} fitments with invalid bike_model_id"
+        )
 
         # Check tire references
         cursor = temp_db._conn.execute(
@@ -117,7 +117,9 @@ class TestTireFitments:
             """
         )
         orphaned_tires = cursor.fetchone()[0]
-        assert orphaned_tires == 0, f"{orphaned_tires} fitments with invalid tire_model_id"
+        assert orphaned_tires == 0, (
+            f"{orphaned_tires} fitments with invalid tire_model_id"
+        )
 
     def test_rim_sizes_covered(self, temp_db):
         """Verify tires are available for all rim sizes used in the catalog."""
@@ -151,14 +153,12 @@ class TestTireFitments:
                 # Check if tire with this rim exists
                 check = temp_db._conn.execute(
                     "SELECT COUNT(*) FROM tire_models WHERE rim_diameter_inch = ?",
-                    (rim,)
+                    (rim,),
                 ).fetchone()[0]
                 if check == 0:
-                    missing_rims.add(f"{size} (rim {rim}\")")
+                    missing_rims.add(f'{size} (rim {rim}")')
 
-        assert len(missing_rims) == 0, (
-            f"Missing tires for rim sizes: {missing_rims}"
-        )
+        assert len(missing_rims) == 0, f"Missing tires for rim sizes: {missing_rims}"
 
     def test_fitment_completeness_summary(self, temp_db):
         """Print a summary of fitment coverage."""
@@ -174,7 +174,7 @@ class TestTireFitments:
         )
         by_type = dict(cursor.fetchall())
 
-        print(f"\nFitment summary:")
+        print("\nFitment summary:")
         print(f"  By position: {by_position}")
         print(f"  By type: {by_type}")
 
@@ -184,7 +184,7 @@ class TestTireFitments:
         total_fitments = sum(by_position.values())
         print(f"  Total bikes: {total_bikes}")
         print(f"  Total fitments: {total_fitments}")
-        print(f"  Average fitments/bike: {total_fitments/total_bikes:.1f}")
+        print(f"  Average fitments/bike: {total_fitments / total_bikes:.1f}")
 
 
 if __name__ == "__main__":

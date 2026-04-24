@@ -168,7 +168,14 @@ _DB: list[dict] = [
         "mfr": "yamaha",
         "model": "r15 v4",
         "year": (2021, 2026),
-        "ratios": [2.800, 1.880, 1.360, 1.090, 0.960, 0.860],  # verified: derived from Yamaha India parallel engineering with NS200 (R15 V4 & NS200 share 155cc platform); 6th ratio 0.860 gives ~144 km/h top (matches published 145 km/h)
+        "ratios": [
+            2.800,
+            1.880,
+            1.360,
+            1.090,
+            0.960,
+            0.860,
+        ],  # verified: derived from Yamaha India parallel engineering with NS200 (R15 V4 & NS200 share 155cc platform); 6th ratio 0.860 gives ~144 km/h top (matches published 145 km/h)
         "front": 15,
         "rear": 43,
         "primary": 2.100,
@@ -177,7 +184,14 @@ _DB: list[dict] = [
         "mfr": "yamaha",
         "model": "mt-15 v2",
         "year": (2021, 2026),
-        "ratios": [2.800, 1.880, 1.360, 1.090, 0.960, 0.860],  # verified: identical to R15 V4 (same 155cc engine & gearbox); 6th ratio 0.860 gives ~144 km/h top
+        "ratios": [
+            2.800,
+            1.880,
+            1.360,
+            1.090,
+            0.960,
+            0.860,
+        ],  # verified: identical to R15 V4 (same 155cc engine & gearbox); 6th ratio 0.860 gives ~144 km/h top
         "front": 15,
         "rear": 43,
         "primary": 2.100,
@@ -376,7 +390,14 @@ _DB: list[dict] = [
         "mfr": "honda",
         "model": "cbr 250r",
         "year": (2011, 2019),
-        "ratios": [3.333, 2.118, 1.571, 1.304, 1.115, 0.963],  # verified: Honda CBR250R service data; 6th ratio 0.963 gives ~152 km/h top (matches published)
+        "ratios": [
+            3.333,
+            2.118,
+            1.571,
+            1.304,
+            1.115,
+            0.963,
+        ],  # verified: Honda CBR250R service data; 6th ratio 0.963 gives ~152 km/h top (matches published)
         "front": 16,
         "rear": 41,
         "primary": 1.900,
@@ -385,7 +406,14 @@ _DB: list[dict] = [
         "mfr": "honda",
         "model": "cb 300r",
         "year": (2019, 2026),
-        "ratios": [3.420, 2.250, 1.650, 1.350, 1.170, 1.040],  # verified: Honda CB300R service specs; 6th ratio 1.040 gives ~157 km/h top (matches published)
+        "ratios": [
+            3.420,
+            2.250,
+            1.650,
+            1.350,
+            1.170,
+            1.040,
+        ],  # verified: Honda CB300R service specs; 6th ratio 1.040 gives ~157 km/h top (matches published)
         "front": 14,
         "rear": 39,
         "primary": 2.176,
@@ -499,7 +527,14 @@ _DB: list[dict] = [
         "mfr": "kawasaki",
         "model": "ninja 300",
         "year": (2013, 2026),
-        "ratios": [2.714, 1.789, 1.409, 1.160, 1.000, 0.857],  # verified: Kawasaki Ninja 300 service manual; 6th ratio 0.857 gives ~170 km/h top (matches published)
+        "ratios": [
+            2.714,
+            1.789,
+            1.409,
+            1.160,
+            1.000,
+            0.857,
+        ],  # verified: Kawasaki Ninja 300 service manual; 6th ratio 0.857 gives ~170 km/h top (matches published)
         "front": 14,
         "rear": 42,
         "primary": 3.087,
@@ -856,7 +891,14 @@ _DB: list[dict] = [
         "mfr": "bajaj",
         "model": "pulsar ns 200",
         "year": (2017, 2026),
-        "ratios": [2.800, 1.880, 1.360, 1.090, 0.960, 0.860],  # verified: official Bajaj specs; 6th ratio 0.860 gives ~130 km/h top (matches published)
+        "ratios": [
+            2.800,
+            1.880,
+            1.360,
+            1.090,
+            0.960,
+            0.860,
+        ],  # verified: official Bajaj specs; 6th ratio 0.860 gives ~130 km/h top (matches published)
         "front": 15,
         "rear": 43,
         "primary": 2.100,
@@ -865,7 +907,14 @@ _DB: list[dict] = [
         "mfr": "bajaj",
         "model": "pulsar rs 200",
         "year": (2015, 2026),
-        "ratios": [2.800, 1.880, 1.360, 1.090, 0.960, 0.860],  # verified: identical to NS200 (same 199.5cc engine & gearbox); 6th ratio 0.860 gives ~130 km/h top
+        "ratios": [
+            2.800,
+            1.880,
+            1.360,
+            1.090,
+            0.960,
+            0.860,
+        ],  # verified: identical to NS200 (same 199.5cc engine & gearbox); 6th ratio 0.860 gives ~130 km/h top
         "front": 15,
         "rear": 43,
         "primary": 2.100,
@@ -1535,9 +1584,7 @@ def lookup_gear_ratios(
     )
 
 
-def _pick_default_key(
-    category: str, displacement_cc: float, gears: int | None
-) -> str:
+def _pick_default_key(category: str, displacement_cc: float, gears: int | None) -> str:
     """
     Pick the appropriate Tier-2 default key based on category and displacement.
 
@@ -1565,4 +1612,4 @@ def _pick_default_key(
         if gears == 5:
             return "generic_5"
         else:
-            return "generic_6"
+            return "generic_6"

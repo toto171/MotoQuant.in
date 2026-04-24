@@ -15,29 +15,30 @@ Outputs (written to web/public/):
 """
 
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+
+from PIL import Image, ImageDraw, ImageFont
 
 # ----------------------------------------------------------------------------
 # Brand tokens (from web/tailwind.config.js)
 # ----------------------------------------------------------------------------
-ORANGE        = "#FF5E1F"
-ORANGE_LIGHT  = "#FF8F57"
-ORANGE_DEEP   = "#CC4000"
-ACCENT_MINT   = "#00FFB2"
-CARBON        = "#0A0A0B"
-INK_2         = "#111113"
-INK_3         = "#1A1A1D"
-INK_4         = "#27272A"
-WHITE         = "#FFFFFF"
-WHITE_DIM     = "#D4D4D7"
-WHITE_SUB     = "#8A8A90"
+ORANGE = "#FF5E1F"
+ORANGE_LIGHT = "#FF8F57"
+ORANGE_DEEP = "#CC4000"
+ACCENT_MINT = "#00FFB2"
+CARBON = "#0A0A0B"
+INK_2 = "#111113"
+INK_3 = "#1A1A1D"
+INK_4 = "#27272A"
+WHITE = "#FFFFFF"
+WHITE_DIM = "#D4D4D7"
+WHITE_SUB = "#8A8A90"
 
-FONT_BOLD_IT  = "/usr/share/fonts/truetype/dejavu/DejaVuSans-BoldOblique.ttf"
-FONT_BOLD     = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-FONT_COND_B   = "/usr/share/fonts/truetype/dejavu/DejaVuSansCondensed-Bold.ttf"
-FONT_MONO_B   = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
-FONT_MONO     = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
-FONT_REGULAR  = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+FONT_BOLD_IT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-BoldOblique.ttf"
+FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+FONT_COND_B = "/usr/share/fonts/truetype/dejavu/DejaVuSansCondensed-Bold.ttf"
+FONT_MONO_B = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
+FONT_MONO = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+FONT_REGULAR = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 
 OUT_DIR = Path("/sessions/charming-vigilant-ptolemy/mnt/Vehicle Dynamics/web/public")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -68,11 +69,10 @@ def render_mark(size: int, *, include_accents: bool = True) -> Image.Image:
         # but the dot visually collided with the italic M's top-right
         # serif at every size ≥48px, so it's been removed.
         bar_y1 = int(size * 0.83)
-        bar_h  = max(1, int(size * 0.05))
+        bar_h = max(1, int(size * 0.05))
         bar_x1 = int(size * 0.22)
         bar_x2 = int(size * 0.78)
-        d.rectangle([bar_x1, bar_y1, bar_x2, bar_y1 + bar_h],
-                    fill=ORANGE)
+        d.rectangle([bar_x1, bar_y1, bar_x2, bar_y1 + bar_h], fill=ORANGE)
 
     # Bold italic M — the hero mark. Fills the square but leaves breathing
     # room above (for the italic top-right reach to not clip the corner)
@@ -129,7 +129,9 @@ ICON_SVG = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role=
 # OG image: 1200x630, brand-consistent, with live project numbers.
 # Layout: left = brand lockup + tagline + stat strip, right = v(t) curve card.
 # ----------------------------------------------------------------------------
-def draw_grid(d: ImageDraw.ImageDraw, w: int, h: int, color=(255, 255, 255, 10), step: int = 60) -> None:
+def draw_grid(
+    d: ImageDraw.ImageDraw, w: int, h: int, color=(255, 255, 255, 10), step: int = 60
+) -> None:
     for x in range(0, w, step):
         d.line([(x, 0), (x, h)], fill=color, width=1)
     for y in range(0, h, step):
@@ -145,6 +147,7 @@ def hex_rgba(hexcode: str, alpha: int = 255) -> tuple:
 def velocity_curve_points(t_total=12.0, v_trap_kmh=240.0, samples=180):
     """Return [(t, v_kmh), ...] for a plausible GSX-R K5 quarter-mile v(t)."""
     import math
+
     pts = []
     v_trap_ms = v_trap_kmh / 3.6
     # Classic drag-racing profile: big launch accel, tapering toward trap.
@@ -181,14 +184,21 @@ def render_og_image(path: Path) -> None:
     pill_w = pill_bbox[2] - pill_bbox[0] + 72
     pill_h = 48
     pill_x, pill_y = 110, 90
-    d.rounded_rectangle([pill_x, pill_y, pill_x + pill_w, pill_y + pill_h],
-                        radius=pill_h // 2, fill=(0, 0, 0, 0),
-                        outline=(255, 255, 255, 60), width=1)
+    d.rounded_rectangle(
+        [pill_x, pill_y, pill_x + pill_w, pill_y + pill_h],
+        radius=pill_h // 2,
+        fill=(0, 0, 0, 0),
+        outline=(255, 255, 255, 60),
+        width=1,
+    )
     # pill dot
-    d.ellipse([pill_x + 16, pill_y + pill_h // 2 - 6,
-               pill_x + 28, pill_y + pill_h // 2 + 6], fill=ORANGE)
-    d.text((pill_x + 38, pill_y + 11), pill_text,
-           font=pill_font, fill=hex_rgba(WHITE_DIM))
+    d.ellipse(
+        [pill_x + 16, pill_y + pill_h // 2 - 6, pill_x + 28, pill_y + pill_h // 2 + 6],
+        fill=ORANGE,
+    )
+    d.text(
+        (pill_x + 38, pill_y + 11), pill_text, font=pill_font, fill=hex_rgba(WHITE_DIM)
+    )
 
     # Wordmark: "Moto" orange, "Quant" white. Sized to fit in ~600px of
     # left column without crowding the simulation card at x≈720.
@@ -202,20 +212,24 @@ def render_og_image(path: Path) -> None:
 
     # Tagline
     tag_font = ImageFont.truetype(FONT_BOLD, 30)
-    d.text((110, 295), "The Physics of Faster",
-           font=tag_font, fill=hex_rgba(WHITE, 230))
+    d.text(
+        (110, 295), "The Physics of Faster", font=tag_font, fill=hex_rgba(WHITE, 230)
+    )
 
     # Subline — trimmed so it fits in the left column
     sub_font = ImageFont.truetype(FONT_REGULAR, 20)
-    d.text((110, 338),
-           "Quarter-mile simulation  ·  ±0.07s accuracy",
-           font=sub_font, fill=hex_rgba(WHITE_SUB, 255))
+    d.text(
+        (110, 338),
+        "Quarter-mile simulation  ·  ±0.07s accuracy",
+        font=sub_font,
+        fill=hex_rgba(WHITE_SUB, 255),
+    )
 
     # Stat strip — 4 stats (dropped 'tires' for horizontal budget)
     stats = [
         ("287", "bikes"),
         ("465", "parts"),
-        ("12",  "venues"),
+        ("12", "venues"),
         ("739", "tests"),
     ]
     stat_x = 110
@@ -226,8 +240,12 @@ def render_og_image(path: Path) -> None:
         n_bbox = d.textbbox((0, 0), num, font=stat_num_font)
         n_w = n_bbox[2] - n_bbox[0]
         d.text((stat_x, stat_y), num, font=stat_num_font, fill=ORANGE)
-        d.text((stat_x, stat_y + 58), lbl.upper(),
-               font=stat_lbl_font, fill=hex_rgba(WHITE_SUB))
+        d.text(
+            (stat_x, stat_y + 58),
+            lbl.upper(),
+            font=stat_lbl_font,
+            fill=hex_rgba(WHITE_SUB),
+        )
         stat_x += max(n_w + 42, 120)
 
     # ----- Right side: v(t) simulation card -----
@@ -237,17 +255,24 @@ def render_og_image(path: Path) -> None:
     # Card background with subtle orange glow border
     card_bg = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     cdraw = ImageDraw.Draw(card_bg)
-    cdraw.rounded_rectangle([card_x, card_y, card_x + card_w, card_y + card_h],
-                            radius=card_r, fill=(17, 17, 19, 255),
-                            outline=(255, 94, 31, 120), width=2)
+    cdraw.rounded_rectangle(
+        [card_x, card_y, card_x + card_w, card_y + card_h],
+        radius=card_r,
+        fill=(17, 17, 19, 255),
+        outline=(255, 94, 31, 120),
+        width=2,
+    )
     img.paste(Image.alpha_composite(img.convert("RGBA"), card_bg).convert("RGB"))
     d = ImageDraw.Draw(img, "RGBA")
 
     # Card header
     hdr_font = ImageFont.truetype(FONT_MONO, 18)
-    d.text((card_x + 24, card_y + 20),
-           "GSX-R 1000 K5  —  v(t) simulation",
-           font=hdr_font, fill=hex_rgba(WHITE_SUB))
+    d.text(
+        (card_x + 24, card_y + 20),
+        "GSX-R 1000 K5  —  v(t) simulation",
+        font=hdr_font,
+        fill=hex_rgba(WHITE_SUB),
+    )
 
     # Plot area inside card
     plot_x1 = card_x + 60
@@ -256,10 +281,10 @@ def render_og_image(path: Path) -> None:
     plot_y2 = card_y + card_h - 80
 
     # Plot grid
-    for i in range(0, 7):
+    for i in range(7):
         gy = plot_y1 + i * (plot_y2 - plot_y1) // 6
         d.line([(plot_x1, gy), (plot_x2, gy)], fill=(255, 255, 255, 15), width=1)
-    for i in range(0, 7):
+    for i in range(7):
         gx = plot_x1 + i * (plot_x2 - plot_x1) // 6
         d.line([(gx, plot_y1), (gx, plot_y2)], fill=(255, 255, 255, 15), width=1)
 
@@ -268,20 +293,34 @@ def render_og_image(path: Path) -> None:
     # y-axis (km/h) — 0, 60, 120, 180, 240
     for i, v in enumerate([240, 180, 120, 60]):
         gy = plot_y1 + i * (plot_y2 - plot_y1) // 4
-        d.text((plot_x1 - 44, gy - 9), f"{v:>3d}",
-               font=axis_font, fill=hex_rgba(WHITE_SUB, 200))
+        d.text(
+            (plot_x1 - 44, gy - 9),
+            f"{v:>3d}",
+            font=axis_font,
+            fill=hex_rgba(WHITE_SUB, 200),
+        )
     # x-axis (time)
-    d.text((plot_x1 - 6, plot_y2 + 10), "0",
-           font=axis_font, fill=hex_rgba(WHITE_SUB, 200))
-    d.text((plot_x2 - 24, plot_y2 + 10), "12s",
-           font=axis_font, fill=hex_rgba(WHITE_SUB, 200))
+    d.text(
+        (plot_x1 - 6, plot_y2 + 10), "0", font=axis_font, fill=hex_rgba(WHITE_SUB, 200)
+    )
+    d.text(
+        (plot_x2 - 24, plot_y2 + 10),
+        "12s",
+        font=axis_font,
+        fill=hex_rgba(WHITE_SUB, 200),
+    )
 
     # Curve
     pts = velocity_curve_points()
     t_max = 12.0
     v_max = 245.0
-    px = [(plot_x1 + (t / t_max) * (plot_x2 - plot_x1),
-           plot_y2 - (v / v_max) * (plot_y2 - plot_y1)) for t, v in pts]
+    px = [
+        (
+            plot_x1 + (t / t_max) * (plot_x2 - plot_x1),
+            plot_y2 - (v / v_max) * (plot_y2 - plot_y1),
+        )
+        for t, v in pts
+    ]
 
     # Fill under curve
     fill_poly = px + [(plot_x2, plot_y2), (plot_x1, plot_y2)]
@@ -300,8 +339,11 @@ def render_og_image(path: Path) -> None:
     dash_len = 6
     y = plot_y1
     while y < plot_y2:
-        d.line([(et_x, y), (et_x, min(y + dash_len, plot_y2))],
-               fill=(255, 94, 31, 200), width=1)
+        d.line(
+            [(et_x, y), (et_x, min(y + dash_len, plot_y2))],
+            fill=(255, 94, 31, 200),
+            width=1,
+        )
         y += dash_len * 2
     # dot
     d.ellipse([et_x - 7, et_y - 7, et_x + 7, et_y + 7], fill=ORANGE)
@@ -315,11 +357,14 @@ def render_og_image(path: Path) -> None:
     c_h = 30
     c_x = min(et_x + 14, plot_x2 - c_w)
     c_y = et_y - 36
-    d.rounded_rectangle([c_x, c_y, c_x + c_w, c_y + c_h],
-                        radius=c_h // 2, fill=CARBON,
-                        outline=ORANGE, width=1)
-    d.text((c_x + 12, c_y + 6), call_text,
-           font=call_font, fill=ORANGE)
+    d.rounded_rectangle(
+        [c_x, c_y, c_x + c_w, c_y + c_h],
+        radius=c_h // 2,
+        fill=CARBON,
+        outline=ORANGE,
+        width=1,
+    )
+    d.text((c_x + 12, c_y + 6), call_text, font=call_font, fill=ORANGE)
 
     # Bottom-right domain pill
     dom_font = ImageFont.truetype(FONT_MONO_B, 18)
@@ -329,16 +374,20 @@ def render_og_image(path: Path) -> None:
     d_h = 42
     d_x = W - d_w - 40
     d_y = H - d_h - 40
-    d.rounded_rectangle([d_x, d_y, d_x + d_w, d_y + d_h],
-                        radius=d_h // 2, fill=(0, 0, 0, 0),
-                        outline=(255, 255, 255, 70), width=1)
-    d.text((d_x + 20, d_y + 11), dom_text,
-           font=dom_font, fill=hex_rgba(WHITE_DIM))
+    d.rounded_rectangle(
+        [d_x, d_y, d_x + d_w, d_y + d_h],
+        radius=d_h // 2,
+        fill=(0, 0, 0, 0),
+        outline=(255, 255, 255, 70),
+        width=1,
+    )
+    d.text((d_x + 20, d_y + 11), dom_text, font=dom_font, fill=hex_rgba(WHITE_DIM))
 
     # Bottom-left tagline chip
     bl_font = ImageFont.truetype(FONT_MONO, 16)
-    d.text((110, 585), "The physics of faster",
-           font=bl_font, fill=hex_rgba(WHITE_SUB, 220))
+    d.text(
+        (110, 585), "The physics of faster", font=bl_font, fill=hex_rgba(WHITE_SUB, 220)
+    )
 
     img.save(path, "PNG", optimize=True)
 
@@ -389,8 +438,7 @@ def main() -> None:
 
     # favicon.ico — bundle 16/32/48 for legacy browsers + Google
     ico_path = OUT_DIR / "favicon.ico"
-    rasters[16].save(ico_path, format="ICO",
-                     sizes=[(16, 16), (32, 32), (48, 48)])
+    rasters[16].save(ico_path, format="ICO", sizes=[(16, 16), (32, 32), (48, 48)])
     print(f"wrote {ico_path.name}")
 
     # App-directory copies — Next.js app-router picks these up automatically.
@@ -401,7 +449,7 @@ def main() -> None:
     rasters[180].save(app_dir / "apple-icon.png", "PNG", optimize=True)
     # Small favicon.ico next to the app so /favicon.ico is served.
     (OUT_DIR / "favicon.ico").replace(OUT_DIR / "favicon.ico")  # no-op
-    print(f"wrote app/icon.png and app/apple-icon.png")
+    print("wrote app/icon.png and app/apple-icon.png")
 
     # Web manifest
     (OUT_DIR / "site.webmanifest").write_text(WEBMANIFEST, encoding="utf-8")

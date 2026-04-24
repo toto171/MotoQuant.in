@@ -16,8 +16,6 @@ Test philosophy
 """
 
 import copy
-import json
-import math
 import os
 import sys
 import tempfile
@@ -45,14 +43,12 @@ from motoquant.analysis.surrogate_data import (
     generate_training_data,
 )
 from motoquant.analysis.surrogate_xgb import (
-    DEFAULT_XGB_PARAMS,
     SurrogateMetrics,
     XGBSurrogate,
     _check_array_shapes,
     train_surrogate,
 )
 from motoquant.defaults import gsxr1000_k5
-
 
 # ─────────────────────────────────────────────────────────────────
 # Shared fixture helpers
@@ -71,7 +67,10 @@ def _make_synthetic_arrays(
     Synthetic 17-feature dataset where ET ≈ f(power, mass, power_to_weight).
     Used to verify XGBoost can learn a simple relationship.
     """
-    from motoquant.analysis.surrogate_data import _compute_derived_features, BASE_FEATURE_NAMES
+    from motoquant.analysis.surrogate_data import (
+        BASE_FEATURE_NAMES,
+        _compute_derived_features,
+    )
 
     rng = np.random.default_rng(seed)
     # Build base features (14) at midpoints
@@ -92,7 +91,10 @@ def _make_synthetic_arrays(
         rows.append([full[k] for k in FEATURE_NAMES])
 
     X = np.array(rows, dtype=np.float32)
-    pw_idx = FEATURE_NAMES.index("power_to_weight_hp_kg")
+    # power_to_weight_hp_kg index reserved for future use (curve fits
+    # below intentionally use peak_power_hp + total_mass_kg directly so
+    # the surrogate has to learn the derived ratio rather than reading
+    # it from a leak-from-target feature).
 
     # ET is a simple function of power/weight (the derived feature)
     y_et = (
@@ -102,7 +104,8 @@ def _make_synthetic_arrays(
         + rng.normal(0, 0.01, size=n)
     ).astype(np.float32)
     y_trap = (
-        55.0 + X[:, FEATURE_NAMES.index("peak_power_hp")] * 0.10
+        55.0
+        + X[:, FEATURE_NAMES.index("peak_power_hp")] * 0.10
         + rng.normal(0, 0.5, size=n)
     ).astype(np.float32)
 
@@ -151,8 +154,13 @@ class TestFeatureSchema(unittest.TestCase):
 
     def test_required_derived_features_present(self):
         for feat in (
-            "power_to_weight_hp_kg", "effective_1st_ratio", "effective_top_ratio",
-            "gear_ratio_2nd", "gear_ratio_3rd", "gear_ratio_4th", "gear_ratio_5th",
+            "power_to_weight_hp_kg",
+            "effective_1st_ratio",
+            "effective_top_ratio",
+            "gear_ratio_2nd",
+            "gear_ratio_3rd",
+            "gear_ratio_4th",
+            "gear_ratio_5th",
         ):
             self.assertIn(feat, DERIVED_FEATURE_NAMES)
 
@@ -168,12 +176,20 @@ class TestFeatureSchema(unittest.TestCase):
 class TestDerivedFeatures(unittest.TestCase):
     def _base(self, power=150.0, mass=230.0, prim=2.0, final=3.5, g1=3.0, gtop=1.0):
         return {
-            "peak_power_hp": power, "peak_torque_nm": 80.0, "redline_rpm": 12000.0,
-            "total_mass_kg": mass, "aero_cd": 0.70, "frontal_area_m2": 0.50,
-            "tire_mu_peak": 1.10, "rear_rolling_radius_m": 0.300,
-            "primary_ratio": prim, "final_drive_ratio": final,
-            "gear_ratio_1st": g1, "gear_ratio_top": gtop,
-            "reaction_time_ms": 100.0, "altitude_m": 0.0,
+            "peak_power_hp": power,
+            "peak_torque_nm": 80.0,
+            "redline_rpm": 12000.0,
+            "total_mass_kg": mass,
+            "aero_cd": 0.70,
+            "frontal_area_m2": 0.50,
+            "tire_mu_peak": 1.10,
+            "rear_rolling_radius_m": 0.300,
+            "primary_ratio": prim,
+            "final_drive_ratio": final,
+            "gear_ratio_1st": g1,
+            "gear_ratio_top": gtop,
+            "reaction_time_ms": 100.0,
+            "altitude_m": 0.0,
         }
 
     def test_power_to_weight(self):
@@ -206,8 +222,12 @@ class TestDerivedFeatures(unittest.TestCase):
     def test_gears_monotonically_decreasing(self):
         base = self._base(g1=3.5, gtop=0.9)
         d = _compute_derived_features(base)
-        gears = [d["gear_ratio_2nd"], d["gear_ratio_3rd"],
-                 d["gear_ratio_4th"], d["gear_ratio_5th"]]
+        gears = [
+            d["gear_ratio_2nd"],
+            d["gear_ratio_3rd"],
+            d["gear_ratio_4th"],
+            d["gear_ratio_5th"],
+        ]
         for i in range(len(gears) - 1):
             self.assertGreater(gears[i], gears[i + 1])
 
@@ -233,7 +253,9 @@ class TestFeatureExtraction(unittest.TestCase):
             lo, hi = FEATURE_BOUNDS[name]
             lower_guard = lo - max(1.0, abs(lo) * 0.5)
             upper_guard = hi * 2.0
-            self.assertGreaterEqual(val, lower_guard, f"{name}={val} is way below low={lo}")
+            self.assertGreaterEqual(
+                val, lower_guard, f"{name}={val} is way below low={lo}"
+            )
             self.assertLess(val, upper_guard, f"{name}={val} is way above high={hi}")
 
     def test_config_to_feature_vector_shape(self):
@@ -279,12 +301,8 @@ class TestSobolSampling(unittest.TestCase):
             for name in BASE_FEATURE_NAMES:
                 val = s[name]
                 lo, hi = FEATURE_BOUNDS[name]
-                self.assertGreaterEqual(
-                    val, lo - 1e-6, f"{name}={val} below low={lo}"
-                )
-                self.assertLessEqual(
-                    val, hi + 1e-6, f"{name}={val} above high={hi}"
-                )
+                self.assertGreaterEqual(val, lo - 1e-6, f"{name}={val} below low={lo}")
+                self.assertLessEqual(val, hi + 1e-6, f"{name}={val} above high={hi}")
 
     def test_different_seeds_produce_different_samples(self):
         s1 = _sobol_sample_features(16, seed=0)
@@ -372,7 +390,10 @@ class TestApplyFeaturesToConfig(unittest.TestCase):
 
 class TestSurrogateDataPoint(unittest.TestCase):
     def _make_point(self):
-        base = {k: (FEATURE_BOUNDS[k][0] + FEATURE_BOUNDS[k][1]) / 2.0 for k in BASE_FEATURE_NAMES}
+        base = {
+            k: (FEATURE_BOUNDS[k][0] + FEATURE_BOUNDS[k][1]) / 2.0
+            for k in BASE_FEATURE_NAMES
+        }
         feat = {**base, **_compute_derived_features(base)}
         return SurrogateDataPoint(features=feat, et_s=10.5, trap_speed_mps=55.0)
 
@@ -479,6 +500,7 @@ class TestSurrogateDataset(unittest.TestCase):
             path = f.name
         try:
             import numpy as _np
+
             _np.savez_compressed(
                 path,
                 X=X14,
@@ -567,7 +589,7 @@ class TestXGBSurrogate(unittest.TestCase):
     def test_evaluate_returns_metrics(self):
         metrics = self.model.evaluate(self.X, self.y_et, self.y_trap)
         self.assertIsInstance(metrics, SurrogateMetrics)
-        self.assertGreater(metrics.et_r2, 0.5)   # should learn simple relationship
+        self.assertGreater(metrics.et_r2, 0.5)  # should learn simple relationship
 
     def test_evaluate_r2_positive(self):
         metrics = self.model.evaluate(self.X, self.y_et, self.y_trap)
@@ -724,10 +746,15 @@ class TestSurrogateCLI(unittest.TestCase):
     def test_generate_creates_npz(self):
         _, rc = self._run_cli(
             [
-                "analysis", "surrogate", "generate",
-                "--n-samples", "16",
-                "--output", self.data_path,
-                "--seed", "0",
+                "analysis",
+                "surrogate",
+                "generate",
+                "--n-samples",
+                "16",
+                "--output",
+                self.data_path,
+                "--seed",
+                "0",
             ]
         )
         self.assertEqual(rc, 0)
@@ -738,17 +765,26 @@ class TestSurrogateCLI(unittest.TestCase):
         if not Path(self.data_path).exists():
             self._run_cli(
                 [
-                    "analysis", "surrogate", "generate",
-                    "--n-samples", "16",
-                    "--output", self.data_path,
-                    "--seed", "0",
+                    "analysis",
+                    "surrogate",
+                    "generate",
+                    "--n-samples",
+                    "16",
+                    "--output",
+                    self.data_path,
+                    "--seed",
+                    "0",
                 ]
             )
         _, rc = self._run_cli(
             [
-                "analysis", "surrogate", "train",
-                "--data", self.data_path,
-                "--model-out", self.model_path,
+                "analysis",
+                "surrogate",
+                "train",
+                "--data",
+                self.data_path,
+                "--model-out",
+                self.model_path,
             ]
         )
         self.assertEqual(rc, 0)
@@ -759,9 +795,17 @@ class TestSurrogateCLI(unittest.TestCase):
         from motoquant.run import build_parser, cmd_analysis
 
         parser = build_parser()
-        args = parser.parse_args(["analysis", "surrogate", "generate",
-                                   "--n-samples", "4",
-                                   "--output", str(Path(self.tmpdir) / "tmp.npz")])
+        args = parser.parse_args(
+            [
+                "analysis",
+                "surrogate",
+                "generate",
+                "--n-samples",
+                "4",
+                "--output",
+                str(Path(self.tmpdir) / "tmp.npz"),
+            ]
+        )
         args.surrogate_command = "nonexistent"
         buf = StringIO()
         with patch("sys.stdout", buf):
@@ -784,10 +828,18 @@ class TestDNNSurrogate(unittest.TestCase):
         cls.model = None
         try:
             from motoquant.analysis.surrogate_dnn import DNNSurrogate
+
             cls.model = DNNSurrogate(hidden_dims=(32, 64, 64, 32), dropout=0.0)
             # Use small hidden dims + few epochs for fast test
-            cls.model.fit(cls.X, cls.y_et, cls.y_trap, epochs=10, batch_size=64,
-                          patience=5, verbose=False)
+            cls.model.fit(
+                cls.X,
+                cls.y_et,
+                cls.y_trap,
+                epochs=10,
+                batch_size=64,
+                patience=5,
+                verbose=False,
+            )
         except ImportError as e:
             raise unittest.SkipTest(f"DNNSurrogate unavailable: {e}")
 
@@ -818,6 +870,7 @@ class TestDNNSurrogate(unittest.TestCase):
     def test_predict_config_returns_floats(self):
         self._skip_if_none()
         from motoquant.defaults import gsxr1000_k5
+
         et, trap = self.model.predict_config(gsxr1000_k5())
         self.assertIsInstance(et, float)
         self.assertIsInstance(trap, float)
@@ -827,6 +880,7 @@ class TestDNNSurrogate(unittest.TestCase):
     def test_evaluate_returns_metrics(self):
         self._skip_if_none()
         from motoquant.analysis.surrogate_xgb import SurrogateMetrics
+
         metrics = self.model.evaluate(self.X, self.y_et, self.y_trap)
         self.assertIsInstance(metrics, SurrogateMetrics)
         self.assertTrue(np.isfinite(metrics.et_mae_s))
@@ -841,6 +895,7 @@ class TestDNNSurrogate(unittest.TestCase):
 
     def test_unfitted_predict_raises(self):
         from motoquant.analysis.surrogate_dnn import DNNSurrogate
+
         m = DNNSurrogate(hidden_dims=(16,))
         with self.assertRaises(RuntimeError):
             m.predict(self.X[:1])
@@ -852,6 +907,7 @@ class TestDNNSurrogate(unittest.TestCase):
         try:
             self.model.save(path)
             from motoquant.analysis.surrogate_dnn import DNNSurrogate
+
             loaded = DNNSurrogate.load(path)
             self.assertTrue(loaded.is_fitted)
             et_orig, trap_orig = self.model.predict(self.X[:10])
@@ -862,6 +918,7 @@ class TestDNNSurrogate(unittest.TestCase):
 
     def test_load_missing_file_raises(self):
         from motoquant.analysis.surrogate_dnn import DNNSurrogate
+
         with self.assertRaises(FileNotFoundError):
             DNNSurrogate.load("/tmp/does_not_exist_dnn_xyz.pkl")
 

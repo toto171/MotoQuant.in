@@ -5,7 +5,6 @@ Lockup, slider (centrifugal), and multi-stage clutch engagement.
 Computes transmitted torque and heat generation.
 """
 
-
 import numpy as np
 
 from ..constants import RADS_TO_RPM
@@ -118,6 +117,7 @@ class ClutchModel:
         # silently ate unsupported types (including CLUTCH_SLIPPER before the
         # branch above existed).
         import logging as _logging
+
         _logging.getLogger(__name__).warning(
             "Unknown clutch_type %r — falling back to lockup behaviour.",
             cl.clutch_type,

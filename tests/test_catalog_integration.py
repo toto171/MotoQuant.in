@@ -27,7 +27,6 @@ from motoquant.scraper.importer import (
 )
 from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
 
-
 # ═══════════════════════════════════════════════════════════════
 # Fixtures — fully seeded in-memory DB with 267 known bikes
 # ═══════════════════════════════════════════════════════════════
@@ -197,9 +196,7 @@ class TestEnrichBikeRow:
     def test_manufacturer_name_joined(self, seeded_db):
         """A bike_models row missing 'manufacturer' gets it populated."""
         row = dict(
-            seeded_db._conn.execute(
-                "SELECT * FROM bike_models LIMIT 1"
-            ).fetchone()
+            seeded_db._conn.execute("SELECT * FROM bike_models LIMIT 1").fetchone()
         )
         row.pop("manufacturer", None)
         row.pop("manufacturer_name", None)
@@ -255,38 +252,61 @@ class TestInferCylinderConfig:
         )
 
     def test_single_cylinder(self):
-        assert _infer_cylinder_config(self._make_spec("Royal Enfield", "Classic 350", 1)) == "I1"
+        assert (
+            _infer_cylinder_config(self._make_spec("Royal Enfield", "Classic 350", 1))
+            == "I1"
+        )
 
     def test_inline_twin_default(self):
         assert _infer_cylinder_config(self._make_spec("Yamaha", "MT-07", 2)) == "I2"
 
     def test_ducati_v_twin(self):
-        assert _infer_cylinder_config(self._make_spec("Ducati", "Monster 1200", 2)) == "V2"
+        assert (
+            _infer_cylinder_config(self._make_spec("Ducati", "Monster 1200", 2)) == "V2"
+        )
 
     def test_harley_v_twin(self):
-        assert _infer_cylinder_config(self._make_spec("Harley-Davidson", "Street 750", 2)) == "V2"
+        assert (
+            _infer_cylinder_config(self._make_spec("Harley-Davidson", "Street 750", 2))
+            == "V2"
+        )
 
     def test_indian_short_name_v_twin(self):
         """Indian Motorcycle stored as bare 'Indian' in DB must still infer V2."""
         assert _infer_cylinder_config(self._make_spec("Indian", "Scout", 2)) == "V2"
-        assert _infer_cylinder_config(self._make_spec("Indian", "FTR 1200 S", 2)) == "V2"
-        assert _infer_cylinder_config(self._make_spec("Indian", "Chief Dark Horse", 2)) == "V2"
+        assert (
+            _infer_cylinder_config(self._make_spec("Indian", "FTR 1200 S", 2)) == "V2"
+        )
+        assert (
+            _infer_cylinder_config(self._make_spec("Indian", "Chief Dark Horse", 2))
+            == "V2"
+        )
 
     def test_sv650_is_v_twin(self):
         """Suzuki is usually inline, but SV650 is a V-twin — model-token override."""
         assert _infer_cylinder_config(self._make_spec("Suzuki", "SV650", 2)) == "V2"
 
     def test_inline_four(self):
-        assert _infer_cylinder_config(self._make_spec("Suzuki", "GSX-R 1000", 4)) == "I4"
+        assert (
+            _infer_cylinder_config(self._make_spec("Suzuki", "GSX-R 1000", 4)) == "I4"
+        )
 
     def test_panigale_v4(self):
-        assert _infer_cylinder_config(self._make_spec("Ducati", "Panigale V4", 4)) == "V4"
+        assert (
+            _infer_cylinder_config(self._make_spec("Ducati", "Panigale V4", 4)) == "V4"
+        )
 
     def test_rsv4_v4(self):
-        assert _infer_cylinder_config(self._make_spec("Aprilia", "RSV4 Factory", 4)) == "V4"
+        assert (
+            _infer_cylinder_config(self._make_spec("Aprilia", "RSV4 Factory", 4))
+            == "V4"
+        )
 
     def test_inline_triple(self):
-        assert _infer_cylinder_config(self._make_spec("Triumph", "Street Triple 765", 3)) == "I3"
+        assert (
+            _infer_cylinder_config(self._make_spec("Triumph", "Street Triple 765", 3))
+            == "I3"
+        )
 
     def test_unknown_cylinders_returns_none(self):
         assert _infer_cylinder_config(self._make_spec("Honda", "CBR", None)) is None
@@ -308,23 +328,17 @@ class TestInferChainPitch:
 
     def test_hayabusa_530_pitch(self):
         """Hayabusa uses 530-pitch chain."""
-        pitch = _infer_chain_pitch(
-            self._make_spec("Suzuki", "Hayabusa", 1340, cyls=4)
-        )
+        pitch = _infer_chain_pitch(self._make_spec("Suzuki", "Hayabusa", 1340, cyls=4))
         assert pitch == "530"
 
     def test_small_displacement_428(self):
         """Sub-200cc bikes typically use 428-pitch chain."""
-        pitch = _infer_chain_pitch(
-            self._make_spec("Honda", "CB150R", 150, cyls=1)
-        )
+        pitch = _infer_chain_pitch(self._make_spec("Honda", "CB150R", 150, cyls=1))
         assert pitch == "428"
 
     def test_midrange_520_pitch(self):
         """Mid-range 600-700cc bikes typically use 520-pitch."""
-        pitch = _infer_chain_pitch(
-            self._make_spec("Honda", "CBR650R", 649, cyls=4)
-        )
+        pitch = _infer_chain_pitch(self._make_spec("Honda", "CBR650R", 649, cyls=4))
         assert pitch == "520"
 
 
@@ -339,11 +353,7 @@ class TestFamilySeparation:
         not RE 350 single-cylinder parts."""
         re650 = _get_bike(seeded_db, "Interceptor 650")
         assert re650 is not None
-        matches = [
-            p
-            for p in _exhausts(seeded_db)
-            if is_compatible(p, re650)[0]
-        ]
+        matches = [p for p in _exhausts(seeded_db) if is_compatible(p, re650)[0]]
         names = [f"{p['brand']} {p['model_name']}".lower() for p in matches]
         # RE 650 should NOT match RE 350-specific parts (HP Corse RE 350, Zard RE 350)
         assert not any("re 350" in n for n in names), (
@@ -356,11 +366,7 @@ class TestFamilySeparation:
         """Indian Scout (1133cc V-twin) must match at least one exhaust."""
         scout = _get_bike(seeded_db, "Scout", manufacturer="Indian")
         assert scout is not None
-        matches = [
-            p
-            for p in _exhausts(seeded_db)
-            if is_compatible(p, scout)[0]
-        ]
+        matches = [p for p in _exhausts(seeded_db) if is_compatible(p, scout)[0]]
         assert matches, "Indian Scout should match at least one exhaust"
         # Verify cylinder_config was correctly inferred as V2
         assert scout.get("cylinder_config") == "V2", (

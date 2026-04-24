@@ -30,13 +30,13 @@ import time
 import warnings
 from pathlib import Path
 
-from motoquant import MotoQuantEngine
-from motoquant.scraper.importer import spec_to_bike_config
-from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
-
 # Reuse the word-boundary model matcher from validation_sweep so "Duke 390"
 # doesn't accidentally match "Duke 390 Adventure".
 from validation_sweep import _model_match  # type: ignore
+
+from motoquant import MotoQuantEngine
+from motoquant.scraper.importer import spec_to_bike_config
+from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
 
 logging.getLogger("motoquant").setLevel(logging.ERROR)
 warnings.filterwarnings("ignore")
@@ -50,53 +50,53 @@ warnings.filterwarnings("ignore")
 # tell at a glance whether the sim is respecting the limit or blowing past it.
 BENCHMARKS: list[tuple[str, str, int, float, str]] = [
     # ── Hyperbikes (factory-limited to 299 km/h by gentleman's agreement) ──
-    ("Suzuki",   "Hayabusa",          1999, 299, "factory-limited"),
-    ("Suzuki",   "Hayabusa",          2008, 299, "factory-limited"),
-    ("Suzuki",   "Hayabusa",          2021, 299, "factory-limited"),
-    ("Kawasaki", "Ninja ZX-14R",      2012, 299, "factory-limited"),
-    ("Kawasaki", "ZZR1400",           2006, 299, "factory-limited"),
-    ("Kawasaki", "Ninja H2",          2015, 340, "factory / MCN derestricted"),
+    ("Suzuki", "Hayabusa", 1999, 299, "factory-limited"),
+    ("Suzuki", "Hayabusa", 2008, 299, "factory-limited"),
+    ("Suzuki", "Hayabusa", 2021, 299, "factory-limited"),
+    ("Kawasaki", "Ninja ZX-14R", 2012, 299, "factory-limited"),
+    ("Kawasaki", "ZZR1400", 2006, 299, "factory-limited"),
+    ("Kawasaki", "Ninja H2", 2015, 340, "factory / MCN derestricted"),
     # ── Litre superbikes (factory-limited; tests show 280-320 derestricted) ─
-    ("Suzuki",   "GSX-R 1000",        2005, 283, "Cycle World derestricted"),
-    ("Suzuki",   "GSX-R 1000",        2007, 293, "Sport Rider"),
-    ("Suzuki",   "GSX-R 1000",        2017, 299, "factory-limited"),
-    ("BMW",      "S 1000 RR",         2019, 303, "derestricted"),
-    ("BMW",      "M1000RR",           2021, 314, "derestricted"),
-    ("Kawasaki", "Ninja ZX-10R",      2021, 300, "MCN"),
-    ("Honda",    "CBR1000RR",         2020, 299, "MCN"),
-    ("Yamaha",   "YZF-R1",            2015, 298, "MCN"),
-    ("Ducati",   "Panigale V4",       2018, 299, "MCN"),
-    ("Aprilia",  "RSV4 Factory",      2021, 293, "MCN"),
+    ("Suzuki", "GSX-R 1000", 2005, 283, "Cycle World derestricted"),
+    ("Suzuki", "GSX-R 1000", 2007, 293, "Sport Rider"),
+    ("Suzuki", "GSX-R 1000", 2017, 299, "factory-limited"),
+    ("BMW", "S 1000 RR", 2019, 303, "derestricted"),
+    ("BMW", "M1000RR", 2021, 314, "derestricted"),
+    ("Kawasaki", "Ninja ZX-10R", 2021, 300, "MCN"),
+    ("Honda", "CBR1000RR", 2020, 299, "MCN"),
+    ("Yamaha", "YZF-R1", 2015, 298, "MCN"),
+    ("Ducati", "Panigale V4", 2018, 299, "MCN"),
+    ("Aprilia", "RSV4 Factory", 2021, 293, "MCN"),
     # ── Naked / sport-tourer ──────────────────────────────────────────────
-    ("KTM",      "1290 Super Duke R", 2022, 290, "factory"),
-    ("Yamaha",   "MT-10",             2016, 258, "MCN"),
-    ("BMW",      "R1250GS",           2019, 220, "MCN"),
+    ("KTM", "1290 Super Duke R", 2022, 290, "factory"),
+    ("Yamaha", "MT-10", 2016, 258, "MCN"),
+    ("BMW", "R1250GS", 2019, 220, "MCN"),
     # ── Big cruisers / muscle ─────────────────────────────────────────────
-    ("Triumph",  "Rocket 3 R",        2020, 225, "factory"),
-    ("Yamaha",   "VMAX 1700",         2009, 235, "MCN"),
+    ("Triumph", "Rocket 3 R", 2020, 225, "factory"),
+    ("Yamaha", "VMAX 1700", 2009, 235, "MCN"),
     # ── Mid-sport twins/triples ───────────────────────────────────────────
-    ("Yamaha",   "YZF-R7",            2022, 220, "MCN"),
-    ("Aprilia",  "RS 660",            2021, 220, "MCN"),
-    ("Aprilia",  "RS 457",            2024, 180, "factory / reviews"),
-    ("Suzuki",   "SV650",             2016, 215, "MCN"),
-    ("Kawasaki", "Ninja 650",         2020, 208, "MCN"),
-    ("Honda",    "CB650R",            2021, 209, "MCN"),
-    ("Triumph",  "Trident 660",       2021, 220, "MCN"),
+    ("Yamaha", "YZF-R7", 2022, 220, "MCN"),
+    ("Aprilia", "RS 660", 2021, 220, "MCN"),
+    ("Aprilia", "RS 457", 2024, 180, "factory / reviews"),
+    ("Suzuki", "SV650", 2016, 215, "MCN"),
+    ("Kawasaki", "Ninja 650", 2020, 208, "MCN"),
+    ("Honda", "CB650R", 2021, 209, "MCN"),
+    ("Triumph", "Trident 660", 2021, 220, "MCN"),
     # ── Entry sport twins ─────────────────────────────────────────────────
-    ("Kawasaki", "Ninja 400",         2018, 185, "MCN"),
-    ("Kawasaki", "Ninja 300",         2013, 171, "MCN"),
-    ("Kawasaki", "Ninja ZX-4RR",      2023, 220, "MCN"),
+    ("Kawasaki", "Ninja 400", 2018, 185, "MCN"),
+    ("Kawasaki", "Ninja 300", 2013, 171, "MCN"),
+    ("Kawasaki", "Ninja ZX-4RR", 2023, 220, "MCN"),
     # ── Indian-market 150-400cc ───────────────────────────────────────────
-    ("KTM",      "Duke 390",          2019, 167, "factory"),
-    ("Bajaj",    "Pulsar NS200",      2019, 136, "factory"),
-    ("Bajaj",    "Pulsar RS 200",     2015, 141, "factory"),
-    ("Yamaha",   "YZF-R15 V3",        2018, 139, "factory"),
-    ("TVS",      "Apache RR 310",     2020, 160, "factory"),
+    ("KTM", "Duke 390", 2019, 167, "factory"),
+    ("Bajaj", "Pulsar NS200", 2019, 136, "factory"),
+    ("Bajaj", "Pulsar RS 200", 2015, 141, "factory"),
+    ("Yamaha", "YZF-R15 V3", 2018, 139, "factory"),
+    ("TVS", "Apache RR 310", 2020, 160, "factory"),
     # ── 2-stroke classics ─────────────────────────────────────────────────
-    ("Yamaha",   "RD350",             1973, 175, "factory"),
-    ("Yamaha",   "RD400 Daytona",     1976, 177, "factory"),
-    ("Kawasaki", "H2 Mach IV",        1973, 201, "factory"),
-    ("Suzuki",   "RG500",             1985, 220, "factory"),
+    ("Yamaha", "RD350", 1973, 175, "factory"),
+    ("Yamaha", "RD400 Daytona", 1976, 177, "factory"),
+    ("Kawasaki", "H2 Mach IV", 1973, 201, "factory"),
+    ("Suzuki", "RG500", 1985, 220, "factory"),
 ]
 
 
@@ -124,7 +124,8 @@ def _sim_spec(spec) -> dict:
 
 def _match(mfr_sub: str, mdl_sub: str, year_hint: int, results: list[dict]):
     cands = [
-        r for r in results
+        r
+        for r in results
         if mfr_sub.lower() in r["manufacturer"].lower()
         and _model_match(mdl_sub, r["model"])
     ]
@@ -154,14 +155,16 @@ def run_sweep(verbose: bool = True) -> dict:
         if not m:
             continue
         delta = m["v_max_kmh"] - target
-        scored.append({
-            "benchmark": f"{mfr} {mdl} ({yr})",
-            "target_kmh": target,
-            "sim_kmh": m["v_max_kmh"],
-            "delta_kmh": delta,
-            "source": src,
-            "bike_match": f"{m['manufacturer']} {m['model']}",
-        })
+        scored.append(
+            {
+                "benchmark": f"{mfr} {mdl} ({yr})",
+                "target_kmh": target,
+                "sim_kmh": m["v_max_kmh"],
+                "delta_kmh": delta,
+                "source": src,
+                "bike_match": f"{m['manufacturer']} {m['model']}",
+            }
+        )
 
     abs_d = [abs(x["delta_kmh"]) for x in scored]
     deltas = [x["delta_kmh"] for x in scored]
@@ -174,7 +177,9 @@ def run_sweep(verbose: bool = True) -> dict:
         "wall_time_s": round(wall, 1),
         "benchmarks_matched": len(scored),
         "mean_abs_delta_kmh": round(sum(abs_d) / len(abs_d), 1) if abs_d else None,
-        "median_abs_delta_kmh": round(sorted(abs_d)[len(abs_d) // 2], 1) if abs_d else None,
+        "median_abs_delta_kmh": round(sorted(abs_d)[len(abs_d) // 2], 1)
+        if abs_d
+        else None,
         "bias_kmh": round(sum(deltas) / len(deltas), 1) if deltas else None,
         "within_10_kmh": sum(1 for d in abs_d if d <= 10),
         "within_20_kmh": sum(1 for d in abs_d if d <= 20),
@@ -182,14 +187,20 @@ def run_sweep(verbose: bool = True) -> dict:
     }
 
     if verbose:
-        print(f"Top-speed sweep: {summary['n_bikes_simmed']} bikes, {summary['n_fails']} fails, "
-              f"wall {summary['wall_time_s']}s")
+        print(
+            f"Top-speed sweep: {summary['n_bikes_simmed']} bikes, {summary['n_fails']} fails, "
+            f"wall {summary['wall_time_s']}s"
+        )
         print(f"  Plateau hit: {summary['plateau_count']}/{summary['n_bikes_simmed']}")
         print(f"  Benchmarks matched: {summary['benchmarks_matched']}")
-        print(f"  Mean |Δ|: {summary['mean_abs_delta_kmh']} km/h  "
-              f"median: {summary['median_abs_delta_kmh']}  bias: {summary['bias_kmh']:+}")
-        print(f"  Within ±10/±20/±30 km/h: "
-              f"{summary['within_10_kmh']}/{summary['within_20_kmh']}/{summary['within_30_kmh']}")
+        print(
+            f"  Mean |Δ|: {summary['mean_abs_delta_kmh']} km/h  "
+            f"median: {summary['median_abs_delta_kmh']}  bias: {summary['bias_kmh']:+}"
+        )
+        print(
+            f"  Within ±10/±20/±30 km/h: "
+            f"{summary['within_10_kmh']}/{summary['within_20_kmh']}/{summary['within_30_kmh']}"
+        )
 
     return {"summary": summary, "sims": results, "scored": scored}
 

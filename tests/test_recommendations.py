@@ -14,7 +14,6 @@ Test philosophy
   baseline ET aggressively.
 """
 
-import copy
 import json
 import math
 import os
@@ -26,6 +25,7 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from motoquant.analysis.recommendations import (
+    _PROFILE_CATEGORIES,
     EXCLUSIVE_GROUPS,
     SOFT_DEPENDENCIES,
     SYNERGIES,
@@ -39,7 +39,6 @@ from motoquant.analysis.recommendations import (
     _detect_synergies,
     _detect_warnings,
     _filter_parts_by_profile,
-    _PROFILE_CATEGORIES,
     generate_upgrade_path,
     get_category_upgrade_order,
     recommend_build,
@@ -47,7 +46,6 @@ from motoquant.analysis.recommendations import (
 from motoquant.analysis.roi import BuildROIResult, PartROIResult
 from motoquant.database.connection import MotoQuantDB
 from motoquant.defaults import gsxr1000_k5
-
 
 # ─────────────────────────────────────────────────────────────────
 # Shared fixture: seeded DB in /tmp (WAL-safe)
@@ -86,8 +84,12 @@ class TestBuildProfile(unittest.TestCase):
     """Build profile enum and values."""
 
     def test_all_profiles_exist(self):
-        profiles = [BuildProfile.ALL, BuildProfile.STREET_LEGAL,
-                     BuildProfile.DRAG_PREP, BuildProfile.FULL_RACE]
+        profiles = [
+            BuildProfile.ALL,
+            BuildProfile.STREET_LEGAL,
+            BuildProfile.DRAG_PREP,
+            BuildProfile.FULL_RACE,
+        ]
         self.assertEqual(len(profiles), 4)
 
     def test_profile_values(self):
@@ -177,11 +179,21 @@ class TestSynergyDetection(unittest.TestCase):
 
     def _make_roi(self, category: str) -> PartROIResult:
         return PartROIResult(
-            part_id=1, part_name="Test", brand="Test", category=category,
-            category_display=category.title(), price_inr=1000, price_usd=None,
-            base_et_s=10.0, modified_et_s=9.9, delta_et_s=0.1,
-            delta_trap_ms=1.0, roi_score=1.0, cost_per_tenth_inr=10000,
-            is_compatible=True, availability="in_stock",
+            part_id=1,
+            part_name="Test",
+            brand="Test",
+            category=category,
+            category_display=category.title(),
+            price_inr=1000,
+            price_usd=None,
+            base_et_s=10.0,
+            modified_et_s=9.9,
+            delta_et_s=0.1,
+            delta_trap_ms=1.0,
+            roi_score=1.0,
+            cost_per_tenth_inr=10000,
+            is_compatible=True,
+            availability="in_stock",
         )
 
     def test_exhaust_ecu_synergy(self):
@@ -234,11 +246,21 @@ class TestWarningDetection(unittest.TestCase):
 
     def _make_roi(self, category: str, part_id: int = 1) -> PartROIResult:
         return PartROIResult(
-            part_id=part_id, part_name="Test", brand="Test", category=category,
-            category_display=category.title(), price_inr=1000, price_usd=None,
-            base_et_s=10.0, modified_et_s=9.9, delta_et_s=0.1,
-            delta_trap_ms=1.0, roi_score=1.0, cost_per_tenth_inr=10000,
-            is_compatible=True, availability="in_stock",
+            part_id=part_id,
+            part_name="Test",
+            brand="Test",
+            category=category,
+            category_display=category.title(),
+            price_inr=1000,
+            price_usd=None,
+            base_et_s=10.0,
+            modified_et_s=9.9,
+            delta_et_s=0.1,
+            delta_trap_ms=1.0,
+            roi_score=1.0,
+            cost_per_tenth_inr=10000,
+            is_compatible=True,
+            availability="in_stock",
         )
 
     def test_boost_without_fuel_warns(self):
@@ -252,8 +274,11 @@ class TestWarningDetection(unittest.TestCase):
         """Turbo WITH fuel system should not warn about fuel."""
         parts = [self._make_roi("boost_kit"), self._make_roi("fuel_system")]
         warns = _detect_warnings(parts)
-        fuel_warns = [w for w in warns if "fuel" in w.message.lower()
-                       and w.category_a == "boost_kit"]
+        fuel_warns = [
+            w
+            for w in warns
+            if "fuel" in w.message.lower() and w.category_a == "boost_kit"
+        ]
         self.assertEqual(len(fuel_warns), 0)
 
     def test_nitrous_without_ecu_warns(self):
@@ -338,13 +363,23 @@ class TestDataClasses(unittest.TestCase):
     """Test that data classes are well-formed and produce output."""
 
     def _make_roi(self, **overrides) -> PartROIResult:
-        defaults = dict(
-            part_id=1, part_name="Test Part", brand="Test", category="exhaust",
-            category_display="Exhaust System", price_inr=5000, price_usd=None,
-            base_et_s=10.0, modified_et_s=9.9, delta_et_s=0.1,
-            delta_trap_ms=1.0, roi_score=2.0, cost_per_tenth_inr=5000,
-            is_compatible=True, availability="in_stock",
-        )
+        defaults = {
+            "part_id": 1,
+            "part_name": "Test Part",
+            "brand": "Test",
+            "category": "exhaust",
+            "category_display": "Exhaust System",
+            "price_inr": 5000,
+            "price_usd": None,
+            "base_et_s": 10.0,
+            "modified_et_s": 9.9,
+            "delta_et_s": 0.1,
+            "delta_trap_ms": 1.0,
+            "roi_score": 2.0,
+            "cost_per_tenth_inr": 5000,
+            "is_compatible": True,
+            "availability": "in_stock",
+        }
         defaults.update(overrides)
         return PartROIResult(**defaults)
 
@@ -366,10 +401,15 @@ class TestDataClasses(unittest.TestCase):
     def test_build_tier_summary(self):
         build = BuildROIResult(
             selected_parts=[self._make_roi()],
-            total_cost_inr=5000, budget_inr=10000,
-            base_et_s=10.0, modified_et_s=9.9, delta_et_s=0.1,
-            delta_trap_ms=1.0, parts_evaluated=5,
-            parts_skipped_incompatible=0, parts_skipped_no_gain=1,
+            total_cost_inr=5000,
+            budget_inr=10000,
+            base_et_s=10.0,
+            modified_et_s=9.9,
+            delta_et_s=0.1,
+            delta_trap_ms=1.0,
+            parts_evaluated=5,
+            parts_skipped_incompatible=0,
+            parts_skipped_no_gain=1,
         )
         tier = BuildTier("Budget", 10000, build)
         summary = tier.summary()
@@ -379,10 +419,15 @@ class TestDataClasses(unittest.TestCase):
     def test_build_recommendation_summary(self):
         build = BuildROIResult(
             selected_parts=[self._make_roi()],
-            total_cost_inr=5000, budget_inr=50000,
-            base_et_s=10.0, modified_et_s=9.9, delta_et_s=0.1,
-            delta_trap_ms=1.0, parts_evaluated=10,
-            parts_skipped_incompatible=0, parts_skipped_no_gain=2,
+            total_cost_inr=5000,
+            budget_inr=50000,
+            base_et_s=10.0,
+            modified_et_s=9.9,
+            delta_et_s=0.1,
+            delta_trap_ms=1.0,
+            parts_evaluated=10,
+            parts_skipped_incompatible=0,
+            parts_skipped_no_gain=2,
         )
         rec = BuildRecommendation(
             bike_name="GSX-R 1000 K5",
@@ -398,10 +443,15 @@ class TestDataClasses(unittest.TestCase):
     def test_build_recommendation_to_dict(self):
         build = BuildROIResult(
             selected_parts=[self._make_roi()],
-            total_cost_inr=5000, budget_inr=50000,
-            base_et_s=10.0, modified_et_s=9.9, delta_et_s=0.1,
-            delta_trap_ms=1.0, parts_evaluated=10,
-            parts_skipped_incompatible=0, parts_skipped_no_gain=2,
+            total_cost_inr=5000,
+            budget_inr=50000,
+            base_et_s=10.0,
+            modified_et_s=9.9,
+            delta_et_s=0.1,
+            delta_trap_ms=1.0,
+            parts_evaluated=10,
+            parts_skipped_incompatible=0,
+            parts_skipped_no_gain=2,
         )
         rec = BuildRecommendation(
             bike_name="Test",
@@ -422,14 +472,24 @@ class TestDataClasses(unittest.TestCase):
         part = self._make_roi()
         nu = NextUpgrade(part, 0.05, 3000, 1.67, "Best value")
         build = BuildROIResult(
-            selected_parts=[], total_cost_inr=0, budget_inr=50000,
-            base_et_s=10.0, modified_et_s=10.0, delta_et_s=0.0,
-            delta_trap_ms=0.0, parts_evaluated=5,
-            parts_skipped_incompatible=0, parts_skipped_no_gain=5,
+            selected_parts=[],
+            total_cost_inr=0,
+            budget_inr=50000,
+            base_et_s=10.0,
+            modified_et_s=10.0,
+            delta_et_s=0.0,
+            delta_trap_ms=0.0,
+            parts_evaluated=5,
+            parts_skipped_incompatible=0,
+            parts_skipped_no_gain=5,
         )
         rec = BuildRecommendation(
-            bike_name="Test", profile=BuildProfile.ALL, budget_inr=50000,
-            build=build, category_priority=[], next_upgrade=nu,
+            bike_name="Test",
+            profile=BuildProfile.ALL,
+            budget_inr=50000,
+            build=build,
+            category_priority=[],
+            next_upgrade=nu,
         )
         d = rec.to_dict()
         self.assertIn("next_upgrade", d)
@@ -438,14 +498,23 @@ class TestDataClasses(unittest.TestCase):
     def test_to_dict_handles_inf_roi(self):
         part = self._make_roi(roi_score=float("inf"), price_inr=0, is_free=True)
         build = BuildROIResult(
-            selected_parts=[part], total_cost_inr=0, budget_inr=10000,
-            base_et_s=10.0, modified_et_s=9.9, delta_et_s=0.1,
-            delta_trap_ms=1.0, parts_evaluated=1,
-            parts_skipped_incompatible=0, parts_skipped_no_gain=0,
+            selected_parts=[part],
+            total_cost_inr=0,
+            budget_inr=10000,
+            base_et_s=10.0,
+            modified_et_s=9.9,
+            delta_et_s=0.1,
+            delta_trap_ms=1.0,
+            parts_evaluated=1,
+            parts_skipped_incompatible=0,
+            parts_skipped_no_gain=0,
         )
         rec = BuildRecommendation(
-            bike_name="Test", profile=BuildProfile.ALL, budget_inr=10000,
-            build=build, category_priority=[],
+            bike_name="Test",
+            profile=BuildProfile.ALL,
+            budget_inr=10000,
+            build=build,
+            category_priority=[],
         )
         d = rec.to_dict()
         # inf ROI should be serialized as None (JSON doesn't support inf)
@@ -453,10 +522,16 @@ class TestDataClasses(unittest.TestCase):
 
     def test_upgrade_path_summary(self):
         build = BuildROIResult(
-            selected_parts=[], total_cost_inr=0, budget_inr=10000,
-            base_et_s=10.0, modified_et_s=10.0, delta_et_s=0.0,
-            delta_trap_ms=0.0, parts_evaluated=0,
-            parts_skipped_incompatible=0, parts_skipped_no_gain=0,
+            selected_parts=[],
+            total_cost_inr=0,
+            budget_inr=10000,
+            base_et_s=10.0,
+            modified_et_s=10.0,
+            delta_et_s=0.0,
+            delta_trap_ms=0.0,
+            parts_evaluated=0,
+            parts_skipped_incompatible=0,
+            parts_skipped_no_gain=0,
         )
         tier = BuildTier("Budget", 10000, build)
         path = UpgradePath("Test Bike", [tier])
@@ -466,10 +541,16 @@ class TestDataClasses(unittest.TestCase):
 
     def test_upgrade_path_to_dict(self):
         build = BuildROIResult(
-            selected_parts=[], total_cost_inr=0, budget_inr=10000,
-            base_et_s=10.0, modified_et_s=10.0, delta_et_s=0.0,
-            delta_trap_ms=0.0, parts_evaluated=0,
-            parts_skipped_incompatible=0, parts_skipped_no_gain=0,
+            selected_parts=[],
+            total_cost_inr=0,
+            budget_inr=10000,
+            base_et_s=10.0,
+            modified_et_s=10.0,
+            delta_et_s=0.0,
+            delta_trap_ms=0.0,
+            parts_evaluated=0,
+            parts_skipped_incompatible=0,
+            parts_skipped_no_gain=0,
         )
         tier = BuildTier("Budget", 10000, build)
         path = UpgradePath("Test Bike", [tier])
@@ -487,7 +568,9 @@ class TestDataClasses(unittest.TestCase):
 _RUN_SLOW = os.environ.get("MOTOQUANT_SLOW_TESTS", "0") == "1"
 
 
-@unittest.skipUnless(_RUN_SLOW, "Set MOTOQUANT_SLOW_TESTS=1 to run physics-engine integration tests")
+@unittest.skipUnless(
+    _RUN_SLOW, "Set MOTOQUANT_SLOW_TESTS=1 to run physics-engine integration tests"
+)
 class TestRecommendBuild(unittest.TestCase):
     """End-to-end recommend_build() with real DB and physics engine."""
 
@@ -499,7 +582,8 @@ class TestRecommendBuild(unittest.TestCase):
     def test_basic_recommendation(self):
         """recommend_build with a reasonable budget produces a result."""
         rec = recommend_build(
-            self.config, budget_inr=50_000,
+            self.config,
+            budget_inr=50_000,
             parts_repo=self.mdb.parts,
         )
         self.assertIsInstance(rec, BuildRecommendation)
@@ -509,14 +593,16 @@ class TestRecommendBuild(unittest.TestCase):
 
     def test_recommendation_respects_budget(self):
         rec = recommend_build(
-            self.config, budget_inr=50_000,
+            self.config,
+            budget_inr=50_000,
             parts_repo=self.mdb.parts,
         )
         self.assertLessEqual(rec.build.total_cost_inr, 50_000)
 
     def test_recommendation_with_profile(self):
         rec = recommend_build(
-            self.config, budget_inr=100_000,
+            self.config,
+            budget_inr=100_000,
             parts_repo=self.mdb.parts,
             profile=BuildProfile.STREET_LEGAL,
         )
@@ -527,7 +613,8 @@ class TestRecommendBuild(unittest.TestCase):
 
     def test_zero_budget_returns_free_parts_only(self):
         rec = recommend_build(
-            self.config, budget_inr=0,
+            self.config,
+            budget_inr=0,
             parts_repo=self.mdb.parts,
         )
         for part in rec.build.selected_parts:
@@ -535,14 +622,16 @@ class TestRecommendBuild(unittest.TestCase):
 
     def test_recommendation_includes_category_priority(self):
         rec = recommend_build(
-            self.config, budget_inr=50_000,
+            self.config,
+            budget_inr=50_000,
             parts_repo=self.mdb.parts,
         )
         self.assertIsInstance(rec.category_priority, list)
 
     def test_recommendation_includes_next_upgrade(self):
         rec = recommend_build(
-            self.config, budget_inr=10_000,
+            self.config,
+            budget_inr=10_000,
             parts_repo=self.mdb.parts,
             include_next_upgrade=True,
         )
@@ -553,7 +642,8 @@ class TestRecommendBuild(unittest.TestCase):
 
     def test_no_next_upgrade_when_disabled(self):
         rec = recommend_build(
-            self.config, budget_inr=50_000,
+            self.config,
+            budget_inr=50_000,
             parts_repo=self.mdb.parts,
             include_next_upgrade=False,
         )
@@ -561,7 +651,8 @@ class TestRecommendBuild(unittest.TestCase):
 
     def test_summary_is_string(self):
         rec = recommend_build(
-            self.config, budget_inr=50_000,
+            self.config,
+            budget_inr=50_000,
             parts_repo=self.mdb.parts,
         )
         summary = rec.summary()
@@ -570,7 +661,8 @@ class TestRecommendBuild(unittest.TestCase):
 
     def test_to_dict_is_json_serializable(self):
         rec = recommend_build(
-            self.config, budget_inr=50_000,
+            self.config,
+            budget_inr=50_000,
             parts_repo=self.mdb.parts,
         )
         d = rec.to_dict()
@@ -581,11 +673,13 @@ class TestRecommendBuild(unittest.TestCase):
     def test_larger_budget_improves_et(self):
         """Larger budget should produce equal or better ET."""
         rec_small = recommend_build(
-            self.config, budget_inr=10_000,
+            self.config,
+            budget_inr=10_000,
             parts_repo=self.mdb.parts,
         )
         rec_large = recommend_build(
-            self.config, budget_inr=200_000,
+            self.config,
+            budget_inr=200_000,
             parts_repo=self.mdb.parts,
         )
         self.assertGreaterEqual(
@@ -594,7 +688,9 @@ class TestRecommendBuild(unittest.TestCase):
         )
 
 
-@unittest.skipUnless(_RUN_SLOW, "Set MOTOQUANT_SLOW_TESTS=1 to run physics-engine integration tests")
+@unittest.skipUnless(
+    _RUN_SLOW, "Set MOTOQUANT_SLOW_TESTS=1 to run physics-engine integration tests"
+)
 class TestGenerateUpgradePath(unittest.TestCase):
     """End-to-end generate_upgrade_path() tests."""
 
@@ -605,7 +701,9 @@ class TestGenerateUpgradePath(unittest.TestCase):
 
     def test_basic_upgrade_path(self):
         path = generate_upgrade_path(
-            self.config, parts_repo=self.mdb.parts, n_tiers=3,
+            self.config,
+            parts_repo=self.mdb.parts,
+            n_tiers=3,
         )
         self.assertIsInstance(path, UpgradePath)
         self.assertEqual(path.bike_name, self.config.name)
@@ -613,7 +711,9 @@ class TestGenerateUpgradePath(unittest.TestCase):
 
     def test_tiers_have_increasing_budgets(self):
         path = generate_upgrade_path(
-            self.config, parts_repo=self.mdb.parts, n_tiers=3,
+            self.config,
+            parts_repo=self.mdb.parts,
+            n_tiers=3,
         )
         budgets = [t.budget_inr for t in path.tiers]
         for i in range(1, len(budgets)):
@@ -621,14 +721,17 @@ class TestGenerateUpgradePath(unittest.TestCase):
 
     def test_tier_names(self):
         path = generate_upgrade_path(
-            self.config, parts_repo=self.mdb.parts, n_tiers=3,
+            self.config,
+            parts_repo=self.mdb.parts,
+            n_tiers=3,
         )
         names = [t.tier_name for t in path.tiers]
         self.assertEqual(names, ["Budget", "Mid-Range", "Performance"])
 
     def test_custom_budget_tiers(self):
         path = generate_upgrade_path(
-            self.config, parts_repo=self.mdb.parts,
+            self.config,
+            parts_repo=self.mdb.parts,
             budget_tiers=[10_000, 50_000],
         )
         self.assertEqual(len(path.tiers), 2)
@@ -637,7 +740,9 @@ class TestGenerateUpgradePath(unittest.TestCase):
 
     def test_higher_tier_has_more_or_equal_parts(self):
         path = generate_upgrade_path(
-            self.config, parts_repo=self.mdb.parts, n_tiers=3,
+            self.config,
+            parts_repo=self.mdb.parts,
+            n_tiers=3,
         )
         counts = [len(t.build.selected_parts) for t in path.tiers]
         for i in range(1, len(counts)):
@@ -645,7 +750,9 @@ class TestGenerateUpgradePath(unittest.TestCase):
 
     def test_higher_tier_better_or_equal_et(self):
         path = generate_upgrade_path(
-            self.config, parts_repo=self.mdb.parts, n_tiers=3,
+            self.config,
+            parts_repo=self.mdb.parts,
+            n_tiers=3,
         )
         ets = [t.build.delta_et_s for t in path.tiers]
         for i in range(1, len(ets)):
@@ -653,14 +760,18 @@ class TestGenerateUpgradePath(unittest.TestCase):
 
     def test_two_tier_path(self):
         path = generate_upgrade_path(
-            self.config, parts_repo=self.mdb.parts, n_tiers=2,
+            self.config,
+            parts_repo=self.mdb.parts,
+            n_tiers=2,
         )
         self.assertEqual(len(path.tiers), 2)
 
     def test_upgrade_path_with_profile(self):
         path = generate_upgrade_path(
-            self.config, parts_repo=self.mdb.parts,
-            profile=BuildProfile.STREET_LEGAL, n_tiers=2,
+            self.config,
+            parts_repo=self.mdb.parts,
+            profile=BuildProfile.STREET_LEGAL,
+            n_tiers=2,
         )
         for tier in path.tiers:
             for part in tier.build.selected_parts:
@@ -668,7 +779,9 @@ class TestGenerateUpgradePath(unittest.TestCase):
 
     def test_summary_is_string(self):
         path = generate_upgrade_path(
-            self.config, parts_repo=self.mdb.parts, n_tiers=2,
+            self.config,
+            parts_repo=self.mdb.parts,
+            n_tiers=2,
         )
         summary = path.summary()
         self.assertIsInstance(summary, str)
@@ -676,7 +789,9 @@ class TestGenerateUpgradePath(unittest.TestCase):
 
     def test_to_dict_is_json_serializable(self):
         path = generate_upgrade_path(
-            self.config, parts_repo=self.mdb.parts, n_tiers=2,
+            self.config,
+            parts_repo=self.mdb.parts,
+            n_tiers=2,
         )
         d = path.to_dict()
         json_str = json.dumps(d)
@@ -685,12 +800,16 @@ class TestGenerateUpgradePath(unittest.TestCase):
     def test_n_tiers_clamped(self):
         """n_tiers below 2 should be clamped to 2."""
         path = generate_upgrade_path(
-            self.config, parts_repo=self.mdb.parts, n_tiers=1,
+            self.config,
+            parts_repo=self.mdb.parts,
+            n_tiers=1,
         )
         self.assertEqual(len(path.tiers), 2)
 
 
-@unittest.skipUnless(_RUN_SLOW, "Set MOTOQUANT_SLOW_TESTS=1 to run physics-engine integration tests")
+@unittest.skipUnless(
+    _RUN_SLOW, "Set MOTOQUANT_SLOW_TESTS=1 to run physics-engine integration tests"
+)
 class TestCategoryUpgradeOrder(unittest.TestCase):
     """Test get_category_upgrade_order()."""
 
@@ -701,13 +820,15 @@ class TestCategoryUpgradeOrder(unittest.TestCase):
 
     def test_returns_list(self):
         result = get_category_upgrade_order(
-            self.config, parts_repo=self.mdb.parts,
+            self.config,
+            parts_repo=self.mdb.parts,
         )
         self.assertIsInstance(result, list)
 
     def test_entries_have_required_fields(self):
         result = get_category_upgrade_order(
-            self.config, parts_repo=self.mdb.parts,
+            self.config,
+            parts_repo=self.mdb.parts,
         )
         if result:
             entry = result[0]
@@ -721,7 +842,8 @@ class TestCategoryUpgradeOrder(unittest.TestCase):
 
     def test_sorted_by_roi(self):
         result = get_category_upgrade_order(
-            self.config, parts_repo=self.mdb.parts,
+            self.config,
+            parts_repo=self.mdb.parts,
         )
         for i in range(1, len(result)):
             prev_roi = result[i - 1]["roi_score"]
@@ -732,25 +854,29 @@ class TestCategoryUpgradeOrder(unittest.TestCase):
 
     def test_ranks_sequential(self):
         result = get_category_upgrade_order(
-            self.config, parts_repo=self.mdb.parts,
+            self.config,
+            parts_repo=self.mdb.parts,
         )
         ranks = [e["rank"] for e in result]
         self.assertEqual(ranks, list(range(1, len(result) + 1)))
 
     def test_reasons_are_non_empty(self):
         result = get_category_upgrade_order(
-            self.config, parts_repo=self.mdb.parts,
+            self.config,
+            parts_repo=self.mdb.parts,
         )
         for entry in result:
             self.assertTrue(len(entry["reason"]) > 5)
 
     def test_profile_filtering_applies(self):
         all_result = get_category_upgrade_order(
-            self.config, parts_repo=self.mdb.parts,
+            self.config,
+            parts_repo=self.mdb.parts,
             profile=BuildProfile.ALL,
         )
         street_result = get_category_upgrade_order(
-            self.config, parts_repo=self.mdb.parts,
+            self.config,
+            parts_repo=self.mdb.parts,
             profile=BuildProfile.STREET_LEGAL,
         )
         # Street-legal might have fewer categories

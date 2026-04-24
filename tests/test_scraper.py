@@ -19,7 +19,6 @@ from motoquant.database import MotoQuantDB
 from motoquant.scraper.importer import (
     CATEGORY_AERO,
     CATEGORY_COG_HEIGHT,
-    CATEGORY_ENGINE_INERTIA,
     _build_aero_from_spec,
     _build_chassis_from_spec,
     _build_drivetrain_from_spec,
@@ -346,11 +345,15 @@ class TestSubBuilders:
 
         # K5-class: sport 999cc 4cyl → 0.032
         spec_k5 = _make_spec(displacement_cc=999.0, cylinders=4, category="sport")
-        assert _build_engine_from_spec(spec_k5).engine_inertia_kgm2 == pytest.approx(0.032, abs=0.003)
+        assert _build_engine_from_spec(spec_k5).engine_inertia_kgm2 == pytest.approx(
+            0.032, abs=0.003
+        )
 
         # Hayabusa-class: sport 1340cc 4cyl → 0.040 (reference target)
         spec_hyper = _make_spec(displacement_cc=1340.0, cylinders=4, category="sport")
-        assert _build_engine_from_spec(spec_hyper).engine_inertia_kgm2 == pytest.approx(0.040, abs=0.003)
+        assert _build_engine_from_spec(spec_hyper).engine_inertia_kgm2 == pytest.approx(
+            0.040, abs=0.003
+        )
 
         # Small-cc single: sport 155cc 1cyl → 0.0057
         spec_small = _make_spec(displacement_cc=155.0, cylinders=1, category="sport")
@@ -361,8 +364,12 @@ class TestSubBuilders:
         assert 0.012 <= _build_engine_from_spec(spec_mid).engine_inertia_kgm2 <= 0.018
 
         # Cruiser big-bore: 1700cc 4cyl cruiser → 0.048 × 1.35 = 0.065
-        spec_cruiser = _make_spec(displacement_cc=1700.0, cylinders=4, category="cruiser")
-        assert 0.060 <= _build_engine_from_spec(spec_cruiser).engine_inertia_kgm2 <= 0.075
+        spec_cruiser = _make_spec(
+            displacement_cc=1700.0, cylinders=4, category="cruiser"
+        )
+        assert (
+            0.060 <= _build_engine_from_spec(spec_cruiser).engine_inertia_kgm2 <= 0.075
+        )
 
         # Same engine as "naked" → no cruiser bonus, just 0.048
         spec_naked = _make_spec(displacement_cc=1700.0, cylinders=4, category="naked")
@@ -371,7 +378,10 @@ class TestSubBuilders:
         assert i_c > i_n  # cruiser flywheel heavier than naked
 
         # Monotonic in displacement for same cyl count + category
-        specs = [_make_spec(displacement_cc=d, cylinders=4, category="sport") for d in (600, 1000, 1400)]
+        specs = [
+            _make_spec(displacement_cc=d, cylinders=4, category="sport")
+            for d in (600, 1000, 1400)
+        ]
         inertias = [_build_engine_from_spec(s).engine_inertia_kgm2 for s in specs]
         assert inertias == sorted(inertias)
 
@@ -384,8 +394,9 @@ class TestSubBuilders:
     def test_engine_inertia_2t_reduced(self):
         """2-stroke engines should have ~0.60× inertia (no valvetrain)."""
         spec_4t = _make_spec(displacement_cc=347.0, cylinders=2)
-        spec_2t = _make_spec(displacement_cc=347.0, cylinders=2, stroke_type=2,
-                             reed_valve=True)
+        spec_2t = _make_spec(
+            displacement_cc=347.0, cylinders=2, stroke_type=2, reed_valve=True
+        )
         i_4t = _build_engine_from_spec(spec_4t).engine_inertia_kgm2
         i_2t = _build_engine_from_spec(spec_2t).engine_inertia_kgm2
         assert i_2t == pytest.approx(i_4t * 0.60, abs=0.002)
@@ -465,15 +476,17 @@ class TestSubBuilders:
         normalized down to the tuck regime (× 0.55) for sport-class
         bikes — corrects the small-cc launch-phase double-inflation.
         """
-        spec = _make_spec(category="sport", displacement_cc=155.0,
-                          cylinders=1, cd=0.56)  # R15-V3-shape upright Cd
+        spec = _make_spec(
+            category="sport", displacement_cc=155.0, cylinders=1, cd=0.56
+        )  # R15-V3-shape upright Cd
         aero = _build_aero_from_spec(spec)
         # 0.56 × 0.55 = 0.308 (above floor 0.30)
         assert 0.30 <= aero.cd <= 0.35
 
         # Legitimate tuck Cds (e.g. K5 0.32) should NOT be altered
-        spec_k5 = _make_spec(category="sport", displacement_cc=999.0,
-                             cylinders=4, cd=0.32)
+        spec_k5 = _make_spec(
+            category="sport", displacement_cc=999.0, cylinders=4, cd=0.32
+        )
         assert _build_aero_from_spec(spec_k5).cd == pytest.approx(0.32)
 
 
