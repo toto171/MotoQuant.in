@@ -35,13 +35,28 @@ import tempfile
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from .defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 from .models import BikeConfig
 from .physics import MotoQuantEngine
+
+# ─── Auth dependency (imported early so Depends() default-args resolve) ───────
+# Wrapped in try/except so the server still starts without python-jose installed
+# (tests stub this out; production must have all deps in requirements-api.txt).
+try:
+    from .auth import require_tier as require_tier  # noqa: PLC0414
+except ImportError:  # pragma: no cover
+    def require_tier(_tier: str):  # type: ignore[misc]
+        """Stub — replace by installing python-jose[cryptography]."""
+
+        def _noop() -> dict:
+            return {}
+
+        return _noop  # callers wrap with Depends(require_tier(...))
+
 
 # ─── App init ─────────────────────────────────────────────────────────────
 
@@ -1168,7 +1183,10 @@ class SaveRunRequest(BaseModel):
 
 
 @app.post("/api/simulate/save", status_code=201)
-def save_simulation(req: SaveRunRequest):
+def save_simulation(
+    req: SaveRunRequest,
+    _auth: dict = Depends(require_tier("pro")),  # noqa: B008
+):
     """Persist a single sim result to sim_runs. Resolves the incoming
     bike_models.id to a bike_configs.id using the seed's 1:1 mapping."""
     from . import __version__
@@ -1452,6 +1470,7 @@ async def upload_dragy(
     file: UploadFile = File(..., description="Dragy CSV or JSON export"),
     bike_id: int | None = Form(None, description="Bike to overlay sim against"),
     bike_preset: str | None = Form(None),
+    _auth: dict = Depends(require_tier("studio")),  # noqa: B008
 ):
     """
     Upload a Dragy GPS file, parse it, and optionally overlay against simulation.
@@ -1569,6 +1588,7 @@ async def upload_dyno(
     temp_c: float | None = Form(None, description="Ambient temperature during run [C]"),
     pressure_kpa: float | None = Form(None, description="Barometric pressure [kPa]"),
     rh_pct: float = Form(0.0, description="Relative humidity [%]"),
+    _auth: dict = Depends(require_tier("studio")),  # noqa: B008
 ):
     """Upload a dyno CSV, parse it with SAE J1349 correction, return power/torque curve."""
     log = logging.getLogger(__name__)
@@ -2030,3 +2050,418 @@ def resolve_venue(req: VenueResolveRequest):
         "fetched_at": datetime.now(timezone.utc).isoformat(),
         "source": "openweathermap",
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# SURROGATE MODEL INFERENCE  (/api/surrogate/*)
+# Loaded once at startup into app.state.  Falls back DNN -> XGBoost.
+# ═══════════════════════════════════════════════════════════════════════════
+
+import os as _os
+import time as _time
+from pathlib import Path as _Path
+
+_SURROGATE = None          # DNNSurrogate | XGBSurrogate | None — set at startup
+_SURROGATE_SOURCE = "none" # "dnn" | "xgb" | "none"
+_SURROGATE_LOCK = __import__("threading").Lock()
+
+
+def _load_surrogate():
+    """Try DNN first, fall back to XGBoost. Returns (model, label)."""
+    repo_root = _Path(__file__).parent.parent
+    dnn_path = repo_root / "surrogate_dnn.pkl"
+    xgb_path = repo_root / "surrogate.pkl"
+    _log = logging.getLogger(__name__)
+
+    try:
+        from motoquant.analysis.surrogate_dnn import DNNSurrogate
+        if dnn_path.exists():
+            m = DNNSurrogate.load(dnn_path)
+            _log.info("Surrogate: loaded DNN from %s", dnn_path)
+            return m, "dnn"
+    except Exception as exc:
+        _log.warning("Surrogate DNN load failed: %s", exc)
+
+    try:
+        from motoquant.analysis.surrogate_xgb import XGBSurrogate
+        if xgb_path.exists():
+            m = XGBSurrogate.load(xgb_path)
+            _log.info("Surrogate: loaded XGBoost from %s", xgb_path)
+            return m, "xgb"
+    except Exception as exc:
+        _log.warning("Surrogate XGB load failed: %s", exc)
+
+    _log.warning("Surrogate: no model available (place surrogate_dnn.pkl at repo root)")
+    return None, "none"
+
+
+@app.on_event("startup")
+async def _startup_load_surrogate():
+    global _SURROGATE, _SURROGATE_SOURCE
+    with _SURROGATE_LOCK:
+        _SURROGATE, _SURROGATE_SOURCE = _load_surrogate()
+
+
+# ─── Request / Response models ────────────────────────────────────────────
+
+
+class SurrogatePredictRequest(BaseModel):
+    bike_id: int = Field(None, description="DB bike_models.id (optional)")
+    power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
+    mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
+    aero_cd_override: float = Field(None, ge=0.30, le=1.20)
+    tire_mu_override: float = Field(None, ge=0.50, le=1.80)
+    altitude_m: float = Field(0.0, ge=0.0, le=5000.0)
+    rider_weight_kg: float = Field(75.0, ge=40.0, le=150.0)
+
+    model_config = {"populate_by_name": True}
+
+
+class SurrogatePredictResponse(BaseModel):
+    et_s: float
+    trap_kmh: float
+    inference_ms: float
+    source: str
+    within_training_envelope: bool
+    envelope_violations: list
+
+
+class SurrogateCompareRequest(BaseModel):
+    config_a: SurrogatePredictRequest
+    config_b: SurrogatePredictRequest
+
+
+class SurrogateCompareResponse(BaseModel):
+    a: SurrogatePredictResponse
+    b: SurrogatePredictResponse
+    delta_et_s: float
+    delta_trap_kmh: float
+    faster: str
+
+
+# ─── Helpers ─────────────────────────────────────────────────────────────
+
+
+def _check_envelope(fvec):
+    """Check each BASE feature against FEATURE_BOUNDS. Returns (ok, violations)."""
+    try:
+        from motoquant.analysis.surrogate_data import FEATURE_NAMES, FEATURE_BOUNDS
+        violations = []
+        for i, name in enumerate(FEATURE_NAMES):
+            if name not in FEATURE_BOUNDS:
+                continue
+            lo, hi = FEATURE_BOUNDS[name]
+            if float(fvec[i]) < lo or float(fvec[i]) > hi:
+                violations.append(name)
+        return len(violations) == 0, violations
+    except Exception:
+        return True, []
+
+
+def _config_from_surrogate_request(req):
+    """
+    Build a BikeConfig from a SurrogatePredictRequest.
+    Delegates to _build_config() so DB lookup / preset fallback / override
+    scaling stay consistent with all other simulate endpoints.
+    Additional overrides (aero, tire) applied afterward.
+    """
+    config = _build_config(
+        bike_id=req.bike_id,
+        bike_preset=None,
+        power_boost_pct=req.power_boost_pct,
+        mass_delta_kg=req.mass_delta_kg,
+        rider_mass_kg=req.rider_weight_kg,
+    )
+    if req.aero_cd_override is not None:
+        config.aero.cd = req.aero_cd_override
+    if req.tire_mu_override is not None:
+        config.tires.mu_peak = req.tire_mu_override
+    return config
+
+
+# ─── Routes ──────────────────────────────────────────────────────────────
+
+
+@app.post("/api/surrogate/predict", response_model=SurrogatePredictResponse)
+def surrogate_predict(req: SurrogatePredictRequest):
+    """
+    Fast surrogate-model inference — target p95 < 5 ms.
+
+    Applies power/mass/aero/tire overrides then calls the loaded DNN or
+    XGBoost model.  ``within_training_envelope`` is False when any feature
+    exceeds the Sobol training bounds, signalling the prediction may be
+    unreliable.
+    """
+    global _SURROGATE, _SURROGATE_SOURCE
+    if _SURROGATE is None:
+        with _SURROGATE_LOCK:
+            if _SURROGATE is None:
+                _SURROGATE, _SURROGATE_SOURCE = _load_surrogate()
+    if _SURROGATE is None:
+        raise HTTPException(
+            503,
+            "Surrogate model not available — train and place surrogate_dnn.pkl at repo root",
+        )
+
+    try:
+        config = _config_from_surrogate_request(req)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(400, f"Config construction failed: {exc}") from exc
+
+    try:
+        from motoquant.analysis.surrogate_data import config_to_feature_vector
+        fvec = config_to_feature_vector(config)
+        within_env, violations = _check_envelope(fvec)
+
+        t0 = _time.perf_counter()
+        et_arr, trap_arr = _SURROGATE.predict(fvec.reshape(1, -1))
+        elapsed_ms = (_time.perf_counter() - t0) * 1000.0
+
+        et_val = float(et_arr[0]) if hasattr(et_arr, "__len__") else float(et_arr)
+        trap_val = float(trap_arr[0]) if hasattr(trap_arr, "__len__") else float(trap_arr)
+        # Both DNN and XGB store trap internally in m/s; convert to km/h
+        trap_kmh = trap_val * 3.6 if trap_val < 200.0 else trap_val
+
+    except Exception as exc:
+        raise HTTPException(500, f"Surrogate inference error: {exc}") from exc
+
+    return SurrogatePredictResponse(
+        et_s=round(et_val, 4),
+        trap_kmh=round(trap_kmh, 2),
+        inference_ms=round(elapsed_ms, 3),
+        source=_SURROGATE_SOURCE,
+        within_training_envelope=within_env,
+        envelope_violations=violations,
+    )
+
+
+@app.post("/api/surrogate/compare", response_model=SurrogateCompareResponse)
+def surrogate_compare(req: SurrogateCompareRequest):
+    """
+    Compare two configs via the surrogate — ideal for BuildPage part-swap sweeps.
+    Returns per-config predictions and a delta summary.
+    """
+    resp_a = surrogate_predict(req.config_a)
+    resp_b = surrogate_predict(req.config_b)
+
+    delta_et = round(resp_b.et_s - resp_a.et_s, 4)
+    delta_trap = round(resp_b.trap_kmh - resp_a.trap_kmh, 2)
+    if abs(delta_et) < 0.001:
+        faster = "tie"
+    elif delta_et < 0:
+        faster = "b"
+    else:
+        faster = "a"
+
+    return SurrogateCompareResponse(
+        a=resp_a,
+        b=resp_b,
+        delta_et_s=delta_et,
+        delta_trap_kmh=delta_trap,
+        faster=faster,
+    )
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# LIVE PRICING  (/api/pricing/*)
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class PricingEntryOut(BaseModel):
+    retailer: str
+    price_inr: float = Field(None)
+    in_stock: bool
+    fetched_at: str
+    source_url: str
+    is_stale: bool
+
+
+class PartPricingOut(BaseModel):
+    part_id: int
+    part_name: str
+    seed_price_inr: float = Field(None)
+    cheapest_live_inr: float = Field(None)
+    prices: list
+    all_stale: bool
+
+
+class BikePricingSummaryItem(BaseModel):
+    part_id: int
+    part_name: str
+    category: str
+    seed_price_inr: float = Field(None)
+    cheapest_live_inr: float = Field(None)
+    cheapest_retailer: str = Field(None)
+    in_stock: bool = Field(None)
+
+
+class BikePricingSummaryOut(BaseModel):
+    bike_id: int
+    bike_name: str
+    items: list
+    total_cheapest_inr: float
+
+
+class PricingRefreshOut(BaseModel):
+    part_id: int
+    retailer: str = Field(None)
+    price_inr: float = Field(None)
+    in_stock: bool = Field(None)
+    fetched_at: str = Field(None)
+    status: str
+
+
+@app.get("/api/pricing/part/{part_id}", response_model=PartPricingOut)
+def pricing_for_part(part_id: int):
+    """
+    Return the 3 cheapest live prices for *part_id* from the part_prices table.
+    Flags stale rows (>14 days).  Falls back gracefully when no live prices exist.
+    """
+    db = _get_db()
+    if db is None:
+        raise HTTPException(503, "Database unavailable")
+
+    part_row = db.execute(
+        "SELECT id, brand, model_name, price_inr FROM parts WHERE id = ?",
+        (part_id,),
+    ).fetchone()
+    if part_row is None:
+        raise HTTPException(404, f"Part {part_id} not found")
+
+    from motoquant.database.pricing_refresh import get_cheapest_prices
+    prices = get_cheapest_prices(db, part_id, limit=3)
+
+    cheapest_live = prices[0]["price_inr"] if prices and prices[0]["price_inr"] else None
+    all_stale = bool(prices) and all(p["is_stale"] for p in prices)
+
+    return PartPricingOut(
+        part_id=part_id,
+        part_name="{} {}".format(part_row["brand"] or "", part_row["model_name"] or "").strip(),
+        seed_price_inr=part_row["price_inr"],
+        cheapest_live_inr=cheapest_live,
+        prices=prices,
+        all_stale=all_stale,
+    )
+
+
+@app.get("/api/pricing/bike/{bike_id}", response_model=BikePricingSummaryOut)
+def pricing_for_bike(bike_id: int, limit: int = Query(50, ge=1, le=500)):
+    """
+    Pricing summary for all parts in the catalog, showing the cheapest live
+    retailer per part.  ``total_cheapest_inr`` sums the cheapest price per part
+    (useful for estimating a full-build landed cost).
+    """
+    db = _get_db()
+    if db is None:
+        raise HTTPException(503, "Database unavailable")
+
+    bike_row = db.execute(
+        "SELECT id, model_name FROM bike_models WHERE id = ?", (bike_id,)
+    ).fetchone()
+    if bike_row is None:
+        raise HTTPException(404, f"Bike {bike_id} not found")
+
+    part_rows = db.execute(
+        """
+        SELECT p.id, p.brand, p.model_name, p.price_inr,
+               pc.name AS category
+          FROM parts p
+          JOIN parts_categories pc ON pc.id = p.category_id
+         LIMIT ?
+        """,
+        (limit,),
+    ).fetchall()
+
+    from motoquant.database.pricing_refresh import get_cheapest_prices
+
+    items = []
+    total = 0.0
+
+    for pr in part_rows:
+        prices = get_cheapest_prices(db, pr["id"], limit=1)
+        cheapest = prices[0] if prices else None
+        cheapest_inr = cheapest["price_inr"] if cheapest and cheapest["price_inr"] else None
+        if cheapest_inr:
+            total += cheapest_inr
+        elif pr["price_inr"]:
+            total += pr["price_inr"]
+
+        items.append({
+            "part_id": pr["id"],
+            "part_name": "{} {}".format(pr["brand"] or "", pr["model_name"] or "").strip(),
+            "category": pr["category"] or "",
+            "seed_price_inr": pr["price_inr"],
+            "cheapest_live_inr": cheapest_inr,
+            "cheapest_retailer": cheapest["retailer"] if cheapest else None,
+            "in_stock": cheapest["in_stock"] if cheapest else None,
+        })
+
+    return BikePricingSummaryOut(
+        bike_id=bike_id,
+        bike_name=bike_row["model_name"],
+        items=items,
+        total_cheapest_inr=round(total, 2),
+    )
+
+
+@app.post("/api/pricing/refresh/{part_id}", response_model=PricingRefreshOut)
+def refresh_part_price(part_id: int, force: bool = Query(False)):
+    """
+    Trigger a live price refresh for a single part.
+
+    Uses the part's ``retailer_url`` field to hit the live retailer page.
+    Set ``force=true`` to bypass the 14-day freshness check.
+
+    NOTE: This endpoint is intentionally open for now.  Stream 5 (auth)
+    will wrap it with admin-role gating via ``app.include_router(auth_router)``.
+    """
+    db = _get_db()
+    if db is None:
+        raise HTTPException(503, "Database unavailable")
+
+    part_row = db.execute(
+        "SELECT id, brand, model_name, retailer, retailer_url FROM parts WHERE id = ?",
+        (part_id,),
+    ).fetchone()
+    if part_row is None:
+        raise HTTPException(404, f"Part {part_id} not found")
+
+    if not part_row["retailer_url"]:
+        return PricingRefreshOut(
+            part_id=part_id,
+            retailer=part_row["retailer"],
+            price_inr=None,
+            in_stock=None,
+            fetched_at=None,
+            status="no_url",
+        )
+
+    from motoquant.database.pricing_refresh import fetch_live_price
+    result = fetch_live_price(db, part_id, force=force)
+
+    if result is None:
+        return PricingRefreshOut(
+            part_id=part_id,
+            retailer=part_row["retailer"],
+            price_inr=None,
+            in_stock=None,
+            fetched_at=None,
+            status="fetch_failed",
+        )
+
+    return PricingRefreshOut(
+        part_id=part_id,
+        retailer=result.retailer,
+        price_inr=result.price_inr,
+        in_stock=result.in_stock,
+        fetched_at=result.fetched_at.isoformat(),
+        status="refreshed",
+    )
+
+
+# ------- END ws/backend-surrogate-pricing additions ----------------------
+# Lines below here are reserved for Stream 5 auth router mounts:
+#   from motoquant.auth import router as auth_router
+#   app.include_router(auth_router)

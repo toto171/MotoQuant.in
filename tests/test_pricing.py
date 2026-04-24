@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import os
 import sys
+import unittest
 
 import pytest
 
@@ -340,3 +341,187 @@ class TestCoverageReport:
         refresh_retailer_urls(seeded_db.conn, only_missing=True)
         after = coverage_report(seeded_db.conn)
         assert after["with_retailer_url"] > before["with_retailer_url"]
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Live pricing adapter tests — all HTTP calls mocked via unittest.mock
+# ═══════════════════════════════════════════════════════════════════════════
+
+import datetime
+import unittest.mock as _mock
+
+
+class TestRetailAdapters(unittest.TestCase):
+    """Unit tests for the retail_adapters module — no real HTTP."""
+
+    def _make_response(self, body: str, status: int = 200):
+        """Build a fake urllib response context manager."""
+        import io
+        raw = body.encode("utf-8")
+        resp = _mock.MagicMock()
+        resp.__enter__ = _mock.MagicMock(return_value=resp)
+        resp.__exit__ = _mock.MagicMock(return_value=False)
+        resp.read = _mock.MagicMock(return_value=raw)
+        resp.status = status
+        return resp
+
+    def test_woocommerce_price_extraction(self):
+        """Generic WooCommerce price pattern should parse INR symbol."""
+        from motoquant.database.retail_adapters import _extract_price_inr
+        html = '<span class="price"><span class="woocommerce-Price-amount">&#8377;12,500.00</span></span>'
+        price = _extract_price_inr(html)
+        self.assertIsNotNone(price)
+        self.assertAlmostEqual(price, 12500.0, places=0)
+
+    def test_rs_prefix_extraction(self):
+        """'Rs.' price prefix should be parsed."""
+        from motoquant.database.retail_adapters import _extract_price_inr
+        html = '<div class="price">Rs. 8,999</div>'
+        price = _extract_price_inr(html)
+        self.assertIsNotNone(price)
+        self.assertAlmostEqual(price, 8999.0, places=0)
+
+    def test_oos_detection(self):
+        """Out-of-stock signal should flip in_stock to False."""
+        from motoquant.database.retail_adapters import _extract_in_stock
+        self.assertFalse(_extract_in_stock("This product is Out of Stock"))
+        self.assertFalse(_extract_in_stock("sold out"))
+        self.assertTrue(_extract_in_stock("In Stock — ships in 2 days"))
+
+    def test_fetch_price_mocked_powertronic(self):
+        """fetch_price should call adapter and return PriceResult on success."""
+        from motoquant.database.retail_adapters import fetch_price
+        fake_html = "<html><body>Price: &#8377;6,500 Add to cart</body></html>"
+        with _mock.patch("urllib.request.urlopen", return_value=self._make_response(fake_html)):
+            result = fetch_price("https://powertronicecu.com/product/z-fi-tc/")
+        self.assertIsNotNone(result)
+        self.assertAlmostEqual(result.price_inr, 6500.0, places=0)
+        self.assertTrue(result.in_stock)
+        self.assertEqual(result.retailer, "Powertronic ECU")
+
+    def test_fetch_price_oos_mocked(self):
+        """OOS page should return in_stock=False."""
+        from motoquant.database.retail_adapters import fetch_price
+        fake_html = "<html><body>Rs. 14,000 — Out of Stock</body></html>"
+        with _mock.patch("urllib.request.urlopen", return_value=self._make_response(fake_html)):
+            result = fetch_price("https://motodelic.com/product/k-n-filter/")
+        self.assertIsNotNone(result)
+        self.assertFalse(result.in_stock)
+
+    def test_fetch_price_network_error_returns_none(self):
+        """Network error should return None gracefully (no exception raised)."""
+        import urllib.error
+        from motoquant.database.retail_adapters import fetch_price
+        with _mock.patch("urllib.request.urlopen", side_effect=urllib.error.URLError("timeout")):
+            result = fetch_price("https://motomiu.com/product/exhaust/")
+        self.assertIsNone(result)
+
+    def test_cloudflare_challenge_returns_none(self):
+        """Cloudflare challenge page should return None for Akrapovic adapter."""
+        from motoquant.database.retail_adapters import fetch_akrapovic
+        cf_html = "<html><title>Just a moment...</title><body>Cloudflare Ray ID</body></html>"
+        with _mock.patch("urllib.request.urlopen", return_value=self._make_response(cf_html)):
+            result = fetch_akrapovic("https://akrapovic.com/en/motorcycle/product/123")
+        self.assertIsNone(result)
+
+
+class TestLandingCostMath(unittest.TestCase):
+    """Unit tests for estimate_landing_cost_inr()."""
+
+    def test_domestic_indian_part(self):
+        """Indian-stocked part: sticker × 1.18 + 250 courier."""
+        from motoquant.database.pricing_refresh import estimate_landing_cost_inr, GST_RATE, COURIER_INR
+        sticker = 10_000.0
+        expected = sticker * (1 + GST_RATE) + COURIER_INR
+        result = estimate_landing_cost_inr(sticker, retailer="Grand Pitstop")
+        self.assertAlmostEqual(result, expected, places=1)
+
+    def test_us_sourced_part_has_import_duty(self):
+        """US-sourced retailer should add 30% import duty on top of GST + courier."""
+        from motoquant.database.pricing_refresh import (
+            estimate_landing_cost_inr, GST_RATE, COURIER_INR, IMPORT_DUTY_RATE,
+        )
+        sticker = 10_000.0
+        base = sticker * (1 + GST_RATE) + COURIER_INR
+        expected = base * (1 + IMPORT_DUTY_RATE)
+        result = estimate_landing_cost_inr(sticker, retailer="RevZilla USA")
+        self.assertAlmostEqual(result, expected, places=1)
+
+    def test_import_only_availability(self):
+        """availability='import_only' triggers import duty even for neutral retailer."""
+        from motoquant.database.pricing_refresh import (
+            estimate_landing_cost_inr, GST_RATE, COURIER_INR, IMPORT_DUTY_RATE,
+        )
+        sticker = 5_000.0
+        base = sticker * (1 + GST_RATE) + COURIER_INR
+        expected = base * (1 + IMPORT_DUTY_RATE)
+        result = estimate_landing_cost_inr(sticker, availability="import_only")
+        self.assertAlmostEqual(result, expected, places=1)
+
+
+class TestStaleLivePrices(unittest.TestCase):
+    """Unit tests for stale_live_prices() against an in-memory DB."""
+
+    def _make_db(self):
+        import sqlite3
+        conn = sqlite3.connect(":memory:")
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA journal_mode=DELETE")
+        conn.executescript("""
+            CREATE TABLE parts (
+                id INTEGER PRIMARY KEY, brand TEXT, model_name TEXT,
+                retailer TEXT, price_inr REAL, retailer_url TEXT
+            );
+            CREATE TABLE part_prices (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                part_id INTEGER NOT NULL,
+                retailer TEXT NOT NULL,
+                source_url TEXT NOT NULL,
+                price_inr REAL,
+                in_stock INTEGER NOT NULL DEFAULT 1,
+                fetched_at TEXT NOT NULL DEFAULT (datetime('now','utc')),
+                created_at TEXT DEFAULT (datetime('now','utc')),
+                UNIQUE(part_id, retailer)
+            );
+        """)
+        conn.execute("INSERT INTO parts (id, brand, model_name, retailer) VALUES (1, 'Akra', 'Evo Ti', 'Akrapovic India')")
+        conn.execute("INSERT INTO parts (id, brand, model_name, retailer) VALUES (2, 'KN', 'HA-1099', 'K&N India')")
+        conn.commit()
+        return conn
+
+    def test_all_parts_stale_when_no_prices(self):
+        """All parts are stale when part_prices table is empty."""
+        from motoquant.database.pricing_refresh import stale_live_prices
+        conn = self._make_db()
+        stale = stale_live_prices(conn, days_threshold=14)
+        self.assertEqual(len(stale), 2, "both parts should be stale with empty price table")
+
+    def test_fresh_price_not_in_stale_list(self):
+        """A part with a price fetched today should NOT appear in stale list."""
+        from motoquant.database.pricing_refresh import stale_live_prices
+        conn = self._make_db()
+        conn.execute(
+            "INSERT INTO part_prices (part_id, retailer, source_url, price_inr, in_stock, fetched_at) "
+            "VALUES (1, 'Akrapovic India', 'http://x.com', 45000.0, 1, datetime('now','utc'))"
+        )
+        conn.commit()
+        stale = stale_live_prices(conn, days_threshold=14)
+        part_ids = [s[0] for s in stale]
+        self.assertNotIn(1, part_ids, "part 1 was just fetched and should not be stale")
+        self.assertIn(2, part_ids, "part 2 has no price and should be stale")
+
+    def test_old_price_is_stale(self):
+        """A price fetched 20 days ago should appear in stale list with 14-day threshold."""
+        from motoquant.database.pricing_refresh import stale_live_prices
+        conn = self._make_db()
+        twenty_days_ago = (
+            datetime.date.today() - datetime.timedelta(days=20)
+        ).isoformat() + "T00:00:00"
+        conn.execute(
+            "INSERT INTO part_prices (part_id, retailer, source_url, price_inr, in_stock, fetched_at) "
+            "VALUES (2, 'K&N India', 'http://x.com', 2500.0, 1, ?)",
+            (twenty_days_ago,)
+        )
+        conn.commit()
+        stale = stale_live_prices(conn, days_threshold=14)
+        part_ids = [s[0] for s in stale]
+        self.assertIn(2, part_ids, "price from 20 days ago is stale at 14-day threshold")
