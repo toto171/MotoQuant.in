@@ -8,14 +8,14 @@
  * Step 2: user clicks link in email → /login?token=... → POST /api/auth/verify
  */
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../../components/AuthProvider";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL || "https://web-production-de6eb.up.railway.app";
 
-export default function LoginPage() {
+function LoginPageInner() {
   const router = useRouter();
   const params = useSearchParams();
   const { isAuthenticated, applyLoginTokens } = useAuth();
@@ -191,5 +191,14 @@ export default function LoginPage() {
         </p>
       </div>
     </main>
+  );
+}
+
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-ink-1 flex items-center justify-center text-white/60">Loading...</div>}>
+      <LoginPageInner />
+    </Suspense>
   );
 }

@@ -1,5 +1,6 @@
 import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
+import AuthProvider from '../components/AuthProvider';
 import StructuredData, {
   organizationSchema,
   websiteSchema,
@@ -257,7 +258,7 @@ export default function RootLayout({ children }) {
         <StructuredData data={websiteSchema()} />
         <StructuredData data={softwareApplicationSchema()} />
         <StructuredData data={faqSchema()} />
-        {children}
+        <AuthProvider>{children}</AuthProvider>
         <div className="grain" aria-hidden="true" />
       </body>
     </html>
