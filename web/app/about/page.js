@@ -317,4 +317,27 @@ export default function AboutPage() {
                       className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-brand-orange/60 transition-colors resize-none"
                       placeholder="Tell us what you want to know, build, or break."
                     />
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-brand-orange text-black font-display font-bold rounded-lg hover:bg-brand-orangeLight transition-colors"
+                  >
+                    <Send size={14} /> Send message
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-10 px-6 text-center text-white/40 text-xs font-mono">
+        <div className="max-w-6xl mx-auto">
+          <p>MotoQuant Pro · Built by engineers, for racers · motoquant.in</p>
+        </div>
+      </footer>
+    </div>
+  );
+}
            
