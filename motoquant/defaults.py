@@ -131,6 +131,7 @@ def _synthetic_2stroke_torque_curve(
     peak_power_hp: float | None = None,
     peak_power_rpm: float | None = None,
     cylinders: int = 1,
+    displacement_cc: float | None = None,
     points: int = 100,
 ) -> DynoCurve:
     """
@@ -196,6 +197,22 @@ def _synthetic_2stroke_torque_curve(
         band_lo = 0.30
         band_hi = 0.15
         baseline = 0.25
+    elif (
+        cylinders == 1
+        and not powervalve
+        and displacement_cc is not None
+        and displacement_cc < 200.0
+    ):
+        # Apr-24-PM kaizen: small commuter / cub piston-port singles
+        # (RX100 98 cc, RX135 132 cc, RXZ135 133 cc, AX100, XL125 class).
+        # Mild OEM pipe -- NOT a race expansion chamber. Real RX100 dyno
+        # shows ~70 % of peak at 5 000 rpm, ~50 % at 8 500 rpm. Without
+        # this branch the race-single widths (0.12/0.08/0.12) collapsed
+        # torque to baseline outside a narrow 7-8 krpm window, so these
+        # bikes never reached top-of-gear-1 speed (DNF at 26 s).
+        band_lo = 0.35   # wide below-peak shoulder (mild pipe)
+        band_hi = 0.25   # gentle above-peak fall
+        baseline = 0.35  # strong off-pipe torque (street-tuned)
     else:
         band_lo = 0.12  # was 0.24 — piston-port is peakier
         band_hi = 0.08  # was 0.11
