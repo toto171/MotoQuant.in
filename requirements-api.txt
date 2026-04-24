@@ -1,4 +1,4 @@
-# MotoQuant Pro — API server dependencies (production)
+# MotoQuant Pro -- API server dependencies (production)
 # Install with: pip install -r requirements-api.txt
 
 # Web framework
@@ -14,4 +14,9 @@ scipy>=1.10.0
 python-multipart>=0.0.6
 
 # Database
-# (sqlite3 is stdlib — no extra package needed)
+# (sqlite3 is stdlib -- no extra package needed)
+
+# Auth and subscriptions (commercial launch)
+python-jose[cryptography]>=3.3.0
+email-validator>=2.0.0
+razorpay>=1.4.0
