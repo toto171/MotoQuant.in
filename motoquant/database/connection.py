@@ -147,6 +147,26 @@ class MotoQuantDB:
         # The CREATE TABLE statement is idempotent in TABLES_DDL, so no-op here —
         # but we bump the version so older DB files get their schema_meta updated.
 
+        # v3 → v4: part_prices table (live Indian-market retailer pricing layer)
+        if from_version < 4:
+            conn.executescript(
+                """
+                CREATE TABLE IF NOT EXISTS part_prices (
+                    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                    part_id    INTEGER NOT NULL REFERENCES parts(id) ON DELETE CASCADE,
+                    retailer   TEXT    NOT NULL,
+                    source_url TEXT    NOT NULL,
+                    price_inr  REAL,
+                    in_stock   INTEGER NOT NULL DEFAULT 1,
+                    fetched_at TEXT    NOT NULL DEFAULT (datetime('now','utc')),
+                    created_at TEXT    DEFAULT (datetime('now','utc')),
+                    UNIQUE(part_id, retailer)
+                );
+                CREATE INDEX IF NOT EXISTS idx_part_prices_part  ON part_prices(part_id);
+                CREATE INDEX IF NOT EXISTS idx_part_prices_fetch ON part_prices(fetched_at);
+                """
+            )
+
     def _seed_parts_categories(self):
         """Insert parts categories if not present. Also prunes the retired
         'tire' pseudo-category from older DBs (tires are managed in tire_models,
@@ -301,6 +321,8 @@ class MotoQuantDB:
     # ────────────────────────────────────────────
     # Utility
     # ────────────────────────────────────────────
+    # Utility
+    # ────────────────────────────────────────────
 
     def stats(self) -> dict:
         """Return row counts for all major tables."""
@@ -334,3 +356,14 @@ class MotoQuantDB:
     @property
     def path(self) -> Path:
         return self._db_path
+
+
+def connect(db_path=None):
+    """
+    Convenience helper: open a connection to the MotoQuant DB and return it.
+    Uses MOTOQUANT_DB env var if db_path is None, defaulting to motoquant.db.
+    """
+    import os as _os
+    path = db_path or _os.environ.get("MOTOQUANT_DB", "motoquant.db")
+    db = MotoQuantDB(path)
+    return db.conn
