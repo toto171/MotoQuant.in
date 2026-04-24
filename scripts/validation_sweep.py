@@ -105,29 +105,37 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     ("Aprilia", "RS250", 1996, 12.40, 168, "Sport Rider 1996"),
     # Indian-market small-cc (from local drag strip telemetry collected
     # by R2 Moto, Aamby Valley community runs — community logged)
-    ("Bajaj", "Pulsar NS200", 2019, 15.80, 130, "Community runs 2019"),
-    ("KTM", "Duke 390", 2019, 14.20, 150, "Community runs 2019"),
-    ("Royal Enfield", "Continental GT 650", 2019, 14.50, 140, "MCN 2019"),
-    ("Yamaha", "R15 V3", 2020, 16.20, 125, "Community runs 2020"),
+    # April 24, 2026: April-24-PM cross-checked against FastestLaps,
+    # MotorBikeCatalog, DragTimes, and Indian drag-event reports. Updated
+    # values flagged with the verification source. Bikes for which no
+    # real timeslip data was found are marked "DERIVED" — the figure is
+    # an order-of-magnitude estimate from a 0-100 multiplier and carries
+    # ±0.5-1.0 s uncertainty.
+    ("Bajaj", "Pulsar NS200", 2019, 16.90, 130, "MotorBikeCatalog 2012 (verified)"),
+    ("KTM", "Duke 390", 2019, 14.00, 150, "Motorcycle Consumer News (Duke 390 14.02 @ 91.88 mph)"),
+    ("Royal Enfield", "Continental GT 650", 2019, 13.90, 155, "FastestLaps + Mantra Racing (verified)"),
+    ("Yamaha", "R15 V3", 2020, 16.20, 125, "DERIVED (no real timeslip found)"),
     # Indian-market 150-400cc expansion (April 2026)
-    ("Bajaj", "Pulsar RS 200", 2015, 15.70, 132, "Derived from 0-100 (autoX 2015)"),
-    ("Bajaj", "Pulsar N250", 2021, 15.45, 135, "Derived from 0-100 (autoX 2021)"),
-    ("Bajaj", "Pulsar NS400Z", 2024, 14.10, 155, "Derived from 0-100 (autoX 2024)"),
-    ("KTM", "Duke 250", 2017, 15.20, 140, "Derived from 0-100 (motorbeam 2017)"),
-    ("KTM", "RC 390", 2017, 13.16, 159, "ZeroTo60Times 2017"),
-    ("TVS", "Apache RR 310", 2020, 14.80, 145, "Derived from 0-100 (bikewale 2020)"),
-    ("TVS", "Apache RTR 200 4V", 2016, 15.90, 128, "Derived from 0-100 (bikewale 2016)"),
-    ("Yamaha", "R15 V4", 2021, 16.40, 123, "Derived from 0-100 (autocar 2021)"),
-    ("Yamaha", "MT-15", 2019, 15.80, 130, "Derived from 0-100 (bikewale 2019)"),
-    ("Yamaha", "R3", 2015, 15.80, 125, "MotoStatz 2015"),
-    ("Yamaha", "MT-03", 2020, 14.05, 92, "AccelerationTimes 2020"),
-    ("Honda", "CB350RS", 2021, 15.50, 138, "Derived from 0-100 (bikewale 2021)"),
-    ("Honda", "CBR500R", 2022, 13.51, 98, "MotoStatz 2022"),
-    ("Honda", "CB650R", 2021, 11.80, 115, "AccelerationTimes 2021"),
-    ("Suzuki", "Gixxer 250", 2018, 16.10, 126, "Derived from 0-100 (bikewale 2018)"),
+    ("Bajaj", "Pulsar RS 200", 2015, 15.70, 132, "DERIVED (0-100 × 1.6, ±0.7s)"),
+    ("Bajaj", "Pulsar N250", 2021, 15.45, 135, "DERIVED (0-100 × 1.6, ±0.7s)"),
+    ("Bajaj", "Pulsar NS400Z", 2024, 14.10, 155, "DERIVED (0-100 × 1.6, ±0.7s)"),
+    ("KTM", "Duke 250", 2017, 15.20, 140, "DERIVED (0-100 × 1.6, ±0.7s)"),
+    ("KTM", "RC 390", 2017, 13.85, 159, "Duke 390 baseline (Motorcycle Consumer News, RC adds ~−0.15s for fairing)"),
+    ("TVS", "Apache RR 310", 2020, 15.46, 135, "FastestLaps + BikeWale (verified stock)"),
+    ("TVS", "Apache RTR 200 4V", 2016, 15.90, 128, "DERIVED (0-100 × 1.6, ±0.7s)"),
+    ("Yamaha", "R15 V4", 2021, 16.40, 123, "DERIVED (0-100 × 1.6, ±0.7s)"),
+    ("Yamaha", "MT-15", 2019, 15.80, 130, "DERIVED (0-100 × 1.6, ±0.7s)"),
+    ("Yamaha", "R3", 2015, 15.80, 125, "MotoStatz 2015 (DERIVED)"),
+    ("Yamaha", "MT-03", 2020, 14.05, 92, "AccelerationTimes 2020 (DERIVED)"),
+    ("Honda", "CB350RS", 2021, 15.50, 138, "DERIVED (0-100 × 1.6, ±0.7s)"),
+    ("Honda", "CBR500R", 2022, 13.51, 98, "MotoStatz 2022 (DERIVED)"),
+    ("Honda", "CB650R", 2021, 11.80, 115, "AccelerationTimes 2021 (DERIVED)"),
+    ("Honda", "CBR250R", 2011, 15.86, 130, "MotorBikeCatalog 2011 (verified, 81.2 mph)"),
+    ("Suzuki", "Gixxer 250", 2018, 16.10, 126, "DERIVED (0-100 × 1.6, ±0.7s)"),
+    ("Kawasaki", "Ninja 300", 2013, 14.10, 150, "FastestLaps (verified, 93 mph)"),
     # Mid-range global expansion (April 2026)
     ("Suzuki", "SV650", 2016, 11.82, 115, "FastestLaps 2016"),
-    ("Kawasaki", "Ninja 300", 2013, 14.60, 102, "MotoStatz 2013"),
+    # ("Kawasaki", "Ninja 300", 2013, ...) — moved up + verified figure used
     ("Kawasaki", "Ninja 400", 2018, 12.98, 102, "MotoStatz 2018"),
     ("Kawasaki", "Ninja 650", 2020, 12.30, 111, "MotoStatz 2020"),
     ("Kawasaki", "Z 650", 2017, 12.40, 110, "MotoStatz 2017"),
@@ -139,8 +147,8 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     ("Benelli", "TNT 600i", 2014, 12.60, 108, "MotorbikeCatalog 2014"),
     ("Aprilia", "RS 457", 2024, 13.30, 97, "FastestLaps 2024"),
     # SE Asia enthusiast 150cc expansion (April 2026)
-    ("Yamaha", "YZF-R7", 2022, 11.64, 116, "MotoStatz 2022"),
-    ("Yamaha", "FZ25", 2018, 16.00, 127, "Derived from 0-100 (bikewale 2018)"),
+    ("Yamaha", "YZF-R7", 2022, 11.64, 116, "MotoStatz 2022 (DERIVED)"),
+    ("Yamaha", "FZ25", 2018, 16.00, 127, "DERIVED (0-100 × 1.6, ±0.7s)"),
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

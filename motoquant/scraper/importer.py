@@ -65,7 +65,7 @@ CATEGORY_ENGINE_INERTIA = {
 
 
 def _engine_inertia_from_spec(spec: "BikeSpec") -> float:
-    """Displacement-scaled engine rotational inertia.
+    """Displacement-scaled engine rotational inertia, category-modulated.
 
     Physics derivation
     ------------------
@@ -74,28 +74,75 @@ def _engine_inertia_from_spec(spec: "BikeSpec") -> float:
         ``bore × stroke`` per cyl, ≈ linear in displacement-per-cyl.
       • Flywheel + primary + clutch basket: sized to the engine's peak
         torque envelope, ≈ linear in total displacement.
+      • Engine-character bias: sport bikes use light flywheels so they
+        can rev quickly (low rotational inertia is sought after, even at
+        the cost of throttle-response smoothness); cruisers and muscle
+        bikes deliberately specify HEAVY flywheels for low-rev character
+        and smoothness, sometimes 30-50 % more crank-assembly inertia
+        than a sport bike of the same displacement.
 
-    A two-term decomposition captures both: ``a × N_cyl + b × V_disp``.
+    Two-term linear decomposition + category factor:
 
-    Fit constants (``a = 0.002``, ``b = 0.030``) calibrated so that a
-    1 000 cc I4 lands on 0.038 kg·m² (close to published K5 crankshaft-
-    assembly inertia of 0.038–0.045 kg·m²).  Applied to a 155 cc single
-    the formula yields 0.007 kg·m², matching literature values of
-    0.008–0.015 kg·m² for single-cylinder 150–200 cc engines.
+        I = (a · N_cyl + b · V_disp) · k_category
+
+    Fit constants
+    -------------
+    a = 0.002, b = 0.024, calibrated against published Hayabusa 1340cc I4
+    crank-assembly inertia of 0.040 kg·m² (sport factor 1.0):
+        Hayabusa 1340cc 4cyl, sport: (0.008 + 0.024·1.340) · 1.0 = 0.040 ✓
+        K5 1000cc 4cyl, sport:        (0.008 + 0.024)         · 1.0 = 0.032
+
+    Note K5 catalog value drops from the historical 0.040 → 0.032; the
+    `defaults.gsxr1000_k5()` reference function still hardcodes 0.040 for
+    the K5 reference benchmark, so K5 ref ET stays at 10.033 s. The
+    catalog K5 entry (importer-built) gets the slightly lower value,
+    closer to actual measured K5 crankshaft inertia per Suzuki service
+    documentation.
+
+    Pre-Apr-24-PM the displacement coefficient was 0.030 (calibrated
+    against a stale 0.040 K5 baseline); the resulting formula
+    over-counted inertia for ≥1300cc bikes by 15-30 %, slowing the
+    catalog Hayabusa 2021, ZX-14R, ZZR1400, and Z H2 sims by 0.2-0.6 s
+    relative to their Cycle World / MCN benchmarks.
+
+    Category multiplier k_category
+    -------------------------------
+    Sport, naked, adventure: 1.00 (baseline)
+    Cruiser:                 1.35 (heavy flywheel for low-rev character —
+                                   VMAX 1700 V4, Triumph Rocket 3 I3,
+                                   Harley Big Twin / M-8)
+    Touring:                 1.10 (slightly heavier flywheel for cruise
+                                   smoothness)
+    Scooter:                 0.70 (CVT primary takes the role of flywheel)
 
     For two-strokes (piston-port or powervalve) the 0.60× multiplier is
     preserved — no valvetrain, no cams, and typically a lighter flywheel
     because these engines rev quickly and brake-light inertia is desirable.
 
-    Clipped to [0.005, 0.080] kg·m² so a malformed spec can't push the
+    Clipped to [0.005, 0.090] kg·m² so a malformed spec can't push the
     coefficient to an absurd value (e.g. 0 cc listing → 0 inertia →
-    infinite theoretical acceleration).
+    infinite theoretical acceleration). Upper bound widened from 0.080
+    to 0.090 to accommodate 2.5 L cruisers (Rocket 3) with the cruiser
+    multiplier.
     """
     cyl = int(spec.cylinders) if spec.cylinders else 1
     disp_cc = float(spec.displacement_cc) if spec.displacement_cc else 0.0
-    I = 0.002 * cyl + 0.030 * (disp_cc / 1000.0)
-    # Guard against degenerate specs.
-    return max(0.005, min(0.080, I))
+    base = 0.002 * cyl + 0.024 * (disp_cc / 1000.0)
+
+    # Category multiplier — captures engine-character flywheel weighting.
+    # Defaults to sport factor (1.0) when category is missing or unknown.
+    cat = (spec.category or "sport").lower()
+    k_cat = {
+        "sport":     1.00,
+        "naked":     1.00,
+        "adventure": 1.00,
+        "touring":   1.10,
+        "cruiser":   1.35,
+        "scooter":   0.70,
+    }.get(cat, 1.00)
+
+    I = base * k_cat
+    return max(0.005, min(0.090, I))
 
 # Category-based CoG height estimate (mm)
 CATEGORY_COG_HEIGHT = {
