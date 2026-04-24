@@ -50,7 +50,7 @@ export default function AboutPage() {
     // For now, fall through to mailto as a reliable baseline.
     const subject = encodeURIComponent(`MotoQuant — message from ${name}`);
     const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`);
-    window.location.href = `mailto:dhisetu@gmail.com?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:hello@motoquant.in?subject=${subject}&body=${body}`;
     setSent(true);
   }
 
@@ -136,36 +136,69 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Founder */}
+      {/* Founders */}
       <section className="py-20 px-6 border-b border-brand-orange/10 bg-ink-1/30">
-        <div className="max-w-4xl mx-auto">
-          <div className="glass rounded-2xl p-8 md:p-12 border border-brand-orange/20">
-            <div className="flex items-start gap-6">
-              <div className="w-14 h-14 rounded-full bg-brand-orange/20 border border-brand-orange/40 flex items-center justify-center shrink-0">
-                <span className="text-brand-orange font-display font-bold text-xl">H</span>
-              </div>
-              <div>
-                <div className="font-display font-bold text-xl text-white mb-0.5">Hritwik Mudhai</div>
-                <div className="font-mono text-xs text-white/50 mb-5">Founder · Pune, India</div>
-                <div className="space-y-3 text-white/70 text-sm leading-relaxed">
-                  <p>
-                    I built MotoQuant because I wanted to know the answer before spending money. The Indian drag community is full of talented riders and tuners — but the data tooling is stuck in the spreadsheet era.
-                  </p>
-                  <p>
-                    The physics engine started as a weekend project to predict my own bike&apos;s ET. Fifteen sub-models and 287 bikes later, it&apos;s become the most accurate open drag simulator for Indian-market bikes that I know of.
-                  </p>
-                  <p>
-                    If you&apos;re a tuning shop in Narhe, a racer at Aamby Valley, or a weekend drag enthusiast trying to figure out which part to buy next — this is built for you.
-                  </p>
+        <div className="max-w-5xl mx-auto">
+          <h2 className="font-display font-bold text-3xl md:text-4xl mb-3 text-white">Founders</h2>
+          <p className="text-white/60 text-sm font-mono mb-10 uppercase tracking-wide">Engineers first. Racers second. Shipping a tool we&apos;d use ourselves.</p>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Founder 1 — Arya Desai */}
+            <div className="glass rounded-2xl p-8 border border-brand-orange/20">
+              <div className="flex items-start gap-5 mb-5">
+                <div className="w-14 h-14 rounded-full bg-brand-orange/20 border border-brand-orange/40 flex items-center justify-center shrink-0">
+                  <span className="text-brand-orange font-display font-bold text-xl">A</span>
                 </div>
-                <a
-                  href="mailto:dhisetu@gmail.com"
-                  className="inline-flex items-center gap-1.5 mt-5 text-sm text-brand-accent font-mono hover:text-brand-orange transition-colors"
-                >
-                  dhisetu@gmail.com <ChevronRight size={14} />
-                </a>
+                <div>
+                  <div className="font-display font-bold text-xl text-white mb-0.5">Arya Desai</div>
+                  <div className="font-mono text-xs text-white/50">Co-founder · Pune, India</div>
+                </div>
+              </div>
+              <div className="space-y-3 text-white/70 text-sm leading-relaxed">
+                <p>
+                  Automobile engineer — M.Tech at NIT Warangal, B.Tech from Manipal Institute of Technology (Automotive System Design). The hands-on side of MotoQuant.
+                </p>
+                <p>
+                  Diagnosed, serviced, and performance-tuned 25+ luxury and performance vehicles at Power Solutions Pune — Mercedes AMG, BMW, Audi, Jaguar Land Rover, Lincoln — including a flagship Mercedes AMG SLS valvetronic exhaust install. ECU-tuning certified (Techmaghi / ReynLab).
+                </p>
+                <p>
+                  Research on polyurethane-based magnetorheological elastomers at NIT-W delivered a 22% improvement in vibration damping under magnetic excitation — the kind of first-principles work that shapes how MotoQuant models tire and chassis dynamics.
+                </p>
               </div>
             </div>
+
+            {/* Founder 2 — Hritwik Mudhai */}
+            <div className="glass rounded-2xl p-8 border border-brand-orange/20">
+              <div className="flex items-start gap-5 mb-5">
+                <div className="w-14 h-14 rounded-full bg-brand-orange/20 border border-brand-orange/40 flex items-center justify-center shrink-0">
+                  <span className="text-brand-orange font-display font-bold text-xl">H</span>
+                </div>
+                <div>
+                  <div className="font-display font-bold text-xl text-white mb-0.5">Hritwik Mudhai</div>
+                  <div className="font-mono text-xs text-white/50">Co-founder · Manipal, India</div>
+                </div>
+              </div>
+              <div className="space-y-3 text-white/70 text-sm leading-relaxed">
+                <p>
+                  The physics + software side. Built the 15-sub-model drag simulation engine, the 287-bike catalog, the ROI knapsack, and the calibration pipeline that fits sim output to real Dragy traces within ±0.05 s.
+                </p>
+                <p>
+                  Wrote the RK4 integrator, the Pacejka tire model, the expansion-chamber 2-stroke curve, and the clutch-slip thermal model from the ground up. Cares more about which terms actually survive the force balance than about chasing a good-looking regression.
+                </p>
+                <p>
+                  Wants MotoQuant to be the tool every serious tuner already has open on a second monitor.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-10 text-center">
+            <a
+              href="mailto:hello@motoquant.in"
+              className="inline-flex items-center gap-1.5 text-sm text-brand-accent font-mono hover:text-brand-orange transition-colors"
+            >
+              hello@motoquant.in <ChevronRight size={14} />
+            </a>
           </div>
         </div>
       </section>
@@ -223,8 +256,8 @@ export default function AboutPage() {
               <div className="space-y-3">
                 <div>
                   <div className="text-xs font-mono text-white/40 uppercase tracking-widest mb-1">Email</div>
-                  <a href="mailto:dhisetu@gmail.com" className="font-mono text-brand-accent hover:text-brand-orange transition-colors text-sm">
-                    dhisetu@gmail.com
+                  <a href="mailto:hello@motoquant.in" className="font-mono text-brand-accent hover:text-brand-orange transition-colors text-sm">
+                    hello@motoquant.in
                   </a>
                 </div>
                 <div>
@@ -233,7 +266,7 @@ export default function AboutPage() {
                 </div>
                 <div>
                   <div className="text-xs font-mono text-white/40 uppercase tracking-widest mb-1">Pro licensing</div>
-                  <a href="mailto:dhisetu@gmail.com?subject=MotoQuant%20Pro%20Licensing" className="font-mono text-brand-accent hover:text-brand-orange transition-colors text-sm">
+                  <a href="mailto:hello@motoquant.in?subject=MotoQuant%20Pro%20Licensing" className="font-mono text-brand-accent hover:text-brand-orange transition-colors text-sm">
                     Request a quote →
                   </a>
                 </div>
@@ -245,7 +278,7 @@ export default function AboutPage() {
                 <div className="glass rounded-xl p-8 border border-brand-accent/30 text-center">
                   <div className="text-brand-accent text-3xl mb-3">✓</div>
                   <h3 className="font-display font-bold text-white mb-2">Message sent!</h3>
-                  <p className="text-white/60 text-sm">Your mail client should have opened with a pre-filled message. If not, email dhisetu@gmail.com directly.</p>
+                  <p className="text-white/60 text-sm">Your mail client should have opened with a pre-filled message. If not, email hello@motoquant.in directly.</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="glass rounded-xl p-6 border border-brand-orange/20 space-y-4">
@@ -265,43 +298,3 @@ export default function AboutPage() {
                     <input
                       type="email"
                       value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      required
-                      className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-brand-orange/60 transition-colors"
-                      placeholder="you@example.com"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-mono text-white/50 uppercase tracking-wider mb-1.5">Message</label>
-                    <textarea
-                      value={message}
-                      onChange={e => setMessage(e.target.value)}
-                      required
-                      rows={4}
-                      className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-brand-orange/60 transition-colors resize-none"
-                      placeholder="Hi Hritwik, I run a tuning shop in Narhe and I'm interested in the Pro plan..."
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full flex items-center justify-center gap-2 py-3 bg-brand-orange text-black font-display font-bold rounded-lg hover:bg-brand-orangeLight transition-colors"
-                  >
-                    <Send size={16} /> Send Message
-                  </button>
-                  <p className="text-xs text-white/30 text-center font-mono">
-                    Opens your default email client · No tracking
-                  </p>
-                </form>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-brand-orange/10 py-8 px-6 text-center text-white/40 text-xs font-mono">
-        <p>© {new Date().getFullYear()} MotoQuant Pro · <Link href="/" className="hover:text-brand-orange transition-colors">motoquant.in</Link></p>
-      </footer>
-    </div>
-  );
-}
