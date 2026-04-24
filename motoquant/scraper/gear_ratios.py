@@ -759,11 +759,22 @@ _DB: list[dict] = [
         "primary": 1.960,
     },
     # ── BMW ───────────────────────────────────────────────────────────────────
+    # K46 platform (2009-2018): wide-ratio gearbox
     {
         "mfr": "bmw",
         "model": "s 1000 rr",
-        "year": (2009, 2026),
+        "year": (2009, 2018),
         "ratios": [2.640, 1.947, 1.619, 1.395, 1.250, 1.143],
+        "front": 17,
+        "rear": 44,
+        "primary": 1.565,
+    },
+    # K67 platform (2019+): close-ratio gearbox — BMW SM 01490104695
+    {
+        "mfr": "bmw",
+        "model": "s 1000 rr",
+        "year": (2019, 2026),
+        "ratios": [2.640, 2.176, 1.800, 1.560, 1.400, 1.280],
         "front": 17,
         "rear": 44,
         "primary": 1.565,
@@ -786,11 +797,12 @@ _DB: list[dict] = [
         "rear": 46,
         "primary": 1.565,
     },
+    # M1000RR shares K67 close-ratio gearbox
     {
         "mfr": "bmw",
         "model": "m 1000 rr",
         "year": (2021, 2026),
-        "ratios": [2.640, 1.947, 1.619, 1.395, 1.250, 1.143],
+        "ratios": [2.640, 2.176, 1.800, 1.560, 1.400, 1.280],
         "front": 17,
         "rear": 44,
         "primary": 1.565,
@@ -1238,15 +1250,6 @@ _DB: list[dict] = [
         "rear": 46,
         "primary": 2.029,
     },
-    {
-        "mfr": "suzuki",
-        "model": "katana",
-        "year": (2019, 2024),
-        "ratios": [2.562, 1.947, 1.636, 1.416, 1.260, 1.136],
-        "front": 17,
-        "rear": 44,
-        "primary": 1.553,
-    },
     # Ducati
     {
         "mfr": "ducati",
@@ -1313,14 +1316,15 @@ _DB: list[dict] = [
         "rear": 0,
         "primary": 1.588,
     },
+    # M 1000 R shares K67 engine/gearbox; BMW owner's manual 01498053618
     {
         "mfr": "bmw",
         "model": "m 1000 r",
         "year": (2023, 2026),
-        "ratios": [2.529, 2.058, 1.714, 1.476, 1.304, 1.173],
+        "ratios": [2.640, 2.176, 1.800, 1.560, 1.400, 1.280],
         "front": 17,
         "rear": 45,
-        "primary": 1.524,
+        "primary": 1.565,
     },
     # Aprilia
     {
