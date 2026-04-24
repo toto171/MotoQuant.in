@@ -100,3 +100,5 @@ node_modules/
 
 # Pytest cache copies
 pytest-cache-files-*/
+motoquant/parts/__pycache__/
+__pycache__/
