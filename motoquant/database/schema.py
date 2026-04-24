@@ -11,7 +11,7 @@ Design principles for quantitative accuracy:
   5. Schema version tracked for forward-compatible migrations.
 """
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 
 # ────────────────────────────────────────────────────────
 # Full DDL executed on db.initialize()
@@ -524,6 +524,20 @@ CREATE TABLE IF NOT EXISTS bike_suggestions (
 
 CREATE INDEX IF NOT EXISTS idx_bike_sugg_status  ON bike_suggestions(status);
 CREATE INDEX IF NOT EXISTS idx_bike_sugg_make    ON bike_suggestions(make);
+
+CREATE TABLE IF NOT EXISTS part_prices (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    part_id    INTEGER NOT NULL REFERENCES parts(id) ON DELETE CASCADE,
+    retailer   TEXT    NOT NULL,
+    source_url TEXT    NOT NULL,
+    price_inr  REAL,
+    in_stock   INTEGER NOT NULL DEFAULT 1,
+    fetched_at TEXT    NOT NULL DEFAULT (datetime('now','utc')),
+    created_at TEXT    DEFAULT (datetime('now','utc')),
+    UNIQUE(part_id, retailer)
+);
+CREATE INDEX IF NOT EXISTS idx_part_prices_part  ON part_prices(part_id);
+CREATE INDEX IF NOT EXISTS idx_part_prices_fetch ON part_prices(fetched_at);
 """
 
 # Categories seeded on first init

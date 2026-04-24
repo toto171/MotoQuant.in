@@ -170,6 +170,46 @@ def _roi_metrics(
 # ─────────────────────────────────────────────────────────────────
 
 
+def _resolve_price(part: dict, conn=None, *, use_live_pricing: bool = False) -> float:
+    """
+    Return the best available price for *part*.
+
+    When *use_live_pricing* is True and *conn* is provided, we check the
+    ``part_prices`` table for a live price that is:
+      • fresher than the seed ``price_inr`` by >10 % (absolute INR difference), OR
+      • present when the seed price is missing.
+    Falls back to ``part["price_inr"]`` (seed value from catalog) otherwise.
+    """
+    seed_price = part.get("price_inr") or 0.0
+    if not use_live_pricing or conn is None:
+        return seed_price
+
+    try:
+        cur = conn.cursor()
+        row = cur.execute(
+            """
+            SELECT price_inr, fetched_at FROM part_prices
+             WHERE part_id = ?
+               AND price_inr IS NOT NULL
+               AND in_stock = 1
+             ORDER BY price_inr ASC
+             LIMIT 1
+            """,
+            (part.get("id") or part.get("part_id"),),
+        ).fetchone()
+        if row is None:
+            return seed_price
+        live_price = float(row["price_inr"])
+        if seed_price <= 0:
+            return live_price
+        # Prefer live price only when it differs by >10% from seed (avoids noise)
+        if abs(live_price - seed_price) / max(seed_price, 1.0) > 0.10:
+            return live_price
+        return seed_price
+    except Exception:
+        return seed_price
+
+
 def compute_parts_roi(
     base_config: BikeConfig,
     part_ids: list[int],
@@ -177,6 +217,8 @@ def compute_parts_roi(
     min_delta_et_ms: float = 5.0,  # ignore parts with <5 ms improvement (noise floor)
     require_compatible: bool = False,
     bike_model_id: int | None = None,
+    use_live_pricing: bool = False,
+    db_conn=None,  # sqlite3 connection for live price lookup
 ) -> list[PartROIResult]:
     """
     Evaluate every supplied part against the baseline config.
@@ -252,7 +294,7 @@ def compute_parts_roi(
 
         # Apply noise floor
         effective_delta = delta_et if delta_et * 1000 >= min_delta_et_ms else 0.0
-        price_inr = part.get("price_inr") or 0.0
+        price_inr = _resolve_price(part, db_conn, use_live_pricing=use_live_pricing)
 
         roi_score, cpt = _roi_metrics(price_inr, effective_delta)
 
@@ -296,6 +338,8 @@ def find_best_build(
     bike_model_id: int | None = None,
     allow_negative_parts: bool = False,
     min_delta_et_ms: float = 5.0,
+    use_live_pricing: bool = False,
+    db_conn=None,
 ) -> BuildROIResult:
     """
     Find the combination of parts that maximises ET improvement within a budget.
@@ -343,6 +387,8 @@ def find_best_build(
         parts_repo=parts_repo,
         min_delta_et_ms=min_delta_et_ms,
         bike_model_id=bike_model_id,
+        use_live_pricing=use_live_pricing,
+        db_conn=db_conn,
     )
 
     # Filter to parts that improve ET and have a finite price ≤ budget
@@ -442,55 +488,4 @@ def find_best_build(
         total_cost_inr=total_cost,
         budget_inr=budget_inr,
         base_et_s=base_et,
-        modified_et_s=build_et,
-        delta_et_s=base_et - build_et,
-        delta_trap_ms=build_trap - base_trap,
-        parts_evaluated=n_evaluated,
-        parts_skipped_incompatible=n_incompat,
-        parts_skipped_no_gain=n_no_gain,
-    )
-
-
-def rank_categories(
-    roi_results: list[PartROIResult],
-) -> list[dict]:
-    """
-    Aggregate ROI results by category.
-
-    Returns a list of dicts:
-      {"category": str, "best_roi": float, "best_et_gain": float,
-       "avg_cost_per_tenth": float, "part_count": int}
-    sorted by best_roi descending.
-    """
-    from collections import defaultdict
-
-    buckets: dict[str, list[PartROIResult]] = defaultdict(list)
-    for r in roi_results:
-        buckets[r.category_display or r.category].append(r)
-
-    summary = []
-    for cat, parts in buckets.items():
-        improving = [p for p in parts if p.delta_et_s > 0]
-        if not improving:
-            continue
-        best_roi = max(p.roi_score for p in improving)
-        best_gain = max(p.delta_et_s for p in improving)
-        valid_cpt = [
-            p.cost_per_tenth_inr
-            for p in improving
-            if not math.isinf(p.cost_per_tenth_inr)
-        ]
-        avg_cpt = sum(valid_cpt) / len(valid_cpt) if valid_cpt else float("inf")
-        summary.append(
-            {
-                "category": cat,
-                "best_roi": round(best_roi, 4),
-                "best_et_gain_s": round(best_gain, 4),
-                "avg_cost_per_tenth": round(avg_cpt, 0),
-                "part_count": len(parts),
-                "improving_count": len(improving),
-            }
-        )
-
-    summary.sort(key=lambda d: -d["best_roi"])
-    return summary
+       
