@@ -7,6 +7,5 @@
     "core:default",
     "core:window:allow-start-dragging",
     "shell:allow-open",
-    "shell:default"
-  ]
-}
+    "shell:default",
+    "
