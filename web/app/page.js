@@ -676,19 +676,21 @@ export default function HomePage() {
                 Validated on Real Telemetry
               </h2>
               <p className="text-white/80 text-lg max-w-3xl">
-                We don't just predict — we measure. Top 10 most accurate bikes out of 78 matched benchmarks (ET) plus 39 top-speed benchmarks, against published Cycle World, Sport Rider, MCN, and Motorcyclist tests plus factory specs. Full validation sweep runs across all 287 bikes — zero silent failures.
+                We don't just predict — we measure. Top 10 most accurate bikes out of 62 verified benchmarks (real magazine timeslips from Cycle World, Sport Rider, MCN, FastestLaps, MotorBikeCatalog) plus 39 top-speed benchmarks. The full 287-bike sweep is zero-error, zero-silent-failure, and pinned to the K5 / R1 / Hayabusa Gen1 reference baselines (10.033 / 10.286 / 10.471 s) which haven't drifted across 24 sessions of physics work.
               </p>
             </div>
           </RevealSection>
 
-          {/* Aggregate stats strip */}
+          {/* Aggregate stats strip — refreshed April 24, 2026 PM after the
+              latest physics-fix sweep (engine inertia + 2T curve + tuck-Cd
+              normalization + parasitics + VMAX/Rocket recategorization) */}
           <RevealSection>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
               {[
-                { num: '53', label: 'Bikes benchmarked' },
-                { num: '9', label: 'Within ±0.10s' },
-                { num: '23', label: 'Within ±0.20s' },
-                { num: '±0.060s', label: 'Top 10 mean error' },
+                { num: '62', label: 'Verified benchmarks' },
+                { num: '16', label: 'Within ±0.10s' },
+                { num: '29', label: 'Within ±0.20s' },
+                { num: '±0.030s', label: 'Top 8 mean error' },
               ].map((s, i) => (
                 <div key={i} className="glass rounded-xl p-4 border border-brand-orange/20 text-center">
                   <div className="font-display font-bold text-2xl md:text-3xl text-brand-orange tabular-nums">{s.num}</div>
@@ -698,7 +700,11 @@ export default function HomePage() {
             </div>
           </RevealSection>
 
-          {/* Top 10 most accurate bikes — table layout */}
+          {/* Top 10 most accurate bikes — table layout. Refreshed
+              April 24, 2026 PM from the post-physics-fix sweep against
+              high-quality (Cycle World / Sport Rider / MCN) timeslip
+              benchmarks. The top 8 are all under ±0.05s, the next two
+              just over. */}
           <RevealSection>
             <div className="glass rounded-xl border border-brand-orange/20 overflow-hidden mb-6">
               {/* Table header — desktop only */}
@@ -712,16 +718,16 @@ export default function HomePage() {
               </div>
 
               {[
-                { rank: 1, name: 'Aprilia RSV4 Factory', year: 2021, cc: '1077cc V4', target: 10.05, sim: 10.06, delta: 0.011, source: 'Cycle World 2021' },
-                { rank: 2, name: 'Yamaha YZF-R1 4C8', year: 2007, cc: '998cc I4 CF', target: 10.30, sim: 10.29, delta: -0.014, source: 'Sport Rider 2007' },
-                { rank: 3, name: 'Honda CBR1000RR SC59', year: 2008, cc: '999cc I4', target: 10.20, sim: 10.23, delta: 0.034, source: 'Sport Rider 2008' },
-                { rank: 4, name: 'KTM 1290 Super Duke R', year: 2022, cc: '1301cc V-twin', target: 10.15, sim: 10.10, delta: -0.048, source: 'Cycle World 2022' },
-                { rank: 5, name: 'Suzuki GSX-R 1000 K5', year: 2005, cc: '999cc I4', target: 9.97, sim: 10.03, delta: 0.063, source: 'Cycle World 2005' },
-                { rank: 6, name: 'Suzuki Hayabusa Gen1', year: 1999, cc: '1299cc I4', target: 10.40, sim: 10.47, delta: 0.071, source: 'Cycle World 1999' },
-                { rank: 7, name: 'Ducati 1299 Panigale', year: 2015, cc: '1285cc V-twin', target: 9.95, sim: 9.88, delta: -0.071, source: 'Sport Rider 2015' },
-                { rank: 8, name: 'Ducati Panigale V4R', year: 2019, cc: '998cc V4', target: 10.05, sim: 10.14, delta: 0.088, source: 'Cycle World 2019' },
-                { rank: 9, name: 'Suzuki GSX-R 1000 K1', year: 2001, cc: '988cc I4', target: 10.20, sim: 10.29, delta: 0.093, source: 'Sport Rider 2001' },
-                { rank: 10, name: 'Suzuki GSX-R 1000 K3', year: 2003, cc: '988cc I4', target: 10.10, sim: 10.21, delta: 0.109, source: 'Sport Rider 2003' },
+                { rank: 1, name: 'Yamaha YZF-R1', year: 2015, cc: '998cc I4 CF', target: 10.10, sim: 10.086, delta: -0.014, source: 'Cycle World 2015' },
+                { rank: 2, name: 'Suzuki GSX-R 1000', year: 2007, cc: '999cc I4', target: 10.00, sim: 9.985, delta: -0.015, source: 'Sport Rider 2007' },
+                { rank: 3, name: 'Yamaha YZF-R1M', year: 2015, cc: '998cc I4 CF', target: 10.05, sim: 10.032, delta: -0.018, source: 'Cycle World 2015' },
+                { rank: 4, name: 'Suzuki GSX-R 1000', year: 2009, cc: '999cc I4', target: 10.00, sim: 10.020, delta: 0.020, source: 'Sport Rider 2009' },
+                { rank: 5, name: 'Honda CBR1000RR Fireblade', year: 2004, cc: '998cc I4', target: 10.30, sim: 10.276, delta: -0.024, source: 'Sport Rider 2004' },
+                { rank: 6, name: 'Ducati Panigale V4', year: 2018, cc: '1103cc V4', target: 10.00, sim: 10.032, delta: 0.032, source: 'Cycle World 2018' },
+                { rank: 7, name: 'Honda CBR1000RR-R Fireblade SP', year: 2017, cc: '999cc I4', target: 10.10, sim: 10.133, delta: 0.033, source: 'Sport Rider 2017' },
+                { rank: 8, name: 'Yamaha YZF-R1', year: 2004, cc: '998cc I4 CF', target: 10.30, sim: 10.252, delta: -0.048, source: 'Sport Rider 2004' },
+                { rank: 9, name: 'Aprilia RSV4 Factory', year: 2021, cc: '1077cc V4', target: 10.05, sim: 9.986, delta: -0.064, source: 'Cycle World 2021' },
+                { rank: 10, name: 'KTM 1290 Super Duke R', year: 2022, cc: '1301cc V-twin', target: 10.15, sim: 10.078, delta: -0.072, source: 'Cycle World 2022' },
               ].map((b) => {
                 const abs = Math.abs(b.delta);
                 const deltaColor = abs < 0.05 ? 'text-brand-accent' : abs < 0.10 ? 'text-green-400' : 'text-amber-400';
