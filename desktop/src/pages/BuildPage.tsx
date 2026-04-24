@@ -1,71 +1,42 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Plus,
-  Trash2,
-  Loader2,
-  Filter,
-  AlertCircle,
-  IndianRupee,
-  ArrowLeftRight,
+  Plus, Trash2, Loader2, Filter, AlertCircle, IndianRupee, ArrowLeftRight, Wrench,
 } from "lucide-react";
 import { BikePicker } from "@/components/BikePicker";
 import { StatTile } from "@/components/StatTile";
+import { OfflineBanner } from "@/components/OfflineBanner";
+import { SkeletonPartRows } from "@/components/Skeleton";
+import { useToastStore } from "@/store/toastStore";
 import {
-  useParts,
-  usePartsCategories,
-  useQuickSimulate,
+  useParts, usePartsCategories, useQuickSimulate,
 } from "@/hooks/useApi";
 import type { BikeSummary, Part } from "@/types/api";
 import clsx from "clsx";
 
-// Categories where picking one part should DE-select any other part in the
-// same category — you can't realistically run two exhausts or two ECUs on the
-// same bike. Check by lowercased category name so seed variants
-// ("exhaust-full-system" vs "exhaust") all collapse to the same prefix.
-//
-// Anything NOT in this list (e.g. bodywork, accessories, lighting) stays
-// additive — you can stack a tail tidy + a windscreen + a seat cowl.
-const EXCLUSIVE_CATEGORY_PREFIXES = [
-  "exhaust",
-  "air-filter",
-  "air_filter",
-  "ecu",
-  "piggyback",
-  "fuel-system",
-  "fuel_system",
-  "battery",
-  "chain",
-  "front-sprocket",
-  "front_sprocket",
-  "rear-sprocket",
-  "rear_sprocket",
-  "slipper",
-  "clutch",
-  "quickshifter",
-  "boost",
-  "turbo",
-  "supercharger",
-  "nitrous",
-  "wheelie",
+const EXCLUSIVE_PREFIXES = [
+  "exhaust", "air-filter", "air_filter", "ecu", "piggyback",
+  "fuel-system", "fuel_system", "battery", "chain",
+  "front-sprocket", "front_sprocket", "rear-sprocket", "rear_sprocket",
+  "slipper", "clutch", "quickshifter", "boost", "turbo", "supercharger",
+  "nitrous", "wheelie",
 ] as const;
 
-function isExclusiveCategory(name: string | null | undefined): boolean {
+export function isExclusiveCategory(name: string | null | undefined): boolean {
   if (!name) return false;
   const n = name.toLowerCase();
-  return EXCLUSIVE_CATEGORY_PREFIXES.some((p) => n.startsWith(p) || n.includes(p));
+  return EXCLUSIVE_PREFIXES.some((p) => n.startsWith(p) || n.includes(p));
 }
 
 export function BuildPage() {
+  const pushToast = useToastStore((s) => s.push);
   const [bike, setBike] = useState<BikeSummary | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [search, setSearch] = useState("");
-  // Selected parts are kept as a full Map keyed by id so a filter change on
-  // the catalog doesn't cause them to vanish from the build summary.
   const [selectedMap, setSelectedMap] = useState<Map<number, Part>>(new Map());
-  const selectedIds = useMemo(
-    () => Array.from(selectedMap.keys()),
-    [selectedMap],
-  );
+
+  const selectedIds = useMemo(() => Array.from(selectedMap.keys()), [selectedMap]);
+  const selectedParts = useMemo(() => Array.from(selectedMap.values()), [selectedMap]);
+  const buildCost = selectedParts.reduce((sum, p) => sum + (p.price_inr ?? 0), 0);
 
   const categories = usePartsCategories();
   const parts = useParts({
@@ -75,46 +46,23 @@ export function BuildPage() {
     compatible_only: true,
     limit: 500,
   });
-
   const sim = useQuickSimulate();
 
-  // Re-run whenever bike or selection changes — ~50 ms per run server-side.
   useEffect(() => {
     if (!bike) return;
-    sim.mutate({
-      bike_id: bike.id,
-      part_ids: selectedIds,
-      rider_mass_kg: 75,
-    });
+    sim.mutate({ bike_id: bike.id, part_ids: selectedIds, rider_mass_kg: 75 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bike?.id, selectedIds.join(",")]);
 
-  const selectedParts = useMemo(
-    () => Array.from(selectedMap.values()),
-    [selectedMap],
-  );
-  const buildCost = selectedParts.reduce(
-    (sum, p) => sum + (p.price_inr ?? 0),
-    0,
+  const visibleParts = useMemo(
+    () => (parts.data?.parts ?? []).filter((p) => p.compatible !== false),
+    [parts.data],
   );
 
-  // Belt-and-braces client filter on top of the server's compatible_only=true.
-  // If the server ever leaks an incompatible row (it shouldn't — the server's
-  // is_compatible() already filters), we still hide it. Also annotates parts
-  // in their exclusive category where a swap would happen on click.
-  const visibleParts = useMemo(() => {
-    const serverParts = parts.data?.parts ?? [];
-    return serverParts.filter((p) => p.compatible !== false);
-  }, [parts.data]);
-
-  // For each exclusive category, find the currently-selected part in it (so
-  // the UI can show "Selecting this will replace X" hints).
   const selectedByExclusiveCategory = useMemo(() => {
-    const m = new Map<number, Part>(); // category_id → selected part
+    const m = new Map<number, Part>();
     for (const p of selectedParts) {
-      if (isExclusiveCategory(p.category_name)) {
-        m.set(p.category_id, p);
-      }
+      if (isExclusiveCategory(p.category_name)) m.set(p.category_id, p);
     }
     return m;
   }, [selectedParts]);
@@ -122,124 +70,124 @@ export function BuildPage() {
   const toggle = (part: Part) =>
     setSelectedMap((prev) => {
       const next = new Map(prev);
+      if (next.has(part.id)) { next.delete(part.id); return next; }
 
-      // Deselect if already picked.
-      if (next.has(part.id)) {
-        next.delete(part.id);
-        return next;
-      }
-
-      // Enforce category exclusivity: if this part is in a category marked
-      // exclusive, kick out any other selected part in the same category
-      // before adding this one. Prevents the "two exhausts at once" bug.
+      // Exclusive category: evict the incumbent and fire a toast.
       if (isExclusiveCategory(part.category_name)) {
         for (const [otherId, otherPart] of next) {
           if (otherPart.category_id === part.category_id) {
             next.delete(otherId);
+            pushToast({
+              message: `Replaced ${otherPart.brand} ${otherPart.model_name} with ${part.brand} ${part.model_name}`,
+              variant: "info",
+            });
           }
         }
       }
-
       next.set(part.id, part);
       return next;
     });
 
   return (
     <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
-      <section className="space-y-5">
+      {/* Left: catalog */}
+      <section className="space-y-5 min-w-0">
         <header>
           <h1 className="text-2xl font-semibold">Build-a-bike</h1>
           <p className="text-sm text-carbon-400 mt-1">
-            Pick a base. Add parts. See the ET and trap speed update live —
-            every pick runs the physics engine end to end. Only parts that
-            fit the chosen bike are shown, and exclusive categories (exhaust,
-            ECU, chain, etc.) swap rather than stack.
+            Pick a base. Add parts. Every pick runs the physics engine live.
+            Exclusive categories (exhaust, ECU, chain…) swap rather than stack.
           </p>
         </header>
 
+        <OfflineBanner />
+
         <div className="card p-5 space-y-4">
           <div>
-            <label className="block text-xs uppercase tracking-wider text-carbon-500 mb-2">
-              Base bike
-            </label>
+            <label className="block text-xs uppercase tracking-wider text-carbon-500 mb-2">Base bike</label>
             <BikePicker
               value={bike?.id ?? null}
-              onChange={(_, summary) => {
-                setBike(summary);
-                setSelectedMap(new Map());
-              }}
+              onChange={(_, summary) => { setBike(summary); setSelectedMap(new Map()); }}
             />
           </div>
 
           {bike && (
             <div className="flex flex-wrap gap-3">
-              <div className="relative flex-1 min-w-[200px]">
-                <Filter className="w-3.5 h-3.5 text-carbon-500 absolute left-3 top-3 pointer-events-none" />
+              <div className="relative flex-1 min-w-[180px]">
+                <Filter className="w-3.5 h-3.5 text-carbon-500 absolute left-3 top-3 pointer-events-none" aria-hidden="true" />
                 <select
                   className="input pl-8"
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
+                  aria-label="Filter parts by category"
                 >
                   <option value="">All categories</option>
                   {categories.data?.categories.map((c) => (
-                    <option key={c.id} value={c.name}>
-                      {c.display_name}
-                    </option>
+                    <option key={c.id} value={c.name}>{c.display_name}</option>
                   ))}
                 </select>
               </div>
               <input
-                className="input flex-1 min-w-[200px]"
+                className="input flex-1 min-w-[180px]"
                 placeholder="Search brand or model…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                aria-label="Search parts"
               />
             </div>
           )}
         </div>
 
+        {/* Empty state — no bike selected */}
         {!bike && (
-          <div className="card p-8 text-center text-carbon-500 text-sm">
-            Pick a base bike to start browsing the parts catalog.
+          <div className="card p-12 text-center flex flex-col items-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-carbon-800 flex items-center justify-center">
+              <Wrench className="w-7 h-7 text-carbon-600" aria-hidden="true" />
+            </div>
+            <div>
+              <div className="font-medium text-carbon-200">No bike selected</div>
+              <div className="text-sm text-carbon-500 mt-1">
+                Choose a base bike above to browse the compatible parts catalog.
+              </div>
+            </div>
           </div>
         )}
 
         {bike && (
           <div className="card overflow-hidden">
-            {parts.isLoading && (
-              <div className="p-8 text-center text-carbon-500 text-sm">
-                <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />
-                Loading catalog…
-              </div>
-            )}
+            {/* Loading skeleton */}
+            {parts.isLoading && <SkeletonPartRows rows={8} />}
+
+            {/* Error */}
             {parts.isError && (
-              <div className="p-6 border-l-4 border-stop-500 flex items-start gap-3 text-sm">
-                <AlertCircle className="w-5 h-5 text-stop-500 shrink-0 mt-0.5" />
+              <div className="p-6 border-l-4 border-stop-500 flex items-start gap-3 text-sm" role="alert">
+                <AlertCircle className="w-5 h-5 text-stop-500 shrink-0 mt-0.5" aria-hidden="true" />
                 <div>
-                  <div className="font-medium text-stop-500">
-                    Parts failed to load
-                  </div>
-                  <div className="text-carbon-400 mt-1">
-                    {parts.error?.message || "Unknown error"}
-                  </div>
+                  <div className="font-medium text-stop-500">Parts failed to load</div>
+                  <div className="text-carbon-400 mt-1">{parts.error?.message || "Unknown error"}</div>
                 </div>
               </div>
             )}
-            {!parts.isLoading && visibleParts.length === 0 && (
-              <div className="p-8 text-center text-carbon-500 text-sm">
-                No compatible parts for this bike + filter combo.
+
+            {/* Empty state — filters produced no results */}
+            {!parts.isLoading && !parts.isError && visibleParts.length === 0 && (
+              <div className="p-10 text-center text-carbon-500 text-sm flex flex-col items-center gap-2">
+                <div className="font-medium">No compatible parts found</div>
+                <div className="text-xs text-carbon-600">
+                  {categoryFilter || search
+                    ? "Try clearing the category or search filter."
+                    : `No parts are catalogued for ${bike.manufacturer} ${bike.model} yet.`}
+                </div>
               </div>
             )}
+
             {visibleParts.length > 0 && (
               <>
                 <div className="px-4 py-2 text-[10px] uppercase tracking-wider text-carbon-500 bg-carbon-900/40 border-b border-carbon-800">
-                  {visibleParts.length} compatible part
-                  {visibleParts.length === 1 ? "" : "s"} for{" "}
-                  <span className="text-carbon-300">
-                    {bike.manufacturer} {bike.model}
-                  </span>
+                  {visibleParts.length} compatible part{visibleParts.length === 1 ? "" : "s"} for{" "}
+                  <span className="text-carbon-300">{bike.manufacturer} {bike.model}</span>
                 </div>
-                <ul className="divide-y divide-carbon-800">
+                <ul className="divide-y divide-carbon-800" role="list" aria-label="Compatible parts">
                   {visibleParts.map((p) => {
                     const exclusiveSwap =
                       isExclusiveCategory(p.category_name) &&
@@ -264,45 +212,37 @@ export function BuildPage() {
         )}
       </section>
 
+      {/* Right: build summary */}
       <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
         <div className="card p-5">
-          <div className="text-xs uppercase tracking-wider text-carbon-500 mb-3">
-            Your build
-          </div>
+          <div className="text-xs uppercase tracking-wider text-carbon-500 mb-3">Your build</div>
+
           {!bike && (
             <div className="text-sm text-carbon-500">No bike selected.</div>
           )}
+
           {bike && sim.isPending && !sim.data && (
             <div className="flex items-center gap-2 text-sm text-carbon-400">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Simulating baseline…
+              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> Simulating baseline…
             </div>
           )}
+
+          {sim.isError && (
+            <div className="text-xs text-stop-400 flex items-center gap-1.5" role="alert">
+              <AlertCircle className="w-3.5 h-3.5" aria-hidden="true" />
+              {sim.error?.message || "Simulation failed"}
+            </div>
+          )}
+
           {sim.data && (
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
-                <StatTile
-                  label="ET"
-                  value={sim.data.et_quarter_s.toFixed(3)}
-                  unit="s"
-                  accent="signal"
-                />
-                <StatTile
-                  label="Trap"
-                  value={sim.data.trap_speed_kmh.toFixed(1)}
-                  unit="km/h"
-                />
-                <StatTile
-                  label="60 ft"
-                  value={sim.data.et_60ft_s.toFixed(3)}
-                  unit="s"
-                />
-                <StatTile
-                  label="1/8 mi"
-                  value={sim.data.et_eighth_s.toFixed(3)}
-                  unit="s"
-                />
+                <StatTile label="ET" value={sim.data.et_quarter_s.toFixed(3)} unit="s" accent="signal" />
+                <StatTile label="Trap" value={sim.data.trap_speed_kmh.toFixed(1)} unit="km/h" />
+                <StatTile label="60 ft" value={sim.data.et_60ft_s.toFixed(3)} unit="s" />
+                <StatTile label="1/8 mi" value={sim.data.et_eighth_s.toFixed(3)} unit="s" />
               </div>
+
               {sim.data.stock_et_s != null && sim.data.et_delta_s != null && (
                 <div
                   className={clsx(
@@ -313,6 +253,8 @@ export function BuildPage() {
                         ? "border-warn-500/40 bg-warn-500/5 text-warn-500"
                         : "border-carbon-700 text-carbon-400",
                   )}
+                  role="status"
+                  aria-live="polite"
                 >
                   Parts delta{" "}
                   <strong className="tabular-nums">
@@ -322,46 +264,42 @@ export function BuildPage() {
                   vs stock {sim.data.stock_et_s.toFixed(3)} s
                 </div>
               )}
+
               <div className="flex items-center justify-between text-xs text-carbon-400 pt-2 border-t border-carbon-800">
                 <div className="flex items-center gap-1">
-                  <IndianRupee className="w-3 h-3" />
+                  <IndianRupee className="w-3 h-3" aria-hidden="true" />
                   {buildCost > 0 ? buildCost.toLocaleString("en-IN") : "—"}
                 </div>
-                <div>
-                  {selectedIds.length} part
-                  {selectedIds.length === 1 ? "" : "s"}
-                </div>
+                <div>{selectedIds.length} part{selectedIds.length === 1 ? "" : "s"}</div>
               </div>
+            </div>
+          )}
+
+          {/* Empty state — bike selected but nothing added yet */}
+          {bike && !sim.isPending && sim.data && selectedParts.length === 0 && (
+            <div className="mt-4 pt-4 border-t border-carbon-800 text-center text-carbon-500 text-xs">
+              Pick parts from the catalog to see their impact.
             </div>
           )}
         </div>
 
         {selectedParts.length > 0 && (
           <div className="card p-4">
-            <div className="text-xs uppercase tracking-wider text-carbon-500 mb-2">
-              Selected
-            </div>
-            <ul className="space-y-2">
+            <div className="text-xs uppercase tracking-wider text-carbon-500 mb-2">Selected</div>
+            <ul className="space-y-2" role="list" aria-label="Selected parts">
               {selectedParts.map((p) => (
-                <li
-                  key={p.id}
-                  className="flex items-start justify-between gap-2 text-sm"
-                >
+                <li key={p.id} className="flex items-start justify-between gap-2 text-sm">
                   <div className="min-w-0">
-                    <div className="font-medium text-carbon-100 truncate">
-                      {p.brand} {p.model_name}
-                    </div>
+                    <div className="font-medium text-carbon-100 truncate">{p.brand} {p.model_name}</div>
                     <div className="text-[10px] text-carbon-500 uppercase tracking-wider">
                       {p.category_display}
-                      {p.price_inr
-                        ? ` · ₹${p.price_inr.toLocaleString("en-IN")}`
-                        : ""}
+                      {p.price_inr ? ` · ₹${p.price_inr.toLocaleString("en-IN")}` : ""}
                     </div>
                   </div>
                   <button
                     onClick={() => toggle(p)}
-                    className="text-carbon-500 hover:text-stop-500 shrink-0"
-                    title="Remove"
+                    className="text-carbon-500 hover:text-stop-500 shrink-0 focus-visible:outline-2 focus-visible:outline-signal-500 rounded"
+                    aria-label={`Remove ${p.brand} ${p.model_name}`}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -375,67 +313,45 @@ export function BuildPage() {
   );
 }
 
-function PartRow({
-  part,
-  selected,
-  swapsOut,
-  onToggle,
-}: {
-  part: Part;
-  selected: boolean;
-  swapsOut: Part | null;
-  onToggle: () => void;
+function PartRow({ part, selected, swapsOut, onToggle }: {
+  part: Part; selected: boolean; swapsOut: Part | null; onToggle: () => void;
 }) {
   return (
     <li
       className={clsx(
-        "flex items-center gap-3 px-4 py-3 hover:bg-carbon-800/40 cursor-pointer",
+        "flex items-center gap-3 px-4 py-3 hover:bg-carbon-800/40 cursor-pointer transition-colors",
         selected && "bg-signal-500/5",
       )}
       onClick={onToggle}
+      role="option"
+      aria-selected={selected}
     >
       <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggle();
-        }}
+        onClick={(e) => { e.stopPropagation(); onToggle(); }}
         className={clsx(
-          "w-7 h-7 rounded border shrink-0 flex items-center justify-center",
+          "w-7 h-7 rounded border shrink-0 flex items-center justify-center transition-colors focus-visible:outline-2 focus-visible:outline-signal-500",
           selected
             ? "border-signal-500 bg-signal-500 text-carbon-950"
             : "border-carbon-700 text-carbon-500 hover:border-signal-500",
         )}
+        aria-label={selected ? `Remove ${part.brand} ${part.model_name}` : `Add ${part.brand} ${part.model_name}`}
       >
-        <Plus
-          className={clsx(
-            "w-3.5 h-3.5 transition-transform",
-            selected && "rotate-45",
-          )}
-        />
+        <Plus className={clsx("w-3.5 h-3.5 transition-transform", selected && "rotate-45")} aria-hidden="true" />
       </button>
       <div className="min-w-0 flex-1">
-        <div className="flex items-baseline gap-2">
-          <span className="font-medium text-carbon-100 truncate">
-            {part.brand}
-          </span>
-          <span className="text-sm text-carbon-400 truncate">
-            {part.model_name}
-          </span>
+        <div className="flex items-baseline gap-2 flex-wrap">
+          <span className="font-medium text-carbon-100 truncate">{part.brand}</span>
+          <span className="text-sm text-carbon-400 truncate">{part.model_name}</span>
         </div>
-        <div className="text-[10px] uppercase tracking-wider text-carbon-500 mt-0.5 flex items-center gap-2">
+        <div className="text-[10px] uppercase tracking-wider text-carbon-500 mt-0.5 flex flex-wrap items-center gap-2">
           <span>{part.category_display}</span>
-          {typeof part.power_delta_hp === "number" && (
-            <span>· +{part.power_delta_hp} hp</span>
-          )}
+          {typeof part.power_delta_hp === "number" && <span>· +{part.power_delta_hp} hp</span>}
           {typeof part.mass_delta_kg === "number" && (
-            <span>
-              · {part.mass_delta_kg > 0 ? "+" : ""}
-              {part.mass_delta_kg} kg
-            </span>
+            <span>· {part.mass_delta_kg > 0 ? "+" : ""}{part.mass_delta_kg} kg</span>
           )}
           {swapsOut && (
             <span className="inline-flex items-center gap-1 text-warn-500">
-              <ArrowLeftRight className="w-3 h-3" />
+              <ArrowLeftRight className="w-3 h-3" aria-hidden="true" />
               replaces {swapsOut.brand}
             </span>
           )}
@@ -443,9 +359,7 @@ function PartRow({
       </div>
       <div className="text-right text-sm shrink-0">
         {part.price_inr ? (
-          <div className="tabular-nums text-carbon-200">
-            ₹{part.price_inr.toLocaleString("en-IN")}
-          </div>
+          <div className="tabular-nums text-carbon-200">₹{part.price_inr.toLocaleString("en-IN")}</div>
         ) : (
           <div className="text-carbon-600 text-xs">no price</div>
         )}
