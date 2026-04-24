@@ -1,7 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
+import { Menu } from "lucide-react";
 import { api, getResolvedBaseUrl } from "@/lib/api";
+import { useSidebar } from "@/components/Layout";
 
 export function TopBar() {
+  const { toggle } = useSidebar();
+
   const health = useQuery({
     queryKey: ["health"],
     queryFn: () => api.health(),
@@ -19,36 +23,47 @@ export function TopBar() {
   const failed = health.isError;
 
   return (
-    <header className="h-14 shrink-0 border-b border-carbon-800 bg-carbon-900/60 backdrop-blur flex items-center justify-between px-6">
-      <div className="text-xs uppercase tracking-widest text-carbon-500">
-        First-principles motorcycle drag simulation
+    <header className="h-14 shrink-0 border-b border-carbon-800 bg-carbon-900/60 backdrop-blur flex items-center justify-between px-4 md:px-6">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={toggle}
+          className="text-carbon-400 hover:text-carbon-100 transition-colors p-1 rounded focus-visible:outline-2 focus-visible:outline-signal-500"
+          aria-label="Toggle navigation sidebar"
+          title="Toggle sidebar"
+        >
+          <Menu className="w-5 h-5" aria-hidden="true" />
+        </button>
+        <div className="hidden sm:block text-xs uppercase tracking-widest text-carbon-500">
+          First-principles motorcycle drag simulation
+        </div>
       </div>
+
       <div className="flex items-center gap-3 text-xs">
         <span
           className={
-            online
-              ? "chip chip-success"
-              : failed
-                ? "chip chip-danger"
-                : "chip"
+            online ? "chip chip-success" : failed ? "chip chip-danger" : "chip"
           }
+          aria-label={online ? "Engine online" : failed ? "Engine offline" : "Engine starting"}
         >
           <span
             className={`w-1.5 h-1.5 rounded-full ${
-              online
-                ? "bg-go-500"
-                : failed
-                  ? "bg-stop-500"
-                  : "bg-warn-500 animate-pulse"
+              online ? "bg-go-500" : failed ? "bg-stop-500" : "bg-warn-500 animate-pulse"
             }`}
+            aria-hidden="true"
           />
           {online ? "Engine online" : failed ? "Engine offline" : "Starting..."}
         </span>
         {baseUrl.data && (
-          <span className="text-[10px] text-carbon-600 font-mono">
+          <span className="hidden md:block text-[10px] text-carbon-600 font-mono">
             {baseUrl.data.replace(/^https?:\/\//, "")}
           </span>
         )}
+        <span
+          className="hidden sm:block text-[10px] text-carbon-700 select-none"
+          title="Press ? for keyboard shortcuts"
+        >
+          ? shortcuts
+        </span>
       </div>
     </header>
   );
