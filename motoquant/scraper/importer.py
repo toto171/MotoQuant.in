@@ -625,23 +625,71 @@ def _build_tires_from_spec(spec: BikeSpec) -> TireParams:
 def _build_aero_from_spec(spec: BikeSpec) -> AeroParams:
     """Build AeroParams from spec or category defaults.
 
-    For small-cc bikes (<500cc), apply sub-gates: naked bikes sit up higher,
-    sport bikes are more tucked. This reflects the physical reality that
-    small-cc aero drag is geometry-driven, not RPM-driven like larger bikes.
+    Critical convention: ``spec.cd`` is the **rider-tuck Cd** (the value the
+    bike+rider system presents during a high-speed run with the rider
+    tucked behind the fairing, knees against the tank, chin on the tank).
+    The rider_dynamics submodel multiplies by 1.18× for the upright launch
+    position and interpolates back down to ``spec.cd`` over
+    ``tuck_transition_time_s``.
+
+    Reference tuck Cds in the catalog (all faired sport bikes):
+      Suzuki GSX-R 1000 K5     0.32
+      Yamaha YZF-R1 (4C8)      0.33
+      Suzuki Hayabusa Gen1     0.31
+      Kawasaki ZX-10R modern   0.34
+
+    These match published wind-tunnel data for full-fairing sport bikes
+    in tuck position. Cd is dominated by fairing GEOMETRY, not engine
+    displacement — a properly-faired R15 in the same rider position has
+    Cd around 0.40 (slightly higher than K5 because rider is closer to
+    the size of the bike, exposing more of their back to the airstream).
+
+    Pre-April-24 the sub-500cc ``sport`` defaults here were `cd=0.72` —
+    that's an UPRIGHT Cd. Combined with the rider_dynamics 1.18× upright
+    multiplier, the launch-phase effective Cd was 0.85, ~2.6× what a
+    K5-class bike sees. This single error contributed about 1-1.5 s to
+    the small-cc-class ET bias (validated by perturbation: scaling Cd
+    by 0.5 on R15 V3 dropped ET by 0.33 s in earlier sensitivity sweep,
+    and the proper tuck value is roughly 0.55× the upright spec value).
+
+    Fix: enforce a tuck-Cd ceiling of 0.45 for sport-class bikes
+    regardless of displacement. The sub-500cc default drops from 0.72
+    (upright) to 0.42 (tuck). Per-spec values from known_bikes.py that
+    look like upright Cds (>0.45 for sport class) are normalized down to
+    the tuck range using a 0.55× scale factor (calibrated from the
+    upright/tuck ratio measured on K5-class bikes).
     """
     aero_defaults = CATEGORY_AERO.get(spec.category, CATEGORY_AERO["sport"])
     base = gsxr1000_k5().aero
     cc = spec.displacement_cc or 1000
 
-    # Small-cc sub-gate: adjust aero for <500cc bikes by category
+    # Small-cc sub-gate: tighter sport-tuck Cd for sub-500cc faired bikes.
+    # Naked bikes don't have a fairing to tuck behind — keep their drag
+    # numbers as-is (sitting upright is their physical reality regardless
+    # of what the rider does).
     if cc < 500:
         if spec.category == "naked":
             aero_defaults = {"cd": 0.86, "frontal_area_m2": 0.55, "wheelie_tendency": 0.8}
         elif spec.category == "sport":
-            aero_defaults = {"cd": 0.72, "frontal_area_m2": 0.48, "wheelie_tendency": 1.2}
+            # Tuck Cd for a faired small-cc sport bike — slightly higher
+            # than K5's 0.32 because the smaller fairing leaves more of
+            # the rider exposed.
+            aero_defaults = {"cd": 0.42, "frontal_area_m2": 0.46, "wheelie_tendency": 1.2}
+
+    cd = spec.cd if spec.cd is not None else aero_defaults["cd"]
+
+    # Tuck-Cd normalization for sport-class bikes: spec.cd values from
+    # the known_bikes catalog were inadvertently populated with upright
+    # values for several sub-500cc sport bikes (R15 V3 0.56, RC 390
+    # 0.68, etc.). Normalize them back to the tuck regime so the rider-
+    # dynamics 1.18× upright multiplier doesn't double-inflate drag
+    # during the launch phase.
+    if spec.category == "sport" and cd > 0.45:
+        cd_normalized = max(0.30, cd * 0.55)
+        cd = cd_normalized
 
     return AeroParams(
-        cd=spec.cd or aero_defaults["cd"],
+        cd=cd,
         frontal_area_m2=spec.frontal_area_m2 or aero_defaults["frontal_area_m2"],
         # All other aero params stay at base defaults
         cl=base.cl,

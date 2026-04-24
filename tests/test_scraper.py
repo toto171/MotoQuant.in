@@ -422,12 +422,42 @@ class TestSubBuilders:
         assert aero.cd == pytest.approx(0.30)
 
     def test_aero_cd_from_category_default(self):
+        """Default Cd from CATEGORY_AERO passes through for non-sport
+        categories. April 24 PM update: sport-class spec.cd undergoes
+        tuck-Cd normalization (× 0.55, floor 0.30) because the
+        rider_dynamics submodel treats spec.cd as the rider-tuck value
+        and applies a 1.18× multiplier for the upright launch position.
+        See `_build_aero_from_spec` docstring for the physics derivation.
+        """
         for cat, vals in CATEGORY_AERO.items():
             spec = _make_spec(category=cat)
             spec.cd = None
             spec.frontal_area_m2 = None
             aero = _build_aero_from_spec(spec)
-            assert aero.cd == pytest.approx(vals["cd"])
+            if cat == "sport":
+                # Sport: upright default 0.65 → tuck 0.65 × 0.55 = 0.358
+                # (clipped to floor 0.30).
+                assert aero.cd == pytest.approx(max(0.30, vals["cd"] * 0.55), abs=0.01)
+            else:
+                # Naked / cruiser / adventure / touring / scooter: no
+                # tuck normalization (riders sit upright by design).
+                assert aero.cd == pytest.approx(vals["cd"])
+
+    def test_aero_cd_tuck_normalization_for_small_sport(self):
+        """spec.cd values populated as upright (e.g. R15 V3 0.56) are
+        normalized down to the tuck regime (× 0.55) for sport-class
+        bikes — corrects the small-cc launch-phase double-inflation.
+        """
+        spec = _make_spec(category="sport", displacement_cc=155.0,
+                          cylinders=1, cd=0.56)  # R15-V3-shape upright Cd
+        aero = _build_aero_from_spec(spec)
+        # 0.56 × 0.55 = 0.308 (above floor 0.30)
+        assert 0.30 <= aero.cd <= 0.35
+
+        # Legitimate tuck Cds (e.g. K5 0.32) should NOT be altered
+        spec_k5 = _make_spec(category="sport", displacement_cc=999.0,
+                             cylinders=4, cd=0.32)
+        assert _build_aero_from_spec(spec_k5).cd == pytest.approx(0.32)
 
 
 # ────────────────────────────────────────────────────────────
