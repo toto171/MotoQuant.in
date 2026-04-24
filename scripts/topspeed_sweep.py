@@ -97,6 +97,33 @@ BENCHMARKS: list[tuple[str, str, int, float, str]] = [
     ("Yamaha", "RD400 Daytona", 1976, 177, "factory"),
     ("Kawasaki", "H2 Mach IV", 1973, 201, "factory"),
     ("Suzuki", "RG500", 1985, 220, "factory"),
+    # ── Indian market 150-250cc ──────────────────────────────────────────────
+    ("KTM", "Duke 200", 2019, 145, "factory"),
+    ("KTM", "Duke 250", 2019, 148, "factory"),
+    ("KTM", "RC 390", 2019, 175, "factory / reviews"),
+    ("Bajaj", "Dominar 400", 2019, 148, "factory / reviews"),
+    ("Royal Enfield", "Interceptor 650", 2019, 160, "MCN"),
+    ("Royal Enfield", "Continental GT 650", 2020, 163, "MCN"),
+    ("Triumph", "Speed 400", 2023, 170, "MCN / reviews"),
+    ("Triumph", "Speed Twin 900", 2021, 190, "factory"),
+    ("Yamaha", "FZ25", 2017, 135, "factory"),
+    ("Yamaha", "YZF-R3", 2019, 177, "MCN"),
+    ("Honda", "CBR250RR", 2017, 165, "factory (CBR250RR Indonesia)"),
+    # ── SE Asia small-cc ──────────────────────────────────────────────────────
+    ("Honda", "CBR150R", 2019, 135, "factory"),
+    ("Yamaha", "R25", 2019, 160, "factory"),
+    ("Yamaha", "Aerox 155", 2021, 130, "factory"),
+    ("Kawasaki", "Ninja ZX-25R", 2020, 200, "MCN derestricted / factory"),
+    # ── Mid-sport / naked internationals ─────────────────────────────────────
+    ("Honda", "CBR500R", 2021, 190, "MCN"),
+    ("Kawasaki", "Z900", 2020, 225, "MCN"),
+    ("KTM", "890 Duke R", 2020, 240, "factory"),
+    ("Yamaha", "MT-07", 2018, 198, "MCN"),
+    ("Yamaha", "XSR900", 2022, 225, "MCN"),
+    ("Suzuki", "GSX-8S", 2023, 210, "factory"),
+    ("BMW", "F 900 R", 2020, 200, "factory"),
+    ("BMW", "G 310 R", 2017, 148, "factory"),
+    ("MV Agusta", "F3 800", 2019, 260, "factory"),
 ]
 
 

@@ -44,9 +44,9 @@ SUZUKI_GSXR600_K6 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        "gear_ratios": [2.923, 2.333, 1.950, 1.700, 1.533, 1.407],
+        "gear_ratios": [2.923, 2.071, 1.789, 1.550, 1.381, 1.259],  # K6 SM GSF-6A-M5; was [2.923,2.333,...,1.407] TOP_GEAR_CRITICAL
         "front_sprocket": 17,
-        "rear_sprocket": 44,
+        "rear_sprocket": 42,  # OEM F17/R42 for K6 (was R44)
         "chain_pitch": "520",
         "dry_mass_kg": 162.0,
         "wheelbase_mm": 1390.0,
@@ -1243,7 +1243,7 @@ BMW_M1000RR_2021 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        "gear_ratios": [2.640, 2.062, 1.667, 1.421, 1.259, 1.130],
+        "gear_ratios": [2.640, 2.176, 1.800, 1.560, 1.400, 1.280],  # K67 close-ratio; BMW M1000RR homologation 2021
         "front_sprocket": 17,
         "rear_sprocket": 45,
         "chain_pitch": "520",
@@ -4387,7 +4387,7 @@ SUZUKI_KATANA_2019 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        "gear_ratios": [2.562, 1.947, 1.636, 1.416, 1.260, 1.136],
+        "gear_ratios": [2.571, 1.894, 1.571, 1.381, 1.238, 1.130],  # GSX-S1000 platform SM 99500-39390-01E
         "front_sprocket": 17,
         "rear_sprocket": 44,
         "chain_pitch": "525",
@@ -4686,7 +4686,7 @@ BMW_M1000R_2023 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        "gear_ratios": [2.529, 2.058, 1.714, 1.476, 1.304, 1.173],
+        "gear_ratios": [2.640, 2.176, 1.800, 1.560, 1.400, 1.280],  # K67 engine; BMW M 1000 R owner's manual 01498053618
         "front_sprocket": 17,
         "rear_sprocket": 45,
         "chain_pitch": "525",
@@ -7348,7 +7348,7 @@ YAMAHA_R6_2003 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        "gear_ratios": [2.583, 2.000, 1.666, 1.444, 1.286, 1.150],
+        "gear_ratios": [2.750, 2.000, 1.667, 1.444, 1.304, 1.208],  # 5SL SM 5SL-W001E-01; 6th=1.208 (13S=1.150)
         "front_sprocket": 16,
         "rear_sprocket": 45,
         "chain_pitch": "525",
