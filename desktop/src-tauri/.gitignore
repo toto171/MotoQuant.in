@@ -4,5 +4,5 @@
 # Tauri generated
 /gen/schemas
 
-# Bundled Python sidecar binary (built out-of-band via PyInstaller)
-/bin/
+# Bundled Python sidecar binary (built out-of-band via PyInstaller).
+# Bin

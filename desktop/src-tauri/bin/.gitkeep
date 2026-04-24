@@ -1,0 +1,8 @@
+# This directory holds the PyInstaller sidecar binaries for each target triple.
+# Files here are NOT committed to git (see .gitignore rule below).
+# They are produced by desktop/sidecar/build.sh|ps1 and named:
+#   motoquant-backend-x86_64-unknown-linux-gnu
+#   motoquant-backend-x86_64-pc-windows-msvc.exe
+#   motoquant-backend-aarch64-apple-darwin
+#   motoquant-backend-x86_64-apple-darwin
+# The CI release workflow builds each and drops them here before `tauri build`.
