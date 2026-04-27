@@ -86,7 +86,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'In practice, getting the right gear ratios for 287 different bikes was its own multi-month effort. We maintain a Tier-1 lookup table with 150+ named-model entries derived from service manuals (R15 V4: 14F/48R, primary 2.83, gears 2.833 / 1.875 / 1.429 / 1.16 / 0.963 / 0.84 — those numbers come from the YZF-R15 service manual, not from a forum). Bikes without a Tier-1 entry fall back to category-based defaults (sport-1000, naked-mid, cruiser-big, etc.) which are still better than generic numbers but lose the per-model flavor.',
+    text: 'In practice, getting the right gear ratios for 327 different bikes was its own multi-month effort. We maintain a Tier-1 lookup table with 150+ named-model entries derived from service manuals (R15 V4: 14F/48R, primary 2.83, gears 2.833 / 1.875 / 1.429 / 1.16 / 0.963 / 0.84 — those numbers come from the YZF-R15 service manual, not from a forum). Bikes without a Tier-1 entry fall back to category-based defaults (sport-1000, naked-mid, cruiser-big, etc.) which are still better than generic numbers but lose the per-model flavor.',
   },
   {
     type: 'p',
@@ -174,7 +174,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The sub-models are tested independently. test_validation.py exercises physics conservation laws (energy in == energy out + heat). test_no_silent_failures.py runs all 287 catalog bikes and asserts each finishes within the time budget or is on an explicit DNF whitelist for vintage low-power 2-strokes. test_submodel_kaizen.py catches silent failure modes in clutch, tire thermal, braking, and rider dynamics. The full suite passes 174 fast tests; integration tests exercise the surrogate models, ROI engine, and recommendations layer.',
+    text: 'The sub-models are tested independently. test_validation.py exercises physics conservation laws (energy in == energy out + heat). test_no_silent_failures.py runs all 327 catalog bikes and asserts each finishes within the time budget or is on an explicit DNF whitelist for vintage low-power 2-strokes. test_submodel_kaizen.py catches silent failure modes in clutch, tire thermal, braking, and rider dynamics. The full suite passes 174 fast tests; integration tests exercise the surrogate models, ROI engine, and recommendations layer.',
   },
   {
     type: 'h2',

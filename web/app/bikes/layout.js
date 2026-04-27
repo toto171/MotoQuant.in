@@ -4,9 +4,9 @@
 import StructuredData, { SITE_URL } from '../StructuredData';
 
 const TITLE =
-  'Motorcycle Catalog — 287 Bikes with Dyno, Aero, and Gear-Ratio Data';
+  'Motorcycle Catalog — 327 Bikes with Dyno, Aero, and Gear-Ratio Data';
 const DESCRIPTION =
-  'Browse every motorcycle modelled in MotoQuant Pro. 287 bikes across 25+ manufacturers — Suzuki, Yamaha, Honda, Kawasaki, Ducati, BMW, KTM, Royal Enfield, Bajaj, TVS, Aprilia, Triumph, Harley-Davidson, CFMoto and more. Individual Cd, frontal area, peak power, redline, wet mass, wheelbase, chain pitch, and OEM tire fitments for each.';
+  'Browse every motorcycle modelled in MotoQuant Pro. 327 bikes across 25+ manufacturers — Suzuki, Yamaha, Honda, Kawasaki, Ducati, BMW, KTM, Royal Enfield, Bajaj, TVS, Aprilia, Triumph, Harley-Davidson, CFMoto and more. Individual Cd, frontal area, peak power, redline, wet mass, wheelbase, chain pitch, and OEM tire fitments for each.';
 
 export const metadata = {
   title: TITLE,
@@ -40,7 +40,7 @@ export const metadata = {
         url: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'MotoQuant Pro bike catalog — 287 motorcycles with full spec data',
+        alt: 'MotoQuant Pro bike catalog — 327 motorcycles with full spec data',
       },
     ],
   },
@@ -78,7 +78,7 @@ function collectionSchema() {
       '@type': 'Thing',
       name: 'Motorcycle specifications and drag-racing physics data',
     },
-    numberOfItems: 287,
+    numberOfItems: 327,
     inLanguage: 'en',
   };
 }

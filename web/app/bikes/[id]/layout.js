@@ -1,5 +1,5 @@
 // Dynamic per-bike metadata. This is the single highest-leverage SEO change
-// in the project: every one of the 287 bike detail pages now gets a unique
+// in the project: every one of the 327 bike detail pages now gets a unique
 // title, description, keyword set, Open Graph, and rich-result-eligible
 // Vehicle/Product schema — so search queries like "Hayabusa quarter mile
 // time" or "Pulsar NS200 drag simulator" can land directly on the right
@@ -62,14 +62,14 @@ export async function generateMetadata({ params }) {
     // wakes up.
     //
     // DO NOT emit noindex here — an API hiccup at Googlebot crawl time
-    // would permanently mark the page non-indexable and we'd lose 287
+    // would permanently mark the page non-indexable and we'd lose 327
     // URLs from the index. Emit neutral-but-indexable metadata instead;
     // Google re-crawls periodically and will pick up the full metadata
     // once the API is responsive again.
     const fallbackTitle =
       'Motorcycle Quarter-Mile Drag Simulator — MotoQuant Pro';
     const fallbackDesc =
-      'Physics-based quarter-mile drag-racing simulator for this motorcycle. 287 bikes in the catalog. Free and in-browser.';
+      'Physics-based quarter-mile drag-racing simulator for this motorcycle. 327 bikes in the catalog. Free and in-browser.';
     return {
       title: fallbackTitle,
       description: fallbackDesc,

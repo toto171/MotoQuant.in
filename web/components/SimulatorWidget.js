@@ -507,7 +507,7 @@ export default function SimulatorWidget() {
       </AnimatePresence>
 
       <p className="text-xs text-white/30 text-center mt-6 relative z-10">
-        First-principles RK4 physics · 15 sub-models · 1 ms timestep · 287 bikes
+        First-principles RK4 physics · 15 sub-models · 1 ms timestep · 327 bikes
       </p>
     </motion.div>
   );

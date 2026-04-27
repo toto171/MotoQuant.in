@@ -80,11 +80,11 @@ function ScrollIndicator() {
 
 function StatsStrip() {
   const stats = [
-    { num: '287', label: 'BIKES' },
-    { num: '159', label: 'TIRES' },
-    { num: '424', label: 'PARTS' },
+    { num: '327', label: 'BIKES' },
+    { num: '232', label: 'TIRES' },
+    { num: '555', label: 'PARTS' },
     { num: '20', label: 'VENUES' },
-    { num: '838', label: 'TESTS' },
+    { num: '976', label: 'TESTS' },
     { num: '15', label: 'SUB-MODELS' },
   ];
 
@@ -475,7 +475,7 @@ export default function HomePage() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="text-lg md:text-xl text-white/80 mb-6 max-w-2xl mx-auto leading-relaxed"
           >
-            327 bikes. 514 parts. 15 physics sub-models. Predict your quarter-mile within ±0.5s
+            327 bikes. 555 parts. 15 physics sub-models. Predict your quarter-mile within ±0.5s
             before you buy a single part.
           </motion.p>
 
@@ -568,7 +568,7 @@ export default function HomePage() {
               {
                 icon: BarChart3,
                 title: 'Validated',
-                body: 'Kawasaki ZX-10R 2021 at ±0.011s. Top-10 mean error ±0.032s. Reference baselines: K5 10.033s, R1 10.286s, Hayabusa 10.471s — all within 0.001s of targets. 838 regression tests, zero silent failures.',
+                body: 'Kawasaki ZX-10R 2021 at ±0.011s. Top-10 mean error ±0.032s. Reference baselines: K5 10.033s, R1 10.286s, Hayabusa 10.471s — all within 0.001s of targets. 976 regression tests, zero silent failures.',
                 link: '/docs/validation',
                 linkLabel: 'See benchmark table →',
               },
@@ -679,7 +679,7 @@ export default function HomePage() {
               items={[
                 'RK4 fixed-step integrator at 1ms timestep',
                 'Adaptive step-size solver with error bounds',
-                '838 regression tests (catalog integration + physics + API + silent-failure sweep)',
+                '976 regression tests (catalog integration + physics + API + silent-failure sweep)',
                 'Validated against real GPS and ECU telemetry',
               ]}
             />
