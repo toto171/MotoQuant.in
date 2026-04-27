@@ -539,7 +539,7 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
         peak_power_rpm=int(peak_hp_rpm),
         peak_torque_rpm=int(peak_tq_rpm),
         redline_rpm=int(redline),
-        launch_rpm=int(redline * 0.55),  # ~55% of redline as launch RPM estimate
+        launch_rpm=int(peak_tq_rpm) if spec.displacement_cc and spec.displacement_cc < 400 else int(redline * 0.55),  # Apr-27: <400cc launches at peak_torque_rpm (max torque available); >400cc at 55% of redline
         idle_rpm=idle,
         displacement_cc=spec.displacement_cc or base.displacement_cc,
         bore_mm=spec.bore_mm or base.bore_mm,
@@ -852,7 +852,11 @@ def spec_to_bike_config(spec: BikeSpec) -> BikeConfig:
     # tuned_rpm × 0.92 (gives slight headroom before the pipe comes on).
     import copy
     staging = copy.deepcopy(base_config.staging)
-    if spec.stroke_type == 2:
+    # Apr-27: Small-cc 4T launch optimization — launch at peak_torque_rpm where torque peaks,
+    # not at 55% redline (which is for 1000cc superbikes). Small bikes are torque-limited.
+    if spec.stroke_type != 2 and spec.displacement_cc and spec.displacement_cc < 400:
+        staging.launch_rpm = float(engine.peak_torque_rpm)
+    elif spec.stroke_type == 2:
         # Apr-24-PM kaizen: previous ``tuned * 0.92`` put commuter 2T
         # launches (RX100 peak_tq=6500, tuned=7500 -> launch=6900) BELOW
         # peak-torque RPM, firing off the rising edge of the Gaussian

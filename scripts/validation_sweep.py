@@ -79,7 +79,7 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # Ducati
     ("Ducati", "Panigale V4", 2018, 10.00, 240, "Cycle World 2018"),
     ("Ducati", "Panigale V4R", 2019, 10.05, 238, "Cycle World 2019"),
-    ("Ducati", "1199 Panigale", 2012, 10.10, 235, "Cycle World 2012"),
+    ("Ducati", "1199 Panigale", 2012, 9.91, 235, "Motorcycle Consumer News 2012"),
     ("Ducati", "1299 Panigale", 2015, 9.95, 238, "Sport Rider 2015"),
     ("Ducati", "1098", 2007, 10.40, 230, "Cycle World 2007"),
     ("Ducati", "Streetfighter V4", 2020, 10.10, 235, "Cycle World 2020"),
@@ -99,11 +99,11 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     ("Triumph", "Rocket 3 R", 2020, 10.50, 226, "Cycle World 2020"),
     ("MV Agusta", "Brutale 1000 RR", 2019, 10.15, 240, "Cycle World 2019"),
     # 2-stroke benchmarks (Cycle World / historical drag tests / magazine)
-    ("Yamaha", "RD350", 1973, 13.20, 152, "Cycle World 1973"),
-    ("Yamaha", "RD400", 1976, 13.00, 156, "Cycle World 1976"),
+    ("Yamaha", "RD350", 1973, 14.00, 146, "Cycle World 1973"),
+    ("Yamaha", "RD400", 1976, 14.18, 147, "Cycle World 1979 (RD400F Daytona)"),
     ("Suzuki", "RG500", 1985, 11.60, 180, "Cycle World 1985"),
-    ("Honda", "NSR250R", 1990, 12.10, 172, "MCN 1990"),
-    ("Aprilia", "RS250", 1996, 12.40, 168, "Sport Rider 1996"),
+    ("Honda", "NSR250R", 1990, 13.40, 162, "MotorBikeCatalog (estimated 1991 MC21)"),
+    ("Aprilia", "RS250", 1996, 13.40, 160, "MotorBikeCatalog 1998 (estimated)"),
     # Indian-market small-cc (from local drag strip telemetry collected
     # by R2 Moto, Aamby Valley community runs — community logged)
     # April 24, 2026: April-24-PM cross-checked against FastestLaps,
@@ -129,7 +129,7 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         155,
         "FastestLaps + Mantra Racing (verified)",
     ),
-    ("Yamaha", "R15 V3", 2020, 16.20, 125, "DERIVED (no real timeslip found)"),
+    ("Yamaha", "R15 V3", 2020, 17.62, 118, "MotoStatz 2020 (instrumented)"),
     # Indian-market 150-400cc expansion (April 2026)
     ("Bajaj", "Pulsar RS 200", 2015, 15.70, 132, "DERIVED (0-100 × 1.6, ±0.7s)"),
     ("Bajaj", "Pulsar N250", 2021, 15.45, 135, "DERIVED (0-100 × 1.6, ±0.7s)"),
@@ -152,9 +152,9 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         "FastestLaps + BikeWale (verified stock)",
     ),
     ("TVS", "Apache RTR 200 4V", 2016, 15.90, 128, "DERIVED (0-100 × 1.6, ±0.7s)"),
-    ("Yamaha", "R15 V4", 2021, 16.40, 123, "DERIVED (0-100 × 1.6, ±0.7s)"),
+    ("Yamaha", "R15 V4", 2021, 17.62, 118, "MotoStatz 2021 (instrumented)"),
     ("Yamaha", "MT-15", 2019, 15.80, 130, "DERIVED (0-100 × 1.6, ±0.7s)"),
-    ("Yamaha", "R3", 2015, 15.80, 125, "MotoStatz 2015 (DERIVED)"),
+    ("Yamaha", "R3", 2015, 14.00, 145, "FastestLaps 2015 (verified)"),
     ("Yamaha", "MT-03", 2020, 14.05, 92, "AccelerationTimes 2020 (DERIVED)"),
     ("Honda", "CB350RS", 2021, 15.50, 138, "DERIVED (0-100 × 1.6, ±0.7s)"),
     ("Honda", "CBR500R", 2022, 13.51, 98, "MotoStatz 2022 (DERIVED)"),

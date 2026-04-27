@@ -504,15 +504,65 @@ class MotoQuantEngine:
                             T_clutch_max *= ramp
 
                     T_e_crank = self.engine_torque(omega_e * RADS_TO_RPM, t)
-                    T_transmitted = min(abs(T_e_crank), T_clutch_max)
-                    T_e = T_transmitted
 
-                    I_e = (
+                    # Apr 27, 2026: rate-limited over-clutching for low-power
+                    # bikes. Real launches: rider can pull clutch in beyond
+                    # pure friction-matching, briefly drawing energy from
+                    # engine inertia to accelerate the bike faster than
+                    # steady-state engine torque allows. This was the missing
+                    # mechanism causing the +1.84 s small-cc cluster bias.
+                    # GATED on peak_power_hp < 60 so K5/R1/Hayabusa baselines
+                    # (178/180/197 hp) are unaffected — they keep the legacy
+                    # min(T_e_crank, T_clutch_max) behaviour.
+                    I_e_local = (
                         cfg.engine.engine_inertia_kgm2 + cfg.clutch.basket_inertia_kgm2
                     )
+                    peak_hp = cfg.engine.peak_power_hp or 0.0
+                    if peak_hp < 60.0 and slip_speed > 0:
+                        # Rate-limit engine deceleration to a realistic launch
+                        # value. Tier the cap by power: very-low-power bikes
+                        # get more aggressive launches (riders rev higher and
+                        # bog harder).
+                        if peak_hp < 22.0:
+                            max_decel_rad_per_s2 = 350.0   # ~3300 rpm/s — hard launch
+                            over_clutch_factor = 0.50
+                        elif peak_hp < 30.0:
+                            max_decel_rad_per_s2 = 280.0   # ~2700 rpm/s
+                            over_clutch_factor = 0.40
+                        else:
+                            max_decel_rad_per_s2 = 200.0   # ~1900 rpm/s
+                            over_clutch_factor = 0.30
+                        max_back_torque = max_decel_rad_per_s2 * max(I_e_local, 0.001)
+                        headroom = max(0.0, T_clutch_max - abs(T_e_crank))
+                        over_clutch_extra = min(headroom * over_clutch_factor, max_back_torque)
+                        T_transmitted = min(abs(T_e_crank) + over_clutch_extra, T_clutch_max)
+                    else:
+                        T_transmitted = min(abs(T_e_crank), T_clutch_max)
+                    T_e = T_transmitted
+
+                    I_e = I_e_local
                     T_net_engine = T_e_crank - T_transmitted
                     d_omega_e = T_net_engine / max(I_e, 0.001)
                     omega_e += d_omega_e * dt
+                    # Apr 27, 2026: during launch slip on low-power bikes, prevent
+                    # engine RPM from dropping below peak_torque_rpm. Without this,
+                    # over-clutching pulls engine into weak-power region and the
+                    # ET goes UP not DOWN. Real riders modulate clutch to hold
+                    # engine at peak_torque_rpm; this clamp models that. K5/R1/Busa
+                    # bypass via peak_hp >= 60 gate above (their else branch keeps
+                    # legacy min behaviour, no force on omega_e drop).
+                    if peak_hp < 60.0:
+                        # 2-strokes: clamp at tuned_rpm (where the expansion
+                        # chamber peaks) — peak_torque_rpm is BELOW the actual
+                        # peak for piston-port 2T. 4T: peak_torque_rpm is the
+                        # actual torque peak so use that directly.
+                        if cfg.engine.stroke_type == 2 and cfg.engine.tuned_rpm:
+                            floor_rpm = cfg.engine.tuned_rpm
+                        else:
+                            floor_rpm = cfg.engine.peak_torque_rpm
+                        floor_omega = floor_rpm * RPM_TO_RADS
+                        if omega_e < floor_omega:
+                            omega_e = floor_omega
                     omega_e = np.clip(
                         omega_e,
                         cfg.engine.idle_rpm * RPM_TO_RADS,

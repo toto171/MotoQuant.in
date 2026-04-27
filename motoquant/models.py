@@ -247,9 +247,11 @@ class EngineParams:
             band_hi = 0.25
             baseline = 0.35
         else:
-            band_lo = 0.12
-            band_hi = 0.08
-            baseline = 0.12  # piston-port: peakier, narrower base
+            # Apr-27: Fixed piston-port race engines (>200cc 1-cyl, no YPVS).
+            # Widened from 0.12/0.08/0.12 (too peaky for drag). Now 0.25/0.15/0.25.
+            band_lo = 0.25
+            band_hi = 0.15
+            baseline = 0.25
 
         if rpm <= tuned:
             x = (tuned - rpm) / max(1.0, tuned * band_lo)

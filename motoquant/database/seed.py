@@ -9340,18 +9340,27 @@ def seed_all(db: MotoQuantDB) -> dict:
     from .seed_catalogs.drag_specific import seed_drag_specific
     from .seed_catalogs.premium_universal import seed_premium_universal
     from .seed_catalogs.two_stroke import seed_two_stroke
+    from .seed_catalogs.indian_retailer_depth import seed_indian_retailer_depth
+    from .seed_recommended_fitments import seed_recommended_fitments
 
     seed_reference_bikes(db)
     n_tires = seed_tire_library(db)
     n_parts = seed_parts_catalog(db)
     # Expansion catalogs (April 2026): bike-specific mod libraries across
     # ADV/cruiser exhausts, drag-specific mods, premium universal options,
-    # and 2-stroke-specific parts (pipes, reeds, powervalve controllers).
+    # 2-stroke-specific parts (pipes, reeds, powervalve controllers),
+    # and deep Indian-market retailer parts (R15/NS200/RE650/R1/Hayabusa variants).
     n_parts += seed_adv_cruiser_exhausts(db)
     n_parts += seed_drag_specific(db)
     n_parts += seed_premium_universal(db)
     n_parts += seed_two_stroke(db)
+    n_parts += seed_indian_retailer_depth(db)
     n_fitments = seed_bike_tire_fitments(db)
+    # Recommended/drag_prep fitments (Apr 27, 2026): adds upgrade-tier fitments
+    # beyond OEM with on-the-fly tire creation when referenced models are missing.
+    rec_stats = seed_recommended_fitments(db)
+    n_fitments += rec_stats.get("inserted", 0) if isinstance(rec_stats, dict) else 0
+    n_tires += rec_stats.get("tires_created", 0) if isinstance(rec_stats, dict) else 0
     summary = {
         "bikes": 3,
         "tires": n_tires,
