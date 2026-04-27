@@ -102,3 +102,10 @@ node_modules/
 pytest-cache-files-*/
 motoquant/parts/__pycache__/
 __pycache__/
+
+# Local secrets — never commit
+tokens.md
+tokens.md.bak
+*.token
+secrets.local
+.env.local

@@ -5,4 +5,8 @@
 /gen/schemas
 
 # Bundled Python sidecar binary (built out-of-band via PyInstaller).
-# Bin
+# Binaries are NOT committed — they are produced by build.sh/ps1 on each
+# target machine and staged into bin/ by the CI release workflow.
+# The .gitkeep is allowed so the directory is tracked in git.
+/bin/*
+!/bin/.gitkeep

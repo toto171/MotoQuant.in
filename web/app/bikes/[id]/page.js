@@ -261,4 +261,23 @@ export default function BikeDetailPage() {
     </div>
   );
 }
-  
+                <Link
+                  href={`/simulator?bike_id=${bike.id}`}
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-orange text-black font-display font-bold rounded-lg transition-all hover:shadow-[0_0_30px_rgba(255,94,31,0.4)]"
+                >
+                  <Gauge size={16} /> Simulate this bike
+                </Link>
+                <Link
+                  href="/bikes"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-white/20 hover:border-brand-orange/60 text-white/80 font-display font-semibold rounded-lg transition-colors"
+                >
+                  Back to catalog
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}

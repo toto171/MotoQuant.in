@@ -488,4 +488,55 @@ def find_best_build(
         total_cost_inr=total_cost,
         budget_inr=budget_inr,
         base_et_s=base_et,
-       
+        modified_et_s=build_et,
+        delta_et_s=base_et - build_et,
+        delta_trap_ms=build_trap - base_trap,
+        parts_evaluated=n_evaluated,
+        parts_skipped_incompatible=n_incompat,
+        parts_skipped_no_gain=n_no_gain,
+    )
+
+
+def rank_categories(
+    roi_results: list[PartROIResult],
+) -> list[dict]:
+    """
+    Aggregate ROI results by category.
+
+    Returns a list of dicts:
+      {"category": str, "best_roi": float, "best_et_gain": float,
+       "avg_cost_per_tenth": float, "part_count": int}
+    sorted by best_roi descending.
+    """
+    from collections import defaultdict
+
+    buckets: dict[str, list[PartROIResult]] = defaultdict(list)
+    for r in roi_results:
+        buckets[r.category_display or r.category].append(r)
+
+    summary = []
+    for cat, parts in buckets.items():
+        improving = [p for p in parts if p.delta_et_s > 0]
+        if not improving:
+            continue
+        best_roi = max(p.roi_score for p in improving)
+        best_gain = max(p.delta_et_s for p in improving)
+        valid_cpt = [
+            p.cost_per_tenth_inr
+            for p in improving
+            if not math.isinf(p.cost_per_tenth_inr)
+        ]
+        avg_cpt = sum(valid_cpt) / len(valid_cpt) if valid_cpt else float("inf")
+        summary.append(
+            {
+                "category": cat,
+                "best_roi": round(best_roi, 4),
+                "best_et_gain_s": round(best_gain, 4),
+                "avg_cost_per_tenth": round(avg_cpt, 0),
+                "part_count": len(parts),
+                "improving_count": len(improving),
+            }
+        )
+
+    summary.sort(key=lambda d: -d["best_roi"])
+    return summary
