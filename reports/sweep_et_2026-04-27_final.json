@@ -1,0 +1,766 @@
+{
+ "references": {
+  "K5": 10.0334,
+  "R1": 10.2859,
+  "Hayabusa": 10.4712
+ },
+ "results": [
+  {
+   "mfr": "Suzuki",
+   "model": "GSX-R 1000",
+   "cl": "litre-sport-600-1000",
+   "sim": 9.968595520744898,
+   "bench": 10.2,
+   "d": -0.23140447925510088
+  },
+  {
+   "mfr": "Suzuki",
+   "model": "GSX-R 1000",
+   "cl": "litre-sport-600-1000",
+   "sim": 9.882725686597535,
+   "bench": 10.1,
+   "d": -0.21727431340246461
+  },
+  {
+   "mfr": "Suzuki",
+   "model": "GSX-R 1000",
+   "cl": "litre-sport-600-1000",
+   "sim": 9.893101461566404,
+   "bench": 10.0,
+   "d": -0.10689853843359565
+  },
+  {
+   "mfr": "Suzuki",
+   "model": "GSX-R 1000",
+   "cl": "litre-sport-600-1000",
+   "sim": 9.914474179587966,
+   "bench": 10.0,
+   "d": -0.08552582041203394
+  },
+  {
+   "mfr": "Suzuki",
+   "model": "GSX-R 1000",
+   "cl": "litre-sport-195+",
+   "sim": 9.769358662051543,
+   "bench": 9.95,
+   "d": -0.18064133794845638
+  },
+  {
+   "mfr": "Suzuki",
+   "model": "Hayabusa",
+   "cl": "litre-sport-195+",
+   "sim": 10.064388491308272,
+   "bench": 9.85,
+   "d": 0.21438849130827187
+  },
+  {
+   "mfr": "Suzuki",
+   "model": "Hayabusa",
+   "cl": "other",
+   "sim": 10.298560710781238,
+   "bench": 9.75,
+   "d": 0.5485607107812385
+  },
+  {
+   "mfr": "Suzuki",
+   "model": "TL1000R",
+   "cl": "litre-sport-600-1000",
+   "sim": 10.516943252539567,
+   "bench": 10.5,
+   "d": 0.01694325253956741
+  },
+  {
+   "mfr": "Yamaha",
+   "model": "YZF-R1",
+   "cl": "litre-sport-600-1000",
+   "sim": 10.194401481288692,
+   "bench": 10.3,
+   "d": -0.1055985187113091
+  },
+  {
+   "mfr": "Yamaha",
+   "model": "YZF-R1",
+   "cl": "litre-sport-600-1000",
+   "sim": 10.141651302277022,
+   "bench": 10.3,
+   "d": -0.15834869772297822
+  },
+  {
+   "mfr": "Yamaha",
+   "model": "YZF-R1",
+   "cl": "litre-sport-600-1000",
+   "sim": 10.190148804380012,
+   "bench": 10.3,
+   "d": -0.10985119561998857
+  },
+  {
+   "mfr": "Yamaha",
+   "model": "YZF-R1",
+   "cl": "litre-sport-600-1000",
+   "sim": 10.171620784582892,
+   "bench": 10.2,
+   "d": -0.028379215417107417
+  },
+  {
+   "mfr": "Yamaha",
+   "model": "YZF-R1",
+   "cl": "litre-sport-195+",
+   "sim": 9.974549362604924,
+   "bench": 10.1,
+   "d": -0.12545063739507611
+  },
+  {
+   "mfr": "Yamaha",
+   "model": "YZF-R1M",
+   "cl": "litre-sport-195+",
+   "sim": 9.90094431773581,
+   "bench": 10.05,
+   "d": -0.14905568226419064
+  },
+  {
+   "mfr": "Yamaha",
+   "model": "MT-10",
+   "cl": "litre-sport-600-1000",
+   "sim": 10.525440200596451,
+   "bench": 10.35,
+   "d": 0.1754402005964515
+  },
+  {
+   "mfr": "Honda",
+   "model": "CBR 1000RR Fireblade",
+   "cl": "litre-sport-600-1000",
+   "sim": 10.151249462947545,
+   "bench": 10.3,
+   "d": -0.14875053705245556
+  },
+  {
+   "mfr": "Honda",
+   "model": "CBR1000RR",
+   "cl": "litre-sport-600-1000",
+   "sim": 9.938975901419814,
+   "bench": 10.2,
+   "d": -0.2610240985801848
+  },
+  {
+   "mfr": "Honda",
+   "model": "CBR 1000RR Fireblade SP",
+   "cl": "litre-sport-600-1000",
+   "sim": 10.010029166545085,
+   "bench": 10.1,
+   "d": -0.08997083345491497
+  },
+  {
+   "mfr": "Honda",
+   "model": "CBR1000RR-R Fireblade SP",
+   "cl": "litre-sport-195+",
+   "sim": 9.927291586835779,
+   "bench": 10.2,
+   "d": -0.2727084131642208
+  },
+  {
+   "mfr": "Kawasaki",
+   "model": "Ninja ZX-9R",
+   "cl": "litre-sport-600-1000",
+   "sim": 10.496836049464827,
+   "bench": 10.5,
+   "d": -0.0031639505351730435
+  },
+  {
+   "mfr": "Kawasaki",
+   "model": "Ninja ZX-10R",
+   "cl": "litre-sport-600-1000",
+   "sim": 9.793564258098865,
+   "bench": 10.3,
+   "d": -0.5064357419011358
+  },
+  {
+   "mfr": "Kawasaki",
+   "model": "Ninja ZX-10R",
+   "cl": "litre-sport-600-1000",
+   "sim": 9.782132836736224,
+   "bench": 10.3,
+   "d": -0.5178671632637766
+  },
+  {
+   "mfr": "Kawasaki",
+   "model": "Ninja ZX-10R",
+   "cl": "litre-sport-600-1000",
+   "sim": 9.81809465983187,
+   "bench": 10.3,
+   "d": -0.48190534016813125
+  },
+  {
+   "mfr": "Kawasaki",
+   "model": "Ninja ZX-10R",
+   "cl": "litre-sport-195+",
+   "sim": 9.88887114401139,
+   "bench": 10.1,
+   "d": -0.2111288559886102
+  },
+  {
+   "mfr": "Kawasaki",
+   "model": "Ninja ZX-10R",
+   "cl": "litre-sport-195+",
+   "sim": 10.010554180720703,
+   "bench": 10.0,
+   "d": 0.010554180720703243
+  },
+  {
+   "mfr": "Kawasaki",
+   "model": "Ninja ZX-14R",
+   "cl": "litre-sport-195+",
+   "sim": 9.890078984020233,
+   "bench": 9.47,
+   "d": 0.4200789840202326
+  },
+  {
+   "mfr": "Kawasaki",
+   "model": "ZZR1400",
+   "cl": "other",
+   "sim": 10.073267191051146,
+   "bench": 9.9,
+   "d": 0.17326719105114563
+  },
+  {
+   "mfr": "Kawasaki",
+   "model": "Ninja H2",
+   "cl": "litre-sport-195+",
+   "sim": 9.714620737116924,
+   "bench": 9.62,
+   "d": 0.09462073711692476
+  },
+  {
+   "mfr": "Kawasaki",
+   "model": "Ninja 650",
+   "cl": "litre-sport-600-1000",
+   "sim": 11.809921604496063,
+   "bench": 12.3,
+   "d": -0.4900783955039376
+  },
+  {
+   "mfr": "BMW",
+   "model": "S 1000 RR",
+   "cl": "litre-sport-195+",
+   "sim": 9.980587540439974,
+   "bench": 9.9,
+   "d": 0.08058754043997318
+  },
+  {
+   "mfr": "BMW",
+   "model": "S 1000 RR",
+   "cl": "litre-sport-195+",
+   "sim": 9.965115859763374,
+   "bench": 9.85,
+   "d": 0.11511585976337457
+  },
+  {
+   "mfr": "BMW",
+   "model": "M1000RR",
+   "cl": "litre-sport-195+",
+   "sim": 9.845161298853302,
+   "bench": 9.8,
+   "d": 0.045161298853301446
+  },
+  {
+   "mfr": "Ducati",
+   "model": "1098",
+   "cl": "litre-sport-600-1000",
+   "sim": 9.996230535414355,
+   "bench": 10.4,
+   "d": -0.4037694645856451
+  },
+  {
+   "mfr": "Ducati",
+   "model": "1199 Panigale",
+   "cl": "litre-sport-195+",
+   "sim": 9.603038126666124,
+   "bench": 9.91,
+   "d": -0.3069618733338757
+  },
+  {
+   "mfr": "Ducati",
+   "model": "1299 Panigale",
+   "cl": "litre-sport-195+",
+   "sim": 9.662874587497411,
+   "bench": 9.95,
+   "d": -0.28712541250258816
+  },
+  {
+   "mfr": "Ducati",
+   "model": "Panigale V4",
+   "cl": "litre-sport-195+",
+   "sim": 9.933988635776874,
+   "bench": 10.0,
+   "d": -0.06601136422312592
+  },
+  {
+   "mfr": "Ducati",
+   "model": "Streetfighter V4",
+   "cl": "litre-sport-195+",
+   "sim": 10.164273873174,
+   "bench": 10.1,
+   "d": 0.06427387317400068
+  },
+  {
+   "mfr": "Aprilia",
+   "model": "RSV4 1000",
+   "cl": "litre-sport-600-1000",
+   "sim": 10.051733717940477,
+   "bench": 10.4,
+   "d": -0.34826628205952304
+  },
+  {
+   "mfr": "Aprilia",
+   "model": "RSV4 Factory",
+   "cl": "litre-sport-195+",
+   "sim": 9.85041562701236,
+   "bench": 10.05,
+   "d": -0.19958437298764053
+  },
+  {
+   "mfr": "KTM",
+   "model": "Duke 390",
+   "cl": "mid-twin-300-500",
+   "sim": 13.460750590493102,
+   "bench": 14.0,
+   "d": -0.5392494095068976
+  },
+  {
+   "mfr": "KTM",
+   "model": "RC 390",
+   "cl": "mid-twin-300-500",
+   "sim": 13.053061415766082,
+   "bench": 13.85,
+   "d": -0.7969385842339172
+  },
+  {
+   "mfr": "KTM",
+   "model": "Duke 250",
+   "cl": "entry-200-300",
+   "sim": 15.178478306055194,
+   "bench": 15.2,
+   "d": -0.02152169394480552
+  },
+  {
+   "mfr": "Bajaj",
+   "model": "Pulsar RS 200",
+   "cl": "entry-150-200",
+   "sim": 16.243334553848648,
+   "bench": 15.7,
+   "d": 0.5433345538486485
+  },
+  {
+   "mfr": "TVS",
+   "model": "Apache RR 310",
+   "cl": "mid-twin-300-500",
+   "sim": 14.696664559859157,
+   "bench": 15.46,
+   "d": -0.7633354401408443
+  },
+  {
+   "mfr": "TVS",
+   "model": "Apache RTR 200 4V",
+   "cl": "entry-150-200",
+   "sim": 17.065879014391992,
+   "bench": 15.9,
+   "d": 1.165879014391992
+  },
+  {
+   "mfr": "Royal Enfield",
+   "model": "Continental GT 650",
+   "cl": "litre-sport-600-1000",
+   "sim": 13.746112661181375,
+   "bench": 13.9,
+   "d": -0.1538873388186257
+  },
+  {
+   "mfr": "Yamaha",
+   "model": "YZF-R15 V4",
+   "cl": "entry-150-200",
+   "sim": 17.52949968878738,
+   "bench": 17.62,
+   "d": -0.09050031121262236
+  },
+  {
+   "mfr": "Yamaha",
+   "model": "MT-15 V2",
+   "cl": "entry-150-200",
+   "sim": 18.095768811114436,
+   "bench": 15.8,
+   "d": 2.295768811114435
+  },
+  {
+   "mfr": "Kawasaki",
+   "model": "Ninja 300",
+   "cl": "entry-200-300",
+   "sim": 14.479581287097016,
+   "bench": 14.1,
+   "d": 0.37958128709701633
+  },
+  {
+   "mfr": "Kawasaki",
+   "model": "Ninja 400",
+   "cl": "mid-twin-300-500",
+   "sim": 14.070132251555345,
+   "bench": 12.98,
+   "d": 1.0901322515553442
+  },
+  {
+   "mfr": "Kawasaki",
+   "model": "Z 650",
+   "cl": "litre-sport-600-1000",
+   "sim": 12.283185396287152,
+   "bench": 12.4,
+   "d": -0.11681460371284835
+  },
+  {
+   "mfr": "Triumph",
+   "model": "Speed 400",
+   "cl": "mid-twin-300-500",
+   "sim": 14.510109258738979,
+   "bench": 14.5,
+   "d": 0.01010925873897861
+  },
+  {
+   "mfr": "MV Agusta",
+   "model": "Brutale 1000 RR",
+   "cl": "litre-sport-195+",
+   "sim": 10.10265999648762,
+   "bench": 10.15,
+   "d": -0.04734000351237988
+  },
+  {
+   "mfr": "Royal Enfield",
+   "model": "Continental GT 650",
+   "cl": "litre-sport-600-1000",
+   "sim": 13.154954232608993,
+   "bench": 13.9,
+   "d": -0.7450457673910069
+  },
+  {
+   "mfr": "Harley-Davidson",
+   "model": "Sportster S",
+   "cl": "other",
+   "sim": 11.286149977799742,
+   "bench": 11.1,
+   "d": 0.18614997779974196
+  },
+  {
+   "mfr": "KTM",
+   "model": "390 Duke",
+   "cl": "mid-twin-300-500",
+   "sim": 13.2344641689386,
+   "bench": 14.0,
+   "d": -0.7655358310614009
+  },
+  {
+   "mfr": "KTM",
+   "model": "1290 Super Duke R",
+   "cl": "other",
+   "sim": 9.981375778980894,
+   "bench": 10.15,
+   "d": -0.16862422101910646
+  },
+  {
+   "mfr": "Yamaha",
+   "model": "YZF-R7",
+   "cl": "litre-sport-600-1000",
+   "sim": 11.731532914258125,
+   "bench": 11.64,
+   "d": 0.09153291425812426
+  },
+  {
+   "mfr": "Yamaha",
+   "model": "VMAX 1700",
+   "cl": "litre-sport-195+",
+   "sim": 10.777000300947288,
+   "bench": 10.3,
+   "d": 0.47700030094728696
+  },
+  {
+   "mfr": "Honda",
+   "model": "CB650R",
+   "cl": "litre-sport-600-1000",
+   "sim": 11.971713917033279,
+   "bench": 11.8,
+   "d": 0.1717139170332782
+  },
+  {
+   "mfr": "Honda",
+   "model": "CBR500R",
+   "cl": "mid-twin-300-500",
+   "sim": 13.388227682355812,
+   "bench": 13.51,
+   "d": -0.12177231764418828
+  },
+  {
+   "mfr": "Kawasaki",
+   "model": "Z H2",
+   "cl": "litre-sport-195+",
+   "sim": 10.243892417597994,
+   "bench": 9.95,
+   "d": 0.2938924175979949
+  },
+  {
+   "mfr": "Suzuki",
+   "model": "SV650",
+   "cl": "litre-sport-600-1000",
+   "sim": 12.077499444918327,
+   "bench": 11.82,
+   "d": 0.2574994449183272
+  },
+  {
+   "mfr": "Ducati",
+   "model": "Panigale V4R",
+   "cl": "litre-sport-195+",
+   "sim": 9.822675099870366,
+   "bench": 10.05,
+   "d": -0.22732490012963424
+  },
+  {
+   "mfr": "Triumph",
+   "model": "Rocket 3 R",
+   "cl": "other",
+   "sim": 10.83603107538176,
+   "bench": 10.5,
+   "d": 0.3360310753817597
+  },
+  {
+   "mfr": "Triumph",
+   "model": "Trident 660",
+   "cl": "litre-sport-600-1000",
+   "sim": 12.184775101525453,
+   "bench": 12.0,
+   "d": 0.18477510152545307
+  },
+  {
+   "mfr": "Benelli",
+   "model": "TNT 600i",
+   "cl": "litre-sport-600-1000",
+   "sim": 12.71832725572589,
+   "bench": 12.6,
+   "d": 0.11832725572589098
+  },
+  {
+   "mfr": "Bajaj",
+   "model": "Pulsar NS200",
+   "cl": "entry-150-200",
+   "sim": 16.927169317155663,
+   "bench": 16.9,
+   "d": 0.027169317155664174
+  },
+  {
+   "mfr": "Bajaj",
+   "model": "Pulsar N250",
+   "cl": "entry-200-300",
+   "sim": 16.758912846427734,
+   "bench": 15.45,
+   "d": 1.3089128464277344
+  },
+  {
+   "mfr": "Bajaj",
+   "model": "Pulsar NS400Z",
+   "cl": "mid-twin-300-500",
+   "sim": 14.761357462997436,
+   "bench": 14.1,
+   "d": 0.6613574629974366
+  },
+  {
+   "mfr": "Yamaha",
+   "model": "FZ25",
+   "cl": "entry-200-300",
+   "sim": 17.23017915769824,
+   "bench": 16.0,
+   "d": 1.2301791576982417
+  },
+  {
+   "mfr": "Yamaha",
+   "model": "YZF-R15 V3",
+   "cl": "entry-150-200",
+   "sim": 17.60004945013718,
+   "bench": 17.62,
+   "d": -0.019950549862819855
+  },
+  {
+   "mfr": "Yamaha",
+   "model": "YZF-R3",
+   "cl": "mid-twin-300-500",
+   "sim": 14.252137436351127,
+   "bench": 14.0,
+   "d": 0.25213743635112706
+  },
+  {
+   "mfr": "Yamaha",
+   "model": "MT-03",
+   "cl": "mid-twin-300-500",
+   "sim": 14.760798118091497,
+   "bench": 14.05,
+   "d": 0.7107981180914962
+  },
+  {
+   "mfr": "Honda",
+   "model": "CB350RS",
+   "cl": "mid-twin-300-500",
+   "sim": 17.091075921069493,
+   "bench": 15.5,
+   "d": 1.5910759210694927
+  },
+  {
+   "mfr": "Suzuki",
+   "model": "Gixxer SF 250",
+   "cl": "entry-200-300",
+   "sim": 15.695283374076524,
+   "bench": 16.1,
+   "d": -0.4047166259234771
+  },
+  {
+   "mfr": "Suzuki",
+   "model": "Gixxer 250",
+   "cl": "entry-200-300",
+   "sim": 16.242405157203606,
+   "bench": 16.1,
+   "d": 0.14240515720360492
+  },
+  {
+   "mfr": "Benelli",
+   "model": "302R",
+   "cl": "mid-twin-300-500",
+   "sim": 15.207121263841213,
+   "bench": 15.8,
+   "d": -0.592878736158788
+  },
+  {
+   "mfr": "Aprilia",
+   "model": "RS 457",
+   "cl": "mid-twin-300-500",
+   "sim": 13.110104429634076,
+   "bench": 13.3,
+   "d": -0.18989557036592508
+  },
+  {
+   "mfr": "KTM",
+   "model": "Duke 390",
+   "cl": "mid-twin-300-500",
+   "sim": 13.584837245417052,
+   "bench": 14.0,
+   "d": -0.4151627545829477
+  },
+  {
+   "mfr": "Yamaha",
+   "model": "RD350",
+   "cl": "two-stroke",
+   "sim": 15.641019110581935,
+   "bench": 14.0,
+   "d": 1.6410191105819347
+  },
+  {
+   "mfr": "Yamaha",
+   "model": "RD400 Daytona",
+   "cl": "two-stroke",
+   "sim": 14.537660502407137,
+   "bench": 14.18,
+   "d": 0.3576605024071373
+  },
+  {
+   "mfr": "Suzuki",
+   "model": "RG500 Gamma",
+   "cl": "two-stroke",
+   "sim": 11.048823553533419,
+   "bench": 11.6,
+   "d": -0.5511764464665809
+  },
+  {
+   "mfr": "Honda",
+   "model": "NSR250R SP",
+   "cl": "two-stroke",
+   "sim": 15.160097868446524,
+   "bench": 13.4,
+   "d": 1.7600978684465236
+  },
+  {
+   "mfr": "Aprilia",
+   "model": "RS250",
+   "cl": "two-stroke",
+   "sim": 13.065644418113942,
+   "bench": 13.4,
+   "d": -0.33435558188605796
+  },
+  {
+   "mfr": "Honda",
+   "model": "CBR1000RR-R Fireblade SP",
+   "cl": "litre-sport-195+",
+   "sim": 9.902983107801823,
+   "bench": 10.2,
+   "d": -0.29701689219817595
+  },
+  {
+   "mfr": "Ducati",
+   "model": "Panigale V4",
+   "cl": "litre-sport-195+",
+   "sim": 10.049405559193364,
+   "bench": 10.0,
+   "d": 0.04940555919336376
+  },
+  {
+   "mfr": "Kawasaki",
+   "model": "Z H2 SE",
+   "cl": "litre-sport-195+",
+   "sim": 9.947053258626266,
+   "bench": 9.95,
+   "d": -0.00294674137373363
+  },
+  {
+   "mfr": "Suzuki",
+   "model": "Hayabusa 25th Anniversary",
+   "cl": "litre-sport-195+",
+   "sim": 9.983458338875334,
+   "bench": 9.85,
+   "d": 0.1334583388753341
+  },
+  {
+   "mfr": "Kawasaki",
+   "model": "ZX-9R Ninja",
+   "cl": "litre-sport-600-1000",
+   "sim": 10.6062290388616,
+   "bench": 10.5,
+   "d": 0.10622903886159918
+  }
+ ],
+ "cluster_summary": {
+  "litre-sport-600-1000": {
+   "N": 29,
+   "mean_abs_d": 0.22181798005036651,
+   "bias": -0.1444068679497671
+  },
+  "litre-sport-195+": {
+   "N": 25,
+   "mean_abs_d": 0.1748733627612988,
+   "bias": -0.014990356200437845
+  },
+  "other": {
+   "N": 5,
+   "mean_abs_d": 0.28252663520659843,
+   "bias": 0.21507694679895586
+  },
+  "mid-twin-300-500": {
+   "N": 14,
+   "mean_abs_d": 0.6071699351784846,
+   "bias": 0.009345843222069026
+  },
+  "entry-200-300": {
+   "N": 6,
+   "mean_abs_d": 0.58121946138248,
+   "bias": 0.4391400214263858
+  },
+  "entry-150-200": {
+   "N": 6,
+   "mean_abs_d": 0.6904337595976969,
+   "bias": 0.6536168059058829
+  },
+  "two-stroke": {
+   "N": 5,
+   "mean_abs_d": 0.928861901957647,
+   "bias": 0.5746490906165913
+  }
+ }
+}

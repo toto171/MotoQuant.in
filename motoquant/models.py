@@ -233,10 +233,25 @@ class EngineParams:
             band_lo = 0.30
             band_hi = 0.15
             baseline = 0.25
+        elif (
+            cyls == 1
+            and self.displacement_cc is not None
+            and self.displacement_cc < 200.0
+        ):
+            # Apr-24-PM kaizen: small commuter / cub piston-port single
+            # (RX100/RX135/RXZ135 class). Mild OEM pipe -- wide soft curve,
+            # NOT a race expansion chamber. Kept in sync with the scraper-
+            # side small-cc-commuter branch in
+            # ``_synthetic_2stroke_torque_curve`` (defaults.py).
+            band_lo = 0.35
+            band_hi = 0.25
+            baseline = 0.35
         else:
-            band_lo = 0.12
-            band_hi = 0.08
-            baseline = 0.12  # piston-port: peakier, narrower base
+            # Apr-27: Fixed piston-port race engines (>200cc 1-cyl, no YPVS).
+            # Widened from 0.12/0.08/0.12 (too peaky for drag). Now 0.25/0.15/0.25.
+            band_lo = 0.25
+            band_hi = 0.15
+            baseline = 0.25
 
         if rpm <= tuned:
             x = (tuned - rpm) / max(1.0, tuned * band_lo)

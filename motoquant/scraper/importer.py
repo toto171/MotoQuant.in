@@ -154,6 +154,47 @@ CATEGORY_COG_HEIGHT = {
 }
 
 
+def _fluid_mass_from_spec(spec: "BikeSpec") -> float:
+    """Displacement-scaled fluid payload (fuel + oil + coolant) in kg.
+
+    Apr-24-PM kaizen: pre-fix ``_build_chassis_from_spec`` hardcoded
+    ``fluid_mass_kg = 17.0`` (K5 reference) for every spec'd bike. For
+    small-cc commuters whose real fuel+oil+coolant payload is 8-10 kg,
+    that added 7-9 kg of phantom chassis mass, visible as a ~0.5 s ET
+    penalty on 19 s small-cc sims. Reference K5/R1/Hayabusa are hand-
+    built in ``defaults.py`` and NOT affected by this function.
+
+    Formula: ``clip(8.0 + 0.009 x disp_cc, 7.0, 22.0)`` -- calibrated so
+    1000 cc -> 17.0 kg (matches K5) and 155 cc -> 9.4 kg (matches real
+    R15 V3 fuel + oil + coolant payload).
+    """
+    disp_cc = float(spec.displacement_cc) if spec.displacement_cc else 1000.0
+    fluid = 8.0 + 0.009 * disp_cc
+    return max(7.0, min(22.0, fluid))
+
+
+def _basket_inertia_from_spec(spec: "BikeSpec") -> float:
+    """Displacement-scaled clutch-basket rotational inertia (kg.m^2).
+
+    Apr-24-PM kaizen: pre-fix ``spec_to_bike_config`` inherited K5's
+    ``basket_inertia_kgm2 = 0.010`` for every bike via
+    ``base_config.clutch``. The basket inertia is reflected to the
+    wheel by ``(i_total / r_w)^2``. For R15 V3 in gear 1 that factor
+    is 2478, so the 0.010->0.0015 over-estimate becomes ~21 kg of
+    phantom rotational mass on the wheel -- ~9 % of effective mass in
+    gear 1, a real ~0.5 s ET penalty. Reference K5/R1/Hayabusa hand-
+    built configs in ``defaults.py`` keep their own basket_inertia
+    values and are unaffected.
+
+    Formula: ``clip(0.00001 x disp_cc, 0.0010, 0.020)``. Calibrated so
+    1000 cc -> 0.010 kg.m^2 (matches K5 hand-built).
+    """
+    disp_cc = float(spec.displacement_cc) if spec.displacement_cc else 1000.0
+    I = 0.00001 * disp_cc
+    return max(0.0010, min(0.020, I))
+
+
+
 # ────────────────────────────────────────────────────────
 # Cylinder-config inference for parts-compatibility fitment
 # ────────────────────────────────────────────────────────
@@ -462,6 +503,7 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
                 peak_power_hp=float(peak_hp),
                 peak_power_rpm=float(peak_hp_rpm),
                 cylinders=int(cyls or 1),
+                displacement_cc=float(cc),
                 points=100,
             )
         else:
@@ -497,7 +539,7 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
         peak_power_rpm=int(peak_hp_rpm),
         peak_torque_rpm=int(peak_tq_rpm),
         redline_rpm=int(redline),
-        launch_rpm=int(redline * 0.55),  # ~55% of redline as launch RPM estimate
+        launch_rpm=int(peak_tq_rpm) if spec.displacement_cc and spec.displacement_cc < 400 else int(redline * 0.55),  # Apr-27: <400cc launches at peak_torque_rpm (max torque available); >400cc at 55% of redline
         idle_rpm=idle,
         displacement_cc=spec.displacement_cc or base.displacement_cc,
         bore_mm=spec.bore_mm or base.bore_mm,
@@ -515,7 +557,16 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
 
 
 def _build_chassis_from_spec(spec: BikeSpec) -> ChassisParams:
-    """Build ChassisParams from a BikeSpec."""
+    """Build ChassisParams from a BikeSpec.
+
+    Apr-24-PM kaizen: ``fluid_mass_kg`` and ``fuel_mass_kg`` were both
+    K5-default constants (17 and 18 kg) applied to every bike regardless
+    of size. That overcharged ~7-9 kg of phantom mass to every <300 cc
+    commuter, a real ET penalty of ~0.5 s on a 19 s small-cc sim. Both
+    now scale with displacement via ``_fluid_mass_from_spec``.
+    K5/R1/Hayabusa reference baselines are hand-built in ``defaults.py``
+    and unaffected.
+    """
     base = gsxr1000_k5().chassis
 
     dry_mass = spec.dry_mass_kg or spec.wet_mass_kg or base.dry_mass_kg
@@ -523,11 +574,23 @@ def _build_chassis_from_spec(spec: BikeSpec) -> ChassisParams:
     if spec.dry_mass_kg is None and spec.wet_mass_kg:
         dry_mass = spec.wet_mass_kg - 25.0
 
+    fluid_mass = _fluid_mass_from_spec(spec)
+    # fuel_mass_kg is a decorative field (the live consumed mass during
+    # the sim is tracked separately via fuel_consumption_gs); keep it in
+    # rough sync with fluid_mass so UIs showing "fuel weight" don't lie.
+    # Use spec value when given, else displacement-scaled estimate.
+    if spec.fuel_capacity_l:
+        fuel_mass = float(spec.fuel_capacity_l) * 0.74
+    else:
+        disp = float(spec.displacement_cc) if spec.displacement_cc else 1000.0
+        fuel_l = max(7.0, min(22.0, 7.0 + 0.011 * disp))
+        fuel_mass = fuel_l * 0.74
+
     return ChassisParams(
         dry_mass_kg=float(dry_mass),
         rider_mass_kg=75.0,
-        fluid_mass_kg=17.0,
-        fuel_mass_kg=18.0 if not spec.fuel_capacity_l else spec.fuel_capacity_l * 0.74,
+        fluid_mass_kg=float(fluid_mass),
+        fuel_mass_kg=float(fuel_mass),
         wheelbase_mm=float(spec.wheelbase_mm or base.wheelbase_mm),
         cog_height_mm=float(CATEGORY_COG_HEIGHT.get(spec.category, 540)),
         seat_height_mm=float(spec.seat_height_mm or base.seat_height_mm),
@@ -789,9 +852,22 @@ def spec_to_bike_config(spec: BikeSpec) -> BikeConfig:
     # tuned_rpm × 0.92 (gives slight headroom before the pipe comes on).
     import copy
     staging = copy.deepcopy(base_config.staging)
-    if spec.stroke_type == 2:
-        tuned = spec.tuned_rpm or spec.peak_power_rpm or engine.peak_power_rpm
-        staging.launch_rpm = float(int(tuned * 0.92))
+    # Apr-27: Small-cc 4T launch optimization — launch at peak_torque_rpm where torque peaks,
+    # not at 55% redline (which is for 1000cc superbikes). Small bikes are torque-limited.
+    if spec.stroke_type != 2 and spec.displacement_cc and spec.displacement_cc < 400:
+        staging.launch_rpm = float(engine.peak_torque_rpm)
+    elif spec.stroke_type == 2:
+        # Apr-24-PM kaizen: previous ``tuned * 0.92`` put commuter 2T
+        # launches (RX100 peak_tq=6500, tuned=7500 -> launch=6900) BELOW
+        # peak-torque RPM, firing off the rising edge of the Gaussian
+        # band at half available torque. Fixed: clamp launch_rpm at the
+        # maximum of (peak_torque_rpm, tuned_rpm), capped at 96 % of
+        # redline so the rev-limiter doesn't fire at the staging beam.
+        tuned = float(spec.tuned_rpm or spec.peak_power_rpm or engine.peak_power_rpm)
+        peak_tq = float(spec.peak_torque_rpm or engine.peak_torque_rpm)
+        launch = max(peak_tq, tuned)
+        launch = min(launch, float(engine.redline_rpm) * 0.96)
+        staging.launch_rpm = float(int(launch))
         staging.two_step = True  # 2T drag launches almost always use a limiter
 
     # Parasitic: 2-strokes have no valvetrain; pre-mix bikes have no oil
@@ -844,6 +920,16 @@ def spec_to_bike_config(spec: BikeSpec) -> BikeConfig:
             parasitic.alternator_power_w = 120.0
         # else: leave at K5 base default 150 W
 
+    # ── Clutch: scale basket inertia with displacement ──────────────
+    # Apr-24-PM kaizen: K5 default ``basket_inertia=0.010 kg.m^2`` is
+    # a 1000 cc-I4 figure. Applied unchanged to a 155 cc R15 V3 single
+    # it inflates effective mass at the wheel by ~21 kg in gear 1 --
+    # a real ~0.5 s ET penalty. Reference K5/R1/Hayabusa hand-built
+    # configs in ``defaults.py`` keep their original basket_inertia
+    # values and are unaffected.
+    clutch = copy.deepcopy(base_config.clutch)
+    clutch.basket_inertia_kgm2 = _basket_inertia_from_spec(spec)
+
     # Compose model name
     year_tag = ""
     if spec.year_from:
@@ -862,7 +948,7 @@ def spec_to_bike_config(spec: BikeSpec) -> BikeConfig:
         aero=aero,
         # Retain all other sub-configs at defaults
         forced_induction=base_config.forced_induction,
-        clutch=base_config.clutch,
+        clutch=clutch,
         suspension=base_config.suspension,
         braking=base_config.braking,
         wheelie=base_config.wheelie,
