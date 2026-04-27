@@ -307,18 +307,3 @@ export default function BikesPage() {
     </div>
   );
 }
-              </button>
-            </div>
-          )}
-        </div>
-      </main>
-
-      {/* Suggest modal */}
-      <AnimatePresence>
-        {suggestOpen && (
-          <SuggestBikeForm onClose={() => setSuggestOpen(false)} />
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}

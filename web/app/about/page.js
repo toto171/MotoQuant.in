@@ -340,26 +340,3 @@ export default function AboutPage() {
     </div>
   );
 }
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-brand-orange text-black font-display font-bold rounded-lg hover:bg-brand-orangeLight transition-colors"
-                  >
-                    <Send size={14} /> Send message
-                  </button>
-                </form>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="py-10 px-6 text-center text-white/40 text-xs font-mono">
-        <div className="max-w-6xl mx-auto">
-          <p>MotoQuant Pro · Built by engineers, for racers · motoquant.in</p>
-        </div>
-      </footer>
-    </div>
-  );
-}
