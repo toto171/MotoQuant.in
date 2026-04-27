@@ -114,14 +114,29 @@ class BikeRepository:
         self._conn.commit()
 
         if cur.lastrowid == 0:
-            # Already existed
+            # Already existed (UNIQUE constraint on manufacturer+model+code+year hit).
+            # Try strict 4-key match first (matches the UNIQUE constraint exactly).
             row = self._conn.execute(
                 """SELECT id FROM bike_models
                    WHERE manufacturer_id = ? AND model_name = ?
                    AND model_code IS ? AND year_from IS ?""",
                 (manufacturer_id, model_name, model_code, year_from),
             ).fetchone()
-            return row["id"] if row else 0
+            if row:
+                return row["id"]
+            # Lenient fallback: a row with the same (manufacturer, model_name) exists
+            # but model_code/year_from differ slightly (e.g. spec says K8/2008, DB stores
+            # the same bike with K8/None or different year_from). Pick the closest year.
+            candidates = self._conn.execute(
+                """SELECT id, model_code, year_from FROM bike_models
+                   WHERE manufacturer_id = ? AND model_name = ?
+                   ORDER BY (year_from IS NULL), ABS(COALESCE(year_from, 0) - ?)""",
+                (manufacturer_id, model_name, year_from or 0),
+            ).fetchall()
+            if candidates:
+                return candidates[0]["id"]
+            # Truly missing — return 0 as before (caller handles)
+            return 0
 
         return cur.lastrowid
 
