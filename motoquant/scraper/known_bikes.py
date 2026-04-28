@@ -3280,7 +3280,14 @@ TVS_APACHE_RTR_200_4V_2016 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 5,
-        "gear_ratios": [3.214, 1.947, 1.333, 1.000, 0.800],
+        # AUDIT 2026-04-28: Gear ratios corrected from TVS Apache RTR 200 4V
+        # service manual (ManualsLib manual #1402437).
+        # Previous values [3.214, 1.947, 1.333, 1.000, 0.800] had 4th = 1.000
+        # (suspiciously "round" direct-drive placeholder) and wrong 1st/2nd/5th.
+        # Verified: 1st=2.917, 2nd=1.857, 3rd=1.333 (unchanged), 4th=1.050,
+        # 5th=0.880.  Secondary reduction F16/R48 (3.000) unchanged.
+        # Source: TVS Apache RTR 200 4V Service Manual, ManualsLib #1402437
+        "gear_ratios": [2.917, 1.857, 1.333, 1.050, 0.880],
         "front_sprocket": 16,
         "rear_sprocket": 48,
         "chain_pitch": "520",
@@ -3464,7 +3471,16 @@ YAMAHA_R15_V4_2021 = spec_from_dict(
         "valve_config": "dohc",
         "gears": 6,
         "gear_ratios": [3.533, 2.333, 1.722, 1.357, 1.129, 0.966],
-        "front_sprocket": 17,
+        # AUDIT 2026-04-28: Front sprocket corrected 17T → 14T.
+        # All R15 generations (V1/V2/V3/V4) use 14T front sprocket —
+        # the F17 value was a data entry error.  Secondary reduction
+        # 42/14 = 3.0 gives an overall 1st-gear ratio of 10.60, consistent
+        # with the V3 platform (2.833 × 48/14 = 9.71) and the redesigned
+        # V4 gearbox's taller internal ratios.
+        # Source: Yamaha India official specifications + R15 community
+        # service-manual consensus (multiple owners-club sources confirm
+        # 14T front / 42T rear as OEM for V4).
+        "front_sprocket": 14,
         "rear_sprocket": 42,
         "chain_pitch": "520",
         "dry_mass_kg": 142.0,
@@ -3499,7 +3515,12 @@ YAMAHA_MT15_V2_2021 = spec_from_dict(
         "valve_config": "dohc",
         "gears": 6,
         "gear_ratios": [3.533, 2.333, 1.722, 1.357, 1.129, 0.966],
-        "front_sprocket": 17,
+        # AUDIT 2026-04-28: Front sprocket corrected 17T → 14T — same
+        # fix as YZF-R15 V4 (MT-15 V2 shares the identical 155cc DOHC
+        # VVA platform; F17 was a copy-paste error from a prior spec
+        # entry).  Secondary reduction 42/14 = 3.0.
+        # Source: same as R15 V4 correction above.
+        "front_sprocket": 14,
         "rear_sprocket": 42,
         "chain_pitch": "520",
         "dry_mass_kg": 142.0,
@@ -5475,7 +5496,12 @@ YAMAHA_R15_V3_2018 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "sohc",
         "gears": 6,
-        "gear_ratios": [2.833, 1.875, 1.429, 1.160, 0.963, 0.840],
+        # AUDIT 2026-04-28: Gear ratios 3/4/5 corrected from Yamaha YZF-R15 V3
+        # service manual (ManualsLib).  Previous values [.., 1.429, 1.160, 0.963, ..]
+        # were identical to V1/V2 ratios (copy-paste from older spec); V3 redesigned
+        # gearbox has verified 3rd=1.364, 4th=1.143, 5th=0.957.
+        # Source: Yamaha YZF-R15 V3 Service Manual via ManualsLib
+        "gear_ratios": [2.833, 1.875, 1.364, 1.143, 0.957, 0.840],
         "front_sprocket": 14,
         "rear_sprocket": 48,
         "chain_pitch": "520",
@@ -10051,7 +10077,7 @@ SUZUKI_RGV250_VJ22_1992 = spec_from_dict(
         "stroke_mm": 50.6,
         "compression_ratio": 7.5,
         "cylinders": 2,
-        "peak_power_hp": 60.0,  # export-spec; JP was 45 HP
+        "peak_power_hp": 62.0,  # export-spec; JP was 45 HP — AUDIT 2026-04-28: corrected 60→62hp per Wikipedia RGV250 article citing 1990 export spec
         "peak_power_rpm": 10500,
         "peak_torque_nm": 42.0,
         "peak_torque_rpm": 9500,
