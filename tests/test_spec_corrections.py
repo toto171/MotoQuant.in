@@ -65,7 +65,7 @@ def _seed_one_bike(db):
     ).fetchone()[0]
     conn.execute(
         """INSERT INTO bike_models
-               (manufacturer_id, model_name, year, category)
+               (manufacturer_id, model_name, year_from, category)
            VALUES (?, 'TestBike', 2020, 'sport')""",
         (mfr_id,),
     )
@@ -172,7 +172,7 @@ class TestSchemaMigrationExistingV3(unittest.TestCase):
             # SQLite can't DROP columns; instead we recreate bike_models without it.
             db_bootstrap.conn.executescript("""
                 CREATE TABLE bike_models_v3_tmp AS
-                    SELECT id, manufacturer_id, model_name, year, category,
+                    SELECT id, manufacturer_id, model_name, year_from, category,
                            data_quality, data_quality_score, data_source_notes,
                            peak_power_hp, peak_torque_nm, peak_power_rpm, peak_torque_rpm,
                            displacement_cc, bore_mm, stroke_mm, compression_ratio,

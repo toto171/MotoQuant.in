@@ -43,6 +43,7 @@ class MotoQuantDB:
         self._parts = None
         self._sim_runs = None
         self._bike_suggestions = None
+        self._spec_corrections = None
 
     # ────────────────────────────────────────────
     # Connection lifecycle
@@ -80,6 +81,7 @@ class MotoQuantDB:
         self._venues = None
         self._weather = None
         self._parts = None
+        self._spec_corrections = None
         self._sim_runs = None
         self._bike_suggestions = None
 
@@ -317,6 +319,15 @@ class MotoQuantDB:
 
             self._bike_suggestions = BikeSuggestionsRepository(self.conn)
         return self._bike_suggestions
+
+    @property
+    def spec_corrections(self):
+        """Spec-corrections (user-submitted field-level fixes) repository."""
+        if self._spec_corrections is None:
+            from .spec_corrections_repo import SpecCorrectionsRepository
+
+            self._spec_corrections = SpecCorrectionsRepository(self.conn)
+        return self._spec_corrections
 
     # ────────────────────────────────────────────
     # Utility
