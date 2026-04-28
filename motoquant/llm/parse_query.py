@@ -1,27 +1,17 @@
 """
-parse_query -- turn a natural-language query into a structured ParsedSimRequest.
+NL query → structured ParsedSimRequest.
 
-Pipeline
---------
-  1. LLM extracts: bike_name, venue_name, env params, parts list, goal
-     (forced via tool-use, never plain text)
-  2. Local code resolves bike_name -> bike_id via DB fuzzy match (optional)
-  3. Local code resolves venue_name -> venue_id via DB lookup (optional)
-  4. Returns ParsedSimRequest -- maps cleanly to api.QuickSimRequest
+Pipeline:
+  1. Build a forced-tool-use call so the LLM can only return JSON in our schema.
+  2. Optionally resolve bike/venue names against the live DB via the smart
+     fuzzy resolver in motoquant.llm.resolver.
 
-Why two-stage (LLM + local resolution):
-  - Keeps the LLM prompt tiny (don't dump 290 bike rows into context every call)
-  - Reuses the existing fuzzy-matching logic in BikesRepository.search()
-  - Cheap: ~$0.01/query at Claude Sonnet 4.6 rates with ~1k token output
+Intent classification has been added (April 2026): the LLM tags each query
+with one of: simulate / compare / rank / recommend / explain / smalltalk.
+The runner.py routes each intent to the right backend handler.
 
-Usage
------
-    from motoquant.llm import parse_query
-    from motoquant.database.connection import MotoQuantDB
-
-    db = MotoQuantDB("motoquant.db")
-    parsed = parse_query("optimize my K5 for 35C at Aamby Valley", db=db)
-    print(parsed.bike_id, parsed.ambient_temp_c)
+For tests, callers should pass an LLMClient(_call_override=fn) so the SDK
+is never touched and no API tokens burn.
 """
 
 from __future__ import annotations
@@ -31,11 +21,9 @@ from typing import Any
 
 from .client import LLMClient, get_default_client
 
-__all__ = ["ParsedSimRequest", "parse_query", "TOOL_SCHEMA", "SYSTEM_PROMPT"]
-
 
 # ───────────────────────────────────────────────────────────────────
-# ParsedSimRequest -- output dataclass
+# Parsed shape
 # ───────────────────────────────────────────────────────────────────
 
 
@@ -44,12 +32,16 @@ class ParsedSimRequest:
     """Structured form of a parsed NL query.
 
     Maps closely to api.QuickSimRequest with a few enrichments
-    (raw_query, bike_name pre-resolution, optimization_goal, notes).
+    (raw_query, bike_name pre-resolution, optimization_goal, notes,
+    intent_type for routing, bike_b_name for compare).
     """
 
     raw_query: str
     bike_name: str  # what the LLM extracted (pre-DB-resolution)
     bike_id: int | None = None  # post-DB-resolution
+    bike_b_name: str | None = None  # second bike for compare intent
+    bike_b_id: int | None = None
+    intent_type: str = "simulate"  # simulate / compare / rank / recommend / explain / smalltalk
     venue_name: str | None = None
     venue_id: int | None = None
 
@@ -69,10 +61,7 @@ class ParsedSimRequest:
     notes: str = ""  # LLM commentary (e.g. "assumed K5 = GSX-R 1000 K5")
 
     def to_quick_sim_kwargs(self) -> dict[str, Any]:
-        """Subset suitable for `QuickSimRequest(**kwargs)` in api.py.
-
-        Skips None values so QuickSimRequest's own defaults kick in.
-        """
+        """Subset suitable for `QuickSimRequest(**kwargs)` in api.py."""
         kw: dict[str, Any] = {
             "rider_mass_kg": self.rider_mass_kg,
             "power_boost_pct": self.power_boost_pct,
@@ -92,19 +81,41 @@ class ParsedSimRequest:
 
 
 # ───────────────────────────────────────────────────────────────────
-# Tool schema -- Anthropic forces the model to produce this shape
+# Tool schema
 # ───────────────────────────────────────────────────────────────────
 
 TOOL_SCHEMA: dict[str, Any] = {
     "type": "object",
     "properties": {
+        "intent_type": {
+            "type": "string",
+            "enum": ["simulate", "compare", "rank", "recommend", "explain", "smalltalk"],
+            "description": (
+                "What the user wants. "
+                "simulate = run a sim for one specific bike (default). "
+                "compare = side-by-side two bikes (set bike_name AND bike_b_name). "
+                "rank = list fastest/quickest bikes matching criteria, no specific bike. "
+                "recommend = suggest parts/mods for a specific bike + budget. "
+                "explain = answer a tuning/physics question, may not need a sim. "
+                "smalltalk = greeting / off-topic; respond conversationally."
+            ),
+        },
         "bike_name": {
             "type": "string",
             "description": (
-                "Name of the bike the user is asking about. "
-                "Use the most specific form you can extract: brand + model + "
-                "year/code if given. Examples: 'Suzuki Hayabusa', "
-                "'Yamaha YZF-R15 V4', 'GSX-R 1000 K5'."
+                "Name of the bike the user is asking about. Use the most specific "
+                "form you can extract: brand + model + year/code if given. "
+                "Examples: 'Suzuki Hayabusa', 'Yamaha YZF-R15 V4', 'GSX-R 1000 K5'. "
+                "If intent_type=rank or smalltalk and no specific bike is mentioned, "
+                "set this to the empty string."
+            ),
+        },
+        "bike_b_name": {
+            "type": ["string", "null"],
+            "description": (
+                "Second bike name when intent_type=compare. Null otherwise. "
+                "Example: 'compare K5 vs R1' → bike_name='GSX-R 1000 K5', "
+                "bike_b_name='Yamaha YZF-R1'."
             ),
         },
         "venue_name": {
@@ -150,20 +161,19 @@ TOOL_SCHEMA: dict[str, Any] = {
             "type": "array",
             "items": {"type": "string"},
             "description": (
-                "Part categories the user wants to consider. "
-                "Use these canonical names: exhaust, air_filter, ecu, clutch, "
-                "chain, weight_reduction, fuel_system, suspension, brakes, "
-                "wheelie_bar, quickshifter, battery, tire, turbo, supercharger, "
-                "nitrous. Empty list if no parts mentioned."
+                "Part categories the user wants to consider. Use these canonical "
+                "names: exhaust, air_filter, ecu, clutch, chain, weight_reduction, "
+                "fuel_system, suspension, brakes, wheelie_bar, quickshifter, "
+                "battery, tire, turbo, supercharger, nitrous. Empty list if no "
+                "parts mentioned."
             ),
         },
         "optimization_goal": {
             "type": "string",
             "enum": ["minimize_et", "maximize_trap", "best_budget"],
             "description": (
-                "What the user is optimizing for. "
-                "minimize_et = lowest quarter-mile time (default). "
-                "maximize_trap = highest trap speed. "
+                "What the user is optimizing for. minimize_et = lowest "
+                "quarter-mile time (default). maximize_trap = highest trap speed. "
                 "best_budget = best parts within budget."
             ),
         },
@@ -171,21 +181,37 @@ TOOL_SCHEMA: dict[str, Any] = {
             "type": "string",
             "description": (
                 "Brief note about any non-obvious assumption you made (e.g. "
-                "'Assumed K5 = Suzuki GSX-R 1000 K5 generation'). "
-                "Empty string if straightforward."
+                "'Assumed K5 = Suzuki GSX-R 1000 K5 generation'). Empty string "
+                "if straightforward."
             ),
         },
     },
-    "required": ["bike_name", "optimization_goal"],
+    "required": ["intent_type", "bike_name", "optimization_goal"],
 }
 
 
 SYSTEM_PROMPT = """\
 You are a query parser for MotoQuant Pro, a motorcycle drag-racing simulator.
 
-The user describes what they want to simulate or optimize. Extract structured \
-parameters and submit them via the submit_sim_query tool. Do not respond in \
-plain text -- always invoke the tool.
+The user describes what they want. Extract structured parameters and submit \
+them via the submit_sim_query tool. Do not respond in plain text -- always \
+invoke the tool.
+
+Intent classification (set the intent_type field):
+- "simulate"  : single specific bike, possibly with venue/conditions/mods. \
+                Examples: "how fast is a K5", "R15 V4 in 35C heat".
+- "compare"   : two specific bikes side-by-side. Set bike_b_name. \
+                Examples: "compare Hayabusa vs Ninja H2", "K5 vs R1".
+- "rank"      : ranking question; no specific bike. \
+                Examples: "fastest 600cc bike", "what's the quickest at Aamby Valley". \
+                Set bike_name="" (empty).
+- "recommend" : "what mods" / "what parts" / "best build for budget". \
+                Examples: "best mods for R15 V4 under 30k INR", "make my K5 faster".
+- "explain"   : tuning physics question, may or may not name a bike. \
+                Examples: "what does altitude do to ET", "why does humidity matter".
+- "smalltalk" : greeting / off-topic / unclear. \
+                Examples: "hi", "what is this", "thanks". Set bike_name="" if no \
+                bike mentioned.
 
 Bike alias hints:
 - K5/K6/K7 etc. = Suzuki GSX-R 1000 (year-coded generation)
@@ -196,9 +222,10 @@ Bike alias hints:
 - 'Ninja' alone is ambiguous -- preserve the user's qualifier (e.g. 'Ninja 400')
 
 Indian venue alias hints:
-- Aamby / TVR = Aamby Valley
+- Aamby / TVR / Aambey = Aamby Valley
 - MMRT = Madras Motor Race Track
 - BIC = Buddh International Circuit
+- Kari = Kari Motor Speedway
 
 Rules:
 - If the user does not specify environmental conditions, leave those fields \
@@ -228,15 +255,11 @@ def parse_query(
       query: User's natural-language string.
       client: Optional LLMClient. Defaults to module singleton.
       db: Optional MotoQuantDB. If provided, bike_name and venue_name are
-          resolved to bike_id / venue_id via DB lookup.
+          resolved to bike_id / venue_id via the smart fuzzy resolver.
 
     Returns:
       ParsedSimRequest. bike_id / venue_id may still be None if resolution
-      failed -- caller should check and fall back gracefully.
-
-    Raises:
-      LLMNotConfiguredError: no API key and no _call_override.
-      RuntimeError: model refused to invoke the tool.
+      failed -- caller (runner.py) handles missing IDs intent-aware.
     """
     cli = client or get_default_client()
     response = cli.call_tool(
@@ -250,6 +273,8 @@ def parse_query(
     parsed = ParsedSimRequest(
         raw_query=query,
         bike_name=(payload.get("bike_name") or "").strip(),
+        bike_b_name=((payload.get("bike_b_name") or "").strip() or None),
+        intent_type=(payload.get("intent_type") or "simulate").strip().lower(),
         venue_name=payload.get("venue_name"),
         ambient_temp_c=payload.get("ambient_temp_c"),
         humidity_pct=payload.get("humidity_pct"),
@@ -275,20 +300,20 @@ def parse_query(
 
 
 def _resolve_against_db(parsed: ParsedSimRequest, db: Any) -> None:
-    """Best-effort fuzzy resolution. Mutates `parsed` in place. Silent on miss."""
+    """Smart fuzzy resolution. Mutates `parsed` in place. Silent on miss."""
+    from .resolver import resolve_bike, resolve_venue
+
     if parsed.bike_name:
-        try:
-            rows = db.bikes.search(name_contains=parsed.bike_name)
-            if rows:
-                parsed.bike_id = rows[0]["id"]
-        except Exception:
-            # Don't fail parse on DB error; caller handles missing bike_id.
-            pass
+        bike_id, _ = resolve_bike(parsed.bike_name, db)
+        if bike_id is not None:
+            parsed.bike_id = bike_id
+
+    if parsed.bike_b_name:
+        bike_b_id, _ = resolve_bike(parsed.bike_b_name, db)
+        if bike_b_id is not None:
+            parsed.bike_b_id = bike_b_id
 
     if parsed.venue_name:
-        try:
-            venue = db.venues.get_by_name(parsed.venue_name)
-            if venue:
-                parsed.venue_id = venue["id"]
-        except Exception:
-            pass
+        v_id = resolve_venue(parsed.venue_name, db)
+        if v_id is not None:
+            parsed.venue_id = v_id
