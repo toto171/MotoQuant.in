@@ -955,7 +955,7 @@ def _summarize_rank(
         "STRICT: cite actual sim ETs to 3 decimals; do not invent specs. "
         "No filler verbs. 60-100 words total."
     )
-    top = rank.get("top", [])[:5]
+    top = rk.get("top", [])[:5]
     if not top:
         return "No bikes matched the filter — try broadening the criteria."
     lines = []
@@ -971,9 +971,9 @@ def _summarize_rank(
         )
     user = (
         f"User asked: {parsed.raw_query}\n\n"
-        f"Filter applied: {rank.get('filter')}\n"
-        f"Total catalog matches: {rank.get('matches')}\n"
-        f"Bikes simulated: {rank.get('candidates_simulated', '?')}\n\n"
+        f"Filter applied: {rk.get('filter')}\n"
+        f"Total catalog matches: {rk.get('matches')}\n"
+        f"Bikes simulated: {rk.get('candidates_simulated', '?')}\n\n"
         f"Top results (sorted by physics-engine ET):\n" + "\n".join(lines)
     )
     return _llm_text(client, sys_p, user)
