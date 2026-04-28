@@ -34,7 +34,9 @@ from typing import Any, Callable
 # ─── Provider table ───────────────────────────────────────────────────────
 _PROVIDERS: dict[str, dict[str, str | None]] = {
     "gemini": {
-        "model": "gemini-1.5-flash",
+        # gemini-1.5-flash was deprecated (Sept 2025); 2.0-flash is the
+        # current free-tier flagship: 1500 RPD / 10 RPM / 1M-token context.
+        "model": "gemini-2.0-flash",
         "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
         "api_key_env": "GEMINI_API_KEY",
     },
