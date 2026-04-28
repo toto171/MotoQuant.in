@@ -458,6 +458,25 @@ def _run_rank(
 # ───────────────────────────────────────────────────────────────────
 
 
+# Priority categories the recommend handler picks across, in order. The
+# tuple is (substring_to_match_in_category_name, display_label_for_prompt).
+# We pick at most one part per category — keeps the build sheet focused.
+_RECOMMEND_PRIORITY = [
+    ("exhaust",          "Exhaust"),
+    ("air_filter",       "Air filter"),
+    ("ecu",              "ECU flash / piggyback"),
+    ("fuel_system",      "Fuel system"),
+    ("clutch",           "Clutch / slipper"),
+    ("quickshifter",     "Quickshifter"),
+    ("sprocket",         "Sprocket"),
+    ("chain",            "Chain"),
+    ("suspension",       "Suspension"),
+    ("brakes",           "Brakes"),
+    ("weight_reduction", "Weight reduction"),
+    ("battery",          "Lightweight battery"),
+]
+
+
 def _run_recommend(
     parsed: ParsedSimRequest,
     db: Any,
@@ -479,45 +498,86 @@ def _run_recommend(
         return result
 
     try:
-        # Fetch parts compatible with this bike
-        # Avoid heavy recommend_build (which needs running sims) — keep it light.
-        parts = db.parts.list_for_bike(parsed.bike_id, limit=200) if hasattr(
-            db.parts, "list_for_bike"
-        ) else []
-        if not parts:
-            try:
-                parts = db.parts.list_all(limit=200) or []
-            except Exception:
-                parts = []
+        # 1. Pull catalog parts that pass the compatibility check for this bike.
+        #    list_compatible_for_bike runs the FitmentMatch engine (manufacturer,
+        #    engine config, displacement bounds, chain pitch, stroke type) so
+        #    we don't surface a 1340cc Hayabusa exhaust on a 155cc R15.
+        try:
+            parts = db.parts.list_compatible_for_bike(parsed.bike_id) or []
+        except Exception:
+            parts = []
 
         budget = parsed.budget_inr
-        # Filter by budget if set
         if budget is not None:
-            parts = [
-                p for p in parts
-                if (p.get("price_inr") or 0) <= budget
-            ]
-        # Filter by requested categories
+            parts = [p for p in parts if (p.get("price_inr") or 0) <= budget]
+
+        # 2. Optional category filter from the LLM-parsed query.
         if parsed.parts_categories:
             wanted = {c.lower() for c in parsed.parts_categories}
             parts = [
                 p for p in parts
-                if (p.get("category_name") or "").lower() in wanted
-                or any(c in (p.get("category_name") or "").lower() for c in wanted)
+                if any(c in (p.get("category_name") or "").lower() for c in wanted)
             ]
-        # Sort by price-to-improve heuristic: prefer exhausts/ECU/quickshifter
-        # high-impact categories at any price; otherwise descending price (more
-        # expensive parts usually have higher ET impact).
-        priority_cats = {"exhaust", "ecu", "quickshifter", "clutch", "weight_reduction"}
 
-        def _score(p):
-            cat = (p.get("category_name") or "").lower()
-            cat_pri = 1 if any(pc in cat for pc in priority_cats) else 0
-            price = float(p.get("price_inr") or 0)
-            return (-cat_pri, -price)
+        # 3. Group by canonical category, sort each by price descending so the
+        #    "premium-tier" pick lands at the top of each bucket.
+        by_cat: dict[str, list[dict[str, Any]]] = {}
+        for p in parts:
+            cat = (p.get("category_name") or "uncategorized").lower()
+            by_cat.setdefault(cat, []).append(p)
+        for lst in by_cat.values():
+            lst.sort(key=lambda p: -float(p.get("price_inr") or 0))
 
-        parts.sort(key=_score)
-        top = parts[:8]
+        # 4. Walk the priority list and pick one part per category until budget
+        #    is roughly spent (allow 20 % headroom — better to over-build than
+        #    leave the user with a half-finished plan).
+        selected: list[dict[str, Any]] = []
+        used_budget = 0.0
+        budget_cap = (budget * 1.2) if budget else float("inf")
+        for cat_key, cat_label in _RECOMMEND_PRIORITY:
+            # Find any cat_name in by_cat that contains the priority key
+            candidates: list[dict[str, Any]] = []
+            for cat_name, lst in by_cat.items():
+                if cat_key in cat_name:
+                    candidates.extend(lst)
+            if not candidates:
+                continue
+            # Pick the highest-priced compatible candidate that still fits budget.
+            for p in candidates:
+                price = float(p.get("price_inr") or 0)
+                if used_budget + price > budget_cap:
+                    continue
+                selected.append({"_label": cat_label, **p})
+                used_budget += price
+                break
+            if used_budget >= (budget or 0) * 0.95 > 0:
+                break
+
+        # 5. Recommended-tier + drag-prep tire fitments — completely separate
+        #    from the parts catalog. These are the BIG ROI swaps for drag day.
+        tires: list[dict[str, Any]] = []
+        try:
+            for ftype in ("recommended", "drag_prep"):
+                tires.extend(
+                    db.tires.get_bike_fitments(parsed.bike_id, fitment_type=ftype)
+                    or []
+                )
+        except Exception:
+            pass
+        if budget is not None:
+            tires = [t for t in tires if (t.get("price_inr") or 0) <= budget]
+        # Dedupe on tire_model_id; keep highest mu_peak first
+        seen: set[int] = set()
+        uniq: list[dict[str, Any]] = []
+        for t in sorted(
+            tires, key=lambda t: -float(t.get("mu_peak") or 0.0)
+        ):
+            tid = t.get("tire_model_id")
+            if tid in seen:
+                continue
+            seen.add(tid)
+            uniq.append(t)
+        tires = uniq[:4]
 
         result.recommend_result = {
             "bike_id": parsed.bike_id,
@@ -526,14 +586,34 @@ def _run_recommend(
             "parts": [
                 {
                     "part_id": p["id"],
-                    "name": p.get("name") or p.get("model_name"),
+                    "label": p.get("_label"),
+                    "name": p.get("model_name"),
+                    "brand": p.get("brand"),
                     "category": p.get("category_name"),
-                    "manufacturer": p.get("manufacturer_name"),
+                    "category_display": p.get("category_display"),
                     "price_inr": p.get("price_inr"),
+                    "fitment_reason": p.get("fitment_reason"),
                 }
-                for p in top
+                for p in selected
             ],
-            "total_inr": sum(float(p.get("price_inr") or 0) for p in top),
+            "tires": [
+                {
+                    "tire_model_id": t.get("tire_model_id"),
+                    "manufacturer": t.get("tire_manufacturer"),
+                    "model": t.get("model_name"),
+                    "size": t.get("size_designation"),
+                    "compound": t.get("compound_type"),
+                    "mu_peak": t.get("mu_peak"),
+                    "position": t.get("position"),
+                    "fitment_type": t.get("fitment_type"),
+                    "price_inr": t.get("price_inr"),
+                }
+                for t in tires
+            ],
+            "total_inr": (
+                sum(float(p.get("price_inr") or 0) for p in selected)
+                + sum(float(t.get("price_inr") or 0) for t in tires)
+            ),
         }
     except Exception as e:  # noqa: BLE001
         result.error = "recommend_failed"
@@ -822,23 +902,86 @@ def _summarize_rank(
 def _summarize_recommend(
     parsed: ParsedSimRequest, rec: dict[str, Any], client: LLMClient | None
 ) -> str:
+    """Build a strict, hallucination-resistant build-sheet prompt.
+
+    The system prompt forbids inventing brands or prices — only the rows
+    we pass in the user message are allowed. This stops Llama / Gemini
+    from defaulting to "Akrapovic or Yoshimura" when the catalog already
+    has a specific Red Rooster Performance / Big Bird Customs / KustomHub
+    pipe for the user\'s actual bike.
+    """
     sys_p = (
-        "You are MotoQuant. Summarize a parts-recommendation in 2-3 sentences. "
-        "Use INR for money. Highlight the most ROI-rich category. End with one "
-        "concrete suggestion (e.g. exhaust + ECU combo, or budget pivot)."
+        "You are MotoQuant, a drag-racing tuner. Build a concrete bike-specific "
+        "upgrade plan from the catalog rows below. STRICT RULES: "
+        "(1) Use ONLY the exact parts and tires listed below — DO NOT invent "
+        "any brand, model, or price. If you don\'t know a number, omit it. "
+        "(2) Every line must cite brand + model + INR price exactly as given. "
+        "(3) Group by category in this order: Exhaust, ECU, Air filter, Fuel "
+        "system, Tire, Clutch, Sprockets/Chain, Other. Skip categories that "
+        "have no row. (4) For each part, add a short reason (1 short clause) "
+        "explaining what it changes (e.g. \'+8 hp top-end\', \'cuts launch "
+        "wheelspin\'). (5) End with two lines: \'Total: ₹X\' and (if a budget "
+        "was given) \'Budget remaining: ₹Y\'. (6) No generic preamble. No "
+        "\'consider also...\' suggestions for products not in the data. Keep it "
+        "tight — markdown bullets, no fluff."
     )
-    top = rec.get("parts", [])[:6]
-    lines = [
-        f"  {p.get('manufacturer') or '?'} {p.get('name') or '?'} "
-        f"({p.get('category')}) — ₹{int(p.get('price_inr') or 0):,}"
-        for p in top
-    ]
+
+    parts = rec.get("parts") or []
+    tires = rec.get("tires") or []
+    bike = rec.get("bike_name") or "(unknown bike)"
+    budget = rec.get("budget_inr")
+
+    # Group parts by category for the prompt
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for p in parts:
+        label = p.get("label") or p.get("category_display") or p.get("category") or "Other"
+        grouped.setdefault(label, []).append(p)
+
+    cat_blocks = []
+    for label, items in grouped.items():
+        lines = []
+        for p in items:
+            brand = p.get("brand") or "?"
+            name = p.get("name") or "?"
+            price = int(p.get("price_inr") or 0)
+            reason = p.get("fitment_reason") or ""
+            lines.append(
+                f"  - {brand} {name} — ₹{price:,}"
+                + (f"   [{reason}]" if reason else "")
+            )
+        cat_blocks.append(f"{label}:\n" + "\n".join(lines))
+
+    # Tire block
+    if tires:
+        tire_lines = []
+        for t in tires:
+            mfr = t.get("manufacturer") or "?"
+            model = t.get("model") or "?"
+            size = t.get("size") or ""
+            mu = t.get("mu_peak")
+            pos = t.get("position") or ""
+            ftype = t.get("fitment_type") or ""
+            price = int(t.get("price_inr") or 0)
+            mu_txt = f" mu_peak={mu:.2f}" if mu else ""
+            tire_lines.append(
+                f"  - {mfr} {model} {size} ({pos}, {ftype}){mu_txt}"
+                + (f" — ₹{price:,}" if price else "")
+            )
+        cat_blocks.append("Tires (recommended/drag-prep fitments):\n" + "\n".join(tire_lines))
+
+    parts_section = "\n\n".join(cat_blocks) if cat_blocks else "(no compatible parts found)"
+
     user = (
-        f"User asked: {parsed.raw_query}\n\n"
-        f"Bike: {rec.get('bike_name')} (id {rec.get('bike_id')})\n"
-        f"Budget: ₹{rec.get('budget_inr') or '(unspecified)'}\n"
-        f"Recommended parts:\n" + "\n".join(lines) + "\n\n"
-        f"Total: ₹{int(rec.get('total_inr') or 0):,}"
+        f"User asked: {parsed.raw_query}\n"
+        f"Bike: {bike}\n"
+        f"Budget: ₹{budget:,}\n" if budget else f"Budget: (unspecified)\n"
+    )
+    user = (
+        f"User asked: {parsed.raw_query}\n"
+        f"Bike: {bike}\n"
+        f"Budget: " + (f"₹{budget:,}" if budget else "(unspecified)") + "\n\n"
+        f"Catalog rows for this bike:\n\n{parts_section}\n\n"
+        f"Total of selected items: ₹{int(rec.get('total_inr') or 0):,}"
     )
     return _llm_text(client, sys_p, user)
 
