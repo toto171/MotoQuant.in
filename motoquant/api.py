@@ -2461,6 +2461,141 @@ def refresh_part_price(part_id: int, force: bool = Query(False)):
     )
 
 
+# ─────────────────────────────────────────────────────────────────
+# Phase A: Claude-powered chat endpoint
+# ─────────────────────────────────────────────────────────────────
+
+
+_db_facade = None  # MotoQuantDB instance (provides .bikes, .venues, etc.)
+
+
+def _get_db_facade():
+    """Return the MotoQuantDB facade (with repos), reconnecting if needed.
+
+    Distinct from `_get_db()` which returns a raw sqlite3.Connection.
+    The chat runner uses the facade so it can call db.bikes.search(),
+    db.venues.to_environment(), etc.
+    """
+    global _db_facade
+    if _db_facade is not None:
+        try:
+            _db_facade.conn.execute("SELECT 1")
+            return _db_facade
+        except Exception:
+            _db_facade = None  # stale, rebuild
+
+    try:
+        from .database.connection import MotoQuantDB
+
+        db_path = os.environ.get("MOTOQUANT_DB", "motoquant.db")
+        _db_facade = MotoQuantDB(db_path)
+        return _db_facade
+    except Exception as e:
+        logging.getLogger(__name__).error(
+            "Failed to initialize MotoQuantDB at %s: %s",
+            os.environ.get("MOTOQUANT_DB", "motoquant.db"),
+            e,
+            exc_info=True,
+        )
+        return None
+
+
+def get_llm_client():
+    """FastAPI dependency. Tests override via app.dependency_overrides."""
+    from .llm import get_default_client
+
+    return get_default_client()
+
+
+class ChatRequest(BaseModel):
+    """POST /api/chat -- ask MotoQuant a question in natural language."""
+
+    query: str = Field(
+        ...,
+        min_length=1,
+        max_length=2000,
+        description=(
+            "Natural-language tuning query. "
+            "Example: 'How fast is my K5 in 35C heat at Aamby Valley?'"
+        ),
+    )
+    run_summary: bool = Field(
+        True,
+        description=(
+            "If True, Claude writes a 2-4 sentence prose summary. "
+            "Set False to skip the second LLM call (saves tokens / latency)."
+        ),
+    )
+
+
+class ChatBikeSuggestion(BaseModel):
+    id: int | None = None
+    manufacturer: str | None = None
+    model: str | None = None
+    year_range: str | None = None
+
+
+class ChatResponse(BaseModel):
+    """Full chat response. error == None means success.
+
+    Frontends should:
+      - if error == "bike_not_found": render bike_suggestions as clickable
+        chips so the user can pick a bike and re-run.
+      - if error == "llm_not_configured": show a banner pointing the
+        operator at ANTHROPIC_API_KEY (this is a server-side config issue).
+      - if error == "parse_failed" or "sim_failed": show error_detail.
+      - if error == None: render sim_result tiles + summary text.
+    """
+
+    raw_query: str
+    bike_name: str = ""
+    bike_id: int | None = None
+    venue_name: str | None = None
+    venue_id: int | None = None
+    parsed_notes: str = ""
+    optimization_goal: str = "minimize_et"
+    bike_suggestions: list[ChatBikeSuggestion] = Field(default_factory=list)
+    sim_result: dict[str, Any] | None = None
+    summary: str | None = None
+    error: str | None = None
+    error_detail: str | None = None
+
+
+@app.post("/api/chat", response_model=ChatResponse)
+def chat(req: ChatRequest, client=Depends(get_llm_client)) -> ChatResponse:
+    """End-to-end NL chat: parse with Claude, run physics, summarize.
+
+    Always returns 200 with `error` populated on failure modes the user
+    can recover from (bike not found, LLM not configured). Returns 503
+    only if the database itself is unreachable.
+    """
+    db = _get_db_facade()
+    if db is None:
+        raise HTTPException(status_code=503, detail="database_unavailable")
+
+    from .llm import run_chat_pipeline
+
+    result = run_chat_pipeline(
+        req.query, db, client=client, run_summary=req.run_summary
+    )
+    return ChatResponse(
+        raw_query=result.raw_query,
+        bike_name=result.bike_name,
+        bike_id=result.bike_id,
+        venue_name=result.venue_name,
+        venue_id=result.venue_id,
+        parsed_notes=result.parsed_notes,
+        optimization_goal=result.optimization_goal,
+        bike_suggestions=[
+            ChatBikeSuggestion(**s) for s in result.bike_suggestions
+        ],
+        sim_result=result.sim_result,
+        summary=result.summary,
+        error=result.error,
+        error_detail=result.error_detail,
+    )
+
+
 # ------- END ws/backend-surrogate-pricing additions ----------------------
 # Lines below here are reserved for Stream 5 auth router mounts:
 #   from motoquant.auth import router as auth_router
