@@ -2,10 +2,11 @@
 LLMClient -- thin provider-agnostic wrapper around chat-completion APIs.
 
 Supported providers (selected via the LLM_PROVIDER env var):
-  - "gemini"     -- Google Gemini (free tier, 1500 req/day; default)
+  - "groq"       -- Groq Llama 3.3 70B (free, fastest; OpenAI-compatible) [default]
+  - "gemini"     -- Google Gemini (free tier, but free-tier eligibility for
+                    individual model IDs varies by project / region)
   - "anthropic"  -- Anthropic Claude (paid, native SDK)
   - "deepseek"   -- DeepSeek API (cheap; OpenAI-compatible)
-  - "groq"       -- Groq Llama 3.3 70B (free, fastest; OpenAI-compatible)
   - "openrouter" -- OpenRouter (free DeepSeek/Llama via aggregator)
 
 All non-Anthropic providers go through the OpenAI Python SDK pointed at
@@ -55,9 +56,15 @@ _PROVIDERS: dict[str, dict[str, str | None]] = {
         "api_key_env": "DEEPSEEK_API_KEY",
     },
     "groq": {
+        # Llama 3.3 70B Versatile — Groq's flagship free model.
+        # Free tier: 30 RPM, 14,400 RPD on most accounts (much more
+        # generous than Gemini's per-model variability). Override via
+        # GROQ_MODEL env var to use llama-3.1-70b / llama-3.1-8b-instant /
+        # mixtral-8x7b / etc. without redeploying.
         "model": "llama-3.3-70b-versatile",
         "base_url": "https://api.groq.com/openai/v1",
         "api_key_env": "GROQ_API_KEY",
+        "model_env": "GROQ_MODEL",
     },
     "openrouter": {
         "model": "deepseek/deepseek-chat-v3:free",
@@ -66,7 +73,7 @@ _PROVIDERS: dict[str, dict[str, str | None]] = {
     },
 }
 
-DEFAULT_PROVIDER = "gemini"
+DEFAULT_PROVIDER = "groq"
 DEFAULT_MAX_TOKENS = 1024
 DEFAULT_TIMEOUT_S = 30.0
 
