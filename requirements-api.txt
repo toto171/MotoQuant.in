@@ -25,3 +25,6 @@ razorpay>=1.4.0
 # Requires ANTHROPIC_API_KEY env var at runtime. Falls through gracefully
 # if the key is missing -- callers get a typed LLMNotConfiguredError.
 anthropic>=0.34.0
+
+# OpenAI SDK — used for OpenAI-compatible providers (Gemini, DeepSeek, Groq, OpenRouter)
+openai>=1.40.0
