@@ -8,6 +8,7 @@ import StructuredData, {
   faqSchema,
   SITE_URL,
 } from './StructuredData';
+import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({
   variable: '--font-inter',
@@ -260,6 +261,7 @@ export default function RootLayout({ children }) {
         <StructuredData data={faqSchema()} />
         <AuthProvider>{children}</AuthProvider>
         <div className="grain" aria-hidden="true" />
+        <Analytics />
       </body>
     </html>
   );
