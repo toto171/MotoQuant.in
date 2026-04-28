@@ -266,3 +266,92 @@ def resolve_venue(name: str | None, db: Any) -> int | None:
     if best_score >= 60:
         return best
     return None
+
+
+# ───────────────────────────────────────────────────────────────────
+# Archetype resolution (modded builds layered onto an OEM base bike)
+# ───────────────────────────────────────────────────────────────────
+
+# Normalised aliases → canonical archetype name in bike_archetypes.name.
+# Keys are lower-cased token strings; values are exact DB names.
+_ARCHETYPE_ALIASES: dict[str, str] = {
+    "tts hayabusa": "TTS Stage 2 Turbo Hayabusa",
+    "tts stage 2 hayabusa": "TTS Stage 2 Turbo Hayabusa",
+    "tts turbo hayabusa": "TTS Stage 2 Turbo Hayabusa",
+    "stage 2 hayabusa": "TTS Stage 2 Turbo Hayabusa",
+    "velocity hayabusa": "Velocity Racing 5-sec Turbo Hayabusa",
+    "velocity 5 sec hayabusa": "Velocity Racing 5-sec Turbo Hayabusa",
+    "velocity 5sec hayabusa": "Velocity Racing 5-sec Turbo Hayabusa",
+    "5 second hayabusa": "Velocity Racing 5-sec Turbo Hayabusa",
+    "5sec hayabusa": "Velocity Racing 5-sec Turbo Hayabusa",
+    "bonneville h2": "Bonneville H2 Carbon Track Edition",
+    "bonneville h2 carbon": "Bonneville H2 Carbon Track Edition",
+    "salt flat h2": "Bonneville H2 Carbon Track Edition",
+    "carbon h2": "Bonneville H2 Carbon Track Edition",
+    "schnitz hayabusa": "Schnitz Nitrous Hayabusa",
+    "schnitz nitrous hayabusa": "Schnitz Nitrous Hayabusa",
+    "nitrous hayabusa": "Schnitz Nitrous Hayabusa",
+    "nos hayabusa": "Schnitz Nitrous Hayabusa",
+    "ron ayers hayabusa": "Ron Ayers RAW Turbo Hayabusa",
+    "ron ayers raw hayabusa": "Ron Ayers RAW Turbo Hayabusa",
+    "raw racing hayabusa": "Ron Ayers RAW Turbo Hayabusa",
+    "raw hayabusa": "Ron Ayers RAW Turbo Hayabusa",
+}
+
+
+def resolve_archetype(name: str, db: Any) -> tuple[int | None, int | None]:
+    """Resolve a free-text archetype name → (archetype_id, base_bike_model_id).
+
+    Returns (None, None) if no match. Tries:
+      1. Exact (case-insensitive) match against bike_archetypes.name.
+      2. Alias map for common short forms ("TTS Hayabusa", "Velocity 5-sec").
+      3. Token-set Jaccard fuzzy match (>= 50% overlap).
+    """
+    if not name:
+        return None, None
+
+    try:
+        rows = db._conn.execute(
+            "SELECT id, name, base_bike_model_id FROM bike_archetypes ORDER BY id"
+        ).fetchall()
+    except Exception:
+        return None, None
+    if not rows:
+        return None, None
+
+    # 1. Exact (case-insensitive) name match.
+    n_lower = name.strip().lower()
+    for r in rows:
+        if (r["name"] or "").strip().lower() == n_lower:
+            return r["id"], r["base_bike_model_id"]
+
+    # 2. Alias map.
+    n_norm = _normalize(name)
+    if n_norm in _ARCHETYPE_ALIASES:
+        canon = _ARCHETYPE_ALIASES[n_norm]
+        for r in rows:
+            if (r["name"] or "").strip().lower() == canon.lower():
+                return r["id"], r["base_bike_model_id"]
+
+    # 3. Token-set Jaccard fuzzy match.
+    n_tokens = _tokenize(name)
+    if not n_tokens:
+        return None, None
+
+    best = None
+    best_score = 0
+    for r in rows:
+        cand_tokens = _tokenize(r["name"] or "")
+        if not cand_tokens:
+            continue
+        common = n_tokens & cand_tokens
+        if not common:
+            continue
+        score = int(100 * len(common) / len(n_tokens | cand_tokens))
+        if score > best_score:
+            best_score = score
+            best = r
+
+    if best is not None and best_score >= 50:
+        return best["id"], best["base_bike_model_id"]
+    return None, None

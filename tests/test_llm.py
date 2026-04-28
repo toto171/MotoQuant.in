@@ -213,9 +213,8 @@ class TestParseQuery(unittest.TestCase):
         parsed = parse_query("...", client=client, db=db)
         self.assertEqual(parsed.bike_id, 7)
         self.assertEqual(parsed.venue_id, 3)
-        # New resolver may make multiple search() calls across strategies.
-        self.assertGreaterEqual(db.bikes.search.call_count, 1)
-        self.assertGreaterEqual(db.venues.get_by_name.call_count, 1)
+        db.bikes.search.assert_called_once_with(name_contains="Hayabusa")
+        db.venues.get_by_name.assert_called_once_with("Aamby Valley")
 
     def test_db_resolution_silent_on_miss(self):
         """No bike match should leave bike_id as None, not raise."""

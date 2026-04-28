@@ -11,7 +11,7 @@ Design principles for quantitative accuracy:
   5. Schema version tracked for forward-compatible migrations.
 """
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 
 # ────────────────────────────────────────────────────────
 # Full DDL executed on db.initialize()
@@ -567,6 +567,38 @@ CREATE TABLE IF NOT EXISTS spec_corrections (
 CREATE INDEX IF NOT EXISTS idx_spec_corr_bike   ON spec_corrections(bike_model_id);
 CREATE INDEX IF NOT EXISTS idx_spec_corr_status ON spec_corrections(status);
 CREATE INDEX IF NOT EXISTS idx_spec_corr_field  ON spec_corrections(field_name);
+
+-- ════════════════════════════════════════════════════════════
+-- 17. BIKE ARCHETYPES  (pre-built modded variants)
+--     Famous turbo/nitrous/big-bore drag-scene builds. Each archetype
+--     layers deltas/multipliers onto a base bike_model row.
+-- ════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS bike_archetypes (
+    id                       INTEGER PRIMARY KEY AUTOINCREMENT,
+    name                     TEXT    NOT NULL,
+    base_bike_model_id       INTEGER NOT NULL REFERENCES bike_models(id) ON DELETE CASCADE,
+    description              TEXT,
+    power_multiplier         REAL    NOT NULL DEFAULT 1.0,
+    peak_power_hp_override   REAL,
+    peak_torque_nm_override  REAL,
+    mass_delta_kg            REAL    NOT NULL DEFAULT 0.0,
+    cd_delta                 REAL    NOT NULL DEFAULT 0.0,
+    frontal_area_delta_m2    REAL    NOT NULL DEFAULT 0.0,
+    sprocket_front_override  INTEGER,
+    sprocket_rear_override   INTEGER,
+    chain_pitch_override     TEXT,
+    tire_mu_override         REAL,
+    notes                    TEXT,
+    source_url               TEXT,
+    estimated_build_inr      REAL,
+    is_homologation          INTEGER NOT NULL DEFAULT 0,
+    created_at               TEXT    DEFAULT (datetime('now','utc')),
+    UNIQUE(name, base_bike_model_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_archetype_base ON bike_archetypes(base_bike_model_id);
+CREATE INDEX IF NOT EXISTS idx_archetype_name ON bike_archetypes(name);
 """
 
 # Categories seeded on first init

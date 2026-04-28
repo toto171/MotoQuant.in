@@ -45,6 +45,11 @@ class ParsedSimRequest:
     venue_name: str | None = None
     venue_id: int | None = None
 
+    # Modded archetype the user named (e.g. "TTS turbo Hayabusa", "Bonneville H2").
+    # Resolved against bike_archetypes table by resolver.resolve_archetype.
+    archetype_name: str | None = None
+    archetype_id: int | None = None
+
     ambient_temp_c: float | None = None
     humidity_pct: float | None = None
     altitude_m: float | None = None
@@ -116,6 +121,18 @@ TOOL_SCHEMA: dict[str, Any] = {
                 "Second bike name when intent_type=compare. Null otherwise. "
                 "Example: 'compare K5 vs R1' → bike_name='GSX-R 1000 K5', "
                 "bike_b_name='Yamaha YZF-R1'."
+            ),
+        },
+        "archetype_name": {
+            "type": ["string", "null"],
+            "description": (
+                "Pre-built modded archetype if the user named one. Examples: "
+                "'TTS Stage 2 Hayabusa', 'Velocity 5-sec Hayabusa', 'Schnitz "
+                "nitrous Hayabusa', 'Bonneville H2 Carbon', 'Ron Ayers RAW "
+                "Hayabusa'. Null if user only mentioned a stock OEM bike. "
+                "When set, bike_name should still be the OEM base (e.g. "
+                "'Hayabusa') so the resolver can find the base bike to "
+                "layer the archetype onto."
             ),
         },
         "venue_name": {
@@ -221,6 +238,18 @@ Bike alias hints:
 - 'Panigale V4' is Ducati; 'RSV4' is Aprilia (do not conflate)
 - 'Ninja' alone is ambiguous -- preserve the user's qualifier (e.g. 'Ninja 400')
 
+Modded-archetype hints (set archetype_name AND keep bike_name as the OEM base):
+- 'TTS turbo Hayabusa' / 'Stage 2 Hayabusa' → archetype_name='TTS Stage 2 \
+Turbo Hayabusa', bike_name='Hayabusa'
+- 'Velocity 5-sec' / '5-second Hayabusa' → archetype_name='Velocity Racing \
+5-sec Turbo Hayabusa', bike_name='Hayabusa'
+- 'Bonneville H2' / 'salt-flat H2' → archetype_name='Bonneville H2 Carbon \
+Track Edition', bike_name='Ninja H2'
+- 'Schnitz nitrous Hayabusa' / 'NOS Hayabusa' → archetype_name='Schnitz \
+Nitrous Hayabusa', bike_name='Hayabusa'
+- 'Ron Ayers' / 'RAW racing Hayabusa' → archetype_name='Ron Ayers RAW \
+Turbo Hayabusa', bike_name='Hayabusa'
+
 Indian venue alias hints:
 - Aamby / TVR / Aambey = Aamby Valley
 - MMRT = Madras Motor Race Track
@@ -274,6 +303,7 @@ def parse_query(
         raw_query=query,
         bike_name=(payload.get("bike_name") or "").strip(),
         bike_b_name=((payload.get("bike_b_name") or "").strip() or None),
+        archetype_name=((payload.get("archetype_name") or "").strip() or None),
         intent_type=(payload.get("intent_type") or "simulate").strip().lower(),
         venue_name=payload.get("venue_name"),
         ambient_temp_c=payload.get("ambient_temp_c"),
@@ -301,7 +331,7 @@ def parse_query(
 
 def _resolve_against_db(parsed: ParsedSimRequest, db: Any) -> None:
     """Smart fuzzy resolution. Mutates `parsed` in place. Silent on miss."""
-    from .resolver import resolve_bike, resolve_venue
+    from .resolver import resolve_archetype, resolve_bike, resolve_venue
 
     if parsed.bike_name:
         bike_id, _ = resolve_bike(parsed.bike_name, db)
@@ -312,6 +342,15 @@ def _resolve_against_db(parsed: ParsedSimRequest, db: Any) -> None:
         bike_b_id, _ = resolve_bike(parsed.bike_b_name, db)
         if bike_b_id is not None:
             parsed.bike_b_id = bike_b_id
+
+    if parsed.archetype_name:
+        arc_id, base_id = resolve_archetype(parsed.archetype_name, db)
+        if arc_id is not None:
+            parsed.archetype_id = arc_id
+            # If the LLM did not pick a base bike but the archetype carries one,
+            # pin the archetype's base as the bike_id so the sim has a target.
+            if parsed.bike_id is None and base_id is not None:
+                parsed.bike_id = base_id
 
     if parsed.venue_name:
         v_id = resolve_venue(parsed.venue_name, db)

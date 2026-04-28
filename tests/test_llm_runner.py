@@ -195,40 +195,40 @@ class TestRunChatPipelineErrors(unittest.TestCase):
         )
         db = MagicMock()
 
-        yamaha_rows = [
-            {
-                "id": 1,
-                "manufacturer_name": "Yamaha",
-                "model_name": "YZF-R1",
-                "year_from": 2009,
-                "year_to": 2014,
-            },
-            {
-                "id": 2,
-                "manufacturer_name": "Yamaha",
-                "model_name": "YZF-R6",
-                "year_from": 2008,
-                "year_to": None,
-            },
-        ]
-
-        def search_side_effect(*args, **kwargs):
-            blob = " ".join(
-                str(v).lower() for v in (list(args) + list(kwargs.values())) if v
-            )
-            if "nonexistent" in blob and "yamaha" not in blob:
-                return []
-            if "yamaha" in blob:
-                return yamaha_rows
+        def search_side_effect(*, name_contains: str):
+            if name_contains == "Nonexistent Yamaha 999":
+                return []  # full name miss
+            if name_contains.lower() == "yamaha":
+                return [
+                    {
+                        "id": 1,
+                        "manufacturer_name": "Yamaha",
+                        "model_name": "YZF-R1",
+                        "year_start": 2009,
+                        "year_end": 2014,
+                    },
+                    {
+                        "id": 2,
+                        "manufacturer_name": "Yamaha",
+                        "model_name": "YZF-R6",
+                        "year_start": 2008,
+                        "year_end": None,
+                    },
+                ]
             return []
 
         db.bikes.search.side_effect = search_side_effect
         db.venues.get_by_name.return_value = None
 
+        # Resolution attempt sets parsed.bike_id from the FIRST search
+        # (full name) -- we returned [] for that, so bike_id stays None.
+        # The fallback _bike_suggestions retries with token searches.
         result = run_chat_pipeline("...", db, client=client)
         self.assertEqual(result.error, "bike_not_found")
-        self.assertGreaterEqual(len(result.bike_suggestions), 1)
-        self.assertEqual(result.bike_suggestions[0]["manufacturer"], "Yamaha")
+        self.assertEqual(len(result.bike_suggestions), 2)
+        self.assertEqual(result.bike_suggestions[0]["model"], "YZF-R1")
+        self.assertEqual(result.bike_suggestions[0]["year_range"], "2009-2014")
+        self.assertEqual(result.bike_suggestions[1]["year_range"], "2008")
 
 
 # ───────────────────────────────────────────────────────────────────

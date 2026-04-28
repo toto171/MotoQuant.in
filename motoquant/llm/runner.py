@@ -386,6 +386,7 @@ def _run_rank(
                     sim_rows.append({**r, "sim_et_s": None, "sim_source": "no-config"})
                     continue
                 _apply_env_overrides(config, parsed)
+                _apply_archetype(config, parsed, db)
                 _apply_power_boost(config, parsed)
                 engine = MotoQuantEngine(config)
                 sim = engine.run()
@@ -651,6 +652,7 @@ def _run_one_sim(
         return f"to_config returned None for {config_row['id']}"
 
     _apply_env_overrides(config, parsed)
+    _apply_archetype(config, parsed, db)
     _apply_power_boost(config, parsed)
 
     try:
@@ -862,3 +864,107 @@ def _summarize_explain(
             f"  60ft = {sim_context['et_60ft_s']:.3f}s\n"
         )
     return _llm_text(client, sys_p, user)
+
+
+# ───────────────────────────────────────────────────────────────────
+# Archetype delta application
+# ───────────────────────────────────────────────────────────────────
+
+
+def _apply_archetype(config: Any, parsed: ParsedSimRequest, db: Any) -> None:
+    """Layer a bike_archetypes row's deltas onto `config` in place.
+
+    Applied AFTER env overrides but BEFORE power_boost so the user's
+    explicit power_boost_pct stacks on top of an archetype's boost
+    (e.g. "TTS Hayabusa with +10% power" = TTS multiplier x 1.10).
+
+    Silent on miss / DB errors so a broken archetype lookup never breaks
+    a sim that would otherwise run fine on the base bike.
+    """
+    if parsed.archetype_id is None or db is None:
+        return
+    try:
+        row = db._conn.execute(
+            """SELECT power_multiplier, peak_power_hp_override,
+                      peak_torque_nm_override, mass_delta_kg, cd_delta,
+                      frontal_area_delta_m2, sprocket_front_override,
+                      sprocket_rear_override, chain_pitch_override,
+                      tire_mu_override
+                 FROM bike_archetypes
+                WHERE id = ?""",
+            (parsed.archetype_id,),
+        ).fetchone()
+    except Exception:
+        return
+    if row is None:
+        return
+
+    eng = getattr(config, "engine", None)
+    if eng is not None:
+        if row["peak_power_hp_override"] is not None:
+            try:
+                eng.peak_power_hp = float(row["peak_power_hp_override"])
+            except Exception:
+                pass
+        if row["peak_torque_nm_override"] is not None:
+            try:
+                eng.peak_torque_nm = float(row["peak_torque_nm_override"])
+            except Exception:
+                pass
+        mult = row["power_multiplier"]
+        if mult and abs(mult - 1.0) > 1e-6:
+            try:
+                if getattr(eng, "peak_power_hp", None):
+                    eng.peak_power_hp *= float(mult)
+                if getattr(eng, "peak_torque_nm", None):
+                    eng.peak_torque_nm *= float(mult)
+                dyno = getattr(eng, "dyno_curve", None)
+                if dyno is not None and getattr(dyno, "torque_nm", None):
+                    dyno.torque_nm = [t * float(mult) for t in dyno.torque_nm]
+            except Exception:
+                pass
+
+    chassis = getattr(config, "chassis", None)
+    if chassis is not None and row["mass_delta_kg"]:
+        try:
+            chassis.dry_mass_kg = (chassis.dry_mass_kg or 0.0) + float(row["mass_delta_kg"])
+        except Exception:
+            pass
+
+    aero = getattr(config, "aero", None)
+    if aero is not None:
+        if row["cd_delta"]:
+            try:
+                aero.cd = (aero.cd or 0.0) + float(row["cd_delta"])
+            except Exception:
+                pass
+        if row["frontal_area_delta_m2"]:
+            try:
+                aero.frontal_area_m2 = (aero.frontal_area_m2 or 0.0) + float(row["frontal_area_delta_m2"])
+            except Exception:
+                pass
+
+    dt = getattr(config, "drivetrain", None)
+    if dt is not None:
+        if row["sprocket_front_override"] is not None:
+            try:
+                dt.front_sprocket = int(row["sprocket_front_override"])
+            except Exception:
+                pass
+        if row["sprocket_rear_override"] is not None:
+            try:
+                dt.rear_sprocket = int(row["sprocket_rear_override"])
+            except Exception:
+                pass
+        if row["chain_pitch_override"]:
+            try:
+                dt.chain_pitch = str(row["chain_pitch_override"])
+            except Exception:
+                pass
+
+    tires = getattr(config, "tires", None)
+    if tires is not None and row["tire_mu_override"] is not None:
+        try:
+            tires.mu_peak = float(row["tire_mu_override"])
+        except Exception:
+            pass

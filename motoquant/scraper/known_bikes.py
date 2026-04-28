@@ -12276,3 +12276,10 @@ ALL_KNOWN_BIKES = [
     YAMAHA_SR400_2014,
     BIMOTA_TESI_1D_1991,
 ]
+# ────────────────────────────────────────────────────────────
+# Extended catalogue — high-power / homologation specials
+# (kept in a sibling module to avoid file-write-tool truncation
+# on this 12k-line file)
+# ────────────────────────────────────────────────────────────
+from .known_bikes_extended import EXTENDED_BIKES  # noqa: E402
+ALL_KNOWN_BIKES.extend(EXTENDED_BIKES)
