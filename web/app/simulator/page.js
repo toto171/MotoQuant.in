@@ -11,6 +11,7 @@ import {
   AreaChart, Area
 } from 'recharts';
 import { API_URL as API } from '../../lib/api';
+import ChatPanel from '../../components/ChatPanel';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    REUSABLE COMPONENTS
@@ -628,13 +629,11 @@ export default function SimulatorPage() {
           </div>
         )}
 
-        {/* Natural-language chat (Phase A) */}
+        {/* Natural-language chat */}
         <div className="mb-5 rounded-2xl border border-white/[0.06] bg-gradient-to-br from-white/[0.04] to-white/[0.01] backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.3)] p-5">
           <div className="flex items-center gap-2 mb-3">
             <MessageSquare size={14} className="text-orange-500" />
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-              Ask MotoQuant
-            </h3>
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-gray-400">Ask MotoQuant</h3>
           </div>
           <ChatPanel apiUrl={API} />
         </div>

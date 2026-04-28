@@ -24,7 +24,7 @@ const FEATURES = [
   // [label, free, pro, studio]
   ["Simulations per day",                "10", "Unlimited", "Unlimited"],
   ["Parts in a build",                   "3",  "Unlimited", "Unlimited"],
-  ["Bike catalog (270+ bikes)",          "✓",  "✓",         "✓"],
+  ["Bike catalog (334 bikes)",          "✓",  "✓",         "✓"],
   ["Tire library (232 tires)",           "✓",  "✓",         "✓"],
   ["Venue conditions (20 venues)",       "✓",  "✓",         "✓"],
   ["ROI & Sobol analysis",               "—",  "✓",         "✓"],
