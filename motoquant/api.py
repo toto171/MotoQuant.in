@@ -1749,6 +1749,182 @@ def suggest_bike(req: BikeSuggestionRequest):
     }
 
 
+# --- Spec Corrections (user-submitted field-level fixes) -----------------
+
+
+class SpecCorrectionRequest(BaseModel):
+    """POST /api/specs/correct — propose a correction for one spec field."""
+
+    bike_id: int = Field(
+        ..., description="DB bike model ID to correct"
+    )
+    field_name: str = Field(
+        ...,
+        max_length=80,
+        description=(
+            "Field to correct — must be one of the allowed spec fields "
+            "(see GET /api/specs/correction-fields for the full list)"
+        ),
+    )
+    proposed_value: str = Field(
+        ..., max_length=500, description="Corrected value as a string"
+    )
+    source_url: str | None = Field(
+        None, max_length=500, description="URL of supporting evidence (optional)"
+    )
+    submitter_email: str | None = Field(
+        None, max_length=254, description="Optional reply address"
+    )
+    notes: str | None = Field(
+        None, max_length=2000, description="Free-form context"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "bike_id": 42,
+                "field_name": "peak_power_hp",
+                "proposed_value": "185.5",
+                "source_url": "https://example.com/r15-dyno-2024.pdf",
+                "submitter_email": "rider@example.com",
+                "notes": "Indian Autos Mag wheel-dyno, stock R15 V4, July 2024 issue",
+            }
+        }
+
+
+def _fetch_current_value(db, bike_id: int, field_name: str) -> str | None:
+    """
+    Snapshot the current value of ``field_name`` from the DB for the audit trail.
+    Returns None if the field can't be found cleanly (non-blocking — we always
+    store the correction regardless).
+    """
+    # Fields that live directly on bike_models as columns
+    _HEADLINE_COLS = {
+        "peak_power_hp", "peak_torque_nm", "peak_power_rpm", "peak_torque_rpm",
+        "displacement_cc", "bore_mm", "stroke_mm", "compression_ratio",
+        "dry_mass_kg", "wet_mass_kg", "cylinder_count", "wheelbase_mm",
+        "seat_height_mm", "fuel_capacity_l",
+    }
+    # Fields that live inside bike_configs JSON blobs
+    _BLOB_FIELD_MAP = {
+        "front_sprocket":  "drivetrain_params",
+        "rear_sprocket":   "drivetrain_params",
+        "gear_ratios":     "drivetrain_params",
+        "redline_rpm":     "engine_params",
+        "cd":              "aero_params",
+        "frontal_area_m2": "aero_params",
+    }
+    try:
+        if field_name in _HEADLINE_COLS:
+            row = db.execute(
+                f"SELECT {field_name} FROM bike_models WHERE id = ?",  # noqa: S608
+                (bike_id,),
+            ).fetchone()
+            if row:
+                val = row[0]
+                return str(val) if val is not None else None
+        elif field_name in _BLOB_FIELD_MAP:
+            blob_col = _BLOB_FIELD_MAP[field_name]
+            cfg_row = db.execute(
+                f"SELECT {blob_col} FROM bike_configs "  # noqa: S608
+                "WHERE bike_model_id = ? AND is_current = 1 ORDER BY version DESC LIMIT 1",
+                (bike_id,),
+            ).fetchone()
+            if cfg_row and cfg_row[0]:
+                blob = json.loads(cfg_row[0])
+                val = blob.get(field_name)
+                return str(val) if val is not None else None
+    except Exception:
+        pass
+    return None
+
+
+@app.get("/api/specs/correction-fields")
+def list_correction_fields():
+    """Return the set of field names that users can propose corrections for."""
+    from .database.spec_corrections_repo import FIELD_LABELS, VALID_CORRECTION_FIELDS
+
+    return {
+        "fields": sorted(VALID_CORRECTION_FIELDS),
+        "labels": FIELD_LABELS,
+    }
+
+
+@app.post("/api/specs/correct", status_code=201)
+def submit_spec_correction(req: SpecCorrectionRequest):
+    """
+    Submit a user correction for a single spec field on a bike model.
+
+    Stored as ``status='pending'`` — not applied to the catalog until a
+    maintainer reviews it.  The ``field_name`` must be in the whitelist
+    returned by ``GET /api/specs/correction-fields``.
+
+    Returns ``201 Created`` with ``{id, status, message}`` on success.
+    """
+    from .database.spec_corrections_repo import (
+        SpecCorrectionsRepository,
+        VALID_CORRECTION_FIELDS,
+    )
+
+    db = _get_db()
+    if not db:
+        raise HTTPException(503, "Database unavailable")
+
+    # Validate field_name against whitelist
+    if req.field_name not in VALID_CORRECTION_FIELDS:
+        from .database.spec_corrections_repo import FIELD_LABELS
+        raise HTTPException(
+            422,
+            f"field_name {req.field_name!r} is not correctable. "
+            f"Valid fields: {sorted(VALID_CORRECTION_FIELDS)}",
+        )
+
+    # Confirm bike exists
+    bike_row = db.execute(
+        """SELECT bm.id, bm.model_name, m.name AS manufacturer
+           FROM bike_models bm
+           JOIN manufacturers m ON bm.manufacturer_id = m.id
+           WHERE bm.id = ?""",
+        (req.bike_id,),
+    ).fetchone()
+    if not bike_row:
+        raise HTTPException(404, f"Bike {req.bike_id} not found")
+
+    # Snapshot current value for the audit trail
+    current_value = _fetch_current_value(db, req.bike_id, req.field_name)
+
+    try:
+        repo = SpecCorrectionsRepository(db)
+        result = repo.create(
+            bike_model_id=req.bike_id,
+            field_name=req.field_name,
+            proposed_value=req.proposed_value,
+            current_value=current_value,
+            source_url=req.source_url,
+            submitter_email=req.submitter_email,
+            notes=req.notes,
+        )
+    except ValueError as exc:
+        raise HTTPException(422, str(exc))
+    except Exception as exc:
+        logging.getLogger(__name__).error(
+            "Failed to store spec correction: %s", exc, exc_info=True
+        )
+        raise HTTPException(500, f"Database error: {exc}")
+
+    bike_label = f"{dict(bike_row)['manufacturer']} {dict(bike_row)['model_name']}"
+    return {
+        "id": result["id"],
+        "status": "pending",
+        "bike": bike_label,
+        "field": req.field_name,
+        "message": (
+            "Thanks! Your correction is queued for review. "
+            "If accepted, it will be applied to the catalog in the next release."
+        ),
+    }
+
+
 # --- Venue Resolve (auto race-environment setup) -------------------------
 
 
