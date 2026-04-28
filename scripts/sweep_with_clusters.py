@@ -35,14 +35,33 @@ from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
 from scripts.validation_sweep import BENCHMARKS
 
 
+def _wb_match(pattern: str, spec_str: str) -> bool:
+    """Word-boundary token-set match. Splits on space/hyphen/dot and checks
+    every pattern token appears as a standalone token in spec_str. Avoids
+    the YZF-R1 vs YZF-R15 substring collision documented in CLAUDE.md
+    April 21 fix and April 27 sanity-sweep regression discovery."""
+    import re as _re
+    tokens = [t for t in _re.split(r"[\s\-\.]+", pattern.lower()) if t]
+    spec_tokens = {t for t in _re.split(r"[\s\-\.]+", spec_str.lower()) if t}
+    return all(t in spec_tokens for t in tokens)
+
+
 def cluster_for(manufacturer, model_name, disp_cc, power_hp, stroke_type, category):
     if stroke_type == 2:
         return "two-stroke"
     cat = (category or "sport").lower()
-    if cat in ("sport", "naked") and power_hp and power_hp >= 195:
-        return "litre-sport-195+"
     if cat in ("cruiser", "touring", "muscle") and disp_cc and disp_cc >= 1300:
         return "cruiser-1300+"
+    # Apr 27, 2026: high-displacement muscle/sport bikes (VMAX 1700,
+    # Triumph Rocket 3, B-King) can be tagged "naked" or "sport" in
+    # known_bikes.py for engine-inertia tuning reasons, but their mass
+    # profile is cruiser-class. Route them to cruiser-1300+ to prevent
+    # the litre-sport-195+ cluster from being polluted by 320 kg muscle
+    # bikes whose ETs are inherently slower than 220 kg sport-1000s.
+    if disp_cc and disp_cc >= 1500 and cat in ("naked", "sport"):
+        return "cruiser-1300+"
+    if cat in ("sport", "naked") and power_hp and power_hp >= 195:
+        return "litre-sport-195+"
     if disp_cc:
         if 600 <= disp_cc < 1100 and cat in ("sport", "naked"):
             return "litre-sport-600-1000"
@@ -123,7 +142,7 @@ def run_sweep(out_path):
         # Find a benchmark matching by manufacturer substring and model substring
         match = None
         for (bm, bmod), entries in bench_map.items():
-            if bm in m_lo and bmod in mod_lo:
+            if _wb_match(bm, m_lo) and _wb_match(bmod, mod_lo):
                 yf = rec.get("year_from") or 0
                 yt = rec.get("year_to") or yf
                 best = None

@@ -365,3 +365,14 @@ class MotoQuantDB:
     @property
     def path(self) -> Path:
         return self._db_path
+
+
+def connect(db_path=None):
+    """
+    Convenience helper: open a connection to the MotoQuant DB and return it.
+    Uses MOTOQUANT_DB env var if db_path is None, defaulting to motoquant.db.
+    """
+    import os as _os
+    path = db_path or _os.environ.get("MOTOQUANT_DB", "motoquant.db")
+    db = MotoQuantDB(path)
+    return db.conn

@@ -44,7 +44,7 @@ The adaptive-dt solver is especially useful for identifying the precise clutch e
     stats: [
       { num: '15', label: 'Sub-models' },
       { num: '1 ms', label: 'Timestep' },
-      { num: '838', label: 'Regression tests' },
+      { num: '976', label: 'Regression tests' },
     ],
   },
   {
@@ -52,8 +52,8 @@ The adaptive-dt solver is especially useful for identifying the precise clutch e
     icon: BarChart3,
     label: '02 / Parts Catalog',
     title: 'Parts ROI Before You Buy',
-    subtitle: '465 parts. Cost-per-tenth ranking. Budget-constrained knapsack optimiser.',
-    body: `The parts catalog covers 465 upgrades across 20 categories — exhausts, ECU flashes, forced induction kits, slipper clutches, suspension, brakes, wheelie bars. Every part has a physics-accurate parameter delta: an Akrapovič slip-on doesn't add a round number of horsepower, it shifts the entire torque curve.
+    subtitle: '555 parts. Cost-per-tenth ranking. Budget-constrained knapsack optimiser.',
+    body: `The parts catalog covers 555 upgrades across 20 categories — exhausts, ECU flashes, forced induction kits, slipper clutches, suspension, brakes, wheelie bars. Every part has a physics-accurate parameter delta: an Akrapovič slip-on doesn't add a round number of horsepower, it shifts the entire torque curve.
 
 The ROI engine runs a 0/1 knapsack DP at ₹100 bucket resolution across any compatible parts set. Tell it your budget and it finds the combination that minimises your ET. The cost-per-tenth column tells you how many rupees you're paying per 0.1 second of ET gain — the clearest way to compare a ₹15,000 exhaust against a ₹60,000 turbo kit.
 
@@ -62,7 +62,7 @@ Build profiles — Street Legal, Drag Prep, Full Race — pre-filter the catalog
     docsLabel: 'See build optimizer guide',
     mockup: null, // TODO: screenshot of BuildPage parts list
     stats: [
-      { num: '465', label: 'Parts' },
+      { num: '555', label: 'Parts' },
       { num: '20', label: 'Categories' },
       { num: '₹100', label: 'Budget granularity' },
     ],

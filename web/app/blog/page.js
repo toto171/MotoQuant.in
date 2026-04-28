@@ -8,6 +8,15 @@ export const metadata = {
 
 const POSTS = [
   {
+    slug: 'how-the-motoquant-physics-engine-works',
+    title: 'How the MotoQuant Physics Engine Works',
+    date: '2026-04-27',
+    readTime: '14 min',
+    tags: ['physics', 'engine', 'validation', 'methodology'],
+    excerpt:
+      'A first-principles tour of the 15-sub-model RK4 physics engine. Engine torque curves, Pacejka tires, clutch slip dynamics, weight transfer — what we simulate, what we validate against, and what the residual error actually means.',
+  },
+  {
     slug: 'the-physics-of-a-perfect-launch',
     title: 'The Physics of a Perfect Launch',
     date: '2026-04-24',

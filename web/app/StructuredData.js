@@ -27,7 +27,7 @@ export function organizationSchema() {
       height: 512,
     },
     description:
-      'First-principles physics engine for motorcycle quarter-mile drag racing. Predict ET, compare builds, and quantify parts ROI for 287+ bikes.',
+      'First-principles physics engine for motorcycle quarter-mile drag racing. Predict ET, compare builds, and quantify parts ROI for 327+ bikes.',
     foundingDate: '2025-11-01',
     founder: { '@type': 'Person', name: 'Hritwik Mudhai' },
     sameAs: [
@@ -81,7 +81,7 @@ export function softwareApplicationSchema() {
     downloadUrl: `${SITE_URL}/simulator`,
     softwareVersion: '1.0',
     description:
-      'Physics-based quarter-mile drag racing simulator for motorcycles. 15-submodel engine (engine, drivetrain, clutch, chain, tires, aero, weight-transfer, rider dynamics, staging, environmental, braking, wheelie, parasitic, rolling resistance, forced induction) covering 290 bikes, 465 parts, 159 tires, 20 venues. Validated to K5 GSX-R1000 10.03s, YZF-R1 10.29s, Hayabusa 10.47s.',
+      'Physics-based quarter-mile drag racing simulator for motorcycles. 15-submodel engine (engine, drivetrain, clutch, chain, tires, aero, weight-transfer, rider dynamics, staging, environmental, braking, wheelie, parasitic, rolling resistance, forced induction) covering 327 bikes, 555 parts, 232 tires, 20 venues. Validated to K5 GSX-R1000 10.03s, YZF-R1 10.29s, Hayabusa 10.47s.',
     publisher: { '@id': `${SITE_URL}/#organization` },
     author: { '@id': `${SITE_URL}/#organization` },
     offers: {
@@ -93,8 +93,8 @@ export function softwareApplicationSchema() {
     },
     featureList: [
       'Quarter-mile ET prediction to ±0.2s',
-      '287 motorcycles with individual aero + dyno curves',
-      '465-part catalog with cost-per-tenth ROI analysis',
+      '327 motorcycles with individual aero + dyno curves',
+      '555-part catalog with cost-per-tenth ROI analysis',
       '15 independent physics sub-models',
       'Dragy GPS + dyno import and auto-calibration',
       'XGBoost + DNN surrogate models for instant iteration',
@@ -124,7 +124,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'MotoQuant Pro is a physics-based motorcycle quarter-mile drag racing simulator. It predicts ET, trap speed, and split times for 287 production bikes using 15 independent physics sub-models and validated aero, tire, and dyno data.',
+            'MotoQuant Pro is a physics-based motorcycle quarter-mile drag racing simulator. It predicts ET, trap speed, and split times for 327 production bikes using 15 independent physics sub-models and validated aero, tire, and dyno data.',
         },
       },
       {
@@ -142,7 +142,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'The catalog covers 290 bikes across 25+ manufacturers: Suzuki, Yamaha, Honda, Kawasaki, BMW, Ducati, Aprilia, KTM, Triumph, Royal Enfield, Bajaj, TVS, Hero, Harley-Davidson, Indian Motorcycle, CFMoto, Benelli, Husqvarna, MV Agusta, Moto Guzzi, Buell, and more. Includes Indian 200–400cc commuters, SE Asia underbones, and 20 two-stroke drag bikes (RD350, RX100, RGV250, H2 Mach IV).',
+            'The catalog covers 327 bikes across 25+ manufacturers: Suzuki, Yamaha, Honda, Kawasaki, BMW, Ducati, Aprilia, KTM, Triumph, Royal Enfield, Bajaj, TVS, Hero, Harley-Davidson, Indian Motorcycle, CFMoto, Benelli, Husqvarna, MV Agusta, Moto Guzzi, Buell, and more. Includes Indian 200–400cc commuters, SE Asia underbones, and 20 two-stroke drag bikes (RD350, RX100, RGV250, H2 Mach IV).',
         },
       },
       {
@@ -169,7 +169,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'Each part in the 465-part catalog is evaluated by running the simulation with and without it. The delta in ET is divided by the part cost in INR to produce a cost-per-tenth metric. A 0/1 knapsack optimizer then picks the best combination under your budget, respecting compatibility rules and known synergy pairs (e.g. exhaust + ECU flash).',
+            'Each part in the 555-part catalog is evaluated by running the simulation with and without it. The delta in ET is divided by the part cost in INR to produce a cost-per-tenth metric. A 0/1 knapsack optimizer then picks the best combination under your budget, respecting compatibility rules and known synergy pairs (e.g. exhaust + ECU flash).',
         },
       },
       {
@@ -195,7 +195,7 @@ export function productSchema() {
     '@id': `${SITE_URL}/#product`,
     name: 'MotoQuant Pro',
     description:
-      'Physics-accurate motorcycle quarter-mile drag racing simulator. 290 bikes, 465 parts, 15 physics sub-models. Predict ET, trap speed, and split times. Validated against real Dragy GPS data.',
+      'Physics-accurate motorcycle quarter-mile drag racing simulator. 327 bikes, 555 parts, 15 physics sub-models. Predict ET, trap speed, and split times. Validated against real Dragy GPS data.',
     brand: {
       '@type': 'Brand',
       name: 'MotoQuant',

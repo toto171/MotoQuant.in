@@ -10,7 +10,7 @@ const ROADMAP = [
     phase: 'Phase 1–2',
     status: 'complete',
     label: 'Physics engine + Database',
-    desc: '15 sub-models, 290 bikes, 465 parts, 20 venues, 838 tests. Full validation suite.',
+    desc: '15 sub-models, 327 bikes, 555 parts, 20 venues, 976 tests. Full validation suite.',
   },
   {
     phase: 'Phase 3',
@@ -186,7 +186,7 @@ export default function AboutPage() {
               </div>
               <div className="space-y-3 text-white/70 text-sm leading-relaxed">
                 <p>
-                  The physics + software side. Built the 15-sub-model drag simulation engine, the 287-bike catalog, the ROI knapsack, and the calibration pipeline that fits sim output to real Dragy traces within ±0.05 s.
+                  The physics + software side. Built the 15-sub-model drag simulation engine, the 327-bike catalog, the ROI knapsack, and the calibration pipeline that fits sim output to real Dragy traces within ±0.05 s.
                 </p>
                 <p>
                   AI engineer by trade — currently building a separate AI startup in parallel. That expertise is baked into MotoQuant&apos;s machine-learning layer: the DNN surrogate (1 ms per ET prediction), the XGBoost-backed ROI ranker, the Bayesian build optimiser, and the natural-language tuning interface.
@@ -340,4 +340,3 @@ export default function AboutPage() {
     </div>
   );
 }
-           

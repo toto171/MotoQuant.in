@@ -25,7 +25,7 @@ const FEATURES = [
   ["Simulations per day",                "10", "Unlimited", "Unlimited"],
   ["Parts in a build",                   "3",  "Unlimited", "Unlimited"],
   ["Bike catalog (270+ bikes)",          "✓",  "✓",         "✓"],
-  ["Tire library (159 tires)",           "✓",  "✓",         "✓"],
+  ["Tire library (232 tires)",           "✓",  "✓",         "✓"],
   ["Venue conditions (20 venues)",       "✓",  "✓",         "✓"],
   ["ROI & Sobol analysis",               "—",  "✓",         "✓"],
   ["Build optimiser (BoTorch)",          "—",  "✓",         "✓"],

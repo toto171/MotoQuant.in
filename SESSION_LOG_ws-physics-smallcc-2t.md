@@ -172,4 +172,119 @@ smaller bikes.
 
 ### Why these fixes are physically motivated, not magic multipliers
 
-- **Fluid mas
+- **Fluid mass** is 0.74 kg/L gasoline × tank capacity + oil + coolant.
+  Tank capacity scales ≈ linearly with displacement across the catalog
+  (100 cc → 7 L tank, 1000 cc → 18 L tank). Slope 0.009 kg/cc with
+  floor 7 kg matches real-world measurements within ±2 kg.
+- **Basket inertia** is set by basket OD and plate count, both of
+  which scale with the engine's peak torque envelope. K5's 0.010 at
+  1000 cc fixes the slope to 0.00001 kg·m²/cc.
+- **2T launch RPM** at peak-torque or tuned RPM (whichever is higher)
+  reflects real drag-racing practice: launch into the pipe's tuned
+  band so lockup happens with the resonance already on.
+- **2T commuter-single band** widening is calibrated against published
+  RX100 dyno traces — ~70 % of peak at 5500 rpm, ~50 % at 8500 rpm.
+
+## 4. Verification
+
+Full 287-bike sweep run in 4 chunks of ~75 bikes each (fits under the
+45 s-per-shell cap). Aggregated to `reports/sweep_et_2026-04-24_post_smallcc_fix.json`.
+
+### Reference baselines (must NOT regress):
+
+| Bike       | Target     | Post-fix   | Δ        |
+|------------|-----------:|-----------:|---------:|
+| K5         | 10.0334    | 10.0334    | **+0.0000** ✓ |
+| R1 (4C8)   | 10.2859    | 10.2859    | **+0.0000** ✓ |
+| Hayabusa   | 10.4712    | 10.4712    | **+0.0000** ✓ |
+
+### Cluster summary:
+
+| Cluster              | N  | mean \|Δ\| | bias   |
+|----------------------|----|-----------:|-------:|
+| litre-sport-195+     | 21 | 0.182 s    | −0.009 s |
+| litre-sport-600-1000 | 27 | 0.193 s    | −0.114 s |
+| mid-twin-300-500     | 12 | 0.732 s    | +0.412 s |
+| entry-200-300        |  4 | 1.412 s    | +1.412 s |
+| entry-150-200        |  5 | 1.836 s    | +1.836 s |
+| two-stroke           |  5 | 2.071 s    | +1.851 s |
+| other (cruisers etc.)|  5 | 0.283 s    | +0.215 s |
+
+### Top-10 closest matches (unchanged from pre-fix quality):
+
+```
+Kawasaki   Ninja ZX-9R           Δ=−0.0032s
+Yamaha     YZF-R1                Δ=−0.0099s
+Kawasaki   Ninja ZX-10R          Δ=+0.0106s
+Suzuki     TL1000R               Δ=+0.0169s
+Honda      CBR1000RR-R SP        Δ=−0.0227s
+Yamaha     YZF-R1 (other)        Δ=−0.0284s
+KTM        Duke 390              Δ=−0.0292s
+BMW        M1000RR               Δ=+0.0452s
+MV Agusta  Brutale 1000 RR       Δ=−0.0473s
+Royal Enfield Continental GT 650 Δ=+0.0560s
+
+top-10 mean|Δ| = 0.0269s   (pre-fix: 0.032s, 15 % tighter)
+```
+
+## 5. Tests
+
+`tests/test_small_cc_calibration.py` — **21 new tests, all passing**:
+
+- `TestReferenceBaselines` — K5/R1/Hayabusa within ±0.02 s.
+- `TestClusterBiases` — per-cluster canaries at post-fix tolerance.
+- `TestPowerBoostStillLive` — +50 % power must shave ≥1 s on R15 V3.
+- `TestFluidMassScaling` — 6 direct helper tests.
+- `TestBasketInertiaScaling` — 4 direct helper tests.
+- `TestTwoStrokeSmallCommuter` — RX100 must finish; launch_rpm ≥ peak_tq_rpm.
+- `TestSpecPathPropagatesFixes` — production-path integration (no tautology).
+
+All tests hit the **production code path** (`spec_to_bike_config` →
+`MotoQuantEngine.run`). No scaling-inside-the-test tricks.
+
+Pre-existing test suites still green: `test_two_stroke` (30), `test_validation`,
+`test_scraper`, `test_power_boost_regression` (10), `test_submodel_kaizen`
+all pass — 183 tests total + 21 new = **204 tests passing** in the
+targeted subset.
+
+## 6. Deferred work
+
+- **150-200 cc entry cluster** closed only 36 % (target 40 %). Residual
+  +1.84 s bias likely split between: (a) the catalog benchmarks for
+  R15 V3/V4 and MT-15 include rider weights ≤70 kg whereas our sim
+  uses 75 kg (3-4 kg difference ≈ 0.15 s), (b) residual
+  small-commuter-clutch basket inertia miscalibration (scale could be
+  more aggressive for cyl==1), (c) small-cc CoG height (the 540 mm
+  sport default is probably 50-70 mm too high for a 150 cc commuter).
+  Not investigated this session.
+- **2-stroke cluster** closed 31 % (target 40 %). Residual bias is
+  dominated by gear-ratio gaps on small commuters (RX100's 2.833 → 1.705
+  drop takes the engine from tuned_rpm to 60 % of tuned_rpm on the
+  upshift, which is below even the new wider band baseline). Fix
+  requires either service-manual gear ratios (orchestrator-owned
+  workstream) or a dedicated 2T up-shift predictor. Not investigated.
+- **"other" cluster (N=5)** includes a few 1300+ cruisers that used to
+  be in the "Hayabusa/ZX-14 1300+" cluster in the CLAUDE.md
+  taxonomy. Residual bias +0.22 s — well within tolerance, no action.
+- **Substring-match bug in `SimpleSweepCluster` matcher** fixed by
+  switching to `scripts/validation_sweep._model_match` (word-boundary
+  tokenization). Documented here so future sweeps don't re-introduce
+  the "YZF-R1 matches YZF-R15" bug.
+
+## 7. Files changed (explicit git add list)
+
+- `motoquant/scraper/importer.py` — 5 changes (2 new helpers, chassis
+  builder, 2T launch RPM, clutch override, 2T curve call)
+- `motoquant/defaults.py` — 1 change (2T small-commuter-single branch)
+- `motoquant/models.py` — 1 change (EngineParams._two_stroke_torque
+  sync)
+- `tests/test_small_cc_calibration.py` — new (21 tests)
+- `scripts/sweep_with_clusters.py` — new (diagnostic tool)
+- `reports/sweep_et_2026-04-24_post_smallcc_fix.json` — new
+- `SESSION_LOG_ws-physics-smallcc-2t.md` — this file
+
+**NOT staged** (other-stream ownership per orchestrator):
+- `motoquant/scraper/gear_ratios.py`, `known_bikes.py` gear cassette fields
+- `motoquant/api.py`, `motoquant/database/**`
+- `desktop/**`, `web/**`
+- `CLAUDE.md`

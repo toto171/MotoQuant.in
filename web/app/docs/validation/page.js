@@ -230,7 +230,7 @@ export default function ValidationPage() {
           </Link>
           <Link href="/simulator" className="glass rounded-xl p-4 border border-white/10 hover:border-brand-orange/40 transition-colors group">
             <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Try the simulator →</div>
-            <div className="text-xs text-white/50">287 bikes, free in the browser, no account needed.</div>
+            <div className="text-xs text-white/50">327 bikes, free in the browser, no account needed.</div>
           </Link>
         </div>
       </div>

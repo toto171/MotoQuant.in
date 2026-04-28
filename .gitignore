@@ -103,7 +103,12 @@ pytest-cache-files-*/
 motoquant/parts/__pycache__/
 __pycache__/
 
-# Local secrets — never commit (contains GitHub PAT pasted in chat sessions)
+# Local secrets — never commit
+# (contains GitHub PAT pasted in chat sessions, env files, etc.)
 # User should revoke any PAT here at github.com/settings/tokens
 tokens.md
+tokens.md.bak
 *.tokens
+*.token
+secrets.local
+.env.local

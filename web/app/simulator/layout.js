@@ -8,7 +8,7 @@ import StructuredData, { SITE_URL } from '../StructuredData';
 const TITLE =
   'Free Motorcycle Quarter-Mile Simulator — Predict ET in Seconds';
 const DESCRIPTION =
-  'Run a live quarter-mile drag simulation for any of 287 motorcycles. Tweak rider weight, power delta, mass, and venue, then read ET, trap speed, 60-ft split, and a full v(t) / RPM / accel chart. Validated to ±0.2s on K5, R1, and Hayabusa.';
+  'Run a live quarter-mile drag simulation for any of 327 motorcycles. Tweak rider weight, power delta, mass, and venue, then read ET, trap speed, 60-ft split, and a full v(t) / RPM / accel chart. Validated to ±0.2s on K5, R1, and Hayabusa.';
 
 export const metadata = {
   title: TITLE,
@@ -38,7 +38,7 @@ export const metadata = {
         url: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'MotoQuant Pro Simulator — live quarter-mile drag simulation for 287 motorcycles',
+        alt: 'MotoQuant Pro Simulator — live quarter-mile drag simulation for 327 motorcycles',
       },
     ],
   },
@@ -82,7 +82,7 @@ function webApplicationSchema() {
       priceCurrency: 'INR',
     },
     featureList: [
-      '287 motorcycles in catalog',
+      '327 motorcycles in catalog',
       '20 drag strip venues with seasonal weather',
       'ET + trap + splits in <1 second',
       'Dragy GPS import for calibration',

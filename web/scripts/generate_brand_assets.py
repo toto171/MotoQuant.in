@@ -227,7 +227,7 @@ def render_og_image(path: Path) -> None:
 
     # Stat strip — 4 stats (dropped 'tires' for horizontal budget)
     stats = [
-        ("287", "bikes"),
+        ("327", "bikes"),
         ("465", "parts"),
         ("12", "venues"),
         ("739", "tests"),
