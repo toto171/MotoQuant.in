@@ -78,6 +78,7 @@ class BikeRepository:
         year_to: int = None,
         category: str = "sport",
         subcategory: str = None,
+        data_source: str = "estimated",
         **headline_specs,
     ) -> int:
         """Create a new bike model entry. Returns model ID."""
@@ -89,6 +90,7 @@ class BikeRepository:
             "year_to",
             "category",
             "subcategory",
+            "data_source",
         ]
         vals = [
             manufacturer_id,
@@ -98,6 +100,7 @@ class BikeRepository:
             year_to,
             category,
             subcategory,
+            data_source,
         ]
 
         for k, v in headline_specs.items():
@@ -496,6 +499,34 @@ class BikeRepository:
             (et_s, trap_kmh, source, model_id),
         )
         self._conn.commit()
+
+    def update_data_source(self, model_id: int, data_source: str) -> bool:
+        """
+        Set the data_source label on a bike_model row.
+
+        Valid values: 'verified_service_manual', 'magazine_test', 'estimated',
+                      'user_submitted_pending', 'user_submitted_verified'.
+        Returns True if the row was found and updated.
+        """
+        valid = {
+            "verified_service_manual",
+            "magazine_test",
+            "estimated",
+            "user_submitted_pending",
+            "user_submitted_verified",
+        }
+        if data_source not in valid:
+            raise ValueError(
+                f"data_source must be one of {sorted(valid)}, got {data_source!r}"
+            )
+        cur = self._conn.execute(
+            """UPDATE bike_models
+               SET data_source = ?, updated_at = datetime('now','utc')
+               WHERE id = ?""",
+            (data_source, model_id),
+        )
+        self._conn.commit()
+        return cur.rowcount > 0
 
     # ────────────────────────────────────────────
     # Counts

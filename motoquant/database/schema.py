@@ -74,6 +74,9 @@ CREATE TABLE IF NOT EXISTS bike_models (
     data_completeness   REAL    DEFAULT 0.0,    -- 0–1 fraction of sim params filled
     data_quality        TEXT    DEFAULT 'scraped',
         -- scraped / spec_sheet / verified / dyno_validated / track_validated
+    data_source         TEXT    DEFAULT 'estimated',
+        -- verified_service_manual / magazine_test / estimated /
+        -- user_submitted_pending / user_submitted_verified
     validation_et_s     REAL,                   -- known QM ET for cross-check
     validation_trap_kmh REAL,
     validation_source   TEXT,
@@ -538,6 +541,32 @@ CREATE TABLE IF NOT EXISTS part_prices (
 );
 CREATE INDEX IF NOT EXISTS idx_part_prices_part  ON part_prices(part_id);
 CREATE INDEX IF NOT EXISTS idx_part_prices_fetch ON part_prices(fetched_at);
+
+-- ════════════════════════════════════════════════════════════
+-- 16. SPEC CORRECTIONS  (user-submitted field-level corrections)
+--     Indian forum users and verified tuners can propose corrections
+--     to individual spec fields on any bike_model row.  Each row is
+--     reviewed before being applied to the live catalog.
+-- ════════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS spec_corrections (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    bike_model_id   INTEGER NOT NULL REFERENCES bike_models(id) ON DELETE CASCADE,
+    field_name      TEXT    NOT NULL,           -- dotted or flat field name (e.g. 'peak_power_hp')
+    current_value   TEXT,                       -- snapshot of current DB value (for audit trail)
+    proposed_value  TEXT    NOT NULL,           -- submitter's suggested replacement
+    source_url      TEXT,                       -- URL of supporting evidence
+    submitter_email TEXT,                       -- optional reply address
+    notes           TEXT,                       -- free-form context from submitter
+    status          TEXT    NOT NULL DEFAULT 'pending'
+                                   CHECK(status IN ('pending','approved','rejected')),
+    created_at      TEXT    DEFAULT (datetime('now','utc')),
+    reviewed_at     TEXT                        -- set when approved or rejected
+);
+
+CREATE INDEX IF NOT EXISTS idx_spec_corr_bike   ON spec_corrections(bike_model_id);
+CREATE INDEX IF NOT EXISTS idx_spec_corr_status ON spec_corrections(status);
+CREATE INDEX IF NOT EXISTS idx_spec_corr_field  ON spec_corrections(field_name);
 """
 
 # Categories seeded on first init
