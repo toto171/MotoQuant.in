@@ -2917,6 +2917,101 @@ def cmd_nl(args):
         return 1
 
 
+def cmd_chat(args):
+    """
+    Phase A: LLM-powered natural language tuning interface.
+
+    Thin CLI wrapper around motoquant.llm.run_chat_pipeline. Delegates the
+    parse -> resolve -> sim -> summarize pipeline to the shared runner so
+    the CLI and POST /api/chat never drift.
+
+    Differences vs `nl` (regex parser):
+      - Handles paraphrased / unusual queries that regex can't match
+      - Returns a human-readable summary instead of just stats
+      - Requires ANTHROPIC_API_KEY env var
+    """
+    from .llm import run_chat_pipeline
+
+    query = getattr(args, "query", None)
+    if not query:
+        print("  Error: No query provided. Usage: chat 'your query here'")
+        return 1
+
+    db = ensure_db(args)
+    output_json = getattr(args, "output_json", False)
+    verbose = getattr(args, "verbose", False)
+
+    result = run_chat_pipeline(query, db)
+    db.close()
+
+    if output_json:
+        import json as _json
+
+        print(_json.dumps(result.to_dict(), indent=2, default=str))
+        return 0 if result.error is None else 1
+
+    if verbose:
+        print(
+            f"\n  Parsed: bike='{result.bike_name}' bike_id={result.bike_id}"
+        )
+        print(
+            f"          venue='{result.venue_name}' venue_id={result.venue_id}"
+        )
+        print(f"          goal={result.optimization_goal}")
+        if result.parsed_notes:
+            print(f"          notes: {result.parsed_notes}")
+
+    if result.error == "llm_not_configured":
+        print(f"  Error: {result.error_detail}")
+        print("  Hint: try `nl` (regex parser) instead -- no API key required.")
+        return 1
+    if result.error == "parse_failed":
+        print(f"  Error parsing query: {result.error_detail}")
+        return 1
+    if result.error == "bike_not_found":
+        print(f"  Error: {result.error_detail}")
+        if result.bike_suggestions:
+            print("  Did you mean:")
+            for s in result.bike_suggestions:
+                yr = f" ({s['year_range']})" if s.get("year_range") else ""
+                print(f"    - {s.get('manufacturer','?')} {s.get('model','?')}{yr}  [id={s.get('id')}]")
+        else:
+            print("  Try `bikes` to browse the catalog.")
+        return 1
+    if result.error == "sim_failed":
+        print(f"  Error: simulation failed -- {result.error_detail}")
+        return 1
+
+    sim = result.sim_result or {}
+    summary = result.summary or "(no summary)"
+
+    print("\n  +-- MotoQuant chat -----------------------------------------+")
+    print(f"\n  Query : {result.raw_query}")
+    print(f"  Bike  : {result.bike_name} (id={result.bike_id})")
+    if result.venue_name:
+        print(f"  Venue : {result.venue_name}")
+    print()
+    if sim.get("et_s") is not None:
+        print(f"  ET    : {sim['et_s']:.3f} s")
+    if sim.get("trap_speed_kmh") is not None:
+        print(
+            f"  Trap  : {sim['trap_speed_kmh']:.1f} km/h "
+            f"({sim.get('trap_speed_mph', 0):.1f} mph)"
+        )
+    if sim.get("sixty_foot_s") is not None:
+        print(f"  60-ft : {sim['sixty_foot_s']:.3f} s")
+    print()
+    print("  Summary:")
+    import textwrap
+
+    for paragraph in summary.split("\n\n"):
+        for line in textwrap.wrap(paragraph, width=70):
+            print(f"    {line}")
+        print()
+
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="motoquant",
@@ -3763,6 +3858,34 @@ def build_parser() -> argparse.ArgumentParser:
         "--verbose", action="store_true", help="Print debug info on error"
     )
 
+    p_chat = subparsers.add_parser(
+        "chat",
+        help=(
+            "Phase A: Claude-powered NL tuning. Requires ANTHROPIC_API_KEY. "
+            "Use `nl` if you want the regex parser without an API key."
+        ),
+    )
+    p_chat.add_argument(
+        "query",
+        metavar="QUERY",
+        nargs="?",
+        help=(
+            "Natural language query "
+            "(e.g., 'how fast is my Hayabusa at Aamby Valley in 35C heat?')"
+        ),
+    )
+    p_chat.add_argument(
+        "--json",
+        action="store_true",
+        dest="output_json",
+        help="Output result + summary as JSON",
+    )
+    p_chat.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Print parsed structure + debug info on error",
+    )
+
     return parser
 
 
@@ -3785,6 +3908,7 @@ SUBCOMMAND_MAP = {
     "calibrate": cmd_calibrate,
     "analysis": cmd_analysis,
     "nl": cmd_nl,
+    "chat": cmd_chat,
     "pricing": cmd_pricing,
 }
 
