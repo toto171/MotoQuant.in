@@ -73,9 +73,9 @@ def _format_user_message(parsed: ParsedSimRequest, sim: dict[str, Any]) -> str:
 
     lines.append("")
     lines.append("Simulation result:")
-    et = sim.get("et_s", sim.get("time_quarter"))
+    et = sim.get("et_quarter_s", sim.get("et_s", sim.get("time_quarter")))
     trap_kmh = sim.get("trap_speed_kmh")
-    sixty = sim.get("sixty_foot_s", sim.get("time_60ft"))
+    sixty = sim.get("et_60ft_s", sim.get("sixty_foot_s", sim.get("time_60ft")))
 
     if et is not None:
         lines.append(f"  ET: {float(et):.3f} s")

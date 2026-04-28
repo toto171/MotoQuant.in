@@ -159,8 +159,12 @@ export default function ChatPanel({ apiUrl }) {
               <div className="flex gap-2 items-start p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-300 text-xs">
                 <KeyRound size={14} className="shrink-0 mt-0.5" />
                 <span>
-                  Set <code className="font-mono bg-white/10 px-1 rounded">ANTHROPIC_API_KEY</code> on
-                  the server to enable natural-language queries.
+                  Natural-language chat is offline — server is missing an LLM API key.
+                  {chatResult.error_detail && (
+                    <span className="block mt-1 opacity-70 font-mono">
+                      {chatResult.error_detail}
+                    </span>
+                  )}
                 </span>
               </div>
             )}

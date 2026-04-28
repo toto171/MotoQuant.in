@@ -1,149 +1,176 @@
 """
-LLMClient -- thin wrapper around the Anthropic Messages API.
+LLMClient -- thin provider-agnostic wrapper around chat-completion APIs.
 
-Why a wrapper:
-  - Centralizes model name + retry logic + timeout in one place
-  - Lets tests inject mocked responses without touching the anthropic SDK
-  - Lazy-imports anthropic so the module loads even when the package is
-    not installed (only fails at call time with a typed error)
-  - Gracefully degrades when ANTHROPIC_API_KEY is missing
+Supported providers (selected via the LLM_PROVIDER env var):
+  - "gemini"     -- Google Gemini (free tier, 1500 req/day; default)
+  - "anthropic"  -- Anthropic Claude (paid, native SDK)
+  - "deepseek"   -- DeepSeek API (cheap; OpenAI-compatible)
+  - "groq"       -- Groq Llama 3.3 70B (free, fastest; OpenAI-compatible)
+  - "openrouter" -- OpenRouter (free DeepSeek/Llama via aggregator)
 
-Usage
------
-    from motoquant.llm.client import LLMClient
+All non-Anthropic providers go through the OpenAI Python SDK pointed at
+the provider's OpenAI-compatible endpoint, so the call shape is identical.
 
-    client = LLMClient()  # reads ANTHROPIC_API_KEY from env
-    resp = client.call_tool(
-        system="You parse queries.",
-        user="optimize my K5",
-        tool_name="submit_query",
-        tool_schema={...},
-    )
-    parsed_dict = resp.tool_input
+Each provider reads its own API key env var:
+  - GEMINI_API_KEY     -- get from https://aistudio.google.com/apikey
+  - ANTHROPIC_API_KEY  -- get from https://console.anthropic.com/
+  - DEEPSEEK_API_KEY   -- get from https://platform.deepseek.com/api_keys
+  - GROQ_API_KEY       -- get from https://console.groq.com/keys
+  - OPENROUTER_API_KEY -- get from https://openrouter.ai/keys
 
 For tests, pass `_call_override`:
     def fake(kind, kwargs):
-        return {"bike_name": "K5", "optimization_goal": "minimize_et"}
+        return {"bike_name": "K5"}
     client = LLMClient(_call_override=fake)
 """
 
 from __future__ import annotations
 
+import json
 import os
 from dataclasses import dataclass
 from typing import Any, Callable
 
-# Pinned model -- bump this in one place when upgrading.
-DEFAULT_MODEL = "claude-sonnet-4-6"
+# ─── Provider table ───────────────────────────────────────────────────────
+_PROVIDERS: dict[str, dict[str, str | None]] = {
+    "gemini": {
+        "model": "gemini-1.5-flash",
+        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+        "api_key_env": "GEMINI_API_KEY",
+    },
+    "anthropic": {
+        "model": "claude-sonnet-4-6",
+        "base_url": None,
+        "api_key_env": "ANTHROPIC_API_KEY",
+    },
+    "deepseek": {
+        "model": "deepseek-chat",
+        "base_url": "https://api.deepseek.com/v1",
+        "api_key_env": "DEEPSEEK_API_KEY",
+    },
+    "groq": {
+        "model": "llama-3.3-70b-versatile",
+        "base_url": "https://api.groq.com/openai/v1",
+        "api_key_env": "GROQ_API_KEY",
+    },
+    "openrouter": {
+        "model": "deepseek/deepseek-chat-v3:free",
+        "base_url": "https://openrouter.ai/api/v1",
+        "api_key_env": "OPENROUTER_API_KEY",
+    },
+}
+
+DEFAULT_PROVIDER = "gemini"
 DEFAULT_MAX_TOKENS = 1024
 DEFAULT_TIMEOUT_S = 30.0
 
 
 class LLMNotConfiguredError(RuntimeError):
-    """Raised when the Anthropic client is needed but cannot be built.
+    """Raised when the LLM client is needed but cannot be built."""
 
-    Reasons:
-      - ANTHROPIC_API_KEY env var is unset and no api_key passed
-      - `anthropic` package is not installed
+
+class LLMRateLimitError(RuntimeError):
+    """Raised when the provider returns a 429 / quota-exceeded error.
+
+    Distinct from generic errors so the chat pipeline can return a typed
+    'rate_limit' marker to the UI instead of bubbling a stack trace.
     """
 
 
 @dataclass
 class LLMResponse:
-    """Normalized response from a tool-use or text call.
-
-    For tool calls: tool_input is the parsed JSON the model produced.
-    For text calls: raw_text is the concatenated text content.
-    """
-
     tool_input: dict[str, Any] | None = None
     raw_text: str | None = None
     stop_reason: str | None = None
 
 
 class LLMClient:
-    """Thin wrapper around the Anthropic Messages API.
-
-    Two main usage modes:
-      - call_tool(...) -> LLMResponse with tool_input populated
-        Use for structured output (query parsing, build extraction).
-      - call_text(...) -> str
-        Plain text response. Use for summarization.
-
-    For tests:
-      LLMClient(_call_override=lambda kind, kwargs: ...) bypasses the SDK
-      entirely. `kind` is "tool" or "text"; `kwargs` are the call args.
-    """
-
     def __init__(
         self,
+        provider: str | None = None,
         api_key: str | None = None,
-        model: str = DEFAULT_MODEL,
+        model: str | None = None,
         max_tokens: int = DEFAULT_MAX_TOKENS,
         timeout_s: float = DEFAULT_TIMEOUT_S,
         _call_override: Callable[[str, dict[str, Any]], Any] | None = None,
     ):
-        self._api_key = api_key or os.environ.get("ANTHROPIC_API_KEY")
-        self._model = model
+        self._provider = (
+            provider or os.environ.get("LLM_PROVIDER") or DEFAULT_PROVIDER
+        ).lower()
+        if self._provider not in _PROVIDERS:
+            raise LLMNotConfiguredError(
+                f"Unknown LLM_PROVIDER {self._provider!r}. "
+                f"Supported: {sorted(_PROVIDERS.keys())}"
+            )
+        cfg = _PROVIDERS[self._provider]
+        self._api_key = api_key or os.environ.get(cfg["api_key_env"])
+        if not self._api_key and self._provider == "anthropic":
+            self._api_key = os.environ.get("ANTHROPIC_API_KEY")
+        self._model = model or cfg["model"]
+        self._base_url = cfg["base_url"]
         self._max_tokens = max_tokens
         self._timeout_s = timeout_s
         self._call_override = _call_override
-        self._sdk_client = None  # lazy
+        self._sdk_client = None
 
     @property
     def model(self) -> str:
         return self._model
 
     @property
+    def provider(self) -> str:
+        return self._provider
+
+    @property
     def is_configured(self) -> bool:
-        """True if a real API call would succeed (key set, SDK importable)."""
         if self._call_override is not None:
             return True
         if not self._api_key:
             return False
         try:
-            import anthropic  # noqa: F401
+            if self._provider == "anthropic":
+                import anthropic  # noqa: F401
+            else:
+                import openai  # noqa: F401
         except ImportError:
             return False
         return True
 
     def _get_sdk(self):
-        """Lazy-init the anthropic.Anthropic SDK client."""
         if self._sdk_client is not None:
             return self._sdk_client
         if not self._api_key:
+            cfg = _PROVIDERS[self._provider]
             raise LLMNotConfiguredError(
-                "ANTHROPIC_API_KEY env var not set. "
-                "Set it (export ANTHROPIC_API_KEY=sk-ant-...) or pass "
-                "api_key= to LLMClient(). Get a key at "
-                "https://console.anthropic.com/"
+                f"{cfg['api_key_env']} env var not set. "
+                f"Provider={self._provider!r}. Set {cfg['api_key_env']}=... "
+                f"or set LLM_PROVIDER to a different provider."
             )
-        try:
-            import anthropic
-        except ImportError as e:
-            raise LLMNotConfiguredError(
-                "anthropic package not installed. Run: "
-                "pip install anthropic --break-system-packages"
-            ) from e
-        self._sdk_client = anthropic.Anthropic(
-            api_key=self._api_key, timeout=self._timeout_s
-        )
+        if self._provider == "anthropic":
+            try:
+                import anthropic
+            except ImportError as e:
+                raise LLMNotConfiguredError(
+                    "anthropic package not installed: pip install anthropic"
+                ) from e
+            self._sdk_client = anthropic.Anthropic(
+                api_key=self._api_key, timeout=self._timeout_s
+            )
+        else:
+            try:
+                import openai
+            except ImportError as e:
+                raise LLMNotConfiguredError(
+                    "openai package not installed: pip install openai"
+                ) from e
+            self._sdk_client = openai.OpenAI(
+                api_key=self._api_key,
+                base_url=self._base_url,
+                timeout=self._timeout_s,
+            )
         return self._sdk_client
 
-    # ── public methods ────────────────────────────────────────────────────
-
-    def call_tool(
-        self,
-        system: str,
-        user: str,
-        tool_name: str,
-        tool_schema: dict[str, Any],
-    ) -> LLMResponse:
-        """Force the model to invoke `tool_name` with input matching `tool_schema`.
-
-        Returns LLMResponse with tool_input populated.
-        Raises RuntimeError if the model refuses to invoke the tool.
-        """
+    def call_tool(self, system, user, tool_name, tool_schema):
         if self._call_override is not None:
             result = self._call_override(
                 "tool",
@@ -159,75 +186,120 @@ class LLMClient:
             if isinstance(result, dict):
                 return LLMResponse(tool_input=result, stop_reason="tool_use")
             raise TypeError(
-                f"_call_override for 'tool' must return dict or LLMResponse, "
-                f"got {type(result).__name__}"
+                f"_call_override for 'tool' must return dict or LLMResponse"
             )
 
         client = self._get_sdk()
+
+        if self._provider == "anthropic":
+            tools = [
+                {
+                    "name": tool_name,
+                    "description": (
+                        f"Submit the structured parse result. "
+                        f"Always invoke {tool_name}."
+                    ),
+                    "input_schema": tool_schema,
+                }
+            ]
+            msg = client.messages.create(
+                model=self._model,
+                max_tokens=self._max_tokens,
+                system=system,
+                tools=tools,
+                tool_choice={"type": "tool", "name": tool_name},
+                messages=[{"role": "user", "content": user}],
+            )
+            for block in msg.content:
+                if getattr(block, "type", None) == "tool_use" and block.name == tool_name:
+                    return LLMResponse(
+                        tool_input=dict(block.input), stop_reason=msg.stop_reason
+                    )
+            raise RuntimeError(
+                f"Model did not invoke {tool_name}; stop_reason={msg.stop_reason}"
+            )
+
+        # OpenAI-compatible providers
         tools = [
             {
-                "name": tool_name,
-                "description": (
-                    f"Submit the structured parse result. "
-                    f"Always invoke {tool_name} -- never reply in plain text."
-                ),
-                "input_schema": tool_schema,
+                "type": "function",
+                "function": {
+                    "name": tool_name,
+                    "description": (
+                        f"Submit the structured parse result. "
+                        f"Always invoke {tool_name}."
+                    ),
+                    "parameters": tool_schema,
+                },
             }
         ]
-        msg = client.messages.create(
+        msg = client.chat.completions.create(
             model=self._model,
             max_tokens=self._max_tokens,
-            system=system,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
             tools=tools,
-            tool_choice={"type": "tool", "name": tool_name},
-            messages=[{"role": "user", "content": user}],
+            tool_choice={"type": "function", "function": {"name": tool_name}},
         )
-        for block in msg.content:
-            if getattr(block, "type", None) == "tool_use" and block.name == tool_name:
-                return LLMResponse(
-                    tool_input=dict(block.input),
-                    stop_reason=msg.stop_reason,
-                )
+        choice = msg.choices[0]
+        tool_calls = getattr(choice.message, "tool_calls", None) or []
+        for tc in tool_calls:
+            fn = getattr(tc, "function", None)
+            if fn is None or fn.name != tool_name:
+                continue
+            try:
+                args = json.loads(fn.arguments)
+            except (TypeError, ValueError) as e:
+                raise RuntimeError(
+                    f"Provider returned malformed JSON for {tool_name}: {fn.arguments!r}"
+                ) from e
+            return LLMResponse(tool_input=args, stop_reason=choice.finish_reason)
         raise RuntimeError(
-            f"Model did not invoke {tool_name}; stop_reason={msg.stop_reason}"
+            f"Model did not invoke {tool_name}; "
+            f"finish_reason={choice.finish_reason}"
         )
 
-    def call_text(self, system: str, user: str) -> str:
-        """Plain-text completion. Returns the concatenated text content."""
+    def call_text(self, system, user):
         if self._call_override is not None:
             result = self._call_override("text", {"system": system, "user": user})
             if isinstance(result, str):
                 return result
             raise TypeError(
-                f"_call_override for 'text' must return str, "
-                f"got {type(result).__name__}"
+                f"_call_override for 'text' must return str, got {type(result).__name__}"
             )
 
         client = self._get_sdk()
-        msg = client.messages.create(
+
+        if self._provider == "anthropic":
+            msg = client.messages.create(
+                model=self._model,
+                max_tokens=self._max_tokens,
+                system=system,
+                messages=[{"role": "user", "content": user}],
+            )
+            chunks = []
+            for block in msg.content:
+                if getattr(block, "type", None) == "text":
+                    chunks.append(block.text)
+            return "".join(chunks).strip()
+
+        msg = client.chat.completions.create(
             model=self._model,
             max_tokens=self._max_tokens,
-            system=system,
-            messages=[{"role": "user", "content": user}],
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
         )
-        chunks: list[str] = []
-        for block in msg.content:
-            if getattr(block, "type", None) == "text":
-                chunks.append(block.text)
-        return "".join(chunks).strip()
+        return (msg.choices[0].message.content or "").strip()
 
-
-# ── module singleton ──────────────────────────────────────────────────────
 
 _DEFAULT_CLIENT: LLMClient | None = None
 
 
 def get_default_client() -> LLMClient:
-    """Singleton accessor for the default LLMClient.
-
-    Tests should NOT use this -- pass an explicit
-    LLMClient(_call_override=...) into parse_query / summarize_result instead.
-    """
     global _DEFAULT_CLIENT
     if _DEFAULT_CLIENT is None:
         _DEFAULT_CLIENT = LLMClient()
@@ -235,6 +307,8 @@ def get_default_client() -> LLMClient:
 
 
 def reset_default_client() -> None:
-    """For tests / dev -- drop the singleton so the next call rebuilds it."""
     global _DEFAULT_CLIENT
     _DEFAULT_CLIENT = None
+
+
+DEFAULT_MODEL = _PROVIDERS[DEFAULT_PROVIDER]["model"]
