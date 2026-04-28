@@ -69,7 +69,7 @@ export async function generateMetadata({ params }) {
     const fallbackTitle =
       'Motorcycle Quarter-Mile Drag Simulator — MotoQuant Pro';
     const fallbackDesc =
-      'Physics-based quarter-mile drag-racing simulator for this motorcycle. 287 bikes in the catalog. Free and in-browser.';
+      'Physics-based quarter-mile drag-racing simulator for this motorcycle. 290 bikes in the catalog. Free and in-browser.';
     return {
       title: fallbackTitle,
       description: fallbackDesc,

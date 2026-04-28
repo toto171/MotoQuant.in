@@ -6,7 +6,7 @@ import StructuredData, { SITE_URL } from '../StructuredData';
 const TITLE =
   'Motorcycle Catalog — 287 Bikes with Dyno, Aero, and Gear-Ratio Data';
 const DESCRIPTION =
-  'Browse every motorcycle modelled in MotoQuant Pro. 287 bikes across 25+ manufacturers — Suzuki, Yamaha, Honda, Kawasaki, Ducati, BMW, KTM, Royal Enfield, Bajaj, TVS, Aprilia, Triumph, Harley-Davidson, CFMoto and more. Individual Cd, frontal area, peak power, redline, wet mass, wheelbase, chain pitch, and OEM tire fitments for each.';
+  'Browse every motorcycle modelled in MotoQuant Pro. 290 bikes across 25+ manufacturers — Suzuki, Yamaha, Honda, Kawasaki, Ducati, BMW, KTM, Royal Enfield, Bajaj, TVS, Aprilia, Triumph, Harley-Davidson, CFMoto and more. Individual Cd, frontal area, peak power, redline, wet mass, wheelbase, chain pitch, and OEM tire fitments for each.';
 
 export const metadata = {
   title: TITLE,

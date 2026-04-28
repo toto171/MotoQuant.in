@@ -475,7 +475,7 @@ export default function HomePage() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="text-lg md:text-xl text-white/80 mb-6 max-w-2xl mx-auto leading-relaxed"
           >
-            287 bikes. 424 parts. 15 physics sub-models. Predict your quarter-mile within ±0.5s
+            290 bikes. 465 parts. 15 physics sub-models. Predict your quarter-mile within ±0.5s
             before you buy a single part.
           </motion.p>
 
@@ -554,7 +554,7 @@ export default function HomePage() {
               {
                 icon: Target,
                 title: 'Indian Market-First',
-                body: '287 bikes including 57 Indian commuters (Pulsar, Apache, R15, Duke, RE), 15 SE Asia drag cubs, and the complete Indian racing scene. Parts prices in INR with live retailer data. Venues: Aamby Valley, MMRT, BIC, Kari, Hyderabad.',
+                body: '290 bikes including 57 Indian commuters (Pulsar, Apache, R15, Duke, RE), 15 SE Asia drag cubs, and the complete Indian racing scene. Parts prices in INR with live retailer data. Venues: Aamby Valley, MMRT, BIC, Kari, Hyderabad.',
                 link: '/bikes',
                 linkLabel: 'Browse all 287 bikes →',
               },

@@ -10,6 +10,8 @@ import type {
   ApiError,
   BikeDetail,
   BikesListResponse,
+  ChatRequest,
+  ChatResponse,
   CompareRequest,
   CompareResponse,
   LeaderboardResponse,
@@ -191,6 +193,13 @@ export const api = {
   // Leaderboard (top saved runs from local sim_runs table)
   leaderboard: (params: { limit?: number } = {}) =>
     request<LeaderboardResponse>(`/api/leaderboard${qs(params)}`),
+
+  // Natural-language chat (Phase A — POST /api/chat)
+  chat: (req: ChatRequest) =>
+    request<ChatResponse>("/api/chat", {
+      method: "POST",
+      body: JSON.stringify(req),
+    }),
 };
 
 export { ApiRequestError };

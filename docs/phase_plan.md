@@ -15,7 +15,7 @@ and professional-grade tooling.
 
 **Key finding from the codebase audit:** the previous plan included rebuilding
 Pacejka, RK4, aero, engine, drivetrain, and clutch models — all of which
-already exist and are validated against 287 bikes. This revised plan eliminates
+already exist and are validated against 290 bikes. This revised plan eliminates
 redundant work and focuses on the three real gaps: production surrogate
 (undertrained at 1.5k samples), cornering physics (zero code exists), and
 AI tuning intelligence (new capability).

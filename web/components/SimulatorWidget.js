@@ -2,8 +2,9 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, AlertCircle, MapPin } from 'lucide-react';
+import { Zap, AlertCircle, MapPin, MessageSquare, Gauge } from 'lucide-react';
 import LocationPicker, { environmentOverridesFromLocation } from './LocationPicker';
+import ChatPanel from './ChatPanel';
 import { API_URL } from '../lib/api';
 
 // Curated bike list — popular India-market machines first, then global
@@ -92,10 +93,13 @@ function AnimatedCounter({ target, decimals = 3 }) {
   return count.toFixed(decimals);
 }
 
+// ─── Main widget ──────────────────────────────────────────────────────────────
+
 export default function SimulatorWidget() {
   // Default to "Indian Sport" tab + KTM RC 390 (one of the most-recognized
   // Indian-market sport bikes; mid-pack performance so it's a good demo
   // bike that doesn't oversell or undersell the simulator).
+  const [widgetMode, setWidgetMode] = useState('sim'); // 'sim' | 'chat'
   const [activeTab, setActiveTab] = useState(0);
   const [selectedBike, setSelectedBike] = useState(BIKE_CATEGORIES[0].bikes[0]);
   const [riderKg, setRiderKg] = useState(75);
@@ -165,14 +169,79 @@ export default function SimulatorWidget() {
         )}
       </AnimatePresence>
 
-      <h3 className="text-xl font-bold mb-6 flex items-center gap-2 relative z-10">
-        <motion.div whileHover={{ scale: 1.1 }} transition={{ type: 'spring', stiffness: 400 }}>
-          <Zap className="text-[#FF5E1F]" size={20} />
-        </motion.div>
-        <span className="bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
-          Live Quarter-Mile Simulator
-        </span>
-      </h3>
+      <div className="flex items-center justify-between mb-6 relative z-10">
+        <h3 className="text-xl font-bold flex items-center gap-2">
+          <motion.div whileHover={{ scale: 1.1 }} transition={{ type: 'spring', stiffness: 400 }}>
+            <Zap className="text-[#FF5E1F]" size={20} />
+          </motion.div>
+          <span className="bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
+            Live Quarter-Mile Simulator
+          </span>
+        </h3>
+
+        {/* Mode toggle — Simulate / Chat */}
+        <div className="flex items-center gap-0.5 bg-white/[0.04] rounded-lg p-0.5 border border-white/10">
+          {[
+            { id: 'sim', icon: Gauge, label: 'Sim' },
+            { id: 'chat', icon: MessageSquare, label: 'Chat' },
+          ].map(({ id, icon: Icon, label }) => (
+            <button
+              key={id}
+              onClick={() => setWidgetMode(id)}
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                widgetMode === id
+                  ? 'bg-[#FF5E1F] text-white shadow-sm'
+                  : 'text-white/50 hover:text-white/80'
+              }`}
+            >
+              <Icon size={12} />
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Bike chip grid for active tab */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5">
+          {BIKE_CATEGORIES[activeTab].bikes.map((b) => {
+            const key = b.presetId || `id${b.id}`;
+            const isSelected =
+              (b.presetId && selectedBike.presetId === b.presetId) ||
+              (b.id != null && selectedBike.id === b.id);
+            return (
+              <motion.button
+                key={key}
+                onClick={() => setSelectedBike(b)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`relative p-2.5 sm:p-3 rounded-xl border transition-all duration-300 text-left group ${
+                  isSelected
+                    ? 'bg-white/[0.08] border-[#FF5E1F] shadow-[0_0_20px_rgba(255,94,31,0.2)]'
+                    : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-white/10'
+                }`}
+              >
+                <div className="font-semibold text-xs sm:text-sm leading-tight text-white">
+                  {/* Strip the manufacturer prefix on small chips for tighter layout */}
+                  {b.label}
+                </div>
+                <div className="text-[10px] text-white/40 mt-1.5 group-hover:text-white/60 transition-colors">
+                  {b.cc} · {b.hp} hp
+                </div>
+              </motion.button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Chat mode ────────────────────────────────────────────────────── */}
+      {widgetMode === 'chat' && (
+        <div className="relative z-10 mb-6">
+          <ChatPanel apiUrl={API_URL} />
+        </div>
+      )}
+
+      {/* ── Sim mode ─────────────────────────────────────────────────────── */}
+      {widgetMode === 'sim' && (
+      <>
 
       {/* Bike selector — category tabs + chip grid */}
       <div className="mb-6 relative z-10">
@@ -506,8 +575,12 @@ export default function SimulatorWidget() {
         )}
       </AnimatePresence>
 
+      {/* end sim mode */}
+      </>
+      )}
+
       <p className="text-xs text-white/30 text-center mt-6 relative z-10">
-        First-principles RK4 physics · 15 sub-models · 1 ms timestep · 287 bikes
+        First-principles RK4 physics · 15 sub-models · 1 ms timestep · 290 bikes
       </p>
     </motion.div>
   );

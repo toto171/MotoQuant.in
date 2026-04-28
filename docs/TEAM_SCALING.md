@@ -14,7 +14,7 @@ Pulled from `CLAUDE.md` on the date above:
 | Signal | State |
 |---|---|
 | Test suite | 739+ passing, 15 sub-models, ±0.07s accuracy on reference bikes |
-| Catalog | 287 bikes, 465 parts, 159 tires, 20 venues |
+| Catalog | 290 bikes, 465 parts, 159 tires, 20 venues |
 | Backend | FastAPI + SQLite, calibration pipeline complete |
 | Web frontend | Next.js landing + simulator widget, not deployed |
 | Desktop app | Tauri + React 19 scaffolded, 2 pages built, not shipped |
@@ -75,7 +75,7 @@ Pulled from `CLAUDE.md` on the date above:
 | Area | Maturity | Current gap |
 |---|---|---|
 | Physics engine | 15 sub-models, ±0.07s on reference bikes, 739+ tests | Diminishing returns until there's a product to sell |
-| Catalog data | 287 bikes, 465 parts | Curated, accurate, tested for leaks |
+| Catalog data | 290 bikes, 465 parts | Curated, accurate, tested for leaks |
 | Calibration pipeline | Dragy + dyno + ECU, auto-tune via DE + Nelder-Mead | Code-complete |
 | **Desktop app (Tauri + React)** | **2 of 5 pages built** | **Main product surface for v1.0 — half-done** |
 | **Web deployment** | **Configs ready, nothing live** | **Zero public footprint** |

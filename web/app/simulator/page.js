@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo, useId } from 'react'
 import {
   Zap, Search, ChevronDown, ChevronRight, X, MapPin, Gauge, Wrench,
   CircleDot, IndianRupee, ArrowLeft, Thermometer, Wind, Droplets,
-  BarChart3, Table2, Settings2, Upload, RotateCcw, Play, Layers
+  BarChart3, Table2, Settings2, Upload, RotateCcw, Play, Layers, MessageSquare
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -627,6 +627,18 @@ export default function SimulatorPage() {
             {loadError}
           </div>
         )}
+
+        {/* Natural-language chat (Phase A) */}
+        <div className="mb-5 rounded-2xl border border-white/[0.06] bg-gradient-to-br from-white/[0.04] to-white/[0.01] backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.3)] p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <MessageSquare size={14} className="text-orange-500" />
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+              Ask MotoQuant
+            </h3>
+          </div>
+          <ChatPanel apiUrl={API} />
+        </div>
+
         <div className="grid grid-cols-12 gap-5">
 
           {/* ═══════════════════════════════════════════════════════════
