@@ -527,6 +527,11 @@ KAWASAKI_ZX10R_2021 = spec_from_dict(
 
 KAWASAKI_H2_2015 = spec_from_dict(
     {
+        # AUDIT 2026-04-28: Power corrected 310 -> 228 hp.
+        # The 310 hp figure was from H2R (track-only), not the street H2.
+        # Street H2 (2015-2018): 197 hp; (2019-2023): 228 hp with ram air.
+        # Using the higher 228 figure to represent later-spec ram-air street H2.
+        # Source: Kawasaki Heavy Industries press kit + MCN test 2019.
         "manufacturer": "Kawasaki",
         "model_name": "Ninja H2",
         "model_code": "ZXT00X",
@@ -538,10 +543,10 @@ KAWASAKI_H2_2015 = spec_from_dict(
         "stroke_mm": 55.0,
         "compression_ratio": 8.5,
         "cylinders": 4,
-        "peak_power_hp": 310.0,
-        "peak_power_rpm": 14000,  # with ram air
-        "peak_torque_nm": 165.0,
-        "peak_torque_rpm": 12500,
+        "peak_power_hp": 228.0,
+        "peak_power_rpm": 11000,  # ram-air, street-legal
+        "peak_torque_nm": 141.7,
+        "peak_torque_rpm": 10500,
         "fuel_system": "fi",
         "cooling": "liquid",
         "valve_config": "dohc",
@@ -556,6 +561,45 @@ KAWASAKI_H2_2015 = spec_from_dict(
         "rear_tire_size": "200/55ZR17",
         "cd": 0.63,
         "frontal_area_m2": 0.48,
+    },
+    source_name="spec_sheet",
+)
+
+KAWASAKI_H2R_2015 = spec_from_dict(
+    {
+        # Kawasaki Ninja H2R (2015-current): track-only, supercharged 1000cc.
+        # 310 hp with ram air, 326 hp with carbon fairing kit. Closed-course only.
+        # 1/4 mile: ~9.4-9.5s @ 240+ km/h trap (Cycle World, MCN tests).
+        # Top speed: 400+ km/h (record runs).
+        "manufacturer": "Kawasaki",
+        "model_name": "Ninja H2R",
+        "model_code": "ZX1000P",
+        "year_from": 2015,
+        "year_to": 2026,
+        "category": "sport",
+        "displacement_cc": 998,
+        "bore_mm": 76.0,
+        "stroke_mm": 55.0,
+        "compression_ratio": 8.3,
+        "cylinders": 4,
+        "peak_power_hp": 310.0,
+        "peak_power_rpm": 14000,
+        "peak_torque_nm": 165.0,
+        "peak_torque_rpm": 12500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        "gear_ratios": [2.461, 1.941, 1.647, 1.440, 1.296, 1.185],
+        "front_sprocket": 17,
+        "rear_sprocket": 43,
+        "chain_pitch": "520",
+        "dry_mass_kg": 216.0,
+        "wheelbase_mm": 1450.0,
+        "front_tire_size": "120/600R17",  # slick
+        "rear_tire_size": "190/650R17",   # slick
+        "cd": 0.55,  # carbon dive planes + fairing
+        "frontal_area_m2": 0.45,
     },
     source_name="spec_sheet",
 )
@@ -11862,6 +11906,7 @@ ALL_KNOWN_BIKES = [
     KAWASAKI_ZX14R_2012,
     KAWASAKI_ZZR1400_2006,
     KAWASAKI_H2_2015,
+    KAWASAKI_H2R_2015,
     KAWASAKI_Z1000_2014,
     KAWASAKI_Z900_2020,
     KAWASAKI_NINJA_650,

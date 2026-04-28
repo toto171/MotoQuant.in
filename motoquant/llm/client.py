@@ -34,7 +34,7 @@ from typing import Any, Callable
 # ─── Provider table ───────────────────────────────────────────────────────
 _PROVIDERS: dict[str, dict[str, str | None]] = {
     "gemini": {
-        "model": "gemini-2.5-flash",
+        "model": "gemini-1.5-flash",
         "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
         "api_key_env": "GEMINI_API_KEY",
     },
@@ -67,6 +67,14 @@ DEFAULT_TIMEOUT_S = 30.0
 
 class LLMNotConfiguredError(RuntimeError):
     """Raised when the LLM client is needed but cannot be built."""
+
+
+class LLMRateLimitError(RuntimeError):
+    """Raised when the provider returns a 429 / quota-exceeded error.
+
+    Distinct from generic errors so the chat pipeline can return a typed
+    'rate_limit' marker to the UI instead of bubbling a stack trace.
+    """
 
 
 @dataclass

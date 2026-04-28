@@ -236,7 +236,7 @@ def _run_compare(
         result.error_detail = f"Bike B sim failed: {sim_b}"
         return result
 
-    delta_et = sim_a["et_s"] - sim_b["et_s"]
+    delta_et = sim_a["et_quarter_s"] - sim_b["et_quarter_s"]
     delta_trap = sim_a["trap_speed_kmh"] - sim_b["trap_speed_kmh"]
     if delta_et < 0:
         faster = "A"
@@ -283,23 +283,31 @@ def _run_rank(
     *,
     run_summary: bool,
 ) -> ChatResult:
-    """Filter catalog and return top-N.
+    """Catalog filter + actual sims on top candidates.
 
-    Heuristic filtering from the parsed query — extract displacement / category
-    hints from raw_query plus optimization_goal, then sort by validation_et_s
-    (or peak_power_hp as fallback when ET is missing).
+    1. Parse query for displacement/category/'stock'/'modded' keywords.
+    2. Fetch matching catalog rows.
+    3. Take top-N by power-to-weight (rough first cut).
+    4. RUN REAL SIMS on those N bikes via MotoQuantEngine — venue-aware.
+    5. Sort by sim ET ascending; return top 10 with sim numbers.
+
+    This is slower than a pure-DB query (~80-150ms per sim × 12-15 candidates
+    = ~1.5-2s) but gives physics-correct ranking that handles cases where
+    raw P/W misleads (e.g., supercharged H2 with launch traction limits,
+    or year-newer revs where peak_power_hp is similar but gearing changed).
     """
     try:
-        # Build search filter from raw query.
         rq = (parsed.raw_query or "").lower()
-        kw: dict[str, Any] = {"limit": 200}
-        # Crude displacement filter
-        for needle, lo, hi in [
+        kw: dict[str, Any] = {"limit": 400}
+
+        # ── Displacement keywords (order matters: longer matches first) ──
+        disp_filters = [
+            # exact-cc
             ("125cc", 110, 135),
-            ("150cc", 140, 165),
+            ("150cc", 140, 170),
             ("200cc", 180, 220),
             ("250cc", 220, 280),
-            ("300cc", 280, 330),
+            ("300cc", 280, 350),
             ("400cc", 380, 460),
             ("450cc", 420, 500),
             ("500cc", 480, 560),
@@ -307,23 +315,30 @@ def _run_rank(
             ("650cc", 630, 720),
             ("750cc", 720, 800),
             ("1000cc", 950, 1100),
-            ("liter", 950, 1300),
-            ("litre", 950, 1300),
-            ("1300", 1250, 1350),
-        ]:
+            ("1300cc", 1250, 1400),
+            # class names — 'litre/liter' = stock 1000cc; user query example
+            # "fastest litre class" should map to 950-1100, EXCLUDING 1340cc Hayabusa.
+            ("litre class", 950, 1100),
+            ("liter class", 950, 1100),
+            ("litre", 950, 1100),
+            ("liter", 950, 1100),
+            ("open class", 950, 1400),  # MotoGP "open" historically up to 1000+
+            ("middleweight", 580, 800),
+            ("supersport", 580, 800),
+            ("hyperbike", 1100, 1500),
+            ("muscle", 1500, 2500),
+        ]
+        for needle, lo, hi in disp_filters:
             if needle in rq:
                 kw["displacement_min"] = lo
                 kw["displacement_max"] = hi
                 break
 
-        # Crude category filter
+        # ── Category keywords ──
         for needle, cat in [
-            ("naked", "naked"),
-            ("cruiser", "cruiser"),
-            ("adventure", "adventure"),
-            ("sport", "sport"),
-            ("touring", "touring"),
-            ("scooter", "scooter"),
+            ("naked", "naked"), ("cruiser", "cruiser"),
+            ("adventure", "adventure"), ("touring", "touring"),
+            ("scooter", "scooter"), ("sport", "sport"),
         ]:
             if needle in rq:
                 kw["category"] = cat
@@ -331,26 +346,80 @@ def _run_rank(
 
         rows = db.bikes.search(**kw) or []
 
-        # Sort: by validation_et_s ascending (fastest first); fall back to power.
-        def _key(r: dict[str, Any]):
-            et = r.get("validation_et_s")
-            if et is not None:
-                try:
-                    return (0, float(et))
-                except (TypeError, ValueError):
-                    pass
-            # No measured ET → estimate via power-to-weight as a tiebreaker
+        # ── Pre-rank: power-to-weight ascending (best P/W first) ──
+        def _ptw(r):
             hp = r.get("peak_power_hp") or 0
             mass = r.get("dry_mass_kg") or 999
-            ptw = float(hp) / max(float(mass), 1.0)
-            return (1, -ptw)  # higher P/W = lower sort key
+            try:
+                return float(hp) / max(float(mass), 1.0)
+            except (TypeError, ValueError):
+                return 0.0
 
-        rows.sort(key=_key)
-        top_n = rows[:10]
+        rows.sort(key=_ptw, reverse=True)
+        top_pool = rows[:15]  # candidates we will actually simulate
+
+        # ── Run real sims on each candidate ──
+        env = None
+        if parsed.venue_id is not None:
+            try:
+                env = db.venues.to_environment(
+                    parsed.venue_id, month=datetime.now().month
+                )
+            except Exception:
+                env = None
+
+        sim_rows: list[dict[str, Any]] = []
+        for r in top_pool:
+            bike_id = r["id"]
+            try:
+                config_row = db.bikes.get_current_config(bike_id)
+                if config_row is None:
+                    # No config seeded for this bike — fall back to validation_et_s
+                    et = r.get("validation_et_s")
+                    sim_rows.append(
+                        {**r, "sim_et_s": float(et) if et else None,
+                         "sim_trap_kmh": None, "sim_source": "validation"}
+                    )
+                    continue
+                config = db.bikes.to_config(config_row["id"], environment=env)
+                if config is None:
+                    sim_rows.append({**r, "sim_et_s": None, "sim_source": "no-config"})
+                    continue
+                _apply_env_overrides(config, parsed)
+                _apply_power_boost(config, parsed)
+                engine = MotoQuantEngine(config)
+                sim = engine.run()
+                sim_rows.append({
+                    **r,
+                    "sim_et_s": round(float(sim.time_quarter), 3),
+                    "sim_trap_kmh": round(float(sim.speed_quarter) * MS_TO_KMH, 1),
+                    "sim_60ft_s": round(float(sim.time_60ft), 3),
+                    "sim_source": "engine",
+                })
+            except Exception:
+                # Fall back to validation if sim fails
+                et = r.get("validation_et_s")
+                sim_rows.append({
+                    **r,
+                    "sim_et_s": float(et) if et else None,
+                    "sim_trap_kmh": None,
+                    "sim_source": "validation-fallback",
+                })
+
+        # Final sort: by sim_et_s ascending, None last
+        def _final_key(r):
+            et = r.get("sim_et_s")
+            if et is None:
+                return (1, 999.0)
+            return (0, float(et))
+
+        sim_rows.sort(key=_final_key)
+        top_n = sim_rows[:10]
 
         result.rank_result = {
-            "filter": kw,
+            "filter": {k: v for k, v in kw.items() if k != "limit"},
             "matches": len(rows),
+            "candidates_simulated": len(top_pool),
             "top": [
                 {
                     "rank": i + 1,
@@ -361,7 +430,10 @@ def _run_rank(
                     "displacement_cc": r.get("displacement_cc"),
                     "peak_power_hp": r.get("peak_power_hp"),
                     "dry_mass_kg": r.get("dry_mass_kg"),
-                    "validation_et_s": r.get("validation_et_s"),
+                    "et_s": r.get("sim_et_s"),
+                    "trap_kmh": r.get("sim_trap_kmh"),
+                    "et_60ft_s": r.get("sim_60ft_s"),
+                    "source": r.get("sim_source"),
                 }
                 for i, r in enumerate(top_n)
             ],
@@ -588,16 +660,21 @@ def _run_one_sim(
         return f"MotoQuantEngine.run: {type(e).__name__}: {e}"
 
     out: dict[str, Any] = {
-        "et_s": round(float(sim.time_quarter), 4),
+        # NOTE: key names are pinned by the frontend UIs (web ChatPanel +
+        # desktop ChatBox). Do NOT rename — both surfaces look these up by
+        # exact name.
+        "et_quarter_s": round(float(sim.time_quarter), 4),
         "trap_speed_kmh": round(float(sim.speed_quarter) * MS_TO_KMH, 1),
         "trap_speed_mph": round(float(sim.speed_quarter) * MS_TO_MPH, 1),
-        "sixty_foot_s": round(float(sim.time_60ft), 4),
+        "et_60ft_s": round(float(sim.time_60ft), 4),
         "peak_accel_g": round(float(np.max(sim.a)), 2),
+        # Bike + condition context for the summary prompt
+        "bike_name": "",  # filled in by caller after _run_one_sim returns
     }
     for attr, key in (
-        ("time_330ft", "330ft_s"),
-        ("time_eighth", "eighth_s"),
-        ("time_1000ft", "1000ft_s"),
+        ("time_330ft", "et_330ft_s"),
+        ("time_eighth", "et_eighth_s"),
+        ("time_1000ft", "et_1000ft_s"),
     ):
         val = getattr(sim, attr, None)
         if val is not None:
@@ -696,10 +773,10 @@ def _summarize_compare(
     a, b = comp["a"], comp["b"]
     user = (
         f"User asked: {parsed.raw_query}\n\n"
-        f"Bike A: {a['bike_name']} → ET {a['sim']['et_s']:.3f}s, "
-        f"trap {a['sim']['trap_speed_kmh']:.1f} km/h, 60ft {a['sim']['sixty_foot_s']:.3f}s\n"
-        f"Bike B: {b['bike_name']} → ET {b['sim']['et_s']:.3f}s, "
-        f"trap {b['sim']['trap_speed_kmh']:.1f} km/h, 60ft {b['sim']['sixty_foot_s']:.3f}s\n"
+        f"Bike A: {a['bike_name']} -> ET {a['sim']['et_quarter_s']:.3f}s, "
+        f"trap {a['sim']['trap_speed_kmh']:.1f} km/h, 60ft {a['sim']['et_60ft_s']:.3f}s\n"
+        f"Bike B: {b['bike_name']} -> ET {b['sim']['et_quarter_s']:.3f}s, "
+        f"trap {b['sim']['trap_speed_kmh']:.1f} km/h, 60ft {b['sim']['et_60ft_s']:.3f}s\n"
         f"Δ ET = {comp['delta_et_s']:+.3f}s, Δ trap = {comp['delta_trap_kmh']:+.1f} km/h, "
         f"faster = bike {comp['faster']}\n"
     )
@@ -710,26 +787,32 @@ def _summarize_rank(
     parsed: ParsedSimRequest, rank: dict[str, Any], client: LLMClient | None
 ) -> str:
     sys_p = (
-        "You are MotoQuant. Summarize a list of fastest bikes from the catalog "
-        "in 2-3 sentences. Mention top 3 by name. End with one practical takeaway."
+        "You are MotoQuant. Summarize a ranked list of fastest bikes in 3-4 "
+        "sentences. Mention top 3 by name with their predicted ET. The ET "
+        "numbers come from running the actual physics engine on each bike, "
+        "so they are physics-grounded. End with one practical takeaway about "
+        "what makes the #1 bike fastest in this class."
     )
     top = rank.get("top", [])[:5]
     if not top:
         return "No bikes matched the filter — try broadening the criteria."
     lines = []
     for r in top:
-        et = r.get("validation_et_s")
-        et_s = f"{et:.2f}s" if et else "—"
+        et = r.get("et_s")
+        trap = r.get("trap_kmh")
+        et_str = f"{et:.2f}s" if et else "-"
+        trap_str = f", trap {trap:.0f} km/h" if trap else ""
         lines.append(
             f"  #{r['rank']}: {r['manufacturer']} {r['model']} "
             f"({r.get('displacement_cc') or '?'}cc, "
-            f"{r.get('peak_power_hp') or '?'} hp, ET {et_s})"
+            f"{r.get('peak_power_hp') or '?'} hp) -> ET {et_str}{trap_str}"
         )
     user = (
         f"User asked: {parsed.raw_query}\n\n"
-        f"Filter: {rank.get('filter')}\n"
-        f"Total matches: {rank.get('matches')}\n"
-        f"Top:\n" + "\n".join(lines)
+        f"Filter applied: {rank.get('filter')}\n"
+        f"Total catalog matches: {rank.get('matches')}\n"
+        f"Bikes simulated: {rank.get('candidates_simulated', '?')}\n\n"
+        f"Top results (sorted by physics-engine ET):\n" + "\n".join(lines)
     )
     return _llm_text(client, sys_p, user)
 
@@ -774,8 +857,8 @@ def _summarize_explain(
     if sim_context:
         user += (
             f"\nFor context, here's a sim of the mentioned bike:\n"
-            f"  ET = {sim_context['et_s']:.3f}s\n"
+            f"  ET = {sim_context['et_quarter_s']:.3f}s\n"
             f"  Trap = {sim_context['trap_speed_kmh']:.1f} km/h\n"
-            f"  60ft = {sim_context['sixty_foot_s']:.3f}s\n"
+            f"  60ft = {sim_context['et_60ft_s']:.3f}s\n"
         )
     return _llm_text(client, sys_p, user)
