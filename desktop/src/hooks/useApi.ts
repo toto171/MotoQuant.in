@@ -9,6 +9,10 @@ import type {
   SaveRunResponse,
   SimulateRequest,
   SimulateResponse,
+  SurrogateCompareRequest,
+  SurrogateCompareResponse,
+  SurrogatePredictRequest,
+  SurrogatePredictResponse,
 } from "@/types/api";
 
 export function useBikes(params: {
@@ -96,5 +100,25 @@ export function useSaveRun() {
       // on the History tab without waiting for staleTime to expire.
       qc.invalidateQueries({ queryKey: ["leaderboard"] });
     },
+  });
+}
+
+
+// ─── Surrogate-model preview hooks ────────────────────────────────────
+// Use these in BuildPage to deliver near-instant feedback on slider /
+// part-toggle changes. The full physics sim takes ~50 ms over HTTP; the
+// surrogate is ~1-3 ms inference.  Always cross-check against
+// useQuickSimulate() before saving a run, since out-of-distribution
+// builds may trigger envelope_violations and lower confidence.
+
+export function useSurrogatePredict() {
+  return useMutation<SurrogatePredictResponse, Error, SurrogatePredictRequest>({
+    mutationFn: (req) => api.surrogatePredict(req),
+  });
+}
+
+export function useSurrogateCompare() {
+  return useMutation<SurrogateCompareResponse, Error, SurrogateCompareRequest>({
+    mutationFn: (req) => api.surrogateCompare(req),
   });
 }

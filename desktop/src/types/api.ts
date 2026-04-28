@@ -395,3 +395,43 @@ export interface ChatResponse {
   error: string | null;
   error_detail: string | null;
 }
+
+
+// ─── Surrogate model (POST /api/surrogate/*) ─────────────────────────────
+// Fast inference (target p95 < 5 ms) over a trained DNN/XGBoost model.
+// Used for live BuildPage previews where running a full physics sim per
+// slider tick would feel laggy. Falls back to /api/simulate/quick when
+// `within_training_envelope` is false (signals out-of-distribution input).
+
+export interface SurrogatePredictRequest {
+  bike_id?: number | null;
+  power_boost_pct?: number; // -50..200
+  mass_delta_kg?: number;   // -100..200
+  aero_cd_override?: number | null; // 0.30..1.20
+  tire_mu_override?: number | null; // 0.50..1.80
+  altitude_m?: number; // 0..5000
+  rider_weight_kg?: number; // 40..150
+}
+
+export interface SurrogatePredictResponse {
+  et_s: number;
+  trap_kmh: number;
+  inference_ms: number;
+  source: string;            // "dnn" | "xgboost" | etc.
+  within_training_envelope: boolean;
+  envelope_violations: string[];
+}
+
+export interface SurrogateCompareRequest {
+  config_a: SurrogatePredictRequest;
+  config_b: SurrogatePredictRequest;
+}
+
+export interface SurrogateCompareResponse {
+  a: SurrogatePredictResponse;
+  b: SurrogatePredictResponse;
+  delta_et_s: number;
+  delta_trap_kmh: number;
+  faster: "a" | "b" | "tie";
+}
+

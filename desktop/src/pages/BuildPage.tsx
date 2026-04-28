@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Plus, Trash2, Loader2, Filter, AlertCircle, IndianRupee, ArrowLeftRight, Wrench,
+  Plus, Trash2, Loader2, Filter, AlertCircle, IndianRupee, ArrowLeftRight, Wrench, Zap,
 } from "lucide-react";
 import { BikePicker } from "@/components/BikePicker";
 import { StatTile } from "@/components/StatTile";
@@ -8,7 +8,7 @@ import { OfflineBanner } from "@/components/OfflineBanner";
 import { SkeletonPartRows } from "@/components/Skeleton";
 import { useToastStore } from "@/store/toastStore";
 import {
-  useParts, usePartsCategories, useQuickSimulate,
+  useParts, usePartsCategories, useQuickSimulate, useSurrogatePredict,
 } from "@/hooks/useApi";
 import type { BikeSummary, Part } from "@/types/api";
 import clsx from "clsx";
@@ -33,10 +33,29 @@ export function BuildPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [search, setSearch] = useState("");
   const [selectedMap, setSelectedMap] = useState<Map<number, Part>>(new Map());
+  // Fast-preview = surrogate model (~1-3 ms inference). Falls back to the
+  // full quick-sim (~50 ms) automatically when the surrogate reports the
+  // build is outside its training envelope, or when the surrogate route
+  // is unavailable (503 — model pickle not loaded on the backend).
+  const [fastPreview, setFastPreview] = useState(true);
 
   const selectedIds = useMemo(() => Array.from(selectedMap.keys()), [selectedMap]);
   const selectedParts = useMemo(() => Array.from(selectedMap.values()), [selectedMap]);
   const buildCost = selectedParts.reduce((sum, p) => sum + (p.price_inr ?? 0), 0);
+
+  // Aggregate part deltas for the surrogate preview. The full sim path
+  // re-applies parts server-side; the surrogate path takes raw deltas.
+  const previewDeltas = useMemo(() => {
+    let powerBoost = 0;
+    let massDelta = 0;
+    for (const p of selectedParts) {
+      if (typeof p.power_delta_hp === "number") {
+        powerBoost += p.power_delta_hp;
+      }
+      if (typeof p.mass_delta_kg === "number") massDelta += p.mass_delta_kg;
+    }
+    return { powerBoost, massDelta };
+  }, [selectedParts]);
 
   const categories = usePartsCategories();
   const parts = useParts({
@@ -47,12 +66,37 @@ export function BuildPage() {
     limit: 500,
   });
   const sim = useQuickSimulate();
+  const surrogate = useSurrogatePredict();
 
   useEffect(() => {
     if (!bike) return;
-    sim.mutate({ bike_id: bike.id, part_ids: selectedIds, rider_mass_kg: 75 });
+
+    if (fastPreview) {
+      const stockHp = (bike as unknown as { peak_power_hp?: number }).peak_power_hp ?? 100;
+      const powerBoostPct = stockHp > 0 ? (previewDeltas.powerBoost / stockHp) * 100 : 0;
+      surrogate.mutate(
+        {
+          bike_id: bike.id,
+          power_boost_pct: powerBoostPct,
+          mass_delta_kg: previewDeltas.massDelta,
+          rider_weight_kg: 75,
+        },
+        {
+          onSuccess: (resp) => {
+            if (!resp.within_training_envelope) {
+              sim.mutate({ bike_id: bike.id, part_ids: selectedIds, rider_mass_kg: 75 });
+            }
+          },
+          onError: () => {
+            sim.mutate({ bike_id: bike.id, part_ids: selectedIds, rider_mass_kg: 75 });
+          },
+        },
+      );
+    } else {
+      sim.mutate({ bike_id: bike.id, part_ids: selectedIds, rider_mass_kg: 75 });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bike?.id, selectedIds.join(",")]);
+  }, [bike?.id, selectedIds.join(","), fastPreview, previewDeltas.powerBoost, previewDeltas.massDelta]);
 
   const visibleParts = useMemo(
     () => (parts.data?.parts ?? []).filter((p) => p.compatible !== false),
@@ -215,22 +259,54 @@ export function BuildPage() {
       {/* Right: build summary */}
       <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
         <div className="card p-5">
-          <div className="text-xs uppercase tracking-wider text-carbon-500 mb-3">Your build</div>
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-xs uppercase tracking-wider text-carbon-500">Your build</div>
+            <button
+              onClick={() => setFastPreview((v) => !v)}
+              className={clsx(
+                "text-[10px] uppercase tracking-wider px-2 py-1 rounded border transition-colors flex items-center gap-1 focus-visible:outline-2 focus-visible:outline-signal-500",
+                fastPreview
+                  ? "border-signal-500/40 bg-signal-500/10 text-signal-500"
+                  : "border-carbon-700 text-carbon-400 hover:border-carbon-600",
+              )}
+              title={fastPreview ? "Surrogate model preview (~1-3 ms). Click for full sim." : "Full physics sim (~50 ms). Click for fast preview."}
+              aria-pressed={fastPreview}
+            >
+              <Zap className="w-3 h-3" aria-hidden="true" />
+              {fastPreview ? "Fast preview" : "Full sim"}
+            </button>
+          </div>
 
           {!bike && (
             <div className="text-sm text-carbon-500">No bike selected.</div>
           )}
 
-          {bike && sim.isPending && !sim.data && (
+          {bike && (sim.isPending || surrogate.isPending) && !sim.data && !surrogate.data && (
             <div className="flex items-center gap-2 text-sm text-carbon-400">
-              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> Simulating baseline…
+              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+              {fastPreview ? "Inferring…" : "Simulating baseline…"}
             </div>
           )}
 
-          {sim.isError && (
+          {sim.isError && !surrogate.data && (
             <div className="text-xs text-stop-400 flex items-center gap-1.5" role="alert">
               <AlertCircle className="w-3.5 h-3.5" aria-hidden="true" />
               {sim.error?.message || "Simulation failed"}
+            </div>
+          )}
+
+          {/* Surrogate-only display: when fastPreview is on AND surrogate is
+              within envelope AND we don't have a full sim escalation yet. */}
+          {fastPreview && surrogate.data?.within_training_envelope && !sim.data && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <StatTile label="ET" value={surrogate.data.et_s.toFixed(3)} unit="s" accent="signal" />
+                <StatTile label="Trap" value={surrogate.data.trap_kmh.toFixed(1)} unit="km/h" />
+              </div>
+              <div className="text-[10px] text-carbon-500 uppercase tracking-wider flex items-center justify-between border-t border-carbon-800 pt-2">
+                <span>Surrogate · {surrogate.data.source}</span>
+                <span className="tabular-nums">{surrogate.data.inference_ms.toFixed(1)} ms</span>
+              </div>
             </div>
           )}
 
@@ -242,6 +318,13 @@ export function BuildPage() {
                 <StatTile label="60 ft" value={sim.data.et_60ft_s.toFixed(3)} unit="s" />
                 <StatTile label="1/8 mi" value={sim.data.et_eighth_s.toFixed(3)} unit="s" />
               </div>
+
+              {fastPreview && surrogate.data && !surrogate.data.within_training_envelope && (
+                <div className="text-[10px] text-warn-500 flex items-start gap-1.5 px-2.5 py-1.5 rounded-md border border-warn-500/30 bg-warn-500/5">
+                  <AlertCircle className="w-3 h-3 mt-0.5 shrink-0" aria-hidden="true" />
+                  Build is outside the surrogate's training envelope ({surrogate.data.envelope_violations.join(", ")}). Used full sim instead.
+                </div>
+              )}
 
               {sim.data.stock_et_s != null && sim.data.et_delta_s != null && (
                 <div

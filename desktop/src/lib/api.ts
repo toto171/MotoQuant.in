@@ -23,6 +23,10 @@ import type {
   SaveRunResponse,
   SimulateRequest,
   SimulateResponse,
+  SurrogateCompareRequest,
+  SurrogateCompareResponse,
+  SurrogatePredictRequest,
+  SurrogatePredictResponse,
   TiresResponse,
   VenuesResponse,
 } from "@/types/api";
@@ -197,6 +201,22 @@ export const api = {
   // Natural-language chat (Phase A — POST /api/chat)
   chat: (req: ChatRequest) =>
     request<ChatResponse>("/api/chat", {
+      method: "POST",
+      body: JSON.stringify(req),
+    }),
+
+  // ─── Surrogate model inference ───────────────────────────────────────
+  // Fast (target p95 < 5 ms) ET/trap prediction via the trained DNN/XGB
+  // surrogate. Used by BuildPage for slider-tick previews; falls back to
+  // simulateQuick when within_training_envelope is false.
+  surrogatePredict: (req: SurrogatePredictRequest) =>
+    request<SurrogatePredictResponse>("/api/surrogate/predict", {
+      method: "POST",
+      body: JSON.stringify(req),
+    }),
+
+  surrogateCompare: (req: SurrogateCompareRequest) =>
+    request<SurrogateCompareResponse>("/api/surrogate/compare", {
       method: "POST",
       body: JSON.stringify(req),
     }),
