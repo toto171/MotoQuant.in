@@ -199,37 +199,6 @@ export default function SimulatorWidget() {
             </button>
           ))}
         </div>
-
-        {/* Bike chip grid for active tab */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5">
-          {BIKE_CATEGORIES[activeTab].bikes.map((b) => {
-            const key = b.presetId || `id${b.id}`;
-            const isSelected =
-              (b.presetId && selectedBike.presetId === b.presetId) ||
-              (b.id != null && selectedBike.id === b.id);
-            return (
-              <motion.button
-                key={key}
-                onClick={() => setSelectedBike(b)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={`relative p-2.5 sm:p-3 rounded-xl border transition-all duration-300 text-left group ${
-                  isSelected
-                    ? 'bg-white/[0.08] border-[#FF5E1F] shadow-[0_0_20px_rgba(255,94,31,0.2)]'
-                    : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-white/10'
-                }`}
-              >
-                <div className="font-semibold text-xs sm:text-sm leading-tight text-white">
-                  {/* Strip the manufacturer prefix on small chips for tighter layout */}
-                  {b.label}
-                </div>
-                <div className="text-[10px] text-white/40 mt-1.5 group-hover:text-white/60 transition-colors">
-                  {b.cc} · {b.hp} hp
-                </div>
-              </motion.button>
-            );
-          })}
-        </div>
       </div>
 
       {/* ── Chat mode ────────────────────────────────────────────────────── */}
