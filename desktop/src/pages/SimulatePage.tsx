@@ -9,6 +9,8 @@ import { SkeletonStatTile, SkeletonChartGrid } from "@/components/Skeleton";
 import { useSettings } from "@/contexts/SettingsContext";
 import { toast } from "@/store/toastStore";
 import type { BikeSummary } from "@/types/api";
+import { ChatBox } from "@/components/ChatBox";
+import type { ChatBikeSuggestion } from "@/types/api";
 
 // PDF export — pure jsPDF, no canvas capture, generates in <200ms.
 async function exportSimPdf(data: {
@@ -235,6 +237,9 @@ export function SimulatePage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
+      <div className="card p-4 mb-4">
+        <ChatBox onSuggestionClick={(s: ChatBikeSuggestion) => { /* future: populate BikePicker */ void s; }} />
+      </div>
       <header>
         <h1 className="text-2xl font-semibold">Simulate a pass</h1>
         <p className="text-sm text-carbon-400 mt-1">

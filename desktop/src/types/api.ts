@@ -364,3 +364,34 @@ export interface ApiError {
   detail: string;
   status: number;
 }
+
+// ─── Chat (Phase A LLM) ───────────────────────────────────────────────────
+
+export interface ChatRequest {
+  /** Natural-language tuning query, 1–2000 chars. */
+  query: string;
+  /** Whether to request a plain-English summary from the LLM. */
+  run_summary?: boolean;
+}
+
+export interface ChatBikeSuggestion {
+  id: number | null;
+  manufacturer: string | null;
+  model: string | null;
+  year_range: string | null;
+}
+
+export interface ChatResponse {
+  raw_query: string;
+  bike_name: string;
+  bike_id: number | null;
+  venue_name: string | null;
+  venue_id: number | null;
+  parsed_notes: string;
+  optimization_goal: string;
+  bike_suggestions: ChatBikeSuggestion[];
+  sim_result: Record<string, unknown> | null;
+  summary: string | null;
+  error: string | null;
+  error_detail: string | null;
+}
