@@ -50,6 +50,19 @@ class ParsedSimRequest:
     archetype_name: str | None = None
     archetype_id: int | None = None
 
+    # Build tier — auto-detected from query phrasing. Drives recommend recipes:
+    #   stage_1   = light bolt-ons (~50k INR class): exhaust + air filter + ECU flash
+    #   stage_2   = stage_1 + sprockets/chain + clutch + tire upgrade (~100-200k)
+    #   all_out   = stage_2 + suspension + brakes + premium ECU + drag tires (no cap)
+    # Falls back to stage_2 when ambiguous.
+    build_tier: str = "stage_2"
+
+    # choose_bike intent fields — what class / category the user wants to win in.
+    # Examples: target_class="litre" / "600" / "300" / "twin" / "cruiser" / "2T".
+    target_class: str | None = None
+    # If user is set on Indian-market bikes specifically (price + availability).
+    prefer_indian: bool = False
+
     ambient_temp_c: float | None = None
     humidity_pct: float | None = None
     altitude_m: float | None = None
@@ -94,13 +107,15 @@ TOOL_SCHEMA: dict[str, Any] = {
     "properties": {
         "intent_type": {
             "type": "string",
-            "enum": ["simulate", "compare", "rank", "recommend", "explain", "smalltalk"],
+            "enum": ["simulate", "compare", "rank", "recommend", "explain", "smalltalk", "choose_bike"],
             "description": (
                 "What the user wants. "
                 "simulate = run a sim for one specific bike (default). "
                 "compare = side-by-side two bikes (set bike_name AND bike_b_name). "
                 "rank = list fastest/quickest bikes matching criteria, no specific bike. "
-                "recommend = suggest parts/mods for a specific bike + budget. "
+                "recommend = suggest parts/mods for a specific bike (set build_tier). "
+                "choose_bike = 'help me pick a bike for X class at Y venue with Z budget' — "
+                "set target_class + venue_name + budget_inr; bike_name should be empty. "
                 "explain = answer a tuning/physics question, may not need a sim. "
                 "smalltalk = greeting / off-topic; respond conversationally."
             ),
@@ -194,6 +209,40 @@ TOOL_SCHEMA: dict[str, Any] = {
                 "best_budget = best parts within budget."
             ),
         },
+        "build_tier": {
+            "type": "string",
+            "enum": ["stage_1", "stage_2", "all_out"],
+            "description": (
+                "For recommend intent, infer the build tier from phrasing: "
+                "stage_1 (basic bolt-ons, mentions of 'budget' / 'first mods' / "
+                "'stage 1' / 'starter' / sub-50k INR / quick wins) — "
+                "stage_2 (serious upgrades, 'street-legal sport build' / "
+                "'track-day prep' / 'full Stage 2' / 50-200k INR) — "
+                "all_out ('no budget' / 'all out' / 'race build' / 'maximum' / "
+                "'full send' / 'best possible'). "
+                "Default to stage_2 when ambiguous."
+            ),
+        },
+        "target_class": {
+            "type": ["string", "null"],
+            "description": (
+                "For choose_bike intent: what race class the user wants to compete in. "
+                "Examples: 'litre' (open litre/superbike), '600' (supersport 600), "
+                "'300' (entry sport), 'twin' (parallel twin / RE 650 class), "
+                "'cruiser' (V-twin muscle), '2T' (two-stroke), "
+                "'modified-hayabusa' (Pro Street drag class), 'naked' (streetfighter), "
+                "'small-cc' (sub-200cc Indian/SE Asia drag class). Null otherwise."
+            ),
+        },
+        "prefer_indian": {
+            "type": "boolean",
+            "description": (
+                "True if the user explicitly prefers Indian-market bikes (price + "
+                "availability + parts + service network). Implied by phrasings like "
+                "'Indian market', 'available in India', 'in INR', 'KTM India / "
+                "Bajaj / TVS / Hero / RE'. Default false."
+            ),
+        },
         "notes": {
             "type": "string",
             "description": (
@@ -237,6 +286,22 @@ Bike alias hints:
 - R15 / R15M = Yamaha YZF-R15
 - 'Panigale V4' is Ducati; 'RSV4' is Aprilia (do not conflate)
 - 'Ninja' alone is ambiguous -- preserve the user's qualifier (e.g. 'Ninja 400')
+
+Build tier inference hints (set build_tier on recommend intent):
+- "budget" / "first mods" / "under X INR" / "stage 1" / "starter" / "basics" → stage_1
+- "track day" / "serious" / "stage 2" / "50-200k" / "street-legal sport" → stage_2
+- "no budget" / "all out" / "maximum" / "full send" / "best possible" / "race build" / "unlimited" / "money no object" → all_out
+- Default to stage_2 when phrasing is ambiguous.
+
+Race-class hints (set target_class on choose_bike intent):
+- "litre class" / "open class" / "superbike" / "1000cc" → litre
+- "600cc" / "supersport" / "middleweight" → 600
+- "twin" / "parallel twin" / "RE 650" / "SV650 class" → twin
+- "cruiser" / "muscle bike" / "V-twin power cruiser" → cruiser
+- "two-stroke" / "2T" / "RD350 / NSR / RGV class" → 2T
+- "Pro Street" / "modified Hayabusa" / "turbo Busa class" → modified-hayabusa
+- "naked" / "streetfighter" / "hooligan" → naked
+- "small-cc" / "sub-200cc" / "R15 / RC 200 / NS200 class" / "Indian commuter drag" → small-cc
 
 Modded-archetype hints (set archetype_name AND keep bike_name as the OEM base):
 - 'TTS turbo Hayabusa' / 'Stage 2 Hayabusa' → archetype_name='TTS Stage 2 \
@@ -304,6 +369,9 @@ def parse_query(
         bike_name=(payload.get("bike_name") or "").strip(),
         bike_b_name=((payload.get("bike_b_name") or "").strip() or None),
         archetype_name=((payload.get("archetype_name") or "").strip() or None),
+        build_tier=(payload.get("build_tier") or "stage_2").strip().lower(),
+        target_class=((payload.get("target_class") or "").strip() or None),
+        prefer_indian=bool(payload.get("prefer_indian", False)),
         intent_type=(payload.get("intent_type") or "simulate").strip().lower(),
         venue_name=payload.get("venue_name"),
         ambient_temp_c=payload.get("ambient_temp_c"),

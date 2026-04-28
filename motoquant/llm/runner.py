@@ -140,6 +140,10 @@ def run_chat_pipeline(
             parsed, db, client, result,
             run_summary=run_summary, suggestion_limit=suggestion_limit,
         )
+    if intent == "choose_bike":
+        return _run_choose_bike(
+            parsed, db, client, result, run_summary=run_summary,
+        )
     # default → simulate
     return _run_simulate(
         parsed, db, client, result,
@@ -458,23 +462,52 @@ def _run_rank(
 # ───────────────────────────────────────────────────────────────────
 
 
-# Priority categories the recommend handler picks across, in order. The
-# tuple is (substring_to_match_in_category_name, display_label_for_prompt).
-# We pick at most one part per category — keeps the build sheet focused.
-_RECOMMEND_PRIORITY = [
-    ("exhaust",          "Exhaust"),
-    ("air_filter",       "Air filter"),
-    ("ecu",              "ECU flash / piggyback"),
-    ("fuel_system",      "Fuel system"),
-    ("clutch",           "Clutch / slipper"),
-    ("quickshifter",     "Quickshifter"),
-    ("sprocket",         "Sprocket"),
-    ("chain",            "Chain"),
-    ("suspension",       "Suspension"),
-    ("brakes",           "Brakes"),
-    ("weight_reduction", "Weight reduction"),
-    ("battery",          "Lightweight battery"),
+# Tiered build recipes. Each tier is the ORDERED list of categories to
+# include — keys are matched as substrings against parts.category_name (so
+# "exhaust" matches both "exhaust" and "exhaust_full_system"). Stage_2
+# is the default / safest fallback; stage_1 is light bolt-ons; all_out
+# adds suspension + brakes + drag prep.
+#
+# Tuple shape: (substring_match_key, display_label_for_prompt).
+
+_TIER_STAGE_1 = [
+    ("exhaust",      "Exhaust"),
+    ("air_filter",   "Air filter"),
+    ("ecu",          "ECU flash / piggyback"),
+    ("fuel_system",  "Fuel system"),
 ]
+
+_TIER_STAGE_2 = _TIER_STAGE_1 + [
+    ("clutch",       "Clutch / slipper"),
+    ("quickshifter", "Quickshifter"),
+    ("sprocket",     "Sprocket"),
+    ("chain",        "Chain"),
+    ("battery",      "Lightweight battery"),
+]
+
+_TIER_ALL_OUT = _TIER_STAGE_2 + [
+    ("suspension",        "Suspension"),
+    ("brakes",            "Brakes"),
+    ("weight_reduction",  "Weight reduction"),
+    ("nitrous",           "Nitrous"),
+    ("boost",             "Boost / forced induction"),
+    ("wheelie",           "Wheelie / launch aid"),
+]
+
+_TIER_RECIPES = {
+    "stage_1":  _TIER_STAGE_1,
+    "stage_2":  _TIER_STAGE_2,
+    "all_out":  _TIER_ALL_OUT,
+}
+
+# Soft budget caps when the user didn't specify one. These are guidance —
+# the recommend handler will pick the highest-priced compatible part within
+# the tier ceiling so a stage_1 ask doesn't return Öhlins and Brembo Stylema.
+_TIER_DEFAULT_BUDGET_INR = {
+    "stage_1":  60_000,
+    "stage_2": 200_000,
+    "all_out": None,  # no cap
+}
 
 
 def _run_recommend(
@@ -519,22 +552,49 @@ def _run_recommend(
                 if any(c in (p.get("category_name") or "").lower() for c in wanted)
             ]
 
-        # 3. Group by canonical category, sort each by price descending so the
-        #    "premium-tier" pick lands at the top of each bucket.
+        # 3. Group by canonical category, sort each by price.
+        #    Tier-aware ordering so stage_1 picks the cheapest viable option
+        #    in each category (don't blow the budget on the first pick),
+        #    stage_2 picks middle-tier, and all_out goes premium-first.
+        tier_for_sort = (parsed.build_tier or "stage_2").lower()
         by_cat: dict[str, list[dict[str, Any]]] = {}
         for p in parts:
             cat = (p.get("category_name") or "uncategorized").lower()
             by_cat.setdefault(cat, []).append(p)
         for lst in by_cat.values():
-            lst.sort(key=lambda p: -float(p.get("price_inr") or 0))
+            if tier_for_sort == "stage_1":
+                # Cheapest first: a budget user wants the entry-tier upgrade,
+                # not the Akrapovic. Skip zero-price entries — those are
+                # placeholder rows without real pricing.
+                lst.sort(key=lambda p: float(p.get("price_inr") or 9_999_999))
+            elif tier_for_sort == "all_out":
+                # Premium first: no-budget user wants the Öhlins / Brembo /
+                # Akrapovic pick. Sort by price descending.
+                lst.sort(key=lambda p: -float(p.get("price_inr") or 0))
+            else:
+                # stage_2 (default): pick the median-price part in each
+                # category. Sort ascending then access middle index later.
+                lst.sort(key=lambda p: float(p.get("price_inr") or 0))
 
-        # 4. Walk the priority list and pick one part per category until budget
-        #    is roughly spent (allow 20 % headroom — better to over-build than
-        #    leave the user with a half-finished plan).
+        # 4. Walk the priority list for the user's chosen build tier and pick
+        #    one part per category until budget is roughly spent (allow 20 %
+        #    headroom — better to over-build than leave the user with a half-
+        #    finished plan). Stage_1 implicitly excludes high-cost categories
+        #    (suspension/brakes/weight). All_out skips the budget cap entirely.
+        tier = (parsed.build_tier or "stage_2").lower()
+        recipe = _TIER_RECIPES.get(tier, _TIER_STAGE_2)
+        # Effective budget: explicit > tier default > infinite
+        effective_budget = (
+            budget
+            if budget is not None
+            else _TIER_DEFAULT_BUDGET_INR.get(tier)
+        )
+        budget_cap = (
+            effective_budget * 1.2 if effective_budget else float("inf")
+        )
         selected: list[dict[str, Any]] = []
         used_budget = 0.0
-        budget_cap = (budget * 1.2) if budget else float("inf")
-        for cat_key, cat_label in _RECOMMEND_PRIORITY:
+        for cat_key, cat_label in recipe:
             # Find any cat_name in by_cat that contains the priority key
             candidates: list[dict[str, Any]] = []
             for cat_name, lst in by_cat.items():
@@ -542,15 +602,22 @@ def _run_recommend(
                     candidates.extend(lst)
             if not candidates:
                 continue
-            # Pick the highest-priced compatible candidate that still fits budget.
-            for p in candidates:
+            # For stage_2 prefer the median candidate so we don't always
+            # pick the cheapest (would feel like a stage_1 recommend) or the
+            # most expensive (would leave nothing for other categories).
+            if tier_for_sort == "stage_2" and len(candidates) > 1:
+                mid = len(candidates) // 2
+                ordered = candidates[mid:] + candidates[:mid]
+            else:
+                ordered = candidates
+            for p in ordered:
                 price = float(p.get("price_inr") or 0)
                 if used_budget + price > budget_cap:
                     continue
                 selected.append({"_label": cat_label, **p})
                 used_budget += price
                 break
-            if used_budget >= (budget or 0) * 0.95 > 0:
+            if effective_budget and used_budget >= effective_budget * 0.95:
                 break
 
         # 5. Recommended-tier + drag-prep tire fitments — completely separate
@@ -582,7 +649,9 @@ def _run_recommend(
         result.recommend_result = {
             "bike_id": parsed.bike_id,
             "bike_name": parsed.bike_name,
+            "build_tier": tier,
             "budget_inr": budget,
+            "effective_budget_inr": effective_budget,
             "parts": [
                 {
                     "part_id": p["id"],
@@ -849,8 +918,16 @@ def _summarize_compare(
     parsed: ParsedSimRequest, comp: dict[str, Any], client: LLMClient | None
 ) -> str:
     sys_p = (
-        "You are MotoQuant. Summarize a compare-two-bikes simulation result in "
-        "2-3 sentences. Use INR for money. End with one concrete suggestion."
+        "You are MotoQuant, a drag-racing tuner. Compare these two bikes "
+        "definitively. Format: "
+        "(1) one-line winner with explicit ΔET in seconds and Δtrap in km/h. "
+        "(2) 1-2 sentences on WHY the winner wins — cite the actual P/W "
+        "ratio difference, gearing advantage, or aero (use the data given). "
+        "(3) One trade-off line — the loser is better at X (price, "
+        "Indian-market availability, parts ecosystem, top speed past 1/4). "
+        "STRICT: cite actual sim ETs to 3 decimals and trap to 1 decimal. "
+        "Do not invent specs. No 'in conclusion' / 'overall' filler. "
+        "No bullet points unless required. Aim 50-80 words total."
     )
     a, b = comp["a"], comp["b"]
     user = (
@@ -866,14 +943,17 @@ def _summarize_compare(
 
 
 def _summarize_rank(
-    parsed: ParsedSimRequest, rank: dict[str, Any], client: LLMClient | None
+    parsed: ParsedSimRequest, rk: dict[str, Any], client: LLMClient | None
 ) -> str:
     sys_p = (
-        "You are MotoQuant. Summarize a ranked list of fastest bikes in 3-4 "
-        "sentences. Mention top 3 by name with their predicted ET. The ET "
-        "numbers come from running the actual physics engine on each bike, "
-        "so they are physics-grounded. End with one practical takeaway about "
-        "what makes the #1 bike fastest in this class."
+        "You are MotoQuant. Summarize a ranked top-N drag list. Format: "
+        "(1) one-line podium (1st-3rd by sim ET with explicit times). "
+        "(2) For #1 only, 1-2 sentences on what gives it the edge "
+        "(P/W ratio, gearing, weight, aero — use whatever the data shows). "
+        "(3) Two-line aside on a notable runner-up if interesting (e.g. "
+        "newer / cheaper / Indian-market / more affordable parts). "
+        "STRICT: cite actual sim ETs to 3 decimals; do not invent specs. "
+        "No filler verbs. 60-100 words total."
     )
     top = rank.get("top", [])[:5]
     if not top:
@@ -992,11 +1072,15 @@ def _summarize_explain(
     client: LLMClient | None,
 ) -> str:
     sys_p = (
-        "You are MotoQuant, an expert motorcycle drag-racing tuner. Answer "
-        "the user's question in 3-5 sentences. Be concrete and physics-based. "
-        "If sim numbers are provided, ground your answer in them. Use Indian "
-        "context (INR, Aamby Valley/MMRT/BIC/Kari) where relevant. Avoid "
-        "generic platitudes — give a specific number, ratio, or technique."
+        "You are MotoQuant, a drag-racing tuner with first-principles physics "
+        "background. Answer concretely in 3-5 sentences. STRICT RULES: "
+        "(1) If a sim result is in the data, cite exact ET / trap / 60ft. "
+        "(2) If you state a physical effect (rho, DA, traction), give a "
+        "specific number / ratio / direction (\'+0.05s slower\', "
+        "\'8 % less power\') — never \'significantly\' / \'noticeable\' / "
+        "\'a bit\'. (3) Indian context: prefer Aamby Valley / MMRT / BIC / "
+        "Kari examples; use INR. (4) End with a one-line actionable "
+        "takeaway the user can apply at the strip. No preamble."
     )
     user = f"User asked: {parsed.raw_query}\n"
     if sim_context:
@@ -1111,3 +1195,278 @@ def _apply_archetype(config: Any, parsed: ParsedSimRequest, db: Any) -> None:
             tires.mu_peak = float(row["tire_mu_override"])
         except Exception:
             pass
+
+
+# ───────────────────────────────────────────────────────────────────
+# Intent: CHOOSE_BIKE  (pick best bike for class+venue+budget)
+# ───────────────────────────────────────────────────────────────────
+
+# Class -> displacement window + category filter. Used by _run_choose_bike
+# to narrow the catalog before running candidate sims.
+_CLASS_FILTERS = {
+    "litre": {
+        "disp_min": 950, "disp_max": 1200,
+        "categories": {"sport", "naked"},
+        "label": "Litre / open-class superbike",
+    },
+    "600": {
+        "disp_min": 580, "disp_max": 700,
+        "categories": {"sport", "naked"},
+        "label": "Supersport 600",
+    },
+    "300": {
+        "disp_min": 250, "disp_max": 410,
+        "categories": {"sport", "naked"},
+        "label": "Entry-level sport 300",
+    },
+    "twin": {
+        "disp_min": 470, "disp_max": 800,
+        "categories": {"sport", "naked", "cruiser", "modern_classic"},
+        "cylinder_count": 2,
+        "label": "Mid-displacement twin",
+    },
+    "cruiser": {
+        "disp_min": 800, "disp_max": 2500,
+        "categories": {"cruiser", "muscle"},
+        "label": "Cruiser / muscle",
+    },
+    "2t": {
+        "disp_min": 95, "disp_max": 800,
+        "stroke_type": 2,
+        "label": "Two-stroke (vintage / dirt)",
+    },
+    "two-stroke": {
+        "disp_min": 95, "disp_max": 800,
+        "stroke_type": 2,
+        "label": "Two-stroke (vintage / dirt)",
+    },
+    "modified-hayabusa": {
+        "model_keywords": ["Hayabusa"],
+        "disp_min": 1290, "disp_max": 1350,
+        "label": "Pro Street modified Hayabusa",
+    },
+    "naked": {
+        "categories": {"naked", "muscle"},
+        "disp_min": 600,
+        "label": "Streetfighter / naked",
+    },
+    "small-cc": {
+        "disp_min": 145, "disp_max": 250,
+        "categories": {"sport", "naked", "underbone"},
+        "label": "Small-cc Indian / SE Asia drag",
+    },
+}
+
+
+def _choose_bike_candidate_query(parsed, db):
+    """Build SQL + params to fetch candidate bikes for the target_class."""
+    cls = (parsed.target_class or "").lower().strip()
+    spec = _CLASS_FILTERS.get(cls) or _CLASS_FILTERS["litre"]
+
+    where = ["1=1"]
+    params = []
+
+    if spec.get("disp_min"):
+        where.append("bm.displacement_cc >= ?")
+        params.append(spec["disp_min"])
+    if spec.get("disp_max"):
+        where.append("bm.displacement_cc <= ?")
+        params.append(spec["disp_max"])
+    if spec.get("categories"):
+        cats = list(spec["categories"])
+        ph = ",".join(["?"] * len(cats))
+        where.append("LOWER(bm.category) IN (" + ph + ")")
+        params.extend(c.lower() for c in cats)
+    if spec.get("cylinder_count"):
+        where.append("bm.cylinder_count = ?")
+        params.append(spec["cylinder_count"])
+    if spec.get("model_keywords"):
+        for kw in spec["model_keywords"]:
+            where.append("bm.model_name LIKE ?")
+            params.append("%" + kw + "%")
+
+    if parsed.prefer_indian:
+        indian_mfrs = (
+            "Bajaj", "TVS", "Hero", "Royal Enfield", "Mahindra", "Yezdi",
+            "Jawa", "Indian Motorcycle",
+            "Yamaha", "Honda", "Suzuki", "Kawasaki", "KTM", "Triumph",
+            "BMW", "Aprilia", "Husqvarna", "CFMoto", "Benelli",
+            "Harley-Davidson",
+        )
+        ph = ",".join(["?"] * len(indian_mfrs))
+        where.append("m.name IN (" + ph + ")")
+        params.extend(indian_mfrs)
+
+    sql = (
+        "SELECT bm.id, bm.model_name, bm.year_from, bm.year_to, "
+        "       bm.displacement_cc, bm.peak_power_hp, bm.peak_torque_nm, "
+        "       bm.dry_mass_kg, bm.wet_mass_kg, bm.category, "
+        "       bm.cylinder_count, m.name AS manufacturer "
+        "FROM bike_models bm "
+        "JOIN manufacturers m ON m.id = bm.manufacturer_id "
+        "WHERE " + " AND ".join(where) + " "
+        "ORDER BY (bm.peak_power_hp / "
+        "          NULLIF(COALESCE(bm.dry_mass_kg, bm.wet_mass_kg), 0)) DESC "
+        "LIMIT 30"
+    )
+    return sql, params
+
+
+def _run_choose_bike(parsed, db, client, result, *, run_summary):
+    """Pick best bike for target_class + venue + budget."""
+    sql, params = _choose_bike_candidate_query(parsed, db)
+    try:
+        rows = [dict(r) for r in db._conn.execute(sql, params).fetchall()]
+    except Exception as e:
+        result.error = "choose_bike_failed"
+        result.error_detail = "DB query failed: " + type(e).__name__ + ": " + str(e)
+        return result
+
+    if not rows:
+        result.error = "no_candidates"
+        result.error_detail = (
+            "No bikes match target_class='" + str(parsed.target_class)
+            + "' with prefer_indian=" + str(parsed.prefer_indian)
+        )
+        return result
+
+    sim_rows = []
+    for r in rows[:25]:
+        try:
+            cfg_row = db.bikes.get_current_config(r["id"])
+            if cfg_row is None:
+                continue
+            env = None
+            if parsed.venue_id is not None:
+                try:
+                    env = db.venues.to_environment(
+                        parsed.venue_id, month=datetime.now().month
+                    )
+                except Exception:
+                    env = None
+            cfg = db.bikes.to_config(cfg_row["id"], environment=env)
+            if cfg is None:
+                continue
+            _apply_env_overrides(cfg, parsed)
+            _apply_archetype(cfg, parsed, db)
+            _apply_power_boost(cfg, parsed)
+            engine = MotoQuantEngine(cfg)
+            sim = engine.run()
+            sim_rows.append({
+                **r,
+                "sim_et_s": round(float(sim.time_quarter), 3),
+                "sim_trap_kmh": round(float(sim.speed_quarter) * MS_TO_KMH, 1),
+                "sim_60ft_s": round(float(getattr(sim, "time_60ft", 0.0) or 0.0), 3),
+            })
+        except Exception:
+            continue
+
+    if not sim_rows:
+        result.error = "all_sims_failed"
+        result.error_detail = (
+            "Found " + str(len(rows)) + " candidate bikes but all sims failed."
+        )
+        return result
+
+    sim_rows.sort(key=lambda r: r.get("sim_et_s") or 999.0)
+    hero = sim_rows[0]
+    runners_up = sim_rows[1:5]
+
+    result.choose_bike_result = {
+        "target_class": parsed.target_class,
+        "class_label": _CLASS_FILTERS.get(
+            (parsed.target_class or "").lower(), {}
+        ).get("label"),
+        "venue_name": parsed.venue_name,
+        "venue_id": parsed.venue_id,
+        "budget_inr": parsed.budget_inr,
+        "prefer_indian": parsed.prefer_indian,
+        "candidate_count": len(sim_rows),
+        "hero": _slim_choose_row(hero),
+        "runners_up": [_slim_choose_row(r) for r in runners_up],
+    }
+
+    if run_summary:
+        try:
+            result.summary = _summarize_choose_bike(
+                parsed, result.choose_bike_result, client
+            )
+        except Exception as e:
+            result.summary = (
+                "(choose_bike summary failed: " + type(e).__name__ + ": " + str(e) + ")"
+            )
+
+    return result
+
+
+def _slim_choose_row(r):
+    return {
+        "bike_id": r.get("id"),
+        "manufacturer": r.get("manufacturer"),
+        "model_name": r.get("model_name"),
+        "year_from": r.get("year_from"),
+        "year_to": r.get("year_to"),
+        "displacement_cc": r.get("displacement_cc"),
+        "peak_power_hp": r.get("peak_power_hp"),
+        "peak_torque_nm": r.get("peak_torque_nm"),
+        "dry_mass_kg": r.get("dry_mass_kg"),
+        "category": r.get("category"),
+        "sim_et_s": r.get("sim_et_s"),
+        "sim_trap_kmh": r.get("sim_trap_kmh"),
+        "sim_60ft_s": r.get("sim_60ft_s"),
+    }
+
+
+def _summarize_choose_bike(parsed, cb, client):
+    sys_p = (
+        "You are MotoQuant, a drag-racing tuner. Build a definitive "
+        "bike-pick recommendation from the data below. Format: "
+        "(1) one-line hero pick with sim ET + trap, "
+        "(2) 2-3 sentences explaining why it wins (P/W ratio, gearing, "
+        "available mods in the catalog, Indian-market availability if "
+        "prefer_indian=true), (3) bullet list of runners-up with their "
+        "sim ETs and the single trade-off. "
+        "STRICT: use ONLY the bikes in the data — do not invent specs "
+        "or models. Cite the actual sim ET to 3 decimals. No preamble."
+    )
+
+    hero = cb.get("hero") or {}
+    runners = cb.get("runners_up") or []
+    venue = cb.get("venue_name") or "ISA standard conditions"
+    cls_label = cb.get("class_label") or cb.get("target_class") or "(unspecified)"
+
+    lines = []
+    lines.append("User asked: " + parsed.raw_query)
+    lines.append("Class: " + str(cls_label))
+    lines.append("Venue: " + str(venue))
+    if cb.get("budget_inr"):
+        lines.append("Budget hint: ₹" + format(int(cb["budget_inr"]), ","))
+    if cb.get("prefer_indian"):
+        lines.append("User prefers Indian-market bikes.")
+    lines.append("Total candidates evaluated: " + str(cb.get("candidate_count")))
+    lines.append("")
+    lines.append("HERO PICK:")
+    lines.append(
+        "  " + str(hero.get("manufacturer")) + " " + str(hero.get("model_name"))
+        + " (" + str(hero.get("year_from")) + "-" + str(hero.get("year_to")) + ") — "
+        + str(hero.get("displacement_cc")) + "cc, "
+        + str(hero.get("peak_power_hp")) + " hp, "
+        + str(hero.get("dry_mass_kg")) + " kg dry"
+    )
+    lines.append(
+        "  Sim ET " + str(hero.get("sim_et_s")) + " s @ trap "
+        + str(hero.get("sim_trap_kmh")) + " km/h (60ft "
+        + str(hero.get("sim_60ft_s")) + " s)"
+    )
+    lines.append("")
+    lines.append("RUNNERS-UP:")
+    for r in runners:
+        lines.append(
+            "  " + str(r.get("manufacturer")) + " " + str(r.get("model_name")) + " — "
+            + str(r.get("peak_power_hp")) + " hp / "
+            + str(r.get("dry_mass_kg")) + " kg dry, "
+            + "sim ET " + str(r.get("sim_et_s")) + " s @ "
+            + str(r.get("sim_trap_kmh")) + " km/h"
+        )
+
+    return _llm_text(client, sys_p, "\n".join(lines))
