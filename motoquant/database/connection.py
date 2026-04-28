@@ -1,5 +1,5 @@
 """
-MotoQuant Pro — Database Connection Manager
+MotoQuant Pro â Database Connection Manager
 ==========================================
 Handles SQLite connection lifecycle, schema initialization, migrations,
 and provides a single entry-point (MotoQuantDB) for all repository access.
@@ -45,9 +45,9 @@ class MotoQuantDB:
         self._bike_suggestions = None
         self._spec_corrections = None
 
-    # ────────────────────────────────────────────
+    # ââââââââââââââââââââââââââââââââââââââââââââ
     # Connection lifecycle
-    # ────────────────────────────────────────────
+    # ââââââââââââââââââââââââââââââââââââââââââââ
 
     def connect(self) -> sqlite3.Connection:
         """Open (or return existing) SQLite connection with optimal pragmas."""
@@ -98,9 +98,9 @@ class MotoQuantDB:
             self.connect()
         return self._conn
 
-    # ────────────────────────────────────────────
+    # ââââââââââââââââââââââââââââââââââââââââââââ
     # Schema initialization & migration
-    # ────────────────────────────────────────────
+    # ââââââââââââââââââââââââââââââââââââââââââââ
 
     def initialize(self):
         """Create all tables, seed reference data, and set schema version."""
@@ -136,7 +136,7 @@ class MotoQuantDB:
         """Run incremental migrations."""
         conn = self.conn
 
-        # v1 → v2: Add fitment_rules column to parts table
+        # v1 â v2: Add fitment_rules column to parts table
         if from_version < 2:
             try:
                 conn.execute("ALTER TABLE parts ADD COLUMN fitment_rules TEXT")
@@ -145,11 +145,11 @@ class MotoQuantDB:
                 if "duplicate column name" not in str(e).lower():
                     raise
 
-        # v2 → v3: bike_suggestions table (added for /api/bikes/suggest endpoint)
-        # The CREATE TABLE statement is idempotent in TABLES_DDL, so no-op here —
+        # v2 â v3: bike_suggestions table (added for /api/bikes/suggest endpoint)
+        # The CREATE TABLE statement is idempotent in TABLES_DDL, so no-op here â
         # but we bump the version so older DB files get their schema_meta updated.
 
-        # v3 → v4: part_prices table (live Indian-market retailer pricing layer)
+        # v3 â v4: part_prices table (live Indian-market retailer pricing layer)
         if from_version < 4:
             conn.executescript(
                 """
@@ -172,7 +172,7 @@ class MotoQuantDB:
     def _seed_parts_categories(self):
         """Insert parts categories if not present. Also prunes the retired
         'tire' pseudo-category from older DBs (tires are managed in tire_models,
-        not parts — the category was only ever empty)."""
+        not parts â the category was only ever empty)."""
         conn = self.conn
         for name, display, affects in SEED_PARTS_CATEGORIES:
             conn.execute(
@@ -181,7 +181,7 @@ class MotoQuantDB:
                 (name, display, affects),
             )
         # Retire stale "tire" category if it exists AND is empty (parts in it
-        # would block the delete via FK — that scenario is impossible by design
+        # would block the delete via FK â that scenario is impossible by design
         # but we still guard against it rather than silently dropping data).
         tire_row = conn.execute(
             "SELECT id FROM parts_categories WHERE name = 'tire'"
@@ -253,9 +253,9 @@ class MotoQuantDB:
                     ),
                 )
 
-    # ────────────────────────────────────────────
+    # ââââââââââââââââââââââââââââââââââââââââââââ
     # Repository accessors
-    # ────────────────────────────────────────────
+    # ââââââââââââââââââââââââââââââââââââââââââââ
 
     @property
     def bikes(self):
@@ -331,4 +331,37 @@ class MotoQuantDB:
 
     # ────────────────────────────────────────────
     # Utility
-    # ──────────�
+    # ────────────────────────────────────────────
+
+    def stats(self) -> dict:
+        """Return row counts for all major tables."""
+        tables = [
+            "manufacturers",
+            "bike_models",
+            "bike_configs",
+            "dyno_curves",
+            "tire_manufacturers",
+            "tire_models",
+            "venues",
+            "weather_records",
+            "venue_seasonal",
+            "parts",
+            "sim_runs",
+            "data_provenance",
+        ]
+        counts = {}
+        for t in tables:
+            try:
+                row = self.conn.execute(f"SELECT COUNT(*) AS c FROM {t}").fetchone()
+                counts[t] = row["c"]
+            except sqlite3.OperationalError:
+                counts[t] = 0
+        return counts
+
+    def vacuum(self):
+        """Reclaim disk space."""
+        self.conn.execute("VACUUM")
+
+    @property
+    def path(self) -> Path:
+        return self._db_path

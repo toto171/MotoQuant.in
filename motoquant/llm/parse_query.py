@@ -10,7 +10,7 @@ Pipeline
   4. Returns ParsedSimRequest -- maps cleanly to api.QuickSimRequest
 
 Why two-stage (LLM + local resolution):
-  - Keeps the LLM prompt tiny (don't dump 327 bike rows into context every call)
+  - Keeps the LLM prompt tiny (don't dump 290 bike rows into context every call)
   - Reuses the existing fuzzy-matching logic in BikesRepository.search()
   - Cheap: ~$0.01/query at Claude Sonnet 4.6 rates with ~1k token output
 

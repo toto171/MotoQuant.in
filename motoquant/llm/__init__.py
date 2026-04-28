@@ -14,7 +14,7 @@ Design notes
   never have to parse free-form text. Schema in parse_query.TOOL_SCHEMA.
 - Bike resolution is two-stage: LLM extracts a name string, then
   parse_query._resolve_against_db does a fuzzy DB lookup. Keeps the
-  prompt tiny (we never dump 327 bike rows into context).
+  prompt tiny (we never dump 290 bike rows into context).
 - run_chat_pipeline is the single source of truth shared by the
   `motoquant chat` CLI and POST /api/chat. Pure data in, structured
   data out -- no printing, no HTTP.

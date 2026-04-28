@@ -167,7 +167,7 @@ export function SettingsPage() {
 
         <AboutRow Icon={Gauge} label="App version" value="MotoQuant Pro v0.5.0" hint="Tauri 2 · React 19 · FastAPI sidecar" />
         <AboutRow Icon={Server} label="Backend URL" value={url.data ?? "resolving…"} hint="Python sidecar (ephemeral port)" />
-        <AboutRow Icon={Database} label="Database" value="motoquant.db (bundled)" hint="SQLite · WAL-fallback · 287 bikes" />
+        <AboutRow Icon={Database} label="Database" value="motoquant.db (bundled)" hint="SQLite · WAL-fallback · 290 bikes" />
         <AboutRow Icon={Cpu} label="Physics engine" value="RK4 · 1 ms fixed (or adaptive)" hint="15 sub-models validated" />
         <AboutRow
           Icon={Info}

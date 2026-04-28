@@ -81,7 +81,7 @@ export function softwareApplicationSchema() {
     downloadUrl: `${SITE_URL}/simulator`,
     softwareVersion: '1.0',
     description:
-      'Physics-based quarter-mile drag racing simulator for motorcycles. 15-submodel engine (engine, drivetrain, clutch, chain, tires, aero, weight-transfer, rider dynamics, staging, environmental, braking, wheelie, parasitic, rolling resistance, forced induction) covering 287 bikes, 424 parts, 159 tires, 20 venues. Validated to K5 GSX-R1000 10.03s, YZF-R1 10.29s, Hayabusa 10.47s.',
+      'Physics-based quarter-mile drag racing simulator for motorcycles. 15-submodel engine (engine, drivetrain, clutch, chain, tires, aero, weight-transfer, rider dynamics, staging, environmental, braking, wheelie, parasitic, rolling resistance, forced induction) covering 290 bikes, 465 parts, 159 tires, 20 venues. Validated to K5 GSX-R1000 10.03s, YZF-R1 10.29s, Hayabusa 10.47s.',
     publisher: { '@id': `${SITE_URL}/#organization` },
     author: { '@id': `${SITE_URL}/#organization` },
     offers: {
@@ -142,7 +142,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'The catalog covers 287 bikes across 25+ manufacturers: Suzuki, Yamaha, Honda, Kawasaki, BMW, Ducati, Aprilia, KTM, Triumph, Royal Enfield, Bajaj, TVS, Hero, Harley-Davidson, Indian Motorcycle, CFMoto, Benelli, Husqvarna, MV Agusta, Moto Guzzi, Buell, and more. Includes Indian 200–400cc commuters, SE Asia underbones, and 20 two-stroke drag bikes (RD350, RX100, RGV250, H2 Mach IV).',
+            'The catalog covers 290 bikes across 25+ manufacturers: Suzuki, Yamaha, Honda, Kawasaki, BMW, Ducati, Aprilia, KTM, Triumph, Royal Enfield, Bajaj, TVS, Hero, Harley-Davidson, Indian Motorcycle, CFMoto, Benelli, Husqvarna, MV Agusta, Moto Guzzi, Buell, and more. Includes Indian 200–400cc commuters, SE Asia underbones, and 20 two-stroke drag bikes (RD350, RX100, RGV250, H2 Mach IV).',
         },
       },
       {
@@ -195,7 +195,7 @@ export function productSchema() {
     '@id': `${SITE_URL}/#product`,
     name: 'MotoQuant Pro',
     description:
-      'Physics-accurate motorcycle quarter-mile drag racing simulator. 287 bikes, 424 parts, 15 physics sub-models. Predict ET, trap speed, and split times. Validated against real Dragy GPS data.',
+      'Physics-accurate motorcycle quarter-mile drag racing simulator. 290 bikes, 465 parts, 15 physics sub-models. Predict ET, trap speed, and split times. Validated against real Dragy GPS data.',
     brand: {
       '@type': 'Brand',
       name: 'MotoQuant',
