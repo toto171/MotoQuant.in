@@ -34,11 +34,15 @@ from typing import Any, Callable
 # ─── Provider table ───────────────────────────────────────────────────────
 _PROVIDERS: dict[str, dict[str, str | None]] = {
     "gemini": {
-        # gemini-1.5-flash was deprecated (Sept 2025); 2.0-flash is the
-        # current free-tier flagship: 1500 RPD / 10 RPM / 1M-token context.
-        "model": "gemini-2.0-flash",
+        # Free-tier eligibility for specific model IDs varies by project /
+        # region (Google sometimes returns "limit: 0" on a model the docs
+        # claim is free). Override via GEMINI_MODEL env var if needed —
+        # known-good free options: gemini-2.5-flash, gemini-2.5-flash-lite,
+        # gemini-2.0-flash, gemini-2.0-flash-lite.
+        "model": "gemini-2.5-flash",
         "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
         "api_key_env": "GEMINI_API_KEY",
+        "model_env": "GEMINI_MODEL",
     },
     "anthropic": {
         "model": "claude-sonnet-4-6",
@@ -108,7 +112,13 @@ class LLMClient:
         self._api_key = api_key or os.environ.get(cfg["api_key_env"])
         if not self._api_key and self._provider == "anthropic":
             self._api_key = os.environ.get("ANTHROPIC_API_KEY")
-        self._model = model or cfg["model"]
+        # Allow per-provider model override via env var (e.g. GEMINI_MODEL,
+        # ANTHROPIC_MODEL) — handy for swapping on Railway without redeploy.
+        env_model = None
+        model_env_var = cfg.get("model_env")
+        if model_env_var:
+            env_model = os.environ.get(model_env_var)
+        self._model = model or env_model or cfg["model"]
         self._base_url = cfg["base_url"]
         self._max_tokens = max_tokens
         self._timeout_s = timeout_s
