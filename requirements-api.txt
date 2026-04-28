@@ -21,7 +21,13 @@ python-jose[cryptography]>=3.3.0
 email-validator>=2.0.0
 razorpay>=1.4.0
 
-# Phase A: Claude-powered NL chat (POST /api/chat, `motoquant chat`)
-# Requires ANTHROPIC_API_KEY env var at runtime. Falls through gracefully
-# if the key is missing -- callers get a typed LLMNotConfiguredError.
+# NL chat layer (POST /api/chat, `motoquant chat`).
+# The LLMClient supports multiple providers selected via the LLM_PROVIDER
+# env var (default 'gemini'). Anthropic uses its own SDK; Gemini /
+# DeepSeek / Groq / OpenRouter all use the openai SDK with a base_url
+# override (their OpenAI-compatible endpoints).
+# Set ONE of: GEMINI_API_KEY (default), ANTHROPIC_API_KEY, DEEPSEEK_API_KEY,
+# GROQ_API_KEY, OPENROUTER_API_KEY. Falls through gracefully if missing --
+# callers get a typed LLMNotConfiguredError.
 anthropic>=0.34.0
+openai>=1.40.0
