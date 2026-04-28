@@ -102,9 +102,10 @@ class TestRunChatPipelineSuccess(unittest.TestCase):
         self.assertIsNone(result.error)
         self.assertIsNotNone(result.bike_id)
         self.assertIsNotNone(result.sim_result)
-        self.assertIn("et_s", result.sim_result)
-        self.assertGreater(result.sim_result["et_s"], 5.0)
-        self.assertLess(result.sim_result["et_s"], 30.0)
+        # Key was renamed to et_quarter_s to match frontend contract
+        self.assertIn("et_quarter_s", result.sim_result)
+        self.assertGreater(result.sim_result["et_quarter_s"], 5.0)
+        self.assertLess(result.sim_result["et_quarter_s"], 30.0)
         self.assertEqual(result.summary, "K5 ran cleanly.")
         # Both LLM calls happened: tool (parse) + text (summarize)
         kinds = [c["kind"] for c in calls]
@@ -139,7 +140,7 @@ class TestRunChatPipelineSuccess(unittest.TestCase):
         self.assertIsNone(result.error)
         # We can't introspect the config from outside the runner cleanly,
         # but at minimum the run shouldn't crash and ET should be sensible.
-        self.assertGreater(result.sim_result["et_s"], 8.0)
+        self.assertGreater(result.sim_result["et_quarter_s"], 8.0)
 
 
 class TestRunChatPipelineErrors(unittest.TestCase):
@@ -278,7 +279,8 @@ class TestChatEndpoint(unittest.TestCase):
         self.assertIsNone(body["error"])
         self.assertIsNotNone(body["bike_id"])
         self.assertIsNotNone(body["sim_result"])
-        self.assertIn("et_s", body["sim_result"])
+        # Key was renamed to et_quarter_s to match frontend contract
+        self.assertIn("et_quarter_s", body["sim_result"])
         self.assertEqual(body["summary"], "Hayabusa ran cleanly.")
 
     def test_run_summary_false_omits_summary(self):
