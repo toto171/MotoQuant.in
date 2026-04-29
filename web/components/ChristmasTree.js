@@ -76,16 +76,16 @@ function StageRow({ label, on }) {
       >
         {label}
       </div>
-      <div className="mt-2 flex items-center justify-center gap-3 sm:gap-4">
+      <div className="mt-1.5 sm:mt-2 flex items-center justify-center gap-2 sm:gap-3 lg:gap-4">
         <span
           className={[
-            'w-4 h-4 sm:w-5 sm:h-5 rounded-full border transition-all duration-300',
+            'w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 rounded-full border transition-all duration-300',
             smallBulbClass(on),
           ].join(' ')}
         />
         <span
           className={[
-            'w-4 h-4 sm:w-5 sm:h-5 rounded-full border transition-all duration-300',
+            'w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 rounded-full border transition-all duration-300',
             smallBulbClass(on),
           ].join(' ')}
         />
@@ -152,7 +152,7 @@ export default function ChristmasTree({ className = '' }) {
         transition={{ duration: 0.5 }}
       />
 
-      <div className="relative w-[180px] sm:w-[220px] rounded-2xl bg-ink-1/90 border border-white/10 backdrop-blur-sm p-4 sm:p-5">
+      <div className="relative w-[150px] sm:w-[200px] lg:w-[220px] rounded-2xl bg-ink-1/90 border border-white/10 backdrop-blur-sm p-3 sm:p-4 lg:p-5">
         {/* Crown rail */}
         <div className="mx-auto mb-3 h-1 w-12 rounded-full bg-white/10" />
 
@@ -168,34 +168,34 @@ export default function ChristmasTree({ className = '' }) {
         <div className="mt-4 mx-auto w-[3px] h-3 bg-white/10 rounded-full" />
 
         {/* The 3 amber + green + red column */}
-        <div className="mt-2 flex flex-col items-center gap-3 sm:gap-3.5">
+        <div className="mt-2 flex flex-col items-center gap-1.5 sm:gap-2.5 lg:gap-3.5">
           <span
             className={[
-              'w-[54px] sm:w-[64px] aspect-square rounded-full border-2 transition-all duration-300',
+              'w-[40px] sm:w-[52px] lg:w-[64px] aspect-square rounded-full border-2 transition-all duration-300',
               largeBulbClass(lit.has('amber-1'), 'amber'),
             ].join(' ')}
           />
           <span
             className={[
-              'w-[54px] sm:w-[64px] aspect-square rounded-full border-2 transition-all duration-300',
+              'w-[40px] sm:w-[52px] lg:w-[64px] aspect-square rounded-full border-2 transition-all duration-300',
               largeBulbClass(lit.has('amber-2'), 'amber'),
             ].join(' ')}
           />
           <span
             className={[
-              'w-[54px] sm:w-[64px] aspect-square rounded-full border-2 transition-all duration-300',
+              'w-[40px] sm:w-[52px] lg:w-[64px] aspect-square rounded-full border-2 transition-all duration-300',
               largeBulbClass(lit.has('amber-3'), 'amber'),
             ].join(' ')}
           />
           <span
             className={[
-              'w-[54px] sm:w-[64px] aspect-square rounded-full border-2 transition-all duration-300',
+              'w-[40px] sm:w-[52px] lg:w-[64px] aspect-square rounded-full border-2 transition-all duration-300',
               largeBulbClass(greenOn, 'green'),
             ].join(' ')}
           />
           <span
             className={[
-              'w-[54px] sm:w-[64px] aspect-square rounded-full border-2 transition-all duration-300',
+              'w-[40px] sm:w-[52px] lg:w-[64px] aspect-square rounded-full border-2 transition-all duration-300',
               largeBulbClass(false, 'red'),
             ].join(' ')}
           />

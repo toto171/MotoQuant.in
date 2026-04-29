@@ -323,7 +323,7 @@ export default function PhysicsDial({ progress, className = '' }) {
     <svg
       ref={svgRef}
       viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
-      className={['select-none', className].join(' ')}
+      className={['select-none block max-w-full', className].join(' ')}
       style={{ filter: 'drop-shadow(0 0 60px rgba(255,94,31,0.18))' }}
       aria-hidden="true"
     >
@@ -393,7 +393,7 @@ export default function PhysicsDial({ progress, className = '' }) {
         <text x="660" y="104" fill="#71717A">15 SUB-MODELS</text>
       </g>
       <text x="694" y="395" textAnchor="middle"
-        fontFamily="ui-monospace, monospace" fontSize="11" letterSpacing="3" fill="#52525B"
+        fontFamily="ui-monospace, monospace" fontSize="10" letterSpacing="1.5" fill="#52525B"
         data-anim="label" style={{ opacity: 0 }}>
         NINJA H2R · 998 cm³ · 310 hp · supercharged
       </text>

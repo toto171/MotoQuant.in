@@ -278,13 +278,13 @@ export default function HomePage() {
   });
 
   return (
-    <div className="min-h-screen bg-black text-white antialiased">
+    <div className="min-h-screen bg-black text-white antialiased overflow-x-clip">
       <SiteNav />
 
       {/* ─── HERO ─────────────────────────────────────────────── */}
       <section
         ref={heroRef}
-        className="relative min-h-screen pt-16 overflow-hidden bg-black"
+        className="relative min-h-[640px] sm:min-h-[800px] lg:min-h-screen pt-16 overflow-hidden bg-black"
       >
         {/* background — radial glow + grid + horizon lights */}
         <div className="absolute inset-0 pointer-events-none">
@@ -301,7 +301,7 @@ export default function HomePage() {
 
         <motion.div
           style={{ opacity: heroFade }}
-          className="relative max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 pt-8 pb-32 min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center"
+          className="relative max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 pt-4 sm:pt-8 pb-12 sm:pb-20 lg:pb-32 min-h-[calc(640px-4rem)] sm:min-h-[calc(800px-4rem)] lg:min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center"
         >
           {/* Tree + dial centerpiece. Stacks on mobile, side-by-side on lg+.
               The previous `scale-[0.7] sm:scale-[0.85]` on the tree wrapper
@@ -309,17 +309,17 @@ export default function HomePage() {
               the visual was shrunk 30% but the layout box stayed full size.
               Removed; the tree's own `w-[180px] sm:w-[220px]` responsive
               width handles small viewports cleanly. */}
-          <div className="relative w-full max-w-[1080px] mx-auto pointer-events-none flex flex-col items-center gap-6 sm:gap-8 lg:flex-row lg:items-start lg:justify-center lg:gap-12">
+          <div className="relative w-full max-w-[1080px] mx-auto pointer-events-none flex flex-col items-center gap-3 sm:gap-6 lg:flex-row lg:items-start lg:justify-center lg:gap-12 min-w-0">
             <div className="pointer-events-auto flex-shrink-0 lg:mt-10">
               <ChristmasTree />
             </div>
-            <div ref={dialRef} className="w-full max-w-[640px] flex-shrink">
+            <div ref={dialRef} className="w-full max-w-full sm:max-w-[600px] lg:max-w-[640px] flex-shrink min-w-0">
               <PhysicsDial progress={dialProgress} className="w-full h-auto" />
             </div>
           </div>
 
           {/* Hero copy — centred below the centerpiece */}
-          <div className="relative z-10 mt-10 max-w-3xl text-center">
+          <div className="relative z-10 mt-6 sm:mt-8 lg:mt-10 max-w-3xl text-center">
             <Reveal y={20} duration={0.7}>
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-brand-orange/40 bg-brand-orange/10 text-[10px] sm:text-xs font-mono uppercase tracking-[0.25em] text-brand-orange">
                 Proudly Built in India
@@ -327,7 +327,7 @@ export default function HomePage() {
             </Reveal>
 
             <Reveal y={32} duration={0.9} delay={0.05}>
-              <h1 className="mt-7 font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[0.95] tracking-[-0.04em] text-white">
+              <h1 className="mt-5 sm:mt-7 font-display font-bold text-[2rem] sm:text-5xl lg:text-6xl leading-[1.05] sm:leading-[0.95] tracking-[-0.03em] sm:tracking-[-0.04em] text-white">
                 The physics of{' '}
                 <span className="text-gradient-orange">faster.</span>
               </h1>

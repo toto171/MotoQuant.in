@@ -1,6 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* ── Mobile horizontal-overflow safety net ───────────────────────────
+   User-reported bug (Apr 29): mobile screenshots showed the page wider
+   than the viewport, with content shifted left and clipped at edges.
+   Root cause was inside the hero centerpiece (page.js patch addresses
+   it) but this CSS-level guard catches any future overflow from any
+   absolutely-positioned glow / blur / decoration that might escape its
+   parent box. Doesn't disable vertical scroll. */
+html, body {
+  overflow-x: clip;
+  max-width: 100vw;
+}
+
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
