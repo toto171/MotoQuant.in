@@ -107,14 +107,21 @@ export default function SimulatorWidget() {
   const [massChange, setMassChange] = useState(0);
   const [location, setLocation] = useState(null);
   const [locationOpen, setLocationOpen] = useState(false);
-  const [result, setResult] = useState(null);
+  // Sim mode — 'quarter' (¼-mile ET + trap + splits) or 'topspeed' (terminal
+  // velocity + time-to-terminal + gear + RPM). Each mode hits a different
+  // FastAPI endpoint and renders a different result panel below.
+  const [simMode, setSimMode] = useState('quarter');
+  const [result, setResult] = useState(null);          // quarter-mile result
+  const [topSpeedResult, setTopSpeedResult] = useState(null);  // top-speed result
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  async function runSim() {
+  async function runSim(mode = simMode) {
+    setSimMode(mode);
     setLoading(true);
     setError(null);
-    setResult(null);
+    if (mode === 'quarter') setResult(null);
+    else setTopSpeedResult(null);
     try {
       const envOverrides = environmentOverridesFromLocation(location);
       const body = {
@@ -131,7 +138,14 @@ export default function SimulatorWidget() {
       } else {
         body.bike_id = selectedBike.id;
       }
-      const res = await fetch(`${API_URL}/api/simulate/quick`, {
+      // Different endpoint per mode:
+      //   quarter  → /api/simulate/quick (ET + trap + 60ft / ⅛-mile splits)
+      //   topspeed → /api/simulate/top-speed (terminal velocity + plateau
+      //              detection + gear + RPM at terminal)
+      const endpoint = mode === 'topspeed'
+        ? `${API_URL}/api/simulate/top-speed`
+        : `${API_URL}/api/simulate/quick`;
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -140,7 +154,9 @@ export default function SimulatorWidget() {
         const msg = await res.text();
         throw new Error(`API error ${res.status}: ${msg}`);
       }
-      setResult(await res.json());
+      const data = await res.json();
+      if (mode === 'quarter') setResult(data);
+      else setTopSpeedResult(data);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -175,7 +191,7 @@ export default function SimulatorWidget() {
             <Zap className="text-[#FF5E1F]" size={20} />
           </motion.div>
           <span className="bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
-            Live Quarter-Mile Simulator
+            Live Simulator
           </span>
         </h3>
 
@@ -405,22 +421,22 @@ export default function SimulatorWidget() {
         </AnimatePresence>
       </div>
 
-      <motion.button
-        onClick={runSim}
-        disabled={loading}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        className="relative w-full py-3 bg-gradient-to-r from-[#FF5E1F] to-[#FF7A00] hover:shadow-[0_0_40px_rgba(255,94,31,0.4)] disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-semibold text-white transition-all flex items-center justify-center gap-2 group overflow-hidden z-10"
-      >
-        <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors" />
-        <div className="relative flex items-center gap-2">
-          {loading ? (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 relative z-10">
+        <motion.button
+          onClick={() => runSim('quarter')}
+          disabled={loading}
+          whileHover={{ scale: loading ? 1 : 1.02 }}
+          whileTap={{ scale: loading ? 1 : 0.98 }}
+          className={[
+            'relative py-3.5 rounded-xl font-semibold text-sm sm:text-[0.95rem] transition-all flex items-center justify-center gap-2 group overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed',
+            simMode === 'quarter'
+              ? 'bg-gradient-to-r from-[#FF5E1F] to-[#FF7A00] text-white shadow-[0_0_30px_rgba(255,94,31,0.35)] hover:shadow-[0_0_45px_rgba(255,94,31,0.5)]'
+              : 'bg-white/[0.04] border border-white/10 text-white/85 hover:bg-white/[0.08] hover:border-[#FF5E1F]/40',
+          ].join(' ')}
+        >
+          {loading && simMode === 'quarter' ? (
             <>
-              <motion.div
-                animate={{ opacity: [1, 0.5, 1] }}
-                transition={{ duration: 1.2, repeat: Infinity }}
-                className="flex gap-1"
-              >
+              <motion.div animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1.2, repeat: Infinity }} className="flex gap-1">
                 <span className="w-1.5 h-1.5 bg-white rounded-full" />
                 <span className="w-1.5 h-1.5 bg-white rounded-full" />
                 <span className="w-1.5 h-1.5 bg-white rounded-full" />
@@ -429,12 +445,41 @@ export default function SimulatorWidget() {
             </>
           ) : (
             <>
-              <Zap size={16} />
-              <span>Run Simulation</span>
+              <Zap size={15} />
+              <span>Quarter-Mile ET</span>
             </>
           )}
-        </div>
-      </motion.button>
+        </motion.button>
+
+        <motion.button
+          onClick={() => runSim('topspeed')}
+          disabled={loading}
+          whileHover={{ scale: loading ? 1 : 1.02 }}
+          whileTap={{ scale: loading ? 1 : 0.98 }}
+          className={[
+            'relative py-3.5 rounded-xl font-semibold text-sm sm:text-[0.95rem] transition-all flex items-center justify-center gap-2 group overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed',
+            simMode === 'topspeed'
+              ? 'bg-gradient-to-r from-[#FF5E1F] to-[#FF7A00] text-white shadow-[0_0_30px_rgba(255,94,31,0.35)] hover:shadow-[0_0_45px_rgba(255,94,31,0.5)]'
+              : 'bg-white/[0.04] border border-white/10 text-white/85 hover:bg-white/[0.08] hover:border-[#FF5E1F]/40',
+          ].join(' ')}
+        >
+          {loading && simMode === 'topspeed' ? (
+            <>
+              <motion.div animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1.2, repeat: Infinity }} className="flex gap-1">
+                <span className="w-1.5 h-1.5 bg-white rounded-full" />
+                <span className="w-1.5 h-1.5 bg-white rounded-full" />
+                <span className="w-1.5 h-1.5 bg-white rounded-full" />
+              </motion.div>
+              <span>Simulating…</span>
+            </>
+          ) : (
+            <>
+              <Gauge size={15} />
+              <span>Top Speed Stats</span>
+            </>
+          )}
+        </motion.button>
+      </div>
 
       <AnimatePresence>
         {error && (
@@ -497,27 +542,72 @@ export default function SimulatorWidget() {
               transition={{ delay: 0.3 }}
               className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-6 backdrop-blur"
             >
-              <p className="text-xs font-semibold text-white/50 mb-4 uppercase tracking-wide">Split Timeline</p>
-              <div className="relative">
-                <div className="absolute top-8 left-0 right-0 h-0.5 bg-gradient-to-r from-[#FF5E1F] via-[#FF7A00] to-transparent opacity-40" />
-
-                <div className="grid grid-cols-4 gap-1 sm:gap-2 relative">
-                  {[
-                    { label: '0 ft', val: 0 },
-                    { label: '60 ft', val: result.et_60ft_s },
-                    { label: '⅛ mile', val: result.et_eighth_s },
-                    { label: '¼ mile', val: result.et_quarter_s },
-                  ].map((split, idx) => (
-                    <div key={idx} className="text-center">
-                      <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-[#FF5E1F] shadow-[0_0_15px_rgba(255,94,31,0.5)] mx-auto mb-3" />
-                      <p className="text-[10px] sm:text-xs text-white/40 mb-1">{split.label}</p>
-                      <p className="text-xs sm:text-sm font-mono font-semibold text-white">
-                        {split.val === 0 ? '0.000s' : `${split.val.toFixed(3)}s`}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-xs font-semibold text-white/55 uppercase tracking-wider">Split Timeline</p>
+                <p className="text-[10px] font-mono text-white/30 tabular-nums">
+                  402 m · 1320 ft
+                </p>
               </div>
+              {(() => {
+                const splits = [
+                  { label: '0 ft',    val: 0,                       distM: 0 },
+                  { label: '60 ft',   val: result.et_60ft_s ?? 0,   distM: 18.3 },
+                  { label: '⅛ mile',  val: result.et_eighth_s ?? 0, distM: 201 },
+                  { label: '¼ mile',  val: result.et_quarter_s ?? 0,distM: 402 },
+                ];
+                const totalT = splits[3].val || 1;
+                return (
+                  <div className="relative">
+                    {/* Progress track: full width, rendered behind the
+                        4 milestone cards. The orange fill width is
+                        always 100 % at the end (the last marker IS the
+                        finish line), but the gradient stops are
+                        positioned by relative time so the eye reads the
+                        pacing — narrow gaps = quick splits, wide gaps
+                        = slow splits. */}
+                    <div className="absolute left-3 right-3 top-[18px] h-[3px] rounded-full bg-white/10 overflow-hidden">
+                      <motion.div
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: 1 }}
+                        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                        style={{ transformOrigin: 'left' }}
+                        className="h-full bg-gradient-to-r from-[#FF5E1F] via-[#FF8F57] to-[#FFD089]"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-4 gap-1 sm:gap-2 relative">
+                      {splits.map((s, idx) => {
+                        const pct = totalT > 0 ? Math.round((s.val / totalT) * 100) : 0;
+                        return (
+                          <motion.div
+                            key={idx}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 + idx * 0.08, duration: 0.4 }}
+                            className="flex flex-col items-center text-center"
+                          >
+                            {/* Milestone dot — sits ON the progress track */}
+                            <div className="w-[14px] h-[14px] sm:w-[18px] sm:h-[18px] rounded-full bg-[#FF5E1F] border-2 border-black shadow-[0_0_18px_rgba(255,94,31,0.6)] mb-2.5" />
+                            {/* Distance label */}
+                            <p className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/45 mb-0.5">
+                              {s.label}
+                            </p>
+                            {/* Big time value */}
+                            <p className="text-sm sm:text-base font-mono font-bold text-white tabular-nums leading-none">
+                              {s.val === 0 ? '0.000' : s.val.toFixed(3)}
+                              <span className="text-white/40 text-[10px] sm:text-xs ml-0.5">s</span>
+                            </p>
+                            {/* Pace tick (% of total ET) */}
+                            <p className="text-[9px] sm:text-[10px] font-mono text-[#FF8F57]/70 tabular-nums mt-1">
+                              {pct}%
+                            </p>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
             </motion.div>
 
             <div className="grid grid-cols-2 gap-4 text-center">
@@ -539,6 +629,128 @@ export default function SimulatorWidget() {
                 <p className="text-white/40 text-xs mb-1">Peak Power</p>
                 <p className="font-semibold text-[#00FFB2]">{result.peak_power_hp.toFixed(0)} hp</p>
               </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Top-Speed result panel ──────────────────────────────────
+          Different KPIs for top-speed mode: terminal velocity, time +
+          distance to plateau, terminal gear/RPM/power. Renders only
+          when simMode === 'topspeed' and topSpeedResult is in state. */}
+      <AnimatePresence>
+        {simMode === 'topspeed' && topSpeedResult && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.4 }}
+            className="mt-8 space-y-4 relative z-10"
+          >
+            <div className="grid grid-cols-2 gap-4">
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.1 }}
+                className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-6 text-center backdrop-blur"
+              >
+                <p className="text-[10px] sm:text-xs font-semibold text-white/50 mb-2 uppercase tracking-wide">
+                  Top Speed
+                </p>
+                <p className="text-3xl sm:text-5xl font-mono font-bold text-[#FF5E1F]">
+                  <AnimatedCounter target={topSpeedResult.terminal_velocity_kmh ?? 0} decimals={1} />
+                </p>
+                <p className="text-xs text-white/40 mt-2">km/h</p>
+              </motion.div>
+
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-6 text-center backdrop-blur flex flex-col justify-center"
+              >
+                <p className="text-[10px] sm:text-xs font-semibold text-white/50 mb-2 uppercase tracking-wide">
+                  Plateau
+                </p>
+                {topSpeedResult.reached_plateau ? (
+                  <>
+                    <p className="text-2xl sm:text-3xl font-mono font-bold text-[#00FFB2]">Reached</p>
+                    <p className="text-[11px] text-white/45 mt-1.5 font-mono tabular-nums">
+                      in {topSpeedResult.time_to_terminal_s?.toFixed(1) ?? '—'}s
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-2xl sm:text-3xl font-mono font-bold text-amber-400/85">Limited</p>
+                    <p className="text-[11px] text-white/45 mt-1.5 font-mono tabular-nums">
+                      gearing or wind
+                    </p>
+                  </>
+                )}
+              </motion.div>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-6 backdrop-blur"
+            >
+              <p className="text-xs font-semibold text-white/55 mb-4 uppercase tracking-wider">Run Detail</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                <div>
+                  <p className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/40 mb-1">Time</p>
+                  <p className="text-base sm:text-lg font-mono font-bold text-white tabular-nums">
+                    {topSpeedResult.time_to_terminal_s?.toFixed(1) ?? '—'}<span className="text-white/40 text-xs ml-0.5">s</span>
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/40 mb-1">Distance</p>
+                  <p className="text-base sm:text-lg font-mono font-bold text-white tabular-nums">
+                    {topSpeedResult.distance_to_terminal_m == null
+                      ? '—'
+                      : topSpeedResult.distance_to_terminal_m >= 1000
+                        ? (topSpeedResult.distance_to_terminal_m / 1000).toFixed(2)
+                        : Math.round(topSpeedResult.distance_to_terminal_m)}
+                    <span className="text-white/40 text-xs ml-0.5">{topSpeedResult.distance_to_terminal_m >= 1000 ? 'km' : 'm'}</span>
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/40 mb-1">mph</p>
+                  <p className="text-base sm:text-lg font-mono font-bold text-white tabular-nums">
+                    {topSpeedResult.terminal_velocity_mph?.toFixed(1) ?? '—'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/40 mb-1">Gear</p>
+                  <p className="text-base sm:text-lg font-mono font-bold text-white tabular-nums">
+                    {topSpeedResult.terminal_gear ?? '—'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/40 mb-1">RPM</p>
+                  <p className="text-base sm:text-lg font-mono font-bold text-white tabular-nums">
+                    {topSpeedResult.terminal_rpm?.toLocaleString('en-US') ?? '—'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/40 mb-1">Power</p>
+                  <p className="text-base sm:text-lg font-mono font-bold text-[#00FFB2] tabular-nums">
+                    {topSpeedResult.terminal_power_hp?.toFixed(0) ?? '—'}<span className="text-white/40 text-xs ml-0.5">hp</span>
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div className="text-sm">
+                <p className="text-white/40 text-xs mb-1">Bike</p>
+                <p className="font-semibold text-white">{topSpeedResult.bike_name?.split(' ').slice(-2).join(' ')}</p>
+              </div>
+              <div className="text-sm">
+                <p className="text-white/40 text-xs mb-1">Peak Power</p>
+                <p className="font-semibold text-[#00FFB2]">{topSpeedResult.peak_power_hp?.toFixed(0) ?? '—'} hp</p>
+              </div>
             </div>
           </motion.div>
         )}
