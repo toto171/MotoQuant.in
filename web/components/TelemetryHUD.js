@@ -211,18 +211,15 @@ export default function TelemetryHUD() {
   const sectionRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    // 'start end' → section TOP enters viewport BOTTOM (section just visible)
-    //               → progress = 0
-    // '20% start' → 20% of the way into the section's height aligns with the
-    //               viewport TOP → progress = 1
+    // 'start end' → section TOP at viewport BOTTOM (section just appearing) → progress 0
+    // 'end end'   → section BOTTOM at viewport BOTTOM (next section about to peek) → progress 1
     //
-    // This delays the animation's completion by ~20% of section height past
-    // "fully in view" — so the chart is still progressing for a moment after
-    // the section first fills the viewport. By the time progress = 1 hits,
-    // the next section is just appearing at the bottom of the viewport,
-    // creating a natural hand-off (chart finishes its run + next section
-    // arrives in one synchronised beat). User-tested visually.
-    offset: ['start end', '20% start'],
+    // With section h-[130svh], that maps progress 0..1 over scrollY
+    //   = section_top - 100vh  →  section_top + 30vh
+    // Animation completes when the user has scrolled 30 vh past the moment
+    // the section first fills the viewport — the exact moment the next
+    // section begins to peek into the bottom edge. Natural hand-off.
+    offset: ['start end', 'end end'],
   });
 
   // Initialise from progress=0 so gauges show staged-and-idle values
@@ -272,7 +269,7 @@ export default function TelemetryHUD() {
     <section
       ref={sectionRef}
       id="telemetry"
-      className="relative bg-gradient-to-b from-black via-ink-1 to-black border-t border-brand-orange/10 h-[100svh] min-h-[640px] overflow-hidden flex flex-col"
+      className="relative bg-gradient-to-b from-black via-ink-1 to-black border-t border-brand-orange/10 h-[130svh] min-h-[820px] lg:h-[110svh] lg:min-h-[700px] overflow-hidden flex flex-col"
     >
       {/* No sticky pin — section is exactly one viewport tall. The animation
           is driven by the section's intersection with the viewport via the
@@ -281,7 +278,7 @@ export default function TelemetryHUD() {
           exiting at the top. Animation completes the moment the section
           disappears, then the next section is already in view. No sticky-pin →
           no post-animation dead scroll. */}
-      <div className="h-full overflow-hidden flex flex-col">
+      <div className="sticky top-0 h-[100svh] overflow-hidden flex flex-col">
         <div className="px-6 sm:px-10 lg:px-16 pt-20 sm:pt-24 pb-4 sm:pb-6">
           <div className="max-w-7xl mx-auto">
             <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-brand-orange mb-3">
