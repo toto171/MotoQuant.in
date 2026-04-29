@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import SiteNav from '../../components/SiteNav';
+import SiteFooter from '../../components/SiteFooter';
 
 export const metadata = {
   title: 'Blog — MotoQuant Pro',
@@ -75,28 +77,8 @@ function PostCard({ post }) {
 
 export default function BlogIndexPage() {
   return (
-    <div className="min-h-screen bg-ink-0 text-white">
-      {/* Nav */}
-      <nav className="fixed top-0 inset-x-0 h-16 backdrop-blur bg-black/80 border-b border-brand-orange/10 z-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="text-xl font-display font-bold tracking-tight">
-              <span className="text-gradient-orange">Moto</span><span>Quant</span>
-            </div>
-            <div className="ml-2 px-2 py-1 rounded text-xs font-mono font-semibold text-brand-accent border border-brand-accent/30 bg-brand-accent/5">Pro</div>
-          </Link>
-          <div className="hidden md:flex gap-6 items-center text-sm font-mono">
-            <Link href="/simulator" className="text-white/60 hover:text-white transition-colors">Simulator</Link>
-            <Link href="/bikes" className="text-white/60 hover:text-white transition-colors">Bikes</Link>
-            <Link href="/features" className="text-white/60 hover:text-white transition-colors">Features</Link>
-            <Link href="/blog" className="text-brand-orange">Blog</Link>
-            <Link href="/about" className="text-white/60 hover:text-white transition-colors">About</Link>
-          </div>
-          <Link href="/simulator" className="px-4 py-2 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">
-            Try free
-          </Link>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-black text-white">
+      <SiteNav />
 
       <main className="pt-32 pb-24 px-6">
         <div className="max-w-5xl mx-auto">
@@ -121,9 +103,7 @@ export default function BlogIndexPage() {
         </div>
       </main>
 
-      <footer className="border-t border-brand-orange/10 py-8 px-6 text-center text-white/40 text-xs font-mono">
-        <p>© {new Date().getFullYear()} MotoQuant Pro · <Link href="/" className="hover:text-brand-orange transition-colors">motoquant.in</Link></p>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

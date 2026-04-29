@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Send, ChevronRight, Zap, Flag, Target, Cpu } from 'lucide-react';
+import SiteNav from '../../components/SiteNav';
+import SiteFooter from '../../components/SiteFooter';
 
 const ROADMAP = [
   {
@@ -57,26 +59,7 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-ink-0 text-white overflow-x-hidden">
       {/* Nav */}
-      <nav className="fixed top-0 inset-x-0 h-16 backdrop-blur bg-black/80 border-b border-brand-orange/10 z-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="text-xl font-display font-bold tracking-tight">
-              <span className="text-gradient-orange">Moto</span><span>Quant</span>
-            </div>
-            <div className="ml-2 px-2 py-1 rounded text-xs font-mono font-semibold text-brand-accent border border-brand-accent/30 bg-brand-accent/5">Pro</div>
-          </Link>
-          <div className="hidden md:flex gap-6 items-center text-sm font-mono">
-            <Link href="/simulator" className="text-white/60 hover:text-white transition-colors">Simulator</Link>
-            <Link href="/bikes" className="text-white/60 hover:text-white transition-colors">Bikes</Link>
-            <Link href="/features" className="text-white/60 hover:text-white transition-colors">Features</Link>
-            <Link href="/blog" className="text-white/60 hover:text-white transition-colors">Blog</Link>
-            <Link href="/about" className="text-brand-orange">About</Link>
-          </div>
-          <Link href="/simulator" className="px-4 py-2 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">
-            Try free
-          </Link>
-        </div>
-      </nav>
+      <SiteNav />
 
       {/* Hero */}
       <section className="pt-32 pb-20 px-6 border-b border-brand-orange/10">
@@ -331,12 +314,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-10 px-6 text-center text-white/40 text-xs font-mono">
-        <div className="max-w-6xl mx-auto">
-          <p>MotoQuant Pro · Built by engineers, for racers · motoquant.in</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

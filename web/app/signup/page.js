@@ -19,8 +19,8 @@ export default function SignupPage() {
   }, [router]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-950">
-      <p className="text-gray-500 text-sm">Redirecting…</p>
+    <main className="flex min-h-screen items-center justify-center bg-black">
+      <p className="text-white/55 text-sm font-mono">Redirecting…</p>
     </main>
   );
 }

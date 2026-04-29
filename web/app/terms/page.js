@@ -3,22 +3,29 @@
  * Last updated: April 24, 2026
  */
 
+import SiteNav from "../../components/SiteNav";
+import SiteFooter from "../../components/SiteFooter";
+
 export const metadata = {
   title: "Terms of Service — MotoQuant Pro",
+  alternates: { canonical: "https://motoquant.in/terms" },
 };
 
 export default function TermsPage() {
   return (
-    <main className="min-h-screen bg-gray-950 py-16 px-4">
-      <div className="mx-auto max-w-3xl prose prose-invert prose-sm">
-        <a href="/" className="text-orange-400 no-underline hover:text-orange-300 text-sm">
-          ← motoquant.in
-        </a>
+    <div className="min-h-screen bg-black text-white">
+      <SiteNav />
+      <main className="pt-32 pb-20 px-4 sm:px-6">
+        <div className="mx-auto max-w-3xl prose prose-invert prose-sm">
+          <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-brand-orange mb-3">
+            Legal
+          </div>
+          <h1 className="font-display font-bold text-4xl md:text-5xl text-white tracking-tight mt-0 mb-3">
+            Terms of Service
+          </h1>
+          <p className="text-white/45 text-sm font-mono">Last updated: 24 April 2026</p>
 
-        <h1 className="mt-6 text-3xl font-extrabold text-white">Terms of Service</h1>
-        <p className="text-gray-400">Last updated: 24 April 2026</p>
-
-        <p className="text-gray-300 mt-6">
+        <p className="text-white/80 mt-6">
           These Terms of Service ("Terms") govern your access to and use of MotoQuant Pro
           ("MotoQuant", "we", "us"), a motorcycle drag-racing physics simulation platform
           operated from Pune, India. By creating an account or using the service, you agree
@@ -87,7 +94,7 @@ export default function TermsPage() {
 
         <Section title="5. Acceptable Use">
           <p>You may not:</p>
-          <ul className="text-gray-300 list-disc pl-5 space-y-1">
+          <ul className="text-white/80 list-disc pl-5 space-y-1">
             <li>Reverse-engineer, decompile, or extract the physics model code</li>
             <li>Use the API at volumes exceeding fair-use limits (contact us for high-volume B2B arrangements)</li>
             <li>Share subscription credentials or license keys with third parties</li>
@@ -143,24 +150,26 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <div className="mt-12 border-t border-gray-800 pt-8 text-sm text-gray-500">
+        <div className="mt-12 border-t border-white/10 pt-8 text-sm text-white/45">
           <p>MotoQuant Pro · Pune, Maharashtra, India</p>
-          <p>Contact: <a href="mailto:motoquant@gmail.com" className="text-orange-400">motoquant@gmail.com</a></p>
+          <p>Contact: <a href="mailto:motoquant@gmail.com" className="text-brand-accent hover:text-white transition-colors">motoquant@gmail.com</a></p>
           <div className="mt-4 flex gap-4">
-            <a href="/privacy" className="text-orange-400 hover:text-orange-300">Privacy Policy</a>
-            <a href="/pricing" className="text-orange-400 hover:text-orange-300">Pricing</a>
+            <a href="/privacy" className="text-brand-orange hover:text-brand-orangeLight transition-colors">Privacy Policy</a>
+            <a href="/pricing" className="text-brand-orange hover:text-brand-orangeLight transition-colors">Pricing</a>
           </div>
         </div>
-      </div>
-    </main>
+        </div>
+      </main>
+      <SiteFooter />
+    </div>
   );
 }
 
 function Section({ title, children }) {
   return (
     <div className="mt-8">
-      <h2 className="text-lg font-bold text-white mb-3">{title}</h2>
-      <div className="space-y-3 text-gray-300 text-sm leading-relaxed">{children}</div>
+      <h2 className="font-display font-bold text-xl text-white mb-3">{title}</h2>
+      <div className="space-y-3 text-white/80 text-sm leading-relaxed">{children}</div>
     </div>
   );
 }

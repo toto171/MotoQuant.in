@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import SiteNav from '../../../components/SiteNav';
+import SiteFooter from '../../../components/SiteFooter';
 
 export const metadata = {
   title: 'How the MotoQuant Physics Engine Works — MotoQuant Blog',
@@ -234,10 +236,11 @@ const articleSchema = {
 
 export default function Page() {
   return (
-    <main className="min-h-screen bg-brand-carbon text-white">
+    <div className="min-h-screen bg-black text-white">
+      <SiteNav />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
 
-      <div className="max-w-3xl mx-auto px-6 py-12">
+      <main className="max-w-3xl mx-auto px-6 pt-32 pb-12">
         <Link href="/blog" className="text-brand-accent text-sm font-mono mb-6 inline-block hover:text-brand-orange transition-colors">
           ← back to blog
         </Link>
@@ -271,10 +274,13 @@ export default function Page() {
             on the home page — pick a bike, set your conditions, and see the physics in action.
           </p>
           <p className="text-white/40 text-xs mt-4">
-            Reference baselines preserved across all releases: GSX-R 1000 K5 = 10.0334 s, YZF-R1 4C8 = 10.2859 s, Hayabusa Gen1 = 10.4712 s. All claims about cluster bias, mean absolute error, and within-tolerance fractions in this post reflect the April 27, 2026 sweep against 90 published benchmarks.
+            Reference baselines preserved across all releases: GSX-R 1000 K5 = 10.0334 s, YZF-R1 4C8 = 10.2859 s, Hayabusa Gen1 = 10.4712 s.
+            All claims about cluster bias, mean absolute error, and within-tolerance fractions in this post reflect the April 27, 2026 sweep against 90 published benchmarks.
           </p>
         </footer>
-      </div>
-    </main>
+      </main>
+
+      <SiteFooter />
+    </div>
   );
 }

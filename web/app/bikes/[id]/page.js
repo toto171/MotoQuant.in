@@ -6,6 +6,8 @@ import { ChevronLeft, Gauge, Zap, Wind, CircleDot, AlertCircle } from 'lucide-re
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { API_URL } from '../../../lib/api';
+import SiteNav from '../../../components/SiteNav';
+import SiteFooter from '../../../components/SiteFooter';
 
 function formatCell(value, suffix = '', decimals = null) {
   if (value === null || value === undefined || value === '') return '—';
@@ -63,35 +65,8 @@ export default function BikeDetailPage() {
   }, [bikeId]);
 
   return (
-    <div className="min-h-screen bg-ink-0 text-white">
-      {/* Nav */}
-      <nav className="fixed top-0 inset-x-0 h-16 backdrop-blur bg-black/80 border-b border-brand-orange/10 z-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="text-xl font-display font-bold tracking-tight">
-              <span className="text-gradient-orange">Moto</span>
-              <span>Quant</span>
-            </div>
-            <div className="ml-2 px-2 py-1 rounded text-xs font-mono font-semibold text-brand-accent border border-brand-accent/30 bg-brand-accent/5">
-              Pro
-            </div>
-          </Link>
-          <div className="hidden md:flex gap-8 items-center text-sm font-mono">
-            <Link href="/simulator" className="text-white/60 hover:text-white transition-colors">Simulator</Link>
-            <Link href="/bikes" className="text-brand-orange transition-colors">Bikes</Link>
-            <Link href="/features" className="text-white/60 hover:text-white transition-colors">Features</Link>
-            <Link href="/docs/getting-started" className="text-white/60 hover:text-white transition-colors">Docs</Link>
-            <Link href="/blog" className="text-white/60 hover:text-white transition-colors">Blog</Link>
-            <Link href="/pricing" className="text-white/60 hover:text-white transition-colors">Pricing</Link>
-          </div>
-          <Link
-            href="/simulator"
-            className="px-3 sm:px-4 py-2 bg-brand-orange hover:bg-brand-orangeLight text-black font-semibold rounded-lg text-xs sm:text-sm font-display transition-colors"
-          >
-            Launch <span className="hidden sm:inline">Simulator</span>
-          </Link>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-black text-white">
+      <SiteNav />
 
       <main className="pt-24 pb-16 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
@@ -258,6 +233,8 @@ export default function BikeDetailPage() {
           )}
         </div>
       </main>
+
+      <SiteFooter />
     </div>
   );
 }

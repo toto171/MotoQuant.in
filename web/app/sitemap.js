@@ -45,6 +45,7 @@ export default async function sitemap() {
     { url: `${SITE_URL}/docs/getting-started`, lastModified: now, changeFrequency: 'monthly', priority: 0.80 },
     { url: `${SITE_URL}/docs/physics`,         lastModified: now, changeFrequency: 'monthly', priority: 0.80 },
     { url: `${SITE_URL}/docs/validation`,      lastModified: now, changeFrequency: 'monthly', priority: 0.80 },
+    { url: `${SITE_URL}/whitepaper`,           lastModified: now, changeFrequency: 'monthly', priority: 0.85 },
   ];
 
   const bikeRoutes = bikes.map((bike) => ({

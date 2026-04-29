@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import SiteNav from '../../../components/SiteNav';
+import SiteFooter from '../../../components/SiteFooter';
 
 export const metadata = {
   title: 'The Physics of a Perfect Launch — MotoQuant Blog',
@@ -142,23 +144,8 @@ function Prose({ content }) {
 
 export default function PostPage() {
   return (
-    <div className="min-h-screen bg-ink-0 text-white">
-      <nav className="fixed top-0 inset-x-0 h-16 backdrop-blur bg-black/80 border-b border-brand-orange/10 z-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="text-xl font-display font-bold tracking-tight">
-              <span className="text-gradient-orange">Moto</span><span>Quant</span>
-            </div>
-            <div className="ml-2 px-2 py-1 rounded text-xs font-mono font-semibold text-brand-accent border border-brand-accent/30 bg-brand-accent/5">Pro</div>
-          </Link>
-          <Link href="/blog" className="text-white/60 hover:text-white transition-colors text-sm font-mono">
-            ← All posts
-          </Link>
-          <Link href="/simulator" className="px-4 py-2 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors">
-            Try free
-          </Link>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-black text-white">
+      <SiteNav />
 
       <article className="pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
@@ -190,9 +177,7 @@ export default function PostPage() {
         </div>
       </article>
 
-      <footer className="border-t border-brand-orange/10 py-8 px-6 text-center text-white/40 text-xs font-mono">
-        <p>© {new Date().getFullYear()} MotoQuant Pro · <Link href="/" className="hover:text-brand-orange transition-colors">motoquant.in</Link> · <Link href="/blog" className="hover:text-brand-orange transition-colors">Blog</Link></p>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

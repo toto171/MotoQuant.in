@@ -1,0 +1,25 @@
+# EditorConfig — root config for the MotoQuant repo.
+# https://editorconfig.org
+#
+# Eliminates the CRLF / LF drift problem documented in CLAUDE.md
+# hygiene. With every editor honouring this file, file-level diffs
+# stop carrying noise.
+
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
+indent_style = space
+indent_size = 2
+
+[*.{md,markdown}]
+trim_trailing_whitespace = false
+
+[*.{py}]
+indent_size = 4
+
+[Makefile]
+indent_style = tab

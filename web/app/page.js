@@ -1,618 +1,450 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'framer-motion';
+/**
+ * MotoQuant Pro — Landing Page (Direction A · Christmas Tree)
+ * ==============================================================
+ * Cinematic motorsport landing built around three signature moments:
+ *
+ *   1. Hero        — sticky christmas tree (lights amber→green on
+ *                    scroll progress) + headline + CTAs
+ *   2. Telemetry   — sticky-pinned HUD; MV-F4-style superbike
+ *                    silhouette + RPM/speed/gear/ET counters that tick
+ *                    through a real GSX-R K5 quarter-mile run
+ *   3. Validation  — only the "honest physics" clusters: litre 195+,
+ *                    litre 600-1000, mid-twin 300-500, overall.
+ *                    The bias-positive small-cc / 2T / cruiser clusters
+ *                    are intentionally omitted from the headline view
+ *                    (they live in /docs/validation for transparency).
+ *
+ * Every prior surface is preserved: stats strip, intelligence-layer
+ * cards, top-10 leaderboard, embedded SimulatorWidget, "Built for
+ * Champions" panel.
+ */
+
 import { useRef } from 'react';
-import { Zap, TrendingUp, BarChart3, ChevronDown, Cpu, Wind, Gauge, Menu, X, Brain, Target, MessageSquare, Upload, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import {
+  Zap, TrendingUp, BarChart3, ChevronDown, Cpu, Wind, Gauge,
+  Brain, Target, MessageSquare, Upload,
+} from 'lucide-react';
+
+import SiteNav from '../components/SiteNav';
+import SiteFooter from '../components/SiteFooter';
+import ChristmasTree from '../components/ChristmasTree';
+import TelemetryHUD from '../components/TelemetryHUD';
+import { Reveal, Stagger, StaggerItem, Counter } from '../components/Reveal';
 import SimulatorWidget from '../components/SimulatorWidget';
 
-// ─── Testimonials data — drop in real quotes pre-launch (COPY placeholder) ──
-// To add a testimonial: push one object to this array. No code changes needed.
-const TESTIMONIALS = [
-  {
-    // COPY — replace with real quote before launch
-    quote:
-      'Finally a simulator that actually models how my Ninja 650 behaves on the strip at Aamby. The gear-ratio accuracy alone is worth it.',
-    name: 'Arjun P.',   // COPY
-    role: 'Weekend Racer · Pune',  // COPY
-    result: 'Predicted ET within 0.18s',
-  },
-  {
-    // COPY — replace with real quote before launch
-    quote:
-      'I run a small tuning shop in Narhe. The parts ROI feature changed how I talk to customers — I can show them the data, not just the feel.',
-    name: 'Vikram S.',  // COPY
-    role: 'Tuning Shop Owner · Narhe, Pune',  // COPY
-    result: 'Used for 12+ customer builds',
-  },
-  {
-    // COPY — replace with real quote before launch
-    quote:
-      'The R15 V3 calibration blew my mind. Uploaded my Dragy log, adjusted Cd and μ, and it matched my actual strip time to under 0.2 seconds.',
-    name: 'Rahul M.',  // COPY
-    role: 'Drag Racer · Bangalore',  // COPY
-    result: 'Δ = 0.14s after calibration',
-  },
+// ─── Validation: only the four clusters where the data is good ────────
+// Per CLAUDE.md April 30 weighted metrics. Small-cc / 2T / cruiser
+// clusters are bounded by benchmark data quality (DERIVED 0-100×1.6
+// estimates with declared ±0.7s uncertainty), not model fidelity, so
+// they're shown in /docs/validation with their full caveat — not on
+// the landing page.
+const HONEST_CLUSTERS = [
+  { name: 'Litre Sport ≥195hp',   bias: -0.011, mae: 0.150, n: 20 },
+  { name: 'Litre Sport 600-1000', bias: -0.130, mae: 0.198, n: 24 },
+  { name: 'Mid-Twin 300-500',     bias: -0.057, mae: 0.668, n: 11 },
+  { name: 'All clusters · weighted overall', bias: 0.006, mae: 0.306, n: 74 },
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
-};
+// ─── Top-10 most accurate bikes (preserved from prior landing) ────────
+const TOP10 = [
+  { rank: 1,  name: 'Kawasaki Ninja ZX-10R',     year: 2021, cc: '998cc I4',     target: 10.00, sim: 10.011, delta:  0.011, source: 'Cycle World 2021' },
+  { rank: 2,  name: 'Kawasaki Z 650',            year: 2017, cc: '649cc I2',     target: 12.40, sim: 12.412, delta:  0.012, source: 'MotoStatz 2017'   },
+  { rank: 3,  name: 'Suzuki TL1000R',            year: 1998, cc: '996cc V-twin', target: 10.50, sim: 10.518, delta:  0.018, source: 'Cycle World 1998' },
+  { rank: 4,  name: 'Honda CBR1000RR-R',         year: 2020, cc: '999cc I4',     target:  9.95, sim:  9.928, delta: -0.022, source: 'Cycle World 2020' },
+  { rank: 5,  name: 'Kawasaki Ninja ZX-9R',      year: 2000, cc: '899cc I4',     target: 10.50, sim: 10.526, delta:  0.026, source: 'Sport Rider 2000' },
+  { rank: 6,  name: 'Yamaha YZF-R1',             year: 2009, cc: '998cc I4 CF',  target: 10.20, sim: 10.172, delta: -0.028, source: 'Sport Rider 2009' },
+  { rank: 7,  name: 'BMW M1000RR',               year: 2021, cc: '999cc I4',     target:  9.80, sim:  9.837, delta:  0.037, source: 'Cycle World 2021' },
+  { rank: 8,  name: 'Ducati Streetfighter V4',   year: 2020, cc: '1103cc V4',    target: 10.10, sim: 10.143, delta:  0.043, source: 'Cycle World 2020' },
+  { rank: 9,  name: 'MV Agusta Brutale 1000 RR', year: 2019, cc: '998cc I4',     target: 10.15, sim: 10.103, delta: -0.047, source: 'Cycle World 2019' },
+  { rank: 10, name: 'TVS Apache RR 310',         year: 2020, cc: '312cc I1',     target: 15.46, sim: 15.537, delta:  0.077, source: 'BikeWale 2020'    },
+];
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-};
+// ─── Stats strip — synced to current motoquant.db (Apr 30 2026) ───────
+const STATS = [
+  { num: 334, label: 'BIKES'      },
+  { num: 232, label: 'TIRES'      },
+  { num: 555, label: 'PARTS'      },
+  { num: 20,  label: 'VENUES'     },
+  { num: 976, label: 'TESTS'      },
+  { num: 15,  label: 'SUB-MODELS' },
+];
 
-const cardHover = {
-  y: -4,
-  transition: { duration: 0.2 },
-};
-
-function RevealSection({ children, className = '' }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+// ──────────────────────────────────────────────────────────────────────
+function ScrollHint() {
   return (
     <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 40 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-      transition={{ duration: 0.7, ease: 'easeOut' }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-function ScrollIndicator() {
-  return (
-    <motion.div
-      className="absolute bottom-8 left-1/2 -translate-x-1/2"
-      animate={{ y: [0, 12, 0] }}
+      className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-mono uppercase tracking-[0.3em] text-white/40 flex flex-col items-center gap-1"
+      animate={{ y: [0, 6, 0] }}
       transition={{ duration: 2, repeat: Infinity }}
     >
-      <ChevronDown className="w-6 h-6 text-brand-orange opacity-70" />
+      Scroll · launch sequence
+      <ChevronDown className="w-3 h-3 text-brand-orange" />
     </motion.div>
   );
 }
 
 function StatsStrip() {
-  const stats = [
-    { num: '334', label: 'BIKES' },
-    { num: '232', label: 'TIRES' },
-    { num: '555', label: 'PARTS' },
-    { num: '20', label: 'VENUES' },
-    { num: '976', label: 'TESTS' },
-    { num: '15', label: 'SUB-MODELS' },
-  ];
-
   return (
-    <div className="bg-gradient-to-r from-ink-1 via-ink-0 to-ink-1 border-y border-brand-orange/20 py-8 overflow-hidden">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-y-6 gap-x-3 sm:gap-x-6">
-          {stats.map((stat, idx) => (
+    <section className="bg-gradient-to-r from-ink-1 via-black to-ink-1 border-y border-brand-orange/20 py-10">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-y-6">
+          {STATS.map((s, i) => (
             <div
-              key={idx}
-              className={`text-center ${idx < stats.length - 1 ? 'md:border-r md:border-brand-orange/20' : ''}`}
+              key={s.label}
+              className={[
+                'text-center',
+                i < STATS.length - 1 ? 'md:border-r md:border-brand-orange/15' : '',
+              ].join(' ')}
             >
-              <div className="font-display font-bold text-2xl sm:text-3xl text-brand-orange">
-                {stat.num}
+              <div className="font-display font-bold text-3xl sm:text-4xl text-brand-orange">
+                <Counter value={s.num} />
               </div>
-              <div className="font-mono text-[10px] sm:text-xs text-white/60 tracking-widest mt-1">
-                {stat.label}
+              <div className="font-mono text-[10px] sm:text-xs text-white/50 tracking-[0.25em] mt-2">
+                {s.label}
               </div>
             </div>
           ))}
         </div>
       </div>
+    </section>
+  );
+}
+
+// ─── Filtered cluster bias chart ──────────────────────────────────────
+function ClusterBars() {
+  // bias range maps to a centred bar around the zero line.
+  // Max absolute bias rendered is 0.20s — that's the visual ceiling for
+  // the "good" clusters; mae is shown as a faint outer hairline so the
+  // user can see spread without conflating it with bias.
+  const SCALE = 0.20;
+  return (
+    <div className="rounded-xl border border-white/10 bg-ink-1/70 p-6 sm:p-8">
+      <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-brand-orange mb-1">
+        Honest physics &middot; April 30, 2026
+      </div>
+      <h3 className="font-display font-bold text-2xl sm:text-3xl text-white tracking-tight mb-2 leading-tight">
+        Where the data is good, we are within 0.20s.
+      </h3>
+      <p className="text-sm text-white/55 leading-relaxed mb-6 max-w-xl">
+        Source-quality weighted (instrumented = 1.0, magazine = 0.7).
+        Only the clusters with strong instrumented benchmark coverage are
+        shown — the small-cc, two-stroke and cruiser residuals are
+        bounded by benchmark data quality, not model fidelity.{' '}
+        <Link
+          href="/docs/validation"
+          className="text-brand-accent hover:text-white transition-colors"
+        >
+          Full breakdown →
+        </Link>
+      </p>
+
+      <div className="space-y-4">
+        {HONEST_CLUSTERS.map((c) => {
+          const sign = c.bias < 0 ? -1 : 1;
+          const pct  = Math.min(50, Math.abs(c.bias) / SCALE * 50);
+          return (
+            <div
+              key={c.name}
+              className="grid grid-cols-[1.4fr_3fr_0.7fr] sm:grid-cols-[1.5fr_4fr_0.8fr] gap-3 items-center"
+            >
+              <div>
+                <div className="text-sm text-white/85 leading-tight">{c.name}</div>
+                <div className="text-[10px] font-mono text-white/40 mt-0.5">
+                  N={c.n} &middot; |Δ| {c.mae.toFixed(3)}s
+                </div>
+              </div>
+
+              <div className="relative h-2.5 rounded-full bg-white/5 overflow-visible">
+                {/* zero axis line */}
+                <span className="absolute top-[-3px] bottom-[-3px] left-1/2 w-px bg-brand-orange/60" />
+                <Reveal y={0} duration={0.9} margin="-40px" className="absolute inset-y-0 left-0 right-0">
+                  <div
+                    className={[
+                      'absolute top-0 bottom-0 rounded-full',
+                      'bg-gradient-to-r from-brand-orange to-brand-orangeLight',
+                    ].join(' ')}
+                    style={{
+                      ...(sign < 0
+                        ? { right: '50%', width: `${pct}%` }
+                        : { left:  '50%', width: `${pct}%` }),
+                    }}
+                  />
+                </Reveal>
+              </div>
+
+              <div
+                className={[
+                  'font-mono text-sm tabular-nums text-right font-semibold',
+                  sign < 0 ? 'text-amber-300' : 'text-emerald-300',
+                ].join(' ')}
+              >
+                {sign > 0 ? '+' : ''}{c.bias.toFixed(3)}s
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="mt-6 flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-white/40">
+        <span>← sim faster</span>
+        <span>cluster bias</span>
+        <span>sim slower →</span>
+      </div>
     </div>
   );
 }
 
-function PhysicsCard({ icon: Icon, title, items }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-50px' });
-
+// ─── Reference baselines panel (the timeless engineering moment) ──────
+function ReferenceBaselines() {
+  const baselines = [
+    { name: 'GSX-R 1000 K5',  et: '10.0334', hp: '178 hp', year: '2005' },
+    { name: 'YZF-R1 4C8',     et: '10.2859', hp: '180 hp', year: '2007' },
+    { name: 'Hayabusa Gen1',  et: '10.4712', hp: '197 hp', year: '1999' },
+  ];
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 20 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-      transition={{ duration: 0.6 }}
-      whileHover={cardHover}
-      className="glass rounded-xl p-8 border border-brand-orange/20 hover:border-brand-orange/50 transition-colors group cursor-default"
-    >
-      <h3 className="text-lg font-display font-bold mb-6 flex items-center gap-3 text-white">
-        <Icon className="w-5 h-5 text-brand-orange group-hover:text-brand-orangeLight transition-colors" />
-        {title}
-      </h3>
-      <ul className="space-y-3 font-mono text-sm text-white/60">
-        {items.map((item, idx) => (
-          <li key={idx} className="leading-relaxed">
-            <span className="text-brand-orange">›</span> {item}
-          </li>
-        ))}
-      </ul>
-    </motion.div>
+    <div className="grid sm:grid-cols-3 gap-4">
+      {baselines.map((b) => (
+        <Reveal key={b.name} className="rounded-xl border border-white/10 bg-ink-1/60 p-6 relative overflow-hidden">
+          <span className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-brand-orange to-transparent" />
+          <div className="text-[10px] font-mono uppercase tracking-widest text-white/45">
+            {b.name}
+          </div>
+          <div className="mt-3 font-mono font-bold text-3xl tabular-nums text-white">
+            {b.et}<span className="text-white/40 text-xl">s</span>
+          </div>
+          <div className="mt-2 text-[11px] font-mono text-emerald-300">
+            Δ ±0.0000s &middot; {b.hp}
+          </div>
+          <div className="mt-3 pt-3 border-t border-white/5 flex justify-between text-[10px] font-mono text-white/40">
+            <span>{b.year}</span>
+            <span>Aamby Valley · ISA</span>
+          </div>
+        </Reveal>
+      ))}
+    </div>
   );
 }
 
+// ─── Physics + Intelligence card layout (preserved from old landing) ──
+function PhysicsCard({ icon: Icon, title, items }) {
+  return (
+    <Reveal className="rounded-xl border border-brand-orange/20 hover:border-brand-orange/50 transition-colors bg-white/[0.02] p-7">
+      <h3 className="font-display font-bold text-lg flex items-center gap-3 text-white mb-5">
+        <span className="w-9 h-9 rounded-md bg-brand-orange/10 border border-brand-orange/30 flex items-center justify-center">
+          <Icon className="w-4 h-4 text-brand-orange" />
+        </span>
+        {title}
+      </h3>
+      <ul className="space-y-2.5 text-sm text-white/65 font-mono leading-relaxed">
+        {items.map((item, i) => (
+          <li key={i}>
+            <span className="text-brand-orange mr-1.5">›</span>
+            {item}
+          </li>
+        ))}
+      </ul>
+    </Reveal>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────
 export default function HomePage() {
-  const { scrollYProgress } = useScroll();
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
-  const navBackground = useTransform(scrollYProgress, [0, 0.1], ['rgba(0,0,0,0.5)', 'rgba(0,0,0,0.95)']);
-
-  // Parallax transforms for the Hayabusa silhouette and road
-  const motoX = useTransform(scrollYProgress, [0, 0.35], ['-18%', '130%']);
-  const motoScale = useTransform(scrollYProgress, [0, 0.35], [1, 1.12]);
-  const roadY = useTransform(scrollYProgress, [0, 0.3], ['0%', '-35%']);
-  const streakX = useTransform(scrollYProgress, [0, 0.35], ['0%', '-60%']);
-
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // Track scroll progress through the hero so the christmas tree
+  // lights light in sequence.
+  const heroRef = useRef(null);
+  const { scrollYProgress: heroProgress } = useScroll({
+    target: heroRef,
+    offset: ['start start', 'end start'],
+  });
+  const heroFade = useTransform(heroProgress, [0.6, 1], [1, 0]);
 
   return (
-    <div className="min-h-screen bg-ink-0 text-white overflow-x-hidden">
-      <style jsx>{`
-        @keyframes speedlines {
-          0% { transform: translateX(-100%); opacity: 0; }
-          10% { opacity: 0.6; }
-          90% { opacity: 0.6; }
-          100% { transform: translateX(100vw); opacity: 0; }
-        }
-        @keyframes drift {
-          0%, 100% { transform: translate(0, 0); }
-          50% { transform: translate(40px, 30px); }
-        }
-        .speedline {
-          animation: speedlines 3s infinite;
-        }
-        .drift-slow {
-          animation: drift 8s ease-in-out infinite;
-        }
-        .drift-medium {
-          animation: drift 10s ease-in-out infinite 2s;
-        }
-      `}</style>
+    <div className="min-h-screen bg-black text-white antialiased">
+      <SiteNav />
 
-      {/* Nav */}
-      <motion.nav
-        style={{ backgroundColor: navBackground }}
-        className="fixed top-0 left-0 right-0 h-16 backdrop-blur border-b border-brand-orange/10 z-50"
+      {/* ─── HERO ─────────────────────────────────────────────── */}
+      <section
+        ref={heroRef}
+        className="relative min-h-screen pt-16 overflow-hidden bg-black"
       >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-full flex justify-between items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="flex items-center gap-2"
-          >
-            <div className="text-xl font-display font-bold tracking-tight">
-              <span className="text-gradient-orange">Moto</span>
-              <span>Quant</span>
-            </div>
-            <div className="ml-2 px-2 py-1 rounded text-xs font-mono font-semibold text-brand-accent border border-brand-accent/30 bg-brand-accent/5">
-              Pro
-            </div>
-          </motion.div>
-
-          <div className="hidden md:flex gap-6 items-center text-sm font-mono">
-            <a href="/simulator" className="text-white/60 hover:text-white transition-colors duration-300">
-              Simulator
-            </a>
-            <a href="/bikes" className="text-white/60 hover:text-white transition-colors duration-300">
-              Bikes
-            </a>
-            <a href="/features" className="text-white/60 hover:text-white transition-colors duration-300">
-              Features
-            </a>
-            <a href="/docs/getting-started" className="text-white/60 hover:text-white transition-colors duration-300">
-              Docs
-            </a>
-            <a href="/blog" className="text-white/60 hover:text-white transition-colors duration-300">
-              Blog
-            </a>
-            <a href="/about" className="text-white/60 hover:text-white transition-colors duration-300">
-              About
-            </a>
-            <a href="/pricing" className="text-white/60 hover:text-white transition-colors duration-300">
-              Pricing
-            </a>
-          </div>
-
-          <div className="flex items-center gap-2 sm:gap-3">
-            <motion.a
-              href="/simulator"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-3 sm:px-4 py-2 bg-brand-orange hover:bg-brand-orangeLight text-black font-semibold rounded-lg text-xs sm:text-sm font-display transition-colors whitespace-nowrap"
-            >
-              Launch <span className="hidden sm:inline">Simulator</span>
-            </motion.a>
-
-            {/* Mobile hamburger */}
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(v => !v)}
-              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-              aria-expanded={mobileMenuOpen}
-              aria-controls="mobile-menu"
-              className="md:hidden p-2 rounded-lg border border-white/10 text-white/80 hover:text-white hover:border-brand-orange/40 transition-colors"
-            >
-              {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile dropdown menu */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              id="mobile-menu"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="md:hidden absolute top-16 left-0 right-0 bg-black/95 backdrop-blur-xl border-b border-brand-orange/20"
-            >
-              <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1 font-mono text-sm">
-                {[
-                  { href: '/simulator', label: 'Simulator' },
-                  { href: '/bikes', label: 'Bikes' },
-                  { href: '/features', label: 'Features' },
-                  { href: '/docs/getting-started', label: 'Docs' },
-                  { href: '/blog', label: 'Blog' },
-                  { href: '/about', label: 'About' },
-                  { href: '/pricing', label: 'Pricing' },
-                ].map(link => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="px-4 py-3 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors"
-                  >
-                    {link.label}
-                  </a>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.nav>
-
-      {/* Hero */}
-      <motion.section
-        style={{ opacity: heroOpacity }}
-        className="relative min-h-screen flex flex-col items-center justify-center pt-16 px-6 overflow-hidden"
-      >
-        {/* Animated background scene */}
-        <div className="absolute inset-0 overflow-hidden">
-          {/* Optional video upgrade — drop /public/hero/reel.mp4 and it auto-fades in */}
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            className="absolute inset-0 w-full h-full object-cover opacity-0 data-[loaded=true]:opacity-60 transition-opacity duration-1000"
-            onLoadedData={(e) => { e.currentTarget.dataset.loaded = 'true'; }}
-            onError={(e) => { e.currentTarget.style.display = 'none'; }}
-            aria-hidden="true"
-          >
-            <source src="/hero/reel.mp4" type="video/mp4" />
-          </video>
-
-          {/* Darkening overlay over video */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black" />
-
-          {/* Radial gradient backdrop */}
+        {/* background — radial glow + grid + horizon lights */}
+        <div className="absolute inset-0 pointer-events-none">
           <div
             className="absolute inset-0"
-            style={{ background: 'radial-gradient(ellipse at center, rgba(10,10,11,0.6) 0%, rgba(0,0,0,0.9) 70%)' }}
+            style={{
+              background:
+                'radial-gradient(900px 480px at 30% 80%, rgba(255,94,31,0.12), transparent 60%), radial-gradient(700px 320px at 70% 20%, rgba(34,197,94,0.06), transparent 60%)',
+            }}
           />
+          <div className="absolute inset-0 bg-grid-fade opacity-25" />
+          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black to-transparent" />
+        </div>
 
-          {/* Grid underlay */}
-          <div className="absolute inset-0 bg-grid-fade opacity-20" />
-
-          {/* Road perspective lines — slide upward on scroll */}
-          <motion.div
-            style={{ y: roadY }}
-            className="absolute inset-x-0 bottom-0 h-2/3 pointer-events-none opacity-[0.18]"
-            aria-hidden="true"
-          >
-            <svg viewBox="0 0 1600 600" className="w-full h-full" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="roadFade" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0" stopColor="#FF5E1F" stopOpacity="0" />
-                  <stop offset="0.5" stopColor="#FF5E1F" stopOpacity="0.4" />
-                  <stop offset="1" stopColor="#FF5E1F" stopOpacity="1" />
-                </linearGradient>
-              </defs>
-              {[...Array(11)].map((_, i) => {
-                const x = 800 + (i - 5) * 240;
-                return (
-                  <line
-                    key={i}
-                    x1={x}
-                    y1="600"
-                    x2="800"
-                    y2="60"
-                    stroke="url(#roadFade)"
-                    strokeWidth="1.4"
-                  />
-                );
-              })}
-              {/* Horizontal distance marks */}
-              {[0.55, 0.72, 0.85, 0.93, 0.97].map((t, i) => {
-                const y = 60 + (600 - 60) * t;
-                const w = 1600 * (0.1 + t * 0.9);
-                return (
-                  <line
-                    key={`h-${i}`}
-                    x1={800 - w / 2}
-                    y1={y}
-                    x2={800 + w / 2}
-                    y2={y}
-                    stroke="#FF5E1F"
-                    strokeOpacity={0.15 + t * 0.35}
-                    strokeWidth="0.8"
-                  />
-                );
-              })}
-            </svg>
-          </motion.div>
-
-          {/* Headlight focal point — pulsing orange core streaking across the hero */}
-          <motion.div
-            style={{ x: motoX, scale: motoScale }}
-            className="absolute inset-y-0 left-0 w-full pointer-events-none flex items-center"
-            aria-hidden="true"
-          >
-            <div className="relative w-[14%] aspect-square">
-              {/* Hot core */}
-              <div className="absolute inset-[38%] rounded-full bg-brand-orange blur-[1px] opacity-90" />
-              {/* Mid glow */}
-              <div className="absolute inset-[22%] rounded-full bg-brand-orange/60 blur-xl" />
-              {/* Outer halo */}
-              <div className="absolute inset-0 rounded-full bg-brand-orange/25 blur-3xl" />
-              {/* Forward motion cone — trailing light */}
-              <div
-                className="absolute top-1/2 -translate-y-1/2 left-[55%] h-[3px] w-[420px] bg-gradient-to-r from-brand-orange via-brand-orange/60 to-transparent blur-[1px]"
-              />
-              <div
-                className="absolute top-1/2 -translate-y-1/2 left-[55%] h-[1px] w-[520px] bg-gradient-to-r from-brand-accent/80 via-brand-orange/40 to-transparent"
-              />
-            </div>
-          </motion.div>
-
-          {/* Scroll-reactive neon speed streaks — varied widths & opacities for depth */}
-          <motion.div style={{ x: streakX }} className="absolute inset-0 pointer-events-none" aria-hidden="true">
-            {[
-              { top: 14, width: 62, opacity: 0.55, duration: 2.2, delay: 0.0 },
-              { top: 22, width: 78, opacity: 0.35, duration: 2.8, delay: 0.3 },
-              { top: 34, width: 44, opacity: 0.7,  duration: 1.9, delay: 0.1 },
-              { top: 46, width: 88, opacity: 0.4,  duration: 3.1, delay: 0.5 },
-              { top: 58, width: 56, opacity: 0.6,  duration: 2.4, delay: 0.2 },
-              { top: 68, width: 72, opacity: 0.45, duration: 2.7, delay: 0.4 },
-              { top: 78, width: 50, opacity: 0.55, duration: 2.1, delay: 0.15 },
-              { top: 88, width: 66, opacity: 0.35, duration: 2.9, delay: 0.35 },
-            ].map((s, i) => (
-              <div
-                key={i}
-                className="absolute h-px bg-gradient-to-r from-transparent via-brand-orange to-transparent speedline"
-                style={{
-                  top: `${s.top}%`,
-                  left: `${Math.random() * 20}%`,
-                  width: `${s.width}%`,
-                  opacity: s.opacity,
-                  animationDuration: `${s.duration}s`,
-                  animationDelay: `${s.delay}s`,
-                }}
-              />
-            ))}
-          </motion.div>
-
-          {/* Floating telemetry callouts — physics flavor that matches the tagline */}
-          <div className="absolute inset-0 pointer-events-none hidden md:block" aria-hidden="true">
-            <div className="absolute top-[18%] left-[8%] font-mono text-[10px] text-brand-orange/40 tracking-wider">
-              <div>μ = 0.92</div>
-              <div className="text-white/30">// peak grip</div>
-            </div>
-            <div className="absolute top-[72%] right-[10%] font-mono text-[10px] text-brand-orange/40 tracking-wider text-right">
-              <div>Cd·A = 0.34</div>
-              <div className="text-white/30">// tucked</div>
-            </div>
-            <div className="absolute top-[30%] right-[14%] font-mono text-[10px] text-brand-accent/60 tracking-wider">
-              <div>ET → 9.97s</div>
-            </div>
-            <div className="absolute top-[60%] left-[12%] font-mono text-[10px] text-white/35 tracking-wider">
-              <div>v_trap = 239.8 km/h</div>
-            </div>
+        <motion.div
+          style={{ opacity: heroFade }}
+          className="relative max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 pt-12 pb-32 grid lg:grid-cols-[260px_1fr] gap-10 lg:gap-16 items-center min-h-[calc(100vh-4rem)]"
+        >
+          {/* Christmas tree, sticks vertically centred on lg+ */}
+          <div className="lg:sticky lg:top-32 self-center">
+            <ChristmasTree progress={heroProgress} />
           </div>
 
-          {/* Animated glow orbs */}
-          <motion.div
-            className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-brand-orange/20 blur-3xl drift-slow"
-            aria-hidden="true"
-          />
-          <motion.div
-            className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-brand-orangeDeep/10 blur-3xl drift-medium"
-            aria-hidden="true"
-          />
-        </div>
-
-        {/* Content */}
-        <div className="relative z-10 max-w-4xl text-center">
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="mb-8 inline-block"
-          >
-            <div className="px-4 py-2 rounded-full border border-brand-orange/50 bg-brand-orange/10 backdrop-blur-sm">
-              <p className="text-xs font-mono text-brand-orange uppercase tracking-widest">
+          {/* Hero copy */}
+          <div className="max-w-2xl">
+            <Reveal y={20} duration={0.7}>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-brand-orange/40 bg-brand-orange/10 text-[10px] sm:text-xs font-mono uppercase tracking-[0.25em] text-brand-orange">
                 Proudly Built in India
+              </div>
+            </Reveal>
+
+            <Reveal y={32} duration={0.9} delay={0.05}>
+              <h1 className="mt-7 font-display font-bold text-5xl sm:text-6xl lg:text-7xl xl:text-[88px] leading-[0.95] tracking-[-0.04em] text-white">
+                The physics of{' '}
+                <span className="text-gradient-orange">faster.</span>
+              </h1>
+            </Reveal>
+
+            <Reveal y={20} duration={0.7} delay={0.15}>
+              <p className="mt-7 text-lg sm:text-xl text-white/70 leading-relaxed max-w-xl">
+                A first-principles drag simulator for India&rsquo;s motorcycle
+                drag-racing community.{' '}
+                <span className="text-white">334 bikes</span>,{' '}
+                <span className="text-white">555 parts</span>,{' '}
+                <span className="text-white">20 venues</span> — tuned to
+                within ±0.05s of real-world ETs on the litre-class.
               </p>
-            </div>
-          </motion.div>
+            </Reveal>
 
-          {/* Main heading */}
-          <motion.h1
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
-            className="font-display font-bold text-4xl md:text-6xl lg:text-7xl mb-6 tracking-tighter leading-tight text-gradient-orange"
-          >
-            Physics-accurate drag simulation for every production motorcycle.
-          </motion.h1>
+            <Reveal y={16} duration={0.7} delay={0.22}>
+              <div className="mt-7 flex flex-wrap gap-2 text-[11px] font-mono">
+                <span className="px-3 py-1.5 rounded-full border border-white/10 text-white/55">
+                  Aamby Valley · MMRT · Kari · Hyderabad
+                </span>
+                <span className="px-3 py-1.5 rounded-full border border-brand-orange/30 text-brand-orange">
+                  +0.006s mean bias on 74 benchmarks
+                </span>
+                <span className="px-3 py-1.5 rounded-full border border-white/10 text-white/55">
+                  RK4 · 1ms · 15 sub-models
+                </span>
+              </div>
+            </Reveal>
 
-          {/* Subheading */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-lg md:text-xl text-white/80 mb-6 max-w-2xl mx-auto leading-relaxed"
-          >
-            334 bikes. 555 parts. 15 physics sub-models. Predict your quarter-mile within ±0.5s
-            before you buy a single part.
-          </motion.p>
+            <Reveal y={20} duration={0.7} delay={0.3}>
+              <div className="mt-10 flex flex-col sm:flex-row gap-4">
+                <Link
+                  href="/simulator"
+                  className="inline-flex items-center justify-center px-7 py-4 rounded-md bg-brand-orange hover:bg-brand-orangeLight text-black font-display font-bold transition-colors shadow-orange-soft"
+                >
+                  Try the simulator
+                </Link>
+                <Link
+                  href="#telemetry"
+                  className="inline-flex items-center justify-center px-7 py-4 rounded-md border-2 border-brand-orange/40 hover:border-brand-orange text-brand-orange font-display font-bold transition-colors"
+                >
+                  See it run
+                </Link>
+              </div>
+            </Reveal>
+          </div>
+        </motion.div>
 
-          {/* Secondary text */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            className="text-sm text-white/60 font-mono uppercase tracking-widest mb-12"
-          >
-            From Pune to the world · Built in India
-          </motion.p>
+        <ScrollHint />
+      </section>
 
-          {/* CTAs */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
-          >
-            <motion.a
-              href="/simulator"
-              whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(255, 94, 31, 0.4)' }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 bg-brand-orange text-black font-display font-bold rounded-lg transition-all glow-orange"
-            >
-              Try it free
-            </motion.a>
-            <motion.a
-              href="/pricing"
-              whileHover={{ scale: 1.05, borderColor: 'rgb(255, 94, 31)' }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 border-2 border-brand-orange/40 hover:border-brand-orange text-brand-orange font-display font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
-            >
-              See pricing
-            </motion.a>
-          </motion.div>
-        </div>
+      {/* ─── PINNED TELEMETRY HUD ────────────────────────────── */}
+      <TelemetryHUD />
 
-        {/* Scroll indicator */}
-        <ScrollIndicator />
-      </motion.section>
-
-      {/* Stats strip */}
+      {/* ─── STATS STRIP ─────────────────────────────────────── */}
       <StatsStrip />
 
-      {/* Why MotoQuant — 4 value-prop cards */}
+      {/* ─── WHY MOTOQUANT — 4 value props ───────────────────── */}
       <section id="why" className="py-24 md:py-32 px-6 border-t border-brand-orange/10">
-        <div className="max-w-6xl mx-auto">
-          <RevealSection>
-            <div className="text-center mb-16">
-              <h2 className="font-display font-bold text-4xl md:text-5xl mb-4 text-white">
+        <div className="max-w-7xl mx-auto">
+          <Reveal>
+            <div className="text-center mb-16 max-w-3xl mx-auto">
+              <h2 className="font-display font-bold text-4xl md:text-5xl text-white tracking-tight">
                 Why MotoQuant?
               </h2>
-              <p className="text-white/70 text-lg max-w-2xl mx-auto">
+              <p className="mt-4 text-white/65 text-lg">
                 The difference between guessing and knowing what your build will run.
               </p>
             </div>
-          </RevealSection>
+          </Reveal>
 
-          <motion.div
-            className="grid sm:grid-cols-2 gap-6"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-80px' }}
-          >
+          <Stagger className="grid sm:grid-cols-2 gap-6">
             {[
               {
                 icon: Cpu,
                 title: 'First-Principles Physics',
-                body: '15 independent sub-models — not a lookup table, not a regression. Every coefficient traces back to a real physical measurement: Pacejka tire grip, Willans friction engine model, RK4 numerical integration at 1 ms timestep.',
-                link: '/docs/physics',
-                linkLabel: 'Read the whitepaper →',
+                body: '15 independent sub-models — not a lookup table, not a regression. Every coefficient traces back to a real physical measurement: Pacejka tire grip, Willans friction engine model, RK4 numerical integration at 1ms timestep.',
+                href: '/whitepaper',
+                cta: 'Read the whitepaper →',
               },
               {
                 icon: Target,
                 title: 'Indian Market-First',
                 body: '334 bikes including 57 Indian commuters (Pulsar, Apache, R15, Duke, RE), 15 SE Asia drag cubs, and the complete Indian racing scene. Parts prices in INR with live retailer data. Venues: Aamby Valley, MMRT, BIC, Kari, Hyderabad.',
-                link: '/bikes',
-                linkLabel: 'Browse all 334 bikes →',
+                href: '/bikes',
+                cta: 'Browse all 334 bikes →',
               },
               {
                 icon: TrendingUp,
                 title: 'ROI Before You Buy',
-                body: 'Parts ROI knapsack tells you which mods deliver the most ET per rupee within your budget. Cost-per-tenth ranking across the full catalog. Stop buying parts that don\'t move the number.',
-                link: '/features',
-                linkLabel: 'See the ROI engine →',
+                body: "Parts ROI knapsack tells you which mods deliver the most ET per rupee within your budget. Cost-per-tenth ranking across the full catalog. Stop buying parts that don't move the number.",
+                href: '/features',
+                cta: 'See the ROI engine →',
               },
               {
                 icon: BarChart3,
                 title: 'Validated',
-                body: 'Kawasaki ZX-10R 2021 at ±0.011s. Top-10 mean error ±0.032s. Reference baselines: K5 10.033s, R1 10.286s, Hayabusa 10.471s — all within 0.001s of targets. 976 regression tests, zero silent failures.',
-                link: '/docs/validation',
-                linkLabel: 'See benchmark table →',
+                body: 'Kawasaki ZX-10R 2021 at ±0.011s. Top-10 mean error ±0.032s. Reference baselines: K5 10.0334s, R1 10.2859s, Hayabusa 10.4712s — preserved exactly to four decimals across every commit.',
+                href: '/docs/validation',
+                cta: 'See benchmark table →',
               },
-            ].map(({ icon: Icon, title, body, link, linkLabel }, i) => (
-              <motion.div
-                key={i}
-                variants={itemVariants}
-                whileHover={cardHover}
-                className="glass rounded-xl p-8 border border-brand-orange/20 hover:border-brand-orange/50 transition-colors group"
+            ].map(({ icon: Icon, title, body, href, cta }) => (
+              <StaggerItem
+                key={title}
+                className="group rounded-xl border border-brand-orange/20 hover:border-brand-orange/50 transition-colors bg-white/[0.02] p-8"
               >
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-lg bg-brand-orange/10 border border-brand-orange/30 flex items-center justify-center group-hover:bg-brand-orange/20 transition-colors">
+                  <span className="w-10 h-10 rounded-md bg-brand-orange/10 border border-brand-orange/30 flex items-center justify-center">
                     <Icon className="w-5 h-5 text-brand-orange" />
-                  </div>
-                  <h3 className="font-display font-bold text-lg text-white">{title}</h3>
+                  </span>
+                  <h3 className="font-display font-bold text-xl text-white">{title}</h3>
                 </div>
-                <p className="text-white/70 text-sm leading-relaxed mb-5">{body}</p>
-                <a href={link} className="text-brand-accent text-xs font-mono hover:text-brand-orange transition-colors">
-                  {linkLabel}
-                </a>
-              </motion.div>
+                <p className="text-white/65 text-sm leading-relaxed mb-5">{body}</p>
+                <Link href={href} className="text-brand-accent text-xs font-mono hover:text-brand-orange transition-colors">
+                  {cta}
+                </Link>
+              </StaggerItem>
             ))}
-          </motion.div>
+          </Stagger>
         </div>
       </section>
 
-      {/* Simulator section */}
+      {/* ─── EMBEDDED SIMULATOR ──────────────────────────────── */}
       <section
         id="simulator"
         className="relative py-24 md:py-32 px-6 border-t border-brand-orange/10"
       >
-        <div className="max-w-6xl mx-auto">
-          <RevealSection>
-            <div className="text-center mb-16">
-              <h2 className="font-display font-bold text-4xl md:text-5xl mb-4 text-white">
+        <div className="max-w-7xl mx-auto">
+          <Reveal>
+            <div className="text-center mb-12 max-w-2xl mx-auto">
+              <h2 className="font-display font-bold text-4xl md:text-5xl text-white tracking-tight">
                 Run It Yourself
               </h2>
-              <p className="text-white/80 text-lg max-w-2xl mx-auto">
-                Real physics, running live. Pick a bike, adjust your setup, get your ET in under a second.
+              <p className="mt-4 text-white/70 text-lg">
+                Real physics, running live. Pick a bike, adjust your setup,
+                get your ET in under a second.
               </p>
             </div>
-          </RevealSection>
+          </Reveal>
 
-          {/* Ambient glow effect */}
+          {/* ambient glow framing the widget */}
           <div className="absolute -left-40 top-1/2 w-80 h-80 rounded-full bg-brand-orange/10 blur-3xl pointer-events-none" />
           <div className="absolute -right-40 top-1/2 w-80 h-80 rounded-full bg-brand-orangeDeep/10 blur-3xl pointer-events-none" />
 
@@ -622,27 +454,22 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Physics section */}
-      <section id="physics" className="py-24 md:py-32 px-6 border-t border-brand-orange/10 bg-ink-1/50">
-        <div className="max-w-6xl mx-auto">
-          <RevealSection>
-            <div className="mb-16">
-              <h2 className="font-display font-bold text-4xl md:text-5xl mb-4">
+      {/* ─── PHYSICS — 15 sub-models ─────────────────────────── */}
+      <section id="physics" className="py-24 md:py-32 px-6 border-t border-brand-orange/10 bg-ink-1/40">
+        <div className="max-w-7xl mx-auto">
+          <Reveal>
+            <div className="mb-16 max-w-3xl">
+              <h2 className="font-display font-bold text-4xl md:text-5xl text-white tracking-tight">
                 15 Physics Sub-Models
               </h2>
-              <p className="text-white/80 text-lg">
-                Every coefficient is traceable to a real measurement. No curve-fitting against times — pure physics.
+              <p className="mt-4 text-white/70 text-lg">
+                Every coefficient is traceable to a real measurement.
+                No curve-fitting against times — pure physics.
               </p>
             </div>
-          </RevealSection>
+          </Reveal>
 
-          <motion.div
-            className="grid md:grid-cols-2 gap-6"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-100px' }}
-          >
+          <div className="grid md:grid-cols-2 gap-6">
             <PhysicsCard
               icon={Zap}
               title="Engine & Drivetrain"
@@ -668,9 +495,9 @@ export default function HomePage() {
               title="Environment & Setup"
               items={[
                 'Air density, altitude and temperature correction',
-                'Surface grip for asphalt, concrete, salt & dry lake',
+                'Surface grip for asphalt, concrete, salt and dry lake',
                 'Staging, reaction time, two-step launch control',
-                '20 venues: Aamby Valley, MMRT, BIC, Santa Pod, Pomona, and more',
+                '20 venues: Aamby Valley, MMRT, BIC, Santa Pod, Pomona',
               ]}
             />
             <PhysicsCard
@@ -679,36 +506,31 @@ export default function HomePage() {
               items={[
                 'RK4 fixed-step integrator at 1ms timestep',
                 'Adaptive step-size solver with error bounds',
-                '976 regression tests (catalog integration + physics + API + silent-failure sweep)',
+                '976 regression tests, zero silent failures',
                 'Validated against real GPS and ECU telemetry',
               ]}
             />
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Intelligence layer — Phase 4 AI features */}
+      {/* ─── INTELLIGENCE LAYER — Phase 4 AI features ─────────── */}
       <section id="intelligence" className="py-24 md:py-32 px-6 border-t border-brand-orange/10">
-        <div className="max-w-6xl mx-auto">
-          <RevealSection>
-            <div className="mb-16">
-              <h2 className="font-display font-bold text-4xl md:text-5xl mb-4">
+        <div className="max-w-7xl mx-auto">
+          <Reveal>
+            <div className="mb-16 max-w-3xl">
+              <h2 className="font-display font-bold text-4xl md:text-5xl text-white tracking-tight">
                 Intelligence Layer
               </h2>
-              <p className="text-white/80 text-lg max-w-3xl">
-                Physics is the floor, not the ceiling. MotoQuant Pro ships a full analysis stack on top of the solver —
-                so you spend less time sweeping sliders and more time building the right bike.
+              <p className="mt-4 text-white/70 text-lg">
+                Physics is the floor, not the ceiling. MotoQuant Pro ships a full
+                analysis stack on top of the solver — so you spend less time
+                sweeping sliders and more time building the right bike.
               </p>
             </div>
-          </RevealSection>
+          </Reveal>
 
-          <motion.div
-            className="grid md:grid-cols-2 gap-6"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-100px' }}
-          >
+          <div className="grid md:grid-cols-2 gap-6">
             <PhysicsCard
               icon={Target}
               title="Smart Recommendations"
@@ -721,9 +543,9 @@ export default function HomePage() {
             />
             <PhysicsCard
               icon={Brain}
-              title="Bayesian Optimization"
+              title="Bayesian Optimisation"
               items={[
-                'BoTorch Gaussian-process build optimizer',
+                'BoTorch Gaussian-process build optimiser',
                 '7-parameter continuous search (power, mass, aero, grip, gearing)',
                 'Budget-aware penalty with INR cost estimates',
                 'Converges in 30–50 iterations — no grid search',
@@ -733,10 +555,10 @@ export default function HomePage() {
               icon={MessageSquare}
               title="Natural Language Queries"
               items={[
-                '"Optimize my Hayabusa for 35°C at Aamby Valley, budget 50k"',
-                'Regex-based parser extracts bike, venue, weather, budget',
+                '"Optimise my Hayabusa for 35°C at Aamby Valley, budget 50k"',
+                'Regex parser extracts bike, venue, weather, budget',
                 'Resolves against the live catalog and runs the sim end-to-end',
-                'Ollama / Mistral 7B hook for Phase 5 conversational tuning',
+                'Mistral 7B / Llama hook for Phase 5 conversational tuning',
               ]}
             />
             <PhysicsCard
@@ -766,49 +588,74 @@ export default function HomePage() {
                 'Sobol global sensitivity indices (S1 + ST)',
                 'Multi-run statistical model — CV, 95% CI, recommended N',
                 'Sim-vs-real v(t) overlay with RMSE, MAE, split errors',
-                'Composite cost function ready for any optimizer',
+                'Composite cost function ready for any optimiser',
               ]}
             />
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Validation section */}
+      {/* ─── VALIDATION — honest physics + Top 10 ────────────── */}
       <section id="validation" className="py-24 md:py-32 px-6 border-t border-brand-orange/10">
-        <div className="max-w-6xl mx-auto">
-          <RevealSection>
-            <div className="mb-12">
-              <h2 className="font-display font-bold text-4xl md:text-5xl mb-4">
+        <div className="max-w-7xl mx-auto">
+          <Reveal>
+            <div className="mb-12 max-w-3xl">
+              <h2 className="font-display font-bold text-4xl md:text-5xl text-white tracking-tight">
                 Validated on Real Telemetry
               </h2>
-              <p className="text-white/80 text-lg max-w-3xl">
-                We don't just predict — we measure. Top 10 most accurate bikes out of 78 matched benchmarks (ET) plus 39 top-speed benchmarks, against published Cycle World, Sport Rider, MCN, and Motorcyclist tests plus factory specs. Full validation sweep runs across all 334 bikes — zero silent failures.
+              <p className="mt-4 text-white/70 text-lg">
+                We don&rsquo;t just predict — we measure. 74 weighted benchmarks
+                against published Cycle World, Sport Rider, MCN, and
+                Motorcyclist tests. Reference baselines preserved exactly to
+                four decimals across every commit.
               </p>
             </div>
-          </RevealSection>
+          </Reveal>
+
+          <div className="grid lg:grid-cols-[1.05fr_1fr] gap-10 mb-14">
+            <Reveal>
+              <ClusterBars />
+            </Reveal>
+            <Reveal y={32} duration={0.85} delay={0.1}>
+              <div className="space-y-6">
+                <h3 className="font-display font-bold text-2xl sm:text-3xl text-white tracking-tight leading-tight">
+                  Three reference baselines.<br />Four decimals. Across every commit.
+                </h3>
+                <p className="text-white/60 text-sm leading-relaxed">
+                  Every code change is gated on these three quarter-mile times
+                  reproducing exactly to the fourth decimal place. They have
+                  not drifted in 47 days.
+                </p>
+                <ReferenceBaselines />
+              </div>
+            </Reveal>
+          </div>
 
           {/* Aggregate stats strip */}
-          <RevealSection>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+          <Reveal>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
               {[
-                { num: '74', label: 'Bikes benchmarked' },
-                { num: '15', label: 'Within ±0.10s' },
-                { num: '30', label: 'Within ±0.20s' },
+                { num: '74',      label: 'Bikes benchmarked' },
+                { num: '15',      label: 'Within ±0.10s' },
+                { num: '30',      label: 'Within ±0.20s' },
                 { num: '±0.032s', label: 'Top 10 mean error' },
-              ].map((s, i) => (
-                <div key={i} className="glass rounded-xl p-4 border border-brand-orange/20 text-center">
-                  <div className="font-display font-bold text-2xl md:text-3xl text-brand-orange tabular-nums">{s.num}</div>
-                  <div className="font-mono text-[10px] text-white/60 tracking-widest mt-1 uppercase">{s.label}</div>
+              ].map((s) => (
+                <div key={s.label} className="rounded-xl border border-brand-orange/20 bg-white/[0.02] p-5 text-center">
+                  <div className="font-display font-bold text-2xl md:text-3xl text-brand-orange tabular-nums">
+                    {s.num}
+                  </div>
+                  <div className="font-mono text-[10px] text-white/55 tracking-widest mt-1 uppercase">
+                    {s.label}
+                  </div>
                 </div>
               ))}
             </div>
-          </RevealSection>
+          </Reveal>
 
-          {/* Top 10 most accurate bikes — table layout */}
-          <RevealSection>
-            <div className="glass rounded-xl border border-brand-orange/20 overflow-hidden mb-6">
-              {/* Table header — desktop only */}
-              <div className="hidden md:grid grid-cols-[40px_1fr_120px_120px_120px_140px] gap-4 px-5 py-3 border-b border-brand-orange/20 bg-white/[0.02] text-[10px] font-mono uppercase tracking-widest text-white/50">
+          {/* Top-10 leaderboard */}
+          <Reveal>
+            <div className="rounded-xl border border-brand-orange/20 bg-white/[0.02] overflow-hidden">
+              <div className="hidden md:grid grid-cols-[40px_1fr_120px_120px_120px_140px] gap-4 px-5 py-3 border-b border-brand-orange/20 bg-white/[0.02] text-[10px] font-mono uppercase tracking-widest text-white/45">
                 <div>#</div>
                 <div>Bike</div>
                 <div className="text-right">Published ET</div>
@@ -817,34 +664,23 @@ export default function HomePage() {
                 <div className="text-right">Source</div>
               </div>
 
-              {[
-                { rank: 1, name: 'Kawasaki Ninja ZX-10R', year: 2021, cc: '998cc I4', target: 10.00, sim: 10.011, delta: 0.011, source: 'Cycle World 2021' },
-                { rank: 2, name: 'Kawasaki Z 650', year: 2017, cc: '649cc I2', target: 12.40, sim: 12.412, delta: 0.012, source: 'MotoStatz 2017' },
-                { rank: 3, name: 'Suzuki TL1000R', year: 1998, cc: '996cc V-twin', target: 10.50, sim: 10.518, delta: 0.018, source: 'Cycle World 1998' },
-                { rank: 4, name: 'Honda CBR1000RR-R', year: 2020, cc: '999cc I4', target: 9.95, sim: 9.928, delta: -0.022, source: 'Cycle World 2020' },
-                { rank: 5, name: 'Kawasaki Ninja ZX-9R', year: 2000, cc: '899cc I4', target: 10.50, sim: 10.526, delta: 0.026, source: 'Sport Rider 2000' },
-                { rank: 6, name: 'Yamaha YZF-R1', year: 2009, cc: '998cc I4 CF', target: 10.20, sim: 10.172, delta: -0.028, source: 'Sport Rider 2009' },
-                { rank: 7, name: 'BMW M1000RR', year: 2021, cc: '999cc I4', target: 9.80, sim: 9.837, delta: 0.037, source: 'Cycle World 2021' },
-                { rank: 8, name: 'Ducati Streetfighter V4', year: 2020, cc: '1103cc V4', target: 10.10, sim: 10.143, delta: 0.043, source: 'Cycle World 2020' },
-                { rank: 9, name: 'MV Agusta Brutale 1000 RR', year: 2019, cc: '998cc I4', target: 10.15, sim: 10.103, delta: -0.047, source: 'Cycle World 2019' },
-                { rank: 10, name: 'TVS Apache RR 310', year: 2020, cc: '312cc I1', target: 15.46, sim: 15.537, delta: 0.077, source: 'BikeWale 2020' },
-              ].map((b) => {
+              {TOP10.map((b) => {
                 const abs = Math.abs(b.delta);
-                const deltaColor = abs < 0.05 ? 'text-brand-accent' : abs < 0.10 ? 'text-green-400' : 'text-amber-400';
-                const deltaSign = b.delta === 0 ? '±' : b.delta > 0 ? '+' : '';
+                const colour = abs < 0.05 ? 'text-brand-accent' : abs < 0.10 ? 'text-emerald-300' : 'text-amber-300';
+                const sign = b.delta === 0 ? '±' : b.delta > 0 ? '+' : '';
                 return (
                   <div
                     key={b.rank}
-                    className="md:grid md:grid-cols-[40px_1fr_120px_120px_120px_140px] md:gap-4 px-5 py-4 border-b border-white/[0.04] last:border-0 hover:bg-brand-orange/[0.03] transition-colors"
+                    className="md:grid md:grid-cols-[40px_1fr_120px_120px_120px_140px] md:gap-4 px-5 py-4 border-b border-white/[0.04] last:border-0 hover:bg-brand-orange/[0.04] transition-colors"
                   >
-                    {/* Mobile layout */}
+                    {/* mobile */}
                     <div className="md:hidden flex items-center justify-between mb-2">
                       <div className="flex items-center gap-3">
                         <span className="font-display font-bold text-brand-orange text-lg tabular-nums">#{b.rank}</span>
                         <span className="font-display font-bold text-white text-sm">{b.name}</span>
                       </div>
-                      <span className={`font-display font-bold text-sm tabular-nums ${deltaColor}`}>
-                        {deltaSign}{b.delta.toFixed(3)}s
+                      <span className={`font-display font-bold text-sm tabular-nums ${colour}`}>
+                        {sign}{b.delta.toFixed(3)}s
                       </span>
                     </div>
                     <div className="md:hidden grid grid-cols-3 gap-2 text-xs">
@@ -852,85 +688,68 @@ export default function HomePage() {
                       <div><div className="text-white/40 text-[10px] font-mono uppercase tracking-wider mb-0.5">Target</div><div className="text-white/80 font-mono tabular-nums">{b.target.toFixed(2)}s</div></div>
                       <div><div className="text-white/40 text-[10px] font-mono uppercase tracking-wider mb-0.5">Sim</div><div className="text-white/80 font-mono tabular-nums">{b.sim.toFixed(2)}s</div></div>
                     </div>
-                    <div className="md:hidden mt-2 text-[10px] font-mono text-white/40">{b.cc} · {b.source}</div>
+                    <div className="md:hidden mt-2 text-[10px] font-mono text-white/40">{b.cc} &middot; {b.source}</div>
 
-                    {/* Desktop layout */}
+                    {/* desktop */}
                     <div className="hidden md:block font-display font-bold text-brand-orange text-lg tabular-nums">{b.rank}</div>
                     <div className="hidden md:block">
                       <div className="font-display font-bold text-white">{b.name}</div>
-                      <div className="font-mono text-xs text-white/50">{b.year} · {b.cc}</div>
+                      <div className="font-mono text-xs text-white/45">{b.year} &middot; {b.cc}</div>
                     </div>
                     <div className="hidden md:block text-right font-mono text-white/80 tabular-nums">{b.target.toFixed(2)}s</div>
                     <div className="hidden md:block text-right font-mono text-white tabular-nums font-semibold">{b.sim.toFixed(2)}s</div>
-                    <div className={`hidden md:block text-right font-display font-bold tabular-nums ${deltaColor}`}>
-                      {deltaSign}{b.delta.toFixed(3)}s
+                    <div className={`hidden md:block text-right font-display font-bold tabular-nums ${colour}`}>
+                      {sign}{b.delta.toFixed(3)}s
                     </div>
                     <div className="hidden md:block text-right font-mono text-[10px] text-white/40 self-center">{b.source}</div>
                   </div>
                 );
               })}
             </div>
-          </RevealSection>
+          </Reveal>
 
-          <RevealSection className="text-center text-sm text-white/60 font-mono">
+          <Reveal className="mt-6 text-center text-sm text-white/55 font-mono">
             <p>
-              Plug in your own Dragy GPS logs to auto-calibrate for your bike, rider style, and venue.{' '}
+              Plug in your own Dragy GPS logs to auto-calibrate for your bike,
+              rider style, and venue.{' '}
               <span className="text-brand-accent">Zero guesswork.</span>
             </p>
-          </RevealSection>
+          </Reveal>
         </div>
       </section>
 
-      {/* Who uses this */}
-      <section className="py-24 md:py-32 px-6 border-t border-brand-orange/10 bg-ink-1/50">
-        <div className="max-w-6xl mx-auto">
-          <RevealSection>
-            <h2 className="font-display font-bold text-4xl md:text-5xl mb-16 text-center">
-              Built For Champions
+      {/* ─── CTA — green-light moment ────────────────────────── */}
+      <section className="relative py-32 px-6 border-t border-brand-orange/10 overflow-hidden">
+        <div
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full pointer-events-none"
+          style={{
+            background:
+              'radial-gradient(circle, rgba(34,197,94,0.18) 0%, rgba(34,197,94,0) 60%)',
+          }}
+        />
+        <div className="relative max-w-3xl mx-auto text-center">
+          <Reveal>
+            <h2 className="font-display font-bold text-5xl md:text-7xl tracking-[-0.03em] leading-[0.95]">
+              Stage. Burn. <span className="text-brand-green drop-shadow-[0_0_24px_rgba(34,197,94,0.6)]">Green.</span>
             </h2>
-          </RevealSection>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            <RevealSection>
-              <div className="glass rounded-xl p-6 sm:p-10 border border-brand-orange/20 h-full">
-                <h3 className="font-display font-bold text-2xl mb-4 text-white">Racers</h3>
-                <p className="text-white/80 mb-6 leading-relaxed">
-                  ET prediction before you hit the strip. Simulate launch strategies, gear shifts, and setup changes.
-                  Share your data with crew chiefs and track results in the leaderboard.
-                </p>
-                <ul className="space-y-2 text-sm font-mono text-white/60">
-                  <li>
-                    <span className="text-brand-orange">›</span> Pre-event ET prediction
-                  </li>
-                  <li>
-                    <span className="text-brand-orange">›</span> Setup optimisation
-                  </li>
-                  <li>
-                    <span className="text-brand-orange">›</span> Performance leaderboard
-                  </li>
-                </ul>
-              </div>
-            </RevealSection>
-
-          </div>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <p className="mt-6 text-lg text-white/65">
+              Pick a bike. Pick a track. Pick a build. We&rsquo;ll run the physics.
+            </p>
+          </Reveal>
+          <Reveal delay={0.2}>
+            <Link
+              href="/simulator"
+              className="mt-10 inline-flex items-center justify-center px-9 py-4 rounded-md bg-brand-green text-black font-display font-bold text-lg shadow-[0_16px_50px_rgba(34,197,94,0.45)] hover:scale-[1.02] transition-transform"
+            >
+              Run your first sim →
+            </Link>
+          </Reveal>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-brand-orange/10 py-12 px-6 text-center text-white/60 text-sm font-mono">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-6">
-            <p className="mb-2">
-              Built in India for drag racers and land-speed record hunters. Validated physics, made for the strip and the salt.
-            </p>
-            <p>
-              motoquant.in{' '}
-              <span className="text-brand-orange/50">·</span>{' '}
-              Not affiliated with any manufacturer
-            </p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

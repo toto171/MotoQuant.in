@@ -1,0 +1,60 @@
+name: web-verify
+
+# Catches the failure modes that have repeatedly hit web/ this session:
+#   1. NULL bytes in source files (FUSE corruption)
+#   2. Mid-token truncation by the Cowork Write/Edit tool
+#   3. Brace imbalance / structural breakage
+#   4. Real Next.js build failures
+#
+# Runs on every push and pull request that touches web/. Cheap (<1 min),
+# fails fast, blocks merge before broken code reaches Vercel.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+      - ".github/workflows/web-verify.yml"
+  pull_request:
+    paths:
+      - "web/**"
+      - ".github/workflows/web-verify.yml"
+
+jobs:
+  verify:
+    name: Integrity + build
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    defaults:
+      run:
+        working-directory: web
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: web/package-lock.json
+
+      # Step 1 — integrity check, no install needed.
+      # This catches null-byte tails and truncation in <1 second.
+      - name: Source integrity (npm run verify)
+        run: node scripts/verify-web.mjs
+
+      # Step 2 — full install, then real build. Catches every other
+      # JSX/TSX issue that the integrity check is too loose to detect.
+      - name: Install
+        run: npm ci
+
+      - name: Build (next build)
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+
+      # Step 3 — surface bundle size in the PR for visibility.
+      - name: Print bundle size
+        run: du -sh .next 2>/dev/null || true
