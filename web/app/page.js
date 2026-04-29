@@ -290,7 +290,7 @@ export default function HomePage() {
         >
           {/* Christmas tree, sticks vertically centred on lg+ */}
           <div className="lg:sticky lg:top-32 self-center">
-            <ChristmasTree progress={heroProgress} />
+            <ChristmasTree />
           </div>
 
           {/* Hero copy */}

@@ -16,52 +16,41 @@
  *              ●               large amber  (countdown 2)
  *              ●               large amber  (countdown 1)
  *              ●               GREEN — go
- *              ●               red — foul (intentionally never lit
- *                                          on the marketing landing)
+ *              ●               red — foul (intentionally never lit)
  *
- * Sequencing on hero scroll progress 0..1:
+ * Sequence — TIMER-DRIVEN, fires once on first user scroll.
  *
- *   0.00 → bike approaches:   pre-stage pair on
- *   0.10 → bike fully staged: stage pair on (pre-stage stays on)
- *   0.30 → amber #1 (top)     on
- *   0.45 → amber #2 (mid)     on
- *   0.60 → amber #3 (bottom)  on
- *   0.78 → GREEN — go          on
- *
- * The red lamp is rendered to keep the geometry honest but is never
- * activated by the scroll progression — there's no false start on a
- * marketing site.
+ * The first version drove every lamp off scroll progress and only fully
+ * lit the green when the user had scrolled through 78% of the hero.
+ * Real visitors don't scroll that precisely, so most never saw the
+ * green. New design: pre-stage starts lit (the bike has rolled up to
+ * the lights), then any scroll movement triggers a real Pro-Tree
+ * sequence: stage at +200ms, ambers at +400/600/800ms, GREEN at
+ * +1200ms. After GREEN it stays lit. Total ~1.2s — the same timing
+ * a real Pro Tree would run.
  */
 
 import { useEffect, useState } from 'react';
-import { motion, useMotionValueEvent } from 'framer-motion';
+import { motion } from 'framer-motion';
 
-// Threshold list mapping scroll progress → which logical lamps light.
-// The order in this array IS the lighting order; index N lights when
-// progress ≥ THRESHOLDS[N].
-const THRESHOLDS = [
-  { id: 'pre-stage', at: 0.00 },
-  { id: 'stage',     at: 0.10 },
-  { id: 'amber-1',   at: 0.30 },
-  { id: 'amber-2',   at: 0.45 },
-  { id: 'amber-3',   at: 0.60 },
-  { id: 'green',     at: 0.78 },
+// id, color, ms-after-trigger
+const SEQUENCE = [
+  { id: 'pre-stage', color: 'amber', at:    0 },
+  { id: 'stage',     color: 'amber', at:  150 },
+  { id: 'amber-1',   color: 'amber', at:  350 },
+  { id: 'amber-2',   color: 'amber', at:  550 },
+  { id: 'amber-3',   color: 'amber', at:  750 },
+  { id: 'green',     color: 'green', at: 1100 },
 ];
 
-function smallBulbClass(on, color = 'amber') {
-  if (!on) {
-    return 'bg-ink-3 border-ink-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]';
-  }
-  if (color === 'amber') {
-    return 'bg-brand-amber border-yellow-300 shadow-lamp-amber animate-lamp-pulse';
-  }
-  return 'bg-brand-red border-red-300 shadow-lamp-red';
+function smallBulbClass(on) {
+  return on
+    ? 'bg-brand-amber border-yellow-300 shadow-lamp-amber animate-lamp-pulse'
+    : 'bg-ink-3 border-ink-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]';
 }
 
 function largeBulbClass(on, color) {
-  if (!on) {
-    return 'bg-ink-3 border-ink-4 shadow-[inset_0_4px_8px_rgba(0,0,0,0.7)]';
-  }
+  if (!on) return 'bg-ink-3 border-ink-4 shadow-[inset_0_4px_8px_rgba(0,0,0,0.7)]';
   switch (color) {
     case 'amber':
       return 'bg-brand-amber border-yellow-300 shadow-lamp-amber animate-lamp-pulse';
@@ -105,31 +94,52 @@ function StageRow({ label, on }) {
   );
 }
 
-export default function ChristmasTree({ progress, className = '' }) {
-  const [lit, setLit] = useState(() => new Set());
+export default function ChristmasTree({ className = '' }) {
+  // Pre-stage starts lit immediately (bike has rolled up to the lights).
+  const [lit, setLit] = useState(() => new Set(['pre-stage']));
+  const [triggered, setTriggered] = useState(false);
 
-  useMotionValueEvent(progress, 'change', (v) => {
-    const p = Math.min(1, Math.max(0, v));
-    const next = new Set();
-    for (const t of THRESHOLDS) {
-      if (p >= t.at) next.add(t.id);
-    }
-    setLit((prev) => {
-      // Only update if changed (string-compare set contents)
-      if (prev.size !== next.size) return next;
-      for (const x of prev) if (!next.has(x)) return next;
-      return prev;
-    });
-  });
-
-  // Initial paint from current progress value
+  // First user scroll OR first 800 ms of dwell → fire the sequence.
+  // Either signal is sufficient — whichever comes first wins.
   useEffect(() => {
-    const p = progress.get?.() ?? 0;
-    const init = new Set();
-    for (const t of THRESHOLDS) if (p >= t.at) init.add(t.id);
-    setLit(init);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (triggered) return;
+
+    function fire() {
+      if (triggered) return;
+      setTriggered(true);
+    }
+
+    const onScroll = () => {
+      if (window.scrollY > 4) fire();
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Fallback: if the user is reading without scrolling, fire after
+    // a short dwell so the green-light moment isn't gated entirely on
+    // scroll behaviour.
+    const dwell = setTimeout(fire, 1200);
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      clearTimeout(dwell);
+    };
+  }, [triggered]);
+
+  // Once triggered, schedule each lamp's lighting per the SEQUENCE table.
+  useEffect(() => {
+    if (!triggered) return;
+    const timeouts = SEQUENCE.map(({ id, at }) =>
+      setTimeout(() => {
+        setLit((prev) => {
+          if (prev.has(id)) return prev;
+          const next = new Set(prev);
+          next.add(id);
+          return next;
+        });
+      }, at)
+    );
+    return () => timeouts.forEach(clearTimeout);
+  }, [triggered]);
 
   const greenOn = lit.has('green');
 
@@ -143,7 +153,7 @@ export default function ChristmasTree({ progress, className = '' }) {
       />
 
       <div className="relative w-[180px] sm:w-[220px] rounded-2xl bg-ink-1/90 border border-white/10 backdrop-blur-sm p-4 sm:p-5">
-        {/* Crown rail — small detail to evoke the real boxed sign */}
+        {/* Crown rail */}
         <div className="mx-auto mb-3 h-1 w-12 rounded-full bg-white/10" />
 
         {/* Pre-stage panel */}
@@ -154,40 +164,35 @@ export default function ChristmasTree({ progress, className = '' }) {
           <StageRow label="Stage" on={lit.has('stage')} />
         </div>
 
-        {/* Vertical mast — the staff that holds the big bulbs */}
+        {/* Vertical mast */}
         <div className="mt-4 mx-auto w-[3px] h-3 bg-white/10 rounded-full" />
 
-        {/* The 3 amber + green + red — the actual countdown column */}
+        {/* The 3 amber + green + red column */}
         <div className="mt-2 flex flex-col items-center gap-3 sm:gap-3.5">
-          {/* Amber 1 */}
           <span
             className={[
               'w-[54px] sm:w-[64px] aspect-square rounded-full border-2 transition-all duration-300',
               largeBulbClass(lit.has('amber-1'), 'amber'),
             ].join(' ')}
           />
-          {/* Amber 2 */}
           <span
             className={[
               'w-[54px] sm:w-[64px] aspect-square rounded-full border-2 transition-all duration-300',
               largeBulbClass(lit.has('amber-2'), 'amber'),
             ].join(' ')}
           />
-          {/* Amber 3 */}
           <span
             className={[
               'w-[54px] sm:w-[64px] aspect-square rounded-full border-2 transition-all duration-300',
               largeBulbClass(lit.has('amber-3'), 'amber'),
             ].join(' ')}
           />
-          {/* Green — GO */}
           <span
             className={[
               'w-[54px] sm:w-[64px] aspect-square rounded-full border-2 transition-all duration-300',
               largeBulbClass(greenOn, 'green'),
             ].join(' ')}
           />
-          {/* Red — foul. Never lit by scroll, but rendered for accuracy. */}
           <span
             className={[
               'w-[54px] sm:w-[64px] aspect-square rounded-full border-2 transition-all duration-300',

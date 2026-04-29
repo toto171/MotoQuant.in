@@ -6,12 +6,14 @@
  *   - <Counter>  : tabular-nums number that counts up on entry
  *   - <Stagger>  : container that staggers child Reveal animations
  *
- * Built on framer-motion. All "once" by default — animations only
- * play the first time the element scrolls into view, so re-entering
- * doesn't replay them.
+ * Counter is NOT a ticker — it animates exactly once when the element
+ * first scrolls into view. It rounds to int by default so we don't
+ * see "10.271" mid-animation. The format function is stable across
+ * renders so a parent re-render never restarts the animation
+ * (the original bug surfaced as visibly fluctuating stat numbers).
  */
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { motion, useInView } from 'framer-motion';
 
 export function Reveal({
@@ -68,31 +70,42 @@ export const StaggerItem = (props) => (
   />
 );
 
+// Stable default formatter — defined OUTSIDE the component so its
+// reference identity never changes across renders.
+const defaultFormat = (n) => Math.round(n).toLocaleString();
+
 export function Counter({
   value,
   duration = 1400,
-  format = (n) => n.toLocaleString(),
+  format,
   suffix = '',
   className = '',
 }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
-  const [display, setDisplay] = useState(format(0));
+  const fmt = format || defaultFormat;
+  const [display, setDisplay] = useState(() => fmt(0));
+  const startedRef = useRef(false);
+
+  // Stabilise the format function reference across re-renders so the
+  // useEffect dep-list doesn't retrigger and restart the animation.
+  const stableFmt = useCallback(fmt, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (!inView) return;
+    if (!inView || startedRef.current) return;
+    startedRef.current = true;
     let raf;
     const t0 = performance.now();
     const step = (t) => {
       const u = Math.min(1, (t - t0) / duration);
       const eased = 1 - Math.pow(1 - u, 3);
-      setDisplay(format(value * eased));
+      setDisplay(stableFmt(value * eased));
       if (u < 1) raf = requestAnimationFrame(step);
-      else setDisplay(format(value));
+      else setDisplay(stableFmt(value));
     };
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
-  }, [inView, value, duration, format]);
+  }, [inView, value, duration, stableFmt]);
 
   return (
     <span ref={ref} className={['tabular-nums', className].join(' ')}>

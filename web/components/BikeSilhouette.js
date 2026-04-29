@@ -1,31 +1,41 @@
 'use client';
 
 /**
- * BikeSilhouette — realistic SVG superbike profile.
+ * BikeSilhouette — MV-Agusta-F4-faithful superbike profile.
  *
- * Design language modelled on the MV Agusta F4: sharp angular front
- * fairing with stacked twin headlights, deep tank cut-outs, raised
- * pilot tail hump, single-sided swingarm exposed on the right side,
- * and the brand's signature quad-tip underseat exhaust array.
+ * Reference: the user's F4 photo. Key design cues we carry over:
  *
- * Rendered as inline SVG so it scales cleanly, themes via currentColor,
- * and takes a `glow` prop to drop the orange aura when used in the
- * pinned telemetry HUD.
+ *   - RIGHT-FACING profile (front fairing on the right side) — matches
+ *     the cinematic motion direction of the rest of the page.
+ *   - Sharp wedge nose with TWIN STACKED LED headlights deep-set in
+ *     the lower fairing slot.
+ *   - Tank flowing rearward into a DRAMATIC TAIL HUMP that peaks high
+ *     and drops sharply to the tail-light.
+ *   - Signature MV QUAD-TIP underseat exhaust array tucked under the
+ *     tail cowl.
+ *   - SINGLE-SIDED swingarm exposing the rear wheel detail.
+ *   - 5-spoke Y-pattern wheels with a red rim accent.
+ *   - Visible silver TRELLIS frame above the engine.
+ *   - GOLD USD inverted forks at the front.
+ *   - Brembo-style red brake calipers.
+ *   - Brand-orange livery (so it reads as MotoQuant, not as a stock
+ *     MV in factory red).
  *
- * Geometry hand-tuned at viewBox 720×320:
- *   - Wheelbase:  ~470 px (centre-to-centre, scales to ~1430 mm)
- *   - Wheel ID:   80 px outer / 50 px hub
- *   - Front rake:  ~24°  (sharp sport rake)
- *   - Rider tank line peak: y=92 (matches F4 hump silhouette)
+ * Geometry is hand-tuned at viewBox 720×320:
+ *   - Front wheel cx=620 (right side, 17 inch)
+ *   - Rear wheel cx=140 (left side, 17 inch)
+ *   - Wheelbase 480 px (~1430 mm scaled)
+ *   - Aggressive sport rake — steering stem leans forward 22°
+ *   - Tail hump peaks at y=66 (highest point of bodywork)
  */
 
 export default function BikeSilhouette({
   className = '',
   glow = true,
-  primary = '#FF5E1F',      // brand orange — bodywork
-  secondary = '#FF8F57',    // brand orange light — fairing highlight
+  primary = '#FF5E1F',
+  secondary = '#FF8F57',
   shadow = '#000000',
-  ariaLabel = 'MV-style superbike silhouette',
+  ariaLabel = 'MV-Agusta-F4-style superbike silhouette',
 }) {
   return (
     <svg
@@ -35,292 +45,379 @@ export default function BikeSilhouette({
       className={className}
       style={{
         filter: glow
-          ? 'drop-shadow(0 0 24px rgba(255,94,31,0.45)) drop-shadow(0 8px 14px rgba(0,0,0,0.7))'
-          : 'drop-shadow(0 8px 14px rgba(0,0,0,0.7))',
+          ? 'drop-shadow(0 0 28px rgba(255,94,31,0.55)) drop-shadow(0 10px 18px rgba(0,0,0,0.7))'
+          : 'drop-shadow(0 10px 18px rgba(0,0,0,0.7))',
       }}
     >
       <defs>
+        {/* Body: bright top, deep shadow on the bottom edge */}
         <linearGradient id="bsBody" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0" stopColor={secondary} />
-          <stop offset="0.55" stopColor={primary} />
-          <stop offset="1" stopColor="#9C2E00" />
+          <stop offset="0"    stopColor={secondary} />
+          <stop offset="0.45" stopColor={primary} />
+          <stop offset="1"    stopColor="#7A1E00" />
         </linearGradient>
-        <linearGradient id="bsFairing" x1="0" x2="1" y1="0" y2="0.6">
-          <stop offset="0" stopColor={primary} />
-          <stop offset="1" stopColor={secondary} />
+        <linearGradient id="bsBodyDark" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stopColor="#9C2E00" />
+          <stop offset="1" stopColor="#3D0E00" />
+        </linearGradient>
+        <linearGradient id="bsWheel" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stopColor="#3F3F46" />
+          <stop offset="1" stopColor="#0A0A0A" />
         </linearGradient>
         <linearGradient id="bsExhaust" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0" stopColor="#525252" />
-          <stop offset="0.5" stopColor="#9CA3AF" />
-          <stop offset="1" stopColor="#404040" />
+          <stop offset="0"   stopColor="#9CA3AF" />
+          <stop offset="0.5" stopColor="#71717A" />
+          <stop offset="1"   stopColor="#3F3F46" />
         </linearGradient>
-        <linearGradient id="bsRim" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0" stopColor="#3F3F46" />
-          <stop offset="1" stopColor="#18181B" />
+        <linearGradient id="bsFork" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0"   stopColor="#FCD34D" />
+          <stop offset="0.5" stopColor="#D4A745" />
+          <stop offset="1"   stopColor="#7C5A1B" />
         </linearGradient>
-        <linearGradient id="bsWindscreen" x1="0" x2="0" y1="0" y2="1">
+        <linearGradient id="bsScreen" x1="0" x2="0" y1="0" y2="1">
           <stop offset="0" stopColor="#1F2937" stopOpacity="0.85" />
           <stop offset="1" stopColor="#0F172A" stopOpacity="0.95" />
         </linearGradient>
         <radialGradient id="bsHeadlight" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0" stopColor="#FFE9C4" />
-          <stop offset="0.4" stopColor="#FFAF60" />
-          <stop offset="1" stopColor="#7A2A00" stopOpacity="0" />
+          <stop offset="0"   stopColor="#FFE9C4" />
+          <stop offset="0.5" stopColor="#FFAF60" />
+          <stop offset="1"   stopColor="#7A2A00" stopOpacity="0" />
         </radialGradient>
       </defs>
 
-      {/* Ground shadow */}
-      <ellipse cx="360" cy="284" rx="270" ry="6" fill={shadow} opacity="0.45" />
+      {/* Ground shadow — slightly offset under the bike */}
+      <ellipse cx="380" cy="290" rx="290" ry="6" fill={shadow} opacity="0.45" />
 
-      {/* ─── Rear wheel (single-sided swingarm visible behind) ─── */}
+      {/* ─── REAR WHEEL (left side) — 5-spoke Y pattern ─── */}
       <g>
-        {/* Hub-side disc + caliper */}
-        <circle cx="600" cy="222" r="60" fill="url(#bsRim)" />
-        <circle cx="600" cy="222" r="58" fill="#0a0a0a" />
-        <circle cx="600" cy="222" r="48" fill="url(#bsRim)" />
-        <circle cx="600" cy="222" r="22" fill="#27272A" />
-        {/* Spokes (Y-spoke pattern, sharp italian style) */}
-        <g stroke="#52525B" strokeWidth="3" strokeLinecap="round">
-          <line x1="600" y1="178" x2="600" y2="266" />
-          <line x1="562" y1="200" x2="638" y2="244" />
-          <line x1="562" y1="244" x2="638" y2="200" />
+        {/* Tyre */}
+        <circle cx="140" cy="225" r="62" fill="#0A0A0A" />
+        {/* Sidewall red stripe (Pirelli accent) */}
+        <circle cx="140" cy="225" r="60" fill="none" stroke="#DC2626" strokeWidth="0.8" opacity="0.55" />
+        {/* Rim */}
+        <circle cx="140" cy="225" r="48" fill="url(#bsWheel)" />
+        <circle cx="140" cy="225" r="46" fill="#0A0A0A" />
+        <circle cx="140" cy="225" r="40" fill="url(#bsWheel)" />
+        {/* Hub */}
+        <circle cx="140" cy="225" r="14" fill="#27272A" />
+        <circle cx="140" cy="225" r="6"  fill="#52525B" />
+        {/* 5 Y-spokes */}
+        <g stroke="#52525B" strokeWidth="3" strokeLinecap="round" fill="none">
+          {/* spoke 1: 12 o'clock */}
+          <path d="M 140 225 L 140 183" />
+          {/* spoke 2: ~72° */}
+          <path d="M 140 225 L 180 200" />
+          {/* spoke 3: ~144° */}
+          <path d="M 140 225 L 165 263" />
+          {/* spoke 4: ~216° */}
+          <path d="M 140 225 L 115 263" />
+          {/* spoke 5: ~288° */}
+          <path d="M 140 225 L 100 200" />
         </g>
-        {/* Single-sided swingarm */}
+        {/* Y-split detail at outer end of each spoke */}
+        <g stroke="#3F3F46" strokeWidth="1.5" fill="none" opacity="0.7">
+          <path d="M 134 188 L 146 188" />
+          <path d="M 175 192 L 184 207" />
+          <path d="M 154 256 L 175 268" />
+          <path d="M 105 268 L 126 256" />
+          <path d="M 96 207 L 105 192" />
+        </g>
+      </g>
+
+      {/* ─── SINGLE-SIDED SWINGARM ─── */}
+      <g>
         <path
-          d="M 380 218 Q 460 214 590 222 L 600 222 L 600 226 Q 470 222 380 226 Z"
+          d="M 320 218 Q 240 217 158 222 L 158 232 Q 240 227 320 230 Z"
           fill="#3F3F46"
-          stroke="#27272A"
-          strokeWidth="0.6"
+          stroke="#1F2937"
+          strokeWidth="0.8"
         />
-        {/* Chain line */}
-        <path
-          d="M 392 230 L 590 230"
-          stroke="#FF5E1F"
-          strokeWidth="1.2"
-          strokeDasharray="4 3"
-          opacity="0.7"
-        />
+        {/* Pivot bolt at the engine end */}
+        <circle cx="320" cy="225" r="5" fill="#71717A" stroke="#0A0A0A" strokeWidth="0.6" />
+        {/* Hub-mount detail at wheel end */}
+        <rect x="148" y="218" width="14" height="14" rx="2" fill="#27272A" />
       </g>
 
-      {/* ─── Front wheel ─── */}
+      {/* ─── REAR SHOCK (red, tucked diagonally) ─── */}
       <g>
-        <circle cx="120" cy="222" r="60" fill="url(#bsRim)" />
-        <circle cx="120" cy="222" r="58" fill="#0a0a0a" />
-        <circle cx="120" cy="222" r="48" fill="url(#bsRim)" />
-        <circle cx="120" cy="222" r="22" fill="#27272A" />
-        <g stroke="#52525B" strokeWidth="3" strokeLinecap="round">
-          <line x1="120" y1="178" x2="120" y2="266" />
-          <line x1="82"  y1="200" x2="158" y2="244" />
-          <line x1="82"  y1="244" x2="158" y2="200" />
+        <rect x="290" y="158" width="42" height="9" rx="3" fill={primary} />
+        <rect x="290" y="158" width="42" height="9" rx="3" fill="none" stroke="#0A0A0A" strokeWidth="0.6" />
+        <circle cx="290" cy="162.5" r="5" fill="#A1A1AA" />
+        <circle cx="332" cy="162.5" r="5" fill="#A1A1AA" />
+        {/* Spring coils */}
+        <g stroke="#9C2E00" strokeWidth="0.7" opacity="0.55">
+          <line x1="296" y1="159" x2="326" y2="159" />
+          <line x1="296" y1="161" x2="326" y2="161" />
+          <line x1="296" y1="163" x2="326" y2="163" />
+          <line x1="296" y1="165" x2="326" y2="165" />
         </g>
-        {/* Front brake disc detail */}
-        <circle cx="120" cy="222" r="44" fill="none" stroke="#71717A" strokeWidth="2" opacity="0.5" />
-        {/* Brake caliper */}
-        <rect x="148" y="188" width="14" height="20" rx="3" fill="#FF5E1F" opacity="0.85" />
       </g>
 
-      {/* ─── Front forks (USD inverted — gold sliders) ─── */}
+      {/* ─── ENGINE BLOCK (compact 4-cyl, tucked low) ─── */}
       <g>
         <path
-          d="M 116 222 L 156 130 L 168 130 L 130 222 Z"
-          fill="#D4A745"
-          stroke="#7C5A1B"
-          strokeWidth="0.6"
-        />
-        <path
-          d="M 158 132 L 162 88 L 172 88 L 168 132 Z"
-          fill="#71717A"
-        />
-        {/* Triple clamp */}
-        <rect x="156" y="78" width="22" height="14" rx="2" fill="#27272A" />
-      </g>
-
-      {/* ─── Rear shock (visible through swingarm gap, F4-style horizontal) ─── */}
-      <rect x="404" y="178" width="64" height="10" rx="3" fill="#FF5E1F" opacity="0.9" />
-      <rect x="404" y="178" width="64" height="10" rx="3" fill="none" stroke="#0a0a0a" strokeWidth="1" />
-      <circle cx="404" cy="183" r="6" fill="#A1A1AA" />
-      <circle cx="468" cy="183" r="6" fill="#A1A1AA" />
-
-      {/* ─── Engine block (compact inline-4, signature F4 quad-stacked exhaust) ─── */}
-      <g>
-        {/* Crankcase */}
-        <path
-          d="M 240 210 L 240 178 Q 250 168 268 168 L 380 168 Q 398 170 402 188 L 402 220 Q 398 232 380 232 L 268 232 Q 248 232 240 220 Z"
+          d="M 290 200 L 290 175 Q 296 165 312 165 L 410 165 Q 432 168 438 188 L 438 218 Q 432 232 410 232 L 312 232 Q 294 232 290 218 Z"
           fill="#1F2937"
           stroke="#0F172A"
           strokeWidth="1"
         />
         {/* Cylinder fins */}
-        <g stroke="#404040" strokeWidth="0.8">
-          <line x1="270" y1="174" x2="270" y2="200" />
-          <line x1="290" y1="174" x2="290" y2="200" />
-          <line x1="310" y1="174" x2="310" y2="200" />
-          <line x1="330" y1="174" x2="330" y2="200" />
-          <line x1="350" y1="174" x2="350" y2="200" />
-          <line x1="370" y1="174" x2="370" y2="200" />
+        <g stroke="#404040" strokeWidth="0.7" opacity="0.85">
+          <line x1="312" y1="170" x2="312" y2="200" />
+          <line x1="328" y1="170" x2="328" y2="200" />
+          <line x1="344" y1="170" x2="344" y2="200" />
+          <line x1="360" y1="170" x2="360" y2="200" />
+          <line x1="376" y1="170" x2="376" y2="200" />
+          <line x1="392" y1="170" x2="392" y2="200" />
+          <line x1="408" y1="170" x2="408" y2="200" />
         </g>
-        {/* Engine highlight stripe */}
-        <path d="M 250 174 L 396 174" stroke="#FF5E1F" strokeWidth="1.2" opacity="0.55" />
+        {/* Highlight stripe along cam-cover */}
+        <path d="M 296 170 L 432 170" stroke={primary} strokeWidth="1.4" opacity="0.55" />
+        {/* Sprocket cover on the engine's left side */}
+        <circle cx="318" cy="222" r="9" fill="#27272A" stroke="#0A0A0A" strokeWidth="0.6" />
       </g>
 
-      {/* ─── Trellis frame (visible Italian-style tubular frame) ─── */}
-      <g stroke="#9CA3AF" strokeWidth="3.2" strokeLinecap="round" fill="none" opacity="0.85">
-        <path d="M 178 90 L 250 130" />
-        <path d="M 250 130 L 250 175" />
-        <path d="M 178 90 L 250 158" />
-        <path d="M 250 130 L 320 130" />
-        <path d="M 320 130 L 320 168" />
-        <path d="M 250 158 L 320 168" />
+      {/* ─── CHAIN line ─── */}
+      <path
+        d="M 158 230 L 318 230"
+        stroke="#FF5E1F"
+        strokeWidth="1.5"
+        strokeDasharray="5 3"
+        opacity="0.65"
+      />
+
+      {/* ─── TRELLIS FRAME (silver tubes, F4 signature) ─── */}
+      <g stroke="#A1A1AA" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.85">
+        {/* Top rail from steering head → tank */}
+        <path d="M 506 100 L 432 130" />
+        {/* Diagonal trellis tubes */}
+        <path d="M 506 100 L 446 158" />
+        <path d="M 478 122 L 432 168" />
+        <path d="M 506 100 L 410 162" />
+        {/* Lower rail to swingarm pivot */}
+        <path d="M 432 168 L 320 218" />
+        <path d="M 446 158 L 320 218" />
       </g>
 
-      {/* ─── Quad-tip underseat exhaust (MV F4 signature) ─── */}
+      {/* ─── FOUR-TIP UNDERSEAT EXHAUST (MV F4 signature) ─── */}
       <g>
+        {/* Heat-shield tunnel running back from engine */}
         <path
-          d="M 396 196 Q 440 192 488 198 L 540 200 L 568 196 L 568 220 L 540 224 L 488 222 Q 440 216 396 220 Z"
+          d="M 250 198 Q 200 196 158 200 L 130 196 L 124 218 L 158 222 Q 200 220 250 222 Z"
           fill="url(#bsExhaust)"
-          stroke="#0a0a0a"
+          stroke="#0A0A0A"
           strokeWidth="0.6"
         />
-        {/* Four-tip exit detail */}
-        <g fill="#0a0a0a">
-          <circle cx="566" cy="200" r="3" />
-          <circle cx="566" cy="208" r="3" />
-          <circle cx="566" cy="216" r="3" />
-          <circle cx="566" cy="224" r="3" />
+        {/* Inner four-tip outlet — two stacked rows of 2 */}
+        <g>
+          <circle cx="126" cy="201" r="3.2" fill="#0A0A0A" />
+          <circle cx="126" cy="210" r="3.2" fill="#0A0A0A" />
+          <circle cx="118" cy="201" r="3.2" fill="#0A0A0A" />
+          <circle cx="118" cy="210" r="3.2" fill="#0A0A0A" />
         </g>
-        {/* Heat shield highlight */}
-        <path d="M 410 196 L 555 200" stroke="#FFAF60" strokeWidth="0.8" opacity="0.6" />
+        {/* Faint metallic highlight along the heat-shield */}
+        <path d="M 140 200 L 244 202" stroke="#FFAF60" strokeWidth="0.6" opacity="0.5" />
       </g>
 
-      {/* ─── Body / fuel tank (sculpted, with deep knee cut-outs) ─── */}
+      {/* ─── FUEL TANK (sculpted with knee cutouts) ─── */}
       <path
-        d="M 232 168
-           Q 246 122 286 110
-           L 372 102
-           Q 416 100 432 124
-           L 446 158
-           Q 444 170 432 174
-           L 256 174
-           Q 240 174 232 168 Z"
+        d="M 432 168
+           L 446 130
+           Q 460 105 502 100
+           L 545 102
+           Q 556 105 558 122
+           L 555 158
+           Q 548 168 532 170
+           L 442 170
+           Q 434 170 432 168 Z"
         fill="url(#bsBody)"
         stroke="#7A1F00"
         strokeWidth="0.8"
       />
-      {/* Tank highlight */}
+      {/* Tank knee-cutout shadow */}
       <path
-        d="M 252 130 Q 290 116 360 112 Q 410 112 430 130"
+        d="M 458 138 Q 480 124 530 122"
         stroke={secondary}
         strokeWidth="2"
         fill="none"
         opacity="0.85"
       />
       {/* Filler cap */}
-      <circle cx="346" cy="120" r="6" fill="#27272A" stroke="#0a0a0a" strokeWidth="0.8" />
-      <circle cx="346" cy="120" r="3" fill="#52525B" />
+      <circle cx="500" cy="115" r="6" fill="#27272A" stroke="#0A0A0A" strokeWidth="0.8" />
+      <circle cx="500" cy="115" r="3" fill="#52525B" />
 
-      {/* ─── Pilot seat + tail hump (raised F4 hump silhouette) ─── */}
+      {/* ─── PILOT SEAT + DRAMATIC TAIL HUMP ─── */}
       <path
-        d="M 432 124
-           Q 478 116 514 116
-           Q 562 116 580 138
-           L 588 168
-           Q 580 180 560 180
-           L 466 180
-           Q 444 178 432 168 Z"
+        d="M 340 124
+           Q 342 96 372 80
+           Q 408 70 444 76
+           Q 460 80 462 110
+           L 460 148
+           Q 458 168 442 170
+           L 360 170
+           Q 344 168 340 152 Z"
+        fill="url(#bsBodyDark)"
+        stroke="#7A1F00"
+        strokeWidth="0.8"
+      />
+      {/* Tall tail-cowl peak — the F4's trademark sharp dorsal fin */}
+      <path
+        d="M 280 140
+           Q 285 84 332 70
+           Q 380 60 412 70
+           L 412 80
+           Q 380 76 348 88
+           Q 312 102 296 144 Z"
         fill="url(#bsBody)"
         stroke="#7A1F00"
         strokeWidth="0.8"
       />
-      {/* Seat split line */}
+      {/* Subtle shadow gusset on the tail */}
       <path
-        d="M 446 156 Q 500 152 580 156"
-        stroke="#0a0a0a"
+        d="M 296 144 L 340 124 L 340 168 L 280 168 Z"
+        fill={primary}
+        opacity="0.35"
+      />
+      {/* Tail brake-light slot */}
+      <path
+        d="M 282 158 L 296 144 L 304 158 Z"
+        fill="#FCA5A5"
+        opacity="0.85"
+      />
+
+      {/* Seat split-line */}
+      <path
+        d="M 358 144 Q 410 138 458 142"
+        stroke="#0A0A0A"
         strokeWidth="1.2"
         fill="none"
         opacity="0.85"
       />
-      {/* Tail tuck — racing single-seat hump */}
-      <path
-        d="M 524 116 Q 580 110 596 138 L 600 174 L 580 174"
-        fill={primary}
-        opacity="0.9"
-      />
-      {/* Tail-light slot */}
-      <path
-        d="M 588 168 L 600 174 L 600 178 L 586 175 Z"
-        fill="#FCA5A5"
-        opacity="0.8"
-      />
 
-      {/* ─── Front fairing (sharp angular MV nose) ─── */}
+      {/* ─── FRONT FAIRING (sharp wedge) ─── */}
       <path
-        d="M 178 90
-           Q 192 60 218 56
-           L 252 60
-           Q 274 64 282 86
-           L 286 130
-           Q 282 162 254 168
-           L 232 168
-           Q 218 162 214 144
-           L 198 110 Z"
-        fill="url(#bsFairing)"
+        d="M 545 102
+           Q 565 86 596 84
+           L 632 88
+           Q 658 96 666 122
+           L 660 168
+           Q 656 184 638 188
+           L 600 188
+           Q 580 184 572 168
+           L 558 122 Z"
+        fill="url(#bsBody)"
         stroke="#7A1F00"
         strokeWidth="0.8"
       />
-      {/* Side air intake slot */}
+      {/* Side air intake louvre */}
       <path
-        d="M 232 110 Q 250 108 268 116 L 268 132 Q 248 130 232 134 Z"
-        fill="#0a0a0a"
+        d="M 600 138 Q 620 134 638 142 L 638 158 Q 618 156 600 162 Z"
+        fill="#0A0A0A"
+        opacity="0.85"
+      />
+      {/* Black accent stripe along the fairing — F4 signature */}
+      <path
+        d="M 558 122 L 580 130 L 596 144 L 612 168"
+        stroke="#0A0A0A"
+        strokeWidth="3"
+        fill="none"
         opacity="0.85"
       />
 
-      {/* ─── Twin stacked headlights (MV signature) ─── */}
+      {/* ─── TWIN STACKED HEADLIGHTS (deep-set in nose) ─── */}
       <g>
-        <ellipse cx="206" cy="84" rx="14" ry="9" fill="url(#bsHeadlight)" />
-        <ellipse cx="206" cy="100" rx="14" ry="9" fill="url(#bsHeadlight)" opacity="0.85" />
-        <ellipse cx="206" cy="84" rx="14" ry="9" fill="none" stroke="#0a0a0a" strokeWidth="1" />
-        <ellipse cx="206" cy="100" rx="14" ry="9" fill="none" stroke="#0a0a0a" strokeWidth="1" />
+        <ellipse cx="638" cy="116" rx="14" ry="9" fill="url(#bsHeadlight)" />
+        <ellipse cx="638" cy="132" rx="14" ry="9" fill="url(#bsHeadlight)" opacity="0.85" />
+        <ellipse cx="638" cy="116" rx="14" ry="9" fill="none" stroke="#0A0A0A" strokeWidth="1" />
+        <ellipse cx="638" cy="132" rx="14" ry="9" fill="none" stroke="#0A0A0A" strokeWidth="1" />
       </g>
 
-      {/* ─── Windscreen ─── */}
+      {/* ─── WINDSCREEN ─── */}
       <path
-        d="M 226 60 L 270 56 Q 282 56 286 78 L 282 94 Q 256 80 226 76 Z"
-        fill="url(#bsWindscreen)"
+        d="M 596 84
+           Q 622 76 642 84
+           L 656 102
+           Q 638 96 614 92
+           Q 600 90 596 96 Z"
+        fill="url(#bsScreen)"
         stroke="#0F172A"
         strokeWidth="0.6"
       />
-      {/* Windscreen highlight */}
       <path
-        d="M 232 64 L 268 60"
+        d="M 600 88 Q 620 84 642 90"
         stroke="#9CA3AF"
-        strokeWidth="0.8"
+        strokeWidth="0.7"
         opacity="0.7"
       />
 
-      {/* ─── Clip-on bars peeking through ─── */}
-      <line x1="244" y1="92" x2="262" y2="80" stroke="#27272A" strokeWidth="3" strokeLinecap="round" />
-
-      {/* ─── Mirror stalks (small details) ─── */}
+      {/* ─── MIRROR STALK ─── */}
       <path
-        d="M 250 70 Q 240 56 224 56"
+        d="M 614 90 Q 628 76 644 76"
         stroke="#27272A"
-        strokeWidth="2"
+        strokeWidth="2.5"
         fill="none"
       />
-      <ellipse cx="222" cy="56" rx="6" ry="3" fill="#0a0a0a" />
+      <ellipse cx="646" cy="76" rx="6" ry="3" fill="#0A0A0A" />
 
-      {/* ─── Footpeg + rearset ─── */}
-      <line x1="412" y1="220" x2="426" y2="240" stroke="#27272A" strokeWidth="3" strokeLinecap="round" />
-      <circle cx="426" cy="240" r="3" fill="#FF5E1F" />
+      {/* ─── CLIP-ON BARS peeking through ─── */}
+      <line x1="566" y1="108" x2="586" y2="98" stroke="#27272A" strokeWidth="3" strokeLinecap="round" />
 
-      {/* Number plate / racing dot — adds Italian race-bike charm */}
-      <circle cx="540" cy="146" r="14" fill="#0a0a0a" stroke={secondary} strokeWidth="1.5" />
+      {/* ─── FRONT FORK (USD inverted, gold sliders) ─── */}
+      <g>
+        {/* Outer slider */}
+        <path
+          d="M 614 168 L 588 230 L 600 230 L 626 168 Z"
+          fill="url(#bsFork)"
+          stroke="#7C5A1B"
+          strokeWidth="0.6"
+        />
+        {/* Inner stanchion (chrome upper) */}
+        <path
+          d="M 612 168 L 610 110 L 622 110 L 624 168 Z"
+          fill="#9CA3AF"
+        />
+        {/* Triple clamp */}
+        <rect x="606" y="100" width="22" height="14" rx="2" fill="#27272A" />
+        {/* Steering damper detail (small horizontal bar) */}
+        <rect x="608" y="118" width="22" height="3" rx="1" fill="#52525B" />
+      </g>
+
+      {/* ─── FRONT WHEEL (right side) — 5-spoke Y pattern, BIG ─── */}
+      <g>
+        <circle cx="620" cy="225" r="62" fill="#0A0A0A" />
+        <circle cx="620" cy="225" r="60" fill="none" stroke="#DC2626" strokeWidth="0.8" opacity="0.55" />
+        <circle cx="620" cy="225" r="48" fill="url(#bsWheel)" />
+        <circle cx="620" cy="225" r="46" fill="#0A0A0A" />
+        <circle cx="620" cy="225" r="40" fill="url(#bsWheel)" />
+        <circle cx="620" cy="225" r="14" fill="#27272A" />
+        <circle cx="620" cy="225" r="6"  fill="#52525B" />
+        <g stroke="#52525B" strokeWidth="3" strokeLinecap="round" fill="none">
+          <path d="M 620 225 L 620 183" />
+          <path d="M 620 225 L 660 200" />
+          <path d="M 620 225 L 645 263" />
+          <path d="M 620 225 L 595 263" />
+          <path d="M 620 225 L 580 200" />
+        </g>
+        {/* Brake disc (twin-disc visible) */}
+        <circle cx="620" cy="225" r="44" fill="none" stroke="#71717A" strokeWidth="2" opacity="0.55" />
+        {/* Brembo-style red caliper */}
+        <rect x="588" y="195" width="14" height="22" rx="3" fill="#DC2626" stroke="#0A0A0A" strokeWidth="0.5" />
+        <rect x="589" y="200" width="12" height="3" rx="1" fill="#7F1D1D" />
+        <rect x="589" y="208" width="12" height="3" rx="1" fill="#7F1D1D" />
+      </g>
+
+      {/* ─── FOOTPEG + REARSET (mid-bike, hint of rider position) ─── */}
+      <line x1="376" y1="232" x2="362" y2="252" stroke="#27272A" strokeWidth="3" strokeLinecap="round" />
+      <circle cx="362" cy="252" r="3" fill={primary} />
+
+      {/* ─── F4 number-plate dot on the tail (Italian race-bike charm) ─── */}
+      <circle cx="376" cy="118" r="14" fill="#0A0A0A" stroke={secondary} strokeWidth="1.5" />
       <text
-        x="540"
-        y="151"
+        x="376"
+        y="123"
         textAnchor="middle"
         fontFamily="ui-monospace, monospace"
-        fontSize="12"
+        fontSize="11"
         fontWeight="800"
         fill={secondary}
       >
