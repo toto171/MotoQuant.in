@@ -125,15 +125,15 @@ function SpeedTrace({ currentV, currentT, progress }) {
   const dotY = 200 - (currentV / TRAP_KMH) * 170;
 
   return (
-    <div className="relative h-[260px] sm:h-[320px] lg:h-[400px] rounded-2xl border border-white/10 bg-ink-1/60 overflow-hidden">
+    <div className="relative h-full min-h-[240px] sm:min-h-[300px] rounded-2xl border border-white/10 bg-ink-1/60 overflow-hidden">
       <span className="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-brand-orange" />
       <span className="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-brand-orange" />
 
-      <div className="absolute top-3 left-12 right-12 flex justify-between items-baseline">
-        <div className="font-mono text-[10px] tracking-widest text-brand-orange/85">
+      <div className="absolute top-3 left-10 right-10 sm:left-12 sm:right-12 flex justify-between items-baseline gap-2">
+        <div className="font-mono text-[9px] sm:text-[10px] tracking-widest text-brand-orange/85 truncate">
           v(t) · NINJA H2R · 1/4 mile
         </div>
-        <div className="flex items-center gap-2 font-mono text-[10px] tracking-widest text-brand-accent">
+        <div className="flex items-center gap-1.5 font-mono text-[9px] sm:text-[10px] tracking-widest text-brand-accent shrink-0">
           <span className="w-1.5 h-1.5 rounded-full bg-brand-accent animate-live-pulse" />
           LIVE
         </div>
@@ -190,15 +190,17 @@ function SpeedTrace({ currentV, currentT, progress }) {
         <line x1={dotX} y1={dotY} x2={dotX} y2="200" stroke="#FF5E1F" strokeDasharray="3 4" strokeWidth="1" opacity="0.55" />
       </svg>
 
-      <div className="absolute bottom-3 left-12 right-12 flex justify-between font-mono text-[9px] text-white/40 tracking-widest">
+      <div className="absolute bottom-2 left-10 right-10 sm:left-12 sm:right-12 flex justify-between font-mono text-[8px] sm:text-[9px] text-white/40 tracking-widest tabular-nums">
         <span>0.0s</span>
-        <span>2.4s</span>
+        <span className="hidden xs:inline sm:inline">2.4s</span>
         <span>4.8s</span>
-        <span>7.2s</span>
+        <span className="hidden xs:inline sm:inline">7.2s</span>
         <span>9.62s</span>
       </div>
 
-      <div className="absolute bottom-3 left-3 font-mono text-[10px] tracking-widest text-brand-orange/85">
+      {/* REC label hidden on mobile (was overlapping the time-axis labels);
+          shown only on >=sm where there is room. */}
+      <div className="hidden sm:block absolute bottom-2 left-3 font-mono text-[9px] tracking-widest text-brand-orange/85 pointer-events-none">
         REC · 60FPS · 0.001s ε
       </div>
     </div>
@@ -262,7 +264,7 @@ export default function TelemetryHUD() {
       className="relative bg-gradient-to-b from-black via-ink-1 to-black border-t border-brand-orange/10"
       style={{ height: 'clamp(180vh, 220vh, 280vh)' }}
     >
-      <div className="sticky top-0 h-screen overflow-hidden flex flex-col">
+      <div className="sticky top-0 h-[100svh] overflow-hidden flex flex-col">
         <div className="px-6 sm:px-10 lg:px-16 pt-20 sm:pt-24 pb-4 sm:pb-6">
           <div className="max-w-7xl mx-auto">
             <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-brand-orange mb-3">
@@ -275,7 +277,7 @@ export default function TelemetryHUD() {
         </div>
 
         <div className="flex-1 px-6 sm:px-10 lg:px-16 pb-10 overflow-hidden">
-          <div className="max-w-7xl mx-auto h-full grid lg:grid-cols-[1fr_460px] gap-6 sm:gap-8 items-start lg:items-center">
+          <div className="max-w-7xl mx-auto h-full grid grid-rows-[1fr_auto] lg:grid-rows-1 lg:grid-cols-[1fr_460px] gap-4 sm:gap-6 lg:gap-8 items-stretch lg:items-center">
             <SpeedTrace currentV={spd} currentT={et} progress={progress} />
 
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
