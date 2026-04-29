@@ -175,8 +175,12 @@ export default function SimulatorWidget() {
     setSimMode(mode);
     setLoading(true);
     setError(null);
-    if (mode === 'quarter') setResult(null);
-    else setTopSpeedResult(null);
+    // Clear BOTH results when starting a new sim. Without this, the
+    // previous mode's panel was still mounted briefly during the loading
+    // state — and on slow networks the user could see the stale panel
+    // sitting next to the loading dots of the new mode for seconds.
+    setResult(null);
+    setTopSpeedResult(null);
     track('sim_run_start', {
       surface: 'landing_widget',
       mode,
@@ -388,7 +392,12 @@ export default function SimulatorWidget() {
             min: -10,
             max: 30,
             format: v => `${v > 0 ? '+' : ''}${v}%`,
-            highlight: powerBoost > 0,
+            // Semantic colour: positive boost = green (faster ET),
+            // negative = red (slower), zero = neutral white.
+            valueColor:
+              powerBoost > 0 ? 'text-[#00FFB2]'
+              : powerBoost < 0 ? 'text-[#FF6B6B]'
+              : 'text-white',
           },
           {
             label: 'Mass change',
@@ -397,7 +406,13 @@ export default function SimulatorWidget() {
             min: -15,
             max: 15,
             format: v => `${v > 0 ? '+' : ''}${v} kg`,
-            highlight: massChange !== 0,
+            // Mass added = red (slower), mass reduced = green (faster),
+            // zero = neutral. Inverse of power-boost direction (since
+            // adding kg hurts ET while adding hp helps it).
+            valueColor:
+              massChange > 0 ? 'text-[#FF6B6B]'
+              : massChange < 0 ? 'text-[#00FFB2]'
+              : 'text-white',
           },
         ].map((slider, idx) => (
           <div key={idx} className="space-y-2">
@@ -414,9 +429,7 @@ export default function SimulatorWidget() {
                 className="flex-1 h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-[#FF5E1F] slider-thumb"
               />
             </div>
-            <div className={`text-sm font-mono text-right transition-colors ${
-              slider.highlight ? 'text-[#00FFB2]' : 'text-white'
-            }`}>
+            <div className={`text-sm font-mono text-right transition-colors ${slider.valueColor ?? 'text-white'}`}>
               {slider.format(slider.value)}
             </div>
           </div>
@@ -578,7 +591,7 @@ export default function SimulatorWidget() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {result && (
+        {simMode === 'quarter' && result && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
