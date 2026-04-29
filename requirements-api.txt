@@ -31,3 +31,9 @@ razorpay>=1.4.0
 # callers get a typed LLMNotConfiguredError.
 anthropic>=0.34.0
 openai>=1.40.0
+
+# Optional production observability — error tracking + performance traces.
+# Soft-dep: motoquant.observability.init_sentry() no-ops if SENTRY_DSN env
+# var is not set. Enable on Railway by setting SENTRY_DSN to your project's
+# DSN URL (https://...sentry.io/...).
+sentry-sdk[fastapi]>=2.0.0

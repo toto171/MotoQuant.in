@@ -68,6 +68,11 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+# Optional Sentry error tracking. No-ops if SENTRY_DSN is not set OR if
+# sentry-sdk isn't installed. See motoquant.observability for env knobs.
+from motoquant.observability import init_sentry as _init_sentry  # noqa: E402
+_init_sentry(app_name="motoquant-api")
+
 # CORS -- allow the Next.js frontend on any origin during early development
 app.add_middleware(
     CORSMiddleware,

@@ -61,7 +61,8 @@ export default function ChatPanel({ apiUrl }) {
   }
 
   function onKeyDown(e) {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    // Enter submits; Shift+Enter inserts a newline (standard chat UX).
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
       e.preventDefault();
       runChat();
     }
@@ -103,7 +104,7 @@ export default function ChatPanel({ apiUrl }) {
       </div>
 
       <p className="text-[10px] text-white/30">
-        Ctrl+Enter to submit
+        Enter to submit · Shift+Enter for newline
       </p>
 
       {/* Example chips — shown before first query */}

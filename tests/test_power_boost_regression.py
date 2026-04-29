@@ -130,20 +130,41 @@ class TestPowerBoostIsLive(unittest.TestCase):
 
 
 class TestReferenceBaselines(unittest.TestCase):
+    """
+    Pinned baselines — golden-file equivalent for the three reference bikes.
+
+    Tolerance is **0.001s** (NOT 0.02s) because per CLAUDE.md every recent
+    physics-touching commit has preserved K5/R1/Hayabusa to 4 decimals exactly.
+    Any future drift past 1ms is structurally interesting and should fail CI
+    immediately so we catch the regression at PR-time, not at the next manual
+    sweep.
+
+    If you intentionally re-baseline (e.g. after a deliberate physics rewrite),
+    update the constants below in the SAME commit and document the rationale
+    in CLAUDE.md's session entry. Never widen the delta to "make the test pass".
+    """
+    K5_BASELINE_S       = 10.0334
+    R1_BASELINE_S       = 10.2859
+    HAYABUSA_BASELINE_S = 10.4712
+    BASELINE_TOLERANCE  = 0.001  # 1 ms — sim is exact to 4 decimals
+
     def test_k5(self):
         from motoquant.defaults import gsxr1000_k5
         et = motoquant.MotoQuantEngine(gsxr1000_k5()).run().time_quarter
-        self.assertAlmostEqual(et, 10.033, delta=0.02)
+        self.assertAlmostEqual(et, self.K5_BASELINE_S, delta=self.BASELINE_TOLERANCE,
+                               msg=f"K5 drifted: sim={et:.4f}s vs pinned {self.K5_BASELINE_S}s")
 
     def test_r1(self):
         from motoquant.defaults import yzfr1_4c8
         et = motoquant.MotoQuantEngine(yzfr1_4c8()).run().time_quarter
-        self.assertAlmostEqual(et, 10.286, delta=0.02)
+        self.assertAlmostEqual(et, self.R1_BASELINE_S, delta=self.BASELINE_TOLERANCE,
+                               msg=f"R1 drifted: sim={et:.4f}s vs pinned {self.R1_BASELINE_S}s")
 
     def test_hayabusa(self):
         from motoquant.defaults import hayabusa_gen1
         et = motoquant.MotoQuantEngine(hayabusa_gen1()).run().time_quarter
-        self.assertAlmostEqual(et, 10.471, delta=0.02)
+        self.assertAlmostEqual(et, self.HAYABUSA_BASELINE_S, delta=self.BASELINE_TOLERANCE,
+                               msg=f"Hayabusa drifted: sim={et:.4f}s vs pinned {self.HAYABUSA_BASELINE_S}s")
 
 
 if __name__ == "__main__":

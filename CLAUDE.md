@@ -694,6 +694,67 @@ python -m motoquant.run parts
 
 ---
 
+## TOOLKIT REFERENCE (April 29, 2026)
+
+The full curated tooling shortlist lives at `docs/motoquant_toolkit.md` in the repo (originally drafted as a strategic libraries/repos pass for the project). The classifications below are the project-specific filtering — ★ = adopt this quarter; ✓ = already in the codebase; ✗ = explicitly rejected. Re-read this section before starting any "should I use library X?" investigation — most are already decided.
+
+### Already in the stack (✓ — don't re-shop)
+- **Pacejka tire model** — full B/C/D/E + thermal coefficients across 232 tires. OpenTirePython is a *reference*, not a dependency.
+- **BoTorch** — wired into `motoquant/analysis/bayesian_opt.py` (Phase 4).
+- **XGBoost + DNN surrogate** — `surrogate.pkl` (4.4 MB) + `surrogate_dnn.pkl` (10.8 MB).
+- **scipy / numpy / sklearn / SALib** — physics solver hot path + Sobol sensitivity.
+- **SAE J1349 dyno correction** — implemented in `motoquant/calibration/dyno.py`.
+- **Pydantic v2** — via FastAPI, all DTOs.
+- **Tailwind + React Query (TanStack Query)** — desktop and web frontends.
+- **anthropic-skills (docx/pdf/xlsx/pptx)** — for customer-facing reports.
+- **anime.js** — wired into the landing-page H2R physics dial hero (`web/components/PhysicsDial.js`) for SVG draw-on + needle sweep. Already in `web/package.json` as `animejs ^3.2.2`.
+- **ruff** — already configured (`docs/RUFF_SETUP.md`); runs as part of CI.
+
+### Adopt this quarter (★)
+- **pytest-regressions** — golden-file snapshots for the 334-bike sweep. The K5/R1/Hayabusa baselines are already de-facto golden files; formalising them stops physics drift in CI rather than at the next manual sweep. *Highest ROI item on this list.*
+- **Hypothesis** — property-based tests for monotonicity invariants (ET decreases with power; mass; Cd reduction). Catches the class of bug where `power_boost_pct` was a dead knob (April 24 AM regression).
+- **Numba `@njit`** — JIT the inner RK4 loop in `motoquant/physics.py`. The 334-bike chunked sweep takes ~30 s/chunk; Numba routinely gets 50–100× on numpy-heavy time-step loops, which collapses sweep wall-time and makes per-PR CI runs cheap.
+- **Optuna** — for offline tuning of the per-cluster `CategoryProfile` knobs in `motoquant/category_profiles.py` against the weighted-benchmark cost function. Faster iteration than the manual 1.00→0.65 parasitic-mult tweaks done by hand on April 30.
+- **filterpy (Kalman)** — gate behind real Dragy upload volume; once users start submitting timeslips, GPS noise smoothing meaningfully improves the calibrator's signal-to-noise.
+- **Sentry** — production error tracking on Railway + Vercel. Free tier is plenty at current traffic.
+- **MotoQuant MCP server** — wrap the existing `/api/*` surface. Phase 6 distribution channel; "ask Claude what 16/45 vs 16/47 does to your 60-foot" is a marketing demo that writes itself. Weekend project given the OpenAPI spec already exists at `/docs`.
+- **MotoQuant skill for Claude** — teach Claude the bike spec schema + glossary (60-foot, ET, trap, two-step, anti-squat, slipper, expansion chamber). Use `skill-creator` to build it; lives at `skills/motoquant.skill/`.
+
+### Adopt later (Phase 6 / scale gates)
+- **DVC** — version-control the 334-bike spec dataset + benchmark CSVs. Worth it once benchmark counts cross 200+ and "v1.4.2 was validated against bike-set@a3f9c2" reproducibility matters.
+- **PostHog / Logfire** — product analytics + tracing. Wait for paid users before instrumenting.
+- **Polars / pandera** — only if pandas shows up in the hot path. Currently it doesn't (sweep is pure numpy).
+- **Ax** — wraps BoTorch with multi-objective + constraint bookkeeping. Adopt when "optimize for ET subject to budget ≤ ₹X and street-legal=true" becomes a product feature.
+- **Alembic** — needed for the SQLite → PostgreSQL migration if/when Phase 6 cloud sync goes live.
+- **shadcn/ui** — desktop is on plain Tailwind; shadcn drop-in would speed up the remaining HistoryPage / SettingsPage surfaces. Low urgency.
+
+### Project-specific additions not in the original toolkit
+- **uv** — modern fast Python package manager; drop-in for pip. Adopt alongside Sentry rollout.
+- **Playwright** — end-to-end browser tests against `motoquant.in`. Catches the class of regression where the FastAPI ↔ Next.js rewrite chain breaks silently (the April 28 chat panel deploy was a near miss).
+- **Razorpay test mode + webhook simulator** — required gating for the Phase 6 subscription launch. Currently unblocked-but-untested per the S5 carry-forward list.
+- **k6 / Locust** — load-test the FastAPI surface before public launch. Railway's free-tier instance degrades quickly under concurrent surrogate calls.
+- **Lighthouse CI / Vercel Speed Insights** — Core Web Vitals tracking on `motoquant.in`. SEO and conversion rate both depend on this; Vercel's built-in is already free.
+- **Codecov (or coverage.py + Github Actions artifact)** — currently no test-coverage signal in CI; the 739+ test count is impressive but says nothing about which physics branches are actually exercised.
+
+### Discard (✗)
+- **asammdf / cantools / python-can** — pro-team CAN bus ingest is too far out for the Indian drag scene; Dragy + dyno CSVs cover ~99 % of the user-facing telemetry. Revisit only on a B2B Pro Studio request.
+- **Cantera** — combustion-kinetics overkill; empirical torque maps + dyno injection cover the use case end-to-end.
+- **Litestar** — no migration value over FastAPI.
+- **Heavyweight CFD (OpenFOAM / SU2)** — Cd·A is a 1-DOF lookup; user-measured Dragy data closes the gap better than any wind-tunnel sim.
+- **MATLAB tire toolboxes (mfeval, etc.)** — Python-native stack policy; books and papers only as references.
+- **engine-sim (AngeTheGreat)** — UX reference at most; do not use for physics per its own README.
+- **The "LLM council" multi-model voting pattern** — agreed with toolkit author; the API spend and workflow drag are not justified for a physics-heavy product where the right answer is usually deterministic.
+
+### Suggested order of attack (project-specific)
+1. **pytest-regressions over the 334-bike sweep** — formalise the implicit baseline contract. ★ highest ROI; protects every future physics change.
+2. **Numba JIT on the RK4 loop** — collapses sweep wall-time so #1's CI run is cheap.
+3. **Optuna over `CategoryProfile`** — automate the per-cluster tuning loop that's currently manual.
+4. **Sentry on Railway + Vercel** — catch the 500s and edge errors silently happening in production right now.
+5. **Ship the MCP server** — Phase 6 distribution channel; weekend-scale work given the OpenAPI surface.
+6. **Write `motoquant.skill`** — instant Claude domain fluency for every future session here.
+
+---
+
 ## GEMINI ROADMAP REVIEW NOTES (April 2026)
 
 Gemini provided a 6-phase strategic roadmap. Vetted assessment already incorporated above. Summary of what was accepted/rejected:

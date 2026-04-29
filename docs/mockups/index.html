@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MotoQuant — three directions</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --fg: #fafafa;
+    --muted: #8a8a8a;
+    --orange: #ff6b1a;
+    --green: #22c55e;
+    --line: #1f1f1f;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; }
+  body { min-height: 100vh; display: grid; place-items: center; padding: 48px 24px; }
+  .wrap { max-width: 1080px; width: 100%; }
+  header { display: flex; align-items: baseline; gap: 16px; padding-bottom: 32px; border-bottom: 1px solid var(--line); margin-bottom: 32px; }
+  header .brand { font-weight: 700; font-size: 22px; letter-spacing: -0.02em; }
+  header .brand b { color: var(--orange); }
+  header .tag { color: var(--muted); font-size: 14px; }
+  h1 { font-size: clamp(32px, 5vw, 56px); line-height: 1.05; letter-spacing: -0.03em; margin: 0 0 16px; font-weight: 800; }
+  .lede { color: var(--muted); font-size: 18px; max-width: 700px; line-height: 1.5; margin: 0 0 48px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  .card { display: block; text-decoration: none; color: inherit; padding: 28px; border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(180deg, #111 0%, #0d0d0d 100%); transition: transform 0.2s ease, border-color 0.2s ease; }
+  .card:hover { transform: translateY(-4px); border-color: var(--orange); }
+  .card .label { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--orange); border: 1px solid var(--orange); border-radius: 999px; padding: 4px 10px; margin-bottom: 16px; }
+  .card h2 { margin: 0 0 8px; font-size: 22px; letter-spacing: -0.01em; }
+  .card p { color: var(--muted); margin: 0 0 16px; font-size: 15px; line-height: 1.5; }
+  .card ul { padding-left: 18px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+  .card .open { display: inline-flex; align-items: center; gap: 6px; margin-top: 18px; color: var(--fg); font-weight: 600; font-size: 14px; }
+  .card .open::after { content: "→"; transition: transform 0.2s; }
+  .card:hover .open::after { transform: translateX(4px); }
+  footer { margin-top: 56px; color: var(--muted); font-size: 13px; text-align: center; }
+  footer code { background: #111; padding: 2px 6px; border-radius: 4px; color: var(--fg); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">MOTO<b>QUANT</b> PRO</div>
+    <div class="tag">three scroll-driven website directions</div>
+  </header>
+
+  <h1>Pick the feel.</h1>
+  <p class="lede">Three full-page mockups, each a different take on cinematic motorsport. Open each in a tab, scroll all the way through, then tell me which direction to commit to. After we pick one, I'll port it into the Next.js codebase as the new <code style="color: inherit; background: #111; padding: 2px 6px; border-radius: 4px;">web/app/page.js</code>.</p>
+
+  <div class="grid">
+    <a class="card" href="direction-a-christmas-tree.html">
+      <span class="label">Direction A</span>
+      <h2>Christmas Tree</h2>
+      <p>Drag-strip telemetry cinematic. Black canvas, signal-orange accents, HUD overlays.</p>
+      <ul>
+        <li>Christmas tree countdown lights up on scroll</li>
+        <li>Sticky telemetry section with live HUD</li>
+        <li>Stats tick up like a timeslip printer</li>
+        <li>Feels like: track-day broadcast graphic</li>
+      </ul>
+      <span class="open">Open A</span>
+    </a>
+
+    <a class="card" href="direction-b-wind-tunnel.html">
+      <span class="label">Direction B</span>
+      <h2>Wind Tunnel</h2>
+      <p>Engineering cinematic. Off-white technical aesthetic, equations and dyno curves animate in.</p>
+      <ul>
+        <li>Airflow streamlines draw on scroll</li>
+        <li>Pinned dyno curve traces in real time</li>
+        <li>8-cluster taxonomy fans out</li>
+        <li>Feels like: a research lab demo reel</li>
+      </ul>
+      <span class="open">Open B</span>
+    </a>
+
+    <a class="card" href="direction-c-launch-sequence.html">
+      <span class="label">Direction C</span>
+      <h2>Launch Sequence</h2>
+      <p>Multi-layer parallax with depth. Drag-strip horizon, bike foreground, leaderboard reveals.</p>
+      <ul>
+        <li>3-layer parallax hero with RPM sweep</li>
+        <li>Pinned live-sim demo with slider</li>
+        <li>Top-10 board slides in row by row</li>
+        <li>Feels like: high production motorsport ad</li>
+      </ul>
+      <span class="open">Open C</span>
+    </a>
+  </div>
+
+  <footer>Each file is fully standalone — no build step, no CDN deps. Open with any modern browser.</footer>
+</div>
+</body>
+</html>

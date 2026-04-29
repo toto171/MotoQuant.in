@@ -263,6 +263,20 @@ export default function HomePage() {
   });
   const heroFade = useTransform(heroProgress, [0.6, 1], [1, 0]);
 
+  // ── Dial gets its OWN scroll progress, decoupled from the hero. ──
+  // On mobile the dial stacks BELOW the tree, so by the time the gauge
+  // is on-screen the hero progress is already past 0.5 and the needle
+  // would only sweep the low-RPM portion before the hero fades out. By
+  // scoping the dial's progress to its own bounding-box passing through
+  // the viewport (`start end` → `end start`), the full 1500→14500 RPM
+  // sweep maps to "dial enters viewport bottom" → "dial exits viewport
+  // top", which works at every viewport height.
+  const dialRef = useRef(null);
+  const { scrollYProgress: dialProgress } = useScroll({
+    target: dialRef,
+    offset: ['start end', 'end start'],
+  });
+
   return (
     <div className="min-h-screen bg-black text-white antialiased">
       <SiteNav />
@@ -289,13 +303,18 @@ export default function HomePage() {
           style={{ opacity: heroFade }}
           className="relative max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 pt-8 pb-32 min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center"
         >
-          {/* Tree + dial centerpiece. Stacks on mobile, side-by-side on lg+. */}
-          <div className="relative w-full max-w-[1080px] mx-auto pointer-events-none flex flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-center lg:gap-12">
-            <div className="pointer-events-auto flex-shrink-0 scale-[0.7] sm:scale-[0.85] lg:scale-100 lg:mt-10 origin-top">
+          {/* Tree + dial centerpiece. Stacks on mobile, side-by-side on lg+.
+              The previous `scale-[0.7] sm:scale-[0.85]` on the tree wrapper
+              created a phantom-bounding-box gap below the tree on mobile —
+              the visual was shrunk 30% but the layout box stayed full size.
+              Removed; the tree's own `w-[180px] sm:w-[220px]` responsive
+              width handles small viewports cleanly. */}
+          <div className="relative w-full max-w-[1080px] mx-auto pointer-events-none flex flex-col items-center gap-6 sm:gap-8 lg:flex-row lg:items-start lg:justify-center lg:gap-12">
+            <div className="pointer-events-auto flex-shrink-0 lg:mt-10">
               <ChristmasTree />
             </div>
-            <div className="w-full max-w-[640px] flex-shrink">
-              <PhysicsDial progress={heroProgress} className="w-full h-auto" />
+            <div ref={dialRef} className="w-full max-w-[640px] flex-shrink">
+              <PhysicsDial progress={dialProgress} className="w-full h-auto" />
             </div>
           </div>
 

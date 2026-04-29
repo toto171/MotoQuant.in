@@ -343,17 +343,293 @@ def fetch_akrapovic(url: str) -> PriceResult | None:
 
 
 # ─────────────────────────────────────────────────────────────────
+# Adapter: Mototorque (mototorque.in) — biggest Indian mega-retailer
+# Shopify storefront. Used as fallback target for ~30 brands' search URLs.
+# ─────────────────────────────────────────────────────────────────
+
+def fetch_mototorque(url: str) -> PriceResult | None:
+    """Scrape a Mototorque (mototorque.in) product/search page."""
+    raw = _throttled_fetch(url)
+    if raw is None:
+        return None
+    html = raw.decode("utf-8", errors="replace")
+    # Shopify-style price-in-paise heuristic (same as Motomiu)
+    m = re.search(r'"price"\s*:\s*(\d+)', html)
+    price = None
+    if m:
+        v = float(m.group(1))
+        price = v / 100.0 if v > 100_000 else v
+        if not (50.0 <= price <= 2_000_000.0):
+            price = None
+    if price is None:
+        price = _extract_price_inr(html)
+    in_stock = _extract_in_stock(html)
+    return PriceResult(
+        price_inr=price,
+        in_stock=in_stock,
+        fetched_at=_now_utc(),
+        source_url=url,
+        retailer="Mototorque",
+    )
+
+
+# ─────────────────────────────────────────────────────────────────
+# Adapter: Grand Pitstop (grandpitstop.com) — Tier-1 Indian retailer
+# ─────────────────────────────────────────────────────────────────
+
+def fetch_grandpitstop(url: str) -> PriceResult | None:
+    """Scrape a Grand Pitstop product page (Shopify)."""
+    raw = _throttled_fetch(url)
+    if raw is None:
+        return None
+    html = raw.decode("utf-8", errors="replace")
+    m = re.search(r'"price"\s*:\s*(\d+)', html)
+    price = None
+    if m:
+        v = float(m.group(1))
+        price = v / 100.0 if v > 100_000 else v
+        if not (50.0 <= price <= 2_000_000.0):
+            price = None
+    if price is None:
+        price = _extract_price_inr(html)
+    return PriceResult(
+        price_inr=price,
+        in_stock=_extract_in_stock(html),
+        fetched_at=_now_utc(),
+        source_url=url,
+        retailer="Grand Pitstop",
+    )
+
+
+# ─────────────────────────────────────────────────────────────────
+# Adapter: Superbike Store (superbikestore.com) — Tier-1, multi-brand
+# Used for Akrapovic / Brembo / Öhlins / EBC / K-Tech queries.
+# WooCommerce storefront.
+# ─────────────────────────────────────────────────────────────────
+
+def fetch_superbikestore(url: str) -> PriceResult | None:
+    raw = _throttled_fetch(url)
+    if raw is None:
+        return None
+    html = raw.decode("utf-8", errors="replace")
+    return PriceResult(
+        price_inr=_extract_price_inr(html),
+        in_stock=_extract_in_stock(html),
+        fetched_at=_now_utc(),
+        source_url=url,
+        retailer="Superbike Store",
+    )
+
+
+# ─────────────────────────────────────────────────────────────────
+# Adapter: Race Dynamics (racedynamics.in) — ECU specialist
+# ─────────────────────────────────────────────────────────────────
+
+def fetch_racedynamics(url: str) -> PriceResult | None:
+    raw = _throttled_fetch(url)
+    if raw is None:
+        return None
+    html = raw.decode("utf-8", errors="replace")
+    return PriceResult(
+        price_inr=_extract_price_inr(html),
+        in_stock=_extract_in_stock(html),
+        fetched_at=_now_utc(),
+        source_url=url,
+        retailer="Race Dynamics",
+    )
+
+
+# ─────────────────────────────────────────────────────────────────
+# Adapter: HealTech India (healtech-india.com) — quickshifters / GIPro
+# ─────────────────────────────────────────────────────────────────
+
+def fetch_healtech_india(url: str) -> PriceResult | None:
+    raw = _throttled_fetch(url)
+    if raw is None:
+        return None
+    html = raw.decode("utf-8", errors="replace")
+    return PriceResult(
+        price_inr=_extract_price_inr(html),
+        in_stock=_extract_in_stock(html),
+        fetched_at=_now_utc(),
+        source_url=url,
+        retailer="HealTech India",
+    )
+
+
+# ─────────────────────────────────────────────────────────────────
+# Adapter: YSS India (yssindia.in) — suspension specialist
+# ─────────────────────────────────────────────────────────────────
+
+def fetch_yssindia(url: str) -> PriceResult | None:
+    raw = _throttled_fetch(url)
+    if raw is None:
+        return None
+    html = raw.decode("utf-8", errors="replace")
+    return PriceResult(
+        price_inr=_extract_price_inr(html),
+        in_stock=_extract_in_stock(html),
+        fetched_at=_now_utc(),
+        source_url=url,
+        retailer="YSS India",
+    )
+
+
+# ─────────────────────────────────────────────────────────────────
+# Adapter: Battery Bhai (batterybhai.com) — battery specialist
+# Pricing wrapped in a custom React SPA; fall back to JSON-LD.
+# ─────────────────────────────────────────────────────────────────
+
+_BATTERYBHAI_JSONLD = re.compile(
+    r'"price"\s*:\s*"?(\d+(?:\.\d{1,2})?)"?', re.IGNORECASE
+)
+
+
+def fetch_batterybhai(url: str) -> PriceResult | None:
+    raw = _throttled_fetch(url)
+    if raw is None:
+        return None
+    html = raw.decode("utf-8", errors="replace")
+    price = None
+    m = _BATTERYBHAI_JSONLD.search(html)
+    if m:
+        try:
+            v = float(m.group(1))
+            if 200.0 <= v <= 50_000.0:  # battery sanity band: ₹200-50k
+                price = v
+        except ValueError:
+            pass
+    if price is None:
+        price = _extract_price_inr(html)
+    return PriceResult(
+        price_inr=price,
+        in_stock=_extract_in_stock(html),
+        fetched_at=_now_utc(),
+        source_url=url,
+        retailer="Battery Bhai",
+    )
+
+
+# ─────────────────────────────────────────────────────────────────
+# Adapter: IndiaMart (indiamart.com) — B2B marketplace, JSON-LD heavy
+# ─────────────────────────────────────────────────────────────────
+
+_INDIAMART_PRICE = re.compile(
+    r'"(?:price|priceValue|offers"\s*:\s*\{[^\}]*"price)"\s*:\s*"?(\d+(?:\.\d{1,2})?)"?'
+)
+
+
+def fetch_indiamart(url: str) -> PriceResult | None:
+    """Scrape an IndiaMart listing for INR price (JSON-LD or HTML)."""
+    raw = _throttled_fetch(url, headers={"Accept-Language": "en-IN,en;q=0.9"})
+    if raw is None:
+        return None
+    html = raw.decode("utf-8", errors="replace")
+    price = None
+    m = _INDIAMART_PRICE.search(html)
+    if m:
+        try:
+            v = float(m.group(1))
+            if 50.0 <= v <= 2_000_000.0:
+                price = v
+        except ValueError:
+            pass
+    if price is None:
+        price = _extract_price_inr(html)
+    in_stock = _extract_in_stock(html)
+    if "ask price" in html.lower() or "get latest price" in html.lower():
+        # IndiaMart-specific: hidden price often means OOS or B2B-only
+        in_stock = False
+    return PriceResult(
+        price_inr=price,
+        in_stock=in_stock,
+        fetched_at=_now_utc(),
+        source_url=url,
+        retailer="IndiaMart",
+    )
+
+
+# ─────────────────────────────────────────────────────────────────
+# Adapter: Tyrebazaar (tyrebazaar.com) — TIRES
+# ─────────────────────────────────────────────────────────────────
+
+def fetch_tyrebazaar(url: str) -> PriceResult | None:
+    raw = _throttled_fetch(url)
+    if raw is None:
+        return None
+    html = raw.decode("utf-8", errors="replace")
+    return PriceResult(
+        price_inr=_extract_price_inr(html),
+        in_stock=_extract_in_stock(html),
+        fetched_at=_now_utc(),
+        source_url=url,
+        retailer="Tyrebazaar",
+    )
+
+
+# ─────────────────────────────────────────────────────────────────
+# Adapter: Tyrekart (tyrekart.com) — TIRES
+# ─────────────────────────────────────────────────────────────────
+
+def fetch_tyrekart(url: str) -> PriceResult | None:
+    raw = _throttled_fetch(url)
+    if raw is None:
+        return None
+    html = raw.decode("utf-8", errors="replace")
+    return PriceResult(
+        price_inr=_extract_price_inr(html),
+        in_stock=_extract_in_stock(html),
+        fetched_at=_now_utc(),
+        source_url=url,
+        retailer="Tyrekart",
+    )
+
+
+# ─────────────────────────────────────────────────────────────────
+# Adapter: Dynojet India (dynojetindia.com) — PCV / Power Commander
+# ─────────────────────────────────────────────────────────────────
+
+def fetch_dynojet_india(url: str) -> PriceResult | None:
+    raw = _throttled_fetch(url)
+    if raw is None:
+        return None
+    html = raw.decode("utf-8", errors="replace")
+    return PriceResult(
+        price_inr=_extract_price_inr(html),
+        in_stock=_extract_in_stock(html),
+        fetched_at=_now_utc(),
+        source_url=url,
+        retailer="Dynojet India",
+    )
+
+
+# ─────────────────────────────────────────────────────────────────
 # Domain-router: pick the right adapter from a URL
 # ─────────────────────────────────────────────────────────────────
 
 #: Map of netloc substrings → adapter function
 ADAPTERS: dict[str, Callable[[str], PriceResult | None]] = {
-    "powertronicecu.com": fetch_powertronicecu,
-    "motomiu.com":        fetch_motomiu,
-    "knfilters.com":      fetch_kn_india,
-    "motodelic.com":      fetch_motodelic,
-    "amazon.in":          fetch_amazon_in,
-    "akrapovic.com":      fetch_akrapovic,
+    "powertronicecu.com":  fetch_powertronicecu,
+    "motomiu.com":         fetch_motomiu,
+    "knfilters.com":       fetch_kn_india,
+    "motodelic.com":       fetch_motodelic,
+    "amazon.in":           fetch_amazon_in,
+    "akrapovic.com":       fetch_akrapovic,
+    # Indian Tier-1 mega-retailers
+    "mototorque.in":       fetch_mototorque,
+    "grandpitstop.com":    fetch_grandpitstop,
+    "superbikestore.com":  fetch_superbikestore,
+    # Specialty Indian retailers
+    "racedynamics.in":     fetch_racedynamics,
+    "healtech-india.com":  fetch_healtech_india,
+    "yssindia.in":         fetch_yssindia,
+    "batterybhai.com":     fetch_batterybhai,
+    "dynojetindia.com":    fetch_dynojet_india,
+    # B2B marketplace
+    "indiamart.com":       fetch_indiamart,
+    # Tire-specific marketplaces
+    "tyrebazaar.com":      fetch_tyrebazaar,
+    "tyrekart.com":        fetch_tyrekart,
 }
 
 
@@ -386,10 +662,23 @@ __all__ = [
     "PriceResult",
     "fetch_price",
     "ADAPTERS",
+    # Original 6 adapters
     "fetch_powertronicecu",
     "fetch_motomiu",
     "fetch_kn_india",
     "fetch_motodelic",
     "fetch_amazon_in",
     "fetch_akrapovic",
+    # Apr 29 expansion: 11 new adapters
+    "fetch_mototorque",
+    "fetch_grandpitstop",
+    "fetch_superbikestore",
+    "fetch_racedynamics",
+    "fetch_healtech_india",
+    "fetch_yssindia",
+    "fetch_batterybhai",
+    "fetch_indiamart",
+    "fetch_tyrebazaar",
+    "fetch_tyrekart",
+    "fetch_dynojet_india",
 ]

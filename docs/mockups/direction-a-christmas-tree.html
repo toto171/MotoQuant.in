@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MotoQuant Pro — Direction A · Christmas Tree</title>
+<style>
+  :root {
+    --bg: #050505;
+    --bg2: #0a0a0a;
+    --fg: #fafafa;
+    --muted: #7a7a7a;
+    --line: #1a1a1a;
+    --orange: #ff6b1a;
+    --green: #22c55e;
+    --amber: #f59e0b;
+    --red: #ef4444;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    overflow-x: hidden;
+  }
+  .mono { font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, "Liberation Mono", monospace; }
+
+  /* Nav */
+  nav.top {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 32px;
+    background: rgba(5,5,5,0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  nav.top .brand { font-weight: 800; font-size: 16px; letter-spacing: 0.02em; }
+  nav.top .brand b { color: var(--orange); }
+  nav.top ul { list-style: none; display: flex; gap: 28px; padding: 0; margin: 0; font-size: 14px; color: var(--muted); }
+  nav.top ul a { color: inherit; text-decoration: none; }
+  nav.top ul a:hover { color: var(--fg); }
+  nav.top .cta { background: var(--orange); color: #050505; padding: 8px 16px; border-radius: 6px; font-weight: 700; font-size: 13px; text-decoration: none; }
+
+  /* Hero */
+  section.hero {
+    min-height: 100vh;
+    position: relative;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 64px;
+    padding: 120px 64px 64px;
+    align-items: center;
+    background:
+      radial-gradient(1200px 600px at 20% 80%, rgba(255,107,26,0.10), transparent 60%),
+      linear-gradient(180deg, #050505 0%, #0a0a0a 100%);
+  }
+  @media (max-width: 800px) {
+    section.hero { grid-template-columns: 1fr; padding: 110px 24px 48px; gap: 32px; }
+  }
+
+  /* Christmas tree */
+  .tree {
+    position: sticky;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 220px;
+    aspect-ratio: 1 / 2.4;
+    background: #0d0d0d;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 22px 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
+  }
+  .tree .lamp {
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    background: #181818;
+    border: 2px solid #222;
+    box-shadow: inset 0 4px 8px rgba(0,0,0,0.6);
+    transition: background 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+  .tree .lamp.amber.on { background: var(--amber); border-color: #fbbf24; box-shadow: 0 0 28px rgba(245,158,11,0.7), inset 0 4px 10px rgba(0,0,0,0.3); }
+  .tree .lamp.green.on { background: var(--green); border-color: #4ade80; box-shadow: 0 0 36px rgba(34,197,94,0.8), inset 0 4px 10px rgba(0,0,0,0.3); }
+  .tree .lamp.red.on   { background: var(--red);   border-color: #f87171; box-shadow: 0 0 28px rgba(239,68,68,0.7), inset 0 4px 10px rgba(0,0,0,0.3); }
+  .tree .label { font-size: 10px; letter-spacing: 0.16em; color: var(--muted); margin-top: 4px; }
+
+  /* Hero copy */
+  .hero-copy h1 { font-size: clamp(40px, 7vw, 96px); font-weight: 800; line-height: 0.95; letter-spacing: -0.04em; margin: 0 0 24px; }
+  .hero-copy h1 .accent { color: var(--orange); }
+  .hero-copy .sub { color: var(--muted); font-size: 18px; line-height: 1.5; max-width: 560px; margin: 0 0 32px; }
+  .hero-copy .badges { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 32px; font-size: 12px; }
+  .hero-copy .badges span { padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); }
+  .hero-copy .badges b { color: var(--orange); font-weight: 700; }
+  .hero-copy .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .hero-copy .cta-row a { padding: 14px 22px; border-radius: 6px; text-decoration: none; font-weight: 700; font-size: 15px; }
+  .hero-copy .cta-row .primary { background: var(--orange); color: #050505; }
+  .hero-copy .cta-row .ghost { background: transparent; border: 1px solid var(--line); color: var(--fg); }
+
+  .scroll-hint {
+    position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+    color: var(--muted); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
+    animation: float 1.8s ease-in-out infinite;
+  }
+  @keyframes float { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 6px); } }
+
+  /* Pinned telemetry */
+  section.telemetry {
+    height: 280vh; /* tall section so user scrolls through it */
+    position: relative;
+    background: linear-gradient(180deg, #0a0a0a 0%, #050505 100%);
+  }
+  section.telemetry .sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 480px;
+    gap: 48px;
+    padding: 80px 64px;
+    align-items: center;
+    overflow: hidden;
+  }
+  @media (max-width: 1000px) {
+    section.telemetry .sticky { grid-template-columns: 1fr; gap: 24px; padding: 80px 24px; }
+  }
+  .silhouette {
+    position: relative;
+    height: 380px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background:
+      linear-gradient(180deg, transparent 0%, rgba(255,107,26,0.05) 100%),
+      repeating-linear-gradient(90deg, transparent 0 39px, rgba(255,255,255,0.02) 39px 40px);
+    overflow: hidden;
+  }
+  .silhouette svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .silhouette .blur-trail {
+    position: absolute;
+    top: 50%; left: -20%;
+    width: 140%; height: 4px;
+    background: linear-gradient(90deg, transparent, var(--orange), transparent);
+    transform: translateY(-50%);
+    filter: blur(6px);
+    opacity: 0.6;
+  }
+  .silhouette .frame-corners { position: absolute; inset: 12px; pointer-events: none; }
+  .silhouette .frame-corners::before,
+  .silhouette .frame-corners::after {
+    content: ""; position: absolute; width: 24px; height: 24px;
+    border: 2px solid var(--orange);
+  }
+  .silhouette .frame-corners::before { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+  .silhouette .frame-corners::after  { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+  .silhouette .stamp {
+    position: absolute; bottom: 14px; left: 16px;
+    font-size: 10px; letter-spacing: 0.18em; color: var(--orange); opacity: 0.85;
+  }
+
+  .hud { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .hud .gauge { background: #0d0d0d; border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+  .hud .gauge .lbl { font-size: 10px; letter-spacing: 0.18em; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; }
+  .hud .gauge .val { font-size: 40px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .hud .gauge .unit { font-size: 12px; color: var(--muted); margin-left: 4px; font-weight: 500; }
+  .hud .gauge.full { grid-column: 1 / -1; }
+  .hud .gauge .bar { margin-top: 10px; height: 6px; border-radius: 3px; background: #1a1a1a; overflow: hidden; }
+  .hud .gauge .bar > span { display: block; height: 100%; background: linear-gradient(90deg, var(--green), var(--amber), var(--red)); width: 0%; transition: width 0.05s linear; }
+  .hud .gauge.elapsed .val { color: var(--orange); }
+
+  .telemetry-title { position: absolute; top: 100px; left: 64px; right: 64px; }
+  .telemetry-title .kicker { color: var(--orange); font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 8px; }
+  .telemetry-title h2 { font-size: clamp(28px, 4vw, 44px); margin: 0; max-width: 700px; letter-spacing: -0.02em; line-height: 1.1; font-weight: 800; }
+
+  /* Stats / timeslip */
+  section.stats {
+    padding: 120px 64px;
+    background: #050505;
+    border-top: 1px solid var(--line);
+  }
+  @media (max-width: 800px) { section.stats { padding: 80px 24px; } }
+  section.stats .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; max-width: 1200px; margin: 0 auto; }
+  @media (max-width: 900px) { section.stats .grid { grid-template-columns: repeat(2, 1fr); } }
+  .stat {
+    background: linear-gradient(180deg, #0d0d0d, #080808);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--orange), transparent);
+    opacity: 0; transition: opacity 0.4s;
+  }
+  .stat.in-view::before { opacity: 1; }
+  .stat .num { font-size: 56px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat .num .suffix { color: var(--orange); }
+  .stat .lbl { color: var(--muted); font-size: 13px; margin-top: 10px; line-height: 1.4; }
+  .stats-kicker { text-align: center; margin-bottom: 56px; }
+  .stats-kicker .tag { color: var(--orange); font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; }
+  .stats-kicker h2 { font-size: clamp(28px, 4vw, 44px); margin: 8px 0 12px; letter-spacing: -0.02em; font-weight: 800; }
+  .stats-kicker p { color: var(--muted); max-width: 600px; margin: 0 auto; line-height: 1.5; }
+
+  /* Validation */
+  section.validation {
+    padding: 120px 64px;
+    background: linear-gradient(180deg, #050505, #0a0a0a);
+    border-top: 1px solid var(--line);
+  }
+  @media (max-width: 800px) { section.validation { padding: 80px 24px; } }
+  .val-wrap { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1.2fr; gap: 56px; align-items: center; }
+  @media (max-width: 900px) { .val-wrap { grid-template-columns: 1fr; gap: 32px; } }
+  .val-copy .tag { color: var(--orange); font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; }
+  .val-copy h2 { font-size: clamp(28px, 4vw, 44px); margin: 8px 0 16px; letter-spacing: -0.02em; line-height: 1.1; font-weight: 800; }
+  .val-copy p { color: var(--muted); line-height: 1.6; margin: 0 0 16px; }
+  .val-copy .baseline { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 24px; }
+  .val-copy .baseline .b { background: #0d0d0d; border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+  .val-copy .baseline .b .name { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+  .val-copy .baseline .b .et { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .val-copy .baseline .b .delta { color: var(--green); font-size: 11px; margin-top: 2px; }
+
+  .bias-chart { background: #0a0a0a; border: 1px solid var(--line); border-radius: 14px; padding: 32px; }
+  .bias-chart .row { display: grid; grid-template-columns: 180px 1fr 80px; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 13px; }
+  .bias-chart .row .name { color: var(--muted); }
+  .bias-chart .row .delta { font-variant-numeric: tabular-nums; text-align: right; font-weight: 600; }
+  .bias-chart .row .delta.neg { color: #fca5a5; }
+  .bias-chart .row .delta.pos { color: #86efac; }
+  .bias-chart .row .delta.neutral { color: var(--muted); }
+  .bias-chart .track { position: relative; height: 8px; background: #1a1a1a; border-radius: 4px; }
+  .bias-chart .track .axis { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--orange); opacity: 0.5; }
+  .bias-chart .track .fill {
+    position: absolute; top: 0; bottom: 0;
+    background: linear-gradient(90deg, var(--orange), #fb923c);
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .bias-chart .track .fill.left { right: 50%; }
+  .bias-chart .track .fill.right { left: 50%; }
+  .bias-chart .legend { color: var(--muted); font-size: 11px; margin-top: 16px; display: flex; justify-content: space-between; }
+
+  /* CTA */
+  section.cta {
+    padding: 140px 64px;
+    text-align: center;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+    border-top: 1px solid var(--line);
+  }
+  section.cta::after {
+    content: ""; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: 120vw; height: 120vw; max-width: 1200px; max-height: 1200px;
+    background: radial-gradient(circle, rgba(34,197,94,0.18) 0%, transparent 60%);
+    z-index: 0; pointer-events: none;
+  }
+  section.cta .inner { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; }
+  section.cta h2 { font-size: clamp(36px, 6vw, 72px); letter-spacing: -0.04em; margin: 0 0 16px; line-height: 1; font-weight: 800; }
+  section.cta h2 .green { color: var(--green); }
+  section.cta p { color: var(--muted); font-size: 18px; margin: 0 0 32px; }
+  section.cta a.go {
+    display: inline-block; padding: 18px 36px;
+    background: var(--green); color: #050505;
+    border-radius: 8px; font-weight: 800; font-size: 18px;
+    text-decoration: none;
+    box-shadow: 0 10px 40px rgba(34,197,94,0.4);
+    transition: transform 0.15s;
+  }
+  section.cta a.go:hover { transform: translateY(-2px); }
+
+  footer { padding: 40px 64px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="brand">MOTO<b>QUANT</b> PRO</div>
+  <ul>
+    <li><a href="#telemetry">Engine</a></li>
+    <li><a href="#stats">Catalog</a></li>
+    <li><a href="#validation">Validation</a></li>
+    <li><a href="#go">Pricing</a></li>
+  </ul>
+  <a href="#go" class="cta">Run a sim →</a>
+</nav>
+
+<section class="hero">
+  <div class="tree-wrap">
+    <div class="tree" id="tree">
+      <div class="lamp red"   data-i="0"></div>
+      <div class="lamp amber" data-i="1"></div>
+      <div class="lamp amber" data-i="2"></div>
+      <div class="lamp amber" data-i="3"></div>
+      <div class="lamp green" data-i="4"></div>
+      <div class="label">PRO TREE</div>
+    </div>
+  </div>
+  <div class="hero-copy">
+    <h1>The physics of <span class="accent">faster.</span></h1>
+    <p class="sub">A first-principles drag simulator for India's motorcycle drag-racing community. 334 bikes, 555 parts, 90 published benchmarks &mdash; tuned to within ±0.05s of real-world ETs on the litre-class.</p>
+    <div class="badges">
+      <span>Aamby Valley · MMRT · Kari · Hyderabad</span>
+      <span><b>±0.006s</b> mean bias on 74 matched ETs</span>
+      <span>RK4 1ms · 15 sub-models</span>
+    </div>
+    <div class="cta-row">
+      <a class="primary" href="#go">Try the simulator</a>
+      <a class="ghost" href="#telemetry">See it run</a>
+    </div>
+  </div>
+  <div class="scroll-hint">scroll · launch sequence</div>
+</section>
+
+<section class="telemetry" id="telemetry">
+  <div class="sticky">
+    <div class="telemetry-title">
+      <div class="kicker">Live HUD · Suzuki GSX-R 1000 K5 · Aamby Valley</div>
+      <h2>15 sub-models. RK4 at 1 ms. Telemetry that matches the timeslip.</h2>
+    </div>
+    <div class="silhouette">
+      <div class="frame-corners"></div>
+      <div class="blur-trail"></div>
+      <svg viewBox="0 0 600 320" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="bikeGrad" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0" stop-color="#ff6b1a"/>
+            <stop offset="1" stop-color="#ff9248"/>
+          </linearGradient>
+        </defs>
+        <!-- Bike profile silhouette -->
+        <g fill="url(#bikeGrad)" transform="translate(60,80)">
+          <circle cx="80" cy="160" r="56"/>
+          <circle cx="80" cy="160" r="36" fill="#050505"/>
+          <circle cx="400" cy="160" r="56"/>
+          <circle cx="400" cy="160" r="36" fill="#050505"/>
+          <path d="M80 160 L160 80 L260 60 L320 70 L360 110 L400 160 L340 160 L300 110 L240 110 L200 130 L140 160 Z"/>
+          <path d="M250 50 L290 40 L300 60 L260 70 Z"/>
+          <path d="M320 70 L360 50 L380 70 L340 90 Z" opacity="0.85"/>
+        </g>
+        <!-- Speed lines -->
+        <g stroke="#ff6b1a" stroke-width="2" opacity="0.4">
+          <line x1="0"   y1="120" x2="40"  y2="120"/>
+          <line x1="0"   y1="160" x2="60"  y2="160"/>
+          <line x1="0"   y1="200" x2="50"  y2="200"/>
+          <line x1="540" y1="100" x2="600" y2="100"/>
+          <line x1="540" y1="220" x2="600" y2="220"/>
+        </g>
+      </svg>
+      <div class="stamp mono">REC · 60FPS · 0.001s ε</div>
+    </div>
+    <div class="hud">
+      <div class="gauge">
+        <div class="lbl">Engine RPM</div>
+        <div class="val mono"><span id="rpm">0</span><span class="unit">/ 13,500</span></div>
+        <div class="bar"><span id="rpmBar"></span></div>
+      </div>
+      <div class="gauge">
+        <div class="lbl">Speed</div>
+        <div class="val mono"><span id="spd">0</span><span class="unit">km/h</span></div>
+        <div class="bar"><span id="spdBar"></span></div>
+      </div>
+      <div class="gauge">
+        <div class="lbl">Gear</div>
+        <div class="val mono"><span id="gear">N</span></div>
+      </div>
+      <div class="gauge elapsed">
+        <div class="lbl">Elapsed</div>
+        <div class="val mono"><span id="et">0.000</span><span class="unit">s</span></div>
+      </div>
+      <div class="gauge full">
+        <div class="lbl">Distance · Quarter Mile</div>
+        <div class="val mono"><span id="dist">0</span><span class="unit">/ 402m</span></div>
+        <div class="bar"><span id="distBar"></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stats" id="stats">
+  <div class="stats-kicker">
+    <div class="tag">Catalog · April 2026</div>
+    <h2>Every bike. Every part. Every track.</h2>
+    <p>The catalog grew from 270 to 334 bikes over the last six weeks &mdash; service-manual-accurate gear ratios, individual Cd, real OEM tire fitments, and Indian-retailer pricing.</p>
+  </div>
+  <div class="grid">
+    <div class="stat" data-target="334"><div class="num"><span class="counter">0</span></div><div class="lbl">Bikes in catalog<br/>4T + 2T, 1973-2026</div></div>
+    <div class="stat" data-target="555"><div class="num"><span class="counter">0</span></div><div class="lbl">Performance parts<br/>17 categories, INR-priced</div></div>
+    <div class="stat" data-target="232"><div class="num"><span class="counter">0</span></div><div class="lbl">Tire models<br/>Full Pacejka + thermal</div></div>
+    <div class="stat" data-target="20"><div class="num"><span class="counter">0</span></div><div class="lbl">Drag venues<br/>India · USA · UAE · EU</div></div>
+  </div>
+</section>
+
+<section class="validation" id="validation">
+  <div class="val-wrap">
+    <div class="val-copy">
+      <div class="tag">Honest physics · Apr 30, 2026</div>
+      <h2>Validated against 74 real-world quarter-mile times.</h2>
+      <p>Source-quality weighted: instrumented magazine data weighs 10× more than forum timeslips. Overall mean bias is <b style="color: var(--green);">+0.006s</b> &mdash; the model is structurally centred, not biased.</p>
+      <p>Reference baselines preserved exactly to four decimals across every code change:</p>
+      <div class="baseline">
+        <div class="b">
+          <div class="name">GSX-R 1000 K5</div>
+          <div class="et mono">10.0334s</div>
+          <div class="delta">Δ ±0.0000</div>
+        </div>
+        <div class="b">
+          <div class="name">YZF-R1 4C8</div>
+          <div class="et mono">10.2859s</div>
+          <div class="delta">Δ ±0.0000</div>
+        </div>
+        <div class="b">
+          <div class="name">Hayabusa Gen1</div>
+          <div class="et mono">10.4712s</div>
+          <div class="delta">Δ ±0.0000</div>
+        </div>
+      </div>
+    </div>
+    <div class="bias-chart" id="biasChart">
+      <div class="row"><span class="name">Litre sport ≥195hp</span><div class="track"><div class="axis"></div><div class="fill left" data-pct="2"></div></div><span class="delta neg">-0.011s</span></div>
+      <div class="row"><span class="name">Litre sport 600-1000</span><div class="track"><div class="axis"></div><div class="fill left" data-pct="13"></div></div><span class="delta neg">-0.130s</span></div>
+      <div class="row"><span class="name">Mid-twin 300-500</span><div class="track"><div class="axis"></div><div class="fill left" data-pct="6"></div></div><span class="delta neg">-0.057s</span></div>
+      <div class="row"><span class="name">Entry 200-300</span><div class="track"><div class="axis"></div><div class="fill right" data-pct="41"></div></div><span class="delta pos">+0.410s</span></div>
+      <div class="row"><span class="name">Entry 150-200</span><div class="track"><div class="axis"></div><div class="fill right" data-pct="29"></div></div><span class="delta pos">+0.285s</span></div>
+      <div class="row"><span class="name">Two-stroke</span><div class="track"><div class="axis"></div><div class="fill right" data-pct="31"></div></div><span class="delta pos">+0.306s</span></div>
+      <div class="row"><span class="name">Cruiser 1300+</span><div class="track"><div class="axis"></div><div class="fill right" data-pct="41"></div></div><span class="delta pos">+0.406s</span></div>
+      <div class="legend"><span>← sim faster</span><span>cluster bias (s)</span><span>sim slower →</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta" id="go">
+  <div class="inner">
+    <h2>Stage. Burn. <span class="green">Green.</span></h2>
+    <p>Pick a bike. Pick a track. Pick a build. We'll run the physics.</p>
+    <a class="go" href="#">Run your first sim →</a>
+  </div>
+</section>
+
+<footer>
+  <div>MOTO<b style="color:var(--orange);">QUANT</b> PRO &middot; Direction A · Christmas Tree</div>
+  <div>Made in Pune · Physics that matches the timeslip</div>
+</footer>
+
+<script>
+(() => {
+  // Christmas tree light-up driven by hero scroll progress
+  const tree = document.getElementById('tree');
+  const lamps = [...tree.querySelectorAll('.lamp')];
+  function updateTree() {
+    const hero = document.querySelector('section.hero');
+    const r = hero.getBoundingClientRect();
+    const progress = Math.min(1, Math.max(0, (window.innerHeight - r.top) / window.innerHeight));
+    // Light lamps in sequence: red first, then 3 ambers, then green
+    // Map progress 0..1 to 0..5 lamps lit
+    const lit = Math.floor(progress * 5.999);
+    lamps.forEach((lamp, i) => {
+      lamp.classList.toggle('on', i <= lit);
+    });
+  }
+  updateTree();
+  window.addEventListener('scroll', updateTree, { passive: true });
+  window.addEventListener('resize', updateTree);
+
+  // Telemetry HUD ticker — driven by scroll progress through the pinned section
+  const tele = document.getElementById('telemetry');
+  const rpm = document.getElementById('rpm');
+  const spd = document.getElementById('spd');
+  const gear = document.getElementById('gear');
+  const et = document.getElementById('et');
+  const dist = document.getElementById('dist');
+  const rpmBar = document.getElementById('rpmBar');
+  const spdBar = document.getElementById('spdBar');
+  const distBar = document.getElementById('distBar');
+
+  // Synthetic K5 quarter-mile run waypoints (t in s, v in km/h, gear, rpm, dist m)
+  // 10.034s ET / 239.8 km/h trap
+  const run = [
+    { t: 0,    v: 0,    g: 1, r: 4500,  d: 0 },
+    { t: 1.0,  v: 75,   g: 1, r: 11500, d: 12 },
+    { t: 2.0,  v: 122,  g: 2, r: 11000, d: 41 },
+    { t: 3.0,  v: 158,  g: 3, r: 10800, d: 80 },
+    { t: 4.5,  v: 188,  g: 4, r: 11200, d: 158 },
+    { t: 6.0,  v: 209,  g: 5, r: 11400, d: 240 },
+    { t: 8.0,  v: 226,  g: 5, r: 12200, d: 350 },
+    { t: 10.034, v: 239.8, g: 6, r: 12100, d: 402 },
+  ];
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function sample(progress) {
+    // progress 0..1 maps to run timeline
+    const tEnd = 10.034;
+    const tNow = progress * tEnd;
+    let i = 0;
+    while (i < run.length - 1 && run[i + 1].t < tNow) i++;
+    const a = run[i];
+    const b = run[Math.min(i + 1, run.length - 1)];
+    const span = (b.t - a.t) || 1;
+    const u = Math.min(1, Math.max(0, (tNow - a.t) / span));
+    return {
+      t: tNow,
+      v: lerp(a.v, b.v, u),
+      g: b.g,
+      r: lerp(a.r, b.r, u),
+      d: lerp(a.d, b.d, u),
+    };
+  }
+
+  function updateHUD() {
+    const r = tele.getBoundingClientRect();
+    const total = tele.offsetHeight - window.innerHeight;
+    const scrolled = Math.min(total, Math.max(0, -r.top));
+    const p = total > 0 ? scrolled / total : 0;
+    const s = sample(p);
+    rpm.textContent = Math.round(s.r).toLocaleString();
+    spd.textContent = s.v.toFixed(1);
+    gear.textContent = s.g;
+    et.textContent = s.t.toFixed(3);
+    dist.textContent = Math.round(s.d);
+    rpmBar.style.width = Math.min(100, (s.r / 13500) * 100) + '%';
+    spdBar.style.width = Math.min(100, (s.v / 260) * 100) + '%';
+    distBar.style.width = Math.min(100, (s.d / 402) * 100) + '%';
+  }
+  updateHUD();
+  window.addEventListener('scroll', updateHUD, { passive: true });
+  window.addEventListener('resize', updateHUD);
+
+  // Counter animation on viewport entry
+  const counters = document.querySelectorAll('.stat');
+  const ioStat = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const card = e.target;
+      card.classList.add('in-view');
+      const target = +card.dataset.target;
+      const el = card.querySelector('.counter');
+      const dur = 1400;
+      const t0 = performance.now();
+      function tick(t) {
+        const u = Math.min(1, (t - t0) / dur);
+        const eased = 1 - Math.pow(1 - u, 3);
+        el.textContent = Math.round(target * eased).toLocaleString();
+        if (u < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+      ioStat.unobserve(card);
+    });
+  }, { threshold: 0.4 });
+  counters.forEach(c => ioStat.observe(c));
+
+  // Bias chart fill on entry
+  const ioBias = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const fills = e.target.querySelectorAll('.fill');
+      fills.forEach((f, i) => {
+        setTimeout(() => { f.style.width = f.dataset.pct + '%'; }, i * 80);
+      });
+      ioBias.unobserve(e.target);
+    });
+  }, { threshold: 0.3 });
+  const bc = document.getElementById('biasChart');
+  if (bc) ioBias.observe(bc);
+})();
+</script>
+</body>
+</html>

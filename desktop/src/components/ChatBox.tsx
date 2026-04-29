@@ -280,10 +280,12 @@ export function ChatBox({ onSuggestionClick }: ChatBoxProps) {
     chat.mutate({ query: q, run_summary: true });
   }, [query, chat]);
 
-  // Ctrl/Cmd+Enter submits
+  // Enter submits; Shift+Enter inserts a newline (standard chat UX).
+  // isComposing guards against IME composition (e.g. Japanese / Chinese input)
+  // where the Enter keystroke is part of selecting a candidate, not a submit.
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
         e.preventDefault();
         submit();
       }
@@ -333,7 +335,7 @@ export function ChatBox({ onSuggestionClick }: ChatBoxProps) {
             disabled={!canSubmit}
             className="btn btn-primary self-end shrink-0 focus-visible:outline-2 focus-visible:outline-signal-300"
             aria-label="Send query"
-            title="Send (Ctrl+Enter)"
+            title="Send (Enter)"
           >
             {chat.isPending ? (
               <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
@@ -344,7 +346,7 @@ export function ChatBox({ onSuggestionClick }: ChatBoxProps) {
         </div>
 
         <p className="text-[10px] text-carbon-600">
-          Press <kbd className="font-mono bg-carbon-800 px-1 rounded">Ctrl+Enter</kbd> to submit
+          Press <kbd className="font-mono bg-carbon-800 px-1 rounded">Enter</kbd> to submit · <kbd className="font-mono bg-carbon-800 px-1 rounded">Shift+Enter</kbd> for newline
         </p>
 
         {/* Example prompts — only shown before first query */}

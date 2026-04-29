@@ -22,7 +22,7 @@ export function Reveal({
   delay = 0,
   y = 28,
   duration = 0.7,
-  margin = '-80px',
+  margin = '0px 0px -10% 0px',
   as = 'div',
 }) {
   const ref = useRef(null);
@@ -43,7 +43,7 @@ export function Reveal({
 
 export function Stagger({ children, className = '', stagger = 0.08 }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-80px' });
+  const inView = useInView(ref, { once: true, margin: '0px 0px -10% 0px' });
   return (
     <motion.div
       ref={ref}
@@ -82,7 +82,7 @@ export function Counter({
   className = '',
 }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-60px' });
+  const inView = useInView(ref, { once: true, margin: '0px 0px -10% 0px' });
   const fmt = format || defaultFormat;
   const [display, setDisplay] = useState(() => fmt(0));
   const startedRef = useRef(false);
