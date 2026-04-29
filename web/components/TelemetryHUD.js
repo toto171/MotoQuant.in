@@ -16,7 +16,7 @@
  * showing the same bike's run.
  */
 
-import { useRef, useState, useMemo } from 'react';
+import { useRef, useState, useMemo, useEffect } from 'react';
 import { useScroll, useMotionValueEvent } from 'framer-motion';
 
 // Hand-curated waypoints for the H2R baseline run.
@@ -97,7 +97,7 @@ function Gauge({ label, value, unit, percent, accent = false, full = false }) {
 
 // Speed-trace chart — replaces the bike silhouette as the visual.
 // Shows the v(t) curve; a moving dot tracks the current run state.
-function SpeedTrace({ currentV, currentT }) {
+function SpeedTrace({ currentV, currentT, progress }) {
   const tracePath = useMemo(() => {
     const N = 80;
     const pts = [];
@@ -154,8 +154,36 @@ function SpeedTrace({ currentV, currentT }) {
           <line x1="0" y1="160" x2="600" y2="160" />
         </g>
 
-        <path d={tracePath.fill} fill="url(#vfill)" />
-        <path d={tracePath.stroke} stroke="#FF5E1F" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        {/* Ghost trace — full curve, low opacity. Tells the user where the
+            run is HEADING; the bright "live" path overlays only the portion
+            already covered by scroll progress. */}
+        <path d={tracePath.stroke} stroke="#FF5E1F" strokeWidth="1.25" fill="none"
+              strokeLinecap="round" strokeLinejoin="round" opacity="0.18" />
+
+        {/* Progress-clipped fill — uses a clipPath rectangle that grows with
+            progress so the orange area fill only shows under the drawn portion. */}
+        <defs>
+          <clipPath id="vfill-clip">
+            <rect x="0" y="0" width={Math.max(0, Math.min(1, progress)) * 600} height="220" />
+          </clipPath>
+        </defs>
+        <path d={tracePath.fill} fill="url(#vfill)" clipPath="url(#vfill-clip)" />
+
+        {/* Live trace — same path, but drawn via stroke-dashoffset so the
+            line "draws on" as scroll progresses. pathLength=1 normalises any
+            length to 0..1 so the offset math is independent of the actual
+            geometric length of the curve. */}
+        <path
+          d={tracePath.stroke}
+          stroke="#FF5E1F"
+          strokeWidth="2.5"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          pathLength="1"
+          strokeDasharray="1"
+          strokeDashoffset={1 - Math.max(0, Math.min(1, progress))}
+        />
 
         <circle cx={dotX} cy={dotY} r="6" fill="#FF8F57" />
         <circle cx={dotX} cy={dotY} r="11" fill="none" stroke="#FF5E1F" strokeWidth="1.5" opacity="0.55" />
@@ -184,14 +212,25 @@ export default function TelemetryHUD() {
     offset: ['start start', 'end end'],
   });
 
-  const [rpm, setRpm] = useState(0);
-  const [spd, setSpd] = useState(0);
-  const [gear, setGear] = useState(1);
-  const [et, setEt] = useState(0);
-  const [dist, setDist] = useState(0);
+  // Initialise from progress=0 so gauges show staged-and-idle values
+  // (RPM ≈ 4500, spd 0, gear 1, et 0, dist 0) on first paint instead of all
+  // zeros. Without this, mobile users saw RPM=0 / chart=full-trace on first
+  // load — a desync between visible chart and gauge readouts.
+  const initial = useMemo(() => sampleRun(0), []);
+  const [rpm, setRpm] = useState(Math.round(initial.r));
+  const [spd, setSpd] = useState(initial.v);
+  const [gear, setGear] = useState(initial.g);
+  const [et, setEt] = useState(initial.t);
+  const [dist, setDist] = useState(initial.d);
+  // Track progress as React state so the chart can clip its drawn portion.
+  // Mirrors the motion value but persists across renders so SVG path-length
+  // math is stable per render.
+  const [progress, setProgress] = useState(0);
 
   useMotionValueEvent(scrollYProgress, 'change', (p) => {
-    const s = sampleRun(Math.min(1, Math.max(0, p)));
+    const clamped = Math.min(1, Math.max(0, p));
+    const s = sampleRun(clamped);
+    setProgress(clamped);
     setRpm(Math.round(s.r));
     setSpd(s.v);
     setGear(s.g);
@@ -199,15 +238,32 @@ export default function TelemetryHUD() {
     setDist(s.d);
   });
 
+  // Fire once on mount in case the user has already scrolled (browser back
+  // / fragment navigation / refresh in the middle of the page). Without
+  // this the chart and gauges stay at "scroll=0" values until the user
+  // moves the scroll wheel manually.
+  useEffect(() => {
+    const p = scrollYProgress.get();
+    const clamped = Math.min(1, Math.max(0, p));
+    const s = sampleRun(clamped);
+    setProgress(clamped);
+    setRpm(Math.round(s.r));
+    setSpd(s.v);
+    setGear(s.g);
+    setEt(s.t);
+    setDist(s.d);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <section
       ref={sectionRef}
       id="telemetry"
       className="relative bg-gradient-to-b from-black via-ink-1 to-black border-t border-brand-orange/10"
-      style={{ height: '280vh' }}
+      style={{ height: 'clamp(180vh, 220vh, 280vh)' }}
     >
       <div className="sticky top-0 h-screen overflow-hidden flex flex-col">
-        <div className="px-6 sm:px-10 lg:px-16 pt-24 pb-6">
+        <div className="px-6 sm:px-10 lg:px-16 pt-20 sm:pt-24 pb-4 sm:pb-6">
           <div className="max-w-7xl mx-auto">
             <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-brand-orange mb-3">
               Live HUD &middot; Kawasaki Ninja H2R &middot; Aamby Valley &middot; ISA
@@ -219,8 +275,8 @@ export default function TelemetryHUD() {
         </div>
 
         <div className="flex-1 px-6 sm:px-10 lg:px-16 pb-10 overflow-hidden">
-          <div className="max-w-7xl mx-auto h-full grid lg:grid-cols-[1fr_460px] gap-8 items-center">
-            <SpeedTrace currentV={spd} currentT={et} />
+          <div className="max-w-7xl mx-auto h-full grid lg:grid-cols-[1fr_460px] gap-6 sm:gap-8 items-start lg:items-center">
+            <SpeedTrace currentV={spd} currentT={et} progress={progress} />
 
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <Gauge
