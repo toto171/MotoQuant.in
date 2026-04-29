@@ -78,7 +78,10 @@ const STATS = [
 function ScrollHint() {
   return (
     <motion.div
-      className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-mono uppercase tracking-[0.3em] text-white/40 flex flex-col items-center gap-1"
+      // Hidden on phones (collides with the See-it-run CTA on a
+      // min-h-[640px] hero). Shown from sm: upward where the hero has
+      // breathing room and the hint reads as a tasteful affordance.
+      className="hidden sm:flex absolute bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-mono uppercase tracking-[0.3em] text-white/40 flex-col items-center gap-1 pointer-events-none"
       animate={{ y: [0, 6, 0] }}
       transition={{ duration: 2, repeat: Infinity }}
     >
