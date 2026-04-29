@@ -939,8 +939,23 @@ def spec_to_bike_config(spec: BikeSpec) -> BikeConfig:
 
     name = f"{spec.manufacturer} {spec.model_name}{year_tag}"
 
+    # Auto-derive the category_tag for cluster-flavoured physics dispatch.
+    # See motoquant.category_profiles.derive_category_tag — mirrors
+    # scripts/sweep_with_clusters.py::cluster_for so benchmark grouping and
+    # physics dispatch share one taxonomy.
+    from ..category_profiles import derive_category_tag
+    category_tag = derive_category_tag(
+        manufacturer=spec.manufacturer,
+        model_name=spec.model_name,
+        displacement_cc=spec.displacement_cc,
+        peak_power_hp=spec.peak_power_hp,
+        stroke_type=spec.stroke_type,
+        category=spec.category,
+    )
+
     return BikeConfig(
         name=name,
+        category_tag=category_tag,
         engine=engine,
         chassis=chassis,
         drivetrain=drivetrain,

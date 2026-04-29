@@ -329,6 +329,7 @@ def gsxr1000_k5() -> BikeConfig:
 
     return BikeConfig(
         name="Suzuki GSX-R 1000 K5/K6",
+        category_tag="litre_sport_195p",
         chassis=ChassisParams(
             dry_mass_kg=166.0,  # Dry weight
             rider_mass_kg=75.0,
@@ -491,6 +492,7 @@ def yzfr1_4c8() -> BikeConfig:
 
     return BikeConfig(
         name="Yamaha YZF-R1 4C8",
+        category_tag="litre_sport_195p",
         chassis=ChassisParams(
             dry_mass_kg=177.0,
             rider_mass_kg=75.0,
@@ -610,6 +612,7 @@ def hayabusa_gen1() -> BikeConfig:
 
     return BikeConfig(
         name="Suzuki Hayabusa GSX1300R Gen1",
+        category_tag="litre_sport_195p",
         chassis=ChassisParams(
             dry_mass_kg=215.0,  # Heavier than litre bikes
             rider_mass_kg=75.0,

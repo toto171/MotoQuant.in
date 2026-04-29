@@ -751,6 +751,11 @@ class BikeConfig:
     """Complete motorcycle configuration — all parameters in one place."""
 
     name: str = "Generic Litre-Class"
+    # Canonical category tag for dispatch into category-flavoured sub-models.
+    # Values are defined in motoquant.category_profiles (string constants).
+    # When None / "unknown", the legacy pre-April-30 hard-coded physics
+    # behaviour is preserved (backwards-compat anchor).
+    category_tag: str | None = None
     chassis: ChassisParams = field(default_factory=ChassisParams)
     engine: EngineParams = field(default_factory=EngineParams)
     forced_induction: ForcedInductionParams = field(

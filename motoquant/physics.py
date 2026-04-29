@@ -212,6 +212,23 @@ class MotoQuantEngine:
         self.v_wind = self._env_model.v_headwind
         self.power_correction = self._env_model.power_correction
 
+        # Category-flavoured physics dispatch (April 30, 2026).
+        # Look up per-cluster profile. If category_tag is unset, auto-
+        # derive one from engine spec so legacy saved configs still get
+        # category-aware behaviour (keeps the over-clutching tier alive
+        # for old DB rows that pre-date the category_tag field).
+        from .category_profiles import derive_category_tag, get_profile
+        tag = c.category_tag
+        if not tag:
+            tag = derive_category_tag(
+                manufacturer="", model_name="",
+                displacement_cc=c.engine.displacement_cc,
+                peak_power_hp=c.engine.peak_power_hp,
+                stroke_type=c.engine.stroke_type,
+                category=None,
+            )
+        self._profile = get_profile(tag)
+
     def _init_submodels(self):
         """Instantiate all sub-model classes with precomputed values."""
         self._engine = EngineModel(self.cfg, self.eta_dt, self.power_correction)
@@ -518,23 +535,16 @@ class MotoQuantEngine:
                         cfg.engine.engine_inertia_kgm2 + cfg.clutch.basket_inertia_kgm2
                     )
                     peak_hp = cfg.engine.peak_power_hp or 0.0
-                    if peak_hp < 60.0 and slip_speed > 0:
-                        # Rate-limit engine deceleration to a realistic launch
-                        # value. Tier the cap by power: very-low-power bikes
-                        # get more aggressive launches (riders rev higher and
-                        # bog harder).
-                        if peak_hp < 22.0:
-                            max_decel_rad_per_s2 = 350.0   # ~3300 rpm/s — hard launch
-                            over_clutch_factor = 0.50
-                        elif peak_hp < 30.0:
-                            max_decel_rad_per_s2 = 280.0   # ~2700 rpm/s
-                            over_clutch_factor = 0.40
-                        else:
-                            max_decel_rad_per_s2 = 200.0   # ~1900 rpm/s
-                            over_clutch_factor = 0.30
-                        max_back_torque = max_decel_rad_per_s2 * max(I_e_local, 0.001)
+                    # Category-flavoured over-clutching dispatch.
+                    # Reads tier knobs from self._profile (set in _precompute).
+                    # Profile.over_clutch_factor==0 reproduces the pre-April-30
+                    # legacy min(T_e_crank, T_clutch_max) behaviour for the
+                    # litre-sport / cruiser clusters that don't need slip-launch.
+                    prof = self._profile
+                    if prof.over_clutch_factor > 0.0 and slip_speed > 0:
+                        max_back_torque = prof.max_engine_decel_rads2 * max(I_e_local, 0.001)
                         headroom = max(0.0, T_clutch_max - abs(T_e_crank))
-                        over_clutch_extra = min(headroom * over_clutch_factor, max_back_torque)
+                        over_clutch_extra = min(headroom * prof.over_clutch_factor, max_back_torque)
                         T_transmitted = min(abs(T_e_crank) + over_clutch_extra, T_clutch_max)
                     else:
                         T_transmitted = min(abs(T_e_crank), T_clutch_max)
@@ -551,15 +561,14 @@ class MotoQuantEngine:
                     # engine at peak_torque_rpm; this clamp models that. K5/R1/Busa
                     # bypass via peak_hp >= 60 gate above (their else branch keeps
                     # legacy min behaviour, no force on omega_e drop).
-                    if peak_hp < 60.0:
-                        # 2-strokes: clamp at tuned_rpm (where the expansion
-                        # chamber peaks) — peak_torque_rpm is BELOW the actual
-                        # peak for piston-port 2T. 4T: peak_torque_rpm is the
-                        # actual torque peak so use that directly.
+                    if prof.launch_floor_factor > 0.0:
+                        # Cluster-aware launch RPM floor. 2-strokes pin at
+                        # tuned_rpm (expansion-chamber resonance, above
+                        # peak_torque_rpm); 4T pins at peak_torque_rpm.
                         if cfg.engine.stroke_type == 2 and cfg.engine.tuned_rpm:
-                            floor_rpm = cfg.engine.tuned_rpm
+                            floor_rpm = cfg.engine.tuned_rpm * prof.launch_floor_factor
                         else:
-                            floor_rpm = cfg.engine.peak_torque_rpm
+                            floor_rpm = cfg.engine.peak_torque_rpm * prof.launch_floor_factor
                         floor_omega = floor_rpm * RPM_TO_RADS
                         if omega_e < floor_omega:
                             omega_e = floor_omega
