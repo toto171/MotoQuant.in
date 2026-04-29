@@ -35,6 +35,7 @@ import ChristmasTree from '../components/ChristmasTree';
 import TelemetryHUD from '../components/TelemetryHUD';
 import { Reveal, Stagger, StaggerItem, Counter } from '../components/Reveal';
 import SimulatorWidget from '../components/SimulatorWidget';
+import PhysicsDial from '@/components/PhysicsDial';
 
 // ─── Validation: only the four clusters where the data is good ────────
 // Per CLAUDE.md April 30 weighted metrics. Small-cc / 2T / cruiser
@@ -286,15 +287,20 @@ export default function HomePage() {
 
         <motion.div
           style={{ opacity: heroFade }}
-          className="relative max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 pt-12 pb-32 grid lg:grid-cols-[260px_1fr] gap-10 lg:gap-16 items-center min-h-[calc(100vh-4rem)]"
+          className="relative max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 pt-8 pb-32 min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center"
         >
-          {/* Christmas tree, sticks vertically centred on lg+ */}
-          <div className="lg:sticky lg:top-32 self-center">
-            <ChristmasTree />
+          {/* Tree + dial centerpiece. Stacks on mobile, side-by-side on lg+. */}
+          <div className="relative w-full max-w-[1080px] mx-auto pointer-events-none flex flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-center lg:gap-12">
+            <div className="pointer-events-auto flex-shrink-0 scale-[0.7] sm:scale-[0.85] lg:scale-100 lg:mt-10 origin-top">
+              <ChristmasTree />
+            </div>
+            <div className="w-full max-w-[640px] flex-shrink">
+              <PhysicsDial progress={heroProgress} className="w-full h-auto" />
+            </div>
           </div>
 
-          {/* Hero copy */}
-          <div className="max-w-2xl">
+          {/* Hero copy — centred below the centerpiece */}
+          <div className="relative z-10 mt-10 max-w-3xl text-center">
             <Reveal y={20} duration={0.7}>
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-brand-orange/40 bg-brand-orange/10 text-[10px] sm:text-xs font-mono uppercase tracking-[0.25em] text-brand-orange">
                 Proudly Built in India
@@ -302,14 +308,14 @@ export default function HomePage() {
             </Reveal>
 
             <Reveal y={32} duration={0.9} delay={0.05}>
-              <h1 className="mt-7 font-display font-bold text-5xl sm:text-6xl lg:text-7xl xl:text-[88px] leading-[0.95] tracking-[-0.04em] text-white">
+              <h1 className="mt-7 font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[0.95] tracking-[-0.04em] text-white">
                 The physics of{' '}
                 <span className="text-gradient-orange">faster.</span>
               </h1>
             </Reveal>
 
             <Reveal y={20} duration={0.7} delay={0.15}>
-              <p className="mt-7 text-lg sm:text-xl text-white/70 leading-relaxed max-w-xl">
+              <p className="mt-7 text-lg sm:text-xl text-white/70 leading-relaxed max-w-xl mx-auto">
                 A first-principles drag simulator for India&rsquo;s motorcycle
                 drag-racing community.{' '}
                 <span className="text-white">334 bikes</span>,{' '}
@@ -320,7 +326,7 @@ export default function HomePage() {
             </Reveal>
 
             <Reveal y={16} duration={0.7} delay={0.22}>
-              <div className="mt-7 flex flex-wrap gap-2 text-[11px] font-mono">
+              <div className="mt-7 flex flex-wrap gap-2 text-[11px] font-mono justify-center">
                 <span className="px-3 py-1.5 rounded-full border border-white/10 text-white/55">
                   Aamby Valley · MMRT · Kari · Hyderabad
                 </span>
@@ -334,7 +340,7 @@ export default function HomePage() {
             </Reveal>
 
             <Reveal y={20} duration={0.7} delay={0.3}>
-              <div className="mt-10 flex flex-col sm:flex-row gap-4">
+              <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/simulator"
                   className="inline-flex items-center justify-center px-7 py-4 rounded-md bg-brand-orange hover:bg-brand-orangeLight text-black font-display font-bold transition-colors shadow-orange-soft"
