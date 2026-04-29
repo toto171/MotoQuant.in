@@ -211,7 +211,11 @@ export default function TelemetryHUD() {
   const sectionRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ['start start', 'end end'],
+    // 'start end' → section TOP enters viewport BOTTOM (just visible).
+    // 'end start' → section BOTTOM exits viewport TOP (just gone).
+    // Animation runs over the entire viewport-traversal — completes at the
+    // exact moment the section disappears, no dead-space afterwards.
+    offset: ['start end', 'end start'],
   });
 
   // Initialise from progress=0 so gauges show staged-and-idle values
@@ -261,10 +265,16 @@ export default function TelemetryHUD() {
     <section
       ref={sectionRef}
       id="telemetry"
-      className="relative bg-gradient-to-b from-black via-ink-1 to-black border-t border-brand-orange/10"
-      style={{ height: 'clamp(180vh, 220vh, 280vh)' }}
+      className="relative bg-gradient-to-b from-black via-ink-1 to-black border-t border-brand-orange/10 h-[100svh] min-h-[640px] overflow-hidden flex flex-col"
     >
-      <div className="sticky top-0 h-[100svh] overflow-hidden flex flex-col">
+      {/* No sticky pin — section is exactly one viewport tall. The animation
+          is driven by the section's intersection with the viewport via the
+          useScroll offset ['start end', 'end start']: progress=0 the moment
+          the section starts entering from below, progress=1 when it finishes
+          exiting at the top. Animation completes the moment the section
+          disappears, then the next section is already in view. No sticky-pin →
+          no post-animation dead scroll. */}
+      <div className="h-full overflow-hidden flex flex-col">
         <div className="px-6 sm:px-10 lg:px-16 pt-20 sm:pt-24 pb-4 sm:pb-6">
           <div className="max-w-7xl mx-auto">
             <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-brand-orange mb-3">
