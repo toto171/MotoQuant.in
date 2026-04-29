@@ -148,11 +148,16 @@ export default function SimulatorWidget() {
             // Tolerates the API returning slight name variations
             // (e.g. "YZF-R15 V4 (2021-)" vs label "Yamaha YZF-R15 V4").
             const labelLower = entry.label.toLowerCase();
+            // The /api/bikes endpoint returns each row with `manufacturer`
+            // and `model` (NOT `model_name` — that's the DB column name,
+            // not the API field). Verified Apr 29 via /api/bikes?limit=5
+            // — the prod API exposes: id, manufacturer, model, year,
+            // category, displacement_cc, peak_power_hp, dry_mass_kg.
             const found = bikes.find(b => {
-              const full = `${b.manufacturer ?? ''} ${b.model_name ?? ''}`.toLowerCase();
+              const full = `${b.manufacturer ?? ''} ${b.model ?? ''}`.toLowerCase();
               if (full.includes(labelLower)) return true;
               // Fallback: drop the manufacturer prefix from the label
-              // and try matching just the model name fragment.
+              // and try matching just the model fragment.
               const tokens = labelLower.split(/\s+/);
               const modelOnly = tokens.slice(1).join(' ');
               return modelOnly && full.includes(modelOnly);
