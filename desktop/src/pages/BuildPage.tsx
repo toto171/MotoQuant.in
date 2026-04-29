@@ -49,6 +49,8 @@ export function BuildPage() {
     let powerBoost = 0;
     let massDelta = 0;
     for (const p of selectedParts) {
+      // power_delta_hp on a stock 100 hp bike → +1% per hp gain (rough);
+      // a real recompute happens on the server when fastPreview is OFF.
       if (typeof p.power_delta_hp === "number") {
         powerBoost += p.power_delta_hp;
       }
@@ -72,6 +74,9 @@ export function BuildPage() {
     if (!bike) return;
 
     if (fastPreview) {
+      // Power boost % from absolute hp delta — assumes stock peak is in
+      // the bike summary; if not present, treat 1 hp delta as ~1 % which
+      // is the right order of magnitude across the catalog.
       const stockHp = (bike as unknown as { peak_power_hp?: number }).peak_power_hp ?? 100;
       const powerBoostPct = stockHp > 0 ? (previewDeltas.powerBoost / stockHp) * 100 : 0;
       surrogate.mutate(
@@ -84,10 +89,12 @@ export function BuildPage() {
         {
           onSuccess: (resp) => {
             if (!resp.within_training_envelope) {
+              // Out-of-distribution → escalate to the real sim.
               sim.mutate({ bike_id: bike.id, part_ids: selectedIds, rider_mass_kg: 75 });
             }
           },
           onError: () => {
+            // Surrogate unavailable (503 → no model) → fall back to real sim.
             sim.mutate({ bike_id: bike.id, part_ids: selectedIds, rider_mass_kg: 75 });
           },
         },
@@ -319,6 +326,7 @@ export function BuildPage() {
                 <StatTile label="1/8 mi" value={sim.data.et_eighth_s.toFixed(3)} unit="s" />
               </div>
 
+              {/* Out-of-envelope chip — surrogate triggered fallback to full sim */}
               {fastPreview && surrogate.data && !surrogate.data.within_training_envelope && (
                 <div className="text-[10px] text-warn-500 flex items-start gap-1.5 px-2.5 py-1.5 rounded-md border border-warn-500/30 bg-warn-500/5">
                   <AlertCircle className="w-3 h-3 mt-0.5 shrink-0" aria-hidden="true" />

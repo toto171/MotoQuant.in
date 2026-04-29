@@ -396,7 +396,6 @@ export interface ChatResponse {
   error_detail: string | null;
 }
 
-
 // ─── Surrogate model (POST /api/surrogate/*) ─────────────────────────────
 // Fast inference (target p95 < 5 ms) over a trained DNN/XGBoost model.
 // Used for live BuildPage previews where running a full physics sim per
@@ -434,4 +433,3 @@ export interface SurrogateCompareResponse {
   delta_trap_kmh: number;
   faster: "a" | "b" | "tie";
 }
-

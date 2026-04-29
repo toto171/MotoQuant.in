@@ -103,7 +103,6 @@ export function useSaveRun() {
   });
 }
 
-
 // ─── Surrogate-model preview hooks ────────────────────────────────────
 // Use these in BuildPage to deliver near-instant feedback on slider /
 // part-toggle changes. The full physics sim takes ~50 ms over HTTP; the
