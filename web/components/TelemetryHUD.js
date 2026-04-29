@@ -211,11 +211,15 @@ export default function TelemetryHUD() {
   const sectionRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    // 'start end' → section TOP enters viewport BOTTOM (just visible).
-    // 'end start' → section BOTTOM exits viewport TOP (just gone).
-    // Animation runs over the entire viewport-traversal — completes at the
-    // exact moment the section disappears, no dead-space afterwards.
-    offset: ['start end', 'end start'],
+    // 'start end'   → section TOP enters viewport BOTTOM (section just visible).
+    // 'start start' → section TOP at viewport TOP (section fully in view).
+    // Animation runs ONLY during the entry phase — completes the moment the
+    // section is fully on-screen. After that, progress stays at 1, the chart
+    // sits at its final state, and the user can scroll naturally to the next
+    // section. Doesn't waste scroll on a "fade out" period: every pixel of
+    // scroll while the section is animating is paying the user back with
+    // visible animation progress.
+    offset: ['start end', 'start start'],
   });
 
   // Initialise from progress=0 so gauges show staged-and-idle values
