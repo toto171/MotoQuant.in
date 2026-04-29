@@ -125,7 +125,7 @@ function SpeedTrace({ currentV, currentT, progress }) {
   const dotY = 200 - (currentV / TRAP_KMH) * 170;
 
   return (
-    <div className="relative h-full min-h-[240px] sm:min-h-[300px] rounded-2xl border border-white/10 bg-ink-1/60 overflow-hidden">
+    <div className="relative h-full min-h-[200px] sm:min-h-[280px] rounded-2xl border border-white/10 bg-ink-1/60 overflow-hidden">
       <span className="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-brand-orange" />
       <span className="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-brand-orange" />
 
@@ -211,15 +211,15 @@ export default function TelemetryHUD() {
   const sectionRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    // 'start end' → section TOP at viewport BOTTOM (section just appearing) → progress 0
-    // 'end end'   → section BOTTOM at viewport BOTTOM (next section about to peek) → progress 1
+    // 'start end'    → section TOP at viewport BOTTOM (section just appearing) → progress 0
+    // 'center start' → section CENTER at viewport TOP (section half-exited)    → progress 1
     //
-    // With section h-[130svh], that maps progress 0..1 over scrollY
-    //   = section_top - 100vh  →  section_top + 30vh
-    // Animation completes when the user has scrolled 30 vh past the moment
-    // the section first fills the viewport — the exact moment the next
-    // section begins to peek into the bottom edge. Natural hand-off.
-    offset: ['start end', 'end end'],
+    // With section h-[100svh], that maps progress 0..1 over scrollY
+    //   = section_top - 100vh  →  section_top + 50vh
+    // Animation completes when the section is half-way exiting at the top,
+    // which is also when the next section is filling the bottom half of
+    // viewport — the user's preferred 'finishes here' point.
+    offset: ['start end', 'center start'],
   });
 
   // Initialise from progress=0 so gauges show staged-and-idle values
@@ -269,7 +269,7 @@ export default function TelemetryHUD() {
     <section
       ref={sectionRef}
       id="telemetry"
-      className="relative bg-gradient-to-b from-black via-ink-1 to-black border-t border-brand-orange/10 h-[130svh] min-h-[820px] lg:h-[110svh] lg:min-h-[700px] overflow-hidden flex flex-col"
+      className="relative bg-gradient-to-b from-black via-ink-1 to-black border-t border-brand-orange/10 h-[100svh] min-h-[640px] overflow-hidden flex flex-col"
     >
       {/* No sticky pin — section is exactly one viewport tall. The animation
           is driven by the section's intersection with the viewport via the
@@ -278,7 +278,7 @@ export default function TelemetryHUD() {
           exiting at the top. Animation completes the moment the section
           disappears, then the next section is already in view. No sticky-pin →
           no post-animation dead scroll. */}
-      <div className="sticky top-0 h-[100svh] overflow-hidden flex flex-col">
+      <div className="h-full flex flex-col">
         <div className="px-6 sm:px-10 lg:px-16 pt-20 sm:pt-24 pb-4 sm:pb-6">
           <div className="max-w-7xl mx-auto">
             <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-brand-orange mb-3">

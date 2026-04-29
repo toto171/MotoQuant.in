@@ -11,6 +11,7 @@ import {
   AreaChart, Area
 } from 'recharts';
 import { API_URL as API } from '../../lib/api';
+import { track, installErrorHandlers } from '../../lib/telemetry';
 import ChatPanel from '../../components/ChatPanel';
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -247,6 +248,8 @@ export default function SimulatorPage() {
   const [topSpeedError, setTopSpeedError] = useState(null);
 
   // ─── Fetch all data on mount ─────────────────────────────────────────
+  useEffect(() => { installErrorHandlers(); track('page_view', { surface: 'simulator_page' }); }, []);
+
   useEffect(() => {
     async function load() {
       try {
@@ -408,6 +411,7 @@ export default function SimulatorPage() {
 
   // ─── Top Speed / LSR runner ─────────────────────────────────────────
   const runTopSpeed = useCallback(async () => {
+    track('sim_run_start', { surface: 'simulator_page', mode: 'topspeed', bike_label: bike?.model_name ?? 'unknown', bike_id: bike?.id ?? null });
     if (!bike) return;
     setTopSpeedLoading(true);
     setTopSpeedError(null);

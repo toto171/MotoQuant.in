@@ -6,6 +6,7 @@ import { Zap, AlertCircle, MapPin, MessageSquare, Gauge } from 'lucide-react';
 import LocationPicker, { environmentOverridesFromLocation } from './LocationPicker';
 import ChatPanel from './ChatPanel';
 import { API_URL } from '../lib/api';
+import { track, installErrorHandlers } from '../lib/telemetry';
 
 // Curated bike list — popular India-market machines first, then global
 // dream bikes. Each entry uses bike_id (catalog primary key) so we can
@@ -115,6 +116,55 @@ export default function SimulatorWidget() {
   const [topSpeedResult, setTopSpeedResult] = useState(null);  // top-speed result
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  // CRITICAL: production DB IDs drift over time as the catalog is reseeded.
+  // Hardcoded IDs in BIKE_CATEGORIES were stale — id 192 was 'YZF-R15 V4'
+  // when the list was authored but is now 'Aprilia ...' on prod (verified
+  // via /api/bikes/{id}). To stay robust we fetch the catalog on mount and
+  // resolve each labelled bike to its CURRENT id by manufacturer + model
+  // name match. Keys are the .label string from BIKE_CATEGORIES, values
+  // are catalog ids. While this map is empty (initial render OR if the
+  // fetch fails) we fall back to the hardcoded id, which at worst sims
+  // the wrong bike instead of erroring out.
+  const [bikeIdMap, setBikeIdMap] = useState({});
+
+  useEffect(() => {
+    installErrorHandlers();
+    track('widget_view', { surface: 'landing_widget' });
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`${API_URL}/api/bikes?limit=500`)
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then(data => {
+        if (cancelled) return;
+        const bikes = data.bikes || [];
+        const map = {};
+        BIKE_CATEGORIES.forEach(cat => {
+          cat.bikes.forEach(entry => {
+            if (entry.presetId) return; // reference bikes use preset, no id lookup
+            // Match strategy: case-insensitive substring match on
+            //   "{manufacturer} {model_name}"  vs  entry.label
+            // Tolerates the API returning slight name variations
+            // (e.g. "YZF-R15 V4 (2021-)" vs label "Yamaha YZF-R15 V4").
+            const labelLower = entry.label.toLowerCase();
+            const found = bikes.find(b => {
+              const full = `${b.manufacturer ?? ''} ${b.model_name ?? ''}`.toLowerCase();
+              if (full.includes(labelLower)) return true;
+              // Fallback: drop the manufacturer prefix from the label
+              // and try matching just the model name fragment.
+              const tokens = labelLower.split(/\s+/);
+              const modelOnly = tokens.slice(1).join(' ');
+              return modelOnly && full.includes(modelOnly);
+            });
+            if (found) map[entry.label] = found.id;
+          });
+        });
+        setBikeIdMap(map);
+      })
+      .catch(() => { /* keep map empty; fall back to hardcoded ids */ });
+    return () => { cancelled = true; };
+  }, []);
 
   async function runSim(mode = simMode) {
     setSimMode(mode);
@@ -122,6 +172,16 @@ export default function SimulatorWidget() {
     setError(null);
     if (mode === 'quarter') setResult(null);
     else setTopSpeedResult(null);
+    track('sim_run_start', {
+      surface: 'landing_widget',
+      mode,
+      bike_label: selectedBike?.label ?? 'unknown',
+      bike_id: selectedBike?.id ?? null,
+      bike_preset: selectedBike?.presetId ?? null,
+      power_boost_pct: powerBoost,
+      mass_delta_kg: massChange,
+      rider_kg: riderKg,
+    });
     try {
       const envOverrides = environmentOverridesFromLocation(location);
       const body = {
@@ -131,12 +191,14 @@ export default function SimulatorWidget() {
         ...envOverrides,
       };
       // Reference bikes use bike_preset (legacy path that hits hand-built
-      // BikeConfig from defaults.py); catalog bikes use bike_id (resolves
-      // to the importer-built BikeConfig from the seeded SQLite catalog).
+      // BikeConfig from defaults.py); catalog bikes use bike_id resolved
+      // from the API at mount time (bikeIdMap). If the resolution map
+      // hasn't loaded yet OR the label couldn't be matched, fall back
+      // to the hardcoded id from BIKE_CATEGORIES.
       if (selectedBike.presetId) {
         body.bike_preset = selectedBike.presetId;
       } else {
-        body.bike_id = selectedBike.id;
+        body.bike_id = bikeIdMap[selectedBike.label] ?? selectedBike.id;
       }
       // Different endpoint per mode:
       //   quarter  → /api/simulate/quick (ET + trap + 60ft / ⅛-mile splits)
@@ -157,8 +219,23 @@ export default function SimulatorWidget() {
       const data = await res.json();
       if (mode === 'quarter') setResult(data);
       else setTopSpeedResult(data);
+      track('sim_run_success', {
+        surface: 'landing_widget',
+        mode,
+        bike_label: selectedBike?.label ?? 'unknown',
+        et_quarter_s: data?.et_quarter_s ?? null,
+        trap_speed_kmh: data?.trap_speed_kmh ?? null,
+        terminal_velocity_kmh: data?.terminal_velocity_kmh ?? null,
+        reached_plateau: data?.reached_plateau ?? null,
+      });
     } catch (e) {
       setError(e.message);
+      track('sim_run_error', {
+        surface: 'landing_widget',
+        mode,
+        bike_label: selectedBike?.label ?? 'unknown',
+        error: String(e?.message ?? e).slice(0, 200),
+      });
     } finally {
       setLoading(false);
     }

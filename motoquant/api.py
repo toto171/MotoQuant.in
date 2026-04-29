@@ -381,6 +381,50 @@ def health():
     }
 
 
+# ─────────────────────────────────────────────────────────────────────────
+# Anonymous telemetry endpoint
+# ─────────────────────────────────────────────────────────────────────────
+# Used by web/lib/telemetry.js to capture client-side events:
+#   - sim_run_start / sim_run_success / sim_run_error
+#   - js_error / js_unhandled_rejection
+#   - bike_select / mode_change
+# Privacy: no user id, no IP correlation, per-tab random session_id only.
+# Storage: stdout (Railway log stream); ship to PostHog/Logfire later
+# without changing the client.
+
+@app.post("/api/telemetry/event")
+async def telemetry_event(payload: dict = None):
+    """Log one anonymous client telemetry event. Always 200 — telemetry
+    must never surface as a user-facing error."""
+    if payload is None or not isinstance(payload, dict):
+        return {"ok": True}
+    event = str(payload.get("event", ""))[:64] or "unknown"
+    session_id = str(payload.get("session_id", ""))[:64]
+    props = payload.get("props") if isinstance(payload.get("props"), dict) else {}
+    safe_props = {
+        str(k)[:64]: (str(v)[:200] if isinstance(v, str) else v)
+        for k, v in list(props.items())[:32]
+        if isinstance(v, (str, int, float, bool, type(None)))
+    }
+    viewport = payload.get("viewport") if isinstance(payload.get("viewport"), dict) else {}
+    path = str(payload.get("path", ""))[:128]
+    ua = str(payload.get("ua", ""))[:200]
+    try:
+        logging.getLogger(__name__).info(
+            "TELEMETRY event=%s session=%s path=%s vw=%sx%s ua=%s props=%s",
+            event,
+            session_id[:8],
+            path,
+            viewport.get("w"),
+            viewport.get("h"),
+            ua[:80],
+            safe_props,
+        )
+    except Exception:
+        pass
+    return {"ok": True}
+
+
 @app.get("/api/bikes")
 def list_bikes(
     search: str | None = Query(None, description="Search by model/manufacturer"),
