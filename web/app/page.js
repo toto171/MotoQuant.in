@@ -353,7 +353,7 @@ export default function HomePage() {
                   Aamby Valley · MMRT · Kari · Hyderabad
                 </span>
                 <span className="px-3 py-1.5 rounded-full border border-brand-orange/30 text-brand-orange">
-                  +0.006s mean bias on 74 benchmarks
+                  +0.006s mean bias on 74 of 79 benchmarks
                 </span>
                 <span className="px-3 py-1.5 rounded-full border border-white/10 text-white/55">
                   RK4 · 1ms · 15 sub-models
@@ -632,7 +632,7 @@ export default function HomePage() {
                 Validated on Real Telemetry
               </h2>
               <p className="mt-4 text-white/70 text-lg">
-                We don&rsquo;t just predict — we measure. 74 weighted benchmarks
+                We don&rsquo;t just predict — we measure. 79 weighted benchmarks
                 against published Cycle World, Sport Rider, MCN, and
                 Motorcyclist tests. Reference baselines preserved exactly to
                 four decimals across every commit.
@@ -663,7 +663,7 @@ export default function HomePage() {
           <Reveal>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
               {[
-                { num: '74',      label: 'Bikes benchmarked' },
+                { num: '79',      label: 'Bikes benchmarked' },
                 { num: '15',      label: 'Within ±0.10s' },
                 { num: '30',      label: 'Within ±0.20s' },
                 { num: '±0.032s', label: 'Top 10 mean error' },

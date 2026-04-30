@@ -9341,6 +9341,7 @@ def seed_all(db: MotoQuantDB) -> dict:
     from .seed_catalogs.premium_universal import seed_premium_universal
     from .seed_catalogs.two_stroke import seed_two_stroke
     from .seed_catalogs.indian_retailer_depth import seed_indian_retailer_depth
+    from .seed_catalogs.drag_prep_specialty import seed_drag_prep_specialty
     from .seed_recommended_fitments import seed_recommended_fitments
 
     seed_reference_bikes(db)
@@ -9355,6 +9356,7 @@ def seed_all(db: MotoQuantDB) -> dict:
     n_parts += seed_premium_universal(db)
     n_parts += seed_two_stroke(db)
     n_parts += seed_indian_retailer_depth(db)
+    n_parts += seed_drag_prep_specialty(db)
     n_fitments = seed_bike_tire_fitments(db)
     # Recommended/drag_prep fitments (Apr 27, 2026): adds upgrade-tier fitments
     # beyond OEM with on-the-fly tire creation when referenced models are missing.
