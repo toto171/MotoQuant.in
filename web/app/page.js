@@ -341,7 +341,7 @@ export default function HomePage() {
                 A first-principles drag simulator for India&rsquo;s motorcycle
                 drag-racing community.{' '}
                 <span className="text-white">334 bikes</span>,{' '}
-                <span className="text-white">555 parts</span>,{' '}
+                <span className="text-white">562 parts</span>,{' '}
                 <span className="text-white">20 venues</span> — tuned to
                 within ±0.05s of real-world ETs on the litre-class.
               </p>
