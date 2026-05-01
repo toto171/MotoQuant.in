@@ -4,7 +4,8 @@ import { useState, useEffect, useRef, useCallback, useMemo, useId } from 'react'
 import {
   Zap, Search, ChevronDown, ChevronRight, X, MapPin, Gauge, Wrench,
   CircleDot, IndianRupee, ArrowLeft, Thermometer, Wind, Droplets,
-  BarChart3, Table2, Settings2, Upload, RotateCcw, Play, Layers, MessageSquare
+  BarChart3, Table2, Settings2, Upload, RotateCcw, Play, Layers, MessageSquare,
+  Locate, Loader2, AlertCircle
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -216,6 +217,10 @@ export default function SimulatorPage() {
   const [trackTemp, setTrackTemp] = useState(30);
   const [humidity, setHumidity] = useState(40);
   const [headwind, setHeadwind] = useState(0);
+
+  // ─── "Use my location" geolocation flow ─────────────────────────────
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [geoMessage, setGeoMessage] = useState(null);  // { tone: 'ok'|'err', text: string }
 
   // ─── Simulation ──────────────────────────────────────────────────────
   const [result, setResult] = useState(null);
@@ -460,6 +465,97 @@ export default function SimulatorPage() {
     setPowerBoost(0); setMassChange(0); setRiderKg(75);
     setAmbientTemp(25); setTrackTemp(30); setHumidity(40); setHeadwind(0);
     setFullResult(null); setCompareResult(null); setUploadResult(null);
+    setGeoMessage(null);
+  }
+
+  // ─── "Use my location" — proximity match seeded venues, fall back to OWM
+  // We don't rely on the LocationPicker component here because the full sim
+  // already has its own venue Dropdown + ambient/humidity sliders; we just
+  // need to populate them from the user's GPS in one click.
+  function haversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const toRad = (d) => (d * Math.PI) / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(a));
+  }
+
+  async function applyResolved(payload, label) {
+    if (payload?.matched_venue_id != null) {
+      const v = venues.find((x) => x.id === payload.matched_venue_id);
+      if (v) setVenue(v);
+    }
+    if (payload?.temperature_c != null) setAmbientTemp(Math.round(payload.temperature_c));
+    if (payload?.humidity_pct != null) setHumidity(Math.round(payload.humidity_pct));
+    setGeoMessage({ tone: 'ok', text: label || 'Location applied' });
+  }
+
+  async function useMyLocation() {
+    setGeoMessage(null);
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      setGeoMessage({ tone: 'err', text: 'Your browser does not support geolocation.' });
+      return;
+    }
+    setGeoLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          // Step 1: client-side proximity match against seeded venues (50 km radius).
+          let closest = null;
+          let closestKm = Infinity;
+          for (const v of venues) {
+            if (v.latitude == null || v.longitude == null) continue;
+            const km = haversineKm(latitude, longitude, v.latitude, v.longitude);
+            if (km < closestKm) {
+              closestKm = km;
+              closest = v;
+            }
+          }
+          // Step 2: ask backend to resolve. If a nearby seeded venue exists,
+          // hand over the venue NAME (no OWM key required). Otherwise pass
+          // GPS coords for OWM fallback.
+          const useSeeded = closest && closestKm <= 50;
+          const body = useSeeded
+            ? { location: closest.name }
+            : { lat: latitude, lon: longitude };
+          const res = await fetch(`${API}/api/venues/resolve`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+          if (!res.ok) {
+            let msg = `Resolve failed (${res.status})`;
+            try {
+              const j = await res.json();
+              if (j?.detail) msg = typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail);
+            } catch {}
+            throw new Error(msg);
+          }
+          const data = await res.json();
+          const label = useSeeded
+            ? `Near ${closest.name} (${closestKm.toFixed(0)} km)`
+            : data.venue_name || data.location_name || 'My location';
+          await applyResolved(data, label);
+        } catch (e) {
+          setGeoMessage({ tone: 'err', text: e.message || 'Failed to resolve location' });
+        } finally {
+          setGeoLoading(false);
+        }
+      },
+      (err) => {
+        setGeoLoading(false);
+        const map = {
+          1: 'Permission denied. Allow location access in your browser.',
+          2: 'Location unavailable. Check GPS / network and try again.',
+          3: 'Location request timed out.',
+        };
+        setGeoMessage({ tone: 'err', text: map[err.code] || `Location error: ${err.message}` });
+      },
+      { timeout: 10000, maximumAge: 60000, enableHighAccuracy: false },
+    );
   }
 
   // ─── A vs B comparison ──────────────────────────────────────────────
@@ -722,6 +818,35 @@ export default function SimulatorPage() {
                     renderItem={v => <div className="flex justify-between w-full"><span>{v.name}</span>{v.altitude_m && <span className="text-[10px] text-gray-600">{v.altitude_m}m</span>}</div>}
                     renderSelected={v => <span className="text-white text-xs">{v.name}</span>}
                   />
+
+                  {/* Use my location — proximity-matches a seeded venue
+                      within 50 km, else falls back to OWM by GPS.
+                      Populates venue + ambient temp + humidity. */}
+                  <div className="space-y-1.5">
+                    <button
+                      type="button"
+                      onClick={useMyLocation}
+                      disabled={geoLoading}
+                      className="w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-lg border border-white/[0.08] hover:border-orange-500/30 bg-white/[0.02] hover:bg-orange-500/5 text-xs text-gray-400 hover:text-orange-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {geoLoading
+                        ? <Loader2 size={12} className="animate-spin" />
+                        : <Locate size={12} className="text-orange-500" />}
+                      {geoLoading ? 'Locating…' : 'Use my location'}
+                    </button>
+                    {geoMessage && (
+                      <div className={`flex items-start gap-1.5 px-2 py-1.5 rounded-md text-[11px] ${
+                        geoMessage.tone === 'ok'
+                          ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-300'
+                          : 'bg-red-500/10 border border-red-500/30 text-red-300'
+                      }`}>
+                        {geoMessage.tone === 'ok'
+                          ? <Locate size={11} className="shrink-0 mt-0.5" />
+                          : <AlertCircle size={11} className="shrink-0 mt-0.5" />}
+                        <span className="font-mono">{geoMessage.text}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </Card>

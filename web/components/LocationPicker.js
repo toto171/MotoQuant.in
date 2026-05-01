@@ -1,18 +1,26 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Loader2, AlertCircle, Check, Locate, X } from 'lucide-react';
 import { API_URL } from '../lib/api';
 
 /**
- * LocationPicker — asks the backend to resolve a race venue from text
- * or GPS and exposes the environment (temperature, humidity, pressure,
- * altitude, density altitude) to its parent via the `onResolved` callback.
+ * LocationPicker — asks the backend to resolve a race venue from text,
+ * a quick-pick venue chip, or browser GPS, and exposes the resolved
+ * environment (temperature, humidity, pressure, altitude, density
+ * altitude) to its parent via the `onResolved` callback.
  *
- * Two inputs are supported:
- *   1. Typed location (matches seeded venues first, then falls back to OWM)
- *   2. Browser GPS (geolocation API → OWM by lat/lon)
+ * Three input paths:
+ *   1. Quick-pick chip — instant click on a seeded venue (Aamby Valley,
+ *      MMRT, BIC, etc.). Resolves via the seeded-venue branch of
+ *      /api/venues/resolve, no OWM key required.
+ *   2. Free-text query — types a city or venue name; resolves seeded
+ *      first, OWM fallback if no match.
+ *   3. Browser GPS — geolocation API → proximity-matches the closest
+ *      seeded venue within 50 km (so works without an OWM key as long
+ *      as the user is near a tracked drag strip); falls back to OWM by
+ *      lat/lon if no nearby venue.
  *
  * Props
  * -----
@@ -21,39 +29,94 @@ import { API_URL } from '../lib/api';
  *   onCleared       () => void     — called when the user clears the picker
  *   compact         boolean        — tighter layout for sidebar use
  */
+
+// Haversine distance in km between two GPS points
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth radius km
+  const toRad = (d) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+// Module-level cache so we don't refetch /api/venues on every mount
+let _cachedVenues = null;
+
+async function fetchVenues() {
+  if (_cachedVenues) return _cachedVenues;
+  try {
+    const res = await fetch(`${API_URL}/api/venues`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    _cachedVenues = Array.isArray(data?.venues) ? data.venues : [];
+    return _cachedVenues;
+  } catch {
+    return [];
+  }
+}
+
 export default function LocationPicker({ value, onResolved, onCleared, compact = false }) {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [venues, setVenues] = useState([]);
 
-  const resolve = useCallback(async (body, label) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(`${API_URL}/api/venues/resolve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) {
-        let msg = `Failed (${res.status})`;
-        try {
-          const j = await res.json();
-          if (j?.detail) msg = typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail);
-        } catch {
-          try { msg = await res.text(); } catch {}
+  useEffect(() => {
+    let mounted = true;
+    fetchVenues().then((v) => {
+      if (mounted) setVenues(v);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // Quick-pick chip set: Indian venues first (active drag scene), then by name.
+  const quickPickVenues = useMemo(() => {
+    if (!venues.length) return [];
+    const indianFirst = [...venues].sort((a, b) => {
+      const aIN = (a.country || '').toUpperCase() === 'IN' ? 0 : 1;
+      const bIN = (b.country || '').toUpperCase() === 'IN' ? 0 : 1;
+      if (aIN !== bIN) return aIN - bIN;
+      return (a.name || '').localeCompare(b.name || '');
+    });
+    return indianFirst.slice(0, compact ? 6 : 8);
+  }, [venues, compact]);
+
+  const resolve = useCallback(
+    async (body, label) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(`${API_URL}/api/venues/resolve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) {
+          let msg = `Failed (${res.status})`;
+          try {
+            const j = await res.json();
+            if (j?.detail)
+              msg = typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail);
+          } catch {
+            try { msg = await res.text(); } catch {}
+          }
+          throw new Error(msg);
         }
-        throw new Error(msg);
+        const data = await res.json();
+        onResolved?.({ ...data, _label: label || data.resolved_name || data.venue_name || query });
+      } catch (e) {
+        setError(e.message || 'Failed to resolve location');
+      } finally {
+        setLoading(false);
       }
-      const data = await res.json();
-      // Attach the user-visible label for display
-      onResolved?.({ ...data, _label: label || data.resolved_name || query });
-    } catch (e) {
-      setError(e.message || 'Failed to resolve location');
-    } finally {
-      setLoading(false);
-    }
-  }, [onResolved, query]);
+    },
+    [onResolved, query],
+  );
 
   async function handleText(e) {
     e.preventDefault();
@@ -62,6 +125,11 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
       return;
     }
     await resolve({ location: query.trim() }, query.trim());
+  }
+
+  async function pickVenue(v) {
+    setError(null);
+    await resolve({ location: v.name }, v.name);
   }
 
   async function useMyLocation() {
@@ -74,15 +142,41 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude, altitude } = pos.coords;
+        // Try proximity-match against seeded venues first — no OWM key needed.
+        try {
+          const seeded = venues.length ? venues : await fetchVenues();
+          let closest = null;
+          let closestKm = Infinity;
+          for (const v of seeded) {
+            if (v.latitude == null || v.longitude == null) continue;
+            const km = haversineKm(latitude, longitude, v.latitude, v.longitude);
+            if (km < closestKm) {
+              closestKm = km;
+              closest = v;
+            }
+          }
+          if (closest && closestKm <= 50) {
+            const label = `Near ${closest.name} (${closestKm.toFixed(0)} km)`;
+            await resolve({ location: closest.name }, label);
+            return;
+          }
+        } catch {
+          // fall through to OWM
+        }
         const body = { lat: latitude, lon: longitude };
         if (altitude != null && Number.isFinite(altitude)) body.altitude_m = altitude;
         await resolve(body, 'My location');
       },
       (err) => {
         setLoading(false);
-        setError(`Location denied: ${err.message}`);
+        const map = {
+          1: 'Permission denied. Allow location access in your browser.',
+          2: 'Location unavailable. Check GPS / network and try again.',
+          3: 'Location request timed out.',
+        };
+        setError(map[err.code] || `Location error: ${err.message}`);
       },
-      { timeout: 10000, maximumAge: 60000 }
+      { timeout: 10000, maximumAge: 60000, enableHighAccuracy: false },
     );
   }
 
@@ -95,36 +189,66 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
   return (
     <div className={`w-full ${compact ? '' : 'p-1'}`}>
       {!value ? (
-        <form onSubmit={handleText} className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={15} />
-              <input
-                type="text"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                placeholder="Venue or city (e.g. Aamby Valley, MMRT, Pune)"
-                disabled={loading}
-                className="w-full pl-9 pr-3 py-2 bg-black/40 border border-white/10 rounded-lg text-sm text-white placeholder:text-white/30 focus:border-brand-orange focus:outline-none font-mono disabled:opacity-50"
-              />
+        <div className="space-y-2.5">
+          {quickPickVenues.length > 0 && (
+            <div>
+              <p className="text-[10px] font-mono uppercase tracking-wider text-white/40 mb-1.5">
+                Quick pick
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {quickPickVenues.map((v) => (
+                  <button
+                    key={v.id}
+                    type="button"
+                    onClick={() => pickVenue(v)}
+                    disabled={loading}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/[0.04] hover:bg-brand-orange/20 hover:border-brand-orange/40 border border-white/10 text-[11px] font-mono text-white/70 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <MapPin size={10} className="text-brand-orange/80" />
+                    {v.name}
+                    {v.altitude_m != null && (
+                      <span className="text-[9px] text-white/40 ml-0.5">
+                        {Math.round(v.altitude_m)}m
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={handleText} className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={15} />
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Or type any city / venue (e.g. Pune)"
+                  disabled={loading}
+                  className="w-full pl-9 pr-3 py-2 bg-black/40 border border-white/10 rounded-lg text-sm text-white placeholder:text-white/30 focus:border-brand-orange focus:outline-none font-mono disabled:opacity-50"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loading || !query.trim()}
+                className="px-3 py-2 bg-brand-orange hover:bg-brand-orangeLight disabled:opacity-40 disabled:cursor-not-allowed text-black font-display font-semibold rounded-lg text-xs transition-colors"
+              >
+                {loading ? <Loader2 size={14} className="animate-spin" /> : 'Set'}
+              </button>
             </div>
             <button
-              type="submit"
-              disabled={loading || !query.trim()}
-              className="px-3 py-2 bg-brand-orange hover:bg-brand-orangeLight disabled:opacity-40 disabled:cursor-not-allowed text-black font-display font-semibold rounded-lg text-xs transition-colors"
+              type="button"
+              onClick={useMyLocation}
+              disabled={loading}
+              className="inline-flex items-center gap-1.5 text-xs font-mono text-white/50 hover:text-brand-orange transition-colors disabled:opacity-50"
             >
-              {loading ? <Loader2 size={14} className="animate-spin" /> : 'Set'}
+              {loading ? <Loader2 size={12} className="animate-spin" /> : <Locate size={12} />}
+              Use my GPS location
             </button>
-          </div>
-          <button
-            type="button"
-            onClick={useMyLocation}
-            disabled={loading}
-            className="inline-flex items-center gap-1.5 text-xs font-mono text-white/50 hover:text-brand-orange transition-colors disabled:opacity-50"
-          >
-            <Locate size={12} /> Use my GPS location
-          </button>
-        </form>
+          </form>
+        </div>
       ) : (
         <ResolvedCard value={value} onClear={clear} compact={compact} />
       )}
@@ -146,13 +270,9 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
 }
 
 function ResolvedCard({ value, onClear, compact }) {
-  // /api/venues/resolve returns a flat payload (not nested under "environment")
   const source = value?.source || 'unknown';
   const label =
-    value?._label ||
-    value?.venue_name ||
-    value?.location_name ||
-    'Resolved location';
+    value?._label || value?.venue_name || value?.location_name || 'Resolved location';
 
   const rows = [
     { label: 'Temp', v: value?.temperature_c, suffix: '°C', dec: 1 },
@@ -180,7 +300,8 @@ function ResolvedCard({ value, onClear, compact }) {
                 : source === 'openweathermap'
                   ? 'Live weather (OpenWeatherMap)'
                   : source}
-              {value?.fetched_at && ` · ${new Date(value.fetched_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+              {value?.fetched_at &&
+                ` · ${new Date(value.fetched_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
             </p>
           </div>
         </div>
@@ -197,9 +318,7 @@ function ResolvedCard({ value, onClear, compact }) {
         {rows.map((r, i) => (
           <div key={i} className="text-left">
             <p className="text-[9px] font-mono uppercase tracking-wider text-white/40">{r.label}</p>
-            <p className={`text-xs font-mono tabular-nums mt-0.5 ${
-              r.highlight ? 'text-brand-orange' : 'text-white/90'
-            }`}>
+            <p className={`text-xs font-mono tabular-nums mt-0.5 ${r.highlight ? 'text-brand-orange' : 'text-white/90'}`}>
               {r.v == null ? '—' : `${Number(r.v).toFixed(r.dec)}${r.suffix}`}
             </p>
           </div>
@@ -211,14 +330,7 @@ function ResolvedCard({ value, onClear, compact }) {
 
 /**
  * Helper: given a LocationPicker `value` (the raw /api/venues/resolve response),
- * build the simulator environment override fields. Maps flat resolve-endpoint
- * fields to QuickSimRequest names.
- *
- *   temperature_c → ambient_temp_c
- *   humidity_pct  → humidity_pct
- *
- * If the resolved location matched a seeded venue, `venue_id` is also set
- * so the backend can apply the venue's surface grip / altitude profile.
+ * build the simulator environment override fields.
  */
 export function environmentOverridesFromLocation(value) {
   if (!value) return {};
