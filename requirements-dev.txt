@@ -1,0 +1,17 @@
+# MotoQuant Pro -- developer / CI-only dependencies
+# Install with: pip install -r requirements-dev.txt
+#
+# These are only needed to run the test suite + tooling, not to run
+# the API server in production. Production runtime deps live in
+# requirements-api.txt.
+
+# Test runner (already required by every existing tests/test_*.py
+# but pinned here so a fresh dev checkout `pip install -r
+# requirements-dev.txt` is enough to run `pytest` straight away).
+pytest>=7.0,<10
+
+# Property-based testing — powers tests/test_physics_invariants.py
+# (monotonicity invariants for mass / power / Cd / frontal_area).
+# The test file is gated on `pytest.importorskip("hypothesis")` so
+# the rest of the suite still runs without this dependency.
+hypothesis>=6.100,<7
