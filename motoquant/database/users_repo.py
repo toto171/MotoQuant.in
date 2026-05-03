@@ -131,6 +131,13 @@ def consume_magic_link(conn: sqlite3.Connection, token: str) -> Optional[str]:
     Validate and consume a magic-link token.
     Returns the email on success, None on invalid/expired/already-used token.
     Expiry check uses SQLite datetime() to handle both timestamp formats.
+
+    Consumes the token atomically via a conditional UPDATE: the UPDATE only
+    fires when consumed=0, and the Cursor.rowcount tells us whether we won
+    the race. Two simultaneous requests with the same token both see
+    consumed=0 at SELECT time, but only one of them gets rowcount=1 on the
+    UPDATE -- the other loses and returns None, preventing duplicate
+    sessions on a replay of the magic-link URL.
     """
     token_hash = _sha256(token)
     row = conn.execute(
@@ -145,10 +152,14 @@ def consume_magic_link(conn: sqlite3.Connection, token: str) -> Optional[str]:
     row = dict(row)
     if row["consumed"]:
         return None
-    conn.execute(
-        "UPDATE magic_links SET consumed = 1 WHERE id = ?", (row["id"],)
+    cur = conn.execute(
+        "UPDATE magic_links SET consumed = 1 WHERE id = ? AND consumed = 0",
+        (row["id"],),
     )
     conn.commit()
+    if cur.rowcount != 1:
+        # Another request consumed the token between our SELECT and UPDATE.
+        return None
     return row["email"]
 
 
