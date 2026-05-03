@@ -320,4 +320,37 @@ class MotoQuantDB:
 
     # ────────────────────────────────────────────
     # Utility
-    # ──────────�
+    # ────────────────────────────────────────────
+
+    def stats(self) -> dict:
+        """Return row counts for all major tables."""
+        tables = [
+            "manufacturers",
+            "bike_models",
+            "bike_configs",
+            "dyno_curves",
+            "tire_manufacturers",
+            "tire_models",
+            "venues",
+            "weather_records",
+            "venue_seasonal",
+            "parts",
+            "sim_runs",
+            "data_provenance",
+        ]
+        counts = {}
+        for t in tables:
+            try:
+                row = self.conn.execute(f"SELECT COUNT(*) AS c FROM {t}").fetchone()
+                counts[t] = row["c"]
+            except sqlite3.OperationalError:
+                counts[t] = 0
+        return counts
+
+    def vacuum(self):
+        """Reclaim disk space."""
+        self.conn.execute("VACUUM")
+
+    @property
+    def path(self) -> Path:
+        return self._db_path
