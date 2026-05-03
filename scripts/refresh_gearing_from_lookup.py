@@ -109,7 +109,11 @@ def refresh(db_path: str = "motoquant.db") -> dict:
         drv["front_sprocket"] = int(front)
         drv["rear_sprocket"] = int(rear)
         drv["primary_ratio"] = float(primary)
-        drv["final_drive_ratio"] = float(rear) / float(front)
+        # Shaft- / belt-drive bikes have front=0 in the Tier-1 lookup; guard
+        # against ZeroDivisionError. final_drive is meaningless for these.
+        drv["final_drive_ratio"] = (
+            float(rear) / float(front) if float(front) > 0 else None
+        )
         cur.execute(
             "UPDATE bike_configs SET drivetrain_params = ?, "
             "updated_at = datetime('now','utc') WHERE id = ?",
@@ -120,7 +124,6 @@ def refresh(db_path: str = "motoquant.db") -> dict:
     conn.commit()
     conn.close()
     return stats
-
 
 if __name__ == "__main__":
     db = sys.argv[1] if len(sys.argv) > 1 else "motoquant.db"
