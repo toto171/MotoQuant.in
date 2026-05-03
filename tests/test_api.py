@@ -52,6 +52,21 @@ _api_mod._db_conn = None
 
 client = TestClient(app)
 
+# S5 added require_tier(...) gates on /api/simulate/save, /api/calibrate/dragy,
+# /api/calibrate/dyno.  These tests predate that work and test the endpoint
+# unit logic (CSV parsing, J1349 correction, overlay), not auth.  Override
+# get_current_user so require_tier sees a studio-tier user.
+try:
+    from motoquant.auth import get_current_user as _gcu
+    app.dependency_overrides[_gcu] = lambda: {
+        "id": 999,
+        "email": "test@motoquant.in",
+        "tier": "studio",
+        "is_active": 1,
+    }
+except ImportError:
+    pass
+
 
 def tearDownModule():
     """Remove the tmp DB after all tests finish."""
