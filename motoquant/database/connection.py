@@ -5,6 +5,7 @@ Handles SQLite connection lifecycle, schema initialization, migrations,
 and provides a single entry-point (MotoQuantDB) for all repository access.
 """
 
+import os
 import sqlite3
 from pathlib import Path
 
@@ -354,3 +355,30 @@ class MotoQuantDB:
     @property
     def path(self) -> Path:
         return self._db_path
+
+
+def connect(db_path: str | None = None) -> sqlite3.Connection:
+    """
+    Module-level connection helper used by auth.py, subscriptions.py, run.py.
+
+    Mirrors MotoQuantDB.connect(): opens SQLite at ``db_path`` (or the
+    MOTOQUANT_DB env var, falling back to ``motoquant.db``), applies the
+    same WAL -> DELETE journal-mode fallback for FUSE/network mounts, sets
+    ``row_factory = sqlite3.Row`` and enables foreign keys.
+
+    The caller is responsible for closing the returned connection.
+    """
+    if db_path is None:
+        db_path = os.environ.get("MOTOQUANT_DB", "motoquant.db")
+    conn = sqlite3.connect(str(db_path), check_same_thread=False)
+    conn.row_factory = sqlite3.Row
+    try:
+        row = conn.execute("PRAGMA journal_mode=WAL").fetchone()
+        if row and row[0] != "wal":
+            raise sqlite3.OperationalError("WAL not accepted by filesystem")
+    except sqlite3.OperationalError:
+        conn.execute("PRAGMA journal_mode=DELETE")
+    conn.execute("PRAGMA foreign_keys=ON")
+    conn.execute("PRAGMA synchronous=NORMAL")
+    conn.execute("PRAGMA cache_size=-64000")
+    return conn
