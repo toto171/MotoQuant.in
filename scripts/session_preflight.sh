@@ -31,7 +31,20 @@ set -euo pipefail
 readonly REPO_URL="https://github.com/da25mem5s02-debug/MotoQuant_v1.git"
 readonly REPO_NAME="MotoQuant_v1"
 readonly FUSE_MOUNT="/sessions/sharp-confident-cerf/mnt/Vehicle Dynamics"
-readonly SECRETS_DIR="${HOME}/.motoquant-secrets"
+# SECRETS_DIR resolution order (first existing wins):
+#   1. $MOTOQUANT_SECRETS_DIR  — explicit override (recommended for sandboxes)
+#   2. $HOME/.motoquant-secrets — standard home location (real machines)
+#   3. /tmp/.motoquant-secrets  — fallback for read-only homes / disk-full
+SECRETS_DIR="${MOTOQUANT_SECRETS_DIR:-}"
+if [[ -z "${SECRETS_DIR}" ]]; then
+  if [[ -w "${HOME}" ]] 2>/dev/null && touch "${HOME}/.motoquant-secrets-probe" 2>/dev/null; then
+    rm -f "${HOME}/.motoquant-secrets-probe"
+    SECRETS_DIR="${HOME}/.motoquant-secrets"
+  else
+    SECRETS_DIR="/tmp/.motoquant-secrets"
+  fi
+fi
+readonly SECRETS_DIR
 readonly SECRETS_FILE="${SECRETS_DIR}/git-creds.env"
 readonly MUTEX_FILE="/tmp/motoquant-session.lock"
 readonly MUTEX_MAX_AGE_HOURS=6
@@ -233,9 +246,12 @@ read_dispatch_inbox() {
   fi
 
   local instructions
+  # Only match real dated entries: ## INSTRUCTION — YYYY-MM-DD — ...
+  # (templates and placeholders use literal "YYYY-MM-DD" so they don't match)
   instructions=$(awk '
-    /^## INSTRUCTION/ { p=1; print; next }
+    /^## INSTRUCTION — [0-9]{4}-[0-9]{2}-[0-9]{2}/ { p=1; print; next }
     /^## (DONE|DEFERRED|RESPONDED)/ { p=0 }
+    /^## (INSTRUCTION|INSTRUCTIONS QUEUE|DONE|How to use|Severity|Templates|---)/ { p=0; next }
     p { print }
   ' "${inbox}")
 

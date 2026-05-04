@@ -25,7 +25,19 @@
 
 set -euo pipefail
 
-readonly SECRETS_DIR="${HOME}/.motoquant-secrets"
+# SECRETS_DIR resolution: same logic as session_preflight.sh.
+# Override via MOTOQUANT_SECRETS_DIR for sandboxes where HOME is read-only
+# or full. Real machines use $HOME/.motoquant-secrets/.
+SECRETS_DIR="${MOTOQUANT_SECRETS_DIR:-}"
+if [[ -z "${SECRETS_DIR}" ]]; then
+  if [[ -w "${HOME}" ]] 2>/dev/null && touch "${HOME}/.motoquant-secrets-probe" 2>/dev/null; then
+    rm -f "${HOME}/.motoquant-secrets-probe"
+    SECRETS_DIR="${HOME}/.motoquant-secrets"
+  else
+    SECRETS_DIR="/tmp/.motoquant-secrets"
+  fi
+fi
+readonly SECRETS_DIR
 readonly SECRETS_FILE="${SECRETS_DIR}/git-creds.env"
 readonly REPO_URL="https://github.com/da25mem5s02-debug/MotoQuant_v1.git"
 
