@@ -76,6 +76,37 @@ Compare against: <prior report or benchmark>
 
 ---
 
+
+
+## Mobile shorthand DSL
+
+For one-tap dispatch from your phone, drop a `## MOBILE — YYYY-MM-DD — HH:MM` block anywhere in this file. The preflight handler expands it into proper INSTRUCTION blocks. Available verbs:
+
+```
+ship                                # process inbox + commit + push
+pause                               # halt all autonomous sessions
+unpause                             # resume autonomous sessions
+rerun yesterday                     # re-execute yesterday's primary task
+rerun <agent>                       # run a specific agent immediately
+add bike <make> <model> <year>      # queue [urgent] catalog request
+investigate <topic>                 # queue [research] investigation
++1 <agent>                          # bump weight +10 for this agent
+-1 <agent>                          # cut weight -10
+status                              # post current STATUS.md to OUTBOX
+incident <text>                     # raise an incident manually
+```
+
+Once processed, the block is renamed `## MOBILE-PROCESSED — ...` so it isn't re-fired.
+
+Example:
+
+```
+## MOBILE — 2026-05-15 — 10:30
+add bike Aprilia Tuono V4 1100 Factory 2024
++1 marketing-content
+investigate why ZX-25R sim trap is 5 km/h slow
+```
+
 ## INSTRUCTIONS QUEUE
 
 > _Add new `## INSTRUCTION` blocks above this divider. Claude marks them `## DONE` once handled._
