@@ -149,12 +149,18 @@ class TestSchemaMigrationFresh(unittest.TestCase):
         self.assertIn("idx_spec_corr_status", indexes)
         self.assertIn("idx_spec_corr_field", indexes)
 
-    def test_schema_version_is_4(self):
+    def test_schema_version_is_current(self):
+        from motoquant.database.schema import SCHEMA_VERSION
+
         row = self.db.conn.execute(
             "SELECT value FROM schema_meta WHERE key = 'schema_version'"
         ).fetchone()
         self.assertIsNotNone(row, "schema_meta should have a schema_version entry")
-        self.assertEqual(int(row[0]), 4, "SCHEMA_VERSION should be 4 after fresh init")
+        self.assertEqual(
+            int(row[0]),
+            SCHEMA_VERSION,
+            f"DB schema_version should match motoquant.database.schema.SCHEMA_VERSION ({SCHEMA_VERSION}) after fresh init",
+        )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
