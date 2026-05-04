@@ -251,6 +251,100 @@ KAWASAKI_Z_H2_SX_SE_PLUS_2024 = spec_from_dict(
 
 
 # Master list — exported back to known_bikes.py
+# ── KTM 1390 Super Duke R EVO (2024-2026) ────────────────────────────
+# 1350cc 75° V-twin LC8 EVO, 190 hp at 10000 rpm, 145 Nm at 8000 rpm.
+# Direct successor to the 1290 Super Duke R EVO using the SAME chassis,
+# transmission cassette, and final drive (per KTM "the 1390 inherits the
+# 1290 EVO platform with new pistons + crankshaft" — KTM 2024 press kit).
+# So gear ratios + sprockets + chain pitch match the 1290 entry exactly;
+# only bore (108→110 mm), displacement (1301→1350 cc), and power/torque
+# are bumped.
+# Sources: KTM official 2024 technical data sheet (ktm.com), MCN 2024
+# launch test, Cycle World 2024 first-ride.
+KTM_1390_SUPERDUKE_R_EVO_2024 = spec_from_dict(
+    {
+        "manufacturer": "KTM",
+        "model_name": "1390 Super Duke R EVO",
+        "model_code": "1390EVO",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 1350,
+        "bore_mm": 110.0,
+        "stroke_mm": 71.0,
+        "compression_ratio": 13.5,
+        "cylinders": 2,
+        "peak_power_hp": 190.0,
+        "peak_power_rpm": 10000,
+        "peak_torque_nm": 145.0,
+        "peak_torque_rpm": 8000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # SAME cassette as 1290 Super Duke R EVO — KTM 2024 press kit
+        # confirms transmission carryover.
+        "gear_ratios": [2.500, 1.857, 1.538, 1.300, 1.148, 1.000],
+        "front_sprocket": 17,
+        "rear_sprocket": 41,
+        "chain_pitch": "525",
+        "dry_mass_kg": 200.0,  # 211 kg wet - ~11 kg fuel = ~200 dry
+        "wheelbase_mm": 1497.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "200/55ZR17",
+        "cd": 0.74,        # naked litre median; ref KTM 1290 SDR @ 0.73
+        "frontal_area_m2": 0.55,  # marginally wider than 1290 (0.54)
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Hero Xtreme 200S 4V (2023-2026 — Indian commuter sport) ─────────
+# 199.6cc oil-cooled single, 4-valve head, 19.1 hp @ 8500, 17.35 Nm @
+# 6500. Half-faired commuter with sport-naked ergonomics. The "200S
+# 4V" replaces the older 2-valve Xtreme 200S with a Karizma-derived
+# 4V head — bumps power ~3 hp over the 2V variant.
+# Sources: Hero MotoCorp official spec sheet (heromotocorp.com),
+# 91Wheels review database, ZigWheels spec table.
+HERO_XTREME_200S_4V_2023 = spec_from_dict(
+    {
+        "manufacturer": "Hero",
+        "model_name": "Xtreme 200S 4V",
+        "model_code": "X200S4V",
+        "year_from": 2023,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 199.6,
+        "bore_mm": 67.0,
+        "stroke_mm": 56.5,
+        "compression_ratio": 9.8,
+        "cylinders": 1,
+        "peak_power_hp": 19.1,
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 17.35,
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "oil",
+        "valve_config": "sohc",
+        "gears": 5,
+        # Standard 5-speed Hero 200cc commuter cassette — same as
+        # Karizma R / 200cc Xtreme platform (Hero service manual).
+        "gear_ratios": [3.182, 1.778, 1.318, 1.045, 0.875],
+        "front_sprocket": 14,
+        "rear_sprocket": 42,
+        "chain_pitch": "428",
+        "dry_mass_kg": 158.0,  # 165 kg kerb - ~7 kg fuel = ~158 dry
+        "wheelbase_mm": 1335.0,
+        "front_tire_size": "100/80-17",
+        "rear_tire_size": "130/70-17",
+        "cd": 0.78,        # half-faired commuter; ref Pulsar 220F @ 0.83, NS200 @ 0.80
+        "frontal_area_m2": 0.46,  # ref TVS Apache RTR 200 @ 0.45
+    },
+    source_name="spec_sheet",
+)
+
+
+# Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
     BMW_HP4_RACE_2017,
@@ -258,4 +352,7 @@ EXTENDED_BIKES = [
     MV_AGUSTA_F4_RC_2017,
     HONDA_RC213V_S_2015,
     KAWASAKI_Z_H2_SX_SE_PLUS_2024,
+    # ── Daily improvement run 2026-05-04 (Monday — Catalog) ──
+    KTM_1390_SUPERDUKE_R_EVO_2024,
+    HERO_XTREME_200S_4V_2023,
 ]

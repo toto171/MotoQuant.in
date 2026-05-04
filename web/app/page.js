@@ -340,7 +340,7 @@ export default function HomePage() {
               <p className="mt-7 text-lg sm:text-xl text-white/70 leading-relaxed max-w-xl mx-auto">
                 A first-principles drag simulator for India&rsquo;s motorcycle
                 drag-racing community.{' '}
-                <span className="text-white">334 bikes</span>,{' '}
+                <span className="text-white">336 bikes</span>,{' '}
                 <span className="text-white">562 parts</span>,{' '}
                 <span className="text-white">20 venues</span> — tuned to
                 within ±0.05s of real-world ETs on the litre-class.
@@ -415,9 +415,9 @@ export default function HomePage() {
               {
                 icon: Target,
                 title: 'Indian Market-First',
-                body: '334 bikes including 57 Indian commuters (Pulsar, Apache, R15, Duke, RE), 15 SE Asia drag cubs, and the complete Indian racing scene. Parts prices in INR with live retailer data. Venues: Aamby Valley, MMRT, BIC, Kari, Hyderabad.',
+                body: '336 bikes including 57 Indian commuters (Pulsar, Apache, R15, Duke, RE), 15 SE Asia drag cubs, and the complete Indian racing scene. Parts prices in INR with live retailer data. Venues: Aamby Valley, MMRT, BIC, Kari, Hyderabad.',
                 href: '/bikes',
-                cta: 'Browse all 334 bikes →',
+                cta: 'Browse all 336 bikes →',
               },
               {
                 icon: TrendingUp,
