@@ -54,14 +54,26 @@ log "found pending MOBILE blocks"
 
 # We do this in Python because bash regex + multi-line state machine = misery
 python3 - <<'PYEOF'
-import re, json, os, sys, datetime
+import re, json, os, sys, datetime, subprocess
 from pathlib import Path
 
-inbox_path  = Path(os.environ["INBOX"])
-outbox_path = Path(os.environ["OUTBOX"])
-weights_path = Path(os.environ["WEIGHTS"])
-pause_flag  = Path(os.environ["PAUSE_FLAG"])
-repo = Path(os.environ.get("REPO", "."))
+def _np(p):
+    """Cross-platform path normalize: MINGW /tmp/ → Windows via cygpath."""
+    if not p:
+        return p
+    if os.name == "nt" and str(p).startswith("/"):
+        try:
+            out = subprocess.check_output(["cygpath", "-w", str(p)], text=True).strip()
+            return out if out else str(p)
+        except Exception:
+            return str(p)
+    return str(p)
+
+inbox_path  = Path(_np(os.environ["INBOX"]))
+outbox_path = Path(_np(os.environ["OUTBOX"]))
+weights_path = Path(_np(os.environ["WEIGHTS"]))
+pause_flag  = Path(_np(os.environ["PAUSE_FLAG"]))
+repo = Path(_np(os.environ.get("REPO", ".")))
 
 text = inbox_path.read_text()
 

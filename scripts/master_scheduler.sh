@@ -122,12 +122,24 @@ score_agents() {
   python3 - <<PYEOF
 import json, sys, os, subprocess
 
-weights_file = "${WEIGHTS_FILE}"
-inbox_file   = "${INBOX_FILE}"
-status_file  = "${STATUS_FILE}"
-signals_file = "${SIGNALS_FILE}"
+def _np(p):
+    """Cross-platform path normalize: MINGW /tmp/ → Windows via cygpath."""
+    if not p:
+        return p
+    if os.name == "nt" and p.startswith("/"):
+        try:
+            out = subprocess.check_output(["cygpath", "-w", p], text=True).strip()
+            return out if out else p
+        except Exception:
+            return p
+    return p
+
+weights_file = _np("${WEIGHTS_FILE}")
+inbox_file   = _np("${INBOX_FILE}")
+status_file  = _np("${STATUS_FILE}")
+signals_file = _np("${SIGNALS_FILE}")
 dow          = int("${DOW}")
-agents_dir   = "${AGENTS_DIR}"
+agents_dir   = _np("${AGENTS_DIR}")
 
 with open(weights_file) as f:
     weights = json.load(f)
