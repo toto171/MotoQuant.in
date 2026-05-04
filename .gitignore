@@ -120,3 +120,13 @@ tokens.md.bak
 *.token
 secrets.local
 .env.local
+
+# ── Reliability stack hardening (2026-05-04) ──────────────────────────────
+# Belt-and-braces — these paths SHOULD never be inside the repo (they live
+# outside the FUSE mount or in /tmp), but defence-in-depth in case anyone
+# ever copies them in.
+.motoquant-secrets/
+git-creds.env
+preflight.env
+mq-session-*/
+*.session.lock
