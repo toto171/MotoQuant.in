@@ -66,6 +66,9 @@ Thumbs.db
 *.db.bak*
 *.db-shm.bak*
 *.db-wal.bak*
+# Pre-rebuild safety copies (e.g. motoquant.db.before-rebuild_2026_05_03).
+# Same reason -- suffix breaks the *.db glob.
+*.db.before-rebuild*
 
 # Temporary files
 .tmp
