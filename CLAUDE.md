@@ -76,6 +76,38 @@ The Cowork Write/Edit tools occasionally truncate at ~5-6 KB when rewriting exis
 ### Sync the headline numbers across the codebase on every catalog/feature change
 When ALL_KNOWN_BIKES, the parts catalog, the tire library, the fitments table, or the test count changes, the visible numbers in the web frontend AND the docs go stale instantly. Three places hit by the April 27 deploy that should have been updated together but weren't: (a) `web/app/bikes/page.js` metadata title hard-codes "287 Bikes" — still says 287 even though prod is now 327. (b) `web/app/page.js` stats strip on the landing page (bikes / tires / parts / venues / tests / sub-models tiles). (c) `README.md` stats blurb. Plus blog posts that reference specific counts (e.g. "across 90 published benchmarks"), the `validation` doc page, the `features` page hero stat, and any social-card OG image generated from those numbers. Rule: **after a catalog or feature deploy, run `python3 scripts/audit_headline_stats.py` (creates a diff report of declared-vs-actual numbers) and patch every drift it flags before you push.** Counts to keep in sync: `ALL_KNOWN_BIKES` length, `parts`/`bike_models`/`bike_tire_fitments`/`tire_models`/`venues` row counts in `motoquant.db`, total fast test count from pytest, total benchmark count in `BENCHMARKS`, and the K5/R1/Hayabusa reference baselines (those last three are fixed but get re-quoted in the blog/docs and need to match the current sweep). Treat this as a release-checklist gate — do NOT ship a build that changes any of these numbers without doing the sync pass.
 
+
+### FUSE-mount sandbox: clone to `/tmp` before committing
+The Cowork sandbox mounts the repo at `/sessions/<id>/mnt/Projects--Vehicle Dynamics/` via FUSE. Three classes of failure happen *only* on this mount and never on a real terminal: (1) `git status` reports phantom staged deletions / modifications because the FUSE index goes out of sync with the on-disk tree (the May-3 daily aborted report is the canonical example — 44 fake deletions including `motoquant/observability.py`, `tests/test_physics_invariants.py`, the design mockups, etc., none of which are actually missing on disk); (2) `git push` / `git fetch` fail with `cannot lock ref … File exists` on stale `.git/refs/remotes/origin/*.lock` and `.git/packed-refs.lock` files owned by `sharp-epic-shannon` that the sandbox cannot unlink (`Operation not permitted`); (3) `git branch -D` and `git config --global` fail for the same reason. **Standard recovery:** clone fresh to `/tmp/mq-push`, do all commit / push / rebase / branch-delete work there, sync motoquant.db / CLAUDE.md / new files back into the clone via `cp` from the FUSE checkout, commit by explicit file list, push with the inline credential helper. End-to-end pattern:
+
+```bash
+PAT=$(awk '/^github_pat_/ {print; exit}' "/sessions/<id>/mnt/Projects--Vehicle Dynamics/tokens.md")
+cd /tmp && rm -rf mq-push
+git -c "credential.helper=" \
+    -c "credential.helper=!f() { echo username=x-access-token; echo password=${PAT}; }; f" \
+    clone https://github.com/da25mem5s02-debug/MotoQuant_v1.git mq-push
+cd mq-push
+git config user.name  "Hritwik Mudhai"
+git config user.email "da25mem5s02@student.nitw.ac.in"
+
+# Bring in only the files you intend to commit, by explicit path:
+cp "/sessions/<id>/mnt/Projects--Vehicle Dynamics/motoquant.db"     ./motoquant.db
+cp "/sessions/<id>/mnt/Projects--Vehicle Dynamics/CLAUDE.md"        ./CLAUDE.md
+# (etc.)
+
+git add motoquant.db CLAUDE.md       # NEVER `git add -A` here either
+git commit -m "..."
+git -c "credential.helper=" \
+    -c "credential.helper=!f() { echo username=x-access-token; echo password=${PAT}; }; f" \
+    push origin main
+```
+
+For force-pushes (e.g. the `ws/kaizen` rebase that re-authored the 5 `kaizen@motoquant.local` commits to `da25mem5s02@student.nitw.ac.in` on May 3), use `--force-with-lease` and only on the branch that actually needs it — never on `main`. The `main` baseline pin (K5 10.0334s / R1 10.2859s / Hayabusa 10.4712s) is load-bearing for every CI gate, so any force-push that touches `main` voids the trust contract for every downstream session.
+
+**FUSE artifacts to ignore:** anything `git status` reports against the FUSE checkout that does not match `git diff <(git show HEAD:path) <(tr -d '\r' < path)`. The May-3 aborted report tabulated which files were "real" vs "fake" diffs — read it before assuming a working-tree change is intentional.
+
+**What the sandbox cannot do, ever (delegate to the user):** `git branch -D` of stale `ws/ws/*` duplicates, `rm .git/refs/heads/test_write_probe` and other broken refs, `git config --global` writes when `/sessions` is at 100 % disk, and any live `curl` against Railway / Vercel / api.github.com (egress allowlist blocks all three).
+
 ---
 
 ## ⚠️ BEFORE STARTING ANY TASK — MODEL SELECTION

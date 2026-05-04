@@ -66,9 +66,14 @@ Thumbs.db
 *.db.bak*
 *.db-shm.bak*
 *.db-wal.bak*
-# Pre-rebuild safety copies (e.g. motoquant.db.before-rebuild_2026_05_03).
-# Same reason -- suffix breaks the *.db glob.
+# Pre-rebuild safety copies (e.g. motoquant.db.before-rebuild_2026_05_03,
+# tokens.md.before-rebuild). The suffix-after-extension form breaks the
+# narrower *.db.bak* and *.db* globs above, so cover the whole class.
 *.db.before-rebuild*
+*.before-rebuild
+*.before-rebuild_*
+*.before-reseed
+*.before-reseed_*
 
 # Temporary files
 .tmp
