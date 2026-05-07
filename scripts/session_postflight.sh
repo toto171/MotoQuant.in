@@ -30,6 +30,7 @@
 #   3  — fatal: focused-test subset broke
 #   4  — fatal: push failed (both primary + backup PAT)
 #   5  — soft: deploy verification timeout (push succeeded)
+#   6  — fatal: headline-sync auto-patch gate failed
 
 set -euo pipefail
 
@@ -115,6 +116,53 @@ run_focused_tests() {
     fatal "focused test subset FAILED — refusing to push" 3
   fi
   log "focused tests: green"
+}
+
+# ─── 2.5. Headline-sync auto-patch gate ──────────────────────────────────
+# Runs `audit_headline_stats.py --fix --regen-og` AFTER agents finish but
+# BEFORE staging. Auto-patches stale numbers across web/blog/docs/README and
+# regenerates the OG social card if drift detected. Files modified by --fix
+# are appended to COMMIT_FILES so the drift-fix rides the same commit as the
+# work that caused the drift (no separate chore(headline-sync) commits).
+headline_sync_gate() {
+  log "running headline-sync auto-patch gate..."
+  local fix_json fixed_list
+  # NOTE: we pass --fix only (not --regen-og). The audit script auto-regens
+  # the OG card when text drift was patched OR the cached image is older
+  # than motoquant.db. Forcing --regen-og every session would create noise
+  # commits even when no numbers shifted.
+  if ! fix_json=$(python3 scripts/audit_headline_stats.py --fix --json 2>/dev/null); then
+    _queue_alert "Postflight headline-sync gate FAILED — could not run audit_headline_stats.py --fix. Push aborted."
+    fatal "headline-sync gate failed (audit script returned non-zero)" 6
+  fi
+
+  fixed_list=$(printf '%s' "$fix_json" | python3 -c "
+import json, sys
+try:
+    d = json.load(sys.stdin)
+    print(' '.join(d.get('fixed_files', []) or []))
+except Exception as exc:
+    sys.stderr.write(f'JSON parse failed: {exc}\n')
+    sys.exit(1)
+" 2>/dev/null) || {
+    _queue_alert "Postflight headline-sync gate: JSON parse failed on audit output. Push aborted."
+    fatal "headline-sync gate JSON parse failed" 6
+  }
+
+  if [[ -z "${fixed_list}" ]]; then
+    log "headline-sync: no drift detected, no patches applied"
+    return 0
+  fi
+
+  log "headline-sync auto-patched: ${fixed_list}"
+  # Append fixed files to COMMIT_FILES (de-duplicated). Drift-fix rides the
+  # same commit as the agent work so we don't proliferate chore commits.
+  for f in ${fixed_list}; do
+    if [[ " ${COMMIT_FILES} " != *" ${f} "* ]]; then
+      COMMIT_FILES="${COMMIT_FILES} ${f}"
+    fi
+  done
+  log "COMMIT_FILES updated → ${COMMIT_FILES}"
 }
 
 # ─── 3. Stage explicit files (NEVER git add -A) ──────────────────────────
@@ -282,6 +330,7 @@ main() {
 
   verify_baselines
   run_focused_tests
+  headline_sync_gate
 
   if stage_files; then
     do_commit

@@ -55,7 +55,7 @@ export const viewport = {
 // internal linking. This file handles the first three.
 
 const DESCRIPTION =
-  'Free physics-based motorcycle quarter-mile drag racing simulator. Predict ET, trap speed, and split times for 334+ bikes. Compare builds, quantify parts ROI, and upload Dragy runs for auto-calibration. Built for the Indian drag racing community.';
+  'Free physics-based motorcycle quarter-mile drag racing simulator. Predict ET, trap speed, and split times for 342+ bikes. Compare builds, quantify parts ROI, and upload Dragy runs for auto-calibration. Built for the Indian drag racing community.';
 
 export const metadata = {
   title: {
@@ -87,7 +87,7 @@ export const metadata = {
         secureUrl: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'MotoQuant Pro — quarter-mile drag racing simulator covering 334 motorcycles, 555 parts, 232 tires, 20 venues',
+        alt: 'MotoQuant Pro — quarter-mile drag racing simulator covering 342 motorcycles, 563 parts, 232 tires, 20 venues',
         type: 'image/png',
       },
     ],
@@ -103,7 +103,7 @@ export const metadata = {
     images: [
       {
         url: `${SITE_URL}/og-image.png`,
-        alt: 'MotoQuant Pro — quarter-mile drag racing simulator covering 334 motorcycles, 555 parts, 232 tires, 20 venues',
+        alt: 'MotoQuant Pro — quarter-mile drag racing simulator covering 342 motorcycles, 563 parts, 232 tires, 20 venues',
       },
     ],
     site: '@motoquant',

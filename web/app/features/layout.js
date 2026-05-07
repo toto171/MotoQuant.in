@@ -5,7 +5,7 @@
 import StructuredData, { SITE_URL } from '../StructuredData';
 
 const TITLE = "Features — Drag Sim, ROI Engine, Dragy Import, Build Optimiser";
-const DESCRIPTION = "Complete feature breakdown: 15 physics sub-models, 334-bike catalog, parts ROI with cost-per-tenth, Bayesian build optimiser, Dragy GPS calibration, A vs B compare, smart recommendations engine.";
+const DESCRIPTION = "Complete feature breakdown: 15 physics sub-models, 342-bike catalog, parts ROI with cost-per-tenth, Bayesian build optimiser, Dragy GPS calibration, A vs B compare, smart recommendations engine.";
 
 export const metadata = {
   title: TITLE,

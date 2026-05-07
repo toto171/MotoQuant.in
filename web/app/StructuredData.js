@@ -27,7 +27,7 @@ export function organizationSchema() {
       height: 512,
     },
     description:
-      'First-principles physics engine for motorcycle quarter-mile drag racing. Predict ET, compare builds, and quantify parts ROI for 334+ bikes.',
+      'First-principles physics engine for motorcycle quarter-mile drag racing. Predict ET, compare builds, and quantify parts ROI for 342+ bikes.',
     foundingDate: '2025-11-01',
     founder: { '@type': 'Person', name: 'Hritwik Mudhai' },
     sameAs: [
@@ -93,8 +93,8 @@ export function softwareApplicationSchema() {
     },
     featureList: [
       'Quarter-mile ET prediction to ±0.2s',
-      '334 motorcycles with individual aero + dyno curves',
-      '555-part catalog with cost-per-tenth ROI analysis',
+      '342 motorcycles with individual aero + dyno curves',
+      '563-part catalog with cost-per-tenth ROI analysis',
       '15 independent physics sub-models',
       'Dragy GPS + dyno import and auto-calibration',
       'XGBoost + DNN surrogate models for instant iteration',
@@ -142,7 +142,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'The catalog covers 334 bikes across 25+ manufacturers: Suzuki, Yamaha, Honda, Kawasaki, BMW, Ducati, Aprilia, KTM, Triumph, Royal Enfield, Bajaj, TVS, Hero, Harley-Davidson, Indian Motorcycle, CFMoto, Benelli, Husqvarna, MV Agusta, Moto Guzzi, Buell, and more. Includes Indian 200–400cc commuters, SE Asia underbones, and 20 two-stroke drag bikes (RD350, RX100, RGV250, H2 Mach IV).',
+            'The catalog covers 342 bikes across 25+ manufacturers: Suzuki, Yamaha, Honda, Kawasaki, BMW, Ducati, Aprilia, KTM, Triumph, Royal Enfield, Bajaj, TVS, Hero, Harley-Davidson, Indian Motorcycle, CFMoto, Benelli, Husqvarna, MV Agusta, Moto Guzzi, Buell, and more. Includes Indian 200–400cc commuters, SE Asia underbones, and 20 two-stroke drag bikes (RD350, RX100, RGV250, H2 Mach IV).',
         },
       },
       {
@@ -169,7 +169,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'Each part in the 555-part catalog is evaluated by running the simulation with and without it. The delta in ET is divided by the part cost in INR to produce a cost-per-tenth metric. A 0/1 knapsack optimizer then picks the best combination under your budget, respecting compatibility rules and known synergy pairs (e.g. exhaust + ECU flash).',
+            'Each part in the 563-part catalog is evaluated by running the simulation with and without it. The delta in ET is divided by the part cost in INR to produce a cost-per-tenth metric. A 0/1 knapsack optimizer then picks the best combination under your budget, respecting compatibility rules and known synergy pairs (e.g. exhaust + ECU flash).',
         },
       },
       {

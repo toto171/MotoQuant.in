@@ -64,7 +64,7 @@ Build profiles — Street Legal, Drag Prep, Full Race — pre-filter the catalog
     docsLabel: 'See build optimizer guide',
     mockup: null, // TODO: screenshot of BuildPage parts list
     stats: [
-      { num: '555', label: 'Parts' },
+      { num: '563', label: 'Parts' },
       { num: '20', label: 'Categories' },
       { num: '₹100', label: 'Budget granularity' },
     ],
