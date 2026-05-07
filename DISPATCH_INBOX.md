@@ -107,6 +107,82 @@ add bike Aprilia Tuono V4 1100 Factory 2024
 investigate why ZX-25R sim trap is 5 km/h slow
 ```
 
+## INSTRUCTION — 2026-05-07 — sync all headline numbers + regen OG social card + wire postflight auto-patch gate
+[urgent]
+
+Problem: WhatsApp/Twitter/Slack link previews for motoquant.in show severely stale numbers in the OG card image — **287 BIKES / 465 PARTS / 12 VENUES / 739 TESTS / ±0.07s accuracy** vs current reality **~341 / ~562 / 20 / [collect via pytest] / ±0.032s top-10 mean**. The OG image is the worst offender; it's a static PNG that hasn't been regenerated since circa April-mid. Even the meta description text ("334+ bikes") is stale. Screenshot evidence: user dispatch 2026-05-07 chat.
+
+CLAUDE.md "Sync the headline numbers across the codebase" hygiene already flags this class of bug and references `scripts/audit_headline_stats.py`. The audit script needs extending and a postflight auto-patch gate needs wiring so this never drifts again.
+
+Source-of-truth values for THIS session (derive at runtime, do NOT hard-code anywhere):
+
+- bike_models row count: `python3 -c "import sqlite3; print(sqlite3.connect('motoquant.db').execute('SELECT COUNT(*) FROM bike_models').fetchone()[0])"`
+- parts / tire_models / bike_tire_fitments / venues row counts (same pattern)
+- BENCHMARKS list length (grep `motoquant/scraper/` or wherever it lives)
+- Total fast pytest count: `python3 -m pytest --collect-only -q tests/ 2>&1 | tail -3`
+- Top-10 mean |Δ| from the latest `reports/sweep_et_*.json` — extract programmatically
+- K5/R1/Hayabusa reference baselines: 10.0334s / 10.2859s / 10.4712s (preserved exactly — DO NOT touch)
+
+Tasks (all in one session, single commit):
+
+1. **Audit drift.** Run `python3 scripts/audit_headline_stats.py` — capture report.
+
+2. **Patch every drift on every visible surface** (numbers derived at runtime, no constants):
+   - `web/app/page.js` — landing stats strip + schema.org product schema
+   - `web/app/bikes/page.js` — metadata title + body
+   - `web/app/features/page.js` — feature subtitles
+   - `web/app/blog/*/page.js` — every post that quotes counts
+   - `web/app/docs/*/page.js`
+   - `web/app/layout.js` — meta description + OG / Twitter card meta tags
+   - `web/components/StructuredData.js` (if hard-coded)
+   - `README.md`
+
+3. **Regenerate the OG social-card image.** Locate the canonical path (likely `web/public/og-image.png` or `web/public/og.png`, or a Next.js dynamic route at `web/app/opengraph-image.{js,tsx}`). Match the existing card layout from the screenshot exactly:
+   - Top pill row: "Free · Open Source · India" (orange dot)
+   - Hero: large "MotoQuant" wordmark, "The Physics of Faster" subtitle, "Quarter-mile simulation · ±[current top-10 mean]s accuracy" small line
+   - 4-stat grid in orange: BIKES / PARTS / VENUES / TESTS with current counts
+   - Right panel: GSX-R 1000 K5 v(t) curve hero with "10.03s · 239 km/h" badge — keep this exactly (baseline preserved)
+   - Bottom-right: "motoquant.in" pill
+   - Dimensions: **1200×630** (Twitter/Facebook standard) — verify before commit
+   - Save with the same filename so existing meta tags resolve unchanged
+   - Implementation choice: prefer Pillow/Cairo from Python (deterministic, no headless browser dep) OR Next.js dynamic `opengraph-image` route reading from a build-time JSON. If you go dynamic, also commit a static fallback PNG so deploys without the build step still serve current numbers.
+
+4. **Extend `scripts/audit_headline_stats.py`** to:
+   - Check OG image mtime vs `motoquant.db` mtime — flag if image is older
+   - Parse OG meta description "X+ bikes" string
+   - Parse Twitter card meta tags
+   - Parse Schema.org structured-data numeric fields
+   - Add a `--fix` flag that auto-patches all listed surfaces (used by postflight below)
+
+5. **Wire postflight auto-patch gate.** Edit `scripts/session_postflight.sh` to run `python3 scripts/audit_headline_stats.py --fix` AFTER agents finish their work but BEFORE the explicit-list `git add`. Behaviour:
+   - Auto-patches stale numbers in all listed surfaces in-place
+   - Regenerates OG image if any checked surface shifted
+   - Lists files modified by `--fix`; postflight adds them to the same commit as the agents' work (no separate `chore(headline-sync)` commits — drift fix rides whatever commit caused the drift)
+   - If `--fix` fails for unrecoverable reasons (e.g. cannot regenerate image), abort the push and write `### ALERT` to outbox with diagnostic details
+
+6. **Optional new agent (only if postflight gate exceeds ~50 LOC inline).** Factor out as `scripts/agents/headline-sync.md` with low scheduler base weight (5) for on-demand / weekly Sunday firing. The postflight gate stays — it runs every session unconditionally.
+
+Deliverables (single commit):
+
+- "feat(web): regen OG card + sync all headline numbers + wire postflight auto-patch gate"
+- Updated `scripts/audit_headline_stats.py` (with `--fix` + OG/twitter-card checks)
+- Regenerated OG PNG at the canonical path
+- Updated `scripts/session_postflight.sh` with the auto-patch gate
+- Every web/blog/docs surface showing current numbers
+- Outbox `## SESSION` block lists drift-fix delta + path to the regenerated PNG (and ideally the image dimensions verified)
+
+Quality gates (do not skip):
+
+- Reference baselines K5/R1/Hayabusa MUST stay at +0.0000s — patches to web copy must NOT touch physics
+- Pre-push smoke: `python3 -c "import motoquant; e = motoquant.MotoQuantEngine(motoquant.gsxr1000_k5()); print(f'{e.run().time_quarter:.4f}s')"` should print exactly `10.0334s`
+- Focused tests still pass (scraper / validation / two_stroke / compatibility / submodel_kaizen / power_boost_regression)
+- ZERO hard-coded count constants added anywhere — every number derived at runtime from DB / pytest / sweep JSON
+- New OG image visually matches the screenshot layout; dimensions verified 1200×630
+
+Source: user dispatch 2026-05-07 with WhatsApp screenshot showing 287 BIKES / 465 PARTS / 12 VENUES / 739 TESTS card. Standing rule going forward (per user): "every time numbers / features / lists change in any commit, the next consecutive push (or same push) must update all visible surfaces — the postflight gate makes this automatic."
+
+---
+
 ## INSTRUCTION — 2026-05-07 — preflight: /sessions disk-guard
 [opportunistic]
 
