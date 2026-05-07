@@ -41,3 +41,15 @@ All three queued to `DISPATCH_INBOX.md` as `[opportunistic]` INSTRUCTION blocks 
 
 - Once `bike_suggestions` accumulates real submissions (post-launch), this agent should run weekly, not on the empty-table fall-through.
 - OUTBOX entries will accumulate naturally; re-run this triage in 2 weeks to validate the fix proposals against actual `### ALERT` data instead of the proxy-via-daily-reports used here.
+
+---
+
+## Second-pass addendum — 2026-05-07T18:30 (same-day re-run)
+
+Re-fired the agent later the same day. State delta vs the earlier 17:40 run:
+
+- `bike_suggestions`: still 0 rows / 0 pending — no submissions arrived in the ~50-minute gap.
+- `DISPATCH_OUTBOX.md`: one new `## SESSION` entry from session `1778175630-727` (17:57). Zero new `### ALERT` or `## INCIDENT` blocks. Baselines clean, PAT primary tier, deploy-side appears healthy.
+- `DISPATCH_INBOX.md`: confirmed all three systemic-fix INSTRUCTIONS from the earlier run (disk-guard / health-side-channel / year-suffix upsert) are already queued + intact, plus two additional standing-priority blocks (analytics+S5-DDL bootstrap, competitive-landscape research).
+
+**Outcome:** zero DB updates, zero new INSTRUCTIONS proposed (would be duplicates). This second-pass entry is logged so future agents can see the agent is correctly idempotent on same-day re-runs.

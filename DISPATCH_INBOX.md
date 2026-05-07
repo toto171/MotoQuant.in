@@ -197,6 +197,19 @@ Source: `reports/product_priorities_2026-05-07.md` (escalation: missing data).
 
 ---
 
+## INSTRUCTION — 2026-05-07 — research: widen scraper tire-format validator for Indian bias-ply notation
+[research]
+
+Three consecutive autonomous catalog runs (May 4 Hero Xtreme 200S 4V, May 7 AM TVS Apache RTR 180, May 7 PM Hero Mavrick 440) hit cosmetic warnings from the scraper validator's tire-size regex. The current regex is hardcoded for ZR/R radial notation (`120/70ZR17`); Indian-market and small-cc commuter bikes commonly carry bias-ply notation like `100/80-17`, `90/90-17`, `110/70-17`, `150/60-17`. Each run produces 1-2 cosmetic warnings that drop the spec confidence score from ~0.85 to ~0.82 even though the spec itself is valid.
+
+Proposal: extend the tire-size regex in `motoquant/scraper/validator.py` to accept `WWW/HH-RR` and `WWW/HH RR` (no Z, no R prefix), with NO confidence penalty for bias-ply hits — the format is legitimate for the affected segment, not a low-confidence flag. Test against the three bikes above to confirm the warnings clear.
+
+Effort: ~30 min — single regex edit, one new test class. Low-risk.
+
+Source: `reports/catalog_expansion_2026-05-07_pm.md` + carry-forward from May 4.
+
+---
+
 ## INSTRUCTIONS QUEUE
 
 > _Add new `## INSTRUCTION` blocks above this divider. Claude marks them `## DONE` once handled._

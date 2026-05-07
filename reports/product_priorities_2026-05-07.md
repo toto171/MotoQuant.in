@@ -1,85 +1,74 @@
 # Product Priorities — 2026-05-07 (Thursday)
 
-**Agent:** product-prioritisation (A7) — first run; no prior `reports/product_priorities_*.md` to diff against. Re-ranking the open Phase 4/5/6 carry-forward items in `CLAUDE.md` against this week's signals.
+**Agent:** product-prioritisation (A7) — second run today. Re-evaluated against the day's accumulated signals; no top-1 change required.
+
+### Update history
+
+- **2026-05-07 17:40 UTC** — first run of the week. Established top-3 (analytics-bootstrap / surrogate route / CI sidecar matrix), queued 2 product INSTRUCTIONS (analytics+DDL bootstrap + competitive-landscape research) + supporting CLAUDE.md "Standing Priorities" block. Source signals: STATUS.md KPIs all TBD, 0 bike_suggestions, no S5 tables on prod DB.
+- **2026-05-07 ~21:00 UTC** *(this run)* — re-fired same-day to validate. **No top-1 change.** Signals unchanged from morning (KPIs still TBD, 0 user submissions, 0 OUTBOX ALERT/INCIDENT entries since wiring). The single new event — catalog +3 bikes (Tuareg 660 / Apache RTR 180 / NS400R) shipped via session `1778175630-727` — is on a separate axis (catalog growth) and does not displace the analytics gap. Report overwritten with confirmation reasoning + same top-3.
 
 ---
 
-## Signals consumed
+## Signals consumed this run
 
-| Source | Status | What it told us |
+| Source | Status | Delta vs morning run |
 |---|---|---|
-| `STATUS.md` KPIs | sparse | Catalog 336 ✓ on track; baselines 0.0000s ✓; **all user-facing KPIs (indexed pages, organic sessions, sim users, B2B convos, Dragy uploads) are TBD/0** — no analytics layer wired yet |
-| `data/competitive_landscape.md` | **MISSING** | competitive-intel agent has not produced a landscape file yet (first run pending) |
-| `bike_suggestions` table (motoquant.db) | 0 rows | `/api/bikes/suggest` is wired, no submissions in shipped DB |
-| `DISPATCH_OUTBOX.md` | 3-day window, 0 ALERT/INCIDENT entries | OUTBOX wired May-4; only setup preamble. Proxy via `reports/support_triage_2026-05-07.md` shows recurring sandbox-only friction, **not** product-facing pain |
-| `DISPATCH_INBOX.md` | 3 open `[opportunistic]` instructions | All sandbox-infra (disk-guard, GH-Actions health side-channel, bike_repo year-suffix) — none are product features |
-| `motoquant.db` audit | `users` / `sessions` / `subscriptions` / `license_keys` tables **NOT FOUND**; `sim_runs` 0 rows | S5 subscription-auth code merged, but DDL **never ran on the production DB** — silent gap |
+| `STATUS.md` KPIs | unchanged | All user-facing rows still TBD; catalog 336 still on track |
+| `data/competitive_landscape.md` | **STILL MISSING** | competitive-intel agent has not produced output (research instruction queued morning, still pending) |
+| `bike_suggestions` table | 0 rows | Still 0 — confirmed by support_triage 18:30 second pass |
+| `DISPATCH_OUTBOX.md` | 1 new SESSION entry | `1778175630-727` (17:57) — catalog +3 bikes, baselines clean, PAT primary tier, **zero new ALERT/INCIDENT** |
+| `DISPATCH_INBOX.md` | 5 open instructions | 3 sandbox-infra (disk-guard / GH-Actions side-channel / year-suffix upsert) + 2 product (analytics+DDL / competitive landscape). All from morning run; none picked up yet by code-touching agents. |
+| `motoquant.db` | tables unchanged | `users` / `sessions` / `subscriptions` / `license_keys` STILL not present on prod DB — silent gap persists |
 
-The dominant signal this week is **"there are no users yet"** — every user-facing KPI is zero or unknown, no bike suggestions, no Dragy uploads, no sim runs. The second-strongest signal is the silent S5 auth-DDL gap.
-
----
-
-## Open items, scored
-
-Scale 1–5 each on **Impact** (revenue / KPI move), **Confidence** (we know how to ship it), **Effort** (1=trivial, 5=multi-week). Score = (I × C) / E.
-
-| # | Item (phase) | I | C | E | Score | Note |
-|---|---|---|---|---|---|---|
-| 1 | **Wire GA4 + PostHog + apply S5 DDL to prod DB** (analytics + auth bootstrap) | 5 | 5 | 1 | **25.0** | Without it, every other KPI stays "TBD". Unblocks B2C path entirely. |
-| 2 | **Live `/api/surrogate/predict` route + BuildPage hook** (Phase 4/5) | 4 | 5 | 2 | 10.0 | Pickle ships; route is ~1 day; converts BuildPage from "novelty" to "fast tuner" |
-| 3 | **CI sidecar-build matrix → unblock desktop release** (Phase 5) | 4 | 4 | 2 | 8.0 | Only blocker to v1.0 download; user-installable artefact = signup driver |
-| 4 | **MCP server wrapping `/api/*`** (Phase 6) | 4 | 4 | 2 | 8.0 | Distribution + marketing demo; OpenAPI already at `/docs` |
-| 5 | **Indian retail-adapter live scraping** (Phase 4 carry) | 4 | 3 | 3 | 4.0 | Pricing trust = ROI trust; high cost (per-retailer adapters), medium confidence |
-| 6 | **Razorpay live keys + tier gating** (Phase 6) | 5 | 3 | 4 | 3.75 | Required for revenue, but **blocked on**: real users, GST registration, plan IDs |
-| 7 | **Pune/Narhe closed beta outreach** (Phase 5) | 5 | 2 | 4 | 2.5 | High value, low confidence in execution from sandbox |
-| 8 | **PDF report export** (Phase 5) | 2 | 5 | 1 | 10.0* | High score, but **no users to give reports to** — depromote until #1 produces signups |
-| 9 | **3D bike viz / PPO RL / OBD-II** (Phase 5/6 nice-to-haves) | 1 | 2 | 5 | 0.4 | Defer indefinitely — pure roadmap inflation |
-
-\*Item 8 scores high mechanically but fails the gating signal: ship after analytics shows users finishing sims.
+**Dominant signal — unchanged from morning:** zero users measured because zero analytics. Second-strongest signal — also unchanged: silent S5 auth-DDL gap.
 
 ---
 
-## Top-3 — recommended order this week
+## Re-scoring (single-day window, light-touch)
 
-### 1. **Bootstrap analytics + apply auth-DDL on prod** — *new top-1*
+No event today moves any item's `(I × C) / E` score by ≥1.0. The morning ranking holds:
 
-**What:** (a) Add Google Analytics 4 to `web/app/layout.js`; (b) wire PostHog free-tier to FastAPI `/api/*` middleware; (c) ship a `scripts/apply_s5_ddl.py` migration that runs `ensure_tables()` on the production `motoquant.db` so `users` / `sessions` / `subscriptions` / `license_keys` tables exist. Verify on Railway via the new GH-Actions health side-channel (already queued in INBOX) before declaring done.
+| # | Item | Score (morning) | Score (now) | Δ | Note |
+|---|---|---|---|---|---|
+| 1 | Analytics bootstrap + S5 DDL apply | 25.0 | 25.0 | 0 | Still cheapest unblock for every KPI row |
+| 2 | Live `/api/surrogate/predict` + BuildPage hook | 10.0 | 10.0 | 0 | Pickle still in repo, route still unwritten |
+| 3 | CI sidecar-build matrix | 8.0 | 8.0 | 0 | No movement on `desktop/sidecar/build.sh` execution |
+| 4 | MCP server wrapping `/api/*` | 8.0 | 8.0 | 0 | No new distribution signal |
+| 5 | Indian retail-adapter live scraping | 4.0 | 4.0 | 0 | — |
+| 6 | Razorpay live keys + tier gating | 3.75 | 3.75 | 0 | Still blocked on real users → still gated by item #1 |
+| 7 | Pune/Narhe closed beta outreach | 2.5 | 2.5 | 0 | Still gated by item #3 (no installer) |
 
-**Success metric:** Within 14 days of ship, **STATUS.md "Indexed pages" + "Indian organic sessions/mo" + "Active simulator users/mo" rows show real numbers** (any non-TBD value), and `users` table query returns ≥0 rows on prod (i.e., schema exists). 30-day target: 200 active sim users / month.
-
-**Why now:** every other Phase 6 commercial item (Razorpay, B2B outreach, freemium signup flow) depends on knowing whether anyone is actually visiting. Currently we are flying blind. Cheapest, fastest, highest-leverage move.
-
-### 2. **Live `/api/surrogate/predict` + BuildPage live preview**
-
-**What:** FastAPI startup loads `surrogate_dnn.pkl` (10.8 MB, already in repo); `POST /api/surrogate/predict` scores one feature vector in ~1 ms; new `useSurrogate()` React Query hook in desktop + web `SimulatorWidget`; toggle keeps "real" sim available.
-
-**Success metric:** BuildPage slider tick latency drops from ~50 ms (full sim) to ≤5 ms p95 (surrogate). User-perceived "drag the slider, watch ET move" — measurably interactive, not click-and-wait.
-
-**Why:** the surrogate is the highest-prepared, lowest-effort capability we are sitting on. Apr 22 BuildPage write explicitly TODO'd this; pickle has been in the repo for 3+ weeks. Direct conversion-driver for the desktop v1.0 download.
-
-### 3. **CI sidecar-build matrix → first downloadable v1.0 binaries**
-
-**What:** Add `desktop-build` job to `.github/workflows/ci.yml` matrix `{ubuntu-latest, windows-latest, macos-latest}` running `desktop/sidecar/build.sh|ps1` + `tauri build`, uploading platform binaries as workflow artifacts on every `v*` tag push.
-
-**Success metric:** Tagging `v1.0.0-beta.1` produces 3 downloadable artifacts in GitHub Releases within 30 minutes, each passing the local smoke-test (sidecar boots, `/api/health` returns 200).
-
-**Why:** unblocks the "Pune/Narhe closed beta" Phase 5 outreach item. We have a 2433-module bundle compiling cleanly and a packaging scaffold complete since Apr 23, but no actual installable binary anywhere. Without this, item #7 (closed beta) is impossible.
+**Conclusion: top-3 confirmed. No CLAUDE.md edit required.** The "Standing Priorities" block at line 126 already reflects this ranking.
 
 ---
 
-## Conflicts / escalations
+## Top-3 — confirmed for week of 2026-05-07
 
-- **Conflict:** Item #1 (analytics bootstrap) is not on any current Phase list — it's *implicit* in the KPI tracking but uncodified. Recommend adding a "Phase 5.5: Instrumentation" half-step to CLAUDE.md.
-- **Budget gate (Item #6, future):** Razorpay needs GST-registered Indian entity + real bank account + plan IDs created in dashboard. Already known from S5 carry-forward — defer until Item #1 produces signup volume justifying the paperwork. **Not queued as `[blocking]` this week** — too early.
-- **Missing data:** `data/competitive_landscape.md` does not exist. Recommend a `[research]` INSTRUCTION to bootstrap the competitive-intel agent's first scan. Without it, opportunity-weight in the master scheduler is dead-input.
+### 1. Bootstrap analytics + apply auth-DDL on prod *(top-1, unchanged)*
+
+**Status:** INSTRUCTION queued in DISPATCH_INBOX (line 167), `[opportunistic]`. Awaiting next code-touching agent.
+
+**Success metric:** STATUS.md user-facing KPI rows show real (non-TBD) numbers within 14 days; `users` table query returns ≥0 rows on prod.
+
+### 2. Live `/api/surrogate/predict` + BuildPage live preview *(unchanged)*
+
+**Status:** Not yet queued as an INSTRUCTION (intentional — top-1 should ship first; once analytics is producing numbers, queue this as the next product feature).
+
+**Success metric:** BuildPage slider tick latency p95 ≤ 5 ms.
+
+### 3. CI sidecar-build matrix → first downloadable v1.0 binaries *(unchanged)*
+
+**Status:** Not queued. Same staging logic — once #1 is in flight, queue this so the Pune/Narhe outreach gate clears.
+
+**Success metric:** `v1.0.0-beta.1` tag → 3 platform artifacts in GitHub Releases within 30 min.
 
 ---
 
-## CLAUDE.md edit recommended
+## Open conflicts / escalations *(carried over)*
 
-CLAUDE.md has no "Standing priorities" section. Recommend adding one immediately under the standing-notes block at the top, as a numbered top-3 that the daily scheduler can read. (Edit applied alongside this report.)
+- **Missing data:** `data/competitive_landscape.md` still absent. INSTRUCTION already queued (line 182, `[research]`). Future weekly competitive-intel runs will diff against the eventual baseline.
+- **Razorpay gating:** still deferred — needs real users + GST-registered entity + plan IDs. Re-evaluate in 4 weeks.
 
-## Inbox actions queued
+## Inbox actions this run
 
-1. `[opportunistic]` — bootstrap analytics + apply S5 DDL on prod DB (Top-1 owner: next code-touching agent).
-2. `[research]` — populate `data/competitive_landscape.md` with an initial scan of Bikes.app, Drag-y app, MotoCalc, Tuneboss (2-page brief, no action yet).
+**Zero new INSTRUCTIONS.** All systemic fixes (3 sandbox-infra) and product items (2: analytics+DDL bootstrap + competitive-landscape research) are already queued from the morning run — duplicates would be noise. Logging this run as idempotent same-day re-validation.

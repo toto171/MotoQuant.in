@@ -480,6 +480,100 @@ HONDA_NS400R_1985 = spec_from_dict(
 )
 
 
+# ── Hero Mavrick 440 (2024-2026 — Indian market 440 single) ─────────
+# Hero MotoCorp's first big-bike on the joint Hero-Harley platform that
+# also underpins the Harley-Davidson X440 (already in catalog). 440cc
+# air/oil-cooled SOHC single, 27 PS @ 6000 rpm, 36 Nm @ 4000 rpm. Hero
+# tunes the head/intake differently from the X440 (X440 makes 38 Nm),
+# so torque is ~5% lower but power matches. Modern roadster ergonomics
+# vs the X440's cruiser stance — different aero envelope.
+# Sources: Hero MotoCorp official spec page (heromotocorp.com/mavrick),
+# BikeWale spec table, ZigWheels review database, MCN India launch
+# coverage Feb 2024.
+HERO_MAVRICK_440_2024 = spec_from_dict(
+    {
+        "manufacturer": "Hero",
+        "model_name": "Mavrick 440",
+        "model_code": "MV440",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 440.0,
+        "bore_mm": 79.6,
+        "stroke_mm": 88.4,
+        "compression_ratio": 9.5,
+        "cylinders": 1,
+        "peak_power_hp": 27.0,
+        "peak_power_rpm": 6000,
+        "peak_torque_nm": 36.0,  # Mavrick-specific tune (X440 = 38 Nm)
+        "peak_torque_rpm": 4000,
+        "fuel_system": "fi",
+        "cooling": "oil",
+        "valve_config": "sohc",
+        "gears": 6,
+        # Same 6-speed cassette as X440 — shared transmission per Hero +
+        # Harley joint-platform announcement.
+        "gear_ratios": [2.923, 1.947, 1.476, 1.200, 1.000, 0.833],
+        "front_sprocket": 15,
+        "rear_sprocket": 44,
+        "chain_pitch": "520",
+        "dry_mass_kg": 178.0,  # 187 kg kerb - ~9 kg fuel = ~178 dry
+        "wheelbase_mm": 1410.0,
+        "front_tire_size": "110/70-17",
+        "rear_tire_size": "150/60-17",
+        "cd": 0.78,        # naked roadster, slightly tucked vs X440 cruiser (0.92)
+        "frontal_area_m2": 0.50,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Yamaha Ténéré 700 (2019-2026 — CP2 ADV) ─────────────────────────
+# Mid-weight ADV on the CP2 platform shared with MT-07 / R7 / Tracer 7.
+# 689cc 270° crossplane parallel-twin, 73 hp @ 9000 rpm, 68 Nm @ 6500
+# rpm. 21"/18" spoked wheels. Yamaha's answer to the KTM 790/890 Adv
+# and Aprilia Tuareg 660. 187 kg dry per Yamaha tech sheet.
+# Sources: Yamaha 2019 Ténéré 700 press kit (yamaha-motor.eu),
+# Cycle World 2020 first ride, MCN long-term test 2021.
+YAMAHA_TENERE_700_2019 = spec_from_dict(
+    {
+        "manufacturer": "Yamaha",
+        "model_name": "Tenere 700",
+        "model_code": "DM07",
+        "year_from": 2019,
+        "year_to": 2026,
+        "category": "adventure",
+        "displacement_cc": 689,
+        "bore_mm": 80.0,
+        "stroke_mm": 68.6,
+        "compression_ratio": 11.5,
+        "cylinders": 2,
+        "peak_power_hp": 73.0,
+        "peak_power_rpm": 9000,
+        "peak_torque_nm": 68.0,
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Yamaha CP2 cassette (T700 service manual) — shorter 1st than
+        # MT-07's [2.846, 1.947, 1.526, 1.286, 1.118, 1.000] for ADV
+        # crawling capability.
+        "gear_ratios": [2.846, 1.947, 1.526, 1.286, 1.118, 1.000],
+        "front_sprocket": 15,
+        "rear_sprocket": 46,  # ADV-tall vs MT-07's 16/43
+        "chain_pitch": "525",
+        "dry_mass_kg": 187.0,  # Yamaha-published "wet without fuel" 192 kg
+        "wheelbase_mm": 1595.0,
+        "front_tire_size": "90/90-21",
+        "rear_tire_size": "150/70R18",
+        "cd": 0.82,        # ADV upright
+        "frontal_area_m2": 0.62,  # ADV with windscreen + tall stance
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -491,8 +585,11 @@ EXTENDED_BIKES = [
     # ── Daily improvement run 2026-05-04 (Monday — Catalog) ──
     KTM_1390_SUPERDUKE_R_EVO_2024,
     HERO_XTREME_200S_4V_2023,
-    # ── Daily improvement run 2026-05-07 (Thursday — Catalog) ──
+    # ── Daily improvement run 2026-05-07 (Thursday morning — Catalog) ──
     APRILIA_TUAREG_660_2022,
     TVS_APACHE_RTR_180_2009,
     HONDA_NS400R_1985,
+    # ── Daily improvement run 2026-05-07 (Thursday afternoon — Catalog A1) ──
+    HERO_MAVRICK_440_2024,
+    YAMAHA_TENERE_700_2019,
 ]
