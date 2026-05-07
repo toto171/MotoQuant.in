@@ -715,6 +715,104 @@ HERO_XTREME_250R_2024 = spec_from_dict(
 )
 
 
+# ── Ducati Hypermotard 698 Mono (2024-2026 — first big-bore Ducati single) ──
+# Ducati's first big-bore single-cylinder production motorcycle. The 659cc
+# Superquadro Mono engine is derived from the 1199 Panigale's 1285cc Superquadro
+# twin (split into a single cylinder); the 116 mm bore is a record value for a
+# road-going single. Desmodromic timing, 2-balance countershafts, "box-in-box"
+# piston with DLC-coated pin, titanium intake valves, 4-valve DOHC head.
+# 77.5 hp @ 9750 rpm, 63 Nm @ 8000 rpm; redline 10,250 rpm. 151 kg dry per
+# Ducati press kit. 6-speed cassette per Ducati spec sheet (modeled on Panigale
+# V4 with long first for corner-exit drive); F15/R42 520 chain.
+# Sources: Ducati press release (mediahouse.ducati.com), Ducati official spec
+# page (ducati.com/us/en/bikes/hypermotard/hypermotard-698-mono), Cycle World
+# 2024 first ride review, Bennetts BikeSocial 2024 review, ducati-specs.com
+# transmission ratio table, motoplanete tech-data sheet.
+DUCATI_HYPERMOTARD_698_MONO_2024 = spec_from_dict(
+    {
+        "manufacturer": "Ducati",
+        "model_name": "Hypermotard 698 Mono",
+        "model_code": "698MONO",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 659,
+        "bore_mm": 116.0,
+        "stroke_mm": 62.4,
+        "compression_ratio": 13.1,
+        "cylinders": 1,
+        "peak_power_hp": 77.5,
+        "peak_power_rpm": 9750,
+        "peak_torque_nm": 63.0,
+        "peak_torque_rpm": 8000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Ducati Hypermotard 698 Mono cassette per Ducati press kit + ducati-specs.com.
+        "gear_ratios": [2.769, 2.059, 1.600, 1.318, 1.143, 1.040],
+        "front_sprocket": 15,
+        "rear_sprocket": 42,
+        "chain_pitch": "520",
+        "dry_mass_kg": 151.0,  # Ducati press release "151 kg dry"
+        "wheelbase_mm": 1443.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "160/60ZR17",
+        "cd": 0.78,        # supermoto upright stance; ref Hypermotard 950 @ 0.78
+        "frontal_area_m2": 0.50,  # narrow supermoto; less than ADV
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Yamaha XSR700 (2018-2024 — CP2 Sport Heritage) ──────────────────
+# Sport Heritage retro built on the same CP2 270° crossplane parallel-twin
+# platform as MT-07 / R7 / Tracer 7 / Ténéré 700. 689cc, 74.8 hp @ 9000 rpm,
+# 68 Nm @ 8500 rpm. Same 6-speed cassette as the MT-07 (CP2 gearbox is
+# unchanged across the platform). Final drive: F16/R43 525 chain (taller
+# than MT-07's F16/R47 — XSR700 trades acceleration for cruising character).
+# 186 kg wet (~178 dry, subtracting 8 kg fuel for a 14L tank).
+# Sources: Yamaha press kit 2018 (yamaha-motor.eu), Yamaha Motorsports USA
+# 2024 spec page (yamahamotorsports.com/models/24-xsr700/specs), Cycle World
+# 2024 buyer's guide (cycleworld.com/yamaha/xsr700/), ultimatespecs.com 2018
+# tech sheet, Pro-Tek aftermarket sprocket listings (16T front, 525 pitch).
+YAMAHA_XSR700_2018 = spec_from_dict(
+    {
+        "manufacturer": "Yamaha",
+        "model_name": "XSR700",
+        "model_code": "RM12",
+        "year_from": 2018,
+        "year_to": 2024,
+        "category": "naked",
+        "displacement_cc": 689,
+        "bore_mm": 80.0,
+        "stroke_mm": 68.6,
+        "compression_ratio": 11.5,
+        "cylinders": 2,
+        "peak_power_hp": 74.8,
+        "peak_power_rpm": 9000,
+        "peak_torque_nm": 68.0,
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # CP2 platform cassette — same as MT-07 (2018+) per Yamaha service manual.
+        "gear_ratios": [2.846, 2.133, 1.700, 1.450, 1.286, 1.160],
+        "front_sprocket": 16,
+        "rear_sprocket": 43,    # XSR700 taller final drive vs MT-07's 16/47
+        "chain_pitch": "525",
+        "dry_mass_kg": 178.0,   # 186 kg wet - ~8 kg fuel = ~178 dry
+        "wheelbase_mm": 1405.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.78,        # retro naked, similar to MT-07 @ 0.78
+        "frontal_area_m2": 0.52,  # ref MT-07 @ 0.52
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -737,4 +835,7 @@ EXTENDED_BIKES = [
     BAJAJ_PULSAR_NS160_2017,
     HONDA_CB_HORNET_160R_2016,
     HERO_XTREME_250R_2024,
+    # ── Daily improvement run 2026-05-07 (Thursday evening — Catalog A1 third pass) ──
+    DUCATI_HYPERMOTARD_698_MONO_2024,
+    YAMAHA_XSR700_2018,
 ]

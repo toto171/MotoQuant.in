@@ -53,3 +53,18 @@ Re-fired the agent later the same day. State delta vs the earlier 17:40 run:
 - `DISPATCH_INBOX.md`: confirmed all three systemic-fix INSTRUCTIONS from the earlier run (disk-guard / health-side-channel / year-suffix upsert) are already queued + intact, plus two additional standing-priority blocks (analytics+S5-DDL bootstrap, competitive-landscape research).
 
 **Outcome:** zero DB updates, zero new INSTRUCTIONS proposed (would be duplicates). This second-pass entry is logged so future agents can see the agent is correctly idempotent on same-day re-runs.
+
+---
+
+## Third-pass addendum — 2026-05-07T22:30 (same-day re-run, session 1778193031-619)
+
+Third firing of the customer-support agent on 2026-05-07. State delta vs the 18:30 second-pass:
+
+- `bike_suggestions`: still **0 rows / 0 pending** — no submissions in the ~4-hour gap. `/api/bikes/suggest` endpoint remains wired but un-exercised by real users.
+- `DISPATCH_OUTBOX.md`: two new `## SESSION` entries appended since last triage (sessions `1778178639-614` at 18:39 and `1778185843-631` at 20:48). **Zero new `### ALERT` blocks, zero `## INCIDENT` blocks.** Both new sessions reported PAT primary tier + baselines clean — healthy.
+- `DISPATCH_INBOX.md`: **seven** INSTRUCTION blocks now queued (the three systemic-fix proposals from the morning run + four standing-priority blocks added independently: OG-card regen + headline-sync gate, analytics + S5 DDL bootstrap, competitive-landscape research, tire-format validator widening). All seven still pending; none have been picked up + marked `## DONE` yet.
+- DB headline numbers (used to validate triage agents downstream): 342 bikes / 563 parts / 232 tires / 20 venues / 861 fitments — confirms catalog-expansion sessions earlier today landed cleanly (was 336 at session-start per CLAUDE.md May 4 entry; +6 across May 5 / 6 / 7 catalog runs).
+
+**Outcome:** zero DB updates, zero new INSTRUCTIONS proposed (all candidate fixes already queued). Triage is correctly idempotent on the empty-table fall-through path. The agent has now run 3× same-day with consistent no-op behaviour, which is the expected steady-state until either (a) `bike_suggestions` accumulates real submissions, or (b) the OUTBOX accumulates `### ALERT` / `## INCIDENT` blocks that warrant a fresh systemic-fix proposal.
+
+**Suggestion for scheduler (carry-forward):** while `bike_suggestions.COUNT() == 0` AND no new `### ALERT` blocks have appeared since the last successful triage, this agent should weight-down (e.g., `-10` weight via `MOBILE -1 customer-support` line) so it doesn't keep firing same-day. Daily/weekly cadence is sufficient for the empty-table fall-through; same-day re-runs add zero value beyond the second pass that already confirms idempotency.
