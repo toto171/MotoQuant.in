@@ -139,7 +139,7 @@ fi
 #   remove this flag and run interactively.
 # 2>&1: merge stderr into stdout so the log captures everything.
 set +e
-claude --dangerously-skip-permissions -p "${PROMPT_FINAL}" 2>&1 | tee -a "${LOG_FILE}"
+claude --dangerously-skip-permissions -p "${PROMPT_FINAL}" </dev/null 2>claude --dangerously-skip-permissions -p "${PROMPT_FINAL}" 2>&11 | tee -a "${LOG_FILE}"
 CLAUDE_EXIT=${PIPESTATUS[0]}
 set -e
 
