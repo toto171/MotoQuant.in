@@ -101,7 +101,7 @@ Once processed, the block is renamed `## MOBILE-PROCESSED — ...` so it isn't r
 Example:
 
 ```
-## MOBILE — 2026-05-15 — 10:30
+### MOBILE EXAMPLE — 2026-05-15 — 10:30
 add bike Aprilia Tuono V4 1100 Factory 2024
 +1 marketing-content
 investigate why ZX-25R sim trap is 5 km/h slow
