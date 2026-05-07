@@ -130,3 +130,15 @@ git-creds.env
 preflight.env
 mq-session-*/
 *.session.lock
+
+# ── Added 2026-05-07: post-cleanup hardening ──
+# Runtime session logs — never track
+logs/
+logs/*.log
+
+# One-time token-merge files (transient, manual cleanup after paste)
+TOKENS_UPDATE_*.md
+
+# Defensive: file accidentally created when bash redirect target name
+# collides with the 'claude' command (sed-mangle artifact, see 2c4986d)
+/claude

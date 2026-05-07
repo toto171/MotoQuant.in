@@ -1,0 +1,22 @@
+{
+  "_meta": {
+    "schema": 1,
+    "last_self_review": null,
+    "comment": "agents are scored each morning. Higher = more likely to run today. Self-review can adjust ±10 per cycle. Manual override via mobile dispatch."
+  },
+  "agents": {
+    "catalog-expansion":      { "base": 50, "best_dow": [1] },
+    "physics-calibration":    { "base": 40, "best_dow": [3] },
+    "benchmark-import":       { "base": 40, "best_dow": [2] },
+    "marketing-content":      { "base": 35, "best_dow": [1, 5] },
+    "seo-keyword":            { "base": 30, "best_dow": [1] },
+    "competitive-intel":      { "base": 25, "best_dow": [2] },
+    "product-prioritisation": { "base": 20, "best_dow": [4] },
+    "customer-support":       { "base": 30, "best_dow": [4] },
+    "technical-debt-pass":    { "base": 25, "best_dow": [3, 6] },
+    "performance-monitor":    { "base": 20, "best_dow": [7] },
+    "growth-experiments":     { "base": 30, "best_dow": [5] },
+    "partnership-outreach":   { "base": 25, "best_dow": [5] },
+    "self-review":            { "base": 50, "best_dow": [7] }
+  }
+}
