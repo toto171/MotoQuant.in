@@ -107,6 +107,96 @@ add bike Aprilia Tuono V4 1100 Factory 2024
 investigate why ZX-25R sim trap is 5 km/h slow
 ```
 
+## INSTRUCTION — 2026-05-07 — preflight: /sessions disk-guard
+[opportunistic]
+
+Add `scripts/preflight_disk_guard.sh` invoked from `scripts/session_preflight.sh`.
+Behaviour: `df --output=avail /sessions | tail -1` — if < 500 MB, write a
+`## INCIDENT` block to `DISPATCH_OUTBOX.md` with the disk-usage snapshot and
+exit non-zero. Rationale: `/sessions` at 100% silently broke `git config --global`,
+`pip install`, and `npm install` in 3/3 of the last daily sessions
+(May 2 / 3 / 4). Source: `reports/support_triage_2026-05-07.md`.
+
+Expected deliverable: one new script + one line in preflight + a test that
+mocks `df` output below threshold and asserts non-zero exit.
+
+---
+
+## INSTRUCTION — 2026-05-07 — investigate: health-check side-channel via GH Actions
+[research]
+
+Context: 3/3 of the last daily sessions logged "Production health NOT VERIFIED —
+sandbox network egress blocked Railway domain (cowork-egress-blocked)". Even
+the `/api/health` smoke-test the postflight script wants to do as a deploy-gate
+cannot run from the sandbox.
+
+Investigate: a GitHub Actions workflow on a 15-min cron that curls
+`https://web-production-de6eb.up.railway.app/api/health` and
+`https://www.motoquant.in`, writes JSON to a gist (or a `health/` branch
+in the repo). Sandbox sessions read the file via `git fetch` (which IS
+permitted) instead of attempting the blocked egress.
+
+Don't act yet — write findings to outbox with a one-page proposal (cron freq,
+auth model for the gist, JSON schema, fallback if the workflow itself fails)
+and ask before implementing.
+
+Source: `reports/support_triage_2026-05-07.md`.
+
+---
+
+## INSTRUCTION — 2026-05-07 — fix: bike_repo year-suffix matching for upsert
+[opportunistic]
+
+Root cause already documented in CLAUDE.md May-4 entry: `bike_repo.create_model`
+upsert fallback doesn't strip `(YYYY-YYYY)` model-name suffixes before matching
+against existing rows, so re-running `python3 -m motoquant.run import --known-bikes`
+inserts phantom duplicates whose `model_name` carries the suffix. May-4 hit
+this with 35 phantom rows on first attempt; the workaround was
+`git checkout HEAD -- motoquant.db` then a manual 2-bike `import_batch` call.
+
+Fix: in `motoquant/database/bike_repo.py::create_model`, normalise
+`model_name` by stripping a trailing ` \(\d{4}-\d{4}\)` regex group before
+the lenient `(manufacturer_id, model_name) ORDER BY year proximity` fallback
+match. Add a regression test in `tests/test_scraper.py` that imports the same
+bike list twice and asserts row count doesn't grow.
+
+Source: `reports/support_triage_2026-05-07.md`.
+
+---
+
+## INSTRUCTION — 2026-05-07 — bootstrap: analytics + apply S5 auth-DDL on prod DB
+[opportunistic]
+
+This is the new top-1 standing priority (see CLAUDE.md "STANDING PRIORITIES" + `reports/product_priorities_2026-05-07.md`). Three sub-tasks, ship together:
+
+1. **GA4** — add `<Script>` tag to `web/app/layout.js` with `NEXT_PUBLIC_GA_MEASUREMENT_ID` env var (placeholder OK for first ship; user supplies the real ID separately).
+2. **PostHog free-tier** — wire to FastAPI `/api/*` middleware in `motoquant/api.py`. Capture endpoint + bike_id + user-agent + response time. PostHog Python SDK + env-gated init so dev tests don't dispatch.
+3. **Apply S5 DDL on prod DB** — write `scripts/apply_s5_ddl.py` that calls `subscriptions_repo.ensure_tables()` + `users_repo.ensure_tables()` against `motoquant.db` (idempotent — uses `CREATE TABLE IF NOT EXISTS`). Run once locally, commit the migrated DB. Verify tables exist post-deploy via the GH-Actions health side-channel (instruction above).
+
+Success metric: STATUS.md user-facing KPI rows show real (non-TBD) numbers within 14 days of ship; `users` table query returns ≥0 rows on prod (i.e., schema exists).
+
+Source: `reports/product_priorities_2026-05-07.md` (top-1).
+
+---
+
+## INSTRUCTION — 2026-05-07 — research: bootstrap data/competitive_landscape.md
+[research]
+
+Context: the `competitive-intel` agent's output file `data/competitive_landscape.md` does not exist yet (verified 2026-05-07). This makes `opportunity_weight` in the master scheduler dead-input and product-prioritisation cannot factor competitor moves into ranking.
+
+Bootstrap a one-time scan covering the 4 nearest products:
+
+- **Bikes.app** (community ride-tracking + leaderboards) — pricing, free-tier limits, last visible feature ship
+- **Dragy app** (GPS timeslip, the user-data layer we want to ingest) — recent updates, integration APIs (any open?), Indian-market presence
+- **MotoCalc** (gear-ratio + power calculators, desktop) — feature set, last release, price
+- **Tuneboss / Race-y / similar** — any Indian-market drag prediction tool? capture or note absence
+
+Output: `data/competitive_landscape.md`, ~2 pages markdown, sections per competitor with `last_scanned: 2026-05-07`. Don't act on findings yet; future weekly competitive-intel runs will diff against this baseline.
+
+Source: `reports/product_priorities_2026-05-07.md` (escalation: missing data).
+
+---
+
 ## INSTRUCTIONS QUEUE
 
 > _Add new `## INSTRUCTION` blocks above this divider. Claude marks them `## DONE` once handled._

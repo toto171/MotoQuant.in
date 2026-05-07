@@ -123,6 +123,16 @@ For force-pushes (e.g. the `ws/kaizen` rebase that re-authored the 5 `kaizen@mot
 
 ---
 
+## ⭐ STANDING PRIORITIES — top-3 (refreshed weekly by product-prioritisation agent)
+
+> Set 2026-05-07. The daily scheduler should bias its `opportunity_weight` toward these. Re-evaluated every Thursday by `scripts/agents/product-prioritisation.md`. See `reports/product_priorities_2026-05-07.md` for scoring detail.
+
+1. **Bootstrap analytics + apply S5 auth-DDL on prod DB.** Without GA4 + PostHog + the `users`/`sessions`/`subscriptions`/`license_keys` tables existing on prod, every user-facing KPI (sessions, signups, B2B convos) stays "TBD" and Phase 6 commercial work cannot start. **Success metric:** STATUS.md user-facing KPI rows show real numbers within 14 days; 200 active sim users / month within 30 days.
+2. **Live `/api/surrogate/predict` route + BuildPage live preview.** Pickle (`surrogate_dnn.pkl`, 10.8 MB) ships in repo; route + React Query hook + BuildPage wiring is ~1 day of work. **Success metric:** BuildPage slider tick latency p95 ≤ 5 ms.
+3. **CI sidecar-build matrix → first downloadable v1.0 binaries.** Tagging `v1.0.0-beta.1` should produce 3 platform artifacts in GitHub Releases. Unblocks the Pune/Narhe closed-beta outreach item that has been deferred 3 weeks. **Success metric:** `v*` tag push → 3 downloadable artifacts in 30 min, each passing sidecar smoke-test.
+
+---
+
 ## ⚠️ BEFORE STARTING ANY TASK — MODEL SELECTION
 
 **Always check which model the user is on and advise if it's wrong. Do not proceed with a mismatched model without explicit acknowledgement.**

@@ -537,6 +537,44 @@ def seed_two_stroke(db) -> int:
                 "retailer": "FMF Racing USA",
                 "delivery_days": 14,
             },
+            # --- Honda NS400R V3 2T (1985-1987 GP-derived street triple) ---
+            {
+                "category": "exhaust",
+                "brand": "Tyga Performance",
+                "model_name": "Tyga Expansion Chambers Honda NS400R",
+                "part_number": "TYGA-NS400R-EX",
+                "specs": {
+                    "type": "expansion_chamber",
+                    "material": "mild_steel",
+                    "config": "triple_pipe",
+                    "stroke_type": 2,
+                    "weight_kg": 9.0,
+                },
+                "param_deltas": {
+                    "engine.peak_power_hp": 8,
+                    "engine.peak_torque_nm": 4,
+                    "chassis.dry_mass_kg": -3.5,
+                },
+                "param_overrides": {
+                    "engine.expansion_chamber": True,
+                    "engine.tuned_rpm": 9800,
+                },
+                "fitment_rules": {
+                    "tier": "family",
+                    "match": {
+                        "manufacturers": ["Honda"],
+                        "engine_configs": ["I3"],
+                        "displacement_min_cc": 380,
+                        "displacement_max_cc": 400,
+                        "stroke_type": 2,
+                    },
+                    "description": "Tyga triple-pipe set for Honda NS400R 90° V3 2T; race-spec, 9.8k peak",
+                },
+                "price_inr": 78000,
+                "availability": "import_only",
+                "retailer": "Tyga Performance Thailand",
+                "delivery_days": 30,
+            },
         ]
     )
 

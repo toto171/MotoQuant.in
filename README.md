@@ -82,8 +82,8 @@ and phase roadmap.
 ## Project state (Apr 2026)
 
 - **Phase 1 -- Core Physics:** complete. 15 sub-models, adaptive RK4.
-- **Phase 2 -- Database & Ingestion:** complete. 336 bikes, 232 tires,
-  562 parts, 20 venues, 861 OEM bike-tire fitments.
+- **Phase 2 -- Database & Ingestion:** complete. 339 bikes, 232 tires,
+  563 parts, 20 venues, 861 OEM bike-tire fitments.
 - **Phase 3 -- Validation & Calibration:** in progress. Dragy + dyno + ECU
   import done; FastAPI + Next.js frontend live at motoquant.in.
 - **Phase 4 -- AI / Optimisation:** in progress. ROI, Sobol, Bayesian opt,

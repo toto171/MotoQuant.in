@@ -344,6 +344,142 @@ HERO_XTREME_200S_4V_2023 = spec_from_dict(
 )
 
 
+# ── Aprilia Tuareg 660 (2022-2026) ──────────────────────────────────
+# Adventure variant of the 660 parallel-twin platform. Same 659cc engine
+# as RS 660 / Tuono 660 but de-tuned for ADV character: 80 hp @ 9250 rpm
+# (vs RS 660's 100 hp), 70 Nm @ 6500 rpm. 21"/18" spoked wheels, taller
+# gearing, ADV ergonomics. 204 kg dry.
+# Sources: Aprilia 2022 press kit (aprilia.com), MCN Tuareg 660 review
+# 2022, Cycle World first ride 2022.
+APRILIA_TUAREG_660_2022 = spec_from_dict(
+    {
+        "manufacturer": "Aprilia",
+        "model_name": "Tuareg 660",
+        "model_code": "TUAR660",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "adventure",
+        "displacement_cc": 659,
+        "bore_mm": 81.0,
+        "stroke_mm": 63.93,
+        "compression_ratio": 13.5,
+        "cylinders": 2,
+        "peak_power_hp": 80.0,
+        "peak_power_rpm": 9250,
+        "peak_torque_nm": 70.0,
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Aprilia 660-platform cassette per Aprilia tech data sheet.
+        "gear_ratios": [2.687, 2.062, 1.647, 1.368, 1.173, 1.037],
+        "front_sprocket": 15,
+        "rear_sprocket": 45,  # ADV taller than RS660's 15/43
+        "chain_pitch": "525",
+        "dry_mass_kg": 204.0,
+        "wheelbase_mm": 1525.0,
+        "front_tire_size": "90/90-21",
+        "rear_tire_size": "150/70R18",
+        "cd": 0.82,        # ADV upright; ref V-Strom 650 @ 0.82
+        "frontal_area_m2": 0.62,  # ADV with windscreen + tall stance
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── TVS Apache RTR 180 (2009-2024 — Indian commuter sport) ──────────
+# Long-running 177.4cc single. Air/oil cooled, 17.55 PS @ 8500 rpm,
+# 15.5 Nm @ 6500 rpm (BS6 spec, 2020+). 5-speed, F15/R41 with 428
+# chain, ~131 kg dry. Popular Indian drag-racing entry-class.
+# Sources: TVS Apache RTR 180 official spec page (tvsmotor.com),
+# BikeWale spec table, ZigWheels review database.
+TVS_APACHE_RTR_180_2009 = spec_from_dict(
+    {
+        "manufacturer": "TVS",
+        "model_name": "Apache RTR 180",
+        "model_code": "RTR180",
+        "year_from": 2009,
+        "year_to": 2024,
+        "category": "naked",
+        "displacement_cc": 177.4,
+        "bore_mm": 62.5,
+        "stroke_mm": 57.8,
+        "compression_ratio": 9.5,
+        "cylinders": 1,
+        "peak_power_hp": 17.55,
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 15.5,
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "oil",
+        "valve_config": "sohc",
+        "gears": 5,
+        # TVS Apache RTR 180 service manual cassette — same family as
+        # RTR 160 4V but with the older 2V head's cassette ratios.
+        "gear_ratios": [3.000, 1.875, 1.333, 1.045, 0.880],
+        "front_sprocket": 15,
+        "rear_sprocket": 41,
+        "chain_pitch": "428",
+        "dry_mass_kg": 131.0,  # 139 kg kerb - ~8 kg fuel = ~131 dry
+        "wheelbase_mm": 1300.0,
+        "front_tire_size": "90/90-17",
+        "rear_tire_size": "110/80-17",
+        "cd": 0.81,        # naked commuter; ref Apache RTR 200 4V @ 0.81
+        "frontal_area_m2": 0.44,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda NS400R (1985-1987 — vintage 2T V3) ────────────────────────
+# NS500-GP-derived 387cc 90° V3 2-stroke. ATAC power-valve, water-cooled,
+# 72 hp @ 9500 rpm, 51 Nm @ 8500 rpm. Reed-valve induction, 6-speed,
+# 163 kg dry. Honda's "GP bike for the street" of the mid-80s.
+# Sources: Honda 1985 press kit (RC-built brochure), Cycle World 1985
+# road test, MCN classic-bike database.
+HONDA_NS400R_1985 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "NS400R",
+        "model_code": "NC19",
+        "year_from": 1985,
+        "year_to": 1987,
+        "category": "sport",
+        "displacement_cc": 387.0,
+        "bore_mm": 57.0,
+        "stroke_mm": 50.6,
+        "compression_ratio": 6.7,
+        "cylinders": 3,
+        "peak_power_hp": 72.0,
+        "peak_power_rpm": 9500,
+        "peak_torque_nm": 51.0,
+        "peak_torque_rpm": 8500,
+        "fuel_system": "carb",
+        "cooling": "liquid",
+        "valve_config": "2T_reed",
+        "stroke_type": 2,
+        "tuned_rpm": 9500,
+        "expansion_chamber": True,
+        "reed_valve": True,
+        "powervalve": True,  # ATAC (Auto-controlled Torque Amplification Chamber)
+        "gears": 6,
+        # NS400R service manual cassette (Honda NC19 shop manual).
+        "gear_ratios": [2.500, 1.750, 1.380, 1.143, 0.965, 0.846],
+        "front_sprocket": 15,
+        "rear_sprocket": 39,
+        "chain_pitch": "530",
+        "dry_mass_kg": 163.0,
+        "wheelbase_mm": 1385.0,
+        "front_tire_size": "100/90-16",
+        "rear_tire_size": "110/90-18",
+        "cd": 0.58,
+        "frontal_area_m2": 0.45,
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -355,4 +491,8 @@ EXTENDED_BIKES = [
     # ── Daily improvement run 2026-05-04 (Monday — Catalog) ──
     KTM_1390_SUPERDUKE_R_EVO_2024,
     HERO_XTREME_200S_4V_2023,
+    # ── Daily improvement run 2026-05-07 (Thursday — Catalog) ──
+    APRILIA_TUAREG_660_2022,
+    TVS_APACHE_RTR_180_2009,
+    HONDA_NS400R_1985,
 ]
