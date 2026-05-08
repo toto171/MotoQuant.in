@@ -10,6 +10,15 @@ export const metadata = {
 
 const POSTS = [
   {
+    slug: 'hero-xtreme-200s-4v-quarter-mile-physics',
+    title: 'Hero Xtreme 200S 4V Quarter-Mile Physics: 200cc Commuter Drag',
+    date: '2026-05-08',
+    readTime: '9 min',
+    tags: ['Hero', 'Xtreme 200S 4V', 'Indian 200cc', 'commuter sport'],
+    excerpt:
+      'MotoQuant simulates the Hero Xtreme 200S 4V at 17.40s and 125 km/h trap. Why the 19.1 hp / 17.35 Nm 4-valve oil-cooled single is gearing-limited, not power-limited — and the two ₹3,600 mods that close most of the gap.',
+  },
+  {
     slug: 'ktm-1390-super-duke-r-evo-quarter-mile-physics',
     title: 'KTM 1390 Super Duke R EVO Quarter-Mile Physics Breakdown',
     date: '2026-05-08',

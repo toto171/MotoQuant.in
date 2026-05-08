@@ -8,8 +8,9 @@
  * CTAs hit POST /api/subscriptions/checkout and redirect to Razorpay.
  */
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "../../components/AuthProvider";
 import TierBadge from "../../components/TierBadge";
 import SiteNav from "../../components/SiteNav";
@@ -79,11 +80,24 @@ function FaqItem({ q, a }) {
   );
 }
 
-export default function PricingPage() {
+function PricingPageInner() {
   const [cycle, setCycle] = useState("monthly");
   const [loading, setLoading] = useState(null);
   const [error, setError] = useState("");
   const { isAuthenticated, accessToken } = useAuth();
+
+  // ── EXP-002: Pro-CTA copy A/B test (live 2026-05-08) ────────────────
+  // Hypothesis: "Subscribe to Pro" is high-commitment language; framing
+  // the same action as "Start Pro · 7-day refund" embeds the risk-reversal
+  // directly on the button so the visitor's eye doesn't have to drift to
+  // the smaller "7-day money-back guarantee" caption below it. SEO-safe:
+  // SSR always renders Variant A (default); ?variant=B switches client-side.
+  const searchParams = useSearchParams();
+  const proCtaVariant = searchParams?.get("variant") === "B" ? "B" : "A";
+  const proCtaCopy = (loadingText) => {
+    if (loadingText) return loadingText;
+    return proCtaVariant === "B" ? "Start Pro · 7-day refund" : "Subscribe to Pro";
+  };
 
   async function subscribe(tier) {
     if (!isAuthenticated) {
@@ -218,9 +232,11 @@ export default function PricingPage() {
                 <button
                   onClick={() => subscribe("pro")}
                   disabled={!!loading}
+                  data-exp="EXP-002"
+                  data-variant={proCtaVariant}
                   className="mt-8 w-full rounded-md bg-brand-orange py-3 text-sm font-display font-bold text-black shadow-orange-soft hover:bg-brand-orangeLight disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {loading === "pro" ? "Redirecting…" : "Subscribe to Pro"}
+                  {loading === "pro" ? "Redirecting…" : proCtaCopy()}
                 </button>
                 <p className="mt-3 text-center text-xs text-white/40 font-mono">7-day money-back guarantee</p>
               </div>
@@ -335,5 +351,18 @@ export default function PricingPage() {
       </main>
       <SiteFooter />
     </div>
+  );
+}
+
+
+// ──────────────────────────────────────────────────────────────────────
+// Default export wraps PricingPageInner in <Suspense> so the static
+// prerender of /pricing doesn't bail out on the EXP-002 useSearchParams()
+// call. Mirrors the HomePage Suspense fix (66e769d).
+export default function PricingPage() {
+  return (
+    <Suspense fallback={null}>
+      <PricingPageInner />
+    </Suspense>
   );
 }

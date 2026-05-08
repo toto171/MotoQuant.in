@@ -51,3 +51,40 @@ Drafted 5 cold-email templates targeting Pune-area performance/tuning shops for 
 - Mumbai performance shops (Bandra/Andheri) — different rider demographic, weekend Aamby Valley overlap
 - Bangalore (Indiranagar/Whitefield) — KTM-heavy market, MMRT proximity for track day cross-sell
 - Hyderabad — drag scene is active, lower competition for simulator tooling
+
+---
+
+# Partnership Outreach — Bangalore + Hyderabad — 2026-05-08 (Batch 2)
+
+## Category picked
+
+Bangalore + Hyderabad performance shops (priority 2 from the outreach playbook). Pune was already covered by Batch 1 above, so picked the next-largest urban performance markets. Both cities have visible litre-sport service shops, which is the cluster MotoQuant Pro is most accurate against (mean |Δ| 0.162s on litre ≥195hp, 0.225s on 600-1000cc sport — both directly usable as anchor stats).
+
+## Businesses drafted (5)
+
+| Business | City | Local-insight hook |
+|---|---|---|
+| Big Bad Bikes | Bangalore | Litre-sport service (ZX-10R / S1000RR / Panigale) — anchored on top-10 ±0.032s and litre-sport cluster mean |Δ| 0.162s |
+| Planet Superbikes | Bangalore | Ducati Panigale V4 + KTM 1290/1390 Super Duke — both well-modelled with cluster bias under 0.20s |
+| Redline Superbikes | Bangalore | Hayabusa / ZX-14R / S1000RR — anchored on the Hayabusa Gen-1 reference baseline (10.4712s) and Brock's-style drag builds |
+| SD Superbikes | Hyderabad | Panigale / ZX-10R / R1 with Hakimpet airstrip + Kari context |
+| Throttle Superbikes | Hyderabad | Litre + 600cc sport — anchored on the 600-1000cc cluster (29 benchmarks, mean |Δ| 0.225s) |
+
+## Files created — Batch 2
+
+- `outreach/bangalore/big-bad-bikes.md`
+- `outreach/bangalore/planet-superbikes.md`
+- `outreach/bangalore/redline-superbikes.md`
+- `outreach/hyderabad/sd-superbikes.md`
+- `outreach/hyderabad/throttle-superbikes.md`
+- `outreach/CONTACTS.csv` (5 rows appended)
+
+## Anti-slop discipline (Batch 2)
+
+- Same checks as Batch 1: no AI-tell phrases, no fabricated user counts, Phase 5 closed-beta and Phase 6 subscriptions described as planned/in-progress (not live).
+- All contact fields are `<TODO: user to find current email>` — agent has no web access; user verifies before sending.
+- Tone matches Batch 1: 3-4 short paragraphs, one local-insight hook per email, soft CTA.
+
+## Commit summary (≤80 chars)
+
+`outreach: 5 drafts for Bangalore + Hyderabad shops (Batch 2)`

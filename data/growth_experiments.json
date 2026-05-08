@@ -22,6 +22,28 @@
       "default": "A",
       "implementation_notes": "Client-side useSearchParams() in web/app/page.js. Same canonical URL, same href (/simulator), same h1, same meta — SEO-safe. data-exp/data-variant attributes on the Link for analytics attribution.",
       "decision_criteria": "Ship variant B as new control if simulator-runs/visitor lifts ≥15% with p<0.05 over ≥200 samples per arm. Roll back if bounce rate increases >10% or CTR decreases. No decision before 200 samples per arm."
+    },
+    {
+      "id": "EXP-002",
+      "started": "2026-05-08",
+      "page": "/pricing",
+      "element": "Pro-tier subscribe CTA copy",
+      "hypothesis": "Pricing-page Pro CTA 'Subscribe to Pro' is high-commitment language that triggers loss-aversion on the click. Variant B 'Start Pro · 7-day refund' reframes the action as a low-risk trial start with the risk-reversal embedded on the button itself, so the eye doesn't have to drift to the smaller caption below. Should lift Pro checkout-init / pricing-visitor.",
+      "variant_a": "Subscribe to Pro",
+      "variant_b": "Start Pro · 7-day refund",
+      "primary_metric": "pro_checkout_init_clicks / pricing_page_visitor",
+      "secondary_metrics": [
+        "pro_cta_click_through_rate",
+        "razorpay_checkout_completion_rate",
+        "studio_cta_cannibalisation_rate",
+        "pricing_page_bounce_rate"
+      ],
+      "min_sample": 200,
+      "status": "live",
+      "flag": "?variant=B",
+      "default": "A",
+      "implementation_notes": "Client-side useSearchParams() in web/app/pricing/page.js. Same canonical URL, same checkout endpoint, same h1, same meta — SEO-safe. data-exp/data-variant attributes on the Pro button for analytics attribution. Studio CTA unchanged (single-variable rule). EXP-001 is on landing-hero so no page conflict.",
+      "decision_criteria": "Ship variant B as new control if pro_checkout_init/visitor lifts ≥15% with p<0.05 over ≥200 samples per arm AND razorpay_checkout_completion does not drop >5% (we want trial intent, not abandoned-cart inflation). Roll back if Studio cannibalisation increases >10% (refund-anchor stealing higher-tier intent). No decision before 200 samples per arm."
     }
   ]
 }
