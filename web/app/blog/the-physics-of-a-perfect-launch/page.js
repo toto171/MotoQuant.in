@@ -1,6 +1,8 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
+import InlineSimCta from './InlineSimCta';
 
 export const metadata = {
   title: 'The Physics of a Perfect Launch — MotoQuant Blog',
@@ -119,24 +121,47 @@ const CONTENT = [
   },
 ];
 
-function Prose({ content }) {
+function Prose({ content, inlineCta }) {
+  // GROWTH_EXP_004: inject InlineSimCta after the Nth H2 (mid-scroll) when
+  // variant=B. Index is the count of H2 blocks already rendered; inject after
+  // the 2nd H2 (i.e. midway between intro and conclusion). Variant A renders
+  // an empty fragment in the same slot so DOM ordering stays identical for
+  // both arms.
+  const INJECT_AFTER_H2_COUNT = 2;
+  let h2Seen = 0;
+
   return (
     <div className="max-w-2xl mx-auto">
       {content.map((block, i) => {
+        const nodes = [];
         if (block.type === 'h2') {
-          return <h2 key={i} className="font-display font-bold text-2xl md:text-3xl text-white mt-12 mb-4 tracking-tight">{block.text}</h2>;
-        }
-        if (block.type === 'lead') {
-          return <p key={i} className="text-lg text-white/80 leading-relaxed mb-8 font-light">{block.text}</p>;
-        }
-        if (block.type === 'callout') {
-          return (
+          h2Seen += 1;
+          nodes.push(
+            <h2 key={i} className="font-display font-bold text-2xl md:text-3xl text-white mt-12 mb-4 tracking-tight">{block.text}</h2>
+          );
+        } else if (block.type === 'lead') {
+          nodes.push(
+            <p key={i} className="text-lg text-white/80 leading-relaxed mb-8 font-light">{block.text}</p>
+          );
+        } else if (block.type === 'callout') {
+          nodes.push(
             <div key={i} className="my-8 px-5 py-4 rounded-xl border-l-4 border-brand-orange bg-brand-orange/5">
               <p className="text-sm text-white/80 leading-relaxed italic">{block.text}</p>
             </div>
           );
+        } else {
+          nodes.push(
+            <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">{block.text}</p>
+          );
         }
-        return <p key={i} className="text-white/70 text-sm leading-relaxed mb-5">{block.text}</p>;
+        // Inject the inline CTA slot directly after the Nth H2 *and its
+        // following paragraph cluster*. We attach it after the H2 itself
+        // so the slot lives at the natural section boundary, not before
+        // the heading.
+        if (block.type === 'h2' && h2Seen === INJECT_AFTER_H2_COUNT) {
+          nodes.push(<div key={`exp004-slot-${i}`}>{inlineCta}</div>);
+        }
+        return nodes;
       })}
     </div>
   );
@@ -163,7 +188,16 @@ export default function PostPage() {
           </div>
         </div>
 
-        <Prose content={CONTENT} />
+        {/* GROWTH_EXP_004: inline mid-scroll CTA. Variant A renders nothing
+            (control = end-of-post CTA only). Variant B renders a pull-quote-
+            style sim CTA after the 2nd H2. Suspense boundary required because
+            InlineSimCta uses useSearchParams() and this page is otherwise
+            statically prerendered. */}
+        <Prose content={CONTENT} inlineCta={
+          <Suspense fallback={null}>
+            <InlineSimCta />
+          </Suspense>
+        } />
 
         {/* CTA */}
         <div className="max-w-2xl mx-auto mt-16 glass rounded-xl p-6 border border-brand-orange/25 flex flex-col sm:flex-row items-center gap-4">

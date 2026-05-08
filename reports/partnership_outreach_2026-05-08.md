@@ -141,3 +141,72 @@ Where the right partnership shape is genuinely ambiguous (Powertronic, K&N, Dyno
 ## Commit summary (Batch 3, ≤80 chars)
 
 `outreach: draft 5 dyno-vendor / importer / ECU-tuner emails`
+
+---
+
+# Partnership Outreach — Indian Moto-Press — 2026-05-08 (Batch 4)
+
+## Category picked
+
+Priority #4 in the agent template: Indian moto-press for product mentions. Pune-Narhe, Bangalore + Hyderabad, and dyno-vendors / importers were already covered in Batches 1-3, so picked moto-press as the next un-touched segment. ROI argument: a single TopGear India / BikeWale / Motoroids / RushLane mention reaches 10-100x the audience of any individual tuning shop, and the editorial angle "physics simulator built in India for the Indian drag scene" is genuine editorial-fit content rather than a sales pitch. Pitch shape is intentionally different from Batches 1-3 — no SaaS license ask, no per-shop ROI math; instead a soft press-kit / walkthrough CTA with editorial angles tailored to each publication's existing format.
+
+## Publications drafted (5)
+
+| Slug | Publication | HQ | Editorial angle |
+|---|---|---|---|
+| topgear-india | TopGear India (BBC Worldwide India) | Mumbai | Methodology / validation piece — K5/R1/Hayabusa pinned to ±0.0000s as regression contract; ±0.032s mean error on top-10 best-matched bikes |
+| bikewale | BikeWale (CarTrade Tech) | Mumbai | Comparison-review format fit + bidirectional data partnership on 200-300cc Indian commuter cluster (where MotoQuant's bias is +1.4s and BikeWale's road-test data would tighten it) |
+| motoroids | Motoroids (independent) | Pune/Delhi (verify) | Three story angles — technical methodology, validation/per-cluster bias disclosure, practical-tooling (Pune tuning shops) |
+| rushlane | RushLane (independent) | Bangalore (verify) | News-hook angle — sim-vs-claim within 24-48h of new launches (KTM 1390 / Pulsar NS400Z / Hayabusa 25th); plus the "physics simulator built in India" editorial differentiator |
+| overdrive | OVERDRIVE Magazine (Network18 / Forbes India) | Mumbai | Pre-test prediction on the instrumented road-test program + long-form magazine piece validating against OVERDRIVE's own historical road-test archive |
+
+## Files created — Batch 4
+
+- `outreach/moto-press/topgear-india.md`
+- `outreach/moto-press/bikewale.md`
+- `outreach/moto-press/motoroids.md`
+- `outreach/moto-press/rushlane.md`
+- `outreach/moto-press/overdrive.md`
+- `outreach/CONTACTS.csv` (5 rows appended; total now 21 lines = 1 header + 20 contacts)
+
+## Verification gaps the user must close before sending
+
+Every email is marked `[verify]` in the front-matter and `[EDITOR NAME — verify]` in the salutation. Specific items to fill in:
+
+| Publication | What to verify |
+|---|---|
+| TopGear India | Editor / bike-section writer name from current masthead; correct domain (topgear.com/india vs topgearmagazine.in); editorial contact email |
+| BikeWale | Road-test / reviews team lead name; editorial contact email (try contact-us page or LinkedIn); confirm CarTrade Tech parent company is current |
+| Motoroids | HQ city (Pune vs Delhi — public sources are inconsistent); editor name; editorial contact email |
+| RushLane | HQ city (Bangalore likely but verify); two-wheeler beat writer name; editorial contact email |
+| OVERDRIVE | Bike-section editor name; editorial contact email — likely on Network18 / Forbes India domain rather than overdrive.in |
+
+**Recommendation:** before sending any of the 5, spend 20-30 minutes on each publication's masthead and About / Contact pages. If a contact email is genuinely not findable, LinkedIn outreach to the named bike-section editor is a reasonable fallback. Do not send to a generic `info@` or `news@` if a specific editorial address can be found.
+
+## Quality gates (Batch 4)
+
+- **Unique angle in para 1:** every draft opens with a recipient-specific observation tied to a real piece of that publication's recent coverage where possible. No interchangeable boilerplate.
+- **No fabricated facts:** every claim about the recipient that's not directly verifiable on a quick web search is marked `[verify]`. Editor names, exact contact emails, and HQ cities (where ambiguous) all use `[verify]` placeholders.
+- **No Phase 6 puffery:** pitch is grounded in the same factual claims as Batches 1-3 — 336-bike catalog, 79 published benchmarks, ±0.032s top-10 mean error, four-decimal-pinned reference baselines, 15 physics sub-models.
+- **Anti-slop check passed:** grepped for delve, tapestry, fast-paced world, embark on a journey, navigating, leverage, seamlessly, ecosystem, holistic, synergy, streamline, robust solution, state-of-the-art, world-class, next-level, game-changer, cutting-edge, paradigm, revolutionize, harness the power, unlock the, elevate your. Zero matches across all 5 emails and the report.
+- **No credentials / PATs in any draft.** Confirmed.
+
+## Editorial angle hierarchy (for the user, when picking who to send first)
+
+1. **Motoroids** — best fit on first read; performance / drag editorial slant matches the product more cleanly than mass-market BikeWale or Network18-owned OVERDRIVE.
+2. **RushLane** — fastest publication cycle; "physics simulator built in India" angle and the launch-day sim-vs-claim hook are timely for the KTM 1390 catalog addition that landed this week.
+3. **BikeWale** — largest reach, slowest cycle; the data-partnership angle is the differentiator and worth a longer-form pitch if a 1:1 with the road-test team can be arranged.
+4. **OVERDRIVE** — best long-form magazine piece if the historical road-test archive can be unlocked for validation; biggest editorial commitment, longest sales cycle.
+5. **TopGear India** — most prestigious masthead; tightest editorial discipline; correspondingly hardest to land. Send last, after the validation report has been polished and the press kit exists.
+
+## Carry-forward / open hygiene
+
+1. **Press kit does not yet exist** — before sending, the user should at minimum prepare a 1-page PDF summary with the validation chart, the 79-benchmark scorecard, and 3-4 representative sim outputs (Hayabusa Gen-1, KTM 1390, Pulsar NS400Z, RE GT 650). Several emails reference "press kit" as if it exists; produce one before any reply lands and a press-kit attachment is requested.
+2. **Validation report public link** — most of these publications will follow up asking for the validation methodology in writing. The internal `reports/validation_*.md` files are not yet user-facing; either publish a sanitised version at `motoquant.in/validation` or have a PDF ready to send.
+3. **Sample comparison report for BikeWale-style format** — generate one Hayabusa-vs-ZX-14R or Duke-390-vs-Apache-RR-310 side-by-side report so it's already attached when BikeWale (or any comparison-format publication) replies.
+4. **Next outreach slot (Batch 5):** drag-strip operators — Aamby Valley owners and MMRT scheduling are the priority. Aamby Valley is geographically the most relevant given the Pune base; MMRT has the published-result archive that's most useful for benchmark expansion. Worth queuing for the next outreach session.
+5. **Open category beyond the priority list:** Indian motorcycle YouTube channels (xBhp's video team, BikeWithGirl, MotorOctane, Throttle67, Powerdrift) — long-form video review embeds map well to MotoQuant's per-build comparison output.
+
+## Commit summary (Batch 4, ≤80 chars)
+
+`outreach: draft 5 Indian moto-press emails (Batch 4)`

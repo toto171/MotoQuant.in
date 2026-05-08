@@ -66,6 +66,29 @@
       "default": "A",
       "implementation_notes": "Client-side useSearchParams() in web/app/simulator/page.js, wrapped in <Suspense> per the static-prerender rule. Variant-aware selection done in pickDefaultBikeForVariant() — name-substring match against the DB bike list so catalog reshuffles (Hayabusa Gen1 vs 2008-2012 vs 2021-2024 model rows) don't break the variant. Falls back to bikes[0] (existing pre-EXP-003 alphabetical-first behaviour) if no name match. data-exp/data-variant attributes on the bike-picker Card for analytics attribution. Same canonical URL, same h1, same meta — SEO-safe. EXP-001 is on landing-hero, EXP-002 is on /pricing — no page conflict.",
       "decision_criteria": "Ship variant B as new control if simulator-runs/visitor lifts ≥15% with p<0.05 over ≥200 samples per arm AND bike_picker_change_rate does not increase by >20% (we want a useful default, not just a default the user immediately overrides). Roll back if simulator_page_bounce_rate increases >10% (Pulsar default may push aspirational-segment visitors away). No decision before 200 samples per arm. Note the SEO consideration: variant A stays canonical because layout.js metadata + OG copy reference Hayabusa; if B wins we still keep Hayabusa as the explicit ?variant=A path so search-result CTR isn't disrupted by the default flip."
+    },
+    {
+      "id": "EXP-004",
+      "started": "2026-05-08",
+      "page": "/blog/the-physics-of-a-perfect-launch",
+      "element": "inline mid-scroll simulator CTA placement",
+      "hypothesis": "Blog readers who reach the 2nd H2 of a long-form physics post are at a natural mid-scroll section break and have already invested ~3 minutes of reading attention. The current end-of-post CTA fires only after they finish — by which point they are mentally exiting. Placing a pull-quote-style simulator CTA after the 2nd H2 (with copy + href identical to the end-of-post card so placement is the only variable) should lift simulator-runs / blog-post-visitor without cannibalising the end-of-post CTA, because mid-scroll click-throughs come from a reader cohort that would otherwise have bounced before the article end.",
+      "variant_a": "End-of-post CTA only (existing pattern — single card after final paragraph)",
+      "variant_b": "End-of-post CTA + pull-quote-style inline CTA after 2nd H2 (mid-scroll)",
+      "primary_metric": "simulator_runs_per_blog_post_visitor",
+      "secondary_metrics": [
+        "post_dwell_time_s",
+        "scroll_depth_pct",
+        "post_to_simulator_ctr",
+        "post_to_pricing_ctr",
+        "end_of_post_cta_ctr_share"
+      ],
+      "min_sample": 200,
+      "status": "live",
+      "flag": "?variant=B",
+      "default": "A",
+      "implementation_notes": "Client-side useSearchParams() in web/app/blog/the-physics-of-a-perfect-launch/InlineSimCta.js, wrapped in <Suspense> per the static-prerender rule (page.js stays a server component so metadata + OG tags still flow through SSG). Variant A renders a hidden span placeholder so the DOM tree is identical except for the inline CTA block itself — no layout shift on control. Variant B injects the CTA after the 2nd H2 (block-counter in the Prose function). Same canonical URL, same h1, same meta — SEO-safe. Inline CTA copy + href deliberately match the end-of-post card so the only variable is placement. data-exp/data-variant attributes on both the wrapper div and the Link element for analytics attribution. End-of-post CTA unchanged on both arms (additive test). EXP-001 is on landing-hero, EXP-002 on /pricing, EXP-003 on /simulator — no page conflict.",
+      "decision_criteria": "Ship variant B as new control if simulator-runs/blog-post-visitor lifts ≥15% with p<0.05 over ≥200 samples per arm AND end-of-post CTA absolute CTR does not drop >25% (we want net new clicks, not redistributed clicks — if mid-scroll cannibalises end-of-post entirely we have not actually lifted the page). Roll back if scroll_depth_pct drops >10% (inline CTA causing premature exits) or post_dwell_time_s drops >15% (CTA disrupting reading flow). No decision before 200 samples per arm. If B wins, replicate the pattern across the other 7 blog posts in a follow-up rollout (one post at a time so each replication is its own micro-validation, not a blanket assumption)."
     }
   ]
 }
