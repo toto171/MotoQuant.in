@@ -21,7 +21,7 @@
  * Champions" panel.
  */
 
-import { useRef } from 'react';
+import { Suspense, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
@@ -257,7 +257,7 @@ function PhysicsCard({ icon: Icon, title, items }) {
 }
 
 // ──────────────────────────────────────────────────────────────────────
-export default function HomePage() {
+function HomePageInner() {
   // GROWTH_EXP_001: hero-CTA copy A/B test — see data/growth_experiments.json
   // Default OFF (control). Visitors who land with ?variant=B see the
   // verb-result variant. Same href, same SEO, same h1.
@@ -790,5 +790,20 @@ export default function HomePage() {
 
       <SiteFooter />
     </div>
+  );
+}
+
+
+// ──────────────────────────────────────────────────────────────────────
+// Default export wraps HomePageInner in <Suspense> so the static
+// prerender of `/` doesn't bail out on the EXP-001 useSearchParams()
+// call. Without this boundary, `next build` errors with
+// "missing-suspense-with-csr-bailout" on the root route. See
+// web/CONTRIBUTING.md for the full rule.
+export default function HomePage() {
+  return (
+    <Suspense fallback={null}>
+      <HomePageInner />
+    </Suspense>
   );
 }
