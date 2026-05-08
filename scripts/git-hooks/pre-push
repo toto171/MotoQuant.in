@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+#
+# pre-push — run `next build` when the push includes changes under web/**.
+#
+# Why this hook exists
+# --------------------
+# Vercel's prerender step rejects client components that call
+# `useSearchParams()` (and similar URL hooks) without a Suspense
+# boundary above them. The build error there is identical to a local
+# `next build` error — but Vercel only sees it after we push, and the
+# next user-visible deploy is broken until we patch + push again.
+#
+# This hook closes that gap by running `next build` locally before
+# the push leaves the laptop. It only fires when the diff actually
+# touches web/**, so non-web work isn't slowed down.
+#
+# Setup
+# -----
+# Once per clone:
+#
+#   git config core.hooksPath scripts/git-hooks
+#
+# That tells git to look here for hooks instead of .git/hooks/.
+#
+# Bypass
+# ------
+# In an emergency, set SKIP_WEB_BUILD=1 to skip the local build:
+#
+#   SKIP_WEB_BUILD=1 git push
+#
+# Use sparingly — the GitHub Actions web-verify workflow will still
+# run on the server, so you'll find out within a minute either way.
+
+set -e
+
+if [ "${SKIP_WEB_BUILD:-0}" = "1" ]; then
+  echo "[pre-push] SKIP_WEB_BUILD=1 — skipping local web build."
+  exit 0
+fi
+
+# Find the upstream commit for the current branch. If we can't resolve
+# one (e.g. first push of a new branch), compare against origin/main.
+upstream="$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || true)"
+if [ -z "$upstream" ]; then
+  upstream="origin/main"
+fi
+
+# List files changed between upstream and HEAD. If git can't resolve
+# the upstream (offline / new remote), fall back to staged + last commit.
+if changed="$(git diff --name-only "$upstream"...HEAD 2>/dev/null)"; then
+  :
+else
+  changed="$(git diff --name-only HEAD~1 HEAD 2>/dev/null || true)"
+fi
+
+if echo "$changed" | grep -qE '^web/'; then
+  echo "[pre-push] web/** changed — running 'next build' locally..."
+  if [ ! -d web ]; then
+    echo "[pre-push] WARN: web/ directory not found, skipping. (Are you in the repo root?)"
+    exit 0
+  fi
+  cd web
+  if [ ! -d node_modules ]; then
+    echo "[pre-push] node_modules missing — running 'npm ci' first..."
+    npm ci --no-audit --no-fund --loglevel=error
+  fi
+  if NEXT_TELEMETRY_DISABLED=1 npm run build; then
+    echo "[pre-push] OK: next build succeeded."
+  else
+    echo ""
+    echo "[pre-push] FAIL: next build failed. Push aborted."
+    echo "[pre-push] To bypass (emergency only): SKIP_WEB_BUILD=1 git push"
+    exit 1
+  fi
+else
+  echo "[pre-push] No web/** changes — skipping local web build."
+fi
+
+exit 0
