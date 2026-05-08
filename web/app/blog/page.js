@@ -10,6 +10,15 @@ export const metadata = {
 
 const POSTS = [
   {
+    slug: 'ktm-1390-super-duke-r-evo-quarter-mile-physics',
+    title: 'KTM 1390 Super Duke R EVO Quarter-Mile Physics Breakdown',
+    date: '2026-05-08',
+    readTime: '9 min',
+    tags: ['KTM', '1390 Super Duke R', 'physics', 'litre naked'],
+    excerpt:
+      'MotoQuant simulates the 2024 KTM 1390 Super Duke R EVO at 10.225s and 237 km/h trap. MCN clocked stock test bikes at 9.95s. Here is exactly what the 0.275s gap is — and what actually limits the bike at the strip.',
+  },
+  {
     slug: 'how-the-motoquant-physics-engine-works',
     title: 'How the MotoQuant Physics Engine Works',
     date: '2026-04-27',

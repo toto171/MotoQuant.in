@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "updated": "2026-05-08",
+  "experiments": [
+    {
+      "id": "EXP-001",
+      "started": "2026-05-08",
+      "page": "landing-hero",
+      "element": "primary CTA copy",
+      "hypothesis": "Indian-market visitors landing on motoquant.in don't try the simulator because the hero CTA copy doesn't tell them what they'll get. Variant B replaces 'Try the simulator' with a verb-result CTA naming the outcome ('See your bike's quarter-mile ET') — should lift simulator-runs / landing-visitor.",
+      "variant_a": "Try the simulator",
+      "variant_b": "See your bike's quarter-mile ET",
+      "primary_metric": "simulator_runs / landing_visitor",
+      "secondary_metrics": [
+        "hero_cta_click_through_rate",
+        "bounce_rate",
+        "time_to_first_simulator_run_s"
+      ],
+      "min_sample": 200,
+      "status": "live",
+      "flag": "?variant=B",
+      "default": "A",
+      "implementation_notes": "Client-side useSearchParams() in web/app/page.js. Same canonical URL, same href (/simulator), same h1, same meta — SEO-safe. data-exp/data-variant attributes on the Link for analytics attribution.",
+      "decision_criteria": "Ship variant B as new control if simulator-runs/visitor lifts ≥15% with p<0.05 over ≥200 samples per arm. Roll back if bounce rate increases >10% or CTR decreases. No decision before 200 samples per arm."
+    }
+  ]
+}

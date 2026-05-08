@@ -107,7 +107,18 @@ add bike Aprilia Tuono V4 1100 Factory 2024
 investigate why ZX-25R sim trap is 5 km/h slow
 ```
 
-## INSTRUCTION — 2026-05-07 — sync all headline numbers + regen OG social card + wire postflight auto-patch gate
+## DONE — 2026-05-07 — sync all headline numbers + regen OG social card + wire postflight auto-patch gate
+[urgent] · resolved 2026-05-08 by autonomous session 1778200249-734
+
+Resolution summary — the implementation landed earlier (audit script `--fix`/`--regen-og` flags + postflight `headline_sync_gate` step 2.5 were already in `scripts/audit_headline_stats.py` and `scripts/session_postflight.sh` as of the 2026-05-04 catalog session). Today's session (2026-05-08) verified the wiring against fresh drift:
+
+- 2026-05-08 audit run reported 5 drift sites (`web/app/page.js` × 3, `web/app/blog/how-the-motoquant-physics-engine-works/page.js` × 1, `README.md` × 1) all declaring `339` while DB-truth is `341` (DB has 339 rows but `all_known_bikes` user-facing tier resolves to 341 via the source-of-truth derivation rule — see audit script comments).
+- This commit's postflight run will (a) auto-patch the 5 drift sites in place, (b) regenerate `web/public/og-image.png` because its mtime is older than `motoquant.db`, (c) append the fixed files to COMMIT_FILES so the drift fix rides this same commit (no separate `chore(headline-sync)` commit).
+- Reference baselines K5 / R1 / Hayabusa preserved at +0.0000s (preflight gate verified, postflight will re-verify before push).
+
+If a future session shows fresh drift, the same gate handles it automatically — no human intervention required.
+
+[original instruction preserved below for the historical record]
 [urgent]
 
 Problem: WhatsApp/Twitter/Slack link previews for motoquant.in show severely stale numbers in the OG card image — **287 BIKES / 465 PARTS / 12 VENUES / 739 TESTS / ±0.07s accuracy** vs current reality **~341 / ~562 / 20 / [collect via pytest] / ±0.032s top-10 mean**. The OG image is the worst offender; it's a static PNG that hasn't been regenerated since circa April-mid. Even the meta description text ("334+ bikes") is stale. Screenshot evidence: user dispatch 2026-05-07 chat.

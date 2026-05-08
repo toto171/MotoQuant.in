@@ -22,6 +22,7 @@
  */
 
 import { useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import {
@@ -257,6 +258,13 @@ function PhysicsCard({ icon: Icon, title, items }) {
 
 // ──────────────────────────────────────────────────────────────────────
 export default function HomePage() {
+  // GROWTH_EXP_001: hero-CTA copy A/B test — see data/growth_experiments.json
+  // Default OFF (control). Visitors who land with ?variant=B see the
+  // verb-result variant. Same href, same SEO, same h1.
+  const searchParams = useSearchParams();
+  const ctaVariant = searchParams?.get('variant') === 'B' ? 'B' : 'A';
+  const heroCtaLabel = ctaVariant === 'B' ? "See your bike's quarter-mile ET" : 'Try the simulator';
+
   // Track scroll progress through the hero so the christmas tree
   // lights light in sequence.
   const heroRef = useRef(null);
@@ -362,12 +370,15 @@ export default function HomePage() {
             </Reveal>
 
             <Reveal y={20} duration={0.7} delay={0.3}>
+              {/* GROWTH_EXP_001: A/B variant — see data/growth_experiments.json */}
               <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/simulator"
+                  data-exp="EXP-001"
+                  data-variant={ctaVariant}
                   className="inline-flex items-center justify-center px-7 py-4 rounded-md bg-brand-orange hover:bg-brand-orangeLight text-black font-display font-bold transition-colors shadow-orange-soft"
                 >
-                  Try the simulator
+                  {heroCtaLabel}
                 </Link>
                 <Link
                   href="#telemetry"
