@@ -88,3 +88,56 @@ Bangalore + Hyderabad performance shops (priority 2 from the outreach playbook).
 ## Commit summary (≤80 chars)
 
 `outreach: 5 drafts for Bangalore + Hyderabad shops (Batch 2)`
+
+---
+
+# Partnership Outreach — Dyno Vendors / Importers / ECU Tuning Houses — 2026-05-08 (Batch 3)
+
+## Category picked
+
+Priority #3 in the agent template: dyno equipment vendors, performance-parts importers, and ECU-tuning houses. Pune-Narhe drag shops (Batch 1) and Bangalore + Hyderabad service shops (Batch 2) were already covered, so this batch deliberately moves into a different segment with a distinct pitch shape. These businesses don't run customer bikes — they sell hardware, tuning services, and parts to the downstream dealer/shop network. The angle is therefore one of:
+
+- **Augmenting their dyno session output** (customer leaves with predicted ET / trap / 60-foot / cost-per-tenth alongside the peak hp/tq print-out — same dyno time, higher session value).
+- **Co-marketing / data-partnership** (anonymised dyno-curve feedback into MotoQuant's calibrator in exchange for named partner credit).
+- **Distributor-channel license bundling** (per-shop SaaS license bundled with dyno hardware sales or filter SKUs).
+
+Where the right partnership shape is genuinely ambiguous (Powertronic, K&N, DynoJet distributor), the email proposes both options and asks the recipient to pick rather than over-prescribing.
+
+## Businesses drafted (5)
+
+| Business | Location | Angle | Verification status |
+|---|---|---|---|
+| Powertronic | Bangalore | India's only end-to-end ECU+software house — pitch is data partnership + software-bundle for their dealer network | Entity verified online; owner / contact email `[verify]` |
+| DynoJet India [distributor] | `[verify — likely Mumbai or Delhi NCR]` | Distributor-channel pitch — bundle Pro Studio license with new DynoJet 250i / 424x sales as a value-add | **Entity name + distributor location must be verified before sending.** Do NOT contact dynojet.com US directly. |
+| Race Concepts | Bangalore | Vertically-integrated tuning shop with in-house dyno (rare in India) — direct B2B Pro Studio fit | Entity exists; owner / contact `[verify]` |
+| K&N India [distributor] | `[verify — Mumbai/Pune likely]` | Parts-importer pitch — arm dealer network with quantitative ET-impact answers at point of sale | Distributor entity + email address must be verified — do NOT email kn.com US |
+| Eurotech Performance | `[verify — Mumbai most-cited]` | European-platform specialist (Ducati / BMW / Aprilia / KTM) — litre-sport ≥195hp cluster is MotoQuant's tightest (mean \|Δ\| 0.162s) | Entity name + city must be verified before sending |
+
+## Files created — Batch 3
+
+- `outreach/dyno-vendors/powertronic.md`
+- `outreach/dyno-vendors/dynojet-india.md`
+- `outreach/dyno-vendors/race-concepts.md`
+- `outreach/dyno-vendors/kn-india-distributor.md`
+- `outreach/dyno-vendors/eurotech-performance.md`
+- `outreach/CONTACTS.csv` (5 rows appended; CSV integrity verified — 12 cols header, all 15 data rows match, no broken commas/quotes)
+
+## Quality gates (Batch 3)
+
+- **Unique angle in para 1:** every draft opens with a recipient-specific observation (Powertronic's end-to-end ECU+software stack; DynoJet's installed base across Indian shops; Race Concepts' vertical integration; K&N's drop-in being the most-common first mod; Eurotech's European-V4 specialisation vs the Japanese-I4 norm). No interchangeable boilerplate.
+- **Body word counts (frontmatter excluded):** 392 / 428 / 427 / 392 / 402 — all within the 250–450 target.
+- **No fabricated facts:** every claim about a recipient that's not directly verifiable on a quick web search is marked `[verify]`. Owner names, contact emails, phone numbers, websites, exact city locations all `[verify]` placeholders. The `[verify]` discipline is stronger in this batch than in Batches 1 & 2 because most of these entities are distributor-channel relationships where the wrong contact (e.g., the US sales line instead of the Indian regional rep) would burn the lead.
+- **No Phase 6 puffery:** no claims of "ML magic" or features that don't exist. Pitch is grounded in the existing 336-bike catalog, 79 published benchmarks, ±0.032s top-10 mean error, four-decimal-pinned reference baselines, 21 dyno-curve injections, SAE J1349 correction, 562-part catalog with verified compatibility rules.
+- **No credentials / PATs in any draft.** Confirmed.
+
+## Carry-forward / open hygiene
+
+1. **DynoJet India entity verification is the highest-priority pre-send item.** The official Indian distributor name and contact must be confirmed before sending — pitching an out-of-region US sales line would burn the lead.
+2. **K&N India distributor entity** has the same risk profile — need the actual Indian regional contact, not the US K&N site.
+3. **Powertronic outreach should ideally be sent after** the user has had a brief LinkedIn / introduction-style touch via a mutual contact (their team is small enough that a cold email may go to a single person who triages everything).
+4. **Eurotech Performance city verification** — multiple businesses with similar names exist; confirm the Mumbai entity is the European-superbike specialist before sending.
+5. Next priority slot in the agent template (after this one) is **content / community partnerships** — moto-vlog channels, drag-strip event organisers, RiderZone / xBhp forum partnerships. Not in scope for today; queued for the next outreach session.
+
+## Commit summary (Batch 3, ≤80 chars)
+
+`outreach: draft 5 dyno-vendor / importer / ECU-tuner emails`

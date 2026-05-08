@@ -38,6 +38,7 @@ export default async function sitemap() {
     { url: `${SITE_URL}/about`,    lastModified: now, changeFrequency: 'monthly', priority: 0.70 },
     { url: `${SITE_URL}/pricing`,  lastModified: now, changeFrequency: 'monthly', priority: 0.85 },
     { url: `${SITE_URL}/blog`,     lastModified: now, changeFrequency: 'weekly',  priority: 0.80 },
+    { url: `${SITE_URL}/blog/hayabusa-vs-zx-14r-which-is-faster`, lastModified: now, changeFrequency: 'monthly', priority: 0.80 },
     { url: `${SITE_URL}/blog/hero-xtreme-200s-4v-quarter-mile-physics`, lastModified: now, changeFrequency: 'monthly', priority: 0.78 },
     { url: `${SITE_URL}/blog/ktm-1390-super-duke-r-evo-quarter-mile-physics`, lastModified: now, changeFrequency: 'monthly', priority: 0.78 },
     { url: `${SITE_URL}/blog/how-the-motoquant-physics-engine-works`, lastModified: now, changeFrequency: 'monthly', priority: 0.78 },

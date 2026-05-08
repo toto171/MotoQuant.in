@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, useMemo, useId } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, useId, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   Zap, Search, ChevronDown, ChevronRight, X, MapPin, Gauge, Wrench,
   CircleDot, IndianRupee, ArrowLeft, Thermometer, Wind, Droplets,
@@ -14,6 +15,38 @@ import {
 import { API_URL as API } from '../../lib/api';
 import { track, installErrorHandlers } from '../../lib/telemetry';
 import ChatPanel from '../../components/ChatPanel';
+
+// ──────────────────────────────────────────────────────────────────────────
+// GROWTH_EXP_003: default-bike A/B test.
+// A (control / SEO-stable) = Hayabusa — aspirational, matches layout.js
+//                            keywords and OG copy ("hayabusa quarter mile").
+// B (variant)              = Pulsar NS 200 — high-volume Indian commuter,
+//                            most likely to match the visitor's actual bike,
+//                            tests whether localising the default reduces the
+//                            "is this for me?" friction on /simulator.
+// Picker is name-substring matched against the DB-loaded bike list so that
+// catalog reshuffles (Hayabusa Gen1 vs 2008-2012 vs 2021-2024) don't break
+// the variant. Falls back to bikes[0] if no name match (e.g. unseeded DB).
+// See data/growth_experiments.json (id: EXP-003) for full design + decision.
+// ──────────────────────────────────────────────────────────────────────────
+const EXP003_DEFAULT_BIKE_PATTERNS = {
+  A: [/hayabusa/i],
+  B: [/pulsar\s*ns\s*200/i, /pulsar ns 200/i],
+};
+
+function pickDefaultBikeForVariant(bikes, variant) {
+  if (!bikes || bikes.length === 0) return null;
+  const patterns = EXP003_DEFAULT_BIKE_PATTERNS[variant] || EXP003_DEFAULT_BIKE_PATTERNS.A;
+  for (const re of patterns) {
+    const match = bikes.find(b => {
+      const label = `${b.manufacturer || ''} ${b.model || b.model_name || ''}`;
+      return re.test(label);
+    });
+    if (match) return match;
+  }
+  // Fallback: alphabetical-first (existing pre-EXP-003 behaviour).
+  return bikes[0];
+}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    REUSABLE COMPONENTS
@@ -192,7 +225,14 @@ function SimChart({ data, dataKey, label, unit, color = CHART_COLORS.a, domain }
    MAIN PAGE
    ═══════════════════════════════════════════════════════════════════════════ */
 
-export default function SimulatorPage() {
+function SimulatorPageInner() {
+  // ─── GROWTH_EXP_003: read ?variant=B (default A = Hayabusa control) ──
+  // Same canonical URL, same h1, same meta — the only difference is which
+  // bike pre-selects. data-exp/data-variant on the bike-picker Card lets
+  // analytics attribute simulator runs to the right arm.
+  const searchParams = useSearchParams();
+  const defaultBikeVariant = searchParams?.get('variant') === 'B' ? 'B' : 'A';
+
   // ─── Data from API ───────────────────────────────────────────────────
   const [bikes, setBikes] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -281,7 +321,8 @@ export default function SimulatorPage() {
         setAllParts(partsData.parts || []);
         setAllTires(tiresData.tires || []);
         setVenues(venuesData.venues || []);
-        if (bikesData.bikes?.length) setBike(bikesData.bikes[0]);
+        // GROWTH_EXP_003: variant-aware default bike (A=Hayabusa, B=Pulsar NS 200).
+        if (bikesData.bikes?.length) setBike(pickDefaultBikeForVariant(bikesData.bikes, defaultBikeVariant));
         // If /api/bikes came back empty, the backend is reachable but
         // either unseeded or filtering killed the request body -- either
         // way the user deserves to see *something* instead of an empty
@@ -746,7 +787,10 @@ export default function SimulatorPage() {
           <div className="col-span-12 lg:col-span-3 space-y-4">
 
             {/* Bike Selector — z-10 so dropdown overlaps cards below */}
-            <Card className="p-4 relative z-10 overflow-visible">
+            {/* GROWTH_EXP_003: data-exp/data-variant attrs let analytics attribute
+                pre-selected default bike (A=Hayabusa control, B=Pulsar NS 200).
+                See data/growth_experiments.json. */}
+            <Card className="p-4 relative z-10 overflow-visible" data-exp="EXP-003" data-variant={defaultBikeVariant}>
               <h3 className="text-xs font-semibold mb-3 flex items-center gap-2 uppercase tracking-widest text-gray-400">
                 <Gauge size={13} className="text-orange-500" /> Motorcycle
               </h3>
@@ -1677,5 +1721,20 @@ export default function SimulatorPage() {
         MotoQuant Pro · First-principles RK4 physics · 15 sub-models · 1ms timestep · motoquant.in
       </div>
     </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Default export wraps SimulatorPageInner in <Suspense> so the static
+// prerender of `/simulator` doesn't bail out on the EXP-003 useSearchParams()
+// call. Without this boundary, `next build` errors with
+// "missing-suspense-with-csr-bailout". See web/CONTRIBUTING.md for the rule
+// and web/app/page.js for the matching pattern used by EXP-001.
+// ──────────────────────────────────────────────────────────────────────────
+export default function SimulatorPage() {
+  return (
+    <Suspense fallback={null}>
+      <SimulatorPageInner />
+    </Suspense>
   );
 }

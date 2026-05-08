@@ -44,6 +44,28 @@
       "default": "A",
       "implementation_notes": "Client-side useSearchParams() in web/app/pricing/page.js. Same canonical URL, same checkout endpoint, same h1, same meta — SEO-safe. data-exp/data-variant attributes on the Pro button for analytics attribution. Studio CTA unchanged (single-variable rule). EXP-001 is on landing-hero so no page conflict.",
       "decision_criteria": "Ship variant B as new control if pro_checkout_init/visitor lifts ≥15% with p<0.05 over ≥200 samples per arm AND razorpay_checkout_completion does not drop >5% (we want trial intent, not abandoned-cart inflation). Roll back if Studio cannibalisation increases >10% (refund-anchor stealing higher-tier intent). No decision before 200 samples per arm."
+    },
+    {
+      "id": "EXP-003",
+      "started": "2026-05-08",
+      "page": "/simulator",
+      "element": "default pre-selected bike",
+      "hypothesis": "Indian-market visitors who land on /simulator see Hayabusa pre-selected, which feels aspirational but disconnected — the 'is this for my bike?' cognitive cost is non-trivial when a 220 hp 1340cc liter bike is pre-loaded for a visitor whose actual bike is a 200cc commuter. Variant B defaults to Pulsar NS 200 (the highest-volume Indian commuter most likely to match a /simulator visitor's actual ride). If the localised default reduces friction, simulator-runs / visitor-to-simulator should rise without compromising the SEO-stable Hayabusa control on the canonical URL.",
+      "variant_a": "Hayabusa pre-selected (existing control, matches OG copy + SEO keywords)",
+      "variant_b": "Pulsar NS 200 pre-selected (high-volume Indian commuter)",
+      "primary_metric": "simulator_runs_per_visitor_to_simulator_page",
+      "secondary_metrics": [
+        "bike_picker_change_rate",
+        "first_run_time_to_click_s",
+        "simulator_page_bounce_rate",
+        "post_run_parts_engagement_rate"
+      ],
+      "min_sample": 200,
+      "status": "live",
+      "flag": "?variant=B",
+      "default": "A",
+      "implementation_notes": "Client-side useSearchParams() in web/app/simulator/page.js, wrapped in <Suspense> per the static-prerender rule. Variant-aware selection done in pickDefaultBikeForVariant() — name-substring match against the DB bike list so catalog reshuffles (Hayabusa Gen1 vs 2008-2012 vs 2021-2024 model rows) don't break the variant. Falls back to bikes[0] (existing pre-EXP-003 alphabetical-first behaviour) if no name match. data-exp/data-variant attributes on the bike-picker Card for analytics attribution. Same canonical URL, same h1, same meta — SEO-safe. EXP-001 is on landing-hero, EXP-002 is on /pricing — no page conflict.",
+      "decision_criteria": "Ship variant B as new control if simulator-runs/visitor lifts ≥15% with p<0.05 over ≥200 samples per arm AND bike_picker_change_rate does not increase by >20% (we want a useful default, not just a default the user immediately overrides). Roll back if simulator_page_bounce_rate increases >10% (Pulsar default may push aspirational-segment visitors away). No decision before 200 samples per arm. Note the SEO consideration: variant A stays canonical because layout.js metadata + OG copy reference Hayabusa; if B wins we still keep Hayabusa as the explicit ?variant=A path so search-result CTR isn't disrupted by the default flip."
     }
   ]
 }

@@ -10,6 +10,15 @@ export const metadata = {
 
 const POSTS = [
   {
+    slug: 'hayabusa-vs-zx-14r-which-is-faster',
+    title: 'Hayabusa vs ZX-14R: Which Is Faster Off the Line?',
+    date: '2026-05-08',
+    readTime: '11 min',
+    tags: ['Suzuki', 'Hayabusa', 'Kawasaki', 'ZX-14R', 'hyper sport', 'comparison'],
+    excerpt:
+      'MotoQuant simulates the Hayabusa Gen1 reference at 10.471s and pegs the ZX-14R 2012 with a slim ~0.12 second ET advantage under matched conditions. Spec-by-spec breakdown of the two flagship hyper-bikes — where each one wins, and why.',
+  },
+  {
     slug: 'hero-xtreme-200s-4v-quarter-mile-physics',
     title: 'Hero Xtreme 200S 4V Quarter-Mile Physics: 200cc Commuter Drag',
     date: '2026-05-08',
