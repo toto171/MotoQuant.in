@@ -20,7 +20,6 @@ import pytest
 # Add parent to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from motoquant.database import MotoQuantDB
 from motoquant.run import (
     cmd_bikes,
     cmd_db,
@@ -34,6 +33,7 @@ from motoquant.run import (
     print_table,
     resolve_bike,
 )
+from tests._helpers import WalDisabledDB as _TestDB  # noqa: E402
 
 # ─────────────────────────────────────────
 # Helpers
@@ -41,21 +41,6 @@ from motoquant.run import (
 
 # Use /tmp for the test DB — but disable WAL to avoid disk I/O on mounted FS
 TEST_DB = f"/tmp/test_cli_{os.getpid()}.db"
-
-
-class _TestDB(MotoQuantDB):
-    """MotoQuantDB subclass that skips WAL pragma (for test FS compat)."""
-
-    def connect(self):
-        import sqlite3
-
-        if self._conn is not None:
-            return self._conn
-        self._conn = sqlite3.connect(str(self._db_path))
-        self._conn.row_factory = sqlite3.Row
-        self._conn.execute("PRAGMA journal_mode=DELETE")
-        self._conn.execute("PRAGMA foreign_keys=ON")
-        return self._conn
 
 
 def make_args(**kwargs):

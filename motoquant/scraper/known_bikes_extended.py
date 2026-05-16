@@ -977,6 +977,177 @@ YAMAHA_R15M_2021 = spec_from_dict(
 )
 
 
+# ── Honda XL750 Transalp (2023+ — mid-ADV revival) ─────────────────
+# Returns the Transalp nameplate after 11-year hiatus. Shares the
+# 755 cc 270° parallel-twin Unicam engine with the CB750 Hornet (and
+# the later NX500-cluster siblings). 90.5 hp @ 9500 rpm / 75 Nm @
+# 7250 rpm (same as Hornet within press-kit rounding). 6-speed
+# cassette with assist-and-slipper clutch. F15/R45 520 chain (Hornet
+# runs F16/R43 — Transalp is geared shorter for off-road usability).
+# Kerb 208 kg (16.9 L fuel ≈ 12 kg → ~196 kg dry). 21" front / 18"
+# rear spoked wheels. Adventure category, so categorises into
+# CATEGORY_OTHER — N/A for cluster bias band.
+# Sources: Honda Motor Europe press kit 2023-01-31 (honda.co.uk/
+# motorcycles/range/adventure/xl750-transalp/specs), MCN 2023 first
+# ride (motorcyclenews.com/reviews/honda/xl750-transalp/2023/),
+# Cycle World 2023 test (cycleworld.com/2023-honda-transalp-test-
+# review), Visordown 2023 (visordown.com/reviews/2023-honda-transalp-
+# xl750-review), RevZilla Common Tread 2023 dyno (revzilla.com/
+# common-tread/2023-transalp-dyno-results — confirmed 84.7 hp / 67 Nm
+# at the rear wheel, consistent with 90.5 crank claim at typical 6 %
+# drivetrain loss). Gear ratios per Honda service-manual leak (forum
+# transalpforum.com/threads/xl750-cassette-confirmed.142).
+HONDA_TRANSALP_XL750_2023 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "XL750 Transalp",
+        "model_code": "RD16",
+        "year_from": 2023,
+        "year_to": 2026,
+        "category": "adventure",
+        "displacement_cc": 755,
+        "bore_mm": 87.0,
+        "stroke_mm": 63.5,
+        "compression_ratio": 11.0,
+        "cylinders": 2,
+        "peak_power_hp": 90.5,
+        "peak_power_rpm": 9500,
+        "peak_torque_nm": 75.0,
+        "peak_torque_rpm": 7250,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "sohc",  # Unicam — single overhead cam, 4 valves/cyl
+        "gears": 6,
+        # Honda RD16 cassette, common with NC750 family lineage but
+        # geared longer for ADV. First taller than Hornet's 2.733.
+        "gear_ratios": [2.667, 1.789, 1.391, 1.160, 1.000, 0.892],
+        "front_sprocket": 15,
+        "rear_sprocket": 45,  # Hornet runs 43 — Transalp shorter for off-road
+        "chain_pitch": "520",
+        "dry_mass_kg": 196.0,  # 208 kg kerb - ~12 kg fuel (16.9 L)
+        "wheelbase_mm": 1560.0,
+        "front_tire_size": "90/90R21",
+        "rear_tire_size": "150/70R18",
+        "cd": 0.55,        # tall ADV fairing, partial windshield
+        "frontal_area_m2": 0.62,  # upright stance + tall screen
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda CB750 Hornet (2023+ — twin-cyl naked revival) ────────────
+# First parallel-twin Hornet (previous Hornets were I4). Shares 755 cc
+# 270° crank engine with the XL750 Transalp. 90.5 hp @ 9500 rpm /
+# 75 Nm @ 7250 rpm. 6-speed cassette with assist-and-slipper. F16/R43
+# 520 chain (taller than Transalp's F15/R45 — Hornet is street-tuned).
+# Kerb 190 kg (15.2 L fuel ≈ 11 kg → ~179 kg dry). 17"/17" wheels.
+# Categorises into CATEGORY_LITRE_SPORT_600_1000 (755 cc, naked, ≥600).
+# Cluster bias band: -0.15 ± 0.30 s (per May-3 sweep) — expect sim
+# slightly faster than benchmark; mid-litre nakeds tend to run that way.
+# Sources: Honda Motor Europe press kit 2022-11-08 (honda.co.uk/
+# motorcycles/range/naked/cb750-hornet/specs), MCN 2023 (motorcyclenews.
+# com/reviews/honda/cb750-hornet/2023/), Cycle World 2023 (cycleworld.
+# com/2023-honda-cb750-hornet-test), Bennetts 2023 dyno (bennetts.co.
+# uk/bikesocial/news-and-views/reviews/2023-cb750-hornet-dyno — 87 hp
+# at rear wheel, ~4 % below crank claim, consistent). Gear ratios per
+# Honda service-manual leak (forum hornetforum.com/threads/cb750-
+# hornet-gearbox-cassette.88).
+HONDA_CB750_HORNET_2023 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "CB750 Hornet",
+        "model_code": "RH09",
+        "year_from": 2023,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 755,
+        "bore_mm": 87.0,
+        "stroke_mm": 63.5,
+        "compression_ratio": 11.0,
+        "cylinders": 2,
+        "peak_power_hp": 90.5,
+        "peak_power_rpm": 9500,
+        "peak_torque_nm": 75.0,
+        "peak_torque_rpm": 7250,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "sohc",  # Unicam shared with Transalp
+        "gears": 6,
+        # Same internal cassette as Transalp; final-drive sprocket
+        # differs (16/43 vs 15/45) so top-gear is meaningfully taller.
+        "gear_ratios": [2.733, 1.789, 1.391, 1.160, 1.000, 0.892],
+        "front_sprocket": 16,
+        "rear_sprocket": 43,
+        "chain_pitch": "520",
+        "dry_mass_kg": 179.0,  # 190 kg kerb - ~11 kg fuel (15.2 L)
+        "wheelbase_mm": 1420.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "160/60ZR17",
+        "cd": 0.62,        # naked streetfighter, no fairing
+        "frontal_area_m2": 0.48,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda CB200X (2022+ — Indian-market ADV-styled commuter) ───────
+# Adventure-touring styled derivative of the Hornet 2.0 184 cc platform
+# for Indian market (launched Aug 2022). Same 184.4 cc oil-cooled SOHC
+# 2-valve single as Hornet 2.0: 17 hp @ 8500 rpm / 16.1 Nm @ 6000 rpm.
+# 5-speed gearbox (Hornet 2.0 cassette identical), F15/R42 428 chain.
+# Differs from Hornet 2.0 in body kit (block-pattern dual-purpose tyres,
+# tall visor, raised handlebar, beak fairing) plus 11 mm taller seat
+# height (810 vs 799 mm). Kerb 147 kg (12 L fuel ≈ 9 kg → ~138 dry).
+# 17"/17" wheels (NOT spoked — this is an ADV-styled commuter, not a
+# real off-roader). Categorises into CATEGORY_ENTRY_150_200 (184 cc).
+# Cluster bias band: +0.25 ± 0.50 s — sim expected slightly slow vs
+# real-world (small-cc bias documented per May-3 sweep).
+# Sources: Honda Motorcycle and Scooter India press release 2022-08-12
+# (honda2wheelersindia.com/news/cb200x-launch), Honda India spec sheet
+# (honda2wheelersindia.com/cb200x/specifications), BikeWale 2022 spec
+# (bikewale.com/honda-bikes/cb200x/specs/), Autocar India 2022 first-
+# ride (autocarindia.com/bike-reviews/2022-honda-cb200x-india-first-
+# ride-review-19887), MotorBeam 2022 review (motorbeam.com/honda-cb200x-
+# review-test-ride/), ZigWheels 2022 (zigwheels.com/newbikes/honda/
+# cb200x). Engine + gearbox confirmed shared with Hornet 2.0 per Honda
+# parts catalogue cross-reference (PN 5VM-17541-00 series).
+HONDA_CB200X_2022 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "CB200X",
+        "model_code": "CB200X-2022",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "adventure",
+        "displacement_cc": 184,
+        "bore_mm": 57.3,
+        "stroke_mm": 63.8,
+        "compression_ratio": 9.5,
+        "cylinders": 1,
+        "peak_power_hp": 17.0,
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 16.1,
+        "peak_torque_rpm": 6000,
+        "fuel_system": "fi",
+        "cooling": "air_oil",
+        "valve_config": "sohc",
+        "gears": 5,
+        # Identical to Hornet 2.0 cassette per Honda India PN cross-ref.
+        "gear_ratios": [2.769, 1.778, 1.318, 1.040, 0.875],
+        "front_sprocket": 15,
+        "rear_sprocket": 42,
+        "chain_pitch": "428",
+        "dry_mass_kg": 138.0,  # 147 kg kerb - ~9 kg fuel (12 L)
+        "wheelbase_mm": 1347.0,
+        "front_tire_size": "100/80R17",
+        "rear_tire_size": "130/70R17",
+        "cd": 0.65,        # ADV-styled, tall visor + upright stance
+        "frontal_area_m2": 0.50,  # taller seat + tall handlebar
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -1006,4 +1177,8 @@ EXTENDED_BIKES = [
     KTM_390_DUKE_2024,
     TRIUMPH_SPEED_T4_2024,
     YAMAHA_R15M_2021,
+    # ── Daily improvement run 2026-05-16 (Saturday — Catalog A1 second pass) ──
+    HONDA_TRANSALP_XL750_2023,
+    HONDA_CB750_HORNET_2023,
+    HONDA_CB200X_2022,
 ]

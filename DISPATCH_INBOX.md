@@ -424,6 +424,32 @@ Invoked from `scripts/session_preflight.sh` before mutex acquisition.
 
 ---
 
+## INSTRUCTION — 2026-05-16 — [self-review] add `inbox-implementer` agent (meta-fix for stalled kaizen queue)
+[urgent]
+
+**Attribution:** self-review M2 2026-05-16 (`reports/self_review_2026-05-16_m2.md` Layer 4 + capability-frontier sections). Last 14 days produced 7 `[self-review]`-tagged INSTRUCTIONS (INBOX:300, 322, 341, 361, 376, 389, 408) plus 6 carry-over from 2026-05-07 — none implemented. Root cause: the 14 agents in `scripts/scheduler_weights.json::agents` all *generate* work, none *consume* INBOX backlog. Toolkit star-list (CLAUDE.md TOOLKIT REFERENCE) has 6 of 8 items untouched 17 days after listing — same shape.
+
+**Proposed agent:**
+
+- Name: `inbox-implementer`
+- Scope: each session, pick the oldest `[urgent]`-tagged INSTRUCTION in DISPATCH_INBOX whose scope fits within one session budget (≤ ~3 hrs, ≤ 5 files touched, no external infra change). Implement it. Mark `## DONE` with `### Result` block citing commits + diffs.
+- Don't-do list: do NOT pick INSTRUCTIONs requiring user secrets (PAT rotation, Razorpay plan setup, SMTP creds), live-service infra (DNS, Vercel project deletes), or multi-session efforts (PostgreSQL migration). Defer those with a note in `## RESPONDED` heading.
+- Prompt template lives at: `scripts/agents/inbox-implementer.md` (write a draft along with this — see `scripts/agents/self-review.md:45` rule).
+- Scheduler weight: base 45, best_dow [2, 4] (mid-week — gives Mon catalog + Sat self-review room).
+
+**Why urgent:** without this agent, every future self-review run is write-only. The 7 INBOX items queued today will still be there next Saturday. Closing the loop is worth more than any single feature ship per CLAUDE.md Kaizen Principle.
+
+**Done when:**
+
+1. `scripts/agents/inbox-implementer.md` written (mirror existing agent-template structure)
+2. Added to `scripts/scheduler_weights.json::agents` with `{ "base": 45, "best_dow": [2, 4] }`
+3. First implementer run picks an INBOX item and marks it `## DONE` with attribution
+4. STATUS.md `_LAST_RUN_JSON.inbox-implementer` row added
+
+**Effort:** ~2 hrs for agent template + scheduler wiring + first dry-run. Item consumption ongoing.
+
+---
+
 ## INSTRUCTIONS QUEUE
 
 > _Add new `## INSTRUCTION` blocks above this divider. Claude marks them `## DONE` once handled._
