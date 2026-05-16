@@ -297,6 +297,92 @@ Source: `reports/catalog_expansion_2026-05-07_pm.md` + carry-forward from May 4.
 
 ---
 
+## INSTRUCTION — 2026-05-16 — [self-review] build GH-Actions health-check side-channel
+[urgent]
+
+**Attribution:** self-review M1 2026-05-16 Finding 2.1 + the May 9-15 dark-window incident (zero commits for 7.5 days, no `## INCIDENT` block written because no observer existed).
+
+A `[research]` instruction queued 2026-05-07 already proposed investigating this — promoting to `[urgent]` with direct attribution. Without it, future cron/wrapper regressions will silently extend dark windows for days.
+
+**Minimum viable build:**
+1. `.github/workflows/heartbeat.yml` — cron `*/30 * * * *` (every 30 min)
+2. Job: `curl -s -m 10 https://web-production-de6eb.up.railway.app/api/health` and `https://www.motoquant.in` (HEAD only, just status)
+3. Write `health/latest.json` (or a side branch) with `{ "checked_at": "...", "api": "ok|fail", "web": "ok|fail", "bike_count": N }`
+4. Additionally: read `STATUS.md _LAST_RUN_JSON._updated`; if >36h stale, write `## INCIDENT — heartbeat — no autonomous activity >36h` to `DISPATCH_OUTBOX.md` via the workflow's own `git push` (use a GH-Actions-scoped PAT, not the user's primary)
+5. Sandbox sessions read `health/latest.json` via `git fetch && git show origin/health:latest.json` instead of attempting blocked egress.
+
+**Done when:** the workflow runs for 7 days, catches one synthetic outage (test by manually pausing the cron), and the OUTBOX gets an INCIDENT block from CI.
+
+**Expected impact:** dark windows ≤2 days instead of ~8 days. Resolves the single biggest root cause this week.
+
+---
+
+## INSTRUCTION — 2026-05-16 — [self-review] promote standing-priorities → queue_weight boost
+[opportunistic]
+
+**Attribution:** self-review M1 2026-05-16 Finding 2.4. The top-1 standing priority "bootstrap analytics + apply S5 auth-DDL" sits in INBOX tagged `[opportunistic]` (queue_weight = +10) for 9 days while being CLAUDE.md's #1 priority. Severity tag and CLAUDE.md priority disagree.
+
+**Proposal:** Extend `scripts/master_scheduler.sh::queue_weight` to also scan the `## STANDING PRIORITIES — top-3` section of CLAUDE.md and apply a +25 boost to any agent whose name appears as a keyword in those priorities. Cap: only the top-3 priorities count; no compounding stacking.
+
+**Why this is approval-needed:** scoring-formula change → policy table says INBOX.
+
+**Effort:** ~1 hr — single bash function + a unit-style test of the parser. Low-risk; weights and priorities are both static files.
+
+**Done when:** for the current state of CLAUDE.md, dispatching the scheduler in `--dry-run` shows an agent matching "analytics" / "surrogate" / "release pipeline" gets +25 in its detailed scoring breakdown.
+
+---
+
+## INSTRUCTION — 2026-05-16 — [self-review] fix postflight outbox truncation bug
+[opportunistic]
+
+**Attribution:** self-review M1 2026-05-16 Finding 2.5. Multiple `## SESSION` blocks in DISPATCH_OUTBOX.md show `> ## Work performed` as the final line of the embedded session-log heredoc — content after the header is being eaten by the postflight script's quoting / heredoc handling.
+
+**Repro:** scroll through DISPATCH_OUTBOX.md; sessions `1778175630-727` / `1778178639-614` / `1778185843-631` / `1778193038-619` / `1778200249-734` / `1778214642-622` / `1778221840-619` all show this truncation. Session `1778207448-655` and the May-4 setup entry have correct full content, so the bug isn't 100% — it's intermittent or depends on session-log content.
+
+**Investigation needed before fix:** which postflight code path writes the embedded `## Work performed` block. Probably a here-doc with an unescaped sentinel, or a `cat $SESSION_LOG` that hits a `## ` line that's interpreted as a new section by the outer parser.
+
+**Effort:** ~1 hr investigation + ~30 min fix. Cosmetic only — data is not lost (the actual commit + session log file are fine), only the outbox embed is truncated.
+
+---
+
+## INSTRUCTION — 2026-05-16 — [self-review] bootstrap motoquant.skill for Claude
+[opportunistic]
+
+**Attribution:** self-review M1 2026-05-16 Layer 3 + CLAUDE.md TOOLKIT REFERENCE "Adopt this quarter ★".
+
+**Proposal:** Use the `skill-creator` skill to write `skills/motoquant.skill/` that teaches Claude:
+- The bike spec schema (`BikeSpec`, `BikeConfig`, `EngineParams`, `DrivetrainParams`)
+- The 8-cluster category taxonomy (litre_sport_195p / litre_sport_600_1000 / mid_twin_*_700 / entry_*_300 / two_stroke / cruiser_1300p)
+- Drag glossary (60-foot, ET, trap, two-step, anti-squat, slipper, expansion chamber)
+- The K5/R1/Hayabusa reference baselines (10.0334 / 10.2859 / 10.4712 — never touch)
+- The standing dispatch protocol (INBOX/OUTBOX)
+- The standing hygiene rules (CLAUDE.md hygiene section)
+
+**Done when:** a fresh session can answer "what cluster does the Z H2 SE fall in?" without first reading 9 files.
+
+**Effort:** ~2 hr — mostly extracting and condensing from CLAUDE.md.
+
+---
+
+## INSTRUCTION — 2026-05-16 — [self-review] add wrapper smoke-test in preflight
+[opportunistic]
+
+**Attribution:** self-review M1 2026-05-16 Finding 2.1 root-cause prevention. After May 7 saw THREE wrapper regressions in one day (CRLF, stdin-redirect, MINGW path), the system shipped to production without a smoke-test for the wrapper itself. May 9-15 silence suggests at least one more wrapper-class regression occurred and went unnoticed.
+
+**Proposal:** Add `scripts/preflight_wrapper_smoke.sh` that:
+1. Runs `claude --version` with `< /dev/null` and `-p ''` to verify it doesn't hang
+2. Verifies `scripts/run_autonomous_session.sh` syntax with `bash -n`
+3. Verifies all shebang lines + line endings on `scripts/*.sh` (LF only)
+4. Writes a one-line PASS/FAIL to `preflight.env`
+
+Invoked from `scripts/session_preflight.sh` before mutex acquisition.
+
+**Done when:** intentionally introducing a CRLF into one of the wrapper scripts fails the next preflight with a clear error message.
+
+**Effort:** ~1 hr.
+
+---
+
 ## INSTRUCTIONS QUEUE
 
 > _Add new `## INSTRUCTION` blocks above this divider. Claude marks them `## DONE` once handled._

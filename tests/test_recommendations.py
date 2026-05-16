@@ -18,7 +18,6 @@ import json
 import math
 import os
 import sys
-import tempfile
 import unittest
 
 # Ensure project root is on path
@@ -47,32 +46,9 @@ from motoquant.analysis.roi import BuildROIResult, PartROIResult
 from motoquant.database.connection import MotoQuantDB
 from motoquant.defaults import gsxr1000_k5
 
-# ─────────────────────────────────────────────────────────────────
-# Shared fixture: seeded DB in /tmp (WAL-safe)
-# ─────────────────────────────────────────────────────────────────
-
-
-class _TestDB:
-    """Creates a temporary DB in /tmp, seeds it, caches for reuse."""
-
-    _db_path = None
-    _mdb = None
-
-    @classmethod
-    def get_mdb(cls) -> MotoQuantDB:
-        if cls._mdb is None:
-            tmp = tempfile.NamedTemporaryFile(suffix=".db", dir="/tmp", delete=False)
-            cls._db_path = tmp.name
-            tmp.close()
-            mdb = MotoQuantDB(cls._db_path)
-            mdb.connect()
-            mdb.conn.execute("PRAGMA journal_mode=DELETE")
-            mdb.initialize()
-            from motoquant.database.seed import seed_all
-
-            seed_all(mdb)
-            cls._mdb = mdb
-        return cls._mdb
+# Shared seeded-DB singleton (process-scoped, WAL-fallback to DELETE for /tmp).
+# See tests/_helpers.py for the canonical definition.
+from tests._helpers import SeededTestDB as _TestDB  # noqa: E402
 
 
 # ─────────────────────────────────────────────────────────────────

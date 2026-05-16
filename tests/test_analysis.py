@@ -17,7 +17,6 @@ import json
 import math
 import os
 import sys
-import tempfile
 import unittest
 from io import StringIO
 from unittest.mock import patch
@@ -50,37 +49,12 @@ from motoquant.database.connection import MotoQuantDB
 from motoquant.database.parts_repo import PartsRepository
 from motoquant.defaults import gsxr1000_k5
 
+# Shared seeded-DB singleton (process-scoped, WAL-fallback to DELETE for /tmp)
+from tests._helpers import SeededTestDB as _TestDB  # noqa: E402
+
 # ─────────────────────────────────────────────────────────────────
-# Shared fixture: seeded DB in /tmp (WAL-safe)
+# Shared fixture helpers (thin wrappers over tests._helpers.SeededTestDB)
 # ─────────────────────────────────────────────────────────────────
-
-
-class _TestDB:
-    """Creates a temporary DB in /tmp, seeds it, and caches the MotoQuantDB."""
-
-    _db_path = None
-    _mdb = None
-
-    @classmethod
-    def get_mdb(cls) -> MotoQuantDB:
-        if cls._mdb is None:
-            tmp = tempfile.NamedTemporaryFile(suffix=".db", dir="/tmp", delete=False)
-            cls._db_path = tmp.name
-            tmp.close()
-            mdb = MotoQuantDB(cls._db_path)
-            mdb.connect()
-            mdb.conn.execute("PRAGMA journal_mode=DELETE")
-            mdb.initialize()
-            # Run full catalog seed (tires, parts, bikes, fitments)
-            from motoquant.database.seed import seed_all
-
-            seed_all(mdb)
-            cls._mdb = mdb
-        return cls._mdb
-
-    @classmethod
-    def get_conn(cls):
-        return cls.get_mdb().conn
 
 
 def _seed_mdb() -> MotoQuantDB:

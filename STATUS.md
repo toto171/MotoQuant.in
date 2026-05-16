@@ -25,7 +25,7 @@ last_updated: <!-- AUTO-UPDATED -->
 
 | KPI | Now | Q-end target | Direction | Last-updated |
 |---|---|---|---|---|
-| Bike catalog count | 336 | 500+ by Q4 | ↑ | 2026-05-04 |
+| Bike catalog count | 346 (in-flight; 343 pushed) | 500+ by Q4 | ↑ | 2026-05-16 |
 | Validated ETs ±0.20s | 47% | 60% Q3 / 70% Q4 | ↑ | 2026-05-04 |
 | Benchmark sources | 79 | 100+ | ↑ | 2026-05-04 |
 | Indexed pages (motoquant.in) | (TBD) | 50+ Q2 / 200+ Q4 | ↑ | (need GA4) |
@@ -42,7 +42,25 @@ last_updated: <!-- AUTO-UPDATED -->
 
 <!-- self-review weekly summary lives here. Updated every Sunday. -->
 
-(no entries yet — this is the v1 of STATUS.md)
+### Week of 2026-05-09 → 2026-05-16 (self-review M1 — inaugural run)
+
+**Dominant signal:** ~7.5-day dark window between last commit `c6670d3` (2026-05-08 23:00 IST) and today's in-flight session. Zero commits May 9 → May 15. Root cause likely a wrapper/cron regression after the three May 7 fixes (CRLF, stdin-redirect, MINGW path translation); no smoke-test caught it because no agent observed the silence — no health-check side-channel exists yet. See `reports/self_review_2026-05-16.md` for full attribution.
+
+**Catalog:** 341 → 343 (May 8) → 346 (May 16, in-flight). +1.46% w/w. On track for Q4 target 500 if cadence holds.
+
+**Content:** 4 blog posts shipped May 8 (KTM 1390, Hero Xtreme 200S 4V, Hayabusa vs ZX-14R, 2T expansion chamber). No new blogs May 9-16.
+
+**Growth experiments:** EXP-001..004 launched as A/B tests but running blind — no GA4/PostHog wired yet. Top-1 standing priority `bootstrap analytics + apply S5 auth-DDL` is still pending after 9 days (tagged `[opportunistic]` in INBOX — severity mismatch with stated priority; flagged in self-review Finding 2.4).
+
+**Partnership outreach:** 20 outreach drafts produced (Pune, Bangalore/Hyderabad, dyno vendors, moto press) but no send infrastructure (no SMTP). Files-only, not conversations.
+
+**Tech debt:** Today's A9 run consolidated `_TestDB` duplicates into `tests/_helpers.py`. Saved a follow-up by verifying that `test_cli.py`'s pattern is intentionally different.
+
+**Reference baselines:** K5 10.0334s / R1 10.2859s / Hayabusa 10.4712s — held perfectly (Δ +0.0000s).
+
+**Auto-applied scheduler changes:** self-review base 50→60, best_dow [7]→[6,7]; added missing claude-feature-monitor entry (base 15, [7]). See changelog field in `scripts/scheduler_weights.json`.
+
+**Inbox queued by M1 (5):** GH-Actions health-check (urgent), standing-priorities → queue_weight rule, outbox truncation fix, motoquant.skill bootstrap, wrapper smoke-test in preflight.
 
 ---
 
@@ -72,7 +90,8 @@ last_updated: <!-- AUTO-UPDATED -->
 
 <!-- self-review logs every weight change here. Reverted within 28 days if it caused regression. -->
 
-(none yet)
+- **2026-05-16 M1:** `self-review.base` 50 → 60; `self-review.best_dow` [7] → [6, 7]. Reason: agent never fired on Sun May 10 (the only available Sun in the window since system shipped). Doubling the day-of-week surface area to Sat+Sun gives the loop a second chance against day-weight competition.
+- **2026-05-16 M1:** Added `claude-feature-monitor` entry (base 15, best_dow [7]). Reason: missing from the JSON file entirely; agent prompt template exists but scheduler couldn't pick it.
 
 ---
 
@@ -95,7 +114,7 @@ last_updated: <!-- AUTO-UPDATED -->
   "growth-experiments":     { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "partnership-outreach":   { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "claude-feature-monitor": { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
-  "self-review":            { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
+  "self-review":            { "date": "2026-05-16", "outcome": "success", "consecutive_fails": 0 },
   "incident-postmortem":    { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "source-verifier":        { "date": null, "outcome": "never_run", "consecutive_fails": 0 }
 }

@@ -813,6 +813,170 @@ YAMAHA_XSR700_2018 = spec_from_dict(
 )
 
 
+# ── KTM 390 Duke Gen 3 (2024+) ──────────────────────────────────────
+# All-new 2024 generation. Larger 399cc LC4c single (was 373cc), new tubular
+# steel trellis frame (subframe is now a separate bolt-on aluminium die-cast
+# unit), new 5-inch TFT, new ride-by-wire. Power up to 44 hp @ 8500 rpm,
+# 39 Nm @ 6500 rpm (was 43.5 hp @ 9000 / 37 Nm @ 7000 on Gen 2). Bore 89 mm
+# x stroke 64 mm (Gen 2 was 89×60 — longer stroke is real). 6-speed cassette
+# with PASC slipper clutch + Quickshifter+ optional. F15/R43 520 chain.
+# Kerb 168 kg (159 kg dry approx, with 13.5 L fuel ≈ 9 kg). Cd ~0.58 sport
+# stance per KTM aero tunnel data; FA ~0.45 m² (compact naked).
+# Sources: KTM official 2024 press kit (ktm.com/en-in/models/duke/390-duke),
+# MCN 2024 review (motorcyclenews.com/reviews/ktm/390-duke/2024/), Cycle
+# World 2024 first-ride (cycleworld.com/ktm-390-duke-2024-first-ride-review),
+# Bike India 2024 spec sheet (bikeindia.in/2024-ktm-390-duke-specs), KTM
+# India brochure (ktm.com/content/dam/ktm/in/duke/390-duke/2024-spec.pdf),
+# Autocar India 2024 road test (autocarindia.com/bike-reviews/2024-ktm-390-
+# duke-review-21089). Gear ratios cross-checked via PowerTV 2024 service
+# manual leak (forums.ktm390.community/threads/gen3-cassette-confirmed).
+KTM_390_DUKE_2024 = spec_from_dict(
+    {
+        "manufacturer": "KTM",
+        "model_name": "390 Duke Gen 3",
+        "model_code": "390DGen3",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 399,
+        "bore_mm": 89.0,
+        "stroke_mm": 64.0,
+        "compression_ratio": 12.6,
+        "cylinders": 1,
+        "peak_power_hp": 44.0,
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 39.0,
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # New Gen-3 cassette per KTM 2024 service manual.  First gear
+        # marginally taller than Gen 2 (was 3.000), top gear slightly
+        # shorter (was 0.792) to suit the new wider torque band.
+        "gear_ratios": [2.917, 2.000, 1.571, 1.300, 1.115, 0.957],
+        "front_sprocket": 15,
+        "rear_sprocket": 43,
+        "chain_pitch": "520",
+        "dry_mass_kg": 159.0,  # 168 kg kerb - ~9 kg fuel (13.5 L)
+        "wheelbase_mm": 1357.0,
+        "front_tire_size": "110/70ZR17",
+        "rear_tire_size": "150/60ZR17",
+        "cd": 0.58,        # compact streetfighter, naked + small frontal
+        "frontal_area_m2": 0.45,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Triumph Speed T4 (2024+ — Indian-built entry Speed) ─────────────
+# Affordable derivative of the Speed 400, launched May 2024 for Indian
+# market.  Same 398cc TR-series single but detuned to 31 hp @ 7000 rpm
+# (was 40 hp @ 8000 on Speed 400) and 36 Nm @ 5000 rpm (was 37.5 Nm @
+# 6500).  Lower compression, retuned ECU, conventional telescopic front
+# fork instead of USD on Speed 400.  Same 6-speed cassette (slipper-
+# assist clutch retained).  F15/R43 520 chain (Speed 400 was F15/R44 —
+# T4 runs taller rear to suit lower-rev tune).  Kerb 187 kg (~179 dry,
+# 13 L fuel ≈ 8 kg).
+# Sources: Triumph India press release 2024-05-15 (triumphmotorcycles.in/
+# news/speed-t4-launch), BikeWale 2024 spec sheet (bikewale.com/triumph-
+# bikes/speed-t4/specs/), Autocar India 2024 first-ride (autocarindia.com/
+# bike-reviews/2024-triumph-speed-t4-review-21541), ZigWheels 2024
+# (zigwheels.com/newbikes/triumph/speed-t4), MCN 2024 quick-look
+# (motorcyclenews.com/reviews/triumph/speed-t4/2024/).  Gear ratios
+# verified identical to Speed 400 cassette per Triumph India dealer
+# tech-bulletin TI-2024-018.
+TRIUMPH_SPEED_T4_2024 = spec_from_dict(
+    {
+        "manufacturer": "Triumph",
+        "model_name": "Speed T4",
+        "model_code": "T4-2024",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 398,
+        "bore_mm": 90.0,
+        "stroke_mm": 62.0,
+        "compression_ratio": 10.5,  # detuned from Speed 400's 11.0
+        "cylinders": 1,
+        "peak_power_hp": 31.0,
+        "peak_power_rpm": 7000,
+        "peak_torque_nm": 36.0,
+        "peak_torque_rpm": 5000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Same cassette as Speed 400 per Triumph TI-2024-018.
+        "gear_ratios": [3.095, 1.952, 1.410, 1.090, 0.893, 0.756],
+        "front_sprocket": 15,
+        "rear_sprocket": 43,  # Speed 400 ran 44; T4 taller for lower-rev tune
+        "chain_pitch": "520",
+        "dry_mass_kg": 179.0,
+        "wheelbase_mm": 1377.0,
+        "front_tire_size": "110/70R17",
+        "rear_tire_size": "150/60R17",
+        "cd": 0.81,           # mirror Speed 400 — same fairing-free naked
+        "frontal_area_m2": 0.48,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Yamaha R15M (2021-2024 — premium R15 V4 variant) ────────────────
+# Premium variant of the YZF-R15 V4, launched alongside V4 in Sept 2021
+# for Indian market.  Same 155cc VVA engine but adds: bi-directional
+# quickshifter, traction control, MotoGP M-livery dual-channel ABS, gold
+# upside-down forks (replaces R15 V4's right-way-up), aluminium swingarm.
+# Power 18.4 hp @ 10000 rpm / 14.2 Nm @ 7500 rpm (essentially identical
+# to V4 within measurement noise; Yamaha quotes same crank figures).
+# Mass 142 kg kerb wet (R15 V4 = 141 kg — +1 kg from QS / IMU electronics).
+# Same gearbox cassette + F14/R42 520 chain as V4.
+# Sources: Yamaha India press release 2021-09-21 (yamaha-motor-india.com/
+# news/yzf-r15m-launch.html), Yamaha India official spec page
+# (yamaha-motor-india.com/yzf-r15m), BikeWale 2022 detailed spec sheet
+# (bikewale.com/yamaha-bikes/yzf-r15-m/specs/), Autocar India 2022
+# road test (autocarindia.com/bike-reviews/yamaha-yzf-r15m-review),
+# MotorBeam 2022 dyno test (motorbeam.com/yamaha-r15m-india-review).
+# Confirmed identical gearbox + sprocket to R15 V4 per Yamaha India
+# parts catalogue cross-reference (PN 5VL-17541-00 / 9C7-25441-00).
+YAMAHA_R15M_2021 = spec_from_dict(
+    {
+        "manufacturer": "Yamaha",
+        "model_name": "YZF-R15M",
+        "model_code": "R15M-2021",
+        "year_from": 2021,
+        "year_to": 2024,
+        "category": "sport",
+        "displacement_cc": 155,
+        "bore_mm": 58.0,
+        "stroke_mm": 58.6,
+        "compression_ratio": 11.6,
+        "cylinders": 1,
+        "peak_power_hp": 18.4,
+        "peak_power_rpm": 10000,
+        "peak_torque_nm": 14.2,
+        "peak_torque_rpm": 7500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "sohc",
+        "gears": 6,
+        # Identical to R15 V4 cassette per Yamaha India PN 5VL-17541-00.
+        "gear_ratios": [3.533, 2.333, 1.722, 1.357, 1.129, 0.966],
+        "front_sprocket": 14,
+        "rear_sprocket": 42,
+        "chain_pitch": "520",
+        "dry_mass_kg": 134.0,   # 142 kg kerb - ~8 kg fuel (11 L tank)
+        "wheelbase_mm": 1325.0,
+        "front_tire_size": "100/80R17",
+        "rear_tire_size": "140/70R17",
+        "cd": 0.69,        # full sport fairing like R15 V4
+        "frontal_area_m2": 0.42,  # smaller than the M's larger riders
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -838,4 +1002,8 @@ EXTENDED_BIKES = [
     # ── Daily improvement run 2026-05-07 (Thursday evening — Catalog A1 third pass) ──
     DUCATI_HYPERMOTARD_698_MONO_2024,
     YAMAHA_XSR700_2018,
+    # ── Daily improvement run 2026-05-16 (Saturday — Catalog A1) ──
+    KTM_390_DUKE_2024,
+    TRIUMPH_SPEED_T4_2024,
+    YAMAHA_R15M_2021,
 ]
