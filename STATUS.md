@@ -62,6 +62,8 @@ last_updated: <!-- AUTO-UPDATED -->
 
 **Inbox queued by M1 (5):** GH-Actions health-check (urgent), standing-priorities → queue_weight rule, outbox truncation fix, motoquant.skill bootstrap, wrapper smoke-test in preflight.
 
+**Follow-up run (evening 2026-05-16, same day):** M1 re-dispatched to audit the URGENT GH-Actions side-channel proposal before any session implements it. Six design tightenings logged in `reports/self_review_2026-05-16_followup.md` Section A (cron cadence 30-min → 6h, curl timeout 10s → 20s, JSON schema additions, side-branch isolation, PAT scope spec, INCIDENT-push race fix). Two new INSTRUCTIONs queued: companion `[urgent]` design-notes block + `[opportunistic]` postflight `_updated`-timestamp fix (current `null` would break the side-channel's staleness check on first cron tick). Total INBOX backlog now 8 self-review items + 6 carry-over from May 7.
+
 ---
 
 ## Open blockers (resolve before next major sprint)

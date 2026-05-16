@@ -297,6 +297,47 @@ Source: `reports/catalog_expansion_2026-05-07_pm.md` + carry-forward from May 4.
 
 ---
 
+## INSTRUCTION — 2026-05-16 — [self-review] design notes for GH-Actions side-channel (read before implementing)
+[urgent]
+
+**Attribution:** self-review M1 2026-05-16 follow-up Section A. Companion to the existing `[urgent]` INSTRUCTION below ("build GH-Actions health-check side-channel"). Read `reports/self_review_2026-05-16_followup.md` Section A in full before writing any YAML.
+
+Six design tightenings the morning's minimum-viable-build under-specified:
+
+1. **Cron cadence:** drop from `*/30 * * * *` to `0 */6 * * *` (4 runs/day). The May 9-15 failure mode is a 7.5-day silence; catching it on a 6h vs 30-min schedule produces the same outcome and is 12× cheaper on Actions minutes budget (matters if the repo flips private). Pair with the alert threshold at 36h — gives 6 polling windows before fire-true-alert, correct flap protection.
+2. **Curl timeouts:** bump `-m 10` → `-m 20`. Railway Hobby cold-starts run 8-12s; 10s creates false-positive `fail` JSON. Specify `-X GET` for `/api/health` and `-I` (HEAD) for `motoquant.in/`.
+3. **JSON schema additions:** include `api_latency_ms`, `web_latency_ms`, `workflow_sha`, `commit_sha_at_check` in `latest.json`. Without latency fields the signal is binary and degradation can't be graphed.
+4. **Side branch + rolling history:** pin `git checkout -B health && git push -f origin health` (never merged to main). Keep `health/latest.json` plus `health/history.jsonl` capped to 7-day rolling window. Sandbox reads via `git fetch origin health && git show origin/health:latest.json`.
+5. **PAT scope and rotation:** dedicated fine-grained PAT, scope Contents:R+W only, repo-scoped not org-scoped, stored as `HEARTBEAT_PAT` GH Actions Secret. Add a workflow startup step `gh api user` to verify token alive; on 401 mark workflow failed (the red X in the Actions tab is the user's only OOB signal). Default expiry 90 days — needs calendar reminder for rotation.
+6. **Race on the INCIDENT push to main:** the workflow's `git push origin main` for the INCIDENT block will race with autonomous-session postflight pushes. Pin `git pull --rebase` with retries. Spec the INCIDENT block format as `## INCIDENT — YYYY-MM-DDTHH:MM:SSZ — heartbeat — <reason>` to match the existing `## SESSION` parser pattern.
+
+Also fix this BEFORE the side-channel ships: per follow-up Section B.2 + B.3, `STATUS.md _LAST_RUN_JSON._updated` and the top-level `last_run:` placeholder are both `null` because the postflight script does not write them. The side-channel's staleness check evaluates `null → unparseable → false-positive alert on first run`. See separate INSTRUCTION below for the postflight fix.
+
+Done when: the original implementation (INSTRUCTION below) lands incorporating all six tightenings.
+
+Source: `reports/self_review_2026-05-16_followup.md` Section A.
+
+---
+
+## INSTRUCTION — 2026-05-16 — [self-review] postflight should update STATUS.md timestamps
+[opportunistic]
+
+**Attribution:** self-review M1 2026-05-16 follow-up Section B.2 + B.3. The `_LAST_RUN_JSON._updated` field at STATUS.md line 103 and the top-level `last_run:` placeholder at line 123 are both `null` even after the morning M1 session successfully pushed. The postflight script writes per-agent `date` and `outcome` fields under `_LAST_RUN_JSON.<agent_name>` but does NOT write the top-level `_updated` field nor the `last_run:` line.
+
+**Why it matters:** the GH-Actions heartbeat side-channel (urgent INSTRUCTION above) reads `_updated` to decide if the system has gone dark. If `_updated` stays `null`, the staleness check will misfire on the first cron tick — either as a permanent false-positive (`null > 36h ago`) or it skips the check entirely. Either way the alert is broken before it ships.
+
+**Proposed fix:** in `scripts/session_postflight.sh`, after the per-agent state update, also stamp:
+- `_LAST_RUN_JSON._updated` ← `$(date -u +%Y-%m-%dT%H:%M:%SZ)`
+- The `last_run:` placeholder at STATUS.md (search for the `<!-- AUTO-UPDATED — used by catchup_detect` comment marker and rewrite the line) ← same ISO timestamp.
+
+Both writes are single-line sed substitutions; the changes ride the same commit as the agent's work (no separate commit). Add a regression case: postflight on a no-op session should still bump `_updated`.
+
+**Effort:** ~30 min. Low-risk. Unblocks Section A.4 of the GH-Actions design above.
+
+Source: `reports/self_review_2026-05-16_followup.md` Section B.2 + B.3.
+
+---
+
 ## INSTRUCTION — 2026-05-16 — [self-review] build GH-Actions health-check side-channel
 [urgent]
 

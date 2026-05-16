@@ -13,7 +13,7 @@ Guarantees:
 
 import dataclasses
 import json
-from typing import Any
+from typing import Any, TypedDict
 
 import numpy as np
 
@@ -147,7 +147,32 @@ def extract_dyno_curve(config: BikeConfig) -> dict[str, Any] | None:
     }
 
 
-def extract_headline_specs(config: BikeConfig) -> dict[str, Any]:
+class HeadlineSpecsDict(TypedDict):
+    """Shape of the dict returned by :func:`extract_headline_specs`.
+
+    Keys map 1:1 to ``bike_models`` columns that the parts-compatibility
+    engine and search filters read directly (i.e. without cracking open
+    the JSON ``engine_params`` blob). All fields are nullable because
+    legacy seed rows may pre-date the spec-extraction work; ``None``
+    propagates as SQL ``NULL``.
+    """
+
+    displacement_cc: float | None
+    bore_mm: float | None
+    stroke_mm: float | None
+    compression_ratio: float | None
+    peak_power_hp: float | None
+    peak_power_rpm: float | None
+    peak_torque_nm: float | None
+    peak_torque_rpm: float | None
+    cylinder_count: int | None
+    cylinder_config: str | None
+    dry_mass_kg: float | None
+    wheelbase_mm: float | None
+    seat_height_mm: float | None
+
+
+def extract_headline_specs(config: BikeConfig) -> HeadlineSpecsDict:
     """
     Extract searchable headline specs from a BikeConfig
     for the bike_models table.
