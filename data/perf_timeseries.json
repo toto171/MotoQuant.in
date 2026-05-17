@@ -189,5 +189,37 @@
     "test_walltime_s": 7.96,
     "tests_passed": 111,
     "notes": "Run 7 of 2026-05-17 (performance-monitor agent A12). Captured TTFB via curl -w. Railway /api/health TTFB 5-sample avg 712.35ms (range 641-808). Landing TTFB 1346ms, /api/bikes?limit=10 TTFB 823ms. bike_count remains 342 (drift vs CLAUDE.md headline 336 still standing). Tests 7.96s \u2014 within \u00b115% of all prior same-day runs (range 7.775-10.40s). Cross-day rolling baseline still not formed; first available 2026-05-18."
+  },
+  {
+    "date": "2026-05-17",
+    "run_index": 8,
+    "agent": "performance-monitor",
+    "landing_ttfb_ms": 1290.224,
+    "landing_total_ms": 1294.436,
+    "landing_size_bytes": 32634,
+    "landing_http": 200,
+    "api_health_ms_avg": 665.73,
+    "api_health_ms_median": 683.261,
+    "api_health_ms_samples": [
+      782.813,
+      683.261,
+      494.417,
+      707.108,
+      661.03
+    ],
+    "api_health_http": 200,
+    "api_health_bike_count": 342,
+    "api_bikes_ms": 793.805,
+    "api_bikes_total_ms": 793.93,
+    "api_bikes_http": 200,
+    "api_bikes_size_bytes": 1948,
+    "api_bikes_count": 10,
+    "api_bikes_first": "Aprilia RS 457 (2024-2026)",
+    "test_walltime_s": 8.132,
+    "test_internal_s": 7.66,
+    "tests_passed": 111,
+    "tests_failed": 0,
+    "network_blocked": false,
+    "notes": "Run 8 of 2026-05-17 (performance-monitor agent, autonomous Sunday). Egress functional (CLAUDE.md egress-blocked caveat is stale). Landing TTFB 1290ms vs same-day mean 1362ms (-5.3%, faster). /api/health 5-sample mean 665.7ms vs same-day mean 710.3ms (-6.3%, faster). /api/bikes 793.8ms (no same-day mean baseline yet \u2014 prior runs recorded different fields). Pytest real wall 8.132s vs same-day mean 8.437s (-3.6%, within noise). 111 passed / 0 failed unchanged. bike_count 342 stable across all 8 runs of the day (note: CLAUDE.md headline still 336 \u2014 pre-existing drift, not new). No escalation. Cross-day baseline still not formed (all 8 rows same-date 2026-05-17); rolling drift detection will begin once 2026-05-18 data lands."
   }
 ]

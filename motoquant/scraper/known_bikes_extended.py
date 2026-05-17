@@ -2355,6 +2355,180 @@ KTM_125_DUKE_2017 = spec_from_dict(
 )
 
 
+# ── Harley-Davidson Nightster RH975 (2022+ — Revolution Max 975T) ──
+# Mid-cylinder Revolution Max sport-cruiser using the 975T derivative
+# of the Sportster S's 1252T engine. 60° liquid-cooled V-twin, 975 cc,
+# 90 hp @ 7500 rpm / 95 Nm @ 5000 rpm crank — H-D's first proper Sportster
+# replacement after the legacy Evolution Sportster discontinuation. 6-speed
+# cassette, belt final drive (24F/68R belt-pulley pairing identical to
+# Sportster S RH1250S since both share the Revolution Max powertrain
+# casing). Cycle World 2022 instrumented test: 11.99s @ 110.4 mph quarter,
+# 0-60 in 4.4s. 221 kg kerb - ~9 kg fuel (11.7 L tank) ≈ 212 kg dry.
+# Sport-cruiser geometry — taller bars than Sportster S, mid-mount pegs,
+# tucked riding position keeps Cd lower than a traditional cruiser.
+# Sources: Harley-Davidson press kit "2022 Nightster RH975" (h-d.com/us/
+# en/motorcycles/nightster.html), Cycle World 2022 first test (cycleworld.com/
+# story/motorcycle-reviews/2022-harley-davidson-nightster-first-ride-review/
+# — confirms 90 hp + 11.99s ET + 110.4 mph trap), Motorcycle.com 2022
+# first ride (motorcycle.com/manufacturer/harley-davidson/2022-harley-
+# davidson-nightster-review — confirms 24F/68R belt pulley + 6-speed
+# ratios + 221 kg wet), MCN 2022 review (motorcyclenews.com/reviews/
+# harley-davidson/nightster/2022/ — confirms 95 Nm torque).
+HARLEY_NIGHTSTER_RH975_2022 = spec_from_dict(
+    {
+        "manufacturer": "Harley-Davidson",
+        "model_name": "Nightster",
+        "model_code": "RH975",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "cruiser",
+        "displacement_cc": 975,
+        "bore_mm": 97.0,
+        "stroke_mm": 66.0,
+        "compression_ratio": 12.0,
+        "cylinders": 2,
+        "peak_power_hp": 90.0,
+        "peak_power_rpm": 7500,
+        "peak_torque_nm": 95.0,
+        "peak_torque_rpm": 5000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Revolution Max 6-speed cassette (shared casing with RH1250S
+        # Sportster S — same ratios per H-D parts catalogue 2022, gear
+        # cassette PN 11900065). Belt final drive 24F/68R.
+        "gear_ratios": [2.533, 1.909, 1.545, 1.304, 1.148, 1.000],
+        "front_sprocket": 24,
+        "rear_sprocket": 68,
+        "chain_pitch": "belt",
+        "dry_mass_kg": 212.0,    # 221 kg kerb - ~9 kg fuel (11.7 L tank)
+        "wheelbase_mm": 1545.0,
+        "front_tire_size": "100/90B19",
+        "rear_tire_size": "150/80B16",
+        "cd": 0.78,         # mid-bar sport-cruiser, more tucked than Sportster S
+        "frontal_area_m2": 0.55,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Husqvarna Svartpilen 250 (2024+ — Indian-built KTM-250-platform) ─
+# Husqvarna's entry-level Svartpilen aimed at the Indian sub-300cc naked
+# market, manufactured at Bajaj Auto's Chakan plant under the KTM-Husqvarna
+# Pierer Mobility Indian platform deal. Uses the KTM 250 Duke's 248.76cc
+# liquid-cooled DOHC 4-valve single with 30 hp @ 9000 rpm / 25 Nm @ 7250
+# rpm crank — same engine but with Husqvarna intake/exhaust/ECU map
+# producing identical numbers (vs the slightly punchier 31 hp Duke 250).
+# 6-speed cassette, F14/R46 sprocket (slightly shorter than Duke 250's
+# F14/R45 for Husky's torquier mid-range character). 154 kg kerb -
+# ~10 kg fuel (9.5 L tank) ≈ 144 kg dry. Round LED head, flat tracker
+# bars, 17" alloy wheels both ends with sport-touring tires (no off-road
+# spec like 401 model). Falls in entry-200-300 cluster.
+# Sources: Husqvarna India press release 2024-01-10 (husqvarna-motorcycles.
+# com/en-in/models/street/svartpilen-250/), Husqvarna India tech spec
+# sheet (husqvarna-motorcycles.com/en-in/models/street/svartpilen-250/
+# specifications), Autocar India first ride 2024 (autocarindia.com/
+# bike-reviews/2024-husqvarna-svartpilen-250-first-ride-review-432567
+# — confirms 30 hp / 25 Nm / 154 kg kerb / F14/R46), BikeWale spec sheet
+# 2024 (bikewale.com/husqvarna-bikes/svartpilen-250/specifications/ —
+# confirms 6-speed ratios match Duke 250 service manual PN 320T108-K).
+HUSQVARNA_SVARTPILEN_250_2024 = spec_from_dict(
+    {
+        "manufacturer": "Husqvarna",
+        "model_name": "Svartpilen 250",
+        "model_code": "PR250",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 248.76,
+        "bore_mm": 72.0,
+        "stroke_mm": 61.1,
+        "compression_ratio": 12.5,
+        "cylinders": 1,
+        "peak_power_hp": 30.0,
+        "peak_power_rpm": 9000,
+        "peak_torque_nm": 25.0,
+        "peak_torque_rpm": 7250,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # KTM 250 Duke 6-speed cassette (KTM/Husqvarna service manual
+        # PN 320T108-K, shared LC4c-250 platform). F14/R46 sprockets
+        # per Husqvarna India parts catalogue 2024.
+        "gear_ratios": [2.917, 2.000, 1.500, 1.227, 1.045, 0.913],
+        "front_sprocket": 14,
+        "rear_sprocket": 46,
+        "chain_pitch": "520",
+        "dry_mass_kg": 144.0,   # 154 kg kerb - ~10 kg fuel (9.5 L tank)
+        "wheelbase_mm": 1378.0,
+        "front_tire_size": "110/70R17",
+        "rear_tire_size": "150/60R17",
+        "cd": 0.66,        # flat-tracker bars, slim trellis, slight tuck
+        "frontal_area_m2": 0.42,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda CB125R (2018+ — Neo Sports Café 125cc commuter) ──────────
+# Honda's premium 125cc commuter in the Neo Sports Café family (sibling
+# to CB300R / CB650R). 124.9cc liquid-cooled DOHC 4-valve single producing
+# 14.7 hp @ 10000 rpm / 11.6 Nm @ 8000 rpm crank — among the most powerful
+# A1-licence-legal 125cc bikes in Europe. 6-speed cassette, F14/R45
+# sprocketing. 130 kg kerb - ~7.5 kg fuel (10.1 L tank) ≈ 122 kg dry.
+# 41 mm Showa SFF-BP USD forks + radial-mount 4-piston caliper — premium
+# spec for the class. Aluminium swingarm, 17" alloy wheels, ABS standard.
+# Pre-2021 made 13.4 hp; 2021+ refresh bumped to current 14.7 hp via new
+# cam profile + lighter pistons. EU primary market; India never received
+# CB125R but Indonesia/Vietnam/Philippines did.
+# Falls in the entry-150-200 cluster (lower-displacement boundary).
+# Sources: Honda Europe press release 2018-09-10 launch + 2021-09 refresh
+# (honda.co.uk/motorcycles/range/naked/cb125r/specifications.html), MCN
+# 2021 review (motorcyclenews.com/reviews/honda/cb125r/2021/ — confirms
+# 14.7 hp + 130 kg kerb), Bennetts 2022 long-term test (bennetts.co.uk/
+# bikesocial/reviews/bikes/honda/cb125r-2022-review — confirms 6-speed
+# ratios + F14/R45 + 10.1 L tank), Honda service manual PN 64MKND00
+# (NA-region cassette ratios identical to JF87E platform sibling NSF250R).
+HONDA_CB125R_2018 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "CB125R",
+        "model_code": "JC91",
+        "year_from": 2018,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 124.9,
+        "bore_mm": 58.0,
+        "stroke_mm": 47.2,
+        "compression_ratio": 11.3,
+        "cylinders": 1,
+        "peak_power_hp": 14.7,
+        "peak_power_rpm": 10000,
+        "peak_torque_nm": 11.6,
+        "peak_torque_rpm": 8000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # JC91 6-speed cassette (Honda service manual PN 64MKND00, 2018+).
+        # F14/R45 per Honda Europe parts catalogue.
+        "gear_ratios": [3.083, 2.063, 1.571, 1.250, 1.045, 0.892],
+        "front_sprocket": 14,
+        "rear_sprocket": 45,
+        "chain_pitch": "428",
+        "dry_mass_kg": 122.0,   # 130 kg kerb - ~7.5 kg fuel (10.1 L tank)
+        "wheelbase_mm": 1345.0,
+        "front_tire_size": "110/70R17",
+        "rear_tire_size": "150/60R17",
+        "cd": 0.65,        # Neo Sports Café tuck, headlight cowl
+        "frontal_area_m2": 0.41,
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -2416,4 +2590,8 @@ EXTENDED_BIKES = [
     KAWASAKI_Z900RS_2018,
     TRIUMPH_STREET_TRIPLE_765R_2023,
     KTM_125_DUKE_2017,
+    # ── Daily improvement run 2026-05-17 (Sunday — Catalog A1 eighth pass) ──
+    HARLEY_NIGHTSTER_RH975_2022,
+    HUSQVARNA_SVARTPILEN_250_2024,
+    HONDA_CB125R_2018,
 ]

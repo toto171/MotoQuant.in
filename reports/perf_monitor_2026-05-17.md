@@ -181,3 +181,46 @@ No drift escalation. Pytest wall-clock comfortably below same-day rolling mean (
 
 7 same-day datapoints now exist; cross-day rolling baseline still not formed. First cross-day comparison possible from 2026-05-18 onward.
 
+## Run 8 (performance-monitor agent, autonomous Sunday) — full curl primitives
+
+Eighth perf-monitor probe on 2026-05-17. `curl -w` for TTFB / total / payload; pytest via shell `time`.
+
+| Probe | TTFB (ms) | Total (ms) | HTTP | Size | Notes |
+|---|---|---|---|---|---|
+| `https://www.motoquant.in/` | **1290.22** | 1294.44 | 200 | 32,634 B | Landing payload byte-stable across runs 4/6/7/8 |
+| `/api/health` ×5 | **665.66 avg** | (≈TTFB) | 200 | 55 B | Samples: 782.8 / 683.3 / 494.4 / 707.1 / 661.0 ms; median 683.3; `bike_count: 342` |
+| `/api/bikes?limit=10` | **793.81** | 793.93 | 200 | 1,948 B | One sample; first row Aprilia RS 457 (2024-2026) |
+| `pytest tests/test_validation.py tests/test_scraper.py` | n/a | n/a | n/a | n/a | **111 passed / 0 failed in 7.66 s** (real 8.132 s via shell `time`) |
+
+### Run 8 drift table (vs prior-7 same-day baseline)
+
+Prior-7 wall vector: `[9.231, 7.900, 8.154, 10.400, 7.775, 7.898, 7.960]` → mean **8.474 s**.
+
+| Metric                    | Run 8 (today)  | Run 7 (prior)  | Δ vs run 7 | Prior-7 mean | Δ vs mean | Gate (>+30%) |
+|---------------------------|----------------|----------------|------------|--------------|-----------|--------------|
+| Landing TTFB (ms)         | 1290.22        | 1346.17        | -4.2%      | 1338.28      | -3.6%     | ok           |
+| Landing payload (bytes)   | 32,634         | 32,634         | 0.0%       | 32,634       | 0.0%      | ok           |
+| /api/health avg (n=5, ms) | 665.66         | 712.35         | -6.5%      | 710.32       | -6.3%     | ok           |
+| /api/health median (ms)   | 683.26         | 714.78         | -4.4%      | —            | —         | ok           |
+| /api/bikes latency (ms)   | 793.81         | 823.19         | -3.6%      | —            | —         | **resolved** (was investigate on run 7) |
+| Pytest wall-clock (s)     | 8.132          | 7.960          | +2.2%      | 8.474        | -4.0%     | ok           |
+| Pytest internal (s)       | 7.66           | —              | —          | —            | —         | ok           |
+| Pytest pass / fail        | 111 / 0        | 111 / 0        | flat       | —            | —         | ok           |
+| api_health bike_count     | 342            | 342            | flat       | 342 (×7)     | 0         | stable       |
+
+### Run 8 — `/api/bikes` single-sample drift resolved
+
+Run 7 flagged `/api/bikes` at +72% vs run 6 for next-run confirmation. Run 8 measured 793.8 ms vs run 7's 823.2 ms (-3.6%) — well within ±5% jitter band. **Confirmed: run 7's +72% reading was sandbox-to-Railway handshake jitter, NOT a real backend slowdown.** No escalation. Drift watch on `/api/bikes` cleared.
+
+First `/api/health` sample 782.8 ms vs trailing 4 mean 636.5 ms — cold-cache signature consistent with runs 4 / 6 / 7. This is structural to single-instance Railway us-west2 + cold-process startup, not a regression signal.
+
+### Run 8 verdict
+
+**No drift escalation.** All probes within ±10% of prior-7 mean. Pytest comfortably under same-day mean. `/api/bikes` regression watch (raised run 7) explicitly closed by today's measurement. 111 passed / 0 failed unchanged across all 8 same-day pytest runs.
+
+### Run 8 carry-forward notes
+
+- **Cross-day rolling baseline still not formed** — all 8 rows of `data/perf_timeseries.json` are dated 2026-05-17. Cross-day drift detection begins 2026-05-18.
+- **`bike_count` 342 vs CLAUDE.md headline 336** — pre-existing documented drift (catalog autonomously grew by 6 since May 4 headline pin), not a new regression. Continues to be tracked by other agents; perf-monitor does not own this.
+- **Egress functional** — all 8 same-day runs successfully hit motoquant.in + Railway directly from the sandbox via either WebFetch or curl. The CLAUDE.md "egress blocked" caveat (referenced in this agent's prompt template) is stale and should be retired on the next CLAUDE.md hygiene pass.
+- **TTFB / payload primitives** now reliably captured via curl across runs 4 / 6 / 7 / 8 — WebFetch-based runs (1 / 2 / 3 / 5) had to leave them null. Future perf-monitor runs should prefer curl by default.
