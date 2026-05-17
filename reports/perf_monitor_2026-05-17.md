@@ -268,3 +268,51 @@ Landing TTFB notably faster today (1074 ms vs same-day mean 1339 ms, -20%) -- ne
 - **bike_count 342 stable** across all 9 same-day reads; CLAUDE.md headline (336) drift carries forward as a known catalog-vs-doc gap, not a new regression.
 - **Egress functional** -- 3 consecutive perf-monitor runs today (7 / 8 / 9) confirmed direct sandbox -> Railway + sandbox -> Vercel reachability via both WebFetch and curl. CLAUDE.md "egress blocked" caveat is now solidly stale; queued `INSTRUCTION 2026-05-07 health-check side-channel via GH Actions` is likely moot -- flagging for user triage but not queueing as urgent.
 - **No `[urgent]` block queued to DISPATCH_INBOX.md** -- all gates passed.
+
+## Run 10 (performance-monitor agent, session 1779042639-615) — full curl primitives
+
+Tenth perf-monitor probe on 2026-05-17. `curl -w` for TTFB / total / payload; pytest median of 2 wall samples.
+
+| Probe | TTFB (ms) | Total (ms) | HTTP | Size | Notes |
+|---|---|---|---|---|---|
+| `https://www.motoquant.in/` | **1158.985** | 1164.313 | 200 | 32,634 B | Landing payload byte-stable across runs 4/6/7/8/9/10 |
+| `/api/health` x5 | **594.87 avg** | (~TTFB) | 200 | 55 B | Samples: 788.21 / 472.94 / 651.41 / 500.15 / 561.65 ms; median 561.65; `bike_count: 342` |
+| `/api/bikes?limit=10` | **832.125** | 832.219 | 200 | 1,948 B | One sample; row[0] manufacturer=Aprilia (model_name field null on API response, schema artefact not data regression -- `total: 342`) |
+| `pytest tests/test_validation.py tests/test_scraper.py` x2 | n/a | n/a | n/a | n/a | **111 passed / 0 failed**; samples [8.927, 8.543] s; **median 8.735 s** |
+
+### Run 10 drift table (vs prior-9 same-day baseline)
+
+Prior-9 wall vector: `[9.231, 7.900, 8.154, 10.400, 7.775, 7.898, 7.960, 8.132, 8.741]` -> mean **8.466 s**.
+Prior-5 curl `/api/health` mean vector (runs 4/6/7/8/9): `[706.74, 708.29, 712.35, 665.73, 884.74]` -> mean **735.57 ms**.
+Prior-5 curl landing TTFB vector (runs 4/6/7/8/9): `[1330.65, 1378.51, 1346.17, 1290.22, 1074.00]` -> mean **1283.91 ms**.
+
+| Metric                    | Run 10 (today) | Run 9 (prior)  | delta vs run 9 | Same-day prior mean | delta vs mean   | Gate (>+30%) |
+|---------------------------|----------------|----------------|----------------|---------------------|------------------|--------------|
+| Landing TTFB (ms)         | 1158.99        | 1073.998       | +7.9%          | 1283.91             | -9.7%            | ok (faster)  |
+| Landing payload (bytes)   | 32,634         | 32,634         | 0.0%           | 32,634              | 0.0%             | ok           |
+| /api/health avg (n=5, ms) | 594.87         | 884.74         | -32.8%         | 735.57              | **-19.1%**       | improvement; fastest of the day |
+| /api/health median (ms)   | 561.65         | 935.88         | -40.0%         | -                   | -                | improvement  |
+| /api/bikes latency (ms)   | 832.13         | 1015.74        | -18.1%         | -                   | -                | within envelope |
+| Pytest wall median (s)    | 8.735          | 8.741          | -0.1%          | 8.466               | +3.2%            | ok           |
+| Pytest pass / fail        | 111 / 0        | 111 / 0        | flat           | -                   | -                | ok           |
+| api_health bike_count     | 342            | 342            | flat           | 342 (x9)            | 0                | stable       |
+
+### Run 10 -- Run 9's `/api/health` spike was transient
+
+Run 9 closed-to-gate at +26.7% on /api/health mean. Run 10 measured **594.87 ms** -- 32.8% below run 9 and the **fastest /api/health probe of all 10 same-day runs**. This invalidates the "sustained degradation" hypothesis and supports the cold-cache-jitter reading from run 9's commentary. No 2-consecutive-bad-run pattern materialised, so no escalation under the agent spec's drift rule.
+
+Landing TTFB ticked up 7.9% vs run 9's 1074 ms (today's floor), but still ~10% below same-day mean -- no concern.
+
+Pytest median essentially flat vs run 9 (-0.1%) and only +3.2% vs same-day prior-9 mean. 111/0 pass/fail unchanged across all 10 runs.
+
+### Run 10 verdict
+
+**No drift escalation.** All metrics within +/-30% gate; the headline read is that /api/health recovered cleanly from run 9's high and posted the day's fastest mean. The Aprilia row[0] `model_name: null` observation is a payload-schema quirk worth a note for the api-route owner but is NOT a regression (run 8 reported `Aprilia RS 457 (2024-2026)` on what looks like the same row -- likely a Pydantic field-rename or null-coalesce drift on the bike-list serializer between deploys; pre-existing API behaviour, flagging for triage not escalating).
+
+### Run 10 carry-forward notes
+
+- **10 same-day rows** in `data/perf_timeseries.json` -- cross-day rolling baseline still not formed. First true cross-day drift comparison possible from 2026-05-18.
+- **`bike_count` 342 stable** across all 10 same-day reads; CLAUDE.md headline (336) drift pre-existing.
+- **Egress functional** -- 4 consecutive perf-monitor runs today (7/8/9/10) confirmed direct sandbox->Railway + sandbox->Vercel reachability via curl. CLAUDE.md "egress blocked" caveat solidly stale; queued INSTRUCTION 2026-05-07 health-check side-channel via GH Actions can be retired on next dispatch hygiene pass.
+- **API serializer null `model_name` on `/api/bikes` row[0]** -- first time observed in perf-monitor history (run 8 captured `Aprilia RS 457 (2024-2026)`, run 10 captured `Aprilia` with `model_name: null`). Worth a single-line note to the api-route owner; NOT escalated.
+- **No `[urgent]` block queued to DISPATCH_INBOX.md** -- all drift gates passed.

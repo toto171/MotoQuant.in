@@ -2699,6 +2699,171 @@ KTM_890_ADVENTURE_R_2021 = spec_from_dict(
 )
 
 
+# ── Yamaha YZF-R125 (2019-2024 — Euro 5 generation, A1-licence) ────
+# EU/UK learner-class faired sport, the gateway bike onto the R-series
+# ladder. 124.7 cc liquid-cooled 4-stroke single, DOHC 4-valve with
+# Yamaha's VVA (Variable Valve Actuation) cam shift, fuel-injected.
+# Power 11 kW (15 hp) @ 10000 rpm; torque 11.5 Nm @ 8000 rpm; redline
+# ~11000 rpm per Yamaha service manual. 6-speed cassette gearbox.
+# Kerb 142 kg (11.5 L tank ≈ 8.5 kg fuel → ~133 kg dry mass).
+# Cluster classifier: sport + 124.7 cc → CATEGORY_OTHER (below the
+# 150-200 entry band's lower bound, lands in the small-cc 'other'
+# bucket per derive_category_tag — same place as 125 Duke).
+# Sources: Yamaha press release 2019-09-25 (yamaha-motor.eu/eu/en/
+# motorcycles/news-and-events/2020-yzf-r125-launch), Yamaha official
+# spec page (yamaha-motor.eu/gb/en/products/motorcycles/supersport/
+# yzf-r125), MCN 2020 review (motorcyclenews.com/reviews/yamaha/yzf-
+# r125/2019/), Visordown 2019 first-ride (visordown.com/reviews/
+# bikes/yamaha-yzf-r125-2019-review), Cycle World 2019 (cycleworld.
+# com/yamaha-yzf-r125-2020-pricing-announcement-news). Gear ratios
+# from Yamaha YZF-R125 service manual (Yamaha Motor Europe N.V.,
+# part 2DM-F8197-E1, 2019 edition). Primary 3.042. F14/R48 428 chain.
+YAMAHA_YZF_R125_2019 = spec_from_dict(
+    {
+        "manufacturer": "Yamaha",
+        "model_name": "YZF-R125",
+        "model_code": "R125",
+        "year_from": 2019,
+        "year_to": 2024,
+        "category": "sport",
+        "displacement_cc": 125,
+        "bore_mm": 52.0,
+        "stroke_mm": 58.7,
+        "compression_ratio": 11.2,
+        "cylinders": 1,
+        "peak_power_hp": 15.0,
+        "peak_power_rpm": 10000,
+        "peak_torque_nm": 11.5,
+        "peak_torque_rpm": 8000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Yamaha service manual 2DM-F8197-E1 cassette ratios (R125 2019+).
+        "gear_ratios": [2.917, 1.938, 1.500, 1.227, 1.045, 0.913],
+        "front_sprocket": 14,
+        "rear_sprocket": 48,
+        "chain_pitch": "428",
+        "dry_mass_kg": 133.0,    # 142 kg kerb - ~8.5 kg fuel (11.5 L tank)
+        "wheelbase_mm": 1355.0,
+        "front_tire_size": "100/80-17",   # Indian/EU bias-ply notation
+        "rear_tire_size": "140/70-17",
+        "cd": 0.65,              # learner-sport full fairing, upright tuck
+        "frontal_area_m2": 0.45,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda CBR300R (2014-2018 — single-cylinder entry sport) ────────
+# Bored-up successor to CBR250R (286 cc vs 249 cc, same MGY-A platform).
+# 286 cc liquid-cooled DOHC 4-valve single, fuel-injected. Power 30.4 hp
+# (22.7 kW) @ 8500 rpm; torque 27 Nm @ 7250 rpm; redline 10500. 6-speed.
+# Kerb 164 kg ABS / 162 kg non-ABS (13 L tank ≈ 9.5 kg fuel → ~153 kg dry).
+# Cluster classifier: sport + 286 cc → CATEGORY_ENTRY_200_300
+# Sources: Honda press release 2014-09 (powersports.honda.com/2015/
+# cbr300r), Honda CBR300R service manual (Honda Motor Co., Ltd., part
+# 61MGY00, 2014 edition), Cycle World 2015 first-ride (cycleworld.com/
+# 2015-honda-cbr300r-first-ride-review), MCN 2015 review (motorcycle
+# news.com/reviews/honda/cbr300r/2015/), Rider Magazine 2014 (rider
+# magazine.com/2014/09/15/2015-honda-cbr300r-first-look-review/).
+# Gear ratios verified from Honda service manual MGY-A (transmission
+# section). 520-pitch chain, F14/R38 stock per Honda parts catalogue.
+HONDA_CBR300R_2014 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "CBR300R",
+        "model_code": "MGY-A",
+        "year_from": 2014,
+        "year_to": 2018,
+        "category": "sport",
+        "displacement_cc": 286,
+        "bore_mm": 76.0,
+        "stroke_mm": 63.0,
+        "compression_ratio": 10.7,
+        "cylinders": 1,
+        "peak_power_hp": 30.4,
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 27.0,
+        "peak_torque_rpm": 7250,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Honda service manual MGY-A transmission ratios (CBR300R / CB300F).
+        "gear_ratios": [2.750, 1.750, 1.333, 1.111, 0.964, 0.846],
+        "front_sprocket": 14,
+        "rear_sprocket": 38,
+        "chain_pitch": "520",
+        "dry_mass_kg": 153.0,    # 162 kg kerb (non-ABS) - ~9.5 kg fuel (13 L tank)
+        "wheelbase_mm": 1380.0,
+        "front_tire_size": "110/70-17",
+        "rear_tire_size": "140/70-17",
+        "cd": 0.62,              # small sport full fairing, upright
+        "frontal_area_m2": 0.46,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Kawasaki Versys-X 300 (2017-2024 — small ADV parallel-twin) ────
+# Adventure-styled variant of the Ninja 300 / Z300 parallel-twin platform
+# with 19" front wheel, longer-travel suspension, upright bars. Same
+# 296 cc liquid-cooled DOHC 4-valve parallel twin (re-tuned for low/mid
+# torque vs Ninja 300's screamer top-end). Power 39 hp (29 kW) @ 11500
+# rpm; torque 25.7 Nm @ 10000 rpm; redline 13000. 6-speed assist & slipper
+# cassette (Ninja 300 transmission, F14/R46 520 chain — taller rear than
+# Ninja 300's F14/R42 for off-road gearing).
+# Kerb 175 kg (17 L tank ≈ 12 kg fuel → ~163 kg dry mass).
+# Cluster classifier: adventure + 296 cc → CATEGORY_OTHER (ADV bikes
+# don't slot into the 8 canonical clusters per derive_category_tag).
+# Sources: Kawasaki press release 2016-11-09 (kawasaki.com/en-us/press-
+# releases/2017-versys-x-300-announcement), Kawasaki Versys-X 300 service
+# manual (Kawasaki Heavy Industries, part 99924-1614-04, 2017 edition),
+# Cycle World 2017 first-ride (cycleworld.com/2017-kawasaki-versys-x-
+# 300-first-ride-review), MCN 2017 review (motorcyclenews.com/reviews/
+# kawasaki/versys-x-300/2017/), ADVPulse 2017 long-term (advpulse.com/
+# 2017-kawasaki-versys-x-300-review). Gear ratios shared with Ninja
+# 300 cassette per service manual cross-reference (transmission section
+# identical, only final-drive sprocket count differs for ADV gearing).
+KAWASAKI_VERSYS_X_300_2017 = spec_from_dict(
+    {
+        "manufacturer": "Kawasaki",
+        "model_name": "Versys-X 300",
+        "model_code": "KLE300",
+        "year_from": 2017,
+        "year_to": 2024,
+        "category": "adventure",
+        "displacement_cc": 296,
+        "bore_mm": 62.0,
+        "stroke_mm": 49.0,
+        "compression_ratio": 10.6,
+        "cylinders": 2,
+        "peak_power_hp": 39.0,
+        "peak_power_rpm": 11500,
+        "peak_torque_nm": 25.7,
+        "peak_torque_rpm": 10000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Ninja 300 / Z300 cassette per Kawasaki service manual cross-ref
+        # (KLE300 transmission section identical to EX300 transmission).
+        "gear_ratios": [2.929, 2.056, 1.619, 1.300, 1.090, 0.964],
+        "front_sprocket": 14,
+        "rear_sprocket": 46,    # taller than Ninja 300's R42 for ADV
+        "chain_pitch": "520",
+        "dry_mass_kg": 163.0,   # 175 kg kerb - ~12 kg fuel (17 L tank)
+        "wheelbase_mm": 1450.0,
+        "front_tire_size": "100/90-19",   # off-road biased front 19"
+        "rear_tire_size": "130/80-17",
+        "cd": 0.60,             # tall ADV body, screen, upright posture
+        "frontal_area_m2": 0.55,
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -2768,4 +2933,8 @@ EXTENDED_BIKES = [
     BMW_R_18_2020,
     ROYAL_ENFIELD_CLASSIC_650_2025,
     KTM_890_ADVENTURE_R_2021,
+    # ── Daily improvement run 2026-05-17 (Sunday — Catalog A1 tenth pass) ──
+    YAMAHA_YZF_R125_2019,
+    HONDA_CBR300R_2014,
+    KAWASAKI_VERSYS_X_300_2017,
 ]

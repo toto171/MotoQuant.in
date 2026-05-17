@@ -257,5 +257,41 @@
     "tests_failed": 0,
     "network_blocked": false,
     "notes": "Run 9 of 2026-05-17 (performance-monitor agent). Egress functional via curl (CLAUDE.md egress-blocked caveat remains stale; suggests the queued GH-Actions side-channel INSTRUCTION 2026-05-07 may now be moot). Pytest median 8.741s of 2 samples [8.856, 8.625] vs same-day prior mean 8.431s = +3.7% (within +/-30% drift gate). API /health 5-sample mean 884.74ms (median 935.88ms) vs same-day prior mean 698.28ms = +26.7%. Landing TTFB 1074ms (-21% vs prior ~1339ms same-day mean, improvement, not escalated). /api/bikes 1016ms (+30-ish% vs prior 478-823ms range; single-sample, treating as noise). bike_count 342 stable across all 9 runs today; CLAUDE.md headline 336 drift pre-existing. 111/0 pass/fail stable. NO drift escalation. Cross-day baseline still not formed (all 9 rows are 2026-05-17); first cross-day comparison possible 2026-05-18."
+  },
+  {
+    "date": "2026-05-17",
+    "run_index": 10,
+    "agent": "performance-monitor",
+    "session_id": "1779042639-615",
+    "landing_ttfb_ms": 1158.985,
+    "landing_total_ms": 1164.313,
+    "landing_size_bytes": 32634,
+    "landing_http": 200,
+    "api_health_ms_avg": 594.87,
+    "api_health_ms_median": 561.646,
+    "api_health_ms_samples": [
+      788.207,
+      472.943,
+      651.405,
+      500.150,
+      561.646
+    ],
+    "api_health_http": 200,
+    "api_health_bike_count": 342,
+    "api_bikes_ms": 832.125,
+    "api_bikes_total_ms": 832.219,
+    "api_bikes_http": 200,
+    "api_bikes_size_bytes": 1948,
+    "api_bikes_count": 10,
+    "api_bikes_first": "Aprilia (model_name null in row[0] payload schema)",
+    "test_walltime_s": 8.735,
+    "test_walltime_samples_s": [
+      8.927,
+      8.543
+    ],
+    "tests_passed": 111,
+    "tests_failed": 0,
+    "network_blocked": false,
+    "notes": "Run 10 of 2026-05-17 (performance-monitor agent, session 1779042639-615). Egress functional. /api/health 5-sample mean 594.87ms (median 561.65ms) vs same-day prior-curl mean (runs 4/6/7/8/9: 706.74/708.29/712.35/665.73/884.74) of 735.57ms = -19.1% (improvement, fastest of the day). Run 9's +26.7% spike did NOT persist -- recovered cleanly, supporting the cold-cache jitter hypothesis over sustained degradation. Landing TTFB 1158.99ms vs same-day prior mean ~1283.91ms = -9.7% (within noise). /api/bikes 832.13ms within same-day envelope [478-1016ms]. Pytest median 8.735s of 2 samples [8.927, 8.543] vs prior-9 same-day mean 8.466s = +3.2% (within noise). 111/0 pass/fail stable. bike_count 342 stable across all 10 runs today. NO drift escalation. Cross-day baseline still not formed (10 rows all 2026-05-17); first true cross-day drift comparison from 2026-05-18 onward."
   }
 ]
