@@ -32,5 +32,24 @@
     "test_wallclock_s": 7.90,
     "tests_passed": 111,
     "notes": "Second perf-monitor probe on 2026-05-17. All three WebFetch probes succeeded on first attempt — no retries needed. Bike count 342 unchanged from earlier run today. Test wall-clock 7.90s vs prior 9.231s on same date — -14%, within noise (drift gate is +30% per agent spec). Two consecutive datapoints now exist on this date but the 7-entry rolling window required for drift escalation is not yet populated. TTFB still not exposed by WebFetch tool."
+  },
+  {
+    "date": "2026-05-17",
+    "run_index": 3,
+    "web_ttfb_ms": null,
+    "web_payload_bytes": null,
+    "web_landing_status": "ok",
+    "web_landing_title": "MotoQuant Pro — Motorcycle Quarter-Mile Drag Racing Simulator | ET Predictor & Build Optimizer",
+    "api_health_latency_ms": null,
+    "api_health_status": "ok",
+    "api_health_response": {"status": "ok", "database": "connected", "bike_count": 342},
+    "api_bikes_latency_ms": null,
+    "api_bikes_status": "ok",
+    "api_bikes_count": 10,
+    "api_bikes_first": "Aprilia RS 457 (2024-2026)",
+    "pytest_validation_scraper_s": 8.154,
+    "tests_passed": 111,
+    "network_blocked": false,
+    "notes": "Third perf-monitor probe on 2026-05-17 (agent A10). All three WebFetch probes succeeded — network NOT blocked despite CLAUDE.md egress note. Pytest 8.154s vs same-day [9.231, 7.90] — mean 8.428s, today's run -3.2% from mean, well within noise. WebFetch tool does not expose TTFB or payload size primitives, so those fields stay null until a lower-level probe lands. 3 same-day data points now; 7-entry rolling baseline still not formed — drift escalation not triggered (would require 2 consecutive >+30% deltas anyway). Bike count 342 stable across all 3 runs today."
   }
 ]

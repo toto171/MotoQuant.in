@@ -319,7 +319,22 @@ Source: `reports/self_review_2026-05-16_followup.md` Section A.
 
 ---
 
-## INSTRUCTION — 2026-05-16 — [self-review] postflight should update STATUS.md timestamps
+## DONE — 2026-05-17 — [self-review] postflight updates STATUS.md timestamps
+[opportunistic — resolved]
+
+**Resolution:** session 1778992230-620 (2026-05-17, Path C of the META INSTRUCTION at line 427).
+
+- New script `scripts/stamp_status_timestamps.py` — stamps both `_LAST_RUN_JSON._updated` and the top-level `last_run:` placeholder with the current UTC ISO timestamp. Idempotent. Exits non-zero on missing/malformed STATUS.md.
+- Wired into `scripts/session_postflight.sh::main()` as `stamp_status_timestamps()` between `headline_sync_gate` and `stage_files`. Auto-appends `STATUS.md` to `COMMIT_FILES` (de-duplicated) so the bump rides the same commit — no separate chore commit.
+- Regression suite: `tests/test_status_timestamp_stamp.py` — 7 tests covering null→stamp, prior-timestamp overwrite, idempotency with same `--now`, missing-file error, malformed-STATUS error, the public `stamp()` function's change-flag return, and a smoke test against the live STATUS.md so format drift is caught immediately. All 7 green.
+- Unblocks INBOX:341 (GH-Actions heartbeat side-channel) Section A.4 — the staleness check now has a non-null timestamp to read.
+
+Source: `reports/self_review_2026-05-16_followup.md` Section B.2 + B.3.
+
+---
+
+## Original instruction (preserved for traceability)
+
 [opportunistic]
 
 **Attribution:** self-review M1 2026-05-16 follow-up Section B.2 + B.3. The `_LAST_RUN_JSON._updated` field at STATUS.md line 103 and the top-level `last_run:` placeholder at line 123 are both `null` even after the morning M1 session successfully pushed. The postflight script writes per-agent `date` and `outcome` fields under `_LAST_RUN_JSON.<agent_name>` but does NOT write the top-level `_updated` field nor the `last_run:` line.
@@ -453,6 +468,18 @@ Implementing INBOX:341 before INBOX:322 + INBOX:376 produces false-positive aler
 **Done when:** any one of Paths A/B/C is chosen and at least 1 of the 14 listed INSTRUCTIONs moves to `## DONE` with a citing commit SHA. M3 commits to NOT queueing any more `[self-review]`-tagged items until backlog drops below 8.
 
 **Cooldown note:** per `scripts/agents/self-review.md:64`, no further self-review runs before **2026-05-22**.
+
+### RESPONDED — 2026-05-17 — session 1778992230-620 — Path C chosen
+
+The scheduler picked `self-review` for today's dispatch despite the 5-day cooldown rule + this META's own cooldown lockout. Session honoured the cooldown and skipped `self-review`. Instead:
+
+- **Path C selected** (line-number priority list, single-cycle bypass of agent infrastructure).
+- **INBOX:322 implemented and moved to ## DONE** above (postflight `_updated` stamp + 7-test regression suite + idempotency + smoke against live STATUS.md).
+- **INBOX:376 deferred** to the next session that has time for the investigation: the root-cause is a heredoc-quoting interaction in `append_outbox()` that needs reproduction first, not a simple sed swap. Out of session budget today after running 2 agents + 1 manual fix.
+- **No new `[self-review]`-tagged items queued** this session, per M3's stated commitment.
+- Catalog-expansion + performance-monitor both ran successfully alongside this fix — net session output: +3 bikes, +1 perf data row, +1 INBOX item closed.
+
+Backlog now: 13 pending (was 14). One down. Path A (build `inbox-implementer`) remains the better structural fix — defer to next non-cooldown self-review-eligible window.
 
 ---
 

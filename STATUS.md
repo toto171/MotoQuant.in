@@ -125,7 +125,7 @@ last_updated: <!-- AUTO-UPDATED -->
 <!-- LAST_RUN_JSON
 {
   "_schema": 1,
-  "_updated": null,
+  "_updated": "2026-05-17T04:43:26Z",
   "catalog-expansion":      { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "physics-calibration":    { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "benchmark-import":       { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
@@ -145,4 +145,4 @@ last_updated: <!-- AUTO-UPDATED -->
 }
 -->
 
-last_run: <!-- AUTO-UPDATED — used by catchup_detect to decide if we need recovery mode -->
+last_run: 2026-05-17T04:43:26Z  <!-- AUTO-UPDATED — used by catchup_detect to decide if we need recovery mode -->

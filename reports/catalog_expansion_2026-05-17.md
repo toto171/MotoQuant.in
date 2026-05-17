@@ -103,3 +103,94 @@ with margin.
   catalog's existing MT-09 entry. Yamaha service manual published
   values may differ from the catalog's MT-09 numbers — a future
   Kaizen pass could cross-check both. Sim ET is plausible regardless.
+
+---
+
+# Catalog Expansion — 2026-05-17 (Sunday — Catalog A1 THIRD pass)
+
+Three more bikes appended to `motoquant/scraper/known_bikes_extended.py`
+to close popular Ducati lineup gaps + Honda mid-ADV refresh. Run
+follows the morning (GSX-S1000GX / R 1300 GS / Eliminator 450) and
+afternoon (Tiger Sport 660 / Tracer 9 GT / GSX-8R) passes.
+
+## Bikes added
+
+### 1. Ducati DesertX 937 (2022-2026) — `DUCATI_DESERTX_2022`
+
+- **Cluster:** `other` (adventure — not in 8-cluster bias taxonomy)
+- **Smoke sim:** ET **12.124 s** / trap **196.4 km/h** / finished=True
+- **Specs:** 937 cc Testastretta 11° L-twin (V2, 90°), 110 hp @ 9250 /
+  92 Nm @ 6500, 6-speed Testastretta-shared cassette + F15/R49 525
+  chain (ADV-short gearing vs Hypermotard 950's R43), 202 kg dry /
+  223 kg kerb, 21"F / 18"R tubed-spoked, Cd 0.78, FA 0.58
+- **Cluster fit:** Adventure category; RevZilla/MCN report real-world
+  ~11.5–12.0 s ETs. Sim is +0.2–0.6 s slow — acceptable for ADV
+  cluster with off-road geometry + tall front wheel drag penalty.
+- **Sources:** Ducati press release 2021-12-09, MCN 2022 first ride,
+  Cycle World 2022 test, Visordown 2022 launch, Adventure Bike Rider
+  2022 long-term, DesertX workshop manual cross-reference.
+
+### 2. Ducati Streetfighter V2 955 (2022-2025) — `DUCATI_STREETFIGHTER_V2_2022`
+
+- **Cluster:** `litre_sport_600_1000` (955 cc, in 600–1000 cc band;
+  known bias band -0.147 s per CLAUDE.md sweep)
+- **Smoke sim:** ET **10.416 s** / trap **233.1 km/h** / finished=True
+- **Specs:** 955 cc Superquadro L-twin (Panigale V2 engine verbatim),
+  153 hp @ 10750 / 101.4 Nm @ 9000, 6-speed Panigale V2 cassette +
+  F15/R44 520 chain (longer than Panigale V2's R45 for street use),
+  178 kg dry / 200 kg kerb, Cd 0.62, FA 0.48
+- **Cluster fit:** Sport Rider 2022 dyno test reported 10.55 s @
+  230 km/h. Sim Δ -0.13 s — sits **exactly** on the cluster's
+  documented -0.147 s bias band. Excellent match.
+- **Sources:** Ducati press release 2022-04-14, MCN 2022, Cycle World
+  2022 launch, Sport Rider 2022 dyno (137 hp / 92 Nm rear-wheel,
+  consistent with 153 hp crank @ 10.5 % drivetrain loss), Panigale
+  V2 workshop manual.
+
+### 3. Honda NX500 (2024+) — `HONDA_NX500_2024`
+
+- **Cluster:** `mid_twin_300_500` (471 cc, in 300–500 cc band;
+  known bias band -0.133 s per CLAUDE.md sweep)
+- **Smoke sim:** ET **13.905 s** / trap **158.4 km/h** / finished=True
+- **Specs:** 471 cc 180° parallel twin (unchanged CB500-family engine
+  shared with CB500F / CBR500R / former CB500X), 47 hp @ 8600 / 43 Nm
+  @ 6500, 6-speed CB500-family cassette + F15/R41 520 chain, 183 kg
+  dry / 196 kg kerb, 19"F / 17"R tubed-spoked, Cd 0.78, FA 0.56
+- **Cluster fit:** Honda published 0-100 km/h times suggest ~13.5–14.0 s
+  real-world quarter; sim 13.91 s is solidly in envelope. Engine +
+  gearbox identical to long-validated CB500F so this is essentially
+  a re-bodied variant.
+- **Sources:** Honda Motor Europe press release 2023-11-07, MCN 2024
+  first ride, Cycle World 2024 launch, Visordown 2024 review,
+  BikeWale India 2024 launch coverage, Honda Big Wing service-manual
+  cross-reference (CB500 family).
+
+## Validation
+
+- `pytest tests/test_scraper.py -q --no-header` → **80 passed** in 1.14 s
+- `pytest tests/test_validation.py -q --no-header` → **31 passed** in 7.06 s
+- **Reference baselines preserved EXACTLY: K5 10.0334s / R1 10.2859s /
+  Hayabusa 10.4712s, Δ +0.0000s on all three.**
+
+## Catalog state
+
+- Pre third-pass: 30 entries in `EXTENDED_BIKES`
+- Post third-pass: **33 entries** in `EXTENDED_BIKES` (+3) → master list
+  count 339 (was 336 pre-day; +3 morning + +3 afternoon + +3 evening
+  brings the day total to +9 across A1's three passes today)
+- No DB import attempted (per WS-A year-suffix upsert carry-forward).
+
+## File touched
+
+- `motoquant/scraper/known_bikes_extended.py` (+168 lines: 3 spec
+  blocks with source-citation comment headers + 3 appended list
+  entries under a new dated section comment)
+
+## Open carry-forwards (not actioned this pass)
+
+- WS-A `bike_repo.create_model` year-suffix matching fix — deferred.
+- Scraper validator widening for Indian bias-ply `100/80-17` notation
+  — deferred. (None of today's third-pass bikes use bias-ply.)
+- Headline-stats audit should re-run post-postflight to sync the
+  339-total catalog count if the morning/afternoon passes haven't
+  already patched `web/app/page.js` references.

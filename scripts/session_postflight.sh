@@ -165,6 +165,25 @@ except Exception as exc:
   log "COMMIT_FILES updated → ${COMMIT_FILES}"
 }
 
+# ─── 2.7. STATUS.md timestamp stamp (INBOX:322 — self-review M1 Sec B.2/B.3)
+# Writes the current UTC ISO timestamp into STATUS.md's "_LAST_RUN_JSON._updated"
+# field and the top-level "last_run:" placeholder. Auto-appends STATUS.md to
+# COMMIT_FILES so the bump rides the same commit as the agent work (no
+# separate chore commit). Runs even on no-op sessions — the GH-Actions
+# heartbeat side-channel relies on _updated being non-null to detect dark
+# windows.
+stamp_status_timestamps() {
+  log "stamping STATUS.md _updated + last_run (INBOX:322)..."
+  if ! python3 scripts/stamp_status_timestamps.py STATUS.md 2>&1 | tail -3; then
+    warn "STATUS.md stamp failed — continuing (non-fatal)"
+    return 0
+  fi
+  if [[ " ${COMMIT_FILES} " != *" STATUS.md "* ]]; then
+    COMMIT_FILES="${COMMIT_FILES} STATUS.md"
+    log "STATUS.md appended to COMMIT_FILES"
+  fi
+}
+
 # ─── 3. Stage explicit files (NEVER git add -A) ──────────────────────────
 stage_files() {
   if [[ -z "${COMMIT_FILES}" ]]; then
@@ -331,6 +350,7 @@ main() {
   verify_baselines
   run_focused_tests
   headline_sync_gate
+  stamp_status_timestamps
 
   if stage_files; then
     do_commit

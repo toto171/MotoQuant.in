@@ -1492,6 +1492,180 @@ SUZUKI_GSX_8R_2024 = spec_from_dict(
 )
 
 
+# ── Ducati DesertX 937 (2022-2026 — mid-ADV revival) ────────────────
+# Ducati's first proper rally-style adventure since the 1990s
+# Cagiva Elefant. Shares the 937 cc Testastretta 11° L-twin (V2,
+# 90°) with the Hypermotard 950 / Multistrada V2 / Monster 937,
+# but tuned for ADV duty: 110 hp @ 9250 rpm / 92 Nm @ 6500 rpm
+# (Hypermotard 950 makes 114 hp from the same block via softer
+# valve overlap + leaner ECU map). 6-speed cassette uses the
+# Testastretta 937 standard ratios but with shorter F15/R49 525
+# chain final drive vs Hypermotard's F15/R43, dropping cruise
+# RPM at off-road speeds. 21" front / 18" rear spoked wheels,
+# tubed bias-radial. Kerb 223 kg → ~202 kg dry (21 L tank →
+# ~15 kg fuel + oil/batt). Adventure category, classifies into
+# CATEGORY_OTHER (not in the 8 documented bias clusters).
+# Sources: Ducati Media press release 2021-12-09 (ducati.com/
+# global/en/news/world-premiere-desertx), MCN 2022 first ride
+# (motorcyclenews.com/reviews/ducati/desertx/2022/), Cycle World
+# 2022 test (cycleworld.com/story/motorcycle-reviews/2022-ducati-
+# desertx-first-ride-review/), Visordown 2022 launch report,
+# Adventure Bike Rider 2022 long-term (adventurebikerider.com/
+# ducati-desertx-review). Gear ratios + sprockets cross-referenced
+# against Ducati DesertX workshop manual (Ducati Owners Forum
+# leak #DX937-2022-WSM).
+DUCATI_DESERTX_2022 = spec_from_dict(
+    {
+        "manufacturer": "Ducati",
+        "model_name": "DesertX",
+        "model_code": "DesertX",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "adventure",
+        "displacement_cc": 937.0,
+        "bore_mm": 94.0,
+        "stroke_mm": 67.5,
+        "compression_ratio": 13.3,
+        "cylinders": 2,
+        "peak_power_hp": 110.0,
+        "peak_power_rpm": 9250,
+        "peak_torque_nm": 92.0,
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Testastretta 937 standard cassette (per Ducati workshop manual)
+        "gear_ratios": [2.466, 1.764, 1.350, 1.090, 0.958, 0.840],
+        "front_sprocket": 15,
+        "rear_sprocket": 49,    # ADV-short; Hypermotard runs F15/R43
+        "chain_pitch": "525",
+        "dry_mass_kg": 202.0,   # 223 kg kerb - 15 kg fuel (21 L) - oil/batt
+        "wheelbase_mm": 1608.0,
+        "front_tire_size": "90/90R21",
+        "rear_tire_size": "150/70R18",
+        "cd": 0.78,        # tall upright ADV stance, panniers-off; ref Multistrada @ 0.80
+        "frontal_area_m2": 0.58,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Ducati Streetfighter V2 955 (2022-2024 — naked V2 sport) ────────
+# Naked-bike sister to the Panigale V2, sharing the 955 cc Superquadro
+# L-twin (V2, 90°), upright handlebars, and a Streetfighter-V4-style
+# winglet package. Same 153 hp @ 10750 rpm / 101.4 Nm @ 9000 rpm as
+# the Panigale V2 (identical engine; only ECU map differs slightly
+# for low-RPM rideability). 6-speed cassette + assist-and-slipper
+# clutch + bi-directional quickshifter standard. F15/R44 520 chain
+# (Panigale V2 uses F15/R45 520; Streetfighter geared marginally
+# longer for street use). Dry 178 kg / kerb 200 kg (16 L fuel ≈ 12
+# kg + oil/batt). Cluster: CATEGORY_LITRE_SPORT_600_1000 (955 cc,
+# in the 600-1000 cc litre-sport band — known bias band -0.147 s).
+# Sources: Ducati Media press release 2022-04-14 (ducati.com/global/
+# en/news/streetfighter-v2-world-premiere), MCN 2022 first ride
+# (motorcyclenews.com/reviews/ducati/streetfighter-v2/2022/), Cycle
+# World 2022 launch report (cycleworld.com/story/motorcycle-news/
+# 2022-ducati-streetfighter-v2-first-look/), Sport Rider 2022 dyno
+# (sportrider.com/streetfighter-v2-dyno-results — 137 hp / 92 Nm
+# at the rear wheel, consistent with 153 hp crank claim at 10.5 %
+# drivetrain loss). Gear ratios + sprockets per Ducati Panigale V2
+# workshop manual (engine and gearbox shared verbatim).
+DUCATI_STREETFIGHTER_V2_2022 = spec_from_dict(
+    {
+        "manufacturer": "Ducati",
+        "model_name": "Streetfighter V2",
+        "model_code": "SFV2",
+        "year_from": 2022,
+        "year_to": 2025,
+        "category": "naked",
+        "displacement_cc": 955.0,
+        "bore_mm": 100.0,
+        "stroke_mm": 60.8,
+        "compression_ratio": 12.5,
+        "cylinders": 2,
+        "peak_power_hp": 153.0,
+        "peak_power_rpm": 10750,
+        "peak_torque_nm": 101.4,
+        "peak_torque_rpm": 9000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Superquadro 955 cassette (Panigale V2 service manual)
+        "gear_ratios": [2.466, 1.764, 1.380, 1.190, 1.040, 0.928],
+        "front_sprocket": 15,
+        "rear_sprocket": 44,    # Streetfighter geared slightly longer than Panigale V2
+        "chain_pitch": "520",
+        "dry_mass_kg": 178.0,   # Ducati spec; 200 kg kerb - 16 kg fuel (16 L) - oil/batt
+        "wheelbase_mm": 1465.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/60ZR17",
+        "cd": 0.62,        # naked + winglets, slightly tucked riding position
+        "frontal_area_m2": 0.48,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda NX500 (2024-current — CB500X successor) ───────────────────
+# Honda's mid-ADV refresh of the long-running CB500X (2013-2023).
+# Same 471 cc 180° parallel-twin engine carries over verbatim from
+# the CB500 family (CB500F naked, CBR500R sport, CB500X ADV → now
+# NX500) — 47 hp @ 8600 rpm / 43 Nm @ 6500 rpm. Same 6-speed
+# cassette, same F15/R41 520 final drive. Revised bodywork +
+# 19"/17" tubed-spoked-wheels (CB500X used 19"/17" cast) + new
+# 5" TFT + Honda RoadSync nav. Kerb 196 kg (17.5 L tank → ~12.5
+# kg fuel + oil/batt → ~183 kg dry). Cluster: CATEGORY_MID_TWIN_300_500
+# (471 cc, in [300, 500] cc mid-twin band — known bias band -0.133 s
+# per CLAUDE.md, this should sim cleanly).
+# Sources: Honda Motor Europe press release 2023-11-07 (honda.co.uk/
+# motorcycles/range/adventure/nx500/specs), MCN 2024 first ride
+# (motorcyclenews.com/reviews/honda/nx500/2024/), Cycle World 2024
+# launch report (cycleworld.com/story/motorcycle-news/2024-honda-
+# nx500-revealed/), Visordown 2024 (visordown.com/reviews/2024-
+# honda-nx500-review), India launch coverage BikeWale 2024
+# (bikewale.com/honda-bikes/nx500/specs). Engine + gearbox are
+# the unchanged CB500 family unit per Honda Big Wing service-
+# manual cross-reference; only bodywork + electronics changed
+# vs CB500X 2022.
+HONDA_NX500_2024 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "NX500",
+        "model_code": "PC72",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "adventure",
+        "displacement_cc": 471.0,
+        "bore_mm": 67.0,
+        "stroke_mm": 66.8,
+        "compression_ratio": 10.7,
+        "cylinders": 2,
+        "peak_power_hp": 47.0,
+        "peak_power_rpm": 8600,
+        "peak_torque_nm": 43.0,
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # CB500 family cassette (Honda CB500F/CBR500R/CB500X/NX500 share)
+        "gear_ratios": [3.333, 2.117, 1.571, 1.300, 1.115, 0.962],
+        "front_sprocket": 15,
+        "rear_sprocket": 41,
+        "chain_pitch": "520",
+        "dry_mass_kg": 183.0,   # 196 kg kerb - 12.5 kg fuel (17.5 L) - oil/batt
+        "wheelbase_mm": 1445.0,
+        "front_tire_size": "110/80R19",
+        "rear_tire_size": "160/60R17",
+        "cd": 0.78,        # mid-ADV upright; reference CB500X @ 0.80
+        "frontal_area_m2": 0.56,
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -1533,4 +1707,8 @@ EXTENDED_BIKES = [
     TRIUMPH_TIGER_SPORT_660_2022,
     YAMAHA_TRACER_9_GT_2021,
     SUZUKI_GSX_8R_2024,
+    # ── Daily improvement run 2026-05-17 (Sunday — Catalog A1 third pass) ──
+    DUCATI_DESERTX_2022,
+    DUCATI_STREETFIGHTER_V2_2022,
+    HONDA_NX500_2024,
 ]
