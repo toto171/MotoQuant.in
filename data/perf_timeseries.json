@@ -19,5 +19,18 @@
     "surrogate_per_call_ms": null,
     "surrogate_pickle_present": false,
     "notes": "Inaugural run; no rolling-avg baseline yet. WebFetch egress worked today (Railway + Vercel reachable from sandbox), contradicting prior CLAUDE.md egress-blocked note. TTFB not exposed by WebFetch tool; payload + status captured instead. Surrogate pickles absent from this clone (surrogate_dnn.pkl + surrogate.pkl both missing). Baseline ETs match locked references exactly."
+  },
+  {
+    "date": "2026-05-17",
+    "run_index": 2,
+    "motoquant_in_status": "ok",
+    "api_health_status": "ok",
+    "api_health_response": {"status": "ok", "database": "connected", "bike_count": 342},
+    "api_bikes_status": "ok",
+    "api_bikes_count": 10,
+    "api_bikes_first": "Aprilia RS 457 (2024-2026)",
+    "test_wallclock_s": 7.90,
+    "tests_passed": 111,
+    "notes": "Second perf-monitor probe on 2026-05-17. All three WebFetch probes succeeded on first attempt — no retries needed. Bike count 342 unchanged from earlier run today. Test wall-clock 7.90s vs prior 9.231s on same date — -14%, within noise (drift gate is +30% per agent spec). Two consecutive datapoints now exist on this date but the 7-entry rolling window required for drift escalation is not yet populated. TTFB still not exposed by WebFetch tool."
   }
 ]

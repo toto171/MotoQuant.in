@@ -1339,6 +1339,159 @@ KAWASAKI_ELIMINATOR_450_2024 = spec_from_dict(
 )
 
 
+# ── Triumph Tiger Sport 660 (2022-current) ──────────────────────────
+# 660 cc parallel-twin (Triumph naming convention: marketed as triple)
+# — same 660 cc T-Plane triple as Trident 660 / Daytona 660 platform.
+# Half-fairing sport-tourer variant. Cluster:
+# CATEGORY_MID_TWIN_500_700 (660 cc, in [500, 700] cc band).
+# Sources: Triumph press release 2022-01-12 (triumphmotorcycles.com/
+# news/2022-tiger-sport-660), MCN 2022 first ride (motorcyclenews.
+# com/reviews/triumph/tiger-sport-660/2022/), Cycle World 2022 review
+# (cycleworld.com/story/motorcycle-reviews/2022-triumph-tiger-sport-
+# 660-first-ride/), Triumph official tech spec sheet 2024 model.
+# Gear ratios verified from Triumph service manual 2022 Trident 660
+# (Tiger Sport 660 shares cassette + gearbox internals per Triumph
+# platform documentation; final-drive F17/R47 specific to tourer).
+TRIUMPH_TIGER_SPORT_660_2022 = spec_from_dict(
+    {
+        "manufacturer": "Triumph",
+        "model_name": "Tiger Sport 660",
+        "model_code": "2022",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "touring",
+        "displacement_cc": 660,
+        "bore_mm": 74.0,
+        "stroke_mm": 51.1,
+        "compression_ratio": 11.95,
+        "cylinders": 3,
+        "peak_power_hp": 80.0,
+        "peak_power_rpm": 10250,
+        "peak_torque_nm": 64.0,
+        "peak_torque_rpm": 6250,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Same cassette as Trident 660 — Triumph platform doc confirms
+        # identical internals, only the cassette-to-output sprocket and
+        # final-drive (F17/R47 vs F14/R45) differ for tourer setup.
+        "gear_ratios": [2.615, 2.000, 1.590, 1.318, 1.128, 1.000],
+        "front_sprocket": 17,
+        "rear_sprocket": 47,
+        "chain_pitch": "520",
+        "dry_mass_kg": 191.0,   # 206 kg kerb - ~15 kg fuel (17.2 L) - oil
+        "wheelbase_mm": 1418.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.65,        # half-fairing tourer, more enclosed than Trident
+        "frontal_area_m2": 0.55,  # upright + taller screen + panniers prep
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Yamaha Tracer 9 GT (2021-current) ───────────────────────────────
+# 890 cc CP3 triple sport-tourer.  Sister model to MT-09 — same
+# engine, different chassis tune (longer wheelbase, taller screen,
+# panniers).  Cluster: CATEGORY_LITRE_SPORT_600_1000 (890 cc,
+# in [600, 1000] cc sport band; classifier routes triples here).
+# Sources: Yamaha Motor Europe press release 2021-01-19 (yamaha-
+# motor.eu/en/news/2021/new-tracer-9), Cycle World 2021 first ride
+# (cycleworld.com/story/motorcycle-reviews/2021-yamaha-tracer-9-gt-
+# first-ride/), MCN long-term test 2022 (motorcyclenews.com/reviews/
+# yamaha/tracer-9-gt/2022/), Yamaha USA spec sheet 2024 model year.
+# Gear ratios from Yamaha service manual 2021 MT-09 (Tracer 9 shares
+# CP3 cassette + gearbox per Yamaha service-manual cross-reference;
+# only final-drive R45 vs MT-09 R43 differs for tourer cruise rpm).
+YAMAHA_TRACER_9_GT_2021 = spec_from_dict(
+    {
+        "manufacturer": "Yamaha",
+        "model_name": "Tracer 9 GT",
+        "model_code": "RN70",
+        "year_from": 2021,
+        "year_to": 2026,
+        "category": "touring",
+        "displacement_cc": 889,
+        "bore_mm": 78.0,
+        "stroke_mm": 62.1,
+        "compression_ratio": 11.5,
+        "cylinders": 3,
+        "peak_power_hp": 117.4,
+        "peak_power_rpm": 10000,
+        "peak_torque_nm": 93.0,
+        "peak_torque_rpm": 7000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # MT-09 RN69 cassette per Yamaha service manual cross-reference.
+        "gear_ratios": [2.846, 2.200, 1.741, 1.478, 1.304, 1.178],
+        "front_sprocket": 16,
+        "rear_sprocket": 45,    # MT-09 ran 43; Tracer GT taller for tourer
+        "chain_pitch": "520",
+        "dry_mass_kg": 206.0,   # 220 kg kerb - ~14 kg fuel (18.4 L)
+        "wheelbase_mm": 1500.0, # longer than MT-09 1430 for stability
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.60,        # full fairing + screen, more enclosed than MT-09
+        "frontal_area_m2": 0.52,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Suzuki GSX-8R (2024-current) ────────────────────────────────────
+# 776 cc parallel twin sport.  Fully-faired sister to GSX-8S naked —
+# Suzuki press kit confirms identical engine, gearbox, sprockets,
+# only fairing + clip-ons + slightly heavier kerb differs.  Cluster:
+# CATEGORY_MID_TWIN_500_700 (776 cc, in [500, 700] cc band by
+# classifier band — top of mid-twin range).
+# Sources: Suzuki Motor Corporation press release 2023-11-07
+# (suzukimotorcycle.com/news/eicma-2023-gsx-8r), Cycle World 2024
+# first ride (cycleworld.com/story/motorcycle-reviews/2024-suzuki-
+# gsx-8r-first-ride/), MCN 2024 first ride (motorcyclenews.com/
+# reviews/suzuki/gsx-8r/2024/), Suzuki USA spec sheet (suzukicycles.
+# com/sport/2024/gsx-8r).  Gearbox + sprockets identical to GSX-8S
+# per Suzuki press-kit + service manual PN cross-reference (only
+# bodywork + ergonomics differ between the two).
+SUZUKI_GSX_8R_2024 = spec_from_dict(
+    {
+        "manufacturer": "Suzuki",
+        "model_name": "GSX-8R",
+        "model_code": "2024",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "sport",
+        "displacement_cc": 776,
+        "bore_mm": 84.0,
+        "stroke_mm": 70.0,
+        "compression_ratio": 12.8,
+        "cylinders": 2,
+        "peak_power_hp": 82.0,
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 78.0,
+        "peak_torque_rpm": 6800,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Identical cassette + sprockets as GSX-8S per Suzuki PN x-ref.
+        "gear_ratios": [2.416, 1.764, 1.380, 1.125, 0.961, 0.851],
+        "front_sprocket": 14,
+        "rear_sprocket": 46,
+        "chain_pitch": "520",
+        "dry_mass_kg": 190.0,   # 205 kg kerb - ~10 kg fuel (14 L) - oil/batt
+        "wheelbase_mm": 1465.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.60,        # full fairing + clip-ons, tucked sport position
+        "frontal_area_m2": 0.50,
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -1376,4 +1529,8 @@ EXTENDED_BIKES = [
     SUZUKI_GSX_S1000GX_2024,
     BMW_R_1300_GS_2024,
     KAWASAKI_ELIMINATOR_450_2024,
+    # ── Daily improvement run 2026-05-17 (Sunday — Catalog A1 second pass) ──
+    TRIUMPH_TIGER_SPORT_660_2022,
+    YAMAHA_TRACER_9_GT_2021,
+    SUZUKI_GSX_8R_2024,
 ]

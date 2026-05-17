@@ -1,10 +1,8 @@
-# Performance Monitor — 2026-05-17 (inaugural run)
+# Performance Monitor — 2026-05-17
 
-First run of agent A10 (`performance-monitor`). No rolling-average baseline exists
-yet; today's row establishes the seed. Future runs will diff against the trailing
-7-day mean and flag > +30% drift.
+Two perf-monitor probes have now landed on 2026-05-17. The first run (earlier today) was the inaugural seed of `data/perf_timeseries.json`; this second run confirms the signals are stable across the day and documents the result delta.
 
-## Measurements
+## Run 1 (inaugural, earlier today) — measurements
 
 | Probe                          | Result                                       | Notes                                                                 |
 | ------------------------------ | -------------------------------------------- | --------------------------------------------------------------------- |
@@ -12,36 +10,41 @@ yet; today's row establishes the seed. Future runs will diff against the trailin
 | Vercel `www.motoquant.in`      | Reachable, title renders                     | Page-title string matches expected SEO copy                            |
 | `tests/test_validation.py + test_scraper.py` | 111 passed in 9.231 s wall-clock | Matches the ~10 s focused-subset budget documented in CLAUDE.md      |
 | Baseline sim (K5 + R1 + Hayabusa) | 0.7682 s for 3 bikes (~0.256 s each)      | All three ETs match locked references exactly to 4 dp                  |
-| Baseline ET — K5               | 10.0334 s                                    | Locked reference; Δ +0.0000                                            |
-| Baseline ET — R1               | 10.2859 s                                    | Locked reference; Δ +0.0000                                            |
-| Baseline ET — Hayabusa         | 10.4712 s                                    | Locked reference; Δ +0.0000                                            |
 | Surrogate pickle               | Absent                                       | Neither `surrogate_dnn.pkl` nor `surrogate.pkl` present in this clone  |
 
-## Drift check
+## Run 2 (this session) — measurements
 
-First run — no prior data to diff. The threshold rule (> +30% over 7-day rolling
-mean, two consecutive bad samples) cannot fire yet. Earliest meaningful drift
-report: 2026-05-24 with N=7 prior rows.
+| Probe | Status | Detail |
+|---|---|---|
+| `https://www.motoquant.in/` | ok | Page rendered; title = `MotoQuant Pro — Motorcycle Quarter-Mile Drag Racing Simulator | ET Predictor & Build Optimizer` |
+| `https://web-production-de6eb.up.railway.app/api/health` | ok | `{"status":"ok","database":"connected","bike_count":342}` — first attempt |
+| `https://web-production-de6eb.up.railway.app/api/bikes?limit=10` | ok | 10 rows; first row = `Aprilia RS 457 (2024-2026)` |
+| `pytest tests/test_validation.py tests/test_scraper.py` | ok | `111 passed in 7.90s` (also captured via `/usr/bin/time`: 8.38s first invocation including warmup) |
 
-## Notable observations
+## Drift table
 
-1. **Egress to Railway + Vercel succeeded** from this sandbox. CLAUDE.md and the
-   May-3 daily-aborted report both list these domains as blocked. Either the
-   allowlist was widened recently, or the prior cache went stale. Worth flagging
-   so future runs don't pre-emptively skip the WebFetch step.
-2. **Production `bike_count` is 342**, while local clone CLAUDE.md headline-stats
-   are pinned at 336 (May 4 daily session). Production is 6 ahead — consistent
-   with additional autonomous catalog additions between May 4 and today that
-   haven't yet been mirrored back into CLAUDE.md.
-3. **Surrogate pickles missing locally.** Per Phase 4 status in CLAUDE.md they
-   ship in repo root (`surrogate_dnn.pkl` 10.8 MB). They're gitignored or got
-   pruned in this session's clone. Inference-latency timing skipped this run;
-   capture it next time if the file is present.
-4. **TTFB cannot be measured via WebFetch.** The tool returns content but not
-   network timing. If TTFB tracking matters, swap to a `curl -w "%{time_starttransfer}"`
-   probe in a follow-up. Recorded `ttfb_ms: null` to keep the schema honest.
+| Metric | Run 1 | Run 2 | Delta | Verdict |
+|---|---|---|---|---|
+| `api_health.bike_count` | 342 | 342 | 0 | unchanged |
+| `tests_passed` | 111 | 111 | 0 | unchanged |
+| `tests_wall_s` | 9.231 | 7.90 | -14.4% | within noise (drift gate +30%) |
+| `web_landing.title` | matches | matches | 0 | unchanged |
 
-## No INBOX entries queued
+Only two datapoints exist on the timeseries so the 7-entry rolling comparison the spec calls for is not yet possible. No drift flag raised. Two consecutive measurements is the escalation gate per spec — both runs today are within noise, so no INBOX item queued.
 
-Measurements are within expected envelopes. Tests at 9.2 s and 3-bike baseline
-at 0.77 s are nominal. No urgent action required.
+## NETWORK_ACCESS
+
+- motoquant.in: **ok** — first-attempt success, title renders
+- railway api: **ok** — `/api/health` and `/api/bikes?limit=10` both succeeded on first attempt; no retries required
+
+Two consecutive perf-monitor sessions on 2026-05-17 (run 1 + run 2) hit Railway and Vercel cleanly from the sandbox. The CLAUDE.md "cowork-egress-blocked" note (May 2/3/4 daily reports) does not currently apply in this sandbox tier — at least intermittently reachable. The GH-Actions side-channel design remains queued in `DISPATCH_INBOX.md` (`[urgent]` with full design notes from the 2026-05-16 self-review follow-up) as a reliability hedge — no duplicate INBOX entry created from this run.
+
+## Notable observations (carry-forward from run 1, still true)
+
+1. **Production `bike_count` is 342**, while CLAUDE.md headline-stats are pinned at 336 (May 4 daily session). Production is 6 ahead — consistent with autonomous catalog additions since May 4 that haven't been mirrored back into CLAUDE.md's last-updated header.
+2. **Surrogate pickles still missing locally** in this clone. Phase 4 status says they ship in repo root (`surrogate_dnn.pkl` 10.8 MB); they're either gitignored or pruned. Inference-latency timing skipped again this run.
+3. **TTFB still cannot be measured via WebFetch.** The tool returns content + status only, no network timing. The GH-Actions side-channel (queued INBOX item) can use `curl -w "%{time_starttransfer}"` to close this gap naturally — recommend that be the canonical TTFB source once it ships.
+
+## No INBOX entries queued this run
+
+Measurements within envelope; egress functional; no drift; no missing-deploy signal. The two pre-existing related `[urgent]` INBOX items (GH-Actions side-channel build + design notes) already cover the observability gap that would have motivated a new queue entry.
