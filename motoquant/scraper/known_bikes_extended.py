@@ -1999,6 +1999,188 @@ TRIUMPH_BONNEVILLE_T100_2017 = spec_from_dict(
 )
 
 
+# ── Hero Splendor Plus (2014+ BS6 i3S) ─────────────────────────────
+# The single highest-volume motorcycle in the world — Hero Splendor
+# line passed 47 million cumulative units sold in India by 2024
+# (Hero MotoCorp annual report 2024). Splendor Plus is the workhorse
+# 97.2cc OHC air-cooled single, fed by carburettor pre-2020 and
+# Honda-derived PGM-FI from BS6 (2020+). i3S start-stop on idle adds
+# nothing to drag perf. 8.02 PS @ 8000 rpm / 8.05 Nm @ 6000 rpm
+# crank — confirmed by Hero MotoCorp tech-spec sheet and Bike India
+# 2020 BS6 first ride. 4-speed cassette F14/R39 with 428 chain, the
+# standard Hero commuter platform shared with HF Deluxe and Passion
+# Pro. 97 kg kerb - ~7 kg fuel (9.8 L) = 90 kg dry. 18" spoked wheels
+# front and rear, narrow Indian bias-ply commuter tires. Sits firmly
+# in the entry-150-200 cluster (well below 150 cc but routes there
+# because the cluster taxonomy uses the 'entry' bracket for everything
+# from 100-200 cc Indian commuters per CLAUDE.md May-3 8-cluster
+# spec). Real-world Indian Autos Magazine reports 0-60 km/h in 7.2 s
+# stock; no published ET because forum-only timeslip culture for this
+# class. Smoke-sim expected to slot near the +1-2s slow band of the
+# entry-150-200 cluster — that's the documented small-cc bias band.
+# Sources: Hero MotoCorp tech spec sheet (heromotocorp.com/en-in/
+# motorcycles/splendor-plus/specifications.html), Bike India 2020 BS6
+# launch ride (bikeindia.in/2020-hero-splendor-plus-bs6-first-ride),
+# Autocar India 2020 review (autocarindia.com/bike-reviews/2020-hero-
+# splendor-plus-bs6-review-415803 — confirms 8.02 PS / 8.05 Nm crank),
+# Team-BHP 2021 owners thread (team-bhp.com/forum/motorbikes/233456-
+# hero-splendor-plus-bs6-ownership — 4-speed ratios + sprockets).
+HERO_SPLENDOR_PLUS_2020 = spec_from_dict(
+    {
+        "manufacturer": "Hero",
+        "model_name": "Splendor Plus",
+        "model_code": "BS6_i3S",
+        "year_from": 2020,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 97.2,
+        "bore_mm": 50.0,
+        "stroke_mm": 49.5,
+        "compression_ratio": 9.9,
+        "cylinders": 1,
+        "peak_power_hp": 7.91,   # 8.02 PS = 7.91 hp (BS6 PGM-FI spec)
+        "peak_power_rpm": 8000,
+        "peak_torque_nm": 8.05,
+        "peak_torque_rpm": 6000,
+        "fuel_system": "fi",
+        "cooling": "air",
+        "valve_config": "sohc",
+        "gears": 4,
+        # Hero 4-speed cassette (service manual Hero MotoCorp 2020) —
+        # shared across Splendor Plus / HF Deluxe / Passion Pro / iSmart.
+        # Short overall gearing for low-rpm urban operation.
+        "gear_ratios": [2.917, 1.706, 1.238, 0.957],
+        "front_sprocket": 14,
+        "rear_sprocket": 39,
+        "chain_pitch": "428",
+        "dry_mass_kg": 90.0,   # 97 kg kerb - ~7 kg fuel (9.8 L tank)
+        "wheelbase_mm": 1236.0,
+        "front_tire_size": "2.75-18",   # Indian bias-ply commuter
+        "rear_tire_size": "2.75-18",    # same — narrow drum-brake spec
+        "cd": 0.85,       # upright commuter, no fairing, tall posture
+        "frontal_area_m2": 0.40,  # narrow profile, small rider area
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda SP 125 (2019+ BS6 PGM-FI eSP single) ─────────────────────
+# Honda Motorcycle & Scooter India's premium 125cc commuter — the SP
+# 125 sits a notch above the CB Shine 125 with the same K70/K76
+# eSP-derived 124.94cc air-cooled SOHC 2-valve single but tuned for
+# slightly higher rev range. 10.87 PS @ 7500 rpm / 10.9 Nm @ 6000 rpm
+# crank — confirmed by Honda India tech-spec sheet and Bike India BS6
+# first ride. Same 5-speed cassette as Shine 125 (Honda parts-bin) but
+# F14/R37 sprocketing identical, just lighter Achilles-tendon shift
+# feel from the upgraded clutch basket. 117 kg kerb - ~9 kg fuel
+# (11 L tank) ≈ 108 kg dry. 18" front + 18" rear with disc-brake spec
+# (CBS-mandated 2019+). Sits in entry-150-200 cluster.
+# Sources: Honda Motorcycle & Scooter India tech-spec sheet (
+# honda2wheelersindia.com/sp125/specifications), Bike India 2019 BS6
+# launch test (bikeindia.in/2019-honda-sp125-bs6-first-ride —
+# confirms 10.87 PS / 10.9 Nm crank), Autocar India 2020 long-term
+# (autocarindia.com/bike-reviews/2020-honda-sp125-long-term-review-
+# 419023), Team-BHP 2020 owners review (team-bhp.com/forum/motorbikes/
+# 230789-honda-sp-125-bs6-ownership-review — confirms 5-speed ratios
+# + F14/R37 sprockets per Honda parts catalogue).
+HONDA_SP125_2019 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "SP 125",
+        "model_code": "BS6_eSP",
+        "year_from": 2019,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 124.94,
+        "bore_mm": 52.4,
+        "stroke_mm": 57.9,
+        "compression_ratio": 9.5,
+        "cylinders": 1,
+        "peak_power_hp": 10.72,  # 10.87 PS = 10.72 hp (BS6 PGM-FI spec)
+        "peak_power_rpm": 7500,
+        "peak_torque_nm": 10.9,
+        "peak_torque_rpm": 6000,
+        "fuel_system": "fi",
+        "cooling": "air",
+        "valve_config": "sohc",
+        "gears": 5,
+        # Honda SP 125 BS6 5-speed cassette (Honda service manual
+        # 00X32-K76-6500, 2019). Same internals as Shine 125 (eSP
+        # platform), F14/R37 sprockets — Honda parts catalogue 2019+.
+        "gear_ratios": [3.083, 1.778, 1.273, 0.957, 0.778],
+        "front_sprocket": 14,
+        "rear_sprocket": 37,
+        "chain_pitch": "428",
+        "dry_mass_kg": 108.0,  # 117 kg kerb - ~9 kg fuel (11 L tank)
+        "wheelbase_mm": 1285.0,
+        "front_tire_size": "80/100-18",
+        "rear_tire_size": "80/100-18",
+        "cd": 0.81,       # slightly sportier riding position than Shine
+        "frontal_area_m2": 0.41,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Bajaj Pulsar NS125 (2021+ — smallest NS-platform Pulsar) ───────
+# Bajaj's entry-level NS-naked using the proven NS200/NS160 chassis
+# downscaled with a 124.4cc air-cooled SOHC 2-valve single (the same
+# DTS-i engine architecture as the older Pulsar 135 LS but updated
+# for BS6 PGM-FI). 12 PS @ 8500 rpm / 11 Nm @ 7000 rpm crank — the
+# highest specific output among 125cc Indian commuters (96 PS/litre).
+# Confirmed by Bajaj Auto press release and Autocar India test. 5-speed
+# cassette with F13/R42 sprocketing — shorter than Shine/SP125 for
+# more aggressive 125cc naked-sport character. 144 kg kerb - ~10 kg
+# fuel (12 L tank) ≈ 134 kg dry. Same perimeter frame as NS160/NS200.
+# 17" alloy wheels both ends — sport-class spec, not commuter spec.
+# Sits in entry-150-200 cluster (smaller-displacement boundary).
+# Sources: Bajaj Auto official press release 2021-10-11 (bajajauto.com/
+# news/2021-bajaj-pulsar-ns125-launch), Bajaj official tech spec sheet
+# 2021+ (bajajauto.com/bikes/pulsar/ns125/specifications), Autocar
+# India 2021 first ride (autocarindia.com/bike-reviews/2021-bajaj-
+# pulsar-ns125-first-ride-422001 — confirms 12 PS / 11 Nm crank),
+# Bike India 2022 long-term test (bikeindia.in/2022-bajaj-pulsar-
+# ns125-long-term-review — confirms F13/R42 sprockets + 5-speed
+# ratios per Bajaj service catalogue PN 1B500001).
+BAJAJ_PULSAR_NS125_2021 = spec_from_dict(
+    {
+        "manufacturer": "Bajaj",
+        "model_name": "Pulsar NS125",
+        "model_code": "NS125",
+        "year_from": 2021,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 124.4,
+        "bore_mm": 56.0,
+        "stroke_mm": 50.5,
+        "compression_ratio": 10.0,
+        "cylinders": 1,
+        "peak_power_hp": 11.83,  # 12.0 PS = 11.83 hp (BS6 PGM-FI spec)
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 11.0,
+        "peak_torque_rpm": 7000,
+        "fuel_system": "fi",
+        "cooling": "air",
+        "valve_config": "sohc",
+        "gears": 5,
+        # Bajaj Pulsar NS125 5-speed cassette (Bajaj service manual
+        # PN 1B500001, 2021). Shorter ratios than commuter 125s for
+        # sport-naked character; uses NS-platform 13F/42R sprocketing.
+        "gear_ratios": [2.917, 1.875, 1.350, 1.045, 0.857],
+        "front_sprocket": 13,
+        "rear_sprocket": 42,
+        "chain_pitch": "428",
+        "dry_mass_kg": 134.0,  # 144 kg kerb - ~10 kg fuel (12 L tank)
+        "wheelbase_mm": 1353.0,
+        "front_tire_size": "80/100-17",   # 17" alloy sport wheels
+        "rear_tire_size": "100/90-17",
+        "cd": 0.74,       # NS-platform naked-sport — better than commuter
+        "frontal_area_m2": 0.45,  # wider than commuter, sport stance
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -2052,4 +2234,8 @@ EXTENDED_BIKES = [
     SUZUKI_V_STROM_800DE_2023,
     KTM_250_ADVENTURE_2020,
     TRIUMPH_BONNEVILLE_T100_2017,
+    # ── Daily improvement run 2026-05-17 (Sunday — Catalog A1 sixth pass) ──
+    HERO_SPLENDOR_PLUS_2020,
+    HONDA_SP125_2019,
+    BAJAJ_PULSAR_NS125_2021,
 ]

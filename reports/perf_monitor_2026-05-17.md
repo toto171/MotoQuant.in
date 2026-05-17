@@ -120,3 +120,26 @@ Fifth perf-monitor probe on 2026-05-17. WebFetch used (no curl this run) so TTFB
 - WebFetch tool still lacks TTFB / payload-bytes primitives. Run 4 captured those via curl; no escalation signal this run warranted a re-shell.
 - Surrogate pickles still not re-checked this run (out of fast-probe scope).
 
+## Run 6 (perf-monitor agent A11) — full curl primitives
+
+Probed via curl this run for TTFB + payload bytes. All probes returned HTTP 200 first attempt.
+
+| Metric                    | Today (run 6) | Prior (run 4 — full curl) | Δ vs run 4 | Same-day pytest mean | Δ vs mean | Gate (>+30%) |
+|---------------------------|---------------|----------------------------|------------|----------------------|-----------|--------------|
+| Landing TTFB (ms)         | 1378.51       | 1330.65                    | +3.6%      | —                    | —         | ok           |
+| Landing payload (bytes)   | 32,634        | 32,634                     | 0.0%       | —                    | —         | ok           |
+| /api/health avg (n=5, ms) | 708.29        | 706.74                     | +0.2%      | —                    | —         | ok           |
+| /api/health median (ms)   | 687.44        | 672.48                     | +2.2%      | —                    | —         | ok           |
+| /api/bikes latency (ms)   | 478.23        | 703.99                     | -32.1%     | —                    | —         | improvement  |
+| Pytest wall-clock (s)     | 7.898         | 10.40                      | -24.1%     | 8.692                | -9.1%     | ok           |
+| Pytest pass / fail        | 111 / 0       | 111 / 0                    | flat       | —                    | —         | ok           |
+| api_health bike_count     | 342           | 342                        | flat       | —                    | —         | ok           |
+
+Raw 5-sample /api/health latency (ms): `[821.71, 656.88, 703.23, 687.44, 672.21]`. First sample +21% above the trailing 4 — cold-cache pattern consistent with run 4.
+
+Same-day pytest history vector: `[9.231, 7.900, 8.154, 10.400, 7.775, 7.898]` → mean 8.560 s.
+
+**Verdict:** No drift. `/api/bikes` improved -32% vs run 4 (negative drift = faster, not escalated per agent spec). All other metrics within ±5% of run 4 capture. Pytest wall-clock comfortably below same-day rolling mean. No `[urgent]` queued to DISPATCH_INBOX.md.
+
+**Baseline status:** 6 same-date entries; cross-day rolling baseline still not formed. First cross-day comparison possible from 2026-05-18 onward.
+

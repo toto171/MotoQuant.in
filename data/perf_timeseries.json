@@ -138,5 +138,24 @@
     "tests_passed": 111,
     "network_blocked": false,
     "notes": "Fifth perf probe on 2026-05-17 (perf-monitor agent A5). All three WebFetch probes succeeded on first attempt. Pytest wall 7.775s (real-time via `time`) \u2014 same-day history now [9.231, 7.90, 8.154, 10.40, 7.775], mean 8.69s; today's 7.775s is -10.5% vs mean, well within noise. Bike count 342 stable across all 5 runs today. WebFetch does not expose TTFB/payload primitives natively. NOT escalated \u2014 no drift, no API errors, no test regressions. 5 same-date entries still below the 7-entry rolling baseline threshold."
+  },
+  {
+    "date": "2026-05-17",
+    "run_index": 6,
+    "landing_ttfb_ms": 1378.51,
+    "landing_payload_bytes": 32634,
+    "landing_http_code": 200,
+    "api_health_avg_ms": 708.29,
+    "api_health_median_ms": 687.44,
+    "api_health_samples_ms": [821.71, 656.88, 703.23, 687.44, 672.21],
+    "api_health_bike_count": 342,
+    "api_bikes_avg_ms": 478.23,
+    "api_bikes_count": 10,
+    "api_bikes_first": "Aprilia RS 457 (2024-2026)",
+    "test_wall_clock_s": 7.898,
+    "test_pass_count": 111,
+    "test_fail_count": 0,
+    "network_blocked": false,
+    "notes": "Sixth perf probe on 2026-05-17 (perf-monitor agent A11). All probes via curl with full TTFB/payload primitives. Landing TTFB 1378.51ms vs prior 1330.65ms (+3.6%); /api/health 5-sample mean 708.29ms vs prior 706.74ms (+0.2%, essentially flat); /api/bikes 478.23ms vs prior 703.99ms (-32%, improvement \u2014 NOT escalated since negative drift = faster). Pytest 7.898s vs same-day history [9.231, 7.90, 8.154, 10.40, 7.775] mean 8.69s = -9.1%, within noise. 111/0 pass/fail stable. Bike count 342 stable across all 6 runs today. No drift escalation. 6 same-date entries; 7-entry rolling baseline still not formed across distinct dates (all same-day), so cross-day drift detection remains pending."
   }
 ]
