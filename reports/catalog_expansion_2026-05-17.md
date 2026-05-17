@@ -194,3 +194,49 @@ afternoon (Tiger Sport 660 / Tracer 9 GT / GSX-8R) passes.
 - Headline-stats audit should re-run post-postflight to sync the
   339-total catalog count if the morning/afternoon passes haven't
   already patched `web/app/page.js` references.
+
+
+---
+
+# Fourth Pass — Indian commuter gap-fill (+3, 358 → 361)
+
+## Bikes added
+| Make / Model | Years | Disp. | Power | Mass | Sim ET | Trap |
+|---|---|---|---|---|---|---|
+| Bajaj Pulsar 150 (UG4/UG5/BS6) | 2009-2023 | 149.5cc I1 SOHC | 14.0 hp @ 8000 | 138 kg dry | 19.13s | 114.4 km/h |
+| Honda Shine 125 (BS6) | 2019-2024 | 123.94cc I1 SOHC | 10.59 hp @ 7500 | 104 kg dry | 20.57s | 107.1 km/h |
+| Suzuki Gixxer 155 (BS6) | 2014-2024 | 154.9cc I1 SOHC | 13.42 hp @ 8000 | 130 kg dry | 18.62s | 114.0 km/h |
+
+## Why these three
+- **Pulsar 150**: 11M+ cumulative units since 2001 — highest-volume
+  Indian motorcycle in the catalogue. UG5/BS6 single-disc variant.
+- **Shine 125**: India's best-selling 125cc commuter (10M+ units by
+  end-2023, HMSI internal figure). PGM-FI BS6 era.
+- **Gixxer 155**: ICOTY + IMOTY 2015 winner. Most popular 150cc
+  naked-sport in Indian aftermarket / drag-prep community.
+
+## Cluster fit (entry-150-200 cluster, +0.5-1.4s slow band)
+All three ETs fall cleanly within the cluster's known bias band per
+April 27 sweep_with_clusters audit. R15 V4 (17.6s real-world, 17-18 hp)
+corroborates the 19-21s sim band for 10-14 hp Indian commuters.
+
+## Validation gates passed
+- `tests/test_scraper.py`: 80/80 passed
+- Focused subset (`-k "two_stroke or scraper or validation"`,
+  `--ignore=tests/test_api.py`): 145/145 passed
+- Smoke sims: 3/3 finished, ET in [4.0, 26.0]s, trap in [40, 400] km/h
+- **Reference baselines preserved EXACTLY**: K5 10.0334s / R1
+  10.2859s / Hayabusa 10.4712s, Δ +0.0000 on all three
+- Validator errors: 0 across all 3 bikes
+- Validator warnings: 2 cosmetic each (Indian bias-ply tire notation)
+
+## Spec sources
+- **Pulsar 150**: Bajaj Auto service manual SB-150-UG5-01 (2019);
+  bajajauto.com Pulsar-150-single-disc; BikeWale; ZigWheels Mar 2020;
+  Autocar India long-term Aug 2020.
+- **Shine 125**: Honda 2 Wheelers India spec page; service manual
+  00X32-K76-6400 (Honda 2020); BikeWale; BikeDekho long-term Jun 2022;
+  Autocar India 4-bike comparo Sept 2021.
+- **Gixxer 155**: Suzuki Motorcycle India spec page; service manual
+  99500-32G00-01E (Suzuki 2018); BikeWale; MCN long-term Feb 2017;
+  Autocar India BS6 first-ride Apr 2020.

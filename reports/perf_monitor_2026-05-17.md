@@ -57,3 +57,36 @@ Three consecutive perf-monitor sessions on 2026-05-17 have hit Railway and Verce
 ## No INBOX entries queued this run
 
 Measurements within envelope; egress functional; no drift; no missing-deploy signal.
+
+## Run 4 — measurements (curl-based, full latency primitives)
+
+First run today to use `curl -w` end-to-end so TTFB / payload-bytes / per-sample latencies are captured numerically.
+
+| Probe | Value | Status |
+|---|---|---|
+| motoquant.in TTFB (`time_total`) | 1330.65 ms | 200 OK |
+| motoquant.in payload | 32,634 bytes | — |
+| Railway `/api/health` × 5 (ms) | 850.12 / 677.04 / 664.67 / 669.37 / 672.48 | 200 OK |
+| `/api/health` mean / median | 706.74 / 672.48 ms | — |
+| Railway `/api/bikes?limit=10` | 703.99 ms, 10 bikes, first = Aprilia RS 457 | 200 OK |
+| pytest wall (`/usr/bin/time`) | 10.40 s | 111 passed, 460 warnings |
+| pytest internal summary | 8.13 s | — |
+| `bike_count` | 342 | unchanged across all 4 runs |
+
+### Run 4 drift table
+
+| Metric | Today | Same-day prior | Δ vs mean | Verdict |
+|---|---|---|---|---|
+| pytest_wall_s | 10.40 | [9.231, 7.90, 8.154] mean 8.43 | +23.4% | within +30% gate — NOT escalated |
+| api_health_mean_ms | 706.74 | n/a (first curl-measured) | — | baseline-building |
+| web_ttfb_ms | 1330.65 | n/a (first curl-measured) | — | baseline-building |
+| api_bikes_ms | 703.99 | n/a (first curl-measured) | — | baseline-building |
+| bike_count | 342 | 342 (× 3 prior) | 0 | stable |
+
+### Run 4 notes
+
+- First sample of `/api/health` was 850 ms vs subsequent 4 at ~670 ms — cold-cache / cold-process signature. Flag if the gap widens across future runs.
+- pytest wall 10.40 s vs internal 8.13 s — 2.3 s collection/import overhead; `/usr/bin/time` value tracks what CI sees.
+- Drift escalation gate (≥3 prior **rows** + 2 **consecutive** > +30% deltas) still not met. No DISPATCH_INBOX action.
+- Baselines (K5 / R1 / Hayabusa) not re-verified this run — relying on prior same-day runs' confirmation.
+

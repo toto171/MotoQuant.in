@@ -5,17 +5,25 @@
       "status": "ok",
       "ttfb_ms": null,
       "error_class": null,
-      "payload": {"status": "ok", "database": "connected", "bike_count": 342}
+      "payload": {
+        "status": "ok",
+        "database": "connected",
+        "bike_count": 342
+      }
     },
     "web_landing": {
       "status": "ok",
       "ttfb_ms": null,
-      "title": "MotoQuant Pro — Motorcycle Quarter-Mile Drag Racing Simulator | ET Predictor & Build Optimizer"
+      "title": "MotoQuant Pro \u2014 Motorcycle Quarter-Mile Drag Racing Simulator | ET Predictor & Build Optimizer"
     },
     "tests_wall_s": 9.231,
     "tests_passed": 111,
     "baseline_sim_3bikes_s": 0.7682,
-    "baseline_et_s": {"K5": 10.0334, "R1": 10.2859, "Hayabusa": 10.4712},
+    "baseline_et_s": {
+      "K5": 10.0334,
+      "R1": 10.2859,
+      "Hayabusa": 10.4712
+    },
     "surrogate_per_call_ms": null,
     "surrogate_pickle_present": false,
     "notes": "Inaugural run; no rolling-avg baseline yet. WebFetch egress worked today (Railway + Vercel reachable from sandbox), contradicting prior CLAUDE.md egress-blocked note. TTFB not exposed by WebFetch tool; payload + status captured instead. Surrogate pickles absent from this clone (surrogate_dnn.pkl + surrogate.pkl both missing). Baseline ETs match locked references exactly."
@@ -25,13 +33,17 @@
     "run_index": 2,
     "motoquant_in_status": "ok",
     "api_health_status": "ok",
-    "api_health_response": {"status": "ok", "database": "connected", "bike_count": 342},
+    "api_health_response": {
+      "status": "ok",
+      "database": "connected",
+      "bike_count": 342
+    },
     "api_bikes_status": "ok",
     "api_bikes_count": 10,
     "api_bikes_first": "Aprilia RS 457 (2024-2026)",
-    "test_wallclock_s": 7.90,
+    "test_wallclock_s": 7.9,
     "tests_passed": 111,
-    "notes": "Second perf-monitor probe on 2026-05-17. All three WebFetch probes succeeded on first attempt — no retries needed. Bike count 342 unchanged from earlier run today. Test wall-clock 7.90s vs prior 9.231s on same date — -14%, within noise (drift gate is +30% per agent spec). Two consecutive datapoints now exist on this date but the 7-entry rolling window required for drift escalation is not yet populated. TTFB still not exposed by WebFetch tool."
+    "notes": "Second perf-monitor probe on 2026-05-17. All three WebFetch probes succeeded on first attempt \u2014 no retries needed. Bike count 342 unchanged from earlier run today. Test wall-clock 7.90s vs prior 9.231s on same date \u2014 -14%, within noise (drift gate is +30% per agent spec). Two consecutive datapoints now exist on this date but the 7-entry rolling window required for drift escalation is not yet populated. TTFB still not exposed by WebFetch tool."
   },
   {
     "date": "2026-05-17",
@@ -39,10 +51,14 @@
     "web_ttfb_ms": null,
     "web_payload_bytes": null,
     "web_landing_status": "ok",
-    "web_landing_title": "MotoQuant Pro — Motorcycle Quarter-Mile Drag Racing Simulator | ET Predictor & Build Optimizer",
+    "web_landing_title": "MotoQuant Pro \u2014 Motorcycle Quarter-Mile Drag Racing Simulator | ET Predictor & Build Optimizer",
     "api_health_latency_ms": null,
     "api_health_status": "ok",
-    "api_health_response": {"status": "ok", "database": "connected", "bike_count": 342},
+    "api_health_response": {
+      "status": "ok",
+      "database": "connected",
+      "bike_count": 342
+    },
     "api_bikes_latency_ms": null,
     "api_bikes_status": "ok",
     "api_bikes_count": 10,
@@ -50,6 +66,47 @@
     "pytest_validation_scraper_s": 8.154,
     "tests_passed": 111,
     "network_blocked": false,
-    "notes": "Third perf-monitor probe on 2026-05-17 (agent A10). All three WebFetch probes succeeded — network NOT blocked despite CLAUDE.md egress note. Pytest 8.154s vs same-day [9.231, 7.90] — mean 8.428s, today's run -3.2% from mean, well within noise. WebFetch tool does not expose TTFB or payload size primitives, so those fields stay null until a lower-level probe lands. 3 same-day data points now; 7-entry rolling baseline still not formed — drift escalation not triggered (would require 2 consecutive >+30% deltas anyway). Bike count 342 stable across all 3 runs today."
+    "notes": "Third perf-monitor probe on 2026-05-17 (agent A10). All three WebFetch probes succeeded \u2014 network NOT blocked despite CLAUDE.md egress note. Pytest 8.154s vs same-day [9.231, 7.90] \u2014 mean 8.428s, today's run -3.2% from mean, well within noise. WebFetch tool does not expose TTFB or payload size primitives, so those fields stay null until a lower-level probe lands. 3 same-day data points now; 7-entry rolling baseline still not formed \u2014 drift escalation not triggered (would require 2 consecutive >+30% deltas anyway). Bike count 342 stable across all 3 runs today."
+  },
+  {
+    "date": "2026-05-17",
+    "run_index": 4,
+    "web_landing": {
+      "status": "ok",
+      "http_code": 200,
+      "ttfb_ms": 1330.65,
+      "payload_bytes": 32634,
+      "title": "MotoQuant Pro \u2014 Motorcycle Quarter-Mile Drag Racing Simulator | ET Predictor & Build Optimizer"
+    },
+    "api_health": {
+      "status": "ok",
+      "http_code": 200,
+      "samples_ms": [
+        850.124,
+        677.042,
+        664.669,
+        669.372,
+        672.479
+      ],
+      "mean_ms": 706.74,
+      "median_ms": 672.48,
+      "response": {
+        "status": "ok",
+        "database": "connected",
+        "bike_count": 342
+      }
+    },
+    "api_bikes": {
+      "status": "ok",
+      "http_code": 200,
+      "latency_ms": 703.99,
+      "count": 10,
+      "first": "Aprilia RS 457 (2024-2026)"
+    },
+    "pytest_validation_scraper_s": 10.4,
+    "pytest_internal_s": 8.13,
+    "tests_passed": 111,
+    "network_blocked": false,
+    "notes": "Fourth perf probe on 2026-05-17 (perf-monitor agent). Full latency primitives captured via curl this run: web TTFB 1330.65ms / payload 32,634 bytes; API /health 5-sample mean 706.74ms (median 672.48ms, first sample 850.12ms hints at cold-cache); /api/bikes 703.99ms. Pytest wall 10.40s (/usr/bin/time) vs internal 8.13s \u2014 same-day history now [9.231, 7.90, 8.154, 10.40], mean 8.92s; today's 10.40s is +16.5% vs mean \u2014 within +30% gate, NOT escalated. Bike count 342 stable. Baseline-building continues \u2014 4 same-date entries do not constitute a 7-day rolling baseline."
   }
 ]
