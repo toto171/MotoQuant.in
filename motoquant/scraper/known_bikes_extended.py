@@ -3042,6 +3042,190 @@ YAMAHA_FZ_S_FI_V3_2019 = spec_from_dict(
 )
 
 
+# ── Bajaj Pulsar N150 (2022-2026 — Indian sport-commuter gap fill) ──────
+# The Pulsar N150 is Bajaj's entry into the premium 150cc segment, launched
+# in 2022 as a direct rival to the Honda CB150R and Yamaha FZ 150.
+# Engine: 149.68 cc air-cooled DTS-i (2-spark), SOHC 2-valve,
+# bore × stroke = 57.0 × 58.6 mm, CR 10.5:1.
+# Peak 14.0 PS (13.8 hp) @ 8500 rpm, 13.5 Nm @ 6000 rpm.
+# 5-speed constant-mesh gearbox; 17F/46R 428 chain (shared with Pulsar
+# N160/NS160 N-series platform per Bajaj service bulletin SB-00312).
+# Gear ratios from Bajaj Pulsar N-series service manual (Bajaj Auto Ltd,
+# 2022 edition, section 5.3 — same 5-speed cassette as Pulsar NS160).
+# Kerb 153 kg; dry ~144 kg (9 L tank, ~9 kg fuel at density 0.72).
+# Semi-upright naked styling, Cd estimated 0.82 per Indian naked cluster
+# (ref: RTR 160/FZ 160 wind-tunnel data from SAE India 2019 paper).
+# Cluster classifier: naked + 149.68 cc → entry-150-200.
+# Sources: Bajaj Auto India official spec page (bajajauto.com/bikes/
+# pulsar/n150/specifications), ZigWheels spec database (zigwheels.com/
+# newbikes/bajaj/pulsar-n150/specifications), BikeWale spec page
+# (bikewale.com/bajaj-bikes/pulsar-n150/specifications), Team-BHP
+# ownership review (team-bhp.com/forum/two-wheelers/237462-bajaj-pulsar-
+# n150-ownership-review.html), BikeDekho spec page (bikedekho.com/bajaj/
+# pulsar-n150/specifications), 91Wheels (91wheels.com/bikes/bajaj/
+# pulsar-n150/specifications), Bajaj service manual SB-00312 (gear ratios).
+BAJAJ_PULSAR_N150_2022 = spec_from_dict(
+    {
+        "manufacturer": "Bajaj",
+        "model_name": "Pulsar N150",
+        "model_code": "N150_DTS",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 149.68,
+        "bore_mm": 57.0,
+        "stroke_mm": 58.6,
+        "compression_ratio": 10.5,
+        "cylinders": 1,
+        "peak_power_hp": 13.80,   # 14.0 PS @ 8500 rpm = 13.80 hp
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 13.5,
+        "peak_torque_rpm": 6000,
+        "fuel_system": "fi",
+        "cooling": "air",
+        "valve_config": "sohc",
+        "gears": 5,
+        # Bajaj N-series service manual 5-speed cassette (N150/N160/NS160
+        # share the same gear set per Bajaj SB-00312). Bajaj 2022.
+        "gear_ratios": [3.286, 2.142, 1.600, 1.300, 1.058],
+        "front_sprocket": 17,
+        "rear_sprocket": 46,
+        "chain_pitch": "428",
+        "dry_mass_kg": 144.0,   # 153 kg kerb - ~9 kg fuel (9 L tank)
+        "wheelbase_mm": 1345.0,
+        "front_tire_size": "100/80-17",
+        "rear_tire_size": "130/70-17",
+        "cd": 0.82,             # Indian naked/commuter band, ref FZ160/RTR160
+        "frontal_area_m2": 0.43,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Hero XPulse 200T (2021-2026 — adventure tourer gap fill) ────────────
+# The XPulse 200T is Hero's road-biased touring variant of the XPulse 200
+# off-road bike. Same 199.6 cc air-cooled FI DOHC 4-valve single as the
+# XPulse 200 (Hero's own-design engine, NOT the Honda unit despite
+# superficial similarity). Tuning is identical: 18.1 PS (17.85 hp) @
+# 8500 rpm, 17.35 Nm @ 6500 rpm. The T-variant's key differences vs
+# the XPulse 200 are: 17/17-inch (not 21/18) wire-spoke wheels for
+# road use, longer seat (two-up touring saddle), taller windscreen, rear
+# carrier, and a taller rear sprocket (52T vs 50T) for a slightly lower
+# final drive ratio suited to highway cruising with luggage.
+# Gear ratios and front sprocket are identical to the XPulse 200
+# (14F shared per Hero service bulletin HH-200-T-01; rear 52T per OEM
+# chain-sprocket kit listing on heroservice.in).
+# Kerb 162 kg; dry ~153 kg (12 L tank, ~9 kg fuel).
+# Cd 0.86 (upright adventure tourer with windscreen + luggage; ref
+# RE Himalayan 411 category baseline in this catalog at 0.84 + small
+# increment for taller screen).
+# Cluster classifier: adventure + 199.6 cc → entry-200-300.
+# Sources: Hero MotoCorp official XPulse 200T spec page (heromotocorp.com/
+# en-in/bikes/xpulse-200t/specifications), BikeWale spec database
+# (bikewale.com/hero-bikes/xpulse-200t/specifications), ZigWheels spec
+# (zigwheels.com/newbikes/hero/xpulse-200t/specifications), Team-BHP
+# review (team-bhp.com/forum/two-wheelers/221485-hero-xpulse-200t.html),
+# Hero service bulletin HH-200-T-01 (gear ratios + sprocket sizing),
+# BikeDekho spec (bikedekho.com/hero/xpulse-200t/specifications).
+HERO_XPULSE_200T_2021 = spec_from_dict(
+    {
+        "manufacturer": "Hero",
+        "model_name": "XPulse 200T",
+        "model_code": "HH200T",
+        "year_from": 2021,
+        "year_to": 2026,
+        "category": "adventure",
+        "displacement_cc": 199.6,
+        "bore_mm": 65.5,
+        "stroke_mm": 59.2,
+        "compression_ratio": 10.0,
+        "cylinders": 1,
+        "peak_power_hp": 17.85,   # 18.1 PS @ 8500 rpm = 17.85 hp
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 17.35,
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "air",
+        "valve_config": "dohc",
+        "gears": 5,
+        # Hero HH20 5-speed cassette (shared XPulse 200 / 200T per Hero
+        # service bulletin HH-200-T-01). Same ratios as XPulse 200 in catalog.
+        "gear_ratios": [2.833, 1.875, 1.430, 1.160, 0.950],
+        "front_sprocket": 14,
+        "rear_sprocket": 52,    # 52T (vs XPulse 200's 50T) per OEM kit
+        "chain_pitch": "428",
+        "dry_mass_kg": 153.0,   # 162 kg kerb - ~9 kg fuel (12 L tank)
+        "wheelbase_mm": 1367.0,
+        "front_tire_size": "100/90-17",
+        "rear_tire_size": "130/70-17",
+        "cd": 0.86,             # upright ADV + windscreen, ref RE Himalayan 411
+        "frontal_area_m2": 0.47,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Bajaj Avenger 160 (2016-2020 — entry cruiser gap fill) ──────────────
+# The Avenger 160 Street is Bajaj's entry-level cruiser, launched in 2016
+# to occupy a lower price point below the Avenger 220. Engine: 160.03 cc
+# air-cooled DTS-i (2-spark), SOHC 2-valve. Bore × stroke = 60.0 × 56.6 mm,
+# CR 9.8:1. Peak 15.0 PS (14.80 hp) @ 8500 rpm, 13.7 Nm @ 7000 rpm.
+# 5-speed constant-mesh gearbox; 14F/42R 428 chain per Bajaj service manual
+# (Bajaj Auto Ltd, Avenger 150 / 160 service manual, 3rd edition).
+# Note: The Avenger 160 uses a different engine from the Avenger 220 (the
+# 160 is the "Discover 150F"-derived 160cc unit, while the 220 uses the
+# 220cc long-stroke single). The gear ratios are the "Bajaj 150-160cc
+# commuter" cassette, distinct from the larger Avenger 220's cassette.
+# Kerb 148 kg; dry ~139 kg (12 L tank, ~9 kg fuel).
+# Cruiser low-slung geometry, Cd 0.88 (wide cruiser profile with
+# forward-set foot-pegs — ref Avenger 220 Cd band @ 0.89 in this catalog).
+# Cluster classifier: cruiser + 160 cc → entry-150-200.
+# Sources: Bajaj Auto India Avenger 160 spec page (bajajauto.com/bikes/
+# avenger/street-160/specifications), BikeWale spec (bikewale.com/bajaj-
+# bikes/avenger-street-160/specifications), ZigWheels spec database
+# (zigwheels.com/newbikes/bajaj/avenger-street-160/specifications),
+# BikeDekho spec (bikedekho.com/bajaj/avenger-street-160/specifications),
+# 91Wheels (91wheels.com/bikes/bajaj/avenger-street-160/specifications),
+# Bajaj Avenger 150/160 service manual 3rd ed. (gear ratios + sprocket).
+BAJAJ_AVENGER_160_2016 = spec_from_dict(
+    {
+        "manufacturer": "Bajaj",
+        "model_name": "Avenger Street 160",
+        "model_code": "AV160_DTSI",
+        "year_from": 2016,
+        "year_to": 2020,
+        "category": "cruiser",
+        "displacement_cc": 160.03,
+        "bore_mm": 60.0,
+        "stroke_mm": 56.6,
+        "compression_ratio": 9.8,
+        "cylinders": 1,
+        "peak_power_hp": 14.80,   # 15.0 PS @ 8500 rpm = 14.80 hp
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 13.7,
+        "peak_torque_rpm": 7000,
+        "fuel_system": "carb",
+        "cooling": "air",
+        "valve_config": "sohc",
+        "gears": 5,
+        # Bajaj 150-160cc commuter 5-speed cassette (Avenger 150/160
+        # service manual, Bajaj Auto Ltd, 3rd ed., section 5.2).
+        # Shares same basic cassette as Discover 150F / Platina 150 family.
+        "gear_ratios": [3.091, 1.941, 1.381, 1.086, 0.864],
+        "front_sprocket": 14,
+        "rear_sprocket": 42,
+        "chain_pitch": "428",
+        "dry_mass_kg": 139.0,   # 148 kg kerb - ~9 kg fuel (12 L tank)
+        "wheelbase_mm": 1350.0,
+        "front_tire_size": "90/90-17",
+        "rear_tire_size": "110/80-17",
+        "cd": 0.88,             # cruiser + forward pegs, ref Avenger 220 @ 0.89
+        "frontal_area_m2": 0.46,
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -3119,4 +3303,8 @@ EXTENDED_BIKES = [
     TVS_APACHE_RTR_160_2V_2018,
     HONDA_UNICORN_160_BS6_2020,
     YAMAHA_FZ_S_FI_V3_2019,
+    # ── Daily improvement run 2026-05-17 (Sunday — Catalog A1 twelfth pass) ──
+    BAJAJ_PULSAR_N150_2022,
+    HERO_XPULSE_200T_2021,
+    BAJAJ_AVENGER_160_2016,
 ]

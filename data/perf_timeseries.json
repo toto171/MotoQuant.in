@@ -323,5 +323,27 @@
     "tests_failed": 0,
     "network_blocked": false,
     "notes": "Run 11 of 2026-05-17 (performance-monitor agent, session 1779049840-773). **PRODUCTION INCIDENT: Railway API returns platform-level 404 'Application not found' (request_id present in body).** Both direct https://web-production-de6eb.up.railway.app/api/health and the Vercel-rewrite https://www.motoquant.in/api/health return identical {status:error, code:404, message:'Application not found'} responses; root path of the Railway host (/) ALSO returns the same 404, confirming this is the Railway router rejecting the service name -- not a route-level FastAPI 404. Pattern is consistent with Railway trial-expiry / service-removal (CLAUDE.md flagged '$4.86 / 24 days left as of Apr 23' under Phase-3 post-launch hygiene; that 24-day window expires ~May-17, today). Run 10 (~25 min prior) saw the service healthy at bike_count 342. Landing page (Vercel) still 200 OK at 1002 ms TTFB -- frontend is unaffected, only the API backend is gone. Pytest 2-sample median 8.532s [8.487, 8.577] vs same-day prior-10 mean 8.392s = +1.7% (within +/-30% gate). 111/0 pass/fail unchanged. **Drift gate:** 1 consecutive bad run on /api/health and /api/bikes (run 10 was healthy); agent spec requires 2-consecutive-bad before automated drift escalation. However, this is NOT drift -- it is an outage (404 vs N/A is binary, not metric). Escalating to DISPATCH_INBOX with [urgent] tag per agent's outage-vs-drift judgment. User action required: Railway billing / service redeploy. CLAUDE.md 'egress blocked' caveat now definitively stale (curl reached the Railway router cleanly, just got a 404 platform response)."
+  },
+  {
+    "date": "2026-05-17",
+    "run_index": 12,
+    "agent": "performance-monitor",
+    "session_id": "1779057034-621",
+    "landing_status": "ok",
+    "landing_http": 200,
+    "landing_ttfb_ms": null,
+    "landing_payload_bytes": null,
+    "api_health_http": 404,
+    "api_health_status": "error",
+    "api_health_error": "Application not found - Railway trial expired (still ongoing)",
+    "api_bikes_http": 404,
+    "api_bikes_status": "error",
+    "api_bikes_error": "Application not found - Railway trial expired (still ongoing)",
+    "test_walltime_s": 10.11,
+    "tests_passed": 111,
+    "tests_failed": 0,
+    "network_blocked": false,
+    "railway_outage": true,
+    "notes": "Run 12 of 2026-05-17 (performance-monitor agent, session 1779057034-621). Railway outage continues - no change since runs 9-11; both /api/health and /api/bikes?limit=10 return HTTP 404. Pre-diagnosed outage still queued as [urgent] in DISPATCH_INBOX.md; no fresh escalation raised. Vercel landing OK (motoquant.in). Pytest test_validation + test_scraper: 111 passed / 0 failed in 10.11s real time; consistent with same-day prior runs (8.5-10.1s, within +30% gate). Cross-day rolling baseline still not formed (all 12 rows are same-date 2026-05-17). Note: original perf-monitor agent ran in a stale worktree; data above re-keyed as Run 12 for the canonical $MQ_REPO."
   }
 ]

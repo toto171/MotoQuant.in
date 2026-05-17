@@ -377,3 +377,22 @@ Queueing `[urgent]` INSTRUCTION block to `DISPATCH_INBOX.md` requesting Railway 
 - **Pytest median was unaffected** by the API outage (tests run in-process, not via HTTP). 8.532 s of 2 samples is within noise of all 10 prior same-day medians.
 - **Landing page TTFB unaffected** because the static Next.js shell does not require API on initial paint. Any client-side fetches (simulator widget, /api/bikes browser) will fail once a user lands.
 - **No DNN/XGB pickle changes** this session; not probed.
+
+---
+
+## Run 12 — 2026-05-17T22:30Z — performance-monitor (session 1779057034-621)
+
+**Outcome:** Railway outage continues; no change.
+
+| Metric | Value | Status |
+|---|---|---|
+| motoquant.in landing | 200 OK | ✅ healthy |
+| /api/health | 404 (5/5 samples) | 🔴 outage (unchanged since run 11) |
+| /api/bikes?limit=10 | 404 | 🔴 outage |
+| pytest test_validation + test_scraper | 111 pass / 0 fail, 10.11 s wall | ✅ within band |
+
+**Drift gate:** no new escalations. Railway 404 is the same incident already queued as `[urgent] [blocking]` in DISPATCH_INBOX at line 110. Run 11 (session 1779049840-773) created the inbox item ~25 minutes after the outage started; this run (12) is the second confirmation. Per agent spec, fresh drift escalation requires 2 consecutive bad runs on a single metric — that gate is now satisfied but the corresponding INBOX ticket already exists, so no duplicate is filed.
+
+**Pytest sample band:** 8.5–10.1 s across runs 7–12. Run-12 single sample 10.11 s sits at the high end but ≤ +30 % above the 12-run mean — within tolerance.
+
+**Operational note:** the canonical perf-monitor for run 12 was re-keyed manually in $MQ_REPO because the dispatched sub-agent worked in a worktree based on a stale commit (094eef8) that pre-dated session 1779049840-773's commit 0128b82. The substantive readings are identical to the worktree's draft.

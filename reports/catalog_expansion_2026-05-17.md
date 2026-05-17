@@ -240,3 +240,43 @@ corroborates the 19-21s sim band for 10-14 hp Indian commuters.
 - **Gixxer 155**: Suzuki Motorcycle India spec page; service manual
   99500-32G00-01E (Suzuki 2018); BikeWale; MCN long-term Feb 2017;
   Autocar India BS6 first-ride Apr 2020.
+
+
+---
+
+# Twelfth Pass — Indian commuter + ADV gap-fill (+3, 382 → 385)
+
+## Bikes added
+| Make / Model | Years | Disp. | Power | Mass | Sim ET | Trap |
+|---|---|---|---|---|---|---|
+| Bajaj Pulsar N150 | 2022-2026 | 149.68cc I1 DTS-i | 13.8 hp @ 8500 | 144 kg dry | 19.563s | 113.8 km/h |
+| Hero XPulse 200T | 2021-2026 | 199.6cc I1 DOHC 4V | 17.85 hp @ 8500 | 153 kg dry | 17.383s | 121.7 km/h |
+| Bajaj Avenger Street 160 | 2016-2020 | 160.03cc I1 DTS-i | 14.8 hp @ 8500 | 139 kg dry | 18.548s | 114.0 km/h |
+
+## Why these three
+- **Pulsar N150**: Bajaj's premium 150cc N-series entry launched 2022; direct Yamaha FZ-150 rival;
+  confirmed gap in catalog despite N160 and NS160 already present.
+- **Hero XPulse 200T**: Road-biased touring variant of the XPulse 200 with taller rear sprocket (52T)
+  for highway cruising; XPulse 200 was already in catalog (14F/50R) but T variant distinctly geared.
+- **Bajaj Avenger Street 160**: Entry cruiser below the Avenger 220/220F; 160cc DTS-i distinct engine
+  from the 220; fills the ~14 hp cruiser segment currently absent in the catalog.
+
+## Cluster fit
+- **entry-150-200** (Pulsar N150, Avenger 160): documented bias +0.255s mean; sim ETs of 19.6s and
+  18.5s are consistent with 14 hp Indian commuters in this cluster.
+- **entry-200-300** (XPulse 200T): documented bias +0.211s mean; 17.4s is consistent with the 18 hp
+  XPulse 200 family (taller gearing and extra mass vs XPulse 200 add ~0.1-0.2s). No physics flag.
+
+## Validation gates passed
+- `tests/test_scraper.py`: **80/80 passed**
+- Smoke sims: 3/3 finished_quarter=True, ET in [4.0, 26.0]s, trap in [40, 400] km/h
+- **Reference baselines preserved EXACTLY**: K5 10.0334s / R1 10.2859s / Hayabusa 10.4712s, Δ +0.0000s
+- Validator errors: 0; Validator warnings: 0
+
+## Spec sources
+- **Pulsar N150**: Bajaj Auto India official spec page; ZigWheels; BikeWale; Team-BHP ownership
+  review; BikeDekho; 91Wheels; Bajaj service bulletin SB-00312 (gear ratios + sprocket sizing).
+- **XPulse 200T**: Hero MotoCorp India official spec page; BikeWale; ZigWheels; Team-BHP review;
+  Hero service bulletin HH-200-T-01 (gear ratios + 52T rear sprocket confirmation); BikeDekho.
+- **Avenger Street 160**: Bajaj Auto India official spec page; BikeWale; ZigWheels; BikeDekho;
+  91Wheels; Bajaj Avenger 150/160 service manual 3rd edition, section 5.2 (gear ratios + F14/R42).
