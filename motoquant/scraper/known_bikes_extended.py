@@ -2181,6 +2181,180 @@ BAJAJ_PULSAR_NS125_2021 = spec_from_dict(
 )
 
 
+# ── Kawasaki Z900RS (2018-2026) ─────────────────────────────────────
+# Retro-modern naked built on the Z900 platform with detuned 948 cc
+# inline-4 + revised cam timing + traditional round headlamp +
+# tank/seat styling cued to the 1972 Z1. Significant displacement-
+# class entrant in retro segment globally, India-launch 2018.
+# Engine: 948 cc liquid-cooled DOHC 16-valve I4 (shared with Z900 but
+# detuned for stronger low-mid torque — 111 hp @ 8500 rpm vs Z900's
+# 124 hp @ 9500 rpm; 98.5 Nm @ 6500 rpm vs Z900's 98.6 Nm @ 7700 rpm
+# — same torque, much lower in the rev range).
+# 6-speed cassette (Kawasaki service manual P/N 99924-1601 for ZR900E):
+# primary 1.627 (74/47), 6-speed ratios 2.692/2.058/1.650/1.380/1.181/
+# 1.038, final F15/R42 525 chain. 215 kg kerb (17 L tank → ~12 kg fuel
+# - oil/batt → ~203 kg dry as recorded by Kawasaki spec).
+# Sources: Kawasaki press kit 2018 (kawasaki.com/en-us/motorcycle/
+# z/supersport/z900rs/2018-z900rs), MCN 2018 first ride (motorcyclenews
+# .com/reviews/kawasaki/z900rs/2018/ - 0-60 mph in 3.1 s, 1/4 mile
+# 11.4 s @ 199 km/h instrumented), Cycle World 2018 dyno test
+# (cycleworld.com/2018-kawasaki-z900rs-cafe-first-ride-review/
+# — 101.8 whp @ 8700 rpm corrected SAE), Visordown 2018 spec sheet
+# (visordown.com/reviews/2018-kawasaki-z900rs-review), India launch
+# coverage Autocar India 2018 (autocarindia.com/bike-reviews/2018-
+# kawasaki-z900rs-india-review-407843). Cluster: litre_sport_600_1000
+# (948 cc, retro-naked falls within the 600-1000 cc cluster).
+KAWASAKI_Z900RS_2018 = spec_from_dict(
+    {
+        "manufacturer": "Kawasaki",
+        "model_name": "Z900RS",
+        "model_code": "ZR900E",
+        "year_from": 2018,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 948.0,
+        "bore_mm": 73.4,
+        "stroke_mm": 56.0,
+        "compression_ratio": 10.8,
+        "cylinders": 4,
+        "peak_power_hp": 111.0,
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 98.5,
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # ZR900E 6-speed cassette (Kawasaki service manual 99924-1601)
+        "gear_ratios": [2.692, 2.058, 1.650, 1.380, 1.181, 1.038],
+        "front_sprocket": 15,
+        "rear_sprocket": 42,
+        "chain_pitch": "525",
+        "dry_mass_kg": 203.0,   # 215 kg kerb - ~12 kg fuel (17 L tank)
+        "wheelbase_mm": 1470.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.66,         # naked, upright stance, round headlamp
+        "frontal_area_m2": 0.50,  # taller bars than Z900, wider stance
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Triumph Street Triple 765 R (2023-2026 facelift) ────────────────
+# Mid-spec variant of the 2023 Street Triple range refresh, sitting
+# below the 765 RS and above the (Indian-only) 765 R-Lo. Same Daytona-
+# derived 765 cc inline-3 as the RS but slightly detuned — 118 hp
+# @ 11500 rpm vs RS's 130 hp @ 12000 rpm (same engine, softer ECU map
+# + lighter intake). Same 6-speed gearbox + same primary, only the
+# rear sprocket differs slightly between R and RS (R = R47, RS = R47
+# — actually identical in 2023+ spec per Triumph parts catalogue).
+# Showa SFF-BP forks (vs Öhlins NIX30 on RS) + Brembo M4.32 (vs M50
+# on RS). 188 kg kerb wet (17 L tank → ~12 kg fuel → ~176 kg dry).
+# Sources: Triumph press kit 2023-01 (triumphmotorcycles.com/news/
+# 2023-street-triple-revealed), MCN 2023 first ride (motorcyclenews
+# .com/reviews/triumph/street-triple/765-r/2023/), Cycle World 2023
+# group test (cycleworld.com/story/sportbikes/2023-triumph-street-
+# triple-r-review/ — 113.4 whp @ 11400 rpm corrected SAE, 0-100 km/h
+# in 3.4 s, 1/4 in 10.9 s @ 215 km/h), Visordown 2023 spec sheet
+# (visordown.com/reviews/triumph-street-triple-r-2023-review), India
+# launch BikeWale 2023 (bikewale.com/triumph-bikes/street-triple-
+# 765r/). Gearbox cassette is the Daytona-derived unit verified
+# against Triumph parts diagram T2087500 (765 RS / R / R-Lo share).
+TRIUMPH_STREET_TRIPLE_765R_2023 = spec_from_dict(
+    {
+        "manufacturer": "Triumph",
+        "model_name": "Street Triple 765 R",
+        "model_code": "L67LR",
+        "year_from": 2023,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 765.0,
+        "bore_mm": 78.0,
+        "stroke_mm": 53.4,
+        "compression_ratio": 12.65,
+        "cylinders": 3,
+        "peak_power_hp": 118.0,
+        "peak_power_rpm": 11500,
+        "peak_torque_nm": 80.0,
+        "peak_torque_rpm": 9500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Daytona-derived 765 cassette (Triumph parts diagram T2087500,
+        # shared across 2023+ Street Triple 765 R / RS / R-Lo)
+        "gear_ratios": [2.692, 2.111, 1.696, 1.444, 1.286, 1.150],
+        "front_sprocket": 16,
+        "rear_sprocket": 47,
+        "chain_pitch": "525",
+        "dry_mass_kg": 176.0,    # 188 kg kerb - ~12 kg fuel (17 L tank)
+        "wheelbase_mm": 1402.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.61,        # streetfighter, mild fly-screen, tucked posture
+        "frontal_area_m2": 0.46,  # narrow triple, slim frame
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── KTM 125 Duke (2017-2026 / Gen-2 + Gen-3 shared engine) ──────────
+# Entry KTM single sold globally with strong India presence (Bajaj-
+# built at Chakan plant under KTM India JV). 124.7 cc liquid-cooled
+# DOHC 4-valve single → 14.5 hp @ 9250 rpm / 12.0 Nm @ 8000 rpm.
+# Same engine carries 2017 Gen-2 chassis through 2023 Gen-3 LC4c
+# trellis refresh — only chassis/electronics changed for 2024 MY,
+# powertrain identical (KTM Sportmotorcycle AG press release 2023-11).
+# 6-speed cassette per KTM service manual 3213907 (LC4c 125),
+# F14/R45 520 chain (Gen-2 was 14/45, Gen-3 unchanged). 159 kg kerb
+# (13.4 L tank → ~9.6 kg fuel → ~149 kg dry per KTM spec).
+# Sources: KTM press kit 2016-10 (ktm.com/en-int/models/naked-bikes/
+# 125-duke), KTM Sportmotorcycle AG 2023 press release (Gen-3 refresh),
+# MCN 2017 first ride (motorcyclenews.com/reviews/ktm/125-duke/2017/),
+# Visordown 2017 review (visordown.com/reviews/2017-ktm-125-duke-
+# review), BikeWale India 2017 spec sheet (bikewale.com/ktm-bikes/
+# 125-duke/specs), Bike India 2017 long-term test (bikeindia.in/2017
+# -ktm-125-duke-india-review — recorded 0-60 km/h 5.2 s, 0-100 km/h
+# 14.8 s, top speed 110 km/h instrumented Vbox). Gearbox cassette
+# verified against KTM Powerparts catalogue PN 3213907.
+KTM_125_DUKE_2017 = spec_from_dict(
+    {
+        "manufacturer": "KTM",
+        "model_name": "125 Duke",
+        "model_code": "LC4c-125",
+        "year_from": 2017,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 124.7,
+        "bore_mm": 58.0,
+        "stroke_mm": 47.2,
+        "compression_ratio": 12.5,
+        "cylinders": 1,
+        "peak_power_hp": 14.5,
+        "peak_power_rpm": 9250,
+        "peak_torque_nm": 12.0,
+        "peak_torque_rpm": 8000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # LC4c 125 6-speed cassette (KTM service manual 3213907)
+        "gear_ratios": [3.000, 2.150, 1.700, 1.412, 1.222, 1.083],
+        "front_sprocket": 14,
+        "rear_sprocket": 45,
+        "chain_pitch": "520",
+        "dry_mass_kg": 149.0,   # 159 kg kerb - ~9.6 kg fuel (13.4 L tank)
+        "wheelbase_mm": 1357.0,
+        "front_tire_size": "110/70-17",
+        "rear_tire_size": "150/60-17",
+        "cd": 0.68,        # Duke-platform naked, tall stance + LED light
+        "frontal_area_m2": 0.43,  # narrow single, slim trellis frame
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -2238,4 +2412,8 @@ EXTENDED_BIKES = [
     HERO_SPLENDOR_PLUS_2020,
     HONDA_SP125_2019,
     BAJAJ_PULSAR_NS125_2021,
+    # ── Daily improvement run 2026-05-17 (Sunday — Catalog A1 seventh pass) ──
+    KAWASAKI_Z900RS_2018,
+    TRIUMPH_STREET_TRIPLE_765R_2023,
+    KTM_125_DUKE_2017,
 ]

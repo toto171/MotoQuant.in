@@ -143,3 +143,41 @@ Same-day pytest history vector: `[9.231, 7.900, 8.154, 10.400, 7.775, 7.898]` �
 
 **Baseline status:** 6 same-date entries; cross-day rolling baseline still not formed. First cross-day comparison possible from 2026-05-18 onward.
 
+## Run 7 (perf-monitor agent A12) — full curl primitives
+
+Seventh perf-monitor probe on 2026-05-17. Probed via `curl -w` end-to-end so TTFB / total-time / payload bytes are captured numerically.
+
+| Probe | TTFB (ms) | Total (ms) | HTTP | Size | Notes |
+|---|---|---|---|---|---|
+| `https://www.motoquant.in/` (landing) | **1346.17** | 1350.33 | 200 | 32,634 B | Title matches expected SEO copy |
+| `https://web-production-de6eb.up.railway.app/api/health` ×5 | **712.35 avg** | (≈TTFB) | 200 | 55 B | Samples: 807.7 / 714.6 / 683.4 / 641.2 / 714.8 ms; range 641-808 ms; payload `{"status":"ok","database":"connected","bike_count":342}` |
+| `https://web-production-de6eb.up.railway.app/api/bikes?limit=10` | **823.19** | 823.26 | 200 | 1,948 B | One sample; healthy response size for 10-row payload |
+| `pytest tests/test_validation.py tests/test_scraper.py` | n/a | n/a | n/a | n/a | **111 passed in 7.96s** |
+
+### Run 7 drift table (vs prior-6 same-day mean)
+
+Prior-6 wall vector: `[9.231, 7.900, 8.154, 10.400, 7.775, 7.898]` → mean **8.560s**.
+
+| Metric                    | Run 7 (today)  | Run 6 (prior curl) | Δ vs run 6 | Prior-6 mean | Δ vs mean | Gate (>+30%) |
+|---------------------------|----------------|---------------------|------------|--------------|-----------|--------------|
+| Landing TTFB (ms)         | 1346.17        | 1378.51             | -2.3%      | —            | —         | ok           |
+| Landing payload (bytes)   | 32,634         | 32,634              | 0.0%       | —            | —         | ok           |
+| /api/health avg (n=5, ms) | 712.35         | 708.29              | +0.6%      | —            | —         | ok           |
+| /api/health median (ms)   | 714.78         | 687.44              | +4.0%      | —            | —         | ok           |
+| /api/bikes latency (ms)   | 823.19         | 478.23              | +72.1%     | —            | —         | **investigate** |
+| Pytest wall-clock (s)     | 7.96           | 7.898               | +0.8%      | 8.560        | **-7.0%** | ok           |
+| Pytest pass / fail        | 111 / 0        | 111 / 0             | flat       | —            | —         | ok           |
+| api_health bike_count     | 342            | 342                 | flat       | —            | —         | ok           |
+
+### Run 7 single-sample drift caveat — `/api/bikes` +72%
+
+`/api/bikes?limit=10` came in at 823 ms vs run-6's 478 ms (+72%). Single sample on both sides — **not** escalated per the agent spec ("require 2 consecutive bad runs before raising drift"). Equally consistent with sandbox-to-Railway TLS handshake / TCP slow-start jitter as with a real backend slowdown. Will compare on run 8; if next probe also ≥ +30%, escalate to `DISPATCH_INBOX.md`.
+
+First `/api/health` sample 807.7 ms vs trailing 4 at ~688 ms (mean) — cold-cache / cold-connection signature consistent with runs 4 + 6.
+
+### Run 7 verdict
+
+No drift escalation. Pytest wall-clock comfortably below same-day rolling mean (-7.0%). Landing TTFB + `/api/health` avg both within ±5% of run-6 capture. `/api/bikes` single-sample bump flagged for next-run comparison but not escalated. No `[urgent]` block queued to `DISPATCH_INBOX.md`.
+
+7 same-day datapoints now exist; cross-day rolling baseline still not formed. First cross-day comparison possible from 2026-05-18 onward.
+
