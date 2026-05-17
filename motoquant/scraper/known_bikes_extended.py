@@ -2529,6 +2529,176 @@ HONDA_CB125R_2018 = spec_from_dict(
 )
 
 
+# ── BMW R 18 (2020+ — big-twin cruiser) ────────────────────────────
+# BMW's "Big Boxer" cruiser — 1802 cc air/oil-cooled flat-twin, the
+# largest production boxer engine ever made. 91 hp @ 4750 rpm, 158 Nm
+# @ 3000 rpm. 6-speed gearbox + shaft drive (paralever-style cardan).
+# Kerb 345 kg (16 L tank ≈ 12 kg fuel → ~333 kg dry). Pure low-revving
+# torque-monster cruiser, redline ~5750 rpm. Classic-style tubular
+# steel double-cradle frame.
+# Cluster classifier: cruiser + 1802 cc → CATEGORY_CRUISER_1300P
+# Shaft-drive routes to `front_sprocket=0, rear_sprocket=0` per the
+# BMW R-series rule added to importer._BMW_SHAFT_MODELS for "R 18".
+# Sources: BMW Motorrad press kit 2020-04-03 (press.bmwgroup.com/
+# global/article/detail/T0307956EN/the-new-bmw-r-18-the-big-boxer),
+# BMW Motorrad official spec page (bmwmotorrad.com/en/models/heritage/
+# r18/r18/specs), MCN 2020 review (motorcyclenews.com/reviews/bmw/
+# r-18/2020/), Cycle World 2020 first-ride (cycleworld.com/story/
+# motorcycle-reviews/2020-bmw-r-18-first-ride-review). Gear ratios from
+# BMW R 18 service manual (Repair Manual K34).
+BMW_R_18_2020 = spec_from_dict(
+    {
+        "manufacturer": "BMW",
+        "model_name": "R 18",
+        "model_code": "K34",
+        "year_from": 2020,
+        "year_to": 2026,
+        "category": "cruiser",
+        "displacement_cc": 1802,
+        "bore_mm": 107.1,
+        "stroke_mm": 100.0,
+        "compression_ratio": 9.6,
+        "cylinders": 2,
+        "peak_power_hp": 91.0,
+        "peak_power_rpm": 4750,
+        "peak_torque_nm": 158.0,
+        "peak_torque_rpm": 3000,
+        "fuel_system": "fi",
+        "cooling": "air",      # air/oil — primary is air
+        "valve_config": "ohv", # pushrod, 2 valves per cyl, OHV
+        "gears": 6,
+        # K34 6-speed cassette per BMW service manual.
+        "gear_ratios": [3.231, 2.169, 1.640, 1.342, 1.115, 0.960],
+        "front_sprocket": 0,   # shaft drive
+        "rear_sprocket": 0,
+        "chain_pitch": None,
+        "dry_mass_kg": 333.0,  # 345 kg DIN kerb - ~12 kg fuel (16 L tank)
+        "wheelbase_mm": 1731.0,
+        "front_tire_size": "120/70R19",
+        "rear_tire_size": "180/65B16",
+        "cd": 0.85,            # naked cruiser, riding position upright
+        "frontal_area_m2": 0.66,  # protruding boxer cylinders
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Royal Enfield Classic 650 (2024-2025 EICMA launch) ─────────────
+# Latest addition to the 650 twin platform — RE's 648 cc parallel-twin
+# already powering Interceptor / Continental GT / Super Meteor / Shotgun /
+# Bear. Classic 650 is the 350-style retro cruiser body on the larger
+# twin platform; same SOHC 4-valve-per-cyl 270° crank, 47 hp @ 7250 rpm,
+# 52.3 Nm @ 5650 rpm. 6-speed gearbox shared with whole 650 twin family.
+# Kerb 243 kg (14.7 L tank ≈ 11 kg fuel → ~232 kg dry).
+# Cluster classifier: cruiser + 648 cc → CATEGORY_MID_TWIN_500_700
+# Sources: Royal Enfield press release 2024-11-05 (EICMA launch,
+# royalenfield.com/in/en/our-world/news/2024-classic-650-eicma-launch),
+# Royal Enfield official spec page (royalenfield.com/in/en/motorcycles/
+# classic-650/specifications/), Cycle World 2024 EICMA report
+# (cycleworld.com/story/motorcycles/royal-enfield-classic-650-eicma-
+# 2024), Autocar India 2025 first-ride (autocarindia.com/bike-reviews/
+# 2025-royal-enfield-classic-650-review), MCN 2025 review
+# (motorcyclenews.com/reviews/royal-enfield/classic-650/2025/). Gear
+# ratios verified shared with Interceptor 650 (Tier-1 lookup in
+# gear_ratios.py covers all 650 twin variants — same UCE 648 cc
+# transmission cassette + F15/R45 525 chain per RE parts catalogue).
+ROYAL_ENFIELD_CLASSIC_650_2025 = spec_from_dict(
+    {
+        "manufacturer": "Royal Enfield",
+        "model_name": "Classic 650",
+        "model_code": "Classic650",
+        "year_from": 2025,
+        "year_to": 2026,
+        "category": "cruiser",
+        "displacement_cc": 648,
+        "bore_mm": 78.0,
+        "stroke_mm": 67.8,
+        "compression_ratio": 9.5,
+        "cylinders": 2,
+        "peak_power_hp": 47.0,
+        "peak_power_rpm": 7250,
+        "peak_torque_nm": 52.3,
+        "peak_torque_rpm": 5650,
+        "fuel_system": "fi",
+        "cooling": "air",      # air/oil
+        "valve_config": "sohc",
+        "gears": 6,
+        # Shared with Interceptor 650 / Super Meteor 650 (UCE 648 cc
+        # twin platform). Per RE parts catalogue + Tier-1 lookup.
+        "gear_ratios": [2.923, 2.058, 1.605, 1.333, 1.158, 1.000],
+        "front_sprocket": 15,
+        "rear_sprocket": 45,
+        "chain_pitch": "525",
+        "dry_mass_kg": 232.0,  # 243 kg kerb - ~11 kg fuel (14.7 L tank)
+        "wheelbase_mm": 1475.0,
+        "front_tire_size": "100/90R19",
+        "rear_tire_size": "140/70R18",
+        "cd": 0.80,            # classic cruiser tuck
+        "frontal_area_m2": 0.60,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── KTM 890 Adventure R (2021-2024 — middleweight ADV) ─────────────
+# Off-road oriented variant of the 890 platform (vs the 890 Adventure
+# standard); 21" front wheel, longer travel WP XPLOR suspension, taller
+# 880 mm seat. Engine: 889 cc LC8c parallel-twin, 105 hp @ 8000 rpm /
+# 100 Nm @ 6500 rpm — shared crankshaft / pistons / cylinder head with
+# 890 Duke R (Tier-1 gear ratio entry "duke 890" applies here too —
+# same PASC slipper cassette + F15/R45 520 chain per KTM service manual).
+# Kerb 210 kg (20 L tank ≈ 15 kg fuel → ~196 kg dry).
+# Cluster classifier: adventure + 889 cc → CATEGORY_OTHER (no
+# specific cluster — ADV bikes don't slot into the 8 canonical clusters
+# per derive_category_tag).
+# Sources: KTM press release 2020-12-08 (ktm.com/en-us/content-pool/
+# press-releases/2020/12/the-2021-ktm-890-adventure-r), KTM official
+# spec page (ktm.com/en-us/motorcycles/travel/890-adventure-r/2024-
+# 890-adventure-r), MCN 2021 review (motorcyclenews.com/reviews/ktm/
+# 890-adventure-r/2021/), Cycle World 2021 first-ride (cycleworld.com/
+# story/motorcycle-reviews/2021-ktm-890-adventure-r-first-ride-review),
+# RevZilla 2024 review (revzilla.com/common-tread/ktm-890-adventure-r-
+# review). Gear ratios from KTM 890 Duke service manual (same gearbox).
+KTM_890_ADVENTURE_R_2021 = spec_from_dict(
+    {
+        "manufacturer": "KTM",
+        "model_name": "890 Adventure R",
+        "model_code": "890ADVR",
+        "year_from": 2021,
+        "year_to": 2024,
+        "category": "adventure",
+        "displacement_cc": 889,
+        "bore_mm": 90.7,
+        "stroke_mm": 68.8,
+        "compression_ratio": 13.5,
+        "cylinders": 2,
+        "peak_power_hp": 105.0,
+        "peak_power_rpm": 8000,
+        "peak_torque_nm": 100.0,
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Shared with 890 Duke R (PASC slipper 6-speed cassette per
+        # KTM service manual). F15/R45 520 chain per KTM parts catalogue
+        # (890 ADV R uses 45T rear sprocket vs Duke R's 42T for
+        # off-road gearing).
+        "gear_ratios": [2.625, 1.941, 1.580, 1.346, 1.185, 1.071],
+        "front_sprocket": 15,
+        "rear_sprocket": 45,
+        "chain_pitch": "520",
+        "dry_mass_kg": 196.0,  # 210 kg kerb - ~15 kg fuel (20 L tank)
+        "wheelbase_mm": 1528.0,
+        "front_tire_size": "90/90R21",
+        "rear_tire_size": "150/70R18",
+        "cd": 0.58,            # tall ADV, big screen, adjustable
+        "frontal_area_m2": 0.65,
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -2594,4 +2764,8 @@ EXTENDED_BIKES = [
     HARLEY_NIGHTSTER_RH975_2022,
     HUSQVARNA_SVARTPILEN_250_2024,
     HONDA_CB125R_2018,
+    # ── Daily improvement run 2026-05-17 (Sunday — Catalog A1 ninth pass) ──
+    BMW_R_18_2020,
+    ROYAL_ENFIELD_CLASSIC_650_2025,
+    KTM_890_ADVENTURE_R_2021,
 ]

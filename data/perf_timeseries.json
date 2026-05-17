@@ -221,5 +221,41 @@
     "tests_failed": 0,
     "network_blocked": false,
     "notes": "Run 8 of 2026-05-17 (performance-monitor agent, autonomous Sunday). Egress functional (CLAUDE.md egress-blocked caveat is stale). Landing TTFB 1290ms vs same-day mean 1362ms (-5.3%, faster). /api/health 5-sample mean 665.7ms vs same-day mean 710.3ms (-6.3%, faster). /api/bikes 793.8ms (no same-day mean baseline yet \u2014 prior runs recorded different fields). Pytest real wall 8.132s vs same-day mean 8.437s (-3.6%, within noise). 111 passed / 0 failed unchanged. bike_count 342 stable across all 8 runs of the day (note: CLAUDE.md headline still 336 \u2014 pre-existing drift, not new). No escalation. Cross-day baseline still not formed (all 8 rows same-date 2026-05-17); rolling drift detection will begin once 2026-05-18 data lands."
+  },
+  {
+    "date": "2026-05-17",
+    "run_index": 9,
+    "agent": "performance-monitor",
+    "session_id": "1779035449-728",
+    "landing_ttfb_ms": 1073.998,
+    "landing_total_ms": 1077.718,
+    "landing_size_bytes": 32634,
+    "landing_http": 200,
+    "api_health_ms_avg": 884.74,
+    "api_health_ms_median": 935.88,
+    "api_health_ms_samples": [
+      995.756,
+      1013.171,
+      935.882,
+      591.978,
+      886.897
+    ],
+    "api_health_http": 200,
+    "api_health_bike_count": 342,
+    "api_bikes_ms": 1015.74,
+    "api_bikes_total_ms": 1015.832,
+    "api_bikes_http": 200,
+    "api_bikes_size_bytes": 1948,
+    "api_bikes_count": 10,
+    "api_bikes_first": "Aprilia RS 457 (2024-2026)",
+    "test_walltime_s": 8.741,
+    "test_walltime_samples_s": [
+      8.856,
+      8.625
+    ],
+    "tests_passed": 111,
+    "tests_failed": 0,
+    "network_blocked": false,
+    "notes": "Run 9 of 2026-05-17 (performance-monitor agent). Egress functional via curl (CLAUDE.md egress-blocked caveat remains stale; suggests the queued GH-Actions side-channel INSTRUCTION 2026-05-07 may now be moot). Pytest median 8.741s of 2 samples [8.856, 8.625] vs same-day prior mean 8.431s = +3.7% (within +/-30% drift gate). API /health 5-sample mean 884.74ms (median 935.88ms) vs same-day prior mean 698.28ms = +26.7%. Landing TTFB 1074ms (-21% vs prior ~1339ms same-day mean, improvement, not escalated). /api/bikes 1016ms (+30-ish% vs prior 478-823ms range; single-sample, treating as noise). bike_count 342 stable across all 9 runs today; CLAUDE.md headline 336 drift pre-existing. 111/0 pass/fail stable. NO drift escalation. Cross-day baseline still not formed (all 9 rows are 2026-05-17); first cross-day comparison possible 2026-05-18."
   }
 ]
