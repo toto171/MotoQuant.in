@@ -1,0 +1,23 @@
+[
+  {
+    "date": "2026-05-17",
+    "api_health": {
+      "status": "ok",
+      "ttfb_ms": null,
+      "error_class": null,
+      "payload": {"status": "ok", "database": "connected", "bike_count": 342}
+    },
+    "web_landing": {
+      "status": "ok",
+      "ttfb_ms": null,
+      "title": "MotoQuant Pro — Motorcycle Quarter-Mile Drag Racing Simulator | ET Predictor & Build Optimizer"
+    },
+    "tests_wall_s": 9.231,
+    "tests_passed": 111,
+    "baseline_sim_3bikes_s": 0.7682,
+    "baseline_et_s": {"K5": 10.0334, "R1": 10.2859, "Hayabusa": 10.4712},
+    "surrogate_per_call_ms": null,
+    "surrogate_pickle_present": false,
+    "notes": "Inaugural run; no rolling-avg baseline yet. WebFetch egress worked today (Railway + Vercel reachable from sandbox), contradicting prior CLAUDE.md egress-blocked note. TTFB not exposed by WebFetch tool; payload + status captured instead. Surrogate pickles absent from this clone (surrogate_dnn.pkl + surrogate.pkl both missing). Baseline ETs match locked references exactly."
+  }
+]

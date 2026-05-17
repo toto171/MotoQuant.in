@@ -424,6 +424,38 @@ Invoked from `scripts/session_preflight.sh` before mutex acquisition.
 
 ---
 
+## INSTRUCTION — 2026-05-17 — [self-review] META: 14 INSTRUCTIONs unprocessed — pick a remediation path
+[urgent]
+
+**Attribution:** self-review M3 2026-05-17 (`reports/self_review_2026-05-17.md` Layer 4 + Finding 3.1). Replaces issuing more individual INBOX items per the brief's "if dominant signal is M1/M2 queued items still unprocessed, write ONE meta-INSTRUCTION instead".
+
+**The fact:** 14 INSTRUCTIONs are queued in this file, none have moved to `## DONE` since 2026-05-07. 6 are 10 days old (lines 197, 212, 234, 254, 269, 287); 8 are 1 day old (lines 300, 322, 341, 361, 376, 389, 408, 427). Counted backlog growth since system shipped 2026-05-04: **+15 queued / 0 consumed.** The kaizen loop is structurally write-only.
+
+**Three remediation paths — pick one (or combine):**
+
+**Path A — Approve building `inbox-implementer` (INBOX:427) as the immediate next priority.** This is the structural fix M2 identified. Once an agent exists whose scope is "consume the oldest urgent INBOX item per session", every future self-review run becomes net-zero or net-negative rather than net-positive. Effort: ~2 hours per INBOX:427's Done-when block. **Recommended.**
+
+**Path B — Manually triage the 6 items from 2026-05-07.** Some may be stale (e.g., INBOX:234 `bike_repo year-suffix matching` may have been done implicitly by a catalog-expansion session — quick `git log --all -S "year_suffix" -- motoquant/database/bike_repo.py` would tell). Mark stale items `## DEFERRED` with reason. Shrinks the surface area before any implementer agent picks them up. Effort: ~30 minutes user-side.
+
+**Path C — Dispatch the next session manually with line-number priority list.** E.g., "implement INBOX:322 (postflight `_updated` stamp) + INBOX:376 (outbox truncation) in that order; mark DONE on completion." Bypasses the agent infrastructure for one cycle. Effort: per-item; INBOX:322 is ~1 hour, INBOX:376 is ~1 hour (both shell-script edits to `scripts/session_postflight.sh`).
+
+**Dependency order if Path A or C picks the GH-Actions side-channel chain (per Finding 3.5):**
+
+```
+INBOX:322 (postflight writes _updated)        — prerequisite for staleness check to function
+ └─> INBOX:376 (fix OUTBOX heredoc truncation) — prerequisite for cron to parse OUTBOX
+      └─> INBOX:300 (read side-channel design notes)
+           └─> INBOX:341 (build the side-channel itself)
+```
+
+Implementing INBOX:341 before INBOX:322 + INBOX:376 produces false-positive alerts on first cron tick (per M1 followup Section A.4 + B.2/B.3 + M3 Finding 3.5).
+
+**Done when:** any one of Paths A/B/C is chosen and at least 1 of the 14 listed INSTRUCTIONs moves to `## DONE` with a citing commit SHA. M3 commits to NOT queueing any more `[self-review]`-tagged items until backlog drops below 8.
+
+**Cooldown note:** per `scripts/agents/self-review.md:64`, no further self-review runs before **2026-05-22**.
+
+---
+
 ## INSTRUCTION — 2026-05-16 — [self-review] add `inbox-implementer` agent (meta-fix for stalled kaizen queue)
 [urgent]
 

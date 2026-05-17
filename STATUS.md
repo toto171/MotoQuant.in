@@ -25,7 +25,7 @@ last_updated: <!-- AUTO-UPDATED -->
 
 | KPI | Now | Q-end target | Direction | Last-updated |
 |---|---|---|---|---|
-| Bike catalog count | 346 (in-flight; 343 pushed) | 500+ by Q4 | ↑ | 2026-05-16 |
+| Bike catalog count | 349 (commit msg); 342 in DB — mismatch flagged | 500+ by Q4 | ↑ | 2026-05-17 |
 | Validated ETs ±0.20s | 47% | 60% Q3 / 70% Q4 | ↑ | 2026-05-04 |
 | Benchmark sources | 79 | 100+ | ↑ | 2026-05-04 |
 | Indexed pages (motoquant.in) | (TBD) | 50+ Q2 / 200+ Q4 | ↑ | (need GA4) |
@@ -41,6 +41,28 @@ last_updated: <!-- AUTO-UPDATED -->
 ## Last 7 days — session-level digest
 
 <!-- self-review weekly summary lives here. Updated every Sunday. -->
+
+### Week of 2026-05-10 → 2026-05-17 (self-review M3 — Sunday cadence)
+
+**Dominant signal:** INBOX backlog at 14 unprocessed INSTRUCTIONs (6 from 2026-05-07 aged 10 days, 8 from 2026-05-16 aged 1 day). **Zero items consumed since 2026-05-07.** The proposed remedy — `inbox-implementer` agent at INBOX:427 — is itself queued, not built. Loop is empirically write-only: +15 items queued / 0 consumed since system shipped 2026-05-04. See `reports/self_review_2026-05-17.md` for full Layer 4 attribution.
+
+**Commits 2026-05-10 → 2026-05-17 (7-day window):** 6 commits, all on 2026-05-16. May 10-15 empty (carry-over from the M1-identified dark window). Today's 2026-05-17 has 1.77 hours elapsed since M2 (no other commits yet — this M3 will be the first).
+
+**Catalog:** 343 pushed → 346 (M1 morning, +3) → 349 (M2 evening, +3 Honda). DB ships at 342 — mismatch with declared 349 in commit message. **Flagged for `scripts/audit_headline_stats.py` next session.**
+
+**Tech debt:** A9 ran twice (morning `_TestDB` lift to `tests/_helpers.py`, evening bridge.py TypedDict refactor). Both held; 100% test pass.
+
+**Self-review activity (anomalous):** 3 dispatches in 24h (M1 morning + followup + M2), now M3 on natural Sunday cadence. All produced reports; M1 morning + M2 made the only code changes (`scripts/scheduler_weights.json` weight bumps × 4 single-knob edits across both runs).
+
+**Reference baselines:** K5 10.0334s / R1 10.2859s / Hayabusa 10.4712s — held (Δ +0.0000s).
+
+**Auto-applied this run (M3):** `partnership-outreach.base` 25 → 15. Reason: 20 drafts in `outreach/` since May 8, no SMTP send infra, KPI `Closed B2B conversations` = 0. Demote until either send-pipeline lands or drafts get consumed.
+
+**Inbox queued by M3 (1):** single meta-INSTRUCTION about the 14-deep backlog, with three remediation paths and dependency-ordering for items 322 → 376 → 300 → 341. Avoids adding individual items per the brief's "if dominant signal is M1/M2 queued items still unprocessed, write ONE meta-INSTRUCTION instead".
+
+**Cooldown:** per agent-template `:64` ("Don't run more than one self-review per 5 days"), M3 commits to no further self-review before 2026-05-22.
+
+---
 
 ### Week of 2026-05-09 → 2026-05-16 (self-review M1 — inaugural run)
 
@@ -94,6 +116,7 @@ last_updated: <!-- AUTO-UPDATED -->
 
 - **2026-05-16 M1:** `self-review.base` 50 → 60; `self-review.best_dow` [7] → [6, 7]. Reason: agent never fired on Sun May 10 (the only available Sun in the window since system shipped). Doubling the day-of-week surface area to Sat+Sun gives the loop a second chance against day-weight competition.
 - **2026-05-16 M1:** Added `claude-feature-monitor` entry (base 15, best_dow [7]). Reason: missing from the JSON file entirely; agent prompt template exists but scheduler couldn't pick it.
+- **2026-05-17 M3:** `partnership-outreach.base` 25 → 15. Reason: 20 outreach drafts produced May 8 but 0 sent, no SMTP wiring exists, KPI `Closed B2B conversations` = 0 after 9 days. Demote until either send infra lands or a downstream agent consumes the drafts. Single-knob change, within ±10 envelope per agent-template policy. Attribution: `reports/self_review_2026-05-17.md` Finding 3.2.
 
 ---
 
@@ -116,7 +139,7 @@ last_updated: <!-- AUTO-UPDATED -->
   "growth-experiments":     { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "partnership-outreach":   { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "claude-feature-monitor": { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
-  "self-review":            { "date": "2026-05-16", "outcome": "success", "consecutive_fails": 0 },
+  "self-review":            { "date": "2026-05-17", "outcome": "success", "consecutive_fails": 0 },
   "incident-postmortem":    { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "source-verifier":        { "date": null, "outcome": "never_run", "consecutive_fails": 0 }
 }

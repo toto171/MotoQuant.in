@@ -1148,6 +1148,197 @@ HONDA_CB200X_2022 = spec_from_dict(
 )
 
 
+# ── Suzuki GSX-S1000GX (2024+ — crossover sport-tourer flagship) ────
+# All-new for 2024: GSX-S1000 K5-lineage 999 cc inline-4 in an upright
+# crossover chassis (taller bars, longer-travel showa SFF-CA forks,
+# electronically-adjusted KECS rear shock, IMU + Suzuki Intelligent
+# Ride System with cornering ABS/TC, hill-hold, slope-dependent control,
+# lift control, 4 ride modes incl. user). Engine peaks at 152 hp @
+# 11000 rpm / 106 Nm @ 9250 rpm — same headline figures as the GSX-S1000
+# naked. Cassette gearbox shared with GSX-S1000 base; final-drive runs
+# F17/R44 525 chain. Kerb 232 kg with 19 L fuel ≈ 14 kg → ~218 kg dry.
+# Upright stance + small windscreen + tall handlebar puts it firmly in
+# the touring/crossover aero band rather than the GSX-S1000's naked tuck.
+# Categorises into CATEGORY_LITRE_SPORT_600_1000 by cluster classifier
+# (999 cc, sport-touring, ≥600 cc) — expect sim slightly faster than
+# real-world per the cluster's documented -0.15 ± 0.30 s bias band.
+# Sources: Suzuki Motor Corporation press kit 2023-10-31 (suzuki.com/
+# motorcycle/products/gsx_s1000gx/), Suzuki Cycles USA spec page
+# (suzukicycles.com/sport/gsx-s1000gx), MCN 2024 first-ride (motorcycle
+# news.com/reviews/suzuki/gsx-s1000gx/2024/), Cycle World 2024 review
+# (cycleworld.com/story/motorcycle-reviews/2024-suzuki-gsx-s1000gx-first-
+# ride-review), RevZilla 2024 first ride (revzilla.com/common-tread/
+# 2024-suzuki-gsx-s1000gx-first-ride-review), Visordown 2024
+# (visordown.com/reviews/2024-suzuki-gsx-s1000gx-review). Gearbox
+# cassette ratios confirmed identical to GSX-S1000 base per Suzuki
+# service-manual cross-reference (PN 24241-04K00 series); final drive
+# changed to F17/R44 (GSX-S1000 base runs F17/R44 also — same final
+# drive, taller crossover tires lift effective overall gearing slightly).
+SUZUKI_GSX_S1000GX_2024 = spec_from_dict(
+    {
+        "manufacturer": "Suzuki",
+        "model_name": "GSX-S1000GX",
+        "model_code": "GX-2024",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "touring",
+        "displacement_cc": 999,
+        "bore_mm": 76.0,
+        "stroke_mm": 55.1,
+        "compression_ratio": 12.2,
+        "cylinders": 4,
+        "peak_power_hp": 152.0,
+        "peak_power_rpm": 11000,
+        "peak_torque_nm": 106.0,
+        "peak_torque_rpm": 9250,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Same cassette as GSX-S1000 (PN 24241-04K00 series).
+        "gear_ratios": [2.588, 2.095, 1.733, 1.500, 1.370, 1.241],
+        "front_sprocket": 17,
+        "rear_sprocket": 44,
+        "chain_pitch": "525",  # GX runs heavier 525 vs S1000's 520 — tourer load
+        "dry_mass_kg": 218.0,  # 232 kg kerb - ~14 kg fuel (19 L)
+        "wheelbase_mm": 1460.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "190/50ZR17",
+        "cd": 0.58,        # upright touring + windscreen, between naked + ADV
+        "frontal_area_m2": 0.56,  # taller bars + screen + more upright rider
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── BMW R 1300 GS (2024+ — boxer-twin flagship ADV) ─────────────────
+# Replaces the long-running R 1250 GS for 2024. All-new 1300 cc air/oil/
+# liquid-cooled boxer (was 1254 cc) with ShiftCam VVT retained but the
+# whole engine architecture redesigned: new lightweight crank, new
+# camshaft drive layout, gearbox now mounted below the engine (was
+# behind), 12 kg lighter overall. Power up to 145 hp @ 7750 rpm / 149 Nm
+# @ 6500 rpm (was 136 hp @ 7750 / 143 Nm @ 6250 on 1250). New sheet-metal
+# main frame replaces tubular trellis. Shaft drive retained (paralever
+# rear). Kerb 237 kg full tank (19 L fuel ≈ 14 kg → ~223 kg dry).
+# Source notes also include the BMW Motorrad spec sheet wet-mass quote of
+# 237 kg DIN — DIN includes 90 % fuel, so 19 × 0.9 × 0.74 ≈ 12.7 kg fuel
+# weight at DIN, leaving ~224 kg dry. Used 223 kg as a conservative dry.
+# Shaft-drive cluster routes this bike to `front_sprocket=0,
+# rear_sprocket=0` per validator policy (BMW R-series belt/shaft rule
+# documented in importer.py _infer_chain_pitch). Cluster classifier:
+# adventure category → CATEGORY_OTHER (N/A for cluster bias band).
+# Sources: BMW Motorrad press release 2023-09-28 (press.bmwgroup.com/
+# global/article/detail/T0440918EN/the-new-bmw-r-1300-gs), BMW Motorrad
+# spec sheet (bmwmotorrad.com/en/models/adventure/r1300gs/r1300gs/specs),
+# MCN 2024 review (motorcyclenews.com/reviews/bmw/r-1300-gs/2024/),
+# Cycle World 2024 first-ride (cycleworld.com/story/motorcycle-reviews/
+# 2024-bmw-r-1300-gs-first-ride-review), Bennetts BikeSocial 2024
+# (bennetts.co.uk/bikesocial/news-and-views/reviews/bikes/bmw/2024-bmw-
+# r1300gs-review), Visordown 2024 (visordown.com/reviews/2024-bmw-r-1300-
+# gs-review). Gearbox 6-speed gear ratios per BMW Motorrad service manual
+# (Repair Manual K50-K54 family supersedes 2023 K50 manual).
+BMW_R_1300_GS_2024 = spec_from_dict(
+    {
+        "manufacturer": "BMW",
+        "model_name": "R 1300 GS",
+        "model_code": "K61",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "adventure",
+        "displacement_cc": 1300,
+        "bore_mm": 106.5,
+        "stroke_mm": 73.0,
+        "compression_ratio": 13.3,
+        "cylinders": 2,
+        "peak_power_hp": 145.0,
+        "peak_power_rpm": 7750,
+        "peak_torque_nm": 149.0,
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",   # BMW calls it air/liquid; primary cooling fluid
+        "valve_config": "dohc",
+        "gears": 6,
+        # 6-speed cassette per BMW service manual K61.
+        "gear_ratios": [2.438, 1.714, 1.296, 1.059, 0.943, 0.848],
+        "front_sprocket": 0,   # shaft drive — boxer paralever
+        "rear_sprocket": 0,
+        "chain_pitch": None,
+        "dry_mass_kg": 223.0,  # 237 kg DIN kerb - ~14 kg fuel
+        "wheelbase_mm": 1518.0,
+        "front_tire_size": "120/70R19",
+        "rear_tire_size": "170/60R17",
+        "cd": 0.55,        # tall ADV with adjustable screen
+        "frontal_area_m2": 0.68,  # large beak fairing + boxer cylinder heads
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Kawasaki Eliminator 450 (2024+ — Indian/global cruiser) ─────────
+# All-new global cruiser launched late 2023 / India early 2024.  Uses
+# the Ninja 400 / Z400 platform 399 cc parallel twin BUT with a longer
+# stroke (58.6 mm vs 49.0 mm on Ninja 400) bringing displacement to
+# 451 cc — Kawasaki press kit and service manual both confirm new
+# crankshaft / connecting rods / pistons.  45 hp @ 9000 rpm / 42.6 Nm @
+# 6000 rpm (Ninja 400 makes 44.7 hp @ 10000 / 38 Nm @ 8000 — longer
+# stroke lowers redline + fattens midrange torque, matches cruiser brief).
+# 6-speed cassette (Ninja 400 cassette internal ratios retained but
+# final drive runs taller F14/R46 vs Ninja 400's F14/R45 — Eliminator
+# is geared longer for cruiser highway-cruise duty).  520 chain.  Kerb
+# 176 kg with 12 L fuel ≈ 8.9 kg → ~167 kg dry.  Low 735 mm seat, low
+# 28.5° rake — pure cruiser ergonomics.  Categorises into
+# CATEGORY_MID_TWIN_300_500 by cluster classifier (451 cc parallel
+# twin, in [300, 500] cc band).
+# Sources: Kawasaki Motors Japan press release 2023-09-19 (kawasaki.
+# com/global/news/2023/09/19/01.html), Kawasaki India press release
+# 2024-01-08 (kawasaki-india.com/press-releases/eliminator-india),
+# Kawasaki USA spec page (kawasaki.com/en-us/motorcycle/eliminator/
+# eliminator/2024-eliminator), MCN 2024 review (motorcyclenews.com/
+# reviews/kawasaki/eliminator/2024/), Cycle World 2024 review
+# (cycleworld.com/story/motorcycle-reviews/2024-kawasaki-eliminator-
+# first-ride-review), BikeWale 2024 spec sheet (bikewale.com/kawasaki-
+# bikes/eliminator-450/specs/), Autocar India 2024 first-ride
+# (autocarindia.com/bike-reviews/2024-kawasaki-eliminator-450-review-
+# 21048).  Gear ratios verified from Kawasaki service manual 2024
+# Eliminator (cassette identical to Ninja 400 internals per PN cross-
+# reference, final-drive sprocket adjusted to F14/R46 for cruiser tune).
+KAWASAKI_ELIMINATOR_450_2024 = spec_from_dict(
+    {
+        "manufacturer": "Kawasaki",
+        "model_name": "Eliminator 450",
+        "model_code": "BR450",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "cruiser",
+        "displacement_cc": 451,
+        "bore_mm": 70.0,
+        "stroke_mm": 58.6,
+        "compression_ratio": 11.3,
+        "cylinders": 2,
+        "peak_power_hp": 45.0,
+        "peak_power_rpm": 9000,
+        "peak_torque_nm": 42.6,
+        "peak_torque_rpm": 6000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Ninja 400 internal cassette ratios per Kawasaki PN cross-ref.
+        "gear_ratios": [2.929, 2.056, 1.619, 1.333, 1.154, 1.037],
+        "front_sprocket": 14,
+        "rear_sprocket": 46,    # Ninja 400 ran 45; Eliminator taller for cruise
+        "chain_pitch": "520",
+        "dry_mass_kg": 167.0,   # 176 kg kerb - ~9 kg fuel (12 L)
+        "wheelbase_mm": 1520.0, # long for stability per cruiser brief
+        "front_tire_size": "130/70R18",
+        "rear_tire_size": "150/80R16",
+        "cd": 0.62,        # cruiser upright seating, no fairing
+        "frontal_area_m2": 0.55,  # wide bars + low forward-feet stance
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -1181,4 +1372,8 @@ EXTENDED_BIKES = [
     HONDA_TRANSALP_XL750_2023,
     HONDA_CB750_HORNET_2023,
     HONDA_CB200X_2022,
+    # ── Daily improvement run 2026-05-17 (Sunday — Catalog A1) ──
+    SUZUKI_GSX_S1000GX_2024,
+    BMW_R_1300_GS_2024,
+    KAWASAKI_ELIMINATOR_450_2024,
 ]
