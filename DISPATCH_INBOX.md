@@ -107,6 +107,50 @@ add bike Aprilia Tuono V4 1100 Factory 2024
 investigate why ZX-25R sim trap is 5 km/h slow
 ```
 
+## INSTRUCTION — 2026-05-17 — [urgent] Railway API offline: production 404 "Application not found"
+[urgent] [blocking]
+
+**Detected by:** perf-monitor agent run 11, session 1779049840-773, 2026-05-17. Report: `reports/perf_monitor_2026-05-17.md` (Run 11 section). Timeseries: `data/perf_timeseries.json` row index 10 (run_index 11).
+
+**Symptom:** Every Railway endpoint returns HTTP 404 with body `{"status":"error","code":404,"message":"Application not found","request_id":"..."}`. This is the Railway *platform* router replying that no service is registered at the hostname — NOT a FastAPI route 404. Reproducible via curl from this sandbox:
+
+```
+$ curl https://web-production-de6eb.up.railway.app/api/health
+{"status":"error","code":404,"message":"Application not found","request_id":"YnjSO8EfT2uuQx54AQeqjw"}
+
+$ curl https://web-production-de6eb.up.railway.app/             # root path, same
+{"status":"error","code":404,"message":"Application not found","request_id":"6y6FbkRQReW4mRhJAQeqjw"}
+
+$ curl https://www.motoquant.in/api/health                       # Vercel rewrite -> same dead Railway
+{"status":"error","code":404,"message":"Application not found","request_id":"AzDlmQu8QhalWe84m3z_FQ"}
+```
+
+**Most likely root cause:** Railway trial expiry. CLAUDE.md Phase-3 post-launch hygiene block explicitly flags: *"Upgrade Railway trial ($4.86 / 24 days left as of Apr 23) -> Hobby or Pro before suspension"*. April 23 + 24 days = **May 17 (today)**. Run 10 (~25 min before run 11) saw the service healthy at `bike_count: 342, /api/health ~595 ms avg`. The drop is binary, not gradual — fits trial-clock-suspension perfectly.
+
+**User-visible impact:**
+- `motoquant.in` landing page still renders (Vercel static shell unaffected; TTFB 1002 ms, healthy)
+- All client-side fetches break: simulator widget, `/bikes` browser, `/leaderboard`, save-run, parts-impact CLI through web, chat, etc.
+- Half-broken site state — users land on a page that loads but cannot transact.
+
+**Required user action (cannot be done by autonomous session — needs Railway billing credentials):**
+1. Log into Railway dashboard (`railway.com/dashboard` -> project `proactive-adventure` -> service `web`)
+2. Check service status — likely shows "suspended" or "deleted" due to trial expiry
+3. Upgrade to Hobby plan ($5/mo) OR Pro plan, OR redeploy fresh if service was wiped
+4. Verify `motoquant.db` is still bundled in the deploy (it should be — file is tracked in git per CLAUDE.md Apr 23 entry)
+5. Hit `https://web-production-de6eb.up.railway.app/api/health` — confirm `{status:ok, database:connected, bike_count:342}` returns
+6. Move `## INSTRUCTION` to `## DONE` with resolution date + new bill plan
+
+**Out-of-scope for autonomous fix:** account credentials, billing actions, redeploy with new env vars. Pure user action.
+
+**While API is down:** all perf-monitor runs will continue to record 404 on `/api/health` and `/api/bikes`. Pytest wall-clock + landing TTFB monitoring still functional. Suggest pausing the `pricing-refresh` and `auto-content` agents (both need API access for ROI/sim sanity checks) until restored.
+
+**Cross-reference:** related stale-but-still-correct hygiene items in CLAUDE.md:
+- Rename Railway project `proactive-adventure` -> `motoquant-api` (cosmetic; do during redeploy)
+- Long-term DB-in-git vs volume decision (still open)
+- Delete orphan Vercel project `motoquant-web` (separate issue, unblocked)
+
+---
+
 ## DONE — 2026-05-07 — sync all headline numbers + regen OG social card + wire postflight auto-patch gate
 [urgent] · resolved 2026-05-08 by autonomous session 1778200249-734
 

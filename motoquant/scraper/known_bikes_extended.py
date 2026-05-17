@@ -2864,6 +2864,184 @@ KAWASAKI_VERSYS_X_300_2017 = spec_from_dict(
 )
 
 
+# ── TVS Apache RTR 160 2V (2018-2024 — Indian commuter-sport gap fill) ──
+# The 2-valve sibling to the already-cataloged Apache RTR 160 4V. Older,
+# longer-running platform that has been TVS's volume RTR commuter since
+# 2018 (BS4 launch) through BS6 Phase 2 refresh. 159.7 cc air-cooled
+# SOHC 2-valve single (NOT the 4V's oil-cooled head); FI from BS6 onwards.
+# Peak 15.53 PS (15.3 hp) @ 8400 rpm, 13.9 Nm @ 7000 rpm — milder than the
+# RTR 180 (17.55 hp) but in the same family with shared 5-speed cassette.
+# Kerb 140 kg, ~131 kg dry (13 L tank → ~9 kg fuel). Cluster classifier:
+# naked + 159.7 cc → entry-150-200 (matches Pulsar NS160 / CB Hornet 160R
+# cluster cohort). Distinct from the 4V variant which has oil-cooling +
+# 4 valves + 17.55 hp tune.
+# Sources: TVS Apache RTR 160 2V official spec page (tvsmotor.com/tvs-
+# apache/apache-rtr-160-2v), TVS Apache RTR 160 2V owner manual PDF
+# (tvsmotor.com/-/media/Feature/Owners/User-Manual-11-Apr-22/TVS-Apache-
+# RTR-160-2V.pdf), ZigWheels spec database (zigwheels.com/tvs-bikes/
+# apache-rtr-160/specifications), BikeWale spec table (bikewale.com/tvs-
+# bikes/apache-160/specifications-features), Times Bull engine review
+# (timesbull.com/auto/tvs-apache-rtr-160-2v-engine-performance-and-
+# power-specifications-353776.html), BikeDekho spec page (bikedekho.com/
+# tvs/apache-rtr-160/specifications). Gear cassette is the RTR 160/180
+# 2V service-manual cassette (shared 2V single-cylinder transmission
+# across the 159.7-177.4 cc 2V family).
+TVS_APACHE_RTR_160_2V_2018 = spec_from_dict(
+    {
+        "manufacturer": "TVS",
+        "model_name": "Apache RTR 160 2V",
+        "model_code": "RTR160_2V",
+        "year_from": 2018,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 159.7,
+        "bore_mm": 62.0,
+        "stroke_mm": 52.9,
+        "compression_ratio": 9.5,
+        "cylinders": 1,
+        "peak_power_hp": 15.31,   # 15.53 PS @ 8400 rpm = 15.31 hp
+        "peak_power_rpm": 8400,
+        "peak_torque_nm": 13.9,
+        "peak_torque_rpm": 7000,
+        "fuel_system": "fi",
+        "cooling": "air",
+        "valve_config": "sohc",
+        "gears": 5,
+        # TVS RTR 2V family service-manual cassette (shared 159.7 cc /
+        # 177.4 cc transmission). Same ratios as RTR 180 2V.
+        "gear_ratios": [3.000, 1.875, 1.333, 1.045, 0.880],
+        "front_sprocket": 14,
+        "rear_sprocket": 43,
+        "chain_pitch": "428",
+        "dry_mass_kg": 131.0,   # 140 kg kerb - ~9 kg fuel (13 L tank)
+        "wheelbase_mm": 1300.0,
+        "front_tire_size": "90/90-17",
+        "rear_tire_size": "110/80-17",
+        "cd": 0.81,             # naked commuter, ref RTR 180 @ 0.81
+        "frontal_area_m2": 0.44,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda Unicorn 160 BS6 (2020-2024 — Indian commuter gap fill) ─────
+# The Unicorn nameplate dates to 2004 (CB Unicorn 150), refreshed in
+# 2014 to 162.7 cc as CB Unicorn 160. The BS6 (2020-2024) model is the
+# direct successor to the CB Hornet 160R but tuned milder for commuter
+# duty rather than sport-naked styling: same Honda KP2A 162.71 cc engine
+# (60.0 × 57.5 mm) as the Hornet, but milder cam profile yields 13.46 PS
+# (13.26 hp) @ 7500 rpm + 14.58 Nm @ 5500 rpm vs the Hornet's 15.06 PS
+# @ 8500 rpm. PGM-FI, air-cooled SOHC 2-valve. Taller rear sprocket
+# (R45 vs Hornet's R44) for fuel economy. Mass 139 kg kerb (~130 kg dry,
+# 13 L tank, ~9 kg fuel).
+# Cluster classifier: naked + 162.7 cc → entry-150-200.
+# Sources: Honda 2 Wheelers India spec page (hondamotorcycle.co.in/
+# unicorn), BikeWale spec database (bikewale.com/honda-bikes/unicorn),
+# Carbike Information review (carbikeinformation.com/2021/08/Honda-
+# Unicorn-160.html), ZigWheels spec page (zigwheels.com/honda-bikes/
+# unicorn-160/specifications), Bikes4Sale specs (bikes4sale.in/details/
+# honda/unicorn/unicorn-160-bs6), 91Wheels spec page (91wheels.com/
+# bikes/honda/unicorn-160/specifications), 2Wheelerspares OEM chain-
+# sprocket kit listing (15F/45R per "128 15 45" Honda OEM kit number,
+# 2wheelerspares.com/product/honda-unicorn-160-bs6-chain-sprocket).
+# Gear cassette = Honda KP2A 5-speed (shared with CB Hornet 160R per
+# service-manual cross-reference; only sprocket sizing differs).
+HONDA_UNICORN_160_BS6_2020 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "Unicorn",
+        "model_code": "KP2A_BS6",
+        "year_from": 2020,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 162.71,
+        "bore_mm": 60.0,
+        "stroke_mm": 57.5,
+        "compression_ratio": 10.0,
+        "cylinders": 1,
+        "peak_power_hp": 13.27,   # 13.46 PS @ 7500 rpm = 13.27 hp
+        "peak_power_rpm": 7500,
+        "peak_torque_nm": 14.58,
+        "peak_torque_rpm": 5500,
+        "fuel_system": "fi",
+        "cooling": "air",
+        "valve_config": "sohc",
+        "gears": 5,
+        # Honda KP2A service-manual 5-speed cassette (shared with CB
+        # Hornet 160R). Service Manual 00X38-K1R-6400, Honda 2018.
+        "gear_ratios": [3.308, 1.812, 1.227, 0.969, 0.786],
+        "front_sprocket": 15,
+        "rear_sprocket": 45,    # OEM kit "128 15 45" per 2Wheelerspares
+        "chain_pitch": "428",
+        "dry_mass_kg": 130.0,   # 139 kg kerb - ~9 kg fuel (13 L tank)
+        "wheelbase_mm": 1336.0,
+        "front_tire_size": "80/100-17",
+        "rear_tire_size": "110/80-17",
+        "cd": 0.78,             # commuter, slightly more upright than Hornet
+        "frontal_area_m2": 0.43,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Yamaha FZ-S FI V3 (2019-2024 — Indian commuter-naked gap fill) ───
+# Third-gen Yamaha FZ-S (BS6, FI). The 149 cc air-cooled SOHC 2-valve
+# single is the legacy "old FZ" engine (57 × 58 mm), distinct from the
+# DOHC liquid-cooled engine in the 2021+ FZ-X (52 × 70 mm, 12.2 hp).
+# Peak 12.4 PS (12.23 hp) @ 7250 rpm, 13.3 Nm @ 5500 rpm. PGM-FI replaced
+# the V2's carb in 2019; otherwise the engine architecture is
+# essentially unchanged from the 2014 FZ V2.0. 5-speed manual chain
+# drive. Kerb 135 kg (~127 kg dry — 13 L tank, ~8 kg fuel).
+# Cluster classifier: naked + 149 cc → entry-150-200.
+# Sources: Yamaha Motor India official FZ-S FI V3 spec page
+# (yamaha-motor-india.com/fz-s-fi), Team-BHP spec database
+# (team-bhp.com/new-bikes/yamaha/fz-s-fi-v3/specifications), ZigWheels
+# spec database (zigwheels.com/newbikes/Yamaha/fz-s-fi-version-30/
+# specifications), BikeDekho spec page (bikedekho.com/yamaha/fz-s-fi-
+# version-3/specifications), 91Wheels spec page (91wheels.com/bikes/
+# yamaha/fz-fi-v3/specifications), TheBikeJunction review
+# (thebikejunction.com/yamaha-bikes/fz-s-fi-v3/specifications),
+# Bikes24 spec page (bikes24.com/yamaha/fz-s-fi/specifications).
+# Gear cassette is the legacy Yamaha FZ 149 cc 5-speed cassette
+# (shared FZ V2 / V3 transmission per service manual cross-reference).
+YAMAHA_FZ_S_FI_V3_2019 = spec_from_dict(
+    {
+        "manufacturer": "Yamaha",
+        "model_name": "FZ-S FI V3",
+        "model_code": "BS_FZ_V3",
+        "year_from": 2019,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 149.0,
+        "bore_mm": 57.3,
+        "stroke_mm": 57.9,
+        "compression_ratio": 9.6,
+        "cylinders": 1,
+        "peak_power_hp": 12.23,  # 12.4 PS @ 7250 rpm = 12.23 hp
+        "peak_power_rpm": 7250,
+        "peak_torque_nm": 13.3,
+        "peak_torque_rpm": 5500,
+        "fuel_system": "fi",
+        "cooling": "air",
+        "valve_config": "sohc",
+        "gears": 5,
+        # Yamaha FZ 149 cc 5-speed cassette (FZ V2/V3 shared transmission
+        # per Yamaha service manual cross-reference).
+        "gear_ratios": [2.833, 1.875, 1.364, 1.083, 0.913],
+        "front_sprocket": 14,
+        "rear_sprocket": 42,
+        "chain_pitch": "428",
+        "dry_mass_kg": 127.0,   # 135 kg kerb - ~8 kg fuel (13 L tank)
+        "wheelbase_mm": 1330.0,
+        "front_tire_size": "100/80-17",
+        "rear_tire_size": "140/60-17",
+        "cd": 0.79,             # naked-streetfighter style
+        "frontal_area_m2": 0.44,
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -2937,4 +3115,8 @@ EXTENDED_BIKES = [
     YAMAHA_YZF_R125_2019,
     HONDA_CBR300R_2014,
     KAWASAKI_VERSYS_X_300_2017,
+    # ── Daily improvement run 2026-05-17 (Sunday — Catalog A1 eleventh pass) ──
+    TVS_APACHE_RTR_160_2V_2018,
+    HONDA_UNICORN_160_BS6_2020,
+    YAMAHA_FZ_S_FI_V3_2019,
 ]

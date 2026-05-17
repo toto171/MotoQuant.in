@@ -273,7 +273,7 @@
       788.207,
       472.943,
       651.405,
-      500.150,
+      500.15,
       561.646
     ],
     "api_health_http": 200,
@@ -293,5 +293,35 @@
     "tests_failed": 0,
     "network_blocked": false,
     "notes": "Run 10 of 2026-05-17 (performance-monitor agent, session 1779042639-615). Egress functional. /api/health 5-sample mean 594.87ms (median 561.65ms) vs same-day prior-curl mean (runs 4/6/7/8/9: 706.74/708.29/712.35/665.73/884.74) of 735.57ms = -19.1% (improvement, fastest of the day). Run 9's +26.7% spike did NOT persist -- recovered cleanly, supporting the cold-cache jitter hypothesis over sustained degradation. Landing TTFB 1158.99ms vs same-day prior mean ~1283.91ms = -9.7% (within noise). /api/bikes 832.13ms within same-day envelope [478-1016ms]. Pytest median 8.735s of 2 samples [8.927, 8.543] vs prior-9 same-day mean 8.466s = +3.2% (within noise). 111/0 pass/fail stable. bike_count 342 stable across all 10 runs today. NO drift escalation. Cross-day baseline still not formed (10 rows all 2026-05-17); first true cross-day drift comparison from 2026-05-18 onward."
+  },
+  {
+    "date": "2026-05-17",
+    "run_index": 11,
+    "agent": "performance-monitor",
+    "session_id": "1779049840-773",
+    "landing_ttfb_ms": 1002.036,
+    "landing_total_ms": 1005.36,
+    "landing_size_bytes": 32634,
+    "landing_http": 200,
+    "api_health_ms_avg": null,
+    "api_health_ms_median": null,
+    "api_health_ms_samples": [],
+    "api_health_http": 404,
+    "api_health_bike_count": null,
+    "api_bikes_ms": null,
+    "api_bikes_total_ms": null,
+    "api_bikes_http": 404,
+    "api_bikes_size_bytes": 101,
+    "api_bikes_count": 0,
+    "api_bikes_first": null,
+    "test_walltime_s": 8.532,
+    "test_walltime_samples_s": [
+      8.487,
+      8.577
+    ],
+    "tests_passed": 111,
+    "tests_failed": 0,
+    "network_blocked": false,
+    "notes": "Run 11 of 2026-05-17 (performance-monitor agent, session 1779049840-773). **PRODUCTION INCIDENT: Railway API returns platform-level 404 'Application not found' (request_id present in body).** Both direct https://web-production-de6eb.up.railway.app/api/health and the Vercel-rewrite https://www.motoquant.in/api/health return identical {status:error, code:404, message:'Application not found'} responses; root path of the Railway host (/) ALSO returns the same 404, confirming this is the Railway router rejecting the service name -- not a route-level FastAPI 404. Pattern is consistent with Railway trial-expiry / service-removal (CLAUDE.md flagged '$4.86 / 24 days left as of Apr 23' under Phase-3 post-launch hygiene; that 24-day window expires ~May-17, today). Run 10 (~25 min prior) saw the service healthy at bike_count 342. Landing page (Vercel) still 200 OK at 1002 ms TTFB -- frontend is unaffected, only the API backend is gone. Pytest 2-sample median 8.532s [8.487, 8.577] vs same-day prior-10 mean 8.392s = +1.7% (within +/-30% gate). 111/0 pass/fail unchanged. **Drift gate:** 1 consecutive bad run on /api/health and /api/bikes (run 10 was healthy); agent spec requires 2-consecutive-bad before automated drift escalation. However, this is NOT drift -- it is an outage (404 vs N/A is binary, not metric). Escalating to DISPATCH_INBOX with [urgent] tag per agent's outage-vs-drift judgment. User action required: Railway billing / service redeploy. CLAUDE.md 'egress blocked' caveat now definitively stale (curl reached the Railway router cleanly, just got a 404 platform response)."
   }
 ]

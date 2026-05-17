@@ -316,3 +316,64 @@ Pytest median essentially flat vs run 9 (-0.1%) and only +3.2% vs same-day prior
 - **Egress functional** -- 4 consecutive perf-monitor runs today (7/8/9/10) confirmed direct sandbox->Railway + sandbox->Vercel reachability via curl. CLAUDE.md "egress blocked" caveat solidly stale; queued INSTRUCTION 2026-05-07 health-check side-channel via GH Actions can be retired on next dispatch hygiene pass.
 - **API serializer null `model_name` on `/api/bikes` row[0]** -- first time observed in perf-monitor history (run 8 captured `Aprilia RS 457 (2024-2026)`, run 10 captured `Aprilia` with `model_name: null`). Worth a single-line note to the api-route owner; NOT escalated.
 - **No `[urgent]` block queued to DISPATCH_INBOX.md** -- all drift gates passed.
+
+---
+
+## Run 11 (this session, agent A10, session 1779049840-773) — measurements
+
+| Probe | Status | Detail |
+|---|---|---|
+| `https://www.motoquant.in/` | **ok** | 200 OK, TTFB 1002 ms, payload 32,634 B (unchanged) |
+| `https://web-production-de6eb.up.railway.app/api/health` | **FAIL** | **HTTP 404** -- `{"status":"error","code":404,"message":"Application not found"}` (Railway platform-level error, NOT a FastAPI route 404). 3 consecutive curl probes all returned 404. |
+| `https://web-production-de6eb.up.railway.app/api/bikes?limit=10` | **FAIL** | HTTP 404, same Railway platform body |
+| `https://www.motoquant.in/api/*` (Vercel rewrite) | **FAIL** | HTTP 404, identical body -- the Vercel rewrite proxies to the dead Railway, so the API surface is fully gone end-to-end |
+| `https://web-production-de6eb.up.railway.app/` (root) | **FAIL** | HTTP 404, identical body -- confirms Railway router rejecting the service name, not an app-level route mismatch |
+| `pytest tests/test_validation.py tests/test_scraper.py` | ok | sample 1: 8.487 s; sample 2: 8.577 s; median 8.532 s |
+
+### Run 11 -- numbers table
+
+| Metric                    | Run 11 (today) | Run 10 (prior)  | Same-day prior-10 mean | delta vs prior-10 mean | Gate (>+30%) |
+|---------------------------|----------------|------------------|------------------------|------------------------|--------------|
+| Landing TTFB (ms)         | 1002.04        | 1158.99          | 1249.58                | -19.8%                 | ok (faster)  |
+| Landing payload (bytes)   | 32,634         | 32,634           | 32,634                 | 0.0%                   | ok           |
+| /api/health avg (ms)      | **N/A (404)**  | 594.87           | 714.42                 | n/a                    | **OUTAGE**   |
+| /api/bikes latency (ms)   | **N/A (404)**  | 832.13           | 866.21                 | n/a                    | **OUTAGE**   |
+| Pytest wall median (s)    | 8.532          | 8.735            | 8.392                  | +1.7%                  | ok           |
+| Pytest pass / fail        | 111 / 0        | 111 / 0          | -                      | flat                   | ok           |
+| api_health bike_count     | **N/A (404)**  | 342              | 342 (x10)              | n/a                    | **OUTAGE**   |
+
+### Run 11 -- PRODUCTION INCIDENT: Railway API offline
+
+Run 10 (~25 minutes ago, session 1779042639-615) measured `/api/health` at 594.87 ms with `bike_count: 342`. Run 11 measures **HTTP 404 with body `{"status":"error","code":404,"message":"Application not found","request_id":"..."}`** on every API endpoint, including the Railway hostname's root path.
+
+**Diagnostic signal:** This is NOT a FastAPI route mismatch (which would return our app's own 404 JSON shape). It is the Railway *platform* router replying that no service is registered at this hostname. Three reproducible cases proving this:
+
+1. `GET https://web-production-de6eb.up.railway.app/` -> 404, same `Application not found` body (FastAPI app does not own `/` as 404; it owns `/api/health` etc., and a missing service would land here)
+2. `GET https://web-production-de6eb.up.railway.app/api/health` -> 404, identical body + Railway `request_id`
+3. `GET https://www.motoquant.in/api/health` (Vercel rewrite) -> 404, identical body, just slower TTFB due to the rewrite hop
+
+**Root-cause hypothesis (highest probability):** Railway trial expiry. CLAUDE.md Phase-3 post-launch hygiene block explicitly flags: *"Upgrade Railway trial ($4.86 / 24 days left as of Apr 23) -> Hobby or Pro before suspension"*. April 23 + 24 days = **May 17 (today)**. The trial timer almost certainly ran out between run 10 and run 11.
+
+**Drift-gate verdict:**
+
+- The agent spec rule "don't blame a single bad sample -- require 2 consecutive bad runs before raising drift" applies to *metric drift*, not to *binary outages*. /api/health going from `200 OK, bike_count: 342` to `404 Application not found` is not a +30% latency drift; it is a service availability failure.
+- I am escalating immediately with `[urgent]` tag rather than waiting for run 12 to confirm a "2-consecutive-bad" pattern, because (a) the failure mode is unambiguous and platform-attributable, (b) the documented root cause is a billing-clock event flagged by CLAUDE.md a month ago, and (c) the frontend (`motoquant.in`) is still 200 OK so users see a half-broken site (page renders, simulator/leaderboard widgets cannot fetch data). Every hour of delay compounds user-visible breakage.
+
+**What is NOT broken:**
+
+- Vercel `www.motoquant.in` landing page: 200 OK, 1002 ms TTFB (faster than same-day mean of 1249 ms, by -19.8%)
+- Local test suite: 111/0 pass/fail, 8.532 s median (within noise of same-day mean)
+- Reference baselines (K5/R1/Hayabusa): not re-probed this run, but tests cover them and they pass
+
+### Run 11 -- escalation
+
+Queueing `[urgent]` INSTRUCTION block to `DISPATCH_INBOX.md` requesting Railway billing / redeploy. Out-of-scope for autonomous agent (requires user account credentials).
+
+### Run 11 -- carry-forward notes
+
+- **11 same-day rows** in `data/perf_timeseries.json` -- cross-day baseline still not formed; first cross-day comparison possible 2026-05-18 (assuming the API is back by then).
+- **`bike_count` 342** was stable across runs 1-10; unobservable in run 11 because API is down.
+- **Egress is NOT blocked** (consistent with runs 7-10 finding). Curl reached Railway's router cleanly; the 404 is an application-level response, not a network failure. CLAUDE.md `egress blocked` caveat is definitively stale.
+- **Pytest median was unaffected** by the API outage (tests run in-process, not via HTTP). 8.532 s of 2 samples is within noise of all 10 prior same-day medians.
+- **Landing page TTFB unaffected** because the static Next.js shell does not require API on initial paint. Any client-side fetches (simulator widget, /api/bikes browser) will fail once a user lands.
+- **No DNN/XGB pickle changes** this session; not probed.
