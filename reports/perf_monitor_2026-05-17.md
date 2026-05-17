@@ -90,3 +90,33 @@ First run today to use `curl -w` end-to-end so TTFB / payload-bytes / per-sample
 - Drift escalation gate (≥3 prior **rows** + 2 **consecutive** > +30% deltas) still not met. No DISPATCH_INBOX action.
 - Baselines (K5 / R1 / Hayabusa) not re-verified this run — relying on prior same-day runs' confirmation.
 
+## Run 5 — measurements (WebFetch-based)
+
+Fifth perf-monitor probe on 2026-05-17. WebFetch used (no curl this run) so TTFB / payload primitives left null per tool limitation.
+
+| Probe | Status | Detail |
+|---|---|---|
+| `https://www.motoquant.in/` | ok | title matches expected SEO copy |
+| `https://web-production-de6eb.up.railway.app/api/health` × 5 | ok | `{"status":"ok","database":"connected","bike_count":342}` on every sample |
+| `https://web-production-de6eb.up.railway.app/api/bikes?limit=10` | ok | 10 rows; first = `Aprilia RS 457 (2024-2026)` |
+| `pytest tests/test_validation.py tests/test_scraper.py` | ok | **111 passed in 7.775 s** (`real 0m7.775s` per `time`) |
+
+### Run 5 drift table
+
+| Metric | Today | Same-day prior | Δ vs mean | Verdict |
+|---|---|---|---|---|
+| pytest_wall_s | 7.775 | [9.231, 7.90, 8.154, 10.40] mean 8.921 | **-12.8%** | within noise (gate +30%) |
+| api_health bike_count | 342 | 342 (× 4 prior) | 0 | stable |
+| api_bikes count | 10 | 10 (× prior) | 0 | unchanged |
+| web title | matches | matches | 0 | unchanged |
+| network egress | functional | functional | 0 | unchanged |
+
+5 same-day datapoints now exist; rolling-baseline still not formed across distinct dates. No drift flag raised. No `DISPATCH_INBOX.md` escalation queued — all metrics inside envelope.
+
+### Run 5 notes
+
+- Pytest 7.775 s sits at the low end of today's spread [7.78–10.40 s] — confirms run-4's 10.40 s `/usr/bin/time` reading was overhead-tainted, not a real regression.
+- All 5 today's `bike_count` reads stable at 342 — no DB rollback / re-seed event.
+- WebFetch tool still lacks TTFB / payload-bytes primitives. Run 4 captured those via curl; no escalation signal this run warranted a re-shell.
+- Surrogate pickles still not re-checked this run (out of fast-probe scope).
+

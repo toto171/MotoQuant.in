@@ -108,5 +108,35 @@
     "tests_passed": 111,
     "network_blocked": false,
     "notes": "Fourth perf probe on 2026-05-17 (perf-monitor agent). Full latency primitives captured via curl this run: web TTFB 1330.65ms / payload 32,634 bytes; API /health 5-sample mean 706.74ms (median 672.48ms, first sample 850.12ms hints at cold-cache); /api/bikes 703.99ms. Pytest wall 10.40s (/usr/bin/time) vs internal 8.13s \u2014 same-day history now [9.231, 7.90, 8.154, 10.40], mean 8.92s; today's 10.40s is +16.5% vs mean \u2014 within +30% gate, NOT escalated. Bike count 342 stable. Baseline-building continues \u2014 4 same-date entries do not constitute a 7-day rolling baseline."
+  },
+  {
+    "date": "2026-05-17",
+    "run_index": 5,
+    "web_landing": {
+      "status": "ok",
+      "title": "MotoQuant Pro \u2014 Motorcycle Quarter-Mile Drag Racing Simulator | ET Predictor & Build Optimizer",
+      "ttfb_ms": null,
+      "payload_bytes": null
+    },
+    "api_health": {
+      "status": "ok",
+      "samples": 5,
+      "response": {
+        "status": "ok",
+        "database": "connected",
+        "bike_count": 342
+      },
+      "ttfb_ms": null
+    },
+    "api_bikes": {
+      "status": "ok",
+      "count": 10,
+      "first": "Aprilia RS 457 (2024-2026)",
+      "ttfb_ms": null
+    },
+    "pytest_validation_scraper_s": 7.775,
+    "tests_passed": 111,
+    "network_blocked": false,
+    "notes": "Fifth perf probe on 2026-05-17 (perf-monitor agent A5). All three WebFetch probes succeeded on first attempt. Pytest wall 7.775s (real-time via `time`) \u2014 same-day history now [9.231, 7.90, 8.154, 10.40, 7.775], mean 8.69s; today's 7.775s is -10.5% vs mean, well within noise. Bike count 342 stable across all 5 runs today. WebFetch does not expose TTFB/payload primitives natively. NOT escalated \u2014 no drift, no API errors, no test regressions. 5 same-date entries still below the 7-entry rolling baseline threshold."
   }
 ]

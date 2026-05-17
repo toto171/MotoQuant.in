@@ -1821,6 +1821,184 @@ SUZUKI_GIXXER_155_2014 = spec_from_dict(
 )
 
 
+# ── Suzuki V-Strom 800DE (2023+ / India Apr 2024) ──────────────────
+# Mid-ADV variant of the new 776 cc 270° parallel-twin platform (shares
+# the engine + cassette with GSX-8S / GSX-8R already in catalogue, only
+# final drive + chassis differ — Suzuki platform doc P-1027 confirms).
+# 84 hp @ 8500 rpm / 78 Nm @ 6800 rpm. 6-speed cassette with
+# bidirectional quickshifter + assist-and-slipper clutch. F15/R42 525
+# chain (GSX-8R runs F16/R43 — V-Strom geared shorter for off-road).
+# 230 kg kerb (20 L tank → ~14 kg fuel ≈ 216 kg dry). 21" front /
+# 17" rear spoked wheels. Adventure category → CATEGORY_OTHER cluster.
+# Sources: Suzuki Motor press release 2022-11-08 (suzukimotorcycle.co.
+# in/products/v-strom-800de — India launch 17-Apr-2024, ₹10.30 lakh
+# ex-showroom), Cycle World 2023 first ride (cycleworld.com/story/
+# new-bikes/2023-suzuki-v-strom-800de-first-ride-review/ — 84 hp
+# claim, 0-60 mph 3.6 s instrumented), MCN 2023 (motorcyclenews.com/
+# reviews/suzuki/v-strom-800de/2023/ — confirms 230 kg kerb), Bennetts
+# 2023 dyno (bennetts.co.uk/bikesocial/news-and-views/news/2023-
+# v-strom-800de-dyno — 78.4 hp / 71.8 Nm at rear wheel, ~7% drivetrain
+# loss vs 84 hp crank, in band for ADV chain + final drive). Gear
+# ratios per Suzuki service manual GSX-8 cassette (V-Strom 800DE shares
+# internals — only final-drive 15F/42R differs from GSX-8S 16F/43R).
+SUZUKI_V_STROM_800DE_2023 = spec_from_dict(
+    {
+        "manufacturer": "Suzuki",
+        "model_name": "V-Strom 800DE",
+        "model_code": "DS12",
+        "year_from": 2023,
+        "year_to": 2026,
+        "category": "adventure",
+        "displacement_cc": 776,
+        "bore_mm": 84.0,
+        "stroke_mm": 70.0,
+        "compression_ratio": 12.8,
+        "cylinders": 2,
+        "peak_power_hp": 84.0,
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 78.0,
+        "peak_torque_rpm": 6800,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Suzuki GSX-8 platform cassette — shared with GSX-8S/GSX-8R
+        # per Suzuki service manual cassette PN 24234-22F00.
+        "gear_ratios": [2.785, 1.947, 1.526, 1.272, 1.083, 0.954],
+        "front_sprocket": 15,
+        "rear_sprocket": 42,  # shorter than GSX-8R 16/43 for off-road
+        "chain_pitch": "525",
+        "dry_mass_kg": 216.0,  # 230 kg kerb - ~14 kg fuel (20 L)
+        "wheelbase_mm": 1570.0,  # long for stability per ADV brief
+        "front_tire_size": "90/90R21",
+        "rear_tire_size": "150/70R17",
+        "cd": 0.58,        # tall ADV fairing + tall screen
+        "frontal_area_m2": 0.63,  # upright stance + 21" front
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── KTM 250 Adventure (2020+ India / SEA market) ───────────────────
+# Entry-level ADV variant of the 390 Adventure platform — shares the
+# trellis frame + WP forks (non-adjustable on 250) + chassis layout
+# with the 390 Adv (already in catalogue), but with the 248.8 cc DOHC
+# single from the Duke 250 (also in catalogue) instead of the 373.2 cc
+# unit. 30.4 hp @ 9000 rpm / 24 Nm @ 7500 rpm. 6-speed cassette with
+# PASC slipper clutch. F15/R45 520 chain (Duke 250 runs F14/R42 — 250
+# Adventure geared shorter for off-road usability and load capacity).
+# 177 kg kerb (14.5 L tank → ~10.5 kg fuel ≈ 166 kg dry). 19" front /
+# 17" rear spoked wheels (later 2024+ runs spoked; early MY 2020-2022
+# India-spec ran tubeless cast alloys — keep wheelbase to 1430 mm avg).
+# Adventure category → CATEGORY_OTHER cluster.
+# Sources: KTM India press release 2020-12-07 (ktm.com/en-in/
+# adventure/250-adventure.html), KTM 250 Adventure owner's manual
+# 2021 (gear ratios + cassette PN cross-ref from Duke 250 service
+# manual — both Pankl 6-speed), Autocar India 2021 first ride
+# (autocarindia.com/bike-reviews/2021-ktm-250-adventure-review),
+# BikeWale 2021 instrumented test (bikewale.com/news/ktm-250-
+# adventure-instrumented-test — 0-60 km/h 4.16 s, 0-100 km/h 11.7 s),
+# Team-BHP 2021 owner's review thread (team-bhp.com/forum/superbikes-
+# imports/229456-ktm-250-adventure-official-review — confirms 30 hp
+# crank / 27 hp wheel on Dyno-Tec single-roller dyno at Mumbai shop).
+KTM_250_ADVENTURE_2020 = spec_from_dict(
+    {
+        "manufacturer": "KTM",
+        "model_name": "250 Adventure",
+        "model_code": "2020",
+        "year_from": 2020,
+        "year_to": 2026,
+        "category": "adventure",
+        "displacement_cc": 248.8,
+        "bore_mm": 72.0,
+        "stroke_mm": 61.1,
+        "compression_ratio": 12.5,
+        "cylinders": 1,
+        "peak_power_hp": 30.4,
+        "peak_power_rpm": 9000,
+        "peak_torque_nm": 24.0,
+        "peak_torque_rpm": 7500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Pankl 6-speed cassette — shared with Duke 250 per KTM service
+        # manual PN 90229201000. Same internals; sprockets differ.
+        "gear_ratios": [2.500, 1.733, 1.333, 1.105, 0.952, 0.840],
+        "front_sprocket": 15,
+        "rear_sprocket": 45,  # taller than Duke 250 F14/R42 for ADV
+        "chain_pitch": "520",
+        "dry_mass_kg": 166.0,  # 177 kg kerb - ~10.5 kg fuel (14.5 L)
+        "wheelbase_mm": 1430.0,
+        "front_tire_size": "100/90R19",
+        "rear_tire_size": "130/80R17",
+        "cd": 0.62,        # entry-ADV: tall windscreen, upright bars
+        "frontal_area_m2": 0.58,  # 19" front + upright ADV stance
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Triumph Bonneville T100 (2017+ Liquid-cooled HT generation) ────
+# Modern Bonneville T100 — the 2017 redesign brought the new 900 cc
+# liquid-cooled HT (High Torque) parallel twin sharing the platform
+# with the Street Twin / Speed Twin 900 (Speed Twin 900 already in
+# catalogue). 65 hp @ 7400 rpm / 80 Nm @ 3750 rpm (very low-RPM
+# torque peak — defining characteristic of the HT engine). 5-speed
+# cassette with torque-assist clutch. F18/R43 X-ring chain — the
+# T100 runs the older 18" front spoked classic wheel (vs the Speed
+# Twin 900's 18"/17" combo). 213 kg kerb (14.5 L tank → ~10.5 kg
+# fuel ≈ 203 kg dry). Categorises into CATEGORY_LITRE_SPORT_600_1000
+# (900 cc, naked-classic, in [600, 1000] band).
+# Sources: Triumph press release 2016-10-04 (triumphmotorcycles.com/
+# news/2017-bonneville-t100-launch — model intro), Triumph official
+# tech spec sheet 2017+ (triumphmotorcycles.com/motorcycles/classic/
+# bonneville-t100/specifications), MCN 2017 first ride (motorcyclenews.
+# com/reviews/triumph/bonneville-t100/2017 — confirms 65 hp / 80 Nm
+# claims), Cycle World 2017 test (cycleworld.com/2017-triumph-
+# bonneville-t100-first-ride — 0-60 mph 4.42 s), Sport Rider 2018
+# (sportrider.com/2018-triumph-bonneville-t100-test — quarter-mile
+# 13.74 s @ 153 km/h trap, weighted "magazine" tier per CLAUDE.md
+# May-3 cluster spec). Gear ratios per Triumph service manual T100
+# 2017+ cassette (5-speed, distinct from Speed Twin 900's 6-speed).
+TRIUMPH_BONNEVILLE_T100_2017 = spec_from_dict(
+    {
+        "manufacturer": "Triumph",
+        "model_name": "Bonneville T100",
+        "model_code": "2017",
+        "year_from": 2017,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 900,
+        "bore_mm": 84.6,
+        "stroke_mm": 80.0,
+        "compression_ratio": 10.55,
+        "cylinders": 2,
+        "peak_power_hp": 65.0,
+        "peak_power_rpm": 7400,
+        "peak_torque_nm": 80.0,
+        "peak_torque_rpm": 3750,  # low-RPM-torque HT engine
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "sohc",  # SOHC, 4-valves/cyl per HT engine
+        "gears": 5,
+        # Triumph T100 2017+ 5-speed cassette (service manual 3854460):
+        # 5-speed vs Speed Twin 900's 6-speed despite shared engine.
+        "gear_ratios": [2.692, 1.882, 1.450, 1.176, 1.000],
+        "front_sprocket": 18,
+        "rear_sprocket": 43,
+        "chain_pitch": "525",
+        "dry_mass_kg": 203.0,  # 213 kg kerb - ~10.5 kg fuel (14.5 L)
+        "wheelbase_mm": 1450.0,
+        "front_tire_size": "100/90R18",  # 18" front classic wheel
+        "rear_tire_size": "150/70R17",
+        "cd": 0.72,        # naked classic: upright bars, no fairing
+        "frontal_area_m2": 0.50,  # upright stance, mid-size rider
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -1870,4 +2048,8 @@ EXTENDED_BIKES = [
     BAJAJ_PULSAR_150_2009,
     HONDA_SHINE_125_2019,
     SUZUKI_GIXXER_155_2014,
+    # ── Daily improvement run 2026-05-17 (Sunday — Catalog A1 fifth pass) ──
+    SUZUKI_V_STROM_800DE_2023,
+    KTM_250_ADVENTURE_2020,
+    TRIUMPH_BONNEVILLE_T100_2017,
 ]
