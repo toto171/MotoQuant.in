@@ -5,13 +5,24 @@
 import StructuredData, { SITE_URL } from '../StructuredData';
 
 const TITLE = "About MotoQuant — Built in Pune for the Indian Drag Strip";
-const DESCRIPTION = "MotoQuant Pro is a first-principles drag-racing simulator built specifically for the Indian motorcycle community. Founder, roadmap, design philosophy, and contact information.";
+const DESCRIPTION = "MotoQuant Pro is a first-principles drag-racing simulator built in Pune for the Indian motorcycle community — Aamby Valley regulars, MMRT track-day riders, and Narhe tuning shops. Founder story, roadmap, design philosophy, and how the project differs from generic power-to-weight quarter-mile calculators.";
 
 export const metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: '/about' },
-  keywords: ["motoquant about", "indian drag racing simulator", "pune motorcycle physics tool"],
+  keywords: [
+    "motoquant about",
+    "indian drag racing simulator",
+    "pune motorcycle physics tool",
+    "aamby valley drag racing software",
+    "narhe motorcycle tuning",
+    "indian motorcycle simulator team",
+    "drag racing software india",
+    "physics based motorcycle calculator india",
+    "valley run technology",
+    "mmrt drag simulator",
+  ],
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,

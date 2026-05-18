@@ -5,10 +5,11 @@ import SiteFooter from "../../components/SiteFooter";
 export const metadata = {
   title: "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
   description:
-    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Pulsar NS400Z vs RC 390, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
+    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: KTM Duke 390 vs RC 390, Pulsar NS400Z vs RC 390, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
   keywords: [
     "motorcycle drag racing blog",
     "indian motorcycle quarter mile",
+    "ktm duke 390 vs rc 390",
     "pulsar ns400z vs rc 390",
     "continental gt 650 drag",
     "ns200 vs apache rtr 200",
@@ -22,6 +23,15 @@ export const metadata = {
 };
 
 const POSTS = [
+  {
+    slug: "ktm-duke-390-vs-rc-390-quarter-mile-physics",
+    title: "KTM Duke 390 vs RC 390: Quarter-Mile Physics at Aamby Valley",
+    date: "2026-05-18",
+    readTime: "12 min",
+    tags: ["KTM", "Duke 390", "RC 390", "Indian 400cc", "comparison"],
+    excerpt:
+      "MotoQuant simulates the RC 390 at ~13.5s and 166 km/h trap, the Duke 390 at ~13.7s and 162 km/h at Aamby Valley. Same engine, two tenths apart — almost all of it aerodynamic. Plus four cost-per-tenth mods under ₹25,000 and a look at the Fast Track Racing 11.342s record.",
+  },
   {
     slug: "pulsar-ns400z-quarter-mile-physics",
     title: "Pulsar NS400Z Quarter-Mile Physics (and Why an RC 390 Still Wins)",

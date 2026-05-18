@@ -5,13 +5,24 @@
 import StructuredData, { SITE_URL } from '../StructuredData';
 
 const TITLE = "Whitepaper — The Physics Behind MotoQuant Pro";
-const DESCRIPTION = "Complete technical whitepaper: RK4 integrator, Pacejka tire model, dyno SAE J1349 correction, weighted-benchmark validation methodology, 15 sub-model architecture. Read before you trust the numbers.";
+const DESCRIPTION = "Complete technical whitepaper for the MotoQuant Pro motorcycle drag simulator: RK4 integrator at 1 ms step, Pacejka magic-formula tire model with thermal evolution, SAE J1349 dyno correction, weighted-benchmark validation methodology against 74 published timeslips, 15 sub-model architecture, and the K5/R1/Hayabusa reference baselines. Read this before you trust the predicted quarter-mile numbers.";
 
 export const metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: '/whitepaper' },
-  keywords: ["drag simulator whitepaper", "motorcycle physics paper", "pacejka tire model india"],
+  keywords: [
+    "drag simulator whitepaper",
+    "motorcycle physics paper",
+    "pacejka tire model india",
+    "rk4 motorcycle simulator",
+    "first principles motorcycle drag simulation",
+    "motorcycle quarter mile physics whitepaper",
+    "sae j1349 dyno correction",
+    "weighted benchmark validation methodology",
+    "motorcycle physics simulation accuracy",
+    "physics based bike ET predictor",
+  ],
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,

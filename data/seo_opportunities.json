@@ -1,7 +1,7 @@
 {
   "_updated": "2026-05-18",
-  "_run": "third-pass-evening",
-  "_methodology": "Three passes today. Morning + afternoon: 9 + catalog-driven WebSearch + keyword mining (logged in earlier seo_audit_2026-05-18.md). Evening pass (this run): mark NS400Z opportunity done (blog post landed today at /blog/pulsar-ns400z-quarter-mile-physics, commit shipped via marketing-content agent), add 5 new opportunities sourced from today's third-pass catalog adds (Aprilia Tuono 660 Factory + RE Bullet 350 J-platform), plus required physics/comparison/venue queries per agent template. WebSearch was not invoked live this run; volume qualitative based on Indian motoring publication signals (BikeWale/BikeDekho/Autocar India coverage density, RE Bullet sales volume on company filings, Tuono 660 Factory press kit availability). All unverified rank+volume flagged honestly.",
+  "_run": "fourth-pass-late-evening",
+  "_methodology": "Four passes today. Morning + afternoon + evening: 18 keyword opportunities + 7 escalations logged via prior 3 passes (see seo_audit_2026-05-18.md). Fourth pass (this run): WebSearch was not invoked live (marketing-content agent has the WebSearch quota tonight on parallel blog work); volume qualitative inference only. Pass scope intentionally narrow — coordinate-by-file-ownership: marketing-content owns web/app/blog/<NEW>/*, sitemap.js, blog/page.js. SEO agent picks NON-blog targets. Added 2 new opportunities (RE Hunter 350 J-platform sibling, motorcycle physics methodology authority signal via /docs/physics). On-page tweaks land on /docs/physics, /docs/validation, /about, /whitepaper — all of which had 0-3 keyword metadata entries pre-pass. All unverified rank+volume flagged honestly.",
   "_competitor_signal": "Generic 'quarter mile calculator' tools (xcceleration, ajdesigner, robrobinette, speedmaster) all use simple power-to-weight formulas, no per-bike physics. MotoQuant's defensible angle: 'physics-based, validated against 90 published benchmarks, 342 bikes pre-configured, cost-per-tenth ROI in INR'.",
   "opportunities": [
     {
@@ -207,6 +207,29 @@
       "action": "create-blog-later",
       "priority": 18,
       "rationale": "MMRT is the second most-searched Indian drag venue after Aamby Valley. Currently the simulator accepts ?venue= deep links but there is no dedicated content page for MMRT setup tuning. Queue marketing-content for /blog/how-to-tune-for-mmrt-chennai (sea-level + high humidity vs Aamby Valley's 1050 m + low humidity is the obvious physics contrast)."
+    },
+    {
+      "keyword": "royal enfield hunter 350 quarter mile",
+      "secondary": ["hunter 350 drag time", "hunter 350 vs classic 350", "hunter 350 top speed india", "hunter 350 0-100"],
+      "intent": "informational",
+      "estimated_volume_india": "high",
+      "seasonality": "evergreen — best-selling Hunter 350 is RE's youth-targeted growth driver",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "create-blog-later",
+      "priority": 19,
+      "rationale": "Hunter 350 is the smallest + lightest J-platform sibling (less mass than Classic/Bullet/Meteor). Pairs naturally with the Bullet 350 J-platform escalation (priority 15) — single blog post can cover all 4 J-platform siblings with the same physics framework. RE's Hunter 350 sales reportedly outpace the other three J-platform variants combined; high-volume target with low SERP competition (top results are BikeWale/Drivespark spec pages, no physics breakdowns)."
+    },
+    {
+      "keyword": "motorcycle physics simulator validation methodology",
+      "secondary": ["how accurate is motoquant", "drag simulator benchmark methodology", "weighted benchmark validation motorcycle"],
+      "intent": "academic/authority",
+      "estimated_volume_india": "low (global, niche)",
+      "current_rank": null,
+      "target_url": "/docs/validation",
+      "action": "tweak-existing",
+      "priority": 20,
+      "rationale": "Existing /docs/validation page documents 74-bike benchmark sweep + per-cluster bias + open calibration gaps. Until this 4th pass, page had no keywords array on metadata — invisible to query expansion. Tweaked keywords to capture authority-signal queries from journalists, tuning shops, and academic searchers. Low volume but very high citation potential for backlink building when motoring publications fact-check claims."
     }
   ],
   "escalations": [

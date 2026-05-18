@@ -2,8 +2,20 @@ import Link from 'next/link';
 
 export const metadata = {
   title: 'Physics Whitepaper',
-  description: 'MotoQuant Pro physics engine: 15 sub-models, RK4 integrator, Pacejka tire model, and validation methodology for motorcycle quarter-mile simulation.',
+  description: 'First-principles physics behind MotoQuant Pro: 15 sub-models, RK4 integrator at 1 ms step, Pacejka magic-formula tire model with thermal evolution, Willans friction, 2T expansion-chamber Gaussian curve, weight transfer, weighted-benchmark validation. The complete methodology document for the motorcycle quarter-mile simulator.',
   alternates: { canonical: 'https://motoquant.in/docs/physics' },
+  keywords: [
+    'pacejka tire model motorcycle',
+    'rk4 motorcycle simulator',
+    'first principles motorcycle drag simulation',
+    'motorcycle physics simulator methodology',
+    'two stroke expansion chamber model',
+    'magic formula tire india',
+    'willans friction motorcycle',
+    'motorcycle quarter mile physics whitepaper',
+    'physics based bike ET predictor',
+    'validated drag racing model india',
+  ],
 };
 
 const SUBMODELS = [

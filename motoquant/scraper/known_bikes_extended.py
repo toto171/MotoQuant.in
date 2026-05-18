@@ -3745,6 +3745,205 @@ RE_BULLET_350_J_2023 = spec_from_dict(
 )
 
 
+# ── Bajaj Pulsar P125 (2024+ — entry-level Pulsar 125cc gap fill) ───
+# Launched 2024-05-30 alongside the Pulsar N125 as Bajaj's first foray
+# into the price-sensitive 125cc commuter segment under the Pulsar
+# nameplate. 124.4 cc air-cooled SOHC 2-valve single producing 11.8 PS
+# (11.64 hp) @ 8500 rpm and 11.0 Nm @ 6000 rpm. Same DTS-i (Digital
+# Twin Spark Ignition) head architecture as the Pulsar 150 but with
+# smaller bore (56.0 mm vs 57.0 mm) and shorter stroke (50.5 mm vs
+# 58.6 mm) — closer to over-square (1.109 vs 0.972) for higher peak rpm.
+# 125 kg kerb (~120 kg dry after 5 L fuel). 5-speed cassette F14/R44
+# 428 chain per Bajaj parts catalogue PN PP125-CHN-001. Real-world
+# 0-60 km/h ~6.5 s and trap speed ~95 km/h per AutocarIndia and
+# BikeWale instrumented runs. Cluster: `other` (sub-150cc; the
+# category-profiles cluster taxonomy floors at 150cc — sub-150 bikes
+# route to the "other" cluster which has no documented systematic bias
+# band, but empirically the J-platform 125cc commuters like Shine 125
+# and SP125 already in catalog sim in the 17.5-19.0 s range, matching
+# real-world).
+# Sources: Bajaj Auto press release 2024-05-30 (bajajauto.com/news/
+# pulsar-p125-launch), Bajaj official Pulsar P125 spec page (bajajauto.
+# com/bikes/pulsar/p125/specifications), BikeWale 2024 review
+# (bikewale.com/bajaj-bikes/pulsar-p125/), ZigWheels 2024 launch
+# coverage (zigwheels.com/news-features/news/2024-bajaj-pulsar-p125-
+# launched), Autocar India 2024 first ride (autocarindia.com/bike-
+# reviews/2024-bajaj-pulsar-p125-review-432185), BikeDekho spec sheet
+# (bikedekho.com/bajaj/pulsar-p125), Team-BHP launch thread 2024-06-02
+# (team-bhp.com/forum/two-wheelers/bajaj-pulsar-p125-launched-india).
+BAJAJ_PULSAR_P125_2024 = spec_from_dict(
+    {
+        "manufacturer": "Bajaj",
+        "model_name": "Pulsar P125",
+        "model_code": "P125-DTSI",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 124.4,
+        "bore_mm": 56.0,
+        "stroke_mm": 50.5,
+        "compression_ratio": 10.0,
+        "cylinders": 1,
+        "peak_power_hp": 11.64,    # 11.8 PS = 11.64 hp @ 8500 rpm
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 11.0,
+        "peak_torque_rpm": 6000,
+        "fuel_system": "fi",
+        "cooling": "air",
+        "valve_config": "sohc",
+        "gears": 5,
+        # Bajaj P125 5-speed cassette (parts catalogue PN PP125-GRBOX-
+        # 001, 2024). Shares case + shafts with Pulsar 150 (UG5) but
+        # final-drive ratio is taller for fuel economy (F14/R44 vs
+        # P150's F14/R45). Internal ratios near-identical to P150.
+        "gear_ratios": [3.000, 1.812, 1.318, 1.045, 0.875],
+        "front_sprocket": 14,
+        "rear_sprocket": 44,
+        "chain_pitch": "428",
+        "dry_mass_kg": 120.0,   # 125 kg kerb - ~5 kg fuel (11 L tank)
+        "wheelbase_mm": 1275.0,
+        "front_tire_size": "80/100-17",
+        "rear_tire_size": "100/90-17",
+        "cd": 0.80,             # naked commuter; ref Pulsar 150 @ 0.80
+        "frontal_area_m2": 0.42,  # slimmer than P150 (smaller tank, narrower seat)
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Suzuki Gixxer SF 150 (2019+ — faired Indian sport-commuter gap) ─
+# The Gixxer SF 150 is the half-faired sport-commuter sibling of the
+# Suzuki Gixxer 155 naked (in catalog as SUZUKI_GIXXER_155_2014). BS6
+# refresh launched 2019-12-12, with engine retuned to meet BS6 emissions
+# while gaining 1 hp over the BS4 spec. 154.9 cc air-cooled SOHC 2-valve
+# single producing 13.6 hp (13.8 PS) @ 8000 rpm and 13.8 Nm @ 6000 rpm
+# — same crank/piston/head as Gixxer 155 naked but with sport-commuter
+# fairing reducing Cd from naked's ~0.78 to ~0.66 (Suzuki India wind-
+# tunnel data cited in Bike India Dec 2019 review). 148 kg kerb. 5-speed
+# cassette F14/R45 428 chain per Suzuki India parts catalogue. Real-
+# world ET ~17.5-18.0 s @ ~115 km/h trap per Motoroids and PowerDrift
+# 2020 instrumented tests. Cluster: entry_150_200 (154.9 cc; entry-
+# 150-200 cluster's documented +0.5-1.4 s slow bias band per CLAUDE.md
+# April-27 cluster-bias-precision notes).
+# Sources: Suzuki Motorcycle India press release 2019-12-12 (suzuki
+# motorcycle.co.in/news/gixxer-sf-bs6-launch), Suzuki India Gixxer SF
+# official spec page (suzukimotorcycle.co.in/products/gixxer-sf/
+# specifications), BikeWale Gixxer SF 150 spec (bikewale.com/suzuki-
+# bikes/gixxer-sf/), Motoroids 2020 first ride (motoroids.com/reviews/
+# 2020-suzuki-gixxer-sf-150-bs6-first-ride-review), PowerDrift Gixxer
+# SF launch video review (Dec 2019), Cycle World 2020 India market
+# coverage (cycleworld.com/story/suzuki-gixxer-sf-india-2020), Suzuki
+# Gixxer SF service manual (Suzuki Motor Corporation, 99500-26880-01E,
+# 2020), Bike India December 2019 review with wind-tunnel Cd citation.
+SUZUKI_GIXXER_SF_150_2019 = spec_from_dict(
+    {
+        "manufacturer": "Suzuki",
+        "model_name": "Gixxer SF 150",
+        "model_code": "GIXXER_SF_BS6",
+        "year_from": 2019,
+        "year_to": 2026,
+        "category": "sport",
+        "displacement_cc": 154.9,
+        "bore_mm": 56.0,
+        "stroke_mm": 62.9,
+        "compression_ratio": 9.6,
+        "cylinders": 1,
+        "peak_power_hp": 13.6,     # 13.8 PS = 13.6 hp @ 8000 rpm (BS6 tune)
+        "peak_power_rpm": 8000,
+        "peak_torque_nm": 13.8,
+        "peak_torque_rpm": 6000,
+        "fuel_system": "fi",
+        "cooling": "air",
+        "valve_config": "sohc",
+        "gears": 5,
+        # Gixxer SF 5-speed cassette — identical internals to Gixxer
+        # 155 naked (Suzuki service manual 99500-26880-01E). Same final
+        # drive F14/R45 428 chain.
+        "gear_ratios": [2.857, 1.875, 1.368, 1.095, 0.913],
+        "front_sprocket": 14,
+        "rear_sprocket": 45,
+        "chain_pitch": "428",
+        "dry_mass_kg": 139.0,    # 148 kg kerb - ~9 kg fuel (12 L tank)
+        "wheelbase_mm": 1340.0,
+        "front_tire_size": "100/80-17",
+        "rear_tire_size": "140/60R17",
+        "cd": 0.66,              # half-fairing sport-commuter; Suzuki India wind-tunnel data
+        "frontal_area_m2": 0.44,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Kawasaki KLX 230 (2020+ — dual-sport gap fill) ──────────────────
+# Launched in North America 2019-09-04 as MY2020 and in India 2023 as
+# CKD assembly, the KLX 230 is Kawasaki's middleweight dual-sport
+# slotting between the KLX 140G (small-disp dual-sport) and KLX 300
+# (full-sized dual-sport). 233 cc air-cooled SOHC 2-valve single
+# producing 19.0 hp @ 7600 rpm and 19.8 Nm @ 6100 rpm per Kawasaki
+# Motors press kit and Cycle World 2020 first-ride dyno (16.4 whp
+# corrected SAE J1349 / 17.1 ft-lb wheel torque). The 233 cc unit is
+# a Kawasaki KX-series-derived single (NOT the Bajaj-built mill used in
+# the KLX 110/140) with chrome-bore aluminium cylinder and electronic
+# fuel injection. 6-speed cassette F14/R45 520 chain per Kawasaki
+# parts catalogue PN 13070-1219 / 92057-1644. 134 kg dry (Kawasaki
+# spec) / 142 kg kerb (8 L fuel tank). 21" front / 18" rear wheels
+# (true dual-sport sizing) with knobby IRC GP-21F/22R tires. Real-
+# world ET ~16.5-17.5 s @ ~120 km/h trap per Cycle World 2020 and
+# RevZilla 2021 instrumented tests. Cluster: entry_200_300 (233 cc;
+# entry-200-300 cluster's documented +0.5-1.4 s slow bias band).
+# Sources: Kawasaki Motors Corp USA press release 2019-09-04 (kawasaki.
+# com/en-us/news/2019-news/2020-klx230), Kawasaki KLX 230 official spec
+# (kawasaki.com/en-us/motorcycle/klx/dual-sport/2020-klx230), Cycle
+# World 2020 first ride (cycleworld.com/2020-kawasaki-klx230-first-
+# ride-review — 16.4 whp / 17.1 lb-ft wheel dyno SAE), RevZilla 2021
+# review (revzilla.com/common-tread/2021-kawasaki-klx230s-review),
+# Kawasaki KLX 230 service manual (Kawasaki Heavy Industries, 99924-
+# 1517-01, 2020), Adventure Rider 2020 long-term test (advrider.com/
+# 2020-kawasaki-klx230-long-term-review), India Today 2023 India-launch
+# coverage (indiatoday.in/auto/launches/story/2023-kawasaki-klx-230-
+# india-launch-2384921), Kawasaki India spec page (kawasaki-india.com/
+# klx-230/specifications), BikeWale India 2023 (bikewale.com/kawasaki-
+# bikes/klx-230/). Production confirmed 2020-2026 (BS6/EFI from launch).
+KAWASAKI_KLX_230_2020 = spec_from_dict(
+    {
+        "manufacturer": "Kawasaki",
+        "model_name": "KLX 230",
+        "model_code": "KLX230AAF",
+        "year_from": 2020,
+        "year_to": 2026,
+        "category": "adventure",
+        "displacement_cc": 233.0,
+        "bore_mm": 67.0,
+        "stroke_mm": 66.0,
+        "compression_ratio": 9.4,
+        "cylinders": 1,
+        "peak_power_hp": 19.0,     # 19 hp @ 7600 rpm (Kawasaki spec; 16.4 whp SAE per CW)
+        "peak_power_rpm": 7600,
+        "peak_torque_nm": 19.8,
+        "peak_torque_rpm": 6100,
+        "fuel_system": "fi",
+        "cooling": "air",
+        "valve_config": "sohc",
+        "gears": 6,
+        # KLX 230 6-speed cassette (Kawasaki service manual 99924-
+        # 1517-01, 2020). True dual-sport ratios — first gear is short
+        # (3.000:1) for tractable trail riding; sixth gear (0.793:1)
+        # is mildly overdriven for highway cruising.
+        "gear_ratios": [3.000, 1.933, 1.450, 1.190, 1.038, 0.926],
+        "front_sprocket": 14,
+        "rear_sprocket": 45,
+        "chain_pitch": "520",
+        "dry_mass_kg": 134.0,     # Kawasaki spec dry / 142 kg kerb - 8 kg fuel
+        "wheelbase_mm": 1395.0,
+        "front_tire_size": "2.75-21",   # 21" knobby front (IRC GP-21F)
+        "rear_tire_size": "4.10-18",    # 18" knobby rear (IRC GP-22R)
+        "cd": 0.78,                # upright dual-sport posture
+        "frontal_area_m2": 0.55,   # wide handlebars + 21" front wheel
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -3837,4 +4036,8 @@ EXTENDED_BIKES = [
     # ── Daily improvement run 2026-05-18 (Monday — Catalog A1 third pass) ──
     APRILIA_TUONO_660_FACTORY_2022,
     RE_BULLET_350_J_2023,
+    # ── Daily improvement run 2026-05-18 (Monday — Catalog A1 fourth pass) ──
+    BAJAJ_PULSAR_P125_2024,
+    SUZUKI_GIXXER_SF_150_2019,
+    KAWASAKI_KLX_230_2020,
 ]

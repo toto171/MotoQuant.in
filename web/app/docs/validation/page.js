@@ -2,8 +2,20 @@ import Link from 'next/link';
 
 export const metadata = {
   title: 'Validation Data',
-  description: 'MotoQuant Pro benchmark table — 74 bikes matched against published magazine timeslips and strip records. Per-cluster accuracy, methodology, and known limitations.',
+  description: 'MotoQuant Pro accuracy report — 74 bikes matched against published Cycle World, Sport Rider, MotoStatz, and BikeWale timeslips. Per-cluster bias and mean absolute error, full methodology, and the open small-cc + 2-stroke calibration gaps. Reference baselines: K5 10.0334s, R1 10.2859s, Hayabusa 10.4712s — Δ ±0.0000 since April 30, 2026.',
   alternates: { canonical: 'https://motoquant.in/docs/validation' },
+  keywords: [
+    'motorcycle simulator accuracy',
+    'drag simulator validation india',
+    'quarter mile simulator benchmark',
+    'motorcycle physics simulation accuracy',
+    'validated drag racing model',
+    'hayabusa simulator validation',
+    'gsxr 1000 k5 reference baseline',
+    'r1 4c8 baseline',
+    'motoquant accuracy report',
+    'cycle world quarter mile timeslip database',
+  ],
 };
 
 // Top-10 post-fix sweep data (Apr-24-PM)
