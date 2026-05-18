@@ -39,6 +39,10 @@ export const metadata = {
     'honda hornet 2.0 drag',
     'honda cbr150r drag time',
     'kari motor speedway drag',
+    'yezdi roadster quarter mile',
+    'yezdi adventure 334 drag time',
+    'hero glamour 125 drag',
+    'motorcycle drag time predictor india',
   ],
   openGraph: {
     title: TITLE,

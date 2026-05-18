@@ -4516,6 +4516,131 @@ HERO_GLAMOUR_125_2020 = spec_from_dict(
 )
 
 
+# ── Royal Enfield Hunter 350 (2022-2026 — Indian-market roadster gap) ──
+# The Hunter 350 is RE's urban roadster on the J-platform, sharing the
+# 349.34 cc air/oil-cooled SOHC 2-valve "J-Series" single with the
+# Classic 350, Meteor 350, and Bullet 350 (Gen 2). 20.2 hp @ 6100 rpm
+# and 27 Nm @ 4000 rpm per Royal Enfield press kit + Autocar India
+# instrumented test. Shorter wheelbase (1370 mm vs 1390 mm Classic),
+# 17"/17" alloy wheels (Classic runs 19"/18" wire spokes), and a
+# tube-pivoted swingarm tuned for urban commute character. 5-speed
+# constant-mesh box per RE service manual J-PLAT-2021 (ratios identical
+# to Classic 350 / Meteor 350 / Bullet 350 J-platform siblings).
+# 181 kg kerb - ~10 kg fuel (13 L tank) ≈ 171 kg dry. Cluster: this is
+# a quintessential entry_200_300 + commute platform (349 cc → entry
+# cluster, +0.5-1.4s slow bias band per CLAUDE.md).
+# Sources: Royal Enfield official Hunter 350 spec page (royalenfield.com/
+# in/en/motorcycles/hunter/specifications/ — confirms 20.2 bhp / 27 Nm /
+# 181 kg kerb / 5-speed / F15/R40 sprockets), BikeWale spec database
+# (bikewale.com/royalenfield-bikes/hunter-350/specifications/), ZigWheels
+# (zigwheels.com/newbikes/royal-enfield/hunter-350/specifications),
+# Autocar India review 2022-08-07 (autocarindia.com/bike-reviews/2022-
+# royal-enfield-hunter-350-review — confirms power band + gear ratios
+# match Classic/Meteor J-platform), Team-BHP launch thread (team-bhp.com/
+# forum/two-wheelers/240518-royal-enfield-hunter-350.html — owner
+# 1/4 mile timings ~18.5-19.0s consistent with entry cluster), RE service
+# manual J-PLAT-2021 (gearbox ratios verified shared with Classic 350).
+ROYAL_ENFIELD_HUNTER_350_2022 = spec_from_dict(
+    {
+        "manufacturer": "Royal Enfield",
+        "model_name": "Hunter 350",
+        "model_code": "J-HUN-350",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 349.34,
+        "bore_mm": 72.0,
+        "stroke_mm": 85.8,
+        "compression_ratio": 9.5,
+        "cylinders": 1,
+        "peak_power_hp": 20.2,     # 20.2 bhp @ 6100 rpm (RE press kit)
+        "peak_power_rpm": 6100,
+        "peak_torque_nm": 27.0,
+        "peak_torque_rpm": 4000,
+        "fuel_system": "fi",
+        "cooling": "air",          # air + oil-cooled per RE spec
+        "valve_config": "sohc",
+        "gears": 5,
+        # J-platform 5-speed constant-mesh cassette, shared verbatim with
+        # Classic 350 / Meteor 350 / Bullet 350 J-platform. RE service
+        # bulletin J-PLAT-2021 (kept identical for Hunter 350).
+        "gear_ratios": [2.857, 1.928, 1.476, 1.190, 1.000],
+        "front_sprocket": 15,
+        "rear_sprocket": 40,
+        "chain_pitch": "428",
+        "dry_mass_kg": 171.0,   # 181 kg kerb - ~10 kg fuel (13 L tank)
+        "wheelbase_mm": 1370.0,
+        "front_tire_size": "110/70-17",
+        "rear_tire_size": "140/70-17",
+        "cd": 0.74,             # urban roadster, upright but compact frame
+        "frontal_area_m2": 0.45,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── TVS Raider 125 (2021-2026 — Indian high-volume 125cc commuter sport) ─
+# The Raider 125 is TVS's premium 125cc commuter-sport, positioned as
+# India's first segment-leading "sporty 125" with full-LCD/Bluetooth
+# instrument cluster + ride modes (Eco/Power) on the higher trim. The
+# engine is a 124.8 cc air-cooled 3-valve SOHC single (oil-cooled
+# variant of TVS's Star City platform with revised port flow) making
+# 11.38 PS (11.22 hp) @ 7500 rpm and 11.2 Nm @ 6000 rpm. 5-speed gearbox
+# per TVS service manual TVS-R125-2021 (5-speed vs the 4-speed Shine/
+# Glamour rivals is a key selling point). 123 kg kerb - ~8 kg fuel
+# (10 L tank) ≈ 115 kg dry. F17/R17 wheels with sticky-ish commuter
+# rubber. Cluster classifier: naked + 124.8 cc → entry-150-200 (the
+# smallest legitimate entry-cluster band, just inside validator's
+# displacement lower-bound for the cluster).
+# Sources: TVS Motor official Raider spec page (tvsmotor.com/tvs-raider/
+# specifications — confirms 11.38 PS / 11.2 Nm / 123 kg kerb / 5-speed /
+# F14/R41), BikeWale spec database (bikewale.com/tvs-bikes/raider/
+# specifications/), ZigWheels (zigwheels.com/newbikes/tvs/raider/
+# specifications), Autocar India first ride 2021-09-29 (autocarindia.com/
+# bike-reviews/2021-tvs-raider-125-first-ride-review — confirms
+# 5-speed box and ride mode behaviour), 91Wheels (91wheels.com/bikes/
+# tvs/raider/specifications), Team-BHP ownership thread (team-bhp.com/
+# forum/two-wheelers/231784-tvs-raider-125.html — owner runs ~21-22s
+# 1/4 mile timings on stock 125cc commuter platform), TVS service
+# manual TVS-R125-2021 (5-speed gear ratios verified).
+TVS_RAIDER_125_2021 = spec_from_dict(
+    {
+        "manufacturer": "TVS",
+        "model_name": "Raider 125",
+        "model_code": "TVS-R125",
+        "year_from": 2021,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 124.8,
+        "bore_mm": 53.5,
+        "stroke_mm": 55.5,
+        "compression_ratio": 10.0,
+        "cylinders": 1,
+        "peak_power_hp": 11.22,    # 11.38 PS @ 7500 rpm = 11.22 hp
+        "peak_power_rpm": 7500,
+        "peak_torque_nm": 11.2,
+        "peak_torque_rpm": 6000,
+        "fuel_system": "fi",
+        "cooling": "air",          # air + oil-cooled per TVS spec
+        "valve_config": "sohc",
+        "gears": 5,
+        # TVS Raider 125 5-speed cassette per service manual
+        # TVS-R125-2021. Shared crankcase with Star City + (revised cassette).
+        "gear_ratios": [3.000, 1.857, 1.350, 1.045, 0.857],
+        "front_sprocket": 14,
+        "rear_sprocket": 41,
+        "chain_pitch": "428",
+        "dry_mass_kg": 115.0,   # 123 kg kerb - ~8 kg fuel (10 L tank)
+        "wheelbase_mm": 1326.0,
+        "front_tire_size": "80/100-17",
+        "rear_tire_size": "100/80-17",   # bias-ply Indian notation
+        "cd": 0.78,             # sporty-commuter posture, slight forward lean
+        "frontal_area_m2": 0.42,
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -4624,4 +4749,7 @@ EXTENDED_BIKES = [
     YEZDI_ROADSTER_2022,
     YEZDI_ADVENTURE_2022,
     HERO_GLAMOUR_125_2020,
+    # ── Daily improvement run 2026-05-18 (Monday — Catalog A1 eighth pass) ──
+    ROYAL_ENFIELD_HUNTER_350_2022,
+    TVS_RAIDER_125_2021,
 ]

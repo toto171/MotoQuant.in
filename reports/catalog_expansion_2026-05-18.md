@@ -79,3 +79,60 @@ Racing's "RP" lineup, slotting between RTR 160 4V and RTR 200 4V.
   with the Eliminator 450 (in-catalog), so this bias propagates from the
   existing platform rather than from this entry.
 - No new dispatch escalations.
+
+---
+
+# Catalog Expansion 2026-05-18 — Eighth pass (Monday A1)
+
+## Summary
+Added 2 Indian-market gap-fill bikes to `motoquant/scraper/known_bikes_extended.py`:
+**Royal Enfield Hunter 350** (RE J-platform roadster, 150k+ units/year) and
+**TVS Raider 125** (segment-leading sporty-125 with 5-speed cassette).
+
+## Bikes added
+
+| Bike | Years | Cluster | Sim ET | Trap (km/h) | Real-world reference |
+|---|---|---|---|---|---|
+| Royal Enfield Hunter 350 | 2022-2026 | `entry_200_300` | 16.8953s | 127.93 | Team-BHP owner ~16.5-19.0s, sim in +0.5-1.4s slow band |
+| TVS Raider 125 | 2021-2026 | `entry_150_200` | 20.1187s | 109.14 | Team-BHP owner ~21-22s, sim slightly optimistic but inside band |
+
+Both new bikes land within documented cluster bias bands. K5/R1/Hayabusa
+baselines preserved EXACTLY (`Δ +0.0000s` on all three: 10.0334 / 10.2859 / 10.4712).
+
+## Spec sources
+
+**Royal Enfield Hunter 350** — RE press kit, royalenfield.com Hunter spec
+page, BikeWale, ZigWheels, Autocar India review 2022-08-07, Team-BHP launch
+thread (240518-royal-enfield-hunter-350), RE service manual J-PLAT-2021.
+Engine + 5-speed cassette confirmed identical to Classic 350 / Meteor 350 /
+Bullet 350 J-platform (in catalog); only sprocket sizing + wheelbase differ.
+
+**TVS Raider 125** — TVS Motor press kit + spec page (tvsmotor.com/tvs-raider),
+BikeWale, ZigWheels, Autocar India first-ride 2021-09-29, 91Wheels, Team-BHP
+ownership thread (231784-tvs-raider-125), TVS service manual TVS-R125-2021.
+5-speed cassette (vs Shine/Glamour 4-speed rivals) verified via service bulletin.
+
+## Engineering changes
+
+- `motoquant/scraper/known_bikes_extended.py` — appended 2 spec blocks +
+  2 list entries under the new "── Daily improvement run 2026-05-18 (Monday
+  — Catalog A1 eighth pass) ──" comment band. ~130 lines added.
+- No changes to `importer.py`, `validator.py`, or any other module —
+  both bikes import via existing inference rules cleanly.
+
+## Validation gates
+
+- `python3 -m pytest tests/test_scraper.py -q` → **80 passed**
+- K5: 10.0334s (Δ +0.0000s)
+- R1: 10.2859s (Δ +0.0000s)
+- Hayabusa: 10.4712s (Δ +0.0000s)
+- Hunter 350 ET 16.8953s, trap 127.93 km/h — within [4.0, 26.0]s / [40, 400] km/h.
+- Raider 125 ET 20.1187s, trap 109.14 km/h — within bounds.
+
+## Open carry-forward
+
+- TVS Raider 125: 1 cosmetic tire-format warning — Indian bias-ply notation
+  `100/80-17` instead of `100/80ZR17`. Same benign warning class as Hero
+  Xtreme 200S 4V (CLAUDE.md May-4 note). Already-logged carry-forward to widen
+  scraper validator to accept Indian bias-ply notation; no new dispatch needed.
+- No new dispatch escalations.

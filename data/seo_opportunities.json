@@ -1,7 +1,7 @@
 {
   "_updated": "2026-05-18",
-  "_run": "seventh-pass-2026-05-18",
-  "_methodology": "Six passes today. Passes 1-5 logged 24 opportunities + 7 escalations across simulator, bikes, features, pricing, about, whitepaper, docs/physics, docs/validation (see reports/seo_audit_2026-05-18*.md). Sixth pass (this run): today's catalog-expansion sixth pass shipped 3 new bikes (Yamaha XSR900 GP, Kawasaki Ninja ZX-4R, Bajaj Pulsar N125) and the marketing-content agent landed the ZX-4R post (/blog/kawasaki-ninja-zx-4r-quarter-mile-physics). SEO sixth-pass scope: (a) mark ZX-4R opportunity as done (post is live), (b) add 3 new entries for XSR900 GP + Pulsar N125 + an XSR900-GP-vs-MT-09 comparison, (c) extend /simulator keyword array with the 3 new bike-entity keywords, (d) inject the new bike entities into StructuredData.js FAQ answer + landing-page Indian Market-First tile body for entity-mention signal. Did NOT touch web/app/blog/* or sitemap.js — marketing-content owns those. SEVENTH PASS (this run): 5 new keyword opportunities identified via WebSearch on (a) Honda Hornet 2.0 vs NS200 drag (SERP is YouTube-only, no written physics piece), (b) Kawasaki Ninja 400 quarter mile India (well-documented globally at ~12.98s/102mph, India-assembled at Chakan, no India-specific drag piece exists), (c) Honda CBR150R quarter mile (SE Asia / India 149cc segment leader, top-speed ~136 km/h, no instrumented ET in SERP), (d) Kari Motor Speedway drag racing (genuine drag heritage — Wikipedia notes the site hosted drag racing in the late 1990s before becoming a permanent circuit in 2002; nobody is currently surfacing this for drag-intent), (e) ECU flash India cost (SERP dominated by international tuners; India-specific Pro-tier content gap). On-page edits: simulator + features layout keyword expansion (4 + 3 new entities); R15 blog keywords gained the NS200/Hornet 2.0 comparison cluster; StructuredData FAQ answer for the Indian drag-strips question gained Karis drag heritage signal.",
+  "_run": "eighth-pass-2026-05-18",
+  "_methodology": "Seven passes prior today. Passes 1-7 logged 33 opportunities + 11 escalations across simulator, bikes, features, pricing, about, whitepaper, docs/physics, docs/validation (see reports/seo_audit_2026-05-18*.md and reports/seo_audit_2026_05_17.md for the May-17 ninth-catalog-pass run that landed Yezdi Roadster 334 + Yezdi Adventure 334 + Hero Glamour 125 to motoquant.db). EIGHTH PASS (this run, 2026-05-18 Monday): three new keyword opportunities surfaced for the three catalog-expansion entries from yesterday's commit a84fb23/0cdb5f4: (a) 'yezdi roadster quarter mile' — Yezdi (Classic Legends, Mahindra group) is the active Indian neo-retro challenger to Royal Enfield Classic 350; SERP is BikeWale/BikeDekho spec pages with no instrumented ET. (b) 'yezdi adventure 334 drag time' — fresh-platform 334cc adventure, year-1 search demand climbing, no SERP ET data. (c) 'hero glamour 125 drag time' — Hero Glamour 125 is one of India's longest-running 125cc commuters, very high evergreen volume, SERP is dominated by mileage/price pages with zero ET content. Plus one strategic methodology entry: 'motorcycle drag time predictor india' — a slot-broadening variant on the existing /simulator primary keyword designed to capture intent that searches 'predictor' instead of 'calculator/simulator'. On-page edits: simulator keyword array +4 new entities (3 bikes + 'motorcycle drag time predictor india'); bikes layout keyword array +3 spec-database entries for the new bikes; bikes page H1 subtitle namechecks Yezdi Roadster and Hero Glamour 125 alongside the existing entity mention cluster. No StructuredData / FAQ / sitemap edits this pass (marketing-content owns blog + sitemap; landing page entity mentions were updated yesterday).",
   "_competitor_signal": "Generic 'quarter mile calculator' tools (xcceleration, ajdesigner, robrobinette, speedmaster) all use simple power-to-weight formulas, no per-bike physics. MotoQuant's defensible angle: 'physics-based, validated against 90 published benchmarks, 342 bikes pre-configured, cost-per-tenth ROI in INR'.",
   "opportunities": [
     {
@@ -526,6 +526,74 @@
       "action": "tweak-existing",
       "priority": 33,
       "rationale": "SERP is international tuners (Brock's, Woolich, 2 Wheel DynoWorks) with USD pricing. India buyer-funnel gap: no consolidated cost-per-tenth analysis comparing Powertronic (Indian), Bazzaz, Dynojet PCV, and Woolich flash options against ECU-cluster ROI on common Indian bikes (R15, NS200, Duke 390, Interceptor 650, Hayabusa). Pro-tier B2B funnel signal. Keywords array on /features expanded this pass to capture intent; queue a dedicated /blog/ecu-flash-india-cost-per-tenth post."
+    },
+    {
+      "keyword": "yezdi roadster quarter mile",
+      "secondary": [
+        "yezdi roadster 334 drag time",
+        "yezdi roadster 0-100",
+        "yezdi vs royal enfield drag",
+        "yezdi roadster top speed india"
+      ],
+      "intent": "informational",
+      "estimated_volume_india": "med-high",
+      "seasonality": "evergreen — Yezdi nameplate revived under Classic Legends (Mahindra group) in 2022; year-on-year search trend climbing as Yezdi expands dealer network across south and west India",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "create-blog-later",
+      "priority": 34,
+      "rationale": "Yezdi Roadster 334 added to motoquant.db on 2026-05-17 (catalog ninth pass, commit 0cdb5f4). Direct neo-retro challenger to RE Classic 350 / Meteor 350 with the J-platform-equivalent positioning, but Yezdi Roadster runs a 334cc oil-cooled single (29 hp, 28.85 Nm) — meaningfully more power than the Classic 350's 20 hp. MotoQuant sim ET should fall in the entry_300_500 cluster (15-16s). SERP top results are BikeWale / BikeDekho / ZigWheels spec pages, ProBiker forum threads, and YouTube reviews — zero instrumented quarter-mile ET data. The 'is Yezdi faster than RE Classic 350?' question is a recurring forum thread that nobody answers with physics. Queue marketing-content for /blog/yezdi-roadster-vs-re-classic-350-quarter-mile-physics — both bikes already in catalog, clean platform-comparison story."
+    },
+    {
+      "keyword": "yezdi adventure 334 drag time",
+      "secondary": [
+        "yezdi adventure 334 quarter mile",
+        "yezdi adventure 334 vs himalayan 450",
+        "yezdi adventure 334 top speed",
+        "yezdi adventure 334 0-100"
+      ],
+      "intent": "informational",
+      "estimated_volume_india": "med",
+      "seasonality": "fresh — Yezdi Adventure refresh to 334cc launched 2024-2025; year-2 search demand still climbing",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "create-blog-later",
+      "priority": 35,
+      "rationale": "Yezdi Adventure 334 added to motoquant.db on 2026-05-17 (catalog ninth pass, commit 0cdb5f4). Shares 334cc oil-cooled single platform with Yezdi Roadster but adds adventure-touring geometry (longer wheelbase, taller suspension, 21-inch front wheel, ~15 kg heavier). MotoQuant predicts ~0.6-0.8s slower than the Roadster on the same engine — clean drivetrain-share-with-mass-tax story. Direct competition for RE Himalayan 450 (already in catalog with 40 hp 451cc single, ~196 kg — bigger engine but heavier mass). SERP for 'yezdi adventure vs himalayan' is dominated by spec-comparison pages and a few YouTube long-form reviews; nobody runs physics. Strong cluster-pair-post candidate alongside Yezdi Roadster — single URL captures both queries."
+    },
+    {
+      "keyword": "hero glamour 125 drag time",
+      "secondary": [
+        "hero glamour 125 0-100",
+        "hero glamour 125 quarter mile",
+        "hero glamour vs splendor plus",
+        "hero glamour 125 top speed india",
+        "hero glamour 125 vs pulsar n125"
+      ],
+      "intent": "informational",
+      "estimated_volume_india": "very-high",
+      "seasonality": "evergreen — Hero Glamour 125 is one of India's longest-running 125cc commuter nameplates; ~150k unit-per-year average sales",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "create-blog-later",
+      "priority": 36,
+      "rationale": "Hero Glamour 125 added to motoquant.db on 2026-05-17 (catalog ninth pass, commit 0cdb5f4). 124.7cc air-cooled OBD2B single, 10.7 hp @ 7500 rpm, 10.6 Nm @ 6000 rpm. Direct competitor to Bajaj Pulsar N125 (in catalog, priority 27) and Honda Shine 125 (not yet in catalog). MotoQuant sim ET will fall in the entry_150_200 cluster — typically 18-21s, consistent with the documented +0.5-1.4s cluster bias band. SERP is overwhelmingly mileage-and-price queries (BikeWale, BikeDekho, 91Wheels) with literally zero quarter-mile ET data because 125cc commuter audience does not search for drag times — they search for fuel economy. That intent-mismatch is the editorial differentiator: a single 125cc-commuter shootout post (Glamour 125, Pulsar N125, Splendor Plus when added) reframes the segment from mileage-bragging to acceleration-bragging and could land a long-tail evergreen rank for the underserved 'which 125cc commuter is the fastest' query. Queue marketing-content for /blog/hero-glamour-125-vs-pulsar-n125-quarter-mile-physics."
+    },
+    {
+      "keyword": "motorcycle drag time predictor india",
+      "secondary": [
+        "bike drag time predictor",
+        "predict motorcycle quarter mile online",
+        "online motorcycle ET predictor india",
+        "free bike drag time predictor"
+      ],
+      "intent": "transactional/methodology",
+      "estimated_volume_india": "med",
+      "current_rank": null,
+      "target_url": "/simulator",
+      "action": "tweak-existing",
+      "priority": 37,
+      "rationale": "Slot-broadening variant on the existing /simulator primary keyword cluster ('motorcycle quarter mile calculator india', priority 3). Users who search 'predictor' instead of 'calculator/simulator' are doing the same job but with different vocabulary — capturing both phrasings at once requires both phrasings in the keywords array. WebSearch on the variant returns generic spreadsheet templates and YouTube videos but no physics-based interactive tool that includes the India locale signal. Added to /simulator layout.js keywords array this pass. Defensible angle stays the same: physics-based, 342 bikes pre-configured, validated to ±0.2s on K5/R1/Hayabusa baselines, cost-per-tenth ROI in INR — none of the generic tools can match any of those four criteria."
     }
   ],
   "escalations": [
@@ -594,6 +662,18 @@
       "to": "marketing-content",
       "topic": "ECU flash India cost — Powertronic vs Bazzaz vs Dynojet PCV vs Woolich, by cost-per-tenth on common Indian bikes",
       "rationale": "B2B Pro-tier buyer funnel content. SERP is international tuners with USD pricing. Run MotoQuant's parts ROI engine on the same 4-5 ECU options for R15 V4 / NS200 / Duke 390 / Interceptor 650 / Hayabusa. Output a ₹/tenth table. Unique to MotoQuant — no competitor has the catalog + sim to produce this."
+    },
+    {
+      "severity": "opportunistic",
+      "to": "marketing-content",
+      "topic": "Yezdi Roadster vs Royal Enfield Classic 350 — quarter-mile physics breakdown for the 334cc challenger",
+      "rationale": "Yezdi Roadster 334 added to catalog on 2026-05-17. The neo-retro challenge to RE Classic 350 is one of the most-asked questions in the Indian motorcycle forum scene (Team-BHP threads run for years on this). Both bikes in catalog with corrected gear ratios + correct masses. Roadster has ~9 hp more power and similar mass — straightforward physics story showing where that power buys ET. SERP zero physics content. Strong evergreen Indian SEO target."
+    },
+    {
+      "severity": "opportunistic",
+      "to": "marketing-content",
+      "topic": "Hero Glamour 125 vs Pulsar N125 — 125cc commuter quarter-mile shootout (reframing the segment from mileage to acceleration)",
+      "rationale": "Hero Glamour 125 + Pulsar N125 both in catalog as of yesterday. The 125cc commuter SERP is overwhelmingly mileage queries with zero acceleration content — an obvious editorial differentiator. Single post reframes the segment intent from 'best mileage' to 'fastest commuter' and could pick up a long-tail evergreen rank with very low competition. Pairs naturally with the Splendor Plus / Hero HF Deluxe entries that will land in future catalog passes."
     }
   ]
 }

@@ -5,10 +5,15 @@ import SiteFooter from "../../components/SiteFooter";
 export const metadata = {
   title: "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
   description:
-    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Yamaha XSR900 GP vs MT-09, Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
+    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
   keywords: [
     "motorcycle drag racing blog",
     "indian motorcycle quarter mile",
+    "mmrt chennai drag racing motorcycle",
+    "madras motor race track quarter mile",
+    "how to tune for mmrt chennai",
+    "mmrt vs aamby valley",
+    "kari motor speedway drag racing",
     "yamaha xsr900 gp vs mt-09",
     "xsr900 gp quarter mile",
     "mt-09 quarter mile time",
@@ -35,6 +40,15 @@ export const metadata = {
 };
 
 const POSTS = [
+  {
+    slug: "how-to-tune-for-mmrt-chennai",
+    title: "How to Tune for MMRT Chennai: Sea-Level, Humid, Hot Track",
+    date: "2026-05-18",
+    readTime: "11 min",
+    tags: ["MMRT", "Chennai", "venue", "tuning", "Tamil Nadu"],
+    excerpt:
+      "MMRT Chennai sits at 78 m altitude with 80% humidity and 30°C track temperatures most of the year. MotoQuant simulates the same Hayabusa 0.05s quicker at MMRT than Aamby Valley in November, with a higher trap speed but a slightly worse 60-foot. Venue-specific tuning math, month-by-month ET table, and four practical adjustments before you trailer the bike.",
+  },
   {
     slug: "yamaha-xsr900-gp-vs-mt-09-quarter-mile-physics",
     title: "Yamaha XSR900 GP vs MT-09: Where the Heritage Tax Is Paid",

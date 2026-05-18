@@ -170,6 +170,12 @@ export default async function sitemap() {
       priority: 0.75,
     },
     {
+      url: `${SITE_URL}/blog/how-to-tune-for-mmrt-chennai`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.82,
+    },
+    {
       url: `${SITE_URL}/docs/getting-started`,
       lastModified: now,
       changeFrequency: "monthly",

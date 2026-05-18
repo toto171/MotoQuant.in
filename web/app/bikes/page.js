@@ -148,10 +148,11 @@ export default function BikesPage() {
                 </h1>
                 <p className="text-white/70 mt-3 max-w-2xl">
                   342 bikes modelled in MotoQuant Pro — Hayabusa, ZX-14R, R15 V4,
-                  KTM Duke 390, Pulsar NS200, Apache RTR, Interceptor 650, and the
-                  full Indian + SE Asia drag-strip catalog. Individual aero
-                  (Cd &amp; frontal area), dyno curves, service-manual gear ratios,
-                  and predicted ET at Aamby Valley + 19 other venues.
+                  KTM Duke 390, Pulsar NS200, Apache RTR, Interceptor 650, Yezdi
+                  Roadster, Hero Glamour 125, and the full Indian + SE Asia
+                  drag-strip catalog. Individual aero (Cd &amp; frontal area), dyno
+                  curves, service-manual gear ratios, and predicted ET at Aamby
+                  Valley + 19 other venues.
                   Missing yours?{' '}
                   <button
                     type="button"
