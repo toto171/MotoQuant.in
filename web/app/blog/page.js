@@ -5,10 +5,13 @@ import SiteFooter from "../../components/SiteFooter";
 export const metadata = {
   title: "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
   description:
-    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
+    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
   keywords: [
     "motorcycle drag racing blog",
     "indian motorcycle quarter mile",
+    "kawasaki ninja zx-4r quarter mile",
+    "zx-4r vs zx-4rr",
+    "zx-4r india price",
     "yamaha mt-125 quarter mile",
     "yamaha xsr125 quarter mile",
     "mt-125 vs xsr125",
@@ -28,6 +31,15 @@ export const metadata = {
 };
 
 const POSTS = [
+  {
+    slug: "kawasaki-ninja-zx-4r-quarter-mile-physics",
+    title: "Kawasaki Ninja ZX-4R Quarter-Mile Physics: 400cc Inline-Four",
+    date: "2026-05-18",
+    readTime: "11 min",
+    tags: ["Kawasaki", "Ninja ZX-4R", "400cc", "inline-four", "physics"],
+    excerpt:
+      "MotoQuant simulates the 2024 Kawasaki Ninja ZX-4R at 12.681s and 192.6 km/h trap. Why a 76 hp 400cc inline-four runs a 12.6 when every other 400-class bike runs a 13.5 — plus three mods under ₹30,000 that close the gap to the ZX-4RR.",
+  },
   {
     slug: "yamaha-mt-125-xsr125-platform-physics",
     title: "Yamaha MT-125 vs XSR125: Same Engine, 0.10s Apart at the Strip",

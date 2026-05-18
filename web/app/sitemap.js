@@ -74,6 +74,12 @@ export default async function sitemap() {
       priority: 0.8,
     },
     {
+      url: `${SITE_URL}/blog/kawasaki-ninja-zx-4r-quarter-mile-physics`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
       url: `${SITE_URL}/blog/cfmoto-800nk-quarter-mile-physics`,
       lastModified: now,
       changeFrequency: "monthly",

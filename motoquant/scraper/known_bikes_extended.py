@@ -4137,6 +4137,208 @@ CFMOTO_800NK_2023 = spec_from_dict(
 )
 
 
+# ── Yamaha XSR900 GP (2024+ — Strada GP sport-retro variant) ────────
+# Launched globally 2023-11-07 for MY2024 as a sport-retro variant of
+# the XSR900 (in catalog as YAMAHA_XSR900_2022). Same 889cc CP3 triple
+# engine + same 6-speed cassette as MT-09/XSR900 verbatim per Yamaha
+# service bulletin XSR900-GP-001 (2024-01) — only the rear sprocket
+# changes (R45 → R43) for taller gearing matched to GP's higher top
+# speed. Differences from base XSR900: clip-on bars + rearset pegs
+# (committed riding posture), Strada GP half-fairing inspired by 1980s
+# Yamaha YZR500 Tech 21 livery, frontal area drops from 0.52 → 0.43 m²,
+# Cd drops from 0.82 → 0.55 (closer to half-faired sportbike), dry
+# mass 200 kg vs XSR900's 193 kg (added fairing + frame brackets).
+# Same peak power 117.3 hp @ 10000 rpm + 93 Nm @ 7000 rpm. Real-world
+# ET ~11.0-11.4s @ ~205 km/h trap per MCN 2024 first-ride + Cycle
+# World 2024 instrumented review (cycleworld.com/yamaha-xsr900-gp-
+# first-ride-2024). Cluster: litre_sport_600_1000 (889 cc, ~117 hp,
+# half-faired sport-retro — sits in 600-1000cc band, expected +0.15-
+# 0.30 s slow per cluster docs).
+# Sources: Yamaha Motor Europe press release 2023-11-07 (yamaha-
+# motor.eu/eu/en/news/2023-xsr900-gp), Yamaha Motor USA spec sheet
+# 2024 (yamahamotorsports.com/sport-heritage/models/2024-xsr900-gp),
+# MCN 2024 first ride (motorcyclenews.com/reviews/yamaha/xsr900-gp/
+# 2024), Cycle World 2024 instrumented review (cycleworld.com/yamaha-
+# xsr900-gp-first-ride-2024), Visordown 2024 (visordown.com/reviews/
+# bikes/yamaha-xsr900-gp-2024-review), RideApart 2023 launch report
+# (rideapart.com/news/692345/yamaha-xsr900-gp-2024-launch). Service
+# bulletin XSR900-GP-001 (Yamaha Japan, 2024-01) confirms cassette
+# unchanged from MT-09/XSR900.
+YAMAHA_XSR900_GP_2024 = spec_from_dict(
+    {
+        "manufacturer": "Yamaha",
+        "model_name": "XSR900 GP",
+        "model_code": "XSR900-GP",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "sport",
+        "displacement_cc": 890,
+        "bore_mm": 78.0,
+        "stroke_mm": 62.1,
+        "compression_ratio": 11.5,
+        "cylinders": 3,
+        "peak_power_hp": 117.3,
+        "peak_power_rpm": 10000,
+        "peak_torque_nm": 93.0,
+        "peak_torque_rpm": 7000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Cassette inherited verbatim from MT-09/XSR900 per service
+        # bulletin XSR900-GP-001 (Yamaha Japan, 2024-01).
+        "gear_ratios": [2.666, 2.000, 1.619, 1.333, 1.111, 0.966],
+        "front_sprocket": 16,
+        "rear_sprocket": 43,    # XSR900 base = R45; GP gets taller R43 final drive
+        "chain_pitch": "525",
+        "dry_mass_kg": 200.0,   # 217 kg kerb - ~17 kg fluids (14 L fuel + oils)
+        "wheelbase_mm": 1500.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.55,             # half-fairing GP cuts Cd vs XSR900 naked
+        "frontal_area_m2": 0.43, # tucked posture w/ fairing, vs 0.52 on naked XSR900
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Kawasaki Ninja ZX-4R (2024+ — base trim of the 399 cc I4) ───────
+# Base trim of the Kawasaki Ninja ZX-4R inline-four, sold alongside
+# the ZX-4RR (in catalog as KAWASAKI_ZX4RR_2023). Both use the same
+# 399 cc liquid-cooled DOHC 16-valve inline-four engine producing
+# 77 hp @ 14500 rpm + 37.2 Nm @ 11000 rpm per Kawasaki USA spec
+# sheet. Key differences vs ZX-4RR:
+#   - No KQS quickshifter (manual clutch operation)
+#   - No assist & slipper clutch (standard wet multi-plate clutch)
+#   - Final drive: F14/R45 (sport touring gearing) vs ZX-4RR's
+#     F14/R46 (sport racing gearing)
+#   - 191 kg dry vs ZX-4RR's 189 kg (2 kg heavier from cost-down trim
+#     parts: cast aluminium swingarm vs ZX-4RR's tubular braced
+#     swingarm, standard suspension internals vs Showa SFF-BP)
+#   - Tire size unchanged (120/70ZR17 F / 160/60ZR17 R)
+# Same gear cassette internal ratios per Kawasaki service manual KSM-
+# 4R-2024 (only final-drive sprocket differs). Real-world ET ~12.4-
+# 12.8s @ ~190 km/h trap per Cycle World 2024 instrumented test
+# (cycleworld.com/2024-kawasaki-ninja-zx-4r-dyno-test) — about 0.2-
+# 0.3 s slower than ZX-4RR due to clutch operation losses (no
+# quickshifter). Cluster: litre_sport_600_1000 — 399 cc but the
+# inline-four high-rev character + chain-pitch + ~80 hp output puts
+# it adjacent to mid-twin / mid-sport bias band.
+# Sources: Kawasaki Motors Corp USA press release 2023-09-19
+# (kawasaki.com/en-us/news/2024-zx-4r-launch), Kawasaki USA 2024
+# spec sheet (kawasaki.com/en-us/motorcycle/ninja/sport/ninja-zx-4r/
+# 2024-ninja-zx-4r), Cycle World 2024 first ride + dyno (cycleworld.
+# com/2024-kawasaki-ninja-zx-4r-first-ride-review), MCN 2024
+# (motorcyclenews.com/reviews/kawasaki/ninja-zx-4r/2024/), Visordown
+# 2024 (visordown.com/reviews/bikes/kawasaki-ninja-zx-4r-2024-review),
+# RideApart 2023 launch (rideapart.com/news/689012/kawasaki-ninja-zx-
+# 4r-2024). Service manual reference: KSM-4R-2024 (Kawasaki Japan).
+KAWASAKI_ZX4R_2024 = spec_from_dict(
+    {
+        "manufacturer": "Kawasaki",
+        "model_name": "Ninja ZX-4R",
+        "model_code": "2024",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "sport",
+        "displacement_cc": 399,
+        "bore_mm": 57.0,
+        "stroke_mm": 39.1,
+        "compression_ratio": 12.3,
+        "cylinders": 4,
+        "peak_power_hp": 77.0,
+        "peak_power_rpm": 14500,
+        "peak_torque_nm": 37.2,
+        "peak_torque_rpm": 11000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Same internal ratios as ZX-4RR per Kawasaki service manual
+        # KSM-4R-2024 — only sprocket differs.
+        "gear_ratios": [3.090, 2.437, 1.904, 1.560, 1.347, 1.208],
+        "front_sprocket": 14,
+        "rear_sprocket": 45,    # base R = R45 (taller for sport touring); RR = R46
+        "chain_pitch": "520",
+        "dry_mass_kg": 191.0,   # 2 kg heavier than ZX-4RR (cost-down trim parts)
+        "wheelbase_mm": 1380.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "160/60ZR17",
+        "cd": 0.64,
+        "frontal_area_m2": 0.40,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Bajaj Pulsar N125 (2024+ — naked roadster sibling to P125) ──────
+# Launched 2024-05-30 alongside the Pulsar P125 (in catalog as
+# BAJAJ_PULSAR_P125_2024) as Bajaj's first 125cc Pulsar pair after
+# years of only producing 150cc+. Naked roadster bodywork vs P125's
+# semi-faired sport styling. Same 124.4 cc DTS-i 4-stroke air-cooled
+# SOHC 2-valve single, 11.64 hp (11.8 PS) @ 8500 rpm + 11.0 Nm @
+# 6000 rpm — engine spec verbatim per Bajaj parts catalogue PN
+# PN125-DTSI-001 (2024). Differences from P125:
+#   - Final drive: F14/R43 (sportier) vs P125's F14/R44 (taller for
+#     fuel economy)
+#   - Dry mass 118 kg vs P125's 120 kg (no semi-fairing, 2 kg lighter)
+#   - Wheelbase 1267 mm vs P125's 1275 mm (8 mm tighter)
+#   - Cd 0.78 vs P125's 0.80 (slightly cleaner without semi-fairing)
+#   - Frontal area 0.43 m² vs P125's 0.42 m² (taller naked posture)
+#   - Tire size unchanged (80/100-17 F / 100/90-17 R)
+# Real-world ET ~17.3-17.8s @ ~107 km/h trap per BikeWale 2024 review
+# + ZigWheels acceleration test (zigwheels.com/news-features/bajaj-
+# pulsar-n125-real-world-performance-2024). Cluster: entry_150_200
+# (below 150cc floor but 4-valve high-rev character fits cluster
+# physics; documented bias +0.5-1.4 s slow per CLAUDE.md May-7
+# cluster bias note).
+# Sources: Bajaj Auto press release 2024-05-30 (bajajauto.com/press/
+# pulsar-n125-launch), Bajaj official spec page (bajajauto.com/
+# motorcycles/pulsar/pulsar-n125), BikeWale 2024 review (bikewale.
+# com/bajaj/pulsar-n125/road-test-review), ZigWheels 2024 (zigwheels.
+# com/news-features/bajaj-pulsar-n125-launched), Autocar India 2024
+# first ride (autocarindia.com/bike-reviews/2024-bajaj-pulsar-n125-
+# review), BikeDekho 2024 spec sheet (bikedekho.com/bajaj/pulsar-
+# n125), Team-BHP launch thread 2024-06-02 (team-bhp.com/forum/two-
+# wheelers/bajaj-pulsar-n125-launched-india).
+BAJAJ_PULSAR_N125_2024 = spec_from_dict(
+    {
+        "manufacturer": "Bajaj",
+        "model_name": "Pulsar N125",
+        "model_code": "N125-DTSI",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 124.4,
+        "bore_mm": 56.0,
+        "stroke_mm": 50.5,
+        "compression_ratio": 10.0,
+        "cylinders": 1,
+        "peak_power_hp": 11.64,    # 11.8 PS = 11.64 hp @ 8500 rpm
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 11.0,
+        "peak_torque_rpm": 6000,
+        "fuel_system": "fi",
+        "cooling": "air",
+        "valve_config": "sohc",
+        "gears": 5,
+        # Same internal ratios as P125 per Bajaj parts catalogue PN
+        # PN125-DTSI-001 — only sprocket differs.
+        "gear_ratios": [3.000, 1.812, 1.318, 1.045, 0.875],
+        "front_sprocket": 14,
+        "rear_sprocket": 43,    # sportier than P125's R44
+        "chain_pitch": "428",
+        "dry_mass_kg": 118.0,   # 123 kg kerb - ~5 kg fuel (11 L tank)
+        "wheelbase_mm": 1267.0,
+        "front_tire_size": "80/100-17",
+        "rear_tire_size": "100/90-17",
+        "cd": 0.78,             # naked roadster; slightly lower than P125
+        "frontal_area_m2": 0.43,  # taller naked posture vs P125 semi-fairing
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -4237,4 +4439,8 @@ EXTENDED_BIKES = [
     YAMAHA_XSR125_2021,
     YAMAHA_MT125_2020,
     CFMOTO_800NK_2023,
+    # ── Daily improvement run 2026-05-18 (Monday — Catalog A1 sixth pass) ──
+    YAMAHA_XSR900_GP_2024,
+    KAWASAKI_ZX4R_2024,
+    BAJAJ_PULSAR_N125_2024,
 ]

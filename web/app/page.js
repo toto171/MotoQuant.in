@@ -426,7 +426,7 @@ function HomePageInner() {
               {
                 icon: Target,
                 title: 'Indian Market-First',
-                body: '342 bikes including 57 Indian commuters (Pulsar, Apache, R15, Duke, RE), 15 SE Asia drag cubs, and the complete Indian racing scene. Parts prices in INR with live retailer data. Venues: Aamby Valley, MMRT, BIC, Kari, Hyderabad.',
+                body: '342 bikes including 57 Indian commuters (Pulsar N125, NS200, NS400Z, Apache RTR, R15 V4, Duke 390, RE Interceptor 650), 15 SE Asia drag cubs, the Kawasaki Ninja ZX-4R/ZX-4RR 400cc inline-fours, and the complete Indian racing scene. Parts prices in INR with live retailer data. Venues: Aamby Valley, MMRT, BIC, Kari, Hyderabad.',
                 href: '/bikes',
                 cta: 'Browse all 342 bikes →',
               },

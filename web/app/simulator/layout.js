@@ -32,6 +32,9 @@ export const metadata = {
     'trap speed calculator',
     'acceleration simulator motorcycle',
     'physics based quarter mile calculator',
+    'kawasaki zx-4r quarter mile',
+    'yamaha xsr900 gp drag',
+    'pulsar n125 quarter mile',
   ],
   openGraph: {
     title: TITLE,

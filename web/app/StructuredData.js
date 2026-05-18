@@ -142,7 +142,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'The catalog covers 342 bikes across 25+ manufacturers: Suzuki, Yamaha, Honda, Kawasaki, BMW, Ducati, Aprilia, KTM, Triumph, Royal Enfield, Bajaj, TVS, Hero, Harley-Davidson, Indian Motorcycle, CFMoto, Benelli, Husqvarna, MV Agusta, Moto Guzzi, Buell, and more. Includes Indian 200–400cc commuters, SE Asia underbones, and 20 two-stroke drag bikes (RD350, RX100, RGV250, H2 Mach IV).',
+            'The catalog covers 342 bikes across 25+ manufacturers: Suzuki, Yamaha, Honda, Kawasaki, BMW, Ducati, Aprilia, KTM, Triumph, Royal Enfield, Bajaj, TVS, Hero, Harley-Davidson, Indian Motorcycle, CFMoto, Benelli, Husqvarna, MV Agusta, Moto Guzzi, Buell, and more. Includes Indian 200–400cc commuters (Pulsar N125, NS200, NS400Z, Apache RTR, R15 V4), SE Asia underbones, 400cc inline-fours (Kawasaki Ninja ZX-4R, ZX-4RR), retro flagships (Yamaha XSR900 GP), and 20 two-stroke drag bikes (RD350, RX100, RGV250, H2 Mach IV).',
         },
       },
       {

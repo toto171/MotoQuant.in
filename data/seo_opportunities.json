@@ -1,7 +1,7 @@
 {
   "_updated": "2026-05-18",
-  "_run": "fifth-pass-night",
-  "_methodology": "Five passes today. Passes 1-4 logged 20 opportunities + 7 escalations across the simulator, bikes, features, pricing, about, whitepaper, docs/physics, and docs/validation surfaces (see reports/seo_audit_2026-05-18.md and seo_audit_2026-05-18_fourth_pass.md). Fifth pass (this run): 2 live WebSearch probes (CFMoto 800NK + Yamaha MT-125 quarter mile) confirmed SERP gaps. Today's catalog-expansion agent shipped 3 new bikes (Yamaha XSR125, Yamaha MT-125, CFMoto 800NK) and the marketing-content agent is writing one blog post for one of them. SEO agent's fifth-pass scope: surface the other two as keyword opportunities, expand /features and /pricing keyword arrays to capture A-vs-B comparison and new-bike-adjacent intents, and add a real H1/subheader keyword improvement to /bikes (which previously had a barely-SEO-relevant 'Bikes Catalog' H1). Coordinate-by-file-ownership: did NOT touch web/app/blog/* or web/app/sitemap.js \u2014 marketing-content owns those.",
+  "_run": "sixth-pass-late-night",
+  "_methodology": "Six passes today. Passes 1-5 logged 24 opportunities + 7 escalations across simulator, bikes, features, pricing, about, whitepaper, docs/physics, docs/validation (see reports/seo_audit_2026-05-18*.md). Sixth pass (this run): today's catalog-expansion sixth pass shipped 3 new bikes (Yamaha XSR900 GP, Kawasaki Ninja ZX-4R, Bajaj Pulsar N125) and the marketing-content agent landed the ZX-4R post (/blog/kawasaki-ninja-zx-4r-quarter-mile-physics). SEO sixth-pass scope: (a) mark ZX-4R opportunity as done (post is live), (b) add 3 new entries for XSR900 GP + Pulsar N125 + an XSR900-GP-vs-MT-09 comparison, (c) extend /simulator keyword array with the 3 new bike-entity keywords, (d) inject the new bike entities into StructuredData.js FAQ answer + landing-page Indian Market-First tile body for entity-mention signal. Did NOT touch web/app/blog/* or sitemap.js \u2014 marketing-content owns those.",
   "_competitor_signal": "Generic 'quarter mile calculator' tools (xcceleration, ajdesigner, robrobinette, speedmaster) all use simple power-to-weight formulas, no per-bike physics. MotoQuant's defensible angle: 'physics-based, validated against 90 published benchmarks, 342 bikes pre-configured, cost-per-tenth ROI in INR'.",
   "opportunities": [
     {
@@ -382,6 +382,75 @@
       "action": "tweak-existing",
       "priority": 24,
       "rationale": "The /bikes page H1 was previously 'Bikes Catalog' \u2014 minimal SEO weight. Refreshed this pass to 'Motorcycle Specs & Quarter-Mile Database' with a subheader naming Hayabusa, ZX-14R, R15 V4, KTM Duke 390, Pulsar NS200, Apache RTR, Interceptor 650 and the Indian + SE Asia drag-strip framing. Subheader also adds a contextual internal link to /simulator anchored on 'quarter-mile calculator' (the simulator's primary keyword). Database-pattern queries are a strong entity-signal play; BikeWale and BikeDekho dominate the spec-database SERP but neither indexes quarter-mile ET \u2014 that's MotoQuant's defensible angle."
+    },
+    {
+      "keyword": "kawasaki ninja zx-4r quarter mile",
+      "secondary": [
+        "zx-4r vs zx-4rr",
+        "zx-4r india price",
+        "kawasaki zx-4r 0-100",
+        "400cc inline four drag"
+      ],
+      "intent": "informational",
+      "estimated_volume_india": "med-high",
+      "seasonality": "fresh \u2014 Indian launch May 2025, year-2 search demand still climbing",
+      "current_rank": null,
+      "target_url": "/blog/kawasaki-ninja-zx-4r-quarter-mile-physics",
+      "action": "done",
+      "priority": 25,
+      "rationale": "DONE 2026-05-18: Marketing-content shipped /blog/kawasaki-ninja-zx-4r-quarter-mile-physics. ZX-4R sim 12.681s @ 192.6 km/h trap; ZX-4RR sim 12.58s @ 193.4 km/h. Real-world band 12.4-12.8s per Cycle World 2024. 400cc inline-four screamer angle is defensible \u2014 no other physics-breakdown content exists for the platform in the SERP. Cycle World and MCN dominate global queries but lack India-segment + cost-per-tenth math. Post is live; sitemap entry at priority 0.85; blog index and meta keyword array refreshed. Rank tracking begins on next Sunday product-prioritisation pass via Search Console."
+    },
+    {
+      "keyword": "yamaha xsr900 gp quarter mile",
+      "secondary": [
+        "xsr900 gp drag time",
+        "yamaha xsr900 gp india",
+        "xsr900 gp vs mt-09",
+        "xsr900 gp 0-100",
+        "yamaha cp3 retro flagship drag"
+      ],
+      "intent": "informational",
+      "estimated_volume_india": "low (India CBU only) / med (Europe + Japan)",
+      "seasonality": "fresh \u2014 launched globally late 2023, Indian CBU availability via Yamaha India sole-importer March 2024",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "create-blog-later",
+      "priority": 26,
+      "rationale": "Yamaha XSR900 GP added to motoquant.db today (2026-05-18 catalog sixth pass). MotoQuant sim ET 10.980s @ 222.3 km/h trap. MCN/Cycle World 2024 published ~11.0-11.4s @ ~205 km/h instrumented. 200 kg dry, 117 hp CP3 triple, half-fairing + clip-ons + rearsets on the MT-09/XSR900 platform \u2014 same engine and cassette as MT-09 (already in catalog) but ~7 kg heavier from the GP bodywork. Indian buyer-intent volume is low because the bike is sold only as a CBU import (~\u20b914 lakh on-road) but global volume is meaningful and the platform-share angle (MT-09 / XSR900 / Tracer 9 GT / Niken / XSR900 GP all share the CP3 triple) is unique editorial territory. Queue marketing-content for /blog/yamaha-xsr900-gp-quarter-mile-physics \u2014 the GP-trim vs base-MT-09 comparison is a strong differentiator-with-mass-tax story analogous to the MT-125/XSR125 pair-post that landed today."
+    },
+    {
+      "keyword": "bajaj pulsar n125 quarter mile",
+      "secondary": [
+        "pulsar n125 0-100",
+        "pulsar n125 top speed india",
+        "pulsar n125 vs p125",
+        "pulsar n125 mileage drag",
+        "n125 vs splendor plus"
+      ],
+      "intent": "informational",
+      "estimated_volume_india": "high",
+      "seasonality": "fresh \u2014 launched May 2024, year-2 search demand still climbing; commuter-segment queries are evergreen with steady volume",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "create-blog-later",
+      "priority": 27,
+      "rationale": "Bajaj Pulsar N125 added to motoquant.db today (2026-05-18 catalog sixth pass). MotoQuant sim ET 20.175s @ 110.2 km/h trap. BikeWale/ZigWheels 2024 review ~17.3-17.8s \u2014 sim +2.4s slow consistent with documented entry_150_200 cluster bias band (CLAUDE.md May-7 note: +0.5-1.4s mean, with small-cc outliers running +1.0-3.0s slow). Same engine + cassette as P125 (in catalog) but naked roadster styling, 2 kg lighter, sportier F14/R43 final drive vs P125's F14/R44. Pulsar 125 is Bajaj's mass-market commuter \u2014 Honda Splendor / Hero Glamour / TVS Raider 125 cohort. Highest-volume Indian search bucket per BikeWale traffic data. SERP top results are BikeWale/BikeDekho/ZigWheels spec pages with no ET data. Queue marketing-content for /blog/pulsar-n125-vs-p125-quarter-mile-physics (or a 125cc commuter shootout including Raider 125 and Splendor Plus once those land in catalog). High-volume target with low SERP competition."
+    },
+    {
+      "keyword": "yamaha xsr900 gp vs mt-09",
+      "secondary": [
+        "xsr900 gp vs mt-09 drag",
+        "yamaha cp3 platform comparison",
+        "xsr900 gp mass tax drag",
+        "is xsr900 gp slower than mt-09"
+      ],
+      "intent": "comparison",
+      "estimated_volume_india": "low (India) / med (Europe + Japan)",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "create-blog-later",
+      "priority": 28,
+      "rationale": "Platform-pair comparison between XSR900 GP (added today) and MT-09 (already in catalog). Both share 890 cc CP3 triple + 6-speed cassette + 16F/45R chain. XSR900 GP carries half-fairing + clip-ons + rearsets \u2014 adds ~7 kg dry mass and slightly larger frontal area from the fairing. MotoQuant sim \u0394 between the two is ~0.07-0.10s \u2014 a clean platform-share story showing where 'heritage tax' lives in a quarter-mile. Pairs naturally with priority 26 (XSR900 GP standalone post) and the MT-125/XSR125 platform pair-post that landed today. Single blog post can cover both queries with one URL. SERP has zero physics-based comparison content \u2014 top results are MCN reviews and Yamaha press releases."
     }
   ],
   "escalations": [
@@ -426,6 +495,18 @@
       "to": "marketing-content",
       "topic": "How to tune for MMRT Chennai \u2014 sea-level + high humidity vs Aamby Valley's 1050 m + low humidity",
       "rationale": "MMRT is the #2 most-searched Indian drag venue. The Aamby Valley November tuning post is the most-cited venue piece on MotoQuant; an MMRT counterpart would close out the obvious symmetry and let us cross-link both pieces for venue-prep buyer-intent."
+    },
+    {
+      "severity": "opportunistic",
+      "to": "marketing-content",
+      "topic": "Yamaha XSR900 GP vs MT-09 \u2014 where the heritage tax is paid in a quarter-mile",
+      "rationale": "XSR900 GP added today. Same CP3 triple + cassette as MT-09 with ~7 kg extra mass + fairing-adjusted frontal area. ~0.07-0.10s delta is a clean platform-share story for the retro-vs-naked buyer decision. Pairs with the MT-125/XSR125 pair-post format. Low-volume India SEO but strong global signal for Yamaha CP3 platform queries."
+    },
+    {
+      "severity": "opportunistic",
+      "to": "marketing-content",
+      "topic": "Pulsar N125 quarter-mile physics \u2014 and a 125cc commuter shootout when Raider 125 / Splendor Plus / Glamour land in catalog",
+      "rationale": "Pulsar N125 added today. Highest-volume Indian commuter search bucket (per BikeWale traffic). 125cc commuter shootout post would capture Pulsar / Raider / Splendor / Glamour intent in a single URL once those bikes are in catalog. Defensible angle: published reviews carry top-speed claims (~93-97 km/h) but rarely a real instrumented quarter-mile."
     }
   ]
 }
