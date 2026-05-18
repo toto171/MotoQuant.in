@@ -98,6 +98,12 @@ export default async function sitemap() {
       priority: 0.78,
     },
     {
+      url: `${SITE_URL}/blog/pulsar-ns200-vs-apache-rtr-200-quarter-mile-physics`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.82,
+    },
+    {
       url: `${SITE_URL}/blog/how-the-motoquant-physics-engine-works`,
       lastModified: now,
       changeFrequency: "monthly",

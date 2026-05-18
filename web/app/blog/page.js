@@ -11,6 +11,22 @@ export const metadata = {
 
 const POSTS = [
   {
+    slug: "pulsar-ns200-vs-apache-rtr-200-quarter-mile-physics",
+    title: "Pulsar NS200 vs Apache RTR 200 4V: Which Wins the Quarter Mile?",
+    date: "2026-05-18",
+    readTime: "11 min",
+    tags: [
+      "Bajaj",
+      "Pulsar NS200",
+      "TVS",
+      "Apache RTR 200 4V",
+      "Indian 200cc",
+      "comparison",
+    ],
+    excerpt:
+      "MotoQuant simulates the NS200 at ~15.9s and the Apache RTR 200 4V at ~16.4s under matched Aamby Valley conditions. Spec-by-spec physics breakdown plus the top three cost-per-tenth mods under ₹15,000 for each.",
+  },
+  {
     slug: "how-a-2-stroke-expansion-chamber-actually-works",
     title: "How a 2-Stroke Expansion Chamber Actually Works",
     date: "2026-05-08",

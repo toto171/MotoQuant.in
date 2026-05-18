@@ -1,0 +1,116 @@
+{
+  "_updated": "2026-05-18",
+  "_methodology": "5-10 WebSearch queries against India-biased buyer-intent + comparison + geo + physics keywords. Volume is qualitative (high/med/low) based on result density, presence of multiple major Indian motoring publications, and YouTube/forum chatter. Current ranks NOT independently verified — left null where unknown.",
+  "_competitor_signal": "Generic 'quarter mile calculator' tools (xcceleration, ajdesigner, robrobinette, speedmaster) all use simple power-to-weight formulas, no per-bike physics. MotoQuant's defensible angle: 'physics-based, validated against 90 published benchmarks, 342 bikes pre-configured'.",
+  "opportunities": [
+    {
+      "keyword": "valley run drag race",
+      "secondary": ["aamby valley drag", "valley run 2026 results", "valley run quarter mile"],
+      "intent": "transactional/event-followup",
+      "estimated_volume_india": "high",
+      "seasonality": "spikes around April + November (event dates)",
+      "current_rank": null,
+      "target_url": "/simulator?venue=aamby-valley",
+      "action": "tweak-existing",
+      "priority": 1,
+      "rationale": "Valley Run 2026 Summer happened April 3-5. Spectators/participants Google 'valley run drag race' to find times. MotoQuant has Aamby Valley as venue #1 with seasonal weather. Surface it on /simulator landing copy + cross-link from landing page."
+    },
+    {
+      "keyword": "hayabusa quarter mile india",
+      "secondary": ["hayabusa drag time india", "fastest hayabusa india", "hayabusa valley run"],
+      "intent": "informational",
+      "estimated_volume_india": "high",
+      "current_rank": null,
+      "target_url": "/blog/hayabusa-vs-zx-14r-which-is-faster",
+      "action": "tweak-existing",
+      "priority": 2,
+      "rationale": "Top SERP results are Autocar India 'Aces of Speed' and Valley Run coverage. We have the Hayabusa-vs-ZX14R comparison post; add 'India' qualifier to meta + first paragraph hook with Faheem Zahran's 9.298s record reference."
+    },
+    {
+      "keyword": "motorcycle quarter mile calculator india",
+      "secondary": ["bike 1/4 mile calculator", "free quarter mile simulator", "motorcycle ET calculator"],
+      "intent": "transactional",
+      "estimated_volume_india": "med-high",
+      "current_rank": null,
+      "target_url": "/simulator",
+      "action": "tweak-existing",
+      "priority": 3,
+      "rationale": "All current top-10 tools are generic power-to-weight formulas. MotoQuant is the only physics-based, bike-specific simulator. Simulator H1/meta should emphasize 'physics-based, not a power-to-weight formula' and lead with India locale signal."
+    },
+    {
+      "keyword": "ktm duke 390 quarter mile",
+      "secondary": ["rc 390 drag time", "duke 390 ET", "fastest ktm 390 india"],
+      "intent": "informational",
+      "estimated_volume_india": "high",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "create-blog-later",
+      "priority": 4,
+      "rationale": "Fast Track Racing India set 11.342s record at ASEAN Superfast (Thailand) and 11.732s at Valley Run 2025 Winter. Stock Duke 390 ~13.30s. Wide gap is a great explainer hook. Queue marketing-content INSTRUCTION."
+    },
+    {
+      "keyword": "pulsar ns200 vs apache rtr 200",
+      "secondary": ["ns200 vs apache 200 drag", "pulsar vs apache quarter mile", "ns200 quarter mile"],
+      "intent": "comparison",
+      "estimated_volume_india": "high",
+      "current_rank": null,
+      "target_url": null,
+      "action": "create-blog-later",
+      "priority": 5,
+      "rationale": "Dominant comparison search in 200cc Indian segment. Top SERP is YouTube videos only — no written physics-based comparison exists. Strong opportunity for /blog/pulsar-ns200-vs-apache-rtr-200-quarter-mile-physics. Queue."
+    },
+    {
+      "keyword": "r15 v4 quarter mile time",
+      "secondary": ["r15 v4 drag", "r15 0-100", "r15 v4 vs ns200"],
+      "intent": "informational",
+      "estimated_volume_india": "high",
+      "current_rank": "unknown",
+      "target_url": "/blog/why-your-r15-wont-hit-14s",
+      "action": "tweak-existing",
+      "priority": 6,
+      "rationale": "Existing post is about R15 ET. MotoStatz cites 17.62s real-world. Add 'R15 V4 quarter mile time' phrase to meta description and H1 to capture exact-match queries."
+    },
+    {
+      "keyword": "best mods for ktm rc 390 india",
+      "secondary": ["rc 390 performance upgrade cost", "rc 390 exhaust price india", "duke 390 ROI mods"],
+      "intent": "transactional",
+      "estimated_volume_india": "high",
+      "current_rank": null,
+      "target_url": "/simulator",
+      "action": "create-blog-later",
+      "priority": 7,
+      "rationale": "Top results are listicles (motoroctane, motorcyclist.com) without cost-per-tenth math. MotoQuant's parts ROI engine is the differentiator. Queue marketing-content for /blog/best-mods-for-rc-390-budget-vs-cost-per-tenth."
+    },
+    {
+      "keyword": "pacejka tire model motorcycle",
+      "secondary": ["motorcycle tire slip simulation", "first principles drag racing physics"],
+      "intent": "academic/methodology",
+      "estimated_volume_india": "low (global)",
+      "current_rank": null,
+      "target_url": "/docs/physics",
+      "action": "monitor",
+      "priority": 8,
+      "rationale": "Low volume but extremely high authority signal. Existing /blog/how-the-motoquant-physics-engine-works already targets this. Defer."
+    }
+  ],
+  "escalations": [
+    {
+      "severity": "opportunistic",
+      "to": "marketing-content",
+      "topic": "Pulsar NS200 vs Apache RTR 200 4V — physics-based quarter-mile breakdown",
+      "rationale": "Top of search funnel for the 200cc Indian segment. No written competitor; all YouTube videos. MotoQuant can win on 'we ran the physics sim, here are the numbers + cost-per-tenth on the top 3 mods for each'."
+    },
+    {
+      "severity": "opportunistic",
+      "to": "marketing-content",
+      "topic": "KTM Duke 390 vs RC 390 — stock quarter-mile, mod ladder, cost-per-tenth in INR",
+      "rationale": "Fast Track Racing India's 11.342s record at ASEAN Superfast is news hook. Bridge to MotoQuant catalog (Duke 390, RC 390 both modelled)."
+    },
+    {
+      "severity": "opportunistic",
+      "to": "marketing-content",
+      "topic": "Valley Run 2026 Summer Edition — physics-based predictions vs actual results",
+      "rationale": "Post-event recap. Pull MotoQuant Aamby Valley sims for top entries (Hayabusa, ZX-14R, ZX-10R, Ninja H2) and overlay against published times. Backlinks bait from Autocar India / evoindia."
+    }
+  ]
+}

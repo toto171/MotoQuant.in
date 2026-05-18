@@ -3,9 +3,9 @@ import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 
 export const metadata = {
-  title: "Why Your R15 Won't Hit 14s — MotoQuant Blog",
-  description: "The Yamaha YZF-R15 V3 should run ~14.5s based on factory power. Most stock bikes run 15.5–16s. The gap is about gearing, clutch slip, and traction — not engine power.",
-  keywords: ['Yamaha R15 quarter mile', 'R15 V3 drag time', 'Indian 150cc drag', 'R15 tuning', 'why is my R15 slow'],
+  title: "R15 V4 Quarter-Mile Time: Why Your R15 Won't Hit 14s — MotoQuant",
+  description: "Yamaha R15 V3/V4 quarter-mile time explained. Factory power predicts ~14.5s, but real R15s run 15.5–17.6s at Indian drag strips. Where each second goes — gearing, clutch slip, traction, aero.",
+  keywords: ['R15 V4 quarter mile time', 'R15 V3 quarter mile', 'Yamaha R15 quarter mile', 'R15 V4 drag time', 'R15 V4 0-100 india', 'Indian 150cc drag', 'R15 tuning', 'why is my R15 slow'],
   alternates: { canonical: 'https://motoquant.in/blog/why-your-r15-wont-hit-14s' },
   openGraph: {
     title: "Why Your R15 Won't Hit 14s",

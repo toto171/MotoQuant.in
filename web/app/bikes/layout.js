@@ -4,16 +4,16 @@
 import StructuredData, { SITE_URL } from '../StructuredData';
 
 const TITLE =
-  'Motorcycle Catalog — 342 Bikes with Dyno, Aero, and Gear-Ratio Data';
+  'Motorcycle Spec Database India — 342 Bikes with Dyno, Aero & Quarter-Mile Data';
 const DESCRIPTION =
-  'Browse every motorcycle modelled in MotoQuant Pro. 342 bikes across 25+ manufacturers — Suzuki, Yamaha, Honda, Kawasaki, Ducati, BMW, KTM, Royal Enfield, Bajaj, TVS, Aprilia, Triumph, Harley-Davidson, CFMoto and more. Individual Cd, frontal area, peak power, redline, wet mass, wheelbase, chain pitch, and OEM tire fitments for each.';
+  'Indian motorcycle specifications database — 342 bikes with full physics data for quarter-mile drag simulation. Hayabusa, ZX-14R, R15 V4, KTM Duke 390, Pulsar NS200, Apache RTR, Interceptor 650 and more. Individual Cd, frontal area, peak power, redline, wet mass, wheelbase, chain pitch, OEM tire fitments, and predicted ET at Aamby Valley + 19 other venues.';
 
 export const metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: '/bikes' },
   keywords: [
-    'motorcycle spec database',
+    'motorcycle spec database india',
     'motorcycle catalog',
     'bike specifications database',
     'motorcycle dyno database',
@@ -23,12 +23,15 @@ export const metadata = {
     'gsxr 1000 specs',
     'r1 specifications',
     'zx-10r specs',
-    'ktm duke specifications',
-    'bajaj pulsar specs',
-    'yamaha r15 specifications',
-    'royal enfield interceptor specs',
+    'ktm duke 390 specifications',
+    'rc 390 specs',
+    'bajaj pulsar ns200 specs',
+    'apache rtr 200 specs',
+    'yamaha r15 v4 specifications',
+    'royal enfield interceptor 650 specs',
     'indian motorcycle database',
     'indian bike specifications',
+    'valley run bikes',
   ],
   openGraph: {
     title: TITLE,

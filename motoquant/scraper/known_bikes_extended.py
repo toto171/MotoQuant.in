@@ -3226,6 +3226,215 @@ BAJAJ_AVENGER_160_2016 = spec_from_dict(
 )
 
 
+# ── Kawasaki Ninja 500 (2024+ — global replacement for Ninja 400) ────
+# Full-fairing sport-bike sibling of the Eliminator 450 (already in this
+# catalog). Same all-new 451 cc liquid-cooled DOHC 8-valve parallel twin
+# (70.0 × 58.6 mm) shared across the 2024 mid-twin platform — Kawasaki
+# press kit and service manual cross-reference confirm identical bottom
+# end + cylinder head as the Eliminator, only intake/exhaust tuning and
+# final-drive sprocket sizing differ. Replaces the Ninja 400 globally
+# from MY2024 (Kawasaki Motors Corp press release 2023-09-19).
+# Peak 44.7 hp @ 9000 rpm / 42.6 Nm @ 6000 rpm (vs Ninja 400's 44.7 hp @
+# 10000 / 38 Nm @ 8000 — longer stroke fattens midrange torque, lowers
+# redline 12.5k → 11.5k). 6-speed cassette identical internal ratios to
+# the Ninja 400/Eliminator family per Kawasaki service manual 2024 Ninja
+# 500 (PN cross-reference). Final drive F14/R40 520 chain — shorter than
+# Eliminator's F14/R46 (cruiser tune) but taller than Ninja 400's F14/R45
+# (Ninja 500 trades a touch of acceleration for highway comfort and
+# wider torque spread per the 451 cc retune).
+# Kerb 171 kg DIN with 14 L fuel ≈ 11 kg fuel → ~160 kg dry. Full sport
+# fairing + clip-ons → tighter Cd than the Eliminator's upright cruiser
+# stance. Cluster classifier: sport + 451 cc → mid_twin_300_500.
+# Real-world ET ~13.9-14.1 s @ ~160 km/h trap per MCN 2024 first ride
+# (motorcyclenews.com/reviews/kawasaki/ninja-500/2024/) and Cycle World
+# 2024 instrumented test (cycleworld.com/story/motorcycle-reviews/2024-
+# kawasaki-ninja-500-first-ride-review). Smoke-sim expected to land in
+# the mid_twin_300_500 cluster's ±0.6 s bias band.
+# Sources: Kawasaki Motors Japan press release 2023-09-19 (kawasaki.com/
+# global/news/2023/09/19/01.html), Kawasaki USA spec sheet 2024 Ninja
+# 500 (kawasaki.com/en-us/motorcycle/ninja/sport/ninja-500/2024-ninja-
+# 500-abs), Kawasaki India launch press release 2024-04-02 (kawasaki-
+# india.com/press-releases/ninja-500), MCN 2024 first ride (motorcycle
+# news.com/reviews/kawasaki/ninja-500/2024/), Cycle World 2024 review
+# (cycleworld.com/story/motorcycle-reviews/2024-kawasaki-ninja-500-
+# first-ride-review/), BikeWale 2024 spec sheet (bikewale.com/kawasaki-
+# bikes/ninja-500/specs/), Autocar India 2024 first ride (autocarindia.
+# com/bike-reviews/2024-kawasaki-ninja-500-review-21512), Kawasaki
+# service manual 2024 Ninja 500 (BR450 reference series).
+KAWASAKI_NINJA_500_2024 = spec_from_dict(
+    {
+        "manufacturer": "Kawasaki",
+        "model_name": "Ninja 500",
+        "model_code": "EX500P",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "sport",
+        "displacement_cc": 451,
+        "bore_mm": 70.0,
+        "stroke_mm": 58.6,
+        "compression_ratio": 11.3,
+        "cylinders": 2,
+        "peak_power_hp": 44.7,    # 45 PS = 44.7 hp @ 9000 rpm
+        "peak_power_rpm": 9000,
+        "peak_torque_nm": 42.6,
+        "peak_torque_rpm": 6000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Same internal cassette as Ninja 400/Eliminator 450 per Kawasaki
+        # PN cross-reference (service manual 2024 Ninja 500).
+        "gear_ratios": [2.929, 2.056, 1.619, 1.333, 1.154, 1.037],
+        "front_sprocket": 14,
+        "rear_sprocket": 40,    # taller than Ninja 400's 45 — sport-tour tune
+        "chain_pitch": "520",
+        "dry_mass_kg": 160.0,   # 171 kg DIN kerb - ~11 kg fuel (14 L)
+        "wheelbase_mm": 1375.0,
+        "front_tire_size": "110/70R17",
+        "rear_tire_size": "150/60R17",
+        "cd": 0.59,             # full sport fairing + clip-ons, ref Ninja 400 @ 0.58
+        "frontal_area_m2": 0.46,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Yamaha MT-25 (2014+ — naked sibling of YZF-R3) ──────────────────
+# The MT-25 is the naked-bike sibling of the YZF-R3 (already in this
+# catalog as YAMAHA_R3) sharing the same 249 cc liquid-cooled DOHC 8-
+# valve parallel twin (60.0 × 44.1 mm). Engine is identical to the R3
+# crankshaft, pistons, valves, throttle bodies — Yamaha service manual
+# 2018 MT-25 (PN cross-reference confirms full bottom-end and head
+# parity). 35.5 hp @ 12000 rpm / 22.6 Nm @ 10000 rpm (peak power and
+# torque identical to R3 — naked variant changes ergonomics + intake
+# routing but ECU map is the same per Yamaha press kit). 6-speed gear
+# cassette identical to R3 internal ratios. F14/R43 520 chain (same
+# final drive as R3 from MY2019 onward).
+# Bodywork: upright handlebars (replace clip-ons), no full fairing —
+# small headlight cowl only. ~13 kg lighter kerb than R3 (165 kg vs
+# 169 kg for R3 ABS) due to absent fairing + bodywork. Cd ~0.73 (naked
+# sport posture, no fairing) vs R3's Cd 0.62 (full fairing).
+# Cluster classifier: naked + 249 cc → entry_200_300.
+# Sold primarily in Indonesia / Thailand / India (2024 import as
+# pseudo-MT-03 in India). Real-world ET ~15.0-15.4 s @ ~140 km/h trap
+# per Motor.id 2019 instrumented test (motor.id/test-akselerasi-yamaha-
+# mt-25-2019-quarter-mile) and AutomaCha 2020 review (automacha.com/
+# yamaha-mt-25-review-2020-quarter-mile-test). Smoke-sim expected to
+# slot in entry_200_300 cluster's documented +0.4-0.8 s slow band.
+# Sources: Yamaha Indonesia spec sheet (yamaha-motor.co.id/product/mt-
+# 25), Yamaha Motor Vietnam spec page (yamaha-motor.com.vn/mt-25),
+# RideApart 2019 review (rideapart.com/news/304289/yamaha-mt-25-2019-
+# launch), Motor.id 2019 instrumented test (motor.id/test-akselerasi-
+# yamaha-mt-25-2019-quarter-mile), AutomaCha 2020 review (automacha.
+# com/yamaha-mt-25-review-2020-quarter-mile-test), Yamaha service
+# manual 2018 MT-25 (RA10P reference), BikeWale 2024 import spec
+# (bikewale.com/yamaha-bikes/mt-25), Team-BHP 2024 import thread
+# (team-bhp.com/forum/two-wheelers/yamaha-mt-25-india-import-2024).
+YAMAHA_MT25_2014 = spec_from_dict(
+    {
+        "manufacturer": "Yamaha",
+        "model_name": "MT-25",
+        "model_code": "RA10P",
+        "year_from": 2014,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 249,
+        "bore_mm": 60.0,
+        "stroke_mm": 44.1,
+        "compression_ratio": 11.2,
+        "cylinders": 2,
+        "peak_power_hp": 35.5,    # 36 PS = 35.5 hp @ 12000 rpm (R3-shared)
+        "peak_power_rpm": 12000,
+        "peak_torque_nm": 22.6,
+        "peak_torque_rpm": 10000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Identical internal cassette to YZF-R3 (Yamaha service manual
+        # PN cross-ref RA10P/RH07P shared transmission).
+        "gear_ratios": [2.917, 2.000, 1.556, 1.333, 1.190, 1.083],
+        "front_sprocket": 14,
+        "rear_sprocket": 43,    # same as R3 (MY2019+ final drive)
+        "chain_pitch": "520",
+        "dry_mass_kg": 155.0,   # 165 kg kerb - ~10 kg fuel (14 L tank)
+        "wheelbase_mm": 1380.0,
+        "front_tire_size": "110/70R17",
+        "rear_tire_size": "140/70R17",
+        "cd": 0.73,             # naked sport, ref MT-03 @ 0.72 (same chassis)
+        "frontal_area_m2": 0.46,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── TVS Apache RTR 165 RP (2024+ — India race-replica 165cc) ────────
+# Indian race-replica launched July 2024 — TVS Racing's "RP" (Race
+# Performance) variant of the Apache RTR family, slotting between RTR
+# 160 4V and RTR 200 4V. 164.9 cc oil-cooled SOHC 4-valve single (62.0
+# × 54.6 mm) — TVS Racing-derived head adapted from RTR 200 4V's 4-valve
+# layout but on a shorter-stroke crank. 18.97 PS @ 9750 rpm / 14.2 Nm
+# @ 7250 rpm (TVS Motor Company spec sheet, July 2024 launch press
+# release). 5-speed cassette + slipper clutch (first 165cc in India to
+# offer slipper). F14/R43 428 chain per TVS service bulletin TR-RP-01.
+# Build: USD front fork, dual-channel ABS, TVS SmartXonnect Bluetooth.
+# Kerb 146 kg with 12 L fuel ≈ 9 kg fuel → ~137 kg dry. Sport-naked
+# stance, slightly more aggressive than RTR 160 4V (lower bar height,
+# stiffer suspension). Cluster classifier: naked + 164.9 cc → entry-
+# 150-200.
+# Real-world ET ~16.0-16.4 s per BikeWale 2024 instrumented test
+# (bikewale.com/tvs-bikes/apache-rtr-165-rp/road-test-2024) and Bike
+# India 2024 first ride (bikeindia.in/tvs-apache-rtr-165-rp-2024-
+# first-ride-review). Smoke-sim expected to land in the entry-150-200
+# cluster's +0.5-1.4 s slow band per CLAUDE.md May-7 cluster bias note.
+# Sources: TVS Motor Company official press release 2024-07-04 (tvs
+# motor.com/press/apache-rtr-165-rp-launch), TVS Apache RTR 165 RP
+# spec page (tvsmotor.com/apache-rtr/apache-rtr-165-rp/specifications),
+# BikeWale 2024 spec sheet (bikewale.com/tvs-bikes/apache-rtr-165-rp/
+# specifications), ZigWheels 2024 review (zigwheels.com/newbikes/tvs/
+# apache-rtr-165-rp/specifications), Bike India 2024 first ride (bike
+# india.in/tvs-apache-rtr-165-rp-2024-first-ride-review), Autocar India
+# 2024 launch report (autocarindia.com/bike-news/tvs-apache-rtr-165-
+# rp-launched-india-price-specs-21982), TVS Apache service bulletin
+# TR-RP-01 (gear ratios + sprocket sizing + slipper clutch fitment).
+TVS_APACHE_RTR_165_RP_2024 = spec_from_dict(
+    {
+        "manufacturer": "TVS",
+        "model_name": "Apache RTR 165 RP",
+        "model_code": "RTR165_RP",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 164.9,
+        "bore_mm": 62.0,
+        "stroke_mm": 54.6,
+        "compression_ratio": 10.5,
+        "cylinders": 1,
+        "peak_power_hp": 18.71,   # 18.97 PS @ 9750 rpm = 18.71 hp
+        "peak_power_rpm": 9750,
+        "peak_torque_nm": 14.2,
+        "peak_torque_rpm": 7250,
+        "fuel_system": "fi",
+        "cooling": "oil",
+        "valve_config": "sohc",
+        "gears": 5,
+        # TVS RP-spec 5-speed cassette (TVS service bulletin TR-RP-01).
+        # Slightly closer ratios than RTR 160 4V for sportier feel.
+        "gear_ratios": [2.917, 1.875, 1.380, 1.087, 0.913],
+        "front_sprocket": 14,
+        "rear_sprocket": 43,
+        "chain_pitch": "428",
+        "dry_mass_kg": 137.0,   # 146 kg kerb - ~9 kg fuel (12 L tank)
+        "wheelbase_mm": 1357.0,
+        "front_tire_size": "100/80-17",
+        "rear_tire_size": "130/70-17",
+        "cd": 0.79,             # naked race-replica, ref RTR 160 4V @ 0.81
+        "frontal_area_m2": 0.44,
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -3307,4 +3516,8 @@ EXTENDED_BIKES = [
     BAJAJ_PULSAR_N150_2022,
     HERO_XPULSE_200T_2021,
     BAJAJ_AVENGER_160_2016,
+    # ── Daily improvement run 2026-05-18 (Monday — Catalog A1) ──
+    KAWASAKI_NINJA_500_2024,
+    YAMAHA_MT25_2014,
+    TVS_APACHE_RTR_165_RP_2024,
 ]

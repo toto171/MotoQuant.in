@@ -6,16 +6,18 @@
 import StructuredData, { SITE_URL } from '../StructuredData';
 
 const TITLE =
-  'Free Motorcycle Quarter-Mile Simulator — Predict ET in Seconds';
+  'Motorcycle Quarter-Mile Calculator — Physics-Based ET Predictor for 342 Bikes';
 const DESCRIPTION =
-  'Run a live quarter-mile drag simulation for any of 342 motorcycles. Tweak rider weight, power delta, mass, and venue, then read ET, trap speed, 60-ft split, and a full v(t) / RPM / accel chart. Validated to ±0.2s on K5, R1, and Hayabusa.';
+  'Free physics-based motorcycle quarter-mile calculator — not a power-to-weight formula. Predict ET, trap speed, and 60-ft split for 342 bikes at Aamby Valley, MMRT, BIC, and 17 more venues. Tweak rider weight, power delta, mass, and conditions live. Validated to ±0.2s on GSX-R K5, YZF-R1, and Hayabusa.';
 
 export const metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: '/simulator' },
   keywords: [
+    'motorcycle quarter mile calculator',
     'motorcycle quarter mile simulator',
+    'motorcycle quarter mile calculator india',
     'bike 1/4 mile calculator',
     'ET predictor online',
     'drag racing calculator motorcycle',
@@ -24,9 +26,12 @@ export const metadata = {
     'dragy simulator',
     'hayabusa quarter mile calculator',
     'gsxr 1000 drag simulator',
+    'aamby valley drag simulator',
+    'valley run quarter mile predictor',
     '60 ft time motorcycle',
     'trap speed calculator',
     'acceleration simulator motorcycle',
+    'physics based quarter mile calculator',
   ],
   openGraph: {
     title: TITLE,

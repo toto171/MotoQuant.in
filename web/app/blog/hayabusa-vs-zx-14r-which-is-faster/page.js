@@ -4,21 +4,23 @@ import SiteFooter from '../../../components/SiteFooter';
 import StructuredData, { articleSchema } from '../../StructuredData';
 
 const SLUG = 'hayabusa-vs-zx-14r-which-is-faster';
-const TITLE = 'Hayabusa vs ZX-14R: Which Is Faster Off the Line?';
+const TITLE = 'Hayabusa vs ZX-14R: Quarter-Mile Drag Race Physics (India)';
 const DESCRIPTION =
-  'MotoQuant simulates the Suzuki Hayabusa Gen1 at 10.471s and the Kawasaki ZX-14R 2012 at the litre-plus hyper-sport line. Spec-by-spec, gear-by-gear physics breakdown of the two flagship hyper-bikes.';
+  'Hayabusa quarter-mile time vs Ninja ZX-14R in India: MotoQuant simulates the Suzuki Hayabusa Gen1 at 10.471s and the Kawasaki ZX-14R 2012 at the litre-plus hyper-sport line. Spec-by-spec physics breakdown referencing Valley Run / Aces of Speed Indian drag-strip records.';
 
 export const metadata = {
-  title: 'Hayabusa vs ZX-14R: Which Is Faster Off the Line? — MotoQuant',
+  title: 'Hayabusa vs ZX-14R: Quarter-Mile Physics Breakdown (India)',
   description: DESCRIPTION,
   keywords: [
     'Hayabusa vs ZX-14R',
-    'Hayabusa quarter mile',
-    'ZX-14R quarter mile',
+    'Hayabusa quarter mile time india',
+    'ZX-14R quarter mile india',
     'Hayabusa vs Ninja ZX-14R drag race',
     'fastest production motorcycle India',
     'Hayabusa Gen1 vs ZX-14R',
     'hyper sport bike comparison',
+    'valley run hayabusa',
+    'aces of speed hayabusa',
   ],
   alternates: { canonical: `https://motoquant.in/blog/${SLUG}` },
   openGraph: {
