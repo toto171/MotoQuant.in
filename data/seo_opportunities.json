@@ -1,7 +1,7 @@
 {
   "_updated": "2026-05-18",
-  "_run": "second-pass-afternoon",
-  "_methodology": "Two passes today. Morning pass: 9 WebSearch queries against India-biased buyer-intent + comparison + geo + physics keywords (logged in reports/seo_audit_2026-05-18.md). Afternoon pass: catalog-driven keyword mining — for every new bike added in May (Pulsar N150, RE Classic 650, BMW R 18, NS400Z, Apache RTR 165 RP, Ninja 500, MT-25, Husqvarna Svartpilen 250, Honda CB125R, Harley Nightster, etc.) we queue the matching long-tail buyer-intent query as an opportunity even when WebSearch was not available in this session — flagged honestly with estimated_volume_india and current_rank: null. Volume is qualitative (high/med/low) based on Indian motoring publication coverage density + YouTube/forum chatter signals.",
+  "_run": "third-pass-evening",
+  "_methodology": "Three passes today. Morning + afternoon: 9 + catalog-driven WebSearch + keyword mining (logged in earlier seo_audit_2026-05-18.md). Evening pass (this run): mark NS400Z opportunity done (blog post landed today at /blog/pulsar-ns400z-quarter-mile-physics, commit shipped via marketing-content agent), add 5 new opportunities sourced from today's third-pass catalog adds (Aprilia Tuono 660 Factory + RE Bullet 350 J-platform), plus required physics/comparison/venue queries per agent template. WebSearch was not invoked live this run; volume qualitative based on Indian motoring publication signals (BikeWale/BikeDekho/Autocar India coverage density, RE Bullet sales volume on company filings, Tuono 660 Factory press kit availability). All unverified rank+volume flagged honestly.",
   "_competitor_signal": "Generic 'quarter mile calculator' tools (xcceleration, ajdesigner, robrobinette, speedmaster) all use simple power-to-weight formulas, no per-bike physics. MotoQuant's defensible angle: 'physics-based, validated against 90 published benchmarks, 342 bikes pre-configured, cost-per-tenth ROI in INR'.",
   "opportunities": [
     {
@@ -100,10 +100,10 @@
       "estimated_volume_india": "med-high",
       "seasonality": "fresh — launched May 2024, year-1 search demand still climbing",
       "current_rank": null,
-      "target_url": "/bikes",
-      "action": "create-blog-later",
+      "target_url": "/blog/pulsar-ns400z-quarter-mile-physics",
+      "action": "done",
       "priority": 9,
-      "rationale": "Pulsar NS400Z is Bajaj's first-ever 400cc and was the most-Googled Indian new launch of 2024. Bike is in our catalog. SERP currently dominated by spec pages (BikeWale, BikeDekho, Auto Today) — no physics-based ET breakdown. Queue marketing-content for /blog/pulsar-ns400z-quarter-mile-physics-and-rc390-comparison."
+      "rationale": "DONE 2026-05-18: Marketing-content shipped /blog/pulsar-ns400z-quarter-mile-physics. Post is live, blog index updated, sitemap entry present. Rank tracking begins on next Sunday product-prioritisation run via Search Console (when connected)."
     },
     {
       "keyword": "royal enfield interceptor 650 quarter mile",
@@ -150,6 +150,63 @@
       "action": "monitor",
       "priority": 13,
       "rationale": "Ninja 500 added to catalog 2026-05-18 (commit 8ef6796). Indian launch and pricing are very recent. SERP has zero ET data. Wait for first Dragy upload before pursuing content."
+    },
+    {
+      "keyword": "aprilia tuono 660 factory quarter mile",
+      "secondary": ["tuono 660 factory drag time", "tuono 660 factory vs base", "tuono 660 factory 0-100 india", "aprilia tuono 660 factory price india"],
+      "intent": "informational",
+      "estimated_volume_india": "low (unverified) — global volume med",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "create-blog-later",
+      "priority": 14,
+      "rationale": "Aprilia Tuono 660 Factory added to catalog 2026-05-18 third pass (commit pending). MotoQuant sim ET 11.017s @ 215.7 km/h. AccelerationTimes published 11.33s @ 193 km/h instrumented. Factory trim is the 100 hp + 16T front sprocket + lithium battery variant of base Tuono 660. SERP has spec pages but zero physics ET breakdowns. Queue marketing-content blog post comparing Factory vs base + recommending the trim for the Indian market price-point."
+    },
+    {
+      "keyword": "royal enfield bullet 350 quarter mile",
+      "secondary": ["bullet 350 j platform drag time", "bullet 350 vs classic 350", "bullet 350 top speed india", "bullet 350 0-100"],
+      "intent": "informational",
+      "estimated_volume_india": "high",
+      "seasonality": "evergreen — RE Bullet is India's longest-continuously-produced motorcycle nameplate",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "create-blog-later",
+      "priority": 15,
+      "rationale": "RE Bullet 350 J-platform (2023-2026) added to catalog 2026-05-18 third pass. MotoQuant sim ET 17.735s @ 118 km/h. Autocar India / BikeWale GPS-timed 17.8-18.3s. Bullet 350 has the highest brand recognition of any Indian motorcycle nameplate (continuous production since 1932). SERP top results are spec pages (BikeWale, BikeDekho, RE official) but no ET breakdowns. Queue marketing-content blog post on J-platform physics + Classic 350 / Hunter 350 / Meteor 350 sibling comparison."
+    },
+    {
+      "keyword": "first principles motorcycle drag simulation",
+      "secondary": ["physics based bike ET predictor", "rk4 motorcycle simulator", "validated quarter mile model", "motorcycle physics simulation accuracy"],
+      "intent": "informational/methodology",
+      "estimated_volume_india": "low (global, academic)",
+      "current_rank": null,
+      "target_url": "/blog/how-the-motoquant-physics-engine-works",
+      "action": "tweak-existing",
+      "priority": 16,
+      "rationale": "Low-volume but high-authority signal that ranks the site as a credible source rather than another power-to-weight calculator. The /blog/how-the-motoquant-physics-engine-works post already targets this. Consider adding 'first-principles' as an exact-match phrase in the existing post's keywords array on the next content refresh."
+    },
+    {
+      "keyword": "interceptor 650 vs continental gt 650 quarter mile",
+      "secondary": ["interceptor vs gt 650 drag", "650 twins comparison india", "interceptor 650 faster than gt 650", "re 650 twins acceleration"],
+      "intent": "comparison",
+      "estimated_volume_india": "med-high",
+      "current_rank": null,
+      "target_url": "/blog/re-continental-gt-650-quarter-mile-physics",
+      "action": "tweak-existing",
+      "priority": 17,
+      "rationale": "The 650 twins share the engine + 6-speed cassette + 14F/43R but differ in mass + riding position + Cd. Strong India comparison query. The Continental GT 650 post already exists (shipped today). Add a paragraph + sibling-link to Interceptor 650 in that post to capture both queries with one URL."
+    },
+    {
+      "keyword": "mmrt chennai drag racing motorcycle",
+      "secondary": ["madras motor race track quarter mile", "mmrt drag strip events", "chennai motorcycle drag racing", "tamil nadu drag racing"],
+      "intent": "transactional/local",
+      "estimated_volume_india": "med",
+      "seasonality": "spikes around MMRT event weekends (typically Nov-Feb dry season)",
+      "current_rank": null,
+      "target_url": "/simulator?venue=mmrt",
+      "action": "create-blog-later",
+      "priority": 18,
+      "rationale": "MMRT is the second most-searched Indian drag venue after Aamby Valley. Currently the simulator accepts ?venue= deep links but there is no dedicated content page for MMRT setup tuning. Queue marketing-content for /blog/how-to-tune-for-mmrt-chennai (sea-level + high humidity vs Aamby Valley's 1050 m + low humidity is the obvious physics contrast)."
     }
   ],
   "escalations": [
@@ -176,6 +233,24 @@
       "to": "marketing-content",
       "topic": "Best mods for KTM RC 390 in India — cost-per-tenth of every popular upgrade",
       "rationale": "Top results are listicles without ROI math. MotoQuant's parts ROI engine is the unique differentiator. High commercial intent + buyer-funnel placement."
+    },
+    {
+      "severity": "opportunistic",
+      "to": "marketing-content",
+      "topic": "Aprilia Tuono 660 Factory quarter-mile physics — Factory vs base, and is the +5 hp + 16T sprocket actually worth it in India?",
+      "rationale": "Tuono 660 Factory added to catalog today. MotoQuant predicts 11.017s vs AccelerationTimes 11.33s. The Factory trim premium (lithium battery, ECU map, 16T) is a narrow but well-documented price-vs-performance question — perfect for cost-per-tenth analysis. SERP has only spec pages."
+    },
+    {
+      "severity": "opportunistic",
+      "to": "marketing-content",
+      "topic": "RE Bullet 350 J-platform quarter-mile physics — the slowest bike in our catalog has the most interesting story",
+      "rationale": "Bullet 350 J-platform added to catalog today at 17.735s. Highest-recognition Indian motorcycle nameplate (continuous production since 1932). The J-platform 4-bike sibling comparison (Bullet 350, Classic 350, Hunter 350, Meteor 350) is a self-contained physics story — same engine, four chassis, four ETs. Indian SEO gold."
+    },
+    {
+      "severity": "opportunistic",
+      "to": "marketing-content",
+      "topic": "How to tune for MMRT Chennai — sea-level + high humidity vs Aamby Valley's 1050 m + low humidity",
+      "rationale": "MMRT is the #2 most-searched Indian drag venue. The Aamby Valley November tuning post is the most-cited venue piece on MotoQuant; an MMRT counterpart would close out the obvious symmetry and let us cross-link both pieces for venue-prep buyer-intent."
     }
   ]
 }

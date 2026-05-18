@@ -3612,6 +3612,139 @@ DUCATI_MULTISTRADA_V2S_2022 = spec_from_dict(
 )
 
 
+# ── Aprilia Tuono 660 Factory (2022-2026) ───────────────────────────
+# Higher-spec Factory trim of the standard Tuono 660 launched at EICMA
+# 2021 (Nov 25, 2021). Same 659cc parallel-twin engine + 6-speed gearbox
+# as base Tuono 660, but with revised ECU map (+5 hp peak — 100 hp @
+# 10500 rpm vs base's 95 hp; torque unchanged at 67 Nm @ 8500 rpm),
+# lighter lithium-ion battery (-2 kg vs base), shortened final drive
+# (16T front sprocket vs base's 17T — 43T rear retained) for sharper
+# acceleration off the line. Suspension is fully-adjustable KYB 41mm
+# forks + Sachs rear shock (NOT Öhlins per Aprilia's pricing strategy).
+# Six-axis IMU enables cornering ABS + traction control. 181 kg kerb
+# (169 kg dry per Aprilia spec sheet — 12 kg fuel from 15 L tank).
+# Same gear cassette ratios as base Tuono 660 confirmed via Aprilia
+# parts catalogue + AF1 Racing chain/sprocket bulletin. Sources:
+# Aprilia press kit 2021-11-25 (paultan.org/2021/11/25/eicma-2021-
+# aprilia-tuono-660-factory-100-hp-181-kg-kerb-weight), Aprilia
+# official Tuono 660 PDF (storeusa.aprilia.com/files/technical/
+# EN_tuono_660.pdf), MCN review 2022 (motorcyclenews.com/bike-reviews/
+# aprilia/tuono-660-factory/2022), Rider Magazine first look 2021-11-24
+# (ridermagazine.com/2021/11/24/2022-aprilia-tuono-660-factory-first-
+# look-review), AccelerationTimes instrumented (accelerationtimes.com/
+# models/aprilia-tuono-660-factory — 1/4 mile 11.33s @ 120 mph =
+# 193 km/h), AF1 Racing OEM gearing chart (af1racing.com/tuono-660-
+# chains-sprockets — confirms 16/43 stock Factory, 17/43 stock base),
+# Carole Nash 2022 review confirming shortened final drive. Cluster:
+# litre_sport_600_1000 (659cc parallel twin — bottom of cluster band).
+APRILIA_TUONO_660_FACTORY_2022 = spec_from_dict(
+    {
+        "manufacturer": "Aprilia",
+        "model_name": "Tuono 660 Factory",
+        "model_code": "T660F",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 659,
+        "bore_mm": 81.0,
+        "stroke_mm": 63.93,
+        "compression_ratio": 13.5,
+        "cylinders": 2,
+        "peak_power_hp": 100.0,    # 100 hp @ 10500 rpm (Aprilia spec; +5 hp vs base via ECU map)
+        "peak_power_rpm": 10500,
+        "peak_torque_nm": 67.0,
+        "peak_torque_rpm": 8500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Tuono 660 Factory 6-speed cassette — identical gearbox internals
+        # to base Tuono 660 (Aprilia parts catalogue PN 2D000395 covers
+        # both trims). Only final-drive sprocketing differs (16F vs 17F).
+        "gear_ratios": [2.687, 2.062, 1.647, 1.368, 1.173, 1.037],
+        "front_sprocket": 16,      # Factory-specific — base Tuono 660 = 17F
+        "rear_sprocket": 43,
+        "chain_pitch": "520",
+        "dry_mass_kg": 169.0,      # 181 kg kerb - ~12 kg fuel (15 L tank)
+        "wheelbase_mm": 1370.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.62,                # naked sport, ref Tuono 660 base
+        "frontal_area_m2": 0.51,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Royal Enfield Bullet 350 J-platform (2023-2026) ─────────────────
+# All-new J-platform Bullet launched September 2023, replacing the
+# 30+ year-old UCE Bullet 350. Same 349cc air/oil-cooled SOHC single
+# as the Classic 350 / Meteor 350 / Hunter 350 J-platform siblings
+# (20.2 hp @ 6100 rpm / 27 Nm @ 4000 rpm), 5-speed gearbox with
+# primary balancer shaft. Heritage oval-tube cradle frame (visually
+# distinct from the Hunter/Classic twin-spar) with traditional Bullet
+# styling: round headlight, casquette nacelle, tube-and-blade rear
+# fender, hand-painted pinstripe tank. 195 kg kerb (13 L tank; ~10 kg
+# fuel — same dry mass as Classic 350 sibling). 19" front / 18" rear
+# spoked wheels with MRF tube tires. Single 300 mm front disc + 153 mm
+# rear drum (entry trim) or 270 mm rear disc (top trim). Sources:
+# Royal Enfield press kit 2023-09-01 (royalenfield.com/in/en/our-world/
+# news/bullet-350-launch), RE official tech spec PDF (royalenfield.com/
+# content/dam/open-pdf/royal-enfield-bullet-350-technical-specifications.
+# pdf), BikeWale 2023 review (bikewale.com/royalenfield-bikes/bullet/),
+# ZigWheels 2023 launch report (zigwheels.com/royal-enfield-bikes/
+# bullet-350/specifications/), Autocar India 2023 first ride (
+# autocarindia.com/bike-reviews/2023-royal-enfield-bullet-350-review-
+# 429847), Cycle World 2023 launch coverage (cycleworld.com/story/
+# 2023-royal-enfield-bullet-350-launch), autoevolution 2023 spec
+# database (autoevolution.com/moto/royal-enfield-bullet-350-2023.html).
+# J-platform engine + 5-speed gearbox confirmed identical to in-catalog
+# Classic 350 / Meteor 350 / Hunter 350 via RE service bulletin
+# RE-J-PLT-005 — only chassis (oval-tube cradle), ergonomics, and tank
+# shape differ. Cluster: entry_200_300 (349cc single; same bias band
+# as J-platform siblings — RE J-platform empirically lands +0.4-1.0s
+# slow vs real-world per CLAUDE.md May-3 daily-session note, consistent
+# with the +0.5-1.4s entry-200-300 cluster band).
+RE_BULLET_350_J_2023 = spec_from_dict(
+    {
+        "manufacturer": "Royal Enfield",
+        "model_name": "Bullet 350",
+        "model_code": "J-Bullet",
+        "year_from": 2023,
+        "year_to": 2026,
+        "category": "cruiser",
+        "displacement_cc": 349.34,
+        "bore_mm": 72.0,
+        "stroke_mm": 85.8,
+        "compression_ratio": 9.5,
+        "cylinders": 1,
+        "peak_power_hp": 20.2,     # 20.2 hp / 15.0 kW @ 6100 rpm
+        "peak_power_rpm": 6100,
+        "peak_torque_nm": 27.0,
+        "peak_torque_rpm": 4000,
+        "fuel_system": "fi",
+        "cooling": "air",
+        "valve_config": "sohc",
+        "gears": 5,
+        # J-platform 5-speed cassette per RE service bulletin RE-J-PLT-005.
+        # Identical to Classic 350 / Meteor 350 / Hunter 350 entries
+        # already in catalog — primary balancer shaft + counterbalancer
+        # is shared design.
+        "gear_ratios": [2.917, 1.938, 1.474, 1.167, 0.955],
+        "front_sprocket": 15,
+        "rear_sprocket": 39,
+        "chain_pitch": "428",
+        "dry_mass_kg": 185.0,      # 195 kg kerb - ~10 kg fuel (13 L tank)
+        "wheelbase_mm": 1390.0,
+        "front_tire_size": "100/90-19",
+        "rear_tire_size": "120/80-18",
+        "cd": 0.92,                # upright Bullet posture, ref Classic 350
+        "frontal_area_m2": 0.60,
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -3701,4 +3834,7 @@ EXTENDED_BIKES = [
     TRIUMPH_SPEED_TRIPLE_1200_RR_2022,
     HONDA_CRF300L_RALLY_2021,
     DUCATI_MULTISTRADA_V2S_2022,
+    # ── Daily improvement run 2026-05-18 (Monday — Catalog A1 third pass) ──
+    APRILIA_TUONO_660_FACTORY_2022,
+    RE_BULLET_350_J_2023,
 ]

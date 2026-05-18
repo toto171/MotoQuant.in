@@ -104,6 +104,12 @@ export default async function sitemap() {
       priority: 0.82,
     },
     {
+      url: `${SITE_URL}/blog/pulsar-ns400z-quarter-mile-physics`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.82,
+    },
+    {
       url: `${SITE_URL}/blog/re-continental-gt-650-quarter-mile-physics`,
       lastModified: now,
       changeFrequency: "monthly",

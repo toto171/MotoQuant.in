@@ -3,13 +3,34 @@ import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
 
 export const metadata = {
-  title: "Blog — MotoQuant Pro",
+  title: "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
   description:
-    "Technical articles on motorcycle drag racing physics, tuning strategy, and data analysis for the Indian racing community.",
+    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Pulsar NS400Z vs RC 390, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
+  keywords: [
+    "motorcycle drag racing blog",
+    "indian motorcycle quarter mile",
+    "pulsar ns400z vs rc 390",
+    "continental gt 650 drag",
+    "ns200 vs apache rtr 200",
+    "hayabusa vs zx-14r india",
+    "r15 v4 quarter mile time",
+    "ktm 1390 super duke",
+    "2 stroke expansion chamber",
+    "aamby valley tuning",
+  ],
   alternates: { canonical: "https://motoquant.in/blog" },
 };
 
 const POSTS = [
+  {
+    slug: "pulsar-ns400z-quarter-mile-physics",
+    title: "Pulsar NS400Z Quarter-Mile Physics (and Why an RC 390 Still Wins)",
+    date: "2026-05-18",
+    readTime: "12 min",
+    tags: ["Bajaj", "Pulsar NS400Z", "KTM RC 390", "Indian 400cc", "physics"],
+    excerpt:
+      "MotoQuant simulates the Pulsar NS400Z at ~13.8s and 158 km/h trap at Aamby Valley. A stock RC 390 still beats it by 0.3s. Physics-based explanation of the 23 kg, the gearing, and the Cd that the press release glossed over — plus three cost-per-tenth mods under ₹22,000.",
+  },
   {
     slug: "re-continental-gt-650-quarter-mile-physics",
     title: "Royal Enfield Continental GT 650 Quarter-Mile Physics",

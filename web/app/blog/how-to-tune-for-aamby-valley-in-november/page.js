@@ -5,7 +5,16 @@ import SiteFooter from '../../../components/SiteFooter';
 export const metadata = {
   title: 'How to Tune for Aamby Valley in November — MotoQuant Blog',
   description: 'November at Aamby Valley means density altitude around 1100 m, 18–24°C, and concrete with a good grip coefficient. Every number changes your optimal tune.',
-  keywords: ['Aamby Valley drag racing', 'drag racing India conditions', 'density altitude motorcycle', 'tune for conditions'],
+  keywords: [
+    'Aamby Valley drag racing',
+    'aamby valley density altitude november',
+    'aamby valley weather drag racing',
+    'valley run november tuning',
+    'indian drag strip weather',
+    'drag racing India conditions',
+    'density altitude motorcycle',
+    'tune for conditions',
+  ],
   alternates: { canonical: 'https://motoquant.in/blog/how-to-tune-for-aamby-valley-in-november' },
   openGraph: {
     title: 'How to Tune for Aamby Valley in November',
