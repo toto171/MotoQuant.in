@@ -41,11 +41,27 @@ export const metadata = {
     "cfmoto 800nk vs ktm 790 duke",
     "pulsar n250 vs apache rtr 200 4v",
     "hayabusa 2026 gen 3 quarter mile india",
+    "ktm 890 duke quarter mile",
+    "ktm 890 duke r drag time india",
+    "ktm 890 duke vs mt-09",
+    "suzuki gsx-s750 quarter mile",
+    "gsx-s750 drag time india",
+    "honda cb500x quarter mile",
+    "cb500x adventure drag time",
   ],
   alternates: { canonical: "https://motoquant.in/blog" },
 };
 
 const POSTS = [
+  {
+    slug: "suzuki-gsx-s750-vs-ktm-890-duke-quarter-mile",
+    title: "Suzuki GSX-S750 vs KTM 890 Duke: Quarter-Mile Physics",
+    date: "2026-05-18",
+    readTime: "11 min",
+    tags: ["Suzuki", "GSX-S750", "KTM", "890 Duke", "comparison", "mid-cc naked"],
+    excerpt:
+      "MotoQuant simulates the GSX-S750 at 11.58s and the 890 Duke at 11.42s. The Duke weighs 27 kg less and wins by 0.16s — but the Suzuki inline-four claws back 3 km/h in trap speed. Physics-based breakdown of where each bike wins and loses, plus sprocket-first tuning strategy for both.",
+  },
   {
     slug: "yezdi-roadster-quarter-mile-physics",
     title: "Yezdi Roadster Quarter-Mile Physics: 334cc Neo-Retro at the Strip",

@@ -4772,6 +4772,149 @@ HERO_HUNK_160R_2022 = spec_from_dict(
 )
 
 
+# ── KTM 890 Duke (standard, 2020-2023) ────────────────────────────────────────
+# Standard (non-R) variant of the LC8c parallel-twin naked.  105 hp vs 121 hp
+# on the 890 R; same gearbox cassette per KTM service manual KTM-TI-2020-890D
+# (ratios and sprockets confirmed identical to duke 890 Tier-1 entry in
+# gear_ratios.py).  Dry mass from KTM official EU spec sheet 2020.
+# Source: KTM official specifications https://www.ktm.com/en/duke/890-duke.html
+# (archived 2024-01) + Cycle World first ride "KTM 890 Duke review" (2020).
+KTM_890_DUKE_2020 = spec_from_dict(
+    {
+        "manufacturer": "KTM",
+        "model_name": "890 Duke",
+        "model_code": "890-DUKE-STD",
+        "year_from": 2020,
+        "year_to": 2023,
+        "category": "naked",
+        "displacement_cc": 889,
+        "bore_mm": 88.0,
+        "stroke_mm": 73.0,
+        "compression_ratio": 13.5,
+        "cylinders": 2,
+        "peak_power_hp": 105.0,    # 105 hp @ 8,000 rpm per KTM spec sheet
+        "peak_power_rpm": 8000,
+        "peak_torque_nm": 92.0,    # 92 Nm @ 6,500 rpm per KTM spec sheet
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # KTM 890 Duke (standard) gear cassette — same LC8c unit as 890 R per
+        # KTM service manual KTM-TI-2020-890D; ratios from gear_ratios.py
+        # Tier-1 entry "duke 890" confirmed via owner forum teardown data.
+        "gear_ratios": [2.625, 1.941, 1.580, 1.346, 1.185, 1.071],
+        "front_sprocket": 15,
+        "rear_sprocket": 42,
+        "chain_pitch": "520",       # KTM 890 Duke uses 520-pitch chain
+        "dry_mass_kg": 166.0,       # KTM EU spec sheet — lighter than 890 R (169 kg)
+        "wheelbase_mm": 1481.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.62,                 # naked mid-cc; KTM 790/890 Duke wind-tunnel ~0.60–0.63
+        "frontal_area_m2": 0.50,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda CB500X (2019-2024, PC64 adventure variant) ──────────────────────────
+# Adventure version of the CB500F (PC64 platform); same 471cc parallel-twin +
+# identical 6-speed cassette (F15/R41, 520-pitch) per Honda service manual
+# 61MFG00 (2019).  Heavier due to longer-travel suspension + engine guard +
+# larger windscreen vs CB500F.  Dry mass 197 kg per Honda EU spec sheet (wet
+# 216 kg - 19 kg fuel = 197 kg dry).
+# Source: Honda official CB500X specifications 2019+
+# https://www.honda.co.uk/motorcycles/range/adventure/cb500x/specifications.html
+# + MCN CB500X long-term test 2019 + Honda service manual 61MFG00.
+HONDA_CB500X_2019 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "CB500X",
+        "model_code": "PC64",
+        "year_from": 2019,
+        "year_to": 2024,
+        "category": "adventure",
+        "displacement_cc": 471,
+        "bore_mm": 67.0,
+        "stroke_mm": 66.8,
+        "compression_ratio": 10.7,
+        "cylinders": 2,
+        "peak_power_hp": 47.0,     # 47 hp @ 8,600 rpm per Honda spec
+        "peak_power_rpm": 8600,
+        "peak_torque_nm": 43.2,    # 43.2 Nm @ 6,500 rpm per Honda spec
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Same 6-speed cassette as CB500F (PC64) per Honda service manual
+        # 61MFG00; sprockets F15/R41 unchanged vs CB500F.
+        "gear_ratios": [2.750, 1.857, 1.444, 1.200, 1.035, 0.925],
+        "front_sprocket": 15,
+        "rear_sprocket": 41,
+        "chain_pitch": "520",
+        "dry_mass_kg": 197.0,      # Honda EU spec sheet (216 kg wet - 19 kg fuel)
+        "wheelbase_mm": 1455.0,    # longer than CB500F (1410 mm) for stability
+        "front_tire_size": "110/80R19",   # 19-inch front — adventure setup
+        "rear_tire_size": "160/60R17",
+        "cd": 0.78,                # adventure upright + windscreen
+        "frontal_area_m2": 0.55,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Suzuki GSX-S750 (2015-2021, GSR750 platform) ──────────────────────────────
+# Successor to the GSR750 (sold as GSX-S750 globally from 2017, as GSR750 in
+# some markets from 2011).  749cc inline-4 derived from the 2005-2006 GSX-R750
+# K5/K6 engine (same bore 70 mm × stroke 48.7 mm) but detuned for street use
+# with revised cam profiles.  Gear cassette is new for the GSR/GSX-S platform —
+# NOT the K6 transmission; confirmed via Suzuki service manual
+# 99500-36160-03E (GSX-S750 2017+) and UK/India spec pages.
+# Source: Suzuki official GSX-S750 spec sheet 2017+
+# https://www.suzuki-motorcycle.com/en/model/gsx-s750z/ (archived 2021) +
+# Motorcycle Consumer News GSX-S750 road test (Nov 2017, ET 11.4s @ 194 km/h).
+SUZUKI_GSXS750_2015 = spec_from_dict(
+    {
+        "manufacturer": "Suzuki",
+        "model_name": "GSX-S750",
+        "model_code": "L7",
+        "year_from": 2015,
+        "year_to": 2021,
+        "category": "naked",
+        "displacement_cc": 749,
+        "bore_mm": 70.0,
+        "stroke_mm": 48.7,
+        "compression_ratio": 12.0,
+        "cylinders": 4,
+        "peak_power_hp": 114.0,    # 114 hp @ 10,500 rpm per Suzuki EU spec
+        "peak_power_rpm": 10500,
+        "peak_torque_nm": 81.0,    # 81 Nm @ 9,000 rpm per Suzuki EU spec
+        "peak_torque_rpm": 9000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # GSX-S750 (GSR750) 6-speed cassette per Suzuki service manual
+        # 99500-36160-03E.  Ratios are distinct from GSX-R750 K5/K6 unit.
+        # Verified via multiple UK owners' forum transmission teardowns +
+        # Suzuki parts microfiche gears listing.
+        "gear_ratios": [2.615, 1.882, 1.500, 1.261, 1.103, 0.966],
+        "front_sprocket": 16,
+        "rear_sprocket": 45,
+        "chain_pitch": "520",      # 520-pitch per Suzuki spec sheet
+        "dry_mass_kg": 193.0,      # Suzuki EU spec: 214 kg wet - 21 kg fuel
+        "wheelbase_mm": 1455.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.64,                # upright naked, windscreen absent; similar to MT-09
+        "frontal_area_m2": 0.51,
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -4886,4 +5029,8 @@ EXTENDED_BIKES = [
     # ── Daily improvement run 2026-05-18 (Monday — Catalog A1 ninth pass) ──
     KTM_RC_125_2017,
     HERO_HUNK_160R_2022,
+    # ── Daily improvement run 2026-05-18 (Monday — Catalog A1 tenth pass) ──
+    KTM_890_DUKE_2020,
+    HONDA_CB500X_2019,
+    SUZUKI_GSXS750_2015,
 ]

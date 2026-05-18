@@ -6,7 +6,7 @@ import StructuredData, { SITE_URL } from '../StructuredData';
 const TITLE =
   'Motorcycle Spec Database India — 342 Bikes with Dyno, Aero & Quarter-Mile Data';
 const DESCRIPTION =
-  'Indian motorcycle specifications database — 342 bikes with full physics data for quarter-mile drag simulation. Hayabusa, ZX-14R, R15 V4, KTM Duke 390, Pulsar NS200, Apache RTR, Interceptor 650 and more. Individual Cd, frontal area, peak power, redline, wet mass, wheelbase, chain pitch, OEM tire fitments, and predicted ET at Aamby Valley + 19 other venues.';
+  'Indian motorcycle specifications database — 342 bikes with full physics data for quarter-mile drag simulation. Hayabusa, ZX-14R, R15 V4, KTM Duke 390, KTM 890 Duke, Suzuki GSX-S750, Honda CB500X, Pulsar NS200, Apache RTR, Interceptor 650 and more. Individual Cd, frontal area, peak power, redline, wet mass, wheelbase, chain pitch, OEM tire fitments, and predicted ET at Aamby Valley + 19 other venues.';
 
 export const metadata = {
   title: TITLE,
@@ -35,6 +35,12 @@ export const metadata = {
     'cfmoto 800nk specs',
     'hayabusa 2026 gen 3 specs',
     'pulsar n250 specifications',
+    'ktm 890 duke specs',
+    'ktm 890 duke r india',
+    'suzuki gsx-s750 specs',
+    'gsx-s750 quarter mile',
+    'honda cb500x adventure specs',
+    'honda cb500x india',
     'indian motorcycle database',
     'indian bike specifications',
     'valley run bikes',

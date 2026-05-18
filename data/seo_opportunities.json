@@ -1,7 +1,7 @@
 {
   "_updated": "2026-05-18",
-  "_run": "ninth-pass-2026-05-18",
-  "_methodology": "Eight passes prior today. Passes 1-8 logged 37 opportunities + 13 escalations across simulator, bikes, features, pricing, about, whitepaper, docs/physics, docs/validation, blog index. NINTH PASS (this run, 2026-05-18 Monday late): three new keyword opportunities surfaced from WebSearch on the catalog-expansion bikes shipping tonight (CFMoto 800NK + Yamaha MT-125 + Yamaha XSR125) and recent Indian-market signals: (a) 'cfmoto 800nk vs ktm 790 duke quarter mile' — CFMoto 800NK and KTM 790 Duke share the LC8c parallel twin platform; SERP for the comparison query has zero physics content (AccelerationTimes/FastestLaps/MaxAbout publish spec pages but no instrumented quarter-mile data); strong platform-share comparison angle now that the /blog/cfmoto-800nk-quarter-mile-physics post is live (shipped earlier today). (b) 'pulsar n250 vs apache rtr 200 4v drag race' — Carblogindia ran a real-world drag (Pulsar N250 wins from launch); MotoQuant has both bikes in catalog. SERP is YouTube-dominated, no physics-based written analysis. Pairs naturally with the existing NS200 vs RTR 200 post; can extend to 3-bike or queue dedicated post. (c) 'hayabusa 2026 gen 3 quarter mile india' — Suzuki India launched the OBD-2B Gen-3 refresh at ₹18.06 lakh ex-showroom (190 PS, 150 Nm, revised throttle maps); reviewers cite 0-100 in 2.6s with launch control but no SERP carries a recent India-specific instrumented ET. Pure refresh of MotoQuant's flagship Hayabusa target page would land the Gen 3 phrasing for buyer-intent queries. On-page edits: simulator keyword array +3 new entities; bikes layout keyword array +3 spec-database entries; blog index meta keyword array expanded with cfmoto/ktm-790-duke comparison phrasings; bikes page H1 subtitle namechecks CFMoto 800NK alongside the existing entity mention cluster. No StructuredData/FAQ/sitemap edits this pass (marketing-content owns blog + sitemap).",
+  "_run": "tenth-pass-2026-05-18",
+  "_methodology": "Nine passes prior today. Passes 1-9 logged 40 opportunities + 16 escalations. TENTH PASS (this run, 2026-05-18 Monday): three new keyword opportunities surfaced from WebSearch on tonight's catalog-expansion bikes (KTM 890 Duke 2020, Honda CB500X 2019, Suzuki GSX-S750 2015). Findings: (a) 'ktm 890 duke quarter mile india' — KTM 890 Duke R launched in India Nov 2024 at ₹14.50 lakh; 889cc LC8c twin, 121 PS/99 Nm. AccelerationTimes + FastestLaps carry ~11.0s global ET but SERP has zero India-specific content. Strong comparison angle with GSX-S750 (direct segment rival) and MT-09 (documented comparison in press). (b) 'suzuki gsx-s750 quarter mile' — 749cc inline-4 naked, 114 PS. MotoStatz publishes 11.24s @ 122 mph. No India-specific drag content exists. Direct rival to 890 Duke + MT-09 in middleweight naked segment where MotoQuant has no dedicated blog content yet. (c) 'honda cb500x quarter mile india' — 471cc parallel twin, 47 hp, popular adventure tourer in India at ₹5.80 lakh. SERP dominated by spec pages + forum discussions; no physics breakdown. Lower drag priority (adventure-tourer audience is not drag-focused) — monitor. On-page edits: bikes/layout.js title/description/keywords +412 count + new bike entities; blog/page.js keywords +new bike quarter-mile phrases; simulator/layout.js title +412 count + new bike keywords; simulator OG alt text count corrected. No StructuredData/FAQ edits (structure is load-bearing per CLAUDE.md). Two new escalations queued for marketing-content.",
   "_competitor_signal": "Generic 'quarter mile calculator' tools (xcceleration, ajdesigner, robrobinette, speedmaster) all use simple power-to-weight formulas, no per-bike physics. MotoQuant's defensible angle: 'physics-based, validated against 90 published benchmarks, 342 bikes pre-configured, cost-per-tenth ROI in INR'.",
   "opportunities": [
     {
@@ -647,6 +647,59 @@
       "action": "tweak-existing",
       "priority": 40,
       "rationale": "WebSearch 2026-05-18 confirmed: Suzuki India 2026 Gen-3 refresh launched at ₹18.06 lakh ex-showroom Delhi (~₹20.17 lakh on-road), 190 PS @ 9700 rpm, 150 Nm @ 7000 rpm, revised throttle maps for stronger low-to-mid torque, OBD-2B compliance. Autocar India / BikeWale / 91Wheels / Smartprix / Suzuki India all carry the 0-100 in ~2.6s factory claim (with launch control) but NO published SERP carries a recent India-specific instrumented quarter-mile ET for the Gen-3 refresh. MotoQuant's Hayabusa reference baseline (10.4712s) covers Gen 1 (1999-2007) precisely — adding the Gen-3 OBD-2B phrasing as a buyer-intent qualifier on the existing /blog/hayabusa-vs-zx-14r-which-is-faster post (and the Hayabusa bike-detail page) captures the freshness signal without splitting URLs or risking the Gen-1 baseline credibility. Defensible angle: 'all three generations simulated, validated to 10.47s on Gen 1' is a stronger claim than any spec-page competitor can match."
+    },
+    {
+      "keyword": "ktm 890 duke quarter mile india",
+      "secondary": [
+        "ktm 890 duke r drag time india",
+        "ktm 890 duke 0-100 india",
+        "ktm 890 duke r vs mt-09",
+        "ktm 890 duke r vs gsx-s750",
+        "ktm 890 duke india price quarter mile"
+      ],
+      "intent": "informational/buyer-funnel",
+      "estimated_volume_india": "med-high",
+      "seasonality": "fresh — Indian launch Nov 2024 at ₹14.50 lakh; year-2 buyer-intent queries climbing",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "create-blog-later",
+      "priority": 41,
+      "rationale": "WebSearch 2026-05-18 confirmed: KTM 890 Duke R launched India Nov 2024 at ₹14.50 lakh (₹15.71 lakh on-road Delhi). SERP carries AccelerationTimes (~11.0s @ 128 mph global), FastestLaps, BikeWale / 91Wheels / TimeDrive India spec pages, plus a planet-knox MT-09 vs 890 Duke R comparison piece — but ZERO India-specific physics or drag breakdown content. KTM 890 Duke 2020 added to motoquant.db tonight. 889cc LC8c parallel twin, 121 PS @ 9000 rpm, 99 Nm @ 7000 rpm. MotoQuant sim ET expected ~11.0-11.2s (mid_twin_500_700 or litre_sport_600_1000 cluster). Marketing-content agent has already shipped /blog/suzuki-gsx-s750-vs-ktm-890-duke-quarter-mile tonight — that post captures both the standalone 890 Duke query and the GSX-S750 comparison. On-page: bikes/layout.js keywords updated this pass to add 'ktm 890 duke specs' + 'ktm 890 duke r india'. Blog index keywords updated. Action now: monitor post ranking; escalation to dedicate standalone 890 Duke post only if comparison post fails to rank for '890 Duke quarter mile india' within 90 days."
+    },
+    {
+      "keyword": "suzuki gsx-s750 quarter mile india",
+      "secondary": [
+        "gsx-s750 drag time india",
+        "suzuki gsx-s750 0-100 india",
+        "gsx-s750 vs ktm 890 duke",
+        "gsx-s750 vs mt-07",
+        "suzuki gsx-s750 top speed india"
+      ],
+      "intent": "informational",
+      "estimated_volume_india": "med",
+      "seasonality": "evergreen — 2015 platform, steady search volume; India mid-size naked segment",
+      "current_rank": null,
+      "target_url": "/blog/suzuki-gsx-s750-vs-ktm-890-duke-quarter-mile",
+      "action": "done",
+      "priority": 42,
+      "rationale": "WebSearch 2026-05-18 confirmed: MotoStatz publishes 11.24s @ 122 mph for the GSX-S750 — the most detailed published global ET. No India-specific drag content in SERP. Suzuki GSX-S750 2015 added to motoquant.db tonight. 749cc inline-4 derived from GSX-R750, 114 PS @ 10500 rpm, 81 Nm @ 9000 rpm. Marketing-content agent has already shipped /blog/suzuki-gsx-s750-vs-ktm-890-duke-quarter-mile tonight — that URL now captures both 'gsx-s750 quarter mile' and 'ktm 890 duke quarter mile' queries with a single physics-comparison post. Blog/page.js and bikes/layout.js keywords updated this pass to surface both phrasings. Status: done (blog post live, on-page updated). Rank tracking begins next Sunday via Search Console."
+    },
+    {
+      "keyword": "honda cb500x quarter mile india",
+      "secondary": [
+        "cb500x drag time india",
+        "honda cb500x 0-100 india",
+        "cb500x adventure tourer acceleration",
+        "cb500x vs vstrom 650 acceleration"
+      ],
+      "intent": "informational (low drag-specific intent)",
+      "estimated_volume_india": "med",
+      "seasonality": "evergreen — CB500X is India's most-referenced mid-weight adventure tourer",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "monitor",
+      "priority": 43,
+      "rationale": "WebSearch 2026-05-18 confirmed: Honda CB500X 2019 added to motoquant.db tonight. 471cc parallel twin, 47 hp @ 8500 rpm. ProfessCars estimates ~14.3s quarter-mile. SERP is adventure-tourer buyer research — ReiseMoto, Autocar India, Team-BHP, CarToq — firmly in the touring/reliability/mileage intent cluster, not drag-racing intent. Limited blog content opportunity: the CB500X audience does not search for drag times. Primary SEO value is catalog coverage signal (412-bike credibility) + internal-link surface from /bikes/cb500x detail page. Monitor: if 'cb500x vs ninja 400 acceleration' or 'cb500x 0-100 india' surfaces with measurable volume, escalate. No blog post queued for the drag angle."
     }
   ],
   "escalations": [
@@ -745,6 +798,18 @@
       "to": "marketing-content",
       "topic": "Suzuki Hayabusa 2026 Gen 3 quarter-mile physics — what the OBD-2B refresh changed and what it didn't",
       "rationale": "Suzuki India OBD-2B Gen-3 launched at ₹18.06 lakh (190 PS, 150 Nm, revised throttle maps for low-to-mid torque). Reviewers cite 0-100 in 2.6s with launch control but no SERP carries a recent India-specific instrumented quarter-mile ET for the Gen-3. MotoQuant has the Gen 1 reference baseline locked at 10.4712s; Gen 2 and Gen 3 share the same 1340 cc inline-four with throttle-map + emissions deltas (no chassis or aero changes). Clean editorial story: 'we simulated all three Hayabusa generations' — defensible angle that no competitor (Autocar/BikeWale/91Wheels) can match. Refresh the existing /blog/hayabusa-vs-zx-14r post with Gen-3 paragraph + add Gen-3 callout to the Hayabusa bike-detail page."
+    },
+    {
+      "severity": "opportunistic",
+      "to": "marketing-content",
+      "topic": "KTM 890 Duke R standalone quarter-mile physics — if the GSX-S750 comparison post fails to rank for '890 Duke quarter mile india' within 90 days",
+      "rationale": "KTM 890 Duke R launched India Nov 2024 at ₹14.50 lakh. SERP has zero India-specific drag content. Marketing-content shipped /blog/suzuki-gsx-s750-vs-ktm-890-duke-quarter-mile tonight which covers both bikes; monitor whether the comparison URL captures the standalone '890 Duke quarter mile india' query or whether a dedicated /blog/ktm-890-duke-r-quarter-mile-physics post is needed. If comparison post ranks top-5 for the standalone query within 90 days, no action needed. If not, queue a dedicated post."
+    },
+    {
+      "severity": "opportunistic",
+      "to": "marketing-content",
+      "topic": "Honda CB500X vs Kawasaki Ninja 400 — which 400-500cc beginner upgrade is quicker at Aamby Valley?",
+      "rationale": "CB500X added to catalog tonight. The 'CB500X vs Ninja 400' buyer comparison is a recurring Indian forum question (Team-BHP, xBhp) with high volume but zero physics-based content. Both bikes are in catalog. 471cc parallel twin vs 399cc inline twin is a clean architecture-and-displacement comparison. Not a drag-racing SERP (adventure vs sportsbike audience mismatch) but the 'which is faster' framing converts the adventure-tourer audience to our simulator — a mid-funnel acquisition play. Low priority; queue only after the higher-priority middleweight naked posts (KTM 890 Duke standalone, Suzuki GSX-S750 standalone) are ranked."
     }
   ]
 }

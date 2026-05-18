@@ -176,6 +176,12 @@ export default async function sitemap() {
       priority: 0.75,
     },
     {
+      url: `${SITE_URL}/blog/suzuki-gsx-s750-vs-ktm-890-duke-quarter-mile`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.83,
+    },
+    {
       url: `${SITE_URL}/blog/how-to-tune-for-mmrt-chennai`,
       lastModified: now,
       changeFrequency: "monthly",

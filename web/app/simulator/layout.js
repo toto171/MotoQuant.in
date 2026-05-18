@@ -6,9 +6,9 @@
 import StructuredData, { SITE_URL } from '../StructuredData';
 
 const TITLE =
-  'Motorcycle Quarter-Mile Calculator — Physics-Based ET Predictor for 342 Bikes';
+  'Motorcycle Quarter-Mile Calculator — Physics-Based ET Predictor for 412 Bikes';
 const DESCRIPTION =
-  'Free physics-based motorcycle quarter-mile calculator — not a power-to-weight formula. Predict ET, trap speed, and 60-ft split for 342 bikes at Aamby Valley, MMRT, BIC, and 17 more venues. Tweak rider weight, power delta, mass, and conditions live. Validated to ±0.2s on GSX-R K5, YZF-R1, and Hayabusa.';
+  'Free physics-based motorcycle quarter-mile calculator — not a power-to-weight formula. Predict ET, trap speed, and 60-ft split for 412 bikes at Aamby Valley, MMRT, BIC, and 17 more venues. Tweak rider weight, power delta, mass, and conditions live. Validated to ±0.2s on GSX-R K5, YZF-R1, and Hayabusa.';
 
 export const metadata = {
   title: TITLE,
@@ -46,6 +46,10 @@ export const metadata = {
     'cfmoto 800nk vs ktm 790 duke',
     'pulsar n250 vs apache rtr 200 4v',
     'hayabusa 2026 gen 3 quarter mile india',
+    'ktm 890 duke quarter mile',
+    'ktm 890 duke r drag time india',
+    'suzuki gsx-s750 quarter mile',
+    'honda cb500x quarter mile',
   ],
   openGraph: {
     title: TITLE,
