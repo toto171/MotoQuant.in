@@ -4,14 +4,23 @@
 
 import StructuredData, { SITE_URL } from '../StructuredData';
 
-const TITLE = "Features — Drag Sim, ROI Engine, Dragy Import, Build Optimiser";
-const DESCRIPTION = "Complete feature breakdown: 15 physics sub-models, 342-bike catalog, parts ROI with cost-per-tenth, Bayesian build optimiser, Dragy GPS calibration, A vs B compare, smart recommendations engine.";
+const TITLE = "Features — Physics Drag Sim, Parts ROI, Dragy Import, Build Optimiser (India)";
+const DESCRIPTION = "What you get inside MotoQuant Pro: 15 first-principles physics sub-models (Pacejka tires, RK4 solver, weight transfer, two-stroke expansion-chamber), 342-bike catalog covering Hayabusa to R15 V4 to NS400Z, parts ROI with cost-per-tenth in INR, Bayesian build optimiser, Dragy GPS calibration, A vs B compare, and the smart recommendations engine.";
 
 export const metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: '/features' },
-  keywords: ["drag racing features", "motorcycle build optimiser", "parts ROI calculator", "dragy import software"],
+  keywords: [
+    "drag racing features",
+    "motorcycle build optimiser india",
+    "parts ROI calculator",
+    "cost per tenth calculator",
+    "dragy import software",
+    "pacejka tire model motorcycle",
+    "motorcycle physics simulator features",
+    "bayesian build optimiser",
+  ],
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,

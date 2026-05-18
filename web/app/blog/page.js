@@ -11,6 +11,15 @@ export const metadata = {
 
 const POSTS = [
   {
+    slug: "re-continental-gt-650-quarter-mile-physics",
+    title: "Royal Enfield Continental GT 650 Quarter-Mile Physics",
+    date: "2026-05-18",
+    readTime: "10 min",
+    tags: ["Royal Enfield", "Continental GT 650", "Indian 650cc", "cafe racer"],
+    excerpt:
+      "MotoQuant simulates the RE Continental GT 650 at ~14.1s and 158 km/h trap. Why the 47 hp / 52 Nm air/oil-cooled twin is rev-limited rather than power-limited — and the ₹7,800 sprocket-and-tire combo that closes most of the gap.",
+  },
+  {
     slug: "pulsar-ns200-vs-apache-rtr-200-quarter-mile-physics",
     title: "Pulsar NS200 vs Apache RTR 200 4V: Which Wins the Quarter Mile?",
     date: "2026-05-18",

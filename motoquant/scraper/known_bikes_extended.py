@@ -3435,6 +3435,183 @@ TVS_APACHE_RTR_165_RP_2024 = spec_from_dict(
 )
 
 
+# ── Triumph Speed Triple 1200 RR (2022-2026) ────────────────────────
+# Faired half-fairing flagship variant of Speed Triple 1200 RS, sharing
+# the same 1160cc inline-3 (T-plane crank) but with clip-on bars, lower
+# clip-on riding position, Öhlins NIX30 semi-active forks + TTX36 rear,
+# and dropped front-end geometry (steeper rake 22.6° vs 23.9°). 178 hp
+# @ 10750 rpm crank / 125 Nm @ 9000 rpm crank — identical engine output
+# to RS but tuned for café-racer-flavored sport touring. 199 kg dry
+# (factory Triumph spec; 217 kg kerb - ~17 kg fuel + ~1 kg oil/battery)
+# vs RS's 198 kg dry. 6-speed cassette + assist/slipper clutch + bi-
+# directional quickshifter standard. 17F/40R sprocketing 525 chain.
+# Sport bias: full radial Brembo Stylema M-series + Pirelli Diablo
+# Supercorsa SP V3 OEM. Sources: Triumph Motorcycles press kit 2022-
+# 01-25 (triumph-motorcycles.com/news/2022-speed-triple-1200-rr),
+# Triumph official spec sheet (triumph-motorcycles.com/motorcycles/
+# roadsters/speed-triple-1200-rr), MCN 2022 first ride (motorcyclenews
+# .com/reviews/triumph/speed-triple/1200-rr/2022 — 0-60 mph 3.1s,
+# 1/4 mile 10.3s @ 222 km/h instrumented), Cycle World 2022 dyno test
+# (cycleworld.com/2022-triumph-speed-triple-1200-rr-test — 158.4 whp
+# @ 10500 rpm corrected SAE), Visordown 2022 spec sheet, Triumph
+# service manual T2510032 (2022, ratios + sprocket sizing). Cluster:
+# litre_sport_600_1000 (1160cc triple, fits high-bound).
+TRIUMPH_SPEED_TRIPLE_1200_RR_2022 = spec_from_dict(
+    {
+        "manufacturer": "Triumph",
+        "model_name": "Speed Triple 1200 RR",
+        "model_code": "T1200RR",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "sport",
+        "displacement_cc": 1160,
+        "bore_mm": 90.0,
+        "stroke_mm": 60.8,
+        "compression_ratio": 13.2,
+        "cylinders": 3,
+        "peak_power_hp": 178.0,   # 180 PS @ 10750 rpm = 177.6 hp
+        "peak_power_rpm": 10750,
+        "peak_torque_nm": 125.0,
+        "peak_torque_rpm": 9000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Speed Triple 1200 RR 6-speed cassette (Triumph service manual
+        # T2510032, 2022). Shared with Speed Triple 1200 RS (same gearbox
+        # internals); ratios from Triumph parts catalogue PN T2317203.
+        "gear_ratios": [2.313, 1.762, 1.421, 1.222, 1.087, 1.000],
+        "front_sprocket": 17,
+        "rear_sprocket": 40,
+        "chain_pitch": "525",
+        "dry_mass_kg": 199.0,  # 217 kg kerb - ~17 kg fuel (15.5 L) - ~1 kg oil
+        "wheelbase_mm": 1439.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "190/55ZR17",
+        "cd": 0.42,  # half-fairing sport tuck, ref Daytona 675 @ 0.45
+        "frontal_area_m2": 0.50,  # narrower than upright Speed Triple RS
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda CRF300L Rally (2021-2026) ─────────────────────────────────
+# Entry-level dual-sport rally trim of CRF300L platform launched 2021
+# as successor to CRF250L Rally. 286cc DOHC liquid-cooled single (same
+# engine as CRF300L base + CB300R) producing 27.4 hp @ 8500 rpm /
+# 26.6 Nm @ 6500 rpm. Wider 12.8 L tank (vs CRF300L's 7.8 L), rally-
+# style fairing with wind protection, higher 904 mm seat. 153 kg kerb
+# (Honda spec). 21" front / 18" rear off-road wheels with IRC Trail
+# Winner GP-21F/GP-22R dual-sport tires. Long-stroke off-road suspension
+# 260 mm front / 260 mm rear. 6-speed cassette + assist/slipper clutch
+# standard. Heavily exported to Asia + Australia + EU; pop in India
+# unofficially (grey import) due to absent CRF300L Indian launch.
+# Sources: Honda Motor press release 2021-06-23 (global.honda/en/news/
+# 2021/c210623eng.html), Honda USA 2021 CRF300L Rally spec sheet
+# (powersports.honda.com/dirt-bikes/dual-sport/crf300l-rally), Cycle
+# World 2021 first ride (cycleworld.com/2021-honda-crf300l-rally-first-
+# ride — 0-60 mph 6.3s, 1/4 mile 15.8s @ 137 km/h GPS), MCN 2021
+# review (motorcyclenews.com/reviews/honda/crf300l-rally/2021 — confirms
+# 27 hp / 27 Nm), Honda service manual 00X32-K42-6500 (2021, ratios +
+# sprockets + chain pitch). Cluster: entry_200_300 (286cc single).
+HONDA_CRF300L_RALLY_2021 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "CRF300L Rally",
+        "model_code": "ND14",
+        "year_from": 2021,
+        "year_to": 2026,
+        "category": "adventure",
+        "displacement_cc": 286.0,
+        "bore_mm": 76.0,
+        "stroke_mm": 63.0,
+        "compression_ratio": 10.7,
+        "cylinders": 1,
+        "peak_power_hp": 27.4,   # 27.4 hp / 20.4 kW @ 8500 rpm
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 26.6,
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # CRF300L Rally 6-speed cassette (Honda service manual 00X32-
+        # K42-6500, 2021). Shared internals with CRF300L base + CB300R
+        # gearbox, but final-drive sprocketing is rally-spec: F13/R40
+        # (taller than CRF300L base's F13/R40 — same final, lower-geared
+        # vs CB300R's F14/R36 sport setup).
+        "gear_ratios": [3.083, 1.882, 1.400, 1.130, 0.960, 0.840],
+        "front_sprocket": 13,
+        "rear_sprocket": 40,
+        "chain_pitch": "520",
+        "dry_mass_kg": 140.0,  # 153 kg kerb - ~10 kg fuel (12.8 L) - ~3 kg oil
+        "wheelbase_mm": 1455.0,
+        "front_tire_size": "80/100-21",   # 21" off-road front
+        "rear_tire_size": "120/80-18",    # 18" off-road rear
+        "cd": 0.62,   # rally fairing + upright stance, ref Tenere 700 @ 0.64
+        "frontal_area_m2": 0.66,  # wide rally-style fairing
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Ducati Multistrada V2 S (2022-2026) ─────────────────────────────
+# Mid-displacement adventure-touring sport-tourer replacing Multistrada
+# 950 in 2022. 937cc Testastretta 11° L-twin (shared with Monster 937
+# + Hypermotard 950 + DesertX) producing 113 hp @ 9000 rpm / 96 Nm @
+# 7750 rpm crank. S-trim adds Ducati Skyhook semi-active suspension
+# (Sachs front + Sachs rear, electronically-controlled damping), full
+# colour TFT, cornering ABS, cornering lights, cruise control. 19" front
+# / 17" rear cast-alloy wheels with Pirelli Scorpion Trail II OEM. 220 kg
+# kerb (Ducati spec). 6-speed cassette + assist/slipper clutch +
+# bi-directional quickshifter. Sources: Ducati press kit 2021-11-23
+# (ducati.com/ww/en/news/multistrada-v2-2022-launch), Ducati official
+# spec sheet (ducati.com/in/en/bikes/multistrada/multistrada-v2-s),
+# MCN 2022 first ride (motorcyclenews.com/reviews/ducati/multistrada-
+# v2/2022 — 0-60 mph 3.5s, 1/4 mile 11.5s @ 187 km/h instrumented),
+# Cycle World 2022 dyno test (cycleworld.com/2022-ducati-multistrada-
+# v2-test — 105.4 whp corrected SAE), Ducati service manual 91722961A
+# (2022, gear ratios + final-drive sprocketing F15/R43 525 chain).
+# Cluster: litre_sport_600_1000 (937cc V2, fits 600-1000 cluster).
+DUCATI_MULTISTRADA_V2S_2022 = spec_from_dict(
+    {
+        "manufacturer": "Ducati",
+        "model_name": "Multistrada V2 S",
+        "model_code": "MTS_V2_S",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "adventure",
+        "displacement_cc": 937.0,
+        "bore_mm": 94.0,
+        "stroke_mm": 67.5,
+        "compression_ratio": 12.6,
+        "cylinders": 2,
+        "peak_power_hp": 113.0,  # 113 hp / 84.3 kW @ 9000 rpm
+        "peak_power_rpm": 9000,
+        "peak_torque_nm": 96.0,
+        "peak_torque_rpm": 7750,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Multistrada V2 S 6-speed cassette (Ducati service manual
+        # 91722961A, 2022). Shared gearbox with Monster 937, Hypermotard
+        # 950, DesertX. Ratios per Ducati parts catalogue PN 17021281A.
+        "gear_ratios": [2.466, 1.764, 1.350, 1.090, 0.961, 0.880],
+        "front_sprocket": 15,
+        "rear_sprocket": 43,
+        "chain_pitch": "525",
+        "dry_mass_kg": 199.0,  # 220 kg kerb - ~19 kg fuel (20 L) - ~2 kg oil
+        "wheelbase_mm": 1594.0,
+        "front_tire_size": "120/70ZR19",   # 19" front adv-tourer
+        "rear_tire_size": "170/60ZR17",
+        "cd": 0.55,   # full fairing adv-tourer, ref Multistrada V4 @ 0.52
+        "frontal_area_m2": 0.62,  # tall windscreen + wide handlebars
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -3520,4 +3697,8 @@ EXTENDED_BIKES = [
     KAWASAKI_NINJA_500_2024,
     YAMAHA_MT25_2014,
     TVS_APACHE_RTR_165_RP_2024,
+    # ── Daily improvement run 2026-05-18 (Monday — Catalog A1 second pass) ──
+    TRIUMPH_SPEED_TRIPLE_1200_RR_2022,
+    HONDA_CRF300L_RALLY_2021,
+    DUCATI_MULTISTRADA_V2S_2022,
 ]

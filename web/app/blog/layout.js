@@ -4,14 +4,24 @@
 
 import StructuredData, { SITE_URL } from '../StructuredData';
 
-const TITLE = "MotoQuant Blog — Drag Racing Physics, Tuning, and Validation Notes";
-const DESCRIPTION = "Long-form posts on the physics of the perfect launch, why your R15 will not hit 14s, how to tune for Aamby Valley in November, and other deep-dives from the MotoQuant team.";
+const TITLE = "MotoQuant Blog — Motorcycle Drag Racing Physics, Tuning & Bike Breakdowns";
+const DESCRIPTION = "Long-form deep dives on motorcycle drag racing physics, India-specific tuning, and bike-by-bike quarter-mile breakdowns: Hayabusa vs ZX-14R, Pulsar NS200 vs Apache RTR 200, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, how a 2-stroke expansion chamber actually works, why your R15 will not hit 14s, and Aamby Valley November tuning.";
 
 export const metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: '/blog' },
-  keywords: ["motorcycle drag racing blog", "india drag tuning guide", "aamby valley setup"],
+  keywords: [
+    "motorcycle drag racing blog",
+    "india drag tuning guide",
+    "aamby valley setup",
+    "hayabusa vs zx-14r",
+    "pulsar ns200 vs apache rtr 200",
+    "r15 v4 quarter mile",
+    "ktm 1390 super duke",
+    "2 stroke expansion chamber",
+    "motorcycle physics blog india",
+  ],
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,

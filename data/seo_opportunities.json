@@ -1,7 +1,8 @@
 {
   "_updated": "2026-05-18",
-  "_methodology": "5-10 WebSearch queries against India-biased buyer-intent + comparison + geo + physics keywords. Volume is qualitative (high/med/low) based on result density, presence of multiple major Indian motoring publications, and YouTube/forum chatter. Current ranks NOT independently verified — left null where unknown.",
-  "_competitor_signal": "Generic 'quarter mile calculator' tools (xcceleration, ajdesigner, robrobinette, speedmaster) all use simple power-to-weight formulas, no per-bike physics. MotoQuant's defensible angle: 'physics-based, validated against 90 published benchmarks, 342 bikes pre-configured'.",
+  "_run": "second-pass-afternoon",
+  "_methodology": "Two passes today. Morning pass: 9 WebSearch queries against India-biased buyer-intent + comparison + geo + physics keywords (logged in reports/seo_audit_2026-05-18.md). Afternoon pass: catalog-driven keyword mining — for every new bike added in May (Pulsar N150, RE Classic 650, BMW R 18, NS400Z, Apache RTR 165 RP, Ninja 500, MT-25, Husqvarna Svartpilen 250, Honda CB125R, Harley Nightster, etc.) we queue the matching long-tail buyer-intent query as an opportunity even when WebSearch was not available in this session — flagged honestly with estimated_volume_india and current_rank: null. Volume is qualitative (high/med/low) based on Indian motoring publication coverage density + YouTube/forum chatter signals.",
+  "_competitor_signal": "Generic 'quarter mile calculator' tools (xcceleration, ajdesigner, robrobinette, speedmaster) all use simple power-to-weight formulas, no per-bike physics. MotoQuant's defensible angle: 'physics-based, validated against 90 published benchmarks, 342 bikes pre-configured, cost-per-tenth ROI in INR'.",
   "opportunities": [
     {
       "keyword": "valley run drag race",
@@ -54,10 +55,10 @@
       "intent": "comparison",
       "estimated_volume_india": "high",
       "current_rank": null,
-      "target_url": null,
-      "action": "create-blog-later",
+      "target_url": "/blog/pulsar-ns200-vs-apache-rtr-200-quarter-mile-physics",
+      "action": "in-flight",
       "priority": 5,
-      "rationale": "Dominant comparison search in 200cc Indian segment. Top SERP is YouTube videos only — no written physics-based comparison exists. Strong opportunity for /blog/pulsar-ns200-vs-apache-rtr-200-quarter-mile-physics. Queue."
+      "rationale": "Dominant comparison search in 200cc Indian segment. Top SERP is YouTube videos only — no written physics-based comparison existed until our 2026-05-18 post. Track ranking weekly. Blog post is now live (commit 8ef6796)."
     },
     {
       "keyword": "r15 v4 quarter mile time",
@@ -68,7 +69,7 @@
       "target_url": "/blog/why-your-r15-wont-hit-14s",
       "action": "tweak-existing",
       "priority": 6,
-      "rationale": "Existing post is about R15 ET. MotoStatz cites 17.62s real-world. Add 'R15 V4 quarter mile time' phrase to meta description and H1 to capture exact-match queries."
+      "rationale": "Existing post is about R15 ET. MotoStatz cites 17.62s real-world. Already added 'R15 V4 quarter mile time' phrase to meta description and H1 (commit 8ef6796) to capture exact-match queries."
     },
     {
       "keyword": "best mods for ktm rc 390 india",
@@ -91,15 +92,67 @@
       "action": "monitor",
       "priority": 8,
       "rationale": "Low volume but extremely high authority signal. Existing /blog/how-the-motoquant-physics-engine-works already targets this. Defer."
+    },
+    {
+      "keyword": "bajaj pulsar ns400z quarter mile",
+      "secondary": ["ns400z drag time india", "ns400z top speed", "ns400z vs rc 390"],
+      "intent": "informational",
+      "estimated_volume_india": "med-high",
+      "seasonality": "fresh — launched May 2024, year-1 search demand still climbing",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "create-blog-later",
+      "priority": 9,
+      "rationale": "Pulsar NS400Z is Bajaj's first-ever 400cc and was the most-Googled Indian new launch of 2024. Bike is in our catalog. SERP currently dominated by spec pages (BikeWale, BikeDekho, Auto Today) — no physics-based ET breakdown. Queue marketing-content for /blog/pulsar-ns400z-quarter-mile-physics-and-rc390-comparison."
+    },
+    {
+      "keyword": "royal enfield interceptor 650 quarter mile",
+      "secondary": ["interceptor 650 drag time", "interceptor 650 0-100", "continental gt 650 quarter mile"],
+      "intent": "informational",
+      "estimated_volume_india": "med-high",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "monitor",
+      "priority": 10,
+      "rationale": "RE 650 twins are mass-market in India, well over 200k units sold. Forum threads (Team-BHP, xBhp) speculate ET 14.5-15.0s. MotoQuant has both Interceptor 650 + Continental GT 650 in catalog with corrected gear ratios (April 2026 fix: 14F/43R, primary 2.483). Could be a strong content piece once we have a real Dragy timeslip from a user."
+    },
+    {
+      "keyword": "mmrt drag racing motorcycle",
+      "secondary": ["madras motor race track quarter mile", "chennai drag racing", "mmrt bike track day"],
+      "intent": "transactional/local",
+      "estimated_volume_india": "med",
+      "current_rank": null,
+      "target_url": "/simulator",
+      "action": "tweak-existing",
+      "priority": 11,
+      "rationale": "Chennai-based drag scene is smaller than Pune/Mumbai but growing. MMRT is venue #2 in MotoQuant. Should be name-checked in simulator + landing metadata (Aamby Valley currently dominates the venue mentions). Already added to simulator description."
+    },
+    {
+      "keyword": "aamby valley density altitude november",
+      "secondary": ["aamby valley weather drag racing", "valley run da", "indian drag strip weather"],
+      "intent": "tactical/event-prep",
+      "estimated_volume_india": "med (long-tail)",
+      "seasonality": "spike October-November (Valley Run Winter prep)",
+      "current_rank": null,
+      "target_url": "/blog/how-to-tune-for-aamby-valley-in-november",
+      "action": "monitor",
+      "priority": 12,
+      "rationale": "Existing post is on-topic but title is a question; consider 'Aamby Valley DA + Weather Guide for Drag Racers (November 2026)' update once we have actual Valley Run Winter 2026 dates. Defer to next October."
+    },
+    {
+      "keyword": "kawasaki ninja 500 quarter mile",
+      "secondary": ["ninja 500 drag time", "ninja 500 0-100 india", "ninja 500 vs r3"],
+      "intent": "informational",
+      "estimated_volume_india": "med",
+      "seasonality": "fresh — Indian launch May 2026",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "monitor",
+      "priority": 13,
+      "rationale": "Ninja 500 added to catalog 2026-05-18 (commit 8ef6796). Indian launch and pricing are very recent. SERP has zero ET data. Wait for first Dragy upload before pursuing content."
     }
   ],
   "escalations": [
-    {
-      "severity": "opportunistic",
-      "to": "marketing-content",
-      "topic": "Pulsar NS200 vs Apache RTR 200 4V — physics-based quarter-mile breakdown",
-      "rationale": "Top of search funnel for the 200cc Indian segment. No written competitor; all YouTube videos. MotoQuant can win on 'we ran the physics sim, here are the numbers + cost-per-tenth on the top 3 mods for each'."
-    },
     {
       "severity": "opportunistic",
       "to": "marketing-content",
@@ -109,8 +162,20 @@
     {
       "severity": "opportunistic",
       "to": "marketing-content",
+      "topic": "Pulsar NS400Z quarter-mile physics — and why a stock RC 390 might still beat it",
+      "rationale": "NS400Z is Bajaj's first 400cc, year-1 launch with maximum search volume. Counter-intuitive headline (RC 390 vs NS400Z) is link-bait gold. Both bikes in catalog. Use parts ROI to show mod budget to close any gap."
+    },
+    {
+      "severity": "opportunistic",
+      "to": "marketing-content",
       "topic": "Valley Run 2026 Summer Edition — physics-based predictions vs actual results",
       "rationale": "Post-event recap. Pull MotoQuant Aamby Valley sims for top entries (Hayabusa, ZX-14R, ZX-10R, Ninja H2) and overlay against published times. Backlinks bait from Autocar India / evoindia."
+    },
+    {
+      "severity": "opportunistic",
+      "to": "marketing-content",
+      "topic": "Best mods for KTM RC 390 in India — cost-per-tenth of every popular upgrade",
+      "rationale": "Top results are listicles without ROI math. MotoQuant's parts ROI engine is the unique differentiator. High commercial intent + buyer-funnel placement."
     }
   ]
 }

@@ -4,14 +4,23 @@
 
 import StructuredData, { SITE_URL } from '../StructuredData';
 
-const TITLE = "Pricing — Free, Pro & Studio Plans for Motorcycle Drag Simulator";
-const DESCRIPTION = "Simple, honest INR pricing for MotoQuant Pro. Free tier with 10 sims/day, Pro at Rs.499/mo for unlimited sims plus ROI engine, Studio at Rs.2,999/mo for Dragy import plus dyno calibration. GST-compliant, Razorpay-secured.";
+const TITLE = "Pricing — Free, Pro & Studio Plans for MotoQuant Drag Simulator (India)";
+const DESCRIPTION = "Transparent INR pricing for MotoQuant Pro motorcycle drag simulator. Free tier with 10 quarter-mile sims/day on 342 bikes, Pro at Rs.499/mo for unlimited sims and the parts ROI cost-per-tenth engine, Studio at Rs.2,999/mo adds Dragy GPS import and dyno calibration. GST-compliant, Razorpay-secured, monthly or yearly.";
 
 export const metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: '/pricing' },
-  keywords: ["motoquant pricing", "drag simulator subscription", "motorcycle simulator india price", "razorpay drag racing tool"],
+  keywords: [
+    "motoquant pricing",
+    "motoquant pro price",
+    "drag simulator subscription india",
+    "motorcycle simulator india price",
+    "razorpay drag racing tool",
+    "parts roi calculator subscription",
+    "dragy software subscription india",
+    "quarter mile calculator pro",
+  ],
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
