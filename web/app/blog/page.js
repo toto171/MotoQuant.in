@@ -33,13 +33,28 @@ export const metadata = {
     "hayabusa vs zx-14r india",
     "r15 v4 quarter mile time",
     "ktm 1390 super duke",
+    "yezdi roadster quarter mile",
+    "yezdi roadster drag time",
+    "yezdi 334 platform",
     "2 stroke expansion chamber",
     "aamby valley tuning",
+    "cfmoto 800nk vs ktm 790 duke",
+    "pulsar n250 vs apache rtr 200 4v",
+    "hayabusa 2026 gen 3 quarter mile india",
   ],
   alternates: { canonical: "https://motoquant.in/blog" },
 };
 
 const POSTS = [
+  {
+    slug: "yezdi-roadster-quarter-mile-physics",
+    title: "Yezdi Roadster Quarter-Mile Physics: 334cc Neo-Retro at the Strip",
+    date: "2026-05-18",
+    readTime: "11 min",
+    tags: ["Yezdi", "Roadster 334", "BG6 platform", "Indian retro", "physics"],
+    excerpt:
+      "MotoQuant simulates the Yezdi Roadster 334 at 15.42s and 138 km/h trap at Aamby Valley. 28.6 hp, 175 kg dry, BG6 platform shared with the Scrambler / Adventure 334 / Jawa 42 Bobber 350. Why the ₹6,500 sprocket swap is the cheapest tenth on the bike, and where the Roadster sits against the Classic 350 and Duke 390.",
+  },
   {
     slug: "how-to-tune-for-mmrt-chennai",
     title: "How to Tune for MMRT Chennai: Sea-Level, Humid, Hot Track",

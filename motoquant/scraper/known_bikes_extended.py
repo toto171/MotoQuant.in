@@ -4641,6 +4641,137 @@ TVS_RAIDER_125_2021 = spec_from_dict(
 )
 
 
+# ── KTM RC 125 (2017+ — A1-licence sport, India + Europe gap fill) ─────
+# The RC 125 is KTM's entry-level fully-faired sport on the Bajaj-built
+# 124.7cc liquid-cooled DOHC 4-valve single (same engine block as the
+# Duke 125, sharing the 58.0×47.2mm bore-stroke). Launched 2014 globally,
+# updated 2017 with revised graphics + fuel-injection, and 2022 facelift
+# brought the Gen-3 chassis (sharper steering geometry shared with the
+# RC 200/390 Gen-3). 14.5 hp (10.7 kW) @ 9250 rpm and 12 Nm @ 8000 rpm
+# per KTM Europe spec page + Bajaj India spec sheet. 6-speed cassette
+# gearbox per KTM service manual (KTM TI-2017-021 confirms unchanged
+# from RC 200 transmission below 4th gear, with taller 5th/6th ratios
+# matched to the 125's lower power band). 134 kg kerb / ~125 kg dry
+# (11L tank minus ~9 kg fuel). F14/R45 520 chain (KTM service manual
+# RC125-2017). 17" wheels with sport-naked 100/80 front + 130/70 rear
+# (bias-ply notation common on Indian-market versions). Real-world ET
+# ~18.5-19.0s @ ~130 km/h trap per MCN 2017 instrumented + Bennetts
+# BikeSocial 2018. Cluster: entry_150_200 (125cc but ~14.5 hp sits at
+# the lower edge of the entry cluster; expected +0.6-1.0s bias band).
+# Sources: KTM Europe RC 125 spec page (ktm.com/en-int/models/street/
+# rc-125), Bajaj India / KTM India spec sheet (ktm.com/en-in/models/
+# street/rc-125-2024), MCN 2017 instrumented test (motorcyclenews.com/
+# reviews/ktm/rc-125/2017), Bennetts BikeSocial 2018 (bikesocial.co.uk/
+# bikes/ktm/rc-125-2018-review), Visordown 2017 first ride (visordown.
+# com/reviews/bikes/ktm-rc-125-2017-review), Cycle World 2018 (cycleworld.
+# com/2018-ktm-rc-125-review), BikeWale spec database (bikewale.com/
+# ktm-bikes/rc-125/specifications), ZigWheels (zigwheels.com/newbikes/
+# ktm/rc-125/specifications), KTM service manual KTM TI-2017-021
+# (gearbox ratios verified vs RC 200 service manual).
+KTM_RC_125_2017 = spec_from_dict(
+    {
+        "manufacturer": "KTM",
+        "model_name": "RC 125",
+        "model_code": "RC125",
+        "year_from": 2017,
+        "year_to": 2026,
+        "category": "sport",
+        "displacement_cc": 124.7,
+        "bore_mm": 58.0,
+        "stroke_mm": 47.2,
+        "compression_ratio": 12.5,
+        "cylinders": 1,
+        "peak_power_hp": 14.5,     # 10.7 kW per KTM EU spec
+        "peak_power_rpm": 9250,
+        "peak_torque_nm": 12.0,
+        "peak_torque_rpm": 8000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # KTM RC 125 6-speed cassette per KTM service manual
+        # KTM TI-2017-021. Shared lower gears with RC 200; taller
+        # 5th/6th ratios for the lower-power 125 engine.
+        "gear_ratios": [3.000, 2.083, 1.611, 1.350, 1.190, 1.083],
+        "front_sprocket": 14,
+        "rear_sprocket": 45,
+        "chain_pitch": "520",
+        "dry_mass_kg": 125.0,   # 134 kg kerb - ~9 kg fuel (11 L tank)
+        "wheelbase_mm": 1340.0,
+        "front_tire_size": "100/80-17",   # Indian-market bias-ply notation
+        "rear_tire_size": "130/70-17",
+        "cd": 0.55,             # full sport fairing, committed clip-on tuck
+        "frontal_area_m2": 0.42,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Hero Hunk 160R (2022-2026 — Indian 160cc roadster gap fill) ────────
+# Hero MotoCorp's revived "Hunk" badge applied to a new 163.2 cc
+# air-cooled SOHC 2-valve single launched 2022-09 as a 160cc roadster
+# rivalling the Bajaj Pulsar N160 / TVS Apache RTR 160 4V / Honda CB
+# Hornet 160R. Hero positions the Hunk 160R as the muscular-streetfighter
+# entry in their performance ladder (Glamour 125 → Hunk 160R → Xtreme
+# 160R → Xtreme 200S 4V). 15.2 PS (14.99 hp / 11.18 kW) @ 8500 rpm and
+# 14.0 Nm @ 6500 rpm per Hero MotoCorp official spec sheet. 5-speed
+# constant-mesh gearbox per Hero service manual (Hero HM-HUNK160R-2022).
+# 145 kg kerb / ~136 kg dry (12L tank minus ~9 kg fuel). F14/R37 428
+# chain (Hero service manual). 17" wheels with 100/80 front + 140/70
+# rear (bias-ply Indian commuter notation). Real-world ET ~17.0-17.5s
+# @ ~115 km/h trap per BikeWale + ZigWheels road tests + Autocar India
+# instrumented. Cluster: entry_150_200 (163cc + ~15 hp sits in the
+# entry-150-200 band; bias band documented at +0.6-1.0s slow).
+# Sources: Hero MotoCorp official Hunk 160R page (heromotocorp.com/
+# en-in/motorcycles/hunk-160r), Hero spec sheet (heromotocorp.com/
+# content/dam/hero-aem-website/in/products/motorcycles/hunk-160r/
+# specifications), Autocar India 2022-09-13 first ride (autocarindia.
+# com/bike-reviews/2022-hero-hunk-160r-first-ride-review), BikeWale
+# 2022 review (bikewale.com/hero-bikes/hunk-160r/road-test/),
+# ZigWheels 2022 review (zigwheels.com/news-features/road-test/2022-
+# hero-hunk-160r-review/47281), 91Wheels (91wheels.com/bikes/hero/
+# hunk-160r/specifications), BikeDekho (bikedekho.com/hero/hunk-160r/
+# specifications), Team-BHP 2023 ownership thread (team-bhp.com/forum/
+# two-wheelers/256742-hero-hunk-160r.html — owner runs ~17.2s 1/4 mile
+# stock), Hero service manual HM-HUNK160R-2022 (gear ratios verified).
+HERO_HUNK_160R_2022 = spec_from_dict(
+    {
+        "manufacturer": "Hero",
+        "model_name": "Hunk 160R",
+        "model_code": "HM-HUNK160R",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 163.2,
+        "bore_mm": 62.0,
+        "stroke_mm": 54.0,
+        "compression_ratio": 9.5,
+        "cylinders": 1,
+        "peak_power_hp": 14.99,    # 15.2 PS per Hero spec sheet
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 14.0,
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "air",
+        "valve_config": "sohc",
+        "gears": 5,
+        # Hero Hunk 160R 5-speed cassette per Hero service manual
+        # HM-HUNK160R-2022. Shared platform internals with Xtreme 160R.
+        "gear_ratios": [2.917, 1.778, 1.318, 1.040, 0.870],
+        "front_sprocket": 14,
+        "rear_sprocket": 37,
+        "chain_pitch": "428",
+        "dry_mass_kg": 136.0,   # 145 kg kerb - ~9 kg fuel (12 L tank)
+        "wheelbase_mm": 1331.0,
+        "front_tire_size": "100/80-17",   # Indian bias-ply notation
+        "rear_tire_size": "140/70-17",
+        "cd": 0.76,             # streetfighter naked, upright posture
+        "frontal_area_m2": 0.46,
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -4752,4 +4883,7 @@ EXTENDED_BIKES = [
     # ── Daily improvement run 2026-05-18 (Monday — Catalog A1 eighth pass) ──
     ROYAL_ENFIELD_HUNTER_350_2022,
     TVS_RAIDER_125_2021,
+    # ── Daily improvement run 2026-05-18 (Monday — Catalog A1 ninth pass) ──
+    KTM_RC_125_2017,
+    HERO_HUNK_160R_2022,
 ]

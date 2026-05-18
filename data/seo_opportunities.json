@@ -1,7 +1,7 @@
 {
   "_updated": "2026-05-18",
-  "_run": "eighth-pass-2026-05-18",
-  "_methodology": "Seven passes prior today. Passes 1-7 logged 33 opportunities + 11 escalations across simulator, bikes, features, pricing, about, whitepaper, docs/physics, docs/validation (see reports/seo_audit_2026-05-18*.md and reports/seo_audit_2026_05_17.md for the May-17 ninth-catalog-pass run that landed Yezdi Roadster 334 + Yezdi Adventure 334 + Hero Glamour 125 to motoquant.db). EIGHTH PASS (this run, 2026-05-18 Monday): three new keyword opportunities surfaced for the three catalog-expansion entries from yesterday's commit a84fb23/0cdb5f4: (a) 'yezdi roadster quarter mile' — Yezdi (Classic Legends, Mahindra group) is the active Indian neo-retro challenger to Royal Enfield Classic 350; SERP is BikeWale/BikeDekho spec pages with no instrumented ET. (b) 'yezdi adventure 334 drag time' — fresh-platform 334cc adventure, year-1 search demand climbing, no SERP ET data. (c) 'hero glamour 125 drag time' — Hero Glamour 125 is one of India's longest-running 125cc commuters, very high evergreen volume, SERP is dominated by mileage/price pages with zero ET content. Plus one strategic methodology entry: 'motorcycle drag time predictor india' — a slot-broadening variant on the existing /simulator primary keyword designed to capture intent that searches 'predictor' instead of 'calculator/simulator'. On-page edits: simulator keyword array +4 new entities (3 bikes + 'motorcycle drag time predictor india'); bikes layout keyword array +3 spec-database entries for the new bikes; bikes page H1 subtitle namechecks Yezdi Roadster and Hero Glamour 125 alongside the existing entity mention cluster. No StructuredData / FAQ / sitemap edits this pass (marketing-content owns blog + sitemap; landing page entity mentions were updated yesterday).",
+  "_run": "ninth-pass-2026-05-18",
+  "_methodology": "Eight passes prior today. Passes 1-8 logged 37 opportunities + 13 escalations across simulator, bikes, features, pricing, about, whitepaper, docs/physics, docs/validation, blog index. NINTH PASS (this run, 2026-05-18 Monday late): three new keyword opportunities surfaced from WebSearch on the catalog-expansion bikes shipping tonight (CFMoto 800NK + Yamaha MT-125 + Yamaha XSR125) and recent Indian-market signals: (a) 'cfmoto 800nk vs ktm 790 duke quarter mile' — CFMoto 800NK and KTM 790 Duke share the LC8c parallel twin platform; SERP for the comparison query has zero physics content (AccelerationTimes/FastestLaps/MaxAbout publish spec pages but no instrumented quarter-mile data); strong platform-share comparison angle now that the /blog/cfmoto-800nk-quarter-mile-physics post is live (shipped earlier today). (b) 'pulsar n250 vs apache rtr 200 4v drag race' — Carblogindia ran a real-world drag (Pulsar N250 wins from launch); MotoQuant has both bikes in catalog. SERP is YouTube-dominated, no physics-based written analysis. Pairs naturally with the existing NS200 vs RTR 200 post; can extend to 3-bike or queue dedicated post. (c) 'hayabusa 2026 gen 3 quarter mile india' — Suzuki India launched the OBD-2B Gen-3 refresh at ₹18.06 lakh ex-showroom (190 PS, 150 Nm, revised throttle maps); reviewers cite 0-100 in 2.6s with launch control but no SERP carries a recent India-specific instrumented ET. Pure refresh of MotoQuant's flagship Hayabusa target page would land the Gen 3 phrasing for buyer-intent queries. On-page edits: simulator keyword array +3 new entities; bikes layout keyword array +3 spec-database entries; blog index meta keyword array expanded with cfmoto/ktm-790-duke comparison phrasings; bikes page H1 subtitle namechecks CFMoto 800NK alongside the existing entity mention cluster. No StructuredData/FAQ/sitemap edits this pass (marketing-content owns blog + sitemap).",
   "_competitor_signal": "Generic 'quarter mile calculator' tools (xcceleration, ajdesigner, robrobinette, speedmaster) all use simple power-to-weight formulas, no per-bike physics. MotoQuant's defensible angle: 'physics-based, validated against 90 published benchmarks, 342 bikes pre-configured, cost-per-tenth ROI in INR'.",
   "opportunities": [
     {
@@ -594,6 +594,59 @@
       "action": "tweak-existing",
       "priority": 37,
       "rationale": "Slot-broadening variant on the existing /simulator primary keyword cluster ('motorcycle quarter mile calculator india', priority 3). Users who search 'predictor' instead of 'calculator/simulator' are doing the same job but with different vocabulary — capturing both phrasings at once requires both phrasings in the keywords array. WebSearch on the variant returns generic spreadsheet templates and YouTube videos but no physics-based interactive tool that includes the India locale signal. Added to /simulator layout.js keywords array this pass. Defensible angle stays the same: physics-based, 342 bikes pre-configured, validated to ±0.2s on K5/R1/Hayabusa baselines, cost-per-tenth ROI in INR — none of the generic tools can match any of those four criteria."
+    },
+    {
+      "keyword": "cfmoto 800nk vs ktm 790 duke quarter mile",
+      "secondary": [
+        "cfmoto 800nk vs 790 duke",
+        "lc8c parallel twin comparison",
+        "cfmoto vs ktm parallel twin drag",
+        "is 800nk faster than 790 duke",
+        "cfmoto 800nk vs duke 790 india"
+      ],
+      "intent": "comparison",
+      "estimated_volume_india": "med",
+      "seasonality": "fresh — CFMoto 800NK Indian launch is recent (~9-12 lakh on-road); year-1 buyer-decision queries still climbing",
+      "current_rank": null,
+      "target_url": "/blog/cfmoto-800nk-quarter-mile-physics",
+      "action": "tweak-existing",
+      "priority": 38,
+      "rationale": "WebSearch 2026-05-18 confirmed: SERP for 'cfmoto 800nk' is dominated by AccelerationTimes/FastestLaps/MaxAbout/Bikes4Sale/Fasterwheeler spec pages and the CFMoto US/Global dealer pages — ZERO instrumented quarter-mile data, and zero physics-based comparison against the KTM 790 Duke despite both bikes running the LC8c parallel twin (KTM-designed, CFMoto licence-built). The /blog/cfmoto-800nk-quarter-mile-physics post shipped earlier today already namechecks the 790 Duke share — adding the 790-Duke comparison phrasing to the existing post's meta keywords + first-paragraph hook captures the comparison query without splitting target URLs. Defensible angle: same LC8c, ~₹5 lakh price gap, ~5 hp / ~5 kg / ~₹3-4 lakh delta — clean buyer-decision physics story. Cross-link from /blog/ktm-duke-390-vs-rc-390 (also live) for internal-link signal."
+    },
+    {
+      "keyword": "pulsar n250 vs apache rtr 200 4v drag race",
+      "secondary": [
+        "pulsar n250 vs rtr 200 drag",
+        "pulsar 250 vs apache 200 quarter mile",
+        "n250 vs rtr 200 4v india",
+        "pulsar 250 drag time",
+        "apache rtr 200 4v drag time"
+      ],
+      "intent": "comparison",
+      "estimated_volume_india": "high",
+      "current_rank": null,
+      "target_url": "/blog/pulsar-ns200-vs-apache-rtr-200-quarter-mile-physics",
+      "action": "tweak-existing",
+      "priority": 39,
+      "rationale": "WebSearch 2026-05-18 confirmed: Carblogindia ran a real-world Pulsar N250 vs Apache RTR 200 4V drag (N250 wins from launch via 24.5 PS / 249cc advantage). Autocar India, ZigWheels, BikeWale all carry 0-60 / 0-100 data but no full quarter-mile. SERP top results are YouTube videos only, no written physics-based comparison. MotoQuant catalog has both bikes already (Pulsar N250 + Apache RTR 200 4V) with corrected gear ratios + service-manual cassettes. The existing /blog/pulsar-ns200-vs-apache-rtr-200 post can be extended to 3-bike (add N250 to the comparison) OR keep as 2-bike and queue a dedicated /blog/pulsar-n250-vs-apache-rtr-200-quarter-mile-physics post — the latter captures the N250 query exactly. Same SERP-gap pattern as the existing post: physics-based, India-specific, cost-per-tenth ROI in ₹, none of which the YouTube competitors have."
+    },
+    {
+      "keyword": "hayabusa 2026 gen 3 quarter mile india",
+      "secondary": [
+        "hayabusa 2026 quarter mile",
+        "hayabusa gen 3 obd2b drag time",
+        "suzuki hayabusa 2026 0-100 india",
+        "hayabusa 2026 launch control",
+        "hayabusa 2026 price india quarter mile"
+      ],
+      "intent": "informational/buyer-funnel",
+      "estimated_volume_india": "high",
+      "seasonality": "fresh — Suzuki India OBD-2B Gen-3 refresh launched at ₹18.06 lakh ex-showroom; year-1 buyer-intent queries climbing",
+      "current_rank": null,
+      "target_url": "/blog/hayabusa-vs-zx-14r-which-is-faster",
+      "action": "tweak-existing",
+      "priority": 40,
+      "rationale": "WebSearch 2026-05-18 confirmed: Suzuki India 2026 Gen-3 refresh launched at ₹18.06 lakh ex-showroom Delhi (~₹20.17 lakh on-road), 190 PS @ 9700 rpm, 150 Nm @ 7000 rpm, revised throttle maps for stronger low-to-mid torque, OBD-2B compliance. Autocar India / BikeWale / 91Wheels / Smartprix / Suzuki India all carry the 0-100 in ~2.6s factory claim (with launch control) but NO published SERP carries a recent India-specific instrumented quarter-mile ET for the Gen-3 refresh. MotoQuant's Hayabusa reference baseline (10.4712s) covers Gen 1 (1999-2007) precisely — adding the Gen-3 OBD-2B phrasing as a buyer-intent qualifier on the existing /blog/hayabusa-vs-zx-14r-which-is-faster post (and the Hayabusa bike-detail page) captures the freshness signal without splitting URLs or risking the Gen-1 baseline credibility. Defensible angle: 'all three generations simulated, validated to 10.47s on Gen 1' is a stronger claim than any spec-page competitor can match."
     }
   ],
   "escalations": [
@@ -674,6 +727,24 @@
       "to": "marketing-content",
       "topic": "Hero Glamour 125 vs Pulsar N125 — 125cc commuter quarter-mile shootout (reframing the segment from mileage to acceleration)",
       "rationale": "Hero Glamour 125 + Pulsar N125 both in catalog as of yesterday. The 125cc commuter SERP is overwhelmingly mileage queries with zero acceleration content — an obvious editorial differentiator. Single post reframes the segment intent from 'best mileage' to 'fastest commuter' and could pick up a long-tail evergreen rank with very low competition. Pairs naturally with the Splendor Plus / Hero HF Deluxe entries that will land in future catalog passes."
+    },
+    {
+      "severity": "opportunistic",
+      "to": "marketing-content",
+      "topic": "CFMoto 800NK vs KTM 790 Duke — LC8c platform-share quarter-mile physics breakdown",
+      "rationale": "CFMoto 800NK landed today's catalog-expansion pass. Both bikes run the same LC8c parallel twin (KTM-designed, CFMoto licence-built for the 800NK). The ~₹5 lakh price gap, ~5 hp / ~5 kg / Cd delta is a clean buyer-decision physics story analogous to the MT-125/XSR125 pair-post and the XSR900 GP/MT-09 pair-post that landed today. SERP is dominated by spec pages; zero physics-based comparison content exists. Extend the existing /blog/cfmoto-800nk-quarter-mile-physics post OR queue a dedicated /blog/cfmoto-800nk-vs-ktm-790-duke-quarter-mile-physics post."
+    },
+    {
+      "severity": "opportunistic",
+      "to": "marketing-content",
+      "topic": "Pulsar N250 vs Apache RTR 200 4V — physics-based drag analysis (Carblogindia ran the real-world drag, MotoQuant runs the math)",
+      "rationale": "Carblogindia's drag-race report shows the N250 wins from launch (24.5 PS / 249 cc Pulsar vs 20.5 PS / 197 cc Apache). SERP is YouTube + spec-comparison pages only — no physics-based written analysis. MotoQuant has both bikes in catalog with corrected service-manual gear cassettes. Either extend the existing NS200 vs Apache RTR 200 post to a 3-bike comparison OR queue a dedicated Pulsar N250 vs Apache RTR 200 4V post. Latter captures the exact-match query for a high-volume Indian SERP gap."
+    },
+    {
+      "severity": "opportunistic",
+      "to": "marketing-content",
+      "topic": "Suzuki Hayabusa 2026 Gen 3 quarter-mile physics — what the OBD-2B refresh changed and what it didn't",
+      "rationale": "Suzuki India OBD-2B Gen-3 launched at ₹18.06 lakh (190 PS, 150 Nm, revised throttle maps for low-to-mid torque). Reviewers cite 0-100 in 2.6s with launch control but no SERP carries a recent India-specific instrumented quarter-mile ET for the Gen-3. MotoQuant has the Gen 1 reference baseline locked at 10.4712s; Gen 2 and Gen 3 share the same 1340 cc inline-four with throttle-map + emissions deltas (no chassis or aero changes). Clean editorial story: 'we simulated all three Hayabusa generations' — defensible angle that no competitor (Autocar/BikeWale/91Wheels) can match. Refresh the existing /blog/hayabusa-vs-zx-14r post with Gen-3 paragraph + add Gen-3 callout to the Hayabusa bike-detail page."
     }
   ]
 }

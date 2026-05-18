@@ -43,6 +43,9 @@ export const metadata = {
     'yezdi adventure 334 drag time',
     'hero glamour 125 drag',
     'motorcycle drag time predictor india',
+    'cfmoto 800nk vs ktm 790 duke',
+    'pulsar n250 vs apache rtr 200 4v',
+    'hayabusa 2026 gen 3 quarter mile india',
   ],
   openGraph: {
     title: TITLE,
