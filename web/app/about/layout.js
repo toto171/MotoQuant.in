@@ -22,6 +22,11 @@ export const metadata = {
     "physics based motorcycle calculator india",
     "valley run technology",
     "mmrt drag simulator",
+    "buddh international circuit track day",
+    "bic motorcycle track day",
+    "indian motorcycle dyno tuning",
+    "motorcycle 60 ft time launch technique",
+    "pune dyno tuning shop",
   ],
   openGraph: {
     title: TITLE,

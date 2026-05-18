@@ -5,10 +5,13 @@ import SiteFooter from "../../components/SiteFooter";
 export const metadata = {
   title: "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
   description:
-    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
+    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
   keywords: [
     "motorcycle drag racing blog",
     "indian motorcycle quarter mile",
+    "yamaha mt-125 quarter mile",
+    "yamaha xsr125 quarter mile",
+    "mt-125 vs xsr125",
     "cfmoto 800nk quarter mile",
     "cfmoto 800nk india price",
     "ktm duke 390 vs rc 390",
@@ -25,6 +28,15 @@ export const metadata = {
 };
 
 const POSTS = [
+  {
+    slug: "yamaha-mt-125-xsr125-platform-physics",
+    title: "Yamaha MT-125 vs XSR125: Same Engine, 0.10s Apart at the Strip",
+    date: "2026-05-18",
+    readTime: "10 min",
+    tags: ["Yamaha", "MT-125", "XSR125", "A1 licence", "platform physics"],
+    excerpt:
+      "MotoQuant simulates the MT-125 at 19.123s and the XSR125 at 19.222s — same engine, same gearbox, same final drive, 0.10s apart. Where the tenth lives, why the heritage tax is paid in frontal area, and why the YZF-R125 beats both.",
+  },
   {
     slug: "cfmoto-800nk-quarter-mile-physics",
     title: "CFMoto 800NK Quarter-Mile Physics: A KTM 790 Duke in Disguise",

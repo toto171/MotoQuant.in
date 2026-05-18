@@ -1,8 +1,17 @@
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Getting Started',
-  description: 'How to install the MotoQuant desktop app, run your first simulation, and interpret the results.',
+  title: 'Getting Started — Run Your First Motorcycle Quarter-Mile Simulation',
+  description: 'Step-by-step guide to running your first motorcycle quarter-mile drag simulation in MotoQuant Pro — pick from 342 bikes, choose Aamby Valley or MMRT or BIC as your venue, dial in rider weight + power delta + mass, and interpret the ET, 60-foot, and trap speed output. No physics PhD required.',
+  keywords: [
+    'motoquant getting started',
+    'how to use motorcycle drag simulator',
+    'motorcycle quarter mile simulation guide',
+    'first drag simulation tutorial',
+    'how to predict motorcycle quarter mile time',
+    'motorcycle 60 ft time guide',
+    'aamby valley simulation setup',
+  ],
   alternates: { canonical: 'https://motoquant.in/docs/getting-started' },
 };
 

@@ -1,12 +1,16 @@
 {
   "_updated": "2026-05-18",
   "_run": "fifth-pass-night",
-  "_methodology": "Five passes today. Passes 1-4 logged 20 opportunities + 7 escalations across the simulator, bikes, features, pricing, about, whitepaper, docs/physics, and docs/validation surfaces (see reports/seo_audit_2026-05-18.md and seo_audit_2026-05-18_fourth_pass.md). Fifth pass (this run): 2 live WebSearch probes (CFMoto 800NK + Yamaha MT-125 quarter mile) confirmed SERP gaps. Today's catalog-expansion agent shipped 3 new bikes (Yamaha XSR125, Yamaha MT-125, CFMoto 800NK) and the marketing-content agent is writing one blog post for one of them. SEO agent's fifth-pass scope: surface the other two as keyword opportunities, expand /features and /pricing keyword arrays to capture A-vs-B comparison and new-bike-adjacent intents, and add a real H1/subheader keyword improvement to /bikes (which previously had a barely-SEO-relevant 'Bikes Catalog' H1). Coordinate-by-file-ownership: did NOT touch web/app/blog/* or web/app/sitemap.js — marketing-content owns those.",
+  "_methodology": "Five passes today. Passes 1-4 logged 20 opportunities + 7 escalations across the simulator, bikes, features, pricing, about, whitepaper, docs/physics, and docs/validation surfaces (see reports/seo_audit_2026-05-18.md and seo_audit_2026-05-18_fourth_pass.md). Fifth pass (this run): 2 live WebSearch probes (CFMoto 800NK + Yamaha MT-125 quarter mile) confirmed SERP gaps. Today's catalog-expansion agent shipped 3 new bikes (Yamaha XSR125, Yamaha MT-125, CFMoto 800NK) and the marketing-content agent is writing one blog post for one of them. SEO agent's fifth-pass scope: surface the other two as keyword opportunities, expand /features and /pricing keyword arrays to capture A-vs-B comparison and new-bike-adjacent intents, and add a real H1/subheader keyword improvement to /bikes (which previously had a barely-SEO-relevant 'Bikes Catalog' H1). Coordinate-by-file-ownership: did NOT touch web/app/blog/* or web/app/sitemap.js \u2014 marketing-content owns those.",
   "_competitor_signal": "Generic 'quarter mile calculator' tools (xcceleration, ajdesigner, robrobinette, speedmaster) all use simple power-to-weight formulas, no per-bike physics. MotoQuant's defensible angle: 'physics-based, validated against 90 published benchmarks, 342 bikes pre-configured, cost-per-tenth ROI in INR'.",
   "opportunities": [
     {
       "keyword": "valley run drag race",
-      "secondary": ["aamby valley drag", "valley run 2026 results", "valley run quarter mile"],
+      "secondary": [
+        "aamby valley drag",
+        "valley run 2026 results",
+        "valley run quarter mile"
+      ],
       "intent": "transactional/event-followup",
       "estimated_volume_india": "high",
       "seasonality": "spikes around April + November (event dates)",
@@ -18,7 +22,11 @@
     },
     {
       "keyword": "hayabusa quarter mile india",
-      "secondary": ["hayabusa drag time india", "fastest hayabusa india", "hayabusa valley run"],
+      "secondary": [
+        "hayabusa drag time india",
+        "fastest hayabusa india",
+        "hayabusa valley run"
+      ],
       "intent": "informational",
       "estimated_volume_india": "high",
       "current_rank": null,
@@ -29,7 +37,11 @@
     },
     {
       "keyword": "motorcycle quarter mile calculator india",
-      "secondary": ["bike 1/4 mile calculator", "free quarter mile simulator", "motorcycle ET calculator"],
+      "secondary": [
+        "bike 1/4 mile calculator",
+        "free quarter mile simulator",
+        "motorcycle ET calculator"
+      ],
       "intent": "transactional",
       "estimated_volume_india": "med-high",
       "current_rank": null,
@@ -40,7 +52,11 @@
     },
     {
       "keyword": "ktm duke 390 quarter mile",
-      "secondary": ["rc 390 drag time", "duke 390 ET", "fastest ktm 390 india"],
+      "secondary": [
+        "rc 390 drag time",
+        "duke 390 ET",
+        "fastest ktm 390 india"
+      ],
       "intent": "informational",
       "estimated_volume_india": "high",
       "current_rank": null,
@@ -51,18 +67,26 @@
     },
     {
       "keyword": "pulsar ns200 vs apache rtr 200",
-      "secondary": ["ns200 vs apache 200 drag", "pulsar vs apache quarter mile", "ns200 quarter mile"],
+      "secondary": [
+        "ns200 vs apache 200 drag",
+        "pulsar vs apache quarter mile",
+        "ns200 quarter mile"
+      ],
       "intent": "comparison",
       "estimated_volume_india": "high",
       "current_rank": null,
       "target_url": "/blog/pulsar-ns200-vs-apache-rtr-200-quarter-mile-physics",
       "action": "in-flight",
       "priority": 5,
-      "rationale": "Dominant comparison search in 200cc Indian segment. Top SERP is YouTube videos only — no written physics-based comparison existed until our 2026-05-18 post. Track ranking weekly. Blog post is now live (commit 8ef6796)."
+      "rationale": "Dominant comparison search in 200cc Indian segment. Top SERP is YouTube videos only \u2014 no written physics-based comparison existed until our 2026-05-18 post. Track ranking weekly. Blog post is now live (commit 8ef6796)."
     },
     {
       "keyword": "r15 v4 quarter mile time",
-      "secondary": ["r15 v4 drag", "r15 0-100", "r15 v4 vs ns200"],
+      "secondary": [
+        "r15 v4 drag",
+        "r15 0-100",
+        "r15 v4 vs ns200"
+      ],
       "intent": "informational",
       "estimated_volume_india": "high",
       "current_rank": "unknown",
@@ -73,7 +97,11 @@
     },
     {
       "keyword": "best mods for ktm rc 390 india",
-      "secondary": ["rc 390 performance upgrade cost", "rc 390 exhaust price india", "duke 390 ROI mods"],
+      "secondary": [
+        "rc 390 performance upgrade cost",
+        "rc 390 exhaust price india",
+        "duke 390 ROI mods"
+      ],
       "intent": "transactional",
       "estimated_volume_india": "high",
       "current_rank": null,
@@ -84,7 +112,10 @@
     },
     {
       "keyword": "pacejka tire model motorcycle",
-      "secondary": ["motorcycle tire slip simulation", "first principles drag racing physics"],
+      "secondary": [
+        "motorcycle tire slip simulation",
+        "first principles drag racing physics"
+      ],
       "intent": "academic/methodology",
       "estimated_volume_india": "low (global)",
       "current_rank": null,
@@ -95,10 +126,14 @@
     },
     {
       "keyword": "bajaj pulsar ns400z quarter mile",
-      "secondary": ["ns400z drag time india", "ns400z top speed", "ns400z vs rc 390"],
+      "secondary": [
+        "ns400z drag time india",
+        "ns400z top speed",
+        "ns400z vs rc 390"
+      ],
       "intent": "informational",
       "estimated_volume_india": "med-high",
-      "seasonality": "fresh — launched May 2024, year-1 search demand still climbing",
+      "seasonality": "fresh \u2014 launched May 2024, year-1 search demand still climbing",
       "current_rank": null,
       "target_url": "/blog/pulsar-ns400z-quarter-mile-physics",
       "action": "done",
@@ -107,7 +142,11 @@
     },
     {
       "keyword": "royal enfield interceptor 650 quarter mile",
-      "secondary": ["interceptor 650 drag time", "interceptor 650 0-100", "continental gt 650 quarter mile"],
+      "secondary": [
+        "interceptor 650 drag time",
+        "interceptor 650 0-100",
+        "continental gt 650 quarter mile"
+      ],
       "intent": "informational",
       "estimated_volume_india": "med-high",
       "current_rank": null,
@@ -118,7 +157,11 @@
     },
     {
       "keyword": "mmrt drag racing motorcycle",
-      "secondary": ["madras motor race track quarter mile", "chennai drag racing", "mmrt bike track day"],
+      "secondary": [
+        "madras motor race track quarter mile",
+        "chennai drag racing",
+        "mmrt bike track day"
+      ],
       "intent": "transactional/local",
       "estimated_volume_india": "med",
       "current_rank": null,
@@ -129,7 +172,11 @@
     },
     {
       "keyword": "aamby valley density altitude november",
-      "secondary": ["aamby valley weather drag racing", "valley run da", "indian drag strip weather"],
+      "secondary": [
+        "aamby valley weather drag racing",
+        "valley run da",
+        "indian drag strip weather"
+      ],
       "intent": "tactical/event-prep",
       "estimated_volume_india": "med (long-tail)",
       "seasonality": "spike October-November (Valley Run Winter prep)",
@@ -141,10 +188,14 @@
     },
     {
       "keyword": "kawasaki ninja 500 quarter mile",
-      "secondary": ["ninja 500 drag time", "ninja 500 0-100 india", "ninja 500 vs r3"],
+      "secondary": [
+        "ninja 500 drag time",
+        "ninja 500 0-100 india",
+        "ninja 500 vs r3"
+      ],
       "intent": "informational",
       "estimated_volume_india": "med",
-      "seasonality": "fresh — Indian launch May 2026",
+      "seasonality": "fresh \u2014 Indian launch May 2026",
       "current_rank": null,
       "target_url": "/bikes",
       "action": "monitor",
@@ -153,9 +204,14 @@
     },
     {
       "keyword": "aprilia tuono 660 factory quarter mile",
-      "secondary": ["tuono 660 factory drag time", "tuono 660 factory vs base", "tuono 660 factory 0-100 india", "aprilia tuono 660 factory price india"],
+      "secondary": [
+        "tuono 660 factory drag time",
+        "tuono 660 factory vs base",
+        "tuono 660 factory 0-100 india",
+        "aprilia tuono 660 factory price india"
+      ],
       "intent": "informational",
-      "estimated_volume_india": "low (unverified) — global volume med",
+      "estimated_volume_india": "low (unverified) \u2014 global volume med",
       "current_rank": null,
       "target_url": "/bikes",
       "action": "create-blog-later",
@@ -164,10 +220,15 @@
     },
     {
       "keyword": "royal enfield bullet 350 quarter mile",
-      "secondary": ["bullet 350 j platform drag time", "bullet 350 vs classic 350", "bullet 350 top speed india", "bullet 350 0-100"],
+      "secondary": [
+        "bullet 350 j platform drag time",
+        "bullet 350 vs classic 350",
+        "bullet 350 top speed india",
+        "bullet 350 0-100"
+      ],
       "intent": "informational",
       "estimated_volume_india": "high",
-      "seasonality": "evergreen — RE Bullet is India's longest-continuously-produced motorcycle nameplate",
+      "seasonality": "evergreen \u2014 RE Bullet is India's longest-continuously-produced motorcycle nameplate",
       "current_rank": null,
       "target_url": "/bikes",
       "action": "create-blog-later",
@@ -176,7 +237,12 @@
     },
     {
       "keyword": "first principles motorcycle drag simulation",
-      "secondary": ["physics based bike ET predictor", "rk4 motorcycle simulator", "validated quarter mile model", "motorcycle physics simulation accuracy"],
+      "secondary": [
+        "physics based bike ET predictor",
+        "rk4 motorcycle simulator",
+        "validated quarter mile model",
+        "motorcycle physics simulation accuracy"
+      ],
       "intent": "informational/methodology",
       "estimated_volume_india": "low (global, academic)",
       "current_rank": null,
@@ -187,7 +253,12 @@
     },
     {
       "keyword": "interceptor 650 vs continental gt 650 quarter mile",
-      "secondary": ["interceptor vs gt 650 drag", "650 twins comparison india", "interceptor 650 faster than gt 650", "re 650 twins acceleration"],
+      "secondary": [
+        "interceptor vs gt 650 drag",
+        "650 twins comparison india",
+        "interceptor 650 faster than gt 650",
+        "re 650 twins acceleration"
+      ],
       "intent": "comparison",
       "estimated_volume_india": "med-high",
       "current_rank": null,
@@ -198,7 +269,12 @@
     },
     {
       "keyword": "mmrt chennai drag racing motorcycle",
-      "secondary": ["madras motor race track quarter mile", "mmrt drag strip events", "chennai motorcycle drag racing", "tamil nadu drag racing"],
+      "secondary": [
+        "madras motor race track quarter mile",
+        "mmrt drag strip events",
+        "chennai motorcycle drag racing",
+        "tamil nadu drag racing"
+      ],
       "intent": "transactional/local",
       "estimated_volume_india": "med",
       "seasonality": "spikes around MMRT event weekends (typically Nov-Feb dry season)",
@@ -210,33 +286,47 @@
     },
     {
       "keyword": "royal enfield hunter 350 quarter mile",
-      "secondary": ["hunter 350 drag time", "hunter 350 vs classic 350", "hunter 350 top speed india", "hunter 350 0-100"],
+      "secondary": [
+        "hunter 350 drag time",
+        "hunter 350 vs classic 350",
+        "hunter 350 top speed india",
+        "hunter 350 0-100"
+      ],
       "intent": "informational",
       "estimated_volume_india": "high",
-      "seasonality": "evergreen — best-selling Hunter 350 is RE's youth-targeted growth driver",
+      "seasonality": "evergreen \u2014 best-selling Hunter 350 is RE's youth-targeted growth driver",
       "current_rank": null,
       "target_url": "/bikes",
       "action": "create-blog-later",
       "priority": 19,
-      "rationale": "Hunter 350 is the smallest + lightest J-platform sibling (less mass than Classic/Bullet/Meteor). Pairs naturally with the Bullet 350 J-platform escalation (priority 15) — single blog post can cover all 4 J-platform siblings with the same physics framework. RE's Hunter 350 sales reportedly outpace the other three J-platform variants combined; high-volume target with low SERP competition (top results are BikeWale/Drivespark spec pages, no physics breakdowns)."
+      "rationale": "Hunter 350 is the smallest + lightest J-platform sibling (less mass than Classic/Bullet/Meteor). Pairs naturally with the Bullet 350 J-platform escalation (priority 15) \u2014 single blog post can cover all 4 J-platform siblings with the same physics framework. RE's Hunter 350 sales reportedly outpace the other three J-platform variants combined; high-volume target with low SERP competition (top results are BikeWale/Drivespark spec pages, no physics breakdowns)."
     },
     {
       "keyword": "motorcycle physics simulator validation methodology",
-      "secondary": ["how accurate is motoquant", "drag simulator benchmark methodology", "weighted benchmark validation motorcycle"],
+      "secondary": [
+        "how accurate is motoquant",
+        "drag simulator benchmark methodology",
+        "weighted benchmark validation motorcycle"
+      ],
       "intent": "academic/authority",
       "estimated_volume_india": "low (global, niche)",
       "current_rank": null,
       "target_url": "/docs/validation",
       "action": "tweak-existing",
       "priority": 20,
-      "rationale": "Existing /docs/validation page documents 74-bike benchmark sweep + per-cluster bias + open calibration gaps. Until this 4th pass, page had no keywords array on metadata — invisible to query expansion. Tweaked keywords to capture authority-signal queries from journalists, tuning shops, and academic searchers. Low volume but very high citation potential for backlink building when motoring publications fact-check claims."
+      "rationale": "Existing /docs/validation page documents 74-bike benchmark sweep + per-cluster bias + open calibration gaps. Until this 4th pass, page had no keywords array on metadata \u2014 invisible to query expansion. Tweaked keywords to capture authority-signal queries from journalists, tuning shops, and academic searchers. Low volume but very high citation potential for backlink building when motoring publications fact-check claims."
     },
     {
       "keyword": "cfmoto 800nk quarter mile",
-      "secondary": ["cfmoto 800nk drag time", "cfmoto 800nk 0-100 india", "cfmoto 800nk vs duke 790", "cfmoto 800nk price india"],
+      "secondary": [
+        "cfmoto 800nk drag time",
+        "cfmoto 800nk 0-100 india",
+        "cfmoto 800nk vs duke 790",
+        "cfmoto 800nk price india"
+      ],
       "intent": "informational",
       "estimated_volume_india": "med",
-      "seasonality": "fresh — Indian launch + 2026 model year refresh; year-1 search demand climbing",
+      "seasonality": "fresh \u2014 Indian launch + 2026 model year refresh; year-1 search demand climbing",
       "current_rank": null,
       "target_url": "/bikes",
       "action": "create-blog-later",
@@ -245,79 +335,96 @@
     },
     {
       "keyword": "yamaha mt-125 quarter mile",
-      "secondary": ["mt-125 drag time", "mt-125 0-100", "mt-125 vs r15", "mt-125 india price"],
+      "secondary": [
+        "mt-125 drag time",
+        "mt-125 0-100",
+        "mt-125 vs r15",
+        "mt-125 india price"
+      ],
       "intent": "informational",
       "estimated_volume_india": "low (India) / med (Europe + SE Asia)",
       "current_rank": null,
-      "target_url": "/bikes",
-      "action": "monitor",
+      "target_url": "/blog/yamaha-mt-125-xsr125-platform-physics",
+      "action": "done",
       "priority": 22,
-      "rationale": "WebSearch 2026-05-18 confirmed: top SERP is MCN + autosnout + Bennetts + BikesWiki spec pages. Only fragmented owner-report 0-60 data (one report ~9.8s). MotoStatz / FastestLaps both have empty quarter-mile cells for MT-125. Yamaha MT-125 was added to motoquant.db today (2026-05-18 catalog-expansion). 124cc single, 14.75 bhp @ 10000 rpm, 11.5 Nm @ 8000 rpm, 142 kg. Not officially sold in India (CBU import only) so Indian volume is low, but Europe + Philippines + Thailand search volume is meaningful. Monitor — defer blog post until either Indian launch confirmed or a EU/SEA-targeted content track opens."
+      "rationale": "WebSearch 2026-05-18 confirmed: top SERP is MCN + autosnout + Bennetts + BikesWiki spec pages. Only fragmented owner-report 0-60 data (one report ~9.8s). MotoStatz / FastestLaps both have empty quarter-mile cells for MT-125. Yamaha MT-125 was added to motoquant.db today (2026-05-18 catalog-expansion). 124cc single, 14.75 bhp @ 10000 rpm, 11.5 Nm @ 8000 rpm, 142 kg. Not officially sold in India (CBU import only) so Indian volume is low, but Europe + Philippines + Thailand search volume is meaningful. Monitor \u2014 defer blog post until either Indian launch confirmed or a EU/SEA-targeted content track opens.",
+      "notes": "Blog post landed 2026-05-18 \u2014 MT-125 + XSR125 pair-post covers both targets in one URL. Captures primary keyword (yamaha mt-125 quarter mile) + secondary cluster (mt-125 vs xsr125 / mt-125 drag time / mt-125 0-100). 10-min read, ~2,400 body words. Cluster bias ~+0.4-0.6s slow (other/unknown 125cc class), relative MT-125-vs-XSR125 ordering preserved."
     },
     {
       "keyword": "yamaha xsr125 drag time",
-      "secondary": ["xsr125 quarter mile", "xsr125 vs mt-125", "xsr125 0-100", "xsr125 india launch"],
+      "secondary": [
+        "xsr125 quarter mile",
+        "xsr125 vs mt-125",
+        "xsr125 0-100",
+        "xsr125 india launch"
+      ],
       "intent": "informational",
       "estimated_volume_india": "low (India) / med (Europe + SE Asia)",
       "current_rank": null,
-      "target_url": "/bikes",
-      "action": "monitor",
+      "target_url": "/blog/yamaha-mt-125-xsr125-platform-physics",
+      "action": "done",
       "priority": 23,
-      "rationale": "Yamaha XSR125 was added to motoquant.db today (2026-05-18 catalog-expansion). Shares the MT-125 engine + chassis with neo-retro styling (10 kg heavier). MotorcycleNews coverage is heavy but quarter-mile data is virtually nonexistent across SERP. Pairs naturally with the MT-125 entry — single blog post comparing the platform-mate pair (XSR125 vs MT-125) could capture both queries with one URL. Defer until a EU/SEA content track is opened — Indian launch unconfirmed."
+      "rationale": "Yamaha XSR125 was added to motoquant.db today (2026-05-18 catalog-expansion). Shares the MT-125 engine + chassis with neo-retro styling (10 kg heavier). MotorcycleNews coverage is heavy but quarter-mile data is virtually nonexistent across SERP. Pairs naturally with the MT-125 entry \u2014 single blog post comparing the platform-mate pair (XSR125 vs MT-125) could capture both queries with one URL. Defer until a EU/SEA content track is opened \u2014 Indian launch unconfirmed.",
+      "notes": "Blog post landed 2026-05-18 \u2014 same URL as priority 22 (MT-125 + XSR125 platform-pair-post). Captures secondary cluster including xsr125 vs mt-125 / xsr125 0-100 / yamaha 125 sport heritage drag."
     },
     {
       "keyword": "motorcycle quarter mile database india",
-      "secondary": ["bike specs database india", "indian motorcycle quarter mile catalog", "motorcycle ET catalog india", "bike performance database india"],
+      "secondary": [
+        "bike specs database india",
+        "indian motorcycle quarter mile catalog",
+        "motorcycle ET catalog india",
+        "bike performance database india"
+      ],
       "intent": "navigational/informational",
       "estimated_volume_india": "med",
       "current_rank": null,
       "target_url": "/bikes",
       "action": "tweak-existing",
       "priority": 24,
-      "rationale": "The /bikes page H1 was previously 'Bikes Catalog' — minimal SEO weight. Refreshed this pass to 'Motorcycle Specs & Quarter-Mile Database' with a subheader naming Hayabusa, ZX-14R, R15 V4, KTM Duke 390, Pulsar NS200, Apache RTR, Interceptor 650 and the Indian + SE Asia drag-strip framing. Subheader also adds a contextual internal link to /simulator anchored on 'quarter-mile calculator' (the simulator's primary keyword). Database-pattern queries are a strong entity-signal play; BikeWale and BikeDekho dominate the spec-database SERP but neither indexes quarter-mile ET — that's MotoQuant's defensible angle."
+      "rationale": "The /bikes page H1 was previously 'Bikes Catalog' \u2014 minimal SEO weight. Refreshed this pass to 'Motorcycle Specs & Quarter-Mile Database' with a subheader naming Hayabusa, ZX-14R, R15 V4, KTM Duke 390, Pulsar NS200, Apache RTR, Interceptor 650 and the Indian + SE Asia drag-strip framing. Subheader also adds a contextual internal link to /simulator anchored on 'quarter-mile calculator' (the simulator's primary keyword). Database-pattern queries are a strong entity-signal play; BikeWale and BikeDekho dominate the spec-database SERP but neither indexes quarter-mile ET \u2014 that's MotoQuant's defensible angle."
     }
   ],
   "escalations": [
     {
       "severity": "opportunistic",
       "to": "marketing-content",
-      "topic": "KTM Duke 390 vs RC 390 — stock quarter-mile, mod ladder, cost-per-tenth in INR",
+      "topic": "KTM Duke 390 vs RC 390 \u2014 stock quarter-mile, mod ladder, cost-per-tenth in INR",
       "rationale": "Fast Track Racing India's 11.342s record at ASEAN Superfast is news hook. Bridge to MotoQuant catalog (Duke 390, RC 390 both modelled)."
     },
     {
       "severity": "opportunistic",
       "to": "marketing-content",
-      "topic": "Pulsar NS400Z quarter-mile physics — and why a stock RC 390 might still beat it",
+      "topic": "Pulsar NS400Z quarter-mile physics \u2014 and why a stock RC 390 might still beat it",
       "rationale": "NS400Z is Bajaj's first 400cc, year-1 launch with maximum search volume. Counter-intuitive headline (RC 390 vs NS400Z) is link-bait gold. Both bikes in catalog. Use parts ROI to show mod budget to close any gap."
     },
     {
       "severity": "opportunistic",
       "to": "marketing-content",
-      "topic": "Valley Run 2026 Summer Edition — physics-based predictions vs actual results",
+      "topic": "Valley Run 2026 Summer Edition \u2014 physics-based predictions vs actual results",
       "rationale": "Post-event recap. Pull MotoQuant Aamby Valley sims for top entries (Hayabusa, ZX-14R, ZX-10R, Ninja H2) and overlay against published times. Backlinks bait from Autocar India / evoindia."
     },
     {
       "severity": "opportunistic",
       "to": "marketing-content",
-      "topic": "Best mods for KTM RC 390 in India — cost-per-tenth of every popular upgrade",
+      "topic": "Best mods for KTM RC 390 in India \u2014 cost-per-tenth of every popular upgrade",
       "rationale": "Top results are listicles without ROI math. MotoQuant's parts ROI engine is the unique differentiator. High commercial intent + buyer-funnel placement."
     },
     {
       "severity": "opportunistic",
       "to": "marketing-content",
-      "topic": "Aprilia Tuono 660 Factory quarter-mile physics — Factory vs base, and is the +5 hp + 16T sprocket actually worth it in India?",
-      "rationale": "Tuono 660 Factory added to catalog today. MotoQuant predicts 11.017s vs AccelerationTimes 11.33s. The Factory trim premium (lithium battery, ECU map, 16T) is a narrow but well-documented price-vs-performance question — perfect for cost-per-tenth analysis. SERP has only spec pages."
+      "topic": "Aprilia Tuono 660 Factory quarter-mile physics \u2014 Factory vs base, and is the +5 hp + 16T sprocket actually worth it in India?",
+      "rationale": "Tuono 660 Factory added to catalog today. MotoQuant predicts 11.017s vs AccelerationTimes 11.33s. The Factory trim premium (lithium battery, ECU map, 16T) is a narrow but well-documented price-vs-performance question \u2014 perfect for cost-per-tenth analysis. SERP has only spec pages."
     },
     {
       "severity": "opportunistic",
       "to": "marketing-content",
-      "topic": "RE Bullet 350 J-platform quarter-mile physics — the slowest bike in our catalog has the most interesting story",
-      "rationale": "Bullet 350 J-platform added to catalog today at 17.735s. Highest-recognition Indian motorcycle nameplate (continuous production since 1932). The J-platform 4-bike sibling comparison (Bullet 350, Classic 350, Hunter 350, Meteor 350) is a self-contained physics story — same engine, four chassis, four ETs. Indian SEO gold."
+      "topic": "RE Bullet 350 J-platform quarter-mile physics \u2014 the slowest bike in our catalog has the most interesting story",
+      "rationale": "Bullet 350 J-platform added to catalog today at 17.735s. Highest-recognition Indian motorcycle nameplate (continuous production since 1932). The J-platform 4-bike sibling comparison (Bullet 350, Classic 350, Hunter 350, Meteor 350) is a self-contained physics story \u2014 same engine, four chassis, four ETs. Indian SEO gold."
     },
     {
       "severity": "opportunistic",
       "to": "marketing-content",
-      "topic": "How to tune for MMRT Chennai — sea-level + high humidity vs Aamby Valley's 1050 m + low humidity",
+      "topic": "How to tune for MMRT Chennai \u2014 sea-level + high humidity vs Aamby Valley's 1050 m + low humidity",
       "rationale": "MMRT is the #2 most-searched Indian drag venue. The Aamby Valley November tuning post is the most-cited venue piece on MotoQuant; an MMRT counterpart would close out the obvious symmetry and let us cross-link both pieces for venue-prep buyer-intent."
     }
   ]

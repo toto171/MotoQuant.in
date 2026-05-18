@@ -22,6 +22,11 @@ export const metadata = {
     "weighted benchmark validation methodology",
     "motorcycle physics simulation accuracy",
     "physics based bike ET predictor",
+    "motorcycle 60 ft time physics",
+    "drag racing launch rpm modelling",
+    "motorcycle clutch slip phase simulation",
+    "indian dyno chart rear wheel power",
+    "motorcycle drag racing wheelie physics",
   ],
   openGraph: {
     title: TITLE,

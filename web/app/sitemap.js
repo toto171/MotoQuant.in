@@ -80,6 +80,12 @@ export default async function sitemap() {
       priority: 0.82,
     },
     {
+      url: `${SITE_URL}/blog/yamaha-mt-125-xsr125-platform-physics`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.78,
+    },
+    {
       url: `${SITE_URL}/blog/how-a-2-stroke-expansion-chamber-actually-works`,
       lastModified: now,
       changeFrequency: "monthly",
