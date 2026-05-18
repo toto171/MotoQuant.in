@@ -35,6 +35,10 @@ export const metadata = {
     'kawasaki zx-4r quarter mile',
     'yamaha xsr900 gp drag',
     'pulsar n125 quarter mile',
+    'kawasaki ninja 400 quarter mile india',
+    'honda hornet 2.0 drag',
+    'honda cbr150r drag time',
+    'kari motor speedway drag',
   ],
   openGraph: {
     title: TITLE,

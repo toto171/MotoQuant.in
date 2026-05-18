@@ -5,10 +5,14 @@ import SiteFooter from "../../components/SiteFooter";
 export const metadata = {
   title: "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
   description:
-    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
+    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Yamaha XSR900 GP vs MT-09, Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
   keywords: [
     "motorcycle drag racing blog",
     "indian motorcycle quarter mile",
+    "yamaha xsr900 gp vs mt-09",
+    "xsr900 gp quarter mile",
+    "mt-09 quarter mile time",
+    "yamaha cp3 triple drag",
     "kawasaki ninja zx-4r quarter mile",
     "zx-4r vs zx-4rr",
     "zx-4r india price",
@@ -31,6 +35,15 @@ export const metadata = {
 };
 
 const POSTS = [
+  {
+    slug: "yamaha-xsr900-gp-vs-mt-09-quarter-mile-physics",
+    title: "Yamaha XSR900 GP vs MT-09: Where the Heritage Tax Is Paid",
+    date: "2026-05-18",
+    readTime: "11 min",
+    tags: ["Yamaha", "XSR900 GP", "MT-09", "CP3 triple", "comparison"],
+    excerpt:
+      "MotoQuant simulates the Yamaha XSR900 GP at 10.98s and the MT-09 at 10.86s — same 890cc CP3 triple, same 6-speed cassette, 0.12s apart. Spec-by-spec physics breakdown of where the mass lives, why the fairing pays it back at top speed, and the Indian CBU pricing math.",
+  },
   {
     slug: "kawasaki-ninja-zx-4r-quarter-mile-physics",
     title: "Kawasaki Ninja ZX-4R Quarter-Mile Physics: 400cc Inline-Four",

@@ -80,6 +80,12 @@ export default async function sitemap() {
       priority: 0.85,
     },
     {
+      url: `${SITE_URL}/blog/yamaha-xsr900-gp-vs-mt-09-quarter-mile-physics`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.82,
+    },
+    {
       url: `${SITE_URL}/blog/cfmoto-800nk-quarter-mile-physics`,
       lastModified: now,
       changeFrequency: "monthly",

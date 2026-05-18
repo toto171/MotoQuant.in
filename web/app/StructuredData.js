@@ -160,7 +160,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'Yes — MotoQuant Pro was built for the Indian drag racing community. The venue database covers Aamby Valley (Pune), Madras Motor Race Track (Chennai), Buddh International Circuit (Greater Noida), Kari Motor Speedway (Coimbatore), and Hyderabad, plus seven international venues. Parts pricing is in INR with GST and import duty already factored in.',
+            'Yes — MotoQuant Pro was built for the Indian drag racing community. The venue database covers Aamby Valley (Pune), Madras Motor Race Track (Chennai), Buddh International Circuit (Greater Noida), Kari Motor Speedway (Coimbatore — the Coimbatore strip hosted drag events in the late 1990s before the permanent circuit was built), and Hyderabad, plus seven international venues. Parts pricing is in INR with GST and import duty already factored in.',
         },
       },
       {

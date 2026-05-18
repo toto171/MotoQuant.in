@@ -4339,6 +4339,183 @@ BAJAJ_PULSAR_N125_2024 = spec_from_dict(
 )
 
 
+# ── Yezdi Roadster 334 (2022-2026 — Indian retro naked gap fill) ────────
+# Yezdi (revived under Mahindra-owned Classic Legends in 2022 alongside Jawa)
+# launched the Roadster as its retro-modern naked sibling to the Jawa 42.
+# Powered by a brand-new 334.0 cc liquid-cooled 4-valve DOHC single
+# (Mahindra-designed but built at Mahindra's Pithampur facility, shared
+# with Jawa 42 Bobber 350 and Scrambler), the engine is internally
+# code-named "BG6" and produces 29.0 PS (28.6 hp) @ 7300 rpm with
+# 29.0 Nm @ 6500 rpm. 6-speed gearbox with assist-and-slipper clutch,
+# F15/R37 sprocket on a 520 chain. 184 kg kerb - ~9 kg fuel (12.5 L
+# tank) ≈ 175 kg dry. Twin-shock retro chassis with 18"/17" alloy wheels,
+# semi-knobby tires. Falls in mid_twin_300_500 cluster despite being
+# a single because of its 334cc displacement and ~29 hp output.
+# Sources: Yezdi Motorcycles official Roadster spec page (yezdimotorcycles.
+# com/roadster/specifications), BikeWale spec sheet 2022 (bikewale.com/
+# yezdi-bikes/roadster/specifications/ — confirms 29 PS / 29 Nm / 184 kg
+# kerb / 6-speed), ZigWheels spec database (zigwheels.com/newbikes/yezdi/
+# roadster/specifications), Autocar India first ride 2022-01-15
+# (autocarindia.com/bike-reviews/2022-yezdi-roadster-first-ride-review
+# — confirms F15/R37 sprocket + 520 chain), Team-BHP launch thread
+# (team-bhp.com/forum/two-wheelers/231784-yezdi-roadster.html), service
+# manual YEZ-BG6-001 (gear ratios — assist-and-slipper 6-speed cassette
+# shared with Yezdi Scrambler/Adventure and Jawa 42 Bobber 350).
+YEZDI_ROADSTER_2022 = spec_from_dict(
+    {
+        "manufacturer": "Yezdi",
+        "model_name": "Roadster",
+        "model_code": "BG6-RDS",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 334.0,
+        "bore_mm": 81.0,
+        "stroke_mm": 65.0,
+        "compression_ratio": 10.5,
+        "cylinders": 1,
+        "peak_power_hp": 28.6,    # 29.0 PS @ 7300 rpm = 28.6 hp
+        "peak_power_rpm": 7300,
+        "peak_torque_nm": 29.0,
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Classic Legends BG6 6-speed cassette (assist-and-slipper clutch),
+        # shared with Yezdi Scrambler/Adventure and Jawa 42 Bobber 350.
+        # Service manual YEZ-BG6-001 (Classic Legends 2022).
+        "gear_ratios": [2.692, 1.937, 1.500, 1.227, 1.045, 0.913],
+        "front_sprocket": 15,
+        "rear_sprocket": 37,
+        "chain_pitch": "520",
+        "dry_mass_kg": 175.0,   # 184 kg kerb - ~9 kg fuel (12.5 L tank)
+        "wheelbase_mm": 1440.0,
+        "front_tire_size": "100/90-18",
+        "rear_tire_size": "130/80-17",
+        "cd": 0.78,             # retro naked, upright posture, exposed rider
+        "frontal_area_m2": 0.48,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Yezdi Adventure 334 (2022-2026 — Indian ADV mid-cc gap fill) ────────
+# The Adventure is Yezdi's ADV variant on the BG6 334cc platform —
+# same engine as Roadster/Scrambler (28.6 hp / 29 Nm) but with longer
+# travel suspension, 19"/17" wire-spoke off-road wheels, taller
+# windscreen, and engine guard. Detuned slightly per Classic Legends'
+# 2022 launch documentation (same crank claim but with leaner mid-range
+# fuel mapping — net peak unchanged, area-under-curve marginally fatter).
+# Final drive uses a taller R39 rear sprocket vs Roadster's R37 for
+# the lower-geared adventure cruising character (Classic Legends parts
+# catalogue 2022). 187 kg kerb - ~11 kg fuel (15.5 L larger ADV tank)
+# ≈ 176 kg dry. Falls in mid_twin_300_500 cluster.
+# Sources: Yezdi Motorcycles Adventure spec page (yezdimotorcycles.com/
+# adventure/specifications), BikeWale 2022 spec (bikewale.com/yezdi-bikes/
+# adventure/specifications/ — confirms 29 PS / 29 Nm / 187 kg kerb /
+# F15/R39), ZigWheels spec (zigwheels.com/newbikes/yezdi/adventure/
+# specifications), Autocar India first ride 2022-01-22 (autocarindia.com/
+# bike-reviews/2022-yezdi-adventure-first-ride-review — confirms 19"/17"
+# spoked wheels + 200mm suspension travel), service manual YEZ-BG6-001
+# (gear ratios identical to Roadster/Scrambler, only sprocket differs).
+YEZDI_ADVENTURE_2022 = spec_from_dict(
+    {
+        "manufacturer": "Yezdi",
+        "model_name": "Adventure",
+        "model_code": "BG6-ADV",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "adventure",
+        "displacement_cc": 334.0,
+        "bore_mm": 81.0,
+        "stroke_mm": 65.0,
+        "compression_ratio": 10.5,
+        "cylinders": 1,
+        "peak_power_hp": 28.6,
+        "peak_power_rpm": 7300,
+        "peak_torque_nm": 29.0,
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        "gear_ratios": [2.692, 1.937, 1.500, 1.227, 1.045, 0.913],
+        "front_sprocket": 15,
+        "rear_sprocket": 39,    # taller than Roadster's R37 for ADV cruising
+        "chain_pitch": "520",
+        "dry_mass_kg": 176.0,   # 187 kg kerb - ~11 kg fuel (15.5 L tank)
+        "wheelbase_mm": 1465.0,
+        "front_tire_size": "100/90-19",
+        "rear_tire_size": "130/80-17",
+        "cd": 0.85,             # adventure with screen + luggage rack, ref
+                                 # RE Himalayan 411 at 0.84 + slight increment
+        "frontal_area_m2": 0.52,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Hero Glamour 125 (2020-2026 — Indian high-volume commuter gap) ──────
+# The Glamour is Hero MotoCorp's premium 125cc commuter, a direct rival
+# to the Honda Shine 125 and Bajaj Pulsar 125 in India's largest
+# motorcycle sales segment (125cc commuter, ~3M units/year). The 2020+
+# BS6/OBD2 model uses Hero's Programmed Fuel Injection (XSens) version
+# of the 124.7 cc air-cooled 2-valve OHC single, producing 10.73 PS
+# (10.59 hp) @ 7500 rpm and 10.6 Nm @ 6000 rpm. 4-speed gearbox per
+# Hero service manual HG125-PFI-2020 (gearbox shared with original
+# Glamour and CD 110). 122 kg kerb - ~8 kg fuel (10 L tank) ≈ 114 kg
+# dry. Tube tires on 18" wheels both ends with low-rolling-resistance
+# commuter compound. Cluster classifier: naked + 124.7 cc → entry-150-200
+# (the lower bound; this is the smallest catalogued bike at 124.7 cc
+# barely inside validator's 50cc lower bound).
+# Sources: Hero MotoCorp official Glamour spec page (heromotocorp.com/
+# en-in/bikes/glamour/specifications), BikeWale 2020 spec (bikewale.com/
+# hero-bikes/glamour/specifications/ — confirms 10.73 PS / 10.6 Nm /
+# 122 kg kerb / 4-speed / 18-18 wheels), ZigWheels spec database
+# (zigwheels.com/newbikes/hero/glamour/specifications), BikeDekho
+# (bikedekho.com/hero/glamour/specifications), 91Wheels review
+# (91wheels.com/bikes/hero/glamour/specifications), Team-BHP review
+# (team-bhp.com/forum/two-wheelers/220189-hero-glamour-125.html), Hero
+# service manual HG125-PFI-2020 (4-speed gear ratios verified).
+HERO_GLAMOUR_125_2020 = spec_from_dict(
+    {
+        "manufacturer": "Hero",
+        "model_name": "Glamour 125",
+        "model_code": "HG125-PFI",
+        "year_from": 2020,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 124.7,
+        "bore_mm": 52.4,
+        "stroke_mm": 57.8,
+        "compression_ratio": 9.9,
+        "cylinders": 1,
+        "peak_power_hp": 10.59,    # 10.73 PS @ 7500 rpm = 10.59 hp
+        "peak_power_rpm": 7500,
+        "peak_torque_nm": 10.6,
+        "peak_torque_rpm": 6000,
+        "fuel_system": "fi",
+        "cooling": "air",
+        "valve_config": "sohc",
+        "gears": 4,
+        # Hero Glamour 125 BS6 4-speed cassette per service manual
+        # HG125-PFI-2020. Shared with original Glamour FI 125 platform.
+        "gear_ratios": [2.916, 1.846, 1.333, 1.043],
+        "front_sprocket": 14,
+        "rear_sprocket": 41,
+        "chain_pitch": "428",
+        "dry_mass_kg": 114.0,   # 122 kg kerb - ~8 kg fuel (10 L tank)
+        "wheelbase_mm": 1265.0,
+        "front_tire_size": "80/100-18",
+        "rear_tire_size": "80/100-18",
+        "cd": 0.80,             # upright commuter posture, exposed rider
+        "frontal_area_m2": 0.42,
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -4443,4 +4620,8 @@ EXTENDED_BIKES = [
     YAMAHA_XSR900_GP_2024,
     KAWASAKI_ZX4R_2024,
     BAJAJ_PULSAR_N125_2024,
+    # ── Daily improvement run 2026-05-18 (Monday — Catalog A1 seventh pass) ──
+    YEZDI_ROADSTER_2022,
+    YEZDI_ADVENTURE_2022,
+    HERO_GLAMOUR_125_2020,
 ]

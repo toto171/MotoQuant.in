@@ -27,6 +27,9 @@ export const metadata = {
     "yamaha mt-125 quarter mile",
     "yamaha xsr125 drag",
     "drag racing parts knapsack optimiser",
+    "hornet 2.0 vs ns200 drag",
+    "kawasaki ninja 400 india drag",
+    "ecu flash cost india motorcycle",
   ],
   openGraph: {
     title: TITLE,
