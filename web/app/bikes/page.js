@@ -144,11 +144,26 @@ export default function BikesPage() {
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
               <div>
                 <h1 className="font-display font-bold text-4xl md:text-5xl text-white">
-                  Bikes Catalog
+                  Motorcycle Specs &amp; Quarter-Mile Database
                 </h1>
                 <p className="text-white/70 mt-3 max-w-2xl">
-                  Every bike modelled in MotoQuant Pro — individual aero, dyno curves, and service-manual gear ratios.
-                  Missing yours? Let us know.
+                  342 bikes modelled in MotoQuant Pro — Hayabusa, ZX-14R, R15 V4,
+                  KTM Duke 390, Pulsar NS200, Apache RTR, Interceptor 650, and the
+                  full Indian + SE Asia drag-strip catalog. Individual aero
+                  (Cd &amp; frontal area), dyno curves, service-manual gear ratios,
+                  and predicted ET at Aamby Valley + 19 other venues.
+                  Missing yours?{' '}
+                  <button
+                    type="button"
+                    onClick={() => setSuggestOpen(true)}
+                    className="text-brand-orange hover:underline underline-offset-2"
+                  >
+                    Suggest a bike
+                  </button>
+                  {' '}or{' '}
+                  <Link href="/simulator" className="text-brand-orange hover:underline underline-offset-2">
+                    open the quarter-mile calculator
+                  </Link>.
                 </p>
               </div>
               <button

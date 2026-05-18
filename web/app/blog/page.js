@@ -5,10 +5,12 @@ import SiteFooter from "../../components/SiteFooter";
 export const metadata = {
   title: "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
   description:
-    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: KTM Duke 390 vs RC 390, Pulsar NS400Z vs RC 390, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
+    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
   keywords: [
     "motorcycle drag racing blog",
     "indian motorcycle quarter mile",
+    "cfmoto 800nk quarter mile",
+    "cfmoto 800nk india price",
     "ktm duke 390 vs rc 390",
     "pulsar ns400z vs rc 390",
     "continental gt 650 drag",
@@ -23,6 +25,15 @@ export const metadata = {
 };
 
 const POSTS = [
+  {
+    slug: "cfmoto-800nk-quarter-mile-physics",
+    title: "CFMoto 800NK Quarter-Mile Physics: A KTM 790 Duke in Disguise",
+    date: "2026-05-18",
+    readTime: "11 min",
+    tags: ["CFMoto", "800NK", "LC8c", "Indian mid-cc", "physics"],
+    excerpt:
+      "MotoQuant simulates the CFMoto 800NK at 11.386s and 203.2 km/h trap. The KTM-derived LC8c parallel twin sits at ₹9-12 lakh in India — the cheapest LC8c-engined bike on the market. Physics breakdown of where the tenths live and why a 95 hp parallel twin runs an 11.4.",
+  },
   {
     slug: "ktm-duke-390-vs-rc-390-quarter-mile-physics",
     title: "KTM Duke 390 vs RC 390: Quarter-Mile Physics at Aamby Valley",

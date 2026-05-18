@@ -20,6 +20,13 @@ export const metadata = {
     "pacejka tire model motorcycle",
     "motorcycle physics simulator features",
     "bayesian build optimiser",
+    "a vs b motorcycle compare",
+    "motorcycle quarter mile compare tool",
+    "indian motorcycle drag tool features",
+    "cfmoto 800nk simulator",
+    "yamaha mt-125 quarter mile",
+    "yamaha xsr125 drag",
+    "drag racing parts knapsack optimiser",
   ],
   openGraph: {
     title: TITLE,

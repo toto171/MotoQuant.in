@@ -20,6 +20,12 @@ export const metadata = {
     "parts roi calculator subscription",
     "dragy software subscription india",
     "quarter mile calculator pro",
+    "motoquant studio plan",
+    "motoquant free plan",
+    "motorcycle drag tool gst invoice",
+    "indian motorcycle simulator subscription",
+    "drag racing app monthly plan india",
+    "free quarter mile simulator india",
   ],
   openGraph: {
     title: TITLE,

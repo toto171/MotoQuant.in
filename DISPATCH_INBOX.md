@@ -107,6 +107,21 @@ add bike Aprilia Tuono V4 1100 Factory 2024
 investigate why ZX-25R sim trap is 5 km/h slow
 ```
 
+## INSTRUCTION — 2026-05-18 — [opportunistic] marketing-content blog post for whichever of {CFMoto 800NK, Yamaha MT-125, Yamaha XSR125} the parallel run does NOT pick tonight
+[opportunistic]
+
+**Context:** SEO agent fifth pass 2026-05-18 confirmed via WebSearch that all three of today's new catalog additions (CFMoto 800NK, Yamaha MT-125, Yamaha XSR125) have SERP gaps for quarter-mile ET data — top results are spec/dealer pages with empty ET cells on AccelerationTimes / FastestLaps / MotoStatz. The parallel marketing-content agent tonight is writing ONE blog post for one of the three (the agent prompt suggests CFMoto 800NK).
+
+**Ask:** On the next marketing-content rotation slot (Tuesday 2026-05-19), write the OTHER two as a single pair-post (or two posts if they merit independent coverage):
+
+1. **CFMoto 800NK** (if not picked tonight) — 799cc parallel-twin, 100 hp, 81 Nm, 6-speed, ~205 kg wet. Indian launch is the news hook. Frame as "China-import platform vs Triumph Trident 660 / Yamaha MT-07 / Kawasaki Z650 in India — does the cost-per-hp win translate to cost-per-tenth?". Trident 660, MT-07, Z650 are all already in catalog.
+
+2. **Yamaha MT-125 + XSR125 platform pair** — 124cc single, 14.75 bhp @ 10000 rpm, 11.5 Nm @ 8000 rpm. MT-125 142 kg, XSR125 ~152 kg (10 kg neo-retro tax). Frame as "platform-mate physics: same engine, different chassis, different ET" — a self-contained narrative that captures both 'mt-125 quarter mile' + 'xsr125 quarter mile' queries with one URL. Not officially India-launched (CBU only) but EU + SEA volume is meaningful.
+
+**Reference:** `data/seo_opportunities.json` priority 21 (800NK), 22 (MT-125), 23 (XSR125).
+
+**Expected deliverable:** 1-2 blog post(s) under `web/app/blog/`, sitemap updated, blog index updated, SEO opportunities priorities 21-23 marked `action: done`.
+
 ## INSTRUCTION — 2026-05-17 — [urgent] Railway API offline: production 404 "Application not found"
 [urgent] [blocking]
 

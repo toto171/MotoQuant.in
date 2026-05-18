@@ -1,7 +1,7 @@
 {
   "_updated": "2026-05-18",
-  "_run": "fourth-pass-late-evening",
-  "_methodology": "Four passes today. Morning + afternoon + evening: 18 keyword opportunities + 7 escalations logged via prior 3 passes (see seo_audit_2026-05-18.md). Fourth pass (this run): WebSearch was not invoked live (marketing-content agent has the WebSearch quota tonight on parallel blog work); volume qualitative inference only. Pass scope intentionally narrow — coordinate-by-file-ownership: marketing-content owns web/app/blog/<NEW>/*, sitemap.js, blog/page.js. SEO agent picks NON-blog targets. Added 2 new opportunities (RE Hunter 350 J-platform sibling, motorcycle physics methodology authority signal via /docs/physics). On-page tweaks land on /docs/physics, /docs/validation, /about, /whitepaper — all of which had 0-3 keyword metadata entries pre-pass. All unverified rank+volume flagged honestly.",
+  "_run": "fifth-pass-night",
+  "_methodology": "Five passes today. Passes 1-4 logged 20 opportunities + 7 escalations across the simulator, bikes, features, pricing, about, whitepaper, docs/physics, and docs/validation surfaces (see reports/seo_audit_2026-05-18.md and seo_audit_2026-05-18_fourth_pass.md). Fifth pass (this run): 2 live WebSearch probes (CFMoto 800NK + Yamaha MT-125 quarter mile) confirmed SERP gaps. Today's catalog-expansion agent shipped 3 new bikes (Yamaha XSR125, Yamaha MT-125, CFMoto 800NK) and the marketing-content agent is writing one blog post for one of them. SEO agent's fifth-pass scope: surface the other two as keyword opportunities, expand /features and /pricing keyword arrays to capture A-vs-B comparison and new-bike-adjacent intents, and add a real H1/subheader keyword improvement to /bikes (which previously had a barely-SEO-relevant 'Bikes Catalog' H1). Coordinate-by-file-ownership: did NOT touch web/app/blog/* or web/app/sitemap.js — marketing-content owns those.",
   "_competitor_signal": "Generic 'quarter mile calculator' tools (xcceleration, ajdesigner, robrobinette, speedmaster) all use simple power-to-weight formulas, no per-bike physics. MotoQuant's defensible angle: 'physics-based, validated against 90 published benchmarks, 342 bikes pre-configured, cost-per-tenth ROI in INR'.",
   "opportunities": [
     {
@@ -230,6 +230,51 @@
       "action": "tweak-existing",
       "priority": 20,
       "rationale": "Existing /docs/validation page documents 74-bike benchmark sweep + per-cluster bias + open calibration gaps. Until this 4th pass, page had no keywords array on metadata — invisible to query expansion. Tweaked keywords to capture authority-signal queries from journalists, tuning shops, and academic searchers. Low volume but very high citation potential for backlink building when motoring publications fact-check claims."
+    },
+    {
+      "keyword": "cfmoto 800nk quarter mile",
+      "secondary": ["cfmoto 800nk drag time", "cfmoto 800nk 0-100 india", "cfmoto 800nk vs duke 790", "cfmoto 800nk price india"],
+      "intent": "informational",
+      "estimated_volume_india": "med",
+      "seasonality": "fresh — Indian launch + 2026 model year refresh; year-1 search demand climbing",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "create-blog-later",
+      "priority": 21,
+      "rationale": "WebSearch 2026-05-18 confirmed: top SERP results are AccelerationTimes / FastestLaps / autoevolution spec pages, Indian retailer pages (MaxAbout, Fasterwheeler), and the CFMoto US dealer page. ZERO published quarter-mile ET data in the SERP. CFMoto 800NK was added to motoquant.db today (2026-05-18 catalog-expansion pass). 799cc parallel twin, 100 hp @ 9000 rpm, 81 Nm @ 8000 rpm, 6-speed. Mass-market China-import platform competing in the 700-800cc parallel-twin segment (MT-07, GSX-8S, Trident 660). Marketing-content agent is queued to write the blog post for one of the three new bikes today; if not 800NK, this entry escalates to next Tuesday's marketing-content slot."
+    },
+    {
+      "keyword": "yamaha mt-125 quarter mile",
+      "secondary": ["mt-125 drag time", "mt-125 0-100", "mt-125 vs r15", "mt-125 india price"],
+      "intent": "informational",
+      "estimated_volume_india": "low (India) / med (Europe + SE Asia)",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "monitor",
+      "priority": 22,
+      "rationale": "WebSearch 2026-05-18 confirmed: top SERP is MCN + autosnout + Bennetts + BikesWiki spec pages. Only fragmented owner-report 0-60 data (one report ~9.8s). MotoStatz / FastestLaps both have empty quarter-mile cells for MT-125. Yamaha MT-125 was added to motoquant.db today (2026-05-18 catalog-expansion). 124cc single, 14.75 bhp @ 10000 rpm, 11.5 Nm @ 8000 rpm, 142 kg. Not officially sold in India (CBU import only) so Indian volume is low, but Europe + Philippines + Thailand search volume is meaningful. Monitor — defer blog post until either Indian launch confirmed or a EU/SEA-targeted content track opens."
+    },
+    {
+      "keyword": "yamaha xsr125 drag time",
+      "secondary": ["xsr125 quarter mile", "xsr125 vs mt-125", "xsr125 0-100", "xsr125 india launch"],
+      "intent": "informational",
+      "estimated_volume_india": "low (India) / med (Europe + SE Asia)",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "monitor",
+      "priority": 23,
+      "rationale": "Yamaha XSR125 was added to motoquant.db today (2026-05-18 catalog-expansion). Shares the MT-125 engine + chassis with neo-retro styling (10 kg heavier). MotorcycleNews coverage is heavy but quarter-mile data is virtually nonexistent across SERP. Pairs naturally with the MT-125 entry — single blog post comparing the platform-mate pair (XSR125 vs MT-125) could capture both queries with one URL. Defer until a EU/SEA content track is opened — Indian launch unconfirmed."
+    },
+    {
+      "keyword": "motorcycle quarter mile database india",
+      "secondary": ["bike specs database india", "indian motorcycle quarter mile catalog", "motorcycle ET catalog india", "bike performance database india"],
+      "intent": "navigational/informational",
+      "estimated_volume_india": "med",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "tweak-existing",
+      "priority": 24,
+      "rationale": "The /bikes page H1 was previously 'Bikes Catalog' — minimal SEO weight. Refreshed this pass to 'Motorcycle Specs & Quarter-Mile Database' with a subheader naming Hayabusa, ZX-14R, R15 V4, KTM Duke 390, Pulsar NS200, Apache RTR, Interceptor 650 and the Indian + SE Asia drag-strip framing. Subheader also adds a contextual internal link to /simulator anchored on 'quarter-mile calculator' (the simulator's primary keyword). Database-pattern queries are a strong entity-signal play; BikeWale and BikeDekho dominate the spec-database SERP but neither indexes quarter-mile ET — that's MotoQuant's defensible angle."
     }
   ],
   "escalations": [

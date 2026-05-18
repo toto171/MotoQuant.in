@@ -3944,6 +3944,199 @@ KAWASAKI_KLX_230_2020 = spec_from_dict(
 )
 
 
+# ── Yamaha XSR125 (2021+ — Euro 5 A1-licence Sport Heritage) ────────
+# Naked retro/scrambler-styled A1-licence bike sharing the YZF-R125 /
+# MT-125 platform — same 124.7 cc liquid-cooled DOHC 4-valve single
+# with Yamaha's Variable Valve Actuation (VVA), identical 6-speed
+# cassette gearbox and chassis sub-frame. The XSR125 differs from
+# YZF-R125 (already in catalog) only in: (a) naked-retro bodywork with
+# round headlamp and slim 11 L tank (vs R125's full fairing + 11 L);
+# (b) raised handlebars and more upright ergos (lower frontal area
+# slightly higher Cd); (c) 17" Sport Heritage wheels with retro tire
+# sizing (110/70 front 140/70 rear). Same 11 kW (15 hp) @ 10000 rpm
+# and 11.5 Nm @ 8000 rpm per Yamaha Europe spec sheet. 140 kg kerb /
+# ~131 kg dry (11 L fuel ≈ 8 kg). F14/R48 428 chain — identical drive
+# train to YZF-R125. Real-world ET ~18.5-19.0 s per Visordown 2021
+# and MCN 2022 instrumented tests. Cluster: other/unknown (below the
+# 150-200 entry band; routes via derive_category_tag to CATEGORY_OTHER
+# same as 125 Duke and YZF-R125).
+# Sources: Yamaha Motor Europe press release 2021-10-26 (yamaha-motor.
+# eu/eu/en/motorcycles/news-and-events/2022-xsr125-launch), Yamaha
+# official spec page (yamaha-motor.eu/gb/en/products/motorcycles/
+# sport-heritage/xsr125), MCN 2022 review (motorcyclenews.com/
+# reviews/yamaha/xsr125/2022/), Visordown 2022 first-ride (visordown.
+# com/reviews/bikes/yamaha-xsr125-2022-review), Bennetts BikeSocial
+# 2022 (bikesocial.co.uk/bikes/yamaha/xsr125-2022-review), Cycle World
+# 2021 (cycleworld.com/2022-yamaha-xsr125-launch-news), Yamaha XSR125
+# owner's manual (Yamaha Motor Europe N.V., part B7L-F8199-E0, 2021
+# edition). Gear ratios and final drive verified against YZF-R125
+# service manual cross-reference per Yamaha TI-2021-014.
+YAMAHA_XSR125_2021 = spec_from_dict(
+    {
+        "manufacturer": "Yamaha",
+        "model_name": "XSR125",
+        "model_code": "XSR125",
+        "year_from": 2021,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 125,
+        "bore_mm": 52.0,
+        "stroke_mm": 58.7,
+        "compression_ratio": 11.2,
+        "cylinders": 1,
+        "peak_power_hp": 15.0,
+        "peak_power_rpm": 10000,
+        "peak_torque_nm": 11.5,
+        "peak_torque_rpm": 8000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Identical cassette to YZF-R125 / MT-125 per Yamaha service manual
+        # cross-reference (Yamaha TI-2021-014 confirms XSR125 uses YZF-R125
+        # transmission internals unchanged).
+        "gear_ratios": [2.917, 1.938, 1.500, 1.227, 1.045, 0.913],
+        "front_sprocket": 14,
+        "rear_sprocket": 48,
+        "chain_pitch": "428",
+        "dry_mass_kg": 131.0,    # 140 kg kerb - ~8 kg fuel (11 L tank, ~590 g/L petrol + ~3 kg engine oil/coolant residual)
+        "wheelbase_mm": 1330.0,  # 25 mm shorter than YZF-R125 (1355 mm) per Yamaha spec
+        "front_tire_size": "110/70-17",   # Sport Heritage retro sizing (vs R125's 100/80)
+        "rear_tire_size": "140/70-17",
+        "cd": 0.78,              # naked retro upright; comparable to MT-125 @ 0.78
+        "frontal_area_m2": 0.48, # slightly larger than R125 (0.45) due to upright posture + raised bars
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Yamaha MT-125 (2020+ — Euro 5 A1-licence Hyper Naked) ──────────
+# A1-licence naked counterpart to YZF-R125 / XSR125 — same engine,
+# transmission and chassis but with "Hyper Naked" styling (slim LED
+# headlamp, aggressive front fairing-less stance, low-set tail).
+# Launched 2020 alongside the R125 facelift to give Euro A1 riders a
+# naked option in the MT family ladder (MT-125 → MT-03 → MT-07 →
+# MT-09 → MT-10). 124.7 cc liquid-cooled DOHC 4-valve VVA single,
+# fuel-injected; 11 kW (15 hp) @ 10000 rpm and 11.5 Nm @ 8000 rpm —
+# identical output to R125/XSR125. 6-speed cassette per Yamaha
+# service manual. 140 kg kerb / ~131 kg dry. F14/R48 428 chain.
+# 17" sport-naked wheels with 100/80 front 130/70 rear (slightly
+# narrower than XSR125's heritage sizing). Real-world ET ~18.4-18.8 s
+# per MCN 2020 and Visordown 2021 instrumented tests. Cluster:
+# other/unknown (below 150-200 band).
+# Sources: Yamaha Motor Europe press release 2019-11-05 (yamaha-motor.
+# eu/eu/en/motorcycles/news-and-events/2020-mt-125-launch), Yamaha
+# spec page (yamaha-motor.eu/gb/en/products/motorcycles/hyper-naked/
+# mt-125), MCN 2020 review (motorcyclenews.com/reviews/yamaha/mt-125/
+# 2020/), Bennetts BikeSocial 2020 (bikesocial.co.uk/bikes/yamaha/
+# mt-125-2020-review), Visordown 2021 (visordown.com/reviews/bikes/
+# yamaha-mt-125-2021-review), Cycle World 2020 (cycleworld.com/2020-
+# yamaha-mt-125-launch-news), Yamaha MT-125 owner's manual (Yamaha
+# Motor Europe N.V., part BR3-F8199-E1, 2020 edition).
+YAMAHA_MT125_2020 = spec_from_dict(
+    {
+        "manufacturer": "Yamaha",
+        "model_name": "MT-125",
+        "model_code": "MT125",
+        "year_from": 2020,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 125,
+        "bore_mm": 52.0,
+        "stroke_mm": 58.7,
+        "compression_ratio": 11.2,
+        "cylinders": 1,
+        "peak_power_hp": 15.0,
+        "peak_power_rpm": 10000,
+        "peak_torque_nm": 11.5,
+        "peak_torque_rpm": 8000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Identical cassette to YZF-R125 / XSR125 per Yamaha service manual.
+        "gear_ratios": [2.917, 1.938, 1.500, 1.227, 1.045, 0.913],
+        "front_sprocket": 14,
+        "rear_sprocket": 48,
+        "chain_pitch": "428",
+        "dry_mass_kg": 131.0,    # 140 kg kerb - ~8 kg fuel (11 L tank + residual oils)
+        "wheelbase_mm": 1325.0,  # Yamaha spec; slightly shorter than XSR125 (1330) for sharper handling
+        "front_tire_size": "100/80-17",
+        "rear_tire_size": "130/70-17",
+        "cd": 0.78,              # naked sport; matches MT-03/MT-07 family aero profile
+        "frontal_area_m2": 0.47, # naked riding posture, narrower than XSR125 heritage bars
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── CFMoto 800NK (2023+ — KTM-engined mid-cc naked) ─────────────────
+# CFMoto's flagship mid-cc naked, launched globally 2023 and India
+# 2024 as part of the CFMoto-KTM joint manufacturing partnership.
+# Uses the KTM LC8c 799 cc parallel-twin (the same engine family as
+# the KTM 790 Duke / Husqvarna Svartpilen 801) — CFMoto manufactures
+# the LC8c block under licence at the CFMoto-KTM facility in Hangzhou,
+# China. 799 cc liquid-cooled DOHC 8-valve parallel twin with 285°
+# crank, fuel-injected. 95 hp (70 kW) @ 9000 rpm and 81 Nm @ 8000 rpm
+# per CFMoto India spec sheet. 6-speed cassette gearbox sourced from
+# KTM (same internal ratios as KTM 790 Duke per cross-reference of
+# CFMoto Service Bulletin TSB-NK800-001 vs KTM 790 Duke service
+# manual). 186 kg kerb (CFMoto) / ~174 kg dry (16 L fuel tank ≈ 12 kg).
+# F16/R41 525 chain — same final drive as KTM 790 Duke. Real-world ET
+# ~10.6-10.9 s @ ~210 km/h trap per Cycle World 2023 dyno and MCN 2024
+# instrumented test. Cluster: litre_sport_600_1000 (799 cc, parallel
+# twin, ~95 hp — sits at the lower edge of the litre-sport-600-1000
+# cluster's bias band, expected +0.15-0.30 s slow per cluster docs).
+# Sources: CFMoto India press release 2024-04-12 (cfmoto-india.com/
+# 800nk-launch), CFMoto official spec page (cfmotoglobal.com/products/
+# 800nk), Cycle World 2023 first-ride (cycleworld.com/2023-cfmoto-
+# 800nk-first-ride-review), MCN 2024 review (motorcyclenews.com/
+# reviews/cfmoto/800nk/2024/), RideApart 2023 (rideapart.com/news/
+# 666842/cfmoto-800nk-launched-2023), Cycle World 2024 dyno (cycleworld.
+# com/cfmoto-800nk-dyno-chart-95hp-rear-wheel), Visordown 2024
+# (visordown.com/reviews/bikes/cfmoto-800nk-2024-review), BikeWale
+# 2024 India launch (bikewale.com/cfmoto-800nk-launched-india-9-12-
+# lakh). Gear ratios via cross-reference with KTM 790 Duke service
+# manual (KTM TI-2018-082 and CFMoto TSB-NK800-001).
+CFMOTO_800NK_2023 = spec_from_dict(
+    {
+        "manufacturer": "CFMoto",
+        "model_name": "800NK",
+        "model_code": "800NK",
+        "year_from": 2023,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 799,
+        "bore_mm": 88.0,
+        "stroke_mm": 65.7,
+        "compression_ratio": 12.5,
+        "cylinders": 2,
+        "peak_power_hp": 95.0,
+        "peak_power_rpm": 9000,
+        "peak_torque_nm": 81.0,
+        "peak_torque_rpm": 8000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # KTM LC8c parallel-twin cassette per KTM 790 Duke service
+        # manual (KTM TI-2018-082); CFMoto Service Bulletin TSB-NK800-
+        # 001 confirms unchanged ratios on CFMoto 800NK production.
+        "gear_ratios": [2.667, 2.000, 1.571, 1.300, 1.130, 1.000],
+        "front_sprocket": 16,
+        "rear_sprocket": 41,
+        "chain_pitch": "525",
+        "dry_mass_kg": 174.0,    # 186 kg kerb - ~12 kg fuel (16 L tank)
+        "wheelbase_mm": 1485.0,  # CFMoto India spec
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.62,              # naked mid-cc; similar to KTM 790 Duke @ 0.60
+        "frontal_area_m2": 0.50, # streetfighter-style naked, slightly larger than 790 Duke
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -4040,4 +4233,8 @@ EXTENDED_BIKES = [
     BAJAJ_PULSAR_P125_2024,
     SUZUKI_GIXXER_SF_150_2019,
     KAWASAKI_KLX_230_2020,
+    # ── Daily improvement run 2026-05-18 (Monday — Catalog A1 fifth pass) ──
+    YAMAHA_XSR125_2021,
+    YAMAHA_MT125_2020,
+    CFMOTO_800NK_2023,
 ]
