@@ -76,8 +76,10 @@ export function BuildPage() {
     if (fastPreview) {
       // Power boost % from absolute hp delta — assumes stock peak is in
       // the bike summary; if not present, treat 1 hp delta as ~1 % which
-      // is the right order of magnitude across the catalog.
-      const stockHp = (bike as unknown as { peak_power_hp?: number }).peak_power_hp ?? 100;
+      // is the right order of magnitude across the catalog. `BikeSummary`
+      // declares `peak_power_hp: number | null`, so a direct read with
+      // `?? 100` fallback is correctly typed without an assertion.
+      const stockHp = bike.peak_power_hp ?? 100;
       const powerBoostPct = stockHp > 0 ? (previewDeltas.powerBoost / stockHp) * 100 : 0;
       surrogate.mutate(
         {

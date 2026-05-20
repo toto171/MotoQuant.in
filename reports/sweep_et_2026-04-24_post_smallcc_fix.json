@@ -1,5 +1,5 @@
 {
- "took_s": 154.07976293563843,
+ "took_s": 154.85441637039185,
  "results": [
   {
    "kind": "reference",
@@ -7212,6 +7212,38 @@
    "sim_et": 22.42788750693154,
    "sim_trap_kmh": 98.74794047754332,
    "elapsed_s": 22.428000000004428
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "BMW",
+   "model": "M 1000 XR",
+   "year_from": 2024,
+   "year_to": 2026,
+   "disp_cc": 999,
+   "power_hp": 210.0,
+   "stroke_type": 4,
+   "category": "sport",
+   "cluster": "litre-sport-195+",
+   "finished": true,
+   "sim_et": 10.22406981650796,
+   "sim_trap_kmh": 252.84871276412488,
+   "elapsed_s": 10.224999999999772
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Kawasaki",
+   "model": "Ninja 1000SX",
+   "year_from": 2020,
+   "year_to": 2026,
+   "disp_cc": 1043,
+   "power_hp": 140.0,
+   "stroke_type": 4,
+   "category": "sport",
+   "cluster": "litre-sport-600-1000",
+   "finished": true,
+   "sim_et": 10.723483029767312,
+   "sim_trap_kmh": 226.78295695875374,
+   "elapsed_s": 10.723999999999496
   }
  ],
  "summary": {
@@ -7220,7 +7252,7 @@
    "R1": 10.285930649053409,
    "Hayabusa": 10.471201919790467
   },
-  "total_bikes": 426,
+  "total_bikes": 428,
   "errors": 0,
   "dnf": 0,
   "clusters": {
@@ -7231,8 +7263,8 @@
     "stats": {}
    },
    "litre-sport-600-1000": {
-    "bikes": 118,
-    "finished": 118,
+    "bikes": 119,
+    "finished": 119,
     "dnf": 0,
     "stats": {
      "n": 29,
@@ -7246,8 +7278,8 @@
     }
    },
    "litre-sport-195+": {
-    "bikes": 35,
-    "finished": 35,
+    "bikes": 36,
+    "finished": 36,
     "dnf": 0,
     "stats": {
      "n": 25,

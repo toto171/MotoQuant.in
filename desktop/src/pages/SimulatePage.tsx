@@ -8,7 +8,7 @@ import { OfflineBanner } from "@/components/OfflineBanner";
 import { SkeletonStatTile, SkeletonChartGrid } from "@/components/Skeleton";
 import { useSettings } from "@/contexts/SettingsContext";
 import { toast } from "@/store/toastStore";
-import type { BikeSummary } from "@/types/api";
+import type { BikeSummary, Splits } from "@/types/api";
 import { ChatBox } from "@/components/ChatBox";
 import type { ChatBikeSuggestion } from "@/types/api";
 
@@ -17,7 +17,7 @@ async function exportSimPdf(data: {
   bike: { manufacturer: string; model: string };
   et: number;
   trap: number;
-  splits: Record<string, number>;
+  splits: Splits;
   config: {
     peak_power_hp: number;
     peak_torque_nm: number;
@@ -210,7 +210,7 @@ export function SimulatePage() {
         bike: result.bike,
         et: result.et_quarter_s,
         trap: result.trap_speed_kmh,
-        splits: result.splits as unknown as Record<string, number>,
+        splits: result.splits,
         config: result.config,
       });
       toast.success("PDF exported");

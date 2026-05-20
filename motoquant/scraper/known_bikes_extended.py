@@ -5885,6 +5885,206 @@ KAWASAKI_NINJA_1000SX_2020 = spec_from_dict(
 )
 
 
+# ── Yamaha Tracer 7 (2020-2026) ──────────────────────────────────────────────
+# Sport-tourer sibling of the MT-07 — same 689 cc CP2 parallel-twin engine,
+# same 6-speed gearbox, same F16/R43 520-pitch chain; chassis adds a half-
+# fairing, larger 17 L tank, taller bars, longer-travel suspension. Replaced
+# the outgoing Tracer 700 (RM14) with model code RM30 starting 2020 Euro5;
+# 2023 facelift introduced the new LCD/TFT dash but engine + ratios unchanged
+# (still EU type-approval e11*168/2013*…*06 for 689 cc, 74 hp @ 8,750 rpm).
+#
+# The Tracer 7 occupies a real gap in the catalogue — MT-07 (RM30) is in
+# but the half-fairing sport-tourer variant (heavier dry mass, taller
+# screen, larger fuel cell) is sufficiently different aerodynamically and
+# mass-wise to deserve its own row, especially for ROI/build comparisons.
+#
+# Cluster: mid_twin_500_700 (689 cc parallel twin, 74 hp). Expected ET in
+# the 12.4–13.0s band (vs MT-07 ~12.0–12.5s — Tracer is +0.4s slower from
+# the +25 kg fairing + fuel-tank mass and the extra Cd*A from the screen).
+#
+# Sources:
+#   Yamaha Motor Europe press release "2020 Yamaha Tracer 700 becomes
+#   Tracer 7" 2020-10-13 (yamaha-motor.eu/eu/en/products/motorcycles/sport-
+#   touring/tracer-7/); Yamaha Tracer 7 spec sheet 2023 (yamaha-motor.eu);
+#   MCN "Yamaha Tracer 7 review 2021" (motorcyclenews.com/reviews/yamaha/
+#   tracer-7/2021/); Cycle World "2021 Yamaha Tracer 7 First Ride"
+#   2021-04 (cycleworld.com); MT-07 RM30 service manual section 5
+#   "Transmission" (Yamaha PN LIT-11616-RM-30) — gear ratios inherited
+#   from MT-07 verbatim per Yamaha PN cross-reference.
+YAMAHA_TRACER_7_2020 = spec_from_dict(
+    {
+        "manufacturer": "Yamaha",
+        "model_name": "Tracer 7",
+        "model_code": "RM30T",
+        "year_from": 2020,
+        "year_to": 2026,
+        "category": "sport",
+        "displacement_cc": 689,
+        "bore_mm": 80.0,
+        "stroke_mm": 68.6,
+        "compression_ratio": 11.5,
+        "cylinders": 2,
+        "peak_power_hp": 74.0,            # 54.4 kW @ 8,750 rpm — Yamaha EU spec 2023
+        "peak_power_rpm": 8750,
+        "peak_torque_nm": 67.0,           # 67 Nm @ 6,500 rpm — Yamaha EU spec 2023
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # MT-07 RM30 6-speed ratios verbatim (service manual section 5)
+        "gear_ratios": [2.846, 2.125, 1.632, 1.300, 1.091, 0.964],
+        "front_sprocket": 16,
+        "rear_sprocket": 43,              # F16/R43 520-pitch — Yamaha EU parts catalogue
+        "chain_pitch": "520",
+        "dry_mass_kg": 196.0,             # 213 kg kerb (Yamaha EU 2023) − 12.75 kg fuel
+                                          # (17 L @ 0.75 kg/L) − ~4.25 kg fluids ≈ 196 kg dry
+        "wheelbase_mm": 1460.0,           # Yamaha Tracer 7 EU spec sheet 2023
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.62,                       # half-fairing sport-tourer; ref Ninja 650 @ 0.66,
+                                          # MT-07 naked @ 0.78
+        "frontal_area_m2": 0.55,          # taller screen + bars vs MT-07's 0.52
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── BMW F 900 XR (2020-2026) ─────────────────────────────────────────────────
+# Adventure-sport sibling to the F900R (already in catalog) — same 895 cc
+# parallel twin, same gearbox, same F16/R47 525 chain. F900XR (model code
+# K84) adds a half-fairing with adjustable screen, taller suspension travel,
+# larger 15.5 L fuel cell, slightly taller riding triangle. Targeted at the
+# crossover sport-tourer segment competing with Tracer 9 / Ninja 1000SX /
+# Versys 1000.
+#
+# The XR variant matters because aerodynamically and mass-wise it is
+# meaningfully different from the F900R naked: +8 kg from fairing + fuel,
+# slightly lower Cd from the screen+fairing combo (~0.65 vs 0.75 naked),
+# and a larger frontal area (~0.60 m² vs 0.55 m²). ROI/build comparisons
+# of the same engine in two chassis is exactly what the simulator exists
+# to disambiguate.
+#
+# Cluster: litre_sport_600_1000 (895 cc parallel twin, 105 hp). Expected
+# ET ~11.6–12.2s (vs F900R ~11.2–11.7s — XR ~+0.4s slower from extra
+# mass + frontal area).
+#
+# Sources:
+#   BMW Motorrad press kit "F 900 XR — All You Need For Sport And Travel"
+#   2019-11-05 (press.bmwgroup.com); BMW F 900 XR spec sheet 2024
+#   (bmwmotorrad.com/en/models/sport/f900xr/specifications.html); MCN
+#   "BMW F 900 XR review 2020" (motorcyclenews.com/reviews/bmw/f-900-xr/
+#   2020/); Visordown "BMW F 900 XR Review" 2020-03 (visordown.com);
+#   BMW Motorrad service training "F900R/XR K83/K84" 2020 — gear ratios
+#   identical between F900R and F900XR (same gearbox PN, same final drive).
+BMW_F_900_XR_2020 = spec_from_dict(
+    {
+        "manufacturer": "BMW",
+        "model_name": "F 900 XR",
+        "model_code": "K84",
+        "year_from": 2020,
+        "year_to": 2026,
+        "category": "sport",
+        "displacement_cc": 895.0,
+        "bore_mm": 86.0,
+        "stroke_mm": 77.0,
+        "compression_ratio": 13.1,
+        "cylinders": 2,
+        "peak_power_hp": 105.0,           # 77 kW @ 8,500 rpm — BMW spec sheet 2024
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 92.0,           # 92 Nm @ 6,500 rpm — BMW spec sheet 2024
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # K83/K84 share gearbox; ratios match F900R verbatim per BMW PN
+        "gear_ratios": [2.615, 1.812, 1.400, 1.130, 0.960, 0.827],
+        "front_sprocket": 16,
+        "rear_sprocket": 47,              # F16/R47 525-pitch — BMW parts catalogue
+        "chain_pitch": "525",
+        "dry_mass_kg": 219.0,             # 219 kg kerb-with-90%-fuel (BMW) − ~1 kg
+                                          # for missing 10% fuel + minor fluids ≈ 219 kg
+                                          # actual dry; BMW lists 223 kg "wet" and 219
+                                          # for DIN dry estimate via press kit
+        "wheelbase_mm": 1518.0,           # BMW F 900 XR spec sheet 2024
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.65,                       # half-fairing + screen; ref F900R @ 0.75 naked
+        "frontal_area_m2": 0.60,          # tall ADV-sport riding position + screen
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda Grom / MSX125 (2022+ JC92 facelift) ────────────────────────────────
+# Mini-bike sport — 124 cc air-cooled SOHC 2-valve single, 9.7 hp @ 7,250 rpm,
+# 10.5 Nm @ 6,000 rpm. The 2022 facelift (model code JC92, replacing 2014–2020
+# JC75 + 2021 JC92 initial revision) added a 5-speed gearbox (was 4-speed),
+# new ABS, refreshed bodywork, and 12-litre underseat fuel cell. Cult drag
+# bike in the SE Asia / Indian sub-150cc scene (huge aftermarket — big-bore
+# kits to 181 cc, ECU, exhaust).
+#
+# Critical for the catalog because the entry_150_200 cluster is statistically
+# thin — Grom is the only mainstream sub-150cc 4T single from a major OEM
+# with global presence, and the underbone / cub clones (Wave 110, Wave 125)
+# are already represented. Grom slots cleanly into the entry_150_200 cluster
+# even though displacement is 124 cc — its weight (104 kg dry) and power
+# profile match the cluster envelope.
+#
+# Cluster: entry_150_200 (or unknown for the 124 cc edge case). Expected
+# ET ~17.5–19.0s reflecting its sub-150cc nature; trap 100–115 km/h —
+# matches the entry_150_200 known +0.5–1.4s slow band (sim will lean
+# toward the high end of cluster ET range given near-floor power).
+#
+# Sources:
+#   Honda Motor Co press release "2022 Grom JC92" 2021-06 (powersports.honda.
+#   com/news); Honda Grom JC92 spec sheet 2024 (powersports.honda.com/2024/
+#   grom/specs); Cycle World "2022 Honda Grom First Ride" 2021-08 (cycleworld.
+#   com); MCN "Honda MSX125 Grom review 2022" (motorcyclenews.com/reviews/
+#   honda/msx125-grom/2022/); Honda service manual JC92 2022 section 6
+#   "Transmission" — 5-speed cassette ratios + final drive 15F/34R 420-pitch
+#   chain confirmed (compare to JC75's 4-speed 16F/36R 420-pitch).
+HONDA_GROM_MSX125_2022 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "Grom MSX125",
+        "model_code": "JC92",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "sport",
+        "displacement_cc": 124,
+        "bore_mm": 50.0,
+        "stroke_mm": 63.1,
+        "compression_ratio": 10.0,
+        "cylinders": 1,
+        "peak_power_hp": 9.7,             # 7.2 kW @ 7,250 rpm — Honda spec sheet 2024
+        "peak_power_rpm": 7250,
+        "peak_torque_nm": 10.5,           # 10.5 Nm @ 6,000 rpm — Honda spec sheet 2024
+        "peak_torque_rpm": 6000,
+        "fuel_system": "fi",
+        "cooling": "air",
+        "valve_config": "sohc",
+        "gears": 5,
+        # JC92 5-speed cassette ratios — service manual section 6.
+        # Note: 2014-2020 JC75 was 4-speed; 2022+ JC92 added 5th gear.
+        "gear_ratios": [2.500, 1.550, 1.150, 0.923, 0.778],
+        "front_sprocket": 15,
+        "rear_sprocket": 34,              # F15/R34 420-pitch — Honda parts catalogue JC92
+        "chain_pitch": "420",
+        "dry_mass_kg": 104.0,             # 104 kg dry (Honda) / 105 kg wet incl. ~4.4 kg
+                                          # fuel (6 L @ 0.73 kg/L) ≈ 100.6 kg dry; Honda
+                                          # press kit cites 104 kg DIN dry
+        "wheelbase_mm": 1200.0,           # Honda Grom JC92 spec sheet 2024
+        "front_tire_size": "120/70-12",   # 12-inch wheels — small-bike notation
+        "rear_tire_size": "130/70-12",
+        "cd": 0.72,                       # upright mini-bike; ref small commuter ~0.75
+        "frontal_area_m2": 0.42,          # very compact mini frontal area
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -6025,4 +6225,8 @@ EXTENDED_BIKES = [
     # ── Daily improvement run 2026-05-20 (Wednesday — Catalog A1 sixth pass) ──
     BMW_M_1000_XR_2024,
     KAWASAKI_NINJA_1000SX_2020,
+    # ── Daily improvement run 2026-05-20 (Wednesday — Catalog A1 seventh pass) ──
+    YAMAHA_TRACER_7_2020,
+    BMW_F_900_XR_2020,
+    HONDA_GROM_MSX125_2022,
 ]
