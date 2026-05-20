@@ -35,14 +35,14 @@ Price range: ₹18,000–₹2,50,000 depending on brand/material tier.
 """
 
 
+from motoquant.database.seed_catalogs import _create_parts_batch
+
+
 def seed_adv_cruiser_exhausts(db) -> int:
     """
     Seeds adventure & cruiser exhaust parts.
     Returns count of parts created.
     """
-    import logging
-
-    logger = logging.getLogger(__name__)
     parts = []
 
     # ══════════════════════════════════════════════════════════════
@@ -1080,27 +1080,4 @@ def seed_adv_cruiser_exhausts(db) -> int:
     # CREATE PARTS IN DATABASE
     # ══════════════════════════════════════════════════════════════
 
-    count = 0
-    for part in parts:
-        try:
-            db.parts.create(
-                category_name=part["category"],
-                brand=part["brand"],
-                model_name=part["model_name"],
-                part_number=part.get("part_number"),
-                specifications=part.get("specs"),
-                param_deltas=part.get("param_deltas"),
-                fitment_rules=part.get("fitment_rules"),
-                price_inr=part.get("price_inr"),
-                fitment_notes=part.get("fitment_rules", {}).get("description"),
-                mrp_inr=part.get("price_inr"),
-            )
-            count += 1
-            logger.info(f"✓ Created: {part['brand']} {part['model_name']}")
-        except Exception as e:
-            logger.error(
-                f"✗ Failed to create {part['brand']} {part['model_name']}: {e}"
-            )
-
-    logger.info(f"\n📦 ADV/Cruiser Exhausts: {count} parts seeded")
-    return count
+    return _create_parts_batch(db, parts, label="ADV/Cruiser Exhausts")

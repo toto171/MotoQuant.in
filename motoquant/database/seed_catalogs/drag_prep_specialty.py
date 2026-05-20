@@ -52,14 +52,14 @@ Physics deltas
 """
 
 
+from motoquant.database.seed_catalogs import _create_parts_batch
+
+
 def seed_drag_prep_specialty(db) -> int:
     """
     Seeds drag-prep specialty parts (swingarm extensions + drag chains).
     Returns count of parts successfully created.
     """
-    import logging
-
-    logger = logging.getLogger(__name__)
     parts = []
 
     # SWINGARM EXTENSIONS (4 parts)
@@ -326,32 +326,4 @@ def seed_drag_prep_specialty(db) -> int:
     )
 
     # CREATE PARTS IN DATABASE
-    count = 0
-    for part in parts:
-        try:
-            db.parts.create(
-                category_name=part["category"],
-                brand=part["brand"],
-                model_name=part["model_name"],
-                part_number=part.get("part_number"),
-                specifications=part.get("specs"),
-                param_deltas=part.get("param_deltas"),
-                param_overrides=part.get("param_overrides"),
-                param_multipliers=part.get("param_multipliers"),
-                fitment_rules=part.get("fitment_rules"),
-                price_inr=part.get("price_inr"),
-                fitment_notes=part.get("fitment_rules", {}).get("description"),
-                mrp_inr=part.get("price_inr"),
-                availability=part.get("availability", "order"),
-                retailer=part.get("retailer"),
-                estimated_delivery_days=part.get("delivery_days"),
-            )
-            count += 1
-            logger.info(f"OK Created: {part['brand']} {part['model_name']}")
-        except Exception as e:
-            logger.error(
-                f"FAIL Failed to create {part['brand']} {part['model_name']}: {e}"
-            )
-
-    logger.info(f"Drag-Prep Specialty Parts: {count} parts seeded")
-    return count
+    return _create_parts_batch(db, parts, label="Drag-Prep Specialty Parts")
