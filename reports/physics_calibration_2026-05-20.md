@@ -99,3 +99,35 @@ The `entry_150_200` cluster mean|Δ| of 1.483s is dominated by Apache RTR 200 4V
 ```
 perf(physics): raise two_stroke max_engine_decel_rads2 380→800 rad/s² (-72ms cluster mean|Δ|)
 ```
+
+---
+
+## Second pass (same day, physics-calibration agent re-run)
+
+**Target investigated:** `mid_twin_300_500` (N=15, mean|Δ|=0.630s, bias=-0.172s)
+
+**Finding:** No category-level knob produces >50ms cluster improvement without causing regression.
+
+**Key discovery:** The category_profile knobs (`over_clutch_factor`, `parasitic_mult`) have **zero effect** on KTM 390 Duke and similar 30-60hp bikes because:
+1. These bikes use a synthetic dyno curve with `is_at_wheel=True`
+2. `physics.py:477-483` skips the parasitic subtraction when `is_at_wheel=True`
+3. The `over_clutch_factor` only fires during clutch-slip phase; these bikes lock up rapidly
+
+**Torque curve factor test (1.05→0.97 for 30-60hp band):**
+```
+                          curr Δ    new Δ    Verdict
+KTM Duke 390 (2017)      -0.577   -0.253   Improves
+KTM 390 Duke (2023)      -0.809   -0.483   Improves
+Yamaha YZF-R3            -0.020   +0.428   REGRESSES (in top-10, was rank 6)
+Ninja 400                +1.044   +1.267   Regresses
+```
+The YZF-R3 regression violates the "never degrade top-10" rule. Cannot ship.
+
+**Root cause:** KTM 390 Duke spec dry_mass=149kg appears too low (real kerb weight ~163kg). 
+This is a catalog data issue, not a physics model issue.
+
+**Escalation queued:**
+- `[research]` Ninja 400 benchmark 12.98s (MotoStatz 2018): A 44.8hp parallel twin doing 12.98s is implausibly faster than KTM 390 (43.5hp) at 14.0s and R3 (42hp) at 14.0s — both verified. Suspect this is a modified-bike or incorrect match.
+- `[catalog]` KTM 390 Duke dry_mass: update 149→163kg (add 8kg fluids/equipment, matches KTM service manual kerb weight 163kg). Would move KTM 390 Duke delta from -0.577 to approximately -0.33s without touching physics.
+
+**Result: no changes shipped in this pass.**

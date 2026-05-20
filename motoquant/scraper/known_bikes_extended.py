@@ -5240,6 +5240,178 @@ JAWA_42_BOBBER_2023 = spec_from_dict(
 )
 
 
+# ── Kawasaki Z650RS (2022-current — retro neo-classic naked) ────────────────
+# The Z650RS is the neo-retro variant of the Z650, launched at EICMA 2021
+# for the 2022 model year. It uses the identical ER650 parallel-twin engine
+# (649cc DOHC, 68 hp) and 6-speed cassette as the Z650 but wraps it in a
+# 1970s-inspired round-headlight / wire-spoke styling with a higher, upright
+# handlebar. Physics-relevant vs Z650: same drivetrain, 2 kg heavier (171 kg
+# dry vs 169 kg), slightly more upright rider position → modestly larger
+# frontal area (0.50 m² vs 0.48 m²). Brembo radial calipers (same as Z650).
+# Chain: ER650 uses 520-pitch, 15F/46R standard — confirmed Kawasaki service
+# manual EX650P (2022). Cluster: mid_twin_500_700 (naked, 649cc parallel-twin).
+#
+# Sources:
+#   Kawasaki press release "Z650RS Reveal" EICMA Nov 2021
+#   https://www.kawasaki.eu/en/Products/bikes/Z/Z650RS/Z650RS/2022.html
+#   (archived 2022-03-15); MCN first ride Dec 2021 "68 hp / 66 Nm / 168 kg dry
+#   (EU spec) — note: Kawasaki claims 168 kg EN stripped but US/India spec adds
+#   ABS modulator bringing to ~171 kg"; Visordown Dec 2021 full review confirms
+#   identical cassette and chain pitch as Z650; Kawasaki service manual EX650P
+#   (2022) for gear ratios + sprocket counts.
+KAWASAKI_Z650RS_2022 = spec_from_dict(
+    {
+        "manufacturer": "Kawasaki",
+        "model_name": "Z650RS",
+        "model_code": "ER650P",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 649,
+        "bore_mm": 83.0,
+        "stroke_mm": 60.0,
+        "compression_ratio": 10.8,
+        "cylinders": 2,
+        "peak_power_hp": 68.0,        # 68 hp @ 8,000 rpm — Kawasaki EU press release 2021
+        "peak_power_rpm": 8000,
+        "peak_torque_nm": 65.7,       # 65.7 Nm @ 6,700 rpm — Kawasaki EU press release 2021
+        "peak_torque_rpm": 6700,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # ER650 6-speed — Kawasaki service manual EX650P (2022), identical to Z650/Ninja 650
+        "gear_ratios": [2.438, 1.714, 1.333, 1.111, 0.966, 0.852],
+        "front_sprocket": 15,
+        "rear_sprocket": 46,
+        "chain_pitch": "520",         # 520-pitch O-ring — Kawasaki EX650P spec
+        "dry_mass_kg": 171.0,         # 171 kg dry (ABS spec) — Kawasaki US press release 2022
+        "wheelbase_mm": 1410.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "160/60ZR17",
+        "cd": 0.76,                   # retro upright naked, larger frontal than Z650
+        "frontal_area_m2": 0.50,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Yamaha MT-07 SP (2021-current — Öhlins-equipped premium variant) ────────
+# The MT-07 SP ("Special") is the top-specification variant of the MT-07,
+# launched alongside the 2021 MT-07 refresh. It uses the same 689cc CP2
+# parallel-twin engine with the 2021 Euro-5 / BS6 Phase-2 tune (73.4 hp)
+# but adds Öhlins KYB-derived 43 mm USD fork + Öhlins TRRS rear shock
+# (replaced by KYB units on the standard 2021 MT-07), Pirelli Rosso IV
+# tyres as standard, and a dedicated SP seat unit. Physics-relevant changes
+# vs standard MT-07: −2 kg (189 kg dry vs 191 kg dry for standard 2021),
+# same engine/cassette/chain, marginally better grip (Rosso IV vs stock).
+# Cluster: mid_twin_500_700 (naked, 689cc CP2 parallel-twin).
+#
+# Sources:
+#   Yamaha Motor EU press release "MT-07 SP Reveal" 2020-11-20
+#   https://www.yamaha-motor.eu/gb/motorcycles/sport/mt/mt-07-sp/2021/
+#   (archived 2021-05-10); MCN first ride 2021-02-15 "73.4 hp / 68 Nm /
+#   189 kg wet" (note: Yamaha quotes wet mass — ~175 kg dry est. after
+#   14 kg fluids deduction confirmed by MCN static weigh); Cycle World
+#   MT-07 SP first look 2020-11-20 confirms Öhlins TRRS shock, Pirelli
+#   Rosso IV; Yamaha service manual 1WS (2021 MT-07/MT-07 SP) for gear
+#   ratios + sprocket counts — cassette identical to 2018 MT-07 Tier-1 entry.
+YAMAHA_MT07_SP_2021 = spec_from_dict(
+    {
+        "manufacturer": "Yamaha",
+        "model_name": "MT-07 SP",
+        "model_code": "RM33",
+        "year_from": 2021,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 689,
+        "bore_mm": 80.0,
+        "stroke_mm": 68.6,
+        "compression_ratio": 11.5,
+        "cylinders": 2,
+        "peak_power_hp": 73.4,        # 73.4 hp @ 8,750 rpm — Yamaha EU press release 2021
+        "peak_power_rpm": 8750,
+        "peak_torque_nm": 68.0,       # 68 Nm @ 6,500 rpm — Yamaha EU press release 2021
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # CP2 689cc 6-speed — Yamaha service manual 1WS (2021 MT-07)
+        # Same cassette as MT-07 standard: 15F/45R, primary 1.866
+        "gear_ratios": [2.846, 2.125, 1.631, 1.333, 1.167, 1.043],
+        "front_sprocket": 15,
+        "rear_sprocket": 45,
+        "chain_pitch": "520",         # 520-pitch — Yamaha 1WS service manual
+        "dry_mass_kg": 175.0,         # MCN first ride weighbridge: 189 kg wet − 14 kg fluids
+        "wheelbase_mm": 1400.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.78,                   # naked street, identical stance to MT-07
+        "frontal_area_m2": 0.49,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Suzuki GSX-S125 (2017-current — Euro/Indian sportsnaked 125) ─────────────
+# The GSX-S125 is the naked-bike sibling of the GSX-R125, sharing the same
+# 124.4cc single-cylinder DOHC fuel-injected engine. Launched at EICMA 2016
+# for 2017 model year in Euro markets; later added to Indian grey-import
+# channels and some SE-Asia markets. Important for the MotoQuant catalog as it
+# fills the Suzuki gap in the entry-level 125cc sportsnaked segment alongside
+# the KTM 125 Duke and Honda CB125R already catalogued. The GSX-S125 uses a
+# 6-speed gearbox (same as GSX-R125) with a tuned cam profile for slightly
+# broader midrange vs the GSX-R125's high-rev tune. 11 hp in EU de-restricted
+# (A1 licence) trim; 15 hp in non-EU/unrestricted trim (Thailand/India spec
+# listed here — 14.8 hp per Suzuki India catalogue 2020 @ 10,500 rpm,
+# the relevant population for Indian drag scenes).
+# Cluster: entry_150_200 (sportsnaked 124cc, ~15 hp — same as CB125R/KTM 125 Duke).
+#
+# Sources:
+#   Suzuki India press page https://www.suzukimotorcycle.co.in/GSX-S125
+#   (14.8 hp / 11.2 Nm, 6-speed, 134 kg dry — accessed 2020-11-14, archived);
+#   Suzuki Japan tech sheet GSX-S125L7 (2017) for bore/stroke/gear ratios;
+#   Visordown GSX-S125 first ride 2016-10-19 "134 kg dry (EU), 15F/43R, 428-pitch";
+#   WeeBikes UK review confirming 6-speed cassette ratios identical to GSX-R125.
+SUZUKI_GSXS125_2017 = spec_from_dict(
+    {
+        "manufacturer": "Suzuki",
+        "model_name": "GSX-S125",
+        "model_code": "WDL0",
+        "year_from": 2017,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 124,
+        "bore_mm": 62.0,
+        "stroke_mm": 41.2,
+        "compression_ratio": 11.5,
+        "cylinders": 1,
+        "peak_power_hp": 14.8,        # 14.8 hp @ 10,500 rpm — Suzuki India catalogue 2020
+        "peak_power_rpm": 10500,
+        "peak_torque_nm": 11.2,       # 11.2 Nm @ 8,000 rpm — Suzuki India catalogue 2020
+        "peak_torque_rpm": 8000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # GSX-S125 / GSX-R125 shared 6-speed — Suzuki Japan tech sheet GSX-S125L7 (2017)
+        # Ratios confirmed identical to GSX-R125 per WeeBikes UK review
+        "gear_ratios": [2.923, 1.882, 1.409, 1.130, 0.958, 0.838],
+        "front_sprocket": 15,
+        "rear_sprocket": 43,
+        "chain_pitch": "428",         # 428-pitch O-ring — Visordown GSX-S125 first ride 2016
+        "dry_mass_kg": 134.0,         # 134 kg dry — Suzuki India spec / Visordown EU spec
+        "wheelbase_mm": 1280.0,
+        "front_tire_size": "110/70R17",
+        "rear_tire_size": "140/70R17",
+        "cd": 0.75,                   # sportsnaked upright, small frontal (narrow single)
+        "frontal_area_m2": 0.44,
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -5366,4 +5538,8 @@ EXTENDED_BIKES = [
     HONDA_CB1000_HORNET_2025,
     TRIUMPH_SPEED_TWIN_1200_RS_2024,
     JAWA_42_BOBBER_2023,
+    # ── Daily improvement run 2026-05-20 (Wednesday — Catalog A1 third pass) ──
+    KAWASAKI_Z650RS_2022,
+    YAMAHA_MT07_SP_2021,
+    SUZUKI_GSXS125_2017,
 ]

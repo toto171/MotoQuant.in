@@ -12,6 +12,7 @@ All parts use explicit fitment constraints to avoid leaks:
 """
 
 from ..connection import MotoQuantDB
+from motoquant.database.seed_catalogs import _create_parts_batch
 
 
 def seed_premium_universal(db: MotoQuantDB) -> int:
@@ -1637,25 +1638,6 @@ def seed_premium_universal(db: MotoQuantDB) -> int:
         },
     ]
 
-    count = 0
-    for p in parts:
-        db.parts.create(
-            category_name=p["category"],
-            brand=p["brand"],
-            model_name=p["model_name"],
-            specifications=p["specs"],
-            part_number=p.get("part_number"),
-            fitment_rules=p.get("fitment_rules"),
-            fitment_universal=p.get("universal", False),
-            fitment_notes=p.get("fitment_notes"),
-            param_overrides=p.get("param_overrides"),
-            param_deltas=p.get("param_deltas"),
-            param_multipliers=p.get("param_multipliers"),
-            price_inr=p.get("price_inr"),
-            retailer=p.get("retailer"),
-            availability=p.get("availability", "in_stock"),
-            estimated_delivery_days=p.get("delivery_days"),
-        )
-        count += 1
-
-    return count
+    return _create_parts_batch(
+        db, parts, label="Premium Universal Parts", default_availability="in_stock"
+    )
