@@ -21,7 +21,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -30,6 +30,9 @@ from ..physics import MotoQuantEngine
 from .client import LLMClient, LLMNotConfiguredError
 from .parse_query import ParsedSimRequest, parse_query
 from .summarize import summarize_result
+
+if TYPE_CHECKING:
+    from ..database.connection import MotoQuantDB
 
 __all__ = ["ChatResult", "run_chat_pipeline"]
 
@@ -90,7 +93,7 @@ class ChatResult:
 
 def run_chat_pipeline(
     query: str,
-    db: Any,
+    db: MotoQuantDB,
     *,
     client: LLMClient | None = None,
     run_summary: bool = True,
@@ -158,7 +161,7 @@ def run_chat_pipeline(
 
 def _run_simulate(
     parsed: ParsedSimRequest,
-    db: Any,
+    db: MotoQuantDB,
     client: LLMClient | None,
     result: ChatResult,
     *,
@@ -199,7 +202,7 @@ def _run_simulate(
 
 def _run_compare(
     parsed: ParsedSimRequest,
-    db: Any,
+    db: MotoQuantDB,
     client: LLMClient | None,
     result: ChatResult,
     *,
@@ -281,7 +284,7 @@ def _run_compare(
 
 def _run_rank(
     parsed: ParsedSimRequest,
-    db: Any,
+    db: MotoQuantDB,
     client: LLMClient | None,
     result: ChatResult,
     *,
@@ -512,7 +515,7 @@ _TIER_DEFAULT_BUDGET_INR = {
 
 def _run_recommend(
     parsed: ParsedSimRequest,
-    db: Any,
+    db: MotoQuantDB,
     client: LLMClient | None,
     result: ChatResult,
     *,
@@ -707,7 +710,7 @@ def _run_recommend(
 
 def _run_explain(
     parsed: ParsedSimRequest,
-    db: Any,
+    db: MotoQuantDB,
     client: LLMClient | None,
     result: ChatResult,
     *,
@@ -773,7 +776,7 @@ def _run_smalltalk(
 
 
 def _run_one_sim(
-    bike_id: int, parsed: ParsedSimRequest, db: Any
+    bike_id: int, parsed: ParsedSimRequest, db: MotoQuantDB
 ) -> dict[str, Any] | str:
     """Run a single sim for `bike_id` with `parsed`'s overrides applied.
 
@@ -869,7 +872,7 @@ def _apply_power_boost(config: Any, parsed: ParsedSimRequest) -> None:
 
 
 def _bike_suggestions(
-    db: Any, bike_name: str, *, limit: int = 5
+    db: MotoQuantDB, bike_name: str, *, limit: int = 5
 ) -> list[dict[str, Any]]:
     """Top-N best matches for a bike-name query (uses smart resolver)."""
     if not bike_name or db is None:
@@ -1098,7 +1101,7 @@ def _summarize_explain(
 # ───────────────────────────────────────────────────────────────────
 
 
-def _apply_archetype(config: Any, parsed: ParsedSimRequest, db: Any) -> None:
+def _apply_archetype(config: Any, parsed: ParsedSimRequest, db: MotoQuantDB) -> None:
     """Layer a bike_archetypes row's deltas onto `config` in place.
 
     Applied AFTER env overrides but BEFORE power_boost so the user's

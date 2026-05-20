@@ -583,6 +583,25 @@ Backlog now: 13 pending (was 14). One down. Path A (build `inbox-implementer`) r
 
 ---
 
+## INSTRUCTION — 2026-05-20 — research: verify entry_200_300 DERIVED benchmarks
+[research]
+
+Context: physics-calibration agent (2026-05-20, third pass) found that the entry_200_300 cluster mean|Δ| of 0.533s is dominated by Bajaj Pulsar N250 (sim=16.47s vs bench=15.45s DERIVED, Δ=+1.02) and Yamaha FZ25 (sim=16.93s vs bench=16.00s DERIVED, Δ=+0.93). 5 of 6 cluster benchmarks use the 0-100×1.6 DERIVED methodology (±0.7s uncertainty). The only verified benchmark (Kawasaki Ninja 300, FastestLaps 14.10s) is within +0.29s.
+
+Knob sensitivity probe found 11 of 12 category-level knobs (`parasitic_mult`, `over_clutch_factor`, `launch_rpm_factor`, `engine_inertia_mult`, `chain_efficiency_override`) have zero effect on these bikes — most use synthetic dyno curves with `is_at_wheel=True` which skips parasitic at `physics.py:477-483`. The one knob that does respond (`max_engine_decel_rads2`) only moves cluster mean|Δ| by 3ms and worsens the already-fast Gixxer SF 250 by 104ms. Cluster is data-bound, not model-bound.
+
+Sourcing real instrumented or Dragy timeslip data for:
+1. Bajaj Pulsar N250 (249cc, 24.5hp) — real quarter-mile ET
+2. Yamaha FZ25 (249cc, 20.6hp) — real quarter-mile ET
+3. Suzuki Gixxer 250 / Gixxer SF 250 (249cc, 26.5hp) — real quarter-mile ET (the SF 250 sim is 0.69s *faster* than benchmark, suggesting the DERIVED benchmark is wrong, not the physics)
+4. KTM Duke 250 (248cc, 30hp) — already close at Δ=-0.117 (DERIVED may actually be reasonable here)
+
+Suggested sources: TeamBHP forum drag timeslips, Indian Autos Mag instrumented tests, MotoStatz database, Aamby Valley drag-strip records. Without measured data, this cluster cannot be calibrated further without per-bike overrides — which the physics-calibration agent prompt forbids.
+
+Until measured benchmarks land, the physics-calibration scheduler should skip entry_200_300 from rotation (rule update suggestion: "Skip cluster X if >80% of benchmarks are DERIVED and last probe showed all knobs dead").
+
+---
+
 ## INSTRUCTIONS QUEUE
 
 > _Add new `## INSTRUCTION` blocks above this divider. Claude marks them `## DONE` once handled._

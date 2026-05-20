@@ -21,7 +21,10 @@ No external dependencies. Pure stdlib.
 from __future__ import annotations
 
 import re
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from ..database.connection import MotoQuantDB
 
 # Manufacturers known to appear at the start of user queries.
 # When the LLM returns "Suzuki Hayabusa" but the DB row has model_name="Hayabusa
@@ -141,7 +144,7 @@ def _score_candidate(query: str, manufacturer: str, model_name: str) -> int:
 
 
 def resolve_bike(
-    name: str | None, db: Any
+    name: str | None, db: MotoQuantDB
 ) -> tuple[int | None, list[dict[str, Any]]]:
     """Resolve a free-form bike name to a (bike_id, suggestions) pair.
 
@@ -226,7 +229,7 @@ def resolve_bike(
     return None, suggestions
 
 
-def resolve_venue(name: str | None, db: Any) -> int | None:
+def resolve_venue(name: str | None, db: MotoQuantDB) -> int | None:
     """Resolve a venue name to a venue_id. Falls back to None on miss."""
     if not name or db is None:
         return None
@@ -299,7 +302,7 @@ _ARCHETYPE_ALIASES: dict[str, str] = {
 }
 
 
-def resolve_archetype(name: str, db: Any) -> tuple[int | None, int | None]:
+def resolve_archetype(name: str, db: MotoQuantDB) -> tuple[int | None, int | None]:
     """Resolve a free-text archetype name → (archetype_id, base_bike_model_id).
 
     Returns (None, None) if no match. Tries:

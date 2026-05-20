@@ -131,3 +131,83 @@ This is a catalog data issue, not a physics model issue.
 - `[catalog]` KTM 390 Duke dry_mass: update 149→163kg (add 8kg fluids/equipment, matches KTM service manual kerb weight 163kg). Would move KTM 390 Duke delta from -0.577 to approximately -0.33s without touching physics.
 
 **Result: no changes shipped in this pass.**
+
+---
+
+## Third pass (same day, physics-calibration agent re-run)
+
+**Target investigated:** `entry_200_300` (N=6, mean|Δ|=0.533s, bias=+0.214s)
+
+The morning session shipped two_stroke (max_decel 380→800). The second pass investigated mid_twin_300_500 and produced no shippable change. This third pass picks the only remaining cluster meeting the rotation criteria (N>5 AND mean|Δ|>0.4s): `entry_200_300`.
+
+### Cluster snapshot
+
+| Bike | hp | sim ET | bench | Δ | bench src |
+|---|---|---|---|---|---|
+| Bajaj Pulsar N250 | 24.5 | 16.471 | 15.45 | +1.021 | DERIVED |
+| Yamaha FZ25 | 20.6 | 16.932 | 16.00 | +0.932 | DERIVED |
+| Suzuki Gixxer SF 250 | 26.5 | 15.410 | 16.10 | -0.690 | DERIVED |
+| Kawasaki Ninja 300 | 39.0 | 14.389 | 14.10 | +0.289 | FastestLaps verified |
+| Suzuki Gixxer 250 | 26.5 | 15.952 | 16.10 | -0.148 | DERIVED |
+| KTM Duke 250 | 30.0 | 15.083 | 15.20 | -0.117 | DERIVED |
+
+5/6 benchmarks are DERIVED (0-100 × 1.6 methodology, ±0.7s uncertainty). The cluster splits cleanly: low-power (20-24 hp) bikes run **slow**; mid-power (25-30 hp) sport-positioned bikes run **fast**. Cluster bias is positive only because the slow bikes dominate the absolute-delta sum.
+
+### Knob sensitivity probe
+
+Held all reference baselines (K5/R1/Hayabusa preserved); ran one-knob-at-a-time sweeps over the 6 cluster bikes.
+
+| Knob change | mean\|Δ\| | bias | per-bike worst-case |
+|---|---|---|---|
+| baseline | 0.533 | +0.214 | — |
+| parasitic_mult 0.85 → 0.70 | 0.533 | +0.214 | **DEAD KNOB** |
+| parasitic_mult 0.85 → 0.75 | 0.533 | +0.214 | **DEAD KNOB** |
+| parasitic_mult 0.85 → 0.95 | 0.533 | +0.214 | **DEAD KNOB** |
+| over_clutch 0.40 → 0.50 | 0.533 | +0.214 | **DEAD KNOB** |
+| over_clutch 0.40 → 0.30 | 0.533 | +0.214 | **DEAD KNOB** |
+| launch_rpm_factor 0.85 | 0.533 | +0.214 | **DEAD KNOB** |
+| engine_inertia_mult 0.70 | 0.533 | +0.214 | **DEAD KNOB** |
+| engine_inertia_mult 0.85 | 0.533 | +0.214 | **DEAD KNOB** |
+| engine_inertia_mult 1.15 | 0.533 | +0.214 | **DEAD KNOB** |
+| chain_efficiency_override 0.93 | 0.533 | +0.214 | **DEAD KNOB** |
+| chain_efficiency_override 0.97 | 0.533 | +0.214 | **DEAD KNOB** |
+| max_decel 280 → 200 | 0.535 | +0.272 | worse |
+| max_decel 280 → 400 | **0.530** | **+0.134** | Gixxer SF 250 -0.690 → -0.794 (worse by 0.104s) |
+
+### Findings
+
+1. **Eleven of twelve probed knobs are DEAD on this cluster.** Same root cause as the morning's mid_twin_300_500 investigation: most cluster bikes here use synthetic dyno curves marked `is_at_wheel=True`, which makes the physics path skip parasitic subtraction entirely (`physics.py:477-483`). And these bikes lock up too quickly for `over_clutch_factor` to fire meaningfully.
+
+2. **Only `max_engine_decel_rads2` has any effect**, and the best landing (400 rad/s²) gives a cluster mean|Δ| improvement of just 3ms — well below the 50ms shipping gate. The bias improves nicely (+0.214 → +0.134) but the already-fast Gixxer SF 250 worsens by 104ms. The bias improvement comes from moving the cluster fast-ward; the absolute-delta change is small because the worst offenders (N250, FZ25) only move ~100ms each.
+
+3. **Structural diagnosis matches CLAUDE.md April 24 history:** the slow-but-DERIVED entry-class bikes are limited by something other than engine torque generation (likely the synthetic dyno curve shape + traction model interaction). No category-level knob can move them without ALSO moving the already-fast Gixxer SF 250 — they share the same physics path.
+
+### No-shippable-change rationale
+
+- max_decel=400 fails 50ms gate (only 3ms cluster improvement)
+- max_decel=400 also worsens a non-top-10 bike by 104ms (Gixxer SF 250 from -0.690 to -0.794)
+- All other probed knobs are bit-for-bit dead on this cluster
+- Per-bike calibration would be needed, but the agent prompt forbids per-bike overrides
+
+### Escalation
+
+Adding a `[research]` note to `DISPATCH_INBOX.md` requesting instrumented timeslip data for Pulsar N250 and FZ25 — same shape as the entry-150-200 escalation queued this morning. Until DERIVED benchmarks are replaced with measured data, the entry-200-300 cluster is data-bound, not model-bound.
+
+### Validation gates (re-run after probe)
+
+| Gate | Result |
+|---|---|
+| K5/R1/Hayabusa baselines | ✓ +0.0000 / +0.0000 / +0.0000 |
+| `tests/test_power_boost_regression.py + submodel_kaizen + two_stroke` | ✓ 51 passed |
+| `tests/test_physics_invariants.py` | ✓ 1 skipped (hypothesis not installed — expected) |
+
+### Files modified in this pass
+
+None. (Probe was performed in-memory; no source files committed for this pass.)
+
+### Commit summary for this third pass
+
+```
+chore(physics): no-shippable-change entry_200_300 (11/12 knobs dead, only viable knob fails 50ms gate + degrades non-top-10 bike)
+```
+

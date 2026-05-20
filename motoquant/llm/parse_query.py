@@ -17,9 +17,12 @@ is never touched and no API tokens burn.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from .client import LLMClient, get_default_client
+
+if TYPE_CHECKING:
+    from ..database.connection import MotoQuantDB
 
 
 # ───────────────────────────────────────────────────────────────────
@@ -341,7 +344,7 @@ def parse_query(
     query: str,
     *,
     client: LLMClient | None = None,
-    db: Any = None,
+    db: MotoQuantDB | None = None,
 ) -> ParsedSimRequest:
     """Parse a natural-language query into a ParsedSimRequest.
 
@@ -397,7 +400,7 @@ def parse_query(
 # ───────────────────────────────────────────────────────────────────
 
 
-def _resolve_against_db(parsed: ParsedSimRequest, db: Any) -> None:
+def _resolve_against_db(parsed: ParsedSimRequest, db: MotoQuantDB) -> None:
     """Smart fuzzy resolution. Mutates `parsed` in place. Silent on miss."""
     from .resolver import resolve_archetype, resolve_bike, resolve_venue
 
