@@ -9,24 +9,25 @@ try/except-per-row pattern and the ``db.parts.create()`` kwargs so individual
 catalog files only need to supply the data.
 
 Part dict schema (all keys are optional unless noted):
-    category*         str   parts_categories.name
-    brand*            str
-    model_name*       str
-    part_number       str
-    specs             dict  → specifications column
-    param_deltas      dict
-    param_overrides   dict
-    param_multipliers dict
-    fitment_rules     dict  (description sub-key is also used as fitment_notes
-                            fallback when fitment_notes key is absent)
-    fitment_notes     str   explicit fitment notes (overrides fitment_rules
-                            description fallback when present)
-    fitment_universal bool  whether the part fits all bikes universally
-    price_inr         float
-    mrp_inr           float maximum retail price (distinct from price_inr)
-    availability      str   default "order"
-    retailer          str
-    delivery_days     int   → estimated_delivery_days
+    category*              str   parts_categories.name
+    brand*                 str
+    model_name*            str
+    part_number            str
+    specs                  dict  → specifications column
+    param_deltas           dict
+    param_overrides        dict
+    param_multipliers      dict
+    fitment_rules          dict  (description sub-key is also used as fitment_notes
+                                 fallback when fitment_notes key is absent)
+    fitment_notes          str   explicit fitment notes (overrides fitment_rules
+                                 description fallback when present)
+    fitment_universal      bool  whether the part fits all bikes universally
+    price_inr              float
+    mrp_inr                float maximum retail price (distinct from price_inr)
+    availability           str   default "order"
+    retailer               str
+    delivery_days          int   → estimated_delivery_days  (preferred key)
+    estimated_delivery_days int  → estimated_delivery_days  (alias; delivery_days wins)
 """
 
 from __future__ import annotations
@@ -86,7 +87,10 @@ def _create_parts_batch(
                 mrp_inr=part.get("mrp_inr"),
                 availability=part.get("availability", default_availability),
                 retailer=part.get("retailer"),
-                estimated_delivery_days=part.get("delivery_days"),
+                estimated_delivery_days=(
+                    part.get("delivery_days")
+                    or part.get("estimated_delivery_days")
+                ),
             )
             count += 1
             logger.info("Created: %s %s", part["brand"], part["model_name"])

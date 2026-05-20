@@ -211,3 +211,69 @@ None. (Probe was performed in-memory; no source files committed for this pass.)
 chore(physics): no-shippable-change entry_200_300 (11/12 knobs dead, only viable knob fails 50ms gate + degrades non-top-10 bike)
 ```
 
+---
+
+## Fourth pass (2026-05-20, physics-calibration agent re-run)
+
+**Target cluster:** `mid_twin_300_500` (N=15, mean|Δ|=0.630s before, 0.577s after)  
+**Fix type:** Spec data correction (not a physics knob change)  
+**Outcome:** SHIP — mean|Δ| 0.630→0.577 (-53ms, exceeds 50ms gate)
+
+### Finding: Kawasaki Ninja 400 primary_ratio spec error
+
+During investigation of the `mid_twin_300_500` cluster, the Ninja 400 showed ET=14.024s vs bench=12.98s (+1.044s delta — the dominant outlier). Timeseries analysis revealed the root cause: the bike reached terminal velocity (146.2 km/h) at ~t=10.5s and spent the entire second half of the quarter at constant speed. This is a gearing problem, not a physics problem.
+
+**Root cause:**  
+`motoquant/scraper/known_bikes.py:KAWASAKI_NINJA_400_2018` had `primary_ratio=3.082` — the Ninja 300 value, copy-pasted in the April-22 audit that corrected the gear cassette and sprockets. The correct EX400 service manual value is 85/41 ≈ 2.073 (already recorded in `gear_ratios.py` Tier-1 entry since April 22).
+
+The importer at line 638 uses `primary = primary or lu_primary`. Since `spec.primary_ratio = 3.082` is non-null, the importer silently ignores the correct `lu_primary = 2.073` from gear_ratios.py. The gear_ratios.py fix was present but blocked by the stale known_bikes.py value.
+
+**Impact of 3.082 vs 2.073:**  
+- Gear 1 top speed at redline: 64 km/h (wrong, 3.082) vs 95.7 km/h (correct, 2.073)  
+- Gear 2 top speed at redline: 97 km/h (wrong) vs 144 km/h (correct)  
+- The bike was gear-limited to ~146 km/h trap speed vs the correct ~174 km/h
+
+### Before / After (Ninja 400)
+
+| Metric | Before | After |
+|---|---|---|
+| Spec primary_ratio | 3.082 | 2.073 |
+| Sim ET | 14.024s | 13.229s |
+| Benchmark | 12.98s (MotoStatz 2018) | 12.98s |
+| Delta from bench | +1.044s | +0.249s |
+| Trap speed | 146.2 km/h | 173.9 km/h |
+
+### Cluster sweep after fix
+
+| Cluster | N | mean|Δ| before | mean|Δ| after |
+|---|---|---|---|
+| mid-twin-300-500 | 15 | 0.630s | **0.577s** (-53ms) |
+| OVERALL | 93 | 0.413s | **0.404s** (-9ms) |
+
+Top-10 mean|Δ|: **0.0226s unchanged** (no regression on best bikes).  
+within ±1.00s: 85→86 bikes (92%).
+
+### Reference baselines post-fix
+
+```
+K5:       ET=10.0334  Δ=+0.0000 ✓
+R1:       ET=10.2859  Δ=+0.0000 ✓
+Hayabusa: ET=10.4712  Δ=+0.0000 ✓
+```
+
+### Validation gates
+
+- `reseed_configs_from_specs.py`: 339 updated, 3 reference bikes correctly skipped, 0 errors
+- `pytest tests/test_power_boost_regression.py tests/test_submodel_kaizen.py tests/test_two_stroke.py tests/test_physics_invariants.py`: **51 passed, 1 skipped (hypothesis — expected)**
+
+### File modified
+
+- `motoquant/scraper/known_bikes.py` — `KAWASAKI_NINJA_400_2018.primary_ratio` changed from 3.082 → 2.073
+- `motoquant.db` — reseeded (339 configs updated)
+
+### Commit message
+
+```
+fix(gearing): correct Ninja 400 primary_ratio 3.082→2.073 in known_bikes.py (-53ms mid-twin-300-500 cluster)
+```
+

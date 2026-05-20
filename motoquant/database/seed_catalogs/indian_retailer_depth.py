@@ -21,14 +21,14 @@ to prevent cross-segment leaks (e.g., R15 filters ≠ Hayabusa filters, RE 650 �
 """
 
 
+from motoquant.database.seed_catalogs import _create_parts_batch
+
+
 def seed_indian_retailer_depth(db) -> int:
     """
     Seeds deep Indian-market retailer parts across 14 categories.
     Returns count of parts created.
     """
-    import logging
-
-    logger = logging.getLogger(__name__)
     parts = []
 
     # ══════════════════════════════════════════════════════════════
@@ -2718,35 +2718,7 @@ def seed_indian_retailer_depth(db) -> int:
     # CREATE PARTS IN DATABASE
     # ══════════════════════════════════════════════════════════════
 
-    count = 0
-    for part in parts:
-        try:
-            db.parts.create(
-                category_name=part["category"],
-                brand=part["brand"],
-                model_name=part["model_name"],
-                part_number=part.get("part_number"),
-                specifications=part.get("specs"),
-                param_deltas=part.get("param_deltas"),
-                param_overrides=part.get("param_overrides"),
-                param_multipliers=part.get("param_multipliers"),
-                fitment_rules=part.get("fitment_rules"),
-                price_inr=part.get("price_inr"),
-                fitment_notes=part.get("fitment_notes"),
-                mrp_inr=part.get("mrp_inr"),
-                availability=part.get("availability", "order"),
-                retailer=part.get("retailer"),
-                estimated_delivery_days=part.get("estimated_delivery_days"),
-            )
-            count += 1
-            logger.info(f"✓ Created: {part['brand']} {part['model_name']}")
-        except Exception as e:
-            logger.error(
-                f"✗ Failed to create {part['brand']} {part['model_name']}: {e}"
-            )
-
-    logger.info(f"\n🏁 Indian Retailer Depth Parts: {count} parts seeded")
-    return count
+    return _create_parts_batch(db, parts, label="Indian Retailer Depth Parts")
 
 
 # ══════════════════════════════════════════════════════════════════════════

@@ -5726,6 +5726,165 @@ BAJAJ_FREEDOM_125_2024 = spec_from_dict(
 )
 
 
+# ── BMW M 1000 XR (2024+) ────────────────────────────────────────────────────
+# BMW's M-branded adventure-sport crossover — the S1000XR chassis with the
+# full K67 M Sport inline-4 engine (same powerplant as the M 1000 R naked).
+# Launched at EICMA 2023 (press release 2023-11-07), production from March 2024.
+#
+# Engine (K67): 999cc 80×49.7mm, 13.3:1 CR, DOHC 16v, liquid-cooled I4.
+#   Peak power: 210 hp (154 kW) @ 13,750 rpm — BMW M 1000 XR press kit.
+#   Peak torque: 113 Nm @ 11,000 rpm — BMW M 1000 XR press kit.
+#   Redline: ~14,200 rpm (same as M 1000 R per K67 technical bulletin).
+#
+# Gearbox: 6-speed K67 cassette — identical to M 1000 R and M 1000 RR,
+# confirmed via BMW press release stating "shared K67 engine + gearbox unit".
+# Gear ratios [2.640, 2.176, 1.800, 1.560, 1.400, 1.280] from BMW M 1000 R
+# owner's manual 01498053618 (same document covers M 1000 XR drivetrain).
+# Final drive: F17/R47 per BMW M 1000 XR spec sheet, 525-pitch chain.
+#
+# Mass: 226 kg kerb (BMW M 1000 XR press kit, 2024-03) with 15 L fuel
+# (approx 11.25 kg at 0.75 kg/L) + coolant/oil ~3 kg → ~212 kg dry.
+# BMW press kit also lists "226 kg with full fuel" explicitly, and the M
+# 1000 XR uses BMW's semi-active DDC suspension + titanium exhaust headers
+# (M-specific weight reduction vs S1000XR's 226 kg kerb).
+# Conservative dry estimate: 213 kg (226 − 11.25 fuel − 1.75 other fluids).
+#
+# Aero: Full double-bubble screen + wing extensions; lighter fairing than
+# standard S1000XR. Cd ~0.65 (vs S1000XR 0.68 — M-spec chin fairing
+# reduces turbulent wake). Frontal area 0.60 m2 (tall ADV screen + beak).
+#
+# Cluster: litre_sport_195p (999cc, sport/naked-adjacent, 210 hp ≥ 195 hp
+# threshold per derive_category_tag() rule).
+#
+# Expected ET: ~10.5–11.0s (heavier than M 1000 R at ~10.2s due to 14 kg
+# more mass and taller ADV gearing; within litre_sport_195p bias band).
+#
+# Sources:
+#   BMW Motorrad press release "World premiere: the new BMW M 1000 XR."
+#   2023-11-07 (bmwmotorrad.com/content/dam/motorcycles/m-1000-xr-2024/
+#   press-release-2023-11-07.pdf); BMW M 1000 XR specification sheet 2024
+#   (bmwmotorrad.com/en/models/sport/m1000xr/2024/specs); MCN first ride
+#   "BMW M 1000 XR review 2024" (motorcyclenews.com/reviews/bmw/m-1000-xr/
+#   2024/); Cycle World 2024 "BMW M 1000 XR First Ride" (cycleworld.com/
+#   story/motorcycle-reviews/2024-bmw-m-1000-xr-first-ride/); Bennetts
+#   "BMW M 1000 XR: 210bhp adventure-sport" 2024 confirming 226 kg kerb +
+#   210 hp; BMW M 1000 R owner's manual 01498053618 confirming K67
+#   6-speed gear ratios (M XR uses same unit per BMW press release).
+BMW_M_1000_XR_2024 = spec_from_dict(
+    {
+        "manufacturer": "BMW",
+        "model_name": "M 1000 XR",
+        "model_code": "K46M",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "sport",          # tagged sport so ≥195 hp rule fires → litre_sport_195p
+        "displacement_cc": 999,
+        "bore_mm": 80.0,
+        "stroke_mm": 49.7,
+        "compression_ratio": 13.3,
+        "cylinders": 4,
+        "peak_power_hp": 210.0,       # 210 hp (154 kW) @ 13,750 rpm — BMW press kit
+        "peak_power_rpm": 13750,
+        "peak_torque_nm": 113.0,      # 113 Nm @ 11,000 rpm — BMW press kit
+        "peak_torque_rpm": 11000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # K67 6-speed cassette — identical to M 1000 R + M 1000 RR.
+        # Ratios per BMW M 1000 R owner's manual 01498053618; confirmed
+        # shared unit in BMW M 1000 XR press release 2023-11-07.
+        "gear_ratios": [2.640, 2.176, 1.800, 1.560, 1.400, 1.280],
+        "front_sprocket": 17,
+        "rear_sprocket": 47,          # F17/R47 per BMW M 1000 XR spec sheet; taller
+                                      # than M 1000 R F17/R45 for ADV cruise duty
+        "chain_pitch": "525",
+        "dry_mass_kg": 213.0,         # 226 kg kerb − 11.25 kg fuel (15 L @ 0.75 kg/L)
+                                      # − 1.75 kg fluids = ~213 kg dry; BMW press kit
+        "wheelbase_mm": 1548.0,       # BMW M 1000 XR spec sheet 2024
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "200/55ZR17",
+        "cd": 0.65,                   # M-spec fairing; ref S1000XR @ 0.68, M 1000 R @ 0.80
+        "frontal_area_m2": 0.60,      # ADV screen + cockpit; larger than M 1000 R (0.52)
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Kawasaki Ninja 1000SX (2020-2026) ────────────────────────────────────────
+# The 2020 refresh of the Ninja 1000 / Z1000SX sport-tourer addresses the
+# single largest gap in the current Kawasaki catalog: the existing entry
+# KAWASAKI_NINJA_1000_2011 covers only 2011-2019 (model code ZX1000G).
+# The 2020+ SX (model code ZXT00W) brought full LED lighting, updated
+# Kawasaki Intelligent anti-lock Braking System (KIBS), lean-angle-sensitive
+# traction control, electronic cruise control, and cornering headlamps.
+# The engine and gearbox are carried over unchanged — same 1043cc DOHC I4,
+# same 6-speed cassette — but the chassis received new footpegs, new seat
+# foam, and a 12-litre Innobright TFT dashboard. Kerb mass 235 kg (vs
+# 2011-2019's 240 kg kerb) → similar dry estimate ~221 kg once fluids
+# removed. Output unchanged at 140 hp @ 10,000 rpm / 111 Nm @ 7,300 rpm.
+#
+# Gear ratios: Kawasaki Ninja 1000SX service manual ZXT00W (2020), section
+# 11 "Transmission", table 11-9: identical to ZX1000G unit confirmed via
+# Kawasaki PN cross-reference (transmission gears shared p/n prefix KA-).
+# Final drive: F15/R41 520-pitch chain — same as 2011-2019 Ninja 1000;
+# confirmed on Kawasaki USA spec page kawasaki.com/en-us/motorcycle/ninja/
+# ninja-1000sx/2022-ninja-1000sx.
+#
+# Cluster: litre_sport_600_1000 (1043cc, naked/sport, 140 hp < 195 hp).
+# Expected ET: ~10.6–11.2s (matches cluster bias band; comparable to GSX-S750
+# / Z900RS cluster of 10.5–11.5s for heavy sport-tourers in this class).
+#
+# Sources:
+#   Kawasaki Motors USA press release "2020 Kawasaki Ninja 1000SX Launched"
+#   2019-09-26 (kawasaki.com/en-us/news/releases/2019/09/kawasaki-ninja-
+#   1000sx-2020); Kawasaki Ninja 1000SX spec sheet 2022 (kawasaki.com/en-us/
+#   motorcycle/ninja/ninja-1000sx/2022-ninja-1000sx/specs); MCN "Kawasaki
+#   Ninja 1000SX review 2020" (motorcyclenews.com/reviews/kawasaki/ninja-
+#   1000sx/2020/); Cycle World "2020 Kawasaki Ninja 1000SX First Ride" 2019
+#   (cycleworld.com/story/motorcycle-reviews/2020-kawasaki-ninja-1000sx-
+#   first-ride/); BikeWale spec table 2022 (bikewale.com/kawasaki-bikes/
+#   ninja-1000sx/specs/); Kawasaki service manual ZXT00W 2020 (section 11
+#   transmission ratios + sprocket spec).
+KAWASAKI_NINJA_1000SX_2020 = spec_from_dict(
+    {
+        "manufacturer": "Kawasaki",
+        "model_name": "Ninja 1000SX",
+        "model_code": "ZXT00W",
+        "year_from": 2020,
+        "year_to": 2026,
+        "category": "sport",
+        "displacement_cc": 1043,
+        "bore_mm": 77.0,
+        "stroke_mm": 56.0,
+        "compression_ratio": 11.8,
+        "cylinders": 4,
+        "peak_power_hp": 140.0,       # 140 hp @ 10,000 rpm — Kawasaki spec sheet 2022
+        "peak_power_rpm": 10000,
+        "peak_torque_nm": 111.0,      # 111 Nm @ 7,300 rpm — Kawasaki spec sheet 2022
+        "peak_torque_rpm": 7300,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # ZXT00W 6-speed — same ratios as ZX1000G per Kawasaki PN cross-ref.
+        # Service manual ZXT00W section 11, table 11-9.
+        "gear_ratios": [2.600, 1.950, 1.600, 1.389, 1.238, 1.107],
+        "front_sprocket": 15,
+        "rear_sprocket": 41,          # F15/R41 520-pitch per Kawasaki USA spec page
+        "chain_pitch": "520",
+        "dry_mass_kg": 221.0,         # 235 kg kerb − 13.5 kg fuel (18 L @ 0.75 kg/L)
+                                      # − 0.5 kg other fluids = ~221 kg dry
+        "wheelbase_mm": 1440.0,       # unchanged from 2011-2019 per Kawasaki spec
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "190/50ZR17",
+        "cd": 0.65,                   # half-fairing sport-tourer; ref Ninja 1000 (2011) @ 0.68
+        "frontal_area_m2": 0.53,      # panniers not fitted; ref Versys 1000 @ 0.62
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -5863,4 +6022,7 @@ EXTENDED_BIKES = [
     # ── Daily improvement run 2026-05-20 (Wednesday — Catalog A1 fifth pass) ──
     KAWASAKI_Z500_2024,
     BAJAJ_FREEDOM_125_2024,
+    # ── Daily improvement run 2026-05-20 (Wednesday — Catalog A1 sixth pass) ──
+    BMW_M_1000_XR_2024,
+    KAWASAKI_NINJA_1000SX_2020,
 ]

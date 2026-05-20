@@ -3784,7 +3784,10 @@ KAWASAKI_NINJA_400_2018 = spec_from_dict(
         # Kawasaki Ninja 400 2018 service manual — DIFFERENT from Ninja 300
         # Previous entry erroneously used Ninja 300 gear data
         "gear_ratios": [2.846, 2.071, 1.700, 1.441, 1.241, 1.107],  # internal ratios (SM p. 3-33)
-        "primary_ratio": 3.082,        # crank → main shaft (SM p. 3-33)
+        "primary_ratio": 2.073,        # crank → main shaft: 85/41 ≈ 2.073 (EX400 SM p. 3-33)
+        # NOTE: was 3.082 (Ninja 300 value — copy-paste error). Fix already in
+        # gear_ratios.py since Apr-22 but spec field was blocking the lookup
+        # (non-null spec.primary_ratio short-circuits lu_primary in importer.py:638).
         "front_sprocket": 15,          # OEM: 15T (was 17 — Ninja 300 data)
         "rear_sprocket": 46,           # OEM: 46T (was 43 — Ninja 300 data)
         "chain_pitch": "520",
