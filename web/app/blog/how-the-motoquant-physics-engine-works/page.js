@@ -88,7 +88,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'In practice, getting the right gear ratios for 342 different bikes was its own multi-month effort. We maintain a Tier-1 lookup table with 150+ named-model entries derived from service manuals (R15 V4: 14F/48R, primary 2.83, gears 2.833 / 1.875 / 1.429 / 1.16 / 0.963 / 0.84 — those numbers come from the YZF-R15 service manual, not from a forum). Bikes without a Tier-1 entry fall back to category-based defaults (sport-1000, naked-mid, cruiser-big, etc.) which are still better than generic numbers but lose the per-model flavor.',
+    text: 'In practice, getting the right gear ratios for 345 different bikes was its own multi-month effort. We maintain a Tier-1 lookup table with 150+ named-model entries derived from service manuals (R15 V4: 14F/48R, primary 2.83, gears 2.833 / 1.875 / 1.429 / 1.16 / 0.963 / 0.84 — those numbers come from the YZF-R15 service manual, not from a forum). Bikes without a Tier-1 entry fall back to category-based defaults (sport-1000, naked-mid, cruiser-big, etc.) which are still better than generic numbers but lose the per-model flavor.',
   },
   {
     type: 'p',
@@ -116,7 +116,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Aero is straightforward: F_drag = 0.5 × rho × v² × Cd × A. The interesting part is that Cd × A is time-varying. The rider transitions from an upright staging stance to a tucked aerodynamic position over roughly 2 seconds after launch, dropping Cd × A by 30–40 %. We model this transition with a sigmoid curve — at 0 seconds, the rider is upright (Cd × A = ~0.55); at 2 seconds, fully tucked (Cd × A = ~0.32). Cd and frontal area come from per-bike values; we measured or estimated each one of the 342 bikes individually after discovering that 71 % of the catalog had inherited a generic 0.32 Cd that is closer to a passenger car than a motorcycle.',
+    text: 'Aero is straightforward: F_drag = 0.5 × rho × v² × Cd × A. The interesting part is that Cd × A is time-varying. The rider transitions from an upright staging stance to a tucked aerodynamic position over roughly 2 seconds after launch, dropping Cd × A by 30–40 %. We model this transition with a sigmoid curve — at 0 seconds, the rider is upright (Cd × A = ~0.55); at 2 seconds, fully tucked (Cd × A = ~0.32). Cd and frontal area come from per-bike values; we measured or estimated each one of the 345 bikes individually after discovering that 71 % of the catalog had inherited a generic 0.32 Cd that is closer to a passenger car than a motorcycle.',
   },
   {
     type: 'p',
@@ -176,7 +176,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The sub-models are tested independently. test_validation.py exercises physics conservation laws (energy in == energy out + heat). test_no_silent_failures.py runs all 342 catalog bikes and asserts each finishes within the time budget or is on an explicit DNF whitelist for vintage low-power 2-strokes. test_submodel_kaizen.py catches silent failure modes in clutch, tire thermal, braking, and rider dynamics. The full suite passes 174 fast tests; integration tests exercise the surrogate models, ROI engine, and recommendations layer.',
+    text: 'The sub-models are tested independently. test_validation.py exercises physics conservation laws (energy in == energy out + heat). test_no_silent_failures.py runs all 345 catalog bikes and asserts each finishes within the time budget or is on an explicit DNF whitelist for vintage low-power 2-strokes. test_submodel_kaizen.py catches silent failure modes in clutch, tire thermal, braking, and rider dynamics. The full suite passes 174 fast tests; integration tests exercise the surrogate models, ROI engine, and recommendations layer.',
   },
   {
     type: 'h2',

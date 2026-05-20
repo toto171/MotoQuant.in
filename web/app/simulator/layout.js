@@ -61,7 +61,7 @@ export const metadata = {
         url: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'MotoQuant Pro Simulator — live quarter-mile drag simulation for 342 motorcycles',
+        alt: 'MotoQuant Pro Simulator — live quarter-mile drag simulation for 345 motorcycles',
       },
     ],
   },
@@ -105,7 +105,7 @@ function webApplicationSchema() {
       priceCurrency: 'INR',
     },
     featureList: [
-      '342 motorcycles in catalog',
+      '345 motorcycles in catalog',
       '20 drag strip venues with seasonal weather',
       'ET + trap + splits in <1 second',
       'Dragy GPS import for calibration',

@@ -62,3 +62,48 @@ supersedes any earlier draft naming a different bike-set on the same date.
 ## Open carry-forward
 
 None. No escalations to DISPATCH_INBOX.
+# Catalog Expansion — 2026-05-20 (Wednesday, Catalog A1 eighth pass)
+
+**Agent:** A1 (catalog-expansion)
+**Result:** +3 bikes added; DB **342 → 345** (`EXTENDED_BIKES` 106 → 109).
+**Baselines:** K5 10.0334s / R1 10.2859s / Hayabusa 10.4712s — preserved exactly (+0.0000s all three).
+**Tests:** 80 scraper + 91 validation/two_stroke/compat = **171 passed / 0 failed**.
+
+## Bikes added
+
+### 1. Hero Xtreme 200R (2018-2024)
+- Cluster: `entry_150_200` (199.6cc oil-cooled single, Indian naked)
+- Engine: 199.6cc SOHC oil-cooled, 18.4 hp @ 8500 rpm, 17.1 Nm @ 6500 rpm
+- Drivetrain: 5-speed, F14/R43, 520 chain (Hero SB-A1 service manual)
+- Mass: 148 kg dry (Hero India official)
+- Sim: ET **17.2594s** @ 122.1 km/h — within entry_150_200 cluster slow band (+0.5 to +1.4 s)
+- Validator: errors=0, warnings=2 (Indian tire notation cosmetic)
+- Sources: Hero India spec sheet; BikeWale; Autocar India; Hero Service Manual SBA1-001-2018
+
+### 2. Honda X-Blade 160 BS6 (2018-2024)
+- Cluster: `entry_150_200` (162.71cc HET single, Indian sporty commuter)
+- Engine: 162.71cc SOHC air-cooled, 17.02 hp @ 8750 rpm, 14.48 Nm @ 6500 rpm, PGM-FI
+- Drivetrain: 5-speed (cassette shared with CB Hornet 160R per Honda PN 23100-K33-V00), F14/R39, 520 chain
+- Mass: 133 kg dry (Honda India official)
+- Sim: ET **18.1722s** @ 122.2 km/h — within entry_150_200 cluster slow band
+- Validator: errors=0, warnings=2 (Indian tire notation cosmetic)
+- Sources: Honda India product page; BikeWale; Autocar India; Honda parts catalogue
+
+### 3. KTM 790 Adventure (2019-2022)
+- Cluster: `mid_twin_500_700` (799cc LC8c parallel twin, mid-weight adventure)
+- Engine: 799cc DOHC liquid-cooled parallel twin, 94 hp @ 8000 rpm, 88 Nm @ 6500 rpm
+- Drivetrain: 6-speed (LC8c cassette per KTM service manual 3CM2019EN), F16/R42, 520 chain
+- Mass: 189 kg (KTM press kit 2019)
+- Sim: ET **12.1563s** @ 189.9 km/h — physically plausible (MT-07 74 hp = ~11.3 s; extra mass + taller gearing gives ~12.2 s for 94 hp ADV)
+- Validator: errors=0, warnings=1 (21-inch front tire notation)
+- Sources: KTM press kit 2019; KTM owner's manual 3CM2019EN §5.3; MCN 2019; Cycle World 2019
+
+## Validation gates
+- `pytest tests/test_scraper.py` → 80 passed
+- `pytest tests/test_validation.py tests/test_two_stroke.py tests/test_compatibility.py` → 91 passed
+- **Total: 171 passed / 0 failed**
+- `import_batch` result: `imported=3, skipped_invalid=0, errors=0`
+
+## DB stats
+- Before: 342 bike_models
+- After: 345 bike_models (+3)

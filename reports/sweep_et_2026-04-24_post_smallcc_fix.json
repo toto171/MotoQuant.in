@@ -1,5 +1,5 @@
 {
- "took_s": 154.85441637039185,
+ "took_s": 157.04456877708435,
  "results": [
   {
    "kind": "reference",
@@ -7244,6 +7244,54 @@
    "sim_et": 10.723483029767312,
    "sim_trap_kmh": 226.78295695875374,
    "elapsed_s": 10.723999999999496
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Yamaha",
+   "model": "Tracer 7",
+   "year_from": 2020,
+   "year_to": 2026,
+   "disp_cc": 689,
+   "power_hp": 74.0,
+   "stroke_type": 4,
+   "category": "sport",
+   "cluster": "litre-sport-600-1000",
+   "finished": true,
+   "sim_et": 11.830297117251535,
+   "sim_trap_kmh": 199.28433186717527,
+   "elapsed_s": 11.830999999998882
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "BMW",
+   "model": "F 900 XR",
+   "year_from": 2020,
+   "year_to": 2026,
+   "disp_cc": 895.0,
+   "power_hp": 105.0,
+   "stroke_type": 4,
+   "category": "sport",
+   "cluster": "litre-sport-600-1000",
+   "finished": true,
+   "sim_et": 11.488262351003547,
+   "sim_trap_kmh": 205.90485112574552,
+   "elapsed_s": 11.488999999999072
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Honda",
+   "model": "Grom MSX125",
+   "year_from": 2022,
+   "year_to": 2026,
+   "disp_cc": 124,
+   "power_hp": 9.7,
+   "stroke_type": 4,
+   "category": "sport",
+   "cluster": "other",
+   "finished": true,
+   "sim_et": 21.05628411530174,
+   "sim_trap_kmh": 112.41084240821077,
+   "elapsed_s": 21.057000000002752
   }
  ],
  "summary": {
@@ -7252,7 +7300,7 @@
    "R1": 10.285930649053409,
    "Hayabusa": 10.471201919790467
   },
-  "total_bikes": 428,
+  "total_bikes": 431,
   "errors": 0,
   "dnf": 0,
   "clusters": {
@@ -7263,8 +7311,8 @@
     "stats": {}
    },
    "litre-sport-600-1000": {
-    "bikes": 119,
-    "finished": 119,
+    "bikes": 121,
+    "finished": 121,
     "dnf": 0,
     "stats": {
      "n": 29,
@@ -7293,8 +7341,8 @@
     }
    },
    "other": {
-    "bikes": 87,
-    "finished": 87,
+    "bikes": 88,
+    "finished": 88,
     "dnf": 0,
     "stats": {
      "n": 5,

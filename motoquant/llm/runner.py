@@ -21,7 +21,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypedDict
 
 import numpy as np
 
@@ -35,6 +35,39 @@ if TYPE_CHECKING:
     from ..database.connection import MotoQuantDB
 
 __all__ = ["ChatResult", "run_chat_pipeline"]
+
+
+# ───────────────────────────────────────────────────────────────────
+# SimDict — typed shape returned by _run_one_sim on success
+# ───────────────────────────────────────────────────────────────────
+
+
+class _SimDictBase(TypedDict):
+    """Required fields always present in a successful _run_one_sim result.
+
+    Key names are pinned by the frontend UIs (web ChatPanel + desktop ChatBox);
+    do NOT rename without updating both surfaces.
+    """
+
+    et_quarter_s: float    # quarter-mile elapsed time in seconds
+    trap_speed_kmh: float  # trap speed in km/h
+    trap_speed_mph: float  # trap speed in mph
+    et_60ft_s: float       # 60-foot split in seconds
+    peak_accel_g: float    # peak longitudinal acceleration in g
+    bike_name: str         # human-readable bike name (filled in by caller)
+
+
+class SimDict(_SimDictBase, total=False):
+    """Full sim result dict including optional split-time fields.
+
+    The three split fields are added only when the ``SimResult`` object
+    carries the corresponding attribute (they are absent for bikes that DNF
+    or for simulations shorter than the split distance).
+    """
+
+    et_330ft_s: float   # 330-foot split (if available)
+    et_eighth_s: float  # 1/8-mile split  (if available)
+    et_1000ft_s: float  # 1000-foot split (if available)
 
 
 # ───────────────────────────────────────────────────────────────────
@@ -71,7 +104,7 @@ class ChatResult:
     bike_suggestions: list[dict[str, Any]] = field(default_factory=list)
 
     # Intent-specific payloads
-    sim_result: dict[str, Any] | None = None  # simulate
+    sim_result: SimDict | None = None  # simulate
     compare_result: dict[str, Any] | None = None  # compare
     rank_result: dict[str, Any] | None = None  # rank
     recommend_result: dict[str, Any] | None = None  # recommend
@@ -721,7 +754,7 @@ def _run_explain(
     If a specific bike was identified, run a quick sim and use its numbers as
     grounding for the explanation. Otherwise rely purely on the LLM.
     """
-    sim_for_context: dict[str, Any] | None = None
+    sim_for_context: SimDict | None = None
     if parsed.bike_id is not None:
         sim = _run_one_sim(parsed.bike_id, parsed, db)
         if isinstance(sim, dict):
@@ -777,10 +810,10 @@ def _run_smalltalk(
 
 def _run_one_sim(
     bike_id: int, parsed: ParsedSimRequest, db: MotoQuantDB
-) -> dict[str, Any] | str:
+) -> SimDict | str:
     """Run a single sim for `bike_id` with `parsed`'s overrides applied.
 
-    Returns a sim_dict on success or an error string on failure.
+    Returns a :class:`SimDict` on success or an error string on failure.
     """
     try:
         config_row = db.bikes.get_current_config(bike_id)
@@ -813,10 +846,7 @@ def _run_one_sim(
     except Exception as e:  # noqa: BLE001
         return f"MotoQuantEngine.run: {type(e).__name__}: {e}"
 
-    out: dict[str, Any] = {
-        # NOTE: key names are pinned by the frontend UIs (web ChatPanel +
-        # desktop ChatBox). Do NOT rename — both surfaces look these up by
-        # exact name.
+    out: SimDict = {
         "et_quarter_s": round(float(sim.time_quarter), 4),
         "trap_speed_kmh": round(float(sim.speed_quarter) * MS_TO_KMH, 1),
         "trap_speed_mph": round(float(sim.speed_quarter) * MS_TO_MPH, 1),
@@ -1071,7 +1101,7 @@ def _summarize_recommend(
 
 def _summarize_explain(
     parsed: ParsedSimRequest,
-    sim_context: dict[str, Any] | None,
+    sim_context: SimDict | None,
     client: LLMClient | None,
 ) -> str:
     sys_p = (

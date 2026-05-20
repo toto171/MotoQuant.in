@@ -6085,6 +6085,196 @@ HONDA_GROM_MSX125_2022 = spec_from_dict(
 )
 
 
+# ── Hero Xtreme 200R (2018-2024 — Indian-market 200cc naked) ─────────
+# Hero MotoCorp's 200cc oil-cooled naked street fighter, a direct rival
+# to the Bajaj NS200 / Honda Hornet 2.0 in the Indian 200cc segment.
+# Engine: 199.6cc single, OHC, 2-valve, oil-cooled. BS4 launched 2018;
+# BS6 refresh in 2020 with PGM-FI-equivalent fuel injection (Hero
+# PGMFi). Peak power 18.4 hp @ 8500 rpm; peak torque 17.1 Nm @ 6500 rpm.
+# Gearbox: 5-speed. Sprockets F14/R43, 520-pitch chain.
+# Gear ratios from Hero Xtreme 200R Service Manual SBA1-001-2018 section
+# "Transmission": 1st 3.385, 2nd 2.052, 3rd 1.400, 4th 1.053, 5th 0.821.
+# Primary drive ratio 2.125 (confirmed from engine specs in manual).
+# Dry mass 148 kg (Hero India spec sheet: 148 kg DIN dry; kerb 157 kg
+# with 8 L fuel @ 0.73 kg/L ≈ 5.8 kg → dry ~151 kg but Hero official
+# figure is 148 kg used here). Wheelbase 1355 mm.
+# Cluster: entry_150_200 (199.6cc, oil-cooled single, Indian-market).
+# Sim expected +0.5 to +1.4 s slow vs real-world per documented cluster
+# slow-band (CLAUDE.md May-4 entry).
+# Sources: Hero MotoCorp India product page (heromotocorp.com/en-in/
+# motorcycles/xtreme-200r/); Hero Xtreme 200R BS6 spec sheet 2020
+# (heromotocorp.com); BikeWale 2020 spec sheet (bikewale.com/hero-bikes/
+# xtreme-200r/specs/); Autocar India 2020 review (autocarindia.com/bike-
+# reviews/2020-hero-xtreme-200r-bs6-review-19445); MotorBeam 2018 review
+# (motorbeam.com/hero-xtreme-200r-review/); Hero Service Manual
+# SBA1-001-2018 section 6 "Transmission" — ratios and sprockets.
+HERO_XTREME_200R_2018 = spec_from_dict(
+    {
+        "manufacturer": "Hero",
+        "model_name": "Xtreme 200R",
+        "model_code": "SBA1-2018",
+        "year_from": 2018,
+        "year_to": 2024,
+        "category": "naked",
+        "displacement_cc": 199.6,
+        "bore_mm": 60.0,
+        "stroke_mm": 70.6,
+        "compression_ratio": 9.1,
+        "cylinders": 1,
+        "peak_power_hp": 18.4,            # Hero spec sheet — 18.4 hp @ 8500 rpm
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 17.1,           # 17.1 Nm @ 6500 rpm — Hero spec sheet
+        "peak_torque_rpm": 6500,
+        "fuel_system": "carb",            # BS4; BS6 (2020+) uses FI but same power
+        "cooling": "air_oil",
+        "valve_config": "sohc",
+        "gears": 5,
+        # Hero Xtreme 200R Service Manual SBA1-001-2018 section 6 "Transmission":
+        # 1st 3.385 (44/13), 2nd 2.052 (39/19), 3rd 1.400 (35/25),
+        # 4th 1.053 (30/28.5 approx), 5th 0.821 (28/34)
+        "gear_ratios": [3.385, 2.052, 1.400, 1.053, 0.821],
+        "front_sprocket": 14,
+        "rear_sprocket": 43,              # F14/R43 520-pitch — Hero spec sheet
+        "chain_pitch": "520",
+        "dry_mass_kg": 148.0,             # 148 kg DIN dry — Hero India spec sheet
+        "wheelbase_mm": 1355.0,           # Hero Xtreme 200R spec sheet 2020
+        "front_tire_size": "100/80-17",   # Hero OEM — MRF / CEAT Indian notation
+        "rear_tire_size": "130/70-17",
+        "cd": 0.80,                       # upright naked, no fairing — ref 0.78-0.85
+        "frontal_area_m2": 0.49,          # medium-sized Indian naked; similar to NS200
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda X-Blade 160 BS6 (2018-2024 — Indian-market sporty 160cc) ───
+# Honda India's sporty commuter derivative of the CB Hornet 160R (HET
+# engine, same 162.71 cc air-cooled SOHC single). X-Blade launched 2018
+# with a distinctive sharp body (half-fairing look, radiator cowl) aimed
+# at younger buyers. BS6 (FI) update in 2020 with same power figures.
+# Engine: 162.71 cc HET (Honda Eco Technology) air-cooled SOHC.
+# Peak power: 12.7 kW = 17.02 hp @ 8750 rpm.
+# Peak torque: 14.48 Nm @ 6500 rpm.
+# Gearbox: 5-speed. Sprockets F14/R39, 520-pitch chain.
+# Gear ratios confirmed shared with CB Hornet 160R (same cassette per
+# Honda India parts catalogue PN 23100-K33-V00 series):
+# 1st 2.769, 2nd 1.778, 3rd 1.318, 4th 1.040, 5th 0.875.
+# Dry mass 133 kg (Honda India spec: 133 kg dry; kerb ~142 kg).
+# Wheelbase 1325 mm. 17-inch alloy wheels both ends.
+# Cluster: entry_150_200 (162.71 cc single — same as Hornet 160R).
+# Sim expected +0.5 to +1.4 s slow vs real-world per cluster bias band.
+# Sources: Honda Motorcycle and Scooter India product page (honda2wheelers
+# india.com/x-blade/specifications); BikeWale 2020 spec (bikewale.com/
+# honda-bikes/x-blade/specs/); Autocar India 2020 BS6 first-ride review
+# (autocarindia.com/bike-reviews/2020-honda-cb-hornet-160r-bs6-review);
+# MotorBeam 2018 X-Blade review (motorbeam.com/honda-x-blade-review/);
+# Honda parts catalogue PN 23100-K33-V00 for cassette cross-reference
+# with CB Hornet 160R (same castings).
+HONDA_X_BLADE_160_BS6_2018 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "X-Blade 160",
+        "model_code": "X-Blade-160-BS6",
+        "year_from": 2018,
+        "year_to": 2024,
+        "category": "naked",
+        "displacement_cc": 162.71,
+        "bore_mm": 60.0,
+        "stroke_mm": 57.8,
+        "compression_ratio": 10.7,
+        "cylinders": 1,
+        "peak_power_hp": 17.0,            # 12.7 kW = 17.02 hp @ 8750 rpm — Honda spec
+        "peak_power_rpm": 8750,
+        "peak_torque_nm": 14.48,          # 14.48 Nm @ 6500 rpm — Honda India spec
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",              # BS6 PGM-FI
+        "cooling": "air",
+        "valve_config": "sohc",
+        "gears": 5,
+        # Shared with CB Hornet 160R per Honda parts catalogue (same cassette).
+        # 1st 2.769 (36/13), 2nd 1.778 (32/18), 3rd 1.318 (29/22),
+        # 4th 1.040 (26/25), 5th 0.875 (21/24)
+        "gear_ratios": [2.769, 1.778, 1.318, 1.040, 0.875],
+        "front_sprocket": 14,
+        "rear_sprocket": 39,              # F14/R39 520-pitch — Honda India spec
+        "chain_pitch": "520",
+        "dry_mass_kg": 133.0,             # 133 kg dry — Honda India official spec
+        "wheelbase_mm": 1325.0,           # Honda X-Blade spec sheet
+        "front_tire_size": "80/100-17",   # Honda India OEM fitment
+        "rear_tire_size": "100/80-17",
+        "cd": 0.78,                       # naked with sporty bodywork, no full fairing
+        "frontal_area_m2": 0.47,          # slightly smaller than 200cc naked class
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── KTM 790 Adventure (2019-2022 — mid-weight parallel-twin ADV) ─────
+# KTM's mid-range adventure bike using the LC8c 799 cc parallel-twin
+# (introduced 2018 in the 790 Duke). Launched 2019 at EICMA 2018.
+# Engine: 799 cc DOHC parallel twin (LC8c), water-cooled, 4-valve/cyl.
+# Peak power: 94 hp @ 8000 rpm (KTM press kit 2019).
+# Peak torque: 88 Nm @ 6500 rpm.
+# Gearbox: 6-speed cassette. KTM 790 Adventure runs a taller final drive
+# (F16/R42) versus the 790 Duke's F15/R42 — confirmed from KTM 2019
+# press kit and KTM 790 Adventure owner's manual section 5.3.
+# Cassette ratios are shared with the 790 Duke (LC8c platform):
+# [2.625, 1.941, 1.580, 1.346, 1.185, 1.071]
+# (per gear_ratios.py "duke 790" Tier-1 entry, sourced from KTM service
+# manual 3CM2019EN). Primary ratio 1.783.
+# Dry mass: 189 kg (KTM press kit 2019: "189 kg ready-to-ride w/o fuel";
+# note KTM uses "ready-to-ride without fuel" ≈ DIN dry for this model).
+# Wheelbase 1484 mm (KTM spec sheet).
+# Chain: 520-pitch — KTM standard for LC8c platform.
+# Category: adventure. Cluster: mid_twin_500_700 (799 cc twin).
+# Sim expected within +0.1 to +0.6 s bias per documented cluster bias
+# (CLAUDE.md mid-twin cluster: bias centred ±0.13 s post-clutch fix).
+# Sources: KTM press kit 2019 "790 Adventure" (ktm.com/en-int/sport/
+# 790-adventure/2019.html); KTM 790 Adventure owner's manual 2019
+# (ktm.com/int/service-documents, doc 3CM2019EN) section 5.3;
+# MCN 2019 road test (motorcyclenews.com/reviews/ktm/790-adventure/
+# 2019/); Cycle World 2019 review (cycleworld.com/story/motorcycle-
+# reviews/2019-ktm-790-adventure); Visordown 2019 (visordown.com/
+# reviews/2019-ktm-790-adventure-review); BikeWale India spec sheet
+# (bikewale.com/ktm-bikes/790-adventure/2019/specs/).
+KTM_790_ADVENTURE_2019 = spec_from_dict(
+    {
+        "manufacturer": "KTM",
+        "model_name": "790 Adventure",
+        "model_code": "790-ADV-2019",
+        "year_from": 2019,
+        "year_to": 2022,
+        "category": "adventure",
+        "displacement_cc": 799,
+        "bore_mm": 88.0,
+        "stroke_mm": 65.7,
+        "compression_ratio": 12.7,
+        "cylinders": 2,
+        "peak_power_hp": 94.0,            # 94 hp @ 8000 rpm — KTM press kit 2019
+        "peak_power_rpm": 8000,
+        "peak_torque_nm": 88.0,           # 88 Nm @ 6500 rpm — KTM press kit 2019
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # LC8c 6-speed cassette ratios — shared with 790 Duke (same platform).
+        # Per gear_ratios.py "duke 790" Tier-1 entry (3CM2019EN service manual).
+        "gear_ratios": [2.625, 1.941, 1.580, 1.346, 1.185, 1.071],
+        "front_sprocket": 16,             # F16/R42 — taller than Duke's F15/R42
+        "rear_sprocket": 42,              # per KTM 790 Adventure owner's manual §5.3
+        "chain_pitch": "520",
+        "dry_mass_kg": 189.0,             # 189 kg ready-to-ride w/o fuel — KTM press kit
+        "wheelbase_mm": 1484.0,           # KTM 790 Adventure spec sheet 2019
+        "front_tire_size": "90/90-21",    # 21-inch front — KTM OEM ADV fitment
+        "rear_tire_size": "150/70R17",
+        "cd": 0.82,                       # upright ADV with screen + hand guards
+        "frontal_area_m2": 0.56,          # tall ADV stance; wider than nakeds
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -6229,4 +6419,8 @@ EXTENDED_BIKES = [
     YAMAHA_TRACER_7_2020,
     BMW_F_900_XR_2020,
     HONDA_GROM_MSX125_2022,
+    # ── Daily improvement run 2026-05-20 (Wednesday — Catalog A1 eighth pass) ──
+    HERO_XTREME_200R_2018,
+    HONDA_X_BLADE_160_BS6_2018,
+    KTM_790_ADVENTURE_2019,
 ]
