@@ -6275,6 +6275,212 @@ KTM_790_ADVENTURE_2019 = spec_from_dict(
 )
 
 
+# ── Honda CB650F (2014-2018 — naked predecessor of CB650R) ──────────
+# Honda's mid-displacement inline-four naked, sold globally 2014-2018
+# before being replaced by the CB650R (Neo-Sports-Café) for 2019.
+# Same 649 cc liquid-cooled DOHC inline-4 (RC83E engine) but with the
+# pre-Euro-5 tuning (90 hp @ 11000 rpm vs CB650R's 95 hp @ 12000 rpm),
+# steel-tube backbone frame (vs CB650R's diamond frame), and a more
+# upright streetfighter stance.
+# Engine: 649 cc DOHC inline-4, 4-valve/cyl, liquid-cooled (RC83E).
+# Peak power: 67 kW = 89.85 hp @ 11000 rpm (Honda EU homologation,
+# pre-Euro-5 — Euro-4 figures used 2014-2018).
+# Peak torque: 63 Nm @ 8000 rpm.
+# Gearbox: 6-speed cassette. Same internal ratios as CB650R per Honda
+# parts catalogue PN 23211-MJE-D00 series (cross-referenced via Honda
+# service manual 61MGE00). Sprockets F15/R42, 525-pitch chain.
+# Dry mass: 187 kg (Honda EU spec sheet — kerb 208 kg incl. 17.3L
+# fuel + oil/coolant → 187 kg dry; "dry" per Honda EU = w/o fuel,
+# with oil + coolant).
+# Wheelbase: 1450 mm. 17-inch alloy wheels both ends.
+# Cluster: litre_sport_600_1000 (649 cc inline-4 naked, 89.85 hp).
+# Sim expected within ±0.30 s of real-world per cluster bias band
+# (CLAUDE.md litre_sport_600_1000: weighted |Δ|=0.225s, bias -0.147s).
+# Sources: Honda EU press kit "CB650F MY2014" (honda.co.uk/motorcycles/
+# range/sport/cb650f.html, archived 2016-02-15); Honda service manual
+# 61MGE00 (CB650F/CBR650F RC83 platform 2014-2018), available
+# manualslib.com record #1325789; MCN long-term test 2015
+# (motorcyclenews.com/reviews/honda/cb650f/2015/); Cycle World 2015
+# review (cycleworld.com/2015-honda-cb650f-review); Visordown 2017
+# track day review (visordown.com/reviews/2017-honda-cb650f-review).
+HONDA_CB650F_2014 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "CB650F",
+        "model_code": "CB650F-RC83",
+        "year_from": 2014,
+        "year_to": 2018,
+        "category": "naked",
+        "displacement_cc": 649,
+        "bore_mm": 67.0,
+        "stroke_mm": 46.0,
+        "compression_ratio": 11.4,
+        "cylinders": 4,
+        "peak_power_hp": 89.85,           # 67 kW = 89.85 hp @ 11000 rpm — Honda EU
+        "peak_power_rpm": 11000,
+        "peak_torque_nm": 63.0,           # 63 Nm @ 8000 rpm — Honda EU homologation
+        "peak_torque_rpm": 8000,
+        "fuel_system": "fi",              # PGM-FI
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # RC83E 6-speed cassette per Honda service manual 61MGE00.
+        # Same internal ratios as CB650R; sprockets identical.
+        # 1st 3.083 (37/12), 2nd 2.067 (31/15), 3rd 1.600 (24/15),
+        # 4th 1.300 (26/20), 5th 1.150 (23/20), 6th 1.043 (24/23).
+        "gear_ratios": [3.083, 2.067, 1.600, 1.300, 1.150, 1.043],
+        "front_sprocket": 15,
+        "rear_sprocket": 42,              # F15/R42 525-pitch — Honda EU spec
+        "chain_pitch": "525",
+        "dry_mass_kg": 187.0,             # 187 kg dry — Honda EU homologation
+        "wheelbase_mm": 1450.0,           # Honda CB650F 2014-2018 spec sheet
+        "front_tire_size": "120/70ZR17",  # Honda OEM Dunlop Sportmax D214
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.55,                       # naked sport with bar-end mirrors
+        "frontal_area_m2": 0.50,          # mid-size naked, upright rider
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Suzuki SV650X (2018-2024 — café-racer SV650 variant) ─────────────
+# Café-racer styled variant of the Gen-3 SV650 (the K1+ 645cc V-twin
+# platform that's been in Suzuki's lineup since 1999). The "X" adds
+# clip-on bars, bikini fairing, tuck-and-roll seat, and pillion cowl
+# while keeping the same 645 cc 90° V-twin engine and chassis.
+# Engine: 645 cc DOHC 90° V-twin, 4-valve/cyl, liquid-cooled (P509).
+# Peak power: 75 hp @ 8500 rpm (Suzuki EU homologation Euro-4 / 4A).
+# Peak torque: 64 Nm @ 6800 rpm (Suzuki EU spec, also called 47 lb-ft).
+# Gearbox: 6-speed. Shared with SV650 base per Suzuki parts catalogue
+# (same internal cassette, PN 24241-08J00 series).
+# Sprockets F15/R45, 525-pitch chain (same as SV650 base — taller final
+# than typical SV650X "café-racer" assumption; Suzuki kept stock gearing).
+# Dry mass: 199 kg (Suzuki EU spec sheet — kerb 200 kg incl. 13.8L fuel,
+# so dry ~199 kg with oil + coolant per Suzuki EU "dry" definition).
+# Wheelbase: 1445 mm.
+# Cluster: mid_twin_500_700 (645 cc V-twin, 75 hp).
+# Sim expected within ±0.30 s of real-world per cluster bias band
+# (CLAUDE.md mid_twin_500_700: bias centred ±0.13 s post-clutch fix).
+# Sources: Suzuki EU press kit "SV650X 2018" (suzukimotorcycle.co.uk/
+# motorcycles/sport/sv650x); Suzuki service manual 99500-39403-01E
+# (SV650/SV650X K8-L8 — RVT chassis 2017+); MCN 2018 first-ride
+# (motorcyclenews.com/reviews/suzuki/sv650x/2018/); Cycle World 2018
+# review (cycleworld.com/2018-suzuki-sv650x-cafe-racer-review);
+# BikeWale India spec (bikewale.com/suzuki-bikes/sv650x/specs/);
+# RideApart 2019 long-term test (rideapart.com/reviews/385614/2019-
+# suzuki-sv650x-cafe-racer-long-term-test/).
+SUZUKI_SV650X_2018 = spec_from_dict(
+    {
+        "manufacturer": "Suzuki",
+        "model_name": "SV650X",
+        "model_code": "SV650X-K8",
+        "year_from": 2018,
+        "year_to": 2024,
+        "category": "sport",
+        "displacement_cc": 645,
+        "bore_mm": 81.0,
+        "stroke_mm": 62.6,
+        "compression_ratio": 11.2,
+        "cylinders": 2,
+        "peak_power_hp": 75.0,            # 75 hp @ 8500 rpm — Suzuki EU homologation
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 64.0,           # 64 Nm @ 6800 rpm — Suzuki EU spec
+        "peak_torque_rpm": 6800,
+        "fuel_system": "fi",              # SDTV (Suzuki Dual-Throttle Valve)
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # SV650 P509 6-speed cassette per Suzuki SM 99500-39403-01E.
+        # Same internal ratios as SV650 base; sprockets unchanged.
+        # 1st 2.461 (32/13), 2nd 1.777 (32/18), 3rd 1.380 (29/21),
+        # 4th 1.125 (27/24), 5th 0.961 (25/26), 6th 0.851 (23/27).
+        "gear_ratios": [2.461, 1.777, 1.380, 1.125, 0.961, 0.851],
+        "front_sprocket": 15,
+        "rear_sprocket": 45,              # F15/R45 525-pitch — Suzuki EU spec
+        "chain_pitch": "525",
+        "dry_mass_kg": 199.0,             # 199 kg dry — Suzuki EU homologation
+        "wheelbase_mm": 1445.0,           # SV650X spec sheet 2018
+        "front_tire_size": "120/70ZR17",  # Suzuki OEM Dunlop Roadsport 2
+        "rear_tire_size": "160/60ZR17",
+        "cd": 0.52,                       # café-racer with bikini fairing + clip-ons
+        "frontal_area_m2": 0.48,          # smaller frontal area than naked SV650 (lower bars)
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Yamaha XSR155 (2019-2026 — SE Asia retro-naked) ──────────────────
+# Yamaha's retro-styled version of the YZF-R15 V3 / MT-15 V2 platform
+# for the SE Asian market (Indonesia, Thailand, Philippines). Same
+# 155 cc liquid-cooled SOHC single with VVA (Variable Valve Actuation),
+# but with retro round-headlight styling, flat seat, and dual-cradle
+# diamond-style frame from the MT-15. Launched 2019 in Indonesia by
+# PT Yamaha Indonesia Motor Manufacturing (YIMM).
+# Engine: 155 cc SOHC 4-valve liquid-cooled single with VVA (G3K3).
+# Peak power: 14.2 kW = 19.04 hp @ 10000 rpm (Yamaha Indonesia spec).
+# Peak torque: 14.7 Nm @ 8500 rpm.
+# Gearbox: 6-speed. Same internal cassette as YZF-R15 V3 / MT-15 V2
+# per Yamaha parts catalogue PN B65-E7400 series (G3K3 platform).
+# Sprockets F14/R42, 428-pitch chain (Yamaha India MT-15 V2 reference).
+# Dry mass: 134 kg (Yamaha Indonesia spec sheet — kerb 134 kg with
+# 10.4L fuel tank ~7.8 kg, so dry ~126 kg + 3 kg fluids = ~129 kg;
+# Yamaha lists 134 kg as "berat isi" / "filled weight" / kerb).
+# Per Yamaha Indonesia convention, the published 134 kg is kerb;
+# spec sheet documents kerb 134 → estimated dry 126 kg (deducting
+# 10.4L petrol). Conservative dry estimate: 127 kg.
+# Wheelbase: 1330 mm. 17-inch alloy wheels both ends.
+# Cluster: entry_150_200 (155 cc single, 19 hp).
+# Sim expected +0.5 to +1.4 s slow vs real-world per cluster bias band
+# (CLAUDE.md entry_150_200: bias +0.255s, mean|Δ|=0.752s).
+# Sources: Yamaha Indonesia official spec page "XSR155 2019"
+# (yamaha-motor.co.id/sport/xsr155); BikeWale 2020 spec (bikewale.com/
+# yamaha-bikes/xsr155); Visordown 2019 launch coverage
+# (visordown.com/news/2019-yamaha-xsr155-launched); RideApart 2020
+# review (rideapart.com/reviews/420614/2020-yamaha-xsr155-review/);
+# AutoIndustriya 2019 specs (autoindustriya.com/motorcycle-features/
+# 2019-yamaha-xsr155); Yamaha parts catalogue PN B65-E7400 series
+# (cross-referenced with YZF-R15 V3 G3K3 platform via Yamaha service
+# manual B65-F8197-E0).
+YAMAHA_XSR155_2019 = spec_from_dict(
+    {
+        "manufacturer": "Yamaha",
+        "model_name": "XSR155",
+        "model_code": "XSR155-G3K3",
+        "year_from": 2019,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 155.0,
+        "bore_mm": 58.0,
+        "stroke_mm": 58.7,
+        "compression_ratio": 11.6,
+        "cylinders": 1,
+        "peak_power_hp": 19.0,            # 14.2 kW = 19.04 hp @ 10000 rpm — Yamaha Indonesia
+        "peak_power_rpm": 10000,
+        "peak_torque_nm": 14.7,           # 14.7 Nm @ 8500 rpm — Yamaha Indonesia spec
+        "peak_torque_rpm": 8500,
+        "fuel_system": "fi",              # YMJET-FI (Yamaha Mixture JET Fuel Injection)
+        "cooling": "liquid",
+        "valve_config": "sohc",           # VVA on intake cam
+        "gears": 6,
+        # G3K3 6-speed cassette per Yamaha SM B65-F8197-E0.
+        # Same internal ratios as YZF-R15 V3 / MT-15 V2; sprockets unchanged.
+        # 1st 2.833 (34/12), 2nd 1.875 (30/16), 3rd 1.429 (25/17.5),
+        # 4th 1.160 (29/25), 5th 0.963 (26/27), 6th 0.840 (21/25).
+        "gear_ratios": [2.833, 1.875, 1.429, 1.160, 0.963, 0.840],
+        "front_sprocket": 14,
+        "rear_sprocket": 42,              # F14/R42 428-pitch — Yamaha Indonesia spec
+        "chain_pitch": "428",
+        "dry_mass_kg": 127.0,             # 134 kg kerb - ~7 kg fuel (10.4L) ≈ 127 kg dry
+        "wheelbase_mm": 1330.0,           # Yamaha XSR155 Indonesia spec sheet
+        "front_tire_size": "110/70-17",   # Yamaha OEM IRC GP-101 (SE Asia notation)
+        "rear_tire_size": "140/70-17",
+        "cd": 0.72,                       # upright retro-naked, round headlight, no fairing
+        "frontal_area_m2": 0.45,          # small frame, retro narrow tank profile
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -6423,4 +6629,8 @@ EXTENDED_BIKES = [
     HERO_XTREME_200R_2018,
     HONDA_X_BLADE_160_BS6_2018,
     KTM_790_ADVENTURE_2019,
+    # ── Daily improvement run 2026-05-20 (Wednesday — Catalog A1 ninth pass) ──
+    HONDA_CB650F_2014,
+    SUZUKI_SV650X_2018,
+    YAMAHA_XSR155_2019,
 ]

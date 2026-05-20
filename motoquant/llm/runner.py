@@ -71,6 +71,39 @@ class SimDict(_SimDictBase, total=False):
 
 
 # ───────────────────────────────────────────────────────────────────
+# CompareDict — typed shape returned by _run_compare on success
+# ───────────────────────────────────────────────────────────────────
+
+
+class _CompareBikeEntry(TypedDict):
+    """One side (A or B) of a head-to-head compare result.
+
+    ``bike_id`` and ``bike_name`` are pulled directly from the parsed
+    request; ``sim`` is the SimDict produced by `_run_one_sim` for that
+    bike.
+    """
+
+    bike_id: int | None
+    bike_name: str | None
+    sim: SimDict
+
+
+class CompareDict(TypedDict):
+    """Full compare-intent result dict.
+
+    Shape pinned by `_summarize_compare` (which reads ``a``, ``b``,
+    ``delta_et_s``, ``delta_trap_kmh``, ``faster``) and by the web/desktop
+    ChatPanel surfaces — do NOT rename without updating both consumers.
+    """
+
+    a: _CompareBikeEntry
+    b: _CompareBikeEntry
+    delta_et_s: float       # A.et_quarter_s - B.et_quarter_s, rounded to 4dp
+    delta_trap_kmh: float   # A.trap_speed_kmh - B.trap_speed_kmh, rounded to 1dp
+    faster: str             # "A" | "B" | "tie"
+
+
+# ───────────────────────────────────────────────────────────────────
 # ChatResult — structured return value
 # ───────────────────────────────────────────────────────────────────
 
@@ -105,7 +138,7 @@ class ChatResult:
 
     # Intent-specific payloads
     sim_result: SimDict | None = None  # simulate
-    compare_result: dict[str, Any] | None = None  # compare
+    compare_result: CompareDict | None = None  # compare
     rank_result: dict[str, Any] | None = None  # rank
     recommend_result: dict[str, Any] | None = None  # recommend
     explain_result: dict[str, Any] | None = None  # explain
@@ -285,7 +318,7 @@ def _run_compare(
     else:
         faster = "tie"
 
-    result.compare_result = {
+    compare_payload: CompareDict = {
         "a": {
             "bike_id": parsed.bike_id,
             "bike_name": parsed.bike_name,
@@ -300,6 +333,7 @@ def _run_compare(
         "delta_trap_kmh": round(delta_trap, 1),
         "faster": faster,
     }
+    result.compare_result = compare_payload
 
     if run_summary:
         try:
@@ -948,7 +982,7 @@ def _llm_text(client: LLMClient | None, system: str, user: str) -> str:
 
 
 def _summarize_compare(
-    parsed: ParsedSimRequest, comp: dict[str, Any], client: LLMClient | None
+    parsed: ParsedSimRequest, comp: CompareDict, client: LLMClient | None
 ) -> str:
     sys_p = (
         "You are MotoQuant, a drag-racing tuner. Compare these two bikes "
