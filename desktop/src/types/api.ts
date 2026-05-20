@@ -117,6 +117,34 @@ export interface PartsCategoriesResponse {
   categories: PartsCategory[];
 }
 
+// Match clause inside fitment_rules (family/category-tier constraints).
+// Schema documented at motoquant/database/schema.py::parts.fitment_rules.
+// Every field is optional because each part declares only the constraints
+// relevant to it (e.g. a "bodywork" universal part may omit all of them).
+export interface FitmentMatch {
+  manufacturers?: string[];
+  engine_configs?: string[]; // "I1" | "I2" | "I3" | "I4" | "V2" | "V4" | ...
+  categories?: string[];
+  displacement_min_cc?: number;
+  displacement_max_cc?: number;
+  chain_pitch?: string; // "428" | "520" | "525" | "530"
+  stroke_type?: number; // 2 or 4
+  [extra: string]: unknown; // tolerate future schema additions (e.g. model_keywords)
+}
+
+// Shape of a parsed fitment_rules JSON blob as returned by /api/parts.
+// `tier` is one of "exact" | "family" | "category" | "universal" (see
+// motoquant/parts/compatibility.py). API may also return the raw JSON string
+// if parsing fails; the union below documents that fallback explicitly.
+export interface FitmentRule {
+  tier: "exact" | "family" | "category" | "universal" | string;
+  bike_ids?: number[];
+  excluded_bike_ids?: number[];
+  match?: FitmentMatch;
+  description?: string;
+  [extra: string]: unknown;
+}
+
 export interface Part {
   id: number;
   category_id: number;
@@ -131,8 +159,12 @@ export interface Part {
   param_deltas?: Record<string, number> | null;
   param_multipliers?: Record<string, number> | null;
   specifications?: Record<string, unknown> | null;
-  compatible_bikes?: unknown;
-  fitment_rules?: unknown;
+  // Legacy exact-bike compatibility list (JSON array of bike_model_ids).
+  // Falls back to `string` if the API couldn't parse the stored JSON.
+  compatible_bikes?: number[] | string | null;
+  // Family-/category-tier fitment ruleset. Falls back to `string` if the API
+  // couldn't parse the stored JSON.
+  fitment_rules?: FitmentRule | string | null;
   compatible?: boolean;
   fitment_reason?: string | null;
   [extra: string]: unknown;

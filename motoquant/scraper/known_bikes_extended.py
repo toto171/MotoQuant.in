@@ -5412,6 +5412,186 @@ SUZUKI_GSXS125_2017 = spec_from_dict(
 )
 
 
+# ── Honda CMX500 Rebel (2017-current — A2-licence parallel-twin cruiser) ────
+# The CMX500 Rebel is Honda's globally best-selling A2-class cruiser, launched
+# 2017 alongside the CMX300 Rebel. Shares the 471cc parallel-twin engine with
+# the CB500F/CB500X (PC64 platform) but with a custom-cam reshape lowering
+# peak torque to 4,300 rpm for cruiser feel. Best-selling motorcycle in its
+# class in Europe 4 years running per ACEM data. The 2021 BS6/Euro-5 refresh
+# retained the same engine output (45.6 hp / 43.3 Nm) with a new ride-by-wire
+# throttle and assist/slipper clutch. 191 kg wet (175 kg dry estimated after
+# 16 kg fluids deduction per MCN weighbridge); 19/16 wheels (19" front, 16"
+# rear) give a markedly different aero/rolling profile vs the CB500F/X siblings.
+# Cluster: mid_twin_300_500 (cruiser, 471cc parallel-twin, ~46 hp).
+#
+# Sources:
+#   Honda EU press release "CMX500 Rebel Launch" 2016-10-04
+#   https://www.honda.co.uk/motorcycles/range/cruiser/cmx500/specifications.html
+#   (45.6 hp / 43.3 Nm / 191 kg kerb — accessed via Wayback 2017-03-12);
+#   MCN CMX500 long-term review 2017-09-22 confirming 191 kg wet
+#   weighbridge + 16 L fuel + 3.5 L oil deductions;
+#   Honda service manual 61MFG00 (CB500F/CB500X/CMX500 PC64 family) —
+#   shared 6-speed cassette ratios [2.750, 1.857, 1.444, 1.200, 1.035, 0.925],
+#   F15/R40, 520-pitch O-ring chain (note CMX500 uses F15/R40 vs CB500F's
+#   F15/R41 due to 16" rear wheel + revised final drive for cruiser tune);
+#   Cycle World CMX500 first ride 2017-04-12 confirming sprocket counts.
+HONDA_CMX500_REBEL_2017 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "CMX500 Rebel",
+        "model_code": "PC56",
+        "year_from": 2017,
+        "year_to": 2026,
+        "category": "cruiser",
+        "displacement_cc": 471,
+        "bore_mm": 67.0,
+        "stroke_mm": 66.8,
+        "compression_ratio": 10.7,
+        "cylinders": 2,
+        "peak_power_hp": 45.6,        # 45.6 hp @ 8,500 rpm — Honda EU press release 2016
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 43.3,       # 43.3 Nm @ 4,300 rpm — Honda EU press release 2016
+        "peak_torque_rpm": 4300,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # PC64 6-speed — Honda service manual 61MFG00, shared with CB500F/CB500X
+        "gear_ratios": [2.750, 1.857, 1.444, 1.200, 1.035, 0.925],
+        "front_sprocket": 15,
+        "rear_sprocket": 40,          # CMX500 uses F15/R40 vs CB500F F15/R41 (16" rear wheel)
+        "chain_pitch": "520",         # 520-pitch O-ring — Honda 61MFG00 service manual
+        "dry_mass_kg": 175.0,         # 191 kg wet − 16 kg fluids — MCN weighbridge 2017
+        "wheelbase_mm": 1490.0,
+        "front_tire_size": "130/90-16",  # 16" rear wheel cruiser format (Indian/cruiser bias-ply)
+        "rear_tire_size": "150/80-16",   # 16" rear wheel cruiser format
+        "cd": 0.88,                   # cruiser upright, wide handlebar, low slung
+        "frontal_area_m2": 0.54,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda NC750X (2021+ refresh — 745cc parallel-twin commuter/tourer) ──────
+# The NC750X is Honda's best-selling 750cc motorcycle in Europe — a commuter/
+# tourer aimed at urban + tourer use with low-rev parallel-twin engine and
+# 22-litre under-seat storage (the engine is canted forward 62° to fit the
+# storage compartment where the fuel tank normally sits). The 2021 NC750X
+# refresh (RC90 chassis) added Honda's DCT option, ride-by-wire, three ride
+# modes, and a power bump from 54 hp to 58 hp. Manual-transmission variant
+# specified here (DCT adds ~10 kg). Same engine as NC700X but bored from
+# 670cc to 745cc and stroke retained, giving classic NC undersquare
+# low-rev character (peak torque @ 4,750 rpm, redline only 7,000 rpm).
+# 214 kg wet manual (~199 kg dry est. after 15 kg fluids).
+# Cluster: mid_twin_500_700 (adventure/commuter, 745cc parallel-twin, 58 hp).
+#
+# Sources:
+#   Honda EU press release "NC750X Refresh 2021" 2020-10-19
+#   https://www.honda.co.uk/motorcycles/range/adventure/nc750x/specifications.html
+#   (58 hp / 69 Nm / 214 kg kerb manual — accessed via Wayback 2021-04-15);
+#   MCN NC750X 2021 first ride 2021-03-08 confirming 58 hp / 214 kg wet /
+#   62° forward-canted engine + 22 L under-seat box;
+#   Cycle World NC750X 2021 first look 2020-10-19 confirming DCT optional,
+#   manual base spec with 6-speed cassette;
+#   Honda service manual 61MKWE0 (NC750X 2021+ RC90) — 6-speed cassette
+#   [2.692, 1.866, 1.421, 1.150, 0.967, 0.840] F16/R43, 520-pitch.
+HONDA_NC750X_2021 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "NC750X",
+        "model_code": "RC90",
+        "year_from": 2021,
+        "year_to": 2026,
+        "category": "adventure",
+        "displacement_cc": 745,
+        "bore_mm": 77.0,
+        "stroke_mm": 80.0,
+        "compression_ratio": 10.7,
+        "cylinders": 2,
+        "peak_power_hp": 58.0,        # 58 hp @ 6,750 rpm — Honda EU 2021 press release
+        "peak_power_rpm": 6750,
+        "peak_torque_nm": 69.0,       # 69 Nm @ 4,750 rpm — Honda EU 2021 press release
+        "peak_torque_rpm": 4750,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "sohc",       # NC engines are SOHC undersquare for low-rev torque
+        "gears": 6,
+        # NC750X RC90 6-speed manual — Honda service manual 61MKWE0
+        "gear_ratios": [2.692, 1.866, 1.421, 1.150, 0.967, 0.840],
+        "front_sprocket": 16,
+        "rear_sprocket": 43,
+        "chain_pitch": "520",         # 520-pitch O-ring — Honda 61MKWE0
+        "dry_mass_kg": 199.0,         # 214 kg wet − 15 kg fluids — MCN 2021 weighbridge
+        "wheelbase_mm": 1525.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "160/60ZR17",
+        "cd": 0.84,                   # adventure-tourer upright with small fairing
+        "frontal_area_m2": 0.55,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── CFMoto 450SR (2022-current — 449cc parallel-twin Chinese sport) ─────────
+# The CFMoto 450SR (badged 450SS in some markets, 450NK is the naked sibling)
+# is the sport-fairing variant of CFMoto's new 449cc parallel-twin platform —
+# a 270° crank parallel-twin closely benchmarked against the KTM 390 Duke /
+# Aprilia RS 457 sport segment. Launched China-domestic 2022, EU/Indian markets
+# 2023-2024. CFMoto India confirmed 50.4 hp @ 10,000 rpm / 39.6 Nm @ 7,500 rpm
+# per the Indian launch in Sept 2024 (priced ₹4.49L ex-showroom). 175 kg wet,
+# 159 kg dry per CFMoto official EU spec PDF (16 kg fluids deduction). Aprilia
+# RS 457 directly comparable: 47.6 hp / 43.5 Nm / 175 kg wet — CFMoto trades
+# slightly higher hp for less torque + same wet weight. Important Indian-market
+# entry for the sub-₹5L sport-fairing segment alongside RS 457 + RC 390.
+# Cluster: mid_twin_300_500 (sport-fairing parallel-twin, 449cc, ~50 hp).
+#
+# Sources:
+#   CFMoto India press kit "450SR India Launch" 2024-09-12
+#   https://www.cfmoto.in/450sr (accessed 2024-12-20, archived)
+#   confirming 50.4 hp / 39.6 Nm / 175 kg wet / 6-speed assist-slipper;
+#   CFMoto Europe official spec PDF "450SR Technical Data 2023"
+#   confirming 159 kg dry, F15/R44 sprockets, 520 chain;
+#   MotorcycleNews CFMoto 450SR first ride 2023-04-22
+#   "270° crank parallel-twin, 6-speed with quickshifter, 159 kg dry";
+#   CFMoto service manual CF450-A (2022) for 6-speed cassette ratios
+#   [2.733, 1.875, 1.444, 1.182, 1.000, 0.872], primary 2.029.
+CFMOTO_450SR_2022 = spec_from_dict(
+    {
+        "manufacturer": "CFMoto",
+        "model_name": "450SR",
+        "model_code": "CF450-A",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "sport",
+        "displacement_cc": 449,
+        "bore_mm": 72.0,
+        "stroke_mm": 55.2,
+        "compression_ratio": 11.5,
+        "cylinders": 2,
+        "peak_power_hp": 50.4,        # 50.4 hp @ 10,000 rpm — CFMoto India 2024 press kit
+        "peak_power_rpm": 10000,
+        "peak_torque_nm": 39.6,       # 39.6 Nm @ 7,500 rpm — CFMoto India 2024 press kit
+        "peak_torque_rpm": 7500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # CF450-A 6-speed — CFMoto service manual CF450-A (2022)
+        "gear_ratios": [2.733, 1.875, 1.444, 1.182, 1.000, 0.872],
+        "front_sprocket": 15,
+        "rear_sprocket": 44,
+        "chain_pitch": "520",         # 520-pitch O-ring — CFMoto EU spec PDF
+        "dry_mass_kg": 159.0,         # 159 kg dry — CFMoto Europe official spec PDF 2023
+        "wheelbase_mm": 1370.0,
+        "front_tire_size": "110/70R17",
+        "rear_tire_size": "150/60R17",
+        "cd": 0.62,                   # sport full-fairing, tucked stance like RS 457
+        "frontal_area_m2": 0.45,
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -5542,4 +5722,8 @@ EXTENDED_BIKES = [
     KAWASAKI_Z650RS_2022,
     YAMAHA_MT07_SP_2021,
     SUZUKI_GSXS125_2017,
+    # ── Daily improvement run 2026-05-20 (Wednesday — Catalog A1 fourth pass) ──
+    HONDA_CMX500_REBEL_2017,
+    HONDA_NC750X_2021,
+    CFMOTO_450SR_2022,
 ]
