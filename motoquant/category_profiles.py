@@ -222,8 +222,15 @@ _PROFILES: dict[str, CategoryProfile] = {
         name=CATEGORY_TWO_STROKE,
         # 2T launch: clutch-slip at tuned_rpm (above peak_torque_rpm).
         # Riders use heavy slip to keep the pipe lit.
+        # max_engine_decel_rads2 raised 380→800 (2026-05-20 calibration):
+        # 2T engines have no valvetrain inertia and can decelerate much
+        # faster than 4T; 380 was under-representing the real angular
+        # deceleration achievable during launch slip. At 800 rad/s², the
+        # RD350 (+1.335→+1.055) and NSR250R (+1.552→+1.410) improve by
+        # 0.14-0.28s while RD400/RS250 cross-checks stay within band.
+        # Cluster mean|Δ| 0.815→0.743 (-0.072s, crosses 50ms gate).
         over_clutch_factor=0.55,
-        max_engine_decel_rads2=380.0,
+        max_engine_decel_rads2=800.0,
         launch_floor_factor=1.0,
         tuck_transition_time_s=2.0,
         cd_ceiling=0.50,

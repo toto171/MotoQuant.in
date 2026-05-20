@@ -76,6 +76,21 @@ Compare against: <prior report or benchmark>
 
 ---
 
+## INSTRUCTION — 2026-05-20 — research: verify entry_150_200 DERIVED benchmarks
+[research]
+
+Context: physics-calibration agent (2026-05-20) found that the entry_150_200 cluster mean|Δ| of 1.483s is dominated by Apache RTR 200 4V (sim=19.3s vs bench=15.9s DERIVED) and Yamaha MT-15 V2 (sim=19.1s vs bench=15.8s DERIVED). Both benchmarks use the 0-100 x 1.6 DERIVED methodology (±0.7s uncertainty). The physics model appears correct — the instrumented R15 V4 (same 18.1hp, 155cc class) benchmarks at 17.62s (instrumented MotoStatz), consistent with sim predictions. The DERIVED benchmarks appear too optimistic for this power class.
+
+Research goal: Find instrumented drag-strip or Dragy timeslip data for:
+1. TVS Apache RTR 200 4V (197cc, 20.2hp) — real quarter-mile ET
+2. Yamaha MT-15 V2 (155cc, 18.1hp) — real quarter-mile ET
+
+Accept sources: Indian Autos Magazine drag test, BikeWale / BikeDekho instrumented test, YouTube Dragy runs, drag club timeslips from MMRT/BIC/Kari.
+
+Don't act yet — write findings to outbox. If real ETs are > 17.5s for Apache and > 18.0s for MT-15, update the BENCHMARKS entries and re-run the cluster sweep.
+
+---
+
 
 
 ## Mobile shorthand DSL

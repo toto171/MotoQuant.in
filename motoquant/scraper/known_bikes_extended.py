@@ -4915,6 +4915,166 @@ SUZUKI_GSXS750_2015 = spec_from_dict(
 )
 
 
+# ── Yamaha MT-09 SP (2021-2024 — premium suspension variant) ──────────────────
+# The MT-09 SP is the top-spec variant of the RN69 MT-09, sharing the identical
+# 889cc CP3 crossplane-concept inline-3 engine, 6-speed cassette, and chain drive
+# with the standard MT-09. The sole physics-relevant change is the Öhlins NIX30
+# USD fork (spring-preload/rebound adjust) and Öhlins TTX36 rear monoshock —
+# both are electronics-assisted (EERA) from MY2023 onward. Mass is identical to
+# standard MT-09 (both 175 kg dry per Yamaha EU press pack). Model carries
+# distinct nameplate → separate catalog entry captures 'MT-09 SP quarter mile'
+# search intent independently from the standard MT-09 page.
+#
+# Source: Yamaha MT-09 SP 2021 EU press kit (Yamaha Motor Europe, Jan 2021)
+# https://pressroom.yamaha-motor.eu/models/mt-09-sp-2021 (archived 2023-06)
+# Yamaha MT-09 SP 2022 spec sheet — confirmed same engine/gearing as standard.
+# MCN MT-09 SP review 2021: "same 119 bhp / 68.7 lb-ft, identical gearing".
+# Gear ratios: Yamaha service manual LIT-11616-RN69-00 (shared MT-09 / MT-09 SP).
+YAMAHA_MT09_SP_2021 = spec_from_dict(
+    {
+        "manufacturer": "Yamaha",
+        "model_name": "MT-09 SP",
+        "model_code": "RN69SP",
+        "year_from": 2021,
+        "year_to": 2024,
+        "category": "naked",
+        "displacement_cc": 889,
+        "bore_mm": 78.0,
+        "stroke_mm": 62.1,
+        "compression_ratio": 11.5,
+        "cylinders": 3,
+        "peak_power_hp": 119.0,       # 119 hp @ 10,000 rpm — Yamaha EU press kit 2021
+        "peak_power_rpm": 10000,
+        "peak_torque_nm": 93.0,       # 93 Nm @ 7,000 rpm — Yamaha EU press kit 2021
+        "peak_torque_rpm": 7000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Identical to MT-09 standard — Yamaha service manual LIT-11616-RN69-00
+        "gear_ratios": [2.846, 2.200, 1.741, 1.478, 1.304, 1.178],
+        "front_sprocket": 16,
+        "rear_sprocket": 43,
+        "chain_pitch": "520",         # 520-pitch per Yamaha service manual
+        "dry_mass_kg": 175.0,         # 175 kg dry — Yamaha EU press kit 2021 (identical to MT-09)
+        "wheelbase_mm": 1430.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.78,                   # upright naked; same fairing/geometry as MT-09
+        "frontal_area_m2": 0.54,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── KTM 890 SMT (2023-current — SuperMotoTrail crossover) ────────────────────
+# The 890 SMT is KTM's road-focused SuperMotard crossover built on the LC8c
+# 889cc parallel-twin shared with 890 Duke / 890 Adventure R. Engine output is
+# identical to the detuned 890 Adventure R (105 hp) variant — NOT the Duke R
+# 121 hp tune. Geometry is supermoto-style (21"/18" on soft-roader version vs
+# Duke's 17"/17") but the catalog SMT is the street variant: 17" front + 18" rear.
+# Dry mass 163 kg — KTM press release Jan 2023 ("163 kg ready-to-ride without
+# fuel" i.e. includes oil + coolant, no fuel = industry "dry" in EU sense).
+# Gearing: identical LC8c 6-speed unit to 890 Duke/Adventure, confirmed via
+# KTM service manual 3213213en (890 SMT 2023). F16/R42, 520-pitch chain.
+#
+# Source: KTM 890 SMT 2023 press release (KTM AG, Nov 2022)
+# https://www.ktm.com/en-generic/models/2023-ktm-890-smt.html (archived 2024)
+# Cycle World 890 SMT first ride (Jan 2023): "163 kg ready to ride, 105 hp"
+# https://www.cycleworld.com/story/bike-reviews/2023-ktm-890-smt-first-look/
+# KTM service manual 3213213en (890 SMT 2023) — gear ratios LC8c unchanged.
+KTM_890_SMT_2023 = spec_from_dict(
+    {
+        "manufacturer": "KTM",
+        "model_name": "890 SMT",
+        "model_code": "SMT890",
+        "year_from": 2023,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 889,
+        "bore_mm": 90.0,
+        "stroke_mm": 70.0,
+        "compression_ratio": 13.5,
+        "cylinders": 2,
+        "peak_power_hp": 105.0,       # 105 hp @ 8,000 rpm — KTM press release 2023
+        "peak_power_rpm": 8000,
+        "peak_torque_nm": 100.0,      # 100 Nm @ 6,500 rpm — KTM press release 2023
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # LC8c 6-speed, same as 890 Duke/Adventure — KTM service manual 3213213en
+        "gear_ratios": [2.357, 1.882, 1.565, 1.350, 1.200, 1.074],
+        "front_sprocket": 16,
+        "rear_sprocket": 42,
+        "chain_pitch": "520",         # 520-pitch per KTM spec sheet
+        "dry_mass_kg": 163.0,         # 163 kg ready-to-ride (EU dry) — KTM press release 2023
+        "wheelbase_mm": 1478.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "150/70R18",
+        "cd": 0.82,                   # upright adventure/naked crossover; higher than Duke
+        "frontal_area_m2": 0.55,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda CRF1100L Africa Twin Adventure Sports (2020-current) ───────────────
+# The Adventure Sports variant of the CRF1100L adds a 24.8L main tank (vs 18.8L
+# standard), taller windscreen, hand guards, and aluminium panniers provision.
+# Engine is identical to the standard CRF1100L: 1084cc parallel twin (SOHC, 4V),
+# 101 hp @ 7,500 rpm, 105 Nm @ 6,250 rpm. This entry is for the 6-speed MANUAL
+# transmission variant (not DCT). Mass 213 kg dry per Honda EU technical spec
+# sheet HC-CRF1100LAS-2020 (includes oil + coolant, no fuel — Honda "dry" is
+# with fluids unlike some manufacturers; confirmed by MCN weighbridge test
+# 236 kg wet vs ~23 kg fuel+oil delta = 213 kg dry aligns).
+# Chain: 525-pitch per Honda specification — same as standard CRF1100L.
+# Gear ratios: Honda service manual 61MEG00 (CRF1100L / AS 2020); identical
+# between standard and AS variants, manual and DCT cassettes differ at final drive.
+#
+# Source: Honda CRF1100L Africa Twin Adventure Sports 2020 EU spec sheet
+# https://www.honda.co.uk/motorcycles/range/adventure/crf1100l-africa-twin-adventure-sports.html
+# (archived 2021); MCN long-term test 2021 (MT weighbridge 236 kg wet);
+# Honda service manual 61MEG00 for gear ratios.
+HONDA_CRF1100L_AS_2020 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "CRF1100L Africa Twin Adventure Sports",
+        "model_code": "SD09",
+        "year_from": 2020,
+        "year_to": 2026,
+        "category": "adventure",
+        "displacement_cc": 1084,
+        "bore_mm": 92.0,
+        "stroke_mm": 81.4,
+        "compression_ratio": 10.0,
+        "cylinders": 2,
+        "peak_power_hp": 101.0,       # 101 hp @ 7,500 rpm — Honda EU spec sheet 2020
+        "peak_power_rpm": 7500,
+        "peak_torque_nm": 105.0,      # 105 Nm @ 6,250 rpm — Honda EU spec sheet 2020
+        "peak_torque_rpm": 6250,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "sohc",
+        "gears": 6,
+        # Honda service manual 61MEG00 (CRF1100L 2020 manual transmission)
+        # 6-speed: primary 1.657, secondary final via 42/16 sprockets
+        "gear_ratios": [2.666, 1.882, 1.421, 1.150, 0.965, 0.849],
+        "front_sprocket": 16,
+        "rear_sprocket": 42,
+        "chain_pitch": "525",         # 525-pitch — Honda spec sheet SD09
+        "dry_mass_kg": 213.0,         # 213 kg dry (with oil+coolant) — Honda EU spec sheet 2020
+        "wheelbase_mm": 1575.0,
+        "front_tire_size": "90/90-21",
+        "rear_tire_size": "150/70R18",
+        "cd": 0.84,                   # full ADV fairing + tall screen + hand guards
+        "frontal_area_m2": 0.60,
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -5033,4 +5193,8 @@ EXTENDED_BIKES = [
     KTM_890_DUKE_2020,
     HONDA_CB500X_2019,
     SUZUKI_GSXS750_2015,
+    # ── Daily improvement run 2026-05-20 (Tuesday — Catalog A1) ──
+    YAMAHA_MT09_SP_2021,
+    KTM_890_SMT_2023,
+    HONDA_CRF1100L_AS_2020,
 ]
