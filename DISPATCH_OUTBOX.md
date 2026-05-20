@@ -852,3 +852,26 @@ Postflight deploy check timed out after 180s
 > 
 > ## Work performed
 > 
+
+### ALERT — 2026-05-20T18:57:09+00:00
+Postflight deploy check timed out after 180s
+
+## 2026-05-20T18:57:09+00:00 — session 1779301838-641
+
+**Commit:** `ecbfe6a61461063ae468840190e116b90ddaef8f`
+**Files:** `desktop/src/pages/BuildPage.tsx desktop/src/pages/SimulatePage.tsx motoquant/scraper/known_bikes_extended.py reports/catalog_expansion_2026-05-20.md reports/sweep_et_2026-04-24_post_smallcc_fix.json reports/physics_calibration_2026-05-20_pm.md reports/tech_debt_drop_unknown_casts_2026-05-20.md STATUS.md`
+
+> # Session log — 2026-05-20T18:30:38+00:00
+> 
+> **Started:** 2026-05-20T18:30:38+00:00
+> **Workdir:** /tmp/mq-session-1779301832-641/repo
+> **HEAD at start:** d25edf29917fcdd05d7c58e3a6bfdcf4c6cb44d0
+> **Identity:** Arya Desai <da25mem5s02@student.nitw.ac.in>
+> **PAT tier:** primary
+> **Push branch:** main
+> **Baselines:** ✓ K5/R1/Hayabusa within ±0.005s
+> 
+> ---
+> 
+> ## Work performed
+> 
