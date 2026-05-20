@@ -33,7 +33,7 @@ import os
 import sqlite3
 import tempfile
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, TypedDict
 
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -120,7 +120,34 @@ def _get_db():
         return None
 
 
-def _bike_row_to_summary(row: dict) -> dict:
+class BikeRowSummary(TypedDict):
+    """Shape of the dict returned by :func:`_bike_row_to_summary`.
+
+    Mirrors the ``BikeSummary`` TypeScript interface in
+    ``desktop/src/types/api.ts``. Every field is nullable because
+    ``row.get(...)`` returns ``None`` for any column the DB row is missing
+    (e.g. a partially-scraped bike with no ``peak_power_hp``). ``id`` is
+    nullable at the type level for symmetry with the other fields and to
+    survive a hypothetical row that lacks a JOIN — in practice the DB
+    schema guarantees ``id`` is an ``INTEGER PRIMARY KEY``.
+
+    Keep field names + types in lockstep with
+    ``desktop/src/types/api.ts::BikeSummary`` — any drift between the two
+    silently breaks the desktop UI's typing guarantees.
+    """
+
+    id: int | None
+    manufacturer: str | None
+    model: str | None
+    year: int | None
+    category: str | None
+    displacement_cc: float | None
+    peak_power_hp: float | None
+    dry_mass_kg: float | None
+    data_quality: str | None
+
+
+def _bike_row_to_summary(row: dict[str, Any]) -> BikeRowSummary:
     return {
         "id": row.get("id"),
         "manufacturer": row.get("manufacturer"),  # from JOIN alias

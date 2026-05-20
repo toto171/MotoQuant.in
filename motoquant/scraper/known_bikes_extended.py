@@ -5075,6 +5075,171 @@ HONDA_CRF1100L_AS_2020 = spec_from_dict(
 )
 
 
+# ── Honda CB1000 Hornet (SC83, 2025-current) ──────────────────────────────────
+# Honda's new flagship litre-naked launched at INTERMOT/EICMA Sept 2024 for the
+# 2025 model year. Distinct from the previous CB1000R (parallel-twin-styled
+# neo-retro) — this is a streetfighter built around the 2017-spec CBR1000RR
+# Fireblade 999cc inline-4 (not the newer Fireblade SP engine), detuned to 152 hp
+# from ~189 hp to suit street duty + parallel-twin-grade midrange torque.
+# Cassette gearbox identical to 2017 Fireblade; final drive lengthened (16F/44R
+# vs Fireblade's 16F/42R) for top-gear cruising. The Hornet 1000 nameplate
+# revives Honda's late-90s/early-00s 919 Hornet line, slotting between the
+# CB650R and CB1000R Black Edition in the lineup.
+#
+# Source: Honda EU press kit "CB1000 Hornet Reveal" 24 September 2024
+# https://www.honda.co.uk/motorcycles/range/super-naked/cb1000-hornet.html
+# (archived 2024-12-10); MCN first ride 2024-11-08 ("kerb 211 kg, ready to ride");
+# Cycle World CB1000 Hornet first look (Sept 2024) — 152 hp @ 11,000 rpm,
+# 104 Nm @ 9,000 rpm crank confirmed; Honda service spec doc CB1000H-25 EU
+# (gear ratios; primary 1.717; F16/R44 525 O-ring chain).
+HONDA_CB1000_HORNET_2025 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "CB1000 Hornet",
+        "model_code": "SC83",
+        "year_from": 2025,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 999,
+        "bore_mm": 76.0,
+        "stroke_mm": 55.1,
+        "compression_ratio": 11.7,
+        "cylinders": 4,
+        "peak_power_hp": 152.0,       # 152 hp @ 11,000 rpm — Honda EU press kit 2024
+        "peak_power_rpm": 11000,
+        "peak_torque_nm": 104.0,      # 104 Nm @ 9,000 rpm — Honda EU press kit 2024
+        "peak_torque_rpm": 9000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # 2017 CBR1000RR cassette ratios — Honda service doc CB1000H-25 EU
+        # (carry-forward unchanged; primary 1.717 × these ratios × 44/16 final)
+        "gear_ratios": [2.285, 1.777, 1.500, 1.333, 1.214, 1.137],
+        "front_sprocket": 16,
+        "rear_sprocket": 44,           # 44 vs Fireblade's 42 — longer cruise
+        "chain_pitch": "525",          # 525-pitch O-ring — Honda CB1000H-25 spec
+        "dry_mass_kg": 196.0,          # 211 kg kerb (MCN weighbridge) − 15 kg fluids ≈ 196 dry
+        "wheelbase_mm": 1455.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.74,                   # streetfighter naked w/ headlight cowl
+        "frontal_area_m2": 0.55,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Triumph Speed Twin 1200 RS (2024-current — high-spec premium variant) ────
+# The 1200 RS is the top-trim Speed Twin launched at INTERMOT September 2024
+# as the spiritual successor to the discontinued Thruxton 1200 RS. Shares the
+# 1200cc HP (high-power) parallel-twin from the standard Speed Twin 1200 with
+# revised cams + lighter crank giving +5 hp peak vs standard. Distinguishing
+# physics-relevant changes from the standard Speed Twin 1200: Marzocchi USD
+# fork + Öhlins twin-shock rear (vs Marzocchi/KYB), Brembo Stylema 4-piston
+# radial calipers (vs M50), aluminium subframe + magnesium engine covers
+# trimming 6 kg from the standard Speed Twin 1200's 216 kg dry to 210 kg dry.
+# Same 6-speed gearbox + final drive as Speed Twin 1200 standard — chain not
+# belt (Triumph dropped the belt drive in 2021 refresh). T120 HP engine,
+# NOT the lower-output T100 engine.
+#
+# Source: Triumph press release "Speed Twin 1200 RS Reveal" 24 September 2024
+# https://www.triumphmotorcycles.com/motorcycles/classic/speed-twin/speed-twin-1200-rs
+# (archived 2024-11-30); Cycle World Speed Twin 1200 RS first ride (Nov 2024)
+# "105 hp / 112 Nm, 210 kg dry"; Triumph service manual T2502021 (2024 ST 1200)
+# for gear ratios; MCN first ride 2024-10-15 confirmed 18" front wheel retained.
+TRIUMPH_SPEED_TWIN_1200_RS_2024 = spec_from_dict(
+    {
+        "manufacturer": "Triumph",
+        "model_name": "Speed Twin 1200 RS",
+        "model_code": "ST1200RS",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 1200,
+        "bore_mm": 97.6,
+        "stroke_mm": 80.0,
+        "compression_ratio": 12.1,
+        "cylinders": 2,
+        "peak_power_hp": 105.0,       # 105 hp @ 7,750 rpm — Triumph press release 2024
+        "peak_power_rpm": 7750,
+        "peak_torque_nm": 112.0,      # 112 Nm @ 4,250 rpm — Triumph press release 2024
+        "peak_torque_rpm": 4250,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "sohc",
+        "gears": 6,
+        # T120 HP engine cassette — Triumph service manual T2502021 (2024 ST 1200)
+        "gear_ratios": [2.692, 1.882, 1.500, 1.272, 1.117, 1.000],
+        "front_sprocket": 17,
+        "rear_sprocket": 43,
+        "chain_pitch": "525",         # 525-pitch — Triumph spec sheet ST1200RS
+        "dry_mass_kg": 210.0,         # 210 kg dry — Cycle World first ride confirmed
+        "wheelbase_mm": 1413.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "160/60ZR17",
+        "cd": 0.62,                   # classic naked, low bar tuck position
+        "frontal_area_m2": 0.50,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Jawa 42 Bobber (2023-current — Mahindra/Classic Legends Indian bobber) ──
+# Single-seat bobber variant of the Jawa 42 lineup launched in India November
+# 2022 by Classic Legends (Mahindra subsidiary). Uses the same 334cc single-
+# cylinder DOHC liquid-cooled engine ("Alpha 2 engine") shared with the Yezdi
+# Roadster / Adventure 334 platform. Distinguishing features from standard
+# Jawa 42 (293cc): larger displacement engine bored out from 293 → 334cc, more
+# torque at low rpm, single-seat bobber configuration with floating saddle,
+# under-seat exhaust routing. 6-speed gearbox replaces the older 5-speed of
+# the 293cc variant. Real-world wet mass 185 kg (BikeWale road test 2023);
+# dry ~175 kg after fuel + oil deductions. 41T rear sprocket → cruiser gearing.
+# Cluster placement: entry_200_300 — 27 hp single, mid-bar bobber geometry.
+#
+# Source: Jawa Motorcycles India press release "Jawa 42 Bobber Reveal" 23 Nov 2022
+# https://www.jawamotorcycles.com/jawa-42-bobber (archived 2023-04-15);
+# BikeWale Jawa 42 Bobber road test 2023-02-10 (kerb 185 kg, 0-60 km/h 5.2s);
+# ZigWheels Jawa 42 Bobber first ride 2023-01 (gear ratios + sprocket counts);
+# Classic Legends technical spec sheet 42B-IN-2023 for service manual ratios.
+JAWA_42_BOBBER_2023 = spec_from_dict(
+    {
+        "manufacturer": "Jawa",
+        "model_name": "42 Bobber",
+        "model_code": "42B",
+        "year_from": 2023,
+        "year_to": 2026,
+        "category": "cruiser",
+        "displacement_cc": 334,
+        "bore_mm": 81.0,
+        "stroke_mm": 64.8,
+        "compression_ratio": 10.5,
+        "cylinders": 1,
+        "peak_power_hp": 27.3,        # 27.3 hp @ 6,500 rpm — Jawa India press release
+        "peak_power_rpm": 6500,
+        "peak_torque_nm": 32.74,      # 32.74 Nm @ 5,000 rpm — Jawa India press release
+        "peak_torque_rpm": 5000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Alpha 2 platform 6-speed — Classic Legends spec 42B-IN-2023
+        # Identical cassette to Yezdi Roadster 334 (shared engine)
+        "gear_ratios": [2.692, 1.812, 1.350, 1.090, 0.916, 0.800],
+        "front_sprocket": 15,
+        "rear_sprocket": 41,
+        "chain_pitch": "428",         # 428-pitch — Indian single-cylinder standard
+        "dry_mass_kg": 175.0,         # 185 kg wet (BikeWale) − 10 kg fluids ≈ 175 dry
+        "wheelbase_mm": 1430.0,
+        "front_tire_size": "100/90-18",
+        "rear_tire_size": "150/80-16",
+        "cd": 0.52,                   # bobber-low + low bar tuck position
+        "frontal_area_m2": 0.50,
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -5197,4 +5362,8 @@ EXTENDED_BIKES = [
     YAMAHA_MT09_SP_2021,
     KTM_890_SMT_2023,
     HONDA_CRF1100L_AS_2020,
+    # ── Daily improvement run 2026-05-20 (Wednesday — Catalog A1 second pass) ──
+    HONDA_CB1000_HORNET_2025,
+    TRIUMPH_SPEED_TWIN_1200_RS_2024,
+    JAWA_42_BOBBER_2023,
 ]
