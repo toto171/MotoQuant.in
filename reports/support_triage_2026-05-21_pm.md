@@ -73,6 +73,9 @@ evidence supporting the `:668` ticket's proposal to promote `:605` from
 `[opportunistic]` to `[urgent]`** — the dedup fix is now the only intervention
 short of fixing the Railway outage that reduces system noise.
 
+## NOTE — session 1779359436-644 (6th run, same day)
+All three conditions from §6 hold (`bike_suggestions=0`, INBOX:605 still open, ALERT count now 27, Railway `/api/health` still 404). Per the §6 contract, no fresh report written; this one-liner is the entire session's support-triage delta. Dedup ticket INBOX:605 + urgent-promotion ticket INBOX:668 remain the actionable surface.
+
 ## 6. Recommendation for next support-agent run
 
 If `bike_suggestions` is still empty AND `:605` is still open AND ALERT count is

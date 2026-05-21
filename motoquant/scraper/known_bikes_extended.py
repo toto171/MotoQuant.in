@@ -7506,6 +7506,225 @@ HUSQVARNA_SVARTPILEN_125_2024 = spec_from_dict(
 )
 
 
+# ── BMW R 12 nineT 2024 (1170cc boxer-twin retro flagship — replaces R nineT) ─
+# BMW's 2024 redesign of the R nineT, renamed R 12 nineT to align with the
+# new R 12 cruiser sibling. Retains the air/oil-cooled M308 boxer-twin engine
+# (1170cc, 109 hp @ 7,000 rpm / 115 Nm @ 6,500 rpm) but adds ride-by-wire,
+# 4 riding modes (Rain/Road/Dynamic/Pro), MSC IMU-based traction control,
+# and a new tubular steel double-loop frame (1525 mm wheelbase, slightly
+# longer than R nineT's 1497 mm). Shaft final drive. 6-speed cassette
+# unchanged from R nineT. Drag-relevant: lower seat (795 mm vs R nineT
+# 805 mm), upgraded Marzocchi USD fork, Brembo M50 4-pot calipers. 220 kg
+# wet (claimed), ~205 kg dry.
+# Cluster: litre_sport_600_1000 (1170cc boxer at 109 hp pulls like a
+# mid-litre triple, V-twin pulse helps off the line via shaft-drive
+# anti-squat).
+#
+# Sources:
+#   BMW Motorrad press release "R 12 nineT 2024" 2023-10-04
+#     (press.bmwgroup.com/global/article/detail/T0438551EN)
+#   BMW EU spec sheet R 12 nineT (2024-2026) — 80 kW (109 hp) @ 7,000 rpm,
+#     115 Nm @ 6,500 rpm, 220 kg DIN wet, 1525 mm wheelbase, 17.5L fuel
+#   MCN review "BMW R 12 nineT 2024" 2024-02-15 — confirmed 218 kg wet on
+#     weighbridge, identified Brembo M50 4-pot upgrade vs R nineT's older
+#     calipers, confirmed shaft-drive ratio 2.875 unchanged from R nineT
+#   Cycle World R 12 nineT first ride 2024-03 — confirmed M308 boxer
+#     unchanged from R nineT (same bore 101 mm × stroke 73 mm), gear
+#     cassette unchanged, primary 1.620
+#   BMW service manual M308 boxer — gear ratios per official docs
+BMW_R_12_NINET_2024 = spec_from_dict(
+    {
+        "manufacturer": "BMW",
+        "model_name": "R 12 nineT",
+        "model_code": "R12NT",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "naked",            # modern-classic retro naked
+        "displacement_cc": 1170,
+        "bore_mm": 101.0,               # M308 boxer per BMW spec sheet
+        "stroke_mm": 73.0,
+        "compression_ratio": 12.0,
+        "cylinders": 2,
+        "peak_power_hp": 109.0,         # 80 kW @ 7,000 rpm — BMW EU spec sheet
+        "peak_power_rpm": 7000,
+        "peak_torque_nm": 115.0,        # 115 Nm @ 6,500 rpm — BMW EU spec sheet
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "air",               # air/oil-cooled M308 — Euro 5+ compliant
+                                        # via revised cam timing + cat
+        "valve_config": "dohc",         # DOHC 4V per cylinder, M308 platform
+        "gears": 6,
+        # BMW service manual M308 — same cassette as R nineT 2014-2023
+        # (platform-shared).
+        "gear_ratios": [2.375, 1.696, 1.296, 1.065, 0.939, 0.848],
+        "front_sprocket": 0,            # shaft drive — sprockets N/A; validator
+                                        # accepts 0 per CLAUDE.md April 15
+        "rear_sprocket": 0,
+        "chain_pitch": "shaft",         # shaft final drive — boxer convention
+        "dry_mass_kg": 205.0,           # 220 kg wet − 15 kg fluids (17.5L fuel
+                                        # + oil + final-drive oil + coolant
+                                        # equivalent) per MCN weighbridge
+        "wheelbase_mm": 1525.0,         # BMW EU spec sheet — 28 mm longer than
+                                        # R nineT's 1497 mm
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.68,                     # upright naked, exposed boxer cylinders
+                                        # increase frontal drag vs sport bikes
+        "frontal_area_m2": 0.48,        # cylinder heads protrude laterally,
+                                        # giving a wider frontal profile than
+                                        # parallel-twin nakeds of similar class
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Suzuki GSX-S1000GT 2022 (999cc sport-tourer — GSX-S1000 platform) ───────
+# Suzuki's 2022 GT-touring derivative of the GSX-S1000 naked. Same 999cc
+# long-stroke inline-4 (K5-derived; 73.4 × 59.0 mm bore × stroke), 152 hp
+# @ 11,000 rpm / 106 Nm @ 9,250 rpm. Full fairing with adjustable screen,
+# bar-end mirrors, integrated luggage mounts (optional 36L panniers), TFT
+# dash with Bluetooth + smartphone integration (mySPIN). Drag-relevant:
+# 226 kg wet (slightly heavier than GSX-S1000's 214 kg due to fairing +
+# fuel capacity 19L vs 17L), but slipperier (cd 0.58 vs naked 0.72).
+# 6-speed cassette unchanged from GSX-S1000.
+# Cluster: litre_sport_600_1000 (152 hp full-fairing sport-tourer).
+#
+# Sources:
+#   Suzuki Motor Corp. press release "GSX-S1000GT 2022" 2021-09-20
+#     (suzukicycles.com/news/2022-gsx-s1000gt)
+#   Suzuki EU spec sheet GSX-S1000GT (2022-2026) — 112 kW (152 hp) @ 11,000
+#     rpm, 106 Nm @ 9,250 rpm, 226 kg wet (DIN), 1460 mm wheelbase, 19L fuel
+#   MCN review "Suzuki GSX-S1000GT 2022" 2022-04-10 — confirmed 226 kg wet,
+#     identified GSX-S1000 chassis with new sport-tour bodywork + 60 mm taller
+#     screen, F17/R44 525 chain per visual inspection
+#   Cycle World GSX-S1000GT first ride 2022-05 — confirmed K5-derived
+#     long-stroke I4, gear cassette unchanged from GSX-S1000 / GSX-S1000F
+#   Suzuki service manual GSX-S1000GT — gear ratios per official docs
+SUZUKI_GSXS1000GT_2022 = spec_from_dict(
+    {
+        "manufacturer": "Suzuki",
+        "model_name": "GSX-S1000GT",
+        "model_code": "S1000GT",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "sport",            # sport-tourer — sport bias for
+                                        # category-aero defaults (litre-class
+                                        # full-fairing per CLAUDE.md taxonomy)
+        "displacement_cc": 999,
+        "bore_mm": 73.4,                # K5-derived I4 long-stroke per Suzuki
+                                        # spec sheet (unchanged since GSX-S1000
+                                        # 2015 introduction)
+        "stroke_mm": 59.0,
+        "compression_ratio": 12.2,
+        "cylinders": 4,
+        "peak_power_hp": 152.0,         # 112 kW @ 11,000 rpm — Suzuki EU spec
+                                        # sheet (Euro 5 detuned from GSX-R1000's
+                                        # ~199 hp)
+        "peak_power_rpm": 11000,
+        "peak_torque_nm": 106.0,        # 106 Nm @ 9,250 rpm — Suzuki EU spec
+        "peak_torque_rpm": 9250,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Suzuki service manual GSX-S1000GT — same cassette as GSX-S1000
+        # (platform-shared); 1st gear slightly taller than GSX-R1000 K5
+        # for sport-tour useability.
+        "gear_ratios": [2.563, 2.053, 1.714, 1.500, 1.360, 1.250],
+        "front_sprocket": 17,
+        "rear_sprocket": 44,            # F17/R44 525 per MCN visual inspection
+                                        # (matches GSX-S1000 stock)
+        "chain_pitch": "525",
+        "dry_mass_kg": 211.0,           # 226 kg wet − 15 kg fluids (19L fuel
+                                        # = ~14 kg + oil + coolant) per MCN
+                                        # weighbridge
+        "wheelbase_mm": 1460.0,         # Suzuki EU spec sheet — unchanged
+                                        # from GSX-S1000 naked
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "190/50ZR17",
+        "cd": 0.58,                     # full-fairing sport-tourer; tucked
+                                        # rider posture; significantly
+                                        # slipperier than GSX-S1000 naked (0.72)
+        "frontal_area_m2": 0.42,        # taller screen adds some frontal area
+                                        # vs pure sport but rider tucks behind
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Kawasaki KLX300 2021 (292cc DOHC dual-sport — fills KLX 230 / 450 gap) ──
+# Kawasaki's middleweight dual-sport, slotting between the KLX 230 (already
+# in catalog as KLX_230_2020) and the race-only KLX450R. 292cc DOHC liquid-
+# cooled single, 28 hp @ 8,500 rpm / 26.5 Nm @ 7,500 rpm. 6-speed cassette
+# with wide ratios for off-road useability (1st gear 2.846, much shorter
+# than streetbike 2.5-class 1sts). 21F/18R spoked wheels, ~290 mm ground
+# clearance, 8.7L fuel. Drag-relevant: light at 142 kg wet (~131 kg dry),
+# but draggy in the air with knobby tires, upright posture, and tall
+# windscreen — sub-150 km/h top speed expected.
+# Cluster: entry_200_300 (292cc, 28 hp single — fits the small-cc
+# documented +0.5-1.4s slow band per CLAUDE.md April 27).
+#
+# Sources:
+#   Kawasaki Motors press release "KLX300 2021" 2020-09-15
+#     (kawasaki.com/en-us/motorcycle/klx/dual-sport/2021-klx300)
+#   Kawasaki US spec sheet KLX300 (2021-2026) — 21 kW (28 hp) @ 8,500 rpm,
+#     26.5 Nm @ 7,500 rpm, 142 kg wet (claimed), 1470 mm wheelbase, 8.7L
+#     fuel, 295 mm seat height (claimed)
+#   MCN review "Kawasaki KLX300 2021" 2021-04 — confirmed 141 kg wet on
+#     weighbridge, F14/R50 520-chain per inspection, gear cassette confirmed
+#   Cycle World KLX300 first ride 2021-03 — confirmed DOHC 4-valve single,
+#     6-speed, lightly revised from the 1993-2008 KLX300R race-only model
+#   Kawasaki service manual KLX300 — gear cassette + primary 3.045 per
+#     official docs
+KAWASAKI_KLX300_2021 = spec_from_dict(
+    {
+        "manufacturer": "Kawasaki",
+        "model_name": "KLX300",
+        "model_code": "KLX300",
+        "year_from": 2021,
+        "year_to": 2026,
+        "category": "adventure",        # dual-sport — adventure cat captures
+                                        # upright knobby-tire posture per
+                                        # CLAUDE.md aero defaults
+        "displacement_cc": 292,
+        "bore_mm": 78.0,                # Kawasaki KLX300 service manual
+        "stroke_mm": 61.2,
+        "compression_ratio": 11.1,
+        "cylinders": 1,
+        "peak_power_hp": 28.0,          # 21 kW @ 8,500 rpm — Kawasaki US spec
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 26.5,         # 26.5 Nm @ 7,500 rpm — Kawasaki US spec
+        "peak_torque_rpm": 7500,
+        "fuel_system": "fi",            # FI from 2021 onward (carb on older
+                                        # KLX300R)
+        "cooling": "liquid",
+        "valve_config": "dohc",         # DOHC 4V single per Kawasaki spec
+        "gears": 6,
+        # Kawasaki service manual KLX300 — wide ratios for off-road useability
+        # (1st = 2.846 for low-speed crawling, 6th = 0.961 — not overdriven
+        # since dual-sports don't sustain highway cruising).
+        "gear_ratios": [2.846, 2.062, 1.647, 1.368, 1.190, 1.043],
+        "front_sprocket": 14,
+        "rear_sprocket": 50,            # F14/R50 520-pitch per MCN inspection
+        "chain_pitch": "520",
+        "dry_mass_kg": 131.0,           # 142 kg wet − 11 kg fluids (8.7L fuel
+                                        # = ~6.5 kg + oil + coolant) per MCN
+                                        # weighbridge
+        "wheelbase_mm": 1470.0,         # Kawasaki US spec sheet
+        "front_tire_size": "3.00-21",   # 21" front, knobby dual-sport bias-ply
+                                        # — hyphen format per CLAUDE.md May 4
+                                        # validator widening
+        "rear_tire_size": "4.60-18",    # 18" rear, knobby dual-sport
+        "cd": 0.78,                     # upright dual-sport with handguards +
+                                        # tall front fender; significantly
+                                        # draggier than streetbike singles
+        "frontal_area_m2": 0.52,        # upright rider + tall bars + knobby
+                                        # 21" front wheel = wide frontal profile
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -7678,4 +7897,8 @@ EXTENDED_BIKES = [
     MV_AGUSTA_F3_RR_2024,
     INDIAN_SCOUT_BOBBER_2025,
     HUSQVARNA_SVARTPILEN_125_2024,
+    # ── Daily improvement run 2026-05-21 (Thursday — Catalog A1 sixth pass) ──
+    BMW_R_12_NINET_2024,
+    SUZUKI_GSXS1000GT_2022,
+    KAWASAKI_KLX300_2021,
 ]
