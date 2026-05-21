@@ -99,3 +99,57 @@ RS tune vs 170 hp touring tune). Service manual P/N 91721941A confirms same
 ### Third-pass carry-forward
 
 - No new escalations. Zero scraper validator errors on all 3 entries.
+
+---
+
+## Seventh pass (2026-05-21 Thursday — Catalog A1)
+
+**Files touched:** `motoquant/scraper/known_bikes_extended.py` (7904 → 8124 lines, +220), `motoquant.db` (524 → 527 rows)
+
+### Bikes added (3)
+
+| Bike | Years | Cluster | Sim ET | Trap (km/h) | Notes |
+|---|---|---|---|---|---|
+| BSA Gold Star 650 | 2022-2026 | mid_twin_500_700-ish single | 13.819s | 161.3 | Mahindra/Classic Legends UK retro-naked, 652 cc DOHC single |
+| Hero Passion XPro 110 | 2024-2026 | entry_150_200 | 22.286s | 95.2 | Indian commuter, 110.9 cc 4-speed, fills 100-125 cc gap |
+| Norton Commando 961 SP | 2023-2026 | litre_sport_600_1000 edge | 13.422s | 176.6 | TVS-revived 961 cc air/oil-cooled 270° parallel twin |
+
+### Spec sources
+
+**BSA Gold Star 650** — BSA Motorcycles press release 2021-12-07 (bsacompany.co.uk);
+MCN review 2022-10; Cycle World first-ride 2023-06 (confirmed 45 hp @ 6500 / 55 Nm
+@ 4000, 213 kg dry); Autocar India 2023-08 (F15/R40 525 chain, 5-speed); BSA
+service manual GB650 (gear cassette [2.692, 1.882, 1.450, 1.176, 0.962]).
+
+**Hero Passion XPro 110** — Hero MotoCorp press release 2024-05-29 + official
+spec sheet (heromotocorp.com/content/dam/hero/specifications/passion-xpro.pdf);
+Autocar India 2024-06 (confirmed 9.2 hp / 9.79 Nm, 122 kg kerb, F14/R40 428);
+BikeWale 2024-07 (4-speed cassette via owner's manual). 110.9 cc SOHC 2V single,
+fills 100-125 cc commuter gap below Bajaj Freedom 125 / Honda Shine 125 / Splendor.
+
+**Norton Commando 961 SP** — Norton Motorcycles press release 2023-03-15
+(nortonmotorcycles.com); MCN 2023-05; Cycle World 2023-07 (confirmed 76.8 hp @
+7250 / 81 Nm @ 6500, 230 kg dry); Visordown 2023-09 (F19/R42 525, 19" front +
+18" rear retro spoked); Norton 961-platform service manual (gear cassette
+preserved from pre-TVS 2015-2020 spec). TVS Motor acquired Norton in 2020;
+this is the first TVS-era production model.
+
+### Seventh-pass validation
+
+- `python3 -m pytest tests/test_scraper.py -q --no-header` → **80 passed**, 0 failures, 1.32s
+- All 3 new bikes: ET ∈ [4.0, 26.0]s ✓ and trap ∈ [40, 400] km/h ✓
+- K5: 10.0334s / R1: 10.2859s / Hayabusa: 10.4712s — **Δ +0.0000s** preserved exactly
+- DB re-seed via direct `import_batch` (dodged WS-A `--known-bikes` year-suffix
+  idempotency issue per CLAUDE.md May 4 entry): `imported=3, errors=0, skipped_invalid=0`
+- Post-import DB row count: 527 (was 524, Δ +3)
+- DB rows verified by SELECT: Passion XPro 110, Commando 961 SP, Gold Star 650 — all
+  inserted with year-range suffix `(YYYY-YYYY)` as expected
+
+### Seventh-pass carry-forward
+
+- No new escalations. Zero scraper validator errors. Manufacturer rows for "BSA"
+  and "Norton" already existed in DB (Norton from earlier V4SV entry); only
+  Hero needed manufacturer_id re-use (already there from prior Hero entries).
+- Existing `manufacturer_id` 14 = Hero, 29 = Norton, 30 = BSA confirmed during
+  insert — no FK errors.
+

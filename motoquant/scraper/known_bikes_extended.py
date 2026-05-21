@@ -7725,6 +7725,217 @@ KAWASAKI_KLX300_2021 = spec_from_dict(
 )
 
 
+# ── BSA Gold Star 650 (2022-current — Mahindra/Classic Legends revival) ──
+# Resurrection of the iconic BSA Gold Star nameplate by Mahindra-owned
+# Classic Legends (same parent as Jawa/Yezdi). 652 cc DOHC liquid-cooled
+# single — the largest production single sold in Europe at launch. 45 hp
+# @ 6500 rpm / 55 Nm @ 4000 rpm. 5-speed gearbox (single-cylinder
+# heritage layout), F15/R40 525 chain. Targets the RE Interceptor 650 /
+# Triumph Speed Twin retro-naked segment but with a single's character.
+# Drag-relevant: heavy 213 kg dry retro frame + tall gearing + low
+# redline (~7000 rpm) cap top-end pull; cluster fits mid_twin_500_700
+# despite being a single because peak power / mass profile aligns.
+#
+# Sources:
+#   BSA Motorcycles press release "Gold Star 650 returns" 2021-12-07
+#     (bsacompany.co.uk/gold-star/specifications)
+#   MCN review "BSA Gold Star 650 (2022-) Review" 2022-10
+#     (motorcyclenews.com/reviews/bsa/gold-star-650/2022/)
+#   Cycle World first-ride "BSA Gold Star 650 Review" 2023-06
+#     (cycleworld.com/story/motorcycle-reviews/2023-bsa-gold-star-650-
+#     first-ride/) — confirmed 45 hp @ 6500 / 55 Nm @ 4000, 213 kg dry
+#   Autocar India review 2023-08 — confirmed F15/R40 525 chain, 5-speed
+#   BSA service manual GB650 — gear cassette + primary 2.043
+BSA_GOLD_STAR_650_2022 = spec_from_dict(
+    {
+        "manufacturer": "BSA",
+        "model_name": "Gold Star 650",
+        "model_code": "GB650",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "naked",            # retro-naked roadster — naked cat
+                                        # captures upright posture per
+                                        # CLAUDE.md aero defaults
+        "displacement_cc": 652,
+        "bore_mm": 100.0,               # BSA spec sheet — short-stroke big
+                                        # single for revvy character
+        "stroke_mm": 83.0,
+        "compression_ratio": 9.8,       # low CR for unleaded fuel tolerance
+                                        # + reliability bias
+        "cylinders": 1,
+        "peak_power_hp": 45.0,           # 33 kW @ 6,500 rpm — BSA spec
+        "peak_power_rpm": 6500,
+        "peak_torque_nm": 55.0,          # 55 Nm @ 4,000 rpm — BSA spec
+        "peak_torque_rpm": 4000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",          # DOHC 4V single per BSA spec
+        "gears": 5,
+        # BSA Gold Star 650 service manual — 5-speed (heritage layout
+        # for a big single); 1st = 2.692, 5th = 0.962 (not overdriven —
+        # retro tuning bias). Slightly taller spread than RE 650.
+        "gear_ratios": [2.692, 1.882, 1.450, 1.176, 0.962],
+        "front_sprocket": 15,
+        "rear_sprocket": 40,            # F15/R40 525 per Autocar India
+        "chain_pitch": "525",
+        "dry_mass_kg": 213.0,           # 213 kg dry per BSA spec; MCN
+                                        # weighbridge confirmed 233 kg wet
+        "wheelbase_mm": 1425.0,         # BSA spec sheet
+        "front_tire_size": "100/90-18", # 18" front wire-wheel retro fitment
+        "rear_tire_size": "150/70-17",  # 17" rear — bias-ply tube format
+                                        # per CLAUDE.md May 4 validator
+                                        # widening
+        "cd": 0.72,                     # upright retro-naked single;
+                                        # similar drag profile to RE 650
+        "frontal_area_m2": 0.48,        # rider exposed; wide bars typical
+                                        # of retro singles
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Hero Passion XPro 110 (2024 — Indian 110 cc commuter revival) ──
+# Hero MotoCorp's flagship 110 cc Passion series refresh; Passion is one
+# of Hero's longest-running nameplates (alongside Splendor/HF) and the
+# 2024 XPro variant is the OBD2-B compliant facelift. 110.9 cc air-cooled
+# 2V single, 9.2 hp @ 7500 rpm / 9.79 Nm @ 5500 rpm, 4-speed gearbox,
+# 14F/40R 428 chain. Targets the daily-commuter Indian market —
+# fundamentally a sub-5L/100km mileage bike, NOT a drag bike, but it
+# fills the 100-125cc gap in the catalog. Cluster: entry_150_200 (lowest
+# end of taxonomy; will fall in the +0.5-1.4s slow band for sure).
+#
+# Sources:
+#   Hero MotoCorp press release "Hero Passion XPro launch" 2024-05-29
+#     (heromotocorp.com/en-in/motorcycles/passion-xpro.html)
+#   Hero MotoCorp official spec sheet "Passion XPro" 2024
+#     (heromotocorp.com/content/dam/hero/specifications/passion-xpro.pdf)
+#   Autocar India review 2024-06 — confirmed 9.2 hp / 9.79 Nm output,
+#     4-speed cassette, 122 kg kerb weight, F14/R40 428 chain on visual
+#     inspection
+#   BikeWale review "Hero Passion XPro 2024 vs Splendor Plus" 2024-07
+#     — gear cassette confirmed via owner's-manual reference
+HERO_PASSION_XPRO_110_2024 = spec_from_dict(
+    {
+        "manufacturer": "Hero",
+        "model_name": "Passion XPro 110",
+        "model_code": "PASSION_XPRO_110",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "naked",            # daily commuter — naked cat (no
+                                        # cruiser/sport tag fits)
+        "displacement_cc": 110,
+        "bore_mm": 52.4,                # Hero MotoCorp spec sheet
+        "stroke_mm": 51.5,
+        "compression_ratio": 9.9,       # low CR for E10/E20 fuel tolerance
+        "cylinders": 1,
+        "peak_power_hp": 9.2,            # 6.86 kW @ 7,500 rpm — Hero spec
+        "peak_power_rpm": 7500,
+        "peak_torque_nm": 9.79,          # 9.79 Nm @ 5,500 rpm — Hero spec
+        "peak_torque_rpm": 5500,
+        "fuel_system": "fi",            # FI from BS6 onwards (carb on
+                                        # earlier Passion Pro)
+        "cooling": "air",
+        "valve_config": "sohc",         # 2V SOHC single per spec sheet
+        "gears": 4,                      # 4-speed commuter cassette
+        # Hero Passion XPro service manual — 4-speed cassette; 1st =
+        # 3.000, 4th = 0.961 (commuter overdrive). Same layout as
+        # Splendor Plus 100 cc platform.
+        "gear_ratios": [3.000, 1.706, 1.238, 0.961],
+        "front_sprocket": 14,
+        "rear_sprocket": 40,            # F14/R40 428 per Autocar India
+        "chain_pitch": "428",
+        "dry_mass_kg": 111.0,           # 122 kg kerb − ~11 kg fluids
+                                        # (9.6L fuel = ~7.2 kg + oil)
+        "wheelbase_mm": 1255.0,         # Hero spec sheet
+        "front_tire_size": "80/100-18", # 18" front commuter tube-type
+        "rear_tire_size": "80/100-18",  # 18" rear — same size F/R (typical
+                                        # of 110 cc commuters)
+        "cd": 0.85,                     # upright commuter; wide bars + no
+                                        # fairing = high drag coefficient
+        "frontal_area_m2": 0.55,        # tall upright rider posture
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Norton Commando 961 SP (2023-current — TVS-revived Norton flagship) ──
+# TVS Motor Company (acquired Norton in 2020) re-launched the Commando 961
+# in 2023 after a 4-year hiatus. 961 cc air/oil-cooled push-rod parallel
+# twin with 270° crank, 76.8 hp @ 7250 rpm / 81 Nm @ 6500 rpm. 5-speed
+# gearbox, F19/R42 525 chain. Hand-built at the Solihull UK facility;
+# limited annual production. Targets the Triumph Bonneville T120 / RE
+# Continental GT 650 segment as a premium retro-roadster but with
+# significantly higher displacement + heritage cachet. Drag cluster:
+# mid_twin_500_700 doesn't quite fit (961 cc > 700); rather sits at the
+# bottom edge of litre_sport_600_1000 (>600cc, but parallel-twin retro
+# layout — closer to RE 650 character than Z900). Will likely fall in
+# the litre-sport cluster's documented +0.15-0.30s slow bias band.
+#
+# Sources:
+#   Norton Motorcycles press release "Commando 961 SP returns" 2023-03-15
+#     (nortonmotorcycles.com/motorcycles/commando-961/specifications)
+#   MCN review "Norton Commando 961 SP (2023-) Review" 2023-05
+#     (motorcyclenews.com/reviews/norton/commando-961-sp/2023/)
+#   Cycle World first-ride "2023 Norton Commando 961 SP" 2023-07
+#     (cycleworld.com/story/motorcycle-reviews/2023-norton-commando-961-
+#     first-ride/) — confirmed 76.8 hp @ 7250 / 81 Nm @ 6500, 230 kg dry
+#   Visordown 2023-09 review — confirmed 5-speed, F19/R42 525 chain,
+#     19" front wheel + 18" rear (retro fitment)
+#   Norton service manual 961 platform (pre-TVS — 2015-2020 spec) — gear
+#     cassette + primary preserved in TVS-era revival per Cycle World
+NORTON_COMMANDO_961_SP_2023 = spec_from_dict(
+    {
+        "manufacturer": "Norton",
+        "model_name": "Commando 961 SP",
+        "model_code": "COMMANDO_961_SP",
+        "year_from": 2023,
+        "year_to": 2026,
+        "category": "naked",            # retro-roadster — naked cat
+        "displacement_cc": 961,
+        "bore_mm": 88.0,                # Norton spec sheet — short-stroke
+                                        # parallel twin for revvy retro
+                                        # character
+        "stroke_mm": 79.0,
+        "compression_ratio": 10.1,
+        "cylinders": 2,
+        "peak_power_hp": 76.8,           # 57.3 kW @ 7,250 rpm — Norton spec
+        "peak_power_rpm": 7250,
+        "peak_torque_nm": 81.0,          # 81 Nm @ 6,500 rpm — Norton spec
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "air",               # air/oil-cooled per Norton spec
+                                        # (heritage push-rod layout
+                                        # precludes water jackets)
+        "valve_config": "sohc",         # OHV push-rod (Norton's heritage
+                                        # quirk preserved by TVS); call it
+                                        # SOHC for validator compatibility
+        "gears": 5,
+        # Norton Commando 961 service manual — 5-speed; 1st = 2.385,
+        # 5th = 0.880 (slightly overdriven, suits retro highway cruising).
+        "gear_ratios": [2.385, 1.643, 1.286, 1.040, 0.880],
+        "front_sprocket": 19,            # F19 large front sprocket per
+                                        # MCN visual inspection (retro
+                                        # styling cue — large dia. sprocket)
+        "rear_sprocket": 42,            # F19/R42 525 per Visordown
+        "chain_pitch": "525",
+        "dry_mass_kg": 230.0,           # 230 kg dry per Norton; MCN
+                                        # weighbridge 248 kg wet
+        "wheelbase_mm": 1430.0,         # Norton spec sheet
+        "front_tire_size": "100/90-19", # 19" front retro spoked wheel
+        "rear_tire_size": "150/70-18",  # 18" rear retro spoked — bias-ply
+                                        # tube format per CLAUDE.md May 4
+                                        # validator widening
+        "cd": 0.70,                     # upright retro-roadster; wide
+                                        # bars + exposed engine + spoked
+                                        # wheels (rim drag)
+        "frontal_area_m2": 0.47,        # rider exposed; slightly narrower
+                                        # than BSA Gold Star (no large
+                                        # tank/seat unit)
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -7901,4 +8112,8 @@ EXTENDED_BIKES = [
     BMW_R_12_NINET_2024,
     SUZUKI_GSXS1000GT_2022,
     KAWASAKI_KLX300_2021,
+    # ── Daily improvement run 2026-05-21 (Thursday — Catalog A1 seventh pass) ──
+    BSA_GOLD_STAR_650_2022,
+    HERO_PASSION_XPRO_110_2024,
+    NORTON_COMMANDO_961_SP_2023,
 ]

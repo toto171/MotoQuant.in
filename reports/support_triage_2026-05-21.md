@@ -179,3 +179,39 @@ ticket at `:605` from `[opportunistic]` to `[urgent]` (which `DISPATCH_INBOX.md:
 already proposes).
 
 No DB rows touched. Report updated by session 1779345036-639.
+
+---
+
+## Addendum — session 1779366634-654 (fifth run, same day)
+
+**Delta since fourth addendum (session 1779345036-639):**
+
+- ALERT count in `DISPATCH_OUTBOX.md` (last 30 days) is now **28** (was 25 at prior addendum).
+  Three new identical `Postflight deploy check timed out after 180s` ALERTs landed between
+  `2026-05-21T04:45:24+00:00` and the latest at `2026-05-21T...` — same body, same Railway 404
+  root cause. Signal-dilution ratio across the 30-day window is **100 %** (1 unique
+  signature / 28 entries).
+- `bike_suggestions` table: still **0 rows**. Confirmed via direct sqlite3 (python) query.
+  No DB writes performed.
+- No other `WARNING` / `INCIDENT` / `ERROR` markers found in the 30-day OUTBOX scan — the alert
+  channel is a single-signal channel right now.
+
+**Open INSTRUCTION state — unchanged since fourth addendum:**
+
+- `DISPATCH_INBOX.md` line ~140 (`[urgent] [blocking]` Railway API offline) — open. Root cause.
+- `DISPATCH_INBOX.md:605` (`[opportunistic]` postflight alert dedup) — open. 5-LOC fix.
+- `DISPATCH_INBOX.md` line ~700 (`[self-review] [urgent]` promote `:605` to `[urgent]`) — open.
+  Already proposes the very escalation the cumulative-cost section of the fourth addendum
+  argues for.
+
+**No new INSTRUCTION filed.** Every systemic fix proposal that arises from this scan is already
+represented by an open ticket at higher granularity than this agent can add. Per the agent
+spec's "don't duplicate existing open INBOX tickets — search before adding" rule, and per the
+META self-review at `DISPATCH_INBOX.md:516`, adding a fifth ALERT-related ticket would
+*itself* be the dilution pattern the existing tickets are trying to fix.
+
+**Recommendation reinforced (no new angle since addendum 4):** the `:605` dedup fix is
+independent of the Railway billing action and remains the lowest-cost intervention that breaks
+the no-op-triage-rerun loop.
+
+No DB rows touched. Report finalised by session 1779366634-654.
