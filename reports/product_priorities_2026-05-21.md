@@ -9,7 +9,8 @@
 - **Morning pass** — established new top-1 (Railway restore), demoted analytics to #2, surfaced catalog re-seed gap as #3 (DB 345 / source 447, -102 bikes).
 - **End-of-day pass** — refreshed DB/source counts (488/579), 91-bike remaining gap. Top-3 unchanged.
 - **Late-night pass** — DB now 527 / source 460 (DB **exceeds** source by +67). Catalog re-seed gap **effectively closed**; #3 slot freed. CI sidecar-build matrix promoted into #3.
-- **Thursday close pass *(this report, session `1779373833-626`)*** — fourth same-day run. **No top-3 change.** Confirmation pass: DB still 527 bikes, S5 auth tables still all 5 absent, Railway 404 ticket still open at INBOX:140, ALERT count 28 → 29 (single +1 tick from the latest postflight). All signals identical to late-night pass within noise. Per prompt rule "don't re-rank without strong signal", no CLAUDE.md edit this pass.
+- **Thursday close pass *(session `1779373833-626`)*** — fourth same-day run. **No top-3 change.** Confirmation pass: DB still 527 bikes, S5 auth tables still all 5 absent, Railway 404 ticket still open at INBOX:140, ALERT count 28 → 29 (single +1 tick from the latest postflight). All signals identical to late-night pass within noise. Per prompt rule "don't re-rank without strong signal", no CLAUDE.md edit this pass.
+- **Late-Thursday fifth pass *(this report, session `1779381035-636`)*** — fifth same-day run, fired as the scheduler's weekly Thursday cadence refresh. **No top-3 change.** Signals: DB now **599 bikes** (+72 vs late-night, +212 vs morning — catalog-expansion sessions kept pushing through the outage); S5 auth tables still all 5 absent; INBOX:140 Railway ticket still open at day 5; `### ALERT` count **30** (+1 vs Thursday close pass — ~one new tick every 2 hours, in line with the perf-monitor cadence). `bike_suggestions` table has 0 rows (no user-demand displacement signal). STATUS.md catalog KPI cell remains stale (reads "345 / 447" vs actual DB 599); auto-refresh via postflight not yet observed. Confirm verdict: Railway #1, analytics+DDL #2, CI sidecar #3. Single CLAUDE.md edit this pass: refresh top-1 success metric `bike_count >= 527` → `bike_count >= 599` to match current DB.
 
 ---
 
@@ -103,10 +104,21 @@ Scores: Impact 1-10 × Confidence 1-5 / Effort 1-5. Late-night pass.
 
 ---
 
-## Summary for orchestrator
+## Summary for orchestrator (Thursday close pass — fourth)
 
 1. **Files touched (Thursday close pass):** `reports/product_priorities_2026-05-21.md` (appended fourth-pass update-history bullet only — no rewrite). **No CLAUDE.md edit** — late-night pass already set top-3, all signals confirm.
 2. **Commit summary:** `docs(priorities): confirm 2026-05-21 top-3 — Railway #1 still blocking, no rerank`.
 3. **Top-1 changed (vs late-night pass):** NO. Still "Restore Railway service + redeploy". 29 ALERTs (+1 since late-night).
 4. **Top-3 changed (vs late-night pass):** NO. CI sidecar-build matrix remains at #3.
 5. **CLAUDE.md edited:** NO — block already current.
+
+---
+
+## Summary for orchestrator (Late-Thursday fifth pass — this run)
+
+1. **Files touched:** `reports/product_priorities_2026-05-21.md` (this fifth-pass update-history bullet + this summary block — no rewrite of scoring tables) and `CLAUDE.md` (one-line edit to top-1 success metric: `bike_count >= 527` → `bike_count >= 599` to match current DB).
+2. **Commit summary:** `docs(priorities): 2026-05-21 fifth pass — Thursday weekly refresh, no rerank, sync bike_count target to 599`.
+3. **Top-1 changed (vs Thursday close pass):** NO. Still "Restore Railway service + redeploy". 30 ALERTs total (+1 since Thursday close). Day 5 of outage.
+4. **Top-3 changed (vs Thursday close pass):** NO. Same {Railway / analytics+DDL / CI sidecar matrix}.
+5. **CLAUDE.md edited:** YES — single-knob refresh of the bike_count success metric to track current DB volume. Standing-priorities block otherwise unchanged.
+6. **No new INSTRUCTION queued.** Backlog still consumable by hand (26 items). Same logic as prior passes: queueing top-3 candidates as `[opportunistic]` just adds noise — the standing-priorities block is the primary channel.

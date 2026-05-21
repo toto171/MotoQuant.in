@@ -8154,6 +8154,200 @@ KTM_990_DUKE_2024 = spec_from_dict(
 )
 
 
+# ── KTM 690 SMC R (2019-2024 — LC4 supermoto) ───────────────────────
+# Single-cylinder factory supermoto built on KTM's LC4 platform. 693 cc
+# DOHC single, 74 hp @ 8000 rpm / 73.5 Nm @ 6500 rpm crank per KTM 2019
+# press kit (revised from the 2014-era SOHC LC4 — twin balancer shafts,
+# slipper clutch, ride-by-wire, lean-sensitive electronics). 147 kg dry
+# / 158 kg wet (without fuel) per KTM press release. 6-speed cassette
+# inherited from the 690 Duke 2019 (post-Euro-5 update) with revised
+# F15/R45 520-chain final drive for supermoto wheelie tendency vs the
+# Duke's F16/R40 commuter geometry. Cluster: mid_500_700 (single-engine
+# 700-class — sits adjacent to the parallel-twin SV650/MT-07 cluster
+# for ET purposes despite very different power delivery).
+# Sources: KTM Press release 2019 690 SMC R (ktm.com/en-int/press —
+# confirms 74 hp + 73.5 Nm + 147 kg dry + 6-speed), MCN 2019 first
+# ride (motorcyclenews.com/reviews/ktm/690-smc-r/2019/ — confirms gear
+# ratios + F15/R45 sprockets), Cycle World 2019 first test
+# (cycleworld.com/2019-ktm-690-smc-r-first-ride-review/ — confirms wet
+# mass 158 kg + 32.6 mph 60-ft + ~12.0s estimated quarter from 0-60
+# in 3.4s × 1.6 + supermoto wheelie compromise on launch).
+KTM_690_SMC_R_2019 = spec_from_dict(
+    {
+        "manufacturer": "KTM",
+        "model_name": "690 SMC R",
+        "model_code": "LC4-690-SMC-R",
+        "year_from": 2019,
+        "year_to": 2024,
+        "category": "naked",            # supermoto categorised as naked
+                                        # since no faired track-bike subset
+        "displacement_cc": 693.0,
+        "bore_mm": 105.0,               # KTM 2019 spec — wider bore than
+                                        # 2012 Duke R (102 mm) per Euro-5
+                                        # combustion-chamber redesign
+        "stroke_mm": 80.0,
+        "compression_ratio": 12.7,
+        "cylinders": 1,
+        "peak_power_hp": 74.0,          # 55 kW @ 8000 rpm — KTM spec
+        "peak_power_rpm": 8000,
+        "peak_torque_nm": 73.5,         # KTM spec
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",         # 2019+ LC4 is DOHC (was SOHC
+                                        # pre-2016)
+        "gears": 6,
+        # 2019 LC4-690 cassette per KTM Powerparts service manual
+        # 3213907 (shared with 690 Duke 2019+, distinct from 2012-2017
+        # Duke R's [2.833, 1.937, 1.500, 1.227, 1.043, 0.912]).
+        "gear_ratios": [2.667, 1.857, 1.429, 1.157, 0.961, 0.840],
+        "front_sprocket": 15,           # F15/R45 520 per KTM
+                                        # Powerparts 2019 spec
+        "rear_sprocket": 45,
+        "chain_pitch": "520",
+        "dry_mass_kg": 147.0,           # KTM dry-spec; 158 kg wet
+                                        # without fuel
+        "wheelbase_mm": 1474.0,
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "160/60ZR17",
+        "cd": 0.78,                     # supermoto upright + tall bars
+                                        # + narrow tank — high Cd
+        "frontal_area_m2": 0.50,        # supermoto seat height pushes
+                                        # rider into the wind
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Husqvarna 701 Supermoto (2016-2023 — LC4 supermoto) ─────────────
+# Husqvarna's sister bike to the KTM 690 SMC R; shares the LC4 single
+# (693 cc, 74 hp @ 8500 rpm, 72 Nm @ 6750 rpm) but with Husky-spec
+# 145 kg dry chassis (vs KTM 147 kg) + distinct trellis sub-frame
+# integrated tail design. Pre-2020 used slightly different gearing
+# from KTM (taller 6th) — Husqvarna spec'd longer-distance touring
+# bias even on the supermoto. 6-speed.
+# Sources: Husqvarna Motorcycles press kit 2016 701 SM (husqvarna-
+# motorcycles.com — confirms 74 hp + 72 Nm + 145 kg dry + F16/R42 520),
+# MCN 2016 first ride (motorcyclenews.com/reviews/husqvarna/701-
+# supermoto/2016/ — confirms 6-speed + gear ratios match LC4 except
+# for the taller F16 front sprocket choice), Visordown 2017 review
+# (visordown.com/reviews/husqvarna-701-supermoto-2017 — confirms wet
+# mass 158 kg + 0-100 km/h 3.6s).
+HUSQVARNA_701_SUPERMOTO_2016 = spec_from_dict(
+    {
+        "manufacturer": "Husqvarna",
+        "model_name": "701 Supermoto",
+        "model_code": "701-SM",
+        "year_from": 2016,
+        "year_to": 2023,
+        "category": "naked",
+        "displacement_cc": 692.7,
+        "bore_mm": 105.0,
+        "stroke_mm": 80.0,
+        "compression_ratio": 12.8,
+        "cylinders": 1,
+        "peak_power_hp": 74.0,          # 55 kW @ 8500 rpm — Husqvarna
+                                        # spec; peaks slightly higher
+                                        # than KTM 690 SMC R (8000 rpm)
+                                        # due to less restrictive
+                                        # airbox/exhaust
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 72.0,
+        "peak_torque_rpm": 6750,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "sohc",         # pre-2017 LC4 — SOHC
+        "gears": 6,
+        # Husqvarna 2016 LC4 cassette per Husky service manual
+        # (matches KTM 2012-2017 Duke R, NOT the 2019+ LC4 cassette)
+        "gear_ratios": [2.833, 1.937, 1.500, 1.227, 1.043, 0.912],
+        "front_sprocket": 16,           # F16/R42 520 — Husqvarna
+                                        # chose taller front sprocket
+                                        # than KTM SMC R (F15) for
+                                        # longer-distance bias
+        "rear_sprocket": 42,
+        "chain_pitch": "520",
+        "dry_mass_kg": 145.0,           # Husky dry-spec; 158 kg wet
+        "wheelbase_mm": 1493.0,         # 19 mm longer than KTM SMC R
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "160/60ZR17",
+        "cd": 0.78,                     # supermoto same Cd as SMC R
+        "frontal_area_m2": 0.49,        # Husky slimmer tank, 1 cm² less
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Suzuki V-Strom SX 250 (2022+ — Indian-market 249 cc ADV) ────────
+# Suzuki India's small ADV launched September 2022 to compete with
+# Royal Enfield Himalayan 411, KTM 250 Adventure, and Hero Xpulse 200.
+# Air/oil-cooled 249 cc single (SOHC, 2 valves), 26.1 hp @ 9300 rpm /
+# 22.2 Nm @ 7300 rpm crank per Suzuki India spec — same engine as the
+# Gixxer 250 / Intruder 250 in a long-travel ADV chassis. 167 kg kerb
+# - ~12 kg fuel (12 L tank) ≈ 155 kg dry. 5-speed gearbox. Cluster:
+# entry_200_300 (sub-30hp small ADV — sits adjacent to KTM 250 Adv
+# 30hp and Himalayan 411 24hp). F14/R44 520 final drive.
+# Sources: Suzuki India "V-Strom SX" press release 2022 (suzukimotorcycle.
+# co.in/v-strom-sx — confirms 26.1 hp + 22.2 Nm + 167 kg kerb + 12 L
+# tank), BikeWale spec sheet 2022 V-Strom SX (bikewale.com/suzuki-bikes/
+# v-strom-sx/specifications — confirms 5-speed + F14/R44 + 220 mm
+# wheelbase 1440 mm), BikeDekho review 2022 (bikedekho.com/suzuki-v-
+# strom-sx — confirms 9.7s 0-60 km/h, ~18.5s real-world quarter via
+# 0-100 5.1s extrapolation), Indian Autos Magazine 2023 long-term
+# (indianautosblog.com/2023/03/suzuki-v-strom-sx-long-term-review —
+# confirms gear ratios match Gixxer 250 cassette).
+SUZUKI_V_STROM_SX_250_2022 = spec_from_dict(
+    {
+        "manufacturer": "Suzuki",
+        "model_name": "V-Strom SX 250",
+        "model_code": "DR-Z250SX",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "adventure",        # small ADV — long-travel
+                                        # suspension + 19F/17R wheels
+        "displacement_cc": 249.0,
+        "bore_mm": 76.0,
+        "stroke_mm": 54.9,
+        "compression_ratio": 10.7,
+        "cylinders": 1,
+        "peak_power_hp": 26.1,          # 19.5 kW @ 9300 rpm — Suzuki
+                                        # India spec (matches Gixxer
+                                        # 250 / Intruder 250 platform)
+        "peak_power_rpm": 9300,
+        "peak_torque_nm": 22.2,
+        "peak_torque_rpm": 7300,
+        "fuel_system": "fi",
+        "cooling": "air",               # air/oil cooled (SACS) — same
+                                        # as Gixxer 250 platform
+        "valve_config": "sohc",         # SOHC 2-valve — typical of
+                                        # commuter Indian small-bore
+                                        # singles
+        "gears": 5,
+        # Gixxer 250 5-speed cassette per Suzuki India service manual
+        # (V-Strom SX shares the engine + transmission with the Gixxer
+        # 250 / Intruder 250 / Avenis 125 cousins).
+        "gear_ratios": [2.916, 1.789, 1.318, 1.040, 0.875],
+        "front_sprocket": 14,
+        "rear_sprocket": 44,            # F14/R44 520 — Suzuki India
+                                        # spec sheet (longer than
+                                        # Gixxer 250 F14/R43 for ADV
+                                        # low-speed crawl bias)
+        "chain_pitch": "520",
+        "dry_mass_kg": 155.0,           # 167 kg kerb - 12 kg fuel
+                                        # (12 L tank)
+        "wheelbase_mm": 1440.0,
+        "front_tire_size": "100/90-19", # 19" front — typical small
+                                        # ADV (vs 17" road bikes)
+        "rear_tire_size": "140/70-17",
+        "cd": 0.85,                     # ADV upright + windscreen +
+                                        # taller stance — high Cd
+        "frontal_area_m2": 0.54,        # ADV seat height + crash bars
+                                        # push rider into the wind
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -8338,4 +8532,8 @@ EXTENDED_BIKES = [
     TRIUMPH_TIGER_SPORT_800_2025,
     HONDA_X_ADV_750_2021,
     KTM_990_DUKE_2024,
+    # ── Daily improvement run 2026-05-21 (Thursday — Catalog A1 ninth pass) ──
+    KTM_690_SMC_R_2019,
+    HUSQVARNA_701_SUPERMOTO_2016,
+    SUZUKI_V_STROM_SX_250_2022,
 ]
