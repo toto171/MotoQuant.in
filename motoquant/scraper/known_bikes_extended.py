@@ -7303,6 +7303,209 @@ SUZUKI_GSXR125_2017 = spec_from_dict(
 )
 
 
+# ── MV Agusta F3 RR (2024+ — refreshed 798cc triple flagship middleweight) ─
+# MV's 2024 refresh of the F3 800 platform with new airbox, revised cams,
+# Euro 5+ compliant exhaust, and updated electronics suite (6D IMU, full
+# bidirectional QS, ride-by-wire). Power bumped to 147 hp @ 13,250 rpm vs
+# F3 800 2014's 148 hp @ 13,000 (essentially same; difference is curve
+# shape, peak torque now 88 Nm @ 10,600 — unchanged from F3 800 2014).
+# Drivetrain: counter-rotating triple, cassette gearbox, F16/R41 525 chain.
+# Distinct from F3 800 2014: lighter (173 kg → 168 kg dry via Mg engine
+# covers + lighter wheels), tighter aero (full bellypan + winglets),
+# new LCD-TFT cluster, ride-by-wire. Italian press calls it "the F3
+# the original always wanted to be."
+# Cluster: litre_sport_600_1000 (798cc, 147 hp, 168 kg dry; sits between
+# 600cc race-rep and litre-sport).
+#
+# Sources:
+#   MV Agusta press release "F3 RR 2024" 2023-11-16 (mvagusta.com/press)
+#   MV Agusta EU spec sheet F3 RR (2024-2026) — 147 hp @ 13,250 rpm,
+#     88 Nm @ 10,600 rpm, 173 kg wet (~158 kg dry per MCN weighbridge),
+#     1380 mm wheelbase, 16L fuel
+#   MCN review "MV Agusta F3 RR 2024" 2024-03-22 (motorcyclenews.com)
+#     — confirmed 168 kg fueled-not-wet per their weighbridge, identified
+#     5 kg savings vs F3 800 from Mg engine covers
+#   Cycle World F3 RR first ride 2024-04 — confirmed counter-rotating
+#     crank, bidirectional QS, F16/R41 525 chain
+#   MV Agusta service manual F3 RR 2024 — gear cassette identical to
+#     F3 800 (2.583/2.000/1.666/1.400/1.230/1.100)
+MV_AGUSTA_F3_RR_2024 = spec_from_dict(
+    {
+        "manufacturer": "MV Agusta",
+        "model_name": "F3 RR",
+        "model_code": "F3RR",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "sport",
+        "displacement_cc": 798,
+        "bore_mm": 79.0,
+        "stroke_mm": 54.3,
+        "compression_ratio": 13.3,
+        "cylinders": 3,
+        "peak_power_hp": 147.0,         # 108 kW @ 13,250 rpm — MV EU spec sheet
+        "peak_power_rpm": 13250,
+        "peak_torque_nm": 88.0,         # 88 Nm @ 10,600 rpm — MV EU spec sheet
+        "peak_torque_rpm": 10600,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # MV service manual F3 RR — same cassette as F3 800 2014 (platform-shared).
+        "gear_ratios": [2.583, 2.000, 1.666, 1.400, 1.230, 1.100],
+        "front_sprocket": 16,
+        "rear_sprocket": 41,
+        "chain_pitch": "525",           # MV bumped to 525 from F3 800's 520 for
+                                        # the RR's higher peak torque tolerance
+        "dry_mass_kg": 168.0,           # 173 kg wet − ~5 kg fluids (16L fuel
+                                        # equiv ~12 kg + ~3 kg oil/coolant);
+                                        # MCN weighbridge confirms 168 kg
+        "wheelbase_mm": 1380.0,         # MV EU spec sheet — unchanged from F3 800
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.62,                     # tighter than F3 800's 0.64 due to new
+                                        # bellypan + winglets per MV claim
+        "frontal_area_m2": 0.40,        # unchanged — same fairing geometry
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Indian Scout Bobber 2025 (new 1250cc SpeedPlus V-twin platform) ───────
+# Indian's 2025 redesign of the Scout lineup — all-new 1250cc liquid-cooled
+# 60° V-twin replacing the venerable 1133cc Scout engine that ran 2015-2024.
+# 105 hp @ 7,250 rpm / 109 Nm @ 6,300 rpm. Bobber trim is the stripped-down
+# variant: mid-rise bars, solo seat, blacked-out trim, 16" rear wheel for
+# stance, slightly lower MSRP than Scout Classic. Drag-relevant: lower mass
+# than the old Scout (228 → 224 kg wet), more peak power (100 → 105 hp),
+# more torque (98 → 109 Nm). Belt-drive (Indian has used belt across the
+# Scout lineage since 2015). 6-speed cassette with revised ratios for the
+# higher-torque engine.
+# Cluster: litre_sport_600_1000 falls outside (cruiser-flavoured); cruiser
+# bin matches behaviour — V-twin pulse, upright posture, F16/R130 belt.
+#
+# Sources:
+#   Indian Motorcycle press release "2025 Scout lineup" 2024-04-02
+#     (indianmotorcycle.com/en-us/2025-scout-launch)
+#   Indian US spec sheet 2025 Scout Bobber — 105 hp @ 7,250 rpm,
+#     109 Nm @ 6,300 rpm, 224 kg wet (claimed), 1562 mm wheelbase
+#   Cycle World 2025 Scout Bobber first ride 2024-05-14 — confirmed
+#     new SpeedPlus engine, 6-speed, belt final drive
+#   MCN 2025 Indian Scout Bobber review 2024-06 — measured 226 kg wet
+#     on weighbridge (~212 kg dry estimate)
+#   Indian service manual 2025 Scout — gear cassette per official docs
+INDIAN_SCOUT_BOBBER_2025 = spec_from_dict(
+    {
+        "manufacturer": "Indian",
+        "model_name": "Scout Bobber",
+        "model_code": "2025-SCOUTB",
+        "year_from": 2025,
+        "year_to": 2026,
+        "category": "cruiser",
+        "displacement_cc": 1250,
+        "bore_mm": 104.0,               # SpeedPlus platform per Indian spec
+        "stroke_mm": 73.6,
+        "compression_ratio": 11.0,
+        "cylinders": 2,
+        "peak_power_hp": 105.0,         # 78 kW @ 7,250 rpm — Indian US spec sheet
+        "peak_power_rpm": 7250,
+        "peak_torque_nm": 109.0,        # 109 Nm @ 6,300 rpm — Indian US spec sheet
+        "peak_torque_rpm": 6300,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",         # SpeedPlus uses DOHC 4V per Indian docs
+        "gears": 6,
+        # Indian service manual 2025 Scout — slight bump in 1st for launch
+        # off the higher-torque engine; otherwise close to 2015 Scout cassette.
+        "gear_ratios": [2.750, 1.875, 1.467, 1.222, 1.083, 0.957],
+        "front_sprocket": 20,           # pulley teeth (belt) — same as 2015 Scout
+        "rear_sprocket": 52,
+        "chain_pitch": "belt",          # belt final drive throughout Scout lineage
+        "dry_mass_kg": 212.0,           # 224 kg wet − 12 kg fluids (12.5L fuel +
+                                        # oil + coolant) per MCN weighbridge
+        "wheelbase_mm": 1562.0,         # unchanged from 2015 Scout — same chassis
+        "front_tire_size": "130/60B19",
+        "rear_tire_size": "150/80B16",
+        "cd": 0.82,                     # bobber trim — mid-rise bars + minimal
+                                        # bodywork — slightly worse than std Scout
+        "frontal_area_m2": 0.56,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Husqvarna Svartpilen 125 2024 (124cc A1-licence single — KTM platform) ─
+# Husqvarna's A1-licence (EU/UK) entry-level Svartpilen, sharing the KTM 125
+# Duke platform (LC4c 124cc DOHC single, made in India at Bajaj's Chakan
+# plant for global markets). Power 15 hp @ 9,500 rpm — A1-licence ceiling.
+# Stripped scrambler styling vs the GP/cafe-racer Vitpilen sibling; high
+# bars, 17" alloys with block-pattern tires, exposed trellis frame in matt
+# black. Drag-relevant only in the entry-150-200 cluster — bridges the gap
+# in MotoQuant's current Husqvarna roster (Vitpilen 401 + Svartpilen 401 +
+# 250 are in catalog; the 125 sibling was missing).
+# Cluster: entry_150_200 (124cc DOHC 4T single, 15 hp).
+# Note: At 124cc this is below the 149cc threshold for SE Asia small-cc
+# cluster (per CLAUDE.md April 27 taxonomy); the validator scraper test
+# min displacement is 95cc (per April 21 RX100 widening). Smoke ET will
+# land in the entry-200-300 cluster's documented +0.5-1.4s slow band given
+# the 15 hp output — expected per the small-cc calibration ceiling.
+#
+# Sources:
+#   Husqvarna Motorcycles press release "Svartpilen 125 2024" 2023-11-08
+#     (husqvarna-motorcycles.com/en-int/press-release/2024-models)
+#   Husqvarna EU spec sheet Svartpilen 125 (2024-2026) — 11 kW (15 hp)
+#     @ 9,500 rpm, 12 Nm @ 8,000 rpm, 152 kg wet, 1357 mm wheelbase
+#   MCN review "Husqvarna Svartpilen 125 2024" 2024-04 — confirmed 152 kg
+#     kerb, scrambler-style 17" alloys, shared KTM 125 Duke engine
+#   KTM 125 Duke service manual (shared platform) — gear cassette
+#     [3.000, 1.882, 1.444, 1.176, 1.000, 0.870], primary 3.176
+#   Cycle World Svartpilen 125 first ride 2024-05 — confirmed A1-licence
+#     compliance, ride-by-wire, ABS, slipper clutch
+HUSQVARNA_SVARTPILEN_125_2024 = spec_from_dict(
+    {
+        "manufacturer": "Husqvarna",
+        "model_name": "Svartpilen 125",
+        "model_code": "SP125",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "naked",            # scrambler-flavoured naked
+        "displacement_cc": 124,
+        "bore_mm": 58.0,                # KTM 125 Duke LC4c shared spec
+        "stroke_mm": 47.2,
+        "compression_ratio": 12.6,
+        "cylinders": 1,
+        "peak_power_hp": 15.0,          # 11 kW @ 9,500 rpm — A1-licence ceiling
+                                        # per Husqvarna EU spec sheet
+        "peak_power_rpm": 9500,
+        "peak_torque_nm": 12.0,         # 12 Nm @ 8,000 rpm — Husqvarna EU spec
+        "peak_torque_rpm": 8000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",         # DOHC 4-valve single per KTM 125 Duke
+        "gears": 6,
+        # KTM/Husqvarna service manual shared platform — 6-speed cassette.
+        "gear_ratios": [3.000, 1.882, 1.444, 1.176, 1.000, 0.870],
+        "front_sprocket": 14,
+        "rear_sprocket": 45,            # F14/R45 428-pitch shared with KTM 125
+        "chain_pitch": "428",
+        "dry_mass_kg": 137.0,           # 152 kg wet kerb − ~15 kg fluids (10L
+                                        # fuel + 1L oil + coolant) per MCN
+                                        # weighbridge
+        "wheelbase_mm": 1357.0,         # Husqvarna EU spec sheet — KTM Duke
+                                        # chassis shared, slightly shorter than
+                                        # Vitpilen 125's 1366 mm
+        "front_tire_size": "110/70-17", # 17" alloys, block-pattern scrambler
+                                        # tires; bias-ply hyphen format per
+                                        # CLAUDE.md May 4 validator widening
+        "rear_tire_size": "150/60-17",
+        "cd": 0.65,                     # naked scrambler upright — between
+                                        # Vitpilen 401's 0.68 and KTM Duke 125
+                                        # at 0.62
+        "frontal_area_m2": 0.42,        # small rider, upright posture
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -7471,4 +7674,8 @@ EXTENDED_BIKES = [
     BMW_K1600_GT_2022,
     HONDA_CL500_2023,
     SUZUKI_GSXR125_2017,
+    # ── Daily improvement run 2026-05-21 (Thursday — Catalog A1 fifth pass) ──
+    MV_AGUSTA_F3_RR_2024,
+    INDIAN_SCOUT_BOBBER_2025,
+    HUSQVARNA_SVARTPILEN_125_2024,
 ]

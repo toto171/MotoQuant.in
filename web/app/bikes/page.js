@@ -147,7 +147,7 @@ export default function BikesPage() {
                   Motorcycle Specs &amp; Quarter-Mile Database
                 </h1>
                 <p className="text-white/70 mt-3 max-w-2xl">
-                  345 bikes modelled in MotoQuant Pro — Hayabusa, ZX-14R, R15 V4,
+                  488 bikes modelled in MotoQuant Pro — Hayabusa, ZX-14R, R15 V4,
                   KTM Duke 390, Pulsar NS200, Pulsar N250, Apache RTR, Interceptor
                   650, Yezdi Roadster, Hero Glamour 125, CFMoto 800NK, and the
                   full Indian + SE Asia drag-strip catalog. Individual aero (Cd
