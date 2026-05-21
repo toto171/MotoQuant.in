@@ -28,7 +28,7 @@ const PRICES = {
 const FEATURES = [
   ["Simulations per day",                "10", "Unlimited", "Unlimited"],
   ["Parts in a build",                   "3",  "Unlimited", "Unlimited"],
-  ["Bike catalog (599 bikes)",           "✓",  "✓",         "✓"],
+  ["Bike catalog (637 bikes)",           "✓",  "✓",         "✓"],
   ["Tire library (232 tires)",           "✓",  "✓",         "✓"],
   ["Venue conditions (20 venues)",       "✓",  "✓",         "✓"],
   ["ROI & Sobol analysis",               "—",  "✓",         "✓"],

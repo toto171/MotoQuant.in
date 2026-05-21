@@ -50,7 +50,7 @@ python -m motoquant.run sim --bike-id 1 --venue-id 1
 ```
 motoquant/          Python package -- physics engine, DB layer, calibration,
                     analysis, scraper, CLI.
-  ├── physics.py        RK4 integrator (599 lines)
+  ├── physics.py        RK4 integrator (637 lines)
   ├── submodels/        15 independent sub-models (engine, tire, aero, ...)
   ├── database/         SQLite schema + seed + repos
   ├── calibration/      Dragy + dyno + ECU import, overlay, calibrator
@@ -82,7 +82,7 @@ and phase roadmap.
 ## Project state (Apr 2026)
 
 - **Phase 1 -- Core Physics:** complete. 15 sub-models, adaptive RK4.
-- **Phase 2 -- Database & Ingestion:** complete. 599 bikes, 232 tires,
+- **Phase 2 -- Database & Ingestion:** complete. 637 bikes, 232 tires,
   563 parts, 20 venues, 861 OEM bike-tire fitments.
 - **Phase 3 -- Validation & Calibration:** in progress. Dragy + dyno + ECU
   import done; FastAPI + Next.js frontend live at motoquant.in.

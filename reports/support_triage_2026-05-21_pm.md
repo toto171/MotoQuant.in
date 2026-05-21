@@ -82,6 +82,9 @@ All three §6 conditions still hold (`bike_suggestions=0`, INBOX:605 still open,
 ## NOTE — session 1779381035-636 (8th run, same day)
 All three §6 conditions still hold (`bike_suggestions=0`, INBOX:605 still open, ALERT count now **30**, Railway outage uninterrupted since 2026-05-17T20:45Z, ~114 h). All 30 ALERT bodies in `DISPATCH_OUTBOX.md` are byte-identical (`Postflight deploy check timed out after 180s`) — confirmed via uniq-on-body scan. No fresh report, no new INSTRUCTION. Per §6 contract this single-line entry is the entire 8th-run support-triage delta. Dedup ticket INBOX:605 + urgency-promotion ticket INBOX:668 remain the only actionable levers.
 
+## NOTE — session 1779395435-632 (9th run, same day)
+All three §6 conditions still hold (`bike_suggestions=0`, INBOX:605 still open, ALERT count now **32**, Railway outage uninterrupted since 2026-05-17T20:45Z, ~120 h). Two new identical timeout ALERTs added since 8th-run note. Required deliverable written to `reports/support_triage_2026-05-21_v3.md`. No new INSTRUCTION queued. Dedup ticket INBOX:605 + urgency-promotion ticket INBOX:668 remain the only actionable levers.
+
 ## 6. Recommendation for next support-agent run
 
 If `bike_suggestions` is still empty AND `:605` is still open AND ALERT count is

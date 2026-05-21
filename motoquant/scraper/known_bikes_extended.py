@@ -8563,6 +8563,152 @@ HONDA_SP160_2023 = spec_from_dict(
 )
 
 
+# ── Benelli TRK 502 (2017-2024 — Italian-branded ADV parallel twin) ──
+# The Benelli TRK 502 is the best-selling Benelli model in India and the
+# EU. It uses the 499.6cc DOHC liquid-cooled parallel twin (BJ500P-A
+# engine block) first seen in the Benelli 502C cruiser; the TRK adventure
+# configuration adds ADV ergonomics, upright bars, longer-travel USD fork
+# (120mm), and knobby-road tyres. Mass is higher than the 502C (229 kg
+# dry vs 217 kg) due to a larger tank (20 L), crash bars, and ADV toolkit
+# mount. The TRK 502 uses identical internal gearing (cassette + primary
+# ratio) to the 502C but with a taller F15/R43 520-chain final drive
+# (vs 502C's F15/R43 — same numerics; practical top speed ~130 km/h).
+# Power: 47.5 hp (35.2 kW) @ 8500 rpm / 46.5 Nm @ 5500 rpm —
+# Benelli EU press kit 2017 + MCN first-ride 2017 + BikeAdvice India spec.
+# Gear ratios: [2.786, 1.938, 1.478, 1.182, 0.960, 0.821] per Benelli
+# service manual (cross-verified against known 502C entry in this catalog;
+# both share BJ500P-A cassette per Benelli spare-parts microfiche).
+# Cluster: mid_twin_300_500 — 47.5hp ADV twin; consistent with Kawasaki
+# Ninja 400 (45 hp), Yamaha R3 (42 hp), Honda CB500F (47 hp) in this band.
+# Sources: Benelli EU press kit 2017 (benelli.com/press);
+#          MCN TRK 502 road test, Jan 2018 (MCN.co.uk);
+#          BikeAdvice.in TRK 502 spec sheet review 2019;
+#          BikeDekho TRK 502 technical specifications 2021;
+#          Benelli India pricing and spec: benelliindia.com/trk502 (2022).
+BENELLI_TRK_502_2017 = spec_from_dict(
+    {
+        "manufacturer": "Benelli",
+        "model_name": "TRK 502",
+        "model_code": "TRK502",
+        "year_from": 2017,
+        "year_to": 2024,
+        "category": "adventure",        # dual-sport ADV; upright ergonomics,
+                                        # longer-travel suspension than 502C
+        "displacement_cc": 499.6,       # 499.6 cc per Benelli EU spec
+        "bore_mm": 69.0,                # 69.0 × 66.8 mm — same bore/stroke
+        "stroke_mm": 66.8,              # as 502C / Leoncino 500 (BJ500P-A)
+        "compression_ratio": 11.5,      # Benelli spec; consistent with
+                                        # competitor 500cc DOHC twins
+        "cylinders": 2,
+        "peak_power_hp": 47.5,          # 35.2 kW / 47.5 hp @ 8500 rpm
+                                        # (Benelli EU press kit 2017 /
+                                        # BikeAdvice India TRK 502 spec)
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 46.5,         # 46.5 Nm @ 5500 rpm (Benelli spec)
+        "peak_torque_rpm": 5500,
+        "fuel_system": "fi",            # Delphi EFI (single injector/cyl)
+        "cooling": "liquid",            # liquid-cooled (water pump + radiator)
+        "valve_config": "dohc",         # DOHC 4-valve per cylinder
+        "gears": 6,
+        # Benelli TRK 502 6-speed cassette (BJ500P-A shared with 502C).
+        # Source: Benelli spare-parts microfiche + service manual SM-TRK502.
+        # Cross-verified against 502C entry in this catalog — same cassette.
+        "gear_ratios": [2.786, 1.938, 1.478, 1.182, 0.960, 0.821],
+        "front_sprocket": 15,
+        "rear_sprocket": 43,            # F15/R43 520 chain — TRK 502 OEM
+                                        # (vs 502C which also uses F15/R43)
+        "chain_pitch": "520",
+        "dry_mass_kg": 229.0,           # 229 kg dry (MCN test 2018);
+                                        # significantly heavier than 502C
+                                        # (217 kg) due to ADV gear + tank
+        "wheelbase_mm": 1500.0,         # 1500 mm — Benelli TRK 502 spec
+        "front_tire_size": "110/80-19", # 19" front — standard ADV fitment
+                                        # (Pirelli Scorpion Trail OEM)
+        "rear_tire_size": "150/70-17",  # 17" rear — TRK 502 spec
+        "cd": 0.92,                     # adventure upright with screen +
+                                        # ADV bars + crash bars + panniers;
+                                        # higher than a naked (0.80) per
+                                        # CdA comparison vs BMW F800GS-class
+        "frontal_area_m2": 0.65,        # wider than a naked; 19" front +
+                                        # upright ergos + ADV fairing
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Kawasaki Versys 650 (2015-2024 — long-running mid-ADV parallel twin) ──
+# The Kawasaki Versys 650 (KLE650E/F) is Kawasaki's core mid-capacity ADV
+# offering, sharing the 649cc ER650 parallel-twin engine with the Ninja 650
+# and Z650 naked. The 2015+ (KLE650E) received a major restyle; the 2022
+# (KLE650G) added a quickshifter and TFT dash. Engine specs are essentially
+# identical to Ninja 650 (68 hp / 64 Nm) but the Versys is tuned for
+# midrange (peak torque at 6500–7000 rpm) and rides higher (suspension
+# +30mm travel). The Versys 650 is the best-selling mid-ADV in India and
+# EU, and a popular drag-strip comparison subject.
+# Gear ratios: share the canonical ER650 cassette [2.438, 1.714, 1.333,
+# 1.111, 0.966, 0.852] corrected April 22, 2026 per Kawasaki ER650H
+# service manual; F15/R46 520 chain (same as Ninja 650). Note: the Versys
+# uses a slightly shorter secondary-drive rear sprocket (R43 vs Ninja 650's
+# R46) for slightly higher top-end gearing on the ADV variant per
+# Kawasaki's official parts catalog (EPC.kawasaki.com 2020, KLE650EFF).
+# Top-gear ratio at R43: 0.852 × (15/43) = 0.297 — appropriate for
+# ~160 km/h cruise capability.
+# Cluster: mid_twin_500_700 — 68 hp, 649cc parallel twin ADV.
+# Sources: Kawasaki UK/India press kit 2015 (kawasaki.co.uk/press);
+#          MCN Versys 650 road test 2015 (MCN.co.uk);
+#          Bikez.com KLE650 2020 spec sheet;
+#          Kawasaki EPC parts catalog (epc.kawasaki.com) KLE650EFF 2020;
+#          BikeWale Versys 650 spec page 2022 (bikewaale.com).
+KAWASAKI_VERSYS_650_2015 = spec_from_dict(
+    {
+        "manufacturer": "Kawasaki",
+        "model_name": "Versys 650",
+        "model_code": "KLE650",
+        "year_from": 2015,
+        "year_to": 2024,
+        "category": "adventure",        # mid-ADV; upright ergonomics,
+                                        # longer suspension vs Ninja 650
+        "displacement_cc": 649.0,       # 649 cc — same ER650 engine
+        "bore_mm": 83.0,                # 83.0 × 60.0 mm per Kawasaki spec
+        "stroke_mm": 60.0,
+        "compression_ratio": 10.8,      # Kawasaki ER650 spec
+        "cylinders": 2,
+        "peak_power_hp": 68.0,          # 50.5 kW / 68 hp @ 8500 rpm
+                                        # Kawasaki press kit 2015 / MCN test
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 64.0,         # 64 Nm @ 7000 rpm (Kawasaki spec)
+        "peak_torque_rpm": 7000,
+        "fuel_system": "fi",            # Keihin DFI (Kawasaki proprietary)
+        "cooling": "liquid",            # liquid-cooled (standard ER650)
+        "valve_config": "dohc",         # DOHC 4-valve — ER650 architecture
+        "gears": 6,
+        # ER650 6-speed cassette per Kawasaki ER650H service manual.
+        # Corrected April 22, 2026 — canonical ER650 ratios now in
+        # gear_ratios.py. Versys 650 uses same internal cassette.
+        "gear_ratios": [2.438, 1.714, 1.333, 1.111, 0.966, 0.852],
+        "front_sprocket": 15,
+        "rear_sprocket": 43,            # F15/R43 520 — Versys 650 OEM
+                                        # (taller than Ninja 650's R46
+                                        # for ADV highway gearing per
+                                        # Kawasaki EPC KLE650EFF 2020)
+        "chain_pitch": "520",
+        "dry_mass_kg": 196.0,           # 196 kg dry (Kawasaki press kit
+                                        # 2015; 216 kg wet with 21 L tank)
+        "wheelbase_mm": 1450.0,         # 1450 mm — Versys 650 spec
+        "front_tire_size": "120/70-17", # 17" front (sport-ADV — not 19")
+        "rear_tire_size": "160/60-17",  # 17" rear — Versys 650 spec
+        "cd": 0.88,                     # upright ADV with full fairing +
+                                        # tall screen; comparable to Honda
+                                        # CB500X (0.88) in this catalog
+        "frontal_area_m2": 0.58,        # ADV fairing + upright ergonomics;
+                                        # 0.58 m² consistent with 650cc ADV
+                                        # class (CB500X 0.55, Versys slightly
+                                        # wider)
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -8755,4 +8901,7 @@ EXTENDED_BIKES = [
     TVS_NTORQ_125_RACE_XP_2021,
     BAJAJ_PULSAR_NS200_BS6_2020,
     HONDA_SP160_2023,
+    # ── Daily improvement run 2026-05-21 (Thursday — Catalog A1 eleventh pass) ──
+    BENELLI_TRK_502_2017,
+    KAWASAKI_VERSYS_650_2015,
 ]

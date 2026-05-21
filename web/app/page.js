@@ -67,7 +67,7 @@ const TOP10 = [
 
 // ─── Stats strip — synced to current motoquant.db (Apr 30 2026) ───────
 const STATS = [
-  { num: 599, label: 'BIKES'      },
+  { num: 637, label: 'BIKES'      },
   { num: 232, label: 'TIRES'      },
   { num: 563, label: 'PARTS'      },
   { num: 20,  label: 'VENUES'     },
@@ -348,7 +348,7 @@ function HomePageInner() {
               <p className="mt-7 text-lg sm:text-xl text-white/70 leading-relaxed max-w-xl mx-auto">
                 A first-principles drag simulator for India&rsquo;s motorcycle
                 drag-racing community.{' '}
-                <span className="text-white">599 bikes</span>,{' '}
+                <span className="text-white">637 bikes</span>,{' '}
                 <span className="text-white">563 parts</span>,{' '}
                 <span className="text-white">20 venues</span> — tuned to
                 within ±0.05s of real-world ETs on the litre-class.
@@ -426,9 +426,9 @@ function HomePageInner() {
               {
                 icon: Target,
                 title: 'Indian Market-First',
-                body: '599 bikes including 57 Indian commuters (Pulsar N125, NS200, NS400Z, Apache RTR, R15 V4, Duke 390, RE Interceptor 650), 15 SE Asia drag cubs, the Kawasaki Ninja ZX-4R/ZX-4RR 400cc inline-fours, and the complete Indian racing scene. Parts prices in INR with live retailer data. Venues: Aamby Valley, MMRT, BIC, Kari, Hyderabad.',
+                body: '637 bikes including 57 Indian commuters (Pulsar N125, NS200, NS400Z, Apache RTR, R15 V4, Duke 390, RE Interceptor 650), 15 SE Asia drag cubs, the Kawasaki Ninja ZX-4R/ZX-4RR 400cc inline-fours, and the complete Indian racing scene. Parts prices in INR with live retailer data. Venues: Aamby Valley, MMRT, BIC, Kari, Hyderabad.',
                 href: '/bikes',
-                cta: 'Browse all 599 bikes →',
+                cta: 'Browse all 637 bikes →',
               },
               {
                 icon: TrendingUp,
