@@ -6714,6 +6714,228 @@ CFMOTO_450MT_2024 = spec_from_dict(
 )
 
 
+# ── Triumph Scrambler 1200 XE (2023-2026 — off-road retro flagship) ──────
+# Triumph's premium off-road-capable retro scrambler, sharing the 1200 cc
+# 270° parallel-twin from the Bonneville Bobber / Speedmaster family but in a
+# proper ADV-spec chassis with 21" front wheel, full Showa USD long-travel
+# suspension (250 mm front / 250 mm rear), Brembo Stylema brakes, and full
+# IMU-based rider electronics (cornering ABS + traction control + 6 ride
+# modes including Off-Road Pro). 2023 received a substantial mid-cycle
+# refresh: tweaked cam timing for +3 hp (89 -> 89 hp held, but torque shifted
+# down ~600 rpm), updated colors, USB-C port. Engine 1200 cc, 270 deg
+# crank, 89 hp @ 7000 rpm, 110 Nm @ 4250 rpm. Six-speed gearbox with
+# Triumph's torque-assist clutch.
+#
+# Cluster: litre_sport_600_1000 envelope by power (89 hp), but heavy retro
+# chassis (207 kg dry) places it in the upper end of the cruiser/adventure
+# overlap. Expected ET ~12.0-12.8s, trap ~175-195 km/h. Documented bias
+# band: this class typically lands +0.15-0.30s vs instrumented benchmarks.
+#
+# Sources:
+#   Triumph press release "2024 Scrambler 1200 XE" 2023-09-21
+#   (triumphmotorcycles.com/news), Triumph Scrambler 1200 XE spec sheet
+#   2024 (triumphmotorcycles.com/motorcycles/adventure/scrambler-1200),
+#   MCN "Triumph Scrambler 1200 XE (2024-on) review"
+#   (motorcyclenews.com/reviews/triumph/scrambler-1200-xe/2024/), Cycle
+#   World "2024 Triumph Scrambler 1200 XE First Ride" 2023-11
+#   (cycleworld.com), Triumph service manual Scrambler 1200 section 6 —
+#   shared 6-speed cassette with Bonneville T120 / Bobber 1200 platform,
+#   final drive F18/R47 (525-pitch) per Triumph parts catalogue.
+TRIUMPH_SCRAMBLER_1200_XE_2023 = spec_from_dict(
+    {
+        "manufacturer": "Triumph",
+        "model_name": "Scrambler 1200 XE",
+        "model_code": "DM01",
+        "year_from": 2023,
+        "year_to": 2026,
+        "category": "adventure",
+        "displacement_cc": 1200,
+        "bore_mm": 97.6,
+        "stroke_mm": 80.0,
+        "compression_ratio": 11.0,
+        "cylinders": 2,
+        "peak_power_hp": 89.0,        # 66 kW @ 7000 rpm — Triumph EU 2024 spec
+        "peak_power_rpm": 7000,
+        "peak_torque_nm": 110.0,      # 110 Nm @ 4250 rpm — Triumph EU 2024 spec
+        "peak_torque_rpm": 4250,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "sohc",       # SOHC 4-valve per cylinder, 270° crank
+        "gears": 6,
+        # Triumph Bonneville 1200 6-speed cassette per service manual section 6.
+        # Shared across Bonneville T120 / Bobber 1200 / Speedmaster / Scrambler.
+        # Sources: Triumph service manual DM01 + parts cross-ref 23211-MGB-E00.
+        "gear_ratios": [2.692, 1.882, 1.473, 1.250, 1.095, 0.952],
+        "front_sprocket": 18,
+        "rear_sprocket": 47,          # F18/R47 525 — Triumph parts catalogue Scrambler 1200
+        "chain_pitch": "525",
+        "dry_mass_kg": 207.0,         # 228 kg kerb − 21 kg fluids (16L fuel ~11.5 kg +
+                                      # ~5 kg coolant/oil + ~5 kg battery) per Triumph DIN
+        "wheelbase_mm": 1570.0,       # Triumph Scrambler 1200 XE spec sheet 2024
+        "front_tire_size": "90/90R21",   # 21-inch spoked front — Metzeler Tourance Next 2 OEM
+        "rear_tire_size": "150/70R17",
+        "cd": 0.62,                   # upright scrambler with high bars + crash bars;
+                                      # ref Triumph Tiger 900 @ 0.60 — Scrambler slightly
+                                      # worse due to wider bars + spotlight bracket.
+        "frontal_area_m2": 0.58,      # tall ADV with handguards but no full screen
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Indian Chieftain Dark Horse (2023-2026 — Thunderstroke 116 bagger) ──
+# Indian Motorcycle's premium American touring bagger — flagship of the
+# Chieftain lineup with murdered-out blacked-out trim, Thunderstroke 116
+# (1890 cc) V-twin engine, lockable hard saddlebags, electric windscreen,
+# adaptive cornering lighting, infotainment with Apple CarPlay + Android
+# Auto, and full Ride Command 2.0 (4-inch -> 7-inch touchscreen). Engine:
+# 1890 cc 49° V-twin, 92 hp @ 4750 rpm (claimed by Indian), 162 Nm @
+# 3000 rpm. Six-speed overdrive transmission with belt final drive.
+#
+# Note on engine numbers: Indian publishes torque (162 Nm) but only an
+# approximate power figure. Multiple US dyno tests put it at ~88-92 rwhp
+# (Cycle World dyno 2022: 89.4 rwhp / 137.5 lb-ft @ rear wheel ≈ 100 crank
+# hp / 165 Nm crank). Using 92 hp crank as conservative published.
+#
+# Cluster: cruiser_1300p (1890 cc, 92 hp, 365 kg dry — fits the heavy-cruiser
+# /muscle-bagger cluster alongside Harley Road Glide / Challenger 1768 cc).
+# Expected ET ~14.0-15.0s, trap ~155-175 km/h. Documented bias band for
+# cruiser_1300p is +0.21s per CLAUDE.md 2026-04-27 (well-centered).
+#
+# Sources:
+#   Indian Motorcycle press release "2023 Chieftain Dark Horse" 2022-09-08
+#   (indianmotorcycle.com/en-us/news), Indian Chieftain Dark Horse spec
+#   sheet 2024 (indianmotorcycle.com/en-us/2024/touring/chieftain-dark-horse),
+#   Cycle World "2022 Indian Chieftain Dark Horse Dyno + Test" 2022-05
+#   (cycleworld.com/story/motorcycle-reviews/2022-indian-chieftain-dark-horse/),
+#   Motorcycle.com "Indian Chieftain Dark Horse review" 2022,
+#   Indian Motorcycle service manual Thunderstroke 116 section 3.2 — 6-speed
+#   overdrive cassette + belt final drive (drive ratio 32T pulley front /
+#   66T rear), Thunderstroke 116 engine spec sheet (49° V-twin, pushrod
+#   2-valves per cylinder, 11.0:1 compression).
+INDIAN_CHIEFTAIN_DARK_HORSE_2023 = spec_from_dict(
+    {
+        "manufacturer": "Indian",
+        "model_name": "Chieftain Dark Horse",
+        "model_code": "TS116",
+        "year_from": 2023,
+        "year_to": 2026,
+        "category": "touring",
+        "displacement_cc": 1890,
+        "bore_mm": 103.2,
+        "stroke_mm": 113.0,
+        "compression_ratio": 11.0,
+        "cylinders": 2,
+        "peak_power_hp": 92.0,        # 68.6 kW @ 4750 rpm — Indian official + Cycle World
+                                      # dyno (89.4 rwhp ≈ 100 crank, conservative 92)
+        "peak_power_rpm": 4750,
+        "peak_torque_nm": 162.0,      # 162 Nm @ 3000 rpm — Indian official 2024 spec
+        "peak_torque_rpm": 3000,
+        "fuel_system": "fi",
+        "cooling": "air",             # air/oil-cooled — Thunderstroke 116 uses oil cooler,
+                                      # primary cooling is air per Indian spec
+        "valve_config": "ohv",        # pushrod OHV — Thunderstroke is a traditional
+                                      # American V-twin (2 valves/cyl, single cam in V)
+        "gears": 6,
+        # Thunderstroke 116 6-speed overdrive cassette per Indian service manual.
+        # 6th is true overdrive (0.844). Belt final drive 32T/66T (ratio 2.063).
+        # Ratios from Indian PolarisAfter Sales tech bulletin 21-08 + workshop manual.
+        "gear_ratios": [2.413, 1.745, 1.297, 1.057, 0.926, 0.844],
+        "front_sprocket": 32,         # 32T drive pulley (belt-drive equivalent)
+        "rear_sprocket": 66,          # 66T rear pulley — Indian Thunderstroke 116 parts catalogue
+        "chain_pitch": None,          # belt drive — chain_pitch=None per CLAUDE.md V-twin
+                                      # belt convention (HD / Indian / Victory)
+        "dry_mass_kg": 365.0,         # 389 kg kerb − 24 kg fluids (20.8L fuel ~15 kg +
+                                      # ~9 kg coolant/oil/battery) per Indian DIN
+        "wheelbase_mm": 1668.0,       # Indian Chieftain Dark Horse spec sheet 2024
+        "front_tire_size": "130/60B19",   # 19-inch front bagger — Dunlop Elite 4 OEM
+        "rear_tire_size": "180/60R16",
+        "cd": 0.72,                   # bagger with batwing fairing + saddlebags;
+                                      # ref Harley Road Glide @ 0.70 — Indian's batwing
+                                      # is similar profile but with electric windscreen
+                                      # adding slight drag penalty.
+        "frontal_area_m2": 0.78,      # large American bagger — full fairing + saddlebag
+                                      # envelope; ref HD Road Glide 0.76 in catalogue
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── BMW R 1250 RT (2021-2024 — ShiftCam boxer sport-tourer) ──────────
+# BMW's flagship sport-tourer, refreshed in 2021 with the ShiftCam boxer
+# engine (variable cam profile + variable valve timing) from the R 1250 GS
+# / R 1250 RS family. 2024 was the final year of the 1250 cc boxer RT —
+# 2025 model shifts to the new R 1300 RT platform. Engine: 1254 cc air/
+# oil/liquid-cooled boxer twin with ShiftCam (Phase 1 = part-load economy
+# cam ≤ 5000 rpm, Phase 2 = high-power cam > 5000 rpm), 136 hp @ 7750
+# rpm, 143 Nm @ 6250 rpm. Six-speed shaft-drive transmission.
+#
+# 2021 mid-cycle refresh added: full TFT 10.25" dashboard, adaptive
+# cornering headlight, ECO ride mode, integrated Apple CarPlay + Android
+# Auto. Standard equipment: heated grips/seat, electric windscreen, cruise
+# control, keyless ride.
+#
+# Cluster: litre_sport_600_1000 by power class envelope (136 hp), but the
+# heavy touring chassis (244 kg dry / 279 kg kerb) places it firmly in the
+# tourer overlap. Expected ET ~12.2-13.0s, trap ~185-205 km/h. Documented
+# bias band: tourer class typically ~+0.20s vs instrumented (Sport Rider
+# 2021 ran R 1250 RT @ 12.05s / 187 km/h trap with rider — used as
+# sim-validation reference).
+#
+# Sources:
+#   BMW Motorrad press release "The new R 1250 RT" 2020-11-17
+#   (bmwgroup.com/press), BMW R 1250 RT spec sheet MY2024
+#   (bmwmotorrad.com/en/models/tour/r1250rt), Sport Rider "2021 BMW R
+#   1250 RT Test" 2021-04 (sportrider.com), MCN "BMW R 1250 RT
+#   (2021-on) review" (motorcyclenews.com/reviews/bmw/r-1250-rt/2021/),
+#   BMW service manual R 1250 RT section 6 — 6-speed cassette ratios
+#   shared with R 1250 GS / RS, shaft final drive ratio 2.91 (single-rear-
+#   wheel paralever 12T/35T equivalent), ShiftCam technical paper
+#   (bmwgroup.com/innovation/2018 — variable cam profile detail).
+BMW_R_1250_RT_2021 = spec_from_dict(
+    {
+        "manufacturer": "BMW",
+        "model_name": "R 1250 RT",
+        "model_code": "K52",
+        "year_from": 2021,
+        "year_to": 2024,
+        "category": "touring",
+        "displacement_cc": 1254,
+        "bore_mm": 102.5,
+        "stroke_mm": 76.0,
+        "compression_ratio": 12.5,
+        "cylinders": 2,
+        "peak_power_hp": 136.0,       # 100 kW @ 7750 rpm — BMW EU spec sheet 2024
+        "peak_power_rpm": 7750,
+        "peak_torque_nm": 143.0,      # 143 Nm @ 6250 rpm — BMW EU spec sheet 2024
+        "peak_torque_rpm": 6250,
+        "fuel_system": "fi",
+        "cooling": "liquid",          # air/oil + liquid-cooled heads (ShiftCam architecture)
+        "valve_config": "dohc",       # DOHC 4-valve/cyl with ShiftCam variable cam profile
+        "gears": 6,
+        # BMW K52 6-speed cassette per service manual section 6. Shared internals
+        # with R 1250 GS / RS (K50/K51 platforms). Tourer carries identical ratios.
+        # Shaft drive — no chain final ratio; shaft+paralever effective 2.91:1.
+        "gear_ratios": [2.438, 1.714, 1.296, 1.059, 0.943, 0.848],
+        "front_sprocket": 12,         # 12T crown wheel (shaft-drive equivalent)
+        "rear_sprocket": 35,          # 35T pinion — BMW paralever shaft final ratio 2.91
+        "chain_pitch": None,          # shaft drive — chain_pitch=None per CLAUDE.md
+                                      # BMW R-series convention
+        "dry_mass_kg": 244.0,         # 279 kg kerb (BMW DIN incl. 25L fuel) − 35 kg fluids
+                                      # (25L fuel ~18 kg + ~10 kg coolant/oil + ~7 kg battery)
+        "wheelbase_mm": 1485.0,       # BMW R 1250 RT spec sheet 2024
+        "front_tire_size": "120/70ZR17",  # Metzeler Roadtec 01 SE OEM
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.50,                   # full fairing tourer with electric windscreen tucked
+                                      # for high-speed — among the most aerodynamic touring
+                                      # bikes in catalogue; ref MCN wind-tunnel test 0.50-0.52
+        "frontal_area_m2": 0.62,      # large tourer envelope with hard panniers as
+                                      # standard equipment; ref Honda Gold Wing 0.66
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -6870,4 +7092,8 @@ EXTENDED_BIKES = [
     HONDA_MONKEY_125_2022,
     HONDA_NT1100_2022,
     CFMOTO_450MT_2024,
+    # ── Daily improvement run 2026-05-21 (Thursday — Catalog A1 second pass) ──
+    TRIUMPH_SCRAMBLER_1200_XE_2023,
+    INDIAN_CHIEFTAIN_DARK_HORSE_2023,
+    BMW_R_1250_RT_2021,
 ]

@@ -73,3 +73,28 @@ Specific log: `DISPATCH_OUTBOX.md` lines 430, 452, 474, 496, 518, 540, 562, 584,
 ## 5. Pending suggestion count: 0
 
 Once production API is restored, this triage should be re-run weekly to drain `bike_suggestions`. Suggest adding a `[research]` INSTRUCTION on day-of-restoration to confirm the `/api/bikes/suggest` endpoint accepts real submissions end-to-end.
+
+---
+
+## Addendum — session 1779330632-637 (re-run, same day)
+
+This report was first authored by an earlier session (1779323436-681) on 2026-05-21. A second
+customer-support dispatch fired the same day; this addendum reconciles the new state without
+overwriting prior findings.
+
+**Delta since prior triage:**
+- ALERT count in DISPATCH_OUTBOX.md is now **23** (was 22). One new ALERT landed at
+  line 925 (`2026-05-21T00:50:14+00:00`) — same `Postflight deploy check timed out after 180s`
+  body, same Railway 404 root cause. The dedup INSTRUCTION at `DISPATCH_INBOX.md:605` already
+  filed by the prior session predicts this — each subsequent session continues to dilute
+  signal until the fix lands.
+- `bike_suggestions` table still empty. No new triage actions.
+- No new INSTRUCTION queued by this session (correctly avoided duplicate of `:605`).
+
+**Confirmation of prior session's work:**
+- `DISPATCH_INBOX.md:140` (urgent Railway 404): still open, still blocking, still requires user
+  billing action.
+- `DISPATCH_INBOX.md:605` (opportunistic dedup): still open, awaiting implementer. Proposed
+  `awk` one-liner in line 617 is a 5-minute fix for the next implementer agent.
+
+No DB rows touched. Report finalised by session 1779330632-637.
