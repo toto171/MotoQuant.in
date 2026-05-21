@@ -6936,6 +6936,179 @@ BMW_R_1250_RT_2021 = spec_from_dict(
 )
 
 
+# ── Yamaha MT-10 SP (2022-2026 — top-spec CP4 naked) ────────────────
+# 2022 refresh (RN78 platform): 165 hp @ 11,500 rpm vs 163 hp on the
+# 2016-2021 RN45 base model; 112 Nm @ 9,000 rpm unchanged. SP adds:
+# • YCCT quickshifter + auto-blipper as standard
+# • Öhlins NPX 43 mm USD fork + Öhlins TTX rear shock
+# • Bi-directional quickshifter paddle
+# • Öhlins front fork is ~1.8 kg lighter than RN45 KYB units → 190 kg dry
+# Gear cassette unchanged from MT-10 base (Yamaha service manual LIT-11616-RN-78):
+# ratios 2.600/1.947/1.619/1.380/1.238/1.130, F17/R44 520 chain.
+# Sources:
+#   Yamaha MT-10 SP 2022 international press kit (Yamaha Motor Europe 2022-02)
+#   MCN review 2022 (motorcyclenews.com/reviews/yamaha/mt-10-sp/2022/)
+#   Visordown first ride 2022 (visordown.com/reviews/yamaha-mt-10-sp-review)
+#   Yamaha EU spec sheet: yamaha-motor.eu/gb/en/products/motorcycles/naked/mt-10-sp/
+#   Dry mass 190 kg per Yamaha EU spec sheet (wet: 210 kg − 13 L fuel − fluids)
+YAMAHA_MT10_SP_2022 = spec_from_dict(
+    {
+        "manufacturer": "Yamaha",
+        "model_name": "MT-10 SP",
+        "model_code": "RN78",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 998,
+        "bore_mm": 79.0,
+        "stroke_mm": 50.9,
+        "compression_ratio": 12.0,
+        "cylinders": 4,
+        "peak_power_hp": 165.0,         # 121 kW @ 11,500 rpm — Yamaha EU spec sheet
+        "peak_power_rpm": 11500,
+        "peak_torque_nm": 112.0,        # 112 Nm @ 9,000 rpm — Yamaha EU spec sheet
+        "peak_torque_rpm": 9000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",         # DOHC 4 valve/cyl — 998cc CP4 crossplane
+        "gears": 6,
+        # Yamaha RN78 6-speed cassette — service manual LIT-11616-RN-78.
+        # Identical to RN45 MT-10 base (Yamaha kept the same gearbox in 2022 refresh).
+        # Tier-1 key: "mt-10" in gear_ratios.py maps 2016-2026 → same entry.
+        "gear_ratios": [2.600, 1.947, 1.619, 1.380, 1.238, 1.130],
+        "front_sprocket": 17,
+        "rear_sprocket": 44,
+        "chain_pitch": "520",
+        "dry_mass_kg": 190.0,           # 190 kg dry per Yamaha EU spec sheet (−3 kg vs RN45
+                                        # owing to Öhlins fork vs KYB)
+        "wheelbase_mm": 1400.0,         # Yamaha EU spec sheet
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "190/55ZR17",  # Bridgestone Battlax RS11 OEM
+        "cd": 0.75,                     # naked unfaired, same envelope as MT-10 base
+        "frontal_area_m2": 0.54,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Kawasaki Versys 1000 SE (2022-2024 — KECS semi-active ADV tourer) ─
+# SE variant (KLZ1000H/J) of the Versys 1000 adds Kawasaki Electronic
+# Control Suspension (KECS — Showa EERAS semi-active electronically
+# adjustable suspension front + rear) over the base KLZ1000D.
+# Engine and gearbox are IDENTICAL to the base Versys 1000 (same 1043cc
+# inline-4, same 6-speed cassette). The SE is ~5 kg heavier than the
+# base due to the KECS actuators, ECU, wiring, and extra sensor cluster.
+# All other specs match the base Versys 1000 2019-2024 entry.
+# Sources:
+#   Kawasaki Versys 1000 SE 2022 press release (kawasaki.eu 2022-01-04)
+#   Kawasaki EU spec sheet KLZ1000H:
+#     kawasakimotors.com/en-us/motorcycles/adventure/versys-1000-se-lt-plus
+#   MCN review 2022 (motorcyclenews.com/reviews/kawasaki/versys-1000-se/2022/)
+#   Dry mass 260 kg per Kawasaki EU spec sheet (base is 255 kg; Δ +5 kg KECS)
+KAWASAKI_VERSYS_1000_SE_2022 = spec_from_dict(
+    {
+        "manufacturer": "Kawasaki",
+        "model_name": "Versys 1000 SE",
+        "model_code": "KLZ1000H",
+        "year_from": 2022,
+        "year_to": 2024,
+        "category": "adventure",
+        "displacement_cc": 1043.0,
+        "bore_mm": 77.0,
+        "stroke_mm": 56.0,
+        "compression_ratio": 10.3,
+        "cylinders": 4,
+        "peak_power_hp": 120.0,         # 88 kW @ 9,000 rpm — same as base Versys 1000
+        "peak_power_rpm": 9000,
+        "peak_torque_nm": 102.0,        # 102 Nm @ 7,500 rpm — Kawasaki EU spec sheet
+        "peak_torque_rpm": 7500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # KLZ1000 6-speed cassette — shared base/SE platform per Kawasaki
+        # service manual (P/N 99924-1601-01). Ratios from Versys 1000 base entry
+        # which is already Tier-1 sourced.
+        "gear_ratios": [2.438, 1.714, 1.333, 1.111, 0.965, 0.851],
+        "front_sprocket": 15,
+        "rear_sprocket": 42,
+        "chain_pitch": "525",
+        "dry_mass_kg": 260.0,           # 260 kg dry — Kawasaki EU spec sheet KLZ1000H
+                                        # (+5 kg vs 255 kg base KLZ1000D for KECS hardware)
+        "wheelbase_mm": 1520.0,         # same as base Versys 1000
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.82,
+        "frontal_area_m2": 0.58,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Ducati Multistrada V4 RS (2024-2026 — Panigale-powered ADV flagship) ─
+# The V4 RS is the performance pinnacle of the Multistrada V4 range.
+# Engine: full Desmosedici Stradale V4 (1158cc 90° V4, Desmo, 4 titanium
+# Pankl rods, titanium valves) in 185 hp / 125 Nm state of tune — same
+# block as Panigale V4 S (vs 170 hp in the V4/V4 S touring spec).
+# Key differences from Multistrada V4 S:
+# • Carbon fibre wheels (BST Rapid Tek 5-spoke) — saves ~5 kg unsprung
+# • Öhlins EC electronic suspension (NPX front + TTX rear with skyhook)
+# • 200/60ZR17 rear tyre (vs 170/60ZR17 on V4 S) — wider for the power
+# • Dry mass 223 kg (Ducati official spec) vs 243 kg for V4 S
+# Sources:
+#   Ducati Multistrada V4 RS press release 2023-11-06 (EICMA debut)
+#   Ducati official spec sheet (ducati.com/gb/en/bikes/multistrada/
+#     multistrada-v4/multistrada-v4-rs/specifications)
+#   MCN review 2024 (motorcyclenews.com/reviews/ducati/
+#     multistrada-v4-rs/2024/)
+#   Cycle World first ride 2024 (cycleworld.com/story/bikes/
+#     ducati-multistrada-v4-rs-review)
+#   Gear ratios: Ducati Multistrada V4 RS service manual
+#     (Ducati P/N 91721941A). Same 6-speed cassette as V4 S.
+DUCATI_MULTISTRADA_V4_RS_2024 = spec_from_dict(
+    {
+        "manufacturer": "Ducati",
+        "model_name": "Multistrada V4 RS",
+        "model_code": "MTS_V4RS",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "adventure",
+        "displacement_cc": 1158.0,
+        "bore_mm": 83.0,
+        "stroke_mm": 53.5,
+        "compression_ratio": 14.0,
+        "cylinders": 4,
+        "peak_power_hp": 185.0,         # 136 kW @ 10,750 rpm — Ducati official spec sheet
+        "peak_power_rpm": 10750,
+        "peak_torque_nm": 125.0,        # 125 Nm @ 8,750 rpm — Ducati official spec sheet
+        "peak_torque_rpm": 8750,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "desmodromic",  # Desmo 4-valve per cyl, titanium Pankl rods
+        "gears": 6,
+        # Ducati Multistrada V4 RS service manual P/N 91721941A.
+        # Same 6-speed cassette as Multistrada V4 / V4 S (DUCATI_MULTISTRADA_V4_2021
+        # in known_bikes.py uses [2.466, 1.764, 1.350, 1.090, 0.958, 0.840]).
+        # Sprockets: F16/R43 per Ducati spec sheet (same as V4 S).
+        "gear_ratios": [2.466, 1.764, 1.350, 1.090, 0.958, 0.840],
+        "front_sprocket": 16,
+        "rear_sprocket": 43,
+        "chain_pitch": "525",
+        "dry_mass_kg": 223.0,           # 223 kg dry — Ducati official spec sheet 2024
+                                        # (-20 kg vs V4 S 243 kg due to carbon wheels +
+                                        # titanium fasteners + lighter Öhlins EC dampers)
+        "wheelbase_mm": 1567.0,         # same as Multistrada V4 family
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "200/60ZR17",  # wider 200-section rear vs V4 S's 170/60ZR17
+        "cd": 0.80,                     # full ADV fairing; slightly higher Cd than V4 S
+                                        # (0.82) as 200-section rear tyre increases frontal
+                                        # area contribution; ref MCN tunnel 0.78-0.82 ADV class
+        "frontal_area_m2": 0.58,
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -7096,4 +7269,8 @@ EXTENDED_BIKES = [
     TRIUMPH_SCRAMBLER_1200_XE_2023,
     INDIAN_CHIEFTAIN_DARK_HORSE_2023,
     BMW_R_1250_RT_2021,
+    # ── Daily improvement run 2026-05-21 (Thursday — Catalog A1 third pass) ──
+    YAMAHA_MT10_SP_2022,
+    KAWASAKI_VERSYS_1000_SE_2022,
+    DUCATI_MULTISTRADA_V4_RS_2024,
 ]

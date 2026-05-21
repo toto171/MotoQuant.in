@@ -98,3 +98,34 @@ overwriting prior findings.
   `awk` one-liner in line 617 is a 5-minute fix for the next implementer agent.
 
 No DB rows touched. Report finalised by session 1779330632-637.
+
+---
+
+## Addendum — session 1779337831-648 (third run, same day)
+
+**Delta since second addendum (session 1779330632-637):**
+
+- ALERT count in DISPATCH_OUTBOX.md is now **24** (was 23 at prior addendum). Two new ALERTs
+  landed at lines 925 (`2026-05-21T00:50:14+00:00`) and 948 (`2026-05-21T02:44:13+00:00`) —
+  both identical "Postflight deploy check timed out after 180s". This session's postflight will
+  add a 25th. Pattern continues unabated.
+- `bike_suggestions` table: still 0 rows. No triage actions.
+- All three open INSTRUCTIONs remain in the same state as prior session:
+  - `DISPATCH_INBOX.md:79` (`[research]` entry_150_200 DERIVED benchmarks) — open, no agent
+    has actioned it yet; legitimate research task when Railway API is restored.
+  - `DISPATCH_INBOX.md:140` (`[urgent] [blocking]` Railway API offline) — still open, still
+    requires user billing action (Railway dashboard access, payment update, redeploy).
+  - `DISPATCH_INBOX.md:605` (`[opportunistic]` postflight alert dedup) — still open, 5-minute
+    implementer fix, no blocking dependencies.
+
+**No new INSTRUCTION queued.** The dedup INSTRUCTION at line 605 and the Railway outage
+ticket at line 140 together cover the only actionable surface. Filing a third copy of either
+would itself be the noise the dedup fix is designed to prevent.
+
+**Recommendation for user review:** The DISPATCH_INBOX backlog now stands at 14+ open items
+(the 2026-05-17 META self-review at line 516 documented 14 unprocessed; none have moved to
+`## DONE` since). The Railway fix is the single highest-leverage unblock — it restores the API,
+which would allow real `bike_suggestions` submissions to flow, which gives this support triage
+agent actual work to do.
+
+No DB rows touched. Report updated by session 1779337831-648.

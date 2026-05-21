@@ -636,6 +636,56 @@ Source: `reports/support_triage_2026-05-21.md` Findings B + C; `DISPATCH_OUTBOX.
 
 ---
 
+## INSTRUCTION — 2026-05-21 — [self-review] [urgent] fix catalog-expansion agent prompt to require DB re-seed
+[urgent]
+
+**Attribution:** `reports/self_review_2026-05-21.md` Finding 2.1.
+
+**Problem:** Source files declare **447 bike specs** (`grep -c "spec_from_dict" motoquant/scraper/known_bikes.py motoquant/scraper/known_bikes_extended.py` = 328 + 119); DB ships at **345** (`SELECT COUNT(*) FROM bike_models`). Drift = **102 bikes in source, not in DB**. Root cause: `scripts/agents/catalog-expansion.md` "Validation gates" section (lines 31-34) never instructs the catalog agent to re-seed via `python3 -m motoquant.run import --known-bikes` or `scripts/reseed_configs_from_specs.py`. 30 of 38 substantive commits this week were catalog-expansion runs, but only 3 of those touched `motoquant.db`.
+
+**Mechanism:** every new bike in `known_bikes_extended.py` only reaches `bike_models` table via the `--known-bikes` import path. Without it, the agent's "+3 bikes" claim in the commit message is misleading — DB ships at +0.4 bikes/commit average.
+
+**Proposed prompt edit (insert after line 34 of `scripts/agents/catalog-expansion.md`):**
+
+```
+4. **Re-seed the DB.** Run `python3 -m motoquant.run import --known-bikes` (or `scripts/reseed_configs_from_specs.py` if the change is purely physics-driven). Confirm via:
+   ```
+   python3 -c "import sqlite3; print(sqlite3.connect('motoquant.db').execute('SELECT COUNT(*) FROM bike_models').fetchone()[0])"
+   ```
+   Add `motoquant.db` to `COMMIT_FILES` before committing. If the import errors with FK/idempotency complaints (per the WS-A April 27 hygiene note in CLAUDE.md), fall back to the year-suffix-stripped matcher workaround documented at that entry.
+```
+
+**Acceptance:** the FIRST session that picks up this fix and runs a fresh `--known-bikes` import should jump the DB row count from 345 → ~447 in one commit (whatever number falls out cleanly). After that, every future catalog-expansion run should ship a synchronised source + DB delta.
+
+**Side-fix opportunity:** while editing the prompt, also extend `scripts/audit_headline_stats.py` to add a `source-vs-DB drift check` (compare `spec_from_dict` count in known_bikes*.py vs `bike_models` row count; fail if delta > 5). This makes the gap a postflight gate rather than a self-review-only finding.
+
+**Effort:** ~10 min for the prompt edit; ~5 min for the next session to actually run the re-seed; ~30 min if the audit-script extension is included. Single commit.
+
+Source: `reports/self_review_2026-05-21.md` Finding 2.1.
+
+---
+
+## INSTRUCTION — 2026-05-21 — [self-review] [urgent] promote postflight alert dedup ticket (INBOX:605) to [urgent]
+[urgent]
+
+**Attribution:** `reports/self_review_2026-05-21.md` Finding 2.2.
+
+**Problem:** INBOX:605 (postflight alert dedup during open blocking tickets) is tagged `[opportunistic]`. As of 2026-05-21T03:00Z there are **24 identical `Postflight deploy check timed out after 180s` ALERT entries** in `DISPATCH_OUTBOX.md` since the Railway outage began 2026-05-17. Every new autonomous session adds one more. The dedup fix is a 5-minute awk one-liner (proposal verbatim in INBOX:605 lines 614-628), but the `[opportunistic]` tag keeps it below the daily catalog-expansion work in scheduler priority.
+
+**Asymmetry:** `reports/perf_monitor_2026-05-17.md` Run 12 (line 394) correctly handled the same signal — observed the matching INBOX:140 ticket, declined to file a duplicate. Postflight lacks that logic; this dedup INSTRUCTION fills the gap.
+
+**Proposed action (one-line edit):** in `DISPATCH_INBOX.md:606`, change `[opportunistic]` to `[urgent]`. Optionally also update the title at line 605 to remove `[opportunistic]` if present.
+
+**Why urgent now:** signal dilution is currently growing at ~1 ALERT every 2 hours. By the time Railway is restored (waiting on user billing — could be days), the OUTBOX will be unparseable for genuine deploy-check failures. The fix takes 5 minutes; the delay is purely tag-priority.
+
+**Acceptance:** after the promotion, the next inbox-aware session (or human dispatcher) should be able to pick INBOX:605 ahead of catalog-expansion. After landing, archiving INBOX:140 (Railway ticket → DONE once user resolves) should result in the next genuine deploy timeout firing a fresh ALERT (test by inspection).
+
+**Effort:** 30 seconds for the tag flip; 5 minutes for the fix itself.
+
+Source: `reports/self_review_2026-05-21.md` Finding 2.2.
+
+---
+
 ## INSTRUCTIONS QUEUE
 
 > _Add new `## INSTRUCTION` blocks above this divider. Claude marks them `## DONE` once handled._

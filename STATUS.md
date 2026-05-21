@@ -25,7 +25,7 @@ last_updated: <!-- AUTO-UPDATED -->
 
 | KPI | Now | Q-end target | Direction | Last-updated |
 |---|---|---|---|---|
-| Bike catalog count | 349 (commit msg); 342 in DB — mismatch flagged | 500+ by Q4 | ↑ | 2026-05-17 |
+| Bike catalog count | 345 in DB / 447 in source — +102-bike re-seed gap (M4 Finding 2.1) | 500+ by Q4 | ↑ | 2026-05-21 |
 | Validated ETs ±0.20s | 47% | 60% Q3 / 70% Q4 | ↑ | 2026-05-04 |
 | Benchmark sources | 79 | 100+ | ↑ | 2026-05-04 |
 | Indexed pages (motoquant.in) | (TBD) | 50+ Q2 / 200+ Q4 | ↑ | (need GA4) |
@@ -41,6 +41,28 @@ last_updated: <!-- AUTO-UPDATED -->
 ## Last 7 days — session-level digest
 
 <!-- self-review weekly summary lives here. Updated every Sunday. -->
+
+### Week of 2026-05-14 → 2026-05-21 (self-review M4 — off-cadence Thursday)
+
+**Dominant signal:** **102-bike DB-vs-source drift** in catalog. 30 of 38 substantive commits this week were catalog-expansion runs, but only 3 touched `motoquant.db`. Source files declare 447 specs; DB ships at 345. Root cause: `scripts/agents/catalog-expansion.md` Validation gates section never instructs the agent to re-seed via `python3 -m motoquant.run import --known-bikes` or `scripts/reseed_configs_from_specs.py`. See `reports/self_review_2026-05-21.md` Finding 2.1 for full attribution.
+
+**Kaizen loop status:** **converging at +1 DONE/week**. M3's 2026-05-17 "zero consumption" verdict is revised — INBOX:322 → DONE on 2026-05-17 (session 1778992230-620), demonstrating one self-review proposal CAN flow through to a downstream implementer. Slope is slow but non-zero. `last_delta_age_days for self-review proposals implemented by downstream agent` is now **defined (= 4 days)** for the first time.
+
+**ALERT noise:** 24 identical `Postflight deploy check timed out after 180s` entries in OUTBOX since Railway 404 outage began 2026-05-17. Fix INSTRUCTION at INBOX:605 (5-min awk one-liner) is `[opportunistic]` and keeps being deprioritised. M4 queues promotion to `[urgent]`.
+
+**Catalog declared vs actual:** commit messages all say "+3 bikes" but DB shows ≈ +0.4 average per commit. Headline-stats audit silently passes because it derives from DB row count — but the source-vs-DB delta has never been a tracked check. Adding a check is a candidate for next tech-debt-pass.
+
+**Tech debt:** 5 TypedDict refactors landed (`acf4af3`, `0c220e9`, `df4d92b`, `ecbfe6a`, `d5949f2`) — bridge.py, llm db typing, Part TS types, SimDict, CompareDict. All held, 100 % test pass.
+
+**Physics-calibration:** 3 runs, 1 shipped (`bfac483` two_stroke `max_engine_decel_rads2` 380 → 800, −72 ms cluster mean|Δ|), 2 explicit no-ships with research escalations queued. Reference baselines K5 10.0334s / R1 10.2859s / Hayabusa 10.4712s held perfectly.
+
+**Auto-applied this run (M4):** STATUS.md KPI cell + this digest entry + `_LAST_RUN_JSON.self-review.date` bump. **No** `scheduler_weights.json` edits (no clean single-knob improvement maps to observed signal this week).
+
+**Inbox queued by M4 (2):** (1) `[urgent]` fix catalog-expansion prompt to require DB re-seed; (2) `[urgent]` promote dedup INSTRUCTION from `[opportunistic]`.
+
+**Cooldown:** per agent-template `:64`, next self-review not before **2026-05-26** (5 days).
+
+---
 
 ### Week of 2026-05-10 → 2026-05-17 (self-review M3 — Sunday cadence)
 
@@ -117,6 +139,7 @@ last_updated: <!-- AUTO-UPDATED -->
 - **2026-05-16 M1:** `self-review.base` 50 → 60; `self-review.best_dow` [7] → [6, 7]. Reason: agent never fired on Sun May 10 (the only available Sun in the window since system shipped). Doubling the day-of-week surface area to Sat+Sun gives the loop a second chance against day-weight competition.
 - **2026-05-16 M1:** Added `claude-feature-monitor` entry (base 15, best_dow [7]). Reason: missing from the JSON file entirely; agent prompt template exists but scheduler couldn't pick it.
 - **2026-05-17 M3:** `partnership-outreach.base` 25 → 15. Reason: 20 outreach drafts produced May 8 but 0 sent, no SMTP wiring exists, KPI `Closed B2B conversations` = 0 after 9 days. Demote until either send infra lands or a downstream agent consumes the drafts. Single-knob change, within ±10 envelope per agent-template policy. Attribution: `reports/self_review_2026-05-17.md` Finding 3.2.
+- **2026-05-21 M4:** NO weight changes auto-applied. Findings 2.1 (catalog-expansion prompt) and 2.2 (postflight dedup tag promotion) both queued to INBOX instead. Rationale: prompt-rewrite is multi-knob (out of envelope); INSTRUCTION-severity flip on another agent's ticket is borderline single-knob — queued for transparency. Bookkeeping-only edits (KPI cell + digest section + `_LAST_RUN_JSON`) made this run. Attribution: `reports/self_review_2026-05-21.md` Findings 2.1 + 2.2.
 
 ---
 
@@ -125,7 +148,7 @@ last_updated: <!-- AUTO-UPDATED -->
 <!-- LAST_RUN_JSON
 {
   "_schema": 1,
-  "_updated": "2026-05-21T02:41:03Z",
+  "_updated": "2026-05-21T04:42:12Z",
   "catalog-expansion":      { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "physics-calibration":    { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "benchmark-import":       { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
@@ -139,10 +162,10 @@ last_updated: <!-- AUTO-UPDATED -->
   "growth-experiments":     { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "partnership-outreach":   { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "claude-feature-monitor": { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
-  "self-review":            { "date": "2026-05-17", "outcome": "success", "consecutive_fails": 0 },
+  "self-review":            { "date": "2026-05-21", "outcome": "success", "consecutive_fails": 0 },
   "incident-postmortem":    { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "source-verifier":        { "date": null, "outcome": "never_run", "consecutive_fails": 0 }
 }
 -->
 
-last_run: 2026-05-21T02:41:03Z  <!-- AUTO-UPDATED — used by catchup_detect to decide if we need recovery mode -->
+last_run: 2026-05-21T04:42:12Z  <!-- AUTO-UPDATED — used by catchup_detect to decide if we need recovery mode -->

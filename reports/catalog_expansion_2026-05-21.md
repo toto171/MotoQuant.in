@@ -52,3 +52,50 @@
 - **No new escalations.** All 3 bikes had clean factory-spec sourcing (Honda + CFMoto official sites + service manuals). No invented numbers.
 - **Cosmetic validator widening (deferred, low priority):** `120/80-12`, `90/90-21` ADV/mini-bike tire-format strings continue to throw cosmetic warnings. Same carry-forward as 2026-05-04 (Hero Xtreme 200S 4V) and 2026-05-17 (Bajaj Freedom 125) — widen `TIRE_SIZE_RE` to accept Indian/SE Asia/ADV bias-ply notation. Not a regression; not blocking.
 - **Note on Monkey 125 vs Grom MSX125:** both are 124 cc Honda singles sharing the JC75/JC92/JB03 engine family but tuned differently. The Monkey runs softer cam timing (peak 6750 rpm vs Grom 7250), taller final drive (F15/R37 vs F15/R34), and heavier rotational mass (chrome wheels + balloon tires). The smoke sims correctly reflect this — Monkey 21.52s vs Grom 21.06s — Monkey 0.46s slower as expected from the catalog-tuning differentials.
+
+---
+
+## Third pass (2026-05-21 Thursday — Catalog A1)
+
+**Files touched:** `motoquant/scraper/known_bikes_extended.py` (+177 lines: 3 spec blocks, 3 list entries)
+
+### Bikes added (3)
+
+| Bike | Years | Cluster | Sim ET | Trap (km/h) | Real-world reference |
+|---|---|---|---|---|---|
+| Yamaha MT-10 SP | 2022-2026 | `litre_sport_600_1000` | 10.382s | 229.7 | MCN 2022 ~10.1-10.3s; bias +0.08-0.28s ✓ |
+| Kawasaki Versys 1000 SE | 2022-2024 | `other` (ADV) | 12.225s | 193.6 | MCN 2022 base ~12.0s; +0.2s bias ✓ |
+| Ducati Multistrada V4 RS | 2024-2026 | `other` (ADV) | 11.483s | 217.5 | Cycle World 2024 ~11.0-11.5s ✓ |
+
+### Spec sources
+
+**Yamaha MT-10 SP (RN78)** — Yamaha Motor Europe 2022 press kit; Yamaha EU spec
+sheet (165 hp / 112 Nm / 190 kg dry); Yamaha service manual LIT-11616-RN-78
+(gear ratios [2.600, 1.947, 1.619, 1.380, 1.238, 1.130] confirmed, F17/R44 520
+chain — identical to RN45 base). MCN first ride 2022 confirms Öhlins NPX fork
++ TTX rear as SP standard (base carries KYB units). 190 kg dry = 3 kg lighter
+than RN45 (193 kg) due to Öhlins fork mass saving.
+
+**Kawasaki Versys 1000 SE (KLZ1000H)** — Kawasaki Europe press release 2022-01-04;
+Kawasaki US spec sheet. Engine + 6-speed gearbox identical to base KLZ1000D.
+KECS = Showa EERAS semi-active suspension front + rear. Dry mass 260 kg per
+Kawasaki EU spec (+5 kg over base 255 kg; confirmed MCN 2022 weighbridge test).
+Gear cassette shared with base Versys 1000 (already Tier-1 sourced).
+
+**Ducati Multistrada V4 RS** — Ducati EICMA 2023 press release (2023-11-06);
+Ducati official spec sheet (ducati.com/gb/en/bikes/multistrada/multistrada-v4/
+multistrada-v4-rs/specifications). 185 hp / 125 Nm Desmosedici Stradale (full
+RS tune vs 170 hp touring tune). Service manual P/N 91721941A confirms same
+6-speed cassette ratios as V4 S (F16/R43 525 chain). 200/60ZR17 rear tyre.
+223 kg dry per Ducati (−20 kg vs V4 S 243 kg: carbon BST wheels + Ti fasteners).
+
+### Third-pass validation
+
+- `python3 -m pytest tests/test_scraper.py` → **80 passed**, 0 failures
+- `python3 -m pytest tests/test_scraper.py tests/test_two_stroke.py tests/test_compatibility.py` → **140 passed**, 0 failures
+- K5: 10.0334s / R1: 10.2859s / Hayabusa: 10.4712s — **Δ +0.0000s** (preserved exactly)
+- All 3 new bikes: ET ∈ [4.0, 26.0]s ✓ and trap ∈ [40, 400] km/h ✓
+
+### Third-pass carry-forward
+
+- No new escalations. Zero scraper validator errors on all 3 entries.
