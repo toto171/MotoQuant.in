@@ -129,3 +129,53 @@ which would allow real `bike_suggestions` submissions to flow, which gives this 
 agent actual work to do.
 
 No DB rows touched. Report updated by session 1779337831-648.
+
+---
+
+## Addendum — session 1779345036-639 (fourth run, same day)
+
+**Delta since third addendum (session 1779337831-648):**
+
+- ALERT count in DISPATCH_OUTBOX.md is now **25** (was 24 at prior addendum). One new ALERT
+  landed at line 972 (`2026-05-21T04:45:24+00:00`) — same
+  `Postflight deploy check timed out after 180s` body, same Railway 404 root cause.
+  This session's postflight will add a 26th unless the dedup fix at `:605` lands first.
+- `bike_suggestions` table: still 0 rows (verified via `PRAGMA table_info` + `COUNT(*)`).
+  Schema confirmed unchanged: `id, make, model, year, displacement_cc, peak_power_hp,
+  dry_mass_kg, category, notes, submitter_email, source_url, flagged_out_of_bounds,
+  status, created_at, reviewed_at`. No triage actions taken.
+- Live probe from this sandbox at run-time:
+
+  ```
+  $ curl -s --max-time 10 https://web-production-de6eb.up.railway.app/api/health
+  → HTTP 404 "Application not found"
+  ```
+
+  Outage now in its **5th day** since first detection (2026-05-17). User billing action
+  on `DISPATCH_INBOX.md:140` remains the only resolution path.
+
+**Open INSTRUCTION state — identical to prior addendum (no new queue activity):**
+
+- `DISPATCH_INBOX.md:79` (`[research]` entry_150_200 DERIVED benchmarks) — open, deferred
+  until Railway API restored (sim sanity checks need it).
+- `DISPATCH_INBOX.md:140` (`[urgent] [blocking]` Railway API offline) — open. **Highest-
+  leverage unblock for the entire pipeline.** Restoring this unblocks: real
+  `bike_suggestions` flow, pricing-refresh agent, auto-content agent, perf-monitor
+  meaningful runs, and this triage agent's reason-for-being.
+- `DISPATCH_INBOX.md:605` (`[opportunistic]` postflight alert dedup) — open. ~5 LOC
+  bash fix; would stop the alert spam without needing the Railway billing action first.
+  Independent of the Railway fix; could land tonight if an implementer agent picks it up.
+
+**No new INSTRUCTION filed.** This session adheres to the no-duplicate rule: every
+actionable angle on this incident is already represented by an open ticket. Filing
+a fourth identical report-of-report would itself be the dilution the dedup fix exists
+to prevent.
+
+**Cumulative cost of un-fixed dedup (across 4 same-day support-agent runs):**
+4 triage reports written, 4 sessions consumed, 1 dedup INSTRUCTION filed, 0 net
+new actionable findings beyond what session 1 captured. The dedup fix would convert
+those 4 sessions into 1 + 3 fast no-op exits — direct support for promoting the
+ticket at `:605` from `[opportunistic]` to `[urgent]` (which `DISPATCH_INBOX.md:668`
+already proposes).
+
+No DB rows touched. Report updated by session 1779345036-639.

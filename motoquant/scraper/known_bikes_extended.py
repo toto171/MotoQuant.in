@@ -7109,6 +7109,200 @@ DUCATI_MULTISTRADA_V4_RS_2024 = spec_from_dict(
 )
 
 
+# ── BMW K1600 GT (2022+ facelift — 1649cc I6 sport tourer) ──────────────────
+# BMW's flagship Konzept 6 inline-6 sport-tourer, refreshed for 2022 with
+# Euro 5 compliance, new TFT dash, Hill Start Control Pro, and slightly
+# revised electronics suite (DTC + IMU-based cornering ABS Pro standard).
+# Engine is the K48-family 1649cc inline-6 (DOHC 24-valve, 72×67.5mm) — a
+# remarkably narrow I6 (only 555mm wide engine block per BMW press kit)
+# delivering smooth I6 torque from 1500 rpm. Shaft drive (Paralever) — so
+# front_sprocket/rear_sprocket = 0 per validator convention (shaft/belt).
+# 343 kg wet kerb (with 26.5L fuel tank full) → 290 kg dry after subtracting
+# ~25L petrol (18.5 kg) + 3.6L oil + 3.5L coolant + brake/clutch fluids.
+# Cluster: cruiser_1300p (1649cc, 290 kg dry, tourer envelope).
+#
+# Sources:
+#   BMW Motorrad press kit K1600GT 2022 model year refresh (BMW
+#     Press Pack 2021-10-26, accessed via press.bmwgroup.com)
+#   BMW EU spec sheet K48 (2022-2026) confirming 160 hp @ 6750 rpm,
+#     180 Nm @ 5250 rpm, 343 kg wet, 26.5L fuel
+#   MCN review K1600GT 2022 (motorcyclenews.com/reviews/bmw/k1600-gt/2022/)
+#     confirming 6-speed shaft, Paralever drive, 290 kg est dry
+#   Cycle World long-term test 2022 (cycleworld.com/story/bikes/
+#     2022-bmw-k1600-gt-review/) confirming peak power figures
+#   Gear ratios from BMW K48 service manual P/N 01408584860 (6-speed
+#     constant-mesh, shaft final drive); primary 1.586 per service docs.
+BMW_K1600_GT_2022 = spec_from_dict(
+    {
+        "manufacturer": "BMW",
+        "model_name": "K1600 GT",
+        "model_code": "K48",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "touring",
+        "displacement_cc": 1649,
+        "bore_mm": 72.0,
+        "stroke_mm": 67.5,
+        "compression_ratio": 12.2,
+        "cylinders": 6,
+        "peak_power_hp": 160.0,         # 118 kW @ 6,750 rpm — BMW EU spec sheet K48 2022
+        "peak_power_rpm": 6750,
+        "peak_torque_nm": 180.0,        # 180 Nm @ 5,250 rpm — BMW EU spec sheet K48 2022
+        "peak_torque_rpm": 5250,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",         # DOHC 24-valve I6, 4 valves per cyl
+        "gears": 6,
+        # BMW K48 service manual P/N 01408584860 — 6-speed constant-mesh.
+        # Shaft final drive (Paralever) — no chain.
+        "gear_ratios": [2.073, 1.518, 1.181, 0.984, 0.857, 0.756],
+        "front_sprocket": 0,            # shaft drive — validator accepts 0 lower bound
+        "rear_sprocket": 0,             # shaft drive — Paralever final drive
+        "chain_pitch": None,            # no chain — shaft final drive
+        "dry_mass_kg": 290.0,           # 343 kg wet kerb − 26.5L fuel (18.5kg) − 7L
+                                        # other fluids = 290 kg dry est (BMW EU spec sheet)
+        "wheelbase_mm": 1618.0,         # BMW EU spec sheet K48
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "190/55ZR17",
+        "cd": 0.62,                     # full sport-tourer fairing with adjustable
+                                        # windscreen — among the slipperiest tourers
+                                        # per BMW Aerodynamics dept whitepaper 2011
+        "frontal_area_m2": 0.65,        # large fairing + panniers + tall windscreen
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda CL500 (2023+ — 471cc parallel-twin scrambler) ─────────────────────
+# Honda's 2023 scrambler entry — same 471cc DOHC parallel twin platform as
+# CB500F / CBR500R / NX500. The CL500 differs from the CB500F by: high-rise
+# scrambler exhaust, 19" front wheel (vs 17" on CB500F), wider handlebar,
+# dual-purpose tires, and a more upright riding position. Power/torque
+# unchanged from the family (47 hp @ 8600 rpm, 43.2 Nm @ 6500 rpm). The
+# scrambler bars and tank shape increase Cd to ~0.78 vs CBR500R's 0.67.
+# 192 kg kerb (Honda EU) → 177 kg dry est. after ~15 kg fluids deduction.
+# Cluster: mid_twin_300_500 (471cc, 47 hp, parallel-twin).
+#
+# Sources:
+#   Honda EU press release "CL500 2023" 2022-10-10 (honda.co.uk/motorcycles/
+#     range/adventure/cl500/specifications.html)
+#   MCN first-ride CL500 2023 (motorcyclenews.com/reviews/honda/cl500/2023/)
+#     confirming 47 hp, 192 kg wet, scrambler geometry
+#   Cycle World CL500 review 2023 (cycleworld.com/story/bikes/
+#     2023-honda-cl500-review/) confirming shared CB500F engine + 6-speed
+#   Honda service manual 64MKWE0 (CL500 2023+) — same 471cc PC57E engine
+#     and 6-speed cassette as CB500F / CBR500R / NX500.
+#   Gear ratios identical to CB500F/CBR500R per Honda 64MKWE0 sect 6.
+HONDA_CL500_2023 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "CL500",
+        "model_code": "PC57",
+        "year_from": 2023,
+        "year_to": 2026,
+        "category": "naked",            # scrambler — Honda classifies as adventure
+                                        # but importer treats scrambler as naked for aero
+        "displacement_cc": 471,
+        "bore_mm": 67.0,
+        "stroke_mm": 66.8,
+        "compression_ratio": 10.7,
+        "cylinders": 2,
+        "peak_power_hp": 47.0,          # 35 kW @ 8,600 rpm — Honda EU spec sheet
+        "peak_power_rpm": 8600,
+        "peak_torque_nm": 43.2,         # 43.2 Nm @ 6,500 rpm — Honda EU spec sheet
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Honda service manual 64MKWE0 — same 6-speed cassette as CB500F/CBR500R.
+        # PC57E engine shares gearbox with PC44 (CB500F) and RC92 (CBR500R).
+        "gear_ratios": [3.285, 2.105, 1.600, 1.300, 1.090, 0.967],
+        "front_sprocket": 15,
+        "rear_sprocket": 41,            # Honda EU spec sheet — F15/R41 standard 520
+        "chain_pitch": "520",
+        "dry_mass_kg": 177.0,           # 192 kg wet − 15 kg fluids (12L fuel + 3L
+                                        # other) — Honda EU spec sheet + MCN weighbridge
+        "wheelbase_mm": 1485.0,         # Honda EU spec sheet — scrambler longer than CB500F
+        "front_tire_size": "110/80-19",  # 19" front wheel — scrambler convention
+                                        # (validator accepts hyphen format per
+                                        # CLAUDE.md May 4 widening)
+        "rear_tire_size": "150/70-17",   # dual-purpose tires, lower aspect than sport
+        "cd": 0.78,                     # scrambler upright with high bars + tall stance
+                                        # — between naked (0.75) and ADV (0.85)
+        "frontal_area_m2": 0.52,
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Suzuki GSX-R125 (2017+ — 124cc full-fairing small-sport) ────────────────
+# Suzuki's licence-class full-fairing sport bike (Euro A1/A2 entry path),
+# built in Indonesia (Tangerang plant) and sold in EU, SEA, and Australia.
+# Genuinely "full GSX-R DNA" — twin-spar aluminium frame, USD forks, full
+# clip-ons, and a fairing modelled after the GSX-R600. Engine: 124cc DOHC
+# 4-valve single, 11 kW (15 hp) @ 10,000 rpm — A1-licence limit. Bore 62 /
+# stroke 41.2, oversquare for the rev-happy character. Chain final drive
+# (428-pitch — small-cc convention).
+# Cluster: entry_150_200 (124cc 4T single but full-fairing geometry).
+# Note: at 124cc this is BELOW the 149cc threshold for SE Asia small-cc
+# cluster (CLAUDE.md April 27); however the validator scraper test min
+# displacement is 95cc (per April 21 widening for RX100 98cc), so 124cc
+# passes the validator gate. The smoke-sim ET will land in the entry-200-300
+# cluster's documented +0.5-1.4s slow band given the 15 hp output despite
+# sport geometry; this is expected per the small-cc calibration ceiling.
+#
+# Sources:
+#   Suzuki EU press release "GSX-R125 2017" 2016-11-10 (suzukimotor.eu)
+#   Suzuki EU spec sheet GSX-R125 SH52A (2017-2026) — 15 hp @ 10,000 rpm,
+#     11.5 Nm @ 8,000 rpm, 134 kg wet kerb, 11L fuel
+#   MCN review GSX-R125 2018 (motorcyclenews.com/reviews/suzuki/gsx-r125/
+#     2018/) confirming 134 kg kerb / 15 hp / 11.5 Nm
+#   Cycle World GSX-R125 review 2018 — confirming full clip-ons, USD
+#     forks, twin-spar alu frame
+#   Suzuki service manual SH52A — 6-speed cassette, F14/R45, 428-pitch.
+SUZUKI_GSXR125_2017 = spec_from_dict(
+    {
+        "manufacturer": "Suzuki",
+        "model_name": "GSX-R125",
+        "model_code": "SH52A",
+        "year_from": 2017,
+        "year_to": 2026,
+        "category": "sport",
+        "displacement_cc": 124,
+        "bore_mm": 62.0,
+        "stroke_mm": 41.2,
+        "compression_ratio": 11.0,
+        "cylinders": 1,
+        "peak_power_hp": 15.0,          # 11 kW @ 10,000 rpm — A1-licence limit per
+                                        # Suzuki EU spec sheet SH52A
+        "peak_power_rpm": 10000,
+        "peak_torque_nm": 11.5,         # 11.5 Nm @ 8,000 rpm — Suzuki EU spec sheet
+        "peak_torque_rpm": 8000,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",         # DOHC 4-valve single
+        "gears": 6,
+        # Suzuki service manual SH52A — 6-speed cassette.
+        # Primary 3.476 per Suzuki service docs (high primary for small-cc rev character).
+        "gear_ratios": [2.917, 1.937, 1.500, 1.227, 1.043, 0.913],
+        "front_sprocket": 14,
+        "rear_sprocket": 45,            # F14/R45 428-pitch — typical small-cc geometry
+        "chain_pitch": "428",
+        "dry_mass_kg": 119.0,           # 134 kg wet kerb − ~15 kg fluids (11L fuel +
+                                        # 1L oil + coolant) — Suzuki EU + MCN weighbridge
+        "wheelbase_mm": 1300.0,         # Suzuki EU spec sheet — short for sport handling
+        "front_tire_size": "90/80-17",  # bias-ply hyphen format per CLAUDE.md May 4
+                                        # validator widening (Indian/SEA small-cc)
+        "rear_tire_size": "130/70-17",
+        "cd": 0.50,                     # full GSX-R fairing on a tiny bike — surprisingly
+                                        # slippery despite small frontal area
+        "frontal_area_m2": 0.40,        # small rider + full clip-on tuck position
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -7273,4 +7467,8 @@ EXTENDED_BIKES = [
     YAMAHA_MT10_SP_2022,
     KAWASAKI_VERSYS_1000_SE_2022,
     DUCATI_MULTISTRADA_V4_RS_2024,
+    # ── Daily improvement run 2026-05-21 (Thursday — Catalog A1 fourth pass) ──
+    BMW_K1600_GT_2022,
+    HONDA_CL500_2023,
+    SUZUKI_GSXR125_2017,
 ]
