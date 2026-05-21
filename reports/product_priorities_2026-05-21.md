@@ -159,3 +159,32 @@ Scores: Impact 1-10 × Confidence 1-5 / Effort 1-5. Late-night pass.
 3. **CI sidecar-build matrix → first v1.0 binaries** — Railway-independent; highest-scoring non-blocked item.
 
 **Files touched (seventh pass):** `reports/product_priorities_2026-05-21.md` (this block appended). **No CLAUDE.md edit** — the +3 ALERT tick is below threshold; `bike_count >= 599` success metric is already current. **No new INSTRUCTION queued** — backlog at 26 items, no new blocking signal surfaces.
+
+---
+
+## Summary for orchestrator (Eighth pass — this run)
+
+**Pass context:** eighth same-day run, session `1779402650-784`. Approximately 2 hours after pass 7.
+
+**Signals scanned:**
+
+| Source | Status | Delta vs seventh pass |
+|---|---|---|
+| `motoquant.db` bikes | **637** | **+38** vs pass 7 (599 → 637). Catalog-expansion session fired between pass 7 and this run. |
+| `motoquant.db` fitments | 1,493 | +67 vs pass 6 (1,426). Healthy organic growth. |
+| `motoquant.db` S5 tables | All 5 still absent | 0 — unchanged |
+| `DISPATCH_OUTBOX.md` ALERT count | **33** | -1 vs pass 7 (34 → 33). Likely OUTBOX trim or count-method variance; treat as flat. |
+| `DISPATCH_INBOX.md` Railway ticket | INBOX:140 `[urgent] [blocking]` — still open | 0 — unchanged, day 5 of outage |
+| `bike_suggestions` table | 0 rows | 0 — unchanged |
+| Competitive landscape | `data/competitive_landscape.md` still absent | 0 — competitive-intel agent still has not fired |
+| INBOX open instructions | 26 | 0 — backlog flat |
+
+**Verdict:** No qualitative signal change since pass 7. Catalog growth crossed the +30-bike threshold so the CLAUDE.md success-metric line warrants a single-knob refresh (`bike_count >= 599` → `>= 637`). Top-3 confirmed unchanged for the eighth consecutive check:
+
+1. **Restore Railway service + redeploy** — 33 ALERTs (day 5). User billing action required. INBOX:140 open.
+2. **Bootstrap analytics + apply S5 auth-DDL on prod** — re-promotes to #1 automatically once Railway clears.
+3. **CI sidecar-build matrix → first v1.0 binaries** — Railway-independent; highest-scoring non-blocked item.
+
+**Files touched (eighth pass):** `reports/product_priorities_2026-05-21.md` (this block appended) and `CLAUDE.md` (single-knob refresh of top-1 success metric: `bike_count >= 599` → `>= 637` to match current DB; ALERT count "30" → "33"). **No new INSTRUCTION queued** — backlog at 26 items, no new blocking signal surfaces.
+
+**Commit summary:** `docs(priorities): 2026-05-21 eighth pass — Railway #1 unchanged (day 5), sync bike_count target to 637`

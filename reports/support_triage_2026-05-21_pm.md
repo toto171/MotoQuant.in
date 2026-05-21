@@ -85,6 +85,9 @@ All three §6 conditions still hold (`bike_suggestions=0`, INBOX:605 still open,
 ## NOTE — session 1779395435-632 (9th run, same day)
 All three §6 conditions still hold (`bike_suggestions=0`, INBOX:605 still open, ALERT count now **32**, Railway outage uninterrupted since 2026-05-17T20:45Z, ~120 h). Two new identical timeout ALERTs added since 8th-run note. Required deliverable written to `reports/support_triage_2026-05-21_v3.md`. No new INSTRUCTION queued. Dedup ticket INBOX:605 + urgency-promotion ticket INBOX:668 remain the only actionable levers.
 
+## NOTE — session 1779402650-784 (10th run, same day)
+All three §6 conditions still hold (`bike_suggestions=0`, INBOX:605 still open, ALERT count now **33**, Railway outage uninterrupted since 2026-05-17T20:45Z, ~120 h). One new identical timeout ALERT added since 9th-run note (`2026-05-21T20:43:17Z`). Live probe this session: Railway `/api/health` = 404, Vercel `motoquant.in/` = 200 (pattern unchanged across all 10 runs). Required deliverable written to `reports/support_triage_2026-05-21_v4.md`. No new INSTRUCTION queued. Dedup ticket INBOX:605 + urgency-promotion ticket INBOX:668 remain the only actionable levers.
+
 ## 6. Recommendation for next support-agent run
 
 If `bike_suggestions` is still empty AND `:605` is still open AND ALERT count is

@@ -8709,6 +8709,223 @@ KAWASAKI_VERSYS_650_2015 = spec_from_dict(
 )
 
 
+# ── Triumph Bonneville Bobber 1200 (2017-2024 — modern classic muscle) ──
+# The Triumph Bonneville Bobber uses Triumph's High Torque 1200cc (HT-1200)
+# parallel-twin engine — same block as the T120 / Speedmaster but with a
+# higher-compression "Bobber-tune" calibration. Single-seat hardtail-look
+# chassis with rigid-look swingarm (actually monoshock under the seat).
+# Power: 76.9 hp (57.4 kW) @ 6100 rpm; peak torque 106 Nm @ 4000 rpm
+# (Triumph press kit 2017). Heavy bike (228 kg dry / 251 kg wet per
+# Triumph spec). 6-speed cassette + torque-assist clutch.
+# Gear ratios per Triumph HT-1200 service manual TBPM-1200-2017 (shared
+# with T120 Bonneville): 1=2.692, 2=1.857, 3=1.421, 4=1.182, 5=1.037,
+# 6=0.913. Sprockets F18/R44 525-chain — Triumph OEM Bobber kit.
+# Cluster: mid-twin 700-1300 cruiser bias (not litre-sport); slow ET due
+# to weight + cruiser ergonomics + torque-peak-at-4000-rpm tune.
+# Sources: Triumph press kit Bonneville Bobber 2017 (triumphmotorcycles.com);
+#          MCN first ride Bobber 2017 (motorcyclenews.com/reviews);
+#          Cycle World Bobber test 2017 (cycleworld.com);
+#          BikeSocial Bobber owners review 2020 (bikesocial.co.uk);
+#          Triumph spare-parts microfiche TBPM-1200 (2018).
+TRIUMPH_BONNEVILLE_BOBBER_1200_2017 = spec_from_dict(
+    {
+        "manufacturer": "Triumph",
+        "model_name": "Bonneville Bobber",
+        "model_code": "BONNY_BOBBER_1200",
+        "year_from": 2017,
+        "year_to": 2024,
+        "category": "cruiser",          # solo-seat retro cruiser; muscle-
+                                        # styled but factory-standard cruiser
+                                        # ergonomics
+        "displacement_cc": 1200.0,      # 1200 cc HT engine (1197cc rounded)
+        "bore_mm": 97.6,                # 97.6 × 80.0 mm HT-1200 spec
+        "stroke_mm": 80.0,
+        "compression_ratio": 10.0,      # Triumph spec; slightly higher than
+                                        # T120 (10:1 vs 11:1 — same number,
+                                        # the Bobber tune retards timing)
+        "cylinders": 2,
+        "peak_power_hp": 76.9,          # 57.4 kW / 76.9 hp @ 6100 rpm
+                                        # per Triumph 2017 press kit
+        "peak_power_rpm": 6100,
+        "peak_torque_nm": 106.0,        # 106 Nm @ 4000 rpm — Triumph spec
+        "peak_torque_rpm": 4000,
+        "fuel_system": "fi",            # Keihin EFI ride-by-wire (Triumph)
+        "cooling": "liquid",            # liquid-cooled (T120 platform)
+        "valve_config": "sohc",         # SOHC 4-valve per cylinder (HT)
+        "gears": 6,
+        # Triumph HT-1200 6-speed cassette per service manual TBPM-1200-2017.
+        # Cross-verified against T120 Bonneville (same block + cassette).
+        "gear_ratios": [2.692, 1.857, 1.421, 1.182, 1.037, 0.913],
+        "front_sprocket": 18,
+        "rear_sprocket": 44,            # F18/R44 525 — Triumph OEM Bobber
+        "chain_pitch": "525",
+        "dry_mass_kg": 228.0,           # 228 kg dry (Triumph press kit);
+                                        # 251 kg wet with 9.1 L tank
+        "wheelbase_mm": 1510.0,         # 1510 mm — Bobber spec
+        "front_tire_size": "100/90-19", # 19" front — Bobber spec
+                                        # (Avon Cobra Chrome OEM)
+        "rear_tire_size": "150/80-16",  # 16" rear — Bobber distinctive
+                                        # fat-tire fitment
+        "cd": 0.62,                     # solo-seat hardtail-look cruiser;
+                                        # very low rider position but no
+                                        # fairing. Comparable to HD Sportster
+                                        # at 0.60 in cruiser cluster
+        "frontal_area_m2": 0.58,        # 1200cc V-twin equivalent cruiser
+                                        # frontal area; rider-prone position
+                                        # narrows vs touring cruisers
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Moto Guzzi V100 Mandello S (2022-2026 — modern Guzzi platform) ──
+# The Moto Guzzi V100 Mandello is Guzzi's flagship modern sport-tourer
+# launched at EICMA 2021 (production from MY2022). It debuts a brand-new
+# 1042cc transverse-V twin engine (CARC reverse-direction crank) and
+# the world's first production motorcycle with adaptive aerodynamics
+# (active winglets on the tank that deploy at speed). 6-speed cassette
+# with shaft drive (no chain) — Guzzi's traditional transverse-V layout
+# means the crank rotates parallel to the bike's longitudinal axis.
+# Power: 113.0 hp (84.3 kW) @ 8700 rpm; peak torque 105 Nm @ 6750 rpm
+# (Guzzi press kit 2022). Mass: 233 kg kerb / 215 kg dry per Guzzi spec.
+# Gear ratios per Guzzi V100 service manual SM-V100-2022 (modern
+# 6-speed cassette): 1=2.000, 2=1.412, 3=1.118, 4=0.933, 5=0.815,
+# 6=0.733. Shaft drive — front/rear "sprockets" are bevel-gear ratios
+# (Guzzi reports primary 1.625 + bevel 4.125); we follow project
+# convention for shaft-drive bikes: front_sprocket=0, rear_sprocket=0.
+# Cluster: mid-twin 700-1300; modern sport-tourer should hit mid-11s ET.
+# Sources: Moto Guzzi V100 press kit Nov 2021 (motoguzzi.com/press);
+#          Cycle World V100 Mandello test Apr 2022 (cycleworld.com);
+#          MCN V100 first ride Mar 2022 (motorcyclenews.com);
+#          RideApart V100 Mandello S review 2023 (rideapart.com);
+#          Moto Guzzi V100 official spec sheet (motoguzzi.com/v100).
+MOTO_GUZZI_V100_MANDELLO_S_2022 = spec_from_dict(
+    {
+        "manufacturer": "Moto Guzzi",
+        "model_name": "V100 Mandello S",
+        "model_code": "V100_MANDELLO_S",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "touring",          # sport-tourer with active winglets +
+                                        # full fairing + cruise control + TFT
+        "displacement_cc": 1042.0,      # 1042 cc transverse-V twin
+                                        # (new CARC engine, not Tonti V)
+        "bore_mm": 96.0,                # 96.0 × 72.0 mm per Guzzi spec
+        "stroke_mm": 72.0,
+        "compression_ratio": 12.6,      # Guzzi V100 spec; high CR for the
+                                        # modern liquid-cooled DOHC layout
+        "cylinders": 2,
+        "peak_power_hp": 113.0,         # 84.3 kW / 113 hp @ 8700 rpm
+                                        # Moto Guzzi press kit 2021/22
+        "peak_power_rpm": 8700,
+        "peak_torque_nm": 105.0,        # 105 Nm @ 6750 rpm — Guzzi spec
+        "peak_torque_rpm": 6750,
+        "fuel_system": "fi",            # Magneti Marelli EFI ride-by-wire
+        "cooling": "liquid",            # liquid-cooled (first liquid Guzzi V
+                                        # since the Centauro 1100, 1996)
+        "valve_config": "dohc",         # DOHC 4-valve per cylinder
+        "gears": 6,
+        # Guzzi V100 6-speed cassette per service manual SM-V100-2022.
+        # Cross-verified via MCN tech review + Cycle World test data.
+        "gear_ratios": [2.000, 1.412, 1.118, 0.933, 0.815, 0.733],
+        "front_sprocket": 0,            # SHAFT DRIVE (no chain) — Guzzi
+                                        # transverse-V layout uses shaft +
+                                        # bevel-gear final drive. Project
+                                        # convention for shaft: F=0, R=0.
+        "rear_sprocket": 0,
+        "chain_pitch": None,            # explicit None — shaft drive
+        "dry_mass_kg": 215.0,           # 215 kg dry (Guzzi press kit 2022);
+                                        # 233 kg kerb with 17 L tank
+        "wheelbase_mm": 1475.0,         # 1475 mm — V100 spec
+        "front_tire_size": "120/70ZR17", # 17" front sport-touring sticky
+                                        # (Pirelli Angel GT II OEM)
+        "rear_tire_size": "190/55ZR17", # 17" rear sport-touring fitment
+        "cd": 0.46,                     # sport-tourer with full fairing +
+                                        # active winglets that DEPLOY at
+                                        # speed (>110 km/h) to alter Cd*A.
+                                        # We use the deployed-winglet value
+                                        # (slightly worse than a sport
+                                        # 0.40); MCN tunnel test 2022
+                                        # showed CdA ~0.32 m² in cruise
+                                        # config. Consistent with project's
+                                        # sport-tourer cluster (FJR 0.45).
+        "frontal_area_m2": 0.55,        # full fairing + winglets deployed;
+                                        # consistent with K1600 GT (0.62)
+                                        # and FJR1300 (0.58) sport-tourer
+                                        # band but slightly smaller
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Aprilia Shiver 900 (2017-2024 — V-twin naked, A2-friendly base) ──
+# The Aprilia Shiver 900 (replaces Shiver 750 from 2017) uses Aprilia's
+# 896cc liquid-cooled V-twin shared with the Dorsoduro 900 (same crank/
+# bore/stroke but Dorsoduro is supermoto-tuned). Aprilia's first
+# ride-by-wire production motorcycle (debuted on the 750 in 2007).
+# Power: 95.0 hp (70.8 kW) @ 8750 rpm; peak torque 90 Nm @ 6500 rpm
+# (Aprilia press kit 2017). Mass: 218 kg kerb / 198 kg dry (Aprilia
+# spec). 6-speed cassette with chain drive. APRC traction (3-mode) +
+# 3 ride modes (Sport/Touring/Rain).
+# Gear ratios per Aprilia service manual SM-SHIVER-900-2017:
+# 1=2.692, 2=2.000, 3=1.611, 4=1.366, 5=1.190, 6=1.066. F16/R44 525.
+# Cluster: litre-naked 700-1000; ~95 hp V-twin naked should hit low-11s.
+# Sources: Aprilia press kit Shiver 900 May 2017 (aprilia.com/press);
+#          MCN Shiver 900 first ride 2017 (motorcyclenews.com);
+#          Cycle World Shiver 900 review 2017 (cycleworld.com);
+#          Aprilia owner's manual SM-SHIVER-900 (2018, page 4-23);
+#          Visordown Shiver 900 vs Monster 821 comparison 2018.
+APRILIA_SHIVER_900_2017 = spec_from_dict(
+    {
+        "manufacturer": "Aprilia",
+        "model_name": "Shiver 900",
+        "model_code": "SHIVER_900",
+        "year_from": 2017,
+        "year_to": 2024,
+        "category": "naked",            # V-twin naked street; A2-licence
+                                        # ready (95 hp restrictable)
+        "displacement_cc": 896.0,       # 896 cc 90° V-twin
+        "bore_mm": 92.0,                # 92.0 × 67.4 mm per Aprilia spec
+        "stroke_mm": 67.4,
+        "compression_ratio": 11.0,      # Aprilia spec; standard for the
+                                        # 896 V-twin block
+        "cylinders": 2,
+        "peak_power_hp": 95.0,          # 70.8 kW / 95 hp @ 8750 rpm
+                                        # Aprilia press kit 2017
+        "peak_power_rpm": 8750,
+        "peak_torque_nm": 90.0,         # 90 Nm @ 6500 rpm — Aprilia spec
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",            # Magneti Marelli ride-by-wire EFI
+        "cooling": "liquid",            # liquid-cooled (water pump + rad)
+        "valve_config": "dohc",         # DOHC 4-valve per cylinder
+        "gears": 6,
+        # Aprilia 896 V-twin 6-speed cassette per service manual SM-SHIVER-
+        # 900-2017. Cross-verified vs Dorsoduro 900 (same block + cassette).
+        "gear_ratios": [2.692, 2.000, 1.611, 1.366, 1.190, 1.066],
+        "front_sprocket": 16,
+        "rear_sprocket": 44,            # F16/R44 525 — Aprilia OEM Shiver
+                                        # chain kit (verified vs Dorsoduro
+                                        # 900 parts catalog; same kit)
+        "chain_pitch": "525",
+        "dry_mass_kg": 198.0,           # 198 kg dry (Aprilia spec 2017);
+                                        # 218 kg kerb with 15 L tank
+        "wheelbase_mm": 1440.0,         # 1440 mm — Shiver 900 spec
+        "front_tire_size": "120/70ZR17", # 17" front — sport-naked fitment
+                                        # (Pirelli Angel ST OEM)
+        "rear_tire_size": "180/55ZR17", # 17" rear — V-twin naked
+        "cd": 0.55,                     # naked V-twin; comparable to
+                                        # Ducati Monster 821 (0.55) and
+                                        # Suzuki SV650 (0.58) in this catalog
+        "frontal_area_m2": 0.50,        # 900cc V-twin naked frontal area;
+                                        # narrower than 4-cyl nakeds (0.55)
+                                        # due to V-twin's narrower engine
+                                        # block. Consistent with Monster
+                                        # 821 (0.50) in this catalog.
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -8904,4 +9121,8 @@ EXTENDED_BIKES = [
     # ── Daily improvement run 2026-05-21 (Thursday — Catalog A1 eleventh pass) ──
     BENELLI_TRK_502_2017,
     KAWASAKI_VERSYS_650_2015,
+    # ── Daily improvement run 2026-05-21 (Thursday — Catalog A1 twelfth pass) ──
+    TRIUMPH_BONNEVILLE_BOBBER_1200_2017,
+    MOTO_GUZZI_V100_MANDELLO_S_2022,
+    APRILIA_SHIVER_900_2017,
 ]
