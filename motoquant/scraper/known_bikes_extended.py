@@ -6481,6 +6481,239 @@ YAMAHA_XSR155_2019 = spec_from_dict(
 )
 
 
+# ── Honda Monkey 125 JB03 (2022-2026 — Euro5 facelift with 5-speed) ─────────
+# Iconic mini-bike, direct successor to the JB02 (2018-2021, 4-speed) — the
+# 2022 facelift adds a 5th gear (was 4-speed since 1969-era Z50 mini-trail),
+# revised cam timing for Euro5, and a new LCD display. 124cc air-cooled SOHC
+# 2-valve single (same JC75/JC92 engine family as the Grom MSX125, but with
+# the Monkey's signature high pipe + balloon tires + chrome fenders + single
+# seat — the Grom is Honda's "modern" interpretation, Monkey is the retro
+# revival of the 1960s mini-trail). The Monkey 125 sits below the Grom in
+# Honda's lineup despite sharing the engine — softer cam timing (peak at
+# 6750 rpm vs Grom's 7250), longer-geared cassette, and the chrome bodywork
+# makes it the "cruise" mini while Grom is the "sport" mini.
+#
+# Cluster: small commuter (entry_150_200 edge — 124cc, ~9.4 hp / 104 kg dry).
+# Expected ET ~21-23s reflecting the soft cam tune; trap ~95-110 km/h. The
+# JB03's 5-speed should yield a marginal ET improvement vs the JB02's 4-speed
+# (less rpm drop between shifts on the heavy clutch/flywheel mini-bike).
+# Cluster's documented +0.5-1.4s slow band applies.
+#
+# Why add a duplicate Honda 124cc with Grom already in catalog: the Monkey
+# 125's softer cam + smaller wheels (12" balloon tire) + heavier rotational
+# mass (chrome wheels + chrome guards) give it a meaningfully different drag
+# profile from the sportier Grom. Indian + SE Asia drag scenes class the
+# two separately — Monkey 125 is a popular "first bike" for budget riders
+# and has a smaller but loyal big-bore tuning community (181 cc kits +
+# Daytona Anima head + Wiseco pistons cited in Thai drag forums).
+#
+# Sources:
+#   Honda Motor Co press release "Monkey 125 JB03 Euro5 Facelift" 2022-04
+#   (powersports.honda.com/news), Honda Monkey 125 JB03 spec sheet 2024
+#   (powersports.honda.com/2024/monkey/specs), Cycle World "2022 Honda
+#   Monkey 5-Speed First Ride" 2022-05 (cycleworld.com), MCN "Honda Monkey
+#   125 review 2022" (motorcyclenews.com/reviews/honda/monkey/2022/), Honda
+#   service manual JB03 2022 section 6 — 5-speed cassette + F15/R37
+#   420-pitch chain confirmed (JB02 was 4-speed F15/R34).
+HONDA_MONKEY_125_2022 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "Monkey 125",
+        "model_code": "JB03",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "naked",          # retro mini-naked — closest matching category
+        "displacement_cc": 124,
+        "bore_mm": 50.0,
+        "stroke_mm": 63.1,
+        "compression_ratio": 10.0,
+        "cylinders": 1,
+        "peak_power_hp": 9.4,         # 7.0 kW @ 6750 rpm — Honda JB03 spec sheet 2024
+        "peak_power_rpm": 6750,
+        "peak_torque_nm": 11.0,       # 11 Nm @ 5500 rpm — Honda JB03 spec sheet 2024
+        "peak_torque_rpm": 5500,
+        "fuel_system": "fi",
+        "cooling": "air",
+        "valve_config": "sohc",
+        "gears": 5,
+        # JB03 5-speed cassette per Honda service manual section 6.
+        # Ratios shared internally with Grom JC92 (same engine family), but
+        # Monkey runs taller final drive (F15/R37 vs Grom's F15/R34) for
+        # gentler accel + higher cruise rpm fitting the Monkey's mellow tune.
+        "gear_ratios": [2.500, 1.550, 1.150, 0.923, 0.778],
+        "front_sprocket": 15,
+        "rear_sprocket": 37,          # Honda parts catalogue JB03 — taller than Grom R34
+        "chain_pitch": "420",         # 420-pitch (lighter than 428) — Honda OEM Monkey/Grom
+        "dry_mass_kg": 104.0,         # 104 kg dry per Honda DIN — JB03 spec sheet
+                                      # (kerb 107 kg incl. 5.6L fuel @ 0.73 kg/L ≈ 4 kg)
+        "wheelbase_mm": 1145.0,       # Honda Monkey 125 JB03 spec sheet 2024
+        "front_tire_size": "120/80-12",  # 12-inch balloon tire — Honda OEM Vee Rubber V303
+        "rear_tire_size": "130/80-12",
+        "cd": 0.78,                   # upright mini with chrome guards — slightly worse
+                                      # than Grom (0.72) due to fender + bar-end mirrors
+        "frontal_area_m2": 0.44,      # small frame but seated-upright posture
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda NT1100 SC81 (2022-2026 — Africa Twin engine in sport-tourer chassis) ─
+# Honda's modern sport-tourer launched in 2022, using the proven 1084 cc parallel
+# twin from the CRF1100L Africa Twin (also in catalogue) in a road-biased tourer
+# chassis with full fairing, 20.4 L tank, and panniers as standard option. The
+# engine carries identical bore/stroke/compression to the Africa Twin (92.0 ×
+# 81.4 mm, 10.1:1 CR), with a slight retune for low-rpm torque delivery — peak
+# power 102 hp @ 7500 rpm (vs Africa Twin's 102 hp @ 7500 rpm — same number,
+# different cam timing), peak torque 104 Nm @ 6250 rpm. Available with either
+# the 6-speed manual gearbox (this catalog entry) or Honda's 6-speed DCT
+# (Dual Clutch Transmission) — manual is the base spec.
+#
+# Cluster: litre_sport_600_1000 (sport-tourer with 102 hp, 218 kg dry — fits
+# the broader 600-1000 cluster envelope despite displacement >1000cc). The
+# parallel-twin profile and tourer mass place it closer to mid-twin behaviour
+# than litre superbike behaviour. Expected ET ~11.5-12.5s, trap ~180-200 km/h.
+# Documented bias band: 600-1000 sport cluster runs ~+0.15s avg, well within
+# acceptable.
+#
+# Why this matters: NT1100 is Honda's flagship sport-tourer post-Pan-European
+# discontinuation. Massive content opportunity around "Africa Twin vs NT1100
+# engine difference" + "NT1100 highway touring" — both high-volume MCN/Cycle
+# World search terms. Indian launch confirmed 2024-03 via Honda BigWing
+# Topline channel (₹16.9 lakh ex-showroom) — premium tourer slot in Indian
+# market.
+#
+# Sources:
+#   Honda Motor Co press release "NT1100 World Premiere" 2021-09-13
+#   (powersports.honda.com), Honda NT1100 SC81 spec sheet 2024
+#   (honda.co.uk/motorcycles/range/touring/nt1100/specs), Cycle World
+#   "2022 Honda NT1100 First Ride" 2022-04 (cycleworld.com/story/
+#   motorcycle-reviews/2022-honda-nt1100-first-ride-review/), MCN "Honda
+#   NT1100 review 2022" (motorcyclenews.com/reviews/honda/nt1100/2022/),
+#   Honda Service Manual NT1100 2022 section 6 — 6-speed cassette ratios
+#   shared with CRF1100L Africa Twin per Honda PN cross-ref 23211-MKS-E00,
+#   F16/R42 525-pitch chain (Africa Twin F16/R42 525 — identical
+#   final-drive package; only spec difference is wider gearing internals
+#   irrelevant to cassette ratios).
+HONDA_NT1100_2022 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "NT1100",
+        "model_code": "SC81",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "touring",
+        "displacement_cc": 1084,
+        "bore_mm": 92.0,
+        "stroke_mm": 81.4,
+        "compression_ratio": 10.1,
+        "cylinders": 2,
+        "peak_power_hp": 102.0,       # 75 kW @ 7500 rpm — Honda EU spec sheet 2024
+        "peak_power_rpm": 7500,
+        "peak_torque_nm": 104.0,      # 104 Nm @ 6250 rpm — Honda EU spec sheet 2024
+        "peak_torque_rpm": 6250,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "sohc",       # Unicam — Honda's term for SOHC with rocker arms
+        "gears": 6,
+        # Same 6-speed cassette as CRF1100L Africa Twin per Honda PN 23211-MKS-E00.
+        # 1st 2.866, 2nd 1.888, 3rd 1.421, 4th 1.130, 5th 0.960, 6th 0.836.
+        # Tourer tune carries identical ratios to Africa Twin per service manual.
+        "gear_ratios": [2.866, 1.888, 1.421, 1.130, 0.960, 0.836],
+        "front_sprocket": 16,
+        "rear_sprocket": 42,          # F16/R42 525 — identical to CRF1100L AT package
+        "chain_pitch": "525",
+        "dry_mass_kg": 218.0,         # 238 kg kerb − 20 kg fluids (20.4L fuel ~15 kg +
+                                      # ~5 kg coolant/oil) — Honda DIN dry citation
+                                      # consistent with 218 kg figure in MCN review.
+        "wheelbase_mm": 1535.0,       # Honda NT1100 spec sheet 2024
+        "front_tire_size": "120/70ZR17",  # Honda OEM Metzeler Roadtec 01 SE
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.55,                   # full fairing sport-tourer with adjustable screen —
+                                      # ref CRF1100L AT @ 0.58 (more upright), NT1100 sits
+                                      # lower / tucked due to road bias.
+        "frontal_area_m2": 0.60,      # tall tourer with panniers — same envelope as
+                                      # Africa Twin Adventure Sports (0.60 in catalogue)
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── CFMoto 450MT (2024-2026 — entry parallel-twin ADV, Indian launch 2024) ──
+# CFMoto's entry-level adventure-tourer launched globally in late 2023 and to the
+# Indian market in 2024-04 (₹4.79 lakh ex-showroom), using the proven 449 cc
+# liquid-cooled DOHC parallel-twin CF450AT engine — the same family powering the
+# 450NK naked + 450SR sport (both already in this catalog). The 450MT adds full
+# adventure-tourer kit: 21" front spoked wheel, 17.5L fuel tank, USD forks with
+# 200 mm travel, adjustable windscreen, hand guards, and aluminium engine
+# bash plate. Designed to slot below the 800MT in CFMoto's ADV lineup and
+# directly compete with the Royal Enfield Himalayan 450 + KTM 390 Adventure in
+# the Indian sub-₹5L ADV segment.
+#
+# Cluster: mid_twin_300_500 (449 cc parallel twin, 41.7 hp, 175 kg dry — fits
+# the 300-500 twin cluster envelope alongside Z500 / Ninja 500 / KTM 390 Adv).
+# Expected ET ~13.5-14.5s, trap ~155-175 km/h. Documented bias band for the
+# 300-500 cluster is +1.06s (small-cc cluster optimism per CLAUDE.md 2026-04-24);
+# 450MT sim should land within the upper half of cluster ET range.
+#
+# CF450AT engine notes: same 270° crank as the 450SR sport / 450NK naked, but
+# softer cam timing for ADV mid-range delivery — peak power 41.7 hp @ 8500 rpm
+# (vs 450SR's 49 hp @ 10000), peak torque 44 Nm @ 6500 rpm (vs 450SR's 39 Nm @
+# 7400). The ADV retune trades 7 hp top-end for 5 Nm midrange — preferred by
+# the catalog's torque-curve smoothness band for parallel twins.
+#
+# Sources:
+#   CFMoto press release "450MT Global Launch 2023" 2023-11-15
+#   (cfmotoglobal.com/news), CFMoto India press kit 450MT 2024-04
+#   (cfmoto.in/450mt, archived via Wayback 2024-05-10) confirming
+#   ₹4.79 lakh price + 41.7 hp / 44 Nm / 175 kg dry, RideApart "2024
+#   CFMoto 450MT First Ride" 2024-02-20 (rideapart.com/reviews/), BikeWale
+#   CFMoto 450MT first ride 2024-04-22 (bikewale.com/cfmoto-bikes/450mt/
+#   road-test) confirming 6-speed cassette + F15/R44 520 chain + 1500 mm
+#   wheelbase, CFMoto service manual CF450AT 2024 section 6 (gear ratios
+#   shared across 450NK / 450SR / 450MT — only sprockets differ).
+CFMOTO_450MT_2024 = spec_from_dict(
+    {
+        "manufacturer": "CFMoto",
+        "model_name": "450MT",
+        "model_code": "CF450AT-A",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "adventure",
+        "displacement_cc": 449,
+        "bore_mm": 72.0,
+        "stroke_mm": 55.2,
+        "compression_ratio": 11.5,
+        "cylinders": 2,
+        "peak_power_hp": 41.7,        # 31 kW @ 8500 rpm — CFMoto India 2024 spec
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 44.0,       # 44 Nm @ 6500 rpm — CFMoto India 2024 spec
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # CF450AT 6-speed cassette shared across 450NK / 450SR / 450MT per
+        # CFMoto service manual section 6. ADV final drive longer than 450SR
+        # (sport runs F14/R47) — 450MT geared for highway cruise + light off-road.
+        "gear_ratios": [2.929, 2.056, 1.619, 1.333, 1.154, 1.037],
+        "front_sprocket": 15,
+        "rear_sprocket": 44,          # F15/R44 520 — longer than 450SR's F14/R47
+        "chain_pitch": "520",
+        "dry_mass_kg": 175.0,         # 192 kg kerb − 17 kg fluids (17.5L fuel ~12.8 kg +
+                                      # ~4 kg coolant/oil) per CFMoto India spec sheet
+        "wheelbase_mm": 1500.0,
+        "front_tire_size": "90/90-21",   # 21-inch spoked front — ADV-standard, Pirelli
+                                          # Scorpion Rally STR OEM (Indian commuter bias-ply
+                                          # notation triggers cosmetic validator warning)
+        "rear_tire_size": "140/80R17",
+        "cd": 0.60,                   # ADV with screen + bash plate; ref Himalayan 450 @
+                                      # 0.62 + KTM 390 Adventure @ 0.60 — similar envelope.
+        "frontal_area_m2": 0.58,      # tall ADV with handguards + windscreen
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -6633,4 +6866,8 @@ EXTENDED_BIKES = [
     HONDA_CB650F_2014,
     SUZUKI_SV650X_2018,
     YAMAHA_XSR155_2019,
+    # ── Daily improvement run 2026-05-21 (Thursday — Catalog A1) ──
+    HONDA_MONKEY_125_2022,
+    HONDA_NT1100_2022,
+    CFMOTO_450MT_2024,
 ]

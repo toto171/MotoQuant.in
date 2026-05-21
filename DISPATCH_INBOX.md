@@ -602,6 +602,40 @@ Until measured benchmarks land, the physics-calibration scheduler should skip en
 
 ---
 
+## INSTRUCTION — 2026-05-21 — [opportunistic] postflight alert dedup during open [blocking] INBOX tickets
+[opportunistic]
+
+**Context:** `scripts/session_postflight.sh::verify_deploy()` (lines 252-273) unconditionally calls `_queue_alert "Postflight deploy check timed out after ${DEPLOY_WAIT_SECONDS}s"` whenever the Railway `/api/health` poll loop times out. During the ongoing Railway outage (first detected 2026-05-17, INSTRUCTION at this file line 140, still 404 as of 2026-05-21), this has produced **22 identical `### ALERT` entries** in `DISPATCH_OUTBOX.md` between lines 430 and 902 — same one-line body verbatim every time. That's signal-dilution: a future genuine deploy-check timeout (different commit, different cause) will be lost in the noise.
+
+**Asymmetry:** `reports/perf_monitor_2026-05-17.md` lines 383-398 (Run 12 section) shows the perf-monitor agent correctly handled this — it observed the same 404 symptom, recognised the matching `[urgent] [blocking]` INBOX ticket already existed, and declined to file a duplicate. Postflight lacks that deduplication logic.
+
+**Proposed fix:** before `_queue_alert` fires in `verify_deploy`, grep `DISPATCH_INBOX.md` for an open `## INSTRUCTION` block (i.e. not under `## DONE / DEFERRED ARCHIVE`) that carries the `[blocking]` tag AND mentions "Railway" (or, more generally, the symptom keyword). If one exists, log to stderr ("deploy alert suppressed — open blocking ticket at line N") and skip the outbox append. The alert is still useful when there is no open ticket; it becomes noise once one exists.
+
+Implementation sketch — small bash helper, ~10 LOC:
+```bash
+_blocking_ticket_open() {
+  awk '/^## DONE \/ DEFERRED ARCHIVE/{exit} /^## INSTRUCTION/{block=$0} block && /\[blocking\]/ && /Railway|deploy/{print block; exit}' DISPATCH_INBOX.md
+}
+```
+
+Then `verify_deploy`'s timeout branch becomes:
+```bash
+if [[ -n "$(_blocking_ticket_open)" ]]; then
+  warn "deploy alert suppressed — open blocking ticket: $(_blocking_ticket_open)"
+else
+  _queue_alert "Postflight deploy check timed out after ${DEPLOY_WAIT_SECONDS}s"
+fi
+return 5
+```
+
+Exit code 5 still returned so callers know the deploy didn't verify — only the outbox spam is suppressed.
+
+**Acceptance:** after the Railway service is restored and the [urgent] ticket at line 140 moves to `## DONE`, the next deploy timeout (if any) should fire a fresh ALERT. Verify by archiving the line-140 ticket first, then watching the postflight behaviour.
+
+Source: `reports/support_triage_2026-05-21.md` Findings B + C; `DISPATCH_OUTBOX.md` lines 430, 452, 474, 496, 518, 540, 562, 584, 606, 628, 650, 672, 695, 718, 741, 764, 787, 810, 833, 856, 879, 902 (22 identical ALERTs).
+
+---
+
 ## INSTRUCTIONS QUEUE
 
 > _Add new `## INSTRUCTION` blocks above this divider. Claude marks them `## DONE` once handled._
