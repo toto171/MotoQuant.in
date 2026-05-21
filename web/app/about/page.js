@@ -12,7 +12,7 @@ const ROADMAP = [
     phase: 'Phase 1–2',
     status: 'complete',
     label: 'Physics engine + Database',
-    desc: '15 sub-models, 527 bikes, 563 parts, 20 venues, 976 tests. Full validation suite.',
+    desc: '15 sub-models, 563 bikes, 563 parts, 20 venues, 976 tests. Full validation suite.',
   },
   {
     phase: 'Phase 3',

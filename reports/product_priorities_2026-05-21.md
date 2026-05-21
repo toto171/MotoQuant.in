@@ -8,7 +8,8 @@
 
 - **Morning pass** — established new top-1 (Railway restore), demoted analytics to #2, surfaced catalog re-seed gap as #3 (DB 345 / source 447, -102 bikes).
 - **End-of-day pass** — refreshed DB/source counts (488/579), 91-bike remaining gap. Top-3 unchanged.
-- **Late-night pass *(this report)*** — DB now 527 / source 460 (DB **exceeds** source by +67). Catalog re-seed gap is **effectively closed**; #3 slot freed. CI sidecar-build matrix promoted into #3.
+- **Late-night pass** — DB now 527 / source 460 (DB **exceeds** source by +67). Catalog re-seed gap **effectively closed**; #3 slot freed. CI sidecar-build matrix promoted into #3.
+- **Thursday close pass *(this report, session `1779373833-626`)*** — fourth same-day run. **No top-3 change.** Confirmation pass: DB still 527 bikes, S5 auth tables still all 5 absent, Railway 404 ticket still open at INBOX:140, ALERT count 28 → 29 (single +1 tick from the latest postflight). All signals identical to late-night pass within noise. Per prompt rule "don't re-rank without strong signal", no CLAUDE.md edit this pass.
 
 ---
 
@@ -104,8 +105,8 @@ Scores: Impact 1-10 × Confidence 1-5 / Effort 1-5. Late-night pass.
 
 ## Summary for orchestrator
 
-1. **Files touched:** `reports/product_priorities_2026-05-21.md` (rewritten with late-night refresh + catalog gap closure + #3 promotion), `CLAUDE.md` (surgical Edit of item #3 — swap catalog re-seed for CI sidecar matrix).
-2. **Commit summary:** `chore(priorities): re-rank 2026-05-21 — top-3 now CI sidecar matrix (catalog gap closed)`.
-3. **Top-1 changed (vs last weekly run, 2026-05-07):** YES — was "Bootstrap analytics + apply S5 auth-DDL"; now "Restore Railway service + redeploy". Carried forward from the morning pass — same root cause (Railway 404 since 2026-05-17), 28 ALERTs accumulated.
-4. **Top-3 changed (vs morning/end-of-day pass):** YES at slot #3 — catalog re-seed gap closed (DB 527 > source 460); replaced by CI sidecar-build matrix (score 8.0, Railway-independent, unblocks Pune/Narhe outreach).
-5. **CLAUDE.md edited:** YES — surgical Edit to item #3 only.
+1. **Files touched (Thursday close pass):** `reports/product_priorities_2026-05-21.md` (appended fourth-pass update-history bullet only — no rewrite). **No CLAUDE.md edit** — late-night pass already set top-3, all signals confirm.
+2. **Commit summary:** `docs(priorities): confirm 2026-05-21 top-3 — Railway #1 still blocking, no rerank`.
+3. **Top-1 changed (vs late-night pass):** NO. Still "Restore Railway service + redeploy". 29 ALERTs (+1 since late-night).
+4. **Top-3 changed (vs late-night pass):** NO. CI sidecar-build matrix remains at #3.
+5. **CLAUDE.md edited:** NO — block already current.

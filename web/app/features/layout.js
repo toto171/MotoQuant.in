@@ -5,7 +5,7 @@
 import StructuredData, { SITE_URL } from '../StructuredData';
 
 const TITLE = "Features — Physics Drag Sim, Parts ROI, Dragy Import, Build Optimiser (India)";
-const DESCRIPTION = "What you get inside MotoQuant Pro: 15 first-principles physics sub-models (Pacejka tires, RK4 solver, weight transfer, two-stroke expansion-chamber), 527-bike catalog covering Hayabusa to R15 V4 to NS400Z, parts ROI with cost-per-tenth in INR, Bayesian build optimiser, Dragy GPS calibration, A vs B compare, and the smart recommendations engine.";
+const DESCRIPTION = "What you get inside MotoQuant Pro: 15 first-principles physics sub-models (Pacejka tires, RK4 solver, weight transfer, two-stroke expansion-chamber), 563-bike catalog covering Hayabusa to R15 V4 to NS400Z, parts ROI with cost-per-tenth in INR, Bayesian build optimiser, Dragy GPS calibration, A vs B compare, and the smart recommendations engine.";
 
 export const metadata = {
   title: TITLE,

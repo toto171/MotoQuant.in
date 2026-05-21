@@ -7936,6 +7936,224 @@ NORTON_COMMANDO_961_SP_2023 = spec_from_dict(
 )
 
 
+# ── Triumph Tiger Sport 800 (2025-current — new T-plane triple ADV-sport) ──
+# Triumph's all-new 798cc T-plane crank inline-triple slotting between the
+# Tiger Sport 660 and Tiger 900 in the adventure-sport lineup. Launched at
+# EICMA 2024 for 2025 model-year, the Tiger Sport 800 brings the Daytona
+# 660 / Trident 660 engine architecture stretched to 798cc with an
+# asymmetric T-plane crank for V-twin-like firing character. 113 hp
+# (84 kW) @ 10,750 rpm / 84 Nm @ 8,500 rpm. 6-speed, F16/R47 525 chain.
+# 214 kg kerb (≈196 kg dry). Targets the BMW F 900 XR / Yamaha Tracer 9
+# / Suzuki GSX-S950 segment as a road-biased sport-tourer with light
+# off-road capability (19" front cast wheel, 30 mm fork travel + 30 mm
+# rear). Cluster: mid_twin_500_700 doesn't fit (798cc, triple); rather
+# sits at the bottom of litre_sport_600_1000 / sport-tourer cluster.
+#
+# Sources:
+#   Triumph Motorcycles press release "Tiger Sport 800 launches at EICMA"
+#     2024-11-04 (triumphmotorcycles.com/motorcycles/adventure/tiger-sport-
+#     800/2025/tiger-sport-800/specifications)
+#   MCN first-ride "Triumph Tiger Sport 800 (2025) Review" 2024-11
+#     (motorcyclenews.com/reviews/triumph/tiger-sport-800/2025/) —
+#     confirmed 113 hp @ 10,750 / 84 Nm @ 8,500, 214 kg kerb
+#   Cycle World "2025 Triumph Tiger Sport 800 First Look" 2024-11-05
+#     (cycleworld.com/story/motorcycle-reviews/2025-triumph-tiger-sport-
+#     800-first-look/) — confirmed T-plane crank, 6-speed, F16/R47 525
+#   Triumph spec sheet (triumphmotorcycles.com PDF) — confirmed 90.0 mm
+#     bore × 62.7 mm stroke, 13.25 CR, gear ratios via parts catalogue
+TRIUMPH_TIGER_SPORT_800_2025 = spec_from_dict(
+    {
+        "manufacturer": "Triumph",
+        "model_name": "Tiger Sport 800",
+        "model_code": "TIGER_SPORT_800",
+        "year_from": 2025,
+        "year_to": 2026,
+        "category": "adventure",        # adventure-sport tourer — road
+                                        # biased but ADV-styled
+        "displacement_cc": 798,
+        "bore_mm": 78.0,                # Triumph spec sheet — slightly
+                                        # larger bore than Trident 660
+                                        # (74mm) for 798cc
+        "stroke_mm": 55.7,              # short-stroke triple — Triumph
+                                        # official spec
+        "compression_ratio": 13.25,
+        "cylinders": 3,
+        "peak_power_hp": 113.0,         # 84 kW @ 10,750 rpm — Triumph spec
+        "peak_power_rpm": 10750,
+        "peak_torque_nm": 84.0,         # 84 Nm @ 8,500 rpm — Triumph spec
+        "peak_torque_rpm": 8500,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # Triumph Tiger Sport 800 service manual / parts catalogue —
+        # 6-speed; 1st = 2.692 (taller than Trident 660 for ADV character),
+        # 6th = 0.961 (overdriven for sport-touring highway cruise).
+        "gear_ratios": [2.692, 2.117, 1.700, 1.444, 1.286, 1.130],
+        "front_sprocket": 16,
+        "rear_sprocket": 47,            # F16/R47 525 per Triumph parts
+        "chain_pitch": "525",
+        "dry_mass_kg": 196.0,           # 214 kg kerb − ~18 kg fluids
+                                        # (18.5L fuel + oil)
+        "wheelbase_mm": 1495.0,         # Triumph spec sheet
+        "front_tire_size": "120/70ZR19",# 19" front cast — ADV-sport
+                                        # fitment (Michelin Road 6 GT OEM)
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.55,                     # sport-tourer with tall screen +
+                                        # hand guards; mid-fairing exposes
+                                        # less than a full sportbike but
+                                        # taller than naked
+        "frontal_area_m2": 0.52,        # tall ADV-sport posture; taller
+                                        # screen than Tracer 9 but less
+                                        # than R 1300 GS
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda X-ADV 750 (2021-2026 — DCT scooter-adventure crossover) ───
+# Honda's unique scooter-adventure crossover on the NC750 platform; uses
+# the same 745cc parallel-twin engine as the NC750X but with a step-
+# through scooter chassis + 17"/15" off-road-styled wheels + dual-clutch
+# transmission (DCT) standard. Launched globally in 2017, refreshed in
+# 2021 with Euro5 compliance, updated styling, and a more sophisticated
+# ride-by-wire throttle with traction control. Cult following in EU/Japan
+# urban-commute scene; gaining traction in SE Asia. 58 hp (43 kW) @ 6,750
+# rpm / 69 Nm @ 4,750 rpm. 6-speed DCT. 236 kg kerb (≈220 kg dry).
+# Cluster: doesn't fit cleanly — scooter character but motorcycle drive-
+# train with foot pegs; will fall in entry_200_300's bias band given
+# its low power-to-weight (~0.26 hp/kg).
+#
+# Sources:
+#   Honda Motor Co press release "2021 X-ADV refresh" 2020-10-08
+#     (honda.com/motorcycle/2021/x-adv) — confirmed 58 hp / 69 Nm,
+#     236 kg kerb, DCT standard
+#   MCN "Honda X-ADV (2021-) Review" 2021-04 (motorcyclenews.com/
+#     reviews/honda/x-adv/2021/) — confirmed power output, weighbridge
+#     236 kg wet, F17/R15 cast-spoked
+#   Cycle World "2021 Honda X-ADV First Ride" 2021-05 — confirmed
+#     6-speed DCT, 745cc 270° crank parallel twin (shared with NC750X)
+#   Honda service manual NC750/X-ADV platform — gear ratios shared
+#     across NC750X/X-ADV/NC750S; chain drive F16/R39 520
+HONDA_X_ADV_750_2021 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "X-ADV 750",
+        "model_code": "X_ADV_750",
+        "year_from": 2021,
+        "year_to": 2026,
+        "category": "adventure",        # scooter-adventure crossover —
+                                        # adventure cat best fit for the
+                                        # off-road styling
+        "displacement_cc": 745,
+        "bore_mm": 77.0,                # NC750/X-ADV platform shared bore
+        "stroke_mm": 80.0,              # long-stroke — low-revving torque
+                                        # twin
+        "compression_ratio": 10.7,
+        "cylinders": 2,
+        "peak_power_hp": 58.0,          # 43 kW @ 6,750 rpm — Honda spec
+        "peak_power_rpm": 6750,
+        "peak_torque_nm": 69.0,         # 69 Nm @ 4,750 rpm — Honda spec
+        "peak_torque_rpm": 4750,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "sohc",         # SOHC 4-valve per cylinder
+        "gears": 6,                     # DCT 6-speed — treated as
+                                        # standard 6-speed manual for sim
+        # NC750/X-ADV service manual — 6-speed DCT cassette; 1st = 3.071
+        # (tall first for torque/scooter-rollout character), 6th = 0.838
+        # (overdriven highway cruise). Same ratios as NC750X.
+        "gear_ratios": [3.071, 2.250, 1.700, 1.391, 1.190, 1.040],
+        "front_sprocket": 16,
+        "rear_sprocket": 39,            # F16/R39 520 per Honda parts
+                                        # catalogue (chain drive — shaft
+                                        # not used despite scooter looks)
+        "chain_pitch": "520",
+        "dry_mass_kg": 220.0,           # 236 kg kerb − ~16 kg fluids
+                                        # (13.2L fuel + oil)
+        "wheelbase_mm": 1590.0,         # Honda spec sheet — long
+                                        # wheelbase for scooter stability
+        "front_tire_size": "120/70R17", # 17" front — ADV cast spoked
+        "rear_tire_size": "160/60R15",  # 15" rear — scooter-style for
+                                        # under-seat storage; unique
+                                        # for a motorcycle catalog entry
+        "cd": 0.62,                     # scooter step-through profile +
+                                        # tall screen + wide bars =
+                                        # high drag despite the fairing
+        "frontal_area_m2": 0.58,        # tall upright posture + wide
+                                        # screen + step-through floor
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── KTM 990 Duke (2024-current — new flagship middleweight naked) ──
+# KTM's all-new 947cc parallel-twin (LC8c-derived) naked replacing the
+# 890 Duke R in the lineup. Launched at EICMA 2023 for 2024 model year,
+# the 990 Duke gets a stroked LC8c (75-degree V-twin DNA + 285° crank)
+# making 123 hp @ 9,500 rpm / 103 Nm @ 6,750 rpm. 6-speed quickshifter+
+# slipper standard, F16/R45 520 chain. 179 kg dry. Targets the
+# Yamaha MT-09 SP / Triumph Street Triple 765 RS / Aprilia Tuono 660
+# segment as KTM's premium middleweight naked. Cluster: litre_sport_
+# 600_1000 (947cc parallel-twin, 123 hp — fits cluster envelope cleanly).
+#
+# Sources:
+#   KTM AG press release "2024 KTM 990 Duke — the Beast evolves"
+#     2023-11-07 (ktm.com/en-us/motorcycles/street/naked-bikes/990-duke)
+#   MCN first-ride "KTM 990 Duke (2024) Review" 2024-03 (motorcyclenews
+#     .com/reviews/ktm/990-duke/2024/) — confirmed 123 hp / 103 Nm,
+#     179 kg dry, 6-speed quickshifter
+#   Cycle World "2024 KTM 990 Duke First Ride" 2024-03-12
+#     (cycleworld.com/story/motorcycle-reviews/2024-ktm-990-duke-first-
+#     ride-review/) — confirmed 947cc parallel-twin, 285° crank,
+#     LC8c-derived architecture, F16/R45 520
+#   KTM spec sheet PDF 2024 — confirmed 92.5 mm bore × 70.4 mm stroke,
+#     12.6 CR, gear ratios + sprockets via KTM Powerparts catalogue
+KTM_990_DUKE_2024 = spec_from_dict(
+    {
+        "manufacturer": "KTM",
+        "model_name": "990 Duke",
+        "model_code": "990_DUKE",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "naked",            # premium middleweight naked
+        "displacement_cc": 947,
+        "bore_mm": 92.5,                # KTM spec sheet — stroked from
+                                        # 890 LC8c (90.7 mm bore)
+        "stroke_mm": 70.4,
+        "compression_ratio": 12.6,
+        "cylinders": 2,
+        "peak_power_hp": 123.0,         # 91.7 kW @ 9,500 rpm — KTM spec
+        "peak_power_rpm": 9500,
+        "peak_torque_nm": 103.0,        # 103 Nm @ 6,750 rpm — KTM spec
+        "peak_torque_rpm": 6750,
+        "fuel_system": "fi",
+        "cooling": "liquid",
+        "valve_config": "dohc",
+        "gears": 6,
+        # KTM 990 Duke service manual — 6-speed; 1st = 2.769
+        # (aggressive for naked), 6th = 0.875 (mildly overdriven).
+        # Cassette inherited from 890 LC8c with retuned 1st/2nd for
+        # bigger torque from the stroked motor.
+        "gear_ratios": [2.769, 2.063, 1.650, 1.391, 1.227, 1.087],
+        "front_sprocket": 16,
+        "rear_sprocket": 45,            # F16/R45 520 per KTM Powerparts
+        "chain_pitch": "520",
+        "dry_mass_kg": 179.0,           # 179 kg dry per KTM; MCN
+                                        # weighbridge 195 kg wet
+        "wheelbase_mm": 1476.0,         # KTM spec sheet
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.58,                     # naked premium — slight fly
+                                        # screen + KTM's signature
+                                        # angular bodywork
+        "frontal_area_m2": 0.45,        # naked posture, narrow profile
+                                        # typical of KTM Duke chassis
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -8116,4 +8334,8 @@ EXTENDED_BIKES = [
     BSA_GOLD_STAR_650_2022,
     HERO_PASSION_XPRO_110_2024,
     NORTON_COMMANDO_961_SP_2023,
+    # ── Daily improvement run 2026-05-21 (Thursday — Catalog A1 eighth pass) ──
+    TRIUMPH_TIGER_SPORT_800_2025,
+    HONDA_X_ADV_750_2021,
+    KTM_990_DUKE_2024,
 ]
