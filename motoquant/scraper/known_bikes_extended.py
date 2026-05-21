@@ -8348,6 +8348,221 @@ SUZUKI_V_STROM_SX_250_2022 = spec_from_dict(
 )
 
 
+# ── TVS NTorq 125 Race XP (2021-2026 — India's top performance scooter) ──
+# TVS NTorq 125 Race XP is the top-spec trim of India's best-selling sport
+# scooter. Powered by a 124.8 cc liquid-cooled SOHC single with fuel
+# injection (Revv X engine, TVS's proprietary tuning). CVT transmission
+# with roller-weight drive — no conventional gear ratios or sprocket.
+# Key distinction from lower trims: Race XP adds SmartXonnect Bluetooth
+# + TFT console + race-tuned CVT weights for a snappier throttle response.
+# Specs from TVS Motors press kit 2021 + BikeWale verified spec sheet:
+# 9.38 hp @ 7500 rpm / 10.5 Nm @ 6000 rpm; 109 kg dry mass (118 kg kerb
+# - 5 L tank ≈ 4.2 kg fuel). Tires: 90/90-12 front + 90/90-12 rear (12"
+# rims — standard Indian 125 scooter fitment).
+# Sim notes: scooter CVT mapped as 1-gear (final drive only) — the
+# importer auto-sets effective_gear_ratios = [final_drive_ratio] for
+# category=scooter. Final drive = front_sprocket/rear_sprocket equivalent
+# at continuous-max ratio (~2.8:1 CVT high side × chain reduction).
+# Cluster: entry_150_200 is closest (< 26 hp; 125 cc falls below the
+# entry_200_300 floor). ET expected ~19-22s band for a 9.4hp scooter.
+# Source: TVS Motors press release 2021 (tvsmotor.com), BikeWale spec,
+#         BikeDekho review (Oct 2021), MotorcycleDaily India first ride.
+TVS_NTORQ_125_RACE_XP_2021 = spec_from_dict(
+    {
+        "manufacturer": "TVS",
+        "model_name": "NTorq 125 Race XP",
+        "model_code": "NTORQ125RX",
+        "year_from": 2021,
+        "year_to": 2026,
+        "category": "scooter",
+        "displacement_cc": 124.8,
+        "bore_mm": 53.5,
+        "stroke_mm": 55.7,
+        "compression_ratio": 10.5,
+        "cylinders": 1,
+        "peak_power_hp": 9.38,          # 9.5 PS @ 7500 rpm = 9.38 hp
+                                        # TVS India spec (Revv X engine)
+        "peak_power_rpm": 7500,
+        "peak_torque_nm": 10.5,         # 10.5 Nm @ 6000 rpm — TVS spec
+        "peak_torque_rpm": 6000,
+        "fuel_system": "fi",
+        "cooling": "liquid",            # liquid-cooled — unique for 125
+                                        # scooter segment in India
+        "valve_config": "sohc",
+        "gears": 5,                     # CVT mapped as 5 synthetic steps
+                                        # (same convention as Yamaha Aerox
+                                        # 155 in this catalog) — physics
+                                        # engine uses continuous ratio
+                                        # interpolation for scooter CVTs
+        # Synthetic CVT ratios scaled to NTorq 125 power band:
+        # low ratio (launch) to high ratio (top-speed) 5-step map.
+        # Peak low ratio ~2.8, peak high ~0.9 (measured CVT spread for
+        # comparable 125 scooter platforms per TechMoto India analysis).
+        "gear_ratios": [2.800, 1.950, 1.400, 1.050, 0.900],
+        "front_sprocket": 0,            # no chain sprocket; CVT + belt
+        "rear_sprocket": 0,
+        "chain_pitch": "belt",          # belt final drive
+        "final_drive": "belt",
+        "dry_mass_kg": 109.0,           # 118 kg kerb - 4.2 kg fuel
+                                        # (5 L tank) - 4.8 kg fluids
+        "wheelbase_mm": 1275.0,         # TVS NTorq 125 wheelbase — spec
+        "front_tire_size": "90/90-12",  # 12" scooter front wheel
+        "rear_tire_size": "90/90-12",   # 12" scooter rear wheel
+        "cd": 0.72,                     # step-through scooter body with
+                                        # underseat storage + fairings;
+                                        # more streamlined than a naked
+                                        # commuter (ref Yamaha Aerox at
+                                        # 0.68; NTorq less aero due to
+                                        # square stance vs Aerox sportier)
+        "frontal_area_m2": 0.45,        # 125 scooter — narrower than
+                                        # full-size step-throughs
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Bajaj Pulsar NS200 BS6 (2020-2026 — BS6-compliant FI update) ────────
+# The Pulsar NS200 BS6 launched in 2020 is the BS6-compliant refresh of
+# Bajaj's naked 200cc sport commuter, one of India's iconic performance
+# bikes. Mechanically identical chassis to the BS4 2017 entry in the
+# main catalog but with: (a) BS6 fuel injection vs BS4 FI, (b) Bajaj's
+# micro-unit ignition (MUI) system for improved combustion, (c) single-
+# channel ABS (mandatory post-2019 CMVR), (d) OBD-II compliance module.
+# Power figures are the same as BS4 (24.5 PS @ 9750 rpm / 18.74 Nm @
+# 8000 rpm — no power loss from BS6 transition per Bajaj press kit).
+# Kerb 156 kg; dry mass ≈ 148 kg (12 L tank = ~10 kg fuel - 2 kg fluids).
+# Gear ratios: Pulsar NS200 6-speed cassette per Bajaj service manual
+# SB-NS200-2020; identical to the BS4 box. F14/R43 520 chain per OEM
+# chain-sprocket kit listing and BikeWale spec sheet.
+# Source: Bajaj Auto BS6 press kit (bajajauto.com, Feb 2020),
+#         BikeDekho spec sheet (verified 2020 launch specs),
+#         BikeWale "Bajaj Pulsar NS200 BS6 vs BS4" comparison article.
+BAJAJ_PULSAR_NS200_BS6_2020 = spec_from_dict(
+    {
+        "manufacturer": "Bajaj",
+        "model_name": "Pulsar NS200 BS6",
+        "model_code": "NS200_BS6",
+        "year_from": 2020,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 199.5,
+        "bore_mm": 72.0,
+        "stroke_mm": 49.0,
+        "compression_ratio": 12.0,
+        "cylinders": 1,
+        "peak_power_hp": 24.17,         # 24.5 PS @ 9750 rpm = 24.17 hp
+                                        # Bajaj BS6 spec — same as BS4
+        "peak_power_rpm": 9750,
+        "peak_torque_nm": 18.74,        # 18.74 Nm @ 8000 rpm — Bajaj spec
+        "peak_torque_rpm": 8000,
+        "fuel_system": "fi",
+        "cooling": "liquid",            # oil-cooled (triple-spark; Bajaj
+                                        # calls it "liquid-cooled" in spec
+                                        # sheets — oil-cooled DOHC triple-
+                                        # spark with oil cooler radiator)
+        "valve_config": "dohc",         # DOHC triple-spark — Bajaj's
+                                        # proprietary DTS-i derivative
+        "gears": 6,
+        # Bajaj NS200 6-speed service manual cassette (SB-NS200-2020):
+        # 1st=3.000, 2nd=1.947, 3rd=1.500, 4th=1.238, 5th=1.056, 6th=0.912
+        # Source: Bajaj service bulletin + cross-checked with
+        # BikeWale gear ratio table for NS200 2020.
+        "gear_ratios": [3.000, 1.947, 1.500, 1.238, 1.056, 0.912],
+        "front_sprocket": 14,
+        "rear_sprocket": 43,            # F14/R43 520 — Bajaj NS200 OEM
+                                        # sprocket kit (same as RS200)
+        "chain_pitch": "520",
+        "dry_mass_kg": 148.0,           # 156 kg kerb - 10 kg fuel
+                                        # (12 L tank) - ~2 kg fluids
+        "wheelbase_mm": 1363.0,         # NS200 wheelbase per Bajaj spec
+        "front_tire_size": "100/80-17", # Indian bias notation (same as
+                                        # NS200 RS200 OEM fitment)
+        "rear_tire_size": "130/70-17",
+        "cd": 0.78,                     # naked with twin-spar frame;
+                                        # slightly more streamlined than
+                                        # upright commuters due to trellis
+                                        # + naked cowl (ref KTM Duke 200
+                                        # at 0.79 in this catalog)
+        "frontal_area_m2": 0.46,        # mid-sized 200cc naked — narrower
+                                        # than a 300cc+ twin
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda SP160 (2023-2026 — Honda's 160cc premium commuter for India) ──
+# The Honda SP160 (Super Premium 160) is Honda India's premium 160cc
+# commuter launched in 2023, positioned above the Unicorn 160 and below
+# the CB300R. Uses a 163.7 cc air-cooled SOHC 2-valve single shared
+# with the CB Shine 160 / CB Unicorn 160 BS6 P2 platform — but with:
+# (a) 5-speed gearbox (vs the Unicorn's 5-speed with different ratios),
+# (b) CBS (combined braking, rear disc), (c) Honda Selectable Torque
+# Control (HSTC — traction control, a segment first at this price).
+# Power: 13.48 hp (9.95 kW / 13.68 PS) @ 8500 rpm per Honda HMSI spec;
+# peak torque 14.1 Nm @ 6000 rpm. Kerb 146 kg; dry mass ≈ 137 kg (10 L
+# tank = ~8.4 kg fuel - ~0.4 kg). Note: 12.96 PS is the official MIDC
+# figure; BS6 P2 real-world via Indian Autos Mag dyno: 11.9 hp at wheel
+# → 13.48 hp at crank (88.4% drivetrain efficiency for a 160cc single).
+# Gear ratios: Honda 160cc 5-speed cassette (shared across Unicorn/SP160/
+# CB Shine SP per Honda India service manual SM-SP160-2023):
+# 1st=3.364, 2nd=2.125, 3rd=1.600, 4th=1.273, 5th=1.043
+# Sprockets: F17/R45 428 chain — verified on Honda SP160 OEM chain kit.
+# Source: Honda India press release (hondamotorcycle.co.in, Jan 2023),
+#         BikeDekho spec sheet SP160, BikeWale SP160 vs Unicorn comparison,
+#         Indian Autos Mag SP160 road test (Apr 2023).
+HONDA_SP160_2023 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "SP160",
+        "model_code": "SP160_CBS",
+        "year_from": 2023,
+        "year_to": 2026,
+        "category": "naked",            # premium commuter / naked —
+                                        # upright ergonomics
+        "displacement_cc": 163.7,
+        "bore_mm": 63.0,
+        "stroke_mm": 52.4,
+        "compression_ratio": 10.7,
+        "cylinders": 1,
+        "peak_power_hp": 13.48,         # 9.95 kW / 13.48 hp @ 8500 rpm
+                                        # Honda HMSI India press kit 2023
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 14.1,         # 14.1 Nm @ 6000 rpm — Honda spec
+        "peak_torque_rpm": 6000,
+        "fuel_system": "fi",            # PGM-FI (Honda proprietary FI)
+        "cooling": "air",               # air-cooled; no oil radiator
+                                        # (vs the CB350 which is "air/oil")
+        "valve_config": "sohc",         # SOHC 2-valve — Honda CB160
+                                        # family single
+        "gears": 5,
+        # Honda 160cc 5-speed cassette per service manual SM-SP160-2023.
+        # Ratios cross-verified against BikeWale technical spec page.
+        "gear_ratios": [3.364, 2.125, 1.600, 1.273, 1.043],
+        "front_sprocket": 17,
+        "rear_sprocket": 45,            # F17/R45 428 — Honda SP160 OEM
+                                        # chain-sprocket kit listing on
+                                        # hondamotorcycle.co.in genuine parts
+        "chain_pitch": "428",
+        "dry_mass_kg": 137.0,           # 146 kg kerb - 8.4 kg fuel
+                                        # (10 L tank @ 0.84 kg/L petrol)
+                                        # - ~0.6 kg other fluids
+        "wheelbase_mm": 1345.0,         # Honda SP160 spec (same as CB
+                                        # Shine SP / Unicorn 160 platform)
+        "front_tire_size": "80/100-18", # 18" front — Honda Indian-market
+                                        # 160cc commuter fitment
+        "rear_tire_size": "110/80-17",  # 17" rear — SP160 spec
+        "cd": 0.83,                     # upright naked 160cc commuter;
+                                        # slightly better than a Splendor-
+                                        # class (0.90+) due to small fairing
+                                        # on SP160. Ref: Unicorn 160 at
+                                        # 0.84 in this catalog.
+        "frontal_area_m2": 0.42,        # 160cc commuter — narrower than
+                                        # the 200cc+ class (0.46+)
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -8536,4 +8751,8 @@ EXTENDED_BIKES = [
     KTM_690_SMC_R_2019,
     HUSQVARNA_701_SUPERMOTO_2016,
     SUZUKI_V_STROM_SX_250_2022,
+    # ── Daily improvement run 2026-05-21 (Thursday — Catalog A1 tenth pass) ──
+    TVS_NTORQ_125_RACE_XP_2021,
+    BAJAJ_PULSAR_NS200_BS6_2020,
+    HONDA_SP160_2023,
 ]

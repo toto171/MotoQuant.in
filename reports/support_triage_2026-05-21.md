@@ -215,3 +215,40 @@ independent of the Railway billing action and remains the lowest-cost interventi
 the no-op-triage-rerun loop.
 
 No DB rows touched. Report finalised by session 1779366634-654.
+
+---
+
+## Addendum — session 1779388234-629 (sixth run, same day)
+
+**Delta since fifth addendum (session 1779366634-654):**
+
+- ALERT count in `DISPATCH_OUTBOX.md` (last 30 days) is now **33** (was 28 at prior addendum).
+  Five new identical `Postflight deploy check timed out after 180s` ALERTs landed between
+  `2026-05-21T06:49:03+00:00` and `2026-05-21T16:45:01+00:00` — same body, same Railway 404
+  root cause. Signal-dilution ratio across the 30-day window remains **100 %** (1 unique
+  signature / 33 entries). Rate: approximately 1 ALERT per 2 hours, consistent with prior
+  sessions.
+- `bike_suggestions` table: still **0 rows** — confirmed via Python sqlite3. Schema unchanged.
+  No triage actions taken; no DB writes.
+- Production Railway API: still dead. `curl https://web-production-de6eb.up.railway.app/api/health`
+  returns HTTP 404 `Application not found`. Outage now in its **4th day** since first
+  detection at `2026-05-17T20:45:51Z`.
+
+**Open INSTRUCTION state — unchanged since fifth addendum:**
+
+- `DISPATCH_INBOX.md` line 140 (`[urgent] [blocking]` Railway API offline) — open. Sole
+  resolution path: user billing action in the Railway dashboard.
+- `DISPATCH_INBOX.md:605` (`[opportunistic]` postflight alert dedup) — open. 5-LOC bash fix;
+  independent of the Railway billing action and deployable immediately.
+- `DISPATCH_INBOX.md` line ~680 (`[self-review] [urgent]` promote `:605` to `[urgent]`) — open.
+  This ticket correctly identifies that the dedup fix is mis-tagged at `[opportunistic]`; the
+  scheduler should be prioritising it ahead of catalog-expansion.
+
+**No new INSTRUCTION filed.** All actionable angles are already represented by open tickets.
+Filing additional copies would itself be the dilution pattern the existing tickets exist to prevent.
+
+**Cumulative cost across six same-day support-agent runs:** 6 triage sessions, 6 addenda,
+1 dedup INSTRUCTION filed (session 1), 0 net new actionable findings since session 2. The
+`:605` dedup fix (5 minutes of implementer effort) would short-circuit this loop entirely.
+
+No DB rows touched. Report updated by session 1779388234-629.

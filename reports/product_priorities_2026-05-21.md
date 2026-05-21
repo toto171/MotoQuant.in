@@ -10,7 +10,8 @@
 - **End-of-day pass** — refreshed DB/source counts (488/579), 91-bike remaining gap. Top-3 unchanged.
 - **Late-night pass** — DB now 527 / source 460 (DB **exceeds** source by +67). Catalog re-seed gap **effectively closed**; #3 slot freed. CI sidecar-build matrix promoted into #3.
 - **Thursday close pass *(session `1779373833-626`)*** — fourth same-day run. **No top-3 change.** Confirmation pass: DB still 527 bikes, S5 auth tables still all 5 absent, Railway 404 ticket still open at INBOX:140, ALERT count 28 → 29 (single +1 tick from the latest postflight). All signals identical to late-night pass within noise. Per prompt rule "don't re-rank without strong signal", no CLAUDE.md edit this pass.
-- **Late-Thursday fifth pass *(this report, session `1779381035-636`)*** — fifth same-day run, fired as the scheduler's weekly Thursday cadence refresh. **No top-3 change.** Signals: DB now **599 bikes** (+72 vs late-night, +212 vs morning — catalog-expansion sessions kept pushing through the outage); S5 auth tables still all 5 absent; INBOX:140 Railway ticket still open at day 5; `### ALERT` count **30** (+1 vs Thursday close pass — ~one new tick every 2 hours, in line with the perf-monitor cadence). `bike_suggestions` table has 0 rows (no user-demand displacement signal). STATUS.md catalog KPI cell remains stale (reads "345 / 447" vs actual DB 599); auto-refresh via postflight not yet observed. Confirm verdict: Railway #1, analytics+DDL #2, CI sidecar #3. Single CLAUDE.md edit this pass: refresh top-1 success metric `bike_count >= 527` → `bike_count >= 599` to match current DB.
+- **Late-Thursday fifth pass *(session `1779381035-636`)*** — fifth same-day run, fired as the scheduler's weekly Thursday cadence refresh. **No top-3 change.** Signals: DB now **599 bikes** (+72 vs late-night, +212 vs morning — catalog-expansion sessions kept pushing through the outage); S5 auth tables still all 5 absent; INBOX:140 Railway ticket still open at day 5; `### ALERT` count **30** (+1 vs Thursday close pass — ~one new tick every 2 hours, in line with the perf-monitor cadence). `bike_suggestions` table has 0 rows (no user-demand displacement signal). STATUS.md catalog KPI cell remains stale (reads "345 / 447" vs actual DB 599); auto-refresh via postflight not yet observed. Confirm verdict: Railway #1, analytics+DDL #2, CI sidecar #3. Single CLAUDE.md edit this pass: refresh top-1 success metric `bike_count >= 527` → `bike_count >= 599` to match current DB.
+- **Sixth pass *(this run, session `1779388234-629`)*** — sixth same-day run. **No top-3 change.** Signals as of pass 6: DB **599 bikes** (unchanged — no catalog-expansion session between pass 5 and this run); S5 auth tables still all 5 absent; INBOX:140 Railway ticket still open (day 5 of outage); `### ALERT` count **31** (+1 deploy-check timeout tick vs pass 5). `bike_suggestions` table still 0 rows. fitments have grown to 1,426 (up from ~861 in the CLAUDE.md header — good organic growth, no action). No new INSTRUCTION queued; backlog at 26 items. CLAUDE.md standing-priorities block is current (`bike_count >= 599`, ALERT count quoted as "30" vs actual "31" — single-tick drift below threshold for an edit). No CLAUDE.md edit this pass.
 
 ---
 
@@ -122,3 +123,14 @@ Scores: Impact 1-10 × Confidence 1-5 / Effort 1-5. Late-night pass.
 4. **Top-3 changed (vs Thursday close pass):** NO. Same {Railway / analytics+DDL / CI sidecar matrix}.
 5. **CLAUDE.md edited:** YES — single-knob refresh of the bike_count success metric to track current DB volume. Standing-priorities block otherwise unchanged.
 6. **No new INSTRUCTION queued.** Backlog still consumable by hand (26 items). Same logic as prior passes: queueing top-3 candidates as `[opportunistic]` just adds noise — the standing-priorities block is the primary channel.
+
+---
+
+## Summary for orchestrator (Sixth pass — this run)
+
+1. **Files touched:** `reports/product_priorities_2026-05-21.md` (update-history bullet + this summary block appended). **No CLAUDE.md edit** — standing-priorities block is current; the +1 ALERT tick (30 → 31) is below the threshold for an edit.
+2. **Commit summary:** `docs(priorities): 2026-05-21 sixth pass — Railway #1 unchanged, 31 ALERTs, no rerank`.
+3. **Top-1 changed (vs fifth pass):** NO. Still "Restore Railway service + redeploy". 31 ALERTs, day 5 of outage.
+4. **Top-3 changed (vs fifth pass):** NO. Same {Railway / analytics+DDL / CI sidecar matrix}.
+5. **CLAUDE.md edited:** NO — top-1 success metric already reads `bike_count >= 599`, alert count in text is "30" vs actual "31" — single-tick drift does not justify an edit.
+6. **No new INSTRUCTION queued.** Backlog at 26 items. No new signal warrants an additional item.
