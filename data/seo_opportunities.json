@@ -105,10 +105,10 @@
       "intent": "transactional",
       "estimated_volume_india": "high",
       "current_rank": null,
-      "target_url": "/simulator",
-      "action": "create-blog-later",
+      "target_url": "/blog/best-mods-for-ktm-rc-390-budget-vs-cost-per-tenth",
+      "action": "done",
       "priority": 7,
-      "rationale": "Top results are listicles (motoroctane, motorcyclist.com) without cost-per-tenth math. MotoQuant's parts ROI engine is the differentiator. Queue marketing-content for /blog/best-mods-for-rc-390-budget-vs-cost-per-tenth."
+      "rationale": "DONE 2026-05-22: Marketing-content shipped /blog/best-mods-for-ktm-rc-390-budget-vs-cost-per-tenth. 4-tier cost-per-tenth ladder from ₹950 sprocket to ₹2L drag-prep build, anchored against Fast Track Racing India's 11.342s record. Blog index updated, sitemap entry added. Rank tracking begins on next product-prioritisation pass via Search Console."
     },
     {
       "keyword": "pacejka tire model motorcycle",

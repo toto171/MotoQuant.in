@@ -133,13 +133,13 @@ const SECTIONS = [
     n: '7',
     title: 'Reproducibility',
     body: [
-      'MotoQuant Pro is open to external audit. The simulator code, all sub-model coefficients, the 709-bike catalog, the 563-part library, and every venue\'s seasonal weather profile are inspectable. Every parts ROI calculation is deterministic given the bike configuration and venue conditions. We publish:',
+      'MotoQuant Pro is open to external audit. The simulator code, all sub-model coefficients, the 712-bike catalog, the 563-part library, and every venue\'s seasonal weather profile are inspectable. Every parts ROI calculation is deterministic given the bike configuration and venue conditions. We publish:',
     ],
     list: {
       title: '',
       items: [
         'reports/ directory with full validation sweeps (JSON + Markdown summaries) — one report per release',
-        'tests/ — 976 regression tests covering catalog integrity, physics, API, and silent-failure detection across all 709 bikes',
+        'tests/ — 976 regression tests covering catalog integrity, physics, API, and silent-failure detection across all 712 bikes',
         '/docs/validation — the complete benchmark table with per-bike sources',
         'CLAUDE.md — the project diary, with every design decision and trade-off recorded chronologically',
       ],
@@ -301,7 +301,7 @@ export default function WhitepaperPage() {
             <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { num: '15',     label: 'Sub-models'      },
-                { num: '709',    label: 'Catalog bikes'   },
+                { num: '712',    label: 'Catalog bikes'   },
                 { num: '74',     label: 'Benchmarks'      },
                 { num: '+0.006s', label: 'Weighted bias'  },
               ].map(s => (

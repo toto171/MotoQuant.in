@@ -1,14 +1,21 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
+import EndOfBlogIndexCta from "./EndOfBlogIndexCta";
 
 export const metadata = {
   title: "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
   description:
-    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
+    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: best mods for KTM RC 390 ranked by cost-per-tenth, Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
   keywords: [
     "motorcycle drag racing blog",
     "indian motorcycle quarter mile",
+    "best mods for ktm rc 390 india",
+    "rc 390 cost per tenth",
+    "rc 390 ecu flash price india",
+    "rc 390 performance upgrade cost",
+    "ktm 390 powertronic stage 1",
     "mmrt chennai drag racing motorcycle",
     "madras motor race track quarter mile",
     "how to tune for mmrt chennai",
@@ -57,6 +64,15 @@ export const metadata = {
 };
 
 const POSTS = [
+  {
+    slug: "best-mods-for-ktm-rc-390-budget-vs-cost-per-tenth",
+    title: "Best Mods for KTM RC 390 in India: A Cost-Per-Tenth Ladder",
+    date: "2026-05-22",
+    readTime: "13 min",
+    tags: ["KTM", "RC 390", "Duke 390", "cost-per-tenth", "India mods"],
+    excerpt:
+      "Stock RC 390 runs a 13.5s. Fast Track Racing India ran 11.342s. MotoQuant ranks every mod by ₹/tenth: ₹950 sprocket drops 0.20s, ₹14,500 Powertronic Stage 1 drops 0.22s, full Tier 1-2 build runs a 12.78 for ₹39,100. Where the cheap tenths live and where diminishing returns kick in.",
+  },
   {
     slug: "kawasaki-ninja-400-vs-zx-4r-quarter-mile-physics",
     title: "Kawasaki Ninja 400 vs ZX-4R: Parallel Twin vs Inline-Four at the Strip",
@@ -316,6 +332,11 @@ export default function BlogIndexPage() {
               <PostCard key={post.slug} post={post} />
             ))}
           </div>
+
+          {/* GROWTH_EXP_006 — end-of-grid simulator CTA (default OFF, ?variant=B) */}
+          <Suspense fallback={null}>
+            <EndOfBlogIndexCta />
+          </Suspense>
         </div>
       </main>
 

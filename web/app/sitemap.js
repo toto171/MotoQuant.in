@@ -74,6 +74,12 @@ export default async function sitemap() {
       priority: 0.8,
     },
     {
+      url: `${SITE_URL}/blog/best-mods-for-ktm-rc-390-budget-vs-cost-per-tenth`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.86,
+    },
+    {
       url: `${SITE_URL}/blog/kawasaki-ninja-zx-4r-quarter-mile-physics`,
       lastModified: now,
       changeFrequency: "monthly",

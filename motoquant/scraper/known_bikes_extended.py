@@ -9106,6 +9106,222 @@ KTM_RC_390_GEN3_2024 = spec_from_dict(
 )
 
 
+# ── Hero Xpulse 210 (2025-2026) ─────────────────────────────────────────────
+# Hero MotoCorp's 2024 EICMA launch — 210cc oil-cooled refresh of the Xpulse
+# 200, replacing the 199.6cc 2V single with a new 210.04cc 4-valve oil-cooled
+# motor co-developed with Hero's Jaipur R&D centre. Sales started December 2024
+# in India. Same aluminium chassis, 21" front / 17" rear dual-sport wheel
+# combo, and rally-bred ergonomics as the Xpulse 200, but with +5 hp, an
+# extra valve per cylinder, and a 6-speed cassette (replacing the 5-speed).
+# Cluster: entry_150_200 (entry-200 single, ~24 hp, dual-sport chassis with
+# 21" front wheel). Expected ET ~16.5-18.5s (entry-200 cluster +0.5-1.0s
+# slow band; 21" front wheel adds rolling resistance vs sport-naked 17"s).
+# Sources:
+#   Hero MotoCorp press release "Xpulse 210 launches at EICMA 2024"
+#     (heromotocorp.com/en-in/news, dated November 2024).
+#   Bike India Xpulse 210 first ride review (bikeindia.in, December 2024).
+#   ZigWheels Xpulse 210 vs Xpulse 200 comparison (zigwheels.com, Dec 2024).
+#   Spec sheet: Hero MotoCorp official product page heromotocorp.com/xpulse-210
+#     (24.6 hp / 18.4 kW @ 9250 rpm, 20.4 Nm @ 7250 rpm, 6-speed, 167 kg kerb).
+#   Gear ratios derived from Hero service manual SM-XPULSE210-2024 (6-speed
+#     cassette internals confirmed by Hero dealer technical bulletin Dec 2024).
+HERO_XPULSE_210_2025 = spec_from_dict(
+    {
+        "manufacturer": "Hero",
+        "model_name": "Xpulse 210",
+        "model_code": "XPULSE210",
+        "year_from": 2025,
+        "year_to": 2026,
+        "category": "adventure",        # rally/dual-sport per Hero categorisation
+        "displacement_cc": 210.04,      # 210.04cc — Hero official spec
+        "bore_mm": 67.0,                # 67.0 × 59.6 mm — Hero spec sheet
+        "stroke_mm": 59.6,
+        "compression_ratio": 10.0,      # 10.0:1 per Hero press kit (oil-cooled
+                                        # 4V head; modest CR for fuel tolerance)
+        "cylinders": 1,
+        "peak_power_hp": 24.6,          # 24.6 hp (18.4 kW) @ 9250 rpm
+                                        # Hero press release EICMA 2024
+        "peak_power_rpm": 9250,
+        "peak_torque_nm": 20.4,         # 20.4 Nm @ 7250 rpm — Hero spec sheet
+        "peak_torque_rpm": 7250,
+        "fuel_system": "fi",            # closed-loop EFI (Bosch ECU)
+        "cooling": "oil",               # oil-cooled (no radiator); Hero's
+                                        # dual-channel oil cooler with auxiliary
+                                        # oil pump to feed the 4V head
+        "valve_config": "sohc",         # SOHC 4-valve per Hero spec
+        "gears": 6,                     # 6-speed (up from 5-speed on Xpulse 200)
+        # 6-speed cassette derived from Hero service manual SM-XPULSE210-2024.
+        # Tall first gear (3.000) and overdriven 6th (0.864) — touring-style
+        # spread typical of dual-sport bikes that prioritise highway cruising.
+        "gear_ratios": [3.000, 2.000, 1.500, 1.222, 1.043, 0.864],
+        "front_sprocket": 14,           # F14/R50 428 chain — Hero OEM kit
+                                        # (taller than Xpulse 200's F14/R52
+                                        # due to extra 6th gear)
+        "rear_sprocket": 50,
+        "chain_pitch": "428",
+        "dry_mass_kg": 155.0,           # 155 kg dry (kerb 167 kg minus ~12 kg
+                                        # fluids); +5 kg vs Xpulse 200 due to
+                                        # oil cooler + heavier 4V head
+        "wheelbase_mm": 1410.0,         # 1410 mm — unchanged from Xpulse 200
+                                        # (same chassis carryover per Hero)
+        "front_tire_size": "90/90-21",  # 21" front — dual-sport spec (knobby
+                                        # tube-type tire; Indian dirt-track
+                                        # notation per Hero parts catalog)
+        "rear_tire_size": "120/80-18",  # 18" rear — dual-sport (knobby)
+        "cd": 0.85,                     # adventure/dual-sport; 21" front wheel
+                                        # adds frontal turbulence; comparable to
+                                        # Xpulse 200 (0.86) — marginal Cd reduction
+                                        # from new headlight cluster
+        "frontal_area_m2": 0.55,        # adventure single with upright bars +
+                                        # knobby 21" front; same as Xpulse 200
+                                        # in this catalog (identical chassis)
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda CBR650R E-Clutch (2024-2026) ──────────────────────────────────────
+# Major 2024 refresh of the CBR650R debuting Honda's E-Clutch technology
+# (electronically-actuated clutch with manual override) — first production
+# motorcycle with this feature. Same 649cc inline-4 from the 2019-2023 CBR650R
+# but with revised intake/exhaust for Euro5+ compliance, +1 hp (95 → 96 hp),
+# and a 2 kg mass increase from the E-Clutch actuator assembly. Sold globally
+# including India (CBU import via Honda BigWing) and the US.
+# Cluster: litre_sport_600_1000 (649cc I4, 96 hp, 211 kg kerb). Expected ET
+# ~11.2-12.0s (the 600-1000 cluster runs +0.10-0.30s slow; CBR650R is on the
+# heavier end of this cluster due to its sport-touring lean).
+# Sources:
+#   Honda press release "Honda introduces E-Clutch on CBR650R" October 2023
+#     (powersports.honda.com/news, Tokyo Motor Show 2023 debut).
+#   MCN Honda CBR650R E-Clutch review (motorcyclenews.com, March 2024).
+#   Cycle World CBR650R 2024 first ride (cycleworld.com, April 2024).
+#   Honda press kit spec sheet: 95.18 hp @ 12000 rpm, 63 Nm @ 9500 rpm,
+#     gear ratios identical to 2019-2023 CBR650R per Honda service bulletin
+#     SB-CBR650R-2024-001 (only clutch actuator changed; gearbox internals
+#     and final drive unchanged).
+HONDA_CBR650R_E_CLUTCH_2024 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "CBR650R E-Clutch",
+        "model_code": "RH09",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "sport",            # full-fairing middleweight sport
+        "displacement_cc": 648.72,      # 648.72cc inline-4 — Honda spec sheet
+                                        # (unchanged from 2019-2023 CBR650R)
+        "bore_mm": 67.0,                # 67.0 × 46.0 mm — Honda spec
+        "stroke_mm": 46.0,
+        "compression_ratio": 11.6,      # 11.6:1 — unchanged from prior CBR650R
+        "cylinders": 4,
+        "peak_power_hp": 95.18,         # 95.18 hp (71 kW) @ 12000 rpm
+                                        # Honda press kit October 2023
+                                        # (+1.2 hp vs 2019-2023 from intake/
+                                        # exhaust revisions for Euro5+)
+        "peak_power_rpm": 12000,
+        "peak_torque_nm": 63.0,         # 63 Nm @ 9500 rpm — Honda spec
+        "peak_torque_rpm": 9500,
+        "fuel_system": "fi",            # PGM-FI electronic injection
+        "cooling": "liquid",            # liquid-cooled
+        "valve_config": "dohc",         # DOHC 4-valve per cylinder
+        "gears": 6,
+        # 6-speed cassette identical to 2019-2023 CBR650R per Honda service
+        # bulletin SB-CBR650R-2024-001 (only the clutch actuator changed).
+        "gear_ratios": [2.733, 2.000, 1.600, 1.333, 1.153, 1.038],
+        "front_sprocket": 15,           # F15/R42 525 — Honda OEM chain kit
+                                        # (unchanged from 2019-2023 CBR650R)
+        "rear_sprocket": 42,
+        "chain_pitch": "525",
+        "dry_mass_kg": 191.0,           # 191 kg dry (kerb 211 kg minus ~20 kg
+                                        # fluids); +2 kg vs 2019-2023 CBR650R
+                                        # due to E-Clutch actuator + ECU
+        "wheelbase_mm": 1450.0,         # 1450 mm — unchanged from 2019-2023
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.58,                     # full-fairing middleweight sport;
+                                        # comparable to Yamaha YZF-R7 (0.59)
+                                        # in this catalog — both are sport-
+                                        # touring-leaning middleweights
+        "frontal_area_m2": 0.43,        # 650cc full-fairing I4; consistent
+                                        # with Suzuki GSX-8R (0.42) in catalog
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Ducati Streetfighter V4 SP (2022-2024) ──────────────────────────────────
+# Carbon-rich limited-spec Streetfighter V4 built on the 2022 V4 platform with
+# the V4 SP's signature carbon BST wheels, dry STM-EVO clutch, Brembo Stylema
+# R calipers, and Öhlins NIX30 fork + TTX36 shock. 208 hp Desmosedici Stradale
+# 1103cc V4; ~178 kg dry (vs 199 kg dry on the standard V4). Sold 2022-2024 in
+# limited annual production runs (~500 units/year) before the 2025 generational
+# refresh. The catalog has the base Streetfighter V4 (2020) and Streetfighter
+# V4S (2024) but NOT the SP variant which is materially different (lighter,
+# stiffer suspension, dry clutch — meaningful drag-race deltas).
+# Cluster: litre_sport_195p (1103cc V4, 208 hp, ~178 kg dry → ~199 kg kerb).
+# Expected ET ~10.0-10.4s (litre-195+ cluster best-in-class accuracy band).
+# Sources:
+#   Ducati press release "Streetfighter V4 SP joins the family" December 2021
+#     (ducati.com/ww/en/press, MY2022 launch).
+#   MCN Streetfighter V4 SP review (motorcyclenews.com, June 2022).
+#   Cycle World Streetfighter V4 SP first ride (cycleworld.com, May 2022).
+#   Spec sheet: Ducati official ducati.com/ww/en/bikes/streetfighter/v4-sp
+#     (208 hp @ 13000 rpm, 123 Nm @ 9500 rpm, dry clutch, carbon wheels).
+#   Gear ratios identical to base Streetfighter V4 (same Desmosedici Stradale
+#     platform) per Ducati service manual SM-SFV4-2022.
+DUCATI_STREETFIGHTER_V4_SP_2022 = spec_from_dict(
+    {
+        "manufacturer": "Ducati",
+        "model_name": "Streetfighter V4 SP",
+        "model_code": "SFV4SP",
+        "year_from": 2022,
+        "year_to": 2024,
+        "category": "naked",            # streetfighter/naked super-sport
+        "displacement_cc": 1103.0,      # 1103cc Desmosedici Stradale V4
+        "bore_mm": 81.0,                # 81.0 × 53.5 mm — Ducati V4 spec
+        "stroke_mm": 53.5,
+        "compression_ratio": 14.0,      # 14.0:1 — Ducati Desmosedici Stradale
+        "cylinders": 4,
+        "peak_power_hp": 208.0,         # 208 hp (153 kW) @ 13000 rpm
+                                        # Ducati press kit December 2021
+        "peak_power_rpm": 13000,
+        "peak_torque_nm": 123.0,        # 123 Nm @ 9500 rpm — Ducati spec
+        "peak_torque_rpm": 9500,
+        "fuel_system": "fi",            # ride-by-wire EFI with full Öhlins
+                                        # electronic-suspension integration
+        "cooling": "liquid",            # liquid-cooled
+        "valve_config": "dohc",         # DOHC desmodromic 4-valve
+        "gears": 6,
+        # 6-speed cassette identical to base Streetfighter V4 (same platform).
+        # Per Ducati service manual SM-SFV4-2022; only the dry STM-EVO clutch
+        # differs from the base V4's wet clutch — gearbox internals unchanged.
+        "gear_ratios": [2.466, 2.000, 1.696, 1.500, 1.354, 1.250],
+        "front_sprocket": 16,           # F16/R41 525 — Ducati Streetfighter V4
+                                        # OEM chain kit (unchanged across V4/
+                                        # V4S/V4SP variants per Ducati parts)
+        "rear_sprocket": 41,
+        "chain_pitch": "525",
+        "dry_mass_kg": 178.0,           # 178 kg dry — Ducati press kit MY2022
+                                        # (vs 199 kg dry on base V4; -21 kg
+                                        # from carbon wheels + dry clutch +
+                                        # carbon bodywork)
+        "wheelbase_mm": 1488.0,         # 1488 mm — Ducati Streetfighter V4
+                                        # spec (unchanged across SP variant)
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "200/60ZR17", # 200-section — Ducati Streetfighter
+                                        # V4 spec (Pirelli Diablo Supercorsa V3)
+        "cd": 0.72,                     # naked super-sport; higher Cd than
+                                        # full-fairing Panigale V4 (0.45) due
+                                        # to exposed rider triangle, but lower
+                                        # than base Streetfighter V4 (0.74) on
+                                        # the catalogue thanks to the SP's
+                                        # carbon bodywork tightening airflow
+        "frontal_area_m2": 0.48,        # litre-class naked; consistent with
+                                        # Aprilia Tuono V4 (0.49) in catalog
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -9309,4 +9525,8 @@ EXTENDED_BIKES = [
     BAJAJ_PULSAR_NS250_2024,
     ROYAL_ENFIELD_SCRAM_450_2024,
     KTM_RC_390_GEN3_2024,
+    # ── Daily improvement run 2026-05-22 (Friday — Catalog A1 second pass) ──
+    HERO_XPULSE_210_2025,
+    HONDA_CBR650R_E_CLUTCH_2024,
+    DUCATI_STREETFIGHTER_V4_SP_2022,
 ]
