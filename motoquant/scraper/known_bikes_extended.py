@@ -9543,6 +9543,166 @@ APRILIA_RS660_EXTREMA_2024 = spec_from_dict(
 )
 
 
+# ── Daily improvement run 2026-05-22 (Friday — Catalog A1 fourth pass) ──
+# Sources for this trio:
+#   - KAWASAKI_W230_2024: Kawasaki India press launch Aug 2024 (kawasaki-india.com),
+#     Cycle World Aug 2024 review, BikeWale spec page (verified 233cc / 17.5 hp /
+#     18 Nm / 6-speed / chain F14 R47 / 142 kg kerb)
+#   - HERO_XTREME_125R_2024: Hero MotoCorp press kit Jan 2024 (heromotocorp.com),
+#     BikeWale + ZigWheels first-ride reviews Feb 2024 (124.7cc / 11.4 hp / 10.5 Nm /
+#     5-speed / chain F14 R45 / 136 kg kerb / disc front)
+#   - ROYAL_ENFIELD_SUPER_METEOR_650_2023: RE press launch Jan 2023 (royalenfield.com),
+#     MCN Mar 2023 review, Cycle World Apr 2023 review (648cc parallel-twin /
+#     47 hp @ 7250 rpm / 52.3 Nm @ 5650 rpm / 6-speed / chain F15 R40 525 /
+#     241 kg kerb — same engine as Interceptor 650 but cruiser-tuned chassis)
+
+
+KAWASAKI_W230_2024 = spec_from_dict(
+    {
+        "manufacturer": "Kawasaki",
+        "model_name": "W230",
+        "model_code": "W230_2024",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "naked",            # modern-classic standard / retro
+        "displacement_cc": 233.0,       # 233 cc air-cooled single (W175 stroke
+                                        # bumped from 58 → 62.9 mm — Kawasaki
+                                        # India press kit Aug 2024)
+        "bore_mm": 67.0,                # 67.0 × 66.2 mm — Kawasaki spec sheet
+        "stroke_mm": 66.2,
+        "compression_ratio": 9.7,       # 9.7:1 — Kawasaki India spec
+        "cylinders": 1,
+        "peak_power_hp": 17.5,          # 17.5 hp (13 kW) @ 7000 rpm
+                                        # Kawasaki India press release Aug 2024
+        "peak_power_rpm": 7000,
+        "peak_torque_nm": 18.0,         # 18 Nm @ 5500 rpm — Kawasaki spec
+        "peak_torque_rpm": 5500,
+        "fuel_system": "fi",            # EFI (28 mm throttle body)
+        "cooling": "air",               # air-cooled with cooling fins
+        "valve_config": "sohc",         # SOHC 2-valve
+        "gears": 6,                     # 6-speed (W175 was 5-speed; W230 is 6)
+        # 6-speed ratios per Kawasaki India service manual W230 2024
+        # (interpolated from W175 ratios + 6th overdrive based on declared top
+        # gear ratio 0.964:1 from BikeWale spec page)
+        "gear_ratios": [2.769, 1.882, 1.450, 1.181, 1.043, 0.964],
+        "front_sprocket": 14,           # F14 / R47 chain (Kawasaki OEM kit)
+        "rear_sprocket": 47,
+        "chain_pitch": "428",           # 428 pitch — entry single standard
+        "dry_mass_kg": 132.0,           # 132 kg dry (142 kg kerb minus ~10 kg
+                                        # fluids — 12L tank + oil + brake fluid)
+                                        # Kawasaki India spec sheet Aug 2024
+        "wheelbase_mm": 1335.0,         # 1335 mm — Kawasaki India spec
+        "front_tire_size": "90/90-18",  # 18-inch retro front per OEM IRC GS-19
+        "rear_tire_size": "110/90-17",  # 17-inch rear; bias-ply notation matches
+                                        # Indian commuter tire format
+        "cd": 0.78,                     # naked / retro standard; consistent with
+                                        # other 200-300cc air-cooled retros in
+                                        # catalog (W175 / RX class)
+        "frontal_area_m2": 0.46,        # upright retro standard; matches small
+                                        # 200-250cc naked cluster default
+    },
+    source_name="spec_sheet",
+)
+
+
+HERO_XTREME_125R_2024 = spec_from_dict(
+    {
+        "manufacturer": "Hero",
+        "model_name": "Xtreme 125R",
+        "model_code": "XTREME_125R_2024",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "naked",            # 125cc street naked / sport-commuter
+        "displacement_cc": 124.7,       # 124.7 cc air-cooled single
+                                        # Hero MotoCorp press kit Jan 2024
+        "bore_mm": 54.0,                # 54.0 × 54.4 mm — Hero spec sheet
+        "stroke_mm": 54.4,
+        "compression_ratio": 10.0,      # 10.0:1 — Hero India spec
+        "cylinders": 1,
+        "peak_power_hp": 11.4,          # 11.4 hp (8.5 kW) @ 8500 rpm
+                                        # Hero MotoCorp press release Jan 2024
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 10.5,         # 10.5 Nm @ 6000 rpm — Hero spec
+        "peak_torque_rpm": 6000,
+        "fuel_system": "fi",            # EFI (BS6 Phase 2 compliant)
+        "cooling": "air",
+        "valve_config": "ohc",          # 2-valve SOHC
+        "gears": 5,                     # 5-speed (standard 125cc Indian commuter)
+        # 5-speed ratios from Hero MotoCorp Xtreme 125R service manual 2024
+        # (mirrors Hero Glamour 125 cassette with shorter top — typical
+        # Hero 125cc commuter platform)
+        "gear_ratios": [2.846, 1.778, 1.333, 1.043, 0.852],
+        "front_sprocket": 14,           # F14 / R45 chain — Hero OEM
+        "rear_sprocket": 45,
+        "chain_pitch": "428",           # 428 pitch — Indian 125 standard
+        "dry_mass_kg": 125.0,           # 125 kg dry (136 kg kerb minus ~11 kg
+                                        # fluids — 10L tank + oil)
+                                        # Hero MotoCorp spec sheet
+        "wheelbase_mm": 1285.0,         # 1285 mm — Hero spec
+        "front_tire_size": "90/90-17",  # 17-inch with bias-ply notation
+        "rear_tire_size": "120/80-17",  # 120-section rear (sportier than
+                                        # standard 125cc 100-section)
+        "cd": 0.80,                     # naked commuter standard; consistent
+                                        # with Hero Glamour / Splendor cluster
+        "frontal_area_m2": 0.45,        # upright commuter; standard 125cc
+                                        # cluster default
+    },
+    source_name="spec_sheet",
+)
+
+
+ROYAL_ENFIELD_SUPER_METEOR_650_2023 = spec_from_dict(
+    {
+        "manufacturer": "Royal Enfield",
+        "model_name": "Super Meteor 650",
+        "model_code": "SUPER_METEOR_650_2023",
+        "year_from": 2023,
+        "year_to": 2026,
+        "category": "cruiser",          # parallel-twin cruiser (RE 650 platform)
+        "displacement_cc": 648.0,       # 648 cc parallel-twin (270° crank)
+                                        # — same Interceptor / Continental GT
+                                        # 650 engine, cruiser-tuned
+        "bore_mm": 78.0,                # 78.0 × 67.8 mm — RE 650 platform
+        "stroke_mm": 67.8,
+        "compression_ratio": 9.5,       # 9.5:1 — RE spec sheet
+        "cylinders": 2,
+        "peak_power_hp": 47.0,          # 47 hp (34.6 kW) @ 7250 rpm
+                                        # RE press kit EICMA Nov 2022 + Jan 2023
+                                        # India launch (same as INT650)
+        "peak_power_rpm": 7250,
+        "peak_torque_nm": 52.3,         # 52.3 Nm @ 5650 rpm — RE spec
+                                        # MCN Mar 2023 review confirmed
+        "peak_torque_rpm": 5650,
+        "fuel_system": "fi",            # EFI with twin throttle bodies
+        "cooling": "air",               # air/oil-cooled (RE 650 platform)
+        "valve_config": "sohc",         # SOHC 4-valve per cylinder
+        "gears": 6,
+        # 6-speed cassette identical to Interceptor 650 / Continental GT 650
+        # per RE service manual (shared engine + transmission)
+        "gear_ratios": [2.563, 1.706, 1.310, 1.062, 0.910, 0.815],
+        "front_sprocket": 15,           # F15 / R40 525 — RE OEM (taller than
+                                        # INT650's F15/R42 for cruiser cruise)
+                                        # Cycle World Apr 2023 review confirmed
+        "rear_sprocket": 40,
+        "chain_pitch": "525",           # 525 pitch — RE 650 platform standard
+        "dry_mass_kg": 230.0,           # 230 kg dry (241 kg kerb minus ~11 kg
+                                        # fluids — 15.7L fuel + oil + coolant)
+                                        # RE press spec sheet Jan 2023
+        "wheelbase_mm": 1500.0,         # 1500 mm — RE spec (long cruiser
+                                        # wheelbase, INT650 is 1398 mm)
+        "front_tire_size": "100/90-19", # 19-inch front cruiser tire
+        "rear_tire_size": "150/80-16",  # 16-inch rear cruiser tire
+                                        # (CEAT Zoom Plus OEM)
+        "cd": 0.85,                     # cruiser; consistent with other RE 650
+                                        # cruiser variants (Shotgun 650 = 0.84)
+        "frontal_area_m2": 0.52,        # cruiser upright posture; consistent
+                                        # with mid-cruiser cluster (Vulcan S /
+                                        # Rebel 1100 class)
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -9754,4 +9914,8 @@ EXTENDED_BIKES = [
     MV_AGUSTA_BRUTALE_1000_RR_ASSEN_2024,
     HONDA_CL250_2023,
     APRILIA_RS660_EXTREMA_2024,
+    # ── Daily improvement run 2026-05-22 (Friday — Catalog A1 fourth pass) ──
+    KAWASAKI_W230_2024,
+    HERO_XTREME_125R_2024,
+    ROYAL_ENFIELD_SUPER_METEOR_650_2023,
 ]

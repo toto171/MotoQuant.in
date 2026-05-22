@@ -5,7 +5,8 @@ import SiteFooter from "../../components/SiteFooter";
 import EndOfBlogIndexCta from "./EndOfBlogIndexCta";
 
 export const metadata = {
-  title: "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
+  title:
+    "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
   description:
     "Physics-based quarter-mile breakdowns for Indian and global motorcycles: KTM 890 Duke R India grey-market deep-dive, best mods for KTM RC 390 ranked by cost-per-tenth, Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
   keywords: [
@@ -62,11 +63,25 @@ export const metadata = {
     "ninja 400 vs zx-4r which is faster",
     "ninja 400 drag time india",
     "kawasaki zx-4r vs ninja 400",
+    "kawasaki z900rs quarter mile",
+    "z900rs india price",
+    "z900rs vs z900",
+    "z900rs vs xsr900",
+    "z900rs cost per tenth",
   ],
   alternates: { canonical: "https://motoquant.in/blog" },
 };
 
 const POSTS = [
+  {
+    slug: "kawasaki-z900rs-quarter-mile-physics",
+    date: "2026-05-22",
+    readTime: "10 min",
+    tags: ["Kawasaki", "Z900RS", "retro naked", "physics"],
+    title: "Kawasaki Z900RS Quarter-Mile Physics: Retro Tax on a 948cc I4",
+    excerpt:
+      "MotoQuant simulates the Kawasaki Z900RS at 11.18s and 196 km/h trap. MCN clocked 11.4s and 199 km/h on the stock bike. Where the 13 hp detune actually costs you tenths versus a Z900, why the 6,500 rpm torque peak makes the launch easier than most litre nakeds, and the ₹2,800 sprocket swap that buys 0.08 s.",
+  },
   {
     slug: "ktm-890-duke-r-quarter-mile-india",
     title: "KTM 890 Duke R Quarter-Mile in India: 11.07s on the Grey Market",
@@ -87,7 +102,8 @@ const POSTS = [
   },
   {
     slug: "kawasaki-ninja-400-vs-zx-4r-quarter-mile-physics",
-    title: "Kawasaki Ninja 400 vs ZX-4R: Parallel Twin vs Inline-Four at the Strip",
+    title:
+      "Kawasaki Ninja 400 vs ZX-4R: Parallel Twin vs Inline-Four at the Strip",
     date: "2026-05-22",
     readTime: "12 min",
     tags: ["Kawasaki", "Ninja 400", "ZX-4R", "Indian 400cc", "comparison"],
@@ -99,7 +115,14 @@ const POSTS = [
     title: "Suzuki GSX-S750 vs KTM 890 Duke: Quarter-Mile Physics",
     date: "2026-05-18",
     readTime: "11 min",
-    tags: ["Suzuki", "GSX-S750", "KTM", "890 Duke", "comparison", "mid-cc naked"],
+    tags: [
+      "Suzuki",
+      "GSX-S750",
+      "KTM",
+      "890 Duke",
+      "comparison",
+      "mid-cc naked",
+    ],
     excerpt:
       "MotoQuant simulates the GSX-S750 at 11.58s and the 890 Duke at 11.42s. The Duke weighs 27 kg less and wins by 0.16s — but the Suzuki inline-four claws back 3 km/h in trap speed. Physics-based breakdown of where each bike wins and loses, plus sprocket-first tuning strategy for both.",
   },

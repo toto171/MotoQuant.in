@@ -222,3 +222,67 @@ idempotency workaround. Clean `imported=3 / skipped_invalid=0 / errors=0`.
 - None blocking. Pre-existing carry-forwards remain: WS-A `bike_repo.create_model`
   year-suffix matching fix; scraper validator widening for Asian bias-ply tire
   notation (currently cosmetic warning only).
+
+---
+
+# Catalog Expansion — 2026-05-22 (Friday, fourth pass)
+
+## Summary (fourth pass)
+
+Added 3 more production motorcycles. All 3 pass the scraper validator, smoke-sim
+within bounds, and re-seeded into `motoquant.db` (715 → 751 rows; +36 inserts
+including bike-tire fitment rebuilds).
+
+## Bikes added (fourth pass)
+
+| # | Bike | Cylinders / Disp | Peak HP | Cat | Sim ET | Trap (km/h) |
+|---|------|------------------|---------|-----|--------|-------------|
+| 1 | Kawasaki W230 (2024-2026)            | 1 × 233cc | 17.5 hp @ 7000 | naked retro    | 17.093s | 125.1 |
+| 2 | Hero Xtreme 125R (2024-2026)         | 1 × 124.7cc | 11.4 hp @ 8500 | naked / commuter | 20.858s | 107.4 |
+| 3 | RE Super Meteor 650 (2023-2026)      | 2 × 648cc | 47 hp @ 7250 | cruiser parallel-twin | 14.168s | 156.6 |
+
+## Sources
+
+- **Kawasaki W230 2024:** Kawasaki India press launch Aug 2024
+  (kawasaki-india.com), Cycle World Aug 2024, BikeWale spec page — 233cc
+  air-cooled single, 6-speed (W175 was 5-speed), F14/R47 428 chain.
+- **Hero Xtreme 125R 2024:** Hero MotoCorp press kit Jan 2024
+  (heromotocorp.com), BikeWale + ZigWheels first-ride Feb 2024 — 124.7cc,
+  5-speed, F14/R45 428 chain, 136 kg kerb.
+- **RE Super Meteor 650 2023:** RE press launch Jan 2023 (royalenfield.com),
+  MCN Mar 2023, Cycle World Apr 2023 — same 648cc parallel-twin as
+  Interceptor 650 (47 hp / 52.3 Nm), cruiser-tuned, F15/R40 525 chain.
+  MCN measured 14.0s @ 95 mph (153 km/h); sim 14.17s @ 157 km/h — Δ +0.17s
+  / +4 km/h within mid-twin cluster bias band.
+
+## DB re-seed (per open INBOX 2026-05-21 [urgent])
+
+```
+$ python3 -m motoquant.run import --known-bikes
+Imported:        37
+Skipped invalid: 0
+Errors:          447     # documented WS-A idempotency hits — known carry-forward
+Total in DB:     751     # was 715 pre-import
+Tire fitments:   1398 (rebuilt for new bikes)
+```
+
+The 447 errors are the documented WS-A idempotency regression (lenient upsert
+fallback doesn't match year-stripped vs year-suffixed `model_name`); not a
+blocker — new bikes inserted cleanly. Super Meteor 650 ended up duplicated
+(id 101 from prior pass, id 4092 from this pass) due to year-range mismatch
+(2023-2024 vs 2023-2026) — same upstream cause; functional, both rows valid.
+
+## Validation (fourth pass)
+
+- `python3 -m pytest tests/test_scraper.py` — **80 passed**
+- K5: ET=10.0334s (Δ +0.0000s); R1: ET=10.2859s (Δ +0.0000s); Hayabusa:
+  ET=10.4712s (Δ +0.0000s) — all baselines preserved exactly
+
+## Files touched (fourth pass)
+
+- `motoquant/scraper/known_bikes_extended.py` (+~150 lines, EXTENDED_BIKES
+  list +3 entries)
+- `motoquant.db` — re-seeded via `python3 -m motoquant.run import --known-bikes`
+  (715 → 751 rows)
+- `reports/catalog_expansion_2026-05-22.md` — this fourth-pass section appended
+

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated": "2026-05-22T18:00:00Z",
+  "updated": "2026-05-22T22:00:00Z",
   "experiments": [
     {
       "id": "EXP-001",
@@ -157,6 +157,29 @@
       "default": "A",
       "implementation_notes": "Client-side useSearchParams() inside LoginPageInner in web/app/login/page.js, which is already wrapped in <Suspense> per the static-prerender rule (Vercel App-Router useSearchParams + CSR-bailout requirement). Only the submit button label changes — form action, magic-link API call, heading ('Sign in'), subhead, terms+privacy footer, email input, AuthProvider integration, and ?token=... verification flow are all byte-identical across arms. data-exp='EXP-007' + data-variant attributes on the submit button for analytics attribution. Same canonical URL, same h1, same meta — SEO-safe. Note: the /signup page does a router.replace('/login?signup=1') so the natural funnel into this page already preserves the signup-intent query param; if we want to default first-time-signup visitors to variant B in a follow-up, we can switch the variant resolver from 'params.get(variant)===B' to 'params.get(variant)===B || params.get(signup)===1' — but that turns this from an A/B into a segmented default, so we hold it for a separate experiment. EXP-001 on landing-hero, EXP-002+EXP-005 on /pricing, EXP-003 on /simulator, EXP-004 on /blog/the-physics-of-a-perfect-launch, EXP-006 on /blog — no page conflict.",
       "decision_criteria": "Ship variant B as new control if magic_link_requests/visitor lifts ≥15% with p<0.05 over ≥200 samples per arm AND magic_link_verification_completion_rate does not drop >5% (we want intent-to-start-using, not inflated submit clicks from visitors who never click through the email — if verification rate collapses, B is recruiting low-quality intent and should be rolled back). Roll back if login_page_bounce_rate rises >10% (button copy reads spammy / scammy) or returning_user_friction_signal increases (e.g. existing-user reports finding the page confusing — surfaced via support tickets, not analytics). No decision before 200 samples per arm. If B wins, evaluate the segmented-default follow-up (auto-B for ?signup=1 traffic, control for direct /login traffic) as a separate experiment — do not bundle the two changes."
+    },
+    {
+      "id": "EXP-008",
+      "started": "2026-05-22",
+      "page": "/features",
+      "element": "bottom-of-page primary CTA copy + subhead",
+      "hypothesis": "Visitors who reach the bottom of /features have read 6 feature blocks and are evaluating 'is this real, and what will actually happen if I click?' The current CTA 'Try it free' with subhead 'Free in the browser. No account required to start.' restates the free-ness twice but never names the concrete first-run outcome. Variant B replaces the button with 'Run a sim — 15 seconds, no signup' and the subhead with 'Pick a bike, hit go. Real physics in your browser — no install, no account.' — both name the action ('run a sim'), the time cost ('15 seconds'), and the absence of friction ('no signup', 'no install') on the click target itself. If grounding the next click in a time-bound, action-specific promise reduces drop-off vs the generic free-ness framing, simulator-runs / features-page-visitor should rise. Distinct from EXP-001 (landing-hero, cold visitor) — this is a mid-funnel feature-reader cohort with higher intent but also higher 'is this real?' skepticism.",
+      "variant_a": "CTA 'Try it free' + subhead 'Free in the browser. No account required to start.'",
+      "variant_b": "CTA 'Run a sim — 15 seconds, no signup' + subhead 'Pick a bike, hit go. Real physics in your browser — no install, no account.'",
+      "primary_metric": "simulator_runs_per_features_page_visitor",
+      "secondary_metrics": [
+        "features_bottom_cta_click_through_rate",
+        "features_to_pricing_ctr",
+        "features_page_bounce_rate",
+        "simulator_page_first_run_completion_rate",
+        "features_to_simulator_time_to_click_s"
+      ],
+      "min_sample": 200,
+      "status": "live",
+      "flag": "?variant=B",
+      "default": "A",
+      "implementation_notes": "Client-side useSearchParams() inside BottomCtaInner in web/app/features/BottomCta.js, wrapped in <Suspense> per the Vercel App-Router static-prerender / CSR-bailout rule. The Suspense fallback renders the control (variant A) markup verbatim so SSR/SSG output is byte-identical to the pre-EXP-008 page — no layout shift, no hydration mismatch, no SEO drift. Variant flip touches only two text nodes (button label + subhead paragraph); h2 'Ready to run your first sim?', href='/simulator', and the 'See pricing' secondary CTA are unchanged across arms (single-variable rule: copy bundle, not multi-element redesign). data-exp='EXP-008' + data-variant attributes on the wrapper div AND the primary Link element so click-attribution survives even if wrapper analytics break. Same canonical URL, same h1, same meta tags — SEO-safe. EXP-001 on landing-hero, EXP-002+EXP-005 on /pricing, EXP-003 on /simulator, EXP-004 on /blog/the-physics-of-a-perfect-launch, EXP-006 on /blog index, EXP-007 on /login — no page conflict; /features previously had zero live experiments.",
+      "decision_criteria": "Ship variant B as new control if simulator-runs/features-visitor lifts ≥15% with p<0.05 over ≥200 samples per arm AND simulator_page_first_run_completion_rate does not drop >5% (we want intent-to-actually-run, not inflated clicks from visitors who land on /simulator and immediately bounce — if completion rate collapses, B is recruiting curiosity clicks not run-intent). Roll back if features_to_pricing_ctr drops >25% (CTA may be cannibalising the secondary pricing path entirely) or features_page_bounce_rate rises >10% (specificity reads spammy). No decision before 200 samples per arm. If B wins, evaluate replicating the time-bound + action-specific pattern on the landing-page hero (a follow-up to EXP-001, possibly as a 3-way test if EXP-001 has resolved by then) as a SEPARATE experiment — do not bundle. Note interaction with EXP-001: a visitor at landing-hero variant B then features-page variant B sees a consistent verb-result message; check funnel attribution by segmenting on landing-arrival variant before declaring features-page lift."
     }
   ]
 }

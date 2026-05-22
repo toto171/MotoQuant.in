@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
+import BottomCta from './BottomCta';
 
 const SITE_URL = 'https://motoquant.in';
 
@@ -293,28 +294,11 @@ export default function FeaturesPage() {
         })}
       </div>
 
-      {/* Bottom CTA */}
+      {/* Bottom CTA — EXP-008: variant-aware via ?variant=B */}
       <section className="py-24 px-6 border-t border-brand-orange/10 bg-ink-1/30">
-        <div className="max-w-3xl mx-auto text-center">
-          <RevealSection>
-            <h2 className="font-display font-bold text-4xl mb-4 text-white">Ready to run your first sim?</h2>
-            <p className="text-white/60 mb-10 text-lg">Free in the browser. No account required to start.</p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/simulator"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-brand-orange text-black font-display font-bold rounded-lg glow-orange text-base hover:bg-brand-orangeLight transition-colors"
-              >
-                <Zap size={18} /> Try it free
-              </Link>
-              <Link
-                href="/pricing"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-brand-orange text-brand-orange font-display font-bold rounded-lg transition-colors text-base"
-              >
-                See pricing
-              </Link>
-            </div>
-          </RevealSection>
-        </div>
+        <RevealSection>
+          <BottomCta />
+        </RevealSection>
       </section>
 
       <SiteFooter />
