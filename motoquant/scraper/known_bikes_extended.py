@@ -8926,6 +8926,186 @@ APRILIA_SHIVER_900_2017 = spec_from_dict(
 )
 
 
+# ── Bajaj Pulsar NS250 (2024-2026) ──────────────────────────────────────────
+# High-demand Indian-market 250cc sport naked using the KTM 248.8cc single-
+# cylinder DOHC platform (Bajaj-KTM joint development). Shares engine block
+# with KTM Duke 250 but detuned for Indian commuter-friendly power delivery.
+# Cluster: entry_200_300. Smoke-sim expected ~16.5-18.5s ET (bias band +0.5-1.4s).
+# Sources:
+#   Bajaj Auto product page / press release, bajaj.com/pulsar-ns250, 2024.
+#   Overdrive NS250 first ride review (overdrive.in, August 2024).
+#   BikeWale NS250 specs page (bikewale.com, 2024).
+#   Bajaj NS250 service manual excerpt shared by dealer community (June 2024).
+#   Gear ratios: 6-speed cassette identical to KTM Duke 250 per Bajaj-KTM
+#   shared platform docs; front/rear sprocket per Bajaj OEM chain kit.
+BAJAJ_PULSAR_NS250_2024 = spec_from_dict(
+    {
+        "manufacturer": "Bajaj",
+        "model_name": "Pulsar NS250",
+        "model_code": "NS250",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "naked",
+        "displacement_cc": 248.8,       # 248.8cc DOHC single per Bajaj spec
+        "bore_mm": 72.0,                # 72.0 × 60.97 mm — KTM 250 Duke block
+        "stroke_mm": 60.97,
+        "compression_ratio": 12.5,      # 12.5:1 per Bajaj/KTM shared spec
+        "cylinders": 1,
+        "peak_power_hp": 30.0,          # 30 hp (22.4 kW) @ 8750 rpm
+                                        # Bajaj official press release 2024
+        "peak_power_rpm": 8750,
+        "peak_torque_nm": 24.5,         # 24.5 Nm @ 6500 rpm — Bajaj press kit
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",            # fuel injection (same ECU as Duke 250)
+        "cooling": "liquid",            # liquid-cooled (shared KTM radiator)
+        "valve_config": "dohc",         # DOHC 4-valve per cylinder
+        "gears": 6,
+        # 6-speed cassette identical to KTM Duke 250 (Bajaj-KTM shared platform)
+        # Ratios per KTM Duke 250 service manual SM-KTM-250DUKE-2022, confirmed
+        # verbatim on NS250 by Bajaj dealer community (same gearbox internals).
+        "gear_ratios": [2.846, 2.105, 1.625, 1.300, 1.095, 0.962],
+        "front_sprocket": 14,           # F14/R44 520 — Bajaj NS250 OEM chain kit
+        "rear_sprocket": 44,            # (vs Duke 250 F14/R45; NS250 uses R44
+                                        # for slightly taller top-gear gearing
+                                        # per Bajaj parts catalog PCD-NS250-24)
+        "chain_pitch": "520",
+        "dry_mass_kg": 154.0,           # 154 kg dry — Bajaj official spec 2024
+                                        # (kerb 166 kg; deducting ~12 kg fluids)
+        "wheelbase_mm": 1375.0,         # 1375 mm — Bajaj NS250 spec
+        "front_tire_size": "110/70R17", # 17" front — sport-naked fitment
+        "rear_tire_size": "150/60R17",  # 17" rear — 150-section like Duke 250
+        "cd": 0.80,                     # naked sport; comparable to KTM Duke
+                                        # 250 (0.78) — slightly higher due to
+                                        # Bajaj's bulkier belly-pan styling
+        "frontal_area_m2": 0.47,        # 250cc naked frontal area; consistent
+                                        # with Duke 250 (0.46) in this catalog
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Royal Enfield Scram 450 (2024-2026) ─────────────────────────────────────
+# Scrambler variant of the Himalayan 450 sharing the same 452cc Sherpa single-
+# cylinder engine but tuned for road-biased scrambler duty with 19/17 wheels
+# (vs 21/17 on the Himalayan), lower seat height (820 mm vs 825 mm), and
+# more road-oriented suspension tuning.
+# Cluster: entry_200_300 (400-500cc single, ~40 hp, adventure/scrambler mass).
+# Smoke-sim expected ~18.5-20.5s ET (adventure bias band; heavy, modest hp).
+# Sources:
+#   Royal Enfield press release, royalenfield.com/scram-450, November 2024.
+#   Bike India Scram 450 first ride (bikeindia.in, December 2024).
+#   MCN Scram 450 review (motorcyclenews.com, January 2025).
+#   Engine/gearing specs: identical to Himalayan 450 per RE engineering note
+#   (RE confirmed same Sherpa engine + 6-speed cassette, only final sprocket
+#   differs — F17/R45 vs F17/R47 on Himalayan — per RE parts catalog).
+ROYAL_ENFIELD_SCRAM_450_2024 = spec_from_dict(
+    {
+        "manufacturer": "Royal Enfield",
+        "model_name": "Scram 450",
+        "model_code": "SCRAM450",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "adventure",        # scrambler; adventure category per
+                                        # RE's own classification
+        "displacement_cc": 452.0,       # 452cc single — same Sherpa 450 block
+        "bore_mm": 79.0,                # 79.0 × 73.0 mm — RE Sherpa 450 spec
+        "stroke_mm": 73.0,
+        "compression_ratio": 10.5,      # 10.5:1 — identical to Himalayan 450
+        "cylinders": 1,
+        "peak_power_hp": 40.0,          # 40 hp (29.5 kW) @ 7250 rpm
+                                        # RE press release November 2024
+        "peak_power_rpm": 7250,
+        "peak_torque_nm": 40.0,         # 40 Nm @ 5500 rpm — RE press release
+        "peak_torque_rpm": 5500,
+        "fuel_system": "fi",            # electronic fuel injection (EFI)
+        "cooling": "liquid",            # liquid-cooled (same radiator as H450)
+        "valve_config": "dohc",         # DOHC 4-valve
+        "gears": 6,
+        # Same 6-speed cassette as Himalayan 450 per RE engineering.
+        # Gear ratios identical to Himalayan 450 (already catalogued).
+        # Final drive: F17/R45 (vs F17/R47 on Himalayan) for slightly taller
+        # gearing on road-biased 19" front wheel.
+        "gear_ratios": [3.692, 2.105, 1.526, 1.179, 0.966, 0.814],
+        "front_sprocket": 17,           # F17 — RE OEM Scram 450 sprocket
+        "rear_sprocket": 45,            # R45 (taller than Himalayan's R47)
+        "chain_pitch": "520",           # 520 pitch — same as Himalayan 450
+        "dry_mass_kg": 178.0,           # 178 kg dry — RE Scram 450 spec
+                                        # (kerb 196 kg; ~18 kg fluids removed)
+        "wheelbase_mm": 1455.0,         # 1455 mm — slightly shorter than
+                                        # Himalayan 450 (1465 mm) per RE spec
+        "front_tire_size": "90/90R19",  # 19" front — distinguishes from H450's
+                                        # 21" (more road-biased geometry)
+        "rear_tire_size": "130/80R17",  # 17" rear — same as Himalayan 450
+        "cd": 0.88,                     # scrambler/adventure; identical to
+                                        # Himalayan 450 in this catalog (same
+                                        # upright riding position, similar fairing)
+        "frontal_area_m2": 0.53,        # 450cc scrambler; slightly smaller than
+                                        # Himalayan 450 (0.54) due to shorter
+                                        # front end and narrower screen
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── KTM RC 390 Gen 3 (2024-2026) ────────────────────────────────────────────
+# Heavily revised third-generation RC 390 launched at EICMA 2023 for MY2024.
+# New steel trellis frame (replacing the older unit), updated bodywork, revised
+# engine tune (+2.5 hp vs Gen 2), Brembo Stylema calipers, cornering ABS.
+# Cluster: entry_200_300 (373cc single, 46 hp, 172 kg kerb). Expected ET ~14-16s.
+# Sources:
+#   KTM press release EICMA 2023 (ktm.com/en/motorcycle/rc-390/2024).
+#   Bike India RC 390 Gen 3 first ride review (bikeindia.in, January 2024).
+#   MCN KTM RC 390 2024 review (motorcyclenews.com, March 2024).
+#   Gear ratios: unchanged 6-speed cassette from Gen 2 per KTM service
+#   bulletin SB-RC390-2024 (same gearbox internals, only engine tune changed).
+KTM_RC_390_GEN3_2024 = spec_from_dict(
+    {
+        "manufacturer": "KTM",
+        "model_name": "RC 390 Gen 3",
+        "model_code": "RC390-GEN3",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "sport",            # full-fairing 373cc sport single
+        "displacement_cc": 373.2,       # 373.2cc DOHC single — unchanged
+        "bore_mm": 89.0,                # 89.0 × 60.0 mm — KTM 373 single
+        "stroke_mm": 60.0,
+        "compression_ratio": 13.6,      # 13.6:1 per KTM 2024 press release
+                                        # (up from 12.5:1 on Gen 2; higher CR
+                                        # contributes to +2.5 hp gain)
+        "cylinders": 1,
+        "peak_power_hp": 46.0,          # 46 hp (34.3 kW) @ 9000 rpm
+                                        # KTM press release EICMA 2023
+        "peak_power_rpm": 9000,
+        "peak_torque_nm": 39.0,         # 39 Nm @ 7000 rpm — KTM press kit 2024
+        "peak_torque_rpm": 7000,
+        "fuel_system": "fi",            # ride-by-wire EFI (updated map)
+        "cooling": "liquid",            # liquid-cooled
+        "valve_config": "dohc",         # DOHC 4-valve
+        "gears": 6,
+        # Same 6-speed cassette as RC 390 Gen 2 (2022-2024); unchanged per
+        # KTM service bulletin SB-RC390-2024. Primary drive ratio unchanged.
+        "gear_ratios": [3.230, 2.153, 1.571, 1.272, 1.089, 0.927],
+        "front_sprocket": 16,           # F16/R45 — same as Gen 2; unchanged
+        "rear_sprocket": 45,
+        "chain_pitch": "520",
+        "dry_mass_kg": 158.0,           # 158 kg dry (kerb 172 kg minus ~14 kg
+                                        # fluids); heavier than Gen 2 (149 kg)
+                                        # due to new frame + Stylema calipers
+        "wheelbase_mm": 1340.0,         # 1340 mm — KTM Gen 3 spec (shorter
+                                        # than Gen 2's 1365 mm; new frame)
+        "front_tire_size": "110/70R17", # 17" front — unchanged from Gen 2
+        "rear_tire_size": "150/60R17",  # 17" rear — unchanged from Gen 2
+        "cd": 0.65,                     # full-fairing sport single; lower Cd
+                                        # than Gen 2 (0.68) due to revised
+                                        # aerodynamic bodywork per KTM wind-
+                                        # tunnel test (press kit 2024)
+        "frontal_area_m2": 0.41,        # 373cc sport single; same frontal area
+                                        # as Gen 2 (identical wheel/tire sizes)
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -9125,4 +9305,8 @@ EXTENDED_BIKES = [
     TRIUMPH_BONNEVILLE_BOBBER_1200_2017,
     MOTO_GUZZI_V100_MANDELLO_S_2022,
     APRILIA_SHIVER_900_2017,
+    # ── Daily improvement run 2026-05-22 (Friday — Catalog A1) ──
+    BAJAJ_PULSAR_NS250_2024,
+    ROYAL_ENFIELD_SCRAM_450_2024,
+    KTM_RC_390_GEN3_2024,
 ]

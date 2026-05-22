@@ -5,7 +5,7 @@ import SiteFooter from "../../components/SiteFooter";
 export const metadata = {
   title: "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
   description:
-    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
+    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
   keywords: [
     "motorcycle drag racing blog",
     "indian motorcycle quarter mile",
@@ -48,11 +48,24 @@ export const metadata = {
     "gsx-s750 drag time india",
     "honda cb500x quarter mile",
     "cb500x adventure drag time",
+    "kawasaki ninja 400 quarter mile india",
+    "ninja 400 vs zx-4r which is faster",
+    "ninja 400 drag time india",
+    "kawasaki zx-4r vs ninja 400",
   ],
   alternates: { canonical: "https://motoquant.in/blog" },
 };
 
 const POSTS = [
+  {
+    slug: "kawasaki-ninja-400-vs-zx-4r-quarter-mile-physics",
+    title: "Kawasaki Ninja 400 vs ZX-4R: Parallel Twin vs Inline-Four at the Strip",
+    date: "2026-05-22",
+    readTime: "12 min",
+    tags: ["Kawasaki", "Ninja 400", "ZX-4R", "Indian 400cc", "comparison"],
+    excerpt:
+      "MotoQuant simulates the Ninja 400 at ~13.1s and the ZX-4R at 12.681s and 192.6 km/h trap — same 400cc class, 0.4s apart. Architecture, redline, and the ₹3.7 lakh price gap explain everything. India cost-per-tenth mods for both bikes, and a modded Ninja 400 gets within 0.10s of a stock ZX-4R for ₹21,000.",
+  },
   {
     slug: "suzuki-gsx-s750-vs-ktm-890-duke-quarter-mile",
     title: "Suzuki GSX-S750 vs KTM 890 Duke: Quarter-Mile Physics",

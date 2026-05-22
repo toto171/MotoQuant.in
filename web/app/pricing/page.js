@@ -28,7 +28,7 @@ const PRICES = {
 const FEATURES = [
   ["Simulations per day",                "10", "Unlimited", "Unlimited"],
   ["Parts in a build",                   "3",  "Unlimited", "Unlimited"],
-  ["Bike catalog (673 bikes)",           "✓",  "✓",         "✓"],
+  ["Bike catalog (709 bikes)",           "✓",  "✓",         "✓"],
   ["Tire library (232 tires)",           "✓",  "✓",         "✓"],
   ["Venue conditions (20 venues)",       "✓",  "✓",         "✓"],
   ["ROI & Sobol analysis",               "—",  "✓",         "✓"],
@@ -98,6 +98,23 @@ function PricingPageInner() {
     if (loadingText) return loadingText;
     return proCtaVariant === "B" ? "Start Pro · 7-day refund" : "Subscribe to Pro";
   };
+
+  // ── EXP-005: Pro tier tag-line copy A/B test (live 2026-05-22) ──────
+  // Hypothesis: the current Pro tag line "Everything you need to go faster"
+  // is generic enough to describe any racing product. Visitors who just ran
+  // a free sim and clicked through to pricing already know they want more —
+  // what they're evaluating is "will Pro actually tell me something I can
+  // act on?" Variant B names the specific analytical outputs (ROI per part,
+  // build optimizer, unlimited sims) so the tag line answers "what changes
+  // when I upgrade?" rather than restating the aspirational positioning.
+  // Single-variable: only the 14-word tag line under the Pro price changes.
+  // EXP-002 controls the button; EXP-005 controls the descriptor — no overlap.
+  // Flag: ?exp5=B  (separate param so EXP-002 and EXP-005 can be toggled
+  // independently without arm contamination).
+  const exp5Variant = searchParams?.get("exp5") === "B" ? "B" : "A";
+  const proTagLine = exp5Variant === "B"
+    ? "Unlimited sims, ROI per part, build optimizer — know what each mod does before you buy it."
+    : "Everything you need to go faster.";
 
   async function subscribe(tier) {
     if (!isAuthenticated) {
@@ -218,7 +235,13 @@ function PricingPageInner() {
                     ₹{PRICES.pro.yearly.toLocaleString("en-IN")}/yr · save {yearlyDiscount("pro")}%
                   </p>
                 )}
-                <p className="mt-3 text-sm text-white/75">Everything you need to go faster.</p>
+                <p
+                  className="mt-3 text-sm text-white/75"
+                  data-exp="EXP-005"
+                  data-variant={exp5Variant}
+                >
+                  {proTagLine}
+                </p>
                 <div className="mt-7 flex-1 space-y-3">
                   {FEATURES.map(([label, , pro]) => (
                     <div key={label} className="flex items-start gap-2.5 text-sm text-white/85">

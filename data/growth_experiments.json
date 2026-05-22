@@ -89,6 +89,28 @@
       "default": "A",
       "implementation_notes": "Client-side useSearchParams() in web/app/blog/the-physics-of-a-perfect-launch/InlineSimCta.js, wrapped in <Suspense> per the static-prerender rule (page.js stays a server component so metadata + OG tags still flow through SSG). Variant A renders a hidden span placeholder so the DOM tree is identical except for the inline CTA block itself — no layout shift on control. Variant B injects the CTA after the 2nd H2 (block-counter in the Prose function). Same canonical URL, same h1, same meta — SEO-safe. Inline CTA copy + href deliberately match the end-of-post card so the only variable is placement. data-exp/data-variant attributes on both the wrapper div and the Link element for analytics attribution. End-of-post CTA unchanged on both arms (additive test). EXP-001 is on landing-hero, EXP-002 on /pricing, EXP-003 on /simulator — no page conflict.",
       "decision_criteria": "Ship variant B as new control if simulator-runs/blog-post-visitor lifts ≥15% with p<0.05 over ≥200 samples per arm AND end-of-post CTA absolute CTR does not drop >25% (we want net new clicks, not redistributed clicks — if mid-scroll cannibalises end-of-post entirely we have not actually lifted the page). Roll back if scroll_depth_pct drops >10% (inline CTA causing premature exits) or post_dwell_time_s drops >15% (CTA disrupting reading flow). No decision before 200 samples per arm. If B wins, replicate the pattern across the other 7 blog posts in a follow-up rollout (one post at a time so each replication is its own micro-validation, not a blanket assumption)."
+    },
+    {
+      "id": "EXP-005",
+      "started": "2026-05-22",
+      "page": "/pricing",
+      "element": "Pro tier tag-line (the descriptor under the price)",
+      "hypothesis": "Visitors who reach /pricing after running a free simulation already know they want more capability — what they are evaluating is 'will Pro tell me something I can act on?' The current Pro tag line 'Everything you need to go faster' is aspirational but non-specific; it could describe any racing product. Variant B replaces it with a line that names the three specific analytical outputs unique to Pro (unlimited sims, ROI per part, build optimizer) and frames them as a decision tool ('know what each mod does before you buy it'). If specificity reduces the 'is this worth ₹499?' hesitation, pro_checkout_init / pricing_visitor should rise.",
+      "variant_a": "Everything you need to go faster.",
+      "variant_b": "Unlimited sims, ROI per part, build optimizer — know what each mod does before you buy it.",
+      "primary_metric": "pro_checkout_init_clicks / pricing_page_visitor",
+      "secondary_metrics": [
+        "pro_cta_click_through_rate",
+        "razorpay_checkout_completion_rate",
+        "pricing_page_time_on_page_s",
+        "studio_cta_cannibalisation_rate"
+      ],
+      "min_sample": 200,
+      "status": "live",
+      "flag": "?exp5=B",
+      "default": "A",
+      "implementation_notes": "Client-side useSearchParams() in web/app/pricing/page.js, inside the existing PricingPageInner component which is already wrapped in <Suspense fallback={null}> per the static-prerender rule. Uses a dedicated query param ?exp5=B (not ?variant=B which is owned by EXP-002) so both experiments can be toggled independently without arm contamination — a visitor at ?variant=B&exp5=B gets Pro button variant B + tag line variant B; at ?variant=B alone they get Pro button variant B + tag line control; etc. data-exp='EXP-005' + data-variant={exp5Variant} on the <p> element for analytics attribution. Control is byte-identical at the default URL (/pricing with no query params). Same canonical URL, same h1, same meta — SEO-safe. EXP-002 covers the Pro button; EXP-005 covers the tag line; no copy overlap.",
+      "decision_criteria": "Ship variant B as new control if pro_checkout_init/visitor lifts ≥15% with p<0.05 over ≥200 samples per arm AND razorpay_checkout_completion does not drop >5% (specificity should convert intent, not just inflate clicks). Roll back if studio_cta_cannibalisation_rate increases >10% (specificity may push mid-tier visitors toward Studio, which is a good outcome — but only if Studio conversion also rises, otherwise the effect is cannibalisation not uplift). If both EXP-002 and EXP-005 are running concurrently, use separate ?variant and ?exp5 params for attribution; analyse arms independently before declaring interaction effects. No decision before 200 samples per arm."
     }
   ]
 }
