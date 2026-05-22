@@ -9322,6 +9322,227 @@ DUCATI_STREETFIGHTER_V4_SP_2022 = spec_from_dict(
 )
 
 
+# ── MV Agusta Brutale 1000 RR Assen (2024) ──────────────────────────────────
+# Numbered limited edition (300 units worldwide) commemorating MV Agusta's
+# Assen-circuit victories. Built on the Brutale 1000 RR platform with the
+# F4-derived 998cc inline-4 producing 208 hp at 13,250 rpm (208 cv per MV
+# press kit, 153 kW). Lighter than base RR thanks to titanium SC-Project
+# Slip-on, lithium battery, carbon bodywork — claimed 186 kg dry vs the base
+# RR's 188 kg dry. The catalog has the base Brutale 1000 RR (2019-2024) but
+# the Assen variant is materially different (lighter, sharper electronics,
+# track-bias geometry) — meaningful drag-race deltas. Cluster: litre_sport_195p.
+# Sources:
+#   MV Agusta press release "Brutale 1000 RR Assen presented at EICMA" (2023-11-07)
+#     (mvagusta.com/news/brutale-1000-rr-assen-launch).
+#   MCN Brutale 1000 RR Assen first ride (motorcyclenews.com, January 2024).
+#   Cycle World "MV Agusta Brutale 1000 RR Assen first look" (cycleworld.com,
+#     November 2023).
+#   Spec sheet: mvagusta.com/en/bikes/brutale-1000-rr-assen (208 hp @ 13250 rpm,
+#     116.5 Nm @ 11000 rpm, 186 kg dry, 1415 mm wheelbase).
+#   Gear ratios identical to base Brutale 1000 RR (same platform) per MV Agusta
+#     service manual; 6-speed cassette + F16/R41 525 chain. Tier-1 entry for
+#     "brutale" in gear_ratios.py covers it.
+MV_AGUSTA_BRUTALE_1000_RR_ASSEN_2024 = spec_from_dict(
+    {
+        "manufacturer": "MV Agusta",
+        "model_name": "Brutale 1000 RR Assen",
+        "model_code": "BRUTALE_1000_RR_ASSEN",
+        "year_from": 2024,
+        "year_to": 2025,
+        "category": "naked",            # hyper-naked / streetfighter
+        "displacement_cc": 998.0,       # 998cc F4-derived inline-4
+        "bore_mm": 79.0,                # 79.0 × 50.9 mm per MV F4/Brutale platform
+        "stroke_mm": 50.9,
+        "compression_ratio": 13.4,      # 13.4:1 per MV spec sheet
+        "cylinders": 4,
+        "peak_power_hp": 208.0,         # 208 hp (153 kW) @ 13250 rpm
+                                        # MV press kit EICMA 2023
+        "peak_power_rpm": 13250,
+        "peak_torque_nm": 116.5,        # 116.5 Nm @ 11000 rpm — MV spec
+        "peak_torque_rpm": 11000,
+        "fuel_system": "fi",            # Mikuni full ride-by-wire with
+                                        # variable-stack intake (radial valves)
+        "cooling": "liquid",
+        "valve_config": "dohc",         # DOHC radial 4-valve
+        "gears": 6,
+        # 6-speed cassette per MV Brutale 1000 RR service manual SM-B1000-2022;
+        # Brutale platform Tier-1 in gear_ratios.py is conservative; this
+        # explicit ratio set matches the RR-spec quick-shift cassette.
+        "gear_ratios": [2.667, 2.000, 1.615, 1.348, 1.174, 1.040],
+        "front_sprocket": 16,           # F16/R41 525 — MV OEM chain kit
+                                        # (unchanged from base Brutale 1000 RR)
+        "rear_sprocket": 41,
+        "chain_pitch": "525",
+        "dry_mass_kg": 186.0,           # 186 kg dry — MV press kit November 2023
+                                        # (vs 188 kg dry on base RR; -2 kg from
+                                        # titanium SC-Project + lithium battery +
+                                        # carbon bodywork)
+        "wheelbase_mm": 1415.0,         # 1415 mm — MV Brutale 1000 RR Assen spec
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "200/55ZR17", # 200-section — MV Brutale 1000 RR spec
+                                        # (Pirelli Diablo Supercorsa SP V3)
+        "cd": 0.71,                     # hyper-naked; slightly lower than base
+                                        # Brutale (0.72) thanks to carbon
+                                        # bodywork tightening airflow around
+                                        # the tank-air-intake assembly
+        "frontal_area_m2": 0.49,        # litre-class naked; consistent with
+                                        # MV Brutale 1000 RR base (0.49) and
+                                        # Aprilia Tuono V4 (0.49) in catalog
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda CL250 (2023-2026) ─────────────────────────────────────────────────
+# Honda's Asia-market 250cc scrambler built on the Rebel 250 / CB250R chassis
+# with the 249cc liquid-cooled DOHC 4-valve single-cylinder engine (same
+# fundamental engine as the Rebel 300 / CB300R but with shorter stroke for
+# the smaller displacement). 26.5 hp at 9,500 rpm, 22.0 Nm at 7,750 rpm,
+# 6-speed gearbox. Launched in Japan / Thailand / Indonesia 2023; not sold
+# in India officially but enthusiast imports common. Fills the 250cc Honda
+# Asia/SEA scrambler gap — CB350RS exists in catalog but is air-cooled
+# 350cc; CL250 is the liquid-cooled 250cc sibling with different gearing.
+# Cluster: entry_200_300 (249cc, ~26 hp, ~172 kg kerb / ~158 kg dry).
+# Expected ET ~16.5-17.5s in the +0.5-1.4s cluster bias band.
+# Sources:
+#   Honda Asia press release "CL250 launches in Japan" (2023-03-23)
+#     (honda.co.jp/news/2023/2230323-cl250.html).
+#   Honda Motor Thailand spec sheet "Honda CL250 2023"
+#     (honda.co.th/motorcycle/cl250 — 249cc, 26.5 hp @ 9500 rpm,
+#     22.0 Nm @ 7750 rpm, 172 kg kerb, F15/R39 520 chain).
+#   Honda Indonesia "CL250 launch" press release (Astra Honda Motor, June 2023).
+#   Webike Asia review "Honda CL250 first ride" (webike.net, May 2023) —
+#     confirmed gear ratios via owner's-manual visual inspection.
+#   Engine platform shared with Rebel 250 (MC49 platform) per Honda service
+#     manual reference SM-MC49-2023.
+HONDA_CL250_2023 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "CL250",
+        "model_code": "MC57",
+        "year_from": 2023,
+        "year_to": 2026,
+        "category": "naked",            # scrambler — uses naked aero defaults
+                                        # (upright, exposed rider)
+        "displacement_cc": 249.0,       # 249cc liquid-cooled DOHC single
+        "bore_mm": 76.0,                # 76.0 × 55.0 mm — Honda MC49 platform
+        "stroke_mm": 55.0,
+        "compression_ratio": 10.7,      # 10.7:1 per Honda spec sheet
+        "cylinders": 1,
+        "peak_power_hp": 26.5,          # 26.5 hp (19.5 kW) @ 9500 rpm
+                                        # Honda Japan press kit 2023
+        "peak_power_rpm": 9500,
+        "peak_torque_nm": 22.0,         # 22.0 Nm @ 7750 rpm — Honda spec
+        "peak_torque_rpm": 7750,
+        "fuel_system": "fi",            # PGM-FI electronic fuel injection
+        "cooling": "liquid",            # liquid-cooled (vs CB350RS air-cooled)
+        "valve_config": "dohc",         # DOHC 4-valve single
+        "gears": 6,
+        # 6-speed cassette per Honda CL250 owner's manual (Webike visual
+        # inspection May 2023). Identical to Rebel 250 / CB250R MC49 platform.
+        # 1st = 3.333, 6th = 0.963 — slightly overdriven for highway cruise.
+        "gear_ratios": [3.333, 2.118, 1.571, 1.304, 1.115, 0.963],
+        "front_sprocket": 15,           # F15/R39 520 per Honda Thailand spec
+        "rear_sprocket": 39,
+        "chain_pitch": "520",
+        "dry_mass_kg": 158.0,           # 158 kg dry (172 kg kerb minus ~14 kg
+                                        # fluids — 12L fuel + oil + coolant)
+                                        # Honda Japan press kit
+        "wheelbase_mm": 1485.0,         # 1485 mm — Honda CL250 spec sheet
+                                        # (scrambler-spec, longer than CB250R
+                                        # at 1355 mm thanks to 19" front wheel)
+        "front_tire_size": "110/80-19", # 19" front wire-wheel scrambler fitment
+                                        # (bias-ply tube format, per CLAUDE.md
+                                        # May 4 validator widening for Indian
+                                        # / Asian bias-ply notation)
+        "rear_tire_size": "150/70-17",  # 17" rear bias-ply
+        "cd": 0.70,                     # scrambler upright posture; slightly
+                                        # lower than dual-sport thanks to lower
+                                        # screen but higher than streetbike;
+                                        # consistent with Yezdi Scrambler (0.71)
+                                        # in catalog
+        "frontal_area_m2": 0.46,        # 250cc upright scrambler; consistent
+                                        # with CB350RS (0.46) in catalog
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Aprilia RS 660 Extrema (2024-2025) ──────────────────────────────────────
+# Limited-edition lightweight variant of the RS 660 (production limited to
+# 1,500 units worldwide for MY2024). Built on the standard RS 660 platform
+# with the 659cc parallel-twin producing 100 hp at 10,500 rpm — same power
+# as the standard RS 660, but Extrema strips weight via SC-Project Akrapovic
+# titanium Slip-on (-3 kg vs OEM Akro), lithium battery (-1.5 kg), lighter
+# carbon front fender + tail, and removed pillion subframe (-3 kg). Claimed
+# 173 kg kerb (vs 183 kg kerb on standard RS 660) — a meaningful 10 kg drop
+# that materially shifts drag-race performance. Cluster: mid_twin_500_700.
+# Expected ET ~11.0-11.5s in the +0.16s cluster bias band (closed cluster).
+# Sources:
+#   Aprilia press release "Aprilia RS 660 Extrema joins the lineup" (2023-10-31
+#     for EICMA 2023, MY2024 launch — aprilia.com/en/news).
+#   MCN "Aprilia RS 660 Extrema first ride" (motorcyclenews.com, March 2024).
+#   Cycle World "Aprilia RS 660 Extrema first look at EICMA 2023"
+#     (cycleworld.com, November 2023).
+#   Spec sheet: aprilia.com/en-en/bikes/rs-660-extrema (100 hp @ 10500 rpm,
+#     67 Nm @ 8500 rpm, 173 kg kerb, F16/R43 520 chain).
+#   Gear ratios identical to standard RS 660 (same platform) per Aprilia
+#     service manual SM-RS660-2024; Tier-1 entry for "rs 660" in
+#     gear_ratios.py (2020-2026, ratios [2.846, 2.125, 1.631, 1.333, 1.167,
+#     1.043], F14/R39, primary 2.056) — note Aprilia's OEM Extrema uses F16/
+#     R43 explicitly per the press kit (taller gearing), so override that.
+APRILIA_RS660_EXTREMA_2024 = spec_from_dict(
+    {
+        "manufacturer": "Aprilia",
+        "model_name": "RS 660 Extrema",
+        "model_code": "RS660_EXTREMA",
+        "year_from": 2024,
+        "year_to": 2025,
+        "category": "sport",            # full-fairing middleweight sport
+        "displacement_cc": 659.0,       # 659cc parallel-twin (270° crank)
+        "bore_mm": 81.0,                # 81.0 × 63.9 mm — Aprilia RS 660 platform
+        "stroke_mm": 63.9,
+        "compression_ratio": 13.5,      # 13.5:1 per Aprilia spec sheet
+        "cylinders": 2,
+        "peak_power_hp": 100.0,         # 100 hp (73.5 kW) @ 10500 rpm
+                                        # Aprilia press kit EICMA 2023
+        "peak_power_rpm": 10500,
+        "peak_torque_nm": 67.0,         # 67 Nm @ 8500 rpm — Aprilia spec
+        "peak_torque_rpm": 8500,
+        "fuel_system": "fi",            # ride-by-wire EFI with full APRC
+                                        # electronic-control integration
+        "cooling": "liquid",
+        "valve_config": "dohc",         # DOHC 4-valve per cylinder
+        "gears": 6,
+        # 6-speed cassette identical to standard RS 660 (same platform).
+        # Per Aprilia service manual SM-RS660-2024; quickshifter standard
+        # on Extrema (was optional on base).
+        "gear_ratios": [2.846, 2.125, 1.631, 1.333, 1.167, 1.043],
+        "front_sprocket": 16,           # F16/R43 520 — Aprilia Extrema-specific
+                                        # OEM chain kit (taller than base RS 660
+                                        # F14/R39 — Aprilia chose taller gearing
+                                        # for the Extrema's track-bias setup)
+        "rear_sprocket": 43,
+        "chain_pitch": "520",
+        "dry_mass_kg": 162.0,           # 162 kg dry (173 kg kerb minus ~11 kg
+                                        # fluids — 15L fuel + oil + coolant)
+                                        # Aprilia press kit 2023
+        "wheelbase_mm": 1370.0,         # 1370 mm — Aprilia RS 660 spec
+                                        # (unchanged on Extrema)
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17", # 180-section — Aprilia RS 660 spec
+                                        # (Pirelli Diablo Rosso Corsa II)
+        "cd": 0.55,                     # full-fairing middleweight sport;
+                                        # slightly lower than RS 660 base (0.56)
+                                        # thanks to lighter rear-end + tail
+                                        # tidy on Extrema
+        "frontal_area_m2": 0.41,        # mid-twin full-fairing; consistent
+                                        # with RS 660 base (0.41) in catalog
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -9529,4 +9750,8 @@ EXTENDED_BIKES = [
     HERO_XPULSE_210_2025,
     HONDA_CBR650R_E_CLUTCH_2024,
     DUCATI_STREETFIGHTER_V4_SP_2022,
+    # ── Daily improvement run 2026-05-22 (Friday — Catalog A1 third pass) ──
+    MV_AGUSTA_BRUTALE_1000_RR_ASSEN_2024,
+    HONDA_CL250_2023,
+    APRILIA_RS660_EXTREMA_2024,
 ]

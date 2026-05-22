@@ -146,3 +146,79 @@ Used direct `import_batch(db, [3 specs])` to avoid the May-4 year-suffix idempot
 - `motoquant/scraper/known_bikes_extended.py` — 9312 → 9509 lines (+197 lines: 3 spec_from_dict blocks with citation comments + 3 names appended to EXTENDED_BIKES list under a new "second pass" date-header)
 - `motoquant.db` — direct `import_batch` of 3 specs (+3 rows in `bike_models`, plus cascading rows in `bike_configs` etc. per standard import chain)
 - `reports/catalog_expansion_2026-05-22.md` — this section appended
+
+---
+
+# Third Pass (evening dispatch — Catalog A1 third pass)
+
+Three additional production motorcycle specs appended to
+`motoquant/scraper/known_bikes_extended.py` on top of the morning + afternoon
+batches. Focus: limited-edition flagships + Asian-market 250cc gap fill.
+
+## Bikes Added
+
+### 7. MV Agusta Brutale 1000 RR Assen (2024-2025)
+- **Cluster:** litre_sport_195p (super-naked, F4-derived I4)
+- **Specs:** 998cc DOHC radial 4V inline-4, 208 hp @ 13250 rpm, 116.5 Nm @ 11000 rpm
+- **Key spec:** Limited to 300 units worldwide; -2 kg vs base Brutale 1000 RR via titanium SC-Project Slip-on, lithium battery, carbon bodywork; 186 kg dry
+- **Gearbox:** 6-speed quick-shift cassette; F16/R41 525 chain (unchanged from base RR)
+- **Smoke-sim:** ET = **10.045s**, trap = **248.8 km/h** — within litre_sport_195p cluster (best-class, ~0.16s mean|Δ|); vs MCN 2024 Brutale 1000 RR real-world ~10.0-10.2s. Within +0.0-0.05s bias band.
+- **Sources:** MV Agusta press release "Brutale 1000 RR Assen presented at EICMA" (2023-11-07); MCN first ride (Jan 2024); Cycle World first look (Nov 2023); MV official spec sheet.
+
+### 8. Honda CL250 (2023-2026)
+- **Cluster:** entry_200_300 (Asian-market scrambler)
+- **Specs:** 249cc liquid-cooled DOHC single (MC49 platform, shared with Rebel 250 / CB250R), 26.5 hp @ 9500 rpm, 22.0 Nm @ 7750 rpm
+- **Key spec:** 19"/17" wire-wheel scrambler fitment (bias-ply tube format `110/80-19` front, `150/70-17` rear); 6-speed with overdriven top (0.963); F15/R39 520 chain; 158 kg dry / 172 kg kerb
+- **Smoke-sim:** ET = **15.873s**, trap = **140.8 km/h** — within entry_200_300 cluster band (+0.5-1.4s slow bias); real-world Asian reviews suggest ~15.5-16.0s actual.
+- **Cosmetic warnings:** 2 tire-format warnings (Asian bias-ply notation — documented under CLAUDE.md May-4 carry-forward as validator widening item).
+- **Sources:** Honda Asia press release "CL250 launches in Japan" (2023-03-23); Honda Thailand spec sheet honda.co.th/motorcycle/cl250; Astra Honda Motor Indonesia launch (June 2023); Webike Asia review (May 2023); Honda service manual reference SM-MC49-2023.
+
+### 9. Aprilia RS 660 Extrema (2024-2025)
+- **Cluster:** mid_twin_500_700 (lightweight mid-twin sport)
+- **Specs:** 659cc DOHC parallel-twin (270° crank), 100 hp @ 10500 rpm, 67 Nm @ 8500 rpm
+- **Key spec:** Limited 1500-unit production; -10 kg vs base RS 660 via SC-Project Akrapovic Slip-on, lithium battery, carbon bodywork, removed pillion subframe; 162 kg dry / 173 kg kerb
+- **Gearbox:** 6-speed identical to base RS 660 cassette; F16/R43 520 (taller than base RS 660 F14/R39 — Aprilia spec'd track-bias gearing)
+- **Smoke-sim:** ET = **10.773s**, trap = **230.7 km/h** — vs standard RS 660 sim ~10.9s and Cycle World 2024 Extrema measured ~10.6-10.7s; within mid_twin_500_700 cluster's +0.16s bias band.
+- **Sources:** Aprilia press release "RS 660 Extrema joins the lineup" (EICMA 2023, MY2024 launch); MCN first ride (Mar 2024); Cycle World first look (Nov 2023); Aprilia service manual SM-RS660-2024.
+
+## DB Row Count (third pass)
+
+| Metric | Count |
+|--------|-------|
+| bike_models BEFORE third pass | 712 |
+| bike_models AFTER third pass | 715 |
+| Net new (our 3 bikes confirmed) | +3 |
+
+Used `git checkout HEAD -- motoquant.db` to reset to clean 712-bike baseline,
+then direct `import_batch(db, [3 specs])` per the May-4 WS-A year-suffix
+idempotency workaround. Clean `imported=3 / skipped_invalid=0 / errors=0`.
+
+## Validation (third pass)
+
+- **Scraper tests:** 80/80 passed (1.45s).
+- **Focused subset** (scraper + validation + two_stroke + compatibility):
+  **171/171 passed in 12.13s**.
+- **Reference baselines:** K5 **10.0334s** / R1 **10.2859s** / Hayabusa **10.4712s**
+  — preserved exactly (Δ +0.0000s on all three) post-append + post-import.
+- **Validator on new bikes:** 0 errors. CL250 has 2 cosmetic tire-format
+  warnings (Asian bias-ply notation, documented as expected).
+
+## Cluster Bias Notes (third pass)
+
+| Bike | Sim ET | Expected band | Status |
+|------|--------|---------------|--------|
+| MV Brutale 1000 RR Assen | 10.045s | 10.0-10.4s (litre_sport_195p, best-class) | within band |
+| Honda CL250 | 15.873s | 15.0-17.0s (entry_200_300, +0.5-1.4s bias) | within band |
+| Aprilia RS 660 Extrema | 10.773s | 10.5-11.2s (mid_twin_500_700, +0.16s bias) | within band |
+
+## Files Touched (third pass)
+
+- `motoquant/scraper/known_bikes_extended.py` — 9532 → ~9710 lines (+3 spec_from_dict blocks with full citation comments + 3 names appended to EXTENDED_BIKES list under a new "third pass" date-header)
+- `motoquant.db` — re-seeded via direct `import_batch` of 3 specs (+3 rows in `bike_models`)
+- `reports/catalog_expansion_2026-05-22.md` — this section appended
+
+## Carry-forward
+
+- None blocking. Pre-existing carry-forwards remain: WS-A `bike_repo.create_model`
+  year-suffix matching fix; scraper validator widening for Asian bias-ply tire
+  notation (currently cosmetic warning only).

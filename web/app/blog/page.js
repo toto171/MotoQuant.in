@@ -7,7 +7,7 @@ import EndOfBlogIndexCta from "./EndOfBlogIndexCta";
 export const metadata = {
   title: "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
   description:
-    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: best mods for KTM RC 390 ranked by cost-per-tenth, Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
+    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: KTM 890 Duke R India grey-market deep-dive, best mods for KTM RC 390 ranked by cost-per-tenth, Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
   keywords: [
     "motorcycle drag racing blog",
     "indian motorcycle quarter mile",
@@ -50,6 +50,9 @@ export const metadata = {
     "hayabusa 2026 gen 3 quarter mile india",
     "ktm 890 duke quarter mile",
     "ktm 890 duke r drag time india",
+    "ktm 890 duke r quarter mile india",
+    "ktm 890 duke r grey market india",
+    "ktm 890 duke vs 890 duke r",
     "ktm 890 duke vs mt-09",
     "suzuki gsx-s750 quarter mile",
     "gsx-s750 drag time india",
@@ -64,6 +67,15 @@ export const metadata = {
 };
 
 const POSTS = [
+  {
+    slug: "ktm-890-duke-r-quarter-mile-india",
+    title: "KTM 890 Duke R Quarter-Mile in India: 11.07s on the Grey Market",
+    date: "2026-05-22",
+    readTime: "12 min",
+    tags: ["KTM", "890 Duke R", "India grey market", "mid-cc naked", "physics"],
+    excerpt:
+      "MotoQuant simulates the KTM 890 Duke R at 11.07s and 202 km/h trap at Aamby Valley — 0.35s quicker than the standard 890 Duke. Why almost every 890 Duke in India is actually the R variant, where the tenths come from, and the ₹46,400 Tier-1 stack that closes the gap to a stock MT-09.",
+  },
   {
     slug: "best-mods-for-ktm-rc-390-budget-vs-cost-per-tenth",
     title: "Best Mods for KTM RC 390 in India: A Cost-Per-Tenth Ladder",

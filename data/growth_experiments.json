@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated": "2026-05-22",
+  "updated": "2026-05-22T18:00:00Z",
   "experiments": [
     {
       "id": "EXP-001",
@@ -134,6 +134,29 @@
       "default": "A",
       "implementation_notes": "Server-component blog/page.js stays SSG-rendered (metadata + canonical preserved). The variant-aware CTA lives in web/app/blog/EndOfBlogIndexCta.js as a client component (useSearchParams) wrapped in <Suspense fallback={null}> per the Vercel static-prerender rule. Variant A renders a hidden span so the DOM is byte-equivalent to the pre-EXP-006 control above the footer line. Variant B renders a single full-width orange-bordered CTA card after the grid closes — does not occupy a grid cell so it does not change the post layout on any breakpoint. data-exp='EXP-006' + data-variant attributes on both the wrapper div and the Link element for analytics attribution. Same canonical URL, same h1, same meta — SEO-safe. EXP-001 on landing-hero, EXP-002 + EXP-005 on /pricing, EXP-003 on /simulator, EXP-004 on /blog/the-physics-of-a-perfect-launch (post body, not index) — no page conflict.",
       "decision_criteria": "Ship variant B as new control if simulator-runs/blog-index-visitor lifts ≥15% with p<0.05 over ≥200 samples per arm AND blog_post_click_through_rate does not drop >10% (we want net new conversions to /simulator, not cannibalisation of post reads — if visitors abandon the post grid entirely for the CTA, content engagement collapses and the blog stops doing its SEO job). Roll back if blog_index_bounce_rate rises >10% (CTA looks pushy / out of place) or scroll_depth_pct drops materially (visitors see the CTA early and exit). No decision before 200 samples per arm. If B wins, evaluate replicating the pattern on /features and /docs index pages as separate follow-up micro-experiments (one page at a time, not a blanket rollout)."
+    },
+    {
+      "id": "EXP-007",
+      "started": "2026-05-22",
+      "page": "/login",
+      "element": "magic-link submit button copy",
+      "hypothesis": "First-time visitors arriving at /login (especially via the /signup → /login?signup=1 redirect, and from /pricing or blog CTAs) hesitate at the form because the submit button says 'Send sign-in link' — copy that describes the email-delivery mechanism rather than the outcome the visitor wants ('start using the product, free, with no password'). For returning users the mechanism wording is fine; for first-time-signup intent it raises the perceived friction ('do I need an account first? is this a sign-in for people who already signed up somewhere else?'). Variant B replaces the button with 'Start free · email me the link' — names the outcome (start free), embeds the zero-friction promise on the click target itself, and retains the mechanism noun ('link') so the action remains unambiguous. If the value-forward CTA reduces the moment-of-click hesitation, magic-link-request submits per /login visitor should rise.",
+      "variant_a": "Send sign-in link",
+      "variant_b": "Start free · email me the link",
+      "primary_metric": "magic_link_requests_per_login_page_visitor",
+      "secondary_metrics": [
+        "login_button_click_through_rate",
+        "magic_link_verification_completion_rate",
+        "login_page_bounce_rate",
+        "signup_redirect_to_submit_seconds",
+        "returning_user_friction_signal"
+      ],
+      "min_sample": 200,
+      "status": "live",
+      "flag": "?variant=B",
+      "default": "A",
+      "implementation_notes": "Client-side useSearchParams() inside LoginPageInner in web/app/login/page.js, which is already wrapped in <Suspense> per the static-prerender rule (Vercel App-Router useSearchParams + CSR-bailout requirement). Only the submit button label changes — form action, magic-link API call, heading ('Sign in'), subhead, terms+privacy footer, email input, AuthProvider integration, and ?token=... verification flow are all byte-identical across arms. data-exp='EXP-007' + data-variant attributes on the submit button for analytics attribution. Same canonical URL, same h1, same meta — SEO-safe. Note: the /signup page does a router.replace('/login?signup=1') so the natural funnel into this page already preserves the signup-intent query param; if we want to default first-time-signup visitors to variant B in a follow-up, we can switch the variant resolver from 'params.get(variant)===B' to 'params.get(variant)===B || params.get(signup)===1' — but that turns this from an A/B into a segmented default, so we hold it for a separate experiment. EXP-001 on landing-hero, EXP-002+EXP-005 on /pricing, EXP-003 on /simulator, EXP-004 on /blog/the-physics-of-a-perfect-launch, EXP-006 on /blog — no page conflict.",
+      "decision_criteria": "Ship variant B as new control if magic_link_requests/visitor lifts ≥15% with p<0.05 over ≥200 samples per arm AND magic_link_verification_completion_rate does not drop >5% (we want intent-to-start-using, not inflated submit clicks from visitors who never click through the email — if verification rate collapses, B is recruiting low-quality intent and should be rolled back). Roll back if login_page_bounce_rate rises >10% (button copy reads spammy / scammy) or returning_user_friction_signal increases (e.g. existing-user reports finding the page confusing — surfaced via support tickets, not analytics). No decision before 200 samples per arm. If B wins, evaluate the segmented-default follow-up (auto-B for ?signup=1 traffic, control for direct /login traffic) as a separate experiment — do not bundle the two changes."
     }
   ]
 }

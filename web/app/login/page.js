@@ -31,6 +31,14 @@ function LoginPageInner() {
   const [errorMsg, setErrorMsg] = useState("");
   const [devToken, setDevToken] = useState("");
 
+  // GROWTH_EXP_007: A/B variant — see data/growth_experiments.json
+  // Default OFF (control). Visitors who land with ?variant=B see the
+  // value-forward, zero-friction CTA copy. Same form action, same href,
+  // same heading, same canonical URL, same SEO. Button text only.
+  const ctaVariant = params?.get("variant") === "B" ? "B" : "A";
+  const sendButtonLabel =
+    ctaVariant === "B" ? "Start free · email me the link" : "Send sign-in link";
+
   useEffect(() => {
     if (isAuthenticated) router.replace("/account");
   }, [isAuthenticated, router]);
@@ -164,9 +172,11 @@ function LoginPageInner() {
                   <button
                     type="submit"
                     disabled={status === "sending"}
+                    data-exp="EXP-007"
+                    data-variant={ctaVariant}
                     className="w-full rounded-md bg-brand-orange py-3 text-sm font-display font-bold text-black shadow-orange-soft hover:bg-brand-orangeLight disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    {status === "sending" ? "Sending…" : "Send sign-in link"}
+                    {status === "sending" ? "Sending…" : sendButtonLabel}
                   </button>
                 </form>
 

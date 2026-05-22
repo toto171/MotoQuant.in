@@ -188,6 +188,12 @@ export default async function sitemap() {
       priority: 0.83,
     },
     {
+      url: `${SITE_URL}/blog/ktm-890-duke-r-quarter-mile-india`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.86,
+    },
+    {
       url: `${SITE_URL}/blog/how-to-tune-for-mmrt-chennai`,
       lastModified: now,
       changeFrequency: "monthly",
