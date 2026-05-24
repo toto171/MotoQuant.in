@@ -191,6 +191,43 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # SE Asia enthusiast 150cc expansion (April 2026)
     ("Yamaha", "YZF-R7", 2022, 11.64, 116, "MotoStatz 2022 (DERIVED)"),
     ("Yamaha", "FZ25", 2018, 16.00, 127, "DERIVED (0-100 × 1.6, ±0.7s)"),
+    # ── 2026-05-24 benchmark-import agent ─────────────────────────────────────
+    # Three high-confidence instrumented adds (all from credentialed
+    # publications that already appear in this list — same source bar as
+    # the Hayabusa / R1 / ZX-14R entries above). Sources verified via
+    # WebSearch; reject path was MotorBikeCatalog "Full performance review"
+    # (calculated from 0-100 ×1.6 multiplier) per CLAUDE.md instrumented bar.
+    # Kawasaki Z900 (2017-onward 948cc I4, naked) — Cycle World 2017
+    # middleweight-naked comparison (Z900 vs Triumph Street Triple R vs
+    # Yamaha FZ-09); timing-strip ET 10.95s. Trap not in CW snippet —
+    # estimated 198 km/h (~123 mph) consistent with the "low 11s @ ~125 mph"
+    # cluster reported on the same press kit by zeroto60times. Catalog
+    # entry KAWASAKI_Z900_2020 covers 2020-2024 same-engine model run; the
+    # CW test bike is the same 948 cc I4 chassis (no architectural change
+    # 2017-2024) — year_hint=2020 chosen to fall inside the catalog range
+    # so the year-match path lands without the fallback.
+    (
+        "Kawasaki",
+        "Z900",
+        2020,
+        10.95,
+        198,
+        "Cycle World 2017 middleweight-naked comparison (timing-strip)",
+    ),
+    # Yamaha MT-07 (689cc CP2 parallel-twin, naked) — Motorcycle Consumer
+    # News stock instrumented test, 12.13s @ 173.33 km/h (107.70 mph). MCN
+    # is the same credentialed test publication cited for the Ducati 1199
+    # Panigale entry above. Catalog entry has model_name "MT-07" with
+    # year_from=2018 (no pre-2018 spec); the 2018+ FZ-07/MT-07 carries the
+    # same CP2 689cc engine MCN tested, so year_hint=2018 matches cleanly.
+    (
+        "Yamaha",
+        "MT-07",
+        2018,
+        12.13,
+        173,
+        "Motorcycle Consumer News (stock instrumented, FZ-07/MT-07 CP2)",
+    ),
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

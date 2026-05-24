@@ -791,6 +791,32 @@ fi
 
 ---
 
+## INSTRUCTION — 2026-05-24 — [opportunistic] [kaizen] fix postflight deploy-alert suppression (40 dup alerts in 7 days)
+[opportunistic] [kaizen]
+
+**Detected by:** customer-support agent triage, session 1779647439-649, 2026-05-24. Report: `reports/support_triage_2026-05-24.md`.
+
+**Symptom:** `DISPATCH_OUTBOX.md` has accumulated **40 identical `### ALERT — ... Postflight deploy check timed out after 180s`** entries across 2026-05-17 → 2026-05-24 (~5.7/day). The matching `[urgent] [blocking]` Railway-outage ticket has existed in `DISPATCH_INBOX.md` since 2026-05-17 20:42 UTC — first dup alert fired 3 min later at 20:45 UTC and they have not stopped.
+
+**Existing suppression:** `scripts/session_postflight.sh::_blocking_ticket_open` (lines 284–299) is designed to suppress exactly this case. Manually running the same awk against today's inbox returns the matching ticket. So the gate logic IS sound — but something at postflight runtime is bypassing it.
+
+**Suspected causes (in order of likelihood):**
+1. The awk reads `MQ_WORKDIR/repo/DISPATCH_INBOX.md`, but at the moment `verify_deploy` runs, the *committed* inbox in the just-pushed HEAD already contains the ticket — verify that the working-tree copy matches HEAD at that point (no race against any in-flight `git checkout` or rewrite).
+2. CRLF line-endings on the inbox could break the awk's `block && /\[blocking\]/` match (CRLF would put `\r` between `]` and end-of-line, the regex still matches but worth confirming).
+3. The state machine clears `block` only on the next `## INSTRUCTION` header — if a stray `## ` heading appears mid-block (e.g. one of the curl example URLs in the May-17 ticket starts with `$ curl https://...`), AWK's `/^## /` re-enters block context with `tagged=0, matched=0`. **Most likely cause** — verify by counting `^##` lines inside the ticket body.
+
+**Required fix:**
+1. Write a `scripts/test_blocking_suppression.sh` that pipes a known inbox snapshot through `_blocking_ticket_open` and asserts the expected ticket title is returned. Wire it into `tests/test_session_scripts.sh` (or create that file).
+2. Tighten the awk's `## INSTRUCTION` block-start regex to require `## INSTRUCTION` (full keyword), not bare `## `, to avoid the curl-example false-reset.
+3. Add a defensive backstop in `_queue_alert`: read the LAST `### ALERT` block from the outbox; if its message body is byte-identical to the new message AND the timestamp is <6h old, append ` (repeat #N+1)` to the existing block instead of writing a new one. This prevents ANY future feedback loop where suppression silently regresses.
+4. Add a `reports/cleanup_outbox_alerts.py` one-shot that consolidates the existing 40 dup alerts into a single block with `(repeated 40x between 2026-05-17 and 2026-05-24)` — keeps git history but stops the noise from drowning out the next real alert.
+
+**Effort:** ~2 hours (30 min repro + AWK fix, 30 min for the dedup backstop in `_queue_alert`, 30 min for the consolidation one-shot + run, 30 min for the regression test).
+
+**Not in scope for this ticket:** fixing the underlying Railway outage — that's still on the user (see INBOX line 140, `[urgent] [blocking]`, day-7 open).
+
+---
+
 ## INSTRUCTIONS QUEUE
 
 > _Add new `## INSTRUCTION` blocks above this divider. Claude marks them `## DONE` once handled._

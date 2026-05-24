@@ -122,6 +122,12 @@ export default async function sitemap() {
       priority: 0.8,
     },
     {
+      url: `${SITE_URL}/blog/hayabusa-quarter-mile-physics-what-limits-9-6-seconds`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.88,
+    },
+    {
       url: `${SITE_URL}/blog/hero-xtreme-200s-4v-quarter-mile-physics`,
       lastModified: now,
       changeFrequency: "monthly",
