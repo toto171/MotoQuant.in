@@ -228,6 +228,50 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         173,
         "Motorcycle Consumer News (stock instrumented, FZ-07/MT-07 CP2)",
     ),
+    # ── 2026-05-24 benchmark-import agent (afternoon pass) ────────────────────
+    # Three additional high-confidence instrumented adds, sourced from
+    # publications already cited in this list (Sport Rider / MotoStatz Dragy).
+    # All catalog year ranges verified to include year_hint.
+    # Suzuki GSX-S1000 (999 cc I4 naked, 2021-2024) — Sport Rider's published
+    # sportbike-performance-numbers table at cycleworld.com/sport-rider/tech/
+    # sportbike-performance-numbers (Sport Rider's timing-strip results for
+    # the GSX-S1000 naked: 10.6s @ 214 km/h / 133 mph). Same Sport Rider
+    # source bar as the GSX-R 1000 K7/K9/L7 entries above.
+    (
+        "Suzuki",
+        "GSX-S1000",
+        2022,
+        10.60,
+        214,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip)",
+    ),
+    # Triumph Street Triple 765 RS (765 cc triple, 2020-2024) — MotoStatz
+    # Dragy instrumented: 10.79s @ 132 mph (212 km/h). MotoStatz is the same
+    # source bar used for the Yamaha R7, Ninja 400, Ninja 650, Z 650, MT-10
+    # and S 1000 RR entries above; all MotoStatz figures in this list are
+    # Dragy-GPS-measured stock runs.
+    (
+        "Triumph",
+        "Street Triple 765 RS",
+        2021,
+        10.79,
+        212,
+        "MotoStatz 2021 (Dragy, stock instrumented)",
+    ),
+    # Ducati Panigale V2 (955 cc V2 sport, 2020-2024) — MotoStatz Dragy
+    # instrumented: 10.44s @ 142 mph (228 km/h). Catalog entry covers the
+    # 2020-2024 model run with the 955 cc Superquadro engine; the MotoStatz
+    # data is on this exact platform (separate from the 959 Panigale 2016-
+    # 2019 entry which is also in the catalog but already has the 1199/1299
+    # cluster covered).
+    (
+        "Ducati",
+        "Panigale V2",
+        2022,
+        10.44,
+        228,
+        "MotoStatz 2022 (Dragy, stock instrumented)",
+    ),
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

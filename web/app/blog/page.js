@@ -8,9 +8,14 @@ export const metadata = {
   title:
     "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
   description:
-    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Triumph Street Triple 765 R, KTM 890 Duke R India grey-market deep-dive, best mods for KTM RC 390 ranked by cost-per-tenth, Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
+    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Yamaha MT-15 V1 155cc naked deep-dive, Triumph Street Triple 765 R, KTM 890 Duke R India grey-market, best mods for KTM RC 390 ranked by cost-per-tenth, Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
   keywords: [
     "motorcycle drag racing blog",
+    "yamaha mt-15 v1 quarter mile",
+    "mt-15 v1 vs r15 v3",
+    "mt-15 v1 drag time india",
+    "yamaha mt-15 2019 0-100",
+    "mt-15 v1 top speed india",
     "aprilia tuono 660 factory quarter mile",
     "tuono 660 factory drag time india",
     "tuono 660 factory vs base tuono",
@@ -81,6 +86,15 @@ export const metadata = {
 };
 
 const POSTS = [
+  {
+    slug: "yamaha-mt-15-v1-quarter-mile-physics",
+    date: "2026-05-24",
+    readTime: "10 min",
+    tags: ["Yamaha", "MT-15 V1", "Indian 155cc", "naked sport", "physics"],
+    title: "Yamaha MT-15 V1 Quarter-Mile Physics: 155cc Naked Drag",
+    excerpt:
+      "MotoQuant simulates the Yamaha MT-15 V1 at 17.05s and 125.5 km/h trap. The 2019 R15 V3 platform without VVA loses about a tenth and a half to its faired sibling — most of it aero, not engine. Where the cheap tenths actually live for Indian 155cc owners, and why a ₹3,850 sprocket-and-tire combo beats a ₹38,000 slip-on.",
+  },
   {
     slug: "hayabusa-quarter-mile-physics-what-limits-9-6-seconds",
     date: "2026-05-24",

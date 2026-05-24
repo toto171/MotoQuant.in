@@ -8,6 +8,7 @@ import SuggestBikeForm from '../../components/SuggestBikeForm';
 import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
 import { API_URL } from '../../lib/api';
+import BikeCardCta from './BikeCardCta';
 
 const PAGE_SIZE = 40;
 
@@ -25,49 +26,60 @@ function BikeCard({ bike }) {
   const mass = bike.dry_mass_kg ? `${Math.round(bike.dry_mass_kg)} kg` : '—';
   const disp = bike.displacement_cc ? `${Math.round(bike.displacement_cc)}cc` : '—';
   return (
-    <Link
-      href={`/bikes/${bike.id}`}
-      className="block group"
+    // EXP-009: pill is an absolutely-positioned sibling so we don't nest <a>.
+    // Control (default) renders nothing — visually identical to pre-EXP markup.
+    <div
+      className="relative h-full"
+      data-exp="EXP-009"
+      data-bike-id={bike.id ?? ''}
     >
-      <motion.div
-        whileHover={{ y: -3 }}
-        transition={{ duration: 0.2 }}
-        className="h-full glass rounded-xl border border-white/10 p-5 hover:border-brand-orange/50 transition-colors"
+      <Link
+        href={`/bikes/${bike.id}`}
+        className="block group h-full"
       >
-        <div className="flex items-start justify-between mb-3">
-          <div className="min-w-0 flex-1">
-            <p className="font-mono text-[10px] text-white/50 uppercase tracking-wider truncate">
-              {bike.manufacturer}
-            </p>
-            <h3 className="font-display font-bold text-white text-lg leading-tight mt-1 line-clamp-2 group-hover:text-brand-orange transition-colors">
-              {bike.model}
-            </h3>
+        <motion.div
+          whileHover={{ y: -3 }}
+          transition={{ duration: 0.2 }}
+          className="h-full glass rounded-xl border border-white/10 p-5 hover:border-brand-orange/50 transition-colors"
+        >
+          <div className="flex items-start justify-between mb-3">
+            <div className="min-w-0 flex-1">
+              <p className="font-mono text-[10px] text-white/50 uppercase tracking-wider truncate">
+                {bike.manufacturer}
+              </p>
+              <h3 className="font-display font-bold text-white text-lg leading-tight mt-1 line-clamp-2 group-hover:text-brand-orange transition-colors">
+                {bike.model}
+              </h3>
+            </div>
+            {bike.year && (
+              <span className="font-mono text-xs text-white/50 shrink-0 ml-2">{bike.year}</span>
+            )}
           </div>
-          {bike.year && (
-            <span className="font-mono text-xs text-white/50 shrink-0 ml-2">{bike.year}</span>
+          <div className="grid grid-cols-3 gap-2 mt-4">
+            <div>
+              <p className="text-[9px] font-mono uppercase tracking-wider text-white/40">Disp.</p>
+              <p className="text-sm font-mono text-white/90 tabular-nums mt-0.5">{disp}</p>
+            </div>
+            <div>
+              <p className="text-[9px] font-mono uppercase tracking-wider text-white/40">Power</p>
+              <p className="text-sm font-mono text-brand-orange tabular-nums mt-0.5">{power}</p>
+            </div>
+            <div>
+              <p className="text-[9px] font-mono uppercase tracking-wider text-white/40">Mass</p>
+              <p className="text-sm font-mono text-white/90 tabular-nums mt-0.5">{mass}</p>
+            </div>
+          </div>
+          {bike.category && (
+            <div className="mt-4 inline-block px-2 py-0.5 rounded border border-brand-orange/30 bg-brand-orange/5 text-[10px] font-mono text-brand-orange uppercase tracking-wide">
+              {bike.category}
+            </div>
           )}
-        </div>
-        <div className="grid grid-cols-3 gap-2 mt-4">
-          <div>
-            <p className="text-[9px] font-mono uppercase tracking-wider text-white/40">Disp.</p>
-            <p className="text-sm font-mono text-white/90 tabular-nums mt-0.5">{disp}</p>
-          </div>
-          <div>
-            <p className="text-[9px] font-mono uppercase tracking-wider text-white/40">Power</p>
-            <p className="text-sm font-mono text-brand-orange tabular-nums mt-0.5">{power}</p>
-          </div>
-          <div>
-            <p className="text-[9px] font-mono uppercase tracking-wider text-white/40">Mass</p>
-            <p className="text-sm font-mono text-white/90 tabular-nums mt-0.5">{mass}</p>
-          </div>
-        </div>
-        {bike.category && (
-          <div className="mt-4 inline-block px-2 py-0.5 rounded border border-brand-orange/30 bg-brand-orange/5 text-[10px] font-mono text-brand-orange uppercase tracking-wide">
-            {bike.category}
-          </div>
-        )}
-      </motion.div>
-    </Link>
+        </motion.div>
+      </Link>
+      <div className="absolute bottom-3 right-3 z-10 pointer-events-auto">
+        <BikeCardCta bikeId={bike.id} />
+      </div>
+    </div>
   );
 }
 

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated": "2026-05-22T22:00:00Z",
+  "updated": "2026-05-24",
   "experiments": [
     {
       "id": "EXP-001",
@@ -180,6 +180,29 @@
       "default": "A",
       "implementation_notes": "Client-side useSearchParams() inside BottomCtaInner in web/app/features/BottomCta.js, wrapped in <Suspense> per the Vercel App-Router static-prerender / CSR-bailout rule. The Suspense fallback renders the control (variant A) markup verbatim so SSR/SSG output is byte-identical to the pre-EXP-008 page — no layout shift, no hydration mismatch, no SEO drift. Variant flip touches only two text nodes (button label + subhead paragraph); h2 'Ready to run your first sim?', href='/simulator', and the 'See pricing' secondary CTA are unchanged across arms (single-variable rule: copy bundle, not multi-element redesign). data-exp='EXP-008' + data-variant attributes on the wrapper div AND the primary Link element so click-attribution survives even if wrapper analytics break. Same canonical URL, same h1, same meta tags — SEO-safe. EXP-001 on landing-hero, EXP-002+EXP-005 on /pricing, EXP-003 on /simulator, EXP-004 on /blog/the-physics-of-a-perfect-launch, EXP-006 on /blog index, EXP-007 on /login — no page conflict; /features previously had zero live experiments.",
       "decision_criteria": "Ship variant B as new control if simulator-runs/features-visitor lifts ≥15% with p<0.05 over ≥200 samples per arm AND simulator_page_first_run_completion_rate does not drop >5% (we want intent-to-actually-run, not inflated clicks from visitors who land on /simulator and immediately bounce — if completion rate collapses, B is recruiting curiosity clicks not run-intent). Roll back if features_to_pricing_ctr drops >25% (CTA may be cannibalising the secondary pricing path entirely) or features_page_bounce_rate rises >10% (specificity reads spammy). No decision before 200 samples per arm. If B wins, evaluate replicating the time-bound + action-specific pattern on the landing-page hero (a follow-up to EXP-001, possibly as a 3-way test if EXP-001 has resolved by then) as a SEPARATE experiment — do not bundle. Note interaction with EXP-001: a visitor at landing-hero variant B then features-page variant B sees a consistent verb-result message; check funnel attribution by segmenting on landing-arrival variant before declaring features-page lift."
+    },
+    {
+      "id": "EXP-009",
+      "started": "2026-05-24",
+      "page": "/bikes",
+      "element": "inline 'Run sim' pill on each BikeCard in the catalog grid",
+      "hypothesis": "Visitors who land on /bikes are in a 'browse / lookup' mode — they scroll the 754-bike grid (40 per page, paginated), find their bike, and click into the detail page to read specs. The current BikeCard has exactly one action: a Link wrapping the whole card that navigates to /bikes/<id>. The simulator is mentioned only in a prose sentence inside the header subtitle ('open the quarter-mile calculator'), which most grid-scanners never read. This funnels nearly all catalog traffic into the detail page, not the simulator — even though every grid visitor implicitly has the question 'what does this bike actually run?' which is what the simulator answers. Variant B adds a small, secondary 'Run sim' pill in the bottom-right corner of each card, absolutely positioned outside the parent Link so it can navigate to /simulator independently. The detail-page Link remains the dominant card action (same hover area, same group-hover styling); the pill is a visual minority. Hypothesis: an inline catalog → simulator affordance, even a small one, will lift simulator-runs/bikes-visitor without cannibalising the detail-page CTR (the pill is small and offset; the card body still links to the detail page). Distinct from EXP-001 (landing-hero, cold visitor) and EXP-008 (features-page bottom CTA, evaluation mid-funnel) — this is a high-intent catalog-browsing cohort whose primary friction is awareness, not motivation. /bikes had zero live experiments prior to this.",
+      "variant_a": "control: BikeCard has no inline simulator CTA; entire card links to /bikes/<id> only",
+      "variant_b": "BikeCard gains a small 'Run sim' pill in the bottom-right corner linking to /simulator (event.stopPropagation on click so the parent Link doesn't fire); pill styling matches brand-orange catalog accent (border + 10% fill, monospace uppercase 10px, Zap icon), small enough to read as a secondary action rather than competing with the dominant card-body link",
+      "primary_metric": "simulator_runs_per_bikes_page_visitor",
+      "secondary_metrics": [
+        "bikes_card_run_sim_click_through_rate",
+        "bikes_to_detail_page_ctr",
+        "bikes_page_bounce_rate",
+        "simulator_page_first_run_completion_rate_from_bikes_referrer",
+        "bikes_to_simulator_time_to_click_s"
+      ],
+      "min_sample": 200,
+      "status": "live",
+      "flag": "?variant=B",
+      "default": "A",
+      "implementation_notes": "useSearchParams() lives inside VariantPillInner in web/app/bikes/BikeCardCta.js, wrapped in <Suspense fallback={null}> per the App-Router static-prerender / CSR-bailout rule documented in CLAUDE.md. The Suspense fallback is null, meaning the SSR/SSG output for both arms is byte-identical to the pre-EXP-009 page — zero layout shift, zero hydration mismatch, zero SEO drift on the control. BikeCard structure was minimally restructured: outer <Link> wrapping the entire card is unchanged (preserves the dominant action + SEO link graph); a sibling <div className='absolute bottom-3 right-3'> hosts the BikeCardCta component so we never nest <a> tags (invalid HTML). On variant A, BikeCardCta renders null and the absolutely-positioned div is empty (no visual change vs control). On variant B, the pill links to /simulator with onClick={e=>e.stopPropagation()} so the parent <Link> click handler doesn't navigate to /bikes/<id>. data-exp='EXP-009' on the wrapper div AND data-variant + data-cta + data-bike-id on the pill itself, so click-attribution survives if either layer of analytics misfires. No page conflict with EXP-001..008 — /bikes had no live experiments. The pill links to /simulator without a ?bike=<id> query param because the simulator does not currently honour a bike deeplink and EXP-003 owns the simulator's own variant flag; bundling a deeplink would confound EXP-009 with a separate feature (multi-variable test, against guidance).",
+      "decision_criteria": "Ship variant B as new control if simulator-runs/bikes-visitor lifts ≥15% with p<0.05 over ≥200 samples per arm AND bikes_to_detail_page_ctr does not drop >10% (we want incremental simulator traffic, not cannibalised detail-page traffic — if detail CTR collapses, the pill is winning the wrong battle). Roll back if simulator_page_first_run_completion_rate_from_bikes_referrer drops >15% vs. the site-wide baseline (pill may be recruiting low-intent curiosity clicks that bounce off the simulator) or if bikes_page_bounce_rate rises >10% (visual noise reads as cluttered/spammy). No decision before 200 samples per arm. If B wins, evaluate: (a) adding a /simulator?bike=<id> deeplink as a SEPARATE follow-up experiment to test pre-selection vs. the simulator's own EXP-003 default, (b) replicating the pattern on /bikes/<id> detail pages (one prominent CTA above the spec sheet)."
     }
   ]
 }
