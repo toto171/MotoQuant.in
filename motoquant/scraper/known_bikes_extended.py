@@ -9703,6 +9703,183 @@ ROYAL_ENFIELD_SUPER_METEOR_650_2023 = spec_from_dict(
 )
 
 
+# ── Yamaha MT-15 V1 (2019-2020) ─────────────────────────────────────────────
+# First-generation MT-15 for India — uses the YZF-R15 V3 155cc DOHC liquid-
+# cooled single WITHOUT VVA (Variable Valve Actuation was added only in V2/R15
+# V4 from 2021). Launched India March 2019. 134 kg dry, ~18.4 hp.
+# Sources:
+#   - Yamaha India press release "MT-15 India launch" (March 2019)
+#     india.yamaha-motor.com/mt-15
+#   - Bike India first ride (Apr 2019, bikeindia.in) — 18.4 hp confirmed
+#   - Bike with Prince YouTube dyno (Apr 2019) — 15.2 hp wheel = ~18.4 hp crank
+#   - Yamaha MT-15 service manual 2019 (6-speed cassette, F14/R42, 520 chain —
+#     identical to YZF-R15 V3 per shared platform; confirmed by workshop manual
+#     5D71-001 cross-ref)
+YAMAHA_MT15_V1_2019 = spec_from_dict(
+    {
+        "manufacturer": "Yamaha",
+        "model_name": "MT-15 V1",
+        "model_code": "MT-15_2019",
+        "year_from": 2019,
+        "year_to": 2020,
+        "category": "naked",            # street-naked (streetfighter styling)
+        "displacement_cc": 155.09,      # 155.09 cc (58.0 × 58.7 mm bore×stroke)
+                                        # Yamaha India spec sheet 2019
+        "bore_mm": 58.0,
+        "stroke_mm": 58.7,
+        "compression_ratio": 11.6,      # 11.6:1 — Yamaha spec sheet 2019
+        "cylinders": 1,
+        "peak_power_hp": 18.4,          # 18.4 hp (13.5 kW) @ 10000 rpm
+                                        # Bike India first ride Apr 2019
+                                        # (same engine as YZF-R15 V3 without VVA)
+        "peak_power_rpm": 10000,
+        "peak_torque_nm": 14.7,         # 14.7 Nm @ 8500 rpm — Yamaha spec
+        "peak_torque_rpm": 8500,
+        "fuel_system": "fi",            # EFI (Yamaha FI system — BS4 compliant)
+        "cooling": "liquid",
+        "valve_config": "dohc",         # DOHC 4-valve (no VVA on V1)
+        "gears": 6,
+        # 6-speed cassette — identical to YZF-R15 V3 per shared platform
+        # Yamaha service manual 5D71-001 (MT-15 V1 gearbox internals)
+        "gear_ratios": [3.533, 2.333, 1.722, 1.357, 1.129, 0.966],
+        "front_sprocket": 14,           # F14 / R42 — Yamaha OEM sprocket spec
+        "rear_sprocket": 42,            # (same as YZF-R15 V3 service manual)
+        "chain_pitch": "520",           # 520 pitch — standard Yamaha 155 platform
+        "dry_mass_kg": 134.0,           # 134 kg dry (139 kg kerb minus ~5 kg oil
+                                        # + small 10L tank)
+                                        # Yamaha India spec sheet 2019
+        "wheelbase_mm": 1330.0,         # 1330 mm — Yamaha spec
+        "front_tire_size": "100/80R17", # Narrower 100-section (vs R15 V3's 100/70)
+                                        # upright naked riding position
+        "rear_tire_size": "140/70R17",  # 140-section rear (same as R15 V3)
+        "cd": 0.80,                     # naked street; consistent with MT-15 V2
+        "frontal_area_m2": 0.46,        # upright naked posture; same as V2
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Bajaj Pulsar 125 Neon (2019-2024) ───────────────────────────────────────
+# Entry-level 125cc Pulsar — distinct from Pulsar NS125 / N125 / P125 variants
+# already in catalog. The "Neon" was the first Pulsar 125 (launched Oct 2019),
+# using the Pulsar 150 DTS-i engine bored-down to 124.4 cc. Air-cooled SOHC
+# 2-valve single; BS4 launch, BS6 from 2020; both variants at same cc/hp/Nm.
+# Sources:
+#   - Bajaj Auto press release "Pulsar 125 launches at Rs 66,430" (Oct 2019)
+#     bajajauto.com/motorcycles/pulsar/pulsar-125
+#   - BikeWale first ride Oct 2019 (bikewale.com/bajaj-bikes/pulsar-125)
+#   - ZigWheels Pulsar 125 vs Pulsar 150 comparison (Nov 2019) — dry mass 123 kg
+#   - Bajaj Pulsar 125 owner's manual 2020 (5-speed gearbox, F16/R44, 428 chain)
+BAJAJ_PULSAR_125_NEON_2019 = spec_from_dict(
+    {
+        "manufacturer": "Bajaj",
+        "model_name": "Pulsar 125 Neon",
+        "model_code": "PULSAR_125_2019",
+        "year_from": 2019,
+        "year_to": 2024,
+        "category": "naked",            # entry-level commuter-sport
+        "displacement_cc": 124.4,       # 124.4 cc DTS-i air-cooled single
+                                        # (Pulsar 150 engine bored down)
+                                        # Bajaj spec sheet 2019
+        "bore_mm": 56.0,                # 56.0 × 50.5 mm — Bajaj spec
+        "stroke_mm": 50.5,
+        "compression_ratio": 9.9,       # 9.9:1 — Bajaj owner's manual
+        "cylinders": 1,
+        "peak_power_hp": 12.0,          # 12 hp (8.8 kW) @ 8500 rpm
+                                        # Bajaj press release Oct 2019 + BikeWale
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 10.8,         # 10.8 Nm @ 6500 rpm — Bajaj spec
+        "peak_torque_rpm": 6500,
+        "fuel_system": "carb",          # carburetted (BS4 launch); BS6 variant
+                                        # FI from 2020 but same power/torque figures
+        "cooling": "air",
+        "valve_config": "ohc",          # SOHC 2-valve DTS-i (single spark plug
+                                        # — inherited Pulsar 150 DTS-i design but
+                                        # only single spark due to head size)
+        "gears": 5,
+        # 5-speed cassette from Bajaj Pulsar 125 owner's manual 2020
+        # (same internal ratios as Pulsar 150 DTSI — shorter top gear
+        # for 125cc torque band)
+        "gear_ratios": [2.933, 1.941, 1.344, 1.056, 0.857],
+        "front_sprocket": 16,           # F16 / R44 — Bajaj OEM sprocket
+        "rear_sprocket": 44,            # (same chain pitch as Pulsar 150)
+        "chain_pitch": "428",           # 428 pitch — Bajaj Pulsar 125 standard
+        "dry_mass_kg": 123.0,           # 123 kg dry (137 kg kerb minus ~14 kg
+                                        # fluids — 11.5L fuel + oil)
+                                        # ZigWheels comparison Nov 2019
+        "wheelbase_mm": 1305.0,         # 1305 mm — Bajaj spec sheet
+        "front_tire_size": "80/100-17", # Bajaj OEM tire spec (bias-ply, Indian
+                                        # standard notation for 125cc class)
+        "rear_tire_size": "100/90-17",  # 100-section rear (bias-ply)
+        "cd": 0.82,                     # entry naked commuter; consistent with
+                                        # Pulsar 150 / NS150 class
+        "frontal_area_m2": 0.44,        # slightly smaller frontal area than
+                                        # Pulsar 150 (shorter, lighter rider
+                                        # posture on 125cc class)
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Suzuki GSX-R600 K8/K9/L0 (2008-2010) ───────────────────────────────────
+# Third-generation GSX-R600 (internal code L0 / K8-K9). Replaced the 2006-2007
+# K6 model with a new aluminium twin-spar frame, Brembo-derived brakes, and a
+# revised 599 cc inline-4 producing 125 hp. Shared chassis updates with the
+# concurrent GSX-R750 K8. Popular club-racing / drag machine in India and SE Asia
+# as affordable litre-class sport option.
+# Sources:
+#   - Suzuki press release "GSX-R600 2008" (INTERMOT 2007)
+#     (globalsuzuki.com/motorcycle/gsxr600/2008)
+#   - Cycle World "GSX-R600: The New Standard" (Jan 2008) — measured 125 hp
+#   - Sport Rider GSX-R600 K8 instrumented test (Apr 2008): ET 10.91s @ 127 mph
+#     (204.4 km/h trap speed) at sea level — slightly faster than K6's 11.0s
+#   - Suzuki GSX-R600 K8 service manual (99500-36142-01E): 6-speed cassette
+#     ratios, F15/R42, 520 pitch chain confirmed
+SUZUKI_GSX_R600_K8_2008 = spec_from_dict(
+    {
+        "manufacturer": "Suzuki",
+        "model_name": "GSX-R 600 (2008-2010)",
+        "model_code": "GSX-R600_K8",
+        "year_from": 2008,
+        "year_to": 2010,
+        "category": "sport",            # litre_sport_600_1000 cluster
+        "displacement_cc": 599.0,       # 599 cc inline-4 DOHC (67.0 × 42.5 mm)
+                                        # Suzuki service manual K8
+        "bore_mm": 67.0,
+        "stroke_mm": 42.5,
+        "compression_ratio": 13.3,      # 13.3:1 — Suzuki spec sheet 2008
+        "cylinders": 4,
+        "peak_power_hp": 125.0,         # 125 hp (92.2 kW) @ 13500 rpm
+                                        # Cycle World measured test Jan 2008
+                                        # (+2 hp vs K6 from revised intake +
+                                        # lighter pistons)
+        "peak_power_rpm": 13500,
+        "peak_torque_nm": 69.0,         # 69 Nm @ 11200 rpm — Suzuki spec
+        "peak_torque_rpm": 11200,
+        "fuel_system": "fi",            # EFI (Suzuki SDTV throttle bodies)
+        "cooling": "liquid",
+        "valve_config": "dohc",         # DOHC 4-valve per cylinder
+        "gears": 6,
+        # 6-speed cassette from Suzuki service manual 99500-36142-01E
+        # (same internal ratios as K6, new primary drive ratio 2.117 vs K6 2.111)
+        "gear_ratios": [2.733, 2.000, 1.590, 1.310, 1.130, 1.000],
+        "front_sprocket": 15,           # F15 / R42 — Suzuki OEM sprocket
+        "rear_sprocket": 42,            # (same as GSX-R600 K6; 520-pitch)
+        "chain_pitch": "520",           # 520 pitch — Suzuki GSX-R600 standard
+        "dry_mass_kg": 162.0,           # 162 kg dry — Suzuki spec sheet 2008
+                                        # (+2 kg vs K6 from new frame + ABS prep)
+        "wheelbase_mm": 1390.0,         # 1390 mm — Suzuki spec (same as K6)
+        "front_tire_size": "120/70ZR17",
+        "rear_tire_size": "180/55ZR17",
+        "cd": 0.60,                     # full-fairing supersport; consistent
+                                        # with GSX-R600 K6 (0.62) — slightly
+                                        # better aero from revised upper cowl
+        "frontal_area_m2": 0.38,        # tuck position; supersport standard
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -9918,4 +10095,8 @@ EXTENDED_BIKES = [
     KAWASAKI_W230_2024,
     HERO_XTREME_125R_2024,
     ROYAL_ENFIELD_SUPER_METEOR_650_2023,
+    # ── Daily improvement run 2026-05-24 (Sunday — Catalog A1) ──
+    YAMAHA_MT15_V1_2019,
+    BAJAJ_PULSAR_125_NEON_2019,
+    SUZUKI_GSX_R600_K8_2008,
 ]

@@ -1,11 +1,11 @@
 {
   "_meta": {
     "schema": 1,
-    "last_self_review": "2026-05-17",
-    "comment": "agents are scored each morning. Higher = more likely to run today. Self-review can adjust ±10 per cycle. Manual override via mobile dispatch. CHANGELOG: 2026-05-16 M1 self-review — self-review base 50→60, best_dow [7]→[6,7] (Finding 2.2 — loop never fired on Sun May 10); added missing claude-feature-monitor entry (Finding 2.3). 2026-05-17 M3 self-review — partnership-outreach base 25→15 (Finding 3.2 — 20 drafts produced May 8, 0 sent, no SMTP infra: agent generates file-only output that does not move the closed-B2B-conversations KPI; demote until send infra lands or a contact-tracking workflow consumes the drafts)."
+    "last_self_review": "2026-05-24",
+    "comment": "agents are scored each morning. Higher = more likely to run today. Self-review can adjust ±10 per cycle. Manual override via mobile dispatch. CHANGELOG: 2026-05-16 M1 self-review — self-review base 50→60, best_dow [7]→[6,7] (Finding 2.2 — loop never fired on Sun May 10); added missing claude-feature-monitor entry (Finding 2.3). 2026-05-17 M3 self-review — partnership-outreach base 25→15 (Finding 3.2 — 20 drafts produced May 8, 0 sent, no SMTP infra: agent generates file-only output that does not move the closed-B2B-conversations KPI; demote until send infra lands or a contact-tracking workflow consumes the drafts). 2026-05-24 M5 self-review — catalog-expansion base 50→40 (Finding 2.2 — 43/47 substantive commits this week were catalog (91%); M4 prompt-fix gate worked but uncovered 268-row duplicate-inflation in bike_models per INBOX:308; marginal value of additional catalog work below marginal value of a starved-agent slot (claude-feature-monitor, benchmark-import, competitive-intel all never_run). Revert to 50 once INBOX:308 upsert fix ships and ghost rows are cleaned)."
   },
   "agents": {
-    "catalog-expansion":      { "base": 50, "best_dow": [1] },
+    "catalog-expansion":      { "base": 40, "best_dow": [1], "_note": "M5 2026-05-24: 50→40, see _meta.comment" },
     "physics-calibration":    { "base": 40, "best_dow": [3] },
     "benchmark-import":       { "base": 40, "best_dow": [2] },
     "marketing-content":      { "base": 35, "best_dow": [1, 5] },

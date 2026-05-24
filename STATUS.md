@@ -25,7 +25,7 @@ last_updated: <!-- AUTO-UPDATED -->
 
 | KPI | Now | Q-end target | Direction | Last-updated |
 |---|---|---|---|---|
-| Bike catalog count | 345 in DB / 447 in source — +102-bike re-seed gap (M4 Finding 2.1) | 500+ by Q4 | ↑ | 2026-05-21 |
+| Bike catalog count | 751 raw DB / 483 distinct / 488 source — 268 duplicate rows (M5 Finding 2.1, INBOX:308 promoted [urgent]) | 500+ by Q4 | ↑ | 2026-05-24 |
 | Validated ETs ±0.20s | 47% | 60% Q3 / 70% Q4 | ↑ | 2026-05-04 |
 | Benchmark sources | 79 | 100+ | ↑ | 2026-05-04 |
 | Indexed pages (motoquant.in) | (TBD) | 50+ Q2 / 200+ Q4 | ↑ | (need GA4) |
@@ -41,6 +41,28 @@ last_updated: <!-- AUTO-UPDATED -->
 ## Last 7 days — session-level digest
 
 <!-- self-review weekly summary lives here. Updated every Sunday. -->
+
+### Week of 2026-05-17 → 2026-05-24 (self-review — Sunday cadence)
+
+**Dominant signal:** **Loop drained twice this morning.** INBOX:639 (catalog-expansion prompt fix, queued by M4) + INBOX:674 (postflight dedup tag flip, queued by M4) both moved INSTRUCTION → DONE at the start of today's session. **First multi-item drain in one session ever.** Net since M3 (2026-05-17): 3 DONE / 4 queued = **net -1.** Layer 4 verdict revised upward from M4: loop is now consuming faster than producing.
+
+**M4 prompt fix paid off — and uncovered a deeper bug.** DB went 345 → 751 (+406 rows) but source spec count only grew 447 → 488 (+41 specs). Distinct (manufacturer, model) = 483 ≈ source count. **268 phantom duplicate rows** in `bike_models` — 33 bikes × 9 occurrences from the WS-A April 27 year-suffix idempotency regression. Root cause: `motoquant/database/bike_repo.py::create_model` doesn't strip `(YYYY-YYYY)` suffix before the lenient upsert match. Fix queued since 2026-05-07 at INBOX:308; M5 promoted to `[urgent]` today. After upsert fix lands, run `DELETE FROM bike_models WHERE rowid NOT IN (SELECT MIN(rowid) ... GROUP BY ...)` to drop 268 ghosts; headline snaps 751 → ~483.
+
+**Catalog over-weighted:** 43/47 substantive commits (91 %) this week were catalog-expansion. Starved agents: claude-feature-monitor (`never_run`), benchmark-import (`never_run`), competitive-intel (`never_run`). M5 demoted `catalog-expansion.base` 50 → 40 to free 4–6 slots/week.
+
+**ALERT noise:** 38 identical `Postflight deploy check timed out after 180s` (up from 24 at M4). INBOX:605 tag flipped to `[urgent]` this morning but the awk one-liner itself still pending.
+
+**Physics:** 1 ship (`bfac483`, two_stroke `max_engine_decel_rads2` 380 → 800, −72 ms cluster mean|Δ|). 2 no-ships with research escalations. K5/R1/Hayabusa preserved exactly.
+
+**Tech debt:** 5 TypedDict refactors landed (`acf4af3`, `0c220e9`, `df4d92b`, `ecbfe6a`, `d5949f2`) + 1 seed-catalogs helper consolidation (`b4adf8d`). All held.
+
+**Marketing/growth:** ~15 blog posts shipped (RC 390, Ninja 400 vs ZX-4R, KTM 890 Duke R, Kawasaki Z900RS, etc.) + EXP-005..008 A/B variants.
+
+**Auto-applied this run (M5):** (1) `catalog-expansion.base` 50 → 40; (2) INBOX:308 tag `[opportunistic]` → `[urgent]`. STATUS.md bookkeeping (this section + KPI cell + `_LAST_RUN_JSON`). Per META INBOX:516 commitment, **zero new INBOX items queued** this run.
+
+**Cooldown:** per agent-template `:64`, next self-review not before **2026-05-29**. Natural Sunday cadence resumes **2026-06-07** (2026-05-31 is cleanup-rotation slot).
+
+---
 
 ### Week of 2026-05-14 → 2026-05-21 (self-review M4 — off-cadence Thursday)
 
@@ -140,6 +162,7 @@ last_updated: <!-- AUTO-UPDATED -->
 - **2026-05-16 M1:** Added `claude-feature-monitor` entry (base 15, best_dow [7]). Reason: missing from the JSON file entirely; agent prompt template exists but scheduler couldn't pick it.
 - **2026-05-17 M3:** `partnership-outreach.base` 25 → 15. Reason: 20 outreach drafts produced May 8 but 0 sent, no SMTP wiring exists, KPI `Closed B2B conversations` = 0 after 9 days. Demote until either send infra lands or a downstream agent consumes the drafts. Single-knob change, within ±10 envelope per agent-template policy. Attribution: `reports/self_review_2026-05-17.md` Finding 3.2.
 - **2026-05-21 M4:** NO weight changes auto-applied. Findings 2.1 (catalog-expansion prompt) and 2.2 (postflight dedup tag promotion) both queued to INBOX instead. Rationale: prompt-rewrite is multi-knob (out of envelope); INSTRUCTION-severity flip on another agent's ticket is borderline single-knob — queued for transparency. Bookkeeping-only edits (KPI cell + digest section + `_LAST_RUN_JSON`) made this run. Attribution: `reports/self_review_2026-05-21.md` Findings 2.1 + 2.2.
+- **2026-05-24 M5:** `catalog-expansion.base` 50 → 40. Reason: 43/47 substantive commits this week (91 %) were catalog-expansion; M4 prompt-fix gate worked (DB 345 → 751) but uncovered 268-row duplicate-inflation bug (INBOX:308) — marginal value of each new catalog run is now below marginal value of a starved-agent slot (claude-feature-monitor / benchmark-import both `never_run`). Single-knob, within ±10 envelope. Also auto-applied: INBOX:308 tag `[opportunistic]` → `[urgent]` (mechanical severity flip, same pattern as M4's successful 605→674 promotion that landed in 3 days). Attribution: `reports/self_review_2026-05-24.md` Findings 2.1 + 2.2.
 
 ---
 
@@ -148,7 +171,7 @@ last_updated: <!-- AUTO-UPDATED -->
 <!-- LAST_RUN_JSON
 {
   "_schema": 1,
-  "_updated": "2026-05-22T08:39:11Z",
+  "_updated": "2026-05-24T05:10:22Z",
   "catalog-expansion":      { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "physics-calibration":    { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "benchmark-import":       { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
@@ -162,10 +185,10 @@ last_updated: <!-- AUTO-UPDATED -->
   "growth-experiments":     { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "partnership-outreach":   { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "claude-feature-monitor": { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
-  "self-review":            { "date": "2026-05-21", "outcome": "success", "consecutive_fails": 0 },
+  "self-review":            { "date": "2026-05-24", "outcome": "success", "consecutive_fails": 0 },
   "incident-postmortem":    { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "source-verifier":        { "date": null, "outcome": "never_run", "consecutive_fails": 0 }
 }
 -->
 
-last_run: 2026-05-22T08:39:11Z  <!-- AUTO-UPDATED — used by catchup_detect to decide if we need recovery mode -->
+last_run: 2026-05-24T05:10:22Z  <!-- AUTO-UPDATED — used by catchup_detect to decide if we need recovery mode -->

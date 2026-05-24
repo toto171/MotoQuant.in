@@ -31,12 +31,18 @@ For each bike you add, you need ALL of:
 1. `python3 -m pytest tests/test_scraper.py -q --no-header` — all 80+ scraper validator tests pass
 2. Smoke-sim each new bike via `MotoQuantEngine`: ET must be in [4.0, 26.0]s. Trap must be in [40, 400] km/h. If outside: investigate before committing.
 3. K5/R1/Hayabusa baselines unchanged (these are pinned in `defaults.py`, not in known_bikes; should never drift, but verify).
+4. **Re-seed the DB.** Run `python3 -m motoquant.run import --known-bikes`. Confirm via:
+   ```
+   python3 -c "import sqlite3; print(sqlite3.connect('motoquant.db').execute('SELECT COUNT(*) FROM bike_models').fetchone()[0])"
+   ```
+   Expect the count to rise by the number of new bikes you added. Add `motoquant.db` to the file list returned to the dispatcher (so postflight stages it). If the import errors with FK / idempotency complaints (per the WS-A April 27 hygiene note in CLAUDE.md), the year-suffix-stripped matcher workaround is documented at that entry — fall back to calling `import_batch(db, [<spec>, ...])` directly on the new specs.
 
 ## Deliverable
 
 - Edit: `motoquant/scraper/known_bikes_extended.py` (or `known_bikes.py` for canonical Tier-1)
 - Append to `ALL_KNOWN_BIKES` list (or the extended-list equivalent)
 - Each new bike spec gets a brief comment block citing sources (URL or magazine name + year)
+- Update `motoquant.db` via the import re-seed step above (returned in file list)
 - Write a 30-line summary to `reports/catalog_expansion_YYYY-MM-DD.md`
 
 ## What to ESCALATE (write to DISPATCH_INBOX)
