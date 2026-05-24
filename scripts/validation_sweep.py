@@ -272,6 +272,59 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         228,
         "MotoStatz 2022 (Dragy, stock instrumented)",
     ),
+    # ── 2026-05-24 benchmark-import agent (evening pass) ──────────────────────
+    # Three additional high-confidence instrumented adds, sourced from
+    # publications already cited in this list (Cycle World timing-strip +
+    # MotoStatz Dragy). All catalog year ranges verified to include
+    # year_hint. None duplicates morning/afternoon pass entries.
+    # Kawasaki Z1000 (1043 cc I4 naked, 2014-2021 chassis) — Cycle World 2014
+    # road test timing strip: 10.38s @ 127.5 mph (~205 km/h), 0-60 in 2.5s.
+    # Cycle World is the highest-priority source on the project's accepted
+    # list; same publication/methodology already used for ZX-14R, H2, Z H2,
+    # CBR1000RR-R, S1000RR 2015/2019, M1000RR, Panigale V4, etc. Catalog
+    # entry KAWASAKI_Z1000 covers 2014-2021 (year_hint=2014 hits the year
+    # range cleanly).
+    # URL: https://www.cycleworld.com/tags/z1000/ (2014 road test)
+    (
+        "Kawasaki",
+        "Z1000",
+        2014,
+        10.38,
+        205,
+        "Cycle World 2014 (timing-strip)",
+    ),
+    # Aprilia RS 660 (659 cc parallel-twin sport, 2021-2026) — MotoStatz
+    # Dragy instrumented: 11.24s @ 124 mph (~200 km/h). Cross-checked
+    # against Corner Speed app's independent Dragy run (also 11.24s) and
+    # MotoStatz's own RS-660-vs-YZF-R7 head-to-head article — three
+    # independent Dragy measurements at the same 11.24s figure. Same
+    # MotoStatz/Dragy source bar as the Street Triple 765 RS / Panigale V2
+    # entries from this afternoon's pass.
+    # URL: https://motostatz.com/aprilia-rs660-acceleration-top-speed/
+    (
+        "Aprilia",
+        "RS 660",
+        2021,
+        11.24,
+        200,
+        "MotoStatz 2021 (Dragy, stock instrumented)",
+    ),
+    # KTM 890 Duke R (889 cc LC8c parallel-twin naked, 2020-2024) —
+    # MotoStatz Dragy instrumented: 11.00s @ 129 mph (~208 km/h), top speed
+    # capped 153 mph. Same MotoStatz/Dragy source bar (these are the
+    # publication's standard Dragy stock-bike measurements, identical
+    # methodology to the Z 650 / Ninja 400 / Street Triple entries already
+    # in the list). Catalog entry KTM_890_DUKE_R covers 2020-2024 model run
+    # with the LC8c engine the MotoStatz test exercised.
+    # URL: https://motostatz.com/ktm-890-duke-top-speed-acceleration/
+    (
+        "KTM",
+        "890 Duke R",
+        2020,
+        11.00,
+        208,
+        "MotoStatz 2020 (Dragy, stock instrumented)",
+    ),
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

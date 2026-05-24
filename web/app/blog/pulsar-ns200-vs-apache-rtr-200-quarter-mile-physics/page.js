@@ -2,6 +2,7 @@ import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 import StructuredData, { articleSchema } from '../../StructuredData';
+import InlineSimCta from './InlineSimCta';
 
 const SLUG = 'pulsar-ns200-vs-apache-rtr-200-quarter-mile-physics';
 const TITLE = 'Pulsar NS200 vs Apache RTR 200 4V: Quarter-Mile Physics';
@@ -88,6 +89,14 @@ const CONTENT = [
       ['Top gear at trap', '5th, ~8,900 rpm', '5th, ~8,400 rpm'],
       ['Cluster bias band', '±0.5 s entry-200-300', '±0.5 s entry-200-300'],
     ],
+  },
+  {
+    // EXP-010: mid-article inline CTA sentinel. Renders <InlineSimCta />
+    // which is a client component that returns null on variant=A
+    // (control / default) and a "Run this comparison" card on variant=B.
+    // Placement: immediately after the stock-sim numbers table, where
+    // reader comparison intent peaks.
+    type: 'inline-cta',
   },
   {
     type: 'p',
@@ -235,6 +244,11 @@ function Prose({ content }) {
               <p className="text-sm text-white/80 leading-relaxed italic">{block.text}</p>
             </div>
           );
+        }
+        if (block.type === 'inline-cta') {
+          // EXP-010 — client component, default off; renders null on the
+          // control arm so the static-prerendered DOM is unchanged.
+          return <InlineSimCta key={i} />;
         }
         if (block.type === 'table') {
           const [header, ...rows] = block.rows;
