@@ -119,3 +119,18 @@ Per `scripts/agents/self-review.md:64` ("Don't run more than one self-review per
 - **Second pick:** INBOX:605 dedup-script (5-LOC awk). 38 ALERTs, +1 every 2h.
 - **Don't queue more `[self-review]` items** until backlog drops below 8 (META INBOX:516 commitment). Continue implementer-pattern.
 - **Self-review cooldown:** no further self-review before 2026-05-29. Natural Sunday resumes 2026-06-07.
+
+---
+
+## Addendum — 2026-05-24 second dispatch (no-op)
+
+Orchestrator re-dispatched self-review at session `1779604236-636` ~3 hours after M5 shipped (`468db67`). Per agent template line 64 ("Don't run more than one self-review per 5 days") and per the prompt's explicit guidance ("honour the cooldown by being TIGHT"), this dispatch declines to:
+
+- duplicate the Layer 1-4 scan (already authored above by M5)
+- adjust any scheduler weight (M5 already burned the single-knob ±10 envelope on `catalog-expansion.base 50→40`)
+- queue any new INSTRUCTION (META INBOX:516 commitment + M5's "no further self-review queueing until backlog drops below 8" both still binding; backlog ~23 entries)
+- re-author STATUS.md week-of section (already populated by M5)
+
+**Root cause of the double-fire:** `scheduler_weights.json` `_LAST_RUN_JSON.self-review.date` was updated to `2026-05-24` by M5, but the master scheduler's selection may use a daily-cron-style trigger rather than reading that JSON field. Worth checking next time `master_scheduler.sh` is touched — if the cooldown isn't actually enforced by the scheduler, the agent-template line 64 is the only gate, which depends on agent self-restraint.
+
+**No files committed beyond this addendum.** Postflight will pick up a single-file delta (`reports/self_review_2026-05-24.md`).

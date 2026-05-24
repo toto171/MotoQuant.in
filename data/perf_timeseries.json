@@ -380,5 +380,40 @@
     "network_blocked": false,
     "railway_outage": true,
     "notes": "Run 13 of 2026-05-24 (performance-monitor agent, session 1779597050-811). One week after initial Railway 404 outage on 2026-05-17. **Railway API still 404 (Application not found).** Status unchanged: https://web-production-de6eb.up.railway.app/api/health and /api/bikes?limit=10 both return HTTP 404. Vercel landing page (motoquant.in) still responsive at 1.176ms TTFB (200 OK). Pytest test_validation + test_scraper: median 8.69s of 2 samples [8.76, 8.62]; 7-day rolling baseline cannot be computed yet (only 2 distinct dates: 2026-05-17 with 12 runs, 2026-05-24 with 1 run; need ≥7 distinct dates per agent spec). Compared to 2026-05-17 same-test mean 8.39s: today's 8.69s = +3.6% (within +30% drift gate, no escalation). 111/0 pass/fail stable. INBOX:140 ([urgent][blocking] Railway 404 since 2026-05-17) remains pre-filed and blocking; user is handling migration to Render in parallel chat. Do NOT file fresh INBOX item. This probe documents week-long persistence of outage. Landing TTFB shows sub-2ms response from Vercel, no latency regression on the frontend."
+  },
+  {
+    "date": "2026-05-24",
+    "run_index": 14,
+    "agent": "performance-monitor",
+    "session_id": "1779604236-636",
+    "landing_ttfb_ms": 953.725,
+    "landing_total_ms": 957.541,
+    "landing_size_bytes": 34048,
+    "landing_http": 200,
+    "api_health_ms_samples": [
+      376.755,
+      266.801,
+      323.168,
+      313.831,
+      366.124
+    ],
+    "api_health_ms_avg": 329.336,
+    "api_health_ms_median": 323.168,
+    "api_health_http": 404,
+    "api_health_bike_count": null,
+    "api_bikes_ms": 320.276,
+    "api_bikes_http": 404,
+    "api_bikes_size_bytes": 101,
+    "api_bikes_count": null,
+    "test_walltime_s": 8.79,
+    "test_walltime_samples_s": [
+      8.773,
+      8.810
+    ],
+    "tests_passed": 111,
+    "tests_failed": 0,
+    "network_blocked": false,
+    "railway_outage": true,
+    "notes": "Run 14 of 2026-05-24 (performance-monitor agent, session 1779604236-636). Second probe of the day (intra-day follow-up to Run 13). **Railway API still 404 - Day 8 of outage (initial: 2026-05-17 Run 11).** Both /api/health (5-sample mean 329.3ms, median 323.2ms) and /api/bikes?limit=10 (320.3ms) return HTTP 404 'Application not found'; platform router rejection at ~300ms latency (consistent with Railway-side immediate response, not app timeout). Vercel landing 953.7ms TTFB (200 OK, 34048 bytes) vs 2026-05-17 baseline mean ~1209ms = -21.1% (improvement / cold-vs-warm cache jitter; well within normal envelope, NOT a regression). Pytest median 8.79s of [8.773, 8.810] vs 2026-05-17 same-day mean 8.39s = +4.8% (within +30% drift gate; no escalation). 111/0 pass/fail stable. INBOX:140 [urgent][blocking] still open and user-owned (Render migration in progress per chat); NO fresh INBOX item filed per Run 12/13 dedup precedent. Intra-day consistency confirmed: Run 13 and Run 14 metrics agree (Railway 404 persists, tests ~8.7-8.8s, landing 200 OK). 7-day rolling baseline still incomplete: 2 distinct dates after today (need ≥7). Next probe: 2026-05-25 (Mon)."
   }
 ]

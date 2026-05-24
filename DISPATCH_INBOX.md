@@ -709,6 +709,31 @@ Source: `reports/self_review_2026-05-21.md` Finding 2.2.
 
 ---
 
+## INSTRUCTION — 2026-05-24 — [claude-feature-monitor] [opportunistic] package `motoquant.skill` using native Claude Skills system
+[opportunistic]
+
+**Attribution:** `reports/claude_feature_scan_2026-05-24.md` (bootstrap baseline scan).
+
+**Context:** Anthropic ships a native Skills system at `https://code.claude.com/docs/en/skills` — repeatable workflows packaged as shareable slash commands (e.g. `/review-pr`, `/deploy-staging`). The MotoQuant toolkit shortlist in `CLAUDE.md` already calls for "MotoQuant skill for Claude — teach Claude bike spec schema + glossary (60-foot, ET, trap, two-step, anti-squat, slipper, expansion chamber)" as a low-effort, high-value item. Native Skills makes this a packaging task rather than a custom prompt-engineering job.
+
+**Proposed action:**
+1. Create `skills/motoquant.skill/` with the standard Skills layout (per the Skills docs).
+2. Bundle the bike-spec schema (`BikeConfig` field reference, units, valid ranges) + drag-racing glossary + the K5 / R1 / Hayabusa reference baselines + the 8-cluster `CategoryProfile` map + the dispatch protocol summary.
+3. Add `/motoquant-validate-bike` (runs scraper validator + smoke sim against an inline spec) and `/motoquant-explain-result` (interpret a sim output in plain English for a tuner) as the first two skill commands.
+4. Smoke-test by invoking the skill in a fresh session and verifying it answers a 60-foot question correctly without external context.
+
+**Why opportunistic, not urgent:** the existing CLAUDE.md preload already covers most of the schema fluency for autonomous sessions; the win is primarily for human chat sessions and for any future contributor. No bug, no deadline.
+
+**Effort:** ~2-3 hour spike; one focused session.
+
+**Don't:** ship anything that hard-codes API keys or pricing into the skill (those live in `tokens.md` + Railway env).
+
+**Acceptance:** `/motoquant-validate-bike` correctly validates a canned spec; the skill answers "what is a 60-foot time?" without needing to re-read CLAUDE.md.
+
+Source: `reports/claude_feature_scan_2026-05-24.md` (Adopt section).
+
+---
+
 ## INSTRUCTIONS QUEUE
 
 > _Add new `## INSTRUCTION` blocks above this divider. Claude marks them `## DONE` once handled._

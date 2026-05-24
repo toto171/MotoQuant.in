@@ -1,0 +1,230 @@
+{
+  "snapshot_metadata": {
+    "scan_date": "2026-05-24",
+    "agent": "claude-feature-monitor",
+    "scan_type": "bootstrap_baseline",
+    "first_run": true,
+    "scan_method": "live_web_fetch",
+    "sources": [
+      "https://platform.claude.com/docs/en/about-claude/models/overview",
+      "https://platform.claude.com/docs/en/about-claude/model-deprecations",
+      "https://www.anthropic.com/news",
+      "https://code.claude.com/docs/en/overview"
+    ]
+  },
+  "models": {
+    "active": {
+      "claude-opus-4-7": {
+        "alias": "claude-opus-4-7",
+        "context_window_tokens": 1000000,
+        "max_output_tokens": 128000,
+        "extended_thinking": false,
+        "adaptive_thinking": true,
+        "pricing_input_per_mtok_usd": 5,
+        "pricing_output_per_mtok_usd": 25,
+        "knowledge_cutoff": "2026-01",
+        "training_data_cutoff": "2026-01",
+        "tentative_retirement_not_before": "2027-04-16",
+        "latency_class": "moderate",
+        "tokenizer_note": "Opus 4.7 uses a new tokenizer (~555k words per 1M tokens)"
+      },
+      "claude-sonnet-4-6": {
+        "alias": "claude-sonnet-4-6",
+        "context_window_tokens": 1000000,
+        "max_output_tokens": 64000,
+        "extended_thinking": true,
+        "adaptive_thinking": true,
+        "pricing_input_per_mtok_usd": 3,
+        "pricing_output_per_mtok_usd": 15,
+        "knowledge_cutoff": "2025-08",
+        "training_data_cutoff": "2026-01",
+        "tentative_retirement_not_before": "2027-02-17",
+        "latency_class": "fast",
+        "delta_since_playbook": "Context window upgraded from 200k -> 1M tokens; matches Opus 4.7"
+      },
+      "claude-haiku-4-5-20251001": {
+        "alias": "claude-haiku-4-5",
+        "context_window_tokens": 200000,
+        "max_output_tokens": 64000,
+        "extended_thinking": true,
+        "adaptive_thinking": false,
+        "pricing_input_per_mtok_usd": 1,
+        "pricing_output_per_mtok_usd": 5,
+        "knowledge_cutoff": "2025-02",
+        "training_data_cutoff": "2025-07",
+        "tentative_retirement_not_before": "2026-10-15",
+        "latency_class": "fastest"
+      }
+    },
+    "deprecated_with_retirement": {
+      "claude-opus-4-20250514": {
+        "retirement_date": "2026-06-15",
+        "replacement": "claude-opus-4-7",
+        "motoquant_usage": "none_known"
+      },
+      "claude-sonnet-4-20250514": {
+        "retirement_date": "2026-06-15",
+        "replacement": "claude-sonnet-4-6",
+        "motoquant_usage": "none_known"
+      }
+    },
+    "recently_retired": [
+      "claude-3-7-sonnet-20250219",
+      "claude-3-5-haiku-20241022",
+      "claude-3-haiku-20240307",
+      "claude-3-opus-20240229",
+      "claude-3-5-sonnet-20240620",
+      "claude-3-5-sonnet-20241022"
+    ]
+  },
+  "motoquant_current_routing": {
+    "deep_work_opus": "claude-opus-4-7",
+    "code_sonnet": "claude-sonnet-4-6",
+    "fast_lookup_haiku": "claude-haiku-4-5-20251001",
+    "user_chat_api": "gemini-flash-2.5 (Railway env, non-Anthropic)",
+    "status": "ALL CURRENT — on frontier as of 2026-05-24. No urgent migration required."
+  },
+  "claude_code_capabilities": {
+    "skills": {
+      "url": "/en/skills",
+      "description": "Package repeatable workflows as shareable slash commands (/review-pr, /deploy-staging).",
+      "relevance_to_motoquant": "high",
+      "effort": "low",
+      "rationale": "Toolkit shortlist already calls for a motoquant.skill teaching bike-spec schema + glossary. Native Skills system makes this trivial vs ad-hoc."
+    },
+    "routines": {
+      "url": "/en/routines",
+      "description": "Anthropic-managed scheduled agent runs. Survives local power-off. Triggerable from web/Desktop/CLI /schedule. Also triggers on API calls or GitHub events.",
+      "relevance_to_motoquant": "high",
+      "effort": "medium",
+      "rationale": "Could replace scripts/master_scheduler.sh local cron entirely. Current setup needs a host machine running 24/7 — Routines eliminate that. Evaluate against the resilience.sh power-cut handling."
+    },
+    "channels": {
+      "url": "/en/channels",
+      "description": "Push events from Telegram/Discord/iMessage/webhooks into a Claude Code session.",
+      "relevance_to_motoquant": "medium",
+      "effort": "low-medium",
+      "rationale": "DISPATCH_INBOX.md is currently a file-polling pattern. Telegram → Channels could give the user true async push from phone during the 8h internship without the user having to remember to write to inbox."
+    },
+    "background_agents": {
+      "url": "/en/agent-view",
+      "description": "Run several full sessions in parallel, watch them from one screen.",
+      "relevance_to_motoquant": "medium",
+      "effort": "low",
+      "rationale": "Direct replacement for the parallel-Cowork-chat orchestration pattern documented in CLAUDE.md (April-24 7-stream session). Native primitive vs manual /tmp clone juggling."
+    },
+    "sub_agents": {
+      "url": "/en/sub-agents",
+      "description": "Spawn multiple Claude Code agents working on different parts of a task. Lead agent coordinates, assigns subtasks, merges results.",
+      "relevance_to_motoquant": "high",
+      "effort": "low",
+      "rationale": "Cleanup-rotation already uses 7 subagents via scripts/run_cleanup_subagents.sh. Native sub-agents primitive could simplify; evaluate at next cleanup-rotation Sunday."
+    },
+    "agent_sdk": {
+      "url": "/en/agent-sdk/overview",
+      "description": "Build custom agents with full control over orchestration, tool access, permissions. Powered by Claude Code's tools.",
+      "relevance_to_motoquant": "medium",
+      "effort": "high",
+      "rationale": "Could underpin the 12 production agents in scripts/agents/*. Not urgent — current prompt-template approach works. Re-evaluate when agent count crosses 25 or self-review starts proposing structural changes."
+    },
+    "github_actions": {
+      "url": "/en/github-actions",
+      "description": "Automate PR reviews and issue triage in CI.",
+      "relevance_to_motoquant": "medium",
+      "effort": "low",
+      "rationale": ".github/workflows already has ci.yml + release.yml + web-verify.yml + keepalive.yml. Adding Claude PR review on every PR would catch the class of regression that the May-3 catalog drift introduced (5 stale 334-bike references). Quality-gate before adopting."
+    },
+    "slack_integration": {
+      "url": "/en/slack",
+      "description": "Mention @Claude in Slack with a bug report; get a pull request back.",
+      "relevance_to_motoquant": "low",
+      "effort": "low",
+      "rationale": "User is solo + on Indian internship; no team Slack. Logged only."
+    },
+    "code_review_native": {
+      "url": "/en/code-review",
+      "description": "Automatic Claude code review on every PR.",
+      "relevance_to_motoquant": "medium",
+      "effort": "low",
+      "rationale": "Free quality gate. Evaluate after the pytest-regressions baseline (toolkit shortlist #1) is in place so reviewer has firm baseline contract to enforce."
+    },
+    "mcp_support": {
+      "url": "/en/mcp",
+      "description": "Connect external data sources: Google Drive, Jira, Slack, custom tooling.",
+      "relevance_to_motoquant": "medium",
+      "effort": "varies",
+      "rationale": "Toolkit shortlist already includes building a MotoQuant MCP server. Evaluate Notion MCP for product-priorities sync, Railway MCP for /api/health probing without curl, GitHub MCP as gh-CLI alternative."
+    }
+  },
+  "platform_features": {
+    "extended_thinking": {
+      "supported_models": ["claude-sonnet-4-6", "claude-haiku-4-5"],
+      "url": "/docs/en/build-with-claude/extended-thinking",
+      "motoquant_use_case": "physics validation reasoning, calibrator search space exploration"
+    },
+    "adaptive_thinking": {
+      "supported_models": ["claude-opus-4-7", "claude-sonnet-4-6"],
+      "url": "/docs/en/build-with-claude/adaptive-thinking",
+      "motoquant_use_case": "default for agentic coding loops"
+    },
+    "batch_processing_extended_output": {
+      "url": "/docs/en/build-with-claude/batch-processing#extended-output-beta",
+      "beta_header": "output-300k-2026-03-24",
+      "supported_models": ["claude-opus-4-7", "claude-opus-4-6", "claude-sonnet-4-6"],
+      "max_output_tokens": 300000,
+      "motoquant_use_case": "long-form catalog scrapes, full-doc rewrites"
+    },
+    "priority_tier": {
+      "url": "/docs/en/api/service-tiers",
+      "supported_models": ["claude-opus-4-7", "claude-sonnet-4-6", "claude-haiku-4-5"],
+      "motoquant_use_case": "production /api/chat latency SLO when MotoQuant launches paid tier"
+    },
+    "prompt_caching": {
+      "status": "documented_widely",
+      "motoquant_already_uses": "implicit through Claude Agent SDK 5-minute TTL — visible in ScheduleWakeup tool's cache-aware delay guidance"
+    }
+  },
+  "recent_anthropic_announcements_2026": [
+    {
+      "date": "2026-04-16",
+      "title": "Claude Opus 4.7",
+      "summary": "Step-change in agentic coding over 4.6. New tokenizer. Already adopted by MotoQuant."
+    },
+    {
+      "date": "2026-04-17",
+      "title": "Claude Design",
+      "summary": "Anthropic Labs product for collaborative visual work (designs, prototypes, slides). Relevance to MotoQuant: pitch decks, marketing one-pagers. Effort: low. Track."
+    },
+    {
+      "date": "2026-04-07",
+      "title": "Project Glasswing",
+      "summary": "Multi-org security initiative. Includes Claude Mythos Preview research model for defensive cybersecurity. Invitation-only. Not relevant to MotoQuant."
+    },
+    {
+      "date": "2026-05-06",
+      "title": "Higher usage limits + SpaceX compute partnership",
+      "summary": "More capacity available. May enable higher concurrency for the 7-subagent cleanup-rotation pattern."
+    },
+    {
+      "date": "2026-05-13",
+      "title": "Claude for Small Business",
+      "summary": "New SMB product tier. May be relevant to MotoQuant Phase 6 commercial launch if MotoQuant scales to a small business."
+    }
+  ],
+  "deprecation_alerts": {
+    "june_15_2026_dual_retirement": {
+      "affected_models": ["claude-opus-4-20250514", "claude-sonnet-4-20250514"],
+      "days_until_retirement": 22,
+      "motoquant_exposure": "NONE — production routing uses claude-opus-4-7 and claude-sonnet-4-6 (both current). No code grep on claude-opus-4-2025 or claude-sonnet-4-2025 in scripts/agents/* or docs/. No action required.",
+      "verification_command": "grep -r 'claude-opus-4-20250514\\|claude-sonnet-4-20250514' scripts/ docs/ motoquant/"
+    }
+  },
+  "next_scan_target_date": "2026-06-21",
+  "next_scan_priority_checks": [
+    "Verify zero references to claude-opus-4-20250514 / claude-sonnet-4-20250514 after their June 15 retirement",
+    "Check if Sonnet 4.7 or Opus 4.8 announced (rough cadence: 2-month minor bumps observed)",
+    "Re-scan Claude Design GA status for marketing-deck use case",
+    "Re-evaluate Routines vs scripts/master_scheduler.sh after resilience.sh real-world track record",
+    "Check for new MCP servers relevant to Railway / Vercel / Notion product-priorities flow"
+  ]
+}
