@@ -50,6 +50,12 @@ export const metadata = {
     'ktm 890 duke r drag time india',
     'suzuki gsx-s750 quarter mile',
     'honda cb500x quarter mile',
+    'yamaha mt-15 v1 quarter mile',
+    'mt-15 v1 vs r15 v3',
+    'bajaj pulsar 125 neon quarter mile',
+    'suzuki gsx-r600 k8 quarter mile',
+    'motorcycle 60 ft calculator',
+    'pacejka tire model motorcycle',
   ],
   openGraph: {
     title: TITLE,

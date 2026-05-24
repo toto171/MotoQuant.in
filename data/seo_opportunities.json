@@ -1,7 +1,7 @@
 {
-  "_updated": "2026-05-18",
-  "_run": "tenth-pass-2026-05-18",
-  "_methodology": "Nine passes prior today. Passes 1-9 logged 40 opportunities + 16 escalations. TENTH PASS (this run, 2026-05-18 Monday): three new keyword opportunities surfaced from WebSearch on tonight's catalog-expansion bikes (KTM 890 Duke 2020, Honda CB500X 2019, Suzuki GSX-S750 2015). Findings: (a) 'ktm 890 duke quarter mile india' — KTM 890 Duke R launched in India Nov 2024 at ₹14.50 lakh; 889cc LC8c twin, 121 PS/99 Nm. AccelerationTimes + FastestLaps carry ~11.0s global ET but SERP has zero India-specific content. Strong comparison angle with GSX-S750 (direct segment rival) and MT-09 (documented comparison in press). (b) 'suzuki gsx-s750 quarter mile' — 749cc inline-4 naked, 114 PS. MotoStatz publishes 11.24s @ 122 mph. No India-specific drag content exists. Direct rival to 890 Duke + MT-09 in middleweight naked segment where MotoQuant has no dedicated blog content yet. (c) 'honda cb500x quarter mile india' — 471cc parallel twin, 47 hp, popular adventure tourer in India at ₹5.80 lakh. SERP dominated by spec pages + forum discussions; no physics breakdown. Lower drag priority (adventure-tourer audience is not drag-focused) — monitor. On-page edits: bikes/layout.js title/description/keywords +412 count + new bike entities; blog/page.js keywords +new bike quarter-mile phrases; simulator/layout.js title +412 count + new bike keywords; simulator OG alt text count corrected. No StructuredData/FAQ edits (structure is load-bearing per CLAUDE.md). Two new escalations queued for marketing-content.",
+  "_updated": "2026-05-24",
+  "_run": "2026-05-24-sunday-catalog-and-methodology",
+  "_methodology": "First SEO pass of 2026-05-24 (Sunday). 43 opportunities + 18 escalations carried forward from 2026-05-18. THIS PASS: +5 opportunities (priorities 44-48) covering (a) the three bikes added by today's catalog-expansion agent (Yamaha MT-15 V1, Bajaj Pulsar 125 Neon, Suzuki GSX-R600 K8/K9/L0 per reports/catalog_expansion_2026-05-24.md), (b) two long-tail methodology queries that CLAUDE.md flags as Phase-3 priority (Pacejka tire model motorcycle, 60-ft time motorcycle calculator). Note: marketing-content agent is running in parallel today on the CFMoto 800NK and MT-125/XSR125 platform-pair posts — those keyword targets are left at action=in-progress / done in earlier entries (priorities 38, 41, 42) and NOT duplicated this pass. On-page edits: bikes/layout.js keywords +5 entries for new bike entities + Pacejka methodology marker; bikes/page.js H1 subtitle extended to namecheck MT-15 V1 + GSX-R600 + Pulsar 125 Neon alongside existing entity cluster; simulator/layout.js keywords +4 entries for new bikes + methodology phrasings. No StructuredData/FAQ edits (structure is load-bearing per CLAUDE.md). No edits to web/app/blog/page.js or web/sitemap.js (marketing-content owns those today). 0 new escalations queued this pass.",
   "_competitor_signal": "Generic 'quarter mile calculator' tools (xcceleration, ajdesigner, robrobinette, speedmaster) all use simple power-to-weight formulas, no per-bike physics. MotoQuant's defensible angle: 'physics-based, validated against 90 published benchmarks, 342 bikes pre-configured, cost-per-tenth ROI in INR'.",
   "opportunities": [
     {
@@ -700,6 +700,96 @@
       "action": "monitor",
       "priority": 43,
       "rationale": "WebSearch 2026-05-18 confirmed: Honda CB500X 2019 added to motoquant.db tonight. 471cc parallel twin, 47 hp @ 8500 rpm. ProfessCars estimates ~14.3s quarter-mile. SERP is adventure-tourer buyer research — ReiseMoto, Autocar India, Team-BHP, CarToq — firmly in the touring/reliability/mileage intent cluster, not drag-racing intent. Limited blog content opportunity: the CB500X audience does not search for drag times. Primary SEO value is catalog coverage signal (412-bike credibility) + internal-link surface from /bikes/cb500x detail page. Monitor: if 'cb500x vs ninja 400 acceleration' or 'cb500x 0-100 india' surfaces with measurable volume, escalate. No blog post queued for the drag angle."
+    },
+    {
+      "keyword": "yamaha mt-15 v1 quarter mile",
+      "secondary": [
+        "mt-15 v1 drag time india",
+        "mt-15 v1 vs r15 v3",
+        "yamaha mt-15 2019 0-100",
+        "mt-15 v1 top speed india",
+        "is mt-15 v1 faster than ns200"
+      ],
+      "intent": "informational/buyer-funnel",
+      "estimated_volume_india": "high",
+      "seasonality": "evergreen — MT-15 V1 (2019-2020) is the highest-volume Yamaha India naked bike historically; still actively cross-shopped against R15 V3 / NS200 used-market listings",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "create-blog-later",
+      "priority": 44,
+      "rationale": "Yamaha MT-15 V1 (2019-2020) added to motoquant.db on 2026-05-24 (catalog expansion, see reports/catalog_expansion_2026-05-24.md). 155.09cc DOHC 4V liquid-cooled single (R15 V3 platform sans VVA), 18.4 hp / 14.7 Nm, F14/R42 520-pitch chain, 134 kg dry. MotoQuant smoke-sim ET = 17.0507s in entry_150_200 cluster — directly comparable to YZF-R15 V3 spec which exists in catalog and powered the long-running 'why your R15 won't hit 14s' blog post. The MT-15 V1 vs R15 V3 platform-share question is one of the most-asked Indian used-bike forum threads (Team-BHP, xBhp, Autocar forum). SERP is overwhelmingly spec-comparison pages (BikeWale, BikeDekho, ZigWheels) + YouTube; zero physics-based written analysis. Clean editorial angle: same engine and gear cassette, different fairing/ergonomics/mass → quantified ET delta. Action: queue marketing-content for /blog/mt-15-v1-vs-r15-v3-quarter-mile-physics OR extend the existing R15 V4 / NS200 v Apache post family with an MT-15 platform-mate paragraph."
+    },
+    {
+      "keyword": "bajaj pulsar 125 neon quarter mile",
+      "secondary": [
+        "pulsar 125 neon top speed india",
+        "pulsar 125 neon 0-100",
+        "pulsar 125 vs splendor plus drag",
+        "pulsar 125 neon mods cost",
+        "pulsar 125 neon drag time"
+      ],
+      "intent": "informational",
+      "estimated_volume_india": "very-high",
+      "seasonality": "evergreen — Bajaj Pulsar 125 Neon launched Oct 2019; cumulative Indian sales ~600k+ units across BS4 and BS6 variants; consistent search volume from used-market buyers",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "create-blog-later",
+      "priority": 45,
+      "rationale": "Bajaj Pulsar 125 Neon (2019-2024) added to motoquant.db on 2026-05-24. 124.4cc air-cooled DTS-i SOHC 2V single (Pulsar 150 engine bored down), 12 hp @ 8500 rpm, 10.8 Nm @ 6500 rpm, 5-speed F16/R44 428-pitch chain, 123 kg dry. MotoQuant smoke-sim ET = 20.8849s @ 109.1 km/h, consistent with sub-125cc commuter cluster. Same intent-mismatch story as the Hero Glamour 125 entry (priority 36): the 125cc commuter SERP is overwhelmingly mileage queries (BikeWale, 91Wheels, BikeDekho) with zero quarter-mile content because the segment does not search for drag times — they search for fuel economy. That intent-mismatch is the editorial differentiator. Pairs naturally with the Hero Glamour 125 / Pulsar N125 entries already in catalog for a single 'fastest 125cc commuter in India' shootout post. Queue marketing-content for the multi-bike commuter shootout once Splendor Plus and Hero HF Deluxe land in catalog."
+    },
+    {
+      "keyword": "suzuki gsx-r600 k8 quarter mile",
+      "secondary": [
+        "gsx-r600 k8 drag time",
+        "gsx-r600 2008 0-100",
+        "gsx-r 600 k8 vs cbr600rr",
+        "gsxr 600 k8 quarter mile time",
+        "best mods for gsx-r600 k8"
+      ],
+      "intent": "informational",
+      "estimated_volume_india": "med",
+      "seasonality": "evergreen — K8/K9/L0 GSX-R600 is a foundational 600cc supersport platform; high lifetime search volume from used-market buyers + drag-prep tuners worldwide",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "create-blog-later",
+      "priority": 46,
+      "rationale": "Suzuki GSX-R600 K8/K9/L0 (2008-2010) added to motoquant.db on 2026-05-24. 599cc DOHC inline-4 (67.0 × 42.5 mm), 125 hp @ 13500 rpm, 69 Nm @ 11200 rpm. Twin-spar aluminium frame, Brembo radial calipers. Closes the 600cc supersport coverage gap — catalog already had GSX-R600 K6 (priority 6 carry-forward) and now covers the K8 refresh + K9/L0 carryover years. SERP top results are Cycle World 2008 first ride, MCN test, MotoStatz quarter-mile records (10.94s @ 124 mph stock), and Sport Rider 600cc shootouts; ZERO India-specific drag content, very limited K8-specific physics analysis. Defensible angle: MotoQuant simulates the K8 reference baseline AND compares against the K6 and K11 in the same cluster — three-generation Suzuki 600cc shootout is a clean platform-evolution post. Pairs with the existing 'fastest 600cc supersport' SERP cluster which is dominated by year-by-year buyer-guide listicles."
+    },
+    {
+      "keyword": "pacejka tire model motorcycle",
+      "secondary": [
+        "magic formula tire motorcycle",
+        "motorcycle pacejka coefficients",
+        "pacejka b c d e tire model",
+        "motorcycle tire model physics",
+        "how does pacejka tire model work"
+      ],
+      "intent": "informational/methodology",
+      "estimated_volume_india": "low",
+      "seasonality": "evergreen — methodology query with steady global volume from automotive sim hobbyists, vehicle dynamics students, and tuners who want to understand published lap-sim outputs",
+      "current_rank": null,
+      "target_url": "/docs/physics",
+      "action": "tweak-existing",
+      "priority": 47,
+      "rationale": "Methodology query — surfaced as a Phase-3 priority in CLAUDE.md ('Physics / methodology queries: Pacejka tire model, motorcycle quarter-mile calculator'). Global SERP is dominated by academic PDFs (Pacejka 2012 textbook excerpts, IPG Automotive, Tyre Modelling Workshop papers) and one engineering blog post (mathworks.com/discovery/pacejka-magic-formula.html) — zero motorcycle-specific implementations on the first page, and zero free interactive demos. MotoQuant's catalog has 232 tires with full B/C/D/E + thermal coefficients (per CLAUDE.md, already integrated into the physics engine). The /docs/physics page already references the Pacejka model; surfacing 'Pacejka tire model motorcycle' in the meta keywords + features-page body adds an entry point for the underserved low-volume but very-high-intent methodology audience. Low India volume but high B2B Pro-Studio funnel value (Indian tuning-shop owners searching for credible vehicle-dynamics references). Linked from features page + docs/physics."
+    },
+    {
+      "keyword": "60 ft time motorcycle calculator",
+      "secondary": [
+        "60 foot time motorcycle",
+        "motorcycle 60 ft predictor",
+        "60 ft time vs quarter mile motorcycle",
+        "drag racing 60 ft time motorcycle",
+        "how to calculate 60 ft time"
+      ],
+      "intent": "transactional/methodology",
+      "estimated_volume_india": "low-med",
+      "seasonality": "evergreen — drag-racing telemetry vocabulary; lower volume than 'quarter mile' but very high intent (users searching this phrase are tuning a real bike against a real timeslip)",
+      "current_rank": null,
+      "target_url": "/simulator",
+      "action": "tweak-existing",
+      "priority": 48,
+      "rationale": "60-foot time is the single most predictive split for a clean quarter-mile run — tuners use it to dial in launch RPM, clutch engagement, and rear-tire pressure. MotoQuant already outputs 60-ft, 330-ft, 1/8-mile, 1000-ft, and 1/4-mile splits on every simulation. SERP top results are generic power-to-weight 60-ft calculators (xcceleration, et-calc, robrobinette) — none of which model launch dynamics, clutch slip, or tire heat. MotoQuant's defensible angle: 'we simulate the clutch slip phase + tire thermal at 1ms steps, so the 60-ft you see is a real prediction, not a power-to-weight scalar'. Already present in /simulator metadata keywords ('60 ft time motorcycle') from a prior pass — extending to add 'motorcycle 60 ft calculator' and ensuring the H1/body namecheck the phrase. Pairs naturally with the 'physics-based, not a power-to-weight formula' positioning that already differentiates the simulator from xcceleration / ajdesigner."
     }
   ],
   "escalations": [

@@ -30,6 +30,9 @@ export const metadata = {
     "hornet 2.0 vs ns200 drag",
     "kawasaki ninja 400 india drag",
     "ecu flash cost india motorcycle",
+    "magic formula tire motorcycle",
+    "motorcycle 60 ft calculator",
+    "yamaha mt-15 v1 simulator",
   ],
   openGraph: {
     title: TITLE,

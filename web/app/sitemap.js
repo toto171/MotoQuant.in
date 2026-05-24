@@ -218,6 +218,12 @@ export default async function sitemap() {
       priority: 0.84,
     },
     {
+      url: `${SITE_URL}/blog/aprilia-tuono-660-factory-quarter-mile-physics`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
       url: `${SITE_URL}/docs/getting-started`,
       lastModified: now,
       changeFrequency: "monthly",

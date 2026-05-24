@@ -63,6 +63,8 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     ("Suzuki", "GSX-R 1000", 2017, 9.95, 240, "Cycle World 2017"),
     ("Suzuki", "GSX-R 1000", 2003, 10.10, 236, "Sport Rider 2003"),
     ("Suzuki", "GSX-R 1000", 2001, 10.20, 235, "Sport Rider 2001"),
+    # GSX-R 750 K5/K6 — Cycle World 2005 Open Sportbike Shootout, timing-strip
+    ("Suzuki", "GSX-R750 K5", 2005, 10.43, 216, "Cycle World 2005 (timing-strip)"),
     # BMW
     ("BMW", "S 1000 RR", 2015, 9.90, 240, "Cycle World 2015"),
     ("BMW", "S 1000 RR", 2019, 9.85, 243, "Cycle World 2019"),
@@ -71,6 +73,8 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     ("Kawasaki", "Ninja ZX-10R", 2004, 10.30, 240, "Sport Rider 2004"),
     ("Kawasaki", "Ninja ZX-10R", 2011, 10.10, 240, "Sport Rider 2011"),
     ("Kawasaki", "Ninja ZX-10R", 2021, 10.00, 241, "Cycle World 2021"),
+    # ZX-6R 636 second-gen — Sport Rider 2009 Middleweight Shootout, timing-strip
+    ("Kawasaki", "Ninja ZX-6R", 2009, 10.69, 211, "Sport Rider 2009 (timing-strip)"),
     # CBR1000RR family
     ("Honda", "CBR1000RR", 2008, 10.20, 238, "Sport Rider 2008"),
     ("Honda", "CBR1000RR-R", 2020, 9.95, 240, "Cycle World 2020"),
@@ -90,6 +94,8 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     ("Yamaha", "YZF-R1M", 2015, 10.05, 243, "Cycle World 2015"),
     ("Yamaha", "VMAX 1700", 2009, 10.30, 217, "Cycle World 2009"),
     ("Yamaha", "MT-10", 2016, 10.35, 228, "Cycle World 2016"),
+    # MT-09 third-gen (890cc CP3) — Cycle World 2021 road test, timing-strip
+    ("Yamaha", "MT-09", 2021, 10.95, 204, "Cycle World 2021 (timing-strip)"),
     # Various
     ("Kawasaki", "Ninja ZX-9R", 2000, 10.50, 230, "Sport Rider 2000"),
     ("Suzuki", "TL1000R", 1998, 10.50, 231, "Cycle World 1998"),

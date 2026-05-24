@@ -11,6 +11,11 @@ export const metadata = {
     "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Triumph Street Triple 765 R, KTM 890 Duke R India grey-market deep-dive, best mods for KTM RC 390 ranked by cost-per-tenth, Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
   keywords: [
     "motorcycle drag racing blog",
+    "aprilia tuono 660 factory quarter mile",
+    "tuono 660 factory drag time india",
+    "tuono 660 factory vs base tuono",
+    "tuono 660 factory vs rs 660",
+    "tuono 660 factory price india",
     "triumph street triple 765r quarter mile",
     "street triple 765 r india drag race",
     "triumph 765 india price",
@@ -76,6 +81,16 @@ export const metadata = {
 };
 
 const POSTS = [
+  {
+    slug: "aprilia-tuono-660-factory-quarter-mile-physics",
+    date: "2026-05-24",
+    readTime: "12 min",
+    tags: ["Aprilia", "Tuono 660 Factory", "middleweight naked", "India", "physics"],
+    title:
+      "Aprilia Tuono 660 Factory Quarter-Mile Physics: 11.02s on the Strip",
+    excerpt:
+      "MotoQuant simulates the Aprilia Tuono 660 Factory at 11.02s and 215.7 km/h trap. 5 extra hp, 14 kg less, sharper gearing — where the 0.3s gap over the base Tuono 660 actually lives, and why the Factory trim is the value pick of the Indian middleweight-naked segment at ₹16.15 lakh.",
+  },
   {
     slug: "triumph-street-triple-765r-quarter-mile-physics",
     date: "2026-05-24",
