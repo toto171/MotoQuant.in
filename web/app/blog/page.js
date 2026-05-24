@@ -8,9 +8,12 @@ export const metadata = {
   title:
     "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
   description:
-    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: KTM 890 Duke R India grey-market deep-dive, best mods for KTM RC 390 ranked by cost-per-tenth, Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
+    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Triumph Street Triple 765 R, KTM 890 Duke R India grey-market deep-dive, best mods for KTM RC 390 ranked by cost-per-tenth, Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
   keywords: [
     "motorcycle drag racing blog",
+    "triumph street triple 765r quarter mile",
+    "street triple 765 r india drag race",
+    "triumph 765 india price",
     "indian motorcycle quarter mile",
     "best mods for ktm rc 390 india",
     "rc 390 cost per tenth",
@@ -73,6 +76,16 @@ export const metadata = {
 };
 
 const POSTS = [
+  {
+    slug: "triumph-street-triple-765r-quarter-mile-physics",
+    date: "2026-05-24",
+    readTime: "12 min",
+    tags: ["Triumph", "Street Triple 765 R", "middleweight naked", "physics"],
+    title:
+      "Triumph Street Triple 765 R Quarter-Mile Physics: 118hp Triple at the Strip",
+    excerpt:
+      "MotoQuant simulates the Triumph Street Triple 765 R at 10.74s and 213 km/h trap. Cycle World clocked the 2023 model at 10.9s. How a 118hp inline-three beats a 124hp inline-four by 0.44s, why the 765 R is the fastest CBU under ₹12 lakh at the strip, and the ₹2,200 sprocket swap that starts the upgrade ladder.",
+  },
   {
     slug: "kawasaki-z900rs-quarter-mile-physics",
     date: "2026-05-22",

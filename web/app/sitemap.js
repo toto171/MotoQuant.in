@@ -206,6 +206,12 @@ export default async function sitemap() {
       priority: 0.84,
     },
     {
+      url: `${SITE_URL}/blog/triumph-street-triple-765r-quarter-mile-physics`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
       url: `${SITE_URL}/blog/kawasaki-z900rs-quarter-mile-physics`,
       lastModified: now,
       changeFrequency: "monthly",
