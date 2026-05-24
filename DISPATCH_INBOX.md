@@ -613,7 +613,15 @@ Until measured benchmarks land, the physics-calibration scheduler should skip en
 
 ---
 
-## INSTRUCTION — 2026-05-21 — [urgent] postflight alert dedup during open [blocking] INBOX tickets
+## DONE — 2026-05-24 — [urgent] postflight alert dedup during open [blocking] INBOX tickets
+
+**Result:** `scripts/session_postflight.sh::verify_deploy()` now consults a new `_blocking_ticket_open()` awk helper before queuing the timeout ALERT. When an open (above the `## DONE / DEFERRED ARCHIVE` divider) `## INSTRUCTION` block carries `[blocking]` AND mentions `Railway` or `deploy`, the timeout still returns exit code 5 but the outbox append is suppressed with a `warn` to stderr ("deploy alert suppressed — open blocking ticket: <heading>"). Verified against the real INBOX (matches the 2026-05-17 Railway ticket) and 5 synthetic fixtures: heading-keyword match, body-keyword match, no-blocking, archived-blocking, blocking-but-no-symptom-keyword — all behave as specified. Today's session is the first one running the new code path, so this morning's autonomous run is also the last one that will have queued a duplicate Railway ALERT.
+
+Implemented inline by session 1779611475-643 (Sun 2026-05-24). When the Railway service is restored and INBOX:140 moves to `## DONE`, the helper will return empty and any future genuine deploy-check timeout will fire a fresh ALERT as expected.
+
+**Original instruction below for archival.**
+
+## ORIGINAL — 2026-05-21 — [urgent] postflight alert dedup during open [blocking] INBOX tickets
 [urgent]
 
 **Context:** `scripts/session_postflight.sh::verify_deploy()` (lines 252-273) unconditionally calls `_queue_alert "Postflight deploy check timed out after ${DEPLOY_WAIT_SECONDS}s"` whenever the Railway `/api/health` poll loop times out. During the ongoing Railway outage (first detected 2026-05-17, INSTRUCTION at this file line 140, still 404 as of 2026-05-21), this has produced **22 identical `### ALERT` entries** in `DISPATCH_OUTBOX.md` between lines 430 and 902 — same one-line body verbatim every time. That's signal-dilution: a future genuine deploy-check timeout (different commit, different cause) will be lost in the noise.
@@ -731,6 +739,36 @@ Source: `reports/self_review_2026-05-21.md` Finding 2.2.
 **Acceptance:** `/motoquant-validate-bike` correctly validates a canned spec; the skill answers "what is a 60-foot time?" without needing to re-read CLAUDE.md.
 
 Source: `reports/claude_feature_scan_2026-05-24.md` (Adopt section).
+
+---
+
+## INSTRUCTION — 2026-05-24 — [self-review] [opportunistic] scheduler same-day dedup for already-ran agents
+[opportunistic]
+
+**Attribution:** session 1779611475-643 (Sun 2026-05-24, 08:31 UTC). The morning autonomous run (06:42 UTC, commit `fdaa574`) dispatched all 3 selected agents — self-review (M5), perf-monitor (Run 14), claude-feature-monitor (bootstrap). The 08:31 UTC re-dispatch by the wrapper picked the SAME 3 agents with `days since last run: 0` because `scripts/master_scheduler.sh` rounds the freshness clock to whole days, and "ran 2 h ago" reads as "0 days, eligible". The session-prompt cap of `1 self-review per 5 days` (see `scripts/agents/self-review.md:64`) caught it on the agent side, but the cap is documentation, not enforcement — a less alert session would have re-run the entire stack and produced 3 redundant reports + a duplicate INBOX queue.
+
+**Proposed fix:** in `scripts/master_scheduler.sh`'s scoring loop, before adding an agent to the dispatch plan, check whether `data/STATUS.md::_LAST_RUN_JSON.<agent>.iso_timestamp` is within the last 4 hours (configurable, default 4h). If so, skip the agent and emit a `[skipped: ran 2h ago, cooldown 4h]` note in the dispatch plan. This is in addition to the existing `days since last run` heuristic, not a replacement — different agents have different natural cadences (perf-monitor can re-run if there's a known drift, but self-review really shouldn't fire twice in 4h).
+
+**Implementation sketch:**
+
+```bash
+# In master_scheduler.sh, inside agent-loop, before pushing to plan:
+last_iso=$(jq -r ".\"${agent}\".iso_timestamp // empty" "$last_run_json")
+if [[ -n "$last_iso" ]]; then
+  last_epoch=$(date -d "$last_iso" +%s 2>/dev/null || echo 0)
+  age_seconds=$(( $(date +%s) - last_epoch ))
+  if [[ $age_seconds -lt 14400 ]]; then  # 4 hours
+    log "skip: ${agent} ran ${age_seconds}s ago (< 4h cooldown)"
+    continue
+  fi
+fi
+```
+
+**Acceptance:** the next session that fires within 4h of a previous successful run should see a dispatch plan with the agent listed under a new `### Recently-ran (skipped)` block instead of the active dispatch list. If the plan ends up empty, the wrapper should fall through to an inbox-implementer-style fallback (pick the oldest `[urgent]` INBOX ticket whose scope fits) rather than producing a "null" session.
+
+**Don't:** apply a global cooldown — `physics-calibration` and `tech-debt-pass` legitimately benefit from back-to-back runs when a regression is being chased. Cooldown should be per-agent, configurable in `scheduler_weights.json` (default 4h, override per agent).
+
+**Effort:** ~1 hour (15 min for the jq+date math, 30 min for per-agent cooldown override + test, 15 min to write the fallback-to-inbox-implementer wiring once that agent exists per INBOX:571).
 
 ---
 

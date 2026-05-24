@@ -268,8 +268,34 @@ verify_deploy() {
     log "  waited ${elapsed}s — still waiting"
   done
   warn "deploy verification timeout — push landed but Railway not responding ok"
-  _queue_alert "Postflight deploy check timed out after ${DEPLOY_WAIT_SECONDS}s"
+  local open_ticket
+  open_ticket=$(_blocking_ticket_open)
+  if [[ -n "${open_ticket}" ]]; then
+    warn "deploy alert suppressed — open blocking ticket: ${open_ticket}"
+  else
+    _queue_alert "Postflight deploy check timed out after ${DEPLOY_WAIT_SECONDS}s"
+  fi
   return 5
+}
+
+# Suppress duplicate deploy ALERTs when an open `[blocking]` INBOX ticket already
+# names the symptom (Railway / deploy). Stops at the `## DONE / DEFERRED ARCHIVE`
+# heading so closed tickets don't keep silencing fresh alerts.
+_blocking_ticket_open() {
+  local inbox="${MQ_WORKDIR}/repo/DISPATCH_INBOX.md"
+  [[ -f "${inbox}" ]] || return 0
+  awk '
+    /^## DONE \/ DEFERRED ARCHIVE/ { exit }
+    /^## INSTRUCTION/ {
+      block   = $0
+      tagged  = ($0 ~ /\[blocking\]/)
+      matched = ($0 ~ /Railway|deploy/)
+      next
+    }
+    block && /\[blocking\]/        { tagged  = 1 }
+    block && /Railway|deploy/      { matched = 1 }
+    block && tagged && matched     { print block; exit }
+  ' "${inbox}"
 }
 
 # ─── 7. Append DISPATCH_OUTBOX entry ─────────────────────────────────────
