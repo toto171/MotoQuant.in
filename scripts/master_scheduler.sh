@@ -140,9 +140,47 @@ status_file  = _np("${STATUS_FILE}")
 signals_file = _np("${SIGNALS_FILE}")
 dow          = int("${DOW}")
 agents_dir   = _np("${AGENTS_DIR}")
+repo_root    = _np("${REPO}")
+today_iso    = "${TODAY}"
 
 with open(weights_file) as f:
     weights = json.load(f)
+
+# Same-day dedup config (INBOX 2026-05-24): scheduler must not re-pick agents
+# that already produced a report today. Filesystem evidence is authoritative
+# because postflight only stamps STATUS.md._updated, not per-agent timestamps.
+# Per-agent override: weights["agents"][NAME].report_glob (default: kebab to snake).
+# Per-agent cooldown is implicit "same calendar day"; the file probe catches
+# anything that wrote reports/PREFIX_TODAY*.md.
+import glob as _glob
+
+# Known prefix exceptions where the agent name does not map 1:1 to the
+# report filename stem. Keep this short and explicit; default rule
+# (kebab → snake) handles everything else.
+_REPORT_PREFIX_ALIASES = {
+    "performance-monitor":    "perf_monitor",
+    "claude-feature-monitor": "claude_feature_scan",
+    "seo-keyword":            "seo_audit",
+    "customer-support":       "support_triage",
+    "product-prioritisation": "product_priorities",
+    "growth-experiments":     "growth_exp",
+    "benchmark-import":       "benchmark_audit",
+    "marketing-content":      "content",
+}
+
+def _report_prefix(agent_name, agent_cfg):
+    explicit = agent_cfg.get("report_glob")
+    if explicit:
+        return explicit.rstrip("_*")
+    if agent_name in _REPORT_PREFIX_ALIASES:
+        return _REPORT_PREFIX_ALIASES[agent_name]
+    return agent_name.replace("-", "_")
+
+def _ran_today(agent_name, agent_cfg):
+    prefix = _report_prefix(agent_name, agent_cfg)
+    pattern = os.path.join(repo_root, "reports", f"{prefix}_{today_iso}*.md")
+    matches = _glob.glob(pattern)
+    return matches[0] if matches else None
 
 # Last-run tracking from STATUS.md (a JSON block at the bottom)
 last_run = {}
@@ -183,6 +221,7 @@ def days_since(iso):
         return 99
 
 scores = []
+skipped_same_day = []
 for agent, w in weights["agents"].items():
     base = w["base"]
     best_dow = w.get("best_dow", [])
@@ -197,6 +236,22 @@ for agent, w in weights["agents"].items():
         freshness = -100                        # circuit-break this agent
     sig = signals.get(agent, {}).get("opportunity_boost", 0)
     score = base + dow_bonus + queue_bonus + freshness + sig
+
+    # Same-day dedup gate (INBOX 2026-05-24). Filesystem-based — irrefutable
+    # evidence beats STATUS.md bookkeeping, which the postflight does not
+    # update per-agent today. A failed run (outcome="fail") is allowed to
+    # retry — only successful runs trigger the skip.
+    same_day_evidence = _ran_today(agent, w)
+    if same_day_evidence and last.get("outcome") != "fail":
+        # Push below floor so the agent will not be picked. We keep the
+        # original components in the record for transparency in --dry-run.
+        score -= 200
+        skipped_same_day.append({
+            "agent": agent,
+            "evidence": os.path.relpath(same_day_evidence, repo_root),
+            "original_score": score + 200,
+        })
+
     scores.append({
         "agent": agent,
         "score": score,
@@ -207,22 +262,28 @@ for agent, w in weights["agents"].items():
         "signal_bonus": sig,
         "days_since_last_run": days,
         "last_outcome": last.get("outcome", "unknown"),
+        "same_day_skip": bool(same_day_evidence and last.get("outcome") != "fail"),
+        "same_day_evidence": os.path.relpath(same_day_evidence, repo_root) if same_day_evidence else None,
     })
 
 scores.sort(key=lambda s: -s["score"])
 
 # Pick top 3 (primary + 2 fills) above floor
 floor = 30
-picks = [s for s in scores if s["score"] >= floor][:3]
+picks = [s for s in scores if s["score"] >= floor and not s.get("same_day_skip")][:3]
 
-# Always include self-review on Sunday regardless
+# Always include self-review on Sunday — UNLESS it ran successfully today
+# already. Same-day skip beats the Sunday-pin (otherwise the wrapper would
+# fire self-review N times per Sunday).
 if dow == 7 and not any(p["agent"] == "self-review" for p in picks):
     sr = next(s for s in scores if s["agent"] == "self-review")
-    picks.append(sr)
+    if not sr.get("same_day_skip"):
+        picks.append(sr)
 
 print(json.dumps({
     "all_scored": scores,
     "selected": picks,
+    "skipped_same_day": skipped_same_day,
     "dow": dow,
     "date": "${TODAY}",
 }, indent=2))
@@ -259,11 +320,30 @@ emit_plan() {
   echo "${plan_json}" | python3 -c "
 import json, sys
 data = json.load(sys.stdin)
-for i, p in enumerate(data['selected'], 1):
+selected = data['selected']
+if not selected:
+    print('_(none — see Skipped block below; fall through to inbox-implementer or skip session)_')
+    print()
+for i, p in enumerate(selected, 1):
     print(f'**Agent {i}: {p[\"agent\"]}** (score={p[\"score\"]})')
     print(f'  - prompt: scripts/agents/{p[\"agent\"]}.md')
     print(f'  - days since last run: {p[\"days_since_last_run\"]}')
     print(f'  - last outcome: {p[\"last_outcome\"]}')
+    print()
+"
+
+  # Skipped block — agents that already ran today (filesystem evidence).
+  # Surfaces transparently so the calling session knows why a 'normal' pick
+  # was bumped. INBOX 2026-05-24 dedup INSTRUCTION.
+  echo "${plan_json}" | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+skipped = data.get('skipped_same_day') or []
+if skipped:
+    print('### Skipped (already ran today)')
+    print()
+    for s in skipped:
+        print(f'- **{s[\"agent\"]}** — evidence: \`{s[\"evidence\"]}\` (would-have-scored {s[\"original_score\"]})')
     print()
 "
 

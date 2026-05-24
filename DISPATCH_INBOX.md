@@ -742,7 +742,26 @@ Source: `reports/claude_feature_scan_2026-05-24.md` (Adopt section).
 
 ---
 
-## INSTRUCTION — 2026-05-24 — [self-review] [opportunistic] scheduler same-day dedup for already-ran agents
+## DONE — 2026-05-24 — [self-review] [opportunistic] scheduler same-day dedup for already-ran agents
+
+**Result:** Implemented in `scripts/master_scheduler.sh` during session 1779618640-656 (Sun 2026-05-24, 10:30 UTC) — the third dispatch of the day, which triggered the bug live and made it the natural session to fix it. Approach diverges from the original sketch: instead of relying on `_LAST_RUN_JSON.<agent>.iso_timestamp` (which postflight does not currently maintain per-agent), the scheduler now probes the filesystem for `reports/PREFIX_TODAY*.md`. Prefix mapping uses kebab-to-snake by default plus an explicit alias table for the 8 agents whose report stem deviates (perf_monitor, claude_feature_scan, seo_audit, support_triage, product_priorities, growth_exp, benchmark_audit, content). Filesystem evidence is more robust than STATUS.md bookkeeping because postflight stamps `_updated` but not per-agent dates.
+
+**Behaviour:**
+- If a matching report exists for today AND last outcome was not "fail", the agent's score is cut by 200 (well below floor=30) and it's excluded from `picks`.
+- A new `### Skipped (already ran today)` block appears in the dispatch plan listing the evidence file and would-have-been score.
+- `--dry-run` JSON gains `same_day_skip`, `same_day_evidence` per-agent fields, plus a top-level `skipped_same_day` array.
+- Failed runs (outcome=fail) are exempt — retry behaviour preserved.
+- Sunday self-review auto-pin gated by same-day-skip so it can't fire twice on Sun.
+
+**Validated** on today's repo state: 4 agents (catalog-expansion, performance-monitor, self-review, claude-feature-monitor) correctly skipped because their `reports/*_2026-05-24.md` files already exist; scheduler picks the next-best 3 (physics-calibration, benchmark-import, marketing-content). 6 pytest cases in `tests/test_scheduler_same_day_dedup.py` cover normal pick, skip on report, alias prefix mapping (perf_monitor), failed-run exempt, multi-skip surface, dry-run JSON shape.
+
+**Files touched:** `scripts/master_scheduler.sh`, `tests/test_scheduler_same_day_dedup.py`.
+
+**Deferred from this fix:** (a) per-agent cooldown override in `scheduler_weights.json` (current implementation is "same calendar day" only — no sub-day cooldown); (b) fallback-to-inbox-implementer wiring (depends on INBOX:571 inbox-implementer agent which doesn't exist yet); (c) postflight should still be extended to write per-agent timestamps to LAST_RUN_JSON for the GH-Actions side-channel — separate ticket. The filesystem-based gate covers the immediate same-day-duplicate-dispatch failure mode the user hit.
+
+**Original instruction below for archival.**
+
+## ORIGINAL — 2026-05-24 — [self-review] [opportunistic] scheduler same-day dedup for already-ran agents
 [opportunistic]
 
 **Attribution:** session 1779611475-643 (Sun 2026-05-24, 08:31 UTC). The morning autonomous run (06:42 UTC, commit `fdaa574`) dispatched all 3 selected agents — self-review (M5), perf-monitor (Run 14), claude-feature-monitor (bootstrap). The 08:31 UTC re-dispatch by the wrapper picked the SAME 3 agents with `days since last run: 0` because `scripts/master_scheduler.sh` rounds the freshness clock to whole days, and "ran 2 h ago" reads as "0 days, eligible". The session-prompt cap of `1 self-review per 5 days` (see `scripts/agents/self-review.md:64`) caught it on the agent side, but the cap is documentation, not enforcement — a less alert session would have re-run the entire stack and produced 3 redundant reports + a duplicate INBOX queue.
