@@ -1514,3 +1514,23 @@ Postflight deploy check timed out after 180s
 
 ### ALERT — 2026-05-25T09:00:00Z — self-review M6 auto-applied weight change
 `benchmark-import.base` 40 → 50 (+10, single-knob). Attribution: `reports/self_review_2026-05-25.md` Finding 2.3. Reason: 5 consecutive runs this week (first time agent ran); KPI benchmark count 79 → ~91; 3+ consecutive wins trigger per playbook §5. Revert to 40 if 2 consecutive null-result weeks.
+
+## 2026-05-25T03:08:38+00:00 — session 1779676288-696
+
+**Commit:** `da14ec034ad9889438c6e813edf650ff49f9ebcc`
+**Files:** `DISPATCH_INBOX.md DISPATCH_OUTBOX.md STATUS.md motoquant.db motoquant/scraper/importer.py reports/sweep_et_2026-04-24_post_smallcc_fix.json scripts/scheduler_weights.json web/app/blog/page.js web/app/sitemap.js reports/content_harley-nightster-rh975-quarter-mile-physics_2026-05-25.md reports/physics_calibration_2026-05-25.md reports/self_review_2026-05-25.md web/app/blog/harley-nightster-rh975-quarter-mile-physics/page.js web/app/blog/harley-nightster-rh975-quarter-mile-physics/layout.js web/public/og-image.png`
+
+> # Session log — 2026-05-25T02:31:28+00:00
+> 
+> **Started:** 2026-05-25T02:31:28+00:00
+> **Workdir:** /tmp/mq-session-1779676281-696/repo
+> **HEAD at start:** 8bf3db9814c04fd8b65c76d35fc92b94af3d7b3a
+> **Identity:** Arya Desai <da25mem5s02@student.nitw.ac.in>
+> **PAT tier:** primary
+> **Push branch:** main
+> **Baselines:** ✓ K5/R1/Hayabusa within ±0.005s
+> 
+> ---
+> 
+> ## Work performed
+> 
