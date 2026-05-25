@@ -278,6 +278,12 @@ export default async function sitemap() {
       priority: 0.86,
     },
     {
+      url: `${SITE_URL}/blog/royal-enfield-hunter-350-quarter-mile-physics`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.87,
+    },
+    {
       url: `${SITE_URL}/docs/getting-started`,
       lastModified: now,
       changeFrequency: "monthly",

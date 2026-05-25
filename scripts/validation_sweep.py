@@ -56,6 +56,24 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     ("Kawasaki", "Ninja ZX-14R", 2012, 9.47, 246, "Cycle World 2012"),
     ("Kawasaki", "ZZR1400", 2006, 9.90, 242, "MCN 2006"),
     ("Kawasaki", "Ninja H2", 2015, 9.62, 247, "MCN 2015"),
+    # Kawasaki Ninja H2 SX (998 cc supercharged I4 sport-tourer, 2018-2023) —
+    # Cycle World 2018 Best Open-Class Streetbike feature, timing-strip at a
+    # licensed drag strip: 10.04s @ 144 mph (231.7 km/h). Same Cycle World
+    # source and methodology as the Ninja H2 2015, Z H2 2020, ZX-14R 2012 and
+    # S 1000 RR 2015/2019 entries. The H2 SX is the sport-tourer variant of the
+    # H2 supercharged platform — heavier and softer-tuned than the track-only
+    # H2 (hence 10.04 vs 9.62), but still supercharged. The 4-token model key
+    # "Ninja H2 SX" has higher specificity than "Ninja H2" (2-token) and will
+    # be matched first after the matcher-specificity fix applied 2026-05-25.
+    # URL: https://www.cycleworld.com/best-open-class-streetbike-2018-kawasaki-ninja-h2-sx-se/
+    (
+        "Kawasaki",
+        "Ninja H2 SX",
+        2018,
+        10.04,
+        232,
+        "Cycle World 2018 (timing-strip, Best Open-Class Streetbike)",
+    ),
     ("Kawasaki", "Z H2", 2020, 9.95, 240, "Cycle World 2020"),
     # GSX-R 1000 family
     ("Suzuki", "GSX-R 1000", 2007, 10.00, 239, "Sport Rider 2007"),
@@ -811,6 +829,16 @@ def run_sweep(verbose: bool = True) -> dict:
                 }
             )
 
+    # Sort BENCHMARKS by model-token-count descending so more-specific patterns
+    # (e.g. "Ninja H2 SX", "Street Triple 765 RS") are tried before less-specific
+    # ones ("Ninja H2", "Street Triple") when iterating per spec below.
+    # Without this, {ninja,h2} ⊆ {ninja,h2,sx} causes the shorter pattern to
+    # shadow the longer one via first-match-wins linear scan.
+    import re as _re_vs
+    def _bench_model_token_count(b):
+        return len([t for t in _re_vs.split(r"[\s\-\.]+", b[1]) if t])
+    _benchmarks_sorted = sorted(BENCHMARKS, key=_bench_model_token_count, reverse=True)
+
     # 2. Full catalog sweep
     n = len(ALL_KNOWN_BIKES)
     for i, spec in enumerate(ALL_KNOWN_BIKES, 1):
@@ -824,7 +852,9 @@ def run_sweep(verbose: bool = True) -> dict:
             )
 
         # benchmark match (word-boundary matching — not substring)
-        for bmfr, bmodel, byear, tgt_et, tgt_trap, src in BENCHMARKS:
+        # Use _benchmarks_sorted (most-specific-first) to prevent short patterns
+        # (e.g. "Ninja H2") from shadowing longer ones ("Ninja H2 SX").
+        for bmfr, bmodel, byear, tgt_et, tgt_trap, src in _benchmarks_sorted:
             if spec.manufacturer != bmfr:
                 continue
             if not _model_match(bmodel, spec.model_name):

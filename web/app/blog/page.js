@@ -108,11 +108,31 @@ export const metadata = {
     "hornet 2.0 vs ns200 quarter mile",
     "honda hornet 2.0 drag time india",
     "honda hornet 2.0 0-100 india",
+    "royal enfield hunter 350 quarter mile",
+    "hunter 350 drag time india",
+    "hunter 350 vs classic 350 vs bullet 350",
+    "hunter 350 top speed india",
+    "re j platform drag race",
   ],
   alternates: { canonical: "https://motoquant.in/blog" },
 };
 
 const POSTS = [
+  {
+    slug: "royal-enfield-hunter-350-quarter-mile-physics",
+    date: "2026-05-25",
+    readTime: "12 min",
+    tags: [
+      "Royal Enfield",
+      "Hunter 350",
+      "J-platform",
+      "Indian 350cc",
+      "physics",
+    ],
+    title: "Royal Enfield Hunter 350 Quarter-Mile Physics: Fastest J-Platform at the Strip",
+    excerpt:
+      "MotoQuant simulates the Hunter 350 at 16.895s and 127.9 km/h trap — the quickest J-platform sibling, 0.84s ahead of the Bullet 350 and 1.025s ahead of the Classic 350. All four bikes share the same 20.2 hp single. Every tenth of the gap is mass and aerodynamics, not engine. Physics breakdown of why the lightest RE is also the fastest RE at the strip, plus the three cheapest mods under ₹25,000.",
+  },
   {
     slug: "harley-nightster-rh975-quarter-mile-physics",
     date: "2026-05-25",

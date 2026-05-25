@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import SubModelsCtaVariant from './SubModelsCtaVariant';
 
 export const metadata = {
   title: 'Physics Whitepaper',
@@ -130,6 +131,9 @@ export default function PhysicsPage() {
           {SUBMODELS.map(m => <SubModelRow key={m.n} model={m} />)}
         </div>
       </section>
+
+      {/* EXP-016: post-sub-models simulator CTA (variant B only; fallback=null → SSG byte-identical to control) */}
+      <SubModelsCtaVariant />
 
       {/* Bike config */}
       <section className="mb-14">

@@ -134,6 +134,15 @@ def run_sweep(out_path):
         bench_map.setdefault((bmfr.lower(), bmodel.lower()), []).append(
             (byear, tgt_et, tgt_trap, src)
         )
+    # Sort by model-token-count descending so more-specific patterns (e.g.
+    # "Ninja H2 SX") are tried before less-specific ones ("Ninja H2").
+    # Without this, {ninja,h2} ⊆ {ninja,h2,sx} causes the H2 benchmark to
+    # steal H2 SX catalog rows via first-match-wins dict iteration.
+    import re as _re_sort
+    def _token_count(key):
+        return len([t for t in _re_sort.split(r"[\s\-\.]+", key[1]) if t])
+    bench_map_sorted = sorted(bench_map.items(), key=lambda kv: _token_count(kv[0]), reverse=True)
+
     for rec in results:
         if rec.get("kind") != "catalog" or rec.get("error"):
             continue
@@ -141,7 +150,7 @@ def run_sweep(out_path):
         mod_lo = rec["model"].lower()
         # Find a benchmark matching by manufacturer substring and model substring
         match = None
-        for (bm, bmod), entries in bench_map.items():
+        for (bm, bmod), entries in bench_map_sorted:
             if _wb_match(bm, m_lo) and _wb_match(bmod, mod_lo):
                 yf = rec.get("year_from") or 0
                 yt = rec.get("year_to") or yf

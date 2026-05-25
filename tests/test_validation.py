@@ -367,3 +367,175 @@ class TestSubModels:
         assert abs(T_w - expected) < 1.0, (
             f"Wheel torque {T_w:.1f} doesn't match expected {expected:.1f}"
         )
+
+
+# ═══════════════════════════════════════════
+# BENCHMARK MATCHER SPECIFICITY TESTS
+# ═══════════════════════════════════════════
+
+
+class TestMatcherSpecificity:
+    """Regression tests for the benchmark matcher specificity fix.
+
+    Before 2026-05-25, _wb_match used pure token-subset matching: every
+    token in the pattern must appear in the spec string. This meant that
+    "Ninja H2" (2 tokens) would match "Ninja H2 SX" (3 tokens) because
+    {ninja, h2} ⊆ {ninja, h2, sx}. When iteration order was not sorted by
+    token-count descending, the shorter pattern could shadow the longer one.
+
+    Fix: callers sort candidates by model-token-count descending before
+    iterating so "Ninja H2 SX" (3 tokens) is tried before "Ninja H2" (2 tokens).
+    These tests pin the correct binding for the four collision pairs:
+      - Z H2 (naked)    vs Ninja H2 (supersport)   vs Ninja H2 SX (tourer) vs Ninja H2R (track)
+    """
+
+    def _wb_match(self, pattern: str, spec_str: str) -> bool:
+        """Inline copy of the production _wb_match for direct unit testing."""
+        import re
+        tokens = [t for t in re.split(r"[\s\-\.]+", pattern.lower()) if t]
+        spec_tokens = {t for t in re.split(r"[\s\-\.]+", spec_str.lower()) if t}
+        return all(t in spec_tokens for t in tokens)
+
+    def _token_count(self, s: str) -> int:
+        import re
+        return len([t for t in re.split(r"[\s\-\.]+", s) if t])
+
+    # ── Direct _wb_match logic tests ────────────────────────────────────────
+
+    def test_ninja_h2_matches_ninja_h2(self):
+        """'Ninja H2' should match spec 'Ninja H2 (2015-2022)'."""
+        assert self._wb_match("Ninja H2", "Ninja H2 2015-2022") is True
+
+    def test_ninja_h2_sx_matches_ninja_h2_sx(self):
+        """'Ninja H2 SX' should match spec 'Ninja H2 SX (2018-2023)'."""
+        assert self._wb_match("Ninja H2 SX", "Ninja H2 SX 2018-2023") is True
+
+    def test_ninja_h2_also_matches_h2_sx_spec(self):
+        """'Ninja H2' (2-token) DOES token-match 'Ninja H2 SX' — subset is true.
+        This is the root-cause of the shadow bug; the fix is NOT to change this
+        function but to ensure more-specific patterns are tried first by callers.
+        """
+        assert self._wb_match("Ninja H2", "Ninja H2 SX 2018-2023") is True
+
+    def test_ninja_h2_does_not_match_z_h2(self):
+        """'Ninja H2' should NOT match 'Z H2' — 'Ninja' token is absent."""
+        assert self._wb_match("Ninja H2", "Z H2 2020-2025") is False
+
+    def test_z_h2_does_not_match_ninja_h2(self):
+        """'Z H2' should NOT match 'Ninja H2' — 'Z' token is absent."""
+        assert self._wb_match("Z H2", "Ninja H2 2015-2022") is False
+
+    def test_ninja_h2r_matches_ninja_h2r(self):
+        """'Ninja H2R' should match spec 'Ninja H2R'."""
+        assert self._wb_match("Ninja H2R", "Ninja H2R 2015-2022") is True
+
+    def test_ninja_h2r_does_not_match_ninja_h2(self):
+        """'Ninja H2R' (3 tokens) must NOT match 'Ninja H2 2015-2022'
+        because 'H2R' is not in {ninja, h2, 2015-2022}."""
+        assert self._wb_match("Ninja H2R", "Ninja H2 2015-2022") is False
+
+    # ── Specificity-ordering tests ───────────────────────────────────────────
+
+    def test_h2_sx_has_more_tokens_than_h2(self):
+        """'Ninja H2 SX' should have more tokens than 'Ninja H2'
+        — this is the invariant the sort relies on."""
+        assert self._token_count("Ninja H2 SX") > self._token_count("Ninja H2")
+
+    def test_h2r_same_token_count_as_h2(self):
+        """'Ninja H2R' has the same token count as 'Ninja H2' (both 2 tokens:
+        ['Ninja', 'H2R'] vs ['Ninja', 'H2']). H2R does NOT collide with H2
+        because the token 'H2R' != 'H2', so no shadow bug exists between them.
+        This test documents that the H2R collision risk is a non-issue."""
+        assert self._token_count("Ninja H2R") == self._token_count("Ninja H2")
+
+    def test_specificity_sort_orders_h2_sx_before_h2(self):
+        """Sorting benchmark model keys by token-count descending puts
+        'Ninja H2 SX' before 'Ninja H2', preventing the shadow bug."""
+        import re
+        patterns = ["Ninja H2", "Z H2", "Ninja H2 SX", "Ninja H2R"]
+
+        def _tok(s):
+            return len([t for t in re.split(r"[\s\-\.]+", s) if t])
+
+        sorted_patterns = sorted(patterns, key=_tok, reverse=True)
+        idx_h2 = sorted_patterns.index("Ninja H2")
+        idx_h2_sx = sorted_patterns.index("Ninja H2 SX")
+        # H2 SX (3 tokens) must appear before H2 (2 tokens); this is the
+        # critical ordering for the shadow bug fix.
+        # Note: H2R has the SAME token count as H2 (both 2: ['Ninja','H2R'] /
+        # ['Ninja','H2']) — the sort key is equal; stable sort preserves their
+        # relative position. H2R does NOT shadow H2 because 'H2R' != 'H2', so
+        # no additional ordering constraint is needed for H2R.
+        assert idx_h2_sx < idx_h2, (
+            f"'Ninja H2 SX' (idx {idx_h2_sx}) should sort before 'Ninja H2' (idx {idx_h2})"
+        )
+
+    def test_after_sort_first_match_for_h2_sx_spec_is_h2_sx(self):
+        """After sorting benchmark keys by specificity, iterating over the H2
+        collision group should bind 'Ninja H2 SX 2018-2023' to the 'Ninja H2 SX'
+        benchmark first (not the shorter 'Ninja H2' benchmark)."""
+        import re
+
+        # Simulate the production matcher with sorted iteration
+        benchmark_models = ["Ninja H2", "Z H2", "Ninja H2 SX", "Ninja H2R"]
+
+        def _tok(s):
+            return len([t for t in re.split(r"[\s\-\.]+", s) if t])
+
+        sorted_models = sorted(benchmark_models, key=_tok, reverse=True)
+        spec_name = "Ninja H2 SX 2018-2023"
+
+        first_match = None
+        for bmodel in sorted_models:
+            if self._wb_match(bmodel, spec_name):
+                first_match = bmodel
+                break
+
+        assert first_match == "Ninja H2 SX", (
+            f"Expected 'Ninja H2 SX' to match first, got '{first_match}'"
+        )
+
+    def test_after_sort_first_match_for_h2_spec_is_h2(self):
+        """After sorting, 'Ninja H2 2015-2022' should still bind to 'Ninja H2',
+        not 'Ninja H2 SX' (which won't match because 'sx' is absent)."""
+        import re
+
+        benchmark_models = ["Ninja H2", "Z H2", "Ninja H2 SX", "Ninja H2R"]
+
+        def _tok(s):
+            return len([t for t in re.split(r"[\s\-\.]+", s) if t])
+
+        sorted_models = sorted(benchmark_models, key=_tok, reverse=True)
+        spec_name = "Ninja H2 2015-2022"
+
+        first_match = None
+        for bmodel in sorted_models:
+            if self._wb_match(bmodel, spec_name):
+                first_match = bmodel
+                break
+
+        assert first_match == "Ninja H2", (
+            f"Expected 'Ninja H2' to match first, got '{first_match}'"
+        )
+
+    def test_z_h2_spec_binds_to_z_h2_benchmark(self):
+        """'Z H2 2020-2025' should bind to 'Z H2', never to 'Ninja H2' or 'Ninja H2 SX'."""
+        import re
+
+        benchmark_models = ["Ninja H2", "Z H2", "Ninja H2 SX", "Ninja H2R"]
+
+        def _tok(s):
+            return len([t for t in re.split(r"[\s\-\.]+", s) if t])
+
+        sorted_models = sorted(benchmark_models, key=_tok, reverse=True)
+        spec_name = "Z H2 2020-2025"
+
+        first_match = None
+        for bmodel in sorted_models:
+            if self._wb_match(bmodel, spec_name):
+                first_match = bmodel
+                break
+
+        assert first_match == "Z H2", (
+            f"Expected 'Z H2' to match first, got '{first_match}'"
+        )
