@@ -107,6 +107,15 @@ export const metadata = {
 
 const POSTS = [
   {
+    slug: "royal-enfield-bullet-350-quarter-mile-physics",
+    date: "2026-05-25",
+    readTime: "11 min",
+    tags: ["Royal Enfield", "Bullet 350", "J-platform", "Indian 350cc", "physics"],
+    title: "Royal Enfield Bullet 350 Quarter-Mile Physics: 17.7s on the Strip",
+    excerpt:
+      "MotoQuant simulates the Bullet 350 J-platform at 17.735s and 118 km/h trap. Autocar India and BikeWale GPS-timed 17.8-18.3s on stock bikes. Why 20.2 hp and 195 kg produce a 17-second ET, how the six-speed gearbox works against you at the strip, and what the J-platform siblings (Classic 350, Meteor 350, Hunter 350) inherit from the same engine.",
+  },
+  {
     slug: "harley-nightster-rh975-quarter-mile-physics",
     date: "2026-05-25",
     readTime: "11 min",

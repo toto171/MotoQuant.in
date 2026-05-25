@@ -325,6 +325,62 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         208,
         "MotoStatz 2020 (Dragy, stock instrumented)",
     ),
+    # ── 2026-05-25 benchmark-import agent ─────────────────────────────────────
+    # Three high-confidence instrumented adds from publications already cited
+    # in this list. All catalog year ranges verified to include year_hint.
+    # No duplicates with prior passes.
+    #
+    # Honda CBR 600RR PC40B (599 cc I4 sport, 2013-2020) — MotoStatz 2017
+    # stock test: 10.92s @ 131 mph (210.8 km/h). MotoStatz used a Dragy for
+    # 60-130 mph measurements on this test; their quarter-mile methodology is
+    # identical to the Street Triple 765 RS / Panigale V2 / RS 660 / 890
+    # Duke R entries already in this list. 2017 model year falls squarely in
+    # the HONDA_CBR600RR_PC40B_2013 catalog range (2013-2020); no architecture
+    # change between 2013 and 2020 on the PC40B platform.
+    # URL: https://motostatz.com/honda-cbr600rr-acceleration-and-top-speed/
+    (
+        "Honda",
+        "CBR 600RR",
+        2017,
+        10.92,
+        211,
+        "MotoStatz 2017 (Dragy, stock instrumented)",
+    ),
+    # Triumph Daytona 675 (675 cc triple sport, 2013-2017) — Sport Rider /
+    # Cycle World sportbike-performance-numbers archive: 10.32s @ 136.0 mph
+    # (218.9 km/h). Source is the same Sport Rider timing-strip results table
+    # already used for the Suzuki GSX-S1000 entry in this list (the table
+    # lives at cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    # and aggregates every Sport Rider instrumented drag-strip test since
+    # 1996). The 2013 update brought +6 hp and ~3 kg weight reduction over
+    # the 2007-2012 model, making 10.3x plausible at expert-tester pace
+    # (vs 10.53 for the 2006 and 2008 variants on the same table).
+    # Catalog entry TRIUMPH_DAYTONA_675 covers 2013-2017; year_hint=2013
+    # matches cleanly.
+    (
+        "Triumph",
+        "Daytona 675",
+        2013,
+        10.32,
+        219,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2013)",
+    ),
+    # BMW R nineT (1170 cc boxer-twin retro, 2014-2020) — Cycle World
+    # December 2014 comparison test (R nineT vs CB1100 vs Indian Scout vs
+    # Moto Guzzi Griso); timing-strip: 11.05s @ 120 mph (193.1 km/h), 0-60
+    # 2.8s. Cycle World is the highest-priority source on the project's
+    # accepted list; same publication/methodology as ZX-14R, S1000RR, Z H2,
+    # Panigale V4, etc. Catalog entry BMW_RNINET_2014 covers 2014-2020;
+    # year_hint=2014 matches cleanly.
+    # URL: https://www.cycleworld.com/2014/12/01/retro-motorcycles-comparison-test-review-with-photos-and-specifications/
+    (
+        "BMW",
+        "R nineT",
+        2014,
+        11.05,
+        193,
+        "Cycle World 2014 (timing-strip, retro comparison test)",
+    ),
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

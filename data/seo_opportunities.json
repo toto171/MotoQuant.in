@@ -231,9 +231,9 @@
       "seasonality": "evergreen — RE Bullet is India's longest-continuously-produced motorcycle nameplate",
       "current_rank": null,
       "target_url": "/bikes",
-      "action": "create-blog-later",
+      "action": "done",
       "priority": 15,
-      "rationale": "RE Bullet 350 J-platform (2023-2026) added to catalog 2026-05-18 third pass. MotoQuant sim ET 17.735s @ 118 km/h. Autocar India / BikeWale GPS-timed 17.8-18.3s. Bullet 350 has the highest brand recognition of any Indian motorcycle nameplate (continuous production since 1932). SERP top results are spec pages (BikeWale, BikeDekho, RE official) but no ET breakdowns. Queue marketing-content blog post on J-platform physics + Classic 350 / Hunter 350 / Meteor 350 sibling comparison."
+      "rationale": "RE Bullet 350 J-platform (2023-2026) added to catalog 2026-05-18 third pass. MotoQuant sim ET 17.735s @ 118 km/h. Autocar India / BikeWale GPS-timed 17.8-18.3s. Bullet 350 has the highest brand recognition of any Indian motorcycle nameplate (continuous production since 1932). SERP top results are spec pages (BikeWale, BikeDekho, RE official) but no ET breakdowns. PUBLISHED 2026-05-25 at /blog/royal-enfield-bullet-350-quarter-mile-physics — J-platform physics deep-dive covering Bullet vs Classic 350 / Hunter 350 / Meteor 350 sibling comparison, cost-per-tenth mod ladder, and cluster bias disclosure. marketing-content agent."
     },
     {
       "keyword": "first principles motorcycle drag simulation",
