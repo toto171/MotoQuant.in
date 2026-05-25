@@ -265,6 +265,14 @@ function HomePageInner() {
   const ctaVariant = searchParams?.get('variant') === 'B' ? 'B' : 'A';
   const heroCtaLabel = ctaVariant === 'B' ? "See your bike's quarter-mile ET" : 'Try the simulator';
 
+  // GROWTH_EXP_018: hero subhead value-prop framing A/B test
+  // Default OFF (control = physics-first). Visitors who land with ?exp18=B
+  // see the Indian-community-first framing that names the drag-racing
+  // identity up front rather than the technical methodology.
+  // Uses ?exp18=B (not ?variant=B) to avoid contaminating EXP-001 arms.
+  // Same h1, same CTAs, same meta — SEO-safe. Single variable: subhead only.
+  const exp18Variant = searchParams?.get('exp18') === 'B' ? 'B' : 'A';
+
   // Track scroll progress through the hero so the christmas tree
   // lights light in sequence.
   const heroRef = useRef(null);
@@ -344,15 +352,35 @@ function HomePageInner() {
               </h1>
             </Reveal>
 
+            {/* GROWTH_EXP_018: hero subhead framing — physics-first (A) vs Indian-community-first (B) */}
             <Reveal y={20} duration={0.7} delay={0.15}>
-              <p className="mt-7 text-lg sm:text-xl text-white/70 leading-relaxed max-w-xl mx-auto">
-                A first-principles drag simulator for India&rsquo;s motorcycle
-                drag-racing community.{' '}
-                <span className="text-white">790 bikes</span>,{' '}
-                <span className="text-white">563 parts</span>,{' '}
-                <span className="text-white">20 venues</span> — tuned to
-                within ±0.05s of real-world ETs on the litre-class.
-              </p>
+              {exp18Variant === 'B' ? (
+                <p
+                  className="mt-7 text-lg sm:text-xl text-white/70 leading-relaxed max-w-xl mx-auto"
+                  data-exp="EXP-018"
+                  data-variant="B"
+                >
+                  Your bike. Your strip. Your quarter-mile ET — predicted to
+                  within{' '}
+                  <span className="text-white">±0.05s</span> on the litre-class.{' '}
+                  <span className="text-white">790 Indian and global bikes</span>,{' '}
+                  <span className="text-white">563 parts with INR pricing</span>,{' '}
+                  <span className="text-white">Aamby Valley to MMRT.</span>
+                </p>
+              ) : (
+                <p
+                  className="mt-7 text-lg sm:text-xl text-white/70 leading-relaxed max-w-xl mx-auto"
+                  data-exp="EXP-018"
+                  data-variant="A"
+                >
+                  A first-principles drag simulator for India&rsquo;s motorcycle
+                  drag-racing community.{' '}
+                  <span className="text-white">790 bikes</span>,{' '}
+                  <span className="text-white">563 parts</span>,{' '}
+                  <span className="text-white">20 venues</span> — tuned to
+                  within ±0.05s of real-world ETs on the litre-class.
+                </p>
+              )}
             </Reveal>
 
             <Reveal y={16} duration={0.7} delay={0.22}>
