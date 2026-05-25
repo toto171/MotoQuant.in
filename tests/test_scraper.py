@@ -660,6 +660,98 @@ class TestImportBatch:
 
 
 # ────────────────────────────────────────────────────────────
+# Year-suffix upsert idempotency (INBOX:308 regression guard)
+# ────────────────────────────────────────────────────────────
+
+
+class TestYearSuffixIdempotency:
+    """Re-importing a bike whose model_name carries a `(YYYY-YYYY)` suffix must
+    NOT mint a phantom duplicate row when the DB already holds the bare-named
+    sibling (or vice versa). Without the `_norm_model`-aware pre-check in
+    `bike_repo.create_model`, every catalog re-import added ~9 ghost rows
+    (CLAUDE.md May-4 entry + INBOX:308 attribution).
+
+    Mirrors the real-world failure mode: older seed runs stored bare model
+    names (`"1390 Super Duke R EVO"`), then the importer in later sessions
+    started auto-appending year suffixes from ``spec.year_from`` /
+    ``spec.year_to``, yielding `"1390 Super Duke R EVO (2024-2026)"`. The
+    INSERT OR IGNORE UNIQUE constraint is keyed on the literal string and
+    does NOT conflict between the two forms, so phantom rows accumulated.
+    """
+
+    def test_double_import_same_spec_does_not_grow_table(self, scraper_db):
+        spec = _make_spec(model_name="GSX-R 750", year_from=1985, year_to=1987)
+        import_batch(scraper_db, [spec])
+        n_after_first = scraper_db.bikes.count_models()
+        import_batch(scraper_db, [spec])
+        n_after_second = scraper_db.bikes.count_models()
+        assert n_after_second == n_after_first, (
+            f"Re-importing the same spec grew bike_models from "
+            f"{n_after_first} to {n_after_second} — phantom-row bug."
+        )
+
+    def test_suffix_match_returns_existing_id_when_db_has_bare_name(self, scraper_db):
+        """DB has bare-named row; create_model called with suffixed name must
+        return the existing id, not mint a new row."""
+        mfr_id = scraper_db.bikes.get_or_create_manufacturer("KTM")
+        bare_id = scraper_db.bikes.create_model(
+            manufacturer_id=mfr_id,
+            model_name="1390 Super Duke R EVO",
+            year_from=2024,
+            year_to=2026,
+            category="naked",
+        )
+        n_before = scraper_db.bikes.count_models()
+
+        suffixed_id = scraper_db.bikes.create_model(
+            manufacturer_id=mfr_id,
+            model_name="1390 Super Duke R EVO (2024-2026)",
+            year_from=2024,
+            year_to=2026,
+            category="naked",
+        )
+        n_after = scraper_db.bikes.count_models()
+
+        assert suffixed_id == bare_id, (
+            f"Suffixed create_model returned new id {suffixed_id} instead of "
+            f"existing bare id {bare_id}."
+        )
+        assert n_after == n_before, (
+            f"bike_models grew {n_before} -> {n_after}: phantom row minted."
+        )
+
+    def test_bare_match_returns_existing_id_when_db_has_suffix_name(self, scraper_db):
+        """DB has suffix-bearing row; create_model called with bare name must
+        return the existing id, not mint a new row."""
+        mfr_id = scraper_db.bikes.get_or_create_manufacturer("KTM")
+        suffix_id = scraper_db.bikes.create_model(
+            manufacturer_id=mfr_id,
+            model_name="1390 Super Duke R EVO (2024-2026)",
+            year_from=2024,
+            year_to=2026,
+            category="naked",
+        )
+        n_before = scraper_db.bikes.count_models()
+
+        bare_id = scraper_db.bikes.create_model(
+            manufacturer_id=mfr_id,
+            model_name="1390 Super Duke R EVO",
+            year_from=2024,
+            year_to=2026,
+            category="naked",
+        )
+        n_after = scraper_db.bikes.count_models()
+
+        assert bare_id == suffix_id, (
+            f"Bare create_model returned new id {bare_id} instead of "
+            f"existing suffixed id {suffix_id}."
+        )
+        assert n_after == n_before, (
+            f"bike_models grew {n_before} -> {n_after}: phantom row minted."
+        )
+
+
+# ────────────────────────────────────────────────────────────
 # ALL_KNOWN_BIKES integration
 # ────────────────────────────────────────────────────────────
 

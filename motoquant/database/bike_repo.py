@@ -6,6 +6,7 @@ Handles BikeConfig ↔ DB conversion via the bridge module.
 """
 
 import json
+import re
 import sqlite3
 
 import numpy as np
@@ -18,6 +19,21 @@ from .bridge import (
     extract_dyno_curve,
     extract_headline_specs,
 )
+
+_YEAR_SUFFIX_RE = re.compile(r"\s*\(\d{4}-\d{4}\)\s*$")
+
+
+def _norm_model(s: str) -> str:
+    """Strip a trailing ``(YYYY-YYYY)`` year-range suffix from a model name.
+
+    Importers stamp specs like ``"1390 Super Duke R EVO (2024-2026)"`` while
+    older DB rows are stored bare as ``"1390 Super Duke R EVO"``. Normalising
+    both sides before comparison keeps the lenient upsert from minting phantom
+    duplicates on every re-import.
+    """
+    if not s:
+        return s
+    return _YEAR_SUFFIX_RE.sub("", s.strip())
 
 
 class BikeRepository:
@@ -109,6 +125,32 @@ class BikeRepository:
 
         placeholders = ", ".join(["?"] * len(cols))
         col_str = ", ".join(cols)
+
+        # Pre-insert year-suffix check: the UNIQUE constraint is keyed on the
+        # literal `model_name` string, so the bare-vs-suffixed variants of the
+        # same bike (e.g. `"GSX-R 750"` vs `"GSX-R 750 (1985-1987)"`) do NOT
+        # collide and INSERT OR IGNORE would mint a phantom row. Match in
+        # Python on the normalised form first and short-circuit to the existing
+        # id if any sibling row already covers this bike.
+        normalised_incoming = _norm_model(model_name)
+        existing_rows = self._conn.execute(
+            """SELECT id, model_name, year_from FROM bike_models
+               WHERE manufacturer_id = ?""",
+            (manufacturer_id,),
+        ).fetchall()
+        suffix_matches = [
+            r
+            for r in existing_rows
+            if _norm_model(r["model_name"]) == normalised_incoming
+        ]
+        if suffix_matches:
+            suffix_matches.sort(
+                key=lambda r: (
+                    r["year_from"] is None,
+                    abs((r["year_from"] or 0) - (year_from or 0)),
+                )
+            )
+            return suffix_matches[0]["id"]
 
         cur = self._conn.execute(
             f"INSERT OR IGNORE INTO bike_models ({col_str}) VALUES ({placeholders})",

@@ -860,38 +860,37 @@ Write `/blog/harley-nightster-rh975-quarter-mile-physics` — physics breakdown 
 
 ---
 
-## INSTRUCTION — 2026-05-25 — [self-review] [urgent] implement bike_repo year-suffix upsert fix + ghost-row cleanup
-[urgent]
+## DONE — 2026-05-25 — [self-review] [urgent] implement bike_repo year-suffix upsert fix + ghost-row cleanup
 
-**Attribution:** self-review M6 2026-05-25, Finding 2.1. INBOX:308 first queued 2026-05-07 (18 days); promoted to [urgent] by M5 2026-05-24 (1 day); still unimplemented. DB now at 790 rows / 489 distinct = 301 phantom rows (grew from 268 last week — each `import --known-bikes` run mints ~9 more).
+**Resolved in session 1779712234-644 (2026-05-25).**
 
-**Concrete fix (< 30 min):**
+**Code fix landed:**
+- `motoquant/database/bike_repo.py`: added module-level `_norm_model()` helper that strips trailing `(YYYY-YYYY)` suffix via compiled regex. Added a pre-insert Python-side check in `create_model()` that queries existing rows for the same `manufacturer_id`, compares them on normalised `model_name`, and returns the closest-year sibling's id when a match exists. Short-circuits BEFORE `INSERT OR IGNORE` because the UNIQUE constraint is keyed on the literal string and never fires across bare/suffixed variants.
+- `tests/test_scraper.py`: added `TestYearSuffixIdempotency` with 3 tests — same-spec double import, bare-in-DB → suffixed call, suffixed-in-DB → bare call. All 3 green.
 
-In `motoquant/database/bike_repo.py::create_model`, before the lenient `(manufacturer_id, model_name) ORDER BY year proximity` fallback match, add:
+**DB cleanup deferred (with reason):** the proposed `DELETE FROM bike_models WHERE rowid NOT IN (SELECT MIN(rowid) ...)` query is unsafe to run unsupervised because `bike_configs.bike_model_id` has FK references that could orphan whichever child rows already attached to the rowids being deleted. Safer dedup needs: (a) check FK fanout per duplicate group, (b) prefer the row with the MOST children rather than `MIN(rowid)`, (c) re-point any child rows of the losers to the winner before the DELETE. Queueing as a separate `[urgent]` for a user-supervised cleanup pass.
 
-```python
-import re as _re
-def _norm_model(s: str) -> str:
-    return _re.sub(r'\s*\(\d{4}-\d{4}\)$', '', s.strip())
-```
+**Validation:** full `tests/test_scraper.py` suite green (83 passed, 0 failed). K5/R1/Hayabusa baselines untouched. Code change is data-safe: only changes which existing row id gets returned on duplicate-keyed inserts; never deletes or rewrites rows.
 
-Apply `_norm_model()` to both the incoming `model_name` and existing row's `model_name` before string comparison in the fallback. This prevents `GSX-R 750 (1985-1987)` from being re-inserted as a new row when `GSX-R 750` already exists.
+**Commit reference:** see this session's commit on `main` — `motoquant/database/bike_repo.py` + `tests/test_scraper.py`.
 
-**Post-fix cleanup (run once, then remove):**
-```sql
-DELETE FROM bike_models
-WHERE rowid NOT IN (
-  SELECT MIN(rowid)
-  FROM bike_models
-  GROUP BY manufacturer_id, model_name
-);
-```
+---
 
-After cleanup, `SELECT COUNT(*) FROM bike_models` should be ~489 (matching distinct count).
+## INSTRUCTION — 2026-05-25 — [urgent] [needs-user] supervised ghost-row cleanup for bike_models
 
-**Regression test:** add one test to `tests/test_scraper.py` that imports the same bike list twice and asserts `bike_models` row count does not grow on the second import.
+**Attribution:** spawned by the DONE block above for INBOX:308. The 301 phantom rows that accumulated before today's code fix still exist in `motoquant.db`. The cleanup SQL proposed in the original INBOX:308 (`MIN(rowid)` per `(manufacturer_id, model_name)` group) is unsafe because `bike_configs.bike_model_id` FK references may already point at rows that the DELETE would remove.
 
-**Expected commit files:** `motoquant/database/bike_repo.py`, `motoquant.db`, `tests/test_scraper.py`
+**Required steps (≤ 30 min when run by hand):**
+1. `python3 -c "import sqlite3; c=sqlite3.connect('motoquant.db'); ... "` — enumerate phantom groups: for each `(manufacturer_id, _norm_model(model_name))` group with >1 row, list `(id, model_name, year_from, COUNT(bike_configs.id))`.
+2. Within each group, pick the WINNER row as the one with the most `bike_configs` children. If tied, prefer the row whose `model_name` has the year suffix (canonical form).
+3. For each LOSER row in the group: `UPDATE bike_configs SET bike_model_id = <winner_id> WHERE bike_model_id = <loser_id>`.
+4. `DELETE FROM bike_models WHERE id = <loser_id>` for each loser.
+5. After cleanup: `SELECT COUNT(*) FROM bike_models` should drop from 790 → ~489.
+6. Re-run baselines + focused test subset; verify K5/R1/Hayabusa Δ +0.0000s and `count_models() ≥ ALL_KNOWN_BIKES count`.
+
+**Why user-supervised:** the FK re-point in step 3 is destructive if the script misidentifies the winner. One-shot script with `--dry-run` flag first, then user reviews the planned UPDATEs/DELETEs before committing.
+
+**Done when:** `motoquant.db` shows `COUNT(*) FROM bike_models` ≈ distinct `(manufacturer_id, _norm_model(model_name))` count, no orphan FK refs, and baselines preserved.
 
 ---
 

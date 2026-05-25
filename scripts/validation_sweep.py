@@ -575,6 +575,36 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         192,
         "MotoStatz 2019 (stock instrumented)",
     ),
+    # ── 2026-05-25 benchmark-import agent (fifth pass) ────────────────────────
+    # One high-confidence MotoStatz Dragy instrumented add. The Z900RS was
+    # investigated but rejected: the MotoStatz Z900RS article (Aug 2022,
+    # motostatz.com/kawasaki-z900rs-top-speed-acceleration/) quotes 11.35s @
+    # 120.7 mph but names no specific measurement instrument — fails the
+    # project's instrumented-only bar. The Monster 937 article explicitly
+    # states "Dragy" and names the device in-article, meeting the bar.
+    #
+    # Ducati Monster 937 (937 cc Testastretta L-twin naked, 2021-2026) —
+    # MotoStatz Dragy instrumented test (article published March 2026,
+    # motostatz.com/ducati-monster-top-speed-acceleration/): SS/QM 11.33s @
+    # 118 mph (~190 km/h). The article explicitly names the Dragy GPS device
+    # and states stock bike configuration. Same MotoStatz/Dragy source bar
+    # already used for: Street Triple 765 RS, Panigale V2, RS 660, 890 Duke
+    # R, 790 Duke, XSR900, CBR 600RR PC40B, Ninja 1000SX, BMW S1000R, Honda
+    # CBR650R. Catalog entry DUCATI_MONSTER_937 covers 2021-2026; year_hint=
+    # 2023 falls squarely in the range. Pre-commit sim: 11.127s / 207.7 km/h
+    # → Δ = −0.203s, within ±0.21s (consistent with the litre-naked sub-
+    # cluster mean|Δ| band). The Ducati Monster + (plus) and Monster SP
+    # variants share the same 937 cc engine and chassis — this benchmark
+    # applies to all three within the 2021-2026 catalog window.
+    # URL: https://motostatz.com/ducati-monster-top-speed-acceleration/
+    (
+        "Ducati",
+        "Monster 937",
+        2023,
+        11.33,
+        190,
+        "MotoStatz 2023 (Dragy, stock instrumented)",
+    ),
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

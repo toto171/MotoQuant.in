@@ -1,4 +1,6 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
+import RunSimCta from './RunSimCta';
 
 export const metadata = {
   title: 'Getting Started — Run Your First Motorcycle Quarter-Mile Simulation',
@@ -175,6 +177,11 @@ Content-Type: application/json
           ))}
         </div>
       </section>
+
+      {/* EXP-014 — presence test: bottom CTA before the Next nav cards */}
+      <Suspense fallback={null}>
+        <RunSimCta />
+      </Suspense>
 
       {/* Next steps */}
       <div className="mt-14 pt-8 border-t border-brand-orange/10">
