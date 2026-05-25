@@ -1,7 +1,9 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 import StructuredData, { articleSchema } from '../../StructuredData';
+import EndOfArticleCta from './EndOfArticleCta';
 
 const SLUG = 'best-mods-for-ktm-rc-390-budget-vs-cost-per-tenth';
 const TITLE = 'Best Mods for KTM RC 390 in India: A Cost-Per-Tenth Ladder';
@@ -373,12 +375,19 @@ export default function PostPage() {
               Sweep rider weight, density altitude, sprocket choice, ECU re-flash, exhaust, tire compound, and any of the 562 parts in the catalog. Cost-per-tenth ranks appear on every part toggle in the Pro tier.
             </div>
           </div>
-          <Link
-            href="/simulator?bike=ktm-rc-390&venue=aamby-valley"
-            className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+          {/* GROWTH_EXP_019 — CTA button copy A/B test; see ./EndOfArticleCta.js */}
+          <Suspense
+            fallback={
+              <Link
+                href="/simulator?bike=ktm-rc-390&venue=aamby-valley"
+                className="shrink-0 px-5 py-2.5 bg-brand-orange text-black font-display font-bold rounded-lg text-sm hover:bg-brand-orangeLight transition-colors"
+              >
+                Run sim →
+              </Link>
+            }
           >
-            Run sim →
-          </Link>
+            <EndOfArticleCta />
+          </Suspense>
         </div>
 
         <div className="max-w-2xl mx-auto mt-16">

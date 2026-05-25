@@ -290,6 +290,12 @@ export default async function sitemap() {
       priority: 0.88,
     },
     {
+      url: `${SITE_URL}/blog/suzuki-gsx-r600-k8-quarter-mile-physics`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.84,
+    },
+    {
       url: `${SITE_URL}/docs/getting-started`,
       lastModified: now,
       changeFrequency: "monthly",

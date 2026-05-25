@@ -8,7 +8,7 @@ export const metadata = {
   title:
     "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
   description:
-    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Kawasaki Ninja H2 SX supercharged sport-tourer, Yamaha MT-15 V1 155cc naked deep-dive, Triumph Street Triple 765 R, KTM 890 Duke R India grey-market, best mods for KTM RC 390 ranked by cost-per-tenth, Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
+    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Suzuki GSX-R600 K8 600cc supersport, Kawasaki Ninja H2 SX supercharged sport-tourer, Yamaha MT-15 V1 155cc naked deep-dive, Triumph Street Triple 765 R, KTM 890 Duke R India grey-market, best mods for KTM RC 390 ranked by cost-per-tenth, Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
   keywords: [
     "motorcycle drag racing blog",
     "kawasaki ninja h2 sx quarter mile",
@@ -118,11 +118,34 @@ export const metadata = {
     "density altitude indian drag racing",
     "best drag strip in india for litre bike",
     "best drag strip in india for small cc",
+    "suzuki gsx-r600 k8 quarter mile",
+    "gsx-r600 k8 drag time",
+    "gsx-r 600 k8 vs cbr600rr",
+    "gsxr 600 k8 quarter mile time",
+    "best mods for gsx-r600 k8",
+    "gsx-r600 k8 vs k6",
+    "used 600cc supersport india",
   ],
   alternates: { canonical: "https://motoquant.in/blog" },
 };
 
 const POSTS = [
+  {
+    slug: "suzuki-gsx-r600-k8-quarter-mile-physics",
+    date: "2026-05-25",
+    readTime: "12 min",
+    tags: [
+      "Suzuki",
+      "GSX-R600 K8",
+      "600cc supersport",
+      "Inline-four",
+      "physics",
+    ],
+    title:
+      "Suzuki GSX-R600 K8 Quarter-Mile Physics: 125hp 600cc Supersport",
+    excerpt:
+      "Sport Rider clocked the 2008 GSX-R600 K8 at 10.91s and 204.4 km/h trap at sea level. MotoQuant simulates it at 11.04s under Aamby Valley November conditions. Where the 0.13s gap lives, what the K8 actually gained over the K6 (12 hp, lower Cd, shorter final drive), and a head-to-head against the 2008 R6 + 2007 CBR600RR + 2009 ZX-6R. Plus four India-priced mods that move the needle on a used K8/K9/L0 — the F15-to-F16 sprocket swap is unusual but pays back 0.08s at Aamby Valley specifically.",
+  },
   {
     slug: "indian-drag-strip-elevation-comparison",
     date: "2026-05-25",

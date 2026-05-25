@@ -758,6 +758,52 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # SUSPENDED PER ANTI-FABRICATION RULE: benchmark requires a catalog spec
     # to bind to or it is dead weight. Removing pending CBR1100XX catalog add.
     # ── end seventh pass ──
+    # ── 2026-05-25 benchmark-import agent (ninth pass) ────────────────────────
+    # One high-confidence MotoStatz Dragy instrumented add. Same source bar as
+    # the FTR 1200 was investigated under: the MotoStatz article explicitly names
+    # the Dragy GPS device ("The Dragy 60-130 mph time is a decent 9.86 seconds")
+    # and the article body contains no mention of aftermarket exhaust, ECU
+    # tune, or other modifications. The site-wide "How We Test Motorcycles"
+    # page (motostatz.com/how-we-test-motorcycles/) covers methodology for
+    # every untagged article. Model tested is explicitly identified as the
+    # FTR 1200 S in-article: "The FTR 1200 S is a drag bike for the road."
+    # Catalog entry INDIAN_FTR_1200_S covers 2019-2024; year_hint=2020 matches
+    # cleanly. Per-cluster this lands in the litre-naked / muscle band where
+    # the existing 1290 Super Duke R (2022 CW: 10.15s) and BMW S1000R (2021
+    # MotoStatz: 10.41s) and Z1000 (2014 CW: 10.38s) entries already live —
+    # FTR 1200 at 11.20 fits the slower/heavier end of the cluster (more
+    # weight, less aero efficient than naked sportbikes; 112 rear-wheel hp).
+    #
+    # Rejected this pass (all logged for the report):
+    #   * Z900RS, GSX-S750, CB1000R — MotoStatz article exists but DOES NOT
+    #     name Dragy device, fails project bar (same logic as the seventh-pass
+    #     Z900RS rejection).
+    #   * XSR700 — MotoStatz article exists AND quotes 12.22s @ 107 mph BUT
+    #     test bike runs a Mivv full exhaust system (modified, not stock).
+    #   * Ducati Diavel V4, Honda Africa Twin, Honda NC750X, Triumph Tiger 900,
+    #     BMW R1250GS — only ProfessCars/MotorBikeCatalog calculated estimates
+    #     found across honest search; no Cycle World / Sport Rider / MCN /
+    #     MotoStatz instrumented data exists or was located.
+    #   * Suzuki Katana 1000 — TopSpeed.com quotes 10.86s @ 133.3 mph but
+    #     names no source, no drag-strip cite, no Dragy. Fails anti-fabrication
+    #     bar.
+    #   * Kawasaki Z H2 (MotoStatz: 10.13 @ 146 mph, Dragy-named, stock) —
+    #     would duplicate existing "Z H2 2020 Cycle World 9.95s @ 240" entry
+    #     since article references base Z H2 not the Z H2 SE catalog row.
+    #   * Yamaha MT-09 (MotoStatz: 10.69 @ 129) — duplicates existing
+    #     "MT-09 2021 Cycle World 10.95s @ 204" entry.
+    #
+    # URL: https://motostatz.com/indian-ftr-1200-acceleration-top-speed-review/
+    # Methodology URL: https://motostatz.com/how-we-test-motorcycles/
+    (
+        "Indian",
+        "FTR 1200 S",
+        2020,
+        11.20,
+        193,
+        "MotoStatz (Dragy, stock instrumented FTR 1200 S)",
+    ),
+    # ── end ninth pass ──
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [
