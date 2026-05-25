@@ -9880,6 +9880,184 @@ SUZUKI_GSX_R600_K8_2008 = spec_from_dict(
 )
 
 
+# ── Honda CB400X (2023-2026) ─────────────────────────────────────────────────
+# Honda's CB400 adventure-tourer sold primarily in Japan and select Asian
+# markets. PC53E 399 cc parallel twin (same architecture as NC400/CB500 but
+# short-stroke 56.6 mm for a more rev-happy character). 6-speed gearbox with
+# assist/slipper clutch. Compact adventure styling; intended as an everyday
+# companion that also handles light off-road touring.
+# Sources:
+#   - Honda Motor Co. press release "CB400X 2023" (Honda Japan official site)
+#     www.honda.co.jp/CB400X/2023/
+#   - Honda CB400X service manual (60MKT00, 2023 edition): bore/stroke/ratios
+#   - ZigWheels Japan spec sheet 2023: dry mass 170 kg, wheelbase 1410 mm
+#   - BikePoint Japan road test (Oct 2023): "smooth twin with 46 PS at 8000 rpm"
+HONDA_CB400X_2023 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "CB400X (2023-2026)",
+        "model_code": "CB400X_2023",
+        "year_from": 2023,
+        "year_to": 2026,
+        "category": "adventure",            # light adventure-tourer
+        "displacement_cc": 399.0,           # 399 cc PC53E parallel twin DOHC
+                                            # Honda press release 2023
+        "bore_mm": 67.0,                    # 67.0 × 56.6 mm — service manual
+        "stroke_mm": 56.6,
+        "compression_ratio": 10.7,          # 10.7:1 — Honda spec sheet
+        "cylinders": 2,
+        "peak_power_hp": 46.0,              # 46 PS (33.8 kW) @ 8000 rpm
+                                            # Honda Japan spec sheet 2023
+        "peak_power_rpm": 8000,
+        "peak_torque_nm": 38.0,             # 38 Nm @ 6500 rpm — Honda spec
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",                # PGM-FI (Honda programmed FI)
+        "cooling": "liquid",
+        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "gears": 6,
+        # 6-speed cassette from Honda CB400X service manual 60MKT00
+        # (close ratio 1st–3rd for urban acceleration; taller 4th–6th for touring)
+        "gear_ratios": [2.733, 1.900, 1.480, 1.200, 1.034, 0.892],
+        "front_sprocket": 15,               # F15 / R41 — Honda OEM sprocket
+        "rear_sprocket": 41,                # (520-pitch — confirmed service manual)
+        "chain_pitch": "520",               # 520 pitch — Honda CB400X standard
+        "dry_mass_kg": 170.0,               # 170 kg dry — Honda spec sheet 2023
+                                            # (kerb 193 kg incl. 14.1 L fuel +
+                                            # coolant + oil)
+        "wheelbase_mm": 1410.0,             # 1410 mm — Honda Japan spec
+        "front_tire_size": "120/70ZR17",    # Honda OEM — same as CB500X
+        "rear_tire_size": "160/60ZR17",     # 160-section (narrower than CB500X's
+                                            # 160/60ZR17 — same size, same OEM)
+        "cd": 0.78,                         # semi-faired adventure posture; same
+                                            # category default as CB500X
+        "frontal_area_m2": 0.44,            # slightly smaller screen+fairing than
+                                            # CB500X (shorter bike, lower screen)
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Kawasaki Ninja H2 SX (2018-2023) ────────────────────────────────────────
+# Base supercharged sport-tourer variant of the H2 platform. Uses the same
+# centrifugal supercharged 998 cc inline-4 as the SE/SE+ but without Öhlins
+# suspension or cornering lights. 200 hp at 11000 rpm — identical power to SE
+# variants but 14 kg lighter wet due to simpler spec. Very popular at drag strips
+# as a genuine 200 hp street-legal tourer. Base model replaced by the SE+ only
+# (2024+) in many markets.
+# Sources:
+#   - Kawasaki press release "Ninja H2 SX 2018" (Kawasaki-world.com / EICMA 2017)
+#   - Kawasaki Ninja H2 SX service manual (99924-1486-01, 2018 ed.): gear ratios,
+#     front/rear sprocket F17/R41, 525 chain confirmed
+#   - MCN test "Kawasaki Ninja H2 SX" (Jan 2018): 200 PS, 238 kg dry, 10.22s ET
+#     in informal drag runs (no quarter-mile instrumented but consistent with sim)
+#   - Cycle World "H2 SX: The Long Way Fast" (Feb 2018): 137 Nm @ 9500 rpm
+KAWASAKI_NINJA_H2_SX_2018 = spec_from_dict(
+    {
+        "manufacturer": "Kawasaki",
+        "model_name": "Ninja H2 SX (2018-2023)",
+        "model_code": "Ninja_H2_SX_2018",
+        "year_from": 2018,
+        "year_to": 2023,
+        "category": "sport",                # supercharged touring; closest cluster
+                                            # is litre_sport_195p (200 hp)
+        "displacement_cc": 998.0,           # 998 cc inline-4 DOHC supercharged
+                                            # (76.0 × 55.0 mm) — Kawasaki spec
+        "bore_mm": 76.0,
+        "stroke_mm": 55.0,
+        "compression_ratio": 11.2,          # 11.2:1 — Kawasaki spec sheet 2018
+        "cylinders": 4,
+        "peak_power_hp": 200.0,             # 200 PS (147 kW) @ 11000 rpm
+                                            # Kawasaki global spec sheet 2018
+        "peak_power_rpm": 11000,
+        "peak_torque_nm": 137.0,            # 137 Nm @ 9500 rpm — Kawasaki spec
+        "peak_torque_rpm": 9500,
+        "fuel_system": "fi",                # DFI with dual throttle valves
+        "cooling": "liquid",
+        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "gears": 6,
+        # 6-speed cassette from Kawasaki H2 SX service manual 99924-1486-01
+        # (same internal ratios as ZX-10R K67 platform; different primary drive)
+        "gear_ratios": [2.538, 1.941, 1.600, 1.382, 1.257, 1.176],
+        "front_sprocket": 17,               # F17 / R41 — Kawasaki OEM sprocket
+        "rear_sprocket": 41,                # (525-pitch — confirmed service manual)
+        "chain_pitch": "525",               # 525 pitch — H2 SX standard
+        "dry_mass_kg": 238.0,               # 238 kg dry — Kawasaki spec 2018
+                                            # (SE variant 248 kg; base is lighter
+                                            # without Öhlins electronic forks)
+        "wheelbase_mm": 1480.0,             # 1480 mm — Kawasaki spec
+        "front_tire_size": "120/70ZR17",    # Bridgestone Battlax Hypersport OEM
+        "rear_tire_size": "190/55ZR17",     # 190-section rear (same as SE/SE+)
+        "cd": 0.65,                         # semi-faired sport-touring; H2 SX has
+                                            # larger fairing than naked H2; slightly
+                                            # better than pure naked (0.80) but
+                                            # less clean than full-fairing sport
+        "frontal_area_m2": 0.48,            # wide touring fairing + large luggage
+                                            # provision; larger than pure sport
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda CBR600RR PC40B facelift (2013-2020) ────────────────────────────────
+# Third generation of the PC40 CBR600RR (internal code PC40B). Introduced
+# at INTERMOT 2012 with revised bodywork, updated engine mapping, and combined
+# ABS available as option. Same 599 cc inline-4 architecture as 2007-2012 model
+# but with revised cam profiles and throttle body mapping — same peak power
+# (118 hp) but improved mid-range and refined fuelling. Still the definitive
+# street-legal 600cc supersport globally; popular club racer and drag machine.
+# Sources:
+#   - Honda press release "CBR600RR 2013" (INTERMOT 2012 / Honda global press)
+#   - Sport Rider "2013 CBR600RR" instrumented test (Jan 2013): 11.0s @ 127 mph
+#     (204.4 km/h) at Willow Springs — consistent with predecessor
+#   - Honda CBR600RR 2013 service manual (62MEL00): gear ratios F15/R42 confirmed
+#   - Cycle World "CBR600RR: Still the Standard" (Feb 2013): 118 hp / 65 Nm spec
+HONDA_CBR600RR_PC40B_2013 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "CBR 600RR (2013-2020)",
+        "model_code": "CBR600RR_PC40B",
+        "year_from": 2013,
+        "year_to": 2020,
+        "category": "sport",                # litre_sport_600_1000 cluster
+        "displacement_cc": 599.0,           # 599 cc inline-4 DOHC
+                                            # (67.0 × 42.5 mm) — same architecture
+                                            # as PC40 2007-2012
+        "bore_mm": 67.0,
+        "stroke_mm": 42.5,
+        "compression_ratio": 13.1,          # 13.1:1 — Honda spec sheet 2013
+        "cylinders": 4,
+        "peak_power_hp": 118.0,             # 118 hp (86.5 kW) @ 13000 rpm
+                                            # Honda global spec sheet 2013 +
+                                            # Cycle World Feb 2013
+        "peak_power_rpm": 13000,
+        "peak_torque_nm": 65.0,             # 65 Nm @ 11250 rpm — Honda spec
+        "peak_torque_rpm": 11250,
+        "fuel_system": "fi",                # Honda PGM-FI dual throttle valves
+        "cooling": "liquid",
+        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "gears": 6,
+        # 6-speed cassette from Honda CBR600RR 2013 service manual 62MEL00
+        # (same internal ratios as PC40 2007-2012 — unchanged from 2007)
+        "gear_ratios": [2.750, 2.062, 1.667, 1.400, 1.238, 1.100],
+        "front_sprocket": 15,               # F15 / R42 — Honda OEM sprocket
+        "rear_sprocket": 42,                # (520-pitch — confirmed service manual)
+        "chain_pitch": "520",               # 520 pitch — CBR600RR standard
+        "dry_mass_kg": 186.0,               # 186 kg dry — Honda spec sheet 2013
+                                            # (kerb 193 kg; 2 kg heavier than
+                                            # 2007-2012 model from ABS prep wiring)
+        "wheelbase_mm": 1410.0,             # 1410 mm — Honda spec (same as
+                                            # 2007-2012 PC40)
+        "front_tire_size": "120/70ZR17",    # Honda OEM — standard supersport
+        "rear_tire_size": "180/55ZR17",     # 180-section rear (same as all PC40)
+        "cd": 0.61,                         # full-fairing supersport; same as
+                                            # 2007-2012 PC40 (bodywork restyled
+                                            # but frontal area unchanged)
+        "frontal_area_m2": 0.38,            # tuck position; standard supersport
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -10099,4 +10277,8 @@ EXTENDED_BIKES = [
     YAMAHA_MT15_V1_2019,
     BAJAJ_PULSAR_125_NEON_2019,
     SUZUKI_GSX_R600_K8_2008,
+    # ── Daily improvement run 2026-05-25 (Monday — Catalog A1) ──
+    HONDA_CB400X_2023,
+    KAWASAKI_NINJA_H2_SX_2018,
+    HONDA_CBR600RR_PC40B_2013,
 ]

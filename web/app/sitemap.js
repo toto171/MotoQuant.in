@@ -242,6 +242,12 @@ export default async function sitemap() {
       priority: 0.84,
     },
     {
+      url: `${SITE_URL}/blog/honda-hornet-2-0-vs-pulsar-ns200-quarter-mile`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.84,
+    },
+    {
       url: `${SITE_URL}/docs/getting-started`,
       lastModified: now,
       changeFrequency: "monthly",

@@ -821,7 +821,25 @@ fi
 
 > _Add new `## INSTRUCTION` blocks above this divider. Claude marks them `## DONE` once handled._
 
-(none yet)
+## INSTRUCTION — 2026-05-25 — [opportunistic] blog: Harley-Davidson Nightster RH975 quarter-mile physics
+
+Queued by: seo-keyword agent (2026-05-25 SEO audit pass, priority 50 in data/seo_opportunities.json).
+
+Write `/blog/harley-nightster-rh975-quarter-mile-physics` — physics breakdown of the Nightster RH975 at the drag strip.
+
+**Spec:** Harley-Davidson Nightster RH975 (HARLEY_NIGHTSTER_RH975_2022 in known_bikes_extended.py). 975cc Revolution Max 975T V-twin, 90 hp @ 7500 rpm, 95 Nm @ 5000 rpm, belt drive (24F/68R), ~212 kg dry.
+
+**Benchmark anchor:** Cycle World 2022 instrumented: 11.99s @ 110.4 mph — use as the validation anchor. MotoQuant should simulate close to 12.0s at Aamby Valley (cruiser cluster + belt-drive + 212 kg will sit in the 11.8-12.2s range).
+
+**Post angle:** "Revolution Max 975T — is the Nightster actually fast for a Harley?" The surprise is that it genuinely is — 11.99s puts it ahead of most 600cc middleweights and equal to or faster than the Triumph Street Triple 675R (legacy platform). The mass penalty vs the Sportster S (121 hp, ~227 kg) is the natural comparison bridge.
+
+**Companion piece:** Queue a Nightster RH975 vs Sportster S RH1250S comparison post after this one lands and gains traction. Both are in catalog with Revolution Max powertrain entries.
+
+**SEO targets:** `harley davidson nightster rh975 quarter mile`, `nightster rh975 drag time`, `harley nightster 975 vs sportster s`, `revolution max 975 quarter mile`
+
+**Blog post location:** `/web/app/blog/harley-nightster-rh975-quarter-mile-physics/page.js`  
+**Blog index:** Add to POSTS array in `/web/app/blog/page.js` (top of list, date 2026-05-xx)  
+**Sitemap:** Add entry at priority 0.85
 
 ---
 

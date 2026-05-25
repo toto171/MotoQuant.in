@@ -6,17 +6,26 @@ import StructuredData, { articleSchema } from '../../StructuredData';
 const SLUG = 'ktm-1390-super-duke-r-evo-quarter-mile-physics';
 const TITLE = 'KTM 1390 Super Duke R EVO Quarter-Mile Physics Breakdown';
 const DESCRIPTION =
-  'MotoQuant simulates the 2024 KTM 1390 Super Duke R EVO at 10.225s and 237.3 km/h trap. MCN clocked 9.95s. Here is what closes the 0.275s gap, and why.';
+  'KTM 1390 Super Duke R EVO quarter-mile time — MotoQuant simulates the 2024 EVO at 10.225s and 237.3 km/h trap at Aamby Valley. MCN clocked 9.95s stock. India pricing, cost-per-tenth breakdown, and what closes the 0.275s gap.';
 
 export const metadata = {
   title: 'KTM 1390 Super Duke R EVO Quarter-Mile Physics — MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'KTM 1390 Super Duke R quarter mile',
+    'KTM 1390 EVO quarter mile india',
+    'KTM 1390 Super Duke R EVO drag time',
     'KTM 1390 EVO 0-100',
+    'KTM 1390 EVO 0-100 india',
     'Super Duke R EVO drag race',
-    'KTM 1390 vs 1290',
-    'litre naked drag race India',
+    'KTM 1390 vs 1290 drag',
+    'KTM 1390 price india',
+    'KTM 1390 Super Duke R EVO india review',
+    'ktm 1390 evo vs kawasaki h2',
+    'ktm 1390 evo vs s1000r',
+    'litre naked drag race india',
+    'fastest naked bike india quarter mile',
+    'ktm 1390 aamby valley',
   ],
   alternates: { canonical: `https://motoquant.in/blog/${SLUG}` },
   openGraph: {

@@ -85,11 +85,36 @@ export const metadata = {
     "z900rs vs z900",
     "z900rs vs xsr900",
     "z900rs cost per tenth",
+    "harley davidson nightster rh975 quarter mile",
+    "nightster rh975 drag time",
+    "nightster 975 vs sportster s drag",
+    "harley nightster india price quarter mile",
+    "husqvarna svartpilen 250 quarter mile",
+    "svartpilen 250 vs ktm duke 250",
+    "svartpilen 250 india drag",
+    "honda cb125r quarter mile",
+    "cb125r drag time india",
+    "cb125r vs r15 v4",
+    "ktm 1390 super duke r evo quarter mile india",
+    "ktm 1390 evo drag time",
+    "honda hornet 2.0 vs pulsar ns200 drag",
+    "hornet 2.0 vs ns200 quarter mile",
+    "honda hornet 2.0 drag time india",
+    "honda hornet 2.0 0-100 india",
   ],
   alternates: { canonical: "https://motoquant.in/blog" },
 };
 
 const POSTS = [
+  {
+    slug: "honda-hornet-2-0-vs-pulsar-ns200-quarter-mile",
+    date: "2026-05-25",
+    readTime: "12 min",
+    tags: ["Honda", "Hornet 2.0", "Bajaj", "Pulsar NS200", "Indian 200cc", "comparison"],
+    title: "Honda Hornet 2.0 vs Pulsar NS200: Which Wins the Quarter Mile?",
+    excerpt:
+      "MotoQuant simulates the Honda Hornet 2.0 at ~17.55s and the Pulsar NS200 at ~15.9s under matched Aamby Valley conditions. Seven horsepower and 18 kg separate them — physics-first breakdown of why the gap is engine architecture, not tuning, plus the mod ceiling on each platform.",
+  },
   {
     slug: "bajaj-dominar-400-quarter-mile-physics",
     date: "2026-05-24",

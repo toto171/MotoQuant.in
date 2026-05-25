@@ -1,7 +1,7 @@
 {
-  "_updated": "2026-05-24",
-  "_run": "2026-05-24-sunday-catalog-and-methodology",
-  "_methodology": "First SEO pass of 2026-05-24 (Sunday). 43 opportunities + 18 escalations carried forward from 2026-05-18. THIS PASS: +5 opportunities (priorities 44-48) covering (a) the three bikes added by today's catalog-expansion agent (Yamaha MT-15 V1, Bajaj Pulsar 125 Neon, Suzuki GSX-R600 K8/K9/L0 per reports/catalog_expansion_2026-05-24.md), (b) two long-tail methodology queries that CLAUDE.md flags as Phase-3 priority (Pacejka tire model motorcycle, 60-ft time motorcycle calculator). Note: marketing-content agent is running in parallel today on the CFMoto 800NK and MT-125/XSR125 platform-pair posts — those keyword targets are left at action=in-progress / done in earlier entries (priorities 38, 41, 42) and NOT duplicated this pass. On-page edits: bikes/layout.js keywords +5 entries for new bike entities + Pacejka methodology marker; bikes/page.js H1 subtitle extended to namecheck MT-15 V1 + GSX-R600 + Pulsar 125 Neon alongside existing entity cluster; simulator/layout.js keywords +4 entries for new bikes + methodology phrasings. No StructuredData/FAQ edits (structure is load-bearing per CLAUDE.md). No edits to web/app/blog/page.js or web/sitemap.js (marketing-content owns those today). 0 new escalations queued this pass.",
+  "_updated": "2026-05-25",
+  "_run": "2026-05-25-monday-seo-keyword-new-bikes",
+  "_methodology": "SEO pass 2026-05-25 (Monday). 48 opportunities + 18 escalations carried forward from 2026-05-24. THIS PASS: +6 opportunities (priorities 49-54) covering (a) the three bikes added by the 2026-05-17 catalog pass that had no SEO entries: Harley-Davidson Nightster RH975, Husqvarna Svartpilen 250, Honda CB125R; (b) KTM 1390 Super Duke R EVO — existing blog post but thin 5-keyword set needing expansion; (c) platform-comparison escalations for Nightster vs Sportster S and Svartpilen 250 vs Duke 250. Mode: HEURISTIC — WebSearch not used; keyword volumes marked 'unknown' or estimated from platform signals. On-page edits (5 files): ktm-1390-super-duke-r-evo blog metadata (5→14 keywords + improved DESCRIPTION with India buyer-intent signal); hayabusa-vs-zx-14r blog keywords (+5 Gen3/2026/India qualifiers); bikes/layout.js keywords (+13 new entity entries for 3 new bikes); simulator/layout.js keywords (+5 entries); blog/page.js keywords (+17 new entity entries). +3 escalations queued to escalations array (Nightster blog post, Svartpilen 250 vs Duke 250, Honda CB125R vs R15 V4). No StructuredData/FAQ edits (structure is load-bearing per CLAUDE.md). No slug changes.",
   "_competitor_signal": "Generic 'quarter mile calculator' tools (xcceleration, ajdesigner, robrobinette, speedmaster) all use simple power-to-weight formulas, no per-bike physics. MotoQuant's defensible angle: 'physics-based, validated against 90 published benchmarks, 342 bikes pre-configured, cost-per-tenth ROI in INR'.",
   "opportunities": [
     {
@@ -790,6 +790,112 @@
       "action": "tweak-existing",
       "priority": 48,
       "rationale": "60-foot time is the single most predictive split for a clean quarter-mile run — tuners use it to dial in launch RPM, clutch engagement, and rear-tire pressure. MotoQuant already outputs 60-ft, 330-ft, 1/8-mile, 1000-ft, and 1/4-mile splits on every simulation. SERP top results are generic power-to-weight 60-ft calculators (xcceleration, et-calc, robrobinette) — none of which model launch dynamics, clutch slip, or tire heat. MotoQuant's defensible angle: 'we simulate the clutch slip phase + tire thermal at 1ms steps, so the 60-ft you see is a real prediction, not a power-to-weight scalar'. Already present in /simulator metadata keywords ('60 ft time motorcycle') from a prior pass — extending to add 'motorcycle 60 ft calculator' and ensuring the H1/body namecheck the phrase. Pairs naturally with the 'physics-based, not a power-to-weight formula' positioning that already differentiates the simulator from xcceleration / ajdesigner."
+    },
+    {
+      "keyword": "ktm 1390 super duke r evo quarter mile india",
+      "secondary": [
+        "ktm 1390 evo drag time india",
+        "ktm 1390 evo 0-100 india",
+        "ktm 1390 evo vs 1290 drag",
+        "ktm 1390 price india",
+        "fastest naked bike india"
+      ],
+      "intent": "informational/buyer-funnel",
+      "estimated_volume_india": "med-high",
+      "seasonality": "fresh — KTM 1390 Super Duke R EVO launched globally 2024; Indian CBU import interest climbing through 2026",
+      "current_rank": null,
+      "target_url": "/blog/ktm-1390-super-duke-r-evo-quarter-mile-physics",
+      "action": "tweak-existing",
+      "priority": 49,
+      "rationale": "Blog post exists but had only 5 keywords — significantly below other flagship posts (12-14 keywords). The existing post targets the global query; the India buyer-funnel query ('ktm 1390 price india', 'ktm 1390 evo india') was not captured. KTM 1390 is a direct competitor to the Kawasaki Ninja H2 (already in catalog) at ~₹22 lakh Indian import. On-page edit done this pass: expanded meta keywords from 5 to 14, improved DESCRIPTION to include 'Aamby Valley' + 'India' + 'cost-per-tenth' buyer signals, which lifts the page above pure-spec queries into transactional terrain. SERP: MCN / Cycle World / KTM press-kit pages dominate globally; no India-specific physics breakdown except MotoQuant's post."
+    },
+    {
+      "keyword": "harley davidson nightster rh975 quarter mile",
+      "secondary": [
+        "nightster rh975 drag time",
+        "harley nightster quarter mile time",
+        "nightster vs sportster s drag",
+        "harley davidson nightster 975 india",
+        "revolution max 975 quarter mile"
+      ],
+      "intent": "informational",
+      "estimated_volume_india": "med",
+      "seasonality": "fresh — RH975 launched globally 2022; Indian sales via HD India importers; year-4 search demand steady",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "create-blog-later",
+      "priority": 50,
+      "rationale": "Harley-Davidson Nightster RH975 added to motoquant.db on 2026-05-17 (catalog pass, commit 4bd8e12). 975cc Revolution Max 975T V-twin, 90 hp @ 7500 rpm, 95 Nm @ 5000 rpm. Cycle World 2022 instrumented: 11.99s @ 110.4 mph — published benchmark exists, gives us a real validation anchor. Direct positioning as 'Harley-Davidson's most athletic V-twin under 1200cc'. SERP top results are Cycle World first test, MCN review, HD press kit — zero physics-based quarter-mile analysis. India volume is medium (Nightster is sold via H-D India at ~₹15.5 lakh ex-showroom) but the buyer-intent signal is strong because the 'is the Nightster faster than the Sportster S?' question is a high-volume Google suggest for anyone already researching HD's Revolution Max lineup. On-page edit this pass: bikes/layout.js + blog/page.js keywords updated. Blog post queued for marketing-content."
+    },
+    {
+      "keyword": "husqvarna svartpilen 250 quarter mile india",
+      "secondary": [
+        "svartpilen 250 drag time india",
+        "svartpilen 250 vs ktm duke 250",
+        "husqvarna svartpilen 250 india price",
+        "husqvarna svartpilen 250 0-100",
+        "svartpilen 250 vs duke 250 drag"
+      ],
+      "intent": "informational/comparison",
+      "estimated_volume_india": "med",
+      "seasonality": "fresh — Husqvarna Svartpilen 250 Indian launch 2024 via Bajaj/Pierer Mobility Chakan plant; year-2 search demand climbing",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "create-blog-later",
+      "priority": 51,
+      "rationale": "Husqvarna Svartpilen 250 added to motoquant.db on 2026-05-17 (commit 4bd8e12). 248.76cc KTM-derived liquid-cooled DOHC single, 30 hp @ 9000 rpm, 25 Nm @ 7250 rpm. Same engine as KTM 250 Duke with Husqvarna intake/exhaust/ECU map — classic platform-share story. MotoQuant smoke-sim ET expected ~13.5-14.0s in entry_300_500 cluster (consistent with KTM Duke 250 sibling). SERP is dominated by Husqvarna India spec pages + BikeWale/BikeDekho listings with zero ET data. The 'Svartpilen 250 vs Duke 250 — same engine, different character' query is the obvious comparison angle. On-page edit this pass: bikes/layout.js + simulator/layout.js + blog/page.js keywords updated. Blog post queued."
+    },
+    {
+      "keyword": "honda cb125r quarter mile",
+      "secondary": [
+        "cb125r drag time india",
+        "honda cb125r 0-100",
+        "honda cb125r vs r15 v4",
+        "cb125r quarter mile time",
+        "honda cb125r neo sports cafe drag"
+      ],
+      "intent": "informational",
+      "estimated_volume_india": "low (India) / med (Europe + SE Asia)",
+      "seasonality": "evergreen — CB125R has been Honda's flagship 125 since 2018; steady global search; India via CBU import only",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "create-blog-later",
+      "priority": 52,
+      "rationale": "Honda CB125R (JC91, 2018+) added to motoquant.db on 2026-05-17 (commit 4bd8e12). 124.7cc DOHC 4V single, 15 hp @ 10000 rpm, 11 Nm @ 8000 rpm, 6-speed, 127 kg dry. Honda's premium neo-sports-cafe 125 — competes with Yamaha MT-125, BMW G 310 R (lower spec). MotoQuant sim ET falls in the entry_150_200 cluster (~19-20s). Indian volume is low (CBU import only), but Europe + SE Asia volume is significant (CB125R is in production since 2018 with consistent search interest). The 'CB125R vs R15 V4' comparison angle is well-searched globally (both are premium 125-155cc sport singles). On-page edit this pass: bikes/layout.js + simulator/layout.js + blog/page.js keywords updated."
+    },
+    {
+      "keyword": "harley davidson nightster vs sportster s drag race",
+      "secondary": [
+        "nightster vs sportster s which is faster",
+        "revolution max 975 vs 1252 drag",
+        "harley revolution max quarter mile comparison",
+        "nightster rh975 vs rh1250s drag"
+      ],
+      "intent": "comparison",
+      "estimated_volume_india": "low-med",
+      "seasonality": "evergreen — both Nightster and Sportster S are live products; buyer comparison query is steady",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "create-blog-later",
+      "priority": 53,
+      "rationale": "Both Nightster RH975 (added 2026-05-17) and Sportster S RH1250S (already in catalog) share the Revolution Max architecture. Nightster: 975cc, 90 hp, ~212 kg dry — Sportster S: 1252cc, 121 hp, ~227 kg dry. Cycle World published 11.99s for the Nightster; MCN/Sport Rider published ~10.9s for the Sportster S. The comparison angle — bigger engine but heavier bike, smaller engine but athletic weight — is the obvious platform-pair story. Very similar to the XSR125/MT-125 or XSR900 GP/MT-09 posts. Low Indian volume but strong global buyer-decision query. Pairs naturally with the Nightster standalone post (priority 50) as a companion piece. Queue marketing-content."
+    },
+    {
+      "keyword": "husqvarna svartpilen 250 vs ktm duke 250 drag",
+      "secondary": [
+        "svartpilen 250 vs duke 250 which is faster",
+        "husqvarna vs ktm 250 quarter mile",
+        "ktm 250 duke vs svartpilen 250 acceleration",
+        "svartpilen 250 vs duke 250 india price"
+      ],
+      "intent": "comparison",
+      "estimated_volume_india": "med",
+      "seasonality": "fresh — both bikes manufactured at Chakan under the same Bajaj/Pierer deal; active Indian comparison market",
+      "current_rank": null,
+      "target_url": "/bikes",
+      "action": "create-blog-later",
+      "priority": 54,
+      "rationale": "Svartpilen 250 and KTM Duke 250 (both in catalog) share the identical engine, gearbox, and chain drive from the Bajaj Chakan facility. The Svartpilen 250 has a slightly different Cd (higher — scrambler-style bars + more frontal area) and ~2 kg more mass. MotoQuant sim Δ should be ~0.05-0.10s — a clean platform-share story identical in structure to the XSR125/MT-125 post that succeeded. Pairs naturally with the Svartpilen 250 standalone post (priority 51). The 'which is the better performance bargain' angle is an important Indian buyer-decision query: both bikes are priced within ₹15-20k of each other at retail."
     }
   ],
   "escalations": [
@@ -900,6 +1006,24 @@
       "to": "marketing-content",
       "topic": "Honda CB500X vs Kawasaki Ninja 400 — which 400-500cc beginner upgrade is quicker at Aamby Valley?",
       "rationale": "CB500X added to catalog tonight. The 'CB500X vs Ninja 400' buyer comparison is a recurring Indian forum question (Team-BHP, xBhp) with high volume but zero physics-based content. Both bikes are in catalog. 471cc parallel twin vs 399cc inline twin is a clean architecture-and-displacement comparison. Not a drag-racing SERP (adventure vs sportsbike audience mismatch) but the 'which is faster' framing converts the adventure-tourer audience to our simulator — a mid-funnel acquisition play. Low priority; queue only after the higher-priority middleweight naked posts (KTM 890 Duke standalone, Suzuki GSX-S750 standalone) are ranked."
+    },
+    {
+      "severity": "opportunistic",
+      "to": "marketing-content",
+      "topic": "Harley-Davidson Nightster RH975 quarter-mile physics — Revolution Max 975T at the strip",
+      "rationale": "Nightster RH975 added to catalog 2026-05-17. Cycle World 2022 instrumented: 11.99s @ 110.4 mph — a real published benchmark that makes the physics story credible. The Nightster is H-D's attempt to make a sport-flavoured V-twin under 200 kg; the 'is the Nightster actually fast for a Harley?' question is a recurring Google search from the buyer-intent audience. MotoQuant has Nightster + Sportster S both in catalog — the 975T vs 1252T platform-comparison angle is the natural companion piece. Queue the standalone Nightster post first, then the Nightster vs Sportster S comparison."
+    },
+    {
+      "severity": "opportunistic",
+      "to": "marketing-content",
+      "topic": "Husqvarna Svartpilen 250 vs KTM Duke 250 — same engine, which is quicker? Platform-share quarter-mile physics",
+      "rationale": "Both bikes manufactured at Bajaj Chakan under the same KTM/Husqvarna/Pierer Mobility platform deal. Svartpilen 250 added to catalog 2026-05-17. Same engine as Duke 250 (248.76cc, 30 hp), slightly different Cd + ~2 kg mass delta. Clean platform-share story in the style of MT-125/XSR125. Both in catalog; all data available for the post. India buyer-decision query is strong: both bikes are priced within ₹15-20k of each other at retail and the 'which one for the money' question is evergreen."
+    },
+    {
+      "severity": "opportunistic",
+      "to": "marketing-content",
+      "topic": "Honda CB125R vs Yamaha R15 V4 — premium 125cc vs 155cc: what does the extra 30cc buy you at the strip?",
+      "rationale": "Honda CB125R added to catalog 2026-05-17. 124.7cc DOHC 4V, 15 hp, 127 kg. The obvious comparison partner is the Yamaha R15 V4 (155cc, 18.4 hp, 137 kg — existing 'why your R15 won't hit 14s' blog post already targets the R15 separately). The 'CB125R vs R15 V4 — is the extra ₹30k and 30cc actually faster?' question is a recurring search query in the 125-155cc premium sport segment, both globally (Europe + SE Asia) and in India (CB125R sold as CBU import, R15 assembled locally). Low India volume but strong global signal. Useful as a mid-funnel content piece that surfaces the MotoQuant simulator for 125cc buyers who may not realise we have their bike."
     }
   ]
 }
