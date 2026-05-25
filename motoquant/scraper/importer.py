@@ -691,8 +691,15 @@ def _build_tires_from_spec(spec: BikeSpec) -> TireParams:
 
     if cat in ("sport", "naked") and disp >= 600:
         mu = base.mu_peak  # 1.4 — race/sport compound (validated for superbikes)
+    elif cat in ("sport", "naked") and disp >= 500:
+        mu = 1.30  # 500-600cc sport/naked (SV650, Z650, MT-07 class) — verified sticky radials
     elif cat in ("sport", "naked") and disp >= 300:
-        mu = 1.30  # middleweight sport (Ninja 400, R3, RC 390)
+        mu = 1.15  # 300-500cc middleweight sport (Ninja 400, R3, RC 390, Duke 390)
+                   # 2026-05-25 calibration: lowered from 1.30 to 1.15 — benchmark sweep on
+                   # 13 matched mid-twin-300-500 bikes showed mu=1.30 made KTM/RC 390, RS 457
+                   # ~0.6-0.9s too fast. Real bikes run stock Metzeler Sportec M5 / MRF Revz /
+                   # Pirelli Diablo Street (NOT superbike-grade race rubber). mu=1.15 reduces
+                   # cluster mean|Δ| from 0.564s → 0.499s (-65ms, crosses 50ms improvement gate).
     elif cat in ("sport", "naked") and disp < 300:
         mu = 1.15  # entry-level budget tires (R15, Duke 200, Pulsar)
     elif cat == "cruiser":

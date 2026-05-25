@@ -107,6 +107,15 @@ export const metadata = {
 
 const POSTS = [
   {
+    slug: "harley-nightster-rh975-quarter-mile-physics",
+    date: "2026-05-25",
+    readTime: "11 min",
+    tags: ["Harley-Davidson", "Nightster RH975", "Revolution Max", "cruiser", "V-twin", "physics"],
+    title: "Harley Nightster RH975: Revolution Max Quarter-Mile Physics",
+    excerpt:
+      "Cycle World clocked the Nightster RH975 at 11.99s — quicker than a Triumph Street Triple 765 R. MotoQuant simulates it at 12.45s; the 0.46s gap is almost entirely launch phase. Physics breakdown of why a 90 hp 212 kg belt-drive Harley runs an 11.x, and why the Sportster S RH1250S posts nearly the same time despite 31 more horsepower.",
+  },
+  {
     slug: "honda-hornet-2-0-vs-pulsar-ns200-quarter-mile",
     date: "2026-05-25",
     readTime: "12 min",

@@ -25,9 +25,9 @@ last_updated: <!-- AUTO-UPDATED -->
 
 | KPI | Now | Q-end target | Direction | Last-updated |
 |---|---|---|---|---|
-| Bike catalog count | 751 raw DB / 483 distinct / 488 source — 268 duplicate rows (M5 Finding 2.1, INBOX:308 promoted [urgent]) | 500+ by Q4 | ↑ | 2026-05-24 |
+| Bike catalog count | 790 raw DB / 489 distinct / ~489 source — **301 duplicate rows** (M6 Finding 2.1; INBOX:308 [urgent] 18 days unimplemented) | 500+ by Q4 | ↑ | 2026-05-25 |
 | Validated ETs ±0.20s | 47% | 60% Q3 / 70% Q4 | ↑ | 2026-05-04 |
-| Benchmark sources | 79 | 100+ | ↑ | 2026-05-04 |
+| Benchmark sources | ~91 (79 + 12 instrumented ETs added this week; commits db97304, de00e2b, 1f9f40b, 98c445d) | 100+ | ↑ | 2026-05-25 |
 | Indexed pages (motoquant.in) | (TBD) | 50+ Q2 / 200+ Q4 | ↑ | (need GA4) |
 | Indian organic sessions/mo | (TBD) | 500 Q2, 5k Q4 | ↑ | (need GA4) |
 | Active simulator users/mo | (TBD) | 200 / 2k / 10k cadence | ↑ | (need analytics) |
@@ -41,6 +41,18 @@ last_updated: <!-- AUTO-UPDATED -->
 ## Last 7 days — session-level digest
 
 <!-- self-review weekly summary lives here. Updated every Sunday. -->
+
+### Week of 2026-05-18 → 2026-05-25 (self-review M6 — Monday, user-dispatched)
+
+**Dominant signal:** Benchmark-import agent had its best week ever — 5 runs producing 12 new instrumented ETs (commits `db97304`, `de00e2b`, `1f9f40b`, `98c445d`, `8ed7021`). Benchmark KPI moving from 79 → ~91 for the first time since 2026-05-04. Direct result of M5 catalog-expansion demotion (50→40) freeing Tuesday slots. This is the first measurable evidence a single weight change produced a cross-KPI rebalance.
+
+**Duplicate-row inflation accelerated.** DB 751 → 790 raw; distinct 483 → 489 (+6 real bikes); phantom rows 268 → **301** (+33 this week). INBOX:308 ([urgent] since 2026-05-24) unimplemented — every `import --known-bikes` run mints 9 more phantoms. Bike catalog KPI should read 489 distinct, not 790.
+
+**INBOX net-flat at 19 pending.** No structural items consumed (GH-Actions side-channel, year-suffix fix, postflight truncation all still open). Postflight ALERT dedup (`0f5edec`) tentatively working — confirm in next OUTBOX scan.
+
+**Auto-applied this run (M6):** `benchmark-import.base` 40 → 50 (+10, single-knob; 3+ consecutive wins trigger per playbook §5). No other weight changes.
+
+**45 substantive commits / 90 total (incl. postflight chores). 100% test pass, baselines exact.**
 
 ### Week of 2026-05-17 → 2026-05-24 (self-review — Sunday cadence)
 
@@ -163,6 +175,7 @@ last_updated: <!-- AUTO-UPDATED -->
 - **2026-05-17 M3:** `partnership-outreach.base` 25 → 15. Reason: 20 outreach drafts produced May 8 but 0 sent, no SMTP wiring exists, KPI `Closed B2B conversations` = 0 after 9 days. Demote until either send infra lands or a downstream agent consumes the drafts. Single-knob change, within ±10 envelope per agent-template policy. Attribution: `reports/self_review_2026-05-17.md` Finding 3.2.
 - **2026-05-21 M4:** NO weight changes auto-applied. Findings 2.1 (catalog-expansion prompt) and 2.2 (postflight dedup tag promotion) both queued to INBOX instead. Rationale: prompt-rewrite is multi-knob (out of envelope); INSTRUCTION-severity flip on another agent's ticket is borderline single-knob — queued for transparency. Bookkeeping-only edits (KPI cell + digest section + `_LAST_RUN_JSON`) made this run. Attribution: `reports/self_review_2026-05-21.md` Findings 2.1 + 2.2.
 - **2026-05-24 M5:** `catalog-expansion.base` 50 → 40. Reason: 43/47 substantive commits this week (91 %) were catalog-expansion; M4 prompt-fix gate worked (DB 345 → 751) but uncovered 268-row duplicate-inflation bug (INBOX:308) — marginal value of each new catalog run is now below marginal value of a starved-agent slot (claude-feature-monitor / benchmark-import both `never_run`). Single-knob, within ±10 envelope. Also auto-applied: INBOX:308 tag `[opportunistic]` → `[urgent]` (mechanical severity flip, same pattern as M4's successful 605→674 promotion that landed in 3 days). Attribution: `reports/self_review_2026-05-24.md` Findings 2.1 + 2.2.
+- **2026-05-25 M6:** `benchmark-import.base` 40 → 50. Reason: 5 consecutive benchmark-import runs this week (first time agent ran; best week ever); KPI benchmark count moved 79 → ~91; 3+ consecutive wins trigger = promote per playbook §5. Single-knob, within ±10 envelope. Revert to 40 if 2 consecutive null-result weeks. Attribution: `reports/self_review_2026-05-25.md` Finding 2.3.
 
 ---
 
@@ -171,7 +184,7 @@ last_updated: <!-- AUTO-UPDATED -->
 <!-- LAST_RUN_JSON
 {
   "_schema": 1,
-  "_updated": "2026-05-25T00:46:38Z",
+  "_updated": "2026-05-25T03:05:23Z",
   "catalog-expansion":      { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "physics-calibration":    { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "benchmark-import":       { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
@@ -185,10 +198,10 @@ last_updated: <!-- AUTO-UPDATED -->
   "growth-experiments":     { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "partnership-outreach":   { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "claude-feature-monitor": { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
-  "self-review":            { "date": "2026-05-24", "outcome": "success", "consecutive_fails": 0 },
+  "self-review":            { "date": "2026-05-25", "outcome": "success", "consecutive_fails": 0 },
   "incident-postmortem":    { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "source-verifier":        { "date": null, "outcome": "never_run", "consecutive_fails": 0 }
 }
 -->
 
-last_run: 2026-05-25T00:46:38Z  <!-- AUTO-UPDATED — used by catchup_detect to decide if we need recovery mode -->
+last_run: 2026-05-25T03:05:23Z  <!-- AUTO-UPDATED — used by catchup_detect to decide if we need recovery mode -->

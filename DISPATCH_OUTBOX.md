@@ -1511,3 +1511,6 @@ Postflight deploy check timed out after 180s
 > 
 > ## Work performed
 > 
+
+### ALERT — 2026-05-25T09:00:00Z — self-review M6 auto-applied weight change
+`benchmark-import.base` 40 → 50 (+10, single-knob). Attribution: `reports/self_review_2026-05-25.md` Finding 2.3. Reason: 5 consecutive runs this week (first time agent ran); KPI benchmark count 79 → ~91; 3+ consecutive wins trigger per playbook §5. Revert to 40 if 2 consecutive null-result weeks.

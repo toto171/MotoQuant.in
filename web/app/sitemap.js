@@ -242,6 +242,12 @@ export default async function sitemap() {
       priority: 0.84,
     },
     {
+      url: `${SITE_URL}/blog/harley-nightster-rh975-quarter-mile-physics`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
       url: `${SITE_URL}/blog/honda-hornet-2-0-vs-pulsar-ns200-quarter-mile`,
       lastModified: now,
       changeFrequency: "monthly",

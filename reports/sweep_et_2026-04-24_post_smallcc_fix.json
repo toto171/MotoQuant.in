@@ -1,5 +1,5 @@
 {
- "took_s": 157.04456877708435,
+ "took_s": 177.21867418289185,
  "results": [
   {
    "kind": "reference",
@@ -231,7 +231,11 @@
    "finished": true,
    "sim_et": 10.51428235693859,
    "sim_trap_kmh": 229.76927960253164,
-   "elapsed_s": 10.514999999999612
+   "elapsed_s": 10.514999999999612,
+   "bench_et": 10.6,
+   "bench_trap_kmh": 214.0,
+   "bench_src": "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip)",
+   "delta_et": -0.08571764306140928
   },
   {
    "kind": "catalog",
@@ -419,7 +423,11 @@
    "finished": true,
    "sim_et": 11.100065141174905,
    "sim_trap_kmh": 208.93422989489514,
-   "elapsed_s": 11.100999999999287
+   "elapsed_s": 11.100999999999287,
+   "bench_et": 10.95,
+   "bench_trap_kmh": 204.0,
+   "bench_src": "Cycle World 2021 (timing-strip)",
+   "delta_et": 0.1500651411749061
   },
   {
    "kind": "catalog",
@@ -435,7 +443,11 @@
    "finished": true,
    "sim_et": 11.864156518259044,
    "sim_trap_kmh": 190.02330111237282,
-   "elapsed_s": 11.864999999998863
+   "elapsed_s": 11.864999999998863,
+   "bench_et": 12.13,
+   "bench_trap_kmh": 173.0,
+   "bench_src": "Motorcycle Consumer News (stock instrumented, FZ-07/MT-07 CP2)",
+   "delta_et": -0.26584348174095673
   },
   {
    "kind": "catalog",
@@ -579,7 +591,11 @@
    "finished": true,
    "sim_et": 10.964219649380466,
    "sim_trap_kmh": 226.2512440291259,
-   "elapsed_s": 10.964999999999362
+   "elapsed_s": 10.964999999999362,
+   "bench_et": 10.69,
+   "bench_trap_kmh": 211.0,
+   "bench_src": "Sport Rider 2009 (timing-strip)",
+   "delta_et": 0.2742196493804663
   },
   {
    "kind": "catalog",
@@ -595,7 +611,11 @@
    "finished": true,
    "sim_et": 10.776595678627773,
    "sim_trap_kmh": 231.62757555885221,
-   "elapsed_s": 10.776999999999466
+   "elapsed_s": 10.776999999999466,
+   "bench_et": 10.69,
+   "bench_trap_kmh": 211.0,
+   "bench_src": "Sport Rider 2009 (timing-strip)",
+   "delta_et": 0.08659567862777351
   },
   {
    "kind": "catalog",
@@ -611,7 +631,11 @@
    "finished": true,
    "sim_et": 10.965820621526198,
    "sim_trap_kmh": 228.05783853614517,
-   "elapsed_s": 10.965999999999362
+   "elapsed_s": 10.965999999999362,
+   "bench_et": 10.69,
+   "bench_trap_kmh": 211.0,
+   "bench_src": "Sport Rider 2009 (timing-strip)",
+   "delta_et": 0.2758206215261989
   },
   {
    "kind": "catalog",
@@ -839,7 +863,11 @@
    "finished": true,
    "sim_et": 10.799713229067837,
    "sim_trap_kmh": 217.43484981235994,
-   "elapsed_s": 10.799999999999454
+   "elapsed_s": 10.799999999999454,
+   "bench_et": 10.38,
+   "bench_trap_kmh": 205.0,
+   "bench_src": "Cycle World 2014 (timing-strip)",
+   "delta_et": 0.4197132290678365
   },
   {
    "kind": "catalog",
@@ -855,7 +883,11 @@
    "finished": true,
    "sim_et": 11.010108467373865,
    "sim_trap_kmh": 210.57441385464256,
-   "elapsed_s": 11.010999999999337
+   "elapsed_s": 11.010999999999337,
+   "bench_et": 10.95,
+   "bench_trap_kmh": 198.0,
+   "bench_src": "Cycle World 2017 middleweight-naked comparison (timing-strip)",
+   "delta_et": 0.06010846737386544
   },
   {
    "kind": "catalog",
@@ -1079,7 +1111,11 @@
    "finished": true,
    "sim_et": 10.157822292793465,
    "sim_trap_kmh": 247.27995746444427,
-   "elapsed_s": 10.15799999999981
+   "elapsed_s": 10.15799999999981,
+   "bench_et": 10.44,
+   "bench_trap_kmh": 228.0,
+   "bench_src": "MotoStatz 2022 (Dragy, stock instrumented)",
+   "delta_et": -0.2821777072065341
   },
   {
    "kind": "catalog",
@@ -1201,13 +1237,13 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 13.42327007788934,
-   "sim_trap_kmh": 162.5405438432424,
-   "elapsed_s": 13.423999999998,
+   "sim_et": 13.66460225669055,
+   "sim_trap_kmh": 162.35770633784577,
+   "elapsed_s": 13.664999999997866,
    "bench_et": 14.0,
    "bench_trap_kmh": 150.0,
    "bench_src": "Motorcycle Consumer News (Duke 390 14.02 @ 91.88 mph)",
-   "delta_et": -0.5767299221106601
+   "delta_et": -0.33539774330944994
   },
   {
    "kind": "catalog",
@@ -1221,13 +1257,13 @@
    "category": "sport",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 13.015694126574932,
-   "sim_trap_kmh": 176.75649354263948,
-   "elapsed_s": 13.015999999998225,
+   "sim_et": 13.262337381487578,
+   "sim_trap_kmh": 176.46354378903715,
+   "elapsed_s": 13.262999999998089,
    "bench_et": 13.85,
    "bench_trap_kmh": 159.0,
    "bench_src": "Duke 390 baseline (Motorcycle Consumer News, RC adds ~\u22120.15s for fairing)",
-   "delta_et": -0.8343058734250679
+   "delta_et": -0.5876626185124216
   },
   {
    "kind": "catalog",
@@ -1313,9 +1349,9 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 14.004831904485787,
-   "sim_trap_kmh": 155.1991962926227,
-   "elapsed_s": 14.004999999997677
+   "sim_et": 14.234704314614346,
+   "sim_trap_kmh": 155.04299967817406,
+   "elapsed_s": 14.23499999999755
   },
   {
    "kind": "catalog",
@@ -1361,13 +1397,13 @@
    "category": "sport",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 14.478940434101824,
-   "sim_trap_kmh": 160.22320503546143,
+   "sim_et": 14.47862536059337,
+   "sim_trap_kmh": 160.23357456011163,
    "elapsed_s": 14.478999999997415,
    "bench_et": 15.46,
    "bench_trap_kmh": 135.0,
    "bench_src": "FastestLaps + BikeWale (verified stock)",
-   "delta_et": -0.9810595658981764
+   "delta_et": -0.9813746394066314
   },
   {
    "kind": "catalog",
@@ -1593,13 +1629,13 @@
    "category": "sport",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 13.228772151221417,
-   "sim_trap_kmh": 173.86679815657618,
-   "elapsed_s": 13.228999999998107,
+   "sim_et": 13.467973168328733,
+   "sim_trap_kmh": 173.59765612648687,
+   "elapsed_s": 13.467999999997975,
    "bench_et": 12.98,
    "bench_trap_kmh": 102.0,
    "bench_src": "MotoStatz 2018",
-   "delta_et": 0.2487721512214165
+   "delta_et": 0.4879731683287325
   },
   {
    "kind": "catalog",
@@ -1633,13 +1669,13 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 14.365331133051761,
-   "sim_trap_kmh": 152.25926270698832,
-   "elapsed_s": 14.365999999997477,
+   "sim_et": 14.400726470739839,
+   "sim_trap_kmh": 152.25391866270917,
+   "elapsed_s": 14.400999999997458,
    "bench_et": 14.5,
    "bench_trap_kmh": 140.0,
    "bench_src": "Derived from 0-100 (bikewale 2023)",
-   "delta_et": -0.13466886694823899
+   "delta_et": -0.0992735292601612
   },
   {
    "kind": "catalog",
@@ -1669,9 +1705,9 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 13.418704868581454,
-   "sim_trap_kmh": 162.4764976142121,
-   "elapsed_s": 13.418999999998002
+   "sim_et": 13.660260786400281,
+   "sim_trap_kmh": 162.29447575331622,
+   "elapsed_s": 13.660999999997868
   },
   {
    "kind": "catalog",
@@ -1685,9 +1721,9 @@
    "category": "sport",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 13.003820437354658,
-   "sim_trap_kmh": 176.95429506972968,
-   "elapsed_s": 13.003999999998232
+   "sim_et": 13.25071586934595,
+   "sim_trap_kmh": 176.66049140381858,
+   "elapsed_s": 13.250999999998095
   },
   {
    "kind": "catalog",
@@ -1735,7 +1771,11 @@
    "finished": true,
    "sim_et": 11.013715057822687,
    "sim_trap_kmh": 213.90510351617488,
-   "elapsed_s": 11.013999999999335
+   "elapsed_s": 11.013999999999335,
+   "bench_et": 10.79,
+   "bench_trap_kmh": 212.0,
+   "bench_src": "MotoStatz 2021 (Dragy, stock instrumented)",
+   "delta_et": 0.2237150578226874
   },
   {
    "kind": "catalog",
@@ -1905,13 +1945,13 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 13.190821084433832,
-   "sim_trap_kmh": 166.27363897497133,
-   "elapsed_s": 13.190999999998128,
+   "sim_et": 13.44664903055308,
+   "sim_trap_kmh": 166.0222679160031,
+   "elapsed_s": 13.446999999997987,
    "bench_et": 14.0,
    "bench_trap_kmh": 150.0,
    "bench_src": "Motorcycle Consumer News (Duke 390 14.02 @ 91.88 mph)",
-   "delta_et": -0.8091789155661679
+   "delta_et": -0.5533509694469192
   },
   {
    "kind": "catalog",
@@ -1927,7 +1967,11 @@
    "finished": true,
    "sim_et": 10.803296213258074,
    "sim_trap_kmh": 213.98719077829642,
-   "elapsed_s": 10.803999999999451
+   "elapsed_s": 10.803999999999451,
+   "bench_et": 11.0,
+   "bench_trap_kmh": 208.0,
+   "bench_src": "MotoStatz 2020 (Dragy, stock instrumented)",
+   "delta_et": -0.19670378674192612
   },
   {
    "kind": "catalog",
@@ -2053,13 +2097,13 @@
    "category": "sport",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 13.342562068149192,
-   "sim_trap_kmh": 172.87643163744718,
-   "elapsed_s": 13.342999999998044,
+   "sim_et": 13.588083300166655,
+   "sim_trap_kmh": 172.59813949295753,
+   "elapsed_s": 13.588999999997908,
    "bench_et": 13.51,
    "bench_trap_kmh": 98.0,
    "bench_src": "MotoStatz 2022 (DERIVED)",
-   "delta_et": -0.1674379318508077
+   "delta_et": 0.07808330016665543
   },
   {
    "kind": "catalog",
@@ -2089,9 +2133,9 @@
    "category": "sport",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 12.68342563512167,
-   "sim_trap_kmh": 193.23869124790968,
-   "elapsed_s": 12.68399999999841
+   "sim_et": 13.070644021670557,
+   "sim_trap_kmh": 192.27957614051832,
+   "elapsed_s": 13.070999999998195
   },
   {
    "kind": "catalog",
@@ -2335,7 +2379,11 @@
    "finished": true,
    "sim_et": 10.95484209882389,
    "sim_trap_kmh": 224.98061779570335,
-   "elapsed_s": 10.954999999999368
+   "elapsed_s": 10.954999999999368,
+   "bench_et": 11.24,
+   "bench_trap_kmh": 200.0,
+   "bench_src": "MotoStatz 2021 (Dragy, stock instrumented)",
+   "delta_et": -0.2851579011761096
   },
   {
    "kind": "catalog",
@@ -2465,9 +2513,9 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 14.09913101684596,
-   "sim_trap_kmh": 154.98048829925696,
-   "elapsed_s": 14.099999999997625
+   "sim_et": 14.226493678293295,
+   "sim_trap_kmh": 154.90957130222122,
+   "elapsed_s": 14.226999999997554
   },
   {
    "kind": "catalog",
@@ -2585,13 +2633,13 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 14.569225938170481,
-   "sim_trap_kmh": 151.75857550722816,
-   "elapsed_s": 14.569999999997364,
+   "sim_et": 14.568861178159054,
+   "sim_trap_kmh": 151.7696960996787,
+   "elapsed_s": 14.568999999997365,
    "bench_et": 14.1,
    "bench_trap_kmh": 155.0,
    "bench_src": "DERIVED (0-100 \u00d7 1.6, \u00b10.7s)",
-   "delta_et": 0.4692259381704815
+   "delta_et": 0.46886117815905415
   },
   {
    "kind": "catalog",
@@ -2709,13 +2757,13 @@
    "category": "sport",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 13.97962500626311,
-   "sim_trap_kmh": 169.013803334231,
+   "sim_et": 13.979270836177216,
+   "sim_trap_kmh": 169.02634811721802,
    "elapsed_s": 13.979999999997691,
    "bench_et": 14.0,
    "bench_trap_kmh": 145.0,
    "bench_src": "FastestLaps 2015 (verified)",
-   "delta_et": -0.020374993736890445
+   "delta_et": -0.020729163822784002
   },
   {
    "kind": "catalog",
@@ -2729,13 +2777,13 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 14.476443475190244,
-   "sim_trap_kmh": 155.3270198752928,
+   "sim_et": 14.476085322828935,
+   "sim_trap_kmh": 155.33872923324748,
    "elapsed_s": 14.476999999997416,
    "bench_et": 14.05,
    "bench_trap_kmh": 92.0,
    "bench_src": "AccelerationTimes 2020 (DERIVED)",
-   "delta_et": 0.4264434751902435
+   "delta_et": 0.42608532282893385
   },
   {
    "kind": "catalog",
@@ -2765,13 +2813,13 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 16.996909655363623,
-   "sim_trap_kmh": 123.30481004455778,
+   "sim_et": 16.996574489493,
+   "sim_trap_kmh": 123.31126896340538,
    "elapsed_s": 16.99699999999779,
    "bench_et": 15.5,
    "bench_trap_kmh": 138.0,
    "bench_src": "DERIVED (0-100 \u00d7 1.6, \u00b10.7s)",
-   "delta_et": 1.4969096553636234
+   "delta_et": 1.4965744894929998
   },
   {
    "kind": "catalog",
@@ -2985,8 +3033,8 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 17.35771164547604,
-   "sim_trap_kmh": 122.83839173094934,
+   "sim_et": 17.357385620484656,
+   "sim_trap_kmh": 122.84418997131408,
    "elapsed_s": 17.35799999999823
   },
   {
@@ -3081,9 +3129,9 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 14.448653891639369,
-   "sim_trap_kmh": 151.2184337791447,
-   "elapsed_s": 14.448999999997431
+   "sim_et": 14.456589820097552,
+   "sim_trap_kmh": 151.22743309029045,
+   "elapsed_s": 14.456999999997427
   },
   {
    "kind": "catalog",
@@ -3129,8 +3177,8 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 15.93737225644742,
-   "sim_trap_kmh": 136.38018572500584,
+   "sim_et": 15.937008313803524,
+   "sim_trap_kmh": 136.38820165601538,
    "elapsed_s": 15.937999999996606
   },
   {
@@ -3145,8 +3193,8 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 16.16058533741803,
-   "sim_trap_kmh": 134.91043787579346,
+   "sim_et": 16.160234723036247,
+   "sim_trap_kmh": 134.917890109758,
    "elapsed_s": 16.16099999999677
   },
   {
@@ -3177,13 +3225,13 @@
    "category": "sport",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 14.873027676440271,
-   "sim_trap_kmh": 158.38124000598032,
-   "elapsed_s": 14.873999999997196,
+   "sim_et": 14.872662746555523,
+   "sim_trap_kmh": 158.39267410562266,
+   "elapsed_s": 14.872999999997196,
    "bench_et": 15.8,
    "bench_trap_kmh": 120.0,
    "bench_src": "MotorbikeCatalog 2017",
-   "delta_et": -0.9269723235597294
+   "delta_et": -0.9273372534444775
   },
   {
    "kind": "catalog",
@@ -3197,9 +3245,9 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 15.44016863621543,
-   "sim_trap_kmh": 146.4429413904806,
-   "elapsed_s": 15.440999999996881
+   "sim_et": 15.439786863820814,
+   "sim_trap_kmh": 146.4529117020932,
+   "elapsed_s": 15.439999999996882
   },
   {
    "kind": "catalog",
@@ -3261,9 +3309,9 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 13.740258080504828,
-   "sim_trap_kmh": 159.5330340696494,
-   "elapsed_s": 13.740999999997824
+   "sim_et": 13.800733888294952,
+   "sim_trap_kmh": 159.51348137864784,
+   "elapsed_s": 13.80099999999779
   },
   {
    "kind": "catalog",
@@ -3309,8 +3357,8 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 15.643996697295643,
-   "sim_trap_kmh": 145.30607731603584,
+   "sim_et": 15.643671935787225,
+   "sim_trap_kmh": 145.31504027462805,
    "elapsed_s": 15.643999999996769
   },
   {
@@ -3341,8 +3389,8 @@
    "category": "sport",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 14.687369603777029,
-   "sim_trap_kmh": 157.51824041232658,
+   "sim_et": 14.6870394448467,
+   "sim_trap_kmh": 157.52798474534575,
    "elapsed_s": 14.687999999997299
   },
   {
@@ -3373,13 +3421,13 @@
    "category": "sport",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 13.052847186668478,
-   "sim_trap_kmh": 176.1522185954648,
-   "elapsed_s": 13.052999999998205,
+   "sim_et": 13.275014205628452,
+   "sim_trap_kmh": 175.9127859656837,
+   "elapsed_s": 13.275999999998081,
    "bench_et": 13.3,
    "bench_trap_kmh": 97.0,
    "bench_src": "FastestLaps 2024",
-   "delta_et": -0.24715281333152284
+   "delta_et": -0.02498579437154902
   },
   {
    "kind": "catalog",
@@ -3393,9 +3441,9 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 13.467283347720324,
-   "sim_trap_kmh": 162.31630403722883,
-   "elapsed_s": 13.467999999997975
+   "sim_et": 13.680609392447158,
+   "sim_trap_kmh": 162.17686495260097,
+   "elapsed_s": 13.680999999997857
   },
   {
    "kind": "catalog",
@@ -3425,13 +3473,13 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 13.455438739762576,
-   "sim_trap_kmh": 160.62028934027438,
-   "elapsed_s": 13.455999999997982,
+   "sim_et": 13.651468269377164,
+   "sim_trap_kmh": 160.50820141708346,
+   "elapsed_s": 13.651999999997873,
    "bench_et": 14.0,
    "bench_trap_kmh": 150.0,
    "bench_src": "Motorcycle Consumer News (Duke 390 14.02 @ 91.88 mph)",
-   "delta_et": -0.5445612602374243
+   "delta_et": -0.3485317306228364
   },
   {
    "kind": "catalog",
@@ -3525,9 +3573,9 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 13.806344332466184,
-   "sim_trap_kmh": 160.07148389035183,
-   "elapsed_s": 13.806999999997787
+   "sim_et": 13.875682124807351,
+   "sim_trap_kmh": 160.04327516469357,
+   "elapsed_s": 13.875999999997749
   },
   {
    "kind": "catalog",
@@ -3797,9 +3845,9 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 13.604562458766312,
-   "sim_trap_kmh": 159.34639942408614,
-   "elapsed_s": 13.604999999997899
+   "sim_et": 13.822155679826574,
+   "sim_trap_kmh": 159.2545849760585,
+   "elapsed_s": 13.822999999997778
   },
   {
    "kind": "catalog",
@@ -3879,7 +3927,11 @@
    "finished": true,
    "sim_et": 10.283886684532261,
    "sim_trap_kmh": 245.5170383508046,
-   "elapsed_s": 10.28399999999974
+   "elapsed_s": 10.28399999999974,
+   "bench_et": 10.43,
+   "bench_trap_kmh": 216.0,
+   "bench_src": "Cycle World 2005 (timing-strip)",
+   "delta_et": -0.14611331546773876
   },
   {
    "kind": "catalog",
@@ -4645,13 +4697,13 @@
    "category": "sport",
    "cluster": "two-stroke",
    "finished": true,
-   "sim_et": 15.054722231264442,
-   "sim_trap_kmh": 147.2940303318176,
+   "sim_et": 15.054272326418776,
+   "sim_trap_kmh": 147.30235275434464,
    "elapsed_s": 15.054999999997095,
    "bench_et": 14.0,
    "bench_trap_kmh": 146.0,
    "bench_src": "Cycle World 1973",
-   "delta_et": 1.0547222312644422
+   "delta_et": 1.0542723264187757
   },
   {
    "kind": "catalog",
@@ -4665,13 +4717,13 @@
    "category": "sport",
    "cluster": "two-stroke",
    "finished": true,
-   "sim_et": 14.134483318030542,
-   "sim_trap_kmh": 161.14394112669723,
-   "elapsed_s": 14.134999999997605,
+   "sim_et": 14.266967777906872,
+   "sim_trap_kmh": 161.1436080686363,
+   "elapsed_s": 14.266999999997532,
    "bench_et": 14.18,
    "bench_trap_kmh": 147.0,
    "bench_src": "Cycle World 1979 (RD400F Daytona)",
-   "delta_et": -0.045516681969457906
+   "delta_et": 0.08696777790687271
   },
   {
    "kind": "catalog",
@@ -4685,9 +4737,9 @@
    "category": "sport",
    "cluster": "two-stroke",
    "finished": true,
-   "sim_et": 12.875939941603825,
-   "sim_trap_kmh": 161.83634825632694,
-   "elapsed_s": 12.875999999998303
+   "sim_et": 13.161887854266936,
+   "sim_trap_kmh": 161.47640971334718,
+   "elapsed_s": 13.161999999998145
   },
   {
    "kind": "catalog",
@@ -4701,9 +4753,9 @@
    "category": "sport",
    "cluster": "two-stroke",
    "finished": true,
-   "sim_et": 13.651689659894123,
-   "sim_trap_kmh": 159.14436674214144,
-   "elapsed_s": 13.651999999997873
+   "sim_et": 13.852393779033319,
+   "sim_trap_kmh": 158.92260333199,
+   "elapsed_s": 13.852999999997762
   },
   {
    "kind": "catalog",
@@ -4797,13 +4849,13 @@
    "category": "sport",
    "cluster": "two-stroke",
    "finished": true,
-   "sim_et": 10.866781880693354,
-   "sim_trap_kmh": 217.41252010832335,
-   "elapsed_s": 10.866999999999416,
+   "sim_et": 11.207125749336196,
+   "sim_trap_kmh": 216.32806987851654,
+   "elapsed_s": 11.207999999999227,
    "bench_et": 11.6,
    "bench_trap_kmh": 180.0,
    "bench_src": "Cycle World 1985",
-   "delta_et": -0.7332181193066454
+   "delta_et": -0.39287425066380344
   },
   {
    "kind": "catalog",
@@ -5075,7 +5127,11 @@
    "finished": true,
    "sim_et": 11.034880512860335,
    "sim_trap_kmh": 220.33696166820124,
-   "elapsed_s": 11.034999999999323
+   "elapsed_s": 11.034999999999323,
+   "bench_et": 11.24,
+   "bench_trap_kmh": 200.0,
+   "bench_src": "MotoStatz 2021 (Dragy, stock instrumented)",
+   "delta_et": -0.20511948713966532
   },
   {
    "kind": "catalog",
@@ -5273,8 +5329,8 @@
    "category": "sport",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 14.88875456650708,
-   "sim_trap_kmh": 159.45169588105102,
+   "sim_et": 14.888495109978619,
+   "sim_trap_kmh": 159.46159691117043,
    "elapsed_s": 14.888999999997187
   },
   {
@@ -5433,9 +5489,9 @@
    "category": "sport",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 14.759263598100723,
-   "sim_trap_kmh": 159.5838709459896,
-   "elapsed_s": 14.759999999997259
+   "sim_et": 14.758951920720442,
+   "sim_trap_kmh": 159.59387260943132,
+   "elapsed_s": 14.75899999999726
   },
   {
    "kind": "catalog",
@@ -5765,9 +5821,9 @@
    "category": "sport",
    "cluster": "two-stroke",
    "finished": true,
-   "sim_et": 12.826948145995766,
-   "sim_trap_kmh": 179.11650396495315,
-   "elapsed_s": 12.82699999999833
+   "sim_et": 13.12072435027951,
+   "sim_trap_kmh": 178.06737946430414,
+   "elapsed_s": 13.120999999998167
   },
   {
    "kind": "catalog",
@@ -5781,9 +5837,9 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 15.47783146236742,
-   "sim_trap_kmh": 136.74682324888315,
-   "elapsed_s": 15.477999999996861
+   "sim_et": 15.589400365503113,
+   "sim_trap_kmh": 136.71496524383872,
+   "elapsed_s": 15.589999999996799
   },
   {
    "kind": "catalog",
@@ -5893,13 +5949,13 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 13.232950160932642,
-   "sim_trap_kmh": 168.83854621259871,
-   "elapsed_s": 13.232999999998105,
+   "sim_et": 13.41734790749254,
+   "sim_trap_kmh": 168.7027293690012,
+   "elapsed_s": 13.417999999998003,
    "bench_et": 14.0,
    "bench_trap_kmh": 150.0,
    "bench_src": "Motorcycle Consumer News (Duke 390 14.02 @ 91.88 mph)",
-   "delta_et": -0.7670498390673579
+   "delta_et": -0.5826520925074608
   },
   {
    "kind": "catalog",
@@ -5913,9 +5969,9 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 15.144562113162214,
-   "sim_trap_kmh": 140.3617152911567,
-   "elapsed_s": 15.144999999997045
+   "sim_et": 15.242852726208541,
+   "sim_trap_kmh": 140.33020126296907,
+   "elapsed_s": 15.242999999996991
   },
   {
    "kind": "catalog",
@@ -6569,9 +6625,9 @@
    "category": "sport",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 13.082311553961212,
-   "sim_trap_kmh": 175.39310275418356,
-   "elapsed_s": 13.082999999998188
+   "sim_et": 13.308591996354728,
+   "sim_trap_kmh": 175.14263105909637,
+   "elapsed_s": 13.308999999998063
   },
   {
    "kind": "catalog",
@@ -6809,9 +6865,9 @@
    "category": "sport",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 12.6814477423883,
-   "sim_trap_kmh": 192.5691795707678,
-   "elapsed_s": 12.68199999999841
+   "sim_et": 13.057881826275127,
+   "sim_trap_kmh": 191.62063686046872,
+   "elapsed_s": 13.057999999998202
   },
   {
    "kind": "catalog",
@@ -6841,9 +6897,9 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 16.005057160985267,
-   "sim_trap_kmh": 139.94810936744238,
-   "elapsed_s": 16.00599999999658
+   "sim_et": 16.00473760147264,
+   "sim_trap_kmh": 139.95637662147917,
+   "elapsed_s": 16.004999999996578
   },
   {
    "kind": "catalog",
@@ -6889,8 +6945,8 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 16.895306295112338,
-   "sim_trap_kmh": 127.93151478534338,
+   "sim_et": 16.895003893224615,
+   "sim_trap_kmh": 127.93759873655529,
    "elapsed_s": 16.895999999997667
   },
   {
@@ -7003,7 +7059,11 @@
    "finished": true,
    "sim_et": 11.100065141174905,
    "sim_trap_kmh": 208.93422989489514,
-   "elapsed_s": 11.100999999999287
+   "elapsed_s": 11.100999999999287,
+   "bench_et": 10.95,
+   "bench_trap_kmh": 204.0,
+   "bench_src": "Cycle World 2021 (timing-strip)",
+   "delta_et": 0.1500651411749061
   },
   {
    "kind": "catalog",
@@ -7115,7 +7175,11 @@
    "finished": true,
    "sim_et": 11.918294657457677,
    "sim_trap_kmh": 189.73231189058887,
-   "elapsed_s": 11.918999999998833
+   "elapsed_s": 11.918999999998833,
+   "bench_et": 12.13,
+   "bench_trap_kmh": 173.0,
+   "bench_src": "Motorcycle Consumer News (stock instrumented, FZ-07/MT-07 CP2)",
+   "delta_et": -0.21170534254232365
   },
   {
    "kind": "catalog",
@@ -7177,9 +7241,9 @@
    "category": "sport",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 12.773938887461536,
-   "sim_trap_kmh": 181.90611301351984,
-   "elapsed_s": 12.77399999999836
+   "sim_et": 13.010012332635911,
+   "sim_trap_kmh": 181.6248264124474,
+   "elapsed_s": 13.010999999998228
   },
   {
    "kind": "catalog",
@@ -7193,9 +7257,9 @@
    "category": "naked",
    "cluster": "mid-twin-300-500",
    "finished": true,
-   "sim_et": 13.344118948507521,
-   "sim_trap_kmh": 165.5077215317342,
-   "elapsed_s": 13.344999999998043
+   "sim_et": 13.597863392584287,
+   "sim_trap_kmh": 165.24954439286398,
+   "elapsed_s": 13.597999999997903
   },
   {
    "kind": "catalog",
@@ -7292,6 +7356,982 @@
    "sim_et": 21.05628411530174,
    "sim_trap_kmh": 112.41084240821077,
    "elapsed_s": 21.057000000002752
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Hero",
+   "model": "Xtreme 200R",
+   "year_from": 2018,
+   "year_to": 2024,
+   "disp_cc": 199.6,
+   "power_hp": 18.4,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "entry-150-200",
+   "finished": true,
+   "sim_et": 17.259371198945136,
+   "sim_trap_kmh": 122.05147919732745,
+   "elapsed_s": 17.25999999999811
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Honda",
+   "model": "X-Blade 160",
+   "year_from": 2018,
+   "year_to": 2024,
+   "disp_cc": 162.71,
+   "power_hp": 17.0,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "entry-150-200",
+   "finished": true,
+   "sim_et": 18.172224753757572,
+   "sim_trap_kmh": 122.15622137284976,
+   "elapsed_s": 18.172999999999227
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "KTM",
+   "model": "790 Adventure",
+   "year_from": 2019,
+   "year_to": 2022,
+   "disp_cc": 799,
+   "power_hp": 94.0,
+   "stroke_type": 4,
+   "category": "adventure",
+   "cluster": "other",
+   "finished": true,
+   "sim_et": 12.156343982695574,
+   "sim_trap_kmh": 189.9030465338264,
+   "elapsed_s": 12.156999999998702
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Honda",
+   "model": "CB650F",
+   "year_from": 2014,
+   "year_to": 2018,
+   "disp_cc": 649,
+   "power_hp": 89.85,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "litre-sport-600-1000",
+   "finished": true,
+   "sim_et": 11.951701654189844,
+   "sim_trap_kmh": 199.4253921026836,
+   "elapsed_s": 11.951999999998815
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Suzuki",
+   "model": "SV650X",
+   "year_from": 2018,
+   "year_to": 2024,
+   "disp_cc": 645,
+   "power_hp": 75.0,
+   "stroke_type": 4,
+   "category": "sport",
+   "cluster": "litre-sport-600-1000",
+   "finished": true,
+   "sim_et": 11.737946791576887,
+   "sim_trap_kmh": 203.24867835195843,
+   "elapsed_s": 11.737999999998934
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Yamaha",
+   "model": "XSR155",
+   "year_from": 2019,
+   "year_to": 2026,
+   "disp_cc": 155.0,
+   "power_hp": 19.0,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "entry-150-200",
+   "finished": true,
+   "sim_et": 17.183607574419117,
+   "sim_trap_kmh": 130.26650937930003,
+   "elapsed_s": 17.18399999999802
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Honda",
+   "model": "Monkey 125",
+   "year_from": 2022,
+   "year_to": 2026,
+   "disp_cc": 124,
+   "power_hp": 9.4,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "other",
+   "finished": true,
+   "sim_et": 21.516978180650533,
+   "sim_trap_kmh": 103.11499812647378,
+   "elapsed_s": 21.517000000003314
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Honda",
+   "model": "NT1100",
+   "year_from": 2022,
+   "year_to": 2026,
+   "disp_cc": 1084,
+   "power_hp": 102.0,
+   "stroke_type": 4,
+   "category": "touring",
+   "cluster": "other",
+   "finished": true,
+   "sim_et": 12.000164192675195,
+   "sim_trap_kmh": 197.26684482621366,
+   "elapsed_s": 12.000999999998788
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "CFMoto",
+   "model": "450MT",
+   "year_from": 2024,
+   "year_to": 2026,
+   "disp_cc": 449,
+   "power_hp": 41.7,
+   "stroke_type": 4,
+   "category": "adventure",
+   "cluster": "mid-twin-300-500",
+   "finished": true,
+   "sim_et": 13.957408011144658,
+   "sim_trap_kmh": 157.93317435888704,
+   "elapsed_s": 13.957999999997703
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Triumph",
+   "model": "Scrambler 1200 XE",
+   "year_from": 2023,
+   "year_to": 2026,
+   "disp_cc": 1200,
+   "power_hp": 89.0,
+   "stroke_type": 4,
+   "category": "adventure",
+   "cluster": "other",
+   "finished": true,
+   "sim_et": 12.302116745697417,
+   "sim_trap_kmh": 189.77465084746618,
+   "elapsed_s": 12.30299999999862
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Indian",
+   "model": "Chieftain Dark Horse",
+   "year_from": 2023,
+   "year_to": 2026,
+   "disp_cc": 1890,
+   "power_hp": 92.0,
+   "stroke_type": 4,
+   "category": "touring",
+   "cluster": "cruiser-1300+",
+   "finished": true,
+   "sim_et": 13.279363910077617,
+   "sim_trap_kmh": 168.83609115603525,
+   "elapsed_s": 13.27999999999808
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "BMW",
+   "model": "R 1250 RT",
+   "year_from": 2021,
+   "year_to": 2024,
+   "disp_cc": 1254,
+   "power_hp": 136.0,
+   "stroke_type": 4,
+   "category": "touring",
+   "cluster": "other",
+   "finished": true,
+   "sim_et": 11.229342214927103,
+   "sim_trap_kmh": 215.25445829942956,
+   "elapsed_s": 11.229999999999215
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Yamaha",
+   "model": "MT-10 SP",
+   "year_from": 2022,
+   "year_to": 2026,
+   "disp_cc": 998,
+   "power_hp": 165.0,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "litre-sport-600-1000",
+   "finished": true,
+   "sim_et": 10.382256071104104,
+   "sim_trap_kmh": 229.74428300169316,
+   "elapsed_s": 10.382999999999685,
+   "bench_et": 10.35,
+   "bench_trap_kmh": 228.0,
+   "bench_src": "Cycle World 2016",
+   "delta_et": 0.03225607110410422
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Kawasaki",
+   "model": "Versys 1000 SE",
+   "year_from": 2022,
+   "year_to": 2024,
+   "disp_cc": 1043.0,
+   "power_hp": 120.0,
+   "stroke_type": 4,
+   "category": "adventure",
+   "cluster": "other",
+   "finished": true,
+   "sim_et": 12.225370165072748,
+   "sim_trap_kmh": 193.6294286718806,
+   "elapsed_s": 12.225999999998663
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Ducati",
+   "model": "Multistrada V4 RS",
+   "year_from": 2024,
+   "year_to": 2026,
+   "disp_cc": 1158.0,
+   "power_hp": 185.0,
+   "stroke_type": 4,
+   "category": "adventure",
+   "cluster": "other",
+   "finished": true,
+   "sim_et": 11.483190739300342,
+   "sim_trap_kmh": 217.53461448879744,
+   "elapsed_s": 11.483999999999075
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "BMW",
+   "model": "K1600 GT",
+   "year_from": 2022,
+   "year_to": 2026,
+   "disp_cc": 1649,
+   "power_hp": 160.0,
+   "stroke_type": 4,
+   "category": "touring",
+   "cluster": "cruiser-1300+",
+   "finished": true,
+   "sim_et": 11.37089431335438,
+   "sim_trap_kmh": 215.05569760746124,
+   "elapsed_s": 11.370999999999137
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Honda",
+   "model": "CL500",
+   "year_from": 2023,
+   "year_to": 2026,
+   "disp_cc": 471,
+   "power_hp": 47.0,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "mid-twin-300-500",
+   "finished": true,
+   "sim_et": 13.808345714096575,
+   "sim_trap_kmh": 160.74736444493388,
+   "elapsed_s": 13.808999999997786
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Suzuki",
+   "model": "GSX-R125",
+   "year_from": 2017,
+   "year_to": 2026,
+   "disp_cc": 124,
+   "power_hp": 15.0,
+   "stroke_type": 4,
+   "category": "sport",
+   "cluster": "other",
+   "finished": true,
+   "sim_et": 18.1544290601113,
+   "sim_trap_kmh": 131.6859996545335,
+   "elapsed_s": 18.154999999999205
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "MV Agusta",
+   "model": "F3 RR",
+   "year_from": 2024,
+   "year_to": 2026,
+   "disp_cc": 798,
+   "power_hp": 147.0,
+   "stroke_type": 4,
+   "category": "sport",
+   "cluster": "litre-sport-600-1000",
+   "finished": true,
+   "sim_et": 10.249804098923308,
+   "sim_trap_kmh": 245.36937396638893,
+   "elapsed_s": 10.249999999999758
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Indian",
+   "model": "Scout Bobber",
+   "year_from": 2025,
+   "year_to": 2026,
+   "disp_cc": 1250,
+   "power_hp": 105.0,
+   "stroke_type": 4,
+   "category": "cruiser",
+   "cluster": "other",
+   "finished": true,
+   "sim_et": 12.153922398959555,
+   "sim_trap_kmh": 193.61555845764295,
+   "elapsed_s": 12.153999999998703
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Husqvarna",
+   "model": "Svartpilen 125",
+   "year_from": 2024,
+   "year_to": 2026,
+   "disp_cc": 124,
+   "power_hp": 15.0,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "other",
+   "finished": true,
+   "sim_et": 18.98077909410145,
+   "sim_trap_kmh": 121.19163571420327,
+   "elapsed_s": 18.981000000000215
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "BMW",
+   "model": "R 12 nineT",
+   "year_from": 2024,
+   "year_to": 2026,
+   "disp_cc": 1170,
+   "power_hp": 109.0,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "other",
+   "finished": true,
+   "sim_et": 11.285782229565916,
+   "sim_trap_kmh": 204.48365306346386,
+   "elapsed_s": 11.285999999999184
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Suzuki",
+   "model": "GSX-S1000GT",
+   "year_from": 2022,
+   "year_to": 2026,
+   "disp_cc": 999,
+   "power_hp": 152.0,
+   "stroke_type": 4,
+   "category": "sport",
+   "cluster": "litre-sport-600-1000",
+   "finished": true,
+   "sim_et": 10.478189859324836,
+   "sim_trap_kmh": 238.07514838423594,
+   "elapsed_s": 10.478999999999631
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Kawasaki",
+   "model": "KLX300",
+   "year_from": 2021,
+   "year_to": 2026,
+   "disp_cc": 292,
+   "power_hp": 28.0,
+   "stroke_type": 4,
+   "category": "adventure",
+   "cluster": "entry-200-300",
+   "finished": true,
+   "sim_et": 14.917809454001706,
+   "sim_trap_kmh": 142.94100687556633,
+   "elapsed_s": 14.917999999997171
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "BSA",
+   "model": "Gold Star 650",
+   "year_from": 2022,
+   "year_to": 2026,
+   "disp_cc": 652,
+   "power_hp": 45.0,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "litre-sport-600-1000",
+   "finished": true,
+   "sim_et": 13.819436797144343,
+   "sim_trap_kmh": 161.26515290876418,
+   "elapsed_s": 13.81999999999778
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Hero",
+   "model": "Passion XPro 110",
+   "year_from": 2024,
+   "year_to": 2026,
+   "disp_cc": 110,
+   "power_hp": 9.2,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "other",
+   "finished": true,
+   "sim_et": 22.285561557398445,
+   "sim_trap_kmh": 95.20152941088716,
+   "elapsed_s": 22.286000000004254
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Norton",
+   "model": "Commando 961 SP",
+   "year_from": 2023,
+   "year_to": 2026,
+   "disp_cc": 961,
+   "power_hp": 76.8,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "litre-sport-600-1000",
+   "finished": true,
+   "sim_et": 13.421514557073086,
+   "sim_trap_kmh": 176.6460038339614,
+   "elapsed_s": 13.421999999998
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Triumph",
+   "model": "Tiger Sport 800",
+   "year_from": 2025,
+   "year_to": 2026,
+   "disp_cc": 798,
+   "power_hp": 113.0,
+   "stroke_type": 4,
+   "category": "adventure",
+   "cluster": "other",
+   "finished": true,
+   "sim_et": 11.810963382326518,
+   "sim_trap_kmh": 209.42149789890485,
+   "elapsed_s": 11.810999999998893
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Honda",
+   "model": "X-ADV 750",
+   "year_from": 2021,
+   "year_to": 2026,
+   "disp_cc": 745,
+   "power_hp": 58.0,
+   "stroke_type": 4,
+   "category": "adventure",
+   "cluster": "other",
+   "finished": true,
+   "sim_et": 13.519969732252697,
+   "sim_trap_kmh": 167.1430910442885,
+   "elapsed_s": 13.519999999997946
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "KTM",
+   "model": "990 Duke",
+   "year_from": 2024,
+   "year_to": 2026,
+   "disp_cc": 947,
+   "power_hp": 123.0,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "litre-sport-600-1000",
+   "finished": true,
+   "sim_et": 10.707780333197482,
+   "sim_trap_kmh": 221.51734087109037,
+   "elapsed_s": 10.707999999999505
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "KTM",
+   "model": "690 SMC R",
+   "year_from": 2019,
+   "year_to": 2024,
+   "disp_cc": 693.0,
+   "power_hp": 74.0,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "litre-sport-600-1000",
+   "finished": true,
+   "sim_et": 11.803387307492786,
+   "sim_trap_kmh": 187.9642147799362,
+   "elapsed_s": 11.803999999998897
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Husqvarna",
+   "model": "701 Supermoto",
+   "year_from": 2016,
+   "year_to": 2023,
+   "disp_cc": 692.7,
+   "power_hp": 74.0,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "litre-sport-600-1000",
+   "finished": true,
+   "sim_et": 11.763984890281394,
+   "sim_trap_kmh": 188.97164040822025,
+   "elapsed_s": 11.76399999999892
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Suzuki",
+   "model": "V-Strom SX 250",
+   "year_from": 2022,
+   "year_to": 2026,
+   "disp_cc": 249.0,
+   "power_hp": 26.1,
+   "stroke_type": 4,
+   "category": "adventure",
+   "cluster": "entry-200-300",
+   "finished": true,
+   "sim_et": 16.03007392644242,
+   "sim_trap_kmh": 133.69398352074205,
+   "elapsed_s": 16.03099999999661
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "TVS",
+   "model": "NTorq 125 Race XP",
+   "year_from": 2021,
+   "year_to": 2026,
+   "disp_cc": 124.8,
+   "power_hp": 9.38,
+   "stroke_type": 4,
+   "category": "scooter",
+   "cluster": "other",
+   "finished": true,
+   "sim_et": 21.928908799378544,
+   "sim_trap_kmh": 103.49808638810346,
+   "elapsed_s": 21.929000000003818
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Bajaj",
+   "model": "Pulsar NS200 BS6",
+   "year_from": 2020,
+   "year_to": 2026,
+   "disp_cc": 199.5,
+   "power_hp": 24.17,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "entry-150-200",
+   "finished": true,
+   "sim_et": 15.952153092196713,
+   "sim_trap_kmh": 136.22451416043575,
+   "elapsed_s": 15.952999999996598,
+   "bench_et": 16.9,
+   "bench_trap_kmh": 130.0,
+   "bench_src": "MotorBikeCatalog 2012 (verified)",
+   "delta_et": -0.9478469078032852
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Honda",
+   "model": "SP160",
+   "year_from": 2023,
+   "year_to": 2026,
+   "disp_cc": 163.7,
+   "power_hp": 13.48,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "entry-150-200",
+   "finished": true,
+   "sim_et": 18.853714705295932,
+   "sim_trap_kmh": 114.07733533048867,
+   "elapsed_s": 18.85400000000006
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Benelli",
+   "model": "TRK 502",
+   "year_from": 2017,
+   "year_to": 2024,
+   "disp_cc": 499.6,
+   "power_hp": 47.5,
+   "stroke_type": 4,
+   "category": "adventure",
+   "cluster": "mid-twin-300-500",
+   "finished": true,
+   "sim_et": 14.553941602493206,
+   "sim_trap_kmh": 147.7053998451018,
+   "elapsed_s": 14.553999999997373
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Kawasaki",
+   "model": "Versys 650",
+   "year_from": 2015,
+   "year_to": 2024,
+   "disp_cc": 649.0,
+   "power_hp": 68.0,
+   "stroke_type": 4,
+   "category": "adventure",
+   "cluster": "mid-twin-500-700",
+   "finished": true,
+   "sim_et": 12.847477369602736,
+   "sim_trap_kmh": 174.98418391666524,
+   "elapsed_s": 12.847999999998319
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Triumph",
+   "model": "Bonneville Bobber",
+   "year_from": 2017,
+   "year_to": 2024,
+   "disp_cc": 1200.0,
+   "power_hp": 76.9,
+   "stroke_type": 4,
+   "category": "cruiser",
+   "cluster": "other",
+   "finished": true,
+   "sim_et": 12.808251485020753,
+   "sim_trap_kmh": 178.90324476885112,
+   "elapsed_s": 12.80899999999834
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Moto Guzzi",
+   "model": "V100 Mandello S",
+   "year_from": 2022,
+   "year_to": 2026,
+   "disp_cc": 1042.0,
+   "power_hp": 113.0,
+   "stroke_type": 4,
+   "category": "touring",
+   "cluster": "other",
+   "finished": true,
+   "sim_et": 11.551615521627005,
+   "sim_trap_kmh": 210.29862588217668,
+   "elapsed_s": 11.551999999999037
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Aprilia",
+   "model": "Shiver 900",
+   "year_from": 2017,
+   "year_to": 2024,
+   "disp_cc": 896.0,
+   "power_hp": 95.0,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "litre-sport-600-1000",
+   "finished": true,
+   "sim_et": 11.511932871066945,
+   "sim_trap_kmh": 200.73324329136832,
+   "elapsed_s": 11.511999999999059
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Bajaj",
+   "model": "Pulsar NS250",
+   "year_from": 2024,
+   "year_to": 2026,
+   "disp_cc": 248.8,
+   "power_hp": 30.0,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "entry-200-300",
+   "finished": true,
+   "sim_et": 15.32934222198242,
+   "sim_trap_kmh": 142.382244728205,
+   "elapsed_s": 15.329999999996943
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Royal Enfield",
+   "model": "Scram 450",
+   "year_from": 2024,
+   "year_to": 2026,
+   "disp_cc": 452.0,
+   "power_hp": 40.0,
+   "stroke_type": 4,
+   "category": "adventure",
+   "cluster": "mid-twin-300-500",
+   "finished": true,
+   "sim_et": 14.462945767636063,
+   "sim_trap_kmh": 149.42656423065358,
+   "elapsed_s": 14.462999999997423
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "KTM",
+   "model": "RC 390 Gen 3",
+   "year_from": 2024,
+   "year_to": 2026,
+   "disp_cc": 373.2,
+   "power_hp": 46.0,
+   "stroke_type": 4,
+   "category": "sport",
+   "cluster": "mid-twin-300-500",
+   "finished": true,
+   "sim_et": 13.158066680091729,
+   "sim_trap_kmh": 178.5293676792937,
+   "elapsed_s": 13.158999999998146,
+   "bench_et": 13.85,
+   "bench_trap_kmh": 159.0,
+   "bench_src": "Duke 390 baseline (Motorcycle Consumer News, RC adds ~\u22120.15s for fairing)",
+   "delta_et": -0.6919333199082711
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Hero",
+   "model": "Xpulse 210",
+   "year_from": 2025,
+   "year_to": 2026,
+   "disp_cc": 210.04,
+   "power_hp": 24.6,
+   "stroke_type": 4,
+   "category": "adventure",
+   "cluster": "entry-200-300",
+   "finished": true,
+   "sim_et": 16.18753954947713,
+   "sim_trap_kmh": 131.2270104026642,
+   "elapsed_s": 16.1879999999968
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Honda",
+   "model": "CBR650R E-Clutch",
+   "year_from": 2024,
+   "year_to": 2026,
+   "disp_cc": 648.72,
+   "power_hp": 95.18,
+   "stroke_type": 4,
+   "category": "sport",
+   "cluster": "litre-sport-600-1000",
+   "finished": true,
+   "sim_et": 11.498703345937475,
+   "sim_trap_kmh": 211.7938104130363,
+   "elapsed_s": 11.498999999999066
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Ducati",
+   "model": "Streetfighter V4 SP",
+   "year_from": 2022,
+   "year_to": 2024,
+   "disp_cc": 1103.0,
+   "power_hp": 208.0,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "litre-sport-195+",
+   "finished": true,
+   "sim_et": 10.079318835781567,
+   "sim_trap_kmh": 248.5670743904037,
+   "elapsed_s": 10.079999999999853,
+   "bench_et": 10.1,
+   "bench_trap_kmh": 235.0,
+   "bench_src": "Cycle World 2020",
+   "delta_et": -0.020681164218432357
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "MV Agusta",
+   "model": "Brutale 1000 RR Assen",
+   "year_from": 2024,
+   "year_to": 2025,
+   "disp_cc": 998.0,
+   "power_hp": 208.0,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "litre-sport-195+",
+   "finished": true,
+   "sim_et": 10.045227374932413,
+   "sim_trap_kmh": 248.84688628405334,
+   "elapsed_s": 10.045999999999871,
+   "bench_et": 10.15,
+   "bench_trap_kmh": 240.0,
+   "bench_src": "Cycle World 2019",
+   "delta_et": -0.10477262506758755
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Honda",
+   "model": "CL250",
+   "year_from": 2023,
+   "year_to": 2026,
+   "disp_cc": 249.0,
+   "power_hp": 26.5,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "entry-200-300",
+   "finished": true,
+   "sim_et": 15.872714510951504,
+   "sim_trap_kmh": 140.8272303421983,
+   "elapsed_s": 15.872999999996642
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Aprilia",
+   "model": "RS 660 Extrema",
+   "year_from": 2024,
+   "year_to": 2025,
+   "disp_cc": 659.0,
+   "power_hp": 100.0,
+   "stroke_type": 4,
+   "category": "sport",
+   "cluster": "litre-sport-600-1000",
+   "finished": true,
+   "sim_et": 10.773349369543048,
+   "sim_trap_kmh": 230.7047242358904,
+   "elapsed_s": 10.773999999999468,
+   "bench_et": 11.24,
+   "bench_trap_kmh": 200.0,
+   "bench_src": "MotoStatz 2021 (Dragy, stock instrumented)",
+   "delta_et": -0.466650630456952
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Kawasaki",
+   "model": "W230",
+   "year_from": 2024,
+   "year_to": 2026,
+   "disp_cc": 233.0,
+   "power_hp": 17.5,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "entry-200-300",
+   "finished": true,
+   "sim_et": 17.092771042006863,
+   "sim_trap_kmh": 125.08106388718252,
+   "elapsed_s": 17.092999999997907
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Hero",
+   "model": "Xtreme 125R",
+   "year_from": 2024,
+   "year_to": 2026,
+   "disp_cc": 124.7,
+   "power_hp": 11.4,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "other",
+   "finished": true,
+   "sim_et": 20.858345154812966,
+   "sim_trap_kmh": 107.36280322527813,
+   "elapsed_s": 20.85900000000251
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Royal Enfield",
+   "model": "Super Meteor 650",
+   "year_from": 2023,
+   "year_to": 2026,
+   "disp_cc": 648.0,
+   "power_hp": 47.0,
+   "stroke_type": 4,
+   "category": "cruiser",
+   "cluster": "mid-twin-500-700",
+   "finished": true,
+   "sim_et": 14.168137316004826,
+   "sim_trap_kmh": 156.58840897746177,
+   "elapsed_s": 14.168999999997586
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Yamaha",
+   "model": "MT-15 V1",
+   "year_from": 2019,
+   "year_to": 2020,
+   "disp_cc": 155.09,
+   "power_hp": 18.4,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "entry-150-200",
+   "finished": true,
+   "sim_et": 17.050748788541288,
+   "sim_trap_kmh": 125.50674412500203,
+   "elapsed_s": 17.050999999997856,
+   "bench_et": 15.8,
+   "bench_trap_kmh": 130.0,
+   "bench_src": "DERIVED (0-100 \u00d7 1.6, \u00b10.7s)",
+   "delta_et": 1.2507487885412871
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Bajaj",
+   "model": "Pulsar 125 Neon",
+   "year_from": 2019,
+   "year_to": 2024,
+   "disp_cc": 124.4,
+   "power_hp": 12.0,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "other",
+   "finished": true,
+   "sim_et": 20.884911096905164,
+   "sim_trap_kmh": 109.07843144955487,
+   "elapsed_s": 20.88500000000254
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Suzuki",
+   "model": "GSX-R 600 (2008-2010)",
+   "year_from": 2008,
+   "year_to": 2010,
+   "disp_cc": 599.0,
+   "power_hp": 125.0,
+   "stroke_type": 4,
+   "category": "sport",
+   "cluster": "mid-twin-500-700",
+   "finished": true,
+   "sim_et": 10.769587775622814,
+   "sim_trap_kmh": 236.49587395521007,
+   "elapsed_s": 10.76999999999947
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Honda",
+   "model": "CB400X (2023-2026)",
+   "year_from": 2023,
+   "year_to": 2026,
+   "disp_cc": 399.0,
+   "power_hp": 46.0,
+   "stroke_type": 4,
+   "category": "adventure",
+   "cluster": "mid-twin-300-500",
+   "finished": true,
+   "sim_et": 13.699275618007341,
+   "sim_trap_kmh": 163.68919850249705,
+   "elapsed_s": 13.699999999997846
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Kawasaki",
+   "model": "Ninja H2 SX (2018-2023)",
+   "year_from": 2018,
+   "year_to": 2023,
+   "disp_cc": 998.0,
+   "power_hp": 200.0,
+   "stroke_type": 4,
+   "category": "sport",
+   "cluster": "litre-sport-195+",
+   "finished": true,
+   "sim_et": 10.221997043177492,
+   "sim_trap_kmh": 250.77468279723504,
+   "elapsed_s": 10.221999999999774,
+   "bench_et": 9.62,
+   "bench_trap_kmh": 247.0,
+   "bench_src": "MCN 2015",
+   "delta_et": 0.6019970431774926
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Honda",
+   "model": "CBR 600RR (2013-2020)",
+   "year_from": 2013,
+   "year_to": 2020,
+   "disp_cc": 599.0,
+   "power_hp": 118.0,
+   "stroke_type": 4,
+   "category": "sport",
+   "cluster": "mid-twin-500-700",
+   "finished": true,
+   "sim_et": 11.18310815483838,
+   "sim_trap_kmh": 227.3476140414534,
+   "elapsed_s": 11.18399999999924
   }
  ],
  "summary": {
@@ -7300,49 +8340,49 @@
    "R1": 10.285930649053409,
    "Hayabusa": 10.471201919790467
   },
-  "total_bikes": 431,
+  "total_bikes": 490,
   "errors": 0,
   "dnf": 0,
   "clusters": {
    "mid-twin-500-700": {
-    "bikes": 18,
-    "finished": 18,
+    "bikes": 22,
+    "finished": 22,
     "dnf": 0,
     "stats": {}
    },
    "litre-sport-600-1000": {
-    "bikes": 121,
-    "finished": 121,
+    "bikes": 134,
+    "finished": 134,
     "dnf": 0,
     "stats": {
-     "n": 29,
-     "mean_abs_delta": 0.20594953449420694,
-     "median_abs_delta": 0.15834869772297822,
-     "bias": -0.12853842239360752,
-     "within_0.10": 6,
-     "within_0.20": 18,
-     "within_0.50": 27,
-     "within_1.00": 29
+     "n": 47,
+     "mean_abs_delta": 0.20830393304507153,
+     "median_abs_delta": 0.1754402005964515,
+     "bias": -0.08936690399352104,
+     "within_0.10": 10,
+     "within_0.20": 26,
+     "within_0.50": 45,
+     "within_1.00": 47
     }
    },
    "litre-sport-195+": {
-    "bikes": 36,
-    "finished": 36,
+    "bikes": 39,
+    "finished": 39,
     "dnf": 0,
     "stats": {
-     "n": 25,
-     "mean_abs_delta": 0.16226032085180264,
-     "median_abs_delta": 0.14746078984551048,
-     "bias": -0.03589194810575108,
-     "within_0.10": 9,
-     "within_0.20": 16,
-     "within_0.50": 25,
-     "within_1.00": 25
+     "n": 28,
+     "mean_abs_delta": 0.17085567334852067,
+     "median_abs_delta": 0.14045956436042228,
+     "bias": -0.0150269803125823,
+     "within_0.10": 10,
+     "within_0.20": 18,
+     "within_0.50": 27,
+     "within_1.00": 28
     }
    },
    "other": {
-    "bikes": 88,
-    "finished": 88,
+    "bikes": 107,
+    "finished": 107,
     "dnf": 0,
     "stats": {
      "n": 5,
@@ -7356,38 +8396,38 @@
     }
    },
    "entry-150-200": {
-    "bikes": 34,
-    "finished": 34,
+    "bikes": 40,
+    "finished": 40,
     "dnf": 0,
     "stats": {
-     "n": 6,
-     "mean_abs_delta": 1.4830280807783955,
-     "median_abs_delta": 0.753582320710283,
-     "bias": 1.142360223261206,
+     "n": 8,
+     "mean_abs_delta": 1.3870955226268682,
+     "median_abs_delta": 0.916050636228448,
+     "bias": 0.8946329025381548,
      "within_0.10": 0,
      "within_0.20": 0,
      "within_0.50": 2,
-     "within_1.00": 4
+     "within_1.00": 5
     }
    },
    "mid-twin-300-500": {
-    "bikes": 67,
-    "finished": 67,
+    "bikes": 73,
+    "finished": 73,
     "dnf": 0,
     "stats": {
-     "n": 15,
-     "mean_abs_delta": 0.5767229017118539,
-     "median_abs_delta": 0.5445612602374243,
-     "bias": -0.2245427390524186,
-     "within_0.10": 1,
-     "within_0.20": 3,
-     "within_0.50": 7,
-     "within_1.00": 14
+     "n": 16,
+     "mean_abs_delta": 0.5069253945993336,
+     "median_abs_delta": 0.4784171732438933,
+     "bias": -0.13722821222728665,
+     "within_0.10": 4,
+     "within_0.20": 4,
+     "within_0.50": 9,
+     "within_1.00": 15
     }
    },
    "entry-200-300": {
-    "bikes": 38,
-    "finished": 38,
+    "bikes": 44,
+    "finished": 44,
     "dnf": 0,
     "stats": {
      "n": 6,
@@ -7401,8 +8441,8 @@
     }
    },
    "cruiser-1300+": {
-    "bikes": 8,
-    "finished": 8,
+    "bikes": 10,
+    "finished": 10,
     "dnf": 0,
     "stats": {
      "n": 2,
@@ -7421,25 +8461,25 @@
     "dnf": 0,
     "stats": {
      "n": 5,
-     "mean_abs_delta": 0.7429415486588773,
-     "median_abs_delta": 0.7332181193066454,
-     "bias": 0.24312729029631086,
+     "mean_abs_delta": 0.6830730131486586,
+     "median_abs_delta": 0.4708008446303129,
+     "bias": 0.33760297503101205,
      "within_0.10": 1,
      "within_0.20": 1,
-     "within_0.50": 2,
+     "within_0.50": 3,
      "within_1.00": 3
     }
    }
   },
   "overall_benchmark_stats": {
-   "n": 93,
-   "mean_abs_delta": 0.4044390556683447,
-   "median_abs_delta": 0.23140447925510088,
-   "bias": 0.04461208618431361,
-   "within_0.10": 17,
-   "within_0.20": 43,
-   "within_0.50": 71,
-   "within_1.00": 86
+   "n": 117,
+   "mean_abs_delta": 0.3719422834966747,
+   "median_abs_delta": 0.2237150578226874,
+   "bias": 0.05214194038729032,
+   "within_0.10": 25,
+   "within_0.20": 54,
+   "within_0.50": 94,
+   "within_1.00": 109
   },
   "top10_closest": [
    {
@@ -7463,26 +8503,26 @@
     "delta": 0.01694325253956741
    },
    {
+    "bike": "Ducati Streetfighter V4 SP",
+    "delta": -0.020681164218432357
+   },
+   {
     "bike": "Yamaha YZF-R3",
-    "delta": -0.020374993736890445
+    "delta": -0.020729163822784002
+   },
+   {
+    "bike": "Aprilia RS 457",
+    "delta": -0.02498579437154902
    },
    {
     "bike": "Yamaha YZF-R1",
     "delta": -0.028379215417107417
    },
    {
-    "bike": "BMW M1000RR",
-    "delta": 0.045161298853301446
-   },
-   {
-    "bike": "Yamaha RD400 Daytona",
-    "delta": -0.045516681969457906
-   },
-   {
-    "bike": "MV Agusta Brutale 1000 RR",
-    "delta": -0.04734000351237988
+    "bike": "Yamaha MT-10 SP",
+    "delta": 0.03225607110410422
    }
   ],
-  "top10_mean_abs": 0.022560764419189815
+  "top10_mean_abs": 0.016586685963673808
  }
 }

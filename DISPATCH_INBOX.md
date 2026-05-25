@@ -843,6 +843,77 @@ Write `/blog/harley-nightster-rh975-quarter-mile-physics` — physics breakdown 
 
 ---
 
+## INSTRUCTION — 2026-05-25 — [self-review] [urgent] implement bike_repo year-suffix upsert fix + ghost-row cleanup
+[urgent]
+
+**Attribution:** self-review M6 2026-05-25, Finding 2.1. INBOX:308 first queued 2026-05-07 (18 days); promoted to [urgent] by M5 2026-05-24 (1 day); still unimplemented. DB now at 790 rows / 489 distinct = 301 phantom rows (grew from 268 last week — each `import --known-bikes` run mints ~9 more).
+
+**Concrete fix (< 30 min):**
+
+In `motoquant/database/bike_repo.py::create_model`, before the lenient `(manufacturer_id, model_name) ORDER BY year proximity` fallback match, add:
+
+```python
+import re as _re
+def _norm_model(s: str) -> str:
+    return _re.sub(r'\s*\(\d{4}-\d{4}\)$', '', s.strip())
+```
+
+Apply `_norm_model()` to both the incoming `model_name` and existing row's `model_name` before string comparison in the fallback. This prevents `GSX-R 750 (1985-1987)` from being re-inserted as a new row when `GSX-R 750` already exists.
+
+**Post-fix cleanup (run once, then remove):**
+```sql
+DELETE FROM bike_models
+WHERE rowid NOT IN (
+  SELECT MIN(rowid)
+  FROM bike_models
+  GROUP BY manufacturer_id, model_name
+);
+```
+
+After cleanup, `SELECT COUNT(*) FROM bike_models` should be ~489 (matching distinct count).
+
+**Regression test:** add one test to `tests/test_scraper.py` that imports the same bike list twice and asserts `bike_models` row count does not grow on the second import.
+
+**Expected commit files:** `motoquant/database/bike_repo.py`, `motoquant.db`, `tests/test_scraper.py`
+
+---
+
+## INSTRUCTION — 2026-05-25 — [self-review] [needs-approval] audit master_scheduler.sh for INBOX queue_weight parsing
+[opportunistic]
+
+**Attribution:** self-review M6 2026-05-25, Finding 2.2. INBOX:308 has been `[urgent]` for 1 day and INBOX:617 (Railway offline) for 8 days. Neither triggered the +50 queue_weight boost described in `docs/AUTONOMOUS_OPERATIONS_PLAYBOOK.md` §2. Hypothesis: `scripts/master_scheduler.sh` does not parse severity tags at all — the `queue_weight` subsystem is unimplemented.
+
+**Task:** Run `grep -n "urgent\|queue_weight\|INSTRUCTION" scripts/master_scheduler.sh` and report findings. If the parsing block is missing, add it:
+
+```bash
+# In master_scheduler.sh, scoring function:
+urgent_count=$(grep -c "^\#\# INSTRUCTION.*\[urgent\]" "$INBOX" 2>/dev/null || echo 0)
+if [ "$urgent_count" -gt 0 ]; then
+  queue_weight=$((queue_weight + 50))
+fi
+```
+
+**Deliverable:** A one-paragraph finding in DISPATCH_OUTBOX (if confirmed missing, add the parsing + a 1-liner test). Effort: ~30 min.
+
+---
+
+## INSTRUCTION — 2026-05-25 — [self-review] [opportunistic] technical-debt-pass: add pytest-regressions golden-file contract
+[opportunistic]
+
+**Attribution:** self-review M6 2026-05-25, Layer 3. CLAUDE.md TOOLKIT REFERENCE ★ item "pytest-regressions" has been deferred 25 days. This is the highest-ROI capability-frontier move available.
+
+**Task:** On the next `technical-debt-pass` (A9) run on a Saturday, implement `pytest-regressions` golden-file snapshots for the K5/R1/Hayabusa reference baselines:
+
+1. `pip install pytest-regressions` — add to `requirements-dev.txt`
+2. In `tests/test_validation.py`, add a `test_reference_baselines_golden` test that uses `data_regression.check()` to snapshot `{"k5_et": 10.0334, "r1_et": 10.2859, "hayabusa_et": 10.4712}`. On first run, golden file is created; future runs fail if values shift.
+3. Run `pytest --gen-files tests/test_validation.py::test_reference_baselines_golden` to generate the baseline file.
+
+**Why now:** the existing hardcoded asserts in `test_power_boost_regression.py` are exact but isolated. A golden-file approach extends naturally to the full 489-bike sweep.
+
+**Effort:** ~1 hr. No architectural changes.
+
+---
+
 ## DONE / DEFERRED ARCHIVE
 
 > _Claude moves processed instructions here. Trim periodically — git keeps the full history._
