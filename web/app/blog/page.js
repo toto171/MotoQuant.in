@@ -113,11 +113,34 @@ export const metadata = {
     "hunter 350 vs classic 350 vs bullet 350",
     "hunter 350 top speed india",
     "re j platform drag race",
+    "indian drag strips ranked",
+    "mmrt vs aamby valley elevation",
+    "density altitude indian drag racing",
+    "best drag strip in india for litre bike",
+    "best drag strip in india for small cc",
   ],
   alternates: { canonical: "https://motoquant.in/blog" },
 };
 
 const POSTS = [
+  {
+    slug: "indian-drag-strip-elevation-comparison",
+    date: "2026-05-25",
+    readTime: "12 min",
+    tags: [
+      "Venues",
+      "India",
+      "Altitude",
+      "Density altitude",
+      "MMRT",
+      "Aamby Valley",
+      "physics",
+    ],
+    title:
+      "Indian Drag Strips Ranked by Elevation: How Altitude Flips Quarter-Mile Order",
+    excerpt:
+      "MMRT at 78 m runs a stock Hayabusa Gen 1 at 10.262s — 0.21s quicker than the same bike at Aamby Valley (679 m), but 4.6 km/h slower at the trap. The order flips entirely for a 200cc commuter, where MMRT wins on every metric. MotoQuant sweeps the same physics across all five active Indian strips (MMRT, BIC, Kari, Hyderabad, Aamby Valley) and shows which bike class wants which venue. Drag-prepped turbo Hayabusas want Aamby. Stock R15 V4s want MMRT. The crossover sits between 80 and 120 hp.",
+  },
   {
     slug: "royal-enfield-hunter-350-quarter-mile-physics",
     date: "2026-05-25",

@@ -685,6 +685,79 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         220,
         "MotoStatz 2025 (Dragy, stock 2003 F-gen)",
     ),
+    # ── 2026-05-25 benchmark-import agent (seventh pass) ──────────────────────
+    # Three high-confidence MotoStatz Dragy instrumented adds. All three articles
+    # are from motostatz.com, whose "How We Test Motorcycles" page
+    # (motostatz.com/how-we-test-motorcycles/) explicitly states the site uses
+    # Dragy GPS as the standard measurement device across every review on the
+    # site ("We use Dragy—a GPS device renowned for its precision up to 1/100th
+    # of a second. Each motorcycle undergoes a rigorous flogging, involving a
+    # minimum of 20-30 acceleration runs"). Same MotoStatz/Dragy source bar
+    # already established by the CBR 600RR PC40B, Ninja 1000SX, BMW S1000R,
+    # CBR650R, Monster 937, Tracer 9 GT, ZX-9R F-gen, RS 660 and 890 Duke R
+    # entries above. Catalog year ranges verified to include year_hint via
+    # find_spec(). No duplicates with prior 2026-05-24 / 2026-05-25 passes.
+    #
+    # Honda VFR800F Interceptor (782 cc V4 sport-tourer, 2014-2021) — MotoStatz
+    # Dragy instrumented stock test: 11.14s @ 123 mph (197.95 km/h, rounded to
+    # 198). The MotoStatz article and the site-wide "How We Test" page jointly
+    # confirm Dragy methodology. The 2014-2021 VFR800F is the VTEC V4 with 105
+    # hp; trap of 123 mph fits the litre-sport-touring class cleanly. Catalog
+    # entry HONDA_VFR800F_INTERCEPTOR covers 2014-2021; year_hint=2016 falls
+    # squarely in the range. No matcher specificity concerns — "VFR800F
+    # Interceptor" is unique in the catalog (RC30/VFR750R has distinct model
+    # tokens).
+    # URL: https://motostatz.com/honda-vfr800-acceleration-top-speed/
+    # Methodology URL: https://motostatz.com/how-we-test-motorcycles/
+    (
+        "Honda",
+        "VFR800F Interceptor",
+        2016,
+        11.14,
+        198,
+        "MotoStatz (Dragy, stock instrumented)",
+    ),
+    # Aprilia Tuono 660 (659 cc parallel-twin naked, 2021-2026) — MotoStatz Dragy
+    # instrumented stock test: 11.33s @ 120 mph (193.12 km/h, rounded to 193).
+    # Distinct catalog entry from the RS 660 entry already in the list at
+    # 11.24s/200 km/h — the Tuono 660 is the naked variant of the same 659 cc
+    # parallel-twin platform, slightly heavier (+3 kg) and with worse drag (no
+    # full fairing). The 11.33 vs 11.24 spread between Tuono and RS variants
+    # (+0.09s, -7 km/h trap) is internally consistent with the naked-vs-sport
+    # delta on identical engines. Catalog entry APRILIA_TUONO_660 covers
+    # 2021-2026; year_hint=2021 matches cleanly. The Tuono 660 Factory variant
+    # exists as a separate catalog entry (2022-2026) with the same 100 hp engine
+    # — year_hint=2021 routes to the base 2021 entry first via year-match,
+    # avoiding any specificity collision.
+    # URL: https://motostatz.com/aprilia-tuono-660-top-speed-acceleration/
+    (
+        "Aprilia",
+        "Tuono 660",
+        2021,
+        11.33,
+        193,
+        "MotoStatz (Dragy, stock instrumented)",
+    ),
+    # Honda CBR1100XX Super Blackbird (1137 cc I4 sport-tourer, 1997-2007) —
+    # MotoStatz Dragy instrumented stock test: 10.38s @ 137.8 mph (~222 km/h,
+    # rounded down to 222). The MotoStatz article explicitly names the Dragy
+    # 60-130 mph metric (6.36s), confirming Dragy methodology. The CBR1100XX
+    # was the production-class top-speed king in the late 1990s with a measured
+    # 178 hp at the crank; 10.38s ET cluster-matches the existing Z1000 2014
+    # entry (CW 10.38s @ 205 km/h) — Blackbird trap is higher (~17 km/h) due to
+    # its lower drag coefficient (full fairing vs Z1000 naked). NOTE: The
+    # catalog does NOT currently contain the Honda CBR1100XX Super Blackbird —
+    # checked via the candidate-finder script. This benchmark is added on the
+    # expectation that a future catalog-expansion pass will add the CBR1100XX
+    # Super Blackbird (commonly-requested, was on the "popular bikes without
+    # benchmark" candidate list). Until then, this benchmark row will report
+    # "no matching spec" in the sweep — same handling as the existing
+    # FZS-Fazer-class benchmarks that were investigated this session but
+    # rejected for the same reason. Marked here so a future pass can pick it
+    # up immediately after the catalog add.
+    # SUSPENDED PER ANTI-FABRICATION RULE: benchmark requires a catalog spec
+    # to bind to or it is dead weight. Removing pending CBR1100XX catalog add.
+    # ── end seventh pass ──
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

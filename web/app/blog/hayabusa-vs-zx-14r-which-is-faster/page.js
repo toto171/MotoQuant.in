@@ -2,6 +2,7 @@ import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 import StructuredData, { articleSchema } from '../../StructuredData';
+import InlineSimCta from './InlineSimCta';
 
 const SLUG = 'hayabusa-vs-zx-14r-which-is-faster';
 const TITLE = 'Hayabusa vs ZX-14R: Quarter-Mile Drag Race Physics (India)';
@@ -103,6 +104,9 @@ const CONTENT = [
   {
     type: 'callout',
     text: 'These are stock-tune simulations. A modded Hayabusa with a stretched swingarm, a 14-tooth front sprocket, drag tires, a 4-into-1 stainless system, and a Power Commander tune will run mid-9s territory at well over 250 km/h trap. A modded ZX-14R does the same. The differences in this post describe stock bikes on stock tires under controlled launch conditions — not strip-prepped drag specials.',
+  },
+  {
+    type: 'inline_cta_slot',
   },
   {
     type: 'h2',
@@ -251,6 +255,13 @@ function Prose({ content }) {
               <p className="text-sm text-white/80 leading-relaxed italic">{block.text}</p>
             </div>
           );
+        }
+        if (block.type === 'inline_cta_slot') {
+          // EXP-017 — mid-article inline CTA. Renders nothing on the
+          // control arm; renders a glass CTA card on ?variant=B.
+          // Wrapped in Suspense inside InlineSimCta to satisfy the
+          // App-Router CSR-bailout rule.
+          return <InlineSimCta key={i} />;
         }
         if (block.type === 'table') {
           const [header, ...rows] = block.rows;

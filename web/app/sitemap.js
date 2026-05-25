@@ -284,6 +284,12 @@ export default async function sitemap() {
       priority: 0.87,
     },
     {
+      url: `${SITE_URL}/blog/indian-drag-strip-elevation-comparison`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.88,
+    },
+    {
       url: `${SITE_URL}/docs/getting-started`,
       lastModified: now,
       changeFrequency: "monthly",

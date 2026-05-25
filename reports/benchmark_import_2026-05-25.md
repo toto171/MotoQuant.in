@@ -70,3 +70,91 @@ All 44 tests in `test_validation.py` pass (31 pre-existing + 13 new).
 - `scripts/sweep_with_clusters.py` — matcher specificity sort (parallel fix)
 - `tests/test_validation.py` — 13 new TestMatcherSpecificity regression tests
 - `reports/benchmark_import_2026-05-25.md` — this report
+
+---
+
+## Seventh Pass (later 2026-05-25 session) — +2 MotoStatz Dragy benchmarks
+
+Two additional high-confidence MotoStatz Dragy-instrumented quarter-mile
+benchmarks added in a follow-up benchmark-import pass. Source bar identical to
+the existing MotoStatz Dragy entries (CBR 600RR PC40B, Ninja 1000SX, BMW S1000R,
+CBR650R, Monster 937, Tracer 9 GT, ZX-9R F-gen, RS 660, 890 Duke R, 790 Duke,
+XSR900). MotoStatz's site-wide "How We Test Motorcycles" page
+(https://motostatz.com/how-we-test-motorcycles/) explicitly states the
+publication uses Dragy GPS as the standard measurement device across every
+review on the site — minimum 20-30 runs per bike, precision to 1/100s. That
+confirms Dragy methodology for the two entries below even when the individual
+article snippet does not always quote "Dragy" inline.
+
+### Added benchmarks (2)
+
+| # | Manufacturer | Model | Year | ET (s) | Trap (km/h) | Source |
+|---|---|---|---|---|---|---|
+| 1 | Honda | VFR800F Interceptor | 2016 | 11.14 | 198 | MotoStatz (Dragy, stock) |
+| 2 | Aprilia | Tuono 660 | 2021 | 11.33 | 193 | MotoStatz (Dragy, stock) |
+
+#### 1. Honda VFR800F Interceptor
+
+- **URL:** https://motostatz.com/honda-vfr800-acceleration-top-speed/
+- **Methodology:** https://motostatz.com/how-we-test-motorcycles/
+- **Reported:** 11.14s @ 123 mph
+- **Stored:** 11.14s @ 198 km/h (123 × 1.60934 = 197.95, rounded to 198)
+- **Catalog binding:** `Honda | VFR800F Interceptor` (2014-2021, 782 cc V4
+  VTEC, 105 hp). `find_spec("Honda", "VFR800F Interceptor", 2016)` returns
+  the expected row.
+- **Cluster fit:** litre-sport-touring band; trap of 123 mph (~198 km/h) is
+  consistent with a 105 hp V4 sport-tourer.
+- **Matcher specificity:** No collision risk. "VFR800F" tokens are unique in
+  the catalog; the older RC30/VFR750R has distinct model tokens.
+
+#### 2. Aprilia Tuono 660
+
+- **URL:** https://motostatz.com/aprilia-tuono-660-top-speed-acceleration/
+- **Reported:** 11.33s @ 120 mph (article snippet explicitly says "measured
+  with a Dragy GPS device")
+- **Stored:** 11.33s @ 193 km/h (120 × 1.60934 = 193.12, rounded to 193)
+- **Catalog binding:** `Aprilia | Tuono 660` (2021-2026, 659 cc parallel-twin,
+  100 hp). `find_spec("Aprilia", "Tuono 660", 2021)` returns the expected row.
+- **Cluster fit:** Internally consistent with the existing RS 660 2021 entry
+  (11.24s @ 200 km/h). Tuono is the naked variant of the same 659 cc platform:
+  +3 kg, no fairing → Δ+0.09s ET, –7 km/h trap fits naked-vs-sport delta.
+- **Matcher specificity:** Tuono 660 Factory exists as a separate catalog
+  entry (2022-2026, same engine). Year-match path with year_hint=2021 routes
+  to the base Tuono 660 first; the new specificity sort (3-token "Tuono 660
+  Factory" sorts before 2-token "Tuono 660") would also help if Factory had
+  its own benchmark in the future.
+
+### Investigated but rejected this pass (4)
+
+| Bike | Reason |
+|---|---|
+| Yamaha FZS 1000 Fazer 2001-2005 | MotoStatz 10.78s @ 131 mph (Dragy via site methodology) BUT not in `ALL_KNOWN_BIKES` — only the 2006+ FZ1 Fazer is present. Queued for catalog expansion. |
+| Yamaha FZ8 / FZ8N | MotoStatz 11.45s @ 121 mph (Dragy). Not in catalog. Queued. |
+| Honda CBR1100XX Super Blackbird | MotoStatz 10.38s @ 137.8 mph — strong "Dragy 60-130 mph time" inline citation. NOT in catalog. Queued as a high-value historical add. |
+| Ducati Multistrada V4 | MotoStatz 10.82s @ 131 mph. Catalog present. Article snippet did not explicitly quote "Dragy" inline; while the site-wide methodology page covers it, chose conservative skip vs the two adds that have stronger evidence. |
+
+### Queue for catalog-expansion agent
+
+Three popular bikes with verified instrumented Dragy data exist but the
+catalog rows do not. Adding the catalog rows below would let a future
+benchmark-import pass bind these immediately:
+
+1. **Yamaha FZS 1000 Fazer 2001-2005** (RN061, 998 cc I4, 143 hp) — MotoStatz
+   10.78s @ 131 mph.
+2. **Yamaha FZ8 / FZ8N 2010-2013** (779 cc I4, 106 hp) — MotoStatz 11.45s @
+   121 mph.
+3. **Honda CBR1100XX Super Blackbird 1997-2007** (1137 cc I4, 152-164 hp) —
+   MotoStatz 10.38s @ 137.8 mph.
+
+### Sweep delta (seventh-pass adds only)
+
+- BENCHMARKS list: **106 → 108** (+2 net-new on top of the morning H2 SX add)
+- Both new entries verified to bind to `ALL_KNOWN_BIKES` via `find_spec()`
+- No physics regression — benchmarks are observational reference data;
+  simulator code unchanged.
+
+### Files touched (seventh-pass adds)
+
+- `scripts/validation_sweep.py` — BENCHMARKS list +2 entries (VFR800F
+  Interceptor + Tuono 660) with full inline citations.
+
