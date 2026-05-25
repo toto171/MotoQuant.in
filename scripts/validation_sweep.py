@@ -381,6 +381,77 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         193,
         "Cycle World 2014 (timing-strip, retro comparison test)",
     ),
+    # ── 2026-05-25 benchmark-import agent (second pass) ───────────────────────
+    # Four high-confidence instrumented adds, all sourced from the Cycle World /
+    # Sport Rider sportbike-performance-numbers archive
+    # (cycleworld.com/sport-rider/tech/sportbike-performance-numbers/) — the
+    # same authoritative timing-strip table already cited by the GSX-S1000 and
+    # Daytona 675 entries above. Each row in the archive is a Sport Rider
+    # instrumented drag-strip test. Rejected: Triumph Speed Triple 1200 RS
+    # (AccelerationTimes data turned out to be FastestLaps-derived, not
+    # instrumented); Tuono V4 1100 2021+ (only ProfessCars calculated estimates
+    # found for the 2021-2024 facelift — used the 2016 Sport Rider instrumented
+    # Factory test instead, which exercises the same 1077 cc V4 architecture).
+    #
+    # Suzuki GSX-R 600 K6 (599 cc I4 supersport, 2006-2007) — Sport Rider
+    # timing-strip 10.641s @ 132.71 mph (213.6 km/h). Same generation tested
+    # also clocked 10.979s @ 126.57 mph in 2007 — the K6 number is the cleaner
+    # of the two same-platform passes. Catalog entry GSX-R 600 2006-2007 hits
+    # year_hint=2006 cleanly.
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Suzuki",
+        "GSX-R 600",
+        2006,
+        10.641,
+        214,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2006)",
+    ),
+    # Honda CBR 600RR PC40 first-gen (599 cc I4 supersport, 2007-2012) —
+    # Sport Rider timing-strip 10.844s @ 127.68 mph (205.5 km/h) on the 2007
+    # PC40 platform. Distinct catalog entry from the 2013-2020 PC40B variant
+    # already benchmarked above (MotoStatz 10.92s); year-match routes
+    # year_hint=2007 → CBR 600RR 2007-2012 catalog entry cleanly.
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Honda",
+        "CBR 600RR",
+        2007,
+        10.844,
+        206,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2007)",
+    ),
+    # Yamaha YZF-R6 2C0 (599 cc I4 supersport, 2006-2007 chassis) — Sport
+    # Rider timing-strip 10.854s @ 127.44 mph (205.1 km/h) on the 2007 model.
+    # Catalog entry YZF-R6 2006-2007 covers the 2C0 generation; year_hint=2007
+    # matches cleanly. Distinct from the existing YZF-R1 entries — this is the
+    # 600 supersport sibling.
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Yamaha",
+        "YZF-R6",
+        2007,
+        10.854,
+        205,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2007)",
+    ),
+    # Aprilia Tuono V4 1100 Factory (1077 cc V4 hypernaked) — Sport Rider /
+    # Cycle World instrumented 2016 Factory road test: 10.30s @ 139.2 mph
+    # (224.0 km/h). The 2016 Factory carries the same 1077 cc 65° V4 making
+    # 175 hp as the 2021-2024 catalog entry; the 2021 facelift updated
+    # electronics/aero/Brembo brakes but not the engine. Year_hint=2021 routes
+    # to the TUONO_V4_1100 2021-2024 catalog entry. Per-cluster this lands in
+    # the litre-naked band where the 1290 Super Duke R (2022 CW: 10.15s) and
+    # Brutale 1000 RR (2019 CW: 10.15s) already live — Tuono fits the cluster.
+    # URL: https://www.cycleworld.com/sport-rider/2016-aprilia-tuono-v4-1100-factory-road-test-review/
+    (
+        "Aprilia",
+        "Tuono V4 1100",
+        2021,
+        10.30,
+        224,
+        "Sport Rider / Cycle World 2016 Factory (timing-strip, same 1077cc V4)",
+    ),
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

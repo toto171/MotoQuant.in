@@ -8,6 +8,7 @@ import { useParams } from 'next/navigation';
 import { API_URL } from '../../../lib/api';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
+import TopCtaVariant from './TopCtaVariant';
 
 function formatCell(value, suffix = '', decimals = null) {
   if (value === null || value === undefined || value === '') return '—';
@@ -120,13 +121,8 @@ export default function BikeDetailPage() {
                     )}
                   </div>
                 </div>
-                {/* Prominent simulate CTA beside the title */}
-                <Link
-                  href={`/simulator?bike_id=${bike.id}`}
-                  className="shrink-0 inline-flex items-center gap-2 px-5 py-3 bg-brand-orange text-black font-display font-bold rounded-xl transition-all hover:shadow-[0_0_30px_rgba(255,94,31,0.4)] text-sm"
-                >
-                  <Gauge size={16} /> Simulate this bike →
-                </Link>
+                {/* Prominent simulate CTA beside the title — EXP-011 variant-aware */}
+                <TopCtaVariant bikeId={bike.id} />
               </div>
 
               {/* Headline stats */}

@@ -107,6 +107,15 @@ export const metadata = {
 
 const POSTS = [
   {
+    slug: "husqvarna-svartpilen-250-vs-ktm-duke-250-quarter-mile-physics",
+    date: "2026-05-25",
+    readTime: "11 min",
+    tags: ["Husqvarna", "Svartpilen 250", "KTM", "Duke 250", "LC4c platform", "comparison"],
+    title: "Husqvarna Svartpilen 250 vs KTM Duke 250: Quarter-Mile Physics",
+    excerpt:
+      "MotoQuant sims the Svartpilen 250 at 14.767s / 149 km/h and the Duke 250 at 15.083s / 143 km/h. Same engine, same Bajaj Chakan plant, same Pierer Mobility parts shelf — and 0.316 seconds separates them at the strip. Physics breakdown of where the gap lives (final drive, frontal area, mass), why the Husky surprises everyone, and the cheapest mod that lets a Duke 250 owner match a stock Svartpilen.",
+  },
+  {
     slug: "royal-enfield-bullet-350-quarter-mile-physics",
     date: "2026-05-25",
     readTime: "11 min",

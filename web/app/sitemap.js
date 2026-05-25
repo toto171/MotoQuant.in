@@ -134,6 +134,12 @@ export default async function sitemap() {
       priority: 0.78,
     },
     {
+      url: `${SITE_URL}/blog/husqvarna-svartpilen-250-vs-ktm-duke-250-quarter-mile-physics`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: `${SITE_URL}/blog/yamaha-mt-15-v1-quarter-mile-physics`,
       lastModified: now,
       changeFrequency: "monthly",
