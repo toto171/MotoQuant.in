@@ -235,3 +235,106 @@ Per the agent prompt:
 - `/tmp/mq-session-1779697838-671/repo/reports/benchmark_import_2026-05-25.md`
   — this report (appended this pass section)
 
+---
+
+# Benchmark Import — 2026-05-25 (sixth pass, late session)
+
+Agent: benchmark-import (re-dispatched by master scheduler, sixth pass of
+the day after fifth pass Monster 937)
+Source file edited: `scripts/validation_sweep.py`
+BENCHMARKS list: 103 entries → 105 entries (+2)
+
+## Summary
+
+Two high-confidence MotoStatz Dragy instrumented benchmarks added. Both
+articles explicitly name the Dragy GPS device in the article body
+(verified via WebFetch); both list the test bike as stock; both bind to
+a catalog row whose year range includes the year hint.
+
+| # | Bike | ET (s) | Trap (km/h) | Source URL |
+|---|------|--------|-------------|------------|
+| 1 | Yamaha Tracer 9 GT (2021-2026, 889 cc CP3) | 11.49 | 190 | https://motostatz.com/yamaha-tracer-9-gt-performance-review/ |
+| 2 | Kawasaki Ninja ZX-9R F-gen (2000-2003, 899 cc I4) | 10.62 | 220 | https://motostatz.com/kawasaki-zx-9r-top-speed-acceleration/ |
+
+## Pre-commit sim validation
+
+| Bike | Sim ET | Sim Trap | Bench ET | Δ ET | Quality bucket |
+|------|--------|----------|----------|------|----------------|
+| Yamaha Tracer 9 GT 2021-2026 | 11.704 | 208.5 | 11.49 | +0.214s | within ±0.50s ✓ |
+| Kawasaki Ninja ZX-9R 2000-2003 | 10.497 | 236.6 | 10.62 | −0.123s | within ±0.20s ✓ |
+
+Both ETs land inside their cluster mean|Δ| bands per CLAUDE.md. ZX-9R
+sim trap (236.6 km/h) is closer to the existing Sport Rider 2000 entry's
+declared 230 km/h trap than to my MotoStatz 220 km/h, suggesting the
+SR-2000 entry's trap value is plausible but its ET (10.50s) is slightly
+optimistic relative to the MotoStatz Dragy measurement (10.62s) — the
+two data points effectively bracket the truth.
+
+## Reference baselines preserved (post-edit verification)
+
+| Bike | Sim ET | Target | Δ |
+|---|---|---|---|
+| Suzuki GSX-R 1000 K5 | 10.0334 | 10.0334 | +0.0000 ✓ |
+| Yamaha YZF-R1 4C8 | 10.2859 | 10.2859 | +0.0000 ✓ |
+| Suzuki Hayabusa Gen1 | 10.4712 | 10.4712 | +0.0000 ✓ |
+
+## Rejected this pass (full honest list)
+
+17 candidates investigated; 2 cleared the instrumented-only bar (12 % hit
+rate). Rejection reasons:
+
+| Bike | Reason |
+|------|--------|
+| Triumph Speed Triple 1200 RS | No instrumented test (CW/MotoStatz/MCN); only FastestLaps / AccelerationTimes calculated estimates |
+| Aprilia Tuono 660 | MotoStatz article does NOT name Dragy in body |
+| Ducati Multistrada V4 | MotoStatz article does NOT name Dragy in body |
+| Ducati Streetfighter V4 | MotoStatz article does NOT name Dragy in body; existing CW 2020 entry covers |
+| Suzuki GSX-R 750 | MotoStatz article does NOT name Dragy in body |
+| Yamaha MT-09 (base) | MotoStatz article does NOT name Dragy; MT-09 already covered (CW 2021) |
+| Yamaha MT-09 Y-AMT | Y-AMT variant not in catalog (automatic transmission trim) |
+| Yamaha XSR700 | Test bike NOT stock (Mivv full exhaust); Dragy also not named |
+| Kawasaki ZX-6R 636 | Dragy named only for 60-130 mph delta, not ¼-mile ET — methodology unclear |
+| Honda CBR1000RR 2017-19 | Dragy not named in body |
+| Honda CBR1000RR 2004-05 | Dragy not named; already covered by CBR1000RR 2008 entry |
+| Suzuki Katana 1000 | No Cycle World instrumented quarter-mile test found |
+| Yamaha YZF-R1 2002-03 | Image caption "Storm GP Exhaust" — stock status uncertain; covered by 2004 SR |
+| Ducati Diavel 1198 cc | MotoStatz confirmed Dragy + 10.46s @ 133 mph, BUT 1198 cc variant NOT in catalog (only Diavel V4 1158cc is) |
+| Honda CBR1100XX Super Blackbird | MotoStatz confirmed Dragy + 10.38s @ 137 mph, BUT CBR1100XX NOT in catalog |
+| Suzuki Bandit 1250 / GSX1400 | No MotoStatz article exists for either |
+| BMW F900R | No MotoStatz article; only YouTube Dragy shorts (not citable as primary source) |
+
+## Matcher specificity bug — finding (per agent prompt request)
+
+The bug filed in `DISPATCH_INBOX.md` (2026-05-25, [urgent]) is
+**confirmed real but not triggered by tonight's additions.** Mechanism:
+`_wb_match(pattern, spec)` returns True when ALL `pattern` tokens appear
+in the `spec` token-set — so `{ninja, h2}` matches a spec with tokens
+`{ninja, h2, sx, ...}`. The matchers (both `sweep_with_clusters.py::
+run_sweep` and `validation_sweep.py::run_sweep`) then iterate in
+sequential / insertion order and pick the first match, so the less-
+specific `Ninja H2` benchmark wins over a hypothetical `Ninja H2 SX`.
+
+**Cheapest correct fix:** sort the iteration descending by
+`len(bmodel.split())` (longest/most-specific pattern first) before the
+match loop. The first-match-wins logic then correctly picks the
+longest-prefix-wins binding. Same logic should be applied to both
+matchers; pair with a regression test in `tests/test_validation.py`
+pinning Z H2 vs Ninja H2 vs Ninja H2 SX vs Ninja H2R. Effort estimate
+in the inbox ticket (~1-2 hr) is accurate.
+
+**Tonight's two adds are NOT collision-affected:** Tracer 9 GT has no
+token-subset relationship with any other benchmark; Ninja ZX-9R is
+unique to its catalog row (no ZX-9RR or ZX-9R SX variants exist).
+
+## Files Modified (this pass)
+
+- `/tmp/mq-session-1779719441-635/repo/scripts/validation_sweep.py` —
+  2 new BENCHMARKS entries appended at end of list (after the Monster
+  937 entry from fifth pass earlier today)
+- `/tmp/mq-session-1779719441-635/repo/reports/benchmark_import_2026-05-25.md`
+  — this report (sixth-pass section appended)
+
+## One-line commit summary
+
+`feat(validation): +2 benchmarks (Tracer 9 GT, ZX-9R F-gen) MotoStatz Dragy`
+

@@ -114,6 +114,22 @@ export const metadata = {
 
 const POSTS = [
   {
+    slug: "harley-nightster-rh975-quarter-mile-physics",
+    date: "2026-05-25",
+    readTime: "11 min",
+    tags: [
+      "Harley-Davidson",
+      "Nightster RH975",
+      "Revolution Max",
+      "cruiser",
+      "V-twin",
+      "physics",
+    ],
+    title: "Harley Nightster RH975: Revolution Max Quarter-Mile Physics",
+    excerpt:
+      "Cycle World clocked the Nightster RH975 at 11.99s — quicker than a Triumph Street Triple 765 R. MotoQuant simulates it at 12.45s; the 0.46s gap is almost entirely launch phase. Physics breakdown of why a 90 hp 212 kg belt-drive Harley runs an 11.x, and why the Sportster S RH1250S posts nearly the same time despite 31 more horsepower.",
+  },
+  {
     slug: "kawasaki-ninja-h2-sx-quarter-mile-physics",
     date: "2026-05-25",
     readTime: "11 min",
@@ -168,22 +184,6 @@ const POSTS = [
     title: "Royal Enfield Bullet 350 Quarter-Mile Physics: 17.7s on the Strip",
     excerpt:
       "MotoQuant simulates the Bullet 350 J-platform at 17.735s and 118 km/h trap. Autocar India and BikeWale GPS-timed 17.8-18.3s on stock bikes. Why 20.2 hp and 195 kg produce a 17-second ET, how the six-speed gearbox works against you at the strip, and what the J-platform siblings (Classic 350, Meteor 350, Hunter 350) inherit from the same engine.",
-  },
-  {
-    slug: "harley-nightster-rh975-quarter-mile-physics",
-    date: "2026-05-25",
-    readTime: "11 min",
-    tags: [
-      "Harley-Davidson",
-      "Nightster RH975",
-      "Revolution Max",
-      "cruiser",
-      "V-twin",
-      "physics",
-    ],
-    title: "Harley Nightster RH975: Revolution Max Quarter-Mile Physics",
-    excerpt:
-      "Cycle World clocked the Nightster RH975 at 11.99s — quicker than a Triumph Street Triple 765 R. MotoQuant simulates it at 12.45s; the 0.46s gap is almost entirely launch phase. Physics breakdown of why a 90 hp 212 kg belt-drive Harley runs an 11.x, and why the Sportster S RH1250S posts nearly the same time despite 31 more horsepower.",
   },
   {
     slug: "honda-hornet-2-0-vs-pulsar-ns200-quarter-mile",

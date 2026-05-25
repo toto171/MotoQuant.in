@@ -605,6 +605,68 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         190,
         "MotoStatz 2023 (Dragy, stock instrumented)",
     ),
+    # ── 2026-05-25 benchmark-import agent (sixth pass) ────────────────────────
+    # Two high-confidence MotoStatz Dragy instrumented adds. Both articles
+    # explicitly name the Dragy GPS device in the article body (verified via
+    # WebFetch). Same source bar as the Z H2, KTM 890 Duke R, Ducati Diavel,
+    # Honda CBR1100XX entries — MotoStatz writes "The Dragy 60-130 mph time
+    # is..." in stock-bike tests, confirming methodology. Per CLAUDE.md
+    # instrumented-only bar, MotoStatz articles WITHOUT explicit Dragy
+    # citation get rejected (Tuono 660, Multistrada V4, MT-09, ZX-6R 636,
+    # XSR700, CBR1000RR 2017-19, Streetfighter V4, GSX-R750, Katana — all
+    # checked, all rejected this pass; only the two below cleared the bar).
+    # Also rejected: Speed Triple 1200 RS (no instrumented test found across
+    # Cycle World / MotoStatz / MCN searches); Diavel 1198cc (MotoStatz
+    # confirmed Dragy + 10.46s @ 133 mph but the 1198 cc Testastretta variant
+    # is NOT in catalog — only Diavel V4 1158cc is, and they are different
+    # engines so the data point cannot bind).
+    #
+    # Yamaha Tracer 9 GT (889 cc CP3 triple sport-tourer, 2021-2026) —
+    # MotoStatz Dragy instrumented stock test: 11.49s @ 118 mph (~190 km/h).
+    # Article explicitly names the device: "The Dragy 60-130 mph is a little
+    # slow at 17.70 seconds." Stock confirmed by "Fueling as stock is very
+    # good" article text. Catalog entry YAMAHA_TRACER_9_GT covers 2021-2026;
+    # year_hint=2023 falls in the middle of the range. Same CP3 890 cc engine
+    # as the MT-09 (10.95s CW), MT-09 SP, and XSR900 (11.15s MotoStatz)
+    # entries already in this list — Tracer 9 GT carries +25 kg sport-tourer
+    # mass and adds bodywork drag vs MT-09, so the 11.49s vs 10.95s spread
+    # is internally consistent with the cluster. Article publish date
+    # 2026-03-20.
+    # URL: https://motostatz.com/yamaha-tracer-9-gt-performance-review/
+    (
+        "Yamaha",
+        "Tracer 9 GT",
+        2023,
+        11.49,
+        190,
+        "MotoStatz 2026 (Dragy, stock instrumented)",
+    ),
+    # Kawasaki Ninja ZX-9R F-gen (899 cc I4 sport, 2000-2003) — MotoStatz
+    # Dragy instrumented stock test on 2003 model: 10.62s @ 137 mph
+    # (~220 km/h). Article explicitly names the device: "The best
+    # quarter-mile time via our Dragy 10.62 @ 137 mph." Stock 2003 F-gen
+    # confirmed. Catalog entry KAWASAKI_NINJA_ZX9R covers 2000-2003.
+    # NOTE: The existing Sport Rider 2000 benchmark for the same catalog
+    # entry (10.50s @ 230 km/h) has a suspect trap-vs-ET combination — a
+    # 10.50 ET should trap ~135 mph (217 km/h) for a 143 hp middleweight,
+    # not 143 mph (230 km/h). The MotoStatz 10.62 @ 137 mph figure is more
+    # internally consistent and may indicate the SR-2000 trap figure was a
+    # transcription error from the original 'Sport Rider 2000' source.
+    # Adding the 2003 data point as a parallel reference; the matcher in
+    # validation_sweep.py::run_sweep will continue to bind the existing
+    # 2000 entry first (sequential iteration + first-year-match wins).
+    # The matcher specificity bug documented in DISPATCH_INBOX (2026-05-25)
+    # does not affect this entry — no token-subset collision with other
+    # catalog rows (ZX-9R is unique).
+    # URL: https://motostatz.com/kawasaki-zx-9r-top-speed-acceleration/
+    (
+        "Kawasaki",
+        "Ninja ZX-9R",
+        2003,
+        10.62,
+        220,
+        "MotoStatz 2025 (Dragy, stock 2003 F-gen)",
+    ),
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

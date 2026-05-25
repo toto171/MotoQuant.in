@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import CredibilityCtaVariant from './CredibilityCtaVariant';
 
 export const metadata = {
   title: 'Validation Data',
@@ -231,6 +232,10 @@ export default function ValidationPage() {
           </p>
         </div>
       </section>
+
+      {/* GROWTH_EXP_015 — credibility CTA injected here in variant B; renders
+          null in variant A so the terminal Next nav still anchors the page. */}
+      <CredibilityCtaVariant />
 
       {/* Next */}
       <div className="pt-8 border-t border-brand-orange/10">
