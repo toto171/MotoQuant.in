@@ -146,6 +146,12 @@ export default async function sitemap() {
       priority: 0.78,
     },
     {
+      url: `${SITE_URL}/blog/kawasaki-ninja-h2-sx-quarter-mile-physics`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.84,
+    },
+    {
       url: `${SITE_URL}/blog/yamaha-mt-15-v1-quarter-mile-physics`,
       lastModified: now,
       changeFrequency: "monthly",

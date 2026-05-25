@@ -521,6 +521,60 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         202,
         "MotoStatz 2022 (Dragy, stock instrumented, SC-Project decat noted as neutral)",
     ),
+    # ── 2026-05-25 benchmark-import agent (fourth pass) ───────────────────────
+    # Two additional high-confidence MotoStatz-tier instrumented adds. Both
+    # follow the same source bar already established for the BMW S 1000 RR,
+    # Honda CBR1000RR-R, Z H2, RS 660 and CBR 600RR entries above (Cycle World
+    # /MotoStatz Dragy stock-bike measurements). Catalog year ranges verified
+    # to include year_hint via find_spec(). No duplicates with prior 2026-05-24
+    # / 2026-05-25 passes (BMW S 1000 RR is benchmarked but S1000R naked is a
+    # distinct catalog entry with no benchmark; CBR650R is distinct from
+    # CB650R naked which is already in the list at 11.80s/115mph).
+    # Rejected during search: Honda CB1000R (only MotorBikeCatalog/ProfessCars
+    # calculated estimates 10.8s — no instrumented Cycle World/MotoStatz/MCN
+    # data found in honest search); Kawasaki Ninja H2 SX 2018 (Cycle World
+    # 10.04s @ 144mph EXISTS but the BENCHMARKS matcher binds H2 SX catalog
+    # rows to the older "Ninja H2" 2015 benchmark via shorter token-set match,
+    # so adding the H2 SX entry would not bind cleanly until the matcher
+    # specificity bug documented in CLAUDE.md gets fixed — queued to
+    # DISPATCH_INBOX.md as `[urgent]` for follow-up).
+    #
+    # BMW S 1000 R (999 cc I4 naked, 2021-2024) — MotoStatz Dragy instrumented:
+    # 10.41s @ 144 mph (~232 km/h). Same MotoStatz/Dragy source bar as the
+    # Street Triple 765 RS / Panigale V2 / RS 660 / 890 Duke R / 790 Duke /
+    # XSR900 / CBR 600RR PC40B entries already in this list. Catalog entry
+    # BMW_S1000R covers 2021-2024 with the 999 cc I4 producing 165 hp; the
+    # test bike was stock as MotoStatz's standard methodology. The trap of
+    # 144 mph is faster than the cluster's 600cc supersports (which trap in
+    # the 127-133 mph band) which matches the S 1000 R's 165 hp peak — fits
+    # the litre-naked sub-cluster cleanly alongside the existing M1000RR /
+    # Tuono V4 1100 / 1290 Super Duke R entries.
+    # URL: https://motostatz.com/bmw-s1000r-acceleration-top-speed-review/
+    (
+        "BMW",
+        "S1000R",
+        2021,
+        10.41,
+        232,
+        "MotoStatz 2021 (Dragy, stock instrumented)",
+    ),
+    # Honda CBR650R (649 cc I4 supersport, 2019-2024) — MotoStatz instrumented
+    # test: SS/QM 11.45s @ 119 mph (~192 km/h). Same MotoStatz publication and
+    # methodology as the CB650R 2021 entry already in the list (which is the
+    # naked variant of this same 649 cc CB650R/CBR650R platform). The CBR650R
+    # is the full-fairing sport version with the same 95 hp inline-4 — the
+    # 11.45 vs 11.80 spread (CBR slightly quicker per better aero / sportier
+    # tuck) is internally consistent with the cluster. Catalog entry
+    # HONDA_CBR650R covers 2019-2024; year_hint=2019 matches cleanly.
+    # URL: https://motostatz.com/honda-cbr650r-review/
+    (
+        "Honda",
+        "CBR650R",
+        2019,
+        11.45,
+        192,
+        "MotoStatz 2019 (stock instrumented)",
+    ),
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

@@ -8,9 +8,16 @@ export const metadata = {
   title:
     "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
   description:
-    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Yamaha MT-15 V1 155cc naked deep-dive, Triumph Street Triple 765 R, KTM 890 Duke R India grey-market, best mods for KTM RC 390 ranked by cost-per-tenth, Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
+    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Kawasaki Ninja H2 SX supercharged sport-tourer, Yamaha MT-15 V1 155cc naked deep-dive, Triumph Street Triple 765 R, KTM 890 Duke R India grey-market, best mods for KTM RC 390 ranked by cost-per-tenth, Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
   keywords: [
     "motorcycle drag racing blog",
+    "kawasaki ninja h2 sx quarter mile",
+    "h2 sx drag time",
+    "ninja h2 sx vs hayabusa",
+    "h2 sx vs zx-14r quarter mile",
+    "ninja h2 sx india price",
+    "supercharged motorcycle quarter mile",
+    "ninja h2 sx grey market india",
     "bajaj dominar 400 quarter mile",
     "dominar 400 drag time india",
     "dominar 400 vs rc 390",
@@ -106,6 +113,22 @@ export const metadata = {
 };
 
 const POSTS = [
+  {
+    slug: "kawasaki-ninja-h2-sx-quarter-mile-physics",
+    date: "2026-05-25",
+    readTime: "11 min",
+    tags: [
+      "Kawasaki",
+      "Ninja H2 SX",
+      "Supercharged",
+      "Sport-Tourer",
+      "India gray market",
+      "physics",
+    ],
+    title: "Kawasaki Ninja H2 SX Quarter-Mile Physics: Supercharged Tourer",
+    excerpt:
+      "MotoQuant sims the 2018-2023 Ninja H2 SX at 10.222s and 250.8 km/h trap — a Hayabusa-class quarter-mile from a 238 kg sport-tourer with hard luggage mounts still bolted on. Why the supercharger pays back the touring spec, where the 20 kg of pannier brackets actually live, and how a stripped H2 SX runs within a tenth of a stock Ninja H2 for zero rupees of parts spend. India gray-market context: ₹28-32 lakh vs ₹17.7 lakh Hayabusa Gen 3.",
+  },
   {
     slug: "honda-cb125r-quarter-mile-physics",
     date: "2026-05-25",

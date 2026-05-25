@@ -76,6 +76,23 @@ Compare against: <prior report or benchmark>
 
 ---
 
+## INSTRUCTION — 2026-05-25 — [urgent] fix BENCHMARKS matcher specificity bug
+[urgent]
+
+**Filed by:** benchmark-import agent (fourth pass, 2026-05-25)
+**Blocking:** Cannot add an instrumented Kawasaki Ninja H2 SX 2018 benchmark (Cycle World 10.04s @ 144 mph, verified via WebFetch on `https://www.cycleworld.com/best-open-class-streetbike-2018-kawasaki-ninja-h2-sx-se/`) because the matcher in `scripts/sweep_with_clusters.py::run_sweep` and `scripts/validation_sweep.py::_model_match` binds the catalog row `"Ninja H2 SX (2018-2023)"` to the existing `"Ninja H2", 2015, 9.62` benchmark — tokens `{ninja, h2}` are a subset of `{ninja, h2, sx, ...}` so the less-specific benchmark matches first via dict iteration order.
+
+**Fix candidates:**
+1. In `run_sweep()` `bench_map` lookup, sort benchmark keys by token-count descending so longer/more-specific patterns are tried first; first match wins still works.
+2. Better: score each candidate `(bm_mfr, bm_model)` by token-overlap ratio `len(bm_tokens) / len(spec_tokens)` and pick the highest-scoring match (must still pass year-range filter).
+3. Cheapest fix: add an explicit `if "sx" in spec_tokens and "sx" not in bm_tokens: continue` exclusion clause, but this is special-cased and doesn't scale to the next variant collision (e.g. Z H2 vs Z H2 SE, RSV4 vs RSV4 Factory, R6 vs R6S, etc.).
+
+**Verification target:** after fix, the H2 SX 2018-2023 catalog row should bind to a future H2 SX-specific 10.04s benchmark (not the 9.62s H2 benchmark). Run `scripts/sweep_with_clusters.py` and confirm H2 SX delta is ~+0.18s (sim 10.22 vs bench 10.04) instead of the current ~+0.60s false delta against the H2 benchmark.
+
+**Effort:** ~1-2 hr including a regression test in `tests/test_validation.py` that pins matcher specificity for Z H2 vs Ninja H2 vs Ninja H2 SX vs Ninja H2R, plus a few other collision pairs.
+
+---
+
 ## INSTRUCTION — 2026-05-20 — research: verify entry_150_200 DERIVED benchmarks
 [research]
 

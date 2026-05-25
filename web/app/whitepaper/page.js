@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
+import TerminalCtaVariant from './TerminalCtaVariant';
 
 export const metadata = {
   title: 'Whitepaper — MotoQuant Pro Physics Engine',
@@ -360,12 +361,7 @@ export default function WhitepaperPage() {
                 </div>
                 <div className="text-sm text-white/55 mt-1">Per-bike benchmark table.</div>
               </Link>
-              <Link href="/simulator" className="group rounded-xl border border-brand-orange/40 hover:border-brand-orange bg-brand-orange/[0.05] p-5 transition-colors">
-                <div className="font-display font-bold text-brand-orange">
-                  Run a simulation →
-                </div>
-                <div className="text-sm text-white/65 mt-1">See the engine for yourself.</div>
-              </Link>
+              <TerminalCtaVariant />
             </div>
           </div>
         </article>
