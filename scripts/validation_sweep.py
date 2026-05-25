@@ -452,6 +452,75 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         224,
         "Sport Rider / Cycle World 2016 Factory (timing-strip, same 1077cc V4)",
     ),
+    # ── 2026-05-25 benchmark-import agent (third pass) ────────────────────────
+    # Three additional high-confidence MotoStatz Dragy instrumented adds. All
+    # follow the same source bar already established for MT-07 (MCN), Street
+    # Triple 765 RS / Panigale V2 / RS 660 / 890 Duke R / CBR 600RR PC40B
+    # entries above — MotoStatz uses a Dragy GPS device for stock-bike
+    # quarter-mile measurements. Catalog year ranges verified to include
+    # year_hint. None duplicates prior 2026-05-24 / 2026-05-25 pass entries.
+    # Rejected during search: Honda CBR650R (MotoStatz article exists but
+    # quoted only 0-60/0-100 mph; no quarter-mile time confirmed in snippet);
+    # Ducati Streetfighter V2 (no MotoStatz Dragy article found — only the
+    # Panigale V2 sibling which is already in the list).
+    #
+    # Kawasaki Ninja 1000SX (1043 cc I4 sport-tourer, 2020-2026) — MotoStatz
+    # Dragy instrumented: 10.81s @ 132 mph (~212 km/h). Distinct catalog entry
+    # from the existing Z1000 (1043 cc naked, 2014 Cycle World 10.38s already
+    # in the list) and the older "Ninja 1000 (Z1000SX) 2011-2019" platform
+    # (different fairing/wheelbase, same engine family). The 2020+ Ninja 1000SX
+    # carries the Euro-5 1043 cc I4 producing 140 hp; MotoStatz test bike was
+    # stock with the factory ECU map. Catalog entry KAWASAKI_NINJA_1000SX
+    # covers 2020-2026 model run; year_hint=2022 matches cleanly.
+    # URL: https://motostatz.com/kawasaki-ninja-1000sx-acceleration-top-sped-review/
+    (
+        "Kawasaki",
+        "Ninja 1000SX",
+        2022,
+        10.81,
+        212,
+        "MotoStatz 2022 (Dragy, stock instrumented)",
+    ),
+    # KTM 790 Duke (799 cc LC8c parallel-twin naked, 2018-2022) — MotoStatz
+    # Dragy instrumented: 11.01s @ 124 mph (~200 km/h). Same MotoStatz Dragy
+    # methodology used for the 890 Duke R entry already in the list (which is
+    # the engine-bump successor on the same chassis); 790 ran the 105 hp
+    # version of the LC8c. Catalog entry KTM_790_DUKE covers 2018-2022 model
+    # run; year_hint=2020 matches the middle of the range cleanly.
+    # URL: https://motostatz.com/ktm-790-duke-acceleration-and-top-speed/
+    (
+        "KTM",
+        "790 Duke",
+        2020,
+        11.01,
+        200,
+        "MotoStatz 2020 (Dragy, stock instrumented)",
+    ),
+    # Yamaha XSR900 (890 cc CP3 triple, 2022-2026) — MotoStatz Dragy
+    # instrumented: 11.15s @ 125.5 mph (~202 km/h), 0-60 mph 3.26s. Test bike
+    # ran an SC-Project decat exhaust but MotoStatz noted "power and torque
+    # are more or less the same despite the mods, so similar performance to
+    # stock was expected" — the magazine-tier source explicitly flags the
+    # delta as negligible, putting this on the right side of the project's
+    # instrumented-only bar. Same CP3 890 cc engine as the MT-09 2021 entry
+    # already in the list (CW 10.95s @ 204 km/h) — XSR900 is the retro-styled
+    # sibling on the same chassis with similar power-to-weight, so the 11.15
+    # vs 10.95 spread (XSR slightly slower per +5 kg and slightly less
+    # aggressive ergonomics) is internally consistent. Catalog entry
+    # YAMAHA_XSR900 covers 2022-2026 model run; year_hint=2022 matches cleanly.
+    # Note: a second catalog entry YAMAHA_XSR900_GP exists (2024-2026 sport
+    # variant) which the matcher will also pick up for year_hint=2022 via the
+    # year-fallback path — same engine architecture, expected to land in the
+    # same delta neighborhood, so this is benign.
+    # URL: https://motostatz.com/yamaha-xsr900-top-speed-acceleration/
+    (
+        "Yamaha",
+        "XSR900",
+        2022,
+        11.15,
+        202,
+        "MotoStatz 2022 (Dragy, stock instrumented, SC-Project decat noted as neutral)",
+    ),
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

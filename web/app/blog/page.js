@@ -107,10 +107,26 @@ export const metadata = {
 
 const POSTS = [
   {
+    slug: "honda-cb125r-quarter-mile-physics",
+    date: "2026-05-25",
+    readTime: "11 min",
+    tags: ["Honda", "CB125R", "Neo Sports Café", "125cc", "physics"],
+    title: "Honda CB125R Quarter-Mile Physics: 14.7hp Neo Sports Café",
+    excerpt:
+      "MotoQuant simulates the Honda CB125R at 18.61s and 122 km/h trap — the fastest stock 125cc in the entry cluster. Why a 14.7 hp single out-traps a KTM 125 Duke by 4.4 km/h, where the ₹1.4 lakh price premium over an R15 V4 actually buys you, and the four cheapest tenths for the small-cc Honda owner. JC91 platform, Showa SFF-BP forks, radial-mount Nissin caliper — class-leading hardware that India never officially got.",
+  },
+  {
     slug: "husqvarna-svartpilen-250-vs-ktm-duke-250-quarter-mile-physics",
     date: "2026-05-25",
     readTime: "11 min",
-    tags: ["Husqvarna", "Svartpilen 250", "KTM", "Duke 250", "LC4c platform", "comparison"],
+    tags: [
+      "Husqvarna",
+      "Svartpilen 250",
+      "KTM",
+      "Duke 250",
+      "LC4c platform",
+      "comparison",
+    ],
     title: "Husqvarna Svartpilen 250 vs KTM Duke 250: Quarter-Mile Physics",
     excerpt:
       "MotoQuant sims the Svartpilen 250 at 14.767s / 149 km/h and the Duke 250 at 15.083s / 143 km/h. Same engine, same Bajaj Chakan plant, same Pierer Mobility parts shelf — and 0.316 seconds separates them at the strip. Physics breakdown of where the gap lives (final drive, frontal area, mass), why the Husky surprises everyone, and the cheapest mod that lets a Duke 250 owner match a stock Svartpilen.",
@@ -119,7 +135,13 @@ const POSTS = [
     slug: "royal-enfield-bullet-350-quarter-mile-physics",
     date: "2026-05-25",
     readTime: "11 min",
-    tags: ["Royal Enfield", "Bullet 350", "J-platform", "Indian 350cc", "physics"],
+    tags: [
+      "Royal Enfield",
+      "Bullet 350",
+      "J-platform",
+      "Indian 350cc",
+      "physics",
+    ],
     title: "Royal Enfield Bullet 350 Quarter-Mile Physics: 17.7s on the Strip",
     excerpt:
       "MotoQuant simulates the Bullet 350 J-platform at 17.735s and 118 km/h trap. Autocar India and BikeWale GPS-timed 17.8-18.3s on stock bikes. Why 20.2 hp and 195 kg produce a 17-second ET, how the six-speed gearbox works against you at the strip, and what the J-platform siblings (Classic 350, Meteor 350, Hunter 350) inherit from the same engine.",
@@ -128,7 +150,14 @@ const POSTS = [
     slug: "harley-nightster-rh975-quarter-mile-physics",
     date: "2026-05-25",
     readTime: "11 min",
-    tags: ["Harley-Davidson", "Nightster RH975", "Revolution Max", "cruiser", "V-twin", "physics"],
+    tags: [
+      "Harley-Davidson",
+      "Nightster RH975",
+      "Revolution Max",
+      "cruiser",
+      "V-twin",
+      "physics",
+    ],
     title: "Harley Nightster RH975: Revolution Max Quarter-Mile Physics",
     excerpt:
       "Cycle World clocked the Nightster RH975 at 11.99s — quicker than a Triumph Street Triple 765 R. MotoQuant simulates it at 12.45s; the 0.46s gap is almost entirely launch phase. Physics breakdown of why a 90 hp 212 kg belt-drive Harley runs an 11.x, and why the Sportster S RH1250S posts nearly the same time despite 31 more horsepower.",
@@ -137,7 +166,14 @@ const POSTS = [
     slug: "honda-hornet-2-0-vs-pulsar-ns200-quarter-mile",
     date: "2026-05-25",
     readTime: "12 min",
-    tags: ["Honda", "Hornet 2.0", "Bajaj", "Pulsar NS200", "Indian 200cc", "comparison"],
+    tags: [
+      "Honda",
+      "Hornet 2.0",
+      "Bajaj",
+      "Pulsar NS200",
+      "Indian 200cc",
+      "comparison",
+    ],
     title: "Honda Hornet 2.0 vs Pulsar NS200: Which Wins the Quarter Mile?",
     excerpt:
       "MotoQuant simulates the Honda Hornet 2.0 at ~17.55s and the Pulsar NS200 at ~15.9s under matched Aamby Valley conditions. Seven horsepower and 18 kg separate them — physics-first breakdown of why the gap is engine architecture, not tuning, plus the mod ceiling on each platform.",
@@ -164,7 +200,14 @@ const POSTS = [
     slug: "hayabusa-quarter-mile-physics-what-limits-9-6-seconds",
     date: "2026-05-24",
     readTime: "13 min",
-    tags: ["Suzuki", "Hayabusa", "hyper sport", "drag prep", "India", "physics"],
+    tags: [
+      "Suzuki",
+      "Hayabusa",
+      "hyper sport",
+      "drag prep",
+      "India",
+      "physics",
+    ],
     title: "Hayabusa Quarter-Mile Physics: What Limits the 9.6",
     excerpt:
       "MotoQuant locks the Hayabusa Gen1 at 10.4712s — a reference baseline preserved across every physics commit since April 2024. A drag-prepped Hayabusa runs 9.5-9.7s. The seven tenths between are not engine power. They are traction, geometry, gearing, and air — broken down with a stage-by-stage Indian cost-per-tenth table.",
@@ -173,7 +216,13 @@ const POSTS = [
     slug: "aprilia-tuono-660-factory-quarter-mile-physics",
     date: "2026-05-24",
     readTime: "12 min",
-    tags: ["Aprilia", "Tuono 660 Factory", "middleweight naked", "India", "physics"],
+    tags: [
+      "Aprilia",
+      "Tuono 660 Factory",
+      "middleweight naked",
+      "India",
+      "physics",
+    ],
     title:
       "Aprilia Tuono 660 Factory Quarter-Mile Physics: 11.02s on the Strip",
     excerpt:

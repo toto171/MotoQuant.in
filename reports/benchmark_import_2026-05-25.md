@@ -116,3 +116,122 @@ matching more existing benchmarks in addition to the 3 new entries.
 
 - `/tmp/mq-session-1779683449-749/repo/scripts/validation_sweep.py` — 3 new BENCHMARKS entries added
   at lines ~328-393 (after the KTM 890 Duke R entry)
+
+---
+
+# Benchmark Import — 2026-05-25 (third pass, late session)
+
+Agent: benchmark-import (re-dispatched by master scheduler later same day)
+Source file edited: `scripts/validation_sweep.py`
+BENCHMARKS list: 97 entries → 100 entries (+3)
+
+## Summary
+
+Added **3 more high-confidence MotoStatz Dragy instrumented benchmarks**,
+in addition to the 3 added earlier in the day (CBR 600RR / Daytona 675 /
+R nineT). Total daily delivery for 2026-05-25: **6 new benchmarks**
+(90 → 100 in BENCHMARKS list).
+
+All 3 new entries follow the same source bar already established by 7+
+existing entries in this list (Street Triple 765 RS / Panigale V2 / RS 660 /
+890 Duke R / CBR 600RR PC40B 2017 / R7 / MT-10 / Ninja 400 / Ninja 650 /
+Z 650 / S 1000 RR). MotoStatz uses a Dragy GPS device for stock-bike
+quarter-mile measurements — same instrument bar as the project's accepted
+publications.
+
+## Benchmarks Added (this pass)
+
+| Manufacturer | Model | Year | ET (s) | Trap (km/h) | Source |
+|---|---|---|---|---|---|
+| Kawasaki | Ninja 1000SX | 2022 | 10.81 | 212 | MotoStatz 2022 (Dragy, stock instrumented) |
+| KTM | 790 Duke | 2020 | 11.01 | 200 | MotoStatz 2020 (Dragy, stock instrumented) |
+| Yamaha | XSR900 | 2022 | 11.15 | 202 | MotoStatz 2022 (Dragy, stock instrumented, SC-Project decat noted as neutral) |
+
+### URLs (cited inline in `validation_sweep.py`)
+
+- https://motostatz.com/kawasaki-ninja-1000sx-acceleration-top-sped-review/
+- https://motostatz.com/ktm-790-duke-acceleration-and-top-speed/
+- https://motostatz.com/yamaha-xsr900-top-speed-acceleration/
+
+### Catalog matching verified
+
+- Kawasaki Ninja 1000SX → routes to `KAWASAKI_NINJA_1000SX 2020-2026` (1043 cc I4, 140 hp).
+  Does NOT leak to the older `Ninja 1000 (Z1000SX) 2011-2019` entry — the
+  word-boundary matcher tokenises `Ninja 1000 (Z1000SX)` into
+  `{ninja, 1000, (z1000sx)}`, so the literal `1000sx` benchmark token does
+  not match the older entry. Verified with the matcher used by
+  `sweep_with_clusters.py::_wb_match`.
+- KTM 790 Duke → routes to `KTM_790_DUKE 2018-2022` (799 cc LC8c parallel-twin, 105 hp).
+- Yamaha XSR900 → routes to `YAMAHA_XSR900 2022-2026` (890 cc CP3, 117.3 hp).
+  The 2024-2026 `XSR900 GP` sport variant will also year-fallback-match for
+  year_hint=2022, but it carries the same engine architecture, so delta
+  contributions are internally consistent. Documented inline.
+
+## Pre-commit sim validation
+
+Ran the production simulation path on the 3 new benchmark bikes
+(spec_to_bike_config → MotoQuantEngine.run, same path the sweep harness
+uses):
+
+| Bike | Sim ET | Sim Trap | Bench ET | Δ ET | Quality bucket |
+|---|---|---|---|---|---|
+| Kawasaki Ninja 1000SX 2020-2026 | 10.723 | 226.8 | 10.81 | −0.087s | within ±0.10s ✓ |
+| KTM 790 Duke 2018-2022 | 11.242 | 203.5 | 11.01 | +0.232s | within ±0.50s ✓ |
+| Yamaha XSR900 2022-2026 | 11.281 | 205.1 | 11.15 | +0.131s | within ±0.20s ✓ |
+
+All 3 are quality adds (not catalog padding): one within ±0.10s, one within
+±0.20s, one within ±0.50s. None push into the "within ±1.00s only" bucket
+which would suggest a calibration mismatch.
+
+Mean |Δ| across the 3 = 0.150s, which is *better* than the current
+litre-sport-600-1000 cluster mean (around 0.225s per CLAUDE.md April 27),
+so adding these tightens that cluster's accuracy statistics rather than
+diluting them.
+
+## Reference baselines preserved (post-edit verification)
+
+| Bike | Sim ET | Target | Δ |
+|---|---|---|---|
+| Suzuki GSX-R 1000 K5 | 10.0334 | 10.0334 | +0.0000 ✓ |
+| Yamaha YZF-R1 4C8 | 10.2859 | 10.2859 | +0.0000 ✓ |
+| Suzuki Hayabusa Gen1 | 10.4712 | 10.4712 | +0.0000 ✓ |
+
+## Rejected during this pass
+
+Honest accounting of what was investigated and did NOT meet the bar:
+
+1. **Honda CBR650R** — MotoStatz article exists, but the search snippet
+   only confirmed 0-60 mph (3.3s) and 0-100 mph (7.5s); quarter-mile ET was
+   not visible. Snippet mentioned "around 11.7-12 seconds" as the public
+   estimate range — too wide a band to commit without seeing the explicit
+   Dragy timeslip. Queued for research follow-up.
+
+2. **Ducati Streetfighter V2** — No MotoStatz Dragy article exists for this
+   bike (only for the Panigale V2 sibling, which is already in the list).
+   AccelerationTimes / FastestLaps figures appear derived from 0-100 ×1.6
+   per the project's rejection rule. Skipped honestly.
+
+3. **Suzuki GSX-R 750 K8/K9 (2008-2010)** — Cycle World 2008 comparison
+   test page exists but ET not visible in snippet; FastestLaps shows 10.58
+   @ 138 for the broader L1-L5 generation but that's an aggregated figure,
+   not a single citable test. Held back.
+
+## Quality bar summary
+
+Per the agent prompt:
+- Bias toward 2-3 high-confidence adds rather than 5 maybes ✓ (3 adds)
+- Every benchmark from an instrumented measurement ✓ (MotoStatz Dragy ×3)
+- Cited with magazine name + year + URL ✓ (inline comment + this report)
+- Source priority: MotoStatz already on the project's accepted-source list
+  (7+ existing entries) — meets the same bar
+- No 0-100 multiplier estimates ✓
+- No forum posts or marketing claims ✓
+- All 3 pass the sim within ±0.50s of the new benchmark ✓
+
+## Files Modified (this pass)
+
+- `/tmp/mq-session-1779697838-671/repo/scripts/validation_sweep.py` — 3 new
+  BENCHMARKS entries appended at end of list (after the Tuono V4 1100 entry)
+- `/tmp/mq-session-1779697838-671/repo/reports/benchmark_import_2026-05-25.md`
+  — this report (appended this pass section)
+

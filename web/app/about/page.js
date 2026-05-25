@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Send, ChevronRight, Zap, Flag, Target, Cpu } from 'lucide-react';
 import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
+import EndOfAboutCta from './EndOfAboutCta';
 
 const ROADMAP = [
   {
@@ -313,6 +314,11 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      {/* EXP-012: end-of-page simulator CTA (variant B only). */}
+      <Suspense fallback={null}>
+        <EndOfAboutCta />
+      </Suspense>
 
       <SiteFooter />
     </div>
