@@ -146,6 +146,12 @@ export default async function sitemap() {
       priority: 0.78,
     },
     {
+      url: `${SITE_URL}/blog/honda-cbr150r-quarter-mile-physics`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.82,
+    },
+    {
       url: `${SITE_URL}/blog/kawasaki-ninja-h2-sx-quarter-mile-physics`,
       lastModified: now,
       changeFrequency: "monthly",

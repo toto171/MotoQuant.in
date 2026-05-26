@@ -24,6 +24,9 @@ export const metadata = {
     'rc 390 mods under 25000',
     'ktm rc 390 cost per tenth',
     'fast track racing ktm 390',
+    'ktm rc 390 gen 3 quarter mile',
+    'rc 390 gen 3 india 2026',
+    'rc 390 launch control',
   ],
   alternates: { canonical: `https://motoquant.in/blog/${SLUG}` },
   openGraph: {

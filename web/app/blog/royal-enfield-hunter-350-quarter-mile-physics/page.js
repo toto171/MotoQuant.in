@@ -6,23 +6,25 @@ import StructuredData, { articleSchema } from '../../StructuredData';
 const SLUG = 'royal-enfield-hunter-350-quarter-mile-physics';
 const TITLE = 'Royal Enfield Hunter 350 Quarter-Mile Physics: Fastest J-Platform at the Strip';
 const DESCRIPTION =
-  'MotoQuant simulates the Hunter 350 at 16.895s and 127.9 km/h trap — the quickest J-platform sibling, ahead of Classic 350, Meteor, and Bullet. Why 10 kg of mass advantage and tighter final drive matter more than engine tuning on a 20 hp single.';
+  'Royal Enfield Hunter 350 quarter-mile time and top speed in India: MotoQuant simulates the Hunter 350 at 16.895s ET, a 127.9 km/h trap, and a 114 km/h claimed top speed — the quickest J-platform sibling, ahead of Classic 350, Meteor, and Bullet. Why 10 kg of mass advantage and tighter final drive matter more than engine tuning on a 20 hp single.';
 
 export const metadata = {
-  title: 'Royal Enfield Hunter 350 Quarter-Mile Physics — MotoQuant',
+  title: 'Royal Enfield Hunter 350 Quarter-Mile Time & Top Speed (India) — MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'royal enfield hunter 350 quarter mile',
     'hunter 350 drag time',
-    'hunter 350 vs classic 350',
     'hunter 350 top speed india',
+    'hunter 350 top speed kmph',
     'hunter 350 0-100',
+    'hunter 350 vs classic 350',
     'hunter 350 vs bullet 350',
     'hunter 350 vs meteor 350',
     'royal enfield j platform drag',
     'hunter 350 price india',
     're hunter 350 physics',
     'indian 350cc naked drag',
+    'hunter 350 acceleration',
   ],
   alternates: { canonical: `https://motoquant.in/blog/${SLUG}` },
   openGraph: {

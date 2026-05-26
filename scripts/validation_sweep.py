@@ -883,6 +883,71 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         "Sport Rider 9/10 (Cycle World sportbike-performance-numbers, timing-strip)",
     ),
     # ── end 2026-05-26 pass ──
+    # ── 2026-05-26 benchmark-import agent (second pass) ───────────────────────
+    # Two high-confidence instrumented adds, both from publications already
+    # cited in this list. Verified via WebSearch + spec-bind in-process check:
+    # the proposed entries route via _best_benchmark_match to the intended
+    # catalog rows (HONDA_CBR954RR_2002 and DUCATI_MONSTER_1200_2014) without
+    # specificity collisions. Pre-commit sim sanity (production
+    # spec_to_bike_config path):
+    #   * CBR954RR 2002:    sim 10.174s vs bench 10.490s — Δ −0.316s (within
+    #     litre-sport cluster bias band; CBR954 is documented to run out of
+    #     RPM in 3rd at the line per Cycle World — the sim's faster delta is
+    #     consistent with that real-world handicap not being modeled at this
+    #     level of granularity)
+    #   * Monster 1200 2014: sim 10.376s vs bench 10.570s — Δ −0.194s ✓
+    # K5/R1/Hayabusa reference baselines preserved exact (Δ +0.0000s on all).
+    # No duplicates with prior 2026-05-24 / 2026-05-25 / morning 2026-05-26
+    # passes.
+    #
+    # Honda CBR954RR Fireblade (954 cc I4 sport, 2002-2003 SC50 chassis) —
+    # Cycle World comparison test "Honda CBR954RR vs Suzuki GSX-R1000 vs
+    # Yamaha YZF-R1" (timing-strip): 10.49s @ 139 mph (224 km/h). Same
+    # Cycle World source and methodology as the existing YZF-R1 2004 entry
+    # (10.30s @ 238 km/h) from the same era's comparison-test format and as
+    # the ZX-10R 2004 entry (10.30s @ 240 km/h). The 0.19s gap vs the R1 is
+    # cluster-consistent (CBR954 makes ~154 hp claimed vs R1's ~172 hp). The
+    # Cycle World test noted the CBR954 "runs out of rpm in third right up
+    # to the quarter-mile line so requires a gear change which hurts its
+    # time" — explains why a lighter 168 kg dry bike runs 10.49 not 10.30.
+    # Catalog entry HONDA_CBR954RR_2002 (model_name "CBR954RR Fireblade")
+    # covers 2002-2003 SC50; year_hint=2002 matches cleanly via
+    # _best_benchmark_match (unique 4-token model pattern, no collision).
+    # URL: https://www.cycleworld.com/honda-cbr954rr-vs-suzuki-gsx-r1000-vs-yamaha-yzf-r1-comparison-test-review/
+    (
+        "Honda",
+        "CBR954RR Fireblade",
+        2002,
+        10.49,
+        224,
+        "Cycle World 2002 (timing-strip, vs GSX-R1000 vs YZF-R1 comparison)",
+    ),
+    # Ducati Monster 1200 (1198 cc 90° L-twin Testastretta naked, 2014-2021
+    # M9 chassis) — MotoStatz Dragy instrumented test (article published at
+    # motostatz.com/ducati-monster-1200s-acceleration-top-speed-review/):
+    # 10.57s @ 135 mph (217 km/h), 0-60 mph 2.94s. The article tests the
+    # Monster 1200 S variant which shares the 1198 cc Testastretta 11° L-twin
+    # producing ~150 hp claimed with the base Monster 1200 catalog row (only
+    # delta is the S's Öhlins suspension + Brembo M50 brakes — non-engine
+    # changes that don't move drag-strip ET measurably). Same MotoStatz/Dragy
+    # source bar already established for the Street Triple 765 RS, Panigale
+    # V2, RS 660, 890 Duke R, 790 Duke, XSR900, CBR 600RR PC40B, Ninja 1000SX,
+    # BMW S1000R, CBR650R, Monster 937, Tracer 9 GT, ZX-9R F-gen, VFR800F
+    # Interceptor, Tuono 660, and FTR 1200 S entries above. Catalog entry
+    # DUCATI_MONSTER_1200_2014 covers 2014-2021; year_hint=2014 matches
+    # cleanly. The Monster 1200 R variant (160 hp) is a distinct chassis and
+    # is NOT in catalog — this benchmark applies to the base 1200/1200S only.
+    # URL: https://motostatz.com/ducati-monster-1200s-acceleration-top-speed-review/
+    # Methodology URL: https://motostatz.com/how-we-test-motorcycles/
+    (
+        "Ducati",
+        "Monster 1200",
+        2014,
+        10.57,
+        217,
+        "MotoStatz (Dragy, stock instrumented Monster 1200/1200S)",
+    ),
+    # ── end 2026-05-26 second pass ──
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

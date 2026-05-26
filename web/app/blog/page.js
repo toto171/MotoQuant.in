@@ -8,7 +8,7 @@ export const metadata = {
   title:
     "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
   description:
-    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Suzuki GSX-R600 K8 600cc supersport, Kawasaki Ninja H2 SX supercharged sport-tourer, Yamaha MT-15 V1 155cc naked deep-dive, Triumph Street Triple 765 R, KTM 890 Duke R India grey-market, best mods for KTM RC 390 ranked by cost-per-tenth, Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Kawasaki Ninja ZX-4R, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
+    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Honda CBR150R Indonesian K56F sport single, Suzuki GSX-R600 K8 600cc supersport, Kawasaki Ninja H2 SX supercharged sport-tourer, Yamaha MT-15 V1 155cc naked deep-dive, Triumph Street Triple 765 R, KTM 890 Duke R India grey-market, best mods for KTM RC 390 ranked by cost-per-tenth, Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
   keywords: [
     "motorcycle drag racing blog",
     "kawasaki ninja h2 sx quarter mile",
@@ -125,11 +125,29 @@ export const metadata = {
     "best mods for gsx-r600 k8",
     "gsx-r600 k8 vs k6",
     "used 600cc supersport india",
+    "honda cbr150r quarter mile",
+    "cbr150r drag time india",
+    "cbr150r vs r15 v4",
+    "cbr150r vs rs150r",
+    "cbr150r vs y15zr",
+    "honda k56f platform india",
+    "cbr150r indonesia grey market india",
+    "se asia 150cc drag",
   ],
   alternates: { canonical: "https://motoquant.in/blog" },
 };
 
 const POSTS = [
+  {
+    slug: "honda-cbr150r-quarter-mile-physics",
+    date: "2026-05-26",
+    readTime: "11 min",
+    tags: ["Honda", "CBR150R", "K56F", "150cc", "SE Asia", "physics"],
+    title:
+      "Honda CBR150R Quarter-Mile Physics: 17hp SE Asia Sport Single",
+    excerpt:
+      "MotoQuant simulates the Indonesian Honda CBR150R at 18.42s and 130.5 km/h trap — quicker than a stock R15 V4 by 0.08s on a 1hp deficit. Why the 136 kg dry mass and 0.62 Cd beat the heavier R15 V4 fairing, how the CBR150R compares to the Malaysian RS150R underbone and the Y15ZR V2, and the four mods under ₹15,000 that move the needle for India grey-market owners.",
+  },
   {
     slug: "suzuki-gsx-r600-k8-quarter-mile-physics",
     date: "2026-05-25",
@@ -175,9 +193,9 @@ const POSTS = [
       "Indian 350cc",
       "physics",
     ],
-    title: "Royal Enfield Hunter 350 Quarter-Mile Physics: Fastest J-Platform at the Strip",
+    title: "Royal Enfield Hunter 350 Quarter-Mile Time & Top Speed (India)",
     excerpt:
-      "MotoQuant simulates the Hunter 350 at 16.895s and 127.9 km/h trap — the quickest J-platform sibling, 0.84s ahead of the Bullet 350 and 1.025s ahead of the Classic 350. All four bikes share the same 20.2 hp single. Every tenth of the gap is mass and aerodynamics, not engine. Physics breakdown of why the lightest RE is also the fastest RE at the strip, plus the three cheapest mods under ₹25,000.",
+      "MotoQuant simulates the Hunter 350 at 16.895s ET, a 127.9 km/h trap, and the claimed 114 km/h top speed — the quickest J-platform sibling, 0.84s ahead of the Bullet 350 and 1.025s ahead of the Classic 350. All four bikes share the same 20.2 hp single. Every tenth of the gap is mass and aerodynamics, not engine. Physics breakdown of why the lightest RE is also the fastest RE at the strip, plus the three cheapest mods under ₹25,000.",
   },
   {
     slug: "harley-nightster-rh975-quarter-mile-physics",

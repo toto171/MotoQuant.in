@@ -61,6 +61,12 @@ export const metadata = {
     'honda cb125r drag time',
     'ktm 1390 super duke r evo quarter mile',
     'ktm 1390 evo india drag',
+    '60 foot time motorcycle',
+    '60 ft time predictor motorcycle',
+    'motorcycle launch rpm calculator',
+    'pulsar ns400z 0-100',
+    'ktm rc 390 gen 3 quarter mile',
+    'royal enfield hunter 350 top speed',
   ],
   openGraph: {
     title: TITLE,

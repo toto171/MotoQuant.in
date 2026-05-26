@@ -6,21 +6,22 @@ import StructuredData, { articleSchema } from '../../StructuredData';
 const SLUG = 'pulsar-ns400z-quarter-mile-physics';
 const TITLE = 'Bajaj Pulsar NS400Z Quarter-Mile Physics (and Why an RC 390 Still Wins)';
 const DESCRIPTION =
-  'Bajaj Pulsar NS400Z quarter-mile breakdown. MotoQuant simulates the NS400Z at roughly 13.8s and 158 km/h trap at Aamby Valley. A stock KTM RC 390 still beats it by 0.3s. Physics-based explanation of the 23 kg, the gearing, and the Cd that the press release ignored — plus three cost-per-tenth mods under ₹20,000.';
+  'Bajaj Pulsar NS400Z quarter-mile time and 0-100 in India: MotoQuant simulates the NS400Z at roughly 13.8s ET and 158 km/h trap at Aamby Valley, lining up against the BikeWale-tested 6.4s 0-100. A stock KTM RC 390 still beats it by 0.3s. Physics-based explanation of the 23 kg, the gearing, and the Cd the press release ignored — plus three cost-per-tenth mods under ₹20,000.';
 
 export const metadata = {
-  title: 'Pulsar NS400Z Quarter Mile vs RC 390 — MotoQuant',
+  title: 'Pulsar NS400Z Quarter Mile & 0-100 (India) vs RC 390 — MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'pulsar ns400z quarter mile',
+    'pulsar ns400z 0-100',
     'ns400z drag time india',
     'pulsar ns400z vs rc 390',
-    'ns400z 0-100',
     'bajaj ns400z top speed',
     'ns400z mods cost per tenth',
     'pulsar ns400z review india',
     'first 400cc indian bike',
     'ns400z vs duke 390',
+    'ns400z acceleration india',
   ],
   alternates: { canonical: `https://motoquant.in/blog/${SLUG}` },
   openGraph: {
