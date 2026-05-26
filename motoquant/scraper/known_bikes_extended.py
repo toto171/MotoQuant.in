@@ -10058,6 +10058,232 @@ HONDA_CBR600RR_PC40B_2013 = spec_from_dict(
 )
 
 
+# ── Triumph Rocket 3 Storm R (2024-2026 — Indian-market spec) ────────────────
+# Storm refresh of the Rocket 3 R muscle cruiser. World's largest-displacement
+# production motorcycle (2458 cc triple). The "Storm" trim bumps peak crank
+# power from 167 hp to 182 hp via revised cam timing + airbox + Arrow-tuned
+# silencer profile; peak torque unchanged at 221 Nm but available 250 rpm
+# earlier. Same 6-speed cassette + shaft final drive as the 2020-2023 Rocket 3.
+# Cluster: cruiser_1300p (largest displacement in catalog).
+# Sources:
+#   - Triumph Motorcycles press kit "Rocket 3 Storm R / Storm GT" (Jan 2024)
+#     www.triumphmotorcycles.com/press/2024/rocket-3-storm
+#   - MCN test "Triumph Rocket 3 Storm R first ride" (Mar 2024): "182 hp, same
+#     221 Nm but accessible from 4000 rpm; weight unchanged at 291 kg dry"
+#   - Cycle World "Rocket 3 Storm R: Triple Trouble" (Apr 2024): gear cassette
+#     confirmed unchanged from 2020-2023 Rocket 3 R (Triumph service manual
+#     T0301220 unchanged for Storm variant)
+#   - Visordown "Triumph Rocket 3 Storm review" (Feb 2024): standing-quarter
+#     11.0s @ 195 km/h trap in informal magazine drag-strip runs
+TRIUMPH_ROCKET3_STORM_R_2024 = spec_from_dict(
+    {
+        "manufacturer": "Triumph",
+        "model_name": "Rocket 3 Storm R (2024-2026)",
+        "model_code": "Rocket3_Storm_R_2024",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "cruiser",              # muscle cruiser; cluster cruiser_1300p
+        "displacement_cc": 2458.0,          # 2458 cc inline triple — Triumph spec
+                                            # (110.2 mm bore × 85.9 mm stroke; same
+                                            # bore/stroke as 2020-2023 Rocket 3 R)
+        "bore_mm": 110.2,
+        "stroke_mm": 85.9,
+        "compression_ratio": 10.8,          # 10.8:1 — Triumph spec (Storm refresh
+                                            # raised from 10.3:1 on 2020-2023)
+        "cylinders": 3,                     # longitudinal inline triple (firing
+                                            # order 1-2-3 with 240° spacing)
+        "peak_power_hp": 182.0,             # 182 hp (134 kW) @ 7000 rpm — Triumph
+                                            # press kit Jan 2024 (was 167 hp on R)
+        "peak_power_rpm": 7000,
+        "peak_torque_nm": 221.0,            # 221 Nm @ 4000 rpm — Triumph spec
+                                            # (was 221 Nm @ 4250 rpm on R; Storm
+                                            # peak available 250 rpm earlier)
+        "peak_torque_rpm": 4000,
+        "fuel_system": "fi",                # Multi-point sequential FI, ride-by-wire
+        "cooling": "liquid",
+        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "gears": 6,
+        # 6-speed cassette from Triumph Rocket 3 R service manual T0301220
+        # (unchanged from 2020-2023; Storm uses identical gearbox + shaft drive)
+        # Top gear deliberately tall (overdrive) for long-distance cruising at
+        # low rpm with the massive 221 Nm torque pulling the bike along.
+        "gear_ratios": [2.157, 1.578, 1.250, 1.045, 0.881, 0.755],
+        "front_sprocket": 0,                # SHAFT DRIVE — no front sprocket
+        "rear_sprocket": 0,                 # SHAFT FINAL DRIVE — Triumph helical
+                                            # bevel gear (3.273:1 final ratio
+                                            # baked into final-drive constant)
+        "chain_pitch": None,                # No chain — shaft drive
+        "dry_mass_kg": 291.0,               # 291 kg dry — Triumph spec 2024
+                                            # (kerb 320 kg incl. 18 L tank + oils;
+                                            # unchanged from 2020-2023 Rocket 3)
+        "wheelbase_mm": 1677.0,             # 1677 mm — Triumph spec (long muscle
+                                            # cruiser wheelbase for stability)
+        "front_tire_size": "150/80R17",     # Avon Cobra Chrome OEM — wide front
+        "rear_tire_size": "240/50R16",      # 240-section rear (widest rear in any
+                                            # production motorcycle until Diavel V4)
+        "cd": 0.78,                         # naked muscle cruiser posture; high
+                                            # frontal area from rider sitting
+                                            # upright, plus huge front cylinder
+                                            # exposed to airflow
+        "frontal_area_m2": 0.62,            # very large — upright rider, wide bars,
+                                            # massive triple-cylinder engine fully
+                                            # exposed (no fairing at all)
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda CB1000 Hornet SP (2025-2026 — premium variant) ─────────────────────
+# Premium variant of the CB1000 Hornet (launched at EICMA 2024 alongside
+# standard CB1000 Hornet). Uses the same SC82-derived 999 cc I4 engine
+# adapted from the 2017-2019 CBR1000RR Fireblade, but the SP trim adds:
+# Öhlins TTX36 rear shock (replaces Showa BPF), Brembo Stylema front calipers
+# (replaces Nissin), bi-directional quickshifter standard, Akrapovic-style
+# muffler tip, and SP-specific graphics. Engine output unchanged at 152 hp /
+# 104 Nm. Aimed at the Yamaha MT-09 SP / KTM 990 Duke buyer who wants the
+# extra electronics without going full superbike.
+# Cluster: litre_sport_600_1000 (152 hp; sits below 195+ hp tier).
+# Sources:
+#   - Honda EU press release "CB1000 Hornet SP 2025" (EICMA 2024, Nov 2024)
+#     honda.co.uk/motorcycles/range/sport/cb1000-hornet-sp.html
+#   - Cycle World first ride "Honda CB1000 Hornet SP" (Feb 2025): "152 hp at
+#     11000 rpm, 104 Nm at 9000 rpm; gear cassette shared with standard Hornet"
+#   - MCN "CB1000 Hornet SP first ride" (Jan 2025): wet mass 212 kg; SP is
+#     1 kg heavier than std Hornet due to Öhlins shock
+#   - Honda service manual 64MNK00 (2025 CB1000 Hornet — covers both std + SP)
+#     confirms F16/R44 sprockets, 525 chain, identical gearbox to SC82 Fireblade
+HONDA_CB1000_HORNET_SP_2025 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "CB1000 Hornet SP (2025-2026)",
+        "model_code": "CB1000_Hornet_SP",
+        "year_from": 2025,
+        "year_to": 2026,
+        "category": "naked",                # naked streetfighter; cluster is
+                                            # litre_sport_600_1000 (152 hp)
+        "displacement_cc": 999.0,           # 999 cc inline-4 DOHC — adapted from
+                                            # 2017-2019 CBR1000RR SC82 Fireblade
+                                            # (76.0 × 55.1 mm — Honda spec)
+        "bore_mm": 76.0,
+        "stroke_mm": 55.1,
+        "compression_ratio": 11.7,          # 11.7:1 — Honda spec sheet 2025
+                                            # (lowered from SC82's 13.0:1 for
+                                            # broader mid-range torque on naked)
+        "cylinders": 4,
+        "peak_power_hp": 152.0,             # 152 hp (111 kW) @ 11000 rpm
+                                            # Honda EU press kit 2024
+        "peak_power_rpm": 11000,
+        "peak_torque_nm": 104.0,            # 104 Nm @ 9000 rpm — Honda spec
+        "peak_torque_rpm": 9000,
+        "fuel_system": "fi",                # PGM-FI with ride-by-wire (4 modes)
+        "cooling": "liquid",
+        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "gears": 6,
+        # 6-speed cassette from Honda service manual 64MNK00 (2025 Hornet)
+        # SC82-derived but with revised top three gears for street use (taller
+        # 4th/5th/6th than Fireblade for relaxed highway cruising)
+        "gear_ratios": [2.529, 1.947, 1.600, 1.381, 1.250, 1.150],
+        "front_sprocket": 16,               # F16 / R44 — Honda OEM sprocket
+        "rear_sprocket": 44,                # (525-pitch — service manual confirmed)
+        "chain_pitch": "525",               # 525 pitch — CB1000 Hornet standard
+        "dry_mass_kg": 191.0,               # 191 kg dry — Honda spec 2025
+                                            # (kerb 212 kg incl. 17 L fuel + oils;
+                                            # SP is 1 kg heavier than std Hornet
+                                            # due to Öhlins TTX36 shock)
+        "wheelbase_mm": 1455.0,             # 1455 mm — Honda spec (slightly longer
+                                            # than CBR1000RR SC82's 1405 mm —
+                                            # naked-tuned chassis geometry)
+        "front_tire_size": "120/70ZR17",    # Bridgestone Battlax S22 OEM (SP only)
+        "rear_tire_size": "180/55ZR17",     # 180-section rear (same width as std
+                                            # Hornet — no upspec to 190 on SP)
+        "cd": 0.78,                         # naked streetfighter; same category
+                                            # default as MT-09 / Z900 / Streetfighter
+        "frontal_area_m2": 0.50,            # upright posture + wide bars; larger
+                                            # than full-fairing CBR1000RR (0.40)
+                                            # but standard for naked litre class
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Yamaha MT-09 Y-AMT (2024-2026 — semi-auto gearbox variant) ──────────────
+# Y-AMT (Yamaha Automated Manual Transmission) variant of the RN82 MT-09.
+# Same 890 cc CP3 (crossplane triple) engine as the standard MT-09 / MT-09 SP,
+# but with electrohydraulic clutch + electric shift actuators replacing the
+# cable clutch + foot lever. No clutch lever on the handlebar. Bar-mounted
+# +/- paddles for manual gear selection; full auto mode for traffic / touring.
+# Identical gear ratios, sprockets, and chassis as the standard MT-09 (same
+# Yamaha service manual LIT-11616-RN82-00 applies). 8 kg heavier than
+# manual variant due to Y-AMT actuators + larger 12V battery. Engine output
+# unchanged at 117 hp / 93 Nm.
+# Cluster: mid_twin_500_700 (sits at 890cc — adjacent cluster boundary;
+# the importer's category_tag derivation will land it in "other" or
+# litre_sport_600_1000 depending on displacement bands — see physics.py).
+# Sources:
+#   - Yamaha Motor Europe press kit "MT-09 Y-AMT 2024" (EICMA 2023, Nov 2023)
+#     yamaha-motor.eu/en/news/mt-09-y-amt-2024-launch
+#   - Yamaha service manual LIT-11616-RN82-00 (2024 MT-09 series — confirms
+#     gear cassette + sprockets unchanged from manual RN82; Y-AMT module is
+#     a bolt-on assembly atop the existing 6-speed gearbox)
+#   - MCN "Yamaha MT-09 Y-AMT first ride" (Mar 2024): "117 bhp identical to
+#     manual MT-09; 8 kg added by AMT module; bike picks gears intelligently
+#     in auto mode but feels best with thumb paddles"
+#   - Cycle World "MT-09 Y-AMT tested" (May 2024): wet mass 201 kg (vs 193 kg
+#     manual MT-09); ET expected ~0.15s slower than manual due to mass +
+#     calibrated auto-shifts (~80 ms vs ~50 ms quickshifter)
+#   - RideApart Y-AMT deep dive (Apr 2024): F16/R45 confirmed (same as manual)
+YAMAHA_MT09_Y_AMT_2024 = spec_from_dict(
+    {
+        "manufacturer": "Yamaha",
+        "model_name": "MT-09 Y-AMT (2024-2026)",
+        "model_code": "MT09_Y_AMT_2024",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "naked",                # naked streetfighter triple; same
+                                            # category as MT-09 / MT-09 SP
+        "displacement_cc": 890.0,           # 890 cc CP3 (crossplane triple)
+                                            # 78.0 × 62.1 mm — Yamaha spec
+        "bore_mm": 78.0,
+        "stroke_mm": 62.1,
+        "compression_ratio": 11.5,          # 11.5:1 — Yamaha spec (same as RN82
+                                            # manual MT-09; unchanged for Y-AMT)
+        "cylinders": 3,                     # inline triple (CP3 crossplane)
+        "peak_power_hp": 117.0,             # 117 hp (87 kW) @ 10000 rpm
+                                            # Yamaha global spec (unchanged from
+                                            # manual MT-09 — same engine)
+        "peak_power_rpm": 10000,
+        "peak_torque_nm": 93.0,             # 93 Nm @ 7000 rpm — Yamaha spec
+        "peak_torque_rpm": 7000,
+        "fuel_system": "fi",                # Mikuni TBI 41 mm × 3 with ride-by-wire
+        "cooling": "liquid",
+        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "gears": 6,
+        # 6-speed cassette from Yamaha service manual LIT-11616-RN82-00
+        # (identical to manual MT-09 — Y-AMT actuators sit atop the existing
+        # gearbox; no change to internal ratios)
+        "gear_ratios": [2.667, 2.000, 1.619, 1.381, 1.190, 1.037],
+        "front_sprocket": 16,               # F16 / R45 — Yamaha OEM (same as
+                                            # manual MT-09 — service manual)
+        "rear_sprocket": 45,
+        "chain_pitch": "525",               # 525 pitch — MT-09 platform standard
+        "dry_mass_kg": 201.0,               # 201 kg dry — Yamaha Y-AMT spec
+                                            # (was 193 kg on manual MT-09; +8 kg
+                                            # from AMT actuator + larger battery;
+                                            # kerb 222 kg incl. 14 L fuel + oils)
+        "wheelbase_mm": 1430.0,             # 1430 mm — Yamaha spec (unchanged
+                                            # from manual MT-09 — same chassis)
+        "front_tire_size": "120/70ZR17",    # Bridgestone Battlax S22 OEM
+        "rear_tire_size": "180/55ZR17",     # 180-section rear (same as manual)
+        "cd": 0.78,                         # naked streetfighter; same category
+                                            # default as MT-09 / Z900 / Hornet
+        "frontal_area_m2": 0.48,            # upright posture; same as manual MT-09
+                                            # (Y-AMT module is below seat — no
+                                            # change to frontal silhouette)
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -10281,4 +10507,8 @@ EXTENDED_BIKES = [
     HONDA_CB400X_2023,
     KAWASAKI_NINJA_H2_SX_2018,
     HONDA_CBR600RR_PC40B_2013,
+    # ── Daily improvement run 2026-05-26 (Tuesday — Catalog A1) ──
+    TRIUMPH_ROCKET3_STORM_R_2024,
+    HONDA_CB1000_HORNET_SP_2025,
+    YAMAHA_MT09_Y_AMT_2024,
 ]

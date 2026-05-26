@@ -46,6 +46,16 @@ def _wb_match(pattern: str, spec_str: str) -> bool:
     return all(t in spec_tokens for t in tokens)
 
 
+def _model_specificity_score(pattern: str) -> int:
+    """Number of distinct tokens in pattern after splitting on space /
+    hyphen / dot. Used to pick the *most-specific* benchmark match —
+    e.g. 'Ninja H2 SX' (3 tokens) outranks 'Ninja H2' (2 tokens). Kept
+    in sync with `scripts/validation_sweep.py::_model_specificity_score`.
+    """
+    import re as _re
+    return len([t for t in _re.split(r"[\s\-\.]+", pattern) if t])
+
+
 def cluster_for(manufacturer, model_name, disp_cc, power_hp, stroke_type, category):
     if stroke_type == 2:
         return "two-stroke"
@@ -128,43 +138,57 @@ def run_sweep(out_path):
             }
         results.append(rec)
 
-    # Attach benchmarks
+    # Attach benchmarks — score-and-pick (Option 2 from DISPATCH_INBOX
+    # 2026-05-25). For each catalog row, scan every benchmark that
+    # passes manufacturer + word-boundary model + year-range filters,
+    # then pick the *most-specific* one (highest model-token-count).
+    # Robust against benchmark insertion-order and prior first-match-
+    # wins shadowing of long patterns by short ones, e.g.
+    # "Ninja H2 SX (2018-2023)" now correctly binds to the 3-token
+    # "Ninja H2 SX" benchmark rather than the 2-token "Ninja H2".
     bench_map = {}
     for bmfr, bmodel, byear, tgt_et, tgt_trap, src in BENCHMARKS:
         bench_map.setdefault((bmfr.lower(), bmodel.lower()), []).append(
             (byear, tgt_et, tgt_trap, src)
         )
-    # Sort by model-token-count descending so more-specific patterns (e.g.
-    # "Ninja H2 SX") are tried before less-specific ones ("Ninja H2").
-    # Without this, {ninja,h2} ⊆ {ninja,h2,sx} causes the H2 benchmark to
-    # steal H2 SX catalog rows via first-match-wins dict iteration.
-    import re as _re_sort
-    def _token_count(key):
-        return len([t for t in _re_sort.split(r"[\s\-\.]+", key[1]) if t])
-    bench_map_sorted = sorted(bench_map.items(), key=lambda kv: _token_count(kv[0]), reverse=True)
 
     for rec in results:
         if rec.get("kind") != "catalog" or rec.get("error"):
             continue
         m_lo = rec["manufacturer"].lower()
         mod_lo = rec["model"].lower()
-        # Find a benchmark matching by manufacturer substring and model substring
-        match = None
-        for (bm, bmod), entries in bench_map_sorted:
-            if _wb_match(bm, m_lo) and _wb_match(bmod, mod_lo):
-                yf = rec.get("year_from") or 0
-                yt = rec.get("year_to") or yf
-                best = None
-                for byear, tgt_et, tgt_trap, src in entries:
-                    if yf <= byear <= yt or (not yt and yf == byear):
-                        best = (tgt_et, tgt_trap, src)
-                        break
-                if best is None:
-                    best = (entries[0][1], entries[0][2], entries[0][3])
-                match = best
-                break
-        if match is not None and rec.get("sim_et") is not None:
-            tgt_et, tgt_trap, src = match
+        yf = rec.get("year_from") or 0
+        yt = rec.get("year_to") or yf
+
+        best_match = None
+        best_score = -1
+        best_in_range = False  # in-range matches always beat out-of-range
+        for (bm, bmod), entries in bench_map.items():
+            if not (_wb_match(bm, m_lo) and _wb_match(bmod, mod_lo)):
+                continue
+            # Pick best entry from this benchmark group (in-range year first)
+            in_range_entry = None
+            for byear, tgt_et, tgt_trap, src in entries:
+                if yf <= byear <= yt or (not yt and yf == byear):
+                    in_range_entry = (tgt_et, tgt_trap, src)
+                    break
+            fallback_entry = (entries[0][1], entries[0][2], entries[0][3])
+            chosen_entry = in_range_entry if in_range_entry is not None else fallback_entry
+            entry_in_range = in_range_entry is not None
+            score = _model_specificity_score(bmod)
+
+            # Prefer in-range over out-of-range; within same range-status,
+            # prefer higher specificity.
+            if entry_in_range and not best_in_range:
+                best_match = chosen_entry
+                best_score = score
+                best_in_range = True
+            elif entry_in_range == best_in_range and score > best_score:
+                best_match = chosen_entry
+                best_score = score
+
+        if best_match is not None and rec.get("sim_et") is not None:
+            tgt_et, tgt_trap, src = best_match
             rec["bench_et"] = float(tgt_et)
             rec["bench_trap_kmh"] = float(tgt_trap)
             rec["bench_src"] = src

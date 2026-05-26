@@ -904,6 +904,48 @@ def _model_match(pattern: str, spec_model: str) -> bool:
     return all(t in spec_tokens for t in tokens)
 
 
+def _model_specificity_score(pattern: str) -> int:
+    """Return number of distinct tokens in pattern after splitting on
+    space / hyphen / dot. Used to pick the *most-specific* benchmark
+    among multiple word-boundary matches against the same spec — e.g.
+    `"Ninja H2 SX"` (3 tokens) outranks `"Ninja H2"` (2 tokens) so the
+    H2 SX catalog row binds to the H2 SX benchmark, not the H2 one.
+    See `tests/test_validation.py::TestMatcherSpecificity`.
+    """
+    import re as _re
+
+    return len([t for t in _re.split(r"[\s\-\.]+", pattern) if t])
+
+
+def _best_benchmark_match(spec, benchmarks):
+    """Among all benchmarks that match spec by (manufacturer + word-boundary
+    model tokens + year-range filter), return the *most-specific* one
+    (highest token-count in `bmodel`). Ties broken by first occurrence.
+    Returns the matching tuple `(bmfr, bmodel, byear, tgt_et, tgt_trap, src)`
+    or `None` if no benchmark matches.
+
+    Implements Option 2 from `DISPATCH_INBOX.md` 2026-05-25 ticket:
+    score-and-pick instead of sort-then-first-match, so the matcher is
+    robust against benchmark insertion-order, dict iteration order, and
+    later token-count tie-breaking edge cases.
+    """
+    best = None
+    best_score = -1
+    for entry in benchmarks:
+        bmfr, bmodel, byear, _tgt_et, _tgt_trap, _src = entry
+        if spec.manufacturer != bmfr:
+            continue
+        if not _model_match(bmodel, spec.model_name):
+            continue
+        if byear < spec.year_from or byear > (spec.year_to or spec.year_from + 3):
+            continue
+        score = _model_specificity_score(bmodel)
+        if score > best_score:
+            best = entry
+            best_score = score
+    return best
+
+
 def find_spec(mfr: str, model: str, year: int):
     """Locate a spec in ALL_KNOWN_BIKES matching mfr/model/year."""
     for b in ALL_KNOWN_BIKES:
@@ -1027,16 +1069,6 @@ def run_sweep(verbose: bool = True) -> dict:
                 }
             )
 
-    # Sort BENCHMARKS by model-token-count descending so more-specific patterns
-    # (e.g. "Ninja H2 SX", "Street Triple 765 RS") are tried before less-specific
-    # ones ("Ninja H2", "Street Triple") when iterating per spec below.
-    # Without this, {ninja,h2} ⊆ {ninja,h2,sx} causes the shorter pattern to
-    # shadow the longer one via first-match-wins linear scan.
-    import re as _re_vs
-    def _bench_model_token_count(b):
-        return len([t for t in _re_vs.split(r"[\s\-\.]+", b[1]) if t])
-    _benchmarks_sorted = sorted(BENCHMARKS, key=_bench_model_token_count, reverse=True)
-
     # 2. Full catalog sweep
     n = len(ALL_KNOWN_BIKES)
     for i, spec in enumerate(ALL_KNOWN_BIKES, 1):
@@ -1049,29 +1081,27 @@ def run_sweep(verbose: bool = True) -> dict:
                 f"{rec.get('sim_et_s', '---')}s  {rec['status']}"
             )
 
-        # benchmark match (word-boundary matching — not substring)
-        # Use _benchmarks_sorted (most-specific-first) to prevent short patterns
-        # (e.g. "Ninja H2") from shadowing longer ones ("Ninja H2 SX").
-        for bmfr, bmodel, byear, tgt_et, tgt_trap, src in _benchmarks_sorted:
-            if spec.manufacturer != bmfr:
-                continue
-            if not _model_match(bmodel, spec.model_name):
-                continue
-            if byear < spec.year_from or byear > (spec.year_to or spec.year_from + 3):
-                continue
-            if rec["status"] != "ok":
-                break
-            benchmark_hits.append(
-                {
-                    **rec,
-                    "benchmark_year": byear,
-                    "target_et_s": tgt_et,
-                    "target_trap_kmh": tgt_trap,
-                    "delta_et_s": round(rec["sim_et_s"] - tgt_et, 3),
-                    "source": src,
-                }
-            )
-            break
+        # Benchmark match — score-and-pick (Option 2 from DISPATCH_INBOX
+        # 2026-05-25). Word-boundary matching + manufacturer + year-range
+        # filter, then pick the *most-specific* benchmark (highest model-
+        # token-count). Robust against insertion-order and token-count
+        # ties — e.g. catalog row "Ninja H2 SX (2018-2023)" now correctly
+        # binds to the 3-token "Ninja H2 SX" benchmark instead of the
+        # 2-token "Ninja H2" via subset shadowing.
+        match = _best_benchmark_match(spec, BENCHMARKS)
+        if match is None or rec["status"] != "ok":
+            continue
+        bmfr, bmodel, byear, tgt_et, tgt_trap, src = match
+        benchmark_hits.append(
+            {
+                **rec,
+                "benchmark_year": byear,
+                "target_et_s": tgt_et,
+                "target_trap_kmh": tgt_trap,
+                "delta_et_s": round(rec["sim_et_s"] - tgt_et, 3),
+                "source": src,
+            }
+        )
 
     t_elapsed = time.time() - t_start
 
