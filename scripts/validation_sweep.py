@@ -804,6 +804,85 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         "MotoStatz (Dragy, stock instrumented FTR 1200 S)",
     ),
     # ── end ninth pass ──
+    # ── 2026-05-26 benchmark-import agent ─────────────────────────────────────
+    # Three high-confidence instrumented adds from the Cycle World / Sport Rider
+    # sportbike-performance-numbers archive
+    # (cycleworld.com/sport-rider/tech/sportbike-performance-numbers/). Same
+    # authoritative timing-strip table already cited by the GSX-S1000, Daytona
+    # 675 (2013), GSX-R 600 K6, CBR 600RR 2007 PC40, YZF-R6 2C0 and Tuono V4
+    # 1100 entries above. Each row in the archive is a Sport Rider instrumented
+    # drag-strip test — same publication & methodology bar already accepted.
+    # Catalog year ranges verified to include year_hint via find_spec().
+    # Pre-commit sim sanity (production spec_to_bike_config path):
+    #   * YZF-R6 (13S) 2011: sim 10.861s vs bench 10.87s — Δ −0.009s ✓
+    #   * 848 EVO 2011:      sim 10.290s vs bench 10.75s — Δ −0.460s (Ducati 848
+    #     is documented as hard-to-launch with 180-section tire + peaky cam
+    #     timing; sim-faster delta consistent with cluster's mid-sport band)
+    #   * F4 1000 R 2010:    sim 10.006s vs bench 10.21s — Δ −0.204s ✓
+    # No duplicates with prior 2026-05-24 / 2026-05-25 passes (verified via
+    # the per-spec benched set).
+    #
+    # Yamaha YZF-R6 (13S) (599 cc I4 supersport, 2008-2016 chassis) — Sport
+    # Rider August 2011 issue (8/11) timing-strip 10.87s @ 128.5 mph (~207
+    # km/h). The 13S generation replaced the 2006-2007 2C0 generation (which is
+    # already benchmarked at "YZF-R6 2007 Sport Rider 10.854s @ 205 km/h"). The
+    # 13S has revised intake + closed-deck cylinder + minor cam profile changes
+    # vs 2C0 — slightly slower published power claim (127 vs 123 hp) but a much
+    # cleaner power delivery in the 8-13k zone that Sport Rider's professional
+    # tester exploits. Catalog entry YAMAHA_YZFR6_13S covers 2008-2016. Using
+    # the "(13S)" suffix in the model pattern is intentional — the bare token
+    # set {YZF, R6} would match both 2C0 and 13S catalog rows; the (13S) suffix
+    # makes the match unambiguous and future-proofs against the matcher
+    # specificity bug filed at DISPATCH_INBOX 2026-05-25.
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Yamaha",
+        "YZF-R6 (13S)",
+        2011,
+        10.87,
+        207,
+        "Sport Rider 8/11 (Cycle World sportbike-performance-numbers, timing-strip)",
+    ),
+    # Ducati 848 EVO (849 cc 90° L-twin Testastretta 11° sport, 2011-2013) —
+    # Sport Rider January 2011 issue (1/11) timing-strip 10.75s @ 130.77 mph
+    # (~210 km/h). Distinct platform from the 1199 Panigale (already benched at
+    # 9.91s) — the 848 EVO is the smaller 849 cc Superquadro-precursor V-twin
+    # making 140 hp claimed (vs 195 hp on the 1199), making 10.75s entirely
+    # plausible for an experienced tester. The Sport Rider archive note "4.40 /
+    # 5.27" for the 60-100 / 80-120 mph roll-on splits is consistent with the
+    # 848's narrow torque band — wide roll-on gap is the classic L-twin
+    # signature. Catalog entry DUCATI_848_EVO covers 2008-2013 AND 2011-2013;
+    # year_hint=2011 binds to the 2008-2013 entry via iteration order (both
+    # entries carry identical specs — 849cc/140hp — so the choice is benign).
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Ducati",
+        "848 EVO",
+        2011,
+        10.75,
+        210,
+        "Sport Rider 1/11 (Cycle World sportbike-performance-numbers, timing-strip)",
+    ),
+    # MV Agusta F4 1000 R (998 cc I4 sport, 2010-2018) — Sport Rider September
+    # 2010 issue (9/10) timing-strip 10.21s @ 149.38 mph (~240 km/h). The 2010
+    # F4 1000 R update brought ~186 hp claimed from the radial-valve 998 cc I4;
+    # the 149 mph trap puts it in the litre-sport upper cluster alongside the
+    # CBR1000RR 2010 (Sport Rider 9.67 @ 150.3) and S 1000 RR 2015 (CW 9.90 @
+    # 240 km/h, already in list) — the 10.21s ET is slightly slow vs the
+    # cluster's average because the F4's high-RPM bias (peak power ~12,500 rpm)
+    # is harder to harness off the line than a CBR or S1000RR's torque-broad
+    # design. Catalog entry MVAGUSTA_F4_1000_R covers 2010-2018 (single F4
+    # 1000 R chassis throughout the model run); year_hint=2010 hits cleanly.
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "MV Agusta",
+        "F4 1000 R",
+        2010,
+        10.21,
+        240,
+        "Sport Rider 9/10 (Cycle World sportbike-performance-numbers, timing-strip)",
+    ),
+    # ── end 2026-05-26 pass ──
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

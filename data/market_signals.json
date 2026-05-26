@@ -1,0 +1,45 @@
+{
+  "_updated": "2026-05-26",
+  "_run": "competitive-intel weekly scan 2026-05-26",
+  "_methodology": "Web search across 4 axes: generic quarter-mile calculators, India-qualified bike simulators, DragSim Pro / desktop sim category, Valley Run 2026 + Indian drag scene. No new direct competitor surfaced. Three opportunity boosts queued — see agents{} below.",
+  "agents": {
+    "marketing-content": {
+      "opportunity_boost": 12,
+      "reason": "No English-language coverage of Valley Run 2026 results or 'fastest Indian EV motorcycle drag' (F99 10.712s) has indexed. Window open for a tie-in post crossing /blog with /simulator?venue=aamby-valley."
+    },
+    "seo-keyword": {
+      "opportunity_boost": 10,
+      "reason": "'valley run 2026 results', 'ultraviolette f99 quarter mile', 'valley run drag race' are uncontested India-qualified long-tails. Generic 'quarter mile calculator' SERPs are saturated by US legacy tools (xcceleration, robrobinette, dragcalc) — don't fight there."
+    },
+    "partnership-outreach": {
+      "opportunity_boost": 5,
+      "reason": "Elite Octane (eliteoctane.com, Valley Run organiser) has no software-partner mention. Clean cold-outreach surface for a 'free simulator for participants' offer."
+    },
+    "catalog-expansion": {
+      "opportunity_boost": 3,
+      "reason": "Ultraviolette F99 (Indian electric superbike, 10.712s Valley Run 2024) not in catalog. Adding it covers a defensible Indian-EV-flagship slot before any OEM ships a competing microsite."
+    }
+  },
+  "competitors_scanned": [
+    {"name": "DragSim5", "url": "https://www.motionsoftware.com/dragsim5.htm", "category": "desktop_sim_paid", "threat": "low_medium", "delta_this_week": "none"},
+    {"name": "DragCalc", "url": "https://dragcalc.com/", "category": "web_calculator_free", "threat": "low", "delta_this_week": "none"},
+    {"name": "XCceleration ET Calc", "url": "https://xcceleration.com/et.calculator.html", "category": "web_calculator_free", "threat": "low", "delta_this_week": "none"},
+    {"name": "Rob Robinette ET", "url": "https://robrobinette.com/et.htm", "category": "web_calculator_free", "threat": "low", "delta_this_week": "none"},
+    {"name": "Wallace Racing", "url": "http://www.wallaceracing.com/Calculators.htm", "category": "web_calculator_free", "threat": "low", "delta_this_week": "none"},
+    {"name": "Speedmaster Tools", "url": "https://www.speedmaster79.com/tools/14et-hp", "category": "web_calculator_free", "threat": "low", "delta_this_week": "none"},
+    {"name": "FIRGELLI Engineering blog tool", "url": "https://www.firgelliauto.com/blogs/engineering-calculators/quarter-mile-et-calculator-trap-speed", "category": "web_calculator_free", "threat": "low", "delta_this_week": "newer SEO-aggressive blog-tool format worth mirroring"},
+    {"name": "AJ Designer HP-from-ET", "url": "https://www.ajdesigner.com/fl_horsepower_elapsed_time/horsepower_elapsed_time.php", "category": "web_calculator_free", "threat": "low", "delta_this_week": "none"},
+    {"name": "LeanGP", "url": "https://leangp.com/en/", "category": "rider_training_sim_hardware", "threat": "none", "delta_this_week": "different_category"}
+  ],
+  "indian_scene_signals": [
+    {"event": "Valley Run 2026 Summer", "date": "2026-04-03 to 2026-04-05", "venue": "Aamby Valley Airstrip", "source": "eliteoctane.com/valley.html", "notes": "Indexed coverage still mostly 2024 (Suvarna 8.797s wheelie record, Ultraviolette F99 10.712s). 2026 results not widely published yet."},
+    {"event": "Valley Run 2026 Winter (announced)", "date": "2026-04-17 to 2026-04-19 (alt window)", "venue": "Aamby Valley Airstrip", "source": "eliteoctane.com/events.html", "notes": "Two events same year — check whether April 3-5 was Summer and April 17-19 is a separate event."}
+  ],
+  "no_competitor_found_in": [
+    "india-built motorcycle drag-physics simulator",
+    "ask-ai-to-tune-my-bike-for-aamby-valley tool",
+    "INR-denominated motorcycle parts ROI calculator",
+    "per-bike pre-configured catalog with validated benchmarks (web-native)"
+  ],
+  "escalations_queued": []
+}

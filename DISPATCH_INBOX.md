@@ -322,8 +322,14 @@ Source: `reports/support_triage_2026-05-07.md`.
 
 ---
 
-## INSTRUCTION — 2026-05-07 — fix: bike_repo year-suffix matching for upsert
-[urgent]
+## DONE — 2026-05-07 — fix: bike_repo year-suffix matching for upsert
+
+**Resolved at commit `31b36a4` on 2026-05-25.** Marked DONE on 2026-05-26 by self-review M7 for admin bookkeeping consistency — the close was previously logged as a NEW DONE block at line ~863 (`## DONE — 2026-05-25 — [self-review] [urgent] implement bike_repo year-suffix upsert fix + ghost-row cleanup`) rather than as a status flip on this original 2026-05-07 entry. Ghost-row DELETE step queued separately at INBOX:879 (`[urgent] [needs-user] supervised ghost-row cleanup`).
+
+---
+
+## ARCHIVE (original instruction text below for reference)
+[urgent — closed]
 
 **Severity promoted by self-review M5 (2026-05-24)** — `reports/self_review_2026-05-24.md`
 Finding 2.1. Originally `[opportunistic]` since 2026-05-07 (17 days). Now actively
@@ -927,6 +933,70 @@ fi
 **Why now:** the existing hardcoded asserts in `test_power_boost_regression.py` are exact but isolated. A golden-file approach extends naturally to the full 489-bike sweep.
 
 **Effort:** ~1 hr. No architectural changes.
+
+---
+
+## INSTRUCTION — 2026-05-26 — [self-review] [needs-approval] fix master_scheduler.sh queue_bonus to honour [urgent] tag
+
+**Attribution:** self-review M7 2026-05-26, Finding 2.1. M6 queued INBOX:897 to AUDIT this; the audit found the bug. `scripts/master_scheduler.sh:90` defines `parse_inbox_urgent()` but its output is only printed in the dispatch plan (line 308-313), never folded into agent scores. `scripts/master_scheduler.sh:207-214` looks for `f"@{agent}"` mentions, but the inbox uses `[agent]` bracket-tag syntax for all self-review-queued items (zero `@agent` mentions in current 26-item inbox). Result: `[urgent]` and per-agent-tag are both decorative; agents never get a queue_bonus boost.
+
+**Why this matters:** the `queue_bonus = 50 * inbox_count_per_agent.get(agent, 0)` formula at line 229 is the structural mechanism that's supposed to make the kaizen loop converge faster on urgent backlog. With it dead, the only thing draining the inbox is happenstance overlap of self-review writing-sessions with implementer dispatch slots.
+
+**Proposed fix (drop-in for the inbox_count_per_agent loop ~line 207-214):**
+
+```python
+inbox_count_per_agent = {}
+inbox_urgent_per_agent = {}
+if os.path.isfile(inbox_file):
+    with open(inbox_file) as f:
+        current_block_urgent = False
+        current_block_agents = set()
+        for line in f:
+            if line.startswith("## INSTRUCTION") or line.startswith("## DONE"):
+                # commit previous block
+                for a in current_block_agents:
+                    inbox_count_per_agent[a] = inbox_count_per_agent.get(a, 0) + 1
+                    if current_block_urgent:
+                        inbox_urgent_per_agent[a] = inbox_urgent_per_agent.get(a, 0) + 1
+                current_block_urgent = False
+                current_block_agents = set()
+            if "[urgent]" in line or "[blocking]" in line:
+                current_block_urgent = True
+            for agent in weights["agents"]:
+                if f"@{agent}" in line or f"[{agent}]" in line:
+                    current_block_agents.add(agent)
+        # tail block
+        for a in current_block_agents:
+            inbox_count_per_agent[a] = inbox_count_per_agent.get(a, 0) + 1
+            if current_block_urgent:
+                inbox_urgent_per_agent[a] = inbox_urgent_per_agent.get(a, 0) + 1
+```
+
+Then at scoring line 229:
+```python
+queue_bonus = 50 * inbox_count_per_agent.get(agent, 0) + 50 * inbox_urgent_per_agent.get(agent, 0)
+```
+
+**Verification:** after fix, `--dry-run` should show `queue_bonus > 0` for self-review agent (5 `[self-review]` items currently in inbox) and `queue_bonus > 0` for catalog-expansion (queued items if any tagged).
+
+**Effort:** ~30 min (1 file edit, 1 dry-run verification, 1 commit). No architectural change.
+
+**Note:** This SUPERSEDES INBOX:897 (M6's audit-only ticket). Once this fix lands, mark 897 DONE too.
+
+---
+
+## INSTRUCTION — 2026-05-26 — [self-review] [opportunistic] verify web/app/page.js stats strip uses DISTINCT bike count
+
+**Attribution:** self-review M7 2026-05-26, Finding 2.2. The DB currently has `bike_models` raw=790 / distinct=489. 301 phantom rows from the pre-`31b36a4` regression remain pending the ghost-row cleanup at INBOX:879. If the landing-page stats strip reads `COUNT(*)` (790) instead of `COUNT(DISTINCT manufacturer_id || '|' || model_name)` (489), prod website is overstating catalog size by 62% — a customer-facing trust issue.
+
+**Task (~10 min):**
+
+1. `grep -n "bike_count\|bikes_count\|COUNT" web/app/page.js scripts/audit_headline_stats.py motoquant/api.py | head -30`
+2. Identify which query the landing page renders against
+3. If `COUNT(*)`: switch to `COUNT(DISTINCT manufacturer_id || '|' || model_name)` (same fix as the `scripts/audit_headline_stats.py` SoT)
+4. If already DISTINCT: confirm the displayed value reads ~489 and patch the website if stale
+
+**Deliverable:** One-paragraph finding in the next session report. If a fix is required, commit it as part of the same session that handles INBOX:879 cleanup.
 
 ---
 

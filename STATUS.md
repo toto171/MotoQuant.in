@@ -25,9 +25,9 @@ last_updated: <!-- AUTO-UPDATED -->
 
 | KPI | Now | Q-end target | Direction | Last-updated |
 |---|---|---|---|---|
-| Bike catalog count | 790 raw DB / 489 distinct / ~489 source — **301 duplicate rows** (M6 Finding 2.1; INBOX:308 [urgent] 18 days unimplemented) | 500+ by Q4 | ↑ | 2026-05-25 |
+| Bike catalog count | 790 raw / **489 distinct** / 301 phantom — INBOX:308 [closed via `31b36a4` 2026-05-25]; ghost-row DELETE queued at INBOX:879 `[needs-user]` | 500+ by Q4 | ↑ | 2026-05-26 |
 | Validated ETs ±0.20s | 47% | 60% Q3 / 70% Q4 | ↑ | 2026-05-04 |
-| Benchmark sources | ~91 (79 + 12 instrumented ETs added this week; commits db97304, de00e2b, 1f9f40b, 98c445d) | 100+ | ↑ | 2026-05-25 |
+| Benchmark sources | **112** (79 → 91 → 112 over 14 days; +21 this week; A3 best-streak ever; 8th pass = defensible null) | 100+ ✓ MET | flat | 2026-05-26 |
 | Indexed pages (motoquant.in) | (TBD) | 50+ Q2 / 200+ Q4 | ↑ | (need GA4) |
 | Indian organic sessions/mo | (TBD) | 500 Q2, 5k Q4 | ↑ | (need GA4) |
 | Active simulator users/mo | (TBD) | 200 / 2k / 10k cadence | ↑ | (need analytics) |
@@ -41,6 +41,24 @@ last_updated: <!-- AUTO-UPDATED -->
 ## Last 7 days — session-level digest
 
 <!-- self-review weekly summary lives here. Updated every Sunday. -->
+
+### Week of 2026-05-19 → 2026-05-26 (self-review M7 — Tuesday, user-dispatched)
+
+**Dominant signal:** **First net-negative-INBOX week since launch.** 5 DONE items in 7 days vs 3 new INSTRUCTIONs queued (net −2). The May-25 INBOX:308 year-suffix upsert fix (`31b36a4`) closed the longest-aged urgent item (18 days). M5 + M6 stacked weight changes produced a **second** cross-KPI rebalance — `competitive-intel` broke its 28-day `never_run` streak today (`reports/competitive_intel_2026-05-26.md`). Strongest 2-step kaizen attribution recorded.
+
+**KPI moves:** BENCHMARKS 91 → **112** (+21 in 7 days; first-ever 100+ target MET). Bike catalog distinct 483 → **489** (+6 real adds; phantom rows frozen at 301 — code fix landed, DB cleanup deferred to INBOX:879 `[needs-user]`). Postflight ALERT dedup verified — 0 `deploy timed out` ALERTs since `0f5edec` on 2026-05-24 (M6 Proposal #5 RESOLVED).
+
+**System bug found:** `master_scheduler.sh` `queue_bonus` is half-implemented. `parse_inbox_urgent()` PRINTS urgent items in dispatch plan but never folds them into scores. Inbox uses `[agent]` bracket-tag syntax; scheduler looks for `@agent` — zero matches in 26-item inbox. Result: `[urgent]` tag is decorative. Fix queued as new INSTRUCTION with exact 5-line diff.
+
+**Auto-applied this run (M7):** (1) `growth-experiments.base` 30 → 20 (15 A/B variants launched without measurement layer; pause new launches until GA4 lands). (2) INBOX:325 marked DONE (admin bookkeeping — already resolved at commit `31b36a4`).
+
+**Queued by M7 (2):** `[needs-approval]` `master_scheduler.sh` queue_bonus fix; `[opportunistic]` verify `web/app/page.js` stats strip uses DISTINCT not COUNT(*).
+
+**47 substantive commits / ~70 total. 100% test pass, baselines exact (K5/R1/Hayabusa Δ +0.0000s).**
+
+**Cooldown:** per agent-template `:64`, next autonomous self-review not before **2026-05-31**.
+
+---
 
 ### Week of 2026-05-18 → 2026-05-25 (self-review M6 — Monday, user-dispatched)
 
@@ -176,6 +194,7 @@ last_updated: <!-- AUTO-UPDATED -->
 - **2026-05-21 M4:** NO weight changes auto-applied. Findings 2.1 (catalog-expansion prompt) and 2.2 (postflight dedup tag promotion) both queued to INBOX instead. Rationale: prompt-rewrite is multi-knob (out of envelope); INSTRUCTION-severity flip on another agent's ticket is borderline single-knob — queued for transparency. Bookkeeping-only edits (KPI cell + digest section + `_LAST_RUN_JSON`) made this run. Attribution: `reports/self_review_2026-05-21.md` Findings 2.1 + 2.2.
 - **2026-05-24 M5:** `catalog-expansion.base` 50 → 40. Reason: 43/47 substantive commits this week (91 %) were catalog-expansion; M4 prompt-fix gate worked (DB 345 → 751) but uncovered 268-row duplicate-inflation bug (INBOX:308) — marginal value of each new catalog run is now below marginal value of a starved-agent slot (claude-feature-monitor / benchmark-import both `never_run`). Single-knob, within ±10 envelope. Also auto-applied: INBOX:308 tag `[opportunistic]` → `[urgent]` (mechanical severity flip, same pattern as M4's successful 605→674 promotion that landed in 3 days). Attribution: `reports/self_review_2026-05-24.md` Findings 2.1 + 2.2.
 - **2026-05-25 M6:** `benchmark-import.base` 40 → 50. Reason: 5 consecutive benchmark-import runs this week (first time agent ran; best week ever); KPI benchmark count moved 79 → ~91; 3+ consecutive wins trigger = promote per playbook §5. Single-knob, within ±10 envelope. Revert to 40 if 2 consecutive null-result weeks. Attribution: `reports/self_review_2026-05-25.md` Finding 2.3.
+- **2026-05-26 M7:** `growth-experiments.base` 30 → 20. Reason: 15 A/B variants launched in 7 days (EXP-005..EXP-019) with zero measurement layer (KPIs `Indian organic sessions/mo` + `Active simulator users/mo` both `TBD`). Over-production relative to consumption. Single-knob, within ±10 envelope. Revert to 30 once GA4/PostHog wired and at least one EXP has measured outcome. Attribution: `reports/self_review_2026-05-26.md` Proposal #5.
 
 ---
 
@@ -184,7 +203,7 @@ last_updated: <!-- AUTO-UPDATED -->
 <!-- LAST_RUN_JSON
 {
   "_schema": 1,
-  "_updated": "2026-05-25T22:41:36Z",
+  "_updated": "2026-05-26T00:55:32Z",
   "catalog-expansion":      { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "physics-calibration":    { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "benchmark-import":       { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
@@ -198,10 +217,10 @@ last_updated: <!-- AUTO-UPDATED -->
   "growth-experiments":     { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "partnership-outreach":   { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "claude-feature-monitor": { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
-  "self-review":            { "date": "2026-05-25", "outcome": "success", "consecutive_fails": 0 },
+  "self-review":            { "date": "2026-05-26", "outcome": "success", "consecutive_fails": 0 },
   "incident-postmortem":    { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "source-verifier":        { "date": null, "outcome": "never_run", "consecutive_fails": 0 }
 }
 -->
 
-last_run: 2026-05-25T22:41:36Z  <!-- AUTO-UPDATED — used by catchup_detect to decide if we need recovery mode -->
+last_run: 2026-05-26T00:55:32Z  <!-- AUTO-UPDATED — used by catchup_detect to decide if we need recovery mode -->
