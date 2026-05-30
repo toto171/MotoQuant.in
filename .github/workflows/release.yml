@@ -171,7 +171,7 @@ jobs:
 
       # ── Optional: Windows code-signing ──────────────────────────────────
       - name: Import Windows certificate
-        if: runner.os == 'Windows' && secrets.WINDOWS_CERTIFICATE != ''
+        if: runner.os == 'Windows' && vars.ENABLE_WINDOWS_SIGNING == 'true'
         shell: powershell
         run: |
           $cert = [System.Convert]::FromBase64String("${{ secrets.WINDOWS_CERTIFICATE }}")
@@ -184,7 +184,7 @@ jobs:
 
       # ── Optional: macOS code-signing ────────────────────────────────────
       - name: Import macOS certificate
-        if: runner.os == 'macOS' && secrets.APPLE_CERTIFICATE != ''
+        if: runner.os == 'macOS' && vars.ENABLE_MACOS_SIGNING == 'true'
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
