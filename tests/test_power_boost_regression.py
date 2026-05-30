@@ -15,30 +15,19 @@ is_current=1 bike_configs JSON from current spec_to_bike_config output.
 from __future__ import annotations
 
 import copy
-import shutil
-import tempfile
 import unittest
-from pathlib import Path
 
 import motoquant
-from motoquant.database import MotoQuantDB
 from motoquant.database.bridge import db_row_to_config
 from motoquant.models import DynoCurve
 from motoquant.scraper.importer import spec_to_bike_config
 from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
-
-_DB = Path(__file__).parent.parent / "motoquant.db"
+from tests._helpers import live_db_copy
 
 
 def _open_db():
     """Open DB via writable-fs copy (dodges FUSE-mount sqlite I/O errors)."""
-    if not _DB.exists():
-        return None
-    tmp = Path(tempfile.gettempdir()) / "motoquant_test_ro.db"
-    shutil.copy(str(_DB), str(tmp))
-    db = MotoQuantDB(db_path=str(tmp))
-    db.connect()
-    return db
+    return live_db_copy()
 
 
 def _load_db_r15_v3():

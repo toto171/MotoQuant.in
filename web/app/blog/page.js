@@ -133,18 +133,38 @@ export const metadata = {
     "honda k56f platform india",
     "cbr150r indonesia grey market india",
     "se asia 150cc drag",
+    "600cc supersport simulator accuracy",
+    "yzf r6 quarter mile bias",
+    "engine deceleration launch physics motorcycle",
+    "max engine decel rads2",
+    "clutch slip phase 600cc inline four",
+    "motoquant physics calibration",
   ],
   alternates: { canonical: "https://motoquant.in/blog" },
 };
 
 const POSTS = [
   {
+    slug: "600cc-supersport-launch-physics-engine-deceleration",
+    date: "2026-05-30",
+    readTime: "13 min",
+    tags: [
+      "Physics calibration",
+      "600cc supersport",
+      "Inline-four",
+      "Launch model",
+      "Engine deceleration",
+    ],
+    title: "Why 600cc Supersports Were Running 200ms Slow in Our Sim",
+    excerpt:
+      "MotoQuant's 600cc inline-four sims were biased +0.207s slow against Sport Rider and MotoStatz benchmarks. The fix was one number: max_engine_decel_rads2 lifted from 150 to 600 radians per second squared. Why a 600cc inline-four crankshaft physically wants to decelerate four times faster during clutch slip than the old cap allowed, what the GSX-R 600 K6 / R6 13S / CBR600RR 2013 sim ETs look like after the fix, and how K5/R1/Hayabusa reference baselines stayed pinned to four decimals through the change.",
+  },
+  {
     slug: "honda-cbr150r-quarter-mile-physics",
     date: "2026-05-26",
     readTime: "11 min",
     tags: ["Honda", "CBR150R", "K56F", "150cc", "SE Asia", "physics"],
-    title:
-      "Honda CBR150R Quarter-Mile Physics: 17hp SE Asia Sport Single",
+    title: "Honda CBR150R Quarter-Mile Physics: 17hp SE Asia Sport Single",
     excerpt:
       "MotoQuant simulates the Indonesian Honda CBR150R at 18.42s and 130.5 km/h trap — quicker than a stock R15 V4 by 0.08s on a 1hp deficit. Why the 136 kg dry mass and 0.62 Cd beat the heavier R15 V4 fairing, how the CBR150R compares to the Malaysian RS150R underbone and the Y15ZR V2, and the four mods under ₹15,000 that move the needle for India grey-market owners.",
   },
@@ -159,8 +179,7 @@ const POSTS = [
       "Inline-four",
       "physics",
     ],
-    title:
-      "Suzuki GSX-R600 K8 Quarter-Mile Physics: 125hp 600cc Supersport",
+    title: "Suzuki GSX-R600 K8 Quarter-Mile Physics: 125hp 600cc Supersport",
     excerpt:
       "Sport Rider clocked the 2008 GSX-R600 K8 at 10.91s and 204.4 km/h trap at sea level. MotoQuant simulates it at 11.04s under Aamby Valley November conditions. Where the 0.13s gap lives, what the K8 actually gained over the K6 (12 hp, lower Cd, shorter final drive), and a head-to-head against the 2008 R6 + 2007 CBR600RR + 2009 ZX-6R. Plus four India-priced mods that move the needle on a used K8/K9/L0 — the F15-to-F16 sprocket swap is unusual but pays back 0.08s at Aamby Valley specifically.",
   },

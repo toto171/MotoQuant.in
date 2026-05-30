@@ -1191,6 +1191,98 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2008 K8)",
     ),
     # ── end 2026-05-30 third pass ──
+    # ── 2026-05-30 fourth pass — Cycle World SR archive, four catalog-bind
+    # candidates that had no prior benchmark binding. All four pulled from
+    # cycleworld.com/sport-rider/tech/sportbike-performance-numbers/ (the
+    # same authoritative timing-strip archive backing 24+ existing entries).
+    # Verified via WebFetch this session; each entry binds to exactly one
+    # catalog row via _best_benchmark_match (collision probe clean).
+    # Reference baselines preserved: K5 10.0334 / R1 10.2859 / Hayabusa 10.4712.
+    #
+    # Aprilia RSV Mille (998 cc 60° V-twin sport, 2001-2004 chassis) — Sport
+    # Rider / Cycle World sportbike-performance-numbers archive timing-strip
+    # 2002 model: 10.71s @ 129.1 mph (~208 km/h). The 2001-2004 RSV Mille
+    # produced ~128 hp claimed (Rotax-built V2); a Ducati 998 contemporary
+    # with comparable mass and gearing. The 10.71s ET fits the litre-sport
+    # V-twin cluster cleanly alongside the existing Ducati 999 entries (to
+    # be added below) and the 1098 (2007 CW 10.40s). Catalog entry
+    # APRILIA_RSV_MILLE covers 2001-2004; year_hint=2002 binds cleanly via
+    # _best_benchmark_match. No collision with other catalog rows.
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Aprilia",
+        "RSV Mille",
+        2002,
+        10.71,
+        208,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2002)",
+    ),
+    # Aprilia Tuono 1000 R (998 cc 60° V-twin naked, 2006-2010 chassis) —
+    # Sport Rider / Cycle World sportbike-performance-numbers archive
+    # timing-strip 2007 model: 11.048s @ 125.94 mph (~203 km/h). The Tuono
+    # 1000 R is the upright-naked sibling of the RSV Mille (same Rotax V2,
+    # detuned to ~133 hp claimed with revised cam timing and intake). 11.048s
+    # ET fits the litre-V-twin-naked cluster (slower than the faired RSV
+    # Mille by ~0.34s — consistent with the aero penalty of the upright
+    # riding position + handlebar fairing). Catalog entry
+    # APRILIA_TUONO_1000_R covers 2006-2010; year_hint=2007 binds cleanly.
+    # Distinct from the existing Tuono V4 1100 Factory 2016 (10.30s) and
+    # Tuono V4 R APRC 2012 entries — three Tuono generations now have
+    # benchmarks (1000 V2 / V4 1000 / V4 1100).
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Aprilia",
+        "Tuono 1000 R",
+        2007,
+        11.048,
+        203,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2007)",
+    ),
+    # Honda VTR1000 SP2 (RC51 / SP-2, 999 cc 90° V-twin sport-homologation,
+    # 2002-2006 chassis) — Sport Rider / Cycle World sportbike-performance-
+    # numbers archive timing-strip 2005 model: 10.44s @ 133.5 mph (~215 km/h).
+    # The SP2 made ~133 hp claimed (Nicky Hayden's AMA Superbike platform);
+    # 2002 and 2003 SP2 also tested at 10.49s @ 132.7 mph in same archive,
+    # 2005 is the post-update "SP-2" facelift carbureted variant. 10.44s
+    # is cluster-consistent for a litre-V2 homologation special. Catalog
+    # entry HONDA_VTR1000_SP2_RC51 (model_name "VTR1000 SP2 (RC51)") covers
+    # 2002-2006; year_hint=2005 binds cleanly via the 4-token model pattern
+    # with no collision. The parenthesised "(RC51)" suffix in the catalog
+    # name doesn't appear in the CW source but the matcher's word-boundary
+    # split correctly tokenizes the spec name on whitespace + dash so
+    # "VTR1000 SP2" matches "VTR1000 SP2 (RC51)" (verified).
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Honda",
+        "VTR1000 SP2",
+        2005,
+        10.44,
+        215,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2005)",
+    ),
+    # Ducati 999 (998 cc 90° L-twin sport, 2003-2006 chassis) — Sport Rider /
+    # Cycle World sportbike-performance-numbers archive timing-strip 2003
+    # model: 10.29s @ 133.65 mph (~215 km/h). The 999 replaced the 998 in
+    # the Superbike lineage with the Pierre Terblanche redesign; ~136 hp
+    # claimed. The 10.29s ET makes it slightly quicker than the contemporary
+    # GSX-R1000 K3 (10.10s in 2001 K1 trim) — consistent with its 199 kg
+    # dry vs the K3's mass and the 999's longer-stroke torque advantage off
+    # the line. 2005 model also tested at 10.43s @ 135.0 mph + 2005 999R
+    # at 10.10s @ 141.8 mph in same archive; year_hint=2003 selected as
+    # the base-spec 999 entry. Catalog entry DUCATI_999 covers 2003-2006;
+    # year_hint=2003 binds cleanly. Distinct from the 1098 2007 entry
+    # (10.40s @ 230 km/h) and the 1199 Panigale 2012 entry (9.91s @ 235
+    # km/h) — three Superbike generations now have benchmarks.
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Ducati",
+        "999",
+        2003,
+        10.29,
+        215,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2003)",
+    ),
+    # ── end 2026-05-30 fourth pass ──
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

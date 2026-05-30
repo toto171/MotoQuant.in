@@ -302,6 +302,12 @@ export default async function sitemap() {
       priority: 0.84,
     },
     {
+      url: `${SITE_URL}/blog/600cc-supersport-launch-physics-engine-deceleration`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.86,
+    },
+    {
       url: `${SITE_URL}/docs/getting-started`,
       lastModified: now,
       changeFrequency: "monthly",

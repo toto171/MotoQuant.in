@@ -9,8 +9,6 @@ Skipped when motoquant.db is not present (e.g. CI without seeded DB).
 from __future__ import annotations
 
 import os
-import shutil
-import tempfile
 import unittest
 
 from motoquant.llm.resolver import (
@@ -21,6 +19,7 @@ from motoquant.llm.resolver import (
     resolve_bike,
     resolve_venue,
 )
+from tests._helpers import live_db_copy
 
 # ─── Pure-function tests (no DB) ──────────────────────────────────
 
@@ -107,12 +106,7 @@ def _live_db_path():
 
 def _open_db(path: str):
     """Copy DB to OS tmpfile to dodge FUSE WAL issues, then open."""
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".db").name
-    shutil.copy(path, tmp)
-    from motoquant.database.connection import MotoQuantDB
-    db = MotoQuantDB(tmp)
-    db.connect()
-    return db
+    return live_db_copy(path)
 
 
 @unittest.skipUnless(_live_db_path(), "motoquant.db not found")
