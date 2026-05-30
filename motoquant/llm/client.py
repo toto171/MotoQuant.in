@@ -29,8 +29,9 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 
 # ─── Provider table ───────────────────────────────────────────────────────
 _PROVIDERS: dict[str, dict[str, str | None]] = {
@@ -205,7 +206,7 @@ class LLMClient:
             if isinstance(result, dict):
                 return LLMResponse(tool_input=result, stop_reason="tool_use")
             raise TypeError(
-                f"_call_override for 'tool' must return dict or LLMResponse"
+                "_call_override for 'tool' must return dict or LLMResponse"
             )
 
         client = self._get_sdk()

@@ -25,10 +25,11 @@ These are explicitly whitelisted by (manufacturer_fragment, model_fragment).
 
 from __future__ import annotations
 
+# Use -B flag equivalent by ensuring we read from source, not .pyc
+import sys
+
 import pytest
 
-# Use -B flag equivalent by ensuring we read from source, not .pyc
-import importlib, sys
 
 def _fresh_import(mod_path: str):
     """Import a module from source, bypassing .pyc cache."""
@@ -38,7 +39,7 @@ def _fresh_import(mod_path: str):
     spec_obj = importlib.util.find_spec(mod_path)
     if spec_obj is None:
         raise ImportError(mod_path)
-    loader = importlib.util.source_from_spec(spec_obj) if hasattr(spec_obj, 'origin') else None
+    importlib.util.source_from_spec(spec_obj) if hasattr(spec_obj, 'origin') else None
     mod = importlib.import_module(mod_path)
     return mod
 

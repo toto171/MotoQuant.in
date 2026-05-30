@@ -36,6 +36,11 @@ Tier-2 (importer / order channels):
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .retail_adapters import PriceResult
+
 import datetime
 import logging
 import urllib.parse
@@ -365,7 +370,7 @@ def fetch_live_price(
     part_id: int,
     *,
     force: bool = False,
-) -> "PriceResult | None":
+) -> PriceResult | None:
     """
     Fetch a live price for *part_id* and persist it into ``part_prices``.
 
@@ -378,7 +383,7 @@ def fetch_live_price(
     Returns the :class:`PriceResult` on success, None on failure or skip.
     """
     try:
-        from .retail_adapters import PriceResult, fetch_price  # lazy import
+        from .retail_adapters import fetch_price  # lazy import
     except ImportError:
         log.error("retail_adapters not available — cannot fetch live price")
         return None
@@ -394,7 +399,7 @@ def fetch_live_price(
         log.warning("fetch_live_price: part_id=%d not found", part_id)
         return None
 
-    brand, model_name, retailer, retailer_url = (
+    _brand, _model_name, retailer, retailer_url = (
         row["brand"], row["model_name"], row["retailer"], row["retailer_url"]
     )
 
@@ -420,7 +425,7 @@ def fetch_live_price(
             return None
 
     # Hit the retailer
-    result: "PriceResult | None" = fetch_price(retailer_url)
+    result: PriceResult | None = fetch_price(retailer_url)
     if result is None:
         log.info("part_id=%d: live fetch returned None for %s", part_id, retailer_url)
         return None

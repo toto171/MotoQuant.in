@@ -16,9 +16,6 @@ import os
 import pathlib
 import shutil
 import subprocess
-import sys
-
-import pytest
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 SCRIPT = REPO_ROOT / "scripts" / "master_scheduler.sh"

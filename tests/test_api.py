@@ -778,7 +778,6 @@ class TestSurrogatePredict(unittest.TestCase):
 
     def test_inference_latency_under_10ms(self):
         """Surrogate inference should complete in under 10 ms (p95 target is 5 ms)."""
-        import time as _t
         r = self._predict({})
         if r.status_code == 503:
             self.skipTest("Surrogate model not available")

@@ -14,13 +14,9 @@ they run fast (no LLM, no FUSE, no Groq quota burn).
 
 from __future__ import annotations
 
-import json
 import os
-import sqlite3
 import sys
-import tempfile
 import unittest
-from typing import Any
 
 # Project root on sys.path
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -142,10 +138,10 @@ class TestToolSchema(unittest.TestCase):
 class TestTierRecipes(unittest.TestCase):
     def test_recipes_are_progressive(self):
         from motoquant.llm.runner import (
+            _TIER_ALL_OUT,
             _TIER_RECIPES,
             _TIER_STAGE_1,
             _TIER_STAGE_2,
-            _TIER_ALL_OUT,
         )
         # stage_2 is a proper superset of stage_1
         s1_keys = {k for k, _ in _TIER_STAGE_1}
@@ -274,7 +270,6 @@ class TestSummaryPromptStrictness(unittest.TestCase):
 
     def test_compare_prompt_forbids_filler(self):
         from motoquant.llm.parse_query import ParsedSimRequest
-        from motoquant.llm.runner import _summarize_compare
         sys_p = self._get_prompt_via_stub(
             "_summarize_compare",
             ParsedSimRequest(raw_query="K5 vs R1", bike_name="K5"),
@@ -291,7 +286,6 @@ class TestSummaryPromptStrictness(unittest.TestCase):
         self.assertTrue("invent" in s_lower or "actual" in s_lower)
 
     def test_rank_prompt_requires_three_decimals(self):
-        from motoquant.llm.runner import _summarize_rank
         from motoquant.llm.parse_query import ParsedSimRequest
         sys_p = self._get_prompt_via_stub(
             "_summarize_rank",
@@ -305,7 +299,6 @@ class TestSummaryPromptStrictness(unittest.TestCase):
         self.assertIn("3 decimals", sys_p)
 
     def test_explain_prompt_forbids_vague_words(self):
-        from motoquant.llm.runner import _summarize_explain
         from motoquant.llm.parse_query import ParsedSimRequest
         sys_p = self._get_prompt_via_stub(
             "_summarize_explain",
@@ -328,8 +321,8 @@ class TestSummaryPromptStrictness(unittest.TestCase):
 
 class TestRecommendPromptStrictness(unittest.TestCase):
     def test_no_hallucination_clause(self):
-        from motoquant.llm.runner import _summarize_recommend
         from motoquant.llm.parse_query import ParsedSimRequest
+        from motoquant.llm.runner import _summarize_recommend
 
         stub = _StubLLM()
         rec_payload = {

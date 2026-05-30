@@ -11,8 +11,9 @@ All parts use explicit fitment constraints to avoid leaks:
   - Cruiser/ADV → categories constraint or specific manufacturer lists
 """
 
-from ..connection import MotoQuantDB
 from motoquant.database.seed_catalogs import _create_parts_batch
+
+from ..connection import MotoQuantDB
 
 
 def seed_premium_universal(db: MotoQuantDB) -> int:

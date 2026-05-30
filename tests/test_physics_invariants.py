@@ -40,15 +40,18 @@ adaptive-dt mode toggles don't flake the suite).
 
 from __future__ import annotations
 
-import copy
-
 import pytest
 
 # Gate the whole module on Hypothesis. Skips gracefully on any checkout
 # that hasn't installed the dev dependency yet.
 hypothesis = pytest.importorskip("hypothesis")
-from hypothesis import HealthCheck, assume, given, settings  # noqa: E402
-from hypothesis import strategies as st  # noqa: E402
+from hypothesis import (  # noqa: E402
+    HealthCheck,
+    assume,
+    given,
+    settings,
+    strategies as st,  # noqa: E402
+)
 
 from motoquant.defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8  # noqa: E402
 from motoquant.physics import QUARTER_MILE_M, MotoQuantEngine  # noqa: E402

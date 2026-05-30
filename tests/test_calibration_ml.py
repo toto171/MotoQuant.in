@@ -28,21 +28,20 @@ from __future__ import annotations
 import os
 import tempfile
 import unittest
-from copy import deepcopy
 
 import numpy as np
 
 from motoquant.calibration_ml import (
-    Calibrator,
-    CalibratorMetrics,
-    CorrectionTargets,
     FEATURE_DIM,
     FEATURE_NAMES,
     FEATURE_SCHEMA_VERSION,
-    MeasuredRun,
     PERTURBATION_RANGES,
-    SyntheticDataset,
     TARGET_NAMES,
+    Calibrator,
+    CalibratorMetrics,
+    CorrectionTargets,
+    MeasuredRun,
+    SyntheticDataset,
     extract_features,
     feature_dict,
     generate_dataset,
@@ -50,7 +49,6 @@ from motoquant.calibration_ml import (
     train_calibrator,
 )
 from motoquant.defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
-
 
 # ───────────────────────────────────────────────────────────────────
 # CorrectionTargets

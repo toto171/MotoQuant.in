@@ -8,11 +8,9 @@ All methods accept a sqlite3.Connection so callers control transactions.
 from __future__ import annotations
 
 import hashlib
-import secrets
 import sqlite3
 import uuid
 from datetime import datetime, timezone
-from typing import Optional
 
 # ─── Tier ordering (used for comparison) ──────────────────────────────────────
 
@@ -39,8 +37,8 @@ def upsert_subscription(
     razorpay_subscription_id: str,
     tier: str,
     status: str,
-    current_period_end: Optional[str] = None,
-    plan_id: Optional[str] = None,
+    current_period_end: str | None = None,
+    plan_id: str | None = None,
     billing_cycle: str = "monthly",
 ) -> dict:
     """Insert or update a subscription row. Idempotent on rzp subscription_id."""
@@ -79,7 +77,7 @@ def upsert_subscription(
 
 def get_subscription_by_rzp_id(
     conn: sqlite3.Connection, razorpay_subscription_id: str
-) -> Optional[dict]:
+) -> dict | None:
     row = conn.execute(
         "SELECT * FROM subscriptions WHERE razorpay_subscription_id = ?",
         (razorpay_subscription_id,),
@@ -89,7 +87,7 @@ def get_subscription_by_rzp_id(
 
 def get_active_subscription(
     conn: sqlite3.Connection, user_id: int
-) -> Optional[dict]:
+) -> dict | None:
     """Return the most-recent active subscription for this user."""
     row = conn.execute(
         """SELECT * FROM subscriptions
@@ -120,7 +118,7 @@ def count_active_keys(conn: sqlite3.Connection, user_id: int) -> int:
     return row[0] if row else 0
 
 
-def create_license_key(conn: sqlite3.Connection, user_id: int, tier: str) -> Optional[str]:
+def create_license_key(conn: sqlite3.Connection, user_id: int, tier: str) -> str | None:
     """
     Generate and persist a new license key for the user.
     Returns the plaintext key (UUID4), or None if the per-tier quota is reached.
@@ -142,8 +140,8 @@ def create_license_key(conn: sqlite3.Connection, user_id: int, tier: str) -> Opt
 
 
 def validate_license_key(
-    conn: sqlite3.Connection, plaintext_key: str, device_id: Optional[str] = None
-) -> Optional[dict]:
+    conn: sqlite3.Connection, plaintext_key: str, device_id: str | None = None
+) -> dict | None:
     """
     Validate a license key. Updates last_seen_at and optionally binds device_id.
     Returns the license_keys row dict on success, None on invalid/revoked.

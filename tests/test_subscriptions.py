@@ -17,8 +17,7 @@ import json
 import sqlite3
 import unittest
 from datetime import datetime, timedelta, timezone
-from unittest.mock import MagicMock, patch, PropertyMock
-
+from unittest.mock import patch
 
 # ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -29,8 +28,8 @@ def _mem_conn() -> sqlite3.Connection:
 
 
 def _bootstrap(conn: sqlite3.Connection):
-    from motoquant.database.users_repo import ensure_tables as _u
     from motoquant.database.subscriptions_repo import ensure_tables as _s
+    from motoquant.database.users_repo import ensure_tables as _u
     _u(conn)
     _s(conn)
 
@@ -227,6 +226,7 @@ class TestWebhookHandling(unittest.TestCase):
         try:
             from fastapi import FastAPI
             from fastapi.testclient import TestClient
+
             import motoquant.subscriptions as sub_mod
         except ImportError:
             cls.skipTest(None, "fastapi not installed")
@@ -359,6 +359,7 @@ class TestLicenseKeyEndpoints(unittest.TestCase):
         try:
             from fastapi import FastAPI
             from fastapi.testclient import TestClient
+
             import motoquant.subscriptions as sub_mod
         except ImportError:
             cls.skipTest(None, "fastapi not installed")

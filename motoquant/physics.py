@@ -534,7 +534,6 @@ class MotoQuantEngine:
                     I_e_local = (
                         cfg.engine.engine_inertia_kgm2 + cfg.clutch.basket_inertia_kgm2
                     )
-                    peak_hp = cfg.engine.peak_power_hp or 0.0
                     # Category-flavoured over-clutching dispatch.
                     # Reads tier knobs from self._profile (set in _precompute).
                     # Profile.over_clutch_factor==0 reproduces the pre-April-30

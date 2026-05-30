@@ -20,8 +20,7 @@ unset (e.g. an old saved config), the profile resolver falls back to
 `unknown` which reproduces the pre-April-30 behaviour bit-exact.
 """
 
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass
 
 # ---- Category tag enum (string constants — JSON-friendly) -----------------
 CATEGORY_LITRE_SPORT_195P = "litre_sport_195p"
@@ -80,19 +79,19 @@ class CategoryProfile:
     tuck_transition_time_s: float = 2.0
     # Cd ceiling — clamp on the imported aero.cd (catches catalog rows
     # that were inadvertently filled with upright Cd values).
-    cd_ceiling: Optional[float] = None
+    cd_ceiling: float | None = None
     # Cd floor — minimum permissible aero.cd (catches malformed configs).
     cd_floor: float = 0.25
 
     # ── Tire grip ──────────────────────────────────────────────────────
     # mu_peak override (None = honour the value the importer set).
-    mu_peak_override: Optional[float] = None
+    mu_peak_override: float | None = None
     # Pacejka shape factor C — sport tires 1.65 (peakier), commuter
     # 1.45 (rounder peak, more forgiving but lower max).
-    pacejka_C: Optional[float] = None
+    pacejka_C: float | None = None
     # Load sensitivity k — sport radials 3e-5 1/N, commuter bias-ply
     # ~6e-5 1/N (more grip loss with load).
-    load_sensitivity_k: Optional[float] = None
+    load_sensitivity_k: float | None = None
 
     # ── Engine inertia + parasitic ─────────────────────────────────────
     # Multiplier on the displacement-derived engine inertia. 1.0 default;
@@ -104,12 +103,12 @@ class CategoryProfile:
     # ── Drivetrain efficiency ──────────────────────────────────────────
     # Override chain efficiency when None. K5 default 0.97; small-cc
     # bikes with thin chains/sprockets are around 0.94-0.95.
-    chain_efficiency_override: Optional[float] = None
+    chain_efficiency_override: float | None = None
 
     # ── Idle / launch RPM tuning ───────────────────────────────────────
     # Launch RPM as fraction of redline. 0.55 = K5, 0.70 = small-cc
     # (rev higher to compensate for narrower torque band).
-    launch_rpm_factor: Optional[float] = None
+    launch_rpm_factor: float | None = None
 
     # ── Free-form notes (debugging / docs) ─────────────────────────────
     notes: str = ""

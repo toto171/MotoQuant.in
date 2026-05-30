@@ -42,14 +42,12 @@ import logging
 import os
 import sqlite3
 from datetime import datetime, timezone
-from typing import Annotated, Optional
 
-from fastapi import APIRouter, Body, Depends, Header, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 
 from .auth import get_current_user, require_tier
-from .database import subscriptions_repo as _subs
-from .database import users_repo as _users
+from .database import subscriptions_repo as _subs, users_repo as _users
 
 log = logging.getLogger("motoquant.subscriptions")
 
@@ -150,12 +148,12 @@ class LicenseKeyResponse(BaseModel):
 
 class ValidateKeyRequest(BaseModel):
     key: str
-    device_id: Optional[str] = None
+    device_id: str | None = None
 
 
 class ValidateKeyResponse(BaseModel):
     valid: bool
-    tier: Optional[str] = None
+    tier: str | None = None
     message: str
 
 
@@ -165,9 +163,9 @@ class RevokeKeyRequest(BaseModel):
 
 class StatusResponse(BaseModel):
     tier: str
-    subscription_status: Optional[str] = None
-    current_period_end: Optional[str] = None
-    billing_cycle: Optional[str] = None
+    subscription_status: str | None = None
+    current_period_end: str | None = None
+    billing_cycle: str | None = None
     license_key_count: int
 
 

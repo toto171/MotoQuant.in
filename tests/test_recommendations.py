@@ -43,13 +43,11 @@ from motoquant.analysis.recommendations import (
     recommend_build,
 )
 from motoquant.analysis.roi import BuildROIResult, PartROIResult
-from motoquant.database.connection import MotoQuantDB
 from motoquant.defaults import gsxr1000_k5
 
 # Shared seeded-DB singleton (process-scoped, WAL-fallback to DELETE for /tmp).
 # See tests/_helpers.py for the canonical definition.
 from tests._helpers import SeededTestDB as _TestDB  # noqa: E402
-
 
 # ─────────────────────────────────────────────────────────────────
 # 1. BuildProfile enum tests

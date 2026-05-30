@@ -27,7 +27,6 @@ import pathlib
 import re
 import sys
 
-
 _UPDATED_RE = re.compile(r'"_updated"\s*:\s*(?:null|"[^"]*")\s*,')
 _LAST_RUN_RE = re.compile(r"^last_run:[ \t]*(\S[^\n]*)?$", re.MULTILINE)
 _LAST_RUN_COMMENT = (

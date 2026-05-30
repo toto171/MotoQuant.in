@@ -12,9 +12,7 @@ Covers:
   - Reference baseline preservation (K5 / R1 / Hayabusa)
 """
 
-import json
 import os
-import sqlite3
 import sys
 import tempfile
 import unittest
@@ -666,8 +664,8 @@ class TestValidCorrectionFields(unittest.TestCase):
 
     def test_field_labels_covers_all_whitelist(self):
         from motoquant.database.spec_corrections_repo import (
-            VALID_CORRECTION_FIELDS,
             FIELD_LABELS,
+            VALID_CORRECTION_FIELDS,
         )
         for field in VALID_CORRECTION_FIELDS:
             self.assertIn(

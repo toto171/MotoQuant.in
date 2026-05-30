@@ -9,10 +9,9 @@ Skipped when motoquant.db is not present (e.g. CI without seeded DB).
 from __future__ import annotations
 
 import os
-import sqlite3
+import shutil
 import tempfile
 import unittest
-import shutil
 
 from motoquant.llm.resolver import (
     _normalize,
@@ -22,7 +21,6 @@ from motoquant.llm.resolver import (
     resolve_bike,
     resolve_venue,
 )
-
 
 # ─── Pure-function tests (no DB) ──────────────────────────────────
 

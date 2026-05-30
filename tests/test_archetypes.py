@@ -16,7 +16,6 @@ import tempfile
 import unittest
 from typing import Any
 
-
 # Ensure project root on sys.path so `import motoquant.*` works during direct
 # invocation (`python -m unittest tests.test_archetypes`).
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -240,8 +239,8 @@ class TestArchetypeRunnerApplication(_ArchetypeTestBase):
         )
 
     def test_tts_archetype_scales_power(self) -> None:
-        from motoquant.llm.runner import _apply_archetype
         from motoquant.llm.resolver import resolve_archetype
+        from motoquant.llm.runner import _apply_archetype
 
         arc_id, _ = resolve_archetype("TTS Stage 2 Turbo Hayabusa", self.db)
         self.assertIsNotNone(arc_id)
@@ -264,8 +263,8 @@ class TestArchetypeRunnerApplication(_ArchetypeTestBase):
 
     def test_bonneville_uses_power_override(self) -> None:
         """Bonneville H2 sets peak_power_hp_override to 310 (replaces stock)."""
-        from motoquant.llm.runner import _apply_archetype
         from motoquant.llm.resolver import resolve_archetype
+        from motoquant.llm.runner import _apply_archetype
 
         arc_id, _ = resolve_archetype("Bonneville H2 Carbon Track Edition", self.db)
         self.assertIsNotNone(arc_id)
@@ -278,8 +277,8 @@ class TestArchetypeRunnerApplication(_ArchetypeTestBase):
 
     def test_no_archetype_id_is_noop(self) -> None:
         """If archetype_id is None the helper must not touch config."""
-        from motoquant.llm.runner import _apply_archetype
         from motoquant.llm.parse_query import ParsedSimRequest
+        from motoquant.llm.runner import _apply_archetype
 
         cfg = self._make_stub_config()
         original_hp = cfg.engine.peak_power_hp

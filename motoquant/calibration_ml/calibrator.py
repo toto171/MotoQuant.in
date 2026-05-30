@@ -157,7 +157,7 @@ class Calibrator:
     def is_trained(self) -> bool:
         return len(self.models) == len(self.target_names)
 
-    def fit(self, X: np.ndarray, Y: np.ndarray) -> "Calibrator":
+    def fit(self, X: np.ndarray, Y: np.ndarray) -> Calibrator:
         """Train one regressor per target."""
         if X.shape[1] != FEATURE_DIM:
             raise ValueError(
@@ -238,7 +238,7 @@ class Calibrator:
             )
 
     @classmethod
-    def load(cls, path: str) -> "Calibrator":
+    def load(cls, path: str) -> Calibrator:
         with open(path, "rb") as f:
             obj = pickle.load(f)
         # Handle both formats:
@@ -259,7 +259,7 @@ def train_calibrator(
     hyperparams: dict[str, Any] | None = None,
     backend: str = "auto",
     seed: int = 42,
-) -> tuple["Calibrator", CalibratorMetrics]:
+) -> tuple[Calibrator, CalibratorMetrics]:
     """One-shot: split -> fit -> evaluate. Returns (model, test_metrics)."""
     if dataset.n < 10:
         raise ValueError(

@@ -42,7 +42,6 @@ import os
 import sqlite3
 import sys
 
-
 VALID_TIERS = {"exact", "family", "category", "universal"}
 NESTED_FIELDS = {
     "manufacturers", "engine_configs", "displacement_min_cc", "displacement_max_cc",

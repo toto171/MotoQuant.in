@@ -727,8 +727,8 @@ class TestProductionMatcherSpecificity:
     def test_sweep_with_clusters_specificity_score_in_sync(self):
         """Both scripts must keep `_model_specificity_score` in lock-step
         so the matcher behaves identically between sweep paths."""
-        from scripts.validation_sweep import _model_specificity_score as score_a
         from scripts.sweep_with_clusters import _model_specificity_score as score_b
+        from scripts.validation_sweep import _model_specificity_score as score_a
         for s in ["Ninja H2", "Ninja H2 SX", "Z H2", "RSV4 Factory",
                   "YZF-R6", "YZF-R6S", "Ninja H2R", "Street Triple 765 RS"]:
             assert score_a(s) == score_b(s), (

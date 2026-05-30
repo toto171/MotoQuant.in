@@ -33,9 +33,9 @@ import threading
 import time
 import urllib.error
 import urllib.request
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Callable
 from urllib.parse import urlparse
 
 log = logging.getLogger(__name__)

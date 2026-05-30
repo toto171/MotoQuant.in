@@ -21,26 +21,12 @@ Usage::
     python scripts/gearing_audit.py --top-gear-gt 1.05   # lower the threshold
 """
 
-from __future__ import annotations
-
-import argparse
-import json
-import math
-import sys
-import warnings
-import logging
-from pathlib import Path
-
-warnings.filterwarnings("ignore")
+from __future__ import annotationsimport argparseimport jsonimport loggingimport mathimport sysimport warningsfrom pathlib import Pathwarnings.filterwarnings("ignore")
 logging.disable(logging.CRITICAL)
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
-from motoquant.scraper.importer import spec_to_bike_config
-
-
-def _tire_radius_m(size_str: str | None, default: float = 0.315) -> float:
+from motoquant.scraper.importer import spec_to_bike_configfrom motoquant.scraper.known_bikes import ALL_KNOWN_BIKESdef _tire_radius_m(size_str: str | None, default: float = 0.315) -> float:
     """Parse '190/55ZR17' → radius in metres."""
     if not size_str:
         return default
@@ -107,7 +93,7 @@ def audit_all(top_gear_gt: float = 1.10) -> list[dict]:
             else:
                 overall = 0
                 v_max_kph = 0
-        except Exception as e:
+        except Exception:
             overall = 0
             v_max_kph = 0
 
@@ -180,7 +166,7 @@ def print_table(results: list[dict], top_gear_gt: float, show_all: bool) -> None
     for ftype, count in Counter(all_flags).most_common():
         print(f"  {ftype:<30} {count:>4} bikes")
 
-    print(f"\nTop-10 highest top-gear ratios:")
+    print("\nTop-10 highest top-gear ratios:")
     top10 = sorted(results, key=lambda r: -r["top_gear"])[:10]
     for r in top10:
         print(

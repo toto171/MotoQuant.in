@@ -355,7 +355,6 @@ class TestRetailAdapters(unittest.TestCase):
 
     def _make_response(self, body: str, status: int = 200):
         """Build a fake urllib response context manager."""
-        import io
         raw = body.encode("utf-8")
         resp = _mock.MagicMock()
         resp.__enter__ = _mock.MagicMock(return_value=resp)
@@ -410,6 +409,7 @@ class TestRetailAdapters(unittest.TestCase):
     def test_fetch_price_network_error_returns_none(self):
         """Network error should return None gracefully (no exception raised)."""
         import urllib.error
+
         from motoquant.database.retail_adapters import fetch_price
         with _mock.patch("urllib.request.urlopen", side_effect=urllib.error.URLError("timeout")):
             result = fetch_price("https://motomiu.com/product/exhaust/")
@@ -563,7 +563,11 @@ class TestLandingCostMath(unittest.TestCase):
 
     def test_domestic_indian_part(self):
         """Indian-stocked part: sticker × 1.18 + 250 courier."""
-        from motoquant.database.pricing_refresh import estimate_landing_cost_inr, GST_RATE, COURIER_INR
+        from motoquant.database.pricing_refresh import (
+            COURIER_INR,
+            GST_RATE,
+            estimate_landing_cost_inr,
+        )
         sticker = 10_000.0
         expected = sticker * (1 + GST_RATE) + COURIER_INR
         result = estimate_landing_cost_inr(sticker, retailer="Grand Pitstop")
@@ -572,7 +576,10 @@ class TestLandingCostMath(unittest.TestCase):
     def test_us_sourced_part_has_import_duty(self):
         """US-sourced retailer should add 30% import duty on top of GST + courier."""
         from motoquant.database.pricing_refresh import (
-            estimate_landing_cost_inr, GST_RATE, COURIER_INR, IMPORT_DUTY_RATE,
+            COURIER_INR,
+            GST_RATE,
+            IMPORT_DUTY_RATE,
+            estimate_landing_cost_inr,
         )
         sticker = 10_000.0
         base = sticker * (1 + GST_RATE) + COURIER_INR
@@ -583,7 +590,10 @@ class TestLandingCostMath(unittest.TestCase):
     def test_import_only_availability(self):
         """availability='import_only' triggers import duty even for neutral retailer."""
         from motoquant.database.pricing_refresh import (
-            estimate_landing_cost_inr, GST_RATE, COURIER_INR, IMPORT_DUTY_RATE,
+            COURIER_INR,
+            GST_RATE,
+            IMPORT_DUTY_RATE,
+            estimate_landing_cost_inr,
         )
         sticker = 5_000.0
         base = sticker * (1 + GST_RATE) + COURIER_INR

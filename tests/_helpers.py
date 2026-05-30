@@ -22,7 +22,6 @@ from __future__ import annotations
 
 import sqlite3
 import tempfile
-from typing import Optional
 
 from motoquant.database.connection import MotoQuantDB
 
@@ -62,8 +61,8 @@ class SeededTestDB:
                                           run.py entry point)
     """
 
-    _db_path: Optional[str] = None
-    _mdb: Optional[MotoQuantDB] = None
+    _db_path: str | None = None
+    _mdb: MotoQuantDB | None = None
 
     @classmethod
     def get_mdb(cls) -> MotoQuantDB:

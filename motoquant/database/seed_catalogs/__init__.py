@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 
 
 def _create_parts_batch(
-    db: "MotoQuantDB",
+    db: MotoQuantDB,
     parts: list[dict],
     label: str = "parts",
     default_availability: str = "order",

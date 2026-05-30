@@ -14,7 +14,6 @@ from __future__ import annotations
 
 from .bikez import spec_from_dict
 
-
 # ── Norton V4SV (2022-current) ───────────────────────────────────────
 # Hand-built English exotic; 1200cc 72° V4, 200 hp, 193 kg dry.
 # Source: Norton Motorcycles press kit + Visordown 2022 review.

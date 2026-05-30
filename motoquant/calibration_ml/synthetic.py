@@ -24,9 +24,9 @@ Schema v2: 3 targets (cd_factor dropped), inertia_factor range [0.85, 1.20].
 from __future__ import annotations
 
 import copy
-import warnings
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Any, Iterable
+from typing import Any
 
 import numpy as np
 
@@ -56,10 +56,10 @@ PERTURBATION_RANGES: dict[str, tuple[float, float]] = {
 # Environment jitter -- one stddev each. Clipped to physical bounds.
 # track_temp_c added (was missing in v1, causing zero-variance feature).
 ENV_PERTURBATION = {
-    "ambient_temp_c": dict(sigma=5.0, lo=5.0, hi=45.0),
-    "track_temp_c": dict(sigma=5.0, lo=5.0, hi=60.0),
-    "humidity_pct": dict(sigma=15.0, lo=10.0, hi=95.0),
-    "altitude_m": dict(sigma=200.0, lo=0.0, hi=3000.0),
+    "ambient_temp_c": {"sigma": 5.0, "lo": 5.0, "hi": 45.0},
+    "track_temp_c": {"sigma": 5.0, "lo": 5.0, "hi": 60.0},
+    "humidity_pct": {"sigma": 15.0, "lo": 10.0, "hi": 95.0},
+    "altitude_m": {"sigma": 200.0, "lo": 0.0, "hi": 3000.0},
 }
 
 # Rider mass jitter (was always 75.0 in v1 -- zero variance).
@@ -86,7 +86,7 @@ class SyntheticDataset:
         np.savez_compressed(path, X=self.X, Y=self.Y, n=np.array(self.n))
 
     @classmethod
-    def load(cls, path: str) -> "SyntheticDataset":
+    def load(cls, path: str) -> SyntheticDataset:
         d = np.load(path, allow_pickle=False)
         X = d["X"]
         Y = d["Y"]
@@ -134,7 +134,7 @@ def _sample_correction(
     if mode == "one_at_a_time":
         target_names = list(PERTURBATION_RANGES.keys())
         chosen = target_names[int(rng.integers(0, len(target_names)))]
-        factors = {k: 1.0 for k in target_names}
+        factors = dict.fromkeys(target_names, 1.0)
         lo, hi = PERTURBATION_RANGES[chosen]
         # Draw from (lo, 0.97) union (1.03, hi) to avoid near-identity samples
         # that carry zero training signal.

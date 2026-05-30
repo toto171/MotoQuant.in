@@ -12,10 +12,9 @@ from __future__ import annotations
 
 import json
 import sqlite3
-import time
 import unittest
 from datetime import datetime, timedelta, timezone
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 # ─── helpers shared across tests ─────────────────────────────────────────────
 
@@ -49,8 +48,6 @@ class _NoCloseConn:
 # ─── Import the modules under test ───────────────────────────────────────────
 
 from motoquant.database import users_repo as users_repo
-from motoquant.database import subscriptions_repo as subs_repo
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 1. User CRUD
@@ -231,8 +228,9 @@ class TestJwtHelpers(unittest.TestCase):
         self.assertEqual(payload["type"], "refresh")
 
     def test_expired_token_returns_none(self):
-        import motoquant.auth as auth_mod
         import base64
+
+        import motoquant.auth as auth_mod
         payload_dict = {
             "sub": "1",
             "jti": "x",
@@ -264,9 +262,9 @@ class TestRequireTier(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         try:
-            from fastapi import FastAPI
+            from fastapi import Depends as _Depends, FastAPI
             from fastapi.testclient import TestClient
-            from fastapi import Depends as _Depends
+
             from motoquant.auth import require_tier
         except ImportError:
             cls.skipTest(None, "fastapi not installed")
@@ -361,6 +359,7 @@ class TestMagicLinkEndpoint(unittest.TestCase):
     def setUpClass(cls):
         try:
             from fastapi.testclient import TestClient
+
             import motoquant.auth as auth_mod
         except ImportError:
             cls.skipTest(None, "fastapi not installed")

@@ -27,7 +27,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import re
 import sqlite3
 import subprocess
@@ -93,7 +92,7 @@ def _truth_values():
     # Reference baselines (run sim — slow, ~3s)
     try:
         from motoquant import MotoQuantEngine
-        from motoquant.defaults import gsxr1000_k5, yzfr1_4c8, hayabusa_gen1
+        from motoquant.defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
         for name, fn in [("k5", gsxr1000_k5), ("r1", yzfr1_4c8), ("busa", hayabusa_gen1)]:
             try:
                 r = MotoQuantEngine(fn()).run()
@@ -331,7 +330,7 @@ def regenerate_og_card(truth, output_path: Path | None = None, verbose=True) -> 
         for path in candidates:
             try:
                 return ImageFont.truetype(path, size)
-            except (IOError, OSError):
+            except OSError:
                 continue
         return ImageFont.load_default()
 

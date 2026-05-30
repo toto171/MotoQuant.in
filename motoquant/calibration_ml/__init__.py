@@ -37,11 +37,11 @@ the same backend and benchmarks well -- copy that recipe here.
 """
 
 from .calibrator import (
-    Calibrator,
-    CalibratorMetrics,
     DEFAULT_SKLEARN_PARAMS,
     DEFAULT_XGB_PARAMS,
     TARGET_NAMES,
+    Calibrator,
+    CalibratorMetrics,
     train_calibrator,
 )
 from .features import (

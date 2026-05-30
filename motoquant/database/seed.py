@@ -9337,11 +9337,11 @@ def seed_all(db: MotoQuantDB) -> dict:
     present — otherwise fitments will only cover reference bikes.
     """
     from .seed_catalogs.adv_cruiser_exhausts import seed_adv_cruiser_exhausts
+    from .seed_catalogs.drag_prep_specialty import seed_drag_prep_specialty
     from .seed_catalogs.drag_specific import seed_drag_specific
+    from .seed_catalogs.indian_retailer_depth import seed_indian_retailer_depth
     from .seed_catalogs.premium_universal import seed_premium_universal
     from .seed_catalogs.two_stroke import seed_two_stroke
-    from .seed_catalogs.indian_retailer_depth import seed_indian_retailer_depth
-    from .seed_catalogs.drag_prep_specialty import seed_drag_prep_specialty
     from .seed_recommended_fitments import seed_recommended_fitments
 
     seed_reference_bikes(db)

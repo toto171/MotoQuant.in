@@ -33,9 +33,9 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import Annotated, Optional
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, EmailStr
 
@@ -83,7 +83,7 @@ class MagicLinkRequest(BaseModel):
 class MagicLinkResponse(BaseModel):
     message: str
     # In dev/test mode the token is echoed back for convenience.
-    dev_token: Optional[str] = None
+    dev_token: str | None = None
 
 
 class VerifyRequest(BaseModel):
@@ -106,7 +106,7 @@ class MeResponse(BaseModel):
     email: str
     tier: str
     is_active: bool
-    subscription_status: Optional[str] = None
+    subscription_status: str | None = None
     license_keys: list[dict] = []
 
 
@@ -125,7 +125,8 @@ def _make_access_token(user_id: int, email: str, tier: str, jti: str) -> str:
     if _JOSE_AVAILABLE:
         return _jose_jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
     # Fallback: base64-encoded JSON (dev/test only — NOT secure for production)
-    import base64, json
+    import base64
+    import json
     payload["exp"] = payload["exp"].isoformat()
     return "dev." + base64.urlsafe_b64encode(
         json.dumps(payload).encode()
@@ -141,17 +142,19 @@ def _make_refresh_token(user_id: int, jti: str) -> str:
     }
     if _JOSE_AVAILABLE:
         return _jose_jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
-    import base64, json
+    import base64
+    import json
     payload["exp"] = payload["exp"].isoformat()
     return "dev." + base64.urlsafe_b64encode(
         json.dumps(payload).encode()
     ).decode()
 
 
-def _decode_token(token: str) -> Optional[dict]:
+def _decode_token(token: str) -> dict | None:
     """Decode and verify a JWT. Returns the payload dict or None on failure."""
     if token.startswith("dev."):
-        import base64, json
+        import base64
+        import json
         try:
             data = json.loads(base64.urlsafe_b64decode(token[4:] + "=="))
             exp = datetime.fromisoformat(data["exp"])
@@ -249,7 +252,7 @@ def _get_conn() -> sqlite3.Connection:
 
 def get_current_user(
     credentials: Annotated[
-        Optional[HTTPAuthorizationCredentials], Depends(_bearer)
+        HTTPAuthorizationCredentials | None, Depends(_bearer)
     ] = None,
 ) -> dict:
     """

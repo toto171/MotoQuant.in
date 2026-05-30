@@ -11,8 +11,6 @@ import hashlib
 import secrets
 import sqlite3
 from datetime import datetime, timedelta, timezone
-from typing import Optional
-
 
 # --- helpers -------------------------------------------------------------------
 
@@ -33,14 +31,14 @@ def _expires_iso(seconds: int) -> str:
 
 # --- USERS ---------------------------------------------------------------------
 
-def get_user_by_email(conn: sqlite3.Connection, email: str) -> Optional[dict]:
+def get_user_by_email(conn: sqlite3.Connection, email: str) -> dict | None:
     row = conn.execute(
         "SELECT * FROM users WHERE email = ?", (email.lower().strip(),)
     ).fetchone()
     return dict(row) if row else None
 
 
-def get_user_by_id(conn: sqlite3.Connection, user_id: int) -> Optional[dict]:
+def get_user_by_id(conn: sqlite3.Connection, user_id: int) -> dict | None:
     row = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
     return dict(row) if row else None
 
@@ -126,7 +124,7 @@ def create_magic_link(conn: sqlite3.Connection, email: str) -> str:
     return token
 
 
-def consume_magic_link(conn: sqlite3.Connection, token: str) -> Optional[str]:
+def consume_magic_link(conn: sqlite3.Connection, token: str) -> str | None:
     """
     Validate and consume a magic-link token.
     Returns the email on success, None on invalid/expired/already-used token.
@@ -172,7 +170,7 @@ def create_session(conn: sqlite3.Connection, user_id: int, jwt_id: str) -> dict:
     }
 
 
-def get_session_by_jti(conn: sqlite3.Connection, jwt_id: str) -> Optional[dict]:
+def get_session_by_jti(conn: sqlite3.Connection, jwt_id: str) -> dict | None:
     row = conn.execute(
         "SELECT * FROM sessions WHERE jwt_id = ?", (jwt_id,)
     ).fetchone()

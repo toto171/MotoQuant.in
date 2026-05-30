@@ -141,8 +141,8 @@ def _engine_inertia_from_spec(spec: "BikeSpec") -> float:
         "scooter":   0.70,
     }.get(cat, 1.00)
 
-    I = base * k_cat
-    return max(0.005, min(0.090, I))
+    inertia = base * k_cat
+    return max(0.005, min(0.090, inertia))
 
 # Category-based CoG height estimate (mm)
 CATEGORY_COG_HEIGHT = {
@@ -190,8 +190,8 @@ def _basket_inertia_from_spec(spec: "BikeSpec") -> float:
     1000 cc -> 0.010 kg.m^2 (matches K5 hand-built).
     """
     disp_cc = float(spec.displacement_cc) if spec.displacement_cc else 1000.0
-    I = 0.00001 * disp_cc
-    return max(0.0010, min(0.020, I))
+    inertia = 0.00001 * disp_cc
+    return max(0.0010, min(0.020, inertia))
 
 
 

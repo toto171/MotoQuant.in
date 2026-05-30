@@ -94,7 +94,7 @@ class CorrectionTargets:
         )
 
     @classmethod
-    def from_array(cls, arr) -> "CorrectionTargets":
+    def from_array(cls, arr) -> CorrectionTargets:
         """Inverse of to_array. Accepts list, tuple, or ndarray of length 3."""
         if len(arr) != 3:
             raise ValueError(f"CorrectionTargets requires 3 values, got {len(arr)}")

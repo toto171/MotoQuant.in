@@ -46,7 +46,7 @@ src = src.replace(old1, new1)
 
 
 # 2. Replace the over-clutching tier
-EM = "—".encode("utf-8")  # em-dash
+EM = "—".encode()  # em-dash
 old2 = (
     b"                    peak_hp = cfg.engine.peak_power_hp or 0.0\r\n"
     b"                    if peak_hp < 60.0 and slip_speed > 0:\r\n"

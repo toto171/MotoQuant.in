@@ -28,7 +28,6 @@ from motoquant.database.bridge import config_to_db_row
 from motoquant.scraper.importer import spec_to_bike_config
 from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
 
-
 _YEAR_SUFFIX = re.compile(r"\s*\(\d{4}(?:-\d{4})?\)\s*$")
 
 

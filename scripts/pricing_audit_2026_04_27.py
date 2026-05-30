@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Pricing audit for Indian motorcycle parts (424 parts, all categories)."""
 
-import sqlite3
 import json
-from pathlib import Path
-from datetime import datetime
 import shutil
+import sqlite3
+from datetime import datetime
+from pathlib import Path
 
 BRAND_TIER_LADDER = {
     "exhaust": {
@@ -148,7 +148,7 @@ def run_audit(db_tmp, output_json, output_md):
         json.dump(report, f, indent=2, default=str)
     print(f"[+] JSON report: {output_json}")
 
-    md_lines = [f"# Parts Pricing Audit — 2026-04-27\n",
+    md_lines = ["# Parts Pricing Audit — 2026-04-27\n",
                 f"**Date:** {audit_date}  \n**Total parts updated:** {len(changes)} / {before_overall['n']}  \n**Mean price shift:** Rs{before_overall['avg']:.0f} → Rs{after_overall['avg']:.0f}\n",
                 "## Methodology\n- Sources: WebSearch anchors (Akrapovic, Red Rooster, K&N, Power Commander, Brembo, JT, Öhlins, Shorai, Bazzaz)\n- Brand-tier ladder: 4-tier system (A-import, B-import-value, C-Indian-premium, D-Indian-mass)\n- Sanity ranges: min/max bounds per category\n\n## Changes by Category\n"]
 
@@ -179,7 +179,7 @@ if __name__ == "__main__":
         run_audit(str(db_tmp), str(output_json), str(output_md))
         print("[+] Audit complete")
         shutil.copy(db_tmp, db_source)
-        print(f"[+] Updated DB copied back")
+        print("[+] Updated DB copied back")
     except Exception as e:
         print(f"[!] Audit failed: {e}")
         import traceback

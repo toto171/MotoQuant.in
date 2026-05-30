@@ -28,7 +28,6 @@ from motoquant.scraper.importer import import_batch, spec_to_bike_config
 from motoquant.scraper.known_bikes import KAWASAKI_H2_2015, KAWASAKI_H2R_2015
 from motoquant.scraper.known_bikes_extended import EXTENDED_BIKES
 
-
 ARCHETYPES_DDL = """
 CREATE TABLE IF NOT EXISTS bike_archetypes (
     id                       INTEGER PRIMARY KEY AUTOINCREMENT,

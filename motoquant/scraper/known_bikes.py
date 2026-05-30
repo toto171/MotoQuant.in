@@ -12285,4 +12285,5 @@ ALL_KNOWN_BIKES = [
 # on this 12k-line file)
 # ────────────────────────────────────────────────────────────
 from .known_bikes_extended import EXTENDED_BIKES  # noqa: E402
+
 ALL_KNOWN_BIKES.extend(EXTENDED_BIKES)

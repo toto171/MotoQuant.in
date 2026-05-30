@@ -38,7 +38,6 @@ from topspeed_sweep import BENCHMARKS, _match, _sim_spec  # noqa: E402
 
 from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES  # noqa: E402
 
-
 _PARTIAL_DIR = _HERE.parent / "reports" / "sweep_topspeed_partials"
 
 
@@ -198,8 +197,8 @@ def merge_all(out_json: Path, out_md: Path) -> None:
         md.append(f"- **{k}**: {v}")
     md.append("\n## Anomaly flags (per-bike)\n")
     md.append(
-        f"Flagged when: no plateau reached, time-to-plateau outside 8-60s, "
-        f"or displayed plateau power deviates >10% from crank rating.\n"
+        "Flagged when: no plateau reached, time-to-plateau outside 8-60s, "
+        "or displayed plateau power deviates >10% from crank rating.\n"
     )
     md.append(f"**Total flagged: {len(flagged)}**\n")
     if flagged:

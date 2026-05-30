@@ -24,7 +24,6 @@ from motoquant.llm import (
 )
 from motoquant.llm.parse_query import SYSTEM_PROMPT, TOOL_SCHEMA, _resolve_against_db
 
-
 # ───────────────────────────────────────────────────────────────────
 # Helper: build a fake LLMClient with scripted responses
 # ───────────────────────────────────────────────────────────────────

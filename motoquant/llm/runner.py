@@ -1241,7 +1241,7 @@ def _summarize_recommend(
     user = (
         f"User asked: {parsed.raw_query}\n"
         f"Bike: {bike}\n"
-        f"Budget: ₹{budget:,}\n" if budget else f"Budget: (unspecified)\n"
+        f"Budget: ₹{budget:,}\n" if budget else "Budget: (unspecified)\n"
     )
     user = (
         f"User asked: {parsed.raw_query}\n"

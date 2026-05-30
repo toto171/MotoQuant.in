@@ -26,12 +26,12 @@ if str(_REPO_ROOT) not in sys.path:
 import numpy as np
 
 from motoquant.calibration_ml import (
+    FEATURE_NAMES,
+    TARGET_NAMES,
     Calibrator,
     CorrectionTargets,
-    FEATURE_NAMES,
     MeasuredRun,
     SyntheticDataset,
-    TARGET_NAMES,
 )
 from motoquant.defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 from motoquant.physics import MotoQuantEngine

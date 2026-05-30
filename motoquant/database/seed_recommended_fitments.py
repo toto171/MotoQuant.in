@@ -276,12 +276,12 @@ def _classify_tire_compound(mfr: str, model: str, ftype: str) -> str:
 
 
 _TIRE_TEMPLATES = {
-    'drag':      dict(B=11.0, C=1.7,  D=1.85, E=-0.40, mu_peak=1.85, mu_slide=1.45, opt_temp=80, conf=0.55),
-    'race':      dict(B=11.5, C=1.65, D=1.55, E=-0.35, mu_peak=1.55, mu_slide=1.18, opt_temp=72, conf=0.65),
-    'sport':     dict(B=11.0, C=1.60, D=1.42, E=-0.32, mu_peak=1.42, mu_slide=1.05, opt_temp=60, conf=0.62),
-    'commuter':  dict(B=10.5, C=1.55, D=1.18, E=-0.30, mu_peak=1.18, mu_slide=0.92, opt_temp=45, conf=0.55),
-    'adventure': dict(B=10.0, C=1.50, D=1.20, E=-0.30, mu_peak=1.20, mu_slide=0.94, opt_temp=50, conf=0.58),
-    'cruiser':   dict(B=10.0, C=1.55, D=1.22, E=-0.30, mu_peak=1.22, mu_slide=0.96, opt_temp=50, conf=0.58),
+    'drag':      {"B": 11.0, "C": 1.7,  "D": 1.85, "E": -0.40, "mu_peak": 1.85, "mu_slide": 1.45, "opt_temp": 80, "conf": 0.55},
+    'race':      {"B": 11.5, "C": 1.65, "D": 1.55, "E": -0.35, "mu_peak": 1.55, "mu_slide": 1.18, "opt_temp": 72, "conf": 0.65},
+    'sport':     {"B": 11.0, "C": 1.60, "D": 1.42, "E": -0.32, "mu_peak": 1.42, "mu_slide": 1.05, "opt_temp": 60, "conf": 0.62},
+    'commuter':  {"B": 10.5, "C": 1.55, "D": 1.18, "E": -0.30, "mu_peak": 1.18, "mu_slide": 0.92, "opt_temp": 45, "conf": 0.55},
+    'adventure': {"B": 10.0, "C": 1.50, "D": 1.20, "E": -0.30, "mu_peak": 1.20, "mu_slide": 0.94, "opt_temp": 50, "conf": 0.58},
+    'cruiser':   {"B": 10.0, "C": 1.55, "D": 1.22, "E": -0.30, "mu_peak": 1.22, "mu_slide": 0.96, "opt_temp": 50, "conf": 0.58},
 }
 
 

@@ -71,6 +71,7 @@ app = FastAPI(
 # Optional Sentry error tracking. No-ops if SENTRY_DSN is not set OR if
 # sentry-sdk isn't installed. See motoquant.observability for env knobs.
 from motoquant.observability import init_sentry as _init_sentry  # noqa: E402
+
 _init_sentry(app_name="motoquant-api")
 
 # CORS -- allow the Next.js frontend on any origin during early development
@@ -1943,8 +1944,8 @@ def submit_spec_correction(req: SpecCorrectionRequest):
     Returns ``201 Created`` with ``{id, status, message}`` on success.
     """
     from .database.spec_corrections_repo import (
-        SpecCorrectionsRepository,
         VALID_CORRECTION_FIELDS,
+        SpecCorrectionsRepository,
     )
 
     db = _get_db()
@@ -1953,7 +1954,6 @@ def submit_spec_correction(req: SpecCorrectionRequest):
 
     # Validate field_name against whitelist
     if req.field_name not in VALID_CORRECTION_FIELDS:
-        from .database.spec_corrections_repo import FIELD_LABELS
         raise HTTPException(
             422,
             f"field_name {req.field_name!r} is not correctable. "
@@ -2314,9 +2314,8 @@ def resolve_venue(req: VenueResolveRequest):
 # Loaded once at startup into app.state.  Falls back DNN -> XGBoost.
 # ═══════════════════════════════════════════════════════════════════════════
 
-import os as _os
-import time as _time
-from pathlib import Path as _Path
+import time as _time  # noqa: E402
+from pathlib import Path as _Path  # noqa: E402
 
 _SURROGATE = None          # DNNSurrogate | XGBSurrogate | None — set at startup
 _SURROGATE_SOURCE = "none" # "dnn" | "xgb" | "none"
@@ -2402,7 +2401,7 @@ class SurrogateCompareResponse(BaseModel):
 def _check_envelope(fvec):
     """Check each BASE feature against FEATURE_BOUNDS. Returns (ok, violations)."""
     try:
-        from motoquant.analysis.surrogate_data import FEATURE_NAMES, FEATURE_BOUNDS
+        from motoquant.analysis.surrogate_data import FEATURE_BOUNDS, FEATURE_NAMES
         violations = []
         for i, name in enumerate(FEATURE_NAMES):
             if name not in FEATURE_BOUNDS:

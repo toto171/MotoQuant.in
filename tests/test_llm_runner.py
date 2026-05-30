@@ -28,10 +28,8 @@ from motoquant.database.seed import seed_all  # noqa: E402
 from motoquant.llm import (  # noqa: E402
     ChatResult,
     LLMClient,
-    LLMResponse,
     run_chat_pipeline,
 )
-
 
 # ───────────────────────────────────────────────────────────────────
 # Shared fixtures
@@ -247,6 +245,7 @@ class TestChatEndpoint(unittest.TestCase):
         # dependency-key lookup. Hold the api MODULE instead and read
         # `self.api.get_llm_client` -- that returns the unbound function.
         from fastapi.testclient import TestClient
+
         import motoquant.api as _api_module
 
         cls.api = _api_module

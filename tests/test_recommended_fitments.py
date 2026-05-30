@@ -2,6 +2,7 @@
 
 from motoquant.database.seed_recommended_fitments import RECOMMENDED_FITMENTS
 
+
 def test_fitments_count():
     """At least 200 fitments defined."""
     assert len(RECOMMENDED_FITMENTS) >= 200

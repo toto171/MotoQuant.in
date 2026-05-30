@@ -24,7 +24,6 @@ import os
 import sqlite3
 import sys
 
-
 # (bike_model_id, tire_model_id, position, fitment_type, notes)
 ROWS = [
     # ── Hayabusa (id=11) — drag class champion, deserves the full kit ──
