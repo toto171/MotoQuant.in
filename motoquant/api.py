@@ -2347,6 +2347,16 @@ def _load_surrogate():
     except Exception as exc:
         _log.warning("Surrogate XGB load failed: %s", exc)
 
+    try:
+        from motoquant.analysis.surrogate_numpy import NumpySurrogate
+        npz_path = repo_root / "surrogate_numpy.npz"
+        if npz_path.exists():
+            m = NumpySurrogate.load(npz_path)
+            _log.info("Surrogate: loaded numpy MLP from %s", npz_path)
+            return m, "numpy"
+    except Exception as exc:
+        _log.warning("Surrogate numpy load failed: %s", exc)
+
     _log.warning("Surrogate: no model available (place surrogate_dnn.pkl at repo root)")
     return None, "none"
 
