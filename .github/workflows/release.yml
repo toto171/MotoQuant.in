@@ -102,12 +102,16 @@ jobs:
           pip install -e .
           pip install -r desktop/sidecar/requirements-sidecar.txt
 
-      - name: Seed database for bundling
+      - name: Verify bundled database
         shell: bash
         run: |
-          python -m motoquant.run db init
-          python -m motoquant.run import --known-bikes
-          python -m motoquant.run db seed
+          # The tracked motoquant.db (checked out above) IS the canonical seeded
+          # catalog Render/web serves. Re-seeding here is redundant AND fails:
+          # `db seed` raises a FOREIGN KEY IntegrityError when run against the
+          # already-populated DB (a known idempotency artifact). So we just
+          # verify the checked-out catalog instead of regenerating it.
+          test -f motoquant.db || { echo "::error::motoquant.db missing from checkout"; exit 1; }
+          python -c "import sqlite3; n=sqlite3.connect('motoquant.db').execute('select count(*) from bike_models').fetchone()[0]; print(f'Bundling tracked catalog: {n} bikes'); assert n >= 700, f'tracked catalog too small: {n}'"
           echo "DB size: $(du -h motoquant.db | cut -f1)"
 
       - name: Build PyInstaller sidecar
