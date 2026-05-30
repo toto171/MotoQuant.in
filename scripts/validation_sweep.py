@@ -948,6 +948,99 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         "MotoStatz (Dragy, stock instrumented Monster 1200/1200S)",
     ),
     # ── end 2026-05-26 second pass ──
+    # ── 2026-05-30 benchmark-import agent ─────────────────────────────────────
+    # Two high-confidence MotoStatz Dragy instrumented adds. Both articles
+    # explicitly name the Dragy GPS device in the article body (verified via
+    # WebFetch). Same source bar already established by the ZX-9R F-gen,
+    # CBR 600RR PC40B, Ninja 1000SX, BMW S1000R, CBR650R, Monster 937,
+    # Tracer 9 GT, VFR800F Interceptor, Tuono 660, and FTR 1200 S entries
+    # above. Catalog year ranges verified to include year_hint via
+    # find_spec(). Pre-commit sim sanity (production spec_to_bike_config
+    # path) — both sit within the supersport-600 cluster band:
+    #   * ZX-6R 636 2019-2024: sim 10.966s vs bench 10.74s — Δ +0.226s
+    #   * YZF-R6 2017-2022:    sim 11.286s vs bench 10.89s — Δ +0.396s
+    # Both deltas are well within the 600cc-supersport cluster's documented
+    # +0.5-1.0s positive bias (per CLAUDE.md note that 600cc class is
+    # systematically slow due to high-RPM screamer engines without per-bike
+    # dyno injection). No collision with existing benchmarks per matcher
+    # specificity logic (_best_benchmark_match) — both bind cleanly via
+    # year-range + word-boundary token match. No duplicates with prior
+    # 2026-05-24 / 2026-05-25 / 2026-05-26 passes (verified via
+    # _best_benchmark_match probe).
+    # Rejected this pass (all logged in report):
+    #   * Ducati Multistrada V4 — MotoStatz article DOES NOT explicitly name
+    #     Dragy device in body; fails project bar.
+    #   * Suzuki GSX-S750 — MotoStatz article DOES NOT explicitly name Dragy
+    #     device; fails project bar.
+    #   * Ducati Diavel (1198cc L-twin) — MotoStatz Dragy data exists but the
+    #     1198cc Testastretta L-twin variant is NOT in catalog (only Diavel
+    #     V4 1158cc is, different engine architecture).
+    #   * Kawasaki ZX-10R 2008-2010 — MotoStatz article body does not name
+    #     Dragy device; cluster already well-covered by ZX-10R 2004/2011/2021
+    #     entries already in list.
+    #   * Honda CBR1100XX Super Blackbird — confirmed instrumented data
+    #     exists at MotoStatz (10.38s @ 137.8 mph, Dragy named) but NOT in
+    #     catalog; per anti-fabrication rule do not add benchmark without
+    #     catalog spec to bind.
+    #   * Triumph Speed Triple 1200 RS, BMW M 1000 R, Ducati Streetfighter
+    #     V2, BMW S 1000 XR, Yamaha MT-09 SP, Aprilia Tuono V4 1100 Factory
+    #     — no MotoStatz/Cycle World/Sport Rider/MCN instrumented data
+    #     located in honest search this pass.
+    #
+    # Kawasaki Ninja ZX-6R 636 (636 cc I4 supersport, 2019-2024 facelift) —
+    # MotoStatz Dragy instrumented stock test: 10.74s @ 134 mph (~216 km/h).
+    # Article explicitly names device: "The Dragy benchmark 60-130 mph time
+    # is also incredibly competitive at just 6.60 seconds and can be achieved
+    # starting in first gear." Stock confirmed: "a stock 600 cc supersport
+    # motorcycle" and "stock supersport 600." Catalog entry KAWASAKI_NINJA_
+    # ZX6R 2019-2024 covers the post-facelift 636 cc generation with revised
+    # bodywork + Euro 4 ECU; year_hint=2019 matches cleanly. Distinct from
+    # the existing "Ninja ZX-6R" 2009 Sport Rider 10.69s @ 211 km/h entry
+    # (2009-2012 pre-facelift generation, different chassis tokens via the
+    # year-range filter). The 10.74 vs 10.69 spread (older bike marginally
+    # faster) is consistent with the 2019+ adding ~5 kg of Euro-4 emissions
+    # hardware while keeping the same 130 hp peak.
+    # URL: https://motostatz.com/kawasaki-zx-6r-636-acceleration-top-speed/
+    # Methodology URL: https://motostatz.com/how-we-test-motorcycles/
+    (
+        "Kawasaki",
+        "Ninja ZX-6R",
+        2019,
+        10.74,
+        216,
+        "MotoStatz (Dragy, stock instrumented 2019+ 636cc)",
+    ),
+    # Yamaha YZF-R6 4th-gen (599 cc I4 supersport, 2017-2020 facelift, sold
+    # as catalog row 2017-2022 covering the entire pre-discontinuation final
+    # generation) — MotoStatz Dragy instrumented stock test: 10.89s @ 133 mph
+    # (~214 km/h, rounded down to 214). Article explicitly names device: "The
+    # famous Dragy 60-130 mph time is dispatched in a very respectable 6.86
+    # seconds." Article tests the "fourth generation" YZF-R6 with photo
+    # caption referencing 2020 model year. Stock implied (article discusses
+    # potential modifications as optional enhancements rather than already-
+    # applied: "If you need more torque lower down, the latest YZF-R6
+    # responds extremely well to a 3-4 system that removes the restrictive
+    # catalytic converter"). Catalog entry YAMAHA_YZFR6 2017-2022 covers the
+    # 4th-gen facelift; year_hint=2017 matches cleanly. Distinct from the
+    # existing "YZF-R6 2007 Sport Rider 10.854s @ 205 km/h" entry (2C0
+    # generation, different chassis era) and the "YZF-R6 (13S) 2011 Sport
+    # Rider 10.87s @ 207 km/h" entry (13S generation 2008-2016) — three
+    # generations now have benchmarks (2C0 / 13S / 4th-gen 2017+). Cluster
+    # consistency: 10.854 (2C0 2007) → 10.87 (13S 2011) → 10.89 (4th-gen
+    # 2020) — the post-2017 emissions-restricted R6 is only marginally
+    # slower than the older variants per its identical 118 hp claim with
+    # +2 kg curb weight.
+    # URL: https://motostatz.com/yamaha-yzf-r6-acceleration/
+    # Methodology URL: https://motostatz.com/how-we-test-motorcycles/
+    (
+        "Yamaha",
+        "YZF-R6",
+        2017,
+        10.89,
+        214,
+        "MotoStatz (Dragy, stock instrumented 4th-gen 2017+)",
+    ),
+    # ── end 2026-05-30 pass ──
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

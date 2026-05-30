@@ -900,8 +900,12 @@ Write `/blog/harley-nightster-rh975-quarter-mile-physics` — physics breakdown 
 
 ---
 
-## INSTRUCTION — 2026-05-25 — [self-review] [needs-approval] audit master_scheduler.sh for INBOX queue_weight parsing
+## DONE — 2026-05-25 — [self-review] [needs-approval] audit master_scheduler.sh for INBOX queue_weight parsing
 [opportunistic]
+
+**Audit completed by M7 2026-05-26 (Finding 2.1).** The hypothesis was confirmed: `scripts/master_scheduler.sh:90` defines `parse_inbox_urgent()` but its output only PRINTS in the dispatch plan (line 308-313), never folded into agent scores. Line 207-214 only matches `@agent` syntax (zero such mentions in current inbox; all self-review-queued items use `[agent]` bracket-tag syntax instead). Result confirmed: `[urgent]` tag IS decorative; no agent gets queue_bonus from urgent items.
+
+**Marked DONE 2026-05-30 by self-review M8** for admin bookkeeping consistency — the audit work is complete; the fix is now tracked at INBOX:939 (M7's queued exact-diff ticket), which M8 has promoted to `[urgent]` this run.
 
 **Attribution:** self-review M6 2026-05-25, Finding 2.2. INBOX:308 has been `[urgent]` for 1 day and INBOX:617 (Railway offline) for 8 days. Neither triggered the +50 queue_weight boost described in `docs/AUTONOMOUS_OPERATIONS_PLAYBOOK.md` §2. Hypothesis: `scripts/master_scheduler.sh` does not parse severity tags at all — the `queue_weight` subsystem is unimplemented.
 
@@ -936,7 +940,9 @@ fi
 
 ---
 
-## INSTRUCTION — 2026-05-26 — [self-review] [needs-approval] fix master_scheduler.sh queue_bonus to honour [urgent] tag
+## INSTRUCTION — 2026-05-26 — [self-review] [urgent] [needs-approval] fix master_scheduler.sh queue_bonus to honour [urgent] tag
+
+**Severity promoted from `[needs-approval]` → `[urgent] [needs-approval]` by self-review M8 2026-05-30 (Proposal #2).** Reason: 4 days sat un-actioned during host-machine gap. This is the single highest-impact pending kaizen item because it structurally unblocks the `[urgent]` tag mechanism every other self-review run has been queuing items into. Single-knob severity bump, same pattern as M5's successful INBOX:308 `[opportunistic] → [urgent]` promotion which landed in 1 day.
 
 **Attribution:** self-review M7 2026-05-26, Finding 2.1. M6 queued INBOX:897 to AUDIT this; the audit found the bug. `scripts/master_scheduler.sh:90` defines `parse_inbox_urgent()` but its output is only printed in the dispatch plan (line 308-313), never folded into agent scores. `scripts/master_scheduler.sh:207-214` looks for `f"@{agent}"` mentions, but the inbox uses `[agent]` bracket-tag syntax for all self-review-queued items (zero `@agent` mentions in current 26-item inbox). Result: `[urgent]` and per-agent-tag are both decorative; agents never get a queue_bonus boost.
 
@@ -997,6 +1003,31 @@ queue_bonus = 50 * inbox_count_per_agent.get(agent, 0) + 50 * inbox_urgent_per_a
 4. If already DISTINCT: confirm the displayed value reads ~489 and patch the website if stale
 
 **Deliverable:** One-paragraph finding in the next session report. If a fix is required, commit it as part of the same session that handles INBOX:879 cleanup.
+
+---
+
+## INSTRUCTION — 2026-05-30 — [self-review] [opportunistic] [needs-user] open question: relax auto-apply boundary for low-blast-radius self-review script edits?
+
+**Attribution:** self-review M8 2026-05-30, Finding 2.3 + Proposal #3. M-class observation: in 7 historical M-runs, the auto-apply boundary has produced 5 weight tweaks (single-knob, all held) and 2 INBOX bookkeeping flips. **Zero script/code edits have ever auto-applied**, by design. But the most impactful pending kaizen item right now (INBOX:939 — queue_bonus fix) has sat 4 days untouched because it's a 5-line Python edit in `scripts/master_scheduler.sh` and the auto-apply table forbids script edits.
+
+**The question for the user:** is the strict-no-script-edit policy still the right default, OR should `[self-review]` proposals that meet specific criteria qualify for auto-apply?
+
+**Possible criteria worth considering (if loosening):**
+1. Full unified diff included in the INSTRUCTION
+2. Reversion command also included (e.g., `git revert <sha>`)
+3. Scope strictly limited to: `scripts/master_scheduler.sh`, `scripts/scheduler_weights.json`, `scripts/agents/*.md`, `STATUS.md` (i.e., kaizen-self-improvement surface only)
+4. Auto-revert if no DISPATCH_OUTBOX entry acknowledges the change within 48h
+5. M-class self-review explicitly attributes to a specific Finding number and previous observed event
+
+**Possible response options:**
+- (a) Keep current strict policy — accept slower convergence on script-edit kaizen items
+- (b) Allow auto-apply when ALL 5 criteria above are met
+- (c) Allow auto-apply for `scripts/scheduler_weights.json` edits beyond ±10 (e.g., adding/removing best_dow slots) but keep `.sh`/`.py` strictly manual
+- (d) Other
+
+**Cost of inaction:** every self-review run that finds a system-self-improvement bug requiring a code edit queues it to INBOX, where it waits for the next host-machine availability window. The 4-day gap this week was 4 days where INBOX:939 (the loop's primary structural lever) could have been auto-resolved if policy allowed.
+
+**This is not a fix proposal — it is an open question.** Please respond in DISPATCH_OUTBOX or as an INSTRUCTION update. M-class self-review will hold to current policy until guidance lands.
 
 ---
 

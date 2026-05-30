@@ -104,6 +104,126 @@ class CompareDict(TypedDict):
 
 
 # ───────────────────────────────────────────────────────────────────
+# RankResult — typed shape returned by _run_rank on success
+# ───────────────────────────────────────────────────────────────────
+
+
+class _RankEntry(TypedDict):
+    """One row in the ``RankResult.top`` list.
+
+    Field names are pinned by `_summarize_rank` (which reads
+    ``rank``, ``manufacturer``, ``model``, ``displacement_cc``,
+    ``peak_power_hp``, ``et_s``, ``trap_kmh``) and by the validation
+    corpus harness — do NOT rename without updating both consumers.
+    """
+
+    rank: int
+    bike_id: int | None
+    manufacturer: str | None
+    model: str | None
+    year_from: int | None
+    displacement_cc: float | None
+    peak_power_hp: float | None
+    dry_mass_kg: float | None
+    et_s: float | None
+    trap_kmh: float | None
+    et_60ft_s: float | None
+    source: str | None
+
+
+class RankResult(TypedDict):
+    """Full rank-intent result dict.
+
+    Shape pinned by `_summarize_rank` (which reads ``top``, ``filter``,
+    ``matches``, ``candidates_simulated``) and the validate_chat_corpus
+    harness (which reads ``top``) — do NOT rename without updating both.
+    """
+
+    filter: dict[str, Any]      # subset of parsed-query kw (limit stripped)
+    matches: int                # total catalog rows matching the filter
+    candidates_simulated: int   # subset actually run through the engine
+    top: list[_RankEntry]       # top-N sorted by sim ET ascending
+
+
+# ───────────────────────────────────────────────────────────────────
+# RecommendResult — typed shape returned by _run_recommend on success
+# ───────────────────────────────────────────────────────────────────
+
+
+class _RecommendPart(TypedDict):
+    """One row in the ``RecommendResult.parts`` list.
+
+    Field names are pinned by `_summarize_recommend` (which reads
+    ``label``, ``brand``, ``name``, ``price_inr``, ``fitment_reason``,
+    ``category``, ``category_display``) — do NOT rename.
+    """
+
+    part_id: int | None
+    label: str | None
+    name: str | None
+    brand: str | None
+    category: str | None
+    category_display: str | None
+    price_inr: float | None
+    fitment_reason: str | None
+
+
+class _RecommendTire(TypedDict):
+    """One row in the ``RecommendResult.tires`` list.
+
+    Field names are pinned by `_summarize_recommend` tire block (which
+    reads ``manufacturer``, ``model``, ``size``, ``mu_peak``,
+    ``position``, ``fitment_type``, ``price_inr``).
+    """
+
+    tire_model_id: int | None
+    manufacturer: str | None
+    model: str | None
+    size: str | None
+    compound: str | None
+    mu_peak: float | None
+    position: str | None
+    fitment_type: str | None
+    price_inr: float | None
+
+
+class RecommendResult(TypedDict):
+    """Full recommend-intent result dict.
+
+    Shape pinned by `_summarize_recommend` (which reads ``bike_name``,
+    ``budget_inr``, ``parts``, ``tires``, ``total_inr``) and the
+    validate_chat_corpus harness (which reads ``build_tier`` and
+    ``parts``) — do NOT rename without updating both.
+    """
+
+    bike_id: int | None
+    bike_name: str | None
+    build_tier: str             # "stage_1" | "stage_2" | "all_out"
+    budget_inr: float | None    # user-requested budget (None = unspecified)
+    effective_budget_inr: float # tier-default fallback when budget_inr is None
+    parts: list[_RecommendPart]
+    tires: list[_RecommendTire]
+    total_inr: float            # sum of parts + tires price_inr
+
+
+# ───────────────────────────────────────────────────────────────────
+# ExplainResult — typed shape returned by _run_explain on success
+# ───────────────────────────────────────────────────────────────────
+
+
+class ExplainResult(TypedDict):
+    """Full explain-intent result dict.
+
+    Note: the LLM-generated text answer is stored in ``ChatResult.summary``;
+    ``ExplainResult`` only carries the structured metadata about whether the
+    answer was grounded in a sim run.
+    """
+
+    has_sim_grounding: bool     # True iff a sim was run to anchor the explanation
+    bike_id: int | None         # bike resolved from the parsed query (or None)
+
+
+# ───────────────────────────────────────────────────────────────────
 # ChatResult — structured return value
 # ───────────────────────────────────────────────────────────────────
 
@@ -139,9 +259,9 @@ class ChatResult:
     # Intent-specific payloads
     sim_result: SimDict | None = None  # simulate
     compare_result: CompareDict | None = None  # compare
-    rank_result: dict[str, Any] | None = None  # rank
-    recommend_result: dict[str, Any] | None = None  # recommend
-    explain_result: dict[str, Any] | None = None  # explain
+    rank_result: RankResult | None = None  # rank
+    recommend_result: RecommendResult | None = None  # recommend
+    explain_result: ExplainResult | None = None  # explain
 
     summary: str | None = None
 
@@ -1010,7 +1130,7 @@ def _summarize_compare(
 
 
 def _summarize_rank(
-    parsed: ParsedSimRequest, rk: dict[str, Any], client: LLMClient | None
+    parsed: ParsedSimRequest, rk: RankResult, client: LLMClient | None
 ) -> str:
     sys_p = (
         "You are MotoQuant. Summarize a ranked top-N drag list. Format: "
@@ -1047,7 +1167,7 @@ def _summarize_rank(
 
 
 def _summarize_recommend(
-    parsed: ParsedSimRequest, rec: dict[str, Any], client: LLMClient | None
+    parsed: ParsedSimRequest, rec: RecommendResult, client: LLMClient | None
 ) -> str:
     """Build a strict, hallucination-resistant build-sheet prompt.
 

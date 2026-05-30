@@ -25,9 +25,9 @@ last_updated: <!-- AUTO-UPDATED -->
 
 | KPI | Now | Q-end target | Direction | Last-updated |
 |---|---|---|---|---|
-| Bike catalog count | 790 raw / **489 distinct** / 301 phantom — INBOX:308 [closed via `31b36a4` 2026-05-25]; ghost-row DELETE queued at INBOX:879 `[needs-user]` | 500+ by Q4 | ↑ | 2026-05-26 |
+| Bike catalog count | 793 raw / **492 distinct** / ~301 phantom — +3 real / 0 phantom growth during 2026-05-26→30 silent gap (M6 fix holds); ghost-row DELETE queued at INBOX:879 `[needs-user]` | 500+ by Q4 | ↑ | 2026-05-30 |
 | Validated ETs ±0.20s | 47% | 60% Q3 / 70% Q4 | ↑ | 2026-05-04 |
-| Benchmark sources | **112** (79 → 91 → 112 over 14 days; +21 this week; A3 best-streak ever; 8th pass = defensible null) | 100+ ✓ MET | flat | 2026-05-26 |
+| Benchmark sources | **114** (112 → 114 over 4 days; pre-gap pace stalled by host downtime) | 100+ ✓ MET | flat | 2026-05-30 |
 | Indexed pages (motoquant.in) | (TBD) | 50+ Q2 / 200+ Q4 | ↑ | (need GA4) |
 | Indian organic sessions/mo | (TBD) | 500 Q2, 5k Q4 | ↑ | (need GA4) |
 | Active simulator users/mo | (TBD) | 200 / 2k / 10k cadence | ↑ | (need analytics) |
@@ -41,6 +41,28 @@ last_updated: <!-- AUTO-UPDATED -->
 ## Last 7 days — session-level digest
 
 <!-- self-review weekly summary lives here. Updated every Sunday. -->
+
+### Week of 2026-05-23 → 2026-05-30 (self-review M8 — Saturday, autonomous catchup-mode)
+
+**Dominant signal:** **4-day silent gap (2026-05-27 → 2026-05-30 ~16:30Z), 313h since last_run.** NOT an agent failure — host-machine downtime (user internship schedule). Resilience layer correctly identified the gap and dispatched a single catchup-mode session (this M8) instead of stacking 4 days of agent slots. **System-working-as-designed signal under real failure conditions.**
+
+**KPI moves:** DB raw=790→**793**, distinct=489→**492** (+3 real, 0 phantom growth — **M6 fix `31b36a4` held through gap**). BENCHMARKS 112→**114** (+2). Most KPIs flat by definition during gap.
+
+**Loop state:** −1 DONE (INBOX:903 closed), +0 new tickets (only severity flip on INBOX:939). 25 effective INSTRUCTIONs pending — backlog stable. M7's queue_bonus fix (INBOX:939) **highest-impact pending kaizen item**; promoted `[urgent]` this run after sitting 4 days during gap.
+
+**Meta-finding:** **Auto-apply boundary is the loop's primary bottleneck.** 0 of 7 historical M-runs have auto-applied a script edit (by design). Queued open question to user: should low-blast-radius `[self-review]` script edits qualify for auto-apply with auto-revert?
+
+**Auto-applied this run (M8):** (1) INBOX:903 → DONE (admin bookkeeping; audit completed by M7). (2) INBOX:939 severity flipped to `[urgent] [needs-approval]`. **No weight changes** — 4-day gap blocks observation of M7's growth-experiments demote; observe-only week.
+
+**Queued by M8 (1):** Open question to user re: script-edit auto-apply policy (Finding 2.3).
+
+**Railway:** day 13 of /api/health 404 outage (INBOX:140 `[urgent] [blocking]` since 2026-05-17). Pure `[needs-user]` — requires billing dashboard access.
+
+**0 commits in 4-day gap. K5/R1/Hayabusa baselines preserved (last verified at HEAD `13ff312` 2026-05-26).**
+
+**Cooldown:** per agent-template `:64`, next autonomous self-review not before **2026-06-04** (5 days). Catchup-mode override of M7's 2026-05-31 floor justified by Finding 2.1.
+
+---
 
 ### Week of 2026-05-19 → 2026-05-26 (self-review M7 — Tuesday, user-dispatched)
 
@@ -195,6 +217,7 @@ last_updated: <!-- AUTO-UPDATED -->
 - **2026-05-24 M5:** `catalog-expansion.base` 50 → 40. Reason: 43/47 substantive commits this week (91 %) were catalog-expansion; M4 prompt-fix gate worked (DB 345 → 751) but uncovered 268-row duplicate-inflation bug (INBOX:308) — marginal value of each new catalog run is now below marginal value of a starved-agent slot (claude-feature-monitor / benchmark-import both `never_run`). Single-knob, within ±10 envelope. Also auto-applied: INBOX:308 tag `[opportunistic]` → `[urgent]` (mechanical severity flip, same pattern as M4's successful 605→674 promotion that landed in 3 days). Attribution: `reports/self_review_2026-05-24.md` Findings 2.1 + 2.2.
 - **2026-05-25 M6:** `benchmark-import.base` 40 → 50. Reason: 5 consecutive benchmark-import runs this week (first time agent ran; best week ever); KPI benchmark count moved 79 → ~91; 3+ consecutive wins trigger = promote per playbook §5. Single-knob, within ±10 envelope. Revert to 40 if 2 consecutive null-result weeks. Attribution: `reports/self_review_2026-05-25.md` Finding 2.3.
 - **2026-05-26 M7:** `growth-experiments.base` 30 → 20. Reason: 15 A/B variants launched in 7 days (EXP-005..EXP-019) with zero measurement layer (KPIs `Indian organic sessions/mo` + `Active simulator users/mo` both `TBD`). Over-production relative to consumption. Single-knob, within ±10 envelope. Revert to 30 once GA4/PostHog wired and at least one EXP has measured outcome. Attribution: `reports/self_review_2026-05-26.md` Proposal #5.
+- **2026-05-30 M8:** NO weight changes auto-applied. Reason: 4-day silent gap (2026-05-26 → 2026-05-30) blocked observation of M7's growth-experiments demote effect (zero new EXP launches in window). Observe-only week to give M9 a clean baseline. Auto-applied bookkeeping only: (1) INBOX:903 → DONE (M7 superseded by INBOX:939). (2) INBOX:939 severity `[needs-approval]` → `[urgent] [needs-approval]` to surface in next dispatch plan. Attribution: `reports/self_review_2026-05-30.md` Findings 2.2 + 2.4.
 
 ---
 
@@ -203,7 +226,7 @@ last_updated: <!-- AUTO-UPDATED -->
 <!-- LAST_RUN_JSON
 {
   "_schema": 1,
-  "_updated": "2026-05-26T04:40:15Z",
+  "_updated": "2026-05-30T16:48:30Z",
   "catalog-expansion":      { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "physics-calibration":    { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
   "benchmark-import":       { "date": null, "outcome": "never_run", "consecutive_fails": 0 },
@@ -223,4 +246,4 @@ last_updated: <!-- AUTO-UPDATED -->
 }
 -->
 
-last_run: 2026-05-26T04:40:15Z  <!-- AUTO-UPDATED — used by catchup_detect to decide if we need recovery mode -->
+last_run: 2026-05-30T16:48:30Z  <!-- AUTO-UPDATED — used by catchup_detect to decide if we need recovery mode -->
