@@ -1843,3 +1843,22 @@ Postflight deploy check timed out after 180s
 > **Fixes:** simulator picker limit 500 -> 2000 (full 796-bike catalog selectable; Hayabusa was unreachable); API le=1000 -> le=5000 on bikes/tires/parts; simulator SEO 412 -> 796 bikes; removed 3 JSX-text backslash-apostrophe artifacts in Nightster blog; session_postflight.sh health-check Railway -> Render + 90s timeout; Groq chat key set in Render env.
 > **Verified live:** quick sim (Hayabusa 10.492s), full sim (6 charts), Ask-MotoQuant chat (Groq), /bikes (796), /api/health. Baselines exact: K5 10.0334 / R1 10.2859 / Hayabusa 10.4712.
 > **Open / user-action:** Render sleeps after 15 min idle (keepalive mitigates during IST day); GitHub PAT expires ~June 3; consider server-side bike search if catalog grows past ~2000. Desktop app work next.
+
+## 2026-05-30T21:00:49+00:00 — session 1780173053-634
+
+**Commit:** `81d237d063b1df6bc9067de04e65bfdf0126fc99`
+**Files:** `motoquant/llm/runner.py reports/tech_debt_venue_env_dedup_2026-05-30.md scripts/validation_sweep.py reports/benchmark_import_2026-05-30_third_pass.md motoquant/category_profiles.py reports/physics_calibration_2026-05-30.md web/app/page.js web/public/og-image.png STATUS.md`
+
+### SESSION — 3-agent kaizen dispatch (Saturday rotation)
+
+Three agents shipped in parallel against a fresh clone at `/tmp/mq-session-1780173040-634/repo`. Postflight push initially rejected (remote moved during the session); rebased onto `615d058` (surrogate-free-tier + Tauri-updater-disabled commits), re-verified baselines exact, re-pushed. Render `/api/health` returned `{"status":"ok","database":"connected","bike_count":796}`.
+
+- **technical-debt-pass (A9):** extracted `_resolve_venue_env` helper in `motoquant/llm/runner.py` — 3 duplicated 7-9 line `venues.to_environment` blocks at lines 556/979/1526 collapsed to a single call. -22/+24 LOC. LLM-runner test failures count unchanged (7 fail / 6 err / 74 pass — all pre-existing carryforwards: missing `fastapi` optional dep + 3 chat-resolver bike-name mismatches). 222/222 focused tests pass.
+- **benchmark-import (A3):** +6 instrumented Cycle World `sportbike-performance-numbers` ETs to `scripts/validation_sweep.py` BENCHMARKS: YZF-R1 2002, CBR929RR 2000, CBR900RR 1998, ZX-10R 2006 C1, FZ1 Fazer 2007, GSX-R 750 K8 2008. Closes the April-27-PM follow-up gap: ZX-10R C1 was falling through to the 10.30s 2004 figure. Matched-N 115 → 121.
+- **physics-calibration (A2):** `CATEGORY_MID_TWIN_500_700.max_engine_decel_rads2: 150 → 600` in `motoquant/category_profiles.py`. mid_twin_500_700 mean|Δ| **0.211s → 0.130s** (-81 ms, bias zero-crossed +0.207 → +0.027). Top-10 mean|Δ| improved 0.0114s → 0.0094s (-20%). No DB reseed required (runtime profile lookup, not serialised).
+
+**Reference baselines preserved EXACTLY: K5 10.0334s / R1 10.2859s / Hayabusa 10.4712s, Δ +0.0000s on all three.**
+
+Headline-sync auto-patch gate also touched `web/app/page.js` + `web/public/og-image.png` during postflight (catalog count surface).
+
+**Carry-forward:** Kawasaki ZX-9R 1998 has a clean 9.99s @ 136.80 mph Cycle World entry but the catalog only contains a 1994-1997 ZX-9R spec — surfaced in the benchmark-import report's rejection table for the next catalog-add pass.
