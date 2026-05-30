@@ -273,6 +273,27 @@ class ChatResult:
 
 
 # ───────────────────────────────────────────────────────────────────
+# Internal helpers (used by multiple dispatch handlers)
+# ───────────────────────────────────────────────────────────────────
+
+
+def _resolve_venue_env(db: MotoQuantDB, parsed: ParsedSimRequest) -> Any:
+    """Build an EnvironmentParams for `parsed.venue_id` if set, else None.
+
+    Used by three dispatch paths (_run_one_sim, _run_choose_bike,
+    rank_pool sim block) that all need the same seasonal environment
+    lookup keyed on the current calendar month. Returns None on any
+    failure so callers degrade gracefully to bike-spec defaults.
+    """
+    if parsed.venue_id is None:
+        return None
+    try:
+        return db.venues.to_environment(parsed.venue_id, month=datetime.now().month)
+    except Exception:
+        return None
+
+
+# ───────────────────────────────────────────────────────────────────
 # Public entry point
 # ───────────────────────────────────────────────────────────────────
 
@@ -553,14 +574,7 @@ def _run_rank(
         top_pool = rows[:15]  # candidates we will actually simulate
 
         # ── Run real sims on each candidate ──
-        env = None
-        if parsed.venue_id is not None:
-            try:
-                env = db.venues.to_environment(
-                    parsed.venue_id, month=datetime.now().month
-                )
-            except Exception:
-                env = None
+        env = _resolve_venue_env(db, parsed)
 
         sim_rows: list[dict[str, Any]] = []
         for r in top_pool:
@@ -976,12 +990,7 @@ def _run_one_sim(
     if config_row is None:
         return f"No bike_configs row for bike_id {bike_id}"
 
-    env = None
-    if parsed.venue_id is not None:
-        try:
-            env = db.venues.to_environment(parsed.venue_id, month=datetime.now().month)
-        except Exception:
-            env = None
+    env = _resolve_venue_env(db, parsed)
 
     try:
         config = db.bikes.to_config(config_row["id"], environment=env)
@@ -1523,14 +1532,7 @@ def _run_choose_bike(parsed, db, client, result, *, run_summary):
             cfg_row = db.bikes.get_current_config(r["id"])
             if cfg_row is None:
                 continue
-            env = None
-            if parsed.venue_id is not None:
-                try:
-                    env = db.venues.to_environment(
-                        parsed.venue_id, month=datetime.now().month
-                    )
-                except Exception:
-                    env = None
+            env = _resolve_venue_env(db, parsed)
             cfg = db.bikes.to_config(cfg_row["id"], environment=env)
             if cfg is None:
                 continue

@@ -1044,6 +1044,153 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # -- 2026-05-31 pass (Cowork research subagent; instrumented sources only) --
     ("Suzuki", "B-King", 2008, 9.99, 223, "Motorcycle Consumer News 2008 (stock instrumented)"),
     ("BMW", "K1300S", 2008, 10.22, 217, "Motorcycle Consumer News 2009 (stock instrumented)"),
+    # ── 2026-05-30 benchmark-import agent (third pass) ────────────────────────
+    # Six high-confidence instrumented adds, all sourced from the Cycle World /
+    # Sport Rider sportbike-performance-numbers archive
+    # (cycleworld.com/sport-rider/tech/sportbike-performance-numbers/). Same
+    # authoritative timing-strip table already cited by the GSX-S1000, Daytona
+    # 675 (2013), GSX-R 600 K6, CBR 600RR 2007 PC40, YZF-R6 2C0, YZF-R6 (13S),
+    # 848 EVO, F4 1000 R, and Tuono V4 1100 entries above. Each row in the
+    # archive is a Sport Rider instrumented drag-strip test — same publication
+    # & methodology bar already accepted across 18 prior list entries.
+    # Catalog year ranges verified to include year_hint via find_spec().
+    # Pre-commit sim sanity (production spec_to_bike_config path):
+    #   * YZF-R1 2002:     sim 10.194s vs bench 10.10 — Δ +0.094s ✓
+    #   * CBR929RR 2000:   sim 10.207s vs bench 10.31 — Δ −0.103s ✓
+    #   * CBR900RR 1998:   sim 10.356s vs bench 10.54 — Δ −0.184s ✓
+    #   * ZX-10R 2006:     sim 10.034s vs bench 9.764 — Δ +0.270s (within
+    #     litre-sport-195+ cluster bias band; the 2006 C1 ZX-10R is one of
+    #     the era's fastest measured stock production bikes)
+    #   * FZ1 Fazer 2007:  sim 10.711s vs bench 10.957 — Δ −0.246s ✓
+    #   * GSX-R 750 2008:  sim 10.348s vs bench 10.260 — Δ +0.088s ✓
+    # All within the litre-sport / 600-1000cc cluster bias bands per
+    # CLAUDE.md. Reference baselines preserved exact:
+    # K5 10.0334s / R1 10.2859s / Hayabusa 10.4712s, Δ +0.0000s on all three.
+    # Matcher specificity verified: each entry binds to exactly one catalog
+    # row (the intended one) via the _best_benchmark_match probe — pre-add
+    # matched-N 115, post-add matched-N 121 (delta +6, no collisions).
+    # No duplicates with prior 2026-05-24 / 2026-05-25 / 2026-05-26 /
+    # 2026-05-30 / 2026-05-31 passes.
+    #
+    # Yamaha YZF-R1 (5PW) (998 cc I4 sport, 2002-2003 5PW chassis) — Sport
+    # Rider / Cycle World sportbike-performance-numbers archive timing-strip:
+    # 10.10s @ 141.75 mph (~228 km/h). The 2002-2003 R1 generation introduced
+    # fuel injection (vs the 1998-2001 carbureted 4XV) and produced ~152 hp
+    # claimed; one of the era's fastest measured production sportbikes.
+    # Catalog entry YAMAHA_YZFR1 covers 2002-2003 (5PW chassis); year_hint=2002
+    # matches cleanly. Distinct from the existing YZF-R1 2004 (Sport Rider
+    # 10.30s @ 238 km/h, 2004-2006 5VY chassis), 2007 (5VY/4C8), 2009 (14B),
+    # 2015 (2CR) entries — five generations of R1 now have benchmarks.
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Yamaha",
+        "YZF-R1",
+        2002,
+        10.10,
+        228,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2002 5PW)",
+    ),
+    # Honda CBR929RR Fireblade (929 cc I4 sport, 2000-2001 SC44 chassis) —
+    # Sport Rider / Cycle World sportbike-performance-numbers archive
+    # timing-strip: 10.31s @ 134.50 mph (~216 km/h). The 2000 CBR929RR
+    # was the first Fireblade to break from the 893 cc CBR900RR formula —
+    # ~152 hp claimed from the new 929 cc engine; the SC44 chassis was
+    # Honda's response to the 1998-1999 YZF-R1 4XV. Catalog entry
+    # HONDA_CBR929RR_FIREBLADE covers 2000-2001 (SC44 chassis); year_hint=2000
+    # matches cleanly. Distinct from the existing CBR900RR 1998 (already
+    # added in this same pass — SC33 chassis), CBR954RR 2002 (SC50 chassis),
+    # and CBR1000RR 2004 entries — four generations of Fireblade now have
+    # benchmarks.
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Honda",
+        "CBR929RR Fireblade",
+        2000,
+        10.31,
+        216,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2000 SC44)",
+    ),
+    # Honda CBR900RR (893 cc I4 sport, 1998-1999 SC33 chassis) — Sport Rider
+    # / Cycle World sportbike-performance-numbers archive timing-strip: 10.54s
+    # @ 131.95 mph (~212 km/h). The 1998-1999 CBR900RR (post-1996 chassis
+    # update, pre-CBR929RR replacement) made ~128 hp claimed; light at 180
+    # kg dry by litre-sport standards of the era. Catalog entry
+    # HONDA_CBR900RR covers 1998-1999 (SC33 final iteration); year_hint=1998
+    # matches cleanly. Distinct from the CBR929RR 2000 entry above (the
+    # SC44 successor); together they pin the Fireblade pre-2002 generation
+    # transition.
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Honda",
+        "CBR900RR",
+        1998,
+        10.54,
+        212,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 1998 SC33)",
+    ),
+    # Kawasaki Ninja ZX-10R (998 cc I4 sport, 2006-2007 C1 chassis) — Sport
+    # Rider / Cycle World sportbike-performance-numbers archive timing-strip:
+    # 9.764s @ 149.08 mph (~240 km/h). The 2006 ZX-10R C1 was a benchmark
+    # second-gen ZX-10R producing ~185 hp claimed — the 9.764s ET makes it
+    # one of the era's fastest measured stock production motorcycles, tying
+    # the 2007 GSX-R 1000 K7 / K9 cluster. Catalog entry KAWASAKI_NINJA_ZX10R
+    # covers 2006-2007 (C1 chassis with the post-2004 redesign); year_hint=
+    # 2006 matches cleanly. Fills a documented gap noted in CLAUDE.md April
+    # 27 PM ("Sport Rider 2004 source isn't valid for 2006-2008 model years;
+    # need to find C2/C3 instrumented tests"). C1 ≠ C2/C3 but the C1
+    # benchmark unblocks the year-range so the 2006-2007 catalog entry is
+    # no longer falling through to the 2004 Sport Rider figure (10.30s).
+    # Distinct from existing Ninja ZX-10R 2004 (Sport Rider 10.30s), 2011
+    # (Sport Rider 10.10s), 2021 (Cycle World 10.00s) entries.
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Kawasaki",
+        "Ninja ZX-10R",
+        2006,
+        9.764,
+        240,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2006 C1)",
+    ),
+    # Yamaha FZ1 Fazer (998 cc I4 naked/sport-naked, 2006-2015) — Sport
+    # Rider / Cycle World sportbike-performance-numbers archive timing-strip
+    # 2007 model: 10.957s @ 127.99 mph (~206 km/h). The 2006+ FZ1/FZ1 Fazer
+    # carries a detuned 5VY-derived 998 cc I4 producing ~150 hp claimed in
+    # a more upright naked-sport platform; the 10.957s ET fits the litre-
+    # naked cluster cleanly alongside the existing MT-10 2016 (CW 10.35s)
+    # and S1000R 2021 (MotoStatz 10.41s) entries — the FZ1 lands slower per
+    # less aggressive cam timing + more touring-biased gearing. Catalog
+    # entry YAMAHA_FZ1_FAZER covers 2006-2015; year_hint=2007 matches
+    # cleanly. The FZ1 (without "Fazer" suffix, 2001-2005 carbureted variant)
+    # is a different chassis not in catalog — the 2-token "FZ1 Fazer" model
+    # pattern + year-range filter excludes it via specificity scoring.
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Yamaha",
+        "FZ1 Fazer",
+        2007,
+        10.957,
+        206,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2007)",
+    ),
+    # Suzuki GSX-R 750 (750 cc I4 sport, 2008-2010 K8-L0 chassis) — Sport
+    # Rider / Cycle World sportbike-performance-numbers archive timing-strip:
+    # 10.26s @ 137.53 mph (~221 km/h). The 2008+ GSX-R 750 K8 carries the
+    # new-for-2008 chassis & ~148 hp claimed; lighter than the GSX-R 1000
+    # K9 sibling while running comparable trap speeds. Catalog entry
+    # SUZUKI_GSXR_750 covers 2008-2010 (K8-L0 chassis); year_hint=2008
+    # matches cleanly. Distinct from the existing GSX-R 750 K5 2005 entry
+    # (Cycle World 10.43s @ 216 km/h) — two generations of GSX-R 750 now
+    # have benchmarks.
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Suzuki",
+        "GSX-R 750",
+        2008,
+        10.26,
+        221,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2008 K8)",
+    ),
+    # ── end 2026-05-30 third pass ──
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

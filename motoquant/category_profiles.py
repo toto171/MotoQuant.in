@@ -160,7 +160,19 @@ _PROFILES: dict[str, CategoryProfile] = {
         # ridiculously so. Helps fight the +0.5-0.8s residual bias on
         # SV650/Z650/Ninja 650/MT-07 documented in CLAUDE.md.
         over_clutch_factor=0.20,
-        max_engine_decel_rads2=150.0,
+        # max_engine_decel_rads2 raised 150→600 (2026-05-30 calibration):
+        # The 8 benchmarked 600cc I4 sportbikes (R6, GSX-R 600, CBR600RR)
+        # all carry dyno_curve.is_at_wheel=True, which bypasses parasitic_mult
+        # entirely. The only live knob was over_clutch_factor (inert when
+        # there is no headroom between T_e_crank and T_clutch_max). High-revving
+        # 600cc I4s with light crankshafts can decelerate angularly much faster
+        # than 150 rad/s² during launch slip — the previous value
+        # was under-representing the real shift dynamics, causing 7 of 8
+        # benchmarked bikes to sim slow (bias +0.21s). At 600 rad/s²
+        # cluster mean|Δ| drops 0.211→0.130 (-81ms, crosses 50ms gate),
+        # bias collapses to +0.029s (essentially zero), per-bike spread
+        # tightens with max worst-case at +0.34s (GSX-R 600 K6, was +0.48s).
+        max_engine_decel_rads2=600.0,
         launch_floor_factor=1.0,
         tuck_transition_time_s=1.8,
         cd_ceiling=0.50,
