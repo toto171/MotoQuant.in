@@ -1041,6 +1041,9 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         "MotoStatz (Dragy, stock instrumented 4th-gen 2017+)",
     ),
     # ── end 2026-05-30 pass ──
+    # -- 2026-05-31 pass (Cowork research subagent; instrumented sources only) --
+    ("Suzuki", "B-King", 2008, 9.99, 223, "Motorcycle Consumer News 2008 (stock instrumented)"),
+    ("BMW", "K1300S", 2008, 10.22, 217, "Motorcycle Consumer News 2009 (stock instrumented)"),
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [
