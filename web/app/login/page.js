@@ -19,7 +19,7 @@ import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL || "https://web-production-de6eb.up.railway.app";
+  process.env.NEXT_PUBLIC_API_URL || "https://motoquant-api.onrender.com";
 
 function LoginPageInner() {
   const router = useRouter();

@@ -6,7 +6,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://web-production-de6eb.up.railway.app/api/:path*"
+      "destination": "https://motoquant-api.onrender.com/api/:path*"
     }
   ],
   "headers": [

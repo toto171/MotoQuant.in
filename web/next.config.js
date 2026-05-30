@@ -17,7 +17,7 @@ const nextConfig = {
   async rewrites() {
     const backend =
       process.env.MOTOQUANT_API_BACKEND ||
-      'https://web-production-de6eb.up.railway.app';
+      'https://motoquant-api.onrender.com';
     return [
       {
         source: '/api/:path*',

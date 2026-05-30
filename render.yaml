@@ -1,0 +1,45 @@
+# Render Blueprint for MotoQuant Pro API
+# https://render.com/docs/blueprint-spec
+#
+# Free-tier deployment plan (May 18, 2026):
+#   - Single web service, Docker runtime, Free plan ($0/mo)
+#   - Reuses the existing root-level Dockerfile (same one Railway uses today)
+#   - Free tier sleeps after 15 min of no inbound traffic and cold-starts in
+#     ~30-60s on next request. A GitHub Actions cron at
+#     `.github/workflows/keepalive.yml` pings /api/health every 14 minutes to
+#     keep the service warm during business hours.
+#   - Migration is a soft cutover: Render comes up first, /api/health verified,
+#     then `vercel.json` rewrite is flipped from the Railway URL to the Render
+#     URL. Railway stays running 48h as a fallback before being suspended.
+#
+# To deploy:
+#   1. Push this file to GitHub on `main`.
+#   2. https://dashboard.render.com -> New -> Blueprint -> connect repo.
+#   3. Render reads render.yaml, prompts approval, builds from Dockerfile.
+#   4. Note the resulting `https://motoquant-api.onrender.com` URL.
+#   5. See docs/RENDER_MIGRATION.md for the rest of the cutover.
+
+services:
+  - type: web
+    name: motoquant-api
+    runtime: docker
+    plan: free
+    region: singapore           # closest free region to Indian users
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeploy: true            # redeploy on every push to `main`
+    envVars:
+      - key: MOTOQUANT_DB
+        value: /app/motoquant.db
+      - key: PYTHON_VERSION
+        value: "3.11"
+      # Optional: surface FastAPI / uvicorn logs at INFO level
+      - key: UVICORN_LOG_LEVEL
+        value: info
+      # NOTE: secrets (GEMINI_API_KEY, GROQ_API_KEY, SENTRY_DSN, JWT_SECRET,
+      # RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, etc.) are set manually in the
+      # Render dashboard under Environment -> Add Environment Variable so they
+      # never land in git. The keys listed in requirements-api.txt comments
+      # are all optional — the API serves the simulator and catalog endpoints
+      # without any of them.

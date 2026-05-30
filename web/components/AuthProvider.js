@@ -32,7 +32,7 @@ import {
   useState,
 } from "react";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://web-production-de6eb.up.railway.app";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://motoquant-api.onrender.com";
 
 const AuthContext = createContext(null);
 

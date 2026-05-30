@@ -142,3 +142,6 @@ TOKENS_UPDATE_*.md
 # Defensive: file accidentally created when bash redirect target name
 # collides with the 'claude' command (sed-mangle artifact, see 2c4986d)
 /claude
+
+# Cowork/Claude local worktree + agent state (never commit)
+.claude/

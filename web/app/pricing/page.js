@@ -18,7 +18,7 @@ import SiteFooter from "../../components/SiteFooter";
 import { Reveal } from "../../components/Reveal";
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL || "https://web-production-de6eb.up.railway.app";
+  process.env.NEXT_PUBLIC_API_URL || "https://motoquant-api.onrender.com";
 
 const PRICES = {
   pro:    { monthly: 499,  yearly: 4999 },

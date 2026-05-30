@@ -146,7 +146,7 @@ Desktop beta access is available to tuning shops and racing teams. Contact motoq
     label: '06 / REST API',
     title: 'Open REST API',
     subtitle: 'FastAPI. Full timeseries. CORS-open for web integrations.',
-    body: `Every feature the web UI uses is accessible via the public REST API hosted at web-production-de6eb.up.railway.app.
+    body: `Every feature the web UI uses is accessible via the public REST API hosted at motoquant-api.onrender.com.
 
 POST /api/simulate — full simulation returning complete v(t), RPM, gear, acceleration, and ET. Typical latency 80–150 ms.
 POST /api/simulate/quick — ET + trap speed + splits only, ~50 ms. Used by the slider-driven BuildPage.

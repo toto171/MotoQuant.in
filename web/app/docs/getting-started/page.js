@@ -128,7 +128,7 @@ export default function GettingStartedPage() {
           The API is public and CORS-open. No authentication for basic simulation (rate-limited to 60 req/min per IP).
         </p>
         <Step n="1" title="Quick sim">
-          <Code>{`POST https://web-production-de6eb.up.railway.app/api/simulate/quick
+          <Code>{`POST https://motoquant-api.onrender.com/api/simulate/quick
 Content-Type: application/json
 
 {
@@ -153,7 +153,7 @@ Content-Type: application/json
         </Step>
         <Step n="3" title="Interactive docs">
           <p>Full OpenAPI interactive docs (try-it-now) are available at:</p>
-          <Code>https://web-production-de6eb.up.railway.app/docs</Code>
+          <Code>https://motoquant-api.onrender.com/docs</Code>
         </Step>
       </section>
 
