@@ -9,6 +9,14 @@ requires-python = ">=3.10"
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.packages.find]
+# Flat layout: repo root holds several top-level dirs (motoquant, tests,
+# scripts, web, desktop, ...). Without an explicit find directive, setuptools
+# auto-discovery aborts with "Multiple top-level packages discovered", which
+# breaks `pip install -e .` in the desktop sidecar CI build. Restrict the
+# installed distribution to the motoquant package and its subpackages.
+include = ["motoquant*"]
+
 [tool.ruff]
 line-length = 88
 target-version = "py310"
