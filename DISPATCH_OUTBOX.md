@@ -1814,3 +1814,22 @@ Postflight deploy check timed out after 180s
 > 
 > ## Work performed
 > 
+
+## 2026-05-30T18:48:52+00:00 — session 1780165850-649
+
+**Commit:** `64cb7f1f7ac503f73f45d105a2c27a233ec54fb3`
+**Files:** `motoquant/scraper/spec.py motoquant/scraper/bulk_scrape.py motoquant/scraper/known_bikes_extended.py motoquant.db reports/tech_debt_datetime_utcnow_deprecation_2026-05-30.md reports/benchmark_import_2026-05-30_second_pass.md reports/catalog_expansion_2026-05-30.md`
+
+> 3-agent autonomous-ops pass on Saturday 2026-05-30 (catchup mode).
+>
+> **Agent 1 — technical-debt-pass:** Replaced 5 deprecated `datetime.utcnow()` call sites in `motoquant/scraper/{spec,bulk_scrape}.py` with timezone-aware UTC equivalents that preserve byte-identical naive ISO output. Focused-test deprecation warnings 596 → 0. Net +17 LOC.
+>
+> **Agent 2 — benchmark-import:** Defensible-null pass. Sandbox has no WebSearch/WebFetch; quality bar requires instrumented citations. No benchmarks inflated. Report at reports/benchmark_import_2026-05-30_second_pass.md flags entry-150-200 DERIVED entries as highest-priority research items (already covered by existing inbox tickets).
+>
+> **Agent 3 — catalog-expansion:** Added 3 ADV-cluster bikes — Kawasaki KLR 650 2022, Triumph Tiger 900 GT Pro 2024, Honda CRF250L 2021. bike_models 793→796. Smoke-sims within cluster bias band (KLR 14.94s/147 km/h, Tiger 12.08s/196.5 km/h, CRF 15.78s/134.7 km/h). 140 scraper+validation tests green.
+>
+> **Baselines verified preserved EXACTLY (post-rebase + post-push):** K5 10.0334s / R1 10.2859s / Hayabusa 10.4712s, Δ +0.0000s on all three.
+>
+> **Headline-sync auto-patch gate:** ran clean and patched 13 web/README files inline.
+>
+> **Note:** Original postflight FATAL'd on first push (origin had moved by 1 commit — `71c6eba ci: add Render keep-alive cron`). Resolved by `git pull --rebase`, baselines re-verified +0.0000s, then pushed cleanly. Remaining postflight tail (outbox + FUSE sync) executed manually.
