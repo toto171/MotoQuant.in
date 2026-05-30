@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir -r requirements-api.txt
 COPY motoquant/ ./motoquant/
 COPY app.py .
 COPY motoquant.db .
-COPY surrogate_numpy.npz .
+COPY artifacts/surrogate/surrogate_numpy.npz ./artifacts/surrogate/surrogate_numpy.npz
 
 # Railway injects PORT at runtime
 ENV PORT=8000

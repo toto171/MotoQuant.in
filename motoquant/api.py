@@ -2349,7 +2349,7 @@ def _load_surrogate():
 
     try:
         from motoquant.analysis.surrogate_numpy import NumpySurrogate
-        npz_path = repo_root / "surrogate_numpy.npz"
+        npz_path = repo_root / "artifacts" / "surrogate" / "surrogate_numpy.npz"
         if npz_path.exists():
             m = NumpySurrogate.load(npz_path)
             _log.info("Surrogate: loaded numpy MLP from %s", npz_path)
