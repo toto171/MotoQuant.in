@@ -51,7 +51,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: "What differentiates the Hunter 350 from its siblings is the chassis around the engine. RE targeted a younger, more urban buyer and stripped weight aggressively: the Hunter 350 comes in at 171 kg dry versus the Classic 350's 195 kg, the Meteor 350's 191 kg, and the Bullet 350 J's 185 kg. That 14 to 24 kg advantage is real and consistent across all trim levels — BikeWale's India launch test (August 2022) documented the 171 kg figure on a pre-production unit and production bikes have confirmed the same number in independent weighings. The Hunter also gets a shorter wheelbase (1370 mm vs the Meteor's 1400 mm) and tighter, more street-naked ergonomics with a Cd of 0.74 and a 0.45 m² frontal area — lower drag than any other J-platform variant.",
+    text: "What differentiates the Hunter 350 from its siblings is the chassis around the engine. RE targeted a younger, more urban buyer and stripped weight aggressively: the Hunter 350 comes in at 171 kg dry versus the Classic 350's 195 kg, the Meteor 350's 191 kg, and the Bullet 350 J's 185 kg. That 14 to 24 kg advantage is real and consistent across all trim levels — BikeWale\'s India launch test (August 2022) documented the 171 kg figure on a pre-production unit and production bikes have confirmed the same number in independent weighings. The Hunter also gets a shorter wheelbase (1370 mm vs the Meteor's 1400 mm) and tighter, more street-naked ergonomics with a Cd of 0.74 and a 0.45 m² frontal area — lower drag than any other J-platform variant.",
   },
   {
     type: 'p',
@@ -81,7 +81,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The entry-150-200 and entry-200-300 clusters in MotoQuant carry a documented positive bias (sim runs slower than measured) of roughly +0.4 to +1.0 s for 20-25 hp singles. The Hunter 350 sits in the entry-200-300 band. Applying the cluster bias correction suggests a well-prepared stock Hunter 350 with a competent launch technique should run closer to 15.9 to 16.2 seconds at an actual strip. BikeWale's instrumented acceleration test (August 2022) documented 0-100 km/h in 11.2 seconds — using the standard 0-100 × 1.6 conversion gives a very rough estimated quarter-mile of 17.9 seconds, but that methodology carries ±0.7 s uncertainty and understates strip-prep technique. The sim and the magazine data are consistent within their respective uncertainty bands.',
+    text: 'The entry-150-200 and entry-200-300 clusters in MotoQuant carry a documented positive bias (sim runs slower than measured) of roughly +0.4 to +1.0 s for 20-25 hp singles. The Hunter 350 sits in the entry-200-300 band. Applying the cluster bias correction suggests a well-prepared stock Hunter 350 with a competent launch technique should run closer to 15.9 to 16.2 seconds at an actual strip. BikeWale\'s instrumented acceleration test (August 2022) documented 0-100 km/h in 11.2 seconds — using the standard 0-100 × 1.6 conversion gives a very rough estimated quarter-mile of 17.9 seconds, but that methodology carries ±0.7 s uncertainty and understates strip-prep technique. The sim and the magazine data are consistent within their respective uncertainty bands.',
   },
   {
     type: 'callout',
