@@ -457,7 +457,7 @@ def list_bikes(
     search: str | None = Query(None, description="Search by model/manufacturer"),
     manufacturer: str | None = Query(None),
     category: str | None = Query(None),
-    limit: int = Query(100, le=1000),
+    limit: int = Query(100, le=5000),
     offset: int = Query(0),
 ):
     db = _get_db()
@@ -666,7 +666,7 @@ def list_venues():
 def list_tires(
     compound: str | None = Query(None),
     manufacturer: str | None = Query(None),
-    limit: int = Query(200, le=1000),
+    limit: int = Query(200, le=5000),
 ):
     db = _get_db()
     if not db:
@@ -1150,7 +1150,7 @@ def list_parts(
         "annotation per row.",
     ),
     search: str | None = Query(None),
-    limit: int = Query(500, le=1000),
+    limit: int = Query(500, le=5000),
 ):
     """Return parts catalog, optionally filtered by category and bike compatibility.
 

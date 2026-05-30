@@ -352,7 +352,7 @@ export default function PostPage() {
               <Link href="/blog/triumph-street-triple-765r-quarter-mile-physics" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Triumph Street Triple 765 R Quarter-Mile Physics
               </Link>{' '}
-              — the Nightster\'s nearest competitor in the 11-12 second range from a completely different architecture. 118 hp inline-three at ₹10.67 lakh, beats the Nightster by ~1.75 s, but costs less.
+              — the Nightster's nearest competitor in the 11-12 second range from a completely different architecture. 118 hp inline-three at ₹10.67 lakh, beats the Nightster by ~1.75 s, but costs less.
             </li>
             <li>
               ·{' '}
@@ -373,7 +373,7 @@ export default function PostPage() {
               <Link href="/blog/the-physics-of-a-perfect-launch" className="text-brand-accent hover:text-brand-orange transition-colors">
                 The Physics of a Perfect Launch
               </Link>{' '}
-              — most of the Nightster\'s 0.46 s gap to Cycle World\'s benchmark lives in the first 60 feet. Clutch engagement RPM, weight transfer, and slip ratio on a 212 kg V-twin.
+              — most of the Nightster's 0.46 s gap to Cycle World's benchmark lives in the first 60 feet. Clutch engagement RPM, weight transfer, and slip ratio on a 212 kg V-twin.
             </li>
             <li>
               ·{' '}
