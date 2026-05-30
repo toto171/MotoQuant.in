@@ -1,0 +1,68 @@
+name: Render keep-alive
+
+# Render's free tier puts services to sleep after 15 minutes of no inbound
+# traffic. Cold-start on the next request takes ~30-60 seconds, which would
+# tank the live simulator widget on motoquant.in for any visitor who hits
+# the page after a quiet period.
+#
+# This workflow pings /api/health every 14 minutes (one minute under the
+# sleep threshold) which counts as inbound traffic and keeps the dyno warm.
+# Cost: ~3000 runs/mo * ~6s each ≈ 5 GitHub Actions hours/mo, well under
+# the 2000-minute free tier quota for public repos (and 2000 min for private
+# accounts too).
+#
+# If the service is down, the curl will fail and the job will report a
+# failure in the Actions tab — useful as a free uptime monitor too.
+#
+# To disable temporarily without deleting the file: comment out the
+# `schedule:` block. Manual runs via `workflow_dispatch` always remain
+# available from the Actions tab.
+
+on:
+  schedule:
+    # Every 14 minutes during IST waking hours only — UTC 00:00-18:59
+    # maps to roughly 05:30 AM - 11:59 PM IST. Outside that window
+    # (~12:00 AM - 5:30 AM IST) we let the service sleep, since
+    # MotoQuant's traffic is Indian-market and overnight visitors are
+    # rare. First-visitor cold start at 7 AM IST is the only UX cost.
+    #
+    # Why this matters: Render's free tier caps instance-hours at 750/mo.
+    # A 31-day month with a 24/7 cron uses 744 hrs — only 6 hrs of slack
+    # before month-end suspension. This restricted schedule uses
+    # ~595 hrs/mo (19 hrs/day x 31 days), leaving 155+ hrs of headroom.
+    #
+    # Free Render sleep threshold is 15 min from last request, and GH
+    # Actions cron can drift by several minutes under load, so the
+    # 14-min interval gives a 1-min safety margin against jitter.
+    - cron: "*/14 0-18 * * *"
+  workflow_dispatch:        # allow manual triggering for debugging
+
+# Cancel any backed-up runs if a new one starts — no point pinging twice
+# in quick succession if GH was lagging.
+concurrency:
+  group: render-keepalive
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2     # cold-start can take 60s; 120s gives headroom
+    steps:
+      - name: Ping /api/health
+        env:
+          # Override in repo Settings -> Secrets and variables -> Actions ->
+          # Variables -> RENDER_API_URL if your service URL differs.
+          RENDER_API_URL: ${{ vars.RENDER_API_URL || 'https://motoquant-api.onrender.com' }}
+        run: |
+          set -e
+          echo "Pinging $RENDER_API_URL/api/health ..."
+          response=$(curl --silent --show-error --max-time 90 \
+                          --write-out "\nHTTP_STATUS:%{http_code}\nTIME_TOTAL:%{time_total}\n" \
+                          "$RENDER_API_URL/api/health")
+          echo "$response"
+          status=$(echo "$response" | grep "HTTP_STATUS:" | cut -d: -f2)
+          if [ "$status" != "200" ]; then
+            echo "::error::Health check returned HTTP $status — service may be down or cold-starting beyond timeout"
+            exit 1
+          fi
+          echo "Health check OK"
