@@ -103,7 +103,6 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
-        .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(BackendState::default())
         .invoke_handler(tauri::generate_handler![get_backend_url])
         .setup(|app| {

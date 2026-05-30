@@ -40,7 +40,7 @@
     ],
     "category": "Utility",
     "shortDescription": "Motorcycle drag-racing physics simulator",
-    "longDescription": "MotoQuant Pro — The physics of faster. First-principles quarter-mile simulator for motorcycle drag racing, with a 290-bike catalog, 465-part mod library, 15-submodel physics engine, and data-driven build recommendations.",
+    "longDescription": "MotoQuant Pro \u2014 The physics of faster. First-principles quarter-mile simulator for motorcycle drag racing, with a 290-bike catalog, 465-part mod library, 15-submodel physics engine, and data-driven build recommendations.",
     "windows": {
       "certificateThumbprint": null,
       "digestAlgorithm": "sha256",
@@ -55,16 +55,5 @@
       "bin/motoquant-backend"
     ]
   },
-  "plugins": {
-    "updater": {
-      "pubkey": "REPLACE_WITH_OUTPUT_OF__cargo_tauri_signer_generate",
-      "endpoints": [
-        "https://github.com/da25mem5s02-debug/MotoQuant_v1/releases/latest/download/latest.json"
-      ],
-      "dialog": true,
-      "windows": {
-        "installMode": "passive"
-      }
-    }
-  }
+  "plugins": {}
 }
