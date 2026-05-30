@@ -1833,3 +1833,13 @@ Postflight deploy check timed out after 180s
 > **Headline-sync auto-patch gate:** ran clean and patched 13 web/README files inline.
 >
 > **Note:** Original postflight FATAL'd on first push (origin had moved by 1 commit — `71c6eba ci: add Render keep-alive cron`). Resolved by `git pull --rebase`, baselines re-verified +0.0000s, then pushed cleanly. Remaining postflight tail (outbox + FUSE sync) executed manually.
+
+---
+
+## SESSION — 2026-05-31 (Cowork chat: Railway -> Render migration + cleanup)
+
+> **Infra migration shipped.** Railway (suspended, no card) -> Render free tier. render.yaml + keepalive.yml + RENDER_MIGRATION.md committed; blueprint deployed live at motoquant-api.onrender.com (Singapore, Docker, free). Vercel frontend untouched; flipped NEXT_PUBLIC_API_URL + /api/* rewrite + hardcoded fallbacks Railway -> Render.
+> **Build unblock (major):** every Vercel prod deploy had silently failed since ~May 26 — an unescaped apostrophe in a single-quoted data string in the RE Hunter 350 blog broke `next build`. Escaped it; verified via grep it was the only such bug in web/app. Prod had been frozen on the May-25 build (pointing at dead Railway).
+> **Fixes:** simulator picker limit 500 -> 2000 (full 796-bike catalog selectable; Hayabusa was unreachable); API le=1000 -> le=5000 on bikes/tires/parts; simulator SEO 412 -> 796 bikes; removed 3 JSX-text backslash-apostrophe artifacts in Nightster blog; session_postflight.sh health-check Railway -> Render + 90s timeout; Groq chat key set in Render env.
+> **Verified live:** quick sim (Hayabusa 10.492s), full sim (6 charts), Ask-MotoQuant chat (Groq), /bikes (796), /api/health. Baselines exact: K5 10.0334 / R1 10.2859 / Hayabusa 10.4712.
+> **Open / user-action:** Render sleeps after 15 min idle (keepalive mitigates during IST day); GitHub PAT expires ~June 3; consider server-side bike search if catalog grows past ~2000. Desktop app work next.

@@ -9,7 +9,7 @@
 #   3. Stage explicit-list of files (NEVER `git add -A`).
 #   4. Commit with the provided message + Arya Desai identity.
 #   5. Push to origin/main with PRIMARY → BACKUP PAT fallback.
-#   6. Verify Railway redeploy + bike_count via curl.
+#   6. Verify Render redeploy + bike_count via curl.
 #   7. Append outcome to DISPATCH_OUTBOX.md (committed in the same push).
 #   8. Sync the FUSE mount (cp from /tmp/mq-session/ → FUSE) so the user
 #      sees the latest state from their real terminal.
@@ -37,8 +37,8 @@ set -euo pipefail
 readonly REPO_URL="https://github.com/da25mem5s02-debug/MotoQuant_v1.git"
 readonly FUSE_MOUNT="/sessions/sharp-confident-cerf/mnt/Vehicle Dynamics"
 readonly MUTEX_FILE="/tmp/motoquant-session.lock"
-readonly RAILWAY_HEALTH="https://web-production-de6eb.up.railway.app/api/health"
-readonly DEPLOY_WAIT_SECONDS=180   # max wait for Railway to redeploy
+readonly RENDER_HEALTH="https://motoquant-api.onrender.com/api/health"
+readonly DEPLOY_WAIT_SECONDS=180   # max wait for Render to redeploy
 readonly DEPLOY_POLL_SECONDS=15
 readonly BASELINE_TOLERANCE_S=0.005
 
@@ -254,20 +254,20 @@ verify_deploy() {
     log "skipping deploy verification"
     return 0
   fi
-  log "waiting up to ${DEPLOY_WAIT_SECONDS}s for Railway to redeploy..."
+  log "waiting up to ${DEPLOY_WAIT_SECONDS}s for Render to redeploy..."
   local elapsed=0
   while [[ ${elapsed} -lt ${DEPLOY_WAIT_SECONDS} ]]; do
     sleep ${DEPLOY_POLL_SECONDS}
     elapsed=$((elapsed + DEPLOY_POLL_SECONDS))
     local body
-    body=$(curl -fsS --max-time 10 "${RAILWAY_HEALTH}" 2>/dev/null || echo "")
+    body=$(curl -fsS --max-time 90 "${RENDER_HEALTH}" 2>/dev/null || echo "")
     if [[ "${body}" == *'"status":"ok"'* ]]; then
       log "deploy: live (${body})"
       return 0
     fi
     log "  waited ${elapsed}s — still waiting"
   done
-  warn "deploy verification timeout — push landed but Railway not responding ok"
+  warn "deploy verification timeout — push landed but Render not responding ok"
   local open_ticket
   open_ticket=$(_blocking_ticket_open)
   if [[ -n "${open_ticket}" ]]; then
@@ -279,7 +279,7 @@ verify_deploy() {
 }
 
 # Suppress duplicate deploy ALERTs when an open `[blocking]` INBOX ticket already
-# names the symptom (Railway / deploy). Stops at the `## DONE / DEFERRED ARCHIVE`
+# names the symptom (Render / deploy). Stops at the `## DONE / DEFERRED ARCHIVE`
 # heading so closed tickets don't keep silencing fresh alerts.
 _blocking_ticket_open() {
   local inbox="${MQ_WORKDIR}/repo/DISPATCH_INBOX.md"
@@ -289,11 +289,11 @@ _blocking_ticket_open() {
     /^## INSTRUCTION/ {
       block   = $0
       tagged  = ($0 ~ /\[blocking\]/)
-      matched = ($0 ~ /Railway|deploy/)
+      matched = ($0 ~ /Render|deploy/)
       next
     }
     block && /\[blocking\]/        { tagged  = 1 }
-    block && /Railway|deploy/      { matched = 1 }
+    block && /Render|deploy/      { matched = 1 }
     block && tagged && matched     { print block; exit }
   ' "${inbox}"
 }
