@@ -39,11 +39,14 @@ datas = [
     (str(DB_PATH), "."),  # → <MEIPASS>/motoquant.db
 ]
 
-# Optional: ship surrogate model pickles too. Uncomment when the DNN
-# surrogate becomes a first-class feature (currently loaded lazily).
-# SURROGATE = REPO_ROOT / "artifacts" / "surrogate"
-# if SURROGATE.exists():
-#     datas.append((str(SURROGATE), "artifacts/surrogate"))
+# Surrogate weights for /api/surrogate/predict. Bundle ONLY the pure-numpy
+# .npz (~39 KB) the runtime loader uses — NOT the 1.4 MB sklearn training
+# pickle, which the lean sidecar never imports. Lands at
+# <MEIPASS>/artifacts/surrogate/surrogate_numpy.npz, exactly where
+# api._load_surrogate() looks (repo_root resolves to sys._MEIPASS when frozen).
+SURROGATE_NPZ = REPO_ROOT / "artifacts" / "surrogate" / "surrogate_numpy.npz"
+if SURROGATE_NPZ.exists():
+    datas.append((str(SURROGATE_NPZ), "artifacts/surrogate"))
 
 # ── Hidden imports ────────────────────────────────────────────────────────
 # uvicorn + starlette + motoquant submodules are dynamic imports that
