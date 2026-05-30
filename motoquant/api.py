@@ -2451,7 +2451,6 @@ def _config_from_surrogate_request(req):
 @app.post("/api/surrogate/predict", response_model=SurrogatePredictResponse)
 def surrogate_predict(
     req: SurrogatePredictRequest,
-    _auth: dict = Depends(require_tier("pro")),  # noqa: B008
 ):
     """
     Fast surrogate-model inference — target p95 < 5 ms.
@@ -2509,7 +2508,6 @@ def surrogate_predict(
 @app.post("/api/surrogate/compare", response_model=SurrogateCompareResponse)
 def surrogate_compare(
     req: SurrogateCompareRequest,
-    _auth: dict = Depends(require_tier("pro")),  # noqa: B008
 ):
     """
     Compare two configs via the surrogate — ideal for BuildPage part-swap sweeps.
