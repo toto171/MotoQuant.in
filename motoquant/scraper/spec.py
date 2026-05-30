@@ -8,7 +8,7 @@ Carries provenance (source URL, scrape timestamp) and per-field confidence.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 
@@ -98,7 +98,13 @@ class BikeSpec:
 
     def __post_init__(self):
         if self.scraped_at is None:
-            self.scraped_at = datetime.utcnow().isoformat()
+            # Python 3.12+ deprecates the implicit-UTC ``datetime.utcnow``;
+            # build a timezone-aware UTC value and strip the tzinfo so the
+            # serialised string remains a naive ISO timestamp (matches the
+            # pre-3.12 behaviour byte-for-byte).
+            self.scraped_at = (
+                datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+            )
 
 
 @dataclass

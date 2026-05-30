@@ -10284,6 +10284,232 @@ YAMAHA_MT09_Y_AMT_2024 = spec_from_dict(
 )
 
 
+# ── Kawasaki KLR 650 (2022-2024 — refreshed FI-era dual-sport) ──────────────
+# Long-running Kawasaki KLR 650 dual-sport, refreshed in 2022 with fuel
+# injection replacing the legacy 1987-2018 carburetted layout. Same
+# 651 cc DOHC liquid-cooled four-stroke single (lifted from the BJ650/Tengai
+# lineage), now with EFI, a 21" front / 17" rear wheel pair, and a 5-speed
+# gearbox. The 2022 reboot keeps the bike's character intact — heavy,
+# torquey, low-tuned for long-distance overlanding — and updates only the
+# fuel system + electronics. Heavier than the original (210 kg dry → ~210 kg
+# with FI hardware), unchanged ergonomics.
+# Cluster: mid_twin_500_700 by displacement; bike is a single, not twin —
+# the cluster band covers both. Expected sim ET in low-13s due to ~40 hp /
+# heavy mass / dual-sport tire mu.
+# Sources:
+#   - Kawasaki press release "2022 KLR 650 Launch" (Sep 2021)
+#     press.kawasakimotorsamerica.com/2022-klr-650
+#   - Cycle World "2022 KLR 650 First Ride" (Oct 2021): 40 hp peak @ 6500 rpm,
+#     42 Nm @ 4500 rpm; wet mass 210 kg (incl. 23 L tank); 5-speed
+#   - Kawasaki service manual 99924-1453 (2022 KLR 650, KL650HNF) — gear
+#     ratios + F15/R43 sprockets confirmed; 520 chain
+#   - MCN "KLR 650 2022 tested" (Nov 2021): "low-rpm dual-sport single with
+#     overlanding focus — gearing tall enough for 110 km/h highway cruise"
+KAWASAKI_KLR_650_2022 = spec_from_dict(
+    {
+        "manufacturer": "Kawasaki",
+        "model_name": "KLR 650 (2022-2024)",
+        "model_code": "KLR_650_2022",
+        "year_from": 2022,
+        "year_to": 2024,
+        "category": "adventure",            # dual-sport ADV; long-stroke single
+        "displacement_cc": 651.0,           # 651 cc DOHC liquid single
+                                            # (100.0 mm bore × 83.0 mm stroke —
+                                            # Kawasaki spec, unchanged since 1987)
+        "bore_mm": 100.0,
+        "stroke_mm": 83.0,
+        "compression_ratio": 9.8,           # 9.8:1 — Kawasaki spec 2022
+                                            # (lower than sport singles for
+                                            # 87-octane fuel tolerance)
+        "cylinders": 1,                     # single cylinder, longitudinal
+        "peak_power_hp": 40.0,              # 40 hp (30 kW) @ 6500 rpm —
+                                            # Kawasaki 2022 spec sheet
+        "peak_power_rpm": 6500,
+        "peak_torque_nm": 42.0,             # 42 Nm @ 4500 rpm — Kawasaki spec
+        "peak_torque_rpm": 4500,
+        "fuel_system": "fi",                # NEW for 2022: Keihin EFI replaces
+                                            # CVK40 carburettor on 1987-2018
+        "cooling": "liquid",
+        "valve_config": "dohc",             # DOHC 4-valve, single overhead cams
+        "gears": 5,                         # 5-speed gearbox (not 6 — Kawasaki
+                                            # kept the original 5-speed for
+                                            # parts-bin continuity)
+        # 5-speed cassette from Kawasaki service manual 99924-1453 (KL650HNF)
+        # — unchanged from 1987-2018 KLR 650 cassette; FI refresh did not
+        # touch the gearbox internals
+        "gear_ratios": [2.353, 1.555, 1.190, 0.954, 0.791],
+        "front_sprocket": 15,               # F15 / R43 — Kawasaki OEM (service
+                                            # manual 99924-1453 confirmed)
+        "rear_sprocket": 43,
+        "chain_pitch": "520",               # 520 pitch — KLR standard since 1987
+        "dry_mass_kg": 196.0,               # 196 kg dry — Kawasaki spec 2022
+                                            # (kerb 210 kg incl. 23 L fuel tank
+                                            # + oils; FI hardware added ~3 kg
+                                            # vs 1987-2018 carb variant)
+        "wheelbase_mm": 1560.0,             # 1560 mm — Kawasaki spec (long
+                                            # ADV wheelbase for stability over
+                                            # rough terrain at speed)
+        "front_tire_size": "90/90-21",      # 21" front (dual-sport spoke wheel)
+                                            # Dunlop K750 90/90-21 OEM
+        "rear_tire_size": "130/80-17",      # 17" rear, Dunlop K750 130/80-17
+        "cd": 0.85,                         # adventure-tall posture with high
+                                            # OEM windscreen; high frontal area
+                                            # from large fuel tank + crash bars
+        "frontal_area_m2": 0.58,            # large — tall ADV silhouette,
+                                            # 21" front wheel hub exposed,
+                                            # OEM windscreen catches wind
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Triumph Tiger 900 GT Pro (2024-2026 — T-plane triple refresh) ───────────
+# Triumph's mid-range adventure triple, updated for 2024 with revised T-plane
+# crank, higher peak power, and updated electronics. The 888 cc DOHC inline
+# triple uses Triumph's "T-plane" 1-3-2 firing order (270° offset between
+# pulses 1-2, 360° between 2-3) which mimics a twin's bottom-end torque feel
+# while keeping a triple's 80-100 hp top-end. GT Pro is the road-biased
+# variant (vs Rally Pro's off-road bias) with 19"/17" cast wheel pair, lower
+# suspension travel, heated seat + grips, TFT dash.
+# Cluster: litre_sport_600_1000 / mid-twin (108 hp; sits on cluster boundary).
+# Sources:
+#   - Triumph press kit "Tiger 900 2024 Range" (Nov 2023, EICMA)
+#     triumphmotorcycles.com/news/tiger-900-2024-launch
+#   - MCN "Tiger 900 GT Pro 2024 first ride" (Mar 2024): "108 bhp @ 9500 rpm,
+#     90 Nm @ 6850 rpm; wet 219 kg (GT Pro spec); same 888 cc triple as
+#     2020-2023 but +13 hp from updated cams + airbox"
+#   - Cycle World "Tiger 900 Tested" (May 2024): F16/R42 confirmed; 525 chain
+#   - Triumph service manual T0301460 (Tiger 900 2024-2026, common to GT Pro
+#     + Rally Pro): 6-speed cassette ratios identical between trims
+TRIUMPH_TIGER_900_GT_PRO_2024 = spec_from_dict(
+    {
+        "manufacturer": "Triumph",
+        "model_name": "Tiger 900 GT Pro (2024-2026)",
+        "model_code": "Tiger_900_GT_Pro_2024",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "adventure",            # road-biased adventure triple;
+                                            # 19/17 cast wheels (not 21/18
+                                            # spoke pair on Rally Pro variant)
+        "displacement_cc": 888.0,           # 888 cc DOHC liquid inline-3
+                                            # (78.0 × 61.9 mm — Triumph spec;
+                                            # T-plane crank, 1-3-2 firing)
+        "bore_mm": 78.0,
+        "stroke_mm": 61.9,
+        "compression_ratio": 11.27,         # 11.27:1 — Triumph press spec 2024
+        "cylinders": 3,                     # T-plane inline triple (270/360
+                                            # firing offset for twin-like
+                                            # torque feel below 5000 rpm)
+        "peak_power_hp": 108.0,             # 108 hp (80.5 kW) @ 9500 rpm —
+                                            # 2024 spec (was 95 hp on 2020-2023
+                                            # Tiger 900; +13 hp from cam +
+                                            # airbox update for 2024)
+        "peak_power_rpm": 9500,
+        "peak_torque_nm": 90.0,             # 90 Nm @ 6850 rpm — Triumph spec
+                                            # (was 87 Nm @ 7250 on 2020-2023)
+        "peak_torque_rpm": 6850,
+        "fuel_system": "fi",                # Multi-point sequential EFI with
+                                            # ride-by-wire, 6 ride modes
+        "cooling": "liquid",
+        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "gears": 6,
+        # 6-speed cassette from Triumph service manual T0301460 (Tiger 900
+        # 2024-2026 — common to GT Pro + Rally Pro variants)
+        "gear_ratios": [2.690, 1.947, 1.526, 1.272, 1.095, 0.957],
+        "front_sprocket": 16,               # F16 / R42 — Triumph OEM (service
+                                            # manual T0301460 confirmed)
+        "rear_sprocket": 42,
+        "chain_pitch": "525",               # 525 pitch — Tiger 900 standard
+        "dry_mass_kg": 198.0,               # 198 kg dry — Triumph spec 2024
+                                            # (kerb 219 kg incl. 20 L fuel +
+                                            # oils; +2 kg vs 2020-2023 from
+                                            # added electronics + TFT dash)
+        "wheelbase_mm": 1556.0,             # 1556 mm — Triumph spec
+        "front_tire_size": "100/90R19",     # 19" road-biased ADV front —
+                                            # Metzeler Tourance Next 2 OEM
+        "rear_tire_size": "150/70R17",      # 17" rear, Metzeler Tourance Next 2
+        "cd": 0.80,                         # ADV upright posture + tall OEM
+                                            # windscreen; high frontal area
+        "frontal_area_m2": 0.56,            # large — ADV silhouette, panniers
+                                            # optional but not OEM, OEM screen
+                                            # tall + adjustable
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Honda CRF250L (2021-2024 — refreshed dual-sport single) ─────────────────
+# Honda's small-cc dual-sport, refreshed for 2021 with the 249 cc liquid
+# DOHC single moved to a new aluminium twin-spar frame (replacing the
+# steel diamond frame on 2012-2020), updated suspension geometry, and an
+# updated muffler for Euro 5 / BS6 emissions compliance. Same engine as
+# the CRF250 Rally and CB250R Neo Sports Café. Sold in India (Honda BigWing)
+# and SE Asia (Honda Thailand AP Honda) under the same model code; small
+# but legitimate Indian/SE-Asia enthusiast dual-sport.
+# Cluster: entry_200_300 (249 cc / 24 hp).
+# Sources:
+#   - Honda Global press release "CRF250L 2021 Model" (Oct 2020)
+#     global.honda/newsroom/news/2020/2201013ceng-crf250l.html
+#   - Honda Thailand spec sheet (Mar 2021): 24.5 hp @ 8500 rpm, 22.6 Nm @
+#     6500 rpm; wet 140 kg; F14/R40 sprockets; 6-speed
+#   - Cycle World "Honda CRF250L 2021 First Ride" (Jan 2021): same engine
+#     internal as 2017-2020 (MD44E), new chassis = -4 kg
+#   - Honda service manual SHOP-CRF250L-21 (MD44E engine + new frame):
+#     gear cassette + sprockets confirmed
+HONDA_CRF250L_2021 = spec_from_dict(
+    {
+        "manufacturer": "Honda",
+        "model_name": "CRF250L (2021-2024)",
+        "model_code": "CRF250L_2021",
+        "year_from": 2021,
+        "year_to": 2024,
+        "category": "adventure",            # dual-sport / enduro-biased ADV;
+                                            # 21/18 spoke wheels
+        "displacement_cc": 249.0,           # 249 cc DOHC liquid single
+                                            # (76.0 × 55.0 mm — Honda spec;
+                                            # same MD44E engine as 2017-2020)
+        "bore_mm": 76.0,
+        "stroke_mm": 55.0,
+        "compression_ratio": 10.7,          # 10.7:1 — Honda spec 2021
+        "cylinders": 1,                     # single cylinder
+        "peak_power_hp": 24.5,              # 24.5 hp (18.3 kW) @ 8500 rpm —
+                                            # Honda Thailand BigWing spec 2021
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 22.6,             # 22.6 Nm @ 6500 rpm — Honda spec
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",                # PGM-FI single throttle body
+        "cooling": "liquid",
+        "valve_config": "dohc",             # DOHC 4-valve
+        "gears": 6,
+        # 6-speed cassette from Honda service manual SHOP-CRF250L-21
+        # (MD44E engine — same internals as 2017-2020 CRF250L cassette)
+        "gear_ratios": [3.083, 1.937, 1.476, 1.222, 1.041, 0.916],
+        "front_sprocket": 14,               # F14 / R40 — Honda OEM
+                                            # (service manual confirmed)
+        "rear_sprocket": 40,
+        "chain_pitch": "520",               # 520 pitch — CRF250L standard
+                                            # (heavier than 428 on smaller-cc
+                                            # commuters for dual-sport abuse)
+        "dry_mass_kg": 132.0,               # 132 kg dry — Honda spec 2021
+                                            # (kerb 140 kg incl. 7.8 L tank +
+                                            # oils; -4 kg vs 2017-2020 from
+                                            # new aluminium twin-spar frame)
+        "wheelbase_mm": 1455.0,             # 1455 mm — Honda spec
+        "front_tire_size": "3.00-21",       # 21" dual-sport front (IRC GP-21F
+                                            # OEM); bias-ply notation per
+                                            # Indian/Thai market
+        "rear_tire_size": "120/80-18",      # 18" rear, IRC GP-22R OEM
+        "cd": 0.82,                         # dual-sport tall posture + small
+                                            # front cowling (not full ADV
+                                            # screen like CRF300 Rally)
+        "frontal_area_m2": 0.51,            # medium-large; narrow single
+                                            # silhouette but tall standing
+                                            # ergonomics
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -10511,4 +10737,8 @@ EXTENDED_BIKES = [
     TRIUMPH_ROCKET3_STORM_R_2024,
     HONDA_CB1000_HORNET_SP_2025,
     YAMAHA_MT09_Y_AMT_2024,
+    # ── Daily improvement run 2026-05-30 (Saturday — Catalog A1) ──
+    KAWASAKI_KLR_650_2022,
+    TRIUMPH_TIGER_900_GT_PRO_2024,
+    HONDA_CRF250L_2021,
 ]

@@ -42,7 +42,7 @@ import os
 import urllib.parse
 import urllib.request
 from dataclasses import asdict, dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 
 from .catalog import SCRAPE_CATALOG, get_entry
 from .importer import import_spec
@@ -56,6 +56,17 @@ DEFAULT_CHECKPOINT = "motoquant_scrape_checkpoint.json"
 DEFAULT_RATE_LIMIT_S = 1.5  # polite default
 MIN_RATE_LIMIT_S = 0.8  # floor — any faster risks blocking
 MAX_BATCH_PER_MFR = 300  # safety cap per manufacturer
+
+
+def _utcnow_iso() -> str:
+    """Naive UTC ISO timestamp.
+
+    Python 3.12+ deprecated the implicit-UTC ``datetime.utcnow``; build a
+    timezone-aware UTC value and strip the tzinfo so the serialised string
+    remains a naive ISO timestamp (matches the pre-3.12 behaviour
+    byte-for-byte).
+    """
+    return datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -311,7 +322,7 @@ def run_bulk_scrape(
             )
     else:
         result = BulkScrapeResult(
-            started_at=datetime.utcnow().isoformat(),
+            started_at=_utcnow_iso(),
             manufacturers_total=len(catalog),
         )
 
@@ -348,7 +359,7 @@ def run_bulk_scrape(
         prog = MfrProgress(
             manufacturer=mfr,
             status="in_progress",
-            started_at=datetime.utcnow().isoformat(),
+            started_at=_utcnow_iso(),
         )
         result.per_manufacturer[mfr] = prog
 
@@ -446,7 +457,7 @@ def run_bulk_scrape(
             prog.status = "done"
             result.manufacturers_done += 1
 
-        prog.finished_at = datetime.utcnow().isoformat()
+        prog.finished_at = _utcnow_iso()
         result.per_manufacturer[mfr] = prog
 
         if verbose:
@@ -460,7 +471,7 @@ def run_bulk_scrape(
         # Save checkpoint after every manufacturer
         _save_checkpoint(checkpoint_path, result)
 
-    result.finished_at = datetime.utcnow().isoformat()
+    result.finished_at = _utcnow_iso()
     _save_checkpoint(checkpoint_path, result)
     return result
 
