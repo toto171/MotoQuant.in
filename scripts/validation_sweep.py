@@ -1986,6 +1986,127 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         "Cycle World Sept 1994 (Carlsbad Raceway timing-strip, 1995 CBR900RR road test cover, stock BT50 tyres)",
     ),
     # ── end 2026-05-31 pass 9 ──
+    # ── 2026-05-31 pass 10 — Sunday autonomous slot (benchmark-import) ────────
+    # Two high-confidence Sport Rider / Cycle World instrumented adds from the
+    # sportbike-performance-numbers archive
+    # (cycleworld.com/sport-rider/tech/sportbike-performance-numbers/). Same
+    # authoritative timing-strip table already cited by GSX-R 600 K6, Daytona
+    # 675 (2013), YZF-R6 2C0, Tuono V4 1100, CBR954RR (the Sport Rider 2002
+    # archive row, which is parallel to the CW comparison-test source already
+    # cited), CBR929RR, YZF-R6 13S, ZX-6R 636B, GSX-R 600 K8, ZX-9R B1
+    # entries above. Catalog year ranges verified to include year_hint via
+    # find_spec() probe. No duplicates with prior 2026-05-24 / 2026-05-25 /
+    # 2026-05-31 passes 1-9 (verified via the per-spec benched set).
+    #
+    # Rejected this pass (all logged for the report):
+    #   * Yamaha FZ1 Fazer '11 (SR 10.87 @ 128.2) — DUPLICATE of pass-5
+    #     YAMAHA_FZ1_FAZER 2007 entry at 10.957 @ 127.99 (same catalog row).
+    #   * Honda CBR954RR '02 SR 10.23 @ 137.57 — DUPLICATE (existing CW
+    #     comparison-test 10.49 @ 224 km/h entry on same SC50 catalog row).
+    #   * Honda CBR929RR '00 SR 10.31 @ 134.50 — DUPLICATE (existing SR-
+    #     sourced entry on same SC44 catalog row).
+    #   * Kawasaki Ninja ZX-6R '03 SR 10.67 @ 131.0 — DUPLICATE (existing SR
+    #     entry on ZX636B 2003-2004 catalog row).
+    #   * Suzuki GSX-R 600 K8 '08 SR 10.74 @ 131.36 — DUPLICATE (existing SR
+    #     entry on the 2008-2010 catalog row).
+    #   * BMW S 1000 RR '10 SR 9.57 @ 156.1 — year-out-of-range (catalog
+    #     covers 2015+ K46 / 2019+ K67; 2010 K46 first-gen has no catalog
+    #     row, different Euro-3 cam profile + 193 vs 199 hp).
+    #   * Aprilia RSV4 Factory '13 SR 10.21 @ 143.4 — year-out-of-range AND
+    #     displacement mismatch (catalog covers 2021+ 1099cc RK; '13 was the
+    #     original 999cc 1st-gen).
+    #   * Aprilia Tuono V4 R APRC '12 SR 10.13 @ 140.2 — year-out-of-range
+    #     AND displacement mismatch (catalog "Tuono V4 1100" 2021+ 1077cc;
+    #     '12 was the 999cc 1st-gen Tuono V4 R).
+    #   * KTM 1190 RC8 '08 SR 10.27 @ 138.1 — borderline year match (catalog
+    #     "1190 RC8 R" 2009-2013 covers the same 1148cc V-twin platform);
+    #     held to preserve attribution clarity (the SR test bike was the
+    #     non-R RC8 not the R-spec catalog row).
+    #   * Kawasaki Versys 650 '08 SR 12.40 @ 104.1 — year-out-of-range AND
+    #     chassis-mismatch (catalog 2015+ KLE650F; SR test was 2007-2009
+    #     LE650A first-gen).
+    #   * Honda CB1000R '11 SR 11.13 @ 123.11 — year-out-of-range (catalog
+    #     2021+ SC80 4th-gen; SR test was SC60 1st-gen 998cc).
+    #   * Suzuki SV1000S '03 SR 10.82 @ 127.1, BMW K1200S '05 SR 10.30 @
+    #     137.5, Yamaha YZF1000R '97 SR 10.60 @ 131.7, Yamaha FJR1300 '08
+    #     SR 10.93 @ 124.7, Aprilia RSV Mille R '02 SR 10.62 @ 132.49,
+    #     Triumph Speed Triple 1050 '02 SR 11.04 @ 123.8, Kawasaki ZX-12R
+    #     '01 SR 9.95 @ 144.40, Ducati 916/996/999/1098R/1198, Yamaha
+    #     YZF-R6S '06, Honda RC51 '00 — all NO catalog row (catalog gaps
+    #     queued for future expansion pass; benchmarks held until then per
+    #     anti-fabrication rule "benchmark requires catalog spec to bind").
+    #   * BMW HP4 '13 SR 9.76 @ 152.4 — catalog only has "HP4 Race" (2017+
+    #     track-only) which is a different spec from the road HP4 '13 SR
+    #     tested (HP4 = K46 S1000RR-based road bike; HP4 Race = magnesium-
+    #     wheel carbon-frame trackonly; not the same bike).
+    #   * Honda VFR1200F '10 SR 10.23 @ 136.82, Honda RC51 SP1/SP2 '00 SR
+    #     10.96 @ 129.38 — VFR1200F not in catalog; RC51 SP1 catalog row
+    #     would be "VTR1000 SP1 (RC51)" which isn't in catalog (only the
+    #     SP2 is). RC51 SP1 entry deferred until catalog expansion adds the
+    #     SP1 row separately.
+    #   * Ducati Diavel V4, Tiger Sport 660 / 800, Multistrada V4, Speed
+    #     Triple 1200 RS, CB500F, Hayabusa Gen 3 — investigated via
+    #     MotoStatz / Cycle World / Sport Rider searches; either no
+    #     instrumented (Dragy/Vbox/timing-strip) data found, or article
+    #     exists but doesn't explicitly name the measurement device per the
+    #     project's instrumented-only bar (same logic as the existing 6th-
+    #     and 7th-pass Z900RS, GSX-S750, CB1000R MotoStatz rejections).
+    #
+    # Honda VTR1000 SP2 (RC51) (999 cc 90° V-twin sport, 2002-2006 SC45 chassis
+    # — Honda's clean-sheet WSBK homologation V-twin, factory-claimed 133 hp
+    # at the crank with HMAS hydraulic-pivot rear and 43 mm Showa forks).
+    # Sport Rider 10/02 timing-strip 10.49s @ 132.7 mph (= 213.6 km/h, rounded
+    # 214). The Cycle World sportbike-performance-numbers archive row reads
+    # exactly: "RC51 ('02): 10/02 10.49 @ 132.7". The 2002 SP2 entry is the
+    # updated 999 cc V-twin (vs 1999-2001 SP1 with 999 cc but different bore/
+    # stroke + ECU mapping); the 2002+ SP2 generation is what's in catalog as
+    # HONDA_VTR1000_SP2_RC51 (2002-2006). Pre-add probe via _best_benchmark_
+    # match returns None on this catalog row (previously unbenchmarked); post-
+    # add binds via 4-token "VTR1000 SP2 (RC51)" pattern. The 4-token model
+    # name has high specificity per _model_specificity_score — no collision
+    # risk with other V-twin catalog rows (e.g. "TL1000R", "1199 Panigale"
+    # both have distinct unique tokens). Per-cluster this lands in the litre-
+    # sport-600-1000 band where the existing TL1000R 1998 (CW: 10.50s) and
+    # RSV Mille 2002 (SR: 10.58s/131.50 mph) entries already live — RC51 at
+    # 10.49 fits the cluster head consistently.
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Honda",
+        "VTR1000 SP2 (RC51)",
+        2002,
+        10.49,
+        214,
+        "Sport Rider 10/02 (Cycle World sportbike-performance-numbers, timing-strip)",
+    ),
+    # Honda CBR300R (286 cc DOHC single sport, 2014-2018 MGY-A chassis — the
+    # CBR250R successor with bore stretched to 76 mm × stroke 63 mm, 30.4 hp
+    # @ 8500 rpm in a 164 kg wet chassis). Sport Rider 12/15 / 2015 archive
+    # row reads exactly: "CBR300R ('15): 15.79 @ 82.93 quarter-mile, 7.55s
+    # 60-80mph". Trap 82.93 mph = 133.4 km/h, rounded down to 133. Per the
+    # SR archive listing format, this is a timing-strip number from a SR
+    # press-test session at a licensed drag strip. The 286 cc CBR300R falls
+    # in the entry-200-300 cluster where the existing R3 2015 (14.00s @ 145
+    # km/h, FastestLaps verified), MT-03 2020 (14.05s @ 92 km/h DERIVED), and
+    # CBR250R 2011 (15.86s @ 130 km/h, MotorBikeCatalog 81.2 mph) entries live
+    # — CBR300R at 15.79 fits the cluster's slow end (vs R3/MT-03 which carry
+    # 41 hp twins, the CBR300R is a 30 hp single, so a +1.7s gap is internally
+    # consistent). Catalog entry HONDA_CBR300R covers 2014-2018; year_hint=
+    # 2015 binds cleanly in range. Pre-add probe via _best_benchmark_match
+    # returns None on this catalog row (previously unbenchmarked); post-add
+    # binds via unique "CBR300R" pattern. Note: also distinct from the CBR250RR
+    # (Indonesia) catalog row which is the 250cc parallel-twin Asian-market
+    # platform — completely different engine, different displacement, the
+    # word-boundary matcher correctly distinguishes "CBR300R" from "CBR250RR".
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Honda",
+        "CBR300R",
+        2015,
+        15.79,
+        133,
+        "Sport Rider 2015 (Cycle World sportbike-performance-numbers, timing-strip)",
+    ),
+    # ── end 2026-05-31 pass 10 ──
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

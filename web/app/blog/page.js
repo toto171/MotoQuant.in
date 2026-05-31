@@ -8,9 +8,18 @@ export const metadata = {
   title:
     "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
   description:
-    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: CFMoto 675SR-R sub-INR 6 lakh inline triple sport, Honda CBR150R Indonesian K56F sport single, Suzuki GSX-R600 K8 600cc supersport, Kawasaki Ninja H2 SX supercharged sport-tourer, Yamaha MT-15 V1 155cc naked deep-dive, Triumph Street Triple 765 R, KTM 890 Duke R India grey-market, best mods for KTM RC 390 ranked by cost-per-tenth, Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
+    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Bajaj Pulsar N125 vs TVS Raider 125 vs Hero Glamour 125 commuter shootout, CFMoto 675SR-R sub-INR 6 lakh inline triple sport, Honda CBR150R Indonesian K56F sport single, Suzuki GSX-R600 K8 600cc supersport, Kawasaki Ninja H2 SX supercharged sport-tourer, Yamaha MT-15 V1 155cc naked deep-dive, Triumph Street Triple 765 R, KTM 890 Duke R India grey-market, best mods for KTM RC 390 ranked by cost-per-tenth, Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
   keywords: [
     "motorcycle drag racing blog",
+    "pulsar n125 quarter mile",
+    "pulsar n125 0-100",
+    "pulsar n125 vs raider 125",
+    "tvs raider 125 quarter mile",
+    "hero glamour 125 quarter mile",
+    "fastest 125cc commuter india",
+    "fastest 125cc bike india",
+    "indian 125cc drag race",
+    "pulsar 125 neon drag time",
     "kawasaki ninja h2 sx quarter mile",
     "h2 sx drag time",
     "ninja h2 sx vs hayabusa",
@@ -159,6 +168,23 @@ export const metadata = {
 };
 
 const POSTS = [
+  {
+    slug: "pulsar-n125-vs-raider-125-vs-glamour-125-quarter-mile-physics",
+    date: "2026-05-31",
+    readTime: "13 min",
+    tags: [
+      "Bajaj",
+      "Pulsar N125",
+      "TVS Raider 125",
+      "Hero Glamour 125",
+      "Indian 125cc",
+      "commuter shootout",
+    ],
+    title:
+      "Pulsar N125 vs Raider 125 vs Glamour 125: Which 125cc Commuter Is the Fastest?",
+    excerpt:
+      "MotoQuant sims the TVS Raider 125 at 20.63s, Pulsar P125 at 20.68s, Pulsar N125 at 20.70s, and Glamour 125 at 21.28s on a flat quarter mile. India's most-bought motorcycle class has zero published ET data because the segment buyer searches for fuel economy, not drag times. The Raider 125 wins by 0.07s on a sharper ignition map and 5 kg less mass; the Glamour 125 trails by 0.65s but saves ₹25,000/year in petrol. Cost-per-tenth ladder topped by a ₹450 13F sprocket (~0.20s) and a ₹2,100 sport-rubber rear (~0.18s) — the cheapest tenth in the entire MotoQuant catalog on any bike under 200cc.",
+  },
   {
     slug: "royal-enfield-interceptor-650-quarter-mile-physics",
     date: "2026-05-31",

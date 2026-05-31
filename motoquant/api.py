@@ -207,6 +207,83 @@ class QuickSimResultDict(TypedDict):
     et_delta_s: float | None
 
 
+class LsrSplitDict(TypedDict):
+    """One LSR split entry inside a :class:`TopSpeedResultDict`.
+
+    Built inline in :func:`simulate_top_speed`. Keys are emitted at three
+    units (m/s + km/h + mph) so the web simulator can display whichever
+    unit the user prefers without round-tripping the conversion.
+    """
+
+    time_s: float
+    speed_ms: float
+    speed_kmh: float
+    speed_mph: float
+
+
+class TopSpeedTimeseriesDict(TypedDict):
+    """Downsampled timeseries payload for ``/api/simulate/top-speed``.
+
+    Only populated when the request sets ``include_timeseries=True``.
+    Stride is chosen in :func:`simulate_top_speed` so the payload is
+    ~100 Hz regardless of the underlying solver ``dt``.
+    """
+
+    t: list[float]
+    v_ms: list[float]
+    v_kmh: list[float]
+    rpm: list[float]
+    gear: list[int]
+    power_kw: list[float]
+    x_m: list[float]
+
+
+class TopSpeedResultDict(TypedDict, total=False):
+    """Shape of the dict returned by ``/api/simulate/top-speed``.
+
+    Built inline in :func:`simulate_top_speed`. ``timeseries`` is the only
+    optional key (hence ``total=False``); it appears iff the request sets
+    ``include_timeseries=True``. All other keys are always populated.
+    """
+
+    terminal_velocity_ms: float
+    terminal_velocity_kmh: float
+    terminal_velocity_mph: float
+    time_to_terminal_s: float
+    distance_to_terminal_m: float
+    terminal_power_kw: float
+    terminal_power_hp: float
+    terminal_gear: int
+    terminal_rpm: float
+    reached_plateau: bool
+    lsr_splits: dict[str, LsrSplitDict]
+    bike_name: str
+    peak_power_hp: float
+    total_mass_kg: float
+    parts_applied: list[AppliedPartDict]
+    build_cost_inr: float
+    timeseries: TopSpeedTimeseriesDict
+
+
+class DistanceResultDict(TypedDict):
+    """Shape of the dict returned by ``/api/simulate/distance``.
+
+    Built inline in :func:`simulate_distance`. All keys are always
+    populated — there is no optional ``timeseries`` branch because the
+    distance endpoint only surfaces the trap values at the target.
+    """
+
+    distance_m: float
+    time_s: float
+    trap_speed_ms: float
+    trap_speed_kmh: float
+    trap_speed_mph: float
+    peak_velocity_kmh: float
+    bike_name: str
+    peak_power_hp: float
+    total_mass_kg: float
+
+
 # ─── Request / response models ────────────────────────────────────────────
 
 
@@ -1015,7 +1092,7 @@ class TopSpeedRequest(BaseModel):
 
 
 @app.post("/api/simulate/top-speed")
-def simulate_top_speed(req: TopSpeedRequest):
+def simulate_top_speed(req: TopSpeedRequest) -> TopSpeedResultDict:
     """
     Run the simulation until terminal velocity is reached.
 
@@ -1051,7 +1128,7 @@ def simulate_top_speed(req: TopSpeedRequest):
         raise HTTPException(500, f"Top-speed simulation error: {exc}")
 
     # Format LSR splits with km/h + mph for convenience
-    splits_fmt = {}
+    splits_fmt: dict[str, LsrSplitDict] = {}
     for k, v in ts.lsr_splits.items():
         splits_fmt[k] = {
             "time_s": round(v["time_s"], 3),
@@ -1060,7 +1137,7 @@ def simulate_top_speed(req: TopSpeedRequest):
             "speed_mph": round(v["speed_ms"] * 2.23694, 1),
         }
 
-    response = {
+    response: TopSpeedResultDict = {
         "terminal_velocity_ms": round(ts.terminal_velocity_ms, 2),
         "terminal_velocity_kmh": round(ts.terminal_velocity_kmh, 1),
         "terminal_velocity_mph": round(ts.terminal_velocity_mph, 1),
@@ -1083,7 +1160,7 @@ def simulate_top_speed(req: TopSpeedRequest):
         # Downsample to 100 Hz (every 10 ms) for web payload sanity
         sim = ts.full_sim
         stride = max(1, int(0.01 / max(sim.dt, 0.0001)))
-        response["timeseries"] = {
+        timeseries: TopSpeedTimeseriesDict = {
             "t": sim.t[::stride].tolist(),
             "v_ms": sim.v[::stride].tolist(),
             "v_kmh": (sim.v[::stride] * 3.6).tolist(),
@@ -1092,6 +1169,7 @@ def simulate_top_speed(req: TopSpeedRequest):
             "power_kw": sim.power_kw[::stride].tolist(),
             "x_m": sim.x[::stride].tolist(),
         }
+        response["timeseries"] = timeseries
 
     return response
 
@@ -1119,7 +1197,7 @@ class DistanceRunRequest(BaseModel):
 
 
 @app.post("/api/simulate/distance")
-def simulate_distance(req: DistanceRunRequest):
+def simulate_distance(req: DistanceRunRequest) -> DistanceResultDict:
     """
     Run the simulation to an arbitrary target distance.
 
@@ -1163,7 +1241,7 @@ def simulate_distance(req: DistanceRunRequest):
     trap_time = float(sim.t[target_idx])
     trap_v = float(sim.v[target_idx])
 
-    return {
+    result: DistanceResultDict = {
         "distance_m": req.distance_m,
         "time_s": round(trap_time, 3),
         "trap_speed_ms": round(trap_v, 2),
@@ -1174,6 +1252,7 @@ def simulate_distance(req: DistanceRunRequest):
         "peak_power_hp": round(float(cfg.engine.peak_power_hp), 1),
         "total_mass_kg": round(float(cfg.chassis.total_mass_kg), 1),
     }
+    return result
 
 
 @app.get("/api/parts/categories")

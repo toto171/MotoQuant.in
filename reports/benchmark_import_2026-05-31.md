@@ -207,3 +207,88 @@ trap. Same transcription-error pattern as ZX-9R 2000.
 Reference baselines unchanged (K5 10.0334 / R1 10.2859 / Hayabusa 10.4712).
 57/57 validation tests pass.
 ```
+
+---
+
+## Pass 10 (later same-day autonomous slot — 10th benchmark-import pass on 2026-05-31)
+
+**Agent:** benchmark-import
+**Session:** `/tmp/mq-session-1780266647-625/repo`
+**Sources:** Cycle World / Sport Rider sportbike-performance-numbers archive (timing-strip)
+**Adds:** 2 high-confidence instrumented quarter-mile benchmarks
+**Total BENCHMARKS list:** 152 → **154**
+
+Nine prior passes (passes 1-9) on 2026-05-31 had already harvested most low-hanging fruit. This pass focused on combing the Cycle World Sport Rider sportbike-performance-numbers archive
+(<https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/>) for catalog rows that remained unbenched after the previous passes — same authoritative timing-strip table used by GSX-R 600 K6, Daytona 675 (2013), YZF-R6 2C0, Tuono V4 1100, CBR954RR, CBR929RR, YZF-R6 13S, ZX-6R 636B, GSX-R 600 K8, ZX-9R B1 entries above.
+
+### Adds (both Sport Rider timing-strip)
+
+#### 1. Honda VTR1000 SP2 (RC51) — 2002
+
+| Field | Value |
+|---|---|
+| ET | **10.49 s** |
+| Trap | **132.7 mph (214 km/h)** |
+| Source | Sport Rider 10/02 (Cycle World sportbike-performance-numbers archive, timing-strip) |
+| Catalog row | `Honda VTR1000 SP2 (RC51)` 2002-2006 (SC45) — previously unbenched |
+| URL | <https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/> |
+
+Honda's WSBK homologation 999 cc 90° V-twin (factory-claimed 133 hp). The SR archive row reads "RC51 ('02): 10/02 10.49 @ 132.7". The 2002 SP2 generation is what's in the catalog as `HONDA_VTR1000_SP2_RC51` (the earlier SP1 2000-2001 is not in catalog and was rejected for that reason). Word-boundary matcher binds the SR row to exactly 1 catalog spec (verified post-edit). Cluster-consistent with the existing TL1000R 1998 (CW: 10.50 s) and RSV Mille 2002 (SR: 10.58 s) entries.
+
+#### 2. Honda CBR300R — 2015
+
+| Field | Value |
+|---|---|
+| ET | **15.79 s** |
+| Trap | **82.93 mph (133 km/h)** |
+| Source | Sport Rider 2015 (Cycle World sportbike-performance-numbers archive, timing-strip) |
+| Catalog row | `Honda CBR300R` 2014-2018 (MGY-A) — previously unbenched |
+| URL | <https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/> |
+
+CBR250R successor with bore stretched to 76 mm (286 cc, 30.4 hp). Archive row reads "CBR300R ('15): 15.79 @ 82.93". Cluster-consistent with the existing R3 2015 (14.00 s), MT-03 2020 (14.05 s), and CBR250R 2011 (15.86 s) entries — the +1.7 s gap vs the R3/MT-03 twins reflects CBR300R running a 30 hp single vs the 41 hp twins, internally consistent. Year_hint=2015 binds cleanly inside 2014-2018 catalog range.
+
+### Rejected this pass (full traceability)
+
+**Duplicates — same catalog row already benched:**
+- Yamaha FZ1 Fazer '11 SR 10.87 @ 128.2 — pass-5 `YAMAHA_FZ1_FAZER` 2007 entry 10.957 @ 127.99 (same catalog row).
+- Honda CBR954RR '02 SR 10.23 @ 137.57 — existing CW 10.49 @ 224 km/h entry (same SC50 row).
+- Honda CBR929RR '00 SR 10.31 @ 134.50 — existing SR entry on SC44 catalog row.
+- Kawasaki ZX-6R '03 SR 10.67 @ 131.0 — existing SR entry on ZX636B 2003-2004 catalog row.
+- Suzuki GSX-R 600 K8 '08 SR 10.74 @ 131.36 — existing SR entry on 2008-2010 catalog row.
+- Aprilia RSV Mille R '02 SR 10.62 @ 132.49 — existing RSV Mille 2002 entry (same 2001-2004 catalog row).
+
+**Year-out-of-range / displacement mismatch (anti-fabrication rule):**
+- BMW S 1000 RR '10 SR 9.57 @ 156.1 — catalog covers 2015+ K46 / 2019+ K67; 2010 K46 first-gen has no catalog row, Euro-3 vs Euro-4 cam differences.
+- Aprilia RSV4 Factory '13 SR 10.21 @ 143.4 — catalog covers 2021+ 1099 cc RK; '13 was 999 cc 1st-gen.
+- Aprilia Tuono V4 R APRC '12 SR 10.13 @ 140.2 — catalog "Tuono V4 1100" 2021+ 1077 cc; '12 was 999 cc 1st-gen.
+- KTM 1190 RC8 '08 SR 10.27 @ 138.1 — catalog "1190 RC8 R" 2009-2013; SR test was non-R RC8, held for attribution clarity.
+- Kawasaki Versys 650 '08 SR 12.40 @ 104.1 — catalog 2015+ KLE650F; SR test was 2007-2009 LE650A first-gen, different chassis.
+- Honda CB1000R '11 SR 11.13 @ 123.11 — catalog 2021+ SC80 4th-gen; SR test was SC60 1st-gen.
+- BMW HP4 '13 SR 9.76 @ 152.4 — catalog only has "HP4 Race" (2017+ track-only); HP4 road bike is a different spec.
+
+**No catalog row at all (held until catalog expansion):**
+Suzuki SV1000S '03 (SR 10.82 @ 127.1), BMW K1200S '05 (SR 10.30 @ 137.5), Yamaha YZF1000R '97 (SR 10.60 @ 131.7), Yamaha FJR1300 '08 (SR 10.93 @ 124.7), Triumph Speed Triple 1050 '02 (SR 11.04 @ 123.8), Kawasaki ZX-12R '01 (SR 9.95 @ 144.40), Ducati 916/996/999/1098R/1198/848 EVO, Yamaha YZF-R6S '06, Honda RC51 SP1 '00, Honda VFR1200F '10, Kawasaki Concours 14 '08 (SR 10.52 @ 130.5), Triumph Daytona 675R '11 (SR 10.69 @ 130.7).
+
+**Failed instrumented-only bar (no Dragy/Vbox/timing-strip cite):**
+Honda CB500F (MotoStatz article exists but no Dragy mention), Ducati Multistrada V4 (MotoStatz article no Dragy mention), Triumph Tiger Sport 660/800 (no instrumented data found), Triumph Speed Triple 1200 RS (only AccelerationTimes/FastestLaps-derived figures), Ducati Diavel V4 (MotoStatz article exists for the older 1198 cc Testastretta Diavel only, not the V4 1158 cc catalog row). Same logic as the existing 6th/7th-pass Z900RS, GSX-S750, CB1000R MotoStatz rejections — article exists but doesn't explicitly name the measurement device.
+
+### Validation
+
+```
+python3 -c "import ast; ast.parse(open('scripts/validation_sweep.py').read())"  # OK
+python3 -c "import ast; ast.parse(open('scripts/sweep_with_clusters.py').read())"  # OK
+python3 -c "from scripts.validation_sweep import BENCHMARKS; print(len(BENCHMARKS))"  # 154
+```
+
+Word-boundary matcher binding probe (post-edit):
+- RC51 (2002) → 1 catalog spec match: `Honda VTR1000 SP2 (RC51) 2002-2006` ✓
+- CBR300R (2015) → 1 catalog spec match: `Honda CBR300R 2014-2018` ✓
+
+Both bind cleanly, no token-set collisions with adjacent catalog rows.
+
+### Files touched (pass 10)
+
+- `scripts/validation_sweep.py` (BENCHMARKS list +2 entries, +~95 lines of comments)
+- `reports/benchmark_import_2026-05-31.md` (this report — appended Pass 10 section)
+
+`scripts/sweep_with_clusters.py` does NOT need mirror — it imports `BENCHMARKS` from `validation_sweep.py` (verified at line 35: `from scripts.validation_sweep import BENCHMARKS`).
