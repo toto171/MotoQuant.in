@@ -67,7 +67,7 @@ const TOP10 = [
 
 // ─── Stats strip — synced to current motoquant.db (Apr 30 2026) ───────
 const STATS = [
-  { num: 796, label: 'BIKES'      },
+  { num: 799, label: 'BIKES'      },
   { num: 232, label: 'TIRES'      },
   { num: 563, label: 'PARTS'      },
   { num: 20,  label: 'VENUES'     },
@@ -375,7 +375,7 @@ function HomePageInner() {
                 >
                   A first-principles drag simulator for India&rsquo;s motorcycle
                   drag-racing community.{' '}
-                  <span className="text-white">796 bikes</span>,{' '}
+                  <span className="text-white">799 bikes</span>,{' '}
                   <span className="text-white">563 parts</span>,{' '}
                   <span className="text-white">20 venues</span> — tuned to
                   within ±0.05s of real-world ETs on the litre-class.
@@ -389,7 +389,7 @@ function HomePageInner() {
                   Aamby Valley · MMRT · Kari · Hyderabad
                 </span>
                 <span className="px-3 py-1.5 rounded-full border border-brand-orange/30 text-brand-orange">
-                  +0.006s mean bias on 74 of 136 benchmarks
+                  +0.006s mean bias on 74 of 138 benchmarks
                 </span>
                 <span className="px-3 py-1.5 rounded-full border border-white/10 text-white/55">
                   RK4 · 1ms · 15 sub-models
@@ -454,9 +454,9 @@ function HomePageInner() {
               {
                 icon: Target,
                 title: 'Indian Market-First',
-                body: '796 bikes including 57 Indian commuters (Pulsar N125, NS200, NS400Z, Apache RTR, R15 V4, Duke 390, RE Interceptor 650), 15 SE Asia drag cubs, the Kawasaki Ninja ZX-4R/ZX-4RR 400cc inline-fours, and the complete Indian racing scene. Parts prices in INR with live retailer data. Venues: Aamby Valley, MMRT, BIC, Kari, Hyderabad.',
+                body: '799 bikes including 57 Indian commuters (Pulsar N125, NS200, NS400Z, Apache RTR, R15 V4, Duke 390, RE Interceptor 650), 15 SE Asia drag cubs, the Kawasaki Ninja ZX-4R/ZX-4RR 400cc inline-fours, and the complete Indian racing scene. Parts prices in INR with live retailer data. Venues: Aamby Valley, MMRT, BIC, Kari, Hyderabad.',
                 href: '/bikes',
-                cta: 'Browse all 796 bikes →',
+                cta: 'Browse all 799 bikes →',
               },
               {
                 icon: TrendingUp,

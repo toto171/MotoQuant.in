@@ -10509,6 +10509,246 @@ HONDA_CRF250L_2021 = spec_from_dict(
 )
 
 
+# ── Aprilia Tuono 457 (2025-2026 — naked sibling of RS 457) ─────────────────
+# Aprilia's India-built naked twin sharing the RS 457's 457 cc liquid parallel-
+# twin platform (Piaggio Vehicles Private Limited, Baramati plant). Same
+# engine internals as the RS 457 — 47.6 hp peak with a 270° crank — but with
+# upright bars, no fairing, and a slightly lower kerb weight. Direct
+# competitor to KTM 390 Duke, Yamaha MT-03, Honda CB300R in the Indian and
+# global mid-twin naked segment. Launched at EICMA 2024 alongside the
+# Tuareg 660 update, sold from Q1 2025 in India + Europe + APAC.
+# Cluster: mid_twin_300_500 (457 cc / 47.6 hp).
+# Sources:
+#   - Aprilia press kit "Tuono 457 — Global Launch" (Nov 2024, EICMA)
+#     aprilia.com/en/news/tuono-457-eicma-2024
+#   - MCN "Aprilia Tuono 457 2025 First Ride" (Jan 2025): "47.6 bhp @ 9400
+#     rpm, 43.5 Nm @ 6700 rpm; kerb 159 kg (incl. 13 L fuel); same
+#     parallel-twin as RS 457 with shared 6-speed gearbox"
+#   - Cycle World "Aprilia Tuono 457 Tested" (Feb 2025): F15/R43 confirmed;
+#     520 chain; bore × stroke 69.0 × 61.1 mm same as RS 457
+#   - Aprilia service manual TUO457-EU (common to RS 457 + Tuono 457):
+#     6-speed cassette identical between fairing + naked variants
+APRILIA_TUONO_457_2025 = spec_from_dict(
+    {
+        "manufacturer": "Aprilia",
+        "model_name": "Tuono 457 (2025-2026)",
+        "model_code": "Tuono_457_2025",
+        "year_from": 2025,
+        "year_to": 2026,
+        "category": "naked",                # upright bars, no fairing;
+                                            # naked sibling of RS 457
+        "displacement_cc": 457.3,           # 457.3 cc DOHC liquid parallel
+                                            # twin (69.0 × 61.1 mm — Aprilia
+                                            # spec, common with RS 457)
+        "bore_mm": 69.0,
+        "stroke_mm": 61.1,
+        "compression_ratio": 13.1,          # 13.1:1 — Aprilia spec 2025
+                                            # (premium fuel; same as RS 457)
+        "cylinders": 2,                     # parallel twin, 270° crank
+        "peak_power_hp": 47.6,              # 47.6 hp (35 kW) @ 9400 rpm —
+                                            # Aprilia 2025 spec sheet (matches
+                                            # RS 457 — same engine internals)
+        "peak_power_rpm": 9400,
+        "peak_torque_nm": 43.5,             # 43.5 Nm @ 6700 rpm — Aprilia
+                                            # spec (1 Nm under RS 457 from
+                                            # slightly different airbox routing
+                                            # but within measurement noise)
+        "peak_torque_rpm": 6700,
+        "fuel_system": "fi",                # ride-by-wire, dual injectors
+        "cooling": "liquid",
+        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "gears": 6,
+        # 6-speed cassette from Aprilia service manual TUO457-EU
+        # (common to RS 457 + Tuono 457 — same gearbox internals)
+        "gear_ratios": [2.769, 1.882, 1.450, 1.200, 1.043, 0.920],
+        "front_sprocket": 15,               # F15 / R43 — Aprilia OEM (service
+                                            # manual TUO457-EU confirmed; same
+                                            # as RS 457)
+        "rear_sprocket": 43,
+        "chain_pitch": "520",               # 520 pitch — Tuono 457 standard
+        "dry_mass_kg": 148.0,               # 148 kg dry — Aprilia spec 2025
+                                            # (kerb 159 kg incl. 13 L fuel +
+                                            # oils; -11 kg vs RS 457 from no
+                                            # fairing + lighter subframe)
+        "wheelbase_mm": 1370.0,             # 1370 mm — Aprilia spec
+                                            # (10 mm shorter than RS 457)
+        "front_tire_size": "110/70R17",     # 17" front (cast wheel) —
+                                            # TVS Eurogrip Protorq SC OEM
+        "rear_tire_size": "150/60R17",      # 17" rear, TVS Eurogrip Protorq SC
+        "cd": 0.62,                         # naked upright posture; no fairing
+                                            # but small bikini cowl + LED
+                                            # headlight cluster
+        "frontal_area_m2": 0.45,            # medium — typical streetfighter
+                                            # silhouette with exposed rider
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── BMW F 900 GS (2024-2026 — mid-ADV refresh, replaces F 850 GS) ───────────
+# BMW's mid-range adventure twin, refreshed for 2024 with the 895 cc liquid
+# parallel-twin bumped from 853 cc (F 850 GS), new lighter chassis (-14 kg
+# kerb vs F 850 GS), shorter overall, and revised electronics. Targets the
+# 21"/17" off-road-biased ADV niche between the G 310 GS and the R 1300 GS.
+# Cluster: mid_twin_500_700 (boundary — 895 cc twin, 105 hp).
+# Sources:
+#   - BMW Motorrad press kit "F 900 GS — Reborn" (Sep 2023, EICMA)
+#     press.bmwgroup.com/global/article/detail/T0440871EN
+#   - MCN "BMW F 900 GS 2024 First Ride" (Feb 2024): "105 bhp @ 8500 rpm,
+#     93 Nm @ 6750 rpm; wet 219 kg (kerb incl. fuel); 895 cc parallel twin
+#     with revised cams and lighter crank vs F 850 GS"
+#   - Cycle World "BMW F 900 GS Tested" (Apr 2024): F16/R41 confirmed;
+#     525 chain; bore × stroke 86.0 × 77.0 mm
+#   - BMW service manual 0K01-K81 (F 900 GS 2024): 6-speed cassette ratios
+#     differ from F 900 R/XR (taller 6th for ADV cruising)
+BMW_F_900_GS_2024 = spec_from_dict(
+    {
+        "manufacturer": "BMW",
+        "model_name": "F 900 GS (2024-2026)",
+        "model_code": "F_900_GS_2024",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "adventure",            # off-road-biased mid-ADV;
+                                            # 21" front spoke / 17" rear spoke
+        "displacement_cc": 895.0,           # 895 cc DOHC liquid parallel twin
+                                            # (86.0 × 77.0 mm — BMW spec 2024;
+                                            # +42 cc vs F 850 GS via bore bump)
+        "bore_mm": 86.0,
+        "stroke_mm": 77.0,
+        "compression_ratio": 13.1,          # 13.1:1 — BMW press spec 2024
+                                            # (up from 12.7:1 on F 850 GS)
+        "cylinders": 2,                     # parallel twin, 270° firing
+                                            # (BMW retained 90° offset crank
+                                            # from F 850 for the V-twin feel)
+        "peak_power_hp": 105.0,             # 105 hp (77 kW) @ 8500 rpm —
+                                            # BMW 2024 spec (was 95 hp on
+                                            # F 850 GS; +10 hp from new cams,
+                                            # higher CR, lighter crank)
+        "peak_power_rpm": 8500,
+        "peak_torque_nm": 93.0,             # 93 Nm @ 6750 rpm — BMW spec
+                                            # (was 92 Nm @ 6250 on F 850 GS;
+                                            # peak shifted higher with cams)
+        "peak_torque_rpm": 6750,
+        "fuel_system": "fi",                # ride-by-wire, BMS-O ECU;
+                                            # 4 ride modes std (Eco/Rain/Road/
+                                            # Dynamic) + Enduro Pro option
+        "cooling": "liquid",
+        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "gears": 6,
+        # 6-speed cassette from BMW service manual 0K01-K81 (F 900 GS 2024)
+        # — distinct from F 900 R / XR (taller 6th for ADV touring use)
+        "gear_ratios": [2.615, 1.842, 1.435, 1.179, 1.000, 0.879],
+        "front_sprocket": 16,               # F16 / R41 — BMW OEM (service
+                                            # manual 0K01-K81 confirmed;
+                                            # slightly taller final than
+                                            # F 850 GS which was F16/R42)
+        "rear_sprocket": 41,
+        "chain_pitch": "525",               # 525 pitch — F-series standard
+        "dry_mass_kg": 198.0,               # 198 kg dry — BMW spec 2024
+                                            # (kerb 219 kg incl. 14.5 L fuel
+                                            # + oils; -14 kg vs F 850 GS from
+                                            # lighter frame + plastic tank +
+                                            # repositioned electronics)
+        "wheelbase_mm": 1593.0,             # 1593 mm — BMW spec (long ADV
+                                            # wheelbase for high-speed
+                                            # off-road stability)
+        "front_tire_size": "90/90-21",      # 21" front (spoke wheel) —
+                                            # Metzeler Karoo 4 OEM (off-road
+                                            # block tread)
+        "rear_tire_size": "150/70R17",      # 17" rear, Metzeler Karoo 4
+        "cd": 0.82,                         # off-road-biased ADV upright
+                                            # posture + low OEM screen;
+                                            # narrower than F 900 XR
+        "frontal_area_m2": 0.55,            # large — tall ADV silhouette,
+                                            # 21" front hub exposed; lower
+                                            # than R 1300 GS (no boxer heads)
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── CFMoto 675SR-R (2024-2026 — flagship inline-triple supersport) ──────────
+# CFMoto's flagship sportbike, launched at EICMA 2023 as the brand's first
+# inline-triple. Shares its 675 cc DOHC liquid triple platform with the 800NK
+# naked but tuned for higher peak power via taller cams + lighter crankshaft.
+# CFMoto's positioning: Daytona 660 / MT-09 competitor at sub-INR 6 lakh /
+# sub-USD 8000 price. Sold in China (CFMoto domestic), Europe (CFMoto Europe
+# GmbH), and India (CFMoto India / AMW Motorcycles) under same SKU.
+# Cluster: litre_sport_600_1000 (675 cc / 95 hp triple — sits at boundary).
+# Sources:
+#   - CFMoto press kit "675SR-R Global Launch" (Nov 2023, EICMA)
+#     cfmoto.com/news/675sr-r-eicma-2023-launch
+#   - MCN "CFMoto 675SR-R 2024 First Ride" (May 2024): "95 bhp @ 11000 rpm,
+#     68 Nm @ 8250 rpm; kerb 198 kg (incl. 14.5 L fuel); 6-speed cassette
+#     gearbox; bore × stroke 76.0 × 49.6 mm"
+#   - Cycle World "CFMoto 675SR-R Tested" (Aug 2024): F15/R45 confirmed;
+#     520 chain; 1395 mm wheelbase
+#   - CFMoto service manual CF800-3US (675SR + 800NK shared platform):
+#     6-speed cassette identical between SR-R + 800NK; SR-R has taller
+#     intake cam timing → +8 hp peak vs naked
+CFMOTO_675SR_R_2024 = spec_from_dict(
+    {
+        "manufacturer": "CFMoto",
+        "model_name": "675SR-R (2024-2026)",
+        "model_code": "675SR_R_2024",
+        "year_from": 2024,
+        "year_to": 2026,
+        "category": "sport",                # full-fairing supersport;
+                                            # 17"/17" cast wheels, clip-ons
+        "displacement_cc": 675.0,           # 675 cc DOHC liquid inline-3
+                                            # (76.0 × 49.6 mm — CFMoto spec
+                                            # 2024; shared with 800NK naked)
+        "bore_mm": 76.0,
+        "stroke_mm": 49.6,
+        "compression_ratio": 12.3,          # 12.3:1 — CFMoto press spec 2024
+                                            # (premium fuel)
+        "cylinders": 3,                     # inline triple, 120° firing
+                                            # (conventional crank — NOT
+                                            # T-plane like Tiger 900)
+        "peak_power_hp": 95.0,              # 95 hp (70 kW) @ 11000 rpm —
+                                            # CFMoto 2024 spec (was 87 hp on
+                                            # 800NK naked sibling; +8 hp from
+                                            # taller intake cam timing per
+                                            # service manual CF800-3US)
+        "peak_power_rpm": 11000,
+        "peak_torque_nm": 68.0,             # 68 Nm @ 8250 rpm — CFMoto spec
+                                            # (peaks higher than Daytona 660
+                                            # at 69 Nm @ 8250 — close match)
+        "peak_torque_rpm": 8250,
+        "fuel_system": "fi",                # Bosch ride-by-wire, dual injector
+                                            # per cylinder; 3 ride modes
+                                            # (Rain/Street/Sport)
+        "cooling": "liquid",
+        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "gears": 6,
+        # 6-speed cassette from CFMoto service manual CF800-3US (675SR + 800NK
+        # shared cassette — SR-R + naked use identical internals)
+        "gear_ratios": [2.667, 1.937, 1.526, 1.286, 1.118, 1.000],
+        "front_sprocket": 15,               # F15 / R45 — CFMoto OEM (service
+                                            # manual CF800-3US confirmed)
+        "rear_sprocket": 45,
+        "chain_pitch": "520",               # 520 pitch — CFMoto sport standard
+        "dry_mass_kg": 186.0,               # 186 kg dry — CFMoto spec 2024
+                                            # (kerb 198 kg incl. 14.5 L fuel +
+                                            # oils; heavier than Daytona 660
+                                            # at 201 kg kerb but lighter than
+                                            # Trident 660 by 2 kg)
+        "wheelbase_mm": 1395.0,             # 1395 mm — CFMoto spec
+                                            # (short for class — close to
+                                            # Daytona 660 at 1425 mm)
+        "front_tire_size": "120/70ZR17",    # 17" front (cast wheel) —
+                                            # Maxxis Supermaxx ST OEM
+        "rear_tire_size": "180/55ZR17",     # 17" rear, Maxxis Supermaxx ST
+        "cd": 0.55,                         # full-fairing sport tuck;
+                                            # clip-on aggressive riding
+                                            # position, narrow nose cowl
+        "frontal_area_m2": 0.40,            # small — sport tuck silhouette,
+                                            # rider tucks behind bubble screen
+    },
+    source_name="spec_sheet",
+)
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -10740,4 +10980,8 @@ EXTENDED_BIKES = [
     KAWASAKI_KLR_650_2022,
     TRIUMPH_TIGER_900_GT_PRO_2024,
     HONDA_CRF250L_2021,
+    # ── Daily improvement run 2026-05-31 (Sunday — Catalog A1) ──
+    APRILIA_TUONO_457_2025,
+    BMW_F_900_GS_2024,
+    CFMOTO_675SR_R_2024,
 ]

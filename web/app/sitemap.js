@@ -260,6 +260,12 @@ export default async function sitemap() {
       priority: 0.85,
     },
     {
+      url: `${SITE_URL}/blog/aprilia-tuono-457-vs-rs-457-quarter-mile-physics`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
       url: `${SITE_URL}/blog/bajaj-dominar-400-quarter-mile-physics`,
       lastModified: now,
       changeFrequency: "monthly",

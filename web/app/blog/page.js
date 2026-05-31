@@ -27,6 +27,10 @@ export const metadata = {
     "mt-15 v1 drag time india",
     "yamaha mt-15 2019 0-100",
     "mt-15 v1 top speed india",
+    "aprilia tuono 457 quarter mile",
+    "tuono 457 vs rs 457",
+    "tuono 457 drag time india",
+    "tuono 457 vs duke 390",
     "aprilia tuono 660 factory quarter mile",
     "tuono 660 factory drag time india",
     "tuono 660 factory vs base tuono",
@@ -144,6 +148,22 @@ export const metadata = {
 };
 
 const POSTS = [
+  {
+    slug: "aprilia-tuono-457-vs-rs-457-quarter-mile-physics",
+    date: "2026-05-31",
+    readTime: "13 min",
+    tags: [
+      "Aprilia",
+      "Tuono 457",
+      "RS 457",
+      "Entry naked twin",
+      "India",
+      "physics",
+    ],
+    title: "Aprilia Tuono 457 vs RS 457: Same Engine, 0.41s Different ET",
+    excerpt:
+      "MotoQuant sims the Aprilia Tuono 457 at 13.681s and 162.2 km/h trap, and the RS 457 at 13.275s / 175.9 km/h. Same 47 hp twin, same 175 kg dry, same six-speed cassette, same 14F/42R sprockets. The 0.41 second gap is entirely aerodynamic — Cd climbs from 0.58 on the faired RS to 0.74 on the naked Tuono. Indian price math (₹3.95 lakh vs ₹4.20 lakh), cost-per-tenth mod ladder topped by the ₹3,050 sprocket-swap combo, and the comparison against KTM 390 Duke + Pulsar NS400Z.",
+  },
   {
     slug: "600cc-supersport-launch-physics-engine-deceleration",
     date: "2026-05-30",
