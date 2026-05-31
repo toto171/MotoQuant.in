@@ -1902,3 +1902,34 @@ Headline-sync auto-patch gate also touched `web/app/page.js` + `web/public/og-im
 > 
 > ## Work performed
 > 
+
+## SESSION — 2026-05-31 (scheduled data-accuracy pass — 2nd run)
+
+Autonomous daily data-accuracy pass (second run of the day; the morning pass added
+Z900/MT-09/CBR650R/GSX-S750/Street Triple 765 RS). Dispatched 3 research subagents to
+find MEASURED instrumented quarter-mile data for ~19 globally-tested, still-unbenchmarked
+sport/naked bikes. Vetted strictly (instrumented magazine tests only; rejected
+aggregator/ProfessCars/forum/fakes).
+
+**Benchmarks added (1, all instrumented, bound to ALL_KNOWN_BIKES via find_spec, uncovered, nbind=1):**
+  - Suzuki Katana (2020): 10.86s ET @ 215 km/h
+
+**Skipped — already covered by prior passes:** Kawasaki ZX-14R (9.47s), Suzuki GSX-R 1000
+2009 (10.0s), Yamaha FZ1 Fazer 2007 (10.957s), Kawasaki Z1000 2014 (10.38s), Honda
+CBR1000RR 2006 (10.3s).
+
+**Rejected (no instrumented data — only MotoStatz/ProfessCars aggregator estimates):**
+KTM 890 Duke R, Honda CB650R, Suzuki GSX-8S, Honda CB750 Hornet, Kawasaki Ninja 1000SX,
+2020+ Yamaha YZF-R1. **Rejected (not stock-representative):** MV Brutale 800
+(launch-limited 11.85s outlier); Ducati Panigale V2 / Monster 1200 base (only the hotter
+959 / 1200 R variants had measured ETs). **Dropped (no matching ALL_KNOWN_BIKES spec):**
+any candidate whose model string did not resolve via find_spec.
+
+**Cleanup task D:** N/A — zero parts carry tier "model"; parts 470/473 already tier "family".
+
+**Validation:** focused pytest subset (test_scraper + test_two_stroke + test_category_dispatch
++ test_compatibility + test_validation) green; ruff clean; reference baselines preserved
+EXACTLY — K5 10.0334s / R1 10.2859s / Hayabusa 10.4712s, Δ +0.0000s.
+
+**Note:** Sandbox workspace had a prolonged output-buffering stall mid-session; all gates
+were re-run and confirmed green via status-file gating before this commit.

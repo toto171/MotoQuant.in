@@ -1364,6 +1364,10 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2008)",
     ),
     # ── end 2026-05-31 pass ──
+    # -- 2026-05-31 daily data-accuracy pass (2nd run): instrumented adds --
+    # Vetted via 3 research subagents (Cycle World / Sport Rider strip tests).
+    # Each bound to a unique ALL_KNOWN_BIKES spec via find_spec; uncovered; nbind=1.
+    ("Suzuki", "Katana", 2020, 10.86, 215, "Cycle World 2020 (instrumented)"),
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [
