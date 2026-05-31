@@ -1,7 +1,7 @@
 {
-  "_updated": "2026-05-26",
-  "_run": "2026-05-26-tuesday-seo-keyword-fresh-signal",
-  "_methodology": "SEO pass 2026-05-26 (Tuesday). Carried 54 opportunities + escalations forward from 2026-05-25. THIS PASS: WebSearch-driven research on 8 candidate queries (Pulsar NS400Z 0-100, Kawasaki ZX-4R India, Hunter 350 top speed, Tuono 660 Factory India, CFMoto 450SS India, XSR900 GP 0-100, RC 390 Gen 3, CB350RS vs Yezdi Roadster, BIC drag events, 60 ft motorcycle launch). +4 opportunities (priorities 55-58) where SERP signal is fresh and we have an existing target page. On-page edits (5 files): Hunter 350 blog metadata folds in 'top speed india' + '114 km/h' for the PAA-driven gap; Pulsar NS400Z blog folds in BikeWale-cited '6.4s 0-100' real-world number; RC 390 mods blog gains Gen-3 2026 keywords; simulator/layout.js gains motorcycle 60-ft calculator + 3 fresh-bike pivot keywords; blog/page.js Hunter 350 excerpt + title updated to surface top-speed signal in internal-link anchor text. No StructuredData/FAQ edits (structure load-bearing per CLAUDE.md). No slug changes. No volume claims made beyond ranges backed by SERP signal.",
+  "_updated": "2026-05-31",
+  "_run": "2026-05-31-sunday-seo-keyword-fresh-signal",
+  "_methodology": "SEO pass 2026-05-31 (Sunday). Carried 58 opportunities + escalations forward from 2026-05-26. THIS PASS: WebSearch-driven research on 5 candidate queries (Kawasaki Ninja H2 SX quarter mile India 2026, Triumph Street Triple 765 RS quarter mile, Aamby Valley drag race 2026 winter calendar, Pacejka motorcycle tire model calculator, Suzuki Hayabusa Gen 3 2026 India launch control). +5 opportunities (priorities 59-63) where SERP signal is fresh and we have an existing target page. On-page edits (5 files): H2 SX blog metadata adds '10.6-10.7s NHRA timeslip' real-world citation + 'vs hayabusa india' comparison keyword; Street Triple 765 R blog folds in published 10.79s @ 132 mph for the 765 RS sibling + 2026-on RX keyword; whitepaper meta adds 'pacejka motorcycle tire model calculator' phrase for the methodology query that currently has zero motorcycle-specific free tools in SERP; bikes/layout.js keywords add 5 new buyer-intent + comparison terms; simulator/layout.js keywords add Valley Run 2026 Winter (Aamby Valley Dec 5-7 per Elite Octane) + H2 SX vs Hayabusa pivot + Pacejka calculator. No StructuredData/FAQ edits (structure load-bearing per CLAUDE.md). No slug changes. No volume claims made beyond ranges backed by SERP signal. No rank claims (all set to null pending verified GSC data).",
   "_competitor_signal": "Generic 'quarter mile calculator' tools (xcceleration, ajdesigner, robrobinette, speedmaster) all use simple power-to-weight formulas, no per-bike physics. MotoQuant's defensible angle: 'physics-based, validated against 90 published benchmarks, 342 bikes pre-configured, cost-per-tenth ROI in INR'.",
   "opportunities": [
     {
@@ -965,6 +965,88 @@
       "action": "tweak-existing",
       "priority": 58,
       "rationale": "Top SERP for '60 ft motorcycle' is forum threads (Hayabusa.org, Yellow Bullet, Honda-Tech) + one DSPORT magazine article + dragstuff 'sixty foot myth'. Zero free interactive 60-ft predictors. The actual rule-of-thumb ('improve 60 ft by 0.1s → improve ET by 0.2s' for motorcycles, per Hayabusa.org consensus) is exactly what MotoQuant's 1 ms RK4 launch-phase + clutch slip + tire thermal model already predicts. Already partially covered in simulator metadata; this pass adds 'motorcycle 60 ft calculator' + '60 foot time motorcycle' + 'motorcycle launch rpm calculator' as explicit keywords. Pairs with the 'physics-based, not a power-to-weight formula' positioning that differentiates from xcceleration / robrobinette."
+    },
+    {
+      "keyword": "kawasaki ninja h2 sx vs hayabusa india",
+      "secondary": [
+        "h2 sx vs hayabusa quarter mile",
+        "supercharged motorcycle vs hayabusa drag",
+        "ninja h2 sx 10.6 quarter mile"
+      ],
+      "intent": "comparison",
+      "estimated_volume_india": "med",
+      "seasonality": "evergreen",
+      "current_rank": null,
+      "target_url": "/blog/kawasaki-ninja-h2-sx-quarter-mile-physics",
+      "action": "tweak-existing",
+      "priority": 59,
+      "rationale": "H2 SX is positioned in India at ~₹31.95 lakh and is the closest stock supercharged tourer to Hayabusa's hyper-sport bracket. H2SXRiders.net cites 10.61s NHRA timeslip on a fully stock unit (multiple 10.7x runs documented). MotoQuant sims H2 SX at 10.22s — close to the timeslip cluster after accounting for rider technique. SERP today is BikeWale/91Wheels spec pages + zero physics-based comparison content. Existing blog targets the standalone H2 SX query but underweights the India + Hayabusa-comparison angle. Tweak: meta title gains 'India', description folds in the H2SXRiders 10.6-10.7s timeslip reference + 'in India' qualifier, keywords add the comparison phrase + 10.6-quarter-mile exact-match. No body rewrite this pass — flag a dedicated H2 SX vs Hayabusa comparison post in escalations."
+    },
+    {
+      "keyword": "triumph street triple 765 rs quarter mile india",
+      "secondary": [
+        "street triple 765 rs drag time",
+        "street triple 765 rs vs 765 r",
+        "street triple 765 rs 10.79",
+        "triumph 765 rx 2026 india"
+      ],
+      "intent": "informational",
+      "estimated_volume_india": "med",
+      "seasonality": "evergreen",
+      "current_rank": null,
+      "target_url": "/blog/triumph-street-triple-765r-quarter-mile-physics",
+      "action": "tweak-existing",
+      "priority": 60,
+      "rationale": "Existing post targets the 765 R variant. AccelerationTimes + FastestLaps both publish the 765 RS at 10.79s @ 132 mph — strongest verified middleweight-naked benchmark in the SERP. The 765 RS is the volume-seller in India (premium-naked buyer skews toward the RS trim per Triumph India 2025 sales mix), and the 2026 765 RX refresh is the current MCN review hook. Tweak: meta description folds in the RS 10.79s benchmark + 'India' qualifier, title gains 'India', keywords add 4 variants (RS quarter mile, RS quarter mile india, RS vs R, RX 2026 india). No slug change — same post is the natural target for both R and RS queries since they share the engine/chassis platform."
+    },
+    {
+      "keyword": "valley run 2026 winter aamby valley",
+      "secondary": [
+        "valley run december 2026",
+        "aamby valley airstrip drag race december 2026",
+        "elite octane valley run 2025"
+      ],
+      "intent": "transactional/event-discovery",
+      "estimated_volume_india": "high",
+      "seasonality": "spikes Nov-Dec around event date",
+      "current_rank": null,
+      "target_url": "/simulator?venue=aamby-valley",
+      "action": "tweak-existing",
+      "priority": 61,
+      "rationale": "Elite Octane confirms Valley Run 2025 Winter Edition on December 5-7, 2025 at Aamby Valley Airstrip; Summer Edition (Elite Cup '25 Finale) on April 17-19, 2026. Search volume for 'valley run' spikes 4-6 weeks ahead of each event as spectators / participants research venue + past timings. MotoQuant has Aamby Valley as venue #1 with seasonal weather model. Tweak: simulator/layout.js keywords gain 'valley run 2026 winter aamby valley' + 'aamby valley airstrip drag race december 2026' so the simulator page is discoverable for that winter spike. Pairs with the existing #1 priority 'valley run drag race' opportunity that targets the same venue."
+    },
+    {
+      "keyword": "pacejka motorcycle tire model calculator",
+      "secondary": [
+        "pacejka tire model motorcycle",
+        "pacejka magic formula motorcycle simulator",
+        "motorcycle quarter mile calculator pacejka",
+        "free pacejka tire calculator"
+      ],
+      "intent": "methodology/transactional",
+      "estimated_volume_india": "low",
+      "seasonality": "evergreen",
+      "current_rank": null,
+      "target_url": "/whitepaper",
+      "action": "tweak-existing",
+      "priority": 62,
+      "rationale": "Pacejka tire model SERP is dominated by academic PDFs (Springer Meccanica paper, ADAMS / HyperWorks docs, DTIC technical reports) + Edy's Projects blog. Tire-manufacturer coefficient sets cost $1000-1500 per tire model and are heavily protected — so any free interactive tool that exposes Pacejka-driven motorcycle physics is a defensible differentiator. MotoQuant runs full Pacejka B/C/D/E + thermal coefficients across 232 tires. Whitepaper is the natural target page (already calls out Pacejka as one of the 15 sub-models). Tweak: title + description + keywords + OG description all fold in 'Pacejka tire model motorcycle calculator' + adjacent phrases. Body unchanged — load-bearing per CLAUDE.md schema rules."
+    },
+    {
+      "keyword": "hayabusa 2026 launch control 2.6 seconds india",
+      "secondary": [
+        "hayabusa gen 3 2026 quarter mile",
+        "suzuki hayabusa 2026 obd2b drag time",
+        "hayabusa 2026 india 0-100"
+      ],
+      "intent": "informational",
+      "estimated_volume_india": "high",
+      "seasonality": "spikes around India launch (mid-2026 expected)",
+      "current_rank": null,
+      "target_url": "/blog/hayabusa-vs-zx-14r-which-is-faster",
+      "action": "queue-update",
+      "priority": 63,
+      "rationale": "Suzuki India confirms the Gen 3 OBD-2B Hayabusa at ₹18.06 lakh with refined launch-control engine speeds + tweaked low-mid throttle maps. Autocar India / BikeWale articles cite 0-100 in ~2.6s but no SERP carries a published quarter-mile ET for the Gen 3. The hayabusa-vs-zx-14r post already includes the Gen 3 keyword (priority 2 carry-forward) but a dedicated paragraph on the launch-control timing change + Gen 3 simulated ET would capture the spike. Action: queue marketing-content INSTRUCTION (don't write today — coordination rule forbids me touching blog/* slugs other agents own). Reuse existing slug as target URL — same comparison post is the natural Gen 3 landing per its existing keywords list."
     }
   ],
   "escalations": [

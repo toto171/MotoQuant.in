@@ -62,6 +62,11 @@ export const metadata = {
     'ktm 1390 super duke r evo quarter mile india',
     'ktm 1390 evo drag time',
     'ktm 1390 india price',
+    'kawasaki ninja h2 sx vs hayabusa india',
+    'triumph street triple 765 rs quarter mile india',
+    'street triple 765 rs vs 765 r',
+    'hayabusa 2026 launch control 2.6 seconds',
+    'pacejka motorcycle tire model calculator',
   ],
   openGraph: {
     title: TITLE,

@@ -7,13 +7,16 @@ const SLUG = "triumph-street-triple-765r-quarter-mile-physics";
 const TITLE =
   "Triumph Street Triple 765 R Quarter-Mile Physics: 118hp Triple at the Strip";
 const DESCRIPTION =
-  "MotoQuant simulates the Triumph Street Triple 765 R at 10.74s and 213 km/h trap. Cycle World clocked 10.9s in 2023. Physics breakdown of India's best-value middleweight triple — and what limits the run.";
+  "MotoQuant simulates the Triumph Street Triple 765 R at 10.74s and 213 km/h trap; the 765 RS sibling runs a published 10.79s @ 132 mph. Cycle World clocked the R at 10.9s in 2023. Physics breakdown of India's best-value middleweight triple — and what limits the run at Aamby Valley.";
 
 export const metadata = {
-  title: "Triumph Street Triple 765 R Quarter-Mile Physics — MotoQuant",
+  title: "Triumph Street Triple 765 R Quarter-Mile Physics India — MotoQuant",
   description: DESCRIPTION,
   keywords: [
     "Triumph Street Triple 765 R quarter mile",
+    "triumph street triple 765 rs quarter mile",
+    "triumph street triple 765 rs quarter mile india",
+    "street triple 765 rs 10.79",
     "Street Triple 765 R India price",
     "Street Triple 765 R vs Z900RS",
     "Street Triple 765 R drag time",
@@ -21,6 +24,7 @@ export const metadata = {
     "street triple r vs rs performance",
     "triumph 765 cost per tenth india",
     "middleweight naked drag race india",
+    "street triple 765 rx 2026 india",
   ],
   alternates: { canonical: `https://motoquant.in/blog/${SLUG}` },
   openGraph: {

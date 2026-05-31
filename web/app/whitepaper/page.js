@@ -4,14 +4,24 @@ import SiteFooter from '../../components/SiteFooter';
 import TerminalCtaVariant from './TerminalCtaVariant';
 
 export const metadata = {
-  title: 'Whitepaper — MotoQuant Pro Physics Engine',
+  title: 'Whitepaper — MotoQuant Pro Physics Engine (Pacejka Tire Model + RK4)',
   description:
-    'The MotoQuant Pro whitepaper: 15 sub-models, RK4 integration at 1 ms, validated against 74 source-quality-weighted benchmarks across 8 cluster categories. Reference baselines accurate to four decimals across every commit.',
+    'MotoQuant Pro whitepaper: a free Pacejka tire-model motorcycle quarter-mile calculator built on 15 sub-models and RK4 integration at 1 ms, validated against 74 source-quality-weighted benchmarks across 8 cluster categories. Reference baselines K5 / R1 / Hayabusa accurate to four decimals across every commit.',
   alternates: { canonical: 'https://motoquant.in/whitepaper' },
+  keywords: [
+    'motoquant whitepaper',
+    'motorcycle physics engine whitepaper',
+    'pacejka tire model motorcycle',
+    'pacejka motorcycle tire model calculator',
+    'motorcycle quarter mile calculator pacejka',
+    'rk4 motorcycle simulation',
+    '15 sub-model drag simulator',
+    'motorcycle drag racing physics paper',
+  ],
   openGraph: {
-    title: 'MotoQuant Pro — Physics Engine Whitepaper',
+    title: 'MotoQuant Pro — Physics Engine Whitepaper (Pacejka + RK4)',
     description:
-      '15 sub-models. RK4 at 1 ms. 8-cluster taxonomy. Source-quality weighted validation. Reference baselines accurate to four decimals.',
+      '15 sub-models. RK4 at 1 ms. Pacejka tire model. 8-cluster taxonomy. Source-quality weighted validation. Reference baselines accurate to four decimals.',
     url: 'https://motoquant.in/whitepaper',
     type: 'article',
   },

@@ -67,6 +67,11 @@ export const metadata = {
     'pulsar ns400z 0-100',
     'ktm rc 390 gen 3 quarter mile',
     'royal enfield hunter 350 top speed',
+    'valley run 2026 winter aamby valley',
+    'aamby valley airstrip drag race december 2026',
+    'kawasaki ninja h2 sx vs hayabusa india',
+    'street triple 765 rs quarter mile india',
+    'pacejka motorcycle tire model calculator',
   ],
   openGraph: {
     title: TITLE,

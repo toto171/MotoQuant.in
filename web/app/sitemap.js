@@ -98,6 +98,12 @@ export default async function sitemap() {
       priority: 0.82,
     },
     {
+      url: `${SITE_URL}/blog/cfmoto-675sr-r-quarter-mile-physics`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
       url: `${SITE_URL}/blog/yezdi-roadster-quarter-mile-physics`,
       lastModified: now,
       changeFrequency: "monthly",

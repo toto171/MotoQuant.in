@@ -1,5 +1,5 @@
 {
- "took_s": 183.28033018112183,
+ "took_s": 182.76563930511475,
  "results": [
   {
    "kind": "reference",
@@ -1067,7 +1067,11 @@
    "finished": true,
    "sim_et": 10.189043065694632,
    "sim_trap_kmh": 246.50931161563474,
-   "elapsed_s": 10.189999999999792
+   "elapsed_s": 10.189999999999792,
+   "bench_et": 10.66,
+   "bench_trap_kmh": 219.0,
+   "bench_src": "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2016)",
+   "delta_et": -0.47095693430536834
   },
   {
    "kind": "catalog",
@@ -2077,8 +2081,8 @@
    "sim_trap_kmh": 201.76748547522553,
    "elapsed_s": 11.731999999998937,
    "bench_et": 11.64,
-   "bench_trap_kmh": 116.0,
-   "bench_src": "MotoStatz 2022 (DERIVED)",
+   "bench_trap_kmh": 187.0,
+   "bench_src": "MotoStatz 2022 (Dragy instrumented)",
    "delta_et": 0.09153291425812426
   },
   {
@@ -2175,7 +2179,11 @@
    "finished": true,
    "sim_et": 12.659560900986977,
    "sim_trap_kmh": 178.69381206454153,
-   "elapsed_s": 12.659999999998423
+   "elapsed_s": 12.659999999998423,
+   "bench_et": 12.14,
+   "bench_trap_kmh": 170.0,
+   "bench_src": "Dragy GPS 2021 (Sport mode, stock instrumented)",
+   "delta_et": 0.5195609009869759
   },
   {
    "kind": "catalog",
@@ -3691,7 +3699,11 @@
    "finished": true,
    "sim_et": 12.675457701376247,
    "sim_trap_kmh": 179.50689388990662,
-   "elapsed_s": 12.675999999998414
+   "elapsed_s": 12.675999999998414,
+   "bench_et": 11.79,
+   "bench_trap_kmh": 178.0,
+   "bench_src": "Cycle World 2013 July (Don Canet road test, timing-strip 110.87 mph)",
+   "delta_et": 0.8854577013762484
   },
   {
    "kind": "catalog",
@@ -3967,7 +3979,11 @@
    "finished": true,
    "sim_et": 12.015712415595079,
    "sim_trap_kmh": 187.59387444738246,
-   "elapsed_s": 12.01599999999878
+   "elapsed_s": 12.01599999999878,
+   "bench_et": 11.186,
+   "bench_trap_kmh": 193.0,
+   "bench_src": "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2007 Bandit 1250S)",
+   "delta_et": 0.829712415595079
   },
   {
    "kind": "catalog",
@@ -6095,7 +6111,11 @@
    "finished": true,
    "sim_et": 11.88071543282576,
    "sim_trap_kmh": 189.56256087461958,
-   "elapsed_s": 11.880999999998854
+   "elapsed_s": 11.880999999998854,
+   "bench_et": 12.22,
+   "bench_trap_kmh": 172.0,
+   "bench_src": "MotoStatz 2022 (Dragy, stock instrumented best-of-N)",
+   "delta_et": -0.33928456717424105
   },
   {
    "kind": "catalog",
@@ -8628,6 +8648,54 @@
    "sim_et": 15.776235162936995,
    "sim_trap_kmh": 134.74806635295243,
    "elapsed_s": 15.776999999996695
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "Aprilia",
+   "model": "Tuono 457 (2025-2026)",
+   "year_from": 2025,
+   "year_to": 2026,
+   "disp_cc": 457.3,
+   "power_hp": 47.6,
+   "stroke_type": 4,
+   "category": "naked",
+   "cluster": "mid-twin-300-500",
+   "finished": true,
+   "sim_et": 13.160182979281005,
+   "sim_trap_kmh": 172.85898449457594,
+   "elapsed_s": 13.160999999998145
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "BMW",
+   "model": "F 900 GS (2024-2026)",
+   "year_from": 2024,
+   "year_to": 2026,
+   "disp_cc": 895.0,
+   "power_hp": 105.0,
+   "stroke_type": 4,
+   "category": "adventure",
+   "cluster": "other",
+   "finished": true,
+   "sim_et": 12.083405182498224,
+   "sim_trap_kmh": 193.54085403663854,
+   "elapsed_s": 12.083999999998742
+  },
+  {
+   "kind": "catalog",
+   "manufacturer": "CFMoto",
+   "model": "675SR-R (2024-2026)",
+   "year_from": 2024,
+   "year_to": 2026,
+   "disp_cc": 675.0,
+   "power_hp": 95.0,
+   "stroke_type": 4,
+   "category": "sport",
+   "cluster": "litre-sport-600-1000",
+   "finished": true,
+   "sim_et": 11.322844885126328,
+   "sim_trap_kmh": 214.40163431838386,
+   "elapsed_s": 11.322999999999164
   }
  ],
  "summary": {
@@ -8636,7 +8704,7 @@
    "R1": 10.285930649053409,
    "Hayabusa": 10.471201919790467
   },
-  "total_bikes": 496,
+  "total_bikes": 499,
   "errors": 0,
   "dnf": 0,
   "clusters": {
@@ -8656,18 +8724,18 @@
     }
    },
    "litre-sport-600-1000": {
-    "bikes": 136,
-    "finished": 136,
+    "bikes": 137,
+    "finished": 137,
     "dnf": 0,
     "stats": {
-     "n": 79,
-     "mean_abs_delta": 0.22119448236469771,
-     "median_abs_delta": 0.18477510152545307,
-     "bias": -0.056509392302553856,
+     "n": 81,
+     "mean_abs_delta": 0.22573587170729295,
+     "median_abs_delta": 0.19670378674192612,
+     "bias": -0.06511708016520203,
      "within_0.10": 19,
      "within_0.20": 41,
-     "within_0.50": 75,
-     "within_1.00": 79
+     "within_0.50": 77,
+     "within_1.00": 81
     }
    },
    "litre-sport-195+": {
@@ -8686,18 +8754,18 @@
     }
    },
    "other": {
-    "bikes": 108,
-    "finished": 108,
+    "bikes": 109,
+    "finished": 109,
     "dnf": 0,
     "stats": {
-     "n": 14,
-     "mean_abs_delta": 0.29876442788303464,
-     "median_abs_delta": 0.22468288230832645,
-     "bias": 0.16995039883758573,
+     "n": 17,
+     "mean_abs_delta": 0.3774960593129876,
+     "median_abs_delta": 0.2384106316004999,
+     "bias": 0.27141391774614726,
      "within_0.10": 0,
      "within_0.20": 6,
      "within_0.50": 12,
-     "within_1.00": 14
+     "within_1.00": 17
     }
    },
    "entry-150-200": {
@@ -8716,8 +8784,8 @@
     }
    },
    "mid-twin-300-500": {
-    "bikes": 73,
-    "finished": 73,
+    "bikes": 74,
+    "finished": 74,
     "dnf": 0,
     "stats": {
      "n": 16,
@@ -8777,14 +8845,14 @@
    }
   },
   "overall_benchmark_stats": {
-   "n": 167,
-   "mean_abs_delta": 0.321402238161693,
-   "median_abs_delta": 0.20511948713966532,
-   "bias": 0.03743420037095698,
+   "n": 172,
+   "mean_abs_delta": 0.32976247844442236,
+   "median_abs_delta": 0.21398601317950483,
+   "bias": 0.04462791266528204,
    "within_0.10": 39,
    "within_0.20": 81,
-   "within_0.50": 140,
-   "within_1.00": 161
+   "within_0.50": 142,
+   "within_1.00": 166
   },
   "top10_closest": [
    {

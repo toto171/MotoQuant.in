@@ -8,7 +8,7 @@ export const metadata = {
   title:
     "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
   description:
-    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Honda CBR150R Indonesian K56F sport single, Suzuki GSX-R600 K8 600cc supersport, Kawasaki Ninja H2 SX supercharged sport-tourer, Yamaha MT-15 V1 155cc naked deep-dive, Triumph Street Triple 765 R, KTM 890 Duke R India grey-market, best mods for KTM RC 390 ranked by cost-per-tenth, Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
+    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: CFMoto 675SR-R sub-INR 6 lakh inline triple sport, Honda CBR150R Indonesian K56F sport single, Suzuki GSX-R600 K8 600cc supersport, Kawasaki Ninja H2 SX supercharged sport-tourer, Yamaha MT-15 V1 155cc naked deep-dive, Triumph Street Triple 765 R, KTM 890 Duke R India grey-market, best mods for KTM RC 390 ranked by cost-per-tenth, Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
   keywords: [
     "motorcycle drag racing blog",
     "kawasaki ninja h2 sx quarter mile",
@@ -62,6 +62,11 @@ export const metadata = {
     "mt-125 vs xsr125",
     "cfmoto 800nk quarter mile",
     "cfmoto 800nk india price",
+    "cfmoto 675sr-r quarter mile",
+    "cfmoto 675sr-r india price",
+    "cfmoto 675sr-r vs daytona 660",
+    "cfmoto 675sr-r vs street triple 765",
+    "cfmoto inline triple india",
     "ktm duke 390 vs rc 390",
     "pulsar ns400z vs rc 390",
     "continental gt 650 drag",
@@ -148,6 +153,21 @@ export const metadata = {
 };
 
 const POSTS = [
+  {
+    slug: "cfmoto-675sr-r-quarter-mile-physics",
+    date: "2026-05-31",
+    readTime: "12 min",
+    tags: [
+      "CFMoto",
+      "675SR-R",
+      "Inline triple",
+      "Indian mid-cc sport",
+      "physics",
+    ],
+    title: "CFMoto 675SR-R Quarter-Mile Physics: The 95hp Daytona 660 Rival",
+    excerpt:
+      "MotoQuant sims the CFMoto 675SR-R at 11.323s and 214.4 km/h trap — 5.6 km/h faster at the trap than a Daytona 660 with the same 95 hp, on better aerodynamics. CFMoto first inline triple targets sub-₹6 lakh ex-showroom in India for FY26. Physics breakdown vs Daytona 660 / Street Triple 765 R / MT-09 / 800NK sibling, plus the cost-per-tenth mod ladder topped by the ₹32,000 Powertronic Stage 1 flash.",
+  },
   {
     slug: "aprilia-tuono-457-vs-rs-457-quarter-mile-physics",
     date: "2026-05-31",

@@ -1465,6 +1465,129 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # by 2008 entry (line 53: 9.85s @ 250). Skipping — no add needed, range
     # already validated. (Logging here so future passes don't re-investigate.)
     # ── end 2026-05-31 pass 4 ──
+    # ── 2026-05-31 benchmark-import agent (pass 5) ────────────────────────────
+    # Three high-confidence instrumented adds. Two from the Cycle World /
+    # Sport Rider sportbike-performance-numbers archive
+    # (cycleworld.com/sport-rider/tech/sportbike-performance-numbers/) — same
+    # authoritative timing-strip table already cited by 25+ existing entries
+    # (GSX-S1000, Daytona 675, GSX-R 600 K6, CBR 600RR PC40, YZF-R6 2C0/13S,
+    # Tuono V4 1100, 999, VTR1000 SP2, F4 1000 R, 848 EVO, etc.). One from
+    # Cycle World's 2013 CB1100 road test (Don Canet / July 2013 issue) —
+    # same Don Canet / CW road-test methodology as the VFR1200F entry that
+    # was investigated and rejected this pass (CBR1100XX & VFR1200F NOT in
+    # catalog). Each entry below was checked via _best_benchmark_match probe
+    # to confirm no collision and clean year-range binding.
+    # Reference baselines preserved EXACTLY (verified pre + post add):
+    #   K5 10.0334s / R1 10.2859s / Hayabusa 10.4712s, Δ +0.0000s.
+    # Pre-commit sim sanity (production spec_to_bike_config path):
+    #   * Honda CB1100 2013-2020:    sim 12.675s @ 179.5 km/h vs bench
+    #     11.79s @ 178 km/h — ΔET +0.885s (naked-1100cc cluster slow bias,
+    #     trap matches to ±2 km/h confirming benchmark is internally
+    #     consistent). Same litre-naked bias band as MT-10 / FZ1 Fazer.
+    #   * Ducati 959 Panigale 2016:  sim 10.189s @ 246.5 km/h vs bench
+    #     10.66s @ 219 km/h — ΔET −0.471s (V-twin sport cluster fast bias
+    #     consistent with the existing 1199/1299 Panigale entries; trap
+    #     overshoot consistent with documented Panigale aero handling).
+    #   * Suzuki GSF1250 Bandit:     sim 12.016s @ 187.6 km/h vs bench
+    #     11.19s @ 193 km/h — ΔET +0.826s, trap −5 km/h (naked-1200cc
+    #     cluster slow bias matching CB1100 above).
+    # Rejected this pass (logged in report so future passes skip):
+    #   * Honda VFR1200F (CW 2010 April Don Canet 10.33s @ 134.85 mph) —
+    #     NOT in catalog; per anti-fabrication rule, no benchmark without
+    #     a catalog spec to bind. Queued via DISPATCH_INBOX for catalog
+    #     expansion pass.
+    #   * Honda CBR1100XX Super Blackbird (MotoStatz 10.38s @ 137.8 mph,
+    #     Dragy named) — NOT in catalog; same handling, queued.
+    #   * Suzuki SV1000S (Sport Rider 2003: 10.82s @ 127.1 mph instrumented)
+    #     — NOT in catalog; queued.
+    #   * BMW R 1250 GS — Cycle World's 2021 article is dyno-only, no
+    #     drag-strip timing data; ProfessCars estimate 11.2s rejected per
+    #     instrumented-only bar.
+    #   * Triumph Bonneville T120 2016 — MCN listed "1/4 mile acceleration"
+    #     as `–` (data unavailable) in their road-test review.
+    #   * Triumph Speed Triple 1200 RS — no MotoStatz/Cycle World/Sport
+    #     Rider/MCN instrumented quarter-mile data found in honest search;
+    #     only AccelerationTimes calculated estimates exist.
+    #   * Ducati Multistrada V4 (MotoStatz 10.82s @ 131 mph) — MotoStatz
+    #     article DOES NOT explicitly name Dragy device in body text;
+    #     fails project bar (same pattern as the Z900RS rejection).
+    #   * Indian Scout 1133 (MCN 11.93s claim) — forum-aggregated quote of
+    #     "Motorcycle Consumer News" without direct MCN URL; fails the
+    #     project's direct-source citation bar.
+    #
+    # Honda CB1100 (1140 cc air-cooled I4 retro-naked, 2013-2020) — Cycle
+    # World July 2013 road test by Don Canet, timing-strip instrumented:
+    # 11.79s @ 110.87 mph (~178 km/h). The CB1100 is Honda's air-cooled
+    # retro homage to the original 1980s CB-F series; 89 hp claimed from
+    # the SOHC 1140 cc inline-4. The 11.79s ET fits the litre-naked retro
+    # cluster cleanly alongside the existing FZ1 Fazer 2007 (Sport Rider
+    # 10.957s @ 206 km/h — same source archive, more aggressive 998 cc
+    # detuned-R1 mill vs CB1100's 1140 cc air-cooled SOHC). Catalog entry
+    # HONDA_CB1100 covers 2013-2020; year_hint=2013 binds cleanly. Multiple
+    # corroborating cb1100forum references to the same CW 11.79s @ 110.87
+    # mph figure confirm the data point. The 0-60 mph (3.3s) + 0-100 mph
+    # (8.6s) figures from the same CW test are also documented but not
+    # directly used here.
+    # URL: https://www.cycleworld.com/2013/07/02/2013-honda-cb1100-road-test-review-photos-specs/
+    (
+        "Honda",
+        "CB1100",
+        2013,
+        11.79,
+        178,
+        "Cycle World 2013 July (Don Canet road test, timing-strip 110.87 mph)",
+    ),
+    # Ducati 959 Panigale (955 cc 90° L-twin Superquadro sport, 2016-2019
+    # mid-cycle V2 update) — Sport Rider / Cycle World sportbike-performance-
+    # numbers archive timing-strip 2016 model: 10.66s @ 136 mph (~218.8
+    # km/h, rounded to 219). The 959 Panigale replaced the 899 Panigale in
+    # 2016 with a 955 cc Superquadro V2 producing 157 hp claimed (up from
+    # 148 hp on the 899). Distinct platform from the Panigale V2 2020-2024
+    # catalog entry (which is already benchmarked at MotoStatz 2022 10.44s
+    # @ 228 km/h) — the 959 ran the older 955 cc Superquadro engine and was
+    # discontinued before the Panigale V2 update brought the 955 cc into the
+    # post-2020 chassis. Catalog entry DUCATI_959_PANIGALE covers 2016-2019;
+    # year_hint=2016 binds cleanly. The 10.66 vs 10.44 spread between 959
+    # and Panigale V2 (959 slightly slower per its older chassis + slightly
+    # softer fueling tune; same engine architecture) is internally consistent.
+    # Pre-add probe confirms _best_benchmark_match binds this benchmark to
+    # exactly the DUCATI_959_PANIGALE row (4-token "959 Panigale" pattern
+    # has higher specificity than "Panigale" alone, so no collision with
+    # 1199/1299/V4 catalog rows).
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Ducati",
+        "959 Panigale",
+        2016,
+        10.66,
+        219,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2016)",
+    ),
+    # Suzuki GSF1250 Bandit (1255 cc air/oil-cooled I4 naked, 2007-2016) —
+    # Sport Rider / Cycle World sportbike-performance-numbers archive
+    # timing-strip 2007 model (tested as "Bandit 1250S"): 11.186s @ 119.84
+    # mph (~192.9 km/h, rounded to 193). The GSF1250 carries a detuned
+    # Bandit-spec 1255 cc I4 producing ~98 hp claimed in a heavy upright
+    # naked/sport-touring platform (251 kg wet). The 11.186s ET fits the
+    # litre-plus naked-touring cluster cleanly alongside the existing CB1100
+    # (above, +0.885s sim Δ — same cluster signature) and the Ninja 1000
+    # 2011 entry (CW 11.30s @ 199 km/h, sport-touring I4 same band). Catalog
+    # entry SUZUKI_GSF1250_BANDIT covers 2007-2016; year_hint=2007 binds
+    # cleanly via the year_from match. Distinct from the older Bandit 1200
+    # (1996-2006 carbureted variant) which is NOT in catalog. The Bandit
+    # 1250S tested in the Sport Rider archive is the half-faired S variant
+    # of the same 1255 cc platform (fairing adds ~3 kg vs bare GSF1250 but
+    # doesn't change the 98 hp peak or the trap-speed-class assignment).
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Suzuki",
+        "GSF1250 Bandit",
+        2007,
+        11.186,
+        193,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2007 Bandit 1250S)",
+    ),
+    # ── end 2026-05-31 pass 5 ──
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

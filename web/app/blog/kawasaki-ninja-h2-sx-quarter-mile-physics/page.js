@@ -6,13 +6,15 @@ import StructuredData, { articleSchema } from '../../StructuredData';
 const SLUG = 'kawasaki-ninja-h2-sx-quarter-mile-physics';
 const TITLE = 'Kawasaki Ninja H2 SX Quarter-Mile Physics: Supercharged Tourer';
 const DESCRIPTION =
-  'MotoQuant sims the 2018-2023 Ninja H2 SX at 10.22s and 250.8 km/h trap. Why a 238 kg supercharged tourer runs a Hayabusa-class quarter, and where the H2 SX hides its weight at launch.';
+  'MotoQuant sims the 2018-2023 Ninja H2 SX at 10.22s and 250.8 km/h trap, aligned with the 10.6-10.7s NHRA timeslips fully stock owners post on H2SXriders.net. Why a 238 kg supercharged tourer runs a Hayabusa-class quarter in India, and where the H2 SX hides its weight at launch.';
 
 export const metadata = {
-  title: 'Kawasaki Ninja H2 SX Quarter-Mile Physics — MotoQuant',
+  title: 'Kawasaki Ninja H2 SX Quarter-Mile Physics India — MotoQuant',
   description: DESCRIPTION,
   keywords: [
     'kawasaki ninja h2 sx quarter mile',
+    'kawasaki ninja h2 sx quarter mile india',
+    'kawasaki ninja h2 sx vs hayabusa india',
     'h2 sx drag time',
     'ninja h2 sx vs hayabusa',
     'h2 sx vs zx-14r quarter mile',
@@ -24,6 +26,8 @@ export const metadata = {
     'h2 sx top speed india',
     'kawasaki supercharger drag',
     'h2 sx cost per tenth',
+    'h2 sx 10.6 quarter mile',
+    'ninja h2 sx se+ drag time',
   ],
   alternates: { canonical: `https://motoquant.in/blog/${SLUG}` },
   openGraph: {
