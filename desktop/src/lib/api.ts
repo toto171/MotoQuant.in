@@ -29,6 +29,10 @@ import type {
   SurrogatePredictResponse,
   TiresResponse,
   VenuesResponse,
+  OptimizeBuildRequest,
+  OptimizedBuild,
+  AutotuneRequest,
+  EcuAutotune,
 } from "@/types/api";
 
 // ─── Base-URL resolution ─────────────────────────────────────────────────
@@ -217,6 +221,19 @@ export const api = {
 
   surrogateCompare: (req: SurrogateCompareRequest) =>
     request<SurrogateCompareResponse>("/api/surrogate/compare", {
+      method: "POST",
+      body: JSON.stringify(req),
+    }),
+
+  // ─── Build optimizer + ECU autotune (Track B) ───────────────────────
+  optimizeBuild: (req: OptimizeBuildRequest) =>
+    request<OptimizedBuild>("/api/optimize/build", {
+      method: "POST",
+      body: JSON.stringify(req),
+    }),
+
+  autotuneEcu: (req: AutotuneRequest) =>
+    request<EcuAutotune>("/api/autotune/ecu", {
       method: "POST",
       body: JSON.stringify(req),
     }),

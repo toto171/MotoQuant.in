@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Plus, Trash2, Loader2, Filter, AlertCircle, IndianRupee, ArrowLeftRight, Wrench, Zap,
+  Plus, Trash2, Loader2, Filter, AlertCircle, IndianRupee, ArrowLeftRight, Wrench, Zap, Sparkles,
 } from "lucide-react";
 import { BikePicker } from "@/components/BikePicker";
 import { StatTile } from "@/components/StatTile";
@@ -8,9 +8,9 @@ import { OfflineBanner } from "@/components/OfflineBanner";
 import { SkeletonPartRows } from "@/components/Skeleton";
 import { useToastStore } from "@/store/toastStore";
 import {
-  useParts, usePartsCategories, useQuickSimulate, useSurrogatePredict,
+  useParts, usePartsCategories, useQuickSimulate, useSurrogatePredict, useOptimizeBuild,
 } from "@/hooks/useApi";
-import type { BikeSummary, Part } from "@/types/api";
+import type { BikeSummary, Part, OptimizedBuild } from "@/types/api";
 import clsx from "clsx";
 
 const EXCLUSIVE_PREFIXES = [
@@ -69,6 +69,14 @@ export function BuildPage() {
   });
   const sim = useQuickSimulate();
   const surrogate = useSurrogatePredict();
+  // ── Auto-optimize (Track B) ──
+  const optimize = useOptimizeBuild();
+  const [optBudget, setOptBudget] = useState(100000);
+  const [optGoal, setOptGoal] = useState<"min_et" | "max_trap">("min_et");
+  useEffect(() => {
+    optimize.reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bike?.id]);
 
   useEffect(() => {
     if (!bike) return;
@@ -401,7 +409,113 @@ export function BuildPage() {
             </ul>
           </div>
         )}
+        {/* ── Auto-optimize (Track B) ───────────────────────────── */}
+        <div className="card p-5 space-y-4">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-signal-500" />
+            <div className="text-xs uppercase tracking-wider text-carbon-500">Auto-optimize</div>
+          </div>
+          <p className="text-[11px] text-carbon-500 leading-relaxed">
+            Best on-budget build for this bike. Scored via the surrogate when available, else the full sim.
+          </p>
+          <label className="block">
+            <span className="text-[10px] uppercase tracking-wider text-carbon-500">Budget (₹)</span>
+            <div className="relative mt-1">
+              <IndianRupee className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-carbon-500" />
+              <input
+                type="number" min={0} step={5000}
+                className="w-full bg-carbon-800 border border-carbon-700 rounded-md pl-8 pr-3 py-1.5 text-sm tabular-nums focus-visible:outline-2 focus-visible:outline-signal-500"
+                value={optBudget}
+                onChange={(e) => setOptBudget(Math.max(0, Number(e.target.value) || 0))}
+              />
+            </div>
+          </label>
+          <div>
+            <span className="text-[10px] uppercase tracking-wider text-carbon-500">Goal</span>
+            <div className="mt-1 grid grid-cols-2 gap-2">
+              {(["min_et", "max_trap"] as const).map((g) => (
+                <button
+                  key={g}
+                  onClick={() => setOptGoal(g)}
+                  className={clsx(
+                    "px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
+                    optGoal === g ? "bg-signal-600 text-carbon-950" : "bg-carbon-800 text-carbon-400 hover:text-carbon-100",
+                  )}
+                >
+                  {g === "min_et" ? "Min ET" : "Max trap"}
+                </button>
+              ))}
+            </div>
+          </div>
+          <button
+            onClick={() => bike && optimize.mutate({ bike_id: bike.id, budget_inr: optBudget, goal: optGoal, max_candidates: 50 })}
+            disabled={!bike || optimize.isPending}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-signal-600 text-carbon-950 font-medium text-sm hover:bg-signal-500 disabled:opacity-50 transition-colors"
+          >
+            {optimize.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+            {optimize.isPending ? "Optimizing…" : "Optimize build"}
+          </button>
+          {optimize.isError && (
+            <div className="text-xs text-stop-400 flex items-center gap-1.5">
+              <AlertCircle className="w-3.5 h-3.5" /> {(optimize.error as Error)?.message ?? "Optimization failed"}
+            </div>
+          )}
+          {optimize.data && <OptimizeResult result={optimize.data} />}
+        </div>
       </aside>
+    </div>
+  );
+}
+
+function OptimizeResult({ result }: { result: OptimizedBuild }) {
+  return (
+    <div className="space-y-3 border-t border-carbon-800 pt-3">
+      <div className="grid grid-cols-2 gap-2">
+        <div className="rounded-md bg-carbon-800/50 p-2">
+          <div className="text-[10px] uppercase tracking-wider text-carbon-500">ET</div>
+          <div className="text-lg font-semibold tabular-nums">{result.optimized_et_s.toFixed(3)}s</div>
+          <div className="text-[10px] text-signal-400">{result.delta_et_s >= 0 ? "−" : "+"}{Math.abs(result.delta_et_s).toFixed(3)}s</div>
+        </div>
+        <div className="rounded-md bg-carbon-800/50 p-2">
+          <div className="text-[10px] uppercase tracking-wider text-carbon-500">Trap</div>
+          <div className="text-lg font-semibold tabular-nums">{result.optimized_trap_kmh.toFixed(1)}</div>
+          <div className="text-[10px] text-signal-400">{result.delta_trap_kmh >= 0 ? "+" : ""}{result.delta_trap_kmh.toFixed(1)} km/h</div>
+        </div>
+      </div>
+      <div className="flex items-center justify-between text-[11px] text-carbon-400">
+        <span>₹{result.total_cost_inr.toLocaleString("en-IN")} · {result.budget_used_pct.toFixed(0)}%</span>
+        {result.cost_per_tenth_inr != null && (
+          <span>₹{Math.round(result.cost_per_tenth_inr).toLocaleString("en-IN")}/tenth</span>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        <span className="text-[10px] px-2 py-0.5 rounded-full bg-carbon-800 text-carbon-400">{result.scoring_method}</span>
+        <span className="text-[10px] px-2 py-0.5 rounded-full bg-carbon-800 text-carbon-400">{result.parts.length} parts</span>
+      </div>
+      {result.parts.length > 0 ? (
+        <ul className="space-y-1.5" role="list" aria-label="Optimized parts">
+          {result.parts.map((part) => (
+            <li key={part.part_id} className="flex items-start justify-between gap-2 text-xs">
+              <div className="min-w-0">
+                <div className="font-medium text-carbon-100 truncate">{part.name}</div>
+                <div className="text-[10px] text-carbon-500 uppercase tracking-wider">{part.category_display || part.category}</div>
+              </div>
+              <div className="text-right shrink-0 tabular-nums">
+                <div className="text-carbon-200">₹{part.price_inr.toLocaleString("en-IN")}</div>
+                <div className="text-[10px] text-signal-400">−{part.delta_et_s.toFixed(3)}s</div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="text-[11px] text-carbon-500">No improving parts within this budget.</div>
+      )}
+      {result.next_upgrade && (
+        <div className="text-[11px] text-carbon-400 border-t border-carbon-800 pt-2">
+          <span className="text-carbon-500">Next: </span>
+          {result.next_upgrade.part.name} (₹{result.next_upgrade.marginal_cost_inr.toLocaleString("en-IN")}) — {result.next_upgrade.reason}
+        </div>
+      )}
     </div>
   );
 }

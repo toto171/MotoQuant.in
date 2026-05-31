@@ -4,6 +4,7 @@ import { Layout } from "@/components/Layout";
 import { SimulatePage } from "@/pages/SimulatePage";
 import { BikesPage } from "@/pages/BikesPage";
 import { BuildPage } from "@/pages/BuildPage";
+import { AutotunePage } from "@/pages/AutotunePage";
 import { ComparePage } from "@/pages/ComparePage";
 import { HistoryPage } from "@/pages/HistoryPage";
 import { SettingsPage } from "@/pages/SettingsPage";
@@ -27,6 +28,7 @@ function AppInner() {
           <Route path="/simulate" element={<SimulatePage />} />
           <Route path="/bikes" element={<BikesPage />} />
           <Route path="/build" element={<BuildPage />} />
+          <Route path="/autotune" element={<AutotunePage />} />
           <Route path="/compare" element={<ComparePage />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/settings" element={<SettingsPage />} />

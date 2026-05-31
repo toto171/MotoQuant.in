@@ -2053,3 +2053,32 @@ were re-run and confirmed green via status-file gating before this commit.
 > 
 > ## Work performed
 > 
+
+
+## 2026-05-31T07:07:30+00:00 — Track B (Build Optimizer + ECU Autotune) [chat session, not preflight-driven]
+
+**Commit:** PENDING — sandbox could not push (no git credentials configured + `/sessions` 100% disk-full; `git ls-remote` failed on auth). Commit + push from a real terminal / postflight.
+**Branch target:** `staging/2026-w21` (per `.session_mode`)
+**Files to stage (explicit — never `git add -A`):**
+`motoquant/analysis/build_optimizer.py motoquant/analysis/ecu_autotune.py motoquant/analysis/roi.py motoquant/api.py tests/test_build_optimizer.py tests/test_ecu_autotune.py web/lib/api.js web/components/SiteNav.js web/components/BuildOptimizer.js web/components/EcuAutotune.js web/app/optimize/page.js web/app/optimize/layout.js web/app/autotune/page.js web/app/autotune/layout.js desktop/src/types/api.ts desktop/src/lib/api.ts desktop/src/hooks/useApi.ts desktop/src/pages/BuildPage.tsx desktop/src/pages/AutotunePage.tsx desktop/src/components/Sidebar.tsx desktop/src/App.tsx CLAUDE.md DISPATCH_OUTBOX.md`
+
+> Suggested (real terminal — has creds + egress):
+> ```
+> bash scripts/session_postflight.sh \
+>   --message "feat(track-b): Build Optimizer + ECU Autotune — analysis modules, /api/optimize/build + /api/autotune/ecu, web + desktop UI, tests" \
+>   --files "motoquant/analysis/build_optimizer.py motoquant/analysis/ecu_autotune.py motoquant/analysis/roi.py motoquant/api.py tests/test_build_optimizer.py tests/test_ecu_autotune.py web/lib/api.js web/components/SiteNav.js web/components/BuildOptimizer.js web/components/EcuAutotune.js web/app/optimize/page.js web/app/optimize/layout.js web/app/autotune/page.js web/app/autotune/layout.js desktop/src/types/api.ts desktop/src/lib/api.ts desktop/src/hooks/useApi.ts desktop/src/pages/BuildPage.tsx desktop/src/pages/AutotunePage.tsx desktop/src/components/Sidebar.tsx desktop/src/App.tsx CLAUDE.md DISPATCH_OUTBOX.md"
+> ```
+
+**Shipped (in working tree, validated):**
+- `motoquant/analysis/build_optimizer.py` — surrogate-agnostic `optimize_build` (MCKP exclusivity, min_et/max_trap, quick-sim fallback).
+- `motoquant/analysis/ecu_autotune.py` — conditions-aware `autotune` (gearing/launch/tyre/fuel, full-sim, env-consuming).
+- `motoquant/analysis/roi.py` — +`et_fn`/`objective`/`return_individual` (backward-compatible).
+- `motoquant/api.py` — `POST /api/optimize/build` + `POST /api/autotune/ecu` (public).
+- `tests/test_build_optimizer.py` (13) + `tests/test_ecu_autotune.py` (13) — 26 pass (shim runner); 2 route tests gated on fastapi for CI.
+- web: `/optimize` + `/autotune` pages + BuildOptimizer/EcuAutotune + SiteNav + lib/api.js.
+- desktop: BuildPage Optimize panel + AutotunePage + types/api.ts + lib/api.ts + useApi.ts + Sidebar + App.
+
+**Validation:** baselines K5 10.0334 / R1 10.2859 / Hayabusa 10.4712 Δ+0.0000; roi.py default-path regression clean; api.py `py_compile` OK; all 15 UI files byte-verified (0 nulls, balanced, cross-refs resolve).
+**CI MUST RUN (couldn't in sandbox — disk full):** route TestClient tests, `cd web && next build`, `cd desktop && npx tsc --noEmit`.
+**FLAG (pre-existing, NOT Track B):** headline-stat drift — web/README declare 796 bikes; `audit_headline_stats.py` truth=495, DB(HEAD)=342 (25 sites). Reconcile after staging catalog DB lands; Track B UI hardcodes no counts.
+**Severity:** normal — features complete; awaiting human push + CI build.

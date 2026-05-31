@@ -2854,3 +2854,185 @@ def chat(req: ChatRequest, client=Depends(get_llm_client)) -> ChatResponse:
 # Lines below here are reserved for Stream 5 auth router mounts:
 #   from motoquant.auth import router as auth_router
 #   app.include_router(auth_router)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# BUILD OPTIMIZER + ECU AUTOTUNE  (/api/optimize/*, /api/autotune/*)  — Track B
+# Public (no auth): the free demo surface, like /simulate/quick + /venues/resolve.
+# The optimizer scores candidates through the loaded surrogate when available and
+# in-envelope, else falls back to the full physics sim — so it always answers.
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class OptimizeBuildRequest(BaseModel):
+    """POST /api/optimize/build — best on-budget parts build for a goal."""
+
+    bike_id: int | None = Field(None, description="DB bike_models.id")
+    bike_preset: str | None = Field(
+        None, description="Fallback preset: gsxr1000_k5 | yzfr1_4c8 | hayabusa_gen1"
+    )
+    budget_inr: float = Field(..., ge=0, le=5_000_000, description="Max spend [INR]")
+    goal: str = Field("min_et", description='"min_et" (faster ET) or "max_trap" (higher trap)')
+    profile: str = Field("all", description="all | street_legal | drag_prep | full_race")
+    rider_weight_kg: float = Field(75.0, ge=40, le=150)
+    power_boost_pct: float = Field(0.0, ge=-50, le=200)
+    mass_delta_kg: float = Field(0.0, ge=-100, le=200)
+    venue_id: int | None = Field(None, description="Optional venue for ambient conditions")
+    max_candidates: int | None = Field(
+        None, ge=1, le=200, description="Cap candidate pool (latency control for full-sim fallback)"
+    )
+
+    model_config = {"populate_by_name": True}
+
+
+@app.post("/api/optimize/build")
+def optimize_build_route(req: OptimizeBuildRequest):
+    """
+    Return the best parts combination for a bike within a budget, optimised for
+    ``goal``.  Each part is compatibility-checked; at most one part per exclusive
+    category (exhaust/ecu/air_filter/clutch/quickshifter/battery).  Response
+    includes per-part ROI, predicted ET/trap delta, cost-per-tenth, synergies,
+    warnings, category priority, and the next-best upgrade beyond budget.
+    """
+    conn = _get_db()
+    if conn is None:
+        raise HTTPException(503, "Database unavailable")
+
+    try:
+        config = _build_config(
+            bike_id=req.bike_id,
+            bike_preset=req.bike_preset,
+            power_boost_pct=req.power_boost_pct,
+            mass_delta_kg=req.mass_delta_kg,
+            rider_mass_kg=req.rider_weight_kg,
+            venue_id=req.venue_id,
+        )
+    except Exception as exc:
+        raise HTTPException(400, f"Config construction failed: {exc}") from exc
+
+    # Lazy-load the surrogate (same pattern as /api/surrogate/predict).
+    global _SURROGATE, _SURROGATE_SOURCE
+    if _SURROGATE is None:
+        with _SURROGATE_LOCK:
+            if _SURROGATE is None:
+                _SURROGATE, _SURROGATE_SOURCE = _load_surrogate()
+
+    from .analysis.build_optimizer import optimize_build
+    from .database.parts_repo import PartsRepository
+
+    try:
+        result = optimize_build(
+            config,
+            req.budget_inr,
+            PartsRepository(conn),
+            goal=req.goal,
+            profile=req.profile,
+            bike_model_id=req.bike_id,
+            surrogate=_SURROGATE,
+            surrogate_source=_SURROGATE_SOURCE,
+            max_candidates=req.max_candidates,
+        )
+    except Exception as exc:
+        logging.getLogger(__name__).error("optimize_build failed: %s", exc, exc_info=True)
+        raise HTTPException(500, f"Optimization failed: {exc}") from exc
+
+    return result.to_dict()
+
+
+class AutotuneRequest(BaseModel):
+    """POST /api/autotune/ecu — conditions-aware drag setup advisor."""
+
+    bike_id: int | None = Field(None, description="DB bike_models.id")
+    bike_preset: str | None = Field(None, description="Fallback preset name")
+    location: str | None = Field(None, max_length=200, description="City/venue, e.g. 'Pune, IN'")
+    venue_id: int | None = Field(None, description="Seeded venue id (sets altitude)")
+    lat: float | None = Field(None, ge=-90, le=90)
+    lon: float | None = Field(None, ge=-180, le=180)
+    altitude_m: float | None = Field(None, ge=-500, le=8000)
+    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
+    track_temp_c: float | None = Field(None, ge=-30, le=80)
+    humidity_pct: float | None = Field(None, ge=0, le=100)
+    pressure_hpa: float | None = Field(None, ge=800, le=1100)
+    rider_weight_kg: float = Field(75.0, ge=40, le=150)
+    gear_span: int = Field(3, ge=1, le=6, description="± sprocket-tooth sweep half-width")
+    launch_steps: int = Field(6, ge=2, le=10, description="Launch-RPM sweep resolution")
+
+    model_config = {"populate_by_name": True}
+
+
+def _apply_resolved_env(config, vd: dict) -> None:
+    """Apply a /api/venues/resolve response dict onto config.environment."""
+    if vd.get("temperature_c") is not None:
+        t = float(vd["temperature_c"])
+        config.environment.ambient_temp_c = t
+        config.environment.track_temp_c = t + 7.0  # track typically ~7°C over air
+    if vd.get("humidity_pct") is not None:
+        config.environment.relative_humidity_pct = float(vd["humidity_pct"])
+    if vd.get("pressure_hpa") is not None:
+        config.environment.barometric_pressure_hpa = float(vd["pressure_hpa"])
+    if vd.get("altitude_m") is not None:
+        config.environment.altitude_m = float(vd["altitude_m"])
+    if vd.get("venue_name"):
+        config.environment.venue_name = vd["venue_name"]
+
+
+@app.post("/api/autotune/ecu")
+def autotune_ecu_route(req: AutotuneRequest):
+    """
+    Recommend a conditions-aware launch setup (final drive / gearing, launch RPM,
+    tyre pressure, fuel & timing trim) for a bike at a given location/conditions,
+    with the atmospheric rationale (density altitude, air density, power
+    correction) shown.  Atmospherics are consumed from the venue/weather
+    resolver and the environment model — never re-derived.
+    """
+    try:
+        config = _build_config(
+            bike_id=req.bike_id,
+            bike_preset=req.bike_preset,
+            power_boost_pct=0.0,
+            mass_delta_kg=0.0,
+            rider_mass_kg=req.rider_weight_kg,
+            venue_id=req.venue_id,
+        )
+    except Exception as exc:
+        raise HTTPException(400, f"Config construction failed: {exc}") from exc
+
+    env_source = "config_default"
+    if req.location or (req.lat is not None and req.lon is not None):
+        try:
+            resolved = resolve_venue(
+                VenueResolveRequest(
+                    location=req.location, lat=req.lat, lon=req.lon, altitude_m=req.altitude_m
+                )
+            )
+            _apply_resolved_env(config, resolved)
+            env_source = resolved.get("source", "resolved")
+        except HTTPException as exc:
+            env_source = f"resolution_unavailable_{exc.status_code}"
+        except Exception as exc:
+            logging.getLogger(__name__).warning("autotune env resolve failed: %s", exc)
+            env_source = "resolution_error"
+
+    # Explicit condition overrides take precedence over any resolution.
+    if req.altitude_m is not None:
+        config.environment.altitude_m = req.altitude_m
+    if req.ambient_temp_c is not None:
+        config.environment.ambient_temp_c = req.ambient_temp_c
+    if req.track_temp_c is not None:
+        config.environment.track_temp_c = req.track_temp_c
+    if req.humidity_pct is not None:
+        config.environment.relative_humidity_pct = req.humidity_pct
+    if req.pressure_hpa is not None:
+        config.environment.barometric_pressure_hpa = req.pressure_hpa
+
+    from .analysis.ecu_autotune import autotune
+
+    try:
+        result = autotune(config, gear_span=req.gear_span, launch_steps=req.launch_steps)
+    except Exception as exc:
+        logging.getLogger(__name__).error("autotune failed: %s", exc, exc_info=True)
+        raise HTTPException(500, f"Autotune failed: {exc}") from exc
+
+    out = result.to_dict()
+    out["environment_source"] = env_source
+    return out

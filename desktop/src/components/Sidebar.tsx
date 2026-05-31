@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import {
   Gauge,
+  SlidersHorizontal,
   Bike,
   Wrench,
   GitCompare,
@@ -14,6 +15,7 @@ const NAV = [
   { to: "/simulate", label: "Simulate", Icon: Gauge },
   { to: "/bikes", label: "Bikes", Icon: Bike },
   { to: "/build", label: "Build", Icon: Wrench },
+  { to: "/autotune", label: "Autotune", Icon: SlidersHorizontal },
   { to: "/compare", label: "Compare", Icon: GitCompare },
   { to: "/history", label: "History", Icon: History },
   { to: "/settings", label: "Settings", Icon: Settings },

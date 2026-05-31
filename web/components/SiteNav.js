@@ -7,7 +7,8 @@
  *
  * One component used by:
  *   /, /features, /about, /pricing, /blog, /blog/*, /docs/*, /bikes,
- *   /bikes/[id], /whitepaper, /login, /signup, /account, /terms, /privacy
+ *   /bikes/[id], /whitepaper, /optimize, /autotune, /login, /signup,
+ *   /account, /terms, /privacy
  *
  * The /docs sub-tree previously had its own copy — replaced by this
  * to keep visual rhythm + nav state in lock-step site-wide.
@@ -21,6 +22,8 @@ import { Menu, X } from 'lucide-react';
 
 const NAV_LINKS = [
   { href: '/simulator',                 label: 'Simulator' },
+  { href: '/optimize',                  label: 'Optimize' },
+  { href: '/autotune',                  label: 'Tune' },
   { href: '/bikes',                     label: 'Bikes' },
   { href: '/features',                  label: 'Features' },
   { href: '/whitepaper',                label: 'Whitepaper' },

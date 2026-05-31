@@ -219,6 +219,7 @@ def compute_parts_roi(
     bike_model_id: int | None = None,
     use_live_pricing: bool = False,
     db_conn=None,  # sqlite3 connection for live price lookup
+    et_fn=None,  # Callable[[BikeConfig], (et_s, trap_ms)]; defaults to full physics sim
 ) -> list[PartROIResult]:
     """
     Evaluate every supplied part against the baseline config.
@@ -249,7 +250,8 @@ def compute_parts_roi(
     """
     import json
 
-    base_et, base_trap = _run_et(base_config)
+    _et = et_fn if et_fn is not None else _run_et
+    base_et, base_trap = _et(base_config)
     results: list[PartROIResult] = []
 
     for pid in part_ids:
@@ -282,7 +284,7 @@ def compute_parts_roi(
         # Apply part and simulate
         try:
             modified_config = parts_repo.apply_to_config(pid, base_config)
-            mod_et, mod_trap = _run_et(modified_config)
+            mod_et, mod_trap = _et(modified_config)
         except Exception as exc:
             warnings.warn(
                 f"ROI: skipping part {pid} ({part.get('model_name')}) — sim error: {exc}"
@@ -340,6 +342,9 @@ def find_best_build(
     min_delta_et_ms: float = 5.0,
     use_live_pricing: bool = False,
     db_conn=None,
+    et_fn=None,  # injectable scorer (e.g. surrogate); defaults to full physics sim
+    objective: str = "min_et",  # "min_et" (maximise ET gain) | "max_trap" (maximise trap gain)
+    return_individual: bool = False,  # also return the per-part ROI list
 ) -> BuildROIResult:
     """
     Find the combination of parts that maximises ET improvement within a budget.
@@ -371,6 +376,13 @@ def find_best_build(
     -------
     BuildROIResult with selected parts, combined ET, and cost summary.
     """
+    _et = et_fn if et_fn is not None else _run_et
+    gain_of = (
+        (lambda r: r.delta_trap_ms)
+        if objective == "max_trap"
+        else (lambda r: r.delta_et_s)
+    )
+
     # Discover candidate part IDs
     if part_ids is None:
         raw = parts_repo.search(
@@ -389,22 +401,23 @@ def find_best_build(
         bike_model_id=bike_model_id,
         use_live_pricing=use_live_pricing,
         db_conn=db_conn,
+        et_fn=et_fn,
     )
 
     # Filter to parts that improve ET and have a finite price ≤ budget
     candidates = [
         r
         for r in individual
-        if (allow_negative_parts or r.delta_et_s >= 0) and r.price_inr <= budget_inr
+        if (allow_negative_parts or gain_of(r) >= 0) and r.price_inr <= budget_inr
     ]
 
     n_evaluated = len(individual)
     n_incompat = sum(1 for r in individual if not r.is_compatible)
-    n_no_gain = sum(1 for r in individual if r.delta_et_s <= 0)
+    n_no_gain = sum(1 for r in individual if gain_of(r) <= 0)
 
     if not candidates:
-        base_et, base_trap = _run_et(base_config)
-        return BuildROIResult(
+        base_et, base_trap = _et(base_config)
+        _empty = BuildROIResult(
             selected_parts=[],
             total_cost_inr=0.0,
             budget_inr=budget_inr,
@@ -416,13 +429,14 @@ def find_best_build(
             parts_skipped_incompatible=n_incompat,
             parts_skipped_no_gain=n_no_gain,
         )
+        return (_empty, individual) if return_individual else _empty
 
     # ── Separate free parts — always include them regardless of budget ───
     # Free parts (price_inr == 0) don't consume budget, so they're always
     # beneficial to include if they improve ET.  Keeping them out of the DP
     # (which uses min 1 bucket per item) avoids a correctness edge case at
     # budget = ₹0.
-    free_candidates = [r for r in candidates if r.is_free and r.delta_et_s > 0]
+    free_candidates = [r for r in candidates if r.is_free and gain_of(r) > 0]
     paid_candidates = [r for r in candidates if not r.is_free]
 
     # ── Knapsack DP on paid parts ─────────────────────────────────────
@@ -438,7 +452,7 @@ def find_best_build(
     items: list[tuple[int, int, int]] = []  # (weight_buckets, value_ms, index)
     for i, r in enumerate(paid_candidates):
         w = max(1, int(r.price_inr // BUCKET))  # at least 1 bucket
-        v = max(0, int(r.delta_et_s * SCALE))
+        v = max(0, int(gain_of(r) * SCALE))
         if w <= W and v > 0:
             items.append((w, v, i))
 
@@ -470,20 +484,23 @@ def find_best_build(
 
     try:
         build_config = parts_repo.apply_multiple(selected_ids, build_config)
-        build_et, build_trap = _run_et(build_config)
+        build_et, build_trap = _et(build_config)
     except Exception as exc:
         warnings.warn(
             f"find_best_build: combined sim failed ({exc}); falling back to stock"
         )
-        build_et, build_trap = _run_et(base_config)
+        build_et, build_trap = _et(base_config)
 
-    base_et, base_trap = _run_et(base_config)
+    base_et, base_trap = _et(base_config)
     total_cost = sum(r.price_inr for r in selected)
 
     # Re-fetch ROI results in the sorted order for the output
-    selected_roi = sorted(selected, key=lambda r: -r.roi_score)
+    selected_roi = sorted(
+        selected,
+        key=lambda r: -(r.roi_score if objective == "min_et" else gain_of(r)),
+    )
 
-    return BuildROIResult(
+    _result = BuildROIResult(
         selected_parts=selected_roi,
         total_cost_inr=total_cost,
         budget_inr=budget_inr,
@@ -495,6 +512,7 @@ def find_best_build(
         parts_skipped_incompatible=n_incompat,
         parts_skipped_no_gain=n_no_gain,
     )
+    return (_result, individual) if return_individual else _result
 
 
 def rank_categories(

@@ -465,3 +465,199 @@ export interface SurrogateCompareResponse {
   delta_trap_kmh: number;
   faster: "a" | "b" | "tie";
 }
+
+// ─── Build optimizer + ECU autotune (Track B) ─────────────────────────────
+
+export interface OptimizeBuildRequest {
+  bike_id?: number;
+  bike_preset?: string;
+  budget_inr: number;
+  goal: "min_et" | "max_trap";
+  profile?: string;
+  rider_weight_kg?: number;
+  venue_id?: number;
+  max_candidates?: number;
+}
+
+export interface OptimizedPart {
+  part_id: number;
+  name: string;
+  brand: string;
+  category: string;
+  category_display: string;
+  price_inr: number;
+  delta_et_s: number;
+  delta_trap_ms: number;
+  roi_score: number | null;
+  cost_per_tenth_inr: number | null;
+  is_compatible: boolean;
+}
+
+export interface OptimizeSynergy {
+  category_a: string;
+  category_b: string;
+  multiplier: number;
+  description: string;
+}
+
+export interface OptimizeWarning {
+  severity: string;
+  category_a: string;
+  category_b: string | null;
+  message: string;
+}
+
+export interface OptimizeNextUpgrade {
+  part: OptimizedPart;
+  marginal_et_gain_s: number;
+  marginal_cost_inr: number;
+  marginal_roi: number | null;
+  reason: string;
+}
+
+export interface OptimizedBuild {
+  bike_name: string;
+  goal: string;
+  budget_inr: number;
+  profile: string;
+  base_et_s: number;
+  base_trap_kmh: number;
+  optimized_et_s: number;
+  optimized_trap_kmh: number;
+  delta_et_s: number;
+  delta_trap_kmh: number;
+  total_cost_inr: number;
+  budget_used_pct: number;
+  cost_per_tenth_inr: number | null;
+  parts: OptimizedPart[];
+  synergies: OptimizeSynergy[];
+  warnings: OptimizeWarning[];
+  next_upgrade: OptimizeNextUpgrade | null;
+  // category_priority is a heterogeneous server aggregate; not rendered.
+  category_priority: Array<Record<string, unknown>>;
+  parts_evaluated: number;
+  parts_skipped_incompatible: number;
+  parts_skipped_no_gain: number;
+  scoring_method: string;
+  scoring_stats: Record<string, unknown>;
+}
+
+export interface AutotuneRequest {
+  bike_id?: number;
+  bike_preset?: string;
+  location?: string;
+  venue_id?: number;
+  lat?: number;
+  lon?: number;
+  altitude_m?: number;
+  ambient_temp_c?: number;
+  track_temp_c?: number;
+  humidity_pct?: number;
+  pressure_hpa?: number;
+  rider_weight_kg?: number;
+  gear_span?: number;
+  launch_steps?: number;
+}
+
+export interface AutotuneEnvironment {
+  location: string | null;
+  temperature_c: number;
+  track_temp_c: number;
+  humidity_pct: number;
+  pressure_hpa: number;
+  altitude_m: number;
+  air_density_kgm3: number;
+  density_altitude_ft: number;
+  density_altitude_m: number;
+  power_correction_pct: number;
+  power_loss_pct: number;
+}
+
+export interface AutotuneStock {
+  et_s: number;
+  trap_kmh: number;
+  launch_rpm: number;
+  front_sprocket: number;
+  rear_sprocket: number;
+  rear_pressure_psi: number;
+  front_pressure_psi: number;
+}
+
+export interface AutotuneGearingCandidate {
+  front_sprocket: number;
+  rear_sprocket: number;
+  final_drive: number;
+  et_s: number;
+  trap_kmh: number;
+  is_stock: boolean;
+}
+
+export interface AutotuneGearing {
+  adjustable: boolean;
+  drive: string;
+  stock_front?: number;
+  stock_rear?: number;
+  recommended_front?: number;
+  recommended_rear?: number;
+  recommended_final_drive: number;
+  et_s: number;
+  trap_kmh?: number;
+  delta_et_s: number;
+  recommendation: string;
+  candidates: AutotuneGearingCandidate[];
+}
+
+export interface AutotuneLaunchCandidate {
+  launch_rpm: number;
+  et_s: number;
+  trap_kmh: number;
+  is_stock: boolean;
+}
+
+export interface AutotuneLaunchRpm {
+  stock_rpm: number;
+  recommended_rpm: number;
+  et_s: number;
+  trap_kmh: number;
+  delta_et_s: number;
+  rationale: string;
+  candidates: AutotuneLaunchCandidate[];
+}
+
+export interface AutotuneTyrePressure {
+  stock_rear_psi: number;
+  stock_front_psi: number;
+  rear_psi: number;
+  front_psi: number;
+  rationale: string;
+  is_guideline: boolean;
+}
+
+export interface AutotuneFuelTiming {
+  fuel_trim_pct: number;
+  timing_advance_deg: number;
+  density_ratio: number;
+  applicable: boolean;
+  rationale: string;
+  is_guideline: boolean;
+}
+
+export interface AutotuneCombined {
+  et_s: number;
+  trap_kmh: number;
+  delta_et_s: number;
+}
+
+export interface EcuAutotune {
+  bike_name: string;
+  environment: AutotuneEnvironment;
+  stock: AutotuneStock;
+  gearing: AutotuneGearing;
+  launch_rpm: AutotuneLaunchRpm;
+  tyre_pressure: AutotuneTyrePressure;
+  fuel_timing: AutotuneFuelTiming;
+  combined: AutotuneCombined;
+  rationale: string;
+  scoring_method: string;
+  environment_source: string;
+}

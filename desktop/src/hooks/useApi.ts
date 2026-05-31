@@ -13,6 +13,10 @@ import type {
   SurrogateCompareResponse,
   SurrogatePredictRequest,
   SurrogatePredictResponse,
+  OptimizeBuildRequest,
+  OptimizedBuild,
+  AutotuneRequest,
+  EcuAutotune,
 } from "@/types/api";
 
 export function useBikes(params: {
@@ -119,5 +123,18 @@ export function useSurrogatePredict() {
 export function useSurrogateCompare() {
   return useMutation<SurrogateCompareResponse, Error, SurrogateCompareRequest>({
     mutationFn: (req) => api.surrogateCompare(req),
+  });
+}
+
+// ─── Build optimizer + ECU autotune (Track B) ─────────────────────────
+export function useOptimizeBuild() {
+  return useMutation<OptimizedBuild, Error, OptimizeBuildRequest>({
+    mutationFn: (req) => api.optimizeBuild(req),
+  });
+}
+
+export function useAutotuneEcu() {
+  return useMutation<EcuAutotune, Error, AutotuneRequest>({
+    mutationFn: (req) => api.autotuneEcu(req),
   });
 }
