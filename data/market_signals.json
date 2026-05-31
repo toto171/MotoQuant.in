@@ -1,23 +1,27 @@
 {
-  "_updated": "2026-05-26",
-  "_run": "competitive-intel weekly scan 2026-05-26",
-  "_methodology": "Web search across 4 axes: generic quarter-mile calculators, India-qualified bike simulators, DragSim Pro / desktop sim category, Valley Run 2026 + Indian drag scene. No new direct competitor surfaced. Three opportunity boosts queued — see agents{} below.",
+  "_updated": "2026-05-31",
+  "_run": "competitive-intel weekly scan 2026-05-31",
+  "_methodology": "Web search across 5 axes: generic motorcycle drag simulators, India quarter-mile calculators, motorcycle dyno simulation, Valley Run 2026 results, Indian moto-press homepages (BikeWale / ZigWheels / Autocar India / ackodrive). Also probed AI motorcycle tuning, F99 production launch, 2026 Hayabusa news cycle, MotoGuru AI new entrant. Two material new signals: 2026 Hayabusa unveiled with throttle-map updates (Indian press carrying widely), MotoGuru AI single-page landing site appeared. One date correction from last week: Valley Run 2026 Summer = April 17-19 (not April 3-5).",
   "agents": {
     "marketing-content": {
-      "opportunity_boost": 12,
-      "reason": "No English-language coverage of Valley Run 2026 results or 'fastest Indian EV motorcycle drag' (F99 10.712s) has indexed. Window open for a tie-in post crossing /blog with /simulator?venue=aamby-valley."
-    },
-    "seo-keyword": {
-      "opportunity_boost": 10,
-      "reason": "'valley run 2026 results', 'ultraviolette f99 quarter mile', 'valley run drag race' are uncontested India-qualified long-tails. Generic 'quarter mile calculator' SERPs are saturated by US legacy tools (xcceleration, robrobinette, dragcalc) — don't fight there."
-    },
-    "partnership-outreach": {
-      "opportunity_boost": 5,
-      "reason": "Elite Octane (eliteoctane.com, Valley Run organiser) has no software-partner mention. Clean cold-outreach surface for a 'free simulator for participants' offer."
+      "opportunity_boost": 18,
+      "reason": "2026 Suzuki Hayabusa news cycle live across Autocar India / BikeWale / BikeDekho / 91wheels / ackodrive / gaadikey. Throttle-map + cruise-control + quickshifter updates. Hayabusa is one of our three baseline reference bikes — a 'what the new throttle map does to ET' post hits peak Hayabusa search demand. Valley Run 2026 results page still unindexed; recap content gap also unfilled."
     },
     "catalog-expansion": {
+      "opportunity_boost": 10,
+      "reason": "Add 2026 Hayabusa with updated throttle-map / quickshifter spec; add production-spec Ultraviolette F99 (Q1 2026 launch announced, holds 10.712s Valley Run 2024 record as fastest Indian-manufactured bike). Both are headline-stat anchors and protect against an OEM-side 'configure & race' microsite emerging on flagship platforms."
+    },
+    "seo-keyword": {
+      "opportunity_boost": 12,
+      "reason": "'2026 hayabusa quarter mile', '2026 hayabusa india price', 'ultraviolette f99 launch india', 'valley run 2026 results' are uncontested India-qualified high-intent queries this week. Generic 'quarter mile calculator' SERPs remain saturated by US legacy tools — stay off that battlefield."
+    },
+    "partnership-outreach": {
       "opportunity_boost": 3,
-      "reason": "Ultraviolette F99 (Indian electric superbike, 10.712s Valley Run 2024) not in catalog. Adding it covers a defensible Indian-EV-flagship slot before any OEM ships a competing microsite."
+      "reason": "Elite Octane events page (eliteoctane.com/events.html) still shows no software-partner mention. Carry-over from last week — clean cold-outreach surface for 'free simulator for Valley Run participants' offer."
+    },
+    "competitive-intel": {
+      "opportunity_boost": 8,
+      "reason": "MotoGuru AI (themotoguru.com) surfaced as a new entrant claiming 'intelligent motorcycle recommendations & advice.' Homepage is title-only — could not extract product depth, feature set, or pricing. Needs a deeper probe next week to confirm whether it overlaps our recommend / build-optimizer surface or is unrelated content advisory."
     }
   },
   "competitors_scanned": [
@@ -27,19 +31,27 @@
     {"name": "Rob Robinette ET", "url": "https://robrobinette.com/et.htm", "category": "web_calculator_free", "threat": "low", "delta_this_week": "none"},
     {"name": "Wallace Racing", "url": "http://www.wallaceracing.com/Calculators.htm", "category": "web_calculator_free", "threat": "low", "delta_this_week": "none"},
     {"name": "Speedmaster Tools", "url": "https://www.speedmaster79.com/tools/14et-hp", "category": "web_calculator_free", "threat": "low", "delta_this_week": "none"},
-    {"name": "FIRGELLI Engineering blog tool", "url": "https://www.firgelliauto.com/blogs/engineering-calculators/quarter-mile-et-calculator-trap-speed", "category": "web_calculator_free", "threat": "low", "delta_this_week": "newer SEO-aggressive blog-tool format worth mirroring"},
+    {"name": "FIRGELLI Engineering blog tool", "url": "https://www.firgelliauto.com/blogs/engineering-calculators/quarter-mile-et-calculator-trap-speed", "category": "web_calculator_free", "threat": "low", "delta_this_week": "none"},
     {"name": "AJ Designer HP-from-ET", "url": "https://www.ajdesigner.com/fl_horsepower_elapsed_time/horsepower_elapsed_time.php", "category": "web_calculator_free", "threat": "low", "delta_this_week": "none"},
-    {"name": "LeanGP", "url": "https://leangp.com/en/", "category": "rider_training_sim_hardware", "threat": "none", "delta_this_week": "different_category"}
+    {"name": "MotoGuru AI", "url": "https://www.themotoguru.com/", "category": "ai_motorcycle_advisor_unknown_depth", "threat": "unknown", "delta_this_week": "NEW entrant — single-page landing site, product depth unknown, needs deeper probe next week"},
+    {"name": "Drag Drive Simulator (Roblox)", "url": "https://www.roblox.com/games/131378148336503/Drag-Drive-Simulator", "category": "mobile_arcade_game_mass_audience", "threat": "none_direct_vocabulary_diffusion_signal", "delta_this_week": "Beta V1.1.3 + V1.1.4 shipped gear-ratio tuning + Pettarani drag-strip map; 1.6B+ visits — normalising drag/gear-ratio vocabulary to teen mass audience"},
+    {"name": "LeanGP", "url": "https://leangp.com/en/", "category": "rider_training_sim_hardware", "threat": "none", "delta_this_week": "different_category"},
+    {"name": "VI-Motorcycle (VI-grade)", "url": "https://www.vi-grade.com/en/products/vi-motorcycle/", "category": "enterprise_MSC_Adams_dynamics", "threat": "none", "delta_this_week": "OEM tooling, not consumer-facing"}
   ],
   "indian_scene_signals": [
-    {"event": "Valley Run 2026 Summer", "date": "2026-04-03 to 2026-04-05", "venue": "Aamby Valley Airstrip", "source": "eliteoctane.com/valley.html", "notes": "Indexed coverage still mostly 2024 (Suvarna 8.797s wheelie record, Ultraviolette F99 10.712s). 2026 results not widely published yet."},
-    {"event": "Valley Run 2026 Winter (announced)", "date": "2026-04-17 to 2026-04-19 (alt window)", "venue": "Aamby Valley Airstrip", "source": "eliteoctane.com/events.html", "notes": "Two events same year — check whether April 3-5 was Summer and April 17-19 is a separate event."}
+    {"event": "Valley Run 2026 Summer", "date": "2026-04-17 to 2026-04-19", "venue": "Aamby Valley Airstrip", "source": "https://eliteoctane.com/events.html", "notes": "DATE CORRECTION from last week (was April 3-5). Event has happened; results page still unindexed."},
+    {"event": "2026 Suzuki Hayabusa unveiled", "date": "2026-05 (week of)", "source": "https://www.autocarindia.com/bike-news/2026-suzuki-hayabusa-unveiled-with-technical-updates-438482", "notes": "Throttle-map tweak for low-rev torque; cruise-control stays engaged during quickshifter use; two new colour schemes. UK OTR £18,599 ≈ ₹21.55 lakh. India launch expected near term. Carried by Autocar India / BikeWale / BikeDekho / 91wheels / ackodrive / gaadikey / Smartprix / autoX."},
+    {"event": "Ultraviolette F99 production launch announced", "date": "Q1 2026", "source": "https://www.zigwheels.com/ultraviolette-bikes/f99/", "notes": "Production-spec following 2024 racing concept that set 10.712s FMSCI-certified Indian-manufacturer record. Expected price spread ₹4.5L-₹8L across sources."}
   ],
   "no_competitor_found_in": [
     "india-built motorcycle drag-physics simulator",
     "ask-ai-to-tune-my-bike-for-aamby-valley tool",
     "INR-denominated motorcycle parts ROI calculator",
-    "per-bike pre-configured catalog with validated benchmarks (web-native)"
+    "per-bike pre-configured catalog with validated benchmarks (web-native)",
+    "indian-bike build-optimizer with surrogate-accelerated knapsack (Track B equivalent)"
   ],
-  "escalations_queued": []
+  "escalations_queued": [
+    {"tag": "opportunistic", "to_agent": "marketing-content", "window_days": 14, "note": "2026 Hayabusa news cycle peaks in 7-14 days. Publish 'how the 2026 Hayabusa throttle-map update changes ET' before India launch announcement consumes the keyword space."},
+    {"tag": "track", "to_agent": "competitive-intel", "window_days": 7, "note": "Re-probe MotoGuru AI (themotoguru.com) next week with WebFetch on /about, /features, /pricing if any subpages have shipped. Determine overlap with recommend / build-optimizer surface."}
+  ]
 }

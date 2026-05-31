@@ -154,6 +154,22 @@ export const metadata = {
 
 const POSTS = [
   {
+    slug: "yamaha-rd350-quarter-mile-physics",
+    date: "2026-05-31",
+    readTime: "12 min",
+    tags: [
+      "Yamaha",
+      "RD350",
+      "Two-stroke",
+      "Rajdoot RD350",
+      "India",
+      "physics",
+    ],
+    title: "Yamaha RD350 Quarter-Mile Physics: Why a 1973 2-Stroke Still Runs 14.7s",
+    excerpt:
+      "MotoQuant sims the 1973 Yamaha RD350 at 14.707s and ~145 km/h trap under Aamby Valley November conditions — quicker than a 2026 Pulsar NS200, Hunter 350, or R15 V4. Cycle World clocked the real bike at 14.000s in 1973. The May 31 2026 two-stroke clutch calibration shaved 347ms off the sim ET. Includes the Indian Rajdoot RD350 HT / LT detune math, the cluster-bias honest framing, and the cheapest mod tenth on the bike (a ₹450 sprocket swap).",
+  },
+  {
     slug: "bmw-f-900-gs-quarter-mile-physics",
     date: "2026-05-31",
     readTime: "13 min",
