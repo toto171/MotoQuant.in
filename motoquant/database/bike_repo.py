@@ -20,7 +20,9 @@ from .bridge import (
     extract_headline_specs,
 )
 
-_YEAR_SUFFIX_RE = re.compile(r"\s*\(\d{4}-\d{4}\)\s*$")
+_YEAR_SUFFIX_RE = re.compile(
+    r"\s*\((?:19|20)\d{2}(?:\s*[-–]\s*(?:19|20)?\d{2,4})?\)\s*$"
+)
 
 
 def _norm_model(s: str) -> str:
@@ -132,25 +134,22 @@ class BikeRepository:
         # collide and INSERT OR IGNORE would mint a phantom row. Match in
         # Python on the normalised form first and short-circuit to the existing
         # id if any sibling row already covers this bike.
+        # Keep the FULL year range in the identity so distinct generations
+        # (e.g. GSX-R 1000 2001-2002 vs 2003-2004, which share the year-stripped
+        # name "GSX-R 1000") are NOT collapsed, while bare-vs-suffixed and
+        # NULL-model_code re-imports of the SAME bike (same manufacturer, same
+        # normalised name, same year range) reuse the existing row instead of
+        # minting a phantom duplicate.
         normalised_incoming = _norm_model(model_name)
-        existing_rows = self._conn.execute(
-            """SELECT id, model_name, year_from FROM bike_models
-               WHERE manufacturer_id = ?""",
-            (manufacturer_id,),
-        ).fetchall()
-        suffix_matches = [
-            r
-            for r in existing_rows
-            if _norm_model(r["model_name"]) == normalised_incoming
-        ]
-        if suffix_matches:
-            suffix_matches.sort(
-                key=lambda r: (
-                    r["year_from"] is None,
-                    abs((r["year_from"] or 0) - (year_from or 0)),
-                )
-            )
-            return suffix_matches[0]["id"]
+        for r in self._conn.execute(
+            """SELECT id, model_name FROM bike_models
+               WHERE manufacturer_id = ?
+                 AND COALESCE(year_from, -1) = COALESCE(?, -1)
+                 AND COALESCE(year_to,   -1) = COALESCE(?, -1)""",
+            (manufacturer_id, year_from, year_to),
+        ).fetchall():
+            if _norm_model(r["model_name"]) == normalised_incoming:
+                return r["id"]
 
         cur = self._conn.execute(
             f"INSERT OR IGNORE INTO bike_models ({col_str}) VALUES ({placeholders})",
@@ -277,6 +276,40 @@ class BikeRepository:
         Store a full BikeConfig as a versioned config row.
         Returns config ID.
         """
+        # Serialize parameter blocks up front so identical re-imports can short-circuit.
+        row_data = config_to_db_row(config)
+
+        # ── Idempotency guard ──
+        # Daily spec re-imports call this with byte-identical params. Without this
+        # check every run would append a new version (+ a duplicate dyno curve),
+        # bloating the DB indefinitely. If the current version already holds
+        # identical params, reuse it — no new version, no duplicate dyno curve.
+        _PARAM_COLS = (
+            "chassis_params", "engine_params", "forced_induction_params",
+            "drivetrain_params", "clutch_params", "tire_params", "aero_params",
+            "suspension_params", "braking_params", "wheelie_params",
+            "rider_params", "parasitic_params", "staging_params",
+        )
+        # Match ANY existing version with identical params (not only the current
+        # one). This keeps re-imports fully idempotent even when the source list
+        # carries two conflicting specs for the same bike (a few do, e.g. Versys
+        # 650 / Yezdi Adventure) — otherwise the two specs would ping-pong the
+        # "current" flag and append a new version on every pass. If a match is
+        # found, make it current and reuse it instead of inserting a duplicate.
+        for ev in self._conn.execute(
+            "SELECT id, " + ", ".join(_PARAM_COLS)
+            + " FROM bike_configs WHERE bike_model_id = ? AND config_name = ?",
+            (bike_model_id, config_name),
+        ).fetchall():
+            if all(ev[c] == row_data[c] for c in _PARAM_COLS):
+                self._conn.execute(
+                    "UPDATE bike_configs SET is_current = (id = ?)"
+                    " WHERE bike_model_id = ? AND config_name = ?",
+                    (ev["id"], bike_model_id, config_name),
+                )
+                self._conn.commit()
+                return ev["id"]
+
         # Determine next version number
         row = self._conn.execute(
             """SELECT COALESCE(MAX(version), 0) as max_v
@@ -292,9 +325,6 @@ class BikeRepository:
                WHERE bike_model_id = ? AND config_name = ?""",
             (bike_model_id, config_name),
         )
-
-        # Serialize parameter blocks
-        row_data = config_to_db_row(config)
 
         cur = self._conn.execute(
             """INSERT INTO bike_configs

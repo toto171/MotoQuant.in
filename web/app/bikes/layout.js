@@ -4,9 +4,9 @@
 import StructuredData, { SITE_URL } from '../StructuredData';
 
 const TITLE =
-  'Motorcycle Spec Database India — 799 Bikes with Dyno, Aero & Quarter-Mile Data';
+  'Motorcycle Spec Database India — 498 Bikes with Dyno, Aero & Quarter-Mile Data';
 const DESCRIPTION =
-  'Indian motorcycle specifications database — 799 bikes with full physics data for quarter-mile drag simulation. Hayabusa, ZX-14R, R15 V4, KTM Duke 390, KTM 890 Duke, Suzuki GSX-S750, Honda CB500X, Pulsar NS200, Apache RTR, Interceptor 650 and more. Individual Cd, frontal area, peak power, redline, wet mass, wheelbase, chain pitch, OEM tire fitments, and predicted ET at Aamby Valley + 19 other venues.';
+  'Indian motorcycle specifications database — 498 bikes with full physics data for quarter-mile drag simulation. Hayabusa, ZX-14R, R15 V4, KTM Duke 390, KTM 890 Duke, Suzuki GSX-S750, Honda CB500X, Pulsar NS200, Apache RTR, Interceptor 650 and more. Individual Cd, frontal area, peak power, redline, wet mass, wheelbase, chain pitch, OEM tire fitments, and predicted ET at Aamby Valley + 19 other venues.';
 
 export const metadata = {
   title: TITLE,
@@ -78,7 +78,7 @@ export const metadata = {
         url: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'MotoQuant Pro bike catalog — 799 motorcycles with full spec data',
+        alt: 'MotoQuant Pro bike catalog — 498 motorcycles with full spec data',
       },
     ],
   },
@@ -116,7 +116,7 @@ function collectionSchema() {
       '@type': 'Thing',
       name: 'Motorcycle specifications and drag-racing physics data',
     },
-    numberOfItems: 799,
+    numberOfItems: 498,
     inLanguage: 'en',
   };
 }
