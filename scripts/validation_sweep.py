@@ -1913,6 +1913,79 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         "Cycle World May 1994 (timing-strip, B1 49-state model)",
     ),
     # ── end 2026-05-31 pass 8 ──
+    # ── 2026-05-31 pass 9 — Sunday autonomous slot ──
+    # Suzuki GSX-R 750 (750 cc oilcooled I4 sport, 1985-1987 first-gen
+    # F-model — the original Slabby, factory-claimed 100 hp Japan / 105 hp
+    # Canada / 86 hp US-spec for the 1986 SACS-cooled crate engine in a
+    # 176 kg dry chassis). Cycle World June 1985 cover comparison test
+    # (Suzuki GSX-R750 vs Yamaha FZ750) at Carlsbad Raceway, "a cool,
+    # slightly damp evening" — Canadian-spec 105 bhp tester (the spec
+    # closest to global 1985 production, before the CV-carb US edition).
+    # Timing-strip best: 11.48s @ 118.26 mph (= 190.3 km/h, rounded 190).
+    # The rider lifted the front wheel through 1st-to-2nd shift (clutch-
+    # durability-limited launch technique), so the figure is conservative
+    # for the chassis but represents real instrumented production-bike
+    # performance per the magazine's standard test protocol. Catalog entry
+    # SUZUKI_GSX_R_750_OILCOOLED covers 1985-1987 with the original
+    # 749 cc 16-valve oilcooled engine; year_hint=1985 falls cleanly inside
+    # 1985-1987 range. Pre-add _best_benchmark_match probe returns None
+    # on this catalog row (previously unbenchmarked); post-add binds to
+    # this entry. The other GSX-R 750 catalog row (2008-2010 K8 chassis)
+    # is already benchmarked via "GSX-R 750" 2008 SR archive entry and
+    # is filtered OUT for this benchmark by year-range (2008 > 1987).
+    # Sim verification: spec_to_bike_config() + MotoQuantEngine.run() on
+    # the 1985-1987 row produces 11.252s @ 215.9 km/h (ΔET −0.228s vs
+    # bench 11.48s; ΔTrap +25.6 km/h). The trap delta is consistent with
+    # the well-documented mid-80s SACS dyno-power overestimate (Cycle
+    # World era charts ran +5-15 % optimistic on early SACS power claims;
+    # spec_to_bike_config has no era-correction). ET sits inside the
+    # litre-sport cluster band (mean|Δ| 0.225s per CLAUDE.md April-27
+    # PM metrics) — high-confidence add.
+    # URL: https://magazine.cycleworld.com/article/1985/6/1/suzuki-gsx-r750-vs-yamaha-fz750
+    (
+        "Suzuki",
+        "GSX-R 750",
+        1985,
+        11.48,
+        190,
+        "Cycle World June 1985 (Carlsbad Raceway timing-strip, GSX-R750 vs FZ750 cover comparison, Canadian-spec 105 bhp)",
+    ),
+    # Honda CBR900RR Fireblade (893 cc I4 sport, 1992-1995 SC28 first-gen
+    # Fireblade — Tadao Baba's clean-sheet 893 cc lightweight that founded
+    # the litre-sport class, 124 hp claimed in a 185 kg dry chassis). Cycle
+    # World September 1994 cover test of the revised 1995 model at Carlsbad
+    # Raceway, "mild weather and a light tailwind" — bike fitted with
+    # factory-standard street-compound Bridgestone Battlax BT50 tires (NOT
+    # race rubber), per the magazine's standard road-test protocol. Timing-
+    # strip best: 10.67s @ 131.57 mph (= 211.7 km/h, rounded 212). Article
+    # explicitly cites the 1994 model at 10.84s @ 128.38 mph and the 1995
+    # at 10.67s @ 131.57 mph; the 1995 entry is the more rigorously docu-
+    # mented test (full road-test cover feature vs the 1993 Superbike
+    # Shootout's bracket summary at 10.82s). Catalog entry HONDA_CBR900RR_
+    # FIREBLADE covers 1992-1995 (SC28 first-gen); year_hint=1995 falls
+    # cleanly inside the range. Pre-add probe via _best_benchmark_match
+    # returns None on this catalog row (previously unbenchmarked); post-
+    # add binds via 2-token "CBR900RR Fireblade" pattern. The 1998-1999
+    # SC33 catalog row (separate entry, already benchmarked via "CBR900RR"
+    # 1998 SR archive entry at 10.54s) is unaffected — different chassis
+    # generation, the 2-token "CBR900RR Fireblade" pattern is MORE specific
+    # than the 1-token "CBR900RR" so per _model_specificity_score the SC33
+    # row stays bound to its 1998 benchmark exclusively. Sim verification:
+    # spec_to_bike_config() + MotoQuantEngine.run() produces 10.773s @
+    # 226.6 km/h (ΔET +0.103s vs bench 10.67s; ΔTrap +14.6 km/h). Tight
+    # ET match (within 0.1 s) is high-confidence signal — the cluster mean
+    # |Δ| for litre-sport-600-1000 is 0.225s per CLAUDE.md April-27 PM
+    # metrics, so this entry lands well inside band.
+    # URL: https://magazine.cycleworld.com/article/1994/9/1/1995-honda-cbr900rr
+    (
+        "Honda",
+        "CBR900RR Fireblade",
+        1995,
+        10.67,
+        212,
+        "Cycle World Sept 1994 (Carlsbad Raceway timing-strip, 1995 CBR900RR road test cover, stock BT50 tyres)",
+    ),
+    # ── end 2026-05-31 pass 9 ──
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

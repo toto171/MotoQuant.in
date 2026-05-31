@@ -162,6 +162,51 @@ def _bike_row_to_summary(row: dict[str, Any]) -> BikeRowSummary:
     }
 
 
+class AppliedPartDict(TypedDict, total=False):
+    """Shape of one entry in ``QuickSimResultDict.parts_applied``.
+
+    Mirrors the ``AppliedPart`` TypeScript interface in
+    ``desktop/src/types/api.ts``. Built inside :func:`_apply_parts_to_config`.
+
+    ``total=False`` because ``price_inr`` is omitted when the caller passes
+    ``include_price_in_summary=False`` (currently only ``_run_build``). The
+    other three keys are always populated.
+    """
+
+    id: int
+    name: str
+    brand: str
+    price_inr: float | None
+
+
+class QuickSimResultDict(TypedDict):
+    """Shape of the dict returned by the ``/api/simulate/quick`` endpoint.
+
+    Mirrors the ``QuickSimResponse`` TypeScript interface in
+    ``desktop/src/types/api.ts``. Built inline in :func:`simulate_quick`.
+
+    Keep field names + types in lockstep with
+    ``desktop/src/types/api.ts::QuickSimResponse`` — any drift between the
+    two silently breaks the desktop BuildPage slider UI.
+
+    ``stock_et_s`` and ``et_delta_s`` are nullable because they are only
+    populated when ``parts_applied`` is non-empty (otherwise "stock" equals
+    the current run and the delta is meaningless).
+    """
+
+    et_quarter_s: float
+    trap_speed_kmh: float
+    et_60ft_s: float
+    et_eighth_s: float
+    bike_name: str
+    peak_power_hp: float
+    total_mass_kg: float
+    parts_applied: list[AppliedPartDict]
+    build_cost_inr: float
+    stock_et_s: float | None
+    et_delta_s: float | None
+
+
 # ─── Request / response models ────────────────────────────────────────────
 
 
@@ -382,7 +427,7 @@ def _apply_parts_to_config(
     part_ids: list[int] | None,
     *,
     include_price_in_summary: bool = True,
-) -> tuple[BikeConfig, list[dict], float]:
+) -> tuple[BikeConfig, list[AppliedPartDict], float]:
     """Apply a list of selected ``part_ids`` to *cfg* and report what was used.
 
     Centralises the "load each part from the DB, mutate cfg via
@@ -409,7 +454,7 @@ def _apply_parts_to_config(
         and the accumulated build cost in INR (0.0 when no priced parts
         were applied or the DB was unavailable).
     """
-    parts_applied: list[dict] = []
+    parts_applied: list[AppliedPartDict] = []
     build_cost: float = 0.0
     if not part_ids:
         return cfg, parts_applied, build_cost
@@ -429,7 +474,7 @@ def _apply_parts_to_config(
                 continue
             part_dict = dict(row)
             cfg = apply_part_to_config(cfg, part_dict)
-            summary = {
+            summary: AppliedPartDict = {
                 "id": part_dict["id"],
                 "name": part_dict.get("model_name", ""),
                 "brand": part_dict.get("brand", ""),
@@ -874,7 +919,7 @@ def simulate(req: SimulateRequest):
 
 
 @app.post("/api/simulate/quick")
-def simulate_quick(req: QuickSimRequest):
+def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
     """
     Quick ET-only simulation -- no time-series arrays.
     Returns in ~50 ms; ideal for slider-driven UI.
@@ -930,7 +975,7 @@ def simulate_quick(req: QuickSimRequest):
     except Exception as exc:
         raise HTTPException(500, f"Simulation error: {exc}")
 
-    result = {
+    result: QuickSimResultDict = {
         "et_quarter_s": round(float(sim.time_quarter), 4),
         "trap_speed_kmh": round(float(sim.speed_quarter) * 3.6, 2),
         "et_60ft_s": round(float(sim.time_60ft), 4),

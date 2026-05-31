@@ -160,6 +160,23 @@ export const metadata = {
 
 const POSTS = [
   {
+    slug: "royal-enfield-interceptor-650-quarter-mile-physics",
+    date: "2026-05-31",
+    readTime: "13 min",
+    tags: [
+      "Royal Enfield",
+      "Interceptor 650",
+      "Mid-twin 500-700",
+      "270-degree crank",
+      "Indian mid-displacement",
+      "physics",
+    ],
+    title:
+      "Royal Enfield Interceptor 650 Quarter-Mile Physics: 14.15s on 47hp",
+    excerpt:
+      "MotoQuant sims the Royal Enfield Interceptor 650 at 14.151s and 155.8 km/h trap under Aamby Valley November — 0.05s slower than the GT 650 sibling on identical engine because upright bars push 0.50 m² of frontal area instead of the cafe-racer's 0.46 m². Cost-per-tenth ladder topped by the F15/R46 sprocket swap (₹2,400, drops ET 0.16s) and the Powertronic Stage 1 flash (₹14,500, drops another 0.21s). ₹17,000 mod combo lands the bike at a 13.81s sim ET — faster than a stock Pulsar NS400Z.",
+  },
+  {
     slug: "triumph-tiger-900-gt-pro-quarter-mile-physics",
     date: "2026-05-31",
     readTime: "14 min",
