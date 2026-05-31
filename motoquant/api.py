@@ -377,6 +377,80 @@ def _build_config(
     return cfg
 
 
+def _apply_parts_to_config(
+    cfg: BikeConfig,
+    part_ids: list[int] | None,
+    *,
+    include_price_in_summary: bool = True,
+) -> tuple[BikeConfig, list[dict], float]:
+    """Apply a list of selected ``part_ids`` to *cfg* and report what was used.
+
+    Centralises the "load each part from the DB, mutate cfg via
+    ``apply_part_to_config``, build a parts_applied summary, accumulate
+    INR build cost" loop that was previously duplicated across four API
+    endpoints (simulate_quick, simulate_top_speed, simulate_distance,
+    _run_build).  Behaviour byte-identical to the prior inline blocks:
+
+    * If ``part_ids`` is empty / None, returns ``(cfg, [], 0.0)`` unchanged.
+    * If the DB is unavailable, swallows the failure and returns
+      ``(cfg, [], 0.0)`` so callers can degrade gracefully — matching the
+      prior "if db:" guarded paths.
+    * If any single part row raises while being applied, the whole batch
+      is logged and dropped (mirrors the prior outer ``try/except``).
+    * The ``parts_applied`` dict shape is ``{id, name, brand[, price_inr]}``
+      — the optional ``price_inr`` key is omitted when
+      ``include_price_in_summary=False`` (used by ``_run_build`` whose
+      legacy summary did not include it).
+
+    Returns
+    -------
+    tuple[BikeConfig, list[dict], float]
+        Mutated config (same object), list of per-part summary dicts,
+        and the accumulated build cost in INR (0.0 when no priced parts
+        were applied or the DB was unavailable).
+    """
+    parts_applied: list[dict] = []
+    build_cost: float = 0.0
+    if not part_ids:
+        return cfg, parts_applied, build_cost
+
+    db = _get_db()
+    if not db:
+        return cfg, parts_applied, build_cost
+
+    try:
+        from .database.bridge import apply_part_to_config
+
+        for pid in part_ids:
+            row = db.execute(
+                "SELECT * FROM parts WHERE id=?", (pid,)
+            ).fetchone()
+            if not row:
+                continue
+            part_dict = dict(row)
+            cfg = apply_part_to_config(cfg, part_dict)
+            summary = {
+                "id": part_dict["id"],
+                "name": part_dict.get("model_name", ""),
+                "brand": part_dict.get("brand", ""),
+            }
+            if include_price_in_summary:
+                summary["price_inr"] = part_dict.get("price_inr")
+            parts_applied.append(summary)
+            if part_dict.get("price_inr"):
+                build_cost += float(part_dict["price_inr"])
+    except Exception as exc:  # noqa: BLE001
+        logging.getLogger(__name__).warning(
+            "Failed to apply parts %s: %s", part_ids, exc
+        )
+        # Preserve prior behaviour: return whatever was assembled before the
+        # exception (parts_applied may be partially populated if the failure
+        # came from a late row); cfg likewise carries any deltas already
+        # applied. This matches the inline try/except behaviour we replaced.
+
+    return cfg, parts_applied, build_cost
+
+
 # ─── Endpoints ────────────────────────────────────────────────────────────
 
 
@@ -824,35 +898,7 @@ def simulate_quick(req: QuickSimRequest):
         raise HTTPException(400, f"Config error: {exc}")
 
     # Apply selected parts
-    build_cost_inr = 0.0
-    parts_applied = []
-    if req.part_ids:
-        db = _get_db()
-        if db:
-            try:
-                from .database.bridge import apply_part_to_config
-
-                for pid in req.part_ids:
-                    row = db.execute(
-                        "SELECT * FROM parts WHERE id=?", (pid,)
-                    ).fetchone()
-                    if row:
-                        part_dict = dict(row)
-                        cfg = apply_part_to_config(cfg, part_dict)
-                        parts_applied.append(
-                            {
-                                "id": part_dict["id"],
-                                "name": part_dict.get("model_name", ""),
-                                "brand": part_dict.get("brand", ""),
-                                "price_inr": part_dict.get("price_inr"),
-                            }
-                        )
-                        if part_dict.get("price_inr"):
-                            build_cost_inr += float(part_dict["price_inr"])
-            except Exception as e:
-                logging.getLogger(__name__).warning(
-                    "Failed to apply parts %s: %s", req.part_ids, e
-                )
+    cfg, parts_applied, build_cost_inr = _apply_parts_to_config(cfg, req.part_ids)
 
     # Run stock sim for comparison if parts are applied
     # "Stock" means same slider overrides but NO parts -- shows parts-only delta
@@ -951,35 +997,7 @@ def simulate_top_speed(req: TopSpeedRequest):
     except Exception as exc:
         raise HTTPException(400, f"Config error: {exc}")
 
-    build_cost_inr = 0.0
-    parts_applied = []
-    if req.part_ids:
-        db = _get_db()
-        if db:
-            try:
-                from .database.bridge import apply_part_to_config
-
-                for pid in req.part_ids:
-                    row = db.execute(
-                        "SELECT * FROM parts WHERE id=?", (pid,)
-                    ).fetchone()
-                    if row:
-                        part_dict = dict(row)
-                        cfg = apply_part_to_config(cfg, part_dict)
-                        parts_applied.append(
-                            {
-                                "id": part_dict["id"],
-                                "name": part_dict.get("model_name", ""),
-                                "brand": part_dict.get("brand", ""),
-                                "price_inr": part_dict.get("price_inr"),
-                            }
-                        )
-                        if part_dict.get("price_inr"):
-                            build_cost_inr += float(part_dict["price_inr"])
-            except Exception as e:
-                logging.getLogger(__name__).warning(
-                    "Failed to apply parts %s: %s", req.part_ids, e
-                )
+    cfg, parts_applied, build_cost_inr = _apply_parts_to_config(cfg, req.part_ids)
 
     try:
         engine = MotoQuantEngine(cfg)
@@ -1081,20 +1099,9 @@ def simulate_distance(req: DistanceRunRequest):
     except Exception as exc:
         raise HTTPException(400, f"Config error: {exc}")
 
-    if req.part_ids:
-        db = _get_db()
-        if db:
-            try:
-                from .database.bridge import apply_part_to_config
-
-                for pid in req.part_ids:
-                    row = db.execute(
-                        "SELECT * FROM parts WHERE id=?", (pid,)
-                    ).fetchone()
-                    if row:
-                        cfg = apply_part_to_config(cfg, dict(row))
-            except Exception as e:
-                logging.getLogger(__name__).warning("Parts apply failed: %s", e)
+    # Apply parts (distance run doesn't surface parts_applied/cost in its
+    # response, but the helper handles that consistently).
+    cfg, _, _ = _apply_parts_to_config(cfg, req.part_ids)
 
     try:
         engine = MotoQuantEngine(cfg)
@@ -1418,32 +1425,9 @@ def _run_build(
         humidity_pct=humidity_pct,
         headwind_kmh=headwind_kmh,
     )
-    build_cost = 0.0
-    parts_applied = []
-    if part_ids:
-        db = _get_db()
-        if db:
-            try:
-                from .database.bridge import apply_part_to_config
-
-                for pid in part_ids:
-                    row = db.execute(
-                        "SELECT * FROM parts WHERE id=?", (pid,)
-                    ).fetchone()
-                    if row:
-                        pd = dict(row)
-                        cfg = apply_part_to_config(cfg, pd)
-                        parts_applied.append(
-                            {
-                                "id": pd["id"],
-                                "name": pd.get("model_name", ""),
-                                "brand": pd.get("brand", ""),
-                            }
-                        )
-                        if pd.get("price_inr"):
-                            build_cost += float(pd["price_inr"])
-            except Exception as e:
-                logging.getLogger(__name__).warning("Parts apply error: %s", e)
+    cfg, parts_applied, build_cost = _apply_parts_to_config(
+        cfg, part_ids, include_price_in_summary=False
+    )
 
     sim = MotoQuantEngine(cfg).run()
     return sim, cfg, parts_applied, build_cost

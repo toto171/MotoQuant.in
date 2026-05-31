@@ -1814,6 +1814,105 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2008 C2)",
     ),
     # ── end 2026-05-31 pass 7 ──
+    # ── 2026-05-31 benchmark-import agent (pass 8) ────────────────────────────
+    # Two high-confidence Cycle World instrumented adds. Both are documented
+    # in the magazine.cycleworld.com archive (full text reproduced through
+    # third-party search-result excerpts; original CW magazine pages live at
+    # the URLs cited below). Same archival timing-strip source bar as 30+
+    # existing entries (CW 2005 K5, CW 1999 Hayabusa, CW 1989 reference for
+    # historical first-9-second discussions, etc.). Both target catalog rows
+    # are previously unbenchmarked (pre-add probe via _best_benchmark_match
+    # returned None for each). Reference baselines preserved EXACT pre-edit:
+    # K5 10.0334s / R1 10.2859s / Hayabusa 10.4712s.
+    #
+    # Rejected this pass (logged so future passes don't re-investigate):
+    #   * Honda CB1000R (998 cc 145 hp naked) — no instrumented MCN / CW /
+    #     Dragy quarter-mile data in honest search; only forum estimates and
+    #     "performance estimations" surface.
+    #   * Honda RC30 (VFR750R) — only an unspecified 11.8s figure surfaces;
+    #     no Cycle World 1990 instrumented timing-strip citation located.
+    #   * Kawasaki Z800 (806 cc 113 hp naked) — no instrumented MCN/CW/Dragy
+    #     data found; rejection consistent with pass-7 outcome.
+    #   * Triumph Daytona 660 (660 cc 94 hp sport) — MCN reviewed but did
+    #     not publish a quarter-mile timing strip; no MotoStatz Dragy article
+    #     exists for the model.
+    #   * Triumph Rocket 3 R 2020 (2458 cc 165 hp muscle) — MCN review names
+    #     "11.07s @ 126.06 mph" but the article body does NOT name the
+    #     measurement device (Dragy/Vbox/timing strip). Same project bar as
+    #     the pass-7 Z900RS / Streetfighter V4 / Multistrada V4 rejections:
+    #     MCN's drag-strip practice is typically Dragy-backed but without
+    #     explicit device citation the entry fails the project bar.
+    #   * Triumph Speed Triple 1200 RS / RR — MotoStatz has no dedicated
+    #     1200-class article; only the Street Triple 765 RS Dragy article
+    #     exists; rejection consistent.
+    #   * MV Agusta F4 RC, Bimota Tesi 1D, MV Agusta Brutale 800 — no
+    #     MotoStatz / CW / SR instrumented quarter-mile data found via
+    #     honest search.
+    #   * Honda CBR1100XX Super Blackbird — CW/SR 1997 has the cleanest
+    #     instrumented test in the archive (10.27 @ 136 mph, both publications
+    #     ran the same chassis); model NOT in catalog (queued for catalog-
+    #     expansion agent per pass-7 carry-forward note).
+    #
+    # Yamaha FZR1000 EXUP (1002 cc 145 hp I4 sport, 1989-1995) — Cycle World
+    # February 1989 cover test: 10.39s @ 134.52 mph (~216.5 km/h). CW called
+    # this "the quickest time Cycle World has ever achieved on a stock
+    # motorcycle" at the time of publication; the EXUP system's broad torque
+    # plateau drove a 2.9-second 0-60 mph and ~170 mph top speed, prompting
+    # CW to crown the EXUP "Bike of the Decade". One caveat: the CW test
+    # unit was a pre-production European-spec model — CW themselves noted
+    # production units could be quicker. Pre-add probe via
+    # _best_benchmark_match returns None for the FZR1000 EXUP catalog row
+    # (previously unbenchmarked). The 4-token "FZR1000 EXUP" pattern is
+    # unique in the catalog (only one FZR1000 entry exists), so no token-
+    # subset collision risk with the Yamaha YZF-R1 reference row. Year_hint
+    # = 1989 hits year_from cleanly. Closes a documented late-80s flagship
+    # gap in the BENCHMARKS list (no Yamaha 1000-class entry pre-1996
+    # currently). Cluster-consistency: 10.39s @ 134.5 mph fits the era's
+    # ZX-11 (CW 1990: 10.25s @ 137 mph) and GSX-R 1100 (SR 1997: 10.45s @
+    # 130.2 mph) baselines — slightly slower ET than the ZX-11 but heavier
+    # chassis and softer initial cam timing on a European-spec unit explain
+    # the spread.
+    # URL: https://magazine.cycleworld.com/article/1989/2/1/fzr1000
+    (
+        "Yamaha",
+        "FZR1000 EXUP",
+        1989,
+        10.39,
+        217,
+        "Cycle World Feb 1989 (timing-strip, pre-production Euro-spec)",
+    ),
+    # Kawasaki ZX-9R Ninja B-model (899 cc 147 hp I4 sport, 1994-1997 first-
+    # generation ZX-9R, separate catalog row from the 2000-2003 F-gen already
+    # benchmarked at SR 10.50s / MotoStatz 10.62s) — Cycle World May 1994
+    # instrumented test of the B1 chassis: 10.65s @ 131.38 mph (~211 km/h).
+    # The B-model was Kawasaki's first ZX-9R, built around the 899 cc I4
+    # producing 147 hp claimed; ran in a 215 kg curb chassis with conventional
+    # cassette-box gearing. The 10.65 figure sits between the contemporary
+    # GSX-R 1100 (~10.45) and the FZR1000 EXUP (10.39 — same era, also CW
+    # tested), consistent with the ZX-9R's higher 899 cc displacement vs
+    # the FZR1000 but heavier curb weight. Catalog entry KAWASAKI_ZX9R_NINJA
+    # covers 1994-1997. Catalog model_name reads "ZX-9R Ninja" (Ninja after
+    # ZX-9R) — the _model_match tokeniser splits on whitespace + hyphen, so
+    # the 2-token pattern "ZX-9R Ninja" matches the catalog row regardless
+    # of order. Year_hint = 1994 falls inside the 1994-1997 range; the
+    # already-existing "Ninja ZX-9R 2000" benchmark (10.50, 230) is filtered
+    # OUT by year-range gating because 2000 > 1997, so no shadowing of the
+    # F-gen entry. Verified via _best_benchmark_match probe: B-model catalog
+    # row returns None pre-edit (previously unbenchmarked), F-model row
+    # continues to bind to the SR 2000 entry unchanged. Distinct from the
+    # ZX-9R F-gen and the ZX-7R 2000 entry added this morning in pass 7
+    # (different displacement and chassis generation entirely).
+    # URL: https://magazine.cycleworld.com/article/1994/5/1/rocet-rides
+    # (also referenced via the May 1994 CW B1 49-State Review article)
+    (
+        "Kawasaki",
+        "ZX-9R Ninja",
+        1994,
+        10.65,
+        211,
+        "Cycle World May 1994 (timing-strip, B1 49-state model)",
+    ),
+    # ── end 2026-05-31 pass 8 ──
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

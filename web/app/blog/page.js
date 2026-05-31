@@ -148,11 +148,34 @@ export const metadata = {
     "max engine decel rads2",
     "clutch slip phase 600cc inline four",
     "motoquant physics calibration",
+    "triumph tiger 900 gt pro quarter mile",
+    "tiger 900 gt pro india price",
+    "tiger 900 gt pro vs f 900 gs",
+    "tiger 900 gt pro powertronic stage 1",
+    "triumph t-plane crank physics",
+    "mid adventure bike india drag",
   ],
   alternates: { canonical: "https://motoquant.in/blog" },
 };
 
 const POSTS = [
+  {
+    slug: "triumph-tiger-900-gt-pro-quarter-mile-physics",
+    date: "2026-05-31",
+    readTime: "14 min",
+    tags: [
+      "Triumph",
+      "Tiger 900 GT Pro",
+      "Mid ADV",
+      "T-plane triple",
+      "Indian ADV market",
+      "physics",
+    ],
+    title:
+      "Triumph Tiger 900 GT Pro Quarter-Mile Physics: 108hp Triple at 12.08s",
+    excerpt:
+      "MotoQuant sims the 2024 Triumph Tiger 900 GT Pro at 12.081s and 196.5 km/h trap under Aamby Valley November — dead-heat on ET with the BMW F 900 GS, 3 km/h faster at the trap. The +13 hp the 2024 refresh added moves the back half of the quarter, not the launch. Stage 1 + F15/R42 sprocket combo (₹42,200) lands the bike at 11.78s — Street Triple 765 R territory for ₹2 lakh less than the next variant up.",
+  },
   {
     slug: "yamaha-rd350-quarter-mile-physics",
     date: "2026-05-31",

@@ -110,6 +110,12 @@ export default async function sitemap() {
       priority: 0.85,
     },
     {
+      url: `${SITE_URL}/blog/triumph-tiger-900-gt-pro-quarter-mile-physics`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.86,
+    },
+    {
       url: `${SITE_URL}/blog/yamaha-rd350-quarter-mile-physics`,
       lastModified: now,
       changeFrequency: "monthly",
