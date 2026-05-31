@@ -76,6 +76,37 @@ Compare against: <prior report or benchmark>
 
 ---
 
+## INSTRUCTION — 2026-05-31 — [urgent] fix Rocket 3 R 2020 benchmark trap-speed transcription error
+[urgent]
+
+**Filed by:** benchmark-import agent (2026-05-31 pass)
+**File:** `scripts/validation_sweep.py` line ~123
+**Current entry (suspect):**
+```python
+("Triumph", "Rocket 3 R", 2020, 10.50, 226, "Cycle World 2020"),
+```
+**Issue:** The trap speed `226` km/h (= 140.4 mph) is internally inconsistent with the ET `10.50` s. A 10.50 ET on a 294 kg / 165 hp muscle naked traps at ~126 mph (203 km/h), not 140 mph. Same transcription-error pattern flagged in the seventh-pass note for ZX-9R 2000 (`scripts/validation_sweep.py` line ~668: *"a 10.50 ET should trap ~135 mph (217 km/h) for a 143 hp middleweight, not 143 mph (230 km/h)"*).
+
+**Cross-source verification:**
+- Cycle World "Rickey Gadson and the Triumph Rocket 3 R" feature: **10.562s @ 126.41 mph (= 203.4 km/h)** at Silver Dollar Motorsport Park. The 10.56 figure is Gadson's best after 17 tuned passes — a pro drag racer optimising launch.
+  URL: https://www.cycleworld.com/story/motorcycle-racing/rickey-gadson-and-the-triumph-rocket-3-r/
+- MCN's own airfield road-test of the same 2020 Rocket 3 R: **11.07s @ 126.06 mph (= 202.9 km/h)** — single-attempt journalist test, no pro tuning. ET ~0.5s slower than Gadson's pro-tuned best, trap speed within 0.4 mph — consistent.
+  URL: https://www.motorcyclenews.com/bike-reviews/triumph/rocket-iii/2020/
+
+Both reputable independent instrumented sources agree on the 126 mph (203 km/h) trap. The 226 km/h figure in the current entry is the only outlier and is most likely a metric/imperial transcription error (someone converted "126.4 mph" wrong, or copy-pasted from a different bike's row).
+
+**Fix:** Update the existing entry to
+```python
+("Triumph", "Rocket 3 R", 2020, 10.56, 203, "Cycle World 2020 (Gadson 17-pass tuned at Silver Dollar Motorsport Park)"),
+```
+Also update the ET from 10.50 → 10.56 to match the actual Cycle World cite. Consider optionally adding a parallel MCN entry (11.07 @ 203) as a journalist-test reference point (would NOT bind because the matcher picks one most-specific entry per spec).
+
+**Verification target:** post-fix sweep should show Rocket 3 R Δ near zero or slightly positive (sim ET vs benchmark 10.56), and the existing cruiser_1300p cluster bias should not move materially (single-bike shift).
+
+**Effort:** ~10 min (single-tuple edit + comment + re-run focused sweep).
+
+---
+
 ## INSTRUCTION — 2026-05-25 — [urgent] fix BENCHMARKS matcher specificity bug
 [urgent]
 
@@ -1028,6 +1059,69 @@ queue_bonus = 50 * inbox_count_per_agent.get(agent, 0) + 50 * inbox_urgent_per_a
 **Cost of inaction:** every self-review run that finds a system-self-improvement bug requiring a code edit queues it to INBOX, where it waits for the next host-machine availability window. The 4-day gap this week was 4 days where INBOX:939 (the loop's primary structural lever) could have been auto-resolved if policy allowed.
 
 **This is not a fix proposal — it is an open question.** Please respond in DISPATCH_OUTBOX or as an INSTRUCTION update. M-class self-review will hold to current policy until guidance lands.
+
+---
+
+## INSTRUCTION — 2026-05-31 — [self-review] [urgent] add Vercel pre-build gate to session_postflight.sh
+
+**Attribution:** self-review M9 2026-05-31, Finding 2.1 + Proposal #2. The Saturday user-rescue session (DISPATCH_OUTBOX:1839) found that **every Vercel prod deploy had silently failed since ~May 26** — an unescaped apostrophe in a single-quoted data string in `web/app/blog/royal-enfield-hunter-350-quarter-mile-physics/page.js` broke `next build`. Production frontend was frozen on the May-25 build pointing at dead Railway for 5 days. Marketing-content and catalog-expansion agents pushed web/app changes after May 26 with zero visibility into the silent failure.
+
+**Root cause:** CLAUDE.md hygiene section "When editing web/app/**, run next build from web/ before commit" exists. The pre-push hook at `scripts/git-hooks/pre-push` is supposed to enforce it. Either (a) it's not enabled in autonomous-ops sessions, or (b) it's installed but the `core.hooksPath` config isn't being set in the per-session `/tmp/mq-session-*/repo` clones.
+
+**Proposed fix (add to `scripts/session_postflight.sh` before the push step):**
+
+```bash
+# Vercel pre-build gate — fail-fast on next build errors in web/app/**
+if git diff --cached --name-only | grep -qE '^web/(app|components)/'; then
+  echo "[postflight] web/app touched — running next build…"
+  if ! ( cd web && npx --no-install next build > /tmp/mq-vercel-build.log 2>&1 ); then
+    echo "[postflight] FATAL: next build failed. See /tmp/mq-vercel-build.log" >&2
+    tail -40 /tmp/mq-vercel-build.log >&2
+    exit 7
+  fi
+  echo "[postflight] next build OK"
+fi
+```
+
+Exit code 7 is a new postflight code (current table: 0/1/2/3/4/5/6 documented in DISPATCH_PROTOCOL.md). Add entry to the exit-code table.
+
+**Verification:**
+1. Re-introduce the apostrophe locally in a throw-away clone.
+2. Stage the file. Run `bash scripts/session_postflight.sh --message "test" --files "web/app/..."`.
+3. Confirm exit 7 + log tail with the apostrophe error.
+4. Revert and re-run, confirm exit 0.
+
+**Effort:** ~30 min including verification + DISPATCH_PROTOCOL.md table entry.
+
+**Why `[urgent]`:** the same failure mode could trip on any agent-driven web/app push. The autonomous-ops loop ships 5-10 web/app touches per week. A single quote in a generated blog post will reproduce this in the wild within days.
+
+---
+
+## INSTRUCTION — 2026-05-31 — [self-review] [opportunistic] add Render cold-start warm-up to verify_deploy
+
+**Attribution:** self-review M9 2026-05-31, Finding 2.3 + Proposal #3. The 2026-05-30 Railway → Render migration switched the production backend to Render free tier, which sleeps after 15 min idle and cold-starts in 30-60s. The Saturday rescue session bumped the `session_postflight.sh` health-check timeout from the Railway default to 90s. This handles a warm cold-start but a worst-case 60s cold + ~30s for the first physics import will still trip the timeout and write an ALERT.
+
+**Proposed fix (`verify_deploy()` in `scripts/session_postflight.sh`):**
+
+Before the existing verification poll loop, add a non-fatal warm-up probe:
+
+```bash
+# Render cold-start warm-up
+echo "[postflight] warm-up ping (allow Render cold-start)…"
+if ! curl -sf --max-time 5 "$HEALTH_URL" > /dev/null 2>&1; then
+  echo "[postflight] warm-up returned non-2xx — likely Render cold start. Sleeping 30s…"
+  sleep 30
+  if ! curl -sf --max-time 15 "$HEALTH_URL" > /dev/null 2>&1; then
+    echo "[postflight] warm-up still failing after 30s — proceeding to main verify loop"
+  fi
+fi
+```
+
+The main verify loop stays as-is. This adds at most 50s when Render is asleep, zero when warm.
+
+**Why `[opportunistic]`:** the keepalive cron (`.github/workflows/keepalive.yml`) already pings Render every 10 min during IST day, so most autonomous-ops sessions land on a warm backend. The corner case is the first session of an IST morning if keepalive missed a tick — rare but predictable.
+
+**Effort:** ~20 min including a manual cold-start verification (use `curl https://api.render.com/v1/services/<id>/suspend` to force a sleep, or wait 16 min between requests).
 
 ---
 

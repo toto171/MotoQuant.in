@@ -1283,6 +1283,87 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2003)",
     ),
     # ── end 2026-05-30 fourth pass ──
+    # ── 2026-05-31 benchmark-import agent ─────────────────────────────────────
+    # Two high-confidence instrumented benchmarks. Both from the Cycle World
+    # / Sport Rider sportbike-performance-numbers archive (same canonical
+    # timing-strip table backing 20+ existing entries — Daytona 675 (2013),
+    # GSX-R 600 K6, CBR 600RR 2007 PC40, YZF-R6 2C0, YZF-R6 (13S), Tuono V4
+    # 1100 Factory, 999, VTR1000 SP2, etc.).
+    #
+    # Both target catalog rows that previously had no benchmark binding in
+    # their year range (verified via _best_benchmark_match probe — see
+    # methodology established in 2026-05-30 third-pass report). No collisions
+    # with existing entries.
+    #
+    # CONFLICT NOTE — investigated this pass but NOT added (queued urgent
+    # audit to DISPATCH_INBOX): existing entry "Rocket 3 R 2020 = 10.50s @
+    # 226 km/h (Cycle World 2020)" on line ~123 has a transcribed/internally-
+    # inconsistent trap speed. The Cycle World "Rickey Gadson and the Triumph
+    # Rocket 3 R" feature (cycleworld.com/story/motorcycle-racing/rickey-
+    # gadson-and-the-triumph-rocket-3-r/) reports 10.562s @ 126.41 mph
+    # (= 203.4 km/h, NOT 226 km/h) at Silver Dollar Motorsport Park, with
+    # the 10.56 figure being Gadson's BEST after 17 tuned launches — a pro
+    # drag racer optimising. MCN's own airfield road-test of the same
+    # 2020 Rocket 3 R clocks 11.07s @ 126.06 mph (motorcyclenews.com/bike-
+    # reviews/triumph/rocket-iii/2020/) — 126 mph trap is consistent across
+    # both publications. The existing 226 km/h trap is the issue: a 10.56
+    # ET should trap ~126 mph (203 km/h), not 140 mph (226 km/h). Same
+    # transcription-error pattern flagged for ZX-9R 2000 in the seventh-
+    # pass note (line ~662). Logged as urgent audit ticket — fix should
+    # update existing entry trap_kmh 226 → 203 + source to "Cycle World
+    # 2020 (Rickey Gadson 17-pass tuned at Silver Dollar Motorsport Park)".
+    # NOT adding a parallel entry this pass to avoid bench-binding collision.
+    #
+    # Kawasaki Ninja ZX-6R 636 B-gen (636 cc over-displaced I4 supersport,
+    # 2003-2004 ZX636B chassis — the famously dominant 636 cc generation
+    # that briefly broke supersport-class displacement rules) — Sport Rider
+    # / Cycle World sportbike-performance-numbers archive timing-strip 2003
+    # model: 10.67s @ 131.0 mph (~210.8 km/h). 2004 model in same archive
+    # logged 10.50s @ 130.7 mph (~210.3 km/h); 2003 picked because it's
+    # the year_from on the catalog row and the 2003 figure is the more
+    # conservative of the two. Catalog entry KAWASAKI_ZX6R_636_2003 covers
+    # 2003-2004 (year_from=2003, year_to=2004); year_hint=2003 binds cleanly.
+    # Distinct from existing ZX-6R 2009 Sport Rider entry (10.69s @ 211
+    # km/h, 2009-2012 ZX636C catalog row) and ZX-6R 2019 MotoStatz Dragy
+    # entry (10.74s @ 216 km/h, 2019-2024 ZX636G catalog row) — three ZX-6R
+    # generations now have benchmarks. The 636B's slight speed advantage
+    # over the C/G is consistent with its weight (164 kg dry vs 174 kg
+    # 2009+) and the 2003-2004 emissions hardware before Euro 3.
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Kawasaki",
+        "Ninja ZX-6R",
+        2003,
+        10.67,
+        211,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2003)",
+    ),
+    # Suzuki GSX-R 600 K8 (599 cc I4 supersport, 2008-2010 K8-K10 chassis)
+    # — Sport Rider / Cycle World sportbike-performance-numbers archive
+    # timing-strip 2008 model: 10.74s @ 131.36 mph (~211.4 km/h). 2009 in
+    # same archive logged 10.80s @ 128.1 mph; 2008 picked as the year_from
+    # on the catalog row and the cleaner of the two same-platform passes.
+    # Catalog entry SUZUKI_GSX_R600_K8_2008 covers 2008-2010 under model_
+    # name "GSX-R 600 (2008-2010)"; year_hint=2008 binds cleanly. The
+    # word-boundary matcher tokenises the year-suffix in the model_name
+    # ("GSX", "R", "600", "(2008", "2010)") and the pattern "GSX-R 600"
+    # (tokens "GSX", "R", "600") is a subset — match holds. Distinct from
+    # the existing GSX-R 600 K6 entry (year_hint=2006, year-range filter
+    # excludes K8 row since 2006 < 2008 year_from) and the GSX-R 600 K6
+    # second-pass Sport Rider entry — three GSX-R 600 generation entries
+    # now cover K4/K6/K8 cleanly. The 10.74 vs K6 10.641 spread (K8 0.10s
+    # slower) is consistent with K8 gaining ~3 kg of fueling hardware
+    # while peak power held at 125 hp.
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Suzuki",
+        "GSX-R 600",
+        2008,
+        10.74,
+        211,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2008)",
+    ),
+    # ── end 2026-05-31 pass ──
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

@@ -415,5 +415,32 @@
     "network_blocked": false,
     "railway_outage": true,
     "notes": "Run 14 of 2026-05-24 (performance-monitor agent, session 1779604236-636). Second probe of the day (intra-day follow-up to Run 13). **Railway API still 404 - Day 8 of outage (initial: 2026-05-17 Run 11).** Both /api/health (5-sample mean 329.3ms, median 323.2ms) and /api/bikes?limit=10 (320.3ms) return HTTP 404 'Application not found'; platform router rejection at ~300ms latency (consistent with Railway-side immediate response, not app timeout). Vercel landing 953.7ms TTFB (200 OK, 34048 bytes) vs 2026-05-17 baseline mean ~1209ms = -21.1% (improvement / cold-vs-warm cache jitter; well within normal envelope, NOT a regression). Pytest median 8.79s of [8.773, 8.810] vs 2026-05-17 same-day mean 8.39s = +4.8% (within +30% drift gate; no escalation). 111/0 pass/fail stable. INBOX:140 [urgent][blocking] still open and user-owned (Render migration in progress per chat); NO fresh INBOX item filed per Run 12/13 dedup precedent. Intra-day consistency confirmed: Run 13 and Run 14 metrics agree (Railway 404 persists, tests ~8.7-8.8s, landing 200 OK). 7-day rolling baseline still incomplete: 2 distinct dates after today (need ≥7). Next probe: 2026-05-25 (Mon)."
+  },
+  {
+    "date": "2026-05-31",
+    "run_index": 15,
+    "agent": "performance-monitor",
+    "session_id": "1780187449-782",
+    "landing_ttfb_ms": null,
+    "landing_total_ms": null,
+    "landing_size_bytes": null,
+    "landing_http": 200,
+    "landing_title": "MotoQuant Pro — Motorcycle Quarter-Mile Drag Racing Simulator | ET Predictor & Build Optimizer",
+    "api_health_ms_samples": [],
+    "api_health_ms_avg": null,
+    "api_health_ms_median": null,
+    "api_health_http": 404,
+    "api_health_bike_count": null,
+    "api_bikes_ms": null,
+    "api_bikes_http": 404,
+    "api_bikes_size_bytes": null,
+    "api_bikes_count": null,
+    "test_walltime_s": 8.45,
+    "test_walltime_samples_s": [8.45, 8.19],
+    "tests_passed": 140,
+    "tests_failed": 0,
+    "network_blocked": false,
+    "railway_outage": true,
+    "notes": "Run 15 of 2026-05-31 (performance-monitor agent A10, session 1780187449-782, autonomous Sunday). **Railway API still 404 - Day 14 of outage (initial: 2026-05-17 Run 11).** All 3 /api/health probes + 1 /api/bikes probe via WebFetch returned HTTP 404 (WebFetch raises status-code exceptions; ms-level latency not captured this run, only HTTP status). Vercel landing 200 OK with canonical title intact; WebFetch does not expose TTFB/payload-bytes primitives (curl not available in this session). Pytest test_validation + test_scraper: **140 passed / 0 failed** in median 8.45s of [8.45, 8.19]. **Note: test count grew 111->140** since 2026-05-24 runs - suite expansion landed in interim commits; not a regression. Wall-clock 8.45s vs 2026-05-24 mean 8.74s = -3.3% (within noise / improvement). Drift gate: no escalation (Railway outage pre-filed in INBOX since 2026-05-17, Render migration tracked in docs/RENDER_MIGRATION.md per repo state; user-owned). Rolling baseline: 3 distinct dates now (2026-05-17, 2026-05-24, 2026-05-31), still <7-date threshold for full cross-day drift detection. Cross-date trend on pytest: 2026-05-17 mean 8.43s, 2026-05-24 mean 8.74s, 2026-05-31 8.45s = flat within ±4%. No fresh INBOX item filed."
   }
 ]
