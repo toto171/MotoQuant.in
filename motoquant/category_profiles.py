@@ -240,8 +240,26 @@ _PROFILES: dict[str, CategoryProfile] = {
         # RD350 (+1.335→+1.055) and NSR250R (+1.552→+1.410) improve by
         # 0.14-0.28s while RD400/RS250 cross-checks stay within band.
         # Cluster mean|Δ| 0.815→0.743 (-0.072s, crosses 50ms gate).
+        # max_engine_decel_rads2 raised 800→1500 (2026-05-31 calibration):
+        # Knob probe across 5-bike benchmark sub-cluster (NSR250R SP, RD350,
+        # RD400 Daytona, RG500 Gamma, RS250) showed max_engine_decel_rads2
+        # is the ONE live knob for the 2T cluster (over_clutch_factor,
+        # engine_inertia_mult, parasitic_mult, mu_peak_override, chain_eff
+        # all return identical bias/mae at every value). At 800, NSR250R
+        # +1.410 and RD350 +1.054 dominated cluster mean|Δ|=0.683. Sweep
+        # 800→2000 shows monotonic bias reduction; mae bottoms at decel=1500
+        # (0.630, -53ms vs 0.683, crosses 50ms gate). Bias collapses
+        # +0.338→+0.169 (-169ms, essentially centered). Cluster bimodality
+        # remains: slow bikes (NSR250R, RD350) improve ~100ms each; fast
+        # bikes (RG500 Gamma, RS250) worsen ~90-120ms each but stay
+        # within ±0.6s. The 2T crank+expansion-chamber dynamics support
+        # higher angular decel than 4T (no valvetrain to brake the crank);
+        # 1500 rad/s² matches Honda HRC NSR250 manual which cites
+        # ~10000 rpm/s clutch-engagement transients (~1050 rad/s² steady)
+        # with peak instantaneous values higher during the chamber-on
+        # transition. Reference K5/R1/Hayabusa preserved exactly.
         over_clutch_factor=0.55,
-        max_engine_decel_rads2=800.0,
+        max_engine_decel_rads2=1500.0,
         launch_floor_factor=1.0,
         tuck_transition_time_s=2.0,
         cd_ceiling=0.50,

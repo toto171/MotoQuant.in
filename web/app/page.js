@@ -389,7 +389,7 @@ function HomePageInner() {
                   Aamby Valley · MMRT · Kari · Hyderabad
                 </span>
                 <span className="px-3 py-1.5 rounded-full border border-brand-orange/30 text-brand-orange">
-                  +0.006s mean bias on 74 of 130 benchmarks
+                  +0.006s mean bias on 74 of 136 benchmarks
                 </span>
                 <span className="px-3 py-1.5 rounded-full border border-white/10 text-white/55">
                   RK4 · 1ms · 15 sub-models

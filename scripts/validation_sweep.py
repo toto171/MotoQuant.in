@@ -120,7 +120,15 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     ("Aprilia", "RSV4 Factory", 2021, 10.05, 238, "Cycle World 2021"),
     ("Aprilia", "RSV4 1000", 2009, 10.40, 230, "Sport Rider 2009"),
     ("KTM", "1290 Super Duke R", 2022, 10.15, 230, "Cycle World 2022"),
-    ("Triumph", "Rocket 3 R", 2020, 10.50, 226, "Cycle World 2020"),
+    # Rocket 3 R 2020 — trap-speed transcription fixed 2026-05-31 (urgent inbox
+    # item). Cycle World "Rickey Gadson and the Triumph Rocket 3 R" feature
+    # records 10.562s @ 126.41 mph (= 203.4 km/h) at Silver Dollar Motorsport
+    # Park — Gadson's best after 17 tuned passes. URL: cycleworld.com/story/
+    # motorcycle-racing/rickey-gadson-and-the-triumph-rocket-3-r/. MCN's own
+    # 2020 R3R airfield test corroborates 11.07s @ 126.06 mph (single-pass
+    # journalist). Both publications agree on the 126 mph trap; old 226 km/h
+    # value was an imperial→metric transcription error.
+    ("Triumph", "Rocket 3 R", 2020, 10.56, 203, "Cycle World 2020 (Gadson 17-pass tuned at Silver Dollar Motorsport Park)"),
     ("MV Agusta", "Brutale 1000 RR", 2019, 10.15, 240, "Cycle World 2019"),
     # 2-stroke benchmarks (Cycle World / historical drag tests / magazine)
     ("Yamaha", "RD350", 1973, 14.00, 146, "Cycle World 1973"),
@@ -1368,6 +1376,48 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # Vetted via 3 research subagents (Cycle World / Sport Rider strip tests).
     # Each bound to a unique ALL_KNOWN_BIKES spec via find_spec; uncovered; nbind=1.
     ("Suzuki", "Katana", 2020, 10.86, 215, "Cycle World 2020 (instrumented)"),
+    # ── 2026-05-31 benchmark-import agent pass 3 ──────────────────────────────
+    # Five new instrumented adds, all from the Cycle World / Sport Rider
+    # sportbike-performance-numbers archive (same canonical timing-strip
+    # table that backs 25+ existing entries). Each bound to a unique
+    # ALL_KNOWN_BIKES catalog row via _model_match + year-range filter.
+    # No collisions with existing benchmarks (verified by probe). Source URL:
+    # https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    #
+    # Buell 1125R '08 → catalog BUELL_1125R covers 2008-2010. CW timing
+    # strip: 10.45s @ 133.9 mph (~215.5 km/h). 1125 cc Rotax-built liquid-
+    # cooled 72° V-twin, 146 hp, ~165 kg dry — Erik Buell's last clean-
+    # sheet streetbike before the brand's first wind-down. Sits between
+    # SV1000 (10.82s) and 1098-class V-twin (~10.3s) in the V-twin order
+    # which matches the chassis weight + power curve.
+    ("Buell", "1125R", 2008, 10.45, 215, "Cycle World 2008 (Sport Rider sportbike-performance-numbers, timing-strip 2008)"),
+    # MV Agusta F3 800 '14 → catalog F3 800 covers 2014-2025. CW timing
+    # strip: 10.62s @ 134.5 mph (~216.5 km/h). 798 cc inline-3 counter-
+    # rotating crank, 148 hp @ 13000 rpm, 173 kg dry — the high-revving
+    # triple supersport. Fits the 600-800 supersport cluster between the
+    # ZX-6R/CBR600RR (10.6-10.7) and the 750 GSX-R (10.4-10.5).
+    ("MV Agusta", "F3 800", 2014, 10.62, 216, "Cycle World 2014 (Sport Rider sportbike-performance-numbers, timing-strip 2014)"),
+    # KTM 1190 RC8 R '10 → catalog "1190 RC8 R" covers 2009-2013. CW
+    # timing strip: 10.06s @ 143.36 mph (~230.7 km/h). 1148 cc 75° V-twin,
+    # 178 hp @ 10250 rpm, 184 kg dry — the LC8 V-twin superbike that
+    # briefly competed with Italian V-twin litre superbikes (Aprilia
+    # RSV4, Ducati 1098/1198) before KTM exited the superbike segment.
+    # Matches the V-twin litre-sport cluster (RSV4 1000 10.40, 1198 10.10).
+    ("KTM", "1190 RC8 R", 2010, 10.06, 231, "Cycle World 2010 (Sport Rider sportbike-performance-numbers, timing-strip 2010)"),
+    # Kawasaki Ninja 1000 '11 → catalog "Ninja 1000 (Z1000SX)" covers
+    # 2011-2019. CW timing strip: 11.30s @ 123.46 mph (~198.7 km/h).
+    # 1043 cc I4 sport-tourer, 140 hp, 231 kg wet — heavy upright sport
+    # tourer fits the 11.0-11.5 sport-touring band (B-King-class chassis
+    # weight, more conservative final drive than ZX-10R). First-gen
+    # Z1000-platform-based, pre-2014 refresh that bumped power slightly.
+    ("Kawasaki", "Ninja 1000", 2011, 11.30, 199, "Cycle World 2011 (Sport Rider sportbike-performance-numbers, timing-strip 2011)"),
+    # Yamaha FZ6 '04 → catalog FZ6 Fazer covers 2004-2009. CW timing
+    # strip: 11.53s @ 117.4 mph (~188.9 km/h). 600 cc detuned R6 mill,
+    # 98 hp @ 12000 rpm, ~190 kg wet — naked sport derivative with a
+    # broader/lower torque curve than the R6 it shares an engine block
+    # with. Fits the 600-class naked band (Z750 ~11.3, FZ1 '07 ~10.96).
+    ("Yamaha", "FZ6", 2004, 11.53, 189, "Cycle World 2004 (Sport Rider sportbike-performance-numbers, timing-strip 2004)"),
+    # ── end 2026-05-31 pass 3 ──
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

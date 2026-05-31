@@ -76,6 +76,16 @@ Compare against: <prior report or benchmark>
 
 ---
 
+## DONE — 2026-05-31 — [urgent] fix Rocket 3 R 2020 benchmark trap-speed transcription error
+
+### Result
+Fixed in `scripts/validation_sweep.py` line 123 area. Updated entry to:
+```python
+("Triumph", "Rocket 3 R", 2020, 10.56, 203, "Cycle World 2020 (Gadson 17-pass tuned at Silver Dollar Motorsport Park)"),
+```
+Source: Cycle World "Rickey Gadson and the Triumph Rocket 3 R" — 10.562s @ 126.41 mph (= 203.4 km/h) at Silver Dollar Motorsport Park; URL https://www.cycleworld.com/story/motorcycle-racing/rickey-gadson-and-the-triumph-rocket-3-r/. MCN 2020 R3R airfield test corroborates 11.07s @ 126.06 mph — both publications agree on the 126 mph trap. Post-fix cluster sweep N=167 (+5 new entries including Rocket retention), overall bias improved +0.045 → +0.037s, mean|Δ| improved 0.323 → 0.321s. Reference baselines preserved exactly. Resolved by benchmark-import agent 2026-05-31 pass 3.
+
+## ORIGINAL INSTRUCTION (archived below)
 ## INSTRUCTION — 2026-05-31 — [urgent] fix Rocket 3 R 2020 benchmark trap-speed transcription error
 [urgent]
 
@@ -1122,6 +1132,37 @@ The main verify loop stays as-is. This adds at most 50s when Render is asleep, z
 **Why `[opportunistic]`:** the keepalive cron (`.github/workflows/keepalive.yml`) already pings Render every 10 min during IST day, so most autonomous-ops sessions land on a warm backend. The corner case is the first session of an IST morning if keepalive missed a tick — rare but predictable.
 
 **Effort:** ~20 min including a manual cold-start verification (use `curl https://api.render.com/v1/services/<id>/suspend` to force a sleep, or wait 16 min between requests).
+
+---
+
+## INSTRUCTION — 2026-05-31 — [claude-feature-monitor] [opportunistic] migrate default Opus routing to Claude Opus 4.8
+
+**From:** `scripts/agents/claude-feature-monitor.md` (A13)
+**Source delta:** Claude Opus 4.8 released 2026-05-28. See `reports/claude_feature_scan_2026-05-31.md` and `data/claude_capabilities_snapshot.json` for full evidence.
+
+**What:** Switch the harness default-Opus convention from `claude-opus-4-7` to `claude-opus-4-8`. Update the `CLAUDE.md` "MODEL SELECTION" table to reference Opus 4.8 as the architecture/design model.
+
+**Why opportunistic, not urgent:**
+- Opus 4.7 stays Active until 2027-04-16 — 10+ months runway.
+- Repo-wide grep confirms ZERO model IDs are pinned in `scripts/`, `docs/`, `motoquant/`, `web/`, `desktop/` — only doc/snapshot files reference Opus 4.7. So there is no code-level migration; this is a convention/preference change in the harness routing table only.
+- Opus 4.8 is fully backwards-compatible with 4.7 — no breaking API changes per the migration guide.
+
+**Wins on 4.8 (per Anthropic docs):**
+1. Stronger agentic coding performance (Anthropic's claim — needs our own held-out test).
+2. Mid-conversation system messages (preserves prompt-cache hits when agents inject day-of-week / market-signal context).
+3. Prompt-cache minimum lowered to 1024 tokens (smaller agent prompts in `scripts/agents/*.md` can now cache).
+4. 1M context default with no beta header (cosmetic for us; already on 1M `[1m]`).
+
+**Trap to avoid:** Opus 4.8 recalibrates effort levels (`medium` more thinking, `high` less, `xhigh` substantially more). If we promote 4.8, do NOT tune effort until we've re-baselined at the same level — otherwise we'll mis-attribute cost/quality deltas to the model when they're actually effort-recalibration artifacts.
+
+**Quality gate before promoting:**
+- One architecture-question session on Opus 4.8 (e.g. "review the Phase 6 Razorpay subscription rail design in `motoquant/auth.py`").
+- Confirm answer quality is at-or-above the 4.7 baseline.
+- Confirm token cost on the same input is in the same ballpark (4.8 is same $5/$25 pricing, so output token count is the only variable).
+
+**Fallback path:** If the harness on a given session is unaware of `claude-opus-4-8`, fall back to `claude-opus-4-7`. No urgency to make this universal.
+
+**Effort:** ~15 min for the CLAUDE.md table edit + 1 hour for the held-out quality gate session.
 
 ---
 
