@@ -154,6 +154,21 @@ export const metadata = {
 
 const POSTS = [
   {
+    slug: "bmw-f-900-gs-quarter-mile-physics",
+    date: "2026-05-31",
+    readTime: "13 min",
+    tags: [
+      "BMW",
+      "F 900 GS",
+      "Mid ADV",
+      "Indian ADV market",
+      "physics",
+    ],
+    title: "BMW F 900 GS Quarter-Mile Physics: 105hp Mid-ADV at 12.08s",
+    excerpt:
+      "MotoQuant sims the 2024 BMW F 900 GS at 12.083s and 193.5 km/h trap under Aamby Valley conditions — 0.45s quicker than the F 850 GS it replaces, dead-heat on ET with the Triumph Tiger 900 GT Pro, 0.91s behind the R 1300 GS sibling. The 14 kg weight reduction is doing as much for ET as the +10 hp engine bump. Cost-per-tenth ladder topped by a ₹17,200 road-biased ADV tire swap (~0.13s).",
+  },
+  {
     slug: "cfmoto-675sr-r-quarter-mile-physics",
     date: "2026-05-31",
     readTime: "12 min",

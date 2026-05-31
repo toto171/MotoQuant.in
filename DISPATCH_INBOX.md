@@ -76,6 +76,33 @@ Compare against: <prior report or benchmark>
 
 ---
 
+## INSTRUCTION — 2026-05-31 — wire bike-suggest smoke test into postflight
+[opportunistic]
+
+**Filed by:** customer-support agent (2026-05-31 triage)
+**Context:** `bike_suggestions` table has been empty across 5 triage runs (May-7, May-21, May-24, May-25, May-31). Six weeks live, zero user submissions. Cannot distinguish "no users" from "form is broken" without a synthetic check.
+
+**Task:** Add a 5-step smoke test to `scripts/session_postflight.sh`, gated on `/api/health` returning ok (skip cleanly otherwise to stay green on Render cold starts):
+1. `POST /api/bikes/suggest` with a fixed test payload (make=`TEST-SMOKE`, model=`postflight-check`, year=2026, submitter_email=`smoke@motoquant.in`)
+2. Capture the returned row id
+3. Confirm HTTP 200/201 plus that response includes the id
+4. `DELETE` the row directly from the DB (since there is no DELETE endpoint), use the same Python+sqlite3 path the support agent uses
+5. If any step fails, write an ALERT to `DISPATCH_OUTBOX.md`
+
+**Deliverables:**
+- Patch to `scripts/session_postflight.sh` (add smoke-test function, call after the existing baseline check)
+- One-row migration entry in any session-log report that runs the smoke test
+- No changes to `bike_suggestions` schema
+
+**Constraints:**
+- Skip cleanly when `/api/health` returns non-ok (currently the case during Render cold-start window), do not block postflight on a sleeping container
+- Use the existing PAT-based git push path; do not introduce new credentials
+- Stamp `submitter_email='smoke@motoquant.in'` so future triage runs can easily filter these out
+
+**Why now:** Render migration shipped 2026-05-31; both /api/health and the suggest endpoint are now live for the first time in 14 days. Adding the smoke test now establishes a baseline before any real user traffic, so the first organic submission is obvious when it arrives.
+
+---
+
 ## DONE — 2026-05-31 — [urgent] fix Rocket 3 R 2020 benchmark trap-speed transcription error
 
 ### Result

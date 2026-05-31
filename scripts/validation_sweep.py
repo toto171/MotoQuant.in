@@ -1588,6 +1588,117 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2007 Bandit 1250S)",
     ),
     # ── end 2026-05-31 pass 5 ──
+    # ── begin 2026-05-31 pass 6 ──
+    # Yamaha YZF-R6 (5SL) (599 cc I4 supersport, 2003-2005 5SL chassis — the
+    # first "deltabox" R6 generation with cantilever rear shock + 65 mm bore
+    # and 44.5 mm stroke) — Sport Rider / Cycle World sportbike-performance-
+    # numbers archive timing-strip 2005 model: 10.54s @ 132.9 mph (~213.9
+    # km/h, rounded to 214). Best of cluster across SR's 3 same-chassis
+    # tests: ('03) 10.80 @ 127.8, ('04) 10.68 @ 129.3, ('05) 10.54 @ 132.9
+    # — the 2005 figure represents the final-year tune (4-2-1 exhaust +
+    # revised throttle body + 16k redline). Catalog row YAMAHA_YZF_R6_5SL
+    # (model_name "YZF-R6 (5SL)") covers 2003-2005 and previously had NO
+    # benchmark binding — closes a 3-year R6 generational gap that
+    # existing R6 entries (2006-2007 R6 row → 2007 Sport Rider; 2008-2016
+    # 13S row → 2011 Sport Rider; 2017+ row → MotoStatz) didn't cover.
+    # Pre-add probe confirms the new entry binds via _best_benchmark_match
+    # to exactly the (5SL) catalog row (3-token "YZF-R6 (5SL)" pattern
+    # outranks the bare "YZF-R6" 2-token pattern via score-and-pick logic;
+    # the parenthesised "(5SL)" suffix matches the catalog name's
+    # whitespace-tokenized form). Sim Δ: +0.154s ET / +19.9 km/h trap —
+    # sits well inside the litre-sport-600-1000 cluster's documented
+    # mean|Δ|=0.226s band; trap overshoot matches the documented
+    # supersport-1000-class trap bias.
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Yamaha",
+        "YZF-R6",
+        2005,
+        10.54,
+        214,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2005 5SL)",
+    ),
+    # Yamaha YZF-R1 4C8 (998 cc I4 inline-4 superbike, 2007-2008 final-year
+    # of the 5VY/4C8 platform with the legendary 20-valve YZR-M1-derived
+    # head, before the 2009 crossplane crank redesign) — Sport Rider /
+    # Cycle World sportbike-performance-numbers archive timing-strip 2008
+    # model: 9.80s @ 147.6 mph (~237.5 km/h, rounded to 237). SR also
+    # tested the same 2008 4C8 chassis at 9.86 @ 147.0 mph (one earlier
+    # pass); both runs are listed verbatim, with the 9.80 representing the
+    # best clean launch. Catalog row YAMAHA_YZF_R1_2007 (model_name
+    # "YZF-R1", year_from=2007, year_to=2008) covers the final-year 4C8
+    # platform and previously had NO benchmark binding — the existing
+    # YZF-R1 benchmarks all bind elsewhere: ('98) → YZF-R1 1998 chassis
+    # spec (separate row), ('15) → YZF-R1 2015+ crossplane (separate row).
+    # Pre-add probe confirms binding to exactly the 2007-2008 catalog row
+    # via year-range gating (yr=2008 falls inside 2007-2008). Sim Δ:
+    # +0.390s ET / +9.2 km/h trap — slightly above the litre-sport-195+
+    # cluster mean|Δ|=0.138s band, consistent with the well-documented
+    # 4C8 platform optimistic-dyno-claim bias (factory claimed 180 hp
+    # crank but dyno consistently measured 158-162 hp wheel; the
+    # YZFR1_4C8 reference baseline at 10.2859s is a hand-calibrated
+    # exception). The 9.2 km/h trap delta is within the I4 cluster's
+    # documented ±10 km/h band.
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Yamaha",
+        "YZF-R1",
+        2008,
+        9.80,
+        237,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2008 4C8)",
+    ),
+    # Suzuki GSX-S750 (749 cc I4 naked, 2015-2021 — GSR750-derived chassis
+    # with re-tuned K5-platform engine producing 113 hp claimed at 10500
+    # rpm in a 213 kg naked) — Sport Rider / Cycle World sportbike-
+    # performance-numbers archive timing-strip 2015 model: 11.52s @
+    # 119.83 mph (~192.8 km/h, rounded to 193). Catalog row SUZUKI_GSX_S750
+    # (model_name "GSX-S750") covers 2015-2021 and previously had NO
+    # benchmark binding. Pre-add probe confirms the new entry binds via
+    # _best_benchmark_match to exactly the GSX-S750 catalog row (no
+    # collision with the GSX-S1000 family which uses a distinct token).
+    # Sim Δ: -0.264s ET / +15.8 km/h trap — sim slightly faster, consistent
+    # with the documented mid-cc naked-I4 cluster slight-fast-bias band;
+    # trap overshoot mirrors the K5-derived engine's documented
+    # power-curve-tail bias.
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Suzuki",
+        "GSX-S750",
+        2015,
+        11.52,
+        193,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2015)",
+    ),
+    # Triumph Daytona 955i (955 cc 90° triple sport, 2002-2005 chassis —
+    # final-year T595/955i platform before the 675 triple supersport
+    # generation arrived in 2006) — Sport Rider / Cycle World sportbike-
+    # performance-numbers archive timing-strip 2002 model: 10.61s @ 130.33
+    # mph (~209.8 km/h, rounded to 210). Same archive also tested the
+    # 2000 chassis at 10.70 @ 130.21 mph; the 10.61 figure represents the
+    # 2002 mid-cycle update (revised injection mapping + new airbox).
+    # Catalog row TRIUMPH_DAYTONA_955I (model_name "Daytona 955i") covers
+    # 2002-2005 and previously had NO benchmark binding. Pre-add probe
+    # confirms the new entry binds via _best_benchmark_match to exactly
+    # the Daytona 955i catalog row via the 2-token "Daytona 955i" pattern
+    # — no collision with the Daytona 675 family (3-token specificity
+    # tie-break would favour "Daytona 675" if present, but the 675
+    # platform is separately benchmarked elsewhere). Sim Δ: -0.109s ET /
+    # +24.0 km/h trap — sim slightly faster, within the litre-sport-
+    # 600-1000 cluster band; trap overshoot in the +20-40 km/h documented
+    # triple-955cc bias band (the 955i's claimed 147 hp at the crank was
+    # well-instrumented at ~125 hp wheel, so the catalog spec_to_bike_config
+    # currently slightly over-predicts top-end pull).
+    # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
+    (
+        "Triumph",
+        "Daytona 955i",
+        2002,
+        10.61,
+        210,
+        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2002)",
+    ),
+    # ── end 2026-05-31 pass 6 ──
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [
