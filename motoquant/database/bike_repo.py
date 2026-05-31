@@ -6,6 +6,7 @@ Handles BikeConfig ↔ DB conversion via the bridge module.
 """
 
 import json
+import re
 import sqlite3
 
 import numpy as np
@@ -18,6 +19,21 @@ from .bridge import (
     extract_dyno_curve,
     extract_headline_specs,
 )
+
+
+_YEAR_SUFFIX_RE = re.compile(
+    r"\s*\((?:19|20)\d{2}(?:\s*[-–]\s*(?:19|20)?\d{2,4})?\)\s*$"
+)
+
+
+def _normalize_model_name(name: str | None) -> str:
+    """Lower-case, collapse whitespace, and strip a trailing parenthesised model
+    year / year range, so 'Norden 901 Expedition (2025)' and
+    'Norden 901 Expedition' compare equal. Used to keep imports idempotent — see
+    BikeRepository.create_model / _find_existing_model."""
+    if not name:
+        return ""
+    return re.sub(r"\s+", " ", _YEAR_SUFFIX_RE.sub("", name)).strip().lower()
 
 
 class BikeRepository:
@@ -110,38 +126,70 @@ class BikeRepository:
         placeholders = ", ".join(["?"] * len(cols))
         col_str = ", ".join(cols)
 
+        # ── Idempotency guard (2026-05-31) ──
+        # UNIQUE(manufacturer_id, model_name, model_code, year_from) cannot dedupe
+        # rows whose model_code is NULL, because SQLite treats NULLs as DISTINCT in
+        # UNIQUE constraints. Most catalog bikes have a NULL model_code, so a bare
+        # INSERT OR IGNORE re-inserts them on every import run — this is exactly what
+        # inflated the catalog to 796 rows (301 phantom duplicates, e.g. Norden 901
+        # Expedition x10). Match on a code-independent identity (manufacturer +
+        # year-stripped model name + year range) and reuse the existing row.
+        existing = self._find_existing_model(
+            manufacturer_id, model_name, year_from, year_to
+        )
+        if existing is not None:
+            return existing
+
         cur = self._conn.execute(
             f"INSERT OR IGNORE INTO bike_models ({col_str}) VALUES ({placeholders})",
             vals,
         )
         self._conn.commit()
 
-        if cur.lastrowid == 0:
-            # Already existed (UNIQUE constraint on manufacturer+model+code+year hit).
-            # Try strict 4-key match first (matches the UNIQUE constraint exactly).
-            row = self._conn.execute(
-                """SELECT id FROM bike_models
-                   WHERE manufacturer_id = ? AND model_name = ?
-                   AND model_code IS ? AND year_from IS ?""",
-                (manufacturer_id, model_name, model_code, year_from),
-            ).fetchone()
-            if row:
-                return row["id"]
-            # Lenient fallback: a row with the same (manufacturer, model_name) exists
-            # but model_code/year_from differ slightly (e.g. spec says K8/2008, DB stores
-            # the same bike with K8/None or different year_from). Pick the closest year.
-            candidates = self._conn.execute(
-                """SELECT id, model_code, year_from FROM bike_models
-                   WHERE manufacturer_id = ? AND model_name = ?
-                   ORDER BY (year_from IS NULL), ABS(COALESCE(year_from, 0) - ?)""",
-                (manufacturer_id, model_name, year_from or 0),
-            ).fetchall()
-            if candidates:
-                return candidates[0]["id"]
-            # Truly missing — return 0 as before (caller handles)
-            return 0
+        # cur.rowcount is reliable for INSERT OR IGNORE (1 = inserted, 0 = ignored);
+        # cur.lastrowid is NOT (it retains the previous insert's id on an IGNORE).
+        if cur.rowcount:
+            return cur.lastrowid
 
-        return cur.lastrowid
+        # Ignored: a row matching the strict UNIQUE key already exists (non-NULL code).
+        # Resolve via the code-independent matcher first, then the strict 4-key match.
+        existing = self._find_existing_model(
+            manufacturer_id, model_name, year_from, year_to
+        )
+        if existing is not None:
+            return existing
+        row = self._conn.execute(
+            """SELECT id FROM bike_models
+               WHERE manufacturer_id = ? AND model_name = ?
+               AND model_code IS ? AND year_from IS ?""",
+            (manufacturer_id, model_name, model_code, year_from),
+        ).fetchone()
+        return row["id"] if row else (cur.lastrowid or 0)
+
+    def _find_existing_model(
+        self,
+        manufacturer_id: int,
+        model_name: str,
+        year_from: int = None,
+        year_to: int = None,
+    ) -> int | None:
+        """Return the id of the existing bike_models row representing the same bike as
+        (manufacturer_id, model_name, year_from, year_to), ignoring model_code and any
+        trailing '(YYYY)'/'(YYYY-YYYY)' suffix in the name. The year range stays part
+        of the identity, so distinct generations (e.g. GSX-R 1000 2003-2004 vs
+        2007-2008) are NOT collapsed. Returns None when there is no existing match."""
+        target = _normalize_model_name(model_name)
+        rows = self._conn.execute(
+            """SELECT id, model_name FROM bike_models
+               WHERE manufacturer_id = ?
+                 AND COALESCE(year_from, -1) = COALESCE(?, -1)
+                 AND COALESCE(year_to,   -1) = COALESCE(?, -1)""",
+            (manufacturer_id, year_from, year_to),
+        ).fetchall()
+        for r in rows:
+            if _normalize_model_name(r["model_name"]) == target:
+                return r["id"]
+        return None
 
     def get_model(self, model_id: int) -> dict | None:
         """Get a bike model by ID."""
@@ -235,6 +283,29 @@ class BikeRepository:
         Store a full BikeConfig as a versioned config row.
         Returns config ID.
         """
+        # Serialize parameter blocks up front so identical re-imports can short-circuit.
+        row_data = config_to_db_row(config)
+
+        # ── Idempotency guard (2026-05-31) ──
+        # Daily spec re-imports call this with byte-identical params. Without this
+        # check every run would append a new version (+ a duplicate dyno curve),
+        # bloating the DB indefinitely. If the current version already holds identical
+        # params, reuse it — no new version, no duplicate dyno curve.
+        _PARAM_COLS = (
+            "chassis_params", "engine_params", "forced_induction_params",
+            "drivetrain_params", "clutch_params", "tire_params", "aero_params",
+            "suspension_params", "braking_params", "wheelie_params",
+            "rider_params", "parasitic_params", "staging_params",
+        )
+        current = self._conn.execute(
+            "SELECT id, " + ", ".join(_PARAM_COLS)
+            + " FROM bike_configs"
+            + " WHERE bike_model_id = ? AND config_name = ? AND is_current = 1",
+            (bike_model_id, config_name),
+        ).fetchone()
+        if current and all(current[c] == row_data[c] for c in _PARAM_COLS):
+            return current["id"]
+
         # Determine next version number
         row = self._conn.execute(
             """SELECT COALESCE(MAX(version), 0) as max_v
@@ -250,9 +321,6 @@ class BikeRepository:
                WHERE bike_model_id = ? AND config_name = ?""",
             (bike_model_id, config_name),
         )
-
-        # Serialize parameter blocks
-        row_data = config_to_db_row(config)
 
         cur = self._conn.execute(
             """INSERT INTO bike_configs
