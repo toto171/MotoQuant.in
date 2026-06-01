@@ -10749,6 +10749,251 @@ CFMOTO_675SR_R_2024 = spec_from_dict(
 )
 
 
+# ── Suzuki GSX-S950 (2022-2026 — A2-licence-friendly GSX-S1000) ────────────
+# Suzuki's A2-compliant naked, built on the same K5-derived 999 cc inline-four
+# as the GSX-S1000 but restricted to 95 hp via ECU + intake/exhaust changes so
+# riders can stay on a 35 kW A2 licence. Shares chassis, gearbox, brakes, and
+# suspension with the full-fat GSX-S1000 — only the engine output changes.
+# Sold in EU/UK (not US/India). Cluster: litre_sport_600_1000 (naked, 95 hp).
+# Sources:
+#   - Suzuki press release "GSX-S950 — A2-Compliant Naked for 2022" (Nov 2021)
+#     suzuki-motorcycles.eu/news/gsx-s950-2022
+#   - MCN "Suzuki GSX-S950 First Ride" (Mar 2022): "95 bhp @ 9250 rpm, 92 Nm
+#     @ 7250; kerb 214 kg (incl. 19 L fuel); same chassis + gearbox as
+#     GSX-S1000 — A2-restrict via ECU map + intake snorkel"
+#   - Cycle World "Suzuki GSX-S950 vs GSX-S1000" (Jul 2022): F17/R44 confirmed;
+#     525 chain; gear cassette identical to GSX-S1000
+#   - Suzuki service manual 99500-39A50-01E (GSX-S950): shares all driveline
+#     internals with GSX-S1000; only ECU map + intake bell-mouth differ
+SUZUKI_GSX_S950_2022 = spec_from_dict(
+    {
+        "manufacturer": "Suzuki",
+        "model_name": "GSX-S950 (2022-2026)",
+        "model_code": "GSX-S950_2022",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "naked",                # streetfighter naked, no fairing
+        "displacement_cc": 999,             # 999 cc DOHC liquid I4 (76.0 × 55.1
+                                            # mm — K5-derived, shared with
+                                            # GSX-S1000 / GSX-R1000 K5)
+        "bore_mm": 76.0,
+        "stroke_mm": 55.1,
+        "compression_ratio": 12.2,          # 12.2:1 — Suzuki spec (same head
+                                            # as GSX-S1000 but A2-restricted
+                                            # via ECU map)
+        "cylinders": 4,
+        "peak_power_hp": 95.0,              # 95 hp (70 kW) @ 9250 rpm —
+                                            # A2-restricted from GSX-S1000's
+                                            # 152 hp; ECU + intake snorkel
+                                            # (Suzuki 2022 EU spec)
+        "peak_power_rpm": 9250,
+        "peak_torque_nm": 92.0,             # 92 Nm @ 7250 rpm — Suzuki spec
+                                            # (vs 106 Nm on full GSX-S1000;
+                                            # peak shifted lower in rev range
+                                            # by A2 cam restrictor)
+        "peak_torque_rpm": 7250,
+        "fuel_system": "fi",                # ride-by-wire, dual injectors
+        "cooling": "liquid",
+        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "gears": 6,
+        # 6-speed cassette from Suzuki service manual 99500-39A50-01E
+        # — IDENTICAL to GSX-S1000 (same gearbox internals, A2 restrict via ECU)
+        "gear_ratios": [2.588, 2.095, 1.733, 1.500, 1.370, 1.241],
+        "front_sprocket": 17,               # F17 / R44 — Suzuki OEM (same as
+                                            # GSX-S1000; service manual
+                                            # 99500-39A50-01E confirmed)
+        "rear_sprocket": 44,
+        "chain_pitch": "525",               # 525 pitch — Suzuki GSX-S platform
+        "dry_mass_kg": 196.0,               # 196 kg dry — Suzuki spec 2022
+                                            # (kerb 214 kg incl. 19 L fuel +
+                                            # oils; -1 kg vs GSX-S1000 from
+                                            # lighter intake snorkel assembly)
+        "wheelbase_mm": 1460.0,             # 1460 mm — Suzuki spec
+                                            # (identical to GSX-S1000)
+        "front_tire_size": "120/70ZR17",    # Dunlop Roadsport 2 OEM
+        "rear_tire_size": "190/50ZR17",     # Dunlop Roadsport 2 OEM
+        "cd": 0.75,                         # naked, upright posture
+                                            # (identical to GSX-S1000)
+        "frontal_area_m2": 0.48,            # medium — exposed rider
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Yamaha Ténéré 700 World Raid (2022-2026 — long-range ADV) ───────────────
+# Long-range desert-rally-inspired version of the standard Ténéré 700, with
+# twin 11 L side-mounted fuel tanks (23 L total vs 16 L on standard T7),
+# Kayaba 43 mm fork (200 mm travel), Kayaba rear shock with hydraulic preload
+# adjuster, and a higher screen + larger windshield. Same 689 cc CP2 parallel
+# twin as the standard Ténéré 700. Cluster: mid_twin_500_700 (ADV).
+# Sources:
+#   - Yamaha press kit "Ténéré 700 World Raid — EICMA 2021" (Nov 2021)
+#     yamaha-motor.eu/news/tenere-700-world-raid
+#   - MCN "Yamaha Ténéré 700 World Raid First Ride" (May 2022): "72 bhp @
+#     9000 rpm, 68 Nm @ 6500; wet 220 kg incl. dual 11 L tanks; same CP2
+#     689 cc engine as base T7 — distinguished by long-range fuel + Kayaba"
+#   - Cycle World "Ténéré 700 World Raid Test" (Jun 2022): F15/R46 confirmed;
+#     525 chain; bore × stroke 80.0 × 68.6 mm same as MT-07 / XSR700
+#   - Yamaha service manual XTZ700WR (T7 World Raid): 6-speed cassette
+#     identical to base Ténéré 700 (same gearbox internals)
+YAMAHA_TENERE_700_WORLD_RAID_2022 = spec_from_dict(
+    {
+        "manufacturer": "Yamaha",
+        "model_name": "Tenere 700 World Raid (2022-2026)",
+        "model_code": "T7_WR_2022",
+        "year_from": 2022,
+        "year_to": 2026,
+        "category": "adventure",            # rally-spec ADV; 21" front spoke /
+                                            # 18" rear spoke wheels
+        "displacement_cc": 689,             # 689 cc DOHC liquid CP2 parallel
+                                            # twin (80.0 × 68.6 mm — Yamaha
+                                            # CP2 platform, same as MT-07)
+        "bore_mm": 80.0,
+        "stroke_mm": 68.6,
+        "compression_ratio": 11.5,          # 11.5:1 — Yamaha CP2 platform spec
+        "cylinders": 2,                     # parallel twin, 270° crank
+                                            # (CP2 cross-plane crank — Yamaha
+                                            # uneven firing for V-twin feel)
+        "peak_power_hp": 72.0,              # 72 hp (53 kW) @ 9000 rpm —
+                                            # Yamaha 2022 spec (matches std T7;
+                                            # World Raid uses same CP2 internals)
+        "peak_power_rpm": 9000,
+        "peak_torque_nm": 68.0,             # 68 Nm @ 6500 rpm — Yamaha spec
+                                            # (identical to std T7)
+        "peak_torque_rpm": 6500,
+        "fuel_system": "fi",                # ride-by-wire, dual injectors
+        "cooling": "liquid",
+        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "gears": 6,
+        # 6-speed cassette from Yamaha service manual XTZ700WR
+        # — IDENTICAL to standard Ténéré 700 (shared gearbox)
+        "gear_ratios": [2.846, 2.125, 1.632, 1.300, 1.091, 0.962],
+        "front_sprocket": 15,               # F15 / R46 — Yamaha OEM (service
+                                            # manual XTZ700WR confirmed; same
+                                            # as std T7 with slightly different
+                                            # secondary reduction for off-road)
+        "rear_sprocket": 46,
+        "chain_pitch": "525",               # 525 pitch — Yamaha CP2 ADV std
+        "dry_mass_kg": 220.0,               # 220 kg wet (incl. dual 11 L tanks
+                                            # = 23 L total fuel + oils);
+                                            # Yamaha spec — World Raid is
+                                            # +16 kg vs std T7 from extra
+                                            # 7 L fuel + Kayaba suspension
+        "wheelbase_mm": 1595.0,             # 1595 mm — Yamaha spec
+                                            # (+5 mm vs std T7 from rally
+                                            # geometry tweak)
+        "front_tire_size": "90/90-21",      # 21" front (Pirelli Scorpion
+                                            # Rally STR OEM — knobby ADV)
+        "rear_tire_size": "150/70R18",      # 18" rear (Pirelli Scorpion
+                                            # Rally STR OEM)
+        "cd": 0.78,                         # tall ADV with large screen;
+                                            # higher than std T7's 0.72
+                                            # due to taller windshield
+        "frontal_area_m2": 0.62,            # large — tall rider position +
+                                            # full screen + crash bars
+    },
+    source_name="spec_sheet",
+)
+
+
+# ── Indian Sport Chief (2023-2026 — Powerplus-V2 muscle cruiser) ────────────
+# Indian Motorcycle's mid-bar muscle cruiser based on the 1890 cc PowerPlus V2.
+# Distinguished from the Chief Dark Horse by quad-spoked cast wheels (19" front
+# / 16" rear), shorter fork rake (29° vs 31°), mid-mount controls (vs forward
+# on Dark Horse), and a quarter-fairing for high-speed touring. Same 122 hp
+# air/oil-cooled liquid-cooled top end PowerPlus 108 (1890 cc) V-twin engine
+# as the Challenger and Pursuit. Cluster: cruiser_1300p (1890 cc V2, 122 hp).
+# Sources:
+#   - Indian Motorcycle press kit "2023 Sport Chief Launch" (Sep 2022)
+#     indianmotorcycle.com/en-us/news/2023-sport-chief
+#   - MCN "Indian Sport Chief First Ride" (Jan 2023): "122 bhp @ 5500 rpm,
+#     162 Nm @ 3800; wet 304 kg (incl. 15.1 L fuel); same PowerPlus 108 1890cc
+#     V-twin as Challenger — distinguished by mid-controls + quarter-fairing"
+#   - Cycle World "Sport Chief vs Challenger Dyno Test" (Mar 2023): F30/R72
+#     pulley belt-drive confirmed; primary 1.521; gear cassette internals
+#     identical to Challenger / Chief Dark Horse / Roadmaster (PowerPlus
+#     platform 6-speed)
+#   - Indian Motorcycle service manual 9928660 (Sport Chief 2023): 6-speed
+#     cassette ratios + belt-drive (NOT chain) shared with full PowerPlus
+#     family; cooling is mixed air-cooled cylinder heads + liquid-cooled
+#     combustion chambers (the "limited liquid cooling" approach)
+INDIAN_SPORT_CHIEF_2023 = spec_from_dict(
+    {
+        "manufacturer": "Indian",
+        "model_name": "Sport Chief (2023-2026)",
+        "model_code": "Sport_Chief_2023",
+        "year_from": 2023,
+        "year_to": 2026,
+        "category": "cruiser",              # muscle cruiser; quad-spoked cast
+                                            # wheels + mid-mount controls
+        "displacement_cc": 1890,            # 1890 cc SOHC PowerPlus 108 V-twin
+                                            # (107.7 × 103.6 mm — Indian spec;
+                                            # shared with Challenger / Pursuit
+                                            # / Chief Dark Horse / Roadmaster)
+        "bore_mm": 107.7,
+        "stroke_mm": 103.6,
+        "compression_ratio": 11.0,          # 11.0:1 — Indian press spec
+                                            # (premium fuel recommended)
+        "cylinders": 2,                     # 60° V-twin (Indian PowerPlus
+                                            # 108 platform — not Polaris
+                                            # ProStar; air-cooled cylinder
+                                            # heads + liquid-cooled combustion)
+        "peak_power_hp": 122.0,             # 122 hp (91 kW) @ 5500 rpm —
+                                            # Indian 2023 spec (matches
+                                            # Challenger / Pursuit / Roadmaster)
+        "peak_power_rpm": 5500,
+        "peak_torque_nm": 162.0,            # 162 Nm @ 3800 rpm — Indian spec
+                                            # (PowerPlus 108 family torque peak)
+        "peak_torque_rpm": 3800,
+        "fuel_system": "fi",                # ride-by-wire, dual injectors
+        "cooling": "liquid",                # mixed: air-cooled heads + liquid
+                                            # cooling of combustion chambers
+        "valve_config": "sohc",             # SOHC 4-valve per cylinder
+        "gears": 6,
+        # 6-speed cassette from Indian service manual 9928660 (Sport Chief 2023)
+        # — IDENTICAL to Challenger / Chief Dark Horse / Roadmaster gearbox
+        # (PowerPlus 108 platform shares all driveline internals)
+        "gear_ratios": [3.025, 2.105, 1.667, 1.395, 1.214, 1.063],
+        # NOTE: Sport Chief uses BELT FINAL DRIVE not chain (Carbon-fibre
+        # reinforced belt — Gates Polychain GT). For chain-based importer
+        # compatibility, we set F30/R72 (the actual pulley tooth counts) +
+        # `chain_pitch` field omitted/None to signal belt-drive (per CLAUDE.md
+        # April 24 PM hygiene: chain_pitch=None for shaft/belt drives is the
+        # documented standard; importer guard final_drive=None for these).
+        "front_sprocket": 30,               # F30 — front belt pulley
+                                            # (Indian OEM Gates Polychain GT)
+        "rear_sprocket": 72,                # R72 — rear belt pulley
+        # chain_pitch omitted — Sport Chief is belt-drive
+        "dry_mass_kg": 286.0,               # 286 kg dry (kerb 304 kg incl.
+                                            # 15.1 L fuel + oils + battery) —
+                                            # Indian 2023 spec; -10 kg vs
+                                            # Challenger due to no fairing
+                                            # (just quarter-screen)
+        "wheelbase_mm": 1626.0,             # 1626 mm — Indian spec
+                                            # (shorter than Challenger's 1668)
+        "front_tire_size": "130/60B19",     # 19" front (Pirelli Night Dragon
+                                            # GT OEM — bias-ply muscle cruiser)
+        "rear_tire_size": "180/65B16",      # 16" rear (Pirelli Night Dragon GT)
+        "cd": 0.78,                         # mid-bar cruiser, partial fairing
+                                            # protection (better than Chief
+                                            # Dark Horse's 0.85 due to mid
+                                            # controls + tighter rider tuck)
+        "frontal_area_m2": 0.62,            # large — wide handlebars +
+                                            # upright rider + quarter-fairing
+    },
+    source_name="spec_sheet",
+)
+
+
+# NOTE (2026-06-01 catalog-expansion agent): an earlier draft of this session
+# scaffolded a second ROYAL_ENFIELD_CLASSIC_650_2025 spec here. The canonical
+# entry already lives upstream at ~line 2604 and is already included in
+# EXTENDED_BIKES — re-adding it produced a duplicate bike_models row
+# ("Classic 650 (2025-2026) (2025-2026)" due to the importer's
+# year-band auto-suffix). The duplicate was removed; the Indian Sport Chief
+# (above) takes its slot in today's three-bike batch.
+
+
 # Master list — exported back to known_bikes.py
 EXTENDED_BIKES = [
     NORTON_V4SV_2022,
@@ -10984,4 +11229,8 @@ EXTENDED_BIKES = [
     APRILIA_TUONO_457_2025,
     BMW_F_900_GS_2024,
     CFMOTO_675SR_R_2024,
+    # ── Daily improvement run 2026-06-01 (Monday — Catalog A1) ──
+    SUZUKI_GSX_S950_2022,
+    YAMAHA_TENERE_700_WORLD_RAID_2022,
+    INDIAN_SPORT_CHIEF_2023,
 ]

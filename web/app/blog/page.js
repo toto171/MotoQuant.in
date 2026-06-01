@@ -618,6 +618,15 @@ const POSTS = [
       "MotoQuant simulates the RC 390 at ~13.5s and 166 km/h trap, the Duke 390 at ~13.7s and 162 km/h at Aamby Valley. Same engine, two tenths apart — almost all of it aerodynamic. Plus four cost-per-tenth mods under ₹25,000 and a look at the Fast Track Racing 11.342s record.",
   },
   {
+    slug: "ktm-duke-390-quarter-mile-stock-to-11s",
+    title: "KTM Duke 390 Quarter Mile: From 13.3s Stock to an 11.342s Record",
+    date: "2026-06-01",
+    readTime: "13 min",
+    tags: ["KTM", "Duke 390", "Indian 400cc", "drag mods", "cost per tenth"],
+    excerpt:
+      "MotoQuant simulates the stock 2022 Duke 390 at 13.30s and 162 km/h trap at Aamby Valley. Fast Track Racing India ran 11.342s with the same engine. Two seconds of ET decomposed mod-by-mod, with Indian retail pricing — plus a practical ₹49k build that puts the bike under 12.6s.",
+  },
+  {
     slug: "pulsar-ns400z-quarter-mile-physics",
     title: "Pulsar NS400Z Quarter-Mile Physics (and Why an RC 390 Still Wins)",
     date: "2026-05-18",

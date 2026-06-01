@@ -10,17 +10,20 @@
 import StructuredData, { SITE_URL } from '../StructuredData';
 
 const TITLE =
-  'ECU Autotune — Density-Altitude-Aware Setup for Your Motorcycle';
+  'Motorcycle ECU Autotune India — Density-Altitude-Aware Setup Sheet Calculator';
 const DESCRIPTION =
-  'Enter your bike and race conditions — MotoQuant computes the density altitude and returns a setup sheet: gearing (sprocket + final drive), launch RPM, tyre pressure, and fuel/timing guidance, each with the predicted quarter-mile ET change.';
+  'Free motorcycle ECU autotune for Indian drag strips — enter your bike, venue, and weather, and MotoQuant computes the live density altitude and returns a printable setup sheet: gearing (front + rear sprocket + final drive), launch RPM, tyre pressure, and fuel/timing guidance. Each recommendation comes with the predicted quarter-mile ET delta. Pre-configured for Aamby Valley, MMRT, BIC, Kari and 16 more venues.';
 
 export const metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: '/autotune' },
   keywords: [
+    'motorcycle ecu autotune india',
     'motorcycle ecu autotune',
     'density altitude motorcycle setup',
+    'density altitude motorcycle drag racing',
+    'density altitude calculator motorcycle india',
     'drag bike gearing calculator',
     'launch rpm calculator motorcycle',
     'sprocket calculator quarter mile',
@@ -28,7 +31,15 @@ export const metadata = {
     'fuel trim altitude motorcycle',
     'motorcycle track setup tool india',
     'aamby valley setup calculator',
+    'aamby valley density altitude',
+    'mmrt chennai motorcycle setup',
+    'bic drag setup motorcycle',
     'final drive ratio drag',
+    'powertronic ecu setup india',
+    'launch control motorcycle india',
+    'two-step launch rpm calculator',
+    'altitude correction motorcycle tuning',
+    'sea level vs altitude motorcycle power',
   ],
   openGraph: {
     title: TITLE,

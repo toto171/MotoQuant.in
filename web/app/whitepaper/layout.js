@@ -27,6 +27,12 @@ export const metadata = {
     "motorcycle clutch slip phase simulation",
     "indian dyno chart rear wheel power",
     "motorcycle drag racing wheelie physics",
+    "density altitude motorcycle drag racing",
+    "density altitude correction formula motorcycle",
+    "rk4 1ms integrator motorcycle physics",
+    "pacejka magic formula motorcycle thermal",
+    "weighted benchmark validation 74 timeslips",
+    "ktm 1390 super duke r evo physics",
   ],
   openGraph: {
     title: TITLE,

@@ -5,7 +5,7 @@
 import StructuredData, { SITE_URL } from '../StructuredData';
 
 const TITLE = "Features — Physics Drag Sim, Parts ROI, Dragy Import, Build Optimiser (India)";
-const DESCRIPTION = "What you get inside MotoQuant Pro: 15 first-principles physics sub-models (Pacejka tires, RK4 solver, weight transfer, two-stroke expansion-chamber), 498-bike catalog covering Hayabusa to R15 V4 to NS400Z, parts ROI with cost-per-tenth in INR, Bayesian build optimiser, Dragy GPS calibration, A vs B compare, and the smart recommendations engine.";
+const DESCRIPTION = "What you get inside MotoQuant Pro: 15 first-principles physics sub-models (Pacejka tires, RK4 solver, weight transfer, two-stroke expansion-chamber), 501-bike catalog covering Hayabusa to R15 V4 to NS400Z, parts ROI with cost-per-tenth in INR, Bayesian build optimiser, Dragy GPS calibration, A vs B compare, and the smart recommendations engine.";
 
 export const metadata = {
   title: TITLE,
@@ -14,12 +14,17 @@ export const metadata = {
   keywords: [
     "drag racing features",
     "motorcycle build optimiser india",
+    "motorcycle build optimizer india",
+    "motorcycle ecu autotune india",
+    "density altitude motorcycle drag racing",
     "parts ROI calculator",
     "cost per tenth calculator",
+    "cost per tenth inr",
     "dragy import software",
     "pacejka tire model motorcycle",
     "motorcycle physics simulator features",
     "bayesian build optimiser",
+    "knapsack drag bike parts",
     "a vs b motorcycle compare",
     "motorcycle quarter mile compare tool",
     "indian motorcycle drag tool features",
@@ -28,11 +33,14 @@ export const metadata = {
     "yamaha xsr125 drag",
     "drag racing parts knapsack optimiser",
     "hornet 2.0 vs ns200 drag",
+    "kawasaki ninja zx-4r quarter mile india",
     "kawasaki ninja 400 india drag",
     "ecu flash cost india motorcycle",
     "magic formula tire motorcycle",
     "motorcycle 60 ft calculator",
     "yamaha mt-15 v1 simulator",
+    "altitude correction motorcycle power",
+    "aamby valley density altitude",
   ],
   openGraph: {
     title: TITLE,

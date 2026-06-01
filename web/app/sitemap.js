@@ -212,6 +212,12 @@ export default async function sitemap() {
       priority: 0.84,
     },
     {
+      url: `${SITE_URL}/blog/ktm-duke-390-quarter-mile-stock-to-11s`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.86,
+    },
+    {
       url: `${SITE_URL}/blog/pulsar-ns200-vs-apache-rtr-200-quarter-mile-physics`,
       lastModified: now,
       changeFrequency: "monthly",
