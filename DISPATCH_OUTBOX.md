@@ -2172,3 +2172,5 @@ were re-run and confirmed green via status-file gating before this commit.
 
 **[warn]** next@14.2.3 has an upstream security advisory (Dec 2025) — schedule a dedicated upgrade session.
 **[note]** postflight `git add` chokes on bracket paths (`web/app/bikes/[id]/…` glob-expands) — pre-staged via `:(literal)` this session; consider quoting `${COMMIT_FILES}` array-style in postflight.
+
+**[warn] [blocking-for-paid-launch] Account durability:** prod sqlite is baked into the Docker image (Render free tier, no disk) — every deploy WIPES users/saved-runs/subscriptions. Fine for the free beta; a hard blocker before enforcement. Fix = Render persistent disk + MOTOQUANT_DB=/data/… or Supabase Postgres for auth tables (now Step 0 in docs/PAYMENTS_SETUP.md). The e2e test account created today will vanish on the next deploy — expected.

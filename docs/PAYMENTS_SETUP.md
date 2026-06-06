@@ -13,6 +13,20 @@
 - No payment provider is configured → `POST /api/payments/checkout` returns a
   friendly 503.
 
+## Step 0 — Durable storage (HARD BLOCKER for paid launch)
+
+`motoquant.db` is baked into the Docker image and Render free tier has no
+persistent disk → **user accounts, saved runs and subscription rows are
+wiped on every deploy** (and every push auto-deploys). Acceptable during
+the free beta (accounts are convenience only); **unacceptable once money
+moves**. Before flipping enforcement, do ONE of:
+
+- Add a Render persistent disk (paid plan) mounted at e.g. `/data`, set
+  `MOTOQUANT_DB=/data/motoquant.db`, seed once on first boot; or
+- Move auth/subscription tables to a managed Postgres (Supabase free tier
+  was already the Phase-6 plan of record) and keep the catalog sqlite
+  read-only in-image.
+
 ## Step 1 — Accounts prerequisite (do this FIRST)
 
 | Env var (Render dashboard) | Value |
