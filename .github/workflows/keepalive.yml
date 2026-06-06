@@ -46,23 +46,41 @@ concurrency:
 jobs:
   ping:
     runs-on: ubuntu-latest
-    timeout-minutes: 2     # cold-start can take 60s; 120s gives headroom
+    timeout-minutes: 12    # 4 retries x 150s curl + gaps; cold start can take minutes
     steps:
       - name: Ping /api/health
         env:
           # Override in repo Settings -> Secrets and variables -> Actions ->
           # Variables -> RENDER_API_URL if your service URL differs.
           RENDER_API_URL: ${{ vars.RENDER_API_URL || 'https://motoquant-api.onrender.com' }}
+        # Retry loop (2026-06-06): GitHub throttles */14 crons to every 1-8 h
+        # in practice, so most pings land on a COLD service, and free-tier
+        # cold starts routinely exceed the old single 90 s curl window. That
+        # made every run fail with curl exit 28 while the service went right
+        # back to sleep. Four attempts x 150 s + 20 s gaps = a ~11-minute
+        # wake window, so a throttled ping still goes green and leaves the
+        # service warm (the in-app loop in motoquant/keepwarm.py then holds
+        # it awake for the rest of the active window).
         run: |
-          set -e
-          echo "Pinging $RENDER_API_URL/api/health ..."
-          response=$(curl --silent --show-error --max-time 90 \
-                          --write-out "\nHTTP_STATUS:%{http_code}\nTIME_TOTAL:%{time_total}\n" \
-                          "$RENDER_API_URL/api/health")
-          echo "$response"
-          status=$(echo "$response" | grep "HTTP_STATUS:" | cut -d: -f2)
-          if [ "$status" != "200" ]; then
-            echo "::error::Health check returned HTTP $status — service may be down or cold-starting beyond timeout"
-            exit 1
-          fi
-          echo "Health check OK"
+          url="$RENDER_API_URL/api/health"
+          max_attempts=4
+          attempt=1
+          while [ "$attempt" -le "$max_attempts" ]; do
+            echo "Attempt $attempt/$max_attempts: pinging $url ..."
+            status=$(curl --silent --show-error --output /tmp/health_body \
+                          --max-time 150 --write-out "%{http_code}" \
+                          "$url") || status="000"
+            echo "HTTP status: $status"
+            if [ "$status" = "200" ]; then
+              cat /tmp/health_body; echo
+              echo "Health check OK (attempt $attempt)"
+              exit 0
+            fi
+            if [ "$attempt" -lt "$max_attempts" ]; then
+              echo "Service not up yet (HTTP $status) — retrying in 20s (cold start can take minutes)"
+              sleep 20
+            fi
+            attempt=$((attempt+1))
+          done
+          echo "::error::No HTTP 200 after $max_attempts attempts (~10 min) — service is genuinely down; check the Render dashboard"
+          exit 1
