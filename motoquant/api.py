@@ -3314,6 +3314,28 @@ def job_status(job_id: str):
     return out
 
 
+@app.post("/api/jobs/{job_id}/cancel")
+def job_cancel(job_id: str):
+    """
+    Request cancellation of a running job (the website's Stop button).
+
+    Cooperative: the worker thread stops at its next progress tick. Terminal
+    jobs (done / error / cancelled) are returned unchanged — cancelling a
+    finished job is a no-op, not an error.
+    """
+    from .jobs import cancel_job
+
+    job = cancel_job(job_id)
+    if job is None:
+        raise HTTPException(404, "Unknown or expired job (results are kept ~15 min)")
+    return {
+        "job_id": job.id,
+        "kind": job.kind,
+        "status": job.status,
+        "cancel_requested": job.cancel_requested,
+    }
+
+
 # ─────────────────────────────────────────────
 # Keep-warm self-ping (Render free tier) — added 2026-06-06.
 #

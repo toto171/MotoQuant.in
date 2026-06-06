@@ -28,6 +28,17 @@ class JobCapacityError(RuntimeError):
     """Raised when too many jobs are already queued/running."""
 
 
+class JobCancelled(BaseException):
+    """
+    Raised inside a worker thread when its job has been cancelled.
+
+    Deliberately a ``BaseException``: the simulation / analysis layers (and
+    the API impls) wrap work in ``except Exception`` blocks — including the
+    exception-proofed progress hooks — and none of them may swallow a
+    cancellation. Only the job runner itself catches this.
+    """
+
+
 class Job:
     """One background simulation/optimisation run."""
 
@@ -41,6 +52,7 @@ class Job:
         "error",
         "created_at",
         "updated_at",
+        "cancel_requested",
     )
 
     def __init__(self, kind: str):
@@ -53,6 +65,7 @@ class Job:
         self.error: str | None = None
         self.created_at = time.time()
         self.updated_at = self.created_at
+        self.cancel_requested = False
 
 
 _JOBS: dict[str, Job] = {}
@@ -102,6 +115,10 @@ def create_job(kind: str, runner: Callable[[Callable], Any]) -> Job:
         _JOBS[job.id] = job
 
     def _progress(frac: float, stage: str | None = None) -> None:
+        if job.cancel_requested:
+            # Cooperative cancel: unwind the worker at this tick (every ~250
+            # RK4 steps / every sweep sim / every scored candidate).
+            raise JobCancelled
         try:
             f = float(frac)
         except (TypeError, ValueError):
@@ -116,8 +133,17 @@ def create_job(kind: str, runner: Callable[[Callable], Any]) -> Job:
         job.updated_at = time.time()
         try:
             job.result = runner(_progress)
-            job.progress = 1.0
-            job.status = "done"
+            if job.cancel_requested:  # cancelled between last tick and return
+                job.result = None
+                job.status = "cancelled"
+                job.stage = "Stopped"
+            else:
+                job.progress = 1.0
+                job.status = "done"
+        except JobCancelled:
+            job.result = None
+            job.status = "cancelled"
+            job.stage = "Stopped"
         except Exception as exc:  # surfaced to the client via GET /api/jobs/{id}
             detail = getattr(exc, "detail", None)  # fastapi.HTTPException payload
             msg = str(detail) if detail else f"{type(exc).__name__}: {exc}"
@@ -128,6 +154,22 @@ def create_job(kind: str, runner: Callable[[Callable], Any]) -> Job:
 
     threading.Thread(target=_run, name=f"job-{kind}-{job.id}", daemon=True).start()
     return job
+
+
+def cancel_job(job_id: str) -> Job | None:
+    """
+    Request cooperative cancellation of a job (None if unknown/evicted).
+
+    Terminal jobs (done / error / cancelled) are left untouched. For active
+    jobs the flag is set and the worker unwinds at its next progress tick,
+    freeing its MAX_RUNNING slot within a fraction of a second.
+    """
+    with _LOCK:
+        job = _JOBS.get(job_id)
+        if job is not None and job.status in ("queued", "running"):
+            job.cancel_requested = True
+            job.updated_at = time.time()
+        return job
 
 
 def get_job(job_id: str) -> Job | None:

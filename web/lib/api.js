@@ -26,11 +26,12 @@ export const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 // non-2xx response try to surface the FastAPI `detail` field (string or
 // JSON) before falling back to the raw body text. Throws Error on failure
 // so callers can `try/catch` and render the message in an error tile.
-async function postJson(path, body) {
+async function postJson(path, body, signal) {
   const res = await fetch(`${API_URL}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
+    signal,
   });
   if (!res.ok) {
     let msg = `API error ${res.status}`;
@@ -147,8 +148,14 @@ export async function autotuneEcu(opts) {
 // sidecar) we degrade gracefully to the synchronous route — same result, just
 // without the live percentage.
 
-export async function startJob(kind, body) {
-  return postJson(`/api/jobs/${kind}`, body);
+export async function startJob(kind, body, signal) {
+  return postJson(`/api/jobs/${kind}`, body, signal);
+}
+
+export async function cancelJob(jobId) {
+  // Cooperative server-side cancel — the worker stops at its next progress
+  // tick and frees its concurrency slot. No-op on finished jobs.
+  return postJson(`/api/jobs/${jobId}/cancel`);
 }
 
 export async function getJob(jobId) {
@@ -161,16 +168,22 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
   onProgress?.({ status: 'connecting', progress: null, stage: '' });
   let started;
   try {
-    started = await startJob(kind, body);
+    started = await startJob(kind, body, signal);
   } catch (e) {
+    if (e?.name === 'AbortError') throw e;
     if (fallbackPath && /API error (404|405)/.test(e.message || '')) {
       onProgress?.({ status: 'running', progress: null, stage: '' });
-      return postJson(fallbackPath, body);
+      return postJson(fallbackPath, body, signal);
     }
     throw e;
   }
+  const aborted = () => {
+    // Stop button: free the server slot, then unwind like a fetch abort.
+    cancelJob(started.job_id).catch(() => {});
+    return new DOMException('Aborted', 'AbortError');
+  };
+  if (signal?.aborted) throw aborted();
   for (;;) {
-    if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
     let j;
     try {
       j = await getJob(started.job_id);
@@ -178,23 +191,28 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
       // In-memory registry — a 404 mid-poll means the engine restarted.
       throw new Error('Progress lost (the engine restarted mid-run) — please run again');
     }
+    if (signal?.aborted) throw aborted();
+    if (j.status === 'cancelled') throw new DOMException('Aborted', 'AbortError');
     if (j.status === 'error') throw new Error(j.error || 'Simulation failed');
     onProgress?.({ status: j.status, progress: j.progress, stage: j.stage });
     if (j.status === 'done') return j.result;
     await new Promise((r) => setTimeout(r, pollMs));
+    if (signal?.aborted) throw aborted();
   }
 }
 
-export function optimizeBuildJob(opts, onProgress) {
+export function optimizeBuildJob(opts, onProgress, signal) {
   return runJob('optimize', optimizeBuildBody(opts), {
     onProgress,
+    signal,
     fallbackPath: '/api/optimize/build',
   });
 }
 
-export function autotuneEcuJob(opts, onProgress) {
+export function autotuneEcuJob(opts, onProgress, signal) {
   return runJob('autotune', autotuneEcuBody(opts), {
     onProgress,
+    signal,
     fallbackPath: '/api/autotune/ecu',
   });
 }

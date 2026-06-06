@@ -197,6 +197,13 @@ export default function BuildOptimizer() {
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
   const [prog, setProg] = useState(null); // {progress, stage} from the jobs poller
+  const abortRef = useRef(null);
+
+  const stop = useCallback(() => {
+    abortRef.current?.abort(); // runJob also cancels the job server-side
+    setLoading(false);
+    setProg(null);
+  }, []);
 
   const run = useCallback(async () => {
     if (!bike) {
@@ -206,6 +213,8 @@ export default function BuildOptimizer() {
     setLoading(true);
     setError(null);
     setResult(null);
+    const controller = new AbortController();
+    abortRef.current = controller;
     try {
       // Background job — SimProgress tracks real candidate-scoring progress.
       const data = await optimizeBuildJob(
@@ -217,9 +226,11 @@ export default function BuildOptimizer() {
           rider_weight_kg: riderKg,
         },
         setProg,
+        controller.signal,
       );
       setResult(data);
     } catch (e) {
+      if (e?.name === 'AbortError') return; // user pressed Stop
       setError(e.message || 'Optimisation failed.');
     } finally {
       setLoading(false);
@@ -353,15 +364,15 @@ export default function BuildOptimizer() {
           )}
 
           <motion.button
-            onClick={run}
-            disabled={loading || !bike}
-            whileHover={{ scale: loading || !bike ? 1 : 1.01 }}
-            whileTap={{ scale: loading || !bike ? 1 : 0.99 }}
+            onClick={loading ? stop : run}
+            disabled={!bike}
+            whileHover={{ scale: !bike ? 1 : 1.01 }}
+            whileTap={{ scale: !bike ? 1 : 0.99 }}
             className="w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-brand-orange to-brand-orangeLight text-black shadow-orange-soft hover:brightness-110 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:saturate-50"
           >
             {loading ? (
               <span className="tabular-nums">
-                Optimising…{prog?.progress != null ? ` ${Math.round(prog.progress * 100)}%` : ''}
+                ■ Stop — Optimising…{prog?.progress != null ? ` ${Math.round(prog.progress * 100)}%` : ''}
               </span>
             ) : (
               <>

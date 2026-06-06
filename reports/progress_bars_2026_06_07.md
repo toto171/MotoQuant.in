@@ -57,3 +57,25 @@ quick sim manually instead of automatically → Live/Manual toggle (default Live
   the earlier Jun-7 session); restored from origin before patching.
 - Render free tier keeps jobs in a single process — registry is in-memory by
   design; a restart mid-job surfaces as a clear "run again" error client-side.
+
+## Addendum (same day): Stop button / job cancellation
+
+Operator follow-up: a way to stop a running sim to change the setup.
+
+- `jobs.py`: cooperative cancellation. `cancel_job()` sets `cancel_requested`;
+  the progress callback raises `JobCancelled` at the next tick. It inherits
+  `BaseException` deliberately — every `except Exception` between the RK4 loop
+  and the job runner (engine wrappers, optimizer's exception-proofed
+  `on_predict`, the impls' error handlers) stays unable to swallow a cancel.
+  Terminal states are preserved: cancelling a done job is a no-op.
+- `api.py`: `POST /api/jobs/{id}/cancel`.
+- `lib/api.js`: `cancelJob()`; `runJob` accepts an `AbortSignal` — aborting
+  cancels server-side (frees the MAX_RUNNING slot) and throws `AbortError`,
+  which the components treat as a quiet reset (no error tile). The signal also
+  reaches `postJson`, so the legacy sync fallback aborts client-side too.
+- UI: every run button becomes "■ Stop — …%" while its job runs (EcuAutotune,
+  BuildOptimizer, landing widget, simulator page full-sim/top-speed buttons),
+  plus Stop affordances on the nav progress chip and the top-speed panel via
+  the new `SimProgress onStop` prop.
+- Tests 9 → 14: registry cancel mid-run, cancel-after-done no-op, unknown-id
+  handling, route-level cancel through a real K5 simulate job.

@@ -41,6 +41,7 @@ export default function SimProgress({
   label = 'Running simulation',
   compact = false,
   edge = false,
+  onStop = null,
   className = '',
 }) {
   const [elapsedS, setElapsedS] = useState(0);
@@ -97,6 +98,15 @@ export default function SimProgress({
         <span className="text-[10px] text-orange-400 tabular-nums whitespace-nowrap">
           {pct != null ? `${pct}%` : `${label}…`}
         </span>
+        {onStop && (
+          <button
+            type="button"
+            onClick={onStop}
+            className="text-[10px] text-gray-500 hover:text-red-400 transition-colors whitespace-nowrap"
+          >
+            ■ Stop
+          </button>
+        )}
       </div>
     );
   }
@@ -112,6 +122,15 @@ export default function SimProgress({
           <span className="text-xs font-mono font-bold text-orange-400 tabular-nums shrink-0">
             {pct}%
           </span>
+        )}
+        {onStop && (
+          <button
+            type="button"
+            onClick={onStop}
+            className="text-[10px] uppercase tracking-widest text-gray-500 hover:text-red-400 transition-colors shrink-0"
+          >
+            ■ Stop
+          </button>
         )}
       </div>
       <div className="h-1.5 rounded-full bg-white/[0.08] overflow-hidden">{fill}</div>

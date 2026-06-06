@@ -35,7 +35,7 @@ def _poll_until_finished(client, job_id, timeout_s=180.0, interval_s=0.05):
         assert r.status_code == 200, r.text
         j = r.json()
         snapshots.append(j)
-        if j["status"] in ("done", "error"):
+        if j["status"] in ("done", "error", "cancelled"):
             return j, snapshots
         time.sleep(interval_s)
     raise AssertionError(f"job {job_id} did not finish in {timeout_s}s")
@@ -83,7 +83,7 @@ class TestJobRegistry(unittest.TestCase):
         deadline = time.time() + timeout_s
         while time.time() < deadline:
             got = jobs_mod.get_job(job.id)
-            if got is not None and got.status in ("done", "error"):
+            if got is not None and got.status in ("done", "error", "cancelled"):
                 return got
             time.sleep(0.02)
         raise AssertionError("job did not finish")
@@ -119,6 +119,34 @@ class TestJobRegistry(unittest.TestCase):
 
     def test_unknown_job_is_none(self):
         self.assertIsNone(jobs_mod.get_job("no-such-job"))
+
+    def test_cancel_mid_run(self):
+        def runner(progress):
+            for i in range(2000):  # ~10 s unless cancelled at a tick
+                progress(i / 2000.0)
+                time.sleep(0.005)
+            return {"finished": True}
+
+        job = jobs_mod.create_job("unittest", runner)
+        time.sleep(0.1)
+        flagged = jobs_mod.cancel_job(job.id)
+        self.assertTrue(flagged.cancel_requested)
+        got = self._wait(job)
+        self.assertEqual(got.status, "cancelled")
+        self.assertIsNone(got.result)
+        self.assertEqual(got.stage, "Stopped")
+
+    def test_cancel_after_done_is_noop(self):
+        job = jobs_mod.create_job("unittest", lambda progress: {"ok": 1})
+        got = self._wait(job)
+        self.assertEqual(got.status, "done")
+        again = jobs_mod.cancel_job(job.id)
+        self.assertEqual(again.status, "done")  # terminal state untouched
+        self.assertFalse(again.cancel_requested)
+        self.assertEqual(again.result, {"ok": 1})
+
+    def test_cancel_unknown_is_none(self):
+        self.assertIsNone(jobs_mod.cancel_job("no-such-job"))
 
     def test_capacity_guard(self):
         original = jobs_mod.MAX_RUNNING
@@ -173,6 +201,21 @@ class TestJobsRoutes(unittest.TestCase):
             "Verifying combined setup",
         }
         self.assertTrue({s["stage"] for s in snapshots} <= known)
+
+    def test_cancel_route_stops_simulate_job(self):
+        r = self.client.post("/api/jobs/simulate", json={"bike_preset": "gsxr1000_k5"})
+        self.assertEqual(r.status_code, 202)
+        jid = r.json()["job_id"]
+        rc = self.client.post(f"/api/jobs/{jid}/cancel")
+        self.assertEqual(rc.status_code, 200)
+        self.assertTrue(rc.json()["cancel_requested"])
+        final, _ = _poll_until_finished(self.client, jid, timeout_s=30)
+        self.assertEqual(final["status"], "cancelled")
+        self.assertNotIn("result", final)
+
+    def test_cancel_unknown_job_404(self):
+        r = self.client.post("/api/jobs/deadbeef00000000/cancel")
+        self.assertEqual(r.status_code, 404)
 
     def test_unknown_job_404(self):
         r = self.client.get("/api/jobs/deadbeef00000000")

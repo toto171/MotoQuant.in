@@ -295,6 +295,19 @@ function SimulatorPageInner() {
   const [topSpeedResult, setTopSpeedResult] = useState(null);
   const [topSpeedLoading, setTopSpeedLoading] = useState(false);
   const [topSpeedProgress, setTopSpeedProgress] = useState(null);
+  const fullSimAbortRef = useRef(null);
+  const topSpeedAbortRef = useRef(null);
+
+  const stopFullSim = useCallback(() => {
+    fullSimAbortRef.current?.abort(); // runJob also cancels the job server-side
+    setSimLoading(false);
+    setSimProgress(null);
+  }, []);
+  const stopTopSpeed = useCallback(() => {
+    topSpeedAbortRef.current?.abort();
+    setTopSpeedLoading(false);
+    setTopSpeedProgress(null);
+  }, []);
   const [topSpeedError, setTopSpeedError] = useState(null);
 
   // ─── Fetch all data on mount ─────────────────────────────────────────
@@ -433,6 +446,8 @@ function SimulatorPageInner() {
   const runFullSim = useCallback(async () => {
     if (!bike) return;
     setSimLoading(true);
+    const controller = new AbortController();
+    fullSimAbortRef.current = controller;
     try {
       const body = {
         rider_mass_kg: riderKg,
@@ -452,11 +467,13 @@ function SimulatorPageInner() {
       // Background job — SimProgress tracks the real RK4 progress.
       const data = await runJob('simulate', body, {
         onProgress: setSimProgress,
+        signal: controller.signal,
         fallbackPath: '/api/simulate',
       });
       setFullResult(data);
       setActiveTab('charts');
     } catch (e) {
+      if (e?.name === 'AbortError') return; // user pressed Stop
       setSimError(e.message);
     } finally {
       setSimLoading(false);
@@ -470,6 +487,8 @@ function SimulatorPageInner() {
     if (!bike) return;
     setTopSpeedLoading(true);
     setTopSpeedError(null);
+    const controller = new AbortController();
+    topSpeedAbortRef.current = controller;
     try {
       const body = {
         rider_mass_kg: riderKg,
@@ -491,11 +510,13 @@ function SimulatorPageInner() {
       // Background job — real progress through the terminal-velocity run.
       const data = await runJob('topspeed', body, {
         onProgress: setTopSpeedProgress,
+        signal: controller.signal,
         fallbackPath: '/api/simulate/top-speed',
       });
       setTopSpeedResult(data);
       setActiveTab('topspeed');
     } catch (e) {
+      if (e?.name === 'AbortError') return; // user pressed Stop
       setTopSpeedError(e.message);
     } finally {
       setTopSpeedLoading(false);
@@ -792,6 +813,13 @@ function SimulatorPageInner() {
                   compact
                   progress={(simLoading ? simProgress : topSpeedProgress)?.progress ?? null}
                   label="Computing"
+                  onStop={
+                    simLoading && simProgress
+                      ? stopFullSim
+                      : topSpeedLoading && topSpeedProgress
+                        ? stopTopSpeed
+                        : undefined
+                  }
                 />
               </div>
             )}
@@ -1164,10 +1192,10 @@ function SimulatorPageInner() {
                     )}
 
                     {/* Full sim button */}
-                    <button onClick={runFullSim} disabled={simLoading}
+                    <button onClick={simLoading ? stopFullSim : runFullSim}
                       className="w-full py-2.5 text-xs bg-white/[0.04] hover:bg-orange-500/10 border border-white/[0.06] hover:border-orange-500/30 rounded-xl text-gray-400 hover:text-orange-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
                       {simLoading ? (
-                        <span className="tabular-nums">Simulating…{simProgress?.progress != null ? ` ${Math.round(simProgress.progress * 100)}%` : ''}</span>
+                        <span className="tabular-nums">■ Stop — Simulating…{simProgress?.progress != null ? ` ${Math.round(simProgress.progress * 100)}%` : ''}</span>
                       ) : (
                         <><BarChart3 size={13} /> View Detailed Charts & Analysis</>
                       )}
@@ -1192,6 +1220,7 @@ function SimulatorPageInner() {
                       progress={topSpeedProgress?.progress ?? null}
                       stage={topSpeedProgress?.stage}
                       label="Running top-speed simulation"
+                      onStop={stopTopSpeed}
                     />
                     <div className="text-[10px] text-gray-700 mt-2 text-center">Simulating up to 120 s of terminal velocity</div>
                   </div>
@@ -1315,9 +1344,13 @@ function SimulatorPageInner() {
                     )}
 
                     {/* Re-run button */}
-                    <button onClick={runTopSpeed} disabled={topSpeedLoading}
+                    <button onClick={topSpeedLoading ? stopTopSpeed : runTopSpeed}
                       className="w-full py-2.5 text-xs bg-white/[0.04] hover:bg-orange-500/10 border border-white/[0.06] hover:border-orange-500/30 rounded-xl text-gray-400 hover:text-orange-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
-                      <Play size={12} /> Re-run Top Speed Simulation
+                      {topSpeedLoading ? (
+                        <span className="tabular-nums">■ Stop — Running…{topSpeedProgress?.progress != null ? ` ${Math.round(topSpeedProgress.progress * 100)}%` : ''}</span>
+                      ) : (
+                        <><Play size={12} /> Re-run Top Speed Simulation</>
+                      )}
                     </button>
                   </div>
                 ) : (
@@ -1356,10 +1389,10 @@ function SimulatorPageInner() {
                   <div className="text-center py-12">
                     <BarChart3 size={32} className="mx-auto mb-3 text-gray-800" />
                     <p className="text-gray-600 text-xs mb-3">Run a full simulation to see telemetry charts</p>
-                    <button onClick={runFullSim} disabled={!bike || simLoading}
+                    <button onClick={simLoading ? stopFullSim : runFullSim} disabled={!bike}
                       className="px-4 py-2 text-xs bg-orange-600 hover:bg-orange-700 rounded-lg font-medium transition-colors disabled:opacity-50 inline-flex items-center gap-1.5">
                       {simLoading ? (
-                        <span className="tabular-nums">Simulating…{simProgress?.progress != null ? ` ${Math.round(simProgress.progress * 100)}%` : ''}</span>
+                        <span className="tabular-nums">■ Stop — Simulating…{simProgress?.progress != null ? ` ${Math.round(simProgress.progress * 100)}%` : ''}</span>
                       ) : (
                         <><Play size={12} /> Run Full Simulation</>
                       )}
@@ -1406,10 +1439,10 @@ function SimulatorPageInner() {
                       <>
                         <p className="mb-1">Quick splits from last run:</p>
                         <p className="text-white font-medium tabular-nums">60ft: {result.et_60ft_s?.toFixed(3)}s · ⅛: {result.et_eighth_s?.toFixed(3)}s · ¼: {result.et_quarter_s?.toFixed(3)}s</p>
-                        <button onClick={runFullSim} disabled={simLoading}
+                        <button onClick={simLoading ? stopFullSim : runFullSim}
                           className="mt-3 px-4 py-2 text-xs bg-orange-600 hover:bg-orange-700 rounded-lg font-medium transition-colors disabled:opacity-50 inline-flex items-center gap-1.5">
                           {simLoading ? (
-                            <span className="tabular-nums">Simulating…{simProgress?.progress != null ? ` ${Math.round(simProgress.progress * 100)}%` : ''}</span>
+                            <span className="tabular-nums">■ Stop — Simulating…{simProgress?.progress != null ? ` ${Math.round(simProgress.progress * 100)}%` : ''}</span>
                           ) : (
                             <><Play size={12} /> Get Full Splits</>
                           )}

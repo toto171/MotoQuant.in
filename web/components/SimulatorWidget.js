@@ -118,6 +118,13 @@ export default function SimulatorWidget() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [prog, setProg] = useState(null); // {progress, stage} from the jobs poller
+  const abortRef = useRef(null);
+
+  function stopSim() {
+    abortRef.current?.abort(); // runJob also cancels the job server-side
+    setLoading(false);
+    setProg(null);
+  }
   // CRITICAL: production DB IDs drift over time as the catalog is reseeded.
   // Hardcoded IDs in BIKE_CATEGORIES were stale — id 192 was 'YZF-R15 V4'
   // when the list was authored but is now 'Aprilia ...' on prod (verified
@@ -183,6 +190,8 @@ export default function SimulatorWidget() {
     // sitting next to the loading dots of the new mode for seconds.
     setResult(null);
     setTopSpeedResult(null);
+    const controller = new AbortController();
+    abortRef.current = controller;
     track('sim_run_start', {
       surface: 'landing_widget',
       mode,
@@ -221,6 +230,7 @@ export default function SimulatorWidget() {
         // terminal-velocity run (falls back to the sync route on old backends).
         data = await runJob('topspeed', body, {
           onProgress: setProg,
+          signal: controller.signal,
           fallbackPath: '/api/simulate/top-speed',
         });
       } else {
@@ -230,6 +240,7 @@ export default function SimulatorWidget() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
+          signal: controller.signal,
         });
         if (!res.ok) {
           const msg = await res.text();
@@ -249,6 +260,7 @@ export default function SimulatorWidget() {
         reached_plateau: data?.reached_plateau ?? null,
       });
     } catch (e) {
+      if (e?.name === 'AbortError') return; // user pressed Stop
       setError(e.message);
       track('sim_run_error', {
         surface: 'landing_widget',
@@ -529,8 +541,8 @@ export default function SimulatorWidget() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 relative z-10">
         <motion.button
-          onClick={() => runSim('quarter')}
-          disabled={loading}
+          onClick={() => (loading && simMode === 'quarter' ? stopSim() : runSim('quarter'))}
+          disabled={loading && simMode !== 'quarter'}
           whileHover={{ scale: loading ? 1 : 1.02 }}
           whileTap={{ scale: loading ? 1 : 0.98 }}
           className={[
@@ -541,7 +553,7 @@ export default function SimulatorWidget() {
           ].join(' ')}
         >
           {loading && simMode === 'quarter' ? (
-            <span className="tabular-nums">Simulating…</span>
+            <span className="tabular-nums">■ Stop</span>
           ) : (
             <>
               <Zap size={15} />
@@ -551,8 +563,8 @@ export default function SimulatorWidget() {
         </motion.button>
 
         <motion.button
-          onClick={() => runSim('topspeed')}
-          disabled={loading}
+          onClick={() => (loading && simMode === 'topspeed' ? stopSim() : runSim('topspeed'))}
+          disabled={loading && simMode !== 'topspeed'}
           whileHover={{ scale: loading ? 1 : 1.02 }}
           whileTap={{ scale: loading ? 1 : 0.98 }}
           className={[
@@ -564,7 +576,7 @@ export default function SimulatorWidget() {
         >
           {loading && simMode === 'topspeed' ? (
             <span className="tabular-nums">
-              Simulating…{prog?.progress != null ? ` ${Math.round(prog.progress * 100)}%` : ''}
+              ■ Stop{prog?.progress != null ? ` — ${Math.round(prog.progress * 100)}%` : ''}
             </span>
           ) : (
             <>
