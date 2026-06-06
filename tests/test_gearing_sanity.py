@@ -36,39 +36,41 @@ def _fresh_import(mod_path: str):
     if mod_path in sys.modules:
         del sys.modules[mod_path]
     import importlib.util
+
     spec_obj = importlib.util.find_spec(mod_path)
     if spec_obj is None:
         raise ImportError(mod_path)
-    importlib.util.source_from_spec(spec_obj) if hasattr(spec_obj, 'origin') else None
+    importlib.util.source_from_spec(spec_obj) if hasattr(spec_obj, "origin") else None
     mod = importlib.import_module(mod_path)
     return mod
+
 
 from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
 
 # ── Whitelist: bikes whose top gear is legitimately >= 1.30 ──────────────────
 # Each entry is (manufacturer_fragment, model_fragment) — both case-insensitive
 TOP_GEAR_WHITELIST: list[tuple[str, str]] = [
-    ("suzuki", "hayabusa"),       # Gen1/2/3: 6th = 1.304 (confirmed service manual)
-    ("honda", "cbr 600rr"),       # PC40 close-ratio race box: 6th = 1.315
-    ("honda", "cbr600rr"),        # alternate model_name spelling
+    ("suzuki", "hayabusa"),  # Gen1/2/3: 6th = 1.304 (confirmed service manual)
+    ("honda", "cbr 600rr"),  # PC40 close-ratio race box: 6th = 1.315
+    ("honda", "cbr600rr"),  # alternate model_name spelling
 ]
 
 
 def _is_whitelisted(spec) -> bool:
     mfr = spec.manufacturer.lower()
     mdl = spec.model_name.lower()
-    return any(
-        mf in mfr and ml in mdl
-        for mf, ml in TOP_GEAR_WHITELIST
-    )
+    return any(mf in mfr and ml in mdl for mf, ml in TOP_GEAR_WHITELIST)
 
 
 # Build parametrize list: only bikes that actually have gear_ratios set
 _SPECS_WITH_RATIOS = [
-    s for s in ALL_KNOWN_BIKES
-    if s.gear_ratios and len(s.gear_ratios) >= 2
+    s
+    for s in ALL_KNOWN_BIKES
+    if s.gear_ratios
+    and len(s.gear_ratios) >= 2
     and all(r is not None for r in s.gear_ratios)
 ]
+
 
 def _spec_id(spec) -> str:
     return f"{spec.manufacturer} {spec.model_name} ({spec.year_from})"
@@ -141,7 +143,7 @@ def test_ratios_strictly_descending(spec):
     for i in range(len(ratios) - 1):
         assert ratios[i] > ratios[i + 1], (
             f"{spec.manufacturer} {spec.model_name} ({spec.year_from}): "
-            f"gear {i+1}={ratios[i]:.3f} <= gear {i+2}={ratios[i+1]:.3f} "
+            f"gear {i + 1}={ratios[i]:.3f} <= gear {i + 2}={ratios[i + 1]:.3f} "
             f"— ratios must be strictly descending."
         )
 

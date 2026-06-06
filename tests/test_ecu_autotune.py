@@ -8,7 +8,6 @@ route test covers /api/autotune/ecu with explicit conditions (no OWM key needed)
 """
 
 import copy
-import os
 
 import pytest
 
@@ -29,23 +28,40 @@ def _cfg(alt, temp, rh, press, ttemp, name):
 
 @pytest.fixture(scope="module")
 def sea():
-    return autotune(_cfg(0, 18, 45, 1013.0, 25, "K5 @ sea"), gear_span=2, launch_steps=4)
+    return autotune(
+        _cfg(0, 18, 45, 1013.0, 25, "K5 @ sea"), gear_span=2, launch_steps=4
+    )
 
 
 @pytest.fixture(scope="module")
 def high_da():
-    return autotune(_cfg(1500, 40, 75, 845.0, 48, "K5 @ high DA"), gear_span=2, launch_steps=4)
+    return autotune(
+        _cfg(1500, 40, 75, 845.0, 48, "K5 @ high DA"), gear_span=2, launch_steps=4
+    )
 
 
 class TestStructure:
     def test_returns_full_recommendation(self, sea):
         assert isinstance(sea, EcuAutotune)
-        for block in ("environment", "stock", "gearing", "launch_rpm", "tyre_pressure", "fuel_timing", "combined"):
+        for block in (
+            "environment",
+            "stock",
+            "gearing",
+            "launch_rpm",
+            "tyre_pressure",
+            "fuel_timing",
+            "combined",
+        ):
             assert getattr(sea, block), f"missing {block}"
 
     def test_environment_block_has_atmospherics(self, sea):
         e = sea.environment
-        for k in ("density_altitude_ft", "air_density_kgm3", "power_correction_pct", "temperature_c"):
+        for k in (
+            "density_altitude_ft",
+            "air_density_kgm3",
+            "power_correction_pct",
+            "temperature_c",
+        ):
             assert k in e
         assert 0.5 < e["air_density_kgm3"] < 1.4
 
@@ -81,10 +97,16 @@ class TestStructure:
 
 class TestConditionsAware:
     def test_high_da_has_higher_density_altitude(self, sea, high_da):
-        assert high_da.environment["density_altitude_ft"] > sea.environment["density_altitude_ft"] + 1500
+        assert (
+            high_da.environment["density_altitude_ft"]
+            > sea.environment["density_altitude_ft"] + 1500
+        )
 
     def test_high_da_makes_less_power(self, sea, high_da):
-        assert high_da.environment["power_correction_pct"] < sea.environment["power_correction_pct"]
+        assert (
+            high_da.environment["power_correction_pct"]
+            < sea.environment["power_correction_pct"]
+        )
 
     def test_high_da_leans_fuel_more(self, sea, high_da):
         # thinner air -> lean out; high-DA trim must be more negative than sea-level
@@ -136,4 +158,6 @@ class TestAutotuneRoute:
         body = r.json()
         assert "gearing" in body and "fuel_timing" in body and "environment" in body
         assert "environment_source" in body
-        assert body["environment"]["density_altitude_ft"] > 2000  # hot + high + low pressure
+        assert (
+            body["environment"]["density_altitude_ft"] > 2000
+        )  # hot + high + low pressure

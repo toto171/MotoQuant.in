@@ -51,7 +51,6 @@ Physics deltas
   better efficiency than street chains.
 """
 
-
 from motoquant.database.seed_catalogs import _create_parts_batch
 
 
@@ -68,7 +67,7 @@ def seed_drag_prep_specialty(db) -> int:
             {
                 "category": "swingarm_ext",
                 "brand": "Schnitz Racing",
-                "model_name": "8\" Extended Swingarm — Hayabusa Gen 1",
+                "model_name": '8" Extended Swingarm — Hayabusa Gen 1',
                 "part_number": "SR-SA-BUSA-G1-8",
                 "specs": {
                     "extension_inches": 8,
@@ -89,7 +88,7 @@ def seed_drag_prep_specialty(db) -> int:
                         "displacement_max_cc": 1310,
                     },
                     "description": (
-                        "Schnitz Racing 8\" billet swingarm extension; "
+                        'Schnitz Racing 8" billet swingarm extension; '
                         "Hayabusa Gen 1 1299cc (1999-2007); "
                         "drag-launch wheelie suppression + improved 60-foot."
                     ),
@@ -102,7 +101,7 @@ def seed_drag_prep_specialty(db) -> int:
             {
                 "category": "swingarm_ext",
                 "brand": "Schnitz Racing",
-                "model_name": "10\" Extended Swingarm — Hayabusa Gen 2",
+                "model_name": '10" Extended Swingarm — Hayabusa Gen 2',
                 "part_number": "SR-SA-BUSA-G2-10",
                 "specs": {
                     "extension_inches": 10,
@@ -123,7 +122,7 @@ def seed_drag_prep_specialty(db) -> int:
                         "displacement_max_cc": 1360,
                     },
                     "description": (
-                        "Schnitz Racing 10\" billet swingarm extension; "
+                        'Schnitz Racing 10" billet swingarm extension; '
                         "Hayabusa Gen 2 1340cc (2008-2025); "
                         "matched ride height + race-spec geometry."
                     ),
@@ -136,7 +135,7 @@ def seed_drag_prep_specialty(db) -> int:
             {
                 "category": "swingarm_ext",
                 "brand": "DME Racing",
-                "model_name": "12\" Extended Swingarm — ZX-14R Class",
+                "model_name": '12" Extended Swingarm — ZX-14R Class',
                 "part_number": "DME-SA-ZX14R-12",
                 "specs": {
                     "extension_inches": 12,
@@ -157,7 +156,7 @@ def seed_drag_prep_specialty(db) -> int:
                         "displacement_max_cc": 1450,
                     },
                     "description": (
-                        "DME Racing 12\" extended swingarm; "
+                        'DME Racing 12" extended swingarm; '
                         "ZX-14R 1441cc + ZX-12R 1199cc + ZZR1400; "
                         "+5° frame geometry support, full-bracket Pro Stock builds."
                     ),
@@ -170,7 +169,7 @@ def seed_drag_prep_specialty(db) -> int:
             {
                 "category": "swingarm_ext",
                 "brand": "Brock's Performance",
-                "model_name": "14\" Pro Mod Swingarm — Top Gas / Pro Mod Tier",
+                "model_name": '14" Pro Mod Swingarm — Top Gas / Pro Mod Tier',
                 "part_number": "BP-SA-PROMOD-14",
                 "specs": {
                     "extension_inches": 14,

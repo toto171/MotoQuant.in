@@ -17,6 +17,7 @@ Clusters (matches CLAUDE.md Apr 24 PM taxonomy):
   - ``two-stroke``
   - ``other``  (falls through the above)
 """
+
 import json
 import logging
 import sys
@@ -41,6 +42,7 @@ def _wb_match(pattern: str, spec_str: str) -> bool:
     the YZF-R1 vs YZF-R15 substring collision documented in CLAUDE.md
     April 21 fix and April 27 sanity-sweep regression discovery."""
     import re as _re
+
     tokens = [t for t in _re.split(r"[\s\-\.]+", pattern.lower()) if t]
     spec_tokens = {t for t in _re.split(r"[\s\-\.]+", spec_str.lower()) if t}
     return all(t in spec_tokens for t in tokens)
@@ -53,6 +55,7 @@ def _model_specificity_score(pattern: str) -> int:
     in sync with `scripts/validation_sweep.py::_model_specificity_score`.
     """
     import re as _re
+
     return len([t for t in _re.split(r"[\s\-\.]+", pattern) if t])
 
 
@@ -91,17 +94,25 @@ def run_sweep(out_path):
     t0 = time.time()
 
     # Reference baselines first
-    for label, fn in [("K5", gsxr1000_k5), ("R1", yzfr1_4c8), ("Hayabusa", hayabusa_gen1)]:
+    for label, fn in [
+        ("K5", gsxr1000_k5),
+        ("R1", yzfr1_4c8),
+        ("Hayabusa", hayabusa_gen1),
+    ]:
         cfg = fn()
         r = MotoQuantEngine(cfg).run(use_adaptive_dt=False, max_time=26.0)
-        results.append({
-            "kind": "reference",
-            "label": label,
-            "name": cfg.name,
-            "sim_et": float(r.time_quarter) if r.finished_quarter else None,
-            "sim_trap_kmh": float(r.speed_quarter * 3.6) if r.finished_quarter else None,
-            "finished": bool(r.finished_quarter),
-        })
+        results.append(
+            {
+                "kind": "reference",
+                "label": label,
+                "name": cfg.name,
+                "sim_et": float(r.time_quarter) if r.finished_quarter else None,
+                "sim_trap_kmh": float(r.speed_quarter * 3.6)
+                if r.finished_quarter
+                else None,
+                "finished": bool(r.finished_quarter),
+            }
+        )
 
     # Catalog sweep
     for i, spec in enumerate(ALL_KNOWN_BIKES):
@@ -119,14 +130,18 @@ def run_sweep(out_path):
                 "stroke_type": getattr(spec, "stroke_type", 4) or 4,
                 "category": getattr(spec, "category", None),
                 "cluster": cluster_for(
-                    spec.manufacturer, spec.model_name,
-                    spec.displacement_cc, spec.peak_power_hp,
+                    spec.manufacturer,
+                    spec.model_name,
+                    spec.displacement_cc,
+                    spec.peak_power_hp,
                     getattr(spec, "stroke_type", 4) or 4,
                     getattr(spec, "category", None),
                 ),
                 "finished": bool(r.finished_quarter),
                 "sim_et": float(r.time_quarter) if r.finished_quarter else None,
-                "sim_trap_kmh": float(r.speed_quarter * 3.6) if r.finished_quarter else None,
+                "sim_trap_kmh": float(r.speed_quarter * 3.6)
+                if r.finished_quarter
+                else None,
                 "elapsed_s": float(r.elapsed_time_s),
             }
         except Exception as exc:
@@ -173,7 +188,9 @@ def run_sweep(out_path):
                     in_range_entry = (tgt_et, tgt_trap, src)
                     break
             fallback_entry = (entries[0][1], entries[0][2], entries[0][3])
-            chosen_entry = in_range_entry if in_range_entry is not None else fallback_entry
+            chosen_entry = (
+                in_range_entry if in_range_entry is not None else fallback_entry
+            )
             entry_in_range = in_range_entry is not None
             score = _model_specificity_score(bmod)
 
@@ -238,6 +255,7 @@ def _summarize(results):
         if not deltas:
             return {}
         import statistics as st
+
         abs_deltas = [abs(x) for x in deltas]
         return {
             "n": len(deltas),
@@ -255,21 +273,32 @@ def _summarize(results):
         "total_bikes": sum(e["bikes"] for e in by_cluster.values()),
         "errors": errors,
         "dnf": dnf,
-        "clusters": {cl: {**{k: v for k, v in e.items() if k != "deltas"},
-                          "stats": _stats(e["deltas"])}
-                     for cl, e in by_cluster.items()},
+        "clusters": {
+            cl: {
+                **{k: v for k, v in e.items() if k != "deltas"},
+                "stats": _stats(e["deltas"]),
+            }
+            for cl, e in by_cluster.items()
+        },
         "overall_benchmark_stats": _stats(all_deltas),
     }
     # Top-10 closest
-    finished = [r for r in results if r.get("kind") == "catalog" and r.get("delta_et") is not None]
+    finished = [
+        r
+        for r in results
+        if r.get("kind") == "catalog" and r.get("delta_et") is not None
+    ]
     finished.sort(key=lambda r: abs(r["delta_et"]))
     summary["top10_closest"] = [
-        {"bike": f'{r["manufacturer"]} {r["model"]}', "delta": r["delta_et"]}
+        {"bike": f"{r['manufacturer']} {r['model']}", "delta": r["delta_et"]}
         for r in finished[:10]
     ]
     if finished[:10]:
         import statistics
-        summary["top10_mean_abs"] = statistics.mean(abs(r["delta_et"]) for r in finished[:10])
+
+        summary["top10_mean_abs"] = statistics.mean(
+            abs(r["delta_et"]) for r in finished[:10]
+        )
     return summary
 
 
@@ -279,26 +308,44 @@ def _print_summary(s):
         targets = {"K5": 10.0334, "R1": 10.2859, "Hayabusa": 10.4712}
         t = targets.get(label, 0)
         print(f"  {label:10} ET={et:.4f}  target={t:.4f}  Δ={et - t:+.4f}")
-    print(f"\nTotal catalog: {s['total_bikes']}  errors: {s['errors']}  DNF: {s['dnf']}")
+    print(
+        f"\nTotal catalog: {s['total_bikes']}  errors: {s['errors']}  DNF: {s['dnf']}"
+    )
     print("\n=== OVERALL BENCHMARK STATS ===")
     o = s["overall_benchmark_stats"]
     if o:
-        print(f"  N={o['n']}  mean|Δ|={o['mean_abs_delta']:.3f}s  median|Δ|={o['median_abs_delta']:.3f}s  bias={o['bias']:+.3f}s")
-        print(f"  within ±0.10s: {o['within_0.10']} ({100*o['within_0.10']/o['n']:.0f}%)")
-        print(f"  within ±0.20s: {o['within_0.20']} ({100*o['within_0.20']/o['n']:.0f}%)")
-        print(f"  within ±0.50s: {o['within_0.50']} ({100*o['within_0.50']/o['n']:.0f}%)")
-        print(f"  within ±1.00s: {o['within_1.00']} ({100*o['within_1.00']/o['n']:.0f}%)")
+        print(
+            f"  N={o['n']}  mean|Δ|={o['mean_abs_delta']:.3f}s  median|Δ|={o['median_abs_delta']:.3f}s  bias={o['bias']:+.3f}s"
+        )
+        print(
+            f"  within ±0.10s: {o['within_0.10']} ({100 * o['within_0.10'] / o['n']:.0f}%)"
+        )
+        print(
+            f"  within ±0.20s: {o['within_0.20']} ({100 * o['within_0.20'] / o['n']:.0f}%)"
+        )
+        print(
+            f"  within ±0.50s: {o['within_0.50']} ({100 * o['within_0.50'] / o['n']:.0f}%)"
+        )
+        print(
+            f"  within ±1.00s: {o['within_1.00']} ({100 * o['within_1.00'] / o['n']:.0f}%)"
+        )
     if "top10_mean_abs" in s:
         print(f"  top-10 mean|Δ| = {s['top10_mean_abs']:.4f}s")
     print("\n=== CLUSTER BIASES ===")
     for cl, c in sorted(s["clusters"].items()):
         st = c.get("stats") or {}
         if st:
-            print(f"  {cl:22} bikes={c['bikes']:3d}  N={st['n']:2d}  mean|Δ|={st['mean_abs_delta']:6.3f}s  bias={st['bias']:+6.3f}s")
+            print(
+                f"  {cl:22} bikes={c['bikes']:3d}  N={st['n']:2d}  mean|Δ|={st['mean_abs_delta']:6.3f}s  bias={st['bias']:+6.3f}s"
+            )
         else:
             print(f"  {cl:22} bikes={c['bikes']:3d}  (no benchmarks)")
 
 
 if __name__ == "__main__":
-    out = sys.argv[1] if len(sys.argv) > 1 else "reports/sweep_et_2026-04-24_post_smallcc_fix.json"
+    out = (
+        sys.argv[1]
+        if len(sys.argv) > 1
+        else "reports/sweep_et_2026-04-24_post_smallcc_fix.json"
+    )
     sys.exit(run_sweep(out))

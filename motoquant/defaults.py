@@ -257,13 +257,15 @@ def _synthetic_2stroke_torque_curve(
         # this branch the race-single widths (0.12/0.08/0.12) collapsed
         # torque to baseline outside a narrow 7-8 krpm window, so these
         # bikes never reached top-of-gear-1 speed (DNF at 26 s).
-        band_lo = 0.35   # wide below-peak shoulder (mild pipe)
-        band_hi = 0.25   # gentle above-peak fall
+        band_lo = 0.35  # wide below-peak shoulder (mild pipe)
+        band_hi = 0.25  # gentle above-peak fall
         baseline = 0.35  # strong off-pipe torque (street-tuned)
     else:
         band_lo = 0.25  # was 0.12 (too peaky); now like Yezdi commuter band
         band_hi = 0.15  # was 0.08
-        baseline = 0.25  # was 0.12 — widen to deliver usable torque in drag-run RPM range
+        baseline = (
+            0.25  # was 0.12 — widen to deliver usable torque in drag-run RPM range
+        )
 
     # Required torque at peak_power_rpm to match rated HP (when given)
     required_pp_T = None

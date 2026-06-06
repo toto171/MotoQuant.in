@@ -78,7 +78,9 @@ class TestCorrectionTargets(unittest.TestCase):
         self.assertAlmostEqual(arr[2], 1.10, places=5)  # inertia
 
     def test_array_round_trip(self):
-        t = CorrectionTargets(mu_peak_factor=1.08, peak_torque_factor=1.02, inertia_factor=0.92)
+        t = CorrectionTargets(
+            mu_peak_factor=1.08, peak_torque_factor=1.02, inertia_factor=0.92
+        )
         t2 = CorrectionTargets.from_array(t.to_array())
         self.assertAlmostEqual(t.mu_peak_factor, t2.mu_peak_factor, places=5)
         self.assertAlmostEqual(t.peak_torque_factor, t2.peak_torque_factor, places=5)
@@ -201,9 +203,7 @@ class TestFeatures(unittest.TestCase):
 
     def test_measured_et_appears_in_vector(self):
         x = extract_features(self.cfg, self.measured)
-        self.assertAlmostEqual(
-            x[FEATURE_NAMES.index("measured_et_s")], 10.04, places=4
-        )
+        self.assertAlmostEqual(x[FEATURE_NAMES.index("measured_et_s")], 10.04, places=4)
 
     def test_rear_tire_diameter_populated(self):
         """v2 fix: was reading non-existent 'rear_diameter_mm'; now uses
@@ -275,8 +275,8 @@ class TestSynthetic(unittest.TestCase):
 
     def test_inertia_factor_range_tightened(self):
         lo, hi = PERTURBATION_RANGES["inertia_factor"]
-        self.assertGreaterEqual(lo, 0.84)   # was 0.60
-        self.assertLessEqual(hi, 1.21)       # was 1.80
+        self.assertGreaterEqual(lo, 0.84)  # was 0.60
+        self.assertLessEqual(hi, 1.21)  # was 1.80
         self.assertGreaterEqual(lo, 0.85)
         self.assertLessEqual(hi, 1.20)
 
@@ -286,7 +286,7 @@ class TestSynthetic(unittest.TestCase):
         self.assertIsNotNone(result, "K5 should reliably produce a valid sample")
         x, y = result
         self.assertEqual(x.shape, (FEATURE_DIM,))
-        self.assertEqual(y.shape, (3,))       # schema v2: 3 targets
+        self.assertEqual(y.shape, (3,))  # schema v2: 3 targets
         self.assertTrue(np.all(np.isfinite(x)))
         self.assertTrue(np.all(np.isfinite(y)))
         # Labels should land within the perturbation ranges
@@ -312,7 +312,7 @@ class TestSynthetic(unittest.TestCase):
         # All samples should have exactly 1 perturbed target
         self.assertTrue(
             all(c == 1 for c in non_identity_counts),
-            f"Expected 1 perturbed target per sample; got {non_identity_counts}"
+            f"Expected 1 perturbed target per sample; got {non_identity_counts}",
         )
 
     def test_generate_dataset_smoke_3_targets(self):
@@ -320,7 +320,7 @@ class TestSynthetic(unittest.TestCase):
         ds = generate_dataset([self.k5, self.r1, self.busa], n_samples=12, seed=7)
         self.assertEqual(ds.n, 12)
         self.assertEqual(ds.X.shape, (12, FEATURE_DIM))
-        self.assertEqual(ds.Y.shape, (12, 3))     # schema v2
+        self.assertEqual(ds.Y.shape, (12, 3))  # schema v2
         self.assertEqual(ds.X.dtype, np.float32)
         self.assertEqual(ds.Y.dtype, np.float32)
         self.assertTrue(np.all(np.isfinite(ds.X)))
@@ -381,6 +381,7 @@ class TestCalibrator(unittest.TestCase):
     def _sklearn_available(self):
         try:
             import sklearn  # noqa: F401
+
             return True
         except ImportError:
             return False

@@ -218,10 +218,12 @@ class MotoQuantEngine:
         # category-aware behaviour (keeps the over-clutching tier alive
         # for old DB rows that pre-date the category_tag field).
         from .category_profiles import derive_category_tag, get_profile
+
         tag = c.category_tag
         if not tag:
             tag = derive_category_tag(
-                manufacturer="", model_name="",
+                manufacturer="",
+                model_name="",
                 displacement_cc=c.engine.displacement_cc,
                 peak_power_hp=c.engine.peak_power_hp,
                 stroke_type=c.engine.stroke_type,
@@ -541,10 +543,16 @@ class MotoQuantEngine:
                     # litre-sport / cruiser clusters that don't need slip-launch.
                     prof = self._profile
                     if prof.over_clutch_factor > 0.0 and slip_speed > 0:
-                        max_back_torque = prof.max_engine_decel_rads2 * max(I_e_local, 0.001)
+                        max_back_torque = prof.max_engine_decel_rads2 * max(
+                            I_e_local, 0.001
+                        )
                         headroom = max(0.0, T_clutch_max - abs(T_e_crank))
-                        over_clutch_extra = min(headroom * prof.over_clutch_factor, max_back_torque)
-                        T_transmitted = min(abs(T_e_crank) + over_clutch_extra, T_clutch_max)
+                        over_clutch_extra = min(
+                            headroom * prof.over_clutch_factor, max_back_torque
+                        )
+                        T_transmitted = min(
+                            abs(T_e_crank) + over_clutch_extra, T_clutch_max
+                        )
                     else:
                         T_transmitted = min(abs(T_e_crank), T_clutch_max)
                     T_e = T_transmitted
@@ -567,7 +575,9 @@ class MotoQuantEngine:
                         if cfg.engine.stroke_type == 2 and cfg.engine.tuned_rpm:
                             floor_rpm = cfg.engine.tuned_rpm * prof.launch_floor_factor
                         else:
-                            floor_rpm = cfg.engine.peak_torque_rpm * prof.launch_floor_factor
+                            floor_rpm = (
+                                cfg.engine.peak_torque_rpm * prof.launch_floor_factor
+                            )
                         floor_omega = floor_rpm * RPM_TO_RADS
                         if omega_e < floor_omega:
                             omega_e = floor_omega

@@ -23,6 +23,7 @@ Source-of-truth values:
   - Reference baselines (K5/R1/Busa)   -> motoquant/defaults.py runtime
   - Fast test count                    -> pytest --collect-only -q (best effort)
 """
+
 from __future__ import annotations
 
 import argparse
@@ -40,6 +41,7 @@ DB_PATH = REPO / "motoquant.db"
 
 # ─── Source-of-truth derivation ──────────────────────────────────────────────
 
+
 def _truth_values():
     """Return the canonical numbers from source-of-truth files."""
     sys.path.insert(0, str(REPO))
@@ -51,6 +53,7 @@ def _truth_values():
     # to len(list) + 3 reference bikes only if DB is unreachable.
     try:
         from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
+
         truth["_all_known_bikes_list"] = len(ALL_KNOWN_BIKES)
     except Exception as exc:
         truth["_all_known_bikes_list"] = f"ERROR: {exc}"
@@ -85,6 +88,7 @@ def _truth_values():
     # BENCHMARKS list length
     try:
         from scripts.validation_sweep import BENCHMARKS
+
         truth["benchmarks"] = len(BENCHMARKS)
     except Exception as exc:
         truth["benchmarks"] = f"ERROR: {exc}"
@@ -93,7 +97,12 @@ def _truth_values():
     try:
         from motoquant import MotoQuantEngine
         from motoquant.defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
-        for name, fn in [("k5", gsxr1000_k5), ("r1", yzfr1_4c8), ("busa", hayabusa_gen1)]:
+
+        for name, fn in [
+            ("k5", gsxr1000_k5),
+            ("r1", yzfr1_4c8),
+            ("busa", hayabusa_gen1),
+        ]:
             try:
                 r = MotoQuantEngine(fn()).run()
                 truth[f"baseline_{name}"] = round(float(r.time_quarter), 4)
@@ -106,7 +115,10 @@ def _truth_values():
     try:
         result = subprocess.run(
             ["python3", "-m", "pytest", "tests/", "--collect-only", "-q"],
-            capture_output=True, text=True, cwd=str(REPO), timeout=60,
+            capture_output=True,
+            text=True,
+            cwd=str(REPO),
+            timeout=60,
         )
         # pytest --collect-only -q final line: "N tests collected in Xs" or just count
         for pat in [r"(\d+)\s+tests?\s+collected", r"^=+\s*(\d+)\s+tests?\s+collected"]:
@@ -135,68 +147,245 @@ def _truth_values():
 # Group 1 of the regex must capture the declared numeric value.
 PATTERNS = [
     # Landing page stats strip
-    ("web/app/page.js",                r"(\d{2,4})\s*(?:bikes?|motorcycles?)\b",   "all_known_bikes",   "landing-page bikes tile"),
-    ("web/app/page.js",                r"num:\s*(\d{2,4})\s*,\s*label:\s*'BIKES'",  "all_known_bikes",   "landing-page BIKES num"),
-    ("web/app/page.js",                r"num:\s*(\d{2,4})\s*,\s*label:\s*'PARTS'",  "parts_db",          "landing-page PARTS num"),
-    ("web/app/page.js",                r"(\d{2,4})\s*tires?\b",                    "tires_db",          "landing-page tires tile"),
-    ("web/app/page.js",                r"(\d{2,4})\s*parts?\b",                    "parts_db",          "landing-page parts tile"),
-    ("web/app/page.js",                r"(\d{2,4})\s*venues?\b",                   "venues_db",         "landing-page venues tile"),
-    ("web/app/page.js",                r"(\d{3,4})\s*tests?\b",                    "tests_collected",   "landing-page tests tile"),
-    ("web/app/page.js",                r"(\d{1,3})\s*benchmarks?\b",               "benchmarks",        "landing-page benchmarks count"),
-
+    (
+        "web/app/page.js",
+        r"(\d{2,4})\s*(?:bikes?|motorcycles?)\b",
+        "all_known_bikes",
+        "landing-page bikes tile",
+    ),
+    (
+        "web/app/page.js",
+        r"num:\s*(\d{2,4})\s*,\s*label:\s*'BIKES'",
+        "all_known_bikes",
+        "landing-page BIKES num",
+    ),
+    (
+        "web/app/page.js",
+        r"num:\s*(\d{2,4})\s*,\s*label:\s*'PARTS'",
+        "parts_db",
+        "landing-page PARTS num",
+    ),
+    ("web/app/page.js", r"(\d{2,4})\s*tires?\b", "tires_db", "landing-page tires tile"),
+    ("web/app/page.js", r"(\d{2,4})\s*parts?\b", "parts_db", "landing-page parts tile"),
+    (
+        "web/app/page.js",
+        r"(\d{2,4})\s*venues?\b",
+        "venues_db",
+        "landing-page venues tile",
+    ),
+    (
+        "web/app/page.js",
+        r"(\d{3,4})\s*tests?\b",
+        "tests_collected",
+        "landing-page tests tile",
+    ),
+    (
+        "web/app/page.js",
+        r"(\d{1,3})\s*benchmarks?\b",
+        "benchmarks",
+        "landing-page benchmarks count",
+    ),
     # Bikes catalog page metadata
-    ("web/app/bikes/layout.js",        r"(\d{2,4})\s*(?:Bikes?|bikes?)\b",         "all_known_bikes",   "bikes-page metadata"),
-    ("web/app/bikes/layout.js",        r"(\d{2,4})\s*motorcycles?\b",              "all_known_bikes",   "bikes-page metadata description"),
-    ("web/app/bikes/layout.js",        r"numberOfItems:\s*(\d{2,4})",              "all_known_bikes",   "bikes-page schema numberOfItems"),
-    ("web/app/bikes/[id]/layout.js",   r"(\d{2,4})\s*(?:bikes?|motorcycles?)\b",   "all_known_bikes",   "bikes-id layout"),
-    ("web/app/bikes/page.js",          r"(\d{2,4})\s*(?:Bikes?|bikes?)\b",         "all_known_bikes",   "bikes-page body"),
-
+    (
+        "web/app/bikes/layout.js",
+        r"(\d{2,4})\s*(?:Bikes?|bikes?)\b",
+        "all_known_bikes",
+        "bikes-page metadata",
+    ),
+    (
+        "web/app/bikes/layout.js",
+        r"(\d{2,4})\s*motorcycles?\b",
+        "all_known_bikes",
+        "bikes-page metadata description",
+    ),
+    (
+        "web/app/bikes/layout.js",
+        r"numberOfItems:\s*(\d{2,4})",
+        "all_known_bikes",
+        "bikes-page schema numberOfItems",
+    ),
+    (
+        "web/app/bikes/[id]/layout.js",
+        r"(\d{2,4})\s*(?:bikes?|motorcycles?)\b",
+        "all_known_bikes",
+        "bikes-id layout",
+    ),
+    (
+        "web/app/bikes/page.js",
+        r"(\d{2,4})\s*(?:Bikes?|bikes?)\b",
+        "all_known_bikes",
+        "bikes-page body",
+    ),
     # Features page hero stat
-    ("web/app/features/page.js",       r"(\d{2,4})\s*bikes?\b",                    "all_known_bikes",   "features-page hero"),
-    ("web/app/features/page.js",       r"num:\s*'(\d{2,4})'\s*,\s*label:\s*'Parts'", "parts_db",        "features-page parts num"),
-    ("web/app/features/layout.js",     r"(\d{2,4})-bike\s+catalog",                "all_known_bikes",   "features-page meta description"),
-
+    (
+        "web/app/features/page.js",
+        r"(\d{2,4})\s*bikes?\b",
+        "all_known_bikes",
+        "features-page hero",
+    ),
+    (
+        "web/app/features/page.js",
+        r"num:\s*'(\d{2,4})'\s*,\s*label:\s*'Parts'",
+        "parts_db",
+        "features-page parts num",
+    ),
+    (
+        "web/app/features/layout.js",
+        r"(\d{2,4})-bike\s+catalog",
+        "all_known_bikes",
+        "features-page meta description",
+    ),
     # Layout / metadata / OG / Twitter
-    ("web/app/layout.js",              r"split times for (\d{2,4})\+\s*bikes",     "all_known_bikes",   "layout meta description"),
-    ("web/app/layout.js",              r"covering (\d{2,4}) motorcycles?",         "all_known_bikes",   "layout OG/Twitter alt motorcycles"),
-    ("web/app/layout.js",              r"(\d{2,4}) parts,",                        "parts_db",          "layout OG alt parts"),
-    ("web/app/layout.js",              r"(\d{2,4}) tires,",                        "tires_db",          "layout OG alt tires"),
-    ("web/app/layout.js",              r"(\d{2,4}) venues",                        "venues_db",         "layout OG alt venues"),
-
+    (
+        "web/app/layout.js",
+        r"split times for (\d{2,4})\+\s*bikes",
+        "all_known_bikes",
+        "layout meta description",
+    ),
+    (
+        "web/app/layout.js",
+        r"covering (\d{2,4}) motorcycles?",
+        "all_known_bikes",
+        "layout OG/Twitter alt motorcycles",
+    ),
+    ("web/app/layout.js", r"(\d{2,4}) parts,", "parts_db", "layout OG alt parts"),
+    ("web/app/layout.js", r"(\d{2,4}) tires,", "tires_db", "layout OG alt tires"),
+    ("web/app/layout.js", r"(\d{2,4}) venues", "venues_db", "layout OG alt venues"),
     # Schema.org structured data
-    ("web/app/StructuredData.js",      r"(\d{2,4})\+\s*bikes",                     "all_known_bikes",   "Schema.org description bikes"),
-    ("web/app/StructuredData.js",      r"(\d{2,4}) motorcycles?",                  "all_known_bikes",   "Schema.org motorcycles"),
-    ("web/app/StructuredData.js",      r"(\d{2,4})-part",                          "parts_db",          "Schema.org N-part catalog"),
-    ("web/app/StructuredData.js",      r"(\d{2,4})\s*bikes?\s+across",             "all_known_bikes",   "Schema.org bikes across mfgs"),
-
+    (
+        "web/app/StructuredData.js",
+        r"(\d{2,4})\+\s*bikes",
+        "all_known_bikes",
+        "Schema.org description bikes",
+    ),
+    (
+        "web/app/StructuredData.js",
+        r"(\d{2,4}) motorcycles?",
+        "all_known_bikes",
+        "Schema.org motorcycles",
+    ),
+    (
+        "web/app/StructuredData.js",
+        r"(\d{2,4})-part",
+        "parts_db",
+        "Schema.org N-part catalog",
+    ),
+    (
+        "web/app/StructuredData.js",
+        r"(\d{2,4})\s*bikes?\s+across",
+        "all_known_bikes",
+        "Schema.org bikes across mfgs",
+    ),
     # Simulator, About, Whitepaper, Pricing
-    ("web/app/simulator/layout.js",    r"(\d{2,4}) motorcycles?",                  "all_known_bikes",   "simulator OG alt"),
-    ("web/app/about/page.js",          r"(\d{2,4}) bikes?,",                       "all_known_bikes",   "about-page bikes"),
-    ("web/app/about/page.js",          r"(\d{2,4}) parts?,",                       "parts_db",          "about-page parts"),
-    ("web/app/about/page.js",          r"(\d{2,4}) venues",                        "venues_db",         "about-page venues"),
-    ("web/app/whitepaper/page.js",     r"(\d{2,4})-bike catalog",                  "all_known_bikes",   "whitepaper bike catalog mention"),
-    ("web/app/whitepaper/page.js",     r"(\d{2,4})-part library",                  "parts_db",          "whitepaper part library mention"),
-    ("web/app/whitepaper/page.js",     r"all (\d{2,4}) bikes",                     "all_known_bikes",   "whitepaper all-bikes claim"),
-    ("web/app/whitepaper/page.js",     r"num:\s*'(\d{2,4})'\s*,\s*label:\s*'Catalog bikes'", "all_known_bikes", "whitepaper catalog bikes num"),
-    ("web/app/pricing/page.js",        r"Bike catalog \((\d{2,4}) bikes?\)",       "all_known_bikes",   "pricing tier description"),
-
+    (
+        "web/app/simulator/layout.js",
+        r"(\d{2,4}) motorcycles?",
+        "all_known_bikes",
+        "simulator OG alt",
+    ),
+    (
+        "web/app/about/page.js",
+        r"(\d{2,4}) bikes?,",
+        "all_known_bikes",
+        "about-page bikes",
+    ),
+    ("web/app/about/page.js", r"(\d{2,4}) parts?,", "parts_db", "about-page parts"),
+    ("web/app/about/page.js", r"(\d{2,4}) venues", "venues_db", "about-page venues"),
+    (
+        "web/app/whitepaper/page.js",
+        r"(\d{2,4})-bike catalog",
+        "all_known_bikes",
+        "whitepaper bike catalog mention",
+    ),
+    (
+        "web/app/whitepaper/page.js",
+        r"(\d{2,4})-part library",
+        "parts_db",
+        "whitepaper part library mention",
+    ),
+    (
+        "web/app/whitepaper/page.js",
+        r"all (\d{2,4}) bikes",
+        "all_known_bikes",
+        "whitepaper all-bikes claim",
+    ),
+    (
+        "web/app/whitepaper/page.js",
+        r"num:\s*'(\d{2,4})'\s*,\s*label:\s*'Catalog bikes'",
+        "all_known_bikes",
+        "whitepaper catalog bikes num",
+    ),
+    (
+        "web/app/pricing/page.js",
+        r"Bike catalog \((\d{2,4}) bikes?\)",
+        "all_known_bikes",
+        "pricing tier description",
+    ),
     # Blog posts (per-post)
-    ("web/app/blog/*/page.js",         r"across\s+(\d{2,4})\s+(?:published\s+)?benchmarks?", "benchmarks", "blog post benchmark count"),
-    ("web/app/blog/*/page.js",         r"(\d{3,4}) catalog bikes?",                "all_known_bikes",   "blog 'N catalog bikes'"),
-    ("web/app/blog/*/page.js",         r"(\d{3,4}) different bikes",               "all_known_bikes",   "blog 'N different bikes'"),
-    ("web/app/blog/*/page.js",         r"(\d{3,4}) bikes individually",            "all_known_bikes",   "blog 'measured each of N bikes'"),
-
+    (
+        "web/app/blog/*/page.js",
+        r"across\s+(\d{2,4})\s+(?:published\s+)?benchmarks?",
+        "benchmarks",
+        "blog post benchmark count",
+    ),
+    (
+        "web/app/blog/*/page.js",
+        r"(\d{3,4}) catalog bikes?",
+        "all_known_bikes",
+        "blog 'N catalog bikes'",
+    ),
+    (
+        "web/app/blog/*/page.js",
+        r"(\d{3,4}) different bikes",
+        "all_known_bikes",
+        "blog 'N different bikes'",
+    ),
+    (
+        "web/app/blog/*/page.js",
+        r"(\d{3,4}) bikes individually",
+        "all_known_bikes",
+        "blog 'measured each of N bikes'",
+    ),
     # README
-    ("README.md",                      r"(\d{2,4})\s*bikes?,",                     "all_known_bikes",   "README bikes count"),
-    ("README.md",                      r"(\d{2,4})\s*parts,",                      "parts_db",          "README parts count"),
-
+    ("README.md", r"(\d{2,4})\s*bikes?,", "all_known_bikes", "README bikes count"),
+    ("README.md", r"(\d{2,4})\s*parts,", "parts_db", "README parts count"),
     # Reference baselines (4 decimal places) — these MUST stay pinned
-    ("web/app/page.js",                r"K5\s*[=:]\s*([0-9]+\.[0-9]{1,4})\s*s",    "baseline_k5",       "landing-page K5 baseline"),
-    ("web/app/page.js",                r"R1\s*[=:]\s*([0-9]+\.[0-9]{1,4})\s*s",    "baseline_r1",       "landing-page R1 baseline"),
-    ("web/app/page.js",                r"Hayabusa\s*[=:]\s*([0-9]+\.[0-9]{1,4})\s*s", "baseline_busa",  "landing-page Hayabusa baseline"),
-    ("web/app/blog/*/page.js",         r"K5[^.]*?([0-9]+\.[0-9]{4})\s*s",          "baseline_k5",       "blog K5 baseline"),
-    ("web/app/blog/*/page.js",         r"R1\s+4C8[^.]*?([0-9]+\.[0-9]{4})\s*s",    "baseline_r1",       "blog R1 baseline"),
-    ("web/app/blog/*/page.js",         r"Hayabusa\s+Gen1[^.]*?([0-9]+\.[0-9]{4})\s*s", "baseline_busa", "blog Hayabusa baseline"),
+    (
+        "web/app/page.js",
+        r"K5\s*[=:]\s*([0-9]+\.[0-9]{1,4})\s*s",
+        "baseline_k5",
+        "landing-page K5 baseline",
+    ),
+    (
+        "web/app/page.js",
+        r"R1\s*[=:]\s*([0-9]+\.[0-9]{1,4})\s*s",
+        "baseline_r1",
+        "landing-page R1 baseline",
+    ),
+    (
+        "web/app/page.js",
+        r"Hayabusa\s*[=:]\s*([0-9]+\.[0-9]{1,4})\s*s",
+        "baseline_busa",
+        "landing-page Hayabusa baseline",
+    ),
+    (
+        "web/app/blog/*/page.js",
+        r"K5[^.]*?([0-9]+\.[0-9]{4})\s*s",
+        "baseline_k5",
+        "blog K5 baseline",
+    ),
+    (
+        "web/app/blog/*/page.js",
+        r"R1\s+4C8[^.]*?([0-9]+\.[0-9]{4})\s*s",
+        "baseline_r1",
+        "blog R1 baseline",
+    ),
+    (
+        "web/app/blog/*/page.js",
+        r"Hayabusa\s+Gen1[^.]*?([0-9]+\.[0-9]{4})\s*s",
+        "baseline_busa",
+        "blog Hayabusa baseline",
+    ),
 ]
 
 
@@ -225,6 +414,7 @@ def _scan_file(path: Path, pattern: str, truth_value):
 
 
 # ─── In-place patching ───────────────────────────────────────────────────────
+
 
 def _patch_file(path: Path, pattern: str, truth_value) -> int:
     """Apply pattern in-place, replacing group(1) with truth_value. Returns count of edits."""
@@ -275,7 +465,9 @@ def apply_fixes(truth, verbose=True):
     changed = set()
     for file_glob, pattern, truth_key, desc in PATTERNS:
         truth_value = truth.get(truth_key)
-        if truth_value is None or (isinstance(truth_value, str) and truth_value.startswith("ERROR")):
+        if truth_value is None or (
+            isinstance(truth_value, str) and truth_value.startswith("ERROR")
+        ):
             continue
         for path in REPO.glob(file_glob):
             n = _patch_file(path, pattern, truth_value)
@@ -289,6 +481,7 @@ def apply_fixes(truth, verbose=True):
 
 # ─── OG card regeneration ────────────────────────────────────────────────────
 
+
 def regenerate_og_card(truth, output_path: Path | None = None, verbose=True) -> Path:
     """Render a 1200×630 OG social card matching the existing layout."""
     try:
@@ -301,12 +494,12 @@ def regenerate_og_card(truth, output_path: Path | None = None, verbose=True) -> 
     out_path = output_path or OG_IMAGE_PATH
 
     W, H = 1200, 630
-    BG = (10, 10, 12)              # near-black
+    BG = (10, 10, 12)  # near-black
     PANEL = (20, 20, 24)
     BORDER = (40, 40, 48)
     TEXT = (240, 240, 240)
     DIM = (140, 140, 150)
-    ORANGE = (255, 122, 0)         # signal orange
+    ORANGE = (255, 122, 0)  # signal orange
     GREEN = (32, 200, 110)
 
     img = Image.new("RGB", (W, H), BG)
@@ -334,14 +527,14 @@ def regenerate_og_card(truth, output_path: Path | None = None, verbose=True) -> 
                 continue
         return ImageFont.load_default()
 
-    f_pill   = _font(20)
-    f_brand  = _font(96, "bold")
-    f_tag    = _font(38, "bold")
-    f_sub    = _font(20)
+    f_pill = _font(20)
+    f_brand = _font(96, "bold")
+    f_tag = _font(38, "bold")
+    f_sub = _font(20)
     f_stat_n = _font(64, "bold")
     f_stat_l = _font(18, "bold")
-    f_url    = _font(22, "bold")
-    f_chart  = _font(22, "bold")
+    f_url = _font(22, "bold")
+    f_chart = _font(22, "bold")
     f_chart_sub = _font(16)
 
     # ── Top pill: "Free · Open Source · India" ─────────────────────────
@@ -350,11 +543,18 @@ def regenerate_og_card(truth, output_path: Path | None = None, verbose=True) -> 
     bbox = d.textbbox((0, 0), pill_text, font=f_pill)
     pw = bbox[2] - bbox[0] + 60
     ph = bbox[3] - bbox[1] + 22
-    d.rounded_rectangle((pill_x, pill_y, pill_x + pw, pill_y + ph), radius=ph // 2,
-                        fill=PANEL, outline=BORDER, width=1)
+    d.rounded_rectangle(
+        (pill_x, pill_y, pill_x + pw, pill_y + ph),
+        radius=ph // 2,
+        fill=PANEL,
+        outline=BORDER,
+        width=1,
+    )
     # Orange dot
-    d.ellipse((pill_x + 18, pill_y + ph // 2 - 5, pill_x + 28, pill_y + ph // 2 + 5),
-              fill=ORANGE)
+    d.ellipse(
+        (pill_x + 18, pill_y + ph // 2 - 5, pill_x + 28, pill_y + ph // 2 + 5),
+        fill=ORANGE,
+    )
     d.text((pill_x + 36, pill_y + 10), pill_text, font=f_pill, fill=TEXT)
 
     # ── Brand wordmark ──────────────────────────────────────────────────
@@ -370,7 +570,11 @@ def regenerate_og_card(truth, output_path: Path | None = None, verbose=True) -> 
             # data structure varies; look for top-10 mean in summary
             summary = data.get("summary") or {}
             if isinstance(summary, dict):
-                for k in ("top10_mean_abs_delta_s", "top_10_mean_abs", "top10_mean_delta"):
+                for k in (
+                    "top10_mean_abs_delta_s",
+                    "top_10_mean_abs",
+                    "top10_mean_delta",
+                ):
                     if k in summary:
                         top10 = f"±{float(summary[k]):.3f}"
                         break
@@ -389,10 +593,10 @@ def regenerate_og_card(truth, output_path: Path | None = None, verbose=True) -> 
         tests_n = "1000+"
 
     stats = [
-        (str(bikes_n),  "BIKES"),
-        (str(parts_n),  "PARTS"),
+        (str(bikes_n), "BIKES"),
+        (str(parts_n), "PARTS"),
         (str(venues_n), "VENUES"),
-        (str(tests_n),  "TESTS"),
+        (str(tests_n), "TESTS"),
     ]
 
     grid_x, grid_y = 60, 380
@@ -411,8 +615,9 @@ def regenerate_og_card(truth, output_path: Path | None = None, verbose=True) -> 
     uh = bbox[3] - bbox[1] + 22
     ux = W - uw - 60
     uy = H - uh - 50
-    d.rounded_rectangle((ux, uy, ux + uw, uy + uh), radius=uh // 2,
-                        fill=ORANGE, outline=ORANGE)
+    d.rounded_rectangle(
+        (ux, uy, ux + uw, uy + uh), radius=uh // 2, fill=ORANGE, outline=ORANGE
+    )
     d.text((ux + 21, uy + 8), url, font=f_url, fill=(8, 8, 8))
 
     # ── Right panel: GSX-R K5 v(t) curve ─────────────────────────────────
@@ -420,12 +625,27 @@ def regenerate_og_card(truth, output_path: Path | None = None, verbose=True) -> 
     panel_y = 100
     panel_w = 440
     panel_h = 300
-    d.rounded_rectangle((panel_x, panel_y, panel_x + panel_w, panel_y + panel_h),
-                        radius=14, fill=PANEL, outline=BORDER, width=1)
+    d.rounded_rectangle(
+        (panel_x, panel_y, panel_x + panel_w, panel_y + panel_h),
+        radius=14,
+        fill=PANEL,
+        outline=BORDER,
+        width=1,
+    )
 
     # Header strip
-    d.text((panel_x + 22, panel_y + 18), "GSX-R 1000 K5  ·  Aamby Valley", font=f_chart, fill=TEXT)
-    d.text((panel_x + 22, panel_y + 50), "Reference baseline · preserved exactly", font=f_chart_sub, fill=DIM)
+    d.text(
+        (panel_x + 22, panel_y + 18),
+        "GSX-R 1000 K5  ·  Aamby Valley",
+        font=f_chart,
+        fill=TEXT,
+    )
+    d.text(
+        (panel_x + 22, panel_y + 50),
+        "Reference baseline · preserved exactly",
+        font=f_chart_sub,
+        fill=DIM,
+    )
 
     # Plot region
     pad_l = 28
@@ -455,7 +675,9 @@ def regenerate_og_card(truth, output_path: Path | None = None, verbose=True) -> 
     # Curve
     d.line(pts, fill=ORANGE, width=3)
     # End-point dot
-    d.ellipse((pts[-1][0] - 6, pts[-1][1] - 6, pts[-1][0] + 6, pts[-1][1] + 6), fill=ORANGE)
+    d.ellipse(
+        (pts[-1][0] - 6, pts[-1][1] - 6, pts[-1][0] + 6, pts[-1][1] + 6), fill=ORANGE
+    )
 
     # Footer badge
     badge_text = f"{t_max:.2f}s  ·  {v_max:.0f} km/h"
@@ -464,24 +686,37 @@ def regenerate_og_card(truth, output_path: Path | None = None, verbose=True) -> 
     bh = bbox[3] - bbox[1] + 18
     bx = panel_x + panel_w - bw - 20
     by = panel_y + panel_h - bh - 16
-    d.rounded_rectangle((bx, by, bx + bw, by + bh), radius=bh // 2, fill=GREEN, outline=GREEN)
+    d.rounded_rectangle(
+        (bx, by, bx + bw, by + bh), radius=bh // 2, fill=GREEN, outline=GREEN
+    )
     d.text((bx + 15, by + 7), badge_text, font=f_chart, fill=(8, 8, 8))
 
     img.save(out_path, "PNG", optimize=True)
     if verbose:
         size_kb = out_path.stat().st_size // 1024
-        print(f"  REGEN  {out_path.relative_to(REPO).as_posix()}  ({W}×{H}, {size_kb} KB)")
+        print(
+            f"  REGEN  {out_path.relative_to(REPO).as_posix()}  ({W}×{H}, {size_kb} KB)"
+        )
     return out_path
 
 
 # ─── Main ────────────────────────────────────────────────────────────────────
 
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", action="store_true", help="emit JSON report")
-    ap.add_argument("--fail-on-drift", action="store_true", help="exit 1 if drift detected")
-    ap.add_argument("--fix", action="store_true", help="auto-patch declared values to truth in-place")
-    ap.add_argument("--regen-og", action="store_true", help="regenerate OG social-card PNG")
+    ap.add_argument(
+        "--fail-on-drift", action="store_true", help="exit 1 if drift detected"
+    )
+    ap.add_argument(
+        "--fix",
+        action="store_true",
+        help="auto-patch declared values to truth in-place",
+    )
+    ap.add_argument(
+        "--regen-og", action="store_true", help="regenerate OG social-card PNG"
+    )
     args = ap.parse_args()
 
     truth = _truth_values()
@@ -491,21 +726,25 @@ def main():
     drift_records = []
     for file_glob, pattern, truth_key, desc in PATTERNS:
         truth_value = truth.get(truth_key)
-        if truth_value is None or (isinstance(truth_value, str) and truth_value.startswith("ERROR")):
+        if truth_value is None or (
+            isinstance(truth_value, str) and truth_value.startswith("ERROR")
+        ):
             continue
         for path in REPO.glob(file_glob):
             findings = _scan_file(path, pattern, truth_value)
             for line_num, declared, drift, line_preview in findings:
                 if drift is True:
                     drift_count += 1
-                    drift_records.append({
-                        "file": path.relative_to(REPO).as_posix(),
-                        "line": line_num,
-                        "declared": declared,
-                        "truth": truth_value,
-                        "truth_key": truth_key,
-                        "description": desc,
-                    })
+                    drift_records.append(
+                        {
+                            "file": path.relative_to(REPO).as_posix(),
+                            "line": line_num,
+                            "declared": declared,
+                            "truth": truth_value,
+                            "truth_key": truth_key,
+                            "description": desc,
+                        }
+                    )
 
     if not args.json:
         print("=" * 78)
@@ -517,7 +756,9 @@ def main():
             print(f"  {k:24s}  {v}")
         print()
         for rec in drift_records:
-            print(f"  DRIFT  {rec['file']}:{rec['line']}  declares={rec['declared']}  truth={rec['truth']}  ({rec['description']})")
+            print(
+                f"  DRIFT  {rec['file']}:{rec['line']}  declares={rec['declared']}  truth={rec['truth']}  ({rec['description']})"
+            )
 
     # ── Apply fixes ─────────────────────────────────────────────────────
     changed_files = []
@@ -554,12 +795,18 @@ def main():
                 return 2
 
     if args.json:
-        print(json.dumps({
-            "truth": truth,
-            "drift": drift_records,
-            "fixed_files": changed_files,
-            "og_regenerated": og_regenerated,
-        }, indent=2, default=str))
+        print(
+            json.dumps(
+                {
+                    "truth": truth,
+                    "drift": drift_records,
+                    "fixed_files": changed_files,
+                    "og_regenerated": og_regenerated,
+                },
+                indent=2,
+                default=str,
+            )
+        )
     else:
         print()
         if drift_count == 0 and not changed_files:
@@ -568,7 +815,9 @@ def main():
             n = len(set(changed_files))
             print(f"{drift_count} drift(s) detected, {n} file(s) modified by --fix.")
         else:
-            print(f"{drift_count} drift(s) detected. Patch each location and re-run, or use --fix.")
+            print(
+                f"{drift_count} drift(s) detected. Patch each location and re-run, or use --fix."
+            )
         print()
 
     return 1 if (args.fail_on_drift and drift_count > 0 and not args.fix) else 0

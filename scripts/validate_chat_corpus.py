@@ -62,93 +62,146 @@ CORPUS = [
     ("how fast is a Hayabusa", "simulate", "hayabusa", {}),
     ("R15 V4 ET in 38C heat", "simulate", "r15", {}),
     ("Pulsar NS200 quarter mile", "simulate", "ns200", {}),
-    ("KTM RC 390 at Aamby Valley", "simulate", "rc 390",
-     {"venue_sub": "aamby"}),
+    ("KTM RC 390 at Aamby Valley", "simulate", "rc 390", {"venue_sub": "aamby"}),
     ("how slow is a Royal Enfield Classic 350", "simulate", "classic 350", {}),
     ("Ninja H2R 1/4 mile", "simulate", "h2r", {}),
     ("BMW M1000RR ET", "simulate", "m1000rr", {}),
-    ("CBR1000RR-R SP at MMRT", "simulate", "cbr",
-     {"venue_sub": "mmrt"}),
+    ("CBR1000RR-R SP at MMRT", "simulate", "cbr", {"venue_sub": "mmrt"}),
     ("how fast is an Aprilia RS 660", "simulate", "rs 660", {}),
     ("Honda CB350 H'ness ET", "simulate", "cb350", {}),
-
     # ── COMPARE intent (8) ─────────────────────────────────────────
-    ("compare K5 vs R1", "compare", "gsx-r 1000",
-     {"compare_bike_sub": "yzf-r1"}),
-    ("Hayabusa vs Ninja H2", "compare", "hayabusa",
-     {"compare_bike_sub": "ninja h2"}),
-    ("R15 V4 vs RC 200", "compare", "r15",
-     {"compare_bike_sub": "rc 200"}),
-    ("Panigale V4 R vs RSV4 Factory", "compare", "panigale",
-     {"compare_bike_sub": "rsv4"}),
-    ("Pulsar NS200 vs KTM Duke 390", "compare", "ns200",
-     {"compare_bike_sub": "duke 390"}),
-    ("MT-09 vs Z H2", "compare", "mt-09",
-     {"compare_bike_sub": "z h2"}),
-    ("Continental GT 650 vs Interceptor 650", "compare", "gt 650",
-     {"compare_bike_sub": "interceptor"}),
-    ("RD350 vs RX135", "compare", "rd350",
-     {"compare_bike_sub": "rx135"}),
-
+    ("compare K5 vs R1", "compare", "gsx-r 1000", {"compare_bike_sub": "yzf-r1"}),
+    ("Hayabusa vs Ninja H2", "compare", "hayabusa", {"compare_bike_sub": "ninja h2"}),
+    ("R15 V4 vs RC 200", "compare", "r15", {"compare_bike_sub": "rc 200"}),
+    (
+        "Panigale V4 R vs RSV4 Factory",
+        "compare",
+        "panigale",
+        {"compare_bike_sub": "rsv4"},
+    ),
+    (
+        "Pulsar NS200 vs KTM Duke 390",
+        "compare",
+        "ns200",
+        {"compare_bike_sub": "duke 390"},
+    ),
+    ("MT-09 vs Z H2", "compare", "mt-09", {"compare_bike_sub": "z h2"}),
+    (
+        "Continental GT 650 vs Interceptor 650",
+        "compare",
+        "gt 650",
+        {"compare_bike_sub": "interceptor"},
+    ),
+    ("RD350 vs RX135", "compare", "rd350", {"compare_bike_sub": "rx135"}),
     # ── RANK intent (5) ────────────────────────────────────────────
-    ("fastest litre bike at Aamby Valley", "rank", "",
-     {"venue_sub": "aamby"}),
+    ("fastest litre bike at Aamby Valley", "rank", "", {"venue_sub": "aamby"}),
     ("quickest 600cc bike", "rank", "", {}),
     ("top 5 sport 300 bikes", "rank", "", {}),
     ("fastest Indian-market bike under 4 lakh", "rank", "", {}),
     ("which 2-stroke runs the fastest 1/4", "rank", "", {}),
-
     # ── RECOMMEND intent — tier-aware (12) ─────────────────────────
-    ("best stage 1 mods for R15 V4 in budget", "recommend", "r15",
-     {"tier": "stage_1", "parts_min": 2}),
-    ("Stage 2 build for K5 with 1 lakh", "recommend", "gsx-r 1000",
-     {"tier": "stage_2", "parts_min": 4, "budget": 100000}),
-    ("no budget all out build for Hayabusa", "recommend", "hayabusa",
-     {"tier": "all_out", "parts_min": 8}),
-    ("first mods for Pulsar NS200 under 30k", "recommend", "ns200",
-     {"tier": "stage_1", "parts_min": 1, "budget": 30000}),
-    ("full race build for Panigale V4R", "recommend", "panigale",
-     {"tier": "all_out", "parts_min": 8}),
-    ("track-day prep for RC 390", "recommend", "rc 390",
-     {"tier": "stage_2", "parts_min": 4}),
-    ("best parts under 50000 for KTM Duke 390", "recommend", "duke 390",
-     {"parts_min": 2, "budget": 50000}),
-    ("stage 1 for Continental GT 650", "recommend", "gt 650",
-     {"tier": "stage_1", "parts_min": 2}),
-    ("maximum power upgrades for ZX-10R", "recommend", "zx-10r",
-     {"tier": "all_out", "parts_min": 6}),
-    ("budget mods for FZ25", "recommend", "fz25",
-     {"tier": "stage_1"}),
-    ("all out drag prep for Pulsar NS400Z", "recommend", "ns400z",
-     {"tier": "all_out", "parts_min": 6}),
-    ("street-legal sport build for SV650", "recommend", "sv650",
-     {"tier": "stage_2", "parts_min": 4}),
-
+    (
+        "best stage 1 mods for R15 V4 in budget",
+        "recommend",
+        "r15",
+        {"tier": "stage_1", "parts_min": 2},
+    ),
+    (
+        "Stage 2 build for K5 with 1 lakh",
+        "recommend",
+        "gsx-r 1000",
+        {"tier": "stage_2", "parts_min": 4, "budget": 100000},
+    ),
+    (
+        "no budget all out build for Hayabusa",
+        "recommend",
+        "hayabusa",
+        {"tier": "all_out", "parts_min": 8},
+    ),
+    (
+        "first mods for Pulsar NS200 under 30k",
+        "recommend",
+        "ns200",
+        {"tier": "stage_1", "parts_min": 1, "budget": 30000},
+    ),
+    (
+        "full race build for Panigale V4R",
+        "recommend",
+        "panigale",
+        {"tier": "all_out", "parts_min": 8},
+    ),
+    (
+        "track-day prep for RC 390",
+        "recommend",
+        "rc 390",
+        {"tier": "stage_2", "parts_min": 4},
+    ),
+    (
+        "best parts under 50000 for KTM Duke 390",
+        "recommend",
+        "duke 390",
+        {"parts_min": 2, "budget": 50000},
+    ),
+    (
+        "stage 1 for Continental GT 650",
+        "recommend",
+        "gt 650",
+        {"tier": "stage_1", "parts_min": 2},
+    ),
+    (
+        "maximum power upgrades for ZX-10R",
+        "recommend",
+        "zx-10r",
+        {"tier": "all_out", "parts_min": 6},
+    ),
+    ("budget mods for FZ25", "recommend", "fz25", {"tier": "stage_1"}),
+    (
+        "all out drag prep for Pulsar NS400Z",
+        "recommend",
+        "ns400z",
+        {"tier": "all_out", "parts_min": 6},
+    ),
+    (
+        "street-legal sport build for SV650",
+        "recommend",
+        "sv650",
+        {"tier": "stage_2", "parts_min": 4},
+    ),
     # ── CHOOSE_BIKE intent (8) ─────────────────────────────────────
-    ("help me pick a litre bike for Aamby Valley", "choose_bike", "",
-     {"class": "litre", "venue_sub": "aamby"}),
-    ("which 600 should I buy for racing", "choose_bike", "",
-     {"class": "600"}),
-    ("best Indian twin for drag at MMRT", "choose_bike", "",
-     {"class": "twin", "prefer_indian": True}),
-    ("recommend a 2-stroke for vintage drag", "choose_bike", "",
-     {"class": "2t"}),
-    ("which cruiser is fastest 1/4 mile", "choose_bike", "",
-     {"class": "cruiser"}),
-    ("pick a small-cc bike for Indian-class drag", "choose_bike", "",
-     {"class": "small-cc", "prefer_indian": True}),
-    ("best naked bike for stoppie / wheelie", "choose_bike", "",
-     {"class": "naked"}),
-    ("modified Hayabusa for Pro Street", "choose_bike", "",
-     {"class": "modified-hayabusa"}),
-
+    (
+        "help me pick a litre bike for Aamby Valley",
+        "choose_bike",
+        "",
+        {"class": "litre", "venue_sub": "aamby"},
+    ),
+    ("which 600 should I buy for racing", "choose_bike", "", {"class": "600"}),
+    (
+        "best Indian twin for drag at MMRT",
+        "choose_bike",
+        "",
+        {"class": "twin", "prefer_indian": True},
+    ),
+    ("recommend a 2-stroke for vintage drag", "choose_bike", "", {"class": "2t"}),
+    ("which cruiser is fastest 1/4 mile", "choose_bike", "", {"class": "cruiser"}),
+    (
+        "pick a small-cc bike for Indian-class drag",
+        "choose_bike",
+        "",
+        {"class": "small-cc", "prefer_indian": True},
+    ),
+    ("best naked bike for stoppie / wheelie", "choose_bike", "", {"class": "naked"}),
+    (
+        "modified Hayabusa for Pro Street",
+        "choose_bike",
+        "",
+        {"class": "modified-hayabusa"},
+    ),
     # ── EXPLAIN intent (5) ─────────────────────────────────────────
     ("why does altitude hurt ET", "explain", "", {}),
     ("how does humidity affect drag racing", "explain", "", {}),
     ("what is launch RPM", "explain", "", {}),
     ("explain wheelie limit on a Hayabusa", "explain", "hayabusa", {}),
     ("how does a quickshifter work", "explain", "", {}),
-
     # ── SMALLTALK intent (2) ───────────────────────────────────────
     ("hi there", "smalltalk", "", {}),
     ("what is this site", "smalltalk", "", {}),
@@ -196,37 +249,101 @@ def _mock_parser(query: str) -> dict[str, Any]:
         return out
     if "vs" in q or " versus " in q:
         out["intent_type"] = "compare"
-    elif any(w in q for w in (
-        "fastest", "quickest", "top 5", "top 10", "rank", "which 2-stroke",
-    )):
+    elif any(
+        w in q
+        for w in (
+            "fastest",
+            "quickest",
+            "top 5",
+            "top 10",
+            "rank",
+            "which 2-stroke",
+        )
+    ):
         out["intent_type"] = "rank"
-    elif any(w in q for w in (
-        "help me pick", "which 600 should", "recommend a", "which cruiser",
-        "pick a", "best naked bike", "modified hayabusa", "best indian twin",
-    )):
+    elif any(
+        w in q
+        for w in (
+            "help me pick",
+            "which 600 should",
+            "recommend a",
+            "which cruiser",
+            "pick a",
+            "best naked bike",
+            "modified hayabusa",
+            "best indian twin",
+        )
+    ):
         out["intent_type"] = "choose_bike"
-    elif any(w in q for w in (
-        "best ", "stage", "all out", "no budget", "first mods",
-        "track-day prep", "race build", "build for", "mods for",
-        "parts under", "maximum power", "drag prep", "street-legal",
-        "upgrades for",
-    )):
+    elif any(
+        w in q
+        for w in (
+            "best ",
+            "stage",
+            "all out",
+            "no budget",
+            "first mods",
+            "track-day prep",
+            "race build",
+            "build for",
+            "mods for",
+            "parts under",
+            "maximum power",
+            "drag prep",
+            "street-legal",
+            "upgrades for",
+        )
+    ):
         out["intent_type"] = "recommend"
-    elif any(w in q for w in (
-        "why does", "how does", "explain", "what is launch",
-    )):
+    elif any(
+        w in q
+        for w in (
+            "why does",
+            "how does",
+            "explain",
+            "what is launch",
+        )
+    ):
         out["intent_type"] = "explain"
 
     # Build tier inference
-    if any(w in q for w in ("stage 1", "stage_1", "first mods", "starter",
-                             "budget mods", "in budget", "under 30k",
-                             "under 50000")):
+    if any(
+        w in q
+        for w in (
+            "stage 1",
+            "stage_1",
+            "first mods",
+            "starter",
+            "budget mods",
+            "in budget",
+            "under 30k",
+            "under 50000",
+        )
+    ):
         out["build_tier"] = "stage_1"
-    elif any(w in q for w in ("all out", "no budget", "all_out", "maximum",
-                                "race build", "full race", "drag prep")):
+    elif any(
+        w in q
+        for w in (
+            "all out",
+            "no budget",
+            "all_out",
+            "maximum",
+            "race build",
+            "full race",
+            "drag prep",
+        )
+    ):
         out["build_tier"] = "all_out"
-    elif any(w in q for w in ("stage 2", "stage_2", "track-day prep",
-                                "track day", "street-legal sport")):
+    elif any(
+        w in q
+        for w in (
+            "stage 2",
+            "stage_2",
+            "track-day prep",
+            "track day",
+            "street-legal sport",
+        )
+    ):
         out["build_tier"] = "stage_2"
 
     # Class inference for choose_bike
@@ -335,6 +452,7 @@ class _MockClient:
 
     def call_tool(self, *, system, user, tool_name, tool_schema):
         from motoquant.llm.client import LLMResponse
+
         parsed = _mock_parser(user)
         self.calls.append(("tool", user, parsed))
         return LLMResponse(tool_input=parsed, stop_reason="tool_use")
@@ -369,113 +487,129 @@ def run_corpus(db_path: str) -> dict[str, Any]:
         try:
             r = run_chat_pipeline(query, db, client=client, run_summary=False)
         except Exception as e:  # noqa: BLE001
-            rows.append({
-                "query": query,
-                "ok": False,
-                "errors": [f"pipeline raised {type(e).__name__}: {e}"],
-                "latency_ms": int((time.time() - t0) * 1000),
-            })
+            rows.append(
+                {
+                    "query": query,
+                    "ok": False,
+                    "errors": [f"pipeline raised {type(e).__name__}: {e}"],
+                    "latency_ms": int((time.time() - t0) * 1000),
+                }
+            )
             continue
 
         checks = []
         # Intent matches
-        checks.append(_check(
-            "intent",
-            r.intent_type == exp_intent,
-            f"expected {exp_intent}, got {r.intent_type}",
-        ))
+        checks.append(
+            _check(
+                "intent",
+                r.intent_type == exp_intent,
+                f"expected {exp_intent}, got {r.intent_type}",
+            )
+        )
         # Bike resolved (when expected)
         if exp_bike_sub:
-            checks.append(_check(
-                "bike_resolved",
-                r.bike_id is not None,
-                f"bike_name='{r.bike_name}' did not resolve to any catalog bike",
-            ))
-            checks.append(_check(
-                "bike_substring",
-                exp_bike_sub.lower() in (r.bike_name or "").lower(),
-                f"bike_name='{r.bike_name}' missing substring '{exp_bike_sub}'",
-            ))
+            checks.append(
+                _check(
+                    "bike_resolved",
+                    r.bike_id is not None,
+                    f"bike_name='{r.bike_name}' did not resolve to any catalog bike",
+                )
+            )
+            checks.append(
+                _check(
+                    "bike_substring",
+                    exp_bike_sub.lower() in (r.bike_name or "").lower(),
+                    f"bike_name='{r.bike_name}' missing substring '{exp_bike_sub}'",
+                )
+            )
 
         # Recommend tier check
         if exp_intent == "recommend" and "tier" in extra:
-            tier = (
-                r.recommend_result.get("build_tier")
-                if r.recommend_result else None
+            tier = r.recommend_result.get("build_tier") if r.recommend_result else None
+            checks.append(
+                _check(
+                    "build_tier",
+                    tier == extra["tier"],
+                    f"expected tier={extra['tier']}, got {tier}",
+                )
             )
-            checks.append(_check(
-                "build_tier",
-                tier == extra["tier"],
-                f"expected tier={extra['tier']}, got {tier}",
-            ))
         if exp_intent == "recommend" and "parts_min" in extra:
-            n = (
-                len(r.recommend_result.get("parts", []))
-                if r.recommend_result else 0
+            n = len(r.recommend_result.get("parts", [])) if r.recommend_result else 0
+            checks.append(
+                _check(
+                    "parts_min",
+                    n >= extra["parts_min"],
+                    f"expected >= {extra['parts_min']} parts, got {n}",
+                )
             )
-            checks.append(_check(
-                "parts_min",
-                n >= extra["parts_min"],
-                f"expected >= {extra['parts_min']} parts, got {n}",
-            ))
 
         # Compare check
         if exp_intent == "compare" and "compare_bike_sub" in extra:
             sub = extra["compare_bike_sub"].lower()
             b_name = (r.bike_b_name or "").lower()
-            checks.append(_check(
-                "compare_bike_b",
-                sub in b_name or b_name == "",  # mock may not always match
-                f"bike_b_name='{r.bike_b_name}' missing substring '{sub}'",
-            ))
+            checks.append(
+                _check(
+                    "compare_bike_b",
+                    sub in b_name or b_name == "",  # mock may not always match
+                    f"bike_b_name='{r.bike_b_name}' missing substring '{sub}'",
+                )
+            )
 
         # Rank check
         if exp_intent == "rank":
-            top_count = (
-                len(r.rank_result.get("top", []))
-                if r.rank_result else 0
+            top_count = len(r.rank_result.get("top", [])) if r.rank_result else 0
+            checks.append(
+                _check(
+                    "rank_has_results",
+                    top_count > 0 or r.error in ("no_candidates", None),
+                    f"top has {top_count} entries; error={r.error}",
+                )
             )
-            checks.append(_check(
-                "rank_has_results",
-                top_count > 0 or r.error in ("no_candidates", None),
-                f"top has {top_count} entries; error={r.error}",
-            ))
 
         # Choose_bike check
         if exp_intent == "choose_bike":
             cb = r.choose_bike_result or {}
-            checks.append(_check(
-                "choose_hero",
-                bool(cb.get("hero")) or r.error in ("no_candidates", "all_sims_failed"),
-                f"hero is {cb.get('hero')}; error={r.error}",
-            ))
-            if "class" in extra:
-                checks.append(_check(
-                    "choose_class",
-                    cb.get("target_class") == extra["class"]
+            checks.append(
+                _check(
+                    "choose_hero",
+                    bool(cb.get("hero"))
                     or r.error in ("no_candidates", "all_sims_failed"),
-                    f"target_class={cb.get('target_class')} expected {extra['class']}",
-                ))
+                    f"hero is {cb.get('hero')}; error={r.error}",
+                )
+            )
+            if "class" in extra:
+                checks.append(
+                    _check(
+                        "choose_class",
+                        cb.get("target_class") == extra["class"]
+                        or r.error in ("no_candidates", "all_sims_failed"),
+                        f"target_class={cb.get('target_class')} expected {extra['class']}",
+                    )
+                )
 
         if "venue_sub" in extra:
-            checks.append(_check(
-                "venue",
-                extra["venue_sub"].lower() in (r.venue_name or "").lower(),
-                f"venue='{r.venue_name}' missing '{extra['venue_sub']}'",
-            ))
+            checks.append(
+                _check(
+                    "venue",
+                    extra["venue_sub"].lower() in (r.venue_name or "").lower(),
+                    f"venue='{r.venue_name}' missing '{extra['venue_sub']}'",
+                )
+            )
 
         all_ok = all(c["ok"] for c in checks)
-        rows.append({
-            "query": query,
-            "intent": r.intent_type,
-            "bike_name": r.bike_name,
-            "bike_id": r.bike_id,
-            "venue_name": r.venue_name,
-            "error": r.error,
-            "ok": all_ok,
-            "checks": checks,
-            "latency_ms": int((time.time() - t0) * 1000),
-        })
+        rows.append(
+            {
+                "query": query,
+                "intent": r.intent_type,
+                "bike_name": r.bike_name,
+                "bike_id": r.bike_id,
+                "venue_name": r.venue_name,
+                "error": r.error,
+                "ok": all_ok,
+                "checks": checks,
+                "latency_ms": int((time.time() - t0) * 1000),
+            }
+        )
 
     summary = {
         "total": len(rows),

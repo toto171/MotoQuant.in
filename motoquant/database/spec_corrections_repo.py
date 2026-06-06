@@ -292,9 +292,7 @@ class SpecCorrectionsRepository:
         self._conn.commit()
         found = cur.rowcount > 0
         if found:
-            logger.info(
-                "Spec correction #%d → %s", correction_id, new_status
-            )
+            logger.info("Spec correction #%d → %s", correction_id, new_status)
         return found
 
     def approve(self, correction_id: int) -> bool:

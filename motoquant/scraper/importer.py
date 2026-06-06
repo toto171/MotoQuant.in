@@ -133,16 +133,17 @@ def _engine_inertia_from_spec(spec: "BikeSpec") -> float:
     # Defaults to sport factor (1.0) when category is missing or unknown.
     cat = (spec.category or "sport").lower()
     k_cat = {
-        "sport":     1.00,
-        "naked":     1.00,
+        "sport": 1.00,
+        "naked": 1.00,
         "adventure": 1.00,
-        "touring":   1.10,
-        "cruiser":   1.35,
-        "scooter":   0.70,
+        "touring": 1.10,
+        "cruiser": 1.35,
+        "scooter": 0.70,
     }.get(cat, 1.00)
 
     inertia = base * k_cat
     return max(0.005, min(0.090, inertia))
+
 
 # Category-based CoG height estimate (mm)
 CATEGORY_COG_HEIGHT = {
@@ -194,7 +195,6 @@ def _basket_inertia_from_spec(spec: "BikeSpec") -> float:
     return max(0.0010, min(0.020, inertia))
 
 
-
 # ────────────────────────────────────────────────────────
 # Cylinder-config inference for parts-compatibility fitment
 # ────────────────────────────────────────────────────────
@@ -202,24 +202,48 @@ def _basket_inertia_from_spec(spec: "BikeSpec") -> float:
 # rather than parallel twins. Used when a spec lists cylinders=2 without
 # an explicit engine_config.
 _V_TWIN_2CYL_MAKES = {
-    "Ducati", "Harley-Davidson", "Harley Davidson", "Harley", "HD",
-    "Indian Motorcycle", "Indian",  # DB stores as plain "Indian"
-    "Moto Guzzi", "Buell", "Victory", "Hyosung",
+    "Ducati",
+    "Harley-Davidson",
+    "Harley Davidson",
+    "Harley",
+    "HD",
+    "Indian Motorcycle",
+    "Indian",  # DB stores as plain "Indian"
+    "Moto Guzzi",
+    "Buell",
+    "Victory",
+    "Hyosung",
 }
 
 # Specific 2-cylinder bikes whose manufacturer isn't exclusively V-twin but
 # the named model is (e.g. Suzuki SV650, Honda's Shadow line, KTM's LC8 series).
 _V_TWIN_MODEL_TOKENS = {
-    "SV650", "SV1000", "Shadow", "VT750", "VT1100", "VT1300",
-    "1190", "1290", "LC8", "RC8", "Ducati",  # Ducati as fallback
-    "V7", "V9", "California",  # Moto Guzzi (also covered by make)
+    "SV650",
+    "SV1000",
+    "Shadow",
+    "VT750",
+    "VT1100",
+    "VT1300",
+    "1190",
+    "1290",
+    "LC8",
+    "RC8",
+    "Ducati",  # Ducati as fallback
+    "V7",
+    "V9",
+    "California",  # Moto Guzzi (also covered by make)
 }
 
 # 4-cylinder V4 models (rest are assumed I4).
 _V4_MODEL_TOKENS = {
-    "Panigale V4", "Streetfighter V4", "Multistrada V4",
-    "Diavel V4", "RSV4", "Tuono V4",
-    "VFR1200", "VFR800",
+    "Panigale V4",
+    "Streetfighter V4",
+    "Multistrada V4",
+    "Diavel V4",
+    "RSV4",
+    "Tuono V4",
+    "VFR1200",
+    "VFR800",
     "RC8",
 }
 
@@ -238,7 +262,7 @@ def _infer_cylinder_config(spec: "BikeSpec") -> str | None:
         return None
 
     make = (spec.manufacturer or "").strip()
-    model = (spec.model_name or "")
+    model = spec.model_name or ""
 
     if cyls == 1:
         return "I1"
@@ -279,8 +303,15 @@ _HD_CHAIN_MODELS = {"X440"}
 # BMW-specific: R-series boxer and K-series inline-4 are shaft drive;
 # S1000/F-series parallel-twin/G-series are chain drive.
 _BMW_SHAFT_MODELS = {
-    "R 1250", "R1250", "R 1200", "R1200", "R nineT",
-    "K 1600", "K1600", "K 1300", "K1300",
+    "R 1250",
+    "R1250",
+    "R 1200",
+    "R1200",
+    "R nineT",
+    "K 1600",
+    "K1600",
+    "K 1300",
+    "K1300",
 }
 # Moto Guzzi V-twins are shaft drive
 _MG_SHAFT_MODELS = {"V7", "V9", "V85", "California", "Griso", "Stelvio"}
@@ -296,8 +327,13 @@ _NON_CHAIN_MODELS = {
 _530_PITCH_MODELS = {"Hayabusa", "ZX-14R", "ZZR1400", "ZRX1200"}
 # Models with explicit 428 pitch (SE Asia cubs / underbones / <150cc)
 _428_PITCH_MODELS = {
-    "RS150R", "Winner X", "Supra GTR", "Sonic 150R",
-    "Y15ZR", "Exciter 150", "Exciter 155",
+    "RS150R",
+    "Winner X",
+    "Supra GTR",
+    "Sonic 150R",
+    "Y15ZR",
+    "Exciter 150",
+    "Exciter 155",
     "Xpulse 200",  # Hero Xpulse uses 428 stock
 }
 
@@ -320,7 +356,7 @@ def _infer_chain_pitch(spec: "BikeSpec") -> str | None:
       • ≥1300cc → "530"
     """
     make = (spec.manufacturer or "").strip()
-    model = (spec.model_name or "")
+    model = spec.model_name or ""
     cc = spec.displacement_cc
 
     # Belt / shaft drive exclusions
@@ -390,7 +426,7 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
     from ..defaults import _synthetic_2stroke_torque_curve, _synthetic_torque_curve
     from .dyno_curves import get_dyno_curve
 
-    is_two_stroke = (spec.stroke_type == 2)
+    is_two_stroke = spec.stroke_type == 2
 
     # Start with K5 defaults as a base (reasonable sport bike values)
     base = gsxr1000_k5().engine
@@ -417,7 +453,10 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
     elif spec.peak_power_hp and spec.peak_power_rpm:
         # T = P / ω, where ω = RPM × 2π / 60
         import math
-        peak_tq = spec.peak_power_hp * 745.7 / (spec.peak_power_rpm * 2.0 * math.pi / 60.0)
+
+        peak_tq = (
+            spec.peak_power_hp * 745.7 / (spec.peak_power_rpm * 2.0 * math.pi / 60.0)
+        )
     else:
         peak_tq = base.peak_torque_nm
 
@@ -445,7 +484,7 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
             # power-wise falls into noise by 8500). We split the difference.
             redline_factor = 1.26 if (spec.powervalve) else 1.18
         elif cc < 500 and cyls <= 2:
-            redline_factor = 1.30   # small singles / parallel twins
+            redline_factor = 1.30  # small singles / parallel twins
         elif cc < 700 and cyls <= 2:
             # April 22, 2026: raised 1.22 → 1.32 to close systematic slowness
             # bias on 500-700cc parallel twins (SV650, Z650, Ninja 650, MT-07,
@@ -454,20 +493,20 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
             # 8 500 rpm, giving a ratio of ~1.30–1.35. The old 1.22 under-
             # estimated top-gear pull and forced premature upshifts that
             # truncated trap-speed and pushed validation deltas +0.5 to +1.25 s.
-            redline_factor = 1.32   # mid-size twins (MT-07, Z650, Dominar 400)
+            redline_factor = 1.32  # mid-size twins (MT-07, Z650, Dominar 400)
         elif cc < 700:
-            redline_factor = 1.14   # 600cc-class inline-4 (R6, CBR600RR, ZX-6R)
+            redline_factor = 1.14  # 600cc-class inline-4 (R6, CBR600RR, ZX-6R)
         elif spec.category in ("cruiser", "touring", "muscle"):
             # Big-bore V-twins and muscled-up engines (VMAX 1700, Rocket 3, etc)
             # peak power at ~60% of redline — strong off-boost character
             if cc >= 1400:
-                redline_factor = 1.30   # VMAX 1700, Rocket 3 — peak power lower
+                redline_factor = 1.30  # VMAX 1700, Rocket 3 — peak power lower
             elif cc >= 1200:
-                redline_factor = 1.22   # Panigale V4, larger cruiser V-twins
+                redline_factor = 1.22  # Panigale V4, larger cruiser V-twins
             else:
-                redline_factor = 1.10   # fallback
+                redline_factor = 1.10  # fallback
         else:
-            redline_factor = 1.10   # large inline-4, V4, L-twin (≥ 1000cc class)
+            redline_factor = 1.10  # large inline-4, V4, L-twin (≥ 1000cc class)
         redline = int(peak_hp_rpm * redline_factor)
     else:
         redline = base.redline_rpm
@@ -539,7 +578,11 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
         peak_power_rpm=int(peak_hp_rpm),
         peak_torque_rpm=int(peak_tq_rpm),
         redline_rpm=int(redline),
-        launch_rpm=int(peak_tq_rpm) if spec.displacement_cc and spec.displacement_cc < 400 else int(redline * 0.55),  # Apr-27: <400cc launches at peak_torque_rpm (max torque available); >400cc at 55% of redline
+        launch_rpm=int(peak_tq_rpm)
+        if spec.displacement_cc and spec.displacement_cc < 400
+        else int(
+            redline * 0.55
+        ),  # Apr-27: <400cc launches at peak_torque_rpm (max torque available); >400cc at 55% of redline
         idle_rpm=idle,
         displacement_cc=spec.displacement_cc or base.displacement_cc,
         bore_mm=spec.bore_mm or base.bore_mm,
@@ -695,11 +738,11 @@ def _build_tires_from_spec(spec: BikeSpec) -> TireParams:
         mu = 1.30  # 500-600cc sport/naked (SV650, Z650, MT-07 class) — verified sticky radials
     elif cat in ("sport", "naked") and disp >= 300:
         mu = 1.15  # 300-500cc middleweight sport (Ninja 400, R3, RC 390, Duke 390)
-                   # 2026-05-25 calibration: lowered from 1.30 to 1.15 — benchmark sweep on
-                   # 13 matched mid-twin-300-500 bikes showed mu=1.30 made KTM/RC 390, RS 457
-                   # ~0.6-0.9s too fast. Real bikes run stock Metzeler Sportec M5 / MRF Revz /
-                   # Pirelli Diablo Street (NOT superbike-grade race rubber). mu=1.15 reduces
-                   # cluster mean|Δ| from 0.564s → 0.499s (-65ms, crosses 50ms improvement gate).
+        # 2026-05-25 calibration: lowered from 1.30 to 1.15 — benchmark sweep on
+        # 13 matched mid-twin-300-500 bikes showed mu=1.30 made KTM/RC 390, RS 457
+        # ~0.6-0.9s too fast. Real bikes run stock Metzeler Sportec M5 / MRF Revz /
+        # Pirelli Diablo Street (NOT superbike-grade race rubber). mu=1.15 reduces
+        # cluster mean|Δ| from 0.564s → 0.499s (-65ms, crosses 50ms improvement gate).
     elif cat in ("sport", "naked") and disp < 300:
         mu = 1.15  # entry-level budget tires (R15, Duke 200, Pulsar)
     elif cat == "cruiser":
@@ -798,12 +841,20 @@ def _build_aero_from_spec(spec: BikeSpec) -> AeroParams:
     # of what the rider does).
     if cc < 500:
         if spec.category == "naked":
-            aero_defaults = {"cd": 0.86, "frontal_area_m2": 0.55, "wheelie_tendency": 0.8}
+            aero_defaults = {
+                "cd": 0.86,
+                "frontal_area_m2": 0.55,
+                "wheelie_tendency": 0.8,
+            }
         elif spec.category == "sport":
             # Tuck Cd for a faired small-cc sport bike — slightly higher
             # than K5's 0.32 because the smaller fairing leaves more of
             # the rider exposed.
-            aero_defaults = {"cd": 0.42, "frontal_area_m2": 0.46, "wheelie_tendency": 1.2}
+            aero_defaults = {
+                "cd": 0.42,
+                "frontal_area_m2": 0.46,
+                "wheelie_tendency": 1.2,
+            }
 
     cd = spec.cd if spec.cd is not None else aero_defaults["cd"]
 
@@ -858,6 +909,7 @@ def spec_to_bike_config(spec: BikeSpec) -> BikeConfig:
     # the pipe's tuned RPM. We reproduce that by setting launch_rpm to
     # tuned_rpm × 0.92 (gives slight headroom before the pipe comes on).
     import copy
+
     staging = copy.deepcopy(base_config.staging)
     # Apr-27: Small-cc 4T launch optimization — launch at peak_torque_rpm where torque peaks,
     # not at 55% redline (which is for 1000cc superbikes). Small bikes are torque-limited.
@@ -906,7 +958,7 @@ def spec_to_bike_config(spec: BikeSpec) -> BikeConfig:
         # pump on Autolube/premix systems, possibly no water pump on
         # air-cooled vintage 2Ts.
         parasitic.valve_train_power_w = 0.0
-        parasitic.oil_pump_power_w = 60.0       # micro premix pump
+        parasitic.oil_pump_power_w = 60.0  # micro premix pump
         if spec.cooling == "air":
             parasitic.water_pump_electric = True
     elif spec.displacement_cc:
@@ -951,6 +1003,7 @@ def spec_to_bike_config(spec: BikeSpec) -> BikeConfig:
     # scripts/sweep_with_clusters.py::cluster_for so benchmark grouping and
     # physics dispatch share one taxonomy.
     from ..category_profiles import derive_category_tag
+
     category_tag = derive_category_tag(
         manufacturer=spec.manufacturer,
         model_name=spec.model_name,

@@ -16,6 +16,7 @@ BikeConfig, UPDATEs the JSON blobs in place. Model IDs are preserved.
 Usage:
     MOTOQUANT_DB=/path/to/motoquant.db python3 scripts/reseed_configs_from_specs.py
 """
+
 import os
 import re
 import sys
@@ -113,7 +114,10 @@ def main():
             updated += 1
         except Exception as exc:
             errors += 1
-            print("  ERROR on %s %s: %s" % (row["manufacturer"], row["model_name"], exc), flush=True)
+            print(
+                "  ERROR on %s %s: %s" % (row["manufacturer"], row["model_name"], exc),
+                flush=True,
+            )
 
     db.conn.commit()
 

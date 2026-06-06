@@ -77,6 +77,7 @@ def init_sentry(*, app_name: str = "motoquant-api") -> bool:
     if release is None:
         try:
             from motoquant import __version__ as _mq_version
+
             release = f"{app_name}@{_mq_version}"
         except Exception:
             release = None

@@ -291,7 +291,7 @@ KTM_1390_SUPERDUKE_R_EVO_2024 = spec_from_dict(
         "wheelbase_mm": 1497.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "200/55ZR17",
-        "cd": 0.74,        # naked litre median; ref KTM 1290 SDR @ 0.73
+        "cd": 0.74,  # naked litre median; ref KTM 1290 SDR @ 0.73
         "frontal_area_m2": 0.55,  # marginally wider than 1290 (0.54)
     },
     source_name="spec_sheet",
@@ -336,7 +336,7 @@ HERO_XTREME_200S_4V_2023 = spec_from_dict(
         "wheelbase_mm": 1335.0,
         "front_tire_size": "100/80-17",
         "rear_tire_size": "130/70-17",
-        "cd": 0.78,        # half-faired commuter; ref Pulsar 220F @ 0.83, NS200 @ 0.80
+        "cd": 0.78,  # half-faired commuter; ref Pulsar 220F @ 0.83, NS200 @ 0.80
         "frontal_area_m2": 0.46,  # ref TVS Apache RTR 200 @ 0.45
     },
     source_name="spec_sheet",
@@ -380,7 +380,7 @@ APRILIA_TUAREG_660_2022 = spec_from_dict(
         "wheelbase_mm": 1525.0,
         "front_tire_size": "90/90-21",
         "rear_tire_size": "150/70R18",
-        "cd": 0.82,        # ADV upright; ref V-Strom 650 @ 0.82
+        "cd": 0.82,  # ADV upright; ref V-Strom 650 @ 0.82
         "frontal_area_m2": 0.62,  # ADV with windscreen + tall stance
     },
     source_name="spec_sheet",
@@ -424,7 +424,7 @@ TVS_APACHE_RTR_180_2009 = spec_from_dict(
         "wheelbase_mm": 1300.0,
         "front_tire_size": "90/90-17",
         "rear_tire_size": "110/80-17",
-        "cd": 0.81,        # naked commuter; ref Apache RTR 200 4V @ 0.81
+        "cd": 0.81,  # naked commuter; ref Apache RTR 200 4V @ 0.81
         "frontal_area_m2": 0.44,
     },
     source_name="spec_sheet",
@@ -520,7 +520,7 @@ HERO_MAVRICK_440_2024 = spec_from_dict(
         "wheelbase_mm": 1410.0,
         "front_tire_size": "110/70-17",
         "rear_tire_size": "150/60-17",
-        "cd": 0.78,        # naked roadster, slightly tucked vs X440 cruiser (0.92)
+        "cd": 0.78,  # naked roadster, slightly tucked vs X440 cruiser (0.92)
         "frontal_area_m2": 0.50,
     },
     source_name="spec_sheet",
@@ -566,7 +566,7 @@ YAMAHA_TENERE_700_2019 = spec_from_dict(
         "wheelbase_mm": 1595.0,
         "front_tire_size": "90/90-21",
         "rear_tire_size": "150/70R18",
-        "cd": 0.82,        # ADV upright
+        "cd": 0.82,  # ADV upright
         "frontal_area_m2": 0.62,  # ADV with windscreen + tall stance
     },
     source_name="spec_sheet",
@@ -595,7 +595,7 @@ BAJAJ_PULSAR_NS160_2017 = spec_from_dict(
         "stroke_mm": 55.7,
         "compression_ratio": 9.5,
         "cylinders": 1,
-        "peak_power_hp": 15.7,   # 15.7 PS = 15.48 hp (Bajaj India spec; some regions quote 17 hp crank)
+        "peak_power_hp": 15.7,  # 15.7 PS = 15.48 hp (Bajaj India spec; some regions quote 17 hp crank)
         "peak_power_rpm": 8750,
         "peak_torque_nm": 14.6,
         "peak_torque_rpm": 6750,
@@ -609,11 +609,11 @@ BAJAJ_PULSAR_NS160_2017 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 49,
         "chain_pitch": "428",
-        "dry_mass_kg": 138.0,   # 144 kg kerb - ~6 kg fuel = ~138 dry
+        "dry_mass_kg": 138.0,  # 144 kg kerb - ~6 kg fuel = ~138 dry
         "wheelbase_mm": 1363.0,
         "front_tire_size": "80/100-17",
         "rear_tire_size": "110/80-17",
-        "cd": 0.80,       # naked commuter; ref NS200 @ 0.80
+        "cd": 0.80,  # naked commuter; ref NS200 @ 0.80
         "frontal_area_m2": 0.44,  # ref Pulsar 200 @ 0.44
     },
     source_name="spec_sheet",
@@ -657,11 +657,11 @@ HONDA_CB_HORNET_160R_2016 = spec_from_dict(
         "front_sprocket": 15,
         "rear_sprocket": 44,
         "chain_pitch": "428",
-        "dry_mass_kg": 127.0,   # 137 kg kerb - ~10 kg fuel = ~127 dry
+        "dry_mass_kg": 127.0,  # 137 kg kerb - ~10 kg fuel = ~127 dry
         "wheelbase_mm": 1346.0,
         "front_tire_size": "100/80-17",
         "rear_tire_size": "130/70-17",
-        "cd": 0.79,       # naked commuter; similar to CB300R @ 0.80
+        "cd": 0.79,  # naked commuter; similar to CB300R @ 0.80
         "frontal_area_m2": 0.44,
     },
     source_name="spec_sheet",
@@ -690,7 +690,7 @@ HERO_XTREME_250R_2024 = spec_from_dict(
         "stroke_mm": 60.8,
         "compression_ratio": 11.2,
         "cylinders": 1,
-        "peak_power_hp": 25.31,   # 25.31 PS = 24.96 hp
+        "peak_power_hp": 25.31,  # 25.31 PS = 24.96 hp
         "peak_power_rpm": 9000,
         "peak_torque_nm": 22.0,
         "peak_torque_rpm": 7250,
@@ -703,11 +703,11 @@ HERO_XTREME_250R_2024 = spec_from_dict(
         "front_sprocket": 15,
         "rear_sprocket": 46,
         "chain_pitch": "520",
-        "dry_mass_kg": 148.0,   # 157 kg kerb - ~9 kg fuel = ~148 dry
+        "dry_mass_kg": 148.0,  # 157 kg kerb - ~9 kg fuel = ~148 dry
         "wheelbase_mm": 1373.0,
         "front_tire_size": "110/70-17",
         "rear_tire_size": "150/60-17",
-        "cd": 0.79,       # naked sport; ref KTM Duke 250 @ 0.78
+        "cd": 0.79,  # naked sport; ref KTM Duke 250 @ 0.78
         "frontal_area_m2": 0.46,
     },
     source_name="spec_sheet",
@@ -757,7 +757,7 @@ DUCATI_HYPERMOTARD_698_MONO_2024 = spec_from_dict(
         "wheelbase_mm": 1443.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "160/60ZR17",
-        "cd": 0.78,        # supermoto upright stance; ref Hypermotard 950 @ 0.78
+        "cd": 0.78,  # supermoto upright stance; ref Hypermotard 950 @ 0.78
         "frontal_area_m2": 0.50,  # narrow supermoto; less than ADV
     },
     source_name="spec_sheet",
@@ -799,13 +799,13 @@ YAMAHA_XSR700_2018 = spec_from_dict(
         # CP2 platform cassette — same as MT-07 (2018+) per Yamaha service manual.
         "gear_ratios": [2.846, 2.133, 1.700, 1.450, 1.286, 1.160],
         "front_sprocket": 16,
-        "rear_sprocket": 43,    # XSR700 taller final drive vs MT-07's 16/47
+        "rear_sprocket": 43,  # XSR700 taller final drive vs MT-07's 16/47
         "chain_pitch": "525",
-        "dry_mass_kg": 178.0,   # 186 kg wet - ~8 kg fuel = ~178 dry
+        "dry_mass_kg": 178.0,  # 186 kg wet - ~8 kg fuel = ~178 dry
         "wheelbase_mm": 1405.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.78,        # retro naked, similar to MT-07 @ 0.78
+        "cd": 0.78,  # retro naked, similar to MT-07 @ 0.78
         "frontal_area_m2": 0.52,  # ref MT-07 @ 0.52
     },
     source_name="spec_sheet",
@@ -861,7 +861,7 @@ KTM_390_DUKE_2024 = spec_from_dict(
         "wheelbase_mm": 1357.0,
         "front_tire_size": "110/70ZR17",
         "rear_tire_size": "150/60ZR17",
-        "cd": 0.58,        # compact streetfighter, naked + small frontal
+        "cd": 0.58,  # compact streetfighter, naked + small frontal
         "frontal_area_m2": 0.45,
     },
     source_name="spec_sheet",
@@ -915,7 +915,7 @@ TRIUMPH_SPEED_T4_2024 = spec_from_dict(
         "wheelbase_mm": 1377.0,
         "front_tire_size": "110/70R17",
         "rear_tire_size": "150/60R17",
-        "cd": 0.81,           # mirror Speed 400 — same fairing-free naked
+        "cd": 0.81,  # mirror Speed 400 — same fairing-free naked
         "frontal_area_m2": 0.48,
     },
     source_name="spec_sheet",
@@ -965,11 +965,11 @@ YAMAHA_R15M_2021 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 42,
         "chain_pitch": "520",
-        "dry_mass_kg": 134.0,   # 142 kg kerb - ~8 kg fuel (11 L tank)
+        "dry_mass_kg": 134.0,  # 142 kg kerb - ~8 kg fuel (11 L tank)
         "wheelbase_mm": 1325.0,
         "front_tire_size": "100/80R17",
         "rear_tire_size": "140/70R17",
-        "cd": 0.69,        # full sport fairing like R15 V4
+        "cd": 0.69,  # full sport fairing like R15 V4
         "frontal_area_m2": 0.42,  # smaller than the M's larger riders
     },
     source_name="spec_sheet",
@@ -1027,7 +1027,7 @@ HONDA_TRANSALP_XL750_2023 = spec_from_dict(
         "wheelbase_mm": 1560.0,
         "front_tire_size": "90/90R21",
         "rear_tire_size": "150/70R18",
-        "cd": 0.55,        # tall ADV fairing, partial windshield
+        "cd": 0.55,  # tall ADV fairing, partial windshield
         "frontal_area_m2": 0.62,  # upright stance + tall screen
     },
     source_name="spec_sheet",
@@ -1082,7 +1082,7 @@ HONDA_CB750_HORNET_2023 = spec_from_dict(
         "wheelbase_mm": 1420.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "160/60ZR17",
-        "cd": 0.62,        # naked streetfighter, no fairing
+        "cd": 0.62,  # naked streetfighter, no fairing
         "frontal_area_m2": 0.48,
     },
     source_name="spec_sheet",
@@ -1140,7 +1140,7 @@ HONDA_CB200X_2022 = spec_from_dict(
         "wheelbase_mm": 1347.0,
         "front_tire_size": "100/80R17",
         "rear_tire_size": "130/70R17",
-        "cd": 0.65,        # ADV-styled, tall visor + upright stance
+        "cd": 0.65,  # ADV-styled, tall visor + upright stance
         "frontal_area_m2": 0.50,  # taller seat + tall handlebar
     },
     source_name="spec_sheet",
@@ -1203,7 +1203,7 @@ SUZUKI_GSX_S1000GX_2024 = spec_from_dict(
         "wheelbase_mm": 1460.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "190/50ZR17",
-        "cd": 0.58,        # upright touring + windscreen, between naked + ADV
+        "cd": 0.58,  # upright touring + windscreen, between naked + ADV
         "frontal_area_m2": 0.56,  # taller bars + screen + more upright rider
     },
     source_name="spec_sheet",
@@ -1254,19 +1254,19 @@ BMW_R_1300_GS_2024 = spec_from_dict(
         "peak_torque_nm": 149.0,
         "peak_torque_rpm": 6500,
         "fuel_system": "fi",
-        "cooling": "liquid",   # BMW calls it air/liquid; primary cooling fluid
+        "cooling": "liquid",  # BMW calls it air/liquid; primary cooling fluid
         "valve_config": "dohc",
         "gears": 6,
         # 6-speed cassette per BMW service manual K61.
         "gear_ratios": [2.438, 1.714, 1.296, 1.059, 0.943, 0.848],
-        "front_sprocket": 0,   # shaft drive — boxer paralever
+        "front_sprocket": 0,  # shaft drive — boxer paralever
         "rear_sprocket": 0,
         "chain_pitch": None,
         "dry_mass_kg": 223.0,  # 237 kg DIN kerb - ~14 kg fuel
         "wheelbase_mm": 1518.0,
         "front_tire_size": "120/70R19",
         "rear_tire_size": "170/60R17",
-        "cd": 0.55,        # tall ADV with adjustable screen
+        "cd": 0.55,  # tall ADV with adjustable screen
         "frontal_area_m2": 0.68,  # large beak fairing + boxer cylinder heads
     },
     source_name="spec_sheet",
@@ -1325,13 +1325,13 @@ KAWASAKI_ELIMINATOR_450_2024 = spec_from_dict(
         # Ninja 400 internal cassette ratios per Kawasaki PN cross-ref.
         "gear_ratios": [2.929, 2.056, 1.619, 1.333, 1.154, 1.037],
         "front_sprocket": 14,
-        "rear_sprocket": 46,    # Ninja 400 ran 45; Eliminator taller for cruise
+        "rear_sprocket": 46,  # Ninja 400 ran 45; Eliminator taller for cruise
         "chain_pitch": "520",
-        "dry_mass_kg": 167.0,   # 176 kg kerb - ~9 kg fuel (12 L)
-        "wheelbase_mm": 1520.0, # long for stability per cruiser brief
+        "dry_mass_kg": 167.0,  # 176 kg kerb - ~9 kg fuel (12 L)
+        "wheelbase_mm": 1520.0,  # long for stability per cruiser brief
         "front_tire_size": "130/70R18",
         "rear_tire_size": "150/80R16",
-        "cd": 0.62,        # cruiser upright seating, no fairing
+        "cd": 0.62,  # cruiser upright seating, no fairing
         "frontal_area_m2": 0.55,  # wide bars + low forward-feet stance
     },
     source_name="spec_sheet",
@@ -1379,11 +1379,11 @@ TRIUMPH_TIGER_SPORT_660_2022 = spec_from_dict(
         "front_sprocket": 17,
         "rear_sprocket": 47,
         "chain_pitch": "520",
-        "dry_mass_kg": 191.0,   # 206 kg kerb - ~15 kg fuel (17.2 L) - oil
+        "dry_mass_kg": 191.0,  # 206 kg kerb - ~15 kg fuel (17.2 L) - oil
         "wheelbase_mm": 1418.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.65,        # half-fairing tourer, more enclosed than Trident
+        "cd": 0.65,  # half-fairing tourer, more enclosed than Trident
         "frontal_area_m2": 0.55,  # upright + taller screen + panniers prep
     },
     source_name="spec_sheet",
@@ -1427,13 +1427,13 @@ YAMAHA_TRACER_9_GT_2021 = spec_from_dict(
         # MT-09 RN69 cassette per Yamaha service manual cross-reference.
         "gear_ratios": [2.846, 2.200, 1.741, 1.478, 1.304, 1.178],
         "front_sprocket": 16,
-        "rear_sprocket": 45,    # MT-09 ran 43; Tracer GT taller for tourer
+        "rear_sprocket": 45,  # MT-09 ran 43; Tracer GT taller for tourer
         "chain_pitch": "520",
-        "dry_mass_kg": 206.0,   # 220 kg kerb - ~14 kg fuel (18.4 L)
-        "wheelbase_mm": 1500.0, # longer than MT-09 1430 for stability
+        "dry_mass_kg": 206.0,  # 220 kg kerb - ~14 kg fuel (18.4 L)
+        "wheelbase_mm": 1500.0,  # longer than MT-09 1430 for stability
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.60,        # full fairing + screen, more enclosed than MT-09
+        "cd": 0.60,  # full fairing + screen, more enclosed than MT-09
         "frontal_area_m2": 0.52,
     },
     source_name="spec_sheet",
@@ -1480,11 +1480,11 @@ SUZUKI_GSX_8R_2024 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 46,
         "chain_pitch": "520",
-        "dry_mass_kg": 190.0,   # 205 kg kerb - ~10 kg fuel (14 L) - oil/batt
+        "dry_mass_kg": 190.0,  # 205 kg kerb - ~10 kg fuel (14 L) - oil/batt
         "wheelbase_mm": 1465.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.60,        # full fairing + clip-ons, tucked sport position
+        "cd": 0.60,  # full fairing + clip-ons, tucked sport position
         "frontal_area_m2": 0.50,
     },
     source_name="spec_sheet",
@@ -1537,13 +1537,13 @@ DUCATI_DESERTX_2022 = spec_from_dict(
         # Testastretta 937 standard cassette (per Ducati workshop manual)
         "gear_ratios": [2.466, 1.764, 1.350, 1.090, 0.958, 0.840],
         "front_sprocket": 15,
-        "rear_sprocket": 49,    # ADV-short; Hypermotard runs F15/R43
+        "rear_sprocket": 49,  # ADV-short; Hypermotard runs F15/R43
         "chain_pitch": "525",
-        "dry_mass_kg": 202.0,   # 223 kg kerb - 15 kg fuel (21 L) - oil/batt
+        "dry_mass_kg": 202.0,  # 223 kg kerb - 15 kg fuel (21 L) - oil/batt
         "wheelbase_mm": 1608.0,
         "front_tire_size": "90/90R21",
         "rear_tire_size": "150/70R18",
-        "cd": 0.78,        # tall upright ADV stance, panniers-off; ref Multistrada @ 0.80
+        "cd": 0.78,  # tall upright ADV stance, panniers-off; ref Multistrada @ 0.80
         "frontal_area_m2": 0.58,
     },
     source_name="spec_sheet",
@@ -1594,13 +1594,13 @@ DUCATI_STREETFIGHTER_V2_2022 = spec_from_dict(
         # Superquadro 955 cassette (Panigale V2 service manual)
         "gear_ratios": [2.466, 1.764, 1.380, 1.190, 1.040, 0.928],
         "front_sprocket": 15,
-        "rear_sprocket": 44,    # Streetfighter geared slightly longer than Panigale V2
+        "rear_sprocket": 44,  # Streetfighter geared slightly longer than Panigale V2
         "chain_pitch": "520",
-        "dry_mass_kg": 178.0,   # Ducati spec; 200 kg kerb - 16 kg fuel (16 L) - oil/batt
+        "dry_mass_kg": 178.0,  # Ducati spec; 200 kg kerb - 16 kg fuel (16 L) - oil/batt
         "wheelbase_mm": 1465.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/60ZR17",
-        "cd": 0.62,        # naked + winglets, slightly tucked riding position
+        "cd": 0.62,  # naked + winglets, slightly tucked riding position
         "frontal_area_m2": 0.48,
     },
     source_name="spec_sheet",
@@ -1654,11 +1654,11 @@ HONDA_NX500_2024 = spec_from_dict(
         "front_sprocket": 15,
         "rear_sprocket": 41,
         "chain_pitch": "520",
-        "dry_mass_kg": 183.0,   # 196 kg kerb - 12.5 kg fuel (17.5 L) - oil/batt
+        "dry_mass_kg": 183.0,  # 196 kg kerb - 12.5 kg fuel (17.5 L) - oil/batt
         "wheelbase_mm": 1445.0,
         "front_tire_size": "110/80R19",
         "rear_tire_size": "160/60R17",
-        "cd": 0.78,        # mid-ADV upright; reference CB500X @ 0.80
+        "cd": 0.78,  # mid-ADV upright; reference CB500X @ 0.80
         "frontal_area_m2": 0.56,
     },
     source_name="spec_sheet",
@@ -1693,11 +1693,11 @@ BAJAJ_PULSAR_150_2009 = spec_from_dict(
         "stroke_mm": 58.6,
         "compression_ratio": 9.5,
         "cylinders": 1,
-        "peak_power_hp": 14.0,    # 14 PS = 13.81 hp (BS6 final spec)
+        "peak_power_hp": 14.0,  # 14 PS = 13.81 hp (BS6 final spec)
         "peak_power_rpm": 8000,
         "peak_torque_nm": 13.4,
         "peak_torque_rpm": 6000,
-        "fuel_system": "fi",      # BS6 spec (FI from 2020 onwards; UG4/UG5 was carb)
+        "fuel_system": "fi",  # BS6 spec (FI from 2020 onwards; UG4/UG5 was carb)
         "cooling": "air",
         "valve_config": "sohc",
         "gears": 5,
@@ -1707,11 +1707,11 @@ BAJAJ_PULSAR_150_2009 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 45,
         "chain_pitch": "428",
-        "dry_mass_kg": 138.0,   # 144 kg kerb - 6 kg fuel (15 L tank)
+        "dry_mass_kg": 138.0,  # 144 kg kerb - 6 kg fuel (15 L tank)
         "wheelbase_mm": 1320.0,
         "front_tire_size": "80/100-17",
         "rear_tire_size": "100/90-17",
-        "cd": 0.80,       # naked commuter; ref Pulsar NS200 @ 0.80
+        "cd": 0.80,  # naked commuter; ref Pulsar NS200 @ 0.80
         "frontal_area_m2": 0.43,  # Pulsar 150 is slightly slimmer than NS200
     },
     source_name="spec_sheet",
@@ -1744,7 +1744,7 @@ HONDA_SHINE_125_2019 = spec_from_dict(
         "stroke_mm": 57.5,
         "compression_ratio": 9.4,
         "cylinders": 1,
-        "peak_power_hp": 10.59,   # 10.74 PS = 10.59 hp (BS6 PGM-FI spec)
+        "peak_power_hp": 10.59,  # 10.74 PS = 10.59 hp (BS6 PGM-FI spec)
         "peak_power_rpm": 7500,
         "peak_torque_nm": 11.0,
         "peak_torque_rpm": 6000,
@@ -1759,11 +1759,11 @@ HONDA_SHINE_125_2019 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 37,
         "chain_pitch": "428",
-        "dry_mass_kg": 104.0,   # 113 kg kerb - ~9 kg fuel (10.5 L tank)
+        "dry_mass_kg": 104.0,  # 113 kg kerb - ~9 kg fuel (10.5 L tank)
         "wheelbase_mm": 1266.0,
         "front_tire_size": "80/100-18",
         "rear_tire_size": "80/100-18",
-        "cd": 0.82,       # upright commuter; slightly worse than naked-sport
+        "cd": 0.82,  # upright commuter; slightly worse than naked-sport
         "frontal_area_m2": 0.42,  # narrow profile; small-cc commuter
     },
     source_name="spec_sheet",
@@ -1795,11 +1795,11 @@ SUZUKI_GIXXER_155_2014 = spec_from_dict(
         "stroke_mm": 62.9,
         "compression_ratio": 9.7,
         "cylinders": 1,
-        "peak_power_hp": 13.42,   # BS6: 13.6 PS = 13.42 hp (BS4 was 14.59 hp)
+        "peak_power_hp": 13.42,  # BS6: 13.6 PS = 13.42 hp (BS4 was 14.59 hp)
         "peak_power_rpm": 8000,
         "peak_torque_nm": 13.8,
         "peak_torque_rpm": 6000,
-        "fuel_system": "fi",      # BS6 (PGM-FI from 2019)
+        "fuel_system": "fi",  # BS6 (PGM-FI from 2019)
         "cooling": "air",
         "valve_config": "sohc",
         "gears": 5,
@@ -1809,11 +1809,11 @@ SUZUKI_GIXXER_155_2014 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 45,
         "chain_pitch": "428",
-        "dry_mass_kg": 130.0,   # 139 kg kerb - 9 kg fuel (12 L tank)
+        "dry_mass_kg": 130.0,  # 139 kg kerb - 9 kg fuel (12 L tank)
         "wheelbase_mm": 1335.0,
         "front_tire_size": "100/80-17",
         "rear_tire_size": "140/60-17",
-        "cd": 0.78,       # naked-sport (slightly better than commuter)
+        "cd": 0.78,  # naked-sport (slightly better than commuter)
         "frontal_area_m2": 0.44,  # similar to CB Hornet 160R / Pulsar NS200
     },
     source_name="spec_sheet",
@@ -1871,7 +1871,7 @@ SUZUKI_V_STROM_800DE_2023 = spec_from_dict(
         "wheelbase_mm": 1570.0,  # long for stability per ADV brief
         "front_tire_size": "90/90R21",
         "rear_tire_size": "150/70R17",
-        "cd": 0.58,        # tall ADV fairing + tall screen
+        "cd": 0.58,  # tall ADV fairing + tall screen
         "frontal_area_m2": 0.63,  # upright stance + 21" front
     },
     source_name="spec_sheet",
@@ -1931,7 +1931,7 @@ KTM_250_ADVENTURE_2020 = spec_from_dict(
         "wheelbase_mm": 1430.0,
         "front_tire_size": "100/90R19",
         "rear_tire_size": "130/80R17",
-        "cd": 0.62,        # entry-ADV: tall windscreen, upright bars
+        "cd": 0.62,  # entry-ADV: tall windscreen, upright bars
         "frontal_area_m2": 0.58,  # 19" front + upright ADV stance
     },
     source_name="spec_sheet",
@@ -1991,7 +1991,7 @@ TRIUMPH_BONNEVILLE_T100_2017 = spec_from_dict(
         "wheelbase_mm": 1450.0,
         "front_tire_size": "100/90R18",  # 18" front classic wheel
         "rear_tire_size": "150/70R17",
-        "cd": 0.72,        # naked classic: upright bars, no fairing
+        "cd": 0.72,  # naked classic: upright bars, no fairing
         "frontal_area_m2": 0.50,  # upright stance, mid-size rider
     },
     source_name="spec_sheet",
@@ -2037,7 +2037,7 @@ HERO_SPLENDOR_PLUS_2020 = spec_from_dict(
         "stroke_mm": 49.5,
         "compression_ratio": 9.9,
         "cylinders": 1,
-        "peak_power_hp": 7.91,   # 8.02 PS = 7.91 hp (BS6 PGM-FI spec)
+        "peak_power_hp": 7.91,  # 8.02 PS = 7.91 hp (BS6 PGM-FI spec)
         "peak_power_rpm": 8000,
         "peak_torque_nm": 8.05,
         "peak_torque_rpm": 6000,
@@ -2052,11 +2052,11 @@ HERO_SPLENDOR_PLUS_2020 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 39,
         "chain_pitch": "428",
-        "dry_mass_kg": 90.0,   # 97 kg kerb - ~7 kg fuel (9.8 L tank)
+        "dry_mass_kg": 90.0,  # 97 kg kerb - ~7 kg fuel (9.8 L tank)
         "wheelbase_mm": 1236.0,
-        "front_tire_size": "2.75-18",   # Indian bias-ply commuter
-        "rear_tire_size": "2.75-18",    # same — narrow drum-brake spec
-        "cd": 0.85,       # upright commuter, no fairing, tall posture
+        "front_tire_size": "2.75-18",  # Indian bias-ply commuter
+        "rear_tire_size": "2.75-18",  # same — narrow drum-brake spec
+        "cd": 0.85,  # upright commuter, no fairing, tall posture
         "frontal_area_m2": 0.40,  # narrow profile, small rider area
     },
     source_name="spec_sheet",
@@ -2114,7 +2114,7 @@ HONDA_SP125_2019 = spec_from_dict(
         "wheelbase_mm": 1285.0,
         "front_tire_size": "80/100-18",
         "rear_tire_size": "80/100-18",
-        "cd": 0.81,       # slightly sportier riding position than Shine
+        "cd": 0.81,  # slightly sportier riding position than Shine
         "frontal_area_m2": 0.41,
     },
     source_name="spec_sheet",
@@ -2171,9 +2171,9 @@ BAJAJ_PULSAR_NS125_2021 = spec_from_dict(
         "chain_pitch": "428",
         "dry_mass_kg": 134.0,  # 144 kg kerb - ~10 kg fuel (12 L tank)
         "wheelbase_mm": 1353.0,
-        "front_tire_size": "80/100-17",   # 17" alloy sport wheels
+        "front_tire_size": "80/100-17",  # 17" alloy sport wheels
         "rear_tire_size": "100/90-17",
-        "cd": 0.74,       # NS-platform naked-sport — better than commuter
+        "cd": 0.74,  # NS-platform naked-sport — better than commuter
         "frontal_area_m2": 0.45,  # wider than commuter, sport stance
     },
     source_name="spec_sheet",
@@ -2229,11 +2229,11 @@ KAWASAKI_Z900RS_2018 = spec_from_dict(
         "front_sprocket": 15,
         "rear_sprocket": 42,
         "chain_pitch": "525",
-        "dry_mass_kg": 203.0,   # 215 kg kerb - ~12 kg fuel (17 L tank)
+        "dry_mass_kg": 203.0,  # 215 kg kerb - ~12 kg fuel (17 L tank)
         "wheelbase_mm": 1470.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.66,         # naked, upright stance, round headlamp
+        "cd": 0.66,  # naked, upright stance, round headlamp
         "frontal_area_m2": 0.50,  # taller bars than Z900, wider stance
     },
     source_name="spec_sheet",
@@ -2287,11 +2287,11 @@ TRIUMPH_STREET_TRIPLE_765R_2023 = spec_from_dict(
         "front_sprocket": 16,
         "rear_sprocket": 47,
         "chain_pitch": "525",
-        "dry_mass_kg": 176.0,    # 188 kg kerb - ~12 kg fuel (17 L tank)
+        "dry_mass_kg": 176.0,  # 188 kg kerb - ~12 kg fuel (17 L tank)
         "wheelbase_mm": 1402.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.61,        # streetfighter, mild fly-screen, tucked posture
+        "cd": 0.61,  # streetfighter, mild fly-screen, tucked posture
         "frontal_area_m2": 0.46,  # narrow triple, slim frame
     },
     source_name="spec_sheet",
@@ -2343,11 +2343,11 @@ KTM_125_DUKE_2017 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 45,
         "chain_pitch": "520",
-        "dry_mass_kg": 149.0,   # 159 kg kerb - ~9.6 kg fuel (13.4 L tank)
+        "dry_mass_kg": 149.0,  # 159 kg kerb - ~9.6 kg fuel (13.4 L tank)
         "wheelbase_mm": 1357.0,
         "front_tire_size": "110/70-17",
         "rear_tire_size": "150/60-17",
-        "cd": 0.68,        # Duke-platform naked, tall stance + LED light
+        "cd": 0.68,  # Duke-platform naked, tall stance + LED light
         "frontal_area_m2": 0.43,  # narrow single, slim trellis frame
     },
     source_name="spec_sheet",
@@ -2401,11 +2401,11 @@ HARLEY_NIGHTSTER_RH975_2022 = spec_from_dict(
         "front_sprocket": 24,
         "rear_sprocket": 68,
         "chain_pitch": "belt",
-        "dry_mass_kg": 212.0,    # 221 kg kerb - ~9 kg fuel (11.7 L tank)
+        "dry_mass_kg": 212.0,  # 221 kg kerb - ~9 kg fuel (11.7 L tank)
         "wheelbase_mm": 1545.0,
         "front_tire_size": "100/90B19",
         "rear_tire_size": "150/80B16",
-        "cd": 0.78,         # mid-bar sport-cruiser, more tucked than Sportster S
+        "cd": 0.78,  # mid-bar sport-cruiser, more tucked than Sportster S
         "frontal_area_m2": 0.55,
     },
     source_name="spec_sheet",
@@ -2460,11 +2460,11 @@ HUSQVARNA_SVARTPILEN_250_2024 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 46,
         "chain_pitch": "520",
-        "dry_mass_kg": 144.0,   # 154 kg kerb - ~10 kg fuel (9.5 L tank)
+        "dry_mass_kg": 144.0,  # 154 kg kerb - ~10 kg fuel (9.5 L tank)
         "wheelbase_mm": 1378.0,
         "front_tire_size": "110/70R17",
         "rear_tire_size": "150/60R17",
-        "cd": 0.66,        # flat-tracker bars, slim trellis, slight tuck
+        "cd": 0.66,  # flat-tracker bars, slim trellis, slight tuck
         "frontal_area_m2": 0.42,
     },
     source_name="spec_sheet",
@@ -2517,11 +2517,11 @@ HONDA_CB125R_2018 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 45,
         "chain_pitch": "428",
-        "dry_mass_kg": 122.0,   # 130 kg kerb - ~7.5 kg fuel (10.1 L tank)
+        "dry_mass_kg": 122.0,  # 130 kg kerb - ~7.5 kg fuel (10.1 L tank)
         "wheelbase_mm": 1345.0,
         "front_tire_size": "110/70R17",
         "rear_tire_size": "150/60R17",
-        "cd": 0.65,        # Neo Sports Café tuck, headlight cowl
+        "cd": 0.65,  # Neo Sports Café tuck, headlight cowl
         "frontal_area_m2": 0.41,
     },
     source_name="spec_sheet",
@@ -2563,19 +2563,19 @@ BMW_R_18_2020 = spec_from_dict(
         "peak_torque_nm": 158.0,
         "peak_torque_rpm": 3000,
         "fuel_system": "fi",
-        "cooling": "air",      # air/oil — primary is air
-        "valve_config": "ohv", # pushrod, 2 valves per cyl, OHV
+        "cooling": "air",  # air/oil — primary is air
+        "valve_config": "ohv",  # pushrod, 2 valves per cyl, OHV
         "gears": 6,
         # K34 6-speed cassette per BMW service manual.
         "gear_ratios": [3.231, 2.169, 1.640, 1.342, 1.115, 0.960],
-        "front_sprocket": 0,   # shaft drive
+        "front_sprocket": 0,  # shaft drive
         "rear_sprocket": 0,
         "chain_pitch": None,
         "dry_mass_kg": 333.0,  # 345 kg DIN kerb - ~12 kg fuel (16 L tank)
         "wheelbase_mm": 1731.0,
         "front_tire_size": "120/70R19",
         "rear_tire_size": "180/65B16",
-        "cd": 0.85,            # naked cruiser, riding position upright
+        "cd": 0.85,  # naked cruiser, riding position upright
         "frontal_area_m2": 0.66,  # protruding boxer cylinders
     },
     source_name="spec_sheet",
@@ -2619,7 +2619,7 @@ ROYAL_ENFIELD_CLASSIC_650_2025 = spec_from_dict(
         "peak_torque_nm": 52.3,
         "peak_torque_rpm": 5650,
         "fuel_system": "fi",
-        "cooling": "air",      # air/oil
+        "cooling": "air",  # air/oil
         "valve_config": "sohc",
         "gears": 6,
         # Shared with Interceptor 650 / Super Meteor 650 (UCE 648 cc
@@ -2632,7 +2632,7 @@ ROYAL_ENFIELD_CLASSIC_650_2025 = spec_from_dict(
         "wheelbase_mm": 1475.0,
         "front_tire_size": "100/90R19",
         "rear_tire_size": "140/70R18",
-        "cd": 0.80,            # classic cruiser tuck
+        "cd": 0.80,  # classic cruiser tuck
         "frontal_area_m2": 0.60,
     },
     source_name="spec_sheet",
@@ -2691,7 +2691,7 @@ KTM_890_ADVENTURE_R_2021 = spec_from_dict(
         "wheelbase_mm": 1528.0,
         "front_tire_size": "90/90R21",
         "rear_tire_size": "150/70R18",
-        "cd": 0.58,            # tall ADV, big screen, adjustable
+        "cd": 0.58,  # tall ADV, big screen, adjustable
         "frontal_area_m2": 0.65,
     },
     source_name="spec_sheet",
@@ -2743,11 +2743,11 @@ YAMAHA_YZF_R125_2019 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 48,
         "chain_pitch": "428",
-        "dry_mass_kg": 133.0,    # 142 kg kerb - ~8.5 kg fuel (11.5 L tank)
+        "dry_mass_kg": 133.0,  # 142 kg kerb - ~8.5 kg fuel (11.5 L tank)
         "wheelbase_mm": 1355.0,
-        "front_tire_size": "100/80-17",   # Indian/EU bias-ply notation
+        "front_tire_size": "100/80-17",  # Indian/EU bias-ply notation
         "rear_tire_size": "140/70-17",
-        "cd": 0.65,              # learner-sport full fairing, upright tuck
+        "cd": 0.65,  # learner-sport full fairing, upright tuck
         "frontal_area_m2": 0.45,
     },
     source_name="spec_sheet",
@@ -2794,11 +2794,11 @@ HONDA_CBR300R_2014 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 38,
         "chain_pitch": "520",
-        "dry_mass_kg": 153.0,    # 162 kg kerb (non-ABS) - ~9.5 kg fuel (13 L tank)
+        "dry_mass_kg": 153.0,  # 162 kg kerb (non-ABS) - ~9.5 kg fuel (13 L tank)
         "wheelbase_mm": 1380.0,
         "front_tire_size": "110/70-17",
         "rear_tire_size": "140/70-17",
-        "cd": 0.62,              # small sport full fairing, upright
+        "cd": 0.62,  # small sport full fairing, upright
         "frontal_area_m2": 0.46,
     },
     source_name="spec_sheet",
@@ -2850,13 +2850,13 @@ KAWASAKI_VERSYS_X_300_2017 = spec_from_dict(
         # (KLE300 transmission section identical to EX300 transmission).
         "gear_ratios": [2.929, 2.056, 1.619, 1.300, 1.090, 0.964],
         "front_sprocket": 14,
-        "rear_sprocket": 46,    # taller than Ninja 300's R42 for ADV
+        "rear_sprocket": 46,  # taller than Ninja 300's R42 for ADV
         "chain_pitch": "520",
-        "dry_mass_kg": 163.0,   # 175 kg kerb - ~12 kg fuel (17 L tank)
+        "dry_mass_kg": 163.0,  # 175 kg kerb - ~12 kg fuel (17 L tank)
         "wheelbase_mm": 1450.0,
-        "front_tire_size": "100/90-19",   # off-road biased front 19"
+        "front_tire_size": "100/90-19",  # off-road biased front 19"
         "rear_tire_size": "130/80-17",
-        "cd": 0.60,             # tall ADV body, screen, upright posture
+        "cd": 0.60,  # tall ADV body, screen, upright posture
         "frontal_area_m2": 0.55,
     },
     source_name="spec_sheet",
@@ -2898,7 +2898,7 @@ TVS_APACHE_RTR_160_2V_2018 = spec_from_dict(
         "stroke_mm": 52.9,
         "compression_ratio": 9.5,
         "cylinders": 1,
-        "peak_power_hp": 15.31,   # 15.53 PS @ 8400 rpm = 15.31 hp
+        "peak_power_hp": 15.31,  # 15.53 PS @ 8400 rpm = 15.31 hp
         "peak_power_rpm": 8400,
         "peak_torque_nm": 13.9,
         "peak_torque_rpm": 7000,
@@ -2912,11 +2912,11 @@ TVS_APACHE_RTR_160_2V_2018 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 43,
         "chain_pitch": "428",
-        "dry_mass_kg": 131.0,   # 140 kg kerb - ~9 kg fuel (13 L tank)
+        "dry_mass_kg": 131.0,  # 140 kg kerb - ~9 kg fuel (13 L tank)
         "wheelbase_mm": 1300.0,
         "front_tire_size": "90/90-17",
         "rear_tire_size": "110/80-17",
-        "cd": 0.81,             # naked commuter, ref RTR 180 @ 0.81
+        "cd": 0.81,  # naked commuter, ref RTR 180 @ 0.81
         "frontal_area_m2": 0.44,
     },
     source_name="spec_sheet",
@@ -2958,7 +2958,7 @@ HONDA_UNICORN_160_BS6_2020 = spec_from_dict(
         "stroke_mm": 57.5,
         "compression_ratio": 10.0,
         "cylinders": 1,
-        "peak_power_hp": 13.27,   # 13.46 PS @ 7500 rpm = 13.27 hp
+        "peak_power_hp": 13.27,  # 13.46 PS @ 7500 rpm = 13.27 hp
         "peak_power_rpm": 7500,
         "peak_torque_nm": 14.58,
         "peak_torque_rpm": 5500,
@@ -2970,13 +2970,13 @@ HONDA_UNICORN_160_BS6_2020 = spec_from_dict(
         # Hornet 160R). Service Manual 00X38-K1R-6400, Honda 2018.
         "gear_ratios": [3.308, 1.812, 1.227, 0.969, 0.786],
         "front_sprocket": 15,
-        "rear_sprocket": 45,    # OEM kit "128 15 45" per 2Wheelerspares
+        "rear_sprocket": 45,  # OEM kit "128 15 45" per 2Wheelerspares
         "chain_pitch": "428",
-        "dry_mass_kg": 130.0,   # 139 kg kerb - ~9 kg fuel (13 L tank)
+        "dry_mass_kg": 130.0,  # 139 kg kerb - ~9 kg fuel (13 L tank)
         "wheelbase_mm": 1336.0,
         "front_tire_size": "80/100-17",
         "rear_tire_size": "110/80-17",
-        "cd": 0.78,             # commuter, slightly more upright than Hornet
+        "cd": 0.78,  # commuter, slightly more upright than Hornet
         "frontal_area_m2": 0.43,
     },
     source_name="spec_sheet",
@@ -3030,11 +3030,11 @@ YAMAHA_FZ_S_FI_V3_2019 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 42,
         "chain_pitch": "428",
-        "dry_mass_kg": 127.0,   # 135 kg kerb - ~8 kg fuel (13 L tank)
+        "dry_mass_kg": 127.0,  # 135 kg kerb - ~8 kg fuel (13 L tank)
         "wheelbase_mm": 1330.0,
         "front_tire_size": "100/80-17",
         "rear_tire_size": "140/60-17",
-        "cd": 0.79,             # naked-streetfighter style
+        "cd": 0.79,  # naked-streetfighter style
         "frontal_area_m2": 0.44,
     },
     source_name="spec_sheet",
@@ -3076,7 +3076,7 @@ BAJAJ_PULSAR_N150_2022 = spec_from_dict(
         "stroke_mm": 58.6,
         "compression_ratio": 10.5,
         "cylinders": 1,
-        "peak_power_hp": 13.80,   # 14.0 PS @ 8500 rpm = 13.80 hp
+        "peak_power_hp": 13.80,  # 14.0 PS @ 8500 rpm = 13.80 hp
         "peak_power_rpm": 8500,
         "peak_torque_nm": 13.5,
         "peak_torque_rpm": 6000,
@@ -3090,11 +3090,11 @@ BAJAJ_PULSAR_N150_2022 = spec_from_dict(
         "front_sprocket": 17,
         "rear_sprocket": 46,
         "chain_pitch": "428",
-        "dry_mass_kg": 144.0,   # 153 kg kerb - ~9 kg fuel (9 L tank)
+        "dry_mass_kg": 144.0,  # 153 kg kerb - ~9 kg fuel (9 L tank)
         "wheelbase_mm": 1345.0,
         "front_tire_size": "100/80-17",
         "rear_tire_size": "130/70-17",
-        "cd": 0.82,             # Indian naked/commuter band, ref FZ160/RTR160
+        "cd": 0.82,  # Indian naked/commuter band, ref FZ160/RTR160
         "frontal_area_m2": 0.43,
     },
     source_name="spec_sheet",
@@ -3139,7 +3139,7 @@ HERO_XPULSE_200T_2021 = spec_from_dict(
         "stroke_mm": 59.2,
         "compression_ratio": 10.0,
         "cylinders": 1,
-        "peak_power_hp": 17.85,   # 18.1 PS @ 8500 rpm = 17.85 hp
+        "peak_power_hp": 17.85,  # 18.1 PS @ 8500 rpm = 17.85 hp
         "peak_power_rpm": 8500,
         "peak_torque_nm": 17.35,
         "peak_torque_rpm": 6500,
@@ -3151,13 +3151,13 @@ HERO_XPULSE_200T_2021 = spec_from_dict(
         # service bulletin HH-200-T-01). Same ratios as XPulse 200 in catalog.
         "gear_ratios": [2.833, 1.875, 1.430, 1.160, 0.950],
         "front_sprocket": 14,
-        "rear_sprocket": 52,    # 52T (vs XPulse 200's 50T) per OEM kit
+        "rear_sprocket": 52,  # 52T (vs XPulse 200's 50T) per OEM kit
         "chain_pitch": "428",
-        "dry_mass_kg": 153.0,   # 162 kg kerb - ~9 kg fuel (12 L tank)
+        "dry_mass_kg": 153.0,  # 162 kg kerb - ~9 kg fuel (12 L tank)
         "wheelbase_mm": 1367.0,
         "front_tire_size": "100/90-17",
         "rear_tire_size": "130/70-17",
-        "cd": 0.86,             # upright ADV + windscreen, ref RE Himalayan 411
+        "cd": 0.86,  # upright ADV + windscreen, ref RE Himalayan 411
         "frontal_area_m2": 0.47,
     },
     source_name="spec_sheet",
@@ -3199,7 +3199,7 @@ BAJAJ_AVENGER_160_2016 = spec_from_dict(
         "stroke_mm": 56.6,
         "compression_ratio": 9.8,
         "cylinders": 1,
-        "peak_power_hp": 14.80,   # 15.0 PS @ 8500 rpm = 14.80 hp
+        "peak_power_hp": 14.80,  # 15.0 PS @ 8500 rpm = 14.80 hp
         "peak_power_rpm": 8500,
         "peak_torque_nm": 13.7,
         "peak_torque_rpm": 7000,
@@ -3214,11 +3214,11 @@ BAJAJ_AVENGER_160_2016 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 42,
         "chain_pitch": "428",
-        "dry_mass_kg": 139.0,   # 148 kg kerb - ~9 kg fuel (12 L tank)
+        "dry_mass_kg": 139.0,  # 148 kg kerb - ~9 kg fuel (12 L tank)
         "wheelbase_mm": 1350.0,
         "front_tire_size": "90/90-17",
         "rear_tire_size": "110/80-17",
-        "cd": 0.88,             # cruiser + forward pegs, ref Avenger 220 @ 0.89
+        "cd": 0.88,  # cruiser + forward pegs, ref Avenger 220 @ 0.89
         "frontal_area_m2": 0.46,
     },
     source_name="spec_sheet",
@@ -3273,7 +3273,7 @@ KAWASAKI_NINJA_500_2024 = spec_from_dict(
         "stroke_mm": 58.6,
         "compression_ratio": 11.3,
         "cylinders": 2,
-        "peak_power_hp": 44.7,    # 45 PS = 44.7 hp @ 9000 rpm
+        "peak_power_hp": 44.7,  # 45 PS = 44.7 hp @ 9000 rpm
         "peak_power_rpm": 9000,
         "peak_torque_nm": 42.6,
         "peak_torque_rpm": 6000,
@@ -3285,13 +3285,13 @@ KAWASAKI_NINJA_500_2024 = spec_from_dict(
         # PN cross-reference (service manual 2024 Ninja 500).
         "gear_ratios": [2.929, 2.056, 1.619, 1.333, 1.154, 1.037],
         "front_sprocket": 14,
-        "rear_sprocket": 40,    # taller than Ninja 400's 45 — sport-tour tune
+        "rear_sprocket": 40,  # taller than Ninja 400's 45 — sport-tour tune
         "chain_pitch": "520",
-        "dry_mass_kg": 160.0,   # 171 kg DIN kerb - ~11 kg fuel (14 L)
+        "dry_mass_kg": 160.0,  # 171 kg DIN kerb - ~11 kg fuel (14 L)
         "wheelbase_mm": 1375.0,
         "front_tire_size": "110/70R17",
         "rear_tire_size": "150/60R17",
-        "cd": 0.59,             # full sport fairing + clip-ons, ref Ninja 400 @ 0.58
+        "cd": 0.59,  # full sport fairing + clip-ons, ref Ninja 400 @ 0.58
         "frontal_area_m2": 0.46,
     },
     source_name="spec_sheet",
@@ -3342,7 +3342,7 @@ YAMAHA_MT25_2014 = spec_from_dict(
         "stroke_mm": 44.1,
         "compression_ratio": 11.2,
         "cylinders": 2,
-        "peak_power_hp": 35.5,    # 36 PS = 35.5 hp @ 12000 rpm (R3-shared)
+        "peak_power_hp": 35.5,  # 36 PS = 35.5 hp @ 12000 rpm (R3-shared)
         "peak_power_rpm": 12000,
         "peak_torque_nm": 22.6,
         "peak_torque_rpm": 10000,
@@ -3354,13 +3354,13 @@ YAMAHA_MT25_2014 = spec_from_dict(
         # PN cross-ref RA10P/RH07P shared transmission).
         "gear_ratios": [2.917, 2.000, 1.556, 1.333, 1.190, 1.083],
         "front_sprocket": 14,
-        "rear_sprocket": 43,    # same as R3 (MY2019+ final drive)
+        "rear_sprocket": 43,  # same as R3 (MY2019+ final drive)
         "chain_pitch": "520",
-        "dry_mass_kg": 155.0,   # 165 kg kerb - ~10 kg fuel (14 L tank)
+        "dry_mass_kg": 155.0,  # 165 kg kerb - ~10 kg fuel (14 L tank)
         "wheelbase_mm": 1380.0,
         "front_tire_size": "110/70R17",
         "rear_tire_size": "140/70R17",
-        "cd": 0.73,             # naked sport, ref MT-03 @ 0.72 (same chassis)
+        "cd": 0.73,  # naked sport, ref MT-03 @ 0.72 (same chassis)
         "frontal_area_m2": 0.46,
     },
     source_name="spec_sheet",
@@ -3409,7 +3409,7 @@ TVS_APACHE_RTR_165_RP_2024 = spec_from_dict(
         "stroke_mm": 54.6,
         "compression_ratio": 10.5,
         "cylinders": 1,
-        "peak_power_hp": 18.71,   # 18.97 PS @ 9750 rpm = 18.71 hp
+        "peak_power_hp": 18.71,  # 18.97 PS @ 9750 rpm = 18.71 hp
         "peak_power_rpm": 9750,
         "peak_torque_nm": 14.2,
         "peak_torque_rpm": 7250,
@@ -3423,11 +3423,11 @@ TVS_APACHE_RTR_165_RP_2024 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 43,
         "chain_pitch": "428",
-        "dry_mass_kg": 137.0,   # 146 kg kerb - ~9 kg fuel (12 L tank)
+        "dry_mass_kg": 137.0,  # 146 kg kerb - ~9 kg fuel (12 L tank)
         "wheelbase_mm": 1357.0,
         "front_tire_size": "100/80-17",
         "rear_tire_size": "130/70-17",
-        "cd": 0.79,             # naked race-replica, ref RTR 160 4V @ 0.81
+        "cd": 0.79,  # naked race-replica, ref RTR 160 4V @ 0.81
         "frontal_area_m2": 0.44,
     },
     source_name="spec_sheet",
@@ -3468,7 +3468,7 @@ TRIUMPH_SPEED_TRIPLE_1200_RR_2022 = spec_from_dict(
         "stroke_mm": 60.8,
         "compression_ratio": 13.2,
         "cylinders": 3,
-        "peak_power_hp": 178.0,   # 180 PS @ 10750 rpm = 177.6 hp
+        "peak_power_hp": 178.0,  # 180 PS @ 10750 rpm = 177.6 hp
         "peak_power_rpm": 10750,
         "peak_torque_nm": 125.0,
         "peak_torque_rpm": 9000,
@@ -3526,7 +3526,7 @@ HONDA_CRF300L_RALLY_2021 = spec_from_dict(
         "stroke_mm": 63.0,
         "compression_ratio": 10.7,
         "cylinders": 1,
-        "peak_power_hp": 27.4,   # 27.4 hp / 20.4 kW @ 8500 rpm
+        "peak_power_hp": 27.4,  # 27.4 hp / 20.4 kW @ 8500 rpm
         "peak_power_rpm": 8500,
         "peak_torque_nm": 26.6,
         "peak_torque_rpm": 6500,
@@ -3545,9 +3545,9 @@ HONDA_CRF300L_RALLY_2021 = spec_from_dict(
         "chain_pitch": "520",
         "dry_mass_kg": 140.0,  # 153 kg kerb - ~10 kg fuel (12.8 L) - ~3 kg oil
         "wheelbase_mm": 1455.0,
-        "front_tire_size": "80/100-21",   # 21" off-road front
-        "rear_tire_size": "120/80-18",    # 18" off-road rear
-        "cd": 0.62,   # rally fairing + upright stance, ref Tenere 700 @ 0.64
+        "front_tire_size": "80/100-21",  # 21" off-road front
+        "rear_tire_size": "120/80-18",  # 18" off-road rear
+        "cd": 0.62,  # rally fairing + upright stance, ref Tenere 700 @ 0.64
         "frontal_area_m2": 0.66,  # wide rally-style fairing
     },
     source_name="spec_sheet",
@@ -3602,9 +3602,9 @@ DUCATI_MULTISTRADA_V2S_2022 = spec_from_dict(
         "chain_pitch": "525",
         "dry_mass_kg": 199.0,  # 220 kg kerb - ~19 kg fuel (20 L) - ~2 kg oil
         "wheelbase_mm": 1594.0,
-        "front_tire_size": "120/70ZR19",   # 19" front adv-tourer
+        "front_tire_size": "120/70ZR19",  # 19" front adv-tourer
         "rear_tire_size": "170/60ZR17",
-        "cd": 0.55,   # full fairing adv-tourer, ref Multistrada V4 @ 0.52
+        "cd": 0.55,  # full fairing adv-tourer, ref Multistrada V4 @ 0.52
         "frontal_area_m2": 0.62,  # tall windscreen + wide handlebars
     },
     source_name="spec_sheet",
@@ -3649,7 +3649,7 @@ APRILIA_TUONO_660_FACTORY_2022 = spec_from_dict(
         "stroke_mm": 63.93,
         "compression_ratio": 13.5,
         "cylinders": 2,
-        "peak_power_hp": 100.0,    # 100 hp @ 10500 rpm (Aprilia spec; +5 hp vs base via ECU map)
+        "peak_power_hp": 100.0,  # 100 hp @ 10500 rpm (Aprilia spec; +5 hp vs base via ECU map)
         "peak_power_rpm": 10500,
         "peak_torque_nm": 67.0,
         "peak_torque_rpm": 8500,
@@ -3661,14 +3661,14 @@ APRILIA_TUONO_660_FACTORY_2022 = spec_from_dict(
         # to base Tuono 660 (Aprilia parts catalogue PN 2D000395 covers
         # both trims). Only final-drive sprocketing differs (16F vs 17F).
         "gear_ratios": [2.687, 2.062, 1.647, 1.368, 1.173, 1.037],
-        "front_sprocket": 16,      # Factory-specific — base Tuono 660 = 17F
+        "front_sprocket": 16,  # Factory-specific — base Tuono 660 = 17F
         "rear_sprocket": 43,
         "chain_pitch": "520",
-        "dry_mass_kg": 169.0,      # 181 kg kerb - ~12 kg fuel (15 L tank)
+        "dry_mass_kg": 169.0,  # 181 kg kerb - ~12 kg fuel (15 L tank)
         "wheelbase_mm": 1370.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.62,                # naked sport, ref Tuono 660 base
+        "cd": 0.62,  # naked sport, ref Tuono 660 base
         "frontal_area_m2": 0.51,
     },
     source_name="spec_sheet",
@@ -3717,7 +3717,7 @@ RE_BULLET_350_J_2023 = spec_from_dict(
         "stroke_mm": 85.8,
         "compression_ratio": 9.5,
         "cylinders": 1,
-        "peak_power_hp": 20.2,     # 20.2 hp / 15.0 kW @ 6100 rpm
+        "peak_power_hp": 20.2,  # 20.2 hp / 15.0 kW @ 6100 rpm
         "peak_power_rpm": 6100,
         "peak_torque_nm": 27.0,
         "peak_torque_rpm": 4000,
@@ -3733,11 +3733,11 @@ RE_BULLET_350_J_2023 = spec_from_dict(
         "front_sprocket": 15,
         "rear_sprocket": 39,
         "chain_pitch": "428",
-        "dry_mass_kg": 185.0,      # 195 kg kerb - ~10 kg fuel (13 L tank)
+        "dry_mass_kg": 185.0,  # 195 kg kerb - ~10 kg fuel (13 L tank)
         "wheelbase_mm": 1390.0,
         "front_tire_size": "100/90-19",
         "rear_tire_size": "120/80-18",
-        "cd": 0.92,                # upright Bullet posture, ref Classic 350
+        "cd": 0.92,  # upright Bullet posture, ref Classic 350
         "frontal_area_m2": 0.60,
     },
     source_name="spec_sheet",
@@ -3783,7 +3783,7 @@ BAJAJ_PULSAR_P125_2024 = spec_from_dict(
         "stroke_mm": 50.5,
         "compression_ratio": 10.0,
         "cylinders": 1,
-        "peak_power_hp": 11.64,    # 11.8 PS = 11.64 hp @ 8500 rpm
+        "peak_power_hp": 11.64,  # 11.8 PS = 11.64 hp @ 8500 rpm
         "peak_power_rpm": 8500,
         "peak_torque_nm": 11.0,
         "peak_torque_rpm": 6000,
@@ -3799,11 +3799,11 @@ BAJAJ_PULSAR_P125_2024 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 44,
         "chain_pitch": "428",
-        "dry_mass_kg": 120.0,   # 125 kg kerb - ~5 kg fuel (11 L tank)
+        "dry_mass_kg": 120.0,  # 125 kg kerb - ~5 kg fuel (11 L tank)
         "wheelbase_mm": 1275.0,
         "front_tire_size": "80/100-17",
         "rear_tire_size": "100/90-17",
-        "cd": 0.80,             # naked commuter; ref Pulsar 150 @ 0.80
+        "cd": 0.80,  # naked commuter; ref Pulsar 150 @ 0.80
         "frontal_area_m2": 0.42,  # slimmer than P150 (smaller tank, narrower seat)
     },
     source_name="spec_sheet",
@@ -3847,7 +3847,7 @@ SUZUKI_GIXXER_SF_150_2019 = spec_from_dict(
         "stroke_mm": 62.9,
         "compression_ratio": 9.6,
         "cylinders": 1,
-        "peak_power_hp": 13.6,     # 13.8 PS = 13.6 hp @ 8000 rpm (BS6 tune)
+        "peak_power_hp": 13.6,  # 13.8 PS = 13.6 hp @ 8000 rpm (BS6 tune)
         "peak_power_rpm": 8000,
         "peak_torque_nm": 13.8,
         "peak_torque_rpm": 6000,
@@ -3862,11 +3862,11 @@ SUZUKI_GIXXER_SF_150_2019 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 45,
         "chain_pitch": "428",
-        "dry_mass_kg": 139.0,    # 148 kg kerb - ~9 kg fuel (12 L tank)
+        "dry_mass_kg": 139.0,  # 148 kg kerb - ~9 kg fuel (12 L tank)
         "wheelbase_mm": 1340.0,
         "front_tire_size": "100/80-17",
         "rear_tire_size": "140/60R17",
-        "cd": 0.66,              # half-fairing sport-commuter; Suzuki India wind-tunnel data
+        "cd": 0.66,  # half-fairing sport-commuter; Suzuki India wind-tunnel data
         "frontal_area_m2": 0.44,
     },
     source_name="spec_sheet",
@@ -3916,7 +3916,7 @@ KAWASAKI_KLX_230_2020 = spec_from_dict(
         "stroke_mm": 66.0,
         "compression_ratio": 9.4,
         "cylinders": 1,
-        "peak_power_hp": 19.0,     # 19 hp @ 7600 rpm (Kawasaki spec; 16.4 whp SAE per CW)
+        "peak_power_hp": 19.0,  # 19 hp @ 7600 rpm (Kawasaki spec; 16.4 whp SAE per CW)
         "peak_power_rpm": 7600,
         "peak_torque_nm": 19.8,
         "peak_torque_rpm": 6100,
@@ -3932,12 +3932,12 @@ KAWASAKI_KLX_230_2020 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 45,
         "chain_pitch": "520",
-        "dry_mass_kg": 134.0,     # Kawasaki spec dry / 142 kg kerb - 8 kg fuel
+        "dry_mass_kg": 134.0,  # Kawasaki spec dry / 142 kg kerb - 8 kg fuel
         "wheelbase_mm": 1395.0,
-        "front_tire_size": "2.75-21",   # 21" knobby front (IRC GP-21F)
-        "rear_tire_size": "4.10-18",    # 18" knobby rear (IRC GP-22R)
-        "cd": 0.78,                # upright dual-sport posture
-        "frontal_area_m2": 0.55,   # wide handlebars + 21" front wheel
+        "front_tire_size": "2.75-21",  # 21" knobby front (IRC GP-21F)
+        "rear_tire_size": "4.10-18",  # 18" knobby rear (IRC GP-22R)
+        "cd": 0.78,  # upright dual-sport posture
+        "frontal_area_m2": 0.55,  # wide handlebars + 21" front wheel
     },
     source_name="spec_sheet",
 )
@@ -3998,12 +3998,12 @@ YAMAHA_XSR125_2021 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 48,
         "chain_pitch": "428",
-        "dry_mass_kg": 131.0,    # 140 kg kerb - ~8 kg fuel (11 L tank, ~590 g/L petrol + ~3 kg engine oil/coolant residual)
+        "dry_mass_kg": 131.0,  # 140 kg kerb - ~8 kg fuel (11 L tank, ~590 g/L petrol + ~3 kg engine oil/coolant residual)
         "wheelbase_mm": 1330.0,  # 25 mm shorter than YZF-R125 (1355 mm) per Yamaha spec
-        "front_tire_size": "110/70-17",   # Sport Heritage retro sizing (vs R125's 100/80)
+        "front_tire_size": "110/70-17",  # Sport Heritage retro sizing (vs R125's 100/80)
         "rear_tire_size": "140/70-17",
-        "cd": 0.78,              # naked retro upright; comparable to MT-125 @ 0.78
-        "frontal_area_m2": 0.48, # slightly larger than R125 (0.45) due to upright posture + raised bars
+        "cd": 0.78,  # naked retro upright; comparable to MT-125 @ 0.78
+        "frontal_area_m2": 0.48,  # slightly larger than R125 (0.45) due to upright posture + raised bars
     },
     source_name="spec_sheet",
 )
@@ -4058,12 +4058,12 @@ YAMAHA_MT125_2020 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 48,
         "chain_pitch": "428",
-        "dry_mass_kg": 131.0,    # 140 kg kerb - ~8 kg fuel (11 L tank + residual oils)
+        "dry_mass_kg": 131.0,  # 140 kg kerb - ~8 kg fuel (11 L tank + residual oils)
         "wheelbase_mm": 1325.0,  # Yamaha spec; slightly shorter than XSR125 (1330) for sharper handling
         "front_tire_size": "100/80-17",
         "rear_tire_size": "130/70-17",
-        "cd": 0.78,              # naked sport; matches MT-03/MT-07 family aero profile
-        "frontal_area_m2": 0.47, # naked riding posture, narrower than XSR125 heritage bars
+        "cd": 0.78,  # naked sport; matches MT-03/MT-07 family aero profile
+        "frontal_area_m2": 0.47,  # naked riding posture, narrower than XSR125 heritage bars
     },
     source_name="spec_sheet",
 )
@@ -4125,12 +4125,12 @@ CFMOTO_800NK_2023 = spec_from_dict(
         "front_sprocket": 16,
         "rear_sprocket": 41,
         "chain_pitch": "525",
-        "dry_mass_kg": 174.0,    # 186 kg kerb - ~12 kg fuel (16 L tank)
+        "dry_mass_kg": 174.0,  # 186 kg kerb - ~12 kg fuel (16 L tank)
         "wheelbase_mm": 1485.0,  # CFMoto India spec
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.62,              # naked mid-cc; similar to KTM 790 Duke @ 0.60
-        "frontal_area_m2": 0.50, # streetfighter-style naked, slightly larger than 790 Duke
+        "cd": 0.62,  # naked mid-cc; similar to KTM 790 Duke @ 0.60
+        "frontal_area_m2": 0.50,  # streetfighter-style naked, slightly larger than 790 Duke
     },
     source_name="spec_sheet",
 )
@@ -4188,14 +4188,14 @@ YAMAHA_XSR900_GP_2024 = spec_from_dict(
         # bulletin XSR900-GP-001 (Yamaha Japan, 2024-01).
         "gear_ratios": [2.666, 2.000, 1.619, 1.333, 1.111, 0.966],
         "front_sprocket": 16,
-        "rear_sprocket": 43,    # XSR900 base = R45; GP gets taller R43 final drive
+        "rear_sprocket": 43,  # XSR900 base = R45; GP gets taller R43 final drive
         "chain_pitch": "525",
-        "dry_mass_kg": 200.0,   # 217 kg kerb - ~17 kg fluids (14 L fuel + oils)
+        "dry_mass_kg": 200.0,  # 217 kg kerb - ~17 kg fluids (14 L fuel + oils)
         "wheelbase_mm": 1500.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.55,             # half-fairing GP cuts Cd vs XSR900 naked
-        "frontal_area_m2": 0.43, # tucked posture w/ fairing, vs 0.52 on naked XSR900
+        "cd": 0.55,  # half-fairing GP cuts Cd vs XSR900 naked
+        "frontal_area_m2": 0.43,  # tucked posture w/ fairing, vs 0.52 on naked XSR900
     },
     source_name="spec_sheet",
 )
@@ -4257,9 +4257,9 @@ KAWASAKI_ZX4R_2024 = spec_from_dict(
         # KSM-4R-2024 — only sprocket differs.
         "gear_ratios": [3.090, 2.437, 1.904, 1.560, 1.347, 1.208],
         "front_sprocket": 14,
-        "rear_sprocket": 45,    # base R = R45 (taller for sport touring); RR = R46
+        "rear_sprocket": 45,  # base R = R45 (taller for sport touring); RR = R46
         "chain_pitch": "520",
-        "dry_mass_kg": 191.0,   # 2 kg heavier than ZX-4RR (cost-down trim parts)
+        "dry_mass_kg": 191.0,  # 2 kg heavier than ZX-4RR (cost-down trim parts)
         "wheelbase_mm": 1380.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "160/60ZR17",
@@ -4313,7 +4313,7 @@ BAJAJ_PULSAR_N125_2024 = spec_from_dict(
         "stroke_mm": 50.5,
         "compression_ratio": 10.0,
         "cylinders": 1,
-        "peak_power_hp": 11.64,    # 11.8 PS = 11.64 hp @ 8500 rpm
+        "peak_power_hp": 11.64,  # 11.8 PS = 11.64 hp @ 8500 rpm
         "peak_power_rpm": 8500,
         "peak_torque_nm": 11.0,
         "peak_torque_rpm": 6000,
@@ -4325,13 +4325,13 @@ BAJAJ_PULSAR_N125_2024 = spec_from_dict(
         # PN125-DTSI-001 — only sprocket differs.
         "gear_ratios": [3.000, 1.812, 1.318, 1.045, 0.875],
         "front_sprocket": 14,
-        "rear_sprocket": 43,    # sportier than P125's R44
+        "rear_sprocket": 43,  # sportier than P125's R44
         "chain_pitch": "428",
-        "dry_mass_kg": 118.0,   # 123 kg kerb - ~5 kg fuel (11 L tank)
+        "dry_mass_kg": 118.0,  # 123 kg kerb - ~5 kg fuel (11 L tank)
         "wheelbase_mm": 1267.0,
         "front_tire_size": "80/100-17",
         "rear_tire_size": "100/90-17",
-        "cd": 0.78,             # naked roadster; slightly lower than P125
+        "cd": 0.78,  # naked roadster; slightly lower than P125
         "frontal_area_m2": 0.43,  # taller naked posture vs P125 semi-fairing
     },
     source_name="spec_sheet",
@@ -4373,7 +4373,7 @@ YEZDI_ROADSTER_2022 = spec_from_dict(
         "stroke_mm": 65.0,
         "compression_ratio": 10.5,
         "cylinders": 1,
-        "peak_power_hp": 28.6,    # 29.0 PS @ 7300 rpm = 28.6 hp
+        "peak_power_hp": 28.6,  # 29.0 PS @ 7300 rpm = 28.6 hp
         "peak_power_rpm": 7300,
         "peak_torque_nm": 29.0,
         "peak_torque_rpm": 6500,
@@ -4388,11 +4388,11 @@ YEZDI_ROADSTER_2022 = spec_from_dict(
         "front_sprocket": 15,
         "rear_sprocket": 37,
         "chain_pitch": "520",
-        "dry_mass_kg": 175.0,   # 184 kg kerb - ~9 kg fuel (12.5 L tank)
+        "dry_mass_kg": 175.0,  # 184 kg kerb - ~9 kg fuel (12.5 L tank)
         "wheelbase_mm": 1440.0,
         "front_tire_size": "100/90-18",
         "rear_tire_size": "130/80-17",
-        "cd": 0.78,             # retro naked, upright posture, exposed rider
+        "cd": 0.78,  # retro naked, upright posture, exposed rider
         "frontal_area_m2": 0.48,
     },
     source_name="spec_sheet",
@@ -4441,14 +4441,14 @@ YEZDI_ADVENTURE_2022 = spec_from_dict(
         "gears": 6,
         "gear_ratios": [2.692, 1.937, 1.500, 1.227, 1.045, 0.913],
         "front_sprocket": 15,
-        "rear_sprocket": 39,    # taller than Roadster's R37 for ADV cruising
+        "rear_sprocket": 39,  # taller than Roadster's R37 for ADV cruising
         "chain_pitch": "520",
-        "dry_mass_kg": 176.0,   # 187 kg kerb - ~11 kg fuel (15.5 L tank)
+        "dry_mass_kg": 176.0,  # 187 kg kerb - ~11 kg fuel (15.5 L tank)
         "wheelbase_mm": 1465.0,
         "front_tire_size": "100/90-19",
         "rear_tire_size": "130/80-17",
-        "cd": 0.85,             # adventure with screen + luggage rack, ref
-                                 # RE Himalayan 411 at 0.84 + slight increment
+        "cd": 0.85,  # adventure with screen + luggage rack, ref
+        # RE Himalayan 411 at 0.84 + slight increment
         "frontal_area_m2": 0.52,
     },
     source_name="spec_sheet",
@@ -4490,7 +4490,7 @@ HERO_GLAMOUR_125_2020 = spec_from_dict(
         "stroke_mm": 57.8,
         "compression_ratio": 9.9,
         "cylinders": 1,
-        "peak_power_hp": 10.59,    # 10.73 PS @ 7500 rpm = 10.59 hp
+        "peak_power_hp": 10.59,  # 10.73 PS @ 7500 rpm = 10.59 hp
         "peak_power_rpm": 7500,
         "peak_torque_nm": 10.6,
         "peak_torque_rpm": 6000,
@@ -4504,11 +4504,11 @@ HERO_GLAMOUR_125_2020 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 41,
         "chain_pitch": "428",
-        "dry_mass_kg": 114.0,   # 122 kg kerb - ~8 kg fuel (10 L tank)
+        "dry_mass_kg": 114.0,  # 122 kg kerb - ~8 kg fuel (10 L tank)
         "wheelbase_mm": 1265.0,
         "front_tire_size": "80/100-18",
         "rear_tire_size": "80/100-18",
-        "cd": 0.80,             # upright commuter posture, exposed rider
+        "cd": 0.80,  # upright commuter posture, exposed rider
         "frontal_area_m2": 0.42,
     },
     source_name="spec_sheet",
@@ -4552,12 +4552,12 @@ ROYAL_ENFIELD_HUNTER_350_2022 = spec_from_dict(
         "stroke_mm": 85.8,
         "compression_ratio": 9.5,
         "cylinders": 1,
-        "peak_power_hp": 20.2,     # 20.2 bhp @ 6100 rpm (RE press kit)
+        "peak_power_hp": 20.2,  # 20.2 bhp @ 6100 rpm (RE press kit)
         "peak_power_rpm": 6100,
         "peak_torque_nm": 27.0,
         "peak_torque_rpm": 4000,
         "fuel_system": "fi",
-        "cooling": "air",          # air + oil-cooled per RE spec
+        "cooling": "air",  # air + oil-cooled per RE spec
         "valve_config": "sohc",
         "gears": 5,
         # J-platform 5-speed constant-mesh cassette, shared verbatim with
@@ -4567,11 +4567,11 @@ ROYAL_ENFIELD_HUNTER_350_2022 = spec_from_dict(
         "front_sprocket": 15,
         "rear_sprocket": 40,
         "chain_pitch": "428",
-        "dry_mass_kg": 171.0,   # 181 kg kerb - ~10 kg fuel (13 L tank)
+        "dry_mass_kg": 171.0,  # 181 kg kerb - ~10 kg fuel (13 L tank)
         "wheelbase_mm": 1370.0,
         "front_tire_size": "110/70-17",
         "rear_tire_size": "140/70-17",
-        "cd": 0.74,             # urban roadster, upright but compact frame
+        "cd": 0.74,  # urban roadster, upright but compact frame
         "frontal_area_m2": 0.45,
     },
     source_name="spec_sheet",
@@ -4615,12 +4615,12 @@ TVS_RAIDER_125_2021 = spec_from_dict(
         "stroke_mm": 55.5,
         "compression_ratio": 10.0,
         "cylinders": 1,
-        "peak_power_hp": 11.22,    # 11.38 PS @ 7500 rpm = 11.22 hp
+        "peak_power_hp": 11.22,  # 11.38 PS @ 7500 rpm = 11.22 hp
         "peak_power_rpm": 7500,
         "peak_torque_nm": 11.2,
         "peak_torque_rpm": 6000,
         "fuel_system": "fi",
-        "cooling": "air",          # air + oil-cooled per TVS spec
+        "cooling": "air",  # air + oil-cooled per TVS spec
         "valve_config": "sohc",
         "gears": 5,
         # TVS Raider 125 5-speed cassette per service manual
@@ -4629,11 +4629,11 @@ TVS_RAIDER_125_2021 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 41,
         "chain_pitch": "428",
-        "dry_mass_kg": 115.0,   # 123 kg kerb - ~8 kg fuel (10 L tank)
+        "dry_mass_kg": 115.0,  # 123 kg kerb - ~8 kg fuel (10 L tank)
         "wheelbase_mm": 1326.0,
         "front_tire_size": "80/100-17",
-        "rear_tire_size": "100/80-17",   # bias-ply Indian notation
-        "cd": 0.78,             # sporty-commuter posture, slight forward lean
+        "rear_tire_size": "100/80-17",  # bias-ply Indian notation
+        "cd": 0.78,  # sporty-commuter posture, slight forward lean
         "frontal_area_m2": 0.42,
     },
     source_name="spec_sheet",
@@ -4680,7 +4680,7 @@ KTM_RC_125_2017 = spec_from_dict(
         "stroke_mm": 47.2,
         "compression_ratio": 12.5,
         "cylinders": 1,
-        "peak_power_hp": 14.5,     # 10.7 kW per KTM EU spec
+        "peak_power_hp": 14.5,  # 10.7 kW per KTM EU spec
         "peak_power_rpm": 9250,
         "peak_torque_nm": 12.0,
         "peak_torque_rpm": 8000,
@@ -4695,11 +4695,11 @@ KTM_RC_125_2017 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 45,
         "chain_pitch": "520",
-        "dry_mass_kg": 125.0,   # 134 kg kerb - ~9 kg fuel (11 L tank)
+        "dry_mass_kg": 125.0,  # 134 kg kerb - ~9 kg fuel (11 L tank)
         "wheelbase_mm": 1340.0,
-        "front_tire_size": "100/80-17",   # Indian-market bias-ply notation
+        "front_tire_size": "100/80-17",  # Indian-market bias-ply notation
         "rear_tire_size": "130/70-17",
-        "cd": 0.55,             # full sport fairing, committed clip-on tuck
+        "cd": 0.55,  # full sport fairing, committed clip-on tuck
         "frontal_area_m2": 0.42,
     },
     source_name="spec_sheet",
@@ -4746,7 +4746,7 @@ HERO_HUNK_160R_2022 = spec_from_dict(
         "stroke_mm": 54.0,
         "compression_ratio": 9.5,
         "cylinders": 1,
-        "peak_power_hp": 14.99,    # 15.2 PS per Hero spec sheet
+        "peak_power_hp": 14.99,  # 15.2 PS per Hero spec sheet
         "peak_power_rpm": 8500,
         "peak_torque_nm": 14.0,
         "peak_torque_rpm": 6500,
@@ -4760,11 +4760,11 @@ HERO_HUNK_160R_2022 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 37,
         "chain_pitch": "428",
-        "dry_mass_kg": 136.0,   # 145 kg kerb - ~9 kg fuel (12 L tank)
+        "dry_mass_kg": 136.0,  # 145 kg kerb - ~9 kg fuel (12 L tank)
         "wheelbase_mm": 1331.0,
-        "front_tire_size": "100/80-17",   # Indian bias-ply notation
+        "front_tire_size": "100/80-17",  # Indian bias-ply notation
         "rear_tire_size": "140/70-17",
-        "cd": 0.76,             # streetfighter naked, upright posture
+        "cd": 0.76,  # streetfighter naked, upright posture
         "frontal_area_m2": 0.46,
     },
     source_name="spec_sheet",
@@ -4791,9 +4791,9 @@ KTM_890_DUKE_2020 = spec_from_dict(
         "stroke_mm": 73.0,
         "compression_ratio": 13.5,
         "cylinders": 2,
-        "peak_power_hp": 105.0,    # 105 hp @ 8,000 rpm per KTM spec sheet
+        "peak_power_hp": 105.0,  # 105 hp @ 8,000 rpm per KTM spec sheet
         "peak_power_rpm": 8000,
-        "peak_torque_nm": 92.0,    # 92 Nm @ 6,500 rpm per KTM spec sheet
+        "peak_torque_nm": 92.0,  # 92 Nm @ 6,500 rpm per KTM spec sheet
         "peak_torque_rpm": 6500,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -4805,12 +4805,12 @@ KTM_890_DUKE_2020 = spec_from_dict(
         "gear_ratios": [2.625, 1.941, 1.580, 1.346, 1.185, 1.071],
         "front_sprocket": 15,
         "rear_sprocket": 42,
-        "chain_pitch": "520",       # KTM 890 Duke uses 520-pitch chain
-        "dry_mass_kg": 166.0,       # KTM EU spec sheet — lighter than 890 R (169 kg)
+        "chain_pitch": "520",  # KTM 890 Duke uses 520-pitch chain
+        "dry_mass_kg": 166.0,  # KTM EU spec sheet — lighter than 890 R (169 kg)
         "wheelbase_mm": 1481.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.62,                 # naked mid-cc; KTM 790/890 Duke wind-tunnel ~0.60–0.63
+        "cd": 0.62,  # naked mid-cc; KTM 790/890 Duke wind-tunnel ~0.60–0.63
         "frontal_area_m2": 0.50,
     },
     source_name="spec_sheet",
@@ -4839,9 +4839,9 @@ HONDA_CB500X_2019 = spec_from_dict(
         "stroke_mm": 66.8,
         "compression_ratio": 10.7,
         "cylinders": 2,
-        "peak_power_hp": 47.0,     # 47 hp @ 8,600 rpm per Honda spec
+        "peak_power_hp": 47.0,  # 47 hp @ 8,600 rpm per Honda spec
         "peak_power_rpm": 8600,
-        "peak_torque_nm": 43.2,    # 43.2 Nm @ 6,500 rpm per Honda spec
+        "peak_torque_nm": 43.2,  # 43.2 Nm @ 6,500 rpm per Honda spec
         "peak_torque_rpm": 6500,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -4853,11 +4853,11 @@ HONDA_CB500X_2019 = spec_from_dict(
         "front_sprocket": 15,
         "rear_sprocket": 41,
         "chain_pitch": "520",
-        "dry_mass_kg": 197.0,      # Honda EU spec sheet (216 kg wet - 19 kg fuel)
-        "wheelbase_mm": 1455.0,    # longer than CB500F (1410 mm) for stability
-        "front_tire_size": "110/80R19",   # 19-inch front — adventure setup
+        "dry_mass_kg": 197.0,  # Honda EU spec sheet (216 kg wet - 19 kg fuel)
+        "wheelbase_mm": 1455.0,  # longer than CB500F (1410 mm) for stability
+        "front_tire_size": "110/80R19",  # 19-inch front — adventure setup
         "rear_tire_size": "160/60R17",
-        "cd": 0.78,                # adventure upright + windscreen
+        "cd": 0.78,  # adventure upright + windscreen
         "frontal_area_m2": 0.55,
     },
     source_name="spec_sheet",
@@ -4887,9 +4887,9 @@ SUZUKI_GSXS750_2015 = spec_from_dict(
         "stroke_mm": 48.7,
         "compression_ratio": 12.0,
         "cylinders": 4,
-        "peak_power_hp": 114.0,    # 114 hp @ 10,500 rpm per Suzuki EU spec
+        "peak_power_hp": 114.0,  # 114 hp @ 10,500 rpm per Suzuki EU spec
         "peak_power_rpm": 10500,
-        "peak_torque_nm": 81.0,    # 81 Nm @ 9,000 rpm per Suzuki EU spec
+        "peak_torque_nm": 81.0,  # 81 Nm @ 9,000 rpm per Suzuki EU spec
         "peak_torque_rpm": 9000,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -4902,12 +4902,12 @@ SUZUKI_GSXS750_2015 = spec_from_dict(
         "gear_ratios": [2.615, 1.882, 1.500, 1.261, 1.103, 0.966],
         "front_sprocket": 16,
         "rear_sprocket": 45,
-        "chain_pitch": "520",      # 520-pitch per Suzuki spec sheet
-        "dry_mass_kg": 193.0,      # Suzuki EU spec: 214 kg wet - 21 kg fuel
+        "chain_pitch": "520",  # 520-pitch per Suzuki spec sheet
+        "dry_mass_kg": 193.0,  # Suzuki EU spec: 214 kg wet - 21 kg fuel
         "wheelbase_mm": 1455.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.64,                # upright naked, windscreen absent; similar to MT-09
+        "cd": 0.64,  # upright naked, windscreen absent; similar to MT-09
         "frontal_area_m2": 0.51,
     },
     source_name="spec_sheet",
@@ -4942,9 +4942,9 @@ YAMAHA_MT09_SP_2021 = spec_from_dict(
         "stroke_mm": 62.1,
         "compression_ratio": 11.5,
         "cylinders": 3,
-        "peak_power_hp": 119.0,       # 119 hp @ 10,000 rpm — Yamaha EU press kit 2021
+        "peak_power_hp": 119.0,  # 119 hp @ 10,000 rpm — Yamaha EU press kit 2021
         "peak_power_rpm": 10000,
-        "peak_torque_nm": 93.0,       # 93 Nm @ 7,000 rpm — Yamaha EU press kit 2021
+        "peak_torque_nm": 93.0,  # 93 Nm @ 7,000 rpm — Yamaha EU press kit 2021
         "peak_torque_rpm": 7000,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -4954,12 +4954,12 @@ YAMAHA_MT09_SP_2021 = spec_from_dict(
         "gear_ratios": [2.846, 2.200, 1.741, 1.478, 1.304, 1.178],
         "front_sprocket": 16,
         "rear_sprocket": 43,
-        "chain_pitch": "520",         # 520-pitch per Yamaha service manual
-        "dry_mass_kg": 175.0,         # 175 kg dry — Yamaha EU press kit 2021 (identical to MT-09)
+        "chain_pitch": "520",  # 520-pitch per Yamaha service manual
+        "dry_mass_kg": 175.0,  # 175 kg dry — Yamaha EU press kit 2021 (identical to MT-09)
         "wheelbase_mm": 1430.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.78,                   # upright naked; same fairing/geometry as MT-09
+        "cd": 0.78,  # upright naked; same fairing/geometry as MT-09
         "frontal_area_m2": 0.54,
     },
     source_name="spec_sheet",
@@ -4995,9 +4995,9 @@ KTM_890_SMT_2023 = spec_from_dict(
         "stroke_mm": 70.0,
         "compression_ratio": 13.5,
         "cylinders": 2,
-        "peak_power_hp": 105.0,       # 105 hp @ 8,000 rpm — KTM press release 2023
+        "peak_power_hp": 105.0,  # 105 hp @ 8,000 rpm — KTM press release 2023
         "peak_power_rpm": 8000,
-        "peak_torque_nm": 100.0,      # 100 Nm @ 6,500 rpm — KTM press release 2023
+        "peak_torque_nm": 100.0,  # 100 Nm @ 6,500 rpm — KTM press release 2023
         "peak_torque_rpm": 6500,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -5007,12 +5007,12 @@ KTM_890_SMT_2023 = spec_from_dict(
         "gear_ratios": [2.357, 1.882, 1.565, 1.350, 1.200, 1.074],
         "front_sprocket": 16,
         "rear_sprocket": 42,
-        "chain_pitch": "520",         # 520-pitch per KTM spec sheet
-        "dry_mass_kg": 163.0,         # 163 kg ready-to-ride (EU dry) — KTM press release 2023
+        "chain_pitch": "520",  # 520-pitch per KTM spec sheet
+        "dry_mass_kg": 163.0,  # 163 kg ready-to-ride (EU dry) — KTM press release 2023
         "wheelbase_mm": 1478.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "150/70R18",
-        "cd": 0.82,                   # upright adventure/naked crossover; higher than Duke
+        "cd": 0.82,  # upright adventure/naked crossover; higher than Duke
         "frontal_area_m2": 0.55,
     },
     source_name="spec_sheet",
@@ -5049,9 +5049,9 @@ HONDA_CRF1100L_AS_2020 = spec_from_dict(
         "stroke_mm": 81.4,
         "compression_ratio": 10.0,
         "cylinders": 2,
-        "peak_power_hp": 101.0,       # 101 hp @ 7,500 rpm — Honda EU spec sheet 2020
+        "peak_power_hp": 101.0,  # 101 hp @ 7,500 rpm — Honda EU spec sheet 2020
         "peak_power_rpm": 7500,
-        "peak_torque_nm": 105.0,      # 105 Nm @ 6,250 rpm — Honda EU spec sheet 2020
+        "peak_torque_nm": 105.0,  # 105 Nm @ 6,250 rpm — Honda EU spec sheet 2020
         "peak_torque_rpm": 6250,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -5062,12 +5062,12 @@ HONDA_CRF1100L_AS_2020 = spec_from_dict(
         "gear_ratios": [2.666, 1.882, 1.421, 1.150, 0.965, 0.849],
         "front_sprocket": 16,
         "rear_sprocket": 42,
-        "chain_pitch": "525",         # 525-pitch — Honda spec sheet SD09
-        "dry_mass_kg": 213.0,         # 213 kg dry (with oil+coolant) — Honda EU spec sheet 2020
+        "chain_pitch": "525",  # 525-pitch — Honda spec sheet SD09
+        "dry_mass_kg": 213.0,  # 213 kg dry (with oil+coolant) — Honda EU spec sheet 2020
         "wheelbase_mm": 1575.0,
         "front_tire_size": "90/90-21",
         "rear_tire_size": "150/70R18",
-        "cd": 0.84,                   # full ADV fairing + tall screen + hand guards
+        "cd": 0.84,  # full ADV fairing + tall screen + hand guards
         "frontal_area_m2": 0.60,
     },
     source_name="spec_sheet",
@@ -5104,9 +5104,9 @@ HONDA_CB1000_HORNET_2025 = spec_from_dict(
         "stroke_mm": 55.1,
         "compression_ratio": 11.7,
         "cylinders": 4,
-        "peak_power_hp": 152.0,       # 152 hp @ 11,000 rpm — Honda EU press kit 2024
+        "peak_power_hp": 152.0,  # 152 hp @ 11,000 rpm — Honda EU press kit 2024
         "peak_power_rpm": 11000,
-        "peak_torque_nm": 104.0,      # 104 Nm @ 9,000 rpm — Honda EU press kit 2024
+        "peak_torque_nm": 104.0,  # 104 Nm @ 9,000 rpm — Honda EU press kit 2024
         "peak_torque_rpm": 9000,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -5116,13 +5116,13 @@ HONDA_CB1000_HORNET_2025 = spec_from_dict(
         # (carry-forward unchanged; primary 1.717 × these ratios × 44/16 final)
         "gear_ratios": [2.285, 1.777, 1.500, 1.333, 1.214, 1.137],
         "front_sprocket": 16,
-        "rear_sprocket": 44,           # 44 vs Fireblade's 42 — longer cruise
-        "chain_pitch": "525",          # 525-pitch O-ring — Honda CB1000H-25 spec
-        "dry_mass_kg": 196.0,          # 211 kg kerb (MCN weighbridge) − 15 kg fluids ≈ 196 dry
+        "rear_sprocket": 44,  # 44 vs Fireblade's 42 — longer cruise
+        "chain_pitch": "525",  # 525-pitch O-ring — Honda CB1000H-25 spec
+        "dry_mass_kg": 196.0,  # 211 kg kerb (MCN weighbridge) − 15 kg fluids ≈ 196 dry
         "wheelbase_mm": 1455.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.74,                   # streetfighter naked w/ headlight cowl
+        "cd": 0.74,  # streetfighter naked w/ headlight cowl
         "frontal_area_m2": 0.55,
     },
     source_name="spec_sheet",
@@ -5160,9 +5160,9 @@ TRIUMPH_SPEED_TWIN_1200_RS_2024 = spec_from_dict(
         "stroke_mm": 80.0,
         "compression_ratio": 12.1,
         "cylinders": 2,
-        "peak_power_hp": 105.0,       # 105 hp @ 7,750 rpm — Triumph press release 2024
+        "peak_power_hp": 105.0,  # 105 hp @ 7,750 rpm — Triumph press release 2024
         "peak_power_rpm": 7750,
-        "peak_torque_nm": 112.0,      # 112 Nm @ 4,250 rpm — Triumph press release 2024
+        "peak_torque_nm": 112.0,  # 112 Nm @ 4,250 rpm — Triumph press release 2024
         "peak_torque_rpm": 4250,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -5172,12 +5172,12 @@ TRIUMPH_SPEED_TWIN_1200_RS_2024 = spec_from_dict(
         "gear_ratios": [2.692, 1.882, 1.500, 1.272, 1.117, 1.000],
         "front_sprocket": 17,
         "rear_sprocket": 43,
-        "chain_pitch": "525",         # 525-pitch — Triumph spec sheet ST1200RS
-        "dry_mass_kg": 210.0,         # 210 kg dry — Cycle World first ride confirmed
+        "chain_pitch": "525",  # 525-pitch — Triumph spec sheet ST1200RS
+        "dry_mass_kg": 210.0,  # 210 kg dry — Cycle World first ride confirmed
         "wheelbase_mm": 1413.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "160/60ZR17",
-        "cd": 0.62,                   # classic naked, low bar tuck position
+        "cd": 0.62,  # classic naked, low bar tuck position
         "frontal_area_m2": 0.50,
     },
     source_name="spec_sheet",
@@ -5214,9 +5214,9 @@ JAWA_42_BOBBER_2023 = spec_from_dict(
         "stroke_mm": 64.8,
         "compression_ratio": 10.5,
         "cylinders": 1,
-        "peak_power_hp": 27.3,        # 27.3 hp @ 6,500 rpm — Jawa India press release
+        "peak_power_hp": 27.3,  # 27.3 hp @ 6,500 rpm — Jawa India press release
         "peak_power_rpm": 6500,
-        "peak_torque_nm": 32.74,      # 32.74 Nm @ 5,000 rpm — Jawa India press release
+        "peak_torque_nm": 32.74,  # 32.74 Nm @ 5,000 rpm — Jawa India press release
         "peak_torque_rpm": 5000,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -5227,12 +5227,12 @@ JAWA_42_BOBBER_2023 = spec_from_dict(
         "gear_ratios": [2.692, 1.812, 1.350, 1.090, 0.916, 0.800],
         "front_sprocket": 15,
         "rear_sprocket": 41,
-        "chain_pitch": "428",         # 428-pitch — Indian single-cylinder standard
-        "dry_mass_kg": 175.0,         # 185 kg wet (BikeWale) − 10 kg fluids ≈ 175 dry
+        "chain_pitch": "428",  # 428-pitch — Indian single-cylinder standard
+        "dry_mass_kg": 175.0,  # 185 kg wet (BikeWale) − 10 kg fluids ≈ 175 dry
         "wheelbase_mm": 1430.0,
         "front_tire_size": "100/90-18",
         "rear_tire_size": "150/80-16",
-        "cd": 0.52,                   # bobber-low + low bar tuck position
+        "cd": 0.52,  # bobber-low + low bar tuck position
         "frontal_area_m2": 0.50,
     },
     source_name="spec_sheet",
@@ -5271,9 +5271,9 @@ KAWASAKI_Z650RS_2022 = spec_from_dict(
         "stroke_mm": 60.0,
         "compression_ratio": 10.8,
         "cylinders": 2,
-        "peak_power_hp": 68.0,        # 68 hp @ 8,000 rpm — Kawasaki EU press release 2021
+        "peak_power_hp": 68.0,  # 68 hp @ 8,000 rpm — Kawasaki EU press release 2021
         "peak_power_rpm": 8000,
-        "peak_torque_nm": 65.7,       # 65.7 Nm @ 6,700 rpm — Kawasaki EU press release 2021
+        "peak_torque_nm": 65.7,  # 65.7 Nm @ 6,700 rpm — Kawasaki EU press release 2021
         "peak_torque_rpm": 6700,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -5283,12 +5283,12 @@ KAWASAKI_Z650RS_2022 = spec_from_dict(
         "gear_ratios": [2.438, 1.714, 1.333, 1.111, 0.966, 0.852],
         "front_sprocket": 15,
         "rear_sprocket": 46,
-        "chain_pitch": "520",         # 520-pitch O-ring — Kawasaki EX650P spec
-        "dry_mass_kg": 171.0,         # 171 kg dry (ABS spec) — Kawasaki US press release 2022
+        "chain_pitch": "520",  # 520-pitch O-ring — Kawasaki EX650P spec
+        "dry_mass_kg": 171.0,  # 171 kg dry (ABS spec) — Kawasaki US press release 2022
         "wheelbase_mm": 1410.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "160/60ZR17",
-        "cd": 0.76,                   # retro upright naked, larger frontal than Z650
+        "cd": 0.76,  # retro upright naked, larger frontal than Z650
         "frontal_area_m2": 0.50,
     },
     source_name="spec_sheet",
@@ -5328,9 +5328,9 @@ YAMAHA_MT07_SP_2021 = spec_from_dict(
         "stroke_mm": 68.6,
         "compression_ratio": 11.5,
         "cylinders": 2,
-        "peak_power_hp": 73.4,        # 73.4 hp @ 8,750 rpm — Yamaha EU press release 2021
+        "peak_power_hp": 73.4,  # 73.4 hp @ 8,750 rpm — Yamaha EU press release 2021
         "peak_power_rpm": 8750,
-        "peak_torque_nm": 68.0,       # 68 Nm @ 6,500 rpm — Yamaha EU press release 2021
+        "peak_torque_nm": 68.0,  # 68 Nm @ 6,500 rpm — Yamaha EU press release 2021
         "peak_torque_rpm": 6500,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -5341,12 +5341,12 @@ YAMAHA_MT07_SP_2021 = spec_from_dict(
         "gear_ratios": [2.846, 2.125, 1.631, 1.333, 1.167, 1.043],
         "front_sprocket": 15,
         "rear_sprocket": 45,
-        "chain_pitch": "520",         # 520-pitch — Yamaha 1WS service manual
-        "dry_mass_kg": 175.0,         # MCN first ride weighbridge: 189 kg wet − 14 kg fluids
+        "chain_pitch": "520",  # 520-pitch — Yamaha 1WS service manual
+        "dry_mass_kg": 175.0,  # MCN first ride weighbridge: 189 kg wet − 14 kg fluids
         "wheelbase_mm": 1400.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.78,                   # naked street, identical stance to MT-07
+        "cd": 0.78,  # naked street, identical stance to MT-07
         "frontal_area_m2": 0.49,
     },
     source_name="spec_sheet",
@@ -5386,9 +5386,9 @@ SUZUKI_GSXS125_2017 = spec_from_dict(
         "stroke_mm": 41.2,
         "compression_ratio": 11.5,
         "cylinders": 1,
-        "peak_power_hp": 14.8,        # 14.8 hp @ 10,500 rpm — Suzuki India catalogue 2020
+        "peak_power_hp": 14.8,  # 14.8 hp @ 10,500 rpm — Suzuki India catalogue 2020
         "peak_power_rpm": 10500,
-        "peak_torque_nm": 11.2,       # 11.2 Nm @ 8,000 rpm — Suzuki India catalogue 2020
+        "peak_torque_nm": 11.2,  # 11.2 Nm @ 8,000 rpm — Suzuki India catalogue 2020
         "peak_torque_rpm": 8000,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -5399,12 +5399,12 @@ SUZUKI_GSXS125_2017 = spec_from_dict(
         "gear_ratios": [2.923, 1.882, 1.409, 1.130, 0.958, 0.838],
         "front_sprocket": 15,
         "rear_sprocket": 43,
-        "chain_pitch": "428",         # 428-pitch O-ring — Visordown GSX-S125 first ride 2016
-        "dry_mass_kg": 134.0,         # 134 kg dry — Suzuki India spec / Visordown EU spec
+        "chain_pitch": "428",  # 428-pitch O-ring — Visordown GSX-S125 first ride 2016
+        "dry_mass_kg": 134.0,  # 134 kg dry — Suzuki India spec / Visordown EU spec
         "wheelbase_mm": 1280.0,
         "front_tire_size": "110/70R17",
         "rear_tire_size": "140/70R17",
-        "cd": 0.75,                   # sportsnaked upright, small frontal (narrow single)
+        "cd": 0.75,  # sportsnaked upright, small frontal (narrow single)
         "frontal_area_m2": 0.44,
     },
     source_name="spec_sheet",
@@ -5447,9 +5447,9 @@ HONDA_CMX500_REBEL_2017 = spec_from_dict(
         "stroke_mm": 66.8,
         "compression_ratio": 10.7,
         "cylinders": 2,
-        "peak_power_hp": 45.6,        # 45.6 hp @ 8,500 rpm — Honda EU press release 2016
+        "peak_power_hp": 45.6,  # 45.6 hp @ 8,500 rpm — Honda EU press release 2016
         "peak_power_rpm": 8500,
-        "peak_torque_nm": 43.3,       # 43.3 Nm @ 4,300 rpm — Honda EU press release 2016
+        "peak_torque_nm": 43.3,  # 43.3 Nm @ 4,300 rpm — Honda EU press release 2016
         "peak_torque_rpm": 4300,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -5458,13 +5458,13 @@ HONDA_CMX500_REBEL_2017 = spec_from_dict(
         # PC64 6-speed — Honda service manual 61MFG00, shared with CB500F/CB500X
         "gear_ratios": [2.750, 1.857, 1.444, 1.200, 1.035, 0.925],
         "front_sprocket": 15,
-        "rear_sprocket": 40,          # CMX500 uses F15/R40 vs CB500F F15/R41 (16" rear wheel)
-        "chain_pitch": "520",         # 520-pitch O-ring — Honda 61MFG00 service manual
-        "dry_mass_kg": 175.0,         # 191 kg wet − 16 kg fluids — MCN weighbridge 2017
+        "rear_sprocket": 40,  # CMX500 uses F15/R40 vs CB500F F15/R41 (16" rear wheel)
+        "chain_pitch": "520",  # 520-pitch O-ring — Honda 61MFG00 service manual
+        "dry_mass_kg": 175.0,  # 191 kg wet − 16 kg fluids — MCN weighbridge 2017
         "wheelbase_mm": 1490.0,
         "front_tire_size": "130/90-16",  # 16" rear wheel cruiser format (Indian/cruiser bias-ply)
-        "rear_tire_size": "150/80-16",   # 16" rear wheel cruiser format
-        "cd": 0.88,                   # cruiser upright, wide handlebar, low slung
+        "rear_tire_size": "150/80-16",  # 16" rear wheel cruiser format
+        "cd": 0.88,  # cruiser upright, wide handlebar, low slung
         "frontal_area_m2": 0.54,
     },
     source_name="spec_sheet",
@@ -5507,24 +5507,24 @@ HONDA_NC750X_2021 = spec_from_dict(
         "stroke_mm": 80.0,
         "compression_ratio": 10.7,
         "cylinders": 2,
-        "peak_power_hp": 58.0,        # 58 hp @ 6,750 rpm — Honda EU 2021 press release
+        "peak_power_hp": 58.0,  # 58 hp @ 6,750 rpm — Honda EU 2021 press release
         "peak_power_rpm": 6750,
-        "peak_torque_nm": 69.0,       # 69 Nm @ 4,750 rpm — Honda EU 2021 press release
+        "peak_torque_nm": 69.0,  # 69 Nm @ 4,750 rpm — Honda EU 2021 press release
         "peak_torque_rpm": 4750,
         "fuel_system": "fi",
         "cooling": "liquid",
-        "valve_config": "sohc",       # NC engines are SOHC undersquare for low-rev torque
+        "valve_config": "sohc",  # NC engines are SOHC undersquare for low-rev torque
         "gears": 6,
         # NC750X RC90 6-speed manual — Honda service manual 61MKWE0
         "gear_ratios": [2.692, 1.866, 1.421, 1.150, 0.967, 0.840],
         "front_sprocket": 16,
         "rear_sprocket": 43,
-        "chain_pitch": "520",         # 520-pitch O-ring — Honda 61MKWE0
-        "dry_mass_kg": 199.0,         # 214 kg wet − 15 kg fluids — MCN 2021 weighbridge
+        "chain_pitch": "520",  # 520-pitch O-ring — Honda 61MKWE0
+        "dry_mass_kg": 199.0,  # 214 kg wet − 15 kg fluids — MCN 2021 weighbridge
         "wheelbase_mm": 1525.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "160/60ZR17",
-        "cd": 0.84,                   # adventure-tourer upright with small fairing
+        "cd": 0.84,  # adventure-tourer upright with small fairing
         "frontal_area_m2": 0.55,
     },
     source_name="spec_sheet",
@@ -5567,9 +5567,9 @@ CFMOTO_450SR_2022 = spec_from_dict(
         "stroke_mm": 55.2,
         "compression_ratio": 11.5,
         "cylinders": 2,
-        "peak_power_hp": 50.4,        # 50.4 hp @ 10,000 rpm — CFMoto India 2024 press kit
+        "peak_power_hp": 50.4,  # 50.4 hp @ 10,000 rpm — CFMoto India 2024 press kit
         "peak_power_rpm": 10000,
-        "peak_torque_nm": 39.6,       # 39.6 Nm @ 7,500 rpm — CFMoto India 2024 press kit
+        "peak_torque_nm": 39.6,  # 39.6 Nm @ 7,500 rpm — CFMoto India 2024 press kit
         "peak_torque_rpm": 7500,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -5579,12 +5579,12 @@ CFMOTO_450SR_2022 = spec_from_dict(
         "gear_ratios": [2.733, 1.875, 1.444, 1.182, 1.000, 0.872],
         "front_sprocket": 15,
         "rear_sprocket": 44,
-        "chain_pitch": "520",         # 520-pitch O-ring — CFMoto EU spec PDF
-        "dry_mass_kg": 159.0,         # 159 kg dry — CFMoto Europe official spec PDF 2023
+        "chain_pitch": "520",  # 520-pitch O-ring — CFMoto EU spec PDF
+        "dry_mass_kg": 159.0,  # 159 kg dry — CFMoto Europe official spec PDF 2023
         "wheelbase_mm": 1370.0,
         "front_tire_size": "110/70R17",
         "rear_tire_size": "150/60R17",
-        "cd": 0.62,                   # sport full-fairing, tucked stance like RS 457
+        "cd": 0.62,  # sport full-fairing, tucked stance like RS 457
         "frontal_area_m2": 0.45,
     },
     source_name="spec_sheet",
@@ -5629,9 +5629,9 @@ KAWASAKI_Z500_2024 = spec_from_dict(
         "stroke_mm": 58.6,
         "compression_ratio": 11.3,
         "cylinders": 2,
-        "peak_power_hp": 44.7,        # 45 PS @ 9000 rpm — Kawasaki USA 2024 spec
+        "peak_power_hp": 44.7,  # 45 PS @ 9000 rpm — Kawasaki USA 2024 spec
         "peak_power_rpm": 9000,
-        "peak_torque_nm": 42.6,       # 42.6 Nm @ 6000 rpm — Kawasaki USA 2024 spec
+        "peak_torque_nm": 42.6,  # 42.6 Nm @ 6000 rpm — Kawasaki USA 2024 spec
         "peak_torque_rpm": 6000,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -5641,13 +5641,13 @@ KAWASAKI_Z500_2024 = spec_from_dict(
         # 2024 Z500 (PN cross-reference confirms identical box).
         "gear_ratios": [2.929, 2.056, 1.619, 1.333, 1.154, 1.037],
         "front_sprocket": 14,
-        "rear_sprocket": 45,          # shorter than Ninja 500's R40 — naked accel tune
+        "rear_sprocket": 45,  # shorter than Ninja 500's R40 — naked accel tune
         "chain_pitch": "520",
-        "dry_mass_kg": 153.0,         # 164 kg kerb − 11 kg fluids (14 L fuel) — Kawasaki spec
+        "dry_mass_kg": 153.0,  # 164 kg kerb − 11 kg fluids (14 L fuel) — Kawasaki spec
         "wheelbase_mm": 1375.0,
         "front_tire_size": "110/70R17",
         "rear_tire_size": "150/60R17",
-        "cd": 0.71,                   # naked upright with small fly-screen
+        "cd": 0.71,  # naked upright with small fly-screen
         "frontal_area_m2": 0.46,
     },
     source_name="spec_sheet",
@@ -5695,30 +5695,30 @@ BAJAJ_FREEDOM_125_2024 = spec_from_dict(
         "model_code": "JV124",
         "year_from": 2024,
         "year_to": 2026,
-        "category": "naked",          # commuter naked — closest matching category
+        "category": "naked",  # commuter naked — closest matching category
         "displacement_cc": 125,
         "bore_mm": 56.0,
         "stroke_mm": 50.6,
-        "compression_ratio": 9.8,     # lowered for bi-fuel (vs Pulsar 125's 10.5)
+        "compression_ratio": 9.8,  # lowered for bi-fuel (vs Pulsar 125's 10.5)
         "cylinders": 1,
-        "peak_power_hp": 9.5,         # petrol-mode 9.5 PS @ 8000 rpm — Bajaj press kit
+        "peak_power_hp": 9.5,  # petrol-mode 9.5 PS @ 8000 rpm — Bajaj press kit
         "peak_power_rpm": 8000,
-        "peak_torque_nm": 9.7,        # 9.7 Nm @ 5500 rpm — Bajaj press kit
+        "peak_torque_nm": 9.7,  # 9.7 Nm @ 5500 rpm — Bajaj press kit
         "peak_torque_rpm": 5500,
-        "fuel_system": "fi",          # dual EFI rails (CNG + petrol)
+        "fuel_system": "fi",  # dual EFI rails (CNG + petrol)
         "cooling": "air",
         "valve_config": "sohc",
         "gears": 5,
         # Pulsar-125-platform 5-speed — Bajaj parts catalogue PB-FRD-125-2024
         "gear_ratios": [3.500, 2.105, 1.444, 1.105, 0.917],
         "front_sprocket": 14,
-        "rear_sprocket": 37,          # F14/R37 — Bajaj parts catalogue
-        "chain_pitch": "428",         # 428-pitch O-ring — Indian commuter standard
-        "dry_mass_kg": 138.0,         # 147 kg kerb − 9 kg fluids (petrol+CNG+oil)
+        "rear_sprocket": 37,  # F14/R37 — Bajaj parts catalogue
+        "chain_pitch": "428",  # 428-pitch O-ring — Indian commuter standard
+        "dry_mass_kg": 138.0,  # 147 kg kerb − 9 kg fluids (petrol+CNG+oil)
         "wheelbase_mm": 1340.0,
-        "front_tire_size": "80/100-17",   # Indian commuter bias-ply notation
-        "rear_tire_size": "100/90-17",    # Indian commuter bias-ply notation
-        "cd": 0.78,                   # commuter upright, narrow profile
+        "front_tire_size": "80/100-17",  # Indian commuter bias-ply notation
+        "rear_tire_size": "100/90-17",  # Indian commuter bias-ply notation
+        "cd": 0.78,  # commuter upright, narrow profile
         "frontal_area_m2": 0.48,
     },
     source_name="spec_sheet",
@@ -5776,15 +5776,15 @@ BMW_M_1000_XR_2024 = spec_from_dict(
         "model_code": "K46M",
         "year_from": 2024,
         "year_to": 2026,
-        "category": "sport",          # tagged sport so ≥195 hp rule fires → litre_sport_195p
+        "category": "sport",  # tagged sport so ≥195 hp rule fires → litre_sport_195p
         "displacement_cc": 999,
         "bore_mm": 80.0,
         "stroke_mm": 49.7,
         "compression_ratio": 13.3,
         "cylinders": 4,
-        "peak_power_hp": 210.0,       # 210 hp (154 kW) @ 13,750 rpm — BMW press kit
+        "peak_power_hp": 210.0,  # 210 hp (154 kW) @ 13,750 rpm — BMW press kit
         "peak_power_rpm": 13750,
-        "peak_torque_nm": 113.0,      # 113 Nm @ 11,000 rpm — BMW press kit
+        "peak_torque_nm": 113.0,  # 113 Nm @ 11,000 rpm — BMW press kit
         "peak_torque_rpm": 11000,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -5795,16 +5795,16 @@ BMW_M_1000_XR_2024 = spec_from_dict(
         # shared unit in BMW M 1000 XR press release 2023-11-07.
         "gear_ratios": [2.640, 2.176, 1.800, 1.560, 1.400, 1.280],
         "front_sprocket": 17,
-        "rear_sprocket": 47,          # F17/R47 per BMW M 1000 XR spec sheet; taller
-                                      # than M 1000 R F17/R45 for ADV cruise duty
+        "rear_sprocket": 47,  # F17/R47 per BMW M 1000 XR spec sheet; taller
+        # than M 1000 R F17/R45 for ADV cruise duty
         "chain_pitch": "525",
-        "dry_mass_kg": 213.0,         # 226 kg kerb − 11.25 kg fuel (15 L @ 0.75 kg/L)
-                                      # − 1.75 kg fluids = ~213 kg dry; BMW press kit
-        "wheelbase_mm": 1548.0,       # BMW M 1000 XR spec sheet 2024
+        "dry_mass_kg": 213.0,  # 226 kg kerb − 11.25 kg fuel (15 L @ 0.75 kg/L)
+        # − 1.75 kg fluids = ~213 kg dry; BMW press kit
+        "wheelbase_mm": 1548.0,  # BMW M 1000 XR spec sheet 2024
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "200/55ZR17",
-        "cd": 0.65,                   # M-spec fairing; ref S1000XR @ 0.68, M 1000 R @ 0.80
-        "frontal_area_m2": 0.60,      # ADV screen + cockpit; larger than M 1000 R (0.52)
+        "cd": 0.65,  # M-spec fairing; ref S1000XR @ 0.68, M 1000 R @ 0.80
+        "frontal_area_m2": 0.60,  # ADV screen + cockpit; larger than M 1000 R (0.52)
     },
     source_name="spec_sheet",
 )
@@ -5858,9 +5858,9 @@ KAWASAKI_NINJA_1000SX_2020 = spec_from_dict(
         "stroke_mm": 56.0,
         "compression_ratio": 11.8,
         "cylinders": 4,
-        "peak_power_hp": 140.0,       # 140 hp @ 10,000 rpm — Kawasaki spec sheet 2022
+        "peak_power_hp": 140.0,  # 140 hp @ 10,000 rpm — Kawasaki spec sheet 2022
         "peak_power_rpm": 10000,
-        "peak_torque_nm": 111.0,      # 111 Nm @ 7,300 rpm — Kawasaki spec sheet 2022
+        "peak_torque_nm": 111.0,  # 111 Nm @ 7,300 rpm — Kawasaki spec sheet 2022
         "peak_torque_rpm": 7300,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -5870,15 +5870,15 @@ KAWASAKI_NINJA_1000SX_2020 = spec_from_dict(
         # Service manual ZXT00W section 11, table 11-9.
         "gear_ratios": [2.600, 1.950, 1.600, 1.389, 1.238, 1.107],
         "front_sprocket": 15,
-        "rear_sprocket": 41,          # F15/R41 520-pitch per Kawasaki USA spec page
+        "rear_sprocket": 41,  # F15/R41 520-pitch per Kawasaki USA spec page
         "chain_pitch": "520",
-        "dry_mass_kg": 221.0,         # 235 kg kerb − 13.5 kg fuel (18 L @ 0.75 kg/L)
-                                      # − 0.5 kg other fluids = ~221 kg dry
-        "wheelbase_mm": 1440.0,       # unchanged from 2011-2019 per Kawasaki spec
+        "dry_mass_kg": 221.0,  # 235 kg kerb − 13.5 kg fuel (18 L @ 0.75 kg/L)
+        # − 0.5 kg other fluids = ~221 kg dry
+        "wheelbase_mm": 1440.0,  # unchanged from 2011-2019 per Kawasaki spec
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "190/50ZR17",
-        "cd": 0.65,                   # half-fairing sport-tourer; ref Ninja 1000 (2011) @ 0.68
-        "frontal_area_m2": 0.53,      # panniers not fitted; ref Versys 1000 @ 0.62
+        "cd": 0.65,  # half-fairing sport-tourer; ref Ninja 1000 (2011) @ 0.68
+        "frontal_area_m2": 0.53,  # panniers not fitted; ref Versys 1000 @ 0.62
     },
     source_name="spec_sheet",
 )
@@ -5923,9 +5923,9 @@ YAMAHA_TRACER_7_2020 = spec_from_dict(
         "stroke_mm": 68.6,
         "compression_ratio": 11.5,
         "cylinders": 2,
-        "peak_power_hp": 74.0,            # 54.4 kW @ 8,750 rpm — Yamaha EU spec 2023
+        "peak_power_hp": 74.0,  # 54.4 kW @ 8,750 rpm — Yamaha EU spec 2023
         "peak_power_rpm": 8750,
-        "peak_torque_nm": 67.0,           # 67 Nm @ 6,500 rpm — Yamaha EU spec 2023
+        "peak_torque_nm": 67.0,  # 67 Nm @ 6,500 rpm — Yamaha EU spec 2023
         "peak_torque_rpm": 6500,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -5934,16 +5934,16 @@ YAMAHA_TRACER_7_2020 = spec_from_dict(
         # MT-07 RM30 6-speed ratios verbatim (service manual section 5)
         "gear_ratios": [2.846, 2.125, 1.632, 1.300, 1.091, 0.964],
         "front_sprocket": 16,
-        "rear_sprocket": 43,              # F16/R43 520-pitch — Yamaha EU parts catalogue
+        "rear_sprocket": 43,  # F16/R43 520-pitch — Yamaha EU parts catalogue
         "chain_pitch": "520",
-        "dry_mass_kg": 196.0,             # 213 kg kerb (Yamaha EU 2023) − 12.75 kg fuel
-                                          # (17 L @ 0.75 kg/L) − ~4.25 kg fluids ≈ 196 kg dry
-        "wheelbase_mm": 1460.0,           # Yamaha Tracer 7 EU spec sheet 2023
+        "dry_mass_kg": 196.0,  # 213 kg kerb (Yamaha EU 2023) − 12.75 kg fuel
+        # (17 L @ 0.75 kg/L) − ~4.25 kg fluids ≈ 196 kg dry
+        "wheelbase_mm": 1460.0,  # Yamaha Tracer 7 EU spec sheet 2023
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.62,                       # half-fairing sport-tourer; ref Ninja 650 @ 0.66,
-                                          # MT-07 naked @ 0.78
-        "frontal_area_m2": 0.55,          # taller screen + bars vs MT-07's 0.52
+        "cd": 0.62,  # half-fairing sport-tourer; ref Ninja 650 @ 0.66,
+        # MT-07 naked @ 0.78
+        "frontal_area_m2": 0.55,  # taller screen + bars vs MT-07's 0.52
     },
     source_name="spec_sheet",
 )
@@ -5989,9 +5989,9 @@ BMW_F_900_XR_2020 = spec_from_dict(
         "stroke_mm": 77.0,
         "compression_ratio": 13.1,
         "cylinders": 2,
-        "peak_power_hp": 105.0,           # 77 kW @ 8,500 rpm — BMW spec sheet 2024
+        "peak_power_hp": 105.0,  # 77 kW @ 8,500 rpm — BMW spec sheet 2024
         "peak_power_rpm": 8500,
-        "peak_torque_nm": 92.0,           # 92 Nm @ 6,500 rpm — BMW spec sheet 2024
+        "peak_torque_nm": 92.0,  # 92 Nm @ 6,500 rpm — BMW spec sheet 2024
         "peak_torque_rpm": 6500,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -6000,17 +6000,17 @@ BMW_F_900_XR_2020 = spec_from_dict(
         # K83/K84 share gearbox; ratios match F900R verbatim per BMW PN
         "gear_ratios": [2.615, 1.812, 1.400, 1.130, 0.960, 0.827],
         "front_sprocket": 16,
-        "rear_sprocket": 47,              # F16/R47 525-pitch — BMW parts catalogue
+        "rear_sprocket": 47,  # F16/R47 525-pitch — BMW parts catalogue
         "chain_pitch": "525",
-        "dry_mass_kg": 219.0,             # 219 kg kerb-with-90%-fuel (BMW) − ~1 kg
-                                          # for missing 10% fuel + minor fluids ≈ 219 kg
-                                          # actual dry; BMW lists 223 kg "wet" and 219
-                                          # for DIN dry estimate via press kit
-        "wheelbase_mm": 1518.0,           # BMW F 900 XR spec sheet 2024
+        "dry_mass_kg": 219.0,  # 219 kg kerb-with-90%-fuel (BMW) − ~1 kg
+        # for missing 10% fuel + minor fluids ≈ 219 kg
+        # actual dry; BMW lists 223 kg "wet" and 219
+        # for DIN dry estimate via press kit
+        "wheelbase_mm": 1518.0,  # BMW F 900 XR spec sheet 2024
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.65,                       # half-fairing + screen; ref F900R @ 0.75 naked
-        "frontal_area_m2": 0.60,          # tall ADV-sport riding position + screen
+        "cd": 0.65,  # half-fairing + screen; ref F900R @ 0.75 naked
+        "frontal_area_m2": 0.60,  # tall ADV-sport riding position + screen
     },
     source_name="spec_sheet",
 )
@@ -6057,9 +6057,9 @@ HONDA_GROM_MSX125_2022 = spec_from_dict(
         "stroke_mm": 63.1,
         "compression_ratio": 10.0,
         "cylinders": 1,
-        "peak_power_hp": 9.7,             # 7.2 kW @ 7,250 rpm — Honda spec sheet 2024
+        "peak_power_hp": 9.7,  # 7.2 kW @ 7,250 rpm — Honda spec sheet 2024
         "peak_power_rpm": 7250,
-        "peak_torque_nm": 10.5,           # 10.5 Nm @ 6,000 rpm — Honda spec sheet 2024
+        "peak_torque_nm": 10.5,  # 10.5 Nm @ 6,000 rpm — Honda spec sheet 2024
         "peak_torque_rpm": 6000,
         "fuel_system": "fi",
         "cooling": "air",
@@ -6069,16 +6069,16 @@ HONDA_GROM_MSX125_2022 = spec_from_dict(
         # Note: 2014-2020 JC75 was 4-speed; 2022+ JC92 added 5th gear.
         "gear_ratios": [2.500, 1.550, 1.150, 0.923, 0.778],
         "front_sprocket": 15,
-        "rear_sprocket": 34,              # F15/R34 420-pitch — Honda parts catalogue JC92
+        "rear_sprocket": 34,  # F15/R34 420-pitch — Honda parts catalogue JC92
         "chain_pitch": "420",
-        "dry_mass_kg": 104.0,             # 104 kg dry (Honda) / 105 kg wet incl. ~4.4 kg
-                                          # fuel (6 L @ 0.73 kg/L) ≈ 100.6 kg dry; Honda
-                                          # press kit cites 104 kg DIN dry
-        "wheelbase_mm": 1200.0,           # Honda Grom JC92 spec sheet 2024
-        "front_tire_size": "120/70-12",   # 12-inch wheels — small-bike notation
+        "dry_mass_kg": 104.0,  # 104 kg dry (Honda) / 105 kg wet incl. ~4.4 kg
+        # fuel (6 L @ 0.73 kg/L) ≈ 100.6 kg dry; Honda
+        # press kit cites 104 kg DIN dry
+        "wheelbase_mm": 1200.0,  # Honda Grom JC92 spec sheet 2024
+        "front_tire_size": "120/70-12",  # 12-inch wheels — small-bike notation
         "rear_tire_size": "130/70-12",
-        "cd": 0.72,                       # upright mini-bike; ref small commuter ~0.75
-        "frontal_area_m2": 0.42,          # very compact mini frontal area
+        "cd": 0.72,  # upright mini-bike; ref small commuter ~0.75
+        "frontal_area_m2": 0.42,  # very compact mini frontal area
     },
     source_name="spec_sheet",
 )
@@ -6120,11 +6120,11 @@ HERO_XTREME_200R_2018 = spec_from_dict(
         "stroke_mm": 70.6,
         "compression_ratio": 9.1,
         "cylinders": 1,
-        "peak_power_hp": 18.4,            # Hero spec sheet — 18.4 hp @ 8500 rpm
+        "peak_power_hp": 18.4,  # Hero spec sheet — 18.4 hp @ 8500 rpm
         "peak_power_rpm": 8500,
-        "peak_torque_nm": 17.1,           # 17.1 Nm @ 6500 rpm — Hero spec sheet
+        "peak_torque_nm": 17.1,  # 17.1 Nm @ 6500 rpm — Hero spec sheet
         "peak_torque_rpm": 6500,
-        "fuel_system": "carb",            # BS4; BS6 (2020+) uses FI but same power
+        "fuel_system": "carb",  # BS4; BS6 (2020+) uses FI but same power
         "cooling": "air_oil",
         "valve_config": "sohc",
         "gears": 5,
@@ -6133,14 +6133,14 @@ HERO_XTREME_200R_2018 = spec_from_dict(
         # 4th 1.053 (30/28.5 approx), 5th 0.821 (28/34)
         "gear_ratios": [3.385, 2.052, 1.400, 1.053, 0.821],
         "front_sprocket": 14,
-        "rear_sprocket": 43,              # F14/R43 520-pitch — Hero spec sheet
+        "rear_sprocket": 43,  # F14/R43 520-pitch — Hero spec sheet
         "chain_pitch": "520",
-        "dry_mass_kg": 148.0,             # 148 kg DIN dry — Hero India spec sheet
-        "wheelbase_mm": 1355.0,           # Hero Xtreme 200R spec sheet 2020
-        "front_tire_size": "100/80-17",   # Hero OEM — MRF / CEAT Indian notation
+        "dry_mass_kg": 148.0,  # 148 kg DIN dry — Hero India spec sheet
+        "wheelbase_mm": 1355.0,  # Hero Xtreme 200R spec sheet 2020
+        "front_tire_size": "100/80-17",  # Hero OEM — MRF / CEAT Indian notation
         "rear_tire_size": "130/70-17",
-        "cd": 0.80,                       # upright naked, no fairing — ref 0.78-0.85
-        "frontal_area_m2": 0.49,          # medium-sized Indian naked; similar to NS200
+        "cd": 0.80,  # upright naked, no fairing — ref 0.78-0.85
+        "frontal_area_m2": 0.49,  # medium-sized Indian naked; similar to NS200
     },
     source_name="spec_sheet",
 )
@@ -6182,11 +6182,11 @@ HONDA_X_BLADE_160_BS6_2018 = spec_from_dict(
         "stroke_mm": 57.8,
         "compression_ratio": 10.7,
         "cylinders": 1,
-        "peak_power_hp": 17.0,            # 12.7 kW = 17.02 hp @ 8750 rpm — Honda spec
+        "peak_power_hp": 17.0,  # 12.7 kW = 17.02 hp @ 8750 rpm — Honda spec
         "peak_power_rpm": 8750,
-        "peak_torque_nm": 14.48,          # 14.48 Nm @ 6500 rpm — Honda India spec
+        "peak_torque_nm": 14.48,  # 14.48 Nm @ 6500 rpm — Honda India spec
         "peak_torque_rpm": 6500,
-        "fuel_system": "fi",              # BS6 PGM-FI
+        "fuel_system": "fi",  # BS6 PGM-FI
         "cooling": "air",
         "valve_config": "sohc",
         "gears": 5,
@@ -6195,14 +6195,14 @@ HONDA_X_BLADE_160_BS6_2018 = spec_from_dict(
         # 4th 1.040 (26/25), 5th 0.875 (21/24)
         "gear_ratios": [2.769, 1.778, 1.318, 1.040, 0.875],
         "front_sprocket": 14,
-        "rear_sprocket": 39,              # F14/R39 520-pitch — Honda India spec
+        "rear_sprocket": 39,  # F14/R39 520-pitch — Honda India spec
         "chain_pitch": "520",
-        "dry_mass_kg": 133.0,             # 133 kg dry — Honda India official spec
-        "wheelbase_mm": 1325.0,           # Honda X-Blade spec sheet
-        "front_tire_size": "80/100-17",   # Honda India OEM fitment
+        "dry_mass_kg": 133.0,  # 133 kg dry — Honda India official spec
+        "wheelbase_mm": 1325.0,  # Honda X-Blade spec sheet
+        "front_tire_size": "80/100-17",  # Honda India OEM fitment
         "rear_tire_size": "100/80-17",
-        "cd": 0.78,                       # naked with sporty bodywork, no full fairing
-        "frontal_area_m2": 0.47,          # slightly smaller than 200cc naked class
+        "cd": 0.78,  # naked with sporty bodywork, no full fairing
+        "frontal_area_m2": 0.47,  # slightly smaller than 200cc naked class
     },
     source_name="spec_sheet",
 )
@@ -6249,9 +6249,9 @@ KTM_790_ADVENTURE_2019 = spec_from_dict(
         "stroke_mm": 65.7,
         "compression_ratio": 12.7,
         "cylinders": 2,
-        "peak_power_hp": 94.0,            # 94 hp @ 8000 rpm — KTM press kit 2019
+        "peak_power_hp": 94.0,  # 94 hp @ 8000 rpm — KTM press kit 2019
         "peak_power_rpm": 8000,
-        "peak_torque_nm": 88.0,           # 88 Nm @ 6500 rpm — KTM press kit 2019
+        "peak_torque_nm": 88.0,  # 88 Nm @ 6500 rpm — KTM press kit 2019
         "peak_torque_rpm": 6500,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -6260,15 +6260,15 @@ KTM_790_ADVENTURE_2019 = spec_from_dict(
         # LC8c 6-speed cassette ratios — shared with 790 Duke (same platform).
         # Per gear_ratios.py "duke 790" Tier-1 entry (3CM2019EN service manual).
         "gear_ratios": [2.625, 1.941, 1.580, 1.346, 1.185, 1.071],
-        "front_sprocket": 16,             # F16/R42 — taller than Duke's F15/R42
-        "rear_sprocket": 42,              # per KTM 790 Adventure owner's manual §5.3
+        "front_sprocket": 16,  # F16/R42 — taller than Duke's F15/R42
+        "rear_sprocket": 42,  # per KTM 790 Adventure owner's manual §5.3
         "chain_pitch": "520",
-        "dry_mass_kg": 189.0,             # 189 kg ready-to-ride w/o fuel — KTM press kit
-        "wheelbase_mm": 1484.0,           # KTM 790 Adventure spec sheet 2019
-        "front_tire_size": "90/90-21",    # 21-inch front — KTM OEM ADV fitment
+        "dry_mass_kg": 189.0,  # 189 kg ready-to-ride w/o fuel — KTM press kit
+        "wheelbase_mm": 1484.0,  # KTM 790 Adventure spec sheet 2019
+        "front_tire_size": "90/90-21",  # 21-inch front — KTM OEM ADV fitment
         "rear_tire_size": "150/70R17",
-        "cd": 0.82,                       # upright ADV with screen + hand guards
-        "frontal_area_m2": 0.56,          # tall ADV stance; wider than nakeds
+        "cd": 0.82,  # upright ADV with screen + hand guards
+        "frontal_area_m2": 0.56,  # tall ADV stance; wider than nakeds
     },
     source_name="spec_sheet",
 )
@@ -6315,11 +6315,11 @@ HONDA_CB650F_2014 = spec_from_dict(
         "stroke_mm": 46.0,
         "compression_ratio": 11.4,
         "cylinders": 4,
-        "peak_power_hp": 89.85,           # 67 kW = 89.85 hp @ 11000 rpm — Honda EU
+        "peak_power_hp": 89.85,  # 67 kW = 89.85 hp @ 11000 rpm — Honda EU
         "peak_power_rpm": 11000,
-        "peak_torque_nm": 63.0,           # 63 Nm @ 8000 rpm — Honda EU homologation
+        "peak_torque_nm": 63.0,  # 63 Nm @ 8000 rpm — Honda EU homologation
         "peak_torque_rpm": 8000,
-        "fuel_system": "fi",              # PGM-FI
+        "fuel_system": "fi",  # PGM-FI
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
@@ -6329,14 +6329,14 @@ HONDA_CB650F_2014 = spec_from_dict(
         # 4th 1.300 (26/20), 5th 1.150 (23/20), 6th 1.043 (24/23).
         "gear_ratios": [3.083, 2.067, 1.600, 1.300, 1.150, 1.043],
         "front_sprocket": 15,
-        "rear_sprocket": 42,              # F15/R42 525-pitch — Honda EU spec
+        "rear_sprocket": 42,  # F15/R42 525-pitch — Honda EU spec
         "chain_pitch": "525",
-        "dry_mass_kg": 187.0,             # 187 kg dry — Honda EU homologation
-        "wheelbase_mm": 1450.0,           # Honda CB650F 2014-2018 spec sheet
+        "dry_mass_kg": 187.0,  # 187 kg dry — Honda EU homologation
+        "wheelbase_mm": 1450.0,  # Honda CB650F 2014-2018 spec sheet
         "front_tire_size": "120/70ZR17",  # Honda OEM Dunlop Sportmax D214
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.55,                       # naked sport with bar-end mirrors
-        "frontal_area_m2": 0.50,          # mid-size naked, upright rider
+        "cd": 0.55,  # naked sport with bar-end mirrors
+        "frontal_area_m2": 0.50,  # mid-size naked, upright rider
     },
     source_name="spec_sheet",
 )
@@ -6381,11 +6381,11 @@ SUZUKI_SV650X_2018 = spec_from_dict(
         "stroke_mm": 62.6,
         "compression_ratio": 11.2,
         "cylinders": 2,
-        "peak_power_hp": 75.0,            # 75 hp @ 8500 rpm — Suzuki EU homologation
+        "peak_power_hp": 75.0,  # 75 hp @ 8500 rpm — Suzuki EU homologation
         "peak_power_rpm": 8500,
-        "peak_torque_nm": 64.0,           # 64 Nm @ 6800 rpm — Suzuki EU spec
+        "peak_torque_nm": 64.0,  # 64 Nm @ 6800 rpm — Suzuki EU spec
         "peak_torque_rpm": 6800,
-        "fuel_system": "fi",              # SDTV (Suzuki Dual-Throttle Valve)
+        "fuel_system": "fi",  # SDTV (Suzuki Dual-Throttle Valve)
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
@@ -6395,14 +6395,14 @@ SUZUKI_SV650X_2018 = spec_from_dict(
         # 4th 1.125 (27/24), 5th 0.961 (25/26), 6th 0.851 (23/27).
         "gear_ratios": [2.461, 1.777, 1.380, 1.125, 0.961, 0.851],
         "front_sprocket": 15,
-        "rear_sprocket": 45,              # F15/R45 525-pitch — Suzuki EU spec
+        "rear_sprocket": 45,  # F15/R45 525-pitch — Suzuki EU spec
         "chain_pitch": "525",
-        "dry_mass_kg": 199.0,             # 199 kg dry — Suzuki EU homologation
-        "wheelbase_mm": 1445.0,           # SV650X spec sheet 2018
+        "dry_mass_kg": 199.0,  # 199 kg dry — Suzuki EU homologation
+        "wheelbase_mm": 1445.0,  # SV650X spec sheet 2018
         "front_tire_size": "120/70ZR17",  # Suzuki OEM Dunlop Roadsport 2
         "rear_tire_size": "160/60ZR17",
-        "cd": 0.52,                       # café-racer with bikini fairing + clip-ons
-        "frontal_area_m2": 0.48,          # smaller frontal area than naked SV650 (lower bars)
+        "cd": 0.52,  # café-racer with bikini fairing + clip-ons
+        "frontal_area_m2": 0.48,  # smaller frontal area than naked SV650 (lower bars)
     },
     source_name="spec_sheet",
 )
@@ -6453,13 +6453,13 @@ YAMAHA_XSR155_2019 = spec_from_dict(
         "stroke_mm": 58.7,
         "compression_ratio": 11.6,
         "cylinders": 1,
-        "peak_power_hp": 19.0,            # 14.2 kW = 19.04 hp @ 10000 rpm — Yamaha Indonesia
+        "peak_power_hp": 19.0,  # 14.2 kW = 19.04 hp @ 10000 rpm — Yamaha Indonesia
         "peak_power_rpm": 10000,
-        "peak_torque_nm": 14.7,           # 14.7 Nm @ 8500 rpm — Yamaha Indonesia spec
+        "peak_torque_nm": 14.7,  # 14.7 Nm @ 8500 rpm — Yamaha Indonesia spec
         "peak_torque_rpm": 8500,
-        "fuel_system": "fi",              # YMJET-FI (Yamaha Mixture JET Fuel Injection)
+        "fuel_system": "fi",  # YMJET-FI (Yamaha Mixture JET Fuel Injection)
         "cooling": "liquid",
-        "valve_config": "sohc",           # VVA on intake cam
+        "valve_config": "sohc",  # VVA on intake cam
         "gears": 6,
         # G3K3 6-speed cassette per Yamaha SM B65-F8197-E0.
         # Same internal ratios as YZF-R15 V3 / MT-15 V2; sprockets unchanged.
@@ -6467,14 +6467,14 @@ YAMAHA_XSR155_2019 = spec_from_dict(
         # 4th 1.160 (29/25), 5th 0.963 (26/27), 6th 0.840 (21/25).
         "gear_ratios": [2.833, 1.875, 1.429, 1.160, 0.963, 0.840],
         "front_sprocket": 14,
-        "rear_sprocket": 42,              # F14/R42 428-pitch — Yamaha Indonesia spec
+        "rear_sprocket": 42,  # F14/R42 428-pitch — Yamaha Indonesia spec
         "chain_pitch": "428",
-        "dry_mass_kg": 127.0,             # 134 kg kerb - ~7 kg fuel (10.4L) ≈ 127 kg dry
-        "wheelbase_mm": 1330.0,           # Yamaha XSR155 Indonesia spec sheet
-        "front_tire_size": "110/70-17",   # Yamaha OEM IRC GP-101 (SE Asia notation)
+        "dry_mass_kg": 127.0,  # 134 kg kerb - ~7 kg fuel (10.4L) ≈ 127 kg dry
+        "wheelbase_mm": 1330.0,  # Yamaha XSR155 Indonesia spec sheet
+        "front_tire_size": "110/70-17",  # Yamaha OEM IRC GP-101 (SE Asia notation)
         "rear_tire_size": "140/70-17",
-        "cd": 0.72,                       # upright retro-naked, round headlight, no fairing
-        "frontal_area_m2": 0.45,          # small frame, retro narrow tank profile
+        "cd": 0.72,  # upright retro-naked, round headlight, no fairing
+        "frontal_area_m2": 0.45,  # small frame, retro narrow tank profile
     },
     source_name="spec_sheet",
 )
@@ -6521,15 +6521,15 @@ HONDA_MONKEY_125_2022 = spec_from_dict(
         "model_code": "JB03",
         "year_from": 2022,
         "year_to": 2026,
-        "category": "naked",          # retro mini-naked — closest matching category
+        "category": "naked",  # retro mini-naked — closest matching category
         "displacement_cc": 124,
         "bore_mm": 50.0,
         "stroke_mm": 63.1,
         "compression_ratio": 10.0,
         "cylinders": 1,
-        "peak_power_hp": 9.4,         # 7.0 kW @ 6750 rpm — Honda JB03 spec sheet 2024
+        "peak_power_hp": 9.4,  # 7.0 kW @ 6750 rpm — Honda JB03 spec sheet 2024
         "peak_power_rpm": 6750,
-        "peak_torque_nm": 11.0,       # 11 Nm @ 5500 rpm — Honda JB03 spec sheet 2024
+        "peak_torque_nm": 11.0,  # 11 Nm @ 5500 rpm — Honda JB03 spec sheet 2024
         "peak_torque_rpm": 5500,
         "fuel_system": "fi",
         "cooling": "air",
@@ -6541,16 +6541,16 @@ HONDA_MONKEY_125_2022 = spec_from_dict(
         # gentler accel + higher cruise rpm fitting the Monkey's mellow tune.
         "gear_ratios": [2.500, 1.550, 1.150, 0.923, 0.778],
         "front_sprocket": 15,
-        "rear_sprocket": 37,          # Honda parts catalogue JB03 — taller than Grom R34
-        "chain_pitch": "420",         # 420-pitch (lighter than 428) — Honda OEM Monkey/Grom
-        "dry_mass_kg": 104.0,         # 104 kg dry per Honda DIN — JB03 spec sheet
-                                      # (kerb 107 kg incl. 5.6L fuel @ 0.73 kg/L ≈ 4 kg)
-        "wheelbase_mm": 1145.0,       # Honda Monkey 125 JB03 spec sheet 2024
+        "rear_sprocket": 37,  # Honda parts catalogue JB03 — taller than Grom R34
+        "chain_pitch": "420",  # 420-pitch (lighter than 428) — Honda OEM Monkey/Grom
+        "dry_mass_kg": 104.0,  # 104 kg dry per Honda DIN — JB03 spec sheet
+        # (kerb 107 kg incl. 5.6L fuel @ 0.73 kg/L ≈ 4 kg)
+        "wheelbase_mm": 1145.0,  # Honda Monkey 125 JB03 spec sheet 2024
         "front_tire_size": "120/80-12",  # 12-inch balloon tire — Honda OEM Vee Rubber V303
         "rear_tire_size": "130/80-12",
-        "cd": 0.78,                   # upright mini with chrome guards — slightly worse
-                                      # than Grom (0.72) due to fender + bar-end mirrors
-        "frontal_area_m2": 0.44,      # small frame but seated-upright posture
+        "cd": 0.78,  # upright mini with chrome guards — slightly worse
+        # than Grom (0.72) due to fender + bar-end mirrors
+        "frontal_area_m2": 0.44,  # small frame but seated-upright posture
     },
     source_name="spec_sheet",
 )
@@ -6606,32 +6606,32 @@ HONDA_NT1100_2022 = spec_from_dict(
         "stroke_mm": 81.4,
         "compression_ratio": 10.1,
         "cylinders": 2,
-        "peak_power_hp": 102.0,       # 75 kW @ 7500 rpm — Honda EU spec sheet 2024
+        "peak_power_hp": 102.0,  # 75 kW @ 7500 rpm — Honda EU spec sheet 2024
         "peak_power_rpm": 7500,
-        "peak_torque_nm": 104.0,      # 104 Nm @ 6250 rpm — Honda EU spec sheet 2024
+        "peak_torque_nm": 104.0,  # 104 Nm @ 6250 rpm — Honda EU spec sheet 2024
         "peak_torque_rpm": 6250,
         "fuel_system": "fi",
         "cooling": "liquid",
-        "valve_config": "sohc",       # Unicam — Honda's term for SOHC with rocker arms
+        "valve_config": "sohc",  # Unicam — Honda's term for SOHC with rocker arms
         "gears": 6,
         # Same 6-speed cassette as CRF1100L Africa Twin per Honda PN 23211-MKS-E00.
         # 1st 2.866, 2nd 1.888, 3rd 1.421, 4th 1.130, 5th 0.960, 6th 0.836.
         # Tourer tune carries identical ratios to Africa Twin per service manual.
         "gear_ratios": [2.866, 1.888, 1.421, 1.130, 0.960, 0.836],
         "front_sprocket": 16,
-        "rear_sprocket": 42,          # F16/R42 525 — identical to CRF1100L AT package
+        "rear_sprocket": 42,  # F16/R42 525 — identical to CRF1100L AT package
         "chain_pitch": "525",
-        "dry_mass_kg": 218.0,         # 238 kg kerb − 20 kg fluids (20.4L fuel ~15 kg +
-                                      # ~5 kg coolant/oil) — Honda DIN dry citation
-                                      # consistent with 218 kg figure in MCN review.
-        "wheelbase_mm": 1535.0,       # Honda NT1100 spec sheet 2024
+        "dry_mass_kg": 218.0,  # 238 kg kerb − 20 kg fluids (20.4L fuel ~15 kg +
+        # ~5 kg coolant/oil) — Honda DIN dry citation
+        # consistent with 218 kg figure in MCN review.
+        "wheelbase_mm": 1535.0,  # Honda NT1100 spec sheet 2024
         "front_tire_size": "120/70ZR17",  # Honda OEM Metzeler Roadtec 01 SE
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.55,                   # full fairing sport-tourer with adjustable screen —
-                                      # ref CRF1100L AT @ 0.58 (more upright), NT1100 sits
-                                      # lower / tucked due to road bias.
-        "frontal_area_m2": 0.60,      # tall tourer with panniers — same envelope as
-                                      # Africa Twin Adventure Sports (0.60 in catalogue)
+        "cd": 0.55,  # full fairing sport-tourer with adjustable screen —
+        # ref CRF1100L AT @ 0.58 (more upright), NT1100 sits
+        # lower / tucked due to road bias.
+        "frontal_area_m2": 0.60,  # tall tourer with panniers — same envelope as
+        # Africa Twin Adventure Sports (0.60 in catalogue)
     },
     source_name="spec_sheet",
 )
@@ -6683,9 +6683,9 @@ CFMOTO_450MT_2024 = spec_from_dict(
         "stroke_mm": 55.2,
         "compression_ratio": 11.5,
         "cylinders": 2,
-        "peak_power_hp": 41.7,        # 31 kW @ 8500 rpm — CFMoto India 2024 spec
+        "peak_power_hp": 41.7,  # 31 kW @ 8500 rpm — CFMoto India 2024 spec
         "peak_power_rpm": 8500,
-        "peak_torque_nm": 44.0,       # 44 Nm @ 6500 rpm — CFMoto India 2024 spec
+        "peak_torque_nm": 44.0,  # 44 Nm @ 6500 rpm — CFMoto India 2024 spec
         "peak_torque_rpm": 6500,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -6696,18 +6696,18 @@ CFMOTO_450MT_2024 = spec_from_dict(
         # (sport runs F14/R47) — 450MT geared for highway cruise + light off-road.
         "gear_ratios": [2.929, 2.056, 1.619, 1.333, 1.154, 1.037],
         "front_sprocket": 15,
-        "rear_sprocket": 44,          # F15/R44 520 — longer than 450SR's F14/R47
+        "rear_sprocket": 44,  # F15/R44 520 — longer than 450SR's F14/R47
         "chain_pitch": "520",
-        "dry_mass_kg": 175.0,         # 192 kg kerb − 17 kg fluids (17.5L fuel ~12.8 kg +
-                                      # ~4 kg coolant/oil) per CFMoto India spec sheet
+        "dry_mass_kg": 175.0,  # 192 kg kerb − 17 kg fluids (17.5L fuel ~12.8 kg +
+        # ~4 kg coolant/oil) per CFMoto India spec sheet
         "wheelbase_mm": 1500.0,
-        "front_tire_size": "90/90-21",   # 21-inch spoked front — ADV-standard, Pirelli
-                                          # Scorpion Rally STR OEM (Indian commuter bias-ply
-                                          # notation triggers cosmetic validator warning)
+        "front_tire_size": "90/90-21",  # 21-inch spoked front — ADV-standard, Pirelli
+        # Scorpion Rally STR OEM (Indian commuter bias-ply
+        # notation triggers cosmetic validator warning)
         "rear_tire_size": "140/80R17",
-        "cd": 0.60,                   # ADV with screen + bash plate; ref Himalayan 450 @
-                                      # 0.62 + KTM 390 Adventure @ 0.60 — similar envelope.
-        "frontal_area_m2": 0.58,      # tall ADV with handguards + windscreen
+        "cd": 0.60,  # ADV with screen + bash plate; ref Himalayan 450 @
+        # 0.62 + KTM 390 Adventure @ 0.60 — similar envelope.
+        "frontal_area_m2": 0.58,  # tall ADV with handguards + windscreen
     },
     source_name="spec_sheet",
 )
@@ -6753,30 +6753,30 @@ TRIUMPH_SCRAMBLER_1200_XE_2023 = spec_from_dict(
         "stroke_mm": 80.0,
         "compression_ratio": 11.0,
         "cylinders": 2,
-        "peak_power_hp": 89.0,        # 66 kW @ 7000 rpm — Triumph EU 2024 spec
+        "peak_power_hp": 89.0,  # 66 kW @ 7000 rpm — Triumph EU 2024 spec
         "peak_power_rpm": 7000,
-        "peak_torque_nm": 110.0,      # 110 Nm @ 4250 rpm — Triumph EU 2024 spec
+        "peak_torque_nm": 110.0,  # 110 Nm @ 4250 rpm — Triumph EU 2024 spec
         "peak_torque_rpm": 4250,
         "fuel_system": "fi",
         "cooling": "liquid",
-        "valve_config": "sohc",       # SOHC 4-valve per cylinder, 270° crank
+        "valve_config": "sohc",  # SOHC 4-valve per cylinder, 270° crank
         "gears": 6,
         # Triumph Bonneville 1200 6-speed cassette per service manual section 6.
         # Shared across Bonneville T120 / Bobber 1200 / Speedmaster / Scrambler.
         # Sources: Triumph service manual DM01 + parts cross-ref 23211-MGB-E00.
         "gear_ratios": [2.692, 1.882, 1.473, 1.250, 1.095, 0.952],
         "front_sprocket": 18,
-        "rear_sprocket": 47,          # F18/R47 525 — Triumph parts catalogue Scrambler 1200
+        "rear_sprocket": 47,  # F18/R47 525 — Triumph parts catalogue Scrambler 1200
         "chain_pitch": "525",
-        "dry_mass_kg": 207.0,         # 228 kg kerb − 21 kg fluids (16L fuel ~11.5 kg +
-                                      # ~5 kg coolant/oil + ~5 kg battery) per Triumph DIN
-        "wheelbase_mm": 1570.0,       # Triumph Scrambler 1200 XE spec sheet 2024
-        "front_tire_size": "90/90R21",   # 21-inch spoked front — Metzeler Tourance Next 2 OEM
+        "dry_mass_kg": 207.0,  # 228 kg kerb − 21 kg fluids (16L fuel ~11.5 kg +
+        # ~5 kg coolant/oil + ~5 kg battery) per Triumph DIN
+        "wheelbase_mm": 1570.0,  # Triumph Scrambler 1200 XE spec sheet 2024
+        "front_tire_size": "90/90R21",  # 21-inch spoked front — Metzeler Tourance Next 2 OEM
         "rear_tire_size": "150/70R17",
-        "cd": 0.62,                   # upright scrambler with high bars + crash bars;
-                                      # ref Triumph Tiger 900 @ 0.60 — Scrambler slightly
-                                      # worse due to wider bars + spotlight bracket.
-        "frontal_area_m2": 0.58,      # tall ADV with handguards but no full screen
+        "cd": 0.62,  # upright scrambler with high bars + crash bars;
+        # ref Triumph Tiger 900 @ 0.60 — Scrambler slightly
+        # worse due to wider bars + spotlight bracket.
+        "frontal_area_m2": 0.58,  # tall ADV with handguards but no full screen
     },
     source_name="spec_sheet",
 )
@@ -6825,36 +6825,36 @@ INDIAN_CHIEFTAIN_DARK_HORSE_2023 = spec_from_dict(
         "stroke_mm": 113.0,
         "compression_ratio": 11.0,
         "cylinders": 2,
-        "peak_power_hp": 92.0,        # 68.6 kW @ 4750 rpm — Indian official + Cycle World
-                                      # dyno (89.4 rwhp ≈ 100 crank, conservative 92)
+        "peak_power_hp": 92.0,  # 68.6 kW @ 4750 rpm — Indian official + Cycle World
+        # dyno (89.4 rwhp ≈ 100 crank, conservative 92)
         "peak_power_rpm": 4750,
-        "peak_torque_nm": 162.0,      # 162 Nm @ 3000 rpm — Indian official 2024 spec
+        "peak_torque_nm": 162.0,  # 162 Nm @ 3000 rpm — Indian official 2024 spec
         "peak_torque_rpm": 3000,
         "fuel_system": "fi",
-        "cooling": "air",             # air/oil-cooled — Thunderstroke 116 uses oil cooler,
-                                      # primary cooling is air per Indian spec
-        "valve_config": "ohv",        # pushrod OHV — Thunderstroke is a traditional
-                                      # American V-twin (2 valves/cyl, single cam in V)
+        "cooling": "air",  # air/oil-cooled — Thunderstroke 116 uses oil cooler,
+        # primary cooling is air per Indian spec
+        "valve_config": "ohv",  # pushrod OHV — Thunderstroke is a traditional
+        # American V-twin (2 valves/cyl, single cam in V)
         "gears": 6,
         # Thunderstroke 116 6-speed overdrive cassette per Indian service manual.
         # 6th is true overdrive (0.844). Belt final drive 32T/66T (ratio 2.063).
         # Ratios from Indian PolarisAfter Sales tech bulletin 21-08 + workshop manual.
         "gear_ratios": [2.413, 1.745, 1.297, 1.057, 0.926, 0.844],
-        "front_sprocket": 32,         # 32T drive pulley (belt-drive equivalent)
-        "rear_sprocket": 66,          # 66T rear pulley — Indian Thunderstroke 116 parts catalogue
-        "chain_pitch": None,          # belt drive — chain_pitch=None per CLAUDE.md V-twin
-                                      # belt convention (HD / Indian / Victory)
-        "dry_mass_kg": 365.0,         # 389 kg kerb − 24 kg fluids (20.8L fuel ~15 kg +
-                                      # ~9 kg coolant/oil/battery) per Indian DIN
-        "wheelbase_mm": 1668.0,       # Indian Chieftain Dark Horse spec sheet 2024
-        "front_tire_size": "130/60B19",   # 19-inch front bagger — Dunlop Elite 4 OEM
+        "front_sprocket": 32,  # 32T drive pulley (belt-drive equivalent)
+        "rear_sprocket": 66,  # 66T rear pulley — Indian Thunderstroke 116 parts catalogue
+        "chain_pitch": None,  # belt drive — chain_pitch=None per CLAUDE.md V-twin
+        # belt convention (HD / Indian / Victory)
+        "dry_mass_kg": 365.0,  # 389 kg kerb − 24 kg fluids (20.8L fuel ~15 kg +
+        # ~9 kg coolant/oil/battery) per Indian DIN
+        "wheelbase_mm": 1668.0,  # Indian Chieftain Dark Horse spec sheet 2024
+        "front_tire_size": "130/60B19",  # 19-inch front bagger — Dunlop Elite 4 OEM
         "rear_tire_size": "180/60R16",
-        "cd": 0.72,                   # bagger with batwing fairing + saddlebags;
-                                      # ref Harley Road Glide @ 0.70 — Indian's batwing
-                                      # is similar profile but with electric windscreen
-                                      # adding slight drag penalty.
-        "frontal_area_m2": 0.78,      # large American bagger — full fairing + saddlebag
-                                      # envelope; ref HD Road Glide 0.76 in catalogue
+        "cd": 0.72,  # bagger with batwing fairing + saddlebags;
+        # ref Harley Road Glide @ 0.70 — Indian's batwing
+        # is similar profile but with electric windscreen
+        # adding slight drag penalty.
+        "frontal_area_m2": 0.78,  # large American bagger — full fairing + saddlebag
+        # envelope; ref HD Road Glide 0.76 in catalogue
     },
     source_name="spec_sheet",
 )
@@ -6904,32 +6904,32 @@ BMW_R_1250_RT_2021 = spec_from_dict(
         "stroke_mm": 76.0,
         "compression_ratio": 12.5,
         "cylinders": 2,
-        "peak_power_hp": 136.0,       # 100 kW @ 7750 rpm — BMW EU spec sheet 2024
+        "peak_power_hp": 136.0,  # 100 kW @ 7750 rpm — BMW EU spec sheet 2024
         "peak_power_rpm": 7750,
-        "peak_torque_nm": 143.0,      # 143 Nm @ 6250 rpm — BMW EU spec sheet 2024
+        "peak_torque_nm": 143.0,  # 143 Nm @ 6250 rpm — BMW EU spec sheet 2024
         "peak_torque_rpm": 6250,
         "fuel_system": "fi",
-        "cooling": "liquid",          # air/oil + liquid-cooled heads (ShiftCam architecture)
-        "valve_config": "dohc",       # DOHC 4-valve/cyl with ShiftCam variable cam profile
+        "cooling": "liquid",  # air/oil + liquid-cooled heads (ShiftCam architecture)
+        "valve_config": "dohc",  # DOHC 4-valve/cyl with ShiftCam variable cam profile
         "gears": 6,
         # BMW K52 6-speed cassette per service manual section 6. Shared internals
         # with R 1250 GS / RS (K50/K51 platforms). Tourer carries identical ratios.
         # Shaft drive — no chain final ratio; shaft+paralever effective 2.91:1.
         "gear_ratios": [2.438, 1.714, 1.296, 1.059, 0.943, 0.848],
-        "front_sprocket": 12,         # 12T crown wheel (shaft-drive equivalent)
-        "rear_sprocket": 35,          # 35T pinion — BMW paralever shaft final ratio 2.91
-        "chain_pitch": None,          # shaft drive — chain_pitch=None per CLAUDE.md
-                                      # BMW R-series convention
-        "dry_mass_kg": 244.0,         # 279 kg kerb (BMW DIN incl. 25L fuel) − 35 kg fluids
-                                      # (25L fuel ~18 kg + ~10 kg coolant/oil + ~7 kg battery)
-        "wheelbase_mm": 1485.0,       # BMW R 1250 RT spec sheet 2024
+        "front_sprocket": 12,  # 12T crown wheel (shaft-drive equivalent)
+        "rear_sprocket": 35,  # 35T pinion — BMW paralever shaft final ratio 2.91
+        "chain_pitch": None,  # shaft drive — chain_pitch=None per CLAUDE.md
+        # BMW R-series convention
+        "dry_mass_kg": 244.0,  # 279 kg kerb (BMW DIN incl. 25L fuel) − 35 kg fluids
+        # (25L fuel ~18 kg + ~10 kg coolant/oil + ~7 kg battery)
+        "wheelbase_mm": 1485.0,  # BMW R 1250 RT spec sheet 2024
         "front_tire_size": "120/70ZR17",  # Metzeler Roadtec 01 SE OEM
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.50,                   # full fairing tourer with electric windscreen tucked
-                                      # for high-speed — among the most aerodynamic touring
-                                      # bikes in catalogue; ref MCN wind-tunnel test 0.50-0.52
-        "frontal_area_m2": 0.62,      # large tourer envelope with hard panniers as
-                                      # standard equipment; ref Honda Gold Wing 0.66
+        "cd": 0.50,  # full fairing tourer with electric windscreen tucked
+        # for high-speed — among the most aerodynamic touring
+        # bikes in catalogue; ref MCN wind-tunnel test 0.50-0.52
+        "frontal_area_m2": 0.62,  # large tourer envelope with hard panniers as
+        # standard equipment; ref Honda Gold Wing 0.66
     },
     source_name="spec_sheet",
 )
@@ -6963,13 +6963,13 @@ YAMAHA_MT10_SP_2022 = spec_from_dict(
         "stroke_mm": 50.9,
         "compression_ratio": 12.0,
         "cylinders": 4,
-        "peak_power_hp": 165.0,         # 121 kW @ 11,500 rpm — Yamaha EU spec sheet
+        "peak_power_hp": 165.0,  # 121 kW @ 11,500 rpm — Yamaha EU spec sheet
         "peak_power_rpm": 11500,
-        "peak_torque_nm": 112.0,        # 112 Nm @ 9,000 rpm — Yamaha EU spec sheet
+        "peak_torque_nm": 112.0,  # 112 Nm @ 9,000 rpm — Yamaha EU spec sheet
         "peak_torque_rpm": 9000,
         "fuel_system": "fi",
         "cooling": "liquid",
-        "valve_config": "dohc",         # DOHC 4 valve/cyl — 998cc CP4 crossplane
+        "valve_config": "dohc",  # DOHC 4 valve/cyl — 998cc CP4 crossplane
         "gears": 6,
         # Yamaha RN78 6-speed cassette — service manual LIT-11616-RN-78.
         # Identical to RN45 MT-10 base (Yamaha kept the same gearbox in 2022 refresh).
@@ -6978,12 +6978,12 @@ YAMAHA_MT10_SP_2022 = spec_from_dict(
         "front_sprocket": 17,
         "rear_sprocket": 44,
         "chain_pitch": "520",
-        "dry_mass_kg": 190.0,           # 190 kg dry per Yamaha EU spec sheet (−3 kg vs RN45
-                                        # owing to Öhlins fork vs KYB)
-        "wheelbase_mm": 1400.0,         # Yamaha EU spec sheet
+        "dry_mass_kg": 190.0,  # 190 kg dry per Yamaha EU spec sheet (−3 kg vs RN45
+        # owing to Öhlins fork vs KYB)
+        "wheelbase_mm": 1400.0,  # Yamaha EU spec sheet
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "190/55ZR17",  # Bridgestone Battlax RS11 OEM
-        "cd": 0.75,                     # naked unfaired, same envelope as MT-10 base
+        "cd": 0.75,  # naked unfaired, same envelope as MT-10 base
         "frontal_area_m2": 0.54,
     },
     source_name="spec_sheet",
@@ -7017,9 +7017,9 @@ KAWASAKI_VERSYS_1000_SE_2022 = spec_from_dict(
         "stroke_mm": 56.0,
         "compression_ratio": 10.3,
         "cylinders": 4,
-        "peak_power_hp": 120.0,         # 88 kW @ 9,000 rpm — same as base Versys 1000
+        "peak_power_hp": 120.0,  # 88 kW @ 9,000 rpm — same as base Versys 1000
         "peak_power_rpm": 9000,
-        "peak_torque_nm": 102.0,        # 102 Nm @ 7,500 rpm — Kawasaki EU spec sheet
+        "peak_torque_nm": 102.0,  # 102 Nm @ 7,500 rpm — Kawasaki EU spec sheet
         "peak_torque_rpm": 7500,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -7032,9 +7032,9 @@ KAWASAKI_VERSYS_1000_SE_2022 = spec_from_dict(
         "front_sprocket": 15,
         "rear_sprocket": 42,
         "chain_pitch": "525",
-        "dry_mass_kg": 260.0,           # 260 kg dry — Kawasaki EU spec sheet KLZ1000H
-                                        # (+5 kg vs 255 kg base KLZ1000D for KECS hardware)
-        "wheelbase_mm": 1520.0,         # same as base Versys 1000
+        "dry_mass_kg": 260.0,  # 260 kg dry — Kawasaki EU spec sheet KLZ1000H
+        # (+5 kg vs 255 kg base KLZ1000D for KECS hardware)
+        "wheelbase_mm": 1520.0,  # same as base Versys 1000
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
         "cd": 0.82,
@@ -7077,9 +7077,9 @@ DUCATI_MULTISTRADA_V4_RS_2024 = spec_from_dict(
         "stroke_mm": 53.5,
         "compression_ratio": 14.0,
         "cylinders": 4,
-        "peak_power_hp": 185.0,         # 136 kW @ 10,750 rpm — Ducati official spec sheet
+        "peak_power_hp": 185.0,  # 136 kW @ 10,750 rpm — Ducati official spec sheet
         "peak_power_rpm": 10750,
-        "peak_torque_nm": 125.0,        # 125 Nm @ 8,750 rpm — Ducati official spec sheet
+        "peak_torque_nm": 125.0,  # 125 Nm @ 8,750 rpm — Ducati official spec sheet
         "peak_torque_rpm": 8750,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -7093,15 +7093,15 @@ DUCATI_MULTISTRADA_V4_RS_2024 = spec_from_dict(
         "front_sprocket": 16,
         "rear_sprocket": 43,
         "chain_pitch": "525",
-        "dry_mass_kg": 223.0,           # 223 kg dry — Ducati official spec sheet 2024
-                                        # (-20 kg vs V4 S 243 kg due to carbon wheels +
-                                        # titanium fasteners + lighter Öhlins EC dampers)
-        "wheelbase_mm": 1567.0,         # same as Multistrada V4 family
+        "dry_mass_kg": 223.0,  # 223 kg dry — Ducati official spec sheet 2024
+        # (-20 kg vs V4 S 243 kg due to carbon wheels +
+        # titanium fasteners + lighter Öhlins EC dampers)
+        "wheelbase_mm": 1567.0,  # same as Multistrada V4 family
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "200/60ZR17",  # wider 200-section rear vs V4 S's 170/60ZR17
-        "cd": 0.80,                     # full ADV fairing; slightly higher Cd than V4 S
-                                        # (0.82) as 200-section rear tyre increases frontal
-                                        # area contribution; ref MCN tunnel 0.78-0.82 ADV class
+        "cd": 0.80,  # full ADV fairing; slightly higher Cd than V4 S
+        # (0.82) as 200-section rear tyre increases frontal
+        # area contribution; ref MCN tunnel 0.78-0.82 ADV class
         "frontal_area_m2": 0.58,
     },
     source_name="spec_sheet",
@@ -7144,29 +7144,29 @@ BMW_K1600_GT_2022 = spec_from_dict(
         "stroke_mm": 67.5,
         "compression_ratio": 12.2,
         "cylinders": 6,
-        "peak_power_hp": 160.0,         # 118 kW @ 6,750 rpm — BMW EU spec sheet K48 2022
+        "peak_power_hp": 160.0,  # 118 kW @ 6,750 rpm — BMW EU spec sheet K48 2022
         "peak_power_rpm": 6750,
-        "peak_torque_nm": 180.0,        # 180 Nm @ 5,250 rpm — BMW EU spec sheet K48 2022
+        "peak_torque_nm": 180.0,  # 180 Nm @ 5,250 rpm — BMW EU spec sheet K48 2022
         "peak_torque_rpm": 5250,
         "fuel_system": "fi",
         "cooling": "liquid",
-        "valve_config": "dohc",         # DOHC 24-valve I6, 4 valves per cyl
+        "valve_config": "dohc",  # DOHC 24-valve I6, 4 valves per cyl
         "gears": 6,
         # BMW K48 service manual P/N 01408584860 — 6-speed constant-mesh.
         # Shaft final drive (Paralever) — no chain.
         "gear_ratios": [2.073, 1.518, 1.181, 0.984, 0.857, 0.756],
-        "front_sprocket": 0,            # shaft drive — validator accepts 0 lower bound
-        "rear_sprocket": 0,             # shaft drive — Paralever final drive
-        "chain_pitch": None,            # no chain — shaft final drive
-        "dry_mass_kg": 290.0,           # 343 kg wet kerb − 26.5L fuel (18.5kg) − 7L
-                                        # other fluids = 290 kg dry est (BMW EU spec sheet)
-        "wheelbase_mm": 1618.0,         # BMW EU spec sheet K48
+        "front_sprocket": 0,  # shaft drive — validator accepts 0 lower bound
+        "rear_sprocket": 0,  # shaft drive — Paralever final drive
+        "chain_pitch": None,  # no chain — shaft final drive
+        "dry_mass_kg": 290.0,  # 343 kg wet kerb − 26.5L fuel (18.5kg) − 7L
+        # other fluids = 290 kg dry est (BMW EU spec sheet)
+        "wheelbase_mm": 1618.0,  # BMW EU spec sheet K48
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "190/55ZR17",
-        "cd": 0.62,                     # full sport-tourer fairing with adjustable
-                                        # windscreen — among the slipperiest tourers
-                                        # per BMW Aerodynamics dept whitepaper 2011
-        "frontal_area_m2": 0.65,        # large fairing + panniers + tall windscreen
+        "cd": 0.62,  # full sport-tourer fairing with adjustable
+        # windscreen — among the slipperiest tourers
+        # per BMW Aerodynamics dept whitepaper 2011
+        "frontal_area_m2": 0.65,  # large fairing + panniers + tall windscreen
     },
     source_name="spec_sheet",
 )
@@ -7199,16 +7199,16 @@ HONDA_CL500_2023 = spec_from_dict(
         "model_code": "PC57",
         "year_from": 2023,
         "year_to": 2026,
-        "category": "naked",            # scrambler — Honda classifies as adventure
-                                        # but importer treats scrambler as naked for aero
+        "category": "naked",  # scrambler — Honda classifies as adventure
+        # but importer treats scrambler as naked for aero
         "displacement_cc": 471,
         "bore_mm": 67.0,
         "stroke_mm": 66.8,
         "compression_ratio": 10.7,
         "cylinders": 2,
-        "peak_power_hp": 47.0,          # 35 kW @ 8,600 rpm — Honda EU spec sheet
+        "peak_power_hp": 47.0,  # 35 kW @ 8,600 rpm — Honda EU spec sheet
         "peak_power_rpm": 8600,
-        "peak_torque_nm": 43.2,         # 43.2 Nm @ 6,500 rpm — Honda EU spec sheet
+        "peak_torque_nm": 43.2,  # 43.2 Nm @ 6,500 rpm — Honda EU spec sheet
         "peak_torque_rpm": 6500,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -7218,17 +7218,17 @@ HONDA_CL500_2023 = spec_from_dict(
         # PC57E engine shares gearbox with PC44 (CB500F) and RC92 (CBR500R).
         "gear_ratios": [3.285, 2.105, 1.600, 1.300, 1.090, 0.967],
         "front_sprocket": 15,
-        "rear_sprocket": 41,            # Honda EU spec sheet — F15/R41 standard 520
+        "rear_sprocket": 41,  # Honda EU spec sheet — F15/R41 standard 520
         "chain_pitch": "520",
-        "dry_mass_kg": 177.0,           # 192 kg wet − 15 kg fluids (12L fuel + 3L
-                                        # other) — Honda EU spec sheet + MCN weighbridge
-        "wheelbase_mm": 1485.0,         # Honda EU spec sheet — scrambler longer than CB500F
+        "dry_mass_kg": 177.0,  # 192 kg wet − 15 kg fluids (12L fuel + 3L
+        # other) — Honda EU spec sheet + MCN weighbridge
+        "wheelbase_mm": 1485.0,  # Honda EU spec sheet — scrambler longer than CB500F
         "front_tire_size": "110/80-19",  # 19" front wheel — scrambler convention
-                                        # (validator accepts hyphen format per
-                                        # CLAUDE.md May 4 widening)
-        "rear_tire_size": "150/70-17",   # dual-purpose tires, lower aspect than sport
-        "cd": 0.78,                     # scrambler upright with high bars + tall stance
-                                        # — between naked (0.75) and ADV (0.85)
+        # (validator accepts hyphen format per
+        # CLAUDE.md May 4 widening)
+        "rear_tire_size": "150/70-17",  # dual-purpose tires, lower aspect than sport
+        "cd": 0.78,  # scrambler upright with high bars + tall stance
+        # — between naked (0.75) and ADV (0.85)
         "frontal_area_m2": 0.52,
     },
     source_name="spec_sheet",
@@ -7273,30 +7273,30 @@ SUZUKI_GSXR125_2017 = spec_from_dict(
         "stroke_mm": 41.2,
         "compression_ratio": 11.0,
         "cylinders": 1,
-        "peak_power_hp": 15.0,          # 11 kW @ 10,000 rpm — A1-licence limit per
-                                        # Suzuki EU spec sheet SH52A
+        "peak_power_hp": 15.0,  # 11 kW @ 10,000 rpm — A1-licence limit per
+        # Suzuki EU spec sheet SH52A
         "peak_power_rpm": 10000,
-        "peak_torque_nm": 11.5,         # 11.5 Nm @ 8,000 rpm — Suzuki EU spec sheet
+        "peak_torque_nm": 11.5,  # 11.5 Nm @ 8,000 rpm — Suzuki EU spec sheet
         "peak_torque_rpm": 8000,
         "fuel_system": "fi",
         "cooling": "liquid",
-        "valve_config": "dohc",         # DOHC 4-valve single
+        "valve_config": "dohc",  # DOHC 4-valve single
         "gears": 6,
         # Suzuki service manual SH52A — 6-speed cassette.
         # Primary 3.476 per Suzuki service docs (high primary for small-cc rev character).
         "gear_ratios": [2.917, 1.937, 1.500, 1.227, 1.043, 0.913],
         "front_sprocket": 14,
-        "rear_sprocket": 45,            # F14/R45 428-pitch — typical small-cc geometry
+        "rear_sprocket": 45,  # F14/R45 428-pitch — typical small-cc geometry
         "chain_pitch": "428",
-        "dry_mass_kg": 119.0,           # 134 kg wet kerb − ~15 kg fluids (11L fuel +
-                                        # 1L oil + coolant) — Suzuki EU + MCN weighbridge
-        "wheelbase_mm": 1300.0,         # Suzuki EU spec sheet — short for sport handling
+        "dry_mass_kg": 119.0,  # 134 kg wet kerb − ~15 kg fluids (11L fuel +
+        # 1L oil + coolant) — Suzuki EU + MCN weighbridge
+        "wheelbase_mm": 1300.0,  # Suzuki EU spec sheet — short for sport handling
         "front_tire_size": "90/80-17",  # bias-ply hyphen format per CLAUDE.md May 4
-                                        # validator widening (Indian/SEA small-cc)
+        # validator widening (Indian/SEA small-cc)
         "rear_tire_size": "130/70-17",
-        "cd": 0.50,                     # full GSX-R fairing on a tiny bike — surprisingly
-                                        # slippery despite small frontal area
-        "frontal_area_m2": 0.40,        # small rider + full clip-on tuck position
+        "cd": 0.50,  # full GSX-R fairing on a tiny bike — surprisingly
+        # slippery despite small frontal area
+        "frontal_area_m2": 0.40,  # small rider + full clip-on tuck position
     },
     source_name="spec_sheet",
 )
@@ -7341,9 +7341,9 @@ MV_AGUSTA_F3_RR_2024 = spec_from_dict(
         "stroke_mm": 54.3,
         "compression_ratio": 13.3,
         "cylinders": 3,
-        "peak_power_hp": 147.0,         # 108 kW @ 13,250 rpm — MV EU spec sheet
+        "peak_power_hp": 147.0,  # 108 kW @ 13,250 rpm — MV EU spec sheet
         "peak_power_rpm": 13250,
-        "peak_torque_nm": 88.0,         # 88 Nm @ 10,600 rpm — MV EU spec sheet
+        "peak_torque_nm": 88.0,  # 88 Nm @ 10,600 rpm — MV EU spec sheet
         "peak_torque_rpm": 10600,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -7353,17 +7353,17 @@ MV_AGUSTA_F3_RR_2024 = spec_from_dict(
         "gear_ratios": [2.583, 2.000, 1.666, 1.400, 1.230, 1.100],
         "front_sprocket": 16,
         "rear_sprocket": 41,
-        "chain_pitch": "525",           # MV bumped to 525 from F3 800's 520 for
-                                        # the RR's higher peak torque tolerance
-        "dry_mass_kg": 168.0,           # 173 kg wet − ~5 kg fluids (16L fuel
-                                        # equiv ~12 kg + ~3 kg oil/coolant);
-                                        # MCN weighbridge confirms 168 kg
-        "wheelbase_mm": 1380.0,         # MV EU spec sheet — unchanged from F3 800
+        "chain_pitch": "525",  # MV bumped to 525 from F3 800's 520 for
+        # the RR's higher peak torque tolerance
+        "dry_mass_kg": 168.0,  # 173 kg wet − ~5 kg fluids (16L fuel
+        # equiv ~12 kg + ~3 kg oil/coolant);
+        # MCN weighbridge confirms 168 kg
+        "wheelbase_mm": 1380.0,  # MV EU spec sheet — unchanged from F3 800
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.62,                     # tighter than F3 800's 0.64 due to new
-                                        # bellypan + winglets per MV claim
-        "frontal_area_m2": 0.40,        # unchanged — same fairing geometry
+        "cd": 0.62,  # tighter than F3 800's 0.64 due to new
+        # bellypan + winglets per MV claim
+        "frontal_area_m2": 0.40,  # unchanged — same fairing geometry
     },
     source_name="spec_sheet",
 )
@@ -7401,31 +7401,31 @@ INDIAN_SCOUT_BOBBER_2025 = spec_from_dict(
         "year_to": 2026,
         "category": "cruiser",
         "displacement_cc": 1250,
-        "bore_mm": 104.0,               # SpeedPlus platform per Indian spec
+        "bore_mm": 104.0,  # SpeedPlus platform per Indian spec
         "stroke_mm": 73.6,
         "compression_ratio": 11.0,
         "cylinders": 2,
-        "peak_power_hp": 105.0,         # 78 kW @ 7,250 rpm — Indian US spec sheet
+        "peak_power_hp": 105.0,  # 78 kW @ 7,250 rpm — Indian US spec sheet
         "peak_power_rpm": 7250,
-        "peak_torque_nm": 109.0,        # 109 Nm @ 6,300 rpm — Indian US spec sheet
+        "peak_torque_nm": 109.0,  # 109 Nm @ 6,300 rpm — Indian US spec sheet
         "peak_torque_rpm": 6300,
         "fuel_system": "fi",
         "cooling": "liquid",
-        "valve_config": "dohc",         # SpeedPlus uses DOHC 4V per Indian docs
+        "valve_config": "dohc",  # SpeedPlus uses DOHC 4V per Indian docs
         "gears": 6,
         # Indian service manual 2025 Scout — slight bump in 1st for launch
         # off the higher-torque engine; otherwise close to 2015 Scout cassette.
         "gear_ratios": [2.750, 1.875, 1.467, 1.222, 1.083, 0.957],
-        "front_sprocket": 20,           # pulley teeth (belt) — same as 2015 Scout
+        "front_sprocket": 20,  # pulley teeth (belt) — same as 2015 Scout
         "rear_sprocket": 52,
-        "chain_pitch": "belt",          # belt final drive throughout Scout lineage
-        "dry_mass_kg": 212.0,           # 224 kg wet − 12 kg fluids (12.5L fuel +
-                                        # oil + coolant) per MCN weighbridge
-        "wheelbase_mm": 1562.0,         # unchanged from 2015 Scout — same chassis
+        "chain_pitch": "belt",  # belt final drive throughout Scout lineage
+        "dry_mass_kg": 212.0,  # 224 kg wet − 12 kg fluids (12.5L fuel +
+        # oil + coolant) per MCN weighbridge
+        "wheelbase_mm": 1562.0,  # unchanged from 2015 Scout — same chassis
         "front_tire_size": "130/60B19",
         "rear_tire_size": "150/80B16",
-        "cd": 0.82,                     # bobber trim — mid-rise bars + minimal
-                                        # bodywork — slightly worse than std Scout
+        "cd": 0.82,  # bobber trim — mid-rise bars + minimal
+        # bodywork — slightly worse than std Scout
         "frontal_area_m2": 0.56,
     },
     source_name="spec_sheet",
@@ -7466,40 +7466,40 @@ HUSQVARNA_SVARTPILEN_125_2024 = spec_from_dict(
         "model_code": "SP125",
         "year_from": 2024,
         "year_to": 2026,
-        "category": "naked",            # scrambler-flavoured naked
+        "category": "naked",  # scrambler-flavoured naked
         "displacement_cc": 124,
-        "bore_mm": 58.0,                # KTM 125 Duke LC4c shared spec
+        "bore_mm": 58.0,  # KTM 125 Duke LC4c shared spec
         "stroke_mm": 47.2,
         "compression_ratio": 12.6,
         "cylinders": 1,
-        "peak_power_hp": 15.0,          # 11 kW @ 9,500 rpm — A1-licence ceiling
-                                        # per Husqvarna EU spec sheet
+        "peak_power_hp": 15.0,  # 11 kW @ 9,500 rpm — A1-licence ceiling
+        # per Husqvarna EU spec sheet
         "peak_power_rpm": 9500,
-        "peak_torque_nm": 12.0,         # 12 Nm @ 8,000 rpm — Husqvarna EU spec
+        "peak_torque_nm": 12.0,  # 12 Nm @ 8,000 rpm — Husqvarna EU spec
         "peak_torque_rpm": 8000,
         "fuel_system": "fi",
         "cooling": "liquid",
-        "valve_config": "dohc",         # DOHC 4-valve single per KTM 125 Duke
+        "valve_config": "dohc",  # DOHC 4-valve single per KTM 125 Duke
         "gears": 6,
         # KTM/Husqvarna service manual shared platform — 6-speed cassette.
         "gear_ratios": [3.000, 1.882, 1.444, 1.176, 1.000, 0.870],
         "front_sprocket": 14,
-        "rear_sprocket": 45,            # F14/R45 428-pitch shared with KTM 125
+        "rear_sprocket": 45,  # F14/R45 428-pitch shared with KTM 125
         "chain_pitch": "428",
-        "dry_mass_kg": 137.0,           # 152 kg wet kerb − ~15 kg fluids (10L
-                                        # fuel + 1L oil + coolant) per MCN
-                                        # weighbridge
-        "wheelbase_mm": 1357.0,         # Husqvarna EU spec sheet — KTM Duke
-                                        # chassis shared, slightly shorter than
-                                        # Vitpilen 125's 1366 mm
-        "front_tire_size": "110/70-17", # 17" alloys, block-pattern scrambler
-                                        # tires; bias-ply hyphen format per
-                                        # CLAUDE.md May 4 validator widening
+        "dry_mass_kg": 137.0,  # 152 kg wet kerb − ~15 kg fluids (10L
+        # fuel + 1L oil + coolant) per MCN
+        # weighbridge
+        "wheelbase_mm": 1357.0,  # Husqvarna EU spec sheet — KTM Duke
+        # chassis shared, slightly shorter than
+        # Vitpilen 125's 1366 mm
+        "front_tire_size": "110/70-17",  # 17" alloys, block-pattern scrambler
+        # tires; bias-ply hyphen format per
+        # CLAUDE.md May 4 validator widening
         "rear_tire_size": "150/60-17",
-        "cd": 0.65,                     # naked scrambler upright — between
-                                        # Vitpilen 401's 0.68 and KTM Duke 125
-                                        # at 0.62
-        "frontal_area_m2": 0.42,        # small rider, upright posture
+        "cd": 0.65,  # naked scrambler upright — between
+        # Vitpilen 401's 0.68 and KTM Duke 125
+        # at 0.62
+        "frontal_area_m2": 0.42,  # small rider, upright posture
     },
     source_name="spec_sheet",
 )
@@ -7538,40 +7538,40 @@ BMW_R_12_NINET_2024 = spec_from_dict(
         "model_code": "R12NT",
         "year_from": 2024,
         "year_to": 2026,
-        "category": "naked",            # modern-classic retro naked
+        "category": "naked",  # modern-classic retro naked
         "displacement_cc": 1170,
-        "bore_mm": 101.0,               # M308 boxer per BMW spec sheet
+        "bore_mm": 101.0,  # M308 boxer per BMW spec sheet
         "stroke_mm": 73.0,
         "compression_ratio": 12.0,
         "cylinders": 2,
-        "peak_power_hp": 109.0,         # 80 kW @ 7,000 rpm — BMW EU spec sheet
+        "peak_power_hp": 109.0,  # 80 kW @ 7,000 rpm — BMW EU spec sheet
         "peak_power_rpm": 7000,
-        "peak_torque_nm": 115.0,        # 115 Nm @ 6,500 rpm — BMW EU spec sheet
+        "peak_torque_nm": 115.0,  # 115 Nm @ 6,500 rpm — BMW EU spec sheet
         "peak_torque_rpm": 6500,
         "fuel_system": "fi",
-        "cooling": "air",               # air/oil-cooled M308 — Euro 5+ compliant
-                                        # via revised cam timing + cat
-        "valve_config": "dohc",         # DOHC 4V per cylinder, M308 platform
+        "cooling": "air",  # air/oil-cooled M308 — Euro 5+ compliant
+        # via revised cam timing + cat
+        "valve_config": "dohc",  # DOHC 4V per cylinder, M308 platform
         "gears": 6,
         # BMW service manual M308 — same cassette as R nineT 2014-2023
         # (platform-shared).
         "gear_ratios": [2.375, 1.696, 1.296, 1.065, 0.939, 0.848],
-        "front_sprocket": 0,            # shaft drive — sprockets N/A; validator
-                                        # accepts 0 per CLAUDE.md April 15
+        "front_sprocket": 0,  # shaft drive — sprockets N/A; validator
+        # accepts 0 per CLAUDE.md April 15
         "rear_sprocket": 0,
-        "chain_pitch": "shaft",         # shaft final drive — boxer convention
-        "dry_mass_kg": 205.0,           # 220 kg wet − 15 kg fluids (17.5L fuel
-                                        # + oil + final-drive oil + coolant
-                                        # equivalent) per MCN weighbridge
-        "wheelbase_mm": 1525.0,         # BMW EU spec sheet — 28 mm longer than
-                                        # R nineT's 1497 mm
+        "chain_pitch": "shaft",  # shaft final drive — boxer convention
+        "dry_mass_kg": 205.0,  # 220 kg wet − 15 kg fluids (17.5L fuel
+        # + oil + final-drive oil + coolant
+        # equivalent) per MCN weighbridge
+        "wheelbase_mm": 1525.0,  # BMW EU spec sheet — 28 mm longer than
+        # R nineT's 1497 mm
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.68,                     # upright naked, exposed boxer cylinders
-                                        # increase frontal drag vs sport bikes
-        "frontal_area_m2": 0.48,        # cylinder heads protrude laterally,
-                                        # giving a wider frontal profile than
-                                        # parallel-twin nakeds of similar class
+        "cd": 0.68,  # upright naked, exposed boxer cylinders
+        # increase frontal drag vs sport bikes
+        "frontal_area_m2": 0.48,  # cylinder heads protrude laterally,
+        # giving a wider frontal profile than
+        # parallel-twin nakeds of similar class
     },
     source_name="spec_sheet",
 )
@@ -7606,21 +7606,21 @@ SUZUKI_GSXS1000GT_2022 = spec_from_dict(
         "model_code": "S1000GT",
         "year_from": 2022,
         "year_to": 2026,
-        "category": "sport",            # sport-tourer — sport bias for
-                                        # category-aero defaults (litre-class
-                                        # full-fairing per CLAUDE.md taxonomy)
+        "category": "sport",  # sport-tourer — sport bias for
+        # category-aero defaults (litre-class
+        # full-fairing per CLAUDE.md taxonomy)
         "displacement_cc": 999,
-        "bore_mm": 73.4,                # K5-derived I4 long-stroke per Suzuki
-                                        # spec sheet (unchanged since GSX-S1000
-                                        # 2015 introduction)
+        "bore_mm": 73.4,  # K5-derived I4 long-stroke per Suzuki
+        # spec sheet (unchanged since GSX-S1000
+        # 2015 introduction)
         "stroke_mm": 59.0,
         "compression_ratio": 12.2,
         "cylinders": 4,
-        "peak_power_hp": 152.0,         # 112 kW @ 11,000 rpm — Suzuki EU spec
-                                        # sheet (Euro 5 detuned from GSX-R1000's
-                                        # ~199 hp)
+        "peak_power_hp": 152.0,  # 112 kW @ 11,000 rpm — Suzuki EU spec
+        # sheet (Euro 5 detuned from GSX-R1000's
+        # ~199 hp)
         "peak_power_rpm": 11000,
-        "peak_torque_nm": 106.0,        # 106 Nm @ 9,250 rpm — Suzuki EU spec
+        "peak_torque_nm": 106.0,  # 106 Nm @ 9,250 rpm — Suzuki EU spec
         "peak_torque_rpm": 9250,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -7631,21 +7631,21 @@ SUZUKI_GSXS1000GT_2022 = spec_from_dict(
         # for sport-tour useability.
         "gear_ratios": [2.563, 2.053, 1.714, 1.500, 1.360, 1.250],
         "front_sprocket": 17,
-        "rear_sprocket": 44,            # F17/R44 525 per MCN visual inspection
-                                        # (matches GSX-S1000 stock)
+        "rear_sprocket": 44,  # F17/R44 525 per MCN visual inspection
+        # (matches GSX-S1000 stock)
         "chain_pitch": "525",
-        "dry_mass_kg": 211.0,           # 226 kg wet − 15 kg fluids (19L fuel
-                                        # = ~14 kg + oil + coolant) per MCN
-                                        # weighbridge
-        "wheelbase_mm": 1460.0,         # Suzuki EU spec sheet — unchanged
-                                        # from GSX-S1000 naked
+        "dry_mass_kg": 211.0,  # 226 kg wet − 15 kg fluids (19L fuel
+        # = ~14 kg + oil + coolant) per MCN
+        # weighbridge
+        "wheelbase_mm": 1460.0,  # Suzuki EU spec sheet — unchanged
+        # from GSX-S1000 naked
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "190/50ZR17",
-        "cd": 0.58,                     # full-fairing sport-tourer; tucked
-                                        # rider posture; significantly
-                                        # slipperier than GSX-S1000 naked (0.72)
-        "frontal_area_m2": 0.42,        # taller screen adds some frontal area
-                                        # vs pure sport but rider tucks behind
+        "cd": 0.58,  # full-fairing sport-tourer; tucked
+        # rider posture; significantly
+        # slipperier than GSX-S1000 naked (0.72)
+        "frontal_area_m2": 0.42,  # taller screen adds some frontal area
+        # vs pure sport but rider tucks behind
     },
     source_name="spec_sheet",
 )
@@ -7682,43 +7682,43 @@ KAWASAKI_KLX300_2021 = spec_from_dict(
         "model_code": "KLX300",
         "year_from": 2021,
         "year_to": 2026,
-        "category": "adventure",        # dual-sport — adventure cat captures
-                                        # upright knobby-tire posture per
-                                        # CLAUDE.md aero defaults
+        "category": "adventure",  # dual-sport — adventure cat captures
+        # upright knobby-tire posture per
+        # CLAUDE.md aero defaults
         "displacement_cc": 292,
-        "bore_mm": 78.0,                # Kawasaki KLX300 service manual
+        "bore_mm": 78.0,  # Kawasaki KLX300 service manual
         "stroke_mm": 61.2,
         "compression_ratio": 11.1,
         "cylinders": 1,
-        "peak_power_hp": 28.0,          # 21 kW @ 8,500 rpm — Kawasaki US spec
+        "peak_power_hp": 28.0,  # 21 kW @ 8,500 rpm — Kawasaki US spec
         "peak_power_rpm": 8500,
-        "peak_torque_nm": 26.5,         # 26.5 Nm @ 7,500 rpm — Kawasaki US spec
+        "peak_torque_nm": 26.5,  # 26.5 Nm @ 7,500 rpm — Kawasaki US spec
         "peak_torque_rpm": 7500,
-        "fuel_system": "fi",            # FI from 2021 onward (carb on older
-                                        # KLX300R)
+        "fuel_system": "fi",  # FI from 2021 onward (carb on older
+        # KLX300R)
         "cooling": "liquid",
-        "valve_config": "dohc",         # DOHC 4V single per Kawasaki spec
+        "valve_config": "dohc",  # DOHC 4V single per Kawasaki spec
         "gears": 6,
         # Kawasaki service manual KLX300 — wide ratios for off-road useability
         # (1st = 2.846 for low-speed crawling, 6th = 0.961 — not overdriven
         # since dual-sports don't sustain highway cruising).
         "gear_ratios": [2.846, 2.062, 1.647, 1.368, 1.190, 1.043],
         "front_sprocket": 14,
-        "rear_sprocket": 50,            # F14/R50 520-pitch per MCN inspection
+        "rear_sprocket": 50,  # F14/R50 520-pitch per MCN inspection
         "chain_pitch": "520",
-        "dry_mass_kg": 131.0,           # 142 kg wet − 11 kg fluids (8.7L fuel
-                                        # = ~6.5 kg + oil + coolant) per MCN
-                                        # weighbridge
-        "wheelbase_mm": 1470.0,         # Kawasaki US spec sheet
-        "front_tire_size": "3.00-21",   # 21" front, knobby dual-sport bias-ply
-                                        # — hyphen format per CLAUDE.md May 4
-                                        # validator widening
-        "rear_tire_size": "4.60-18",    # 18" rear, knobby dual-sport
-        "cd": 0.78,                     # upright dual-sport with handguards +
-                                        # tall front fender; significantly
-                                        # draggier than streetbike singles
-        "frontal_area_m2": 0.52,        # upright rider + tall bars + knobby
-                                        # 21" front wheel = wide frontal profile
+        "dry_mass_kg": 131.0,  # 142 kg wet − 11 kg fluids (8.7L fuel
+        # = ~6.5 kg + oil + coolant) per MCN
+        # weighbridge
+        "wheelbase_mm": 1470.0,  # Kawasaki US spec sheet
+        "front_tire_size": "3.00-21",  # 21" front, knobby dual-sport bias-ply
+        # — hyphen format per CLAUDE.md May 4
+        # validator widening
+        "rear_tire_size": "4.60-18",  # 18" rear, knobby dual-sport
+        "cd": 0.78,  # upright dual-sport with handguards +
+        # tall front fender; significantly
+        # draggier than streetbike singles
+        "frontal_area_m2": 0.52,  # upright rider + tall bars + knobby
+        # 21" front wheel = wide frontal profile
     },
     source_name="spec_sheet",
 )
@@ -7752,42 +7752,42 @@ BSA_GOLD_STAR_650_2022 = spec_from_dict(
         "model_code": "GB650",
         "year_from": 2022,
         "year_to": 2026,
-        "category": "naked",            # retro-naked roadster — naked cat
-                                        # captures upright posture per
-                                        # CLAUDE.md aero defaults
+        "category": "naked",  # retro-naked roadster — naked cat
+        # captures upright posture per
+        # CLAUDE.md aero defaults
         "displacement_cc": 652,
-        "bore_mm": 100.0,               # BSA spec sheet — short-stroke big
-                                        # single for revvy character
+        "bore_mm": 100.0,  # BSA spec sheet — short-stroke big
+        # single for revvy character
         "stroke_mm": 83.0,
-        "compression_ratio": 9.8,       # low CR for unleaded fuel tolerance
-                                        # + reliability bias
+        "compression_ratio": 9.8,  # low CR for unleaded fuel tolerance
+        # + reliability bias
         "cylinders": 1,
-        "peak_power_hp": 45.0,           # 33 kW @ 6,500 rpm — BSA spec
+        "peak_power_hp": 45.0,  # 33 kW @ 6,500 rpm — BSA spec
         "peak_power_rpm": 6500,
-        "peak_torque_nm": 55.0,          # 55 Nm @ 4,000 rpm — BSA spec
+        "peak_torque_nm": 55.0,  # 55 Nm @ 4,000 rpm — BSA spec
         "peak_torque_rpm": 4000,
         "fuel_system": "fi",
         "cooling": "liquid",
-        "valve_config": "dohc",          # DOHC 4V single per BSA spec
+        "valve_config": "dohc",  # DOHC 4V single per BSA spec
         "gears": 5,
         # BSA Gold Star 650 service manual — 5-speed (heritage layout
         # for a big single); 1st = 2.692, 5th = 0.962 (not overdriven —
         # retro tuning bias). Slightly taller spread than RE 650.
         "gear_ratios": [2.692, 1.882, 1.450, 1.176, 0.962],
         "front_sprocket": 15,
-        "rear_sprocket": 40,            # F15/R40 525 per Autocar India
+        "rear_sprocket": 40,  # F15/R40 525 per Autocar India
         "chain_pitch": "525",
-        "dry_mass_kg": 213.0,           # 213 kg dry per BSA spec; MCN
-                                        # weighbridge confirmed 233 kg wet
-        "wheelbase_mm": 1425.0,         # BSA spec sheet
-        "front_tire_size": "100/90-18", # 18" front wire-wheel retro fitment
+        "dry_mass_kg": 213.0,  # 213 kg dry per BSA spec; MCN
+        # weighbridge confirmed 233 kg wet
+        "wheelbase_mm": 1425.0,  # BSA spec sheet
+        "front_tire_size": "100/90-18",  # 18" front wire-wheel retro fitment
         "rear_tire_size": "150/70-17",  # 17" rear — bias-ply tube format
-                                        # per CLAUDE.md May 4 validator
-                                        # widening
-        "cd": 0.72,                     # upright retro-naked single;
-                                        # similar drag profile to RE 650
-        "frontal_area_m2": 0.48,        # rider exposed; wide bars typical
-                                        # of retro singles
+        # per CLAUDE.md May 4 validator
+        # widening
+        "cd": 0.72,  # upright retro-naked single;
+        # similar drag profile to RE 650
+        "frontal_area_m2": 0.48,  # rider exposed; wide bars typical
+        # of retro singles
     },
     source_name="spec_sheet",
 )
@@ -7820,38 +7820,38 @@ HERO_PASSION_XPRO_110_2024 = spec_from_dict(
         "model_code": "PASSION_XPRO_110",
         "year_from": 2024,
         "year_to": 2026,
-        "category": "naked",            # daily commuter — naked cat (no
-                                        # cruiser/sport tag fits)
+        "category": "naked",  # daily commuter — naked cat (no
+        # cruiser/sport tag fits)
         "displacement_cc": 110,
-        "bore_mm": 52.4,                # Hero MotoCorp spec sheet
+        "bore_mm": 52.4,  # Hero MotoCorp spec sheet
         "stroke_mm": 51.5,
-        "compression_ratio": 9.9,       # low CR for E10/E20 fuel tolerance
+        "compression_ratio": 9.9,  # low CR for E10/E20 fuel tolerance
         "cylinders": 1,
-        "peak_power_hp": 9.2,            # 6.86 kW @ 7,500 rpm — Hero spec
+        "peak_power_hp": 9.2,  # 6.86 kW @ 7,500 rpm — Hero spec
         "peak_power_rpm": 7500,
-        "peak_torque_nm": 9.79,          # 9.79 Nm @ 5,500 rpm — Hero spec
+        "peak_torque_nm": 9.79,  # 9.79 Nm @ 5,500 rpm — Hero spec
         "peak_torque_rpm": 5500,
-        "fuel_system": "fi",            # FI from BS6 onwards (carb on
-                                        # earlier Passion Pro)
+        "fuel_system": "fi",  # FI from BS6 onwards (carb on
+        # earlier Passion Pro)
         "cooling": "air",
-        "valve_config": "sohc",         # 2V SOHC single per spec sheet
-        "gears": 4,                      # 4-speed commuter cassette
+        "valve_config": "sohc",  # 2V SOHC single per spec sheet
+        "gears": 4,  # 4-speed commuter cassette
         # Hero Passion XPro service manual — 4-speed cassette; 1st =
         # 3.000, 4th = 0.961 (commuter overdrive). Same layout as
         # Splendor Plus 100 cc platform.
         "gear_ratios": [3.000, 1.706, 1.238, 0.961],
         "front_sprocket": 14,
-        "rear_sprocket": 40,            # F14/R40 428 per Autocar India
+        "rear_sprocket": 40,  # F14/R40 428 per Autocar India
         "chain_pitch": "428",
-        "dry_mass_kg": 111.0,           # 122 kg kerb − ~11 kg fluids
-                                        # (9.6L fuel = ~7.2 kg + oil)
-        "wheelbase_mm": 1255.0,         # Hero spec sheet
-        "front_tire_size": "80/100-18", # 18" front commuter tube-type
+        "dry_mass_kg": 111.0,  # 122 kg kerb − ~11 kg fluids
+        # (9.6L fuel = ~7.2 kg + oil)
+        "wheelbase_mm": 1255.0,  # Hero spec sheet
+        "front_tire_size": "80/100-18",  # 18" front commuter tube-type
         "rear_tire_size": "80/100-18",  # 18" rear — same size F/R (typical
-                                        # of 110 cc commuters)
-        "cd": 0.85,                     # upright commuter; wide bars + no
-                                        # fairing = high drag coefficient
-        "frontal_area_m2": 0.55,        # tall upright rider posture
+        # of 110 cc commuters)
+        "cd": 0.85,  # upright commuter; wide bars + no
+        # fairing = high drag coefficient
+        "frontal_area_m2": 0.55,  # tall upright rider posture
     },
     source_name="spec_sheet",
 )
@@ -7889,47 +7889,47 @@ NORTON_COMMANDO_961_SP_2023 = spec_from_dict(
         "model_code": "COMMANDO_961_SP",
         "year_from": 2023,
         "year_to": 2026,
-        "category": "naked",            # retro-roadster — naked cat
+        "category": "naked",  # retro-roadster — naked cat
         "displacement_cc": 961,
-        "bore_mm": 88.0,                # Norton spec sheet — short-stroke
-                                        # parallel twin for revvy retro
-                                        # character
+        "bore_mm": 88.0,  # Norton spec sheet — short-stroke
+        # parallel twin for revvy retro
+        # character
         "stroke_mm": 79.0,
         "compression_ratio": 10.1,
         "cylinders": 2,
-        "peak_power_hp": 76.8,           # 57.3 kW @ 7,250 rpm — Norton spec
+        "peak_power_hp": 76.8,  # 57.3 kW @ 7,250 rpm — Norton spec
         "peak_power_rpm": 7250,
-        "peak_torque_nm": 81.0,          # 81 Nm @ 6,500 rpm — Norton spec
+        "peak_torque_nm": 81.0,  # 81 Nm @ 6,500 rpm — Norton spec
         "peak_torque_rpm": 6500,
         "fuel_system": "fi",
-        "cooling": "air",               # air/oil-cooled per Norton spec
-                                        # (heritage push-rod layout
-                                        # precludes water jackets)
-        "valve_config": "sohc",         # OHV push-rod (Norton's heritage
-                                        # quirk preserved by TVS); call it
-                                        # SOHC for validator compatibility
+        "cooling": "air",  # air/oil-cooled per Norton spec
+        # (heritage push-rod layout
+        # precludes water jackets)
+        "valve_config": "sohc",  # OHV push-rod (Norton's heritage
+        # quirk preserved by TVS); call it
+        # SOHC for validator compatibility
         "gears": 5,
         # Norton Commando 961 service manual — 5-speed; 1st = 2.385,
         # 5th = 0.880 (slightly overdriven, suits retro highway cruising).
         "gear_ratios": [2.385, 1.643, 1.286, 1.040, 0.880],
-        "front_sprocket": 19,            # F19 large front sprocket per
-                                        # MCN visual inspection (retro
-                                        # styling cue — large dia. sprocket)
-        "rear_sprocket": 42,            # F19/R42 525 per Visordown
+        "front_sprocket": 19,  # F19 large front sprocket per
+        # MCN visual inspection (retro
+        # styling cue — large dia. sprocket)
+        "rear_sprocket": 42,  # F19/R42 525 per Visordown
         "chain_pitch": "525",
-        "dry_mass_kg": 230.0,           # 230 kg dry per Norton; MCN
-                                        # weighbridge 248 kg wet
-        "wheelbase_mm": 1430.0,         # Norton spec sheet
-        "front_tire_size": "100/90-19", # 19" front retro spoked wheel
+        "dry_mass_kg": 230.0,  # 230 kg dry per Norton; MCN
+        # weighbridge 248 kg wet
+        "wheelbase_mm": 1430.0,  # Norton spec sheet
+        "front_tire_size": "100/90-19",  # 19" front retro spoked wheel
         "rear_tire_size": "150/70-18",  # 18" rear retro spoked — bias-ply
-                                        # tube format per CLAUDE.md May 4
-                                        # validator widening
-        "cd": 0.70,                     # upright retro-roadster; wide
-                                        # bars + exposed engine + spoked
-                                        # wheels (rim drag)
-        "frontal_area_m2": 0.47,        # rider exposed; slightly narrower
-                                        # than BSA Gold Star (no large
-                                        # tank/seat unit)
+        # tube format per CLAUDE.md May 4
+        # validator widening
+        "cd": 0.70,  # upright retro-roadster; wide
+        # bars + exposed engine + spoked
+        # wheels (rim drag)
+        "frontal_area_m2": 0.47,  # rider exposed; slightly narrower
+        # than BSA Gold Star (no large
+        # tank/seat unit)
     },
     source_name="spec_sheet",
 )
@@ -7967,19 +7967,19 @@ TRIUMPH_TIGER_SPORT_800_2025 = spec_from_dict(
         "model_code": "TIGER_SPORT_800",
         "year_from": 2025,
         "year_to": 2026,
-        "category": "adventure",        # adventure-sport tourer — road
-                                        # biased but ADV-styled
+        "category": "adventure",  # adventure-sport tourer — road
+        # biased but ADV-styled
         "displacement_cc": 798,
-        "bore_mm": 78.0,                # Triumph spec sheet — slightly
-                                        # larger bore than Trident 660
-                                        # (74mm) for 798cc
-        "stroke_mm": 55.7,              # short-stroke triple — Triumph
-                                        # official spec
+        "bore_mm": 78.0,  # Triumph spec sheet — slightly
+        # larger bore than Trident 660
+        # (74mm) for 798cc
+        "stroke_mm": 55.7,  # short-stroke triple — Triumph
+        # official spec
         "compression_ratio": 13.25,
         "cylinders": 3,
-        "peak_power_hp": 113.0,         # 84 kW @ 10,750 rpm — Triumph spec
+        "peak_power_hp": 113.0,  # 84 kW @ 10,750 rpm — Triumph spec
         "peak_power_rpm": 10750,
-        "peak_torque_nm": 84.0,         # 84 Nm @ 8,500 rpm — Triumph spec
+        "peak_torque_nm": 84.0,  # 84 Nm @ 8,500 rpm — Triumph spec
         "peak_torque_rpm": 8500,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -7990,21 +7990,21 @@ TRIUMPH_TIGER_SPORT_800_2025 = spec_from_dict(
         # 6th = 0.961 (overdriven for sport-touring highway cruise).
         "gear_ratios": [2.692, 2.117, 1.700, 1.444, 1.286, 1.130],
         "front_sprocket": 16,
-        "rear_sprocket": 47,            # F16/R47 525 per Triumph parts
+        "rear_sprocket": 47,  # F16/R47 525 per Triumph parts
         "chain_pitch": "525",
-        "dry_mass_kg": 196.0,           # 214 kg kerb − ~18 kg fluids
-                                        # (18.5L fuel + oil)
-        "wheelbase_mm": 1495.0,         # Triumph spec sheet
-        "front_tire_size": "120/70ZR19",# 19" front cast — ADV-sport
-                                        # fitment (Michelin Road 6 GT OEM)
+        "dry_mass_kg": 196.0,  # 214 kg kerb − ~18 kg fluids
+        # (18.5L fuel + oil)
+        "wheelbase_mm": 1495.0,  # Triumph spec sheet
+        "front_tire_size": "120/70ZR19",  # 19" front cast — ADV-sport
+        # fitment (Michelin Road 6 GT OEM)
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.55,                     # sport-tourer with tall screen +
-                                        # hand guards; mid-fairing exposes
-                                        # less than a full sportbike but
-                                        # taller than naked
-        "frontal_area_m2": 0.52,        # tall ADV-sport posture; taller
-                                        # screen than Tracer 9 but less
-                                        # than R 1300 GS
+        "cd": 0.55,  # sport-tourer with tall screen +
+        # hand guards; mid-fairing exposes
+        # less than a full sportbike but
+        # taller than naked
+        "frontal_area_m2": 0.52,  # tall ADV-sport posture; taller
+        # screen than Tracer 9 but less
+        # than R 1300 GS
     },
     source_name="spec_sheet",
 )
@@ -8041,46 +8041,46 @@ HONDA_X_ADV_750_2021 = spec_from_dict(
         "model_code": "X_ADV_750",
         "year_from": 2021,
         "year_to": 2026,
-        "category": "adventure",        # scooter-adventure crossover —
-                                        # adventure cat best fit for the
-                                        # off-road styling
+        "category": "adventure",  # scooter-adventure crossover —
+        # adventure cat best fit for the
+        # off-road styling
         "displacement_cc": 745,
-        "bore_mm": 77.0,                # NC750/X-ADV platform shared bore
-        "stroke_mm": 80.0,              # long-stroke — low-revving torque
-                                        # twin
+        "bore_mm": 77.0,  # NC750/X-ADV platform shared bore
+        "stroke_mm": 80.0,  # long-stroke — low-revving torque
+        # twin
         "compression_ratio": 10.7,
         "cylinders": 2,
-        "peak_power_hp": 58.0,          # 43 kW @ 6,750 rpm — Honda spec
+        "peak_power_hp": 58.0,  # 43 kW @ 6,750 rpm — Honda spec
         "peak_power_rpm": 6750,
-        "peak_torque_nm": 69.0,         # 69 Nm @ 4,750 rpm — Honda spec
+        "peak_torque_nm": 69.0,  # 69 Nm @ 4,750 rpm — Honda spec
         "peak_torque_rpm": 4750,
         "fuel_system": "fi",
         "cooling": "liquid",
-        "valve_config": "sohc",         # SOHC 4-valve per cylinder
-        "gears": 6,                     # DCT 6-speed — treated as
-                                        # standard 6-speed manual for sim
+        "valve_config": "sohc",  # SOHC 4-valve per cylinder
+        "gears": 6,  # DCT 6-speed — treated as
+        # standard 6-speed manual for sim
         # NC750/X-ADV service manual — 6-speed DCT cassette; 1st = 3.071
         # (tall first for torque/scooter-rollout character), 6th = 0.838
         # (overdriven highway cruise). Same ratios as NC750X.
         "gear_ratios": [3.071, 2.250, 1.700, 1.391, 1.190, 1.040],
         "front_sprocket": 16,
-        "rear_sprocket": 39,            # F16/R39 520 per Honda parts
-                                        # catalogue (chain drive — shaft
-                                        # not used despite scooter looks)
+        "rear_sprocket": 39,  # F16/R39 520 per Honda parts
+        # catalogue (chain drive — shaft
+        # not used despite scooter looks)
         "chain_pitch": "520",
-        "dry_mass_kg": 220.0,           # 236 kg kerb − ~16 kg fluids
-                                        # (13.2L fuel + oil)
-        "wheelbase_mm": 1590.0,         # Honda spec sheet — long
-                                        # wheelbase for scooter stability
-        "front_tire_size": "120/70R17", # 17" front — ADV cast spoked
+        "dry_mass_kg": 220.0,  # 236 kg kerb − ~16 kg fluids
+        # (13.2L fuel + oil)
+        "wheelbase_mm": 1590.0,  # Honda spec sheet — long
+        # wheelbase for scooter stability
+        "front_tire_size": "120/70R17",  # 17" front — ADV cast spoked
         "rear_tire_size": "160/60R15",  # 15" rear — scooter-style for
-                                        # under-seat storage; unique
-                                        # for a motorcycle catalog entry
-        "cd": 0.62,                     # scooter step-through profile +
-                                        # tall screen + wide bars =
-                                        # high drag despite the fairing
-        "frontal_area_m2": 0.58,        # tall upright posture + wide
-                                        # screen + step-through floor
+        # under-seat storage; unique
+        # for a motorcycle catalog entry
+        "cd": 0.62,  # scooter step-through profile +
+        # tall screen + wide bars =
+        # high drag despite the fairing
+        "frontal_area_m2": 0.58,  # tall upright posture + wide
+        # screen + step-through floor
     },
     source_name="spec_sheet",
 )
@@ -8115,16 +8115,16 @@ KTM_990_DUKE_2024 = spec_from_dict(
         "model_code": "990_DUKE",
         "year_from": 2024,
         "year_to": 2026,
-        "category": "naked",            # premium middleweight naked
+        "category": "naked",  # premium middleweight naked
         "displacement_cc": 947,
-        "bore_mm": 92.5,                # KTM spec sheet — stroked from
-                                        # 890 LC8c (90.7 mm bore)
+        "bore_mm": 92.5,  # KTM spec sheet — stroked from
+        # 890 LC8c (90.7 mm bore)
         "stroke_mm": 70.4,
         "compression_ratio": 12.6,
         "cylinders": 2,
-        "peak_power_hp": 123.0,         # 91.7 kW @ 9,500 rpm — KTM spec
+        "peak_power_hp": 123.0,  # 91.7 kW @ 9,500 rpm — KTM spec
         "peak_power_rpm": 9500,
-        "peak_torque_nm": 103.0,        # 103 Nm @ 6,750 rpm — KTM spec
+        "peak_torque_nm": 103.0,  # 103 Nm @ 6,750 rpm — KTM spec
         "peak_torque_rpm": 6750,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -8136,18 +8136,18 @@ KTM_990_DUKE_2024 = spec_from_dict(
         # bigger torque from the stroked motor.
         "gear_ratios": [2.769, 2.063, 1.650, 1.391, 1.227, 1.087],
         "front_sprocket": 16,
-        "rear_sprocket": 45,            # F16/R45 520 per KTM Powerparts
+        "rear_sprocket": 45,  # F16/R45 520 per KTM Powerparts
         "chain_pitch": "520",
-        "dry_mass_kg": 179.0,           # 179 kg dry per KTM; MCN
-                                        # weighbridge 195 kg wet
-        "wheelbase_mm": 1476.0,         # KTM spec sheet
+        "dry_mass_kg": 179.0,  # 179 kg dry per KTM; MCN
+        # weighbridge 195 kg wet
+        "wheelbase_mm": 1476.0,  # KTM spec sheet
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.58,                     # naked premium — slight fly
-                                        # screen + KTM's signature
-                                        # angular bodywork
-        "frontal_area_m2": 0.45,        # naked posture, narrow profile
-                                        # typical of KTM Duke chassis
+        "cd": 0.58,  # naked premium — slight fly
+        # screen + KTM's signature
+        # angular bodywork
+        "frontal_area_m2": 0.45,  # naked posture, narrow profile
+        # typical of KTM Duke chassis
     },
     source_name="spec_sheet",
 )
@@ -8178,41 +8178,41 @@ KTM_690_SMC_R_2019 = spec_from_dict(
         "model_code": "LC4-690-SMC-R",
         "year_from": 2019,
         "year_to": 2024,
-        "category": "naked",            # supermoto categorised as naked
-                                        # since no faired track-bike subset
+        "category": "naked",  # supermoto categorised as naked
+        # since no faired track-bike subset
         "displacement_cc": 693.0,
-        "bore_mm": 105.0,               # KTM 2019 spec — wider bore than
-                                        # 2012 Duke R (102 mm) per Euro-5
-                                        # combustion-chamber redesign
+        "bore_mm": 105.0,  # KTM 2019 spec — wider bore than
+        # 2012 Duke R (102 mm) per Euro-5
+        # combustion-chamber redesign
         "stroke_mm": 80.0,
         "compression_ratio": 12.7,
         "cylinders": 1,
-        "peak_power_hp": 74.0,          # 55 kW @ 8000 rpm — KTM spec
+        "peak_power_hp": 74.0,  # 55 kW @ 8000 rpm — KTM spec
         "peak_power_rpm": 8000,
-        "peak_torque_nm": 73.5,         # KTM spec
+        "peak_torque_nm": 73.5,  # KTM spec
         "peak_torque_rpm": 6500,
         "fuel_system": "fi",
         "cooling": "liquid",
-        "valve_config": "dohc",         # 2019+ LC4 is DOHC (was SOHC
-                                        # pre-2016)
+        "valve_config": "dohc",  # 2019+ LC4 is DOHC (was SOHC
+        # pre-2016)
         "gears": 6,
         # 2019 LC4-690 cassette per KTM Powerparts service manual
         # 3213907 (shared with 690 Duke 2019+, distinct from 2012-2017
         # Duke R's [2.833, 1.937, 1.500, 1.227, 1.043, 0.912]).
         "gear_ratios": [2.667, 1.857, 1.429, 1.157, 0.961, 0.840],
-        "front_sprocket": 15,           # F15/R45 520 per KTM
-                                        # Powerparts 2019 spec
+        "front_sprocket": 15,  # F15/R45 520 per KTM
+        # Powerparts 2019 spec
         "rear_sprocket": 45,
         "chain_pitch": "520",
-        "dry_mass_kg": 147.0,           # KTM dry-spec; 158 kg wet
-                                        # without fuel
+        "dry_mass_kg": 147.0,  # KTM dry-spec; 158 kg wet
+        # without fuel
         "wheelbase_mm": 1474.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "160/60ZR17",
-        "cd": 0.78,                     # supermoto upright + tall bars
-                                        # + narrow tank — high Cd
-        "frontal_area_m2": 0.50,        # supermoto seat height pushes
-                                        # rider into the wind
+        "cd": 0.78,  # supermoto upright + tall bars
+        # + narrow tank — high Cd
+        "frontal_area_m2": 0.50,  # supermoto seat height pushes
+        # rider into the wind
     },
     source_name="spec_sheet",
 )
@@ -8245,33 +8245,33 @@ HUSQVARNA_701_SUPERMOTO_2016 = spec_from_dict(
         "stroke_mm": 80.0,
         "compression_ratio": 12.8,
         "cylinders": 1,
-        "peak_power_hp": 74.0,          # 55 kW @ 8500 rpm — Husqvarna
-                                        # spec; peaks slightly higher
-                                        # than KTM 690 SMC R (8000 rpm)
-                                        # due to less restrictive
-                                        # airbox/exhaust
+        "peak_power_hp": 74.0,  # 55 kW @ 8500 rpm — Husqvarna
+        # spec; peaks slightly higher
+        # than KTM 690 SMC R (8000 rpm)
+        # due to less restrictive
+        # airbox/exhaust
         "peak_power_rpm": 8500,
         "peak_torque_nm": 72.0,
         "peak_torque_rpm": 6750,
         "fuel_system": "fi",
         "cooling": "liquid",
-        "valve_config": "sohc",         # pre-2017 LC4 — SOHC
+        "valve_config": "sohc",  # pre-2017 LC4 — SOHC
         "gears": 6,
         # Husqvarna 2016 LC4 cassette per Husky service manual
         # (matches KTM 2012-2017 Duke R, NOT the 2019+ LC4 cassette)
         "gear_ratios": [2.833, 1.937, 1.500, 1.227, 1.043, 0.912],
-        "front_sprocket": 16,           # F16/R42 520 — Husqvarna
-                                        # chose taller front sprocket
-                                        # than KTM SMC R (F15) for
-                                        # longer-distance bias
+        "front_sprocket": 16,  # F16/R42 520 — Husqvarna
+        # chose taller front sprocket
+        # than KTM SMC R (F15) for
+        # longer-distance bias
         "rear_sprocket": 42,
         "chain_pitch": "520",
-        "dry_mass_kg": 145.0,           # Husky dry-spec; 158 kg wet
-        "wheelbase_mm": 1493.0,         # 19 mm longer than KTM SMC R
+        "dry_mass_kg": 145.0,  # Husky dry-spec; 158 kg wet
+        "wheelbase_mm": 1493.0,  # 19 mm longer than KTM SMC R
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "160/60ZR17",
-        "cd": 0.78,                     # supermoto same Cd as SMC R
-        "frontal_area_m2": 0.49,        # Husky slimmer tank, 1 cm² less
+        "cd": 0.78,  # supermoto same Cd as SMC R
+        "frontal_area_m2": 0.49,  # Husky slimmer tank, 1 cm² less
     },
     source_name="spec_sheet",
 )
@@ -8302,46 +8302,46 @@ SUZUKI_V_STROM_SX_250_2022 = spec_from_dict(
         "model_code": "DR-Z250SX",
         "year_from": 2022,
         "year_to": 2026,
-        "category": "adventure",        # small ADV — long-travel
-                                        # suspension + 19F/17R wheels
+        "category": "adventure",  # small ADV — long-travel
+        # suspension + 19F/17R wheels
         "displacement_cc": 249.0,
         "bore_mm": 76.0,
         "stroke_mm": 54.9,
         "compression_ratio": 10.7,
         "cylinders": 1,
-        "peak_power_hp": 26.1,          # 19.5 kW @ 9300 rpm — Suzuki
-                                        # India spec (matches Gixxer
-                                        # 250 / Intruder 250 platform)
+        "peak_power_hp": 26.1,  # 19.5 kW @ 9300 rpm — Suzuki
+        # India spec (matches Gixxer
+        # 250 / Intruder 250 platform)
         "peak_power_rpm": 9300,
         "peak_torque_nm": 22.2,
         "peak_torque_rpm": 7300,
         "fuel_system": "fi",
-        "cooling": "air",               # air/oil cooled (SACS) — same
-                                        # as Gixxer 250 platform
-        "valve_config": "sohc",         # SOHC 2-valve — typical of
-                                        # commuter Indian small-bore
-                                        # singles
+        "cooling": "air",  # air/oil cooled (SACS) — same
+        # as Gixxer 250 platform
+        "valve_config": "sohc",  # SOHC 2-valve — typical of
+        # commuter Indian small-bore
+        # singles
         "gears": 5,
         # Gixxer 250 5-speed cassette per Suzuki India service manual
         # (V-Strom SX shares the engine + transmission with the Gixxer
         # 250 / Intruder 250 / Avenis 125 cousins).
         "gear_ratios": [2.916, 1.789, 1.318, 1.040, 0.875],
         "front_sprocket": 14,
-        "rear_sprocket": 44,            # F14/R44 520 — Suzuki India
-                                        # spec sheet (longer than
-                                        # Gixxer 250 F14/R43 for ADV
-                                        # low-speed crawl bias)
+        "rear_sprocket": 44,  # F14/R44 520 — Suzuki India
+        # spec sheet (longer than
+        # Gixxer 250 F14/R43 for ADV
+        # low-speed crawl bias)
         "chain_pitch": "520",
-        "dry_mass_kg": 155.0,           # 167 kg kerb - 12 kg fuel
-                                        # (12 L tank)
+        "dry_mass_kg": 155.0,  # 167 kg kerb - 12 kg fuel
+        # (12 L tank)
         "wheelbase_mm": 1440.0,
-        "front_tire_size": "100/90-19", # 19" front — typical small
-                                        # ADV (vs 17" road bikes)
+        "front_tire_size": "100/90-19",  # 19" front — typical small
+        # ADV (vs 17" road bikes)
         "rear_tire_size": "140/70-17",
-        "cd": 0.85,                     # ADV upright + windscreen +
-                                        # taller stance — high Cd
-        "frontal_area_m2": 0.54,        # ADV seat height + crash bars
-                                        # push rider into the wind
+        "cd": 0.85,  # ADV upright + windscreen +
+        # taller stance — high Cd
+        "frontal_area_m2": 0.54,  # ADV seat height + crash bars
+        # push rider into the wind
     },
     source_name="spec_sheet",
 )
@@ -8379,42 +8379,42 @@ TVS_NTORQ_125_RACE_XP_2021 = spec_from_dict(
         "stroke_mm": 55.7,
         "compression_ratio": 10.5,
         "cylinders": 1,
-        "peak_power_hp": 9.38,          # 9.5 PS @ 7500 rpm = 9.38 hp
-                                        # TVS India spec (Revv X engine)
+        "peak_power_hp": 9.38,  # 9.5 PS @ 7500 rpm = 9.38 hp
+        # TVS India spec (Revv X engine)
         "peak_power_rpm": 7500,
-        "peak_torque_nm": 10.5,         # 10.5 Nm @ 6000 rpm — TVS spec
+        "peak_torque_nm": 10.5,  # 10.5 Nm @ 6000 rpm — TVS spec
         "peak_torque_rpm": 6000,
         "fuel_system": "fi",
-        "cooling": "liquid",            # liquid-cooled — unique for 125
-                                        # scooter segment in India
+        "cooling": "liquid",  # liquid-cooled — unique for 125
+        # scooter segment in India
         "valve_config": "sohc",
-        "gears": 5,                     # CVT mapped as 5 synthetic steps
-                                        # (same convention as Yamaha Aerox
-                                        # 155 in this catalog) — physics
-                                        # engine uses continuous ratio
-                                        # interpolation for scooter CVTs
+        "gears": 5,  # CVT mapped as 5 synthetic steps
+        # (same convention as Yamaha Aerox
+        # 155 in this catalog) — physics
+        # engine uses continuous ratio
+        # interpolation for scooter CVTs
         # Synthetic CVT ratios scaled to NTorq 125 power band:
         # low ratio (launch) to high ratio (top-speed) 5-step map.
         # Peak low ratio ~2.8, peak high ~0.9 (measured CVT spread for
         # comparable 125 scooter platforms per TechMoto India analysis).
         "gear_ratios": [2.800, 1.950, 1.400, 1.050, 0.900],
-        "front_sprocket": 0,            # no chain sprocket; CVT + belt
+        "front_sprocket": 0,  # no chain sprocket; CVT + belt
         "rear_sprocket": 0,
-        "chain_pitch": "belt",          # belt final drive
+        "chain_pitch": "belt",  # belt final drive
         "final_drive": "belt",
-        "dry_mass_kg": 109.0,           # 118 kg kerb - 4.2 kg fuel
-                                        # (5 L tank) - 4.8 kg fluids
-        "wheelbase_mm": 1275.0,         # TVS NTorq 125 wheelbase — spec
+        "dry_mass_kg": 109.0,  # 118 kg kerb - 4.2 kg fuel
+        # (5 L tank) - 4.8 kg fluids
+        "wheelbase_mm": 1275.0,  # TVS NTorq 125 wheelbase — spec
         "front_tire_size": "90/90-12",  # 12" scooter front wheel
-        "rear_tire_size": "90/90-12",   # 12" scooter rear wheel
-        "cd": 0.72,                     # step-through scooter body with
-                                        # underseat storage + fairings;
-                                        # more streamlined than a naked
-                                        # commuter (ref Yamaha Aerox at
-                                        # 0.68; NTorq less aero due to
-                                        # square stance vs Aerox sportier)
-        "frontal_area_m2": 0.45,        # 125 scooter — narrower than
-                                        # full-size step-throughs
+        "rear_tire_size": "90/90-12",  # 12" scooter rear wheel
+        "cd": 0.72,  # step-through scooter body with
+        # underseat storage + fairings;
+        # more streamlined than a naked
+        # commuter (ref Yamaha Aerox at
+        # 0.68; NTorq less aero due to
+        # square stance vs Aerox sportier)
+        "frontal_area_m2": 0.45,  # 125 scooter — narrower than
+        # full-size step-throughs
     },
     source_name="spec_sheet",
 )
@@ -8449,18 +8449,18 @@ BAJAJ_PULSAR_NS200_BS6_2020 = spec_from_dict(
         "stroke_mm": 49.0,
         "compression_ratio": 12.0,
         "cylinders": 1,
-        "peak_power_hp": 24.17,         # 24.5 PS @ 9750 rpm = 24.17 hp
-                                        # Bajaj BS6 spec — same as BS4
+        "peak_power_hp": 24.17,  # 24.5 PS @ 9750 rpm = 24.17 hp
+        # Bajaj BS6 spec — same as BS4
         "peak_power_rpm": 9750,
-        "peak_torque_nm": 18.74,        # 18.74 Nm @ 8000 rpm — Bajaj spec
+        "peak_torque_nm": 18.74,  # 18.74 Nm @ 8000 rpm — Bajaj spec
         "peak_torque_rpm": 8000,
         "fuel_system": "fi",
-        "cooling": "liquid",            # oil-cooled (triple-spark; Bajaj
-                                        # calls it "liquid-cooled" in spec
-                                        # sheets — oil-cooled DOHC triple-
-                                        # spark with oil cooler radiator)
-        "valve_config": "dohc",         # DOHC triple-spark — Bajaj's
-                                        # proprietary DTS-i derivative
+        "cooling": "liquid",  # oil-cooled (triple-spark; Bajaj
+        # calls it "liquid-cooled" in spec
+        # sheets — oil-cooled DOHC triple-
+        # spark with oil cooler radiator)
+        "valve_config": "dohc",  # DOHC triple-spark — Bajaj's
+        # proprietary DTS-i derivative
         "gears": 6,
         # Bajaj NS200 6-speed service manual cassette (SB-NS200-2020):
         # 1st=3.000, 2nd=1.947, 3rd=1.500, 4th=1.238, 5th=1.056, 6th=0.912
@@ -8468,22 +8468,22 @@ BAJAJ_PULSAR_NS200_BS6_2020 = spec_from_dict(
         # BikeWale gear ratio table for NS200 2020.
         "gear_ratios": [3.000, 1.947, 1.500, 1.238, 1.056, 0.912],
         "front_sprocket": 14,
-        "rear_sprocket": 43,            # F14/R43 520 — Bajaj NS200 OEM
-                                        # sprocket kit (same as RS200)
+        "rear_sprocket": 43,  # F14/R43 520 — Bajaj NS200 OEM
+        # sprocket kit (same as RS200)
         "chain_pitch": "520",
-        "dry_mass_kg": 148.0,           # 156 kg kerb - 10 kg fuel
-                                        # (12 L tank) - ~2 kg fluids
-        "wheelbase_mm": 1363.0,         # NS200 wheelbase per Bajaj spec
-        "front_tire_size": "100/80-17", # Indian bias notation (same as
-                                        # NS200 RS200 OEM fitment)
+        "dry_mass_kg": 148.0,  # 156 kg kerb - 10 kg fuel
+        # (12 L tank) - ~2 kg fluids
+        "wheelbase_mm": 1363.0,  # NS200 wheelbase per Bajaj spec
+        "front_tire_size": "100/80-17",  # Indian bias notation (same as
+        # NS200 RS200 OEM fitment)
         "rear_tire_size": "130/70-17",
-        "cd": 0.78,                     # naked with twin-spar frame;
-                                        # slightly more streamlined than
-                                        # upright commuters due to trellis
-                                        # + naked cowl (ref KTM Duke 200
-                                        # at 0.79 in this catalog)
-        "frontal_area_m2": 0.46,        # mid-sized 200cc naked — narrower
-                                        # than a 300cc+ twin
+        "cd": 0.78,  # naked with twin-spar frame;
+        # slightly more streamlined than
+        # upright commuters due to trellis
+        # + naked cowl (ref KTM Duke 200
+        # at 0.79 in this catalog)
+        "frontal_area_m2": 0.46,  # mid-sized 200cc naked — narrower
+        # than a 300cc+ twin
     },
     source_name="spec_sheet",
 )
@@ -8516,47 +8516,47 @@ HONDA_SP160_2023 = spec_from_dict(
         "model_code": "SP160_CBS",
         "year_from": 2023,
         "year_to": 2026,
-        "category": "naked",            # premium commuter / naked —
-                                        # upright ergonomics
+        "category": "naked",  # premium commuter / naked —
+        # upright ergonomics
         "displacement_cc": 163.7,
         "bore_mm": 63.0,
         "stroke_mm": 52.4,
         "compression_ratio": 10.7,
         "cylinders": 1,
-        "peak_power_hp": 13.48,         # 9.95 kW / 13.48 hp @ 8500 rpm
-                                        # Honda HMSI India press kit 2023
+        "peak_power_hp": 13.48,  # 9.95 kW / 13.48 hp @ 8500 rpm
+        # Honda HMSI India press kit 2023
         "peak_power_rpm": 8500,
-        "peak_torque_nm": 14.1,         # 14.1 Nm @ 6000 rpm — Honda spec
+        "peak_torque_nm": 14.1,  # 14.1 Nm @ 6000 rpm — Honda spec
         "peak_torque_rpm": 6000,
-        "fuel_system": "fi",            # PGM-FI (Honda proprietary FI)
-        "cooling": "air",               # air-cooled; no oil radiator
-                                        # (vs the CB350 which is "air/oil")
-        "valve_config": "sohc",         # SOHC 2-valve — Honda CB160
-                                        # family single
+        "fuel_system": "fi",  # PGM-FI (Honda proprietary FI)
+        "cooling": "air",  # air-cooled; no oil radiator
+        # (vs the CB350 which is "air/oil")
+        "valve_config": "sohc",  # SOHC 2-valve — Honda CB160
+        # family single
         "gears": 5,
         # Honda 160cc 5-speed cassette per service manual SM-SP160-2023.
         # Ratios cross-verified against BikeWale technical spec page.
         "gear_ratios": [3.364, 2.125, 1.600, 1.273, 1.043],
         "front_sprocket": 17,
-        "rear_sprocket": 45,            # F17/R45 428 — Honda SP160 OEM
-                                        # chain-sprocket kit listing on
-                                        # hondamotorcycle.co.in genuine parts
+        "rear_sprocket": 45,  # F17/R45 428 — Honda SP160 OEM
+        # chain-sprocket kit listing on
+        # hondamotorcycle.co.in genuine parts
         "chain_pitch": "428",
-        "dry_mass_kg": 137.0,           # 146 kg kerb - 8.4 kg fuel
-                                        # (10 L tank @ 0.84 kg/L petrol)
-                                        # - ~0.6 kg other fluids
-        "wheelbase_mm": 1345.0,         # Honda SP160 spec (same as CB
-                                        # Shine SP / Unicorn 160 platform)
-        "front_tire_size": "80/100-18", # 18" front — Honda Indian-market
-                                        # 160cc commuter fitment
+        "dry_mass_kg": 137.0,  # 146 kg kerb - 8.4 kg fuel
+        # (10 L tank @ 0.84 kg/L petrol)
+        # - ~0.6 kg other fluids
+        "wheelbase_mm": 1345.0,  # Honda SP160 spec (same as CB
+        # Shine SP / Unicorn 160 platform)
+        "front_tire_size": "80/100-18",  # 18" front — Honda Indian-market
+        # 160cc commuter fitment
         "rear_tire_size": "110/80-17",  # 17" rear — SP160 spec
-        "cd": 0.83,                     # upright naked 160cc commuter;
-                                        # slightly better than a Splendor-
-                                        # class (0.90+) due to small fairing
-                                        # on SP160. Ref: Unicorn 160 at
-                                        # 0.84 in this catalog.
-        "frontal_area_m2": 0.42,        # 160cc commuter — narrower than
-                                        # the 200cc+ class (0.46+)
+        "cd": 0.83,  # upright naked 160cc commuter;
+        # slightly better than a Splendor-
+        # class (0.90+) due to small fairing
+        # on SP160. Ref: Unicorn 160 at
+        # 0.84 in this catalog.
+        "frontal_area_m2": 0.42,  # 160cc commuter — narrower than
+        # the 200cc+ class (0.46+)
     },
     source_name="spec_sheet",
 )
@@ -8591,45 +8591,45 @@ BENELLI_TRK_502_2017 = spec_from_dict(
         "model_code": "TRK502",
         "year_from": 2017,
         "year_to": 2024,
-        "category": "adventure",        # dual-sport ADV; upright ergonomics,
-                                        # longer-travel suspension than 502C
-        "displacement_cc": 499.6,       # 499.6 cc per Benelli EU spec
-        "bore_mm": 69.0,                # 69.0 × 66.8 mm — same bore/stroke
-        "stroke_mm": 66.8,              # as 502C / Leoncino 500 (BJ500P-A)
-        "compression_ratio": 11.5,      # Benelli spec; consistent with
-                                        # competitor 500cc DOHC twins
+        "category": "adventure",  # dual-sport ADV; upright ergonomics,
+        # longer-travel suspension than 502C
+        "displacement_cc": 499.6,  # 499.6 cc per Benelli EU spec
+        "bore_mm": 69.0,  # 69.0 × 66.8 mm — same bore/stroke
+        "stroke_mm": 66.8,  # as 502C / Leoncino 500 (BJ500P-A)
+        "compression_ratio": 11.5,  # Benelli spec; consistent with
+        # competitor 500cc DOHC twins
         "cylinders": 2,
-        "peak_power_hp": 47.5,          # 35.2 kW / 47.5 hp @ 8500 rpm
-                                        # (Benelli EU press kit 2017 /
-                                        # BikeAdvice India TRK 502 spec)
+        "peak_power_hp": 47.5,  # 35.2 kW / 47.5 hp @ 8500 rpm
+        # (Benelli EU press kit 2017 /
+        # BikeAdvice India TRK 502 spec)
         "peak_power_rpm": 8500,
-        "peak_torque_nm": 46.5,         # 46.5 Nm @ 5500 rpm (Benelli spec)
+        "peak_torque_nm": 46.5,  # 46.5 Nm @ 5500 rpm (Benelli spec)
         "peak_torque_rpm": 5500,
-        "fuel_system": "fi",            # Delphi EFI (single injector/cyl)
-        "cooling": "liquid",            # liquid-cooled (water pump + radiator)
-        "valve_config": "dohc",         # DOHC 4-valve per cylinder
+        "fuel_system": "fi",  # Delphi EFI (single injector/cyl)
+        "cooling": "liquid",  # liquid-cooled (water pump + radiator)
+        "valve_config": "dohc",  # DOHC 4-valve per cylinder
         "gears": 6,
         # Benelli TRK 502 6-speed cassette (BJ500P-A shared with 502C).
         # Source: Benelli spare-parts microfiche + service manual SM-TRK502.
         # Cross-verified against 502C entry in this catalog — same cassette.
         "gear_ratios": [2.786, 1.938, 1.478, 1.182, 0.960, 0.821],
         "front_sprocket": 15,
-        "rear_sprocket": 43,            # F15/R43 520 chain — TRK 502 OEM
-                                        # (vs 502C which also uses F15/R43)
+        "rear_sprocket": 43,  # F15/R43 520 chain — TRK 502 OEM
+        # (vs 502C which also uses F15/R43)
         "chain_pitch": "520",
-        "dry_mass_kg": 229.0,           # 229 kg dry (MCN test 2018);
-                                        # significantly heavier than 502C
-                                        # (217 kg) due to ADV gear + tank
-        "wheelbase_mm": 1500.0,         # 1500 mm — Benelli TRK 502 spec
-        "front_tire_size": "110/80-19", # 19" front — standard ADV fitment
-                                        # (Pirelli Scorpion Trail OEM)
+        "dry_mass_kg": 229.0,  # 229 kg dry (MCN test 2018);
+        # significantly heavier than 502C
+        # (217 kg) due to ADV gear + tank
+        "wheelbase_mm": 1500.0,  # 1500 mm — Benelli TRK 502 spec
+        "front_tire_size": "110/80-19",  # 19" front — standard ADV fitment
+        # (Pirelli Scorpion Trail OEM)
         "rear_tire_size": "150/70-17",  # 17" rear — TRK 502 spec
-        "cd": 0.92,                     # adventure upright with screen +
-                                        # ADV bars + crash bars + panniers;
-                                        # higher than a naked (0.80) per
-                                        # CdA comparison vs BMW F800GS-class
-        "frontal_area_m2": 0.65,        # wider than a naked; 19" front +
-                                        # upright ergos + ADV fairing
+        "cd": 0.92,  # adventure upright with screen +
+        # ADV bars + crash bars + panniers;
+        # higher than a naked (0.80) per
+        # CdA comparison vs BMW F800GS-class
+        "frontal_area_m2": 0.65,  # wider than a naked; 19" front +
+        # upright ergos + ADV fairing
     },
     source_name="spec_sheet",
 )
@@ -8665,44 +8665,44 @@ KAWASAKI_VERSYS_650_2015 = spec_from_dict(
         "model_code": "KLE650",
         "year_from": 2015,
         "year_to": 2024,
-        "category": "adventure",        # mid-ADV; upright ergonomics,
-                                        # longer suspension vs Ninja 650
-        "displacement_cc": 649.0,       # 649 cc — same ER650 engine
-        "bore_mm": 83.0,                # 83.0 × 60.0 mm per Kawasaki spec
+        "category": "adventure",  # mid-ADV; upright ergonomics,
+        # longer suspension vs Ninja 650
+        "displacement_cc": 649.0,  # 649 cc — same ER650 engine
+        "bore_mm": 83.0,  # 83.0 × 60.0 mm per Kawasaki spec
         "stroke_mm": 60.0,
-        "compression_ratio": 10.8,      # Kawasaki ER650 spec
+        "compression_ratio": 10.8,  # Kawasaki ER650 spec
         "cylinders": 2,
-        "peak_power_hp": 68.0,          # 50.5 kW / 68 hp @ 8500 rpm
-                                        # Kawasaki press kit 2015 / MCN test
+        "peak_power_hp": 68.0,  # 50.5 kW / 68 hp @ 8500 rpm
+        # Kawasaki press kit 2015 / MCN test
         "peak_power_rpm": 8500,
-        "peak_torque_nm": 64.0,         # 64 Nm @ 7000 rpm (Kawasaki spec)
+        "peak_torque_nm": 64.0,  # 64 Nm @ 7000 rpm (Kawasaki spec)
         "peak_torque_rpm": 7000,
-        "fuel_system": "fi",            # Keihin DFI (Kawasaki proprietary)
-        "cooling": "liquid",            # liquid-cooled (standard ER650)
-        "valve_config": "dohc",         # DOHC 4-valve — ER650 architecture
+        "fuel_system": "fi",  # Keihin DFI (Kawasaki proprietary)
+        "cooling": "liquid",  # liquid-cooled (standard ER650)
+        "valve_config": "dohc",  # DOHC 4-valve — ER650 architecture
         "gears": 6,
         # ER650 6-speed cassette per Kawasaki ER650H service manual.
         # Corrected April 22, 2026 — canonical ER650 ratios now in
         # gear_ratios.py. Versys 650 uses same internal cassette.
         "gear_ratios": [2.438, 1.714, 1.333, 1.111, 0.966, 0.852],
         "front_sprocket": 15,
-        "rear_sprocket": 43,            # F15/R43 520 — Versys 650 OEM
-                                        # (taller than Ninja 650's R46
-                                        # for ADV highway gearing per
-                                        # Kawasaki EPC KLE650EFF 2020)
+        "rear_sprocket": 43,  # F15/R43 520 — Versys 650 OEM
+        # (taller than Ninja 650's R46
+        # for ADV highway gearing per
+        # Kawasaki EPC KLE650EFF 2020)
         "chain_pitch": "520",
-        "dry_mass_kg": 196.0,           # 196 kg dry (Kawasaki press kit
-                                        # 2015; 216 kg wet with 21 L tank)
-        "wheelbase_mm": 1450.0,         # 1450 mm — Versys 650 spec
-        "front_tire_size": "120/70-17", # 17" front (sport-ADV — not 19")
+        "dry_mass_kg": 196.0,  # 196 kg dry (Kawasaki press kit
+        # 2015; 216 kg wet with 21 L tank)
+        "wheelbase_mm": 1450.0,  # 1450 mm — Versys 650 spec
+        "front_tire_size": "120/70-17",  # 17" front (sport-ADV — not 19")
         "rear_tire_size": "160/60-17",  # 17" rear — Versys 650 spec
-        "cd": 0.88,                     # upright ADV with full fairing +
-                                        # tall screen; comparable to Honda
-                                        # CB500X (0.88) in this catalog
-        "frontal_area_m2": 0.58,        # ADV fairing + upright ergonomics;
-                                        # 0.58 m² consistent with 650cc ADV
-                                        # class (CB500X 0.55, Versys slightly
-                                        # wider)
+        "cd": 0.88,  # upright ADV with full fairing +
+        # tall screen; comparable to Honda
+        # CB500X (0.88) in this catalog
+        "frontal_area_m2": 0.58,  # ADV fairing + upright ergonomics;
+        # 0.58 m² consistent with 650cc ADV
+        # class (CB500X 0.55, Versys slightly
+        # wider)
     },
     source_name="spec_sheet",
 )
@@ -8733,45 +8733,45 @@ TRIUMPH_BONNEVILLE_BOBBER_1200_2017 = spec_from_dict(
         "model_code": "BONNY_BOBBER_1200",
         "year_from": 2017,
         "year_to": 2024,
-        "category": "cruiser",          # solo-seat retro cruiser; muscle-
-                                        # styled but factory-standard cruiser
-                                        # ergonomics
-        "displacement_cc": 1200.0,      # 1200 cc HT engine (1197cc rounded)
-        "bore_mm": 97.6,                # 97.6 × 80.0 mm HT-1200 spec
+        "category": "cruiser",  # solo-seat retro cruiser; muscle-
+        # styled but factory-standard cruiser
+        # ergonomics
+        "displacement_cc": 1200.0,  # 1200 cc HT engine (1197cc rounded)
+        "bore_mm": 97.6,  # 97.6 × 80.0 mm HT-1200 spec
         "stroke_mm": 80.0,
-        "compression_ratio": 10.0,      # Triumph spec; slightly higher than
-                                        # T120 (10:1 vs 11:1 — same number,
-                                        # the Bobber tune retards timing)
+        "compression_ratio": 10.0,  # Triumph spec; slightly higher than
+        # T120 (10:1 vs 11:1 — same number,
+        # the Bobber tune retards timing)
         "cylinders": 2,
-        "peak_power_hp": 76.9,          # 57.4 kW / 76.9 hp @ 6100 rpm
-                                        # per Triumph 2017 press kit
+        "peak_power_hp": 76.9,  # 57.4 kW / 76.9 hp @ 6100 rpm
+        # per Triumph 2017 press kit
         "peak_power_rpm": 6100,
-        "peak_torque_nm": 106.0,        # 106 Nm @ 4000 rpm — Triumph spec
+        "peak_torque_nm": 106.0,  # 106 Nm @ 4000 rpm — Triumph spec
         "peak_torque_rpm": 4000,
-        "fuel_system": "fi",            # Keihin EFI ride-by-wire (Triumph)
-        "cooling": "liquid",            # liquid-cooled (T120 platform)
-        "valve_config": "sohc",         # SOHC 4-valve per cylinder (HT)
+        "fuel_system": "fi",  # Keihin EFI ride-by-wire (Triumph)
+        "cooling": "liquid",  # liquid-cooled (T120 platform)
+        "valve_config": "sohc",  # SOHC 4-valve per cylinder (HT)
         "gears": 6,
         # Triumph HT-1200 6-speed cassette per service manual TBPM-1200-2017.
         # Cross-verified against T120 Bonneville (same block + cassette).
         "gear_ratios": [2.692, 1.857, 1.421, 1.182, 1.037, 0.913],
         "front_sprocket": 18,
-        "rear_sprocket": 44,            # F18/R44 525 — Triumph OEM Bobber
+        "rear_sprocket": 44,  # F18/R44 525 — Triumph OEM Bobber
         "chain_pitch": "525",
-        "dry_mass_kg": 228.0,           # 228 kg dry (Triumph press kit);
-                                        # 251 kg wet with 9.1 L tank
-        "wheelbase_mm": 1510.0,         # 1510 mm — Bobber spec
-        "front_tire_size": "100/90-19", # 19" front — Bobber spec
-                                        # (Avon Cobra Chrome OEM)
+        "dry_mass_kg": 228.0,  # 228 kg dry (Triumph press kit);
+        # 251 kg wet with 9.1 L tank
+        "wheelbase_mm": 1510.0,  # 1510 mm — Bobber spec
+        "front_tire_size": "100/90-19",  # 19" front — Bobber spec
+        # (Avon Cobra Chrome OEM)
         "rear_tire_size": "150/80-16",  # 16" rear — Bobber distinctive
-                                        # fat-tire fitment
-        "cd": 0.62,                     # solo-seat hardtail-look cruiser;
-                                        # very low rider position but no
-                                        # fairing. Comparable to HD Sportster
-                                        # at 0.60 in cruiser cluster
-        "frontal_area_m2": 0.58,        # 1200cc V-twin equivalent cruiser
-                                        # frontal area; rider-prone position
-                                        # narrows vs touring cruisers
+        # fat-tire fitment
+        "cd": 0.62,  # solo-seat hardtail-look cruiser;
+        # very low rider position but no
+        # fairing. Comparable to HD Sportster
+        # at 0.60 in cruiser cluster
+        "frontal_area_m2": 0.58,  # 1200cc V-twin equivalent cruiser
+        # frontal area; rider-prone position
+        # narrows vs touring cruisers
     },
     source_name="spec_sheet",
 )
@@ -8805,53 +8805,53 @@ MOTO_GUZZI_V100_MANDELLO_S_2022 = spec_from_dict(
         "model_code": "V100_MANDELLO_S",
         "year_from": 2022,
         "year_to": 2026,
-        "category": "touring",          # sport-tourer with active winglets +
-                                        # full fairing + cruise control + TFT
-        "displacement_cc": 1042.0,      # 1042 cc transverse-V twin
-                                        # (new CARC engine, not Tonti V)
-        "bore_mm": 96.0,                # 96.0 × 72.0 mm per Guzzi spec
+        "category": "touring",  # sport-tourer with active winglets +
+        # full fairing + cruise control + TFT
+        "displacement_cc": 1042.0,  # 1042 cc transverse-V twin
+        # (new CARC engine, not Tonti V)
+        "bore_mm": 96.0,  # 96.0 × 72.0 mm per Guzzi spec
         "stroke_mm": 72.0,
-        "compression_ratio": 12.6,      # Guzzi V100 spec; high CR for the
-                                        # modern liquid-cooled DOHC layout
+        "compression_ratio": 12.6,  # Guzzi V100 spec; high CR for the
+        # modern liquid-cooled DOHC layout
         "cylinders": 2,
-        "peak_power_hp": 113.0,         # 84.3 kW / 113 hp @ 8700 rpm
-                                        # Moto Guzzi press kit 2021/22
+        "peak_power_hp": 113.0,  # 84.3 kW / 113 hp @ 8700 rpm
+        # Moto Guzzi press kit 2021/22
         "peak_power_rpm": 8700,
-        "peak_torque_nm": 105.0,        # 105 Nm @ 6750 rpm — Guzzi spec
+        "peak_torque_nm": 105.0,  # 105 Nm @ 6750 rpm — Guzzi spec
         "peak_torque_rpm": 6750,
-        "fuel_system": "fi",            # Magneti Marelli EFI ride-by-wire
-        "cooling": "liquid",            # liquid-cooled (first liquid Guzzi V
-                                        # since the Centauro 1100, 1996)
-        "valve_config": "dohc",         # DOHC 4-valve per cylinder
+        "fuel_system": "fi",  # Magneti Marelli EFI ride-by-wire
+        "cooling": "liquid",  # liquid-cooled (first liquid Guzzi V
+        # since the Centauro 1100, 1996)
+        "valve_config": "dohc",  # DOHC 4-valve per cylinder
         "gears": 6,
         # Guzzi V100 6-speed cassette per service manual SM-V100-2022.
         # Cross-verified via MCN tech review + Cycle World test data.
         "gear_ratios": [2.000, 1.412, 1.118, 0.933, 0.815, 0.733],
-        "front_sprocket": 0,            # SHAFT DRIVE (no chain) — Guzzi
-                                        # transverse-V layout uses shaft +
-                                        # bevel-gear final drive. Project
-                                        # convention for shaft: F=0, R=0.
+        "front_sprocket": 0,  # SHAFT DRIVE (no chain) — Guzzi
+        # transverse-V layout uses shaft +
+        # bevel-gear final drive. Project
+        # convention for shaft: F=0, R=0.
         "rear_sprocket": 0,
-        "chain_pitch": None,            # explicit None — shaft drive
-        "dry_mass_kg": 215.0,           # 215 kg dry (Guzzi press kit 2022);
-                                        # 233 kg kerb with 17 L tank
-        "wheelbase_mm": 1475.0,         # 1475 mm — V100 spec
-        "front_tire_size": "120/70ZR17", # 17" front sport-touring sticky
-                                        # (Pirelli Angel GT II OEM)
-        "rear_tire_size": "190/55ZR17", # 17" rear sport-touring fitment
-        "cd": 0.46,                     # sport-tourer with full fairing +
-                                        # active winglets that DEPLOY at
-                                        # speed (>110 km/h) to alter Cd*A.
-                                        # We use the deployed-winglet value
-                                        # (slightly worse than a sport
-                                        # 0.40); MCN tunnel test 2022
-                                        # showed CdA ~0.32 m² in cruise
-                                        # config. Consistent with project's
-                                        # sport-tourer cluster (FJR 0.45).
-        "frontal_area_m2": 0.55,        # full fairing + winglets deployed;
-                                        # consistent with K1600 GT (0.62)
-                                        # and FJR1300 (0.58) sport-tourer
-                                        # band but slightly smaller
+        "chain_pitch": None,  # explicit None — shaft drive
+        "dry_mass_kg": 215.0,  # 215 kg dry (Guzzi press kit 2022);
+        # 233 kg kerb with 17 L tank
+        "wheelbase_mm": 1475.0,  # 1475 mm — V100 spec
+        "front_tire_size": "120/70ZR17",  # 17" front sport-touring sticky
+        # (Pirelli Angel GT II OEM)
+        "rear_tire_size": "190/55ZR17",  # 17" rear sport-touring fitment
+        "cd": 0.46,  # sport-tourer with full fairing +
+        # active winglets that DEPLOY at
+        # speed (>110 km/h) to alter Cd*A.
+        # We use the deployed-winglet value
+        # (slightly worse than a sport
+        # 0.40); MCN tunnel test 2022
+        # showed CdA ~0.32 m² in cruise
+        # config. Consistent with project's
+        # sport-tourer cluster (FJR 0.45).
+        "frontal_area_m2": 0.55,  # full fairing + winglets deployed;
+        # consistent with K1600 GT (0.62)
+        # and FJR1300 (0.58) sport-tourer
+        # band but slightly smaller
     },
     source_name="spec_sheet",
 )
@@ -8881,45 +8881,45 @@ APRILIA_SHIVER_900_2017 = spec_from_dict(
         "model_code": "SHIVER_900",
         "year_from": 2017,
         "year_to": 2024,
-        "category": "naked",            # V-twin naked street; A2-licence
-                                        # ready (95 hp restrictable)
-        "displacement_cc": 896.0,       # 896 cc 90° V-twin
-        "bore_mm": 92.0,                # 92.0 × 67.4 mm per Aprilia spec
+        "category": "naked",  # V-twin naked street; A2-licence
+        # ready (95 hp restrictable)
+        "displacement_cc": 896.0,  # 896 cc 90° V-twin
+        "bore_mm": 92.0,  # 92.0 × 67.4 mm per Aprilia spec
         "stroke_mm": 67.4,
-        "compression_ratio": 11.0,      # Aprilia spec; standard for the
-                                        # 896 V-twin block
+        "compression_ratio": 11.0,  # Aprilia spec; standard for the
+        # 896 V-twin block
         "cylinders": 2,
-        "peak_power_hp": 95.0,          # 70.8 kW / 95 hp @ 8750 rpm
-                                        # Aprilia press kit 2017
+        "peak_power_hp": 95.0,  # 70.8 kW / 95 hp @ 8750 rpm
+        # Aprilia press kit 2017
         "peak_power_rpm": 8750,
-        "peak_torque_nm": 90.0,         # 90 Nm @ 6500 rpm — Aprilia spec
+        "peak_torque_nm": 90.0,  # 90 Nm @ 6500 rpm — Aprilia spec
         "peak_torque_rpm": 6500,
-        "fuel_system": "fi",            # Magneti Marelli ride-by-wire EFI
-        "cooling": "liquid",            # liquid-cooled (water pump + rad)
-        "valve_config": "dohc",         # DOHC 4-valve per cylinder
+        "fuel_system": "fi",  # Magneti Marelli ride-by-wire EFI
+        "cooling": "liquid",  # liquid-cooled (water pump + rad)
+        "valve_config": "dohc",  # DOHC 4-valve per cylinder
         "gears": 6,
         # Aprilia 896 V-twin 6-speed cassette per service manual SM-SHIVER-
         # 900-2017. Cross-verified vs Dorsoduro 900 (same block + cassette).
         "gear_ratios": [2.692, 2.000, 1.611, 1.366, 1.190, 1.066],
         "front_sprocket": 16,
-        "rear_sprocket": 44,            # F16/R44 525 — Aprilia OEM Shiver
-                                        # chain kit (verified vs Dorsoduro
-                                        # 900 parts catalog; same kit)
+        "rear_sprocket": 44,  # F16/R44 525 — Aprilia OEM Shiver
+        # chain kit (verified vs Dorsoduro
+        # 900 parts catalog; same kit)
         "chain_pitch": "525",
-        "dry_mass_kg": 198.0,           # 198 kg dry (Aprilia spec 2017);
-                                        # 218 kg kerb with 15 L tank
-        "wheelbase_mm": 1440.0,         # 1440 mm — Shiver 900 spec
-        "front_tire_size": "120/70ZR17", # 17" front — sport-naked fitment
-                                        # (Pirelli Angel ST OEM)
-        "rear_tire_size": "180/55ZR17", # 17" rear — V-twin naked
-        "cd": 0.55,                     # naked V-twin; comparable to
-                                        # Ducati Monster 821 (0.55) and
-                                        # Suzuki SV650 (0.58) in this catalog
-        "frontal_area_m2": 0.50,        # 900cc V-twin naked frontal area;
-                                        # narrower than 4-cyl nakeds (0.55)
-                                        # due to V-twin's narrower engine
-                                        # block. Consistent with Monster
-                                        # 821 (0.50) in this catalog.
+        "dry_mass_kg": 198.0,  # 198 kg dry (Aprilia spec 2017);
+        # 218 kg kerb with 15 L tank
+        "wheelbase_mm": 1440.0,  # 1440 mm — Shiver 900 spec
+        "front_tire_size": "120/70ZR17",  # 17" front — sport-naked fitment
+        # (Pirelli Angel ST OEM)
+        "rear_tire_size": "180/55ZR17",  # 17" rear — V-twin naked
+        "cd": 0.55,  # naked V-twin; comparable to
+        # Ducati Monster 821 (0.55) and
+        # Suzuki SV650 (0.58) in this catalog
+        "frontal_area_m2": 0.50,  # 900cc V-twin naked frontal area;
+        # narrower than 4-cyl nakeds (0.55)
+        # due to V-twin's narrower engine
+        # block. Consistent with Monster
+        # 821 (0.50) in this catalog.
     },
     source_name="spec_sheet",
 )
@@ -8945,39 +8945,39 @@ BAJAJ_PULSAR_NS250_2024 = spec_from_dict(
         "year_from": 2024,
         "year_to": 2026,
         "category": "naked",
-        "displacement_cc": 248.8,       # 248.8cc DOHC single per Bajaj spec
-        "bore_mm": 72.0,                # 72.0 × 60.97 mm — KTM 250 Duke block
+        "displacement_cc": 248.8,  # 248.8cc DOHC single per Bajaj spec
+        "bore_mm": 72.0,  # 72.0 × 60.97 mm — KTM 250 Duke block
         "stroke_mm": 60.97,
-        "compression_ratio": 12.5,      # 12.5:1 per Bajaj/KTM shared spec
+        "compression_ratio": 12.5,  # 12.5:1 per Bajaj/KTM shared spec
         "cylinders": 1,
-        "peak_power_hp": 30.0,          # 30 hp (22.4 kW) @ 8750 rpm
-                                        # Bajaj official press release 2024
+        "peak_power_hp": 30.0,  # 30 hp (22.4 kW) @ 8750 rpm
+        # Bajaj official press release 2024
         "peak_power_rpm": 8750,
-        "peak_torque_nm": 24.5,         # 24.5 Nm @ 6500 rpm — Bajaj press kit
+        "peak_torque_nm": 24.5,  # 24.5 Nm @ 6500 rpm — Bajaj press kit
         "peak_torque_rpm": 6500,
-        "fuel_system": "fi",            # fuel injection (same ECU as Duke 250)
-        "cooling": "liquid",            # liquid-cooled (shared KTM radiator)
-        "valve_config": "dohc",         # DOHC 4-valve per cylinder
+        "fuel_system": "fi",  # fuel injection (same ECU as Duke 250)
+        "cooling": "liquid",  # liquid-cooled (shared KTM radiator)
+        "valve_config": "dohc",  # DOHC 4-valve per cylinder
         "gears": 6,
         # 6-speed cassette identical to KTM Duke 250 (Bajaj-KTM shared platform)
         # Ratios per KTM Duke 250 service manual SM-KTM-250DUKE-2022, confirmed
         # verbatim on NS250 by Bajaj dealer community (same gearbox internals).
         "gear_ratios": [2.846, 2.105, 1.625, 1.300, 1.095, 0.962],
-        "front_sprocket": 14,           # F14/R44 520 — Bajaj NS250 OEM chain kit
-        "rear_sprocket": 44,            # (vs Duke 250 F14/R45; NS250 uses R44
-                                        # for slightly taller top-gear gearing
-                                        # per Bajaj parts catalog PCD-NS250-24)
+        "front_sprocket": 14,  # F14/R44 520 — Bajaj NS250 OEM chain kit
+        "rear_sprocket": 44,  # (vs Duke 250 F14/R45; NS250 uses R44
+        # for slightly taller top-gear gearing
+        # per Bajaj parts catalog PCD-NS250-24)
         "chain_pitch": "520",
-        "dry_mass_kg": 154.0,           # 154 kg dry — Bajaj official spec 2024
-                                        # (kerb 166 kg; deducting ~12 kg fluids)
-        "wheelbase_mm": 1375.0,         # 1375 mm — Bajaj NS250 spec
-        "front_tire_size": "110/70R17", # 17" front — sport-naked fitment
+        "dry_mass_kg": 154.0,  # 154 kg dry — Bajaj official spec 2024
+        # (kerb 166 kg; deducting ~12 kg fluids)
+        "wheelbase_mm": 1375.0,  # 1375 mm — Bajaj NS250 spec
+        "front_tire_size": "110/70R17",  # 17" front — sport-naked fitment
         "rear_tire_size": "150/60R17",  # 17" rear — 150-section like Duke 250
-        "cd": 0.80,                     # naked sport; comparable to KTM Duke
-                                        # 250 (0.78) — slightly higher due to
-                                        # Bajaj's bulkier belly-pan styling
-        "frontal_area_m2": 0.47,        # 250cc naked frontal area; consistent
-                                        # with Duke 250 (0.46) in this catalog
+        "cd": 0.80,  # naked sport; comparable to KTM Duke
+        # 250 (0.78) — slightly higher due to
+        # Bajaj's bulkier belly-pan styling
+        "frontal_area_m2": 0.47,  # 250cc naked frontal area; consistent
+        # with Duke 250 (0.46) in this catalog
     },
     source_name="spec_sheet",
 )
@@ -9004,43 +9004,43 @@ ROYAL_ENFIELD_SCRAM_450_2024 = spec_from_dict(
         "model_code": "SCRAM450",
         "year_from": 2024,
         "year_to": 2026,
-        "category": "adventure",        # scrambler; adventure category per
-                                        # RE's own classification
-        "displacement_cc": 452.0,       # 452cc single — same Sherpa 450 block
-        "bore_mm": 79.0,                # 79.0 × 73.0 mm — RE Sherpa 450 spec
+        "category": "adventure",  # scrambler; adventure category per
+        # RE's own classification
+        "displacement_cc": 452.0,  # 452cc single — same Sherpa 450 block
+        "bore_mm": 79.0,  # 79.0 × 73.0 mm — RE Sherpa 450 spec
         "stroke_mm": 73.0,
-        "compression_ratio": 10.5,      # 10.5:1 — identical to Himalayan 450
+        "compression_ratio": 10.5,  # 10.5:1 — identical to Himalayan 450
         "cylinders": 1,
-        "peak_power_hp": 40.0,          # 40 hp (29.5 kW) @ 7250 rpm
-                                        # RE press release November 2024
+        "peak_power_hp": 40.0,  # 40 hp (29.5 kW) @ 7250 rpm
+        # RE press release November 2024
         "peak_power_rpm": 7250,
-        "peak_torque_nm": 40.0,         # 40 Nm @ 5500 rpm — RE press release
+        "peak_torque_nm": 40.0,  # 40 Nm @ 5500 rpm — RE press release
         "peak_torque_rpm": 5500,
-        "fuel_system": "fi",            # electronic fuel injection (EFI)
-        "cooling": "liquid",            # liquid-cooled (same radiator as H450)
-        "valve_config": "dohc",         # DOHC 4-valve
+        "fuel_system": "fi",  # electronic fuel injection (EFI)
+        "cooling": "liquid",  # liquid-cooled (same radiator as H450)
+        "valve_config": "dohc",  # DOHC 4-valve
         "gears": 6,
         # Same 6-speed cassette as Himalayan 450 per RE engineering.
         # Gear ratios identical to Himalayan 450 (already catalogued).
         # Final drive: F17/R45 (vs F17/R47 on Himalayan) for slightly taller
         # gearing on road-biased 19" front wheel.
         "gear_ratios": [3.692, 2.105, 1.526, 1.179, 0.966, 0.814],
-        "front_sprocket": 17,           # F17 — RE OEM Scram 450 sprocket
-        "rear_sprocket": 45,            # R45 (taller than Himalayan's R47)
-        "chain_pitch": "520",           # 520 pitch — same as Himalayan 450
-        "dry_mass_kg": 178.0,           # 178 kg dry — RE Scram 450 spec
-                                        # (kerb 196 kg; ~18 kg fluids removed)
-        "wheelbase_mm": 1455.0,         # 1455 mm — slightly shorter than
-                                        # Himalayan 450 (1465 mm) per RE spec
+        "front_sprocket": 17,  # F17 — RE OEM Scram 450 sprocket
+        "rear_sprocket": 45,  # R45 (taller than Himalayan's R47)
+        "chain_pitch": "520",  # 520 pitch — same as Himalayan 450
+        "dry_mass_kg": 178.0,  # 178 kg dry — RE Scram 450 spec
+        # (kerb 196 kg; ~18 kg fluids removed)
+        "wheelbase_mm": 1455.0,  # 1455 mm — slightly shorter than
+        # Himalayan 450 (1465 mm) per RE spec
         "front_tire_size": "90/90R19",  # 19" front — distinguishes from H450's
-                                        # 21" (more road-biased geometry)
+        # 21" (more road-biased geometry)
         "rear_tire_size": "130/80R17",  # 17" rear — same as Himalayan 450
-        "cd": 0.88,                     # scrambler/adventure; identical to
-                                        # Himalayan 450 in this catalog (same
-                                        # upright riding position, similar fairing)
-        "frontal_area_m2": 0.53,        # 450cc scrambler; slightly smaller than
-                                        # Himalayan 450 (0.54) due to shorter
-                                        # front end and narrower screen
+        "cd": 0.88,  # scrambler/adventure; identical to
+        # Himalayan 450 in this catalog (same
+        # upright riding position, similar fairing)
+        "frontal_area_m2": 0.53,  # 450cc scrambler; slightly smaller than
+        # Himalayan 450 (0.54) due to shorter
+        # front end and narrower screen
     },
     source_name="spec_sheet",
 )
@@ -9064,42 +9064,42 @@ KTM_RC_390_GEN3_2024 = spec_from_dict(
         "model_code": "RC390-GEN3",
         "year_from": 2024,
         "year_to": 2026,
-        "category": "sport",            # full-fairing 373cc sport single
-        "displacement_cc": 373.2,       # 373.2cc DOHC single — unchanged
-        "bore_mm": 89.0,                # 89.0 × 60.0 mm — KTM 373 single
+        "category": "sport",  # full-fairing 373cc sport single
+        "displacement_cc": 373.2,  # 373.2cc DOHC single — unchanged
+        "bore_mm": 89.0,  # 89.0 × 60.0 mm — KTM 373 single
         "stroke_mm": 60.0,
-        "compression_ratio": 13.6,      # 13.6:1 per KTM 2024 press release
-                                        # (up from 12.5:1 on Gen 2; higher CR
-                                        # contributes to +2.5 hp gain)
+        "compression_ratio": 13.6,  # 13.6:1 per KTM 2024 press release
+        # (up from 12.5:1 on Gen 2; higher CR
+        # contributes to +2.5 hp gain)
         "cylinders": 1,
-        "peak_power_hp": 46.0,          # 46 hp (34.3 kW) @ 9000 rpm
-                                        # KTM press release EICMA 2023
+        "peak_power_hp": 46.0,  # 46 hp (34.3 kW) @ 9000 rpm
+        # KTM press release EICMA 2023
         "peak_power_rpm": 9000,
-        "peak_torque_nm": 39.0,         # 39 Nm @ 7000 rpm — KTM press kit 2024
+        "peak_torque_nm": 39.0,  # 39 Nm @ 7000 rpm — KTM press kit 2024
         "peak_torque_rpm": 7000,
-        "fuel_system": "fi",            # ride-by-wire EFI (updated map)
-        "cooling": "liquid",            # liquid-cooled
-        "valve_config": "dohc",         # DOHC 4-valve
+        "fuel_system": "fi",  # ride-by-wire EFI (updated map)
+        "cooling": "liquid",  # liquid-cooled
+        "valve_config": "dohc",  # DOHC 4-valve
         "gears": 6,
         # Same 6-speed cassette as RC 390 Gen 2 (2022-2024); unchanged per
         # KTM service bulletin SB-RC390-2024. Primary drive ratio unchanged.
         "gear_ratios": [3.230, 2.153, 1.571, 1.272, 1.089, 0.927],
-        "front_sprocket": 16,           # F16/R45 — same as Gen 2; unchanged
+        "front_sprocket": 16,  # F16/R45 — same as Gen 2; unchanged
         "rear_sprocket": 45,
         "chain_pitch": "520",
-        "dry_mass_kg": 158.0,           # 158 kg dry (kerb 172 kg minus ~14 kg
-                                        # fluids); heavier than Gen 2 (149 kg)
-                                        # due to new frame + Stylema calipers
-        "wheelbase_mm": 1340.0,         # 1340 mm — KTM Gen 3 spec (shorter
-                                        # than Gen 2's 1365 mm; new frame)
-        "front_tire_size": "110/70R17", # 17" front — unchanged from Gen 2
+        "dry_mass_kg": 158.0,  # 158 kg dry (kerb 172 kg minus ~14 kg
+        # fluids); heavier than Gen 2 (149 kg)
+        # due to new frame + Stylema calipers
+        "wheelbase_mm": 1340.0,  # 1340 mm — KTM Gen 3 spec (shorter
+        # than Gen 2's 1365 mm; new frame)
+        "front_tire_size": "110/70R17",  # 17" front — unchanged from Gen 2
         "rear_tire_size": "150/60R17",  # 17" rear — unchanged from Gen 2
-        "cd": 0.65,                     # full-fairing sport single; lower Cd
-                                        # than Gen 2 (0.68) due to revised
-                                        # aerodynamic bodywork per KTM wind-
-                                        # tunnel test (press kit 2024)
-        "frontal_area_m2": 0.41,        # 373cc sport single; same frontal area
-                                        # as Gen 2 (identical wheel/tire sizes)
+        "cd": 0.65,  # full-fairing sport single; lower Cd
+        # than Gen 2 (0.68) due to revised
+        # aerodynamic bodywork per KTM wind-
+        # tunnel test (press kit 2024)
+        "frontal_area_m2": 0.41,  # 373cc sport single; same frontal area
+        # as Gen 2 (identical wheel/tire sizes)
     },
     source_name="spec_sheet",
 )
@@ -9131,49 +9131,49 @@ HERO_XPULSE_210_2025 = spec_from_dict(
         "model_code": "XPULSE210",
         "year_from": 2025,
         "year_to": 2026,
-        "category": "adventure",        # rally/dual-sport per Hero categorisation
-        "displacement_cc": 210.04,      # 210.04cc — Hero official spec
-        "bore_mm": 67.0,                # 67.0 × 59.6 mm — Hero spec sheet
+        "category": "adventure",  # rally/dual-sport per Hero categorisation
+        "displacement_cc": 210.04,  # 210.04cc — Hero official spec
+        "bore_mm": 67.0,  # 67.0 × 59.6 mm — Hero spec sheet
         "stroke_mm": 59.6,
-        "compression_ratio": 10.0,      # 10.0:1 per Hero press kit (oil-cooled
-                                        # 4V head; modest CR for fuel tolerance)
+        "compression_ratio": 10.0,  # 10.0:1 per Hero press kit (oil-cooled
+        # 4V head; modest CR for fuel tolerance)
         "cylinders": 1,
-        "peak_power_hp": 24.6,          # 24.6 hp (18.4 kW) @ 9250 rpm
-                                        # Hero press release EICMA 2024
+        "peak_power_hp": 24.6,  # 24.6 hp (18.4 kW) @ 9250 rpm
+        # Hero press release EICMA 2024
         "peak_power_rpm": 9250,
-        "peak_torque_nm": 20.4,         # 20.4 Nm @ 7250 rpm — Hero spec sheet
+        "peak_torque_nm": 20.4,  # 20.4 Nm @ 7250 rpm — Hero spec sheet
         "peak_torque_rpm": 7250,
-        "fuel_system": "fi",            # closed-loop EFI (Bosch ECU)
-        "cooling": "oil",               # oil-cooled (no radiator); Hero's
-                                        # dual-channel oil cooler with auxiliary
-                                        # oil pump to feed the 4V head
-        "valve_config": "sohc",         # SOHC 4-valve per Hero spec
-        "gears": 6,                     # 6-speed (up from 5-speed on Xpulse 200)
+        "fuel_system": "fi",  # closed-loop EFI (Bosch ECU)
+        "cooling": "oil",  # oil-cooled (no radiator); Hero's
+        # dual-channel oil cooler with auxiliary
+        # oil pump to feed the 4V head
+        "valve_config": "sohc",  # SOHC 4-valve per Hero spec
+        "gears": 6,  # 6-speed (up from 5-speed on Xpulse 200)
         # 6-speed cassette derived from Hero service manual SM-XPULSE210-2024.
         # Tall first gear (3.000) and overdriven 6th (0.864) — touring-style
         # spread typical of dual-sport bikes that prioritise highway cruising.
         "gear_ratios": [3.000, 2.000, 1.500, 1.222, 1.043, 0.864],
-        "front_sprocket": 14,           # F14/R50 428 chain — Hero OEM kit
-                                        # (taller than Xpulse 200's F14/R52
-                                        # due to extra 6th gear)
+        "front_sprocket": 14,  # F14/R50 428 chain — Hero OEM kit
+        # (taller than Xpulse 200's F14/R52
+        # due to extra 6th gear)
         "rear_sprocket": 50,
         "chain_pitch": "428",
-        "dry_mass_kg": 155.0,           # 155 kg dry (kerb 167 kg minus ~12 kg
-                                        # fluids); +5 kg vs Xpulse 200 due to
-                                        # oil cooler + heavier 4V head
-        "wheelbase_mm": 1410.0,         # 1410 mm — unchanged from Xpulse 200
-                                        # (same chassis carryover per Hero)
+        "dry_mass_kg": 155.0,  # 155 kg dry (kerb 167 kg minus ~12 kg
+        # fluids); +5 kg vs Xpulse 200 due to
+        # oil cooler + heavier 4V head
+        "wheelbase_mm": 1410.0,  # 1410 mm — unchanged from Xpulse 200
+        # (same chassis carryover per Hero)
         "front_tire_size": "90/90-21",  # 21" front — dual-sport spec (knobby
-                                        # tube-type tire; Indian dirt-track
-                                        # notation per Hero parts catalog)
+        # tube-type tire; Indian dirt-track
+        # notation per Hero parts catalog)
         "rear_tire_size": "120/80-18",  # 18" rear — dual-sport (knobby)
-        "cd": 0.85,                     # adventure/dual-sport; 21" front wheel
-                                        # adds frontal turbulence; comparable to
-                                        # Xpulse 200 (0.86) — marginal Cd reduction
-                                        # from new headlight cluster
-        "frontal_area_m2": 0.55,        # adventure single with upright bars +
-                                        # knobby 21" front; same as Xpulse 200
-                                        # in this catalog (identical chassis)
+        "cd": 0.85,  # adventure/dual-sport; 21" front wheel
+        # adds frontal turbulence; comparable to
+        # Xpulse 200 (0.86) — marginal Cd reduction
+        # from new headlight cluster
+        "frontal_area_m2": 0.55,  # adventure single with upright bars +
+        # knobby 21" front; same as Xpulse 200
+        # in this catalog (identical chassis)
     },
     source_name="spec_sheet",
 )
@@ -9205,43 +9205,43 @@ HONDA_CBR650R_E_CLUTCH_2024 = spec_from_dict(
         "model_code": "RH09",
         "year_from": 2024,
         "year_to": 2026,
-        "category": "sport",            # full-fairing middleweight sport
-        "displacement_cc": 648.72,      # 648.72cc inline-4 — Honda spec sheet
-                                        # (unchanged from 2019-2023 CBR650R)
-        "bore_mm": 67.0,                # 67.0 × 46.0 mm — Honda spec
+        "category": "sport",  # full-fairing middleweight sport
+        "displacement_cc": 648.72,  # 648.72cc inline-4 — Honda spec sheet
+        # (unchanged from 2019-2023 CBR650R)
+        "bore_mm": 67.0,  # 67.0 × 46.0 mm — Honda spec
         "stroke_mm": 46.0,
-        "compression_ratio": 11.6,      # 11.6:1 — unchanged from prior CBR650R
+        "compression_ratio": 11.6,  # 11.6:1 — unchanged from prior CBR650R
         "cylinders": 4,
-        "peak_power_hp": 95.18,         # 95.18 hp (71 kW) @ 12000 rpm
-                                        # Honda press kit October 2023
-                                        # (+1.2 hp vs 2019-2023 from intake/
-                                        # exhaust revisions for Euro5+)
+        "peak_power_hp": 95.18,  # 95.18 hp (71 kW) @ 12000 rpm
+        # Honda press kit October 2023
+        # (+1.2 hp vs 2019-2023 from intake/
+        # exhaust revisions for Euro5+)
         "peak_power_rpm": 12000,
-        "peak_torque_nm": 63.0,         # 63 Nm @ 9500 rpm — Honda spec
+        "peak_torque_nm": 63.0,  # 63 Nm @ 9500 rpm — Honda spec
         "peak_torque_rpm": 9500,
-        "fuel_system": "fi",            # PGM-FI electronic injection
-        "cooling": "liquid",            # liquid-cooled
-        "valve_config": "dohc",         # DOHC 4-valve per cylinder
+        "fuel_system": "fi",  # PGM-FI electronic injection
+        "cooling": "liquid",  # liquid-cooled
+        "valve_config": "dohc",  # DOHC 4-valve per cylinder
         "gears": 6,
         # 6-speed cassette identical to 2019-2023 CBR650R per Honda service
         # bulletin SB-CBR650R-2024-001 (only the clutch actuator changed).
         "gear_ratios": [2.733, 2.000, 1.600, 1.333, 1.153, 1.038],
-        "front_sprocket": 15,           # F15/R42 525 — Honda OEM chain kit
-                                        # (unchanged from 2019-2023 CBR650R)
+        "front_sprocket": 15,  # F15/R42 525 — Honda OEM chain kit
+        # (unchanged from 2019-2023 CBR650R)
         "rear_sprocket": 42,
         "chain_pitch": "525",
-        "dry_mass_kg": 191.0,           # 191 kg dry (kerb 211 kg minus ~20 kg
-                                        # fluids); +2 kg vs 2019-2023 CBR650R
-                                        # due to E-Clutch actuator + ECU
-        "wheelbase_mm": 1450.0,         # 1450 mm — unchanged from 2019-2023
+        "dry_mass_kg": 191.0,  # 191 kg dry (kerb 211 kg minus ~20 kg
+        # fluids); +2 kg vs 2019-2023 CBR650R
+        # due to E-Clutch actuator + ECU
+        "wheelbase_mm": 1450.0,  # 1450 mm — unchanged from 2019-2023
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.58,                     # full-fairing middleweight sport;
-                                        # comparable to Yamaha YZF-R7 (0.59)
-                                        # in this catalog — both are sport-
-                                        # touring-leaning middleweights
-        "frontal_area_m2": 0.43,        # 650cc full-fairing I4; consistent
-                                        # with Suzuki GSX-8R (0.42) in catalog
+        "cd": 0.58,  # full-fairing middleweight sport;
+        # comparable to Yamaha YZF-R7 (0.59)
+        # in this catalog — both are sport-
+        # touring-leaning middleweights
+        "frontal_area_m2": 0.43,  # 650cc full-fairing I4; consistent
+        # with Suzuki GSX-8R (0.42) in catalog
     },
     source_name="spec_sheet",
 )
@@ -9274,48 +9274,48 @@ DUCATI_STREETFIGHTER_V4_SP_2022 = spec_from_dict(
         "model_code": "SFV4SP",
         "year_from": 2022,
         "year_to": 2024,
-        "category": "naked",            # streetfighter/naked super-sport
-        "displacement_cc": 1103.0,      # 1103cc Desmosedici Stradale V4
-        "bore_mm": 81.0,                # 81.0 × 53.5 mm — Ducati V4 spec
+        "category": "naked",  # streetfighter/naked super-sport
+        "displacement_cc": 1103.0,  # 1103cc Desmosedici Stradale V4
+        "bore_mm": 81.0,  # 81.0 × 53.5 mm — Ducati V4 spec
         "stroke_mm": 53.5,
-        "compression_ratio": 14.0,      # 14.0:1 — Ducati Desmosedici Stradale
+        "compression_ratio": 14.0,  # 14.0:1 — Ducati Desmosedici Stradale
         "cylinders": 4,
-        "peak_power_hp": 208.0,         # 208 hp (153 kW) @ 13000 rpm
-                                        # Ducati press kit December 2021
+        "peak_power_hp": 208.0,  # 208 hp (153 kW) @ 13000 rpm
+        # Ducati press kit December 2021
         "peak_power_rpm": 13000,
-        "peak_torque_nm": 123.0,        # 123 Nm @ 9500 rpm — Ducati spec
+        "peak_torque_nm": 123.0,  # 123 Nm @ 9500 rpm — Ducati spec
         "peak_torque_rpm": 9500,
-        "fuel_system": "fi",            # ride-by-wire EFI with full Öhlins
-                                        # electronic-suspension integration
-        "cooling": "liquid",            # liquid-cooled
-        "valve_config": "dohc",         # DOHC desmodromic 4-valve
+        "fuel_system": "fi",  # ride-by-wire EFI with full Öhlins
+        # electronic-suspension integration
+        "cooling": "liquid",  # liquid-cooled
+        "valve_config": "dohc",  # DOHC desmodromic 4-valve
         "gears": 6,
         # 6-speed cassette identical to base Streetfighter V4 (same platform).
         # Per Ducati service manual SM-SFV4-2022; only the dry STM-EVO clutch
         # differs from the base V4's wet clutch — gearbox internals unchanged.
         "gear_ratios": [2.466, 2.000, 1.696, 1.500, 1.354, 1.250],
-        "front_sprocket": 16,           # F16/R41 525 — Ducati Streetfighter V4
-                                        # OEM chain kit (unchanged across V4/
-                                        # V4S/V4SP variants per Ducati parts)
+        "front_sprocket": 16,  # F16/R41 525 — Ducati Streetfighter V4
+        # OEM chain kit (unchanged across V4/
+        # V4S/V4SP variants per Ducati parts)
         "rear_sprocket": 41,
         "chain_pitch": "525",
-        "dry_mass_kg": 178.0,           # 178 kg dry — Ducati press kit MY2022
-                                        # (vs 199 kg dry on base V4; -21 kg
-                                        # from carbon wheels + dry clutch +
-                                        # carbon bodywork)
-        "wheelbase_mm": 1488.0,         # 1488 mm — Ducati Streetfighter V4
-                                        # spec (unchanged across SP variant)
+        "dry_mass_kg": 178.0,  # 178 kg dry — Ducati press kit MY2022
+        # (vs 199 kg dry on base V4; -21 kg
+        # from carbon wheels + dry clutch +
+        # carbon bodywork)
+        "wheelbase_mm": 1488.0,  # 1488 mm — Ducati Streetfighter V4
+        # spec (unchanged across SP variant)
         "front_tire_size": "120/70ZR17",
-        "rear_tire_size": "200/60ZR17", # 200-section — Ducati Streetfighter
-                                        # V4 spec (Pirelli Diablo Supercorsa V3)
-        "cd": 0.72,                     # naked super-sport; higher Cd than
-                                        # full-fairing Panigale V4 (0.45) due
-                                        # to exposed rider triangle, but lower
-                                        # than base Streetfighter V4 (0.74) on
-                                        # the catalogue thanks to the SP's
-                                        # carbon bodywork tightening airflow
-        "frontal_area_m2": 0.48,        # litre-class naked; consistent with
-                                        # Aprilia Tuono V4 (0.49) in catalog
+        "rear_tire_size": "200/60ZR17",  # 200-section — Ducati Streetfighter
+        # V4 spec (Pirelli Diablo Supercorsa V3)
+        "cd": 0.72,  # naked super-sport; higher Cd than
+        # full-fairing Panigale V4 (0.45) due
+        # to exposed rider triangle, but lower
+        # than base Streetfighter V4 (0.74) on
+        # the catalogue thanks to the SP's
+        # carbon bodywork tightening airflow
+        "frontal_area_m2": 0.48,  # litre-class naked; consistent with
+        # Aprilia Tuono V4 (0.49) in catalog
     },
     source_name="spec_sheet",
 )
@@ -9348,45 +9348,45 @@ MV_AGUSTA_BRUTALE_1000_RR_ASSEN_2024 = spec_from_dict(
         "model_code": "BRUTALE_1000_RR_ASSEN",
         "year_from": 2024,
         "year_to": 2025,
-        "category": "naked",            # hyper-naked / streetfighter
-        "displacement_cc": 998.0,       # 998cc F4-derived inline-4
-        "bore_mm": 79.0,                # 79.0 × 50.9 mm per MV F4/Brutale platform
+        "category": "naked",  # hyper-naked / streetfighter
+        "displacement_cc": 998.0,  # 998cc F4-derived inline-4
+        "bore_mm": 79.0,  # 79.0 × 50.9 mm per MV F4/Brutale platform
         "stroke_mm": 50.9,
-        "compression_ratio": 13.4,      # 13.4:1 per MV spec sheet
+        "compression_ratio": 13.4,  # 13.4:1 per MV spec sheet
         "cylinders": 4,
-        "peak_power_hp": 208.0,         # 208 hp (153 kW) @ 13250 rpm
-                                        # MV press kit EICMA 2023
+        "peak_power_hp": 208.0,  # 208 hp (153 kW) @ 13250 rpm
+        # MV press kit EICMA 2023
         "peak_power_rpm": 13250,
-        "peak_torque_nm": 116.5,        # 116.5 Nm @ 11000 rpm — MV spec
+        "peak_torque_nm": 116.5,  # 116.5 Nm @ 11000 rpm — MV spec
         "peak_torque_rpm": 11000,
-        "fuel_system": "fi",            # Mikuni full ride-by-wire with
-                                        # variable-stack intake (radial valves)
+        "fuel_system": "fi",  # Mikuni full ride-by-wire with
+        # variable-stack intake (radial valves)
         "cooling": "liquid",
-        "valve_config": "dohc",         # DOHC radial 4-valve
+        "valve_config": "dohc",  # DOHC radial 4-valve
         "gears": 6,
         # 6-speed cassette per MV Brutale 1000 RR service manual SM-B1000-2022;
         # Brutale platform Tier-1 in gear_ratios.py is conservative; this
         # explicit ratio set matches the RR-spec quick-shift cassette.
         "gear_ratios": [2.667, 2.000, 1.615, 1.348, 1.174, 1.040],
-        "front_sprocket": 16,           # F16/R41 525 — MV OEM chain kit
-                                        # (unchanged from base Brutale 1000 RR)
+        "front_sprocket": 16,  # F16/R41 525 — MV OEM chain kit
+        # (unchanged from base Brutale 1000 RR)
         "rear_sprocket": 41,
         "chain_pitch": "525",
-        "dry_mass_kg": 186.0,           # 186 kg dry — MV press kit November 2023
-                                        # (vs 188 kg dry on base RR; -2 kg from
-                                        # titanium SC-Project + lithium battery +
-                                        # carbon bodywork)
-        "wheelbase_mm": 1415.0,         # 1415 mm — MV Brutale 1000 RR Assen spec
+        "dry_mass_kg": 186.0,  # 186 kg dry — MV press kit November 2023
+        # (vs 188 kg dry on base RR; -2 kg from
+        # titanium SC-Project + lithium battery +
+        # carbon bodywork)
+        "wheelbase_mm": 1415.0,  # 1415 mm — MV Brutale 1000 RR Assen spec
         "front_tire_size": "120/70ZR17",
-        "rear_tire_size": "200/55ZR17", # 200-section — MV Brutale 1000 RR spec
-                                        # (Pirelli Diablo Supercorsa SP V3)
-        "cd": 0.71,                     # hyper-naked; slightly lower than base
-                                        # Brutale (0.72) thanks to carbon
-                                        # bodywork tightening airflow around
-                                        # the tank-air-intake assembly
-        "frontal_area_m2": 0.49,        # litre-class naked; consistent with
-                                        # MV Brutale 1000 RR base (0.49) and
-                                        # Aprilia Tuono V4 (0.49) in catalog
+        "rear_tire_size": "200/55ZR17",  # 200-section — MV Brutale 1000 RR spec
+        # (Pirelli Diablo Supercorsa SP V3)
+        "cd": 0.71,  # hyper-naked; slightly lower than base
+        # Brutale (0.72) thanks to carbon
+        # bodywork tightening airflow around
+        # the tank-air-intake assembly
+        "frontal_area_m2": 0.49,  # litre-class naked; consistent with
+        # MV Brutale 1000 RR base (0.49) and
+        # Aprilia Tuono V4 (0.49) in catalog
     },
     source_name="spec_sheet",
 )
@@ -9421,47 +9421,47 @@ HONDA_CL250_2023 = spec_from_dict(
         "model_code": "MC57",
         "year_from": 2023,
         "year_to": 2026,
-        "category": "naked",            # scrambler — uses naked aero defaults
-                                        # (upright, exposed rider)
-        "displacement_cc": 249.0,       # 249cc liquid-cooled DOHC single
-        "bore_mm": 76.0,                # 76.0 × 55.0 mm — Honda MC49 platform
+        "category": "naked",  # scrambler — uses naked aero defaults
+        # (upright, exposed rider)
+        "displacement_cc": 249.0,  # 249cc liquid-cooled DOHC single
+        "bore_mm": 76.0,  # 76.0 × 55.0 mm — Honda MC49 platform
         "stroke_mm": 55.0,
-        "compression_ratio": 10.7,      # 10.7:1 per Honda spec sheet
+        "compression_ratio": 10.7,  # 10.7:1 per Honda spec sheet
         "cylinders": 1,
-        "peak_power_hp": 26.5,          # 26.5 hp (19.5 kW) @ 9500 rpm
-                                        # Honda Japan press kit 2023
+        "peak_power_hp": 26.5,  # 26.5 hp (19.5 kW) @ 9500 rpm
+        # Honda Japan press kit 2023
         "peak_power_rpm": 9500,
-        "peak_torque_nm": 22.0,         # 22.0 Nm @ 7750 rpm — Honda spec
+        "peak_torque_nm": 22.0,  # 22.0 Nm @ 7750 rpm — Honda spec
         "peak_torque_rpm": 7750,
-        "fuel_system": "fi",            # PGM-FI electronic fuel injection
-        "cooling": "liquid",            # liquid-cooled (vs CB350RS air-cooled)
-        "valve_config": "dohc",         # DOHC 4-valve single
+        "fuel_system": "fi",  # PGM-FI electronic fuel injection
+        "cooling": "liquid",  # liquid-cooled (vs CB350RS air-cooled)
+        "valve_config": "dohc",  # DOHC 4-valve single
         "gears": 6,
         # 6-speed cassette per Honda CL250 owner's manual (Webike visual
         # inspection May 2023). Identical to Rebel 250 / CB250R MC49 platform.
         # 1st = 3.333, 6th = 0.963 — slightly overdriven for highway cruise.
         "gear_ratios": [3.333, 2.118, 1.571, 1.304, 1.115, 0.963],
-        "front_sprocket": 15,           # F15/R39 520 per Honda Thailand spec
+        "front_sprocket": 15,  # F15/R39 520 per Honda Thailand spec
         "rear_sprocket": 39,
         "chain_pitch": "520",
-        "dry_mass_kg": 158.0,           # 158 kg dry (172 kg kerb minus ~14 kg
-                                        # fluids — 12L fuel + oil + coolant)
-                                        # Honda Japan press kit
-        "wheelbase_mm": 1485.0,         # 1485 mm — Honda CL250 spec sheet
-                                        # (scrambler-spec, longer than CB250R
-                                        # at 1355 mm thanks to 19" front wheel)
-        "front_tire_size": "110/80-19", # 19" front wire-wheel scrambler fitment
-                                        # (bias-ply tube format, per CLAUDE.md
-                                        # May 4 validator widening for Indian
-                                        # / Asian bias-ply notation)
+        "dry_mass_kg": 158.0,  # 158 kg dry (172 kg kerb minus ~14 kg
+        # fluids — 12L fuel + oil + coolant)
+        # Honda Japan press kit
+        "wheelbase_mm": 1485.0,  # 1485 mm — Honda CL250 spec sheet
+        # (scrambler-spec, longer than CB250R
+        # at 1355 mm thanks to 19" front wheel)
+        "front_tire_size": "110/80-19",  # 19" front wire-wheel scrambler fitment
+        # (bias-ply tube format, per CLAUDE.md
+        # May 4 validator widening for Indian
+        # / Asian bias-ply notation)
         "rear_tire_size": "150/70-17",  # 17" rear bias-ply
-        "cd": 0.70,                     # scrambler upright posture; slightly
-                                        # lower than dual-sport thanks to lower
-                                        # screen but higher than streetbike;
-                                        # consistent with Yezdi Scrambler (0.71)
-                                        # in catalog
-        "frontal_area_m2": 0.46,        # 250cc upright scrambler; consistent
-                                        # with CB350RS (0.46) in catalog
+        "cd": 0.70,  # scrambler upright posture; slightly
+        # lower than dual-sport thanks to lower
+        # screen but higher than streetbike;
+        # consistent with Yezdi Scrambler (0.71)
+        # in catalog
+        "frontal_area_m2": 0.46,  # 250cc upright scrambler; consistent
+        # with CB350RS (0.46) in catalog
     },
     source_name="spec_sheet",
 )
@@ -9497,46 +9497,46 @@ APRILIA_RS660_EXTREMA_2024 = spec_from_dict(
         "model_code": "RS660_EXTREMA",
         "year_from": 2024,
         "year_to": 2025,
-        "category": "sport",            # full-fairing middleweight sport
-        "displacement_cc": 659.0,       # 659cc parallel-twin (270° crank)
-        "bore_mm": 81.0,                # 81.0 × 63.9 mm — Aprilia RS 660 platform
+        "category": "sport",  # full-fairing middleweight sport
+        "displacement_cc": 659.0,  # 659cc parallel-twin (270° crank)
+        "bore_mm": 81.0,  # 81.0 × 63.9 mm — Aprilia RS 660 platform
         "stroke_mm": 63.9,
-        "compression_ratio": 13.5,      # 13.5:1 per Aprilia spec sheet
+        "compression_ratio": 13.5,  # 13.5:1 per Aprilia spec sheet
         "cylinders": 2,
-        "peak_power_hp": 100.0,         # 100 hp (73.5 kW) @ 10500 rpm
-                                        # Aprilia press kit EICMA 2023
+        "peak_power_hp": 100.0,  # 100 hp (73.5 kW) @ 10500 rpm
+        # Aprilia press kit EICMA 2023
         "peak_power_rpm": 10500,
-        "peak_torque_nm": 67.0,         # 67 Nm @ 8500 rpm — Aprilia spec
+        "peak_torque_nm": 67.0,  # 67 Nm @ 8500 rpm — Aprilia spec
         "peak_torque_rpm": 8500,
-        "fuel_system": "fi",            # ride-by-wire EFI with full APRC
-                                        # electronic-control integration
+        "fuel_system": "fi",  # ride-by-wire EFI with full APRC
+        # electronic-control integration
         "cooling": "liquid",
-        "valve_config": "dohc",         # DOHC 4-valve per cylinder
+        "valve_config": "dohc",  # DOHC 4-valve per cylinder
         "gears": 6,
         # 6-speed cassette identical to standard RS 660 (same platform).
         # Per Aprilia service manual SM-RS660-2024; quickshifter standard
         # on Extrema (was optional on base).
         "gear_ratios": [2.846, 2.125, 1.631, 1.333, 1.167, 1.043],
-        "front_sprocket": 16,           # F16/R43 520 — Aprilia Extrema-specific
-                                        # OEM chain kit (taller than base RS 660
-                                        # F14/R39 — Aprilia chose taller gearing
-                                        # for the Extrema's track-bias setup)
+        "front_sprocket": 16,  # F16/R43 520 — Aprilia Extrema-specific
+        # OEM chain kit (taller than base RS 660
+        # F14/R39 — Aprilia chose taller gearing
+        # for the Extrema's track-bias setup)
         "rear_sprocket": 43,
         "chain_pitch": "520",
-        "dry_mass_kg": 162.0,           # 162 kg dry (173 kg kerb minus ~11 kg
-                                        # fluids — 15L fuel + oil + coolant)
-                                        # Aprilia press kit 2023
-        "wheelbase_mm": 1370.0,         # 1370 mm — Aprilia RS 660 spec
-                                        # (unchanged on Extrema)
+        "dry_mass_kg": 162.0,  # 162 kg dry (173 kg kerb minus ~11 kg
+        # fluids — 15L fuel + oil + coolant)
+        # Aprilia press kit 2023
+        "wheelbase_mm": 1370.0,  # 1370 mm — Aprilia RS 660 spec
+        # (unchanged on Extrema)
         "front_tire_size": "120/70ZR17",
-        "rear_tire_size": "180/55ZR17", # 180-section — Aprilia RS 660 spec
-                                        # (Pirelli Diablo Rosso Corsa II)
-        "cd": 0.55,                     # full-fairing middleweight sport;
-                                        # slightly lower than RS 660 base (0.56)
-                                        # thanks to lighter rear-end + tail
-                                        # tidy on Extrema
-        "frontal_area_m2": 0.41,        # mid-twin full-fairing; consistent
-                                        # with RS 660 base (0.41) in catalog
+        "rear_tire_size": "180/55ZR17",  # 180-section — Aprilia RS 660 spec
+        # (Pirelli Diablo Rosso Corsa II)
+        "cd": 0.55,  # full-fairing middleweight sport;
+        # slightly lower than RS 660 base (0.56)
+        # thanks to lighter rear-end + tail
+        # tidy on Extrema
+        "frontal_area_m2": 0.41,  # mid-twin full-fairing; consistent
+        # with RS 660 base (0.41) in catalog
     },
     source_name="spec_sheet",
 )
@@ -9563,42 +9563,42 @@ KAWASAKI_W230_2024 = spec_from_dict(
         "model_code": "W230_2024",
         "year_from": 2024,
         "year_to": 2026,
-        "category": "naked",            # modern-classic standard / retro
-        "displacement_cc": 233.0,       # 233 cc air-cooled single (W175 stroke
-                                        # bumped from 58 → 62.9 mm — Kawasaki
-                                        # India press kit Aug 2024)
-        "bore_mm": 67.0,                # 67.0 × 66.2 mm — Kawasaki spec sheet
+        "category": "naked",  # modern-classic standard / retro
+        "displacement_cc": 233.0,  # 233 cc air-cooled single (W175 stroke
+        # bumped from 58 → 62.9 mm — Kawasaki
+        # India press kit Aug 2024)
+        "bore_mm": 67.0,  # 67.0 × 66.2 mm — Kawasaki spec sheet
         "stroke_mm": 66.2,
-        "compression_ratio": 9.7,       # 9.7:1 — Kawasaki India spec
+        "compression_ratio": 9.7,  # 9.7:1 — Kawasaki India spec
         "cylinders": 1,
-        "peak_power_hp": 17.5,          # 17.5 hp (13 kW) @ 7000 rpm
-                                        # Kawasaki India press release Aug 2024
+        "peak_power_hp": 17.5,  # 17.5 hp (13 kW) @ 7000 rpm
+        # Kawasaki India press release Aug 2024
         "peak_power_rpm": 7000,
-        "peak_torque_nm": 18.0,         # 18 Nm @ 5500 rpm — Kawasaki spec
+        "peak_torque_nm": 18.0,  # 18 Nm @ 5500 rpm — Kawasaki spec
         "peak_torque_rpm": 5500,
-        "fuel_system": "fi",            # EFI (28 mm throttle body)
-        "cooling": "air",               # air-cooled with cooling fins
-        "valve_config": "sohc",         # SOHC 2-valve
-        "gears": 6,                     # 6-speed (W175 was 5-speed; W230 is 6)
+        "fuel_system": "fi",  # EFI (28 mm throttle body)
+        "cooling": "air",  # air-cooled with cooling fins
+        "valve_config": "sohc",  # SOHC 2-valve
+        "gears": 6,  # 6-speed (W175 was 5-speed; W230 is 6)
         # 6-speed ratios per Kawasaki India service manual W230 2024
         # (interpolated from W175 ratios + 6th overdrive based on declared top
         # gear ratio 0.964:1 from BikeWale spec page)
         "gear_ratios": [2.769, 1.882, 1.450, 1.181, 1.043, 0.964],
-        "front_sprocket": 14,           # F14 / R47 chain (Kawasaki OEM kit)
+        "front_sprocket": 14,  # F14 / R47 chain (Kawasaki OEM kit)
         "rear_sprocket": 47,
-        "chain_pitch": "428",           # 428 pitch — entry single standard
-        "dry_mass_kg": 132.0,           # 132 kg dry (142 kg kerb minus ~10 kg
-                                        # fluids — 12L tank + oil + brake fluid)
-                                        # Kawasaki India spec sheet Aug 2024
-        "wheelbase_mm": 1335.0,         # 1335 mm — Kawasaki India spec
+        "chain_pitch": "428",  # 428 pitch — entry single standard
+        "dry_mass_kg": 132.0,  # 132 kg dry (142 kg kerb minus ~10 kg
+        # fluids — 12L tank + oil + brake fluid)
+        # Kawasaki India spec sheet Aug 2024
+        "wheelbase_mm": 1335.0,  # 1335 mm — Kawasaki India spec
         "front_tire_size": "90/90-18",  # 18-inch retro front per OEM IRC GS-19
         "rear_tire_size": "110/90-17",  # 17-inch rear; bias-ply notation matches
-                                        # Indian commuter tire format
-        "cd": 0.78,                     # naked / retro standard; consistent with
-                                        # other 200-300cc air-cooled retros in
-                                        # catalog (W175 / RX class)
-        "frontal_area_m2": 0.46,        # upright retro standard; matches small
-                                        # 200-250cc naked cluster default
+        # Indian commuter tire format
+        "cd": 0.78,  # naked / retro standard; consistent with
+        # other 200-300cc air-cooled retros in
+        # catalog (W175 / RX class)
+        "frontal_area_m2": 0.46,  # upright retro standard; matches small
+        # 200-250cc naked cluster default
     },
     source_name="spec_sheet",
 )
@@ -9611,40 +9611,40 @@ HERO_XTREME_125R_2024 = spec_from_dict(
         "model_code": "XTREME_125R_2024",
         "year_from": 2024,
         "year_to": 2026,
-        "category": "naked",            # 125cc street naked / sport-commuter
-        "displacement_cc": 124.7,       # 124.7 cc air-cooled single
-                                        # Hero MotoCorp press kit Jan 2024
-        "bore_mm": 54.0,                # 54.0 × 54.4 mm — Hero spec sheet
+        "category": "naked",  # 125cc street naked / sport-commuter
+        "displacement_cc": 124.7,  # 124.7 cc air-cooled single
+        # Hero MotoCorp press kit Jan 2024
+        "bore_mm": 54.0,  # 54.0 × 54.4 mm — Hero spec sheet
         "stroke_mm": 54.4,
-        "compression_ratio": 10.0,      # 10.0:1 — Hero India spec
+        "compression_ratio": 10.0,  # 10.0:1 — Hero India spec
         "cylinders": 1,
-        "peak_power_hp": 11.4,          # 11.4 hp (8.5 kW) @ 8500 rpm
-                                        # Hero MotoCorp press release Jan 2024
+        "peak_power_hp": 11.4,  # 11.4 hp (8.5 kW) @ 8500 rpm
+        # Hero MotoCorp press release Jan 2024
         "peak_power_rpm": 8500,
-        "peak_torque_nm": 10.5,         # 10.5 Nm @ 6000 rpm — Hero spec
+        "peak_torque_nm": 10.5,  # 10.5 Nm @ 6000 rpm — Hero spec
         "peak_torque_rpm": 6000,
-        "fuel_system": "fi",            # EFI (BS6 Phase 2 compliant)
+        "fuel_system": "fi",  # EFI (BS6 Phase 2 compliant)
         "cooling": "air",
-        "valve_config": "ohc",          # 2-valve SOHC
-        "gears": 5,                     # 5-speed (standard 125cc Indian commuter)
+        "valve_config": "ohc",  # 2-valve SOHC
+        "gears": 5,  # 5-speed (standard 125cc Indian commuter)
         # 5-speed ratios from Hero MotoCorp Xtreme 125R service manual 2024
         # (mirrors Hero Glamour 125 cassette with shorter top — typical
         # Hero 125cc commuter platform)
         "gear_ratios": [2.846, 1.778, 1.333, 1.043, 0.852],
-        "front_sprocket": 14,           # F14 / R45 chain — Hero OEM
+        "front_sprocket": 14,  # F14 / R45 chain — Hero OEM
         "rear_sprocket": 45,
-        "chain_pitch": "428",           # 428 pitch — Indian 125 standard
-        "dry_mass_kg": 125.0,           # 125 kg dry (136 kg kerb minus ~11 kg
-                                        # fluids — 10L tank + oil)
-                                        # Hero MotoCorp spec sheet
-        "wheelbase_mm": 1285.0,         # 1285 mm — Hero spec
+        "chain_pitch": "428",  # 428 pitch — Indian 125 standard
+        "dry_mass_kg": 125.0,  # 125 kg dry (136 kg kerb minus ~11 kg
+        # fluids — 10L tank + oil)
+        # Hero MotoCorp spec sheet
+        "wheelbase_mm": 1285.0,  # 1285 mm — Hero spec
         "front_tire_size": "90/90-17",  # 17-inch with bias-ply notation
         "rear_tire_size": "120/80-17",  # 120-section rear (sportier than
-                                        # standard 125cc 100-section)
-        "cd": 0.80,                     # naked commuter standard; consistent
-                                        # with Hero Glamour / Splendor cluster
-        "frontal_area_m2": 0.45,        # upright commuter; standard 125cc
-                                        # cluster default
+        # standard 125cc 100-section)
+        "cd": 0.80,  # naked commuter standard; consistent
+        # with Hero Glamour / Splendor cluster
+        "frontal_area_m2": 0.45,  # upright commuter; standard 125cc
+        # cluster default
     },
     source_name="spec_sheet",
 )
@@ -9657,46 +9657,46 @@ ROYAL_ENFIELD_SUPER_METEOR_650_2023 = spec_from_dict(
         "model_code": "SUPER_METEOR_650_2023",
         "year_from": 2023,
         "year_to": 2026,
-        "category": "cruiser",          # parallel-twin cruiser (RE 650 platform)
-        "displacement_cc": 648.0,       # 648 cc parallel-twin (270° crank)
-                                        # — same Interceptor / Continental GT
-                                        # 650 engine, cruiser-tuned
-        "bore_mm": 78.0,                # 78.0 × 67.8 mm — RE 650 platform
+        "category": "cruiser",  # parallel-twin cruiser (RE 650 platform)
+        "displacement_cc": 648.0,  # 648 cc parallel-twin (270° crank)
+        # — same Interceptor / Continental GT
+        # 650 engine, cruiser-tuned
+        "bore_mm": 78.0,  # 78.0 × 67.8 mm — RE 650 platform
         "stroke_mm": 67.8,
-        "compression_ratio": 9.5,       # 9.5:1 — RE spec sheet
+        "compression_ratio": 9.5,  # 9.5:1 — RE spec sheet
         "cylinders": 2,
-        "peak_power_hp": 47.0,          # 47 hp (34.6 kW) @ 7250 rpm
-                                        # RE press kit EICMA Nov 2022 + Jan 2023
-                                        # India launch (same as INT650)
+        "peak_power_hp": 47.0,  # 47 hp (34.6 kW) @ 7250 rpm
+        # RE press kit EICMA Nov 2022 + Jan 2023
+        # India launch (same as INT650)
         "peak_power_rpm": 7250,
-        "peak_torque_nm": 52.3,         # 52.3 Nm @ 5650 rpm — RE spec
-                                        # MCN Mar 2023 review confirmed
+        "peak_torque_nm": 52.3,  # 52.3 Nm @ 5650 rpm — RE spec
+        # MCN Mar 2023 review confirmed
         "peak_torque_rpm": 5650,
-        "fuel_system": "fi",            # EFI with twin throttle bodies
-        "cooling": "air",               # air/oil-cooled (RE 650 platform)
-        "valve_config": "sohc",         # SOHC 4-valve per cylinder
+        "fuel_system": "fi",  # EFI with twin throttle bodies
+        "cooling": "air",  # air/oil-cooled (RE 650 platform)
+        "valve_config": "sohc",  # SOHC 4-valve per cylinder
         "gears": 6,
         # 6-speed cassette identical to Interceptor 650 / Continental GT 650
         # per RE service manual (shared engine + transmission)
         "gear_ratios": [2.563, 1.706, 1.310, 1.062, 0.910, 0.815],
-        "front_sprocket": 15,           # F15 / R40 525 — RE OEM (taller than
-                                        # INT650's F15/R42 for cruiser cruise)
-                                        # Cycle World Apr 2023 review confirmed
+        "front_sprocket": 15,  # F15 / R40 525 — RE OEM (taller than
+        # INT650's F15/R42 for cruiser cruise)
+        # Cycle World Apr 2023 review confirmed
         "rear_sprocket": 40,
-        "chain_pitch": "525",           # 525 pitch — RE 650 platform standard
-        "dry_mass_kg": 230.0,           # 230 kg dry (241 kg kerb minus ~11 kg
-                                        # fluids — 15.7L fuel + oil + coolant)
-                                        # RE press spec sheet Jan 2023
-        "wheelbase_mm": 1500.0,         # 1500 mm — RE spec (long cruiser
-                                        # wheelbase, INT650 is 1398 mm)
-        "front_tire_size": "100/90-19", # 19-inch front cruiser tire
+        "chain_pitch": "525",  # 525 pitch — RE 650 platform standard
+        "dry_mass_kg": 230.0,  # 230 kg dry (241 kg kerb minus ~11 kg
+        # fluids — 15.7L fuel + oil + coolant)
+        # RE press spec sheet Jan 2023
+        "wheelbase_mm": 1500.0,  # 1500 mm — RE spec (long cruiser
+        # wheelbase, INT650 is 1398 mm)
+        "front_tire_size": "100/90-19",  # 19-inch front cruiser tire
         "rear_tire_size": "150/80-16",  # 16-inch rear cruiser tire
-                                        # (CEAT Zoom Plus OEM)
-        "cd": 0.85,                     # cruiser; consistent with other RE 650
-                                        # cruiser variants (Shotgun 650 = 0.84)
-        "frontal_area_m2": 0.52,        # cruiser upright posture; consistent
-                                        # with mid-cruiser cluster (Vulcan S /
-                                        # Rebel 1100 class)
+        # (CEAT Zoom Plus OEM)
+        "cd": 0.85,  # cruiser; consistent with other RE 650
+        # cruiser variants (Shotgun 650 = 0.84)
+        "frontal_area_m2": 0.52,  # cruiser upright posture; consistent
+        # with mid-cruiser cluster (Vulcan S /
+        # Rebel 1100 class)
     },
     source_name="spec_sheet",
 )
@@ -9721,38 +9721,38 @@ YAMAHA_MT15_V1_2019 = spec_from_dict(
         "model_code": "MT-15_2019",
         "year_from": 2019,
         "year_to": 2020,
-        "category": "naked",            # street-naked (streetfighter styling)
-        "displacement_cc": 155.09,      # 155.09 cc (58.0 × 58.7 mm bore×stroke)
-                                        # Yamaha India spec sheet 2019
+        "category": "naked",  # street-naked (streetfighter styling)
+        "displacement_cc": 155.09,  # 155.09 cc (58.0 × 58.7 mm bore×stroke)
+        # Yamaha India spec sheet 2019
         "bore_mm": 58.0,
         "stroke_mm": 58.7,
-        "compression_ratio": 11.6,      # 11.6:1 — Yamaha spec sheet 2019
+        "compression_ratio": 11.6,  # 11.6:1 — Yamaha spec sheet 2019
         "cylinders": 1,
-        "peak_power_hp": 18.4,          # 18.4 hp (13.5 kW) @ 10000 rpm
-                                        # Bike India first ride Apr 2019
-                                        # (same engine as YZF-R15 V3 without VVA)
+        "peak_power_hp": 18.4,  # 18.4 hp (13.5 kW) @ 10000 rpm
+        # Bike India first ride Apr 2019
+        # (same engine as YZF-R15 V3 without VVA)
         "peak_power_rpm": 10000,
-        "peak_torque_nm": 14.7,         # 14.7 Nm @ 8500 rpm — Yamaha spec
+        "peak_torque_nm": 14.7,  # 14.7 Nm @ 8500 rpm — Yamaha spec
         "peak_torque_rpm": 8500,
-        "fuel_system": "fi",            # EFI (Yamaha FI system — BS4 compliant)
+        "fuel_system": "fi",  # EFI (Yamaha FI system — BS4 compliant)
         "cooling": "liquid",
-        "valve_config": "dohc",         # DOHC 4-valve (no VVA on V1)
+        "valve_config": "dohc",  # DOHC 4-valve (no VVA on V1)
         "gears": 6,
         # 6-speed cassette — identical to YZF-R15 V3 per shared platform
         # Yamaha service manual 5D71-001 (MT-15 V1 gearbox internals)
         "gear_ratios": [3.533, 2.333, 1.722, 1.357, 1.129, 0.966],
-        "front_sprocket": 14,           # F14 / R42 — Yamaha OEM sprocket spec
-        "rear_sprocket": 42,            # (same as YZF-R15 V3 service manual)
-        "chain_pitch": "520",           # 520 pitch — standard Yamaha 155 platform
-        "dry_mass_kg": 134.0,           # 134 kg dry (139 kg kerb minus ~5 kg oil
-                                        # + small 10L tank)
-                                        # Yamaha India spec sheet 2019
-        "wheelbase_mm": 1330.0,         # 1330 mm — Yamaha spec
-        "front_tire_size": "100/80R17", # Narrower 100-section (vs R15 V3's 100/70)
-                                        # upright naked riding position
+        "front_sprocket": 14,  # F14 / R42 — Yamaha OEM sprocket spec
+        "rear_sprocket": 42,  # (same as YZF-R15 V3 service manual)
+        "chain_pitch": "520",  # 520 pitch — standard Yamaha 155 platform
+        "dry_mass_kg": 134.0,  # 134 kg dry (139 kg kerb minus ~5 kg oil
+        # + small 10L tank)
+        # Yamaha India spec sheet 2019
+        "wheelbase_mm": 1330.0,  # 1330 mm — Yamaha spec
+        "front_tire_size": "100/80R17",  # Narrower 100-section (vs R15 V3's 100/70)
+        # upright naked riding position
         "rear_tire_size": "140/70R17",  # 140-section rear (same as R15 V3)
-        "cd": 0.80,                     # naked street; consistent with MT-15 V2
-        "frontal_area_m2": 0.46,        # upright naked posture; same as V2
+        "cd": 0.80,  # naked street; consistent with MT-15 V2
+        "frontal_area_m2": 0.46,  # upright naked posture; same as V2
     },
     source_name="spec_sheet",
 )
@@ -9776,45 +9776,45 @@ BAJAJ_PULSAR_125_NEON_2019 = spec_from_dict(
         "model_code": "PULSAR_125_2019",
         "year_from": 2019,
         "year_to": 2024,
-        "category": "naked",            # entry-level commuter-sport
-        "displacement_cc": 124.4,       # 124.4 cc DTS-i air-cooled single
-                                        # (Pulsar 150 engine bored down)
-                                        # Bajaj spec sheet 2019
-        "bore_mm": 56.0,                # 56.0 × 50.5 mm — Bajaj spec
+        "category": "naked",  # entry-level commuter-sport
+        "displacement_cc": 124.4,  # 124.4 cc DTS-i air-cooled single
+        # (Pulsar 150 engine bored down)
+        # Bajaj spec sheet 2019
+        "bore_mm": 56.0,  # 56.0 × 50.5 mm — Bajaj spec
         "stroke_mm": 50.5,
-        "compression_ratio": 9.9,       # 9.9:1 — Bajaj owner's manual
+        "compression_ratio": 9.9,  # 9.9:1 — Bajaj owner's manual
         "cylinders": 1,
-        "peak_power_hp": 12.0,          # 12 hp (8.8 kW) @ 8500 rpm
-                                        # Bajaj press release Oct 2019 + BikeWale
+        "peak_power_hp": 12.0,  # 12 hp (8.8 kW) @ 8500 rpm
+        # Bajaj press release Oct 2019 + BikeWale
         "peak_power_rpm": 8500,
-        "peak_torque_nm": 10.8,         # 10.8 Nm @ 6500 rpm — Bajaj spec
+        "peak_torque_nm": 10.8,  # 10.8 Nm @ 6500 rpm — Bajaj spec
         "peak_torque_rpm": 6500,
-        "fuel_system": "carb",          # carburetted (BS4 launch); BS6 variant
-                                        # FI from 2020 but same power/torque figures
+        "fuel_system": "carb",  # carburetted (BS4 launch); BS6 variant
+        # FI from 2020 but same power/torque figures
         "cooling": "air",
-        "valve_config": "ohc",          # SOHC 2-valve DTS-i (single spark plug
-                                        # — inherited Pulsar 150 DTS-i design but
-                                        # only single spark due to head size)
+        "valve_config": "ohc",  # SOHC 2-valve DTS-i (single spark plug
+        # — inherited Pulsar 150 DTS-i design but
+        # only single spark due to head size)
         "gears": 5,
         # 5-speed cassette from Bajaj Pulsar 125 owner's manual 2020
         # (same internal ratios as Pulsar 150 DTSI — shorter top gear
         # for 125cc torque band)
         "gear_ratios": [2.933, 1.941, 1.344, 1.056, 0.857],
-        "front_sprocket": 16,           # F16 / R44 — Bajaj OEM sprocket
-        "rear_sprocket": 44,            # (same chain pitch as Pulsar 150)
-        "chain_pitch": "428",           # 428 pitch — Bajaj Pulsar 125 standard
-        "dry_mass_kg": 123.0,           # 123 kg dry (137 kg kerb minus ~14 kg
-                                        # fluids — 11.5L fuel + oil)
-                                        # ZigWheels comparison Nov 2019
-        "wheelbase_mm": 1305.0,         # 1305 mm — Bajaj spec sheet
-        "front_tire_size": "80/100-17", # Bajaj OEM tire spec (bias-ply, Indian
-                                        # standard notation for 125cc class)
+        "front_sprocket": 16,  # F16 / R44 — Bajaj OEM sprocket
+        "rear_sprocket": 44,  # (same chain pitch as Pulsar 150)
+        "chain_pitch": "428",  # 428 pitch — Bajaj Pulsar 125 standard
+        "dry_mass_kg": 123.0,  # 123 kg dry (137 kg kerb minus ~14 kg
+        # fluids — 11.5L fuel + oil)
+        # ZigWheels comparison Nov 2019
+        "wheelbase_mm": 1305.0,  # 1305 mm — Bajaj spec sheet
+        "front_tire_size": "80/100-17",  # Bajaj OEM tire spec (bias-ply, Indian
+        # standard notation for 125cc class)
         "rear_tire_size": "100/90-17",  # 100-section rear (bias-ply)
-        "cd": 0.82,                     # entry naked commuter; consistent with
-                                        # Pulsar 150 / NS150 class
-        "frontal_area_m2": 0.44,        # slightly smaller frontal area than
-                                        # Pulsar 150 (shorter, lighter rider
-                                        # posture on 125cc class)
+        "cd": 0.82,  # entry naked commuter; consistent with
+        # Pulsar 150 / NS150 class
+        "frontal_area_m2": 0.44,  # slightly smaller frontal area than
+        # Pulsar 150 (shorter, lighter rider
+        # posture on 125cc class)
     },
     source_name="spec_sheet",
 )
@@ -9841,39 +9841,39 @@ SUZUKI_GSX_R600_K8_2008 = spec_from_dict(
         "model_code": "GSX-R600_K8",
         "year_from": 2008,
         "year_to": 2010,
-        "category": "sport",            # litre_sport_600_1000 cluster
-        "displacement_cc": 599.0,       # 599 cc inline-4 DOHC (67.0 × 42.5 mm)
-                                        # Suzuki service manual K8
+        "category": "sport",  # litre_sport_600_1000 cluster
+        "displacement_cc": 599.0,  # 599 cc inline-4 DOHC (67.0 × 42.5 mm)
+        # Suzuki service manual K8
         "bore_mm": 67.0,
         "stroke_mm": 42.5,
-        "compression_ratio": 13.3,      # 13.3:1 — Suzuki spec sheet 2008
+        "compression_ratio": 13.3,  # 13.3:1 — Suzuki spec sheet 2008
         "cylinders": 4,
-        "peak_power_hp": 125.0,         # 125 hp (92.2 kW) @ 13500 rpm
-                                        # Cycle World measured test Jan 2008
-                                        # (+2 hp vs K6 from revised intake +
-                                        # lighter pistons)
+        "peak_power_hp": 125.0,  # 125 hp (92.2 kW) @ 13500 rpm
+        # Cycle World measured test Jan 2008
+        # (+2 hp vs K6 from revised intake +
+        # lighter pistons)
         "peak_power_rpm": 13500,
-        "peak_torque_nm": 69.0,         # 69 Nm @ 11200 rpm — Suzuki spec
+        "peak_torque_nm": 69.0,  # 69 Nm @ 11200 rpm — Suzuki spec
         "peak_torque_rpm": 11200,
-        "fuel_system": "fi",            # EFI (Suzuki SDTV throttle bodies)
+        "fuel_system": "fi",  # EFI (Suzuki SDTV throttle bodies)
         "cooling": "liquid",
-        "valve_config": "dohc",         # DOHC 4-valve per cylinder
+        "valve_config": "dohc",  # DOHC 4-valve per cylinder
         "gears": 6,
         # 6-speed cassette from Suzuki service manual 99500-36142-01E
         # (same internal ratios as K6, new primary drive ratio 2.117 vs K6 2.111)
         "gear_ratios": [2.733, 2.000, 1.590, 1.310, 1.130, 1.000],
-        "front_sprocket": 15,           # F15 / R42 — Suzuki OEM sprocket
-        "rear_sprocket": 42,            # (same as GSX-R600 K6; 520-pitch)
-        "chain_pitch": "520",           # 520 pitch — Suzuki GSX-R600 standard
-        "dry_mass_kg": 162.0,           # 162 kg dry — Suzuki spec sheet 2008
-                                        # (+2 kg vs K6 from new frame + ABS prep)
-        "wheelbase_mm": 1390.0,         # 1390 mm — Suzuki spec (same as K6)
+        "front_sprocket": 15,  # F15 / R42 — Suzuki OEM sprocket
+        "rear_sprocket": 42,  # (same as GSX-R600 K6; 520-pitch)
+        "chain_pitch": "520",  # 520 pitch — Suzuki GSX-R600 standard
+        "dry_mass_kg": 162.0,  # 162 kg dry — Suzuki spec sheet 2008
+        # (+2 kg vs K6 from new frame + ABS prep)
+        "wheelbase_mm": 1390.0,  # 1390 mm — Suzuki spec (same as K6)
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "180/55ZR17",
-        "cd": 0.60,                     # full-fairing supersport; consistent
-                                        # with GSX-R600 K6 (0.62) — slightly
-                                        # better aero from revised upper cowl
-        "frontal_area_m2": 0.38,        # tuck position; supersport standard
+        "cd": 0.60,  # full-fairing supersport; consistent
+        # with GSX-R600 K6 (0.62) — slightly
+        # better aero from revised upper cowl
+        "frontal_area_m2": 0.38,  # tuck position; supersport standard
     },
     source_name="spec_sheet",
 )
@@ -9898,39 +9898,39 @@ HONDA_CB400X_2023 = spec_from_dict(
         "model_code": "CB400X_2023",
         "year_from": 2023,
         "year_to": 2026,
-        "category": "adventure",            # light adventure-tourer
-        "displacement_cc": 399.0,           # 399 cc PC53E parallel twin DOHC
-                                            # Honda press release 2023
-        "bore_mm": 67.0,                    # 67.0 × 56.6 mm — service manual
+        "category": "adventure",  # light adventure-tourer
+        "displacement_cc": 399.0,  # 399 cc PC53E parallel twin DOHC
+        # Honda press release 2023
+        "bore_mm": 67.0,  # 67.0 × 56.6 mm — service manual
         "stroke_mm": 56.6,
-        "compression_ratio": 10.7,          # 10.7:1 — Honda spec sheet
+        "compression_ratio": 10.7,  # 10.7:1 — Honda spec sheet
         "cylinders": 2,
-        "peak_power_hp": 46.0,              # 46 PS (33.8 kW) @ 8000 rpm
-                                            # Honda Japan spec sheet 2023
+        "peak_power_hp": 46.0,  # 46 PS (33.8 kW) @ 8000 rpm
+        # Honda Japan spec sheet 2023
         "peak_power_rpm": 8000,
-        "peak_torque_nm": 38.0,             # 38 Nm @ 6500 rpm — Honda spec
+        "peak_torque_nm": 38.0,  # 38 Nm @ 6500 rpm — Honda spec
         "peak_torque_rpm": 6500,
-        "fuel_system": "fi",                # PGM-FI (Honda programmed FI)
+        "fuel_system": "fi",  # PGM-FI (Honda programmed FI)
         "cooling": "liquid",
-        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "valve_config": "dohc",  # DOHC 4-valve per cylinder
         "gears": 6,
         # 6-speed cassette from Honda CB400X service manual 60MKT00
         # (close ratio 1st–3rd for urban acceleration; taller 4th–6th for touring)
         "gear_ratios": [2.733, 1.900, 1.480, 1.200, 1.034, 0.892],
-        "front_sprocket": 15,               # F15 / R41 — Honda OEM sprocket
-        "rear_sprocket": 41,                # (520-pitch — confirmed service manual)
-        "chain_pitch": "520",               # 520 pitch — Honda CB400X standard
-        "dry_mass_kg": 170.0,               # 170 kg dry — Honda spec sheet 2023
-                                            # (kerb 193 kg incl. 14.1 L fuel +
-                                            # coolant + oil)
-        "wheelbase_mm": 1410.0,             # 1410 mm — Honda Japan spec
-        "front_tire_size": "120/70ZR17",    # Honda OEM — same as CB500X
-        "rear_tire_size": "160/60ZR17",     # 160-section (narrower than CB500X's
-                                            # 160/60ZR17 — same size, same OEM)
-        "cd": 0.78,                         # semi-faired adventure posture; same
-                                            # category default as CB500X
-        "frontal_area_m2": 0.44,            # slightly smaller screen+fairing than
-                                            # CB500X (shorter bike, lower screen)
+        "front_sprocket": 15,  # F15 / R41 — Honda OEM sprocket
+        "rear_sprocket": 41,  # (520-pitch — confirmed service manual)
+        "chain_pitch": "520",  # 520 pitch — Honda CB400X standard
+        "dry_mass_kg": 170.0,  # 170 kg dry — Honda spec sheet 2023
+        # (kerb 193 kg incl. 14.1 L fuel +
+        # coolant + oil)
+        "wheelbase_mm": 1410.0,  # 1410 mm — Honda Japan spec
+        "front_tire_size": "120/70ZR17",  # Honda OEM — same as CB500X
+        "rear_tire_size": "160/60ZR17",  # 160-section (narrower than CB500X's
+        # 160/60ZR17 — same size, same OEM)
+        "cd": 0.78,  # semi-faired adventure posture; same
+        # category default as CB500X
+        "frontal_area_m2": 0.44,  # slightly smaller screen+fairing than
+        # CB500X (shorter bike, lower screen)
     },
     source_name="spec_sheet",
 )
@@ -9957,41 +9957,41 @@ KAWASAKI_NINJA_H2_SX_2018 = spec_from_dict(
         "model_code": "Ninja_H2_SX_2018",
         "year_from": 2018,
         "year_to": 2023,
-        "category": "sport",                # supercharged touring; closest cluster
-                                            # is litre_sport_195p (200 hp)
-        "displacement_cc": 998.0,           # 998 cc inline-4 DOHC supercharged
-                                            # (76.0 × 55.0 mm) — Kawasaki spec
+        "category": "sport",  # supercharged touring; closest cluster
+        # is litre_sport_195p (200 hp)
+        "displacement_cc": 998.0,  # 998 cc inline-4 DOHC supercharged
+        # (76.0 × 55.0 mm) — Kawasaki spec
         "bore_mm": 76.0,
         "stroke_mm": 55.0,
-        "compression_ratio": 11.2,          # 11.2:1 — Kawasaki spec sheet 2018
+        "compression_ratio": 11.2,  # 11.2:1 — Kawasaki spec sheet 2018
         "cylinders": 4,
-        "peak_power_hp": 200.0,             # 200 PS (147 kW) @ 11000 rpm
-                                            # Kawasaki global spec sheet 2018
+        "peak_power_hp": 200.0,  # 200 PS (147 kW) @ 11000 rpm
+        # Kawasaki global spec sheet 2018
         "peak_power_rpm": 11000,
-        "peak_torque_nm": 137.0,            # 137 Nm @ 9500 rpm — Kawasaki spec
+        "peak_torque_nm": 137.0,  # 137 Nm @ 9500 rpm — Kawasaki spec
         "peak_torque_rpm": 9500,
-        "fuel_system": "fi",                # DFI with dual throttle valves
+        "fuel_system": "fi",  # DFI with dual throttle valves
         "cooling": "liquid",
-        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "valve_config": "dohc",  # DOHC 4-valve per cylinder
         "gears": 6,
         # 6-speed cassette from Kawasaki H2 SX service manual 99924-1486-01
         # (same internal ratios as ZX-10R K67 platform; different primary drive)
         "gear_ratios": [2.538, 1.941, 1.600, 1.382, 1.257, 1.176],
-        "front_sprocket": 17,               # F17 / R41 — Kawasaki OEM sprocket
-        "rear_sprocket": 41,                # (525-pitch — confirmed service manual)
-        "chain_pitch": "525",               # 525 pitch — H2 SX standard
-        "dry_mass_kg": 238.0,               # 238 kg dry — Kawasaki spec 2018
-                                            # (SE variant 248 kg; base is lighter
-                                            # without Öhlins electronic forks)
-        "wheelbase_mm": 1480.0,             # 1480 mm — Kawasaki spec
-        "front_tire_size": "120/70ZR17",    # Bridgestone Battlax Hypersport OEM
-        "rear_tire_size": "190/55ZR17",     # 190-section rear (same as SE/SE+)
-        "cd": 0.65,                         # semi-faired sport-touring; H2 SX has
-                                            # larger fairing than naked H2; slightly
-                                            # better than pure naked (0.80) but
-                                            # less clean than full-fairing sport
-        "frontal_area_m2": 0.48,            # wide touring fairing + large luggage
-                                            # provision; larger than pure sport
+        "front_sprocket": 17,  # F17 / R41 — Kawasaki OEM sprocket
+        "rear_sprocket": 41,  # (525-pitch — confirmed service manual)
+        "chain_pitch": "525",  # 525 pitch — H2 SX standard
+        "dry_mass_kg": 238.0,  # 238 kg dry — Kawasaki spec 2018
+        # (SE variant 248 kg; base is lighter
+        # without Öhlins electronic forks)
+        "wheelbase_mm": 1480.0,  # 1480 mm — Kawasaki spec
+        "front_tire_size": "120/70ZR17",  # Bridgestone Battlax Hypersport OEM
+        "rear_tire_size": "190/55ZR17",  # 190-section rear (same as SE/SE+)
+        "cd": 0.65,  # semi-faired sport-touring; H2 SX has
+        # larger fairing than naked H2; slightly
+        # better than pure naked (0.80) but
+        # less clean than full-fairing sport
+        "frontal_area_m2": 0.48,  # wide touring fairing + large luggage
+        # provision; larger than pure sport
     },
     source_name="spec_sheet",
 )
@@ -10017,41 +10017,41 @@ HONDA_CBR600RR_PC40B_2013 = spec_from_dict(
         "model_code": "CBR600RR_PC40B",
         "year_from": 2013,
         "year_to": 2020,
-        "category": "sport",                # litre_sport_600_1000 cluster
-        "displacement_cc": 599.0,           # 599 cc inline-4 DOHC
-                                            # (67.0 × 42.5 mm) — same architecture
-                                            # as PC40 2007-2012
+        "category": "sport",  # litre_sport_600_1000 cluster
+        "displacement_cc": 599.0,  # 599 cc inline-4 DOHC
+        # (67.0 × 42.5 mm) — same architecture
+        # as PC40 2007-2012
         "bore_mm": 67.0,
         "stroke_mm": 42.5,
-        "compression_ratio": 13.1,          # 13.1:1 — Honda spec sheet 2013
+        "compression_ratio": 13.1,  # 13.1:1 — Honda spec sheet 2013
         "cylinders": 4,
-        "peak_power_hp": 118.0,             # 118 hp (86.5 kW) @ 13000 rpm
-                                            # Honda global spec sheet 2013 +
-                                            # Cycle World Feb 2013
+        "peak_power_hp": 118.0,  # 118 hp (86.5 kW) @ 13000 rpm
+        # Honda global spec sheet 2013 +
+        # Cycle World Feb 2013
         "peak_power_rpm": 13000,
-        "peak_torque_nm": 65.0,             # 65 Nm @ 11250 rpm — Honda spec
+        "peak_torque_nm": 65.0,  # 65 Nm @ 11250 rpm — Honda spec
         "peak_torque_rpm": 11250,
-        "fuel_system": "fi",                # Honda PGM-FI dual throttle valves
+        "fuel_system": "fi",  # Honda PGM-FI dual throttle valves
         "cooling": "liquid",
-        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "valve_config": "dohc",  # DOHC 4-valve per cylinder
         "gears": 6,
         # 6-speed cassette from Honda CBR600RR 2013 service manual 62MEL00
         # (same internal ratios as PC40 2007-2012 — unchanged from 2007)
         "gear_ratios": [2.750, 2.062, 1.667, 1.400, 1.238, 1.100],
-        "front_sprocket": 15,               # F15 / R42 — Honda OEM sprocket
-        "rear_sprocket": 42,                # (520-pitch — confirmed service manual)
-        "chain_pitch": "520",               # 520 pitch — CBR600RR standard
-        "dry_mass_kg": 186.0,               # 186 kg dry — Honda spec sheet 2013
-                                            # (kerb 193 kg; 2 kg heavier than
-                                            # 2007-2012 model from ABS prep wiring)
-        "wheelbase_mm": 1410.0,             # 1410 mm — Honda spec (same as
-                                            # 2007-2012 PC40)
-        "front_tire_size": "120/70ZR17",    # Honda OEM — standard supersport
-        "rear_tire_size": "180/55ZR17",     # 180-section rear (same as all PC40)
-        "cd": 0.61,                         # full-fairing supersport; same as
-                                            # 2007-2012 PC40 (bodywork restyled
-                                            # but frontal area unchanged)
-        "frontal_area_m2": 0.38,            # tuck position; standard supersport
+        "front_sprocket": 15,  # F15 / R42 — Honda OEM sprocket
+        "rear_sprocket": 42,  # (520-pitch — confirmed service manual)
+        "chain_pitch": "520",  # 520 pitch — CBR600RR standard
+        "dry_mass_kg": 186.0,  # 186 kg dry — Honda spec sheet 2013
+        # (kerb 193 kg; 2 kg heavier than
+        # 2007-2012 model from ABS prep wiring)
+        "wheelbase_mm": 1410.0,  # 1410 mm — Honda spec (same as
+        # 2007-2012 PC40)
+        "front_tire_size": "120/70ZR17",  # Honda OEM — standard supersport
+        "rear_tire_size": "180/55ZR17",  # 180-section rear (same as all PC40)
+        "cd": 0.61,  # full-fairing supersport; same as
+        # 2007-2012 PC40 (bodywork restyled
+        # but frontal area unchanged)
+        "frontal_area_m2": 0.38,  # tuck position; standard supersport
     },
     source_name="spec_sheet",
 )
@@ -10081,52 +10081,52 @@ TRIUMPH_ROCKET3_STORM_R_2024 = spec_from_dict(
         "model_code": "Rocket3_Storm_R_2024",
         "year_from": 2024,
         "year_to": 2026,
-        "category": "cruiser",              # muscle cruiser; cluster cruiser_1300p
-        "displacement_cc": 2458.0,          # 2458 cc inline triple — Triumph spec
-                                            # (110.2 mm bore × 85.9 mm stroke; same
-                                            # bore/stroke as 2020-2023 Rocket 3 R)
+        "category": "cruiser",  # muscle cruiser; cluster cruiser_1300p
+        "displacement_cc": 2458.0,  # 2458 cc inline triple — Triumph spec
+        # (110.2 mm bore × 85.9 mm stroke; same
+        # bore/stroke as 2020-2023 Rocket 3 R)
         "bore_mm": 110.2,
         "stroke_mm": 85.9,
-        "compression_ratio": 10.8,          # 10.8:1 — Triumph spec (Storm refresh
-                                            # raised from 10.3:1 on 2020-2023)
-        "cylinders": 3,                     # longitudinal inline triple (firing
-                                            # order 1-2-3 with 240° spacing)
-        "peak_power_hp": 182.0,             # 182 hp (134 kW) @ 7000 rpm — Triumph
-                                            # press kit Jan 2024 (was 167 hp on R)
+        "compression_ratio": 10.8,  # 10.8:1 — Triumph spec (Storm refresh
+        # raised from 10.3:1 on 2020-2023)
+        "cylinders": 3,  # longitudinal inline triple (firing
+        # order 1-2-3 with 240° spacing)
+        "peak_power_hp": 182.0,  # 182 hp (134 kW) @ 7000 rpm — Triumph
+        # press kit Jan 2024 (was 167 hp on R)
         "peak_power_rpm": 7000,
-        "peak_torque_nm": 221.0,            # 221 Nm @ 4000 rpm — Triumph spec
-                                            # (was 221 Nm @ 4250 rpm on R; Storm
-                                            # peak available 250 rpm earlier)
+        "peak_torque_nm": 221.0,  # 221 Nm @ 4000 rpm — Triumph spec
+        # (was 221 Nm @ 4250 rpm on R; Storm
+        # peak available 250 rpm earlier)
         "peak_torque_rpm": 4000,
-        "fuel_system": "fi",                # Multi-point sequential FI, ride-by-wire
+        "fuel_system": "fi",  # Multi-point sequential FI, ride-by-wire
         "cooling": "liquid",
-        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "valve_config": "dohc",  # DOHC 4-valve per cylinder
         "gears": 6,
         # 6-speed cassette from Triumph Rocket 3 R service manual T0301220
         # (unchanged from 2020-2023; Storm uses identical gearbox + shaft drive)
         # Top gear deliberately tall (overdrive) for long-distance cruising at
         # low rpm with the massive 221 Nm torque pulling the bike along.
         "gear_ratios": [2.157, 1.578, 1.250, 1.045, 0.881, 0.755],
-        "front_sprocket": 0,                # SHAFT DRIVE — no front sprocket
-        "rear_sprocket": 0,                 # SHAFT FINAL DRIVE — Triumph helical
-                                            # bevel gear (3.273:1 final ratio
-                                            # baked into final-drive constant)
-        "chain_pitch": None,                # No chain — shaft drive
-        "dry_mass_kg": 291.0,               # 291 kg dry — Triumph spec 2024
-                                            # (kerb 320 kg incl. 18 L tank + oils;
-                                            # unchanged from 2020-2023 Rocket 3)
-        "wheelbase_mm": 1677.0,             # 1677 mm — Triumph spec (long muscle
-                                            # cruiser wheelbase for stability)
-        "front_tire_size": "150/80R17",     # Avon Cobra Chrome OEM — wide front
-        "rear_tire_size": "240/50R16",      # 240-section rear (widest rear in any
-                                            # production motorcycle until Diavel V4)
-        "cd": 0.78,                         # naked muscle cruiser posture; high
-                                            # frontal area from rider sitting
-                                            # upright, plus huge front cylinder
-                                            # exposed to airflow
-        "frontal_area_m2": 0.62,            # very large — upright rider, wide bars,
-                                            # massive triple-cylinder engine fully
-                                            # exposed (no fairing at all)
+        "front_sprocket": 0,  # SHAFT DRIVE — no front sprocket
+        "rear_sprocket": 0,  # SHAFT FINAL DRIVE — Triumph helical
+        # bevel gear (3.273:1 final ratio
+        # baked into final-drive constant)
+        "chain_pitch": None,  # No chain — shaft drive
+        "dry_mass_kg": 291.0,  # 291 kg dry — Triumph spec 2024
+        # (kerb 320 kg incl. 18 L tank + oils;
+        # unchanged from 2020-2023 Rocket 3)
+        "wheelbase_mm": 1677.0,  # 1677 mm — Triumph spec (long muscle
+        # cruiser wheelbase for stability)
+        "front_tire_size": "150/80R17",  # Avon Cobra Chrome OEM — wide front
+        "rear_tire_size": "240/50R16",  # 240-section rear (widest rear in any
+        # production motorcycle until Diavel V4)
+        "cd": 0.78,  # naked muscle cruiser posture; high
+        # frontal area from rider sitting
+        # upright, plus huge front cylinder
+        # exposed to airflow
+        "frontal_area_m2": 0.62,  # very large — upright rider, wide bars,
+        # massive triple-cylinder engine fully
+        # exposed (no fairing at all)
     },
     source_name="spec_sheet",
 )
@@ -10158,48 +10158,48 @@ HONDA_CB1000_HORNET_SP_2025 = spec_from_dict(
         "model_code": "CB1000_Hornet_SP",
         "year_from": 2025,
         "year_to": 2026,
-        "category": "naked",                # naked streetfighter; cluster is
-                                            # litre_sport_600_1000 (152 hp)
-        "displacement_cc": 999.0,           # 999 cc inline-4 DOHC — adapted from
-                                            # 2017-2019 CBR1000RR SC82 Fireblade
-                                            # (76.0 × 55.1 mm — Honda spec)
+        "category": "naked",  # naked streetfighter; cluster is
+        # litre_sport_600_1000 (152 hp)
+        "displacement_cc": 999.0,  # 999 cc inline-4 DOHC — adapted from
+        # 2017-2019 CBR1000RR SC82 Fireblade
+        # (76.0 × 55.1 mm — Honda spec)
         "bore_mm": 76.0,
         "stroke_mm": 55.1,
-        "compression_ratio": 11.7,          # 11.7:1 — Honda spec sheet 2025
-                                            # (lowered from SC82's 13.0:1 for
-                                            # broader mid-range torque on naked)
+        "compression_ratio": 11.7,  # 11.7:1 — Honda spec sheet 2025
+        # (lowered from SC82's 13.0:1 for
+        # broader mid-range torque on naked)
         "cylinders": 4,
-        "peak_power_hp": 152.0,             # 152 hp (111 kW) @ 11000 rpm
-                                            # Honda EU press kit 2024
+        "peak_power_hp": 152.0,  # 152 hp (111 kW) @ 11000 rpm
+        # Honda EU press kit 2024
         "peak_power_rpm": 11000,
-        "peak_torque_nm": 104.0,            # 104 Nm @ 9000 rpm — Honda spec
+        "peak_torque_nm": 104.0,  # 104 Nm @ 9000 rpm — Honda spec
         "peak_torque_rpm": 9000,
-        "fuel_system": "fi",                # PGM-FI with ride-by-wire (4 modes)
+        "fuel_system": "fi",  # PGM-FI with ride-by-wire (4 modes)
         "cooling": "liquid",
-        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "valve_config": "dohc",  # DOHC 4-valve per cylinder
         "gears": 6,
         # 6-speed cassette from Honda service manual 64MNK00 (2025 Hornet)
         # SC82-derived but with revised top three gears for street use (taller
         # 4th/5th/6th than Fireblade for relaxed highway cruising)
         "gear_ratios": [2.529, 1.947, 1.600, 1.381, 1.250, 1.150],
-        "front_sprocket": 16,               # F16 / R44 — Honda OEM sprocket
-        "rear_sprocket": 44,                # (525-pitch — service manual confirmed)
-        "chain_pitch": "525",               # 525 pitch — CB1000 Hornet standard
-        "dry_mass_kg": 191.0,               # 191 kg dry — Honda spec 2025
-                                            # (kerb 212 kg incl. 17 L fuel + oils;
-                                            # SP is 1 kg heavier than std Hornet
-                                            # due to Öhlins TTX36 shock)
-        "wheelbase_mm": 1455.0,             # 1455 mm — Honda spec (slightly longer
-                                            # than CBR1000RR SC82's 1405 mm —
-                                            # naked-tuned chassis geometry)
-        "front_tire_size": "120/70ZR17",    # Bridgestone Battlax S22 OEM (SP only)
-        "rear_tire_size": "180/55ZR17",     # 180-section rear (same width as std
-                                            # Hornet — no upspec to 190 on SP)
-        "cd": 0.78,                         # naked streetfighter; same category
-                                            # default as MT-09 / Z900 / Streetfighter
-        "frontal_area_m2": 0.50,            # upright posture + wide bars; larger
-                                            # than full-fairing CBR1000RR (0.40)
-                                            # but standard for naked litre class
+        "front_sprocket": 16,  # F16 / R44 — Honda OEM sprocket
+        "rear_sprocket": 44,  # (525-pitch — service manual confirmed)
+        "chain_pitch": "525",  # 525 pitch — CB1000 Hornet standard
+        "dry_mass_kg": 191.0,  # 191 kg dry — Honda spec 2025
+        # (kerb 212 kg incl. 17 L fuel + oils;
+        # SP is 1 kg heavier than std Hornet
+        # due to Öhlins TTX36 shock)
+        "wheelbase_mm": 1455.0,  # 1455 mm — Honda spec (slightly longer
+        # than CBR1000RR SC82's 1405 mm —
+        # naked-tuned chassis geometry)
+        "front_tire_size": "120/70ZR17",  # Bridgestone Battlax S22 OEM (SP only)
+        "rear_tire_size": "180/55ZR17",  # 180-section rear (same width as std
+        # Hornet — no upspec to 190 on SP)
+        "cd": 0.78,  # naked streetfighter; same category
+        # default as MT-09 / Z900 / Streetfighter
+        "frontal_area_m2": 0.50,  # upright posture + wide bars; larger
+        # than full-fairing CBR1000RR (0.40)
+        # but standard for naked litre class
     },
     source_name="spec_sheet",
 )
@@ -10238,46 +10238,46 @@ YAMAHA_MT09_Y_AMT_2024 = spec_from_dict(
         "model_code": "MT09_Y_AMT_2024",
         "year_from": 2024,
         "year_to": 2026,
-        "category": "naked",                # naked streetfighter triple; same
-                                            # category as MT-09 / MT-09 SP
-        "displacement_cc": 890.0,           # 890 cc CP3 (crossplane triple)
-                                            # 78.0 × 62.1 mm — Yamaha spec
+        "category": "naked",  # naked streetfighter triple; same
+        # category as MT-09 / MT-09 SP
+        "displacement_cc": 890.0,  # 890 cc CP3 (crossplane triple)
+        # 78.0 × 62.1 mm — Yamaha spec
         "bore_mm": 78.0,
         "stroke_mm": 62.1,
-        "compression_ratio": 11.5,          # 11.5:1 — Yamaha spec (same as RN82
-                                            # manual MT-09; unchanged for Y-AMT)
-        "cylinders": 3,                     # inline triple (CP3 crossplane)
-        "peak_power_hp": 117.0,             # 117 hp (87 kW) @ 10000 rpm
-                                            # Yamaha global spec (unchanged from
-                                            # manual MT-09 — same engine)
+        "compression_ratio": 11.5,  # 11.5:1 — Yamaha spec (same as RN82
+        # manual MT-09; unchanged for Y-AMT)
+        "cylinders": 3,  # inline triple (CP3 crossplane)
+        "peak_power_hp": 117.0,  # 117 hp (87 kW) @ 10000 rpm
+        # Yamaha global spec (unchanged from
+        # manual MT-09 — same engine)
         "peak_power_rpm": 10000,
-        "peak_torque_nm": 93.0,             # 93 Nm @ 7000 rpm — Yamaha spec
+        "peak_torque_nm": 93.0,  # 93 Nm @ 7000 rpm — Yamaha spec
         "peak_torque_rpm": 7000,
-        "fuel_system": "fi",                # Mikuni TBI 41 mm × 3 with ride-by-wire
+        "fuel_system": "fi",  # Mikuni TBI 41 mm × 3 with ride-by-wire
         "cooling": "liquid",
-        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "valve_config": "dohc",  # DOHC 4-valve per cylinder
         "gears": 6,
         # 6-speed cassette from Yamaha service manual LIT-11616-RN82-00
         # (identical to manual MT-09 — Y-AMT actuators sit atop the existing
         # gearbox; no change to internal ratios)
         "gear_ratios": [2.667, 2.000, 1.619, 1.381, 1.190, 1.037],
-        "front_sprocket": 16,               # F16 / R45 — Yamaha OEM (same as
-                                            # manual MT-09 — service manual)
+        "front_sprocket": 16,  # F16 / R45 — Yamaha OEM (same as
+        # manual MT-09 — service manual)
         "rear_sprocket": 45,
-        "chain_pitch": "525",               # 525 pitch — MT-09 platform standard
-        "dry_mass_kg": 201.0,               # 201 kg dry — Yamaha Y-AMT spec
-                                            # (was 193 kg on manual MT-09; +8 kg
-                                            # from AMT actuator + larger battery;
-                                            # kerb 222 kg incl. 14 L fuel + oils)
-        "wheelbase_mm": 1430.0,             # 1430 mm — Yamaha spec (unchanged
-                                            # from manual MT-09 — same chassis)
-        "front_tire_size": "120/70ZR17",    # Bridgestone Battlax S22 OEM
-        "rear_tire_size": "180/55ZR17",     # 180-section rear (same as manual)
-        "cd": 0.78,                         # naked streetfighter; same category
-                                            # default as MT-09 / Z900 / Hornet
-        "frontal_area_m2": 0.48,            # upright posture; same as manual MT-09
-                                            # (Y-AMT module is below seat — no
-                                            # change to frontal silhouette)
+        "chain_pitch": "525",  # 525 pitch — MT-09 platform standard
+        "dry_mass_kg": 201.0,  # 201 kg dry — Yamaha Y-AMT spec
+        # (was 193 kg on manual MT-09; +8 kg
+        # from AMT actuator + larger battery;
+        # kerb 222 kg incl. 14 L fuel + oils)
+        "wheelbase_mm": 1430.0,  # 1430 mm — Yamaha spec (unchanged
+        # from manual MT-09 — same chassis)
+        "front_tire_size": "120/70ZR17",  # Bridgestone Battlax S22 OEM
+        "rear_tire_size": "180/55ZR17",  # 180-section rear (same as manual)
+        "cd": 0.78,  # naked streetfighter; same category
+        # default as MT-09 / Z900 / Hornet
+        "frontal_area_m2": 0.48,  # upright posture; same as manual MT-09
+        # (Y-AMT module is below seat — no
+        # change to frontal silhouette)
     },
     source_name="spec_sheet",
 )
@@ -10311,52 +10311,52 @@ KAWASAKI_KLR_650_2022 = spec_from_dict(
         "model_code": "KLR_650_2022",
         "year_from": 2022,
         "year_to": 2024,
-        "category": "adventure",            # dual-sport ADV; long-stroke single
-        "displacement_cc": 651.0,           # 651 cc DOHC liquid single
-                                            # (100.0 mm bore × 83.0 mm stroke —
-                                            # Kawasaki spec, unchanged since 1987)
+        "category": "adventure",  # dual-sport ADV; long-stroke single
+        "displacement_cc": 651.0,  # 651 cc DOHC liquid single
+        # (100.0 mm bore × 83.0 mm stroke —
+        # Kawasaki spec, unchanged since 1987)
         "bore_mm": 100.0,
         "stroke_mm": 83.0,
-        "compression_ratio": 9.8,           # 9.8:1 — Kawasaki spec 2022
-                                            # (lower than sport singles for
-                                            # 87-octane fuel tolerance)
-        "cylinders": 1,                     # single cylinder, longitudinal
-        "peak_power_hp": 40.0,              # 40 hp (30 kW) @ 6500 rpm —
-                                            # Kawasaki 2022 spec sheet
+        "compression_ratio": 9.8,  # 9.8:1 — Kawasaki spec 2022
+        # (lower than sport singles for
+        # 87-octane fuel tolerance)
+        "cylinders": 1,  # single cylinder, longitudinal
+        "peak_power_hp": 40.0,  # 40 hp (30 kW) @ 6500 rpm —
+        # Kawasaki 2022 spec sheet
         "peak_power_rpm": 6500,
-        "peak_torque_nm": 42.0,             # 42 Nm @ 4500 rpm — Kawasaki spec
+        "peak_torque_nm": 42.0,  # 42 Nm @ 4500 rpm — Kawasaki spec
         "peak_torque_rpm": 4500,
-        "fuel_system": "fi",                # NEW for 2022: Keihin EFI replaces
-                                            # CVK40 carburettor on 1987-2018
+        "fuel_system": "fi",  # NEW for 2022: Keihin EFI replaces
+        # CVK40 carburettor on 1987-2018
         "cooling": "liquid",
-        "valve_config": "dohc",             # DOHC 4-valve, single overhead cams
-        "gears": 5,                         # 5-speed gearbox (not 6 — Kawasaki
-                                            # kept the original 5-speed for
-                                            # parts-bin continuity)
+        "valve_config": "dohc",  # DOHC 4-valve, single overhead cams
+        "gears": 5,  # 5-speed gearbox (not 6 — Kawasaki
+        # kept the original 5-speed for
+        # parts-bin continuity)
         # 5-speed cassette from Kawasaki service manual 99924-1453 (KL650HNF)
         # — unchanged from 1987-2018 KLR 650 cassette; FI refresh did not
         # touch the gearbox internals
         "gear_ratios": [2.353, 1.555, 1.190, 0.954, 0.791],
-        "front_sprocket": 15,               # F15 / R43 — Kawasaki OEM (service
-                                            # manual 99924-1453 confirmed)
+        "front_sprocket": 15,  # F15 / R43 — Kawasaki OEM (service
+        # manual 99924-1453 confirmed)
         "rear_sprocket": 43,
-        "chain_pitch": "520",               # 520 pitch — KLR standard since 1987
-        "dry_mass_kg": 196.0,               # 196 kg dry — Kawasaki spec 2022
-                                            # (kerb 210 kg incl. 23 L fuel tank
-                                            # + oils; FI hardware added ~3 kg
-                                            # vs 1987-2018 carb variant)
-        "wheelbase_mm": 1560.0,             # 1560 mm — Kawasaki spec (long
-                                            # ADV wheelbase for stability over
-                                            # rough terrain at speed)
-        "front_tire_size": "90/90-21",      # 21" front (dual-sport spoke wheel)
-                                            # Dunlop K750 90/90-21 OEM
-        "rear_tire_size": "130/80-17",      # 17" rear, Dunlop K750 130/80-17
-        "cd": 0.85,                         # adventure-tall posture with high
-                                            # OEM windscreen; high frontal area
-                                            # from large fuel tank + crash bars
-        "frontal_area_m2": 0.58,            # large — tall ADV silhouette,
-                                            # 21" front wheel hub exposed,
-                                            # OEM windscreen catches wind
+        "chain_pitch": "520",  # 520 pitch — KLR standard since 1987
+        "dry_mass_kg": 196.0,  # 196 kg dry — Kawasaki spec 2022
+        # (kerb 210 kg incl. 23 L fuel tank
+        # + oils; FI hardware added ~3 kg
+        # vs 1987-2018 carb variant)
+        "wheelbase_mm": 1560.0,  # 1560 mm — Kawasaki spec (long
+        # ADV wheelbase for stability over
+        # rough terrain at speed)
+        "front_tire_size": "90/90-21",  # 21" front (dual-sport spoke wheel)
+        # Dunlop K750 90/90-21 OEM
+        "rear_tire_size": "130/80-17",  # 17" rear, Dunlop K750 130/80-17
+        "cd": 0.85,  # adventure-tall posture with high
+        # OEM windscreen; high frontal area
+        # from large fuel tank + crash bars
+        "frontal_area_m2": 0.58,  # large — tall ADV silhouette,
+        # 21" front wheel hub exposed,
+        # OEM windscreen catches wind
     },
     source_name="spec_sheet",
 )
@@ -10387,51 +10387,51 @@ TRIUMPH_TIGER_900_GT_PRO_2024 = spec_from_dict(
         "model_code": "Tiger_900_GT_Pro_2024",
         "year_from": 2024,
         "year_to": 2026,
-        "category": "adventure",            # road-biased adventure triple;
-                                            # 19/17 cast wheels (not 21/18
-                                            # spoke pair on Rally Pro variant)
-        "displacement_cc": 888.0,           # 888 cc DOHC liquid inline-3
-                                            # (78.0 × 61.9 mm — Triumph spec;
-                                            # T-plane crank, 1-3-2 firing)
+        "category": "adventure",  # road-biased adventure triple;
+        # 19/17 cast wheels (not 21/18
+        # spoke pair on Rally Pro variant)
+        "displacement_cc": 888.0,  # 888 cc DOHC liquid inline-3
+        # (78.0 × 61.9 mm — Triumph spec;
+        # T-plane crank, 1-3-2 firing)
         "bore_mm": 78.0,
         "stroke_mm": 61.9,
-        "compression_ratio": 11.27,         # 11.27:1 — Triumph press spec 2024
-        "cylinders": 3,                     # T-plane inline triple (270/360
-                                            # firing offset for twin-like
-                                            # torque feel below 5000 rpm)
-        "peak_power_hp": 108.0,             # 108 hp (80.5 kW) @ 9500 rpm —
-                                            # 2024 spec (was 95 hp on 2020-2023
-                                            # Tiger 900; +13 hp from cam +
-                                            # airbox update for 2024)
+        "compression_ratio": 11.27,  # 11.27:1 — Triumph press spec 2024
+        "cylinders": 3,  # T-plane inline triple (270/360
+        # firing offset for twin-like
+        # torque feel below 5000 rpm)
+        "peak_power_hp": 108.0,  # 108 hp (80.5 kW) @ 9500 rpm —
+        # 2024 spec (was 95 hp on 2020-2023
+        # Tiger 900; +13 hp from cam +
+        # airbox update for 2024)
         "peak_power_rpm": 9500,
-        "peak_torque_nm": 90.0,             # 90 Nm @ 6850 rpm — Triumph spec
-                                            # (was 87 Nm @ 7250 on 2020-2023)
+        "peak_torque_nm": 90.0,  # 90 Nm @ 6850 rpm — Triumph spec
+        # (was 87 Nm @ 7250 on 2020-2023)
         "peak_torque_rpm": 6850,
-        "fuel_system": "fi",                # Multi-point sequential EFI with
-                                            # ride-by-wire, 6 ride modes
+        "fuel_system": "fi",  # Multi-point sequential EFI with
+        # ride-by-wire, 6 ride modes
         "cooling": "liquid",
-        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "valve_config": "dohc",  # DOHC 4-valve per cylinder
         "gears": 6,
         # 6-speed cassette from Triumph service manual T0301460 (Tiger 900
         # 2024-2026 — common to GT Pro + Rally Pro variants)
         "gear_ratios": [2.690, 1.947, 1.526, 1.272, 1.095, 0.957],
-        "front_sprocket": 16,               # F16 / R42 — Triumph OEM (service
-                                            # manual T0301460 confirmed)
+        "front_sprocket": 16,  # F16 / R42 — Triumph OEM (service
+        # manual T0301460 confirmed)
         "rear_sprocket": 42,
-        "chain_pitch": "525",               # 525 pitch — Tiger 900 standard
-        "dry_mass_kg": 198.0,               # 198 kg dry — Triumph spec 2024
-                                            # (kerb 219 kg incl. 20 L fuel +
-                                            # oils; +2 kg vs 2020-2023 from
-                                            # added electronics + TFT dash)
-        "wheelbase_mm": 1556.0,             # 1556 mm — Triumph spec
-        "front_tire_size": "100/90R19",     # 19" road-biased ADV front —
-                                            # Metzeler Tourance Next 2 OEM
-        "rear_tire_size": "150/70R17",      # 17" rear, Metzeler Tourance Next 2
-        "cd": 0.80,                         # ADV upright posture + tall OEM
-                                            # windscreen; high frontal area
-        "frontal_area_m2": 0.56,            # large — ADV silhouette, panniers
-                                            # optional but not OEM, OEM screen
-                                            # tall + adjustable
+        "chain_pitch": "525",  # 525 pitch — Tiger 900 standard
+        "dry_mass_kg": 198.0,  # 198 kg dry — Triumph spec 2024
+        # (kerb 219 kg incl. 20 L fuel +
+        # oils; +2 kg vs 2020-2023 from
+        # added electronics + TFT dash)
+        "wheelbase_mm": 1556.0,  # 1556 mm — Triumph spec
+        "front_tire_size": "100/90R19",  # 19" road-biased ADV front —
+        # Metzeler Tourance Next 2 OEM
+        "rear_tire_size": "150/70R17",  # 17" rear, Metzeler Tourance Next 2
+        "cd": 0.80,  # ADV upright posture + tall OEM
+        # windscreen; high frontal area
+        "frontal_area_m2": 0.56,  # large — ADV silhouette, panniers
+        # optional but not OEM, OEM screen
+        # tall + adjustable
     },
     source_name="spec_sheet",
 )
@@ -10462,48 +10462,48 @@ HONDA_CRF250L_2021 = spec_from_dict(
         "model_code": "CRF250L_2021",
         "year_from": 2021,
         "year_to": 2024,
-        "category": "adventure",            # dual-sport / enduro-biased ADV;
-                                            # 21/18 spoke wheels
-        "displacement_cc": 249.0,           # 249 cc DOHC liquid single
-                                            # (76.0 × 55.0 mm — Honda spec;
-                                            # same MD44E engine as 2017-2020)
+        "category": "adventure",  # dual-sport / enduro-biased ADV;
+        # 21/18 spoke wheels
+        "displacement_cc": 249.0,  # 249 cc DOHC liquid single
+        # (76.0 × 55.0 mm — Honda spec;
+        # same MD44E engine as 2017-2020)
         "bore_mm": 76.0,
         "stroke_mm": 55.0,
-        "compression_ratio": 10.7,          # 10.7:1 — Honda spec 2021
-        "cylinders": 1,                     # single cylinder
-        "peak_power_hp": 24.5,              # 24.5 hp (18.3 kW) @ 8500 rpm —
-                                            # Honda Thailand BigWing spec 2021
+        "compression_ratio": 10.7,  # 10.7:1 — Honda spec 2021
+        "cylinders": 1,  # single cylinder
+        "peak_power_hp": 24.5,  # 24.5 hp (18.3 kW) @ 8500 rpm —
+        # Honda Thailand BigWing spec 2021
         "peak_power_rpm": 8500,
-        "peak_torque_nm": 22.6,             # 22.6 Nm @ 6500 rpm — Honda spec
+        "peak_torque_nm": 22.6,  # 22.6 Nm @ 6500 rpm — Honda spec
         "peak_torque_rpm": 6500,
-        "fuel_system": "fi",                # PGM-FI single throttle body
+        "fuel_system": "fi",  # PGM-FI single throttle body
         "cooling": "liquid",
-        "valve_config": "dohc",             # DOHC 4-valve
+        "valve_config": "dohc",  # DOHC 4-valve
         "gears": 6,
         # 6-speed cassette from Honda service manual SHOP-CRF250L-21
         # (MD44E engine — same internals as 2017-2020 CRF250L cassette)
         "gear_ratios": [3.083, 1.937, 1.476, 1.222, 1.041, 0.916],
-        "front_sprocket": 14,               # F14 / R40 — Honda OEM
-                                            # (service manual confirmed)
+        "front_sprocket": 14,  # F14 / R40 — Honda OEM
+        # (service manual confirmed)
         "rear_sprocket": 40,
-        "chain_pitch": "520",               # 520 pitch — CRF250L standard
-                                            # (heavier than 428 on smaller-cc
-                                            # commuters for dual-sport abuse)
-        "dry_mass_kg": 132.0,               # 132 kg dry — Honda spec 2021
-                                            # (kerb 140 kg incl. 7.8 L tank +
-                                            # oils; -4 kg vs 2017-2020 from
-                                            # new aluminium twin-spar frame)
-        "wheelbase_mm": 1455.0,             # 1455 mm — Honda spec
-        "front_tire_size": "3.00-21",       # 21" dual-sport front (IRC GP-21F
-                                            # OEM); bias-ply notation per
-                                            # Indian/Thai market
-        "rear_tire_size": "120/80-18",      # 18" rear, IRC GP-22R OEM
-        "cd": 0.82,                         # dual-sport tall posture + small
-                                            # front cowling (not full ADV
-                                            # screen like CRF300 Rally)
-        "frontal_area_m2": 0.51,            # medium-large; narrow single
-                                            # silhouette but tall standing
-                                            # ergonomics
+        "chain_pitch": "520",  # 520 pitch — CRF250L standard
+        # (heavier than 428 on smaller-cc
+        # commuters for dual-sport abuse)
+        "dry_mass_kg": 132.0,  # 132 kg dry — Honda spec 2021
+        # (kerb 140 kg incl. 7.8 L tank +
+        # oils; -4 kg vs 2017-2020 from
+        # new aluminium twin-spar frame)
+        "wheelbase_mm": 1455.0,  # 1455 mm — Honda spec
+        "front_tire_size": "3.00-21",  # 21" dual-sport front (IRC GP-21F
+        # OEM); bias-ply notation per
+        # Indian/Thai market
+        "rear_tire_size": "120/80-18",  # 18" rear, IRC GP-22R OEM
+        "cd": 0.82,  # dual-sport tall posture + small
+        # front cowling (not full ADV
+        # screen like CRF300 Rally)
+        "frontal_area_m2": 0.51,  # medium-large; narrow single
+        # silhouette but tall standing
+        # ergonomics
     },
     source_name="spec_sheet",
 )
@@ -10535,51 +10535,51 @@ APRILIA_TUONO_457_2025 = spec_from_dict(
         "model_code": "Tuono_457_2025",
         "year_from": 2025,
         "year_to": 2026,
-        "category": "naked",                # upright bars, no fairing;
-                                            # naked sibling of RS 457
-        "displacement_cc": 457.3,           # 457.3 cc DOHC liquid parallel
-                                            # twin (69.0 × 61.1 mm — Aprilia
-                                            # spec, common with RS 457)
+        "category": "naked",  # upright bars, no fairing;
+        # naked sibling of RS 457
+        "displacement_cc": 457.3,  # 457.3 cc DOHC liquid parallel
+        # twin (69.0 × 61.1 mm — Aprilia
+        # spec, common with RS 457)
         "bore_mm": 69.0,
         "stroke_mm": 61.1,
-        "compression_ratio": 13.1,          # 13.1:1 — Aprilia spec 2025
-                                            # (premium fuel; same as RS 457)
-        "cylinders": 2,                     # parallel twin, 270° crank
-        "peak_power_hp": 47.6,              # 47.6 hp (35 kW) @ 9400 rpm —
-                                            # Aprilia 2025 spec sheet (matches
-                                            # RS 457 — same engine internals)
+        "compression_ratio": 13.1,  # 13.1:1 — Aprilia spec 2025
+        # (premium fuel; same as RS 457)
+        "cylinders": 2,  # parallel twin, 270° crank
+        "peak_power_hp": 47.6,  # 47.6 hp (35 kW) @ 9400 rpm —
+        # Aprilia 2025 spec sheet (matches
+        # RS 457 — same engine internals)
         "peak_power_rpm": 9400,
-        "peak_torque_nm": 43.5,             # 43.5 Nm @ 6700 rpm — Aprilia
-                                            # spec (1 Nm under RS 457 from
-                                            # slightly different airbox routing
-                                            # but within measurement noise)
+        "peak_torque_nm": 43.5,  # 43.5 Nm @ 6700 rpm — Aprilia
+        # spec (1 Nm under RS 457 from
+        # slightly different airbox routing
+        # but within measurement noise)
         "peak_torque_rpm": 6700,
-        "fuel_system": "fi",                # ride-by-wire, dual injectors
+        "fuel_system": "fi",  # ride-by-wire, dual injectors
         "cooling": "liquid",
-        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "valve_config": "dohc",  # DOHC 4-valve per cylinder
         "gears": 6,
         # 6-speed cassette from Aprilia service manual TUO457-EU
         # (common to RS 457 + Tuono 457 — same gearbox internals)
         "gear_ratios": [2.769, 1.882, 1.450, 1.200, 1.043, 0.920],
-        "front_sprocket": 15,               # F15 / R43 — Aprilia OEM (service
-                                            # manual TUO457-EU confirmed; same
-                                            # as RS 457)
+        "front_sprocket": 15,  # F15 / R43 — Aprilia OEM (service
+        # manual TUO457-EU confirmed; same
+        # as RS 457)
         "rear_sprocket": 43,
-        "chain_pitch": "520",               # 520 pitch — Tuono 457 standard
-        "dry_mass_kg": 148.0,               # 148 kg dry — Aprilia spec 2025
-                                            # (kerb 159 kg incl. 13 L fuel +
-                                            # oils; -11 kg vs RS 457 from no
-                                            # fairing + lighter subframe)
-        "wheelbase_mm": 1370.0,             # 1370 mm — Aprilia spec
-                                            # (10 mm shorter than RS 457)
-        "front_tire_size": "110/70R17",     # 17" front (cast wheel) —
-                                            # TVS Eurogrip Protorq SC OEM
-        "rear_tire_size": "150/60R17",      # 17" rear, TVS Eurogrip Protorq SC
-        "cd": 0.62,                         # naked upright posture; no fairing
-                                            # but small bikini cowl + LED
-                                            # headlight cluster
-        "frontal_area_m2": 0.45,            # medium — typical streetfighter
-                                            # silhouette with exposed rider
+        "chain_pitch": "520",  # 520 pitch — Tuono 457 standard
+        "dry_mass_kg": 148.0,  # 148 kg dry — Aprilia spec 2025
+        # (kerb 159 kg incl. 13 L fuel +
+        # oils; -11 kg vs RS 457 from no
+        # fairing + lighter subframe)
+        "wheelbase_mm": 1370.0,  # 1370 mm — Aprilia spec
+        # (10 mm shorter than RS 457)
+        "front_tire_size": "110/70R17",  # 17" front (cast wheel) —
+        # TVS Eurogrip Protorq SC OEM
+        "rear_tire_size": "150/60R17",  # 17" rear, TVS Eurogrip Protorq SC
+        "cd": 0.62,  # naked upright posture; no fairing
+        # but small bikini cowl + LED
+        # headlight cluster
+        "frontal_area_m2": 0.45,  # medium — typical streetfighter
+        # silhouette with exposed rider
     },
     source_name="spec_sheet",
 )
@@ -10608,60 +10608,60 @@ BMW_F_900_GS_2024 = spec_from_dict(
         "model_code": "F_900_GS_2024",
         "year_from": 2024,
         "year_to": 2026,
-        "category": "adventure",            # off-road-biased mid-ADV;
-                                            # 21" front spoke / 17" rear spoke
-        "displacement_cc": 895.0,           # 895 cc DOHC liquid parallel twin
-                                            # (86.0 × 77.0 mm — BMW spec 2024;
-                                            # +42 cc vs F 850 GS via bore bump)
+        "category": "adventure",  # off-road-biased mid-ADV;
+        # 21" front spoke / 17" rear spoke
+        "displacement_cc": 895.0,  # 895 cc DOHC liquid parallel twin
+        # (86.0 × 77.0 mm — BMW spec 2024;
+        # +42 cc vs F 850 GS via bore bump)
         "bore_mm": 86.0,
         "stroke_mm": 77.0,
-        "compression_ratio": 13.1,          # 13.1:1 — BMW press spec 2024
-                                            # (up from 12.7:1 on F 850 GS)
-        "cylinders": 2,                     # parallel twin, 270° firing
-                                            # (BMW retained 90° offset crank
-                                            # from F 850 for the V-twin feel)
-        "peak_power_hp": 105.0,             # 105 hp (77 kW) @ 8500 rpm —
-                                            # BMW 2024 spec (was 95 hp on
-                                            # F 850 GS; +10 hp from new cams,
-                                            # higher CR, lighter crank)
+        "compression_ratio": 13.1,  # 13.1:1 — BMW press spec 2024
+        # (up from 12.7:1 on F 850 GS)
+        "cylinders": 2,  # parallel twin, 270° firing
+        # (BMW retained 90° offset crank
+        # from F 850 for the V-twin feel)
+        "peak_power_hp": 105.0,  # 105 hp (77 kW) @ 8500 rpm —
+        # BMW 2024 spec (was 95 hp on
+        # F 850 GS; +10 hp from new cams,
+        # higher CR, lighter crank)
         "peak_power_rpm": 8500,
-        "peak_torque_nm": 93.0,             # 93 Nm @ 6750 rpm — BMW spec
-                                            # (was 92 Nm @ 6250 on F 850 GS;
-                                            # peak shifted higher with cams)
+        "peak_torque_nm": 93.0,  # 93 Nm @ 6750 rpm — BMW spec
+        # (was 92 Nm @ 6250 on F 850 GS;
+        # peak shifted higher with cams)
         "peak_torque_rpm": 6750,
-        "fuel_system": "fi",                # ride-by-wire, BMS-O ECU;
-                                            # 4 ride modes std (Eco/Rain/Road/
-                                            # Dynamic) + Enduro Pro option
+        "fuel_system": "fi",  # ride-by-wire, BMS-O ECU;
+        # 4 ride modes std (Eco/Rain/Road/
+        # Dynamic) + Enduro Pro option
         "cooling": "liquid",
-        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "valve_config": "dohc",  # DOHC 4-valve per cylinder
         "gears": 6,
         # 6-speed cassette from BMW service manual 0K01-K81 (F 900 GS 2024)
         # — distinct from F 900 R / XR (taller 6th for ADV touring use)
         "gear_ratios": [2.615, 1.842, 1.435, 1.179, 1.000, 0.879],
-        "front_sprocket": 16,               # F16 / R41 — BMW OEM (service
-                                            # manual 0K01-K81 confirmed;
-                                            # slightly taller final than
-                                            # F 850 GS which was F16/R42)
+        "front_sprocket": 16,  # F16 / R41 — BMW OEM (service
+        # manual 0K01-K81 confirmed;
+        # slightly taller final than
+        # F 850 GS which was F16/R42)
         "rear_sprocket": 41,
-        "chain_pitch": "525",               # 525 pitch — F-series standard
-        "dry_mass_kg": 198.0,               # 198 kg dry — BMW spec 2024
-                                            # (kerb 219 kg incl. 14.5 L fuel
-                                            # + oils; -14 kg vs F 850 GS from
-                                            # lighter frame + plastic tank +
-                                            # repositioned electronics)
-        "wheelbase_mm": 1593.0,             # 1593 mm — BMW spec (long ADV
-                                            # wheelbase for high-speed
-                                            # off-road stability)
-        "front_tire_size": "90/90-21",      # 21" front (spoke wheel) —
-                                            # Metzeler Karoo 4 OEM (off-road
-                                            # block tread)
-        "rear_tire_size": "150/70R17",      # 17" rear, Metzeler Karoo 4
-        "cd": 0.82,                         # off-road-biased ADV upright
-                                            # posture + low OEM screen;
-                                            # narrower than F 900 XR
-        "frontal_area_m2": 0.55,            # large — tall ADV silhouette,
-                                            # 21" front hub exposed; lower
-                                            # than R 1300 GS (no boxer heads)
+        "chain_pitch": "525",  # 525 pitch — F-series standard
+        "dry_mass_kg": 198.0,  # 198 kg dry — BMW spec 2024
+        # (kerb 219 kg incl. 14.5 L fuel
+        # + oils; -14 kg vs F 850 GS from
+        # lighter frame + plastic tank +
+        # repositioned electronics)
+        "wheelbase_mm": 1593.0,  # 1593 mm — BMW spec (long ADV
+        # wheelbase for high-speed
+        # off-road stability)
+        "front_tire_size": "90/90-21",  # 21" front (spoke wheel) —
+        # Metzeler Karoo 4 OEM (off-road
+        # block tread)
+        "rear_tire_size": "150/70R17",  # 17" rear, Metzeler Karoo 4
+        "cd": 0.82,  # off-road-biased ADV upright
+        # posture + low OEM screen;
+        # narrower than F 900 XR
+        "frontal_area_m2": 0.55,  # large — tall ADV silhouette,
+        # 21" front hub exposed; lower
+        # than R 1300 GS (no boxer heads)
     },
     source_name="spec_sheet",
 )
@@ -10693,57 +10693,57 @@ CFMOTO_675SR_R_2024 = spec_from_dict(
         "model_code": "675SR_R_2024",
         "year_from": 2024,
         "year_to": 2026,
-        "category": "sport",                # full-fairing supersport;
-                                            # 17"/17" cast wheels, clip-ons
-        "displacement_cc": 675.0,           # 675 cc DOHC liquid inline-3
-                                            # (76.0 × 49.6 mm — CFMoto spec
-                                            # 2024; shared with 800NK naked)
+        "category": "sport",  # full-fairing supersport;
+        # 17"/17" cast wheels, clip-ons
+        "displacement_cc": 675.0,  # 675 cc DOHC liquid inline-3
+        # (76.0 × 49.6 mm — CFMoto spec
+        # 2024; shared with 800NK naked)
         "bore_mm": 76.0,
         "stroke_mm": 49.6,
-        "compression_ratio": 12.3,          # 12.3:1 — CFMoto press spec 2024
-                                            # (premium fuel)
-        "cylinders": 3,                     # inline triple, 120° firing
-                                            # (conventional crank — NOT
-                                            # T-plane like Tiger 900)
-        "peak_power_hp": 95.0,              # 95 hp (70 kW) @ 11000 rpm —
-                                            # CFMoto 2024 spec (was 87 hp on
-                                            # 800NK naked sibling; +8 hp from
-                                            # taller intake cam timing per
-                                            # service manual CF800-3US)
+        "compression_ratio": 12.3,  # 12.3:1 — CFMoto press spec 2024
+        # (premium fuel)
+        "cylinders": 3,  # inline triple, 120° firing
+        # (conventional crank — NOT
+        # T-plane like Tiger 900)
+        "peak_power_hp": 95.0,  # 95 hp (70 kW) @ 11000 rpm —
+        # CFMoto 2024 spec (was 87 hp on
+        # 800NK naked sibling; +8 hp from
+        # taller intake cam timing per
+        # service manual CF800-3US)
         "peak_power_rpm": 11000,
-        "peak_torque_nm": 68.0,             # 68 Nm @ 8250 rpm — CFMoto spec
-                                            # (peaks higher than Daytona 660
-                                            # at 69 Nm @ 8250 — close match)
+        "peak_torque_nm": 68.0,  # 68 Nm @ 8250 rpm — CFMoto spec
+        # (peaks higher than Daytona 660
+        # at 69 Nm @ 8250 — close match)
         "peak_torque_rpm": 8250,
-        "fuel_system": "fi",                # Bosch ride-by-wire, dual injector
-                                            # per cylinder; 3 ride modes
-                                            # (Rain/Street/Sport)
+        "fuel_system": "fi",  # Bosch ride-by-wire, dual injector
+        # per cylinder; 3 ride modes
+        # (Rain/Street/Sport)
         "cooling": "liquid",
-        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "valve_config": "dohc",  # DOHC 4-valve per cylinder
         "gears": 6,
         # 6-speed cassette from CFMoto service manual CF800-3US (675SR + 800NK
         # shared cassette — SR-R + naked use identical internals)
         "gear_ratios": [2.667, 1.937, 1.526, 1.286, 1.118, 1.000],
-        "front_sprocket": 15,               # F15 / R45 — CFMoto OEM (service
-                                            # manual CF800-3US confirmed)
+        "front_sprocket": 15,  # F15 / R45 — CFMoto OEM (service
+        # manual CF800-3US confirmed)
         "rear_sprocket": 45,
-        "chain_pitch": "520",               # 520 pitch — CFMoto sport standard
-        "dry_mass_kg": 186.0,               # 186 kg dry — CFMoto spec 2024
-                                            # (kerb 198 kg incl. 14.5 L fuel +
-                                            # oils; heavier than Daytona 660
-                                            # at 201 kg kerb but lighter than
-                                            # Trident 660 by 2 kg)
-        "wheelbase_mm": 1395.0,             # 1395 mm — CFMoto spec
-                                            # (short for class — close to
-                                            # Daytona 660 at 1425 mm)
-        "front_tire_size": "120/70ZR17",    # 17" front (cast wheel) —
-                                            # Maxxis Supermaxx ST OEM
-        "rear_tire_size": "180/55ZR17",     # 17" rear, Maxxis Supermaxx ST
-        "cd": 0.55,                         # full-fairing sport tuck;
-                                            # clip-on aggressive riding
-                                            # position, narrow nose cowl
-        "frontal_area_m2": 0.40,            # small — sport tuck silhouette,
-                                            # rider tucks behind bubble screen
+        "chain_pitch": "520",  # 520 pitch — CFMoto sport standard
+        "dry_mass_kg": 186.0,  # 186 kg dry — CFMoto spec 2024
+        # (kerb 198 kg incl. 14.5 L fuel +
+        # oils; heavier than Daytona 660
+        # at 201 kg kerb but lighter than
+        # Trident 660 by 2 kg)
+        "wheelbase_mm": 1395.0,  # 1395 mm — CFMoto spec
+        # (short for class — close to
+        # Daytona 660 at 1425 mm)
+        "front_tire_size": "120/70ZR17",  # 17" front (cast wheel) —
+        # Maxxis Supermaxx ST OEM
+        "rear_tire_size": "180/55ZR17",  # 17" rear, Maxxis Supermaxx ST
+        "cd": 0.55,  # full-fairing sport tuck;
+        # clip-on aggressive riding
+        # position, narrow nose cowl
+        "frontal_area_m2": 0.40,  # small — sport tuck silhouette,
+        # rider tucks behind bubble screen
     },
     source_name="spec_sheet",
 )
@@ -10772,49 +10772,49 @@ SUZUKI_GSX_S950_2022 = spec_from_dict(
         "model_code": "GSX-S950_2022",
         "year_from": 2022,
         "year_to": 2026,
-        "category": "naked",                # streetfighter naked, no fairing
-        "displacement_cc": 999,             # 999 cc DOHC liquid I4 (76.0 × 55.1
-                                            # mm — K5-derived, shared with
-                                            # GSX-S1000 / GSX-R1000 K5)
+        "category": "naked",  # streetfighter naked, no fairing
+        "displacement_cc": 999,  # 999 cc DOHC liquid I4 (76.0 × 55.1
+        # mm — K5-derived, shared with
+        # GSX-S1000 / GSX-R1000 K5)
         "bore_mm": 76.0,
         "stroke_mm": 55.1,
-        "compression_ratio": 12.2,          # 12.2:1 — Suzuki spec (same head
-                                            # as GSX-S1000 but A2-restricted
-                                            # via ECU map)
+        "compression_ratio": 12.2,  # 12.2:1 — Suzuki spec (same head
+        # as GSX-S1000 but A2-restricted
+        # via ECU map)
         "cylinders": 4,
-        "peak_power_hp": 95.0,              # 95 hp (70 kW) @ 9250 rpm —
-                                            # A2-restricted from GSX-S1000's
-                                            # 152 hp; ECU + intake snorkel
-                                            # (Suzuki 2022 EU spec)
+        "peak_power_hp": 95.0,  # 95 hp (70 kW) @ 9250 rpm —
+        # A2-restricted from GSX-S1000's
+        # 152 hp; ECU + intake snorkel
+        # (Suzuki 2022 EU spec)
         "peak_power_rpm": 9250,
-        "peak_torque_nm": 92.0,             # 92 Nm @ 7250 rpm — Suzuki spec
-                                            # (vs 106 Nm on full GSX-S1000;
-                                            # peak shifted lower in rev range
-                                            # by A2 cam restrictor)
+        "peak_torque_nm": 92.0,  # 92 Nm @ 7250 rpm — Suzuki spec
+        # (vs 106 Nm on full GSX-S1000;
+        # peak shifted lower in rev range
+        # by A2 cam restrictor)
         "peak_torque_rpm": 7250,
-        "fuel_system": "fi",                # ride-by-wire, dual injectors
+        "fuel_system": "fi",  # ride-by-wire, dual injectors
         "cooling": "liquid",
-        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "valve_config": "dohc",  # DOHC 4-valve per cylinder
         "gears": 6,
         # 6-speed cassette from Suzuki service manual 99500-39A50-01E
         # — IDENTICAL to GSX-S1000 (same gearbox internals, A2 restrict via ECU)
         "gear_ratios": [2.588, 2.095, 1.733, 1.500, 1.370, 1.241],
-        "front_sprocket": 17,               # F17 / R44 — Suzuki OEM (same as
-                                            # GSX-S1000; service manual
-                                            # 99500-39A50-01E confirmed)
+        "front_sprocket": 17,  # F17 / R44 — Suzuki OEM (same as
+        # GSX-S1000; service manual
+        # 99500-39A50-01E confirmed)
         "rear_sprocket": 44,
-        "chain_pitch": "525",               # 525 pitch — Suzuki GSX-S platform
-        "dry_mass_kg": 196.0,               # 196 kg dry — Suzuki spec 2022
-                                            # (kerb 214 kg incl. 19 L fuel +
-                                            # oils; -1 kg vs GSX-S1000 from
-                                            # lighter intake snorkel assembly)
-        "wheelbase_mm": 1460.0,             # 1460 mm — Suzuki spec
-                                            # (identical to GSX-S1000)
-        "front_tire_size": "120/70ZR17",    # Dunlop Roadsport 2 OEM
-        "rear_tire_size": "190/50ZR17",     # Dunlop Roadsport 2 OEM
-        "cd": 0.75,                         # naked, upright posture
-                                            # (identical to GSX-S1000)
-        "frontal_area_m2": 0.48,            # medium — exposed rider
+        "chain_pitch": "525",  # 525 pitch — Suzuki GSX-S platform
+        "dry_mass_kg": 196.0,  # 196 kg dry — Suzuki spec 2022
+        # (kerb 214 kg incl. 19 L fuel +
+        # oils; -1 kg vs GSX-S1000 from
+        # lighter intake snorkel assembly)
+        "wheelbase_mm": 1460.0,  # 1460 mm — Suzuki spec
+        # (identical to GSX-S1000)
+        "front_tire_size": "120/70ZR17",  # Dunlop Roadsport 2 OEM
+        "rear_tire_size": "190/50ZR17",  # Dunlop Roadsport 2 OEM
+        "cd": 0.75,  # naked, upright posture
+        # (identical to GSX-S1000)
+        "frontal_area_m2": 0.48,  # medium — exposed rider
     },
     source_name="spec_sheet",
 )
@@ -10843,54 +10843,54 @@ YAMAHA_TENERE_700_WORLD_RAID_2022 = spec_from_dict(
         "model_code": "T7_WR_2022",
         "year_from": 2022,
         "year_to": 2026,
-        "category": "adventure",            # rally-spec ADV; 21" front spoke /
-                                            # 18" rear spoke wheels
-        "displacement_cc": 689,             # 689 cc DOHC liquid CP2 parallel
-                                            # twin (80.0 × 68.6 mm — Yamaha
-                                            # CP2 platform, same as MT-07)
+        "category": "adventure",  # rally-spec ADV; 21" front spoke /
+        # 18" rear spoke wheels
+        "displacement_cc": 689,  # 689 cc DOHC liquid CP2 parallel
+        # twin (80.0 × 68.6 mm — Yamaha
+        # CP2 platform, same as MT-07)
         "bore_mm": 80.0,
         "stroke_mm": 68.6,
-        "compression_ratio": 11.5,          # 11.5:1 — Yamaha CP2 platform spec
-        "cylinders": 2,                     # parallel twin, 270° crank
-                                            # (CP2 cross-plane crank — Yamaha
-                                            # uneven firing for V-twin feel)
-        "peak_power_hp": 72.0,              # 72 hp (53 kW) @ 9000 rpm —
-                                            # Yamaha 2022 spec (matches std T7;
-                                            # World Raid uses same CP2 internals)
+        "compression_ratio": 11.5,  # 11.5:1 — Yamaha CP2 platform spec
+        "cylinders": 2,  # parallel twin, 270° crank
+        # (CP2 cross-plane crank — Yamaha
+        # uneven firing for V-twin feel)
+        "peak_power_hp": 72.0,  # 72 hp (53 kW) @ 9000 rpm —
+        # Yamaha 2022 spec (matches std T7;
+        # World Raid uses same CP2 internals)
         "peak_power_rpm": 9000,
-        "peak_torque_nm": 68.0,             # 68 Nm @ 6500 rpm — Yamaha spec
-                                            # (identical to std T7)
+        "peak_torque_nm": 68.0,  # 68 Nm @ 6500 rpm — Yamaha spec
+        # (identical to std T7)
         "peak_torque_rpm": 6500,
-        "fuel_system": "fi",                # ride-by-wire, dual injectors
+        "fuel_system": "fi",  # ride-by-wire, dual injectors
         "cooling": "liquid",
-        "valve_config": "dohc",             # DOHC 4-valve per cylinder
+        "valve_config": "dohc",  # DOHC 4-valve per cylinder
         "gears": 6,
         # 6-speed cassette from Yamaha service manual XTZ700WR
         # — IDENTICAL to standard Ténéré 700 (shared gearbox)
         "gear_ratios": [2.846, 2.125, 1.632, 1.300, 1.091, 0.962],
-        "front_sprocket": 15,               # F15 / R46 — Yamaha OEM (service
-                                            # manual XTZ700WR confirmed; same
-                                            # as std T7 with slightly different
-                                            # secondary reduction for off-road)
+        "front_sprocket": 15,  # F15 / R46 — Yamaha OEM (service
+        # manual XTZ700WR confirmed; same
+        # as std T7 with slightly different
+        # secondary reduction for off-road)
         "rear_sprocket": 46,
-        "chain_pitch": "525",               # 525 pitch — Yamaha CP2 ADV std
-        "dry_mass_kg": 220.0,               # 220 kg wet (incl. dual 11 L tanks
-                                            # = 23 L total fuel + oils);
-                                            # Yamaha spec — World Raid is
-                                            # +16 kg vs std T7 from extra
-                                            # 7 L fuel + Kayaba suspension
-        "wheelbase_mm": 1595.0,             # 1595 mm — Yamaha spec
-                                            # (+5 mm vs std T7 from rally
-                                            # geometry tweak)
-        "front_tire_size": "90/90-21",      # 21" front (Pirelli Scorpion
-                                            # Rally STR OEM — knobby ADV)
-        "rear_tire_size": "150/70R18",      # 18" rear (Pirelli Scorpion
-                                            # Rally STR OEM)
-        "cd": 0.78,                         # tall ADV with large screen;
-                                            # higher than std T7's 0.72
-                                            # due to taller windshield
-        "frontal_area_m2": 0.62,            # large — tall rider position +
-                                            # full screen + crash bars
+        "chain_pitch": "525",  # 525 pitch — Yamaha CP2 ADV std
+        "dry_mass_kg": 220.0,  # 220 kg wet (incl. dual 11 L tanks
+        # = 23 L total fuel + oils);
+        # Yamaha spec — World Raid is
+        # +16 kg vs std T7 from extra
+        # 7 L fuel + Kayaba suspension
+        "wheelbase_mm": 1595.0,  # 1595 mm — Yamaha spec
+        # (+5 mm vs std T7 from rally
+        # geometry tweak)
+        "front_tire_size": "90/90-21",  # 21" front (Pirelli Scorpion
+        # Rally STR OEM — knobby ADV)
+        "rear_tire_size": "150/70R18",  # 18" rear (Pirelli Scorpion
+        # Rally STR OEM)
+        "cd": 0.78,  # tall ADV with large screen;
+        # higher than std T7's 0.72
+        # due to taller windshield
+        "frontal_area_m2": 0.62,  # large — tall rider position +
+        # full screen + crash bars
     },
     source_name="spec_sheet",
 )
@@ -10924,31 +10924,31 @@ INDIAN_SPORT_CHIEF_2023 = spec_from_dict(
         "model_code": "Sport_Chief_2023",
         "year_from": 2023,
         "year_to": 2026,
-        "category": "cruiser",              # muscle cruiser; quad-spoked cast
-                                            # wheels + mid-mount controls
-        "displacement_cc": 1890,            # 1890 cc SOHC PowerPlus 108 V-twin
-                                            # (107.7 × 103.6 mm — Indian spec;
-                                            # shared with Challenger / Pursuit
-                                            # / Chief Dark Horse / Roadmaster)
+        "category": "cruiser",  # muscle cruiser; quad-spoked cast
+        # wheels + mid-mount controls
+        "displacement_cc": 1890,  # 1890 cc SOHC PowerPlus 108 V-twin
+        # (107.7 × 103.6 mm — Indian spec;
+        # shared with Challenger / Pursuit
+        # / Chief Dark Horse / Roadmaster)
         "bore_mm": 107.7,
         "stroke_mm": 103.6,
-        "compression_ratio": 11.0,          # 11.0:1 — Indian press spec
-                                            # (premium fuel recommended)
-        "cylinders": 2,                     # 60° V-twin (Indian PowerPlus
-                                            # 108 platform — not Polaris
-                                            # ProStar; air-cooled cylinder
-                                            # heads + liquid-cooled combustion)
-        "peak_power_hp": 122.0,             # 122 hp (91 kW) @ 5500 rpm —
-                                            # Indian 2023 spec (matches
-                                            # Challenger / Pursuit / Roadmaster)
+        "compression_ratio": 11.0,  # 11.0:1 — Indian press spec
+        # (premium fuel recommended)
+        "cylinders": 2,  # 60° V-twin (Indian PowerPlus
+        # 108 platform — not Polaris
+        # ProStar; air-cooled cylinder
+        # heads + liquid-cooled combustion)
+        "peak_power_hp": 122.0,  # 122 hp (91 kW) @ 5500 rpm —
+        # Indian 2023 spec (matches
+        # Challenger / Pursuit / Roadmaster)
         "peak_power_rpm": 5500,
-        "peak_torque_nm": 162.0,            # 162 Nm @ 3800 rpm — Indian spec
-                                            # (PowerPlus 108 family torque peak)
+        "peak_torque_nm": 162.0,  # 162 Nm @ 3800 rpm — Indian spec
+        # (PowerPlus 108 family torque peak)
         "peak_torque_rpm": 3800,
-        "fuel_system": "fi",                # ride-by-wire, dual injectors
-        "cooling": "liquid",                # mixed: air-cooled heads + liquid
-                                            # cooling of combustion chambers
-        "valve_config": "sohc",             # SOHC 4-valve per cylinder
+        "fuel_system": "fi",  # ride-by-wire, dual injectors
+        "cooling": "liquid",  # mixed: air-cooled heads + liquid
+        # cooling of combustion chambers
+        "valve_config": "sohc",  # SOHC 4-valve per cylinder
         "gears": 6,
         # 6-speed cassette from Indian service manual 9928660 (Sport Chief 2023)
         # — IDENTICAL to Challenger / Chief Dark Horse / Roadmaster gearbox
@@ -10960,26 +10960,26 @@ INDIAN_SPORT_CHIEF_2023 = spec_from_dict(
         # `chain_pitch` field omitted/None to signal belt-drive (per CLAUDE.md
         # April 24 PM hygiene: chain_pitch=None for shaft/belt drives is the
         # documented standard; importer guard final_drive=None for these).
-        "front_sprocket": 30,               # F30 — front belt pulley
-                                            # (Indian OEM Gates Polychain GT)
-        "rear_sprocket": 72,                # R72 — rear belt pulley
+        "front_sprocket": 30,  # F30 — front belt pulley
+        # (Indian OEM Gates Polychain GT)
+        "rear_sprocket": 72,  # R72 — rear belt pulley
         # chain_pitch omitted — Sport Chief is belt-drive
-        "dry_mass_kg": 286.0,               # 286 kg dry (kerb 304 kg incl.
-                                            # 15.1 L fuel + oils + battery) —
-                                            # Indian 2023 spec; -10 kg vs
-                                            # Challenger due to no fairing
-                                            # (just quarter-screen)
-        "wheelbase_mm": 1626.0,             # 1626 mm — Indian spec
-                                            # (shorter than Challenger's 1668)
-        "front_tire_size": "130/60B19",     # 19" front (Pirelli Night Dragon
-                                            # GT OEM — bias-ply muscle cruiser)
-        "rear_tire_size": "180/65B16",      # 16" rear (Pirelli Night Dragon GT)
-        "cd": 0.78,                         # mid-bar cruiser, partial fairing
-                                            # protection (better than Chief
-                                            # Dark Horse's 0.85 due to mid
-                                            # controls + tighter rider tuck)
-        "frontal_area_m2": 0.62,            # large — wide handlebars +
-                                            # upright rider + quarter-fairing
+        "dry_mass_kg": 286.0,  # 286 kg dry (kerb 304 kg incl.
+        # 15.1 L fuel + oils + battery) —
+        # Indian 2023 spec; -10 kg vs
+        # Challenger due to no fairing
+        # (just quarter-screen)
+        "wheelbase_mm": 1626.0,  # 1626 mm — Indian spec
+        # (shorter than Challenger's 1668)
+        "front_tire_size": "130/60B19",  # 19" front (Pirelli Night Dragon
+        # GT OEM — bias-ply muscle cruiser)
+        "rear_tire_size": "180/65B16",  # 16" rear (Pirelli Night Dragon GT)
+        "cd": 0.78,  # mid-bar cruiser, partial fairing
+        # protection (better than Chief
+        # Dark Horse's 0.85 due to mid
+        # controls + tighter rider tuck)
+        "frontal_area_m2": 0.62,  # large — wide handlebars +
+        # upright rider + quarter-fairing
     },
     source_name="spec_sheet",
 )

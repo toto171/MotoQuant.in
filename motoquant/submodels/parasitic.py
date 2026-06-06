@@ -19,10 +19,12 @@ class ParasiticModel:
         self.cfg = cfg
         # Resolve category profile mult (1.0 if no tag / unknown profile).
         from ..category_profiles import derive_category_tag, get_profile
+
         tag = cfg.category_tag
         if not tag:
             tag = derive_category_tag(
-                manufacturer="", model_name="",
+                manufacturer="",
+                model_name="",
                 displacement_cc=cfg.engine.displacement_cc,
                 peak_power_hp=cfg.engine.peak_power_hp,
                 stroke_type=cfg.engine.stroke_type,

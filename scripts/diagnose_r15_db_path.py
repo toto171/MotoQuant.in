@@ -3,6 +3,7 @@
 Diagnose the dead-power / 22.034s R15 V3 bug (April 2026).
 Usage:  MOTOQUANT_DB=/path/to/motoquant.db python3 scripts/diagnose_r15_db_path.py
 """
+
 import copy
 import os
 import sys
@@ -28,7 +29,10 @@ def find_r15_bike_id(db):
     print("R15 V3 candidates in DB:", flush=True)
     for r in rows:
         d = dict(r)
-        print("  id=%s %s %s %s" % (d['id'], d['manuf'], d['model_name'], d['year_from']), flush=True)
+        print(
+            "  id=%s %s %s %s" % (d["id"], d["manuf"], d["model_name"], d["year_from"]),
+            flush=True,
+        )
     return dict(rows[0])["id"] if rows else None
 
 
@@ -45,8 +49,7 @@ def load_db_config(db, bike_id):
 
 def load_spec_config():
     spec = next(
-        (s for s in ALL_KNOWN_BIKES
-         if "R15" in s.model_name and "V3" in s.model_name),
+        (s for s in ALL_KNOWN_BIKES if "R15" in s.model_name and "V3" in s.model_name),
         None,
     )
     if spec is None:
@@ -56,12 +59,20 @@ def load_spec_config():
 
 def diff_engine(db_cfg, spec_cfg):
     fields = [
-        "displacement_cc", "bore_mm", "stroke_mm",
-        "peak_power_hp", "peak_power_rpm",
-        "peak_torque_nm", "peak_torque_rpm",
-        "idle_rpm", "redline_rpm",
-        "stroke_type", "cylinder_count", "cylinder_config",
-        "tuned_rpm", "powervalve",
+        "displacement_cc",
+        "bore_mm",
+        "stroke_mm",
+        "peak_power_hp",
+        "peak_power_rpm",
+        "peak_torque_nm",
+        "peak_torque_rpm",
+        "idle_rpm",
+        "redline_rpm",
+        "stroke_type",
+        "cylinder_count",
+        "cylinder_config",
+        "tuned_rpm",
+        "powervalve",
     ]
     print("\n%-22s %-20s %-20s match" % ("field", "DB path", "spec path"), flush=True)
     print("-" * 72, flush=True)
@@ -77,15 +88,29 @@ def check_failure_modes(cfg, label):
     e = cfg.engine
     dc = e.dyno_curve
     if dc is None:
-        print("  (a) dyno_curve is None -> 4T synthetic parabolic path will be used", flush=True)
+        print(
+            "  (a) dyno_curve is None -> 4T synthetic parabolic path will be used",
+            flush=True,
+        )
     elif not isinstance(dc, DynoCurve):
         print("  (b) dyno_curve is %s, NOT DynoCurve" % type(dc).__name__, flush=True)
     else:
-        print("  (a/b) dyno_curve OK: DynoCurve with %d points, is_at_wheel=%s" % (len(dc.rpm), dc.is_at_wheel), flush=True)
+        print(
+            "  (a/b) dyno_curve OK: DynoCurve with %d points, is_at_wheel=%s"
+            % (len(dc.rpm), dc.is_at_wheel),
+            flush=True,
+        )
     if e.redline_rpm <= e.idle_rpm:
-        print("  (c) BUG: redline_rpm (%s) <= idle_rpm (%s) -> get_torque returns 0" % (e.redline_rpm, e.idle_rpm), flush=True)
+        print(
+            "  (c) BUG: redline_rpm (%s) <= idle_rpm (%s) -> get_torque returns 0"
+            % (e.redline_rpm, e.idle_rpm),
+            flush=True,
+        )
     else:
-        print("  (c) RPM range OK: idle=%s, redline=%s" % (e.idle_rpm, e.redline_rpm), flush=True)
+        print(
+            "  (c) RPM range OK: idle=%s, redline=%s" % (e.idle_rpm, e.redline_rpm),
+            flush=True,
+        )
     if e.peak_torque_nm < 1.0:
         print("  (d) BUG: peak_torque_nm too small: %s" % e.peak_torque_nm, flush=True)
     else:
@@ -94,7 +119,11 @@ def check_failure_modes(cfg, label):
 
 def power_sweep(cfg, label):
     print("\n=== Power sweep: %s ===" % label, flush=True)
-    print("%-8s %-10s %-10s %-8s %-10s" % ("boost%", "peak hp", "peak Nm", "ET (s)", "trap kmh"), flush=True)
+    print(
+        "%-8s %-10s %-10s %-8s %-10s"
+        % ("boost%", "peak hp", "peak Nm", "ET (s)", "trap kmh"),
+        flush=True,
+    )
     for boost in [0, 50, 100]:
         c = copy.deepcopy(cfg)
         if boost != 0:
@@ -106,7 +135,11 @@ def power_sweep(cfg, label):
         r = motoquant.MotoQuantEngine(c).run(use_adaptive_dt=False, max_time=26.0)
         et = r.time_quarter if r.finished_quarter else float("nan")
         trap = getattr(r, "trap_speed_kmh", float("nan"))
-        print("%-8s %-10.2f %-10.2f %-8.3f %-10.2f" % (boost, c.engine.peak_power_hp, c.engine.peak_torque_nm, et, trap), flush=True)
+        print(
+            "%-8s %-10.2f %-10.2f %-8.3f %-10.2f"
+            % (boost, c.engine.peak_power_hp, c.engine.peak_torque_nm, et, trap),
+            flush=True,
+        )
 
 
 def main():

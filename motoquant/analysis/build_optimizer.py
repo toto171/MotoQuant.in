@@ -35,8 +35,8 @@ Public API
 
 from __future__ import annotations
 
-import logging
 import copy
+import logging
 import warnings
 from dataclasses import asdict, dataclass, field
 
@@ -109,7 +109,9 @@ class SurrogatePredictor:
     scoring method.
     """
 
-    def __init__(self, surrogate=None, source: str = "full_sim", *, allow_fallback: bool = True):
+    def __init__(
+        self, surrogate=None, source: str = "full_sim", *, allow_fallback: bool = True
+    ):
         self.surrogate = surrogate
         self.source = source if surrogate is not None else "full_sim"
         self.allow_fallback = allow_fallback
@@ -133,7 +135,9 @@ class SurrogatePredictor:
 
             et_arr, trap_arr = self.surrogate.predict(fvec.reshape(1, -1))
             et = float(et_arr[0]) if hasattr(et_arr, "__len__") else float(et_arr)
-            trap = float(trap_arr[0]) if hasattr(trap_arr, "__len__") else float(trap_arr)
+            trap = (
+                float(trap_arr[0]) if hasattr(trap_arr, "__len__") else float(trap_arr)
+            )
             if trap > _TRAP_MS_CEILING:  # model returned km/h — normalise to m/s
                 trap /= 3.6
             self.n_surrogate += 1
@@ -141,7 +145,9 @@ class SurrogatePredictor:
         except Exception as exc:  # pragma: no cover (needs a loaded surrogate)
             if not self.allow_fallback:
                 raise
-            warnings.warn(f"build_optimizer: surrogate scoring failed ({exc}); using full sim")
+            warnings.warn(
+                f"build_optimizer: surrogate scoring failed ({exc}); using full sim"
+            )
             self.n_fallback += 1
             return _run_et(config)
 
@@ -165,7 +171,9 @@ class SurrogatePredictor:
         }
 
 
-def make_predictor(surrogate=None, source: str = "full_sim", *, allow_fallback: bool = True) -> SurrogatePredictor:
+def make_predictor(
+    surrogate=None, source: str = "full_sim", *, allow_fallback: bool = True
+) -> SurrogatePredictor:
     """Build a surrogate-agnostic ``BikeConfig -> (et_s, trap_ms)`` scorer."""
     return SurrogatePredictor(surrogate, source, allow_fallback=allow_fallback)
 
@@ -187,14 +195,14 @@ class OptimizedPart:
     category: str
     category_display: str
     price_inr: float
-    delta_et_s: float           # standalone ET gain (positive = faster)
-    delta_trap_ms: float        # standalone trap gain (m/s, positive = faster)
+    delta_et_s: float  # standalone ET gain (positive = faster)
+    delta_trap_ms: float  # standalone trap gain (m/s, positive = faster)
     roi_score: float | None
     cost_per_tenth_inr: float | None
     is_compatible: bool
 
     @classmethod
-    def from_roi(cls, r: PartROIResult, *, is_compatible: bool = True) -> "OptimizedPart":
+    def from_roi(cls, r: PartROIResult, *, is_compatible: bool = True) -> OptimizedPart:
         return cls(
             part_id=r.part_id,
             name=r.part_name,
@@ -228,7 +236,7 @@ class OptimizedBuild:
     total_cost_inr: float
     budget_used_pct: float
     cost_per_tenth_inr: float | None
-    parts: list = field(default_factory=list)            # list[OptimizedPart]
+    parts: list = field(default_factory=list)  # list[OptimizedPart]
     synergies: list = field(default_factory=list)
     warnings: list = field(default_factory=list)
     next_upgrade: dict | None = None
@@ -250,7 +258,9 @@ class OptimizedBuild:
             f"({self.budget_used_pct:.0f}%), {len(self.parts)} parts  [{self.scoring_method}]",
         ]
         for p in self.parts:
-            lines.append(f"    • {p.name} (₹{p.price_inr:,.0f}, Δ {p.delta_et_s:+.3f}s)")
+            lines.append(
+                f"    • {p.name} (₹{p.price_inr:,.0f}, Δ {p.delta_et_s:+.3f}s)"
+            )
         return "\n".join(lines)
 
     def to_dict(self) -> dict:
@@ -274,10 +284,13 @@ def _select_build(
     from each exclusive category (exhaust / ecu / clutch_kit / air_filter /
     quickshifter / battery).  Free parts (price 0) cost no budget.
     """
-    gain = (lambda r: r.delta_trap_ms) if goal == "max_trap" else (lambda r: r.delta_et_s)
+    gain = (
+        (lambda r: r.delta_trap_ms) if goal == "max_trap" else (lambda r: r.delta_et_s)
+    )
 
     candidates = [
-        r for r in individual
+        r
+        for r in individual
         if (allow_negative or gain(r) > 0) and r.price_inr <= budget_inr
     ]
     if not candidates:
@@ -346,7 +359,9 @@ def _next_upgrade_to_dict(nu: NextUpgrade | None) -> dict | None:
     }
 
 
-def _empty_build(base_config, base_et_s, base_trap_ms, goal, budget_inr, profile_value, predictor) -> OptimizedBuild:
+def _empty_build(
+    base_config, base_et_s, base_trap_ms, goal, budget_inr, profile_value, predictor
+) -> OptimizedBuild:
     kmh = round(base_trap_ms * 3.6, 2)
     return OptimizedBuild(
         bike_name=base_config.name,
@@ -405,7 +420,15 @@ def optimize_build(
     if max_candidates is not None:
         candidate_ids = candidate_ids[:max_candidates]
     if not candidate_ids:
-        return _empty_build(base_config, base_et_s, base_trap_ms, goal, budget_inr, profile_enum.value, predictor)
+        return _empty_build(
+            base_config,
+            base_et_s,
+            base_trap_ms,
+            goal,
+            budget_inr,
+            profile_enum.value,
+            predictor,
+        )
 
     # Per-part ROI through the (surrogate-agnostic) scorer.  Candidates are
     # already compatibility-filtered by search(), so they are all fitment-valid.
@@ -418,7 +441,9 @@ def optimize_build(
         et_fn=predictor,
     )
 
-    gain = (lambda r: r.delta_trap_ms) if goal == "max_trap" else (lambda r: r.delta_et_s)
+    gain = (
+        (lambda r: r.delta_trap_ms) if goal == "max_trap" else (lambda r: r.delta_et_s)
+    )
     selected = _select_build(individual, float(budget_inr), goal)
 
     # Combined sim of the selected build (captures part interactions).
@@ -426,10 +451,14 @@ def optimize_build(
     ordered_for_apply = sorted(selected, key=lambda r: r.price_inr)
     if ordered_for_apply:
         try:
-            build_cfg = parts_repo.apply_multiple([r.part_id for r in ordered_for_apply], build_cfg)
+            build_cfg = parts_repo.apply_multiple(
+                [r.part_id for r in ordered_for_apply], build_cfg
+            )
             combined_et, combined_trap_ms = predictor(build_cfg)
         except Exception as exc:
-            warnings.warn(f"optimize_build: combined sim failed ({exc}); reporting stock")
+            warnings.warn(
+                f"optimize_build: combined sim failed ({exc}); reporting stock"
+            )
             selected, combined_et, combined_trap_ms = [], base_et_s, base_trap_ms
     else:
         combined_et, combined_trap_ms = base_et_s, base_trap_ms
@@ -437,7 +466,11 @@ def optimize_build(
     total_cost = sum(r.price_inr for r in selected)
     delta_et = base_et_s - combined_et
     delta_trap_ms = combined_trap_ms - base_trap_ms
-    cost_per_tenth = round(total_cost / (delta_et * 10.0), 2) if (goal == "min_et" and delta_et > 1e-4) else None
+    cost_per_tenth = (
+        round(total_cost / (delta_et * 10.0), 2)
+        if (goal == "min_et" and delta_et > 1e-4)
+        else None
+    )
 
     # Display order: best contributor for the chosen objective first.
     display = sorted(selected, key=lambda r: -gain(r))
@@ -465,7 +498,9 @@ def optimize_build(
         delta_et_s=round(delta_et, 4),
         delta_trap_kmh=round(delta_trap_ms * 3.6, 2),
         total_cost_inr=round(total_cost, 2),
-        budget_used_pct=(round(100.0 * total_cost / budget_inr, 1) if budget_inr > 0 else 0.0),
+        budget_used_pct=(
+            round(100.0 * total_cost / budget_inr, 1) if budget_inr > 0 else 0.0
+        ),
         cost_per_tenth_inr=cost_per_tenth,
         parts=parts,
         synergies=synergies,

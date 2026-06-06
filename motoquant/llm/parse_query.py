@@ -44,7 +44,9 @@ class ParsedSimRequest:
     bike_id: int | None = None  # post-DB-resolution
     bike_b_name: str | None = None  # second bike for compare intent
     bike_b_id: int | None = None
-    intent_type: str = "simulate"  # simulate / compare / rank / recommend / explain / smalltalk
+    intent_type: str = (
+        "simulate"  # simulate / compare / rank / recommend / explain / smalltalk
+    )
     venue_name: str | None = None
     venue_id: int | None = None
 
@@ -110,7 +112,15 @@ TOOL_SCHEMA: dict[str, Any] = {
     "properties": {
         "intent_type": {
             "type": "string",
-            "enum": ["simulate", "compare", "rank", "recommend", "explain", "smalltalk", "choose_bike"],
+            "enum": [
+                "simulate",
+                "compare",
+                "rank",
+                "recommend",
+                "explain",
+                "smalltalk",
+                "choose_bike",
+            ],
             "description": (
                 "What the user wants. "
                 "simulate = run a sim for one specific bike (default). "

@@ -44,9 +44,10 @@ log = logging.getLogger(__name__)
 # Data types
 # ─────────────────────────────────────────────────────────────────
 
+
 @dataclass
 class PriceResult:
-    price_inr: float | None        # None = page found but price hidden / OOS
+    price_inr: float | None  # None = page found but price hidden / OOS
     in_stock: bool
     fetched_at: datetime
     source_url: str
@@ -73,7 +74,9 @@ def _domain_lock(url: str) -> threading.Lock:
         return _DOMAIN_LOCKS[domain]
 
 
-def _throttled_fetch(url: str, *, headers: dict[str, str] | None = None) -> bytes | None:
+def _throttled_fetch(
+    url: str, *, headers: dict[str, str] | None = None
+) -> bytes | None:
     """
     Fetch *url* respecting the global 5 req/s cap and per-domain serialisation.
     Retries once with exponential back-off on 429/503; returns None on failure.
@@ -110,7 +113,9 @@ def _throttled_fetch(url: str, *, headers: dict[str, str] | None = None) -> byte
             except urllib.error.HTTPError as exc:
                 if exc.code in (429, 503):
                     sleep_for = min(backoff, MAX_BACKOFF_S)
-                    log.warning("HTTP %d from %s — backing off %.1fs", exc.code, url, sleep_for)
+                    log.warning(
+                        "HTTP %d from %s — backing off %.1fs", exc.code, url, sleep_for
+                    )
                     time.sleep(sleep_for)
                     backoff *= 2
                     continue
@@ -128,22 +133,23 @@ def _throttled_fetch(url: str, *, headers: dict[str, str] | None = None) -> byte
 
 _INR_PATTERNS = [
     # ₹ symbol variants followed by number
-    re.compile(r'[₹\u20b9]\s*([\d,]+(?:\.\d{1,2})?)', re.UNICODE),
+    re.compile(r"[₹\u20b9]\s*([\d,]+(?:\.\d{1,2})?)", re.UNICODE),
     # "Rs." or "INR" prefix
-    re.compile(r'(?:Rs\.?|INR)\s*([\d,]+(?:\.\d{1,2})?)', re.IGNORECASE),
+    re.compile(r"(?:Rs\.?|INR)\s*([\d,]+(?:\.\d{1,2})?)", re.IGNORECASE),
     # WooCommerce/Shopify JSON: "price":"NNNN" or woocommerce_price: NNNN
     re.compile(r'"(?:price|regular_price|sale_price)"\s*:\s*"?([\d]+(?:\.\d{1,2})?)"?'),
     # data-price="NNNN" attribute
     re.compile(r'data-price=["\']?([\d]+(?:\.\d{1,2})?)["\']?'),
 ]
 _OOS_PATTERNS = re.compile(
-    r'out.of.stock|sold.out|not.available|unavailable|out_of_stock',
+    r"out.of.stock|sold.out|not.available|unavailable|out_of_stock",
     re.IGNORECASE,
 )
 
 
 def _extract_price_inr(html: str) -> float | None:
     import html as _html_mod
+
     html = _html_mod.unescape(html)  # decode &#8377; -> ₹, &amp; etc.
     for pat in _INR_PATTERNS:
         m = pat.search(html)
@@ -151,7 +157,7 @@ def _extract_price_inr(html: str) -> float | None:
             raw = m.group(1).replace(",", "")
             try:
                 val = float(raw)
-                if 50.0 <= val <= 2_000_000.0:   # sanity: ₹50 – ₹20L
+                if 50.0 <= val <= 2_000_000.0:  # sanity: ₹50 – ₹20L
                     return val
             except ValueError:
                 pass
@@ -170,6 +176,7 @@ def _now_utc() -> datetime:
 # ─────────────────────────────────────────────────────────────────
 # Adapter: Powertronic ECU (powertronicecu.com) — Indian ECU shop
 # ─────────────────────────────────────────────────────────────────
+
 
 def fetch_powertronicecu(url: str) -> PriceResult | None:
     """Scrape a Powertronic product page (WooCommerce)."""
@@ -191,6 +198,7 @@ def fetch_powertronicecu(url: str) -> PriceResult | None:
 # ─────────────────────────────────────────────────────────────────
 # Adapter: Motomiu (motomiu.com) — general mods shop
 # ─────────────────────────────────────────────────────────────────
+
 
 def fetch_motomiu(url: str) -> PriceResult | None:
     """Scrape a Motomiu product page (Shopify)."""
@@ -224,6 +232,7 @@ def fetch_motomiu(url: str) -> PriceResult | None:
 # Adapter: K&N India (knfilters.com/en-in) — air filters
 # ─────────────────────────────────────────────────────────────────
 
+
 def fetch_kn_india(url: str) -> PriceResult | None:
     """Scrape K&N India product page."""
     raw = _throttled_fetch(url, headers={"Accept-Language": "en-IN,en;q=0.9"})
@@ -244,6 +253,7 @@ def fetch_kn_india(url: str) -> PriceResult | None:
 # ─────────────────────────────────────────────────────────────────
 # Adapter: Motodelic (motodelic.com) — general mod shop
 # ─────────────────────────────────────────────────────────────────
+
 
 def fetch_motodelic(url: str) -> PriceResult | None:
     """Scrape a Motodelic product page (WooCommerce)."""
@@ -268,7 +278,7 @@ def fetch_motodelic(url: str) -> PriceResult | None:
 # ─────────────────────────────────────────────────────────────────
 
 _AMAZON_PRICE_PATTERNS = [
-    re.compile(r'"priceAmount"\s*:\s*([\d.]+)'),          # JSON-LD
+    re.compile(r'"priceAmount"\s*:\s*([\d.]+)'),  # JSON-LD
     re.compile(r'class="a-price-whole"[^>]*>\s*([\d,]+)'),
     re.compile(r'"price"\s*:\s*"?([\d.]+)"?'),
 ]
@@ -276,10 +286,13 @@ _AMAZON_PRICE_PATTERNS = [
 
 def fetch_amazon_in(url: str) -> PriceResult | None:
     """Scrape an Amazon.in product page for INR price."""
-    raw = _throttled_fetch(url, headers={
-        "Accept-Language": "en-IN,en;q=0.9",
-        "Accept-Encoding": "gzip, deflate",
-    })
+    raw = _throttled_fetch(
+        url,
+        headers={
+            "Accept-Language": "en-IN,en;q=0.9",
+            "Accept-Encoding": "gzip, deflate",
+        },
+    )
     if raw is None:
         return None
     html = raw.decode("utf-8", errors="replace")
@@ -319,7 +332,9 @@ def fetch_amazon_in(url: str) -> PriceResult | None:
 # and let the estimate_landing_cost_inr() caller do currency conversion.
 # ─────────────────────────────────────────────────────────────────
 
-_CF_CHALLENGE = re.compile(r'Cloudflare|cf-browser-verification|__cf_chl', re.IGNORECASE)
+_CF_CHALLENGE = re.compile(
+    r"Cloudflare|cf-browser-verification|__cf_chl", re.IGNORECASE
+)
 
 
 def fetch_akrapovic(url: str) -> PriceResult | None:
@@ -346,6 +361,7 @@ def fetch_akrapovic(url: str) -> PriceResult | None:
 # Adapter: Mototorque (mototorque.in) — biggest Indian mega-retailer
 # Shopify storefront. Used as fallback target for ~30 brands' search URLs.
 # ─────────────────────────────────────────────────────────────────
+
 
 def fetch_mototorque(url: str) -> PriceResult | None:
     """Scrape a Mototorque (mototorque.in) product/search page."""
@@ -377,6 +393,7 @@ def fetch_mototorque(url: str) -> PriceResult | None:
 # Adapter: Grand Pitstop (grandpitstop.com) — Tier-1 Indian retailer
 # ─────────────────────────────────────────────────────────────────
 
+
 def fetch_grandpitstop(url: str) -> PriceResult | None:
     """Scrape a Grand Pitstop product page (Shopify)."""
     raw = _throttled_fetch(url)
@@ -407,6 +424,7 @@ def fetch_grandpitstop(url: str) -> PriceResult | None:
 # WooCommerce storefront.
 # ─────────────────────────────────────────────────────────────────
 
+
 def fetch_superbikestore(url: str) -> PriceResult | None:
     raw = _throttled_fetch(url)
     if raw is None:
@@ -424,6 +442,7 @@ def fetch_superbikestore(url: str) -> PriceResult | None:
 # ─────────────────────────────────────────────────────────────────
 # Adapter: Race Dynamics (racedynamics.in) — ECU specialist
 # ─────────────────────────────────────────────────────────────────
+
 
 def fetch_racedynamics(url: str) -> PriceResult | None:
     raw = _throttled_fetch(url)
@@ -443,6 +462,7 @@ def fetch_racedynamics(url: str) -> PriceResult | None:
 # Adapter: HealTech India (healtech-india.com) — quickshifters / GIPro
 # ─────────────────────────────────────────────────────────────────
 
+
 def fetch_healtech_india(url: str) -> PriceResult | None:
     raw = _throttled_fetch(url)
     if raw is None:
@@ -460,6 +480,7 @@ def fetch_healtech_india(url: str) -> PriceResult | None:
 # ─────────────────────────────────────────────────────────────────
 # Adapter: YSS India (yssindia.in) — suspension specialist
 # ─────────────────────────────────────────────────────────────────
+
 
 def fetch_yssindia(url: str) -> PriceResult | None:
     raw = _throttled_fetch(url)
@@ -553,6 +574,7 @@ def fetch_indiamart(url: str) -> PriceResult | None:
 # Adapter: Tyrebazaar (tyrebazaar.com) — TIRES
 # ─────────────────────────────────────────────────────────────────
 
+
 def fetch_tyrebazaar(url: str) -> PriceResult | None:
     raw = _throttled_fetch(url)
     if raw is None:
@@ -571,6 +593,7 @@ def fetch_tyrebazaar(url: str) -> PriceResult | None:
 # Adapter: Tyrekart (tyrekart.com) — TIRES
 # ─────────────────────────────────────────────────────────────────
 
+
 def fetch_tyrekart(url: str) -> PriceResult | None:
     raw = _throttled_fetch(url)
     if raw is None:
@@ -588,6 +611,7 @@ def fetch_tyrekart(url: str) -> PriceResult | None:
 # ─────────────────────────────────────────────────────────────────
 # Adapter: Dynojet India (dynojetindia.com) — PCV / Power Commander
 # ─────────────────────────────────────────────────────────────────
+
 
 def fetch_dynojet_india(url: str) -> PriceResult | None:
     raw = _throttled_fetch(url)
@@ -609,27 +633,27 @@ def fetch_dynojet_india(url: str) -> PriceResult | None:
 
 #: Map of netloc substrings → adapter function
 ADAPTERS: dict[str, Callable[[str], PriceResult | None]] = {
-    "powertronicecu.com":  fetch_powertronicecu,
-    "motomiu.com":         fetch_motomiu,
-    "knfilters.com":       fetch_kn_india,
-    "motodelic.com":       fetch_motodelic,
-    "amazon.in":           fetch_amazon_in,
-    "akrapovic.com":       fetch_akrapovic,
+    "powertronicecu.com": fetch_powertronicecu,
+    "motomiu.com": fetch_motomiu,
+    "knfilters.com": fetch_kn_india,
+    "motodelic.com": fetch_motodelic,
+    "amazon.in": fetch_amazon_in,
+    "akrapovic.com": fetch_akrapovic,
     # Indian Tier-1 mega-retailers
-    "mototorque.in":       fetch_mototorque,
-    "grandpitstop.com":    fetch_grandpitstop,
-    "superbikestore.com":  fetch_superbikestore,
+    "mototorque.in": fetch_mototorque,
+    "grandpitstop.com": fetch_grandpitstop,
+    "superbikestore.com": fetch_superbikestore,
     # Specialty Indian retailers
-    "racedynamics.in":     fetch_racedynamics,
-    "healtech-india.com":  fetch_healtech_india,
-    "yssindia.in":         fetch_yssindia,
-    "batterybhai.com":     fetch_batterybhai,
-    "dynojetindia.com":    fetch_dynojet_india,
+    "racedynamics.in": fetch_racedynamics,
+    "healtech-india.com": fetch_healtech_india,
+    "yssindia.in": fetch_yssindia,
+    "batterybhai.com": fetch_batterybhai,
+    "dynojetindia.com": fetch_dynojet_india,
     # B2B marketplace
-    "indiamart.com":       fetch_indiamart,
+    "indiamart.com": fetch_indiamart,
     # Tire-specific marketplaces
-    "tyrebazaar.com":      fetch_tyrebazaar,
-    "tyrekart.com":        fetch_tyrekart,
+    "tyrebazaar.com": fetch_tyrebazaar,
+    "tyrekart.com": fetch_tyrekart,
 }
 
 

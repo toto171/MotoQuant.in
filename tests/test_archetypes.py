@@ -62,6 +62,7 @@ def _build_minimal_db() -> str:
     conn.commit()
 
     from scripts.patch_2026_04_29 import ARCHETYPES_DDL
+
     for stmt in ARCHETYPES_DDL.strip().split(";"):
         s = stmt.strip()
         if s:
@@ -73,6 +74,7 @@ def _build_minimal_db() -> str:
 
 class _FakeDB:
     """Minimal MotoQuantDB stand-in: the seed + resolver code only needs `_conn`."""
+
     def __init__(self, path: str) -> None:
         self._conn = sqlite3.connect(path)
         self._conn.row_factory = sqlite3.Row
@@ -89,6 +91,7 @@ def _seeded_db():
     path = _build_minimal_db()
     db = _FakeDB(path)
     from motoquant.database.seed_archetypes import seed_archetypes
+
     n = seed_archetypes(db)
     db._conn.commit()
     return path, db, n
@@ -112,13 +115,15 @@ class TestArchetypeSeed(_ArchetypeTestBase):
 
     def test_seed_inserts_five_archetypes(self) -> None:
         self.assertEqual(
-            self.first_insert_count, 5,
+            self.first_insert_count,
+            5,
             "Initial seed should insert exactly 5 archetypes",
         )
 
     def test_seed_is_idempotent(self) -> None:
         """Re-running seed_archetypes adds zero rows (UNIQUE constraint)."""
         from motoquant.database.seed_archetypes import seed_archetypes
+
         n_again = seed_archetypes(self.db)
         self.assertEqual(n_again, 0, "Re-run should be a no-op")
         total = self.db._conn.execute(
@@ -127,9 +132,12 @@ class TestArchetypeSeed(_ArchetypeTestBase):
         self.assertEqual(total, 5)
 
     def test_archetype_names_present(self) -> None:
-        names = {r["name"] for r in self.db._conn.execute(
-            "SELECT name FROM bike_archetypes"
-        ).fetchall()}
+        names = {
+            r["name"]
+            for r in self.db._conn.execute(
+                "SELECT name FROM bike_archetypes"
+            ).fetchall()
+        }
         self.assertIn("TTS Stage 2 Turbo Hayabusa", names)
         self.assertIn("Velocity Racing 5-sec Turbo Hayabusa", names)
         self.assertIn("Bonneville H2 Carbon Track Edition", names)
@@ -138,28 +146,40 @@ class TestArchetypeSeed(_ArchetypeTestBase):
 
     def test_archetype_deltas_are_sane(self) -> None:
         """Cross-check a few critical numbers haven't drifted."""
-        rows = {r["name"]: r for r in self.db._conn.execute(
-            """SELECT name, power_multiplier, peak_power_hp_override,
+        rows = {
+            r["name"]: r
+            for r in self.db._conn.execute(
+                """SELECT name, power_multiplier, peak_power_hp_override,
                       mass_delta_kg, is_homologation
                FROM bike_archetypes"""
-        ).fetchall()}
+            ).fetchall()
+        }
 
         tts = rows["TTS Stage 2 Turbo Hayabusa"]
-        self.assertGreater(tts["power_multiplier"], 1.5,
-                           "TTS Stage 2 should ~double stock power")
+        self.assertGreater(
+            tts["power_multiplier"], 1.5, "TTS Stage 2 should ~double stock power"
+        )
         self.assertEqual(tts["is_homologation"], 0, "TTS is street-eligible")
 
         velocity = rows["Velocity Racing 5-sec Turbo Hayabusa"]
-        self.assertGreater(velocity["power_multiplier"], 2.5,
-                           "Velocity should triple stock for ~600 hp build")
-        self.assertEqual(velocity["is_homologation"], 1,
-                         "Velocity 5-sec is track-only")
+        self.assertGreater(
+            velocity["power_multiplier"],
+            2.5,
+            "Velocity should triple stock for ~600 hp build",
+        )
+        self.assertEqual(velocity["is_homologation"], 1, "Velocity 5-sec is track-only")
 
         bonneville = rows["Bonneville H2 Carbon Track Edition"]
-        self.assertEqual(bonneville["peak_power_hp_override"], 310.0,
-                         "Bonneville H2 explicitly overrides to H2R-spec power")
-        self.assertLess(bonneville["mass_delta_kg"], -20.0,
-                        "Bonneville H2 strips mass for top-speed runs")
+        self.assertEqual(
+            bonneville["peak_power_hp_override"],
+            310.0,
+            "Bonneville H2 explicitly overrides to H2R-spec power",
+        )
+        self.assertLess(
+            bonneville["mass_delta_kg"],
+            -20.0,
+            "Bonneville H2 strips mass for top-speed runs",
+        )
 
 
 class TestArchetypeResolver(_ArchetypeTestBase):
@@ -167,6 +187,7 @@ class TestArchetypeResolver(_ArchetypeTestBase):
 
     def _resolve(self, name: str):
         from motoquant.llm.resolver import resolve_archetype
+
         return resolve_archetype(name, self.db)
 
     def test_exact_name_match(self) -> None:
@@ -206,31 +227,39 @@ class TestArchetypeRunnerApplication(_ArchetypeTestBase):
 
     def _make_stub_config(self) -> Any:
         """Build a minimal config object with the attribute paths the helper touches."""
+
         class _Engine:
             peak_power_hp = 197.0
             peak_torque_nm = 155.0
             dyno_curve = None
+
         class _Chassis:
             dry_mass_kg = 220.0
+
         class _Aero:
             cd = 0.55
             frontal_area_m2 = 0.55
+
         class _Drivetrain:
             front_sprocket = 18
             rear_sprocket = 40
             chain_pitch = "530"
+
         class _Tires:
             mu_peak = 1.30
+
         class _Config:
             engine = _Engine()
             chassis = _Chassis()
             aero = _Aero()
             drivetrain = _Drivetrain()
             tires = _Tires()
+
         return _Config()
 
     def _make_stub_parsed(self, archetype_id: int) -> Any:
         from motoquant.llm.parse_query import ParsedSimRequest
+
         return ParsedSimRequest(
             raw_query="how fast is a TTS Hayabusa",
             bike_name="Hayabusa",

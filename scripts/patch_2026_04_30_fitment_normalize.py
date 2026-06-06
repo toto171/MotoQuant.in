@@ -44,8 +44,15 @@ import sys
 
 VALID_TIERS = {"exact", "family", "category", "universal"}
 NESTED_FIELDS = {
-    "manufacturers", "engine_configs", "displacement_min_cc", "displacement_max_cc",
-    "categories", "year_min", "year_max", "chain_pitch", "stroke_type",
+    "manufacturers",
+    "engine_configs",
+    "displacement_min_cc",
+    "displacement_max_cc",
+    "categories",
+    "year_min",
+    "year_max",
+    "chain_pitch",
+    "stroke_type",
 }
 DROP_FIELDS = {"model_keywords"}
 
@@ -129,12 +136,14 @@ def main():
         )
         n_changed += 1
         if len(sample_changes) < 5:
-            sample_changes.append({
-                "id": r["id"],
-                "brand": r["brand"],
-                "model_name": r["model_name"],
-                "changes": change_log,
-            })
+            sample_changes.append(
+                {
+                    "id": r["id"],
+                    "brand": r["brand"],
+                    "model_name": r["model_name"],
+                    "changes": change_log,
+                }
+            )
 
     conn.commit()
     conn.close()

@@ -10,6 +10,7 @@ derived=0.1) when computing cluster mean|Δ| and bias.
 Usage::
     python scripts/benchmark_sweep.py [out.json]
 """
+
 from __future__ import annotations
 
 import json
@@ -55,7 +56,10 @@ def _source_quality(src: str) -> tuple[float, str]:
         return (1.0, "instrumented")
     if any(k in s for k in ("cycle world", "sport rider", "mcn", "consumer news")):
         return (0.7, "magazine")
-    if any(k in s for k in ("fastestlaps", "motorbikecatalog", "bikewale", "accelerationtimes")):
+    if any(
+        k in s
+        for k in ("fastestlaps", "motorbikecatalog", "bikewale", "accelerationtimes")
+    ):
         return (0.5, "aggregator")
     return (0.4, "unknown")
 
@@ -79,13 +83,19 @@ def run_sweep(out_path: str | None):
     # References (always run, never quality-weighted)
     ref_targets = {"K5": 9.97, "R1": 10.30, "Hayabusa": 10.40}
     refs = {}
-    for label, fn in [("K5", gsxr1000_k5), ("R1", yzfr1_4c8), ("Hayabusa", hayabusa_gen1)]:
+    for label, fn in [
+        ("K5", gsxr1000_k5),
+        ("R1", yzfr1_4c8),
+        ("Hayabusa", hayabusa_gen1),
+    ]:
         cfg = fn()
         r = MotoQuantEngine(cfg).run(use_adaptive_dt=False, max_time=26.0)
         refs[label] = {
             "sim": float(r.time_quarter) if r.finished_quarter else None,
             "target": ref_targets[label],
-            "delta": (float(r.time_quarter) - ref_targets[label]) if r.finished_quarter else None,
+            "delta": (float(r.time_quarter) - ref_targets[label])
+            if r.finished_quarter
+            else None,
         }
 
     matched_count = 0
@@ -99,8 +109,10 @@ def run_sweep(out_path: str | None):
             if not r.finished_quarter:
                 continue
             cluster = cluster_for(
-                spec.manufacturer, spec.model_name,
-                spec.displacement_cc, spec.peak_power_hp,
+                spec.manufacturer,
+                spec.model_name,
+                spec.displacement_cc,
+                spec.peak_power_hp,
                 getattr(spec, "stroke_type", 4) or 4,
                 getattr(spec, "category", None),
             )
@@ -121,12 +133,14 @@ def run_sweep(out_path: str | None):
             rows.append(row)
             matched_count += 1
         except Exception as exc:
-            rows.append({
-                "mfr": spec.manufacturer,
-                "model": spec.model_name,
-                "year": byear,
-                "error": f"{type(exc).__name__}: {exc}"[:200],
-            })
+            rows.append(
+                {
+                    "mfr": spec.manufacturer,
+                    "model": spec.model_name,
+                    "year": byear,
+                    "error": f"{type(exc).__name__}: {exc}"[:200],
+                }
+            )
 
     took = time.time() - t0
     summary = _summarize(rows, refs)
@@ -195,12 +209,18 @@ def _print(summary, refs, took, matched):
         if info["sim"] is None:
             print(f"  {label:10}  (DNF)")
             continue
-        print(f"  {label:10} ET={info['sim']:.4f}  target={info['target']:.2f}  Δ={info['delta']:+.4f}")
+        print(
+            f"  {label:10} ET={info['sim']:.4f}  target={info['target']:.2f}  Δ={info['delta']:+.4f}"
+        )
     o = summary["overall"]
     if o:
         print("\n=== OVERALL ===")
-        print(f"  N={o['n']}  weighted bias={o['weighted_bias']:+.3f}s  weighted |Δ|={o['weighted_mean_abs']:.3f}s")
-        print(f"             raw bias={o['raw_bias']:+.3f}s   raw |Δ|={o['raw_mean_abs']:.3f}s")
+        print(
+            f"  N={o['n']}  weighted bias={o['weighted_bias']:+.3f}s  weighted |Δ|={o['weighted_mean_abs']:.3f}s"
+        )
+        print(
+            f"             raw bias={o['raw_bias']:+.3f}s   raw |Δ|={o['raw_mean_abs']:.3f}s"
+        )
         print(f"  within ±0.05s: {o['within_0.05']}/{o['n']}")
         print(f"  within ±0.10s: {o['within_0.10']}/{o['n']}")
         print(f"  within ±0.20s: {o['within_0.20']}/{o['n']}")
@@ -208,7 +228,9 @@ def _print(summary, refs, took, matched):
     for cl, st in sorted(summary["by_cluster"].items()):
         if not st:
             continue
-        print(f"  {cl:24} N={st['n']:3d}  wb={st['weighted_bias']:+6.3f}s  w|Δ|={st['weighted_mean_abs']:6.3f}s  raw|Δ|={st['raw_mean_abs']:6.3f}s")
+        print(
+            f"  {cl:24} N={st['n']:3d}  wb={st['weighted_bias']:+6.3f}s  w|Δ|={st['weighted_mean_abs']:6.3f}s  raw|Δ|={st['raw_mean_abs']:6.3f}s"
+        )
 
 
 if __name__ == "__main__":

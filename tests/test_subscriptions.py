@@ -21,6 +21,7 @@ from unittest.mock import patch
 
 # ─── helpers ─────────────────────────────────────────────────────────────────
 
+
 def _mem_conn() -> sqlite3.Connection:
     conn = sqlite3.connect(":memory:", check_same_thread=False)
     conn.row_factory = sqlite3.Row
@@ -30,12 +31,14 @@ def _mem_conn() -> sqlite3.Connection:
 def _bootstrap(conn: sqlite3.Connection):
     from motoquant.database.subscriptions_repo import ensure_tables as _s
     from motoquant.database.users_repo import ensure_tables as _u
+
     _u(conn)
     _s(conn)
 
 
 def _make_user(conn, email="rider@test.in", tier="pro"):
     from motoquant.database import users_repo as ur
+
     user = ur.get_or_create_user(conn, email)
     ur.set_user_tier(conn, user["id"], tier)
     return ur.get_user_by_id(conn, user["id"])
@@ -46,10 +49,13 @@ class _NoCloseConn:
     Used in tests where the endpoint would close the injected connection,
     preventing post-call assertions from working.
     """
+
     def __init__(self, conn):
         self._conn = conn
+
     def close(self):
         pass  # no-op — keep connection alive for test assertions
+
     def __getattr__(self, name):
         return getattr(self._conn, name)
 
@@ -57,6 +63,7 @@ class _NoCloseConn:
 # ══════════════════════════════════════════════════════════════════════════════
 # 1. Subscription repository
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestSubscriptionRepo(unittest.TestCase):
     def setUp(self):
@@ -69,6 +76,7 @@ class TestSubscriptionRepo(unittest.TestCase):
 
     def test_upsert_creates_subscription(self):
         from motoquant.database import subscriptions_repo as sr
+
         sub = sr.upsert_subscription(
             self.conn,
             user_id=self.user["id"],
@@ -81,6 +89,7 @@ class TestSubscriptionRepo(unittest.TestCase):
 
     def test_upsert_is_idempotent(self):
         from motoquant.database import subscriptions_repo as sr
+
         sr.upsert_subscription(
             self.conn,
             user_id=self.user["id"],
@@ -101,6 +110,7 @@ class TestSubscriptionRepo(unittest.TestCase):
 
     def test_get_active_subscription(self):
         from motoquant.database import subscriptions_repo as sr
+
         sr.upsert_subscription(
             self.conn,
             user_id=self.user["id"],
@@ -114,6 +124,7 @@ class TestSubscriptionRepo(unittest.TestCase):
 
     def test_cancelled_subscription_not_returned_as_active(self):
         from motoquant.database import subscriptions_repo as sr
+
         sr.upsert_subscription(
             self.conn,
             user_id=self.user["id"],
@@ -129,6 +140,7 @@ class TestSubscriptionRepo(unittest.TestCase):
 # 2. License key generation and validation
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestLicenseKeys(unittest.TestCase):
     def setUp(self):
         self.conn = _mem_conn()
@@ -142,18 +154,21 @@ class TestLicenseKeys(unittest.TestCase):
 
     def test_pro_can_generate_one_key(self):
         from motoquant.database import subscriptions_repo as sr
+
         key = sr.create_license_key(self.conn, self.pro_user["id"], "pro")
         self.assertIsNotNone(key)
         self.assertGreater(len(key), 10)
 
     def test_pro_cannot_generate_second_key(self):
         from motoquant.database import subscriptions_repo as sr
+
         sr.create_license_key(self.conn, self.pro_user["id"], "pro")
         second = sr.create_license_key(self.conn, self.pro_user["id"], "pro")
         self.assertIsNone(second, "Pro tier quota is 1 key")
 
     def test_studio_can_generate_up_to_five_keys(self):
         from motoquant.database import subscriptions_repo as sr
+
         keys = []
         for _ in range(5):
             k = sr.create_license_key(self.conn, self.studio_user["id"], "studio")
@@ -164,11 +179,13 @@ class TestLicenseKeys(unittest.TestCase):
 
     def test_free_user_gets_no_key(self):
         from motoquant.database import subscriptions_repo as sr
+
         key = sr.create_license_key(self.conn, self.free_user["id"], "free")
         self.assertIsNone(key)
 
     def test_validate_key_returns_tier(self):
         from motoquant.database import subscriptions_repo as sr
+
         key = sr.create_license_key(self.conn, self.pro_user["id"], "pro")
         row = sr.validate_license_key(self.conn, key, device_id="device-abc")
         self.assertIsNotNone(row)
@@ -176,17 +193,20 @@ class TestLicenseKeys(unittest.TestCase):
 
     def test_validate_invalid_key_returns_none(self):
         from motoquant.database import subscriptions_repo as sr
+
         row = sr.validate_license_key(self.conn, "invalid-key-xyz")
         self.assertIsNone(row)
 
     def test_validate_updates_last_seen(self):
         from motoquant.database import subscriptions_repo as sr
+
         key = sr.create_license_key(self.conn, self.pro_user["id"], "pro")
         row = sr.validate_license_key(self.conn, key)
         self.assertIsNotNone(row["last_seen_at"])
 
     def test_revoke_key(self):
         from motoquant.database import subscriptions_repo as sr
+
         key = sr.create_license_key(self.conn, self.pro_user["id"], "pro")
         # Get the key id
         key_hash = hashlib.sha256(key.encode()).hexdigest()
@@ -201,6 +221,7 @@ class TestLicenseKeys(unittest.TestCase):
 
     def test_revoke_other_users_key_returns_false(self):
         from motoquant.database import subscriptions_repo as sr
+
         key = sr.create_license_key(self.conn, self.pro_user["id"], "pro")
         key_hash = hashlib.sha256(key.encode()).hexdigest()
         row = self.conn.execute(
@@ -214,6 +235,7 @@ class TestLicenseKeys(unittest.TestCase):
 # ══════════════════════════════════════════════════════════════════════════════
 # 3. Webhook handler — tier upgrades and downgrades
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestWebhookHandling(unittest.TestCase):
     """
@@ -237,7 +259,9 @@ class TestWebhookHandling(unittest.TestCase):
         cls.client = TestClient(mini, raise_server_exceptions=False)
         cls.sub_mod = sub_mod
 
-    def _make_event(self, event_type: str, rzp_sub_id: str, user_id: int, tier: str = "pro") -> dict:
+    def _make_event(
+        self, event_type: str, rzp_sub_id: str, user_id: int, tier: str = "pro"
+    ) -> dict:
         return {
             "event": event_type,
             "payload": {
@@ -246,7 +270,9 @@ class TestWebhookHandling(unittest.TestCase):
                         "id": rzp_sub_id,
                         "plan_id": "plan_test_pro",
                         "current_end": int(
-                            (datetime.now(timezone.utc) + timedelta(days=30)).timestamp()
+                            (
+                                datetime.now(timezone.utc) + timedelta(days=30)
+                            ).timestamp()
                         ),
                         "notes": {
                             "user_id": str(user_id),
@@ -264,9 +290,13 @@ class TestWebhookHandling(unittest.TestCase):
         post-call assertions even though the handler calls conn.close().
         """
         wrapped = _NoCloseConn(conn)
-        with patch("motoquant.subscriptions._verify_webhook_signature", return_value=True), \
-             patch("motoquant.subscriptions._get_conn", return_value=wrapped), \
-             patch("motoquant.auth._get_conn", return_value=wrapped):
+        with (
+            patch(
+                "motoquant.subscriptions._verify_webhook_signature", return_value=True
+            ),
+            patch("motoquant.subscriptions._get_conn", return_value=wrapped),
+            patch("motoquant.auth._get_conn", return_value=wrapped),
+        ):
             res = self.client.post(
                 "/api/subscriptions/webhook",
                 content=json.dumps(payload).encode(),
@@ -279,11 +309,14 @@ class TestWebhookHandling(unittest.TestCase):
         _bootstrap(conn)
         user = _make_user(conn, "webhook@test.in", "free")  # start free
 
-        event = self._make_event("subscription.activated", "sub_webhook_001", user["id"], "pro")
+        event = self._make_event(
+            "subscription.activated", "sub_webhook_001", user["id"], "pro"
+        )
         res = self._post_webhook(conn, event)
         self.assertEqual(res.status_code, 200)
 
         from motoquant.database import users_repo as ur
+
         updated = ur.get_user_by_id(conn, user["id"])
         self.assertEqual(updated["tier"], "pro")
         conn.close()
@@ -294,6 +327,7 @@ class TestWebhookHandling(unittest.TestCase):
         user = _make_user(conn, "cancel@test.in", "pro")
         # Pre-create subscription
         from motoquant.database import subscriptions_repo as sr
+
         sr.upsert_subscription(
             conn,
             user_id=user["id"],
@@ -302,11 +336,14 @@ class TestWebhookHandling(unittest.TestCase):
             status="active",
         )
 
-        event = self._make_event("subscription.cancelled", "sub_webhook_cancel", user["id"])
+        event = self._make_event(
+            "subscription.cancelled", "sub_webhook_cancel", user["id"]
+        )
         res = self._post_webhook(conn, event)
         self.assertEqual(res.status_code, 200)
 
         from motoquant.database import users_repo as ur
+
         updated = ur.get_user_by_id(conn, user["id"])
         self.assertEqual(updated["tier"], "free")
         conn.close()
@@ -316,13 +353,16 @@ class TestWebhookHandling(unittest.TestCase):
         _bootstrap(conn)
         user = _make_user(conn, "dup@test.in", "free")
 
-        event = self._make_event("subscription.activated", "sub_dup_001", user["id"], "pro")
+        event = self._make_event(
+            "subscription.activated", "sub_dup_001", user["id"], "pro"
+        )
         res1 = self._post_webhook(conn, event)
         res2 = self._post_webhook(conn, event)
         self.assertEqual(res1.status_code, 200)
         self.assertEqual(res2.status_code, 200)
 
         from motoquant.database import users_repo as ur
+
         updated = ur.get_user_by_id(conn, user["id"])
         self.assertEqual(updated["tier"], "pro")
         conn.close()
@@ -341,7 +381,9 @@ class TestWebhookHandling(unittest.TestCase):
         conn = _mem_conn()
         _bootstrap(conn)
         user = _make_user(conn, "unknown@test.in", "free")
-        event = self._make_event("subscription.some_new_event", "sub_unknown", user["id"])
+        event = self._make_event(
+            "subscription.some_new_event", "sub_unknown", user["id"]
+        )
         res = self._post_webhook(conn, event)
         self.assertEqual(res.status_code, 200)
         body = res.json()
@@ -352,6 +394,7 @@ class TestWebhookHandling(unittest.TestCase):
 # ══════════════════════════════════════════════════════════════════════════════
 # 4. License key endpoint (via FastAPI TestClient)
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestLicenseKeyEndpoints(unittest.TestCase):
     @classmethod
@@ -373,11 +416,14 @@ class TestLicenseKeyEndpoints(unittest.TestCase):
         return {"id": 1, "email": "pro@test.in", "tier": "pro", "is_active": 1}
 
     def _request_key(self, conn, user: dict):
-        with patch("motoquant.subscriptions.get_current_user", return_value=user), \
-             patch("motoquant.subscriptions.require_tier", return_value=lambda: user), \
-             patch("motoquant.subscriptions._get_conn", return_value=conn):
+        with (
+            patch("motoquant.subscriptions.get_current_user", return_value=user),
+            patch("motoquant.subscriptions.require_tier", return_value=lambda: user),
+            patch("motoquant.subscriptions._get_conn", return_value=conn),
+        ):
             # Override the dependency
             from motoquant import subscriptions as sub_mod
+
             sub_mod.router.dependencies = []
             res = self.client.post(
                 "/api/subscriptions/license-key",
@@ -390,6 +436,7 @@ class TestLicenseKeyEndpoints(unittest.TestCase):
         _bootstrap(conn)
         user = _make_user(conn, "vkey@test.in", "pro")
         from motoquant.database import subscriptions_repo as sr
+
         key = sr.create_license_key(conn, user["id"], "pro")
 
         with patch("motoquant.subscriptions._get_conn", return_value=conn):

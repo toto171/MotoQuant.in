@@ -18,6 +18,7 @@ from unittest.mock import patch
 
 # ─── helpers shared across tests ─────────────────────────────────────────────
 
+
 def _mem_conn() -> sqlite3.Connection:
     """In-memory SQLite connection with Row factory."""
     conn = sqlite3.connect(":memory:", check_same_thread=False)
@@ -28,9 +29,8 @@ def _mem_conn() -> sqlite3.Connection:
 def _bootstrap(conn: sqlite3.Connection):
     """Create all auth tables in the given connection."""
     from motoquant.database.users_repo import ensure_tables as _u_tables
+
     _u_tables(conn)
-
-
 
 
 class _NoCloseConn:
@@ -38,12 +38,16 @@ class _NoCloseConn:
     Used in tests where the endpoint would close the injected connection,
     preventing post-call assertions from working.
     """
+
     def __init__(self, conn):
         self._conn = conn
+
     def close(self):
         pass  # no-op
+
     def __getattr__(self, name):
         return getattr(self._conn, name)
+
 
 # ─── Import the modules under test ───────────────────────────────────────────
 
@@ -52,6 +56,7 @@ from motoquant.database import users_repo as users_repo
 # ══════════════════════════════════════════════════════════════════════════════
 # 1. User CRUD
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestUserCrud(unittest.TestCase):
     def setUp(self):
@@ -93,6 +98,7 @@ class TestUserCrud(unittest.TestCase):
 # ══════════════════════════════════════════════════════════════════════════════
 # 2. Magic link issuance and verification
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestMagicLink(unittest.TestCase):
     def setUp(self):
@@ -146,6 +152,7 @@ class TestMagicLink(unittest.TestCase):
 # 3. Session management
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestSessions(unittest.TestCase):
     def setUp(self):
         self.conn = _mem_conn()
@@ -157,12 +164,14 @@ class TestSessions(unittest.TestCase):
 
     def test_create_and_validate_session(self):
         import uuid
+
         jti = str(uuid.uuid4())
         users_repo.create_session(self.conn, self.user["id"], jti)
         self.assertTrue(users_repo.is_session_valid(self.conn, jti))
 
     def test_revoked_session_is_invalid(self):
         import uuid
+
         jti = str(uuid.uuid4())
         users_repo.create_session(self.conn, self.user["id"], jti)
         users_repo.revoke_session(self.conn, jti)
@@ -170,6 +179,7 @@ class TestSessions(unittest.TestCase):
 
     def test_expired_session_is_invalid(self):
         import uuid
+
         jti = str(uuid.uuid4())
         users_repo.create_session(self.conn, self.user["id"], jti)
         # Manually expire
@@ -185,6 +195,7 @@ class TestSessions(unittest.TestCase):
 
     def test_revoke_all_sessions(self):
         import uuid
+
         jtis = [str(uuid.uuid4()) for _ in range(3)]
         for jti in jtis:
             users_repo.create_session(self.conn, self.user["id"], jti)
@@ -197,21 +208,25 @@ class TestSessions(unittest.TestCase):
 # 4. JWT helpers (unit-level, no DB)
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestJwtHelpers(unittest.TestCase):
     """Test the _make_access_token / _decode_token path using the dev fallback."""
 
     def setUp(self):
         # Force dev fallback (no jose) for deterministic testing
         import motoquant.auth as auth_mod
+
         self._orig_jose = auth_mod._JOSE_AVAILABLE
         auth_mod._JOSE_AVAILABLE = False
 
     def tearDown(self):
         import motoquant.auth as auth_mod
+
         auth_mod._JOSE_AVAILABLE = self._orig_jose
 
     def test_make_and_decode_access_token(self):
         import motoquant.auth as auth_mod
+
         token = auth_mod._make_access_token(42, "x@y.com", "pro", "jti-123")
         payload = auth_mod._decode_token(token)
         self.assertIsNotNone(payload)
@@ -221,6 +236,7 @@ class TestJwtHelpers(unittest.TestCase):
 
     def test_make_and_decode_refresh_token(self):
         import motoquant.auth as auth_mod
+
         token = auth_mod._make_refresh_token(42, "jti-456")
         payload = auth_mod._decode_token(token)
         self.assertIsNotNone(payload)
@@ -231,20 +247,23 @@ class TestJwtHelpers(unittest.TestCase):
         import base64
 
         import motoquant.auth as auth_mod
+
         payload_dict = {
             "sub": "1",
             "jti": "x",
             "type": "access",
             "exp": (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat(),
         }
-        token = "dev." + base64.urlsafe_b64encode(
-            json.dumps(payload_dict).encode()
-        ).decode()
+        token = (
+            "dev."
+            + base64.urlsafe_b64encode(json.dumps(payload_dict).encode()).decode()
+        )
         result = auth_mod._decode_token(token)
         self.assertIsNone(result)
 
     def test_garbage_token_returns_none(self):
         import motoquant.auth as auth_mod
+
         result = auth_mod._decode_token("not-a-valid-token")
         self.assertIsNone(result)
 
@@ -252,6 +271,7 @@ class TestJwtHelpers(unittest.TestCase):
 # ══════════════════════════════════════════════════════════════════════════════
 # 5. require_tier dependency (via FastAPI TestClient)
 # ══════════════════════════════════════════════════════════════════════════════
+
 
 class TestRequireTier(unittest.TestCase):
     """
@@ -285,6 +305,7 @@ class TestRequireTier(unittest.TestCase):
     def _make_token(self, tier: str) -> str:
         """Create a dev-mode access token for a fake user."""
         import motoquant.auth as auth_mod
+
         orig = auth_mod._JOSE_AVAILABLE
         auth_mod._JOSE_AVAILABLE = False
         try:
@@ -295,9 +316,7 @@ class TestRequireTier(unittest.TestCase):
 
     def _patch_session_valid(self):
         """Patch DB session check to always return True."""
-        return patch(
-            "motoquant.auth._users.is_session_valid", return_value=True
-        )
+        return patch("motoquant.auth._users.is_session_valid", return_value=True)
 
     def _patch_get_user(self, tier: str):
         """Patch DB user lookup to return a fake user with given tier."""
@@ -352,6 +371,7 @@ class TestRequireTier(unittest.TestCase):
 # 6. Magic-link endpoint rate-limit (via FastAPI TestClient)
 # ══════════════════════════════════════════════════════════════════════════════
 
+
 class TestMagicLinkEndpoint(unittest.TestCase):
     """Integration test for POST /api/auth/magic-link rate limiting."""
 
@@ -368,6 +388,7 @@ class TestMagicLinkEndpoint(unittest.TestCase):
         cls.app = auth_mod.router
         # Build a minimal FastAPI app mounting the auth router
         from fastapi import FastAPI
+
         mini = FastAPI()
         mini.include_router(auth_mod.router, prefix="/api/auth")
         cls.client = TestClient(mini, raise_server_exceptions=False)

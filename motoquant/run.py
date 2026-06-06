@@ -2951,12 +2951,8 @@ def cmd_chat(args):
         return 0 if result.error is None else 1
 
     if verbose:
-        print(
-            f"\n  Parsed: bike='{result.bike_name}' bike_id={result.bike_id}"
-        )
-        print(
-            f"          venue='{result.venue_name}' venue_id={result.venue_id}"
-        )
+        print(f"\n  Parsed: bike='{result.bike_name}' bike_id={result.bike_id}")
+        print(f"          venue='{result.venue_name}' venue_id={result.venue_id}")
         print(f"          goal={result.optimization_goal}")
         if result.parsed_notes:
             print(f"          notes: {result.parsed_notes}")
@@ -2974,7 +2970,9 @@ def cmd_chat(args):
             print("  Did you mean:")
             for s in result.bike_suggestions:
                 yr = f" ({s['year_range']})" if s.get("year_range") else ""
-                print(f"    - {s.get('manufacturer','?')} {s.get('model','?')}{yr}  [id={s.get('id')}]")
+                print(
+                    f"    - {s.get('manufacturer', '?')} {s.get('model', '?')}{yr}  [id={s.get('id')}]"
+                )
         else:
             print("  Try `bikes` to browse the catalog.")
         return 1

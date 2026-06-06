@@ -31,11 +31,36 @@ if TYPE_CHECKING:
 # GSX1300R Gen1" + manufacturer="Suzuki" (joined separately), we strip the
 # manufacturer prefix from the query before matching against model_name.
 _KNOWN_MANUFACTURERS = {
-    "suzuki", "yamaha", "honda", "kawasaki", "ducati", "bmw", "ktm",
-    "aprilia", "triumph", "harley-davidson", "harley", "indian",
-    "royal enfield", "re", "bajaj", "tvs", "hero", "yezdi", "jawa",
-    "benelli", "cfmoto", "qj motor", "qj", "mahindra", "hyosung",
-    "mv agusta", "moto guzzi", "buell", "husqvarna", "bimota",
+    "suzuki",
+    "yamaha",
+    "honda",
+    "kawasaki",
+    "ducati",
+    "bmw",
+    "ktm",
+    "aprilia",
+    "triumph",
+    "harley-davidson",
+    "harley",
+    "indian",
+    "royal enfield",
+    "re",
+    "bajaj",
+    "tvs",
+    "hero",
+    "yezdi",
+    "jawa",
+    "benelli",
+    "cfmoto",
+    "qj motor",
+    "qj",
+    "mahindra",
+    "hyosung",
+    "mv agusta",
+    "moto guzzi",
+    "buell",
+    "husqvarna",
+    "bimota",
 }
 
 # Strip "(2024-2026)", "(2024)", etc. from candidate names before scoring.
@@ -88,7 +113,7 @@ def _strip_manufacturer_prefix(query: str) -> tuple[str, str | None]:
     # Try multi-word manufacturers first (so "royal enfield" matches before "re")
     for mfr in sorted(_KNOWN_MANUFACTURERS, key=len, reverse=True):
         if q.startswith(mfr + " ") or q == mfr:
-            stripped = q[len(mfr):].strip()
+            stripped = q[len(mfr) :].strip()
             return stripped, mfr
     return q, None
 

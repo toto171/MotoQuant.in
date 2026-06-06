@@ -23,9 +23,8 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from typing_extensions import TypedDict  # py<3.12-safe with pydantic
-
 import numpy as np
+from typing_extensions import TypedDict  # py<3.12-safe with pydantic
 
 from ..constants import MS_TO_KMH, MS_TO_MPH
 from ..physics import MotoQuantEngine
@@ -51,12 +50,12 @@ class _SimDictBase(TypedDict):
     do NOT rename without updating both surfaces.
     """
 
-    et_quarter_s: float    # quarter-mile elapsed time in seconds
+    et_quarter_s: float  # quarter-mile elapsed time in seconds
     trap_speed_kmh: float  # trap speed in km/h
     trap_speed_mph: float  # trap speed in mph
-    et_60ft_s: float       # 60-foot split in seconds
-    peak_accel_g: float    # peak longitudinal acceleration in g
-    bike_name: str         # human-readable bike name (filled in by caller)
+    et_60ft_s: float  # 60-foot split in seconds
+    peak_accel_g: float  # peak longitudinal acceleration in g
+    bike_name: str  # human-readable bike name (filled in by caller)
 
 
 class SimDict(_SimDictBase, total=False):
@@ -67,7 +66,7 @@ class SimDict(_SimDictBase, total=False):
     or for simulations shorter than the split distance).
     """
 
-    et_330ft_s: float   # 330-foot split (if available)
+    et_330ft_s: float  # 330-foot split (if available)
     et_eighth_s: float  # 1/8-mile split  (if available)
     et_1000ft_s: float  # 1000-foot split (if available)
 
@@ -100,9 +99,9 @@ class CompareDict(TypedDict):
 
     a: _CompareBikeEntry
     b: _CompareBikeEntry
-    delta_et_s: float       # A.et_quarter_s - B.et_quarter_s, rounded to 4dp
-    delta_trap_kmh: float   # A.trap_speed_kmh - B.trap_speed_kmh, rounded to 1dp
-    faster: str             # "A" | "B" | "tie"
+    delta_et_s: float  # A.et_quarter_s - B.et_quarter_s, rounded to 4dp
+    delta_trap_kmh: float  # A.trap_speed_kmh - B.trap_speed_kmh, rounded to 1dp
+    faster: str  # "A" | "B" | "tie"
 
 
 # ───────────────────────────────────────────────────────────────────
@@ -141,10 +140,10 @@ class RankResult(TypedDict):
     harness (which reads ``top``) — do NOT rename without updating both.
     """
 
-    filter: dict[str, Any]      # subset of parsed-query kw (limit stripped)
-    matches: int                # total catalog rows matching the filter
-    candidates_simulated: int   # subset actually run through the engine
-    top: list[_RankEntry]       # top-N sorted by sim ET ascending
+    filter: dict[str, Any]  # subset of parsed-query kw (limit stripped)
+    matches: int  # total catalog rows matching the filter
+    candidates_simulated: int  # subset actually run through the engine
+    top: list[_RankEntry]  # top-N sorted by sim ET ascending
 
 
 # ───────────────────────────────────────────────────────────────────
@@ -200,12 +199,12 @@ class RecommendResult(TypedDict):
 
     bike_id: int | None
     bike_name: str | None
-    build_tier: str             # "stage_1" | "stage_2" | "all_out"
-    budget_inr: float | None    # user-requested budget (None = unspecified)
-    effective_budget_inr: float # tier-default fallback when budget_inr is None
+    build_tier: str  # "stage_1" | "stage_2" | "all_out"
+    budget_inr: float | None  # user-requested budget (None = unspecified)
+    effective_budget_inr: float  # tier-default fallback when budget_inr is None
     parts: list[_RecommendPart]
     tires: list[_RecommendTire]
-    total_inr: float            # sum of parts + tires price_inr
+    total_inr: float  # sum of parts + tires price_inr
 
 
 # ───────────────────────────────────────────────────────────────────
@@ -221,8 +220,8 @@ class ExplainResult(TypedDict):
     answer was grounded in a sim run.
     """
 
-    has_sim_grounding: bool     # True iff a sim was run to anchor the explanation
-    bike_id: int | None         # bike resolved from the parsed query (or None)
+    has_sim_grounding: bool  # True iff a sim was run to anchor the explanation
+    bike_id: int | None  # bike resolved from the parsed query (or None)
 
 
 # ───────────────────────────────────────────────────────────────────
@@ -344,22 +343,38 @@ def run_chat_pipeline(
         return _run_rank(parsed, db, client, result, run_summary=run_summary)
     if intent == "compare":
         return _run_compare(
-            parsed, db, client, result,
-            run_summary=run_summary, suggestion_limit=suggestion_limit,
+            parsed,
+            db,
+            client,
+            result,
+            run_summary=run_summary,
+            suggestion_limit=suggestion_limit,
         )
     if intent == "recommend":
         return _run_recommend(
-            parsed, db, client, result,
-            run_summary=run_summary, suggestion_limit=suggestion_limit,
+            parsed,
+            db,
+            client,
+            result,
+            run_summary=run_summary,
+            suggestion_limit=suggestion_limit,
         )
     if intent == "choose_bike":
         return _run_choose_bike(
-            parsed, db, client, result, run_summary=run_summary,
+            parsed,
+            db,
+            client,
+            result,
+            run_summary=run_summary,
         )
     # default → simulate
     return _run_simulate(
-        parsed, db, client, result,
-        run_summary=run_summary, suggestion_limit=suggestion_limit,
+        parsed,
+        db,
+        client,
+        result,
+        run_summary=run_summary,
+        suggestion_limit=suggestion_limit,
     )
 
 
@@ -436,7 +451,8 @@ def _run_compare(
             sugg.extend(_bike_suggestions(db, name, limit=suggestion_limit))
         seen: set[int] = set()
         result.bike_suggestions = [
-            r for r in sugg
+            r
+            for r in sugg
             if r.get("id") and not (r["id"] in seen or seen.add(r["id"]))
         ][:suggestion_limit]
         return result
@@ -553,9 +569,12 @@ def _run_rank(
 
         # ── Category keywords ──
         for needle, cat in [
-            ("naked", "naked"), ("cruiser", "cruiser"),
-            ("adventure", "adventure"), ("touring", "touring"),
-            ("scooter", "scooter"), ("sport", "sport"),
+            ("naked", "naked"),
+            ("cruiser", "cruiser"),
+            ("adventure", "adventure"),
+            ("touring", "touring"),
+            ("scooter", "scooter"),
+            ("sport", "sport"),
         ]:
             if needle in rq:
                 kw["category"] = cat
@@ -587,8 +606,12 @@ def _run_rank(
                     # No config seeded for this bike — fall back to validation_et_s
                     et = r.get("validation_et_s")
                     sim_rows.append(
-                        {**r, "sim_et_s": float(et) if et else None,
-                         "sim_trap_kmh": None, "sim_source": "validation"}
+                        {
+                            **r,
+                            "sim_et_s": float(et) if et else None,
+                            "sim_trap_kmh": None,
+                            "sim_source": "validation",
+                        }
                     )
                     continue
                 config = db.bikes.to_config(config_row["id"], environment=env)
@@ -600,22 +623,26 @@ def _run_rank(
                 _apply_power_boost(config, parsed)
                 engine = MotoQuantEngine(config)
                 sim = engine.run()
-                sim_rows.append({
-                    **r,
-                    "sim_et_s": round(float(sim.time_quarter), 3),
-                    "sim_trap_kmh": round(float(sim.speed_quarter) * MS_TO_KMH, 1),
-                    "sim_60ft_s": round(float(sim.time_60ft), 3),
-                    "sim_source": "engine",
-                })
+                sim_rows.append(
+                    {
+                        **r,
+                        "sim_et_s": round(float(sim.time_quarter), 3),
+                        "sim_trap_kmh": round(float(sim.speed_quarter) * MS_TO_KMH, 1),
+                        "sim_60ft_s": round(float(sim.time_60ft), 3),
+                        "sim_source": "engine",
+                    }
+                )
             except Exception:
                 # Fall back to validation if sim fails
                 et = r.get("validation_et_s")
-                sim_rows.append({
-                    **r,
-                    "sim_et_s": float(et) if et else None,
-                    "sim_trap_kmh": None,
-                    "sim_source": "validation-fallback",
-                })
+                sim_rows.append(
+                    {
+                        **r,
+                        "sim_et_s": float(et) if et else None,
+                        "sim_trap_kmh": None,
+                        "sim_source": "validation-fallback",
+                    }
+                )
 
         # Final sort: by sim_et_s ascending, None last
         def _final_key(r):
@@ -677,40 +704,40 @@ def _run_rank(
 # Tuple shape: (substring_match_key, display_label_for_prompt).
 
 _TIER_STAGE_1 = [
-    ("exhaust",      "Exhaust"),
-    ("air_filter",   "Air filter"),
-    ("ecu",          "ECU flash / piggyback"),
-    ("fuel_system",  "Fuel system"),
+    ("exhaust", "Exhaust"),
+    ("air_filter", "Air filter"),
+    ("ecu", "ECU flash / piggyback"),
+    ("fuel_system", "Fuel system"),
 ]
 
 _TIER_STAGE_2 = _TIER_STAGE_1 + [
-    ("clutch",       "Clutch / slipper"),
+    ("clutch", "Clutch / slipper"),
     ("quickshifter", "Quickshifter"),
-    ("sprocket",     "Sprocket"),
-    ("chain",        "Chain"),
-    ("battery",      "Lightweight battery"),
+    ("sprocket", "Sprocket"),
+    ("chain", "Chain"),
+    ("battery", "Lightweight battery"),
 ]
 
 _TIER_ALL_OUT = _TIER_STAGE_2 + [
-    ("suspension",        "Suspension"),
-    ("brakes",            "Brakes"),
-    ("weight_reduction",  "Weight reduction"),
-    ("nitrous",           "Nitrous"),
-    ("boost",             "Boost / forced induction"),
-    ("wheelie",           "Wheelie / launch aid"),
+    ("suspension", "Suspension"),
+    ("brakes", "Brakes"),
+    ("weight_reduction", "Weight reduction"),
+    ("nitrous", "Nitrous"),
+    ("boost", "Boost / forced induction"),
+    ("wheelie", "Wheelie / launch aid"),
 ]
 
 _TIER_RECIPES = {
-    "stage_1":  _TIER_STAGE_1,
-    "stage_2":  _TIER_STAGE_2,
-    "all_out":  _TIER_ALL_OUT,
+    "stage_1": _TIER_STAGE_1,
+    "stage_2": _TIER_STAGE_2,
+    "all_out": _TIER_ALL_OUT,
 }
 
 # Soft budget caps when the user didn't specify one. These are guidance —
 # the recommend handler will pick the highest-priced compatible part within
 # the tier ceiling so a stage_1 ask doesn't return Öhlins and Brembo Stylema.
 _TIER_DEFAULT_BUDGET_INR = {
-    "stage_1":  60_000,
+    "stage_1": 60_000,
     "stage_2": 200_000,
     "all_out": None,  # no cap
 }
@@ -754,7 +781,8 @@ def _run_recommend(
         if parsed.parts_categories:
             wanted = {c.lower() for c in parsed.parts_categories}
             parts = [
-                p for p in parts
+                p
+                for p in parts
                 if any(c in (p.get("category_name") or "").lower() for c in wanted)
             ]
 
@@ -791,13 +819,9 @@ def _run_recommend(
         recipe = _TIER_RECIPES.get(tier, _TIER_STAGE_2)
         # Effective budget: explicit > tier default > infinite
         effective_budget = (
-            budget
-            if budget is not None
-            else _TIER_DEFAULT_BUDGET_INR.get(tier)
+            budget if budget is not None else _TIER_DEFAULT_BUDGET_INR.get(tier)
         )
-        budget_cap = (
-            effective_budget * 1.2 if effective_budget else float("inf")
-        )
+        budget_cap = effective_budget * 1.2 if effective_budget else float("inf")
         selected: list[dict[str, Any]] = []
         used_budget = 0.0
         for cat_key, cat_label in recipe:
@@ -832,8 +856,7 @@ def _run_recommend(
         try:
             for ftype in ("recommended", "drag_prep"):
                 tires.extend(
-                    db.tires.get_bike_fitments(parsed.bike_id, fitment_type=ftype)
-                    or []
+                    db.tires.get_bike_fitments(parsed.bike_id, fitment_type=ftype) or []
                 )
         except Exception:
             pass
@@ -842,9 +865,7 @@ def _run_recommend(
         # Dedupe on tire_model_id; keep highest mu_peak first
         seen: set[int] = set()
         uniq: list[dict[str, Any]] = []
-        for t in sorted(
-            tires, key=lambda t: -float(t.get("mu_peak") or 0.0)
-        ):
+        for t in sorted(tires, key=lambda t: -float(t.get("mu_peak") or 0.0)):
             tid = t.get("tire_model_id")
             if tid in seen:
                 continue
@@ -939,6 +960,7 @@ def _run_explain(
     elif run_summary:
         # No client passed — try the default
         from .client import get_default_client
+
         try:
             result.summary = _summarize_explain(
                 parsed, sim_for_context, get_default_client()
@@ -1074,18 +1096,21 @@ def _bike_suggestions(
         return []
     try:
         from .resolver import resolve_bike
+
         _, suggestions = resolve_bike(bike_name, db)
     except Exception:
         suggestions = []
 
     out = []
     for r in suggestions[:limit]:
-        out.append({
-            "id": r.get("id"),
-            "manufacturer": r.get("manufacturer_name"),
-            "model": r.get("model_name"),
-            "year_range": _format_year_range(r),
-        })
+        out.append(
+            {
+                "id": r.get("id"),
+                "manufacturer": r.get("manufacturer_name"),
+                "model": r.get("model_name"),
+                "year_range": _format_year_range(r),
+            }
+        )
     return out
 
 
@@ -1108,6 +1133,7 @@ def _llm_text(client: LLMClient | None, system: str, user: str) -> str:
     """Call the LLM for a plain-text response. Falls back gracefully."""
     if client is None:
         from .client import get_default_client
+
         client = get_default_client()
     return client.call_text(system=system, user=user)
 
@@ -1192,15 +1218,15 @@ def _summarize_recommend(
         "You are MotoQuant, a drag-racing tuner. Build a concrete bike-specific "
         "upgrade plan from the catalog rows below. STRICT RULES: "
         "(1) Use ONLY the exact parts and tires listed below — DO NOT invent "
-        "any brand, model, or price. If you don\'t know a number, omit it. "
+        "any brand, model, or price. If you don't know a number, omit it. "
         "(2) Every line must cite brand + model + INR price exactly as given. "
         "(3) Group by category in this order: Exhaust, ECU, Air filter, Fuel "
         "system, Tire, Clutch, Sprockets/Chain, Other. Skip categories that "
         "have no row. (4) For each part, add a short reason (1 short clause) "
-        "explaining what it changes (e.g. \'+8 hp top-end\', \'cuts launch "
-        "wheelspin\'). (5) End with two lines: \'Total: ₹X\' and (if a budget "
-        "was given) \'Budget remaining: ₹Y\'. (6) No generic preamble. No "
-        "\'consider also...\' suggestions for products not in the data. Keep it "
+        "explaining what it changes (e.g. '+8 hp top-end', 'cuts launch "
+        "wheelspin'). (5) End with two lines: 'Total: ₹X' and (if a budget "
+        "was given) 'Budget remaining: ₹Y'. (6) No generic preamble. No "
+        "'consider also...' suggestions for products not in the data. Keep it "
         "tight — markdown bullets, no fluff."
     )
 
@@ -1212,7 +1238,9 @@ def _summarize_recommend(
     # Group parts by category for the prompt
     grouped: dict[str, list[dict[str, Any]]] = {}
     for p in parts:
-        label = p.get("label") or p.get("category_display") or p.get("category") or "Other"
+        label = (
+            p.get("label") or p.get("category_display") or p.get("category") or "Other"
+        )
         grouped.setdefault(label, []).append(p)
 
     cat_blocks = []
@@ -1245,14 +1273,18 @@ def _summarize_recommend(
                 f"  - {mfr} {model} {size} ({pos}, {ftype}){mu_txt}"
                 + (f" — ₹{price:,}" if price else "")
             )
-        cat_blocks.append("Tires (recommended/drag-prep fitments):\n" + "\n".join(tire_lines))
+        cat_blocks.append(
+            "Tires (recommended/drag-prep fitments):\n" + "\n".join(tire_lines)
+        )
 
-    parts_section = "\n\n".join(cat_blocks) if cat_blocks else "(no compatible parts found)"
+    parts_section = (
+        "\n\n".join(cat_blocks) if cat_blocks else "(no compatible parts found)"
+    )
 
     user = (
-        f"User asked: {parsed.raw_query}\n"
-        f"Bike: {bike}\n"
-        f"Budget: ₹{budget:,}\n" if budget else "Budget: (unspecified)\n"
+        f"User asked: {parsed.raw_query}\nBike: {bike}\nBudget: ₹{budget:,}\n"
+        if budget
+        else "Budget: (unspecified)\n"
     )
     user = (
         f"User asked: {parsed.raw_query}\n"
@@ -1274,9 +1306,9 @@ def _summarize_explain(
         "background. Answer concretely in 3-5 sentences. STRICT RULES: "
         "(1) If a sim result is in the data, cite exact ET / trap / 60ft. "
         "(2) If you state a physical effect (rho, DA, traction), give a "
-        "specific number / ratio / direction (\'+0.05s slower\', "
-        "\'8 % less power\') — never \'significantly\' / \'noticeable\' / "
-        "\'a bit\'. (3) Indian context: prefer Aamby Valley / MMRT / BIC / "
+        "specific number / ratio / direction ('+0.05s slower', "
+        "'8 % less power') — never 'significantly' / 'noticeable' / "
+        "'a bit'. (3) Indian context: prefer Aamby Valley / MMRT / BIC / "
         "Kari examples; use INR. (4) End with a one-line actionable "
         "takeaway the user can apply at the strip. No preamble."
     )
@@ -1352,7 +1384,9 @@ def _apply_archetype(config: Any, parsed: ParsedSimRequest, db: MotoQuantDB) -> 
     chassis = getattr(config, "chassis", None)
     if chassis is not None and row["mass_delta_kg"]:
         try:
-            chassis.dry_mass_kg = (chassis.dry_mass_kg or 0.0) + float(row["mass_delta_kg"])
+            chassis.dry_mass_kg = (chassis.dry_mass_kg or 0.0) + float(
+                row["mass_delta_kg"]
+            )
         except Exception:
             pass
 
@@ -1365,7 +1399,9 @@ def _apply_archetype(config: Any, parsed: ParsedSimRequest, db: MotoQuantDB) -> 
                 pass
         if row["frontal_area_delta_m2"]:
             try:
-                aero.frontal_area_m2 = (aero.frontal_area_m2 or 0.0) + float(row["frontal_area_delta_m2"])
+                aero.frontal_area_m2 = (aero.frontal_area_m2 or 0.0) + float(
+                    row["frontal_area_delta_m2"]
+                )
             except Exception:
                 pass
 
@@ -1403,44 +1439,52 @@ def _apply_archetype(config: Any, parsed: ParsedSimRequest, db: MotoQuantDB) -> 
 # to narrow the catalog before running candidate sims.
 _CLASS_FILTERS = {
     "litre": {
-        "disp_min": 950, "disp_max": 1200,
+        "disp_min": 950,
+        "disp_max": 1200,
         "categories": {"sport", "naked"},
         "label": "Litre / open-class superbike",
     },
     "600": {
-        "disp_min": 580, "disp_max": 700,
+        "disp_min": 580,
+        "disp_max": 700,
         "categories": {"sport", "naked"},
         "label": "Supersport 600",
     },
     "300": {
-        "disp_min": 250, "disp_max": 410,
+        "disp_min": 250,
+        "disp_max": 410,
         "categories": {"sport", "naked"},
         "label": "Entry-level sport 300",
     },
     "twin": {
-        "disp_min": 470, "disp_max": 800,
+        "disp_min": 470,
+        "disp_max": 800,
         "categories": {"sport", "naked", "cruiser", "modern_classic"},
         "cylinder_count": 2,
         "label": "Mid-displacement twin",
     },
     "cruiser": {
-        "disp_min": 800, "disp_max": 2500,
+        "disp_min": 800,
+        "disp_max": 2500,
         "categories": {"cruiser", "muscle"},
         "label": "Cruiser / muscle",
     },
     "2t": {
-        "disp_min": 95, "disp_max": 800,
+        "disp_min": 95,
+        "disp_max": 800,
         "stroke_type": 2,
         "label": "Two-stroke (vintage / dirt)",
     },
     "two-stroke": {
-        "disp_min": 95, "disp_max": 800,
+        "disp_min": 95,
+        "disp_max": 800,
         "stroke_type": 2,
         "label": "Two-stroke (vintage / dirt)",
     },
     "modified-hayabusa": {
         "model_keywords": ["Hayabusa"],
-        "disp_min": 1290, "disp_max": 1350,
+        "disp_min": 1290,
+        "disp_max": 1350,
         "label": "Pro Street modified Hayabusa",
     },
     "naked": {
@@ -1449,7 +1493,8 @@ _CLASS_FILTERS = {
         "label": "Streetfighter / naked",
     },
     "small-cc": {
-        "disp_min": 145, "disp_max": 250,
+        "disp_min": 145,
+        "disp_max": 250,
         "categories": {"sport", "naked", "underbone"},
         "label": "Small-cc Indian / SE Asia drag",
     },
@@ -1485,10 +1530,25 @@ def _choose_bike_candidate_query(parsed, db):
 
     if parsed.prefer_indian:
         indian_mfrs = (
-            "Bajaj", "TVS", "Hero", "Royal Enfield", "Mahindra", "Yezdi",
-            "Jawa", "Indian Motorcycle",
-            "Yamaha", "Honda", "Suzuki", "Kawasaki", "KTM", "Triumph",
-            "BMW", "Aprilia", "Husqvarna", "CFMoto", "Benelli",
+            "Bajaj",
+            "TVS",
+            "Hero",
+            "Royal Enfield",
+            "Mahindra",
+            "Yezdi",
+            "Jawa",
+            "Indian Motorcycle",
+            "Yamaha",
+            "Honda",
+            "Suzuki",
+            "Kawasaki",
+            "KTM",
+            "Triumph",
+            "BMW",
+            "Aprilia",
+            "Husqvarna",
+            "CFMoto",
+            "Benelli",
             "Harley-Davidson",
         )
         ph = ",".join(["?"] * len(indian_mfrs))
@@ -1523,8 +1583,10 @@ def _run_choose_bike(parsed, db, client, result, *, run_summary):
     if not rows:
         result.error = "no_candidates"
         result.error_detail = (
-            "No bikes match target_class='" + str(parsed.target_class)
-            + "' with prefer_indian=" + str(parsed.prefer_indian)
+            "No bikes match target_class='"
+            + str(parsed.target_class)
+            + "' with prefer_indian="
+            + str(parsed.prefer_indian)
         )
         return result
 
@@ -1543,12 +1605,16 @@ def _run_choose_bike(parsed, db, client, result, *, run_summary):
             _apply_power_boost(cfg, parsed)
             engine = MotoQuantEngine(cfg)
             sim = engine.run()
-            sim_rows.append({
-                **r,
-                "sim_et_s": round(float(sim.time_quarter), 3),
-                "sim_trap_kmh": round(float(sim.speed_quarter) * MS_TO_KMH, 1),
-                "sim_60ft_s": round(float(getattr(sim, "time_60ft", 0.0) or 0.0), 3),
-            })
+            sim_rows.append(
+                {
+                    **r,
+                    "sim_et_s": round(float(sim.time_quarter), 3),
+                    "sim_trap_kmh": round(float(sim.speed_quarter) * MS_TO_KMH, 1),
+                    "sim_60ft_s": round(
+                        float(getattr(sim, "time_60ft", 0.0) or 0.0), 3
+                    ),
+                }
+            )
         except Exception:
             continue
 
@@ -1565,9 +1631,9 @@ def _run_choose_bike(parsed, db, client, result, *, run_summary):
 
     result.choose_bike_result = {
         "target_class": parsed.target_class,
-        "class_label": _CLASS_FILTERS.get(
-            (parsed.target_class or "").lower(), {}
-        ).get("label"),
+        "class_label": _CLASS_FILTERS.get((parsed.target_class or "").lower(), {}).get(
+            "label"
+        ),
         "venue_name": parsed.venue_name,
         "venue_id": parsed.venue_id,
         "budget_inr": parsed.budget_inr,
@@ -1638,26 +1704,49 @@ def _summarize_choose_bike(parsed, cb, client):
     lines.append("")
     lines.append("HERO PICK:")
     lines.append(
-        "  " + str(hero.get("manufacturer")) + " " + str(hero.get("model_name"))
-        + " (" + str(hero.get("year_from")) + "-" + str(hero.get("year_to")) + ") — "
-        + str(hero.get("displacement_cc")) + "cc, "
-        + str(hero.get("peak_power_hp")) + " hp, "
-        + str(hero.get("dry_mass_kg")) + " kg dry"
+        "  "
+        + str(hero.get("manufacturer"))
+        + " "
+        + str(hero.get("model_name"))
+        + " ("
+        + str(hero.get("year_from"))
+        + "-"
+        + str(hero.get("year_to"))
+        + ") — "
+        + str(hero.get("displacement_cc"))
+        + "cc, "
+        + str(hero.get("peak_power_hp"))
+        + " hp, "
+        + str(hero.get("dry_mass_kg"))
+        + " kg dry"
     )
     lines.append(
-        "  Sim ET " + str(hero.get("sim_et_s")) + " s @ trap "
-        + str(hero.get("sim_trap_kmh")) + " km/h (60ft "
-        + str(hero.get("sim_60ft_s")) + " s)"
+        "  Sim ET "
+        + str(hero.get("sim_et_s"))
+        + " s @ trap "
+        + str(hero.get("sim_trap_kmh"))
+        + " km/h (60ft "
+        + str(hero.get("sim_60ft_s"))
+        + " s)"
     )
     lines.append("")
     lines.append("RUNNERS-UP:")
     for r in runners:
         lines.append(
-            "  " + str(r.get("manufacturer")) + " " + str(r.get("model_name")) + " — "
-            + str(r.get("peak_power_hp")) + " hp / "
-            + str(r.get("dry_mass_kg")) + " kg dry, "
-            + "sim ET " + str(r.get("sim_et_s")) + " s @ "
-            + str(r.get("sim_trap_kmh")) + " km/h"
+            "  "
+            + str(r.get("manufacturer"))
+            + " "
+            + str(r.get("model_name"))
+            + " — "
+            + str(r.get("peak_power_hp"))
+            + " hp / "
+            + str(r.get("dry_mass_kg"))
+            + " kg dry, "
+            + "sim ET "
+            + str(r.get("sim_et_s"))
+            + " s @ "
+            + str(r.get("sim_trap_kmh"))
+            + " km/h"
         )
 
     return _llm_text(client, sys_p, "\n".join(lines))

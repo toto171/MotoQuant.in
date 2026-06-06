@@ -34,7 +34,6 @@ Parts count: 27 exhausts (slip-on + full-system variants per bike/brand pairing)
 Price range: ₹18,000–₹2,50,000 depending on brand/material tier.
 """
 
-
 from motoquant.database.seed_catalogs import _create_parts_batch
 
 

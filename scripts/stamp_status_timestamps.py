@@ -19,6 +19,7 @@ Exit codes:
     0 — stamped (or no-op if file already had this exact timestamp)
     1 — STATUS.md missing or malformed (no _updated field, no last_run line)
 """
+
 from __future__ import annotations
 
 import argparse
@@ -36,9 +37,7 @@ _LAST_RUN_COMMENT = (
 
 def stamp(text: str, now_iso: str) -> tuple[str, bool, bool]:
     """Apply both substitutions. Returns (new_text, updated_changed, last_run_changed)."""
-    new_text, n_updated = _UPDATED_RE.subn(
-        f'"_updated": "{now_iso}",', text, count=1
-    )
+    new_text, n_updated = _UPDATED_RE.subn(f'"_updated": "{now_iso}",', text, count=1)
     new_text, n_last_run = _LAST_RUN_RE.subn(
         f"last_run: {now_iso}  {_LAST_RUN_COMMENT}",
         new_text,

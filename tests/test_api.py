@@ -718,6 +718,7 @@ if __name__ == "__main__":
 # Surrogate inference tests  (/api/surrogate/*)
 # ═══════════════════════════════════════════════════════════════════════════
 
+
 class TestSurrogatePredict(unittest.TestCase):
     """
     Tests for POST /api/surrogate/predict.
@@ -784,8 +785,11 @@ class TestSurrogatePredict(unittest.TestCase):
         if r.status_code != 200:
             return
         body = r.json()
-        self.assertLess(body["inference_ms"], 10.0,
-                        f"inference_ms={body['inference_ms']:.2f} exceeds 10 ms budget")
+        self.assertLess(
+            body["inference_ms"],
+            10.0,
+            f"inference_ms={body['inference_ms']:.2f} exceeds 10 ms budget",
+        )
 
     def test_power_boost_makes_faster(self):
         """50 % power boost should predict a lower ET than stock."""
@@ -795,8 +799,11 @@ class TestSurrogatePredict(unittest.TestCase):
             self.skipTest("Surrogate model not available")
         if r_stock.status_code != 200 or r_boost.status_code != 200:
             return
-        self.assertLess(r_boost.json()["et_s"], r_stock.json()["et_s"],
-                        "50 % power boost should reduce predicted ET")
+        self.assertLess(
+            r_boost.json()["et_s"],
+            r_stock.json()["et_s"],
+            "50 % power boost should reduce predicted ET",
+        )
 
 
 class TestSurrogateCompare(unittest.TestCase):
@@ -805,7 +812,9 @@ class TestSurrogateCompare(unittest.TestCase):
     def test_compare_same_config(self):
         """Comparing identical configs should return delta_et_s near 0."""
         cfg = {"power_boost_pct": 0.0, "mass_delta_kg": 0.0}
-        r = client.post("/api/surrogate/compare", json={"config_a": cfg, "config_b": cfg})
+        r = client.post(
+            "/api/surrogate/compare", json={"config_a": cfg, "config_b": cfg}
+        )
         if r.status_code == 503:
             self.skipTest("Surrogate model not available")
         self.assertEqual(r.status_code, 200)
@@ -817,7 +826,9 @@ class TestSurrogateCompare(unittest.TestCase):
         """Config A (boosted) should be faster; delta_et_s > 0 and faster=='a'."""
         cfg_a = {"power_boost_pct": 50.0}
         cfg_b = {"power_boost_pct": 0.0}
-        r = client.post("/api/surrogate/compare", json={"config_a": cfg_a, "config_b": cfg_b})
+        r = client.post(
+            "/api/surrogate/compare", json={"config_a": cfg_a, "config_b": cfg_b}
+        )
         if r.status_code == 503:
             self.skipTest("Surrogate model not available")
         if r.status_code != 200:
@@ -826,5 +837,3 @@ class TestSurrogateCompare(unittest.TestCase):
         # B.et_s - A.et_s should be positive (A is faster)
         self.assertGreater(body["delta_et_s"], 0.0)
         self.assertEqual(body["faster"], "a")
-
-

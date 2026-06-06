@@ -205,9 +205,7 @@ class LLMClient:
                 return result
             if isinstance(result, dict):
                 return LLMResponse(tool_input=result, stop_reason="tool_use")
-            raise TypeError(
-                "_call_override for 'tool' must return dict or LLMResponse"
-            )
+            raise TypeError("_call_override for 'tool' must return dict or LLMResponse")
 
         client = self._get_sdk()
 
@@ -231,7 +229,10 @@ class LLMClient:
                 messages=[{"role": "user", "content": user}],
             )
             for block in msg.content:
-                if getattr(block, "type", None) == "tool_use" and block.name == tool_name:
+                if (
+                    getattr(block, "type", None) == "tool_use"
+                    and block.name == tool_name
+                ):
                     return LLMResponse(
                         tool_input=dict(block.input), stop_reason=msg.stop_reason
                     )
@@ -277,8 +278,7 @@ class LLMClient:
                 ) from e
             return LLMResponse(tool_input=args, stop_reason=choice.finish_reason)
         raise RuntimeError(
-            f"Model did not invoke {tool_name}; "
-            f"finish_reason={choice.finish_reason}"
+            f"Model did not invoke {tool_name}; finish_reason={choice.finish_reason}"
         )
 
     def call_text(self, system, user):

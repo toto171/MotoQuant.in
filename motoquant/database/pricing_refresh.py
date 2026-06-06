@@ -400,7 +400,10 @@ def fetch_live_price(
         return None
 
     _brand, _model_name, retailer, retailer_url = (
-        row["brand"], row["model_name"], row["retailer"], row["retailer_url"]
+        row["brand"],
+        row["model_name"],
+        row["retailer"],
+        row["retailer_url"],
     )
 
     if not retailer_url:
@@ -420,7 +423,9 @@ def fetch_live_price(
         if existing:
             log.debug(
                 "part_id=%d retailer=%s — price fresh (fetched %s), skipping",
-                part_id, retailer, existing["fetched_at"],
+                part_id,
+                retailer,
+                existing["fetched_at"],
             )
             return None
 
@@ -473,9 +478,7 @@ def get_cheapest_prices(
     Each dict has: retailer, price_inr, in_stock, fetched_at, source_url, is_stale.
     Sorted by price_inr ASC (NULLs last).
     """
-    cutoff = (
-        datetime.date.today() - datetime.timedelta(days=stale_days)
-    ).isoformat()
+    cutoff = (datetime.date.today() - datetime.timedelta(days=stale_days)).isoformat()
     cur = conn.cursor()
     rows = cur.execute(
         """
@@ -490,12 +493,12 @@ def get_cheapest_prices(
     ).fetchall()
     return [
         {
-            "retailer":   r["retailer"],
-            "price_inr":  r["price_inr"],
-            "in_stock":   bool(r["in_stock"]),
+            "retailer": r["retailer"],
+            "price_inr": r["price_inr"],
+            "in_stock": bool(r["in_stock"]),
             "fetched_at": r["fetched_at"],
             "source_url": r["source_url"],
-            "is_stale":   (r["fetched_at"] or "1970-01-01") < cutoff,
+            "is_stale": (r["fetched_at"] or "1970-01-01") < cutoff,
         }
         for r in rows
     ]

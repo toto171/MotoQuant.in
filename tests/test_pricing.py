@@ -342,6 +342,7 @@ class TestCoverageReport:
         after = coverage_report(seeded_db.conn)
         assert after["with_retailer_url"] > before["with_retailer_url"]
 
+
 # ═══════════════════════════════════════════════════════════════════════════
 # Live pricing adapter tests — all HTTP calls mocked via unittest.mock
 # ═══════════════════════════════════════════════════════════════════════════
@@ -366,6 +367,7 @@ class TestRetailAdapters(unittest.TestCase):
     def test_woocommerce_price_extraction(self):
         """Generic WooCommerce price pattern should parse INR symbol."""
         from motoquant.database.retail_adapters import _extract_price_inr
+
         html = '<span class="price"><span class="woocommerce-Price-amount">&#8377;12,500.00</span></span>'
         price = _extract_price_inr(html)
         self.assertIsNotNone(price)
@@ -374,6 +376,7 @@ class TestRetailAdapters(unittest.TestCase):
     def test_rs_prefix_extraction(self):
         """'Rs.' price prefix should be parsed."""
         from motoquant.database.retail_adapters import _extract_price_inr
+
         html = '<div class="price">Rs. 8,999</div>'
         price = _extract_price_inr(html)
         self.assertIsNotNone(price)
@@ -382,6 +385,7 @@ class TestRetailAdapters(unittest.TestCase):
     def test_oos_detection(self):
         """Out-of-stock signal should flip in_stock to False."""
         from motoquant.database.retail_adapters import _extract_in_stock
+
         self.assertFalse(_extract_in_stock("This product is Out of Stock"))
         self.assertFalse(_extract_in_stock("sold out"))
         self.assertTrue(_extract_in_stock("In Stock — ships in 2 days"))
@@ -389,8 +393,11 @@ class TestRetailAdapters(unittest.TestCase):
     def test_fetch_price_mocked_powertronic(self):
         """fetch_price should call adapter and return PriceResult on success."""
         from motoquant.database.retail_adapters import fetch_price
+
         fake_html = "<html><body>Price: &#8377;6,500 Add to cart</body></html>"
-        with _mock.patch("urllib.request.urlopen", return_value=self._make_response(fake_html)):
+        with _mock.patch(
+            "urllib.request.urlopen", return_value=self._make_response(fake_html)
+        ):
             result = fetch_price("https://powertronicecu.com/product/z-fi-tc/")
         self.assertIsNotNone(result)
         self.assertAlmostEqual(result.price_inr, 6500.0, places=0)
@@ -400,8 +407,11 @@ class TestRetailAdapters(unittest.TestCase):
     def test_fetch_price_oos_mocked(self):
         """OOS page should return in_stock=False."""
         from motoquant.database.retail_adapters import fetch_price
+
         fake_html = "<html><body>Rs. 14,000 — Out of Stock</body></html>"
-        with _mock.patch("urllib.request.urlopen", return_value=self._make_response(fake_html)):
+        with _mock.patch(
+            "urllib.request.urlopen", return_value=self._make_response(fake_html)
+        ):
             result = fetch_price("https://motodelic.com/product/k-n-filter/")
         self.assertIsNotNone(result)
         self.assertFalse(result.in_stock)
@@ -411,17 +421,26 @@ class TestRetailAdapters(unittest.TestCase):
         import urllib.error
 
         from motoquant.database.retail_adapters import fetch_price
-        with _mock.patch("urllib.request.urlopen", side_effect=urllib.error.URLError("timeout")):
+
+        with _mock.patch(
+            "urllib.request.urlopen", side_effect=urllib.error.URLError("timeout")
+        ):
             result = fetch_price("https://motomiu.com/product/exhaust/")
         self.assertIsNone(result)
 
     def test_cloudflare_challenge_returns_none(self):
         """Cloudflare challenge page should return None for Akrapovic adapter."""
         from motoquant.database.retail_adapters import fetch_akrapovic
-        cf_html = "<html><title>Just a moment...</title><body>Cloudflare Ray ID</body></html>"
-        with _mock.patch("urllib.request.urlopen", return_value=self._make_response(cf_html)):
+
+        cf_html = (
+            "<html><title>Just a moment...</title><body>Cloudflare Ray ID</body></html>"
+        )
+        with _mock.patch(
+            "urllib.request.urlopen", return_value=self._make_response(cf_html)
+        ):
             result = fetch_akrapovic("https://akrapovic.com/en/motorcycle/product/123")
         self.assertIsNone(result)
+
     # ─────────────────────────────────────────────────────────────────
     # April 29, 2026 — adapters added for 11 new Indian retailer surfaces
     # (Mototorque, Grand Pitstop, Superbike Store, Race Dynamics, Healtech,
@@ -432,13 +451,21 @@ class TestRetailAdapters(unittest.TestCase):
     def test_adapter_registry_count_apr29(self):
         """Registry should contain >=17 named adapters after April 29 expansion."""
         from motoquant.database.retail_adapters import ADAPTERS
+
         self.assertGreaterEqual(len(ADAPTERS), 17)
         # The 11 new domains must be routable
         new_domains = [
-            "mototorque.in", "grandpitstop.com", "superbikestore.com",
-            "racedynamics.in", "healtech-india.com", "yssindia.in",
-            "batterybhai.com", "dynojetindia.com", "indiamart.com",
-            "tyrebazaar.com", "tyrekart.com",
+            "mototorque.in",
+            "grandpitstop.com",
+            "superbikestore.com",
+            "racedynamics.in",
+            "healtech-india.com",
+            "yssindia.in",
+            "batterybhai.com",
+            "dynojetindia.com",
+            "indiamart.com",
+            "tyrebazaar.com",
+            "tyrekart.com",
         ]
         for d in new_domains:
             self.assertIn(d, ADAPTERS, f"missing adapter for {d}")
@@ -446,8 +473,11 @@ class TestRetailAdapters(unittest.TestCase):
     def test_fetch_mototorque_shopify_paise(self):
         """Mototorque adapter handles Shopify paise-encoded prices."""
         from motoquant.database.retail_adapters import fetch_mototorque
+
         html = '<script>var product = {"price":1850000,"available":true};</script>'  # ₹18,500 in paise
-        with _mock.patch("urllib.request.urlopen", return_value=self._make_response(html)):
+        with _mock.patch(
+            "urllib.request.urlopen", return_value=self._make_response(html)
+        ):
             r = fetch_mototorque("https://mototorque.in/products/akrapovic-r15")
         self.assertIsNotNone(r)
         self.assertEqual(r.retailer, "Mototorque")
@@ -456,8 +486,11 @@ class TestRetailAdapters(unittest.TestCase):
 
     def test_fetch_grandpitstop_inr_symbol(self):
         from motoquant.database.retail_adapters import fetch_grandpitstop
+
         html = '<div class="product-price">&#8377;3,250</div>'
-        with _mock.patch("urllib.request.urlopen", return_value=self._make_response(html)):
+        with _mock.patch(
+            "urllib.request.urlopen", return_value=self._make_response(html)
+        ):
             r = fetch_grandpitstop("https://grandpitstop.com/products/jt-sprocket")
         self.assertIsNotNone(r)
         self.assertEqual(r.retailer, "Grand Pitstop")
@@ -465,17 +498,25 @@ class TestRetailAdapters(unittest.TestCase):
 
     def test_fetch_superbikestore_woocommerce(self):
         from motoquant.database.retail_adapters import fetch_superbikestore
+
         html = '<span class="woocommerce-Price-amount">Rs. 1,25,000</span>'
-        with _mock.patch("urllib.request.urlopen", return_value=self._make_response(html)):
-            r = fetch_superbikestore("https://superbikestore.com/product/akrapovic-titanium-hayabusa")
+        with _mock.patch(
+            "urllib.request.urlopen", return_value=self._make_response(html)
+        ):
+            r = fetch_superbikestore(
+                "https://superbikestore.com/product/akrapovic-titanium-hayabusa"
+            )
         self.assertIsNotNone(r)
         self.assertEqual(r.retailer, "Superbike Store")
         self.assertAlmostEqual(r.price_inr, 125000.0, places=0)
 
     def test_fetch_racedynamics_ecu(self):
         from motoquant.database.retail_adapters import fetch_racedynamics
-        html = '<p>Powertronic Z-Fi TC — INR 38,500</p>'
-        with _mock.patch("urllib.request.urlopen", return_value=self._make_response(html)):
+
+        html = "<p>Powertronic Z-Fi TC — INR 38,500</p>"
+        with _mock.patch(
+            "urllib.request.urlopen", return_value=self._make_response(html)
+        ):
             r = fetch_racedynamics("https://racedynamics.in/product/zfi-tc/")
         self.assertIsNotNone(r)
         self.assertEqual(r.retailer, "Race Dynamics")
@@ -483,8 +524,11 @@ class TestRetailAdapters(unittest.TestCase):
 
     def test_fetch_healtech_india_quickshifter(self):
         from motoquant.database.retail_adapters import fetch_healtech_india
+
         html = '<div class="price">&#8377;14,750</div><p>In stock</p>'
-        with _mock.patch("urllib.request.urlopen", return_value=self._make_response(html)):
+        with _mock.patch(
+            "urllib.request.urlopen", return_value=self._make_response(html)
+        ):
             r = fetch_healtech_india("https://healtech-india.com/product/qse")
         self.assertIsNotNone(r)
         self.assertEqual(r.retailer, "HealTech India")
@@ -492,8 +536,11 @@ class TestRetailAdapters(unittest.TestCase):
 
     def test_fetch_yssindia_suspension(self):
         from motoquant.database.retail_adapters import fetch_yssindia
+
         html = '<span class="amount">Rs. 28,500</span>'
-        with _mock.patch("urllib.request.urlopen", return_value=self._make_response(html)):
+        with _mock.patch(
+            "urllib.request.urlopen", return_value=self._make_response(html)
+        ):
             r = fetch_yssindia("https://yssindia.in/product/g-series-rear/")
         self.assertIsNotNone(r)
         self.assertEqual(r.retailer, "YSS India")
@@ -501,9 +548,12 @@ class TestRetailAdapters(unittest.TestCase):
 
     def test_fetch_batterybhai_jsonld(self):
         from motoquant.database.retail_adapters import fetch_batterybhai
+
         # JSON-LD style price embedding (typical of React SPAs)
         html = '<script type="application/ld+json">{"@type":"Product","offers":{"price":"5499.00","priceCurrency":"INR"}}</script>'
-        with _mock.patch("urllib.request.urlopen", return_value=self._make_response(html)):
+        with _mock.patch(
+            "urllib.request.urlopen", return_value=self._make_response(html)
+        ):
             r = fetch_batterybhai("https://batterybhai.com/product/shorai-lfx")
         self.assertIsNotNone(r)
         self.assertEqual(r.retailer, "Battery Bhai")
@@ -512,17 +562,25 @@ class TestRetailAdapters(unittest.TestCase):
     def test_fetch_indiamart_ask_price_marks_oos(self):
         """IndiaMart 'Ask Price' / 'Get Latest Price' should mark in_stock=False."""
         from motoquant.database.retail_adapters import fetch_indiamart
+
         html = '<h3>Akrapovic Slip On</h3><span class="price">&#8377;45,000</span><a>Get Latest Price</a>'
-        with _mock.patch("urllib.request.urlopen", return_value=self._make_response(html)):
-            r = fetch_indiamart("https://www.indiamart.com/proddetail/akrapovic-slip-on-12345.html")
+        with _mock.patch(
+            "urllib.request.urlopen", return_value=self._make_response(html)
+        ):
+            r = fetch_indiamart(
+                "https://www.indiamart.com/proddetail/akrapovic-slip-on-12345.html"
+            )
         self.assertIsNotNone(r)
         self.assertEqual(r.retailer, "IndiaMart")
         self.assertFalse(r.in_stock)
 
     def test_fetch_tyrebazaar(self):
         from motoquant.database.retail_adapters import fetch_tyrebazaar
+
         html = '<div class="tyre-price">&#8377;4,250</div>'
-        with _mock.patch("urllib.request.urlopen", return_value=self._make_response(html)):
+        with _mock.patch(
+            "urllib.request.urlopen", return_value=self._make_response(html)
+        ):
             r = fetch_tyrebazaar("https://tyrebazaar.com/mrf-zapper-fy")
         self.assertIsNotNone(r)
         self.assertEqual(r.retailer, "Tyrebazaar")
@@ -530,8 +588,11 @@ class TestRetailAdapters(unittest.TestCase):
 
     def test_fetch_tyrekart(self):
         from motoquant.database.retail_adapters import fetch_tyrekart
+
         html = '<span class="amount">Rs. 6,800</span>'
-        with _mock.patch("urllib.request.urlopen", return_value=self._make_response(html)):
+        with _mock.patch(
+            "urllib.request.urlopen", return_value=self._make_response(html)
+        ):
             r = fetch_tyrekart("https://www.tyrekart.com/ceat-zoom-d")
         self.assertIsNotNone(r)
         self.assertEqual(r.retailer, "Tyrekart")
@@ -539,8 +600,11 @@ class TestRetailAdapters(unittest.TestCase):
 
     def test_fetch_dynojet_india_pcv(self):
         from motoquant.database.retail_adapters import fetch_dynojet_india
+
         html = '<div class="price">&#8377;28,500</div>'
-        with _mock.patch("urllib.request.urlopen", return_value=self._make_response(html)):
+        with _mock.patch(
+            "urllib.request.urlopen", return_value=self._make_response(html)
+        ):
             r = fetch_dynojet_india("https://dynojetindia.com/product/pcv/")
         self.assertIsNotNone(r)
         self.assertEqual(r.retailer, "Dynojet India")
@@ -549,13 +613,15 @@ class TestRetailAdapters(unittest.TestCase):
     def test_fetch_price_routes_new_domain(self):
         """fetch_price() should route to the new adapter for tyrebazaar.com."""
         from motoquant.database.retail_adapters import fetch_price
+
         html = '<div class="price">&#8377;3,999</div>'
-        with _mock.patch("urllib.request.urlopen", return_value=self._make_response(html)):
+        with _mock.patch(
+            "urllib.request.urlopen", return_value=self._make_response(html)
+        ):
             r = fetch_price("https://tyrebazaar.com/some-tire-product")
         self.assertIsNotNone(r)
         self.assertEqual(r.retailer, "Tyrebazaar")
         self.assertAlmostEqual(r.price_inr, 3999.0, places=0)
-
 
 
 class TestLandingCostMath(unittest.TestCase):
@@ -568,6 +634,7 @@ class TestLandingCostMath(unittest.TestCase):
             GST_RATE,
             estimate_landing_cost_inr,
         )
+
         sticker = 10_000.0
         expected = sticker * (1 + GST_RATE) + COURIER_INR
         result = estimate_landing_cost_inr(sticker, retailer="Grand Pitstop")
@@ -581,6 +648,7 @@ class TestLandingCostMath(unittest.TestCase):
             IMPORT_DUTY_RATE,
             estimate_landing_cost_inr,
         )
+
         sticker = 10_000.0
         base = sticker * (1 + GST_RATE) + COURIER_INR
         expected = base * (1 + IMPORT_DUTY_RATE)
@@ -595,6 +663,7 @@ class TestLandingCostMath(unittest.TestCase):
             IMPORT_DUTY_RATE,
             estimate_landing_cost_inr,
         )
+
         sticker = 5_000.0
         base = sticker * (1 + GST_RATE) + COURIER_INR
         expected = base * (1 + IMPORT_DUTY_RATE)
@@ -607,6 +676,7 @@ class TestStaleLivePrices(unittest.TestCase):
 
     def _make_db(self):
         import sqlite3
+
         conn = sqlite3.connect(":memory:")
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA journal_mode=DELETE")
@@ -627,21 +697,29 @@ class TestStaleLivePrices(unittest.TestCase):
                 UNIQUE(part_id, retailer)
             );
         """)
-        conn.execute("INSERT INTO parts (id, brand, model_name, retailer) VALUES (1, 'Akra', 'Evo Ti', 'Akrapovic India')")
-        conn.execute("INSERT INTO parts (id, brand, model_name, retailer) VALUES (2, 'KN', 'HA-1099', 'K&N India')")
+        conn.execute(
+            "INSERT INTO parts (id, brand, model_name, retailer) VALUES (1, 'Akra', 'Evo Ti', 'Akrapovic India')"
+        )
+        conn.execute(
+            "INSERT INTO parts (id, brand, model_name, retailer) VALUES (2, 'KN', 'HA-1099', 'K&N India')"
+        )
         conn.commit()
         return conn
 
     def test_all_parts_stale_when_no_prices(self):
         """All parts are stale when part_prices table is empty."""
         from motoquant.database.pricing_refresh import stale_live_prices
+
         conn = self._make_db()
         stale = stale_live_prices(conn, days_threshold=14)
-        self.assertEqual(len(stale), 2, "both parts should be stale with empty price table")
+        self.assertEqual(
+            len(stale), 2, "both parts should be stale with empty price table"
+        )
 
     def test_fresh_price_not_in_stale_list(self):
         """A part with a price fetched today should NOT appear in stale list."""
         from motoquant.database.pricing_refresh import stale_live_prices
+
         conn = self._make_db()
         conn.execute(
             "INSERT INTO part_prices (part_id, retailer, source_url, price_inr, in_stock, fetched_at) "
@@ -656,6 +734,7 @@ class TestStaleLivePrices(unittest.TestCase):
     def test_old_price_is_stale(self):
         """A price fetched 20 days ago should appear in stale list with 14-day threshold."""
         from motoquant.database.pricing_refresh import stale_live_prices
+
         conn = self._make_db()
         twenty_days_ago = (
             datetime.date.today() - datetime.timedelta(days=20)
@@ -663,9 +742,11 @@ class TestStaleLivePrices(unittest.TestCase):
         conn.execute(
             "INSERT INTO part_prices (part_id, retailer, source_url, price_inr, in_stock, fetched_at) "
             "VALUES (2, 'K&N India', 'http://x.com', 2500.0, 1, ?)",
-            (twenty_days_ago,)
+            (twenty_days_ago,),
         )
         conn.commit()
         stale = stale_live_prices(conn, days_threshold=14)
         part_ids = [s[0] for s in stale]
-        self.assertIn(2, part_ids, "price from 20 days ago is stale at 14-day threshold")
+        self.assertIn(
+            2, part_ids, "price from 20 days ago is stale at 14-day threshold"
+        )

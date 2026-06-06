@@ -14,6 +14,7 @@ from datetime import datetime, timedelta, timezone
 
 # --- helpers -------------------------------------------------------------------
 
+
 def _now_utc() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -30,6 +31,7 @@ def _expires_iso(seconds: int) -> str:
 
 
 # --- USERS ---------------------------------------------------------------------
+
 
 def get_user_by_email(conn: sqlite3.Connection, email: str) -> dict | None:
     row = conn.execute(
@@ -54,7 +56,9 @@ def get_or_create_user(conn: sqlite3.Connection, email: str) -> dict:
         (email,),
     )
     conn.commit()
-    return dict(conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone())
+    return dict(
+        conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+    )
 
 
 def set_user_tier(conn: sqlite3.Connection, user_id: int, tier: str) -> None:
@@ -96,9 +100,9 @@ def recent_magic_link_exists(conn: sqlite3.Connection, email: str) -> bool:
     Uses SQLite datetime() to normalise timestamps -- handles both Python isoformat
     ('2026-04-24T11:41:20+00:00') and SQLite space-format ('2026-04-24 11:41:20').
     """
-    cutoff = (datetime.now(timezone.utc) - timedelta(seconds=MAGIC_LINK_COOLDOWN_S)).strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
+    cutoff = (
+        datetime.now(timezone.utc) - timedelta(seconds=MAGIC_LINK_COOLDOWN_S)
+    ).strftime("%Y-%m-%d %H:%M:%S")
     row = conn.execute(
         """SELECT id FROM magic_links
            WHERE email = ? AND consumed = 0
@@ -143,9 +147,7 @@ def consume_magic_link(conn: sqlite3.Connection, token: str) -> str | None:
     row = dict(row)
     if row["consumed"]:
         return None
-    conn.execute(
-        "UPDATE magic_links SET consumed = 1 WHERE id = ?", (row["id"],)
-    )
+    conn.execute("UPDATE magic_links SET consumed = 1 WHERE id = ?", (row["id"],))
     conn.commit()
     return row["email"]
 
@@ -171,9 +173,7 @@ def create_session(conn: sqlite3.Connection, user_id: int, jwt_id: str) -> dict:
 
 
 def get_session_by_jti(conn: sqlite3.Connection, jwt_id: str) -> dict | None:
-    row = conn.execute(
-        "SELECT * FROM sessions WHERE jwt_id = ?", (jwt_id,)
-    ).fetchone()
+    row = conn.execute("SELECT * FROM sessions WHERE jwt_id = ?", (jwt_id,)).fetchone()
     return dict(row) if row else None
 
 
@@ -183,9 +183,7 @@ def revoke_session(conn: sqlite3.Connection, jwt_id: str) -> None:
 
 
 def revoke_all_sessions(conn: sqlite3.Connection, user_id: int) -> None:
-    conn.execute(
-        "UPDATE sessions SET revoked = 1 WHERE user_id = ?", (user_id,)
-    )
+    conn.execute("UPDATE sessions SET revoked = 1 WHERE user_id = ?", (user_id,))
     conn.commit()
 
 
@@ -207,6 +205,7 @@ def is_session_valid(conn: sqlite3.Connection, jwt_id: str) -> bool:
 
 
 # --- ensure tables exist (called by auth.py at startup) -----------------------
+
 
 def ensure_tables(conn: sqlite3.Connection) -> None:
     """

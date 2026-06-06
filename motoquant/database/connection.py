@@ -373,6 +373,7 @@ def connect(db_path=None):
     Uses MOTOQUANT_DB env var if db_path is None, defaulting to motoquant.db.
     """
     import os as _os
+
     path = db_path or _os.environ.get("MOTOQUANT_DB", "motoquant.db")
     db = MotoQuantDB(path)
     return db.conn

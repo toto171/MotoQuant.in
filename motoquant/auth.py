@@ -59,7 +59,7 @@ except ImportError:  # pragma: no cover
 
 JWT_SECRET = os.environ.get("JWT_SECRET", "dev-insecure-secret-change-me")
 JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM", "HS256")
-ACCESS_TOKEN_TTL_S = 15 * 60          # 15 minutes
+ACCESS_TOKEN_TTL_S = 15 * 60  # 15 minutes
 REFRESH_TOKEN_TTL_S = 30 * 24 * 3600  # 30 days
 
 MOTOQUANT_BASE_URL = os.environ.get("MOTOQUANT_BASE_URL", "https://www.motoquant.in")
@@ -127,10 +127,9 @@ def _make_access_token(user_id: int, email: str, tier: str, jti: str) -> str:
     # Fallback: base64-encoded JSON (dev/test only — NOT secure for production)
     import base64
     import json
+
     payload["exp"] = payload["exp"].isoformat()
-    return "dev." + base64.urlsafe_b64encode(
-        json.dumps(payload).encode()
-    ).decode()
+    return "dev." + base64.urlsafe_b64encode(json.dumps(payload).encode()).decode()
 
 
 def _make_refresh_token(user_id: int, jti: str) -> str:
@@ -144,10 +143,9 @@ def _make_refresh_token(user_id: int, jti: str) -> str:
         return _jose_jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
     import base64
     import json
+
     payload["exp"] = payload["exp"].isoformat()
-    return "dev." + base64.urlsafe_b64encode(
-        json.dumps(payload).encode()
-    ).decode()
+    return "dev." + base64.urlsafe_b64encode(json.dumps(payload).encode()).decode()
 
 
 def _decode_token(token: str) -> dict | None:
@@ -155,6 +153,7 @@ def _decode_token(token: str) -> dict | None:
     if token.startswith("dev."):
         import base64
         import json
+
         try:
             data = json.loads(base64.urlsafe_b64decode(token[4:] + "=="))
             exp = datetime.fromisoformat(data["exp"])
@@ -245,6 +244,7 @@ def _get_conn() -> sqlite3.Connection:
     # Lazy import: connection.py is only loaded when a request actually needs the DB,
     # not at module import time (avoids ImportError during tests that mock the DB).
     from .database.connection import connect as _db_connect  # noqa: PLC0415
+
     conn = _db_connect()
     conn.row_factory = sqlite3.Row
     return conn

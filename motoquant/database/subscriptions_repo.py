@@ -30,6 +30,7 @@ def _sha256(value: str) -> str:
 
 # ─── SUBSCRIPTIONS ────────────────────────────────────────────────────────────
 
+
 def upsert_subscription(
     conn: sqlite3.Connection,
     *,
@@ -44,8 +45,14 @@ def upsert_subscription(
     """Insert or update a subscription row. Idempotent on rzp subscription_id."""
     assert tier in ("pro", "studio")
     assert status in (
-        "created", "authenticated", "active", "past_due",
-        "halted", "cancelled", "completed", "expired",
+        "created",
+        "authenticated",
+        "active",
+        "past_due",
+        "halted",
+        "cancelled",
+        "completed",
+        "expired",
     )
     existing = conn.execute(
         "SELECT id FROM subscriptions WHERE razorpay_subscription_id = ?",
@@ -59,8 +66,16 @@ def upsert_subscription(
                SET user_id=?, tier=?, status=?, current_period_end=?,
                    plan_id=?, billing_cycle=?, updated_at=?
                WHERE razorpay_subscription_id=?""",
-            (user_id, tier, status, current_period_end, plan_id, billing_cycle,
-             now, razorpay_subscription_id),
+            (
+                user_id,
+                tier,
+                status,
+                current_period_end,
+                plan_id,
+                billing_cycle,
+                now,
+                razorpay_subscription_id,
+            ),
         )
     else:
         conn.execute(
@@ -68,8 +83,15 @@ def upsert_subscription(
                (user_id, razorpay_subscription_id, tier, status,
                 current_period_end, plan_id, billing_cycle)
                VALUES (?, ?, ?, ?, ?, ?, ?)""",
-            (user_id, razorpay_subscription_id, tier, status,
-             current_period_end, plan_id, billing_cycle),
+            (
+                user_id,
+                razorpay_subscription_id,
+                tier,
+                status,
+                current_period_end,
+                plan_id,
+                billing_cycle,
+            ),
         )
     conn.commit()
     return get_subscription_by_rzp_id(conn, razorpay_subscription_id)
@@ -85,9 +107,7 @@ def get_subscription_by_rzp_id(
     return dict(row) if row else None
 
 
-def get_active_subscription(
-    conn: sqlite3.Connection, user_id: int
-) -> dict | None:
+def get_active_subscription(conn: sqlite3.Connection, user_id: int) -> dict | None:
     """Return the most-recent active subscription for this user."""
     row = conn.execute(
         """SELECT * FROM subscriptions
@@ -98,9 +118,7 @@ def get_active_subscription(
     return dict(row) if row else None
 
 
-def list_subscriptions_for_user(
-    conn: sqlite3.Connection, user_id: int
-) -> list[dict]:
+def list_subscriptions_for_user(conn: sqlite3.Connection, user_id: int) -> list[dict]:
     rows = conn.execute(
         "SELECT * FROM subscriptions WHERE user_id = ? ORDER BY created_at DESC",
         (user_id,),
@@ -109,6 +127,7 @@ def list_subscriptions_for_user(
 
 
 # ─── LICENSE KEYS ─────────────────────────────────────────────────────────────
+
 
 def count_active_keys(conn: sqlite3.Connection, user_id: int) -> int:
     row = conn.execute(
@@ -177,9 +196,7 @@ def validate_license_key(
     return row
 
 
-def revoke_license_key(
-    conn: sqlite3.Connection, key_id: int, user_id: int
-) -> bool:
+def revoke_license_key(conn: sqlite3.Connection, key_id: int, user_id: int) -> bool:
     """Revoke a key. Returns True if found and owned by user, False otherwise."""
     row = conn.execute(
         "SELECT id FROM license_keys WHERE id = ? AND user_id = ?",
@@ -187,9 +204,7 @@ def revoke_license_key(
     ).fetchone()
     if not row:
         return False
-    conn.execute(
-        "UPDATE license_keys SET revoked = 1 WHERE id = ?", (key_id,)
-    )
+    conn.execute("UPDATE license_keys SET revoked = 1 WHERE id = ?", (key_id,))
     conn.commit()
     return True
 
@@ -205,6 +220,7 @@ def list_license_keys(conn: sqlite3.Connection, user_id: int) -> list[dict]:
 
 
 # ─── ensure tables (belt-and-braces for pre-v4 DBs) ──────────────────────────
+
 
 def ensure_tables(conn: sqlite3.Connection) -> None:
     conn.executescript(

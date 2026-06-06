@@ -9,6 +9,7 @@ The morning of 2026-05-24 had 3 sessions fire within 4 hours of each other
 (06:42 / 08:31 / 10:30 UTC) and the scheduler re-picked the same 3 agents
 each time because freshness rounds to whole days.
 """
+
 from __future__ import annotations
 
 import json
@@ -38,8 +39,8 @@ def _fake_repo(tmp_path: pathlib.Path) -> pathlib.Path:
 
     # Minimal STATUS.md with valid LAST_RUN_JSON
     (tmp_path / "STATUS.md").write_text(
-        '<!-- LAST_RUN_JSON\n'
-        '{\n'
+        "<!-- LAST_RUN_JSON\n"
+        "{\n"
         '  "_schema": 1,\n'
         '  "_updated": null,\n'
         '  "self-review":            { "date": null, "outcome": "never_run" },\n'
@@ -49,10 +50,12 @@ def _fake_repo(tmp_path: pathlib.Path) -> pathlib.Path:
         '  "catalog-expansion":      { "date": null, "outcome": "never_run" },\n'
         '  "benchmark-import":       { "date": null, "outcome": "never_run" },\n'
         '  "marketing-content":      { "date": null, "outcome": "never_run" }\n'
-        '}\n'
-        '-->\n'
+        "}\n"
+        "-->\n"
     )
-    (tmp_path / "DISPATCH_INBOX.md").write_text("# Dispatch Inbox\n\n## INSTRUCTIONS QUEUE\n")
+    (tmp_path / "DISPATCH_INBOX.md").write_text(
+        "# Dispatch Inbox\n\n## INSTRUCTIONS QUEUE\n"
+    )
     return tmp_path
 
 

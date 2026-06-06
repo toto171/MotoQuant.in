@@ -55,7 +55,7 @@ ARCHETYPES: list[dict[str, Any]] = [
         "peak_power_hp_override": None,
         "peak_torque_nm_override": 220.0,
         "mass_delta_kg": 14.0,  # turbo + intercooler + plumbing + larger battery
-        "cd_delta": 0.02,        # plumbing stick-out adds drag
+        "cd_delta": 0.02,  # plumbing stick-out adds drag
         "frontal_area_delta_m2": 0.015,
         "sprocket_front_override": 18,  # taller for top-end pulls
         "sprocket_rear_override": 40,
@@ -70,7 +70,6 @@ ARCHETYPES: list[dict[str, Any]] = [
         "estimated_build_inr": 1_400_000,  # ~£12k kit landed in India incl. duty
         "is_homologation": 0,
     },
-
     # ── 2. Velocity Racing 5-second Hayabusa ───────────────────────
     {
         "name": "Velocity Racing 5-sec Turbo Hayabusa",
@@ -80,18 +79,18 @@ ARCHETYPES: list[dict[str, Any]] = [
             "rods + crank, dry-clutch, methanol injection. Pro Street class "
             "drag racer running 5.9s 1/4 mile on a stretched chassis."
         ),
-        "power_multiplier": 2.95,    # ~600 hp crank target
+        "power_multiplier": 2.95,  # ~600 hp crank target
         "peak_power_hp_override": None,
         "peak_torque_nm_override": 480.0,
-        "mass_delta_kg": -22.0,      # full strip + carbon body, but stretched chassis adds
-        "cd_delta": -0.04,           # tight low-slung fairing on long-wheelbase chassis
+        "mass_delta_kg": -22.0,  # full strip + carbon body, but stretched chassis adds
+        "cd_delta": -0.04,  # tight low-slung fairing on long-wheelbase chassis
         "frontal_area_delta_m2": 0.0,
         "sprocket_front_override": 19,
         "sprocket_rear_override": 38,
         "chain_pitch_override": "530",
-        "tire_mu_override": 1.95,    # M&H 5.0 slick + chassis air shifter combo
+        "tire_mu_override": 1.95,  # M&H 5.0 slick + chassis air shifter combo
         "notes": (
-            "5.9s 1/4 mile @ 380+ km/h reported. Track-only — stretched 60+\" "
+            '5.9s 1/4 mile @ 380+ km/h reported. Track-only — stretched 60+" '
             "wheelbase, no headlight, Lexan windscreen, manual shifter or "
             "air-shifter. Not legal for the road in any jurisdiction."
         ),
@@ -99,7 +98,6 @@ ARCHETYPES: list[dict[str, Any]] = [
         "estimated_build_inr": 4_800_000,
         "is_homologation": 1,
     },
-
     # ── 3. Bonneville H2 Carbon (track edition) ─────────────────────
     {
         "name": "Bonneville H2 Carbon Track Edition",
@@ -113,13 +111,13 @@ ARCHETYPES: list[dict[str, Any]] = [
         "power_multiplier": 1.0,
         "peak_power_hp_override": 310.0,  # H2R-spec supercharger + exhaust
         "peak_torque_nm_override": 165.0,
-        "mass_delta_kg": -28.0,           # full carbon, no lights/mirrors/pillion
-        "cd_delta": -0.05,                # lower fairing, tail-piece, belly pan
+        "mass_delta_kg": -28.0,  # full carbon, no lights/mirrors/pillion
+        "cd_delta": -0.05,  # lower fairing, tail-piece, belly pan
         "frontal_area_delta_m2": -0.03,
-        "sprocket_front_override": 18,    # taller gearing for >330 km/h runs
+        "sprocket_front_override": 18,  # taller gearing for >330 km/h runs
         "sprocket_rear_override": 39,
         "chain_pitch_override": "525",
-        "tire_mu_override": 1.45,         # Bonneville-specific low-rolling tires
+        "tire_mu_override": 1.45,  # Bonneville-specific low-rolling tires
         "notes": (
             "Track / land-speed only, no street legal kit. Closer to H2R "
             "performance than street H2. Reported 9.2s 1/4 mile in roll-on "
@@ -129,7 +127,6 @@ ARCHETYPES: list[dict[str, Any]] = [
         "estimated_build_inr": 2_900_000,
         "is_homologation": 1,
     },
-
     # ── 4. Schnitz Racing Nitrous Hayabusa ─────────────────────────
     {
         "name": "Schnitz Nitrous Hayabusa",
@@ -143,13 +140,13 @@ ARCHETYPES: list[dict[str, Any]] = [
         "power_multiplier": 1.36,
         "peak_power_hp_override": None,
         "peak_torque_nm_override": 200.0,
-        "mass_delta_kg": 8.0,         # bottle, plumbing, controller
+        "mass_delta_kg": 8.0,  # bottle, plumbing, controller
         "cd_delta": 0.0,
         "frontal_area_delta_m2": 0.0,
         "sprocket_front_override": 17,
         "sprocket_rear_override": 42,
         "chain_pitch_override": "530",
-        "tire_mu_override": 1.70,     # M&H drag radial 200/55-17
+        "tire_mu_override": 1.70,  # M&H drag radial 200/55-17
         "notes": (
             "9.0-9.3s 1/4 mile typical. Bottle is hit at 60ft after launch on "
             "the front sprocket sensor — full bottle gives ~6 runs. Less "
@@ -159,7 +156,6 @@ ARCHETYPES: list[dict[str, Any]] = [
         "estimated_build_inr": 380_000,
         "is_homologation": 0,
     },
-
     # ── 5. Ron Ayers RAW Racing Turbo Hayabusa ─────────────────────
     {
         "name": "Ron Ayers RAW Turbo Hayabusa",
@@ -169,16 +165,16 @@ ARCHETYPES: list[dict[str, Any]] = [
             "Carrillo rods, JE 9.5:1 pistons, MoTeC M150 ECU. Class-legal Pro "
             "Street drag racer competing in ACU / Santa Pod."
         ),
-        "power_multiplier": 2.30,         # ~450 hp crank class limit
+        "power_multiplier": 2.30,  # ~450 hp crank class limit
         "peak_power_hp_override": None,
         "peak_torque_nm_override": 380.0,
-        "mass_delta_kg": -18.0,           # carbon panels, lithium battery, no lights
+        "mass_delta_kg": -18.0,  # carbon panels, lithium battery, no lights
         "cd_delta": -0.02,
         "frontal_area_delta_m2": 0.0,
         "sprocket_front_override": 19,
         "sprocket_rear_override": 38,
         "chain_pitch_override": "530",
-        "tire_mu_override": 1.85,         # Mickey Thompson ET Drag slick
+        "tire_mu_override": 1.85,  # Mickey Thompson ET Drag slick
         "notes": (
             "Pro Street class winner at Santa Pod multiple seasons. 6.8-7.1s "
             "1/4 mile typical, 320+ km/h trap. Methanol-fuelled, roll-on starts "
@@ -191,7 +187,9 @@ ARCHETYPES: list[dict[str, Any]] = [
 ]
 
 
-def _resolve_base_bike_id(db: Any, manufacturer: str, model_contains: str) -> int | None:
+def _resolve_base_bike_id(
+    db: Any, manufacturer: str, model_contains: str
+) -> int | None:
     """Look up a base bike_models.id by manufacturer + model_name LIKE.
 
     Picks the first matching row sorted by id (stable insertion order).

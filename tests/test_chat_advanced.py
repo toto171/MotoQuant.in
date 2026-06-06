@@ -35,10 +35,9 @@ class _StubLLM:
 
     def call_tool(self, *, system, user, tool_name, tool_schema):
         from motoquant.llm.client import LLMResponse
+
         self.calls.append(("tool", system, user))
-        return LLMResponse(
-            tool_input=self.tool_response, stop_reason="tool_use"
-        )
+        return LLMResponse(tool_input=self.tool_response, stop_reason="tool_use")
 
     def call_text(self, *, system, user):
         self.calls.append(("text", system, user))
@@ -55,11 +54,13 @@ class TestBuildTierField(unittest.TestCase):
 
     def test_default_is_stage_2(self):
         from motoquant.llm.parse_query import ParsedSimRequest
+
         p = ParsedSimRequest(raw_query="upgrade my K5", bike_name="K5")
         self.assertEqual(p.build_tier, "stage_2")
 
     def test_can_set_stage_1(self):
         from motoquant.llm.parse_query import ParsedSimRequest
+
         p = ParsedSimRequest(
             raw_query="basic mods", bike_name="R15", build_tier="stage_1"
         )
@@ -67,6 +68,7 @@ class TestBuildTierField(unittest.TestCase):
 
     def test_can_set_all_out(self):
         from motoquant.llm.parse_query import ParsedSimRequest
+
         p = ParsedSimRequest(
             raw_query="no budget", bike_name="Hayabusa", build_tier="all_out"
         )
@@ -74,12 +76,14 @@ class TestBuildTierField(unittest.TestCase):
 
     def test_target_class_default_none(self):
         from motoquant.llm.parse_query import ParsedSimRequest
+
         p = ParsedSimRequest(raw_query="x", bike_name="x")
         self.assertIsNone(p.target_class)
         self.assertFalse(p.prefer_indian)
 
     def test_choose_bike_fields(self):
         from motoquant.llm.parse_query import ParsedSimRequest
+
         p = ParsedSimRequest(
             raw_query="best litre bike for me",
             bike_name="",
@@ -102,11 +106,13 @@ class TestBuildTierField(unittest.TestCase):
 class TestToolSchema(unittest.TestCase):
     def test_intent_enum_has_choose_bike(self):
         from motoquant.llm.parse_query import TOOL_SCHEMA
+
         intents = TOOL_SCHEMA["properties"]["intent_type"]["enum"]
         self.assertIn("choose_bike", intents)
 
     def test_build_tier_in_schema(self):
         from motoquant.llm.parse_query import TOOL_SCHEMA
+
         self.assertIn("build_tier", TOOL_SCHEMA["properties"])
         bt = TOOL_SCHEMA["properties"]["build_tier"]
         self.assertEqual(bt["type"], "string")
@@ -116,14 +122,14 @@ class TestToolSchema(unittest.TestCase):
 
     def test_target_class_and_prefer_indian_in_schema(self):
         from motoquant.llm.parse_query import TOOL_SCHEMA
+
         self.assertIn("target_class", TOOL_SCHEMA["properties"])
         self.assertIn("prefer_indian", TOOL_SCHEMA["properties"])
-        self.assertEqual(
-            TOOL_SCHEMA["properties"]["prefer_indian"]["type"], "boolean"
-        )
+        self.assertEqual(TOOL_SCHEMA["properties"]["prefer_indian"]["type"], "boolean")
 
     def test_system_prompt_has_tier_hints(self):
         from motoquant.llm.parse_query import SYSTEM_PROMPT
+
         self.assertIn("Build tier inference hints", SYSTEM_PROMPT)
         self.assertIn("Race-class hints", SYSTEM_PROMPT)
         self.assertIn("stage_1", SYSTEM_PROMPT)
@@ -143,6 +149,7 @@ class TestTierRecipes(unittest.TestCase):
             _TIER_STAGE_1,
             _TIER_STAGE_2,
         )
+
         # stage_2 is a proper superset of stage_1
         s1_keys = {k for k, _ in _TIER_STAGE_1}
         s2_keys = {k for k, _ in _TIER_STAGE_2}
@@ -156,6 +163,7 @@ class TestTierRecipes(unittest.TestCase):
 
     def test_stage_1_excludes_premium_categories(self):
         from motoquant.llm.runner import _TIER_STAGE_1
+
         keys = {k for k, _ in _TIER_STAGE_1}
         # Stage 1 must NOT include suspension / brakes / forced induction
         self.assertNotIn("suspension", keys)
@@ -165,6 +173,7 @@ class TestTierRecipes(unittest.TestCase):
 
     def test_all_out_includes_forced_induction(self):
         from motoquant.llm.runner import _TIER_ALL_OUT
+
         keys = {k for k, _ in _TIER_ALL_OUT}
         self.assertIn("nitrous", keys)
         self.assertIn("boost", keys)
@@ -179,6 +188,7 @@ class TestTierRecipes(unittest.TestCase):
 class TestClassFilters(unittest.TestCase):
     def test_litre_class(self):
         from motoquant.llm.runner import _CLASS_FILTERS
+
         litre = _CLASS_FILTERS["litre"]
         self.assertEqual(litre["disp_min"], 950)
         self.assertEqual(litre["disp_max"], 1200)
@@ -186,18 +196,19 @@ class TestClassFilters(unittest.TestCase):
 
     def test_2t_filter_has_stroke_type(self):
         from motoquant.llm.runner import _CLASS_FILTERS
+
         self.assertEqual(_CLASS_FILTERS["2t"]["stroke_type"], 2)
 
     def test_modified_hayabusa_filter(self):
         from motoquant.llm.runner import _CLASS_FILTERS
+
         f = _CLASS_FILTERS["modified-hayabusa"]
         self.assertIn("Hayabusa", f["model_keywords"])
 
     def test_alias_two_stroke(self):
         from motoquant.llm.runner import _CLASS_FILTERS
-        self.assertEqual(
-            _CLASS_FILTERS["two-stroke"]["stroke_type"], 2
-        )
+
+        self.assertEqual(_CLASS_FILTERS["two-stroke"]["stroke_type"], 2)
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -228,10 +239,14 @@ class TestChooseBikeQuery(unittest.TestCase):
         from motoquant.llm.runner import _choose_bike_candidate_query
 
         parsed_neutral = ParsedSimRequest(
-            raw_query="x", bike_name="", target_class="litre",
+            raw_query="x",
+            bike_name="",
+            target_class="litre",
         )
         parsed_indian = ParsedSimRequest(
-            raw_query="x", bike_name="", target_class="litre",
+            raw_query="x",
+            bike_name="",
+            target_class="litre",
             prefer_indian=True,
         )
         sql_n, _ = _choose_bike_candidate_query(parsed_neutral, db=None)
@@ -244,7 +259,9 @@ class TestChooseBikeQuery(unittest.TestCase):
         from motoquant.llm.runner import _choose_bike_candidate_query
 
         parsed = ParsedSimRequest(
-            raw_query="x", bike_name="", target_class="not-a-real-class",
+            raw_query="x",
+            bike_name="",
+            target_class="not-a-real-class",
         )
         sql, params = _choose_bike_candidate_query(parsed, db=None)
         # Should still produce a sane query (fallback to litre)
@@ -263,6 +280,7 @@ class TestSummaryPromptStrictness(unittest.TestCase):
     def _get_prompt_via_stub(self, summarizer_name, *args):
         """Instantiate stub LLM, call summarizer, return the system prompt."""
         from motoquant.llm import runner as r
+
         stub = _StubLLM()
         getattr(r, summarizer_name)(*args, stub)
         # Return system prompt from first call
@@ -270,15 +288,32 @@ class TestSummaryPromptStrictness(unittest.TestCase):
 
     def test_compare_prompt_forbids_filler(self):
         from motoquant.llm.parse_query import ParsedSimRequest
+
         sys_p = self._get_prompt_via_stub(
             "_summarize_compare",
             ParsedSimRequest(raw_query="K5 vs R1", bike_name="K5"),
-            {"a": {"bike_name": "K5", "sim": {"et_quarter_s": 10.03,
-             "trap_speed_kmh": 235, "et_60ft_s": 1.45}},
-             "b": {"bike_name": "R1", "sim": {"et_quarter_s": 10.29,
-             "trap_speed_kmh": 232, "et_60ft_s": 1.48}},
-             "delta_et_s": -0.26, "delta_trap_kmh": 3.0,
-             "faster": "A", "winner": "K5"}
+            {
+                "a": {
+                    "bike_name": "K5",
+                    "sim": {
+                        "et_quarter_s": 10.03,
+                        "trap_speed_kmh": 235,
+                        "et_60ft_s": 1.45,
+                    },
+                },
+                "b": {
+                    "bike_name": "R1",
+                    "sim": {
+                        "et_quarter_s": 10.29,
+                        "trap_speed_kmh": 232,
+                        "et_60ft_s": 1.48,
+                    },
+                },
+                "delta_et_s": -0.26,
+                "delta_trap_kmh": 3.0,
+                "faster": "A",
+                "winner": "K5",
+            },
         )
         self.assertIn("STRICT", sys_p)
         # Either explicit "do not invent" or implicit via "cite actual"
@@ -287,19 +322,32 @@ class TestSummaryPromptStrictness(unittest.TestCase):
 
     def test_rank_prompt_requires_three_decimals(self):
         from motoquant.llm.parse_query import ParsedSimRequest
+
         sys_p = self._get_prompt_via_stub(
             "_summarize_rank",
             ParsedSimRequest(raw_query="fastest 600", bike_name=""),
-            {"top": [{"rank": 1, "manufacturer": "Honda",
-              "model": "CBR600RR", "displacement_cc": 599,
-              "peak_power_hp": 119, "et_s": 10.5, "trap_kmh": 225}],
-             "filter": "supersport_600", "matches": 12,
-             "candidates_simulated": 12},
+            {
+                "top": [
+                    {
+                        "rank": 1,
+                        "manufacturer": "Honda",
+                        "model": "CBR600RR",
+                        "displacement_cc": 599,
+                        "peak_power_hp": 119,
+                        "et_s": 10.5,
+                        "trap_kmh": 225,
+                    }
+                ],
+                "filter": "supersport_600",
+                "matches": 12,
+                "candidates_simulated": 12,
+            },
         )
         self.assertIn("3 decimals", sys_p)
 
     def test_explain_prompt_forbids_vague_words(self):
         from motoquant.llm.parse_query import ParsedSimRequest
+
         sys_p = self._get_prompt_via_stub(
             "_summarize_explain",
             ParsedSimRequest(raw_query="why does altitude matter", bike_name=""),
@@ -309,8 +357,7 @@ class TestSummaryPromptStrictness(unittest.TestCase):
         self.assertIn("specific", s_lower)
         # Must mention forbidden vague words
         self.assertTrue(
-            "significantly" in s_lower or "noticeable" in s_lower
-            or "never" in s_lower
+            "significantly" in s_lower or "noticeable" in s_lower or "never" in s_lower
         )
 
 

@@ -20,7 +20,6 @@ to prevent cross-segment leaks (e.g., R15 filters â‰  Hayabusa filters, RE 650 â
 # REGISTERED in motoquant/database/seed.py:seed_all() (Apr 27, 2026 orchestrator merge)
 """
 
-
 from motoquant.database.seed_catalogs import _create_parts_batch
 
 

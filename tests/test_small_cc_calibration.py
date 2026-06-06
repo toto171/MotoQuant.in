@@ -84,7 +84,7 @@ class TestClusterBiases(unittest.TestCase):
         ("CBR500R", 12.85, 1.3, "300-500 twin"),
         ("Ninja 400", 12.8, 1.8, "300-500 twin"),
         ("RD350", 13.5, 3.5, "2T twin"),
-        ("RX100", None, None, "2T small"),   # only checked for finish
+        ("RX100", None, None, "2T small"),  # only checked for finish
     ]
 
     def test_each_cluster_canary_inside_tolerance(self):
@@ -106,7 +106,8 @@ class TestClusterBiases(unittest.TestCase):
                 )
                 delta = r.time_quarter - real_et
                 self.assertLess(
-                    abs(delta), tol,
+                    abs(delta),
+                    tol,
                     f"{pattern} ET={r.time_quarter:.3f}s vs real={real_et}s "
                     f"(Δ={delta:+.3f}s exceeds tolerance {tol}s)",
                 )
@@ -141,7 +142,8 @@ class TestPowerBoostStillLive(unittest.TestCase):
         self.assertTrue(r_boost.finished_quarter)
         improvement = r_stock.time_quarter - r_boost.time_quarter
         self.assertGreater(
-            improvement, 1.0,
+            improvement,
+            1.0,
             f"+50% power must shave ≥1 s of ET on R15 V3 "
             f"(stock {r_stock.time_quarter:.3f}s, boosted {r_boost.time_quarter:.3f}s, "
             f"Δ={improvement:.3f}s). Power knob regressed to near-dead.",
@@ -155,6 +157,7 @@ class TestFluidMassScaling(unittest.TestCase):
         # Mock BikeSpec with just the displacement field
         class _Spec:
             pass
+
         s = _Spec()
         s.displacement_cc = cc
         return s
@@ -184,18 +187,23 @@ class TestBasketInertiaScaling(unittest.TestCase):
     def _mk(self, cc):
         class _Spec:
             pass
+
         s = _Spec()
         s.displacement_cc = cc
         return s
 
     def test_r15_v3_basket_small(self):
         self.assertAlmostEqual(
-            _basket_inertia_from_spec(self._mk(155)), 0.00155, delta=1e-5,
+            _basket_inertia_from_spec(self._mk(155)),
+            0.00155,
+            delta=1e-5,
         )
 
     def test_k5_basket_matches_reference(self):
         self.assertAlmostEqual(
-            _basket_inertia_from_spec(self._mk(1000)), 0.010, delta=1e-5,
+            _basket_inertia_from_spec(self._mk(1000)),
+            0.010,
+            delta=1e-5,
         )
 
     def test_clipped_floor(self):
@@ -234,7 +242,8 @@ class TestTwoStrokeSmallCommuter(unittest.TestCase):
         r = _run(cfg)
         max_gear = int(r.gear.max())
         self.assertGreaterEqual(
-            max_gear, 2,
+            max_gear,
+            2,
             "Pre-fix RX100 was stuck in gear 1 for 26 s because torque "
             "collapsed above 8 100 rpm. Post-fix it must upshift at "
             "least once.",
@@ -248,7 +257,8 @@ class TestTwoStrokeSmallCommuter(unittest.TestCase):
                 cfg = spec_to_bike_config(spec)
                 peak_tq = spec.peak_torque_rpm or cfg.engine.peak_torque_rpm
                 self.assertGreaterEqual(
-                    cfg.staging.launch_rpm, peak_tq * 0.99,
+                    cfg.staging.launch_rpm,
+                    peak_tq * 0.99,
                     f"{pattern}: staging.launch_rpm={cfg.staging.launch_rpm:.0f} "
                     f"must be >= peak_torque_rpm={peak_tq:.0f} (pre-fix bug: "
                     f"launch at 0.92×tuned_rpm could land below peak_tq).",
@@ -268,7 +278,8 @@ class TestSpecPathPropagatesFixes(unittest.TestCase):
         cfg = spec_to_bike_config(_find_spec("R15 V3"))
         # pre-fix: 17 kg; post-fix: ~9.4 kg
         self.assertLess(
-            cfg.chassis.fluid_mass_kg, 12.0,
+            cfg.chassis.fluid_mass_kg,
+            12.0,
             "R15 V3 fluid_mass_kg must be < 12 kg (pre-fix was hardcoded 17 kg)",
         )
         self.assertGreater(cfg.chassis.fluid_mass_kg, 7.0)
@@ -277,7 +288,8 @@ class TestSpecPathPropagatesFixes(unittest.TestCase):
         cfg = spec_to_bike_config(_find_spec("R15 V3"))
         # pre-fix: 0.010; post-fix: ~0.00155
         self.assertLess(
-            cfg.clutch.basket_inertia_kgm2, 0.005,
+            cfg.clutch.basket_inertia_kgm2,
+            0.005,
             "R15 V3 basket_inertia_kgm2 must be < 0.005 (pre-fix was 0.010 K5 default)",
         )
         self.assertGreater(cfg.clutch.basket_inertia_kgm2, 0.0005)

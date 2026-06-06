@@ -88,8 +88,7 @@ def _create_parts_batch(
                 availability=part.get("availability", default_availability),
                 retailer=part.get("retailer"),
                 estimated_delivery_days=(
-                    part.get("delivery_days")
-                    or part.get("estimated_delivery_days")
+                    part.get("delivery_days") or part.get("estimated_delivery_days")
                 ),
             )
             count += 1

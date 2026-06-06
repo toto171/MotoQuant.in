@@ -125,6 +125,7 @@ def refresh(db_path: str = "motoquant.db") -> dict:
     conn.close()
     return stats
 
+
 if __name__ == "__main__":
     db = sys.argv[1] if len(sys.argv) > 1 else "motoquant.db"
     result = refresh(db)

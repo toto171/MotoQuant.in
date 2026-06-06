@@ -392,12 +392,14 @@ class TestMatcherSpecificity:
     def _wb_match(self, pattern: str, spec_str: str) -> bool:
         """Inline copy of the production _wb_match for direct unit testing."""
         import re
+
         tokens = [t for t in re.split(r"[\s\-\.]+", pattern.lower()) if t]
         spec_tokens = {t for t in re.split(r"[\s\-\.]+", spec_str.lower()) if t}
         return all(t in spec_tokens for t in tokens)
 
     def _token_count(self, s: str) -> int:
         import re
+
         return len([t for t in re.split(r"[\s\-\.]+", s) if t])
 
     # ── Direct _wb_match logic tests ────────────────────────────────────────
@@ -452,6 +454,7 @@ class TestMatcherSpecificity:
         """Sorting benchmark model keys by token-count descending puts
         'Ninja H2 SX' before 'Ninja H2', preventing the shadow bug."""
         import re
+
         patterns = ["Ninja H2", "Z H2", "Ninja H2 SX", "Ninja H2R"]
 
         def _tok(s):
@@ -554,6 +557,7 @@ class TestProductionMatcherSpecificity:
         """Lightweight spec stand-in matching the BikeSpec attributes
         accessed by `_best_benchmark_match`."""
         from types import SimpleNamespace
+
         return SimpleNamespace(
             manufacturer=manufacturer,
             model_name=model_name,
@@ -563,10 +567,14 @@ class TestProductionMatcherSpecificity:
 
     def test_specificity_score_orders_h2_sx_above_h2(self):
         from scripts.validation_sweep import _model_specificity_score
-        assert _model_specificity_score("Ninja H2 SX") > _model_specificity_score("Ninja H2")
+
+        assert _model_specificity_score("Ninja H2 SX") > _model_specificity_score(
+            "Ninja H2"
+        )
 
     def test_specificity_score_handles_hyphen_and_dot(self):
         from scripts.validation_sweep import _model_specificity_score
+
         # YZF-R6 splits on hyphen → 2 tokens; "YZF-R6 13S" → 3 tokens
         assert _model_specificity_score("YZF-R6") == 2
         assert _model_specificity_score("YZF-R6 (13S)") >= 3
@@ -576,6 +584,7 @@ class TestProductionMatcherSpecificity:
         benchmark, not the older 'Ninja H2' one — this is the canonical
         regression for the inbox-2026-05-25 ticket."""
         from scripts.validation_sweep import _best_benchmark_match
+
         benchmarks = [
             ("Kawasaki", "Ninja H2", 2015, 9.62, 247, "MCN 2015"),
             ("Kawasaki", "Ninja H2 SX", 2018, 10.04, 232, "Cycle World 2018"),
@@ -594,6 +603,7 @@ class TestProductionMatcherSpecificity:
         benchmark — the 3-token 'Ninja H2 SX' must NOT match an H2 spec
         because 'sx' is absent from spec tokens."""
         from scripts.validation_sweep import _best_benchmark_match
+
         benchmarks = [
             ("Kawasaki", "Ninja H2", 2015, 9.62, 247, "MCN 2015"),
             ("Kawasaki", "Ninja H2 SX", 2018, 10.04, 232, "Cycle World 2018"),
@@ -608,6 +618,7 @@ class TestProductionMatcherSpecificity:
     def test_z_h2_spec_binds_to_z_h2_not_ninja_h2(self):
         """Z H2 (naked supercharged) must NOT shadow-bind to Ninja H2."""
         from scripts.validation_sweep import _best_benchmark_match
+
         benchmarks = [
             ("Kawasaki", "Ninja H2", 2015, 9.62, 247, "MCN 2015"),
             ("Kawasaki", "Z H2", 2020, 9.95, 240, "Cycle World 2020"),
@@ -624,6 +635,7 @@ class TestProductionMatcherSpecificity:
         unrecorded than to inflate matched-N with a year-mismatched bind.
         """
         from scripts.validation_sweep import _best_benchmark_match
+
         benchmarks = [
             ("Kawasaki", "Z H2", 2020, 9.95, 240, "Cycle World 2020"),
         ]
@@ -637,6 +649,7 @@ class TestProductionMatcherSpecificity:
         """If a Z H2 benchmark exists within the SE's year range, the SE
         spec correctly binds via word-boundary token-subset match."""
         from scripts.validation_sweep import _best_benchmark_match
+
         benchmarks = [
             ("Kawasaki", "Z H2", 2024, 10.10, 238, "Cycle World 2024 (synthetic)"),
         ]
@@ -650,6 +663,7 @@ class TestProductionMatcherSpecificity:
         valid benchmark binding to the 'Ninja H2' entry — 'h2' != 'h2r'
         so the word-boundary check correctly rejects."""
         from scripts.validation_sweep import _best_benchmark_match
+
         benchmarks = [
             ("Kawasaki", "Ninja H2", 2015, 9.62, 247, "MCN 2015"),
         ]
@@ -664,6 +678,7 @@ class TestProductionMatcherSpecificity:
         not the less-specific 'RSV4 1000' even though both pass
         word-boundary matching against the spec."""
         from scripts.validation_sweep import _best_benchmark_match
+
         benchmarks = [
             ("Aprilia", "RSV4 1000", 2009, 10.40, 230, "Sport Rider 2009"),
             ("Aprilia", "RSV4 Factory", 2021, 10.05, 238, "Cycle World 2021"),
@@ -672,14 +687,13 @@ class TestProductionMatcherSpecificity:
         spec = self._make_spec("Aprilia", "RSV4 Factory", 2021, 2023)
         match = _best_benchmark_match(spec, benchmarks)
         assert match is not None
-        assert match[1] == "RSV4 Factory", (
-            f"Expected 'RSV4 Factory', got {match[1]}"
-        )
+        assert match[1] == "RSV4 Factory", f"Expected 'RSV4 Factory', got {match[1]}"
 
     def test_plain_rsv4_does_not_bind_to_factory(self):
         """Plain RSV4 spec (no 'Factory' token) must NOT bind to the
         more-specific 'RSV4 Factory' benchmark — Factory token is absent."""
         from scripts.validation_sweep import _best_benchmark_match
+
         benchmarks = [
             ("Aprilia", "RSV4 1000", 2009, 10.40, 230, "Sport Rider 2009"),
             ("Aprilia", "RSV4 Factory", 2021, 10.05, 238, "Cycle World 2021"),
@@ -693,6 +707,7 @@ class TestProductionMatcherSpecificity:
         """YZF-R6 vs YZF-R6S — 'R6' and 'R6S' are distinct tokens after
         split-on-hyphen so neither pattern should match the other's spec."""
         from scripts.validation_sweep import _best_benchmark_match, _model_match
+
         # Sanity-check the _model_match primitive first
         assert _model_match("YZF-R6", "YZF-R6S") is False
         assert _model_match("YZF-R6S", "YZF-R6") is False
@@ -712,6 +727,7 @@ class TestProductionMatcherSpecificity:
         here because its year (2015) is below the SX spec's year_from
         (2018) — strict year-range filter prevents inflated matched-N."""
         from scripts.validation_sweep import _best_benchmark_match
+
         benchmarks = [
             ("Kawasaki", "Ninja H2", 2015, 9.62, 247, "MCN 2015"),
             ("Kawasaki", "Ninja H2 SX", 2030, 10.04, 232, "future"),  # out of range
@@ -729,8 +745,17 @@ class TestProductionMatcherSpecificity:
         so the matcher behaves identically between sweep paths."""
         from scripts.sweep_with_clusters import _model_specificity_score as score_b
         from scripts.validation_sweep import _model_specificity_score as score_a
-        for s in ["Ninja H2", "Ninja H2 SX", "Z H2", "RSV4 Factory",
-                  "YZF-R6", "YZF-R6S", "Ninja H2R", "Street Triple 765 RS"]:
+
+        for s in [
+            "Ninja H2",
+            "Ninja H2 SX",
+            "Z H2",
+            "RSV4 Factory",
+            "YZF-R6",
+            "YZF-R6S",
+            "Ninja H2R",
+            "Street Triple 765 RS",
+        ]:
             assert score_a(s) == score_b(s), (
                 f"Specificity score diverged for {s!r}: {score_a(s)} vs {score_b(s)}"
             )

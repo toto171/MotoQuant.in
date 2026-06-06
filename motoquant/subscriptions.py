@@ -86,6 +86,7 @@ PLAN_IDS = {
 
 def _get_conn() -> sqlite3.Connection:
     from .database.connection import connect as _db_connect  # noqa: PLC0415
+
     conn = _db_connect()
     conn.row_factory = sqlite3.Row
     return conn
@@ -129,7 +130,7 @@ def _tier_from_plan(plan_id: str) -> str:
 
 
 class CheckoutRequest(BaseModel):
-    tier: str   # "pro" | "studio"
+    tier: str  # "pro" | "studio"
     billing_cycle: str = "monthly"  # "monthly" | "yearly"
 
 
@@ -317,12 +318,12 @@ async def razorpay_webhook(request: Request) -> dict:
         )
 
         STATUS_MAP = {
-            "subscription.activated":  ("active",    tier),
-            "subscription.charged":    ("active",    None),   # keep existing tier
-            "subscription.halted":     ("halted",    None),
-            "subscription.cancelled":  ("cancelled", "free"),
-            "subscription.completed":  ("completed", "free"),
-            "subscription.paused":     ("halted",    None),
+            "subscription.activated": ("active", tier),
+            "subscription.charged": ("active", None),  # keep existing tier
+            "subscription.halted": ("halted", None),
+            "subscription.cancelled": ("cancelled", "free"),
+            "subscription.completed": ("completed", "free"),
+            "subscription.paused": ("halted", None),
             "subscription.authenticated": ("authenticated", tier),
         }
 
@@ -350,7 +351,9 @@ async def razorpay_webhook(request: Request) -> dict:
             log.info("User %d downgraded to free (event: %s)", user_id, event_type)
         elif new_tier in ("pro", "studio"):
             _users.set_user_tier(conn, user_id, new_tier)
-            log.info("User %d upgraded to %s (event: %s)", user_id, new_tier, event_type)
+            log.info(
+                "User %d upgraded to %s (event: %s)", user_id, new_tier, event_type
+            )
 
     finally:
         conn.close()
@@ -401,7 +404,9 @@ def validate_license_key(body: ValidateKeyRequest) -> ValidateKeyResponse:
         conn.close()
 
     if not row:
-        return ValidateKeyResponse(valid=False, message="Invalid or revoked license key.")
+        return ValidateKeyResponse(
+            valid=False, message="Invalid or revoked license key."
+        )
     return ValidateKeyResponse(valid=True, tier=row["tier"], message="License valid.")
 
 
@@ -439,7 +444,9 @@ def cancel_subscription(user: dict = Depends(get_current_user)) -> dict:
 
     client = _rzp_client()
     try:
-        client.subscription.cancel(sub["razorpay_subscription_id"], {"cancel_at_cycle_end": 1})
+        client.subscription.cancel(
+            sub["razorpay_subscription_id"], {"cancel_at_cycle_end": 1}
+        )
     except Exception as exc:
         log.error("Failed to cancel Razorpay subscription: %s", exc)
         raise HTTPException(502, f"Razorpay error: {exc}") from exc

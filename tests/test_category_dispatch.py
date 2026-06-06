@@ -13,6 +13,7 @@ Locks in the contract:
     auto-derive + don't crash.
   • Profile lookup never returns None.
 """
+
 from __future__ import annotations
 
 import dataclasses
@@ -53,40 +54,55 @@ class TestBikeConfigField:
 class TestDeriveCategoryTag:
     def test_two_stroke_takes_precedence(self):
         tag = derive_category_tag(
-            manufacturer="Yamaha", model_name="RD350",
-            displacement_cc=347, peak_power_hp=39, stroke_type=2,
+            manufacturer="Yamaha",
+            model_name="RD350",
+            displacement_cc=347,
+            peak_power_hp=39,
+            stroke_type=2,
             category="sport",
         )
         assert tag == CATEGORY_TWO_STROKE
 
     def test_litre_sport_195p(self):
         tag = derive_category_tag(
-            manufacturer="Kawasaki", model_name="Ninja H2",
-            displacement_cc=998, peak_power_hp=200, stroke_type=4,
+            manufacturer="Kawasaki",
+            model_name="Ninja H2",
+            displacement_cc=998,
+            peak_power_hp=200,
+            stroke_type=4,
             category="sport",
         )
         assert tag == CATEGORY_LITRE_SPORT_195P
 
     def test_litre_sport_600_1000(self):
         tag = derive_category_tag(
-            manufacturer="Yamaha", model_name="YZF-R6",
-            displacement_cc=600, peak_power_hp=120, stroke_type=4,
+            manufacturer="Yamaha",
+            model_name="YZF-R6",
+            displacement_cc=600,
+            peak_power_hp=120,
+            stroke_type=4,
             category="sport",
         )
         assert tag == CATEGORY_LITRE_SPORT_600_1000
 
     def test_entry_150_200(self):
         tag = derive_category_tag(
-            manufacturer="Yamaha", model_name="YZF-R15 V3",
-            displacement_cc=155, peak_power_hp=18, stroke_type=4,
+            manufacturer="Yamaha",
+            model_name="YZF-R15 V3",
+            displacement_cc=155,
+            peak_power_hp=18,
+            stroke_type=4,
             category="sport",
         )
         assert tag == CATEGORY_ENTRY_150_200
 
     def test_cruiser_1300p_via_category(self):
         tag = derive_category_tag(
-            manufacturer="Triumph", model_name="Rocket 3",
-            displacement_cc=2458, peak_power_hp=165, stroke_type=4,
+            manufacturer="Triumph",
+            model_name="Rocket 3",
+            displacement_cc=2458,
+            peak_power_hp=165,
+            stroke_type=4,
             category="cruiser",
         )
         assert tag == CATEGORY_CRUISER_1300P
@@ -95,8 +111,11 @@ class TestDeriveCategoryTag:
         # VMAX 1700 / B-King / Rocket 3 are catalog-tagged sport/naked for
         # engine-inertia tuning but are physically cruiser-class (320 kg).
         tag = derive_category_tag(
-            manufacturer="Yamaha", model_name="VMAX 1700",
-            displacement_cc=1679, peak_power_hp=200, stroke_type=4,
+            manufacturer="Yamaha",
+            model_name="VMAX 1700",
+            displacement_cc=1679,
+            peak_power_hp=200,
+            stroke_type=4,
             category="naked",
         )
         assert tag == CATEGORY_CRUISER_1300P
@@ -105,9 +124,12 @@ class TestDeriveCategoryTag:
 class TestProfileLookup:
     def test_get_profile_for_each_category(self):
         for tag in (
-            CATEGORY_LITRE_SPORT_195P, CATEGORY_LITRE_SPORT_600_1000,
-            CATEGORY_TWO_STROKE, CATEGORY_CRUISER_1300P,
-            CATEGORY_ENTRY_150_200, CATEGORY_UNKNOWN,
+            CATEGORY_LITRE_SPORT_195P,
+            CATEGORY_LITRE_SPORT_600_1000,
+            CATEGORY_TWO_STROKE,
+            CATEGORY_CRUISER_1300P,
+            CATEGORY_ENTRY_150_200,
+            CATEGORY_UNKNOWN,
         ):
             p = get_profile(tag)
             assert p is not None
@@ -170,7 +192,8 @@ class TestEngineProfileWiring:
         # land in litre_sport_600_1000). Either way it must be a real profile.
         assert eng._profile is not None
         assert eng._profile.name in (
-            CATEGORY_LITRE_SPORT_195P, CATEGORY_LITRE_SPORT_600_1000,
+            CATEGORY_LITRE_SPORT_195P,
+            CATEGORY_LITRE_SPORT_600_1000,
         )
 
 
@@ -181,17 +204,20 @@ class TestReferenceBaselinesPreserved:
     numerical values they were pre-April-30 because the unknown branch
     of the dispatch reproduces legacy behaviour bit-exact)."""
 
-    @pytest.mark.parametrize("factory,expected_et", [
-        (gsxr1000_k5, 10.0334),
-        (yzfr1_4c8, 10.2859),
-        (hayabusa_gen1, 10.4712),
-    ])
+    @pytest.mark.parametrize(
+        "factory,expected_et",
+        [
+            (gsxr1000_k5, 10.0334),
+            (yzfr1_4c8, 10.2859),
+            (hayabusa_gen1, 10.4712),
+        ],
+    )
     def test_reference_et_within_1ms(self, factory, expected_et):
         cfg = factory()
         result = MotoQuantEngine(cfg).run(use_adaptive_dt=False)
         assert abs(result.time_quarter - expected_et) < 0.001, (
             f"{cfg.name}: ET drifted to {result.time_quarter:.4f}s "
-            f"(target {expected_et:.4f}, |Δ|={abs(result.time_quarter-expected_et):.4f}s)"
+            f"(target {expected_et:.4f}, |Δ|={abs(result.time_quarter - expected_et):.4f}s)"
         )
 
 

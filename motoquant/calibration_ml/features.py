@@ -59,7 +59,7 @@ FEATURE_NAMES: list[str] = [
     "primary_ratio",
     # Environment (5)
     "ambient_temp_c",
-    "track_temp_c",          # jittered via ENV_PERTURBATION (fixed v2)
+    "track_temp_c",  # jittered via ENV_PERTURBATION (fixed v2)
     "humidity_pct",
     "altitude_m",
     "density_altitude_ft",
@@ -67,13 +67,13 @@ FEATURE_NAMES: list[str] = [
     "measured_et_s",
     "measured_trap_kmh",
     "measured_60ft_s",
-    "measured_330ft_s",      # 0 if unavailable
-    "measured_eighth_s",     # 0 if unavailable
-    "rider_mass_kg",         # jittered 65-95 kg in synthetic (fixed v2)
+    "measured_330ft_s",  # 0 if unavailable
+    "measured_eighth_s",  # 0 if unavailable
+    "rider_mass_kg",  # jittered 65-95 kg in synthetic (fixed v2)
     # Misc bike codes (3)  -- tire_compound_code removed in v2 (no attr exists)
-    "rear_tire_diameter_mm", # fixed v2: rear_rolling_radius_m * 2000
-    "drive_type_code",       # fixed v2: 0=chain, 1=non-chain
-    "stroke_type",           # 2 for 2T, 4 for 4T
+    "rear_tire_diameter_mm",  # fixed v2: rear_rolling_radius_m * 2000
+    "drive_type_code",  # fixed v2: 0=chain, 1=non-chain
+    "stroke_type",  # 2 for 2T, 4 for 4T
 ]
 FEATURE_DIM = len(FEATURE_NAMES)  # 24
 
@@ -158,7 +158,7 @@ def extract_features(bike_config: Any, measured: MeasuredRun) -> np.ndarray:
 
     # Environment (10..14)
     vec[10] = _safe_float(env, "ambient_temp_c", 25.0)
-    vec[11] = _safe_float(env, "track_temp_c", 30.0)    # v2: real attr, now jittered
+    vec[11] = _safe_float(env, "track_temp_c", 30.0)  # v2: real attr, now jittered
     vec[12] = _safe_float(env, "relative_humidity_pct", 50.0)
     vec[13] = _safe_float(env, "altitude_m")
     vec[14] = _density_altitude_ft(env)

@@ -71,7 +71,9 @@ def _migrate_schema(conn):
     print("\n[0/4] Forward-migrating schema (idempotent)...")
     _ensure_column(conn, "bike_models", "data_source", "TEXT DEFAULT 'estimated'")
     _ensure_column(
-        conn, "bike_models", "updated_at",
+        conn,
+        "bike_models",
+        "updated_at",
         "TEXT DEFAULT (datetime('now','utc'))",
     )
     conn.commit()
@@ -81,13 +83,22 @@ def _migrate_schema(conn):
 def _refresh_config_blob(conn, bike_id, spec):
     try:
         from motoquant.database.bridge import config_to_db_row
+
         cfg = spec_to_bike_config(spec)
         row = config_to_db_row(cfg)
         sections = [
-            "engine_params", "drivetrain_params", "clutch_params",
-            "chain_params", "tires_params", "aero_params", "chassis_params",
-            "rider_params", "staging_params", "environment_params",
-            "wheelie_params", "parasitic_params",
+            "engine_params",
+            "drivetrain_params",
+            "clutch_params",
+            "chain_params",
+            "tires_params",
+            "aero_params",
+            "chassis_params",
+            "rider_params",
+            "staging_params",
+            "environment_params",
+            "wheelie_params",
+            "parasitic_params",
         ]
         update_kw = {k: row[k] for k in sections if k in row}
         if update_kw:
@@ -159,7 +170,9 @@ def main():
     before = conn.execute("SELECT COUNT(*) FROM bike_models").fetchone()[0]
     result = import_batch(db, EXTENDED_BIKES)
     after = conn.execute("SELECT COUNT(*) FROM bike_models").fetchone()[0]
-    print("  before=%d after=%d delta=%d (%s)" % (before, after, after - before, result))
+    print(
+        "  before=%d after=%d delta=%d (%s)" % (before, after, after - before, result)
+    )
 
     # 4. Create + seed bike_archetypes table
     print("\n[4/4] Creating bike_archetypes table + seeding 5 modded builds...")

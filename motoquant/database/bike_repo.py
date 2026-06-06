@@ -285,10 +285,19 @@ class BikeRepository:
         # bloating the DB indefinitely. If the current version already holds
         # identical params, reuse it — no new version, no duplicate dyno curve.
         _PARAM_COLS = (
-            "chassis_params", "engine_params", "forced_induction_params",
-            "drivetrain_params", "clutch_params", "tire_params", "aero_params",
-            "suspension_params", "braking_params", "wheelie_params",
-            "rider_params", "parasitic_params", "staging_params",
+            "chassis_params",
+            "engine_params",
+            "forced_induction_params",
+            "drivetrain_params",
+            "clutch_params",
+            "tire_params",
+            "aero_params",
+            "suspension_params",
+            "braking_params",
+            "wheelie_params",
+            "rider_params",
+            "parasitic_params",
+            "staging_params",
         )
         # Match ANY existing version with identical params (not only the current
         # one). This keeps re-imports fully idempotent even when the source list
@@ -297,7 +306,8 @@ class BikeRepository:
         # "current" flag and append a new version on every pass. If a match is
         # found, make it current and reuse it instead of inserting a duplicate.
         for ev in self._conn.execute(
-            "SELECT id, " + ", ".join(_PARAM_COLS)
+            "SELECT id, "
+            + ", ".join(_PARAM_COLS)
             + " FROM bike_configs WHERE bike_model_id = ? AND config_name = ?",
             (bike_model_id, config_name),
         ).fetchall():

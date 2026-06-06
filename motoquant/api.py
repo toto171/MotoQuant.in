@@ -35,14 +35,14 @@ import tempfile
 from datetime import datetime, timezone
 from typing import Any
 
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
+
 # TypedDict must come from typing_extensions on Python < 3.12 when used in
 # Pydantic/FastAPI annotations (pydantic raises PydanticUserError otherwise).
 # python:3.11-slim in prod hit exactly that and crash-looped — 2026-06-06.
 from typing_extensions import TypedDict
-
-from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, UploadFile
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
 
 from .defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 from .models import BikeConfig
@@ -54,6 +54,7 @@ from .physics import MotoQuantEngine
 try:
     from .auth import require_tier as require_tier  # noqa: PLC0414
 except ImportError:  # pragma: no cover
+
     def require_tier(_tier: str):  # type: ignore[misc]
         """Stub — replace by installing python-jose[cryptography]."""
 
@@ -549,9 +550,7 @@ def _apply_parts_to_config(
         from .database.bridge import apply_part_to_config
 
         for pid in part_ids:
-            row = db.execute(
-                "SELECT * FROM parts WHERE id=?", (pid,)
-            ).fetchone()
+            row = db.execute("SELECT * FROM parts WHERE id=?", (pid,)).fetchone()
             if not row:
                 continue
             part_dict = dict(row)
@@ -621,6 +620,7 @@ def health():
 # Storage: stdout (Railway log stream); ship to PostHog/Logfire later
 # without changing the client.
 
+
 @app.post("/api/telemetry/event")
 async def telemetry_event(payload: dict = None):
     """Log one anonymous client telemetry event. Always 200 — telemetry
@@ -635,7 +635,9 @@ async def telemetry_event(payload: dict = None):
         for k, v in list(props.items())[:32]
         if isinstance(v, (str, int, float, bool, type(None)))
     }
-    viewport = payload.get("viewport") if isinstance(payload.get("viewport"), dict) else {}
+    viewport = (
+        payload.get("viewport") if isinstance(payload.get("viewport"), dict) else {}
+    )
     path = str(payload.get("path", ""))[:128]
     ua = str(payload.get("ua", ""))[:200]
     try:
@@ -1945,9 +1947,7 @@ def suggest_bike(req: BikeSuggestionRequest):
 class SpecCorrectionRequest(BaseModel):
     """POST /api/specs/correct — propose a correction for one spec field."""
 
-    bike_id: int = Field(
-        ..., description="DB bike model ID to correct"
-    )
+    bike_id: int = Field(..., description="DB bike model ID to correct")
     field_name: str = Field(
         ...,
         max_length=80,
@@ -1965,9 +1965,7 @@ class SpecCorrectionRequest(BaseModel):
     submitter_email: str | None = Field(
         None, max_length=254, description="Optional reply address"
     )
-    notes: str | None = Field(
-        None, max_length=2000, description="Free-form context"
-    )
+    notes: str | None = Field(None, max_length=2000, description="Free-form context")
 
     class Config:
         json_schema_extra = {
@@ -1990,18 +1988,28 @@ def _fetch_current_value(db, bike_id: int, field_name: str) -> str | None:
     """
     # Fields that live directly on bike_models as columns
     _HEADLINE_COLS = {
-        "peak_power_hp", "peak_torque_nm", "peak_power_rpm", "peak_torque_rpm",
-        "displacement_cc", "bore_mm", "stroke_mm", "compression_ratio",
-        "dry_mass_kg", "wet_mass_kg", "cylinder_count", "wheelbase_mm",
-        "seat_height_mm", "fuel_capacity_l",
+        "peak_power_hp",
+        "peak_torque_nm",
+        "peak_power_rpm",
+        "peak_torque_rpm",
+        "displacement_cc",
+        "bore_mm",
+        "stroke_mm",
+        "compression_ratio",
+        "dry_mass_kg",
+        "wet_mass_kg",
+        "cylinder_count",
+        "wheelbase_mm",
+        "seat_height_mm",
+        "fuel_capacity_l",
     }
     # Fields that live inside bike_configs JSON blobs
     _BLOB_FIELD_MAP = {
-        "front_sprocket":  "drivetrain_params",
-        "rear_sprocket":   "drivetrain_params",
-        "gear_ratios":     "drivetrain_params",
-        "redline_rpm":     "engine_params",
-        "cd":              "aero_params",
+        "front_sprocket": "drivetrain_params",
+        "rear_sprocket": "drivetrain_params",
+        "gear_ratios": "drivetrain_params",
+        "redline_rpm": "engine_params",
+        "cd": "aero_params",
         "frontal_area_m2": "aero_params",
     }
     try:
@@ -2430,8 +2438,8 @@ def resolve_venue(req: VenueResolveRequest):
 import time as _time  # noqa: E402
 from pathlib import Path as _Path  # noqa: E402
 
-_SURROGATE = None          # DNNSurrogate | XGBSurrogate | None — set at startup
-_SURROGATE_SOURCE = "none" # "dnn" | "xgb" | "none"
+_SURROGATE = None  # DNNSurrogate | XGBSurrogate | None — set at startup
+_SURROGATE_SOURCE = "none"  # "dnn" | "xgb" | "none"
 _SURROGATE_LOCK = __import__("threading").Lock()
 
 
@@ -2444,6 +2452,7 @@ def _load_surrogate():
 
     try:
         from motoquant.analysis.surrogate_dnn import DNNSurrogate
+
         if dnn_path.exists():
             m = DNNSurrogate.load(dnn_path)
             _log.info("Surrogate: loaded DNN from %s", dnn_path)
@@ -2453,6 +2462,7 @@ def _load_surrogate():
 
     try:
         from motoquant.analysis.surrogate_xgb import XGBSurrogate
+
         if xgb_path.exists():
             m = XGBSurrogate.load(xgb_path)
             _log.info("Surrogate: loaded XGBoost from %s", xgb_path)
@@ -2462,6 +2472,7 @@ def _load_surrogate():
 
     try:
         from motoquant.analysis.surrogate_numpy import NumpySurrogate
+
         npz_path = repo_root / "artifacts" / "surrogate" / "surrogate_numpy.npz"
         if npz_path.exists():
             m = NumpySurrogate.load(npz_path)
@@ -2525,6 +2536,7 @@ def _check_envelope(fvec):
     """Check each BASE feature against FEATURE_BOUNDS. Returns (ok, violations)."""
     try:
         from motoquant.analysis.surrogate_data import FEATURE_BOUNDS, FEATURE_NAMES
+
         violations = []
         for i, name in enumerate(FEATURE_NAMES):
             if name not in FEATURE_BOUNDS:
@@ -2593,6 +2605,7 @@ def surrogate_predict(
 
     try:
         from motoquant.analysis.surrogate_data import config_to_feature_vector
+
         fvec = config_to_feature_vector(config)
         within_env, violations = _check_envelope(fvec)
 
@@ -2601,7 +2614,9 @@ def surrogate_predict(
         elapsed_ms = (_time.perf_counter() - t0) * 1000.0
 
         et_val = float(et_arr[0]) if hasattr(et_arr, "__len__") else float(et_arr)
-        trap_val = float(trap_arr[0]) if hasattr(trap_arr, "__len__") else float(trap_arr)
+        trap_val = (
+            float(trap_arr[0]) if hasattr(trap_arr, "__len__") else float(trap_arr)
+        )
         # Both DNN and XGB store trap internally in m/s; convert to km/h
         trap_kmh = trap_val * 3.6 if trap_val < 200.0 else trap_val
 
@@ -2714,14 +2729,19 @@ def pricing_for_part(part_id: int):
         raise HTTPException(404, f"Part {part_id} not found")
 
     from motoquant.database.pricing_refresh import get_cheapest_prices
+
     prices = get_cheapest_prices(db, part_id, limit=3)
 
-    cheapest_live = prices[0]["price_inr"] if prices and prices[0]["price_inr"] else None
+    cheapest_live = (
+        prices[0]["price_inr"] if prices and prices[0]["price_inr"] else None
+    )
     all_stale = bool(prices) and all(p["is_stale"] for p in prices)
 
     return PartPricingOut(
         part_id=part_id,
-        part_name="{} {}".format(part_row["brand"] or "", part_row["model_name"] or "").strip(),
+        part_name="{} {}".format(
+            part_row["brand"] or "", part_row["model_name"] or ""
+        ).strip(),
         seed_price_inr=part_row["price_inr"],
         cheapest_live_inr=cheapest_live,
         prices=prices,
@@ -2765,21 +2785,27 @@ def pricing_for_bike(bike_id: int, limit: int = Query(50, ge=1, le=500)):
     for pr in part_rows:
         prices = get_cheapest_prices(db, pr["id"], limit=1)
         cheapest = prices[0] if prices else None
-        cheapest_inr = cheapest["price_inr"] if cheapest and cheapest["price_inr"] else None
+        cheapest_inr = (
+            cheapest["price_inr"] if cheapest and cheapest["price_inr"] else None
+        )
         if cheapest_inr:
             total += cheapest_inr
         elif pr["price_inr"]:
             total += pr["price_inr"]
 
-        items.append({
-            "part_id": pr["id"],
-            "part_name": "{} {}".format(pr["brand"] or "", pr["model_name"] or "").strip(),
-            "category": pr["category"] or "",
-            "seed_price_inr": pr["price_inr"],
-            "cheapest_live_inr": cheapest_inr,
-            "cheapest_retailer": cheapest["retailer"] if cheapest else None,
-            "in_stock": cheapest["in_stock"] if cheapest else None,
-        })
+        items.append(
+            {
+                "part_id": pr["id"],
+                "part_name": "{} {}".format(
+                    pr["brand"] or "", pr["model_name"] or ""
+                ).strip(),
+                "category": pr["category"] or "",
+                "seed_price_inr": pr["price_inr"],
+                "cheapest_live_inr": cheapest_inr,
+                "cheapest_retailer": cheapest["retailer"] if cheapest else None,
+                "in_stock": cheapest["in_stock"] if cheapest else None,
+            }
+        )
 
     return BikePricingSummaryOut(
         bike_id=bike_id,
@@ -2822,6 +2848,7 @@ def refresh_part_price(part_id: int, force: bool = Query(False)):
         )
 
     from motoquant.database.pricing_refresh import fetch_live_price
+
     result = fetch_live_price(db, part_id, force=force)
 
     if result is None:
@@ -2969,9 +2996,7 @@ def chat(req: ChatRequest, client=Depends(get_llm_client)) -> ChatResponse:
         venue_id=result.venue_id,
         parsed_notes=result.parsed_notes,
         optimization_goal=result.optimization_goal,
-        bike_suggestions=[
-            ChatBikeSuggestion(**s) for s in result.bike_suggestions
-        ],
+        bike_suggestions=[ChatBikeSuggestion(**s) for s in result.bike_suggestions],
         sim_result=result.sim_result,
         summary=result.summary,
         error=result.error,
@@ -3001,14 +3026,23 @@ class OptimizeBuildRequest(BaseModel):
         None, description="Fallback preset: gsxr1000_k5 | yzfr1_4c8 | hayabusa_gen1"
     )
     budget_inr: float = Field(..., ge=0, le=5_000_000, description="Max spend [INR]")
-    goal: str = Field("min_et", description='"min_et" (faster ET) or "max_trap" (higher trap)')
-    profile: str = Field("all", description="all | street_legal | drag_prep | full_race")
+    goal: str = Field(
+        "min_et", description='"min_et" (faster ET) or "max_trap" (higher trap)'
+    )
+    profile: str = Field(
+        "all", description="all | street_legal | drag_prep | full_race"
+    )
     rider_weight_kg: float = Field(75.0, ge=40, le=150)
     power_boost_pct: float = Field(0.0, ge=-50, le=200)
     mass_delta_kg: float = Field(0.0, ge=-100, le=200)
-    venue_id: int | None = Field(None, description="Optional venue for ambient conditions")
+    venue_id: int | None = Field(
+        None, description="Optional venue for ambient conditions"
+    )
     max_candidates: int | None = Field(
-        None, ge=1, le=200, description="Cap candidate pool (latency control for full-sim fallback)"
+        None,
+        ge=1,
+        le=200,
+        description="Cap candidate pool (latency control for full-sim fallback)",
     )
 
     model_config = {"populate_by_name": True}
@@ -3062,7 +3096,9 @@ def optimize_build_route(req: OptimizeBuildRequest):
             max_candidates=req.max_candidates,
         )
     except Exception as exc:
-        logging.getLogger(__name__).error("optimize_build failed: %s", exc, exc_info=True)
+        logging.getLogger(__name__).error(
+            "optimize_build failed: %s", exc, exc_info=True
+        )
         raise HTTPException(500, f"Optimization failed: {exc}") from exc
 
     return result.to_dict()
@@ -3073,7 +3109,9 @@ class AutotuneRequest(BaseModel):
 
     bike_id: int | None = Field(None, description="DB bike_models.id")
     bike_preset: str | None = Field(None, description="Fallback preset name")
-    location: str | None = Field(None, max_length=200, description="City/venue, e.g. 'Pune, IN'")
+    location: str | None = Field(
+        None, max_length=200, description="City/venue, e.g. 'Pune, IN'"
+    )
     venue_id: int | None = Field(None, description="Seeded venue id (sets altitude)")
     lat: float | None = Field(None, ge=-90, le=90)
     lon: float | None = Field(None, ge=-180, le=180)
@@ -3083,7 +3121,9 @@ class AutotuneRequest(BaseModel):
     humidity_pct: float | None = Field(None, ge=0, le=100)
     pressure_hpa: float | None = Field(None, ge=800, le=1100)
     rider_weight_kg: float = Field(75.0, ge=40, le=150)
-    gear_span: int = Field(3, ge=1, le=6, description="± sprocket-tooth sweep half-width")
+    gear_span: int = Field(
+        3, ge=1, le=6, description="± sprocket-tooth sweep half-width"
+    )
     launch_steps: int = Field(6, ge=2, le=10, description="Launch-RPM sweep resolution")
 
     model_config = {"populate_by_name": True}
@@ -3131,7 +3171,10 @@ def autotune_ecu_route(req: AutotuneRequest):
         try:
             resolved = resolve_venue(
                 VenueResolveRequest(
-                    location=req.location, lat=req.lat, lon=req.lon, altitude_m=req.altitude_m
+                    location=req.location,
+                    lat=req.lat,
+                    lon=req.lon,
+                    altitude_m=req.altitude_m,
                 )
             )
             _apply_resolved_env(config, resolved)
@@ -3157,7 +3200,9 @@ def autotune_ecu_route(req: AutotuneRequest):
     from .analysis.ecu_autotune import autotune
 
     try:
-        result = autotune(config, gear_span=req.gear_span, launch_steps=req.launch_steps)
+        result = autotune(
+            config, gear_span=req.gear_span, launch_steps=req.launch_steps
+        )
     except Exception as exc:
         logging.getLogger(__name__).error("autotune failed: %s", exc, exc_info=True)
         raise HTTPException(500, f"Autotune failed: {exc}") from exc
@@ -3165,6 +3210,7 @@ def autotune_ecu_route(req: AutotuneRequest):
     out = result.to_dict()
     out["environment_source"] = env_source
     return out
+
 
 # ─────────────────────────────────────────────
 # Keep-warm self-ping (Render free tier) — added 2026-06-06.

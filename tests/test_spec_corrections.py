@@ -27,17 +27,19 @@ if PROJECT_ROOT not in sys.path:
 # Helpers
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def _fresh_db_path():
     """Return a path to a *new* temp file (deleted when the test is done)."""
     fd, path = tempfile.mkstemp(suffix=".db")
     os.close(fd)
-    os.unlink(path)          # MotoQuantDB will recreate it
+    os.unlink(path)  # MotoQuantDB will recreate it
     return path
 
 
 def _open_mq_db(path):
     """Open and fully initialize a MotoQuantDB (DELETE journal for FUSE compat)."""
     from motoquant.database.connection import MotoQuantDB
+
     db = MotoQuantDB(path)
     # Force DELETE journal mode before initialize() touches the DB.
     # connect() is called lazily; we call it explicitly first so we can flip the
@@ -59,9 +61,7 @@ def _seed_one_bike(db, model_name="TestBike"):
     """
     conn = db.conn
     # Ensure a manufacturer exists
-    conn.execute(
-        "INSERT OR IGNORE INTO manufacturers (name) VALUES ('TestMaker')"
-    )
+    conn.execute("INSERT OR IGNORE INTO manufacturers (name) VALUES ('TestMaker')")
     mfr_id = conn.execute(
         "SELECT id FROM manufacturers WHERE name = 'TestMaker'"
     ).fetchone()[0]
@@ -81,6 +81,7 @@ def _seed_one_bike(db, model_name="TestBike"):
 # ─────────────────────────────────────────────────────────────────────────────
 # 1. Schema migration — fresh DB
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestSchemaMigrationFresh(unittest.TestCase):
     """On a brand-new DB the schema must include spec_corrections + data_source."""
@@ -102,27 +103,29 @@ class TestSchemaMigrationFresh(unittest.TestCase):
 
     def test_spec_corrections_columns(self):
         cols = {
-            r[1]
-            for r in self.db.conn.execute("PRAGMA table_info(spec_corrections)")
+            r[1] for r in self.db.conn.execute("PRAGMA table_info(spec_corrections)")
         }
         required = {
-            "id", "bike_model_id", "field_name", "current_value",
-            "proposed_value", "source_url", "submitter_email",
-            "notes", "status", "created_at", "reviewed_at",
+            "id",
+            "bike_model_id",
+            "field_name",
+            "current_value",
+            "proposed_value",
+            "source_url",
+            "submitter_email",
+            "notes",
+            "status",
+            "created_at",
+            "reviewed_at",
         }
         self.assertTrue(required.issubset(cols), f"Missing columns: {required - cols}")
 
     def test_bike_models_has_data_source_column(self):
-        cols = {
-            r[1]
-            for r in self.db.conn.execute("PRAGMA table_info(bike_models)")
-        }
+        cols = {r[1] for r in self.db.conn.execute("PRAGMA table_info(bike_models)")}
         self.assertIn("data_source", cols, "bike_models must have data_source column")
 
     def test_data_source_default_is_estimated(self):
-        self.db.conn.execute(
-            "INSERT OR IGNORE INTO manufacturers (name) VALUES ('X')"
-        )
+        self.db.conn.execute("INSERT OR IGNORE INTO manufacturers (name) VALUES ('X')")
         mfr_id = self.db.conn.execute(
             "SELECT id FROM manufacturers WHERE name='X'"
         ).fetchone()[0]
@@ -164,6 +167,7 @@ class TestSchemaMigrationFresh(unittest.TestCase):
 # ─────────────────────────────────────────────────────────────────────────────
 # 2. Schema migration — existing v3 DB (idempotency)
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestSchemaMigrationExistingV3(unittest.TestCase):
     """Simulate upgrading a DB that was at version 3 (no spec_corrections yet)."""
@@ -231,13 +235,14 @@ class TestSchemaMigrationExistingV3(unittest.TestCase):
 # 3. SpecCorrectionsRepository — CRUD
 # ─────────────────────────────────────────────────────────────────────────────
 
-class TestSpecCorrectionsRepo(unittest.TestCase):
 
+class TestSpecCorrectionsRepo(unittest.TestCase):
     def setUp(self):
         self.db_path = _fresh_db_path()
         self.db = _open_mq_db(self.db_path)
         # Seed the full catalog so FK constraints work cleanly
         from motoquant.database.seed import seed_all
+
         seed_all(self.db)
         self.bike_id = _seed_one_bike(self.db)
         self.repo = self.db.spec_corrections
@@ -320,7 +325,9 @@ class TestSpecCorrectionsRepo(unittest.TestCase):
 
         pending = self.repo.list_pending()
         ids = [p["id"] for p in pending]
-        self.assertNotIn(r1["id"], ids, "Approved correction should not be in pending list")
+        self.assertNotIn(
+            r1["id"], ids, "Approved correction should not be in pending list"
+        )
         self.assertIn(r2["id"], ids)
 
     def test_list_pending_filter_by_bike(self):
@@ -414,8 +421,7 @@ class TestSpecCorrectionsRepo(unittest.TestCase):
 
     def test_get_returns_correct_row(self):
         r = self.repo.create(
-            self.bike_id, "compression_ratio", "11.5",
-            notes="from service manual"
+            self.bike_id, "compression_ratio", "11.5", notes="from service manual"
         )
         fetched = self.repo.get(r["id"])
         self.assertIsNotNone(fetched)
@@ -430,12 +436,13 @@ class TestSpecCorrectionsRepo(unittest.TestCase):
 # 4. bike_repo.update_data_source
 # ─────────────────────────────────────────────────────────────────────────────
 
-class TestUpdateDataSource(unittest.TestCase):
 
+class TestUpdateDataSource(unittest.TestCase):
     def setUp(self):
         self.db_path = _fresh_db_path()
         self.db = _open_mq_db(self.db_path)
         from motoquant.database.seed import seed_all
+
         seed_all(self.db)
         self.bike_id = _seed_one_bike(self.db)
 
@@ -472,14 +479,13 @@ class TestUpdateDataSource(unittest.TestCase):
         ]
         for val in valid_values:
             with self.subTest(val=val):
-                self.assertTrue(
-                    self.db.bikes.update_data_source(self.bike_id, val)
-                )
+                self.assertTrue(self.db.bikes.update_data_source(self.bike_id, val))
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 5. FastAPI endpoints
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestSpecCorrectionsAPI(unittest.TestCase):
     """Integration tests against the FastAPI app using TestClient."""
@@ -494,17 +500,17 @@ class TestSpecCorrectionsAPI(unittest.TestCase):
         cls.db_path = _fresh_db_path()
         db = _open_mq_db(cls.db_path)
         from motoquant.database.seed import seed_all
+
         seed_all(db)
         # Get a real bike_id from the seeded catalog
-        row = db.conn.execute(
-            "SELECT id FROM bike_models LIMIT 1"
-        ).fetchone()
+        row = db.conn.execute("SELECT id FROM bike_models LIMIT 1").fetchone()
         cls.bike_id = row[0] if row else None
         db.close()
 
         os.environ["MOTOQUANT_DB"] = cls.db_path
 
         from motoquant.api import app
+
         cls.client = TestClient(app)
 
     @classmethod
@@ -643,21 +649,36 @@ class TestSpecCorrectionsAPI(unittest.TestCase):
 # 6. VALID_CORRECTION_FIELDS whitelist integrity
 # ─────────────────────────────────────────────────────────────────────────────
 
-class TestValidCorrectionFields(unittest.TestCase):
 
+class TestValidCorrectionFields(unittest.TestCase):
     def test_whitelist_is_frozenset(self):
         from motoquant.database.spec_corrections_repo import VALID_CORRECTION_FIELDS
+
         self.assertIsInstance(VALID_CORRECTION_FIELDS, frozenset)
 
     def test_whitelist_contains_expected_fields(self):
         from motoquant.database.spec_corrections_repo import VALID_CORRECTION_FIELDS
+
         expected = {
-            "peak_power_hp", "peak_torque_nm", "displacement_cc",
-            "dry_mass_kg", "wet_mass_kg", "bore_mm", "stroke_mm",
-            "compression_ratio", "cylinder_count", "wheelbase_mm",
-            "seat_height_mm", "fuel_capacity_l", "front_sprocket",
-            "rear_sprocket", "gear_ratios", "redline_rpm",
-            "cd", "frontal_area_m2", "data_source",
+            "peak_power_hp",
+            "peak_torque_nm",
+            "displacement_cc",
+            "dry_mass_kg",
+            "wet_mass_kg",
+            "bore_mm",
+            "stroke_mm",
+            "compression_ratio",
+            "cylinder_count",
+            "wheelbase_mm",
+            "seat_height_mm",
+            "fuel_capacity_l",
+            "front_sprocket",
+            "rear_sprocket",
+            "gear_ratios",
+            "redline_rpm",
+            "cd",
+            "frontal_area_m2",
+            "data_source",
         }
         missing = expected - VALID_CORRECTION_FIELDS
         self.assertEqual(missing, set(), f"Missing from whitelist: {missing}")
@@ -667,6 +688,7 @@ class TestValidCorrectionFields(unittest.TestCase):
             FIELD_LABELS,
             VALID_CORRECTION_FIELDS,
         )
+
         for field in VALID_CORRECTION_FIELDS:
             self.assertIn(
                 field,
@@ -679,19 +701,21 @@ class TestValidCorrectionFields(unittest.TestCase):
 # 7. Reference baselines preserved
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class TestReferenceBaselinesPreserved(unittest.TestCase):
     """Ensure the spec-corrections feature did not perturb K5/R1/Hayabusa ETs."""
 
     TOLERANCE_S = 0.02  # ±20 ms — same as CLAUDE.md validation criterion
 
     BASELINES = [
-        ("gsxr1000_k5",  10.0334),
-        ("yzfr1_4c8",    10.2859),
+        ("gsxr1000_k5", 10.0334),
+        ("yzfr1_4c8", 10.2859),
         ("hayabusa_gen1", 10.4712),
     ]
 
     def _run_et(self, config_fn_name):
         import motoquant
+
         config_fn = getattr(motoquant, config_fn_name)
         cfg = config_fn()
         engine = motoquant.MotoQuantEngine(cfg)
@@ -700,18 +724,30 @@ class TestReferenceBaselinesPreserved(unittest.TestCase):
 
     def test_k5_baseline(self):
         et = self._run_et("gsxr1000_k5")
-        self.assertAlmostEqual(et, 10.0334, delta=self.TOLERANCE_S,
-                               msg=f"K5 ET {et:.4f}s drifted from baseline 10.0334s")
+        self.assertAlmostEqual(
+            et,
+            10.0334,
+            delta=self.TOLERANCE_S,
+            msg=f"K5 ET {et:.4f}s drifted from baseline 10.0334s",
+        )
 
     def test_r1_baseline(self):
         et = self._run_et("yzfr1_4c8")
-        self.assertAlmostEqual(et, 10.2859, delta=self.TOLERANCE_S,
-                               msg=f"R1 ET {et:.4f}s drifted from baseline 10.2859s")
+        self.assertAlmostEqual(
+            et,
+            10.2859,
+            delta=self.TOLERANCE_S,
+            msg=f"R1 ET {et:.4f}s drifted from baseline 10.2859s",
+        )
 
     def test_hayabusa_baseline(self):
         et = self._run_et("hayabusa_gen1")
-        self.assertAlmostEqual(et, 10.4712, delta=self.TOLERANCE_S,
-                               msg=f"Hayabusa ET {et:.4f}s drifted from baseline 10.4712s")
+        self.assertAlmostEqual(
+            et,
+            10.4712,
+            delta=self.TOLERANCE_S,
+            msg=f"Hayabusa ET {et:.4f}s drifted from baseline 10.4712s",
+        )
 
 
 # ─────────────────────────────────────────────────────────────────────────────

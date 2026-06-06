@@ -39,10 +39,14 @@ def make_mock_client(
     def fake(kind: str, kwargs: dict[str, Any]):
         calls.append({"kind": kind, **kwargs})
         if kind == "tool":
-            return tool_response if tool_response is not None else {
-                "bike_name": "Suzuki Hayabusa",
-                "optimization_goal": "minimize_et",
-            }
+            return (
+                tool_response
+                if tool_response is not None
+                else {
+                    "bike_name": "Suzuki Hayabusa",
+                    "optimization_goal": "minimize_et",
+                }
+            )
         if kind == "text":
             return text_response
         raise AssertionError(f"unexpected kind: {kind}")
@@ -195,7 +199,11 @@ class TestParseQuery(unittest.TestCase):
 
     def test_db_resolution_populates_ids(self):
         """When db is passed, bike_id and venue_id should be resolved."""
-        fake_bike_row = {"id": 7, "manufacturer_name": "Suzuki", "model_name": "Hayabusa"}
+        fake_bike_row = {
+            "id": 7,
+            "manufacturer_name": "Suzuki",
+            "model_name": "Hayabusa",
+        }
         fake_venue = {"id": 3, "name": "Aamby Valley"}
 
         db = MagicMock()
@@ -340,7 +348,12 @@ class TestToolSchema(unittest.TestCase):
 
     def test_nullable_env_fields(self):
         """Env params should accept null so the model can omit them cleanly."""
-        for field_name in ("ambient_temp_c", "humidity_pct", "altitude_m", "headwind_kmh"):
+        for field_name in (
+            "ambient_temp_c",
+            "humidity_pct",
+            "altitude_m",
+            "headwind_kmh",
+        ):
             field_type = TOOL_SCHEMA["properties"][field_name]["type"]
             self.assertIn("null", field_type, f"{field_name} must allow null")
 

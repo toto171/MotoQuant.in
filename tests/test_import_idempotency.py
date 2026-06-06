@@ -58,18 +58,24 @@ class TestCreateModelIdempotent:
     def test_distinct_generations_preserved(self, db):
         mfr = db.bikes.get_or_create_manufacturer("Suzuki")
         a = db.bikes.create_model(
-            manufacturer_id=mfr, model_name="GSX-R 1000 (2003-2004)",
-            year_from=2003, year_to=2004,
+            manufacturer_id=mfr,
+            model_name="GSX-R 1000 (2003-2004)",
+            year_from=2003,
+            year_to=2004,
         )
         b = db.bikes.create_model(
-            manufacturer_id=mfr, model_name="GSX-R 1000 (2007-2008)",
-            year_from=2007, year_to=2008,
+            manufacturer_id=mfr,
+            model_name="GSX-R 1000 (2007-2008)",
+            year_from=2007,
+            year_to=2008,
         )
         assert a != b
         assert db.bikes.count_models() == 2
         a2 = db.bikes.create_model(
-            manufacturer_id=mfr, model_name="GSX-R 1000 (2003-2004)",
-            year_from=2003, year_to=2004,
+            manufacturer_id=mfr,
+            model_name="GSX-R 1000 (2003-2004)",
+            year_from=2003,
+            year_to=2004,
         )
         assert a2 == a
         assert db.bikes.count_models() == 2
@@ -77,12 +83,16 @@ class TestCreateModelIdempotent:
     def test_suffix_variant_collapses(self, db):
         mfr = db.bikes.get_or_create_manufacturer("TestMoto")
         a = db.bikes.create_model(
-            manufacturer_id=mfr, model_name="Zoomer 500 (2025)",
-            year_from=2025, year_to=2025,
+            manufacturer_id=mfr,
+            model_name="Zoomer 500 (2025)",
+            year_from=2025,
+            year_to=2025,
         )
         b = db.bikes.create_model(
-            manufacturer_id=mfr, model_name="Zoomer 500",
-            year_from=2025, year_to=2025,
+            manufacturer_id=mfr,
+            model_name="Zoomer 500",
+            year_from=2025,
+            year_to=2025,
         )
         assert a == b
         assert db.bikes.count_models() == 1
@@ -90,12 +100,18 @@ class TestCreateModelIdempotent:
     def test_differing_model_code_same_bike_collapses(self, db):
         mfr = db.bikes.get_or_create_manufacturer("Yezdi")
         a = db.bikes.create_model(
-            manufacturer_id=mfr, model_name="Adventure (2022-2026)",
-            model_code="Adv", year_from=2022, year_to=2026,
+            manufacturer_id=mfr,
+            model_name="Adventure (2022-2026)",
+            model_code="Adv",
+            year_from=2022,
+            year_to=2026,
         )
         b = db.bikes.create_model(
-            manufacturer_id=mfr, model_name="Adventure (2022-2026)",
-            model_code="BG6-ADV", year_from=2022, year_to=2026,
+            manufacturer_id=mfr,
+            model_name="Adventure (2022-2026)",
+            model_code="BG6-ADV",
+            year_from=2022,
+            year_to=2026,
         )
         assert a == b
         assert db.bikes.count_models() == 1

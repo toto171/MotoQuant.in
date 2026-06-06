@@ -45,7 +45,6 @@ from pathlib import Path
 import numpy as np
 
 # ─── Physical constants ────────────────────────────────────────────────────
-
 from ..constants import QUARTER_MILE_M  # single source of truth (402.336 m)
 
 EIGHTH_MILE_M: float = 201.168  # 1/8 mile in metres

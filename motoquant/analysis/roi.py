@@ -37,8 +37,8 @@ Usage
 
 from __future__ import annotations
 
-import logging
 import copy
+import logging
 import math
 import warnings
 from dataclasses import dataclass
@@ -210,7 +210,9 @@ def _resolve_price(part: dict, conn=None, *, use_live_pricing: bool = False) -> 
     except Exception:
         logging.getLogger(__name__).warning(
             "live price lookup failed for part %s — using seed price ₹%s",
-            part.get("id") or part.get("part_id"), seed_price, exc_info=True,
+            part.get("id") or part.get("part_id"),
+            seed_price,
+            exc_info=True,
         )
         return seed_price
 

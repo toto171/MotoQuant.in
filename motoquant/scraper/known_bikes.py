@@ -44,7 +44,14 @@ SUZUKI_GSXR600_K6 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        "gear_ratios": [2.923, 2.071, 1.789, 1.550, 1.381, 1.259],  # K6 SM GSF-6A-M5; was [2.923,2.333,...,1.407] TOP_GEAR_CRITICAL
+        "gear_ratios": [
+            2.923,
+            2.071,
+            1.789,
+            1.550,
+            1.381,
+            1.259,
+        ],  # K6 SM GSF-6A-M5; was [2.923,2.333,...,1.407] TOP_GEAR_CRITICAL
         "front_sprocket": 17,
         "rear_sprocket": 42,  # OEM F17/R42 for K6 (was R44)
         "chain_pitch": "520",
@@ -597,7 +604,7 @@ KAWASAKI_H2R_2015 = spec_from_dict(
         "dry_mass_kg": 216.0,
         "wheelbase_mm": 1450.0,
         "front_tire_size": "120/600R17",  # slick
-        "rear_tire_size": "190/650R17",   # slick
+        "rear_tire_size": "190/650R17",  # slick
         "cd": 0.55,  # carbon dive planes + fairing
         "frontal_area_m2": 0.45,
     },
@@ -1287,7 +1294,14 @@ BMW_M1000RR_2021 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        "gear_ratios": [2.640, 2.176, 1.800, 1.560, 1.400, 1.280],  # K67 close-ratio; BMW M1000RR homologation 2021
+        "gear_ratios": [
+            2.640,
+            2.176,
+            1.800,
+            1.560,
+            1.400,
+            1.280,
+        ],  # K67 close-ratio; BMW M1000RR homologation 2021
         "front_sprocket": 17,
         "rear_sprocket": 45,
         "chain_pitch": "520",
@@ -3773,9 +3787,9 @@ KAWASAKI_NINJA_400_2018 = spec_from_dict(
         "stroke_mm": 80.0,
         "compression_ratio": 10.8,
         "cylinders": 2,
-        "peak_power_hp": 44.8,       # 44.8 hp at wheel (Cycle World dyno, US spec)
+        "peak_power_hp": 44.8,  # 44.8 hp at wheel (Cycle World dyno, US spec)
         "peak_power_rpm": 10000,
-        "peak_torque_nm": 38.5,       # 38.5 Nm at 8000 rpm (service manual / dyno)
+        "peak_torque_nm": 38.5,  # 38.5 Nm at 8000 rpm (service manual / dyno)
         "peak_torque_rpm": 8000,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -3783,13 +3797,20 @@ KAWASAKI_NINJA_400_2018 = spec_from_dict(
         "gears": 6,
         # Kawasaki Ninja 400 2018 service manual — DIFFERENT from Ninja 300
         # Previous entry erroneously used Ninja 300 gear data
-        "gear_ratios": [2.846, 2.071, 1.700, 1.441, 1.241, 1.107],  # internal ratios (SM p. 3-33)
-        "primary_ratio": 2.073,        # crank → main shaft: 85/41 ≈ 2.073 (EX400 SM p. 3-33)
+        "gear_ratios": [
+            2.846,
+            2.071,
+            1.700,
+            1.441,
+            1.241,
+            1.107,
+        ],  # internal ratios (SM p. 3-33)
+        "primary_ratio": 2.073,  # crank → main shaft: 85/41 ≈ 2.073 (EX400 SM p. 3-33)
         # NOTE: was 3.082 (Ninja 300 value — copy-paste error). Fix already in
         # gear_ratios.py since Apr-22 but spec field was blocking the lookup
         # (non-null spec.primary_ratio short-circuits lu_primary in importer.py:638).
-        "front_sprocket": 15,          # OEM: 15T (was 17 — Ninja 300 data)
-        "rear_sprocket": 46,           # OEM: 46T (was 43 — Ninja 300 data)
+        "front_sprocket": 15,  # OEM: 15T (was 17 — Ninja 300 data)
+        "rear_sprocket": 46,  # OEM: 46T (was 43 — Ninja 300 data)
         "chain_pitch": "520",
         "dry_mass_kg": 168.0,
         "wheelbase_mm": 1345.0,
@@ -4455,7 +4476,14 @@ SUZUKI_KATANA_2019 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        "gear_ratios": [2.571, 1.894, 1.571, 1.381, 1.238, 1.130],  # GSX-S1000 platform SM 99500-39390-01E
+        "gear_ratios": [
+            2.571,
+            1.894,
+            1.571,
+            1.381,
+            1.238,
+            1.130,
+        ],  # GSX-S1000 platform SM 99500-39390-01E
         "front_sprocket": 17,
         "rear_sprocket": 44,
         "chain_pitch": "525",
@@ -4610,9 +4638,9 @@ TRIUMPH_ROCKET_3_2020 = spec_from_dict(
         "rear_sprocket": 47,
         "chain_pitch": "530",
         "dry_mass_kg": 291.0,  # April 24, 2026 — corrected from 317.5
-                               # (Triumph official dry weight for R is 291kg;
-                               # 317.5kg was the WET kerb weight). Spec
-                               # field semantics: dry_mass_kg.
+        # (Triumph official dry weight for R is 291kg;
+        # 317.5kg was the WET kerb weight). Spec
+        # field semantics: dry_mass_kg.
         "wheelbase_mm": 1677.0,
         "front_tire_size": "150/80R17",
         "rear_tire_size": "240/50R16",
@@ -4754,7 +4782,14 @@ BMW_M1000R_2023 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        "gear_ratios": [2.640, 2.176, 1.800, 1.560, 1.400, 1.280],  # K67 engine; BMW M 1000 R owner's manual 01498053618
+        "gear_ratios": [
+            2.640,
+            2.176,
+            1.800,
+            1.560,
+            1.400,
+            1.280,
+        ],  # K67 engine; BMW M 1000 R owner's manual 01498053618
         "front_sprocket": 17,
         "rear_sprocket": 45,
         "chain_pitch": "525",
@@ -7421,7 +7456,14 @@ YAMAHA_R6_2003 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        "gear_ratios": [2.750, 2.000, 1.667, 1.444, 1.304, 1.208],  # 5SL SM 5SL-W001E-01; 6th=1.208 (13S=1.150)
+        "gear_ratios": [
+            2.750,
+            2.000,
+            1.667,
+            1.444,
+            1.304,
+            1.208,
+        ],  # 5SL SM 5SL-W001E-01; 6th=1.208 (13S=1.150)
         "front_sprocket": 16,
         "rear_sprocket": 45,
         "chain_pitch": "525",
@@ -12236,7 +12278,6 @@ ALL_KNOWN_BIKES = [
     KTM_250_SX_2022,
     # Indian 2T
     YEZDI_250_CLASSIC_1990,
-
     # ── WS-A Additions: April 27, 2026 ──
     # Recent 2024-2026 Flagships
     HONDA_CBR1000RR_R_FIREBLADE_SP_2024,

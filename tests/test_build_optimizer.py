@@ -19,10 +19,9 @@ import sqlite3
 import pytest
 
 from motoquant.analysis.build_optimizer import (
+    _EXCLUSIVE_CATEGORIES,
     VALID_GOALS,
     OptimizedBuild,
-    SurrogatePredictor,
-    _EXCLUSIVE_CATEGORIES,
     _select_build,
     make_predictor,
     optimize_build,
@@ -36,11 +35,22 @@ DB_PATH = os.environ.get("MOTOQUANT_TEST_DB", "motoquant.db")
 def _mk(pid, cat, price, det, dtrap=0.0):
     """Build a synthetic PartROIResult."""
     return PartROIResult(
-        part_id=pid, part_name=f"P{pid}", brand="B", category=cat, category_display=cat,
-        price_inr=float(price), price_usd=None, base_et_s=10.0, modified_et_s=10.0 - det,
-        delta_et_s=float(det), delta_trap_ms=float(dtrap),
-        roi_score=(det / max(price, 1) * 1e5), cost_per_tenth_inr=(price / (det * 10) if det > 0 else float("inf")),
-        is_compatible=True, availability="in_stock", is_free=(price == 0),
+        part_id=pid,
+        part_name=f"P{pid}",
+        brand="B",
+        category=cat,
+        category_display=cat,
+        price_inr=float(price),
+        price_usd=None,
+        base_et_s=10.0,
+        modified_et_s=10.0 - det,
+        delta_et_s=float(det),
+        delta_trap_ms=float(dtrap),
+        roi_score=(det / max(price, 1) * 1e5),
+        cost_per_tenth_inr=(price / (det * 10) if det > 0 else float("inf")),
+        is_compatible=True,
+        availability="in_stock",
+        is_free=(price == 0),
     )
 
 
@@ -86,8 +96,8 @@ class TestSelectBuild:
         # A part with tiny ET gain but big trap gain should be preferred under
         # max_trap but not under min_et.
         pool = [
-            _mk(1, "exhaust", 30000, 0.10, 0.5),   # great ET, weak trap
-            _mk(2, "exhaust", 30000, 0.02, 4.0),   # weak ET, great trap
+            _mk(1, "exhaust", 30000, 0.10, 0.5),  # great ET, weak trap
+            _mk(2, "exhaust", 30000, 0.02, 4.0),  # weak ET, great trap
         ]
         et_pick = _select_build(pool, 30000, "min_et")
         trap_pick = _select_build(pool, 30000, "max_trap")
@@ -169,7 +179,9 @@ class TestOptimizeBuildIntegration:
     def test_optimize_litre_min_et(self, conn, repo):
         b = self._bike(conn)
         cfg = self._config(conn, b["id"], f"{b['mfr']} {b['model_name']}")
-        res = optimize_build(cfg, 80_000, repo, goal="min_et", bike_model_id=b["id"], max_candidates=10)
+        res = optimize_build(
+            cfg, 80_000, repo, goal="min_et", bike_model_id=b["id"], max_candidates=10
+        )
         assert isinstance(res, OptimizedBuild)
         assert res.total_cost_inr <= 80_000 + 1e-6
         assert res.parts_skipped_incompatible == 0
@@ -189,7 +201,9 @@ class TestOptimizeBuildIntegration:
     def test_goal_max_trap_returns_valid_build(self, conn, repo):
         b = self._bike(conn)
         cfg = self._config(conn, b["id"], f"{b['mfr']} {b['model_name']}")
-        res = optimize_build(cfg, 80_000, repo, goal="max_trap", bike_model_id=b["id"], max_candidates=10)
+        res = optimize_build(
+            cfg, 80_000, repo, goal="max_trap", bike_model_id=b["id"], max_candidates=10
+        )
         assert res.goal == "max_trap"
         assert res.total_cost_inr <= 80_000 + 1e-6
         assert res.delta_trap_kmh >= 0.0
@@ -197,14 +211,18 @@ class TestOptimizeBuildIntegration:
     def test_zero_budget_only_free_or_empty(self, conn, repo):
         b = self._bike(conn)
         cfg = self._config(conn, b["id"], f"{b['mfr']} {b['model_name']}")
-        res = optimize_build(cfg, 0, repo, goal="min_et", bike_model_id=b["id"], max_candidates=10)
+        res = optimize_build(
+            cfg, 0, repo, goal="min_et", bike_model_id=b["id"], max_candidates=10
+        )
         assert res.total_cost_inr == 0.0
         assert all(p.price_inr == 0 for p in res.parts)
 
     def test_bad_goal_defaults_to_min_et(self, conn, repo):
         b = self._bike(conn)
         cfg = self._config(conn, b["id"], f"{b['mfr']} {b['model_name']}")
-        res = optimize_build(cfg, 50_000, repo, goal="nonsense", bike_model_id=b["id"], max_candidates=6)
+        res = optimize_build(
+            cfg, 50_000, repo, goal="nonsense", bike_model_id=b["id"], max_candidates=6
+        )
         assert res.goal == "min_et"
 
 
@@ -228,7 +246,12 @@ class TestOptimizeRoute:
         bike_id = (bikes.get("bikes") or bikes.get("results") or bikes)[0]["id"]
         r = client.post(
             "/api/optimize/build",
-            json={"bike_id": bike_id, "budget_inr": 60000, "goal": "min_et", "max_candidates": 6},
+            json={
+                "bike_id": bike_id,
+                "budget_inr": 60000,
+                "goal": "min_et",
+                "max_candidates": 6,
+            },
         )
         assert r.status_code == 200, r.text
         body = r.json()

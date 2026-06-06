@@ -54,9 +54,13 @@ class TestTokenize(unittest.TestCase):
 
 class TestStripManufacturerPrefix(unittest.TestCase):
     def test_basic_brands(self):
-        self.assertEqual(_strip_manufacturer_prefix("Suzuki Hayabusa"), ("hayabusa", "suzuki"))
+        self.assertEqual(
+            _strip_manufacturer_prefix("Suzuki Hayabusa"), ("hayabusa", "suzuki")
+        )
         self.assertEqual(_strip_manufacturer_prefix("KTM RC 390"), ("rc 390", "ktm"))
-        self.assertEqual(_strip_manufacturer_prefix("Yamaha YZF-R1"), ("yzf r1", "yamaha"))
+        self.assertEqual(
+            _strip_manufacturer_prefix("Yamaha YZF-R1"), ("yzf r1", "yamaha")
+        )
 
     def test_multiword_brands(self):
         # Royal Enfield must match before just 're'

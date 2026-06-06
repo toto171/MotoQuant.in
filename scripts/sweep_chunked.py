@@ -9,6 +9,7 @@ e.g.
     python scripts/sweep_chunked.py 200 999 /tmp/sweep_chunk_2.json
 Then merge with sweep_merge.py.
 """
+
 import json
 import sys
 import time
@@ -63,7 +64,10 @@ def main():
     took = time.time() - t0
     with open(out, "w") as f:
         json.dump({"start": start, "end": end, "took_s": took, "results": results}, f)
-    print("chunk [%d:%d] %d bikes in %.1fs -> %s" % (start, end, len(results), took, out), flush=True)
+    print(
+        "chunk [%d:%d] %d bikes in %.1fs -> %s" % (start, end, len(results), took, out),
+        flush=True,
+    )
     return 0
 
 

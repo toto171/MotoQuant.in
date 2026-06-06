@@ -27,7 +27,6 @@ inherently separate 2T from 4T since no family overlaps on the exact match set.
 Price range: ₹4k (jet kit) – ₹75k (full expansion chamber + silencer).
 """
 
-
 from motoquant.database.seed_catalogs import _create_parts_batch
 
 

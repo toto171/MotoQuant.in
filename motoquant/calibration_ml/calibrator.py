@@ -119,9 +119,7 @@ def _make_regressor(hyperparams: dict[str, Any]) -> tuple[Any, str]:
 
             # XGB-only kwargs that sklearn doesn't accept
             blocked = {"colsample_bytree", "objective"}
-            sk_params = {
-                k: v for k, v in hyperparams.items() if k not in blocked
-            }
+            sk_params = {k: v for k, v in hyperparams.items() if k not in blocked}
             return GradientBoostingRegressor(**sk_params), "sklearn"
         except ImportError as e:
             raise ImportError(
@@ -206,9 +204,7 @@ class Calibrator:
         y = self.predict(x)[0]
         return CorrectionTargets.from_array(y)
 
-    def evaluate(
-        self, X_test: np.ndarray, Y_test: np.ndarray
-    ) -> CalibratorMetrics:
+    def evaluate(self, X_test: np.ndarray, Y_test: np.ndarray) -> CalibratorMetrics:
         """Per-target MAE, RMSE, and R^2."""
         preds = self.predict(X_test)
         m = CalibratorMetrics(n_test=int(len(X_test)))
@@ -262,9 +258,7 @@ def train_calibrator(
 ) -> tuple[Calibrator, CalibratorMetrics]:
     """One-shot: split -> fit -> evaluate. Returns (model, test_metrics)."""
     if dataset.n < 10:
-        raise ValueError(
-            f"Dataset too small ({dataset.n} rows). Need at least 10."
-        )
+        raise ValueError(f"Dataset too small ({dataset.n} rows). Need at least 10.")
     rng = np.random.default_rng(seed)
     idx = rng.permutation(dataset.n)
     n_test = max(1, int(dataset.n * test_fraction))

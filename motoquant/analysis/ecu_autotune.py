@@ -34,7 +34,7 @@ Public API
 from __future__ import annotations
 
 import copy
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass
 
 from ..models import BikeConfig
 from ..submodels.environmental import EnvironmentalModel
@@ -107,7 +107,9 @@ def _environment_block(config: BikeConfig) -> tuple[dict, float]:
         "density_altitude_ft": round(da_ft, 0),
         "density_altitude_m": round(da_ft * 0.3048, 0),
         "power_correction_pct": round(float(model.power_correction) * 100.0, 1),
-        "power_loss_pct": round(float(getattr(model, "da_power_loss_pct", (1.0 - sigma) * 100.0)), 1),
+        "power_loss_pct": round(
+            float(getattr(model, "da_power_loss_pct", (1.0 - sigma) * 100.0)), 1
+        ),
     }
     return block, sigma
 
@@ -115,7 +117,9 @@ def _environment_block(config: BikeConfig) -> tuple[dict, float]:
 # ─────────────────────────────────────────────────────────────────────────
 # Sweeps (full physics sim — atmospherics matter)
 # ─────────────────────────────────────────────────────────────────────────
-def _gearing_recommendation(config: BikeConfig, stock_et: float, *, span: int = 3) -> dict:
+def _gearing_recommendation(
+    config: BikeConfig, stock_et: float, *, span: int = 3
+) -> dict:
     dt = config.drivetrain
     front = int(getattr(dt, "front_sprocket", 0) or 0)
     rear = int(getattr(dt, "rear_sprocket", 0) or 0)
@@ -131,26 +135,37 @@ def _gearing_recommendation(config: BikeConfig, stock_et: float, *, span: int = 
             cfg = copy.deepcopy(config)
             cfg.drivetrain.rear_sprocket = t
             et, trap = _run_et(cfg)
-            candidates.append({
-                "front_sprocket": front, "rear_sprocket": t,
-                "final_drive": round(t / front, 3),
-                "et_s": round(et, 4), "trap_kmh": round(trap * 3.6, 1),
-                "is_stock": t == rear,
-            })
+            candidates.append(
+                {
+                    "front_sprocket": front,
+                    "rear_sprocket": t,
+                    "final_drive": round(t / front, 3),
+                    "et_s": round(et, 4),
+                    "trap_kmh": round(trap * 3.6, 1),
+                    "is_stock": t == rear,
+                }
+            )
         best = min(candidates, key=lambda c: c["et_s"])
         delta = stock_et - best["et_s"]
         if best["rear_sprocket"] == rear:
             rec = f"keep stock {front}/{rear} gearing"
         else:
-            direction = "shorter (more acceleration)" if best["rear_sprocket"] > rear else "taller (more top-end)"
+            direction = (
+                "shorter (more acceleration)"
+                if best["rear_sprocket"] > rear
+                else "taller (more top-end)"
+            )
             rec = f"{front}/{best['rear_sprocket']} — {direction}"
         return {
-            "adjustable": True, "drive": "chain",
-            "stock_front": front, "stock_rear": rear,
+            "adjustable": True,
+            "drive": "chain",
+            "stock_front": front,
+            "stock_rear": rear,
             "recommended_front": best["front_sprocket"],
             "recommended_rear": best["rear_sprocket"],
             "recommended_final_drive": best["final_drive"],
-            "et_s": best["et_s"], "trap_kmh": best["trap_kmh"],
+            "et_s": best["et_s"],
+            "trap_kmh": best["trap_kmh"],
             "delta_et_s": round(delta, 4),
             "recommendation": rec,
             "candidates": candidates,
@@ -169,13 +184,17 @@ def _gearing_recommendation(config: BikeConfig, stock_et: float, *, span: int = 
     }
 
 
-def _launch_recommendation(config: BikeConfig, stock_et: float, *, steps: int = 6) -> dict:
+def _launch_recommendation(
+    config: BikeConfig, stock_et: float, *, steps: int = 6
+) -> dict:
     eng = config.engine
     redline = float(getattr(eng, "redline_rpm", 12000.0))
     pt = float(getattr(eng, "peak_torque_rpm", redline * 0.7))
     pp = float(getattr(eng, "peak_power_rpm", redline * 0.85))
     idle = float(getattr(eng, "idle_rpm", 1200.0))
-    stock_launch = float(getattr(config.staging, "launch_rpm", 0.0) or getattr(eng, "launch_rpm", pt))
+    stock_launch = float(
+        getattr(config.staging, "launch_rpm", 0.0) or getattr(eng, "launch_rpm", pt)
+    )
 
     lo = _clamp(min(pt, pp) * 0.80, idle * 2.0, redline)
     hi = _clamp(redline * 0.97, lo + 500.0, redline)
@@ -190,16 +209,20 @@ def _launch_recommendation(config: BikeConfig, stock_et: float, *, steps: int = 
         cfg = copy.deepcopy(config)
         cfg.staging.launch_rpm = float(rpm)
         et, trap = _run_et(cfg)
-        candidates.append({
-            "launch_rpm": float(rpm), "et_s": round(et, 4),
-            "trap_kmh": round(trap * 3.6, 1),
-            "is_stock": abs(rpm - stock_launch) < 1.0,
-        })
+        candidates.append(
+            {
+                "launch_rpm": float(rpm),
+                "et_s": round(et, 4),
+                "trap_kmh": round(trap * 3.6, 1),
+                "is_stock": abs(rpm - stock_launch) < 1.0,
+            }
+        )
     best = min(candidates, key=lambda c: c["et_s"])
     return {
         "stock_rpm": round(stock_launch, 0),
         "recommended_rpm": best["launch_rpm"],
-        "et_s": best["et_s"], "trap_kmh": best["trap_kmh"],
+        "et_s": best["et_s"],
+        "trap_kmh": best["trap_kmh"],
         "delta_et_s": round(stock_et - best["et_s"], 4),
         "rationale": (
             "higher launch RPM keeps the engine in its powerband off the line"
@@ -294,8 +317,12 @@ def autotune(
         "launch_rpm": round(float(getattr(config.staging, "launch_rpm", 0.0)), 0),
         "front_sprocket": int(getattr(config.drivetrain, "front_sprocket", 0) or 0),
         "rear_sprocket": int(getattr(config.drivetrain, "rear_sprocket", 0) or 0),
-        "rear_pressure_psi": round(float(getattr(config.tires, "rear_pressure_psi", 30.0)), 0),
-        "front_pressure_psi": round(float(getattr(config.tires, "front_pressure_psi", 33.0)), 0),
+        "rear_pressure_psi": round(
+            float(getattr(config.tires, "rear_pressure_psi", 30.0)), 0
+        ),
+        "front_pressure_psi": round(
+            float(getattr(config.tires, "front_pressure_psi", 33.0)), 0
+        ),
     }
 
     gearing = _gearing_recommendation(config, stock_et, span=gear_span)

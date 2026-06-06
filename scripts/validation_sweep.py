@@ -128,7 +128,14 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # 2020 R3R airfield test corroborates 11.07s @ 126.06 mph (single-pass
     # journalist). Both publications agree on the 126 mph trap; old 226 km/h
     # value was an imperial→metric transcription error.
-    ("Triumph", "Rocket 3 R", 2020, 10.56, 203, "Cycle World 2020 (Gadson 17-pass tuned at Silver Dollar Motorsport Park)"),
+    (
+        "Triumph",
+        "Rocket 3 R",
+        2020,
+        10.56,
+        203,
+        "Cycle World 2020 (Gadson 17-pass tuned at Silver Dollar Motorsport Park)",
+    ),
     ("MV Agusta", "Brutale 1000 RR", 2019, 10.15, 240, "Cycle World 2019"),
     # 2-stroke benchmarks (Cycle World / historical drag tests / magazine)
     ("Yamaha", "RD350", 1973, 14.00, 146, "Cycle World 1973"),
@@ -1056,8 +1063,22 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     ),
     # ── end 2026-05-30 pass ──
     # -- 2026-05-31 pass (Cowork research subagent; instrumented sources only) --
-    ("Suzuki", "B-King", 2008, 9.99, 223, "Motorcycle Consumer News 2008 (stock instrumented)"),
-    ("BMW", "K1300S", 2008, 10.22, 217, "Motorcycle Consumer News 2009 (stock instrumented)"),
+    (
+        "Suzuki",
+        "B-King",
+        2008,
+        9.99,
+        223,
+        "Motorcycle Consumer News 2008 (stock instrumented)",
+    ),
+    (
+        "BMW",
+        "K1300S",
+        2008,
+        10.22,
+        217,
+        "Motorcycle Consumer News 2009 (stock instrumented)",
+    ),
     # ── 2026-05-30 benchmark-import agent (third pass) ────────────────────────
     # Six high-confidence instrumented adds, all sourced from the Cycle World /
     # Sport Rider sportbike-performance-numbers archive
@@ -1396,33 +1417,68 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # sheet streetbike before the brand's first wind-down. Sits between
     # SV1000 (10.82s) and 1098-class V-twin (~10.3s) in the V-twin order
     # which matches the chassis weight + power curve.
-    ("Buell", "1125R", 2008, 10.45, 215, "Cycle World 2008 (Sport Rider sportbike-performance-numbers, timing-strip 2008)"),
+    (
+        "Buell",
+        "1125R",
+        2008,
+        10.45,
+        215,
+        "Cycle World 2008 (Sport Rider sportbike-performance-numbers, timing-strip 2008)",
+    ),
     # MV Agusta F3 800 '14 → catalog F3 800 covers 2014-2025. CW timing
     # strip: 10.62s @ 134.5 mph (~216.5 km/h). 798 cc inline-3 counter-
     # rotating crank, 148 hp @ 13000 rpm, 173 kg dry — the high-revving
     # triple supersport. Fits the 600-800 supersport cluster between the
     # ZX-6R/CBR600RR (10.6-10.7) and the 750 GSX-R (10.4-10.5).
-    ("MV Agusta", "F3 800", 2014, 10.62, 216, "Cycle World 2014 (Sport Rider sportbike-performance-numbers, timing-strip 2014)"),
+    (
+        "MV Agusta",
+        "F3 800",
+        2014,
+        10.62,
+        216,
+        "Cycle World 2014 (Sport Rider sportbike-performance-numbers, timing-strip 2014)",
+    ),
     # KTM 1190 RC8 R '10 → catalog "1190 RC8 R" covers 2009-2013. CW
     # timing strip: 10.06s @ 143.36 mph (~230.7 km/h). 1148 cc 75° V-twin,
     # 178 hp @ 10250 rpm, 184 kg dry — the LC8 V-twin superbike that
     # briefly competed with Italian V-twin litre superbikes (Aprilia
     # RSV4, Ducati 1098/1198) before KTM exited the superbike segment.
     # Matches the V-twin litre-sport cluster (RSV4 1000 10.40, 1198 10.10).
-    ("KTM", "1190 RC8 R", 2010, 10.06, 231, "Cycle World 2010 (Sport Rider sportbike-performance-numbers, timing-strip 2010)"),
+    (
+        "KTM",
+        "1190 RC8 R",
+        2010,
+        10.06,
+        231,
+        "Cycle World 2010 (Sport Rider sportbike-performance-numbers, timing-strip 2010)",
+    ),
     # Kawasaki Ninja 1000 '11 → catalog "Ninja 1000 (Z1000SX)" covers
     # 2011-2019. CW timing strip: 11.30s @ 123.46 mph (~198.7 km/h).
     # 1043 cc I4 sport-tourer, 140 hp, 231 kg wet — heavy upright sport
     # tourer fits the 11.0-11.5 sport-touring band (B-King-class chassis
     # weight, more conservative final drive than ZX-10R). First-gen
     # Z1000-platform-based, pre-2014 refresh that bumped power slightly.
-    ("Kawasaki", "Ninja 1000", 2011, 11.30, 199, "Cycle World 2011 (Sport Rider sportbike-performance-numbers, timing-strip 2011)"),
+    (
+        "Kawasaki",
+        "Ninja 1000",
+        2011,
+        11.30,
+        199,
+        "Cycle World 2011 (Sport Rider sportbike-performance-numbers, timing-strip 2011)",
+    ),
     # Yamaha FZ6 '04 → catalog FZ6 Fazer covers 2004-2009. CW timing
     # strip: 11.53s @ 117.4 mph (~188.9 km/h). 600 cc detuned R6 mill,
     # 98 hp @ 12000 rpm, ~190 kg wet — naked sport derivative with a
     # broader/lower torque curve than the R6 it shares an engine block
     # with. Fits the 600-class naked band (Z750 ~11.3, FZ1 '07 ~10.96).
-    ("Yamaha", "FZ6", 2004, 11.53, 189, "Cycle World 2004 (Sport Rider sportbike-performance-numbers, timing-strip 2004)"),
+    (
+        "Yamaha",
+        "FZ6",
+        2004,
+        11.53,
+        189,
+        "Cycle World 2004 (Sport Rider sportbike-performance-numbers, timing-strip 2004)",
+    ),
     # ── end 2026-05-31 pass 3 ──
     # ── 2026-05-31 pass 4 — benchmark-import agent (Sunday slot) ─────────────
     # Three high-confidence instrumented adds covering gaps in the 689cc CP2-
@@ -1445,7 +1501,14 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # gear" — the 12.22s figure is the best run after multiple attempts so
     # represents a near-optimal stock launch.
     # URL: https://motostatz.com/yamaha-xsr700-engine-and-straight-line-performance-review/
-    ("Yamaha", "XSR700", 2022, 12.22, 172, "MotoStatz 2022 (Dragy, stock instrumented best-of-N)"),
+    (
+        "Yamaha",
+        "XSR700",
+        2022,
+        12.22,
+        172,
+        "MotoStatz 2022 (Dragy, stock instrumented best-of-N)",
+    ),
     # Honda Rebel 1100 '21 → catalog "Rebel 1100" covers 2021-2026
     # (known_bikes.py:4226). User Dragy GPS instrumented: 12.14s @ ~106 mph
     # (~170 km/h) in Sport mode with lowest TC intervention. Cross-checked
@@ -1459,7 +1522,14 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # key "Rebel 1100" has higher specificity than any partial Rebel 500/300
     # overlap.
     # URL: https://www.rideapart.com/honda-rebel-1100-dragy-test/ (Dragy run)
-    ("Honda", "Rebel 1100", 2021, 12.14, 170, "Dragy GPS 2021 (Sport mode, stock instrumented)"),
+    (
+        "Honda",
+        "Rebel 1100",
+        2021,
+        12.14,
+        170,
+        "Dragy GPS 2021 (Sport mode, stock instrumented)",
+    ),
     # Suzuki Hayabusa Gen3 '22 → catalog "Hayabusa (Gen 3)" already covered
     # by the Suzuki Hayabusa 2021 entry (line 54: 9.75s @ 248). Gen2 covered
     # by 2008 entry (line 53: 9.85s @ 250). Skipping — no add needed, range

@@ -93,9 +93,7 @@ class TestRunChatPipelineSuccess(unittest.TestCase):
             },
             summary_text="K5 ran cleanly.",
         )
-        result = run_chat_pipeline(
-            "how fast is the K5", self.db, client=client
-        )
+        result = run_chat_pipeline("how fast is the K5", self.db, client=client)
         self.assertIsInstance(result, ChatResult)
         self.assertIsNone(result.error)
         self.assertIsNotNone(result.bike_id)
@@ -255,9 +253,7 @@ class TestChatEndpoint(unittest.TestCase):
         # Reset overrides between tests
         self.api.app.dependency_overrides.clear()
 
-    def _override_llm(
-        self, parsed_payload: dict[str, Any], summary_text: str = "stub"
-    ):
+    def _override_llm(self, parsed_payload: dict[str, Any], summary_text: str = "stub"):
         """Plug a mock LLMClient into the get_llm_client dependency."""
         cli, _ = _make_mock_client(parsed_payload, summary_text)
         self.api.app.dependency_overrides[self.api.get_llm_client] = lambda: cli
@@ -270,9 +266,7 @@ class TestChatEndpoint(unittest.TestCase):
             },
             summary_text="Hayabusa ran cleanly.",
         )
-        r = self.client.post(
-            "/api/chat", json={"query": "how fast is my Hayabusa"}
-        )
+        r = self.client.post("/api/chat", json={"query": "how fast is my Hayabusa"})
         self.assertEqual(r.status_code, 200, r.text)
         body = r.json()
         self.assertIsNone(body["error"])
@@ -304,9 +298,7 @@ class TestChatEndpoint(unittest.TestCase):
                 "optimization_goal": "minimize_et",
             }
         )
-        r = self.client.post(
-            "/api/chat", json={"query": "fake bike query"}
-        )
+        r = self.client.post("/api/chat", json={"query": "fake bike query"})
         # Recoverable error -- still HTTP 200 so frontend can render suggestions
         self.assertEqual(r.status_code, 200)
         body = r.json()
@@ -321,8 +313,8 @@ class TestChatEndpoint(unittest.TestCase):
         def fake(kind, kwargs):
             raise LLMNotConfiguredError("ANTHROPIC_API_KEY missing")
 
-        self.api.app.dependency_overrides[self.api.get_llm_client] = (
-            lambda: LLMClient(_call_override=fake)
+        self.api.app.dependency_overrides[self.api.get_llm_client] = lambda: LLMClient(
+            _call_override=fake
         )
         r = self.client.post("/api/chat", json={"query": "anything"})
         self.assertEqual(r.status_code, 200)

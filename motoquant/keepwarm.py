@@ -32,14 +32,13 @@ import asyncio
 import logging
 import os
 import urllib.request
-
 from datetime import datetime, timezone
 
 logger = logging.getLogger("motoquant.keepwarm")
 
 #: Hours (UTC) during which the loop actively self-pings. Mirrors the
 #: ``*/14 0-18 * * *`` cron window in .github/workflows/keepalive.yml.
-ACTIVE_HOURS_UTC = range(0, 19)
+ACTIVE_HOURS_UTC = range(19)
 
 DEFAULT_INTERVAL_S = 600  # 10 min — well under Render's 15-min sleep timer
 
@@ -72,7 +71,10 @@ def _in_active_window(now: datetime | None = None) -> bool:
 async def _keepwarm_loop(health_url: str, interval_s: float) -> None:
     logger.info(
         "keep-warm loop started: %s every %.0fs during UTC hours %d-%d",
-        health_url, interval_s, ACTIVE_HOURS_UTC[0], ACTIVE_HOURS_UTC[-1],
+        health_url,
+        interval_s,
+        ACTIVE_HOURS_UTC[0],
+        ACTIVE_HOURS_UTC[-1],
     )
     while True:
         try:
@@ -89,7 +91,7 @@ async def _keepwarm_loop(health_url: str, interval_s: float) -> None:
         await asyncio.sleep(interval_s)
 
 
-def start_keepwarm() -> "asyncio.Task[None] | None":
+def start_keepwarm() -> asyncio.Task[None] | None:
     """Start the background loop if configured. Safe to call unconditionally.
 
     Returns the task (so callers/tests can cancel it) or None when disabled.
@@ -98,10 +100,14 @@ def start_keepwarm() -> "asyncio.Task[None] | None":
     """
     base_url = _resolve_base_url()
     if not base_url:
-        logger.info("keep-warm disabled (no RENDER_EXTERNAL_URL / MOTOQUANT_KEEPWARM_URL)")
+        logger.info(
+            "keep-warm disabled (no RENDER_EXTERNAL_URL / MOTOQUANT_KEEPWARM_URL)"
+        )
         return None
     try:
-        interval_s = float(os.environ.get("MOTOQUANT_KEEPWARM_INTERVAL_S", DEFAULT_INTERVAL_S))
+        interval_s = float(
+            os.environ.get("MOTOQUANT_KEEPWARM_INTERVAL_S", DEFAULT_INTERVAL_S)
+        )
     except ValueError:
         interval_s = float(DEFAULT_INTERVAL_S)
     interval_s = max(60.0, interval_s)  # floor: never hammer more than 1/min
@@ -111,4 +117,6 @@ def start_keepwarm() -> "asyncio.Task[None] | None":
     except RuntimeError:
         logger.warning("keep-warm not started: no running event loop")
         return None
-    return loop.create_task(_keepwarm_loop(health_url, interval_s), name="motoquant-keepwarm")
+    return loop.create_task(
+        _keepwarm_loop(health_url, interval_s), name="motoquant-keepwarm"
+    )

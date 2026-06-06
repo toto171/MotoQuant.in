@@ -92,9 +92,11 @@ def _run_et(cfg) -> float:
     monotonicity violation here implies a real physics regression
     (not a solver-config drift).
     """
-    return MotoQuantEngine(cfg, dt=0.001).run(
-        distance=QUARTER_MILE_M, max_time=15.0
-    ).time_quarter
+    return (
+        MotoQuantEngine(cfg, dt=0.001)
+        .run(distance=QUARTER_MILE_M, max_time=15.0)
+        .time_quarter
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -156,9 +158,7 @@ def test_more_power_means_faster_et(bike_factory, power_scale_low, power_scale_h
         cfg.engine.peak_power_hp = cfg.engine.peak_power_hp * factor
         cfg.engine.peak_torque_nm = cfg.engine.peak_torque_nm * factor
         if cfg.engine.dyno_curve is not None:
-            cfg.engine.dyno_curve.torque_nm = (
-                cfg.engine.dyno_curve.torque_nm * factor
-            )
+            cfg.engine.dyno_curve.torque_nm = cfg.engine.dyno_curve.torque_nm * factor
         return cfg
 
     cfg_low = _scale(bike_factory(), power_scale_low)
