@@ -79,3 +79,13 @@ Operator follow-up: a way to stop a running sim to change the setup.
   the new `SimProgress onStop` prop.
 - Tests 9 → 14: registry cancel mid-run, cancel-after-done no-op, unknown-id
   handling, route-level cancel through a real K5 simulate job.
+
+## Addendum 2 (same day): keepwarm hardening + full-sim bar visibility
+
+- `keepwarm.py`: 600 s → 420 s interval + one retry 60 s after a failed ping.
+  A single transient miss can no longer open the >15-min gap that puts the
+  service (and the loop inside it) to sleep until the throttled GH cron.
+- Simulator page bug: the Charts/Top Speed tab clicks started the sim without
+  switching tabs — progress was only ever the tiny nav chip. Runs now switch
+  to their tab at start, where a prominent SimProgress (stage + % + Stop)
+  renders until the result lands.

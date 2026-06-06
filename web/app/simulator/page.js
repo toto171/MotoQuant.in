@@ -446,6 +446,7 @@ function SimulatorPageInner() {
   const runFullSim = useCallback(async () => {
     if (!bike) return;
     setSimLoading(true);
+    setActiveTab('charts'); // show the progress bar where the result will land
     const controller = new AbortController();
     fullSimAbortRef.current = controller;
     try {
@@ -471,7 +472,6 @@ function SimulatorPageInner() {
         fallbackPath: '/api/simulate',
       });
       setFullResult(data);
-      setActiveTab('charts');
     } catch (e) {
       if (e?.name === 'AbortError') return; // user pressed Stop
       setSimError(e.message);
@@ -487,6 +487,7 @@ function SimulatorPageInner() {
     if (!bike) return;
     setTopSpeedLoading(true);
     setTopSpeedError(null);
+    setActiveTab('topspeed'); // show the progress bar where the result will land
     const controller = new AbortController();
     topSpeedAbortRef.current = controller;
     try {
@@ -514,7 +515,6 @@ function SimulatorPageInner() {
         fallbackPath: '/api/simulate/top-speed',
       });
       setTopSpeedResult(data);
-      setActiveTab('topspeed');
     } catch (e) {
       if (e?.name === 'AbortError') return; // user pressed Stop
       setTopSpeedError(e.message);
@@ -1121,9 +1121,9 @@ function SimulatorPageInner() {
             {/* Tab bar */}
             <div className="flex items-center gap-2 flex-wrap">
               <Tab active={activeTab === 'results'} onClick={() => setActiveTab('results')} icon={<Zap size={12} />} label="1/4 Mile" />
-              <Tab active={activeTab === 'topspeed'} onClick={() => { if (!topSpeedResult) runTopSpeed(); else setActiveTab('topspeed'); }}
+              <Tab active={activeTab === 'topspeed'} onClick={() => { if (!topSpeedResult && !topSpeedLoading) runTopSpeed(); else setActiveTab('topspeed'); }}
                 icon={<Gauge size={12} />} label="Top Speed" />
-              <Tab active={activeTab === 'charts'} onClick={() => { if (!fullResult) runFullSim(); else setActiveTab('charts'); }}
+              <Tab active={activeTab === 'charts'} onClick={() => { if (!fullResult && !simLoading) runFullSim(); else setActiveTab('charts'); }}
                 icon={<BarChart3 size={12} />} label="Charts" />
               <Tab active={activeTab === 'splits'} onClick={() => setActiveTab('splits')} icon={<Table2 size={12} />} label="Splits" />
               <Tab active={activeTab === 'compare'} onClick={() => setActiveTab('compare')} icon={<Layers size={12} />} label="A vs B" />
@@ -1370,7 +1370,20 @@ function SimulatorPageInner() {
             {/* ─── Charts Tab ────────────────────────────────────────── */}
             {activeTab === 'charts' && (
               <Card className="p-5">
-                {chartData.length > 0 ? (
+                {simLoading ? (
+                  <div className="py-12 px-6 max-w-md mx-auto">
+                    <SimProgress
+                      active
+                      progress={simProgress?.progress ?? null}
+                      stage={simProgress?.stage}
+                      label="Running full simulation"
+                      onStop={stopFullSim}
+                    />
+                    <div className="text-[10px] text-gray-700 mt-2 text-center">
+                      Full RK4 physics — telemetry charts will appear here
+                    </div>
+                  </div>
+                ) : chartData.length > 0 ? (
                   <div className="space-y-5">
                     <div className="grid grid-cols-2 gap-4">
                       <SimChart data={chartData} dataKey="speed" label="Speed" unit="km/h" />
@@ -1389,13 +1402,9 @@ function SimulatorPageInner() {
                   <div className="text-center py-12">
                     <BarChart3 size={32} className="mx-auto mb-3 text-gray-800" />
                     <p className="text-gray-600 text-xs mb-3">Run a full simulation to see telemetry charts</p>
-                    <button onClick={simLoading ? stopFullSim : runFullSim} disabled={!bike}
+                    <button onClick={runFullSim} disabled={!bike || simLoading}
                       className="px-4 py-2 text-xs bg-orange-600 hover:bg-orange-700 rounded-lg font-medium transition-colors disabled:opacity-50 inline-flex items-center gap-1.5">
-                      {simLoading ? (
-                        <span className="tabular-nums">■ Stop — Simulating…{simProgress?.progress != null ? ` ${Math.round(simProgress.progress * 100)}%` : ''}</span>
-                      ) : (
-                        <><Play size={12} /> Run Full Simulation</>
-                      )}
+                      <Play size={12} /> Run Full Simulation
                     </button>
                   </div>
                 )}
