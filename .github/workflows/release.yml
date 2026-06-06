@@ -111,7 +111,7 @@ jobs:
           # already-populated DB (a known idempotency artifact). So we just
           # verify the checked-out catalog instead of regenerating it.
           test -f motoquant.db || { echo "::error::motoquant.db missing from checkout"; exit 1; }
-          python -c "import sqlite3; n=sqlite3.connect('motoquant.db').execute('select count(*) from bike_models').fetchone()[0]; print(f'Bundling tracked catalog: {n} bikes'); assert n >= 700, f'tracked catalog too small: {n}'"
+          python -c "import sqlite3; n=sqlite3.connect('motoquant.db').execute('select count(*) from bike_models').fetchone()[0]; print(f'Bundling tracked catalog: {n} bikes'); assert n >= 450, f'tracked catalog too small: {n}'  # floor updated post-dedup (799->498, 2026-06-01)"
           echo "DB size: $(du -h motoquant.db | cut -f1)"
 
       - name: Build PyInstaller sidecar

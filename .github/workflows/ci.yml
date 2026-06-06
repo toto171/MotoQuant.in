@@ -33,7 +33,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-api.txt
           pip install -e .
-          pip install ruff pytest
+          pip install ruff pytest SALib scikit-learn  # optional analysis deps so sobol/surrogate tests run in CI
 
       - name: Ruff lint
         run: ruff check .
@@ -126,11 +126,14 @@ jobs:
           pip install -e .
           pip install -r desktop/sidecar/requirements-sidecar.txt
 
-      - name: Seed database
+      - name: Verify tracked database
         run: |
-          python -m motoquant.run db init
-          python -m motoquant.run import --known-bikes
-          python -m motoquant.run db seed
+          # The tracked motoquant.db IS the canonical seeded catalog. Re-seeding
+          # an already-populated DB raises a FOREIGN KEY IntegrityError (known
+          # idempotency artifact — same fix as release.yml f0d956d), so verify
+          # the checkout instead of regenerating it.
+          test -f motoquant.db || { echo "::error::motoquant.db missing from checkout"; exit 1; }
+          python -c "import sqlite3; n=sqlite3.connect('motoquant.db').execute('select count(*) from bike_models').fetchone()[0]; print(f'Tracked catalog: {n} bikes'); assert n >= 450, f'tracked catalog too small: {n}'"
 
       - name: Build sidecar with PyInstaller
         working-directory: desktop/sidecar
@@ -197,12 +200,4 @@ jobs:
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: web/package-lock.json
-
-      - name: Install npm dependencies
-        run: npm ci
-
-      - name: Next.js build
-        env:
-          NEXT_PUBLIC_API_URL: https://api.motoquant.in
-        run: npm run build
+          cache-dependency-path: web/pack
