@@ -1,26 +1,58 @@
 {
-    "version": 2,
-    "framework": "nextjs",
-    "buildCommand": "next build",
-    "devCommand": "next dev",
-    "installCommand": "npm install",
-    "outputDirectory": ".next",
-    "headers": [
-          {
-                  "source": "/(.*)",
-                  "headers": [
-                            { "key": "X-Content-Type-Options", "value": "nosniff" },
-                            { "key": "X-Frame-Options", "value": "DENY" },
-                            { "key": "X-XSS-Protection", "value": "1; mode=block" },
-                            { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-                            { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
-                  ]
-          },
-          {
-                  "source": "/(.*)\\.(js|css|woff2|png|jpg|svg|mp4)",
-                  "headers": [
-                            { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-                  ]
-          }
-    ]
+  "version": 2,
+  "framework": "nextjs",
+  "buildCommand": "next build",
+  "devCommand": "next dev",
+  "installCommand": "npm install",
+  "outputDirectory": ".next",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)\\.(js|css|woff2|png|jpg|svg|mp4)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/wake",
+      "schedule": "5 0 * * *"
+    },
+    {
+      "path": "/api/wake",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/wake",
+      "schedule": "0 12 * * *"
+    }
+  ]
 }

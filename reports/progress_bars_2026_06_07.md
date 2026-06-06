@@ -89,3 +89,13 @@ Operator follow-up: a way to stop a running sim to change the setup.
   switching tabs — progress was only ever the tiny nav chip. Runs now switch
   to their tab at start, where a prominent SimProgress (stage + % + Stop)
   renders until the result lands.
+
+## Addendum 3 (same day): Vercel cron waker (third keep-alive layer)
+
+- `web/app/api/wake/route.js` + `crons` in both vercel.json files
+  (00:05 / 07:00 / 12:00 UTC daily). Hobby crons: once/day, ±59 min — ideal
+  for the bootstrap wake; keepwarm.py holds the rest of the day.
+- Wake chain now: Vercel cron (reliable daily) → GH Actions cron (throttled
+  backup) → in-app self-ping (holds) → organic traffic.
+- Operator: confirm the crons appear under Vercel → Settings → Cron Jobs
+  after this deploy.
