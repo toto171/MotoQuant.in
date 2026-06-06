@@ -12,7 +12,8 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area
 } from 'recharts';
-import { API_URL as API } from '../../lib/api';
+import { API_URL as API, runJob } from '../../lib/api';
+import SimProgress from '../../components/SimProgress';
 import { track, installErrorHandlers } from '../../lib/telemetry';
 import ChatPanel from '../../components/ChatPanel';
 
@@ -240,6 +241,7 @@ function SimulatorPageInner() {
   const [allTires, setAllTires] = useState([]);
   const [venues, setVenues] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [bootProgress, setBootProgress] = useState(0); // 0..1 — counts the 5 boot fetches
   const [loadError, setLoadError] = useState(null);
 
   // ─── User selections ────────────────────────────────────────────────
@@ -266,6 +268,8 @@ function SimulatorPageInner() {
   const [result, setResult] = useState(null);
   const [fullResult, setFullResult] = useState(null);
   const [simLoading, setSimLoading] = useState(false);
+  const [simProgress, setSimProgress] = useState(null); // {progress, stage} from the jobs poller
+  const [liveSim, setLiveSim] = useState(true); // Live = quick sim re-runs as you tune; Manual = button only
   const [simError, setSimError] = useState(null);
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeTab, setActiveTab] = useState('results');
@@ -290,6 +294,7 @@ function SimulatorPageInner() {
   // ─── Top Speed / LSR ────────────────────────────────────────────────
   const [topSpeedResult, setTopSpeedResult] = useState(null);
   const [topSpeedLoading, setTopSpeedLoading] = useState(false);
+  const [topSpeedProgress, setTopSpeedProgress] = useState(null);
   const [topSpeedError, setTopSpeedError] = useState(null);
 
   // ─── Fetch all data on mount ─────────────────────────────────────────
@@ -302,12 +307,17 @@ function SimulatorPageInner() {
           try { return res.ok ? await res.json() : fallback; }
           catch (e) { console.warn('JSON parse error:', e); return fallback; }
         };
+        // Each settled fetch ticks the boot progress bar by 1/5.
+        const tick = (p) => p.then((r) => {
+          setBootProgress((v) => Math.min(1, v + 0.2));
+          return r;
+        });
         const [bikesRes, catsRes, partsRes, tiresRes, venuesRes] = await Promise.all([
-          fetch(`${API}/api/bikes?limit=2000`),
-          fetch(`${API}/api/parts/categories`),
-          fetch(`${API}/api/parts?limit=2000`),
-          fetch(`${API}/api/tires?limit=2000`),
-          fetch(`${API}/api/venues`),
+          tick(fetch(`${API}/api/bikes?limit=2000`)),
+          tick(fetch(`${API}/api/parts/categories`)),
+          tick(fetch(`${API}/api/parts?limit=2000`)),
+          tick(fetch(`${API}/api/tires?limit=2000`)),
+          tick(fetch(`${API}/api/venues`)),
         ]);
         const [bikesData, catsData, partsData, tiresData, venuesData] = await Promise.all([
           safeJson(bikesRes, { bikes: [] }),
@@ -413,11 +423,11 @@ function SimulatorPageInner() {
   }, [bike, selectedParts, frontTire, rearTire, venue, riderKg, powerBoost, massChange, ambientTemp, trackTemp, humidity, headwind]);
 
   useEffect(() => {
-    if (!bike) return;
+    if (!bike || !liveSim) return; // Manual mode: quick sim only fires from the Run button
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(runQuickSim, 400);
     return () => clearTimeout(debounceRef.current);
-  }, [runQuickSim]);
+  }, [runQuickSim, liveSim]);
 
   // ─── Full sim (on-demand for charts) ─────────────────────────────────
   const runFullSim = useCallback(async () => {
@@ -439,19 +449,18 @@ function SimulatorPageInner() {
       if (rearTire?.id != null) body.rear_tire_id = rearTire.id;
       if (venue?.id != null) body.venue_id = venue.id;
 
-      const res = await fetch(`${API}/api/simulate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+      // Background job — SimProgress tracks the real RK4 progress.
+      const data = await runJob('simulate', body, {
+        onProgress: setSimProgress,
+        fallbackPath: '/api/simulate',
       });
-      if (!res.ok) throw new Error(`API ${res.status}`);
-      const data = await res.json();
       setFullResult(data);
       setActiveTab('charts');
     } catch (e) {
       setSimError(e.message);
     } finally {
       setSimLoading(false);
+      setSimProgress(null);
     }
   }, [bike, frontTire, rearTire, venue, riderKg, powerBoost, massChange, ambientTemp, trackTemp, humidity, headwind]);
 
@@ -479,18 +488,18 @@ function SimulatorPageInner() {
       if (rearTire?.id != null) body.rear_tire_id = rearTire.id;
       if (venue?.id != null) body.venue_id = venue.id;
 
-      const res = await fetch(`${API}/api/simulate/top-speed`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+      // Background job — real progress through the terminal-velocity run.
+      const data = await runJob('topspeed', body, {
+        onProgress: setTopSpeedProgress,
+        fallbackPath: '/api/simulate/top-speed',
       });
-      if (!res.ok) throw new Error(`API ${res.status}`);
-      setTopSpeedResult(await res.json());
+      setTopSpeedResult(data);
       setActiveTab('topspeed');
     } catch (e) {
       setTopSpeedError(e.message);
     } finally {
       setTopSpeedLoading(false);
+      setTopSpeedProgress(null);
     }
   }, [bike, selectedParts, frontTire, rearTire, venue, riderKg, powerBoost, massChange, ambientTemp, trackTemp, humidity, headwind]);
 
@@ -724,9 +733,12 @@ function SimulatorPageInner() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#050508] text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500 text-sm">Loading MotoQuant Pro...</p>
+        <div className="w-72 max-w-[80vw]">
+          <SimProgress
+            active
+            progress={bootProgress > 0 ? bootProgress : null}
+            label="Loading MotoQuant Pro"
+          />
         </div>
       </div>
     );
@@ -748,10 +760,39 @@ function SimulatorPageInner() {
             </div>
           </div>
           <div className="flex items-center gap-4 text-[10px] text-gray-600 uppercase tracking-widest">
-            {simLoading && (
-              <div className="flex items-center gap-1.5 text-orange-400 normal-case tracking-normal">
-                <div className="w-3 h-3 border border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
-                Computing...
+            <button
+              type="button"
+              onClick={() => setLiveSim((v) => !v)}
+              title={liveSim
+                ? 'Live preview ON — the quick sim re-runs as you tune. Click to switch to manual.'
+                : 'Manual mode — the quick sim runs only when you press Run. Click to go live.'}
+              className={`flex items-center gap-1.5 normal-case tracking-normal px-2 py-1 rounded-md border transition-colors ${
+                liveSim
+                  ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+                  : 'border-white/[0.08] bg-white/[0.02] text-gray-500 hover:text-gray-300'
+              }`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${liveSim ? 'bg-emerald-400' : 'bg-gray-600'}`} />
+              {liveSim ? 'Live' : 'Manual'}
+            </button>
+            {!liveSim && (
+              <button
+                type="button"
+                onClick={runQuickSim}
+                disabled={simLoading || !bike}
+                className="normal-case tracking-normal px-2.5 py-1 rounded-md bg-orange-600 hover:bg-orange-700 text-white text-[11px] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Run quick sim
+              </button>
+            )}
+            {(simLoading || topSpeedLoading) && (
+              <div className="normal-case tracking-normal">
+                <SimProgress
+                  active
+                  compact
+                  progress={(simLoading ? simProgress : topSpeedProgress)?.progress ?? null}
+                  label="Computing"
+                />
               </div>
             )}
             <span>{bikes.length} bikes</span>
@@ -1125,7 +1166,11 @@ function SimulatorPageInner() {
                     {/* Full sim button */}
                     <button onClick={runFullSim} disabled={simLoading}
                       className="w-full py-2.5 text-xs bg-white/[0.04] hover:bg-orange-500/10 border border-white/[0.06] hover:border-orange-500/30 rounded-xl text-gray-400 hover:text-orange-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
-                      <BarChart3 size={13} /> View Detailed Charts & Analysis
+                      {simLoading ? (
+                        <span className="tabular-nums">Simulating…{simProgress?.progress != null ? ` ${Math.round(simProgress.progress * 100)}%` : ''}</span>
+                      ) : (
+                        <><BarChart3 size={13} /> View Detailed Charts & Analysis</>
+                      )}
                     </button>
                   </div>
                 ) : (
@@ -1141,10 +1186,14 @@ function SimulatorPageInner() {
             {activeTab === 'topspeed' && (
               <Card className="p-5" glow={!!topSpeedResult}>
                 {topSpeedLoading ? (
-                  <div className="text-center py-12 text-gray-500 text-xs">
-                    <Gauge size={32} className="mx-auto mb-3 opacity-20 animate-pulse" />
-                    Running top speed simulation…
-                    <div className="text-[10px] text-gray-700 mt-1">Simulating up to 120 s of terminal velocity</div>
+                  <div className="py-12 px-6 max-w-md mx-auto">
+                    <SimProgress
+                      active
+                      progress={topSpeedProgress?.progress ?? null}
+                      stage={topSpeedProgress?.stage}
+                      label="Running top-speed simulation"
+                    />
+                    <div className="text-[10px] text-gray-700 mt-2 text-center">Simulating up to 120 s of terminal velocity</div>
                   </div>
                 ) : topSpeedError ? (
                   <div className="text-center py-12 text-xs">
@@ -1309,7 +1358,11 @@ function SimulatorPageInner() {
                     <p className="text-gray-600 text-xs mb-3">Run a full simulation to see telemetry charts</p>
                     <button onClick={runFullSim} disabled={!bike || simLoading}
                       className="px-4 py-2 text-xs bg-orange-600 hover:bg-orange-700 rounded-lg font-medium transition-colors disabled:opacity-50 inline-flex items-center gap-1.5">
-                      <Play size={12} /> Run Full Simulation
+                      {simLoading ? (
+                        <span className="tabular-nums">Simulating…{simProgress?.progress != null ? ` ${Math.round(simProgress.progress * 100)}%` : ''}</span>
+                      ) : (
+                        <><Play size={12} /> Run Full Simulation</>
+                      )}
                     </button>
                   </div>
                 )}
@@ -1355,7 +1408,11 @@ function SimulatorPageInner() {
                         <p className="text-white font-medium tabular-nums">60ft: {result.et_60ft_s?.toFixed(3)}s · ⅛: {result.et_eighth_s?.toFixed(3)}s · ¼: {result.et_quarter_s?.toFixed(3)}s</p>
                         <button onClick={runFullSim} disabled={simLoading}
                           className="mt-3 px-4 py-2 text-xs bg-orange-600 hover:bg-orange-700 rounded-lg font-medium transition-colors disabled:opacity-50 inline-flex items-center gap-1.5">
-                          <Play size={12} /> Get Full Splits
+                          {simLoading ? (
+                            <span className="tabular-nums">Simulating…{simProgress?.progress != null ? ` ${Math.round(simProgress.progress * 100)}%` : ''}</span>
+                          ) : (
+                            <><Play size={12} /> Get Full Splits</>
+                          )}
                         </button>
                       </>
                     ) : 'Run a simulation to see splits'}
@@ -1525,9 +1582,8 @@ function SimulatorPageInner() {
                 </div>
 
                 {uploadLoading && (
-                  <div className="text-center py-6">
-                    <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mx-auto mb-2" />
-                    <p className="text-xs text-gray-500">Parsing file...</p>
+                  <div className="py-6 px-4 max-w-sm mx-auto">
+                    <SimProgress active label="Parsing file" />
                   </div>
                 )}
 

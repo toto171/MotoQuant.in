@@ -118,7 +118,7 @@ def _environment_block(config: BikeConfig) -> tuple[dict, float]:
 # Sweeps (full physics sim — atmospherics matter)
 # ─────────────────────────────────────────────────────────────────────────
 def _gearing_recommendation(
-    config: BikeConfig, stock_et: float, *, span: int = 3
+    config: BikeConfig, stock_et: float, *, span: int = 3, on_sim=None
 ) -> dict:
     dt = config.drivetrain
     front = int(getattr(dt, "front_sprocket", 0) or 0)
@@ -135,6 +135,8 @@ def _gearing_recommendation(
             cfg = copy.deepcopy(config)
             cfg.drivetrain.rear_sprocket = t
             et, trap = _run_et(cfg)
+            if on_sim is not None:
+                on_sim()
             candidates.append(
                 {
                     "front_sprocket": front,
@@ -185,7 +187,7 @@ def _gearing_recommendation(
 
 
 def _launch_recommendation(
-    config: BikeConfig, stock_et: float, *, steps: int = 6
+    config: BikeConfig, stock_et: float, *, steps: int = 6, on_sim=None
 ) -> dict:
     eng = config.engine
     redline = float(getattr(eng, "redline_rpm", 12000.0))
@@ -209,6 +211,8 @@ def _launch_recommendation(
         cfg = copy.deepcopy(config)
         cfg.staging.launch_rpm = float(rpm)
         et, trap = _run_et(cfg)
+        if on_sim is not None:
+            on_sim()
         candidates.append(
             {
                 "launch_rpm": float(rpm),
@@ -301,6 +305,7 @@ def autotune(
     gear_span: int = 3,
     launch_steps: int = 6,
     include_combined: bool = True,
+    progress_cb=None,
 ) -> EcuAutotune:
     """
     Produce a conditions-aware drag setup for ``config``.
@@ -310,7 +315,28 @@ def autotune(
     """
     env_block, sigma = _environment_block(config)
 
+    # Progress ticker for the website's real progress bar (jobs API).
+    # Total full-sim count: stock + gearing sweep + launch sweep (grid can
+    # gain the stock-launch slot) + combined verification. Tooth-dedup can
+    # only shrink the gearing count, so the bar may finish slightly early —
+    # it can never stall short of done.
+    _tick = None
+    if progress_cb is not None:
+        _total = (
+            1
+            + (2 * gear_span + 3)
+            + (launch_steps + 1)
+            + (1 if include_combined else 0)
+        )
+        _done = [0]
+
+        def _tick(stage):
+            _done[0] += 1
+            progress_cb(min(0.98, _done[0] / _total), stage)
+
     stock_et, stock_trap = _run_et(config)
+    if _tick is not None:
+        _tick("Baseline run")
     stock = {
         "et_s": round(stock_et, 4),
         "trap_kmh": round(stock_trap * 3.6, 1),
@@ -325,8 +351,18 @@ def autotune(
         ),
     }
 
-    gearing = _gearing_recommendation(config, stock_et, span=gear_span)
-    launch = _launch_recommendation(config, stock_et, steps=launch_steps)
+    gearing = _gearing_recommendation(
+        config,
+        stock_et,
+        span=gear_span,
+        on_sim=(lambda: _tick("Sweeping gearing")) if _tick is not None else None,
+    )
+    launch = _launch_recommendation(
+        config,
+        stock_et,
+        steps=launch_steps,
+        on_sim=(lambda: _tick("Sweeping launch RPM")) if _tick is not None else None,
+    )
     tyres = _tyre_pressure_recommendation(config, env_block)
     fuel = _fuel_timing_recommendation(config, env_block, sigma)
 
@@ -338,6 +374,8 @@ def autotune(
             cfg.drivetrain.rear_sprocket = int(gearing["recommended_rear"])
         cfg.staging.launch_rpm = float(launch["recommended_rpm"])
         c_et, c_trap = _run_et(cfg)
+        if _tick is not None:
+            _tick("Verifying combined setup")
         combined = {
             "et_s": round(c_et, 4),
             "trap_kmh": round(c_trap * 3.6, 1),

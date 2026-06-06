@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, AlertCircle, MapPin, MessageSquare, Gauge } from 'lucide-react';
 import LocationPicker, { environmentOverridesFromLocation } from './LocationPicker';
 import ChatPanel from './ChatPanel';
-import { API_URL } from '../lib/api';
+import { API_URL, runJob } from '../lib/api';
+import SimProgress from './SimProgress';
 import { track, installErrorHandlers } from '../lib/telemetry';
 
 // Curated bike list — popular India-market machines first, then global
@@ -116,6 +117,7 @@ export default function SimulatorWidget() {
   const [topSpeedResult, setTopSpeedResult] = useState(null);  // top-speed result
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [prog, setProg] = useState(null); // {progress, stage} from the jobs poller
   // CRITICAL: production DB IDs drift over time as the catalog is reseeded.
   // Hardcoded IDs in BIKE_CATEGORIES were stale — id 192 was 'YZF-R15 V4'
   // when the list was authored but is now 'Aprilia ...' on prod (verified
@@ -213,19 +215,28 @@ export default function SimulatorWidget() {
       //   quarter  → /api/simulate/quick (ET + trap + 60ft / ⅛-mile splits)
       //   topspeed → /api/simulate/top-speed (terminal velocity + plateau
       //              detection + gear + RPM at terminal)
-      const endpoint = mode === 'topspeed'
-        ? `${API_URL}/api/simulate/top-speed`
-        : `${API_URL}/api/simulate/quick`;
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) {
-        const msg = await res.text();
-        throw new Error(`API error ${res.status}: ${msg}`);
+      let data;
+      if (mode === 'topspeed') {
+        // Background job — the bar tracks real engine progress through the
+        // terminal-velocity run (falls back to the sync route on old backends).
+        data = await runJob('topspeed', body, {
+          onProgress: setProg,
+          fallbackPath: '/api/simulate/top-speed',
+        });
+      } else {
+        // Quick sim is ~50 ms server-side — a single synchronous request;
+        // the staged bar covers network / cold-start waits.
+        const res = await fetch(`${API_URL}/api/simulate/quick`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) {
+          const msg = await res.text();
+          throw new Error(`API error ${res.status}: ${msg}`);
+        }
+        data = await res.json();
       }
-      const data = await res.json();
       if (mode === 'quarter') setResult(data);
       else setTopSpeedResult(data);
       track('sim_run_success', {
@@ -247,6 +258,7 @@ export default function SimulatorWidget() {
       });
     } finally {
       setLoading(false);
+      setProg(null);
     }
   }
 
@@ -260,14 +272,13 @@ export default function SimulatorWidget() {
       <AnimatePresence>
         {loading && (
           <motion.div
-            className="absolute inset-0 rounded-2xl pointer-events-none"
-            style={{
-              background: 'conic-gradient(from 0deg, transparent, #FF5E1F, transparent)',
-              opacity: 0.3,
-            }}
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-          />
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute top-0 left-1 right-1 z-20"
+          >
+            <SimProgress active edge progress={prog?.progress ?? null} />
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -530,14 +541,7 @@ export default function SimulatorWidget() {
           ].join(' ')}
         >
           {loading && simMode === 'quarter' ? (
-            <>
-              <motion.div animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1.2, repeat: Infinity }} className="flex gap-1">
-                <span className="w-1.5 h-1.5 bg-white rounded-full" />
-                <span className="w-1.5 h-1.5 bg-white rounded-full" />
-                <span className="w-1.5 h-1.5 bg-white rounded-full" />
-              </motion.div>
-              <span>Simulating…</span>
-            </>
+            <span className="tabular-nums">Simulating…</span>
           ) : (
             <>
               <Zap size={15} />
@@ -559,14 +563,9 @@ export default function SimulatorWidget() {
           ].join(' ')}
         >
           {loading && simMode === 'topspeed' ? (
-            <>
-              <motion.div animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1.2, repeat: Infinity }} className="flex gap-1">
-                <span className="w-1.5 h-1.5 bg-white rounded-full" />
-                <span className="w-1.5 h-1.5 bg-white rounded-full" />
-                <span className="w-1.5 h-1.5 bg-white rounded-full" />
-              </motion.div>
-              <span>Simulating…</span>
-            </>
+            <span className="tabular-nums">
+              Simulating…{prog?.progress != null ? ` ${Math.round(prog.progress * 100)}%` : ''}
+            </span>
           ) : (
             <>
               <Gauge size={15} />

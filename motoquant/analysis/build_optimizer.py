@@ -118,8 +118,18 @@ class SurrogatePredictor:
         self.n_surrogate = 0
         self.n_fallback = 0
         self.n_out_of_envelope = 0
+        self.on_predict = None  # optional progress hook (jobs API)
 
     def __call__(self, config: BikeConfig) -> tuple[float, float]:
+        out = self._predict(config)
+        if self.on_predict is not None:
+            try:
+                self.on_predict()
+            except Exception:  # progress reporting must never break scoring
+                pass
+        return out
+
+    def _predict(self, config: BikeConfig) -> tuple[float, float]:
         if self.surrogate is None:
             self.n_fallback += 1
             return _run_et(config)
@@ -396,6 +406,7 @@ def optimize_build(
     max_candidates: int | None = None,
     use_live_pricing: bool = False,
     db_conn=None,
+    progress_cb=None,
 ) -> OptimizedBuild:
     """
     Find the best on-budget parts build for ``base_config``.
@@ -412,6 +423,8 @@ def optimize_build(
 
     # Base run (warm-up + absolute trap so we can report km/h).
     base_et_s, base_trap_ms = predictor(base_config)
+    if progress_cb is not None:
+        progress_cb(0.02, "Baseline run")
 
     # Compatible, profile-filtered candidate parts.
     all_parts = parts_repo.search(bike_model_id=bike_model_id, limit=200)
@@ -419,6 +432,21 @@ def optimize_build(
     candidate_ids = [p["id"] for p in filtered]
     if max_candidates is not None:
         candidate_ids = candidate_ids[:max_candidates]
+    if progress_cb is not None and candidate_ids:
+        # Tick the bar once per scorer call: per-part ROI + combined build
+        # (+ headroom for the next-upgrade probe). Capped below 1.0 — the
+        # jobs layer snaps to 100% on completion.
+        _total = len(candidate_ids) + 2
+        _done = [0]
+
+        def _on_predict():
+            _done[0] += 1
+            progress_cb(
+                min(0.97, 0.02 + 0.95 * _done[0] / _total),
+                "Scoring candidate parts",
+            )
+
+        predictor.on_predict = _on_predict
     if not candidate_ids:
         return _empty_build(
             base_config,
@@ -445,6 +473,8 @@ def optimize_build(
         (lambda r: r.delta_trap_ms) if goal == "max_trap" else (lambda r: r.delta_et_s)
     )
     selected = _select_build(individual, float(budget_inr), goal)
+    if progress_cb is not None:
+        progress_cb(0.98, "Verifying combined build")
 
     # Combined sim of the selected build (captures part interactions).
     build_cfg = copy.deepcopy(base_config)

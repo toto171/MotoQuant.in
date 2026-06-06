@@ -27,7 +27,8 @@ import {
   Sliders, Search, ChevronDown, AlertCircle, MapPin, Thermometer, Wind,
   Droplets, Mountain, Cog, Flag, CircleDot, Flame, Sparkles,
 } from 'lucide-react';
-import { API_URL, autotuneEcu } from '../lib/api';
+import { API_URL, autotuneEcuJob } from '../lib/api';
+import SimProgress from './SimProgress';
 import LocationPicker, { environmentOverridesFromLocation } from './LocationPicker';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -212,6 +213,7 @@ export default function EcuAutotune() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
+  const [prog, setProg] = useState(null); // {progress, stage} from the jobs poller
 
   const run = useCallback(async () => {
     if (!bike) {
@@ -242,12 +244,14 @@ export default function EcuAutotune() {
       else if (env.humidity_pct != null) body.humidity_pct = env.humidity_pct;
       if (altitude !== '') body.altitude_m = Number(altitude);
 
-      const data = await autotuneEcu(body);
+      // Background job — SimProgress tracks the real sweep progress.
+      const data = await autotuneEcuJob(body, setProg);
       setResult(data);
     } catch (e) {
       setError(e.message || 'Autotune failed.');
     } finally {
       setLoading(false);
+      setProg(null);
     }
   }, [bike, location, riderKg, tempC, humidity, altitude]);
 
@@ -265,11 +269,13 @@ export default function EcuAutotune() {
         <AnimatePresence>
           {loading && (
             <motion.div
-              className="absolute inset-0 rounded-2xl pointer-events-none"
-              style={{ background: 'conic-gradient(from 0deg, transparent, #FF5E1F, transparent)', opacity: 0.25 }}
-              animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-            />
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute top-0 left-1 right-1 z-20"
+            >
+              <SimProgress active edge progress={prog?.progress ?? null} />
+            </motion.div>
           )}
         </AnimatePresence>
 
@@ -394,6 +400,15 @@ export default function EcuAutotune() {
             />
           </div>
 
+          {loading && (
+            <SimProgress
+              active
+              progress={prog?.progress ?? null}
+              stage={prog?.stage}
+              label="Computing setup"
+            />
+          )}
+
           <motion.button
             onClick={run}
             disabled={loading || !bike}
@@ -402,10 +417,9 @@ export default function EcuAutotune() {
             className="w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-brand-orange to-brand-orangeLight text-black shadow-orange-soft hover:brightness-110 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:saturate-50"
           >
             {loading ? (
-              <>
-                <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                Computing setup…
-              </>
+              <span className="tabular-nums">
+                Computing setup…{prog?.progress != null ? ` ${Math.round(prog.progress * 100)}%` : ''}
+              </span>
             ) : (
               <>
                 <Sliders size={16} /> Get setup

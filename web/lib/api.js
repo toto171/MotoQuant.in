@@ -67,7 +67,7 @@ async function postJson(path, body) {
  * @param {number} [opts.venue_id]        Venue id for environment.
  * @param {number} [opts.max_candidates]  Cap on parts evaluated.
  */
-export async function optimizeBuild({
+function optimizeBuildBody({
   bike_id,
   budget_inr,
   goal,
@@ -82,7 +82,11 @@ export async function optimizeBuild({
   if (rider_weight_kg != null) body.rider_weight_kg = rider_weight_kg;
   if (venue_id != null) body.venue_id = venue_id;
   if (max_candidates != null) body.max_candidates = max_candidates;
-  return postJson('/api/optimize/build', body);
+  return body;
+}
+
+export async function optimizeBuild(opts) {
+  return postJson('/api/optimize/build', optimizeBuildBody(opts));
 }
 
 /**
@@ -106,7 +110,7 @@ export async function optimizeBuild({
  * @param {number} [opts.gear_span]       Sprocket search span (default 3).
  * @param {number} [opts.launch_steps]    Launch-RPM candidate count (default 6).
  */
-export async function autotuneEcu({
+function autotuneEcuBody({
   bike_id,
   location,
   venue_id,
@@ -128,5 +132,69 @@ export async function autotuneEcu({
   if (rider_weight_kg != null) body.rider_weight_kg = rider_weight_kg;
   if (gear_span != null) body.gear_span = gear_span;
   if (launch_steps != null) body.launch_steps = launch_steps;
-  return postJson('/api/autotune/ecu', body);
+  return body;
+}
+
+export async function autotuneEcu(opts) {
+  return postJson('/api/autotune/ecu', autotuneEcuBody(opts));
+}
+
+// --- Background jobs (real progress) ----------------------------------------
+// POST /api/jobs/{kind} starts the work server-side and returns a job_id;
+// GET /api/jobs/{id} reports {status, progress 0..1, stage, result|error}.
+// runJob() drives the SimProgress bars. Every wrapper takes a `fallbackPath`:
+// when the backend predates /api/jobs/* (deploy skew, self-hosted, the desktop
+// sidecar) we degrade gracefully to the synchronous route — same result, just
+// without the live percentage.
+
+export async function startJob(kind, body) {
+  return postJson(`/api/jobs/${kind}`, body);
+}
+
+export async function getJob(jobId) {
+  const res = await fetch(`${API_URL}/api/jobs/${jobId}`, { cache: 'no-store' });
+  if (!res.ok) throw new Error(`API error ${res.status}`);
+  return res.json();
+}
+
+export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 350, signal } = {}) {
+  onProgress?.({ status: 'connecting', progress: null, stage: '' });
+  let started;
+  try {
+    started = await startJob(kind, body);
+  } catch (e) {
+    if (fallbackPath && /API error (404|405)/.test(e.message || '')) {
+      onProgress?.({ status: 'running', progress: null, stage: '' });
+      return postJson(fallbackPath, body);
+    }
+    throw e;
+  }
+  for (;;) {
+    if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+    let j;
+    try {
+      j = await getJob(started.job_id);
+    } catch {
+      // In-memory registry — a 404 mid-poll means the engine restarted.
+      throw new Error('Progress lost (the engine restarted mid-run) — please run again');
+    }
+    if (j.status === 'error') throw new Error(j.error || 'Simulation failed');
+    onProgress?.({ status: j.status, progress: j.progress, stage: j.stage });
+    if (j.status === 'done') return j.result;
+    await new Promise((r) => setTimeout(r, pollMs));
+  }
+}
+
+export function optimizeBuildJob(opts, onProgress) {
+  return runJob('optimize', optimizeBuildBody(opts), {
+    onProgress,
+    fallbackPath: '/api/optimize/build',
+  });
+}
+
+export function autotuneEcuJob(opts, onProgress) {
+  return runJob('autotune', autotuneEcuBody(opts), {
+    onProgress,
+    fallbackPath: '/api/autotune/ecu',
+  });
 }

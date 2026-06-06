@@ -362,6 +362,8 @@ class MotoQuantEngine:
         distance: float = QUARTER_MILE_M,
         max_time: float = 26.0,
         use_adaptive_dt: bool = False,
+        progress_cb=None,
+        progress_every_steps: int = 250,
     ) -> SimResult:
         """
         Run the quarter-mile simulation.
@@ -378,6 +380,13 @@ class MotoQuantEngine:
             dt_max=5 ms) for a 3–5× speed-up during the locked-clutch phase.
             Results are within ±0.002 s of fixed 1 ms results.
             Default False preserves the deterministic fixed-step behaviour.
+        progress_cb : callable, optional
+            Called every ``progress_every_steps`` integration steps with a
+            float in [0, 1] (fraction of distance/time covered). Powers the
+            website's real progress bars. Has no effect on the physics.
+        progress_every_steps : int
+            Step interval between ``progress_cb`` calls (default 250, ~4 Hz
+            of simulated time at the fixed 1 ms timestep).
 
         Returns
         -------
@@ -441,6 +450,10 @@ class MotoQuantEngine:
         t = 0.0
 
         while x < distance and t < max_time and step < n_max - 1:
+            # ── Progress reporting (UI only — no effect on the physics) ──
+            if progress_cb is not None and step % progress_every_steps == 0:
+                progress_cb(min(1.0, max(x / distance, t / max_time)))
+
             # ── Current RPM and wheel speed ──
             omega_w = v / max(
                 r_eff, 0.15
@@ -793,6 +806,7 @@ class MotoQuantEngine:
         max_distance: float = TOPSPEED_MAX_DISTANCE_M,
         plateau_accel: float = TOPSPEED_PLATEAU_ACCEL,
         plateau_window_s: float = TOPSPEED_PLATEAU_WINDOW_S,
+        progress_cb=None,
     ) -> "TopSpeedResult":
         """
         Run simulation until terminal velocity is reached.
@@ -804,7 +818,12 @@ class MotoQuantEngine:
         Returns a TopSpeedResult with terminal velocity, time/distance to
         reach it, and the full trajectory for plotting.
         """
-        sim = self.run(distance=max_distance, max_time=max_time, use_adaptive_dt=True)
+        sim = self.run(
+            distance=max_distance,
+            max_time=max_time,
+            use_adaptive_dt=True,
+            progress_cb=progress_cb,
+        )
 
         # Convert |a| (in g) back to m/s^2
         a_ms2 = np.abs(sim.a) * G

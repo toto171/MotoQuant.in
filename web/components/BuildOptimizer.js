@@ -26,7 +26,8 @@ import {
   Wrench, Search, ChevronDown, AlertCircle, AlertTriangle, IndianRupee,
   TrendingDown, TrendingUp, Sparkles, ArrowRight, Cpu, Gauge, Layers,
 } from 'lucide-react';
-import { API_URL, optimizeBuild } from '../lib/api';
+import { API_URL, optimizeBuildJob } from '../lib/api';
+import SimProgress from './SimProgress';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 const fmtINR = (n) =>
@@ -195,6 +196,7 @@ export default function BuildOptimizer() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
+  const [prog, setProg] = useState(null); // {progress, stage} from the jobs poller
 
   const run = useCallback(async () => {
     if (!bike) {
@@ -205,18 +207,23 @@ export default function BuildOptimizer() {
     setError(null);
     setResult(null);
     try {
-      const data = await optimizeBuild({
-        bike_id: bike.id,
-        budget_inr: budget,
-        goal,
-        profile,
-        rider_weight_kg: riderKg,
-      });
+      // Background job — SimProgress tracks real candidate-scoring progress.
+      const data = await optimizeBuildJob(
+        {
+          bike_id: bike.id,
+          budget_inr: budget,
+          goal,
+          profile,
+          rider_weight_kg: riderKg,
+        },
+        setProg,
+      );
       setResult(data);
     } catch (e) {
       setError(e.message || 'Optimisation failed.');
     } finally {
       setLoading(false);
+      setProg(null);
     }
   }, [bike, budget, goal, profile, riderKg]);
 
@@ -232,11 +239,13 @@ export default function BuildOptimizer() {
         <AnimatePresence>
           {loading && (
             <motion.div
-              className="absolute inset-0 rounded-2xl pointer-events-none"
-              style={{ background: 'conic-gradient(from 0deg, transparent, #FF5E1F, transparent)', opacity: 0.25 }}
-              animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-            />
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute top-0 left-1 right-1 z-20"
+            >
+              <SimProgress active edge progress={prog?.progress ?? null} />
+            </motion.div>
           )}
         </AnimatePresence>
 
@@ -334,6 +343,15 @@ export default function BuildOptimizer() {
             />
           </div>
 
+          {loading && (
+            <SimProgress
+              active
+              progress={prog?.progress ?? null}
+              stage={prog?.stage}
+              label="Optimising build"
+            />
+          )}
+
           <motion.button
             onClick={run}
             disabled={loading || !bike}
@@ -342,10 +360,9 @@ export default function BuildOptimizer() {
             className="w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-brand-orange to-brand-orangeLight text-black shadow-orange-soft hover:brightness-110 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:saturate-50"
           >
             {loading ? (
-              <>
-                <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                Optimising…
-              </>
+              <span className="tabular-nums">
+                Optimising…{prog?.progress != null ? ` ${Math.round(prog.progress * 100)}%` : ''}
+              </span>
             ) : (
               <>
                 <Wrench size={16} /> Optimise build

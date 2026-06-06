@@ -901,8 +901,7 @@ def list_tires(
         raise HTTPException(500, f"Database error: {exc}")
 
 
-@app.post("/api/simulate")
-def simulate(req: SimulateRequest):
+def _simulate_impl(req: SimulateRequest, progress=None):
     """
     Full quarter-mile simulation.
 
@@ -931,7 +930,12 @@ def simulate(req: SimulateRequest):
 
     try:
         engine = MotoQuantEngine(cfg)
-        sim = engine.run(use_adaptive_dt=req.use_adaptive_dt)
+        sim = engine.run(
+            use_adaptive_dt=req.use_adaptive_dt,
+            progress_cb=(lambda f: progress(f, "Integrating physics"))
+            if progress is not None
+            else None,
+        )
     except Exception as exc:
         raise HTTPException(500, f"Simulation error: {exc}")
 
@@ -1000,6 +1004,12 @@ def simulate(req: SimulateRequest):
             "F_drag_N": _safe_array(sim.F_drag, lambda v: round(float(v), 0)),
         },
     }
+
+
+@app.post("/api/simulate")
+def simulate(req: SimulateRequest):
+    """Synchronous full simulation (see ``_simulate_impl``)."""
+    return _simulate_impl(req)
 
 
 @app.post("/api/simulate/quick")
@@ -1098,8 +1108,7 @@ class TopSpeedRequest(BaseModel):
     include_timeseries: bool = False
 
 
-@app.post("/api/simulate/top-speed")
-def simulate_top_speed(req: TopSpeedRequest) -> TopSpeedResultDict:
+def _topspeed_impl(req: TopSpeedRequest, progress=None) -> TopSpeedResultDict:
     """
     Run the simulation until terminal velocity is reached.
 
@@ -1130,7 +1139,12 @@ def simulate_top_speed(req: TopSpeedRequest) -> TopSpeedResultDict:
 
     try:
         engine = MotoQuantEngine(cfg)
-        ts = engine.run_top_speed(max_time=req.max_time_s)
+        ts = engine.run_top_speed(
+            max_time=req.max_time_s,
+            progress_cb=(lambda f: progress(f, "Running to terminal velocity"))
+            if progress is not None
+            else None,
+        )
     except Exception as exc:
         raise HTTPException(500, f"Top-speed simulation error: {exc}")
 
@@ -1179,6 +1193,12 @@ def simulate_top_speed(req: TopSpeedRequest) -> TopSpeedResultDict:
         response["timeseries"] = timeseries
 
     return response
+
+
+@app.post("/api/simulate/top-speed")
+def simulate_top_speed(req: TopSpeedRequest) -> TopSpeedResultDict:
+    """Synchronous top-speed simulation (see ``_topspeed_impl``)."""
+    return _topspeed_impl(req)
 
 
 class DistanceRunRequest(BaseModel):
@@ -3048,8 +3068,7 @@ class OptimizeBuildRequest(BaseModel):
     model_config = {"populate_by_name": True}
 
 
-@app.post("/api/optimize/build")
-def optimize_build_route(req: OptimizeBuildRequest):
+def _optimize_impl(req: OptimizeBuildRequest, progress=None):
     """
     Return the best parts combination for a bike within a budget, optimised for
     ``goal``.  Each part is compatibility-checked; at most one part per exclusive
@@ -3094,6 +3113,7 @@ def optimize_build_route(req: OptimizeBuildRequest):
             surrogate=_SURROGATE,
             surrogate_source=_SURROGATE_SOURCE,
             max_candidates=req.max_candidates,
+            progress_cb=progress,
         )
     except Exception as exc:
         logging.getLogger(__name__).error(
@@ -3102,6 +3122,12 @@ def optimize_build_route(req: OptimizeBuildRequest):
         raise HTTPException(500, f"Optimization failed: {exc}") from exc
 
     return result.to_dict()
+
+
+@app.post("/api/optimize/build")
+def optimize_build_route(req: OptimizeBuildRequest):
+    """Synchronous build optimiser (see ``_optimize_impl``)."""
+    return _optimize_impl(req)
 
 
 class AutotuneRequest(BaseModel):
@@ -3145,8 +3171,7 @@ def _apply_resolved_env(config, vd: dict) -> None:
         config.environment.venue_name = vd["venue_name"]
 
 
-@app.post("/api/autotune/ecu")
-def autotune_ecu_route(req: AutotuneRequest):
+def _autotune_impl(req: AutotuneRequest, progress=None):
     """
     Recommend a conditions-aware launch setup (final drive / gearing, launch RPM,
     tyre pressure, fuel & timing trim) for a bike at a given location/conditions,
@@ -3201,7 +3226,10 @@ def autotune_ecu_route(req: AutotuneRequest):
 
     try:
         result = autotune(
-            config, gear_span=req.gear_span, launch_steps=req.launch_steps
+            config,
+            gear_span=req.gear_span,
+            launch_steps=req.launch_steps,
+            progress_cb=progress,
         )
     except Exception as exc:
         logging.getLogger(__name__).error("autotune failed: %s", exc, exc_info=True)
@@ -3209,6 +3237,80 @@ def autotune_ecu_route(req: AutotuneRequest):
 
     out = result.to_dict()
     out["environment_source"] = env_source
+    return out
+
+
+@app.post("/api/autotune/ecu")
+def autotune_ecu_route(req: AutotuneRequest):
+    """Synchronous autotune (see ``_autotune_impl``)."""
+    return _autotune_impl(req)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# BACKGROUND JOBS + REAL PROGRESS  (/api/jobs/*) — added 2026-06-07
+#
+# The website's progress bars poll these instead of showing a spinner.
+# POST /api/jobs/{simulate|topspeed|autotune|optimize} starts the work on a
+# daemon thread and returns 202 + job_id immediately; GET /api/jobs/{id}
+# reports {status, progress 0..1, stage, result|error}. The registry is
+# in-memory (single Render instance) with TTL eviction — motoquant/jobs.py.
+# The synchronous routes above are unchanged (desktop app + older clients).
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def _start_job(kind: str, runner) -> dict:
+    from .jobs import JobCapacityError, create_job
+
+    try:
+        job = create_job(kind, runner)
+    except JobCapacityError as exc:
+        raise HTTPException(429, str(exc)) from exc
+    return {"job_id": job.id, "kind": kind, "status": job.status}
+
+
+@app.post("/api/jobs/simulate", status_code=202)
+def job_simulate(req: SimulateRequest):
+    """Start a full simulation as a background job (real progress)."""
+    return _start_job("simulate", lambda progress: _simulate_impl(req, progress))
+
+
+@app.post("/api/jobs/topspeed", status_code=202)
+def job_topspeed(req: TopSpeedRequest):
+    """Start a top-speed run as a background job (real progress)."""
+    return _start_job("topspeed", lambda progress: _topspeed_impl(req, progress))
+
+
+@app.post("/api/jobs/optimize", status_code=202)
+def job_optimize(req: OptimizeBuildRequest):
+    """Start the build optimiser as a background job (real progress)."""
+    return _start_job("optimize", lambda progress: _optimize_impl(req, progress))
+
+
+@app.post("/api/jobs/autotune", status_code=202)
+def job_autotune(req: AutotuneRequest):
+    """Start the ECU autotune as a background job (real progress)."""
+    return _start_job("autotune", lambda progress: _autotune_impl(req, progress))
+
+
+@app.get("/api/jobs/{job_id}")
+def job_status(job_id: str):
+    """Poll a background job: status, progress (0..1), stage, result/error."""
+    from .jobs import get_job
+
+    job = get_job(job_id)
+    if job is None:
+        raise HTTPException(404, "Unknown or expired job (results are kept ~15 min)")
+    out = {
+        "job_id": job.id,
+        "kind": job.kind,
+        "status": job.status,
+        "progress": round(job.progress, 4),
+        "stage": job.stage,
+    }
+    if job.status == "done":
+        out["result"] = job.result
+    elif job.status == "error":
+        out["error"] = job.error
     return out
 
 
