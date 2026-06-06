@@ -43,8 +43,8 @@ export default function PrivacyPage() {
 
         <Section title="2. Data Residency">
           <p className="text-white/80 text-sm leading-relaxed">
-            Data is currently stored on servers in <strong>us-west2 (Oregon, USA)</strong> via
-            Railway (backend) and Vercel (frontend). We are evaluating migration to India-based
+            Data is currently stored on servers in <strong>Singapore</strong> via
+            Render (backend) and Vercel (frontend). We are evaluating migration to India-based
             hosting in line with anticipated data-localisation requirements. We will notify users
             via email before any material change in data residency.
           </p>
@@ -83,7 +83,7 @@ export default function PrivacyPage() {
           </p>
           <ul className="list-disc pl-5 space-y-1 text-white/80 text-sm mt-2">
             <li><strong>Razorpay</strong> — payment processor. Your email and billing information are shared to process subscriptions and issue GST invoices. Governed by Razorpay's privacy policy.</li>
-            <li><strong>Railway / Vercel</strong> — infrastructure providers hosting our servers. Data is subject to their data-processing terms.</li>
+            <li><strong>Render / Vercel</strong> — infrastructure providers hosting our servers. Data is subject to their data-processing terms.</li>
           </ul>
         </Section>
 

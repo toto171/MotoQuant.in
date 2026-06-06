@@ -706,7 +706,25 @@ Until measured benchmarks land, the physics-calibration scheduler should skip en
 
 ## DONE — 2026-05-24 — [urgent] postflight alert dedup during open [blocking] INBOX tickets
 
-**Result:** `scripts/session_postflight.sh::verify_deploy()` now consults a new `_blocking_ticket_open()` awk helper before queuing the timeout ALERT. When an open (above the `## DONE / DEFERRED ARCHIVE` divider) `## INSTRUCTION` block carries `[blocking]` AND mentions `Railway` or `deploy`, the timeout still returns exit code 5 but the outbox append is suppressed with a `warn` to stderr ("deploy alert suppressed — open blocking ticket: <heading>"). Verified against the real INBOX (matches the 2026-05-17 Railway ticket) and 5 synthetic fixtures: heading-keyword match, body-keyword match, no-blocking, archived-blocking, blocking-but-no-symptom-keyword — all behave as specified. Today's session is the first one running the new code path, so this morning's autonomous run is also the last one that will have queued a duplicate Railway ALERT.
+**Result:** `scripts/session_postflight.sh::verify_deploy()` now consults a new `_blocking_ticket_open()` awk helper before queuing the timeout ALERT. When an open (above the `
+## INSTRUCTION — 2026-06-07 — [cleanup-pass] medium-confidence findings queued for triage
+
+**From:** 7-subagent cleanup pass (operator-requested, run early; full detail in `reports/cleanup_consolidated_2026-06-07.md`). High-confidence mechanical items were applied + pushed in the same pass. These need human/dedicated-session judgment:
+
+1. **[S1 dedup]** Extract `scripts/_sweep_utils.py` for `_wb_match` + `_model_specificity_score` (copy-pasted in `benchmark_sweep.py:37` + `sweep_with_clusters.py:38`; canonical in `validation_sweep.py`). ~50 LOC.
+2. **[S1 dedup]** 4 web files hardcode `https://motoquant-api.onrender.com` instead of importing `API_URL` from `web/lib/api.js` (login/pricing/account pages + AuthProvider.js:35) — consolidating routes them through the Vercel rewrite. Needs `next build` gate.
+3. **[S2 types]** `ChatResponse.sim_result: dict[str,Any]|None` → `SimDict|None` (runner.py:62 already defines it); mirror in `desktop/src/types/api.ts:425`. Pydantic TypedDict-validation behaviour change — test chat routes after.
+4. **[S2 types]** `OptimizeBuildRequest.power_boost_pct`/`mass_delta_kg` (api.py:3006) absent from ALL clients (TS/web/desktop) — wire into UIs or drop from the API.
+5. **[S4 layering]** `api.py:1331` + `run.py:1151` import private `_enrich_bike_row_for_fitment` from parts_repo — expose a public method. Plus: promote 3 unnecessary lazy imports of `category_profiles` (physics.py:220, importer.py:953, parasitic.py:21) — physics.py touch ⇒ baseline gate mandatory.
+6. **[S5 types]** runner.py: `_resolve_venue_env() -> Any` → `EnvironmentParams|None`; 3 mutation helpers `config: Any` → `BikeConfig` (lines 1037/1050/1299).
+7. **[S6 errors]** 5 medium-confidence silent swallows still need logging (list in `reports/cleanup_subagent_6_error_handling.md`); reconcile S7's "44 bare excepts in api.py" count with S6's scoping.
+8. **[S7 deprecated]** Delete `nixpacks.toml` + `Procfile` (Railway-only, ignored by Render) **together with** updating the 7 doc references each (CONTRIBUTING.md, README.md deploy sections → Render). One "transformative" slop word + 4 narrative-history comments flagged in the report.
+
+**False positives caught during verification (do NOT delete):** `scripts/validation_run.py` (imported by validation_sweep.py), `scripts/train_surrogate_numpy.py` (provenance of shipped surrogate_numpy.npz), `scripts/diagnose_r15_db_path.py` + `scripts/gearing_audit.py` (referenced by CLAUDE.md standing notes / dispatch docs).
+
+---
+
+## DONE / DEFERRED ARCHIVE` divider) `## INSTRUCTION` block carries `[blocking]` AND mentions `Railway` or `deploy`, the timeout still returns exit code 5 but the outbox append is suppressed with a `warn` to stderr ("deploy alert suppressed — open blocking ticket: <heading>"). Verified against the real INBOX (matches the 2026-05-17 Railway ticket) and 5 synthetic fixtures: heading-keyword match, body-keyword match, no-blocking, archived-blocking, blocking-but-no-symptom-keyword — all behave as specified. Today's session is the first one running the new code path, so this morning's autonomous run is also the last one that will have queued a duplicate Railway ALERT.
 
 Implemented inline by session 1779611475-643 (Sun 2026-05-24). When the Railway service is restored and INBOX:140 moves to `## DONE`, the helper will return empty and any future genuine deploy-check timeout will fire a fresh ALERT as expected.
 

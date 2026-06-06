@@ -35,6 +35,7 @@ Public API
 
 from __future__ import annotations
 
+import logging
 import copy
 import warnings
 from dataclasses import asdict, dataclass, field
@@ -88,7 +89,14 @@ def _check_envelope(fvec) -> tuple[bool, list[str]]:
                 violations.append(name)
         return len(violations) == 0, violations
     except Exception:
-        return True, []
+        # Fail SAFE: if the envelope check itself breaks, claim OUT of
+        # envelope so scoring falls back to the full physics sim instead of
+        # silently trusting the surrogate outside its training data.
+        logging.getLogger(__name__).warning(
+            "surrogate envelope check unavailable — falling back to full sim",
+            exc_info=True,
+        )
+        return False, ["envelope_check_failed"]
 
 
 class SurrogatePredictor:

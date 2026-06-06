@@ -5,6 +5,8 @@ This module defines 230+ additional tire fitments beyond OEM, including popular
 sport-touring/track upgrades (recommended) and drag-prep configurations.
 """
 
+import logging
+
 RECOMMENDED_FITMENTS = [
     # Litre superbikes - recommended upgrades (R1, GSX-R 1000, ZX-10R, S1000RR, CBR1000RR, Panigale, RSV4)
     {"bike_match": {"manufacturer": "Yamaha", "model_keywords": ["R1"]}, "position": "rear", "tire_match": {"manufacturer": "Pirelli", "model_name": "Diablo Rosso IV"}, "fitment_type": "recommended", "notes": "Sport-touring upgrade, OEM alternative"},
@@ -358,7 +360,11 @@ def seed_recommended_fitments(db):
                 (bike_id, tire_id, fitment["position"], fitment["fitment_type"], 0, fitment["notes"])
             )
             stats["inserted"] += 1
-        except Exception:
+        except Exception as exc:
+            logging.getLogger(__name__).warning(
+                "fitment insert failed (bike=%s tire=%s pos=%s): %s",
+                fitment.get("bike"), fitment.get("tire"), fitment.get("position"), exc,
+            )
             stats["errors"] += 1
     db._conn.commit()
     return stats

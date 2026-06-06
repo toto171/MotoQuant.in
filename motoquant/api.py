@@ -2485,11 +2485,11 @@ async def _startup_load_surrogate():
 
 
 class SurrogatePredictRequest(BaseModel):
-    bike_id: int = Field(None, description="DB bike_models.id (optional)")
+    bike_id: int | None = Field(None, description="DB bike_models.id (optional)")
     power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
-    aero_cd_override: float = Field(None, ge=0.30, le=1.20)
-    tire_mu_override: float = Field(None, ge=0.50, le=1.80)
+    aero_cd_override: float | None = Field(None, ge=0.30, le=1.20)
+    tire_mu_override: float | None = Field(None, ge=0.50, le=1.80)
     altitude_m: float = Field(0.0, ge=0.0, le=5000.0)
     rider_weight_kg: float = Field(75.0, ge=40.0, le=150.0)
 

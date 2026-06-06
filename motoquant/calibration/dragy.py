@@ -46,7 +46,8 @@ import numpy as np
 
 # ─── Physical constants ────────────────────────────────────────────────────
 
-QUARTER_MILE_M: float = 402.336  # 1/4 mile in metres
+from ..constants import QUARTER_MILE_M  # single source of truth (402.336 m)
+
 EIGHTH_MILE_M: float = 201.168  # 1/8 mile in metres
 
 # Unit conversion factors
