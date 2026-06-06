@@ -1420,7 +1420,7 @@ class SaveRunRequest(BaseModel):
 @app.post("/api/simulate/save", status_code=201)
 def save_simulation(
     req: SaveRunRequest,
-    _auth: dict = Depends(require_tier("pro")),  # noqa: B008
+    auth_user: dict = Depends(require_tier("pro")),  # noqa: B008
 ):
     """Persist a single sim result to sim_runs. Resolves the incoming
     bike_models.id to a bike_configs.id using the seed's 1:1 mapping."""
@@ -1475,10 +1475,25 @@ def save_simulation(
     except sqlite3.Error as exc:
         raise HTTPException(500, f"Failed to persist run: {exc}")
 
+    # Attribute the run to the signed-in user (no-op for anonymous saves).
+    if auth_user and auth_user.get("id"):
+        try:
+            db.execute(
+                "UPDATE sim_runs SET user_id = ? WHERE id = ?",
+                (auth_user["id"], cur.lastrowid),
+            )
+            db.commit()
+        except sqlite3.Error:
+            logging.getLogger(__name__).warning(
+                "sim_runs.user_id attribution failed (column missing?)",
+                exc_info=True,
+            )
+
     return {
         "run_id": cur.lastrowid,
         "bike_id": req.bike_id,
         "bike_config_id": bike_config_id,
+        "saved_to_account": bool(auth_user and auth_user.get("id")),
     }
 
 
@@ -3353,3 +3368,87 @@ async def _start_keepwarm_loop() -> None:
         start_keepwarm()
     except Exception:  # noqa: BLE001 — keep-warm is best-effort only
         logging.getLogger(__name__).warning("keep-warm init failed", exc_info=True)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# AUTH / SUBSCRIPTIONS / PAYMENTS router mounts (Phase 6 — June 2026)
+# The S5 routers existed since April but were never mounted (the
+# "reserved for Stream 5" comment above) — /api/auth/* 404'd in prod while
+# three routes were already tier-gated. Mounting is wrapped so a missing
+# optional dep (python-jose, email-validator) can never block boot:
+# require_tier already degrades to a no-op stub in that case.
+# ═══════════════════════════════════════════════════════════════════════════
+
+try:
+    from .auth import get_current_user as _get_current_user, router as _auth_router
+    from .payments import router as _payments_router
+    from .subscriptions import router as _subscriptions_router
+
+    app.include_router(_auth_router, prefix="/api/auth")
+    app.include_router(_subscriptions_router, prefix="/api/subscriptions")
+    app.include_router(_payments_router, prefix="/api/payments")
+
+    @app.get("/api/me/runs")
+    def my_runs(
+        user: dict = Depends(_get_current_user),  # noqa: B008
+        limit: int = Query(25, le=100),
+    ):
+        """Saved runs for the signed-in user (powers the account Garage)."""
+        db = _get_db()
+        if not db:
+            raise HTTPException(503, "Database unavailable")
+        try:
+            rows = db.execute(
+                """SELECT sr.id, sr.et_quarter_s, sr.trap_speed_kmh,
+                          sr.et_eighth_s, sr.time_60ft_s, sr.notes,
+                          sr.created_at,
+                          m.name AS manufacturer, bm.model_name AS model,
+                          bm.year_from AS year, v.name AS venue
+                   FROM sim_runs sr
+                   LEFT JOIN bike_configs bc ON sr.bike_config_id = bc.id
+                   LEFT JOIN bike_models bm ON bc.bike_model_id = bm.id
+                   LEFT JOIN manufacturers m ON bm.manufacturer_id = m.id
+                   LEFT JOIN venues v ON sr.venue_id = v.id
+                   WHERE sr.user_id = ?
+                   ORDER BY sr.id DESC
+                   LIMIT ?""",
+                (user["id"], limit),
+            ).fetchall()
+            return {"runs": [dict(r) for r in rows], "count": len(rows)}
+        except sqlite3.Error:
+            return {"runs": [], "count": 0}
+
+except ImportError as _exc:  # pragma: no cover — optional-deps fallback
+    logging.getLogger(__name__).warning(
+        "Auth/subscriptions/payments routers not mounted: %s", _exc
+    )
+
+
+@app.on_event("startup")
+async def _ensure_phase6_schema() -> None:
+    """Guarded ALTERs so pre-June-2026 DBs gain run-attribution + auth tables."""
+    try:
+        db = _get_db()
+        if not db:
+            return
+        try:
+            db.execute("ALTER TABLE sim_runs ADD COLUMN user_id INTEGER")
+            db.commit()
+        except sqlite3.OperationalError:
+            pass  # column already exists
+        from .database import (
+            subscriptions_repo as _subs_repo,
+            users_repo as _users_repo,
+        )
+        from .database.connection import connect as _db_connect
+
+        conn = _db_connect()
+        try:
+            _users_repo.ensure_tables(conn)
+            _subs_repo.ensure_tables(conn)
+        finally:
+            conn.close()
+    except Exception:  # noqa: BLE001 — schema top-up is best-effort
+        logging.getLogger(__name__).warning(
+            "phase6 schema ensure failed", exc_info=True
+        )

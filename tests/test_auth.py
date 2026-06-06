@@ -302,6 +302,19 @@ class TestRequireTier(unittest.TestCase):
 
         cls.client = TestClient(test_app, raise_server_exceptions=False)
 
+    def setUp(self):
+        # These tests exercise ENFORCED billing; the module default is the
+        # freemium-beta passthrough (False) since June 2026.
+        import motoquant.auth as auth_mod
+
+        self._orig_enforce = auth_mod.BILLING_ENFORCE
+        auth_mod.BILLING_ENFORCE = True
+
+    def tearDown(self):
+        import motoquant.auth as auth_mod
+
+        auth_mod.BILLING_ENFORCE = self._orig_enforce
+
     def _make_token(self, tier: str) -> str:
         """Create a dev-mode access token for a fake user."""
         import motoquant.auth as auth_mod
@@ -421,3 +434,241 @@ class TestMagicLinkEndpoint(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 6. Freemium-beta passthrough (BILLING_ENFORCE = False — the default)
+# ══════════════════════════════════════════════════════════════════════════════
+
+
+class TestRequireTierBetaMode(unittest.TestCase):
+    """With billing enforcement OFF (open-beta default), require_tier lets
+    anonymous requests through with {} and attaches users when a valid
+    token is present — never 401/402."""
+
+    @classmethod
+    def setUpClass(cls):
+        from fastapi import Depends as _Depends, FastAPI
+        from fastapi.testclient import TestClient
+
+        from motoquant.auth import require_tier
+
+        app = FastAPI()
+
+        @app.get("/pro-feature")
+        def pro_only(auth: dict = _Depends(require_tier("pro"))):
+            return {"ok": True, "attributed": bool(auth.get("id"))}
+
+        cls.client = TestClient(app, raise_server_exceptions=False)
+
+    def setUp(self):
+        import motoquant.auth as auth_mod
+
+        self._orig = auth_mod.BILLING_ENFORCE
+        auth_mod.BILLING_ENFORCE = False
+
+    def tearDown(self):
+        import motoquant.auth as auth_mod
+
+        auth_mod.BILLING_ENFORCE = self._orig
+
+    def test_anonymous_passes_in_beta(self):
+        res = self.client.get("/pro-feature")
+        self.assertEqual(res.status_code, 200)
+        self.assertFalse(res.json()["attributed"])
+
+    def test_authenticated_user_attached_in_beta(self):
+        import motoquant.auth as auth_mod
+
+        orig = auth_mod._JOSE_AVAILABLE
+        auth_mod._JOSE_AVAILABLE = False
+        try:
+            token = auth_mod._make_access_token(7, "beta@t.in", "free", "jti-beta")
+        finally:
+            auth_mod._JOSE_AVAILABLE = orig
+        fake_user = {"id": 7, "email": "beta@t.in", "tier": "free", "is_active": 1}
+        with (
+            patch("motoquant.auth._users.is_session_valid", return_value=True),
+            patch("motoquant.auth._users.get_user_by_id", return_value=fake_user),
+        ):
+            res = self.client.get(
+                "/pro-feature", headers={"Authorization": f"Bearer {token}"}
+            )
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(res.json()["attributed"])
+
+    def test_invalid_token_does_not_error_in_beta(self):
+        res = self.client.get(
+            "/pro-feature", headers={"Authorization": "Bearer garbage"}
+        )
+        self.assertEqual(res.status_code, 200)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 7. Password auth — scrypt hashing + register/login/change routes
+# ══════════════════════════════════════════════════════════════════════════════
+
+
+class TestPasswordHashing(unittest.TestCase):
+    def test_round_trip(self):
+        from motoquant.auth import hash_password, verify_password
+
+        h = hash_password("quarter-mile-9s")
+        self.assertTrue(h.startswith("scrypt$"))
+        self.assertTrue(verify_password("quarter-mile-9s", h))
+        self.assertFalse(verify_password("quarter-mile-10s", h))
+
+    def test_salt_is_random(self):
+        from motoquant.auth import hash_password
+
+        self.assertNotEqual(hash_password("same"), hash_password("same"))
+
+    def test_malformed_stored_hash_rejected(self):
+        from motoquant.auth import verify_password
+
+        for bad in (None, "", "garbage", "scrypt$broken", "bcrypt$something"):
+            self.assertFalse(verify_password("x", bad))
+
+
+class TestPasswordRoutes(unittest.TestCase):
+    """End-to-end register → login → change-password through the router."""
+
+    @classmethod
+    def setUpClass(cls):
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+
+        from motoquant.auth import router as auth_router
+
+        app = FastAPI()
+        app.include_router(auth_router, prefix="/api/auth")
+        cls.client = TestClient(app, raise_server_exceptions=False)
+
+    def setUp(self):
+        import motoquant.auth as auth_mod
+
+        self.conn = _mem_conn()
+        _bootstrap(self.conn)
+        self._conn_patcher = patch(
+            "motoquant.auth._get_conn", return_value=_NoCloseConn(self.conn)
+        )
+        self._conn_patcher.start()
+        auth_mod._failed_logins.clear()
+
+    def tearDown(self):
+        self._conn_patcher.stop()
+        self.conn.close()
+
+    def _register(self, email="rider@test.in", password="lights-out-9s"):
+        return self.client.post(
+            "/api/auth/register", json={"email": email, "password": password}
+        )
+
+    def test_register_returns_tokens(self):
+        res = self._register()
+        self.assertEqual(res.status_code, 201)
+        body = res.json()
+        self.assertIn("access_token", body)
+        self.assertEqual(body["tier"], "free")
+
+    def test_register_duplicate_email_409(self):
+        self._register()
+        res = self._register(password="another-pass-1")
+        self.assertEqual(res.status_code, 409)
+
+    def test_register_short_password_422(self):
+        res = self._register(password="short")
+        self.assertEqual(res.status_code, 422)
+
+    def test_login_success(self):
+        self._register()
+        res = self.client.post(
+            "/api/auth/login",
+            json={"email": "rider@test.in", "password": "lights-out-9s"},
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertIn("refresh_token", res.json())
+
+    def test_login_wrong_password_401(self):
+        self._register()
+        res = self.client.post(
+            "/api/auth/login",
+            json={"email": "rider@test.in", "password": "wrong-password"},
+        )
+        self.assertEqual(res.status_code, 401)
+
+    def test_login_unknown_email_401_no_enumeration(self):
+        res = self.client.post(
+            "/api/auth/login",
+            json={"email": "ghost@test.in", "password": "whatever-123"},
+        )
+        self.assertEqual(res.status_code, 401)
+        self.assertEqual(res.json()["detail"], "Invalid email or password.")
+
+    def test_login_rate_limited_after_8_failures(self):
+        self._register()
+        for _ in range(8):
+            self.client.post(
+                "/api/auth/login",
+                json={"email": "rider@test.in", "password": "wrong-password"},
+            )
+        res = self.client.post(
+            "/api/auth/login",
+            json={"email": "rider@test.in", "password": "lights-out-9s"},
+        )
+        self.assertEqual(res.status_code, 429)
+
+    def test_magic_link_user_can_set_first_password(self):
+        from motoquant.database import users_repo
+
+        users_repo.get_or_create_user(self.conn, "linkonly@test.in")
+        # sign in via magic link
+        token = users_repo.create_magic_link(self.conn, "linkonly@test.in")
+        res = self.client.post("/api/auth/verify", json={"token": token})
+        self.assertEqual(res.status_code, 200)
+        access = res.json()["access_token"]
+        # set first password without current_password
+        res = self.client.post(
+            "/api/auth/password/change",
+            json={"new_password": "first-password-1"},
+            headers={"Authorization": f"Bearer {access}"},
+        )
+        self.assertEqual(res.status_code, 200)
+        # password login now works
+        res = self.client.post(
+            "/api/auth/login",
+            json={"email": "linkonly@test.in", "password": "first-password-1"},
+        )
+        self.assertEqual(res.status_code, 200)
+
+    def test_change_password_requires_current_when_set(self):
+        reg = self._register().json()
+        headers = {"Authorization": f"Bearer {reg['access_token']}"}
+        res = self.client.post(
+            "/api/auth/password/change",
+            json={"new_password": "new-password-22"},
+            headers=headers,
+        )
+        self.assertEqual(res.status_code, 403)
+        res = self.client.post(
+            "/api/auth/password/change",
+            json={
+                "current_password": "lights-out-9s",
+                "new_password": "new-password-22",
+            },
+            headers=headers,
+        )
+        self.assertEqual(res.status_code, 200)
+        res = self.client.post(
+            "/api/auth/login",
+            json={"email": "rider@test.in", "password": "new-password-22"},
+        )
+        self.assertEqual(res.status_code, 200)
+
+    def test_magic_link_verify_marks_email_verified(self):
+        from motoquant.database import users_repo
+
+        token = users_repo.create_magic_link(self.conn, "verifyme@test.in")
+        self.client.post("/api/auth/verify", json={"token": token})
+        user = users_repo.get_user_by_email(self.conn, "verifyme@test.in")
+        self.assertEqual(user["email_verified"], 1)

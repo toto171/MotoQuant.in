@@ -19,6 +19,7 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
+import { useAuth } from './AuthProvider';
 
 const NAV_LINKS = [
   { href: '/simulator',                 label: 'Simulator' },
@@ -42,6 +43,7 @@ function isActive(pathname, link) {
 
 export default function SiteNav() {
   const pathname = usePathname();
+  const { user, isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -94,6 +96,32 @@ export default function SiteNav() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          {isAuthenticated ? (
+            <Link
+              href="/account"
+              title="Your account"
+              className="hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-white/10 hover:border-brand-orange/50 transition-colors"
+            >
+              <span className="w-5 h-5 rounded-full bg-brand-orange/20 text-brand-orange text-[10px] font-bold flex items-center justify-center uppercase">
+                {user?.email?.[0] ?? 'U'}
+              </span>
+              <span className="text-xs font-mono text-white/70 max-w-[9rem] truncate">
+                {user?.email?.split('@')[0]}
+              </span>
+              {user?.tier && user.tier !== 'free' && (
+                <span className="text-[9px] font-mono uppercase tracking-wider text-brand-accent">
+                  {user.tier}
+                </span>
+              )}
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="hidden sm:block text-sm font-mono text-white/60 hover:text-white transition-colors whitespace-nowrap"
+            >
+              Sign in
+            </Link>
+          )}
           <Link
             href="/simulator"
             className="px-3 sm:px-4 py-2 bg-brand-orange hover:bg-brand-orangeLight text-black font-display font-bold rounded-md text-xs sm:text-sm transition-colors whitespace-nowrap shadow-orange-soft"
@@ -141,6 +169,20 @@ export default function SiteNav() {
                   </Link>
                 );
               })}
+              <div className="my-1 border-t border-white/10" />
+              <Link
+                href={isAuthenticated ? '/account' : '/login'}
+                className={[
+                  'px-4 py-3 rounded-md transition-colors',
+                  isActive(pathname, { href: isAuthenticated ? '/account' : '/login' })
+                    ? 'text-brand-orange bg-brand-orange/10'
+                    : 'text-white/70 hover:text-white hover:bg-white/5',
+                ].join(' ')}
+              >
+                {isAuthenticated
+                  ? `Account — ${user?.email?.split('@')[0] ?? ''}`
+                  : 'Sign in / Create account'}
+              </Link>
             </nav>
           </motion.div>
         )}

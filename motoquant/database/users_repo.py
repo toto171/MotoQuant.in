@@ -222,6 +222,8 @@ def ensure_tables(conn: sqlite3.Connection) -> None:
             is_active               INTEGER NOT NULL DEFAULT 1,
             razorpay_customer_id    TEXT,
             stripe_customer_id      TEXT,
+            password_hash           TEXT,
+            email_verified          INTEGER NOT NULL DEFAULT 0,
             created_at              TEXT    DEFAULT (datetime('now','utc')),
             updated_at              TEXT    DEFAULT (datetime('now','utc'))
         );
@@ -252,3 +254,67 @@ def ensure_tables(conn: sqlite3.Connection) -> None:
         """
     )
     conn.commit()
+
+    # ── v5 columns (password auth / Stripe) — guarded ALTERs for old DBs ──
+    for ddl in (
+        "ALTER TABLE users ADD COLUMN password_hash TEXT",
+        "ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0",
+    ):
+        try:
+            conn.execute(ddl)
+        except sqlite3.OperationalError:
+            pass  # column already exists
+    conn.commit()
+
+
+# --- PASSWORD AUTH + STRIPE HELPERS (Phase 6, June 2026) ------------------------
+
+
+def create_user_with_password(
+    conn: sqlite3.Connection, email: str, password_hash: str
+) -> dict:
+    """Insert a new free-tier user with a password hash. Caller must ensure
+    the email does not already exist (raises sqlite3.IntegrityError otherwise)."""
+    email = email.lower().strip()
+    conn.execute(
+        "INSERT INTO users (email, tier, is_active, password_hash) "
+        "VALUES (?, 'free', 1, ?)",
+        (email, password_hash),
+    )
+    conn.commit()
+    return dict(
+        conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+    )
+
+
+def set_password(conn: sqlite3.Connection, user_id: int, password_hash: str) -> None:
+    conn.execute(
+        "UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?",
+        (password_hash, _now_utc(), user_id),
+    )
+    conn.commit()
+
+
+def mark_email_verified(conn: sqlite3.Connection, user_id: int) -> None:
+    conn.execute(
+        "UPDATE users SET email_verified = 1, updated_at = ? WHERE id = ?",
+        (_now_utc(), user_id),
+    )
+    conn.commit()
+
+
+def set_stripe_customer(conn: sqlite3.Connection, user_id: int, stripe_id: str) -> None:
+    conn.execute(
+        "UPDATE users SET stripe_customer_id = ?, updated_at = ? WHERE id = ?",
+        (stripe_id, _now_utc(), user_id),
+    )
+    conn.commit()
+
+
+def get_user_by_stripe_customer(
+    conn: sqlite3.Connection, stripe_id: str
+) -> dict | None:
+    row = conn.execute(
+        "SELECT * FROM users WHERE stripe_customer_id = ?", (stripe_id,)
+    ).fetchone()
+    return dict(row) if row else None

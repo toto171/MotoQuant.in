@@ -376,7 +376,11 @@ PATTERNS = [
     ),
     (
         "web/app/blog/*/page.js",
-        r"R1\s+4C8[^.]*?([0-9]+\.[0-9]{4})\s*s",
+        # [^.0-9] (not [^.]) so list sentences like "K5 ..., R1 4C8, and
+        # Hayabusa Gen 1 ... (10.0334s / 10.2859s / 10.4712s)" don't capture
+        # K5's number — the false positive that mangled the 600cc blog post
+        # when --fix ran on 2026-06-07.
+        r"R1\s+4C8[^.0-9]*?([0-9]+\.[0-9]{4})\s*s",
         "baseline_r1",
         "blog R1 baseline",
     ),

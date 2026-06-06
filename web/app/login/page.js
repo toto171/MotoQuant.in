@@ -1,14 +1,19 @@
 "use client";
 
 /**
- * MotoQuant Pro — Login Page
- * ===========================
- * Passwordless magic-link sign-in.
- * Step 1: user enters email → POST /api/auth/magic-link
- * Step 2: user clicks link in email → /login?token=... → POST /api/auth/verify
+ * MotoQuant Pro — Login / Register Page
+ * ======================================
+ * Three modes on one surface:
+ *   - "signin"   email + password (works with zero external services)
+ *   - "register" create account (auto-signs-in on success)
+ *   - "magic"    passwordless magic-link (also the forgot-password path;
+ *                emails send once SMTP/RESEND env vars are set server-side)
+ * Arriving with ?token=... verifies a magic link.
+ * Arriving with ?signup=1 opens register mode.
+ * ?next=/path is honoured after auth (same-origin paths only).
  *
  * Direction A refit (April 2026): SiteNav + black canvas + brand-orange
- * accents. Magic-link flow + AuthProvider integration unchanged.
+ * accents. June 2026: password auth added alongside magic-link.
  */
 
 import { Suspense, useEffect, useState } from "react";
@@ -26,22 +31,30 @@ function LoginPageInner() {
   const params = useSearchParams();
   const { isAuthenticated, applyLoginTokens } = useAuth();
 
+  const [mode, setMode] = useState(
+    params?.get("signup") === "1" ? "register" : "signin"
+  );
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState("idle");
+  const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("");
+  const [status, setStatus] = useState("idle"); // idle|sending|sent|verifying|error
   const [errorMsg, setErrorMsg] = useState("");
   const [devToken, setDevToken] = useState("");
 
   // GROWTH_EXP_007: A/B variant — see data/growth_experiments.json
-  // Default OFF (control). Visitors who land with ?variant=B see the
-  // value-forward, zero-friction CTA copy. Same form action, same href,
-  // same heading, same canonical URL, same SEO. Button text only.
   const ctaVariant = params?.get("variant") === "B" ? "B" : "A";
   const sendButtonLabel =
     ctaVariant === "B" ? "Start free · email me the link" : "Send sign-in link";
 
+  // Same-origin ?next= redirect (defends against open-redirect abuse)
+  const nextPath = (() => {
+    const n = params?.get("next") || "";
+    return n.startsWith("/") && !n.startsWith("//") ? n : "/account";
+  })();
+
   useEffect(() => {
-    if (isAuthenticated) router.replace("/account");
-  }, [isAuthenticated, router]);
+    if (isAuthenticated) router.replace(nextPath);
+  }, [isAuthenticated, router, nextPath]);
 
   useEffect(() => {
     const token = params.get("token");
@@ -62,10 +75,50 @@ function LoginPageInner() {
       }
       const data = await res.json();
       applyLoginTokens(data);
-      router.replace("/account");
+      router.replace(nextPath);
     } catch (err) {
       setStatus("error");
       setErrorMsg(err.message || "Verification failed. Please try again.");
+    }
+  }
+
+  async function submitPassword(e) {
+    e.preventDefault();
+    if (!email.trim() || !password) return;
+    if (mode === "register") {
+      if (password.length < 8) {
+        setStatus("error");
+        setErrorMsg("Password must be at least 8 characters.");
+        return;
+      }
+      if (password !== password2) {
+        setStatus("error");
+        setErrorMsg("Passwords don't match.");
+        return;
+      }
+    }
+    setStatus("sending");
+    setErrorMsg("");
+    try {
+      const endpoint = mode === "register" ? "register" : "login";
+      const res = await fetch(`${API_BASE}/api/auth/${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const detail =
+          typeof data.detail === "string"
+            ? data.detail
+            : data.detail?.[0]?.msg || "Sign-in failed. Please try again.";
+        throw new Error(detail);
+      }
+      applyLoginTokens(data);
+      router.replace(nextPath);
+    } catch (err) {
+      setStatus("error");
+      setErrorMsg(err.message);
     }
   }
 
@@ -89,6 +142,29 @@ function LoginPageInner() {
       setErrorMsg(err.message);
     }
   }
+
+  function switchMode(next) {
+    setMode(next);
+    setStatus("idle");
+    setErrorMsg("");
+    setPassword("");
+    setPassword2("");
+  }
+
+  const headings = {
+    signin: ["Sign in", "Welcome back — pick up where you left off."],
+    register: ["Create your account", "Free during the open beta — every Pro feature unlocked."],
+    magic: ["Magic-link sign-in", "No password needed — we’ll email you a sign-in link."],
+  };
+  const [heading, subheading] = headings[mode];
+
+  const tabClass = (m) =>
+    [
+      "flex-1 px-3 py-2 text-xs font-mono uppercase tracking-wider rounded-md transition-colors",
+      mode === m
+        ? "bg-brand-orange/15 text-brand-orange border border-brand-orange/40"
+        : "text-white/45 hover:text-white border border-transparent",
+    ].join(" ");
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -141,10 +217,20 @@ function LoginPageInner() {
 
             {(status === "idle" || status === "sending" || status === "error") && (
               <>
-                <h2 className="font-display font-bold text-2xl text-white">Sign in</h2>
-                <p className="mt-1 text-sm text-white/55">
-                  No password needed — we&rsquo;ll email you a sign-in link.
-                </p>
+                <div className="flex gap-1.5 mb-6">
+                  <button onClick={() => switchMode("signin")} className={tabClass("signin")}>
+                    Sign in
+                  </button>
+                  <button onClick={() => switchMode("register")} className={tabClass("register")}>
+                    Register
+                  </button>
+                  <button onClick={() => switchMode("magic")} className={tabClass("magic")}>
+                    Magic link
+                  </button>
+                </div>
+
+                <h2 className="font-display font-bold text-2xl text-white">{heading}</h2>
+                <p className="mt-1 text-sm text-white/55">{subheading}</p>
 
                 {status === "error" && (
                   <div className="mt-5 rounded-lg bg-red-900/25 border border-red-500/40 px-4 py-3 text-sm text-red-200 flex items-start gap-2">
@@ -153,7 +239,10 @@ function LoginPageInner() {
                   </div>
                 )}
 
-                <form onSubmit={requestLink} className="mt-6 space-y-4">
+                <form
+                  onSubmit={mode === "magic" ? requestLink : submitPassword}
+                  className="mt-6 space-y-4"
+                >
                   <div>
                     <label htmlFor="email" className="block text-[11px] font-mono text-white/55 uppercase tracking-widest mb-2">
                       Email address
@@ -169,16 +258,70 @@ function LoginPageInner() {
                       className="block w-full rounded-md border border-white/10 bg-black/40 px-4 py-3 text-white placeholder-white/30 focus:border-brand-orange focus:outline-none focus:ring-1 focus:ring-brand-orange text-sm font-mono transition-colors"
                     />
                   </div>
+
+                  {mode !== "magic" && (
+                    <div>
+                      <label htmlFor="password" className="block text-[11px] font-mono text-white/55 uppercase tracking-widest mb-2">
+                        Password
+                      </label>
+                      <input
+                        id="password"
+                        type="password"
+                        autoComplete={mode === "register" ? "new-password" : "current-password"}
+                        required
+                        minLength={mode === "register" ? 8 : 1}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder={mode === "register" ? "At least 8 characters" : "Your password"}
+                        className="block w-full rounded-md border border-white/10 bg-black/40 px-4 py-3 text-white placeholder-white/30 focus:border-brand-orange focus:outline-none focus:ring-1 focus:ring-brand-orange text-sm font-mono transition-colors"
+                      />
+                    </div>
+                  )}
+
+                  {mode === "register" && (
+                    <div>
+                      <label htmlFor="password2" className="block text-[11px] font-mono text-white/55 uppercase tracking-widest mb-2">
+                        Confirm password
+                      </label>
+                      <input
+                        id="password2"
+                        type="password"
+                        autoComplete="new-password"
+                        required
+                        minLength={8}
+                        value={password2}
+                        onChange={(e) => setPassword2(e.target.value)}
+                        placeholder="Same password again"
+                        className="block w-full rounded-md border border-white/10 bg-black/40 px-4 py-3 text-white placeholder-white/30 focus:border-brand-orange focus:outline-none focus:ring-1 focus:ring-brand-orange text-sm font-mono transition-colors"
+                      />
+                    </div>
+                  )}
+
                   <button
                     type="submit"
                     disabled={status === "sending"}
-                    data-exp="EXP-007"
-                    data-variant={ctaVariant}
+                    data-exp={mode === "magic" ? "EXP-007" : undefined}
+                    data-variant={mode === "magic" ? ctaVariant : undefined}
                     className="w-full rounded-md bg-brand-orange py-3 text-sm font-display font-bold text-black shadow-orange-soft hover:bg-brand-orangeLight disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    {status === "sending" ? "Sending…" : sendButtonLabel}
+                    {status === "sending"
+                      ? "Working…"
+                      : mode === "magic"
+                        ? sendButtonLabel
+                        : mode === "register"
+                          ? "Create free account"
+                          : "Sign in"}
                   </button>
                 </form>
+
+                {mode === "signin" && (
+                  <button
+                    onClick={() => switchMode("magic")}
+                    className="mt-4 text-xs text-brand-accent hover:text-white transition-colors"
+                  >
+                    Forgot password? Sign in with a magic link instead →
+                  </button>
+                )}
 
                 <p className="mt-6 text-center text-xs text-white/40">
                   By signing in you agree to our{" "}
@@ -191,10 +334,21 @@ function LoginPageInner() {
           </div>
 
           <p className="text-center text-xs text-white/45">
-            New to MotoQuant?{" "}
-            <a href="/pricing" className="text-brand-orange hover:text-brand-orangeLight transition-colors">
-              See plans →
-            </a>
+            {mode === "register" ? (
+              <>
+                Already racing with us?{" "}
+                <button onClick={() => switchMode("signin")} className="text-brand-orange hover:text-brand-orangeLight transition-colors">
+                  Sign in →
+                </button>
+              </>
+            ) : (
+              <>
+                New to MotoQuant?{" "}
+                <button onClick={() => switchMode("register")} className="text-brand-orange hover:text-brand-orangeLight transition-colors">
+                  Create a free account →
+                </button>
+              </>
+            )}
           </p>
         </div>
       </main>

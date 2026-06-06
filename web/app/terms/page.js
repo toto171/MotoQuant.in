@@ -63,13 +63,21 @@ export default function TermsPage() {
         <Section title="3. Subscription Plans and Billing">
           <p>
             MotoQuant Pro offers three tiers: Free, Pro (₹499/mo or ₹4,999/yr), and
-            Studio (₹2,999/mo or ₹29,999/yr). Prices are exclusive of GST (18% applicable
+            Studio (₹1,999/mo or ₹19,990/yr). Prices are exclusive of GST (18% applicable
             under Indian GST law). You will receive a GST-compliant invoice.
           </p>
           <p>
-            Payments are processed by Razorpay. By subscribing you agree to Razorpay's
-            payment terms in addition to these Terms. Subscriptions auto-renew unless
-            cancelled before the end of the billing period.
+            <strong>Open beta: </strong>while MotoQuant Pro is in open beta, all Pro and
+            Studio features are provided free of charge to all registered accounts. We
+            will give registered users advance notice by email before paid billing
+            begins. Beta access does not create an entitlement to free access after
+            commercial launch.
+          </p>
+          <p>
+            Payments are processed by Razorpay (India — UPI, cards, net banking,
+            wallets) and Stripe (international cards). By subscribing you agree to the
+            processor's payment terms in addition to these Terms. Subscriptions
+            auto-renew unless cancelled before the end of the billing period.
           </p>
           <p>
             <strong>7-day refund policy: </strong>If you are not satisfied within 7 calendar

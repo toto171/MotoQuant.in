@@ -41,8 +41,13 @@ def upsert_subscription(
     current_period_end: str | None = None,
     plan_id: str | None = None,
     billing_cycle: str = "monthly",
+    provider: str = "razorpay",
 ) -> dict:
-    """Insert or update a subscription row. Idempotent on rzp subscription_id."""
+    """Insert or update a subscription row, idempotent on the provider's
+    subscription id. NOTE: the razorpay_subscription_id column is legacy-named
+    but stores the subscription id for ANY provider (razorpay sub_…, stripe
+    sub_…); the provider column disambiguates."""
+    assert provider in ("razorpay", "stripe", "paypal")
     assert tier in ("pro", "studio")
     assert status in (
         "created",
@@ -64,7 +69,7 @@ def upsert_subscription(
         conn.execute(
             """UPDATE subscriptions
                SET user_id=?, tier=?, status=?, current_period_end=?,
-                   plan_id=?, billing_cycle=?, updated_at=?
+                   plan_id=?, billing_cycle=?, provider=?, updated_at=?
                WHERE razorpay_subscription_id=?""",
             (
                 user_id,
@@ -73,6 +78,7 @@ def upsert_subscription(
                 current_period_end,
                 plan_id,
                 billing_cycle,
+                provider,
                 now,
                 razorpay_subscription_id,
             ),
@@ -81,8 +87,8 @@ def upsert_subscription(
         conn.execute(
             """INSERT INTO subscriptions
                (user_id, razorpay_subscription_id, tier, status,
-                current_period_end, plan_id, billing_cycle)
-               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                current_period_end, plan_id, billing_cycle, provider)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 user_id,
                 razorpay_subscription_id,
@@ -91,6 +97,7 @@ def upsert_subscription(
                 current_period_end,
                 plan_id,
                 billing_cycle,
+                provider,
             ),
         )
     conn.commit()
@@ -234,6 +241,7 @@ def ensure_tables(conn: sqlite3.Connection) -> None:
             current_period_end          TEXT,
             plan_id                     TEXT,
             billing_cycle               TEXT    DEFAULT 'monthly',
+            provider                    TEXT    NOT NULL DEFAULT 'razorpay',
             created_at                  TEXT    DEFAULT (datetime('now','utc')),
             updated_at                  TEXT    DEFAULT (datetime('now','utc'))
         );
@@ -253,6 +261,51 @@ def ensure_tables(conn: sqlite3.Connection) -> None:
         );
         CREATE INDEX IF NOT EXISTS idx_license_user ON license_keys(user_id);
         CREATE INDEX IF NOT EXISTS idx_license_hash ON license_keys(key_hash);
+
+        CREATE TABLE IF NOT EXISTS payment_events (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            provider    TEXT    NOT NULL,
+            event_id    TEXT    NOT NULL,
+            event_type  TEXT,
+            payload     TEXT,
+            received_at TEXT    DEFAULT (datetime('now','utc')),
+            UNIQUE(provider, event_id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_payevents_provider ON payment_events(provider, event_id);
         """
     )
     conn.commit()
+
+    # ── guarded ALTER for subscriptions tables created before June 2026 ──
+    try:
+        conn.execute(
+            "ALTER TABLE subscriptions ADD COLUMN provider TEXT NOT NULL DEFAULT 'razorpay'"
+        )
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass  # column already exists
+
+
+# ─── PAYMENT EVENT LEDGER (webhook idempotency, June 2026) ────────────────────
+
+
+def record_payment_event(
+    conn: sqlite3.Connection,
+    provider: str,
+    event_id: str,
+    event_type: str | None = None,
+    payload: str | None = None,
+) -> bool:
+    """Insert a webhook event row. Returns True if this is the FIRST time the
+    (provider, event_id) pair is seen, False on duplicate delivery — callers
+    use this as the idempotency gate."""
+    try:
+        conn.execute(
+            "INSERT INTO payment_events (provider, event_id, event_type, payload) "
+            "VALUES (?, ?, ?, ?)",
+            (provider, event_id, event_type, (payload or "")[:10_000]),
+        )
+        conn.commit()
+        return True
+    except sqlite3.IntegrityError:
+        return False

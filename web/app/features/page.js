@@ -5,8 +5,7 @@ import { useRef } from 'react';
 import Link from 'next/link';
 import {
   Cpu, BarChart3, Upload, TrendingUp, Monitor, Code2,
-  ChevronRight, Zap, ArrowRight
-} from 'lucide-react';
+  ChevronRight, Zap, ArrowRight, UserCircle2 } from 'lucide-react';
 import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
 import BottomCta from './BottomCta';
@@ -164,6 +163,26 @@ Interactive docs at /docs (FastAPI's automatic OpenAPI UI). No authentication fo
       { num: '12', label: 'Endpoints' },
       { num: '~100ms', label: 'Full sim latency' },
       { num: '60/min', label: 'Rate limit' },
+    ],
+  },
+  {
+    id: 'accounts',
+    icon: UserCircle2,
+    label: '07 / Accounts & Garage',
+    title: 'Your Garage, Saved',
+    subtitle: 'Free accounts. Saved runs. Shareable builds. Every Pro feature unlocked during the open beta.',
+    body: `Create a free account with an email + password (or a passwordless magic link) and your simulator work stops being throwaway: every run you save lands in My Garage on your account page — bike, build, ET, trap speed, venue, date.
+
+Found a setup worth bragging about? Hit Share on the simulator and send a link that reopens your exact bike, venue and tuning sliders on any device.
+
+While MotoQuant is in open beta, everything in the Pro and Studio tiers — unlimited sims, the build optimiser, ECU autotune, Dragy/dyno imports — is unlocked free for every account. Paid plans only begin at commercial launch, with advance notice.`,
+    docsLink: '/login?signup=1',
+    docsLabel: 'Create a free account',
+    mockup: null,
+    stats: [
+      { num: '₹0', label: 'During open beta' },
+      { num: '25+', label: 'Runs in your garage' },
+      { num: '1-tap', label: 'Build sharing' },
     ],
   },
 ];

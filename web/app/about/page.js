@@ -35,9 +35,9 @@ const ROADMAP = [
   },
   {
     phase: 'Phase 6',
-    status: 'upcoming',
+    status: 'in-progress',
     label: 'Commercial launch + AI layer',
-    desc: 'Tiered pricing. B2B Pro Studio for tuning shops. Conversational AI tuning (Mistral 7B). PPO launch control.',
+    desc: 'Accounts + freemium tiers live (free during open beta). Razorpay + Stripe payment rails wired. Conversational AI tuning shipped. PPO launch control next.',
   },
 ];
 

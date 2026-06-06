@@ -33,6 +33,13 @@ export default function AccountPage() {
   const [revoking, setRevoking] = useState(null);
   const [cancelling, setCancelling] = useState(false);
   const [subMsg, setSubMsg] = useState("");
+  const [pwCurrent, setPwCurrent] = useState("");
+  const [pwNew, setPwNew] = useState("");
+  const [pwSaving, setPwSaving] = useState(false);
+  const [pwMsg, setPwMsg] = useState(null); // { tone: 'ok'|'err', text }
+  const [runs, setRuns] = useState([]);
+  const [runsLoading, setRunsLoading] = useState(false);
+  const [checkoutBanner, setCheckoutBanner] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) router.replace("/login");
@@ -41,6 +48,41 @@ export default function AccountPage() {
   useEffect(() => {
     if (user) setKeys(user.license_keys ?? []);
   }, [user]);
+
+  // My Garage — saved runs for this account
+  useEffect(() => {
+    if (!accessToken) return;
+    let cancelled = false;
+    (async () => {
+      setRunsLoading(true);
+      try {
+        const res = await fetch(`${API_BASE}/api/me/runs?limit=25`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (!cancelled) setRuns(data.runs || []);
+        }
+      } catch (e) {
+        /* garage is best-effort */
+      } finally {
+        if (!cancelled) setRunsLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [accessToken]);
+
+  // Post-checkout landing (?checkout=success) — window.location avoids a
+  // useSearchParams/Suspense prerender dependency on this page.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const qp = new URLSearchParams(window.location.search);
+    if (qp.get("checkout") === "success") {
+      setCheckoutBanner(true);
+      refetchUser();
+      window.history.replaceState({}, "", "/account");
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (isLoading || !user) {
     return (
@@ -124,6 +166,43 @@ export default function AccountPage() {
     } catch (e) {}
   }
 
+  async function changePassword(e) {
+    e.preventDefault();
+    setPwMsg(null);
+    if (pwNew.length < 8) {
+      setPwMsg({ tone: "err", text: "New password must be at least 8 characters." });
+      return;
+    }
+    setPwSaving(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/password/change`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          current_password: user.has_password ? pwCurrent : null,
+          new_password: pwNew,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(
+          typeof data.detail === "string" ? data.detail : "Could not update password."
+        );
+      }
+      setPwMsg({ tone: "ok", text: "Password updated." });
+      setPwCurrent("");
+      setPwNew("");
+      refetchUser();
+    } catch (err) {
+      setPwMsg({ tone: "err", text: err.message });
+    } finally {
+      setPwSaving(false);
+    }
+  }
+
   const canGenerateKey = user.tier !== "free";
   const maxKeys = { free: 0, pro: 1, studio: 5 }[user.tier] ?? 0;
   const activeKeys = keys.filter((k) => !k.revoked);
@@ -133,6 +212,12 @@ export default function AccountPage() {
       <SiteNav />
       <main className="pt-32 pb-20 px-4 sm:px-6">
         <div className="mx-auto max-w-3xl space-y-6">
+          {checkoutBanner && (
+            <div className="rounded-xl bg-emerald-900/25 border border-emerald-500/40 px-5 py-4 text-sm text-emerald-200">
+              Payment received — thank you! Your plan activates within a minute
+              (your tier refreshes automatically).
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <div>
               <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-brand-orange mb-1">
@@ -274,6 +359,108 @@ export default function AccountPage() {
                 )}
               </>
             )}
+          </section>
+
+          <section className="rounded-2xl bg-ink-1/60 border border-white/10 p-6 sm:p-8">
+            <div className="flex items-center justify-between mb-5">
+              <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/45">
+                My Garage — Saved Runs
+              </div>
+              <a href="/simulator" className="text-xs font-mono text-brand-orange hover:text-brand-orangeLight transition-colors">
+                + New sim →
+              </a>
+            </div>
+            {runsLoading && (
+              <p className="text-sm text-white/45 font-mono">Loading your runs…</p>
+            )}
+            {!runsLoading && runs.length === 0 && (
+              <p className="text-sm text-white/55">
+                No saved runs yet. Run a simulation and hit{" "}
+                <strong className="text-white">Save this run</strong> while signed
+                in — it lands here.
+              </p>
+            )}
+            {!runsLoading && runs.length > 0 && (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-[10px] font-mono uppercase tracking-widest text-white/40 border-b border-white/10">
+                      <th className="py-2 pr-4">Bike</th>
+                      <th className="py-2 pr-4 text-right">¼-mile</th>
+                      <th className="py-2 pr-4 text-right">Trap</th>
+                      <th className="py-2 pr-4 hidden sm:table-cell">Venue</th>
+                      <th className="py-2 hidden sm:table-cell">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {runs.map((r) => (
+                      <tr key={r.id} className="border-b border-white/5">
+                        <td className="py-2.5 pr-4 text-white/85">
+                          {r.manufacturer ? `${r.manufacturer} ${r.model}` : `Run #${r.id}`}
+                        </td>
+                        <td className="py-2.5 pr-4 text-right font-mono tabular-nums text-brand-orange">
+                          {r.et_quarter_s != null ? `${r.et_quarter_s.toFixed(3)}s` : "—"}
+                        </td>
+                        <td className="py-2.5 pr-4 text-right font-mono tabular-nums text-white/70">
+                          {r.trap_speed_kmh != null ? `${r.trap_speed_kmh.toFixed(1)} km/h` : "—"}
+                        </td>
+                        <td className="py-2.5 pr-4 text-white/55 hidden sm:table-cell">{r.venue || "—"}</td>
+                        <td className="py-2.5 text-white/45 hidden sm:table-cell">
+                          {r.created_at ? new Date(r.created_at).toLocaleDateString() : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+
+          <section className="rounded-2xl bg-ink-1/60 border border-white/10 p-6 sm:p-8">
+            <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/45 mb-4">
+              Security
+            </div>
+            {!user.has_password && (
+              <p className="mb-4 text-sm text-white/55">
+                You currently sign in via magic link. Add a password to sign in
+                directly — the magic-link option stays available either way.
+              </p>
+            )}
+            {pwMsg && (
+              <p className={`mb-3 text-sm ${pwMsg.tone === "ok" ? "text-emerald-300" : "text-red-300"}`}>
+                {pwMsg.text}
+              </p>
+            )}
+            <form onSubmit={changePassword} className="space-y-3 max-w-sm">
+              {user.has_password && (
+                <input
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={pwCurrent}
+                  onChange={(e) => setPwCurrent(e.target.value)}
+                  placeholder="Current password"
+                  className="block w-full rounded-md border border-white/10 bg-black/40 px-4 py-2.5 text-white placeholder-white/30 focus:border-brand-orange focus:outline-none focus:ring-1 focus:ring-brand-orange text-sm font-mono transition-colors"
+                />
+              )}
+              <input
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={8}
+                value={pwNew}
+                onChange={(e) => setPwNew(e.target.value)}
+                placeholder="New password (8+ characters)"
+                className="block w-full rounded-md border border-white/10 bg-black/40 px-4 py-2.5 text-white placeholder-white/30 focus:border-brand-orange focus:outline-none focus:ring-1 focus:ring-brand-orange text-sm font-mono transition-colors"
+              />
+              <button
+                type="submit"
+                disabled={pwSaving}
+                className="rounded-md bg-white/10 hover:bg-white/15 border border-white/15 px-4 py-2.5 text-sm font-display font-bold text-white disabled:opacity-50 transition-colors"
+              >
+                {pwSaving ? "Saving…" : user.has_password ? "Change password" : "Set a password"}
+              </button>
+            </form>
           </section>
         </div>
       </main>

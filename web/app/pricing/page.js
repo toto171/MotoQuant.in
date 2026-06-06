@@ -3,12 +3,18 @@
 /**
  * MotoQuant Pro — Pricing Page
  * ==============================
- * Three-tier feature matrix: Free / Pro (₹499/mo) / Studio (₹2,999/mo).
+ * Three-tier feature matrix: Free / Pro (₹499/mo) / Studio (₹1,999/mo).
  * Monthly / Yearly toggle (yearly = ~17% off).
- * CTAs hit POST /api/subscriptions/checkout and redirect to Razorpay.
+ *
+ * Freemium open beta (June 2026): /api/payments/config drives the CTAs.
+ * While billing enforcement is off, every Pro/Studio feature is unlocked
+ * for free accounts and the CTAs route to account creation. Once the
+ * operator flips MOTOQUANT_BILLING_ENFORCE, the same buttons hit
+ * POST /api/payments/checkout (Razorpay for India incl. UPI, Stripe for
+ * international cards) and redirect to the hosted checkout.
  */
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "../../components/AuthProvider";
@@ -22,7 +28,7 @@ const API_BASE =
 
 const PRICES = {
   pro:    { monthly: 499,  yearly: 4999 },
-  studio: { monthly: 2999, yearly: 29999 },
+  studio: { monthly: 1999, yearly: 19990 },
 };
 
 const FEATURES = [
@@ -46,11 +52,12 @@ const FEATURES = [
 ];
 
 const FAQ = [
+  { q: "Is the open beta really free?", a: "Yes. While MotoQuant is in open beta, every Pro and Studio feature is unlocked for all accounts at ₹0 — unlimited sims, the build optimiser, ECU autotune, Dragy/dyno imports, all of it. When we flip to paid plans at commercial launch you'll get advance notice by email, and the Free tier stays free forever." },
   { q: "Can I switch tiers?", a: "Yes — you can upgrade or downgrade at any time from your account page. Upgrades take effect immediately; downgrades apply at the end of your current billing period." },
   { q: "What happens if I cancel?", a: "Your access continues until the end of the paid period. After that, your account moves to the Free tier automatically. No data is deleted — your build history and sim runs are retained." },
   { q: "Do I need an internet connection?", a: "The web app always needs a connection. The MotoQuant desktop app (Pro/Studio) works offline for up to 7 days on a cached license validation — useful at the drag strip where signal can be patchy." },
   { q: "Is GST included in the price?", a: "Prices shown are exclusive of GST. 18% GST will be added at checkout as per Indian tax regulations. You will receive a GST invoice." },
-  { q: "What payment methods are accepted?", a: "We accept UPI, credit/debit cards, net banking, and wallets via Razorpay — the same gateway trusted by thousands of Indian businesses." },
+  { q: "What payment methods are accepted?", a: "In India: UPI, credit/debit cards, net banking, and wallets via Razorpay. International riders: credit/debit cards via Stripe. PayPal support is planned." },
   { q: "Is there a refund policy?", a: "Yes. If you are not satisfied within 7 days of your first payment, contact motoquant@gmail.com for a full refund — no questions asked." },
 ];
 
@@ -86,6 +93,21 @@ function PricingPageInner() {
   const [error, setError] = useState("");
   const { isAuthenticated, accessToken } = useAuth();
 
+  // ── Freemium beta switch — served by the backend so flipping
+  // MOTOQUANT_BILLING_ENFORCE on Render reshapes this page with no deploy.
+  // Defaults to beta=true until /config answers (safe: checkout isn't
+  // configured before launch anyway).
+  const [payCfg, setPayCfg] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`${API_BASE}/api/payments/config`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((cfg) => { if (!cancelled && cfg) setPayCfg(cfg); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+  const beta = payCfg ? !!payCfg.beta : true;
+
   // ── EXP-002: Pro-CTA copy A/B test (live 2026-05-08) ────────────────
   // Hypothesis: "Subscribe to Pro" is high-commitment language; framing
   // the same action as "Start Pro · 7-day refund" embeds the risk-reversal
@@ -117,6 +139,11 @@ function PricingPageInner() {
     : "Everything you need to go faster.";
 
   async function subscribe(tier) {
+    if (beta) {
+      // Open beta: no checkout — route to account creation, everything is free.
+      window.location.href = isAuthenticated ? "/simulator" : "/login?signup=1";
+      return;
+    }
     if (!isAuthenticated) {
       window.location.href = `/login?next=/pricing&intent=${tier}_${cycle}`;
       return;
@@ -124,7 +151,7 @@ function PricingPageInner() {
     setLoading(tier);
     setError("");
     try {
-      const res = await fetch(`${API_BASE}/api/subscriptions/checkout`, {
+      const res = await fetch(`${API_BASE}/api/payments/checkout`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -167,8 +194,17 @@ function PricingPageInner() {
               </h1>
               <p className="mt-4 text-lg text-white/65 max-w-2xl mx-auto">
                 Built in Pune. Serving the Indian drag-racing community.
-                INR pricing, GST-compliant, Razorpay-secured.
+                INR pricing, GST-compliant, Razorpay + Stripe secured.
               </p>
+              {beta && (
+                <div className="mt-6 mx-auto max-w-2xl rounded-xl border border-brand-accent/40 bg-brand-accent/10 px-5 py-4">
+                  <p className="text-sm text-brand-accent font-medium">
+                    🏁 Open beta — every Pro &amp; Studio feature is unlocked
+                    free for everyone. Create an account and go racing; paid
+                    plans only start at commercial launch (with advance notice).
+                  </p>
+                </div>
+              )}
               <div className="mt-8 inline-flex items-center gap-1 rounded-full bg-ink-1 border border-white/10 p-1">
                 <button
                   onClick={() => setCycle("monthly")}
@@ -212,7 +248,7 @@ function PricingPageInner() {
                     </div>
                   ))}
                 </div>
-                <Link href="/login" className="mt-8 block w-full rounded-md border border-white/15 py-3 text-center text-sm font-display font-bold text-white/85 hover:border-white/40 hover:text-white transition-colors">
+                <Link href="/login?signup=1" className="mt-8 block w-full rounded-md border border-white/15 py-3 text-center text-sm font-display font-bold text-white/85 hover:border-white/40 hover:text-white transition-colors">
                   Start free
                 </Link>
               </div>
@@ -259,9 +295,11 @@ function PricingPageInner() {
                   data-variant={proCtaVariant}
                   className="mt-8 w-full rounded-md bg-brand-orange py-3 text-sm font-display font-bold text-black shadow-orange-soft hover:bg-brand-orangeLight disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {loading === "pro" ? "Redirecting…" : proCtaCopy()}
+                  {loading === "pro" ? "Redirecting…" : beta ? "Free during beta — create account" : proCtaCopy()}
                 </button>
-                <p className="mt-3 text-center text-xs text-white/40 font-mono">7-day money-back guarantee</p>
+                <p className="mt-3 text-center text-xs text-white/40 font-mono">
+                  {beta ? "₹0 until commercial launch" : "7-day money-back guarantee"}
+                </p>
               </div>
             </Reveal>
 
@@ -293,9 +331,11 @@ function PricingPageInner() {
                   disabled={!!loading}
                   className="mt-8 w-full rounded-md bg-brand-accent py-3 text-sm font-display font-bold text-black hover:bg-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {loading === "studio" ? "Redirecting…" : "Subscribe to Studio"}
+                  {loading === "studio" ? "Redirecting…" : beta ? "Free during beta — create account" : "Subscribe to Studio"}
                 </button>
-                <p className="mt-3 text-center text-xs text-white/40 font-mono">7-day money-back guarantee</p>
+                <p className="mt-3 text-center text-xs text-white/40 font-mono">
+                  {beta ? "₹0 until commercial launch" : "7-day money-back guarantee"}
+                </p>
               </div>
             </Reveal>
           </div>
@@ -303,7 +343,9 @@ function PricingPageInner() {
           <Reveal>
             <div className="mt-14 text-center space-y-3">
               <p className="text-sm text-white/50">
-                Payments secured by <span className="text-white/80 font-medium">Razorpay</span> · UPI · Cards · Net Banking · Wallets
+                India: <span className="text-white/80 font-medium">Razorpay</span> · UPI · Cards · Net Banking · Wallets
+                <span className="text-white/25 mx-2">|</span>
+                International: <span className="text-white/80 font-medium">Stripe</span> · Cards
               </p>
               <p className="text-xs text-white/35 font-mono">
                 All prices in INR + 18% GST at checkout · Cancel anytime · 7-day refund guarantee

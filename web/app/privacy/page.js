@@ -34,6 +34,8 @@ export default function PrivacyPage() {
 
         <Section title="1. Data We Collect">
           <Row label="Email address">Required to create an account and deliver sign-in links. Stored in our database indefinitely until you request deletion.</Row>
+          <Row label="Password (optional)">If you choose password sign-in, we store only a salted scrypt hash — we cannot read your password. Magic-link sign-in requires no password at all.</Row>
+          <Row label="Payment details">Handled entirely by our payment processors — Razorpay (India) and Stripe (international). Card, UPI and bank details never touch MotoQuant servers; we store only your subscription id, plan, and billing status.</Row>
           <Row label="Simulation runs">ET, trap speed, venue, build configuration. Stored to power the leaderboard and your run history. Not sold to third parties.</Row>
           <Row label="Build configurations">Parts combinations and bike selections you save. Used to provide the service.</Row>
           <Row label="Dragy / Dyno / ECU uploads">(Studio tier only) Files you upload for calibration. Stored temporarily during processing and then deleted within 24 hours unless you explicitly save them.</Row>

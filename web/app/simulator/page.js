@@ -6,8 +6,7 @@ import {
   Zap, Search, ChevronDown, ChevronRight, X, MapPin, Gauge, Wrench,
   CircleDot, IndianRupee, ArrowLeft, Thermometer, Wind, Droplets,
   BarChart3, Table2, Settings2, Upload, RotateCcw, Play, Layers, MessageSquare,
-  Locate, Loader2, AlertCircle
-} from 'lucide-react';
+  Locate, Loader2, AlertCircle, Share2, Check } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area
@@ -233,6 +232,15 @@ function SimulatorPageInner() {
   // analytics attribute simulator runs to the right arm.
   const searchParams = useSearchParams();
   const defaultBikeVariant = searchParams?.get('variant') === 'B' ? 'B' : 'A';
+  // One-tap starting points — the bikes the Indian drag scene actually asks for.
+  const POPULAR_BIKE_PATTERNS = useMemo(() => ([
+    { label: 'Hayabusa',    re: /hayabusa/i },
+    { label: 'R15 V4',      re: /yzf[- ]?r15 v4/i },
+    { label: 'Duke 390',    re: /\bduke 390/i },
+    { label: 'Classic 350', re: /classic 350/i },
+    { label: 'ZX-10R',      re: /zx[- ]?10r/i },
+    { label: 'GSX-R1000',   re: /gsx[- ]?r ?1000/i },
+  ]), []);
 
   // ─── Data from API ───────────────────────────────────────────────────
   const [bikes, setBikes] = useState([]);
@@ -310,6 +318,30 @@ function SimulatorPageInner() {
   }, []);
   const [topSpeedError, setTopSpeedError] = useState(null);
 
+  // ─── Share this build (URL with bike/venue/sliders) ─────────────────
+  const [shareCopied, setShareCopied] = useState(false);
+  const shareBuild = useCallback(async () => {
+    const params = new URLSearchParams();
+    if (bike?.id) params.set('bike', String(bike.id));
+    if (venue?.id) params.set('venue', String(venue.id));
+    if (riderKg !== 75) params.set('rider', String(riderKg));
+    if (powerBoost !== 0) params.set('boost', String(powerBoost));
+    if (massChange !== 0) params.set('mass', String(massChange));
+    const url = `${window.location.origin}/simulator?${params.toString()}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: `MotoQuant — ${bike?.manufacturer ?? ''} ${bike?.model ?? ''}`.trim(), url });
+        return;
+      }
+    } catch (e) { /* user dismissed the share sheet — fall through to copy */ }
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+      track('share_build', { bike_id: bike?.id });
+    } catch (e) { /* clipboard unavailable — silently ignore */ }
+  }, [bike, venue, riderKg, powerBoost, massChange]);
+
   // ─── Fetch all data on mount ─────────────────────────────────────────
   useEffect(() => { installErrorHandlers(); track('page_view', { surface: 'simulator_page' }); }, []);
 
@@ -344,8 +376,26 @@ function SimulatorPageInner() {
         setAllParts(partsData.parts || []);
         setAllTires(tiresData.tires || []);
         setVenues(venuesData.venues || []);
-        // GROWTH_EXP_003: variant-aware default bike (A=Hayabusa, B=Pulsar NS 200).
-        if (bikesData.bikes?.length) setBike(pickDefaultBikeForVariant(bikesData.bikes, defaultBikeVariant));
+        // Shared-build links (?bike=<id>&venue=<id>&rider=&boost=&mass=) win
+        // over the GROWTH_EXP_003 variant-aware default (A=Hayabusa, B=Pulsar NS 200).
+        const sharedBikeId = parseInt(searchParams?.get('bike') ?? '', 10);
+        const sharedBike = Number.isFinite(sharedBikeId)
+          ? (bikesData.bikes || []).find((b) => b.id === sharedBikeId)
+          : null;
+        if (sharedBike) setBike(sharedBike);
+        else if (bikesData.bikes?.length) setBike(pickDefaultBikeForVariant(bikesData.bikes, defaultBikeVariant));
+        const sharedVenueId = parseInt(searchParams?.get('venue') ?? '', 10);
+        if (Number.isFinite(sharedVenueId)) {
+          const sv = (venuesData.venues || []).find((v) => v.id === sharedVenueId);
+          if (sv) setVenue(sv);
+        }
+        const qsNum = (key, set, min, max) => {
+          const v = parseFloat(searchParams?.get(key) ?? '');
+          if (Number.isFinite(v) && v >= min && v <= max) set(v);
+        };
+        qsNum('rider', setRiderKg, 50, 130);
+        qsNum('boost', setPowerBoost, -20, 50);
+        qsNum('mass', setMassChange, -30, 30);
         // If /api/bikes came back empty, the backend is reachable but
         // either unseeded or filtering killed the request body -- either
         // way the user deserves to see *something* instead of an empty
@@ -860,9 +910,20 @@ function SimulatorPageInner() {
                 pre-selected default bike (A=Hayabusa control, B=Pulsar NS 200).
                 See data/growth_experiments.json. */}
             <Card className="p-4 relative z-10 overflow-visible" data-exp="EXP-003" data-variant={defaultBikeVariant}>
-              <h3 className="text-xs font-semibold mb-3 flex items-center gap-2 uppercase tracking-widest text-gray-400">
-                <Gauge size={13} className="text-orange-500" /> Motorcycle
-              </h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-semibold flex items-center gap-2 uppercase tracking-widest text-gray-400">
+                  <Gauge size={13} className="text-orange-500" /> Motorcycle
+                </h3>
+                <button
+                  onClick={shareBuild}
+                  disabled={!bike}
+                  title="Copy a link to this exact build"
+                  className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-gray-500 hover:text-orange-400 disabled:opacity-40 transition-colors"
+                >
+                  {shareCopied ? <Check size={11} className="text-green-400" /> : <Share2 size={11} />}
+                  {shareCopied ? 'Link copied' : 'Share'}
+                </button>
+              </div>
               <Dropdown
                 items={bikes}
                 selected={bike}
@@ -880,6 +941,28 @@ function SimulatorPageInner() {
                 )}
                 emptyMsg="No bikes found"
               />
+              {bikes.length > 0 && (
+                <div className="mt-2.5 flex flex-wrap gap-1.5">
+                  {POPULAR_BIKE_PATTERNS.map(({ label, re }) => {
+                    const match = bikes.find((b) => re.test(`${b.manufacturer} ${b.model}`));
+                    if (!match) return null;
+                    const active = bike?.id === match.id;
+                    return (
+                      <button
+                        key={label}
+                        onClick={() => { setBike(match); setSelectedParts([]); setFrontTire(null); setRearTire(null); setFullResult(null); }}
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-mono border transition-colors ${
+                          active
+                            ? 'border-orange-500/60 text-orange-400 bg-orange-500/10'
+                            : 'border-white/10 text-gray-500 hover:text-white hover:border-white/25'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
               {bike && (
                 <div className="mt-2 flex gap-2 text-[10px] text-gray-600">
                   <span className="px-1.5 py-0.5 bg-white/[0.03] rounded">{bike.category}</span>

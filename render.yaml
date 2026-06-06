@@ -37,6 +37,18 @@ services:
       # Optional: surface FastAPI / uvicorn logs at INFO level
       - key: UVICORN_LOG_LEVEL
         value: info
+      # Freemium beta: tier gates pass everyone through (auth still attaches
+      # users for attribution). Flip to "true" at commercial rollout once
+      # Razorpay/Stripe keys + plan/price ids are set below (dashboard).
+      - key: MOTOQUANT_BILLING_ENFORCE
+        value: "false"
+      # Payments go live by adding (Render dashboard, never in git):
+      #   RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET / RAZORPAY_WEBHOOK_SECRET
+      #   PLAN_ID_{PRO|STUDIO}_{MONTHLY|YEARLY}        (Razorpay plan ids)
+      #   STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET
+      #   STRIPE_PRICE_{PRO|STUDIO}_{MONTHLY|YEARLY}   (Stripe price ids)
+      #   JWT_SECRET (32+ random bytes) — REQUIRED before real accounts
+      #   SMTP_HOST/PORT/USER/PASS/FROM or RESEND_API_KEY (magic-link email)
       # NOTE: secrets (GEMINI_API_KEY, GROQ_API_KEY, SENTRY_DSN, JWT_SECRET,
       # RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, etc.) are set manually in the
       # Render dashboard under Environment -> Add Environment Variable so they

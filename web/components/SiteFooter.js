@@ -15,6 +15,7 @@ const COLS = [
       { href: '/simulator',            label: 'Simulator' },
       { href: '/features',             label: 'Features' },
       { href: '/pricing',              label: 'Pricing' },
+      { href: '/login',                label: 'Sign in / Account' },
       { href: '/bikes',                label: 'Bikes catalog' },
     ],
   },

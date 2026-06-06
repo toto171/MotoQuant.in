@@ -25,10 +25,14 @@ Email backends (env-var driven)
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 import logging
 import os
+import secrets
 import smtplib
 import sqlite3
+import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from email.mime.multipart import MIMEMultipart
@@ -37,7 +41,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 # database imports are lazy (inside _get_conn) so auth.py can be imported
 # by tests without needing a real DB file or the connection module available.
@@ -67,6 +71,30 @@ EMAIL_BACKEND = os.environ.get("MOTOQUANT_EMAIL_BACKEND", "stdout")
 
 # Rate-limit: one magic link per email per 60 s
 MAGIC_LINK_COOLDOWN_S = 60
+
+# ─── Billing enforcement (freemium-beta switch) ───────────────────────────────
+# When FALSE (the default — open-beta posture), require_tier() lets every
+# request through: authenticated users are attached for attribution, anonymous
+# users get an empty dict. Tier checks only bite when MOTOQUANT_BILLING_ENFORCE
+# is truthy — flip it in the Render dashboard at commercial rollout.
+# Tests patch motoquant.auth.BILLING_ENFORCE directly (read at request time).
+BILLING_ENFORCE = os.environ.get(
+    "MOTOQUANT_BILLING_ENFORCE", "false"
+).strip().lower() in ("1", "true", "yes", "on")
+
+# Password auth — stdlib scrypt (RFC 7914), zero external hashing deps.
+_SCRYPT_N = 16384
+_SCRYPT_R = 8
+_SCRYPT_P = 1
+PASSWORD_MIN_LEN = 8
+PASSWORD_MAX_LEN = 128
+
+# In-process failed-login limiter: max 8 failures / 15 min / email.
+# Prod runs a single uvicorn worker, so in-memory state is sufficient;
+# swap for a DB-backed counter if workers ever scale out.
+_LOGIN_FAIL_WINDOW_S = 900
+_LOGIN_FAIL_MAX = 8
+_failed_logins: dict[str, list[float]] = {}
 
 # ─── Router ───────────────────────────────────────────────────────────────────
 
@@ -101,11 +129,28 @@ class RefreshRequest(BaseModel):
     refresh_token: str
 
 
+class RegisterRequest(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=PASSWORD_MIN_LEN, max_length=PASSWORD_MAX_LEN)
+
+
+class PasswordLoginRequest(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=1, max_length=PASSWORD_MAX_LEN)
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str | None = None
+    new_password: str = Field(min_length=PASSWORD_MIN_LEN, max_length=PASSWORD_MAX_LEN)
+
+
 class MeResponse(BaseModel):
     id: int
     email: str
     tier: str
     is_active: bool
+    email_verified: bool = False
+    has_password: bool = False
     subscription_status: str | None = None
     license_keys: list[dict] = []
 
@@ -177,6 +222,59 @@ def _issue_token_pair(user: dict, conn: sqlite3.Connection) -> dict:
     access = _make_access_token(user["id"], user["email"], user["tier"], jti)
     refresh = _make_refresh_token(user["id"], jti)
     return {"access_token": access, "refresh_token": refresh}
+
+
+# ─── Password hashing (stdlib scrypt) ─────────────────────────────────────────
+
+
+def hash_password(password: str) -> str:
+    """Hash a password with scrypt. Format: scrypt$N$r$p$salt_hex$hash_hex."""
+    salt = secrets.token_bytes(16)
+    dk = hashlib.scrypt(
+        password.encode(),
+        salt=salt,
+        n=_SCRYPT_N,
+        r=_SCRYPT_R,
+        p=_SCRYPT_P,
+        dklen=64,
+    )
+    return f"scrypt${_SCRYPT_N}${_SCRYPT_R}${_SCRYPT_P}${salt.hex()}${dk.hex()}"
+
+
+def verify_password(password: str, stored: str | None) -> bool:
+    """Constant-time scrypt verification. False on any malformed input."""
+    if not stored or not stored.startswith("scrypt$"):
+        return False
+    try:
+        _, n, r, p_, salt_hex, hash_hex = stored.split("$")
+        dk = hashlib.scrypt(
+            password.encode(),
+            salt=bytes.fromhex(salt_hex),
+            n=int(n),
+            r=int(r),
+            p=int(p_),
+            dklen=len(hash_hex) // 2,
+        )
+        return hmac.compare_digest(dk.hex(), hash_hex)
+    except Exception:
+        return False
+
+
+def _login_locked(email: str) -> bool:
+    now = time.time()
+    attempts = [
+        t for t in _failed_logins.get(email, []) if now - t < _LOGIN_FAIL_WINDOW_S
+    ]
+    _failed_logins[email] = attempts
+    return len(attempts) >= _LOGIN_FAIL_MAX
+
+
+def _register_login_failure(email: str) -> None:
+    _failed_logins.setdefault(email, []).append(time.time())
+
+
+def _clear_login_failures(email: str) -> None:
+    _failed_logins.pop(email, None)
 
 
 # ─── Email delivery ───────────────────────────────────────────────────────────
@@ -280,19 +378,59 @@ def get_current_user(
         conn.close()
 
 
+def get_optional_user(
+    credentials: Annotated[
+        HTTPAuthorizationCredentials | None, Depends(_bearer)
+    ] = None,
+) -> dict | None:
+    """
+    FastAPI dependency. Like get_current_user but NEVER raises — returns the
+    user dict when a valid Bearer token is present, None otherwise. Used for
+    attribution on routes that stay open during the freemium beta.
+    """
+    if not credentials:
+        return None
+    payload = _decode_token(credentials.credentials)
+    if not payload or payload.get("type") != "access":
+        return None
+    jti = payload.get("jti")
+    try:
+        conn = _get_conn()
+    except Exception:
+        return None
+    try:
+        if not _users.is_session_valid(conn, jti):
+            return None
+        user = _users.get_user_by_id(conn, int(payload["sub"]))
+        if not user or not user["is_active"]:
+            return None
+        return user
+    finally:
+        conn.close()
+
+
 def require_tier(minimum_tier: str):
     """
     FastAPI dependency factory.
     Usage: Depends(require_tier("pro"))
 
-    Returns 402 Payment Required (not 401) when the user is authenticated
-    but on a lower tier — lets the client show an upgrade CTA rather than
-    a generic "not authorised" message.
+    Freemium-beta behaviour (BILLING_ENFORCE falsy — the default): every
+    request passes. Authenticated users are returned for attribution;
+    anonymous requests get an empty dict.
+
+    Enforced behaviour (MOTOQUANT_BILLING_ENFORCE truthy): 401 when
+    unauthenticated; 402 Payment Required (not 401) when authenticated but
+    on a lower tier — lets the client show an upgrade CTA rather than a
+    generic "not authorised" message.
     """
     tier_rank = {"free": 0, "pro": 1, "studio": 2}
     required_rank = tier_rank[minimum_tier]
 
-    def _dep(user: dict = Depends(get_current_user)) -> dict:
+    def _dep(user: dict | None = Depends(get_optional_user)) -> dict:
+        if not BILLING_ENFORCE:
+            return user or {}
+        if user is None:
+            raise HTTPException(401, "Authentication required")
         if tier_rank.get(user.get("tier", "free"), 0) < required_rank:
             raise HTTPException(
                 402,
@@ -348,6 +486,10 @@ def verify_magic_link(body: VerifyRequest) -> TokenResponse:
         if not email:
             raise HTTPException(400, "Invalid, expired, or already-used sign-in link.")
         user = _users.get_or_create_user(conn, email)
+        if not user.get("email_verified"):
+            # Consuming a magic link proves inbox ownership.
+            _users.mark_email_verified(conn, user["id"])
+            user["email_verified"] = 1
         tokens = _issue_token_pair(user, conn)
     finally:
         conn.close()
@@ -419,6 +561,109 @@ def me(user: dict = Depends(get_current_user)) -> MeResponse:
         email=user["email"],
         tier=user["tier"],
         is_active=bool(user["is_active"]),
+        email_verified=bool(user.get("email_verified", 0)),
+        has_password=bool(user.get("password_hash")),
         subscription_status=sub["status"] if sub else None,
         license_keys=keys,
     )
+
+
+# ─── Password auth endpoints (Phase 6, June 2026) ─────────────────────────────
+
+
+@router.post("/register", response_model=TokenResponse, status_code=201)
+def register(body: RegisterRequest) -> TokenResponse:
+    """
+    Create an account with email + password and sign in immediately.
+
+    Email ownership is NOT verified at registration (open-beta posture) —
+    the email_verified flag flips to 1 the first time a magic link for the
+    address is consumed. Existing accounts (including passwordless
+    magic-link accounts) are never overwritten — 409.
+    """
+    email = body.email.lower().strip()
+    conn = _get_conn()
+    try:
+        _users.ensure_tables(conn)
+        if _users.get_user_by_email(conn, email):
+            raise HTTPException(
+                409,
+                "An account with this email already exists. Sign in instead "
+                "(use a magic link if you never set a password).",
+            )
+        user = _users.create_user_with_password(
+            conn, email, hash_password(body.password)
+        )
+        tokens = _issue_token_pair(user, conn)
+    finally:
+        conn.close()
+
+    return TokenResponse(
+        access_token=tokens["access_token"],
+        refresh_token=tokens["refresh_token"],
+        tier=user["tier"],
+    )
+
+
+@router.post("/login", response_model=TokenResponse)
+def password_login(body: PasswordLoginRequest) -> TokenResponse:
+    """
+    Email + password sign-in. Returns the same JWT pair as /verify.
+    Deliberately generic 401 — no user-enumeration signal.
+    """
+    email = body.email.lower().strip()
+    if _login_locked(email):
+        raise HTTPException(
+            429,
+            "Too many failed sign-in attempts. Try again in 15 minutes "
+            "or sign in with a magic link.",
+        )
+
+    conn = _get_conn()
+    try:
+        _users.ensure_tables(conn)
+        user = _users.get_user_by_email(conn, email)
+        ok = bool(
+            user
+            and user.get("is_active")
+            and verify_password(body.password, user.get("password_hash"))
+        )
+        if not ok:
+            _register_login_failure(email)
+            raise HTTPException(401, "Invalid email or password.")
+        _clear_login_failures(email)
+        tokens = _issue_token_pair(user, conn)
+    finally:
+        conn.close()
+
+    return TokenResponse(
+        access_token=tokens["access_token"],
+        refresh_token=tokens["refresh_token"],
+        tier=user["tier"],
+    )
+
+
+@router.post("/password/change")
+def change_password(
+    body: ChangePasswordRequest,
+    user: dict = Depends(get_current_user),
+) -> dict:
+    """
+    Set or change the account password.
+
+    Accounts that already hold a password must supply the current one.
+    Magic-link-only accounts set their first password directly — the bearer
+    token already proves control of the inbox.
+    """
+    conn = _get_conn()
+    try:
+        db_user = _users.get_user_by_id(conn, user["id"]) or {}
+        if db_user.get("password_hash"):
+            if not body.current_password or not verify_password(
+                body.current_password, db_user["password_hash"]
+            ):
+                raise HTTPException(403, "Current password is incorrect.")
+        _users.set_password(conn, user["id"], hash_password(body.new_password))
+    finally:
+        conn.close()
+    return {"message": "Password updated."}
