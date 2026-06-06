@@ -13,7 +13,9 @@ Guarantees:
 
 import dataclasses
 import json
-from typing import Any, TypedDict
+from typing import Any
+
+from typing_extensions import TypedDict  # py<3.12-safe with pydantic
 
 import numpy as np
 

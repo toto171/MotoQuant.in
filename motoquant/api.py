@@ -33,7 +33,12 @@ import os
 import sqlite3
 import tempfile
 from datetime import datetime, timezone
-from typing import Any, TypedDict
+from typing import Any
+
+# TypedDict must come from typing_extensions on Python < 3.12 when used in
+# Pydantic/FastAPI annotations (pydantic raises PydanticUserError otherwise).
+# python:3.11-slim in prod hit exactly that and crash-looped — 2026-06-06.
+from typing_extensions import TypedDict
 
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -3160,3 +3165,21 @@ def autotune_ecu_route(req: AutotuneRequest):
     out = result.to_dict()
     out["environment_source"] = env_source
     return out
+
+# ─────────────────────────────────────────────
+# Keep-warm self-ping (Render free tier) — added 2026-06-06.
+#
+# No-op everywhere except where RENDER_EXTERNAL_URL / MOTOQUANT_KEEPWARM_URL
+# is set (Render injects the former automatically). See motoquant/keepwarm.py
+# for the full rationale; wrapped so a failure here can never block boot.
+# ─────────────────────────────────────────────
+
+
+@app.on_event("startup")
+async def _start_keepwarm_loop() -> None:
+    try:
+        from .keepwarm import start_keepwarm
+
+        start_keepwarm()
+    except Exception:  # noqa: BLE001 — keep-warm is best-effort only
+        logging.getLogger(__name__).warning("keep-warm init failed", exc_info=True)

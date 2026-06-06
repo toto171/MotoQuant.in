@@ -26,7 +26,7 @@ Categories mapping (bikez raw → our internal):
   "Super motard" → "naked"  (treated as naked for drag purposes)
 """
 
-from typing import TypedDict
+from typing_extensions import TypedDict  # py<3.12-safe with pydantic
 
 
 class ManufacturerEntry(TypedDict, total=False):

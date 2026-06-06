@@ -21,7 +21,9 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, TypedDict
+from typing import TYPE_CHECKING, Any
+
+from typing_extensions import TypedDict  # py<3.12-safe with pydantic
 
 import numpy as np
 
