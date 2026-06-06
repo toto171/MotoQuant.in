@@ -44,6 +44,19 @@ log "Autonomous session wrapper — $(date -Iseconds)"
 log "Log: ${LOG_FILE}"
 log "════════════════════════════════════════════════════════════════"
 
+# ─── Kill-switch: repo-local pause flag (added 2026-06-06) ────────────────────
+# If a file named AUTONOMOUS_PAUSED exists at the repo root, skip the whole
+# session. This guard lives in the WRAPPER (not just START.sh) so a stale
+# cron entry from an old WSL install can never fire a session again -- the
+# /tmp pause flag used by START.sh --pause is wiped on every WSL restart,
+# which is how the June 2026 rogue-cron incident happened.
+# Re-enable deliberately with:  rm AUTONOMOUS_PAUSED   (and check crontab -l)
+if [[ -f "${REPO_ROOT}/AUTONOMOUS_PAUSED" ]]; then
+  log "AUTONOMOUS_PAUSED flag present at ${REPO_ROOT}/AUTONOMOUS_PAUSED — session skipped."
+  log "Re-enable with: rm '${REPO_ROOT}/AUTONOMOUS_PAUSED' (and verify crontab -l afterwards)"
+  exit 0
+fi
+
 # ─── Load secrets so claude inherits credentials ─────────────────────────
 SECRETS_DIR="${MOTOQUANT_SECRETS_DIR:-${HOME}/.motoquant-secrets}"
 SECRETS_FILE="${SECRETS_DIR}/git-creds.env"

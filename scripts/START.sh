@@ -111,6 +111,14 @@ if [[ -f "${PAUSE_FLAG}" ]]; then
   exit 0
 fi
 
+# Repo-local pause flag (durable across WSL restarts, unlike the /tmp flag
+# above). Added 2026-06-06 after stale WSL cron entries kept firing sessions.
+if [[ -f "${REPO_ROOT}/AUTONOMOUS_PAUSED" ]]; then
+  log "session SKIPPED — AUTONOMOUS_PAUSED flag present at repo root"
+  log "   re-enable with: rm '${REPO_ROOT}/AUTONOMOUS_PAUSED'"
+  exit 0
+fi
+
 log "════════════════════════════════════════════════════════════════"
 log "MotoQuant autonomous session — $(date -Iseconds)"
 log "════════════════════════════════════════════════════════════════"
