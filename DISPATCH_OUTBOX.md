@@ -2148,3 +2148,27 @@ were re-run and confirmed green via status-file gating before this commit.
 **Verified:** TestClient /api/health 200, bike_count 501, baselines Δ+0.0000 ×3 on the pushed tree.
 **Operator TODO:** push `.github/workflows/keepalive.yml` (PAT lacks workflow scope), `bash scripts/setup_wsl_cron.sh --uninstall`, rotate PAT (overdue 2026-06-03) with Contents+Workflows RW, remove stale worktree `agent-a4dd29f1658aa9cf8`.
 **Severity:** resolved pending Render deploy verification.
+
+---
+
+## SESSION — 2026-06-07 — Phase 6 go-live: accounts + unified payments + freemium beta + site refresh
+
+**Commit:** `f1fe86f` (operator-directed chat session; rebased onto `181ed56` after a mid-session upstream push — only CLAUDE.md chain conflicted, merged preserving both entries)
+
+**Shipped:**
+1. **Accounts are LIVE** — the April S5 auth routers were never mounted (`include_router` was a comment); now mounted. Email+password (stdlib scrypt) added alongside magic-link: `/api/auth/register|login|password/change`. Magic-link marks `email_verified`; `/me` exposes `has_password`.
+2. **Unified payments** — NEW `motoquant/payments.py`: `GET /api/payments/config`, `POST /api/payments/checkout` (auto → Razorpay → Stripe), Stripe checkout+webhook via stdlib (HMAC-verified, idempotent `payment_events` ledger), PayPal stubbed. Razorpay path reuses S5 module. **Linking accounts later = env vars only**: see `docs/PAYMENTS_SETUP.md`.
+3. **Freemium beta** — `MOTOQUANT_BILLING_ENFORCE=false` (render.yaml): all tier gates pass-through (signed-in users attributed); flip to `true` at launch for 401/402 enforcement. Pricing: Pro ₹499, **Studio ₹2,999→₹1,999** (yearly ₹19,990); /pricing shows beta ribbon + "free during beta" CTAs driven by the config route.
+4. **UX** — SiteNav account chip + Sign-in; login page tabs (password/register/magic); account page: My Garage (saved runs via new `GET /api/me/runs` + `sim_runs.user_id`), set/change password, checkout=success banner; simulator: shareable build links + Share button + 6 popular-bike chips.
+5. **Content** — headline stats audit clean (501 bikes canonical); fixed: audit --fix had MANGLED the 600cc blog (regex captured K5's number as R1's — text repaired + audit regex fixed), stale "342 bikes"/₹2,999 in pricing meta, Railway→Render comments, terms/privacy updated for accounts+payments+beta, features "07/Accounts & Garage", about Phase 6 in-progress, footer sign-in link.
+
+**Verification:** 104 auth/subs/payments/jobs tests green (49 auth incl. both enforce modes, 26 payments NEW); 14-check e2e smoke green; test_api green minus documented sklearn-gated failure (identical on pristine origin); ruff clean; baselines Δ+0.0000 ×3; next build 74/74.
+
+**[action] Operator TODO before charging money** (full runbook `docs/PAYMENTS_SETUP.md`):
+1. Set `JWT_SECRET` on Render NOW (random 32B) — required before real accounts accumulate.
+2. SMTP/Resend key → magic-link emails go live (password login already works without it).
+3. Razorpay KYC + 4 plans; Stripe 4 prices; webhook URLs per runbook.
+4. Flip `MOTOQUANT_BILLING_ENFORCE=true` at commercial launch — pricing page converts itself, no deploy.
+
+**[warn]** next@14.2.3 has an upstream security advisory (Dec 2025) — schedule a dedicated upgrade session.
+**[note]** postflight `git add` chokes on bracket paths (`web/app/bikes/[id]/…` glob-expands) — pre-staged via `:(literal)` this session; consider quoting `${COMMIT_FILES}` array-style in postflight.
