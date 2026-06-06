@@ -190,9 +190,10 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
   //  - transient errors (network, 5xx): keep polling for up to 60 s
   //  - 404: in-memory registry lost the job (restart) — confirm 3× in a row
   //  - interval backs off 350 ms → 800 ms → 1.5 s as the job ages
-  const t0 = Date.now();
+  let t0 = Date.now();
   let lastSuccessAt = Date.now();
   let lostCount = 0;
+  let restarts = 0;
   for (;;) {
     let j = null;
     let lost = false;
@@ -223,8 +224,30 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
     } else if (lost) {
       lostCount += 1;
       if (lostCount >= 3) {
-        // Genuinely gone — the registry is in-memory, so a restart loses it.
-        throw new Error('Progress lost (the engine restarted mid-run) — please run again');
+        // The registry is in-memory — a backend restart (deploy / crash)
+        // loses the job. Self-heal: the sims are pure compute, so re-submit
+        // the same work once instead of surfacing an error.
+        if (restarts >= 1) {
+          throw new Error('Progress lost (the engine restarted mid-run) — please run again');
+        }
+        restarts += 1;
+        lostCount = 0;
+        onProgress?.({
+          status: 'connecting',
+          progress: null,
+          stage: 'Engine restarted — running again from the start',
+        });
+        try {
+          started = await startJob(kind, body, signal);
+        } catch (e) {
+          if (e?.name === 'AbortError') throw aborted();
+          throw new Error(
+            'Progress lost and the engine is not reachable — please run again'
+          );
+        }
+        lastSuccessAt = Date.now();
+        t0 = Date.now(); // restart the poll-interval backoff for the new job
+        continue;
       }
     } else if (Date.now() - lastSuccessAt > 60_000) {
       cancelJob(started.job_id).catch(() => {}); // don't leave a zombie burning CPU

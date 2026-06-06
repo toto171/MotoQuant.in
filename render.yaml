@@ -28,7 +28,18 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /api/health
-    autoDeploy: true            # redeploy on every push to `main`
+    autoDeploy: true            # redeploy on pushes that touch the backend
+    # Only rebuild when backend-relevant files change. Web-only pushes used
+    # to restart the service too, wiping the in-memory jobs registry and
+    # killing every in-flight simulation (2026-06-07: operator hit
+    # "Progress lost" twice this way during a frontend deploy streak).
+    buildFilter:
+      paths:
+        - motoquant/**
+        - motoquant.db
+        - requirements-api.txt
+        - Dockerfile
+        - render.yaml
     envVars:
       - key: MOTOQUANT_DB
         value: /app/motoquant.db

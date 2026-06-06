@@ -113,3 +113,18 @@ declaring the in-memory registry lost, backs the poll interval off
 
 Deferred (operator decision): adding sklearn+xgboost to the prod image would
 let the surrogate load and cut optimizer latency from minutes to seconds.
+
+## Addendum 5 (same day): deploy collisions were killing in-flight jobs
+
+Second "Progress lost" report explained: every push (even web-only) was
+rebuilding the Render service — `autoDeploy: true`, no build filter — and
+each instance swap wipes the in-memory job registry mid-run. Tonight had 6+
+deploys including the parallel Phase 6 session.
+
+- `render.yaml` gains a `buildFilter` (motoquant/**, motoquant.db,
+  requirements-api.txt, Dockerfile, render.yaml): web pushes no longer
+  restart the backend.
+- `runJob` now self-heals a lost registry: 3×404 → re-submit the same job
+  once ("Engine restarted — running again from the start"), error only on a
+  second loss.
+- Reminder: open tabs keep the old bundle — hard-refresh after web deploys.
