@@ -183,20 +183,59 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
     return new DOMException('Aborted', 'AbortError');
   };
   if (signal?.aborted) throw aborted();
+
+  // Polling is failure-tolerant: long jobs (the optimiser full-sim fallback
+  // runs for minutes) see hundreds of polls, and one VoWiFi blip / proxy
+  // hiccup must NOT kill a run that is still healthy server-side.
+  //  - transient errors (network, 5xx): keep polling for up to 60 s
+  //  - 404: in-memory registry lost the job (restart) — confirm 3× in a row
+  //  - interval backs off 350 ms → 800 ms → 1.5 s as the job ages
+  const t0 = Date.now();
+  let lastSuccessAt = Date.now();
+  let lostCount = 0;
   for (;;) {
-    let j;
+    let j = null;
+    let lost = false;
     try {
-      j = await getJob(started.job_id);
-    } catch {
-      // In-memory registry — a 404 mid-poll means the engine restarted.
-      throw new Error('Progress lost (the engine restarted mid-run) — please run again');
+      const res = await fetch(`${API_URL}/api/jobs/${started.job_id}`, {
+        cache: 'no-store',
+        signal,
+      });
+      if (res.status === 404) {
+        lost = true;
+      } else if (res.ok) {
+        j = await res.json();
+      }
+      // other statuses (502/504 proxy, 5xx) → treated as transient
+    } catch (e) {
+      if (e?.name === 'AbortError') throw aborted();
+      // transient network failure — tolerated below
     }
-    if (signal?.aborted) throw aborted();
-    if (j.status === 'cancelled') throw new DOMException('Aborted', 'AbortError');
-    if (j.status === 'error') throw new Error(j.error || 'Simulation failed');
-    onProgress?.({ status: j.status, progress: j.progress, stage: j.stage });
-    if (j.status === 'done') return j.result;
-    await new Promise((r) => setTimeout(r, pollMs));
+
+    if (j != null) {
+      lastSuccessAt = Date.now();
+      lostCount = 0;
+      if (signal?.aborted) throw aborted();
+      if (j.status === 'cancelled') throw new DOMException('Aborted', 'AbortError');
+      if (j.status === 'error') throw new Error(j.error || 'Simulation failed');
+      onProgress?.({ status: j.status, progress: j.progress, stage: j.stage });
+      if (j.status === 'done') return j.result;
+    } else if (lost) {
+      lostCount += 1;
+      if (lostCount >= 3) {
+        // Genuinely gone — the registry is in-memory, so a restart loses it.
+        throw new Error('Progress lost (the engine restarted mid-run) — please run again');
+      }
+    } else if (Date.now() - lastSuccessAt > 60_000) {
+      cancelJob(started.job_id).catch(() => {}); // don't leave a zombie burning CPU
+      throw new Error(
+        'Connection lost while the simulation was running — check your network and run again'
+      );
+    }
+
+    const age = Date.now() - t0;
+    const interval = age > 60_000 ? 1500 : age > 10_000 ? 800 : pollMs;
+    await new Promise((r) => setTimeout(r, interval));
     if (signal?.aborted) throw aborted();
   }
 }

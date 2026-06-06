@@ -99,3 +99,17 @@ Operator follow-up: a way to stop a running sim to change the setup.
   backup) → in-app self-ping (holds) → organic traffic.
 - Operator: confirm the crons appear under Vercel → Settings → Cron Jobs
   after this deploy.
+
+## Addendum 4 (same day): "Progress lost" on the Build Optimizer — poll resilience
+
+Reproduced the operator's failure: prod scores optimizer candidates on the
+full sim (no surrogate libs in requirements-api.txt), so big optimizes run
+4-5 minutes; the old poller died on the first failed poll out of ~700.
+
+`runJob` now: tolerates transient poll failures for up to 60 s (then cancels
+the job server-side — no zombie CPU burn), requires 3 consecutive 404s before
+declaring the in-memory registry lost, backs the poll interval off
+350 ms → 800 ms → 1.5 s, and threads the AbortSignal into the poll fetch.
+
+Deferred (operator decision): adding sklearn+xgboost to the prod image would
+let the surrogate load and cut optimizer latency from minutes to seconds.
