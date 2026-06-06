@@ -46,6 +46,13 @@ from motoquant.analysis.sobol import (
     compute_sobol_subset,
 )
 from motoquant.database.connection import MotoQuantDB
+
+try:  # SALib is an optional dependency (CLAUDE.md: pip install SALib --break-system-packages)
+    import SALib  # noqa: F401
+
+    _HAS_SALIB = True
+except ImportError:
+    _HAS_SALIB = False
 from motoquant.database.parts_repo import PartsRepository
 from motoquant.defaults import gsxr1000_k5
 
@@ -457,6 +464,7 @@ class TestDefaultParamBounds(unittest.TestCase):
 # ═══════════════════════════════════════════
 
 
+@unittest.skipUnless(_HAS_SALIB, "SALib not installed (optional dependency)")
 class TestComputeSobolIndices(unittest.TestCase):
     """compute_sobol_indices with a 2-parameter subset for speed.
 
@@ -566,6 +574,7 @@ class TestComputeSobolIndices(unittest.TestCase):
         self.assertIn("ST", output)
 
 
+@unittest.skipUnless(_HAS_SALIB, "SALib not installed (optional dependency)")
 class TestComputeSobolSubset(unittest.TestCase):
     """compute_sobol_subset convenience wrapper."""
 
@@ -668,6 +677,7 @@ class TestAnalysisCLI(unittest.TestCase):
         )
         self.assertEqual(ret, 0)
 
+    @unittest.skipUnless(_HAS_SALIB, "SALib not installed (optional dependency)")
     def test_sobol_small_n_runs(self):
         ret, output = self._run_cli(
             ["analysis", "sobol", "--n-samples", "32", "--params", "peak_power,tire_mu"]
@@ -675,6 +685,7 @@ class TestAnalysisCLI(unittest.TestCase):
         self.assertEqual(ret, 0)
         self.assertIn("SOBOL SENSITIVITY", output)
 
+    @unittest.skipUnless(_HAS_SALIB, "SALib not installed (optional dependency)")
     def test_sobol_json_output(self):
         ret, output = self._run_cli(
             [
