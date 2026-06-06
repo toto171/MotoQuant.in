@@ -2139,3 +2139,12 @@ were re-run and confirmed green via status-file gating before this commit.
 > 
 > ## Work performed
 > 
+
+
+## SESSION — 2026-06-06 — incident response (chat session, operator present)
+
+**Commits:** `ded00f1` fix(api) typing_extensions TypedDict (repairs py3.11 crash-loop, dead since Jun 1) · `3ce689c` fix(ops) AUTONOMOUS_PAUSED kill-switch + keepwarm self-ping · docs follow-up.
+**Root causes:** stale WSL cron firing 2-hourly (May-31 `.paused` flag was read by nothing); Jun-1 TypedDict refactor crash-looping python:3.11 prod; GH-throttled keep-alive cron + 90s curl < cold start.
+**Verified:** TestClient /api/health 200, bike_count 501, baselines Δ+0.0000 ×3 on the pushed tree.
+**Operator TODO:** push `.github/workflows/keepalive.yml` (PAT lacks workflow scope), `bash scripts/setup_wsl_cron.sh --uninstall`, rotate PAT (overdue 2026-06-03) with Contents+Workflows RW, remove stale worktree `agent-a4dd29f1658aa9cf8`.
+**Severity:** resolved pending Render deploy verification.
