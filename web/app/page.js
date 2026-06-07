@@ -471,7 +471,7 @@ function HomePageInner() {
       <StatsStrip />
 
       {/* ─── WHY MOTOQUANT — 4 value props ───────────────────── */}
-      <section id="why" className="py-24 md:py-32 px-6 border-t border-brand-orange/10">
+      <section id="why" className="py-20 md:py-28 px-6 border-t border-brand-orange/10">
         <div className="max-w-7xl mx-auto">
           <Reveal>
             <div className="text-center mb-16 max-w-3xl mx-auto">
@@ -539,7 +539,7 @@ function HomePageInner() {
       {/* ─── EMBEDDED SIMULATOR ──────────────────────────────── */}
       <section
         id="simulator"
-        className="relative py-24 md:py-32 px-6 border-t border-brand-orange/10"
+        className="relative py-20 md:py-28 px-6 border-t border-brand-orange/10"
       >
         <div className="max-w-7xl mx-auto">
           <Reveal>
@@ -566,7 +566,7 @@ function HomePageInner() {
       </section>
 
       {/* ─── PHYSICS — 15 sub-models ─────────────────────────── */}
-      <section id="physics" className="py-24 md:py-32 px-6 border-t border-brand-orange/10 bg-ink-1/40">
+      <section id="physics" className="py-20 md:py-28 px-6 border-t border-brand-orange/10 bg-ink-1/40">
         <div className="max-w-7xl mx-auto">
           <Reveal>
             <div className="mb-16 max-w-3xl">
@@ -627,7 +627,7 @@ function HomePageInner() {
       </section>
 
       {/* ─── INTELLIGENCE LAYER — Phase 4 AI features ─────────── */}
-      <section id="intelligence" className="py-24 md:py-32 px-6 border-t border-brand-orange/10">
+      <section id="intelligence" className="py-20 md:py-28 px-6 border-t border-brand-orange/10">
         <div className="max-w-7xl mx-auto">
           <Reveal>
             <div className="mb-16 max-w-3xl">
@@ -709,7 +709,7 @@ function HomePageInner() {
       </section>
 
       {/* ─── VALIDATION — honest physics + Top 10 ────────────── */}
-      <section id="validation" className="py-24 md:py-32 px-6 border-t border-brand-orange/10">
+      <section id="validation" className="py-20 md:py-28 px-6 border-t border-brand-orange/10">
         <div className="max-w-7xl mx-auto">
           <Reveal>
             <div className="mb-12 max-w-3xl">
@@ -769,6 +769,15 @@ function HomePageInner() {
           {/* Top-10 leaderboard */}
           <Reveal>
             <div className="rounded-xl border border-brand-orange/20 bg-white/[0.02] overflow-hidden">
+              {/* timeslip masthead — the leaderboard reads as an official slip */}
+              <div className="flex items-center justify-between gap-3 px-5 py-2.5 border-b border-dashed border-white/15 bg-ink-1/70">
+                <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-white/45">
+                  MotoQuant timing assoc · official accuracy slip
+                </span>
+                <span className="hidden sm:block font-mono text-[10px] tracking-[0.18em] uppercase text-brand-orange/80">
+                  10 cleanest pulls · 79 benchmarks
+                </span>
+              </div>
               <div className="hidden md:grid grid-cols-[40px_1fr_120px_120px_120px_140px] gap-4 px-5 py-3 border-b border-brand-orange/20 bg-white/[0.02] text-[10px] font-mono uppercase tracking-widest text-white/45">
                 <div>#</div>
                 <div>Bike</div>

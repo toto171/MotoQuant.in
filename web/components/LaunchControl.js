@@ -152,6 +152,10 @@ export default function LaunchControl({ holdMV, onTreeRun, onFoul, className = '
         : 'bg-white/10';
     }
     const on = lit.has(id) && status !== 'foul';
+    if (id === 'pre-stage' && on && status === 'idle') {
+      // invite affordance: pre-stage breathes while the control is idle
+      return 'bg-brand-amber/90 animate-pulse shadow-[0_0_6px_rgba(245,158,11,0.7)]';
+    }
     if (!on) return 'bg-white/10';
     if (id === 'green') return 'bg-brand-green shadow-[0_0_8px_rgba(34,197,94,0.9)]';
     return 'bg-brand-amber shadow-[0_0_6px_rgba(245,158,11,0.8)]';
