@@ -88,7 +88,7 @@ function ScrollHint() {
       // Hidden on phones (collides with the See-it-run CTA on a
       // min-h-[640px] hero). Shown from sm: upward where the hero has
       // breathing room and the hint reads as a tasteful affordance.
-      className="hidden sm:flex absolute bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-mono uppercase tracking-[0.3em] text-white/40 flex-col items-center gap-1 pointer-events-none"
+      className="hidden sm:flex absolute bottom-3 left-1/2 -translate-x-1/2 text-[10px] font-mono uppercase tracking-[0.3em] text-white/40 flex-col items-center gap-1 pointer-events-none"
       animate={{ y: [0, 6, 0] }}
       transition={{ duration: 2, repeat: Infinity }}
     >
@@ -301,9 +301,13 @@ function HomePageInner() {
   // sweep maps to "dial enters viewport bottom" → "dial exits viewport
   // top", which works at every viewport height.
   const dialRef = useRef(null);
+  // Cockpit layout: the dial sits near the viewport top at rest, so the
+  // mapping is 'dial-top reaches viewport-top' (0 — staged, idle) through
+  // 'dial-bottom exits viewport-top' (1). At scrollY=0 progress clamps to 0
+  // and the needle genuinely idles at 1,500 rpm.
   const { scrollYProgress: dialProgress } = useScroll({
     target: dialRef,
-    offset: ['start end', 'end start'],
+    offset: ['start start', 'end start'],
   });
 
   // ── LAUNCH CONTROL (hold-to-launch) ──────────────────────────────
@@ -316,7 +320,7 @@ function HomePageInner() {
   // in the hero, which parked the needle at ~9k rpm and the LCD mid-run on
   // first paint. Remap so <=0.22 reads as staged-and-idle (1,500 rpm); the
   // needle only builds once the user genuinely scrolls (or holds to launch).
-  const dialCurved = useTransform(dialProgress, [0.22, 1], [0, 1]);
+  const dialCurved = useTransform(dialProgress, [0.05, 1], [0, 1]);
   const dialDrive = useTransform([dialCurved, holdMV], ([a, b]) => Math.max(a, b));
   const [treeRun, setTreeRun] = useState(0);
   const [treeFoul, setTreeFoul] = useState(false);
@@ -352,7 +356,7 @@ function HomePageInner() {
 
         <motion.div
           style={{ opacity: heroFade }}
-          className="relative max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 pt-4 sm:pt-6 pb-12 sm:pb-16 lg:pb-10 min-h-[calc(640px-4rem)] sm:min-h-[calc(800px-4rem)] lg:min-h-[calc(100vh-4rem)] flex items-center justify-center"
+          className="relative max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 pt-4 sm:pt-6 pb-16 sm:pb-20 lg:pb-16 min-h-[calc(640px-4rem)] sm:min-h-[calc(800px-4rem)] lg:min-h-[calc(100vh-4rem)] flex items-center justify-center"
         >
           {/* One-viewport cockpit (lg+): tree on the left; dial, copy and the
               HOLD TO LAUNCH control stacked on the right — staging lights,
@@ -367,7 +371,7 @@ function HomePageInner() {
             </div>
 
             <div className="w-full min-w-0 flex flex-col items-center lg:items-start">
-              <div ref={dialRef} className="w-full max-w-[560px] lg:max-w-[600px]">
+              <div ref={dialRef} className="w-full max-w-[540px] lg:max-w-[560px]">
                 <PhysicsDial progress={dialDrive} className="w-full h-auto" />
               </div>
 
