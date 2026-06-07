@@ -94,19 +94,21 @@ function StageRow({ label, on }) {
   );
 }
 
-export default function ChristmasTree({ className = '' }) {
+export default function ChristmasTree({ className = '', runSignal = 0, foul = false }) {
   // Pre-stage starts lit immediately (bike has rolled up to the lights).
   const [lit, setLit] = useState(() => new Set(['pre-stage']));
-  const [triggered, setTriggered] = useState(false);
+  // Number of sequence runs so far. 0 = not yet fired; each increment
+  // restarts the full pro-tree sequence (LaunchControl re-arms via
+  // runSignal; the first run also auto-fires on scroll/dwell as before).
+  const [runCount, setRunCount] = useState(0);
 
   // First user scroll OR first 800 ms of dwell → fire the sequence.
   // Either signal is sufficient — whichever comes first wins.
   useEffect(() => {
-    if (triggered) return;
+    if (runCount > 0) return;
 
     function fire() {
-      if (triggered) return;
-      setTriggered(true);
+      setRunCount((c) => (c === 0 ? 1 : c));
     }
 
     const onScroll = () => {
@@ -123,11 +125,17 @@ export default function ChristmasTree({ className = '' }) {
       window.removeEventListener('scroll', onScroll);
       clearTimeout(dwell);
     };
-  }, [triggered]);
+  }, [runCount]);
 
-  // Once triggered, schedule each lamp's lighting per the SEQUENCE table.
+  // External restart — LaunchControl increments runSignal on every hold.
   useEffect(() => {
-    if (!triggered) return;
+    if (runSignal > 0) setRunCount((c) => c + 1);
+  }, [runSignal]);
+
+  // Each run: reset to pre-stage, then schedule lamps per SEQUENCE.
+  useEffect(() => {
+    if (!runCount) return;
+    setLit(new Set(['pre-stage']));
     const timeouts = SEQUENCE.map(({ id, at }) =>
       setTimeout(() => {
         setLit((prev) => {
@@ -139,9 +147,9 @@ export default function ChristmasTree({ className = '' }) {
       }, at)
     );
     return () => timeouts.forEach(clearTimeout);
-  }, [triggered]);
+  }, [runCount]);
 
-  const greenOn = lit.has('green');
+  const greenOn = lit.has('green') && !foul;
 
   return (
     <div className={['relative select-none', className].join(' ')} aria-hidden="true">
@@ -196,7 +204,7 @@ export default function ChristmasTree({ className = '' }) {
           <span
             className={[
               'w-[40px] sm:w-[52px] lg:w-[64px] aspect-square rounded-full border-2 transition-all duration-300',
-              largeBulbClass(false, 'red'),
+              largeBulbClass(foul, 'red'),
             ].join(' ')}
           />
         </div>

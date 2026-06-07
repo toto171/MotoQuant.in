@@ -291,21 +291,20 @@ export default function PhysicsDial({ progress, className = '' }) {
     }
 
     let cancelled = false;
-    import('animejs/lib/anime.es.js').then((mod) => {
+    // anime.js v4 API: named exports, timeline.add(targets, params, position).
+    import('animejs').then((mod) => {
       if (cancelled) return;
-      const anime = mod.default || mod;
-      const tl = anime.timeline({ easing: 'easeOutQuart' });
-      tl.add({
-        targets: bands,
+      const { createTimeline, stagger } = mod;
+      const tl = createTimeline({ defaults: { ease: 'outQuart' } });
+      tl.add(bands, {
         strokeDashoffset: [1, 0],
         duration: 700,
-        delay: anime.stagger(90, { start: 100 }),
+        delay: stagger(90, { start: 100 }),
       });
-      tl.add({
-        targets: labels,
+      tl.add(labels, {
         opacity: [0, 1],
         duration: 500,
-        delay: anime.stagger(120),
+        delay: stagger(120),
       }, '-=400');
     }).catch(() => {
       // anime.js failed to load — snap to final state, never strand visuals.

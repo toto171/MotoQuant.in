@@ -21,10 +21,10 @@
  * Champions" panel.
  */
 
-import { Suspense, useRef } from 'react';
+import { Suspense, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useMotionValue } from 'framer-motion';
 import {
   Zap, TrendingUp, BarChart3, ChevronDown, Cpu, Wind, Gauge,
   Brain, Target, MessageSquare, Upload,
@@ -34,9 +34,15 @@ import SiteNav from '../components/SiteNav';
 import SiteFooter from '../components/SiteFooter';
 import ChristmasTree from '../components/ChristmasTree';
 import TelemetryHUD from '../components/TelemetryHUD';
-import { Reveal, Stagger, StaggerItem, Counter } from '../components/Reveal';
+import { Reveal, Stagger, StaggerItem } from '../components/Reveal';
 import SimulatorWidget from '../components/SimulatorWidget';
 import PhysicsDial from '@/components/PhysicsDial';
+import BootSequence from '../components/BootSequence';
+import HudFrame from '../components/HudFrame';
+import CodeComment from '../components/CodeComment';
+import ManifestoScrub from '../components/ManifestoScrub';
+import LaunchControl from '../components/LaunchControl';
+import ScoreboardDigits, { ScoreboardCounter } from '../components/ScoreboardDigits';
 
 // ─── Validation: only the four clusters where the data is good ────────
 // Per CLAUDE.md April 30 weighted metrics. Small-cc / 2T / cruiser
@@ -105,8 +111,8 @@ function StatsStrip() {
                 i < STATS.length - 1 ? 'md:border-r md:border-brand-orange/15' : '',
               ].join(' ')}
             >
-              <div className="font-display font-bold text-3xl sm:text-4xl text-brand-orange">
-                <Counter value={s.num} />
+              <div className="flex justify-center">
+                <ScoreboardCounter value={s.num} h={30} />
               </div>
               <div className="font-mono text-[10px] sm:text-xs text-white/50 tracking-[0.25em] mt-2">
                 {s.label}
@@ -218,8 +224,9 @@ function ReferenceBaselines() {
           <div className="text-[10px] font-mono uppercase tracking-widest text-white/45">
             {b.name}
           </div>
-          <div className="mt-3 font-mono font-bold text-3xl tabular-nums text-white">
-            {b.et}<span className="text-white/40 text-xl">s</span>
+          <div className="mt-3 flex items-end gap-1.5">
+            <ScoreboardDigits value={b.et} h={28} color="#FFFFFF" label={`${b.et} seconds`} />
+            <span className="text-white/40 font-mono text-sm">s</span>
           </div>
           <div className="mt-2 text-[11px] font-mono text-emerald-300">
             Δ ±0.0000s &middot; {b.hp}
@@ -296,8 +303,25 @@ function HomePageInner() {
     offset: ['start end', 'end start'],
   });
 
+  // ── LAUNCH CONTROL (hold-to-launch) ──────────────────────────────
+  // BITKRAFT-style hold gate. holdMV is driven by the LaunchControl
+  // button; the dial needle reads max(scroll, hold) so both inputs
+  // share one needle with no extra render loops. Tree restarts via
+  // runSignal; an early release lights the red foul bulb.
+  const holdMV = useMotionValue(0);
+  const dialDrive = useTransform([dialProgress, holdMV], ([a, b]) => Math.max(a, b));
+  const [treeRun, setTreeRun] = useState(0);
+  const [treeFoul, setTreeFoul] = useState(false);
+
   return (
     <div className="min-h-screen bg-black text-white antialiased overflow-x-clip">
+      <BootSequence
+        bikes={STATS[0].num}
+        tires={STATS[1].num}
+        parts={STATS[2].num}
+        venues={STATS[3].num}
+      />
+      <HudFrame />
       <SiteNav />
 
       {/* ─── HERO ─────────────────────────────────────────────── */}
@@ -330,10 +354,10 @@ function HomePageInner() {
               width handles small viewports cleanly. */}
           <div className="relative w-full max-w-[1080px] mx-auto pointer-events-none flex flex-col items-center gap-3 sm:gap-6 lg:flex-row lg:items-start lg:justify-center lg:gap-12 min-w-0">
             <div className="pointer-events-auto flex-shrink-0 lg:mt-10">
-              <ChristmasTree />
+              <ChristmasTree runSignal={treeRun} foul={treeFoul} />
             </div>
             <div ref={dialRef} className="w-full max-w-full sm:max-w-[600px] lg:max-w-[640px] flex-shrink min-w-0">
-              <PhysicsDial progress={dialProgress} className="w-full h-auto" />
+              <PhysicsDial progress={dialDrive} className="w-full h-auto" />
             </div>
           </div>
 
@@ -408,12 +432,11 @@ function HomePageInner() {
                 >
                   {heroCtaLabel}
                 </Link>
-                <Link
-                  href="#telemetry"
-                  className="inline-flex items-center justify-center px-7 py-4 rounded-md border-2 border-brand-orange/40 hover:border-brand-orange text-brand-orange font-display font-bold transition-colors"
-                >
-                  See it run
-                </Link>
+                <LaunchControl
+                  holdMV={holdMV}
+                  onTreeRun={() => setTreeRun((c) => c + 1)}
+                  onFoul={setTreeFoul}
+                />
               </div>
             </Reveal>
           </div>
@@ -425,6 +448,9 @@ function HomePageInner() {
       {/* ─── PINNED TELEMETRY HUD ────────────────────────────── */}
       <TelemetryHUD />
 
+      {/* ─── MANIFESTO — scroll-scrubbed belief system ────────── */}
+      <ManifestoScrub />
+
       {/* ─── STATS STRIP ─────────────────────────────────────── */}
       <StatsStrip />
 
@@ -433,6 +459,7 @@ function HomePageInner() {
         <div className="max-w-7xl mx-auto">
           <Reveal>
             <div className="text-center mb-16 max-w-3xl mx-auto">
+              <CodeComment center className="mb-5">value props loaded [4/4]</CodeComment>
               <h2 className="font-display font-bold text-4xl md:text-5xl text-white tracking-tight">
                 Why MotoQuant?
               </h2>
@@ -501,6 +528,7 @@ function HomePageInner() {
         <div className="max-w-7xl mx-auto">
           <Reveal>
             <div className="text-center mb-12 max-w-2xl mx-auto">
+              <CodeComment center className="mb-5">engine warm · awaiting input</CodeComment>
               <h2 className="font-display font-bold text-4xl md:text-5xl text-white tracking-tight">
                 Run It Yourself
               </h2>
@@ -526,6 +554,7 @@ function HomePageInner() {
         <div className="max-w-7xl mx-auto">
           <Reveal>
             <div className="mb-16 max-w-3xl">
+              <CodeComment className="mb-5">loading submodels [15/15] · rk4 @ 1ms</CodeComment>
               <h2 className="font-display font-bold text-4xl md:text-5xl text-white tracking-tight">
                 15 Physics Sub-Models
               </h2>
@@ -586,6 +615,7 @@ function HomePageInner() {
         <div className="max-w-7xl mx-auto">
           <Reveal>
             <div className="mb-16 max-w-3xl">
+              <CodeComment className="mb-5">analysis stack online · surrogate: dnn.pkl</CodeComment>
               <h2 className="font-display font-bold text-4xl md:text-5xl text-white tracking-tight">
                 Intelligence Layer
               </h2>
@@ -667,6 +697,7 @@ function HomePageInner() {
         <div className="max-w-7xl mx-auto">
           <Reveal>
             <div className="mb-12 max-w-3xl">
+              <CodeComment className="mb-5">cross-checking 79 weighted benchmarks</CodeComment>
               <h2 className="font-display font-bold text-4xl md:text-5xl text-white tracking-tight">
                 Validated on Real Telemetry
               </h2>
