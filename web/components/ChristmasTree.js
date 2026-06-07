@@ -120,10 +120,17 @@ export default function ChristmasTree({ className = '', runSignal = 0, foul = fa
     // Fallback: if the user is reading without scrolling, fire after
     // a short dwell so the green-light moment isn't gated entirely on
     // scroll behaviour.
-    // 2800ms: the first-visit boot overlay runs ~1.9s — firing at 1200ms
-    // meant the whole countdown played hidden behind it. Now the green-light
-    // moment lands just after the hero fades in.
-    const dwell = setTimeout(fire, 2800);
+    // First visit: the boot overlay runs ~1.9s, so wait 2800ms — the
+    // green-light moment lands just after the hero fades in. Repeat
+    // visits skip the boot (sessionStorage 'mq-boot-seen'), so the
+    // countdown can start almost immediately.
+    let dwellMs = 2800;
+    try {
+      if (sessionStorage.getItem('mq-boot-seen')) dwellMs = 1100;
+    } catch {
+      /* storage blocked — keep the safe default */
+    }
+    const dwell = setTimeout(fire, dwellMs);
 
     return () => {
       window.removeEventListener('scroll', onScroll);
