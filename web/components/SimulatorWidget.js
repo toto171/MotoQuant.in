@@ -7,6 +7,7 @@ import LocationPicker, { environmentOverridesFromLocation } from './LocationPick
 import ChatPanel from './ChatPanel';
 import { API_URL, runJob } from '../lib/api';
 import SimProgress from './SimProgress';
+import ScoreboardDigits from './ScoreboardDigits';
 import { track, installErrorHandlers } from '../lib/telemetry';
 
 // Curated bike list — popular India-market machines first, then global
@@ -96,6 +97,34 @@ function AnimatedCounter({ target, decimals = 3 }) {
 }
 
 // ─── Main widget ──────────────────────────────────────────────────────────────
+
+// ── SegEt — the user's own ET on the strip timing board ──────────────
+// ETs render on ScoreboardDigits everywhere (stats strip, telemetry
+// ELAPSED, reference baselines); the sim result is the user's personal
+// timeslip, so it counts up on the same seven-segment board.
+function SegEt({ target }) {
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    let raf;
+    const t0 = performance.now();
+    const dur = 900;
+    const tick = (now) => {
+      const t = Math.min(1, (now - t0) / dur);
+      const e = 1 - Math.pow(1 - t, 3);
+      setVal(target * e);
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target]);
+  return (
+    <span className="inline-flex items-end gap-1.5 justify-center">
+      <span className="flex sm:hidden"><ScoreboardDigits value={val.toFixed(3)} h={30} label={`${target}s`} /></span>
+      <span className="hidden sm:flex"><ScoreboardDigits value={val.toFixed(3)} h={42} label={`${target}s`} /></span>
+      <span className="font-mono text-white/40 text-sm sm:text-base">s</span>
+    </span>
+  );
+}
 
 export default function SimulatorWidget() {
   // Default to "Indian Sport" tab + KTM RC 390 (one of the most-recognized
@@ -439,7 +468,7 @@ export default function SimulatorWidget() {
           },
         ].map((slider, idx) => (
           <div key={idx} className="space-y-2">
-            <label className="block text-xs font-semibold text-white/60 uppercase tracking-wide">
+            <label className="block text-[10px] font-mono text-white/45 uppercase tracking-[0.25em]">
               {slider.label}
             </label>
             <div className="flex items-center gap-2">
@@ -617,13 +646,12 @@ export default function SimulatorWidget() {
                 transition={{ delay: 0.1 }}
                 className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-6 text-center backdrop-blur"
               >
-                <p className="text-[10px] sm:text-xs font-semibold text-white/50 mb-2 uppercase tracking-wide">
+                <p className="text-[10px] font-mono text-white/45 mb-2 uppercase tracking-[0.25em]">
                   Quarter-Mile ET
                 </p>
-                <p className="text-3xl sm:text-5xl font-mono font-bold text-[#FF5E1F]">
-                  <AnimatedCounter target={result.et_quarter_s} decimals={3} />
-                  <span className="text-xl sm:text-3xl ml-1">s</span>
-                </p>
+                <div className="flex justify-center">
+                  <SegEt target={result.et_quarter_s} />
+                </div>
               </motion.div>
 
               <motion.div
@@ -632,7 +660,7 @@ export default function SimulatorWidget() {
                 transition={{ delay: 0.2 }}
                 className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-6 text-center backdrop-blur"
               >
-                <p className="text-[10px] sm:text-xs font-semibold text-white/50 mb-2 uppercase tracking-wide">
+                <p className="text-[10px] font-mono text-white/45 mb-2 uppercase tracking-[0.25em]">
                   Trap Speed
                 </p>
                 <p className="text-3xl sm:text-5xl font-mono font-bold text-white">
@@ -649,7 +677,7 @@ export default function SimulatorWidget() {
               className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-6 backdrop-blur"
             >
               <div className="flex items-center justify-between mb-4">
-                <p className="text-xs font-semibold text-white/55 uppercase tracking-wider">Split Timeline</p>
+                <p className="text-[10px] font-mono text-white/45 uppercase tracking-[0.25em]">Split Timeline</p>
                 <p className="text-[10px] font-mono text-white/30 tabular-nums">
                   402 m · 1320 ft
                 </p>
@@ -760,7 +788,7 @@ export default function SimulatorWidget() {
                 transition={{ delay: 0.1 }}
                 className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-6 text-center backdrop-blur"
               >
-                <p className="text-[10px] sm:text-xs font-semibold text-white/50 mb-2 uppercase tracking-wide">
+                <p className="text-[10px] font-mono text-white/45 mb-2 uppercase tracking-[0.25em]">
                   Top Speed
                 </p>
                 <p className="text-3xl sm:text-5xl font-mono font-bold text-[#FF5E1F]">
@@ -775,7 +803,7 @@ export default function SimulatorWidget() {
                 transition={{ delay: 0.2 }}
                 className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-6 text-center backdrop-blur flex flex-col justify-center"
               >
-                <p className="text-[10px] sm:text-xs font-semibold text-white/50 mb-2 uppercase tracking-wide">
+                <p className="text-[10px] font-mono text-white/45 mb-2 uppercase tracking-[0.25em]">
                   Plateau
                 </p>
                 {topSpeedResult.reached_plateau ? (
