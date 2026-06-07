@@ -92,7 +92,7 @@ function ScrollHint() {
       animate={{ y: [0, 6, 0] }}
       transition={{ duration: 2, repeat: Infinity }}
     >
-      Scroll · launch sequence
+      Scroll · live telemetry
       <ChevronDown className="w-3 h-3 text-brand-orange" />
     </motion.div>
   );
@@ -111,7 +111,10 @@ function StatsStrip() {
                 i < STATS.length - 1 ? 'md:border-r md:border-brand-orange/15' : '',
               ].join(' ')}
             >
-              <div className="flex justify-center">
+              <div className="flex justify-center sm:hidden">
+                <ScoreboardCounter value={s.num} h={22} />
+              </div>
+              <div className="hidden sm:flex justify-center">
                 <ScoreboardCounter value={s.num} h={30} />
               </div>
               <div className="font-mono text-[10px] sm:text-xs text-white/50 tracking-[0.25em] mt-2">
@@ -309,7 +312,12 @@ function HomePageInner() {
   // share one needle with no extra render loops. Tree restarts via
   // runSignal; an early release lights the red foul bulb.
   const holdMV = useMotionValue(0);
-  const dialDrive = useTransform([dialProgress, holdMV], ([a, b]) => Math.max(a, b));
+  // Idle curve: raw scroll progress rests around 0.1-0.2 with the dial high
+  // in the hero, which parked the needle at ~9k rpm and the LCD mid-run on
+  // first paint. Remap so <=0.22 reads as staged-and-idle (1,500 rpm); the
+  // needle only builds once the user genuinely scrolls (or holds to launch).
+  const dialCurved = useTransform(dialProgress, [0.22, 1], [0, 1]);
+  const dialDrive = useTransform([dialCurved, holdMV], ([a, b]) => Math.max(a, b));
   const [treeRun, setTreeRun] = useState(0);
   const [treeFoul, setTreeFoul] = useState(false);
 
@@ -344,25 +352,27 @@ function HomePageInner() {
 
         <motion.div
           style={{ opacity: heroFade }}
-          className="relative max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 pt-4 sm:pt-8 pb-12 sm:pb-20 lg:pb-32 min-h-[calc(640px-4rem)] sm:min-h-[calc(800px-4rem)] lg:min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center"
+          className="relative max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 pt-4 sm:pt-6 pb-12 sm:pb-16 lg:pb-10 min-h-[calc(640px-4rem)] sm:min-h-[calc(800px-4rem)] lg:min-h-[calc(100vh-4rem)] flex items-center justify-center"
         >
-          {/* Tree + dial centerpiece. Stacks on mobile, side-by-side on lg+.
-              The previous `scale-[0.7] sm:scale-[0.85]` on the tree wrapper
-              created a phantom-bounding-box gap below the tree on mobile —
-              the visual was shrunk 30% but the layout box stayed full size.
-              Removed; the tree's own `w-[180px] sm:w-[220px]` responsive
-              width handles small viewports cleanly. */}
-          <div className="relative w-full max-w-[1080px] mx-auto pointer-events-none flex flex-col items-center gap-3 sm:gap-6 lg:flex-row lg:items-start lg:justify-center lg:gap-12 min-w-0">
-            <div className="pointer-events-auto flex-shrink-0 lg:mt-10">
+          {/* One-viewport cockpit (lg+): tree on the left; dial, copy and the
+              HOLD TO LAUNCH control stacked on the right — staging lights,
+              revs and the launch button share a single sightline (the v1
+              layout put the CTAs ~1.5 viewports below the tree, so the
+              countdown was never visible while holding). Mobile keeps the
+              vertical stack; LaunchControl's built-in mini lamps carry the
+              countdown there. */}
+          <div className="w-full max-w-[1100px] flex flex-col items-center gap-4 sm:gap-6 lg:grid lg:grid-cols-[auto_minmax(0,1fr)] lg:gap-10 lg:items-center">
+            <div className="pointer-events-auto flex-shrink-0">
               <ChristmasTree runSignal={treeRun} foul={treeFoul} />
             </div>
-            <div ref={dialRef} className="w-full max-w-full sm:max-w-[600px] lg:max-w-[640px] flex-shrink min-w-0">
-              <PhysicsDial progress={dialDrive} className="w-full h-auto" />
-            </div>
-          </div>
 
-          {/* Hero copy — centred below the centerpiece */}
-          <div className="relative z-10 mt-6 sm:mt-8 lg:mt-10 max-w-3xl text-center">
+            <div className="w-full min-w-0 flex flex-col items-center lg:items-start">
+              <div ref={dialRef} className="w-full max-w-[560px] lg:max-w-[600px]">
+                <PhysicsDial progress={dialDrive} className="w-full h-auto" />
+              </div>
+
+          {/* Hero copy — beside the tree, under the dial */}
+          <div className="relative z-10 mt-5 sm:mt-6 max-w-2xl text-center lg:text-left">
             <Reveal y={20} duration={0.7}>
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-brand-orange/40 bg-brand-orange/10 text-[10px] sm:text-xs font-mono uppercase tracking-[0.25em] text-brand-orange">
                 Proudly Built in India
@@ -370,7 +380,7 @@ function HomePageInner() {
             </Reveal>
 
             <Reveal y={32} duration={0.9} delay={0.05}>
-              <h1 className="mt-5 sm:mt-7 font-display font-bold text-[2rem] sm:text-5xl lg:text-6xl leading-[1.05] sm:leading-[0.95] tracking-[-0.03em] sm:tracking-[-0.04em] text-white">
+              <h1 className="mt-4 sm:mt-5 font-display font-bold text-[2rem] sm:text-5xl lg:text-[3.4rem] leading-[1.05] sm:leading-[0.98] tracking-[-0.03em] sm:tracking-[-0.04em] text-white">
                 The physics of{' '}
                 <span className="text-gradient-orange">faster.</span>
               </h1>
@@ -380,7 +390,7 @@ function HomePageInner() {
             <Reveal y={20} duration={0.7} delay={0.15}>
               {exp18Variant === 'B' ? (
                 <p
-                  className="mt-7 text-lg sm:text-xl text-white/70 leading-relaxed max-w-xl mx-auto"
+                  className="mt-4 text-base sm:text-lg text-white/70 leading-relaxed max-w-xl mx-auto lg:mx-0"
                   data-exp="EXP-018"
                   data-variant="B"
                 >
@@ -393,7 +403,7 @@ function HomePageInner() {
                 </p>
               ) : (
                 <p
-                  className="mt-7 text-lg sm:text-xl text-white/70 leading-relaxed max-w-xl mx-auto"
+                  className="mt-4 text-base sm:text-lg text-white/70 leading-relaxed max-w-xl mx-auto lg:mx-0"
                   data-exp="EXP-018"
                   data-variant="A"
                 >
@@ -408,7 +418,7 @@ function HomePageInner() {
             </Reveal>
 
             <Reveal y={16} duration={0.7} delay={0.22}>
-              <div className="mt-7 flex flex-wrap gap-2 text-[11px] font-mono justify-center">
+              <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-mono justify-center lg:justify-start">
                 <span className="px-3 py-1.5 rounded-full border border-white/10 text-white/55">
                   Aamby Valley · MMRT · Kari · Hyderabad
                 </span>
@@ -423,7 +433,7 @@ function HomePageInner() {
 
             <Reveal y={20} duration={0.7} delay={0.3}>
               {/* GROWTH_EXP_001: A/B variant — see data/growth_experiments.json */}
-              <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Link
                   href="/simulator"
                   data-exp="EXP-001"
@@ -439,6 +449,8 @@ function HomePageInner() {
                 />
               </div>
             </Reveal>
+          </div>
+            </div>
           </div>
         </motion.div>
 

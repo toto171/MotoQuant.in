@@ -57,7 +57,7 @@ export default function HudFrame() {
       <span className="absolute bottom-2.5 right-2.5 w-5 h-5 border-r border-b border-white/20" />
 
       {/* engine status — bottom left */}
-      <div className="absolute bottom-4 left-9 flex items-center gap-2 font-mono text-[10px] tracking-[0.22em] text-white/40">
+      <div className="absolute bottom-3.5 left-9 flex items-center gap-2 font-mono text-[10px] tracking-[0.22em] text-white/40 bg-black/65 rounded-sm px-2 py-1">
         <span className="relative flex h-1.5 w-1.5">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-green opacity-60" />
           <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-brand-green" />
@@ -68,7 +68,7 @@ export default function HudFrame() {
       {/* distance readout — bottom right */}
       <div
         ref={distRef}
-        className="absolute bottom-4 right-9 font-mono text-[10px] tracking-[0.22em] text-white/40 tabular-nums"
+        className="absolute bottom-3.5 right-9 font-mono text-[10px] tracking-[0.22em] text-white/40 tabular-nums bg-black/65 rounded-sm px-2 py-1"
       >
         D 0000.0M / 0402M
       </div>

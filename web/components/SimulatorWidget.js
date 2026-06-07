@@ -340,7 +340,7 @@ export default function SimulatorWidget() {
       {/* Bike selector — category tabs + chip grid */}
       <div className="mb-6 relative z-10">
         <div className="flex items-center justify-between mb-3">
-          <label className="text-xs font-semibold text-white/60 uppercase tracking-wide">
+          <label className="text-[10px] font-mono text-white/45 uppercase tracking-[0.25em]">
             Select Bike
           </label>
           <span className="text-[10px] font-mono text-white/30">
@@ -867,7 +867,7 @@ export default function SimulatorWidget() {
       )}
 
       <p className="text-xs text-white/30 text-center mt-6 relative z-10">
-        First-principles RK4 physics · 15 sub-models · 1 ms timestep · 334 bikes
+        First-principles RK4 physics · 15 sub-models · 1 ms timestep
       </p>
     </motion.div>
   );

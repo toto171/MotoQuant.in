@@ -33,8 +33,9 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
-// id, color, ms-after-trigger
-const SEQUENCE = [
+// id, color, ms-after-trigger — exported: LaunchControl's miniature
+// lamp strip mirrors the big tree with this exact timing table.
+export const SEQUENCE = [
   { id: 'pre-stage', color: 'amber', at:    0 },
   { id: 'stage',     color: 'amber', at:  150 },
   { id: 'amber-1',   color: 'amber', at:  350 },
@@ -119,7 +120,10 @@ export default function ChristmasTree({ className = '', runSignal = 0, foul = fa
     // Fallback: if the user is reading without scrolling, fire after
     // a short dwell so the green-light moment isn't gated entirely on
     // scroll behaviour.
-    const dwell = setTimeout(fire, 1200);
+    // 2800ms: the first-visit boot overlay runs ~1.9s — firing at 1200ms
+    // meant the whole countdown played hidden behind it. Now the green-light
+    // moment lands just after the hero fades in.
+    const dwell = setTimeout(fire, 2800);
 
     return () => {
       window.removeEventListener('scroll', onScroll);

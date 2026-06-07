@@ -18,6 +18,7 @@
 
 import { useRef, useState, useMemo, useEffect } from 'react';
 import { useScroll, useMotionValueEvent } from 'framer-motion';
+import ScoreboardDigits from './ScoreboardDigits';
 
 // Hand-curated waypoints for the H2R baseline run.
 // Time (s), velocity (km/h), gear, RPM, distance (m).
@@ -61,7 +62,7 @@ function sampleRun(progress) {
   };
 }
 
-function Gauge({ label, value, unit, percent, accent = false, full = false }) {
+function Gauge({ label, value, unit, percent, accent = false, full = false, seg = false }) {
   return (
     <div
       className={[
@@ -73,6 +74,12 @@ function Gauge({ label, value, unit, percent, accent = false, full = false }) {
         {label}
       </div>
       <div className="mt-1.5 flex items-baseline gap-1.5 leading-none">
+        {seg ? (
+          <>
+            <span className="flex sm:hidden"><ScoreboardDigits value={value} h={26} label={String(value)} /></span>
+            <span className="hidden sm:flex"><ScoreboardDigits value={value} h={32} label={String(value)} /></span>
+          </>
+        ) : (
         <span
           className={[
             'font-mono font-bold tabular-nums text-3xl sm:text-4xl',
@@ -81,6 +88,7 @@ function Gauge({ label, value, unit, percent, accent = false, full = false }) {
         >
           {value}
         </span>
+        )}
         {unit && <span className="font-mono text-xs text-white/45">{unit}</span>}
       </div>
       {percent != null && (
@@ -308,7 +316,7 @@ export default function TelemetryHUD() {
                 percent={(spd / TRAP_KMH) * 100}
               />
               <Gauge label="Gear"     value={gear}            unit={null} />
-              <Gauge label="Elapsed"  value={et.toFixed(3)}   unit="s" accent />
+              <Gauge label="Elapsed"  value={et.toFixed(3)}   unit="s" accent seg />
               <Gauge
                 label="Distance · Quarter Mile"
                 value={Math.round(dist)}

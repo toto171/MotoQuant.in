@@ -57,11 +57,11 @@ export default function ManifestoScrub() {
         <div className="max-w-4xl mx-auto px-6 py-24">
           <CodeComment className="mb-6">belief system · honest physics</CodeComment>
           {reduced ? (
-            <p className="font-display font-bold text-2xl sm:text-4xl lg:text-[2.75rem] leading-snug tracking-tight text-white">
+            <p className="font-display font-bold text-[1.4rem] sm:text-4xl lg:text-[2.75rem] leading-snug tracking-tight text-white">
               {TEXT}
             </p>
           ) : (
-            <p className="font-display font-bold text-2xl sm:text-4xl lg:text-[2.75rem] leading-snug tracking-tight text-white">
+            <p className="font-display font-bold text-[1.4rem] sm:text-4xl lg:text-[2.75rem] leading-snug tracking-tight text-white">
               {WORDS.map((w, i) => (
                 <Word key={i} progress={scrollYProgress} index={i} total={WORDS.length}>
                   {w}

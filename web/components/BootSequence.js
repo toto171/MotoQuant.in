@@ -24,6 +24,7 @@ const KEY = 'mq-boot-seen';
 
 export default function BootSequence({ bikes, parts, venues, tires }) {
   const [phase, setPhase] = useState('idle'); // idle | run | fade | done
+  const [digitH, setDigitH] = useState(72);
   const [pct, setPct] = useState(0);
   const [lineCount, setLineCount] = useState(0);
   const doneRef = useRef(false);
@@ -48,6 +49,7 @@ export default function BootSequence({ bikes, parts, venues, tires }) {
     } catch {
       return; // storage blocked → skip the theatre, never risk a stuck overlay
     }
+    setDigitH(window.innerWidth < 640 ? 50 : 72);
     setPhase('run');
   }, []);
 
@@ -102,6 +104,8 @@ export default function BootSequence({ bikes, parts, venues, tires }) {
       style={{
         opacity: phase === 'fade' ? 0 : 1,
         transitionDuration: `${FADE_MS}ms`,
+        backgroundImage:
+          'repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 3px)',
       }}
       aria-hidden="true"
     >
@@ -132,7 +136,7 @@ export default function BootSequence({ bikes, parts, venues, tires }) {
         <div className="flex items-end gap-3">
           <ScoreboardDigits
             value={String(pct).padStart(2, '0')}
-            h={72}
+            h={digitH}
             color="#FF5E1F"
           />
           <span className="font-mono text-white/40 text-sm pb-1">%</span>

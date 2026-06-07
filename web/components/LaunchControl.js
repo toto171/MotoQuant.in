@@ -2,32 +2,47 @@
 
 /**
  * LaunchControl — BITKRAFT's "DRAG & HOLD TO ENTER" translated to
- * launch control.
+ * launch control, v2.
  *
- * Hold the button: the pro tree restarts its real NHRA sequence and
- * the H2R dial builds revs to the two-step limiter. Release on green:
- * the run plays out (dial sweeps through ET + trap scenes) and the
- * page glides to the telemetry section. Release before green: red
- * light — a real foul, on the tree's never-otherwise-lit red bulb.
+ * v2 (premium pass): the control carries its own miniature staging
+ * lights — a horizontal strip of lamps INSIDE the button that mirrors
+ * the big NHRA tree using the exact same SEQUENCE timing table. The
+ * countdown is therefore always in the user's sightline (the v1 flaw:
+ * tree above the fold, button below — you could never watch both).
+ * Label typography now matches the primary CTA (display bold), the
+ * launch run plays on the dial for ~1.5s BEFORE the page glides to
+ * telemetry, and focus-visible rings make it keyboard-premium.
  *
- * Drives the SAME MotionValue the hero dial already reads (combined
- * with scroll progress via max() in page.js), so there's one needle
- * and zero new render loops. Pointer + keyboard operable.
+ * Hold: tree + mini-lamps restart their sequence, revs build on the
+ * H2R dial (shared MotionValue, max(scroll, hold) in page.js).
+ * Release on green: run plays, then glide to #telemetry.
+ * Release early: red light on BOTH trees — a real foul.
  */
 
 import { useEffect, useRef, useState } from 'react';
 import { animate } from 'framer-motion';
+import { SEQUENCE } from './ChristmasTree';
 
 const GREEN_AT_MS = 1100;   // must match ChristmasTree SEQUENCE green timing
 const LAUNCH_RPM_P = 0.36;  // dial progress at the two-step limiter (~13k rpm)
+const RUN_VIEW_MS = 1500;   // let the ET run play on the dial before gliding
+const RESET_MS = 5200;
+
 
 export default function LaunchControl({ holdMV, onTreeRun, onFoul, className = '' }) {
   const [status, setStatus] = useState('idle'); // idle | staging | launched | foul
+  const [lit, setLit] = useState(() => new Set(['pre-stage']));
   const animRef = useRef(null);
   const downAtRef = useRef(0);
+  const timersRef = useRef([]);
   const resetTimerRef = useRef(null);
   const statusRef = useRef(status);
   statusRef.current = status;
+
+  const clearTimers = () => {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+  };
 
   const stopAnim = () => {
     if (animRef.current) {
@@ -39,10 +54,23 @@ export default function LaunchControl({ holdMV, onTreeRun, onFoul, className = '
   const press = () => {
     if (statusRef.current === 'staging') return;
     clearTimeout(resetTimerRef.current);
+    clearTimers();
     stopAnim();
     setStatus('staging');
     onFoul?.(false);
-    onTreeRun?.();          // restart the pro-tree sequence
+    onTreeRun?.();          // restart the big pro tree
+    // …and run the same sequence on the in-button mini lamps.
+    setLit(new Set(['pre-stage']));
+    timersRef.current = SEQUENCE.map(({ id, at }) =>
+      setTimeout(() => {
+        setLit((prev) => {
+          if (prev.has(id)) return prev;
+          const next = new Set(prev);
+          next.add(id);
+          return next;
+        });
+      }, at)
+    );
     downAtRef.current = performance.now();
     holdMV.set(0);
     animRef.current = animate(holdMV, LAUNCH_RPM_P, {
@@ -55,6 +83,7 @@ export default function LaunchControl({ holdMV, onTreeRun, onFoul, className = '
     if (statusRef.current !== 'staging') return;
     const held = performance.now() - downAtRef.current;
     stopAnim();
+    clearTimers();
 
     if (held < GREEN_AT_MS) {
       // ─ red light ─ left before green
@@ -63,12 +92,13 @@ export default function LaunchControl({ holdMV, onTreeRun, onFoul, className = '
       animRef.current = animate(holdMV, 0, { duration: 0.55, ease: 'easeInOut' });
       resetTimerRef.current = setTimeout(() => {
         onFoul?.(false);
+        setLit(new Set(['pre-stage']));
         setStatus('idle');
-      }, 1900);
+      }, 2100);
       return;
     }
 
-    // ─ clean launch ─ play the run: revs → ET clock → trap speed
+    // ─ clean launch ─ play the run on the dial first, then glide down
     setStatus('launched');
     animRef.current = animate(holdMV, 1, {
       duration: 2.4,
@@ -78,30 +108,34 @@ export default function LaunchControl({ holdMV, onTreeRun, onFoul, className = '
       typeof window !== 'undefined' &&
       window.matchMedia &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    setTimeout(() => {
-      document.getElementById('telemetry')?.scrollIntoView({
-        behavior: reduced ? 'auto' : 'smooth',
-        block: 'start',
-      });
-    }, 550);
+    timersRef.current.push(
+      setTimeout(() => {
+        document.getElementById('telemetry')?.scrollIntoView({
+          behavior: reduced ? 'auto' : 'smooth',
+          block: 'start',
+        });
+      }, RUN_VIEW_MS)
+    );
     resetTimerRef.current = setTimeout(() => {
       holdMV.set(0); // hand the needle back to scroll-driving, quietly
+      setLit(new Set(['pre-stage']));
       setStatus('idle');
-    }, 4200);
+    }, RESET_MS);
   };
 
   useEffect(() => {
     return () => {
       stopAnim();
+      clearTimers();
       clearTimeout(resetTimerRef.current);
     };
   }, []);
 
   const LABELS = {
-    idle: '■ HOLD TO LAUNCH',
-    staging: 'REVS BUILDING — RELEASE ON GREEN',
-    launched: 'LAUNCHED · ET 9.62 ✓',
-    foul: 'RED LIGHT — TOO EARLY',
+    idle: 'Hold to launch',
+    staging: 'Release on green…',
+    launched: 'ET 9.62 — clean run',
+    foul: 'Red light — too soon',
   };
 
   const tone = {
@@ -110,6 +144,18 @@ export default function LaunchControl({ holdMV, onTreeRun, onFoul, className = '
     launched: 'border-brand-green text-brand-green',
     foul: 'border-brand-red text-brand-red',
   }[status];
+
+  const lampClass = (id) => {
+    if (id === 'red') {
+      return status === 'foul'
+        ? 'bg-brand-red shadow-[0_0_8px_rgba(239,68,68,0.9)]'
+        : 'bg-white/10';
+    }
+    const on = lit.has(id) && status !== 'foul';
+    if (!on) return 'bg-white/10';
+    if (id === 'green') return 'bg-brand-green shadow-[0_0_8px_rgba(34,197,94,0.9)]';
+    return 'bg-brand-amber shadow-[0_0_6px_rgba(245,158,11,0.8)]';
+  };
 
   return (
     <button
@@ -136,8 +182,9 @@ export default function LaunchControl({ holdMV, onTreeRun, onFoul, className = '
       }}
       aria-label="Launch control: press and hold, release when the tree goes green"
       className={[
-        'relative inline-flex items-center justify-center px-7 py-4 rounded-md border-2',
+        'relative inline-flex flex-col items-center justify-center gap-2 px-7 py-3 rounded-md border-2',
         'font-display font-bold transition-colors select-none touch-none overflow-hidden',
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
         tone,
         className,
       ].join(' ')}
@@ -151,7 +198,21 @@ export default function LaunchControl({ holdMV, onTreeRun, onFoul, className = '
         ].join(' ')}
         aria-hidden="true"
       />
-      <span className="relative font-mono text-sm tracking-[0.12em]">{LABELS[status]}</span>
+
+      {/* miniature pro tree — same SEQUENCE as the big one */}
+      <span className="relative flex items-center gap-[5px]" aria-hidden="true">
+        <span className={`w-1.5 h-1.5 rounded-full transition-colors duration-200 ${lampClass('pre-stage')}`} />
+        <span className={`w-1.5 h-1.5 rounded-full transition-colors duration-200 ${lampClass('stage')}`} />
+        <span className="w-1 h-px bg-white/15" />
+        <span className={`w-2.5 h-2.5 rounded-full transition-colors duration-200 ${lampClass('amber-1')}`} />
+        <span className={`w-2.5 h-2.5 rounded-full transition-colors duration-200 ${lampClass('amber-2')}`} />
+        <span className={`w-2.5 h-2.5 rounded-full transition-colors duration-200 ${lampClass('amber-3')}`} />
+        <span className="w-1 h-px bg-white/15" />
+        <span className={`w-2.5 h-2.5 rounded-full transition-colors duration-200 ${lampClass('green')}`} />
+        <span className={`w-2.5 h-2.5 rounded-full transition-colors duration-200 ${lampClass('red')}`} />
+      </span>
+
+      <span className="relative leading-none">{LABELS[status]}</span>
     </button>
   );
 }
