@@ -412,6 +412,11 @@ def _build_config(
                     "Failed to load config for bike_id=%s: %s", bike_id, exc
                 )
 
+    if bike_id is not None and cfg is None:
+        # Previously this fell through to the K5 default silently -- a typo'd
+        # bike_id returned GSX-R 1000 results with no error (June 11 QA bug #1).
+        raise HTTPException(404, f"Bike {bike_id} not found")
+
     if cfg is None and bike_preset:
         presets = {
             "gsxr1000_k5": gsxr1000_k5,
@@ -870,23 +875,30 @@ def list_venues():
 def list_tires(
     compound: str | None = Query(None),
     manufacturer: str | None = Query(None),
-    limit: int = Query(200, le=5000),
+    limit: int = Query(1000, le=5000),
 ):
     db = _get_db()
     if not db:
         raise HTTPException(503, "Database unavailable")
     try:
+        count_query = """SELECT COUNT(*)
+                   FROM tire_models tm
+                   JOIN tire_manufacturers tmfr ON tm.manufacturer_id = tmfr.id
+                   WHERE 1=1"""
         query = """SELECT tm.*, tmfr.name AS manufacturer
                    FROM tire_models tm
                    JOIN tire_manufacturers tmfr ON tm.manufacturer_id = tmfr.id
                    WHERE 1=1"""
         params: list[Any] = []
         if compound:
+            count_query += " AND LOWER(tm.compound_type) = LOWER(?)"
             query += " AND LOWER(tm.compound_type) = LOWER(?)"
             params.append(compound)
         if manufacturer:
+            count_query += " AND LOWER(tmfr.name) LIKE LOWER(?)"
             query += " AND LOWER(tmfr.name) LIKE LOWER(?)"
             params.append(f"%{manufacturer}%")
+        total = db.execute(count_query, params).fetchone()[0]
         query += " ORDER BY tmfr.name, tm.model_name LIMIT ?"
         params.append(limit)
         rows = db.execute(query, params).fetchall()
@@ -896,7 +908,7 @@ def list_tires(
             d = dict(r)
             d["model"] = d.get("model_name", "")
             tires.append(d)
-        return {"tires": tires}
+        return {"tires": tires, "total": total}
     except Exception as exc:
         raise HTTPException(500, f"Database error: {exc}")
 
@@ -925,6 +937,8 @@ def _simulate_impl(req: SimulateRequest, progress=None):
             humidity_pct=req.humidity_pct,
             headwind_kmh=req.headwind_kmh,
         )
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(400, f"Config error: {exc}")
 
@@ -1033,6 +1047,8 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
             humidity_pct=req.humidity_pct,
             headwind_kmh=req.headwind_kmh,
         )
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(400, f"Config error: {exc}")
 
@@ -1132,6 +1148,8 @@ def _topspeed_impl(req: TopSpeedRequest, progress=None) -> TopSpeedResultDict:
             humidity_pct=req.humidity_pct,
             headwind_kmh=req.headwind_kmh,
         )
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(400, f"Config error: {exc}")
 
@@ -1246,6 +1264,8 @@ def simulate_distance(req: DistanceRunRequest) -> DistanceResultDict:
             humidity_pct=req.humidity_pct,
             headwind_kmh=req.headwind_kmh,
         )
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(400, f"Config error: {exc}")
 
@@ -1313,8 +1333,9 @@ def list_parts(
 ):
     """Return parts catalog, optionally filtered by category and bike compatibility.
 
-    Default limit raised from 100→500 so the full 465-part catalog fits in one
-    page. Cap raised to 1000 to leave headroom as the catalog grows.
+    ``total`` in the response is the number of MATCHING parts (after category /
+    search / compatibility filtering, before ``limit`` slicing) so paginating
+    callers can detect truncation. Cap is 5000 (563-part catalog as of Jun 2026).
 
     When ``bike_id`` is provided, each returned part is evaluated against the
     bike's fitment rules (stroke_type, manufacturer, engine_config, displacement,
@@ -1342,8 +1363,22 @@ def list_parts(
             query += " AND (p.brand LIKE ? OR p.model_name LIKE ?)"
             params += [f"%{search}%", f"%{search}%"]
 
-        query += " ORDER BY pc.display_name, p.brand, p.model_name LIMIT ?"
-        params.append(limit)
+        query += " ORDER BY pc.display_name, p.brand, p.model_name"
+        if bike_id is None:
+            # Plain catalog listing: SQL LIMIT is safe, but COUNT first for total.
+            count_q = query.replace(
+                "SELECT p.*, pc.name as category_name, pc.display_name as category_display",
+                "SELECT COUNT(*)",
+                1,
+            ).split(" ORDER BY")[0]
+            sql_total = db.execute(count_q, params).fetchone()[0]
+            query += " LIMIT ?"
+            params.append(limit)
+        else:
+            # Compatibility filtering happens in Python below -- applying the SQL
+            # LIMIT first silently starved brands late in the sort order
+            # (June 11 QA / parts-audit handoff). Fetch all, filter, then slice.
+            sql_total = None
 
         rows = db.execute(query, params).fetchall()
 
@@ -1391,9 +1426,13 @@ def list_parts(
                         pass
             parts.append(d)
 
+        total = sql_total if sql_total is not None else len(parts)
+        if bike_id is not None and len(parts) > limit:
+            parts = parts[:limit]
+
         return {
             "parts": parts,
-            "total": len(parts),
+            "total": total,
             "bike_id": bike_id,
             "compatible_only": bool(bike_id is not None and compatible_only),
         }
