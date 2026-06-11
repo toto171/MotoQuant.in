@@ -2606,10 +2606,26 @@ class SurrogateCompareResponse(BaseModel):
 # ─── Helpers ─────────────────────────────────────────────────────────────
 
 
-def _check_envelope(fvec):
-    """Check each BASE feature against FEATURE_BOUNDS. Returns (ok, violations)."""
+def _check_envelope(fvec, model=None):
+    """Check the feature vector against the model's training envelope.
+
+    v2 numpy artifacts embed per-feature train min/max (covers the full
+    501-bike catalog); models without one fall back to the static
+    FEATURE_BOUNDS table over the 14 base features. Returns (ok, violations).
+    """
     try:
         from motoquant.analysis.surrogate_data import FEATURE_BOUNDS, FEATURE_NAMES
+
+        env = getattr(model, "envelope", None)
+        if env is not None:
+            env_min, env_max = env
+            names = getattr(model, "feature_names", FEATURE_NAMES)
+            violations = [
+                str(names[i])
+                for i in range(min(len(fvec), len(env_min)))
+                if not (env_min[i] <= float(fvec[i]) <= env_max[i])
+            ]
+            return len(violations) == 0, violations
 
         violations = []
         for i, name in enumerate(FEATURE_NAMES):
@@ -2681,10 +2697,20 @@ def surrogate_predict(
         from motoquant.analysis.surrogate_data import config_to_feature_vector
 
         fvec = config_to_feature_vector(config)
-        within_env, violations = _check_envelope(fvec)
+        within_env, violations = _check_envelope(fvec, _SURROGATE)
+        # Boost state is invisible to the feature vector — flag boosted configs
+        # so clients know the surrogate is predicting the NA equivalent.
+        if getattr(getattr(config, "forced_induction", None), "is_boosted", False):
+            within_env = False
+            violations = [*violations, "forced_induction_active"]
 
+        # Feature schemas are append-only (v1 models take the first 21 of the
+        # 26 v2 features); trim for models that declare a narrower input.
+        n_feat = getattr(_SURROGATE, "n_features", None) or len(
+            getattr(_SURROGATE, "feature_names", None) or fvec
+        )
         t0 = _time.perf_counter()
-        et_arr, trap_arr = _SURROGATE.predict(fvec.reshape(1, -1))
+        et_arr, trap_arr = _SURROGATE.predict(fvec[:n_feat].reshape(1, -1))
         elapsed_ms = (_time.perf_counter() - t0) * 1000.0
 
         et_val = float(et_arr[0]) if hasattr(et_arr, "__len__") else float(et_arr)

@@ -40,6 +40,8 @@ import logging
 import warnings
 from dataclasses import asdict, dataclass, field
 
+import numpy as np
+
 from ..models import BikeConfig
 from .recommendations import (
     EXCLUSIVE_GROUPS,
@@ -82,10 +84,27 @@ _EXCLUSIVE_CATEGORIES = set().union(*EXCLUSIVE_GROUPS) if EXCLUSIVE_GROUPS else 
 # ─────────────────────────────────────────────────────────────────────────
 # Surrogate-agnostic scorer
 # ─────────────────────────────────────────────────────────────────────────
-def _check_envelope(fvec) -> tuple[bool, list[str]]:
-    """Mirror api._check_envelope: each BASE feature vs FEATURE_BOUNDS."""
+def _check_envelope(fvec, surrogate=None) -> tuple[bool, list[str]]:
+    """Mirror api._check_envelope.
+
+    A v2 surrogate embeds its own per-feature training envelope (min/max over
+    the catalog-wide training set) — prefer that, checking EVERY feature the
+    model knows. Models without one (v1 numpy artifact, XGB/DNN pickles) fall
+    back to the static FEATURE_BOUNDS table over the 14 base features.
+    """
     try:
         from .surrogate_data import FEATURE_BOUNDS, FEATURE_NAMES
+
+        env = getattr(surrogate, "envelope", None)
+        if env is not None:
+            env_min, env_max = env
+            names = getattr(surrogate, "feature_names", FEATURE_NAMES)
+            violations = [
+                str(names[i])
+                for i in range(min(len(fvec), len(env_min)))
+                if not (env_min[i] <= float(fvec[i]) <= env_max[i])
+            ]
+            return len(violations) == 0, violations
 
         violations: list[str] = []
         for i, name in enumerate(FEATURE_NAMES):
@@ -104,6 +123,51 @@ def _check_envelope(fvec) -> tuple[bool, list[str]]:
             exc_info=True,
         )
         return False, ["envelope_check_failed"]
+
+
+def _blind_relevant_signature(config) -> tuple:
+    """Hashable snapshot of every ET-relevant config field the 26-feature
+    vector CANNOT see.
+
+    Parts that only touch these (quickshifters, clutch kits, nitrous/boost,
+    swingarm extensions, wheelie bars, launch electronics, mid-stack gearset
+    swaps, dyno-curve reshapes...) leave the feature vector bit-identical to
+    stock, so the surrogate would score them as exactly zero gain. Comparing
+    this signature against the baseline's lets the predictor full-sim only
+    the feature-blind candidates that can actually move the ET — pure-null
+    parts (brake pads, fork springs, chain links, bodywork) keep the cheap
+    surrogate zero.
+    """
+    import dataclasses as _dc
+
+    dt = config.drivetrain
+    ch = config.chassis
+    eng = config.engine
+    curve = eng.dyno_curve
+    return (
+        _dc.astuple(config.clutch),
+        _dc.astuple(config.forced_induction),
+        _dc.astuple(config.wheelie) if hasattr(config, "wheelie") else (),
+        _dc.astuple(config.staging),
+        dt.quickshifter,
+        dt.air_shifter,
+        dt.total_shift_time_ms,
+        dt.shift_cut_duration_ms,
+        dt.post_shift_retard_ms,
+        dt.chain_efficiency,
+        dt.primary_efficiency,
+        dt.trans_efficiency_per_mesh,
+        dt.shaft_efficiency,
+        tuple(
+            dt.gear_ratios or ()
+        ),  # mid-stack ratio swaps don't move g1/gtop features
+        ch.swingarm_extension_mm if hasattr(ch, "swingarm_extension_mm") else None,
+        getattr(ch, "cog_height_mm", None),
+        getattr(ch, "wheelbase_mm", None),
+        getattr(eng, "engine_inertia_kgm2", None),
+        # dyno-curve SHAPE (a reshape at constant peaks is feature-invisible)
+        None if curve is None else tuple(np.round(curve.torque_nm, 6).tolist()),
+    )
 
 
 class SurrogatePredictor:
@@ -125,6 +189,28 @@ class SurrogatePredictor:
         self.n_surrogate = 0
         self.n_fallback = 0
         self.n_out_of_envelope = 0
+        self.n_feature_blind = 0
+        # Feature vector + blind-signature of the FIRST scored config
+        # (optimize_build / ROI scorers always evaluate the stock baseline
+        # first). A later config with bit-identical features carries a
+        # modification the surrogate cannot see; if its blind-signature also
+        # moved, the change is ET-relevant (quickshifter, clutch, nitrous,
+        # swingarm...) and is full-simmed instead of being silently scored as
+        # zero-gain. Blind AND signature-identical configs (brake pads, fork
+        # internals, chain links...) keep the surrogate's honest zero.
+        self._ref_fvec = None
+        self._ref_sig = None
+        # True-frame anchor: the first scored config (the stock baseline) is
+        # ALSO full-simmed once, and every surrogate prediction afterwards is
+        # shifted by (sim_base - surr_base). Per-part deltas keep the smooth
+        # surrogate differences, while every reported ET lives in the real
+        # physics frame (the surrogate's absolute offset on this bike cancels).
+        self._anchor_offset = None  # (et_shift_s, trap_shift_ms)
+        self.n_anchor_sims = 0
+        # Feature-blind fallback results keyed by blind-signature: a dozen
+        # quickshifter SKUs that all set the same shift time produce the SAME
+        # config as far as the sim cares — one sim covers them all.
+        self._blind_cache: dict = {}
         self.on_predict = None  # optional progress hook (jobs API)
 
     def __call__(self, config: BikeConfig) -> tuple[float, float]:
@@ -144,7 +230,36 @@ class SurrogatePredictor:
             from .surrogate_data import config_to_feature_vector
 
             fvec = config_to_feature_vector(config)
-            ok, _violations = _check_envelope(fvec)
+            first_call = self._ref_fvec is None
+            if first_call:
+                self._ref_fvec = fvec.copy()
+                self._ref_sig = _blind_relevant_signature(config)
+            elif self.allow_fallback and np.array_equal(fvec, self._ref_fvec):
+                sig = _blind_relevant_signature(config)
+                if sig != self._ref_sig:
+                    self.n_feature_blind += 1
+                    try:
+                        cached = self._blind_cache.get(sig)
+                    except TypeError:  # unhashable corner — just sim it
+                        cached = None
+                        sig = None
+                    if cached is not None:
+                        return cached
+                    self.n_fallback += 1
+                    out = _run_et(config)
+                    if sig is not None:
+                        self._blind_cache[sig] = out
+                    return out
+            ok, _violations = _check_envelope(fvec, self.surrogate)
+            # Forced induction is INVISIBLE to the feature vector: boost/nitrous
+            # parts flip forced_induction.* via param_overrides without moving a
+            # single feature, so the surrogate would confidently return the
+            # naturally-aspirated ET (the June-2026 Hayabusa proof run scored a
+            # 60 HP nitrous kit at ~0.0s gain this way). Boosted configs must
+            # always be scored by the full physics sim.
+            if getattr(getattr(config, "forced_induction", None), "is_boosted", False):
+                ok = False
+                _violations = ["forced_induction_active"]
             if not ok and self.allow_fallback:
                 self.n_out_of_envelope += 1
                 self.n_fallback += 1
@@ -158,6 +273,14 @@ class SurrogatePredictor:
             if trap > _TRAP_MS_CEILING:  # model returned km/h — normalise to m/s
                 trap /= 3.6
             self.n_surrogate += 1
+            if first_call and self.allow_fallback:
+                true_et, true_trap = _run_et(config)
+                self.n_anchor_sims += 1
+                self._anchor_offset = (true_et - et, true_trap - trap)
+                return true_et, true_trap
+            if self._anchor_offset is not None:
+                et += self._anchor_offset[0]
+                trap += self._anchor_offset[1]
             return et, trap
         except Exception as exc:  # pragma: no cover (needs a loaded surrogate)
             if not self.allow_fallback:
@@ -185,6 +308,8 @@ class SurrogatePredictor:
             "surrogate_calls": self.n_surrogate,
             "fallback_calls": self.n_fallback,
             "out_of_envelope": self.n_out_of_envelope,
+            "feature_blind": self.n_feature_blind,
+            "anchor_sims": self.n_anchor_sims,
         }
 
 
@@ -471,6 +596,51 @@ def optimize_build(
     selected = _select_build(
         individual, float(budget_inr), goal, position_of=position_of
     )
+
+    # Surrogate-scored runs: re-verify the SELECTED parts with the full sim
+    # and re-select until the pick stabilises (≤3 rounds). Surrogate delta
+    # noise on a single part (±0.03-0.10s) is harmless for ranking the bulk
+    # of the catalog but can promote a phantom pick into the build or hold a
+    # real gain out of it; simming just the winners (10-20 sims) pins every
+    # part that actually spends budget to its true physics delta.
+    n_verify_sims = 0
+    if predictor.surrogate is not None and predictor.allow_fallback and selected:
+        verified: dict[int, tuple[float, float]] = {}
+        base_true_et, base_true_trap = base_et_s, base_trap_ms
+        roi_by_id = {r.part_id: r for r in individual}
+        for _round in range(3):
+            todo = [r.part_id for r in selected if r.part_id not in verified]
+            if not todo:
+                break
+            if progress_cb is not None:
+                progress_cb(0.97, "Verifying selected parts (full sim)")
+            for pid in todo:
+                try:
+                    part_cfg = parts_repo.apply_multiple([pid], base_config)
+                    part_et, part_trap = _run_et(part_cfg)
+                    verified[pid] = (
+                        base_true_et - part_et,
+                        part_trap - base_true_trap,
+                    )
+                    n_verify_sims += 1
+                except Exception:  # noqa: BLE001 — keep the surrogate score
+                    verified[pid] = (
+                        roi_by_id[pid].delta_et_s,
+                        roi_by_id[pid].delta_trap_ms,
+                    )
+            for pid, (d_et, d_trap) in verified.items():
+                r = roi_by_id.get(pid)
+                if r is not None:
+                    r.delta_et_s = round(d_et, 4)
+                    r.delta_trap_ms = round(d_trap, 4)
+            reselected = _select_build(
+                individual, float(budget_inr), goal, position_of=position_of
+            )
+            if {r.part_id for r in reselected} == {r.part_id for r in selected}:
+                selected = reselected
+                break
+            selected = reselected
+
     if progress_cb is not None:
         progress_cb(0.98, "Verifying combined build")
 
@@ -539,5 +709,5 @@ def optimize_build(
         parts_skipped_incompatible=0,  # candidate pool is compatibility-filtered upstream
         parts_skipped_no_gain=sum(1 for r in individual if gain(r) <= 0),
         scoring_method=predictor.method,
-        scoring_stats=predictor.stats(),
+        scoring_stats={**predictor.stats(), "verify_sims": n_verify_sims},
     )
