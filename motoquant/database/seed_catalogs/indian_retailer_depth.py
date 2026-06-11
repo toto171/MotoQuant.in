@@ -963,7 +963,15 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
-                        "manufacturers": ["Yamaha", "Suzuki", "Honda", "Kawasaki", "BMW", "Ducati", "Aprilia"],
+                        "manufacturers": [
+                            "Yamaha",
+                            "Suzuki",
+                            "Honda",
+                            "Kawasaki",
+                            "BMW",
+                            "Ducati",
+                            "Aprilia",
+                        ],
                         "displacement_min_cc": 900,
                         "displacement_max_cc": 1350,
                         "chain_pitch": "530",

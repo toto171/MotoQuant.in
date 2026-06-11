@@ -193,7 +193,7 @@ def _sprocket_positions(parts_repo, part_ids) -> dict[int, str]:
     return out
 
 
-def _knapsack_group_key(r: "PartROIResult", position_of: dict[int, str] | None = None):
+def _knapsack_group_key(r: PartROIResult, position_of: dict[int, str] | None = None):
     """Exclusivity group for the multiple-choice knapsack.
 
     - exclusive categories -> one shared group per category;
@@ -212,11 +212,11 @@ def _knapsack_group_key(r: "PartROIResult", position_of: dict[int, str] | None =
 
 
 def _grouped_knapsack(
-    candidates: "list[PartROIResult]",
+    candidates: list[PartROIResult],
     budget_inr: float,
     gain,
     group_key,
-) -> "list[PartROIResult]":
+) -> list[PartROIResult]:
     """Multiple-choice 0/1 knapsack: maximise sum(gain) subject to
     sum(price) <= budget and at most one part per exclusivity group.
     Free parts weigh 0 buckets, so they are picked whenever gain > 0
@@ -502,7 +502,8 @@ def find_best_build(
     et_fn=None,  # injectable scorer (e.g. surrogate); defaults to full physics sim
     objective: str = "min_et",  # "min_et" (maximise ET gain) | "max_trap" (maximise trap gain)
     return_individual: bool = False,  # also return the per-part ROI list
-    precomputed_individual: list[PartROIResult] | None = None,  # reuse caller's ROI pass
+    precomputed_individual: list[PartROIResult]
+    | None = None,  # reuse caller's ROI pass
 ) -> BuildROIResult:
     """
     Find the combination of parts that maximises ET improvement within a budget.

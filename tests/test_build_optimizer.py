@@ -339,11 +339,12 @@ class TestComputePartsRoiRealFitment:
         from motoquant.defaults import hayabusa_gen1
 
         cfg = hayabusa_gen1()
-        fast = lambda c: (10.0 - (215.0 - c.chassis.dry_mass_kg) * 0.001, 60.0)
+
+        def fast(c):
+            return (10.0 - (215.0 - c.chassis.dry_mass_kg) * 0.001, 60.0)
+
         # 48 = Hayabusa Gen1 Stage 1 flash (fits bike 3); 123 = Duke 390 tune (must not)
-        rois = compute_parts_roi(
-            cfg, [48, 123], repo, bike_model_id=3, et_fn=fast
-        )
+        rois = compute_parts_roi(cfg, [48, 123], repo, bike_model_id=3, et_fn=fast)
         by_id = {r.part_id: r for r in rois}
         assert by_id[48].is_compatible, (
             "Hayabusa flash flagged incompatible with the Hayabusa — legacy "
@@ -358,7 +359,10 @@ class TestComputePartsRoiRealFitment:
         from motoquant.defaults import hayabusa_gen1
 
         cfg = hayabusa_gen1()
-        fast = lambda c: (10.0 - (215.0 - c.chassis.dry_mass_kg) * 0.001, 60.0)
+
+        def fast(c):
+            return (10.0 - (215.0 - c.chassis.dry_mass_kg) * 0.001, 60.0)
+
         build = find_best_build(
             cfg,
             budget_inr=500_000,
