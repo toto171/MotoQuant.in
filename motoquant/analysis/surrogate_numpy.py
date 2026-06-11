@@ -27,6 +27,8 @@ class NumpySurrogate:
         tgt_std,
         feature_names,
         meta=None,
+        env_min=None,
+        env_max=None,
     ):
         self._W = weights
         self._b = biases
@@ -36,6 +38,8 @@ class NumpySurrogate:
         self._ts = tgt_std
         self.feature_names = list(feature_names)
         self.meta = meta
+        self._env_min = env_min
+        self._env_max = env_max
         self._backend = "numpy"
 
     @classmethod
@@ -53,13 +57,24 @@ class NumpySurrogate:
             d["tgt_std"].astype(np.float64),
             [str(s) for s in d["feature_names"]],
             d["meta"] if "meta" in d.files else None,
+            # v2 artifacts embed their training envelope; v1 files simply
+            # lack the keys and fall back to the static FEATURE_BOUNDS check.
+            d["env_min"].astype(np.float64) if "env_min" in d.files else None,
+            d["env_max"].astype(np.float64) if "env_max" in d.files else None,
         )
 
     def predict(self, X):
-        """X: (n,21) or (21,). Returns (et_s array, trap_mps array)."""
+        """X: (n, n_features) or (n_features,). Returns (et_s, trap_mps) arrays.
+
+        Feature schemas are append-only (v1 = 21, v2 = 26 with the v1 features
+        as a strict prefix), so a WIDER vector than this model was trained on
+        is safely truncated to the model's own width.
+        """
         X = np.asarray(X, dtype=np.float64)
         if X.ndim == 1:
             X = X.reshape(1, -1)
+        if X.shape[1] > len(self._fm):
+            X = X[:, : len(self._fm)]
         a = (X - self._fm) / self._fs
         for W, b in zip(self._W[:-1], self._b[:-1]):
             a = np.maximum(0.0, a @ W + b)  # ReLU hidden layers
@@ -71,6 +86,22 @@ class NumpySurrogate:
 
         et, trap = self.predict(config_to_feature_vector(config).reshape(1, -1))
         return float(et[0]), float(trap[0])
+
+    @property
+    def n_features(self) -> int:
+        """Input width this model was trained on (21 for v1, 26 for v2)."""
+        return int(len(self._fm))
+
+    @property
+    def envelope(self):
+        """Per-feature training envelope as (env_min, env_max) arrays.
+
+        Returns None for v1 artifacts that predate embedded envelopes —
+        callers should then fall back to surrogate_data.FEATURE_BOUNDS.
+        """
+        if self._env_min is None or self._env_max is None:
+            return None
+        return self._env_min, self._env_max
 
     @property
     def is_fitted(self) -> bool:

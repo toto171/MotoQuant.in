@@ -88,8 +88,37 @@ DERIVED_FEATURE_NAMES: list[str] = [
     "gear_ratio_5th",  # interpolated 5th gear ratio
 ]
 
-#: All 17 features in order — this is what the model sees.
-FEATURE_NAMES: list[str] = BASE_FEATURE_NAMES + DERIVED_FEATURE_NAMES
+#: 5 structural features appended in v2 (June 2026). They are read straight
+#: off the BikeConfig (never perturbed by parts/venues) and disambiguate
+#: structurally different bikes that share the same 21 v1 features — e.g. a
+#: 4-speed RX100 vs a 6-speed R15, or a peaky 600 vs a flat twin. Adding them
+#: cut catalog-wide holdout ET MAE by ~20% (entry-class clusters by ~37%).
+#: ORDER MATTERS: v1's 21 features stay a strict prefix, so 21-input models
+#: keep working on a [:21] slice of a v2 feature vector.
+EXTRA_FEATURE_NAMES: list[str] = [
+    "n_gears",  # gearbox speed count (4/5/6)
+    "displacement_cc",  # engine displacement
+    "launch_rpm",  # staging launch RPM (2T two-step bikes differ wildly)
+    "peak_torque_rpm",  # where the torque curve peaks (shape proxy)
+    "peak_power_rpm",  # where power peaks vs redline (shape proxy)
+]
+
+#: Neutral fill-ins used ONLY when a feature dict is built without a real
+#: BikeConfig (the legacy Sobol template path / synthetic test fixtures).
+#: generate_training_data overwrites them from the actual applied config.
+EXTRA_FEATURE_DEFAULTS: dict[str, float] = {
+    "n_gears": 6.0,
+    "displacement_cc": 1000.0,
+    "launch_rpm": 9000.0,
+    "peak_torque_rpm": 10000.0,
+    "peak_power_rpm": 11500.0,
+}
+
+#: All 26 features in order — this is what the model sees.
+#: (14 base + 7 derived + 5 structural extras; v1 models used the first 21.)
+FEATURE_NAMES: list[str] = (
+    BASE_FEATURE_NAMES + DERIVED_FEATURE_NAMES + EXTRA_FEATURE_NAMES
+)
 
 #: Sampling bounds for each BASE feature: (low, high).
 #: Covers the full range from 125 cc learner bikes to 1300 cc superbikes.
@@ -164,8 +193,24 @@ def _compute_derived_features(base: dict[str, float]) -> dict[str, float]:
 
 
 def _full_features(base: dict[str, float]) -> dict[str, float]:
-    """Return merged dict of all 17 features (base + derived)."""
-    return {**base, **_compute_derived_features(base)}
+    """Return merged dict of all 26 features (base + derived + extras).
+
+    Structural extras default to EXTRA_FEATURE_DEFAULTS here; callers that
+    hold a real BikeConfig overwrite them via _extras_from_config().
+    """
+    return {**EXTRA_FEATURE_DEFAULTS, **base, **_compute_derived_features(base)}
+
+
+def _extras_from_config(config: BikeConfig) -> dict[str, float]:
+    """Read the 5 structural EXTRA features straight off a BikeConfig."""
+    gear_ratios = config.drivetrain.gear_ratios or []
+    return {
+        "n_gears": float(len(gear_ratios) or 6),
+        "displacement_cc": float(getattr(config.engine, "displacement_cc", 0.0) or 0.0),
+        "launch_rpm": float(getattr(config.staging, "launch_rpm", 0.0) or 0.0),
+        "peak_torque_rpm": float(getattr(config.engine, "peak_torque_rpm", 0.0) or 0.0),
+        "peak_power_rpm": float(getattr(config.engine, "peak_power_rpm", 0.0) or 0.0),
+    }
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -261,7 +306,7 @@ class SurrogateDataset:
         y_trap = data["y_trap"]
         meta = data["meta"]
 
-        # Backward-compat: v1 files have 14 features; derive the 3 extra columns.
+        # Backward-compat: v1 files have 14 features; derive the 7 extra columns.
         if stored_names == BASE_FEATURE_NAMES and X.shape[1] == len(BASE_FEATURE_NAMES):
             logger.info(
                 "Loading v1 dataset (%d features); computing %d derived features.",
@@ -279,6 +324,25 @@ class SurrogateDataset:
                 derived_cols.append([d[k] for k in DERIVED_FEATURE_NAMES])
             derived_array = np.array(derived_cols, dtype=np.float32)
             X = np.concatenate([base_array, derived_array], axis=1)
+            stored_names = BASE_FEATURE_NAMES + DERIVED_FEATURE_NAMES
+        if (
+            len(stored_names) < len(FEATURE_NAMES)
+            and list(stored_names) == FEATURE_NAMES[: len(stored_names)]
+        ):
+            # Pre-v2 file (no structural extras): the stored columns are a
+            # strict prefix of the current schema. Pad the missing extras
+            # with their template defaults — the real values are config
+            # constants this file never recorded.
+            warnings.warn(
+                f"Dataset has {len(stored_names)} features; padding "
+                f"{len(FEATURE_NAMES) - len(stored_names)} v2 structural "
+                "extras with template defaults. Regenerate for full accuracy."
+            )
+            pad_vals = [
+                EXTRA_FEATURE_DEFAULTS[k] for k in FEATURE_NAMES[len(stored_names) :]
+            ]
+            pad = np.tile(np.asarray(pad_vals, dtype=X.dtype), (X.shape[0], 1))
+            X = np.concatenate([X, pad], axis=1)
             stored_names = FEATURE_NAMES
         elif stored_names != FEATURE_NAMES:
             warnings.warn(
@@ -392,13 +456,20 @@ def _extract_nominal_features(config: BikeConfig) -> dict[str, float]:
         "tire_mu_peak": float(config.tires.mu_peak),
         "rear_rolling_radius_m": float(config.tires.rear_rolling_radius_m),
         "primary_ratio": float(config.drivetrain.primary_ratio),
-        "final_drive_ratio": float(config.drivetrain.final_drive_ratio),
+        # v2: use the EFFECTIVE final drive (the final_ratio property — sprocket
+        # teeth override the raw final_drive_ratio field, and the physics engine
+        # only ever sees the property). Reading the raw field made this feature a
+        # dead knob for every config with sprockets set (v1 trained on K5, which
+        # has 17/42 — its sampled final_drive_ratio never reached the sim).
+        "final_drive_ratio": float(config.drivetrain.final_ratio),
         "gear_ratio_1st": float(gear_ratios[0]),
         "gear_ratio_top": float(gear_ratios[-1]),
         "reaction_time_ms": float(config.staging.reaction_time_ms),
         "altitude_m": float(getattr(config.environment, "altitude_m", 0.0)),
     }
-    return _full_features(base)
+    feat = _full_features(base)
+    feat.update(_extras_from_config(config))
+    return feat
 
 
 def _apply_features_to_config(
@@ -566,6 +637,7 @@ def generate_training_data(
 
         try:
             cfg = _apply_features_to_config(base_config, feat)
+            feat = {**feat, **_extras_from_config(cfg)}
             engine = MotoQuantEngine(cfg)
             result = engine.run()
 
@@ -619,11 +691,12 @@ def generate_training_data(
 
 def config_to_feature_vector(config: BikeConfig) -> np.ndarray:
     """
-    Convert a BikeConfig directly to a 17-dim feature vector for inference.
+    Convert a BikeConfig directly to a 26-dim feature vector for inference.
 
     Returns
     -------
-    1D numpy array of shape (17,) in FEATURE_NAMES order (14 base + 3 derived).
+    1D numpy array of shape (26,) in FEATURE_NAMES order
+    (14 base + 7 derived + 5 structural extras; v1 models consume [:21]).
     """
     feat = _extract_nominal_features(config)
     return np.array([feat[k] for k in FEATURE_NAMES], dtype=np.float32)
