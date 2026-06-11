@@ -186,7 +186,12 @@ _PROFILES: dict[str, CategoryProfile] = {
         name=CATEGORY_MID_TWIN_300_500,
         # Moderate over-clutching. Legacy `peak_hp < 60` 0.30 factor.
         over_clutch_factor=0.30,
-        max_engine_decel_rads2=200.0,
+        # max_engine_decel_rads2 lowered 200 -> 50 (2026-06-11 calibration):
+        # cluster was sim-fast (weighted bias -0.116; Apache RR 310 -0.98 and
+        # Benelli 302R -0.93 at w=0.5 vs Ninja 400 +0.49 at w=1.0). Grid
+        # probe 50/120/200: weighted bias centers at 50 (-0.011) with w|D|
+        # 0.466 -> 0.450. Baselines exact at every point.
+        max_engine_decel_rads2=50.0,
         launch_floor_factor=1.0,
         tuck_transition_time_s=2.0,
         cd_ceiling=0.55,
@@ -201,7 +206,13 @@ _PROFILES: dict[str, CategoryProfile] = {
         # Aggressive launch — small-cc commuters bog hard if you don't
         # rev them up and slip the clutch. Legacy `peak_hp < 30` 0.40.
         over_clutch_factor=0.40,
-        max_engine_decel_rads2=280.0,
+        # max_engine_decel_rads2 lowered 280 -> 40 (2026-06-11 calibration):
+        # this cluster was sim-FAST (weighted bias -0.22 driven by CBR300R
+        # -0.87 w=0.7 and the recovered CBR 250R 2011 row). Grid probe
+        # 0/40/80/160/220/280/500/800: w|D| bottoms at 0-40 (0.433-0.434)
+        # vs 0.543 at 280; 40 keeps the over-clutch mechanism armed instead
+        # of dead. Weighted bias lands -0.015.
+        max_engine_decel_rads2=40.0,
         launch_floor_factor=1.0,
         tuck_transition_time_s=2.2,
         cd_ceiling=0.55,
@@ -218,7 +229,15 @@ _PROFILES: dict[str, CategoryProfile] = {
         # Most aggressive launch — these bikes have <22 hp and need
         # every trick to hit the strip in 16-17 seconds.
         over_clutch_factor=0.50,
-        max_engine_decel_rads2=350.0,
+        # max_engine_decel_rads2 raised 350 -> 900 (2026-06-11 calibration):
+        # after the R155 gearing fix (primary 1.609/2.1 franken-values ->
+        # real 3.042) and the measured-wheel-curve extension to the V3
+        # generation, the whole R15/MT-15 quartet simmed consistently slow
+        # (+0.49/+0.55 on the two w=1.0 MotoStatz rows). Grid probe 350/600/
+        # 900/1300 on the 6-bike weighted sub-cluster: w|D| 0.673 -> 0.542 at
+        # 900 with the R15 V3/V4 pair landing +0.20/+0.31; 1300 over-speeds
+        # the NS200 (-1.14) for no pair gain. Baselines exact at every point.
+        max_engine_decel_rads2=900.0,
         launch_floor_factor=1.0,
         tuck_transition_time_s=2.5,
         cd_ceiling=0.55,
@@ -275,10 +294,16 @@ _PROFILES: dict[str, CategoryProfile] = {
     CATEGORY_CRUISER_1300P: CategoryProfile(
         name=CATEGORY_CRUISER_1300P,
         # Cruisers & muscle bikes (VMAX 1700, Rocket 3) torque off the
-        # line. No over-clutching. Heavy flywheel.
-        over_clutch_factor=0.0,
-        max_engine_decel_rads2=0.0,
-        launch_floor_factor=0.0,
+        # line. Heavy flywheel.
+        # 2026-06-11 calibration: both benchmarked rows (VMAX 1700 +0.477,
+        # Rocket 3 R +0.276, Cycle World w=0.7 each) simmed slow — same
+        # heavy-torquey under-launch as the "other" cluster. oc 0.30 /
+        # decel 800 / floor 1.0 lands +0.318/+0.164 (w|D| 0.377 -> 0.241).
+        # N=2 is thin; kept identical to the "other" treatment rather than
+        # fitting the pair harder.
+        over_clutch_factor=0.30,
+        max_engine_decel_rads2=800.0,
+        launch_floor_factor=1.0,
         tuck_transition_time_s=99.0,  # never tucks
         cd_ceiling=1.10,  # cruisers stay upright
         pacejka_C=1.50,
@@ -291,9 +316,22 @@ _PROFILES: dict[str, CategoryProfile] = {
         name=CATEGORY_OTHER,
         # Catch-all for ADV / touring / scooter / unknown. Conservative
         # mid-tier over-clutching, generous tuck timing.
-        over_clutch_factor=0.0,
-        max_engine_decel_rads2=0.0,
-        launch_floor_factor=0.0,
+        # 2026-06-11 calibration: the 15 benchmarked "other" bikes (heavy
+        # standards/muscle: CB1100, GSF1250 Bandit, Rebel 1100, B-King,
+        # K1300S, R nineT, Hayabusa Gen3...) simmed slow (weighted bias
+        # +0.234, w|D| 0.355). Real riders launch these torquey bikes with
+        # meaningful clutch slip; the zero-over-clutch legacy behaviour
+        # under-launched them. Grid probe (floor 1.0 fixed): oc 0.15/0.30/
+        # 0.45 x decel 250/500/800/1100 -> best w|D| 0.296 at oc 0.30 /
+        # decel 800 (bias +0.036); decel 1100 centers bias but degrades the
+        # sporty-naked fast side (Buell 1125R, RC8 R). launch_floor_factor
+        # 1.0 alone is a no-op on this cluster (verified: bit-identical
+        # weighted stats) — it only guards the over-clutch bog documented
+        # Apr 27. Sacred baselines verified exact at every grid point
+        # (references carry explicit litre_sport_195p tags).
+        over_clutch_factor=0.30,
+        max_engine_decel_rads2=800.0,
+        launch_floor_factor=1.0,
         tuck_transition_time_s=2.0,
         cd_ceiling=0.95,
         pacejka_C=1.55,
