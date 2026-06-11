@@ -88,8 +88,18 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     ("BMW", "S 1000 RR", 2019, 9.85, 243, "Cycle World 2019"),
     ("BMW", "M1000RR", 2021, 9.80, 245, "Cycle World 2021"),
     # ZX-10R
-    ("Kawasaki", "Ninja ZX-10R", 2004, 10.30, 240, "Sport Rider 2004"),
-    ("Kawasaki", "Ninja ZX-10R", 2011, 10.10, 240, "Sport Rider 2011"),
+    # ACCURACY 2026-06-11: ZX-10R rows re-verified against the canonical
+    # Sport Rider archive (cycleworld.com/sport-rider/tech/
+    # sportbike-performance-numbers/). The old 2004 row claimed
+    # "Sport Rider 2004" but carried 10.30 — the archive's actual 6/04
+    # test is 9.92 @ 147.4 mph. Year-specific 2006 (6/06) and 2008 (6/08)
+    # rows added (previously the 2004 figure shadowed all early gens —
+    # flagged in CLAUDE.md Apr 27). 2011 aligned 10.10/240 -> archive
+    # 10.08 @ 146.1 mph (7/11).
+    ("Kawasaki", "Ninja ZX-10R", 2004, 9.92, 237.2, "Sport Rider 6/04 (archive)"),
+    ("Kawasaki", "Ninja ZX-10R", 2006, 9.764, 239.9, "Sport Rider 6/06 (archive)"),
+    ("Kawasaki", "Ninja ZX-10R", 2008, 9.93, 236.4, "Sport Rider 6/08 (archive)"),
+    ("Kawasaki", "Ninja ZX-10R", 2011, 10.08, 235.1, "Sport Rider 7/11 (archive)"),
     ("Kawasaki", "Ninja ZX-10R", 2021, 10.00, 241, "Cycle World 2021"),
     # ZX-6R 636 second-gen — Sport Rider 2009 Middleweight Shootout, timing-strip
     ("Kawasaki", "Ninja ZX-6R", 2009, 10.69, 211, "Sport Rider 2009 (timing-strip)"),
@@ -151,7 +161,10 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # real timeslip data was found are marked "DERIVED" — the figure is
     # an order-of-magnitude estimate from a 0-100 multiplier and carries
     # ±0.5-1.0 s uncertainty.
-    ("Bajaj", "Pulsar NS200", 2019, 16.90, 130, "MotorBikeCatalog 2012 (verified)"),
+    # ACCURACY 2026-06-11: year 2019 -> 2012 — the cited source IS the 2012
+    # test and the catalog spec ranges are [2012-2016] + [2020-2026 BS6];
+    # 2019 fell in the gap and the row silently never matched.
+    ("Bajaj", "Pulsar NS200", 2012, 16.90, 130, "MotorBikeCatalog 2012 (verified)"),
     (
         "KTM",
         "Duke 390",
@@ -200,13 +213,18 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     ("Honda", "CB650R", 2021, 11.80, 115, "AccelerationTimes 2021 (DERIVED)"),
     (
         "Honda",
-        "CBR250R",
+        # ACCURACY 2026-06-11: "CBR250R" -> "CBR 250R" to match the catalog
+        # spec naming (word-boundary matcher needs token alignment; the row
+        # silently never matched before).
+        "CBR 250R",
         2011,
         15.86,
         130,
         "MotorBikeCatalog 2011 (verified, 81.2 mph)",
     ),
-    ("Suzuki", "Gixxer 250", 2018, 16.10, 126, "DERIVED (0-100 × 1.6, ±0.7s)"),
+    # ACCURACY 2026-06-11: year 2018 -> 2019 — the Gixxer 250 launched in
+    # 2019 (spec range [2019-2025]); the 2018 row never matched.
+    ("Suzuki", "Gixxer 250", 2019, 16.10, 126, "DERIVED (0-100 × 1.6, ±0.7s)"),
     ("Kawasaki", "Ninja 300", 2013, 14.10, 150, "FastestLaps (verified, 93 mph)"),
     # Mid-range global expansion (April 2026)
     ("Suzuki", "SV650", 2016, 11.82, 115, "FastestLaps 2016"),
