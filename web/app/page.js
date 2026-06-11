@@ -401,7 +401,7 @@ function HomePageInner() {
                   Your bike. Your strip. Your quarter-mile ET — predicted to
                   within{' '}
                   <span className="text-white">±0.05s</span> on the litre-class.{' '}
-                  <span className="text-white">790 Indian and global bikes</span>,{' '}
+                  <span className="text-white">501 Indian and global bikes</span>,{' '}
                   <span className="text-white">563 parts with INR pricing</span>,{' '}
                   <span className="text-white">Aamby Valley to MMRT.</span>
                 </p>
@@ -427,7 +427,7 @@ function HomePageInner() {
                   Aamby Valley · MMRT · Kari · Hyderabad
                 </span>
                 <span className="px-3 py-1.5 rounded-full border border-brand-orange/30 text-brand-orange">
-                  +0.006s mean bias on 74 of 154 benchmarks
+                  ±0.007s mean bias across 156 benchmarks
                 </span>
                 <span className="px-3 py-1.5 rounded-full border border-white/10 text-white/55">
                   RK4 · 1ms · 15 sub-models
@@ -775,7 +775,7 @@ function HomePageInner() {
                   MotoQuant timing assoc · official accuracy slip
                 </span>
                 <span className="hidden sm:block font-mono text-[10px] tracking-[0.18em] uppercase text-brand-orange/80">
-                  10 cleanest pulls · 79 benchmarks
+                  10 cleanest pulls · 156 benchmarks
                 </span>
               </div>
               <div className="hidden md:grid grid-cols-[40px_1fr_120px_120px_120px_140px] gap-4 px-5 py-3 border-b border-brand-orange/20 bg-white/[0.02] text-[10px] font-mono uppercase tracking-widest text-white/45">

@@ -6,9 +6,9 @@
 import StructuredData, { SITE_URL } from '../StructuredData';
 
 const TITLE =
-  'Motorcycle Quarter-Mile Calculator — Physics-Based ET Predictor for 796 Bikes';
+  'Motorcycle Quarter-Mile Calculator — Physics-Based ET Predictor for 501 Bikes';
 const DESCRIPTION =
-  'Free physics-based motorcycle quarter-mile calculator — not a power-to-weight formula. Predict ET, trap speed, and 60-ft split for 796 bikes at Aamby Valley, MMRT, BIC, and 17 more venues. Tweak rider weight, power delta, mass, and conditions live. Validated to ±0.2s on GSX-R K5, YZF-R1, and Hayabusa.';
+  'Free physics-based motorcycle quarter-mile calculator — not a power-to-weight formula. Predict ET, trap speed, and 60-ft split for 501 bikes at Aamby Valley, MMRT, BIC, and 17 more venues. Tweak rider weight, power delta, mass, and conditions live. Validated to ±0.2s on GSX-R K5, YZF-R1, and Hayabusa.';
 
 export const metadata = {
   title: TITLE,

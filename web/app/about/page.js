@@ -170,7 +170,7 @@ export default function AboutPage() {
               </div>
               <div className="space-y-3 text-white/70 text-sm leading-relaxed">
                 <p>
-                  The physics + software side. Built the 15-sub-model drag simulation engine, the 334-bike catalog, the ROI knapsack, and the calibration pipeline that fits sim output to real Dragy traces within ±0.05 s.
+                  The physics + software side. Built the 15-sub-model drag simulation engine, the 501-bike catalog, the ROI knapsack, and the calibration pipeline that fits sim output to real Dragy traces within ±0.05 s.
                 </p>
                 <p>
                   AI engineer by trade — currently building a separate AI startup in parallel. That expertise is baked into MotoQuant&apos;s machine-learning layer: the DNN surrogate (1 ms per ET prediction), the XGBoost-backed ROI ranker, the Bayesian build optimiser, and the natural-language tuning interface.
