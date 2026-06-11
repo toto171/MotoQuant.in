@@ -45,6 +45,7 @@ SEED = 42
 N_EVAL_BIKES = 25
 N_PERTURB_BASES = 120
 PERTURB_PER_BASE = 28
+PERTURB_PER_OTHER = 12  # light coverage around every non-base, non-eval bike
 # Proof/anchor bikes that must be perturbation bases (never eval-held-out).
 ANCHOR_NAME_TOKENS = ("hayabusa", "gsx-r 1000", "yzf-r1", "duke 390", "yzf-r15")
 
@@ -248,6 +249,24 @@ def cmd_plan(workdir: Path):
         streams.append([_draw_knobs(brng) for _ in range(PERTURB_PER_BASE)])
     for k in range(PERTURB_PER_BASE):
         for b, st in zip(base_list, streams):
+            tasks.append(
+                {"tid": tid, "bmid": b["bmid"], "kind": "perturb", "knobs": st[k]}
+            )
+            tid += 1
+    # light perturbation coverage around EVERY remaining bike (neither base
+    # nor eval) so no catalog bike is stock-only in training. Disjoint rng
+    # stream (SEED + 7_000_000 + bmid) keeps base-bike draws unchanged —
+    # this reproduces the v2/v2.1 datasets exactly (the v2 run did this via
+    # a sandbox-side plan extension that never got committed).
+    others = [
+        b for b in bikes if b["bmid"] not in base_ids and b["bmid"] not in eval_ids
+    ]
+    ostreams = []
+    for b in others:
+        orng = np.random.default_rng(SEED + 7_000_000 + b["bmid"])
+        ostreams.append([_draw_knobs(orng) for _ in range(PERTURB_PER_OTHER)])
+    for k in range(PERTURB_PER_OTHER):
+        for b, st in zip(others, ostreams):
             tasks.append(
                 {"tid": tid, "bmid": b["bmid"], "kind": "perturb", "knobs": st[k]}
             )
