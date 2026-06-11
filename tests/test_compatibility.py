@@ -488,3 +488,75 @@ class TestIsCompatible:
         compatible, reason = is_compatible(part, bike)
         # bike_id will be None, which won't match [1, 2]
         assert compatible is False
+
+
+class TestStrokeTypeOnlyRule:
+    """June 2026: a family rule whose ONLY constraint is stroke_type was
+    treated as constraint-less (and therefore universal) because
+    _has_any_match_constraint did not inspect stroke_type — a 2T-only part
+    would match every 4T bike. Pins the production engine path."""
+
+    def test_stroke_only_rule_blocks_other_stroke(self):
+        from motoquant.parts.compatibility import is_compatible
+
+        part = {
+            "id": 9001,
+            "fitment_rules": '{"tier": "family", "match": {"stroke_type": 2}}',
+        }
+        four_stroke_bike = {
+            "id": 1,
+            "manufacturer": "Suzuki",
+            "displacement_cc": 999,
+            "category": "sport",
+            "stroke_type": 4,
+        }
+        ok, reason = is_compatible(part, four_stroke_bike)
+        assert not ok, f"2T-only rule leaked to a 4T bike: {reason}"
+
+    def test_stroke_only_rule_matches_same_stroke(self):
+        from motoquant.parts.compatibility import is_compatible
+
+        part = {
+            "id": 9002,
+            "fitment_rules": '{"tier": "family", "match": {"stroke_type": 2}}',
+        }
+        two_stroke_bike = {
+            "id": 2,
+            "manufacturer": "Yamaha",
+            "displacement_cc": 347,
+            "category": "sport",
+            "stroke_type": 2,
+        }
+        ok, _ = is_compatible(part, two_stroke_bike)
+        assert ok
+
+
+class TestSearchLimitAfterCompatFilter:
+    """June 2026: PartsRepository.search applied the SQL LIMIT *before* the
+    compatibility filter, so with the catalog ordered by brand any compatible
+    part whose brand sorted after the cut was silently never returned —
+    the build optimizer was starved of ~2/3 of the catalog at limit=200."""
+
+    def test_late_alphabet_brands_survive_limit(self):
+        import os
+        import sqlite3
+
+        import pytest
+
+        db_path = os.environ.get("MOTOQUANT_TEST_DB", "motoquant.db")
+        if not os.path.exists(db_path):
+            pytest.skip("no production DB in working tree")
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        from motoquant.database.parts_repo import PartsRepository
+
+        repo = PartsRepository(conn)
+        rows = repo.search(bike_model_id=3, limit=200)  # Hayabusa Gen1
+        assert rows, "expected compatible parts for the Hayabusa"
+        brands = {r["brand"] for r in rows}
+        late = [b for b in brands if b and b[0].upper() >= "S"]
+        assert late, (
+            "no compatible brand sorting at/after 'S' returned — the SQL LIMIT "
+            f"is being applied before the compatibility filter again. Got: {sorted(brands)}"
+        )
+        conn.close()

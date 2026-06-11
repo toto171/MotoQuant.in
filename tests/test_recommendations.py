@@ -859,3 +859,30 @@ class TestCategoryUpgradeOrder(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestExclusiveGroupsJune2026:
+    """The exclusivity taxonomy is sourced from roi.EXCLUSIVE_CATEGORIES and
+    must cover the physically-single-slot categories added in June 2026."""
+
+    def test_new_exclusive_categories_present(self):
+        flat = set().union(*EXCLUSIVE_GROUPS)
+        for cat in (
+            "exhaust",
+            "ecu",
+            "clutch_kit",
+            "air_filter",
+            "quickshifter",
+            "battery",
+            "chain",
+            "boost_kit",
+            "nitrous",
+            "wheelie_bar",
+            "swingarm_ext",
+        ):
+            assert cat in flat, f"{cat} missing from EXCLUSIVE_GROUPS"
+
+    def test_groups_match_roi_source_of_truth(self):
+        from motoquant.analysis.roi import EXCLUSIVE_CATEGORIES
+
+        assert set().union(*EXCLUSIVE_GROUPS) == set(EXCLUSIVE_CATEGORIES)

@@ -257,3 +257,117 @@ class TestOptimizeRoute:
         body = r.json()
         assert "optimized_et_s" in body and "parts" in body
         assert body["total_cost_inr"] <= 60000 + 1e-6
+
+
+class TestKnapsackBudgetAndGrouping:
+    """June 2026 regressions: ceil bucket weights (sub-100-rupee parts used to
+    weigh ZERO buckets so budgets could be exceeded), position-aware sprocket
+    exclusivity, and the widened exclusive-category taxonomy."""
+
+    def test_sub_bucket_parts_cannot_exceed_budget(self):
+        # Three Rs99 parts at a Rs100 budget: floor-division weights made all
+        # three free (weight 0) so all were selected at Rs297 total spend.
+        pool = [
+            _mk(1, "bodywork", 99, 0.05),
+            _mk(2, "suspension", 99, 0.05),
+            _mk(3, "fuel_system", 99, 0.05),
+        ]
+        sel = _select_build(pool, 100, "min_et")
+        assert sum(r.price_inr for r in sel) <= 100, (
+            f"budget exceeded: {sum(r.price_inr for r in sel)}"
+        )
+
+    def test_rear_sprockets_never_stack_with_position_map(self):
+        pool = [
+            _mk(11, "sprocket", 3000, 0.05),
+            _mk(12, "sprocket", 3100, 0.06),
+            _mk(13, "sprocket", 2900, 0.04),
+        ]
+        position_of = {11: "rear", 12: "rear", 13: "front"}
+        sel = _select_build(pool, 100_000, "min_et", position_of=position_of)
+        rears = [r.part_id for r in sel if position_of.get(r.part_id) == "rear"]
+        fronts = [r.part_id for r in sel if position_of.get(r.part_id) == "front"]
+        assert len(rears) <= 1, f"two rear sprockets selected: {rears}"
+        # front + best rear should coexist (separate positions)
+        assert fronts == [13]
+        assert rears == [12]
+
+    def test_chain_and_boost_now_exclusive(self):
+        assert "chain" in _EXCLUSIVE_CATEGORIES
+        assert "boost_kit" in _EXCLUSIVE_CATEGORIES
+        assert "nitrous" in _EXCLUSIVE_CATEGORIES
+        assert "wheelie_bar" in _EXCLUSIVE_CATEGORIES
+        assert "swingarm_ext" in _EXCLUSIVE_CATEGORIES
+        pool = [
+            _mk(21, "chain", 8000, 0.03),
+            _mk(22, "chain", 9000, 0.04),
+            _mk(23, "boost_kit", 90_000, 0.50),
+            _mk(24, "boost_kit", 95_000, 0.55),
+        ]
+        sel = _select_build(pool, 500_000, "min_et")
+        from collections import Counter
+
+        counts = Counter(r.category for r in sel)
+        assert counts.get("chain", 0) <= 1
+        assert counts.get("boost_kit", 0) <= 1
+
+
+class TestComputePartsRoiRealFitment:
+    """June 2026: compute_parts_roi consulted only the legacy compatible_bikes
+    JSON, so every fitment_rules part was flagged incompatible (and
+    find_best_build's parts_skipped_incompatible was fiction). With a DB-backed
+    repo the production is_compatible() engine must drive the flag."""
+
+    def _db_repo(self):
+        import os
+        import sqlite3
+
+        import pytest
+
+        db_path = os.environ.get("MOTOQUANT_TEST_DB", DB_PATH)
+        if not os.path.exists(db_path):
+            pytest.skip("no production DB in working tree")
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        from motoquant.database.parts_repo import PartsRepository
+
+        return conn, PartsRepository(conn)
+
+    def test_compat_flag_uses_fitment_engine(self):
+        conn, repo = self._db_repo()
+        from motoquant.analysis.roi import compute_parts_roi
+        from motoquant.defaults import hayabusa_gen1
+
+        cfg = hayabusa_gen1()
+        fast = lambda c: (10.0 - (215.0 - c.chassis.dry_mass_kg) * 0.001, 60.0)
+        # 48 = Hayabusa Gen1 Stage 1 flash (fits bike 3); 123 = Duke 390 tune (must not)
+        rois = compute_parts_roi(
+            cfg, [48, 123], repo, bike_model_id=3, et_fn=fast
+        )
+        by_id = {r.part_id: r for r in rois}
+        assert by_id[48].is_compatible, (
+            "Hayabusa flash flagged incompatible with the Hayabusa — legacy "
+            "compatible_bikes fallback is back in the production path"
+        )
+        assert not by_id[123].is_compatible, "Duke 390 tune passed on a Hayabusa"
+        conn.close()
+
+    def test_incompatible_parts_never_selected(self):
+        conn, repo = self._db_repo()
+        from motoquant.analysis.roi import find_best_build
+        from motoquant.defaults import hayabusa_gen1
+
+        cfg = hayabusa_gen1()
+        fast = lambda c: (10.0 - (215.0 - c.chassis.dry_mass_kg) * 0.001, 60.0)
+        build = find_best_build(
+            cfg,
+            budget_inr=500_000,
+            parts_repo=repo,
+            part_ids=[48, 123],
+            bike_model_id=3,
+            et_fn=fast,
+        )
+        chosen = {p.part_id for p in build.selected_parts}
+        assert 123 not in chosen, "incompatible part entered the optimized build"
+        assert build.parts_skipped_incompatible == 1
+        conn.close()
