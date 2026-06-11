@@ -199,20 +199,28 @@ class PartsRepository:
 
         where = " AND ".join(conditions) if conditions else "1=1"
 
-        rows = self._conn.execute(
-            f"""SELECT p.*, pc.name as category_name, pc.display_name as category_display
+        # When filtering by bike compatibility, the SQL LIMIT must NOT be
+        # applied before the compatibility filter: with the catalog ordered
+        # by brand, a pre-filter LIMIT silently drops every compatible part
+        # whose brand sorts after the cut (the June-11 audit found the
+        # optimizer never saw ~2/3 of the catalog because of this). Fetch
+        # all matching rows first, filter, then honour `limit`.
+        filtering_by_bike = bike_model_id is not None and not include_incompatible
+
+        sql = f"""SELECT p.*, pc.name as category_name, pc.display_name as category_display
                 FROM parts p
                 JOIN parts_categories pc ON pc.id = p.category_id
                 WHERE {where}
-                ORDER BY p.brand, p.model_name
-                LIMIT ?""",
-            params + [limit],
-        ).fetchall()
+                ORDER BY p.brand, p.model_name"""
+        if filtering_by_bike:
+            rows = self._conn.execute(sql, params).fetchall()
+        else:
+            rows = self._conn.execute(sql + " LIMIT ?", params + [limit]).fetchall()
 
         result = [dict(r) for r in rows]
 
         # If bike_model_id given, filter by compatibility
-        if bike_model_id is not None and not include_incompatible:
+        if filtering_by_bike:
             from ..parts.compatibility import is_compatible
 
             bike_row = self._conn.execute(
@@ -222,6 +230,7 @@ class PartsRepository:
                 bike_row = dict(bike_row)
                 _enrich_bike_row_for_fitment(self._conn, bike_row)
                 result = [r for r in result if is_compatible(r, bike_row)[0]]
+            result = result[: limit if limit is not None else len(result)]
 
         return result
 

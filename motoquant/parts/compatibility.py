@@ -246,6 +246,7 @@ def _has_any_match_constraint(match: FitmentMatch) -> bool:
         or match.year_min is not None
         or match.year_max is not None
         or match.chain_pitch is not None
+        or match.stroke_type is not None
     )
 
 
