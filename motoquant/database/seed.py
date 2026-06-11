@@ -406,8 +406,11 @@ def seed_sample_parts(db: MotoQuantDB):
             "model_name": "Racing Full System GP Ti",
             "part_number": "AK-S-S10R-GP",
             "specs": {"type": "full_system", "material": "titanium", "weight_kg": 4.2},
-            "param_deltas": {"engine.peak_power_hp": 6.0, "engine.peak_torque_nm": 4.0},
-            "param_multipliers": {"chassis.dry_mass_kg": 0.96},
+            "param_deltas": {
+                "engine.peak_power_hp": 6.0,
+                "engine.peak_torque_nm": 4.0,
+                "chassis.dry_mass_kg": -6.3,  # was a 0.96 total-mass multiplier
+            },
             "price_inr": 185000,
             "availability": "order",
             "retailer": "Superbike India",
@@ -6013,10 +6016,27 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "param_deltas": {
                     "engine.peak_power_hp": ex["hp"],
                     "engine.peak_torque_nm": ex["tq"],
+                    # June 2026: was a param_multipliers ratio 5/(wt+5) applied
+                    # to TOTAL dry mass (a 215 kg Hayabusa became 116.8 kg).
+                    # Honest absolute saving vs a typical stock system weight:
+                    # cruiser duals ~14 kg, sport full ~10.5 kg, muffler-only
+                    # slip-on ~4.5 kg; clamped to a plausible band.
+                    "chassis.dry_mass_kg": -round(
+                        min(
+                            8.0,
+                            max(
+                                1.0,
+                                (
+                                    14.0
+                                    if "Cruiser" in ex["model"]
+                                    else (10.5 if ex["type"] == "full" else 4.5)
+                                )
+                                - ex["wt"],
+                            ),
+                        ),
+                        1,
+                    ),
                 },
-                "param_multipliers": {
-                    "chassis.dry_mass_kg": 1.0 - (ex["wt"] / (ex["wt"] + 5))
-                },  # Approximate mass reduction
                 "fitment_rules": fitment_rules,
                 "price_inr": ex["price"],
                 "availability": ex["avail"],
@@ -7845,12 +7865,23 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             tier_desc = "250cc small-cc exhausts (single/twin)"
             match = {"displacement_min_cc": 240, "displacement_max_cc": 320}
         elif "Universal" in model:
-            # SuperTrapp-style universal slip-on adapters — broad but excludes
-            # cruiser V-twins (different mount geometry) and cruiser categories.
-            tier_desc = "Universal slip-on adapter (300cc+ sport/naked; verify fit)"
+            # SuperTrapp-style universal slip-on adapters. June 2026: widened
+            # to adventure/touring/cruiser/muscle — a clamp-on universal
+            # muffler is exactly what those segments run, and the newer ADV /
+            # touring catalog additions otherwise have zero exhaust options.
+            # ("supersport" was a dead token — not a bike_models.category.)
+            tier_desc = "Universal slip-on adapter (300cc+; verify fit)"
             match = {
                 "displacement_min_cc": 300,
-                "categories": ["sport", "supersport", "naked", "sport_touring"],
+                "categories": [
+                    "sport",
+                    "naked",
+                    "sport_touring",
+                    "adventure",
+                    "touring",
+                    "cruiser",
+                    "muscle",
+                ],
             }
         elif "Termignoni" == brand:
             # Termignoni is Ducati's factory exhaust partner — narrow to Ducati.
