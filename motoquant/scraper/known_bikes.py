@@ -3346,6 +3346,14 @@ TVS_APACHE_RTR_200_4V_2016 = spec_from_dict(
         # 5th=0.880.  Secondary reduction F16/R48 (3.000) unchanged.
         # Source: TVS Apache RTR 200 4V Service Manual, ManualsLib #1402437
         "gear_ratios": [2.917, 1.857, 1.333, 1.050, 0.880],
+        # ACCURACY 2026-06-11 (DERIVED): TVS does not publish the primary
+        # reduction. Back-calculated ~3.1 from the published ~127 km/h top
+        # speed at ~9100 rpm in 5th (0.88) with the 130/70-17 rear
+        # (r ~ 0.305 m) and 48/16 final. Without an explicit value the
+        # importer back-filled the Tier-2 default primary 2.0, leaving the
+        # bike ~35% over-geared (sim 19.3 s vs ~16.5 s real-world class
+        # times despite a measured wheel curve).
+        "primary_ratio": 3.1,
         "front_sprocket": 16,
         "rear_sprocket": 48,
         "chain_pitch": "520",
@@ -3517,36 +3525,42 @@ YAMAHA_R15_V4_2021 = spec_from_dict(
         "category": "sport",
         "displacement_cc": 155,
         "bore_mm": 58.0,
-        "stroke_mm": 58.0,
-        "compression_ratio": 11.0,
+        "stroke_mm": 58.7,
+        "compression_ratio": 11.6,
         "cylinders": 1,
         "peak_power_hp": 18.1,
-        "peak_power_rpm": 10250,
+        "peak_power_rpm": 10000,
         "peak_torque_nm": 14.1,
         "peak_torque_rpm": 7500,
         "fuel_system": "fi",
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        "gear_ratios": [3.533, 2.333, 1.722, 1.357, 1.129, 0.966],
-        # AUDIT 2026-04-28: Front sprocket corrected 17T → 14T.
-        # All R15 generations (V1/V2/V3/V4) use 14T front sprocket —
-        # the F17 value was a data entry error.  Secondary reduction
-        # 42/14 = 3.0 gives an overall 1st-gear ratio of 10.60, consistent
-        # with the V3 platform (2.833 × 48/14 = 9.71) and the redesigned
-        # V4 gearbox's taller internal ratios.
-        # Source: Yamaha India official specifications + R15 community
-        # service-manual consensus (multiple owners-club sources confirm
-        # 14T front / 42T rear as OEM for V4).
+        # ACCURACY 2026-06-11: previous [3.533, 2.333, 1.722, 1.357, 1.129,
+        # 0.966] cassette + 42T rear was unsourced (the 2026-04-28 note
+        # claimed a "redesigned V4 gearbox" — no such redesign exists).
+        # The V4 carries the V3's R155 6-speed box unchanged: 1st 34/12,
+        # 2nd 30/16, 3rd 30/22, 4th 24/21, 5th 22/23, 6th 21/25; primary
+        # 73/24 = 3.042; secondary 48/14 on a 428 chain.
+        # Sources: Yamaha R15 V3/V4 service manual via ManualsLib;
+        # ultimatespecs.com R15 V4 2023 (58.0x58.7, 11.6:1, 18.4 PS @
+        # 10000 carried over); OEM kit listings (Rolon/DriveChain 14T/48T
+        # 428 pitch for R15 V4).
+        "gear_ratios": [2.833, 1.875, 1.364, 1.143, 0.957, 0.840],
+        "primary_ratio": 3.042,
         "front_sprocket": 14,
-        "rear_sprocket": 42,
-        "chain_pitch": "520",
+        "rear_sprocket": 48,
+        "chain_pitch": "428",
         "dry_mass_kg": 142.0,
-        "wheelbase_mm": 1345.0,
-        "front_tire_size": "110/70R17",
+        "wheelbase_mm": 1325.0,
+        "front_tire_size": "100/80-17",
         "rear_tire_size": "140/70R17",
-        "cd": 0.69,
-        "frontal_area_m2": 0.41,
+        # ACCURACY 2026-06-11: cd 0.69/fa 0.41 had the V4 at 5% MORE CdA
+        # than the V3 (0.56/0.48) — backwards vs Yamaha's documented V4
+        # aero improvement. Both were desk estimates; pair normalised to
+        # V3 0.63x0.45 / V4 0.62x0.45.
+        "cd": 0.62,
+        "frontal_area_m2": 0.45,
     },
     source_name="spec_sheet",
 )
@@ -3561,26 +3575,26 @@ YAMAHA_MT15_V2_2021 = spec_from_dict(
         "category": "naked",
         "displacement_cc": 155,
         "bore_mm": 58.0,
-        "stroke_mm": 58.0,
-        "compression_ratio": 11.0,
+        "stroke_mm": 58.7,
+        "compression_ratio": 11.6,
         "cylinders": 1,
         "peak_power_hp": 18.1,
-        "peak_power_rpm": 10250,
+        "peak_power_rpm": 10000,
         "peak_torque_nm": 14.1,
         "peak_torque_rpm": 7500,
         "fuel_system": "fi",
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        "gear_ratios": [3.533, 2.333, 1.722, 1.357, 1.129, 0.966],
-        # AUDIT 2026-04-28: Front sprocket corrected 17T → 14T — same
-        # fix as YZF-R15 V4 (MT-15 V2 shares the identical 155cc DOHC
-        # VVA platform; F17 was a copy-paste error from a prior spec
-        # entry).  Secondary reduction 42/14 = 3.0.
-        # Source: same as R15 V4 correction above.
+        # ACCURACY 2026-06-11: real R155 cassette (same box as R15 V3/V4,
+        # see the R15 V4 entry); the MT-15 runs a shorter 52T rear vs the
+        # R15's 48T. Source: Rolon NMR F348 OEM chain kit for MT-15
+        # (14T/52T, 428 chain, 130 links).
+        "gear_ratios": [2.833, 1.875, 1.364, 1.143, 0.957, 0.840],
+        "primary_ratio": 3.042,
         "front_sprocket": 14,
-        "rear_sprocket": 42,
-        "chain_pitch": "520",
+        "rear_sprocket": 52,
+        "chain_pitch": "428",
         "dry_mass_kg": 142.0,
         "wheelbase_mm": 1345.0,
         "front_tire_size": "110/70R17",
@@ -5584,15 +5598,23 @@ YAMAHA_R15_V3_2018 = spec_from_dict(
         # gearbox has verified 3rd=1.364, 4th=1.143, 5th=0.957.
         # Source: Yamaha YZF-R15 V3 Service Manual via ManualsLib
         "gear_ratios": [2.833, 1.875, 1.364, 1.143, 0.957, 0.840],
+        # ACCURACY 2026-06-11: primary 73/24 = 3.042 (Yamaha R15 V3 service
+        # manual). Without it the importer back-filled primary from the
+        # Tier-1 gear table where "YZF-R15 V3" substring-matched the
+        # "yzf-r1" entry — the R15 was simulating with the R1's 1.609
+        # primary, roughly HALF its real total reduction.
+        "primary_ratio": 3.042,
         "front_sprocket": 14,
         "rear_sprocket": 48,
-        "chain_pitch": "520",
+        "chain_pitch": "428",
         "dry_mass_kg": 139.0,
         "wheelbase_mm": 1325.0,
         "front_tire_size": "100/80-17",
         "rear_tire_size": "140/70-17",
-        "cd": 0.56,
-        "frontal_area_m2": 0.48,
+        # ACCURACY 2026-06-11: aero pair-normalised with the R15 V4 entry
+        # (was cd 0.56 / fa 0.48; see V4 comment).
+        "cd": 0.63,
+        "frontal_area_m2": 0.45,
     },
     source_name="spec_sheet",
 )

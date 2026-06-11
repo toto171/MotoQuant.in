@@ -1774,6 +1774,15 @@ KNOWN_DYNO_CURVES = {
     # Yamaha India small-cc (added 2026-04-28)
     ("yamaha", "yzf-r15 v4", 2021, 2026, None): dyno_yamaha_r15_v4,
     ("yamaha", "mt-15 v2", 2021, 2026, None): dyno_yamaha_r15_v4,  # same engine
+    # ACCURACY 2026-06-11: V3-generation keys. The R15 V3 / MT-15 V1 carry
+    # the same R155 engine (BS6 2020-21 trim = exactly the unit on the
+    # Indian Autos Mag chassis dyno above; BS4 2018-19 differs ~4% on the
+    # crank claim, inside chassis-dyno repeatability). Without these keys
+    # the V3-gen fell to the synthetic <22hp curve, which traps ~17 km/h
+    # high vs the MotoStatz instrumented test (sim 139.5 vs real 119 km/h)
+    # and split the V3/V4 pair by 2.1 s against the same benchmark.
+    ("yamaha", "yzf-r15 v3", 2018, 2021, None): dyno_yamaha_r15_v4,
+    ("yamaha", "mt-15 v1", 2019, 2020, None): dyno_yamaha_r15_v4,  # same engine
     # TVS India (added 2026-04-28)
     ("tvs", "apache rtr 200 4v", 2016, 2026, None): dyno_tvs_apache_rtr200_4v,
     # Kawasaki

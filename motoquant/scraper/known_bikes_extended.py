@@ -961,10 +961,13 @@ YAMAHA_R15M_2021 = spec_from_dict(
         "valve_config": "sohc",
         "gears": 6,
         # Identical to R15 V4 cassette per Yamaha India PN 5VL-17541-00.
-        "gear_ratios": [3.533, 2.333, 1.722, 1.357, 1.129, 0.966],
+        # ACCURACY 2026-06-11: real R155 cassette + primary (see R15 V4
+        # entry in known_bikes.py; service-manual 73/24 primary, 428 chain).
+        "gear_ratios": [2.833, 1.875, 1.364, 1.143, 0.957, 0.840],
+        "primary_ratio": 3.042,
         "front_sprocket": 14,
-        "rear_sprocket": 42,
-        "chain_pitch": "520",
+        "rear_sprocket": 48,
+        "chain_pitch": "428",
         "dry_mass_kg": 134.0,  # 142 kg kerb - ~8 kg fuel (11 L tank)
         "wheelbase_mm": 1325.0,
         "front_tire_size": "100/80R17",
@@ -9740,10 +9743,13 @@ YAMAHA_MT15_V1_2019 = spec_from_dict(
         "gears": 6,
         # 6-speed cassette — identical to YZF-R15 V3 per shared platform
         # Yamaha service manual 5D71-001 (MT-15 V1 gearbox internals)
-        "gear_ratios": [3.533, 2.333, 1.722, 1.357, 1.129, 0.966],
+        # ACCURACY 2026-06-11: real R155 cassette + primary (see R15 V4
+        # entry in known_bikes.py; service-manual 73/24 primary, 428 chain).
+        "gear_ratios": [2.833, 1.875, 1.364, 1.143, 0.957, 0.840],
+        "primary_ratio": 3.042,
         "front_sprocket": 14,  # F14 / R42 — Yamaha OEM sprocket spec
-        "rear_sprocket": 42,  # (same as YZF-R15 V3 service manual)
-        "chain_pitch": "520",  # 520 pitch — standard Yamaha 155 platform
+        "rear_sprocket": 52,  # Rolon NMR F348 OEM kit (14T/52T) — shorter than R15's 48T
+        "chain_pitch": "428",  # 428 pitch — R155 platform OEM chain
         "dry_mass_kg": 134.0,  # 134 kg dry (139 kg kerb minus ~5 kg oil
         # + small 10L tank)
         # Yamaha India spec sheet 2019

@@ -168,33 +168,49 @@ _DB: list[dict] = [
         "mfr": "yamaha",
         "model": "r15 v4",
         "year": (2021, 2026),
-        "ratios": [
-            2.800,
-            1.880,
-            1.360,
-            1.090,
-            0.960,
-            0.860,
-        ],  # verified: derived from Yamaha India parallel engineering with NS200 (R15 V4 & NS200 share 155cc platform); 6th ratio 0.860 gives ~144 km/h top (matches published 145 km/h)
-        "front": 15,
-        "rear": 43,
-        "primary": 2.100,
+        # ACCURACY 2026-06-11: previous entry ([2.8, 1.88, 1.36, 1.09, 0.96,
+        # 0.86], F15/R43, primary 2.100) cited a non-existent "NS200 shared
+        # 155cc platform" (the NS200 is a Bajaj 199cc). Real R155 box
+        # (Yamaha R15 V3/V4 service manual): primary 73/24 = 3.042,
+        # secondary 48/14, 428 chain.
+        "ratios": [2.833, 1.875, 1.364, 1.143, 0.957, 0.840],
+        "front": 14,
+        "rear": 48,
+        "primary": 3.042,
+    },
+    {
+        "mfr": "yamaha",
+        "model": "yzf-r15 v3",
+        "year": (2017, 2021),
+        # ACCURACY 2026-06-11: explicit V3 entry. Without it the substring
+        # matcher sent "YZF-R15 V3" to the "yzf-r1" entry (primary 1.609 —
+        # the R1's). Same R155 box as the V4.
+        "ratios": [2.833, 1.875, 1.364, 1.143, 0.957, 0.840],
+        "front": 14,
+        "rear": 48,
+        "primary": 3.042,
     },
     {
         "mfr": "yamaha",
         "model": "mt-15 v2",
         "year": (2021, 2026),
-        "ratios": [
-            2.800,
-            1.880,
-            1.360,
-            1.090,
-            0.960,
-            0.860,
-        ],  # verified: identical to R15 V4 (same 155cc engine & gearbox); 6th ratio 0.860 gives ~144 km/h top
-        "front": 15,
-        "rear": 43,
-        "primary": 2.100,
+        # ACCURACY 2026-06-11: same R155 box; MT-15 rear is 52T (Rolon NMR
+        # F348 OEM kit 14T/52T, 428 chain).
+        "ratios": [2.833, 1.875, 1.364, 1.143, 0.957, 0.840],
+        "front": 14,
+        "rear": 52,
+        "primary": 3.042,
+    },
+    {
+        "mfr": "yamaha",
+        "model": "mt-15",
+        "year": (2019, 2026),
+        # ACCURACY 2026-06-11: generic MT-15 entry (catches "MT-15 V1" which
+        # previously fell to Tier-2 defaults). Same data as V2.
+        "ratios": [2.833, 1.875, 1.364, 1.143, 0.957, 0.840],
+        "front": 14,
+        "rear": 52,
+        "primary": 3.042,
     },
     {
         "mfr": "yamaha",
