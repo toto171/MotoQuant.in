@@ -50,7 +50,14 @@ from .recommendations import (
     _filter_parts_by_profile,
     _find_next_upgrade,
 )
-from .roi import PartROIResult, _run_et, compute_parts_roi, rank_categories
+from .roi import (
+    PartROIResult,
+    _grouped_knapsack,
+    _knapsack_group_key,
+    _run_et,
+    compute_parts_roi,
+    rank_categories,
+)
 
 __all__ = [
     "SurrogatePredictor",
@@ -288,11 +295,16 @@ def _select_build(
     goal: str,
     *,
     allow_negative: bool = False,
+    position_of: dict[int, str] | None = None,
 ) -> list[PartROIResult]:
     """
-    Pick the affordable subset maximising the goal metric, with at most one part
-    from each exclusive category (exhaust / ecu / clutch_kit / air_filter /
-    quickshifter / battery).  Free parts (price 0) cost no budget.
+    Pick the affordable subset maximising the goal metric, with at most one
+    part from each exclusive category (see roi.EXCLUSIVE_CATEGORIES) and at
+    most one sprocket per position when ``position_of`` maps part_id ->
+    'front'/'rear'.  Free parts (price 0) cost no budget.  Delegates to
+    roi._grouped_knapsack, which rounds bucket weights UP so the selected
+    build can never exceed the stated budget (the old floor division let
+    every part under-weigh by up to ₹99 — sub-₹100 parts were free).
     """
     gain = (
         (lambda r: r.delta_trap_ms) if goal == "max_trap" else (lambda r: r.delta_et_s)
@@ -306,43 +318,12 @@ def _select_build(
     if not candidates:
         return []
 
-    def group_key(r: PartROIResult):
-        cat = (r.category or "").lower()
-        return cat if cat in _EXCLUSIVE_CATEGORIES else ("__solo__", r.part_id)
-
-    groups: dict = {}
-    for r in candidates:
-        groups.setdefault(group_key(r), []).append(r)
-
-    BUCKET = 100
-    SCALE = 1000  # ms / (mm/s) precision for integer DP
-    W = int(budget_inr // BUCKET) if budget_inr > 0 else 0
-
-    dp = [0] * (W + 1)
-    choice: list[list[PartROIResult]] = [[] for _ in range(W + 1)]
-
-    # Process each exclusive group as a "choose at most one" block; singleton
-    # solo-groups reduce to ordinary 0/1 items.  Reading from the pre-group dp
-    # for every item in a group enforces mutual exclusivity within the group.
-    for items in groups.values():
-        new_dp = dp[:]
-        new_choice = [c[:] for c in choice]
-        for r in items:
-            v = int(round(gain(r) * SCALE))
-            if v <= 0:
-                continue
-            w = max(0, int(r.price_inr // BUCKET))
-            if w > W:
-                continue
-            for cap in range(W, w - 1, -1):
-                cand = dp[cap - w] + v
-                if cand > new_dp[cap]:
-                    new_dp[cap] = cand
-                    new_choice[cap] = choice[cap - w] + [r]
-        dp = new_dp
-        choice = new_choice
-
-    return choice[W]
+    return _grouped_knapsack(
+        candidates,
+        budget_inr,
+        gain,
+        lambda r: _knapsack_group_key(r, position_of),
+    )
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -472,7 +453,24 @@ def optimize_build(
     gain = (
         (lambda r: r.delta_trap_ms) if goal == "max_trap" else (lambda r: r.delta_et_s)
     )
-    selected = _select_build(individual, float(budget_inr), goal)
+    # Position map so the knapsack can hold one front AND one rear sprocket
+    # but never two of the same position.
+    position_of: dict[int, str] = {}
+    for p in filtered:
+        if p.get("category_name") == "sprocket":
+            specs = p.get("specifications")
+            if isinstance(specs, str):
+                try:
+                    import json as _json
+
+                    specs = _json.loads(specs)
+                except (ValueError, TypeError):
+                    specs = None
+            if isinstance(specs, dict) and specs.get("position") in ("front", "rear"):
+                position_of[p["id"]] = specs["position"]
+    selected = _select_build(
+        individual, float(budget_inr), goal, position_of=position_of
+    )
     if progress_cb is not None:
         progress_cb(0.98, "Verifying combined build")
 

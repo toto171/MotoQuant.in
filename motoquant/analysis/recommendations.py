@@ -45,6 +45,7 @@ from enum import Enum
 
 from ..models import BikeConfig
 from .roi import (
+    EXCLUSIVE_CATEGORIES,
     BuildROIResult,
     PartROIResult,
     _run_et,
@@ -127,15 +128,14 @@ _PROFILE_CATEGORIES: dict[BuildProfile, set[str]] = {
 # ─────────────────────────────────────────────────────────────────
 
 
-# Only one part per exclusive-group can be selected.
-EXCLUSIVE_GROUPS: list[set[str]] = [
-    {"exhaust"},  # can only have one exhaust system
-    {"ecu"},  # can only have one ECU flash
-    {"clutch_kit"},  # one clutch kit
-    {"air_filter"},  # one air filter
-    {"quickshifter"},  # one quickshifter
-    {"battery"},  # one battery
-]
+# Only one part per exclusive-group can be selected. The taxonomy lives in
+# roi.EXCLUSIVE_CATEGORIES (single source of truth — roi.py cannot import
+# this module without a cycle); this list is the historical shape consumed
+# by build_optimizer and the test-suite. June 2026: chain / boost_kit /
+# nitrous / wheelie_bar / swingarm_ext added — a build can no more carry
+# two chains or two turbo kits than two exhausts. Sprockets are handled
+# position-aware (one front + one rear) inside the knapsack itself.
+EXCLUSIVE_GROUPS: list[set[str]] = [{cat} for cat in sorted(EXCLUSIVE_CATEGORIES)]
 
 # Synergy pairs: categories that gain more when combined.
 # The multiplier is applied to the *combined* delta_et prediction
@@ -618,13 +618,15 @@ def recommend_build(
         bike_model_id=bike_model_id,
     )
 
-    # Run knapsack optimizer
+    # Run knapsack optimizer, reusing the ROI pass above (previously this
+    # re-simulated every candidate a second time).
     build = find_best_build(
         base_config=base_config,
         budget_inr=budget_inr,
         parts_repo=parts_repo,
         part_ids=filtered_ids,
         bike_model_id=bike_model_id,
+        precomputed_individual=all_roi,
     )
 
     # Detect synergies and warnings in the selected build

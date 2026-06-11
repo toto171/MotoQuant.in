@@ -134,6 +134,127 @@ class BuildROIResult:
 # ─────────────────────────────────────────────────────────────────
 
 
+# Categories where a build can physically carry at most ONE part. Single
+# source of truth — recommendations.EXCLUSIVE_GROUPS re-exports this set
+# (recommendations imports roi; the reverse would be circular).
+# Sprockets are position-exclusive (one front + one rear) and are handled
+# via _knapsack_group_key, not this set.
+EXCLUSIVE_CATEGORIES: frozenset[str] = frozenset(
+    {
+        "exhaust",
+        "ecu",
+        "clutch_kit",
+        "air_filter",
+        "quickshifter",
+        "battery",
+        "chain",
+        "boost_kit",
+        "nitrous",
+        "wheelie_bar",
+        "swingarm_ext",
+    }
+)
+
+
+def _bucket_weight(price_inr: float, bucket: int = 100) -> int:
+    """Knapsack weight in budget buckets, rounded UP so the DP can never
+    select a combination whose true price exceeds the budget (floor division
+    under-weighed every part by up to bucket-1 rupees — June-11 audit)."""
+    if price_inr is None or price_inr <= 0:
+        return 0
+    return int(-(-price_inr // bucket))
+
+
+def _sprocket_positions(parts_repo, part_ids) -> dict[int, str]:
+    """Map part_id -> 'front'/'rear' for sprocket parts (from specifications).
+    Lets the knapsack treat front and rear sprockets as separate exclusive
+    slots instead of allowing two rear sprockets in one build."""
+    import json as _json
+
+    out: dict[int, str] = {}
+    getter = getattr(parts_repo, "get", None)
+    if getter is None:
+        return out
+    for pid in part_ids:
+        try:
+            part = getter(pid)
+        except Exception:
+            continue
+        if not part or part.get("category_name") != "sprocket":
+            continue
+        specs = part.get("specifications")
+        if isinstance(specs, str):
+            try:
+                specs = _json.loads(specs)
+            except (ValueError, TypeError):
+                specs = None
+        if isinstance(specs, dict) and specs.get("position") in ("front", "rear"):
+            out[pid] = specs["position"]
+    return out
+
+
+def _knapsack_group_key(r: "PartROIResult", position_of: dict[int, str] | None = None):
+    """Exclusivity group for the multiple-choice knapsack.
+
+    - exclusive categories -> one shared group per category;
+    - sprockets -> one group per position (front/rear) when known;
+    - everything else -> its own singleton group (plain 0/1 item).
+    """
+    cat = (r.category or "").lower()
+    if cat == "sprocket":
+        pos = (position_of or {}).get(r.part_id)
+        if pos in ("front", "rear"):
+            return f"sprocket:{pos}"
+        return ("__solo__", r.part_id)
+    if cat in EXCLUSIVE_CATEGORIES:
+        return cat
+    return ("__solo__", r.part_id)
+
+
+def _grouped_knapsack(
+    candidates: "list[PartROIResult]",
+    budget_inr: float,
+    gain,
+    group_key,
+) -> "list[PartROIResult]":
+    """Multiple-choice 0/1 knapsack: maximise sum(gain) subject to
+    sum(price) <= budget and at most one part per exclusivity group.
+    Free parts weigh 0 buckets, so they are picked whenever gain > 0
+    (including at budget 0) while still honouring group exclusivity."""
+    BUCKET = 100
+    SCALE = 1_000  # ms / (mm/s) precision for integer DP
+    W = int(budget_inr // BUCKET) if budget_inr > 0 else 0
+
+    groups: dict = {}
+    for r in candidates:
+        groups.setdefault(group_key(r), []).append(r)
+
+    dp = [0] * (W + 1)
+    choice: list[list] = [[] for _ in range(W + 1)]
+
+    # Each group is a "choose at most one" block: reading from the pre-group
+    # dp for every item in the group enforces mutual exclusivity within it.
+    for items in groups.values():
+        new_dp = dp[:]
+        new_choice = [c[:] for c in choice]
+        for r in items:
+            v = int(round(gain(r) * SCALE))
+            if v <= 0:
+                continue
+            w = _bucket_weight(r.price_inr, BUCKET)
+            if w > W:
+                continue
+            for cap in range(W, w - 1, -1):
+                cand = dp[cap - w] + v
+                if cand > new_dp[cap]:
+                    new_dp[cap] = cand
+                    new_choice[cap] = choice[cap - w] + [r]
+        dp = new_dp
+        choice = new_choice
+
+    return choice[W]
+
+
 def _run_et(config: BikeConfig) -> tuple[float, float]:
     """Run a quick simulation and return (ET_s, trap_speed_ms)."""
     engine = MotoQuantEngine(config)
@@ -261,29 +382,58 @@ def compute_parts_roi(
     base_et, base_trap = _et(base_config)
     results: list[PartROIResult] = []
 
+    # Resolve the bike row ONCE for real fitment checks. Until June 2026 this
+    # function only consulted the legacy compatible_bikes JSON list, so every
+    # fitment_rules-based part was mislabelled incompatible (and the
+    # parts_skipped_incompatible count upstream was fiction). When the repo
+    # exposes a DB connection we now run the same is_compatible() engine the
+    # part-picker UI uses; repo stubs without a connection fall back to the
+    # legacy check.
+    bike_row = None
+    if bike_model_id is not None:
+        conn = getattr(parts_repo, "_conn", None)
+        if conn is not None:
+            try:
+                from ..database.parts_repo import _enrich_bike_row_for_fitment
+
+                raw = conn.execute(
+                    "SELECT * FROM bike_models WHERE id = ?", (bike_model_id,)
+                ).fetchone()
+                if raw is not None:
+                    bike_row = _enrich_bike_row_for_fitment(conn, dict(raw))
+            except Exception:
+                bike_row = None
+
+    if bike_row is not None:
+        from ..parts.compatibility import is_compatible as _is_compatible_engine
+
     for pid in part_ids:
         part = parts_repo.get(pid)
         if part is None:
             continue
 
-        # Compatibility check — default open (assume compatible unless proven otherwise)
+        # Compatibility check — production fitment engine when possible.
         is_compat = True
         if bike_model_id is not None:
-            compatible_bikes_raw = part.get("compatible_bikes")
-            if compatible_bikes_raw:
-                try:
-                    compatible_list = (
-                        json.loads(compatible_bikes_raw)
-                        if isinstance(compatible_bikes_raw, str)
-                        else compatible_bikes_raw
-                    )
-                    is_compat = bike_model_id in compatible_list or part.get(
-                        "fitment_universal", False
-                    )
-                except (ValueError, TypeError):
-                    is_compat = True
+            if bike_row is not None:
+                is_compat = _is_compatible_engine(part, bike_row)[0]
             else:
-                is_compat = part.get("fitment_universal", True)
+                # Legacy fallback (no DB connection on the repo stub)
+                compatible_bikes_raw = part.get("compatible_bikes")
+                if compatible_bikes_raw:
+                    try:
+                        compatible_list = (
+                            json.loads(compatible_bikes_raw)
+                            if isinstance(compatible_bikes_raw, str)
+                            else compatible_bikes_raw
+                        )
+                        is_compat = bike_model_id in compatible_list or part.get(
+                            "fitment_universal", False
+                        )
+                    except (ValueError, TypeError):
+                        is_compat = True
+                else:
+                    is_compat = part.get("fitment_universal", True)
 
         if require_compatible and not is_compat:
             continue
@@ -352,6 +502,7 @@ def find_best_build(
     et_fn=None,  # injectable scorer (e.g. surrogate); defaults to full physics sim
     objective: str = "min_et",  # "min_et" (maximise ET gain) | "max_trap" (maximise trap gain)
     return_individual: bool = False,  # also return the per-part ROI list
+    precomputed_individual: list[PartROIResult] | None = None,  # reuse caller's ROI pass
 ) -> BuildROIResult:
     """
     Find the combination of parts that maximises ET improvement within a budget.
@@ -399,23 +550,32 @@ def find_best_build(
         )
         part_ids = [p["id"] for p in raw]
 
-    # Evaluate each part independently to get individual ROI
-    individual = compute_parts_roi(
-        base_config=base_config,
-        part_ids=part_ids,
-        parts_repo=parts_repo,
-        min_delta_et_ms=min_delta_et_ms,
-        bike_model_id=bike_model_id,
-        use_live_pricing=use_live_pricing,
-        db_conn=db_conn,
-        et_fn=et_fn,
-    )
+    # Evaluate each part independently to get individual ROI (or reuse the
+    # caller's already-computed list — recommend_build was previously running
+    # this full sim pass twice per call).
+    if precomputed_individual is not None:
+        individual = precomputed_individual
+    else:
+        individual = compute_parts_roi(
+            base_config=base_config,
+            part_ids=part_ids,
+            parts_repo=parts_repo,
+            min_delta_et_ms=min_delta_et_ms,
+            bike_model_id=bike_model_id,
+            use_live_pricing=use_live_pricing,
+            db_conn=db_conn,
+            et_fn=et_fn,
+        )
 
-    # Filter to parts that improve ET and have a finite price ≤ budget
+    # Filter to parts that improve the objective, fit the budget, and are
+    # actually compatible (is_compatible now reflects the production fitment
+    # engine; incompatible parts are counted, never built).
     candidates = [
         r
         for r in individual
-        if (allow_negative_parts or gain_of(r) >= 0) and r.price_inr <= budget_inr
+        if (allow_negative_parts or gain_of(r) >= 0)
+        and r.price_inr <= budget_inr
+        and r.is_compatible
     ]
 
     n_evaluated = len(individual)
@@ -438,49 +598,20 @@ def find_best_build(
         )
         return (_empty, individual) if return_individual else _empty
 
-    # ── Separate free parts — always include them regardless of budget ───
-    # Free parts (price_inr == 0) don't consume budget, so they're always
-    # beneficial to include if they improve ET.  Keeping them out of the DP
-    # (which uses min 1 bucket per item) avoids a correctness edge case at
-    # budget = ₹0.
-    free_candidates = [r for r in candidates if r.is_free and gain_of(r) > 0]
-    paid_candidates = [r for r in candidates if not r.is_free]
-
-    # ── Knapsack DP on paid parts ─────────────────────────────────────
-    # Discretise budget to buckets of ₹100 to keep DP tractable.
-    # For budgets ≤ ₹5,00,000 and prices quantised to ₹100, the DP
-    # table has 5000 × len(candidates) cells — very fast in Python.
-    BUCKET = 100
-    W = int(budget_inr // BUCKET)  # capacity in buckets
-
-    # Weight per item (buckets), value per item (seconds × 1000 for int DP)
-    SCALE = 1_000  # ms precision
-
-    items: list[tuple[int, int, int]] = []  # (weight_buckets, value_ms, index)
-    for i, r in enumerate(paid_candidates):
-        w = max(1, int(r.price_inr // BUCKET))  # at least 1 bucket
-        v = max(0, int(gain_of(r) * SCALE))
-        if w <= W and v > 0:
-            items.append((w, v, i))
-
-    if not items:
-        # No paid parts fit or have positive gain — only take free parts
-        selected = list(free_candidates)
-    else:
-        # Standard 0/1 knapsack via 1D DP (rolling array)
-        dp = [0] * (W + 1)
-        choice = [[] for _ in range(W + 1)]  # track chosen item indices
-
-        for w_item, v_item, idx in items:
-            # Traverse backwards to avoid using same item twice
-            for cap in range(W, w_item - 1, -1):
-                new_val = dp[cap - w_item] + v_item
-                if new_val > dp[cap]:
-                    dp[cap] = new_val
-                    choice[cap] = choice[cap - w_item] + [idx]
-
-        chosen_paid = [paid_candidates[i] for i in choice[W]]
-        selected = free_candidates + chosen_paid
+    # ── Multiple-choice knapsack with category exclusivity ────────────
+    # The pre-June-2026 plain 0/1 DP could stack two exhausts / four air
+    # filters (unbuildable) and floor-divided prices into buckets, letting
+    # the "optimal" build exceed the stated budget by up to ₹99 per part.
+    # _grouped_knapsack enforces at-most-one part per exclusive category
+    # (and per sprocket position), rounds weights UP, and handles free
+    # parts (weight 0) uniformly — including at budget ₹0.
+    position_of = _sprocket_positions(parts_repo, [r.part_id for r in candidates])
+    selected = _grouped_knapsack(
+        candidates,
+        budget_inr,
+        gain_of,
+        lambda r: _knapsack_group_key(r, position_of),
+    )
 
     # ── Incremental simulation of selected build ──────────────────────
     # Apply parts in price-ascending order (smaller parts first so
