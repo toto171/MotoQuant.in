@@ -69,7 +69,7 @@ def _make_synthetic_arrays(
     """
     from motoquant.analysis.surrogate_data import (
         BASE_FEATURE_NAMES,
-        _compute_derived_features,
+        _full_features,
     )
 
     rng = np.random.default_rng(seed)
@@ -87,7 +87,7 @@ def _make_synthetic_arrays(
         base = dict(base_mid)
         base["peak_power_hp"] = float(power_vals[i])
         base["total_mass_kg"] = float(mass_vals[i])
-        full = {**base, **_compute_derived_features(base)}
+        full = _full_features(base)  # v2: fills structural extras with defaults
         rows.append([full[k] for k in FEATURE_NAMES])
 
     X = np.array(rows, dtype=np.float32)
@@ -125,10 +125,28 @@ class TestFeatureSchema(unittest.TestCase):
         self.assertEqual(len(DERIVED_FEATURE_NAMES), 7)
 
     def test_feature_names_count(self):
-        self.assertEqual(len(FEATURE_NAMES), 21)
+        # v2 (June 2026): 14 base + 7 derived + 5 structural extras
+        self.assertEqual(len(FEATURE_NAMES), 26)
 
-    def test_feature_names_is_base_plus_derived(self):
-        self.assertEqual(FEATURE_NAMES, BASE_FEATURE_NAMES + DERIVED_FEATURE_NAMES)
+    def test_extra_feature_names_count(self):
+        from motoquant.analysis.surrogate_data import EXTRA_FEATURE_NAMES
+
+        self.assertEqual(len(EXTRA_FEATURE_NAMES), 5)
+
+    def test_feature_names_is_base_plus_derived_plus_extra(self):
+        from motoquant.analysis.surrogate_data import EXTRA_FEATURE_NAMES
+
+        self.assertEqual(
+            FEATURE_NAMES,
+            BASE_FEATURE_NAMES + DERIVED_FEATURE_NAMES + EXTRA_FEATURE_NAMES,
+        )
+
+    def test_v1_prefix_preserved(self):
+        # 21-input v1 models slice [:21] of a v2 vector — the prefix must
+        # stay byte-for-byte identical, forever.
+        self.assertEqual(
+            FEATURE_NAMES[:21], BASE_FEATURE_NAMES + DERIVED_FEATURE_NAMES
+        )
 
     def test_feature_bounds_keys_match_base_names(self):
         # FEATURE_BOUNDS only covers the 14 sampled (base) features
@@ -260,7 +278,7 @@ class TestFeatureExtraction(unittest.TestCase):
 
     def test_config_to_feature_vector_shape(self):
         vec = config_to_feature_vector(self.config)
-        self.assertEqual(vec.shape, (21,))
+        self.assertEqual(vec.shape, (26,))
         self.assertEqual(vec.dtype, np.float32)
 
     def test_config_to_feature_vector_order(self):
@@ -390,17 +408,19 @@ class TestApplyFeaturesToConfig(unittest.TestCase):
 
 class TestSurrogateDataPoint(unittest.TestCase):
     def _make_point(self):
+        from motoquant.analysis.surrogate_data import _full_features
+
         base = {
             k: (FEATURE_BOUNDS[k][0] + FEATURE_BOUNDS[k][1]) / 2.0
             for k in BASE_FEATURE_NAMES
         }
-        feat = {**base, **_compute_derived_features(base)}
+        feat = _full_features(base)  # fills v2 structural extras with defaults
         return SurrogateDataPoint(features=feat, et_s=10.5, trap_speed_mps=55.0)
 
     def test_to_array_shape(self):
         pt = self._make_point()
         arr = pt.to_array()
-        self.assertEqual(arr.shape, (21,))
+        self.assertEqual(arr.shape, (len(FEATURE_NAMES),))
 
     def test_to_array_order(self):
         pt = self._make_point()
@@ -430,7 +450,7 @@ class TestSurrogateDataset(unittest.TestCase):
     def test_to_arrays_shapes(self):
         X, y_et, y_trap = self.ds.to_arrays()
         n = len(self.ds)
-        self.assertEqual(X.shape, (n, 21))
+        self.assertEqual(X.shape, (n, len(FEATURE_NAMES)))
         self.assertEqual(y_et.shape, (n,))
         self.assertEqual(y_trap.shape, (n,))
 
@@ -492,7 +512,8 @@ class TestSurrogateDataset(unittest.TestCase):
             self.assertGreaterEqual(pw, threshold)
 
     def test_backward_compat_load_14_features(self):
-        """Loading a v1 14-feature npz should auto-compute 3 derived features."""
+        """Loading a v1 14-feature npz should auto-complete to the full schema
+        (derived features computed; v2 structural extras padded with defaults)."""
         X14, y_et, y_trap = self.ds.to_arrays()
         X14 = X14[:, :14]  # strip derived columns to simulate v1 file
 
@@ -512,7 +533,7 @@ class TestSurrogateDataset(unittest.TestCase):
             loaded = SurrogateDataset.load(path)
             self.assertEqual(len(loaded), len(self.ds))
             X_loaded, _, _ = loaded.to_arrays()
-            self.assertEqual(X_loaded.shape[1], 21)
+            self.assertEqual(X_loaded.shape[1], len(FEATURE_NAMES))
         finally:
             Path(path).unlink(missing_ok=True)
 
@@ -524,7 +545,7 @@ class TestSurrogateDataset(unittest.TestCase):
 
 class TestCheckArrayShapes(unittest.TestCase):
     def _valid(self):
-        X = np.zeros((10, 21))
+        X = np.zeros((10, len(FEATURE_NAMES)))
         y = np.zeros(10)
         return X, y, y.copy()
 

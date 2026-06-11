@@ -741,7 +741,7 @@ class TestSurrogatePredict(unittest.TestCase):
         self.assertIn("et_s", body)
         self.assertIn("trap_kmh", body)
         self.assertIn("source", body)
-        self.assertIn(body["source"], ("dnn", "xgb"))
+        self.assertIn(body["source"], ("dnn", "xgb", "numpy"))
         self.assertGreater(body["et_s"], 5.0)
         self.assertLess(body["et_s"], 30.0)
         self.assertGreater(body["trap_kmh"], 80.0)
