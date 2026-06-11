@@ -4,13 +4,61 @@
 
 | Name                                | What it is                                          | Size    |
 |-------------------------------------|-----------------------------------------------------|---------|
-| `surrogate_numpy.npz`               | **v2 SHIPPED MODEL** — numpy MLP served in prod     | 87 KB   |
-| `motoquant_surrogate_v2_8k5.npz`    | v2 training dataset (8,574 rows × 26 features)      | 613 KB  |
+| `surrogate_numpy.npz`               | **v2.1 SHIPPED MODEL** — numpy MLP served in prod   | 87 KB   |
+| `motoquant_surrogate_v2_8k5.npz`    | v2.1 training dataset (8,574 rows × 26 features)    | 610 KB  |
 | `surrogate_numpy_v1.npz.bak`        | v1 numpy MLP (K5-only envelope) — rollback copy     | 39 KB   |
 | `motoquant_surrogate_v1_1k5.npz`    | v1 training dataset (K5 Sobol, 1.5k samples)        | 128 KB  |
 | `motoquant_surrogate_v1_1k5.pkl`    | v1 XGBoost model (sklearn-era, not served)          | 1.3 MB  |
 
-## v2 (June 12, 2026) — catalog-wide envelope
+## v2.1 (June 12, 2026) — same-night retrain after the physics retune
+
+v2 was generated and the physics moved underneath it THE SAME NIGHT: the
+per-cluster launch knobs were retuned (entry_150_200, entry_200_300,
+mid_twin_300_500, other, cruiser_1300p in `category_profiles.py`) and the
+R15/MT-15/RTR-200 family specs + DB rows were corrected + reseeded. The v2
+labels went stale for every affected bike — the artifact regression suite
+caught it (R15 V4, bike_id=81: surrogate 17.787 s vs fresh sim 18.296 s,
+0.51 s off). **Lesson for future sessions: a surrogate is a cache of the
+physics — REGENERATE AFTER ANY RESEED/RETUNE, in the same session.**
+
+Smart regen (same plan, seed 42, task-identical to v2 — verified tid-for-tid):
+
+* fresh STOCK sims for all 501 bikes → 31 moved >0.02 s vs the v2 dataset
+  (15 litre_sport_600_1000, 7 entry_150_200, 5 litre_sport_195p, 2
+  mid_twin_500_700, 1 entry_200_300, 1 other — the litre movers come from
+  the same-night benchmark-audit spec corrections, not the launch knobs);
+* second probe: every KEPT bike re-simmed at its MAX-POWER perturbation
+  (launch-knob retunes can be invisible at stock but bind under the
+  optimizer's power scaling) → worst residual 14 ms, **0 promotions**;
+* regenerated: all 501 stock rows, all 50 eval rows (25 stock + 25
+  "+20 %/−8 kg"), full perturbation sets for the 31 moved bikes, plus the
+  447 probe rows — **1,593 fresh sims**; the 6,981 perturbation rows of
+  two-point-verified kept bikes transplanted from the v2 shards tid-aligned.
+  8,574/8,574 rows valid, kind mix identical to v2.
+
+Same recipe (hidden 160,96 · epochs 700 · restarts 2 · split seed 42):
+
+| Metric (ET)            | Holdout (1,278 rows) | 25 UNSEEN bikes, stock | UNSEEN, +20 %/−8 kg |
+|------------------------|----------------------|------------------------|----------------------|
+| MAE                    | **58.5 ms** (v2 74.6)| 113.6 ms (v2 166.6)    | 102.4 ms (v2 132.4)  |
+| RMSE                   | 105.7 ms             | —                      | —                    |
+| R²                     | 0.9987               | —                      | —                    |
+| trap MAE               | 0.91 km/h            | —                      | —                    |
+| delta-sign agreement   | —                    | 25/25 (delta MAE 95.9 ms) |                   |
+
+All 501 bikes in-envelope at stock. Reference presets: K5 +0.018 s,
+R1 −0.018 s (hand-curated Hayabusa preset −0.336 s — documented structural
+outlier; the DB Hayabusa the optimizer uses is fine). Spot suite green:
+Hayabusa/R15 V4/Duke 390 all within 0.5 s on the production DB path.
+
+Optimizer re-proof (2-core sandbox): Hayabusa ₹450k full_race **15.4 s**
+(148 surrogate / 34 sims), ₹446.8k spend, 8 parts, no duplicate exclusives;
+Duke 390 ₹80k all **6.3 s** (87 surrogate / 7 sims), ₹80.0k spend, 7 parts.
+
+(The trainer's 2 restarts take ~31 s each — in a 45 s-capped sandbox run
+them in separate calls with the identical split, then export the better.)
+
+## v2 (June 12, 2026) — catalog-wide envelope — SUPERSEDED by v2.1 (stale labels)
 
 The v1 numpy model was trained on Sobol perturbations of the GSX-R 1000 K5
 template only. **261 of 501 catalog bikes violated its FEATURE_BOUNDS at
