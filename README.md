@@ -8,8 +8,9 @@
 
 First-principles Python physics engine for motorcycle quarter-mile drag racing
 prediction, optimisation, and parts ROI analysis. Aimed at the Indian drag
-racing community (Aamby Valley, MMRT, BIC, Kari, Hyderabad) with 270
-production bikes modelled, a 424-part catalog, and 739+ tests.
+racing community (Aamby Valley, MMRT, BIC, Kari, Hyderabad) with
+501 bikes, 232 tires, 563 parts, and 20 venues modelled, validated
+against 156 published benchmarks by a 1,300+ test pytest suite.
 
 Reference baselines: **GSX-R 1000 K5 → 10.034 s**, **YZF-R1 4C8 → 10.286 s**,
 **Hayabusa Gen1 → 10.472 s**.
@@ -70,26 +71,28 @@ docs/               All non-deploy documentation
   └── papers/       Reference papers, project plans, validation reports
 ```
 
-Deployment configs (`Dockerfile`, `Procfile`, `railway.toml`, `nixpacks.toml`,
-`vercel.json`, `requirements-api.txt`) and launch runbooks
-(`DEPLOY-NOW.md`, `DEPLOYMENT.md`, `RUNBOOK_LAUNCH.md`,
-`LAUNCH-STEPS-FOR-YOU.md`, `SOFT-LAUNCH-CHECKLIST.md`) live at the repo root.
+Deployment configs (`render.yaml`, `Dockerfile`, `vercel.json`,
+`requirements-api.txt`) live at the repo root. The API runs on Render
+(`motoquant-api.onrender.com`, Docker via `render.yaml`); the frontend is on
+Vercel (`motoquant.in`) with a `/api/*` rewrite to Render. See
+`docs/RENDER_MIGRATION.md` for the cutover + rollback runbook.
 
 `CLAUDE.md` is the persistent project-context file read at the start of every
 Claude session -- consult it for the full state-of-the-world, known issues,
 and phase roadmap.
 
-## Project state (Apr 2026)
+## Project state (Jun 2026)
 
 - **Phase 1 -- Core Physics:** complete. 15 sub-models, adaptive RK4.
 - **Phase 2 -- Database & Ingestion:** complete. 501 bikes, 232 tires,
-  563 parts, 20 venues, 861 OEM bike-tire fitments.
+  563 parts, 20 venues, 1253 OEM bike-tire fitments.
 - **Phase 3 -- Validation & Calibration:** in progress. Dragy + dyno + ECU
   import done; FastAPI + Next.js frontend live at motoquant.in.
 - **Phase 4 -- AI / Optimisation:** in progress. ROI, Sobol, Bayesian opt,
   XGBoost + DNN surrogates, smart recommendations -- all shipping.
 - **Phase 5 -- Desktop App:** scaffolded. Tauri 2 + React 19 + Vite 5 MVP.
-- **Phase 6 -- Commercial Launch:** future.
+- **Phase 6 -- Commercial Launch:** in progress. Accounts, Razorpay + Stripe
+  payments, freemium beta live.
 
 Contribute: see [CONTRIBUTING.md](CONTRIBUTING.md). Getting-started walkthrough:
 [docs/ONBOARDING.md](docs/ONBOARDING.md).

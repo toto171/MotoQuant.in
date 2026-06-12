@@ -201,9 +201,9 @@ This is not optional. The current clean state of the codebase is the result of a
 
 ## 10. Release / deploy
 
-Deployment is Phase 3 remaining work. Current state:
-- Railway (API): configured via `nixpacks.toml` + `Procfile`, not yet deployed.
-- Vercel (web): configured via `vercel.json`, not yet deployed.
+Live since April 2026; backend migrated Railway → Render on May 31, 2026:
+- Render (API): `motoquant-api.onrender.com` — Docker deploy via `render.yaml` (free tier, Singapore).
+- Vercel (web): `motoquant.in` — `vercel.json` + the `/api/*` rewrite in `web/next.config.js` point at Render.
 - Domain: `motoquant.in` (primary), `motoquant.app` (reserve).
 
-See `DEPLOYMENT.md` and `DEPLOY-NOW.md` for the current checklist. Do not deploy without coordinating — we only have one set of credentials.
+See `docs/RENDER_MIGRATION.md` for the deploy + rollback runbook. Do not deploy without coordinating — we only have one set of credentials.

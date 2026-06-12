@@ -47,10 +47,9 @@ The project is healthy. The code is not the bottleneck — deployment, data (mor
 - Parts ROI engine (knapsack optimiser), Sobol sensitivity analysis, BoTorch Bayesian optimisation, XGBoost + DNN surrogate models, Smart Recommendations engine with synergy detection.
 - Next.js landing + live simulator widget in `web/`.
 
-### Code-complete, not yet deployed
-- Railway API backend (configs ready: `nixpacks.toml`, `Procfile`, `requirements-api.txt`).
-- Vercel frontend (config ready: `vercel.json`).
-- DNS: `motoquant.in` → Vercel A record, `api.motoquant.in` → Railway CNAME.
+### Deployed
+- Render API backend (`motoquant-api.onrender.com`) — Docker deploy via `render.yaml`; see `docs/RENDER_MIGRATION.md`.
+- Vercel frontend (`motoquant.in`) — `vercel.json`; the browser reaches the API through the `/api/*` rewrite.
 
 ### Not started
 - Phase 5: Tauri 2.0 desktop app with React 19 / TS frontend (replaces Streamlit for v1.0 release).
@@ -76,8 +75,8 @@ Parts catalog prices are hand-entered in INR and go stale. Build a scraper for 2
 ### D. Phase 4C PINN surrogate (ML work — 1–2 weeks, conditional)
 Only do this if you have PyTorch + physics-informed neural network experience AND the existing DNN surrogate (`surrogate_dnn.py`) shows poor extrapolation outside its training distribution. Bake physics constraints (e.g. power ≤ engine peak, tire slip bounded) into the loss function. Justify with DNN failure evidence in the PR description before building.
 
-### E. Deployment to Railway + Vercel (ops work — half a day, needs credentials)
-Walk through `DEPLOY-NOW.md`. Requires access to the shared hosting accounts — coordinate before touching.
+### E. Deployment ops on Render + Vercel (needs credentials)
+Both are live and auto-deploy from `main` (backend rebuilds gated by the `buildFilter` in `render.yaml`). See `docs/RENDER_MIGRATION.md` for the runbook. Requires access to the shared hosting accounts — coordinate before touching.
 
 ---
 
@@ -112,7 +111,7 @@ These are the things that will cause a PR to be rejected even if the code works.
 | Co-developer | *(you — fill in)* | Equal admin on GitHub; coordinate on deployment credentials |
 
 Shared credentials (do not commit):
-- Railway API hosting — single account, ask Hritwik.
+- Render API hosting — single account, ask Hritwik.
 - Vercel frontend hosting — single account.
 - Domain registrar (`motoquant.in`) — via GitHub Education pack, single account.
 - OpenWeatherMap API key — in `.env`, ask for a copy.
