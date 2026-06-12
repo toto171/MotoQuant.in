@@ -22,6 +22,7 @@ import TierBadge from "../../components/TierBadge";
 import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
 import { Reveal } from "../../components/Reveal";
+import PageHero from "../../components/PageHero";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL || "https://motoquant-api.onrender.com";
@@ -182,22 +183,15 @@ function PricingPageInner() {
   return (
     <div className="min-h-screen bg-black text-white">
       <SiteNav />
-      <main className="pt-32 pb-20 px-4 sm:px-6">
-        <div className="mx-auto max-w-6xl">
-          <Reveal>
-            <div className="text-center mb-14">
-              <div className="inline-block px-4 py-1.5 rounded-full border border-brand-orange/40 bg-brand-orange/10 text-[10px] sm:text-xs font-mono text-brand-orange uppercase tracking-[0.25em]">
-                Pricing
-              </div>
-              <h1 className="mt-6 font-display font-bold text-5xl md:text-6xl tracking-[-0.03em] text-white">
-                Simple, honest pricing.
-              </h1>
-              <p className="mt-4 text-lg text-white/65 max-w-2xl mx-auto">
-                Built in Pune. Serving the Indian drag-racing community.
-                INR pricing, GST-compliant, Razorpay + Stripe secured.
-              </p>
+      <PageHero
+        align="center"
+        kicker={beta ? "pricing matrix \u00b7 open beta \u00b7 \u20b90" : "pricing matrix \u00b7 plans live"}
+        badge="Pricing"
+        title={<>Simple, <span className="text-gradient-orange">honest pricing</span>.</>}
+        sub="Built in Pune. Serving the Indian drag-racing community. INR pricing, GST-compliant, Razorpay + Stripe secured."
+      >
               {beta && (
-                <div className="mt-6 mx-auto max-w-2xl rounded-xl border border-brand-accent/40 bg-brand-accent/10 px-5 py-4">
+                <div className="mt-2 mx-auto max-w-2xl rounded-xl border border-brand-accent/40 bg-brand-accent/10 px-5 py-4">
                   <p className="text-sm text-brand-accent font-medium">
                     🏁 Open beta — every Pro &amp; Studio feature is unlocked
                     free for everyone. Create an account and go racing; paid
@@ -205,7 +199,7 @@ function PricingPageInner() {
                   </p>
                 </div>
               )}
-              <div className="mt-8 inline-flex items-center gap-1 rounded-full bg-ink-1 border border-white/10 p-1">
+              <div className="mt-4 inline-flex items-center gap-1 rounded-full bg-ink-1 border border-white/10 p-1">
                 <button
                   onClick={() => setCycle("monthly")}
                   className={`rounded-full px-5 py-1.5 text-sm font-mono transition-colors ${cycle === "monthly" ? "bg-brand-orange text-black font-bold" : "text-white/55 hover:text-white"}`}
@@ -220,18 +214,19 @@ function PricingPageInner() {
                   <span className="rounded bg-brand-green px-2 py-0.5 text-[10px] text-black font-bold">Save ~17%</span>
                 </button>
               </div>
-            </div>
-          </Reveal>
+      </PageHero>
 
+      <main className="pb-20 px-4 sm:px-6">
+        <div className="mx-auto max-w-6xl">
           {error && (
-            <div className="mb-8 rounded-xl bg-red-900/25 border border-red-500/40 px-5 py-4 text-sm text-red-200 text-center">
+            <div className="mb-8 rounded-xl bg-brand-red/10 border border-brand-red/40 px-5 py-4 text-sm text-brand-red/90 text-center">
               {error}
             </div>
           )}
 
           <div className="grid gap-5 md:grid-cols-3">
             <Reveal delay={0.05}>
-              <div className="rounded-2xl bg-ink-1/60 border border-white/10 p-8 flex flex-col h-full">
+              <div className="relative rounded-xl border border-white/[0.06] bg-white/[0.02] p-8 flex flex-col h-full">
                 <TierBadge tier="free" size="sm" />
                 <div className="mt-5">
                   <span className="font-display font-bold text-5xl text-white tabular-nums">₹0</span>
@@ -255,9 +250,13 @@ function PricingPageInner() {
             </Reveal>
 
             <Reveal delay={0.12}>
-              <div className="rounded-2xl bg-gradient-to-b from-brand-orange/10 to-ink-1/40 border border-brand-orange/55 p-8 flex flex-col relative h-full shadow-orange-soft">
+              <div className="relative rounded-xl border border-brand-orange/40 bg-gradient-to-b from-brand-orange/[0.07] to-white/[0.02] p-8 flex flex-col h-full">
+                <div
+                  aria-hidden="true"
+                  className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-orange/70 to-transparent"
+                />
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="rounded-full bg-brand-orange px-4 py-1 text-[10px] font-mono uppercase tracking-widest font-bold text-black shadow-lg">
+                  <span className="rounded-full bg-brand-orange px-4 py-1 text-[10px] font-mono uppercase tracking-[0.25em] font-bold text-black shadow-orange-soft">
                     Most popular
                   </span>
                 </div>
@@ -304,7 +303,7 @@ function PricingPageInner() {
             </Reveal>
 
             <Reveal delay={0.19}>
-              <div className="rounded-2xl bg-ink-1/60 border border-brand-accent/30 p-8 flex flex-col h-full">
+              <div className="relative rounded-xl border border-brand-accent/30 bg-white/[0.02] p-8 flex flex-col h-full">
                 <TierBadge tier="studio" size="sm" />
                 <div className="mt-5">
                   <span className="font-display font-bold text-5xl text-white tabular-nums">{displayPrice("studio")}</span>
@@ -329,7 +328,7 @@ function PricingPageInner() {
                 <button
                   onClick={() => subscribe("studio")}
                   disabled={!!loading}
-                  className="mt-8 w-full rounded-md bg-brand-accent py-3 text-sm font-display font-bold text-black hover:bg-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="mt-8 w-full rounded-md bg-brand-accent py-3 text-sm font-display font-bold text-black hover:bg-brand-accent/85 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {loading === "studio" ? "Redirecting…" : beta ? "Free during beta — create account" : "Subscribe to Studio"}
                 </button>
@@ -363,18 +362,18 @@ function PricingPageInner() {
           </Reveal>
 
           <Reveal>
-            <div className="mt-20">
+            <div className="mt-20 pt-16 border-t border-brand-orange/10">
               <h2 className="font-display font-bold text-2xl md:text-3xl text-white mb-2">Full feature comparison</h2>
               <p className="text-sm text-white/55 mb-8 max-w-2xl">Everything in every tier, side-by-side.</p>
-              <div className="rounded-xl border border-white/10 overflow-hidden bg-ink-1/40">
+              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-white/10 bg-white/[0.02]">
-                        <th className="py-4 px-5 text-left text-[10px] font-mono uppercase tracking-widest text-white/45">Feature</th>
-                        <th className="py-4 px-5 text-center text-[10px] font-mono uppercase tracking-widest text-white/45">Free</th>
-                        <th className="py-4 px-5 text-center text-[10px] font-mono uppercase tracking-widest text-brand-orange">Pro</th>
-                        <th className="py-4 px-5 text-center text-[10px] font-mono uppercase tracking-widest text-brand-accent">Studio</th>
+                        <th className="py-4 px-5 text-left text-[10px] font-mono uppercase tracking-[0.25em] text-white/45">Feature</th>
+                        <th className="py-4 px-5 text-center text-[10px] font-mono uppercase tracking-[0.25em] text-white/45">Free</th>
+                        <th className="py-4 px-5 text-center text-[10px] font-mono uppercase tracking-[0.25em] text-brand-orange">Pro</th>
+                        <th className="py-4 px-5 text-center text-[10px] font-mono uppercase tracking-[0.25em] text-brand-accent">Studio</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -400,14 +399,14 @@ function PricingPageInner() {
           </Reveal>
 
           <Reveal>
-            <div className="mt-20 max-w-2xl mx-auto">
+            <div className="mt-20 pt-16 border-t border-brand-orange/10 max-w-2xl mx-auto">
               <h2 className="font-display font-bold text-2xl md:text-3xl text-white mb-2 text-center">
                 Frequently asked questions
               </h2>
               <p className="text-sm text-white/55 text-center mb-6">
                 Anything else? <a href="mailto:motoquant@gmail.com" className="text-brand-accent hover:text-white transition-colors">motoquant@gmail.com</a>
               </p>
-              <div className="rounded-xl border border-white/10 bg-ink-1/40 px-6">
+              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-6">
                 {FAQ.map((item) => <FaqItem key={item.q} {...item} />)}
               </div>
             </div>
