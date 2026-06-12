@@ -2,11 +2,10 @@
 // Compiled into /sitemap.xml at build time.
 
 import { SITE_URL } from "./StructuredData";
+import { serverApiBase } from "../lib/api";
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ||
-  process.env.MOTOQUANT_INTERNAL_API_URL ||
-  SITE_URL;
+// Same-origin via the production rewrite unless an env override is set.
+const API_BASE = serverApiBase(SITE_URL);
 
 export const revalidate = 86400;
 

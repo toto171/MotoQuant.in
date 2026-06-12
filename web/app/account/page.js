@@ -20,8 +20,7 @@ import SiteFooter from "../../components/SiteFooter";
 import CodeComment from "../../components/CodeComment";
 import { Reveal } from "../../components/Reveal";
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL || "https://motoquant-api.onrender.com";
+import { API_URL_DIRECT as API_BASE } from "../../lib/api";
 
 export default function AccountPage() {
   const router = useRouter();

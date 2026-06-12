@@ -24,8 +24,7 @@ import SiteFooter from "../../components/SiteFooter";
 import { Reveal } from "../../components/Reveal";
 import PageHero from "../../components/PageHero";
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL || "https://motoquant-api.onrender.com";
+import { API_URL_DIRECT as API_BASE } from "../../lib/api";
 
 const PRICES = {
   pro:    { monthly: 499,  yearly: 4999 },

@@ -10,11 +10,9 @@
 // <head> metadata is server-rendered and visible to crawlers.
 
 import StructuredData, { SITE_URL } from '../../StructuredData';
+import { serverApiBase } from '../../../lib/api';
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ||
-  process.env.MOTOQUANT_INTERNAL_API_URL ||
-  SITE_URL; // Same-origin via Vercel rewrite in production
+const API_BASE = serverApiBase(SITE_URL); // Same-origin via the rewrite in production
 
 async function fetchBike(id) {
   // Give the Render backend a longer rope for SSR: its free tier can cold-

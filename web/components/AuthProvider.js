@@ -32,7 +32,7 @@ import {
   useState,
 } from "react";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://motoquant-api.onrender.com";
+import { API_URL_DIRECT as API_BASE } from "../lib/api";
 
 const AuthContext = createContext(null);
 
