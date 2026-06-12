@@ -1,10 +1,11 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
+import CodeComment from '../../../components/CodeComment';
 import RunSimCta from './RunSimCta';
 
 export const metadata = {
   title: 'Getting Started — Run Your First Motorcycle Quarter-Mile Simulation',
-  description: 'Step-by-step guide to running your first motorcycle quarter-mile drag simulation in MotoQuant Pro — pick from 342 bikes, choose Aamby Valley or MMRT or BIC as your venue, dial in rider weight + power delta + mass, and interpret the ET, 60-foot, and trap speed output. No physics PhD required.',
+  description: 'Step-by-step guide to running your first motorcycle quarter-mile drag simulation in MotoQuant Pro — pick from 501 bikes, choose Aamby Valley or MMRT or BIC as your venue, dial in rider weight + power delta + mass, and interpret the ET, 60-foot, and trap speed output. No physics PhD required.',
   keywords: [
     'motoquant getting started',
     'how to use motorcycle drag simulator',
@@ -47,7 +48,7 @@ export default function GettingStartedPage() {
   return (
     <article>
       <header className="mb-12">
-        <div className="text-xs font-mono text-brand-orange/70 uppercase tracking-widest mb-2">Getting Started</div>
+        <CodeComment className="mb-3">getting started · zero to first run</CodeComment>
         <h1 className="font-display font-bold text-4xl text-white mb-4 tracking-tight">Your First Simulation</h1>
         <p className="text-white/60 text-base leading-relaxed">
           MotoQuant runs in the browser — no installation required to simulate. The desktop app and API
@@ -185,7 +186,7 @@ Content-Type: application/json
 
       {/* Next steps */}
       <div className="mt-14 pt-8 border-t border-brand-orange/10">
-        <div className="text-xs font-mono text-white/40 uppercase tracking-widest mb-4">Next</div>
+        <div className="font-mono text-[10px] text-white/45 uppercase tracking-[0.25em] mb-4">Next</div>
         <div className="grid sm:grid-cols-2 gap-4">
           <Link href="/docs/physics" className="glass rounded-xl p-4 border border-white/10 hover:border-brand-orange/40 transition-colors group">
             <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Physics Whitepaper →</div>

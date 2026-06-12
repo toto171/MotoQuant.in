@@ -5,6 +5,7 @@
 
 import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
+import CodeComment from "../../components/CodeComment";
 
 export const metadata = {
   title: "Terms of Service — MotoQuant Pro",
@@ -16,16 +17,14 @@ export default function TermsPage() {
     <div className="min-h-screen bg-black text-white">
       <SiteNav />
       <main className="pt-32 pb-20 px-4 sm:px-6">
-        <div className="mx-auto max-w-3xl prose prose-invert prose-sm">
-          <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-brand-orange mb-3">
-            Legal
-          </div>
+        <div className="mx-auto max-w-3xl">
+          <CodeComment className="mb-3">legal · terms of service · pune jurisdiction</CodeComment>
           <h1 className="font-display font-bold text-4xl md:text-5xl text-white tracking-tight mt-0 mb-3">
             Terms of Service
           </h1>
           <p className="text-white/45 text-sm font-mono">Last updated: 24 April 2026</p>
 
-        <p className="text-white/80 mt-6">
+        <p className="text-white/80 text-sm leading-relaxed mt-6">
           These Terms of Service ("Terms") govern your access to and use of MotoQuant Pro
           ("MotoQuant", "we", "us"), a motorcycle drag-racing physics simulation platform
           operated from Pune, India. By creating an account or using the service, you agree
@@ -176,7 +175,7 @@ export default function TermsPage() {
 function Section({ title, children }) {
   return (
     <div className="mt-8">
-      <h2 className="font-display font-bold text-xl text-white mb-3">{title}</h2>
+      <h2 className="font-display font-bold text-xl text-white mb-3 border-l-2 border-brand-orange pl-3">{title}</h2>
       <div className="space-y-3 text-white/80 text-sm leading-relaxed">{children}</div>
     </div>
   );

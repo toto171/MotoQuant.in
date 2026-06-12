@@ -2,6 +2,8 @@ import { Suspense } from "react";
 import Link from "next/link";
 import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
+import PageHero from "../../components/PageHero";
+import { Stagger, StaggerItem } from "../../components/Reveal";
 import EndOfBlogIndexCta from "./EndOfBlogIndexCta";
 
 export const metadata = {
@@ -743,8 +745,12 @@ const POSTS = [
 
 function PostCard({ post }) {
   return (
-    <Link href={`/blog/${post.slug}`} className="block group">
-      <article className="h-full glass rounded-xl border border-white/10 p-6 hover:border-brand-orange/40 transition-colors">
+    <Link href={`/blog/${post.slug}`} className="block group h-full">
+      <article className="relative h-full overflow-hidden rounded-xl border border-brand-orange/15 bg-ink-1/60 p-6 transition duration-300 hover:border-brand-orange/40 motion-safe:group-hover:-translate-y-1">
+        <span
+          aria-hidden="true"
+          className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent"
+        />
         <div className="flex flex-wrap gap-1.5 mb-4">
           {post.tags.map((t) => (
             <span
@@ -761,8 +767,8 @@ function PostCard({ post }) {
         <p className="text-white/60 text-sm leading-relaxed mb-4">
           {post.excerpt}
         </p>
-        <div className="flex items-center justify-between">
-          <div className="font-mono text-[10px] text-white/40 uppercase tracking-wide">
+        <div className="flex items-center justify-between gap-3">
+          <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/45">
             {new Date(post.date).toLocaleDateString("en-IN", {
               year: "numeric",
               month: "long",
@@ -770,7 +776,7 @@ function PostCard({ post }) {
             })}{" "}
             · {post.readTime} read
           </div>
-          <span className="text-brand-accent text-xs font-mono group-hover:text-brand-orange transition-colors">
+          <span className="shrink-0 text-brand-accent text-xs font-mono group-hover:text-brand-orange transition-colors">
             Read →
           </span>
         </div>
@@ -784,26 +790,24 @@ export default function BlogIndexPage() {
     <div className="min-h-screen bg-black text-white">
       <SiteNav />
 
-      <main className="pt-32 pb-24 px-6">
-        <div className="max-w-5xl mx-auto">
-          <header className="mb-16">
-            <div className="mb-4 inline-block px-4 py-1.5 rounded-full border border-brand-orange/40 bg-brand-orange/10 text-xs font-mono text-brand-orange uppercase tracking-widest">
-              MotoQuant Blog
-            </div>
-            <h1 className="font-display font-bold text-5xl md:text-6xl tracking-tighter text-gradient-orange mb-4">
-              The physics of drag racing.
-            </h1>
-            <p className="text-white/60 text-lg max-w-2xl">
-              Technical deep-dives on motorcycle physics, tuning strategy, and
-              data analysis. Written for the Indian drag racing community.
-            </p>
-          </header>
+      {/* Hero — unified cockpit voice; kicker count stays in lockstep
+          with the POSTS array by construction. */}
+      <PageHero
+        kicker={`${POSTS.length} dispatches · physics · tuning · data`}
+        badge="MotoQuant Blog"
+        title={<>The physics of <span className="text-gradient-orange">drag racing.</span></>}
+        sub="Technical deep-dives on motorcycle physics, tuning strategy, and data analysis. Written for the Indian drag racing community."
+      />
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <main className="pb-24 px-6">
+        <div className="max-w-5xl mx-auto">
+          <Stagger className="grid md:grid-cols-2 lg:grid-cols-3 gap-6" stagger={0.04}>
             {POSTS.map((post) => (
-              <PostCard key={post.slug} post={post} />
+              <StaggerItem key={post.slug} className="h-full">
+                <PostCard post={post} />
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
 
           {/* GROWTH_EXP_006 — end-of-grid simulator CTA (default OFF, ?variant=B) */}
           <Suspense fallback={null}>

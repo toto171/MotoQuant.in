@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import CredibilityCtaVariant from './CredibilityCtaVariant';
+import CodeComment from '../../../components/CodeComment';
 
 export const metadata = {
   title: 'Validation Data',
@@ -48,7 +49,7 @@ export default function ValidationPage() {
   return (
     <article>
       <header className="mb-12">
-        <div className="text-xs font-mono text-brand-orange/70 uppercase tracking-widest mb-2">Validation Data</div>
+        <CodeComment className="mb-3">validation · 156 benchmarks</CodeComment>
         <h1 className="font-display font-bold text-4xl text-white mb-4 tracking-tight">Benchmark Results — April 2026</h1>
         <p className="text-white/60 text-base leading-relaxed">
           Post-calibration sweep results across 74 matched benchmarks. Metrics, per-cluster bias, and methodology.
@@ -132,7 +133,7 @@ export default function ValidationPage() {
           </div>
           {TOP10.map(b => {
             const abs = Math.abs(b.delta);
-            const color = abs < 0.05 ? 'text-brand-accent' : abs < 0.10 ? 'text-green-400' : 'text-amber-400';
+            const color = abs < 0.05 ? 'text-brand-accent' : abs < 0.10 ? 'text-brand-green' : 'text-brand-amber';
             const sign = b.delta > 0 ? '+' : '';
             return (
               <div key={b.rank} className="md:grid md:grid-cols-[36px_1fr_100px_100px_90px_130px] md:gap-3 px-5 py-4 border-b border-white/[0.04] last:border-0 hover:bg-brand-orange/[0.02] transition-colors">
@@ -183,12 +184,12 @@ export default function ValidationPage() {
               <div className="flex items-center gap-3 shrink-0">
                 <span className={`font-display font-bold tabular-nums text-sm ${
                   c.status === 'closed' ? 'text-brand-accent' :
-                  c.status === 'good' ? 'text-green-400' : 'text-amber-400'
+                  c.status === 'good' ? 'text-brand-green' : 'text-brand-amber'
                 }`}>{c.bias}</span>
                 <span className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wide ${
                   c.status === 'closed' ? 'bg-brand-accent/10 text-brand-accent' :
-                  c.status === 'good' ? 'bg-green-400/10 text-green-400' :
-                  'bg-amber-400/10 text-amber-400'
+                  c.status === 'good' ? 'bg-brand-green/10 text-brand-green' :
+                  'bg-brand-amber/10 text-brand-amber'
                 }`}>
                   {c.status === 'closed' ? 'Closed' : c.status === 'good' ? 'Good' : 'Open'}
                 </span>
@@ -239,7 +240,7 @@ export default function ValidationPage() {
 
       {/* Next */}
       <div className="pt-8 border-t border-brand-orange/10">
-        <div className="text-xs font-mono text-white/40 uppercase tracking-widest mb-4">Next</div>
+        <div className="font-mono text-[10px] text-white/45 uppercase tracking-[0.25em] mb-4">Next</div>
         <div className="grid sm:grid-cols-2 gap-4">
           <Link href="/docs/getting-started" className="glass rounded-xl p-4 border border-white/10 hover:border-brand-orange/40 transition-colors group">
             <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Getting Started →</div>
@@ -247,7 +248,7 @@ export default function ValidationPage() {
           </Link>
           <Link href="/simulator" className="glass rounded-xl p-4 border border-white/10 hover:border-brand-orange/40 transition-colors group">
             <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Try the simulator →</div>
-            <div className="text-xs text-white/50">327 bikes, free in the browser, no account needed.</div>
+            <div className="text-xs text-white/50">501 bikes, free in the browser, no account needed.</div>
           </Link>
         </div>
       </div>

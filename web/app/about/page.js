@@ -1,11 +1,12 @@
 'use client';
 
 import { Suspense, useState } from 'react';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { Send, ChevronRight, Zap, Flag, Target, Cpu } from 'lucide-react';
+import { Send, ChevronRight } from 'lucide-react';
 import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
+import PageHero from '../../components/PageHero';
+import CodeComment from '../../components/CodeComment';
+import { Reveal } from '../../components/Reveal';
 import EndOfAboutCta from './EndOfAboutCta';
 
 const ROADMAP = [
@@ -41,6 +42,46 @@ const ROADMAP = [
   },
 ];
 
+/* ── status-dot voice: brand-green = shipped · brand-amber pulse = in
+      progress · hollow white/30 = future. One language, no ad-hoc hues. ── */
+const STATUS_DOT = {
+  complete: 'bg-brand-green border-brand-green',
+  'in-progress': 'bg-brand-amber border-brand-amber animate-pulse',
+  planned: 'bg-transparent border-white/30',
+};
+const STATUS_PILL = {
+  complete: 'bg-brand-green/10 text-brand-green',
+  'in-progress': 'bg-brand-amber/15 text-brand-amber',
+  planned: 'bg-white/5 text-white/40',
+};
+
+function FounderCard({ initial, name, role, email, children }) {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-brand-orange/20 bg-ink-1/60 p-8">
+      <span
+        aria-hidden="true"
+        className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/60 to-transparent"
+      />
+      <div className="flex items-start gap-5 mb-5">
+        <div className="w-14 h-14 rounded-full bg-brand-orange/20 border border-brand-orange/40 flex items-center justify-center shrink-0">
+          <span className="text-brand-orange font-display font-bold text-xl">{initial}</span>
+        </div>
+        <div>
+          <div className="font-display font-bold text-xl text-white mb-0.5">{name}</div>
+          <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">{role}</div>
+        </div>
+      </div>
+      <div className="space-y-3 text-white/70 text-sm leading-relaxed">{children}</div>
+      <a
+        href={`mailto:${email}`}
+        className="inline-flex items-center gap-1.5 mt-5 text-sm text-brand-accent font-mono hover:text-brand-orange transition-colors"
+      >
+        {email} <ChevronRight size={14} />
+      </a>
+    </div>
+  );
+}
+
 export default function AboutPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -57,36 +98,34 @@ export default function AboutPage() {
     setSent(true);
   }
 
+  const inputCls =
+    'w-full bg-ink-0/70 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-brand-orange/60 transition-colors';
+  const labelCls =
+    'block font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1.5';
+
   return (
     <div className="min-h-screen bg-ink-0 text-white overflow-x-hidden">
       {/* Nav */}
       <SiteNav />
 
-      {/* Hero */}
-      <section className="pt-32 pb-20 px-6 border-b border-brand-orange/10">
-        <div className="max-w-3xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
-            className="mb-4 inline-block px-4 py-1.5 rounded-full border border-brand-orange/40 bg-brand-orange/10 text-xs font-mono text-brand-orange uppercase tracking-widest"
-          >
-            Our story
-          </motion.div>
-          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.6 }}
-            className="font-display font-bold text-5xl md:text-6xl mb-6 tracking-tighter text-gradient-orange"
-          >
-            Built in Pune.<br/>For the strip.
-          </motion.h1>
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25, duration: 0.6 }}
-            className="text-white/70 text-lg leading-relaxed"
-          >
+      {/* Hero — unified cockpit voice */}
+      <PageHero
+        kicker="founders · pune, india"
+        badge="Our story"
+        title={<>Built in Pune.<br />For <span className="text-gradient-orange">the strip.</span></>}
+        sub={
+          <>
             MotoQuant started as a single question at a drag strip outside Pune: <em>&ldquo;How do I know which part will actually move my ET?&rdquo;</em> Every tuner, racer, and weekend warrior we talked to had the same problem. The answers were guesswork, YouTube comments, or ₹50,000 test runs. There had to be a better way.
-          </motion.p>
-        </div>
-      </section>
+          </>
+        }
+        className="border-b border-brand-orange/10"
+      />
 
       {/* Story */}
-      <section className="py-20 px-6 border-b border-brand-orange/10 max-w-6xl mx-auto">
+      <section className="py-20 md:py-28 px-6 border-b border-brand-orange/10 max-w-6xl mx-auto">
+        <CodeComment className="mb-10">problem statement · loaded</CodeComment>
         <div className="grid md:grid-cols-2 gap-12 items-start">
-          <div>
+          <Reveal>
             <h2 className="font-display font-bold text-3xl mb-6 text-white">The Problem We Solve</h2>
             <div className="space-y-4 text-white/70 text-sm leading-relaxed">
               <p>
@@ -99,8 +138,8 @@ export default function AboutPage() {
                 MotoQuant is built specifically for the Indian drag scene — with Indian bikes (all 57 of the most common Indian-market machines), Indian parts prices in INR, Indian venues with real seasonal weather data, and Indian community benchmarks used for validation.
               </p>
             </div>
-          </div>
-          <div>
+          </Reveal>
+          <Reveal delay={0.08}>
             <h2 className="font-display font-bold text-3xl mb-6 text-white">Why First Principles?</h2>
             <div className="space-y-4 text-white/70 text-sm leading-relaxed">
               <p>
@@ -116,29 +155,22 @@ export default function AboutPage() {
                 Top-10 mean error after our April 2026 calibration pass: <strong className="text-brand-orange">±0.032s</strong>. Reference baselines within 0.001s of targets. That&apos;s what first principles buys you.
               </p>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
       {/* Founders */}
-      <section className="py-20 px-6 border-b border-brand-orange/10 bg-ink-1/30">
+      <section className="py-20 md:py-28 px-6 border-b border-brand-orange/10 bg-ink-1/30">
         <div className="max-w-5xl mx-auto">
+          <CodeComment className="mb-10">crew manifest · two entries</CodeComment>
           <h2 className="font-display font-bold text-3xl md:text-4xl mb-3 text-white">Founders</h2>
-          <p className="text-white/60 text-sm font-mono mb-10 uppercase tracking-wide">Engineers first. Racers second. Shipping a tool we&apos;d use ourselves.</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-10">
+            Engineers first. Racers second. Shipping a tool we&apos;d use ourselves.
+          </p>
 
           <div className="grid md:grid-cols-2 gap-6">
-            {/* Founder 1 — Arya Desai */}
-            <div className="glass rounded-2xl p-8 border border-brand-orange/20">
-              <div className="flex items-start gap-5 mb-5">
-                <div className="w-14 h-14 rounded-full bg-brand-orange/20 border border-brand-orange/40 flex items-center justify-center shrink-0">
-                  <span className="text-brand-orange font-display font-bold text-xl">A</span>
-                </div>
-                <div>
-                  <div className="font-display font-bold text-xl text-white mb-0.5">Arya Desai</div>
-                  <div className="font-mono text-xs text-white/50">Co-founder · Pune, India</div>
-                </div>
-              </div>
-              <div className="space-y-3 text-white/70 text-sm leading-relaxed">
+            <Reveal>
+              <FounderCard initial="A" name="Arya Desai" role="Co-founder · Pune, India" email="motoquant@gmail.com">
                 <p>
                   Automobile engineer — M.Tech at NIT Warangal, B.Tech from Manipal Institute of Technology (Automotive System Design). The physics-and-shop-floor side of MotoQuant.
                 </p>
@@ -148,27 +180,11 @@ export default function AboutPage() {
                 <p>
                   Hands-on side: diagnosed and performance-tuned 25+ luxury and performance vehicles at Power Solutions Pune — Mercedes AMG, BMW, Audi, Jaguar Land Rover, Lincoln — including a flagship Mercedes AMG SLS valvetronic exhaust install. ECU-tuning certified (Techmaghi / ReynLab). Undergrad research at MIT Manipal on PU-based magnetorheological elastomers delivered a 22% improvement in vibration damping.
                 </p>
-              </div>
-              <a
-                href="mailto:motoquant@gmail.com"
-                className="inline-flex items-center gap-1.5 mt-5 text-sm text-brand-accent font-mono hover:text-brand-orange transition-colors"
-              >
-                motoquant@gmail.com <ChevronRight size={14} />
-              </a>
-            </div>
+              </FounderCard>
+            </Reveal>
 
-            {/* Founder 2 — Hritwik Mudhai */}
-            <div className="glass rounded-2xl p-8 border border-brand-orange/20">
-              <div className="flex items-start gap-5 mb-5">
-                <div className="w-14 h-14 rounded-full bg-brand-orange/20 border border-brand-orange/40 flex items-center justify-center shrink-0">
-                  <span className="text-brand-orange font-display font-bold text-xl">H</span>
-                </div>
-                <div>
-                  <div className="font-display font-bold text-xl text-white mb-0.5">Hritwik Mudhai</div>
-                  <div className="font-mono text-xs text-white/50">Co-founder · Manipal, India</div>
-                </div>
-              </div>
-              <div className="space-y-3 text-white/70 text-sm leading-relaxed">
+            <Reveal delay={0.08}>
+              <FounderCard initial="H" name="Hritwik Mudhai" role="Co-founder · Manipal, India" email="dhisetu@gmail.com">
                 <p>
                   The physics + software side. Built the 15-sub-model drag simulation engine, the 501-bike catalog, the ROI knapsack, and the calibration pipeline that fits sim output to real Dragy traces within ±0.05 s.
                 </p>
@@ -178,62 +194,47 @@ export default function AboutPage() {
                 <p>
                   Wrote the RK4 integrator, the Pacejka tire model, the expansion-chamber 2-stroke curve, and the clutch-slip thermal model from the ground up. Cares more about which terms actually survive the force balance than about chasing a good-looking regression. Wants MotoQuant to be the tool every serious tuner already has open on a second monitor.
                 </p>
-              </div>
-              <a
-                href="mailto:dhisetu@gmail.com"
-                className="inline-flex items-center gap-1.5 mt-5 text-sm text-brand-accent font-mono hover:text-brand-orange transition-colors"
-              >
-                dhisetu@gmail.com <ChevronRight size={14} />
-              </a>
-            </div>
+              </FounderCard>
+            </Reveal>
           </div>
         </div>
       </section>
 
       {/* Roadmap */}
-      <section className="py-20 px-6 border-b border-brand-orange/10">
+      <section className="py-20 md:py-28 px-6 border-b border-brand-orange/10">
         <div className="max-w-4xl mx-auto">
+          <CodeComment className="mb-10">mission plan · phase 6 in progress</CodeComment>
           <h2 className="font-display font-bold text-3xl md:text-4xl mb-3 text-white">Where We&apos;re Going</h2>
-          <p className="text-white/60 text-sm font-mono mb-12 uppercase tracking-wide">Roadmap — no specific dates, shipping when it&apos;s right</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-12">
+            Roadmap — no specific dates, shipping when it&apos;s right
+          </p>
 
           <div className="relative pl-6 border-l border-brand-orange/20 space-y-10">
             {ROADMAP.map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: -10 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="relative"
-              >
+              <Reveal key={i} y={14} duration={0.45} delay={i * 0.08} className="relative">
                 {/* Dot */}
-                <div className={`absolute -left-[1.625rem] top-1.5 w-3 h-3 rounded-full border-2 ${
-                  item.status === 'complete' ? 'bg-brand-accent border-brand-accent' :
-                  item.status === 'in-progress' ? 'bg-brand-orange border-brand-orange animate-pulse' :
-                  'bg-transparent border-white/30'
-                }`} />
+                <div
+                  className={`absolute -left-[1.625rem] top-1.5 w-3 h-3 rounded-full border-2 ${STATUS_DOT[item.status] ?? STATUS_DOT.planned}`}
+                />
 
                 <div className="flex items-center gap-3 mb-1.5">
-                  <span className="font-mono text-[10px] text-white/40 uppercase tracking-widest">{item.phase}</span>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wide ${
-                    item.status === 'complete' ? 'bg-brand-accent/10 text-brand-accent' :
-                    item.status === 'in-progress' ? 'bg-brand-orange/15 text-brand-orange' :
-                    'bg-white/5 text-white/40'
-                  }`}>
+                  <span className="font-mono text-[10px] text-white/45 uppercase tracking-[0.25em]">{item.phase}</span>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wide ${STATUS_PILL[item.status] ?? STATUS_PILL.planned}`}>
                     {item.status === 'complete' ? 'Done' : item.status === 'in-progress' ? 'In progress' : 'Planned'}
                   </span>
                 </div>
                 <h3 className="font-display font-bold text-lg text-white mb-1">{item.label}</h3>
                 <p className="text-white/60 text-sm leading-relaxed">{item.desc}</p>
-              </motion.div>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
       {/* Contact */}
-      <section className="py-20 px-6 border-b border-brand-orange/10 bg-ink-1/30">
+      <section className="py-20 md:py-28 px-6 border-b border-brand-orange/10 bg-ink-1/30">
         <div className="max-w-4xl mx-auto">
+          <CodeComment className="mb-10">comms channel · open</CodeComment>
           <div className="grid md:grid-cols-2 gap-12">
             <div>
               <h2 className="font-display font-bold text-3xl mb-4 text-white">Get in Touch</h2>
@@ -242,17 +243,17 @@ export default function AboutPage() {
               </p>
               <div className="space-y-3">
                 <div>
-                  <div className="text-xs font-mono text-white/40 uppercase tracking-widest mb-1">Email</div>
+                  <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1">Email</div>
                   <a href="mailto:motoquant@gmail.com" className="font-mono text-brand-accent hover:text-brand-orange transition-colors text-sm">
                     motoquant@gmail.com
                   </a>
                 </div>
                 <div>
-                  <div className="text-xs font-mono text-white/40 uppercase tracking-widest mb-1">Location</div>
+                  <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1">Location</div>
                   <span className="font-mono text-white/70 text-sm">Pune, Maharashtra, India</span>
                 </div>
                 <div>
-                  <div className="text-xs font-mono text-white/40 uppercase tracking-widest mb-1">Pro licensing</div>
+                  <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1">Pro licensing</div>
                   <a href="mailto:motoquant@gmail.com?subject=MotoQuant%20Pro%20Licensing" className="font-mono text-brand-accent hover:text-brand-orange transition-colors text-sm">
                     Request a quote →
                   </a>
@@ -262,49 +263,57 @@ export default function AboutPage() {
 
             <div>
               {sent ? (
-                <div className="glass rounded-xl p-8 border border-brand-accent/30 text-center">
-                  <div className="text-brand-accent text-3xl mb-3">✓</div>
+                <div className="relative overflow-hidden rounded-xl border border-brand-green/30 bg-ink-1/60 p-8 text-center">
+                  <span
+                    aria-hidden="true"
+                    className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-green/60 to-transparent"
+                  />
+                  <div className="text-brand-green text-3xl mb-3">✓</div>
                   <h3 className="font-display font-bold text-white mb-2">Message sent!</h3>
                   <p className="text-white/60 text-sm">Your mail client should have opened with a pre-filled message. If not, email motoquant@gmail.com directly.</p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="glass rounded-xl p-6 border border-brand-orange/20 space-y-4">
+                <form onSubmit={handleSubmit} className="relative overflow-hidden rounded-xl border border-brand-orange/20 bg-ink-1/60 p-6 space-y-4">
+                  <span
+                    aria-hidden="true"
+                    className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/60 to-transparent"
+                  />
                   <div>
-                    <label className="block text-xs font-mono text-white/50 uppercase tracking-wider mb-1.5">Your name</label>
+                    <label className={labelCls}>Your name</label>
                     <input
                       type="text"
                       value={name}
                       onChange={e => setName(e.target.value)}
                       required
-                      className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-brand-orange/60 transition-colors"
+                      className={inputCls}
                       placeholder="Arjun Sharma"
                     />
-                              </div>
+                  </div>
                   <div>
-                    <label className="block text-xs font-mono text-white/50 uppercase tracking-wider mb-1.5">Email</label>
+                    <label className={labelCls}>Email</label>
                     <input
                       type="email"
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                       required
-                      className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-brand-orange/60 transition-colors"
+                      className={inputCls}
                       placeholder="you@example.com"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-mono text-white/50 uppercase tracking-wider mb-1.5">Message</label>
+                    <label className={labelCls}>Message</label>
                     <textarea
                       value={message}
                       onChange={e => setMessage(e.target.value)}
                       required
                       rows={5}
-                      className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-brand-orange/60 transition-colors resize-none"
+                      className={`${inputCls} resize-none`}
                       placeholder="Tell us what you want to know, build, or break."
                     />
                   </div>
                   <button
                     type="submit"
-                    className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-brand-orange text-black font-display font-bold rounded-lg hover:bg-brand-orangeLight transition-colors"
+                    className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-brand-orange text-black font-display font-bold rounded-md hover:bg-brand-orangeLight transition-colors shadow-orange-soft"
                   >
                     <Send size={14} /> Send message
                   </button>

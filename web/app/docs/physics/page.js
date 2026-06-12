@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import SubModelsCtaVariant from './SubModelsCtaVariant';
+import CodeComment from '../../../components/CodeComment';
+import ScoreboardDigits from '../../../components/ScoreboardDigits';
 
 export const metadata = {
   title: 'Physics Whitepaper',
@@ -41,7 +43,9 @@ function SubModelRow({ model }) {
   return (
     <div className="py-4 border-b border-white/[0.05] last:border-0">
       <div className="flex items-start gap-4">
-        <div className="font-mono text-xs text-brand-orange/60 w-8 shrink-0 pt-0.5">{model.n}</div>
+        <div className="w-8 shrink-0 pt-1">
+          <ScoreboardDigits value={model.n} h={16} label={`sub-model ${model.n}`} />
+        </div>
         <div className="flex-1">
           <div className="font-display font-bold text-sm text-white mb-1">{model.name}</div>
           <p className="text-xs text-white/60 leading-relaxed">{model.desc}</p>
@@ -56,7 +60,7 @@ export default function PhysicsPage() {
   return (
     <article>
       <header className="mb-12">
-        <div className="text-xs font-mono text-brand-orange/70 uppercase tracking-widest mb-2">Physics Whitepaper</div>
+        <CodeComment className="mb-3">physics engine · 15 submodels</CodeComment>
         <h1 className="font-display font-bold text-4xl text-white mb-4 tracking-tight">How MotoQuant Simulates a Quarter Mile</h1>
         <p className="text-white/60 text-base leading-relaxed">
           A first-principles summary of the 15 sub-models, the RK4 numerical integrator, and the validation
@@ -159,7 +163,7 @@ export default function PhysicsPage() {
 
       {/* Next */}
       <div className="pt-8 border-t border-brand-orange/10">
-        <div className="text-xs font-mono text-white/40 uppercase tracking-widest mb-4">Next</div>
+        <div className="font-mono text-[10px] text-white/45 uppercase tracking-[0.25em] mb-4">Next</div>
         <div className="grid sm:grid-cols-2 gap-4">
           <Link href="/docs/validation" className="glass rounded-xl p-4 border border-white/10 hover:border-brand-orange/40 transition-colors group">
             <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Validation Data →</div>
