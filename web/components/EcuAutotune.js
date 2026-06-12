@@ -35,6 +35,14 @@ import LocationPicker, { environmentOverridesFromLocation } from './LocationPick
 const fmtNum = (n, d = 1) => (n == null ? '—' : Number(n).toFixed(d));
 const fmtDelta = (n, d = 3) =>
   n == null ? '—' : `${n > 0 ? '+' : ''}${Number(n).toFixed(d)}`;
+// Sign-aware tone for ET deltas. Backend convention (ecu_autotune.py):
+// delta_et_s = stock − tuned ⇒ positive = faster. Purely presentational.
+const deltaTone = (n) =>
+  n == null || Number(n) === 0
+    ? 'text-white/50'
+    : Number(n) > 0
+      ? 'text-brand-accent'
+      : 'text-brand-red';
 const fmtInt = (n) => (n == null ? '—' : Math.round(Number(n)).toLocaleString('en-US'));
 
 // ─── Bike picker (self-contained, debounced /api/bikes search) ───────────────
@@ -86,13 +94,13 @@ function BikePicker({ value, onSelect }) {
 
   return (
     <div className="relative" ref={ref}>
-      <label className="flex items-center gap-1.5 text-[10px] text-white/40 mb-1.5 uppercase tracking-widest font-medium">
+      <label className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1.5">
         <Sliders size={11} className="text-brand-orange" /> Bike
       </label>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg border border-white/10 bg-black/30 hover:border-brand-orange/40 text-left transition-colors"
+        className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg border border-white/10 bg-ink-1 hover:border-brand-orange/40 text-left transition-colors"
       >
         <span className={`text-sm truncate ${value ? 'text-white' : 'text-white/40'}`}>
           {label}
@@ -124,7 +132,7 @@ function BikePicker({ value, onSelect }) {
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   placeholder="Search bikes…"
-                  className="w-full pl-8 pr-3 py-2 bg-black/40 border border-white/10 rounded-md text-sm text-white placeholder:text-white/30 focus:border-brand-orange focus:outline-none font-mono"
+                  className="w-full pl-8 pr-3 py-2 bg-ink-1 border border-white/10 rounded-md text-sm text-white placeholder:text-white/30 focus:border-brand-orange/60 focus:outline-none font-mono"
                 />
               </div>
             </div>
@@ -165,7 +173,7 @@ function BikePicker({ value, onSelect }) {
 function EnvStat({ icon: Icon, label, value, accent }) {
   return (
     <div className="text-left">
-      <p className="flex items-center gap-1 text-[9px] font-mono uppercase tracking-wider text-white/40">
+      <p className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">
         {Icon && <Icon size={10} className="text-white/40" />} {label}
       </p>
       <p className={`text-sm font-mono tabular-nums mt-0.5 ${accent || 'text-white/90'}`}>{value}</p>
@@ -176,9 +184,9 @@ function EnvStat({ icon: Icon, label, value, accent }) {
 // ─── recommendation card shell ──────────────────────────────────────────────
 function RecCard({ icon: Icon, title, children, delta, badge }) {
   return (
-    <div className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-5 backdrop-blur">
+    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 sm:p-5">
       <div className="flex items-center justify-between mb-3">
-        <p className="flex items-center gap-1.5 text-xs font-semibold text-white/55 uppercase tracking-wider">
+        <p className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">
           {Icon && <Icon size={13} className="text-brand-orange" />} {title}
         </p>
         <div className="flex items-center gap-2">
@@ -188,7 +196,7 @@ function RecCard({ icon: Icon, title, children, delta, badge }) {
             </span>
           )}
           {delta != null && (
-            <span className="text-xs font-mono text-brand-accent tabular-nums">{fmtDelta(delta, 3)}s</span>
+            <span className={`text-xs font-mono tabular-nums ${deltaTone(delta)}`}>{fmtDelta(delta, 3)}s</span>
           )}
         </div>
       </div>
@@ -275,7 +283,12 @@ export default function EcuAutotune() {
   return (
     <div className="space-y-6">
       {/* ── Controls card ───────────────────────────────────────────── */}
-      <div className="relative bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl p-5 sm:p-7">
+      <div className="relative bg-white/[0.02] backdrop-blur-xl border border-brand-orange/20 rounded-2xl p-5 sm:p-7">
+        {/* orange hairline — promoted controls panel */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-orange/70 to-transparent"
+        />
         <AnimatePresence>
           {loading && (
             <motion.div
@@ -294,13 +307,13 @@ export default function EcuAutotune() {
 
           {/* Location */}
           <div>
-            <label className="block text-[10px] text-white/40 mb-1.5 uppercase tracking-widest font-medium">
+            <label className="block font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1.5">
               Race location
             </label>
             <button
               type="button"
               onClick={() => setLocationOpen((v) => !v)}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg border border-white/10 hover:border-brand-orange/40 bg-black/30 text-left transition-colors"
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg border border-white/10 hover:border-brand-orange/40 bg-ink-1 text-left transition-colors"
             >
               <div className="flex items-center gap-2 text-sm min-w-0 flex-1">
                 <MapPin size={14} className="text-brand-orange shrink-0" />
@@ -353,7 +366,7 @@ export default function EcuAutotune() {
             <button
               type="button"
               onClick={() => setShowManual((v) => !v)}
-              className="text-[11px] font-mono text-white/50 hover:text-brand-orange transition-colors uppercase tracking-wide"
+              className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 hover:text-brand-orange transition-colors"
             >
               {showManual ? '− Hide manual conditions' : '+ Set conditions manually'}
             </button>
@@ -372,7 +385,7 @@ export default function EcuAutotune() {
                       { label: 'Altitude m', v: altitude, set: setAltitude, ph: 'e.g. 600', icon: Mountain },
                     ].map((f) => (
                       <div key={f.label}>
-                        <label className="flex items-center gap-1 text-[9px] font-mono uppercase tracking-wider text-white/40 mb-1">
+                        <label className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1">
                           <f.icon size={10} /> {f.label}
                         </label>
                         <input
@@ -381,7 +394,7 @@ export default function EcuAutotune() {
                           value={f.v}
                           onChange={(e) => f.set(e.target.value)}
                           placeholder={f.ph}
-                          className="w-full px-2.5 py-2 bg-black/40 border border-white/10 rounded-lg text-sm text-white placeholder:text-white/25 focus:border-brand-orange focus:outline-none font-mono"
+                          className="w-full px-2.5 py-2 bg-ink-1 border border-white/10 rounded-lg text-sm text-white placeholder:text-white/25 focus:border-brand-orange/60 focus:outline-none font-mono"
                         />
                       </div>
                     ))}
@@ -397,7 +410,7 @@ export default function EcuAutotune() {
           {/* Rider weight */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-[10px] text-white/40 uppercase tracking-widest font-medium">Rider weight</label>
+              <label className="block font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">Rider weight</label>
               <span className="text-sm font-mono text-white/80 tabular-nums">{riderKg} kg</span>
             </div>
             <input
@@ -424,7 +437,11 @@ export default function EcuAutotune() {
             disabled={!bike}
             whileHover={{ scale: !bike ? 1 : 1.01 }}
             whileTap={{ scale: !bike ? 1 : 0.99 }}
-            className="w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-brand-orange to-brand-orangeLight text-black shadow-orange-soft hover:brightness-110 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:saturate-50"
+            className={`w-full py-3.5 rounded-md text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:saturate-50 ${
+              loading
+                ? 'bg-brand-red/15 border border-brand-red/50 text-brand-red font-mono'
+                : 'bg-brand-orange hover:bg-brand-orangeLight text-black font-display font-bold shadow-orange-soft'
+            }`}
           >
             {loading ? (
               <span className="tabular-nums">
@@ -446,7 +463,7 @@ export default function EcuAutotune() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-300 text-sm flex items-center gap-2"
+            className="p-3 bg-brand-red/10 border border-brand-red/30 rounded-lg text-brand-red text-sm flex items-center gap-2"
           >
             <AlertCircle size={16} /> {error}
           </motion.div>
@@ -465,9 +482,9 @@ export default function EcuAutotune() {
           >
             {/* Header */}
             <div className="flex items-center justify-between flex-wrap gap-2">
-              <h3 className="text-lg font-bold text-white">
+              <h3 className="font-display text-lg font-bold text-white">
                 {result.bike_name}
-                <span className="ml-2 text-xs font-mono text-white/40 uppercase tracking-wide">setup</span>
+                <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">setup</span>
               </h3>
               {result.scoring_method && (
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-accent/10 border border-brand-accent/30 text-[11px] font-mono text-brand-accent">
@@ -478,9 +495,9 @@ export default function EcuAutotune() {
 
             {/* Environment summary */}
             {env && (
-              <div className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-5 backdrop-blur">
+              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-3">
-                  <p className="flex items-center gap-1.5 text-xs font-semibold text-white/55 uppercase tracking-wider">
+                  <p className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">
                     <MapPin size={13} className="text-brand-orange" />
                     {env.location || 'Conditions'}
                   </p>
@@ -508,20 +525,20 @@ export default function EcuAutotune() {
             {/* Combined net result */}
             {combined && (
               <div className="grid grid-cols-3 gap-3">
-                <div className="bg-white/[0.04] border border-white/10 rounded-xl p-4 text-center backdrop-blur">
-                  <p className="text-[10px] font-semibold text-white/50 mb-1.5 uppercase tracking-wide">Tuned ET</p>
+                <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-center">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1.5">Tuned ET</p>
                   <p className="text-2xl sm:text-3xl font-mono font-bold text-brand-orange">
                     {fmtNum(combined.et_s, 3)}<span className="text-base ml-1">s</span>
                   </p>
                 </div>
-                <div className="bg-white/[0.04] border border-white/10 rounded-xl p-4 text-center backdrop-blur">
-                  <p className="text-[10px] font-semibold text-white/50 mb-1.5 uppercase tracking-wide">Trap</p>
+                <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-center">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1.5">Trap</p>
                   <p className="text-2xl sm:text-3xl font-mono font-bold text-white">{fmtNum(combined.trap_kmh, 1)}</p>
                   <p className="text-[11px] text-white/40 mt-1 font-mono">km/h</p>
                 </div>
-                <div className="bg-white/[0.04] border border-white/10 rounded-xl p-4 text-center backdrop-blur">
-                  <p className="text-[10px] font-semibold text-white/50 mb-1.5 uppercase tracking-wide">Net gain</p>
-                  <p className="text-2xl sm:text-3xl font-mono font-bold text-brand-accent">{fmtDelta(combined.delta_et_s, 3)}</p>
+                <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-center">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1.5">Net gain</p>
+                  <p className={`text-2xl sm:text-3xl font-mono font-bold ${deltaTone(combined.delta_et_s)}`}>{fmtDelta(combined.delta_et_s, 3)}</p>
                   <p className="text-[11px] text-white/40 mt-1 font-mono">seconds</p>
                 </div>
               </div>
@@ -539,7 +556,7 @@ export default function EcuAutotune() {
                   <>
                     <div className="grid grid-cols-3 gap-3 mb-3">
                       <div>
-                        <p className="text-[9px] font-mono uppercase tracking-wider text-white/40">Front</p>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">Front</p>
                         <p className="text-base font-mono font-bold text-white tabular-nums mt-0.5">
                           {fmtInt(gearing.recommended_front)}
                           {gearing.stock_front != null && (
@@ -548,7 +565,7 @@ export default function EcuAutotune() {
                         </p>
                       </div>
                       <div>
-                        <p className="text-[9px] font-mono uppercase tracking-wider text-white/40">Rear</p>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">Rear</p>
                         <p className="text-base font-mono font-bold text-white tabular-nums mt-0.5">
                           {fmtInt(gearing.recommended_rear)}
                           {gearing.stock_rear != null && (
@@ -557,7 +574,7 @@ export default function EcuAutotune() {
                         </p>
                       </div>
                       <div>
-                        <p className="text-[9px] font-mono uppercase tracking-wider text-white/40">Final drive</p>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">Final drive</p>
                         <p className="text-base font-mono font-bold text-white tabular-nums mt-0.5">
                           {fmtNum(gearing.recommended_final_drive, 2)}
                         </p>
@@ -599,7 +616,7 @@ export default function EcuAutotune() {
               >
                 <div className="grid grid-cols-2 gap-3 mb-2 max-w-xs">
                   <div>
-                    <p className="text-[9px] font-mono uppercase tracking-wider text-white/40">Rear</p>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">Rear</p>
                     <p className="text-base font-mono font-bold text-white tabular-nums mt-0.5">
                       {fmtNum(tyre.rear_psi, 1)} <span className="text-white/40 text-xs">psi</span>
                       {tyre.stock_rear_psi != null && (
@@ -608,7 +625,7 @@ export default function EcuAutotune() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-[9px] font-mono uppercase tracking-wider text-white/40">Front</p>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">Front</p>
                     <p className="text-base font-mono font-bold text-white tabular-nums mt-0.5">
                       {fmtNum(tyre.front_psi, 1)} <span className="text-white/40 text-xs">psi</span>
                       {tyre.stock_front_psi != null && (
@@ -636,13 +653,13 @@ export default function EcuAutotune() {
                   <>
                     <div className="grid grid-cols-2 gap-3 mb-2 max-w-xs">
                       <div>
-                        <p className="text-[9px] font-mono uppercase tracking-wider text-white/40">Fuel trim</p>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">Fuel trim</p>
                         <p className="text-base font-mono font-bold text-white tabular-nums mt-0.5">
                           {fmtDelta(fuel.fuel_trim_pct, 1)}%
                         </p>
                       </div>
                       <div>
-                        <p className="text-[9px] font-mono uppercase tracking-wider text-white/40">Timing</p>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">Timing</p>
                         <p className="text-base font-mono font-bold text-white tabular-nums mt-0.5">
                           {fmtDelta(fuel.timing_advance_deg, 1)}°
                         </p>
@@ -657,7 +674,7 @@ export default function EcuAutotune() {
             {/* Overall rationale */}
             {result.rationale && (
               <div className="bg-brand-accent/[0.06] border border-brand-accent/25 rounded-xl p-4">
-                <p className="flex items-center gap-1.5 text-xs font-semibold text-brand-accent uppercase tracking-wider mb-2">
+                <p className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-brand-accent mb-2">
                   <Sparkles size={13} /> Summary
                 </p>
                 <p className="text-sm text-white/80">{result.rationale}</p>

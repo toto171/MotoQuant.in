@@ -35,6 +35,15 @@ const fmtINR = (n) =>
 const fmtNum = (n, d = 1) => (n == null ? '—' : Number(n).toFixed(d));
 const fmtDelta = (n, d = 3) =>
   n == null ? '—' : `${n > 0 ? '+' : ''}${Number(n).toFixed(d)}`;
+// Sign-aware tone for ET / trap deltas. Backend convention (build_optimizer.py):
+// delta_et_s = base − optimized, delta_trap = optimized − base ⇒ positive = faster.
+// Purely presentational — no data-flow change.
+const deltaTone = (n) =>
+  n == null || Number(n) === 0
+    ? 'text-white/50'
+    : Number(n) > 0
+      ? 'text-brand-accent'
+      : 'text-brand-red';
 
 const GOALS = [
   { id: 'min_et', label: 'Min ET', icon: TrendingDown },
@@ -99,13 +108,13 @@ function BikePicker({ value, onSelect }) {
 
   return (
     <div className="relative" ref={ref}>
-      <label className="flex items-center gap-1.5 text-[10px] text-white/40 mb-1.5 uppercase tracking-widest font-medium">
+      <label className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1.5">
         <Wrench size={11} className="text-brand-orange" /> Bike
       </label>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg border border-white/10 bg-black/30 hover:border-brand-orange/40 text-left transition-colors"
+        className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg border border-white/10 bg-ink-1 hover:border-brand-orange/40 text-left transition-colors"
       >
         <span className={`text-sm truncate ${value ? 'text-white' : 'text-white/40'}`}>
           {label}
@@ -137,7 +146,7 @@ function BikePicker({ value, onSelect }) {
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   placeholder="Search bikes…"
-                  className="w-full pl-8 pr-3 py-2 bg-black/40 border border-white/10 rounded-md text-sm text-white placeholder:text-white/30 focus:border-brand-orange focus:outline-none font-mono"
+                  className="w-full pl-8 pr-3 py-2 bg-ink-1 border border-white/10 rounded-md text-sm text-white placeholder:text-white/30 focus:border-brand-orange/60 focus:outline-none font-mono"
                 />
               </div>
             </div>
@@ -177,8 +186,8 @@ function BikePicker({ value, onSelect }) {
 // ─── stat tile ───────────────────────────────────────────────────────────────
 function StatTile({ label, value, sub, accent }) {
   return (
-    <div className="bg-white/[0.04] border border-white/10 rounded-xl p-4 text-center backdrop-blur">
-      <p className="text-[10px] font-semibold text-white/50 mb-1.5 uppercase tracking-wide">{label}</p>
+    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-center">
+      <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1.5">{label}</p>
       <p className={`text-2xl sm:text-3xl font-mono font-bold ${accent || 'text-white'}`}>{value}</p>
       {sub != null && <p className="text-[11px] text-white/40 mt-1.5 font-mono">{sub}</p>}
     </div>
@@ -246,7 +255,12 @@ export default function BuildOptimizer() {
   return (
     <div className="space-y-6">
       {/* ── Controls card ───────────────────────────────────────────── */}
-      <div className="relative bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl p-5 sm:p-7">
+      <div className="relative bg-white/[0.02] backdrop-blur-xl border border-brand-orange/20 rounded-2xl p-5 sm:p-7">
+        {/* orange hairline — promoted controls panel */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-orange/70 to-transparent"
+        />
         <AnimatePresence>
           {loading && (
             <motion.div
@@ -266,7 +280,7 @@ export default function BuildOptimizer() {
           {/* Budget */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="flex items-center gap-1.5 text-[10px] text-white/40 uppercase tracking-widest font-medium">
+              <label className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">
                 <IndianRupee size={11} className="text-brand-orange" /> Budget
               </label>
               <span className="text-sm font-mono font-bold text-brand-orange tabular-nums">{fmtINR(budget)}</span>
@@ -301,7 +315,7 @@ export default function BuildOptimizer() {
           {/* Goal + profile */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] text-white/40 mb-1.5 uppercase tracking-widest font-medium">Goal</label>
+              <label className="block font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1.5">Goal</label>
               <div className="flex gap-1 bg-white/[0.04] rounded-lg p-1 border border-white/10">
                 {GOALS.map(({ id, label, icon: Icon }) => (
                   <button
@@ -309,7 +323,7 @@ export default function BuildOptimizer() {
                     type="button"
                     onClick={() => setGoal(id)}
                     className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                      goal === id ? 'bg-brand-orange text-white shadow-sm' : 'text-white/50 hover:text-white/80'
+                      goal === id ? 'bg-brand-orange text-black shadow-sm' : 'text-white/50 hover:text-white/80'
                     }`}
                   >
                     <Icon size={12} /> {label}
@@ -319,13 +333,13 @@ export default function BuildOptimizer() {
             </div>
 
             <div>
-              <label className="block text-[10px] text-white/40 mb-1.5 uppercase tracking-widest font-medium">Profile</label>
+              <label className="block font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1.5">Profile</label>
               <div className="relative">
                 <Layers size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" />
                 <select
                   value={profile}
                   onChange={(e) => setProfile(e.target.value)}
-                  className="w-full appearance-none pl-8 pr-8 py-2 bg-black/30 border border-white/10 rounded-lg text-sm text-white focus:border-brand-orange focus:outline-none cursor-pointer"
+                  className="w-full appearance-none pl-8 pr-8 py-2 bg-ink-1 border border-white/10 rounded-lg text-sm text-white focus:border-brand-orange/60 focus:outline-none cursor-pointer"
                 >
                   {PROFILES.map((p) => (
                     <option key={p.id} value={p.id} className="bg-ink-2">
@@ -341,7 +355,7 @@ export default function BuildOptimizer() {
           {/* Rider weight */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-[10px] text-white/40 uppercase tracking-widest font-medium">Rider weight</label>
+              <label className="block font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">Rider weight</label>
               <span className="text-sm font-mono text-white/80 tabular-nums">{riderKg} kg</span>
             </div>
             <input
@@ -368,7 +382,11 @@ export default function BuildOptimizer() {
             disabled={!bike}
             whileHover={{ scale: !bike ? 1 : 1.01 }}
             whileTap={{ scale: !bike ? 1 : 0.99 }}
-            className="w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-brand-orange to-brand-orangeLight text-black shadow-orange-soft hover:brightness-110 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:saturate-50"
+            className={`w-full py-3.5 rounded-md text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:saturate-50 ${
+              loading
+                ? 'bg-brand-red/15 border border-brand-red/50 text-brand-red font-mono'
+                : 'bg-brand-orange hover:bg-brand-orangeLight text-black font-display font-bold shadow-orange-soft'
+            }`}
           >
             {loading ? (
               <span className="tabular-nums">
@@ -390,7 +408,7 @@ export default function BuildOptimizer() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-300 text-sm flex items-center gap-2"
+            className="p-3 bg-brand-red/10 border border-brand-red/30 rounded-lg text-brand-red text-sm flex items-center gap-2"
           >
             <AlertCircle size={16} /> {error}
           </motion.div>
@@ -399,7 +417,7 @@ export default function BuildOptimizer() {
 
       {/* ── Empty (no parts found) ──────────────────────────────────── */}
       {noParts && !loading && (
-        <div className="p-6 bg-white/[0.03] border border-white/10 rounded-2xl text-center">
+        <div className="p-6 rounded-xl border border-white/[0.06] bg-white/[0.02] text-center">
           <p className="text-white/70 text-sm font-semibold mb-1">No improving parts within budget</p>
           <p className="text-white/40 text-xs">
             Nothing in the {result.profile} catalog improves {result.bike_name} for{' '}
@@ -420,9 +438,9 @@ export default function BuildOptimizer() {
           >
             {/* Header row: bike + scoring chip */}
             <div className="flex items-center justify-between flex-wrap gap-2">
-              <h3 className="text-lg font-bold text-white">
+              <h3 className="font-display text-lg font-bold text-white">
                 {result.bike_name}
-                <span className="ml-2 text-xs font-mono text-white/40 uppercase tracking-wide">
+                <span className="ml-2 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">
                   {result.goal === 'max_trap' ? 'max trap' : 'min ET'} · {result.profile}
                 </span>
               </h3>
@@ -430,7 +448,7 @@ export default function BuildOptimizer() {
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-accent/10 border border-brand-accent/30 text-[11px] font-mono text-brand-accent">
                   <Cpu size={11} /> {result.scoring_method}
                   {result.scoring_stats?.out_of_envelope > 0 && (
-                    <span className="text-amber-400/80" title="some candidates fell outside the surrogate envelope">
+                    <span className="text-brand-amber/80" title="some candidates fell outside the surrogate envelope">
                       · {result.scoring_stats.out_of_envelope} oob
                     </span>
                   )}
@@ -448,7 +466,14 @@ export default function BuildOptimizer() {
                     <span className="text-base ml-1">s</span>
                   </span>
                 }
-                sub={`from ${fmtNum(result.base_et_s, 3)}s · ${fmtDelta(result.delta_et_s, 3)}s`}
+                sub={
+                  <>
+                    from {fmtNum(result.base_et_s, 3)}s ·{' '}
+                    <span className={deltaTone(result.delta_et_s)}>
+                      {fmtDelta(result.delta_et_s, 3)}s
+                    </span>
+                  </>
+                }
                 accent="text-brand-orange"
               />
               <StatTile
@@ -458,7 +483,15 @@ export default function BuildOptimizer() {
                     {fmtNum(result.optimized_trap_kmh, 1)}
                   </span>
                 }
-                sub={`from ${fmtNum(result.base_trap_kmh, 1)} · ${fmtDelta(result.delta_trap_kmh, 1)} km/h`}
+                sub={
+                  <>
+                    from {fmtNum(result.base_trap_kmh, 1)} ·{' '}
+                    <span className={deltaTone(result.delta_trap_kmh)}>
+                      {fmtDelta(result.delta_trap_kmh, 1)}
+                    </span>{' '}
+                    km/h
+                  </>
+                }
                 accent="text-white"
               />
             </div>
@@ -479,9 +512,9 @@ export default function BuildOptimizer() {
             </div>
 
             {/* Selected parts */}
-            <div className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-5 backdrop-blur">
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 sm:p-5">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-semibold text-white/55 uppercase tracking-wider">
+                <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">
                   Selected parts ({parts.length})
                 </p>
                 <p className="text-[10px] font-mono text-white/30">
@@ -494,13 +527,13 @@ export default function BuildOptimizer() {
                 {parts.map((p) => (
                   <div
                     key={p.part_id}
-                    className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg bg-white/[0.02] border border-white/5"
+                    className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06]"
                   >
                     <div className="min-w-0 flex-1">
                       <p className="text-sm text-white font-medium truncate">
                         {p.brand ? `${p.brand} ` : ''}{p.name}
                         {p.is_compatible === false && (
-                          <span className="ml-2 text-[10px] text-amber-400/80 font-mono">incompatible</span>
+                          <span className="ml-2 text-[10px] text-brand-amber/80 font-mono">incompatible</span>
                         )}
                       </p>
                       <p className="text-[10px] font-mono text-white/40 uppercase tracking-wide mt-0.5">
@@ -512,7 +545,7 @@ export default function BuildOptimizer() {
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-sm font-mono text-white tabular-nums">{fmtINR(p.price_inr)}</p>
-                      <p className="text-[11px] font-mono text-brand-accent tabular-nums">
+                      <p className={`text-[11px] font-mono tabular-nums ${deltaTone(p.delta_et_s)}`}>
                         {fmtDelta(p.delta_et_s, 3)}s
                       </p>
                     </div>
@@ -524,7 +557,7 @@ export default function BuildOptimizer() {
             {/* Synergies */}
             {synergies.length > 0 && (
               <div className="bg-brand-accent/[0.06] border border-brand-accent/25 rounded-xl p-4">
-                <p className="flex items-center gap-1.5 text-xs font-semibold text-brand-accent uppercase tracking-wider mb-2.5">
+                <p className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-brand-accent mb-2.5">
                   <Sparkles size={13} /> Synergies
                 </p>
                 <div className="space-y-1.5">
@@ -544,14 +577,14 @@ export default function BuildOptimizer() {
 
             {/* Warnings */}
             {warnings.length > 0 && (
-              <div className="bg-amber-500/[0.06] border border-amber-500/25 rounded-xl p-4">
-                <p className="flex items-center gap-1.5 text-xs font-semibold text-amber-400 uppercase tracking-wider mb-2.5">
+              <div className="bg-brand-amber/[0.06] border border-brand-amber/25 rounded-xl p-4">
+                <p className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-brand-amber mb-2.5">
                   <AlertTriangle size={13} /> Warnings
                 </p>
                 <div className="space-y-1.5">
                   {warnings.map((w, i) => (
                     <p key={i} className="text-sm text-white/80">
-                      <span className="text-[10px] font-mono uppercase text-amber-400/70 mr-2">{w.severity}</span>
+                      <span className="text-[10px] font-mono uppercase text-brand-amber/70 mr-2">{w.severity}</span>
                       {w.message}
                     </p>
                   ))}
@@ -562,7 +595,7 @@ export default function BuildOptimizer() {
             {/* Next upgrade */}
             {result.next_upgrade?.part && (
               <div className="bg-white/[0.03] border border-white/10 rounded-xl p-4">
-                <p className="flex items-center gap-1.5 text-xs font-semibold text-white/55 uppercase tracking-wider mb-2.5">
+                <p className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-2.5">
                   <ArrowRight size={13} className="text-brand-orange" /> Next upgrade (beyond budget)
                 </p>
                 <div className="flex items-center justify-between gap-3">
@@ -579,7 +612,7 @@ export default function BuildOptimizer() {
                     <p className="text-sm font-mono text-white tabular-nums">
                       {fmtINR(result.next_upgrade.marginal_cost_inr)}
                     </p>
-                    <p className="text-[11px] font-mono text-brand-accent tabular-nums">
+                    <p className={`text-[11px] font-mono tabular-nums ${deltaTone(result.next_upgrade.marginal_et_gain_s)}`}>
                       {fmtDelta(result.next_upgrade.marginal_et_gain_s, 3)}s
                     </p>
                   </div>
@@ -589,8 +622,8 @@ export default function BuildOptimizer() {
 
             {/* Category priority */}
             {Array.isArray(result.category_priority) && result.category_priority.length > 0 && (
-              <div className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-5">
-                <p className="flex items-center gap-1.5 text-xs font-semibold text-white/55 uppercase tracking-wider mb-3">
+              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 sm:p-5">
+                <p className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-3">
                   <Gauge size={13} className="text-brand-orange" /> Where the gains are
                 </p>
                 <div className="space-y-1.5">
