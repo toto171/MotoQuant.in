@@ -1216,3 +1216,6 @@ The main verify loop stays as-is. This adds at most 50s when Render is asleep, z
 > _Claude moves processed instructions here. Trim periodically — git keeps the full history._
 
 (none yet)
+
+## INSTRUCTION — 2026-06-12 — [operator] [next-long-session] work from NEXT_SESSION.md
+Operator-authorized briefing for the next long session lives at repo root: **NEXT_SESSION.md** (written at the close of the June-12 rehaul+cleanup, operator-reviewed). P0 = desktop app pass + account-durability decision. Read it before picking any other work; it supersedes older queued cleanup items below where they overlap.
