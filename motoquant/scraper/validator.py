@@ -109,14 +109,6 @@ def _bore_stroke_to_cc(bore_mm: float, stroke_mm: float, cylinders: int = 4) -> 
     return (math.pi / 4) * (bore_mm / 1000) ** 2 * (stroke_mm / 1000) * cylinders * 1e6
 
 
-def _parse_tire_width(size: str) -> int | None:
-    """Extract width from '190/55ZR17' → 190."""
-    if not size:
-        return None
-    m = re.match(r"^(\d{2,3})", size.strip())
-    return int(m.group(1)) if m else None
-
-
 # ────────────────────────────────────────────────────────
 # Main validator
 # ────────────────────────────────────────────────────────

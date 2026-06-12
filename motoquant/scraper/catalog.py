@@ -244,16 +244,6 @@ def get_entry(manufacturer: str) -> ManufacturerEntry | None:
     return None
 
 
-def all_manufacturers() -> list:
-    """Return all manufacturer display names in priority order."""
-    return [e["manufacturer"] for e in SCRAPE_CATALOG]
-
-
-def priority_manufacturers(max_priority: int = 2) -> list:
-    """Return manufacturers at or above the given priority level."""
-    return [e["manufacturer"] for e in SCRAPE_CATALOG if e["priority"] <= max_priority]
-
-
 # ── Summary for CLI ───────────────────────────────────────────────────────────
 if __name__ == "__main__":
     print(f"Total catalog entries: {len(SCRAPE_CATALOG)}")

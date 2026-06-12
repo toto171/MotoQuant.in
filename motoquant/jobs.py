@@ -87,12 +87,6 @@ def _evict_locked(now: float) -> None:
             del _JOBS[jid]
 
 
-def running_jobs() -> int:
-    """Number of jobs currently queued or running."""
-    with _LOCK:
-        return sum(1 for j in _JOBS.values() if j.status in ("queued", "running"))
-
-
 def create_job(kind: str, runner: Callable[[Callable], Any]) -> Job:
     """
     Start ``runner(progress)`` on a daemon thread and return its Job.
