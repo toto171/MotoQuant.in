@@ -24,7 +24,7 @@
  * all errors silently — telemetry MUST NEVER break the page.
  *
  * Backend: see motoquant/api.py @app.post('/api/telemetry/event'). The
- * Railway log stream is the source-of-truth; for prod-scale aggregation
+ * Render log stream is the source-of-truth; for prod-scale aggregation
  * later, the same JSON can be rerouted to PostHog/Logfire without changing
  * the client.
  */
