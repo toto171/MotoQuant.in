@@ -606,6 +606,8 @@ def health():
             bike_count = db.execute("SELECT COUNT(*) FROM bike_models").fetchone()[0]
             db_ok = True
         except Exception:
+            # Health endpoint reports the failure as database=unavailable
+            # below instead of raising.
             pass
     return {
         "status": "ok",
@@ -657,6 +659,8 @@ async def telemetry_event(payload: dict = None):
             safe_props,
         )
     except Exception:
+        # Telemetry is fire-and-forget; a logging failure must never 500
+        # the client beacon.
         pass
     return {"ok": True}
 
@@ -1077,6 +1081,8 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
             stock_sim = MotoQuantEngine(stock_cfg).run()
             stock_et = round(float(stock_sim.time_quarter), 4)
         except Exception:
+            # Baseline comparison is optional; stock_et stays None and the
+            # response simply omits the stock delta.
             pass
 
     try:
@@ -1385,7 +1391,7 @@ def list_parts(
         # ── Bike compatibility annotation / filter ─────────────────────────
         bike_row: dict | None = None
         if bike_id is not None:
-            from .database.parts_repo import _enrich_bike_row_for_fitment
+            from .database.parts_repo import enrich_bike_row_for_fitment
             from .parts.compatibility import is_compatible  # noqa: F401
 
             raw = db.execute(
@@ -1394,7 +1400,7 @@ def list_parts(
             if raw is None:
                 raise HTTPException(404, f"Bike {bike_id} not found")
             bike_row = dict(raw)
-            _enrich_bike_row_for_fitment(db, bike_row)
+            enrich_bike_row_for_fitment(db, bike_row)
 
         parts = []
         for r in rows:
@@ -2107,6 +2113,7 @@ def _fetch_current_value(db, bike_id: int, field_name: str) -> str | None:
                 val = blob.get(field_name)
                 return str(val) if val is not None else None
     except Exception:
+        # Probe helper: malformed/missing config blob degrades to None.
         pass
     return None
 

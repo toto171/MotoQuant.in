@@ -859,6 +859,8 @@ def _run_recommend(
                     db.tires.get_bike_fitments(parsed.bike_id, fitment_type=ftype) or []
                 )
         except Exception:
+            # Best-effort: a missing/broken fitments table must not break the
+            # parts recommendation itself.
             pass
         if budget is not None:
             tires = [t for t in tires if (t.get("price_inr") or 0) <= budget]
@@ -1356,6 +1358,8 @@ def _apply_archetype(config: Any, parsed: ParsedSimRequest, db: MotoQuantDB) -> 
     if row is None:
         return
 
+    # Per-field best-effort from here down: every override swallows its own
+    # cast error per the silent-on-miss contract in the docstring above.
     eng = getattr(config, "engine", None)
     if eng is not None:
         if row["peak_power_hp_override"] is not None:
@@ -1616,6 +1620,8 @@ def _run_choose_bike(parsed, db, client, result, *, run_summary):
                 }
             )
         except Exception:
+            # Skip candidates whose sim blows up; if every one fails the
+            # aggregate all_sims_failed error below surfaces it.
             continue
 
     if not sim_rows:

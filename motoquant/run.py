@@ -1148,11 +1148,11 @@ def cmd_parts(args):
         )
 
         # Compatibility check via existing engine
-        from .database.parts_repo import _enrich_bike_row_for_fitment
+        from .database.parts_repo import enrich_bike_row_for_fitment
         from .parts.compatibility import is_compatible
 
         bike_row = dict(model_row) if model_row else {"id": bike_id}
-        _enrich_bike_row_for_fitment(db._conn, bike_row)
+        enrich_bike_row_for_fitment(db._conn, bike_row)
         compatible, reason = is_compatible(part, bike_row)
 
         # Run base + modified simulations (venue bakes into config via env params)
@@ -1803,6 +1803,7 @@ def legacy_main(args_list=None):
                 )
             db.close()
         except Exception:
+            # Banner stats are cosmetic; never block the CLI on them.
             pass
         return
 
@@ -2013,6 +2014,8 @@ def cmd_calibrate(args):
                 if row:
                     cfg = bike_row_to_config(dict(row))
             except Exception:
+                # DB unavailable or row malformed: fall through to the K5
+                # reference config below (documented demo fallback).
                 pass
         if cfg is None:
             cfg = gsxr1000_k5()

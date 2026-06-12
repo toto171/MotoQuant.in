@@ -18,7 +18,7 @@ from typing import Any
 import numpy as np
 from typing_extensions import TypedDict  # py<3.12-safe with pydantic
 
-from ..config_io import _dataclass_to_dict, _dyno_from_dict
+from ..config_io import dataclass_to_dict, dyno_from_dict
 from ..models import (
     AeroParams,
     BikeConfig,
@@ -75,7 +75,7 @@ DB_COLUMN_TO_SECTION = {
 
 def _serialize_section(section_obj) -> str:
     """Serialize a dataclass section to JSON string, handling DynoCurve + numpy."""
-    d = _dataclass_to_dict(section_obj)
+    d = dataclass_to_dict(section_obj)
     return json.dumps(d, default=_json_default)
 
 
@@ -99,7 +99,7 @@ def _deserialize_section(json_str: str, section_name: str):
     if section_name == "engine" and "dyno_curve" in d:
         dc = d.pop("dyno_curve")
         if dc is not None:
-            d["dyno_curve"] = _dyno_from_dict(dc)
+            d["dyno_curve"] = dyno_from_dict(dc)
 
     # Filter to known fields only
     field_names = {f.name for f in dataclasses.fields(cls)}

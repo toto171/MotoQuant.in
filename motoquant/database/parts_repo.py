@@ -15,7 +15,7 @@ from ..models import BikeConfig
 from .bridge import apply_part_to_config
 
 
-def _enrich_bike_row_for_fitment(conn: sqlite3.Connection, bike_row: dict) -> dict:
+def enrich_bike_row_for_fitment(conn: sqlite3.Connection, bike_row: dict) -> dict:
     """
     Populate bike_row fields that the compatibility engine needs but which
     aren't on the bike_models row alone:
@@ -77,6 +77,11 @@ def _enrich_bike_row_for_fitment(conn: sqlite3.Connection, bike_row: dict) -> di
         except (json.JSONDecodeError, TypeError):
             pass
     return bike_row
+
+
+# Back-compat alias: tests and scripts/patch_2026_06_11_parts_fitment.py
+# import the historical underscore name.
+_enrich_bike_row_for_fitment = enrich_bike_row_for_fitment
 
 
 class PartsRepository:
@@ -228,7 +233,7 @@ class PartsRepository:
             ).fetchone()
             if bike_row:
                 bike_row = dict(bike_row)
-                _enrich_bike_row_for_fitment(self._conn, bike_row)
+                enrich_bike_row_for_fitment(self._conn, bike_row)
                 result = [r for r in result if is_compatible(r, bike_row)[0]]
             result = result[: limit if limit is not None else len(result)]
 
@@ -259,7 +264,7 @@ class PartsRepository:
         if bike_row is None:
             return []
         bike_row = dict(bike_row)
-        _enrich_bike_row_for_fitment(self._conn, bike_row)
+        enrich_bike_row_for_fitment(self._conn, bike_row)
 
         # Search parts
         conditions = []

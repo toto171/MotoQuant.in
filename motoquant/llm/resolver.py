@@ -263,6 +263,8 @@ def resolve_venue(name: str | None, db: MotoQuantDB) -> int | None:
         if v:
             return v["id"]
     except Exception:
+        # Fall through to the substring search below; resolver returns
+        # None on total miss per the docstring contract.
         pass
     # Try a substring-based search in the venues table.
     try:

@@ -179,6 +179,8 @@ def _sprocket_positions(parts_repo, part_ids) -> dict[int, str]:
         try:
             part = getter(pid)
         except Exception:
+            # Unknown part id: skip it rather than failing the whole
+            # gearing-hint scan.
             continue
         if not part or part.get("category_name") != "sprocket":
             continue
@@ -394,13 +396,13 @@ def compute_parts_roi(
         conn = getattr(parts_repo, "_conn", None)
         if conn is not None:
             try:
-                from ..database.parts_repo import _enrich_bike_row_for_fitment
+                from ..database.parts_repo import enrich_bike_row_for_fitment
 
                 raw = conn.execute(
                     "SELECT * FROM bike_models WHERE id = ?", (bike_model_id,)
                 ).fetchone()
                 if raw is not None:
-                    bike_row = _enrich_bike_row_for_fitment(conn, dict(raw))
+                    bike_row = enrich_bike_row_for_fitment(conn, dict(raw))
             except Exception:
                 bike_row = None
 

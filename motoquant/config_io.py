@@ -75,7 +75,7 @@ def _dyno_to_dict(dyno: DynoCurve) -> dict:
     }
 
 
-def _dyno_from_dict(d: dict) -> DynoCurve:
+def dyno_from_dict(d: dict) -> DynoCurve:
     """Deserialize a DynoCurve from a dict."""
     return DynoCurve(
         rpm=np.array(d["rpm"]),
@@ -84,7 +84,7 @@ def _dyno_from_dict(d: dict) -> DynoCurve:
     )
 
 
-def _dataclass_to_dict(obj) -> dict:
+def dataclass_to_dict(obj) -> dict:
     """Recursively convert a dataclass to dict, handling DynoCurve and numpy."""
     result = {}
     for f in dataclasses.fields(obj):
@@ -94,7 +94,7 @@ def _dataclass_to_dict(obj) -> dict:
         elif isinstance(val, np.ndarray):
             result[f.name] = val.tolist()
         elif dataclasses.is_dataclass(val):
-            result[f.name] = _dataclass_to_dict(val)
+            result[f.name] = dataclass_to_dict(val)
         else:
             result[f.name] = val
     return result
@@ -105,7 +105,7 @@ def config_to_dict(config: BikeConfig) -> dict:
     d = {"name": config.name, "_version": "0.2.0"}
     for section_name, _ in _SECTION_MAP.items():
         section_obj = getattr(config, section_name)
-        d[section_name] = _dataclass_to_dict(section_obj)
+        d[section_name] = dataclass_to_dict(section_obj)
     return d
 
 
@@ -125,7 +125,7 @@ def config_from_dict(d: dict) -> BikeConfig:
         if section_name == "engine" and "dyno_curve" in section_data:
             dc = section_data.pop("dyno_curve")
             if dc is not None:
-                section_data["dyno_curve"] = _dyno_from_dict(dc)
+                section_data["dyno_curve"] = dyno_from_dict(dc)
 
         # Filter to only known fields (ignore computed properties)
         field_names = {f.name for f in dataclasses.fields(cls)}
