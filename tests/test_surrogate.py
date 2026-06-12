@@ -144,9 +144,7 @@ class TestFeatureSchema(unittest.TestCase):
     def test_v1_prefix_preserved(self):
         # 21-input v1 models slice [:21] of a v2 vector — the prefix must
         # stay byte-for-byte identical, forever.
-        self.assertEqual(
-            FEATURE_NAMES[:21], BASE_FEATURE_NAMES + DERIVED_FEATURE_NAMES
-        )
+        self.assertEqual(FEATURE_NAMES[:21], BASE_FEATURE_NAMES + DERIVED_FEATURE_NAMES)
 
     def test_feature_bounds_keys_match_base_names(self):
         # FEATURE_BOUNDS only covers the 14 sampled (base) features
