@@ -145,3 +145,14 @@ TOKENS_UPDATE_*.md
 
 # Cowork/Claude local worktree + agent state (never commit)
 .claude/
+
+# ── Added 2026-06-12: repo-hygiene pass ──
+# Git bundles (crash-insurance snapshots made by sandbox sessions — never track)
+*.bundle
+# Stray build/session logs at any depth (b1.log, build*.log, npmi.log class —
+# /tmp scratch that occasionally gets copied into the repo). No .log file is
+# tracked today (verified via `git ls-files '*.log'`), so this swallows nothing.
+*.log
+# Patch-tool droppings
+*.orig
+*.rej

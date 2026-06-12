@@ -8,7 +8,6 @@
 | `motoquant_surrogate_v2_8k5.npz`    | v2.1 training dataset (8,574 rows × 26 features)    | 610 KB  |
 | `surrogate_numpy_v1.npz.bak`        | v1 numpy MLP (K5-only envelope) — rollback copy     | 39 KB   |
 | `motoquant_surrogate_v1_1k5.npz`    | v1 training dataset (K5 Sobol, 1.5k samples)        | 128 KB  |
-| `motoquant_surrogate_v1_1k5.pkl`    | v1 XGBoost model (sklearn-era, not served)          | 1.3 MB  |
 
 ## v2.1 (June 12, 2026) — same-night retrain after the physics retune
 
@@ -165,6 +164,12 @@ full-sim fallback.
   as ±0.15 s class.
 
 ## v1 (April 2026) — historical
+
+The v1 XGBoost pickle (`motoquant_surrogate_v1_1k5.pkl`, 1.3 MB) was removed
+in the June 12 2026 repo-hygiene pass: sklearn/xgboost are not in
+`requirements-api.txt`, so it was unloadable on prod and never served.
+Recoverable from git history (last present at commit dececb7). The numpy
+artifacts below are the complete v1 record.
 
 1.5k Sobol samples around the K5 template; holdout ET MAE 534.6 ms (XGB) /
 ~100 ms (numpy MLP on its own distribution). Served prod until June 12,

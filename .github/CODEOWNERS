@@ -49,10 +49,8 @@
 # ---- CI / infra / deploy configs ----
 /.github/                           @da25mem5s02-debug
 /Dockerfile                         @da25mem5s02-debug
-/nixpacks.toml                      @da25mem5s02-debug
-/railway.toml                       @da25mem5s02-debug
+/render.yaml                        @da25mem5s02-debug
 /vercel.json                        @da25mem5s02-debug
-/Procfile                           @da25mem5s02-debug
 /requirements-api.txt               @da25mem5s02-debug
 /pyproject.toml                     @da25mem5s02-debug
 

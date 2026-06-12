@@ -57,7 +57,7 @@ You work an 8-hour internship daily. You can't be the human-in-the-loop for ever
                     │  - stage explicit files     │
                     │  - commit as Arya Desai     │
                     │  - push with PAT fallback   │
-                    │  - verify Railway deploy    │
+                    │  - verify Render deploy     │
                     │  - append DISPATCH_OUTBOX   │
                     │  - sync FUSE (cp only)      │
                     │  - release mutex            │

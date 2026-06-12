@@ -12,7 +12,7 @@ last_updated: <!-- AUTO-UPDATED -->
 
 **Target:** $1M valuation by 2026-12-31 (Phase 1) → $10M by 2027-12-31 (Phase 2)
 
-**Current monthly burn:** ~$5/mo (Vercel free tier + Railway Hobby pending) — plenty of runway
+**Current monthly burn:** ~$0/mo (Vercel free tier + Render free tier) — plenty of runway
 
 **Path mix (rebalance weekly):**
 - B2C SaaS ARR — _track Indian organic traffic + signup conversions_
@@ -224,7 +224,7 @@ last_updated: <!-- AUTO-UPDATED -->
 
 ## Capability frontier (tracked by claude-feature-monitor)
 
-- **Models in use:** Sonnet 4.6 (routine), Opus 4.6 (deep), Haiku 4.5 (fast lookups), Gemini 2.5-flash (Railway prod /api/chat)
+- **Models in use:** Sonnet 4.6 (routine), Opus 4.6 (deep), Haiku 4.5 (fast lookups), Gemini 2.5-flash (Render prod /api/chat)
 - **MCP servers connected:** Chrome (browser ops), Workspace bash, Cowork artifact tools
 - **Last claude-feature scan:** (never — runs on first Sun)
 
