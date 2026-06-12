@@ -31,18 +31,6 @@ module.exports = {
         },
       },
       keyframes: {
-        shimmer: {
-          '0%, 100%': { backgroundPosition: '-200% 0' },
-          '50%': { backgroundPosition: '200% 0' },
-        },
-        float: {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-8px)' },
-        },
-        'glow-pulse': {
-          '0%, 100%': { opacity: '0.4' },
-          '50%': { opacity: '1' },
-        },
         'lamp-pulse': {
           '0%, 100%': { filter: 'brightness(1)' },
           '50%': { filter: 'brightness(1.25)' },
@@ -53,15 +41,11 @@ module.exports = {
         },
       },
       animation: {
-        shimmer: 'shimmer 3s linear infinite',
-        float: 'float 4s ease-in-out infinite',
-        'glow-pulse': 'glow-pulse 2.5s ease-in-out infinite',
         'lamp-pulse': 'lamp-pulse 1.6s ease-in-out infinite',
         'live-pulse': 'live-pulse 1.4s ease-in-out infinite',
       },
       backgroundImage: {
         'grid-fade': 'radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,1) 70%), linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)',
-        'hero-fade': 'linear-gradient(180deg, transparent 0%, transparent 60%, rgba(0,0,0,0.8) 85%, #000 100%)',
         'tree-glow': 'radial-gradient(circle at 50% 50%, rgba(34,197,94,0.30) 0%, rgba(34,197,94,0) 70%)',
       },
       boxShadow: {

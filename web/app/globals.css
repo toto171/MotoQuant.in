@@ -82,10 +82,6 @@ body {
     mix-blend-mode: overlay;
   }
 
-  .text-gradient {
-    @apply bg-gradient-to-r from-white via-white to-white/60 bg-clip-text text-transparent;
-  }
-
   .text-gradient-orange {
     @apply bg-gradient-to-br from-brand-orangeLight via-brand-orange to-brand-orangeDeep bg-clip-text text-transparent;
   }
@@ -98,14 +94,6 @@ body {
     @apply bg-white/[0.03] backdrop-blur-xl border border-white/10;
   }
 
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
 }
 
 /* ── CodeComment blinking cursor (signature identity pass, Jun 2026) ── */

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo, useId, Suspense } fr
 import { useSearchParams } from 'next/navigation';
 import {
   Zap, Search, ChevronDown, ChevronRight, X, MapPin, Gauge, Wrench,
-  CircleDot, IndianRupee, ArrowLeft, Thermometer, Wind, Droplets,
+  CircleDot, ArrowLeft, Thermometer, Wind,
   BarChart3, Table2, Settings2, Upload, RotateCcw, Play, Layers, MessageSquare,
   Locate, Loader2, AlertCircle, Share2, Check } from 'lucide-react';
 import {

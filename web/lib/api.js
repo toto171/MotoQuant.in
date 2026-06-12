@@ -114,10 +114,6 @@ function optimizeBuildBody({
   return body;
 }
 
-export async function optimizeBuild(opts) {
-  return postJson('/api/optimize/build', optimizeBuildBody(opts));
-}
-
 /**
  * ECU / setup autotune. POSTs to /api/autotune/ecu and returns the
  * environment summary plus gearing, launch-RPM, tyre-pressure, and
@@ -164,10 +160,6 @@ function autotuneEcuBody({
   return body;
 }
 
-export async function autotuneEcu(opts) {
-  return postJson('/api/autotune/ecu', autotuneEcuBody(opts));
-}
-
 // --- Background jobs (real progress) ----------------------------------------
 // POST /api/jobs/{kind} starts the work server-side and returns a job_id;
 // GET /api/jobs/{id} reports {status, progress 0..1, stage, result|error}.
@@ -184,12 +176,6 @@ export async function cancelJob(jobId) {
   // Cooperative server-side cancel — the worker stops at its next progress
   // tick and frees its concurrency slot. No-op on finished jobs.
   return postJson(`/api/jobs/${jobId}/cancel`);
-}
-
-export async function getJob(jobId) {
-  const res = await fetch(`${API_URL}/api/jobs/${jobId}`, { cache: 'no-store' });
-  if (!res.ok) throw new Error(`API error ${res.status}`);
-  return res.json();
 }
 
 export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 350, signal } = {}) {

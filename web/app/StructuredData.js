@@ -186,41 +186,6 @@ export function faqSchema() {
 }
 
 
-// ─── Product schema — for /pricing page (Schema.org rich result eligibility) ──
-// Surfaced in layout.js or the pricing page itself once Stream 5 lands.
-export function productSchema() {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
-    '@id': `${SITE_URL}/#product`,
-    name: 'MotoQuant Pro',
-    description:
-      'Physics-accurate motorcycle quarter-mile drag racing simulator. 501 bikes, 563 parts, 15 physics sub-models. Predict ET, trap speed, and split times. Validated against real Dragy GPS data.',
-    brand: {
-      '@type': 'Brand',
-      name: 'MotoQuant',
-    },
-    offers: [
-      {
-        '@type': 'Offer',
-        name: 'Free',
-        price: '0',
-        priceCurrency: 'INR',
-        availability: 'https://schema.org/InStock',
-        url: `${SITE_URL}/pricing`,
-      },
-      {
-        '@type': 'Offer',
-        name: 'Pro',
-        price: '499',
-        priceCurrency: 'INR',
-        availability: 'https://schema.org/InStock',
-        url: `${SITE_URL}/pricing`,
-      },
-    ],
-  };
-}
-
 // ─── Article schema — for /blog posts (NewsArticle-compatible) ──
 export function articleSchema({ title, description, slug, datePublished, dateModified }) {
   return {

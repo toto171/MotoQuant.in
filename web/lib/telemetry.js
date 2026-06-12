@@ -143,5 +143,3 @@ export function installErrorHandlers() {
 export function disable() {
   _disabled = true;
 }
-
-export const TELEMETRY_SESSION_ID = SESSION_ID;
