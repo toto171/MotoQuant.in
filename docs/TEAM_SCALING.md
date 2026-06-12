@@ -18,7 +18,7 @@ Pulled from `CLAUDE.md` on the date above:
 | Backend | FastAPI + SQLite, calibration pipeline complete |
 | Web frontend | Next.js landing + simulator widget, not deployed |
 | Desktop app | Tauri + React 19 scaffolded, 2 pages built, not shipped |
-| Deployment | Railway + Vercel configs ready, nothing live yet |
+| Deployment | Render (API, `render.yaml`) + Vercel (web) — both live |
 | Revenue | ₹0 |
 | Team size | 1 (founder) + about to add collaborators |
 
@@ -33,9 +33,9 @@ Pulled from `CLAUDE.md` on the date above:
 | 1 | Create a GitHub Organization (`motoquant-labs`) | ✅ Adopt | Real value for commercial IP + granular permissions. Do within 2 weeks. |
 | 2 | Keep all repos private | ✅ Already done | Matches the decision from the collaborator-workflow setup. |
 | 3 | `main` + `staging` + `feature/*` branch strategy | ⚠️ Reject for now | Staging branch is cargo-culted from larger orgs. With Vercel preview deploys (already wired in `.github/workflows/deploy.yml`), every PR gets a shareable URL — that's what `staging` is *for*. Adding a staging branch gives every change a second merge gate with no added safety. Revisit at 6+ engineers. Stay trunk-based: `main` + `feature/*`. |
-| 4 | Railway Pro ($20/seat) for team access | ⚠️ Defer | Real gap, but pay when needed. Keep the founder as sole Railway admin until there's a second person actively pushing backend changes. Budget for Pro the month the second dev joins, not before. |
+| 4 | Render paid tier for team access | ⚠️ Defer | Real gap, but pay when needed. Keep the founder as sole Render admin until there's a second person actively pushing backend changes. Budget for Pro the month the second dev joins, not before. |
 | 5 | Vercel Pro ($20/seat) for commercial use | ⚠️ Defer with trigger | Vercel Hobby ToS forbids commercial use. The moment MotoQuant takes its first rupee of revenue *or* represents itself as a Pvt Ltd publicly, upgrade. Not before. Meanwhile the GitHub Actions deploy workflow (`.github/workflows/deploy.yml`) handles collaborator deploys on Hobby. |
-| 6 | Doppler for secrets sync | ❌ Reject | Railway env vars + Vercel env vars + a shared 1Password vault for API keys is enough at this scale. Doppler adds a third system to audit; add it at 5+ services or 4+ engineers. |
+| 6 | Doppler for secrets sync | ❌ Reject | Render env vars + Vercel env vars + a shared 1Password vault for API keys is enough at this scale. Doppler adds a third system to audit; add it at 5+ services or 4+ engineers. |
 | 7 | Linear for project management | ⚠️ Defer | Linear is great at 4+ engineers. At 2–3, GitHub Issues + Projects + the issue templates in `.github/ISSUE_TEMPLATE/` are free and co-located with code. Migrate when issue triage genuinely exceeds 15 min/week. |
 | 8 | Discord or Slack dev-log channel | ✅ Adopt | Cheap, high-value. Discord for a public community channel (Indian drag-racing scene — the target audience is there), Slack free tier for internal team. GitHub → Slack webhook is 5 min to set up. |
 | 9 | Notion/Obsidian "physics bible" | ❌ Reject | `CLAUDE.md` already *is* the physics bible and it's version-controlled with the code. Moving it to Notion guarantees drift between the doc and the code. Keep technical docs in-repo. Use Notion only for business-side artefacts (investor deck narrative, pricing models, meeting notes). |
@@ -53,7 +53,7 @@ Pulled from `CLAUDE.md` on the date above:
 - [ ] Update remotes, `CODEOWNERS` handles, `CONTRIBUTING.md` URL, any hardcoded refs in workflow files.
 - [ ] Invite first collaborator with `Write` access (branch protection will keep them honest).
 - [ ] Stand up a MotoQuant Slack workspace free tier; wire `#dev-log` to the GitHub webhook (Actions → new workflow run, PR merged, issue opened).
-- [ ] Deploy the Hobby-plan stack (Railway + Vercel) via the existing configs so there's a live URL to show.
+- [x] Deploy the free-tier stack (Render + Vercel) — live at `motoquant.in` + `motoquant-api.onrender.com`.
 - [ ] Pick one good-first-issue from `ONBOARDING.md` §4 and onboard the first collaborator end-to-end on it.
 
 ### 60 days (first paying shop or first serious pilot)
@@ -62,7 +62,7 @@ Pulled from `CLAUDE.md` on the date above:
 - [ ] Decide: does the desktop app go to closed beta with 2-3 Pune/Narhe shops? If yes, freeze feature work on it and harden.
 
 ### 90 days (second engineer onboarded)
-- [ ] Railway Hobby → Pro the week the second backend engineer joins.
+- [ ] Render free tier → paid tier the week the second backend engineer joins.
 - [ ] Evaluate Linear vs. GitHub Issues honestly — if the current system is fine, stay.
 - [ ] Revisit whether a `staging` branch buys anything Vercel previews don't already buy. Almost certainly no, but re-evaluate with the evidence of actual team velocity.
 

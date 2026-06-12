@@ -93,7 +93,7 @@ You market "validated against published 1/4 mile times." That claim is only as s
 
 ## 9. Observability & product analytics
 
-- **★ Sentry** — error tracking. Free tier is fine for current scale. **Adopt this quarter** on Railway + Vercel — catches the 500s and edge errors silently happening in production right now (the FastAPI ↔ Next.js rewrite chain is one fragile dependency).
+- **★ Sentry** — error tracking. Free tier is fine for current scale. **Adopt this quarter** on Render + Vercel — catches the 500s and edge errors silently happening in production right now (the FastAPI ↔ Next.js rewrite chain is one fragile dependency).
 - **◇ PostHog** — `PostHog/posthog`. Product analytics with a free self-host and a generous cloud free tier. Useful for understanding which sliders riders actually move and where they drop off — drives roadmap. Wait for paid users before instrumenting.
 - **◇ Logfire** (mentioned above) — covers tracing.
 - **★ Vercel Speed Insights / Lighthouse CI** — Core Web Vitals tracking on `motoquant.in`. SEO and conversion both depend on this; Vercel's built-in is already free. Adopt this quarter, zero effort.
@@ -122,7 +122,7 @@ These are MotoQuant-specific tooling decisions that fell out of the project audi
 
 ### Adopt later (◇)
 - **Razorpay test mode + webhook simulator** — required gating for the Phase 6 subscription launch. Currently unblocked-but-untested per the S5 carry-forward list.
-- **k6 / Locust** — load-test the FastAPI surface before public launch. Railway's free-tier instance degrades quickly under concurrent surrogate calls.
+- **k6 / Locust** — load-test the FastAPI surface before public launch. Render's free-tier instance degrades quickly under concurrent surrogate calls.
 - **Codecov (or coverage.py + GitHub Actions artifact)** — currently no test-coverage signal in CI; the 739+ test count is impressive but says nothing about which physics branches are actually exercised.
 - **Alembic** — needed for the SQLite → PostgreSQL migration if/when Phase 6 cloud sync goes live.
 
@@ -144,7 +144,7 @@ These are MotoQuant-specific tooling decisions that fell out of the project audi
 1. **★ pytest-regressions over the 334-bike sweep** — formalise the implicit baseline contract. Highest ROI; protects every future physics change.
 2. **★ Numba JIT on the RK4 loop** — collapses sweep wall-time so #1's CI run is cheap.
 3. **★ Optuna over `CategoryProfile`** — automate the per-cluster tuning loop that's currently manual.
-4. **★ Sentry on Railway + Vercel** — catch the 500s and edge errors silently happening in production right now.
+4. **★ Sentry on Render + Vercel** — catch the 500s and edge errors silently happening in production right now.
 5. **★ Ship the MCP server** wrapping `api.motoquant.in`. Distribution channel + free marketing in the AI dev ecosystem. Weekend project.
 6. **★ Write a MotoQuant skill** (`motoquant.skill`) using the official `skill-creator` skill. Instant Claude domain fluency for every future session.
 

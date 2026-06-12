@@ -70,4 +70,4 @@ The Cowork sandbox occasionally truncates files mid-write at ~5–6 KB. After an
 
 - Repository root `CLAUDE.md` — full project context, hygiene rules, and standing notes.
 - `scripts/verify-web.mjs` — what the prebuild integrity check is doing.
-- `next.config.js` — same-origin `/api/*` rewrite to the Railway backend.
+- `next.config.js` — same-origin `/api/*` rewrite to the Render backend.

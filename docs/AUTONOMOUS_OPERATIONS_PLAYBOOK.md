@@ -96,7 +96,7 @@ Different tasks deserve different cost/quality tradeoffs. The scheduler annotate
 | Long-context summarisation (50+ benchmarks, big logs) | **Sonnet 200k** | Need the context window |
 | Drafting marketing copy, blog posts, persuasive content | **Opus once / iterate with Sonnet** | Quality compounds for content |
 | Customer-support triage / classification | **Haiku** | Volume, simple decisions |
-| `/api/chat` user-facing inference | **Gemini Flash 2.5 (Railway env)** | Cheapest viable; non-blocking |
+| `/api/chat` user-facing inference | **Gemini Flash 2.5 (Render env)** | Cheapest viable; non-blocking |
 
 The model preference is a hint, not a hard constraint. If the chosen model is unavailable (rate-limited, etc.), the agent falls back through the priority list with a note in DISPATCH_OUTBOX.
 
@@ -117,7 +117,7 @@ Beyond the existing 7 cleanup subagents (`scripts/subagents/`), we add 12 produc
 | A7 | **product-prioritisation** | Thu | Re-rank Phase 6/7 carry-forward in CLAUDE.md |
 | A8 | **customer-support-triage** | Thu | Process bike_suggestions table; flag/respond |
 | A9 | **technical-debt-pass** | Wed (alt weeks) | Targeted refactor PR, narrow scope |
-| A10 | **performance-monitor** | Sun | Lighthouse + Railway latency check; report drift |
+| A10 | **performance-monitor** | Sun | Lighthouse + Render latency check; report drift |
 | A11 | **growth-experiments** | Fri | One A/B-able UI tweak or copy variant |
 | A12 | **partnership-outreach** | Fri (every 2 weeks) | Drafted email templates for Indian tuning shops + dyno vendors |
 
@@ -160,7 +160,7 @@ The system is allowed to fail individual sessions, but never silently or repeate
 | Backup PAT used | Preflight | ALERT in OUTBOX |
 | `/sessions` disk > 95% | Preflight | Auto-prune `/tmp/mq-session-*` then retry; INCIDENT if still full |
 | Mutex held by stale (PID dead) session | Preflight | Auto-claim |
-| Bike count regression on Railway | Postflight `/api/health` | INCIDENT, halt next session, alert |
+| Bike count regression on Render | Postflight `/api/health` | INCIDENT, halt next session, alert |
 | 3 consecutive null-delta sessions | Self-review | Promote a different task type for next 7 days |
 | Test pass rate < 95% on weekly check | Self-review | Inject `[blocking]` test-fix INSTRUCTION |
 
