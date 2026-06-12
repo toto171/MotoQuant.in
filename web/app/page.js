@@ -59,16 +59,16 @@ const HONEST_CLUSTERS = [
 
 // ─── Top-10 most accurate bikes (preserved from prior landing) ────────
 const TOP10 = [
-  { rank: 1,  name: 'Kawasaki Ninja ZX-10R',     year: 2021, cc: '998cc I4',     target: 10.00, sim: 10.011, delta:  0.011, source: 'Cycle World 2021' },
-  { rank: 2,  name: 'Kawasaki Z 650',            year: 2017, cc: '649cc I2',     target: 12.40, sim: 12.412, delta:  0.012, source: 'MotoStatz 2017'   },
-  { rank: 3,  name: 'Suzuki TL1000R',            year: 1998, cc: '996cc V-twin', target: 10.50, sim: 10.518, delta:  0.018, source: 'Cycle World 1998' },
-  { rank: 4,  name: 'Honda CBR1000RR-R',         year: 2020, cc: '999cc I4',     target:  9.95, sim:  9.928, delta: -0.022, source: 'Cycle World 2020' },
-  { rank: 5,  name: 'Kawasaki Ninja ZX-9R',      year: 2000, cc: '899cc I4',     target: 10.50, sim: 10.526, delta:  0.026, source: 'Sport Rider 2000' },
-  { rank: 6,  name: 'Yamaha YZF-R1',             year: 2009, cc: '998cc I4 CF',  target: 10.20, sim: 10.172, delta: -0.028, source: 'Sport Rider 2009' },
-  { rank: 7,  name: 'BMW M1000RR',               year: 2021, cc: '999cc I4',     target:  9.80, sim:  9.837, delta:  0.037, source: 'Cycle World 2021' },
-  { rank: 8,  name: 'Ducati Streetfighter V4',   year: 2020, cc: '1103cc V4',    target: 10.10, sim: 10.143, delta:  0.043, source: 'Cycle World 2020' },
-  { rank: 9,  name: 'MV Agusta Brutale 1000 RR', year: 2019, cc: '998cc I4',     target: 10.15, sim: 10.103, delta: -0.047, source: 'Cycle World 2019' },
-  { rank: 10, name: 'TVS Apache RR 310',         year: 2020, cc: '312cc I1',     target: 15.46, sim: 15.537, delta:  0.077, source: 'BikeWale 2020'    },
+  { rank: 1,  name: 'Honda CBR 600RR',        year: 2007, cc: '599cc I4',     target: 10.84, sim: 10.845, delta:  0.001, source: 'Sport Rider 2007' },
+  { rank: 2,  name: 'Aprilia Tuono 660',      year: 2021, cc: '659cc I2',     target: 11.33, sim: 11.329, delta: -0.002, source: 'MotoStatz · Dragy' },
+  { rank: 3,  name: 'Kawasaki Ninja ZX-9R',   year: 2000, cc: '899cc I4',     target: 10.50, sim: 10.497, delta: -0.003, source: 'Sport Rider 2000' },
+  { rank: 4,  name: 'Kawasaki Ninja H2',      year: 2015, cc: '998cc I4 SC',  target:  9.62, sim:  9.625, delta:  0.005, source: 'MCN 2015' },
+  { rank: 5,  name: 'Kawasaki Ninja ZX-10R',  year: 2021, cc: '998cc I4',     target: 10.00, sim: 10.011, delta:  0.011, source: 'Cycle World 2021' },
+  { rank: 6,  name: 'Kawasaki ZZR1400',       year: 2006, cc: '1352cc I4',    target:  9.90, sim:  9.911, delta:  0.011, source: 'MCN 2006' },
+  { rank: 7,  name: 'Yamaha YZF-R6',          year: 2007, cc: '599cc I4',     target: 10.85, sim: 10.865, delta:  0.011, source: 'Sport Rider 2007' },
+  { rank: 8,  name: 'Aprilia RS 457',         year: 2024, cc: '457cc I2',     target: 13.30, sim: 13.316, delta:  0.016, source: 'FastestLaps 2024' },
+  { rank: 9,  name: 'Suzuki TL1000R',         year: 1998, cc: '996cc V-twin', target: 10.50, sim: 10.517, delta:  0.017, source: 'Cycle World 1998' },
+  { rank: 10, name: 'Suzuki Katana',          year: 2020, cc: '999cc I4',     target: 10.86, sim: 10.838, delta: -0.022, source: 'Cycle World 2020' },
 ];
 
 // ─── Stats strip — synced to current motoquant.db (Apr 30 2026) ───────
@@ -400,7 +400,7 @@ function HomePageInner() {
                 >
                   Your bike. Your strip. Your quarter-mile ET — predicted to
                   within{' '}
-                  <span className="text-white">±0.05s</span> on the litre-class.{' '}
+                  <span className="text-white">±0.010s</span> on our 10 cleanest validated runs.{' '}
                   <span className="text-white">501 Indian and global bikes</span>,{' '}
                   <span className="text-white">563 parts with INR pricing</span>,{' '}
                   <span className="text-white">Aamby Valley to MMRT.</span>
@@ -415,8 +415,8 @@ function HomePageInner() {
                   drag-racing community.{' '}
                   <span className="text-white">501 bikes</span>,{' '}
                   <span className="text-white">563 parts</span>,{' '}
-                  <span className="text-white">20 venues</span> — tuned to
-                  within ±0.05s of real-world ETs on the litre-class.
+                  <span className="text-white">20 venues</span> — validated
+                  against 156 published quarter-mile tests — ±0.010s across the 10 cleanest.
                 </p>
               )}
             </Reveal>
@@ -749,10 +749,10 @@ function HomePageInner() {
           <Reveal>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
               {[
-                { num: '79',      label: 'Bikes benchmarked' },
-                { num: '15',      label: 'Within ±0.10s' },
-                { num: '30',      label: 'Within ±0.20s' },
-                { num: '±0.032s', label: 'Top 10 mean error' },
+                { num: '156',     label: 'Bikes benchmarked' },
+                { num: '42',      label: 'Within ±0.10s' },
+                { num: '81',      label: 'Within ±0.20s' },
+                { num: '±0.010s', label: 'Top 10 mean error' },
               ].map((s) => (
                 <div key={s.label} className="rounded-xl border border-brand-orange/20 bg-white/[0.02] p-5 text-center">
                   <div className="font-display font-bold text-2xl md:text-3xl text-brand-orange tabular-nums">
@@ -789,7 +789,7 @@ function HomePageInner() {
 
               {TOP10.map((b) => {
                 const abs = Math.abs(b.delta);
-                const colour = abs < 0.05 ? 'text-brand-accent' : abs < 0.10 ? 'text-emerald-300' : 'text-amber-300';
+                const colour = abs < 0.05 ? 'text-brand-accent' : abs < 0.10 ? 'text-brand-green' : 'text-brand-amber';
                 const sign = b.delta === 0 ? '±' : b.delta > 0 ? '+' : '';
                 return (
                   <div

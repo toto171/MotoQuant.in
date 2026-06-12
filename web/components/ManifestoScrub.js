@@ -51,7 +51,7 @@ export default function ManifestoScrub() {
     <section
       ref={ref}
       id="manifesto"
-      className="relative h-[150vh] sm:h-[180vh] border-t border-brand-orange/10 bg-ink-1/30"
+      className="relative h-[120vh] sm:h-[140vh] border-t border-brand-orange/10 bg-ink-1/30"
     >
       <div className="sticky top-0 min-h-screen flex items-center">
         <div className="max-w-4xl mx-auto px-6 py-24">
