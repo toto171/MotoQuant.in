@@ -23,7 +23,7 @@ Run locally
 
 Deploy (Railway / Render / DigitalOcean App Platform)
 ------
-    Set PORT env var; Railway auto-detects the Procfile.
+    Set PORT env var; Render builds via render.yaml (Docker).
 """
 
 import copy
