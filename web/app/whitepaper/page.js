@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
+import CodeComment from '../../components/CodeComment';
+import { Reveal } from '../../components/Reveal';
+import ScoreboardDigits from '../../components/ScoreboardDigits';
 import TerminalCtaVariant from './TerminalCtaVariant';
 
 export const metadata = {
@@ -192,7 +195,7 @@ function Section({ s }) {
   return (
     <section id={s.id} className="scroll-mt-24 mb-16">
       <div className="flex items-baseline gap-4 mb-5">
-        <span className="font-mono text-brand-orange text-sm tabular-nums">{s.n}</span>
+        <span className="font-mono text-brand-orange text-sm tabular-nums">§{s.n}</span>
         <h2 className="font-display font-bold text-3xl tracking-tight text-white">
           {s.title}
         </h2>
@@ -203,9 +206,10 @@ function Section({ s }) {
         </p>
       ))}
       {s.list && (
-        <div className="my-6 rounded-xl border border-white/10 bg-white/[0.02] p-5">
+        <div className="relative overflow-hidden my-6 rounded-xl border border-brand-orange/15 bg-ink-1/60 p-5">
+          <span aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent" />
           {s.list.title && (
-            <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-brand-orange mb-3">
+            <div className="font-mono text-[11px] uppercase tracking-[0.25em] text-brand-orange mb-3">
               {s.list.title}
             </div>
           )}
@@ -220,14 +224,15 @@ function Section({ s }) {
         </div>
       )}
       {s.table && (
-        <div className="my-6 rounded-xl border border-white/10 overflow-hidden">
+        <div className="relative my-6 rounded-xl border border-brand-orange/15 bg-ink-1/40 overflow-hidden">
+          <span aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent" />
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-white/[0.03] border-b border-white/10">
                 {s.table.head.map((h, i) => (
                   <th
                     key={i}
-                    className="text-left px-4 py-3 text-[10px] font-mono uppercase tracking-[0.18em] text-white/50"
+                    className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45"
                   >
                     {h}
                   </th>
@@ -275,7 +280,7 @@ function Section({ s }) {
         </p>
       ))}
       {s.citation && (
-        <pre className="my-4 p-5 rounded-xl border border-white/10 bg-black text-xs font-mono text-white/75 whitespace-pre-wrap leading-relaxed">
+        <pre className="my-4 p-5 rounded-xl border border-brand-orange/15 bg-ink-1/60 text-xs font-mono text-white/75 whitespace-pre-wrap leading-relaxed">
           {s.citation}
         </pre>
       )}
@@ -291,7 +296,9 @@ export default function WhitepaperPage() {
       <main className="pt-32 pb-20 px-6">
         <article className="max-w-4xl mx-auto">
           {/* Cover */}
-          <div className="mb-16 pb-12 border-b border-white/10">
+          <Reveal>
+          <div className="mb-16 pb-12 border-b border-brand-orange/10">
+            <CodeComment className="mb-4">formal specification · rk4 · 1ms</CodeComment>
             <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-brand-orange mb-4">
               Whitepaper · Version 1.0 · April 30, 2026
             </div>
@@ -308,25 +315,33 @@ export default function WhitepaperPage() {
               </a>
             </p>
 
-            {/* Top-level stats */}
+            {/* Top-level stats — timing-board tiles. 74 is this paper's own
+                dated weighted-benchmark corpus (Apr 30, 2026); the live 156-row
+                sweep lives on /features and /docs/validation. */}
             <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { num: '15',     label: 'Sub-models'      },
-                { num: '501',    label: 'Catalog bikes'   },
-                { num: '74',     label: 'Benchmarks'      },
-                { num: '+0.006s', label: 'Weighted bias'  },
-              ].map(s => (
-                <div key={s.label} className="rounded-xl border border-white/10 bg-white/[0.02] p-4 text-center">
-                  <div className="font-display font-bold text-2xl text-brand-orange tabular-nums">{s.num}</div>
-                  <div className="font-mono text-[10px] text-white/55 tracking-widest mt-1 uppercase">{s.label}</div>
+                { seg: '15', label: 'Sub-models' },
+                { seg: '501', label: 'Catalog bikes' },
+                { seg: '74', label: 'Weighted benchmarks' },
+                { seg: '0.006', pre: '+', post: 's', label: 'Weighted bias' },
+              ].map(t => (
+                <div key={t.label} className="relative overflow-hidden rounded-xl border border-brand-orange/20 bg-ink-1/60 p-4">
+                  <span aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent" />
+                  <div className="flex items-end justify-center gap-1">
+                    {t.pre && <span className="font-mono text-sm text-brand-orange mb-0.5">{t.pre}</span>}
+                    <ScoreboardDigits value={t.seg} h={24} label={`${t.pre || ''}${t.seg}${t.post || ''}`} />
+                    {t.post && <span className="font-mono text-sm text-white/40 mb-0.5">{t.post}</span>}
+                  </div>
+                  <div className="font-mono text-[10px] text-white/45 tracking-[0.25em] mt-2 uppercase text-center">{t.label}</div>
                 </div>
               ))}
             </div>
           </div>
+          </Reveal>
 
           {/* Abstract */}
           <section id="abstract" className="mb-16 scroll-mt-24">
-            <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-brand-orange mb-3">Abstract</div>
+            <div className="font-mono text-[11px] uppercase tracking-[0.25em] text-brand-orange mb-3">Abstract</div>
             <p className="text-white/75 leading-relaxed text-[15px] border-l-2 border-brand-orange/50 pl-5">
               {ABSTRACT}
             </p>
@@ -334,11 +349,11 @@ export default function WhitepaperPage() {
 
           {/* Table of contents */}
           <nav id="toc" className="mb-16 scroll-mt-24">
-            <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-brand-orange mb-3">Contents</div>
+            <div className="font-mono text-[11px] uppercase tracking-[0.25em] text-brand-orange mb-3">Contents</div>
             <ol className="space-y-2 columns-1 sm:columns-2 gap-x-10">
               {SECTIONS.map(s => (
                 <li key={s.id} className="flex items-baseline gap-3 break-inside-avoid">
-                  <span className="font-mono text-brand-orange/70 text-sm tabular-nums">{s.n}.</span>
+                  <span className="font-mono text-brand-orange/70 text-sm tabular-nums">§{s.n}</span>
                   <a
                     href={`#${s.id}`}
                     className="text-white/75 hover:text-brand-orange transition-colors text-sm"
@@ -354,18 +369,20 @@ export default function WhitepaperPage() {
           {SECTIONS.map(s => <Section key={s.id} s={s} />)}
 
           {/* Footer / next steps */}
-          <div className="mt-20 pt-10 border-t border-white/10">
-            <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-brand-orange mb-3">
+          <div className="mt-20 pt-10 border-t border-brand-orange/10">
+            <div className="font-mono text-[11px] uppercase tracking-[0.25em] text-brand-orange mb-3">
               Continue reading
             </div>
             <div className="grid sm:grid-cols-3 gap-4">
-              <Link href="/docs/physics" className="group rounded-xl border border-white/10 hover:border-brand-orange/40 bg-white/[0.02] p-5 transition-colors">
+              <Link href="/docs/physics" className="group relative overflow-hidden rounded-xl border border-brand-orange/15 hover:border-brand-orange/40 bg-ink-1/60 p-5 transition-colors">
+                <span aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent" />
                 <div className="font-display font-bold text-white group-hover:text-brand-orange transition-colors">
                   Physics docs →
                 </div>
                 <div className="text-sm text-white/55 mt-1">Sub-model deep-dives.</div>
               </Link>
-              <Link href="/docs/validation" className="group rounded-xl border border-white/10 hover:border-brand-orange/40 bg-white/[0.02] p-5 transition-colors">
+              <Link href="/docs/validation" className="group relative overflow-hidden rounded-xl border border-brand-orange/15 hover:border-brand-orange/40 bg-ink-1/60 p-5 transition-colors">
+                <span aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent" />
                 <div className="font-display font-bold text-white group-hover:text-brand-orange transition-colors">
                   Validation data →
                 </div>
