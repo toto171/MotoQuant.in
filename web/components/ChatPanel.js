@@ -87,14 +87,14 @@ export default function ChatPanel({ apiUrl }) {
           rows={2}
           placeholder="e.g. How fast is an R15 V4 in 38°C at Aamby Valley?"
           disabled={chatLoading}
-          className="flex-1 resize-none rounded-xl border border-white/10 bg-white/[0.04] text-white text-sm px-3 py-2.5 placeholder:text-white/30 focus:outline-none focus:border-[#FF5E1F]/60 transition-colors min-h-[2.75rem]"
+          className="flex-1 resize-none rounded-xl border border-white/10 bg-ink-1 text-white text-sm px-3 py-2.5 placeholder:text-white/30 focus:outline-none focus:border-brand-orange/60 transition-colors min-h-[2.75rem]"
         />
         <motion.button
           onClick={runChat}
           disabled={!query.trim() || chatLoading}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="shrink-0 p-2.5 rounded-xl bg-[#FF5E1F] disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center"
+          className="shrink-0 p-2.5 rounded-md bg-brand-orange hover:bg-brand-orangeLight disabled:opacity-40 disabled:cursor-not-allowed text-black flex items-center justify-center"
           aria-label="Send chat query"
         >
           {chatLoading
@@ -103,7 +103,7 @@ export default function ChatPanel({ apiUrl }) {
         </motion.button>
       </div>
 
-      <p className="text-[10px] text-white/30">
+      <p className="font-mono text-[10px] text-white/30">
         Enter to submit · Shift+Enter for newline
       </p>
 
@@ -124,7 +124,7 @@ export default function ChatPanel({ apiUrl }) {
 
       {/* Network error */}
       {chatError && (
-        <div className="flex gap-2 items-start p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-xs">
+        <div className="flex gap-2 items-start p-3 rounded-lg bg-brand-red/10 border border-brand-red/30 text-brand-red text-xs">
           <AlertCircle size={14} className="shrink-0 mt-0.5" />
           {chatError}
         </div>
@@ -157,7 +157,7 @@ export default function ChatPanel({ apiUrl }) {
           >
             {/* llm_not_configured */}
             {chatResult.error === 'llm_not_configured' && (
-              <div className="flex gap-2 items-start p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-300 text-xs">
+              <div className="flex gap-2 items-start p-3 rounded-lg bg-brand-amber/10 border border-brand-amber/30 text-brand-amber text-xs">
                 <KeyRound size={14} className="shrink-0 mt-0.5" />
                 <span>
                   Natural-language chat is offline — server is missing an LLM API key.
@@ -184,7 +184,7 @@ export default function ChatPanel({ apiUrl }) {
                       <button
                         key={s.id ?? i}
                         onClick={() => setQuery([s.manufacturer, s.model, s.year_range].filter(Boolean).join(' '))}
-                        className="text-[11px] px-2.5 py-1 rounded-full bg-white/[0.06] text-white/70 border border-white/10 hover:border-[#FF5E1F]/50 hover:text-white transition-colors"
+                        className="text-[11px] px-2.5 py-1 rounded-full bg-white/[0.06] text-white/70 border border-white/10 hover:border-brand-orange/50 hover:text-white transition-colors"
                       >
                         {[s.manufacturer, s.model, s.year_range].filter(Boolean).join(' ')}
                       </button>
@@ -196,7 +196,7 @@ export default function ChatPanel({ apiUrl }) {
 
             {/* parse_failed / sim_failed */}
             {(chatResult.error === 'parse_failed' || chatResult.error === 'sim_failed') && (
-              <div className="flex gap-2 items-start p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-xs">
+              <div className="flex gap-2 items-start p-3 rounded-lg bg-brand-red/10 border border-brand-red/30 text-brand-red text-xs">
                 <AlertCircle size={14} className="shrink-0 mt-0.5" />
                 {chatResult.error_detail || 'The simulation could not be completed.'}
               </div>
@@ -219,10 +219,10 @@ export default function ChatPanel({ apiUrl }) {
                       key={label}
                       initial={{ scale: 0.95, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      className="bg-white/[0.04] border border-white/10 rounded-xl p-3 text-center"
+                      className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-center"
                     >
-                      <p className="text-[10px] text-white/40 mb-1 uppercase tracking-wide">{label}</p>
-                      <p className={`text-xl font-mono font-bold ${accent ? 'text-[#FF5E1F]' : 'text-white'}`}>
+                      <p className="font-mono text-[10px] text-white/45 mb-1 uppercase tracking-[0.25em]">{label}</p>
+                      <p className={`text-xl font-mono font-bold ${accent ? 'text-brand-orange' : 'text-white'}`}>
                         {value}
                       </p>
                     </motion.div>
@@ -233,7 +233,7 @@ export default function ChatPanel({ apiUrl }) {
 
             {/* Summary prose */}
             {!chatResult.error && chatResult.summary && (
-              <p className="text-xs text-white/60 leading-relaxed border-l-2 border-[#FF5E1F]/40 pl-3">
+              <p className="text-xs text-white/60 leading-relaxed border-l-2 border-brand-orange/40 pl-3">
                 {chatResult.summary}
               </p>
             )}

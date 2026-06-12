@@ -74,11 +74,11 @@ export default function SimProgress({
 
   const fill = determinate ? (
     <div
-      className="h-full rounded-full bg-gradient-to-r from-[#FF5E1F] to-[#FF7A00] transition-[width] duration-300 ease-linear"
+      className="h-full rounded-full bg-gradient-to-r from-brand-orange to-brand-orangeLight transition-[width] duration-300 ease-linear"
       style={{ width: `${Math.max(pct, 2)}%` }}
     />
   ) : (
-    <div className="mq-progress-sweep h-full w-1/3 rounded-full bg-gradient-to-r from-transparent via-[#FF5E1F] to-transparent" />
+    <div className="mq-progress-sweep h-full w-1/3 rounded-full bg-gradient-to-r from-transparent via-brand-orange to-transparent" />
   );
 
   if (edge) {
@@ -95,14 +95,14 @@ export default function SimProgress({
       <div className={`flex items-center gap-2 ${className}`} {...aria}>
         <style>{SWEEP_CSS}</style>
         <div className="w-24 h-1 rounded-full bg-white/[0.08] overflow-hidden">{fill}</div>
-        <span className="text-[10px] text-orange-400 tabular-nums whitespace-nowrap">
+        <span className="font-mono text-[10px] text-brand-orange tabular-nums whitespace-nowrap">
           {pct != null ? `${pct}%` : `${label}…`}
         </span>
         {onStop && (
           <button
             type="button"
             onClick={onStop}
-            className="text-[10px] text-gray-500 hover:text-red-400 transition-colors whitespace-nowrap"
+            className="font-mono text-[10px] text-white/45 hover:text-brand-red transition-colors whitespace-nowrap"
           >
             ■ Stop
           </button>
@@ -115,11 +115,11 @@ export default function SimProgress({
     <div className={className} {...aria}>
       <style>{SWEEP_CSS}</style>
       <div className="flex items-baseline justify-between mb-1.5 gap-3">
-        <span className="text-[10px] text-gray-500 uppercase tracking-widest font-medium truncate">
+        <span className="font-mono text-[10px] text-white/45 uppercase tracking-[0.25em] font-medium truncate">
           {caption}
         </span>
         {pct != null && (
-          <span className="text-xs font-mono font-bold text-orange-400 tabular-nums shrink-0">
+          <span className="text-xs font-mono font-bold text-brand-orange tabular-nums shrink-0">
             {pct}%
           </span>
         )}
@@ -127,7 +127,7 @@ export default function SimProgress({
           <button
             type="button"
             onClick={onStop}
-            className="text-[10px] uppercase tracking-widest text-gray-500 hover:text-red-400 transition-colors shrink-0"
+            className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 hover:text-brand-red transition-colors shrink-0"
           >
             ■ Stop
           </button>
