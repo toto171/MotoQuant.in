@@ -1,24 +1,52 @@
 // Single source of truth for the API base URL.
 //
-// In production we deliberately default to the *empty string* so every
-// fetch becomes same-origin (`/api/bikes`, `/api/simulate/quick`, etc.)
-// and gets routed via a Vercel rewrite in `vercel.json` to the Railway
-// backend. This has two advantages over hitting Railway directly from
-// the browser:
+// Every place in web/ that needs to reach the backend derives its base URL
+// from ONE of the three exports below — do not re-derive
+// `process.env.NEXT_PUBLIC_API_URL || ...` chains inline in components.
 //
-//   1. DNS filters on corporate / college / hostel WiFi routinely block
-//      `*.up.railway.app` wholesale (Railway hosts unmoderated user
-//      projects so it's a common target). The user's Windows resolver
-//      was returning REFUSED for our Railway subdomain, which surfaced
-//      as "Failed to fetch" / NXDOMAIN in the browser despite the
-//      backend being perfectly healthy. Routing via motoquant.in means
-//      only Vercel's edge needs to resolve Railway, which it always can.
-//   2. No more CORS -- it's all same-origin. We can drop
-//      `allow_origins=['*']` from the FastAPI side later.
+// 1) API_URL — the default for browser fetches. In production it is
+//    deliberately the *empty string* so every fetch becomes same-origin
+//    (`/api/bikes`, `/api/simulate/quick`, etc.) and gets routed via the
+//    `/api/:path*` rewrite (declared in `next.config.js`, mirrored in the
+//    root `vercel.json`) to the Render backend. Two advantages over hitting
+//    Render directly from the browser:
 //
-// For local dev, put `NEXT_PUBLIC_API_URL=http://localhost:8000` in
-// `web/.env.local` so the fetches go to your local uvicorn.
+//      a. DNS filters on corporate / college / hostel WiFi routinely block
+//         PaaS wildcard domains wholesale (they host unmoderated user
+//         projects, so they are common filter targets). We hit exactly this
+//         with the previous Railway host — the user's Windows resolver
+//         returned REFUSED for the API subdomain, which surfaced as
+//         "Failed to fetch" / NXDOMAIN in the browser despite the backend
+//         being perfectly healthy. Routing via motoquant.in means only
+//         Vercel's edge needs to resolve the backend host, which it
+//         always can.
+//      b. No more CORS -- it's all same-origin. We can drop
+//         `allow_origins=['*']` from the FastAPI side later.
+//
+//    For local dev, put `NEXT_PUBLIC_API_URL=http://localhost:8000` in
+//    `web/.env.local` so the fetches go to your local uvicorn.
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+
+// 2) API_URL_DIRECT — same env override, but falls back to the absolute
+//    Render URL instead of the rewrite. Used by the auth + billing surfaces
+//    (AuthProvider, /login, /pricing, /account) which were built against the
+//    direct cross-origin base and must keep identical fetch/cookie semantics
+//    even when NEXT_PUBLIC_API_URL is unset.
+export const API_URL_DIRECT =
+  process.env.NEXT_PUBLIC_API_URL || 'https://motoquant-api.onrender.com';
+
+// 3) serverApiBase(fallback) — for server-side code (sitemap.js, metadata
+//    layouts) that runs at build/ISR time where a relative URL cannot work.
+//    Resolution order: public env override, then the server-only
+//    MOTOQUANT_INTERNAL_API_URL, then the caller-supplied absolute fallback
+//    (typically SITE_URL, i.e. same-origin via the production rewrite).
+export function serverApiBase(fallback) {
+  return (
+    process.env.NEXT_PUBLIC_API_URL ||
+    process.env.MOTOQUANT_INTERNAL_API_URL ||
+    fallback
+  );
+}
 
 // --- Shared POST helper -----------------------------------------------------
 // Mirrors the fetch + error-extraction pattern used inline in
