@@ -2,6 +2,8 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
+import CodeComment from '../../../components/CodeComment';
+import ScoreboardDigits from '../../../components/ScoreboardDigits';
 import InlineSimCta from './InlineSimCta';
 
 export const metadata = {
@@ -180,11 +182,24 @@ export default function PostPage() {
               <span key={t} className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide">{t}</span>
             ))}
           </div>
+          <CodeComment className="mb-4">staging lane · the first 0.4 s</CodeComment>
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             The Physics of a Perfect Launch
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-6">
             24 April 2026 · 8 min read · MotoQuant Blog
+          </div>
+
+          {/* 60-ft stat chip — timing-board voice */}
+          <div className="relative overflow-hidden inline-flex flex-wrap items-end gap-x-5 gap-y-2 rounded-xl border border-brand-orange/20 bg-ink-1/60 px-5 py-4 mb-12">
+            <span aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent" />
+            <span className="flex items-end gap-1.5">
+              <ScoreboardDigits value="1.7-2.1" h={26} label="1.7 to 2.1 seconds" />
+              <span className="font-mono text-xs text-white/40 mb-0.5">s</span>
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-0.5">
+              typical 60-ft · decided in the first 0.4 s
+            </span>
           </div>
         </div>
 

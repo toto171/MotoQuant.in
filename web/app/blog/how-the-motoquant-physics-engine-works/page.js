@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
+import CodeComment from '../../../components/CodeComment';
+import ScoreboardDigits from '../../../components/ScoreboardDigits';
 
 export const metadata = {
   title: 'How the MotoQuant Physics Engine Works — MotoQuant Blog',
@@ -253,6 +255,7 @@ export default function Page() {
               </span>
             ))}
           </div>
+          <CodeComment className="mb-4">engine bay · 15 submodels exposed</CodeComment>
           <h1 className="font-display font-bold text-4xl md:text-5xl text-white leading-tight mb-4">
             How the MotoQuant Physics Engine Works
           </h1>
@@ -273,10 +276,31 @@ export default function Page() {
             </Link>{' '}
             on the home page — pick a bike, set your conditions, and see the physics in action.
           </p>
-          <p className="text-white/40 text-xs mt-4">
-            Reference baselines preserved across all releases: GSX-R 1000 K5 = 10.0334 s, YZF-R1 4C8 = 10.2859 s, Hayabusa Gen1 = 10.4712 s.
-            All claims about cluster bias, mean absolute error, and within-tolerance fractions in this post reflect the April 27, 2026 sweep against 90 published benchmarks.
-          </p>
+          {/* Reference baselines — timing-board panel */}
+          <div className="relative overflow-hidden rounded-xl border border-brand-orange/20 bg-ink-1/60 p-5 mt-6">
+            <span aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent" />
+            <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-4">
+              Reference baselines · preserved across all releases
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[
+                ['GSX-R 1000 K5', '10.0334'],
+                ['YZF-R1 4C8', '10.2859'],
+                ['Hayabusa Gen1', '10.4712'],
+              ].map(([bike, et]) => (
+                <div key={bike}>
+                  <div className="flex items-end gap-1">
+                    <ScoreboardDigits value={et} h={22} color="#FFFFFF" label={`${et} seconds`} />
+                    <span className="font-mono text-[10px] text-white/40 mb-0.5">s</span>
+                  </div>
+                  <div className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">{bike}</div>
+                </div>
+              ))}
+            </div>
+            <p className="text-white/40 text-xs mt-4">
+              All claims about cluster bias, mean absolute error, and within-tolerance fractions in this post reflect the April 27, 2026 sweep against 90 published benchmarks.
+            </p>
+          </div>
         </footer>
       </main>
 

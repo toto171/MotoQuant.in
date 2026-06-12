@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
+import CodeComment from '../../../components/CodeComment';
+import ScoreboardDigits from '../../../components/ScoreboardDigits';
 
 export const metadata = {
   title: "R15 V4 Quarter-Mile Time: Why Your R15 Won't Hit 14s — MotoQuant",
@@ -164,11 +166,32 @@ export default function PostPage() {
               <span key={t} className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide">{t}</span>
             ))}
           </div>
+          <CodeComment className="mb-4">r15 v3 · where the seconds go</CodeComment>
           <h1 className="font-display font-bold text-4xl md:text-5xl tracking-tighter text-white mb-4 leading-tight">
             Why Your R15 Won&apos;t Hit 14s (And What Will Actually Help)
           </h1>
-          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-12">
+          <div className="font-mono text-xs text-white/40 uppercase tracking-wide mb-6">
             24 April 2026 · 10 min read · MotoQuant Blog
+          </div>
+
+          {/* stock vs prepped — timing-board strip */}
+          <div className="relative overflow-hidden rounded-xl border border-brand-orange/20 bg-ink-1/60 p-5 mb-12 flex flex-wrap items-end gap-x-10 gap-y-4">
+            <span aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent" />
+            <div>
+              <div className="flex items-end gap-1.5">
+                <ScoreboardDigits value="16.2" h={26} color="#FFFFFF" label="16.2 seconds stock" />
+                <span className="font-mono text-xs text-white/40 mb-0.5">s</span>
+              </div>
+              <div className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">stock · 15.8–16.2 band</div>
+            </div>
+            <div>
+              <div className="flex items-end gap-1.5">
+                <ScoreboardDigits value="15.0" h={26} label="15.0 seconds prepped" />
+                <span className="font-mono text-xs text-white/40 mb-0.5">s</span>
+              </div>
+              <div className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">prepped · sprocket + tyres + filter</div>
+            </div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-orange/80 mb-0.5">Δ −1.2 s · engine never opened</div>
           </div>
         </div>
 
