@@ -622,7 +622,7 @@ export default function SimulatorWidget() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-300 text-sm flex items-center gap-2 relative z-10"
+            className="mt-4 p-3 bg-brand-red/10 border border-brand-red/30 rounded-lg text-brand-red text-sm flex items-center gap-2 relative z-10"
           >
             <AlertCircle size={16} />
             {error}
@@ -815,7 +815,7 @@ export default function SimulatorWidget() {
                   </>
                 ) : (
                   <>
-                    <p className="text-2xl sm:text-3xl font-mono font-bold text-amber-400/85">Limited</p>
+                    <p className="text-2xl sm:text-3xl font-mono font-bold text-brand-amber/85">Limited</p>
                     <p className="text-[11px] text-white/45 mt-1.5 font-mono tabular-nums">
                       gearing or wind
                     </p>
