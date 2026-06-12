@@ -7,7 +7,7 @@ e.g.
     python scripts/sweep_chunked.py 0   100 /tmp/sweep_chunk_0.json
     python scripts/sweep_chunked.py 100 200 /tmp/sweep_chunk_1.json
     python scripts/sweep_chunked.py 200 999 /tmp/sweep_chunk_2.json
-Then merge with sweep_merge.py.
+Then merge the chunk JSONs (each is a plain list of result records).
 """
 
 import json
