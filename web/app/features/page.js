@@ -1,32 +1,17 @@
 'use client';
 
-import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
 import Link from 'next/link';
 import {
   Cpu, BarChart3, Upload, TrendingUp, Monitor, Code2,
-  ChevronRight, Zap, ArrowRight, UserCircle2 } from 'lucide-react';
+  ArrowRight, UserCircle2 } from 'lucide-react';
 import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
+import PageHero from '../../components/PageHero';
+import { Reveal } from '../../components/Reveal';
+import ScoreboardDigits from '../../components/ScoreboardDigits';
 import BottomCta from './BottomCta';
 
 const SITE_URL = 'https://motoquant.in';
-
-function RevealSection({ children, className = '' }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-80px' });
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 30 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
 
 const FEATURES = [
   {
@@ -42,12 +27,27 @@ Pacejka tire model with thermal evolution, so grip changes as the tyre heats. Ae
 The adaptive-dt solver is especially useful for identifying the precise clutch engagement window that produces the minimum 60-ft time. Reference baselines — GSX-R 1000 K5 at 10.033s, R1 at 10.286s, Hayabusa Gen1 at 10.471s — are all within 0.001s of published Cycle World and Sport Rider timeslips.`,
     docsLink: '/docs/physics',
     docsLabel: 'Read the physics whitepaper',
-    mockup: null, // TODO: screenshot of sim chart
     stats: [
       { num: '15', label: 'Sub-models' },
       { num: '1 ms', label: 'Timestep' },
       { num: '976', label: 'Regression tests' },
     ],
+    readout: {
+      title: 'engine.telemetry',
+      log: [
+        'rk4 step 1 ms · 15 submodels coupled',
+        'pacejka thermal · aero midpoint re-eval',
+        'baseline lock: k5 / r1 / hayabusa Δ 0.0000',
+      ],
+      value: '10.0334',
+      unit: 's',
+      valueLabel: 'gsx-r 1000 k5 · reference et',
+      bars: [
+        { label: 'traction', pct: 86 },
+        { label: 'aero load', pct: 64 },
+        { label: 'clutch slip', pct: 23 },
+      ],
+    },
   },
   {
     id: 'catalog',
@@ -62,12 +62,27 @@ The ROI engine runs a 0/1 knapsack DP at ₹100 bucket resolution across any com
 Build profiles — Street Legal, Drag Prep, Full Race — pre-filter the catalog so you don't accidentally spec a nitrous kit onto a street-registered bike.`,
     docsLink: '/docs/getting-started',
     docsLabel: 'See build optimizer guide',
-    mockup: null, // TODO: screenshot of BuildPage parts list
     stats: [
       { num: '563', label: 'Parts' },
       { num: '20', label: 'Categories' },
       { num: '₹100', label: 'Budget granularity' },
     ],
+    readout: {
+      title: 'roi.ledger',
+      log: [
+        'knapsack dp armed · ₹100 buckets',
+        'exclusive groups: exhaust ×1 · ecu ×1',
+        'best build found · within budget',
+      ],
+      value: '-0.832',
+      unit: 's ΔET',
+      valueLabel: 'akrapovič full system · hayabusa',
+      bars: [
+        { label: 'exhaust', pct: 88 },
+        { label: 'ecu flash', pct: 66 },
+        { label: 'air filter', pct: 38 },
+      ],
+    },
   },
   {
     id: 'calibration',
@@ -86,12 +101,27 @@ ECU logs (Woolich Racing, Power Commander PC-Link, MoTeC i2) with automatic chan
 Once you have a real run imported, the auto-calibrator fits Cd + μ_peak jointly using differential evolution (global) followed by Nelder-Mead refinement (local). The result is a BikeConfig that matches your specific bike, rider, and track surface — not a generic factory spec.`,
     docsLink: '/docs/getting-started',
     docsLabel: 'Calibration walkthrough',
-    mockup: null, // TODO: screenshot of overlay chart
     stats: [
       { num: '3', label: 'Data sources' },
       { num: 'DE + NM', label: 'Optimizer' },
       { num: '<0.2s', label: 'Typical post-cal error' },
     ],
+    readout: {
+      title: 'dragy.import',
+      log: [
+        'run boundary detected · staged',
+        'v(t) integrated · 10 hz gps',
+        'et interpolated at the beam',
+      ],
+      value: '402.336',
+      unit: 'm',
+      valueLabel: 'quarter mile · sub-sample accuracy',
+      bars: [
+        { label: 'gps fix', pct: 92 },
+        { label: 'fit cd', pct: 71 },
+        { label: 'fit μ peak', pct: 64 },
+      ],
+    },
   },
   {
     id: 'roi',
@@ -110,12 +140,27 @@ The Smart Recommendations engine wraps the knapsack with synergy detection: if y
 Natural language queries — "optimize my Hayabusa for 35°C at Aamby Valley, budget ₹50k" — resolve against the live catalog and return a full recommendation set.`,
     docsLink: '/docs/physics',
     docsLabel: 'How the optimizer works',
-    mockup: null, // TODO: screenshot of ROI table
     stats: [
       { num: '7', label: 'Opt. parameters' },
       { num: '30–50', label: 'Iterations to converge' },
       { num: 'R² > 0.99', label: 'Surrogate accuracy' },
     ],
+    readout: {
+      title: 'optimizer.trace',
+      log: [
+        'sobol indices ranked · 14 features',
+        'gp acquisition: expected improvement',
+        'converged in 37 iterations',
+      ],
+      value: '0.99',
+      unit: 'R²',
+      valueLabel: 'surrogate vs full rk4 sim',
+      bars: [
+        { label: 'power', pct: 81 },
+        { label: 'mass', pct: 57 },
+        { label: 'aero cd', pct: 44 },
+      ],
+    },
   },
   {
     id: 'desktop',
@@ -132,12 +177,27 @@ The physics sidecar is the same code that powers the web API — same importer, 
 Desktop beta access is available to tuning shops and racing teams. Contact motoquant@gmail.com to apply.`,
     docsLink: '/docs/getting-started',
     docsLabel: 'Desktop beta access',
-    mockup: null, // TODO: screenshot of desktop app
     stats: [
       { num: '5', label: 'Pages' },
       { num: 'Offline', label: 'No cloud needed' },
       { num: 'Tauri 2', label: 'Framework' },
     ],
+    readout: {
+      title: 'sidecar.boot',
+      log: [
+        'ephemeral port bound · 127.0.0.1',
+        'physics sidecar online in 2.4 s',
+        'engine online · zero cloud calls',
+      ],
+      value: '501',
+      unit: 'bikes',
+      valueLabel: 'full catalog · bundled offline',
+      bars: [
+        { label: 'local db', pct: 100 },
+        { label: 'sim engine', pct: 100 },
+        { label: 'cloud dep', pct: 0 },
+      ],
+    },
   },
   {
     id: 'api',
@@ -158,12 +218,27 @@ GET /api/venues — all 20 venues with 12-month seasonal weather data.
 Interactive docs at /docs (FastAPI's automatic OpenAPI UI). No authentication for basic simulation — rate-limited to 60 requests/minute per IP. Authenticated API keys (email to request) unlock higher limits and private run storage.`,
     docsLink: '/docs/getting-started',
     docsLabel: 'API reference',
-    mockup: null, // TODO: screenshot of OpenAPI docs
     stats: [
       { num: '12', label: 'Endpoints' },
       { num: '~100ms', label: 'Full sim latency' },
       { num: '60/min', label: 'Rate limit' },
     ],
+    readout: {
+      title: 'api.monitor',
+      log: [
+        'post /api/simulate/quick · 200 ok',
+        'p50 latency steady · warm engine',
+        'cors open · 60 req/min per ip',
+      ],
+      value: '50',
+      unit: 'ms',
+      valueLabel: 'quick sim · warm response',
+      bars: [
+        { label: 'uptime', pct: 99 },
+        { label: 'p50', pct: 34 },
+        { label: 'p95', pct: 58 },
+      ],
+    },
   },
   {
     id: 'accounts',
@@ -178,56 +253,120 @@ Found a setup worth bragging about? Hit Share on the simulator and send a link t
 While MotoQuant is in open beta, everything in the Pro and Studio tiers — unlimited sims, the build optimiser, ECU autotune, Dragy/dyno imports — is unlocked free for every account. Paid plans only begin at commercial launch, with advance notice.`,
     docsLink: '/login?signup=1',
     docsLabel: 'Create a free account',
-    mockup: null,
     stats: [
       { num: '₹0', label: 'During open beta' },
       { num: '25+', label: 'Runs in your garage' },
       { num: '1-tap', label: 'Build sharing' },
     ],
+    readout: {
+      title: 'garage.sync',
+      log: [
+        'run saved → my garage',
+        'share link armed · ?bike&venue&rider',
+        'open beta: pro tier unlocked',
+      ],
+      value: '9.62',
+      unit: 's',
+      valueLabel: 'best saved et · clean run',
+      bars: [
+        { label: 'runs', pct: 74 },
+        { label: 'builds', pct: 52 },
+        { label: 'shares', pct: 31 },
+      ],
+    },
   },
 ];
+
+/* ── Mock cockpit readout panel — replaces the old "Screenshot coming
+      soon" placeholder with a self-contained instrument view. Pure
+      JSX/CSS: terminal header + engine-log lines + one seven-segment
+      figure + static readout bars. Zero new deps, zero network cost. ── */
+function FeatureReadout({ readout }) {
+  return (
+    <div className="relative rounded-xl border border-brand-orange/15 bg-ink-1/60 overflow-hidden">
+      <span
+        aria-hidden="true"
+        className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/60 to-transparent"
+      />
+      {/* terminal header */}
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/5 bg-black/40">
+        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">
+          {readout.title}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-live-pulse" aria-hidden="true" />
+          <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-brand-green/80">live</span>
+        </span>
+      </div>
+
+      <div className="p-5">
+        {/* engine-log lines */}
+        <div className="space-y-1.5 font-mono text-[11px] leading-relaxed" aria-hidden="true">
+          {readout.log.map((line, i) => (
+            <div key={i} className="text-white/40">
+              <span className="text-brand-orange/60">//&nbsp;</span>
+              {line}
+              {i === readout.log.length - 1 && (
+                <span className="cc-cursor text-brand-orange/70">_</span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* seven-segment figure */}
+        <div className="mt-5 flex items-end gap-2">
+          <ScoreboardDigits value={readout.value} h={34} label={`${readout.value} ${readout.unit}`} />
+          <span className="font-mono text-xs text-white/40 mb-0.5">{readout.unit}</span>
+        </div>
+        <div className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">
+          {readout.valueLabel}
+        </div>
+
+        {/* static readout bars */}
+        <div className="mt-5 space-y-2">
+          {readout.bars.map((b) => (
+            <div key={b.label} className="flex items-center gap-3">
+              <span className="w-20 shrink-0 font-mono text-[9px] uppercase tracking-[0.18em] text-white/35">
+                {b.label}
+              </span>
+              <span className="flex-1 h-1 rounded-full bg-white/5 overflow-hidden">
+                <span
+                  className="block h-full rounded-full bg-gradient-to-r from-brand-orangeDeep to-brand-orange"
+                  style={{ width: `${b.pct}%` }}
+                />
+              </span>
+              <span className="w-8 shrink-0 text-right font-mono text-[9px] tabular-nums text-white/35">
+                {b.pct}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function FeaturesPage() {
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
       <SiteNav />
 
-      {/* Hero */}
-      <section className="pt-32 pb-20 px-6 text-center border-b border-brand-orange/10">
-        <div className="max-w-3xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-4 inline-block px-4 py-1.5 rounded-full border border-brand-orange/40 bg-brand-orange/10 text-xs font-mono text-brand-orange uppercase tracking-widest"
-          >
-            Full feature list
-          </motion.div>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="font-display font-bold text-5xl md:text-6xl mb-6 tracking-tighter text-gradient-orange"
-          >
-            Everything inside MotoQuant Pro
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-white/70 text-lg max-w-2xl mx-auto leading-relaxed"
-          >
-            Six capability areas — from first-principles physics through to a native desktop app and open REST API.
-            Every layer is built on the same validated simulation engine.
-          </motion.p>
-
-          {/* Quick-jump nav */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.35 }}
-            className="mt-10 flex flex-wrap justify-center gap-2"
-          >
+      {/* Hero — unified cockpit voice */}
+      <PageHero
+        kicker="15 submodels · capability index"
+        badge="Full feature list"
+        title={<>Everything inside <span className="text-gradient-orange">MotoQuant Pro</span></>}
+        sub="Seven capability areas — from first-principles physics through to a native desktop app, an open REST API, and your saved garage. Every layer is built on the same validated simulation engine."
+        stats={[
+          { value: 15, label: 'Sub-models' },
+          { value: 563, label: 'Parts' },
+          { value: 156, label: 'Benchmarks' },
+        ]}
+        className="border-b border-brand-orange/10"
+      >
+        {/* Quick-jump nav */}
+        <Reveal y={10} duration={0.5} delay={0.28}>
+          <div className="mt-4 flex flex-wrap gap-2">
             {FEATURES.map(f => (
               <a
                 key={f.id}
@@ -237,9 +376,9 @@ export default function FeaturesPage() {
                 {f.label.split(' / ')[1]}
               </a>
             ))}
-          </motion.div>
-        </div>
-      </section>
+          </div>
+        </Reveal>
+      </PageHero>
 
       {/* Feature sections */}
       <div className="max-w-6xl mx-auto px-6">
@@ -247,10 +386,10 @@ export default function FeaturesPage() {
           const Icon = feature.icon;
           const isEven = idx % 2 === 0;
           return (
-            <RevealSection key={feature.id}>
+            <Reveal key={feature.id}>
               <section
                 id={feature.id}
-                className={`py-24 md:py-28 border-b border-brand-orange/10 ${idx === FEATURES.length - 1 ? 'border-none' : ''}`}
+                className={`py-20 md:py-28 border-b border-brand-orange/10 ${idx === FEATURES.length - 1 ? 'border-none' : ''}`}
               >
                 <div className={`grid md:grid-cols-2 gap-12 md:gap-16 items-start ${isEven ? '' : 'md:[&>*:first-child]:order-2'}`}>
                   {/* Text side */}
@@ -259,7 +398,7 @@ export default function FeaturesPage() {
                       <div className="w-10 h-10 rounded-lg bg-brand-orange/10 border border-brand-orange/30 flex items-center justify-center">
                         <Icon size={20} className="text-brand-orange" />
                       </div>
-                      <span className="font-mono text-xs text-brand-orange/70 uppercase tracking-widest">{feature.label}</span>
+                      <span className="font-mono text-[10px] text-brand-orange/70 uppercase tracking-[0.25em]">{feature.label}</span>
                     </div>
                     <h2 className="font-display font-bold text-3xl md:text-4xl mb-3 text-white leading-tight">
                       {feature.title}
@@ -280,44 +419,36 @@ export default function FeaturesPage() {
                     </a>
                   </div>
 
-                  {/* Visual side */}
+                  {/* Instrument side */}
                   <div className="space-y-4">
-                    {/* Stats row */}
+                    {/* Stats row — cockpit cards */}
                     <div className="grid grid-cols-3 gap-3">
                       {feature.stats.map((s, i) => (
-                        <div key={i} className="glass rounded-xl p-4 border border-brand-orange/20 text-center">
+                        <div key={i} className="relative overflow-hidden rounded-xl bg-ink-1/60 p-4 border border-brand-orange/20 text-center">
+                          <span
+                            aria-hidden="true"
+                            className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent"
+                          />
                           <div className="font-display font-bold text-xl text-brand-orange tabular-nums">{s.num}</div>
-                          <div className="font-mono text-[10px] text-white/50 uppercase tracking-wide mt-1">{s.label}</div>
+                          <div className="font-mono text-[10px] text-white/45 uppercase tracking-[0.25em] mt-1">{s.label}</div>
                         </div>
                       ))}
                     </div>
-                    {/* Screenshot placeholder */}
-                    <div className="glass rounded-xl border border-brand-orange/15 overflow-hidden aspect-video flex items-center justify-center bg-ink-1/60">
-                      {feature.mockup ? (
-                        <img src={feature.mockup} alt={`${feature.title} screenshot`} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="text-center">
-                          <Icon size={32} className="text-brand-orange/20 mx-auto mb-2" />
-                          <p className="text-xs font-mono text-white/20">
-                            {/* TODO: add screenshot before launch */}
-                            Screenshot coming soon
-                          </p>
-                        </div>
-                      )}
-                    </div>
+                    {/* Mock cockpit readout */}
+                    <FeatureReadout readout={feature.readout} />
                   </div>
                 </div>
               </section>
-            </RevealSection>
+            </Reveal>
           );
         })}
       </div>
 
       {/* Bottom CTA — EXP-008: variant-aware via ?variant=B */}
-      <section className="py-24 px-6 border-t border-brand-orange/10 bg-ink-1/30">
-        <RevealSection>
+      <section className="py-20 md:py-28 px-6 border-t border-brand-orange/10 bg-ink-1/30">
+        <Reveal>
           <BottomCta />
-        </RevealSection>
+        </Reveal>
       </section>
 
       <SiteFooter />
