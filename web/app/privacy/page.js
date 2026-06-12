@@ -5,6 +5,7 @@
 
 import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
+import CodeComment from "../../components/CodeComment";
 
 export const metadata = {
   title: "Privacy Policy — MotoQuant Pro",
@@ -17,9 +18,7 @@ export default function PrivacyPage() {
       <SiteNav />
       <main className="pt-32 pb-20 px-4 sm:px-6">
         <div className="mx-auto max-w-3xl">
-          <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-brand-orange mb-3">
-            Legal
-          </div>
+          <CodeComment className="mb-3">legal · privacy · dpdp act</CodeComment>
           <h1 className="font-display font-bold text-4xl md:text-5xl text-white tracking-tight mt-0">
             Privacy Policy
           </h1>
@@ -146,7 +145,7 @@ export default function PrivacyPage() {
 function Section({ title, children }) {
   return (
     <div className="mt-8">
-      <h2 className="font-display font-bold text-xl text-white mb-3">{title}</h2>
+      <h2 className="font-display font-bold text-xl text-white mb-3 border-l-2 border-brand-orange pl-3">{title}</h2>
       <div className="space-y-3">{children}</div>
     </div>
   );
