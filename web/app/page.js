@@ -51,10 +51,10 @@ import ScoreboardDigits, { ScoreboardCounter } from '../components/ScoreboardDig
 // they're shown in /docs/validation with their full caveat — not on
 // the landing page.
 const HONEST_CLUSTERS = [
-  { name: 'Litre Sport ≥195hp',   bias: -0.011, mae: 0.150, n: 20 },
-  { name: 'Litre Sport 600-1000', bias: -0.130, mae: 0.198, n: 24 },
-  { name: 'Mid-Twin 300-500',     bias: -0.057, mae: 0.668, n: 11 },
-  { name: 'All clusters · weighted overall', bias: 0.006, mae: 0.306, n: 74 },
+  { name: 'Litre Sport ≥195hp',   bias: 0.009,  mae: 0.153, n: 22 },
+  { name: 'Litre Sport 600-1000', bias: -0.046, mae: 0.195, n: 79 },
+  { name: 'Mid-Twin 300-500',     bias: -0.011, mae: 0.450, n: 11 },
+  { name: 'All clusters · weighted overall', bias: -0.007, mae: 0.227, n: 155 },
 ];
 
 // ─── Top-10 most accurate bikes (preserved from prior landing) ────────
