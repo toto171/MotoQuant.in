@@ -20,7 +20,11 @@ export default function SignupPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-black">
-      <p className="text-white/55 text-sm font-mono">Redirecting…</p>
+      <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-white/45 select-none">
+        <span className="text-brand-orange/70">//&nbsp;</span>
+        redirecting to /login…
+        <span className="cc-cursor text-brand-orange/70">_</span>
+      </p>
     </main>
   );
 }

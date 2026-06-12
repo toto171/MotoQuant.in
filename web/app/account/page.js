@@ -17,6 +17,8 @@ import { useAuth } from "../../components/AuthProvider";
 import TierBadge from "../../components/TierBadge";
 import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
+import CodeComment from "../../components/CodeComment";
+import { Reveal } from "../../components/Reveal";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL || "https://motoquant-api.onrender.com";
@@ -89,7 +91,7 @@ export default function AccountPage() {
       <div className="min-h-screen bg-black text-white">
         <SiteNav />
         <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
-          <p className="text-white/55 text-sm font-mono">Loading account…</p>
+          <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-white/45">Loading account…</p>
         </main>
       </div>
     );
@@ -213,12 +215,16 @@ export default function AccountPage() {
       <main className="pt-32 pb-20 px-4 sm:px-6">
         <div className="mx-auto max-w-3xl space-y-6">
           {checkoutBanner && (
-            <div className="rounded-xl bg-emerald-900/25 border border-emerald-500/40 px-5 py-4 text-sm text-emerald-200">
+            <div className="rounded-xl bg-brand-green/10 border border-brand-green/40 px-5 py-4 text-sm text-brand-green/90">
               Payment received — thank you! Your plan activates within a minute
               (your tier refreshes automatically).
             </div>
           )}
-          <div className="flex items-center justify-between">
+          <div className="relative rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 sm:p-8 flex items-center justify-between">
+            <div
+              aria-hidden="true"
+              className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-orange/70 to-transparent"
+            />
             <div>
               <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-brand-orange mb-1">
                 Account
@@ -229,16 +235,16 @@ export default function AccountPage() {
             </div>
             <button
               onClick={logout}
-              className="text-sm font-mono text-white/55 hover:text-red-300 transition-colors"
+              className="text-sm font-mono text-white/55 hover:text-brand-red transition-colors"
             >
               Sign out
             </button>
           </div>
 
-          <section className="rounded-2xl bg-ink-1/60 border border-white/10 p-6 sm:p-8">
-            <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/45 mb-4">
-              Profile
-            </div>
+          <Reveal y={18}>
+          <section className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 sm:p-8">
+            <h2 className="sr-only">Subscription</h2>
+            <CodeComment className="mb-4">subscription · tier status</CodeComment>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white font-medium">{user.email}</p>
@@ -268,24 +274,25 @@ export default function AccountPage() {
             {user.tier !== "free" && (
               <div className="mt-4">
                 {subMsg && (
-                  <p className="mb-2 text-sm text-amber-300">{subMsg}</p>
+                  <p className="mb-2 text-sm text-brand-amber">{subMsg}</p>
                 )}
                 <button
                   onClick={cancelSubscription}
                   disabled={cancelling}
-                  className="text-sm text-white/45 hover:text-red-300 transition-colors disabled:opacity-50 underline"
+                  className="text-sm text-white/45 hover:text-brand-red transition-colors disabled:opacity-50 underline"
                 >
                   {cancelling ? "Cancelling…" : "Cancel subscription"}
                 </button>
               </div>
             )}
           </section>
+          </Reveal>
 
-          <section className="rounded-2xl bg-ink-1/60 border border-white/10 p-6 sm:p-8">
+          <Reveal y={18}>
+          <section className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 sm:p-8">
             <div className="flex items-center justify-between mb-5">
-              <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/45">
-                Desktop License Keys
-              </div>
+              <h2 className="sr-only">Desktop license keys</h2>
+              <CodeComment>license keys · desktop seats</CodeComment>
               <span className="text-xs font-mono text-white/45">
                 {activeKeys.length} / {maxKeys} used
               </span>
@@ -301,17 +308,17 @@ export default function AccountPage() {
             {canGenerateKey && (
               <>
                 {newKey && (
-                  <div className="mb-5 rounded-xl bg-emerald-900/25 border border-emerald-500/40 p-4">
-                    <p className="text-xs text-emerald-300 font-semibold mb-2">
+                  <div className="mb-5 rounded-xl bg-brand-green/10 border border-brand-green/40 p-4">
+                    <p className="text-xs text-brand-green font-semibold mb-2">
                       {keyMsg} Copy it now — you won&rsquo;t see it again.
                     </p>
                     <div className="flex items-center gap-2">
-                      <code className="flex-1 rounded bg-black/60 px-3 py-2 text-xs text-emerald-200 font-mono break-all">
+                      <code className="flex-1 rounded bg-ink-0/60 px-3 py-2 text-xs text-brand-green/90 font-mono break-all">
                         {newKey}
                       </code>
                       <button
                         onClick={copyKey}
-                        className="rounded bg-emerald-700 hover:bg-emerald-600 px-3 py-2 text-xs font-mono text-white inline-flex items-center gap-1.5 transition-colors"
+                        className="rounded bg-brand-green/15 hover:bg-brand-green/25 border border-brand-green/40 px-3 py-2 text-xs font-mono text-brand-green inline-flex items-center gap-1.5 transition-colors"
                       >
                         {copied ? <Check size={12} /> : <Copy size={12} />}
                         {copied ? "Copied" : "Copy"}
@@ -325,7 +332,7 @@ export default function AccountPage() {
                     {activeKeys.map((k) => (
                       <li
                         key={k.id}
-                        className="flex items-center justify-between rounded-md bg-black/40 border border-white/5 px-4 py-3"
+                        className="flex items-center justify-between rounded-md bg-ink-1 border border-white/[0.06] px-4 py-3"
                       >
                         <div className="text-sm text-white/80">
                           <span className="font-mono text-xs text-white/40">#{k.id}</span>
@@ -333,13 +340,13 @@ export default function AccountPage() {
                           {k.device_id ? (
                             <span>Activated · last seen {k.last_seen_at ? new Date(k.last_seen_at).toLocaleDateString() : "never"}</span>
                           ) : (
-                            <span className="text-amber-300">Not yet activated</span>
+                            <span className="text-brand-amber">Not yet activated</span>
                           )}
                         </div>
                         <button
                           onClick={() => revokeKey(k.id)}
                           disabled={revoking === k.id}
-                          className="text-xs text-red-300 hover:text-red-200 underline disabled:opacity-50"
+                          className="text-xs text-brand-red/80 hover:text-brand-red underline disabled:opacity-50"
                         >
                           {revoking === k.id ? "Revoking…" : "Revoke"}
                         </button>
@@ -352,7 +359,7 @@ export default function AccountPage() {
                   <button
                     onClick={generateKey}
                     disabled={generatingKey}
-                    className="rounded-md bg-white/10 hover:bg-white/15 border border-white/15 px-4 py-2.5 text-sm font-display font-bold text-white disabled:opacity-50 transition-colors"
+                    className="rounded-md border border-brand-orange/40 text-brand-orange hover:bg-brand-orange/10 px-4 py-2.5 text-sm font-display font-bold disabled:opacity-50 transition-colors"
                   >
                     {generatingKey ? "Generating…" : "+ Generate new license key"}
                   </button>
@@ -360,12 +367,13 @@ export default function AccountPage() {
               </>
             )}
           </section>
+          </Reveal>
 
-          <section className="rounded-2xl bg-ink-1/60 border border-white/10 p-6 sm:p-8">
+          <Reveal y={18}>
+          <section className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 sm:p-8">
             <div className="flex items-center justify-between mb-5">
-              <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/45">
-                My Garage — Saved Runs
-              </div>
+              <h2 className="sr-only">My garage — saved runs</h2>
+              <CodeComment>garage · saved runs</CodeComment>
               <a href="/simulator" className="text-xs font-mono text-brand-orange hover:text-brand-orangeLight transition-colors">
                 + New sim →
               </a>
@@ -384,7 +392,7 @@ export default function AccountPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-left text-[10px] font-mono uppercase tracking-widest text-white/40 border-b border-white/10">
+                    <tr className="text-left font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 border-b border-white/10">
                       <th className="py-2 pr-4">Bike</th>
                       <th className="py-2 pr-4 text-right">¼-mile</th>
                       <th className="py-2 pr-4 text-right">Trap</th>
@@ -415,11 +423,12 @@ export default function AccountPage() {
               </div>
             )}
           </section>
+          </Reveal>
 
-          <section className="rounded-2xl bg-ink-1/60 border border-white/10 p-6 sm:p-8">
-            <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/45 mb-4">
-              Security
-            </div>
+          <Reveal y={18}>
+          <section className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 sm:p-8">
+            <h2 className="sr-only">Security</h2>
+            <CodeComment className="mb-4">security · password</CodeComment>
             {!user.has_password && (
               <p className="mb-4 text-sm text-white/55">
                 You currently sign in via magic link. Add a password to sign in
@@ -427,7 +436,7 @@ export default function AccountPage() {
               </p>
             )}
             {pwMsg && (
-              <p className={`mb-3 text-sm ${pwMsg.tone === "ok" ? "text-emerald-300" : "text-red-300"}`}>
+              <p className={`mb-3 text-sm ${pwMsg.tone === "ok" ? "text-brand-green" : "text-brand-red/90"}`}>
                 {pwMsg.text}
               </p>
             )}
@@ -440,7 +449,7 @@ export default function AccountPage() {
                   value={pwCurrent}
                   onChange={(e) => setPwCurrent(e.target.value)}
                   placeholder="Current password"
-                  className="block w-full rounded-md border border-white/10 bg-black/40 px-4 py-2.5 text-white placeholder-white/30 focus:border-brand-orange focus:outline-none focus:ring-1 focus:ring-brand-orange text-sm font-mono transition-colors"
+                  className="block w-full rounded-md border border-white/10 bg-ink-1 px-4 py-2.5 text-white placeholder-white/30 focus:border-brand-orange/60 focus:outline-none text-sm font-mono transition-colors"
                 />
               )}
               <input
@@ -451,17 +460,18 @@ export default function AccountPage() {
                 value={pwNew}
                 onChange={(e) => setPwNew(e.target.value)}
                 placeholder="New password (8+ characters)"
-                className="block w-full rounded-md border border-white/10 bg-black/40 px-4 py-2.5 text-white placeholder-white/30 focus:border-brand-orange focus:outline-none focus:ring-1 focus:ring-brand-orange text-sm font-mono transition-colors"
+                className="block w-full rounded-md border border-white/10 bg-ink-1 px-4 py-2.5 text-white placeholder-white/30 focus:border-brand-orange/60 focus:outline-none text-sm font-mono transition-colors"
               />
               <button
                 type="submit"
                 disabled={pwSaving}
-                className="rounded-md bg-white/10 hover:bg-white/15 border border-white/15 px-4 py-2.5 text-sm font-display font-bold text-white disabled:opacity-50 transition-colors"
+                className="rounded-md border border-brand-orange/40 text-brand-orange hover:bg-brand-orange/10 px-4 py-2.5 text-sm font-display font-bold disabled:opacity-50 transition-colors"
               >
                 {pwSaving ? "Saving…" : user.has_password ? "Change password" : "Set a password"}
               </button>
             </form>
           </section>
+          </Reveal>
         </div>
       </main>
       <SiteFooter />
