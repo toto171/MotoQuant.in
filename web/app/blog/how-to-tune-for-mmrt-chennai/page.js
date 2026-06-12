@@ -299,7 +299,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Simulate your bike at MMRT vs Aamby Valley</div>
             <div className="text-white/60 text-sm">
-              Switch venues with one dropdown. Sweep month, track temperature, rider weight, tire compound, and any of the 562 parts in the catalog. See your ET delta before the entry fee.
+              Switch venues with one dropdown. Sweep month, track temperature, rider weight, tire compound, and any of the 563 parts in the catalog. See your ET delta before the entry fee.
             </div>
           </div>
           <Link
@@ -368,7 +368,7 @@ export default function PostPage() {
               <Link href="/bikes" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Browse the full bike catalog
               </Link>{' '}
-              — 336 bikes with full spec sheets, OEM tire fitments, and venue-aware quarter-mile predictions for every Indian drag strip in the database.
+              — 501 bikes with full spec sheets, OEM tire fitments, and venue-aware quarter-mile predictions for every Indian drag strip in the database.
             </li>
             <li>
               ·{' '}
