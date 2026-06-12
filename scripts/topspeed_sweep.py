@@ -30,9 +30,9 @@ import time
 import warnings
 from pathlib import Path
 
-# Reuse the word-boundary model matcher from validation_sweep so "Duke 390"
-# doesn't accidentally match "Duke 390 Adventure".
-from validation_sweep import _model_match  # type: ignore
+# Reuse the shared word-boundary model matcher so "Duke 390" doesn't
+# accidentally match "Duke 390 Adventure".
+from sweep_lib import wb_match as _model_match  # type: ignore
 
 from motoquant import MotoQuantEngine
 from motoquant.scraper.importer import spec_to_bike_config

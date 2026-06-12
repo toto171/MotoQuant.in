@@ -40,6 +40,12 @@ from motoquant import MotoQuantEngine
 from motoquant.defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 from motoquant.scraper.importer import spec_to_bike_config
 from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
+from scripts.sweep_lib import (
+    best_benchmark_match as _best_benchmark_match,
+    find_spec_for_benchmark as _find_spec_for_benchmark,
+    model_specificity_score as _model_specificity_score,  # noqa: F401  (re-export, pinned by tests)
+    wb_match as _model_match,  # noqa: F401  (re-export, pinned by tests)
+)
 
 # Silence importer/validator noise; we log per-bike status ourselves.
 logging.getLogger("motoquant").setLevel(logging.ERROR)
@@ -2204,71 +2210,15 @@ REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [
 ]
 
 
-def _model_match(pattern: str, spec_model: str) -> bool:
-    """Word-boundary model match — avoids `YZF-R1` accidentally matching
-    `YZF-R15`.  Uses simple tokenisation: split on space / hyphen and check
-    every pattern token appears as a standalone token in the spec string.
-    """
-    import re as _re
-
-    tokens = [t for t in _re.split(r"[\s\-]+", pattern) if t]
-    spec_tokens = {t for t in _re.split(r"[\s\-]+", spec_model) if t}
-    return all(t in spec_tokens for t in tokens)
-
-
-def _model_specificity_score(pattern: str) -> int:
-    """Return number of distinct tokens in pattern after splitting on
-    space / hyphen / dot. Used to pick the *most-specific* benchmark
-    among multiple word-boundary matches against the same spec — e.g.
-    `"Ninja H2 SX"` (3 tokens) outranks `"Ninja H2"` (2 tokens) so the
-    H2 SX catalog row binds to the H2 SX benchmark, not the H2 one.
-    See `tests/test_validation.py::TestMatcherSpecificity`.
-    """
-    import re as _re
-
-    return len([t for t in _re.split(r"[\s\-\.]+", pattern) if t])
-
-
-def _best_benchmark_match(spec, benchmarks):
-    """Among all benchmarks that match spec by (manufacturer + word-boundary
-    model tokens + year-range filter), return the *most-specific* one
-    (highest token-count in `bmodel`). Ties broken by first occurrence.
-    Returns the matching tuple `(bmfr, bmodel, byear, tgt_et, tgt_trap, src)`
-    or `None` if no benchmark matches.
-
-    Implements Option 2 from `DISPATCH_INBOX.md` 2026-05-25 ticket:
-    score-and-pick instead of sort-then-first-match, so the matcher is
-    robust against benchmark insertion-order, dict iteration order, and
-    later token-count tie-breaking edge cases.
-    """
-    best = None
-    best_score = -1
-    for entry in benchmarks:
-        bmfr, bmodel, byear, _tgt_et, _tgt_trap, _src = entry
-        if spec.manufacturer != bmfr:
-            continue
-        if not _model_match(bmodel, spec.model_name):
-            continue
-        if byear < spec.year_from or byear > (spec.year_to or spec.year_from + 3):
-            continue
-        score = _model_specificity_score(bmodel)
-        if score > best_score:
-            best = entry
-            best_score = score
-    return best
+# Matcher primitives are shared with the other sweep drivers via
+# scripts/sweep_lib.py; the _-prefixed aliases above keep the import
+# surface used by tests/test_validation.py and topspeed_sweep.py stable.
 
 
 def find_spec(mfr: str, model: str, year: int):
-    """Locate a spec in ALL_KNOWN_BIKES matching mfr/model/year."""
-    for b in ALL_KNOWN_BIKES:
-        if b.manufacturer != mfr:
-            continue
-        if not _model_match(model, b.model_name):
-            continue
-        if year < b.year_from or year > (b.year_to or b.year_from + 3):
-            continue
-        return b
-    return None
+    """Locate the spec in ALL_KNOWN_BIKES best matching mfr/model/year
+    (tightest-fit most-specific match -- see sweep_lib)."""
+    return _find_spec_for_benchmark(mfr, model, year, ALL_KNOWN_BIKES)
 
 
 def _sim_spec(spec) -> dict:

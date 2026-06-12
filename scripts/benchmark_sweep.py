@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import json
 import logging
-import re
 import sys
 import time
 import warnings
@@ -31,49 +30,20 @@ from motoquant import MotoQuantEngine
 from motoquant.defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 from motoquant.scraper.importer import spec_to_bike_config
 from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
+from scripts.sweep_lib import (
+    find_spec_for_benchmark as _lib_find_spec,
+    source_quality as _source_quality,
+)
 from scripts.sweep_with_clusters import cluster_for
 from scripts.validation_sweep import BENCHMARKS
 
 
-def _wb_match(pattern: str, spec_str: str) -> bool:
-    tokens = [t for t in re.split(r"[\s\-\.]+", pattern.lower()) if t]
-    spec_tokens = {t for t in re.split(r"[\s\-\.]+", spec_str.lower()) if t}
-    return all(t in spec_tokens for t in tokens)
-
-
-# Source-quality weights (April 30 decision: weighted by source quality).
-# Heuristic: parse the source string for keywords. Anything containing
-# "DERIVED" or "0-100" or "estimated" is heuristically-derived.
-def _source_quality(src: str) -> tuple[float, str]:
-    """Return (weight, label)."""
-    s = src.lower()
-    if "derived" in s or "0-100" in s or "estimated" in s:
-        return (0.1, "derived")
-    if "forum" in s or "community" in s or "logged" in s or "timeslip" in s:
-        # Owner timeslip / forum claim — better than derived but not lab
-        return (0.3, "forum_or_timeslip")
-    if any(k in s for k in ("instrumented", "motostatz", "dragy", "vbox")):
-        return (1.0, "instrumented")
-    if any(k in s for k in ("cycle world", "sport rider", "mcn", "consumer news")):
-        return (0.7, "magazine")
-    if any(
-        k in s
-        for k in ("fastestlaps", "motorbikecatalog", "bikewale", "accelerationtimes")
-    ):
-        return (0.5, "aggregator")
-    return (0.4, "unknown")
-
-
 def find_spec_for_benchmark(mfr: str, model: str, year: int):
-    for spec in ALL_KNOWN_BIKES:
-        if spec.manufacturer.lower() != mfr.lower():
-            continue
-        if not _wb_match(model, spec.model_name):
-            continue
-        if year < spec.year_from or year > (spec.year_to or spec.year_from + 3):
-            continue
-        return spec
-    return None
+    """Tightest-fit most-specific spec lookup over ALL_KNOWN_BIKES
+    (sweep_lib.find_spec_for_benchmark). Replaces the old first-match
+    scan that could bind a short benchmark pattern to whichever
+    superset-named spec came first in catalog order."""
+    return _lib_find_spec(mfr, model, year, ALL_KNOWN_BIKES)
 
 
 def run_sweep(out_path: str | None):
