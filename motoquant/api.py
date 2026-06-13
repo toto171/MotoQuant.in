@@ -2775,20 +2775,22 @@ def surrogate_compare(
 
 
 class PricingEntryOut(BaseModel):
-    retailer: str
-    price_inr: float = Field(None)
+    # Mirrors a row from get_cheapest_prices(); price/url/timestamp may be NULL
+    # for catalog rows that have no live price yet.
+    retailer: str | None = None
+    price_inr: float | None = None
     in_stock: bool
-    fetched_at: str
-    source_url: str
+    fetched_at: str | None = None
+    source_url: str | None = None
     is_stale: bool
 
 
 class PartPricingOut(BaseModel):
     part_id: int
     part_name: str
-    seed_price_inr: float = Field(None)
-    cheapest_live_inr: float = Field(None)
-    prices: list
+    seed_price_inr: float | None = None
+    cheapest_live_inr: float | None = None
+    prices: list[PricingEntryOut]
     all_stale: bool
 
 
@@ -2796,25 +2798,25 @@ class BikePricingSummaryItem(BaseModel):
     part_id: int
     part_name: str
     category: str
-    seed_price_inr: float = Field(None)
-    cheapest_live_inr: float = Field(None)
-    cheapest_retailer: str = Field(None)
-    in_stock: bool = Field(None)
+    seed_price_inr: float | None = None
+    cheapest_live_inr: float | None = None
+    cheapest_retailer: str | None = None
+    in_stock: bool | None = None
 
 
 class BikePricingSummaryOut(BaseModel):
     bike_id: int
     bike_name: str
-    items: list
+    items: list[BikePricingSummaryItem]
     total_cheapest_inr: float
 
 
 class PricingRefreshOut(BaseModel):
     part_id: int
-    retailer: str = Field(None)
-    price_inr: float = Field(None)
-    in_stock: bool = Field(None)
-    fetched_at: str = Field(None)
+    retailer: str | None = None
+    price_inr: float | None = None
+    in_stock: bool | None = None
+    fetched_at: str | None = None
     status: str
 
 

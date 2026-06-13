@@ -17,6 +17,7 @@ from unittest.mock import MagicMock
 from motoquant.llm import (
     LLMClient,
     LLMNotConfiguredError,
+    LLMRateLimitError,
     LLMResponse,
     ParsedSimRequest,
     parse_query,
@@ -103,6 +104,61 @@ class TestLLMClient(unittest.TestCase):
     def test_is_configured_with_override(self):
         client = LLMClient(_call_override=lambda kind, kwargs: "")
         self.assertTrue(client.is_configured)
+
+    def test_is_rate_limit_detects_status_code(self):
+        client = LLMClient(_call_override=lambda kind, kwargs: "")
+        err = RuntimeError("boom")
+        err.status_code = 429
+        self.assertTrue(client._is_rate_limit(err))
+
+    def test_is_rate_limit_detects_response_status(self):
+        client = LLMClient(_call_override=lambda kind, kwargs: "")
+
+        class _Resp:
+            status_code = 429
+
+        err = RuntimeError("boom")
+        err.response = _Resp()
+        self.assertTrue(client._is_rate_limit(err))
+
+    def test_is_rate_limit_detects_class_name(self):
+        client = LLMClient(_call_override=lambda kind, kwargs: "")
+
+        class RateLimitError(Exception):
+            pass
+
+        self.assertTrue(client._is_rate_limit(RateLimitError("quota")))
+
+    def test_is_rate_limit_ignores_other_errors(self):
+        client = LLMClient(_call_override=lambda kind, kwargs: "")
+        err = RuntimeError("some 500")
+        err.status_code = 500
+        self.assertFalse(client._is_rate_limit(err))
+
+    def test_sdk_create_translates_429_to_rate_limit_error(self):
+        """A provider 429 from the SDK create() call becomes LLMRateLimitError."""
+        client = LLMClient(_call_override=lambda kind, kwargs: "")
+
+        def boom(**kwargs):
+            e = RuntimeError("rate limited")
+            e.status_code = 429
+            raise e
+
+        with self.assertRaises(LLMRateLimitError):
+            client._sdk_create(boom)
+
+    def test_sdk_create_passes_through_non_rate_limit(self):
+        client = LLMClient(_call_override=lambda kind, kwargs: "")
+
+        def boom(**kwargs):
+            raise ValueError("not a 429")
+
+        with self.assertRaises(ValueError):
+            client._sdk_create(boom)
+
+    def test_sdk_create_returns_value_on_success(self):
+        client = LLMClient(_call_override=lambda kind, kwargs: "")
+        self.assertEqual(client._sdk_create(lambda **kw: "ok"), "ok")
 
 
 # ───────────────────────────────────────────────────────────────────

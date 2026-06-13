@@ -1515,10 +1515,7 @@ def cmd_scrape(args):
 
     manufacturer = args.manufacturer
     if not manufacturer:
-        print(
-            "  Error: specify --manufacturer NAME  or  --bulk  for a full catalog run"
-        )
-        print("  Run 'scrape --list-catalog' to see all available manufacturers.")
+        print("  Error: specify --manufacturer NAME")
         return
     limit = args.limit or 50
     category_filter = args.category
@@ -1609,81 +1606,6 @@ def cmd_scrape(args):
     summary = import_batch(db, specs, dry_run=False)
     print(f"  Imported: {summary['imported']}  Errors: {summary['errors']}")
     db.close()
-
-
-def cmd_scrape_bulk(args):
-    """Handle 'scrape --bulk' — multi-manufacturer crawl with checkpoint/resume."""
-    try:
-        from .scraper.bulk_scrape import (
-            DEFAULT_CHECKPOINT,
-            print_checkpoint_status,
-            run_bulk_scrape,
-        )
-    except ImportError as e:
-        print(f"  Bulk scrape module not available: {e}")
-        return
-
-    checkpoint = getattr(args, "checkpoint", None) or DEFAULT_CHECKPOINT
-
-    # ── Status-only mode ──────────────────────────────────────────────────────
-    if getattr(args, "status", False):
-        print_checkpoint_status(checkpoint)
-        return
-
-    # ── Show catalog ──────────────────────────────────────────────────────────
-    if getattr(args, "list_catalog", False):
-        from .scraper.catalog import SCRAPE_CATALOG
-
-        print(f"\n  Bulk scrape catalog  ({len(SCRAPE_CATALOG)} manufacturers)")
-        print(
-            f"  {'#':>3}  {'Manufacturer':<22} {'P':>2}  {'cc+':>5}  {'Years':<11}  Categories"
-        )
-        print(f"  {'─' * 3}  {'─' * 22} {'─' * 2}  {'─' * 5}  {'─' * 11}  {'─' * 20}")
-        for i, e in enumerate(SCRAPE_CATALOG, 1):
-            cats = "/".join(e.get("categories", []))
-            yr = f"{e.get('year_from', 2000)}-{e.get('year_to', 2026)}"
-            print(
-                f"  {i:>3}  {e['manufacturer']:<22} {e.get('priority', 3):>2}  "
-                f"{e.get('min_cc', 600):>5}  {yr:<11}  {cats}"
-            )
-        return
-
-    # ── Actual bulk run ───────────────────────────────────────────────────────
-    dry_run = getattr(args, "dry_run", False)
-    resume = not getattr(args, "no_resume", False)
-    priority = getattr(args, "priority", 3)
-    only = getattr(args, "only", None)
-    limit = getattr(args, "limit", 300) or 300
-    rate = getattr(args, "rate", 1.5) or 1.5
-
-    print("\n  MotoQuant Bulk Scraper")
-    print("  ─────────────────────────────────────────────")
-    print(f"  Checkpoint : {checkpoint}")
-    print(f"  Resume     : {resume}")
-    print(f"  Dry run    : {dry_run}")
-    print(f"  Priority   ≤ {priority}")
-    if only:
-        print(f"  Only       : {only}")
-    print(f"  Rate limit : {rate:.1f}s/request")
-    print(f"  Per-mfr cap: {limit}")
-
-    db = ensure_db(args)
-    result = run_bulk_scrape(
-        db=db,
-        checkpoint_path=checkpoint,
-        resume=resume,
-        dry_run=dry_run,
-        priority=priority,
-        only_manufacturer=only,
-        rate_limit_s=rate,
-        per_mfr_limit=limit,
-        verbose=True,
-    )
-    db.close()
-
-    print()
-    for line in result.summary_lines():
-        print(line)
 
 
 def cmd_import(args):
@@ -3257,21 +3179,14 @@ def build_parser() -> argparse.ArgumentParser:
         "scrape",
         help="Crawl bikez.com for specs and import into DB",
     )
-    p_scrape_mode = p_scrape.add_mutually_exclusive_group()
-    p_scrape_mode.add_argument(
+    p_scrape.add_argument(
         "--manufacturer", help="Single manufacturer to scrape (e.g. 'Suzuki')"
-    )
-    p_scrape_mode.add_argument(
-        "--bulk",
-        action="store_true",
-        help="Bulk-scrape ALL manufacturers in the catalog "
-        "(resumes from checkpoint if interrupted)",
     )
     p_scrape.add_argument(
         "--limit",
         type=int,
         default=None,
-        help="Max bikes per manufacturer (default: 50 single / 300 bulk)",
+        help="Max bikes per manufacturer (default: 50)",
     )
     p_scrape.add_argument(
         "--category",
@@ -3283,45 +3198,6 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_scrape.add_argument(
         "--dry-run", action="store_true", help="Validate/count without writing to DB"
-    )
-    # Bulk-only options
-    p_scrape.add_argument(
-        "--priority",
-        type=int,
-        default=3,
-        help="(bulk) Only scrape manufacturers with priority ≤ N "
-        "(1=top, 2=standard, 3=all)",
-    )
-    p_scrape.add_argument(
-        "--only",
-        default=None,
-        metavar="MFR",
-        help="(bulk) Only scrape this manufacturer from the catalog",
-    )
-    p_scrape.add_argument(
-        "--no-resume",
-        action="store_true",
-        help="(bulk) Start fresh, ignoring any saved checkpoint",
-    )
-    p_scrape.add_argument(
-        "--checkpoint",
-        default=None,
-        metavar="FILE",
-        help="(bulk) Path to checkpoint JSON file",
-    )
-    p_scrape.add_argument(
-        "--rate",
-        type=float,
-        default=1.5,
-        help="(bulk) Seconds between HTTP requests (default: 1.5)",
-    )
-    p_scrape.add_argument(
-        "--status", action="store_true", help="(bulk) Show checkpoint status and exit"
-    )
-    p_scrape.add_argument(
-        "--list-catalog",
-        action="store_true",
-        help="(bulk) List all manufacturers in the catalog and exit",
     )
 
     # ── import ──
