@@ -33,7 +33,7 @@ export function BikesPage() {
       <header>
         <h1 className="text-2xl font-semibold">Bike library</h1>
         <p className="text-sm text-carbon-400 mt-1">
-          287 curated motorcycles — first-principles aero, gear ratios, tire fitments.
+          501 curated motorcycles — first-principles aero, gear ratios, tire fitments.
         </p>
       </header>
 

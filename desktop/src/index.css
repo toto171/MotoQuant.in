@@ -37,8 +37,8 @@
            disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-primary {
-    @apply btn bg-signal-500 text-carbon-950 hover:bg-signal-600
-           shadow-glow;
+    @apply btn bg-signal-500 text-carbon-950 font-semibold
+           hover:bg-signal-600 hover:shadow-glow;
   }
   .btn-secondary {
     @apply btn bg-carbon-700 text-carbon-100 hover:bg-carbon-600
@@ -49,8 +49,12 @@
   }
 
   .card {
-    @apply rounded-lg bg-carbon-850 border border-carbon-700
-           shadow-sm;
+    @apply rounded-lg bg-carbon-850 border border-white/10
+           shadow-sm transition-colors;
+  }
+  /* Emphasis variant — orange hairline, matches the web cockpit cards. */
+  .card-emph {
+    @apply card border-signal-500/20;
   }
 
   .stat-number {
@@ -64,10 +68,20 @@
            focus:border-signal-500;
   }
 
+  /* The one small-caps label voice — mono, uppercase, 0.2em tracking,
+     mirroring the web cockpit. */
+  .label {
+    @apply font-mono uppercase tracking-[0.2em] text-carbon-500;
+  }
+
   .chip {
     @apply inline-flex items-center gap-1 rounded-full bg-carbon-700
            px-2.5 py-0.5 text-xs font-medium text-carbon-200
            border border-carbon-600;
+  }
+  /* Accent chip — sparing #00FFB2 emphasis (web brand.accent). */
+  .chip-accent {
+    @apply chip bg-accent-500/10 text-accent-500 border-accent-500/40;
   }
   .chip-success {
     @apply chip bg-go-500/15 text-go-500 border-go-500/40;

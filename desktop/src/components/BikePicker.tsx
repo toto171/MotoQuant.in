@@ -116,7 +116,7 @@ export function BikePicker({ value, onChange, placeholder }: Props) {
             onChange={(e) => setSearch(e.target.value)}
             onFocus={() => setOpen(true)}
             onKeyDown={(e) => { if (e.key === "Escape") { setOpen(false); setSearch(""); } }}
-            placeholder={placeholder ?? `Search ${allBikes.length || 287} bikes…`}
+            placeholder={placeholder ?? `Search ${allBikes.length || 501} bikes…`}
             className="flex-1 bg-transparent outline-none text-sm placeholder:text-carbon-600"
             aria-autocomplete="list"
             aria-controls="bike-picker-list"

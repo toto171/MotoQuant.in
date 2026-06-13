@@ -23,16 +23,14 @@ const NAV = [
 
 export function Sidebar() {
   return (
-    <aside className="w-60 shrink-0 bg-carbon-900 border-r border-carbon-800 flex flex-col">
-      <div className="h-14 flex items-center gap-2 px-5 border-b border-carbon-800">
-        <div className="w-8 h-8 rounded bg-signal-600 flex items-center justify-center">
+    <aside className="w-60 shrink-0 bg-carbon-900 border-r border-white/10 flex flex-col">
+      <div className="h-14 flex items-center gap-2.5 px-5 border-b border-white/10">
+        <div className="w-8 h-8 rounded bg-signal-500 flex items-center justify-center shadow-glow">
           <Zap className="w-4 h-4 text-carbon-950" strokeWidth={3} />
         </div>
         <div>
-          <div className="font-semibold text-sm leading-tight">MotoQuant</div>
-          <div className="text-[10px] uppercase tracking-wide text-carbon-500">
-            Pro
-          </div>
+          <div className="font-semibold text-sm leading-tight tracking-tight">MotoQuant</div>
+          <div className="label text-[10px] text-signal-500/80">Pro</div>
         </div>
       </div>
 
@@ -43,10 +41,10 @@ export function Sidebar() {
             to={to}
             className={({ isActive }) =>
               clsx(
-                "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
+                "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors border-l-2",
                 isActive
-                  ? "bg-carbon-800 text-white"
-                  : "text-carbon-400 hover:text-carbon-100 hover:bg-carbon-800/60",
+                  ? "bg-carbon-800 text-white border-signal-500"
+                  : "text-carbon-400 border-transparent hover:text-carbon-100 hover:bg-carbon-800/60",
               )
             }
           >
@@ -56,9 +54,9 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="p-3 border-t border-carbon-800 text-[10px] text-carbon-500 leading-relaxed">
-        <div>The physics of faster.</div>
-        <div className="mt-1 text-carbon-600">
+      <div className="p-3 border-t border-white/10 leading-relaxed">
+        <div className="label text-[10px] text-carbon-500">The physics of faster.</div>
+        <div className="mt-1 text-[10px] text-carbon-600 font-mono">
           v0.5.0 · Tauri preview
         </div>
       </div>

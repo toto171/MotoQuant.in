@@ -21,14 +21,17 @@ export default {
         ],
       },
       colors: {
-        // MotoQuant brand palette — carbon + signal orange
+        // MotoQuant brand palette — near-black "ink" surfaces + signal orange.
+        // Tuned to the web cockpit identity (web/tailwind.config.js): the
+        // darkest carbon steps mirror ink.1 (#0A0A0B) / ink.2 (#111113) so a
+        // desktop window and motoquant.in read as the same product.
         carbon: {
-          950: "#08090b",
-          900: "#0d0f13",
-          850: "#11141a",
-          800: "#161a21",
-          700: "#1f242d",
-          600: "#2a303b",
+          950: "#000000",
+          900: "#0a0a0b",
+          850: "#111113",
+          800: "#1a1a1d",
+          700: "#27272a",
+          600: "#33333a",
           500: "#3b424f",
           400: "#5a6170",
           300: "#8b93a3",
@@ -36,26 +39,31 @@ export default {
           100: "#e7eaef",
         },
         signal: {
-          // drag-strip Christmas-tree amber → go-green
-          50: "#fff7ed",
-          300: "#fdba74",
-          500: "#f97316", // primary action
-          600: "#ea580c",
-          700: "#c2410c",
+          // primary action — web brand.orange ramp (#FF5E1F)
+          50: "#fff4ee",
+          300: "#ff8f57", // brand.orangeLight
+          500: "#ff5e1f", // brand.orange — primary action
+          600: "#cc4000", // brand.orangeDeep
+          700: "#a33300",
+        },
+        // Sparing emphasis accent — web brand.accent.
+        accent: {
+          500: "#00ffb2",
         },
         go: {
           500: "#22c55e",
           600: "#16a34a",
         },
         warn: {
-          500: "#eab308",
+          500: "#f59e0b", // web brand.amber
         },
         stop: {
           500: "#ef4444",
         },
       },
       boxShadow: {
-        glow: "0 0 24px rgba(249, 115, 22, 0.35)",
+        // web "orange-soft" glow, retuned to the new #FF5E1F primary.
+        glow: "0 0 28px rgba(255, 94, 31, 0.30), 0 0 64px rgba(255, 94, 31, 0.10)",
       },
     },
   },

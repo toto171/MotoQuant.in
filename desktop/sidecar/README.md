@@ -67,7 +67,7 @@ Tauri resolves `externalBin` paths per-target: the `bin/motoquant-backend` prefi
 
 ## Database bundling
 
-The seeded `motoquant.db` (~5 MB, 290 bikes / 465 parts / 159 tires / 20 venues) is bundled **inside** the PyInstaller binary via `datas` in the spec file. `sidecar_entry.py` resolves `sys._MEIPASS/motoquant.db` at startup and sets `MOTOQUANT_DB` so `motoquant/api.py:92` finds it.
+The seeded `motoquant.db` (~5 MB, 501 bikes / 563 parts / 232 tires / 20 venues) is bundled **inside** the PyInstaller binary via `datas` in the spec file. `sidecar_entry.py` resolves `sys._MEIPASS/motoquant.db` at startup and sets `MOTOQUANT_DB` so `motoquant/api.py:92` finds it.
 
 Trade-off: catalog updates require rebuilding the sidecar. For dev flow where you'd rather not rebuild on every `db seed`, set `MOTOQUANT_DB` before launching the desktop app and the sidecar will respect the override.
 
