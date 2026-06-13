@@ -14,12 +14,12 @@
 //
 // Token storage (honest about the trade-off):
 //   • access token  → React state only (in-memory; never persisted to disk)
-//   • refresh token → sessionStorage (cleared when the app closes; NOT
-//                     localStorage, which would survive restarts and widen the
-//                     XSS exfiltration window)
-// A future hardening step is to move the refresh token into the OS keychain via
-// a Tauri secure-store plugin — see desktop/SECURITY.md "Residual risk". We
-// deliberately avoid persisting the refresh token to plaintext disk.
+//   • refresh token → OS keychain (macOS Keychain / Windows Credential Manager
+//                     / Linux Secret Service) via the Rust `keychain_*`
+//                     commands, with a sessionStorage fallback for dev/browser
+//                     or a keychain-less runtime (see lib/secureStore.ts).
+// The refresh token never touches plaintext disk in the packaged app. This is
+// the hardening step previously flagged in desktop/SECURITY.md "Residual risk".
 
 import {
   createContext,
@@ -32,6 +32,7 @@ import {
 } from "react";
 import { api, registerAuthHooks } from "@/lib/api";
 import type { MeResponse, TokenPair } from "@/types/api";
+import { getSecret, setSecret } from "@/lib/secureStore";
 
 const REFRESH_KEY = "mq_refresh";
 
@@ -50,20 +51,16 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-function readRefresh(): string | null {
-  try {
-    return sessionStorage.getItem(REFRESH_KEY);
-  } catch {
-    return null;
-  }
+// Refresh-token persistence is delegated to the OS keychain (with a
+// sessionStorage fallback) — see lib/secureStore.ts. readRefresh is async
+// (keychain access is async); writeRefresh is fire-and-forget: the in-memory
+// access token already drives the live session, so persistence completing a
+// tick later is harmless.
+function readRefresh(): Promise<string | null> {
+  return getSecret(REFRESH_KEY);
 }
 function writeRefresh(token: string | null): void {
-  try {
-    if (token) sessionStorage.setItem(REFRESH_KEY, token);
-    else sessionStorage.removeItem(REFRESH_KEY);
-  } catch {
-    /* sessionStorage unavailable — degrade to in-memory-only session */
-  }
+  void setSecret(REFRESH_KEY, token);
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -99,7 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Single-flight silent refresh. Returns a fresh access token or null.
   const refreshAccessToken = useCallback(async (): Promise<string | null> => {
     if (refreshPromiseRef.current) return refreshPromiseRef.current;
-    const refresh = readRefresh();
+    const refresh = await readRefresh();
     if (!refresh) return null;
 
     refreshPromiseRef.current = (async () => {

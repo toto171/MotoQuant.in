@@ -20,6 +20,13 @@ tauri = { version = "2.1", features = [] }
 tauri-plugin-shell = "2.0"
 # Self-update (Ed25519-signed). Pubkey + endpoints live in tauri.conf.json.
 tauri-plugin-updater = "2.0"
+# OS keychain for the auth refresh token (macOS Keychain / Windows Credential
+# Manager / Linux Secret Service). Platform backends are feature-gated; the
+# Linux backend (sync-secret-service) is pure-Rust (zbus) so it builds without
+# system D-Bus dev libs. NOTE: build/verify on a Rust toolchain (CI release
+# matrix) — the Cowork sandbox has no cargo. If the Linux build complains, the
+# fix is the feature set on this line.
+keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 log = "0.4"

@@ -38,15 +38,16 @@ A hosted-only licensed client does **not** protect against:
 - **Credential phishing or shared accounts.** Account sharing is a business
   problem; device binding + revocation (server-side) limit but don't eliminate
   it.
-- **Token theft via XSS-equivalent in the WebView.** The refresh token lives in
-  `sessionStorage` (cleared on app close), and the access token lives only in
-  memory. A successful script-injection into the WebView could still read them.
-  We reduce the surface with a strict CSP (`script-src 'self'`, no
-  `unsafe-eval`) and no third-party script origins. **Hardening follow-up:**
-  move the refresh token into the OS keychain via a Tauri secure-store plugin
-  (e.g. `tauri-plugin-stronghold` or an OS-keyring plugin) so it never touches
-  WebView-readable storage. This is intentionally deferred — it requires Rust
-  that must be compiled + verified on the target OS.
+- **Token theft via XSS-equivalent in the WebView.** The refresh token now
+  lives in the **OS keychain** (macOS Keychain / Windows Credential Manager /
+  Linux Secret Service) via the Rust `keychain_get/set/delete` commands
+  (`src-tauri/src/lib.rs`) and `src/lib/secureStore.ts`, so it is no longer
+  readable from WebView-accessible storage. The access token lives only in
+  memory. We further reduce the surface with a strict CSP (`script-src 'self'`,
+  no `unsafe-eval`) and no third-party script origins. Fallback: when no
+  keychain backend is present (dev/browser, or a headless Linux box without a
+  Secret Service provider) the refresh token degrades to `sessionStorage`
+  (cleared on app close) so the session never hard-fails.
 - **A compromised server.** All trust flows from the hosted API; its security
   (JWT secret hygiene, DB access, payment-webhook signature verification) is out
   of scope for this client and is the server's responsibility.
@@ -56,7 +57,7 @@ A hosted-only licensed client does **not** protect against:
 | Token | Storage | Survives app restart? | Rationale |
 |---|---|---|---|
 | Access token | React memory (a `useRef`) | No | Short-lived; never persisted to disk. |
-| Refresh token | `sessionStorage` | No | Cleared on app close. **Not** `localStorage` (which would persist to disk and widen the theft window). |
+| Refresh token | **OS keychain** (Keychain / Credential Manager / Secret Service) | Yes (encrypted by the OS) | Not WebView-readable. Falls back to `sessionStorage` only when no keychain backend is available. **Never** `localStorage` (plaintext on disk). |
 
 The client performs a single silent refresh on a `401`; if refresh fails the
 app drops to the login screen. The client **never** computes or caches any

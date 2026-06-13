@@ -51,6 +51,41 @@ fn get_backend_url(state: State<'_, BackendState>) -> Result<String, String> {
     Ok(resolve_api_url())
 }
 
+/// OS keychain service name for credential storage (macOS Keychain /
+/// Windows Credential Manager / Linux Secret Service). The frontend stores the
+/// auth refresh token here instead of sessionStorage so it never touches
+/// plaintext disk. See desktop/src/lib/secureStore.ts (with a sessionStorage
+/// fallback when no keychain backend is available, e.g. headless Linux).
+const KEYCHAIN_SERVICE: &str = "in.motoquant.desktop";
+
+/// Read a secret from the OS keychain. Returns `None` when the key is absent.
+#[tauri::command]
+fn keychain_get(key: String) -> Result<Option<String>, String> {
+    let entry = keyring::Entry::new(KEYCHAIN_SERVICE, &key).map_err(|e| e.to_string())?;
+    match entry.get_password() {
+        Ok(v) => Ok(Some(v)),
+        Err(keyring::Error::NoEntry) => Ok(None),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+/// Write (create or overwrite) a secret in the OS keychain.
+#[tauri::command]
+fn keychain_set(key: String, value: String) -> Result<(), String> {
+    let entry = keyring::Entry::new(KEYCHAIN_SERVICE, &key).map_err(|e| e.to_string())?;
+    entry.set_password(&value).map_err(|e| e.to_string())
+}
+
+/// Delete a secret from the OS keychain. A missing key is treated as success.
+#[tauri::command]
+fn keychain_delete(key: String) -> Result<(), String> {
+    let entry = keyring::Entry::new(KEYCHAIN_SERVICE, &key).map_err(|e| e.to_string())?;
+    match entry.delete_credential() {
+        Ok(()) | Err(keyring::Error::NoEntry) => Ok(()),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info"))
@@ -60,7 +95,12 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(BackendState::default())
-        .invoke_handler(tauri::generate_handler![get_backend_url])
+        .invoke_handler(tauri::generate_handler![
+            get_backend_url,
+            keychain_get,
+            keychain_set,
+            keychain_delete
+        ])
         .setup(|app| {
             let url = resolve_api_url();
             log::info!("MotoQuant API base URL: {url}");
