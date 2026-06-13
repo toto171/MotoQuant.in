@@ -19,13 +19,28 @@
 persistent disk → **user accounts, saved runs and subscription rows are
 wiped on every deploy** (and every push auto-deploys). Acceptable during
 the free beta (accounts are convenience only); **unacceptable once money
-moves**. Before flipping enforcement, do ONE of:
+moves**.
 
-- Add a Render persistent disk (paid plan) mounted at e.g. `/data`, set
-  `MOTOQUANT_DB=/data/motoquant.db`, seed once on first boot; or
-- Move auth/subscription tables to a managed Postgres (Supabase free tier
-  was already the Phase-6 plan of record) and keep the catalog sqlite
-  read-only in-image.
+**The mechanism is now shipped** (June 2026): `docker-entrypoint.sh` seeds a
+persistent-disk DB from the baked image copy on first boot, then preserves it
+across all later deploys. On the free tier it is a verified no-op (seed path ==
+target path). To turn durability on, do ONE of:
+
+**Option A — Render persistent disk (recommended, ~$1/mo + paid instance).**
+Render disks require a paid plan (Starter+). Then it's a 2-step flip in
+`render.yaml` (both changes are already written as commented diffs in that file):
+1. Uncomment the `disk:` block (`name: motoquant-data`, `mountPath: /data`, `sizeGB: 1`).
+2. Change `MOTOQUANT_DB` from `/app/motoquant.db` to `/data/motoquant.db`.
+Push → first boot copies the seeded catalog to `/data`, and every deploy
+thereafter keeps the accumulated users/runs/subscriptions. Verify with
+`/api/health` (`bike_count` stays 501) and by registering a test account,
+deploying, and confirming the account survives.
+
+**Option B — managed Postgres for auth/subscription tables (Supabase free
+tier, the Phase-6 plan of record).** Keep the catalog sqlite read-only
+in-image; move only the durable tables. Larger change (repo layer +
+connection routing); revisit if disk cost or sqlite write-concurrency on a
+shared instance becomes the constraint.
 
 ## Step 1 — Accounts prerequisite (do this FIRST)
 

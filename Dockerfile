@@ -11,10 +11,14 @@ COPY motoquant/ ./motoquant/
 COPY app.py .
 COPY motoquant.db .
 COPY artifacts/surrogate/surrogate_numpy.npz ./artifacts/surrogate/surrogate_numpy.npz
+COPY docker-entrypoint.sh .
+RUN chmod +x docker-entrypoint.sh
 
 # Railway injects PORT at runtime
 ENV PORT=8000
 ENV MOTOQUANT_DB=/app/motoquant.db
 
 # Startup
-CMD ["/bin/sh", "-c", "exec uvicorn motoquant.api:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Entrypoint seeds a persistent-disk DB on first boot, then execs uvicorn.
+# No-op when MOTOQUANT_DB is the baked /app path (current free tier).
+CMD ["./docker-entrypoint.sh"]
