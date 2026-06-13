@@ -157,3 +157,47 @@ def test_no_nonpositive_ratio(spec):
             f"{spec.manufacturer} {spec.model_name} ({spec.year_from}): "
             f"gear {i} ratio={r} <= 0 — physically impossible."
         )
+
+
+# ── Test 6: pin gear COUNTS corrected by the GEARAUDIT pass (2026-06-13) ──────
+# These bikes had their gear count verified against real-world specs and
+# corrected. A future copy-paste from a sibling spec must not silently revert
+# the count. Each tuple: (model_name, model_code, expected_gear_count).
+# Sources are documented inline in known_bikes*.py next to each spec.
+GEARAUDIT_PINNED_COUNTS: list[tuple[str, str, int]] = [
+    # Suzuki Intruder 250 (BS6) — 249cc oil-cooled SG250 engine shared with the
+    # Gixxer 250 / SF 250 → 6-speed (ZigWheels/BikeWale/RushLane). Was 5.
+    ("Intruder 250", "Intruder250", 6),
+    # Suzuki V-Strom SX 250 (DR-Z250SX) — same SG250 engine as Gixxer 250 →
+    # 6-speed (the prior "Gixxer 250 5-speed" comment was factually wrong). Was 5.
+    ("V-Strom SX 250", "DR-Z250SX", 6),
+]
+
+
+@pytest.mark.parametrize(
+    "model_name,model_code,expected_count",
+    GEARAUDIT_PINNED_COUNTS,
+    ids=[f"{m} ({c})" for m, c, _ in GEARAUDIT_PINNED_COUNTS],
+)
+def test_gearaudit_pinned_gear_counts(model_name, model_code, expected_count):
+    """Pin the gear counts corrected by the 2026-06-13 GEARAUDIT pass.
+
+    Guards against a future copy-paste from a sibling spec silently reverting a
+    verified count (the documented copy-paste failure mode in this codebase).
+    """
+    matches = [
+        s
+        for s in ALL_KNOWN_BIKES
+        if s.model_name == model_name and s.model_code == model_code
+    ]
+    assert matches, f"{model_name} ({model_code}) not found in ALL_KNOWN_BIKES"
+    spec = matches[0]
+    assert spec.gears == expected_count, (
+        f"{model_name} ({model_code}): spec.gears={spec.gears} "
+        f"!= verified {expected_count} (see GEARAUDIT comment in known_bikes*.py)"
+    )
+    assert spec.gear_ratios is not None and len(spec.gear_ratios) == expected_count, (
+        f"{model_name} ({model_code}): len(gear_ratios)="
+        f"{len(spec.gear_ratios) if spec.gear_ratios else None} "
+        f"!= verified {expected_count}"
+    )

@@ -5886,8 +5886,15 @@ SUZUKI_INTRUDER_250_2018 = spec_from_dict(
         "fuel_system": "fi",
         "cooling": "oil",
         "valve_config": "sohc",
-        "gears": 5,
-        "gear_ratios": [2.923, 1.947, 1.476, 1.200, 1.000],
+        # GEARAUDIT 2026-06-13: 5->6 speed. The Intruder 250 (BS6) uses the
+        # 249cc oil-cooled SG250 engine shared with the Gixxer 250/SF 250 and
+        # is a 6-speed — confirmed ZigWheels/BikeWale/RushLane (engine + 6-speed
+        # box from Gixxer SF 250). Ratios + F14/R43 sprockets identical to the
+        # catalogue Gixxer 250 entry (same engine, same final drive).
+        # Sources: zigwheels.com/news-features/news/suzuki-intruder-250-india-launch-soon (6-speed);
+        # rushlane.com/suzuki-intruder-250-cruiser-plans (Gixxer 250 engine).
+        "gears": 6,
+        "gear_ratios": [2.800, 1.895, 1.500, 1.261, 1.087, 0.960],
         "front_sprocket": 14,
         "rear_sprocket": 43,
         "chain_pitch": "520",

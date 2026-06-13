@@ -8324,11 +8324,18 @@ SUZUKI_V_STROM_SX_250_2022 = spec_from_dict(
         "valve_config": "sohc",  # SOHC 2-valve — typical of
         # commuter Indian small-bore
         # singles
-        "gears": 5,
-        # Gixxer 250 5-speed cassette per Suzuki India service manual
-        # (V-Strom SX shares the engine + transmission with the Gixxer
-        # 250 / Intruder 250 / Avenis 125 cousins).
-        "gear_ratios": [2.916, 1.789, 1.318, 1.040, 0.875],
+        # GEARAUDIT 2026-06-13: 5->6 speed. CORRECTION: the prior comment was
+        # factually wrong — the Gixxer 250 / SG250 oil-cooled engine is a
+        # 6-speed (confirmed ZigWheels/BikeWale; the catalogue Gixxer 250 entry
+        # is 6-speed), so the V-Strom SX 250 (same engine) is 6-speed too.
+        # NOTE FOR ORCHESTRATOR: this is a DUPLICATE of SUZUKI_V_STROM_SX_250_2022
+        # in known_bikes.py (model_code=None, already 6-speed) — same bike, both
+        # land in ALL_KNOWN_BIKES. Dedup is out of gear-audit scope; flagging it.
+        # Internal cassette ratios = catalogue Gixxer 250 (shared engine/box);
+        # F14/R44 final drive kept (Suzuki India spec, taller R-sprocket for ADV).
+        # Source: zigwheels.com/suzuki-bikes/gixxer-250/specifications (6-speed).
+        "gears": 6,
+        "gear_ratios": [2.800, 1.895, 1.500, 1.261, 1.087, 0.960],
         "front_sprocket": 14,
         "rear_sprocket": 44,  # F14/R44 520 — Suzuki India
         # spec sheet (longer than
