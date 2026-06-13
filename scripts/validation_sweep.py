@@ -2201,6 +2201,97 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         "Sport Rider 2015 (Cycle World sportbike-performance-numbers, timing-strip)",
     ),
     # ── end 2026-05-31 pass 10 ──
+    # ── 2026-06-13 benchmark-coverage agent (pass 1) ─────────────────────────
+    # Coverage expansion: well-sourced ETs keyed to previously-UNBENCHMARKED
+    # catalog specs. Source bar matches the existing list (MotoStatz Dragy =
+    # instrumented 1.0; magazine 0.7; aggregator 0.5; forum/timeslip 0.3;
+    # DERIVED-from-0-100 = 0.1, labeled honestly for coverage only). Each row
+    # pre-probed via _best_benchmark_match (returned None pre-add) and
+    # find_spec_for_benchmark (binds to the named uncovered spec).
+    #
+    # Kawasaki Ninja ZX-4RR (399cc I4 sport, 2023-2026) — Corner Speed review
+    # (Cycle-World-dyno-referenced): quarter mile low-12s @ ~110 mph trap
+    # (177 km/h). 77 PS screaming I4, 189 kg wet. Aggregator-tier (0.5);
+    # the ET sits at the slow end of the litre-cluster's small-bore neighbours
+    # and is internally consistent with the Ninja 400 (12.98s) being slower.
+    # URL: https://cornerspeedapp.com/blog/kawasaki-zx4rr-review
+    ("Kawasaki", "Ninja ZX-4RR", 2023, 12.00, 177,
+     "Corner Speed 2026 (Cycle World dyno-referenced, low-12s @ 110 mph)"),
+    # Kawasaki ZX-6R 636 (636cc I4 supersport, 2024-2025) — MotoStatz Dragy
+    # instrumented: 10.74s @ 134 mph (216 km/h). Same Dragy methodology as the
+    # ZX-6R 2009 / CBR 600RR / Street Triple 765 RS entries already in this
+    # list. The 2024 636 is the updated Ninja ZX-6R catalog row.
+    # URL: https://motostatz.com/kawasaki-zx-6r-636-acceleration-top-speed/
+    ("Kawasaki", "ZX-6R", 2024, 10.74, 216,
+     "MotoStatz 2024 (Dragy, stock instrumented)"),
+    # Kawasaki Z900RS (948cc I4 retro-naked, 2018-2026) — MotoStatz Dragy
+    # instrumented: 11.35s @ 120.7 mph (194 km/h). Heavier/softer-tuned retro
+    # version of the Z900 (10.95s @ 198 already in list); +0.40s is internally
+    # consistent with the ~14 kg + restyle. Same Dragy source bar.
+    # URL: https://motostatz.com/kawasaki-z900rs-top-speed-acceleration/
+    ("Kawasaki", "Z900RS", 2020, 11.35, 194,
+     "MotoStatz 2022 (Dragy, stock instrumented)"),
+    # Kawasaki Z650RS (649cc parallel-twin retro-naked, 2022-2026) — MotoStatz
+    # Dragy on the Z650 platform (shared engine/chassis): 12.45s @ 105 mph
+    # (169 km/h). Base Z650 (12.40 @ 110) already in list; the RS is the same
+    # mechanicals with retro bodywork, so the Z650 Dragy figure applies.
+    # URL: https://motostatz.com/kawasaki-z650-acceleration-top-speed-review/
+    ("Kawasaki", "Z650RS", 2022, 12.45, 169,
+     "MotoStatz 2022 (Dragy, Z650 platform, 105 mph trap)"),
+    # KTM 390 Duke Gen 3 (399cc single naked, 2024-2026) — MotoStatz Dragy
+    # instrumented: 13.30s @ 96.3 mph (155 km/h). The new 399cc Gen-3 engine
+    # (45 hp) — a distinct catalog row from the 373cc "Duke 390" (13-14s).
+    # Same Dragy source bar; KTM-claimed 0-100 5.9s corroborates.
+    # URL: https://motostatz.com/ktm-390-duke-acceleration/
+    ("KTM", "390 Duke Gen 3", 2024, 13.30, 155,
+     "MotoStatz 2024 (Dragy, stock instrumented, 96.3 mph trap)"),
+    # Honda CRF1100L Africa Twin (1084cc parallel-twin ADV, 2020-2026) —
+    # AfricaTwinForum drag-strip timeslip: 12.7s @ 103 mph (166 km/h), a real
+    # tune-event pass (forum/timeslip tier, 0.3). MotorBikeCatalog ProfessCars
+    # estimate (12.0s) corroborates the ballpark. Trap 103 mph consistent with
+    # the ~100 hp ADV twin at the line.
+    # URL: https://www.africatwinforum.com/threads/1-4-mile-for-kicks.40087/
+    ("Honda", "CRF1100L Africa Twin", 2020, 12.70, 166,
+     "AfricaTwinForum timeslip 2020 (drag strip, 103 mph trap)"),
+    # Ducati Diavel V4 (1158cc V4 power-cruiser, 2023-2026) — MCN's Bruce Dunn
+    # instrumented testing logged regular 10.3s standing quarters with ease.
+    # MCN/Bruce-Dunn is the same credentialed magazine source cited for the
+    # 1199 Panigale / MT-07 entries. Trap ~140 mph (225 km/h) estimated from
+    # the V4's 168 hp + power-cruiser aero (the ET is the load-bearing figure;
+    # the older 1198 V-twin Diavel ran 10.46 @ 133 on MotoStatz, the V4 is
+    # quicker). 0-62 in 2.52s on the RS variant corroborates the launch grunt.
+    # URL: youtube MCN 2023 Ducati Diavel V4 acceleration test (Bruce Dunn)
+    ("Ducati", "Diavel V4", 2023, 10.30, 225,
+     "MCN 2023 (Bruce Dunn instrumented, regular 10.3s standing quarters)"),
+    # Yamaha XSR900 GP (890cc CP3 triple faired-sport, 2024-2026) — MotoStatz
+    # Dragy on the XSR900 platform (shared CP3 engine/chassis): 11.15s @ 125.5
+    # mph (202 km/h). The base XSR900 (11.15 @ 202) is already in this list;
+    # the GP adds a fairing + clip-ons on identical mechanicals (marginally
+    # better aero, so the figure is a conservative match).
+    # URL: https://motostatz.com/yamaha-xsr900-top-speed-acceleration/
+    ("Yamaha", "XSR900 GP", 2024, 11.15, 202,
+     "MotoStatz 2022 (Dragy, XSR900 CP3 platform, 125.5 mph trap)"),
+    # Royal Enfield Interceptor 650 (648cc parallel-twin, 2018-2024) — DERIVED
+    # (0.1) for coverage only. IndianAutosBlog/FastestLaps stock 0-100 km/h
+    # 5.92s ×1.6 ~= 13.8s. Same 648cc twin as the Continental GT 650 (13.90 @
+    # 155 FastestLaps-verified, already in list); the Interceptor is the more
+    # upright variant (slightly higher Cd), so ~13.8s is consistent.
+    # URL: https://indianautosblog.com/royal-enfield-interceptor-650-acceleration-p323051
+    ("Royal Enfield", "Interceptor 650", 2019, 13.80, 150,
+     "DERIVED (0-100 5.92s x1.6 stock, IndianAutosBlog; 648cc twin)"),
+    # Bajaj Dominar 400 (373cc single naked, 2019-2024) — DERIVED (0.1) for
+    # coverage. CarBlogIndia stock 0-100 km/h 8.23s ×1.6 ~= 13.2s; top speed
+    # 148 km/h, trap ~140 km/h. Fills the Indian 350-400 single cluster.
+    # URL: https://www.carblogindia.com/bajaj-dominar-400-top-speed-0-100/
+    ("Bajaj", "Dominar 400", 2019, 13.20, 140,
+     "DERIVED (0-100 8.23s x1.6, CarBlogIndia; top speed 148 km/h)"),
+    # Royal Enfield Classic 350 (349cc single cruiser, 2021-2026) — DERIVED
+    # (0.1) for coverage. ZigWheels/350cc 0-100 km/h ~14s ×1.6 ~= 22.4s; the
+    # 20 hp J-platform single tops out ~115-120 km/h, so the trap is near top
+    # speed. Anchors the slowest end of the Indian-cruiser cluster.
+    # URL: https://www.zigwheels.com/newbikes/faqs/what-is-the-top-speed-of-royal-enfield-classic-350
+    ("Royal Enfield", "Classic 350", 2021, 22.50, 115,
+     "DERIVED (0-100 ~14s x1.6, ZigWheels; top speed ~115-120 km/h)"),
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [
