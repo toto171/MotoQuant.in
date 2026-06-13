@@ -292,3 +292,17 @@ export function autotuneEcuJob(opts, onProgress, signal) {
     fallbackPath: '/api/autotune/ecu',
   });
 }
+
+// ── Part display label ──────────────────────────────────────────────────
+// Defensive: render a part's display name without double-printing the brand.
+// The data layer (parts_repo.normalize_model_name) already strips a leading
+// brand from model_name, but this guard means a future data regression can't
+// reintroduce "Akrapovic Akrapovic Slip-On". Accepts model_name or name.
+export function partLabel(brand, name) {
+  const b = (brand || '').trim();
+  const m = (name || '').trim();
+  if (!b) return m;
+  if (!m) return b;
+  if (m.toLowerCase().startsWith(b.toLowerCase())) return m;
+  return `${b} ${m}`;
+}

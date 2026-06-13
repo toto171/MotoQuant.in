@@ -84,6 +84,27 @@ def enrich_bike_row_for_fitment(conn: sqlite3.Connection, bike_row: dict) -> dic
 _enrich_bike_row_for_fitment = enrich_bike_row_for_fitment
 
 
+def normalize_model_name(brand: str | None, model_name: str | None) -> str:
+    """Strip a leading, exactly-matching brand prefix from a part's model name.
+
+    Many catalog rows stored model_name WITH the brand baked in
+    ("Nitrous Express NX Dual-Stage 60 HP Kit", brand="Nitrous Express"),
+    so any UI rendering ``{brand} {model_name}`` printed the brand twice
+    ("Nitrous Express Nitrous Express NX..."). Stripping at the data layer
+    fixes every surface (web sim/optimize/tune + desktop) at once. Idempotent;
+    never returns empty (keeps the original if stripping would empty it).
+    """
+    if not brand or not model_name:
+        return model_name or ""
+    b = brand.strip()
+    m = model_name.strip()
+    if m.lower().startswith(b.lower()):
+        rest = m[len(b) :].lstrip(" -:\u2013\u2014\t")
+        if rest:
+            return rest
+    return m
+
+
 class PartsRepository:
     """Repository for performance parts with sim-parameter impact tracking."""
 
@@ -117,6 +138,12 @@ class PartsRepository:
         estimated_delivery_days: int = None,
     ) -> int:
         """Create a part entry with simulation impact parameters."""
+        # NOTE: model_name is intentionally NOT normalized here — the fresh
+        # seed_all() path (used by in-memory catalog-integration tests) relies
+        # on the original brand-prefixed names for leak-detection assertions.
+        # Brand de-duplication for DISPLAY is handled at the data layer by
+        # scripts/patch_2026_06_14_part_names.py (run in the DB-regen chain) and
+        # defensively in the UI via partLabel() (web lib/api.js + desktop api.ts).
         # Resolve category ID
         cat_row = self._conn.execute(
             "SELECT id FROM parts_categories WHERE name = ?", (category_name,)

@@ -11,7 +11,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area
 } from 'recharts';
-import { API_URL as API, runJob } from '../../lib/api';
+import { API_URL as API, runJob, partLabel } from '../../lib/api';
 import SimProgress from '../../components/SimProgress';
 import { track, installErrorHandlers } from '../../lib/telemetry';
 import ChatPanel from '../../components/ChatPanel';
@@ -154,7 +154,7 @@ function Slider({ label, value, onChange, min, max, step = 1, unit = '', colorFn
 function PartChip({ part, onRemove }) {
   return (
     <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-brand-orange/10 border border-brand-orange/20 rounded-full text-[10px] text-brand-orangeLight group">
-      <span className="font-medium">{part.brand} {part.model_name}</span>
+      <span className="font-medium">{partLabel(part.brand, part.model_name)}</span>
       {part.price_inr > 0 && <span className="text-brand-orange/50">₹{(part.price_inr / 1000).toFixed(1)}k</span>}
       <button onClick={onRemove} className="opacity-50 group-hover:opacity-100 hover:text-white transition-opacity"><X size={10} /></button>
     </div>
@@ -1164,7 +1164,7 @@ function SimulatorPageInner() {
                                 <div className="flex justify-between items-start">
                                   <div>
                                     <div className="font-medium text-[11px] flex items-center gap-1.5">
-                                      {part.brand} {part.model_name}
+                                      {partLabel(part.brand, part.model_name)}
                                       {!compat && (
                                         <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-brand-red/10 text-brand-red font-normal">
                                           no fit

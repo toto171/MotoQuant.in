@@ -510,3 +510,17 @@ export async function runJob<T>(
 export async function getResolvedBaseUrl(): Promise<string> {
   return resolveBaseUrl();
 }
+
+/**
+ * Render a part's display label without double-printing the brand.
+ * The backend strips a leading brand from model_name; this is the client-side
+ * guard so a data regression can't reintroduce "Akrapovic Akrapovic ...".
+ */
+export function partLabel(brand?: string | null, name?: string | null): string {
+  const b = (brand ?? "").trim();
+  const m = (name ?? "").trim();
+  if (!b) return m;
+  if (!m) return b;
+  if (m.toLowerCase().startsWith(b.toLowerCase())) return m;
+  return `${b} ${m}`;
+}

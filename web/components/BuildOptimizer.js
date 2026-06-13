@@ -26,7 +26,7 @@ import {
   Wrench, Search, ChevronDown, AlertCircle, AlertTriangle, IndianRupee,
   TrendingDown, TrendingUp, Sparkles, ArrowRight, Cpu, Gauge, Layers,
 } from 'lucide-react';
-import { API_URL, optimizeBuildJob } from '../lib/api';
+import { API_URL, optimizeBuildJob, partLabel } from '../lib/api';
 import SimProgress from './SimProgress';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -553,7 +553,7 @@ export default function BuildOptimizer() {
                   >
                     <div className="min-w-0 flex-1">
                       <p className="text-sm text-white font-medium truncate">
-                        {p.brand ? `${p.brand} ` : ''}{p.name}
+                        {partLabel(p.brand, p.name)}
                         {p.is_compatible === false && (
                           <span className="ml-2 text-[10px] text-brand-amber/80 font-mono">incompatible</span>
                         )}

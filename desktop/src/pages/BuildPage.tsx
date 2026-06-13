@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { partLabel } from "@/lib/api";
 import {
   Plus, Trash2, Loader2, Filter, AlertCircle, IndianRupee, ArrowLeftRight, Wrench, Zap, Sparkles,
 } from "lucide-react";
@@ -173,7 +174,7 @@ export function BuildPage() {
           if (otherPart.category_id === part.category_id) {
             next.delete(otherId);
             pushToast({
-              message: `Replaced ${otherPart.brand} ${otherPart.model_name} with ${part.brand} ${part.model_name}`,
+              message: `Replaced ${partLabel(otherPart.brand, otherPart.model_name)} with ${partLabel(part.brand, part.model_name)}`,
               variant: "info",
             });
           }
@@ -425,7 +426,7 @@ export function BuildPage() {
               {selectedParts.map((p) => (
                 <li key={p.id} className="flex items-start justify-between gap-2 text-sm">
                   <div className="min-w-0">
-                    <div className="font-medium text-carbon-100 truncate">{p.brand} {p.model_name}</div>
+                    <div className="font-medium text-carbon-100 truncate">{partLabel(p.brand, p.model_name)}</div>
                     <div className="text-[10px] text-carbon-500 uppercase tracking-wider">
                       {p.category_display}
                       {p.price_inr ? ` · ₹${p.price_inr.toLocaleString("en-IN")}` : ""}
@@ -584,7 +585,7 @@ function PartRow({ part, selected, swapsOut, onToggle }: {
             ? "border-signal-500 bg-signal-500 text-carbon-950"
             : "border-carbon-700 text-carbon-500 hover:border-signal-500",
         )}
-        aria-label={selected ? `Remove ${part.brand} ${part.model_name}` : `Add ${part.brand} ${part.model_name}`}
+        aria-label={selected ? `Remove ${partLabel(part.brand, part.model_name)}` : `Add ${partLabel(part.brand, part.model_name)}`}
       >
         <Plus className={clsx("w-3.5 h-3.5 transition-transform", selected && "rotate-45")} aria-hidden="true" />
       </button>
