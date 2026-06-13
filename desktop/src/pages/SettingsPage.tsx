@@ -2,8 +2,9 @@
 // Units, theme, default venue, and sim engine mode all persist across sessions.
 
 import { useQuery } from "@tanstack/react-query";
-import { Server, Database, Cpu, Info, Gauge, Moon, Sun } from "lucide-react";
+import { Server, Cpu, Info, Gauge, Moon, Sun, User, LogOut, ExternalLink } from "lucide-react";
 import { getResolvedBaseUrl } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useVenues } from "@/hooks/useApi";
 import type { Units, Theme } from "@/contexts/SettingsContext";
@@ -24,9 +25,12 @@ export function SettingsPage() {
       <header>
         <h1 className="text-2xl font-semibold">Settings</h1>
         <p className="text-sm text-carbon-400 mt-1">
-          Preferences are saved locally — no account required.
+          Display preferences are saved locally; your account lives on the
+          MotoQuant servers.
         </p>
       </header>
+
+      <AccountSection />
 
       {/* Display */}
       <section className="card p-5 space-y-5">
@@ -165,10 +169,9 @@ export function SettingsPage() {
       <section className="card p-5 space-y-4">
         <div className="text-[10px] uppercase tracking-wider text-carbon-500">About</div>
 
-        <AboutRow Icon={Gauge} label="App version" value="MotoQuant Pro v0.5.0" hint="Tauri 2 · React 19 · FastAPI sidecar" />
-        <AboutRow Icon={Server} label="Backend URL" value={url.data ?? "resolving…"} hint="Python sidecar (ephemeral port)" />
-        <AboutRow Icon={Database} label="Database" value="motoquant.db (bundled)" hint="SQLite · WAL-fallback · 501 bikes / 563 parts / 232 tires" />
-        <AboutRow Icon={Cpu} label="Physics engine" value="RK4 · 1 ms fixed (or adaptive)" hint="15 sub-models validated" />
+        <AboutRow Icon={Gauge} label="App version" value="MotoQuant Pro v0.5.0" hint="Tauri 2 · React 19 · hosted-API client" />
+        <AboutRow Icon={Server} label="API server" value={url.data ?? "resolving…"} hint="Hosted MotoQuant simulation engine" />
+        <AboutRow Icon={Cpu} label="Physics engine" value="Server-side · RK4 · 15 sub-models" hint="Catalog + engine run on MotoQuant servers; never bundled" />
         <AboutRow
           Icon={Info}
           label="Reference baselines"
@@ -197,5 +200,51 @@ function AboutRow({ Icon, label, value, hint }: {
         {hint && <div className="text-xs text-carbon-500 mt-1 leading-relaxed">{hint}</div>}
       </div>
     </div>
+  );
+}
+
+
+function AccountSection() {
+  const { user, tier, logout } = useAuth();
+  if (!user) return null;
+
+  const openPricing = async () => {
+    try {
+      const { open } = await import("@tauri-apps/plugin-shell");
+      await open("https://motoquant.in/pricing");
+    } catch {
+      // Browser-dev fallback (no Tauri shell): open a new tab.
+      window.open("https://motoquant.in/pricing", "_blank", "noopener");
+    }
+  };
+
+  return (
+    <section className="card p-5 space-y-4">
+      <div className="text-[10px] uppercase tracking-wider text-carbon-500">Account</div>
+      <div className="flex items-start gap-4">
+        <div className="w-9 h-9 rounded bg-carbon-800 flex items-center justify-center shrink-0" aria-hidden="true">
+          <User className="w-4 h-4 text-carbon-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm text-carbon-100 break-all">{user.email}</div>
+          <div className="text-xs text-carbon-500 mt-0.5">
+            Plan: <span className="text-carbon-300 capitalize">{tier ?? "free"}</span>
+            {user.subscription_status ? ` · ${user.subscription_status}` : ""}
+          </div>
+        </div>
+        <div className="flex flex-col gap-2 shrink-0">
+          <button onClick={openPricing} className="btn-secondary text-xs">
+            <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" /> Manage plan
+          </button>
+          <button onClick={() => void logout()} className="btn-ghost text-xs">
+            <LogOut className="w-3.5 h-3.5" aria-hidden="true" /> Sign out
+          </button>
+        </div>
+      </div>
+      <p className="text-[11px] text-carbon-600 leading-relaxed">
+        Your plan, device access, and license status are managed on the MotoQuant
+        servers. Changes there apply on your next sign-in or refresh.
+      </p>
+    </section>
   );
 }

@@ -15,12 +15,9 @@ export function OfflineBanner() {
     >
       <WifiOff className="w-4 h-4 shrink-0" aria-hidden="true" />
       <div>
-        <span className="font-medium">Engine offline.</span>{" "}
-        The MotoQuant backend isn't responding. Start it with{" "}
-        <code className="font-mono text-xs bg-carbon-800 px-1 py-0.5 rounded">
-          uvicorn motoquant.api:app --port 8000
-        </code>{" "}
-        or restart the desktop app.
+        <span className="font-medium">MotoQuant servers unreachable.</span>{" "}
+        Couldn't reach the hosted simulation engine. Check your internet
+        connection — results will load once the connection is restored.
       </div>
     </div>
   );

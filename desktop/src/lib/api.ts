@@ -1,10 +1,11 @@
-// Typed fetch client for the MotoQuant FastAPI backend.
+// Typed fetch client for the hosted MotoQuant API.
 //
-// In production the backend is a Python sidecar spawned by Tauri on an
-// ephemeral port. The `tauri::command get_backend_url` on the Rust side
-// reports the actual URL; we cache it once on first call. During `vite dev`
-// (browser-only, no Tauri shell) we fall back to VITE_API_URL or the common
-// `uvicorn motoquant.api:app --port 8000` default.
+// HOSTED-ONLY: there is no local sidecar. In the packaged app the Tauri
+// `get_backend_url` command returns the hosted API base URL (resolved Rust-side
+// from MOTOQUANT_API_URL or the compile-time default). During `vite dev`
+// (browser-only, no Tauri shell) we fall back to VITE_API_URL or the hosted
+// default. All requests carry a Bearer access token once the user is signed in;
+// a 401 triggers a single silent refresh via the registered auth hooks.
 
 import type {
   ApiError,
@@ -37,6 +38,10 @@ import type {
   JobStartResponse,
   JobStatusResponse,
   JobProgress,
+  TokenPair,
+  MeResponse,
+  MagicLinkResponse,
+  ValidateKeyResponse,
 } from "@/types/api";
 
 // ─── Base-URL resolution ─────────────────────────────────────────────────
@@ -45,7 +50,9 @@ let cachedBaseUrl: string | null = null;
 let baseUrlPromise: Promise<string> | null = null;
 
 const VITE_API_URL = import.meta.env.VITE_API_URL as string | undefined;
-const DEV_FALLBACK = "http://127.0.0.1:8000";
+// Hosted API. The packaged app gets this from the Rust get_backend_url command;
+// this constant is only the browser-dev / fallback default. NOT a localhost URL.
+const HOSTED_DEFAULT = "https://motoquant-api.onrender.com";
 
 function isTauriRuntime(): boolean {
   return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -68,7 +75,7 @@ async function resolveBaseUrl(): Promise<string> {
       }
     }
     const fromEnv = VITE_API_URL && VITE_API_URL.replace(/\/$/, "");
-    cachedBaseUrl = fromEnv || DEV_FALLBACK;
+    cachedBaseUrl = fromEnv || HOSTED_DEFAULT;
     return cachedBaseUrl;
   })();
 
@@ -87,27 +94,96 @@ class ApiRequestError extends Error implements ApiError {
   }
 }
 
-async function request<T>(
+// ─── Auth integration ─────────────────────────────────────────────────────
+// The AuthProvider registers these hooks at startup so the fetch layer can
+// attach the Bearer access token and perform a single silent refresh on a 401
+// without the api.ts module importing React. The client never enforces its own
+// license — the SERVER is authoritative; these hooks only present credentials
+// and react to the server's verdict.
+
+export interface AuthHooks {
+  getAccessToken: () => string | null;
+  // Attempt a single silent refresh; resolve to a fresh access token or null.
+  refreshAccessToken: () => Promise<string | null>;
+  // Called when refresh fails / no session — the app should drop to the login
+  // screen. Implemented by AuthProvider.
+  onAuthExpired: () => void;
+}
+
+let authHooks: AuthHooks | null = null;
+
+export function registerAuthHooks(hooks: AuthHooks | null): void {
+  authHooks = hooks;
+}
+
+// Endpoints that must NOT carry a bearer token or trigger refresh-on-401.
+function isAuthFreePath(path: string): boolean {
+  return (
+    path.startsWith("/api/auth/login") ||
+    path.startsWith("/api/auth/register") ||
+    path.startsWith("/api/auth/magic-link") ||
+    path.startsWith("/api/auth/verify") ||
+    path.startsWith("/api/auth/refresh") ||
+    path.startsWith("/api/subscriptions/license-key/validate") ||
+    path === "/api/health"
+  );
+}
+
+function buildHeaders(
   path: string,
-  init: RequestInit = {},
-): Promise<T> {
-  const base = await resolveBaseUrl();
-  const headers: HeadersInit = {
+  init: RequestInit,
+  token: string | null,
+): HeadersInit {
+  return {
     Accept: "application/json",
     ...(init.body && !(init.body instanceof FormData)
       ? { "Content-Type": "application/json" }
       : {}),
+    ...(token && !isAuthFreePath(path)
+      ? { Authorization: `Bearer ${token}` }
+      : {}),
     ...(init.headers || {}),
   };
+}
 
-  let response: Response;
+async function rawFetch(
+  base: string,
+  path: string,
+  init: RequestInit,
+  token: string | null,
+): Promise<Response> {
   try {
-    response = await fetch(`${base}${path}`, { ...init, headers });
+    return await fetch(`${base}${path}`, {
+      ...init,
+      headers: buildHeaders(path, init, token),
+    });
   } catch (err) {
     throw new ApiRequestError(
       0,
       err instanceof Error ? err.message : "Network unreachable",
     );
+  }
+}
+
+async function request<T>(
+  path: string,
+  init: RequestInit = {},
+): Promise<T> {
+  const base = await resolveBaseUrl();
+
+  const token = authHooks && !isAuthFreePath(path) ? authHooks.getAccessToken() : null;
+  let response = await rawFetch(base, path, init, token);
+
+  // Single silent-refresh retry on 401 for authed paths. The server is the
+  // license authority; if refresh fails the app drops to the login screen.
+  if (response.status === 401 && authHooks && !isAuthFreePath(path)) {
+    const fresh = await authHooks.refreshAccessToken();
+    if (fresh) {
+      response = await rawFetch(base, path, init, fresh);
+    }
+    if (response.status === 401) {
+      authHooks.onAuthExpired();
+    }
   }
 
   if (!response.ok) {
@@ -139,6 +215,49 @@ const qs = (params: Record<string, unknown>): string => {
 
 export const api = {
   health: () => request<{ status: string; version?: string }>("/api/health"),
+
+  // ─── Auth + licensing ────────────────────────────────────────────────
+  authRegister: (email: string, password: string) =>
+    request<TokenPair>("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    }),
+
+  authLogin: (email: string, password: string) =>
+    request<TokenPair>("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    }),
+
+  authMagicLink: (email: string) =>
+    request<MagicLinkResponse>("/api/auth/magic-link", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+
+  authVerifyMagicLink: (token: string) =>
+    request<TokenPair>("/api/auth/verify", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    }),
+
+  authRefresh: (refreshToken: string) =>
+    request<TokenPair>("/api/auth/refresh", {
+      method: "POST",
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    }),
+
+  authMe: () => request<MeResponse>("/api/auth/me"),
+
+  authLogout: () => request<unknown>("/api/auth/logout", { method: "POST" }),
+
+  // License-key validation (no auth header; server-authoritative). device_id
+  // lets the server enforce per-key device binding + revocation on its side.
+  validateLicenseKey: (key: string, deviceId: string | null) =>
+    request<ValidateKeyResponse>("/api/subscriptions/license-key/validate", {
+      method: "POST",
+      body: JSON.stringify({ key, device_id: deviceId }),
+    }),
 
   // Bikes
   listBikes: (params: {
@@ -270,8 +389,8 @@ export { ApiRequestError };
 //     real backend restart) — then re-submit the pure-compute job ONCE
 //   • poll interval backs off 350 ms → 800 ms → 1.5 s as the job ages
 //   • AbortSignal cancels the job server-side and unwinds like a fetch abort
-//   • on 404/405 at submit time (backend predates /api/jobs/*, e.g. an older
-//     bundled sidecar) we transparently fall back to the synchronous route
+//   • on 404/405 at submit time (an older hosted backend predates /api/jobs/*)
+//     we transparently fall back to the synchronous route
 //
 // `fallback` runs the equivalent sync request; it MUST resolve to the same
 // result shape the job would have produced.

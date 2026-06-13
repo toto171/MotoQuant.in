@@ -154,7 +154,7 @@ export function SimulatePage() {
   const venues = useVenues();
   // Full quarter-mile sim runs as a background job (real progress + Stop).
   // Falls back to the synchronous /api/simulate when /api/jobs/* is missing
-  // (e.g. an older bundled sidecar).
+  // (e.g. an older hosted backend).
   const sim = useSimulateJob();
   const save = useSaveRun();
   const runRef = useRef<() => void>(() => {});

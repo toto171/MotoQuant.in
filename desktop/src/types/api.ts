@@ -669,8 +669,8 @@ export interface EcuAutotune {
 // Long-running work (full sim, top-speed, optimise, autotune) runs on a
 // daemon thread server-side; the client polls for real progress instead of
 // showing an indeterminate spinner. The synchronous routes still exist for
-// backends that predate /api/jobs/* (the bundled sidecar may be older), so
-// runJob() falls back to them on 404/405.
+// older hosted backends that predate /api/jobs/*, so runJob() falls back to
+// the synchronous routes on 404/405.
 //   POST /api/jobs/{kind}  → 202 { job_id, kind, status }
 //   GET  /api/jobs/{id}    → { status, progress 0..1, stage, result|error }
 //   POST /api/jobs/{id}/cancel  (cooperative Stop)
@@ -712,3 +712,46 @@ export interface JobProgress {
   stage: string;
 }
 
+
+// ─── Auth + licensing (hosted API) ────────────────────────────────────────
+// The desktop app is a licensed client of the hosted MotoQuant API. The whole
+// app is gated behind a valid authenticated session; an unauthenticated user
+// sees the login screen, never the simulator. Endpoints (mounted under
+// /api/auth and /api/subscriptions on the server):
+//   POST /api/auth/register        { email, password } → TokenPair
+//   POST /api/auth/login           { email, password } → TokenPair
+//   POST /api/auth/magic-link      { email } → { message, dev_token? }
+//   POST /api/auth/verify          { token } → TokenPair       (magic-link)
+//   POST /api/auth/refresh         { refresh_token } → TokenPair
+//   GET  /api/auth/me              (Bearer) → MeResponse
+//   POST /api/auth/logout          (Bearer)
+//   POST /api/subscriptions/license-key/validate { key, device_id } → ValidateKeyResponse
+
+export interface TokenPair {
+  access_token: string;
+  refresh_token: string;
+  token_type: string; // "bearer"
+  tier: string;        // "free" | "pro" | "studio"
+}
+
+export interface MeResponse {
+  id: number;
+  email: string;
+  tier: string;
+  is_active: boolean;
+  email_verified?: boolean;
+  has_password?: boolean;
+  subscription_status?: string | null;
+  license_keys?: Array<Record<string, unknown>>;
+}
+
+export interface MagicLinkResponse {
+  message: string;
+  dev_token?: string | null;
+}
+
+export interface ValidateKeyResponse {
+  valid: boolean;
+  tier?: string | null;
+  message: string;
+}

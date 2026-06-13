@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { Menu } from "lucide-react";
+import { Menu, LogOut } from "lucide-react";
 import { api, getResolvedBaseUrl } from "@/lib/api";
 import { useSidebar } from "@/components/Layout";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function TopBar() {
   const { toggle } = useSidebar();
+  const { user, tier, logout } = useAuth();
 
   const health = useQuery({
     queryKey: ["health"],
@@ -34,7 +36,7 @@ export function TopBar() {
           <Menu className="w-5 h-5" aria-hidden="true" />
         </button>
         <div className="hidden sm:block label text-[10px] text-carbon-500">
-          First-principles motorcycle drag simulation
+          Hosted motorcycle drag simulation
         </div>
       </div>
 
@@ -43,7 +45,7 @@ export function TopBar() {
           className={
             online ? "chip chip-success" : failed ? "chip chip-danger" : "chip"
           }
-          aria-label={online ? "Engine online" : failed ? "Engine offline" : "Engine starting"}
+          aria-label={online ? "Connected to MotoQuant servers" : failed ? "MotoQuant servers unreachable" : "Connecting to MotoQuant servers"}
         >
           <span
             className={`w-1.5 h-1.5 rounded-full ${
@@ -51,7 +53,7 @@ export function TopBar() {
             }`}
             aria-hidden="true"
           />
-          {online ? "Engine online" : failed ? "Engine offline" : "Starting..."}
+          {online ? "Connected" : failed ? "Offline" : "Connecting…"}
         </span>
         {baseUrl.data && (
           <span className="hidden md:block text-[10px] text-carbon-600 font-mono">
@@ -64,6 +66,25 @@ export function TopBar() {
         >
           ? shortcuts
         </span>
+        {user && (
+          <div className="flex items-center gap-2">
+            <span
+              className="hidden md:inline text-[10px] text-carbon-500 max-w-[14rem] truncate"
+              title={`${user.email}${tier ? ` · ${tier}` : ""}`}
+            >
+              {user.email}
+              {tier ? ` · ${tier}` : ""}
+            </span>
+            <button
+              onClick={() => void logout()}
+              className="text-carbon-400 hover:text-carbon-100 transition-colors p-1 rounded focus-visible:outline-2 focus-visible:outline-signal-500"
+              aria-label="Sign out"
+              title="Sign out"
+            >
+              <LogOut className="w-4 h-4" aria-hidden="true" />
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

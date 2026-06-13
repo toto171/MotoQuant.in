@@ -25,7 +25,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self' data: blob:; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' http://127.0.0.1:* http://localhost:*; img-src 'self' data: blob: https:;"
+      "csp": "default-src 'self' data: blob:; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' ipc: http://ipc.localhost https://motoquant-api.onrender.com; img-src 'self' data: blob: https:;"
     }
   },
   "bundle": {
@@ -40,7 +40,7 @@
     ],
     "category": "Utility",
     "shortDescription": "Motorcycle drag-racing physics simulator",
-    "longDescription": "MotoQuant Pro \u2014 The physics of faster. First-principles quarter-mile simulator for motorcycle drag racing, with a 290-bike catalog, 465-part mod library, 15-submodel physics engine, and data-driven build recommendations.",
+    "longDescription": "MotoQuant Pro \u2014 The physics of faster. A licensed desktop client for the MotoQuant quarter-mile simulation service. Sign in to run first-principles drag simulations, build optimization, and data-driven recommendations against the hosted MotoQuant engine. Requires an active MotoQuant account.",
     "windows": {
       "certificateThumbprint": null,
       "digestAlgorithm": "sha256",
@@ -50,10 +50,17 @@
       "signingIdentity": null,
       "providerShortName": null,
       "entitlements": null
-    },
-    "externalBin": [
-      "bin/motoquant-backend"
-    ]
+    }
   },
-  "plugins": {}
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://motoquant.in/desktop/updates/{{target}}/{{arch}}/{{current_version}}"
+      ],
+      "pubkey": "PLACEHOLDER_DO_NOT_SHIP__RUN_tauri_signer_generate_AND_PASTE_PUBKEY",
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
 }

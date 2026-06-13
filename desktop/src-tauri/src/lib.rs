@@ -1,99 +1,54 @@
 // Library-side Tauri entry point. Keeps `main.rs` thin and makes the core
 // logic unit-testable.
+//
+// HOSTED-ONLY ARCHITECTURE
+// ========================
+// MotoQuant Pro desktop is a thin, licensed *client* of the hosted API. The
+// physics engine, optimizer, surrogate models, and bike/part catalog all live
+// server-side and never ship inside this bundle — so the valuable IP is not
+// present on the user's machine to be copied. There is NO local Python sidecar
+// to spawn; the app simply points the React frontend at the hosted API base
+// URL and authenticates against it at runtime.
+//
+// Security framing (honest): removing the sidecar does NOT make the client
+// "uncrackable" — no client is. What it does deliver is that a copied or
+// patched client is *worthless* without a valid authenticated, licensed
+// session against the operator's server, because all compute happens there.
 
-use anyhow::{Context, Result};
-use std::{
-    net::TcpListener,
-    process::Stdio,
-    sync::{Arc, Mutex},
-};
-use tauri::{Manager, State};
-use tokio::{
-    io::{AsyncBufReadExt, BufReader},
-    process::{Child, Command},
-    sync::oneshot,
-};
+use std::sync::{Arc, Mutex};
+use tauri::State;
 
-/// Shared state — the Python sidecar's base URL (e.g. "http://127.0.0.1:43217").
+/// Compile-time default for the hosted API. Overridable at build/dev time via
+/// the `MOTOQUANT_API_URL` environment variable (read once at startup).
+const DEFAULT_API_URL: &str = "https://motoquant-api.onrender.com";
+
+/// Shared state — the hosted API base URL the React frontend should hit.
+/// Resolved once at startup; there is no local process to manage.
 #[derive(Default)]
 pub struct BackendState {
     pub base_url: Arc<Mutex<Option<String>>>,
-    pub child: Arc<Mutex<Option<Child>>>,
+}
+
+/// Resolve the hosted API base URL.
+/// Order: `MOTOQUANT_API_URL` env override → compile-time `DEFAULT_API_URL`.
+/// Trailing slashes are trimmed so the frontend can concatenate `/api/...`.
+fn resolve_api_url() -> String {
+    let raw = std::env::var("MOTOQUANT_API_URL")
+        .ok()
+        .filter(|s| !s.trim().is_empty())
+        .unwrap_or_else(|| DEFAULT_API_URL.to_string());
+    raw.trim().trim_end_matches('/').to_string()
 }
 
 /// Return the base URL the React frontend should hit for API calls.
-/// Waits up to 8 s for the sidecar to come up.
+/// This resolves instantly — there is no sidecar to wait for.
 #[tauri::command]
-async fn get_backend_url(state: State<'_, BackendState>) -> Result<String, String> {
-    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(8);
-    loop {
-        if let Some(url) = state.base_url.lock().unwrap().clone() {
-            return Ok(url);
-        }
-        if std::time::Instant::now() > deadline {
-            return Err("Python sidecar did not start within 8 s".to_string());
-        }
-        tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+fn get_backend_url(state: State<'_, BackendState>) -> Result<String, String> {
+    if let Some(url) = state.base_url.lock().unwrap().clone() {
+        return Ok(url);
     }
-}
-
-/// Pick a free ephemeral port. We do this Rust-side so that we can pass it
-/// to the Python subprocess as an argument, avoiding any handshake protocol
-/// over stdout.
-fn pick_free_port() -> Result<u16> {
-    let listener = TcpListener::bind("127.0.0.1:0").context("bind ephemeral")?;
-    let port = listener.local_addr()?.port();
-    drop(listener);
-    Ok(port)
-}
-
-/// Spawn the Python sidecar (PyInstaller onefile binary shipped in the
-/// bundle's `bin/` folder). In dev we instead expect the user to run
-/// `uvicorn motoquant.api:app --port $PORT` manually — see README.
-async fn spawn_sidecar(port: u16) -> Result<Child> {
-    // In a production bundle Tauri resolves `externalBin` paths to absolute
-    // paths via `resource_dir`; we use relative here for the dev-path and
-    // assume `target/debug/motoquant-backend` is on PATH.
-    let bin_name = if cfg!(windows) {
-        "motoquant-backend.exe"
-    } else {
-        "motoquant-backend"
-    };
-
-    log::info!("Spawning {bin_name} on port {port}");
-
-    let mut cmd = Command::new(bin_name);
-    cmd.args([
-        "--host",
-        "127.0.0.1",
-        "--port",
-        &port.to_string(),
-        "--log-level",
-        "info",
-    ])
-    .stdout(Stdio::piped())
-    .stderr(Stdio::piped())
-    .kill_on_drop(true);
-
-    let mut child = cmd.spawn().context("spawn python sidecar")?;
-    let stderr = child.stderr.take().context("stderr pipe")?;
-    let stdout = child.stdout.take().context("stdout pipe")?;
-
-    // Pipe backend stderr/stdout to Rust log for debugging.
-    tokio::spawn(async move {
-        let mut reader = BufReader::new(stderr).lines();
-        while let Ok(Some(line)) = reader.next_line().await {
-            log::info!("[backend] {line}");
-        }
-    });
-    tokio::spawn(async move {
-        let mut reader = BufReader::new(stdout).lines();
-        while let Ok(Some(line)) = reader.next_line().await {
-            log::debug!("[backend] {line}");
-        }
-    });
-
-    Ok(child)
+    // Should never happen (setup() populates it), but resolve defensively.
+    Ok(resolve_api_url())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -103,39 +58,14 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(BackendState::default())
         .invoke_handler(tauri::generate_handler![get_backend_url])
         .setup(|app| {
+            let url = resolve_api_url();
+            log::info!("MotoQuant API base URL: {url}");
             let state = app.state::<BackendState>();
-            let base_url = state.base_url.clone();
-            let child_slot = state.child.clone();
-
-            // Dev mode: if VITE has set TAURI_DEV_BACKEND_URL we skip
-            // spawning and trust whatever the developer has running.
-            if let Ok(dev_url) = std::env::var("MOTOQUANT_DEV_BACKEND_URL") {
-                log::info!("Using dev backend: {dev_url}");
-                *base_url.lock().unwrap() = Some(dev_url);
-                return Ok(());
-            }
-
-            let (ready_tx, _ready_rx) = oneshot::channel::<()>();
-
-            tauri::async_runtime::spawn(async move {
-                match async {
-                    let port = pick_free_port()?;
-                    let child = spawn_sidecar(port).await?;
-                    *child_slot.lock().unwrap() = Some(child);
-                    *base_url.lock().unwrap() = Some(format!("http://127.0.0.1:{port}"));
-                    let _ = ready_tx.send(());
-                    Ok::<_, anyhow::Error>(())
-                }
-                .await
-                {
-                    Ok(_) => log::info!("Sidecar ready"),
-                    Err(e) => log::error!("Sidecar boot failed: {e:#}"),
-                }
-            });
-
+            *state.base_url.lock().unwrap() = Some(url);
             Ok(())
         })
         .run(tauri::generate_context!())
