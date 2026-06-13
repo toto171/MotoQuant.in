@@ -2412,6 +2412,116 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # URL: https://indianautosblog.com/tvs-apache-rtr-200-4v-top-speed-test-p323630
     ("TVS", "Apache RTR 200", 2010, 16.00, 125,
      "DERIVED (0-100 ~9-10s x1.6 2V VBox, IndianAutosBlog)"),
+    # ── 2026-06-13 benchmark-coverage agent (pass 3) ─────────────────────────
+    # Same source bar / platform-substitution + DERIVED policy as passes 1-2.
+    #
+    # MV Agusta F3 RR (798cc triple sport, 2024-2026) — Cycle World 800cc
+    # comparison timing on the F3 800 platform: 10.5s @ ~142 mph (228 km/h),
+    # 0-60 in 2.9s. The RR is the 147hp up-spec F3; same 798 triple, so 10.5
+    # is conservative. Magazine tier (0.7).
+    # URL: https://fastestlaps.com/models/mv-augusta-f3-800 (Cycle World test)
+    ("MV Agusta", "F3 RR", 2024, 10.50, 228,
+     "Cycle World (F3 800 platform 10.5s; RR up-spec 147hp)"),
+    # Kawasaki Ninja ZX-10RR (998cc I4 superbike, 2021-2024) — MotoStatz Dragy
+    # on the ZX-10R (9.98s @ 151 mph already cited); the RR is the lighter
+    # ~204hp homologation-spec, so ~9.95s. Same Dragy source bar.
+    # URL: https://motostatz.com/kawasaki-zx-10r-acceleration/
+    ("Kawasaki", "Ninja ZX-10RR", 2021, 9.95, 243,
+     "MotoStatz (Dragy, ZX-10R 9.98s @151mph; RR lighter race-spec)"),
+    # Honda CBR250RR (Indonesia, 249.7cc parallel-twin sport, 2017-2026) —
+    # Indonesian VBox instrumented test: 14.55-14.7s @ 89-92 mph (144 km/h).
+    # 38.7hp twin revving to 12,500 rpm; the fastest stock 250 in SE Asia.
+    # Instrumented tier (VBox). 0-100 km/h 6.2s corroborates.
+    # URL: https://en.wikipedia.org/wiki/Honda_CBR250RR_(2017)
+    ("Honda", "CBR250RR", 2017, 14.60, 144,
+     "Indonesian VBox test 2017 (instrumented, 14.55-14.7s @ 89-92mph)"),
+    # Yamaha YZF-R25 (Indonesia, 249cc parallel-twin sport, 2014-2018) —
+    # Otomotifnet VBox/Racelogic instrumented: 0-402m 15.5s, Racelogic top
+    # 158.4 km/h (trap ~145). Same instrumented VBox tier; head-to-head with
+    # the MT-25 in the same test session.
+    # URL: https://otomotifnet.gridoto.com/read/231043140/ (MT-25 vs R25)
+    ("Yamaha", "YZF-R25", 2015, 15.50, 145,
+     "Otomotifnet VBox/Racelogic (instrumented 0-402m 15.5s, top 158 km/h)"),
+    # Yamaha MT-25 (249cc parallel-twin naked, 2014-2026) — same Otomotifnet
+    # VBox/Racelogic test: 0-402m 15.6s, Racelogic top 147 km/h. The naked
+    # R25, 0.1s slower on aero.
+    ("Yamaha", "MT-25", 2015, 15.60, 140,
+     "Otomotifnet VBox/Racelogic (instrumented 0-402m 15.6s, top 147 km/h)"),
+    # Harley-Davidson VRSCA V-Rod (1130cc Revolution V-twin, 2002-2006) —
+    # HDForums/DragTimes owner timeslips: a bone-stock 2006 VRSCA ran 11.6s at
+    # a Daytona dyno-drag. The V-Rod's long-low stance + 240 rear launches like
+    # a dragster; stock low-11s is widely reported. Forum/timeslip tier (0.3).
+    # URL: https://www.hdforums.com/forum/vrsc-models/507272-quarter-mile-times-for-v-rods.html
+    ("Harley-Davidson", "VRSCA V-Rod", 2004, 11.60, 185,
+     "HDForums/DragTimes timeslip (bone-stock 2006 VRSCA 11.6s @ Daytona)"),
+    # Kawasaki Versys 1000 (1043cc I4 ADV-tourer, 2019-2024) — owner-logged
+    # timeslip on the Kawasaki Versys forum: 12.96s @ 99.15 mph (160 km/h).
+    # 120hp I4 in a ~257 kg tall tourer. Forum/timeslip tier (0.3).
+    # URL: https://www.kawasakiversys.com/threads/acceleration.497/
+    ("Kawasaki", "Versys 1000", 2019, 12.96, 160,
+     "KawasakiVersysForum owner timeslip (12.96s @ 99.15 mph)"),
+    # Kawasaki Versys 1000 SE (1043cc I4 ADV-tourer, 2022-2024) — same Versys
+    # 1000 platform / owner-timeslip figure (electronic suspension, same I4).
+    ("Kawasaki", "Versys 1000 SE", 2022, 12.96, 160,
+     "Versys 1000 platform (1043 I4, owner timeslip)"),
+    # Suzuki RGV250 Gamma (249cc 2-stroke V-twin sport, 1991-1996) — DERIVED
+    # (0.1). FastestLaps 0-60 mph 3.7s; 62hp 2T V-twin ~140 kg, sits in the
+    # NSR250 (13.40) / RS250 (13.40) 2-stroke cluster — derived ~12.8s.
+    # URL: https://fastestlaps.com/models/suzuki-rgv250
+    ("Suzuki", "RGV250 Gamma", 1992, 12.80, 160,
+     "DERIVED (0-60mph 3.7s FastestLaps; 62hp 2T V-twin, NSR250/RS250 cluster)"),
+    # Kawasaki Ninja ZX-25R (Indonesia, 249.8cc I4 sport, 2020-2026) — DERIVED
+    # (0.1). 51hp inline-four revving to 17,000 rpm, 0-100 km/h <6s, MotorBeam
+    # top 187-190 km/h. Quicker than the CBR250RR (14.6s) twin — derived ~13.8s.
+    # URL: https://www.motorbeam.com/kawasaki-zx-25r-top-speed-is-190-km-hr-achieved-on-race-track/
+    ("Kawasaki", "Ninja ZX-25R", 2020, 13.80, 160,
+     "DERIVED (51hp 250 I4, 0-100<6s, top 187-190 km/h MotorBeam)"),
+    # Honda CB 300R (286cc single naked, 2019-2024) — DERIVED (0.1). rushlane
+    # 0-100 km/h 6.2s; MotorBikeCatalog QM estimate ~15.1s. 30hp single.
+    # URL: https://www.rushlane.com/honda-cb300r-0-100-kmph-time-12295222.html
+    ("Honda", "CB 300R", 2019, 15.10, 140,
+     "DERIVED (rushlane 0-100 6.2s; MotorBikeCatalog QM ~15.1s)"),
+    # Honda CB300F (293.5cc single naked, 2022-2025) — DERIVED (0.1). Same
+    # 293cc single family as CB300R; ~15.2s.
+    ("Honda", "CB300F", 2022, 15.20, 138,
+     "DERIVED (293cc CB300R platform, ~15.2s)"),
+    # Triumph Daytona 660 (660cc triple sport, 2024-2025) — DERIVED (0.1).
+    # 94hp faired triple; the same 660 triple in the Trident 660 (80hp) ran
+    # 12.00s on MotoStatz, so the faired 94hp Daytona lands ~11.4s.
+    # URL: https://www.triumphmotorcycles.com/motorcycles/sport/daytona-660/
+    ("Triumph", "Daytona 660", 2024, 11.40, 205,
+     "DERIVED (660 triple 94hp faired; Trident 660 base 12.0s, MotoStatz)"),
+    # Bajaj Pulsar F250 (249cc single sport, 2021-2024) — DERIVED (0.1). The
+    # faired sibling of the Pulsar N250 (15.45 in list); CarBlogIndia has it
+    # ~0.9s quicker to 100 km/h, so ~15.0s.
+    # URL: https://www.carblogindia.com/real-world-mileage-test-bajaj-pulsar-f250-n250/
+    ("Bajaj", "Pulsar F250", 2021, 15.00, 130,
+     "DERIVED (faired N250 sibling, ~0.9s quicker than N250; CarBlogIndia)"),
+    # TVS Apache RTR 310 (312.2cc single naked, 2024-2025) — DERIVED (0.1).
+    # Same 312cc engine as the Apache RR 310 (verified 15.46 @ 135 in list);
+    # the naked RTR lands ~15.3s.
+    # URL: https://www.autocarindia.com/bike-reviews/tvs-apache-rtr-310-road-test-review-432982
+    ("TVS", "Apache RTR 310", 2024, 15.30, 137,
+     "DERIVED (RR 310 platform 312cc; RR 310 verified 15.46 @135 FastestLaps)"),
+    # Harley-Davidson V-Rod Muscle (1247cc Revolution V-twin muscle, 2009-2017)
+    # — DERIVED (0.1). Same Revolution V-twin as the VRSCA V-Rod (11.6 timeslip
+    # above); the Muscle is heavier (massive rear), so ~11.8s.
+    ("Harley-Davidson", "V-Rod Muscle", 2010, 11.80, 183,
+     "DERIVED (1247cc Revolution V-Rod platform; heavier muscle body)"),
+    # Harley-Davidson Nightster (975cc Revolution Max V-twin cruiser, 2022-2026)
+    # — DERIVED (0.1). 89hp 975T; the Sportster S (1250 RevMax) runs 11.10
+    # (HDForums timeslip in list); the lighter-powered Nightster lands ~12.2s.
+    ("Harley-Davidson", "Nightster", 2022, 12.20, 175,
+     "DERIVED (975 Revolution Max 89hp; Sportster S 11.10 base in list)"),
+    # Hero Xpulse 200 (199.6cc single ADV, 2019-2025) — DERIVED (0.1). Autocar
+    # India 0-100 km/h 13.5s (4V) ×1.6 ~= 21.6s; 19hp ADV single, top ~123 km/h.
+    # URL: https://www.autocarindia.com/bike-reviews/hero-xpulse-200-4v-review-test-ride-422843
+    ("Hero", "Xpulse 200", 2019, 21.60, 123,
+     "DERIVED (0-100 13.5s x1.6 4V, Autocar India; top ~123 km/h)"),
+    # Hero XPulse 200T (199.6cc single ADV-touring, 2021-2026) — DERIVED (0.1).
+    # Xpulse 200 touring variant, same 19hp single.
+    ("Hero", "XPulse 200T", 2021, 21.60, 120,
+     "DERIVED (XPulse 200 platform, touring variant)"),
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [
