@@ -301,8 +301,14 @@ _PROFILES: dict[str, CategoryProfile] = {
         # decel 800 / floor 1.0 lands +0.318/+0.164 (w|D| 0.377 -> 0.241).
         # N=2 is thin; kept identical to the "other" treatment rather than
         # fitting the pair harder.
-        over_clutch_factor=0.30,
-        max_engine_decel_rads2=800.0,
+        # 2026-06-13: 3rd benchmark (Rocket 3 Storm R) joined the cluster;
+        # all 3 rows sim uniformly slow (cluster w_bias +0.355). Modest
+        # bump oc 0.30->0.45 / decel 800->900 (muscle bikes slip-launch
+        # harder than the shared "other" default) trims the uniform bias
+        # without chasing the thin set to target. Same-direction N=3 so
+        # low regression risk; references are litre_sport so untouched.
+        over_clutch_factor=0.45,
+        max_engine_decel_rads2=900.0,
         launch_floor_factor=1.0,
         tuck_transition_time_s=99.0,  # never tucks
         cd_ceiling=1.10,  # cruisers stay upright
