@@ -190,6 +190,39 @@ class LLMClient:
             )
         return self._sdk_client
 
+    @staticmethod
+    def _is_rate_limit(exc: Exception) -> bool:
+        """Detect a provider 429 / quota-exceeded error in an SDK-agnostic way.
+
+        Both the anthropic and openai SDKs raise a ``RateLimitError`` (status
+        429); other OpenAI-compatible providers surface the same class through
+        the openai SDK. We match on HTTP status (most reliable) and fall back to
+        the exception class name so a minor SDK refactor cannot silently demote
+        a 429 to a generic error.
+        """
+        for attr in ("status_code", "status"):
+            if getattr(exc, attr, None) == 429:
+                return True
+        resp = getattr(exc, "response", None)
+        if getattr(resp, "status_code", None) == 429:
+            return True
+        return type(exc).__name__ == "RateLimitError"
+
+    def _sdk_create(self, create_fn, **kwargs):
+        """Invoke an SDK ``*.create(**kwargs)`` call, translating a provider 429
+        into :class:`LLMRateLimitError` so the chat pipeline can return a typed
+        'rate_limit' marker instead of a bare stack trace."""
+        try:
+            return create_fn(**kwargs)
+        except LLMRateLimitError:
+            raise
+        except Exception as e:  # noqa: BLE001 -- re-raised below
+            if self._is_rate_limit(e):
+                raise LLMRateLimitError(
+                    f"{self._provider} rate limit / quota exceeded: {e}"
+                ) from e
+            raise
+
     def call_tool(self, system, user, tool_name, tool_schema):
         if self._call_override is not None:
             result = self._call_override(
@@ -220,7 +253,8 @@ class LLMClient:
                     "input_schema": tool_schema,
                 }
             ]
-            msg = client.messages.create(
+            msg = self._sdk_create(
+                client.messages.create,
                 model=self._model,
                 max_tokens=self._max_tokens,
                 system=system,
@@ -254,7 +288,8 @@ class LLMClient:
                 },
             }
         ]
-        msg = client.chat.completions.create(
+        msg = self._sdk_create(
+            client.chat.completions.create,
             model=self._model,
             max_tokens=self._max_tokens,
             messages=[
@@ -293,7 +328,8 @@ class LLMClient:
         client = self._get_sdk()
 
         if self._provider == "anthropic":
-            msg = client.messages.create(
+            msg = self._sdk_create(
+                client.messages.create,
                 model=self._model,
                 max_tokens=self._max_tokens,
                 system=system,
@@ -305,7 +341,8 @@ class LLMClient:
                     chunks.append(block.text)
             return "".join(chunks).strip()
 
-        msg = client.chat.completions.create(
+        msg = self._sdk_create(
+            client.chat.completions.create,
             model=self._model,
             max_tokens=self._max_tokens,
             messages=[
