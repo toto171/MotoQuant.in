@@ -311,6 +311,22 @@ class TestInferCylinderConfig:
     def test_unknown_cylinders_returns_none(self):
         assert _infer_cylinder_config(self._make_spec("Honda", "CBR", None)) is None
 
+    def test_honda_vtr1000_sp2_is_v_twin(self):
+        """Honda VTR1000 SP2 (RC51) is a 90-deg V-twin — the 'Honda' make is
+        not exclusively V-twin and was missing a model token, so this used to
+        regress to I2 on every fresh reseed (guarded post-hoc by the Jun-11
+        parts patch). The 'VTR' / 'RC51' model tokens fix the inference."""
+        assert (
+            _infer_cylinder_config(self._make_spec("Honda", "VTR1000 SP2 (RC51)", 2))
+            == "V2"
+        )
+
+    def test_honda_rc213v_s_is_v4(self):
+        """Honda RC213V-S is a MotoGP-derived 90-deg V4 — no V4 model token
+        matched 'RC213V' so this used to regress to I4 on fresh reseed (guarded
+        post-hoc by the Jun-11 parts patch). The 'RC213V' token fixes it."""
+        assert _infer_cylinder_config(self._make_spec("Honda", "RC213V-S", 4)) == "V4"
+
 
 class TestInferChainPitch:
     def _make_spec(self, mfr, model, disp=None, cyls=None):

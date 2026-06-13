@@ -232,6 +232,8 @@ _V_TWIN_MODEL_TOKENS = {
     "V7",
     "V9",
     "California",  # Moto Guzzi (also covered by make)
+    "VTR",  # Honda VTR250/VTR1000F/VTR1000 SP1/SP2 are all 90-deg V-twins
+    "RC51",  # US name for the VTR1000 SP1/SP2 RC51 homologation V-twin
 }
 
 # 4-cylinder V4 models (rest are assumed I4).
@@ -244,6 +246,7 @@ _V4_MODEL_TOKENS = {
     "Tuono V4",
     "VFR1200",
     "VFR800",
+    "RC213V",  # Honda RC213V-S — MotoGP-derived 90-deg V4
     "RC8",
 }
 
