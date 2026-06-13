@@ -837,3 +837,136 @@ class TestSurrogateCompare(unittest.TestCase):
         # B.et_s - A.et_s should be positive (A is faster)
         self.assertGreater(body["delta_et_s"], 0.0)
         self.assertEqual(body["faster"], "a")
+
+
+class TestPricingEndpoints(unittest.TestCase):
+    """Coverage for /api/pricing/* — proves the typed response DTOs
+    (PricingEntryOut / BikePricingSummaryItem wired into the list fields, with
+    honest Optional defaults) serialize for both populated and empty rows.
+
+    part_prices is empty after seed_all(), so we insert rows directly via the
+    API's own connection to exercise the populated path.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        conn = _api_mod._get_db()
+        assert conn is not None
+        # A part that definitely exists in the seeded catalog.
+        row = conn.execute("SELECT id FROM parts ORDER BY id LIMIT 1").fetchone()
+        cls.part_id = row["id"]
+        # A part with no live prices (different id) for the empty-path test.
+        row2 = conn.execute(
+            "SELECT id FROM parts ORDER BY id LIMIT 1 OFFSET 1"
+        ).fetchone()
+        cls.empty_part_id = row2["id"]
+        cls.bike_id = conn.execute(
+            "SELECT id FROM bike_models ORDER BY id LIMIT 1"
+        ).fetchone()["id"]
+        # Seed two live prices for cls.part_id: one fresh, one stale, one NULL price.
+        conn.execute(
+            "INSERT OR REPLACE INTO part_prices "
+            "(part_id, retailer, source_url, price_inr, in_stock, fetched_at) "
+            "VALUES (?,?,?,?,?,datetime('now','utc'))",
+            (cls.part_id, "FreshShop", "https://example.com/a", 12345.0, 1),
+        )
+        conn.execute(
+            "INSERT OR REPLACE INTO part_prices "
+            "(part_id, retailer, source_url, price_inr, in_stock, fetched_at) "
+            "VALUES (?,?,?,?,?,?)",
+            (
+                cls.part_id,
+                "StaleShop",
+                "https://example.com/b",
+                9999.0,
+                0,
+                "2000-01-01",
+            ),
+        )
+        conn.commit()
+
+    def test_part_pricing_populated_serializes(self):
+        r = client.get(f"/api/pricing/part/{self.part_id}")
+        self.assertEqual(r.status_code, 200, r.text)
+        body = r.json()
+        self.assertEqual(body["part_id"], self.part_id)
+        self.assertIsInstance(body["prices"], list)
+        self.assertGreaterEqual(len(body["prices"]), 2)
+        # The cheapest live price is the fresh one.
+        self.assertEqual(body["cheapest_live_inr"], 9999.0)
+        # Every price entry matches the PricingEntryOut shape.
+        for p in body["prices"]:
+            for key in (
+                "retailer",
+                "price_inr",
+                "in_stock",
+                "fetched_at",
+                "source_url",
+                "is_stale",
+            ):
+                self.assertIn(key, p)
+            self.assertIsInstance(p["in_stock"], bool)
+            self.assertIsInstance(p["is_stale"], bool)
+        # The 2000-01-01 row must be flagged stale.
+        self.assertTrue(any(p["is_stale"] for p in body["prices"]))
+
+    def test_part_pricing_empty_returns_null_optionals(self):
+        r = client.get(f"/api/pricing/part/{self.empty_part_id}")
+        self.assertEqual(r.status_code, 200, r.text)
+        body = r.json()
+        self.assertEqual(body["prices"], [])
+        # Honest Optional defaults: no live price -> None, not 0.0 or a crash.
+        self.assertIsNone(body["cheapest_live_inr"])
+        self.assertFalse(body["all_stale"])
+
+    def test_part_pricing_unknown_404(self):
+        r = client.get("/api/pricing/part/99999999")
+        self.assertEqual(r.status_code, 404)
+
+    def test_bike_pricing_summary_serializes(self):
+        r = client.get(f"/api/pricing/bike/{self.bike_id}", params={"limit": 10})
+        self.assertEqual(r.status_code, 200, r.text)
+        body = r.json()
+        self.assertEqual(body["bike_id"], self.bike_id)
+        self.assertIsInstance(body["items"], list)
+        self.assertGreater(len(body["items"]), 0)
+        for it in body["items"]:
+            for key in (
+                "part_id",
+                "part_name",
+                "category",
+                "seed_price_inr",
+                "cheapest_live_inr",
+                "cheapest_retailer",
+                "in_stock",
+            ):
+                self.assertIn(key, it)
+        self.assertIsInstance(body["total_cheapest_inr"], (int, float))
+
+    def test_bike_pricing_unknown_404(self):
+        r = client.get("/api/pricing/bike/99999999")
+        self.assertEqual(r.status_code, 404)
+
+    def test_dtos_accept_all_none_optionals(self):
+        """Direct construction proves the honest Optional defaults: a row with no
+        price/retailer/timestamp must validate, where the old float=Field(None)
+        was a lie (None is not a float)."""
+        from motoquant.api import (
+            BikePricingSummaryItem,
+            PartPricingOut,
+            PricingEntryOut,
+        )
+
+        entry = PricingEntryOut(in_stock=False, is_stale=True)
+        self.assertIsNone(entry.price_inr)
+        self.assertIsNone(entry.retailer)
+        self.assertIsNone(entry.fetched_at)
+
+        part = PartPricingOut(part_id=1, part_name="x", prices=[entry], all_stale=False)
+        self.assertIsNone(part.seed_price_inr)
+        self.assertIsNone(part.cheapest_live_inr)
+        self.assertEqual(len(part.prices), 1)
+
+        item = BikePricingSummaryItem(part_id=1, part_name="x", category="exhaust")
+        self.assertIsNone(item.cheapest_live_inr)
+        self.assertIsNone(item.in_stock)
