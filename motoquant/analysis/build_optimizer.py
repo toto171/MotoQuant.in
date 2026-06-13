@@ -36,6 +36,7 @@ Public API
 from __future__ import annotations
 
 import copy
+import time
 import logging
 import warnings
 from dataclasses import asdict, dataclass, field
@@ -612,9 +613,19 @@ def optimize_build(
             todo = [r.part_id for r in selected if r.part_id not in verified]
             if not todo:
                 break
-            if progress_cb is not None:
-                progress_cb(0.97, "Verifying selected parts (full sim)")
-            for pid in todo:
+            # Tick PER verification sim, not once per round. On the free
+            # tier these full sims run back-to-back for tens of seconds; the
+            # old single 0.97 tick froze the job state while the CPU-bound
+            # worker starved the /api/jobs poll handler, so the browser wrongly
+            # declared "connection lost" at 97% (QC 2026-06-13). Frequent ticks
+            # + a CPU yield keep polls alive and animate a real 95->99% bar.
+            _vtotal = max(1, len(todo))
+            for _vi, pid in enumerate(todo):
+                if progress_cb is not None:
+                    progress_cb(
+                        min(0.99, 0.95 + 0.04 * _vi / _vtotal),
+                        "Verifying selected parts (full sim)",
+                    )
                 try:
                     part_cfg = parts_repo.apply_multiple([pid], base_config)
                     part_et, part_trap = _run_et(part_cfg)
@@ -628,6 +639,7 @@ def optimize_build(
                         roi_by_id[pid].delta_et_s,
                         roi_by_id[pid].delta_trap_ms,
                     )
+                time.sleep(0.02)  # yield CPU so the job-status poll can respond
             for pid, (d_et, d_trap) in verified.items():
                 r = roi_by_id.get(pid)
                 if r is not None:

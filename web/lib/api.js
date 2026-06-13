@@ -201,7 +201,10 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
   // Polling is failure-tolerant: long jobs (the optimiser full-sim fallback
   // runs for minutes) see hundreds of polls, and one VoWiFi blip / proxy
   // hiccup must NOT kill a run that is still healthy server-side.
-  //  - transient errors (network, 5xx): keep polling for up to 60 s
+  //  - transient errors (network, 5xx): keep polling for up to 150 s
+//    (the optimiser verification stage saturates the 0.5-CPU free
+//     tier for ~60-90 s, starving job-status polls; the job still
+//     completes server-side, so the client must outwait it)
   //  - 404: in-memory registry lost the job (restart) — confirm 3× in a row
   //  - interval backs off 350 ms → 800 ms → 1.5 s as the job ages
   let t0 = Date.now();
@@ -263,7 +266,7 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
         t0 = Date.now(); // restart the poll-interval backoff for the new job
         continue;
       }
-    } else if (Date.now() - lastSuccessAt > 60_000) {
+    } else if (Date.now() - lastSuccessAt > 150_000) {
       cancelJob(started.job_id).catch(() => {}); // don't leave a zombie burning CPU
       throw new Error(
         'Connection lost while the simulation was running — check your network and run again'
