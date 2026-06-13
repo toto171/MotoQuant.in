@@ -2522,6 +2522,63 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # Xpulse 200 touring variant, same 19hp single.
     ("Hero", "XPulse 200T", 2021, 21.60, 120,
      "DERIVED (XPulse 200 platform, touring variant)"),
+    # ── 2026-06-13 benchmark-coverage agent (pass 4) ─────────────────────────
+    # Final coverage pass (mostly the adventure/touring cluster, previously the
+    # thinnest in this list). Same source bar / platform / DERIVED policy.
+    #
+    # Kawasaki Z400 (399cc parallel-twin naked, 2019-2026) — MotoStatz Dragy
+    # instrumented: 13.34s @ 98 mph (158 km/h). The naked Ninja 400 (12.98 in
+    # list is the faired Ninja); the Z400 is slightly slower on aero. Same
+    # Dragy source bar.
+    # URL: https://motostatz.com/kawasaki-z400-acceleration-top-speed/
+    ("Kawasaki", "Z400", 2019, 13.34, 158,
+     "MotoStatz (Dragy, stock instrumented, 98 mph trap)"),
+    # Suzuki V-Strom 1050 (1037cc V-twin ADV, 2020-2026) — FastestLaps/
+    # zeroto60 test: 11.56s @ 114.1 mph (184 km/h), 0-60 3.61s. 100hp V-twin.
+    # Aggregator tier (0.5).
+    # URL: https://fastestlaps.com/models/suzuki-v-strom-1050
+    ("Suzuki", "V-Strom 1050", 2020, 11.56, 184,
+     "FastestLaps/zeroto60 (11.56s @ 114.1mph, 0-60 3.61s)"),
+    # Suzuki GSX-S1000GT (999cc I4 sport-tourer, 2022-2026) — DERIVED-platform.
+    # The GSX-S1000 naked (10.60 @ 214 Sport Rider, in list) shares the 150hp
+    # I4; the GT is the faired sport-tourer (similar weight) so ~10.6s.
+    ("Suzuki", "GSX-S1000GT", 2022, 10.60, 214,
+     "GSX-S1000 platform 10.6s (Sport Rider); GT sport-tourer, 150hp I4"),
+    # KTM 790 Adventure (799cc parallel-twin ADV, 2019-2022) — DERIVED (0.1).
+    # The 790 Duke ran 11.01s @ 124 mph on MotoStatz; the Adventure shares the
+    # 799 twin but is heavier + far less aero (tall ADV), so ~12.0s.
+    ("KTM", "790 Adventure", 2019, 12.00, 185,
+     "DERIVED (790 Duke 11.01 MotoStatz + ADV weight/aero ~+1s)"),
+    # BMW R 1300 GS (1300cc boxer ADV, 2024-2026) — DERIVED (0.1). ProfessCars
+    # estimate ~11.0s; 145hp boxer in a ~237 kg ADV, top ~120 mph.
+    # URL: https://www.motorbikecatalog.com/performance/2024/232820/bmw_r_1300_gs.html
+    ("BMW", "R 1300 GS", 2024, 11.00, 195,
+     "DERIVED (ProfessCars est ~11.0s; 145hp boxer ADV, top ~120mph)"),
+    # BMW R 1250 GS (1254cc boxer ADV, 2019-2025) — DERIVED (0.1). 134hp boxer,
+    # ProfessCars-class estimate; slightly slower than the 1300 GS. Top ~131mph
+    # (Bennetts dyno-and-speed test). ~11.3s.
+    ("BMW", "R 1250 GS", 2019, 11.30, 190,
+     "DERIVED (134hp boxer; ProfessCars-class, slightly slower than R1300GS)"),
+    # Triumph Tiger 900 Rally (888cc triple ADV, 2020-2026) — DERIVED (0.1).
+    # 94hp triple, MCN 0-60 ~3.5-3.7s, top 202-205 km/h. The same 888 triple
+    # tested faster than the F800GS + Africa Twin in development; ~11.7s.
+    ("Triumph", "Tiger 900 Rally", 2020, 11.70, 200,
+     "DERIVED (888 triple 94hp; MCN 0-60 ~3.5-3.7s; top 202 km/h)"),
+    # Triumph Tiger 900 GT Pro (888cc triple ADV road-spec, 2024-2026) —
+    # DERIVED (0.1). Same 888 triple as the Rally, road-biased (19" front,
+    # slightly lighter); ~11.6s.
+    ("Triumph", "Tiger 900 GT Pro", 2024, 11.60, 202,
+     "DERIVED (888 triple road-spec, Tiger 900 platform)"),
+    # Honda NC750X (745cc parallel-twin ADV-commuter, 2021-2026) — DERIVED
+    # (0.1). MotorBikeCatalog QM ~13.5s; 58hp low-revving twin, top ~125 mph.
+    # URL: https://www.motorbikecatalog.com/performance/2021/185120/honda_nc750x.html
+    ("Honda", "NC750X", 2021, 13.50, 201,
+     "DERIVED (MotorBikeCatalog QM ~13.5s; 58hp 745 twin, top ~125mph)"),
+    # Yamaha Tracer 7 (689cc CP2 sport-tourer, 2020-2026) — DERIVED (0.1).
+    # Same 689 CP2 as the MT-07 (12.13 MCN, in list); the Tracer adds touring
+    # weight + bodywork, so ~12.4s.
+    ("Yamaha", "Tracer 7", 2020, 12.40, 195,
+     "DERIVED (689 CP2; MT-07 12.13 base + touring weight)"),
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [
