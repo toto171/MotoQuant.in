@@ -25,6 +25,7 @@ Pillow itself is unavailable the script prints an SVG fallback path and exits
 non-zero with a clear message (PNG conversion then needs an external tool such
 as rsvg-convert or Inkscape).
 """
+
 from __future__ import annotations
 
 import argparse
@@ -41,9 +42,9 @@ INK_0 = (0, 0, 0)
 INK_1 = (10, 10, 11)
 INK_2 = (17, 17, 19)
 INK_3 = (26, 26, 29)
-ORANGE = (255, 94, 31)        # brand-orange  #FF5E1F
-ORANGE_DEEP = (204, 64, 0)    # brand-orangeDeep #CC4000
-ACCENT = (0, 255, 178)        # brand-accent  #00FFB2
+ORANGE = (255, 94, 31)  # brand-orange  #FF5E1F
+ORANGE_DEEP = (204, 64, 0)  # brand-orangeDeep #CC4000
+ACCENT = (0, 255, 178)  # brand-accent  #00FFB2
 WHITE = (255, 255, 255)
 WHITE_70 = (200, 200, 205)
 WHITE_45 = (150, 150, 156)
@@ -161,7 +162,9 @@ def build(out_path: str) -> None:
     draw.text((margin, title_y), TITLE, font=f_title, fill=WHITE)
     # accent underbar beneath the wordmark
     tw = _text_w(draw, TITLE, f_title)
-    draw.rectangle([margin, title_y + 118, margin + min(tw, 560), title_y + 126], fill=ORANGE)
+    draw.rectangle(
+        [margin, title_y + 118, margin + min(tw, 560), title_y + 126], fill=ORANGE
+    )
 
     # --- Tagline ----------------------------------------------------------
     draw.text((margin, title_y + 150), TAGLINE, font=f_tag, fill=WHITE_70)
@@ -181,7 +184,12 @@ def build(out_path: str) -> None:
         nw = _text_w(draw, num, f_stat_num)
         draw.text((x0 + (tile_w - nw) / 2, y0 + 22), num, font=f_stat_num, fill=ORANGE)
         lw = _text_w(draw, lbl.upper(), f_stat_lbl)
-        draw.text((x0 + (tile_w - lw) / 2, y0 + 76), lbl.upper(), font=f_stat_lbl, fill=WHITE_45)
+        draw.text(
+            (x0 + (tile_w - lw) / 2, y0 + 76),
+            lbl.upper(),
+            font=f_stat_lbl,
+            fill=WHITE_45,
+        )
 
     # --- Footer domain ----------------------------------------------------
     draw.text((margin, H - 56), DOMAIN, font=f_domain, fill=WHITE_45)
@@ -193,9 +201,17 @@ def build(out_path: str) -> None:
 
 def main() -> None:
     here = os.path.dirname(os.path.abspath(__file__))
-    default_out = os.path.normpath(os.path.join(here, "..", "web", "public", "og-image.png"))
-    ap = argparse.ArgumentParser(description="Generate the MotoQuant Pro OG card (1200x630).")
-    ap.add_argument("--out", default=default_out, help="output PNG path (default: web/public/og-image.png)")
+    default_out = os.path.normpath(
+        os.path.join(here, "..", "web", "public", "og-image.png")
+    )
+    ap = argparse.ArgumentParser(
+        description="Generate the MotoQuant Pro OG card (1200x630)."
+    )
+    ap.add_argument(
+        "--out",
+        default=default_out,
+        help="output PNG path (default: web/public/og-image.png)",
+    )
     args = ap.parse_args()
     build(args.out)
 

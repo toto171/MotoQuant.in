@@ -462,7 +462,7 @@ def _scan_file(path: Path, pattern: str, truth_value):
 def _patch_file(path: Path, pattern: str, truth_value) -> int:
     """Apply pattern in-place, replacing group(1) with truth_value. Returns count of edits."""
     if isinstance(truth_value, str) and (
-        truth_value.startswith("ERROR") or truth_value.startswith(TEST_COUNT_SKIP_PREFIX)
+        truth_value.startswith(("ERROR", TEST_COUNT_SKIP_PREFIX))
     ):
         return 0
     try:
@@ -512,7 +512,7 @@ def apply_fixes(truth, verbose=True):
         truth_value = truth.get(truth_key)
         if truth_value is None or (
             isinstance(truth_value, str)
-            and (truth_value.startswith("ERROR") or truth_value.startswith(TEST_COUNT_SKIP_PREFIX))
+            and (truth_value.startswith(("ERROR", TEST_COUNT_SKIP_PREFIX)))
         ):
             continue
         for path in REPO.glob(file_glob):
@@ -636,7 +636,7 @@ def regenerate_og_card(truth, output_path: Path | None = None, verbose=True) -> 
     venues_n = truth.get("venues_db", "—")
     tests_n = truth.get("tests_collected", "—")
     if isinstance(tests_n, str) and (
-        tests_n.startswith("ERROR") or tests_n.startswith(TEST_COUNT_SKIP_PREFIX)
+        tests_n.startswith(("ERROR", TEST_COUNT_SKIP_PREFIX))
     ):
         tests_n = "1000+"
 
@@ -776,7 +776,7 @@ def main():
         truth_value = truth.get(truth_key)
         if truth_value is None or (
             isinstance(truth_value, str)
-            and (truth_value.startswith("ERROR") or truth_value.startswith(TEST_COUNT_SKIP_PREFIX))
+            and (truth_value.startswith(("ERROR", TEST_COUNT_SKIP_PREFIX)))
         ):
             continue
         for path in REPO.glob(file_glob):
