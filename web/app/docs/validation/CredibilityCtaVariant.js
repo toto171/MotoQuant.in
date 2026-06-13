@@ -7,10 +7,10 @@
 //                below this slot, byte-identical across arms).
 // B (variant)  = one glass card injected between the Methodology section and
 //                the terminal Next nav, with copy that grounds the just-read
-//                ±0.032s top-10 mean error + Δ ±0.0000 baseline drift into a
+//                ±0.006s top-10 mean error + Δ ±0.0000 baseline drift into a
 //                first-run promise:
 //                  "Run your bike through the same engine →"
-//                  "501 bikes pre-loaded. Same RK4 integrator. Same ±0.032s
+//                  "501 bikes pre-loaded. Same RK4 integrator. Same ±0.006s
 //                  top-10 mean error. No signup."
 //
 // Hypothesis: visitors who reach the bottom of /docs/validation have just
@@ -64,7 +64,7 @@ function CtaCard() {
               Run your bike through the same engine →
             </div>
             <div className="text-sm text-white/65 leading-relaxed">
-              501 bikes pre-loaded. Same RK4 integrator. Same ±0.032s top-10
+              501 bikes pre-loaded. Same RK4 integrator. Same ±0.006s top-10
               mean error. No signup.
             </div>
           </div>

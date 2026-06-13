@@ -9,7 +9,7 @@ import TerminalCtaVariant from './TerminalCtaVariant';
 export const metadata = {
   title: 'Whitepaper — MotoQuant Pro Physics Engine (Pacejka Tire Model + RK4)',
   description:
-    'MotoQuant Pro whitepaper: a free Pacejka tire-model motorcycle quarter-mile calculator built on 15 sub-models and RK4 integration at 1 ms, validated against 156 source-quality-weighted benchmarks across 8 cluster categories. Reference baselines K5 / R1 / Hayabusa accurate to four decimals across every commit.',
+    'MotoQuant Pro whitepaper: a free Pacejka tire-model motorcycle quarter-mile calculator built on 15 sub-models and RK4 integration at 1 ms, validated against 216 source-quality-weighted benchmarks across 8 cluster categories. Reference baselines K5 / R1 / Hayabusa accurate to four decimals across every commit.',
   alternates: { canonical: 'https://motoquant.in/whitepaper' },
   keywords: [
     'motoquant whitepaper',
@@ -30,7 +30,7 @@ export const metadata = {
   },
 };
 
-const ABSTRACT = `MotoQuant Pro is a first-principles physics engine for predicting motorcycle quarter-mile drag-racing elapsed times. The model couples 15 independent sub-models — engine torque (Willans friction), Pacejka tire grip with thermal evolution, gear-shift and clutch slip dynamics, weight transfer and rider centre-of-gravity shift, aerodynamic drag with per-bike Cd × A, environmental conditions (density altitude, surface μ, ambient temp), and parasitic loss budget — through a fixed-step fourth-order Runge–Kutta integrator running at one-millisecond resolution. As of the June 2026 sweep we validate against 156 source-quality-weighted published quarter-mile benchmarks (155 matched) across an 8-cluster taxonomy. Overall weighted bias is −0.007 s; weighted mean absolute error is 0.227 s. Within instrumented-magazine-data clusters (litre-sport ≥195 hp), weighted bias is +0.009 s and |Δ| is 0.153 s; across the ten cleanest validated runs the mean absolute error is ±0.010 s. Three reference baselines — GSX-R 1000 K5, YZF-R1 4C8, and Suzuki Hayabusa Gen1 — are preserved exactly to the fourth decimal place across every code change since April 30, 2026.`;
+const ABSTRACT = `MotoQuant Pro is a first-principles physics engine for predicting motorcycle quarter-mile drag-racing elapsed times. The model couples 15 independent sub-models — engine torque (Willans friction), Pacejka tire grip with thermal evolution, gear-shift and clutch slip dynamics, weight transfer and rider centre-of-gravity shift, aerodynamic drag with per-bike Cd × A, environmental conditions (density altitude, surface μ, ambient temp), and parasitic loss budget — through a fixed-step fourth-order Runge–Kutta integrator running at one-millisecond resolution. As of the June 2026 sweep we validate against 216 source-quality-weighted published quarter-mile benchmarks (236 matched) across an 8-cluster taxonomy. Overall weighted bias is −0.015 s; weighted mean absolute error is 0.262 s. Within instrumented-magazine-data clusters (litre-sport ≥195 hp), weighted bias is −0.015 s and |Δ| is 0.137 s; across the ten cleanest validated runs the mean absolute error is ±0.006 s. Three reference baselines — GSX-R 1000 K5, YZF-R1 4C8, and Suzuki Hayabusa Gen1 — are preserved exactly to the fourth decimal place across every code change since April 30, 2026.`;
 
 const SECTIONS = [
   {
@@ -84,7 +84,7 @@ const SECTIONS = [
     n: '4',
     title: 'Validation Methodology',
     body: [
-      'As of the June 2026 sweep we benchmark against 156 published quarter-mile elapsed times (155 matched to a catalog bike) where the bike, year range, and venue conditions are unambiguous. Sources are classified by quality and weighted accordingly:',
+      'As of the June 2026 sweep we benchmark against 216 published quarter-mile elapsed times (236 matched to a catalog bike) where the bike, year range, and venue conditions are unambiguous. Sources are classified by quality and weighted accordingly:',
     ],
     list: {
       title: 'Source-quality weights',
@@ -108,20 +108,20 @@ const SECTIONS = [
     table: {
       head: ['Cluster', 'N', 'Weighted bias', 'Weighted |Δ|'],
       rows: [
-        ['Litre Sport ≥195 hp',          '22', '+0.009 s', '0.153 s'],
+        ['Litre Sport ≥195 hp',          '22', '−0.015 s', '0.137 s'],
         ['Litre Sport 600–1000',         '79', '−0.046 s', '0.195 s'],
-        ['Mid-Twin 500–700',             '8',  '+0.064 s', '0.143 s'],
+        ['Mid-Twin 500–700',             '8',  '+0.064 s', '0.141 s'],
         ['Mid-Twin 300–500',             '11', '−0.011 s', '0.450 s'],
         ['Entry 200–300',                '7',  '−0.015 s', '0.434 s'],
         ['Entry 150–200',                '6',  '+0.217 s', '0.538 s'],
         ['Two-stroke',                   '5',  '+0.072 s', '0.471 s'],
         ['Cruiser 1300+',                '2',  '+0.241 s', '0.241 s'],
         ['Other',                        '15', '+0.036 s', '0.296 s'],
-        ['All clusters · weighted',      '155', '−0.007 s', '0.227 s'],
+        ['All clusters · weighted',      '155', '−0.015 s', '0.262 s'],
       ],
     },
     body: [
-      'The most accurate clusters are mid-twin 500–700 (0.143 s weighted MAE) and litre-sport ≥195 hp (+0.009 s weighted bias, 0.153 s weighted MAE) — well within the ±0.20 s tolerance the modern instrumented Cycle World and Sport Rider tests themselves report as 1-σ test-to-test variation; across the ten cleanest validated runs the mean absolute error is ±0.010 s. Overall weighted bias of −0.007 s indicates the model is essentially centred at zero, and 81 of the 155 matched benchmarks fall within ±0.20 s (42 within ±0.10 s, 22 within ±0.05 s). The remaining residual is bounded by benchmark-data quality, not by physics model fidelity: the small-cc and two-stroke clusters draw heavily from derived benchmarks with declared ±0.7 s uncertainty, fundamentally limiting validation precision regardless of how well the physics is modelled.',
+      'The most accurate clusters are mid-twin 500–700 (0.141 s weighted MAE) and litre-sport ≥195 hp (−0.015 s weighted bias, 0.137 s weighted MAE) — well within the ±0.20 s tolerance the modern instrumented Cycle World and Sport Rider tests themselves report as 1-σ test-to-test variation; across the ten cleanest validated runs the mean absolute error is ±0.006 s. Overall weighted bias of −0.015 s indicates the model is essentially centred at zero, and 81 of the 236 matched benchmarks fall within ±0.20 s (62 within ±0.10 s, 37 within ±0.05 s). The remaining residual is bounded by benchmark-data quality, not by physics model fidelity: the small-cc and two-stroke clusters draw heavily from derived benchmarks with declared ±0.7 s uncertainty, fundamentally limiting validation precision regardless of how well the physics is modelled.',
     ],
   },
   {
@@ -317,8 +317,8 @@ export default function WhitepaperPage() {
             </p>
 
             {/* Top-level stats — timing-board tiles, regenerated from the
-                June 2026 sweep (reports/acc_final_2026_06_11.json): 156 benchmarks,
-                155 matched, weighted bias −0.007 s. Same corpus as /features and
+                13 June 2026 sweep (reports/acc_final_2026_06_13.json): 216 benchmarks,
+                236 matched, weighted bias −0.015 s. Same corpus as /features and
                 /docs/validation. */}
             <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[

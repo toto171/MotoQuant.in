@@ -45,16 +45,16 @@ import LaunchControl from '../components/LaunchControl';
 import ScoreboardDigits, { ScoreboardCounter } from '../components/ScoreboardDigits';
 
 // ─── Validation: only the four clusters where the data is good ────────
-// Per CLAUDE.md April 30 weighted metrics. Small-cc / 2T / cruiser
+// Per the 13 June 2026 weighted sweep (reports/acc_final_2026_06_13.json). Small-cc / 2T / cruiser
 // clusters are bounded by benchmark data quality (DERIVED 0-100×1.6
 // estimates with declared ±0.7s uncertainty), not model fidelity, so
 // they're shown in /docs/validation with their full caveat — not on
 // the landing page.
 const HONEST_CLUSTERS = [
-  { name: 'Litre Sport ≥195hp',   bias: 0.009,  mae: 0.153, n: 22 },
-  { name: 'Litre Sport 600-1000', bias: -0.046, mae: 0.195, n: 79 },
-  { name: 'Mid-Twin 300-500',     bias: -0.011, mae: 0.450, n: 11 },
-  { name: 'All clusters · weighted overall', bias: -0.007, mae: 0.227, n: 155 },
+  { name: 'Litre Sport ≥195hp',   bias: -0.015, mae: 0.137, n: 31 },
+  { name: 'Litre Sport 600-1000', bias: -0.073, mae: 0.201, n: 99 },
+  { name: 'Mid-Twin 300-500',     bias: -0.086, mae: 0.516, n: 23 },
+  { name: 'All clusters · weighted overall', bias: -0.015, mae: 0.262, n: 236 },
 ];
 
 // ─── Top-10 most accurate bikes (preserved from prior landing) ────────
@@ -400,7 +400,7 @@ function HomePageInner() {
                 >
                   Your bike. Your strip. Your quarter-mile ET — predicted to
                   within{' '}
-                  <span className="text-white">±0.010s</span> on our 10 cleanest validated runs.{' '}
+                  <span className="text-white">±0.006s</span> on our 10 cleanest validated runs.{' '}
                   <span className="text-white">501 Indian and global bikes</span>,{' '}
                   <span className="text-white">563 parts with INR pricing</span>,{' '}
                   <span className="text-white">Aamby Valley to MMRT.</span>
@@ -416,7 +416,7 @@ function HomePageInner() {
                   <span className="text-white">501 bikes</span>,{' '}
                   <span className="text-white">563 parts</span>,{' '}
                   <span className="text-white">20 venues</span> — validated
-                  against 156 published quarter-mile tests — ±0.010s across the 10 cleanest.
+                  against 216 published quarter-mile tests — ±0.006s across the 10 cleanest.
                 </p>
               )}
             </Reveal>
@@ -427,7 +427,7 @@ function HomePageInner() {
                   Aamby Valley · MMRT · Kari · Hyderabad
                 </span>
                 <span className="px-3 py-1.5 rounded-full border border-brand-orange/30 text-brand-orange">
-                  ±0.007s mean bias across 156 benchmarks
+                  ±0.015s mean bias across 216 benchmarks
                 </span>
                 <span className="px-3 py-1.5 rounded-full border border-white/10 text-white/55">
                   RK4 · 1ms · 15 sub-models
@@ -511,7 +511,7 @@ function HomePageInner() {
               {
                 icon: BarChart3,
                 title: 'Validated',
-                body: 'Kawasaki ZX-10R 2021 at ±0.011s. Top-10 mean error ±0.032s. Reference baselines: K5 10.0334s, R1 10.2859s, Hayabusa 10.4712s — preserved exactly to four decimals across every commit.',
+                body: 'Kawasaki ZX-10R 2021 at ±0.011s. Top-10 mean error ±0.006s. Reference baselines: K5 10.0334s, R1 10.2859s, Hayabusa 10.4712s — preserved exactly to four decimals across every commit.',
                 href: '/docs/validation',
                 cta: 'See benchmark table →',
               },
@@ -749,10 +749,10 @@ function HomePageInner() {
           <Reveal>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
               {[
-                { num: '156',     label: 'Bikes benchmarked' },
+                { num: '216',     label: 'Bikes benchmarked' },
                 { num: '42',      label: 'Within ±0.10s' },
                 { num: '81',      label: 'Within ±0.20s' },
-                { num: '±0.010s', label: 'Top 10 mean error' },
+                { num: '±0.006s', label: 'Top 10 mean error' },
               ].map((s) => (
                 <div key={s.label} className="rounded-xl border border-brand-orange/20 bg-white/[0.02] p-5 text-center">
                   <div className="font-display font-bold text-2xl md:text-3xl text-brand-orange tabular-nums">
@@ -775,7 +775,7 @@ function HomePageInner() {
                   MotoQuant timing assoc · official accuracy slip
                 </span>
                 <span className="hidden sm:block font-mono text-[10px] tracking-[0.18em] uppercase text-brand-orange/80">
-                  10 cleanest pulls · 156 benchmarks
+                  10 cleanest pulls · 216 benchmarks
                 </span>
               </div>
               <div className="hidden md:grid grid-cols-[40px_1fr_120px_120px_120px_140px] gap-4 px-5 py-3 border-b border-brand-orange/20 bg-white/[0.02] text-[10px] font-mono uppercase tracking-widest text-white/45">

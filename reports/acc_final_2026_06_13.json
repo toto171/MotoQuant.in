@@ -1,0 +1,116 @@
+{
+ "generated": "2026-06-13",
+ "n_matched": 236,
+ "weighted_bias": -0.015,
+ "weighted_mae": 0.2623,
+ "median_abs": 0.2069,
+ "top10_mean_abs": 0.0056,
+ "within": {
+  "0.1": 62,
+  "0.2": 113,
+  "0.5": 187,
+  "1.0": 217
+ },
+ "top10": [
+  {
+   "mfr": "Honda",
+   "model": "CBR 600RR",
+   "year": 2007,
+   "cc": 599,
+   "tgt": 10.844,
+   "sim": 10.8447,
+   "delta": 0.0007,
+   "src": "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2007)"
+  },
+  {
+   "mfr": "Aprilia",
+   "model": "Tuono 660",
+   "year": 2021,
+   "cc": 659,
+   "tgt": 11.33,
+   "sim": 11.3285,
+   "delta": -0.0015,
+   "src": "MotoStatz (Dragy, stock instrumented)"
+  },
+  {
+   "mfr": "Harley-Davidson",
+   "model": "Sportster S",
+   "year": 2021,
+   "cc": 1252,
+   "tgt": 11.1,
+   "sim": 11.0981,
+   "delta": -0.0019,
+   "src": "HDForums timeslip 2021"
+  },
+  {
+   "mfr": "Kawasaki",
+   "model": "Z H2 SE",
+   "year": 2020,
+   "cc": 998,
+   "tgt": 9.95,
+   "sim": 9.9471,
+   "delta": -0.0029,
+   "src": "Cycle World 2020"
+  },
+  {
+   "mfr": "Kawasaki",
+   "model": "Ninja ZX-9R",
+   "year": 2000,
+   "cc": 899,
+   "tgt": 10.5,
+   "sim": 10.4968,
+   "delta": -0.0032,
+   "src": "Sport Rider 2000"
+  },
+  {
+   "mfr": "Kawasaki",
+   "model": "Ninja H2",
+   "year": 2015,
+   "cc": 998,
+   "tgt": 9.62,
+   "sim": 9.6252,
+   "delta": 0.0052,
+   "src": "MCN 2015"
+  },
+  {
+   "mfr": "BMW",
+   "model": "R 12 nineT",
+   "year": 2014,
+   "cc": 1170,
+   "tgt": 11.05,
+   "sim": 11.0583,
+   "delta": 0.0083,
+   "src": "Cycle World 2014 (timing-strip, retro comparison test)"
+  },
+  {
+   "mfr": "Honda",
+   "model": "CB1000R",
+   "year": 2021,
+   "cc": 998,
+   "tgt": 10.8,
+   "sim": 10.8104,
+   "delta": 0.0104,
+   "src": "DERIVED (ProfessCars/MotorBikeCatalog est ~10.8s; 143hp I4 naked)"
+  },
+  {
+   "mfr": "Kawasaki",
+   "model": "Ninja ZX-10R",
+   "year": 2021,
+   "cc": 998,
+   "tgt": 10.0,
+   "sim": 10.0106,
+   "delta": 0.0106,
+   "src": "Cycle World 2021"
+  },
+  {
+   "mfr": "Kawasaki",
+   "model": "ZZR1400",
+   "year": 2006,
+   "cc": 1352,
+   "tgt": 9.9,
+   "sim": 9.9112,
+   "delta": 0.0112,
+   "src": "MCN 2006"
+  }
+ ]
+}

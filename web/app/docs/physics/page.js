@@ -167,7 +167,7 @@ export default function PhysicsPage() {
         <div className="grid sm:grid-cols-2 gap-4">
           <Link href="/docs/validation" className="glass rounded-xl p-4 border border-white/10 hover:border-brand-orange/40 transition-colors group">
             <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Validation Data →</div>
-            <div className="text-xs text-white/50">Benchmark table with 156 benchmarks, per-cluster accuracy metrics, and methodology.</div>
+            <div className="text-xs text-white/50">Benchmark table with 216 benchmarks, per-cluster accuracy metrics, and methodology.</div>
           </Link>
           <Link href="/docs/getting-started" className="glass rounded-xl p-4 border border-white/10 hover:border-brand-orange/40 transition-colors group">
             <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Run your first sim →</div>

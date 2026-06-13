@@ -20,7 +20,7 @@ export const metadata = {
   alternates: { canonical: 'https://motoquant.in/blog/how-the-motoquant-physics-engine-works' },
   openGraph: {
     title: 'How the MotoQuant Physics Engine Works',
-    description: '15 sub-models, RK4 integration at 1ms, validated against 156 published drag-strip benchmarks (June 2026 sweep). Reference baselines accurate to 4 decimals. A tour of what is under the hood.',
+    description: '15 sub-models, RK4 integration at 1ms, validated against 216 published drag-strip benchmarks (June 2026 sweep). Reference baselines accurate to 4 decimals. A tour of what is under the hood.',
     url: 'https://motoquant.in/blog/how-the-motoquant-physics-engine-works',
     type: 'article',
     publishedTime: '2026-04-27T00:00:00Z',
@@ -142,7 +142,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'We maintain a list of 156 published drag-strip benchmarks (155 matched to a catalog bike) — sourced from Cycle World, Sport Rider, MCN, Motorcycle Consumer News, MotorcycleDaily, MotoStatz, FastestLaps, and Indian Autos Mag where the magazine published the actual instrumented timeslip. For each benchmark, we run the simulator at the test-day environmental conditions and compare predicted ET against measured ET. Each source is weighted by quality (instrumented timeslip 1.0, magazine 0.7, aggregator 0.5, derived 0.1) and the delta gets bucketed by class (litre-sport-195+, litre-sport-600-1000, mid-twin-300-500, entry-150-200, two-stroke, etc.) so we can see where the physics is honest and where it has systematic bias.',
+    text: 'We maintain a list of 216 published drag-strip benchmarks (236 matched to a catalog bike) — sourced from Cycle World, Sport Rider, MCN, Motorcycle Consumer News, MotorcycleDaily, MotoStatz, FastestLaps, and Indian Autos Mag where the magazine published the actual instrumented timeslip. For each benchmark, we run the simulator at the test-day environmental conditions and compare predicted ET against measured ET. Each source is weighted by quality (instrumented timeslip 1.0, magazine 0.7, aggregator 0.5, derived 0.1) and the delta gets bucketed by class (litre-sport-195+, litre-sport-600-1000, mid-twin-300-500, entry-150-200, two-stroke, etc.) so we can see where the physics is honest and where it has systematic bias.',
   },
   {
     type: 'p',
@@ -150,7 +150,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Current state across 155 matched benchmarks (June 2026 sweep): overall source-quality-weighted mean absolute error is 0.227 seconds, weighted bias is essentially zero (-0.007 s — meaning the simulator is no longer systematically optimistic or pessimistic). Across the ten cleanest validated runs the mean absolute error is ±0.010 s, and 81 of the 155 benchmarks fall within ±0.20 s. The 195+ hp class is among the tightest at 0.153 s weighted |Δ|. The small-cc and 2-stroke clusters have higher variance, partly because their published benchmarks are themselves uncertain (most Indian small-cc ETs are estimated from 0–100 km/h times rather than measured timeslips).',
+    text: 'Current state across 236 matched benchmarks (June 2026 sweep): overall source-quality-weighted mean absolute error is 0.262 seconds, weighted bias is essentially zero (-0.015 s — meaning the simulator is no longer systematically optimistic or pessimistic). Across the ten cleanest validated runs the mean absolute error is ±0.006 s, and 113 of the 236 benchmarks fall within ±0.20 s. The 195+ hp class is among the tightest at 0.137 s weighted |Δ|. The small-cc and 2-stroke clusters have higher variance, partly because their published benchmarks are themselves uncertain (most Indian small-cc ETs are estimated from 0–100 km/h times rather than measured timeslips).',
   },
   {
     type: 'h2',
@@ -298,7 +298,7 @@ export default function Page() {
               ))}
             </div>
             <p className="text-white/40 text-xs mt-4">
-              All claims about cluster bias, mean absolute error, and within-tolerance fractions in this post reflect the June 2026 sweep against 156 published benchmarks (155 matched).
+              All claims about cluster bias, mean absolute error, and within-tolerance fractions in this post reflect the June 2026 sweep against 216 published benchmarks (236 matched).
             </p>
           </div>
         </footer>

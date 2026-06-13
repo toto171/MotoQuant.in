@@ -360,7 +360,7 @@ export default function FeaturesPage() {
         stats={[
           { value: 15, label: 'Sub-models' },
           { value: 563, label: 'Parts' },
-          { value: 156, label: 'Benchmarks' },
+          { value: 216, label: 'Benchmarks' },
         ]}
         className="border-b border-brand-orange/10"
       >
