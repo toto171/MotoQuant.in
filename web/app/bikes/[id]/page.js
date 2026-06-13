@@ -257,7 +257,7 @@ export default function BikeDetailPage() {
                     <Gauge size={16} /> Simulate this bike
                   </Link>
                   <Link
-                    href="/optimize"
+                    href={`/optimize?bike_id=${bike.id}`}
                     className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md border border-brand-orange/40 text-brand-orange hover:bg-brand-orange/10 font-display font-semibold transition-colors"
                   >
                     <Wrench size={16} /> Optimize build

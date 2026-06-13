@@ -208,6 +208,28 @@ export default function BuildOptimizer() {
   const [prog, setProg] = useState(null); // {progress, stage} from the jobs poller
   const abortRef = useRef(null);
 
+  // Preselect a bike from ?bike_id (deep link from /bikes/[id] "Optimize build").
+  // Guarded window read (not useSearchParams) so the un-Suspense'd client page
+  // keeps prerendering; no-op when the param is absent or invalid.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const raw = new URLSearchParams(window.location.search).get('bike_id');
+    const id = raw != null ? Number(raw) : NaN;
+    if (!Number.isInteger(id) || id <= 0) return;
+    let cancelled = false;
+    fetch(`${API_URL}/api/bikes/${id}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((b) => {
+        if (!cancelled && b && b.id != null) {
+          setBike({ id: b.id, manufacturer: b.manufacturer, model: b.model });
+        }
+      })
+      .catch(() => {}); // bad id / offline → silently leave the picker empty
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const stop = useCallback(() => {
     abortRef.current?.abort(); // runJob also cancels the job server-side
     setLoading(false);
