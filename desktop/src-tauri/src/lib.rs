@@ -16,7 +16,7 @@
 // session against the operator's server, because all compute happens there.
 
 use std::sync::{Arc, Mutex};
-use tauri::State;
+use tauri::{Manager, State};
 
 /// Compile-time default for the hosted API. Overridable at build/dev time via
 /// the `MOTOQUANT_API_URL` environment variable (read once at startup).
