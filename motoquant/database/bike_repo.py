@@ -24,6 +24,15 @@ _YEAR_SUFFIX_RE = re.compile(
     r"\s*\((?:19|20)\d{2}(?:\s*[-–]\s*(?:19|20)?\d{2,4})?\)\s*$"
 )
 
+# Collapses an accidentally DOUBLED trailing year-range
+# ("Classic 650 (2025-2026) (2025-2026)" -> "Classic 650 (2025-2026)").
+# Matches only names ending in TWO ranges, so the 489 correct single-range
+# names are never touched. Idempotent.
+_DOUBLED_YEAR_RE = re.compile(
+    r"(\((?:19|20)\d{2}(?:\s*[-–]\s*(?:19|20)?\d{2,4})?\))"
+    r"\s*\((?:19|20)\d{2}(?:\s*[-–]\s*(?:19|20)?\d{2,4})?\)\s*$"
+)
+
 
 def _norm_model(s: str) -> str:
     """Strip a trailing ``(YYYY-YYYY)`` year-range suffix from a model name.
@@ -100,6 +109,11 @@ class BikeRepository:
         **headline_specs,
     ) -> int:
         """Create a new bike model entry. Returns model ID."""
+        # The importer's year-band auto-suffix appended a range to specs that
+        # already carried one, producing 16 doubled names ("X (2025-2026)
+        # (2025-2026)") visible on /bikes and in the pickers. Collapse to a
+        # single range here — the one chokepoint for every bike insert.
+        model_name = _DOUBLED_YEAR_RE.sub(r"\1", model_name)
         cols = [
             "manufacturer_id",
             "model_name",
