@@ -1,0 +1,350 @@
+{
+  "_comment": "Golden regression snapshot. Regenerate with `python scripts/generate_regression_snapshot.py` ONLY when a physics change is intended. See tests/test_regression_snapshot.py.",
+  "catalog": {
+    "Apache RR 310 (2018-2024)|2018": {
+      "cluster": "entry_300",
+      "eighth_s": 9.960214,
+      "et_s": 15.036602,
+      "finished": true,
+      "sixty_ft_s": 2.839633,
+      "trap_kmh": 156.6012,
+      "trap_ms": 43.500326
+    },
+    "Apache RTR 200 4V (2016-2024)|2016": {
+      "cluster": "entry_200",
+      "eighth_s": 11.94743,
+      "et_s": 19.021629,
+      "finished": true,
+      "sixty_ft_s": 2.772764,
+      "trap_kmh": 109.6932,
+      "trap_ms": 30.470346
+    },
+    "CBR 600RR (2007-2012)|2007": {
+      "cluster": "sport_600_1000",
+      "eighth_s": 7.441333,
+      "et_s": 11.008165,
+      "finished": true,
+      "sixty_ft_s": 2.18548,
+      "trap_kmh": 225.3749,
+      "trap_ms": 62.604148
+    },
+    "Classic 350 (2021-2026)|2021": {
+      "cluster": "cruiser",
+      "eighth_s": 11.792714,
+      "et_s": 18.492014,
+      "finished": true,
+      "sixty_ft_s": 3.13154,
+      "trap_kmh": 115.6432,
+      "trap_ms": 32.123113
+    },
+    "Diavel V4 (2023-2026)|2023": {
+      "cluster": "cruiser",
+      "eighth_s": 7.538448,
+      "et_s": 11.191401,
+      "finished": true,
+      "sixty_ft_s": 2.151869,
+      "trap_kmh": 217.6183,
+      "trap_ms": 60.449526
+    },
+    "Dominar 250 (2020-2024)|2020": {
+      "cluster": "entry_200",
+      "eighth_s": 10.156929,
+      "et_s": 15.820067,
+      "finished": true,
+      "sixty_ft_s": 2.684957,
+      "trap_kmh": 137.3633,
+      "trap_ms": 38.156473
+    },
+    "Duke 390 (2017-2023)|2017": {
+      "cluster": "entry_300",
+      "eighth_s": 9.017302,
+      "et_s": 13.933948,
+      "finished": true,
+      "sixty_ft_s": 2.501173,
+      "trap_kmh": 158.3271,
+      "trap_ms": 43.979759
+    },
+    "GSX-R 600 (2006-2007)|2006": {
+      "cluster": "sport_600_1000",
+      "eighth_s": 7.442398,
+      "et_s": 11.084288,
+      "finished": true,
+      "sixty_ft_s": 2.19998,
+      "trap_kmh": 219.8412,
+      "trap_ms": 61.067013
+    },
+    "GSX-R 750 (2008-2010)|2008": {
+      "cluster": "sport_600_1000",
+      "eighth_s": 7.659745,
+      "et_s": 11.454525,
+      "finished": true,
+      "sixty_ft_s": 2.233377,
+      "trap_kmh": 211.8402,
+      "trap_ms": 58.844496
+    },
+    "Hayabusa (2008-2012)|2008": {
+      "cluster": "litre_hyper",
+      "eighth_s": 6.896241,
+      "et_s": 10.290918,
+      "finished": true,
+      "sixty_ft_s": 1.989258,
+      "trap_kmh": 236.3234,
+      "trap_ms": 65.645379
+    },
+    "MT-07 (2018-2024)|2018": {
+      "cluster": "mid_twin",
+      "eighth_s": 7.876298,
+      "et_s": 12.061319,
+      "finished": true,
+      "sixty_ft_s": 2.201945,
+      "trap_kmh": 187.1351,
+      "trap_ms": 51.981985
+    },
+    "Meteor 350 (2020-2026)|2020": {
+      "cluster": "cruiser",
+      "eighth_s": 11.67584,
+      "et_s": 18.326735,
+      "finished": true,
+      "sixty_ft_s": 3.075523,
+      "trap_kmh": 116.4631,
+      "trap_ms": 32.350861
+    },
+    "NSR250R SP (1990-1993)|1990": {
+      "cluster": "two_stroke",
+      "eighth_s": 9.259226,
+      "et_s": 14.923618,
+      "finished": true,
+      "sixty_ft_s": 2.309003,
+      "trap_kmh": 142.587,
+      "trap_ms": 39.607496
+    },
+    "Ninja 400 (2018-2024)|2018": {
+      "cluster": "entry_300",
+      "eighth_s": 9.071149,
+      "et_s": 13.763656,
+      "finished": true,
+      "sixty_ft_s": 2.543645,
+      "trap_kmh": 170.0708,
+      "trap_ms": 47.24188
+    },
+    "Ninja H2 (2015-2023)|2015": {
+      "cluster": "litre_super",
+      "eighth_s": 6.701488,
+      "et_s": 9.657066,
+      "finished": true,
+      "sixty_ft_s": 1.927471,
+      "trap_kmh": 278.7035,
+      "trap_ms": 77.417637
+    },
+    "Ninja ZX-10R (2004-2005)|2004": {
+      "cluster": "litre_sport",
+      "eighth_s": 6.96436,
+      "et_s": 10.123716,
+      "finished": true,
+      "sixty_ft_s": 2.112648,
+      "trap_kmh": 255.6156,
+      "trap_ms": 71.00432
+    },
+    "Ninja ZX-14R (2012-2023)|2012": {
+      "cluster": "litre_hyper",
+      "eighth_s": 6.825084,
+      "et_s": 10.036438,
+      "finished": true,
+      "sixty_ft_s": 2.034948,
+      "trap_kmh": 250.4627,
+      "trap_ms": 69.572977
+    },
+    "Ninja ZX-6R (2003-2004)|2003": {
+      "cluster": "sport_600_1000",
+      "eighth_s": 7.549919,
+      "et_s": 11.15571,
+      "finished": true,
+      "sixty_ft_s": 2.243066,
+      "trap_kmh": 223.4128,
+      "trap_ms": 62.059121
+    },
+    "Panigale V4 (2018-2024)|2018": {
+      "cluster": "litre_sport",
+      "eighth_s": 6.976051,
+      "et_s": 10.178965,
+      "finished": true,
+      "sixty_ft_s": 2.110503,
+      "trap_kmh": 251.7201,
+      "trap_ms": 69.922245
+    },
+    "Pulsar NS200 (2012-2016)|2012": {
+      "cluster": "entry_200",
+      "eighth_s": 10.35214,
+      "et_s": 16.332432,
+      "finished": true,
+      "sixty_ft_s": 2.705114,
+      "trap_kmh": 128.9056,
+      "trap_ms": 35.807121
+    },
+    "RD350 (1973-1975)|1973": {
+      "cluster": "two_stroke",
+      "eighth_s": 9.403413,
+      "et_s": 14.999781,
+      "finished": true,
+      "sixty_ft_s": 2.375416,
+      "trap_kmh": 145.3726,
+      "trap_ms": 40.381287
+    },
+    "RG500 Gamma (1985-1987)|1985": {
+      "cluster": "two_stroke",
+      "eighth_s": 7.466803,
+      "et_s": 11.217808,
+      "finished": true,
+      "sixty_ft_s": 2.167656,
+      "trap_kmh": 213.9437,
+      "trap_ms": 59.428803
+    },
+    "RGV250 Gamma (1991-1996)|1991": {
+      "cluster": "two_stroke",
+      "eighth_s": 8.476987,
+      "et_s": 13.369618,
+      "finished": true,
+      "sixty_ft_s": 2.248936,
+      "trap_kmh": 159.1858,
+      "trap_ms": 44.218272
+    },
+    "RS 660 (2021-2026)|2021": {
+      "cluster": "mid_twin",
+      "eighth_s": 7.503241,
+      "et_s": 11.145673,
+      "finished": true,
+      "sixty_ft_s": 2.212686,
+      "trap_kmh": 220.3742,
+      "trap_ms": 61.215046
+    },
+    "RSV4 1000 (2009-2014)|2009": {
+      "cluster": "litre_sport",
+      "eighth_s": 6.993139,
+      "et_s": 10.216227,
+      "finished": true,
+      "sixty_ft_s": 2.094789,
+      "trap_kmh": 249.6016,
+      "trap_ms": 69.333783
+    },
+    "RX100 (1985-1996)|1985": {
+      "cluster": "two_stroke",
+      "eighth_s": 13.123036,
+      "et_s": 21.173844,
+      "finished": true,
+      "sixty_ft_s": 2.843274,
+      "trap_kmh": 95.7712,
+      "trap_ms": 26.603108
+    },
+    "Rebel 1100 (2021-2026)|2021": {
+      "cluster": "cruiser",
+      "eighth_s": 8.40122,
+      "et_s": 12.860478,
+      "finished": true,
+      "sixty_ft_s": 2.370307,
+      "trap_kmh": 176.2094,
+      "trap_ms": 48.947062
+    },
+    "Rocket 3 R (2020-2026)|2020": {
+      "cluster": "muscle",
+      "eighth_s": 7.197579,
+      "et_s": 10.882937,
+      "finished": true,
+      "sixty_ft_s": 1.998125,
+      "trap_kmh": 215.8483,
+      "trap_ms": 59.957869
+    },
+    "S 1000 RR (2015-2018)|2015": {
+      "cluster": "litre_sport",
+      "eighth_s": 6.950368,
+      "et_s": 10.100304,
+      "finished": true,
+      "sixty_ft_s": 2.106589,
+      "trap_kmh": 257.5737,
+      "trap_ms": 71.548247
+    },
+    "SV650 (2016-2026)|2016": {
+      "cluster": "mid_twin",
+      "eighth_s": 8.020415,
+      "et_s": 12.295432,
+      "finished": true,
+      "sixty_ft_s": 2.245018,
+      "trap_kmh": 183.5709,
+      "trap_ms": 50.991907
+    },
+    "Tuono 660 (2021-2026)|2021": {
+      "cluster": "mid_twin",
+      "eighth_s": 7.615233,
+      "et_s": 11.510129,
+      "finished": true,
+      "sixty_ft_s": 2.20055,
+      "trap_kmh": 202.7957,
+      "trap_ms": 56.332125
+    },
+    "VMAX 1700 (2009-2020)|2009": {
+      "cluster": "muscle",
+      "eighth_s": 7.212242,
+      "et_s": 10.762627,
+      "finished": true,
+      "sixty_ft_s": 2.063581,
+      "trap_kmh": 224.0975,
+      "trap_ms": 62.249298
+    },
+    "YZF-R15 V4 (2021-2024)|2021": {
+      "cluster": "entry_150",
+      "eighth_s": 11.688035,
+      "et_s": 18.296381,
+      "finished": true,
+      "sixty_ft_s": 2.762909,
+      "trap_kmh": 120.0756,
+      "trap_ms": 33.354339
+    },
+    "YZF-R3 (2015-2022)|2015": {
+      "cluster": "entry_300",
+      "eighth_s": 9.741877,
+      "et_s": 14.576041,
+      "finished": true,
+      "sixty_ft_s": 2.825923,
+      "trap_kmh": 165.1341,
+      "trap_ms": 45.870584
+    },
+    "YZF-R6 (2006-2007)|2006": {
+      "cluster": "sport_600_1000",
+      "eighth_s": 7.577451,
+      "et_s": 11.304878,
+      "finished": true,
+      "sixty_ft_s": 2.203845,
+      "trap_kmh": 215.3855,
+      "trap_ms": 59.829299
+    }
+  },
+  "reference": {
+    "GSX-R 1000 K5": {
+      "eighth_s": 6.73288,
+      "et_s": 10.033405,
+      "finished": true,
+      "sixty_ft_s": 1.984487,
+      "trap_kmh": 239.7727,
+      "trap_ms": 66.603523
+    },
+    "Hayabusa Gen1": {
+      "eighth_s": 7.040507,
+      "et_s": 10.471202,
+      "finished": true,
+      "sixty_ft_s": 2.071675,
+      "trap_kmh": 232.3424,
+      "trap_ms": 64.539559
+    },
+    "YZF-R1 4C8": {
+      "eighth_s": 6.887286,
+      "et_s": 10.285931,
+      "finished": true,
+      "sixty_ft_s": 2.029489,
+      "trap_kmh": 232.922,
+      "trap_ms": 64.700545
+    }
+  },
+  "sim_args": {
+    "max_time": 26.0,
+    "use_adaptive_dt": false
+  }
+}
