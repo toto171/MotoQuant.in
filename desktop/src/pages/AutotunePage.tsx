@@ -7,7 +7,8 @@ import { BikePicker } from "@/components/BikePicker";
 import { StatTile } from "@/components/StatTile";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { SkeletonStatTile } from "@/components/Skeleton";
-import { useAutotuneEcu } from "@/hooks/useApi";
+import { JobProgressBar } from "@/components/JobProgress";
+import { useAutotuneJob } from "@/hooks/useApi";
 import type {
   BikeSummary, EcuAutotune, AutotuneGearing, AutotuneLaunchRpm,
   AutotuneTyrePressure, AutotuneFuelTiming,
@@ -23,7 +24,9 @@ export function AutotunePage() {
   const [humidity, setHumidity] = useState<string>("");
   const [altitudeM, setAltitudeM] = useState<string>("");
 
-  const tune = useAutotuneEcu();
+  // Autotune sweeps gearing + launch RPM on the full sim — slow on a
+  // constrained instance, so it runs as a background job with real progress.
+  const tune = useAutotuneJob();
 
   const numOrNull = (s: string): number | null => {
     const t = s.trim();
@@ -32,11 +35,11 @@ export function AutotunePage() {
     return Number.isFinite(n) ? n : null;
   };
 
-  const canRun = bike != null && !tune.isPending;
+  const canRun = bike != null && !tune.isRunning;
 
   const onRun = () => {
     if (!bike) return;
-    tune.mutate({
+    tune.run({
       bike_id: bike.id,
       location: location.trim() || undefined,
       ambient_temp_c: numOrNull(tempC) ?? undefined,
@@ -103,7 +106,7 @@ export function AutotunePage() {
             className="btn btn-primary px-8 justify-center focus-visible:outline-2 focus-visible:outline-signal-300"
             title={!bike ? "Select a bike first" : "Get setup"}
           >
-            {tune.isPending ? (
+            {tune.isRunning ? (
               <><Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> Computing setup…</>
             ) : (
               <><Play className="w-4 h-4" aria-hidden="true" /> Get setup</>
@@ -113,23 +116,34 @@ export function AutotunePage() {
       </section>
 
       {/* Error */}
-      {tune.isError && (
+      {tune.error && (
         <div className="card p-4 border-stop-500/40 bg-stop-500/5 flex gap-3" role="alert">
           <AlertTriangle className="w-5 h-5 text-stop-500 shrink-0 mt-0.5" aria-hidden="true" />
           <div>
             <div className="font-medium text-stop-500">Autotune failed</div>
             <div className="text-xs text-carbon-400 mt-1">
-              {tune.error?.message || "Unknown error — is the backend running?"}
+              {tune.error.message || "Unknown error — is the backend running?"}
             </div>
           </div>
         </div>
       )}
 
-      {/* Loading skeleton */}
-      {tune.isPending && !result && (
-        <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          {[0, 1, 2, 3, 4].map((i) => <SkeletonStatTile key={i} />)}
-        </section>
+      {/* Live progress (real %, with a Stop button) */}
+      {tune.isRunning && !result && (
+        <>
+          <section className="card p-5">
+            <JobProgressBar
+              status={tune.status}
+              progress={tune.progress}
+              stage={tune.stage}
+              onStop={tune.stop}
+              label="Computing track-aware setup…"
+            />
+          </section>
+          <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {[0, 1, 2, 3, 4].map((i) => <SkeletonStatTile key={i} />)}
+          </section>
+        </>
       )}
 
       {result && <AutotuneResult result={result} />}

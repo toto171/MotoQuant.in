@@ -1,5 +1,6 @@
+import { useCallback, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { api, runJob } from "@/lib/api";
 import type {
   CompareRequest,
   CompareResponse,
@@ -17,6 +18,8 @@ import type {
   OptimizedBuild,
   AutotuneRequest,
   EcuAutotune,
+  JobKind,
+  JobProgress,
 } from "@/types/api";
 
 export function useBikes(params: {
@@ -138,3 +141,130 @@ export function useAutotuneEcu() {
     mutationFn: (req) => api.autotuneEcu(req),
   });
 }
+
+// ─── Background-job runner hook ──────────────────────────────────────────
+// Long-running work (full sim, optimise, autotune) runs server-side with real
+// progress; this hook drives runJob() and exposes { run, stop, isRunning,
+// progress, stage, data, error, reset }. Quick-sim stays synchronous (use
+// useQuickSimulate) — polling would only make a ~50 ms call feel slower.
+//
+// `stop()` aborts the in-flight request AND cancels the job server-side, so a
+// user can change the setup mid-run without leaving a zombie burning CPU.
+// AbortError is swallowed (a deliberate Stop is not an error tile).
+
+interface JobRunState<T> {
+  run: (body: unknown) => Promise<T | undefined>;
+  stop: () => void;
+  reset: () => void;
+  isRunning: boolean;
+  progress: number | null;
+  stage: string;
+  status: JobProgress["status"] | "idle";
+  data: T | null;
+  error: Error | null;
+}
+
+function useJobRunner<T>(
+  kind: JobKind,
+  fallback?: (body: unknown) => Promise<T>,
+): JobRunState<T> {
+  const [isRunning, setRunning] = useState(false);
+  const [progress, setProgress] = useState<number | null>(null);
+  const [stage, setStage] = useState("");
+  const [status, setStatus] = useState<JobProgress["status"] | "idle">("idle");
+  const [data, setData] = useState<T | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  const reset = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setRunning(false);
+    setProgress(null);
+    setStage("");
+    setStatus("idle");
+    setData(null);
+    setError(null);
+  }, []);
+
+  const stop = useCallback(() => {
+    abortRef.current?.abort();
+  }, []);
+
+  const run = useCallback(
+    async (body: unknown): Promise<T | undefined> => {
+      // Abort any prior run before starting a new one.
+      abortRef.current?.abort();
+      const ac = new AbortController();
+      abortRef.current = ac;
+      setRunning(true);
+      setData(null);
+      setError(null);
+      setProgress(null);
+      setStatus("connecting");
+      setStage("");
+      try {
+        const result = await runJob<T>(kind, body, {
+          signal: ac.signal,
+          fallback: fallback ? () => fallback(body) : undefined,
+          onProgress: (p) => {
+            setStatus(p.status);
+            setProgress(p.progress);
+            setStage(p.stage);
+          },
+        });
+        setData(result);
+        setRunning(false);
+        setStatus("done");
+        return result;
+      } catch (err) {
+        // A deliberate Stop unwinds as AbortError — clear state, no error tile.
+        if (err instanceof DOMException && err.name === "AbortError") {
+          setRunning(false);
+          setStatus("idle");
+          setProgress(null);
+          setStage("");
+          return undefined;
+        }
+        setError(err instanceof Error ? err : new Error(String(err)));
+        setRunning(false);
+        setStatus("error");
+        return undefined;
+      }
+    },
+    [kind, fallback],
+  );
+
+  return { run, stop, reset, isRunning, progress, stage, status, data, error };
+}
+
+// Full quarter-mile simulation as a background job (real progress + Stop).
+// Falls back to the synchronous /api/simulate when /api/jobs/* is absent.
+export function useSimulateJob() {
+  const fallback = useCallback(
+    (body: unknown) => api.simulate(body as SimulateRequest),
+    [],
+  );
+  return useJobRunner<SimulateResponse>("simulate", fallback);
+}
+
+// Build optimiser as a background job (it can run for minutes when the
+// surrogate is unavailable and every candidate is a full RK4 sim).
+export function useOptimizeBuildJob() {
+  const fallback = useCallback(
+    (body: unknown) => api.optimizeBuild(body as OptimizeBuildRequest),
+    [],
+  );
+  return useJobRunner<OptimizedBuild>("optimize", fallback);
+}
+
+// ECU autotune as a background job (sweeps gearing + launch RPM on the full
+// sim — slow on a constrained instance).
+export function useAutotuneJob() {
+  const fallback = useCallback(
+    (body: unknown) => api.autotuneEcu(body as AutotuneRequest),
+    [],
+  );
+  return useJobRunner<EcuAutotune>("autotune", fallback);
+}
+

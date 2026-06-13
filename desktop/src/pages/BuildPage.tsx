@@ -6,25 +6,56 @@ import { BikePicker } from "@/components/BikePicker";
 import { StatTile } from "@/components/StatTile";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { SkeletonPartRows } from "@/components/Skeleton";
+import { JobProgressBar } from "@/components/JobProgress";
 import { useToastStore } from "@/store/toastStore";
 import {
-  useParts, usePartsCategories, useQuickSimulate, useSurrogatePredict, useOptimizeBuild,
+  useParts, usePartsCategories, useQuickSimulate, useSurrogatePredict, useOptimizeBuildJob,
 } from "@/hooks/useApi";
 import type { BikeSummary, Part, OptimizedBuild } from "@/types/api";
 import clsx from "clsx";
 
-const EXCLUSIVE_PREFIXES = [
+// Categories where a build can physically carry at most ONE part. This is the
+// canonical category-NAME set returned by /api/parts (column `pc.name`), and it
+// must stay in lockstep with the backend source of truth:
+//   motoquant/analysis/roi.py :: EXCLUSIVE_CATEGORIES
+// (re-exported as recommendations.EXCLUSIVE_GROUPS). No endpoint exposes this
+// map, so it is mirrored here verbatim. Sprockets are position-exclusive (one
+// front + one rear) and are deliberately NOT in this set -- the optimiser keys
+// them by position, and stacking a front + a rear sprocket is valid.
+const EXCLUSIVE_CATEGORY_NAMES: ReadonlySet<string> = new Set([
+  "exhaust",
+  "ecu",
+  "air_filter",
+  "clutch_kit",
+  "quickshifter",
+  "battery",
+  "chain",
+  "boost_kit",
+  "nitrous",
+  "wheelie_bar",
+  "swingarm_ext",
+]);
+
+// Legacy / display-name aliases. The API returns canonical `category_name`
+// values (matched exactly above), but tolerate older display-style strings
+// (e.g. "ECU Flash", "front-sprocket", a bare "boost"/"turbo") so callers that
+// pass a human label still get a sane answer. NOTE: "swingarm" is included so
+// two swingarm extensions can never be stacked regardless of label form.
+const EXCLUSIVE_ALIASES: readonly string[] = [
   "exhaust", "air-filter", "air_filter", "ecu", "piggyback",
-  "fuel-system", "fuel_system", "battery", "chain",
-  "front-sprocket", "front_sprocket", "rear-sprocket", "rear_sprocket",
-  "slipper", "clutch", "quickshifter", "boost", "turbo", "supercharger",
-  "nitrous", "wheelie",
-] as const;
+  "battery", "chain", "clutch", "slipper", "quickshifter",
+  "boost", "turbo", "supercharger", "nitrous", "wheelie",
+  "swingarm", "front-sprocket", "front_sprocket",
+  "rear-sprocket", "rear_sprocket",
+];
 
 export function isExclusiveCategory(name: string | null | undefined): boolean {
   if (!name) return false;
   const n = name.toLowerCase();
-  return EXCLUSIVE_PREFIXES.some((p) => n.startsWith(p) || n.includes(p));
+  // Exact canonical-name match is the contract path (mirrors roi.py).
+  if (EXCLUSIVE_CATEGORY_NAMES.has(n)) return true;
+  // Tolerant fallback for display-style labels.
+  return EXCLUSIVE_ALIASES.some((a) => n.startsWith(a) || n.includes(a));
 }
 
 export function BuildPage() {
@@ -70,7 +101,10 @@ export function BuildPage() {
   const sim = useQuickSimulate();
   const surrogate = useSurrogatePredict();
   // ── Auto-optimize (Track B) ──
-  const optimize = useOptimizeBuild();
+  // Runs as a background job: with no surrogate the optimiser scores every
+  // candidate via a full RK4 sim, which can take minutes. Job-backed so the
+  // user sees real progress and can Stop to change the budget/goal.
+  const optimize = useOptimizeBuildJob();
   const [optBudget, setOptBudget] = useState(100000);
   const [optGoal, setOptGoal] = useState<"min_et" | "max_trap">("min_et");
   useEffect(() => {
@@ -448,16 +482,25 @@ export function BuildPage() {
             </div>
           </div>
           <button
-            onClick={() => bike && optimize.mutate({ bike_id: bike.id, budget_inr: optBudget, goal: optGoal, max_candidates: 50 })}
-            disabled={!bike || optimize.isPending}
+            onClick={() => bike && optimize.run({ bike_id: bike.id, budget_inr: optBudget, goal: optGoal, max_candidates: 50 })}
+            disabled={!bike || optimize.isRunning}
             className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-signal-600 text-carbon-950 font-medium text-sm hover:bg-signal-500 disabled:opacity-50 transition-colors"
           >
-            {optimize.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-            {optimize.isPending ? "Optimizing…" : "Optimize build"}
+            {optimize.isRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+            {optimize.isRunning ? "Optimizing…" : "Optimize build"}
           </button>
-          {optimize.isError && (
+          {optimize.isRunning && (
+            <JobProgressBar
+              status={optimize.status}
+              progress={optimize.progress}
+              stage={optimize.stage}
+              onStop={optimize.stop}
+              label="Scoring candidate builds…"
+            />
+          )}
+          {optimize.error && (
             <div className="text-xs text-stop-400 flex items-center gap-1.5">
-              <AlertCircle className="w-3.5 h-3.5" /> {(optimize.error as Error)?.message ?? "Optimization failed"}
+              <AlertCircle className="w-3.5 h-3.5" /> {optimize.error.message || "Optimization failed"}
             </div>
           )}
           {optimize.data && <OptimizeResult result={optimize.data} />}

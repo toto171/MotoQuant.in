@@ -102,6 +102,9 @@ export interface Tire {
 
 export interface TiresResponse {
   tires: Tire[];
+  // /api/tires now returns the total matching count (before the limit slice)
+  // alongside the page. Optional so older backends that omit it still type.
+  total?: number;
 }
 
 // ─── Parts ───────────────────────────────────────────────────────────────
@@ -661,3 +664,51 @@ export interface EcuAutotune {
   scoring_method: string;
   environment_source: string;
 }
+
+// ─── Background jobs (POST /api/jobs/*) ───────────────────────────────────
+// Long-running work (full sim, top-speed, optimise, autotune) runs on a
+// daemon thread server-side; the client polls for real progress instead of
+// showing an indeterminate spinner. The synchronous routes still exist for
+// backends that predate /api/jobs/* (the bundled sidecar may be older), so
+// runJob() falls back to them on 404/405.
+//   POST /api/jobs/{kind}  → 202 { job_id, kind, status }
+//   GET  /api/jobs/{id}    → { status, progress 0..1, stage, result|error }
+//   POST /api/jobs/{id}/cancel  (cooperative Stop)
+
+export type JobKind = "simulate" | "topspeed" | "optimize" | "autotune";
+
+// Mirrors motoquant/jobs.py Job.status.
+export type JobStatus =
+  | "queued"
+  | "running"
+  | "done"
+  | "error"
+  | "cancelled";
+
+export interface JobStartResponse {
+  job_id: string;
+  kind: string;
+  status: JobStatus;
+}
+
+// GET /api/jobs/{id}. `result` is present only when status === "done"; its
+// shape depends on `kind` (a SimulateResponse, TopSpeed result, OptimizedBuild
+// or EcuAutotune). Callers narrow it themselves.
+export interface JobStatusResponse {
+  job_id: string;
+  kind: string;
+  status: JobStatus;
+  progress: number; // 0..1
+  stage: string;
+  result?: unknown;
+  error?: string;
+}
+
+// What runJob() reports up to the UI on each poll (and during connect /
+// restart transitions where progress is not yet known).
+export interface JobProgress {
+  status: "connecting" | JobStatus;
+  progress: number | null;
+  stage: string;
+}
+

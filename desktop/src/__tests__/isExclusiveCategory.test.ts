@@ -26,6 +26,23 @@ describe("isExclusiveCategory", () => {
     expect(isExclusiveCategory("supercharger")).toBe(true);
     expect(isExclusiveCategory("nitrous")).toBe(true);
     expect(isExclusiveCategory("boost")).toBe(true);
+    expect(isExclusiveCategory("boost_kit")).toBe(true); // canonical name
+  });
+
+  it("returns true for swingarm extensions (canonical + label)", () => {
+    // Regression: the old prefix list omitted swingarm, so two extensions
+    // were stackable. Backend EXCLUSIVE_CATEGORIES carries swingarm_ext.
+    expect(isExclusiveCategory("swingarm_ext")).toBe(true);
+    expect(isExclusiveCategory("Swingarm Ext")).toBe(true);
+  });
+
+  it("matches the backend canonical category names exactly", () => {
+    for (const n of [
+      "exhaust", "ecu", "air_filter", "clutch_kit", "quickshifter",
+      "battery", "chain", "boost_kit", "nitrous", "wheelie_bar", "swingarm_ext",
+    ]) {
+      expect(isExclusiveCategory(n)).toBe(true);
+    }
   });
 
   it("returns false for additive categories", () => {

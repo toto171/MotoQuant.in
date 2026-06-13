@@ -82,3 +82,17 @@
     @apply chip bg-signal-500/15 text-signal-500 border-signal-500/40;
   }
 }
+
+@keyframes job-indeterminate {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+.animate-job-indeterminate {
+  animation: job-indeterminate 1.1s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-job-indeterminate {
+    animation: none;
+  }
+}

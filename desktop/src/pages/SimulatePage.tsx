@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Play, Loader2, AlertTriangle, Save, Check, FileDown } from "lucide-react";
-import { useSimulate, useVenues, useSaveRun } from "@/hooks/useApi";
+import { useSimulateJob, useVenues, useSaveRun } from "@/hooks/useApi";
 import { BikePicker } from "@/components/BikePicker";
 import { StatTile } from "@/components/StatTile";
 import { SimChart, SIM_CHANNELS } from "@/components/SimChart";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { SkeletonStatTile, SkeletonChartGrid } from "@/components/Skeleton";
+import { JobProgressBar } from "@/components/JobProgress";
 import { useSettings } from "@/contexts/SettingsContext";
 import { toast } from "@/store/toastStore";
 import type { BikeSummary, Splits } from "@/types/api";
@@ -151,17 +152,20 @@ export function SimulatePage() {
   const [exporting, setExporting] = useState(false);
 
   const venues = useVenues();
-  const sim = useSimulate();
+  // Full quarter-mile sim runs as a background job (real progress + Stop).
+  // Falls back to the synchronous /api/simulate when /api/jobs/* is missing
+  // (e.g. an older bundled sidecar).
+  const sim = useSimulateJob();
   const save = useSaveRun();
   const runRef = useRef<() => void>(() => {});
 
-  const canRun = bike != null && !sim.isPending;
+  const canRun = bike != null && !sim.isRunning;
   const result = sim.data;
 
   const onRun = useCallback(() => {
     if (!bike) return;
     setSavedRunId(null);
-    sim.mutate({
+    sim.run({
       bike_id: bike.id,
       venue_id: venueId ?? undefined,
       rider_mass_kg: riderMass,
@@ -175,8 +179,8 @@ export function SimulatePage() {
   runRef.current = onRun;
 
   useEffect(() => {
-    if (sim.isPending) setSavedRunId(null);
-  }, [sim.isPending]);
+    if (sim.isRunning) setSavedRunId(null);
+  }, [sim.isRunning]);
 
   const onSave = useCallback(() => {
     if (!result || !bike) return;
@@ -301,7 +305,7 @@ export function SimulatePage() {
               aria-label="Run quarter-mile simulation"
               title="Run (r)"
             >
-              {sim.isPending ? (
+              {sim.isRunning ? (
                 <><Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> Simulating…</>
               ) : (
                 <><Play className="w-4 h-4" aria-hidden="true" /> Run quarter-mile</>
@@ -312,21 +316,30 @@ export function SimulatePage() {
       </section>
 
       {/* Error */}
-      {sim.isError && (
+      {sim.error && (
         <div className="card p-4 border-stop-500/40 bg-stop-500/5 flex gap-3" role="alert">
           <AlertTriangle className="w-5 h-5 text-stop-500 shrink-0 mt-0.5" aria-hidden="true" />
           <div>
             <div className="font-medium text-stop-500">Simulation failed</div>
             <div className="text-xs text-carbon-400 mt-1">
-              {sim.error?.message || "Unknown error — check that the backend is running."}
+              {sim.error.message || "Unknown error — check that the backend is running."}
             </div>
           </div>
         </div>
       )}
 
-      {/* Loading skeleton */}
-      {sim.isPending && !result && (
+      {/* Live progress (real %, with a Stop button) */}
+      {sim.isRunning && !result && (
         <>
+          <section className="card p-5">
+            <JobProgressBar
+              status={sim.status}
+              progress={sim.progress}
+              stage={sim.stage}
+              onStop={sim.stop}
+              label="Running quarter-mile sim…"
+            />
+          </section>
           <section className="grid grid-cols-2 md:grid-cols-4 gap-3" aria-label="Loading results">
             {[0,1,2,3].map(i => <SkeletonStatTile key={i} />)}
           </section>
