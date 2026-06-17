@@ -157,26 +157,26 @@ export default function AboutPage() {
               </a>
             </div>
 
-            {/* Founder 2 — Hritwik Mudhai */}
+            {/* Founder 2 — Ritwik Singh */}
             <div className="glass rounded-2xl p-8 border border-brand-orange/20">
               <div className="flex items-start gap-5 mb-5">
                 <div className="w-14 h-14 rounded-full bg-brand-orange/20 border border-brand-orange/40 flex items-center justify-center shrink-0">
-                  <span className="text-brand-orange font-display font-bold text-xl">H</span>
+                  <span className="text-brand-orange font-display font-bold text-xl">R</span>
                 </div>
                 <div>
-                  <div className="font-display font-bold text-xl text-white mb-0.5">Hritwik Mudhai</div>
-                  <div className="font-mono text-xs text-white/50">Co-founder · Manipal, India</div>
+                  <div className="font-display font-bold text-xl text-white mb-0.5">Ritwik Singh</div>
+                  <div className="font-mono text-xs text-white/50">Co-founder · Bengaluru, India</div>
                 </div>
               </div>
               <div className="space-y-3 text-white/70 text-sm leading-relaxed">
                 <p>
-                  The physics + software side. Built the 15-sub-model drag simulation engine, the 334-bike catalog, the ROI knapsack, and the calibration pipeline that fits sim output to real Dragy traces within ±0.05 s.
+                  Automobile and AI engineer by experience — the physics, software, and machine-learning side of MotoQuant. Built the 15-sub-model drag simulation engine, the bike-and-parts catalog, and the calibration pipeline that fits sim output to real Dragy traces within ±0.05 s.
                 </p>
                 <p>
-                  AI engineer by trade — currently building a separate AI startup in parallel. That expertise is baked into MotoQuant&apos;s machine-learning layer: the DNN surrogate (1 ms per ET prediction), the XGBoost-backed ROI ranker, the Bayesian build optimiser, and the natural-language tuning interface.
+                  Wrote the load-bearing physics from the ground up: the RK4 integrator, the Pacejka tire model, the expansion-chamber two-stroke curve, and the clutch-slip thermal model — caring more about which terms actually survive the force balance than about a good-looking regression. The AI layer is his too — a DNN surrogate that predicts an ET in ~1 ms, an XGBoost-backed ROI ranker, a Bayesian build optimiser, and a natural-language tuning interface.
                 </p>
                 <p>
-                  Wrote the RK4 integrator, the Pacejka tire model, the expansion-chamber 2-stroke curve, and the clutch-slip thermal model from the ground up. Cares more about which terms actually survive the force balance than about chasing a good-looking regression. Wants MotoQuant to be the tool every serious tuner already has open on a second monitor.
+                  Outside MotoQuant he&apos;s building Dhisetu, an AI-assisted indie game studio, from Bengaluru — and a hardcore indie gamer, which is where the instinct comes from. His bet: the next wave of studios won&apos;t look like teams but solo creators with AI co-pilots, shipping as fast as ideas come. Same instinct here — one engineer, the right tools, a sim serious tuners keep open on a second monitor.
                 </p>
               </div>
               <a

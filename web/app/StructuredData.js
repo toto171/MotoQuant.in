@@ -29,7 +29,7 @@ export function organizationSchema() {
     description:
       'First-principles physics engine for motorcycle quarter-mile drag racing. Predict ET, compare builds, and quantify parts ROI for 501+ bikes.',
     foundingDate: '2025-11-01',
-    founder: { '@type': 'Person', name: 'Hritwik Mudhai' },
+    founder: { '@type': 'Person', name: 'Ritwik Singh' },
     sameAs: [
       'https://twitter.com/motoquant',
       'https://github.com/motoquant',
@@ -234,7 +234,7 @@ export function articleSchema({ title, description, slug, datePublished, dateMod
     dateModified: dateModified || datePublished,
     author: {
       '@type': 'Person',
-      name: 'Hritwik Mudhai',
+      name: 'Ritwik Singh',
       url: SITE_URL,
     },
     publisher: {
