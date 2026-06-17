@@ -188,7 +188,7 @@ const SECTIONS = [
     body: [
       'If you reference this whitepaper or use MotoQuant Pro outputs in your own analysis, please cite as:',
     ],
-    citation: 'Mudhai, H. & Desai, A. (2026). MotoQuant Pro: A first-principles drag-racing physics engine for motorcycles. Pune, India. https://motoquant.in/whitepaper',
+    citation: 'Singh, R. & Desai, A. (2026). MotoQuant Pro: A first-principles drag-racing physics engine for motorcycles. Pune, India. https://motoquant.in/whitepaper',
   },
 ];
 
@@ -307,7 +307,7 @@ export default function WhitepaperPage() {
               MotoQuant Pro:<br />A First-Principles Drag-Racing Physics Engine for Motorcycles
             </h1>
             <p className="text-white/60 text-base mb-2">
-              Hritwik Mudhai &nbsp;·&nbsp; Arya Desai
+              Ritwik Singh &nbsp;·&nbsp; Arya Desai
             </p>
             <p className="text-white/40 text-sm font-mono">
               MotoQuant Pro &middot; Pune, India &middot;{' '}

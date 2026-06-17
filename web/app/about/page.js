@@ -184,15 +184,15 @@ export default function AboutPage() {
             </Reveal>
 
             <Reveal delay={0.08}>
-              <FounderCard initial="H" name="Hritwik Mudhai" role="Co-founder · Manipal, India" email="dhisetu@gmail.com">
+              <FounderCard initial="R" name="Ritwik Singh" role="Co-founder · Bengaluru, India" email="dhisetu@gmail.com">
                 <p>
-                  The physics + software side. Built the 15-sub-model drag simulation engine, the 501-bike catalog, the ROI knapsack, and the calibration pipeline that fits sim output to real Dragy traces within ±0.05 s.
+                  Automobile and AI engineer by experience — the physics, software, and machine-learning side of MotoQuant. Built the 15-sub-model drag simulation engine, the bike-and-parts catalog, and the calibration pipeline that fits sim output to real Dragy traces within ±0.05 s.
                 </p>
                 <p>
-                  AI engineer by trade — currently building a separate AI startup in parallel. That expertise is baked into MotoQuant&apos;s machine-learning layer: the DNN surrogate (1 ms per ET prediction), the XGBoost-backed ROI ranker, the Bayesian build optimiser, and the natural-language tuning interface.
+                  Wrote the load-bearing physics from the ground up: the RK4 integrator, the Pacejka tire model, the expansion-chamber two-stroke curve, and the clutch-slip thermal model — caring more about which terms actually survive the force balance than about a good-looking regression. The AI layer is his too — a DNN surrogate that predicts an ET in ~1 ms, an XGBoost-backed ROI ranker, a Bayesian build optimiser, and a natural-language tuning interface.
                 </p>
                 <p>
-                  Wrote the RK4 integrator, the Pacejka tire model, the expansion-chamber 2-stroke curve, and the clutch-slip thermal model from the ground up. Cares more about which terms actually survive the force balance than about chasing a good-looking regression. Wants MotoQuant to be the tool every serious tuner already has open on a second monitor.
+                  Outside MotoQuant he&apos;s building Dhisetu, an AI-assisted indie game studio, from Bengaluru — and a hardcore indie gamer, which is where the instinct comes from. His bet: the next wave of studios won&apos;t look like teams but solo creators with AI co-pilots, shipping as fast as ideas come. Same instinct here — one engineer, the right tools, a sim serious tuners keep open on a second monitor.
                 </p>
               </FounderCard>
             </Reveal>
