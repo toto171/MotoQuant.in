@@ -74,31 +74,27 @@ class TestTireFitments:
         # The default seed has 3 reference bikes = 6 fitments minimum (front+rear each)
         assert total_fitments >= 6, f"Expected >=6 fitments, got {total_fitments}"
 
-    @pytest.mark.xfail(
-        reason=(
-            "PRE-EXISTING: a bare seed_all() DB yields 6/22 (27%) OEM-default "
-            "fitments, just under the test's >30% threshold. Needs a seed-data "
-            "audit to decide whether the seed under-marks is_default on OEM links "
-            "or the threshold is simply too tight -- out of scope for this "
-            "CI-repair change. Tracked as xfail so it stays visible."
-        ),
-        strict=False,
-    )
     def test_fitment_oem_defaults(self, temp_db):
-        """Verify OEM fitments are marked as default."""
-        cursor = temp_db._conn.execute(
+        """Verify OEM fitments are marked as the default for their bike/position.
+
+        (The previous assertion compared OEM-defaults against the count of ALL
+        fitments -- including 'recommended' and 'drag_prep' rows -- so it failed
+        at 27% purely because the seed carries more non-OEM options than OEM
+        links, not because any OEM fitment was mis-flagged. This tests the actual
+        intent: every OEM fitment is a default.)
+        """
+        oem_total = temp_db._conn.execute(
+            "SELECT COUNT(*) FROM bike_tire_fitments WHERE fitment_type = 'oem'"
+        ).fetchone()[0]
+        oem_defaults = temp_db._conn.execute(
             """
             SELECT COUNT(*) FROM bike_tire_fitments
             WHERE fitment_type = 'oem' AND is_default = 1
             """
-        )
-        oem_defaults = cursor.fetchone()[0]
-        # At least half should be OEM defaults
-        total = temp_db._conn.execute(
-            "SELECT COUNT(*) FROM bike_tire_fitments"
         ).fetchone()[0]
-        assert oem_defaults > total * 0.3, (
-            f"Expected >30% OEM defaults, got {oem_defaults}/{total}"
+        assert oem_total > 0, "expected at least one OEM fitment in the seed"
+        assert oem_defaults == oem_total, (
+            f"OEM fitments not all flagged default: {oem_defaults}/{oem_total}"
         )
 
     def test_no_orphaned_fitments(self, temp_db):
