@@ -16,12 +16,15 @@ import unittest
 from typing import Any
 from unittest.mock import MagicMock
 
-# Point the API at an isolated DB BEFORE importing api / runner.
+# Isolated tmp DB for this module. The API is pinned to it in setUpModule (NOT at
+# import time) so it can't leak MOTOQUANT_DB to other test modules at collection
+# time -- that leak made the whole fast suite order-dependent (test_build_optimizer
+# and test_chat_resolver read the catalog DB via the env var and were breaking when
+# this module's tmp path won the global env). Restored in tearDownModule.
 _tmp_db_file = tempfile.NamedTemporaryFile(
     prefix="mq_chat_test_", suffix=".db", delete=False
 )
 _tmp_db_file.close()
-os.environ["MOTOQUANT_DB"] = _tmp_db_file.name
 
 from motoquant.database.connection import MotoQuantDB  # noqa: E402
 from motoquant.database.seed import seed_all  # noqa: E402
@@ -49,6 +52,34 @@ def _get_shared_db() -> MotoQuantDB:
     seed_all(db)
     _SHARED_DB = db
     return db
+
+
+_PREV_MOTOQUANT_DB: str | None = None
+
+
+def setUpModule():
+    """Pin the API at this module's isolated tmp DB for the duration of its tests
+    only. Done here (not at import) so MOTOQUANT_DB is not hijacked globally at
+    collection time; the api _db_conn singleton is reset so the next _get_db()
+    rebinds. Restored in tearDownModule."""
+    global _PREV_MOTOQUANT_DB
+    import motoquant.api as _api_mod
+
+    _PREV_MOTOQUANT_DB = os.environ.get("MOTOQUANT_DB")
+    os.environ["MOTOQUANT_DB"] = _tmp_db_file.name
+    _api_mod._db_conn = None
+
+
+def tearDownModule():
+    """Restore the previous MOTOQUANT_DB and reset the api singleton so later
+    modules aren't left pointing at this module's tmp DB."""
+    import motoquant.api as _api_mod
+
+    if _PREV_MOTOQUANT_DB is None:
+        os.environ.pop("MOTOQUANT_DB", None)
+    else:
+        os.environ["MOTOQUANT_DB"] = _PREV_MOTOQUANT_DB
+    _api_mod._db_conn = None
 
 
 def _make_mock_client(

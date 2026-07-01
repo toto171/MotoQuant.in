@@ -20,8 +20,11 @@ import unittest
 from fastapi.testclient import TestClient
 
 # ---------------------------------------------------------------------------
-# Isolated DB setup -- runs before `from motoquant.api import app` imports
-# cache any state, so we point the API at a fresh tmp DB first.
+# Isolated DB setup. Seed a fresh tmp DB here by EXPLICIT path; the API is pinned
+# to it in setUpModule (NOT at import time) so this module can't leak
+# MOTOQUANT_DB to other test modules during collection. Importing the api below
+# is safe because it binds its DB lazily on first request, and _db_conn is reset
+# below and again in setUpModule.
 # ---------------------------------------------------------------------------
 
 _tmp_db_file = tempfile.NamedTemporaryFile(
@@ -29,7 +32,6 @@ _tmp_db_file = tempfile.NamedTemporaryFile(
 )
 _tmp_db_file.close()
 _TMP_DB_PATH = _tmp_db_file.name
-os.environ["MOTOQUANT_DB"] = _TMP_DB_PATH
 
 # Initialize schema + seeded reference data in the tmp DB
 from motoquant.database.connection import MotoQuantDB as _SetupDB  # noqa: E402
