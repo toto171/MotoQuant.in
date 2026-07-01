@@ -53,26 +53,34 @@ _api_mod._db_conn = None
 client = TestClient(app)
 
 
+_PREV_MOTOQUANT_DB: str | None = None
+
+
 def setUpModule():
     """Re-pin the API to THIS module's isolated tmp DB right before its tests run.
 
     Isolation subtlety that made this suite order-dependent: several test modules
-    (test_api, test_jobs_api, test_payments, test_auth) each set
-    ``os.environ["MOTOQUANT_DB"]`` to their own tmp DB at *import* (collection)
-    time, so whichever is collected last wins the env var for the whole session;
-    and ``motoquant.api`` caches a single process-wide ``_db_conn``. The
-    collection-time reset above is therefore not enough on its own -- by the time
-    these tests actually run, the env var and/or the cached connection can point
-    at another module's DB. Re-asserting both here (setUpModule runs after every
-    earlier module's tests have finished) makes test_api hermetic regardless of
-    collection/run order.
+    (e.g. test_api, test_llm_runner) each set ``os.environ["MOTOQUANT_DB"]`` to
+    their own tmp DB at *import* (collection) time, so whichever is collected last
+    wins the env var for the whole session; and ``motoquant.api`` caches a single
+    process-wide ``_db_conn``. The collection-time reset above is therefore not
+    enough on its own -- by the time these tests actually run, the env var and/or
+    the cached connection can point at another module's DB. Re-asserting both here
+    (setUpModule runs after every earlier module's tests have finished) makes
+    test_api hermetic regardless of collection/run order.
+
+    We snapshot the previous env value and restore it in tearDownModule so that a
+    later module which relies on its own MOTOQUANT_DB is not left pointing at our
+    tmp DB (which tearDownModule deletes).
     """
+    global _PREV_MOTOQUANT_DB
+    _PREV_MOTOQUANT_DB = os.environ.get("MOTOQUANT_DB")
     os.environ["MOTOQUANT_DB"] = _TMP_DB_PATH
     _api_mod._db_conn = None
 
 
 def tearDownModule():
-    """Remove the tmp DB after all tests finish."""
+    """Restore global DB state and remove the tmp DB after all tests finish."""
     try:
         if _api_mod._db_conn is not None:
             try:
@@ -80,6 +88,13 @@ def tearDownModule():
             except Exception:
                 pass
             _api_mod._db_conn = None
+        # Restore the env var so later modules aren't left pointing at our
+        # now-deleted tmp DB, and reset the singleton so the next _get_db()
+        # rebinds against the restored path.
+        if _PREV_MOTOQUANT_DB is None:
+            os.environ.pop("MOTOQUANT_DB", None)
+        else:
+            os.environ["MOTOQUANT_DB"] = _PREV_MOTOQUANT_DB
         if os.path.exists(_TMP_DB_PATH):
             os.unlink(_TMP_DB_PATH)
     except Exception:
