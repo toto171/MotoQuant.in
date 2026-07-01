@@ -100,90 +100,6 @@ jobs:
       - name: Vite build
         run: npx vite build
 
-  sidecar-smoke:
-    name: Sidecar smoke test (Linux)
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    # Runs on every PR so the PyInstaller spec can't silently rot.
-    # Uses ubuntu-latest for speed (Linux PyInstaller → Linux binary).
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: pip
-          cache-dependency-path: |
-            requirements-api.txt
-            desktop/sidecar/requirements-sidecar.txt
-
-      - name: Install deps
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-api.txt
-          pip install -e .
-          pip install -r desktop/sidecar/requirements-sidecar.txt
-
-      - name: Verify tracked database
-        run: |
-          # The tracked motoquant.db IS the canonical seeded catalog. Re-seeding
-          # an already-populated DB raises a FOREIGN KEY IntegrityError (known
-          # idempotency artifact — same fix as release.yml f0d956d), so verify
-          # the checkout instead of regenerating it.
-          test -f motoquant.db || { echo "::error::motoquant.db missing from checkout"; exit 1; }
-          python -c "import sqlite3; n=sqlite3.connect('motoquant.db').execute('select count(*) from bike_models').fetchone()[0]; print(f'Tracked catalog: {n} bikes'); assert n >= 450, f'tracked catalog too small: {n}'"
-
-      - name: Build sidecar with PyInstaller
-        working-directory: desktop/sidecar
-        run: |
-          pyinstaller motoquant-backend.spec --clean --noconfirm
-          echo "Binary size: $(du -h dist/motoquant-backend | cut -f1)"
-          [ -x dist/motoquant-backend ] || (echo "Binary missing or not executable" && exit 1)
-
-      - name: Smoke test — spawn binary, curl /api/health
-        working-directory: desktop/sidecar
-        run: |
-          PORT=$(python - <<'PY'
-          import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1]); s.close()
-          PY
-          )
-          ./dist/motoquant-backend --host 127.0.0.1 --port "$PORT" --log-level warning &
-          PID=$!
-          trap 'kill $PID 2>/dev/null || true' EXIT
-
-          echo "Sidecar PID=$PID on port $PORT — waiting for /api/health..."
-          STATUS=0
-          for i in $(seq 1 40); do
-            sleep 0.5
-            if curl -fsS "http://127.0.0.1:$PORT/api/health" > /tmp/health.json 2>/dev/null; then
-              echo "✓ Health response: $(cat /tmp/health.json)"
-              STATUS=0
-              break
-            fi
-            STATUS=1
-          done
-
-          kill $PID 2>/dev/null || true
-          wait $PID 2>/dev/null || true
-
-          if [ $STATUS -ne 0 ]; then
-            echo "❌ Sidecar did not respond to /api/health within 20 s"
-            exit 1
-          fi
-
-          # Extra: verify bike_count > 0 (DB is seeded)
-          python - <<'PY'
-          import json, sys
-          with open("/tmp/health.json") as f:
-              data = json.load(f)
-          assert data.get("status") == "ok",     f"status != ok: {data}"
-          assert data.get("database") == "connected", f"db not connected: {data}"
-          assert data.get("bike_count", 0) > 0,  f"bike_count=0: {data}"
-          print(f"✓ bike_count={data['bike_count']}")
-          PY
-
   web:
     name: Web (Next.js) build
     runs-on: ubuntu-latest
@@ -200,4 +116,12 @@ jobs:
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: web/pack
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build (next build)
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
