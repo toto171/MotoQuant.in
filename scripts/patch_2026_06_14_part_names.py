@@ -26,9 +26,7 @@ def main() -> int:
     for r in rows:
         new = normalize_model_name(r["brand"], r["model_name"])
         if new != (r["model_name"] or ""):
-            conn.execute(
-                "UPDATE parts SET model_name = ? WHERE id = ?", (new, r["id"])
-            )
+            conn.execute("UPDATE parts SET model_name = ? WHERE id = ?", (new, r["id"]))
             changed += 1
     conn.commit()
     # Report residual duplicates (should be 0 after a run)

@@ -61,7 +61,9 @@ combine-as-imports = true
 "**/__init__.py" = ["F401"]
 # One-off operational scripts (diagnostics, dated patches, audits, sweeps): debug printf,
 # sys.path-then-import, and condensed audit code are intentional here (same rationale as app.py).
-"scripts/*" = ["UP031", "E402", "E701"]
+# E702 (semicolon multi-statement) is the sibling of E701 and belongs with it — condensed
+# sweep/audit lines like `best=chosen; best_score=sc` are deliberate here.
+"scripts/*" = ["UP031", "E402", "E701", "E702"]
 # Test modules set up sys.path / env before importing the package under test.
 "tests/*" = ["E402"]
 
