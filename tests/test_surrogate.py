@@ -28,7 +28,14 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from motoquant.analysis.surrogate_data import (
+import pytest
+
+# This module exercises the XGBoost surrogate; xgboost is an optional training-only
+# dependency (not in requirements-api.txt or the CI dep set), so skip the whole
+# module cleanly when it is absent instead of erroring at import.
+pytest.importorskip("xgboost")
+
+from motoquant.analysis.surrogate_data import (  # noqa: E402
     BASE_FEATURE_NAMES,
     DERIVED_FEATURE_NAMES,
     FEATURE_BOUNDS,

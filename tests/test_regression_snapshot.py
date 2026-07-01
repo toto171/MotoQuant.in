@@ -75,6 +75,12 @@ CAT_ET_TOL_S = 0.002
 CAT_TRAP_TOL_MS = 0.03  # 0.03 m/s ~= 0.108 km/h
 
 _SNAPSHOT_PATH = Path(__file__).resolve().parent / "data" / "sweep_snapshot.json"
+# The golden is generated from the TRACKED, canonical motoquant.db. Pin the guard
+# to it explicitly (not $MOTOQUANT_DB) so it measures PHYSICS drift only -- a fresh
+# `db seed` in CI diverges from the tracked catalog (gearing/config), which would
+# otherwise masquerade as physics drift. The regression-full CI job also points
+# MOTOQUANT_DB here, but pinning makes the always-on tier deterministic too.
+_REPO_DB = Path(__file__).resolve().parent.parent / "motoquant.db"
 
 _REFERENCE_FACTORIES = {
     "GSX-R 1000 K5": gsxr1000_k5,
@@ -160,9 +166,9 @@ def _assert_no_drift(catalog: dict) -> None:
     Shared by the always-on sample tier and the MOTOQUANT_SLOW_TESTS full tier.
     Skips (does not fail) when the live DB is unavailable.
     """
-    db = live_db_copy()
+    db = live_db_copy(src_path=_REPO_DB)
     if db is None:
-        pytest.skip("live motoquant.db not found (set $MOTOQUANT_DB)")
+        pytest.skip("tracked motoquant.db not found in checkout")
 
     drifts: list[str] = []
     missing: list[str] = []
