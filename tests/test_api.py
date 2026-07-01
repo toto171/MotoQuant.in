@@ -68,6 +68,28 @@ def tearDownModule():
         pass
 
 
+class SentrySelfTestRoute(unittest.TestCase):
+    """/api/debug/sentry-test is dormant (404) unless MOTOQUANT_SENTRY_SELFTEST
+    is set, at which point it raises a 500 so Sentry capture can be verified
+    end-to-end. Exercises the real route, not a stub."""
+
+    def tearDown(self):
+        os.environ.pop("MOTOQUANT_SENTRY_SELFTEST", None)
+
+    def test_dormant_by_default_returns_404(self):
+        os.environ.pop("MOTOQUANT_SENTRY_SELFTEST", None)
+        resp = client.get("/api/debug/sentry-test")
+        self.assertEqual(resp.status_code, 404)
+
+    def test_enabled_raises_500(self):
+        os.environ["MOTOQUANT_SENTRY_SELFTEST"] = "1"
+        # raise_server_exceptions=False so the 500 is returned rather than
+        # re-raised into the test runner.
+        local = TestClient(app, raise_server_exceptions=False)
+        resp = local.get("/api/debug/sentry-test")
+        self.assertEqual(resp.status_code, 500)
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

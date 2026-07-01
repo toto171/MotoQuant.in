@@ -67,6 +67,11 @@ def init_sentry(*, app_name: str = "motoquant-api") -> bool:
             "SENTRY_DSN is set but sentry-sdk is not installed. "
             "Run `pip install sentry-sdk[fastapi]` to enable error tracking."
         )
+        print(
+            "[observability] Sentry NOT active — SENTRY_DSN is set but sentry-sdk "
+            "is not installed (add sentry-sdk[fastapi] to requirements-api.txt)",
+            flush=True,
+        )
         return False
 
     sample_rate = _safe_float("SENTRY_TRACES_SAMPLE_RATE", 0.05)
@@ -100,6 +105,16 @@ def init_sentry(*, app_name: str = "motoquant-api") -> bool:
     )
     _INITIALISED = True
     log.info("Sentry initialised — environment=%s release=%s", environment, release)
+    # Also print to stdout. Render/uvicorn do NOT surface INFO from the
+    # `motoquant.observability` logger by default, and sentry_sdk.init() is
+    # itself silent — so without this line a running deploy gives no signal that
+    # error tracking is live (exactly the ambiguity hit on 2026-07-01). This
+    # only fires when a DSN is set, so a DSN-free local/CI run stays completely
+    # silent, per this module's "invisible unless SENTRY_DSN" contract.
+    print(
+        f"[observability] Sentry active — environment={environment} release={release}",
+        flush=True,
+    )
     return True
 
 
@@ -126,4 +141,13 @@ def _tag_app(event: dict[str, Any], app_name: str) -> dict[str, Any]:
     return event
 
 
-__all__ = ["init_sentry"]
+def is_initialised() -> bool:
+    """Return True if init_sentry() has successfully initialised Sentry.
+
+    Lets other modules (e.g. an API health/debug route) report activation state
+    without re-reading the env or re-running init.
+    """
+    return _INITIALISED
+
+
+__all__ = ["init_sentry", "is_initialised"]

@@ -65,6 +65,13 @@ def test_init_sentry_already_initialised_short_circuits():
     assert obs.init_sentry() is True
 
 
+def test_is_initialised_reflects_latch():
+    """is_initialised() mirrors the module latch for external callers."""
+    assert obs.is_initialised() is False
+    obs._INITIALISED = True
+    assert obs.is_initialised() is True
+
+
 def test_safe_float_defaults_and_parsing(monkeypatch):
     monkeypatch.delenv("X_RATE", raising=False)
     assert obs._safe_float("X_RATE", 0.05) == 0.05

@@ -616,6 +616,29 @@ def health():
     }
 
 
+@app.get("/api/debug/sentry-test")
+def sentry_selftest():
+    """Deliberately raise an unhandled error to verify Sentry capture.
+
+    Dormant by default: returns 404 unless the MOTOQUANT_SENTRY_SELFTEST env var
+    is truthy ("1"/"true"/"yes"). Flip the var on Render, hit this route once to
+    confirm the event lands in Sentry -> Issues, then unset it (or delete this
+    route). The RuntimeError propagates as a 500, which the FastAPI Sentry
+    integration reports as an event. A 404/handled error would NOT be captured,
+    which is why this raises an unhandled exception on purpose.
+    """
+    if os.environ.get("MOTOQUANT_SENTRY_SELFTEST", "").strip().lower() not in (
+        "1",
+        "true",
+        "yes",
+    ):
+        raise HTTPException(status_code=404, detail="Not found")
+    raise RuntimeError(
+        "MotoQuant Sentry self-test -- this exception is intentional and confirms "
+        "error reporting is wired end-to-end."
+    )
+
+
 # ─────────────────────────────────────────────────────────────────────────
 # Anonymous telemetry endpoint
 # ─────────────────────────────────────────────────────────────────────────
