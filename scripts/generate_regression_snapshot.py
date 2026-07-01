@@ -94,7 +94,34 @@ def _run(config) -> dict:
     }
 
 
-def build_snapshot() -> dict:
+def _snapshot_all_current(db) -> dict[str, dict]:
+    """Snapshot EVERY catalog bike that has a current config.
+
+    Enumerates all ``bike_models`` joined to their ``is_current=1``
+    ``bike_configs`` row, runs the deterministic fixed-dt sim, and keys the
+    result by ``model_name|year_from`` (same key scheme as ``catalog``). The
+    per-bike ``cluster`` label is the runtime ``category_tag`` for debugging;
+    the full-tier test only asserts on ET/trap/finished, so the label is
+    informational. This is the full-catalog tier -- ~500 bikes, ~3 min to run.
+    """
+    full: dict[str, dict] = {}
+    rows = db.conn.execute(
+        "SELECT bm.model_name AS model_name, bm.year_from AS year_from, bc.* "
+        "FROM bike_models bm "
+        "JOIN bike_configs bc ON bc.bike_model_id = bm.id AND bc.is_current = 1 "
+        "ORDER BY bm.id"
+    ).fetchall()
+    for row in rows:
+        d = dict(row)
+        model_name = d["model_name"]
+        year_from = d["year_from"]
+        cfg = db_row_to_config(d, name=model_name)
+        cluster = getattr(cfg, "category_tag", None) or "unknown"
+        full[f"{model_name}|{year_from}"] = {"cluster": cluster, **_run(cfg)}
+    return full
+
+
+def build_snapshot(full: bool = True) -> dict:
     from tests._helpers import live_db_copy
 
     db = live_db_copy()
@@ -104,6 +131,7 @@ def build_snapshot() -> dict:
             "The catalog snapshot cannot be generated without the seeded DB."
         )
     catalog: dict[str, dict] = {}
+    catalog_full: dict[str, dict] = {}
     missing: list[str] = []
     try:
         for model_name, year_from, cluster in CATALOG_SAMPLE:
@@ -127,6 +155,8 @@ def build_snapshot() -> dict:
                 continue
             cfg = db_row_to_config(dict(cfg_row), name=model_name)
             catalog[f"{model_name}|{year_from}"] = {"cluster": cluster, **_run(cfg)}
+        if full:
+            catalog_full = _snapshot_all_current(db)
     finally:
         db.close()
     if missing:
@@ -136,16 +166,21 @@ def build_snapshot() -> dict:
             + "\nFix CATALOG_SAMPLE (name/year drift) before regenerating."
         )
     reference = {name: _run(factory()) for name, factory in REFERENCE_BIKES}
-    return {
+    snapshot = {
         "_comment": (
             "Golden regression snapshot. Regenerate with "
             "`python scripts/generate_regression_snapshot.py` ONLY when a physics "
-            "change is intended. See tests/test_regression_snapshot.py."
+            "change is intended. See tests/test_regression_snapshot.py. "
+            "'catalog' is the always-on stratified sample; 'catalog_full' is every "
+            "current-config bike, checked by the MOTOQUANT_SLOW_TESTS=1 tier."
         ),
         "sim_args": {"use_adaptive_dt": False, "max_time": 26.0},
         "reference": reference,
         "catalog": catalog,
     }
+    if full:
+        snapshot["catalog_full"] = catalog_full
+    return snapshot
 
 
 def main() -> None:
@@ -155,16 +190,37 @@ def main() -> None:
         default=str(_REPO_ROOT / "tests" / "data" / "sweep_snapshot.json"),
         help="Output JSON path (default: tests/data/sweep_snapshot.json).",
     )
+    ap.add_argument(
+        "--no-full",
+        action="store_true",
+        help=(
+            "Skip the ~3-min full-catalog tier (dev convenience). If the output "
+            "file already has a 'catalog_full', it is preserved so the guard never "
+            "silently shrinks."
+        ),
+    )
     args = ap.parse_args()
-    snapshot = build_snapshot()
+    snapshot = build_snapshot(full=not args.no_full)
     out_path = Path(args.out)
+    # Never silently drop the full tier: if --no-full was used but the existing
+    # golden carries a catalog_full, carry it forward untouched.
+    if args.no_full and out_path.exists():
+        try:
+            with open(out_path, encoding="utf-8") as fh:
+                prev = json.load(fh)
+            if "catalog_full" in prev:
+                snapshot["catalog_full"] = prev["catalog_full"]
+                print("--no-full: preserved existing catalog_full from golden.")
+        except (OSError, json.JSONDecodeError):
+            pass
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as fh:
         json.dump(snapshot, fh, indent=2, sort_keys=True)
         fh.write("\n")
     print(
         f"Wrote {out_path} -- {len(snapshot['reference'])} reference + "
-        f"{len(snapshot['catalog'])} catalog bikes."
+        f"{len(snapshot['catalog'])} catalog + "
+        f"{len(snapshot.get('catalog_full', {}))} full-catalog bikes."
     )
     for name, vals in snapshot["reference"].items():
         print(

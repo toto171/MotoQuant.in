@@ -154,19 +154,16 @@ def test_reference_baselines_exact(name):
     )
 
 
-def test_catalog_snapshot_no_drift():
-    """Re-sim every catalog bike via the production DB path; fail on any drift.
+def _assert_no_drift(catalog: dict) -> None:
+    """Re-sim every bike in ``catalog`` via the production DB path; fail on drift.
 
-    This is the bug-catcher: a single bike whose ET moves past 2 ms (e.g. a
-    wrong gear ratio, a dead physics knob, a clutch-model change) trips the
-    assert, with a per-bike report of exactly which bikes drifted and by how
-    much.
+    Shared by the always-on sample tier and the MOTOQUANT_SLOW_TESTS full tier.
+    Skips (does not fail) when the live DB is unavailable.
     """
     db = live_db_copy()
     if db is None:
         pytest.skip("live motoquant.db not found (set $MOTOQUANT_DB)")
 
-    catalog = _GOLDEN["catalog"]
     drifts: list[str] = []
     missing: list[str] = []
     try:
@@ -203,6 +200,17 @@ def test_catalog_snapshot_no_drift():
     )
 
 
+def test_catalog_snapshot_no_drift():
+    """Re-sim the stratified sample via the production DB path; fail on any drift.
+
+    This is the always-on bug-catcher: a single bike whose ET moves past 2 ms
+    (e.g. a wrong gear ratio, a dead physics knob, a clutch-model change) trips
+    the assert, with a per-bike report of exactly which bikes drifted and by how
+    much. Kept to the ~35-bike sample so the default local `pytest` stays fast.
+    """
+    _assert_no_drift(_GOLDEN["catalog"])
+
+
 def test_snapshot_covers_all_clusters():
     """Sanity: the golden must span the full cluster taxonomy, not collapse to
     one engine class (which would make the guard blind to whole segments)."""
@@ -234,10 +242,21 @@ def test_snapshot_covers_all_clusters():
     reason="opt-in wider sweep; set MOTOQUANT_SLOW_TESTS=1",
 )
 def test_catalog_snapshot_no_drift_full():
-    """Opt-in alias of the always-on catalog check.
+    """Full-catalog drift guard — every current-config bike (~500), ~3 min.
 
-    Kept as a distinct entry point so the golden can later grow a larger
-    'slow' tier (re-simming many more bikes) without changing the default-CI
-    runtime. Today it re-runs the same assertions.
+    Gated behind MOTOQUANT_SLOW_TESTS=1 so the default local/CI fast suite stays
+    quick; a dedicated CI job runs this against the tracked motoquant.db. This is
+    the tier that would have caught the June-13 cruiser_1300+ calibration landing
+    without a snapshot regen, or any single-bike gear/config drift anywhere in the
+    catalog — not just the 35-bike sample.
+
+    Falls back to the sample if the golden predates the full tier (no
+    'catalog_full' key), so an un-regenerated golden degrades gracefully.
     """
-    test_catalog_snapshot_no_drift()
+    full = _GOLDEN.get("catalog_full")
+    if not full:
+        pytest.skip(
+            "golden has no 'catalog_full' tier — regenerate with "
+            "`python scripts/generate_regression_snapshot.py`"
+        )
+    _assert_no_drift(full)
