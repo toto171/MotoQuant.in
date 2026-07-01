@@ -24,7 +24,10 @@ name: Vercel Deploy
 # Refinements from the starter template:
 #   - Production deploys only fire after CI succeeds on main (workflow_run),
 #     so a red test suite never reaches Vercel.
-#   - Preview deploys run on every PR so collaborators get a shareable URL.
+#   - PR preview deploys are handled by Vercel's native Git integration (which
+#     posts the preview URL as a PR comment); the old CLI-based deploy-preview
+#     job here was redundant with it and needed secrets branch CI can't read, so
+#     it was removed.
 #   - All Vercel CLI commands run inside `web/` because that is the frontend
 #     root (Next.js app). Don't change this unless you also change vercel.json.
 #   - Concurrency group prevents two deploys from racing when PRs land
@@ -47,8 +50,6 @@ on:
   workflow_run:
     workflows: ["CI"]
     types: [completed]
-    branches: [main]
-  pull_request:
     branches: [main]
 
 jobs:
@@ -83,47 +84,3 @@ jobs:
 
       - name: Deploy to Vercel (production)
         run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-
-  deploy-preview:
-    # Preview deploys on every PR so reviewers get a clickable URL.
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    concurrency:
-      group: vercel-preview-${{ github.event.pull_request.number }}
-      cancel-in-progress: true
-    defaults:
-      run:
-        working-directory: web
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
-
-      - name: Pull Vercel environment (preview)
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Build project artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Deploy preview
-        id: deploy
-        run: |
-          url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
-          echo "preview_url=$url" >> "$GITHUB_OUTPUT"
-          echo "Preview deployed: $url"
-
-      - name: Comment preview URL on PR
-        if: steps.deploy.outputs.preview_url != ''
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const url = "${{ steps.deploy.outputs.preview_url }}";
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `Vercel preview deployed: ${url}`
-            });

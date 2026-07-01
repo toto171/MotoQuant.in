@@ -53,6 +53,24 @@ _api_mod._db_conn = None
 client = TestClient(app)
 
 
+def setUpModule():
+    """Re-pin the API to THIS module's isolated tmp DB right before its tests run.
+
+    Isolation subtlety that made this suite order-dependent: several test modules
+    (test_api, test_jobs_api, test_payments, test_auth) each set
+    ``os.environ["MOTOQUANT_DB"]`` to their own tmp DB at *import* (collection)
+    time, so whichever is collected last wins the env var for the whole session;
+    and ``motoquant.api`` caches a single process-wide ``_db_conn``. The
+    collection-time reset above is therefore not enough on its own -- by the time
+    these tests actually run, the env var and/or the cached connection can point
+    at another module's DB. Re-asserting both here (setUpModule runs after every
+    earlier module's tests have finished) makes test_api hermetic regardless of
+    collection/run order.
+    """
+    os.environ["MOTOQUANT_DB"] = _TMP_DB_PATH
+    _api_mod._db_conn = None
+
+
 def tearDownModule():
     """Remove the tmp DB after all tests finish."""
     try:
