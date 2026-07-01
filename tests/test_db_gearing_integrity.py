@@ -31,6 +31,11 @@ from motoquant.scraper.gear_ratios import lookup_gear_ratios
 
 DB_PATH = Path(__file__).resolve().parent.parent / "motoquant.db"
 
+# lookup_gear_ratios() returns this confidence on a Tier-1 (named-model) hit;
+# lower means a generic Tier-2 category/displacement default (gear_ratios.py:1591).
+# Only Tier-1 is authoritative, so only Tier-1 matches are enforced below.
+_TIER1_CONFIDENCE = 0.75
+
 REFERENCE_PATTERNS = {
     "GSX-R 1000 K5": gsxr1000_k5,
     "YZF-R1 4C8": yzfr1_4c8,
@@ -114,20 +119,18 @@ class TestDBGearingIntegrity:
             f"{bad}. Re-run scripts/refresh_gearing_from_lookup.py."
         )
 
-    @pytest.mark.xfail(
-        reason=(
-            "PRE-EXISTING data drift: ~469 catalog bikes have DB gear ratios that "
-            "no longer match the current gear_ratios.py Tier-1 lookup (the tracked "
-            "motoquant.db was never re-seeded after lookup-table edits). Fixing it "
-            "means running scripts/refresh_gearing_from_lookup.py, which changes "
-            "those bikes' physics and the regression golden -- a dedicated, "
-            "separately-validated reseed pass, not this CI-repair change. Tracked "
-            "as xfail so the failure stays visible without blocking CI."
-        ),
-        strict=False,
-    )
     def test_non_reference_bikes_match_tier1_lookup(self, rows):
-        """Every non-reference bike's DB gearing must equal its Tier-1 lookup."""
+        """Every non-reference bike with an AUTHORITATIVE Tier-1 lookup must have
+        DB gearing that matches it.
+
+        Only Tier-1 (named-model) hits are enforced. lookup_gear_ratios() never
+        returns None -- a bike without a Tier-1 entry falls through to a GENERIC
+        Tier-2 category/displacement default (confidence < _TIER1_CONFIDENCE),
+        which is NOT authoritative: many bikes carry engine-family-correct or
+        hand-tuned DB gearing that a generic default would be wrong for (e.g. the
+        Versys 650's real ER650 cassette). scripts/refresh_gearing_from_lookup.py
+        reseeds Tier-1 bikes only, so this test enforces exactly that contract.
+        """
         bad = []
         for bmid, mfr, mdl, yf, yt, dp in rows:
             if _reference_config_for(mdl) is not None:
@@ -139,7 +142,13 @@ class TestDBGearingIntegrity:
             lookup = lookup_gear_ratios(mfr, clean, year)
             if lookup is None:
                 continue  # covered by test_every_bike_has_tier1_or_reference_match
-            ratios, front, rear, primary, _ = lookup
+            ratios, front, rear, primary, conf = lookup
+            if conf < _TIER1_CONFIDENCE:
+                continue  # Tier-2 generic default -- not authoritative
+            if any(r is None for r in ratios):
+                continue  # malformed Tier-1 entry (5-speed padded with None);
+                # the reseed skips these too, preserving the DB value. Tracked as
+                # data-debt (currently only Triumph "speed 400").
             drv = json.loads(dp)
             if (
                 drv.get("gear_ratios") != list(ratios)
@@ -149,7 +158,7 @@ class TestDBGearingIntegrity:
             ):
                 bad.append((mfr, mdl, f"{front}F/{rear}R×{primary}"))
         assert not bad, (
-            f"{len(bad)} bikes have stale DB gearing. "
+            f"{len(bad)} bikes have stale Tier-1 DB gearing. "
             f"Run `python scripts/refresh_gearing_from_lookup.py`. First 5: {bad[:5]}"
         )
 

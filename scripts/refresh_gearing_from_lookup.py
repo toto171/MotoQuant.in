@@ -7,6 +7,13 @@ Tier-1 lookup in motoquant.scraper.gear_ratios, *except* for the three reference
 bikes (K5, YZF-R1 4C8, Hayabusa Gen1) which are kept locked to their defaults.py
 ship configs so the K5=10.033 / R1=10.286 / Busa=10.471 baselines are preserved.
 
+TIER-1 ONLY: lookup_gear_ratios() never returns None -- bikes without a named-model
+(Tier-1) entry fall through to GENERIC Tier-2 category/displacement defaults. We
+DELIBERATELY skip those (see the SAFETY note in refresh()), because many carry
+engine-family-correct or hand-tuned DB gearing that a generic default would regress.
+Only ~160 bikes (the Tier-1 mismatches) are rewritten; the ~310 Tier-2 bikes are
+left exactly as they are.
+
 Why this exists
 ---------------
 On April 22 2026 we discovered that motoquant.db had leaked K5-like gear ratios
@@ -36,6 +43,11 @@ if str(REPO_ROOT) not in sys.path:
 
 from motoquant import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8  # noqa: E402
 from motoquant.scraper.gear_ratios import lookup_gear_ratios  # noqa: E402
+
+# lookup_gear_ratios() returns this confidence on a Tier-1 (named-model) hit;
+# anything lower is a GENERIC Tier-2 category/displacement default. See the
+# Tier-1-only safety note in refresh() for why we never reseed from Tier-2.
+TIER1_CONFIDENCE = 0.75
 
 REFERENCE_NAME_PATTERNS: dict[str, callable] = {
     "GSX-R 1000 K5": gsxr1000_k5,
@@ -71,6 +83,8 @@ def refresh(db_path: str = "motoquant.db") -> dict:
         "unchanged": 0,
         "reference_locked": 0,
         "no_tier1": 0,
+        "tier2_skipped": 0,
+        "malformed_skipped": 0,
     }
 
     for cid, bmid, mfr, mdl, yf, yt, dp in rows:
@@ -92,8 +106,24 @@ def refresh(db_path: str = "motoquant.db") -> dict:
             if lookup is None:
                 stats["no_tier1"] += 1
                 continue
-            ratios, front, rear, primary, _ = lookup
+            ratios, front, rear, primary, conf = lookup
+            # SAFETY (Tier-1 only): lookup_gear_ratios() NEVER returns None -- a
+            # non-Tier-1 bike falls through to GENERIC Tier-2 category/displacement
+            # defaults (confidence < TIER1_CONFIDENCE). Applying those would
+            # overwrite engine-family-correct / hand-tuned DB gearing with a
+            # generic curve (e.g. clobbering the Versys 650's real ER650 cassette
+            # with a generic parallel-twin default). Only reseed from authoritative
+            # Tier-1 (named-model) matches; leave everything else untouched.
+            if conf < TIER1_CONFIDENCE:
+                stats["tier2_skipped"] += 1
+                continue
             ratios = list(ratios)
+            # Guard against malformed Tier-1 entries (e.g. a 5-speed padded to 6
+            # with a trailing None). The physics multiplies by every gear, so a
+            # None gear crashes the sim; skip and preserve the DB value.
+            if any(r is None for r in ratios):
+                stats["malformed_skipped"] += 1
+                continue
 
         already = (
             drv.get("gear_ratios") == ratios
@@ -109,11 +139,14 @@ def refresh(db_path: str = "motoquant.db") -> dict:
         drv["front_sprocket"] = int(front)
         drv["rear_sprocket"] = int(rear)
         drv["primary_ratio"] = float(primary)
-        # Shaft- / belt-drive bikes have front=0 in the Tier-1 lookup; guard
-        # against ZeroDivisionError. final_drive is meaningless for these.
-        drv["final_drive_ratio"] = (
-            float(rear) / float(front) if float(front) > 0 else None
-        )
+        # Chain drive: recompute final_drive from the new sprockets.
+        # Shaft-/belt-drive bikes have front=0 in the Tier-1 lookup -- but the
+        # physics still needs a NUMERIC final reduction (models.py final_ratio
+        # falls back to final_drive_ratio when there are no chain sprockets), so
+        # PRESERVE the existing value rather than nulling it (nulling broke the
+        # R 1250 GS sim: primary * gear * None -> TypeError).
+        if float(front) > 0:
+            drv["final_drive_ratio"] = float(rear) / float(front)
         cur.execute(
             "UPDATE bike_configs SET drivetrain_params = ?, "
             "updated_at = datetime('now','utc') WHERE id = ?",

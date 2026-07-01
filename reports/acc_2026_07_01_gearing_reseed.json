@@ -1,0 +1,80 @@
+{
+ "references": {
+  "K5": 10.0334,
+  "R1": 10.2859,
+  "Hayabusa": 10.4712
+ },
+ "n_bikes_swept": 502,
+ "clusters": {
+  "cruiser-1300+": {
+   "n": 3,
+   "w_sum": 2.1,
+   "w_mean_abs": 0.3121,
+   "w_bias": 0.3121,
+   "raw_mean_abs": 0.3121
+  },
+  "entry-150-200": {
+   "n": 12,
+   "w_sum": 3.4,
+   "w_mean_abs": 0.8197,
+   "w_bias": 0.018,
+   "raw_mean_abs": 1.6419
+  },
+  "entry-200-300": {
+   "n": 15,
+   "w_sum": 5.9,
+   "w_mean_abs": 0.3428,
+   "w_bias": 0.0714,
+   "raw_mean_abs": 0.5799
+  },
+  "litre-sport-195+": {
+   "n": 31,
+   "w_sum": 23.8,
+   "w_mean_abs": 0.1373,
+   "w_bias": -0.0151,
+   "raw_mean_abs": 0.138
+  },
+  "litre-sport-600-1000": {
+   "n": 99,
+   "w_sum": 83.2,
+   "w_mean_abs": 0.2013,
+   "w_bias": -0.0725,
+   "raw_mean_abs": 0.2045
+  },
+  "mid-twin-300-500": {
+   "n": 23,
+   "w_sum": 11.2,
+   "w_mean_abs": 0.5156,
+   "w_bias": -0.0858,
+   "raw_mean_abs": 1.0518
+  },
+  "mid-twin-500-700": {
+   "n": 12,
+   "w_sum": 8.4,
+   "w_mean_abs": 0.1415,
+   "w_bias": 0.0586,
+   "raw_mean_abs": 0.1442
+  },
+  "other": {
+   "n": 35,
+   "w_sum": 22.5,
+   "w_mean_abs": 0.3833,
+   "w_bias": 0.1238,
+   "raw_mean_abs": 0.3886
+  },
+  "two-stroke": {
+   "n": 6,
+   "w_sum": 3.2,
+   "w_mean_abs": 0.584,
+   "w_bias": 0.1526,
+   "raw_mean_abs": 0.5888
+  }
+ },
+ "overall": {
+  "n": 236,
+  "w_sum": 163.7,
+  "w_mean_abs": 0.2623,
+  "w_bias": -0.015,
+  "raw_mean_abs": 0.4107
+ }
+}

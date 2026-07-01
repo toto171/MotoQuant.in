@@ -192,6 +192,21 @@ _DB: list[dict] = [
     },
     {
         "mfr": "yamaha",
+        "model": "yzf-r15",
+        "year": (2008, 2026),
+        # ACCURACY 2026-07-01: generic YZF-R15 entry. V1/V2 and the R15M have no
+        # dedicated entry and previously fell to the "yzf-r1" litre-bike box via
+        # the substring matcher (primary 1.609 = the R1's — physically absurd on
+        # a 149-155cc single). Uses the R155 box (exact for the 155cc R15M, close
+        # for the 149cc V1/V2). The longer "yzf-r15 v3" / "r15 v4" patterns still
+        # win for those years via longest-match.
+        "ratios": [2.833, 1.875, 1.364, 1.143, 0.957, 0.840],
+        "front": 14,
+        "rear": 48,
+        "primary": 3.042,
+    },
+    {
+        "mfr": "yamaha",
         "model": "mt-15 v2",
         "year": (2021, 2026),
         # ACCURACY 2026-06-11: same R155 box; MT-15 rear is 52T (Rolon NMR
@@ -216,7 +231,7 @@ _DB: list[dict] = [
         "mfr": "yamaha",
         "model": "fz-x",
         "year": (2021, 2026),
-        "ratios": [3.500, 1.846, 1.227, 0.923, 0.734, None],
+        "ratios": [3.500, 1.846, 1.227, 0.923, 0.734],
         "front": 16,
         "rear": 48,
         "primary": 2.000,
@@ -438,7 +453,7 @@ _DB: list[dict] = [
         "mfr": "honda",
         "model": "hornet 2.0",
         "year": (2020, 2026),
-        "ratios": [3.313, 1.842, 1.157, 0.862, 0.688, None],
+        "ratios": [3.313, 1.842, 1.157, 0.862, 0.688],
         "front": 16,
         "rear": 46,
         "primary": 2.000,
@@ -873,8 +888,11 @@ _DB: list[dict] = [
         "mfr": "ktm",
         "model": "rc 390",
         "year": (2014, 2026),
-        "ratios": [2.600, 1.882, 1.562, 1.333, 1.192, 1.095],
-        "front": 14,
+        # Shares the 373cc engine + 6-speed cassette + final drive with the
+        # Duke 390 (overdriven 6th ~0.96). The previous [...,1.095] box was the
+        # small-Duke/RC 200 cassette and collapsed the RC 390's trap ~15 km/h.
+        "ratios": [2.846, 2.105, 1.625, 1.300, 1.095, 0.962],
+        "front": 15,
         "rear": 45,
         "primary": 2.200,
     },
@@ -951,7 +969,7 @@ _DB: list[dict] = [
         "mfr": "bajaj",
         "model": "pulsar 220f",
         "year": (2007, 2026),
-        "ratios": [3.500, 1.846, 1.227, 0.923, 0.734, None],
+        "ratios": [3.500, 1.846, 1.227, 0.923, 0.734],
         "front": 16,
         "rear": 50,
         "primary": 2.100,
@@ -988,7 +1006,7 @@ _DB: list[dict] = [
         "mfr": "tvs",
         "model": "apache rtr 200",
         "year": (2016, 2026),
-        "ratios": [3.214, 1.947, 1.333, 1.000, 0.800, None],
+        "ratios": [3.214, 1.947, 1.333, 1.000, 0.800],
         "front": 16,
         "rear": 48,
         "primary": 2.000,
@@ -997,7 +1015,7 @@ _DB: list[dict] = [
         "mfr": "tvs",
         "model": "apache rtr 160",
         "year": (2018, 2026),
-        "ratios": [3.182, 1.909, 1.313, 0.987, 0.789, None],
+        "ratios": [3.182, 1.909, 1.313, 0.987, 0.789],
         "front": 16,
         "rear": 48,
         "primary": 2.000,
@@ -1101,7 +1119,7 @@ _DB: list[dict] = [
         "mfr": "hero",
         "model": "xtreme 160r",
         "year": (2020, 2026),
-        "ratios": [3.500, 1.846, 1.227, 0.923, 0.734, None],
+        "ratios": [3.500, 1.846, 1.227, 0.923, 0.734],
         "front": 16,
         "rear": 50,
         "primary": 2.100,
@@ -1562,6 +1580,13 @@ def lookup_gear_ratios(
     model_lower = model_name.lower()
     model_norm = _norm(model_name)
 
+    # Space-preserving normalisation (strip -._ but KEEP spaces) used only to
+    # reject digit-extension collisions below.
+    def _sp_norm(s: str) -> str:
+        return s.lower().replace("-", "").replace("_", "").replace(".", "")
+
+    model_sp = _sp_norm(model_name)
+
     # Collect all matching entries, prefer longest pattern match
     candidates = []
     for entry in _DB:
@@ -1572,6 +1597,20 @@ def lookup_gear_ratios(
         # Accept either a direct substring match (legacy behaviour) or a
         # whitespace-normalised match (handles "CB650R" vs "cb 650r").
         if pattern not in model_lower and pattern_norm not in model_norm:
+            continue
+        # Reject digit-extension collisions: if the pattern -- with hyphens
+        # stripped but SPACES KEPT -- is immediately followed by a digit with no
+        # separator, its model NUMBER is being extended into a different one.
+        # e.g. "yzf-r1" must not match "yzf-r15"/"yzf-r125" (r1 -> r15). A
+        # separated displacement/variant ("rsv4 1000", "apache rtr 200 4V",
+        # "monster 1200") has a space after the pattern and is still allowed.
+        p_sp = _sp_norm(entry["model"])
+        j = model_sp.find(p_sp)
+        if (
+            j != -1
+            and j + len(p_sp) < len(model_sp)
+            and model_sp[j + len(p_sp)].isdigit()
+        ):
             continue
         # Check year range
         if year is not None:
