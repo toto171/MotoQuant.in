@@ -29,6 +29,24 @@ Fix what's free-vs-paid first; the payment keys come last.
 | B7 | **Backups** — no backup job even with a disk | Missing | Cron `sqlite3 .backup` to object storage; do with B1 |
 | B8 | **GST invoice promise** — terms/pricing promise invoices; no generator exists | Missing | Use provider-native invoicing (Razorpay/Stripe both emit) or soften copy |
 
+## Operator env checklist (July 2 functional audit — features that work, waiting only on keys)
+
+> Every flow below is code-complete and verified end-to-end (36/36 functional
+> checks); each lights up with ZERO code changes the moment its env vars land
+> on Render (Dashboard → motoquant-api → Environment). Operator confirmed
+> July 2 they will set these up.
+
+| Feature | Current behavior (unset) | Env vars to set |
+|---|---|---|
+| **Magic-link EMAILS** | Flow works; token minted + verified, but no email sent (stdout backend; login page shows the dev-token box) | `SMTP_HOST` `SMTP_PORT` `SMTP_USER` `SMTP_PASS` `SMTP_FROM` — or `RESEND_API_KEY` + `SMTP_FROM` |
+| **AI chat** | Honest "LLM not configured" banner in the UI | `GROQ_API_KEY` + `LLM_PROVIDER=groq` (or `ANTHROPIC_API_KEY`) |
+| **Live weather for un-seeded cities** | Seeded 20 venues resolve fine; unknown cities → clean 503 | `OPENWEATHERMAP_API_KEY` |
+| **Real checkout** | Beta CTA routes to free signup; `/api/payments/checkout` → friendly 503 | Razorpay keys + plan IDs, Stripe keys + price IDs per `PAYMENTS_SETUP.md`, then `MOTOQUANT_BILLING_ENFORCE=true` |
+| **Session security hardening** | Dev-default JWT secret | `JWT_SECRET` (32-byte random) — set BEFORE real accounts (B5) |
+| **Account durability** | Accounts/runs wiped on redeploy (no disk) | Render paid disk + `MOTOQUANT_DB=/data/motoquant.db` (B1) |
+| **Error tracking** | Sentry wired, no-op | `SENTRY_DSN` |
+| **Product analytics** | PostHog forwarding wired, no-op | `POSTHOG_API_KEY` (+ `NEXT_PUBLIC_POSTHOG_KEY` on Vercel) |
+
 ## Feature ladder (revenue-impact ÷ effort)
 
 1. **Free-sim quota + Pro-gating the Optimizer/Autotune** — the conversion lever. *(metering shipped this session; gating decision is the operator's pricing call)*
