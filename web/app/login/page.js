@@ -161,7 +161,7 @@ function LoginPageInner() {
 
   const tabClass = (m) =>
     [
-      "flex-1 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] rounded-md transition-colors",
+      "flex-1 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] rounded-md transition-colors whitespace-nowrap",
       mode === m
         ? "bg-brand-orange/15 text-brand-orange border border-brand-orange/40"
         : "text-white/45 hover:text-white border border-transparent",
@@ -177,7 +177,7 @@ function LoginPageInner() {
             className="pointer-events-none absolute -inset-x-24 -top-24 -bottom-16 bg-[radial-gradient(ellipse_at_center,rgba(255,94,31,0.10),transparent_65%)]"
           />
           <div className="relative text-center space-y-3">
-            <CodeComment center>auth gate · jwt · 15min access window</CodeComment>
+            <CodeComment center>auth gate · jwt session</CodeComment>
             <p className="font-display font-bold text-2xl text-gradient-orange">
               The physics of faster
             </p>
