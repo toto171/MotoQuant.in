@@ -497,16 +497,13 @@ def _build_config(
                     d = dict(row)
                     if d.get("altitude_m") is not None:
                         cfg.environment.altitude_m = float(d["altitude_m"])
-                    # Derive grip multiplier from surface_type
-                    surface = (d.get("surface_type") or "asphalt").lower()
-                    grip_map = {
-                        "concrete": 1.05,  # prepped concrete (NHRA-style)
-                        "asphalt": 1.00,  # baseline
-                        "prepped": 1.10,  # VHT-prepped
-                    }
-                    cfg.environment.surface_grip_multiplier = grip_map.get(
-                        surface, 1.00
-                    )
+                    # Route the venue's surface type into track_surface — the
+                    # real field EnvironmentalModel reads. (The old code wrote a
+                    # phantom `surface_grip_multiplier` attribute that nothing
+                    # consumed, so venue surface had zero effect on the sim.)
+                    cfg.environment.track_surface = (
+                        d.get("surface_type") or "asphalt"
+                    ).lower()
             except Exception as e:
                 logging.getLogger(__name__).warning(
                     "Failed to load venue %s: %s", venue_id, e
