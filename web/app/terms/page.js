@@ -1,11 +1,12 @@
 /**
  * MotoQuant Pro — Terms of Service
- * Last updated: April 24, 2026
+ * Last updated: July 2, 2026 (§2 corrected: password + magic-link sign-in;
+ * Cockpit v3 PageHero + card surfaces)
  */
 
 import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
-import CodeComment from "../../components/CodeComment";
+import PageHero from "../../components/PageHero";
 
 export const metadata = {
   title: "Terms of Service — MotoQuant Pro",
@@ -16,15 +17,20 @@ export default function TermsPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       <SiteNav />
-      <main className="pt-32 pb-20 px-4 sm:px-6">
-        <div className="mx-auto max-w-3xl">
-          <CodeComment className="mb-3">legal · terms of service · pune jurisdiction</CodeComment>
-          <h1 className="font-display font-bold text-4xl md:text-5xl text-white tracking-tight mt-0 mb-3">
-            Terms of Service
-          </h1>
-          <p className="text-white/45 text-sm font-mono">Last updated: 24 April 2026</p>
 
-        <p className="text-white/80 text-sm leading-relaxed mt-6">
+      <PageHero
+        kicker="legal · terms of service · pune jurisdiction"
+        badge="Legal"
+        title="Terms of Service"
+        sub="The agreement governing your access to and use of MotoQuant Pro."
+        className="border-b border-brand-orange/10 pb-8 md:pb-10"
+      >
+        <p className="label-mono">Last updated · 2 July 2026</p>
+      </PageHero>
+
+      <main className="pt-10 pb-20 px-4 sm:px-6">
+        <div className="mx-auto max-w-3xl">
+        <p className="text-white/80 text-sm leading-relaxed">
           These Terms of Service ("Terms") govern your access to and use of MotoQuant Pro
           ("MotoQuant", "we", "us"), a motorcycle drag-racing physics simulation platform
           operated from Pune, India. By creating an account or using the service, you agree
@@ -49,9 +55,11 @@ export default function TermsPage() {
 
         <Section title="2. Accounts and Authentication">
           <p>
-            You must provide a valid email address to create an account. We use passwordless
-            sign-in (magic-link email) — we never store passwords. You are responsible for
-            keeping your email account secure, as it controls access to MotoQuant Pro.
+            You must provide a valid email address to create an account. You can sign in
+            with a password — which we store only as a salted scrypt hash, never in
+            plaintext — or with a passwordless magic-link email. You are responsible for
+            keeping your email account and any password you set secure, as they control
+            access to MotoQuant Pro.
           </p>
           <p>
             You must be at least 18 years old to create a paid account. By subscribing
@@ -157,7 +165,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <div className="mt-12 border-t border-white/10 pt-8 text-sm text-white/45">
+        <div className="card mt-8 p-5 md:p-6 text-sm text-white/45">
           <p>MotoQuant Pro · Pune, Maharashtra, India</p>
           <p>Contact: <a href="mailto:motoquant@gmail.com" className="text-brand-accent hover:text-white transition-colors">motoquant@gmail.com</a></p>
           <div className="mt-4 flex gap-4">
@@ -174,9 +182,9 @@ export default function TermsPage() {
 
 function Section({ title, children }) {
   return (
-    <div className="mt-8">
+    <section className="card mt-6 p-5 md:p-6">
       <h2 className="font-display font-bold text-xl text-white mb-3 border-l-2 border-brand-orange pl-3">{title}</h2>
       <div className="space-y-3 text-white/80 text-sm leading-relaxed">{children}</div>
-    </div>
+    </section>
   );
 }

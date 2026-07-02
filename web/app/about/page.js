@@ -1,7 +1,7 @@
 'use client';
 
-import { Suspense, useState } from 'react';
-import { Send, ChevronRight } from 'lucide-react';
+import { Suspense } from 'react';
+import { Mail, ChevronRight } from 'lucide-react';
 import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
 import PageHero from '../../components/PageHero';
@@ -83,26 +83,6 @@ function FounderCard({ initial, name, role, email, children }) {
 }
 
 export default function AboutPage() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-  const [sent, setSent] = useState(false);
-
-  function handleSubmit(e) {
-    e.preventDefault();
-    // Wire to Formspree or a POST /api/contact endpoint when ready.
-    // For now, fall through to mailto as a reliable baseline.
-    const subject = encodeURIComponent(`MotoQuant — message from ${name}`);
-    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`);
-    window.location.href = `mailto:motoquant@gmail.com?subject=${subject}&body=${body}`;
-    setSent(true);
-  }
-
-  const inputCls =
-    'w-full bg-ink-0/70 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-brand-orange/60 transition-colors';
-  const labelCls =
-    'block font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1.5';
-
   return (
     <div className="min-h-screen bg-ink-0 text-white overflow-x-hidden">
       {/* Nav */}
@@ -261,64 +241,32 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div>
-              {sent ? (
-                <div className="relative overflow-hidden rounded-xl border border-brand-green/30 bg-ink-1/60 p-8 text-center">
-                  <span
-                    aria-hidden="true"
-                    className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-green/60 to-transparent"
-                  />
-                  <div className="text-brand-green text-3xl mb-3">✓</div>
-                  <h3 className="font-display font-bold text-white mb-2">Message sent!</h3>
-                  <p className="text-white/60 text-sm">Your mail client should have opened with a pre-filled message. If not, email motoquant@gmail.com directly.</p>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="relative overflow-hidden rounded-xl border border-brand-orange/20 bg-ink-1/60 p-6 space-y-4">
-                  <span
-                    aria-hidden="true"
-                    className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/60 to-transparent"
-                  />
-                  <div>
-                    <label className={labelCls}>Your name</label>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={e => setName(e.target.value)}
-                      required
-                      className={inputCls}
-                      placeholder="Arjun Sharma"
-                    />
-                  </div>
-                  <div>
-                    <label className={labelCls}>Email</label>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      required
-                      className={inputCls}
-                      placeholder="you@example.com"
-                    />
-                  </div>
-                  <div>
-                    <label className={labelCls}>Message</label>
-                    <textarea
-                      value={message}
-                      onChange={e => setMessage(e.target.value)}
-                      required
-                      rows={5}
-                      className={`${inputCls} resize-none`}
-                      placeholder="Tell us what you want to know, build, or break."
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-brand-orange text-black font-display font-bold rounded-md hover:bg-brand-orangeLight transition-colors shadow-orange-soft"
-                  >
-                    <Send size={14} /> Send message
-                  </button>
-                </form>
-              )}
+            {/* Honest direct-contact card — no fake form, no fake "sent"
+                state. One mailto action; email is the real channel. */}
+            <div className="relative overflow-hidden card p-6 md:p-8">
+              <span
+                aria-hidden="true"
+                className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/60 to-transparent"
+              />
+              <div className="label-mono mb-3">Direct line</div>
+              <h3 className="font-display font-bold text-xl text-white mb-3">
+                Email us — a founder replies
+              </h3>
+              <p className="text-white/60 text-sm leading-relaxed mb-6">
+                No contact form, no ticket queue. Mail lands straight in the
+                founders&apos; inbox and we reply within 48 hours — usually much
+                faster. Bug reports with a share link or a Dragy CSV attached
+                get answered first.
+              </p>
+              <a
+                href="mailto:motoquant@gmail.com?subject=MotoQuant%20—%20hello"
+                className="btn-primary w-full"
+              >
+                <Mail size={14} /> Email motoquant@gmail.com
+              </a>
+              <p className="mt-4 text-center font-mono text-[10px] uppercase tracking-[0.25em] text-white/35">
+                replies within 48h · IST working hours
+              </p>
             </div>
           </div>
         </div>

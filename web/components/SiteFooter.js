@@ -15,6 +15,7 @@ const COLS = [
       { href: '/simulator',            label: 'Simulator' },
       { href: '/features',             label: 'Features' },
       { href: '/pricing',              label: 'Pricing' },
+      { href: '/leaderboard',          label: 'Leaderboard' },
       { href: '/login',                label: 'Sign in / Account' },
       { href: '/bikes',                label: 'Bikes catalog' },
     ],
@@ -33,7 +34,7 @@ const COLS = [
     links: [
       { href: '/about',                label: 'About' },
       { href: '/blog',                 label: 'Blog' },
-      { href: 'mailto:dhisetu@gmail.com', label: 'Contact' },
+      { href: 'mailto:motoquant@gmail.com', label: 'Contact' },
     ],
   },
   {

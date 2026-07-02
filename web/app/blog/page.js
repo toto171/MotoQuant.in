@@ -9,162 +9,24 @@ import EndOfBlogIndexCta from "./EndOfBlogIndexCta";
 export const metadata = {
   title:
     "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
+  // ≤160 chars; the per-post pages carry their own long-tail metadata —
+  // stuffing the index was a keyword-cannibalisation risk, not a win.
   description:
-    "Physics-based quarter-mile breakdowns for Indian and global motorcycles: Bajaj Pulsar N125 vs TVS Raider 125 vs Hero Glamour 125 commuter shootout, CFMoto 675SR-R sub-INR 6 lakh inline triple sport, Honda CBR150R Indonesian K56F sport single, Suzuki GSX-R600 K8 600cc supersport, Kawasaki Ninja H2 SX supercharged sport-tourer, Yamaha MT-15 V1 155cc naked deep-dive, Triumph Street Triple 765 R, KTM 890 Duke R India grey-market, best mods for KTM RC 390 ranked by cost-per-tenth, Kawasaki Ninja 400 vs ZX-4R, MMRT Chennai venue tuning, Yamaha XSR900 GP vs MT-09, Yamaha MT-125 vs XSR125, CFMoto 800NK, KTM Duke 390 vs RC 390, Pulsar NS400Z, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, R15 V4, plus 2-stroke expansion chamber theory and Aamby Valley November tuning.",
+    "Physics-first quarter-mile breakdowns, cost-per-tenth mod guides, and Indian venue tuning from the MotoQuant simulation engine.",
   keywords: [
     "motorcycle drag racing blog",
-    "pulsar n125 quarter mile",
-    "pulsar n125 0-100",
-    "pulsar n125 vs raider 125",
-    "tvs raider 125 quarter mile",
-    "hero glamour 125 quarter mile",
-    "fastest 125cc commuter india",
-    "fastest 125cc bike india",
-    "indian 125cc drag race",
-    "pulsar 125 neon drag time",
-    "kawasaki ninja h2 sx quarter mile",
-    "h2 sx drag time",
-    "ninja h2 sx vs hayabusa",
-    "h2 sx vs zx-14r quarter mile",
-    "ninja h2 sx india price",
-    "supercharged motorcycle quarter mile",
-    "ninja h2 sx grey market india",
-    "bajaj dominar 400 quarter mile",
-    "dominar 400 drag time india",
-    "dominar 400 vs rc 390",
-    "dominar 400 cost per tenth",
-    "yamaha mt-15 v1 quarter mile",
-    "mt-15 v1 vs r15 v3",
-    "mt-15 v1 drag time india",
-    "yamaha mt-15 2019 0-100",
-    "mt-15 v1 top speed india",
-    "aprilia tuono 457 quarter mile",
-    "tuono 457 vs rs 457",
-    "tuono 457 drag time india",
-    "tuono 457 vs duke 390",
-    "aprilia tuono 660 factory quarter mile",
-    "tuono 660 factory drag time india",
-    "tuono 660 factory vs base tuono",
-    "tuono 660 factory vs rs 660",
-    "tuono 660 factory price india",
-    "triumph street triple 765r quarter mile",
-    "street triple 765 r india drag race",
-    "triumph 765 india price",
-    "indian motorcycle quarter mile",
-    "best mods for ktm rc 390 india",
-    "rc 390 cost per tenth",
-    "rc 390 ecu flash price india",
-    "rc 390 performance upgrade cost",
-    "ktm 390 powertronic stage 1",
-    "mmrt chennai drag racing motorcycle",
-    "madras motor race track quarter mile",
-    "how to tune for mmrt chennai",
-    "mmrt vs aamby valley",
-    "kari motor speedway drag racing",
-    "yamaha xsr900 gp vs mt-09",
-    "xsr900 gp quarter mile",
-    "mt-09 quarter mile time",
-    "yamaha cp3 triple drag",
-    "kawasaki ninja zx-4r quarter mile",
-    "zx-4r vs zx-4rr",
-    "zx-4r india price",
-    "yamaha mt-125 quarter mile",
-    "yamaha xsr125 quarter mile",
-    "mt-125 vs xsr125",
-    "cfmoto 800nk quarter mile",
-    "cfmoto 800nk india price",
-    "cfmoto 675sr-r quarter mile",
-    "cfmoto 675sr-r india price",
-    "cfmoto 675sr-r vs daytona 660",
-    "cfmoto 675sr-r vs street triple 765",
-    "cfmoto inline triple india",
-    "ktm duke 390 vs rc 390",
-    "pulsar ns400z vs rc 390",
-    "continental gt 650 drag",
-    "ns200 vs apache rtr 200",
-    "hayabusa vs zx-14r india",
-    "r15 v4 quarter mile time",
-    "ktm 1390 super duke",
-    "yezdi roadster quarter mile",
-    "yezdi roadster drag time",
-    "yezdi 334 platform",
-    "2 stroke expansion chamber",
+    "motorcycle quarter mile times india",
+    "cost per tenth motorcycle mods",
+    "indian drag strips",
     "aamby valley tuning",
-    "cfmoto 800nk vs ktm 790 duke",
-    "pulsar n250 vs apache rtr 200 4v",
-    "hayabusa 2026 gen 3 quarter mile india",
-    "ktm 890 duke quarter mile",
-    "ktm 890 duke r drag time india",
-    "ktm 890 duke r quarter mile india",
-    "ktm 890 duke r grey market india",
-    "ktm 890 duke vs 890 duke r",
-    "ktm 890 duke vs mt-09",
-    "suzuki gsx-s750 quarter mile",
-    "gsx-s750 drag time india",
-    "honda cb500x quarter mile",
-    "cb500x adventure drag time",
-    "kawasaki ninja 400 quarter mile india",
-    "ninja 400 vs zx-4r which is faster",
-    "ninja 400 drag time india",
-    "kawasaki zx-4r vs ninja 400",
-    "kawasaki z900rs quarter mile",
-    "z900rs india price",
-    "z900rs vs z900",
-    "z900rs vs xsr900",
-    "z900rs cost per tenth",
-    "harley davidson nightster rh975 quarter mile",
-    "nightster rh975 drag time",
-    "nightster 975 vs sportster s drag",
-    "harley nightster india price quarter mile",
-    "husqvarna svartpilen 250 quarter mile",
-    "svartpilen 250 vs ktm duke 250",
-    "svartpilen 250 india drag",
-    "honda cb125r quarter mile",
-    "cb125r drag time india",
-    "cb125r vs r15 v4",
-    "ktm 1390 super duke r evo quarter mile india",
-    "ktm 1390 evo drag time",
-    "honda hornet 2.0 vs pulsar ns200 drag",
-    "hornet 2.0 vs ns200 quarter mile",
-    "honda hornet 2.0 drag time india",
-    "honda hornet 2.0 0-100 india",
-    "royal enfield hunter 350 quarter mile",
-    "hunter 350 drag time india",
-    "hunter 350 vs classic 350 vs bullet 350",
-    "hunter 350 top speed india",
-    "re j platform drag race",
-    "indian drag strips ranked",
-    "mmrt vs aamby valley elevation",
-    "density altitude indian drag racing",
-    "best drag strip in india for litre bike",
-    "best drag strip in india for small cc",
-    "suzuki gsx-r600 k8 quarter mile",
-    "gsx-r600 k8 drag time",
-    "gsx-r 600 k8 vs cbr600rr",
-    "gsxr 600 k8 quarter mile time",
-    "best mods for gsx-r600 k8",
-    "gsx-r600 k8 vs k6",
-    "used 600cc supersport india",
-    "honda cbr150r quarter mile",
-    "cbr150r drag time india",
-    "cbr150r vs r15 v4",
-    "cbr150r vs rs150r",
-    "cbr150r vs y15zr",
-    "honda k56f platform india",
-    "cbr150r indonesia grey market india",
-    "se asia 150cc drag",
-    "600cc supersport simulator accuracy",
-    "yzf r6 quarter mile bias",
-    "engine deceleration launch physics motorcycle",
-    "max engine decel rads2",
-    "clutch slip phase 600cc inline four",
-    "motoquant physics calibration",
-    "triumph tiger 900 gt pro quarter mile",
-    "tiger 900 gt pro india price",
-    "tiger 900 gt pro vs f 900 gs",
-    "tiger 900 gt pro powertronic stage 1",
-    "triumph t-plane crank physics",
-    "mid adventure bike india drag",
+    "mmrt chennai drag racing",
+    "hayabusa vs zx-14r",
+    "ktm duke 390 quarter mile",
+    "pulsar ns200 vs apache rtr 200",
+    "r15 v4 quarter mile time",
+    "royal enfield quarter mile",
+    "2 stroke expansion chamber",
+    "motorcycle physics blog india",
   ],
   alternates: { canonical: "https://motoquant.in/blog" },
 };
@@ -743,6 +605,90 @@ const POSTS = [
   },
 ];
 
+/* ── Featured + rubric grouping ────────────────────────────────────────────
+   The flagship methodology post anchors the index; every other card is
+   grouped under a rubric inferred from its slug, so there is no per-post
+   metadata to maintain — new posts land in the right section automatically. */
+const FEATURED_SLUG = "how-the-motoquant-physics-engine-works";
+
+const RUBRICS = [
+  { id: "physics", title: "Physics & engineering" },
+  { id: "guides", title: "Guides & venue tuning" },
+  { id: "comparisons", title: "Bike comparisons" },
+  { id: "breakdowns", title: "Bike breakdowns" },
+];
+
+function rubricFor(slug) {
+  if (
+    slug.includes("physics-engine-works") ||
+    slug.includes("expansion-chamber") ||
+    slug.includes("physics-of-a-perfect-launch") ||
+    slug.includes("launch-physics-engine-deceleration")
+  ) {
+    return "physics";
+  }
+  if (
+    slug.startsWith("how-to-") ||
+    slug.includes("best-mods") ||
+    slug.includes("wont-hit-14s") ||
+    slug.includes("elevation-comparison") ||
+    slug.includes("stock-to-11s")
+  ) {
+    return "guides";
+  }
+  if (slug.includes("-vs-")) return "comparisons";
+  return "breakdowns";
+}
+
+function FeaturedPostCard({ post }) {
+  return (
+    <Link href={`/blog/${post.slug}`} className="block group mb-16">
+      <article className="card card-hover relative overflow-hidden p-6 md:p-8">
+        <span
+          aria-hidden="true"
+          className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/60 to-transparent"
+        />
+        <div className="label-mono text-brand-orange mb-4">
+          Featured dispatch
+        </div>
+        <div className="grid md:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] gap-6 md:gap-10 items-start">
+          <div>
+            <h2 className="font-display font-bold text-2xl md:text-3xl text-white leading-snug mb-4 group-hover:text-brand-orange transition-colors">
+              {post.title}
+            </h2>
+            <p className="text-white/60 text-sm leading-relaxed mb-5">
+              {post.excerpt}
+            </p>
+            <div className="flex items-center gap-4">
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/45">
+                {new Date(post.date).toLocaleDateString("en-IN", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}{" "}
+                · {post.readTime} read
+              </span>
+              <span className="text-brand-accent text-xs font-mono group-hover:text-brand-orange transition-colors">
+                Read the deep dive →
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-1.5 content-start md:justify-end">
+            {post.tags.map((t) => (
+              <span
+                key={t}
+                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide h-fit"
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+      </article>
+    </Link>
+  );
+}
+
 function PostCard({ post }) {
   return (
     <Link href={`/blog/${post.slug}`} className="block group h-full">
@@ -786,6 +732,15 @@ function PostCard({ post }) {
 }
 
 export default function BlogIndexPage() {
+  const featured = POSTS.find((p) => p.slug === FEATURED_SLUG) ?? POSTS[0];
+  const byDateDesc = (a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
+  const grouped = RUBRICS.map((rubric) => ({
+    ...rubric,
+    posts: POSTS.filter(
+      (p) => p.slug !== featured.slug && rubricFor(p.slug) === rubric.id
+    ).sort(byDateDesc),
+  })).filter((rubric) => rubric.posts.length > 0);
+
   return (
     <div className="min-h-screen bg-black text-white">
       <SiteNav />
@@ -801,13 +756,28 @@ export default function BlogIndexPage() {
 
       <main className="pb-24 px-6">
         <div className="max-w-5xl mx-auto">
-          <Stagger className="grid md:grid-cols-2 lg:grid-cols-3 gap-6" stagger={0.04}>
-            {POSTS.map((post) => (
-              <StaggerItem key={post.slug} className="h-full">
-                <PostCard post={post} />
-              </StaggerItem>
-            ))}
-          </Stagger>
+          <FeaturedPostCard post={featured} />
+
+          {grouped.map((rubric) => (
+            <section key={rubric.id} className="mb-16 last:mb-0">
+              <div className="flex flex-wrap items-baseline gap-3 mb-6">
+                <h2 className="font-display font-bold text-2xl text-white">
+                  {rubric.title}
+                </h2>
+                <span className="label-mono">
+                  {rubric.posts.length}{" "}
+                  {rubric.posts.length === 1 ? "post" : "posts"}
+                </span>
+              </div>
+              <Stagger className="grid md:grid-cols-2 lg:grid-cols-3 gap-6" stagger={0.04}>
+                {rubric.posts.map((post) => (
+                  <StaggerItem key={post.slug} className="h-full">
+                    <PostCard post={post} />
+                  </StaggerItem>
+                ))}
+              </Stagger>
+            </section>
+          ))}
 
           {/* GROWTH_EXP_006 — end-of-grid simulator CTA (default OFF, ?variant=B) */}
           <Suspense fallback={null}>

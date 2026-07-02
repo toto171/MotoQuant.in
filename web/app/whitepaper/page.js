@@ -311,8 +311,8 @@ export default function WhitepaperPage() {
             </p>
             <p className="text-white/40 text-sm font-mono">
               MotoQuant Pro &middot; Pune, India &middot;{' '}
-              <a href="mailto:dhisetu@gmail.com" className="text-brand-accent hover:text-white transition-colors">
-                dhisetu@gmail.com
+              <a href="mailto:motoquant@gmail.com" className="text-brand-accent hover:text-white transition-colors">
+                motoquant@gmail.com
               </a>
             </p>
 
@@ -324,8 +324,8 @@ export default function WhitepaperPage() {
               {[
                 { seg: '15', label: 'Sub-models' },
                 { seg: '501', label: 'Catalog bikes' },
-                { seg: '156', label: 'Weighted benchmarks' },
-                { seg: '0.007', pre: '−', post: 's', label: 'Weighted bias' },
+                { seg: '216', label: 'Weighted benchmarks' },
+                { seg: '0.015', pre: '−', post: 's', label: 'Weighted bias' },
               ].map(t => (
                 <div key={t.label} className="relative overflow-hidden rounded-xl border border-brand-orange/20 bg-ink-1/60 p-4">
                   <span aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent" />

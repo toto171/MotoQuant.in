@@ -82,8 +82,8 @@ export default function PhysicsPage() {
           26 s (prevents infinite loops on bikes that cannot complete), or when a NaN/Inf is detected in the state vector
           (which triggers an early-exit with an error flag rather than a corrupted result).
         </p>
-        <div className="glass rounded-xl border border-brand-orange/20 p-5 mb-4">
-          <div className="font-mono text-xs text-brand-accent mb-2">State vector</div>
+        <div className="card p-5 mb-4 border-brand-orange/20">
+          <div className="label-mono text-brand-accent mb-2">State vector</div>
           <code className="block text-sm font-mono text-white/80">[x, v, ω_e, T_tyre, T_clutch, gear]</code>
           <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-mono text-white/50">
             <span>x — position (m)</span>
@@ -94,8 +94,8 @@ export default function PhysicsPage() {
             <span>gear — gear index (1–6)</span>
           </div>
         </div>
-        <div className="glass rounded-xl border border-brand-orange/20 p-5">
-          <div className="font-mono text-xs text-brand-accent mb-2">Force balance at each timestep</div>
+        <div className="card p-5 border-brand-orange/20">
+          <div className="label-mono text-brand-accent mb-2">Force balance at each timestep</div>
           <code className="block text-sm font-mono text-white/80 leading-relaxed">
             F_net = F_traction − F_aero − F_rolling_resistance − F_grade<br />
             a = F_net / m_total<br />
@@ -131,7 +131,7 @@ export default function PhysicsPage() {
           Each sub-model is an independent Python module in <code className="font-mono text-brand-accent">motoquant/submodels/</code>.
           They communicate only through the BikeConfig dataclass and the current state vector — no global state.
         </p>
-        <div className="glass rounded-xl border border-brand-orange/20 divide-y divide-white/[0.05]">
+        <div className="card px-5 border-brand-orange/20 divide-y divide-white/[0.05]">
           {SUBMODELS.map(m => <SubModelRow key={m.n} model={m} />)}
         </div>
       </section>
@@ -163,13 +163,13 @@ export default function PhysicsPage() {
 
       {/* Next */}
       <div className="pt-8 border-t border-brand-orange/10">
-        <div className="font-mono text-[10px] text-white/45 uppercase tracking-[0.25em] mb-4">Next</div>
+        <div className="label-mono mb-4">Next</div>
         <div className="grid sm:grid-cols-2 gap-4">
-          <Link href="/docs/validation" className="glass rounded-xl p-4 border border-white/10 hover:border-brand-orange/40 transition-colors group">
+          <Link href="/docs/validation" className="card card-hover block p-4 group">
             <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Validation Data →</div>
             <div className="text-xs text-white/50">Benchmark table with 216 benchmarks, per-cluster accuracy metrics, and methodology.</div>
           </Link>
-          <Link href="/docs/getting-started" className="glass rounded-xl p-4 border border-white/10 hover:border-brand-orange/40 transition-colors group">
+          <Link href="/docs/getting-started" className="card card-hover block p-4 group">
             <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Run your first sim →</div>
             <div className="text-xs text-white/50">Getting Started guide — web, desktop, and API.</div>
           </Link>
