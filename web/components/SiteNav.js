@@ -123,7 +123,10 @@ export default function SiteNav() {
           </span>
         </Link>
 
-        <nav className="hidden lg:flex gap-6 items-center text-sm font-mono">
+        {/* gap-4 until xl: at 1024-1100px the full cluster (5 tools + Pricing
+            + Resources + search + auth + CTA) was overflowing the viewport by
+            ~60px and clipping the CTA (field-reported). */}
+        <nav className="hidden lg:flex gap-4 xl:gap-6 items-center text-sm font-mono">
           {TOOL_LINKS.map((link) => (
             <Link key={link.href} href={link.href} className={linkCls(isActive(pathname, link))}>
               {link.label}
@@ -196,7 +199,7 @@ export default function SiteNav() {
             className="flex items-center gap-2 rounded-md border border-white/10 px-2.5 py-2 text-white/60 transition-colors hover:border-brand-orange/50 hover:text-white"
           >
             <Search size={15} aria-hidden="true" />
-            <kbd className="label-mono hidden md:inline">⌘K</kbd>
+            <kbd className="label-mono hidden md:max-lg:inline xl:inline">⌘K</kbd>
           </button>
           {isAuthenticated ? (
             <Link
@@ -228,7 +231,9 @@ export default function SiteNav() {
             href="/simulator"
             className="px-3 sm:px-4 py-2 bg-brand-orange hover:bg-brand-orangeLight text-black font-display font-bold rounded-md text-xs sm:text-sm transition-colors whitespace-nowrap shadow-orange-soft"
           >
-            Launch <span className="hidden sm:inline">Simulator</span>
+            {/* Full label only where it fits: below sm and in the tight
+                lg..xl band the CTA reads "Launch" so the cluster never clips. */}
+            Launch <span className="hidden sm:max-lg:inline xl:inline">Simulator</span>
           </Link>
           <button
             type="button"

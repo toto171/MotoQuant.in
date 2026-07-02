@@ -79,7 +79,14 @@ body {
     @apply rounded-2xl border border-white/10 bg-ink-2/60;
   }
   .card-hover {
-    @apply transition-colors duration-200 hover:border-white/25 hover:bg-ink-2;
+    @apply transition-[border-color,background-color,transform,box-shadow]
+      duration-200 hover:-translate-y-0.5 hover:border-white/25 hover:bg-ink-2
+      hover:shadow-[0_8px_30px_rgba(0,0,0,0.45)];
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card-hover {
+      @apply hover:translate-y-0;
+    }
   }
 
   .btn-primary {
@@ -121,6 +128,23 @@ body {
   }
   .btn-sm {
     @apply h-9 px-4 text-xs;
+  }
+  /* Tactile press: every button compresses 2% under the pointer — the
+     cheapest physical micro-interaction there is. Disabled for
+     reduced-motion users. */
+  .btn-primary,
+  .btn-ghost,
+  .btn-danger,
+  .btn-running {
+    @apply active:scale-[0.98];
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn-primary,
+    .btn-ghost,
+    .btn-danger,
+    .btn-running {
+      @apply active:scale-100;
+    }
   }
 
   .input-base {

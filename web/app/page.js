@@ -296,23 +296,17 @@ function HomePageInner() {
   });
   const heroFade = useTransform(heroProgress, [0.6, 1], [1, 0]);
 
-  // ── Dial gets its OWN scroll progress, decoupled from the hero. ──
-  // On mobile the dial stacks BELOW the tree, so by the time the gauge
-  // is on-screen the hero progress is already past 0.5 and the needle
-  // would only sweep the low-RPM portion before the hero fades out. By
-  // scoping the dial's progress to its own bounding-box passing through
-  // the viewport (`start end` → `end start`), the full 1500→14500 RPM
-  // sweep maps to "dial enters viewport bottom" → "dial exits viewport
-  // top", which works at every viewport height.
+  // ── Dial drive (July 2026 fix: respond from the FIRST scroll pixel). ──
+  // The old mapping scoped progress to the dial's own box crossing the
+  // viewport TOP ('start start' → 'end start'), which meant hundreds of
+  // pixels of scrolling produced zero needle movement — field-reported as
+  // "the rpm gauge moves very late" (the telemetry section below was at
+  // 13.5k rpm while the hero dial still idled at 1,500). The hero's own
+  // progress is 0 exactly at rest and grows from the first scroll tick, so
+  // the dial now rides heroProgress: idle at rest, needle building
+  // immediately, redline by ~half the hero's exit. dialRef stays on the
+  // wrapper (LaunchControl positioning depends on it).
   const dialRef = useRef(null);
-  // Cockpit layout: the dial sits near the viewport top at rest, so the
-  // mapping is 'dial-top reaches viewport-top' (0 — staged, idle) through
-  // 'dial-bottom exits viewport-top' (1). At scrollY=0 progress clamps to 0
-  // and the needle genuinely idles at 1,500 rpm.
-  const { scrollYProgress: dialProgress } = useScroll({
-    target: dialRef,
-    offset: ['start start', 'end start'],
-  });
 
   // ── LAUNCH CONTROL (hold-to-launch) ──────────────────────────────
   // BITKRAFT-style hold gate. holdMV is driven by the LaunchControl
@@ -320,11 +314,12 @@ function HomePageInner() {
   // share one needle with no extra render loops. Tree restarts via
   // runSignal; an early release lights the red foul bulb.
   const holdMV = useMotionValue(0);
-  // Idle curve: raw scroll progress rests around 0.1-0.2 with the dial high
-  // in the hero, which parked the needle at ~9k rpm and the LCD mid-run on
-  // first paint. Remap so <=0.22 reads as staged-and-idle (1,500 rpm); the
-  // needle only builds once the user genuinely scrolls (or holds to launch).
-  const dialCurved = useTransform(dialProgress, [0.05, 1], [0, 1]);
+  // heroProgress is 0 at rest (hero top pinned to viewport top), so a tiny
+  // 2% dead-zone keeps the genuine 1,500-rpm idle on first paint while the
+  // needle starts building on the very first wheel tick. Full sweep lands
+  // by 55% of the hero's exit — the run plays while the dial is still
+  // prominently on screen instead of after it has left.
+  const dialCurved = useTransform(heroProgress, [0.02, 0.55], [0, 1], { clamp: true });
   const dialDrive = useTransform([dialCurved, holdMV], ([a, b]) => Math.max(a, b));
   const [treeRun, setTreeRun] = useState(0);
   const [treeFoul, setTreeFoul] = useState(false);
