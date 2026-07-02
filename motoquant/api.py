@@ -1834,6 +1834,7 @@ def _run_build(
     track_temp_c,
     humidity_pct,
     headwind_kmh,
+    progress_cb=None,
 ):
     """Build config, apply parts, run sim, return (sim, cfg, parts_applied, cost)."""
     cfg = _build_config(
@@ -1854,7 +1855,7 @@ def _run_build(
         cfg, part_ids, include_price_in_summary=False
     )
 
-    sim = MotoQuantEngine(cfg).run()
+    sim = MotoQuantEngine(cfg).run(progress_cb=progress_cb)
     return sim, cfg, parts_applied, build_cost
 
 
@@ -1893,10 +1894,19 @@ def _build_summary(sim, cfg, parts_applied, build_cost, label, include_timeserie
     return result
 
 
-@app.post("/api/simulate/compare")
-def simulate_compare(req: CompareRequest):
-    """Run two builds side-by-side and return full results for both."""
+def _compare_impl(req: CompareRequest, progress=None):
+    """Run two builds side-by-side. ``progress(frac, stage)`` maps build A to
+    0→0.48 and build B to 0.5→0.98 so the /api/jobs poller shows real
+    integration progress across both sims."""
+
+    def _span(lo, hi, stage):
+        if progress is None:
+            return None
+        return lambda f: progress(lo + (hi - lo) * min(1.0, max(0.0, f)), stage)
+
     try:
+        if progress is not None:
+            progress(0.01, "Simulating build A")
         sim_a, cfg_a, parts_a, cost_a = _run_build(
             req.a_bike_id,
             req.a_bike_preset,
@@ -1911,7 +1921,10 @@ def simulate_compare(req: CompareRequest):
             req.track_temp_c,
             req.humidity_pct,
             req.headwind_kmh,
+            progress_cb=_span(0.01, 0.48, "Simulating build A"),
         )
+        if progress is not None:
+            progress(0.5, "Simulating build B")
         sim_b, cfg_b, parts_b, cost_b = _run_build(
             req.b_bike_id,
             req.b_bike_preset,
@@ -1926,12 +1939,15 @@ def simulate_compare(req: CompareRequest):
             req.track_temp_c,
             req.humidity_pct,
             req.headwind_kmh,
+            progress_cb=_span(0.5, 0.98, "Simulating build B"),
         )
     except HTTPException:
         raise  # e.g. 404 for an unknown bike_id — don't relabel as 500
     except Exception as exc:
         raise HTTPException(500, f"Simulation error: {exc}")
 
+    if progress is not None:
+        progress(0.99, "Building comparison")
     a = _build_summary(sim_a, cfg_a, parts_a, cost_a, "A")
     b = _build_summary(sim_b, cfg_b, parts_b, cost_b, "B")
 
@@ -1948,6 +1964,12 @@ def simulate_compare(req: CompareRequest):
             "cost_diff_inr": round(cost_b - cost_a, 0),
         },
     }
+
+
+@app.post("/api/simulate/compare")
+def simulate_compare(req: CompareRequest):
+    """Run two builds side-by-side and return full results for both."""
+    return _compare_impl(req)
 
 
 # --- Dragy / Dyno Upload -------------------------------------------------
@@ -3630,6 +3652,16 @@ def job_optimize(req: OptimizeBuildRequest):
 def job_autotune(req: AutotuneRequest):
     """Start the ECU autotune as a background job (real progress)."""
     return _start_job("autotune", lambda progress: _autotune_impl(req, progress))
+
+
+@app.post("/api/jobs/compare", status_code=202)
+def job_compare(req: CompareRequest):
+    """Start an A-vs-B comparison as a background job (real progress).
+
+    No metering dependency on purpose — the synchronous /api/simulate/compare
+    route has never been metered, and the job route must stay behaviourally
+    identical to the sync route it wraps (deploy-skew fallback contract)."""
+    return _start_job("compare", lambda progress: _compare_impl(req, progress))
 
 
 @app.get("/api/jobs/{job_id}")

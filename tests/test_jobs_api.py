@@ -202,6 +202,41 @@ class TestJobsRoutes(unittest.TestCase):
         }
         self.assertTrue({s["stage"] for s in snapshots} <= known)
 
+    def test_compare_job_end_to_end(self):
+        """A-vs-B comparison as a background job — added for the July 2026
+        redesign so the Compare tab gets a real progress bar + Stop."""
+        r = self.client.post(
+            "/api/jobs/compare",
+            json={
+                "a_bike_preset": "gsxr1000_k5",
+                "b_bike_preset": "gsxr1000_k5",
+                "b_mass_delta_kg": -20.0,
+            },
+        )
+        self.assertEqual(r.status_code, 202)
+        self.assertEqual(r.json()["kind"], "compare")
+
+        final, snapshots = _poll_until_finished(self.client, r.json()["job_id"])
+        self.assertEqual(final["status"], "done", final.get("error"))
+        # Same payload contract as the sync /api/simulate/compare route.
+        result = final["result"]
+        self.assertIn("a", result)
+        self.assertIn("b", result)
+        self.assertIn("delta", result)
+        self.assertAlmostEqual(result["a"]["et_quarter_s"], 10.0334, places=2)
+        # B is 20 kg lighter → must be faster.
+        self.assertEqual(result["delta"]["faster"], "B")
+
+        progress = [s["progress"] for s in snapshots]
+        self.assertTrue(all(b >= a for a, b in zip(progress, progress[1:])))
+        self.assertEqual(progress[-1], 1.0)
+        stages = {s["stage"] for s in snapshots}
+        self.assertTrue(
+            stages
+            <= {"", "Simulating build A", "Simulating build B", "Building comparison"},
+            stages,
+        )
+
     def test_cancel_route_stops_simulate_job(self):
         r = self.client.post("/api/jobs/simulate", json={"bike_preset": "gsxr1000_k5"})
         self.assertEqual(r.status_code, 202)

@@ -70,6 +70,99 @@ body {
   overflow-x: hidden;
 }
 
+/* ── Cockpit v3 component layer (July 2026 redesign) ──────────────────────
+   The shared surface + control vocabulary. Pages compose THESE instead of
+   re-inventing per-page button/card/input class strings. See web/REDESIGN.md.
+   Kept in @layer components so one-off Tailwind utilities can still override. */
+@layer components {
+  .card {
+    @apply rounded-2xl border border-white/10 bg-ink-2/60;
+  }
+  .card-hover {
+    @apply transition-colors duration-200 hover:border-white/25 hover:bg-ink-2;
+  }
+
+  .btn-primary {
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl
+      bg-brand-orange px-5 font-display text-sm font-bold text-black
+      transition-all duration-200
+      hover:bg-brand-orangeLight hover:shadow-orange-soft
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/70
+      focus-visible:ring-offset-2 focus-visible:ring-offset-black
+      disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-brand-orange
+      disabled:hover:shadow-none;
+  }
+  .btn-ghost {
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl
+      border border-white/15 bg-white/[0.03] px-5 font-display text-sm
+      font-semibold text-white/85 transition-colors duration-200
+      hover:border-white/30 hover:text-white
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40
+      focus-visible:ring-offset-2 focus-visible:ring-offset-black
+      disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .btn-danger {
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl
+      border border-brand-red/40 bg-brand-red/10 px-5 font-display text-sm
+      font-semibold text-brand-red transition-colors duration-200
+      hover:border-brand-red/70 hover:bg-brand-red/20
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/60
+      focus-visible:ring-offset-2 focus-visible:ring-offset-black
+      disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  /* ActionButton's active state: a Stop control that carries its own
+     progress strip. Amber-tinted so "running" reads differently from idle. */
+  .btn-running {
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl
+      border border-brand-amber/40 bg-brand-amber/10 px-5 text-brand-amber
+      transition-colors duration-200 hover:border-brand-red/60 hover:text-brand-red
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-amber/60
+      focus-visible:ring-offset-2 focus-visible:ring-offset-black;
+  }
+  .btn-sm {
+    @apply h-9 px-4 text-xs;
+  }
+
+  .input-base {
+    @apply h-11 w-full rounded-xl border border-white/10 bg-ink-3 px-3.5
+      text-sm text-white placeholder:text-white/30
+      focus:border-brand-orange/60 focus:outline-none
+      focus:ring-1 focus:ring-brand-orange/40;
+  }
+
+  .label-mono {
+    @apply font-mono text-[10px] font-medium uppercase tracking-[0.25em] text-white/45;
+  }
+
+  .skeleton {
+    @apply relative overflow-hidden rounded-lg bg-white/[0.06];
+  }
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.07),
+      transparent
+    );
+    animation: mq-shimmer 1.6s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton::after {
+      animation: none;
+    }
+  }
+}
+
+@keyframes mq-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 /* Utility classes */
 @layer utilities {
   .grain {

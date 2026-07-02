@@ -14,7 +14,7 @@
  */
 
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, useReducedMotion } from 'framer-motion';
 
 export function Reveal({
   children,
@@ -27,7 +27,15 @@ export function Reveal({
 }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin });
+  const reduced = useReducedMotion();
   const Comp = motion[as] || motion.div;
+  // Reduced-motion branch (July 2026): this is the most-used animation
+  // primitive on the site, so it must not translate/fade for motion-
+  // sensitive users — render static, fully visible.
+  if (reduced) {
+    const Tag = as || 'div';
+    return <Tag className={className}>{children}</Tag>;
+  }
   return (
     <Comp
       ref={ref}
@@ -44,6 +52,10 @@ export function Reveal({
 export function Stagger({ children, className = '', stagger = 0.08 }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '0px 0px -10% 0px' });
+  const reduced = useReducedMotion();
+  if (reduced) {
+    return <div className={className}>{children}</div>;
+  }
   return (
     <motion.div
       ref={ref}
