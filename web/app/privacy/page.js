@@ -27,7 +27,7 @@ export default function PrivacyPage() {
         <p className="label-mono">Last updated · 24 April 2026</p>
       </PageHero>
 
-      <main className="pt-10 pb-20 px-4 sm:px-6">
+      <main id="main" className="pt-10 pb-20 px-4 sm:px-6">
         <div className="mx-auto max-w-3xl">
         <p className="text-white/80 text-sm leading-relaxed">
           MotoQuant Pro ("we", "us") is committed to protecting your personal data.

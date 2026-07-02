@@ -242,7 +242,7 @@ export default function Page() {
       <SiteNav />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
 
-      <main className="max-w-3xl mx-auto px-6 pt-32 pb-12">
+      <main id="main" className="max-w-3xl mx-auto px-6 pt-32 pb-12">
         <Link href="/blog" className="text-brand-accent text-sm font-mono mb-6 inline-block hover:text-brand-orange transition-colors">
           ← back to blog
         </Link>

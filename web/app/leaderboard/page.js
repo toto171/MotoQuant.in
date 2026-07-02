@@ -23,6 +23,16 @@ import ScoreboardDigits from '../../components/ScoreboardDigits';
 import { Skeleton } from '../../components/Skeleton';
 import { API_URL } from '../../lib/api';
 
+// House reference runs — shown ONLY when the board has no saved runs yet, so
+// a first visitor never sees a dead room. These are the three pinned
+// reference-bike baselines (the same numbers in the footer strip), honestly
+// labeled as the house's own sims. The first real saved run replaces them.
+const HOUSE_RUNS = [
+  { key: 'k5', bike: 'Suzuki GSX-R 1000 K5', year: 2005, et: '10.033', trap: '239.8 km/h' },
+  { key: 'r1', bike: 'Yamaha YZF-R1 4C8', year: 2007, et: '10.286', trap: '236.1 km/h' },
+  { key: 'busa', bike: 'Suzuki Hayabusa Gen1', year: 1999, et: '10.471', trap: '243.0 km/h' },
+];
+
 function fmtDate(iso) {
   if (!iso) return '—';
   try {
@@ -69,7 +79,7 @@ export default function LeaderboardPage() {
   }, [venueId, venues]);
 
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main id="main" className="min-h-screen bg-black text-white">
       <SiteNav />
       <PageHero
         kicker="// leaderboard: saved runs sorted by ET · venue filter armed"
@@ -131,50 +141,89 @@ export default function LeaderboardPage() {
           )}
 
           {!error && rows !== null && rows.length === 0 && (
-            <div className="card text-center py-16 px-6">
+            <div>
               <p className="label-mono text-[11px] mb-3">
-                {venueName} · no saved runs yet
+                {venueName} · no saved runs yet — house reference sims hold the board
               </p>
-              <p className="text-white/70 mb-6">
-                The board is empty — first run takes P1.
-              </p>
-              <Link href="/simulator" className="btn-primary">
-                Run a simulation
-              </Link>
+              <ol className="space-y-2" aria-label="House reference runs">
+                {HOUSE_RUNS.map((r, i) => (
+                  <li
+                    key={r.key}
+                    className={`card flex items-center gap-4 px-4 py-3 opacity-90 ${
+                      i === 0 ? 'border-brand-orange/40 bg-brand-orange/[0.06]' : ''
+                    }`}
+                  >
+                    <span className="w-8 shrink-0 font-mono text-sm text-white/40 text-right">
+                      {i === 0 ? (
+                        <Trophy size={16} className="inline text-brand-orange" aria-label="P1" />
+                      ) : (
+                        `P${i + 1}`
+                      )}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">
+                        {r.bike}
+                        <span className="text-white/40"> · {r.year}</span>
+                      </p>
+                      <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-white/35">
+                        MotoQuant reference sim · Aamby Valley · stock
+                      </p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <ScoreboardDigits value={r.et} h={22} />
+                      <p className="font-mono text-[10px] tracking-[0.2em] text-white/40 mt-1">
+                        {r.trap}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <div className="card mt-4 text-center py-10 px-6">
+                <p className="text-white/70 mb-5">
+                  Take P1 from the house — run a sim and save it to the board.
+                </p>
+                <Link href="/simulator" className="btn-primary">
+                  Run a simulation
+                </Link>
+              </div>
             </div>
           )}
 
           {!error && rows !== null && rows.length > 0 && (
             <ol className="space-y-2">
               {rows.map((r, i) => (
-                <li
-                  key={r.id}
-                  className={`card card-hover flex items-center gap-4 px-4 py-3 ${
-                    i === 0 ? 'border-brand-orange/40 bg-brand-orange/[0.06]' : ''
-                  }`}
-                >
-                  <span className="w-8 shrink-0 font-mono text-sm text-white/40 text-right">
-                    {i === 0 ? (
-                      <Trophy size={16} className="inline text-brand-orange" aria-label="P1" />
-                    ) : (
-                      `P${i + 1}`
-                    )}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">
-                      {(r.manufacturer || '—') + ' ' + (r.model || '')}
-                      {r.year ? <span className="text-white/40"> · {r.year}</span> : null}
-                    </p>
-                    <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-white/35">
-                      {r.venue || 'venue —'} · {fmtDate(r.created_at)}
-                    </p>
-                  </div>
-                  <div className="shrink-0 text-right">
-                    <ScoreboardDigits value={Number(r.et_quarter_s).toFixed(3)} h={22} />
-                    <p className="font-mono text-[10px] tracking-[0.2em] text-white/40 mt-1">
-                      {r.trap_speed_kmh ? `${Number(r.trap_speed_kmh).toFixed(1)} km/h` : ''}
-                    </p>
-                  </div>
+                <li key={r.id}>
+                  {/* Whole row links to the run's public timeslip — the share
+                      loop starts here, not just from the save flow. */}
+                  <Link
+                    href={`/r/${r.id}`}
+                    className={`card card-hover flex items-center gap-4 px-4 py-3 ${
+                      i === 0 ? 'border-brand-orange/40 bg-brand-orange/[0.06]' : ''
+                    }`}
+                  >
+                    <span className="w-8 shrink-0 font-mono text-sm text-white/40 text-right">
+                      {i === 0 ? (
+                        <Trophy size={16} className="inline text-brand-orange" aria-label="P1" />
+                      ) : (
+                        `P${i + 1}`
+                      )}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">
+                        {(r.manufacturer || '—') + ' ' + (r.model || '')}
+                        {r.year ? <span className="text-white/40"> · {r.year}</span> : null}
+                      </p>
+                      <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-white/35">
+                        {r.venue || 'venue —'} · {fmtDate(r.created_at)} · view timeslip →
+                      </p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <ScoreboardDigits value={Number(r.et_quarter_s).toFixed(3)} h={22} />
+                      <p className="font-mono text-[10px] tracking-[0.2em] text-white/40 mt-1">
+                        {r.trap_speed_kmh ? `${Number(r.trap_speed_kmh).toFixed(1)} km/h` : ''}
+                      </p>
+                    </div>
+                  </Link>
                 </li>
               ))}
             </ol>

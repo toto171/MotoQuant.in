@@ -21,7 +21,7 @@ export default function SignupPage() {
   }, [router]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-black">
+    <main id="main" className="flex min-h-screen items-center justify-center bg-black">
       <CodeComment center>redirecting to /login…</CodeComment>
     </main>
   );

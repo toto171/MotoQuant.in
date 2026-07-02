@@ -754,7 +754,7 @@ export default function BlogIndexPage() {
         sub="Technical deep-dives on motorcycle physics, tuning strategy, and data analysis. Written for the Indian drag racing community."
       />
 
-      <main className="pb-24 px-6">
+      <main id="main" className="pb-24 px-6">
         <div className="max-w-5xl mx-auto">
           <FeaturedPostCard post={featured} />
 

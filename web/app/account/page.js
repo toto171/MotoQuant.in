@@ -222,7 +222,7 @@ export default function AccountPage() {
     return (
       <div className="min-h-screen bg-black text-white">
         <SiteNav />
-        <main className="pt-32 pb-20 px-4 sm:px-6">
+        <main id="main" className="pt-32 pb-20 px-4 sm:px-6">
           <div
             className="mx-auto max-w-3xl space-y-6"
             aria-busy="true"

@@ -87,7 +87,7 @@ export default function RunPage() {
   };
 
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main id="main" className="min-h-screen bg-black text-white">
       <SiteNav />
       <section className="pt-28 md:pt-32 pb-24 px-6">
         <div className="max-w-2xl mx-auto">

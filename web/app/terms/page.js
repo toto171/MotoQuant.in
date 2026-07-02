@@ -28,7 +28,7 @@ export default function TermsPage() {
         <p className="label-mono">Last updated · 2 July 2026</p>
       </PageHero>
 
-      <main className="pt-10 pb-20 px-4 sm:px-6">
+      <main id="main" className="pt-10 pb-20 px-4 sm:px-6">
         <div className="mx-auto max-w-3xl">
         <p className="text-white/80 text-sm leading-relaxed">
           These Terms of Service ("Terms") govern your access to and use of MotoQuant Pro

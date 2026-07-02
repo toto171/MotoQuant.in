@@ -231,7 +231,7 @@ export default function BikesPage() {
         </div>
       </PageHero>
 
-      <main className="pb-16 px-4 sm:px-6">
+      <main id="main" className="pb-16 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           {/* Filters — sticky below nav */}
           <div className="sticky top-16 z-40 card bg-ink-1/90 backdrop-blur-xl p-4 mb-6">

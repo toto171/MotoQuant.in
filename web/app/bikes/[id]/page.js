@@ -130,7 +130,7 @@ export default function BikeDetailPage() {
     <div className="min-h-screen bg-black text-white">
       <SiteNav />
 
-      <main className="pt-24 pb-16 px-4 sm:px-6">
+      <main id="main" className="pt-24 pb-16 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <Link
             href="/bikes"

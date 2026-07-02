@@ -294,7 +294,7 @@ export default function WhitepaperPage() {
     <div className="min-h-screen bg-black text-white">
       <SiteNav />
 
-      <main className="pt-32 pb-20 px-6">
+      <main id="main" className="pt-32 pb-20 px-6">
         <article className="max-w-4xl mx-auto">
           {/* Cover */}
           <Reveal>

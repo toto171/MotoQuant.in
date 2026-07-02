@@ -221,7 +221,7 @@ function PricingPageInner() {
               </div>
       </PageHero>
 
-      <main className="pb-20 px-4 sm:px-6">
+      <main id="main" className="pb-20 px-4 sm:px-6">
         <div className="mx-auto max-w-6xl">
           {checkoutError && (
             <div className="mb-8 card border-brand-red/40 bg-brand-red/10 px-5 py-4 text-sm text-brand-red/90 text-center">

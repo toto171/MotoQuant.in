@@ -170,7 +170,7 @@ function LoginPageInner() {
   return (
     <div className="min-h-screen bg-black text-white">
       <SiteNav />
-      <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 pt-20 pb-12">
+      <main id="main" className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 pt-20 pb-12">
         <div className="relative w-full max-w-sm space-y-8">
           <div
             aria-hidden="true"
