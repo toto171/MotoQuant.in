@@ -398,6 +398,17 @@ def compute_sobol_indices(
     specs = [param_specs[k] for k in keys]
     k = len(specs)
 
+    # If any spec perturbs drivetrain.final_drive_ratio, normalise the config's
+    # gearing onto that field. final_ratio prefers sprocket teeth over
+    # final_drive_ratio for chain bikes, so without this the sampled ratio is
+    # written but never read (the sensitivity would falsely read ~0). Setting
+    # final_drive_ratio to the current *effective* ratio keeps the nominal
+    # (all-centre) run bit-identical while making the knob live. Work on a copy
+    # so the caller's config is untouched.
+    if any(s.path == "drivetrain.final_drive_ratio" for s in specs):
+        config = copy.deepcopy(config)
+        config.drivetrain.set_effective_final_drive(config.drivetrain.final_ratio)
+
     # Read nominal values once (for relative-kind params)
     nominal_values: list[float] = []
     for spec in specs:
