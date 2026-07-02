@@ -86,12 +86,7 @@ export function UpgradeCTA({
       <p className="mt-1 text-xs text-white/40 font-mono">
         From {prices[requiredTier]} · Cancel anytime
       </p>
-      <a
-        href="/pricing"
-        className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-brand-orange px-4 py-2
-                   text-sm font-display font-bold text-black hover:bg-brand-orangeLight
-                   transition-colors"
-      >
+      <a href="/pricing" className="btn-primary btn-sm mt-4">
         Upgrade to {config.label}
         <span aria-hidden="true">→</span>
       </a>

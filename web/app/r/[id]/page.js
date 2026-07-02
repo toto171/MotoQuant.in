@@ -7,24 +7,27 @@
  * timeslip identity: seven-segment ET, split times, bike + venue, and a
  * "Simulate your own" CTA. WhatsApp-first share button for the Indian
  * market; OG metadata comes from the server layout.
+ *
+ * Cockpit v3 (July 2026): shared Skeleton loading state shaped like the
+ * timeslip, `.card` surfaces, `.btn-primary` share button with the
+ * copied-state flip, and a `.card` error state with Retry (brand-red).
  */
 
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Share2, AlertCircle } from 'lucide-react';
+import { Share2, Check, AlertCircle } from 'lucide-react';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 import ScoreboardDigits from '../../../components/ScoreboardDigits';
 import CodeComment from '../../../components/CodeComment';
+import { Skeleton } from '../../../components/Skeleton';
 import { API_URL } from '../../../lib/api';
 
 function Tile({ label, children }) {
   return (
-    <div className="rounded-lg border border-white/8 bg-white/[0.02] px-4 py-3">
-      <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-white/40 mb-1.5">
-        {label}
-      </p>
+    <div className="card px-4 py-3">
+      <p className="label-mono mb-1.5">{label}</p>
       {children}
     </div>
   );
@@ -35,14 +38,19 @@ export default function RunPage() {
   const [run, setRun] = useState(null);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [attempt, setAttempt] = useState(0); // bumped by the Retry button
 
   useEffect(() => {
     if (!id) return;
+    let cancelled = false;
+    setRun(null);
+    setError(null);
     fetch(`${API_URL}/api/runs/${id}`)
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then(setRun)
-      .catch((e) => setError(e.message));
-  }, [id]);
+      .then((d) => { if (!cancelled) setRun(d); })
+      .catch((e) => { if (!cancelled) setError(e.message); });
+    return () => { cancelled = true; };
+  }, [id, attempt]);
 
   const splits = useMemo(() => {
     if (!run) return [];
@@ -88,24 +96,52 @@ export default function RunPage() {
           </CodeComment>
 
           {error && (
-            <div className="mt-8 flex items-center gap-2 text-sm text-red-400 border border-red-500/20 bg-red-500/5 rounded-lg px-4 py-3">
-              <AlertCircle size={16} aria-hidden="true" />
-              {error === '404'
-                ? 'This run does not exist (or was removed).'
-                : `Could not load this run (${error}). The engine may be waking up — try again in a minute.`}
+            <div className="mt-8 card border-brand-red/30 px-5 py-4 flex flex-wrap items-center gap-3 text-sm text-brand-red/90">
+              <AlertCircle size={16} className="shrink-0 text-brand-red" aria-hidden="true" />
+              <span className="flex-1 min-w-[200px]">
+                {error === '404'
+                  ? 'This run does not exist (or was removed).'
+                  : `Could not load this run (${error}). The engine may be waking up — a cold start can take up to a minute.`}
+              </span>
+              {error !== '404' ? (
+                <button
+                  type="button"
+                  onClick={() => setAttempt((a) => a + 1)}
+                  className="btn-ghost btn-sm"
+                >
+                  Retry
+                </button>
+              ) : (
+                <Link href="/simulator" className="btn-ghost btn-sm">
+                  Run your own
+                </Link>
+              )}
             </div>
           )}
 
           {!error && !run && (
-            <div className="mt-8 space-y-3" aria-busy="true" aria-label="Loading run">
-              <div className="h-24 rounded-lg bg-white/[0.03] animate-pulse" />
-              <div className="h-40 rounded-lg bg-white/[0.03] animate-pulse" />
+            <div className="mt-6 space-y-4" aria-busy="true" aria-label="Loading run">
+              <div className="card overflow-hidden">
+                <div className="px-6 py-4 border-b border-dashed border-white/15">
+                  <Skeleton className="h-7 w-2/3 mb-2" />
+                  <Skeleton className="h-3 w-1/3" />
+                </div>
+                <div className="px-6 py-8 flex flex-col items-center gap-3">
+                  <Skeleton className="h-3 w-32" />
+                  <Skeleton className="h-14 w-52" />
+                  <Skeleton className="h-4 w-28" />
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <Skeleton className="h-11 w-44 rounded-xl" />
+                <Skeleton className="h-11 w-52 rounded-xl" />
+              </div>
             </div>
           )}
 
           {run && (
             <>
-              <div className="mt-6 border border-white/10 rounded-xl overflow-hidden">
+              <div className="mt-6 card overflow-hidden">
                 {/* masthead */}
                 <div className="border-b border-dashed border-white/15 px-6 py-4">
                   <h1 className="font-display font-bold text-2xl md:text-3xl">
@@ -139,9 +175,7 @@ export default function RunPage() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/5 border-t border-white/10">
                     {splits.map((s) => (
                       <div key={s.label} className="bg-black px-4 py-3 text-center">
-                        <p className="font-mono text-[10px] tracking-[0.25em] uppercase text-white/40">
-                          {s.label}
-                        </p>
+                        <p className="label-mono">{s.label}</p>
                         <p className="font-mono font-bold tabular-nums mt-1">
                           {Number(s.value).toFixed(3)}s
                         </p>
@@ -152,17 +186,15 @@ export default function RunPage() {
               </div>
 
               <div className="mt-6 flex flex-wrap gap-3">
-                <button
-                  onClick={doShare}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-white/15 text-sm font-medium hover:border-brand-orange/60 transition-colors"
-                >
-                  <Share2 size={15} aria-hidden="true" />
+                <button type="button" onClick={doShare} className="btn-primary">
+                  {copied ? (
+                    <Check size={15} aria-hidden="true" />
+                  ) : (
+                    <Share2 size={15} aria-hidden="true" />
+                  )}
                   {copied ? 'Link copied' : 'Share this timeslip'}
                 </button>
-                <Link
-                  href="/simulator"
-                  className="inline-flex items-center px-5 py-2.5 rounded-lg bg-brand-orange text-black font-display font-bold text-sm hover:bg-brand-orangeLight transition-colors"
-                >
+                <Link href="/simulator" className="btn-ghost">
                   Simulate your own build
                 </Link>
               </div>

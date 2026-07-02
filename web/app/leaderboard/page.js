@@ -7,6 +7,10 @@
  * renders the timing-board aesthetic: seven-segment ETs, trophy on P1.
  * Saved runs come from /api/simulate/save (the account Garage flow), so this
  * page is also the "why save a run?" answer — your run lands here.
+ *
+ * Cockpit v3 (July 2026): shared Skeleton loading rows, `.card`/`.card-hover`
+ * row surfaces, `.input-base` venue select, and a `.card` error state with a
+ * Retry button (brand-red, no raw Tailwind reds).
  */
 
 import { useEffect, useMemo, useState } from 'react';
@@ -16,6 +20,7 @@ import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
 import PageHero from '../../components/PageHero';
 import ScoreboardDigits from '../../components/ScoreboardDigits';
+import { Skeleton } from '../../components/Skeleton';
 import { API_URL } from '../../lib/api';
 
 function fmtDate(iso) {
@@ -36,6 +41,7 @@ export default function LeaderboardPage() {
   const [venueId, setVenueId] = useState('');
   const [rows, setRows] = useState(null);
   const [error, setError] = useState(null);
+  const [attempt, setAttempt] = useState(0); // bumped by the Retry button
 
   useEffect(() => {
     fetch(`${API_URL}/api/venues`)
@@ -45,14 +51,16 @@ export default function LeaderboardPage() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
     setRows(null);
     setError(null);
     const q = venueId ? `?venue_id=${venueId}&limit=50` : '?limit=50';
     fetch(`${API_URL}/api/leaderboard${q}`)
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`leaderboard ${r.status}`))))
-      .then((d) => setRows(d.leaderboard || []))
-      .catch((e) => setError(e.message));
-  }, [venueId]);
+      .then((d) => { if (!cancelled) setRows(d.leaderboard || []); })
+      .catch((e) => { if (!cancelled) setError(e.message); });
+    return () => { cancelled = true; };
+  }, [venueId, attempt]);
 
   const venueName = useMemo(() => {
     if (!venueId) return 'All venues';
@@ -79,17 +87,14 @@ export default function LeaderboardPage() {
           {/* venue filter */}
           <div className="flex flex-wrap items-center gap-3 mb-8">
             <MapPin size={16} className="text-brand-orange" aria-hidden="true" />
-            <label
-              htmlFor="venue-filter"
-              className="font-mono text-[11px] tracking-[0.25em] uppercase text-white/50"
-            >
+            <label htmlFor="venue-filter" className="label-mono text-[11px]">
               Venue
             </label>
             <select
               id="venue-filter"
               value={venueId}
               onChange={(e) => setVenueId(e.target.value)}
-              className="bg-ink-2 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-orange/60"
+              className="input-base w-auto min-w-[180px]"
             >
               <option value="">All venues</option>
               {venues.map((v) => (
@@ -101,32 +106,39 @@ export default function LeaderboardPage() {
           </div>
 
           {error && (
-            <div className="flex items-center gap-2 text-sm text-red-400 border border-red-500/20 bg-red-500/5 rounded-lg px-4 py-3">
-              <AlertCircle size={16} aria-hidden="true" />
-              Could not load the leaderboard ({error}). The engine may be waking up — try again in a minute.
+            <div className="card border-brand-red/30 px-5 py-4 flex flex-wrap items-center gap-3 text-sm text-brand-red/90">
+              <AlertCircle size={16} className="shrink-0 text-brand-red" aria-hidden="true" />
+              <span className="flex-1 min-w-[200px]">
+                Could not load the leaderboard ({error}). The engine may be waking
+                up — a cold start can take up to a minute.
+              </span>
+              <button
+                type="button"
+                onClick={() => setAttempt((a) => a + 1)}
+                className="btn-ghost btn-sm"
+              >
+                Retry
+              </button>
             </div>
           )}
 
           {!error && rows === null && (
             <div className="space-y-2" aria-busy="true" aria-label="Loading leaderboard">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-14 rounded-lg bg-white/[0.03] animate-pulse" />
+                <Skeleton key={i} className="h-16 rounded-2xl" />
               ))}
             </div>
           )}
 
           {!error && rows !== null && rows.length === 0 && (
-            <div className="text-center border border-white/10 rounded-xl py-16 px-6">
-              <p className="font-mono text-[11px] tracking-[0.25em] uppercase text-white/40 mb-3">
+            <div className="card text-center py-16 px-6">
+              <p className="label-mono text-[11px] mb-3">
                 {venueName} · no saved runs yet
               </p>
               <p className="text-white/70 mb-6">
                 The board is empty — first run takes P1.
               </p>
-              <Link
-                href="/simulator"
-                className="inline-block px-5 py-2.5 rounded-lg bg-brand-orange text-black font-display font-bold text-sm hover:bg-brand-orangeLight transition-colors"
-              >
+              <Link href="/simulator" className="btn-primary">
                 Run a simulation
               </Link>
             </div>
@@ -137,10 +149,8 @@ export default function LeaderboardPage() {
               {rows.map((r, i) => (
                 <li
                   key={r.id}
-                  className={`flex items-center gap-4 rounded-lg border px-4 py-3 ${
-                    i === 0
-                      ? 'border-brand-orange/40 bg-brand-orange/[0.06]'
-                      : 'border-white/8 bg-white/[0.02]'
+                  className={`card card-hover flex items-center gap-4 px-4 py-3 ${
+                    i === 0 ? 'border-brand-orange/40 bg-brand-orange/[0.06]' : ''
                   }`}
                 >
                   <span className="w-8 shrink-0 font-mono text-sm text-white/40 text-right">

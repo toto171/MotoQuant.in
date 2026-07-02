@@ -3,14 +3,18 @@
 /**
  * MotoQuant Pro — Account Page
  * ==============================
- * Displays: email, tier, subscription status, license keys (copy + revoke).
+ * Displays: email, tier, subscription status, license keys (copy + revoke),
+ * saved-run garage, password management.
  * Requires authentication — redirects to /login if not signed in.
  *
- * Direction A refit (April 2026): SiteNav + black canvas + brand-orange
- * accents. Subscription / license-key API calls unchanged.
+ * Cockpit v3 (July 2026): shared `.card` surfaces + `.label-mono` voice,
+ * SkeletonTable while the garage loads, branded inline confirms (no
+ * alert()/confirm() anywhere), and ActionButton + useAsyncTask on every
+ * submit so the button itself is the progress bar.
+ * Subscription / license-key API calls unchanged.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Copy, Check } from "lucide-react";
 import { useAuth } from "../../components/AuthProvider";
@@ -19,28 +23,78 @@ import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
 import CodeComment from "../../components/CodeComment";
 import { Reveal } from "../../components/Reveal";
+import ActionButton from "../../components/ActionButton";
+import { SkeletonCard, SkeletonTable } from "../../components/Skeleton";
+import useAsyncTask from "../../lib/useAsyncTask";
 
 import { API_URL_DIRECT as API_BASE } from "../../lib/api";
+
+/**
+ * DangerConfirm — the branded inline confirm pattern (replaces confirm()).
+ * Renders a small red-tinted row: prompt + [danger action] [Keep — ghost].
+ * While the task runs, the danger button becomes the ActionButton
+ * running-state (progress strip in the button).
+ */
+function DangerConfirm({
+  prompt,
+  actionLabel,
+  runningLabel,
+  dismissLabel = "Keep",
+  task,
+  onConfirm,
+  onDismiss,
+}) {
+  return (
+    <div className="rounded-xl border border-brand-red/30 bg-brand-red/5 p-4">
+      <p className="text-sm text-white/75">{prompt}</p>
+      {task.error && (
+        <p className="mt-2 text-sm text-brand-red/90">{task.error}</p>
+      )}
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        {task.active ? (
+          <ActionButton
+            task={task}
+            label={actionLabel}
+            runningLabel={runningLabel}
+            stoppable={false}
+            className="btn-sm"
+          />
+        ) : (
+          <button type="button" className="btn-danger btn-sm" onClick={onConfirm}>
+            {actionLabel}
+          </button>
+        )}
+        <button
+          type="button"
+          className="btn-ghost btn-sm"
+          onClick={onDismiss}
+          disabled={task.active}
+        >
+          {dismissLabel}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function AccountPage() {
   const router = useRouter();
   const { user, accessToken, isLoading, isAuthenticated, logout, refetchUser } = useAuth();
 
   const [keys, setKeys] = useState([]);
-  const [generatingKey, setGeneratingKey] = useState(false);
   const [keyMsg, setKeyMsg] = useState("");
   const [newKey, setNewKey] = useState("");
   const [copied, setCopied] = useState(false);
-  const [revoking, setRevoking] = useState(null);
-  const [cancelling, setCancelling] = useState(false);
+  const [revokeTarget, setRevokeTarget] = useState(null); // key id awaiting confirm
+  const [cancelOpen, setCancelOpen] = useState(false); // sub-cancel confirm open
   const [subMsg, setSubMsg] = useState("");
   const [pwCurrent, setPwCurrent] = useState("");
   const [pwNew, setPwNew] = useState("");
-  const [pwSaving, setPwSaving] = useState(false);
-  const [pwMsg, setPwMsg] = useState(null); // { tone: 'ok'|'err', text }
+  const [pwMsg, setPwMsg] = useState(null); // { tone: 'ok', text } — errors live on pwTask.error
   const [runs, setRuns] = useState([]);
   const [runsLoading, setRunsLoading] = useState(false);
   const [checkoutBanner, setCheckoutBanner] = useState(false);
+  const pwFormRef = useRef(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) router.replace("/login");
@@ -85,78 +139,112 @@ export default function AccountPage() {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── async tasks (one per submit — the button is the progress bar) ──────
+
+  const genTask = useAsyncTask(async (signal) => {
+    setKeyMsg("");
+    setNewKey("");
+    setCopied(false);
+    const res = await fetch(`${API_BASE}/api/subscriptions/license-key`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${accessToken}` },
+      signal,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Failed to generate key.");
+    setNewKey(data.key);
+    setKeyMsg(data.message);
+    refetchUser();
+    return data;
+  });
+
+  const revokeTask = useAsyncTask(async (signal, onProgress, keyId) => {
+    const res = await fetch(`${API_BASE}/api/subscriptions/license-key/revoke`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ key_id: keyId }),
+      signal,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Revoke failed.");
+    refetchUser();
+    return data;
+  });
+
+  const cancelTask = useAsyncTask(async (signal) => {
+    setSubMsg("");
+    const res = await fetch(`${API_BASE}/api/subscriptions/cancel`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${accessToken}` },
+      signal,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Cancellation failed.");
+    setSubMsg(data.message || "Subscription cancellation scheduled.");
+    refetchUser();
+    return data;
+  });
+
+  const pwTask = useAsyncTask(async (signal) => {
+    setPwMsg(null);
+    if (pwNew.length < 8) {
+      throw new Error("New password must be at least 8 characters.");
+    }
+    const res = await fetch(`${API_BASE}/api/auth/password/change`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        current_password: user?.has_password ? pwCurrent : null,
+        new_password: pwNew,
+      }),
+      signal,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(
+        typeof data.detail === "string" ? data.detail : "Could not update password."
+      );
+    }
+    setPwMsg({ tone: "ok", text: "Password updated." });
+    setPwCurrent("");
+    setPwNew("");
+    refetchUser();
+    return true;
+  });
+
   if (isLoading || !user) {
     return (
       <div className="min-h-screen bg-black text-white">
         <SiteNav />
-        <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
-          <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-white/45">Loading account…</p>
+        <main className="pt-32 pb-20 px-4 sm:px-6">
+          <div
+            className="mx-auto max-w-3xl space-y-6"
+            aria-busy="true"
+            aria-label="Loading account"
+          >
+            <SkeletonCard rows={2} />
+            <SkeletonCard rows={3} />
+            <SkeletonCard rows={4} />
+          </div>
         </main>
       </div>
     );
   }
 
-  async function generateKey() {
-    setGeneratingKey(true);
-    setKeyMsg("");
-    setNewKey("");
-    setCopied(false);
-    try {
-      const res = await fetch(`${API_BASE}/api/subscriptions/license-key`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Failed to generate key.");
-      setNewKey(data.key);
-      setKeyMsg(data.message);
-      refetchUser();
-    } catch (err) {
-      setKeyMsg(err.message);
-    } finally {
-      setGeneratingKey(false);
-    }
+  async function confirmRevoke(keyId) {
+    const res = await revokeTask.run(keyId);
+    if (res !== undefined) setRevokeTarget(null);
   }
 
-  async function revokeKey(keyId) {
-    setRevoking(keyId);
-    try {
-      const res = await fetch(`${API_BASE}/api/subscriptions/license-key/revoke`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ key_id: keyId }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Revoke failed.");
-      refetchUser();
-    } catch (err) {
-      alert(err.message);
-    } finally {
-      setRevoking(null);
-    }
-  }
-
-  async function cancelSubscription() {
-    if (!confirm("Cancel your subscription? You keep access until the end of the billing period.")) return;
-    setCancelling(true);
-    setSubMsg("");
-    try {
-      const res = await fetch(`${API_BASE}/api/subscriptions/cancel`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Cancellation failed.");
-      setSubMsg(data.message || "Subscription cancellation scheduled.");
-      refetchUser();
-    } catch (err) {
-      setSubMsg(err.message);
-    } finally {
-      setCancelling(false);
-    }
+  async function confirmCancelSub() {
+    const res = await cancelTask.run();
+    if (res !== undefined) setCancelOpen(false);
   }
 
   async function copyKey() {
@@ -165,43 +253,6 @@ export default function AccountPage() {
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
     } catch (e) {}
-  }
-
-  async function changePassword(e) {
-    e.preventDefault();
-    setPwMsg(null);
-    if (pwNew.length < 8) {
-      setPwMsg({ tone: "err", text: "New password must be at least 8 characters." });
-      return;
-    }
-    setPwSaving(true);
-    try {
-      const res = await fetch(`${API_BASE}/api/auth/password/change`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          current_password: user.has_password ? pwCurrent : null,
-          new_password: pwNew,
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(
-          typeof data.detail === "string" ? data.detail : "Could not update password."
-        );
-      }
-      setPwMsg({ tone: "ok", text: "Password updated." });
-      setPwCurrent("");
-      setPwNew("");
-      refetchUser();
-    } catch (err) {
-      setPwMsg({ tone: "err", text: err.message });
-    } finally {
-      setPwSaving(false);
-    }
   }
 
   const canGenerateKey = user.tier !== "free";
@@ -219,15 +270,13 @@ export default function AccountPage() {
               (your tier refreshes automatically).
             </div>
           )}
-          <div className="relative rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 sm:p-8 flex items-center justify-between">
+          <div className="relative card p-6 sm:p-8 flex items-center justify-between">
             <div
               aria-hidden="true"
               className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-orange/70 to-transparent"
             />
             <div>
-              <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-brand-orange mb-1">
-                Account
-              </div>
+              <div className="label-mono text-brand-orange mb-1">Account</div>
               <h1 className="font-display font-bold text-3xl sm:text-4xl text-white tracking-tight">
                 {user.email.split("@")[0]}
               </h1>
@@ -241,7 +290,7 @@ export default function AccountPage() {
           </div>
 
           <Reveal y={18}>
-          <section className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 sm:p-8">
+          <section className="card p-6 sm:p-8">
             <h2 className="sr-only">Subscription</h2>
             <CodeComment className="mb-4">subscription · tier status</CodeComment>
             <div className="flex items-center justify-between">
@@ -261,34 +310,42 @@ export default function AccountPage() {
                 <p className="text-sm text-brand-orangeLight">
                   Upgrade to <strong className="text-white">Pro</strong> for unlimited sims, full analysis suite, and leaderboard saves.
                 </p>
-                <a
-                  href="/pricing"
-                  className="mt-3 inline-flex items-center gap-1 rounded-md bg-brand-orange px-4 py-2 text-sm font-display font-bold text-black hover:bg-brand-orangeLight transition-colors"
-                >
+                <a href="/pricing" className="btn-primary btn-sm mt-3">
                   See plans →
                 </a>
               </div>
             )}
 
             {user.tier !== "free" && (
-              <div className="mt-4">
+              <div className="mt-4 space-y-3">
                 {subMsg && (
-                  <p className="mb-2 text-sm text-brand-amber">{subMsg}</p>
+                  <p className="text-sm text-brand-amber">{subMsg}</p>
                 )}
-                <button
-                  onClick={cancelSubscription}
-                  disabled={cancelling}
-                  className="text-sm text-white/45 hover:text-brand-red transition-colors disabled:opacity-50 underline"
-                >
-                  {cancelling ? "Cancelling…" : "Cancel subscription"}
-                </button>
+                {cancelOpen ? (
+                  <DangerConfirm
+                    prompt="Cancel your subscription? You keep access until the end of the billing period."
+                    actionLabel="Cancel subscription"
+                    runningLabel="Cancelling"
+                    dismissLabel="Keep my plan"
+                    task={cancelTask}
+                    onConfirm={confirmCancelSub}
+                    onDismiss={() => setCancelOpen(false)}
+                  />
+                ) : (
+                  <button
+                    onClick={() => { setCancelOpen(true); cancelTask.reset(); }}
+                    className="text-sm text-white/45 hover:text-brand-red transition-colors underline"
+                  >
+                    Cancel subscription
+                  </button>
+                )}
               </div>
             )}
           </section>
           </Reveal>
 
           <Reveal y={18}>
-          <section className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 sm:p-8">
+          <section className="card p-6 sm:p-8">
             <div className="flex items-center justify-between mb-5">
               <h2 className="sr-only">Desktop license keys</h2>
               <CodeComment>license keys · desktop seats</CodeComment>
@@ -331,37 +388,58 @@ export default function AccountPage() {
                     {activeKeys.map((k) => (
                       <li
                         key={k.id}
-                        className="flex items-center justify-between rounded-md bg-ink-1 border border-white/[0.06] px-4 py-3"
+                        className="rounded-xl bg-ink-1 border border-white/10 px-4 py-3"
                       >
-                        <div className="text-sm text-white/80">
-                          <span className="font-mono text-xs text-white/40">#{k.id}</span>
-                          <span className="mx-2 text-white/20">·</span>
-                          {k.device_id ? (
-                            <span>Activated · last seen {k.last_seen_at ? new Date(k.last_seen_at).toLocaleDateString() : "never"}</span>
-                          ) : (
-                            <span className="text-brand-amber">Not yet activated</span>
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="text-sm text-white/80">
+                            <span className="font-mono text-xs text-white/40">#{k.id}</span>
+                            <span className="mx-2 text-white/20">·</span>
+                            {k.device_id ? (
+                              <span>Activated · last seen {k.last_seen_at ? new Date(k.last_seen_at).toLocaleDateString() : "never"}</span>
+                            ) : (
+                              <span className="text-brand-amber">Not yet activated</span>
+                            )}
+                          </div>
+                          {revokeTarget !== k.id && (
+                            <button
+                              onClick={() => { setRevokeTarget(k.id); revokeTask.reset(); }}
+                              className="text-xs text-brand-red/80 hover:text-brand-red underline"
+                            >
+                              Revoke
+                            </button>
                           )}
                         </div>
-                        <button
-                          onClick={() => revokeKey(k.id)}
-                          disabled={revoking === k.id}
-                          className="text-xs text-brand-red/80 hover:text-brand-red underline disabled:opacity-50"
-                        >
-                          {revoking === k.id ? "Revoking…" : "Revoke"}
-                        </button>
+                        {revokeTarget === k.id && (
+                          <div className="mt-3">
+                            <DangerConfirm
+                              prompt="Revoke this key? The desktop seat frees up immediately and the key stops validating."
+                              actionLabel="Revoke"
+                              runningLabel="Revoking"
+                              dismissLabel="Keep"
+                              task={revokeTask}
+                              onConfirm={() => confirmRevoke(k.id)}
+                              onDismiss={() => setRevokeTarget(null)}
+                            />
+                          </div>
+                        )}
                       </li>
                     ))}
                   </ul>
                 )}
 
                 {activeKeys.length < maxKeys && (
-                  <button
-                    onClick={generateKey}
-                    disabled={generatingKey}
-                    className="rounded-md border border-brand-orange/40 text-brand-orange hover:bg-brand-orange/10 px-4 py-2.5 text-sm font-display font-bold disabled:opacity-50 transition-colors"
-                  >
-                    {generatingKey ? "Generating…" : "+ Generate new license key"}
-                  </button>
+                  <div className="space-y-2">
+                    {genTask.error && (
+                      <p className="text-sm text-brand-red/90">{genTask.error}</p>
+                    )}
+                    <ActionButton
+                      task={genTask}
+                      onRun={() => genTask.run()}
+                      label="+ Generate new license key"
+                      runningLabel="Generating key"
+                      stoppable={false}
+                    />
+                  </div>
                 )}
               </>
             )}
@@ -369,7 +447,7 @@ export default function AccountPage() {
           </Reveal>
 
           <Reveal y={18}>
-          <section className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 sm:p-8">
+          <section className="card p-6 sm:p-8">
             <div className="flex items-center justify-between mb-5">
               <h2 className="sr-only">My garage — saved runs</h2>
               <CodeComment>garage · saved runs</CodeComment>
@@ -378,7 +456,7 @@ export default function AccountPage() {
               </a>
             </div>
             {runsLoading && (
-              <p className="text-sm text-white/45 font-mono">Loading your runs…</p>
+              <SkeletonTable rows={4} cols={4} aria-label="Loading your saved runs" />
             )}
             {!runsLoading && runs.length === 0 && (
               <p className="text-sm text-white/55">
@@ -391,7 +469,7 @@ export default function AccountPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-left font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 border-b border-white/10">
+                    <tr className="text-left label-mono border-b border-white/10">
                       <th className="py-2 pr-4">Bike</th>
                       <th className="py-2 pr-4 text-right">¼-mile</th>
                       <th className="py-2 pr-4 text-right">Trap</th>
@@ -425,7 +503,7 @@ export default function AccountPage() {
           </Reveal>
 
           <Reveal y={18}>
-          <section className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 sm:p-8">
+          <section className="card p-6 sm:p-8">
             <h2 className="sr-only">Security</h2>
             <CodeComment className="mb-4">security · password</CodeComment>
             {!user.has_password && (
@@ -435,11 +513,19 @@ export default function AccountPage() {
               </p>
             )}
             {pwMsg && (
-              <p className={`mb-3 text-sm ${pwMsg.tone === "ok" ? "text-brand-green" : "text-brand-red/90"}`}>
-                {pwMsg.text}
-              </p>
+              <p className="mb-3 text-sm text-brand-green">{pwMsg.text}</p>
             )}
-            <form onSubmit={changePassword} className="space-y-3 max-w-sm">
+            {pwTask.error && (
+              <p className="mb-3 text-sm text-brand-red/90">{pwTask.error}</p>
+            )}
+            <form
+              ref={pwFormRef}
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!pwTask.active) pwTask.run();
+              }}
+              className="space-y-3 max-w-sm"
+            >
               {user.has_password && (
                 <input
                   type="password"
@@ -448,7 +534,7 @@ export default function AccountPage() {
                   value={pwCurrent}
                   onChange={(e) => setPwCurrent(e.target.value)}
                   placeholder="Current password"
-                  className="block w-full rounded-md border border-white/10 bg-ink-1 px-4 py-2.5 text-white placeholder-white/30 focus:border-brand-orange/60 focus:outline-none text-sm font-mono transition-colors"
+                  className="input-base font-mono"
                 />
               )}
               <input
@@ -459,15 +545,17 @@ export default function AccountPage() {
                 value={pwNew}
                 onChange={(e) => setPwNew(e.target.value)}
                 placeholder="New password (8+ characters)"
-                className="block w-full rounded-md border border-white/10 bg-ink-1 px-4 py-2.5 text-white placeholder-white/30 focus:border-brand-orange/60 focus:outline-none text-sm font-mono transition-colors"
+                className="input-base font-mono"
               />
-              <button
-                type="submit"
-                disabled={pwSaving}
-                className="rounded-md border border-brand-orange/40 text-brand-orange hover:bg-brand-orange/10 px-4 py-2.5 text-sm font-display font-bold disabled:opacity-50 transition-colors"
-              >
-                {pwSaving ? "Saving…" : user.has_password ? "Change password" : "Set a password"}
-              </button>
+              {/* hidden submit keeps Enter-to-submit working (ActionButton is type=button) */}
+              <input type="submit" hidden />
+              <ActionButton
+                task={pwTask}
+                onRun={() => pwFormRef.current?.requestSubmit()}
+                label={user.has_password ? "Change password" : "Set a password"}
+                runningLabel="Saving"
+                stoppable={false}
+              />
             </form>
           </section>
           </Reveal>
