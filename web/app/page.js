@@ -44,7 +44,7 @@ import ManifestoScrub from '../components/ManifestoScrub';
 import LaunchControl from '../components/LaunchControl';
 import ScoreboardDigits, { ScoreboardCounter } from '../components/ScoreboardDigits';
 import SectionRail from '../components/SectionRail';
-import TronGrid from '../components/TronGrid';
+import TronBackdrop from '../components/TronBackdrop';
 
 // ─── Validation: only the four clusters where the data is good ────────
 // Per the 13 June 2026 weighted sweep (reports/acc_final_2026_06_13.json). Small-cc / 2T / cruiser
@@ -365,10 +365,12 @@ function HomePageInner() {
           />
           <div className="absolute inset-0 bg-grid-fade opacity-25" />
           {/* Tron floor — live light-cycle traffic; a clean hold-to-launch
-              release fires a burst across it (launchSignal). Canvas renders
-              nothing until mounted, so the static grid above is the SSR /
-              reduced-motion base layer. */}
-          <TronGrid launchSignal={launchSignal} className="opacity-80" />
+              release fires a burst across it (launchSignal). TronBackdrop
+              serves the three.js light-cycle arena on capable desktops and
+              the 2D canvas grid everywhere else; neither renders until
+              mounted, so the static grid above is the SSR / reduced-motion
+              base layer. */}
+          <TronBackdrop launchSignal={launchSignal} className="opacity-80" />
           <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black to-transparent" />
         </div>
 
