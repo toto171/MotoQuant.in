@@ -14,7 +14,11 @@ jobs:
   python:
     name: Python tests + lint
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # The full suite runs the 502-bike no-silent-failure sweep (~4.5 min) plus
+    # the SALib/sklearn sobol+surrogate tests (installed below on purpose), so
+    # it legitimately needs ~20-25 min. The old 15 was never validated because
+    # a pre-existing ruff E702 failed the job before pytest ever ran.
+    timeout-minutes: 35
     steps:
       - name: Checkout
         uses: actions/checkout@v4
