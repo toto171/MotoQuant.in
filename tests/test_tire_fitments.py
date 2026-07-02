@@ -75,20 +75,25 @@ class TestTireFitments:
         assert total_fitments >= 6, f"Expected >=6 fitments, got {total_fitments}"
 
     def test_fitment_oem_defaults(self, temp_db):
-        """Verify OEM fitments are marked as default."""
-        cursor = temp_db._conn.execute(
-            """
-            SELECT COUNT(*) FROM bike_tire_fitments
-            WHERE fitment_type = 'oem' AND is_default = 1
-            """
-        )
-        oem_defaults = cursor.fetchone()[0]
-        # At least half should be OEM defaults
-        total = temp_db._conn.execute(
-            "SELECT COUNT(*) FROM bike_tire_fitments"
+        """Every OEM fitment must be marked as the default tyre (is_default=1)
+        so the simulator always has a sensible stock tyre to fall back on.
+
+        The old assertion required OEM defaults to be >30% of *all* fitments.
+        That proxy went stale once ``seed_all`` began calling
+        ``seed_recommended_fitments`` (April 2026): the seed now adds
+        recommended + drag_prep fitments, which are legitimately non-default,
+        diluting the ratio below 30% even though every OEM fitment is still a
+        default. This checks the real invariant instead of a brittle ratio."""
+        oem_total = temp_db._conn.execute(
+            "SELECT COUNT(*) FROM bike_tire_fitments WHERE fitment_type = 'oem'"
         ).fetchone()[0]
-        assert oem_defaults > total * 0.3, (
-            f"Expected >30% OEM defaults, got {oem_defaults}/{total}"
+        oem_defaults = temp_db._conn.execute(
+            "SELECT COUNT(*) FROM bike_tire_fitments "
+            "WHERE fitment_type = 'oem' AND is_default = 1"
+        ).fetchone()[0]
+        assert oem_total > 0, "seed produced no OEM fitments"
+        assert oem_defaults == oem_total, (
+            f"{oem_total - oem_defaults} OEM fitment(s) not marked is_default=1"
         )
 
     def test_no_orphaned_fitments(self, temp_db):
