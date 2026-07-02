@@ -85,9 +85,12 @@ class TestStripeSignature(unittest.TestCase):
         self.assertFalse(self.verify(self.payload, "not-a-header", self.secret))
         self.assertFalse(self.verify(self.payload, "", self.secret))
 
-    def test_missing_secret_skips_verification(self):
-        # dev convenience — mirrors the Razorpay webhook behaviour
-        self.assertTrue(self.verify(self.payload, "anything", ""))
+    def test_missing_secret_fails_closed(self):
+        # 2026-07-02 security fix: an unset webhook secret must REJECT every
+        # event (fail closed), not accept them — otherwise forged events can
+        # upgrade any account for free while checkout is live but the secret
+        # is unconfigured.
+        self.assertFalse(self.verify(self.payload, "anything", ""))
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -224,10 +227,19 @@ class TestStripeWebhook(unittest.TestCase):
         self._patcher.stop()
         self.conn.close()
 
+    _WEBHOOK_SECRET = "whsec_test_lifecycle"
+
     def _send(self, event: dict):
-        return self.client.post(
-            "/api/payments/webhook/stripe", content=json.dumps(event)
-        )
+        # 2026-07-02: the webhook now fails closed on an unset secret, so
+        # lifecycle events must be signed with a configured secret (this is
+        # exactly the production path, not a test-only shortcut).
+        body = json.dumps(event).encode()
+        with patch.dict("os.environ", {"STRIPE_WEBHOOK_SECRET": self._WEBHOOK_SECRET}):
+            return self.client.post(
+                "/api/payments/webhook/stripe",
+                content=body,
+                headers={"stripe-signature": _stripe_sig(body, self._WEBHOOK_SECRET)},
+            )
 
     def _checkout_completed(self, event_id="evt_1", sub_id="sub_abc"):
         return {

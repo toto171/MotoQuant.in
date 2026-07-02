@@ -195,7 +195,12 @@ def _make_refresh_token(user_id: int, jti: str) -> str:
 
 def _decode_token(token: str) -> dict | None:
     """Decode and verify a JWT. Returns the payload dict or None on failure."""
-    if token.startswith("dev."):
+    # The unsigned "dev." token format is ONLY honoured when jose is
+    # unavailable (the same condition under which it is issued). Before
+    # 2026-07-02 this branch ran unconditionally, so in production (jose
+    # present) an attacker could hand-craft a "dev." token with an
+    # arbitrary payload and skip signature verification entirely.
+    if token.startswith("dev.") and not _JOSE_AVAILABLE:
         import base64
         import json
 
@@ -368,7 +373,7 @@ def get_current_user(
     jti = payload.get("jti")
     conn = _get_conn()
     try:
-        if not _users.is_session_valid(conn, jti):
+        if not _users.is_session_valid(conn, jti, int(payload["sub"])):
             raise HTTPException(401, "Session revoked — please log in again")
         user = _users.get_user_by_id(conn, int(payload["sub"]))
         if not user or not user["is_active"]:
@@ -399,7 +404,7 @@ def get_optional_user(
     except Exception:
         return None
     try:
-        if not _users.is_session_valid(conn, jti):
+        if not _users.is_session_valid(conn, jti, int(payload["sub"])):
             return None
         user = _users.get_user_by_id(conn, int(payload["sub"]))
         if not user or not user["is_active"]:
@@ -513,7 +518,7 @@ def refresh_access_token(body: RefreshRequest) -> TokenResponse:
 
     conn = _get_conn()
     try:
-        if not _users.is_session_valid(conn, jti):
+        if not _users.is_session_valid(conn, jti, user_id):
             raise HTTPException(401, "Session expired or revoked — please log in again")
         user = _users.get_user_by_id(conn, user_id)
         if not user or not user["is_active"]:

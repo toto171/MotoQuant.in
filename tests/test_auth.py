@@ -316,16 +316,16 @@ class TestRequireTier(unittest.TestCase):
         auth_mod.BILLING_ENFORCE = self._orig_enforce
 
     def _make_token(self, tier: str) -> str:
-        """Create a dev-mode access token for a fake user."""
+        """Create an access token for a fake user.
+
+        Uses the current jose state so the issue and decode paths agree —
+        forcing jose off here (as this helper used to) would mint an
+        unsigned "dev." token that the 2026-07-02 security fix now rejects
+        whenever jose is actually installed (which it is in CI).
+        """
         import motoquant.auth as auth_mod
 
-        orig = auth_mod._JOSE_AVAILABLE
-        auth_mod._JOSE_AVAILABLE = False
-        try:
-            token = auth_mod._make_access_token(999, "t@t.in", tier, "jti-test")
-        finally:
-            auth_mod._JOSE_AVAILABLE = orig
-        return token
+        return auth_mod._make_access_token(999, "t@t.in", tier, "jti-test")
 
     def _patch_session_valid(self):
         """Patch DB session check to always return True."""
@@ -480,12 +480,8 @@ class TestRequireTierBetaMode(unittest.TestCase):
     def test_authenticated_user_attached_in_beta(self):
         import motoquant.auth as auth_mod
 
-        orig = auth_mod._JOSE_AVAILABLE
-        auth_mod._JOSE_AVAILABLE = False
-        try:
-            token = auth_mod._make_access_token(7, "beta@t.in", "free", "jti-beta")
-        finally:
-            auth_mod._JOSE_AVAILABLE = orig
+        # Use the real jose state so issue/decode agree (see _make_token note).
+        token = auth_mod._make_access_token(7, "beta@t.in", "free", "jti-beta")
         fake_user = {"id": 7, "email": "beta@t.in", "tier": "free", "is_active": 1}
         with (
             patch("motoquant.auth._users.is_session_valid", return_value=True),

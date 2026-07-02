@@ -316,8 +316,16 @@ def _verify_stripe_signature(
     HMAC-SHA256 over '{t}.{payload}' with the webhook signing secret.
     """
     if not secret:
-        log.warning("STRIPE_WEBHOOK_SECRET not set — skipping signature verification")
-        return True  # dev convenience; ALWAYS set the secret in prod
+        # Fail CLOSED: an unset webhook secret means we cannot trust any
+        # incoming event, so reject them all. The previous "return True"
+        # dev-convenience let anyone forge a checkout.session.completed and
+        # upgrade any account to Studio for free while STRIPE_SECRET_KEY was
+        # set (checkout live) but the webhook secret hadn't been configured
+        # yet -- the exact partial-config state PAYMENTS_SETUP.md walks
+        # through. To test the webhook locally, set a dummy secret and sign
+        # with it (see tests).
+        log.error("STRIPE_WEBHOOK_SECRET not set — rejecting webhook (fail closed)")
+        return False
     try:
         parts = dict(kv.split("=", 1) for kv in sig_header.split(",") if "=" in kv)
         ts = int(parts.get("t", "0"))

@@ -748,6 +748,16 @@ def _build_tires_from_spec(spec: BikeSpec) -> TireParams:
         # cluster mean|Δ| from 0.564s → 0.499s (-65ms, crosses 50ms improvement gate).
     elif cat in ("sport", "naked") and disp < 300:
         mu = 1.15  # entry-level budget tires (R15, Duke 200, Pulsar)
+    elif cat in ("cruiser", "adventure") and (spec.peak_power_hp or 0.0) >= 165:
+        # Sport-derived muscle cruisers / crossover ADVs (Diavel V4, Rocket 3
+        # Storm R, Multistrada V4/RS, S1000XR) ship on sport / sport-touring
+        # radials (Diablo Rosso III, Scorpion Trail II, 240-section rears) --
+        # NOT the touring/knobby compounds the category defaults assume.
+        # 2026-07-02 forensics: category-default grip left these rear-traction
+        # starved at launch (60ft 2.1s+ vs real ~1.65s), uniformly +0.5..+0.8s
+        # slow vs instrumented benchmarks. Gate at 165hp so genuine ADVs on
+        # trail rubber (1290 SAR 160hp, Pan America 150hp) keep the default.
+        mu = 1.40 if cat == "cruiser" else 1.32
     elif cat == "cruiser":
         mu = 1.20  # touring compound, heavier loads
     elif cat == "adventure":
@@ -787,8 +797,15 @@ def _build_tires_from_spec(spec: BikeSpec) -> TireParams:
             aspect = float(m.group(2)) / 100.0
             sidewall = width_mm * aspect
             # Rim diameter: last 2 digits × 25.4 / 2
-            # Match rim diameter: e.g. "ZR17" or "R17" at end of size string
+            # Match rim diameter: e.g. "ZR17", plain "R17"/"B16"
+            # (150/80R16, 240/40R18 -- the single-letter radial/bias code
+            # used across the cruiser catalog), or hyphenated "-17".
+            # 2026-07-02: the old [ZRB]R pattern required TWO letters, so
+            # 32 bikes on non-17" rims (Sportster S 16", Rocket 3 16",
+            # Boulevard M109R 18", ...) silently fell to the 17" default.
             rim_m = re.search(r"[ZRB]R(\d{2})\b", spec.rear_tire_size, re.IGNORECASE)
+            if not rim_m:
+                rim_m = re.search(r"[RB](\d{2})\b", spec.rear_tire_size, re.IGNORECASE)
             if not rim_m:
                 rim_m = re.search(r"-(\d{2})\b", spec.rear_tire_size)
             rim_half = (int(rim_m.group(1)) * 25.4 / 2) if rim_m else 215.9

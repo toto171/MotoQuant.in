@@ -82,7 +82,17 @@ def _evict_locked(now: float) -> None:
     for jid in expired:
         del _JOBS[jid]
     if len(_JOBS) > MAX_JOBS:
-        overflow = sorted(_JOBS.items(), key=lambda kv: kv[1].created_at)
+        # Only finished/cancelled jobs are eviction candidates: evicting a
+        # queued/running job would orphan its worker thread and make the
+        # client's poll 404 mid-run ("Progress lost") under load spikes.
+        overflow = sorted(
+            (
+                (jid, j)
+                for jid, j in _JOBS.items()
+                if j.status not in ("queued", "running")
+            ),
+            key=lambda kv: kv[1].created_at,
+        )
         for jid, _ in overflow[: len(_JOBS) - MAX_JOBS]:
             del _JOBS[jid]
 

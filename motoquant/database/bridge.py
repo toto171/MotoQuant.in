@@ -127,6 +127,11 @@ def config_to_db_row(config: BikeConfig) -> dict[str, Any]:
     for db_col, section_key in DB_COLUMN_TO_SECTION.items():
         section_obj = getattr(config, section_key)
         row[db_col] = _serialize_section(section_obj)
+    # Top-level (non-section) physics fields. category_tag drives the
+    # per-cluster profile dispatch in physics.py -- dropping it made the
+    # DB path re-derive a tag WITHOUT manufacturer/category context and
+    # 44 bikes ran the wrong cluster profile in production.
+    row["category_tag"] = config.category_tag
     return row
 
 
@@ -233,6 +238,10 @@ def db_row_to_config(
             continue  # skip missing optional sections
         section = _deserialize_section(json_str, section_key)
         kwargs[section_key] = section
+
+    tag = row.get("category_tag") if hasattr(row, "get") else None
+    if tag:
+        kwargs["category_tag"] = tag
 
     # Override dyno curve if provided separately
     if dyno_override is not None:

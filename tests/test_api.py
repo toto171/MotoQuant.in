@@ -29,6 +29,11 @@ _tmp_db_file = tempfile.NamedTemporaryFile(
 )
 _tmp_db_file.close()
 _TMP_DB_PATH = _tmp_db_file.name
+# Capture the prior value so tearDownModule can restore it — otherwise this
+# module leaks MOTOQUANT_DB (pointed at a tmp DB it then deletes) for the
+# rest of the pytest session, so any later TestClient-backed test recreates
+# an empty DB at the dead path and reads zero bikes.
+_PRIOR_MOTOQUANT_DB = os.environ.get("MOTOQUANT_DB")
 os.environ["MOTOQUANT_DB"] = _TMP_DB_PATH
 
 # Initialize schema + seeded reference data in the tmp DB
@@ -54,7 +59,7 @@ client = TestClient(app)
 
 
 def tearDownModule():
-    """Remove the tmp DB after all tests finish."""
+    """Remove the tmp DB and restore MOTOQUANT_DB after all tests finish."""
     try:
         if _api_mod._db_conn is not None:
             try:
@@ -66,6 +71,13 @@ def tearDownModule():
             os.unlink(_TMP_DB_PATH)
     except Exception:
         pass
+    # Restore the env + null the api singleton so later TestClient-backed
+    # modules reconnect to the real motoquant.db, not this deleted tmp path.
+    if _PRIOR_MOTOQUANT_DB is None:
+        os.environ.pop("MOTOQUANT_DB", None)
+    else:
+        os.environ["MOTOQUANT_DB"] = _PRIOR_MOTOQUANT_DB
+    _api_mod._db_conn = None
 
 
 # ---------------------------------------------------------------------------

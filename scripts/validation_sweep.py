@@ -424,9 +424,9 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         "Triumph",
         "Daytona 675",
         2013,
-        10.32,
-        219,
-        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2013)",
+        10.70,
+        216,
+        "MotorBikeCatalog / MotoStatz aggregate (~10.70 @ 134 mph); the SR 10.32 timing-strip run is a pro-rider outlier vs mainstream instrumented data",
     ),
     # BMW R nineT (1170 cc boxer-twin retro, 2014-2020) — Cycle World
     # December 2014 comparison test (R nineT vs CB1100 vs Indian Scout vs
@@ -1486,9 +1486,9 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         "Kawasaki",
         "Ninja 1000",
         2011,
-        11.30,
+        10.40,
         199,
-        "Cycle World 2011 (Sport Rider sportbike-performance-numbers, timing-strip 2011)",
+        "MCN 2011 (Bruce Dunn instrumented; the old SR 11.30 row is contradicted by the 25lb-heavier 2010 Z1000 at 10.55 and the 2022 1000SX Dragy 10.81)",
     ),
     # Yamaha FZ6 '04 → catalog FZ6 Fazer covers 2004-2009. CW timing
     # strip: 11.53s @ 117.4 mph (~188.9 km/h). 600 cc detuned R6 mill,

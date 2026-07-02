@@ -109,8 +109,12 @@ def _rzp_client():
 
 def _verify_webhook_signature(payload_bytes: bytes, signature: str) -> bool:
     if not RZP_WEBHOOK_SECRET:
-        log.warning("RAZORPAY_WEBHOOK_SECRET not set — skipping signature verification")
-        return True  # allow in dev; deny in prod via env
+        # Fail CLOSED (see the matching note in payments.py): an unset
+        # secret must reject every webhook, not accept every webhook.
+        # Otherwise a forged subscription.charged event upgrades any
+        # account for free while checkout is live but the secret is unset.
+        log.error("RAZORPAY_WEBHOOK_SECRET not set — rejecting webhook (fail closed)")
+        return False
     expected = hmac.new(
         RZP_WEBHOOK_SECRET.encode(), payload_bytes, hashlib.sha256
     ).hexdigest()

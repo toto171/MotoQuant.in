@@ -36,8 +36,8 @@ Public API
 from __future__ import annotations
 
 import copy
-import time
 import logging
+import time
 import warnings
 from dataclasses import asdict, dataclass, field
 

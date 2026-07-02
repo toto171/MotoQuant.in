@@ -26,16 +26,28 @@ Deploy (Railway / Render / DigitalOcean App Platform)
     Set PORT env var; Render builds via render.yaml (Docker).
 """
 
+import asyncio
 import copy
 import json
 import logging
 import os
 import sqlite3
 import tempfile
+import threading
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, UploadFile
+from fastapi import (
+    Depends,
+    FastAPI,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    Request,
+    Response,
+    UploadFile,
+)
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -47,6 +59,7 @@ from typing_extensions import TypedDict
 from .defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 from .models import BikeConfig
 from .physics import MotoQuantEngine
+from .ratelimit import rate_limit
 
 # ─── Auth dependency (imported early so Depends() default-args resolve) ───────
 # Wrapped in try/except so the server still starts without python-jose installed
@@ -406,7 +419,27 @@ def _build_config(
                     (bike_id,),
                 ).fetchone()
                 if cfg_row:
-                    cfg = db_row_to_config(dict(cfg_row), name=bike_name)
+                    try:
+                        cfg = db_row_to_config(dict(cfg_row), name=bike_name)
+                    except Exception as exc:
+                        # A config row EXISTS but failed to parse (corrupted
+                        # JSON blob, interrupted reseed). That is a data-
+                        # integrity failure, not "bike not found" — surface
+                        # it as a 500 so it gets noticed, instead of the
+                        # misleading 404 this used to produce.
+                        logging.getLogger(__name__).error(
+                            "Corrupt bike_configs row for bike_id=%s: %s",
+                            bike_id,
+                            exc,
+                            exc_info=True,
+                        )
+                        raise HTTPException(
+                            500,
+                            f"Config data for bike {bike_id} failed to load "
+                            "— data integrity issue, not a bad bike id",
+                        )
+            except HTTPException:
+                raise
             except Exception as exc:
                 logging.getLogger(__name__).warning(
                     "Failed to load config for bike_id=%s: %s", bike_id, exc
@@ -426,9 +459,13 @@ def _build_config(
         fn = presets.get(bike_preset)
         if fn:
             cfg = fn()
+        else:
+            # Same bug class as the bike_id fallthrough above: a typo'd
+            # preset silently returned K5 results with no error.
+            raise HTTPException(404, f"Unknown bike_preset: {bike_preset}")
 
     if cfg is None:
-        cfg = gsxr1000_k5()  # default fallback
+        cfg = gsxr1000_k5()  # default fallback (no bike specified at all)
 
     cfg = copy.deepcopy(cfg)
 
@@ -487,8 +524,11 @@ def _build_config(
         cfg.environment.wind_direction_deg = 0.0  # 0 = headwind
 
     # -- Tire overrides ------------------------------------------------------
-    # If a tire ID is provided, look up the tire's mu_peak and apply it
-    for tire_id in (front_tire_id, rear_tire_id):
+    # TireParams carries ONE scalar mu_peak, and drive traction is rear-tire
+    # physics — so ONLY the rear tire may set grip. Previously the loop ran
+    # (front, rear) and both wrote the same field: a front-only selection
+    # silently replaced rear grip with the front tire's compound.
+    for tire_id in (rear_tire_id,):
         if tire_id is not None:
             db = _get_db()
             if db:
@@ -617,6 +657,87 @@ def health():
 
 
 # ─────────────────────────────────────────────────────────────────────────
+# Free-tier sim metering (commercial launch, July 2026)
+# ─────────────────────────────────────────────────────────────────────────
+# FULL simulations (sync + job-backed, top-speed, distance) are metered per
+# identity per UTC day via motoquant/usage.py. Quick sims stay unmetered --
+# the web UI fires them on every slider move, so a daily cap there would
+# break the live-preview UX; the full run with charts is the free-tier
+# quota unit. During the open beta (MOTOQUANT_BILLING_ENFORCE falsy) the
+# quota is advisory: counts are recorded, X-Sims-Remaining is exposed, but
+# nothing is blocked. Flipping the env var arms the 402.
+
+
+def _sim_identity_and_tier(request: Request) -> tuple[str, str]:
+    """Resolve the metering identity: user id when a valid bearer token is
+    present, else a hashed client IP (never stored raw -- privacy page)."""
+    authz = request.headers.get("authorization", "")
+    if authz.lower().startswith("bearer "):
+        try:
+            from . import auth as _auth
+            from .usage import user_identity
+
+            payload = _auth._decode_token(authz.split(" ", 1)[1])
+            if payload and payload.get("type") == "access":
+                conn = _auth._get_conn()
+                try:
+                    user = _auth._users.get_user_by_id(conn, int(payload["sub"]))
+                finally:
+                    conn.close()
+                if user:
+                    return user_identity(user["id"]), user.get("tier", "free")
+        except Exception:  # noqa: BLE001 -- metering must never break sims
+            pass
+    from .usage import anon_identity
+
+    fwd = request.headers.get("x-forwarded-for")
+    ip = (
+        fwd.split(",")[0].strip()
+        if fwd
+        else (request.client.host if request.client else "unknown")
+    )
+    return anon_identity(ip), "free"
+
+
+def _meter_full_sim(request: Request, response: Response) -> None:
+    """FastAPI dependency: count this full sim and (when billing is
+    enforced) 402 free-tier callers past the daily quota."""
+    try:
+        from .database.connection import connect as _db_connect
+        from .usage import record_and_check
+
+        identity, tier = _sim_identity_and_tier(request)
+        conn = _db_connect()
+        try:
+            st = record_and_check(conn, identity, tier=tier)
+        finally:
+            conn.close()
+    except Exception:  # noqa: BLE001 -- metering must never break sims
+        logging.getLogger(__name__).warning("sim metering failed", exc_info=True)
+        return
+    if st.limit is not None:
+        response.headers["X-Sims-Limit"] = str(st.limit)
+        response.headers["X-Sims-Remaining"] = str(st.remaining)
+    if not st.allowed:
+        try:
+            from . import auth as _auth
+        except Exception:  # noqa: BLE001
+            return
+        if _auth.BILLING_ENFORCE:
+            raise HTTPException(
+                402,
+                detail={
+                    "error": "quota_exceeded",
+                    "message": (
+                        f"Free tier includes {st.limit} full simulations per "
+                        "day. Upgrade to Pro for unlimited runs."
+                    ),
+                    "upgrade_url": f"{os.environ.get('MOTOQUANT_BASE_URL', 'https://motoquant.in')}/pricing",
+                },
+            )
+
+
+# ─────────────────────────────────────────────────────────────────────────
 # Anonymous telemetry endpoint
 # ─────────────────────────────────────────────────────────────────────────
 # Used by web/lib/telemetry.js to capture client-side events:
@@ -626,6 +747,49 @@ def health():
 # Privacy: no user id, no IP correlation, per-tab random session_id only.
 # Storage: stdout (Railway log stream); ship to PostHog/Logfire later
 # without changing the client.
+
+
+def _forward_telemetry_posthog(
+    event: str,
+    session_id: str,
+    path: str,
+    props: dict,
+) -> None:
+    """Env-gated server-side forward to PostHog (project "Motoquant", EU).
+
+    No-op unless POSTHOG_API_KEY is set, so behaviour without the key is
+    unchanged (stdout log only). Fires on a daemon thread -- the beacon
+    route is async and a blocking HTTP call would starve the event loop.
+    Server-side capture, no cookies: stays inside the privacy page's
+    consent promise.
+    """
+    api_key = os.environ.get("POSTHOG_API_KEY")
+    if not api_key:
+        return
+    host = os.environ.get("POSTHOG_HOST", "https://eu.i.posthog.com").rstrip("/")
+
+    def _post() -> None:
+        try:
+            import urllib.request
+
+            payload = json.dumps(
+                {
+                    "api_key": api_key,
+                    "event": event,
+                    "distinct_id": session_id or "anonymous",
+                    "properties": {**props, "path": path, "source": "api"},
+                }
+            ).encode("utf-8")
+            req = urllib.request.Request(
+                f"{host}/i/v0/e/",
+                data=payload,
+                headers={"Content-Type": "application/json"},
+            )
+            urllib.request.urlopen(req, timeout=5).read()
+        except Exception:  # noqa: BLE001 -- telemetry must never surface
+            pass
+
+    threading.Thread(target=_post, daemon=True).start()
 
 
 @app.post("/api/telemetry/event")
@@ -658,6 +822,7 @@ async def telemetry_event(payload: dict = None):
             ua[:80],
             safe_props,
         )
+        _forward_telemetry_posthog(event, session_id, path, safe_props)
     except Exception:
         # Telemetry is fire-and-forget; a logging failure must never 500
         # the client beacon.
@@ -706,6 +871,15 @@ def list_bikes(
         if search:
             count_query += " AND (m.name LIKE ? OR bm.model_name LIKE ?)"
             count_params += [f"%{search}%", f"%{search}%"]
+        # Mirror ALL row-query filters — total previously ignored
+        # manufacturer/category, so filtered pagination reported the full
+        # catalog count (e.g. 38 cruisers with total: 501).
+        if manufacturer:
+            count_query += " AND LOWER(m.name) = LOWER(?)"
+            count_params.append(manufacturer)
+        if category:
+            count_query += " AND LOWER(bm.category) = LOWER(?)"
+            count_params.append(category)
 
         total = db.execute(count_query, count_params).fetchone()[0]
 
@@ -1024,7 +1198,7 @@ def _simulate_impl(req: SimulateRequest, progress=None):
     }
 
 
-@app.post("/api/simulate")
+@app.post("/api/simulate", dependencies=[Depends(_meter_full_sim)])
 def simulate(req: SimulateRequest):
     """Synchronous full simulation (see ``_simulate_impl``)."""
     return _simulate_impl(req)
@@ -1125,8 +1299,10 @@ class TopSpeedRequest(BaseModel):
     track_temp_c: float | None = None
     humidity_pct: float | None = None
     headwind_kmh: float | None = None
-    # LSR-specific: optional override for max time/distance
-    max_time_s: float = 120.0
+    # LSR-specific: optional override for max time/distance.
+    # Bounded: n_max preallocates 17 float64 arrays of max_time_s/dt slots,
+    # so an unbounded value is a remotely-triggerable memory bomb.
+    max_time_s: float = Field(120.0, gt=0, le=300.0)
     include_timeseries: bool = False
 
 
@@ -1219,7 +1395,7 @@ def _topspeed_impl(req: TopSpeedRequest, progress=None) -> TopSpeedResultDict:
     return response
 
 
-@app.post("/api/simulate/top-speed")
+@app.post("/api/simulate/top-speed", dependencies=[Depends(_meter_full_sim)])
 def simulate_top_speed(req: TopSpeedRequest) -> TopSpeedResultDict:
     """Synchronous top-speed simulation (see ``_topspeed_impl``)."""
     return _topspeed_impl(req)
@@ -1244,10 +1420,10 @@ class DistanceRunRequest(BaseModel):
     track_temp_c: float | None = None
     humidity_pct: float | None = None
     headwind_kmh: float | None = None
-    max_time_s: float = 120.0
+    max_time_s: float = Field(120.0, gt=0, le=300.0)
 
 
-@app.post("/api/simulate/distance")
+@app.post("/api/simulate/distance", dependencies=[Depends(_meter_full_sim)])
 def simulate_distance(req: DistanceRunRequest) -> DistanceResultDict:
     """
     Run the simulation to an arbitrary target distance.
@@ -1543,33 +1719,74 @@ def save_simulation(
 
 
 @app.get("/api/leaderboard")
-def leaderboard(limit: int = Query(20, le=100)):
-    """Return the top simulation runs saved to the local database."""
+def leaderboard(
+    limit: int = Query(20, le=100),
+    venue_id: int | None = Query(None, description="Filter to one venue"),
+):
+    """Return the top simulation runs saved to the local database,
+    optionally filtered to a single venue (per-venue leaderboards)."""
     db = _get_db()
     if not db:
         raise HTTPException(503, "Database unavailable")
 
     try:
         # sim_runs table stores saved runs from the CLI `sim save-run` command
-        rows = db.execute(
-            """SELECT sr.id, sr.et_quarter_s, sr.trap_speed_kmh,
+        query = """SELECT sr.id, sr.et_quarter_s, sr.trap_speed_kmh,
                       m.name AS manufacturer, bm.model_name AS model,
-                      bm.year_from AS year, sr.created_at
+                      bm.year_from AS year, v.name AS venue, sr.created_at
                FROM sim_runs sr
                LEFT JOIN bike_configs bc ON sr.bike_config_id = bc.id
                LEFT JOIN bike_models bm ON bc.bike_model_id = bm.id
                LEFT JOIN manufacturers m ON bm.manufacturer_id = m.id
-               ORDER BY sr.et_quarter_s ASC
-               LIMIT ?""",
-            (limit,),
-        ).fetchall()
+               LEFT JOIN venues v ON sr.venue_id = v.id
+               WHERE sr.et_quarter_s IS NOT NULL"""
+        params: list[Any] = []
+        if venue_id is not None:
+            query += " AND sr.venue_id = ?"
+            params.append(venue_id)
+        query += " ORDER BY sr.et_quarter_s ASC LIMIT ?"
+        params.append(limit)
+        rows = db.execute(query, params).fetchall()
         return {
             "leaderboard": [dict(r) for r in rows],
             "total": len(rows),
         }
-    except Exception:
-        # sim_runs table may not exist yet -- return empty
+    except sqlite3.OperationalError as exc:
+        # sim_runs table may not exist yet on a fresh DB -- return empty,
+        # but say so in the logs instead of swallowing silently.
+        logging.getLogger(__name__).warning("leaderboard query failed: %s", exc)
         return {"leaderboard": [], "total": 0}
+
+
+@app.get("/api/runs/{run_id}")
+def get_public_run(run_id: int):
+    """Public, immutable view of one saved sim run — powers the shareable
+    /r/[id] timeslip pages (the WhatsApp/OG share loop). Only exposes the
+    run's results + bike/venue names, never the owning account."""
+    db = _get_db()
+    if not db:
+        raise HTTPException(503, "Database unavailable")
+    try:
+        row = db.execute(
+            """SELECT sr.id, sr.et_quarter_s, sr.trap_speed_kmh,
+                      sr.et_eighth_s, sr.time_60ft_s, sr.time_330ft_s,
+                      sr.time_1000ft_s, sr.created_at,
+                      m.name AS manufacturer, bm.model_name AS model,
+                      bm.year_from AS year, v.name AS venue
+               FROM sim_runs sr
+               LEFT JOIN bike_configs bc ON sr.bike_config_id = bc.id
+               LEFT JOIN bike_models bm ON bc.bike_model_id = bm.id
+               LEFT JOIN manufacturers m ON bm.manufacturer_id = m.id
+               LEFT JOIN venues v ON sr.venue_id = v.id
+               WHERE sr.id = ?""",
+            (run_id,),
+        ).fetchone()
+    except sqlite3.OperationalError as exc:
+        logging.getLogger(__name__).warning("run lookup failed: %s", exc)
+        row = None
+    if not row:
+        raise HTTPException(404, "Run not found")
+    return dict(row)
 
 
 # --- A vs B Comparison ---------------------------------------------------
@@ -1713,6 +1930,8 @@ def simulate_compare(req: CompareRequest):
             req.humidity_pct,
             req.headwind_kmh,
         )
+    except HTTPException:
+        raise  # e.g. 404 for an unknown bike_id — don't relabel as 500
     except Exception as exc:
         raise HTTPException(500, f"Simulation error: {exc}")
 
@@ -1765,7 +1984,9 @@ async def upload_dragy(
     try:
         from .calibration.dragy import best_run as dragy_best, parse_dragy_file
 
-        runs = parse_dragy_file(tmp_path)
+        # to_thread: this route is async, so a blocking parse would starve
+        # the single event loop (incl. /api/jobs polling) on the 0.5-CPU tier.
+        runs = await asyncio.to_thread(parse_dragy_file, tmp_path)
     except Exception as exc:
         log.warning("Dragy parse error: %s", exc)
         raise HTTPException(422, f"Failed to parse Dragy file: {exc}")
@@ -1822,7 +2043,9 @@ async def upload_dragy(
                 mass_delta_kg=0,
                 rider_mass_kg=75,
             )
-            sim = MotoQuantEngine(cfg).run()
+            # Full RK4 run takes seconds on prod hardware — keep it off
+            # the event loop.
+            sim = await asyncio.to_thread(MotoQuantEngine(cfg).run)
             from .calibration.overlay import compare_runs
 
             comparison = compare_runs(best, sim)
@@ -1877,7 +2100,8 @@ async def upload_dyno(
     try:
         from .calibration.dyno import parse_dyno_file
 
-        dyno_result = parse_dyno_file(
+        dyno_result = await asyncio.to_thread(
+            parse_dyno_file,
             tmp_path,
             temp_c=temp_c,
             pressure_kpa=pressure_kpa,
@@ -3080,7 +3304,11 @@ class ChatResponse(BaseModel):
     error_detail: str | None = None
 
 
-@app.post("/api/chat", response_model=ChatResponse)
+@app.post(
+    "/api/chat",
+    response_model=ChatResponse,
+    dependencies=[Depends(rate_limit("chat", 20, 60.0))],
+)
 def chat(req: ChatRequest, client=Depends(get_llm_client)) -> ChatResponse:
     """End-to-end NL chat: parse with Claude, run physics, summarize.
 
@@ -3204,6 +3432,8 @@ def _optimize_impl(req: OptimizeBuildRequest, progress=None):
             max_candidates=req.max_candidates,
             progress_cb=progress,
         )
+    except HTTPException:
+        raise  # e.g. 404 for an unknown bike_id — don't relabel as 500
     except Exception as exc:
         logging.getLogger(__name__).error(
             "optimize_build failed: %s", exc, exc_info=True
@@ -3213,7 +3443,10 @@ def _optimize_impl(req: OptimizeBuildRequest, progress=None):
     return result.to_dict()
 
 
-@app.post("/api/optimize/build")
+@app.post(
+    "/api/optimize/build",
+    dependencies=[Depends(rate_limit("optimize", 6, 60.0))],
+)
 def optimize_build_route(req: OptimizeBuildRequest):
     """Synchronous build optimiser (see ``_optimize_impl``)."""
     return _optimize_impl(req)
@@ -3320,6 +3553,8 @@ def _autotune_impl(req: AutotuneRequest, progress=None):
             launch_steps=req.launch_steps,
             progress_cb=progress,
         )
+    except HTTPException:
+        raise  # e.g. 404 for an unknown bike_id — don't relabel as 500
     except Exception as exc:
         logging.getLogger(__name__).error("autotune failed: %s", exc, exc_info=True)
         raise HTTPException(500, f"Autotune failed: {exc}") from exc
@@ -3329,7 +3564,10 @@ def _autotune_impl(req: AutotuneRequest, progress=None):
     return out
 
 
-@app.post("/api/autotune/ecu")
+@app.post(
+    "/api/autotune/ecu",
+    dependencies=[Depends(rate_limit("autotune", 6, 60.0))],
+)
 def autotune_ecu_route(req: AutotuneRequest):
     """Synchronous autotune (see ``_autotune_impl``)."""
     return _autotune_impl(req)
@@ -3357,25 +3595,41 @@ def _start_job(kind: str, runner) -> dict:
     return {"job_id": job.id, "kind": kind, "status": job.status}
 
 
-@app.post("/api/jobs/simulate", status_code=202)
+@app.post(
+    "/api/jobs/simulate",
+    status_code=202,
+    dependencies=[Depends(_meter_full_sim)],
+)
 def job_simulate(req: SimulateRequest):
     """Start a full simulation as a background job (real progress)."""
     return _start_job("simulate", lambda progress: _simulate_impl(req, progress))
 
 
-@app.post("/api/jobs/topspeed", status_code=202)
+@app.post(
+    "/api/jobs/topspeed",
+    status_code=202,
+    dependencies=[Depends(_meter_full_sim)],
+)
 def job_topspeed(req: TopSpeedRequest):
     """Start a top-speed run as a background job (real progress)."""
     return _start_job("topspeed", lambda progress: _topspeed_impl(req, progress))
 
 
-@app.post("/api/jobs/optimize", status_code=202)
+@app.post(
+    "/api/jobs/optimize",
+    status_code=202,
+    dependencies=[Depends(rate_limit("optimize", 6, 60.0))],
+)
 def job_optimize(req: OptimizeBuildRequest):
     """Start the build optimiser as a background job (real progress)."""
     return _start_job("optimize", lambda progress: _optimize_impl(req, progress))
 
 
-@app.post("/api/jobs/autotune", status_code=202)
+@app.post(
+    "/api/jobs/autotune",
+    status_code=202,
+    dependencies=[Depends(rate_limit("autotune", 6, 60.0))],
+)
 def job_autotune(req: AutotuneRequest):
     """Start the ECU autotune as a background job (real progress)."""
     return _start_job("autotune", lambda progress: _autotune_impl(req, progress))
@@ -3507,6 +3761,11 @@ async def _ensure_phase6_schema() -> None:
             return
         try:
             db.execute("ALTER TABLE sim_runs ADD COLUMN user_id INTEGER")
+            db.commit()
+        except sqlite3.OperationalError:
+            pass  # column already exists
+        try:
+            db.execute("ALTER TABLE bike_configs ADD COLUMN category_tag TEXT")
             db.commit()
         except sqlite3.OperationalError:
             pass  # column already exists

@@ -92,7 +92,8 @@ def main():
                 "drivetrain_params=?, clutch_params=?, tire_params=?, "
                 "aero_params=?, suspension_params=?, braking_params=?, "
                 "wheelie_params=?, rider_params=?, parasitic_params=?, "
-                "staging_params=?, updated_at=CURRENT_TIMESTAMP "
+                "staging_params=?, category_tag=?, "
+                "updated_at=CURRENT_TIMESTAMP "
                 "WHERE id=?",
                 (
                     row_data["chassis_params"],
@@ -108,6 +109,7 @@ def main():
                     row_data["rider_params"],
                     row_data["parasitic_params"],
                     row_data["staging_params"],
+                    row_data.get("category_tag"),
                     row["config_id"],
                 ),
             )

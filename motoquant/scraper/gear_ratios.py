@@ -23,6 +23,7 @@ Primary ratio and sprocket defaults are in a separate lookup because they
 compound with gear ratios to give overall reduction.
 """
 
+import re
 
 # ══════════════════════════════════════════════════════════════════
 # TIER 1: NAMED MODEL FAMILIES
@@ -180,6 +181,57 @@ _DB: list[dict] = [
     },
     {
         "mfr": "yamaha",
+        "model": "yzf-r15 v1",
+        "year": (2008, 2010),
+        # ACCURACY 2026-07-02: V1/V2 previously substring-leaked onto the
+        # "yzf-r1" entry (primary 1.609 -- the litre bike's). Same 73/24
+        # primary as the whole R15 family (Yamaha India service manual);
+        # cassette/sprockets mirror the known_bikes spec (F14/R42 on V1).
+        "ratios": [2.833, 1.875, 1.429, 1.160, 0.963, 0.840],
+        "front": 14,
+        "rear": 42,
+        "primary": 3.042,
+    },
+    {
+        "mfr": "yamaha",
+        "model": "yzf-r15 v2",
+        "year": (2011, 2017),
+        "ratios": [2.833, 1.875, 1.429, 1.160, 0.963, 0.840],
+        "front": 14,
+        "rear": 48,
+        "primary": 3.042,
+    },
+    {
+        "mfr": "yamaha",
+        "model": "yzf-r125",
+        "year": (2008, 2026),
+        # Yamaha R125 (shared small-single architecture): primary 73/24.
+        "ratios": [2.917, 1.938, 1.500, 1.227, 1.045, 0.913],
+        "front": 14,
+        "rear": 48,
+        "primary": 3.042,
+    },
+    {
+        "mfr": "yamaha",
+        "model": "xsr125",
+        "year": (2021, 2026),
+        "ratios": [2.917, 1.938, 1.500, 1.227, 1.045, 0.913],
+        "front": 14,
+        "rear": 48,
+        "primary": 3.042,
+    },
+    {
+        "mfr": "yamaha",
+        "model": "xsr155",
+        "year": (2019, 2026),
+        # Same R155 VVA engine as the R15 V3.
+        "ratios": [2.833, 1.875, 1.429, 1.160, 0.963, 0.840],
+        "front": 14,
+        "rear": 42,
+        "primary": 3.042,
+    },
+    {
+        "mfr": "yamaha",
         "model": "yzf-r15 v3",
         "year": (2017, 2021),
         # ACCURACY 2026-06-11: explicit V3 entry. Without it the substring
@@ -250,15 +302,6 @@ _DB: list[dict] = [
     },
     {
         "mfr": "yamaha",
-        "model": "yzf-r7",
-        "year": (2021, 2026),
-        "ratios": [2.846, 2.125, 1.631, 1.333, 1.167, 1.043],
-        "front": 15,
-        "rear": 45,
-        "primary": 1.866,
-    },
-    {
-        "mfr": "yamaha",
         "model": "mt-10",
         "year": (2016, 2026),
         "ratios": [2.600, 1.947, 1.619, 1.380, 1.238, 1.130],
@@ -295,17 +338,8 @@ _DB: list[dict] = [
     },
     {
         "mfr": "yamaha",
-        "model": "vmax",
-        "year": (2009, 2020),
-        "ratios": [2.500, 1.714, 1.333, 1.095, 0.967, 0.864],
-        "front": 18,
-        "rear": 36,
-        "primary": 2.000,
-    },
-    {
-        "mfr": "yamaha",
         "model": "xsr900",
-        "year": (2016, 2026),
+        "year": (2016, 2021),  # 847cc gen; 890cc 2022+ has its own entry
         "ratios": [2.714, 2.000, 1.619, 1.360, 1.200, 1.080],
         "front": 16,
         "rear": 43,
@@ -594,30 +628,12 @@ _DB: list[dict] = [
     },
     {
         "mfr": "aprilia",
-        "model": "rs 660",
-        "year": (2020, 2026),
-        "ratios": [2.846, 2.125, 1.631, 1.333, 1.167, 1.043],
-        "front": 14,
-        "rear": 39,
-        "primary": 2.056,
-    },
-    {
-        "mfr": "aprilia",
         "model": "tuono v4",
         "year": (2011, 2026),
         "ratios": [2.615, 2.000, 1.667, 1.444, 1.286, 1.148],
         "front": 15,
         "rear": 39,
         "primary": 1.872,
-    },
-    {
-        "mfr": "aprilia",
-        "model": "tuono 660",
-        "year": (2021, 2026),
-        "ratios": [2.846, 2.125, 1.631, 1.333, 1.167, 1.043],
-        "front": 14,
-        "rear": 40,
-        "primary": 2.056,
     },
     {
         "mfr": "aprilia",
@@ -1517,6 +1533,15 @@ _DEFAULTS: dict[str, dict] = {
 # ══════════════════════════════════════════════════════════════════
 
 
+def _pattern_match(pattern: str, text: str) -> bool:
+    """Substring match with a trailing-digit boundary guard."""
+    if not pattern:
+        return False
+    if pattern[-1].isdigit():
+        return re.search(re.escape(pattern) + r"(?!\d)", text) is not None
+    return pattern in text
+
+
 def lookup_gear_ratios(
     manufacturer: str,
     model_name: str,
@@ -1571,7 +1596,15 @@ def lookup_gear_ratios(
         pattern_norm = _norm(entry["model"])
         # Accept either a direct substring match (legacy behaviour) or a
         # whitespace-normalised match (handles "CB650R" vs "cb 650r").
-        if pattern not in model_lower and pattern_norm not in model_norm:
+        # Digit-boundary guard (2026-07-02): a pattern ending in a digit
+        # must not be immediately followed by another digit, or "yzf-r1"
+        # leaks its litre-bike primary onto "yzf-r15 v1/v2" and "yzf-r125"
+        # (the exact bug class that gave the R15 V3 the R1 primary before
+        # the June-12 respec -- V1/V2/R125 were still leaking).
+        if not (
+            _pattern_match(pattern, model_lower)
+            or _pattern_match(pattern_norm, model_norm)
+        ):
             continue
         # Check year range
         if year is not None:

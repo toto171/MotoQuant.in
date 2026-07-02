@@ -4573,7 +4573,7 @@ DUCATI_DIAVEL_V4_2023 = spec_from_dict(
         "front_sprocket": 17,
         "rear_sprocket": 44,
         "chain_pitch": "525",
-        "dry_mass_kg": 223.0,
+        "dry_mass_kg": 211.0,  # Ducati official dry (kerb 236)
         "wheelbase_mm": 1590.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "240/45ZR17",
@@ -7453,7 +7453,7 @@ HONDA_CB1100_2013 = spec_from_dict(
         "front_sprocket": 18,
         "rear_sprocket": 42,
         "chain_pitch": "530",
-        "dry_mass_kg": 248.0,
+        "dry_mass_kg": 237.0,  # 248 was Honda curb weight; dry ~237
         "wheelbase_mm": 1490.0,
         "front_tire_size": "110/80R18",
         "rear_tire_size": "140/70R18",
@@ -8520,7 +8520,7 @@ DUCATI_MULTISTRADA_V4_2021 = spec_from_dict(
         "front_sprocket": 16,
         "rear_sprocket": 43,
         "chain_pitch": "525",
-        "dry_mass_kg": 243.0,
+        "dry_mass_kg": 218.0,  # Ducati official dry (kerb 240-243 was here, double-counting fluids)
         "wheelbase_mm": 1567.0,
         "front_tire_size": "120/70ZR19",
         "rear_tire_size": "170/60ZR17",

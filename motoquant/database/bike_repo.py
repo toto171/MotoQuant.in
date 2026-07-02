@@ -356,9 +356,9 @@ class BikeRepository:
                 chassis_params, engine_params, forced_induction_params,
                 drivetrain_params, clutch_params, tire_params, aero_params,
                 suspension_params, braking_params, wheelie_params,
-                rider_params, parasitic_params, staging_params,
+                rider_params, parasitic_params, staging_params, category_tag,
                 source, source_url, confidence, notes)
-               VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+               VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 bike_model_id,
                 next_version,
@@ -376,6 +376,7 @@ class BikeRepository:
                 row_data["rider_params"],
                 row_data["parasitic_params"],
                 row_data["staging_params"],
+                row_data.get("category_tag"),
                 source,
                 source_url,
                 confidence,
