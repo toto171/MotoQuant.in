@@ -29,12 +29,21 @@ export function Reveal({
   const inView = useInView(ref, { once: true, margin });
   const reduced = useReducedMotion();
   const Comp = motion[as] || motion.div;
-  // Reduced-motion branch (July 2026): this is the most-used animation
-  // primitive on the site, so it must not translate/fade for motion-
-  // sensitive users — render static, fully visible.
+  // Reduced-motion branch (July 2026): render the FINAL state with no
+  // animation. This must stay a motion component with `initial={false}` —
+  // NOT a plain element. The static prerender bakes framer's opacity:0
+  // initial style into the HTML (SSR can't know the user's motion
+  // preference), and React hydration does not reconcile attribute
+  // mismatches on a structurally-identical plain element, so a plain-div
+  // branch left the server's opacity:0 in the DOM forever (whole heroes
+  // invisible for reduced-motion users). A motion component always writes
+  // its resolved styles on mount, clearing the stale inline style.
   if (reduced) {
-    const Tag = as || 'div';
-    return <Tag className={className}>{children}</Tag>;
+    return (
+      <Comp ref={ref} initial={false} animate={{ opacity: 1, y: 0 }} className={className}>
+        {children}
+      </Comp>
+    );
   }
   return (
     <Comp
@@ -53,8 +62,20 @@ export function Stagger({ children, className = '', stagger = 0.08 }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '0px 0px -10% 0px' });
   const reduced = useReducedMotion();
+  // Same hydration constraint as Reveal: must stay a motion component so
+  // the children's SSR'd hidden-variant styles get overwritten on mount.
   if (reduced) {
-    return <div className={className}>{children}</div>;
+    return (
+      <motion.div
+        ref={ref}
+        initial={false}
+        animate="visible"
+        variants={{ visible: { opacity: 1, transition: { staggerChildren: 0, duration: 0 } } }}
+        className={className}
+      >
+        {children}
+      </motion.div>
+    );
   }
   return (
     <motion.div
