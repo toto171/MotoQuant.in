@@ -59,9 +59,9 @@ export default function ManifestoScrub() {
     <section
       ref={ref}
       id="manifesto"
-      className="relative h-[100svh] sm:h-[115vh] border-t border-brand-orange/10 bg-ink-1/30"
+      className="relative h-[100svh] sm:h-[106vh] border-t border-brand-orange/10 bg-ink-1/30"
     >
-      <div className="sticky top-0 min-h-[80svh] sm:min-h-screen flex items-center">
+      <div className="sticky top-0 min-h-[80svh] sm:min-h-[92vh] flex items-center">
         <div className="max-w-4xl mx-auto px-6 py-24">
           <CodeComment className="mb-6">belief system · honest physics</CodeComment>
           {reduced ? (
