@@ -246,12 +246,31 @@ def hash_password(password: str) -> str:
     return f"scrypt${_SCRYPT_N}${_SCRYPT_R}${_SCRYPT_P}${salt.hex()}${dk.hex()}"
 
 
+_DUMMY_PASSWORD_HASH: str | None = None
+
+
+def _dummy_hash() -> str:
+    """A well-formed scrypt hash used to burn equivalent CPU when the target
+    account doesn't exist, so login timing can't enumerate registered emails.
+    Computed once, lazily (one scrypt), then cached."""
+    global _DUMMY_PASSWORD_HASH
+    if _DUMMY_PASSWORD_HASH is None:
+        _DUMMY_PASSWORD_HASH = hash_password("mq-constant-time-equalizer")
+    return _DUMMY_PASSWORD_HASH
+
+
 def verify_password(password: str, stored: str | None) -> bool:
-    """Constant-time scrypt verification. False on any malformed input."""
-    if not stored or not stored.startswith("scrypt$"):
-        return False
+    """Constant-time scrypt verification. False on any malformed input.
+
+    Always runs exactly one scrypt — against a dummy hash when ``stored`` is
+    absent/malformed — so a non-existent (or password-less) account is
+    indistinguishable from a wrong password by response timing. Only a real,
+    well-formed stored hash can ever return True.
+    """
+    valid_stored = bool(stored) and stored.startswith("scrypt$")
+    target = stored if valid_stored else _dummy_hash()
     try:
-        _, n, r, p_, salt_hex, hash_hex = stored.split("$")
+        _, n, r, p_, salt_hex, hash_hex = target.split("$")
         dk = hashlib.scrypt(
             password.encode(),
             salt=bytes.fromhex(salt_hex),
@@ -260,9 +279,10 @@ def verify_password(password: str, stored: str | None) -> bool:
             p=int(p_),
             dklen=len(hash_hex) // 2,
         )
-        return hmac.compare_digest(dk.hex(), hash_hex)
+        match = hmac.compare_digest(dk.hex(), hash_hex)
     except Exception:
         return False
+    return match and valid_stored
 
 
 def _login_locked(email: str) -> bool:
@@ -274,8 +294,27 @@ def _login_locked(email: str) -> bool:
     return len(attempts) >= _LOGIN_FAIL_MAX
 
 
+# Bound the tracker so an attacker hammering distinct (never-succeeding)
+# emails can't grow it without limit — keys are otherwise only removed on a
+# successful login.
+_MAX_TRACKED_EMAILS = 4096
+
+
 def _register_login_failure(email: str) -> None:
-    _failed_logins.setdefault(email, []).append(time.time())
+    now = time.time()
+    if len(_failed_logins) >= _MAX_TRACKED_EMAILS and email not in _failed_logins:
+        # Drop fully-expired entries first; if the table is still full it's a
+        # distinct-email flood, so clear it (correctness is unaffected — this
+        # only forgets in-window failure counts under active abuse).
+        for k in [
+            k
+            for k, v in _failed_logins.items()
+            if not v or now - v[-1] > _LOGIN_FAIL_WINDOW_S
+        ]:
+            del _failed_logins[k]
+        if len(_failed_logins) >= _MAX_TRACKED_EMAILS:
+            _failed_logins.clear()
+    _failed_logins.setdefault(email, []).append(now)
 
 
 def _clear_login_failures(email: str) -> None:
@@ -628,11 +667,14 @@ def password_login(body: PasswordLoginRequest) -> TokenResponse:
     try:
         _users.ensure_tables(conn)
         user = _users.get_user_by_email(conn, email)
-        ok = bool(
-            user
-            and user.get("is_active")
-            and verify_password(body.password, user.get("password_hash"))
+        # Always call verify_password (it runs one scrypt even for a missing
+        # account) instead of short-circuiting on `user` — otherwise the fast
+        # no-user path is timing-distinguishable from the slow wrong-password
+        # path, enumerating registered emails.
+        pw_ok = verify_password(
+            body.password, user.get("password_hash") if user else None
         )
+        ok = bool(user and user.get("is_active") and pw_ok)
         if not ok:
             _register_login_failure(email)
             raise HTTPException(401, "Invalid email or password.")
