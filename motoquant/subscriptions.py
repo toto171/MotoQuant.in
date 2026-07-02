@@ -404,6 +404,14 @@ def validate_license_key(body: ValidateKeyRequest) -> ValidateKeyResponse:
     conn = _get_conn()
     try:
         row = _subs.validate_license_key(conn, body.key, body.device_id)
+    except _subs.DeviceMismatchError:
+        return ValidateKeyResponse(
+            valid=False,
+            message=(
+                "This license key is already activated on another device. "
+                "Revoke it from your account page and generate a new one."
+            ),
+        )
     finally:
         conn.close()
 
