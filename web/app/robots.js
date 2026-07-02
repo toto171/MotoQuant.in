@@ -21,7 +21,9 @@ export default function robots() {
         disallow: ['/account', '/login', '/signup', '/api/'],
       },
     ],
-    sitemap: 'https://www.motoquant.in/sitemap.xml',
-    host: 'https://www.motoquant.in',
+    // Apex domain — every canonical URL + SITE_URL on the site uses the apex
+    // (https://motoquant.in); the old www values here were the odd ones out.
+    sitemap: 'https://motoquant.in/sitemap.xml',
+    host: 'https://motoquant.in',
   };
 }

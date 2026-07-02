@@ -162,7 +162,13 @@ def test_catalog_snapshot_no_drift():
     assert, with a per-bike report of exactly which bikes drifted and by how
     much.
     """
-    db = live_db_copy()
+    # Pin the SHIPPED catalog explicitly. live_db_copy() otherwise prefers
+    # $MOTOQUANT_DB, which sibling modules (test_api / test_llm_runner /
+    # test_spec_corrections) transiently repoint at freshly-seeded tmp DBs
+    # during the same pytest session — making this drift tripwire flake by
+    # snapshotting the wrong DB rather than the real motoquant.db.
+    _repo_db = Path(__file__).resolve().parent.parent / "motoquant.db"
+    db = live_db_copy(_repo_db if _repo_db.exists() else None)
     if db is None:
         pytest.skip("live motoquant.db not found (set $MOTOQUANT_DB)")
 

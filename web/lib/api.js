@@ -296,6 +296,67 @@ export function autotuneEcuJob(opts, onProgress, signal) {
   });
 }
 
+export function simulateJob(body, onProgress, signal) {
+  return runJob('simulate', body, {
+    onProgress,
+    signal,
+    fallbackPath: '/api/simulate',
+  });
+}
+
+export function topspeedJob(body, onProgress, signal) {
+  return runJob('topspeed', body, {
+    onProgress,
+    signal,
+    fallbackPath: '/api/simulate/top-speed',
+  });
+}
+
+// A-vs-B comparison as a background job (added July 2026 alongside
+// POST /api/jobs/compare) — real progress across both sims + Stop. Falls
+// back to the synchronous compare route on older backends.
+export function compareJob(body, onProgress, signal) {
+  return runJob('compare', body, {
+    onProgress,
+    signal,
+    fallbackPath: '/api/simulate/compare',
+  });
+}
+
+/**
+ * Persist a simulation result to sim_runs (leaderboard + account Garage).
+ * Anonymous saves work; pass the AuthProvider access token to bind the run
+ * to the signed-in user so it shows in their Garage.
+ *
+ * @param {object} body  {bike_id, venue_id?, et_quarter_s, trap_speed_kmh,
+ *                        et_60ft_s?, et_eighth_s?, et_1000ft_s?, notes?}
+ * @param {string|null} accessToken
+ */
+export async function saveRun(body, accessToken = null, signal) {
+  const res = await fetch(`${API_URL}/api/simulate/save`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    },
+    body: JSON.stringify(body),
+    signal,
+  });
+  if (!res.ok) {
+    let msg = `API error ${res.status}`;
+    try {
+      const j = await res.json();
+      if (j?.detail) {
+        msg = typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail);
+      }
+    } catch {
+      /* keep the status-only message */
+    }
+    throw new Error(msg);
+  }
+  return res.json();
+}
+
 // ── Part display label ──────────────────────────────────────────────────
 // Defensive: render a part's display name without double-printing the brand.
 // The data layer (parts_repo.normalize_model_name) already strips a leading

@@ -165,12 +165,24 @@ def create_license_key(conn: sqlite3.Connection, user_id: int, tier: str) -> str
     return plaintext
 
 
+class DeviceMismatchError(Exception):
+    """A license key already activated on one device was presented from a
+    different device_id. The reset path is revoke + regenerate."""
+
+
 def validate_license_key(
     conn: sqlite3.Connection, plaintext_key: str, device_id: str | None = None
 ) -> dict | None:
     """
     Validate a license key. Updates last_seen_at and optionally binds device_id.
     Returns the license_keys row dict on success, None on invalid/revoked.
+
+    Device binding is ENFORCED (July 2026 — was write-only before): once a
+    key is bound, presenting a *different* device_id raises
+    DeviceMismatchError and the row is left untouched (no last_seen bump).
+    Requests that omit device_id entirely are tolerated for older desktop
+    builds that predate device reporting — binding only tightens when both
+    sides send ids.
     """
     key_hash = _sha256(plaintext_key)
     row = conn.execute(
@@ -181,6 +193,9 @@ def validate_license_key(
     row = dict(row)
     if row["revoked"]:
         return None
+
+    if device_id and row["device_id"] and device_id != row["device_id"]:
+        raise DeviceMismatchError("License key is already activated on another device")
 
     updates: list = [_now_utc()]
     sql_set = "last_seen_at = ?"

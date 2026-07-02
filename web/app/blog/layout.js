@@ -5,7 +5,8 @@
 import StructuredData, { SITE_URL } from '../StructuredData';
 
 const TITLE = "MotoQuant Blog — Motorcycle Drag Racing Physics, Tuning & Bike Breakdowns";
-const DESCRIPTION = "Long-form deep dives on motorcycle drag racing physics, India-specific tuning, and bike-by-bike quarter-mile breakdowns: Pulsar NS400Z vs RC 390, RE Continental GT 650, Pulsar NS200 vs Apache RTR 200 4V, Hayabusa vs ZX-14R, KTM 1390 Super Duke R EVO, Hero Xtreme 200S 4V, how a 2-stroke expansion chamber actually works, why your R15 will not hit 14s, and Aamby Valley November tuning.";
+// ≤160 chars — long-tail terms live on the individual post pages.
+const DESCRIPTION = "Long-form deep dives on motorcycle drag racing physics, India-specific venue tuning, and bike-by-bike quarter-mile breakdowns from the MotoQuant engine.";
 
 export const metadata = {
   title: TITLE,

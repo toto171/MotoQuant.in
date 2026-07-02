@@ -280,7 +280,10 @@ While MotoQuant is in open beta, everything in the Pro and Studio tiers — unli
 /* ── Mock cockpit readout panel — replaces the old "Screenshot coming
       soon" placeholder with a self-contained instrument view. Pure
       JSX/CSS: terminal header + engine-log lines + one seven-segment
-      figure + static readout bars. Zero new deps, zero network cost. ── */
+      figure + static readout bars. Zero new deps, zero network cost.
+      HONESTY: these are illustrative compositions (the headline figures
+      are real — e.g. the K5 10.0334s reference ET — but the bars and log
+      lines are staged), so the panel says so instead of claiming "live". ── */
 function FeatureReadout({ readout }) {
   return (
     <div className="relative rounded-xl border border-brand-orange/15 bg-ink-1/60 overflow-hidden">
@@ -294,8 +297,8 @@ function FeatureReadout({ readout }) {
           {readout.title}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-live-pulse" aria-hidden="true" />
-          <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-brand-green/80">live</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-white/25" aria-hidden="true" />
+          <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/40">demo</span>
         </span>
       </div>
 
@@ -340,6 +343,11 @@ function FeatureReadout({ readout }) {
               </span>
             </div>
           ))}
+        </div>
+
+        {/* honesty caption — this panel is a composition, not a live feed */}
+        <div className="label-mono mt-5 text-white/30">
+          illustrative readout — try the real thing in the simulator
         </div>
       </div>
     </div>

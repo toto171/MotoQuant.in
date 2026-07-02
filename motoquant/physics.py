@@ -207,6 +207,14 @@ class MotoQuantEngine:
 
         # ── EnvironmentalModel: single source for ambient corrections ────────
         self._env_model = EnvironmentalModel(c)
+        # Fold the track-surface grip factor into the effective rear-tire prep
+        # multiplier so wet / salt / dry-lake-bed / prepped-concrete venues
+        # actually change launch traction (previously a dead knob). Uses the
+        # surface-only grip_multiplier (NOT total_grip_multiplier — the ambient
+        # temperature delta is already handled by TireModel's thermal path, so
+        # folding it here would double-count it). Asphalt = 1.00, so the three
+        # reference baselines and every asphalt sweep config are unchanged.
+        self.mu_prep *= self._env_model.grip_multiplier
         self.rho = self._env_model.rho
         self.cd_a = c.aero.cd_a_effective  # static reference Cd*A
         self.v_wind = self._env_model.v_headwind
@@ -244,7 +252,7 @@ class MotoQuantEngine:
         self._braking = BrakingModel(self.cfg, self.N_f_static, self.N_r_static)
         self._wheelie = WheelieModel(self.cfg, self._aero)
         self._parasitic = ParasiticModel(self.cfg)
-        self._rr = RollingResistanceModel(self.cfg)
+        self._rr = RollingResistanceModel(self.cfg, self._env_model.rr_multiplier)
         # Phase-1 Remaining: three extracted inline sub-models
         self._rider = RiderDynamicsModel(self.cfg)
         self._staging = StagingModel(self.cfg)

@@ -11,7 +11,7 @@ Design principles for quantitative accuracy:
   5. Schema version tracked for forward-compatible migrations.
 """
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 
 # ────────────────────────────────────────────────────────
 # Full DDL executed on db.initialize()
@@ -120,6 +120,13 @@ CREATE TABLE IF NOT EXISTS bike_configs (
     rider_params            TEXT    NOT NULL,
     parasitic_params        TEXT    NOT NULL,
     staging_params          TEXT    NOT NULL,
+
+    -- Category-cluster tag driving per-cluster physics dispatch
+    -- (litre_sport_195p / entry_150_200 / two_stroke / ...). Persisted so
+    -- the DB-backed /api/simulate path runs the SAME profile as the
+    -- spec-path sweep -- before 2026-07-02 this was silently dropped on
+    -- round-trip and 44 bikes ran a different profile in production.
+    category_tag            TEXT,
 
     -- Provenance  (critical for quant accuracy)
     source                  TEXT    DEFAULT 'spec_sheet',

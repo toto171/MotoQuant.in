@@ -1,6 +1,7 @@
 import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
 import DocsSidebarNav from './DocsSidebarNav';
+import DocsMobileNav from './DocsMobileNav';
 
 const DOC_PAGES = [
   { href: '/docs/getting-started', label: 'Getting Started' },
@@ -56,6 +57,9 @@ export default function DocsLayout({ children }) {
         </aside>
 
         <main className="flex-1 min-w-0 px-6 sm:px-10 py-12 max-w-4xl">
+          {/* Mobile docs nav — the sidebar is hidden below md, so phones get
+              a collapsible section list above the content instead. */}
+          <DocsMobileNav pages={DOC_PAGES} />
           {children}
         </main>
       </div>

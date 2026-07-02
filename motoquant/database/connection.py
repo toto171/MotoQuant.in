@@ -169,6 +169,15 @@ class MotoQuantDB:
                 """
             )
 
+        # v5 -> v6: category_tag on bike_configs (per-cluster physics tag,
+        # persisted so the DB sim path matches the spec-path sweep)
+        if from_version < 6:
+            try:
+                conn.execute("ALTER TABLE bike_configs ADD COLUMN category_tag TEXT")
+            except sqlite3.OperationalError as e:
+                if "duplicate column name" not in str(e).lower():
+                    raise
+
     def _seed_parts_categories(self):
         """Insert parts categories if not present. Also prunes the retired
         'tire' pseudo-category from older DBs (tires are managed in tire_models,

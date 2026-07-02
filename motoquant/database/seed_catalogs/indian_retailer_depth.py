@@ -928,7 +928,7 @@ def seed_indian_retailer_depth(db) -> int:
                     "teeth": 16,
                     "material": "aluminum",
                 },
-                "param_deltas": {
+                "param_overrides": {
                     "drivetrain.front_sprocket": 16,
                 },
                 "fitment_rules": {
@@ -957,7 +957,7 @@ def seed_indian_retailer_depth(db) -> int:
                     "teeth": 17,
                     "material": "aluminum",
                 },
-                "param_deltas": {
+                "param_overrides": {
                     "drivetrain.front_sprocket": 17,
                 },
                 "fitment_rules": {
@@ -1046,7 +1046,7 @@ def seed_indian_retailer_depth(db) -> int:
                     "teeth": 45,
                     "material": "steel",
                 },
-                "param_deltas": {
+                "param_overrides": {
                     "drivetrain.rear_sprocket": 45,
                 },
                 "fitment_rules": {
@@ -1075,7 +1075,7 @@ def seed_indian_retailer_depth(db) -> int:
                     "teeth": 43,
                     "material": "steel",
                 },
-                "param_deltas": {
+                "param_overrides": {
                     "drivetrain.rear_sprocket": 43,
                 },
                 "fitment_rules": {
@@ -1130,7 +1130,7 @@ def seed_indian_retailer_depth(db) -> int:
                     "teeth": 42,
                     "material": "aluminum",
                 },
-                "param_deltas": {
+                "param_overrides": {
                     "drivetrain.rear_sprocket": 42,
                 },
                 "fitment_rules": {
@@ -2665,7 +2665,7 @@ def seed_indian_retailer_depth(db) -> int:
                     "pressure_bar": 4.0,
                 },
                 "param_deltas": {
-                    "fuel_system.pump_capacity_lph": 60,
+                    "engine.peak_power_hp": 1.5,
                     "chassis.dry_mass_kg": 0.25,
                 },
                 "fitment_rules": {
@@ -2725,7 +2725,7 @@ def seed_indian_retailer_depth(db) -> int:
                     "injector_capacity_cc": 1000,
                 },
                 "param_deltas": {
-                    "fuel_system.pump_capacity_lph": 75,
+                    "engine.peak_power_hp": 1.5,
                     "chassis.dry_mass_kg": 0.32,
                 },
                 "fitment_rules": {
@@ -2755,7 +2755,7 @@ def seed_indian_retailer_depth(db) -> int:
                     "pressure_bar": 4.0,
                 },
                 "param_deltas": {
-                    "fuel_system.pump_capacity_lph": 60,
+                    "engine.peak_power_hp": 1.5,
                     "chassis.dry_mass_kg": 0.25,
                 },
                 "fitment_rules": {

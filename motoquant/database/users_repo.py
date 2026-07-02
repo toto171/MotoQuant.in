@@ -187,12 +187,22 @@ def revoke_all_sessions(conn: sqlite3.Connection, user_id: int) -> None:
     conn.commit()
 
 
-def is_session_valid(conn: sqlite3.Connection, jwt_id: str) -> bool:
+def is_session_valid(
+    conn: sqlite3.Connection,
+    jwt_id: str,
+    expected_user_id: int | None = None,
+) -> bool:
     """Return True iff session exists, is not revoked, and has not expired.
     Uses SQLite datetime() for expiry check -- handles both timestamp formats.
+
+    When ``expected_user_id`` is given, the session's user_id must also match
+    the token's subject. Without this, a token bearing a valid jti but a
+    forged ``sub`` would authenticate as whoever the jti belongs to (a
+    horizontal-account-takeover path when combined with the dev-token
+    branch). Callers pass ``int(payload['sub'])``.
     """
     row = conn.execute(
-        """SELECT revoked FROM sessions
+        """SELECT revoked, user_id FROM sessions
            WHERE jwt_id = ?
              AND datetime(expires_at) > datetime('now')""",
         (jwt_id,),
@@ -200,6 +210,8 @@ def is_session_valid(conn: sqlite3.Connection, jwt_id: str) -> bool:
     if not row:
         return False  # not found or expired
     if row["revoked"]:
+        return False
+    if expected_user_id is not None and row["user_id"] != expected_user_id:
         return False
     return True
 

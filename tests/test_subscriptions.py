@@ -204,6 +204,61 @@ class TestLicenseKeys(unittest.TestCase):
         row = sr.validate_license_key(self.conn, key)
         self.assertIsNotNone(row["last_seen_at"])
 
+    def test_device_binding_enforced(self):
+        """July 2026: device binding was write-only — a bound key validated
+        fine from any device. Now a different device_id is rejected."""
+        from motoquant.database import subscriptions_repo as sr
+
+        key = sr.create_license_key(self.conn, self.pro_user["id"], "pro")
+        first = sr.validate_license_key(self.conn, key, device_id="device-abc")
+        self.assertIsNotNone(first)
+        # Same device revalidates fine
+        again = sr.validate_license_key(self.conn, key, device_id="device-abc")
+        self.assertIsNotNone(again)
+        # Different device is rejected without touching the row
+        before = self.conn.execute(
+            "SELECT last_seen_at, device_id FROM license_keys"
+        ).fetchone()
+        with self.assertRaises(sr.DeviceMismatchError):
+            sr.validate_license_key(self.conn, key, device_id="device-OTHER")
+        after = self.conn.execute(
+            "SELECT last_seen_at, device_id FROM license_keys"
+        ).fetchone()
+        self.assertEqual(dict(before), dict(after), "mismatch must not mutate")
+        # Legacy clients that omit device_id are still tolerated
+        legacy = sr.validate_license_key(self.conn, key)
+        self.assertIsNotNone(legacy)
+
+    def test_device_mismatch_endpoint_message(self):
+        """The public validate route reports the mismatch distinctly."""
+        import importlib.util
+
+        if importlib.util.find_spec("fastapi") is None:
+            self.skipTest("fastapi not installed")
+        from fastapi.testclient import TestClient
+
+        from motoquant.api import app
+        from motoquant.database import subscriptions_repo as sr
+
+        key = sr.create_license_key(self.conn, self.pro_user["id"], "pro")
+        self.assertIsNotNone(key)
+
+        client = TestClient(app)
+        wrapped = _NoCloseConn(self.conn)
+        with patch("motoquant.subscriptions._get_conn", return_value=wrapped):
+            r1 = client.post(
+                "/api/subscriptions/license-key/validate",
+                json={"key": key, "device_id": "dev-A"},
+            )
+            self.assertTrue(r1.json()["valid"], r1.text)
+            r2 = client.post(
+                "/api/subscriptions/license-key/validate",
+                json={"key": key, "device_id": "dev-B"},
+            )
+        body = r2.json()
+        self.assertFalse(body["valid"])
+        self.assertIn("another device", body["message"])
+
     def test_revoke_key(self):
         from motoquant.database import subscriptions_repo as sr
 
@@ -430,6 +485,19 @@ class TestLicenseKeyEndpoints(unittest.TestCase):
                 headers={"Authorization": "Bearer fake"},
             )
         return res
+
+    def test_generate_key_anonymous_beta_401_not_500(self):
+        """Open-beta anonymous callers (require_tier passes {} while
+        MOTOQUANT_BILLING_ENFORCE is off) must get a clean 401 from
+        license-key generation, not a KeyError 500 — July 2026
+        functional-audit find."""
+        from fastapi import HTTPException
+
+        from motoquant import subscriptions as sub_mod
+
+        with self.assertRaises(HTTPException) as ctx:
+            sub_mod.generate_license_key(user={})
+        self.assertEqual(ctx.exception.status_code, 401)
 
     def test_validate_key_endpoint_valid(self):
         conn = _mem_conn()

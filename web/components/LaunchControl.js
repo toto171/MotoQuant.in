@@ -29,7 +29,7 @@ const RUN_VIEW_MS = 1500;   // let the ET run play on the dial before gliding
 const RESET_MS = 5200;
 
 
-export default function LaunchControl({ holdMV, onTreeRun, onFoul, className = '' }) {
+export default function LaunchControl({ holdMV, onTreeRun, onFoul, onLaunch, className = '' }) {
   const [status, setStatus] = useState('idle'); // idle | staging | launched | foul
   const [lit, setLit] = useState(() => new Set(['pre-stage']));
   const animRef = useRef(null);
@@ -100,6 +100,7 @@ export default function LaunchControl({ holdMV, onTreeRun, onFoul, className = '
 
     // ─ clean launch ─ play the run on the dial first, then glide down
     setStatus('launched');
+    onLaunch?.(); // e.g. the TronGrid fires a light-cycle burst
     animRef.current = animate(holdMV, 1, {
       duration: 2.4,
       ease: [0.16, 1, 0.3, 1],

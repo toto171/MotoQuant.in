@@ -23,6 +23,9 @@ import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
 import { Reveal } from "../../components/Reveal";
 import PageHero from "../../components/PageHero";
+import ActionButton from "../../components/ActionButton";
+import { Skeleton } from "../../components/Skeleton";
+import useAsyncTask from "../../lib/useAsyncTask";
 
 import { API_URL_DIRECT as API_BASE } from "../../lib/api";
 
@@ -89,21 +92,23 @@ function FaqItem({ q, a }) {
 
 function PricingPageInner() {
   const [cycle, setCycle] = useState("monthly");
-  const [loading, setLoading] = useState(null);
-  const [error, setError] = useState("");
   const { isAuthenticated, accessToken } = useAuth();
 
   // ── Freemium beta switch — served by the backend so flipping
   // MOTOQUANT_BILLING_ENFORCE on Render reshapes this page with no deploy.
   // Defaults to beta=true until /config answers (safe: checkout isn't
-  // configured before launch anyway).
+  // configured before launch anyway). While the fetch is in flight the CTA
+  // labels show a skeleton instead of flashing the beta default; a failed
+  // fetch settles onto the beta default (cfgLoading goes false either way).
   const [payCfg, setPayCfg] = useState(null);
+  const [cfgLoading, setCfgLoading] = useState(true);
   useEffect(() => {
     let cancelled = false;
     fetch(`${API_BASE}/api/payments/config`)
       .then((r) => (r.ok ? r.json() : null))
       .then((cfg) => { if (!cancelled && cfg) setPayCfg(cfg); })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setCfgLoading(false); });
     return () => { cancelled = true; };
   }, []);
   const beta = payCfg ? !!payCfg.beta : true;
@@ -138,7 +143,7 @@ function PricingPageInner() {
     ? "Unlimited sims, ROI per part, build optimizer — know what each mod does before you buy it."
     : "Everything you need to go faster.";
 
-  async function subscribe(tier) {
+  async function subscribe(tier, signal) {
     if (beta) {
       // Open beta: no checkout — route to account creation, everything is free.
       window.location.href = isAuthenticated ? "/simulator" : "/login?signup=1";
@@ -148,25 +153,26 @@ function PricingPageInner() {
       window.location.href = `/login?next=/pricing&intent=${tier}_${cycle}`;
       return;
     }
-    setLoading(tier);
-    setError("");
-    try {
-      const res = await fetch(`${API_BASE}/api/payments/checkout`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ tier, billing_cycle: cycle }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Checkout failed.");
-      window.location.href = data.checkout_url;
-    } catch (err) {
-      setError(err.message);
-      setLoading(null);
-    }
+    const res = await fetch(`${API_BASE}/api/payments/checkout`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ tier, billing_cycle: cycle }),
+      signal,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Checkout failed.");
+    window.location.href = data.checkout_url;
+    return data;
   }
+
+  // One task per tier button so a running Pro checkout doesn't flip the
+  // Studio button into its running state (and vice versa).
+  const proTask = useAsyncTask((signal) => subscribe("pro", signal));
+  const studioTask = useAsyncTask((signal) => subscribe("studio", signal));
+  const checkoutError = proTask.error || studioTask.error;
 
   const yearlyDiscount = (tier) => {
     const m = PRICES[tier].monthly * 12;
@@ -215,17 +221,17 @@ function PricingPageInner() {
               </div>
       </PageHero>
 
-      <main className="pb-20 px-4 sm:px-6">
+      <main id="main" className="pb-20 px-4 sm:px-6">
         <div className="mx-auto max-w-6xl">
-          {error && (
-            <div className="mb-8 rounded-xl bg-brand-red/10 border border-brand-red/40 px-5 py-4 text-sm text-brand-red/90 text-center">
-              {error}
+          {checkoutError && (
+            <div className="mb-8 card border-brand-red/40 bg-brand-red/10 px-5 py-4 text-sm text-brand-red/90 text-center">
+              {checkoutError}
             </div>
           )}
 
           <div className="grid gap-5 md:grid-cols-3">
             <Reveal delay={0.05}>
-              <div className="relative rounded-xl border border-white/[0.06] bg-white/[0.02] p-8 flex flex-col h-full">
+              <div className="relative card p-8 flex flex-col h-full">
                 <TierBadge tier="free" size="sm" />
                 <div className="mt-5">
                   <span className="font-display font-bold text-5xl text-white tabular-nums">₹0</span>
@@ -242,14 +248,14 @@ function PricingPageInner() {
                     </div>
                   ))}
                 </div>
-                <Link href="/login?signup=1" className="mt-8 block w-full rounded-md border border-white/15 py-3 text-center text-sm font-display font-bold text-white/85 hover:border-white/40 hover:text-white transition-colors">
+                <Link href="/login?signup=1" className="btn-ghost mt-8 w-full">
                   Start free
                 </Link>
               </div>
             </Reveal>
 
             <Reveal delay={0.12}>
-              <div className="relative rounded-xl border border-brand-orange/40 bg-gradient-to-b from-brand-orange/[0.07] to-white/[0.02] p-8 flex flex-col h-full">
+              <div className="relative card border-brand-orange/40 bg-gradient-to-b from-brand-orange/[0.07] to-white/[0.02] p-8 flex flex-col h-full">
                 <div
                   aria-hidden="true"
                   className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-orange/70 to-transparent"
@@ -286,23 +292,34 @@ function PricingPageInner() {
                     </div>
                   ))}
                 </div>
-                <button
-                  onClick={() => subscribe("pro")}
-                  disabled={!!loading}
-                  data-exp="EXP-002"
-                  data-variant={proCtaVariant}
-                  className="mt-8 w-full rounded-md bg-brand-orange py-3 text-sm font-display font-bold text-black shadow-orange-soft hover:bg-brand-orangeLight disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {loading === "pro" ? "Redirecting…" : beta ? "Free during beta — create account" : proCtaCopy()}
-                </button>
-                <p className="mt-3 text-center text-xs text-white/40 font-mono">
-                  {beta ? "₹0 until commercial launch" : "7-day money-back guarantee"}
-                </p>
+                {cfgLoading ? (
+                  <div className="mt-8" aria-hidden="true">
+                    <Skeleton className="h-11 w-full rounded-xl" />
+                    <Skeleton className="mx-auto mt-3 h-3 w-44" />
+                  </div>
+                ) : (
+                  <>
+                    <div className="mt-8" data-exp="EXP-002" data-variant={proCtaVariant}>
+                      <ActionButton
+                        task={proTask}
+                        onRun={() => proTask.run()}
+                        disabled={studioTask.active}
+                        stoppable={false}
+                        label={beta ? "Free during beta — create account" : proCtaCopy()}
+                        runningLabel="Redirecting to checkout"
+                        className="w-full"
+                      />
+                    </div>
+                    <p className="mt-3 text-center text-xs text-white/40 font-mono">
+                      {beta ? "₹0 until commercial launch" : "7-day money-back guarantee"}
+                    </p>
+                  </>
+                )}
               </div>
             </Reveal>
 
             <Reveal delay={0.19}>
-              <div className="relative rounded-xl border border-brand-accent/30 bg-white/[0.02] p-8 flex flex-col h-full">
+              <div className="relative card border-brand-accent/30 p-8 flex flex-col h-full">
                 <TierBadge tier="studio" size="sm" />
                 <div className="mt-5">
                   <span className="font-display font-bold text-5xl text-white tabular-nums">{displayPrice("studio")}</span>
@@ -324,16 +341,28 @@ function PricingPageInner() {
                     </div>
                   ))}
                 </div>
-                <button
-                  onClick={() => subscribe("studio")}
-                  disabled={!!loading}
-                  className="mt-8 w-full rounded-md bg-brand-accent py-3 text-sm font-display font-bold text-black hover:bg-brand-accent/85 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {loading === "studio" ? "Redirecting…" : beta ? "Free during beta — create account" : "Subscribe to Studio"}
-                </button>
-                <p className="mt-3 text-center text-xs text-white/40 font-mono">
-                  {beta ? "₹0 until commercial launch" : "7-day money-back guarantee"}
-                </p>
+                {cfgLoading ? (
+                  <div className="mt-8" aria-hidden="true">
+                    <Skeleton className="h-11 w-full rounded-xl" />
+                    <Skeleton className="mx-auto mt-3 h-3 w-44" />
+                  </div>
+                ) : (
+                  <>
+                    <ActionButton
+                      task={studioTask}
+                      onRun={() => studioTask.run()}
+                      disabled={proTask.active}
+                      stoppable={false}
+                      variant="ghost"
+                      label={beta ? "Free during beta — create account" : "Subscribe to Studio"}
+                      runningLabel="Redirecting to checkout"
+                      className="mt-8 w-full border-brand-accent/40 text-brand-accent"
+                    />
+                    <p className="mt-3 text-center text-xs text-white/40 font-mono">
+                      {beta ? "₹0 until commercial launch" : "7-day money-back guarantee"}
+                    </p>
+                  </>
+                )}
               </div>
             </Reveal>
           </div>
@@ -364,15 +393,15 @@ function PricingPageInner() {
             <div className="mt-20 pt-16 border-t border-brand-orange/10">
               <h2 className="font-display font-bold text-2xl md:text-3xl text-white mb-2">Full feature comparison</h2>
               <p className="text-sm text-white/55 mb-8 max-w-2xl">Everything in every tier, side-by-side.</p>
-              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+              <div className="card overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-white/10 bg-white/[0.02]">
-                        <th className="py-4 px-5 text-left text-[10px] font-mono uppercase tracking-[0.25em] text-white/45">Feature</th>
-                        <th className="py-4 px-5 text-center text-[10px] font-mono uppercase tracking-[0.25em] text-white/45">Free</th>
-                        <th className="py-4 px-5 text-center text-[10px] font-mono uppercase tracking-[0.25em] text-brand-orange">Pro</th>
-                        <th className="py-4 px-5 text-center text-[10px] font-mono uppercase tracking-[0.25em] text-brand-accent">Studio</th>
+                        <th className="py-4 px-5 text-left label-mono">Feature</th>
+                        <th className="py-4 px-5 text-center label-mono">Free</th>
+                        <th className="py-4 px-5 text-center label-mono text-brand-orange">Pro</th>
+                        <th className="py-4 px-5 text-center label-mono text-brand-accent">Studio</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -405,7 +434,7 @@ function PricingPageInner() {
               <p className="text-sm text-white/55 text-center mb-6">
                 Anything else? <a href="mailto:motoquant@gmail.com" className="text-brand-accent hover:text-white transition-colors">motoquant@gmail.com</a>
               </p>
-              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-6">
+              <div className="card px-6">
                 {FAQ.map((item) => <FaqItem key={item.q} {...item} />)}
               </div>
             </div>

@@ -109,8 +109,12 @@ def _rzp_client():
 
 def _verify_webhook_signature(payload_bytes: bytes, signature: str) -> bool:
     if not RZP_WEBHOOK_SECRET:
-        log.warning("RAZORPAY_WEBHOOK_SECRET not set — skipping signature verification")
-        return True  # allow in dev; deny in prod via env
+        # Fail CLOSED (see the matching note in payments.py): an unset
+        # secret must reject every webhook, not accept every webhook.
+        # Otherwise a forged subscription.charged event upgrades any
+        # account for free while checkout is live but the secret is unset.
+        log.error("RAZORPAY_WEBHOOK_SECRET not set — rejecting webhook (fail closed)")
+        return False
     expected = hmac.new(
         RZP_WEBHOOK_SECRET.encode(), payload_bytes, hashlib.sha256
     ).hexdigest()
@@ -370,6 +374,12 @@ def generate_license_key(
     The plaintext key is returned ONCE — store it securely.
     Quota: pro=1 key, studio=5 keys.
     """
+    # require_tier passes anonymous callers through as {} while the open beta
+    # runs (MOTOQUANT_BILLING_ENFORCE=false) so the sim routes stay open — but
+    # a license key MUST belong to an account. Guard explicitly or the
+    # user["id"] below 500s on anonymous requests.
+    if not user.get("id"):
+        raise HTTPException(401, "Sign in to generate a license key.")
     conn = _get_conn()
     try:
         _subs.ensure_tables(conn)
@@ -400,6 +410,14 @@ def validate_license_key(body: ValidateKeyRequest) -> ValidateKeyResponse:
     conn = _get_conn()
     try:
         row = _subs.validate_license_key(conn, body.key, body.device_id)
+    except _subs.DeviceMismatchError:
+        return ValidateKeyResponse(
+            valid=False,
+            message=(
+                "This license key is already activated on another device. "
+                "Revoke it from your account page and generate a new one."
+            ),
+        )
     finally:
         conn.close()
 

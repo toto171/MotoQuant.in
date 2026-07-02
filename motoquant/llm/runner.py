@@ -263,6 +263,11 @@ class ChatResult:
     rank_result: RankResult | None = None  # rank
     recommend_result: RecommendResult | None = None  # recommend
     explain_result: ExplainResult | None = None  # explain
+    # choose_bike: MUST be a declared field — to_dict()/asdict() only
+    # serialises declared fields, so setting it as an instance attribute
+    # (result.choose_bike_result = {...}) silently dropped the entire
+    # choose_bike payload from the /api/chat response.
+    choose_bike_result: dict[str, Any] | None = None  # choose_bike
 
     summary: str | None = None
 
@@ -1541,7 +1546,9 @@ def _choose_bike_candidate_query(parsed, db):
             "Mahindra",
             "Yezdi",
             "Jawa",
-            "Indian Motorcycle",
+            # June-2026 manufacturer merge canonicalised "Indian Motorcycle"
+            # -> "Indian"; the old string matched zero rows post-merge.
+            "Indian",
             "Yamaha",
             "Honda",
             "Suzuki",

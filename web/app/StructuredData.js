@@ -29,7 +29,10 @@ export function organizationSchema() {
     description:
       'First-principles physics engine for motorcycle quarter-mile drag racing. Predict ET, compare builds, and quantify parts ROI for 501+ bikes.',
     foundingDate: '2025-11-01',
-    founder: { '@type': 'Person', name: 'Ritwik Singh' },
+    founder: [
+      { '@type': 'Person', name: 'Ritwik Singh' },
+      { '@type': 'Person', name: 'Arya Desai' },
+    ],
     sameAs: [
       'https://twitter.com/motoquant',
       'https://github.com/motoquant',
@@ -101,13 +104,6 @@ export function softwareApplicationSchema() {
       'Bayesian build optimization under budget',
       'Natural-language tuning queries',
     ],
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.9',
-      ratingCount: '47',
-      bestRating: '5',
-      worstRating: '1',
-    },
     inLanguage: 'en',
   };
 }
@@ -133,7 +129,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'MotoQuant Pro is validated against published magazine tests and Dragy runs: Suzuki GSX-R1000 K5 simulates 10.03s against a real 9.97s; Yamaha YZF-R1 simulates 10.29s against 10.3s; Suzuki Hayabusa simulates 10.47s (real range 10.1–10.7s). Across 55 matched benchmarks, 45% finish within ±0.20s and 82% within ±0.50s.',
+            'MotoQuant Pro is validated against published magazine tests and Dragy runs: Suzuki GSX-R1000 K5 simulates 10.03s against a real 9.97s; Yamaha YZF-R1 simulates 10.29s against 10.3s; Suzuki Hayabusa simulates 10.47s (real range 10.1–10.7s). The June 2026 sweep covers 216 source-quality-weighted benchmarks (236 matched to catalog bikes) with a weighted mean bias of −0.015s; 113 of 236 land within ±0.20s of the published timeslip.',
         },
       },
       {
@@ -151,7 +147,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'Yes — the web simulator at motoquant.in is free to use. No signup, no ads. A paid Pro desktop application for professional tuning shops will follow in Phase 6.',
+            'MotoQuant Pro is free during the open beta — create a free account and every Pro and Studio feature is unlocked, including saved runs, the build optimizer, and calibration uploads. At commercial launch, paid tiers begin at Pro ₹499/month and Studio ₹1,999/month; registered users get advance notice by email before billing starts.',
         },
       },
       {

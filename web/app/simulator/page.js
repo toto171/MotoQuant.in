@@ -2,17 +2,26 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo, useId, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import {
   Zap, Search, ChevronDown, ChevronRight, X, MapPin, Gauge, Wrench,
-  CircleDot, ArrowLeft, Thermometer, Wind,
-  BarChart3, Table2, Settings2, Upload, RotateCcw, Play, Layers, MessageSquare,
-  Locate, Loader2, AlertCircle, Share2, Check } from 'lucide-react';
+  CircleDot, Thermometer,
+  BarChart3, Table2, Settings2, Upload, RotateCcw, Layers, MessageSquare,
+  Locate, AlertCircle, Share2, Check } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area
 } from 'recharts';
-import { API_URL as API, runJob, partLabel } from '../../lib/api';
+import {
+  API_URL as API, simulateJob, topspeedJob, compareJob, saveRun, partLabel,
+} from '../../lib/api';
+import useAsyncTask from '../../lib/useAsyncTask';
 import SimProgress from '../../components/SimProgress';
+import ActionButton from '../../components/ActionButton';
+import { Skeleton, SkeletonCard } from '../../components/Skeleton';
+import SiteNav from '../../components/SiteNav';
+import SiteFooter from '../../components/SiteFooter';
+import { useAuth } from '../../components/AuthProvider';
 import { track, installErrorHandlers } from '../../lib/telemetry';
 import ChatPanel from '../../components/ChatPanel';
 import CodeComment from '../../components/CodeComment';
@@ -54,17 +63,14 @@ function pickDefaultBikeForVariant(bikes, variant) {
    REUSABLE COMPONENTS
    ═══════════════════════════════════════════════════════════════════════════ */
 
-// ─── Glass Card ──────────────────────────────────────────────────────────
-function Card({ children, className = '', glow = false }) {
-  const hasOverflowVisible = className.includes('overflow-visible');
+// ─── Panel Card — Cockpit v3 `.card` surface (rest props spread so
+//     data-exp / role="tabpanel" attributes reach the DOM) ────────────────
+function Card({ children, className = '', glow = false, ...rest }) {
   return (
-    <div className={`
-      relative rounded-2xl border border-white/[0.06]
-      bg-gradient-to-br from-white/[0.04] to-white/[0.01]
-      ${hasOverflowVisible ? '' : 'backdrop-blur-xl'} shadow-[0_0_30px_rgba(0,0,0,0.3)]
-      ${glow ? 'shadow-brand-orange/5 border-brand-orange/20' : ''}
-      ${className}
-    `}>
+    <div
+      className={`card relative ${glow ? 'border-brand-orange/25' : ''} ${className}`}
+      {...rest}
+    >
       {glow && <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-orange/70 to-transparent" aria-hidden="true" />}
       {children}
     </div>
@@ -90,11 +96,14 @@ function Dropdown({ label, items, selected, onSelect, renderItem, renderSelected
   return (
     <div className="relative" ref={ref}>
       {label && (
-        <label className="flex items-center gap-1.5 font-mono text-[10px] text-white/45 mb-1.5 uppercase tracking-[0.25em]">
+        <label className="label-mono flex items-center gap-1.5 mb-1.5">
           {icon}{label}
         </label>
       )}
-      <button onClick={() => setOpen(!open)}
+      <button
+        onClick={() => setOpen(!open)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
         className="w-full p-2.5 rounded-xl border border-white/10 bg-ink-1 text-left flex items-center justify-between hover:border-brand-orange/40 hover:bg-ink-2 transition-all text-sm group">
         {selected ? renderSelected(selected) : <span className="text-white/35">Select...</span>}
         <ChevronDown size={13} className={`text-white/35 group-hover:text-brand-orange transition-all ${open ? 'rotate-180' : ''}`} />
@@ -103,24 +112,26 @@ function Dropdown({ label, items, selected, onSelect, renderItem, renderSelected
         <div className="absolute z-50 mt-1.5 w-full bg-ink-1 border border-white/10 rounded-xl shadow-2xl shadow-black/50 max-h-72 overflow-hidden">
           <div className="p-2 border-b border-white/[0.06]">
             <div className="relative">
-              <Search size={12} className="absolute left-2.5 top-2.5 text-white/35" />
+              <Search size={12} className="absolute left-2.5 top-2.5 text-white/35 z-10" />
               <input type="text" value={q} onChange={e => setQ(e.target.value)} placeholder="Search..."
-                className="w-full pl-8 pr-3 py-2 bg-ink-2 border border-white/10 rounded-lg text-xs text-white placeholder-white/25 focus:outline-none focus:border-brand-orange/60" autoFocus />
+                className="input-base h-9 pl-8 pr-3 text-xs rounded-lg bg-ink-2" autoFocus />
             </div>
           </div>
-          <div className="overflow-y-auto max-h-56 scrollbar-thin">
+          <div className="overflow-y-auto max-h-56 scrollbar-thin" role="listbox">
             {grouped ? Object.keys(grouped).sort().map(g => (
               <div key={g}>
-                <div className="px-3 py-1 font-mono text-[10px] text-white/45 font-semibold uppercase tracking-[0.25em] bg-ink-2 sticky top-0">{g}</div>
+                <div className="label-mono px-3 py-1 font-semibold bg-ink-2 sticky top-0">{g}</div>
                 {grouped[g].map((item, i) => (
-                  <button key={i} onClick={() => { onSelect(item); setOpen(false); setQ(''); }}
+                  <button key={i} role="option" aria-selected={selected === item}
+                    onClick={() => { onSelect(item); setOpen(false); setQ(''); }}
                     className="w-full px-3 py-2 text-left text-xs hover:bg-brand-orange/10 transition-colors text-white/75 hover:text-brand-orangeLight">
                     {renderItem(item)}
                   </button>
                 ))}
               </div>
             )) : filtered.map((item, i) => (
-              <button key={i} onClick={() => { onSelect(item); setOpen(false); setQ(''); }}
+              <button key={i} role="option" aria-selected={selected === item}
+                onClick={() => { onSelect(item); setOpen(false); setQ(''); }}
                 className="w-full px-3 py-2 text-left text-xs hover:bg-brand-orange/10 transition-colors text-white/75 hover:text-brand-orangeLight">
                 {renderItem(item)}
               </button>
@@ -140,11 +151,13 @@ function Slider({ label, value, onChange, min, max, step = 1, unit = '', colorFn
   return (
     <div>
       <div className="flex justify-between text-[11px] mb-1">
-        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">{label}</span>
+        <span className="label-mono">{label}</span>
         <span className={`font-mono font-medium tabular-nums ${color}`}>{display}{unit}</span>
       </div>
       <input type="range" min={min} max={max} step={step} value={value}
         onChange={e => onChange(Number(e.target.value))}
+        aria-label={label}
+        aria-valuetext={`${display}${unit}`}
         className="w-full h-1 accent-brand-orange cursor-pointer" />
     </div>
   );
@@ -165,7 +178,7 @@ function PartChip({ part, onRemove }) {
 function Metric({ label, value, unit, large, accent }) {
   return (
     <div className="text-center">
-      <p className="font-mono text-[10px] text-white/45 uppercase tracking-[0.25em] mb-1">{label}</p>
+      <p className="label-mono mb-1">{label}</p>
       <p className={`font-display font-bold tabular-nums ${large ? 'text-3xl' : 'text-xl'} ${accent ? 'text-brand-orange' : 'text-white'}`}>
         {value}<span className={`${large ? 'text-base' : 'text-xs'} font-mono text-white/40 ml-0.5`}>{unit}</span>
       </p>
@@ -177,6 +190,9 @@ function Metric({ label, value, unit, large, accent }) {
 function Tab({ active, onClick, icon, label }) {
   return (
     <button onClick={onClick}
+      role="tab"
+      aria-selected={active}
+      aria-controls="sim-tabpanel"
       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
         active
           ? 'bg-brand-orange/15 text-brand-orange border border-brand-orange/30'
@@ -184,6 +200,21 @@ function Tab({ active, onClick, icon, label }) {
       }`}>
       {icon}{label}
     </button>
+  );
+}
+
+// ─── Inline error tile with Retry — the one branded error pattern ───────
+function ErrorTile({ message, onRetry, retryLabel = 'Retry', className = '' }) {
+  return (
+    <div className={`rounded-xl border border-brand-red/20 bg-brand-red/5 p-3 text-brand-red text-xs flex items-center justify-between gap-3 ${className}`}>
+      <span className="flex items-start gap-1.5 min-w-0">
+        <AlertCircle size={13} className="shrink-0 mt-0.5" />
+        <span className="break-words">{message}</span>
+      </span>
+      {onRetry && (
+        <button onClick={onRetry} className="btn-ghost btn-sm shrink-0">{retryLabel}</button>
+      )}
+    </div>
   );
 }
 
@@ -199,7 +230,7 @@ function SimChart({ data, dataKey, label, unit, color = CHART_COLORS.a, domain }
   const gid = `grad-${dataKey}-${gradId}`;
   return (
     <div className="h-44">
-      <p className="font-mono text-[10px] text-white/45 uppercase tracking-[0.25em] mb-2">{label}</p>
+      <p className="label-mono mb-2">{label}</p>
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
           <defs>
@@ -275,53 +306,200 @@ function SimulatorPageInner() {
   const [geoLoading, setGeoLoading] = useState(false);
   const [geoMessage, setGeoMessage] = useState(null);  // { tone: 'ok'|'err', text: string }
 
-  // ─── Simulation ──────────────────────────────────────────────────────
-  const [result, setResult] = useState(null);
-  const [fullResult, setFullResult] = useState(null);
-  const [simLoading, setSimLoading] = useState(false);
-  const [simProgress, setSimProgress] = useState(null); // {progress, stage} from the jobs poller
+  // ─── Results + view state ────────────────────────────────────────────
+  const [result, setResult] = useState(null);          // quick sim
+  const [fullResult, setFullResult] = useState(null);  // full RK4 sim
+  const [topSpeedResult, setTopSpeedResult] = useState(null);
+  const [compareResult, setCompareResult] = useState(null);
+  const [uploadResult, setUploadResult] = useState(null);
   const [liveSim, setLiveSim] = useState(true); // Live = quick sim re-runs as you tune; Manual = button only
-  const [simError, setSimError] = useState(null);
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeTab, setActiveTab] = useState('results');
   const [showEnv, setShowEnv] = useState(false);
   const debounceRef = useRef(null);
-  const abortRef = useRef(null);
 
-  // ─── A vs B Comparison ──────────────────────────────────────────────
-  const [compareResult, setCompareResult] = useState(null);
+  // ─── A vs B Comparison config ───────────────────────────────────────
   const [compareBike, setCompareBike] = useState(null);
   const [compareParts, setCompareParts] = useState([]);
   const [comparePower, setComparePower] = useState(0);
   const [compareMass, setCompareMass] = useState(0);
 
-  // ─── Upload ─────────────────────────────────────────────────────────
-  const [uploadResult, setUploadResult] = useState(null);
-  const [uploadLoading, setUploadLoading] = useState(false);
-  const [uploadError, setUploadError] = useState(null);
+  // ─── Upload refs ────────────────────────────────────────────────────
   const fileInputRef = useRef(null);
   const dynoInputRef = useRef(null);
+  const lastDragyFileRef = useRef(null);
+  const lastDynoFileRef = useRef(null);
 
-  // ─── Top Speed / LSR ────────────────────────────────────────────────
-  const [topSpeedResult, setTopSpeedResult] = useState(null);
-  const [topSpeedLoading, setTopSpeedLoading] = useState(false);
-  const [topSpeedProgress, setTopSpeedProgress] = useState(null);
-  const fullSimAbortRef = useRef(null);
-  const topSpeedAbortRef = useRef(null);
+  // ─── Auth (read-only) — bearer token for "Save this run" ────────────
+  const { accessToken } = useAuth();
+  const [savedRun, setSavedRun] = useState(null);
 
-  const stopFullSim = useCallback(() => {
-    fullSimAbortRef.current?.abort(); // runJob also cancels the job server-side
-    setSimLoading(false);
-    setSimProgress(null);
-  }, []);
-  const stopTopSpeed = useCallback(() => {
-    topSpeedAbortRef.current?.abort();
-    setTopSpeedLoading(false);
-    setTopSpeedProgress(null);
-  }, []);
-  const [topSpeedError, setTopSpeedError] = useState(null);
+  // ─── Shared sim request body ─────────────────────────────────────────
+  // Read fresh from state at call time (useAsyncTask keeps its fn current).
+  function baseSimBody(extra = {}) {
+    const body = {
+      rider_mass_kg: riderKg,
+      power_boost_pct: powerBoost,
+      mass_delta_kg: massChange,
+      ambient_temp_c: ambientTemp,
+      track_temp_c: trackTemp,
+      humidity_pct: humidity,
+      headwind_kmh: headwind,
+      ...extra,
+    };
+    if (bike?.id != null) body.bike_id = bike.id;
+    else if (bike?.preset) body.bike_preset = bike.preset;
+    if (frontTire?.id != null) body.front_tire_id = frontTire.id;
+    if (rearTire?.id != null) body.rear_tire_id = rearTire.id;
+    if (venue?.id != null) body.venue_id = venue.id;
+    return body;
+  }
 
-  // ─── Share this build (URL with bike/venue/sliders) ─────────────────
+  /* ─── Per-op async tasks (own {loading, progress, error} each) ─────── */
+
+  // Quick sim (~50 ms warm) — staged feedback only, per the progress doctrine.
+  const quickTask = useAsyncTask(async (signal) => {
+    if (!bike) return null;
+    const body = baseSimBody({ part_ids: selectedParts.map(p => p.id) });
+    const res = await fetch(`${API}/api/simulate/quick`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal,
+    });
+    if (!res.ok) throw new Error(`API ${res.status}`);
+    const data = await res.json();
+    setResult(data);
+    return data;
+  });
+
+  // Full sim — job-backed with real RK4 progress.
+  // NOTE (preserved behaviour): the full-sim body deliberately mirrors the
+  // pre-redesign request and does NOT attach part_ids.
+  const fullSimTask = useAsyncTask(async (signal, onProgress) => {
+    const data = await simulateJob(baseSimBody(), onProgress, signal);
+    setFullResult(data);
+    return data;
+  });
+
+  // Top speed / LSR — job-backed.
+  const topSpeedTask = useAsyncTask(async (signal, onProgress) => {
+    const body = baseSimBody({
+      part_ids: selectedParts.map(p => p.id),
+      include_timeseries: true,
+    });
+    const data = await topspeedJob(body, onProgress, signal);
+    setTopSpeedResult(data);
+    return data;
+  });
+
+  // A vs B compare — job-backed (falls back to the sync route on old backends).
+  const compareTask = useAsyncTask(async (signal, onProgress) => {
+    const bBike = compareBike || bike;
+    const body = {
+      a_bike_id: bike.id != null ? bike.id : undefined,
+      a_bike_preset: bike.preset || undefined,
+      a_power_boost_pct: powerBoost,
+      a_mass_delta_kg: massChange,
+      a_rider_mass_kg: riderKg,
+      a_part_ids: selectedParts.map(p => p.id),
+      a_front_tire_id: frontTire?.id ?? undefined,
+      a_rear_tire_id: rearTire?.id ?? undefined,
+      b_bike_id: bBike.id != null ? bBike.id : undefined,
+      b_bike_preset: bBike.preset || undefined,
+      b_power_boost_pct: comparePower,
+      b_mass_delta_kg: compareMass,
+      b_rider_mass_kg: riderKg,
+      b_part_ids: compareParts.map(p => p.id),
+      venue_id: venue?.id ?? undefined,
+      ambient_temp_c: ambientTemp,
+      track_temp_c: trackTemp,
+      humidity_pct: humidity,
+      headwind_kmh: headwind,
+    };
+    const data = await compareJob(body, onProgress, signal);
+    setCompareResult(data);
+    return data;
+  });
+
+  // Uploads — plain POSTs with staged feedback + Retry (file kept in a ref).
+  const dragyTask = useAsyncTask(async (signal, onProgress, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (bike?.id != null) formData.append('bike_id', bike.id.toString());
+    else if (bike?.preset) formData.append('bike_preset', bike.preset);
+    const res = await fetch(`${API}/api/calibrate/dragy`, {
+      method: 'POST',
+      body: formData,
+      signal,
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    setUploadResult({ type: 'dragy', ...data });
+    setActiveTab('upload');
+    return data;
+  });
+
+  const dynoTask = useAsyncTask(async (signal, onProgress, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch(`${API}/api/calibrate/dyno`, {
+      method: 'POST',
+      body: formData,
+      signal,
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    setUploadResult({ type: 'dyno', ...data });
+    setActiveTab('upload');
+    return data;
+  });
+
+  // Save this run — anonymous saves allowed (beta); the bearer token binds
+  // the run to the signed-in user's Garage when present.
+  const saveTask = useAsyncTask(async (signal) => {
+    const r = result;
+    if (!r || r.et_quarter_s == null || bike?.id == null) return null;
+    const body = {
+      bike_id: bike.id,
+      venue_id: venue?.id ?? null,
+      et_quarter_s: r.et_quarter_s,
+      trap_speed_kmh: r.trap_speed_kmh,
+      et_60ft_s: r.et_60ft_s ?? null,
+      et_eighth_s: r.et_eighth_s ?? null,
+    };
+    const resp = await saveRun(body, accessToken, signal);
+    setSavedRun(resp);
+    track('save_run', { bike_id: bike.id, surface: 'simulator_page' });
+    return resp;
+  });
+
+  // A fresh quick-sim result invalidates the previous "Saved" state
+  // (and any stale save error).
+  const resetSave = saveTask.reset;
+  useEffect(() => { setSavedRun(null); resetSave(); }, [result, resetSave]);
+
+  /* ─── Run wrappers — a run force-switches to its tab AT START ───────── */
+  const startFullSim = useCallback(() => {
+    if (!bike || fullSimTask.active) return;
+    setActiveTab('charts'); // show the progress bar where the result will land
+    fullSimTask.run();
+  }, [bike, fullSimTask]);
+
+  const startTopSpeed = useCallback(() => {
+    track('sim_run_start', { surface: 'simulator_page', mode: 'topspeed', bike_label: bike?.model_name ?? 'unknown', bike_id: bike?.id ?? null });
+    if (!bike || topSpeedTask.active) return;
+    setActiveTab('topspeed');
+    topSpeedTask.run();
+  }, [bike, topSpeedTask]);
+
+  const startCompare = useCallback(() => {
+    if (!bike || compareTask.active) return;
+    setActiveTab('compare');
+    compareTask.run();
+  }, [bike, compareTask]);
+
+  // ─── Share this build (URL with bike/venue/sliders/parts/tires/env) ──
   const [shareCopied, setShareCopied] = useState(false);
   const shareBuild = useCallback(async () => {
     const params = new URLSearchParams();
@@ -330,6 +508,15 @@ function SimulatorPageInner() {
     if (riderKg !== 75) params.set('rider', String(riderKg));
     if (powerBoost !== 0) params.set('boost', String(powerBoost));
     if (massChange !== 0) params.set('mass', String(massChange));
+    // Lossless share (July 2026): parts + tires + environment overrides.
+    // Old links without these params keep working — every param is optional.
+    if (selectedParts.length > 0) params.set('parts', selectedParts.map(p => p.id).join(','));
+    if (frontTire?.id != null) params.set('ft', String(frontTire.id));
+    if (rearTire?.id != null) params.set('rt', String(rearTire.id));
+    if (ambientTemp !== 25) params.set('temp', String(ambientTemp));
+    if (trackTemp !== 30) params.set('track', String(trackTemp));
+    if (humidity !== 40) params.set('hum', String(humidity));
+    if (headwind !== 0) params.set('wind', String(headwind));
     const url = `${window.location.origin}/simulator?${params.toString()}`;
     try {
       if (navigator.share) {
@@ -343,77 +530,108 @@ function SimulatorPageInner() {
       setTimeout(() => setShareCopied(false), 2000);
       track('share_build', { bike_id: bike?.id });
     } catch (e) { /* clipboard unavailable — silently ignore */ }
-  }, [bike, venue, riderKg, powerBoost, massChange]);
+  }, [bike, venue, riderKg, powerBoost, massChange, selectedParts, frontTire, rearTire, ambientTemp, trackTemp, humidity, headwind]);
 
-  // ─── Fetch all data on mount ─────────────────────────────────────────
+  // ─── Boot: fetch all data (retryable — no full-page loader) ──────────
   useEffect(() => { installErrorHandlers(); track('page_view', { surface: 'simulator_page' }); }, []);
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const safeJson = async (res, fallback) => {
-          try { return res.ok ? await res.json() : fallback; }
-          catch (e) { console.warn('JSON parse error:', e); return fallback; }
-        };
-        // Each settled fetch ticks the boot progress bar by 1/5.
-        const tick = (p) => p.then((r) => {
-          setBootProgress((v) => Math.min(1, v + 0.2));
-          return r;
-        });
-        const [bikesRes, catsRes, partsRes, tiresRes, venuesRes] = await Promise.all([
-          tick(fetch(`${API}/api/bikes?limit=2000`)),
-          tick(fetch(`${API}/api/parts/categories`)),
-          tick(fetch(`${API}/api/parts?limit=2000`)),
-          tick(fetch(`${API}/api/tires?limit=2000`)),
-          tick(fetch(`${API}/api/venues`)),
-        ]);
-        const [bikesData, catsData, partsData, tiresData, venuesData] = await Promise.all([
-          safeJson(bikesRes, { bikes: [] }),
-          safeJson(catsRes, { categories: [] }),
-          safeJson(partsRes, { parts: [] }),
-          safeJson(tiresRes, { tires: [] }),
-          safeJson(venuesRes, { venues: [] }),
-        ]);
-        setBikes(bikesData.bikes || []);
-        setCategories(catsData.categories || []);
-        setAllParts(partsData.parts || []);
-        setAllTires(tiresData.tires || []);
-        setVenues(venuesData.venues || []);
-        // Shared-build links (?bike=<id>&venue=<id>&rider=&boost=&mass=) win
-        // over the GROWTH_EXP_003 variant-aware default (A=Hayabusa, B=Pulsar NS 200).
-        const sharedBikeId = parseInt(searchParams?.get('bike') ?? '', 10);
-        const sharedBike = Number.isFinite(sharedBikeId)
-          ? (bikesData.bikes || []).find((b) => b.id === sharedBikeId)
-          : null;
-        if (sharedBike) setBike(sharedBike);
-        else if (bikesData.bikes?.length) setBike(pickDefaultBikeForVariant(bikesData.bikes, defaultBikeVariant));
-        const sharedVenueId = parseInt(searchParams?.get('venue') ?? '', 10);
-        if (Number.isFinite(sharedVenueId)) {
-          const sv = (venuesData.venues || []).find((v) => v.id === sharedVenueId);
-          if (sv) setVenue(sv);
-        }
-        const qsNum = (key, set, min, max) => {
-          const v = parseFloat(searchParams?.get(key) ?? '');
-          if (Number.isFinite(v) && v >= min && v <= max) set(v);
-        };
-        qsNum('rider', setRiderKg, 50, 130);
-        qsNum('boost', setPowerBoost, -20, 50);
-        qsNum('mass', setMassChange, -30, 30);
-        // If /api/bikes came back empty, the backend is reachable but
-        // either unseeded or filtering killed the request body -- either
-        // way the user deserves to see *something* instead of an empty
-        // dropdown with no explanation.
-        if (!(bikesData.bikes?.length > 0)) {
-          setLoadError('Backend reachable but returned zero bikes. Check that the API is pointing at a seeded DB.');
-        }
-      } catch (e) {
-        console.error('Failed to load data:', e);
-        setLoadError(e.message || 'Could not reach the MotoQuant backend.');
-      } finally {
-        setLoading(false);
+  const boot = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
+    setBootProgress(0);
+    try {
+      const safeJson = async (res, fallback) => {
+        try { return res.ok ? await res.json() : fallback; }
+        catch (e) { console.warn('JSON parse error:', e); return fallback; }
+      };
+      // Each settled fetch ticks the boot progress bar by 1/5.
+      const tick = (p) => p.then((r) => {
+        setBootProgress((v) => Math.min(1, v + 0.2));
+        return r;
+      });
+      const [bikesRes, catsRes, partsRes, tiresRes, venuesRes] = await Promise.all([
+        tick(fetch(`${API}/api/bikes?limit=2000`)),
+        tick(fetch(`${API}/api/parts/categories`)),
+        tick(fetch(`${API}/api/parts?limit=2000`)),
+        tick(fetch(`${API}/api/tires?limit=2000`)),
+        tick(fetch(`${API}/api/venues`)),
+      ]);
+      const [bikesData, catsData, partsData, tiresData, venuesData] = await Promise.all([
+        safeJson(bikesRes, { bikes: [] }),
+        safeJson(catsRes, { categories: [] }),
+        safeJson(partsRes, { parts: [] }),
+        safeJson(tiresRes, { tires: [] }),
+        safeJson(venuesRes, { venues: [] }),
+      ]);
+      setBikes(bikesData.bikes || []);
+      setCategories(catsData.categories || []);
+      setAllParts(partsData.parts || []);
+      setAllTires(tiresData.tires || []);
+      setVenues(venuesData.venues || []);
+      // Shared-build links win over the GROWTH_EXP_003 variant-aware default
+      // (A=Hayabusa, B=Pulsar NS 200). `?bike_id=` (used by the /bikes/[id]
+      // CTAs) is accepted as an alias of `?bike=`.
+      const sharedBikeId = parseInt(
+        searchParams?.get('bike') ?? searchParams?.get('bike_id') ?? '', 10,
+      );
+      const sharedBike = Number.isFinite(sharedBikeId)
+        ? (bikesData.bikes || []).find((b) => b.id === sharedBikeId)
+        : null;
+      if (sharedBike) setBike(sharedBike);
+      else if (bikesData.bikes?.length) setBike(pickDefaultBikeForVariant(bikesData.bikes, defaultBikeVariant));
+      const sharedVenueId = parseInt(searchParams?.get('venue') ?? '', 10);
+      if (Number.isFinite(sharedVenueId)) {
+        const sv = (venuesData.venues || []).find((v) => v.id === sharedVenueId);
+        if (sv) setVenue(sv);
       }
+      const qsNum = (key, set, min, max) => {
+        const v = parseFloat(searchParams?.get(key) ?? '');
+        if (Number.isFinite(v) && v >= min && v <= max) set(v);
+      };
+      qsNum('rider', setRiderKg, 50, 130);
+      qsNum('boost', setPowerBoost, -20, 50);
+      qsNum('mass', setMassChange, -30, 30);
+      // Lossless-share read-back: selected parts, tires, env overrides.
+      const partIdsRaw = searchParams?.get('parts');
+      if (partIdsRaw) {
+        const ids = partIdsRaw.split(',').map((s) => parseInt(s, 10)).filter(Number.isFinite);
+        const found = ids
+          .map((id) => (partsData.parts || []).find((p) => p.id === id))
+          .filter(Boolean);
+        if (found.length) setSelectedParts(found);
+      }
+      const ftId = parseInt(searchParams?.get('ft') ?? '', 10);
+      if (Number.isFinite(ftId)) {
+        const t = (tiresData.tires || []).find((x) => x.id === ftId);
+        if (t) setFrontTire(t);
+      }
+      const rtId = parseInt(searchParams?.get('rt') ?? '', 10);
+      if (Number.isFinite(rtId)) {
+        const t = (tiresData.tires || []).find((x) => x.id === rtId);
+        if (t) setRearTire(t);
+      }
+      qsNum('temp', setAmbientTemp, 0, 50);
+      qsNum('track', setTrackTemp, 10, 65);
+      qsNum('hum', setHumidity, 0, 100);
+      qsNum('wind', setHeadwind, -30, 30);
+      // If /api/bikes came back empty, the backend is reachable but
+      // either unseeded or filtering killed the request body -- either
+      // way the user deserves to see *something* instead of an empty
+      // dropdown with no explanation.
+      if (!(bikesData.bikes?.length > 0)) {
+        setLoadError('Backend reachable but returned zero bikes. Check that the API is pointing at a seeded DB.');
+      }
+    } catch (e) {
+      console.error('Failed to load data:', e);
+      setLoadError(e.message || 'Could not reach the MotoQuant backend.');
+    } finally {
+      setLoading(false);
     }
-    load();
+  }, [searchParams, defaultBikeVariant]);
+
+  useEffect(() => {
+    boot();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ─── Re-annotate parts whenever the selected bike changes ────────────
@@ -448,134 +666,15 @@ function SimulatorPageInner() {
     return () => { cancelled = true; };
   }, [bike?.id]);
 
-  // ─── Quick sim (auto-run on changes) ─────────────────────────────────
-  const runQuickSim = useCallback(async () => {
-    if (!bike) return;
-    if (abortRef.current) abortRef.current.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
-    setSimLoading(true);
-    setSimError(null);
-    try {
-      const body = {
-        rider_mass_kg: riderKg,
-        power_boost_pct: powerBoost,
-        mass_delta_kg: massChange,
-        part_ids: selectedParts.map(p => p.id),
-        ambient_temp_c: ambientTemp,
-        track_temp_c: trackTemp,
-        humidity_pct: humidity,
-        headwind_kmh: headwind,
-      };
-      if (bike.id != null) body.bike_id = bike.id;
-      else if (bike.preset) body.bike_preset = bike.preset;
-      if (frontTire?.id != null) body.front_tire_id = frontTire.id;
-      if (rearTire?.id != null) body.rear_tire_id = rearTire.id;
-      if (venue?.id != null) body.venue_id = venue.id;
-
-      const res = await fetch(`${API}/api/simulate/quick`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-        signal: controller.signal,
-      });
-      if (!res.ok) throw new Error(`API ${res.status}`);
-      setResult(await res.json());
-    } catch (e) {
-      if (e.name !== 'AbortError') setSimError(e.message);
-    } finally {
-      setSimLoading(false);
-    }
-  }, [bike, selectedParts, frontTire, rearTire, venue, riderKg, powerBoost, massChange, ambientTemp, trackTemp, humidity, headwind]);
-
+  // ─── Quick sim auto-run (Live mode, 400 ms debounce) ─────────────────
+  const runQuick = quickTask.run;
   useEffect(() => {
     if (!bike || !liveSim) return; // Manual mode: quick sim only fires from the Run button
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(runQuickSim, 400);
+    debounceRef.current = setTimeout(() => runQuick(), 400);
     return () => clearTimeout(debounceRef.current);
-  }, [runQuickSim, liveSim]);
-
-  // ─── Full sim (on-demand for charts) ─────────────────────────────────
-  const runFullSim = useCallback(async () => {
-    if (!bike) return;
-    setSimLoading(true);
-    setActiveTab('charts'); // show the progress bar where the result will land
-    const controller = new AbortController();
-    fullSimAbortRef.current = controller;
-    try {
-      const body = {
-        rider_mass_kg: riderKg,
-        power_boost_pct: powerBoost,
-        mass_delta_kg: massChange,
-        ambient_temp_c: ambientTemp,
-        track_temp_c: trackTemp,
-        humidity_pct: humidity,
-        headwind_kmh: headwind,
-      };
-      if (bike.id != null) body.bike_id = bike.id;
-      else if (bike.preset) body.bike_preset = bike.preset;
-      if (frontTire?.id != null) body.front_tire_id = frontTire.id;
-      if (rearTire?.id != null) body.rear_tire_id = rearTire.id;
-      if (venue?.id != null) body.venue_id = venue.id;
-
-      // Background job — SimProgress tracks the real RK4 progress.
-      const data = await runJob('simulate', body, {
-        onProgress: setSimProgress,
-        signal: controller.signal,
-        fallbackPath: '/api/simulate',
-      });
-      setFullResult(data);
-    } catch (e) {
-      if (e?.name === 'AbortError') return; // user pressed Stop
-      setSimError(e.message);
-    } finally {
-      setSimLoading(false);
-      setSimProgress(null);
-    }
-  }, [bike, frontTire, rearTire, venue, riderKg, powerBoost, massChange, ambientTemp, trackTemp, humidity, headwind]);
-
-  // ─── Top Speed / LSR runner ─────────────────────────────────────────
-  const runTopSpeed = useCallback(async () => {
-    track('sim_run_start', { surface: 'simulator_page', mode: 'topspeed', bike_label: bike?.model_name ?? 'unknown', bike_id: bike?.id ?? null });
-    if (!bike) return;
-    setTopSpeedLoading(true);
-    setTopSpeedError(null);
-    setActiveTab('topspeed'); // show the progress bar where the result will land
-    const controller = new AbortController();
-    topSpeedAbortRef.current = controller;
-    try {
-      const body = {
-        rider_mass_kg: riderKg,
-        power_boost_pct: powerBoost,
-        mass_delta_kg: massChange,
-        part_ids: selectedParts.map(p => p.id),
-        ambient_temp_c: ambientTemp,
-        track_temp_c: trackTemp,
-        humidity_pct: humidity,
-        headwind_kmh: headwind,
-        include_timeseries: true,
-      };
-      if (bike.id != null) body.bike_id = bike.id;
-      else if (bike.preset) body.bike_preset = bike.preset;
-      if (frontTire?.id != null) body.front_tire_id = frontTire.id;
-      if (rearTire?.id != null) body.rear_tire_id = rearTire.id;
-      if (venue?.id != null) body.venue_id = venue.id;
-
-      // Background job — real progress through the terminal-velocity run.
-      const data = await runJob('topspeed', body, {
-        onProgress: setTopSpeedProgress,
-        signal: controller.signal,
-        fallbackPath: '/api/simulate/top-speed',
-      });
-      setTopSpeedResult(data);
-    } catch (e) {
-      if (e?.name === 'AbortError') return; // user pressed Stop
-      setTopSpeedError(e.message);
-    } finally {
-      setTopSpeedLoading(false);
-      setTopSpeedProgress(null);
-    }
-  }, [bike, selectedParts, frontTire, rearTire, venue, riderKg, powerBoost, massChange, ambientTemp, trackTemp, humidity, headwind]);
+  }, [bike, selectedParts, frontTire, rearTire, venue, riderKg, powerBoost, massChange,
+      ambientTemp, trackTemp, humidity, headwind, liveSim, runQuick]);
 
   // ─── Computed ────────────────────────────────────────────────────────
   const buildCost = selectedParts.reduce((s, p) => s + (p.price_inr || 0), 0);
@@ -682,109 +781,24 @@ function SimulatorPageInner() {
     );
   }
 
-  // ─── A vs B comparison ──────────────────────────────────────────────
-  const runCompare = useCallback(async () => {
-    if (!bike) return;
-    const bBike = compareBike || bike;
-    setSimLoading(true);
-    setSimError(null);
-    try {
-      const body = {
-        a_bike_id: bike.id != null ? bike.id : undefined,
-        a_bike_preset: bike.preset || undefined,
-        a_power_boost_pct: powerBoost,
-        a_mass_delta_kg: massChange,
-        a_rider_mass_kg: riderKg,
-        a_part_ids: selectedParts.map(p => p.id),
-        a_front_tire_id: frontTire?.id ?? undefined,
-        a_rear_tire_id: rearTire?.id ?? undefined,
-        b_bike_id: bBike.id != null ? bBike.id : undefined,
-        b_bike_preset: bBike.preset || undefined,
-        b_power_boost_pct: comparePower,
-        b_mass_delta_kg: compareMass,
-        b_rider_mass_kg: riderKg,
-        b_part_ids: compareParts.map(p => p.id),
-        venue_id: venue?.id ?? undefined,
-        ambient_temp_c: ambientTemp,
-        track_temp_c: trackTemp,
-        humidity_pct: humidity,
-        headwind_kmh: headwind,
-      };
-      const res = await fetch(`${API}/api/simulate/compare`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) throw new Error(`API ${res.status}`);
-      const data = await res.json();
-      setCompareResult(data);
-      setActiveTab('compare');
-    } catch (e) {
-      setSimError(e.message);
-    } finally {
-      setSimLoading(false);
-    }
-  }, [bike, compareBike, powerBoost, massChange, riderKg, selectedParts, compareParts, comparePower, compareMass, frontTire, rearTire, venue, ambientTemp, trackTemp, humidity, headwind]);
-
   // ─── File upload handlers ───────────────────────────────────────────
-  const handleDragyUpload = useCallback(async (e) => {
+  const onDragyFile = (e) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
-    setUploadLoading(true);
-    setUploadError(null);
+    lastDragyFileRef.current = file;
     setUploadResult(null);
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      if (bike?.id != null) formData.append('bike_id', bike.id.toString());
-      else if (bike?.preset) formData.append('bike_preset', bike.preset);
+    dragyTask.run(file);
+  };
 
-      const res = await fetch(`${API}/api/calibrate/dragy`, {
-        method: 'POST',
-        body: formData,
-      });
-      if (!res.ok) {
-        const msg = await res.text();
-        throw new Error(msg);
-      }
-      const data = await res.json();
-      setUploadResult({ type: 'dragy', ...data });
-      setActiveTab('upload');
-    } catch (err) {
-      setUploadError(err.message);
-    } finally {
-      setUploadLoading(false);
-      e.target.value = '';
-    }
-  }, [bike]);
-
-  const handleDynoUpload = useCallback(async (e) => {
+  const onDynoFile = (e) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
-    setUploadLoading(true);
-    setUploadError(null);
+    lastDynoFileRef.current = file;
     setUploadResult(null);
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const res = await fetch(`${API}/api/calibrate/dyno`, {
-        method: 'POST',
-        body: formData,
-      });
-      if (!res.ok) {
-        const msg = await res.text();
-        throw new Error(msg);
-      }
-      const data = await res.json();
-      setUploadResult({ type: 'dyno', ...data });
-      setActiveTab('upload');
-    } catch (err) {
-      setUploadError(err.message);
-    } finally {
-      setUploadLoading(false);
-      e.target.value = '';
-    }
-  }, []);
+    dynoTask.run(file);
+  };
 
   // Chart data transform — memoized to avoid re-computing on every render
   const chartData = useMemo(() => {
@@ -803,110 +817,141 @@ function SimulatorPageInner() {
     }));
   }, [fullResult]);
 
-  // ─── Loading screen ──────────────────────────────────────────────────
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="w-72 max-w-[80vw]">
-          <div className="flex items-end justify-center gap-2 mb-4" aria-hidden="true">
-            <ScoreboardDigits value={String(Math.round((bootProgress || 0) * 100)).padStart(3, '0')} h={44} />
-            <span className="font-mono text-xs text-white/40 mb-0.5">%</span>
-          </div>
-          <SimProgress
-            active
-            progress={bootProgress > 0 ? bootProgress : null}
-            label="Loading MotoQuant Pro"
-          />
-        </div>
-      </div>
-    );
-  }
+  // Which op feeds the toolbar's compact progress chip (jobs first, quick
+  // last). In Manual mode the quick sim already has its own Stop button in
+  // the toolbar, so the chip skips it to avoid double feedback.
+  const activeOp = fullSimTask.active
+    ? { task: fullSimTask, label: 'Full sim' }
+    : topSpeedTask.active
+      ? { task: topSpeedTask, label: 'Top speed' }
+      : compareTask.active
+        ? { task: compareTask, label: 'Comparing' }
+        : quickTask.active && liveSim
+          ? { task: quickTask, label: 'Quick sim' }
+          : null;
 
   /* ═════════════════════════════════════════════════════════════════════
      RENDER
      ═════════════════════════════════════════════════════════════════════ */
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* ─── Header ───────────────────────────────────────────────────── */}
-      <nav className="sticky top-0 bg-black/85 backdrop-blur-xl border-b border-brand-orange/15 z-40">
-        <div className="max-w-[1440px] mx-auto px-5 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <a href="/" className="text-white/35 hover:text-white transition-colors"><ArrowLeft size={16} /></a>
-            <div className="text-lg font-display font-bold tracking-tight">
-              <a href="/" className="hover:text-brand-orangeLight transition-colors"><span className="text-brand-orange">Moto</span>Quant</a>
-              <span className="font-mono text-[10px] text-white/45 ml-1.5 font-normal uppercase tracking-[0.25em]">Simulator</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 font-mono text-[10px] text-white/45 uppercase tracking-[0.25em]">
-            <button
-              type="button"
-              onClick={() => setLiveSim((v) => !v)}
-              title={liveSim
-                ? 'Live preview ON — the quick sim re-runs as you tune. Click to switch to manual.'
-                : 'Manual mode — the quick sim runs only when you press Run. Click to go live.'}
-              className={`flex items-center gap-1.5 normal-case tracking-normal px-2 py-1 rounded-md border transition-colors ${
-                liveSim
-                  ? 'border-brand-green/30 bg-brand-green/10 text-brand-green'
-                  : 'border-white/[0.08] bg-white/[0.02] text-white/45 hover:text-white/75'
-              }`}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${liveSim ? 'bg-brand-green' : 'bg-white/30'}`} />
-              {liveSim ? 'Live' : 'Manual'}
-            </button>
-            {!liveSim && (
-              <button
-                type="button"
-                onClick={runQuickSim}
-                disabled={simLoading || !bike}
-                className="normal-case tracking-normal px-2.5 py-1 rounded-md bg-brand-orange hover:bg-brand-orangeLight text-black text-[11px] font-display font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Run quick sim
-              </button>
-            )}
-            {(simLoading || topSpeedLoading) && (
-              <div className="normal-case tracking-normal">
-                <SimProgress
-                  active
-                  compact
-                  progress={(simLoading ? simProgress : topSpeedProgress)?.progress ?? null}
-                  label="Computing"
-                  onStop={
-                    simLoading && simProgress
-                      ? stopFullSim
-                      : topSpeedLoading && topSpeedProgress
-                        ? stopTopSpeed
-                        : undefined
-                  }
-                />
-              </div>
-            )}
-            <span>{bikes.length} bikes</span>
+    <div className="min-h-screen bg-black text-white pt-16">
+      <SiteNav />
+
+      {/* ─── Simulator toolbar (slim, sticky under SiteNav) ───────────── */}
+      <div className="sticky top-16 z-40 bg-black/85 backdrop-blur-xl border-b border-brand-orange/15">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-5 py-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <span className="label-mono text-brand-orange/80">Simulator</span>
+          <button
+            type="button"
+            onClick={() => setLiveSim((v) => !v)}
+            title={liveSim
+              ? 'Live preview ON — the quick sim re-runs as you tune. Click to switch to manual.'
+              : 'Manual mode — the quick sim runs only when you press Run. Click to go live.'}
+            className={`flex items-center gap-1.5 font-mono text-[11px] px-2 py-1 rounded-md border transition-colors ${
+              liveSim
+                ? 'border-brand-green/30 bg-brand-green/10 text-brand-green'
+                : 'border-white/[0.08] bg-white/[0.02] text-white/45 hover:text-white/75'
+            }`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${liveSim ? 'bg-brand-green' : 'bg-white/30'}`} />
+            {liveSim ? 'Live' : 'Manual'}
+          </button>
+          {!liveSim && (
+            <ActionButton
+              task={quickTask}
+              onRun={() => quickTask.run()}
+              label="Run quick sim"
+              runningLabel="Quick sim"
+              disabled={!bike}
+              className="btn-sm"
+            />
+          )}
+          {activeOp && (
+            <SimProgress
+              active
+              compact
+              progress={activeOp.task.progress}
+              label={activeOp.label}
+              onStop={activeOp.task.stop}
+            />
+          )}
+          <div className="ml-auto hidden sm:flex items-center gap-3 label-mono">
+            <span>{loading ? '—' : bikes.length} bikes</span>
             <span className="text-white/20">·</span>
-            <span>{allParts.length} parts</span>
+            <span>{loading ? '—' : allParts.length} parts</span>
             <span className="text-white/20">·</span>
-            <span>{allTires.length} tires</span>
+            <span>{loading ? '—' : allTires.length} tires</span>
           </div>
         </div>
-      </nav>
+        {/* Boot progress — determinate fetch-count bar pinned to the toolbar */}
+        {loading && (
+          <SimProgress
+            active
+            edge
+            progress={bootProgress > 0 ? bootProgress : null}
+            className="absolute inset-x-0 bottom-0"
+          />
+        )}
+      </div>
 
-      <div className="max-w-[1440px] mx-auto px-5 py-5">
-        {loadError && (
-          <div className="mb-4 p-3 rounded-xl border border-brand-red/30 bg-brand-red/5 text-brand-red text-xs">
-            {loadError}
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-5 py-5">
+        {/* Boot failure — branded error card with Retry */}
+        {loadError && !loading && (
+          <div className="card border-brand-red/30 bg-brand-red/5 p-4 mb-4">
+            <div className="flex items-start gap-2 text-brand-red text-xs">
+              <AlertCircle size={14} className="shrink-0 mt-0.5" />
+              <span>{loadError}</span>
+            </div>
+            <button onClick={boot} className="btn-ghost btn-sm mt-3">
+              <RotateCcw size={12} /> Retry
+            </button>
           </div>
         )}
 
         {/* Natural-language chat */}
-        <div className="relative mb-5 rounded-2xl border border-brand-orange/20 bg-gradient-to-br from-white/[0.04] to-white/[0.01] backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.3)] p-5">
-          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-orange/70 to-transparent" aria-hidden="true" />
+        <Card glow className="mb-5 p-5">
           <div className="flex items-center gap-2 mb-3">
             <MessageSquare size={14} className="text-brand-orange" />
             <CodeComment>ask motoquant</CodeComment>
             <h3 className="sr-only">Ask MotoQuant</h3>
           </div>
           <ChatPanel apiUrl={API} />
-        </div>
+        </Card>
 
+        {loading ? (
+          /* ─── Progressive boot: per-panel skeletons, workbench shape ── */
+          <div className="grid grid-cols-12 gap-5" aria-busy="true" aria-label="Loading simulator data">
+            <div className="col-span-12 lg:col-span-3 space-y-4">
+              <SkeletonCard rows={3} />
+              <SkeletonCard rows={3} />
+              <SkeletonCard rows={2} />
+              <SkeletonCard rows={2} />
+            </div>
+            <div className="col-span-12 lg:col-span-4">
+              {/* Parts-list skeleton (rows shaped like the category list) */}
+              <div className="card p-4" aria-hidden="true">
+                <div className="skeleton h-4 w-1/3 mb-4" />
+                <div className="space-y-2">
+                  {Array.from({ length: 10 }, (_, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <Skeleton className="h-3.5 w-3.5 rounded" />
+                      <Skeleton className="h-3.5 flex-1" />
+                      <Skeleton className="h-3.5 w-10" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="col-span-12 lg:col-span-5 space-y-4">
+              <div className="flex gap-2" aria-hidden="true">
+                {Array.from({ length: 5 }, (_, i) => (
+                  <Skeleton key={i} className="h-8 w-20 rounded-lg" />
+                ))}
+              </div>
+              <SkeletonCard rows={6} />
+            </div>
+          </div>
+        ) : (
         <div className="grid grid-cols-12 gap-5">
 
           {/* ═══════════════════════════════════════════════════════════
@@ -919,16 +964,16 @@ function SimulatorPageInner() {
             {/* GROWTH_EXP_003: data-exp/data-variant attrs let analytics attribute
                 pre-selected default bike (A=Hayabusa control, B=Pulsar NS 200).
                 See data/growth_experiments.json. */}
-            <Card className="p-4 relative z-10 overflow-visible" data-exp="EXP-003" data-variant={defaultBikeVariant}>
+            <Card className="p-4 z-10 overflow-visible" data-exp="EXP-003" data-variant={defaultBikeVariant}>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="font-mono text-[10px] font-semibold flex items-center gap-2 uppercase tracking-[0.25em] text-white/45">
+                <h3 className="label-mono font-semibold flex items-center gap-2">
                   <Gauge size={13} className="text-brand-orange" /> Motorcycle
                 </h3>
                 <button
                   onClick={shareBuild}
                   disabled={!bike}
                   title="Copy a link to this exact build"
-                  className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 hover:text-brand-orange disabled:opacity-40 transition-colors"
+                  className="label-mono flex items-center gap-1 hover:text-brand-orange disabled:opacity-40 transition-colors"
                 >
                   {shareCopied ? <Check size={11} className="text-brand-green" /> : <Share2 size={11} />}
                   {shareCopied ? 'Link copied' : 'Share'}
@@ -984,7 +1029,7 @@ function SimulatorPageInner() {
 
             {/* Tuning Sliders */}
             <Card className="p-4">
-              <h3 className="font-mono text-[10px] font-semibold mb-3 uppercase tracking-[0.25em] text-white/45">Quick Tune</h3>
+              <h3 className="label-mono font-semibold mb-3">Quick Tune</h3>
               <div className="space-y-3">
                 <Slider label="Rider" value={riderKg} onChange={setRiderKg} min={50} max={130} unit=" kg"
                   colorFn={() => 'text-white'} />
@@ -996,9 +1041,10 @@ function SimulatorPageInner() {
             </Card>
 
             {/* Environment (collapsible) — z-[8] so venue dropdown overlaps cards below */}
-            <Card className="p-4 relative z-[8] overflow-visible">
+            <Card className="p-4 z-[8] overflow-visible">
               <button onClick={() => setShowEnv(!showEnv)}
-                className="w-full flex items-center justify-between font-mono text-[10px] font-semibold uppercase tracking-[0.25em] text-white/45">
+                aria-expanded={showEnv}
+                className="label-mono w-full flex items-center justify-between font-semibold">
                 <span className="flex items-center gap-2"><Thermometer size={13} className="text-brand-orange" /> Environment</span>
                 <ChevronDown size={12} className={`transition-transform ${showEnv ? 'rotate-180' : ''}`} />
               </button>
@@ -1035,11 +1081,12 @@ function SimulatorPageInner() {
                       disabled={geoLoading}
                       className="w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-lg border border-white/[0.08] hover:border-brand-orange/30 bg-white/[0.02] hover:bg-brand-orange/5 text-xs text-white/55 hover:text-brand-orangeLight transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {geoLoading
-                        ? <Loader2 size={12} className="animate-spin" />
-                        : <Locate size={12} className="text-brand-orange" />}
+                      <Locate size={12} className="text-brand-orange" />
                       {geoLoading ? 'Locating…' : 'Use my location'}
                     </button>
+                    {geoLoading && (
+                      <SimProgress active compact label="Locating" className="justify-center" />
+                    )}
                     {geoMessage && (
                       <div className={`flex items-start gap-1.5 px-2 py-1.5 rounded-md text-[11px] ${
                         geoMessage.tone === 'ok'
@@ -1058,8 +1105,8 @@ function SimulatorPageInner() {
             </Card>
 
             {/* Tires — z-[6] so tire dropdowns overlap cards/buttons below */}
-            <Card className="p-4 relative z-[6] overflow-visible">
-              <h3 className="font-mono text-[10px] font-semibold mb-3 flex items-center gap-2 uppercase tracking-[0.25em] text-white/45">
+            <Card className="p-4 z-[6] overflow-visible">
+              <h3 className="label-mono font-semibold mb-3 flex items-center gap-2">
                 <CircleDot size={13} className="text-brand-orange" /> Tires
               </h3>
               <div className="space-y-2.5">
@@ -1085,8 +1132,7 @@ function SimulatorPageInner() {
             </Card>
 
             {/* Actions */}
-            <button onClick={resetAll}
-              className="w-full py-2 text-xs text-white/45 hover:text-white border border-white/[0.06] hover:border-white/[0.12] rounded-xl transition-all flex items-center justify-center gap-1.5">
+            <button onClick={resetAll} className="btn-ghost btn-sm w-full">
               <RotateCcw size={11} /> Reset All
             </button>
           </div>
@@ -1096,7 +1142,7 @@ function SimulatorPageInner() {
              ═══════════════════════════════════════════════════════════ */}
           <div className="col-span-12 lg:col-span-4">
             <Card className="p-4 h-full flex flex-col">
-              <h3 className="font-mono text-[10px] font-semibold mb-3 flex items-center gap-2 uppercase tracking-[0.25em] text-white/45">
+              <h3 className="label-mono font-semibold mb-3 flex items-center gap-2">
                 <Wrench size={13} className="text-brand-orange" /> Parts Catalog
                 {selectedParts.length > 0 && (
                   <span className="ml-auto text-[10px] bg-brand-orange/15 text-brand-orange px-2 py-0.5 rounded-full font-medium">
@@ -1125,6 +1171,7 @@ function SimulatorPageInner() {
                     <div key={cat.id}>
                       <button
                         onClick={() => setActiveCategory(isActive ? null : cat)}
+                        aria-expanded={isActive}
                         className={`w-full px-3 py-2 rounded-xl text-left text-xs flex items-center justify-between transition-all ${
                           isActive ? 'bg-brand-orange/10 text-brand-orangeLight border border-brand-orange/20' : 'hover:bg-white/[0.03] text-white/55 border border-transparent'
                         }`}>
@@ -1212,33 +1259,40 @@ function SimulatorPageInner() {
           <div className="col-span-12 lg:col-span-5 space-y-4">
             <CodeComment>telemetry · live results feed</CodeComment>
 
-            {/* Tab bar */}
-            <div className="flex items-center gap-2 flex-wrap">
+            {/* Tab bar — tabs ONLY switch views; runs start from explicit buttons */}
+            <div className="flex items-center gap-2 flex-wrap" role="tablist" aria-label="Result views">
               <Tab active={activeTab === 'results'} onClick={() => setActiveTab('results')} icon={<Zap size={12} />} label="1/4 Mile" />
-              <Tab active={activeTab === 'topspeed'} onClick={() => { if (!topSpeedResult && !topSpeedLoading) runTopSpeed(); else setActiveTab('topspeed'); }}
-                icon={<Gauge size={12} />} label="Top Speed" />
-              <Tab active={activeTab === 'charts'} onClick={() => { if (!fullResult && !simLoading) runFullSim(); else setActiveTab('charts'); }}
-                icon={<BarChart3 size={12} />} label="Charts" />
+              <Tab active={activeTab === 'topspeed'} onClick={() => setActiveTab('topspeed')} icon={<Gauge size={12} />} label="Top Speed" />
+              <Tab active={activeTab === 'charts'} onClick={() => setActiveTab('charts')} icon={<BarChart3 size={12} />} label="Charts" />
               <Tab active={activeTab === 'splits'} onClick={() => setActiveTab('splits')} icon={<Table2 size={12} />} label="Splits" />
               <Tab active={activeTab === 'compare'} onClick={() => setActiveTab('compare')} icon={<Layers size={12} />} label="A vs B" />
               <Tab active={activeTab === 'upload'} onClick={() => setActiveTab('upload')} icon={<Upload size={12} />} label="Upload" />
               <Tab active={activeTab === 'specs'} onClick={() => setActiveTab('specs')} icon={<Settings2 size={12} />} label="Specs" />
             </div>
 
-            {/* Error */}
-            {simError && (
-              <div className="p-3 bg-brand-red/5 border border-brand-red/20 rounded-xl text-brand-red text-xs">{simError}</div>
+            {/* Quick-sim error (own state — never collides with full/topspeed/compare) */}
+            {quickTask.error && !quickTask.active && (
+              <ErrorTile
+                message={`Quick sim failed — ${quickTask.error}`}
+                onRetry={() => quickTask.run()}
+              />
             )}
+
+            <div id="sim-tabpanel" role="tabpanel">
 
             {/* ─── Results Tab ───────────────────────────────────────── */}
             {activeTab === 'results' && (
-              <Card className="p-5" glow={!!result}>
+              <Card className="p-5 overflow-hidden" glow={!!result}>
+                {/* Staged edge bar while the quick sim recomputes */}
+                {quickTask.active && (
+                  <SimProgress active edge className="absolute inset-x-0 top-0" />
+                )}
                 {result ? (
                   <div className="space-y-4">
                     {/* Primary metrics */}
                     <div className="grid grid-cols-2 gap-4">
                       <div className="bg-gradient-to-br from-brand-orange/5 to-transparent rounded-xl p-5 text-center border border-brand-orange/10">
-                        <p className="font-mono text-[10px] text-white/45 uppercase tracking-[0.25em] mb-2">Quarter-Mile ET</p>
+                        <p className="label-mono mb-2">Quarter-Mile ET</p>
                         {result.et_quarter_s != null ? (
                           <div className="flex items-end justify-center gap-1.5">
                             <ScoreboardDigits value={result.et_quarter_s.toFixed(3)} h={34} label={`${result.et_quarter_s.toFixed(3)} seconds`} />
@@ -1293,15 +1347,42 @@ function SimulatorPageInner() {
                       </div>
                     )}
 
-                    {/* Full sim button */}
-                    <button onClick={simLoading ? stopFullSim : runFullSim}
-                      className={`w-full py-2.5 text-xs border rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 ${simLoading ? 'bg-brand-red/10 border-brand-red/30 text-brand-red hover:bg-brand-red/15' : 'bg-white/[0.04] hover:bg-brand-orange/10 border-white/[0.06] hover:border-brand-orange/30 text-white/55 hover:text-brand-orange'}`}>
-                      {simLoading ? (
-                        <span className="tabular-nums">■ Stop — Simulating…{simProgress?.progress != null ? ` ${Math.round(simProgress.progress * 100)}%` : ''}</span>
+                    {/* Save this run — anonymous allowed (beta); token binds to Garage */}
+                    {bike?.id != null && result.et_quarter_s != null && (
+                      savedRun ? (
+                        <Link
+                          href="/leaderboard"
+                          className="w-full h-9 inline-flex items-center justify-center gap-2 rounded-xl border border-brand-green/30 bg-brand-green/10 text-brand-green text-xs font-display font-semibold transition-colors hover:bg-brand-green/15"
+                        >
+                          <Check size={13} /> Saved — view leaderboard
+                        </Link>
                       ) : (
-                        <><BarChart3 size={13} /> View Detailed Charts & Analysis</>
-                      )}
-                    </button>
+                        <div className="space-y-1.5">
+                          <ActionButton
+                            task={saveTask}
+                            onRun={() => saveTask.run()}
+                            label="Save this run"
+                            runningLabel="Saving"
+                            variant="ghost"
+                            className="w-full btn-sm"
+                          />
+                          {saveTask.error && !saveTask.active && (
+                            <ErrorTile message={saveTask.error} onRetry={() => saveTask.run()} />
+                          )}
+                        </div>
+                      )
+                    )}
+
+                    {/* Full sim button — own task; Stop while running */}
+                    <ActionButton
+                      task={fullSimTask}
+                      onRun={startFullSim}
+                      label="View detailed charts & analysis"
+                      runningLabel="Full sim"
+                      variant="ghost"
+                      disabled={!bike}
+                      className="w-full btn-sm"
+                    />
                   </div>
                 ) : (
                   <div className="text-center py-12 text-white/30 text-xs">
@@ -1315,31 +1396,35 @@ function SimulatorPageInner() {
             {/* ─── Top Speed Tab ─────────────────────────────────────── */}
             {activeTab === 'topspeed' && (
               <Card className="p-5" glow={!!topSpeedResult}>
-                {topSpeedLoading ? (
+                {topSpeedTask.active ? (
                   <div className="py-12 px-6 max-w-md mx-auto">
                     <SimProgress
                       active
-                      progress={topSpeedProgress?.progress ?? null}
-                      stage={topSpeedProgress?.stage}
+                      progress={topSpeedTask.progress}
+                      stage={topSpeedTask.stage}
                       label="Running top-speed simulation"
-                      onStop={stopTopSpeed}
+                      onStop={topSpeedTask.stop}
                     />
                     <div className="text-[10px] text-white/30 mt-2 text-center">Simulating up to 120 s of terminal velocity</div>
                   </div>
-                ) : topSpeedError ? (
+                ) : topSpeedTask.error ? (
                   <div className="text-center py-12 text-xs">
                     <div className="text-brand-red mb-3">Top speed simulation failed</div>
-                    <div className="text-white/35 text-[10px] mb-4">{topSpeedError}</div>
-                    <button onClick={runTopSpeed} disabled={!bike}
-                      className="px-4 py-2 text-xs bg-brand-orange hover:bg-brand-orangeLight text-black rounded-md font-display font-bold transition-colors disabled:opacity-50 inline-flex items-center gap-1.5">
-                      <Play size={12} /> Retry
-                    </button>
+                    <div className="text-white/35 text-[10px] mb-4">{topSpeedTask.error}</div>
+                    <ActionButton
+                      task={topSpeedTask}
+                      onRun={startTopSpeed}
+                      label="Retry"
+                      runningLabel="Top speed"
+                      disabled={!bike}
+                      className="btn-sm"
+                    />
                   </div>
                 ) : topSpeedResult ? (
                   <div className="space-y-4">
                     {/* Primary terminal velocity */}
                     <div className="bg-gradient-to-br from-brand-orange/10 via-brand-orange/5 to-transparent rounded-xl p-6 text-center border border-brand-orange/20">
-                      <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-orange/80 mb-2">Terminal Velocity</div>
+                      <div className="label-mono text-brand-orange/80 mb-2">Terminal Velocity</div>
                       <div className="font-display font-bold text-5xl text-brand-orange tabular-nums leading-none">
                         {topSpeedResult.terminal_velocity_kmh?.toFixed(1) ?? '—'}
                         <span className="text-xl text-brand-orange/60 ml-2 font-mono">km/h</span>
@@ -1351,7 +1436,7 @@ function SimulatorPageInner() {
                       </div>
                       {topSpeedResult.reached_plateau ? (
                         <div className="inline-flex items-center gap-1.5 mt-3 px-2.5 py-1 bg-brand-green/10 border border-brand-green/20 rounded-full text-[10px] text-brand-green">
-                          <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-brand-green motion-safe:animate-pulse" />
                           Plateau reached
                         </div>
                       ) : (
@@ -1364,11 +1449,11 @@ function SimulatorPageInner() {
                     {/* Time / distance / power grid */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
-                        <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1">Time to terminal</div>
+                        <div className="label-mono mb-1">Time to terminal</div>
                         <div className="font-display text-2xl text-white tabular-nums">{topSpeedResult.time_to_terminal_s?.toFixed(2)}<span className="text-sm text-white/45 ml-1">s</span></div>
                       </div>
                       <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
-                        <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1">Distance to terminal</div>
+                        <div className="label-mono mb-1">Distance to terminal</div>
                         <div className="font-display text-2xl text-white tabular-nums">
                           {topSpeedResult.distance_to_terminal_m >= 1000
                             ? `${(topSpeedResult.distance_to_terminal_m / 1000).toFixed(2)}`
@@ -1382,16 +1467,16 @@ function SimulatorPageInner() {
                     <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
                       <div className="grid grid-cols-3 gap-3 text-center">
                         <div>
-                          <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1">Power @ terminal</div>
+                          <div className="label-mono mb-1">Power @ terminal</div>
                           <div className="font-display text-lg text-white tabular-nums">{topSpeedResult.terminal_power_hp?.toFixed(0)}<span className="text-[10px] text-white/45 ml-1">hp</span></div>
                           <div className="text-[10px] text-white/35 tabular-nums">{topSpeedResult.terminal_power_kw?.toFixed(1)} kW</div>
                         </div>
                         <div>
-                          <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1">Gear</div>
+                          <div className="label-mono mb-1">Gear</div>
                           <div className="font-display text-lg text-white tabular-nums">{topSpeedResult.terminal_gear}</div>
                         </div>
                         <div>
-                          <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1">Engine RPM</div>
+                          <div className="label-mono mb-1">Engine RPM</div>
                           <div className="font-display text-lg text-white tabular-nums">{topSpeedResult.terminal_rpm?.toLocaleString('en-US')}</div>
                         </div>
                       </div>
@@ -1401,7 +1486,7 @@ function SimulatorPageInner() {
                     {topSpeedResult.lsr_splits && Object.keys(topSpeedResult.lsr_splits).length > 0 && (
                       <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
                         <div className="flex items-center justify-between mb-3">
-                          <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 font-medium">Land Speed Splits</div>
+                          <div className="label-mono font-medium">Land Speed Splits</div>
                           <div className="text-[9px] text-white/35">SAE J1349</div>
                         </div>
                         <div className="space-y-1.5">
@@ -1446,24 +1531,29 @@ function SimulatorPageInner() {
                     )}
 
                     {/* Re-run button */}
-                    <button onClick={topSpeedLoading ? stopTopSpeed : runTopSpeed}
-                      className={`w-full py-2.5 text-xs border rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 ${topSpeedLoading ? 'bg-brand-red/10 border-brand-red/30 text-brand-red hover:bg-brand-red/15' : 'bg-white/[0.04] hover:bg-brand-orange/10 border-white/[0.06] hover:border-brand-orange/30 text-white/55 hover:text-brand-orange'}`}>
-                      {topSpeedLoading ? (
-                        <span className="tabular-nums">■ Stop — Running…{topSpeedProgress?.progress != null ? ` ${Math.round(topSpeedProgress.progress * 100)}%` : ''}</span>
-                      ) : (
-                        <><Play size={12} /> Re-run Top Speed Simulation</>
-                      )}
-                    </button>
+                    <ActionButton
+                      task={topSpeedTask}
+                      onRun={startTopSpeed}
+                      label="Re-run top-speed simulation"
+                      runningLabel="Top speed"
+                      variant="ghost"
+                      disabled={!bike}
+                      className="w-full btn-sm"
+                    />
                   </div>
                 ) : (
                   <div className="text-center py-12 text-xs">
                     <Gauge size={32} className="mx-auto mb-3 text-white/20" />
                     <p className="text-white/35 mb-1">Top Speed &amp; Land Speed Record mode</p>
                     <p className="text-white/30 text-[10px] mb-4 max-w-xs mx-auto">Simulates until terminal velocity is reached. Returns ¼ mi / ½ mi / 1 km / 1 mi / 2 mi splits for LSR events at Bonneville, El Mirage, Texas Mile, and more.</p>
-                    <button onClick={runTopSpeed} disabled={!bike}
-                      className="px-4 py-2 text-xs bg-brand-orange hover:bg-brand-orangeLight text-black rounded-md font-display font-bold transition-colors disabled:opacity-50 inline-flex items-center gap-1.5">
-                      <Play size={12} /> Run Top Speed
-                    </button>
+                    <ActionButton
+                      task={topSpeedTask}
+                      onRun={startTopSpeed}
+                      label="Run top-speed pull"
+                      runningLabel="Top speed"
+                      disabled={!bike}
+                      className="btn-sm"
+                    />
                   </div>
                 )}
               </Card>
@@ -1472,43 +1562,58 @@ function SimulatorPageInner() {
             {/* ─── Charts Tab ────────────────────────────────────────── */}
             {activeTab === 'charts' && (
               <Card className="p-5">
-                {simLoading ? (
+                {fullSimTask.active ? (
                   <div className="py-12 px-6 max-w-md mx-auto">
                     <SimProgress
                       active
-                      progress={simProgress?.progress ?? null}
-                      stage={simProgress?.stage}
+                      progress={fullSimTask.progress}
+                      stage={fullSimTask.stage}
                       label="Running full simulation"
-                      onStop={stopFullSim}
+                      onStop={fullSimTask.stop}
                     />
                     <div className="text-[10px] text-white/30 mt-2 text-center">
                       Full RK4 physics — telemetry charts will appear here
                     </div>
                   </div>
-                ) : chartData.length > 0 ? (
-                  <div className="space-y-5">
-                    <div className="grid grid-cols-2 gap-4">
-                      <SimChart data={chartData} dataKey="speed" label="Speed" unit="km/h" />
-                      <SimChart data={chartData} dataKey="rpm" label="Engine RPM" unit="rpm" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <SimChart data={chartData} dataKey="gear" label="Gear" unit="" color="#00FFB2" />
-                      <SimChart data={chartData} dataKey="traction" label="Traction" unit="%" color="#22C55E" domain={[0, 110]} />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <SimChart data={chartData} dataKey="power" label="Power" unit="kW" color="#F59E0B" />
-                      <SimChart data={chartData} dataKey="tire_temp" label="Tire Temp" unit="°C" color="#EF4444" />
-                    </div>
-                  </div>
                 ) : (
-                  <div className="text-center py-12">
-                    <BarChart3 size={32} className="mx-auto mb-3 text-white/20" />
-                    <p className="text-white/35 text-xs mb-3">Run a full simulation to see telemetry charts</p>
-                    <button onClick={runFullSim} disabled={!bike || simLoading}
-                      className="px-4 py-2 text-xs bg-brand-orange hover:bg-brand-orangeLight text-black rounded-md font-display font-bold transition-colors disabled:opacity-50 inline-flex items-center gap-1.5">
-                      <Play size={12} /> Run Full Simulation
-                    </button>
-                  </div>
+                  <>
+                    {fullSimTask.error && (
+                      <ErrorTile
+                        className="mb-4"
+                        message={`Full simulation failed — ${fullSimTask.error}`}
+                        onRetry={startFullSim}
+                      />
+                    )}
+                    {chartData.length > 0 ? (
+                      <div className="space-y-5">
+                        <div className="grid grid-cols-2 gap-4">
+                          <SimChart data={chartData} dataKey="speed" label="Speed" unit="km/h" />
+                          <SimChart data={chartData} dataKey="rpm" label="Engine RPM" unit="rpm" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <SimChart data={chartData} dataKey="gear" label="Gear" unit="" color="#00FFB2" />
+                          <SimChart data={chartData} dataKey="traction" label="Traction" unit="%" color="#22C55E" domain={[0, 110]} />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <SimChart data={chartData} dataKey="power" label="Power" unit="kW" color="#F59E0B" />
+                          <SimChart data={chartData} dataKey="tire_temp" label="Tire Temp" unit="°C" color="#EF4444" />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <BarChart3 size={32} className="mx-auto mb-3 text-white/20" />
+                        <p className="text-white/35 text-xs mb-3">Run a full simulation to see telemetry charts</p>
+                        <ActionButton
+                          task={fullSimTask}
+                          onRun={startFullSim}
+                          label="Run full simulation"
+                          runningLabel="Full sim"
+                          disabled={!bike}
+                          className="btn-sm"
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
               </Card>
             )}
@@ -1518,7 +1623,7 @@ function SimulatorPageInner() {
               <Card className="p-5">
                 {fullResult ? (
                   <div>
-                    <h4 className="font-mono text-[10px] font-semibold uppercase tracking-[0.25em] text-white/45 mb-3">Split Times</h4>
+                    <h4 className="label-mono font-semibold mb-3">Split Times</h4>
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="text-white/35 border-b border-white/[0.04]">
@@ -1550,14 +1655,23 @@ function SimulatorPageInner() {
                       <>
                         <p className="mb-1">Quick splits from last run:</p>
                         <p className="text-white font-medium tabular-nums">60ft: {result.et_60ft_s?.toFixed(3)}s · ⅛: {result.et_eighth_s?.toFixed(3)}s · ¼: {result.et_quarter_s?.toFixed(3)}s</p>
-                        <button onClick={simLoading ? stopFullSim : runFullSim}
-                          className={`mt-3 px-4 py-2 text-xs rounded-md font-display font-bold transition-colors disabled:opacity-50 inline-flex items-center gap-1.5 ${simLoading ? 'bg-brand-red/15 border border-brand-red/30 text-brand-red' : 'bg-brand-orange hover:bg-brand-orangeLight text-black'}`}>
-                          {simLoading ? (
-                            <span className="tabular-nums">■ Stop — Simulating…{simProgress?.progress != null ? ` ${Math.round(simProgress.progress * 100)}%` : ''}</span>
-                          ) : (
-                            <><Play size={12} /> Get Full Splits</>
-                          )}
-                        </button>
+                        <div className="mt-3 flex justify-center">
+                          <ActionButton
+                            task={fullSimTask}
+                            onRun={startFullSim}
+                            label="Get full splits"
+                            runningLabel="Full sim"
+                            disabled={!bike}
+                            className="btn-sm"
+                          />
+                        </div>
+                        {fullSimTask.error && !fullSimTask.active && (
+                          <ErrorTile
+                            className="mt-3 text-left"
+                            message={fullSimTask.error}
+                            onRetry={startFullSim}
+                          />
+                        )}
                       </>
                     ) : 'Run a simulation to see splits'}
                   </div>
@@ -1568,21 +1682,21 @@ function SimulatorPageInner() {
             {/* ─── A vs B Compare Tab ────────────────────────────────── */}
             {activeTab === 'compare' && (
               <Card className="p-5 overflow-visible">
-                <h4 className="font-mono text-[10px] font-semibold uppercase tracking-[0.25em] text-white/45 mb-4 flex items-center gap-2">
+                <h4 className="label-mono font-semibold mb-4 flex items-center gap-2">
                   <Layers size={13} className="text-brand-orange" /> A vs B Comparison
                 </h4>
 
                 {/* Build B config */}
                 <div className="space-y-3 mb-4">
                   <div className="bg-white/[0.02] rounded-xl p-3 border border-white/[0.04]">
-                    <p className="font-mono text-[10px] text-brand-orange font-medium uppercase tracking-[0.25em] mb-2">Build A — Current Setup</p>
+                    <p className="label-mono text-brand-orange font-medium mb-2">Build A — Current Setup</p>
                     <p className="text-xs text-white/55">
                       {bike?.manufacturer} {bike?.model} · {powerBoost !== 0 ? `${powerBoost > 0 ? '+' : ''}${powerBoost}% power` : 'Stock power'} · {selectedParts.length} parts
                     </p>
                   </div>
 
                   <div className="bg-white/[0.02] rounded-xl p-3 border border-brand-accent/20">
-                    <p className="font-mono text-[10px] text-brand-accent font-medium uppercase tracking-[0.25em] mb-2">Build B — Comparison</p>
+                    <p className="label-mono text-brand-accent font-medium mb-2">Build B — Comparison</p>
                     <div className="space-y-2">
                       <Dropdown
                         label="Bike" icon={<Gauge size={10} className="text-brand-accent" />}
@@ -1609,10 +1723,33 @@ function SimulatorPageInner() {
                   </div>
                 </div>
 
-                <button onClick={runCompare} disabled={!bike || simLoading}
-                  className="w-full py-2.5 text-xs bg-gradient-to-r from-brand-orange/80 to-brand-accent/60 hover:from-brand-orange hover:to-brand-accent/80 rounded-xl font-display font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50">
-                  <Layers size={13} /> {simLoading ? 'Comparing...' : 'Run A vs B Comparison'}
-                </button>
+                {/* Run — job-backed with real progress + Stop */}
+                <ActionButton
+                  task={compareTask}
+                  onRun={startCompare}
+                  label="Run A vs B comparison"
+                  runningLabel="Comparing"
+                  disabled={!bike}
+                  className="w-full"
+                />
+                {compareTask.active && (
+                  <div className="mt-3">
+                    <SimProgress
+                      active
+                      progress={compareTask.progress}
+                      stage={compareTask.stage}
+                      label="Running both builds"
+                      onStop={compareTask.stop}
+                    />
+                  </div>
+                )}
+                {compareTask.error && !compareTask.active && (
+                  <ErrorTile
+                    className="mt-3"
+                    message={`Comparison failed — ${compareTask.error}`}
+                    onRetry={startCompare}
+                  />
+                )}
 
                 {/* Compare results */}
                 {compareResult && (
@@ -1621,7 +1758,7 @@ function SimulatorPageInner() {
                     <div className={`p-4 rounded-xl border text-center ${
                       compareResult.delta.et_s < 0 ? 'bg-brand-accent/5 border-brand-accent/20' : compareResult.delta.et_s > 0 ? 'bg-brand-orange/5 border-brand-orange/20' : 'bg-white/[0.02] border-white/[0.04]'
                     }`}>
-                      <div className="font-mono text-[10px] text-white/45 uppercase tracking-[0.25em] mb-1">
+                      <div className="label-mono mb-1">
                         {compareResult.delta.faster === 'B' ? 'Build B is faster' : compareResult.delta.faster === 'A' ? 'Build A is faster' : 'Dead heat'}
                       </div>
                       <div className={`text-2xl font-bold ${compareResult.delta.et_s < 0 ? 'text-brand-accent' : compareResult.delta.et_s > 0 ? 'text-brand-orange' : 'text-white'}`}>
@@ -1640,7 +1777,7 @@ function SimulatorPageInner() {
                         { label: 'Build B', data: compareResult.b, color: 'blue' },
                       ].map(({ label, data, color }) => (
                         <div key={label} className={`bg-white/[0.02] rounded-xl p-3 border ${color === 'orange' ? 'border-brand-orange/20' : 'border-brand-accent/20'}`}>
-                          <p className={`font-mono text-[10px] font-medium uppercase tracking-[0.25em] mb-2 ${color === 'orange' ? 'text-brand-orange' : 'text-brand-accent'}`}>{label}</p>
+                          <p className={`label-mono font-medium mb-2 ${color === 'orange' ? 'text-brand-orange' : 'text-brand-accent'}`}>{label}</p>
                           <div className="space-y-1 text-xs">
                             <div className="flex justify-between"><span className="text-white/45">ET</span><span className="text-white font-bold tabular-nums">{data.et_quarter_s?.toFixed(3)}s</span></div>
                             <div className="flex justify-between"><span className="text-white/45">Trap</span><span className="text-white tabular-nums">{data.trap_speed_kmh?.toFixed(1)} km/h</span></div>
@@ -1665,14 +1802,14 @@ function SimulatorPageInner() {
                       }));
                       return (
                         <div className="space-y-4">
-                          <p className="font-mono text-[10px] text-white/45 uppercase tracking-[0.25em]">Overlay Charts</p>
+                          <p className="label-mono">Overlay Charts</p>
                           {[
                             { key: 'speed', label: 'Speed (km/h)', unit: 'km/h' },
                             { key: 'rpm', label: 'Engine RPM', unit: 'rpm' },
                             { key: 'power', label: 'Power (kW)', unit: 'kW' },
                           ].map(chart => (
                             <div key={chart.key} className="h-44">
-                              <p className="font-mono text-[10px] text-white/45 uppercase tracking-[0.25em] mb-2">{chart.label}</p>
+                              <p className="label-mono mb-2">{chart.label}</p>
                               <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={overlayData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
@@ -1699,15 +1836,15 @@ function SimulatorPageInner() {
             {/* ─── Upload Tab ───────────────────────────────────────────── */}
             {activeTab === 'upload' && (
               <Card className="p-5">
-                <h4 className="font-mono text-[10px] font-semibold uppercase tracking-[0.25em] text-white/45 mb-4 flex items-center gap-2">
+                <h4 className="label-mono font-semibold mb-4 flex items-center gap-2">
                   <Upload size={13} className="text-brand-orange" /> Upload Run Data
                 </h4>
 
                 {/* Upload buttons */}
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <div>
-                    <input type="file" ref={fileInputRef} accept=".csv,.json" onChange={handleDragyUpload} className="hidden" />
-                    <button onClick={() => fileInputRef.current?.click()} disabled={uploadLoading}
+                    <input type="file" ref={fileInputRef} accept=".csv,.json" onChange={onDragyFile} className="hidden" />
+                    <button onClick={() => fileInputRef.current?.click()} disabled={dragyTask.active || dynoTask.active}
                       className="w-full p-4 bg-white/[0.02] hover:bg-brand-orange/5 border border-white/[0.06] hover:border-brand-orange/20 rounded-xl transition-all text-center disabled:opacity-50">
                       <Zap size={20} className="mx-auto mb-2 text-brand-orange" />
                       <p className="text-xs font-medium text-white">Dragy GPS</p>
@@ -1715,8 +1852,8 @@ function SimulatorPageInner() {
                     </button>
                   </div>
                   <div>
-                    <input type="file" ref={dynoInputRef} accept=".csv,.txt" onChange={handleDynoUpload} className="hidden" />
-                    <button onClick={() => dynoInputRef.current?.click()} disabled={uploadLoading}
+                    <input type="file" ref={dynoInputRef} accept=".csv,.txt" onChange={onDynoFile} className="hidden" />
+                    <button onClick={() => dynoInputRef.current?.click()} disabled={dragyTask.active || dynoTask.active}
                       className="w-full p-4 bg-white/[0.02] hover:bg-brand-accent/5 border border-white/[0.06] hover:border-brand-accent/20 rounded-xl transition-all text-center disabled:opacity-50">
                       <BarChart3 size={20} className="mx-auto mb-2 text-brand-accent" />
                       <p className="text-xs font-medium text-white">Dyno Curve</p>
@@ -1725,14 +1862,31 @@ function SimulatorPageInner() {
                   </div>
                 </div>
 
-                {uploadLoading && (
-                  <div className="py-6 px-4 max-w-sm mx-auto">
-                    <SimProgress active label="Parsing file" />
+                {/* Per-upload staged progress (cold-start caption comes free) */}
+                {(dragyTask.active || dynoTask.active) && (
+                  <div className="py-4 px-4 max-w-sm mx-auto">
+                    <SimProgress
+                      active
+                      label={dragyTask.active ? 'Uploading Dragy run' : 'Parsing dyno CSV'}
+                      onStop={dragyTask.active ? dragyTask.stop : dynoTask.stop}
+                    />
                   </div>
                 )}
 
-                {uploadError && (
-                  <div className="p-3 bg-brand-red/5 border border-brand-red/20 rounded-xl text-brand-red text-xs mb-3">{uploadError}</div>
+                {/* Per-upload inline errors with Retry (same file, from ref) */}
+                {dragyTask.error && !dragyTask.active && (
+                  <ErrorTile
+                    className="mb-3"
+                    message={`Dragy upload failed — ${dragyTask.error}`}
+                    onRetry={lastDragyFileRef.current ? () => dragyTask.run(lastDragyFileRef.current) : undefined}
+                  />
+                )}
+                {dynoTask.error && !dynoTask.active && (
+                  <ErrorTile
+                    className="mb-3"
+                    message={`Dyno upload failed — ${dynoTask.error}`}
+                    onRetry={lastDynoFileRef.current ? () => dynoTask.run(lastDynoFileRef.current) : undefined}
+                  />
                 )}
 
                 {/* Dragy results */}
@@ -1740,7 +1894,7 @@ function SimulatorPageInner() {
                   <div className="space-y-3">
                     <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
                       <div className="flex justify-between items-center mb-2">
-                        <p className="font-mono text-[10px] text-brand-orange font-medium uppercase tracking-[0.25em]">Dragy Run — Best of {uploadResult.runs_detected}</p>
+                        <p className="label-mono text-brand-orange font-medium">Dragy Run — Best of {uploadResult.runs_detected}</p>
                         <p className="text-[10px] text-white/35">{uploadResult.filename}</p>
                       </div>
                       <div className="grid grid-cols-2 gap-4 mb-3">
@@ -1762,7 +1916,7 @@ function SimulatorPageInner() {
                     {/* Overlay vs sim */}
                     {uploadResult.overlay && (
                       <div className={`rounded-xl p-4 border ${Math.abs(uploadResult.overlay.et_error_s) < 0.15 ? 'bg-brand-green/5 border-brand-green/20' : 'bg-brand-amber/5 border-brand-amber/20'}`}>
-                        <p className={`font-mono text-[10px] uppercase tracking-[0.25em] mb-2 font-medium ${Math.abs(uploadResult.overlay.et_error_s) < 0.15 ? 'text-brand-green' : 'text-brand-amber'}`}>
+                        <p className={`label-mono mb-2 font-medium ${Math.abs(uploadResult.overlay.et_error_s) < 0.15 ? 'text-brand-green' : 'text-brand-amber'}`}>
                           Sim vs Real — {uploadResult.overlay.bike_name}
                         </p>
                         <div className="grid grid-cols-3 gap-3 text-xs">
@@ -1788,7 +1942,7 @@ function SimulatorPageInner() {
                       }
                       return (
                         <div className="h-48">
-                          <p className="font-mono text-[10px] text-white/45 uppercase tracking-[0.25em] mb-2">Speed Overlay — Real vs Sim</p>
+                          <p className="label-mono mb-2">Speed Overlay — Real vs Sim</p>
                           <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={overlayData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
@@ -1810,7 +1964,7 @@ function SimulatorPageInner() {
                   <div className="space-y-3">
                     <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
                       <div className="flex justify-between items-center mb-3">
-                        <p className="font-mono text-[10px] text-brand-accent font-medium uppercase tracking-[0.25em]">Dyno Curve</p>
+                        <p className="label-mono text-brand-accent font-medium">Dyno Curve</p>
                         <p className="text-[10px] text-white/35">{uploadResult.filename}</p>
                       </div>
                       <div className="grid grid-cols-2 gap-4 mb-3">
@@ -1834,7 +1988,7 @@ function SimulatorPageInner() {
                       }));
                       return (
                         <div className="h-52">
-                          <p className="font-mono text-[10px] text-white/45 uppercase tracking-[0.25em] mb-2">Power & Torque vs RPM</p>
+                          <p className="label-mono mb-2">Power & Torque vs RPM</p>
                           <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={curveData} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
                               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
@@ -1853,7 +2007,7 @@ function SimulatorPageInner() {
                 )}
 
                 {/* Empty state */}
-                {!uploadResult && !uploadLoading && !uploadError && (
+                {!uploadResult && !dragyTask.active && !dynoTask.active && !dragyTask.error && !dynoTask.error && (
                   <div className="text-center py-8 text-white/30 text-xs">
                     <Upload size={32} className="mx-auto mb-3 opacity-20" />
                     <p className="mb-1">Upload your Dragy GPS run or dyno pull</p>
@@ -1868,7 +2022,7 @@ function SimulatorPageInner() {
               <Card className="p-5">
                 {(fullResult?.config || result) ? (
                   <div>
-                    <h4 className="font-mono text-[10px] font-semibold uppercase tracking-[0.25em] text-white/45 mb-3">Configuration</h4>
+                    <h4 className="label-mono font-semibold mb-3">Configuration</h4>
                     <div className="space-y-1.5 text-xs">
                       {[
                         ['Bike', result?.bike_name || bike?.manufacturer + ' ' + bike?.model],
@@ -1889,7 +2043,7 @@ function SimulatorPageInner() {
                       ))}
                     </div>
                     {/* Environment conditions */}
-                    <h4 className="font-mono text-[10px] font-semibold uppercase tracking-[0.25em] text-white/45 mt-5 mb-3">Conditions</h4>
+                    <h4 className="label-mono font-semibold mt-5 mb-3">Conditions</h4>
                     <div className="space-y-1.5 text-xs">
                       {[
                         ['Air Temp', `${ambientTemp}°C`],
@@ -1912,14 +2066,13 @@ function SimulatorPageInner() {
                 )}
               </Card>
             )}
+            </div>
           </div>
         </div>
+        )}
       </div>
 
-      {/* Footer */}
-      <div className="border-t border-white/[0.06] mt-12 py-6 text-center font-mono text-[10px] text-white/30 uppercase tracking-[0.25em]">
-        MotoQuant Pro · First-principles RK4 physics · 15 sub-models · 1ms timestep · motoquant.in
-      </div>
+      <SiteFooter />
     </div>
   );
 }

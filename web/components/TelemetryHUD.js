@@ -1,30 +1,37 @@
 'use client';
 
 /**
- * TelemetryHUD — sticky-pinned section that plays a real Kawasaki
+ * TelemetryHUD — full-viewport section that plays a real Kawasaki
  * Ninja H2R quarter-mile run on scroll progress.
  *
- * Layout: text + headline above, big v(t) speed-trace chart in the
- * middle, HUD gauges on the right. RPM / speed / gear / ET / distance
- * counters tick through the run as the user scrolls.
+ * July 2026 motion pass (field-reported fixes):
+ *  - Responds from the moment the section peeks into the viewport
+ *    (offset 'start 0.95' → 'end 0.35') instead of lagging the reader.
+ *  - Scroll progress runs through a critically-damped spring, so the
+ *    needle/values carry physical inertia instead of tracking raw
+ *    scroll jitter (reduced-motion users get the raw, un-sprung value).
+ *  - Right gauge column is minmax() responsive — the fixed 460px column
+ *    could crowd the 1024-1150px laptop band.
+ *  - SpeedTrace panel redesigned: speed axis, timing-split markers
+ *    (60ft / ⅛ mile / 1000ft), gear-shift ticks on the curve, glowing
+ *    live dot, and a 3D perspective entrance.
  *
  * Reference baseline (Motorcycle USA timeslip + Cycle World testing):
  *   Kawasaki Ninja H2R — 9.620s @ 257 km/h, finishing in gear 5,
  *   14,500 redline.
- *
- * Matches the PhysicsDial above so both the dial and the trace are
- * showing the same bike's run.
  */
 
 import { useRef, useState, useMemo, useEffect } from 'react';
-import { useScroll, useMotionValueEvent } from 'framer-motion';
+import {
+  motion,
+  useScroll,
+  useSpring,
+  useMotionValueEvent,
+  useReducedMotion,
+} from 'framer-motion';
 import ScoreboardDigits from './ScoreboardDigits';
 
 // Hand-curated waypoints for the H2R baseline run.
-// Time (s), velocity (km/h), gear, RPM, distance (m).
-// H2R accelerates much harder than the K5 — peak power is ~310 hp
-// from a 998 cc supercharged I4 — so the v(t) curve is much steeper
-// off the line and asymptotes higher at the trap.
 const RUN = [
   { t: 0.000,  v: 0,    g: 1, r: 4500,  d: 0      },
   { t: 0.600,  v: 80,   g: 1, r: 13500, d: 8      },
@@ -42,6 +49,20 @@ const TOTAL_T = 9.620;
 const REDLINE = 14500;
 const TRAP_KMH = 270;
 const TRACK_M = 402.336;
+
+// Timing splits interpolated from the RUN table (distance → time).
+const SPLITS = [
+  { t: 0.91, label: '60FT' },
+  { t: 4.17, label: '⅛ MILE' },
+  { t: 5.70, label: '1000FT' },
+];
+// Gear-shift moments (RUN waypoints where the gear increments).
+const SHIFTS = [
+  { t: 1.2, g: 2 },
+  { t: 2.7, g: 3 },
+  { t: 4.5, g: 4 },
+  { t: 7.0, g: 5 },
+];
 
 function lerp(a, b, t) { return a + (b - a) * t; }
 
@@ -62,16 +83,40 @@ function sampleRun(progress) {
   };
 }
 
-function Gauge({ label, value, unit, percent, accent = false, full = false, seg = false }) {
+function vAt(t) {
+  let i = 0;
+  while (i < RUN.length - 1 && RUN[i + 1].t < t) i++;
+  const a = RUN[i];
+  const b = RUN[Math.min(i + 1, RUN.length - 1)];
+  const span = (b.t - a.t) || 1;
+  return lerp(a.v, b.v, Math.min(1, Math.max(0, (t - a.t) / span)));
+}
+
+function Gauge({ label, value, unit, percent, accent = false, full = false, seg = false, shiftLight = null }) {
   return (
     <div
       className={[
-        'rounded-xl border border-white/10 bg-white/[0.025] p-4 sm:p-5',
+        'min-w-0 rounded-xl border border-white/10 bg-white/[0.025] p-4 sm:p-5',
         full ? 'col-span-2' : '',
       ].join(' ')}
     >
-      <div className="text-[10px] font-mono uppercase tracking-widest text-white/45">
-        {label}
+      <div className="flex items-center justify-between gap-2">
+        <div className="text-[10px] font-mono uppercase tracking-widest text-white/45 truncate">
+          {label}
+        </div>
+        {shiftLight && (
+          <span
+            aria-hidden="true"
+            className={[
+              'h-2 w-2 shrink-0 rounded-full transition-colors duration-100',
+              shiftLight === 'red'
+                ? 'bg-brand-red shadow-lamp-red'
+                : shiftLight === 'amber'
+                  ? 'bg-brand-amber shadow-lamp-amber'
+                  : 'bg-white/15',
+            ].join(' ')}
+          />
+        )}
       </div>
       <div className="mt-1.5 flex items-baseline gap-1.5 leading-none">
         {seg ? (
@@ -89,7 +134,7 @@ function Gauge({ label, value, unit, percent, accent = false, full = false, seg 
           {value}
         </span>
         )}
-        {unit && <span className="font-mono text-xs text-white/45">{unit}</span>}
+        {unit && <span className="font-mono text-xs text-white/45 whitespace-nowrap">{unit}</span>}
       </div>
       {percent != null && (
         <div className="mt-3 h-1.5 rounded-full bg-white/10 overflow-hidden">
@@ -103,23 +148,16 @@ function Gauge({ label, value, unit, percent, accent = false, full = false, seg 
   );
 }
 
-// Speed-trace chart — replaces the bike silhouette as the visual.
-// Shows the v(t) curve; a moving dot tracks the current run state.
+// Speed-trace chart: v(t) with speed axis, timing splits, gear-shift ticks
+// and a glowing live dot tracking the current run state.
 function SpeedTrace({ currentV, currentT, progress }) {
   const tracePath = useMemo(() => {
-    const N = 80;
+    const N = 120;
     const pts = [];
     const fillPts = ['M 0 200'];
     for (let i = 0; i <= N; i++) {
       const u = i / N;
-      const t = u * TOTAL_T;
-      let idx = 0;
-      while (idx < RUN.length - 1 && RUN[idx + 1].t < t) idx++;
-      const a = RUN[idx];
-      const b = RUN[Math.min(idx + 1, RUN.length - 1)];
-      const span = (b.t - a.t) || 1;
-      const ub = Math.min(1, Math.max(0, (t - a.t) / span));
-      const v = lerp(a.v, b.v, ub);
+      const v = vAt(u * TOTAL_T);
       const x = u * 600;
       const y = 200 - (v / TRAP_KMH) * 170;
       pts.push(`${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`);
@@ -133,11 +171,11 @@ function SpeedTrace({ currentV, currentT, progress }) {
   const dotY = 200 - (currentV / TRAP_KMH) * 170;
 
   return (
-    <div className="relative h-full min-h-[200px] sm:min-h-[280px] rounded-2xl border border-white/10 bg-ink-1/60 overflow-hidden">
+    <div className="relative h-full min-h-[200px] sm:min-h-[280px] min-w-0 rounded-2xl border border-white/10 bg-gradient-to-br from-ink-1/80 to-black overflow-hidden">
       <span className="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-brand-orange" />
       <span className="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-brand-orange" />
 
-      <div className="absolute top-3 left-10 right-10 sm:left-12 sm:right-12 flex justify-between items-baseline gap-2">
+      <div className="absolute top-3 left-10 right-10 sm:left-12 sm:right-12 flex justify-between items-baseline gap-2 z-10">
         <div className="font-mono text-[9px] sm:text-[10px] tracking-widest text-brand-orange/85 truncate">
           v(t) · NINJA H2R · 1/4 mile
         </div>
@@ -153,34 +191,67 @@ function SpeedTrace({ currentV, currentT, progress }) {
             <stop offset="0" stopColor="#FF5E1F" stopOpacity="0.35" />
             <stop offset="1" stopColor="#FF5E1F" stopOpacity="0" />
           </linearGradient>
-        </defs>
-
-        <g stroke="#27272A" strokeWidth="0.6" strokeDasharray="3 4">
-          <line x1="0" y1="40"  x2="600" y2="40"  />
-          <line x1="0" y1="80"  x2="600" y2="80"  />
-          <line x1="0" y1="120" x2="600" y2="120" />
-          <line x1="0" y1="160" x2="600" y2="160" />
-        </g>
-
-        {/* Ghost trace — full curve, low opacity. Tells the user where the
-            run is HEADING; the bright "live" path overlays only the portion
-            already covered by scroll progress. */}
-        <path d={tracePath.stroke} stroke="#FF5E1F" strokeWidth="1.25" fill="none"
-              strokeLinecap="round" strokeLinejoin="round" opacity="0.18" />
-
-        {/* Progress-clipped fill — uses a clipPath rectangle that grows with
-            progress so the orange area fill only shows under the drawn portion. */}
-        <defs>
+          {/* pre-computed glow — the previous feGaussianBlur filter re-ran
+              every frame the spring moved the dot; a radial gradient is the
+              same halo at zero per-frame raster cost */}
+          <radialGradient id="dot-glow-grad">
+            <stop offset="0" stopColor="#FF8F57" stopOpacity="0.9" />
+            <stop offset="0.45" stopColor="#FF5E1F" stopOpacity="0.35" />
+            <stop offset="1" stopColor="#FF5E1F" stopOpacity="0" />
+          </radialGradient>
           <clipPath id="vfill-clip">
             <rect x="0" y="0" width={Math.max(0, Math.min(1, progress)) * 600} height="220" />
           </clipPath>
         </defs>
+
+        {/* speed gridlines */}
+        <g stroke="#27272A" strokeWidth="0.6" strokeDasharray="3 4">
+          <line x1="0" y1="43.4"  x2="600" y2="43.4"  />
+          <line x1="0" y1="86.7"  x2="600" y2="86.7"  />
+          <line x1="0" y1="143.3" x2="600" y2="143.3" />
+        </g>
+        {/* speed axis labels (SVG text scales with the chart) */}
+        <g fill="#FFFFFF" opacity="0.28" fontSize="9" fontFamily="monospace">
+          <text x="6" y="41">250</text>
+          <text x="6" y="84">180</text>
+          <text x="6" y="141">90</text>
+        </g>
+
+        {/* timing-split markers */}
+        {SPLITS.map((s) => {
+          const x = (s.t / TOTAL_T) * 600;
+          const passed = progress * TOTAL_T >= s.t;
+          return (
+            <g key={s.label}>
+              <line
+                x1={x} y1="24" x2={x} y2="200"
+                stroke={passed ? '#FF5E1F' : '#3F3F46'}
+                strokeWidth="0.8"
+                strokeDasharray="2 5"
+                opacity={passed ? 0.5 : 0.35}
+              />
+              <text
+                x={x + 4} y="32"
+                fill={passed ? '#FF8F57' : '#FFFFFF'}
+                opacity={passed ? 0.9 : 0.3}
+                fontSize="8.5"
+                fontFamily="monospace"
+                letterSpacing="1"
+              >
+                {s.label}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Ghost trace — where the run is heading */}
+        <path d={tracePath.stroke} stroke="#FF5E1F" strokeWidth="1.25" fill="none"
+              strokeLinecap="round" strokeLinejoin="round" opacity="0.18" />
+
+        {/* Progress-clipped area fill */}
         <path d={tracePath.fill} fill="url(#vfill)" clipPath="url(#vfill-clip)" />
 
-        {/* Live trace — same path, but drawn via stroke-dashoffset so the
-            line "draws on" as scroll progresses. pathLength=1 normalises any
-            length to 0..1 so the offset math is independent of the actual
-            geometric length of the curve. */}
+        {/* Live trace — draws on with progress */}
         <path
           d={tracePath.stroke}
           stroke="#FF5E1F"
@@ -193,7 +264,31 @@ function SpeedTrace({ currentV, currentT, progress }) {
           strokeDashoffset={1 - Math.max(0, Math.min(1, progress))}
         />
 
-        <circle cx={dotX} cy={dotY} r="6" fill="#FF8F57" />
+        {/* gear-shift ticks on the curve */}
+        {SHIFTS.map((s) => {
+          const x = (s.t / TOTAL_T) * 600;
+          const y = 200 - (vAt(s.t) / TRAP_KMH) * 170;
+          const passed = progress * TOTAL_T >= s.t;
+          return (
+            <g key={s.g} opacity={passed ? 1 : 0.3}>
+              <circle cx={x} cy={y} r="3" fill={passed ? '#FFFFFF' : '#52525B'} />
+              <text
+                x={x} y={y - 8}
+                fill={passed ? '#FFFFFF' : '#71717A'}
+                opacity="0.75"
+                fontSize="8.5"
+                fontFamily="monospace"
+                textAnchor="middle"
+              >
+                {s.g}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* live dot — glowing (gradient halo + solid core, no SVG filter) */}
+        <circle cx={dotX} cy={dotY} r="14" fill="url(#dot-glow-grad)" />
+        <circle cx={dotX} cy={dotY} r="4.5" fill="#FF8F57" />
         <circle cx={dotX} cy={dotY} r="11" fill="none" stroke="#FF5E1F" strokeWidth="1.5" opacity="0.55" />
         <line x1={dotX} y1={dotY} x2={dotX} y2="200" stroke="#FF5E1F" strokeDasharray="3 4" strokeWidth="1" opacity="0.55" />
       </svg>
@@ -206,8 +301,6 @@ function SpeedTrace({ currentV, currentT, progress }) {
         <span>9.62s</span>
       </div>
 
-      {/* REC label hidden on mobile (was overlapping the time-axis labels);
-          shown only on >=sm where there is room. */}
       <div className="hidden sm:block absolute bottom-2 left-3 font-mono text-[9px] tracking-widest text-brand-orange/85 pointer-events-none">
         REC · 60FPS · 0.001s ε
       </div>
@@ -217,35 +310,31 @@ function SpeedTrace({ currentV, currentT, progress }) {
 
 export default function TelemetryHUD() {
   const sectionRef = useRef(null);
+  const reduced = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    // 'start end'    → section TOP at viewport BOTTOM (section just appearing) → progress 0
-    // 'center start' → section CENTER at viewport TOP (section half-exited)    → progress 1
-    //
-    // With section h-[100svh], that maps progress 0..1 over scrollY
-    //   = section_top - 100vh  →  section_top + 50vh
-    // Animation completes when the section is half-way exiting at the top,
-    // which is also when the next section is filling the bottom half of
-    // viewport — the user's preferred 'finishes here' point.
-    offset: ['start end', 'center start'],
+    // Respond the moment the section peeks in (top at 95% viewport) and
+    // complete while it is still mostly on screen (bottom at 35%). The old
+    // window ('start end' → 'center start') played most of the run while
+    // the section was still half-hidden and left the visible portion for a
+    // late jump — field-reported as "moves very late".
+    offset: ['start 0.95', 'end 0.35'],
   });
+  // Physical inertia: the needle chases scroll through a critically-damped
+  // spring instead of tracking raw scroll jitter. Reduced motion reads the
+  // raw value (no overshoot, no lag).
+  const sprung = useSpring(scrollYProgress, { stiffness: 120, damping: 26, mass: 0.35 });
+  const driver = reduced ? scrollYProgress : sprung;
 
-  // Initialise from progress=0 so gauges show staged-and-idle values
-  // (RPM ≈ 4500, spd 0, gear 1, et 0, dist 0) on first paint instead of all
-  // zeros. Without this, mobile users saw RPM=0 / chart=full-trace on first
-  // load — a desync between visible chart and gauge readouts.
   const initial = useMemo(() => sampleRun(0), []);
   const [rpm, setRpm] = useState(Math.round(initial.r));
   const [spd, setSpd] = useState(initial.v);
   const [gear, setGear] = useState(initial.g);
   const [et, setEt] = useState(initial.t);
   const [dist, setDist] = useState(initial.d);
-  // Track progress as React state so the chart can clip its drawn portion.
-  // Mirrors the motion value but persists across renders so SVG path-length
-  // math is stable per render.
   const [progress, setProgress] = useState(0);
 
-  useMotionValueEvent(scrollYProgress, 'change', (p) => {
+  useMotionValueEvent(driver, 'change', (p) => {
     const clamped = Math.min(1, Math.max(0, p));
     const s = sampleRun(clamped);
     setProgress(clamped);
@@ -256,10 +345,7 @@ export default function TelemetryHUD() {
     setDist(s.d);
   });
 
-  // Fire once on mount in case the user has already scrolled (browser back
-  // / fragment navigation / refresh in the middle of the page). Without
-  // this the chart and gauges stay at "scroll=0" values until the user
-  // moves the scroll wheel manually.
+  // Sync once on mount for mid-page loads (back navigation / refresh).
   useEffect(() => {
     const p = scrollYProgress.get();
     const clamped = Math.min(1, Math.max(0, p));
@@ -273,19 +359,27 @@ export default function TelemetryHUD() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Shift-light micro-interaction: amber above 12.5k, red at 14k+.
+  const shiftLight = rpm >= 14000 ? 'red' : rpm >= 12500 ? 'amber' : 'off';
+
+  // 3D entrance for the two panels — perspective tilt settling flat as the
+  // section arrives. Opacity+transform only; skipped under reduced motion.
+  const enter = (delay) =>
+    reduced
+      ? {}
+      : {
+          initial: { opacity: 0, y: 28, rotateX: 10 },
+          whileInView: { opacity: 1, y: 0, rotateX: 0 },
+          viewport: { once: true, margin: '0px 0px -15% 0px' },
+          transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1], delay },
+        };
+
   return (
     <section
       ref={sectionRef}
       id="telemetry"
       className="relative bg-gradient-to-b from-black via-ink-1 to-black border-t border-brand-orange/10 h-[100svh] min-h-[640px] overflow-hidden flex flex-col"
     >
-      {/* No sticky pin — section is exactly one viewport tall. The animation
-          is driven by the section's intersection with the viewport via the
-          useScroll offset ['start end', 'end start']: progress=0 the moment
-          the section starts entering from below, progress=1 when it finishes
-          exiting at the top. Animation completes the moment the section
-          disappears, then the next section is already in view. No sticky-pin →
-          no post-animation dead scroll. */}
       <div className="h-full flex flex-col">
         <div className="px-6 sm:px-10 lg:px-16 pt-20 sm:pt-24 pb-4 sm:pb-6">
           <div className="max-w-7xl mx-auto">
@@ -299,15 +393,21 @@ export default function TelemetryHUD() {
         </div>
 
         <div className="flex-1 px-6 sm:px-10 lg:px-16 pb-10 overflow-hidden">
-          <div className="max-w-7xl mx-auto h-full grid grid-rows-[1fr_auto] lg:grid-rows-1 lg:grid-cols-[1fr_460px] gap-4 sm:gap-6 lg:gap-8 items-stretch lg:items-center">
-            <SpeedTrace currentV={spd} currentT={et} progress={progress} />
+          <div
+            className="max-w-7xl mx-auto h-full grid grid-rows-[1fr_auto] lg:grid-rows-1 lg:grid-cols-[minmax(0,1fr)_minmax(330px,440px)] gap-4 sm:gap-6 lg:gap-8 items-stretch lg:items-center"
+            style={{ perspective: '1200px' }}
+          >
+            <motion.div className="min-w-0 h-full" {...enter(0)}>
+              <SpeedTrace currentV={spd} currentT={et} progress={progress} />
+            </motion.div>
 
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <motion.div className="grid min-w-0 grid-cols-2 gap-3 sm:gap-4" {...enter(0.12)}>
               <Gauge
                 label="Engine RPM"
                 value={rpm.toLocaleString()}
                 unit={`/ ${REDLINE.toLocaleString()}`}
                 percent={(rpm / REDLINE) * 100}
+                shiftLight={shiftLight}
               />
               <Gauge
                 label="Speed"
@@ -324,7 +424,7 @@ export default function TelemetryHUD() {
                 percent={(dist / TRACK_M) * 100}
                 full
               />
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>

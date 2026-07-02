@@ -10,10 +10,16 @@
 //   • llm_not_configured    → ANTHROPIC_API_KEY setup banner
 //   • parse_failed          → inline error with detail
 //   • sim_failed            → inline error with detail
+//
+// Cockpit v3: spinner replaced by a staged SimProgress ("Thinking…") above
+// the response skeleton, and queries are abortable — submitting a new query
+// cancels the in-flight one instead of racing it.
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertCircle, Send, Loader2, KeyRound } from 'lucide-react';
+import { AlertCircle, Send, KeyRound } from 'lucide-react';
+import SimProgress from './SimProgress';
+import { Skeleton } from './Skeleton';
 
 const CHAT_EXAMPLES = [
   'How fast is a KTM RC 390 at Aamby Valley?',
@@ -27,6 +33,7 @@ export default function ChatPanel({ apiUrl }) {
   const [chatResult, setChatResult] = useState(null);
   const [chatError, setChatError] = useState(null);
   const textareaRef = useRef(null);
+  const abortRef = useRef(null);
 
   // Auto-resize textarea up to 120px
   useEffect(() => {
@@ -36,9 +43,16 @@ export default function ChatPanel({ apiUrl }) {
     ta.style.height = `${Math.min(ta.scrollHeight, 120)}px`;
   }, [query]);
 
+  // Abort any in-flight query on unmount.
+  useEffect(() => () => abortRef.current?.abort(), []);
+
   async function runChat() {
     const q = query.trim();
     if (!q) return;
+    // A new query cancels the old one — no racing responses.
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
     setChatLoading(true);
     setChatResult(null);
     setChatError(null);
@@ -47,16 +61,19 @@ export default function ChatPanel({ apiUrl }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: q, run_summary: true }),
+        signal: controller.signal,
       });
       if (!res.ok) {
         const msg = await res.text();
         throw new Error(`Server error ${res.status}: ${msg}`);
       }
-      setChatResult(await res.json());
+      const data = await res.json();
+      if (!controller.signal.aborted) setChatResult(data);
     } catch (e) {
-      setChatError(e.message);
+      if (e?.name !== 'AbortError') setChatError(e.message);
     } finally {
-      setChatLoading(false);
+      // Only the newest request may clear the loading flag.
+      if (abortRef.current === controller) setChatLoading(false);
     }
   }
 
@@ -77,7 +94,7 @@ export default function ChatPanel({ apiUrl }) {
 
   return (
     <div className="space-y-4">
-      {/* Input */}
+      {/* Input — stays enabled while loading so a new query can cancel the old */}
       <div className="flex gap-2 items-end">
         <textarea
           ref={textareaRef}
@@ -86,20 +103,17 @@ export default function ChatPanel({ apiUrl }) {
           onKeyDown={onKeyDown}
           rows={2}
           placeholder="e.g. How fast is an R15 V4 in 38°C at Aamby Valley?"
-          disabled={chatLoading}
-          className="flex-1 resize-none rounded-xl border border-white/10 bg-ink-1 text-white text-sm px-3 py-2.5 placeholder:text-white/30 focus:outline-none focus:border-brand-orange/60 transition-colors min-h-[2.75rem]"
+          className="input-base flex-1 h-auto min-h-[2.75rem] resize-none py-2.5 text-sm bg-ink-1"
         />
         <motion.button
           onClick={runChat}
-          disabled={!query.trim() || chatLoading}
+          disabled={!query.trim()}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className="shrink-0 p-2.5 rounded-md bg-brand-orange hover:bg-brand-orangeLight disabled:opacity-40 disabled:cursor-not-allowed text-black flex items-center justify-center"
           aria-label="Send chat query"
         >
-          {chatLoading
-            ? <Loader2 size={18} className="animate-spin" />
-            : <Send size={18} />}
+          <Send size={18} />
         </motion.button>
       </div>
 
@@ -130,16 +144,19 @@ export default function ChatPanel({ apiUrl }) {
         </div>
       )}
 
-      {/* Loading skeleton */}
+      {/* Loading — staged progress bar (cold-start caption after 4 s) above
+          a response-shaped skeleton. Reduced-motion-safe via .skeleton +
+          SimProgress internals. */}
       {chatLoading && (
-        <div className="space-y-3 animate-pulse">
-          <div className="h-3 bg-white/10 rounded-full w-full" />
-          <div className="h-3 bg-white/10 rounded-full w-5/6" />
+        <div className="space-y-3">
+          <SimProgress active label="Thinking" />
+          <Skeleton className="h-3 w-full" />
+          <Skeleton className="h-3 w-5/6" />
           <div className="grid grid-cols-2 gap-3 mt-4">
             {[0, 1].map(i => (
-              <div key={i} className="bg-white/[0.04] rounded-xl p-4 space-y-2">
-                <div className="h-2.5 bg-white/10 rounded-full w-16" />
-                <div className="h-8 bg-white/10 rounded-full w-24" />
+              <div key={i} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 space-y-2">
+                <Skeleton className="h-2.5 w-16" />
+                <Skeleton className="h-8 w-24" />
               </div>
             ))}
           </div>
@@ -221,7 +238,7 @@ export default function ChatPanel({ apiUrl }) {
                       animate={{ scale: 1, opacity: 1 }}
                       className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-center"
                     >
-                      <p className="font-mono text-[10px] text-white/45 mb-1 uppercase tracking-[0.25em]">{label}</p>
+                      <p className="label-mono mb-1">{label}</p>
                       <p className={`text-xl font-mono font-bold ${accent ? 'text-brand-orange' : 'text-white'}`}>
                         {value}
                       </p>

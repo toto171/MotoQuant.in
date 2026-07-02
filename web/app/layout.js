@@ -255,6 +255,15 @@ export default function RootLayout({ children }) {
         <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
       </head>
       <body className="font-sans">
+        {/* Keyboard/screen-reader users skip the fixed chrome in one Tab. The
+            target id lives on each page's <main>; pages without one still get
+            harmless anchor behavior. */}
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-xl focus:bg-brand-orange focus:px-4 focus:py-2 focus:font-display focus:text-sm focus:font-bold focus:text-black"
+        >
+          Skip to content
+        </a>
         {/* Three site-wide JSON-LD blocks. Keeping them in <body> (rather than
             <head>) is equivalent per the schema.org + Google guidance, and
             lets us render them as React children without <Script> wrappers. */}

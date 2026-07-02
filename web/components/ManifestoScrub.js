@@ -28,9 +28,12 @@ const WORDS = TEXT.split(' ');
 
 function Word({ children, progress, index, total }) {
   // Each word owns a slice of the scrub; slight overlap keeps the
-  // sweep reading as a wave rather than a typewriter.
-  const start = (index / total) * 0.88;
-  const end = start + 0.14;
+  // sweep reading as a wave rather than a typewriter. The wave now
+  // finishes at 82% of the window (was 100%+): field report said the
+  // text "gets brighter late" — the closing words were still dim when
+  // the reader's eye reached them.
+  const start = (index / total) * 0.7;
+  const end = start + 0.12;
   const opacity = useTransform(progress, [start, end], [0.13, 1]);
   return (
     <motion.span style={{ opacity }} className="inline">
@@ -44,16 +47,21 @@ export default function ManifestoScrub() {
   const reduced = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ['start 0.75', 'end 0.45'],
+    // Start brightening the moment the text is comfortably readable
+    // (section top at 80% viewport) and finish while it is still centred
+    // (section end at 60%) — paired with the shorter section below, this
+    // also removes the dead black runway that used to sit between the
+    // manifesto and the stats strip.
+    offset: ['start 0.8', 'end 0.6'],
   });
 
   return (
     <section
       ref={ref}
       id="manifesto"
-      className="relative h-[120vh] sm:h-[140vh] border-t border-brand-orange/10 bg-ink-1/30"
+      className="relative h-[100svh] sm:h-[106vh] border-t border-brand-orange/10 bg-ink-1/30"
     >
-      <div className="sticky top-0 min-h-screen flex items-center">
+      <div className="sticky top-0 min-h-[80svh] sm:min-h-[92vh] flex items-center">
         <div className="max-w-4xl mx-auto px-6 py-24">
           <CodeComment className="mb-6">belief system · honest physics</CodeComment>
           {reduced ? (

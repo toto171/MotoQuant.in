@@ -583,8 +583,11 @@ def regenerate_og_card(truth, output_path: Path | None = None, verbose=True) -> 
     f_chart = _font(22, "bold")
     f_chart_sub = _font(16)
 
-    # ── Top pill: "Free · Open Source · India" ─────────────────────────
-    pill_text = "Free  ·  Open Source  ·  India"
+    # ── Top pill ────────────────────────────────────────────────────────
+    # NOT "Open Source" — the product is deliberately hosted-only/closed
+    # (June 2026 desktop re-arch chose the architecture that protects the
+    # IP). The old pill was a trust liability on every social share.
+    pill_text = "Free during beta  ·  Built in India"
     pill_x, pill_y = 60, 56
     bbox = d.textbbox((0, 0), pill_text, font=f_pill)
     pw = bbox[2] - bbox[0] + 60
@@ -607,8 +610,10 @@ def regenerate_og_card(truth, output_path: Path | None = None, verbose=True) -> 
     d.text((60, 132), "MotoQuant", font=f_brand, fill=TEXT)
     d.text((60, 240), "The Physics of Faster", font=f_tag, fill=ORANGE)
 
-    # Top-10 mean accuracy from latest sweep, fallback to ±0.032s
-    top10 = "±0.032"
+    # Top-10 mean accuracy from latest sweep. Fallback = the June-13 2026
+    # published corpus value (docs/validation top-10 mean ±0.006s) — the old
+    # ±0.032 fallback predated two accuracy passes and understated the site.
+    top10 = "±0.006"
     try:
         sweep_files = sorted(REPO.glob("reports/sweep_et_*.json"), reverse=True)
         if sweep_files:

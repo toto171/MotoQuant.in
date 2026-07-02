@@ -340,6 +340,22 @@ class DrivetrainParams:
             return self.rear_sprocket / self.front_sprocket
         return self.final_drive_ratio
 
+    def set_effective_final_drive(self, ratio: float) -> None:
+        """Force the effective engine→wheel final-drive ratio to ``ratio``.
+
+        ``final_ratio`` prefers sprocket teeth (rear/front) over
+        ``final_drive_ratio`` whenever both sprockets are set — which is every
+        chain-drive bike — so assigning ``final_drive_ratio`` alone is a silent
+        no-op there. This clears the sprocket override so ``ratio`` actually
+        takes effect. Used by the Sobol / Bayesian analysis tools, which
+        perturb *gearing as a continuous ratio* rather than a discrete sprocket
+        swap. Nothing in the physics loop reads sprocket teeth directly (only
+        ``final_ratio`` does), so clearing them changes nothing but the ratio.
+        """
+        self.final_drive_ratio = ratio
+        self.front_sprocket = 0
+        self.rear_sprocket = 0
+
     def overall_ratio(self, gear_idx: int) -> float:
         """Total reduction from engine to wheel for a given gear (0-indexed)."""
         return self.primary_ratio * self.gear_ratios[gear_idx] * self.final_ratio

@@ -258,12 +258,16 @@ class BayesianBuildOptimizer:
         cfg.tires.rear_pressure_psi += params.get("rear_pressure_delta", 0.0)
         cfg.tires.rear_pressure_psi = np.clip(cfg.tires.rear_pressure_psi, 20.0, 50.0)
 
-        # Gearing: apply as multiplicative factor to final drive ratio
+        # Gearing: apply as a multiplicative factor to the EFFECTIVE final
+        # drive. Reading/writing final_drive_ratio directly is a no-op for
+        # chain bikes (final_ratio prefers sprocket teeth), so scale final_ratio
+        # and push it through set_effective_final_drive so the sim actually sees
+        # the change. delta=0 reproduces the baseline exactly.
         ratio_delta = params.get("gearing_ratio_delta", 0.0)
-        cfg.drivetrain.final_drive_ratio *= 1.0 + ratio_delta
-        cfg.drivetrain.final_drive_ratio = np.clip(
-            cfg.drivetrain.final_drive_ratio, 1.5, 6.5
+        new_ratio = float(
+            np.clip(cfg.drivetrain.final_ratio * (1.0 + ratio_delta), 1.5, 6.5)
         )
+        cfg.drivetrain.set_effective_final_drive(new_ratio)
 
         return cfg
 

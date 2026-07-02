@@ -16,6 +16,7 @@ Test philosophy
 """
 
 import copy
+import importlib.util as _importlib_util
 import os
 import sys
 import tempfile
@@ -25,6 +26,14 @@ from pathlib import Path
 from unittest.mock import patch
 
 import numpy as np
+import pytest
+
+# xgboost is intentionally NOT a CI dependency (the job installs SALib +
+# scikit-learn only), and the shipped surrogate is the numpy artifact. Gate
+# the XGBSurrogate-dependent tests so they skip cleanly when xgboost is
+# absent instead of erroring at fit() time.
+_HAS_XGBOOST = _importlib_util.find_spec("xgboost") is not None
+_requires_xgboost = pytest.mark.skipif(not _HAS_XGBOOST, reason="xgboost not installed")
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -573,6 +582,7 @@ class TestCheckArrayShapes(unittest.TestCase):
 # ═════════════════════════════════════════════════════════════════
 
 
+@_requires_xgboost
 class TestXGBSurrogate(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -656,6 +666,7 @@ class TestXGBSurrogate(unittest.TestCase):
 # ═════════════════════════════════════════════════════════════════
 
 
+@_requires_xgboost
 class TestXGBSurrogatePersistence(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -701,6 +712,7 @@ class TestXGBSurrogatePersistence(unittest.TestCase):
 # ═════════════════════════════════════════════════════════════════
 
 
+@_requires_xgboost
 class TestTrainSurrogatePipeline(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -779,6 +791,7 @@ class TestSurrogateCLI(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertTrue(Path(self.data_path).exists())
 
+    @_requires_xgboost
     def test_train_creates_pkl(self):
         # Ensure data file exists (run generate first if needed)
         if not Path(self.data_path).exists():

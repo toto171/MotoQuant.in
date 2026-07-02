@@ -96,8 +96,8 @@ export default function GettingStartedPage() {
           The desktop app runs the same physics engine locally with no cloud dependency. It adds five pages:
           full Simulate, Bikes browser, Build (parts composer), Compare (A-vs-B), and History (local leaderboard).
         </p>
-        <div className="glass rounded-xl border border-brand-orange/20 p-5 mb-6">
-          <div className="font-mono text-xs text-brand-orange/70 uppercase tracking-wide mb-3">Beta access</div>
+        <div className="card p-5 md:p-6 mb-6 border-brand-orange/20">
+          <div className="label-mono text-brand-orange mb-3">Beta access</div>
           <p className="text-white/60 text-sm">
             Desktop beta is currently available to tuning shops and racing teams. Email{' '}
             <a href="mailto:motoquant@gmail.com?subject=MotoQuant%20Desktop%20Beta" className="text-brand-accent hover:text-brand-orange transition-colors">
@@ -171,7 +171,7 @@ Content-Type: application/json
             { label: 'Acceleration (g)', desc: 'Longitudinal g-force. Typically 0.3–0.6g at launch for street bikes, 0.5–0.9g for built drag bikes. The ET reference line marks where ¼ mile falls on the time axis.' },
             { label: 'Power (kW)', desc: 'Wheel power delivered to the road. This is lower than engine power due to drivetrain losses, clutch slip during engagement, and tyre slip.' },
           ].map(item => (
-            <div key={item.label} className="flex gap-4 p-4 rounded-lg glass border border-white/10">
+            <div key={item.label} className="card flex gap-4 p-4">
               <div className="font-mono text-xs text-brand-orange w-32 shrink-0 pt-0.5">{item.label}</div>
               <div className="text-sm text-white/70">{item.desc}</div>
             </div>
@@ -186,13 +186,13 @@ Content-Type: application/json
 
       {/* Next steps */}
       <div className="mt-14 pt-8 border-t border-brand-orange/10">
-        <div className="font-mono text-[10px] text-white/45 uppercase tracking-[0.25em] mb-4">Next</div>
+        <div className="label-mono mb-4">Next</div>
         <div className="grid sm:grid-cols-2 gap-4">
-          <Link href="/docs/physics" className="glass rounded-xl p-4 border border-white/10 hover:border-brand-orange/40 transition-colors group">
+          <Link href="/docs/physics" className="card card-hover block p-4 group">
             <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Physics Whitepaper →</div>
             <div className="text-xs text-white/50">15 sub-models, equations, and validation methodology.</div>
           </Link>
-          <Link href="/docs/validation" className="glass rounded-xl p-4 border border-white/10 hover:border-brand-orange/40 transition-colors group">
+          <Link href="/docs/validation" className="card card-hover block p-4 group">
             <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Validation Data →</div>
             <div className="text-xs text-white/50">Benchmark table, per-cluster accuracy, and methodology.</div>
           </Link>

@@ -1,17 +1,23 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { Search, X, Plus, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import SuggestBikeForm from '../../components/SuggestBikeForm';
 import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
 import PageHero from '../../components/PageHero';
+import { SkeletonCards } from '../../components/Skeleton';
 import { API_URL } from '../../lib/api';
 import BikeCardCta from './BikeCardCta';
 
 const PAGE_SIZE = 40;
+
+// Module-level facet cache: the full-catalog manufacturer/category lists are
+// fetched ONCE per app lifetime (limit=2000 sweep) and survive client-side
+// back-navigation without a refetch (REDESIGN.md §5-B).
+let FACETS_CACHE = null;
 
 function useDebounce(value, delay = 300) {
   const [debounced, setDebounced] = useState(value);
@@ -38,14 +44,14 @@ function BikeCard({ bike }) {
         href={`/bikes/${bike.id}`}
         className="block group h-full"
       >
-        <div className="relative h-full rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 hover:border-brand-orange/50 transition-all duration-200 motion-safe:hover:-translate-y-1">
+        <div className="card card-hover relative h-full p-5 transition-all duration-200 motion-safe:hover:-translate-y-1">
           <div
             aria-hidden="true"
             className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-orange/70 to-transparent"
           />
           <div className="flex items-start justify-between mb-3">
             <div className="min-w-0 flex-1">
-              <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 truncate">
+              <p className="label-mono truncate">
                 {bike.manufacturer}
               </p>
               <h3 className="font-display font-bold text-white text-lg leading-tight mt-1 line-clamp-2 group-hover:text-brand-orange transition-colors">
@@ -58,15 +64,15 @@ function BikeCard({ bike }) {
           </div>
           <div className="grid grid-cols-3 gap-2 mt-4">
             <div>
-              <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/40">Disp.</p>
+              <p className="label-mono">Disp.</p>
               <p className="text-sm font-mono text-white/90 tabular-nums mt-0.5">{disp}</p>
             </div>
             <div>
-              <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/40">Power</p>
+              <p className="label-mono">Power</p>
               <p className="text-sm font-mono text-brand-orange tabular-nums mt-0.5">{power}</p>
             </div>
             <div>
-              <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-white/40">Mass</p>
+              <p className="label-mono">Mass</p>
               <p className="text-sm font-mono text-white/90 tabular-nums mt-0.5">{mass}</p>
             </div>
           </div>
@@ -92,9 +98,12 @@ export default function BikesPage() {
 
   const [bikes, setBikes] = useState([]);
   const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [suggestOpen, setSuggestOpen] = useState(false);
+
+  // Full-catalog facet lists for the filter dropdowns (module-cached).
+  const [facets, setFacets] = useState(FACETS_CACHE);
 
   const debouncedSearch = useDebounce(search, 300);
 
@@ -132,15 +141,44 @@ export default function BikesPage() {
     setOffset(0);
   }, [debouncedSearch, manufacturer, category]);
 
-  const manufacturers = useMemo(() => {
-    const set = new Set(bikes.map(b => b.manufacturer).filter(Boolean));
-    return Array.from(set).sort();
-  }, [bikes]);
+  // One full-catalog sweep to build the REAL filter option lists (the old
+  // datalists were derived from the visible 40 rows — misleading). Non-fatal
+  // on failure: the selects degrade to "Any" + whatever value is set.
+  useEffect(() => {
+    if (FACETS_CACHE) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/bikes?limit=2000`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const rows = data.bikes || [];
+        const uniq = (key) =>
+          Array.from(new Set(rows.map(b => b[key]).filter(Boolean)))
+            .sort((a, b) => String(a).localeCompare(String(b)));
+        FACETS_CACHE = {
+          manufacturers: uniq('manufacturer'),
+          categories: uniq('category'),
+        };
+        if (!cancelled) setFacets(FACETS_CACHE);
+      } catch {
+        // Facet fetch is best-effort; the grid fetch surfaces real errors.
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
-  const categories = useMemo(() => {
-    const set = new Set(bikes.map(b => b.category).filter(Boolean));
-    return Array.from(set).sort();
-  }, [bikes]);
+  // If a filter value is set but missing from the facet list (deep link,
+  // facet fetch failed), keep it selectable so the UI never lies.
+  const manufacturerOptions = useMemo(() => {
+    const list = facets?.manufacturers || [];
+    return manufacturer && !list.includes(manufacturer) ? [manufacturer, ...list] : list;
+  }, [facets, manufacturer]);
+
+  const categoryOptions = useMemo(() => {
+    const list = facets?.categories || [];
+    return category && !list.includes(category) ? [category, ...list] : list;
+  }, [facets, category]);
 
   const hasFilters = !!(search || manufacturer || category);
   const currentPage = Math.floor(offset / PAGE_SIZE) + 1;
@@ -186,79 +224,77 @@ export default function BikesPage() {
         <div className="mt-4">
           <button
             onClick={() => setSuggestOpen(true)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md border border-brand-orange/40 text-brand-orange hover:bg-brand-orange/10 font-display font-semibold text-sm transition-colors"
+            className="btn-ghost"
           >
             <Plus size={16} /> Suggest a bike
           </button>
         </div>
       </PageHero>
 
-      <main className="pb-16 px-4 sm:px-6">
+      <main id="main" className="pb-16 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           {/* Filters — sticky below nav */}
-          <div className="sticky top-16 z-40 rounded-xl border border-white/[0.06] bg-ink-1/90 backdrop-blur-xl p-4 mb-6">
+          <div className="sticky top-16 z-40 card bg-ink-1/90 backdrop-blur-xl p-4 mb-6">
             <div className="grid grid-cols-1 md:grid-cols-[1fr_180px_180px_auto] gap-3 items-end">
               <div>
-                <label htmlFor="bike-search" className="block font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-2">
+                <label htmlFor="bike-search" className="label-mono block mb-2">
                   Search
                 </label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" size={16} />
                   <input
                     id="bike-search"
                     type="text"
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     placeholder="Search by make or model…"
-                    className="w-full pl-10 pr-3 py-2.5 bg-ink-1 border border-white/10 rounded-md text-sm text-white placeholder:text-white/30 focus:border-brand-orange/60 focus:outline-none font-mono"
+                    className="input-base pl-10 font-mono"
                   />
                 </div>
               </div>
               <div>
-                <label htmlFor="bike-mfr" className="block font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-2">
+                <label htmlFor="bike-mfr" className="label-mono block mb-2">
                   Manufacturer
                 </label>
-                <input
+                <select
                   id="bike-mfr"
-                  type="text"
                   value={manufacturer}
                   onChange={e => setManufacturer(e.target.value)}
-                  placeholder="Any"
-                  list="mfr-list"
-                  className="w-full px-3 py-2.5 bg-ink-1 border border-white/10 rounded-md text-sm text-white placeholder:text-white/30 focus:border-brand-orange/60 focus:outline-none font-mono"
-                />
+                  className="input-base font-mono cursor-pointer"
+                >
+                  <option value="">Any</option>
+                  {manufacturerOptions.map(m => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                </select>
               </div>
-              <datalist id="mfr-list">
-                {manufacturers.map(m => <option key={m} value={m} />)}
-              </datalist>
               <div>
-                <label htmlFor="bike-cat" className="block font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-2">
+                <label htmlFor="bike-cat" className="label-mono block mb-2">
                   Category
                 </label>
-                <input
+                <select
                   id="bike-cat"
-                  type="text"
                   value={category}
                   onChange={e => setCategory(e.target.value)}
-                  placeholder="Any"
-                  list="cat-list"
-                  className="w-full px-3 py-2.5 bg-ink-1 border border-white/10 rounded-md text-sm text-white placeholder:text-white/30 focus:border-brand-orange/60 focus:outline-none font-mono"
-                />
+                  className="input-base font-mono cursor-pointer"
+                >
+                  <option value="">Any</option>
+                  {categoryOptions.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
               </div>
-              <datalist id="cat-list">
-                {categories.map(c => <option key={c} value={c} />)}
-              </datalist>
 
               {hasFilters && (
                 <button
                   onClick={() => { setSearch(''); setManufacturer(''); setCategory(''); }}
-                  className="inline-flex items-center gap-1 px-3 py-2.5 rounded-md border border-white/10 hover:border-white/30 font-mono text-[10px] uppercase tracking-[0.25em] text-white/60 hover:text-white transition-colors"
+                  className="btn-ghost"
                 >
                   <X size={14} /> Clear
                 </button>
               )}
             </div>
-            <div className="flex items-center justify-between mt-3 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">
+            <div className="flex items-center justify-between mt-3 label-mono">
               <span>
                 {loading ? 'querying catalog…' : `${total.toLocaleString()} bikes match · showing ${bikes.length}`}
               </span>
@@ -268,28 +304,34 @@ export default function BikesPage() {
             </div>
           </div>
 
-          {/* Error */}
-          <AnimatePresence>
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="mb-4 p-3 bg-brand-red/10 border border-brand-red/40 rounded-lg text-brand-red/90 text-sm flex items-center gap-2"
-              >
-                <AlertCircle size={16} /> {error}
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Grid */}
-          {!loading && bikes.length === 0 && !error ? (
-            <div className="py-24 text-center font-mono text-[11px] uppercase tracking-[0.25em] text-white/45">
+          {/* Grid — skeletons on every fetch, branded error with Retry */}
+          {loading ? (
+            <SkeletonCards count={12} />
+          ) : error ? (
+            <div className="card p-8 text-center">
+              <AlertCircle size={24} className="mx-auto text-brand-red mb-3" />
+              <p className="font-display font-bold text-white text-lg">
+                Couldn&apos;t load the catalog
+              </p>
+              <p className="text-sm text-white/65 mt-2 max-w-md mx-auto">
+                The engine may be waking up — retry in a moment.
+              </p>
+              <p className="font-mono text-[11px] text-white/35 mt-3 break-all max-w-md mx-auto">
+                {error}
+              </p>
+              <div className="mt-6">
+                <button onClick={fetchBikes} className="btn-primary">
+                  Retry
+                </button>
+              </div>
+            </div>
+          ) : bikes.length === 0 ? (
+            <div className="py-24 text-center label-mono">
               No bikes match those filters.
               <div className="mt-6">
                 <button
                   onClick={() => setSuggestOpen(true)}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md border border-brand-orange/40 text-brand-orange hover:bg-brand-orange/10 font-display font-semibold text-sm normal-case tracking-normal transition-colors"
+                  className="btn-ghost normal-case tracking-normal"
                 >
                   <Plus size={16} /> Suggest this bike
                 </button>
@@ -307,17 +349,17 @@ export default function BikesPage() {
               <button
                 onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
                 disabled={offset === 0 || loading}
-                className="inline-flex items-center gap-1 px-3 py-2 rounded-md border border-white/10 hover:border-brand-orange/50 disabled:opacity-30 disabled:cursor-not-allowed font-mono text-[10px] uppercase tracking-[0.25em] text-white/70 hover:text-white transition-colors"
+                className="btn-ghost btn-sm"
               >
                 <ChevronLeft size={14} /> Prev
               </button>
-              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 tabular-nums">
+              <span className="label-mono tabular-nums">
                 {offset + 1}–{Math.min(offset + PAGE_SIZE, total)} of {total}
               </span>
               <button
                 onClick={() => setOffset(offset + PAGE_SIZE)}
                 disabled={offset + PAGE_SIZE >= total || loading}
-                className="inline-flex items-center gap-1 px-3 py-2 rounded-md border border-white/10 hover:border-brand-orange/50 disabled:opacity-30 disabled:cursor-not-allowed font-mono text-[10px] uppercase tracking-[0.25em] text-white/70 hover:text-white transition-colors"
+                className="btn-ghost btn-sm"
               >
                 Next <ChevronRight size={14} />
               </button>

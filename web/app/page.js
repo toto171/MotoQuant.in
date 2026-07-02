@@ -43,6 +43,8 @@ import CodeComment from '../components/CodeComment';
 import ManifestoScrub from '../components/ManifestoScrub';
 import LaunchControl from '../components/LaunchControl';
 import ScoreboardDigits, { ScoreboardCounter } from '../components/ScoreboardDigits';
+import SectionRail from '../components/SectionRail';
+import TronGrid from '../components/TronGrid';
 
 // ─── Validation: only the four clusters where the data is good ────────
 // Per the 13 June 2026 weighted sweep (reports/acc_final_2026_06_13.json). Small-cc / 2T / cruiser
@@ -57,18 +59,21 @@ const HONEST_CLUSTERS = [
   { name: 'All clusters · weighted overall', bias: -0.015, mae: 0.262, n: 236 },
 ];
 
-// ─── Top-10 most accurate bikes (preserved from prior landing) ────────
+// ─── Top-10 most accurate bikes ───────────────────────────────────────
+// MUST equal the docs/validation TOP10 (13 June 2026 sweep,
+// reports/acc_final_2026_06_13.json — 10 smallest |Δ| among published
+// non-derived benchmarks, mean ±0.006s). Sync both together.
 const TOP10 = [
-  { rank: 1,  name: 'Honda CBR 600RR',        year: 2007, cc: '599cc I4',     target: 10.84, sim: 10.845, delta:  0.001, source: 'Sport Rider 2007' },
-  { rank: 2,  name: 'Aprilia Tuono 660',      year: 2021, cc: '659cc I2',     target: 11.33, sim: 11.329, delta: -0.002, source: 'MotoStatz · Dragy' },
-  { rank: 3,  name: 'Kawasaki Ninja ZX-9R',   year: 2000, cc: '899cc I4',     target: 10.50, sim: 10.497, delta: -0.003, source: 'Sport Rider 2000' },
-  { rank: 4,  name: 'Kawasaki Ninja H2',      year: 2015, cc: '998cc I4 SC',  target:  9.62, sim:  9.625, delta:  0.005, source: 'MCN 2015' },
-  { rank: 5,  name: 'Kawasaki Ninja ZX-10R',  year: 2021, cc: '998cc I4',     target: 10.00, sim: 10.011, delta:  0.011, source: 'Cycle World 2021' },
-  { rank: 6,  name: 'Kawasaki ZZR1400',       year: 2006, cc: '1352cc I4',    target:  9.90, sim:  9.911, delta:  0.011, source: 'MCN 2006' },
-  { rank: 7,  name: 'Yamaha YZF-R6',          year: 2007, cc: '599cc I4',     target: 10.85, sim: 10.865, delta:  0.011, source: 'Sport Rider 2007' },
-  { rank: 8,  name: 'Aprilia RS 457',         year: 2024, cc: '457cc I2',     target: 13.30, sim: 13.316, delta:  0.016, source: 'FastestLaps 2024' },
-  { rank: 9,  name: 'Suzuki TL1000R',         year: 1998, cc: '996cc V-twin', target: 10.50, sim: 10.517, delta:  0.017, source: 'Cycle World 1998' },
-  { rank: 10, name: 'Suzuki Katana',          year: 2020, cc: '999cc I4',     target: 10.86, sim: 10.838, delta: -0.022, source: 'Cycle World 2020' },
+  { rank: 1,  name: 'Honda CBR 600RR',             year: 2007, cc: '599cc I4',          target: 10.844, sim: 10.8447, delta:  0.001, source: 'Sport Rider' },
+  { rank: 2,  name: 'Aprilia Tuono 660',           year: 2021, cc: '659cc I2',          target: 11.33,  sim: 11.3285, delta: -0.002, source: 'MotoStatz' },
+  { rank: 3,  name: 'Harley-Davidson Sportster S', year: 2021, cc: '1252cc V2',         target: 11.1,   sim: 11.0981, delta: -0.002, source: 'HDForums timeslip 2021' },
+  { rank: 4,  name: 'Kawasaki Z H2 SE',            year: 2020, cc: '998cc I4',          target: 9.95,   sim: 9.9471,  delta: -0.003, source: 'Cycle World 2020' },
+  { rank: 5,  name: 'Kawasaki Ninja ZX-9R',        year: 2000, cc: '899cc I4',          target: 10.5,   sim: 10.4968, delta: -0.003, source: 'Sport Rider 2000' },
+  { rank: 6,  name: 'Kawasaki Ninja H2',           year: 2015, cc: '998cc I4',          target: 9.62,   sim: 9.6252,  delta:  0.005, source: 'MCN 2015' },
+  { rank: 7,  name: 'BMW R 12 nineT',              year: 2014, cc: '1170cc boxer-twin', target: 11.05,  sim: 11.0583, delta:  0.008, source: 'Cycle World 2014' },
+  { rank: 8,  name: 'Kawasaki Ninja ZX-10R',       year: 2021, cc: '998cc I4',          target: 10.0,   sim: 10.0106, delta:  0.011, source: 'Cycle World 2021' },
+  { rank: 9,  name: 'Kawasaki ZZR1400',            year: 2006, cc: '1352cc I4',         target: 9.9,    sim: 9.9112,  delta:  0.011, source: 'MCN 2006' },
+  { rank: 10, name: 'Yamaha YZF-R6',               year: 2007, cc: '599cc I4',          target: 10.854, sim: 10.8653, delta:  0.011, source: 'Sport Rider 2007' },
 ];
 
 // ─── Stats strip — synced to current motoquant.db (Apr 30 2026) ───────
@@ -138,7 +143,7 @@ function ClusterBars() {
   return (
     <div className="rounded-xl border border-white/10 bg-ink-1/70 p-6 sm:p-8">
       <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-brand-orange mb-1">
-        Honest physics &middot; April 30, 2026
+        Honest physics &middot; June 13, 2026
       </div>
       <h3 className="font-display font-bold text-2xl sm:text-3xl text-white tracking-tight mb-2 leading-tight">
         Where the data is good, we are within 0.20s.
@@ -292,23 +297,17 @@ function HomePageInner() {
   });
   const heroFade = useTransform(heroProgress, [0.6, 1], [1, 0]);
 
-  // ── Dial gets its OWN scroll progress, decoupled from the hero. ──
-  // On mobile the dial stacks BELOW the tree, so by the time the gauge
-  // is on-screen the hero progress is already past 0.5 and the needle
-  // would only sweep the low-RPM portion before the hero fades out. By
-  // scoping the dial's progress to its own bounding-box passing through
-  // the viewport (`start end` → `end start`), the full 1500→14500 RPM
-  // sweep maps to "dial enters viewport bottom" → "dial exits viewport
-  // top", which works at every viewport height.
+  // ── Dial drive (July 2026 fix: respond from the FIRST scroll pixel). ──
+  // The old mapping scoped progress to the dial's own box crossing the
+  // viewport TOP ('start start' → 'end start'), which meant hundreds of
+  // pixels of scrolling produced zero needle movement — field-reported as
+  // "the rpm gauge moves very late" (the telemetry section below was at
+  // 13.5k rpm while the hero dial still idled at 1,500). The hero's own
+  // progress is 0 exactly at rest and grows from the first scroll tick, so
+  // the dial now rides heroProgress: idle at rest, needle building
+  // immediately, redline by ~half the hero's exit. dialRef stays on the
+  // wrapper (LaunchControl positioning depends on it).
   const dialRef = useRef(null);
-  // Cockpit layout: the dial sits near the viewport top at rest, so the
-  // mapping is 'dial-top reaches viewport-top' (0 — staged, idle) through
-  // 'dial-bottom exits viewport-top' (1). At scrollY=0 progress clamps to 0
-  // and the needle genuinely idles at 1,500 rpm.
-  const { scrollYProgress: dialProgress } = useScroll({
-    target: dialRef,
-    offset: ['start start', 'end start'],
-  });
 
   // ── LAUNCH CONTROL (hold-to-launch) ──────────────────────────────
   // BITKRAFT-style hold gate. holdMV is driven by the LaunchControl
@@ -316,14 +315,17 @@ function HomePageInner() {
   // share one needle with no extra render loops. Tree restarts via
   // runSignal; an early release lights the red foul bulb.
   const holdMV = useMotionValue(0);
-  // Idle curve: raw scroll progress rests around 0.1-0.2 with the dial high
-  // in the hero, which parked the needle at ~9k rpm and the LCD mid-run on
-  // first paint. Remap so <=0.22 reads as staged-and-idle (1,500 rpm); the
-  // needle only builds once the user genuinely scrolls (or holds to launch).
-  const dialCurved = useTransform(dialProgress, [0.05, 1], [0, 1]);
+  // heroProgress is 0 at rest (hero top pinned to viewport top), so a tiny
+  // 2% dead-zone keeps the genuine 1,500-rpm idle on first paint while the
+  // needle starts building on the very first wheel tick. Full sweep lands
+  // by 55% of the hero's exit — the run plays while the dial is still
+  // prominently on screen instead of after it has left.
+  const dialCurved = useTransform(heroProgress, [0.02, 0.55], [0, 1], { clamp: true });
   const dialDrive = useTransform([dialCurved, holdMV], ([a, b]) => Math.max(a, b));
   const [treeRun, setTreeRun] = useState(0);
   const [treeFoul, setTreeFoul] = useState(false);
+  // Increments on a clean hold-to-launch release → TronGrid streak burst.
+  const [launchSignal, setLaunchSignal] = useState(0);
 
   return (
     <div className="min-h-screen bg-black text-white antialiased overflow-x-clip">
@@ -335,6 +337,17 @@ function HomePageInner() {
       />
       <HudFrame />
       <SiteNav />
+      <SectionRail
+        sections={[
+          { id: 'telemetry', label: 'Telemetry' },
+          { id: 'manifesto', label: 'Manifesto' },
+          { id: 'why', label: 'Why MotoQuant' },
+          { id: 'simulator', label: 'Live simulator' },
+          { id: 'physics', label: 'Physics' },
+          { id: 'intelligence', label: 'Intelligence' },
+          { id: 'validation', label: 'Validation' },
+        ]}
+      />
 
       {/* ─── HERO ─────────────────────────────────────────────── */}
       <section
@@ -351,6 +364,14 @@ function HomePageInner() {
             }}
           />
           <div className="absolute inset-0 bg-grid-fade opacity-25" />
+          {/* Tron floor — live light-cycle traffic; a clean hold-to-launch
+              release fires a burst across it (launchSignal). Deliberately the
+              lightweight 2D canvas: a WebGL three.js arena was built and
+              pulled same-day after operator preview feedback (visible lag on
+              laptop-class GPUs + didn't earn its keep visually). Canvas
+              renders nothing until mounted, so the static grid above is the
+              SSR / reduced-motion base layer. */}
+          <TronGrid launchSignal={launchSignal} className="opacity-80" />
           <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black to-transparent" />
         </div>
 
@@ -375,11 +396,15 @@ function HomePageInner() {
                 <PhysicsDial progress={dialDrive} className="w-full h-auto" />
               </div>
 
-          {/* Hero copy — beside the tree, under the dial */}
+          {/* Hero copy — beside the tree, under the dial.
+              Cockpit v3 declutter: the "Built in India" badge pill became a
+              small mono eyebrow, and the pill row below the subhead is capped
+              at two (accuracy claim + solver signature) so the lg column
+              reads eyebrow → h1 → subhead → pills → CTAs. */}
           <div className="relative z-10 mt-5 sm:mt-6 max-w-2xl text-center lg:text-left">
             <Reveal y={20} duration={0.7}>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-brand-orange/40 bg-brand-orange/10 text-[10px] sm:text-xs font-mono uppercase tracking-[0.25em] text-brand-orange">
-                Proudly Built in India
+              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-brand-orange/80">
+                Proudly built in India
               </div>
             </Reveal>
 
@@ -423,9 +448,6 @@ function HomePageInner() {
 
             <Reveal y={16} duration={0.7} delay={0.22}>
               <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-mono justify-center lg:justify-start">
-                <span className="px-3 py-1.5 rounded-full border border-white/10 text-white/55">
-                  Aamby Valley · MMRT · Kari · Hyderabad
-                </span>
                 <span className="px-3 py-1.5 rounded-full border border-brand-orange/30 text-brand-orange">
                   ±0.015s mean bias across 216 benchmarks
                 </span>
@@ -450,6 +472,7 @@ function HomePageInner() {
                   holdMV={holdMV}
                   onTreeRun={() => setTreeRun((c) => c + 1)}
                   onFoul={setTreeFoul}
+                  onLaunch={() => setLaunchSignal((c) => c + 1)}
                 />
               </div>
             </Reveal>
@@ -518,7 +541,7 @@ function HomePageInner() {
             ].map(({ icon: Icon, title, body, href, cta }) => (
               <StaggerItem
                 key={title}
-                className="group rounded-xl border border-brand-orange/20 hover:border-brand-orange/50 transition-colors bg-white/[0.02] p-8"
+                className="group card card-hover p-5 md:p-6"
               >
                 <div className="flex items-center gap-3 mb-4">
                   <span className="w-10 h-10 rounded-md bg-brand-orange/10 border border-brand-orange/30 flex items-center justify-center">
@@ -713,12 +736,12 @@ function HomePageInner() {
         <div className="max-w-7xl mx-auto">
           <Reveal>
             <div className="mb-12 max-w-3xl">
-              <CodeComment className="mb-5">cross-checking 79 weighted benchmarks</CodeComment>
+              <CodeComment className="mb-5">cross-checking 216 weighted benchmarks</CodeComment>
               <h2 className="font-display font-bold text-4xl md:text-5xl text-white tracking-tight">
                 Validated on Real Telemetry
               </h2>
               <p className="mt-4 text-white/70 text-lg">
-                We don&rsquo;t just predict — we measure. 79 weighted benchmarks
+                We don&rsquo;t just predict — we measure. 216 weighted benchmarks
                 against published Cycle World, Sport Rider, MCN, and
                 Motorcyclist tests. Reference baselines preserved exactly to
                 four decimals across every commit.
@@ -738,7 +761,7 @@ function HomePageInner() {
                 <p className="text-white/60 text-sm leading-relaxed">
                   Every code change is gated on these three quarter-mile times
                   reproducing exactly to the fourth decimal place. They have
-                  not drifted in 47 days.
+                  not drifted since April 2026.
                 </p>
                 <ReferenceBaselines />
               </div>
@@ -750,8 +773,8 @@ function HomePageInner() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
               {[
                 { num: '216',     label: 'Bikes benchmarked' },
-                { num: '42',      label: 'Within ±0.10s' },
-                { num: '81',      label: 'Within ±0.20s' },
+                { num: '62',      label: 'Within ±0.10s' },
+                { num: '113',     label: 'Within ±0.20s' },
                 { num: '±0.006s', label: 'Top 10 mean error' },
               ].map((s) => (
                 <div key={s.label} className="rounded-xl border border-brand-orange/20 bg-white/[0.02] p-5 text-center">
@@ -842,7 +865,7 @@ function HomePageInner() {
       </section>
 
       {/* ─── CTA — green-light moment ────────────────────────── */}
-      <section className="relative py-32 px-6 border-t border-brand-orange/10 overflow-hidden">
+      <section className="relative py-20 md:py-28 px-6 border-t border-brand-orange/10 overflow-hidden">
         <div
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full pointer-events-none"
           style={{

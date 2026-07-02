@@ -152,36 +152,77 @@ class PartsRepository:
             raise ValueError(f"Unknown parts category: {category_name}")
         category_id = cat_row["id"]
 
+        col_names = (
+            "category_id",
+            "brand",
+            "model_name",
+            "part_number",
+            "fitment_rules",
+            "compatible_bikes",
+            "fitment_universal",
+            "fitment_notes",
+            "specifications",
+            "param_overrides",
+            "param_deltas",
+            "param_multipliers",
+            "price_inr",
+            "price_usd",
+            "mrp_inr",
+            "retailer",
+            "retailer_url",
+            "availability",
+            "estimated_delivery_days",
+        )
+        col_vals = (
+            category_id,
+            brand,
+            model_name,
+            part_number,
+            json.dumps(fitment_rules) if fitment_rules else None,
+            json.dumps(compatible_bike_ids) if compatible_bike_ids else None,
+            1 if fitment_universal else 0,
+            fitment_notes,
+            json.dumps(specifications),
+            json.dumps(param_overrides) if param_overrides else None,
+            json.dumps(param_deltas) if param_deltas else None,
+            json.dumps(param_multipliers) if param_multipliers else None,
+            price_inr,
+            price_usd,
+            mrp_inr,
+            retailer,
+            retailer_url,
+            availability,
+            estimated_delivery_days,
+        )
+
+        # ID-preserving upsert on UNIQUE(brand, part_number). INSERT OR REPLACE
+        # would DELETE+re-INSERT with a new id, silently wiping any part_prices
+        # history (cascades) and dangling sim_runs.applied_parts references to
+        # the old id. Only dedupe when part_number is set — a NULL part_number
+        # can't collide on the UNIQUE (SQLite treats NULLs as distinct), so
+        # those fall through to a plain INSERT as before.
+        existing = None
+        if part_number is not None:
+            existing = self._conn.execute(
+                "SELECT id FROM parts WHERE brand = ? AND part_number = ?",
+                (brand, part_number),
+            ).fetchone()
+        if existing:
+            part_id = existing["id"] if hasattr(existing, "keys") else existing[0]
+            assignments = ", ".join(f"{c} = ?" for c in col_names)
+            self._conn.execute(
+                f"UPDATE parts SET {assignments}, last_price_check = date('now') "
+                "WHERE id = ?",
+                [*col_vals, part_id],
+            )
+            self._conn.commit()
+            return part_id
+
+        placeholders = ", ".join(["?"] * len(col_names))
         cur = self._conn.execute(
-            """INSERT OR REPLACE INTO parts
-               (category_id, brand, model_name, part_number,
-                fitment_rules, compatible_bikes, fitment_universal, fitment_notes,
-                specifications, param_overrides, param_deltas, param_multipliers,
-                price_inr, price_usd, mrp_inr,
-                retailer, retailer_url, availability,
-                estimated_delivery_days, last_price_check)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, date('now'))""",
-            (
-                category_id,
-                brand,
-                model_name,
-                part_number,
-                json.dumps(fitment_rules) if fitment_rules else None,
-                json.dumps(compatible_bike_ids) if compatible_bike_ids else None,
-                1 if fitment_universal else 0,
-                fitment_notes,
-                json.dumps(specifications),
-                json.dumps(param_overrides) if param_overrides else None,
-                json.dumps(param_deltas) if param_deltas else None,
-                json.dumps(param_multipliers) if param_multipliers else None,
-                price_inr,
-                price_usd,
-                mrp_inr,
-                retailer,
-                retailer_url,
-                availability,
-                estimated_delivery_days,
-            ),
+            f"INSERT INTO parts ({', '.join(col_names)}, last_price_check) "
+            f"VALUES ({placeholders}, date('now'))",
+            col_vals,
         )
         self._conn.commit()
         return cur.lastrowid

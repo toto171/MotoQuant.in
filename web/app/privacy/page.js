@@ -5,7 +5,7 @@
 
 import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
-import CodeComment from "../../components/CodeComment";
+import PageHero from "../../components/PageHero";
 
 export const metadata = {
   title: "Privacy Policy — MotoQuant Pro",
@@ -16,15 +16,20 @@ export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       <SiteNav />
-      <main className="pt-32 pb-20 px-4 sm:px-6">
-        <div className="mx-auto max-w-3xl">
-          <CodeComment className="mb-3">legal · privacy · dpdp act</CodeComment>
-          <h1 className="font-display font-bold text-4xl md:text-5xl text-white tracking-tight mt-0">
-            Privacy Policy
-          </h1>
-          <p className="text-white/45 text-sm font-mono mt-2">Last updated: 24 April 2026</p>
 
-        <p className="text-white/80 text-sm leading-relaxed mt-6">
+      <PageHero
+        kicker="legal · privacy · dpdp act"
+        badge="Legal"
+        title="Privacy Policy"
+        sub="What we collect, how we use it, and the rights you keep."
+        className="border-b border-brand-orange/10 pb-8 md:pb-10"
+      >
+        <p className="label-mono">Last updated · 24 April 2026</p>
+      </PageHero>
+
+      <main id="main" className="pt-10 pb-20 px-4 sm:px-6">
+        <div className="mx-auto max-w-3xl">
+        <p className="text-white/80 text-sm leading-relaxed">
           MotoQuant Pro ("we", "us") is committed to protecting your personal data.
           This policy describes what data we collect, how we use it, and your rights
           under applicable Indian data protection principles and the Information
@@ -127,7 +132,7 @@ export default function PrivacyPage() {
           </p>
         </Section>
 
-        <div className="mt-12 border-t border-white/10 pt-8 text-sm text-white/55">
+        <div className="card mt-8 p-5 md:p-6 text-sm text-white/55">
           <p>MotoQuant Pro · Pune, Maharashtra, India</p>
           <p>Contact: <a href="mailto:motoquant@gmail.com" className="text-brand-accent hover:text-white transition-colors">motoquant@gmail.com</a></p>
           <div className="mt-4 flex gap-4">
@@ -144,10 +149,10 @@ export default function PrivacyPage() {
 
 function Section({ title, children }) {
   return (
-    <div className="mt-8">
+    <section className="card mt-6 p-5 md:p-6">
       <h2 className="font-display font-bold text-xl text-white mb-3 border-l-2 border-brand-orange pl-3">{title}</h2>
       <div className="space-y-3">{children}</div>
-    </div>
+    </section>
   );
 }
 

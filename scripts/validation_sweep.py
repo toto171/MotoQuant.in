@@ -424,9 +424,9 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         "Triumph",
         "Daytona 675",
         2013,
-        10.32,
-        219,
-        "Sport Rider (Cycle World sportbike-performance-numbers, timing-strip 2013)",
+        10.70,
+        216,
+        "MotorBikeCatalog / MotoStatz aggregate (~10.70 @ 134 mph); the SR 10.32 timing-strip run is a pro-rider outlier vs mainstream instrumented data",
     ),
     # BMW R nineT (1170 cc boxer-twin retro, 2014-2020) — Cycle World
     # December 2014 comparison test (R nineT vs CB1100 vs Indian Scout vs
@@ -1486,9 +1486,9 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         "Kawasaki",
         "Ninja 1000",
         2011,
-        11.30,
+        10.40,
         199,
-        "Cycle World 2011 (Sport Rider sportbike-performance-numbers, timing-strip 2011)",
+        "MCN 2011 (Bruce Dunn instrumented; the old SR 11.30 row is contradicted by the 25lb-heavier 2010 Z1000 at 10.55 and the 2022 1000SX Dragy 10.81)",
     ),
     # Yamaha FZ6 '04 → catalog FZ6 Fazer covers 2004-2009. CW timing
     # strip: 11.53s @ 117.4 mph (~188.9 km/h). 600 cc detuned R6 mill,
@@ -2215,44 +2215,80 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # the ET sits at the slow end of the litre-cluster's small-bore neighbours
     # and is internally consistent with the Ninja 400 (12.98s) being slower.
     # URL: https://cornerspeedapp.com/blog/kawasaki-zx4rr-review
-    ("Kawasaki", "Ninja ZX-4RR", 2023, 12.00, 177,
-     "Corner Speed 2026 (Cycle World dyno-referenced, low-12s @ 110 mph)"),
+    (
+        "Kawasaki",
+        "Ninja ZX-4RR",
+        2023,
+        12.00,
+        177,
+        "Corner Speed 2026 (Cycle World dyno-referenced, low-12s @ 110 mph)",
+    ),
     # Kawasaki ZX-6R 636 (636cc I4 supersport, 2024-2025) — MotoStatz Dragy
     # instrumented: 10.74s @ 134 mph (216 km/h). Same Dragy methodology as the
     # ZX-6R 2009 / CBR 600RR / Street Triple 765 RS entries already in this
     # list. The 2024 636 is the updated Ninja ZX-6R catalog row.
     # URL: https://motostatz.com/kawasaki-zx-6r-636-acceleration-top-speed/
-    ("Kawasaki", "ZX-6R", 2024, 10.74, 216,
-     "MotoStatz 2024 (Dragy, stock instrumented)"),
+    (
+        "Kawasaki",
+        "ZX-6R",
+        2024,
+        10.74,
+        216,
+        "MotoStatz 2024 (Dragy, stock instrumented)",
+    ),
     # Kawasaki Z900RS (948cc I4 retro-naked, 2018-2026) — MotoStatz Dragy
     # instrumented: 11.35s @ 120.7 mph (194 km/h). Heavier/softer-tuned retro
     # version of the Z900 (10.95s @ 198 already in list); +0.40s is internally
     # consistent with the ~14 kg + restyle. Same Dragy source bar.
     # URL: https://motostatz.com/kawasaki-z900rs-top-speed-acceleration/
-    ("Kawasaki", "Z900RS", 2020, 11.35, 194,
-     "MotoStatz 2022 (Dragy, stock instrumented)"),
+    (
+        "Kawasaki",
+        "Z900RS",
+        2020,
+        11.35,
+        194,
+        "MotoStatz 2022 (Dragy, stock instrumented)",
+    ),
     # Kawasaki Z650RS (649cc parallel-twin retro-naked, 2022-2026) — MotoStatz
     # Dragy on the Z650 platform (shared engine/chassis): 12.45s @ 105 mph
     # (169 km/h). Base Z650 (12.40 @ 110) already in list; the RS is the same
     # mechanicals with retro bodywork, so the Z650 Dragy figure applies.
     # URL: https://motostatz.com/kawasaki-z650-acceleration-top-speed-review/
-    ("Kawasaki", "Z650RS", 2022, 12.45, 169,
-     "MotoStatz 2022 (Dragy, Z650 platform, 105 mph trap)"),
+    (
+        "Kawasaki",
+        "Z650RS",
+        2022,
+        12.45,
+        169,
+        "MotoStatz 2022 (Dragy, Z650 platform, 105 mph trap)",
+    ),
     # KTM 390 Duke Gen 3 (399cc single naked, 2024-2026) — MotoStatz Dragy
     # instrumented: 13.30s @ 96.3 mph (155 km/h). The new 399cc Gen-3 engine
     # (45 hp) — a distinct catalog row from the 373cc "Duke 390" (13-14s).
     # Same Dragy source bar; KTM-claimed 0-100 5.9s corroborates.
     # URL: https://motostatz.com/ktm-390-duke-acceleration/
-    ("KTM", "390 Duke Gen 3", 2024, 13.30, 155,
-     "MotoStatz 2024 (Dragy, stock instrumented, 96.3 mph trap)"),
+    (
+        "KTM",
+        "390 Duke Gen 3",
+        2024,
+        13.30,
+        155,
+        "MotoStatz 2024 (Dragy, stock instrumented, 96.3 mph trap)",
+    ),
     # Honda CRF1100L Africa Twin (1084cc parallel-twin ADV, 2020-2026) —
     # AfricaTwinForum drag-strip timeslip: 12.7s @ 103 mph (166 km/h), a real
     # tune-event pass (forum/timeslip tier, 0.3). MotorBikeCatalog ProfessCars
     # estimate (12.0s) corroborates the ballpark. Trap 103 mph consistent with
     # the ~100 hp ADV twin at the line.
     # URL: https://www.africatwinforum.com/threads/1-4-mile-for-kicks.40087/
-    ("Honda", "CRF1100L Africa Twin", 2020, 12.70, 166,
-     "AfricaTwinForum timeslip 2020 (drag strip, 103 mph trap)"),
+    (
+        "Honda",
+        "CRF1100L Africa Twin",
+        2020,
+        12.70,
+        166,
+        "AfricaTwinForum timeslip 2020 (drag strip, 103 mph trap)",
+    ),
     # Ducati Diavel V4 (1158cc V4 power-cruiser, 2023-2026) — MCN's Bruce Dunn
     # instrumented testing logged regular 10.3s standing quarters with ease.
     # MCN/Bruce-Dunn is the same credentialed magazine source cited for the
@@ -2261,37 +2297,67 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # the older 1198 V-twin Diavel ran 10.46 @ 133 on MotoStatz, the V4 is
     # quicker). 0-62 in 2.52s on the RS variant corroborates the launch grunt.
     # URL: youtube MCN 2023 Ducati Diavel V4 acceleration test (Bruce Dunn)
-    ("Ducati", "Diavel V4", 2023, 10.30, 225,
-     "MCN 2023 (Bruce Dunn instrumented, regular 10.3s standing quarters)"),
+    (
+        "Ducati",
+        "Diavel V4",
+        2023,
+        10.30,
+        225,
+        "MCN 2023 (Bruce Dunn instrumented, regular 10.3s standing quarters)",
+    ),
     # Yamaha XSR900 GP (890cc CP3 triple faired-sport, 2024-2026) — MotoStatz
     # Dragy on the XSR900 platform (shared CP3 engine/chassis): 11.15s @ 125.5
     # mph (202 km/h). The base XSR900 (11.15 @ 202) is already in this list;
     # the GP adds a fairing + clip-ons on identical mechanicals (marginally
     # better aero, so the figure is a conservative match).
     # URL: https://motostatz.com/yamaha-xsr900-top-speed-acceleration/
-    ("Yamaha", "XSR900 GP", 2024, 11.15, 202,
-     "MotoStatz 2022 (Dragy, XSR900 CP3 platform, 125.5 mph trap)"),
+    (
+        "Yamaha",
+        "XSR900 GP",
+        2024,
+        11.15,
+        202,
+        "MotoStatz 2022 (Dragy, XSR900 CP3 platform, 125.5 mph trap)",
+    ),
     # Royal Enfield Interceptor 650 (648cc parallel-twin, 2018-2024) — DERIVED
     # (0.1) for coverage only. IndianAutosBlog/FastestLaps stock 0-100 km/h
     # 5.92s ×1.6 ~= 13.8s. Same 648cc twin as the Continental GT 650 (13.90 @
     # 155 FastestLaps-verified, already in list); the Interceptor is the more
     # upright variant (slightly higher Cd), so ~13.8s is consistent.
     # URL: https://indianautosblog.com/royal-enfield-interceptor-650-acceleration-p323051
-    ("Royal Enfield", "Interceptor 650", 2019, 13.80, 150,
-     "DERIVED (0-100 5.92s x1.6 stock, IndianAutosBlog; 648cc twin)"),
+    (
+        "Royal Enfield",
+        "Interceptor 650",
+        2019,
+        13.80,
+        150,
+        "DERIVED (0-100 5.92s x1.6 stock, IndianAutosBlog; 648cc twin)",
+    ),
     # Bajaj Dominar 400 (373cc single naked, 2019-2024) — DERIVED (0.1) for
     # coverage. CarBlogIndia stock 0-100 km/h 8.23s ×1.6 ~= 13.2s; top speed
     # 148 km/h, trap ~140 km/h. Fills the Indian 350-400 single cluster.
     # URL: https://www.carblogindia.com/bajaj-dominar-400-top-speed-0-100/
-    ("Bajaj", "Dominar 400", 2019, 13.20, 140,
-     "DERIVED (0-100 8.23s x1.6, CarBlogIndia; top speed 148 km/h)"),
+    (
+        "Bajaj",
+        "Dominar 400",
+        2019,
+        13.20,
+        140,
+        "DERIVED (0-100 8.23s x1.6, CarBlogIndia; top speed 148 km/h)",
+    ),
     # Royal Enfield Classic 350 (349cc single cruiser, 2021-2026) — DERIVED
     # (0.1) for coverage. ZigWheels/350cc 0-100 km/h ~14s ×1.6 ~= 22.4s; the
     # 20 hp J-platform single tops out ~115-120 km/h, so the trap is near top
     # speed. Anchors the slowest end of the Indian-cruiser cluster.
     # URL: https://www.zigwheels.com/newbikes/faqs/what-is-the-top-speed-of-royal-enfield-classic-350
-    ("Royal Enfield", "Classic 350", 2021, 22.50, 115,
-     "DERIVED (0-100 ~14s x1.6, ZigWheels; top speed ~115-120 km/h)"),
+    (
+        "Royal Enfield",
+        "Classic 350",
+        2021,
+        22.50,
+        115,
+        "DERIVED (0-100 ~14s x1.6, ZigWheels; top speed ~115-120 km/h)",
+    ),
     # ── 2026-06-13 benchmark-coverage agent (pass 2) ─────────────────────────
     # More coverage rows. Same source bar. Platform-substitution rows (an "S"/
     # "SP"/"Factory"/"RS" variant given its mechanically-identical base bike's
@@ -2305,113 +2371,226 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # Base Streetfighter V4 (10.10 @ 235 CW) already in list; the S adds
     # Ohlins semi-active on identical engine/mass.
     # URL: https://motostatz.com/ducati-streetfigher-v4-acceleration-top-speed/
-    ("Ducati", "Streetfighter V4S", 2024, 10.20, 240,
-     "MotoStatz (Dragy, Streetfighter V4 1103 platform, 149 mph trap)"),
+    (
+        "Ducati",
+        "Streetfighter V4S",
+        2024,
+        10.20,
+        240,
+        "MotoStatz (Dragy, Streetfighter V4 1103 platform, 149 mph trap)",
+    ),
     # Ducati Streetfighter V4 SP (1103cc V4, 2022-2024) — same MotoStatz V4
     # platform figure; the SP is the carbon-wheel track-spec V4 (lighter,
     # so 10.20 is conservative).
-    ("Ducati", "Streetfighter V4 SP", 2022, 10.20, 240,
-     "MotoStatz (Dragy, Streetfighter V4 1103 platform, 149 mph trap)"),
+    (
+        "Ducati",
+        "Streetfighter V4 SP",
+        2022,
+        10.20,
+        240,
+        "MotoStatz (Dragy, Streetfighter V4 1103 platform, 149 mph trap)",
+    ),
     # Aprilia Tuono 660 Factory (659cc parallel-twin naked, 2022-2026) —
     # MotoStatz Dragy on the Tuono 660 platform: 11.33s @ 120 mph (193 km/h).
     # The Factory is the up-spec Tuono 660 (same 100 hp 660 twin, Ohlins +
     # slightly less weight). Sibling RS 660 (11.24) already in list.
     # URL: https://motostatz.com/aprilia-tuono-660-top-speed-acceleration/
-    ("Aprilia", "Tuono 660 Factory", 2022, 11.33, 193,
-     "MotoStatz (Dragy, Tuono 660 platform, 120 mph trap)"),
+    (
+        "Aprilia",
+        "Tuono 660 Factory",
+        2022,
+        11.33,
+        193,
+        "MotoStatz (Dragy, Tuono 660 platform, 120 mph trap)",
+    ),
     # KTM RC 390 (373cc single sport, 2022-2024) — MotoStatz Dragy: 13.16s @
     # 99 mph (159 km/h). The faired RC sibling of the Duke 390; same 373cc
     # engine. (The existing "RC 390 2017" row binds the older catalog spec;
     # this is the 2022-2024 catalog entry.)
     # URL: https://motostatz.com/ktm-rc-390-top-speed-and-acceleration/
-    ("KTM", "RC 390", 2022, 13.16, 159,
-     "MotoStatz (Dragy, RC 390 373cc, 99 mph trap)"),
+    ("KTM", "RC 390", 2022, 13.16, 159, "MotoStatz (Dragy, RC 390 373cc, 99 mph trap)"),
     # KTM RC 390 Gen 3 (399cc single sport, 2024-2026) — same MotoStatz RC 390
     # Dragy figure; the Gen-3 399cc engine (the 390 Duke Gen 3 ran 13.30 on
     # MotoStatz) lands the RC at ~13.1-13.3s with its fairing aero edge.
-    ("KTM", "RC 390 Gen 3", 2024, 13.16, 159,
-     "MotoStatz (Dragy, RC 390 platform; Gen3 399cc engine)"),
+    (
+        "KTM",
+        "RC 390 Gen 3",
+        2024,
+        13.16,
+        159,
+        "MotoStatz (Dragy, RC 390 platform; Gen3 399cc engine)",
+    ),
     # Triumph Street Triple 765 R (765cc triple naked, 2023-2026) — MotoStatz
     # Dragy on the 765 RS platform (10.79 @ 132, already in list); the R is
     # ~10 hp down on the RS so ~10.9s. Same engine/chassis.
     # URL: https://motostatz.com/triumph-street-triple-rs-top-speed-acceleration/
-    ("Triumph", "Street Triple 765 R", 2023, 10.90, 210,
-     "MotoStatz (Dragy, Street Triple 765 RS platform; R ~10hp down)"),
+    (
+        "Triumph",
+        "Street Triple 765 R",
+        2023,
+        10.90,
+        210,
+        "MotoStatz (Dragy, Street Triple 765 RS platform; R ~10hp down)",
+    ),
     # Ducati Multistrada V4 (1158cc V4 ADV, 2021-2026) — MotoStatz Dragy
     # instrumented: 10.82s @ 131 mph (211 km/h). Same Dragy source bar.
     # URL: https://motostatz.com/ducati-multistrada-v4-top-speed-acceleration/
-    ("Ducati", "Multistrada V4", 2021, 10.82, 211,
-     "MotoStatz (Dragy, stock instrumented, 131 mph trap)"),
+    (
+        "Ducati",
+        "Multistrada V4",
+        2021,
+        10.82,
+        211,
+        "MotoStatz (Dragy, stock instrumented, 131 mph trap)",
+    ),
     # Ducati Multistrada V4 RS (1158cc V4 ADV, 2024-2026) — same MotoStatz V4
     # platform figure; the RS is the Streetfighter-engined lighter variant
     # (so 10.82 is conservative).
-    ("Ducati", "Multistrada V4 RS", 2024, 10.82, 211,
-     "MotoStatz (Dragy, Multistrada V4 1158 platform; RS lighter)"),
+    (
+        "Ducati",
+        "Multistrada V4 RS",
+        2024,
+        10.82,
+        211,
+        "MotoStatz (Dragy, Multistrada V4 1158 platform; RS lighter)",
+    ),
     # Ducati DesertX (937cc V-twin ADV, 2022-2026) — MotoStatz Dragy: 11.84s @
     # 110.5 mph (178 km/h). 110 hp Testastretta in a tall ADV.
     # URL: https://motostatz.com/ducati-desertx-top-speed-acceleration/
-    ("Ducati", "DesertX", 2022, 11.84, 178,
-     "MotoStatz (Dragy, stock instrumented, 110.5 mph trap)"),
+    (
+        "Ducati",
+        "DesertX",
+        2022,
+        11.84,
+        178,
+        "MotoStatz (Dragy, stock instrumented, 110.5 mph trap)",
+    ),
     # KTM 890 Duke (889cc LC8c parallel-twin naked, 2020-2023) — MotoStatz
     # Dragy: 11.00s @ 128 mph (206 km/h). Same engine as the 890 Duke R
     # (11.00 @ 208 already in list) in slightly lower state of tune.
     # URL: https://motostatz.com/ktm-890-duke-top-speed-acceleration/
-    ("KTM", "890 Duke", 2020, 11.00, 206,
-     "MotoStatz (Dragy, 890 Duke LC8c, 128 mph trap)"),
+    (
+        "KTM",
+        "890 Duke",
+        2020,
+        11.00,
+        206,
+        "MotoStatz (Dragy, 890 Duke LC8c, 128 mph trap)",
+    ),
     # KTM 890 SMT (889cc LC8c supermoto-tourer, 2023-2026) — same MotoStatz
     # 890 LC8c platform; the SMT is heavier (touring bodywork/tank) so ~11.2s.
-    ("KTM", "890 SMT", 2023, 11.20, 205,
-     "MotoStatz (Dragy, 890 LC8c platform; SMT heavier supermoto-tourer)"),
+    (
+        "KTM",
+        "890 SMT",
+        2023,
+        11.20,
+        205,
+        "MotoStatz (Dragy, 890 LC8c platform; SMT heavier supermoto-tourer)",
+    ),
     # Yamaha MT-09 Y-AMT (890cc CP3 naked, automated transmission, 2024-2026) —
     # MotoStatz Dragy on the Y-AMT: 11.20s @ 121 mph (195 km/h). The auto-trans
     # launch is slower off the line than the manual MT-09 (10.95 CW), hence
     # +0.25s; MotoStatz logged it explicitly on this AMT variant.
     # URL: https://motostatz.com/yamaha-mt-09-y-amt-acceleration-and-top-speed-test/
-    ("Yamaha", "MT-09 Y-AMT", 2024, 11.20, 195,
-     "MotoStatz 2024 (Dragy, Y-AMT auto-trans launch, 121 mph trap)"),
+    (
+        "Yamaha",
+        "MT-09 Y-AMT",
+        2024,
+        11.20,
+        195,
+        "MotoStatz 2024 (Dragy, Y-AMT auto-trans launch, 121 mph trap)",
+    ),
     # Honda CB1000R (998cc I4 naked, 2021-2024) — DERIVED (0.1) for coverage.
     # ProfessCars/MotorBikeCatalog estimate ~10.8s; 143 hp Fireblade-derived
     # I4 in a ~212 kg naked. Trap ~205 km/h estimated.
     # URL: https://www.motorbikecatalog.com/performance/2024/233000/honda_cb1000r.html
-    ("Honda", "CB1000R", 2021, 10.80, 205,
-     "DERIVED (ProfessCars/MotorBikeCatalog est ~10.8s; 143hp I4 naked)"),
+    (
+        "Honda",
+        "CB1000R",
+        2021,
+        10.80,
+        205,
+        "DERIVED (ProfessCars/MotorBikeCatalog est ~10.8s; 143hp I4 naked)",
+    ),
     # Honda CB750 Hornet (755cc parallel-twin naked, 2023-2026) — DERIVED (0.1).
     # MotorBikeCatalog estimate ~11.8s; 90 hp twin, top ~131 mph (211 km/h).
     # URL: https://www.motorbikecatalog.com/performance/2023/237410/honda_cb750_hornet.html
-    ("Honda", "CB750 Hornet", 2023, 11.80, 211,
-     "DERIVED (MotorBikeCatalog est ~11.8s; 90hp 755 twin, top ~131 mph)"),
+    (
+        "Honda",
+        "CB750 Hornet",
+        2023,
+        11.80,
+        211,
+        "DERIVED (MotorBikeCatalog est ~11.8s; 90hp 755 twin, top ~131 mph)",
+    ),
     # Royal Enfield Super Meteor 650 (648cc parallel-twin cruiser, 2023-2024) —
     # DERIVED (0.1). Same 648 twin as the GT 650 (13.90 in list); the heavier
     # cruiser body lands it at ~13.9s (0-100 km/h ~6s ×1.6).
     # URL: https://www.bennetts.co.uk/bikesocial/reviews/bikes/royal-enfield/super-meteor-650-2023-review
-    ("Royal Enfield", "Super Meteor 650", 2023, 13.90, 150,
-     "DERIVED (648 twin cruiser, 0-100 ~6s x1.6; Bennetts/BikeDekho)"),
+    (
+        "Royal Enfield",
+        "Super Meteor 650",
+        2023,
+        13.90,
+        150,
+        "DERIVED (648 twin cruiser, 0-100 ~6s x1.6; Bennetts/BikeDekho)",
+    ),
     # Royal Enfield Shotgun 650 (648cc parallel-twin cruiser, 2024-2026) —
     # DERIVED (0.1). Same 648 twin / Super Meteor 650 platform.
-    ("Royal Enfield", "Shotgun 650", 2024, 13.90, 150,
-     "DERIVED (648 twin platform, Super Meteor 650 sibling)"),
+    (
+        "Royal Enfield",
+        "Shotgun 650",
+        2024,
+        13.90,
+        150,
+        "DERIVED (648 twin platform, Super Meteor 650 sibling)",
+    ),
     # Royal Enfield Classic 650 (648cc parallel-twin cruiser, 2025-2026) —
     # DERIVED (0.1). Same 648 twin, heaviest of the 650 cruisers (classic
     # bodywork), so ~14.1s.
-    ("Royal Enfield", "Classic 650", 2025, 14.10, 148,
-     "DERIVED (648 twin, heavy classic cruiser body)"),
+    (
+        "Royal Enfield",
+        "Classic 650",
+        2025,
+        14.10,
+        148,
+        "DERIVED (648 twin, heavy classic cruiser body)",
+    ),
     # Bajaj Pulsar NS 200 (199cc single naked, 2017-2024) — DERIVED (0.1).
     # ZigWheels/TopSpeedIndia 0-100 km/h ~9.7-10s ×1.6 ~= 15.7s. (Distinct
     # catalog spec from the "Pulsar NS200 2012" BS4 row already in list.)
     # URL: https://www.zigwheels.com/newbikes/faqs/milege-performance/1817964/
-    ("Bajaj", "Pulsar NS 200", 2017, 15.70, 130,
-     "DERIVED (0-100 ~9.7-10s x1.6, ZigWheels/TopSpeedIndia)"),
+    (
+        "Bajaj",
+        "Pulsar NS 200",
+        2017,
+        15.70,
+        130,
+        "DERIVED (0-100 ~9.7-10s x1.6, ZigWheels/TopSpeedIndia)",
+    ),
     # Bajaj Pulsar NS200 BS6 (199.5cc single naked, 2020-2026) — DERIVED (0.1).
     # BikeDekho BS6 0-100 km/h ~10.3s ×1.6 ~= 16.0s (BS6 is ~0.5s slower than
     # BS4 to 100 per BikeDekho's VBox comparison).
     # URL: https://www.bikedekho.com/news/tvs-apache-rtr-200-4v-bs4-vs-bs6-performance-numbers-compared
-    ("Bajaj", "Pulsar NS200 BS6", 2020, 16.00, 128,
-     "DERIVED (0-100 ~10.3s x1.6 BS6, BikeDekho)"),
+    (
+        "Bajaj",
+        "Pulsar NS200 BS6",
+        2020,
+        16.00,
+        128,
+        "DERIVED (0-100 ~10.3s x1.6 BS6, BikeDekho)",
+    ),
     # TVS Apache RTR 200 (197.75cc single naked, 2007-2015) — DERIVED (0.1).
     # IndianAutosBlog VBox 0-100 km/h ~9-10s ×1.6 ~= 16.0s for the 2V.
     # URL: https://indianautosblog.com/tvs-apache-rtr-200-4v-top-speed-test-p323630
-    ("TVS", "Apache RTR 200", 2010, 16.00, 125,
-     "DERIVED (0-100 ~9-10s x1.6 2V VBox, IndianAutosBlog)"),
+    (
+        "TVS",
+        "Apache RTR 200",
+        2010,
+        16.00,
+        125,
+        "DERIVED (0-100 ~9-10s x1.6 2V VBox, IndianAutosBlog)",
+    ),
     # ── 2026-06-13 benchmark-coverage agent (pass 3) ─────────────────────────
     # Same source bar / platform-substitution + DERIVED policy as passes 1-2.
     #
@@ -2420,108 +2599,215 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # 0-60 in 2.9s. The RR is the 147hp up-spec F3; same 798 triple, so 10.5
     # is conservative. Magazine tier (0.7).
     # URL: https://fastestlaps.com/models/mv-augusta-f3-800 (Cycle World test)
-    ("MV Agusta", "F3 RR", 2024, 10.50, 228,
-     "Cycle World (F3 800 platform 10.5s; RR up-spec 147hp)"),
+    (
+        "MV Agusta",
+        "F3 RR",
+        2024,
+        10.50,
+        228,
+        "Cycle World (F3 800 platform 10.5s; RR up-spec 147hp)",
+    ),
     # Kawasaki Ninja ZX-10RR (998cc I4 superbike, 2021-2024) — MotoStatz Dragy
     # on the ZX-10R (9.98s @ 151 mph already cited); the RR is the lighter
     # ~204hp homologation-spec, so ~9.95s. Same Dragy source bar.
     # URL: https://motostatz.com/kawasaki-zx-10r-acceleration/
-    ("Kawasaki", "Ninja ZX-10RR", 2021, 9.95, 243,
-     "MotoStatz (Dragy, ZX-10R 9.98s @151mph; RR lighter race-spec)"),
+    (
+        "Kawasaki",
+        "Ninja ZX-10RR",
+        2021,
+        9.95,
+        243,
+        "MotoStatz (Dragy, ZX-10R 9.98s @151mph; RR lighter race-spec)",
+    ),
     # Honda CBR250RR (Indonesia, 249.7cc parallel-twin sport, 2017-2026) —
     # Indonesian VBox instrumented test: 14.55-14.7s @ 89-92 mph (144 km/h).
     # 38.7hp twin revving to 12,500 rpm; the fastest stock 250 in SE Asia.
     # Instrumented tier (VBox). 0-100 km/h 6.2s corroborates.
     # URL: https://en.wikipedia.org/wiki/Honda_CBR250RR_(2017)
-    ("Honda", "CBR250RR", 2017, 14.60, 144,
-     "Indonesian VBox test 2017 (instrumented, 14.55-14.7s @ 89-92mph)"),
+    (
+        "Honda",
+        "CBR250RR",
+        2017,
+        14.60,
+        144,
+        "Indonesian VBox test 2017 (instrumented, 14.55-14.7s @ 89-92mph)",
+    ),
     # Yamaha YZF-R25 (Indonesia, 249cc parallel-twin sport, 2014-2018) —
     # Otomotifnet VBox/Racelogic instrumented: 0-402m 15.5s, Racelogic top
     # 158.4 km/h (trap ~145). Same instrumented VBox tier; head-to-head with
     # the MT-25 in the same test session.
     # URL: https://otomotifnet.gridoto.com/read/231043140/ (MT-25 vs R25)
-    ("Yamaha", "YZF-R25", 2015, 15.50, 145,
-     "Otomotifnet VBox/Racelogic (instrumented 0-402m 15.5s, top 158 km/h)"),
+    (
+        "Yamaha",
+        "YZF-R25",
+        2015,
+        15.50,
+        145,
+        "Otomotifnet VBox/Racelogic (instrumented 0-402m 15.5s, top 158 km/h)",
+    ),
     # Yamaha MT-25 (249cc parallel-twin naked, 2014-2026) — same Otomotifnet
     # VBox/Racelogic test: 0-402m 15.6s, Racelogic top 147 km/h. The naked
     # R25, 0.1s slower on aero.
-    ("Yamaha", "MT-25", 2015, 15.60, 140,
-     "Otomotifnet VBox/Racelogic (instrumented 0-402m 15.6s, top 147 km/h)"),
+    (
+        "Yamaha",
+        "MT-25",
+        2015,
+        15.60,
+        140,
+        "Otomotifnet VBox/Racelogic (instrumented 0-402m 15.6s, top 147 km/h)",
+    ),
     # Harley-Davidson VRSCA V-Rod (1130cc Revolution V-twin, 2002-2006) —
     # HDForums/DragTimes owner timeslips: a bone-stock 2006 VRSCA ran 11.6s at
     # a Daytona dyno-drag. The V-Rod's long-low stance + 240 rear launches like
     # a dragster; stock low-11s is widely reported. Forum/timeslip tier (0.3).
     # URL: https://www.hdforums.com/forum/vrsc-models/507272-quarter-mile-times-for-v-rods.html
-    ("Harley-Davidson", "VRSCA V-Rod", 2004, 11.60, 185,
-     "HDForums/DragTimes timeslip (bone-stock 2006 VRSCA 11.6s @ Daytona)"),
+    (
+        "Harley-Davidson",
+        "VRSCA V-Rod",
+        2004,
+        11.60,
+        185,
+        "HDForums/DragTimes timeslip (bone-stock 2006 VRSCA 11.6s @ Daytona)",
+    ),
     # Kawasaki Versys 1000 (1043cc I4 ADV-tourer, 2019-2024) — owner-logged
     # timeslip on the Kawasaki Versys forum: 12.96s @ 99.15 mph (160 km/h).
     # 120hp I4 in a ~257 kg tall tourer. Forum/timeslip tier (0.3).
     # URL: https://www.kawasakiversys.com/threads/acceleration.497/
-    ("Kawasaki", "Versys 1000", 2019, 12.96, 160,
-     "KawasakiVersysForum owner timeslip (12.96s @ 99.15 mph)"),
+    (
+        "Kawasaki",
+        "Versys 1000",
+        2019,
+        12.96,
+        160,
+        "KawasakiVersysForum owner timeslip (12.96s @ 99.15 mph)",
+    ),
     # Kawasaki Versys 1000 SE (1043cc I4 ADV-tourer, 2022-2024) — same Versys
     # 1000 platform / owner-timeslip figure (electronic suspension, same I4).
-    ("Kawasaki", "Versys 1000 SE", 2022, 12.96, 160,
-     "Versys 1000 platform (1043 I4, owner timeslip)"),
+    (
+        "Kawasaki",
+        "Versys 1000 SE",
+        2022,
+        12.96,
+        160,
+        "Versys 1000 platform (1043 I4, owner timeslip)",
+    ),
     # Suzuki RGV250 Gamma (249cc 2-stroke V-twin sport, 1991-1996) — DERIVED
     # (0.1). FastestLaps 0-60 mph 3.7s; 62hp 2T V-twin ~140 kg, sits in the
     # NSR250 (13.40) / RS250 (13.40) 2-stroke cluster — derived ~12.8s.
     # URL: https://fastestlaps.com/models/suzuki-rgv250
-    ("Suzuki", "RGV250 Gamma", 1992, 12.80, 160,
-     "DERIVED (0-60mph 3.7s FastestLaps; 62hp 2T V-twin, NSR250/RS250 cluster)"),
+    (
+        "Suzuki",
+        "RGV250 Gamma",
+        1992,
+        12.80,
+        160,
+        "DERIVED (0-60mph 3.7s FastestLaps; 62hp 2T V-twin, NSR250/RS250 cluster)",
+    ),
     # Kawasaki Ninja ZX-25R (Indonesia, 249.8cc I4 sport, 2020-2026) — DERIVED
     # (0.1). 51hp inline-four revving to 17,000 rpm, 0-100 km/h <6s, MotorBeam
     # top 187-190 km/h. Quicker than the CBR250RR (14.6s) twin — derived ~13.8s.
     # URL: https://www.motorbeam.com/kawasaki-zx-25r-top-speed-is-190-km-hr-achieved-on-race-track/
-    ("Kawasaki", "Ninja ZX-25R", 2020, 13.80, 160,
-     "DERIVED (51hp 250 I4, 0-100<6s, top 187-190 km/h MotorBeam)"),
+    (
+        "Kawasaki",
+        "Ninja ZX-25R",
+        2020,
+        13.80,
+        160,
+        "DERIVED (51hp 250 I4, 0-100<6s, top 187-190 km/h MotorBeam)",
+    ),
     # Honda CB 300R (286cc single naked, 2019-2024) — DERIVED (0.1). rushlane
     # 0-100 km/h 6.2s; MotorBikeCatalog QM estimate ~15.1s. 30hp single.
     # URL: https://www.rushlane.com/honda-cb300r-0-100-kmph-time-12295222.html
-    ("Honda", "CB 300R", 2019, 15.10, 140,
-     "DERIVED (rushlane 0-100 6.2s; MotorBikeCatalog QM ~15.1s)"),
+    (
+        "Honda",
+        "CB 300R",
+        2019,
+        15.10,
+        140,
+        "DERIVED (rushlane 0-100 6.2s; MotorBikeCatalog QM ~15.1s)",
+    ),
     # Honda CB300F (293.5cc single naked, 2022-2025) — DERIVED (0.1). Same
     # 293cc single family as CB300R; ~15.2s.
-    ("Honda", "CB300F", 2022, 15.20, 138,
-     "DERIVED (293cc CB300R platform, ~15.2s)"),
+    ("Honda", "CB300F", 2022, 15.20, 138, "DERIVED (293cc CB300R platform, ~15.2s)"),
     # Triumph Daytona 660 (660cc triple sport, 2024-2025) — DERIVED (0.1).
     # 94hp faired triple; the same 660 triple in the Trident 660 (80hp) ran
     # 12.00s on MotoStatz, so the faired 94hp Daytona lands ~11.4s.
     # URL: https://www.triumphmotorcycles.com/motorcycles/sport/daytona-660/
-    ("Triumph", "Daytona 660", 2024, 11.40, 205,
-     "DERIVED (660 triple 94hp faired; Trident 660 base 12.0s, MotoStatz)"),
+    (
+        "Triumph",
+        "Daytona 660",
+        2024,
+        11.40,
+        205,
+        "DERIVED (660 triple 94hp faired; Trident 660 base 12.0s, MotoStatz)",
+    ),
     # Bajaj Pulsar F250 (249cc single sport, 2021-2024) — DERIVED (0.1). The
     # faired sibling of the Pulsar N250 (15.45 in list); CarBlogIndia has it
     # ~0.9s quicker to 100 km/h, so ~15.0s.
     # URL: https://www.carblogindia.com/real-world-mileage-test-bajaj-pulsar-f250-n250/
-    ("Bajaj", "Pulsar F250", 2021, 15.00, 130,
-     "DERIVED (faired N250 sibling, ~0.9s quicker than N250; CarBlogIndia)"),
+    (
+        "Bajaj",
+        "Pulsar F250",
+        2021,
+        15.00,
+        130,
+        "DERIVED (faired N250 sibling, ~0.9s quicker than N250; CarBlogIndia)",
+    ),
     # TVS Apache RTR 310 (312.2cc single naked, 2024-2025) — DERIVED (0.1).
     # Same 312cc engine as the Apache RR 310 (verified 15.46 @ 135 in list);
     # the naked RTR lands ~15.3s.
     # URL: https://www.autocarindia.com/bike-reviews/tvs-apache-rtr-310-road-test-review-432982
-    ("TVS", "Apache RTR 310", 2024, 15.30, 137,
-     "DERIVED (RR 310 platform 312cc; RR 310 verified 15.46 @135 FastestLaps)"),
+    (
+        "TVS",
+        "Apache RTR 310",
+        2024,
+        15.30,
+        137,
+        "DERIVED (RR 310 platform 312cc; RR 310 verified 15.46 @135 FastestLaps)",
+    ),
     # Harley-Davidson V-Rod Muscle (1247cc Revolution V-twin muscle, 2009-2017)
     # — DERIVED (0.1). Same Revolution V-twin as the VRSCA V-Rod (11.6 timeslip
     # above); the Muscle is heavier (massive rear), so ~11.8s.
-    ("Harley-Davidson", "V-Rod Muscle", 2010, 11.80, 183,
-     "DERIVED (1247cc Revolution V-Rod platform; heavier muscle body)"),
+    (
+        "Harley-Davidson",
+        "V-Rod Muscle",
+        2010,
+        11.80,
+        183,
+        "DERIVED (1247cc Revolution V-Rod platform; heavier muscle body)",
+    ),
     # Harley-Davidson Nightster (975cc Revolution Max V-twin cruiser, 2022-2026)
     # — DERIVED (0.1). 89hp 975T; the Sportster S (1250 RevMax) runs 11.10
     # (HDForums timeslip in list); the lighter-powered Nightster lands ~12.2s.
-    ("Harley-Davidson", "Nightster", 2022, 12.20, 175,
-     "DERIVED (975 Revolution Max 89hp; Sportster S 11.10 base in list)"),
+    (
+        "Harley-Davidson",
+        "Nightster",
+        2022,
+        12.20,
+        175,
+        "DERIVED (975 Revolution Max 89hp; Sportster S 11.10 base in list)",
+    ),
     # Hero Xpulse 200 (199.6cc single ADV, 2019-2025) — DERIVED (0.1). Autocar
     # India 0-100 km/h 13.5s (4V) ×1.6 ~= 21.6s; 19hp ADV single, top ~123 km/h.
     # URL: https://www.autocarindia.com/bike-reviews/hero-xpulse-200-4v-review-test-ride-422843
-    ("Hero", "Xpulse 200", 2019, 21.60, 123,
-     "DERIVED (0-100 13.5s x1.6 4V, Autocar India; top ~123 km/h)"),
+    (
+        "Hero",
+        "Xpulse 200",
+        2019,
+        21.60,
+        123,
+        "DERIVED (0-100 13.5s x1.6 4V, Autocar India; top ~123 km/h)",
+    ),
     # Hero XPulse 200T (199.6cc single ADV-touring, 2021-2026) — DERIVED (0.1).
     # Xpulse 200 touring variant, same 19hp single.
-    ("Hero", "XPulse 200T", 2021, 21.60, 120,
-     "DERIVED (XPulse 200 platform, touring variant)"),
+    (
+        "Hero",
+        "XPulse 200T",
+        2021,
+        21.60,
+        120,
+        "DERIVED (XPulse 200 platform, touring variant)",
+    ),
     # ── 2026-06-13 benchmark-coverage agent (pass 4) ─────────────────────────
     # Final coverage pass (mostly the adventure/touring cluster, previously the
     # thinnest in this list). Same source bar / platform / DERIVED policy.
@@ -2531,54 +2817,114 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # list is the faired Ninja); the Z400 is slightly slower on aero. Same
     # Dragy source bar.
     # URL: https://motostatz.com/kawasaki-z400-acceleration-top-speed/
-    ("Kawasaki", "Z400", 2019, 13.34, 158,
-     "MotoStatz (Dragy, stock instrumented, 98 mph trap)"),
+    (
+        "Kawasaki",
+        "Z400",
+        2019,
+        13.34,
+        158,
+        "MotoStatz (Dragy, stock instrumented, 98 mph trap)",
+    ),
     # Suzuki V-Strom 1050 (1037cc V-twin ADV, 2020-2026) — FastestLaps/
     # zeroto60 test: 11.56s @ 114.1 mph (184 km/h), 0-60 3.61s. 100hp V-twin.
     # Aggregator tier (0.5).
     # URL: https://fastestlaps.com/models/suzuki-v-strom-1050
-    ("Suzuki", "V-Strom 1050", 2020, 11.56, 184,
-     "FastestLaps/zeroto60 (11.56s @ 114.1mph, 0-60 3.61s)"),
+    (
+        "Suzuki",
+        "V-Strom 1050",
+        2020,
+        11.56,
+        184,
+        "FastestLaps/zeroto60 (11.56s @ 114.1mph, 0-60 3.61s)",
+    ),
     # Suzuki GSX-S1000GT (999cc I4 sport-tourer, 2022-2026) — DERIVED-platform.
     # The GSX-S1000 naked (10.60 @ 214 Sport Rider, in list) shares the 150hp
     # I4; the GT is the faired sport-tourer (similar weight) so ~10.6s.
-    ("Suzuki", "GSX-S1000GT", 2022, 10.60, 214,
-     "GSX-S1000 platform 10.6s (Sport Rider); GT sport-tourer, 150hp I4"),
+    (
+        "Suzuki",
+        "GSX-S1000GT",
+        2022,
+        10.60,
+        214,
+        "GSX-S1000 platform 10.6s (Sport Rider); GT sport-tourer, 150hp I4",
+    ),
     # KTM 790 Adventure (799cc parallel-twin ADV, 2019-2022) — DERIVED (0.1).
     # The 790 Duke ran 11.01s @ 124 mph on MotoStatz; the Adventure shares the
     # 799 twin but is heavier + far less aero (tall ADV), so ~12.0s.
-    ("KTM", "790 Adventure", 2019, 12.00, 185,
-     "DERIVED (790 Duke 11.01 MotoStatz + ADV weight/aero ~+1s)"),
+    (
+        "KTM",
+        "790 Adventure",
+        2019,
+        12.00,
+        185,
+        "DERIVED (790 Duke 11.01 MotoStatz + ADV weight/aero ~+1s)",
+    ),
     # BMW R 1300 GS (1300cc boxer ADV, 2024-2026) — DERIVED (0.1). ProfessCars
     # estimate ~11.0s; 145hp boxer in a ~237 kg ADV, top ~120 mph.
     # URL: https://www.motorbikecatalog.com/performance/2024/232820/bmw_r_1300_gs.html
-    ("BMW", "R 1300 GS", 2024, 11.00, 195,
-     "DERIVED (ProfessCars est ~11.0s; 145hp boxer ADV, top ~120mph)"),
+    (
+        "BMW",
+        "R 1300 GS",
+        2024,
+        11.00,
+        195,
+        "DERIVED (ProfessCars est ~11.0s; 145hp boxer ADV, top ~120mph)",
+    ),
     # BMW R 1250 GS (1254cc boxer ADV, 2019-2025) — DERIVED (0.1). 134hp boxer,
     # ProfessCars-class estimate; slightly slower than the 1300 GS. Top ~131mph
     # (Bennetts dyno-and-speed test). ~11.3s.
-    ("BMW", "R 1250 GS", 2019, 11.30, 190,
-     "DERIVED (134hp boxer; ProfessCars-class, slightly slower than R1300GS)"),
+    (
+        "BMW",
+        "R 1250 GS",
+        2019,
+        11.30,
+        190,
+        "DERIVED (134hp boxer; ProfessCars-class, slightly slower than R1300GS)",
+    ),
     # Triumph Tiger 900 Rally (888cc triple ADV, 2020-2026) — DERIVED (0.1).
     # 94hp triple, MCN 0-60 ~3.5-3.7s, top 202-205 km/h. The same 888 triple
     # tested faster than the F800GS + Africa Twin in development; ~11.7s.
-    ("Triumph", "Tiger 900 Rally", 2020, 11.70, 200,
-     "DERIVED (888 triple 94hp; MCN 0-60 ~3.5-3.7s; top 202 km/h)"),
+    (
+        "Triumph",
+        "Tiger 900 Rally",
+        2020,
+        11.70,
+        200,
+        "DERIVED (888 triple 94hp; MCN 0-60 ~3.5-3.7s; top 202 km/h)",
+    ),
     # Triumph Tiger 900 GT Pro (888cc triple ADV road-spec, 2024-2026) —
     # DERIVED (0.1). Same 888 triple as the Rally, road-biased (19" front,
     # slightly lighter); ~11.6s.
-    ("Triumph", "Tiger 900 GT Pro", 2024, 11.60, 202,
-     "DERIVED (888 triple road-spec, Tiger 900 platform)"),
+    (
+        "Triumph",
+        "Tiger 900 GT Pro",
+        2024,
+        11.60,
+        202,
+        "DERIVED (888 triple road-spec, Tiger 900 platform)",
+    ),
     # Honda NC750X (745cc parallel-twin ADV-commuter, 2021-2026) — DERIVED
     # (0.1). MotorBikeCatalog QM ~13.5s; 58hp low-revving twin, top ~125 mph.
     # URL: https://www.motorbikecatalog.com/performance/2021/185120/honda_nc750x.html
-    ("Honda", "NC750X", 2021, 13.50, 201,
-     "DERIVED (MotorBikeCatalog QM ~13.5s; 58hp 745 twin, top ~125mph)"),
+    (
+        "Honda",
+        "NC750X",
+        2021,
+        13.50,
+        201,
+        "DERIVED (MotorBikeCatalog QM ~13.5s; 58hp 745 twin, top ~125mph)",
+    ),
     # Yamaha Tracer 7 (689cc CP2 sport-tourer, 2020-2026) — DERIVED (0.1).
     # Same 689 CP2 as the MT-07 (12.13 MCN, in list); the Tracer adds touring
     # weight + bodywork, so ~12.4s.
-    ("Yamaha", "Tracer 7", 2020, 12.40, 195,
-     "DERIVED (689 CP2; MT-07 12.13 base + touring weight)"),
+    (
+        "Yamaha",
+        "Tracer 7",
+        2020,
+        12.40,
+        195,
+        "DERIVED (689 CP2; MT-07 12.13 base + touring weight)",
+    ),
 ]
 
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [

@@ -28,17 +28,14 @@ export default function AutotunePage() {
         ]}
       />
 
-      {/* Tool */}
+      {/* Tool — two-column workbench (controls left, results right; stacks below lg) */}
       <section className="px-4 sm:px-6 py-20 md:py-28 border-t border-brand-orange/10">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <EcuAutotune />
 
-          <div className="mt-8 text-center">
-            <Link
-              href="/simulator"
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-white/15 text-white/70 hover:text-white hover:border-brand-orange/40 font-display font-semibold rounded-md text-sm transition-colors"
-            >
-              <Zap size={15} /> Open the full simulator
+          <div className="mt-10 text-center">
+            <Link href="/simulator" className="btn-ghost">
+              <Zap size={15} aria-hidden="true" /> Open the full simulator
             </Link>
           </div>
         </div>

@@ -86,11 +86,35 @@ class TireRepository:
             cols.append(k)
             vals.append(v)
 
+        # ID-preserving upsert. INSERT OR REPLACE would DELETE the conflicting
+        # row (on UNIQUE(manufacturer_id, model_name, size_designation)) and
+        # re-INSERT with a NEW autoincrement id — which (a) trips the
+        # un-cascaded FK from bike_tire_fitments once any fitment references
+        # the tire (crashing a second seed_all()), and (b) orphans/renumbers
+        # tires the rest of the time. Match the id-preserving pattern used by
+        # bike_repo.create_model().
+        existing = self._conn.execute(
+            """SELECT id FROM tire_models
+               WHERE manufacturer_id = ? AND model_name = ?
+                 AND size_designation = ?""",
+            (mfr_id, model_name, size_designation),
+        ).fetchone()
+        if existing:
+            tire_id = existing["id"] if hasattr(existing, "keys") else existing[0]
+            set_cols = [c for c in cols if c not in ("manufacturer_id",)]
+            set_vals = [v for c, v in zip(cols, vals) if c not in ("manufacturer_id",)]
+            assignments = ", ".join(f"{c} = ?" for c in set_cols)
+            self._conn.execute(
+                f"UPDATE tire_models SET {assignments} WHERE id = ?",
+                [*set_vals, tire_id],
+            )
+            self._conn.commit()
+            return tire_id
+
         placeholders = ", ".join(["?"] * len(cols))
         col_str = ", ".join(cols)
-
         cur = self._conn.execute(
-            f"INSERT OR REPLACE INTO tire_models ({col_str}) VALUES ({placeholders})",
+            f"INSERT INTO tire_models ({col_str}) VALUES ({placeholders})",
             vals,
         )
         self._conn.commit()

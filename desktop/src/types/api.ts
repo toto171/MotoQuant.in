@@ -324,6 +324,27 @@ export interface LeaderboardResponse {
   total: number;
 }
 
+// ─── Personal run history (GET /api/me/runs — auth required) ─────────────
+
+export interface MyRun {
+  id: number;
+  et_quarter_s: number;
+  trap_speed_kmh: number;
+  et_eighth_s: number | null;
+  time_60ft_s: number | null;
+  notes: string | null;
+  created_at: string | null;
+  manufacturer: string | null;
+  model: string | null;
+  year: number | null;
+  venue: string | null;
+}
+
+export interface MyRunsResponse {
+  runs: MyRun[];
+  count: number;
+}
+
 // ─── Compare (A vs B) ────────────────────────────────────────────────────
 
 export interface CompareRequest {

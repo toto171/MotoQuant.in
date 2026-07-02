@@ -28,7 +28,12 @@ from ..models import BikeConfig
 # Values are relative to clean dry asphalt = 1.00
 _SURFACE_GRIP: dict = {
     "asphalt": 1.00,
-    "concrete": 0.94,  # slightly less bite on concrete
+    # Every "concrete" venue in the catalog (Santa Pod / Pomona / Gainesville /
+    # Sydney Dragway) is a prepped NHRA/FIA-style concrete launch pad, not raw
+    # highway concrete — those strips bite HARDER than street asphalt, so the
+    # factor is >1.0. (An unprepped-concrete road would be ~0.94, but no such
+    # venue exists here, and track_surface is fed only from venue.surface_type.)
+    "concrete": 1.03,
     "prepped": 1.18,  # track prep compound on asphalt
     "wet": 0.55,  # rain
     "damp": 0.72,

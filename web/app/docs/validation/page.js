@@ -72,7 +72,7 @@ export default function ValidationPage() {
             { num: '−0.015s', label: 'Weighted bias (sim − real)' },
             { num: '±0.006s', label: 'Top-10 mean error' },
           ].map((s, i) => (
-            <div key={i} className="glass rounded-xl p-4 border border-brand-orange/20 text-center">
+            <div key={i} className="card p-4 border-brand-orange/20 text-center">
               <div className="font-display font-bold text-xl text-brand-orange tabular-nums">{s.num}</div>
               <div className="font-mono text-[10px] text-white/50 uppercase tracking-wide mt-1">{s.label}</div>
             </div>
@@ -85,7 +85,7 @@ export default function ValidationPage() {
             { num: '187', label: 'Within ±0.50s' },
             { num: '217', label: 'Within ±1.00s' },
           ].map((s, i) => (
-            <div key={i} className="glass rounded-xl p-4 border border-white/10 text-center">
+            <div key={i} className="card p-4 text-center">
               <div className="font-display font-bold text-xl text-white tabular-nums">{s.num}<span className="text-white/40 text-sm">/236</span></div>
               <div className="font-mono text-[10px] text-white/50 uppercase tracking-wide mt-1">{s.label}</div>
             </div>
@@ -100,7 +100,7 @@ export default function ValidationPage() {
           Three reference bikes from <code className="font-mono text-brand-accent">defaults.py</code> are hand-calibrated and excluded from the ALL_KNOWN_BIKES auto-reseed.
           They serve as regression anchors — if any code change moves these by more than ±0.02s, something is wrong.
         </p>
-        <div className="glass rounded-xl border border-brand-orange/20 overflow-hidden">
+        <div className="card border-brand-orange/20 overflow-hidden">
           <div className="hidden sm:grid grid-cols-[1fr_120px_120px_120px] gap-4 px-5 py-3 border-b border-brand-orange/20 bg-white/[0.02] text-[10px] font-mono uppercase tracking-widest text-white/50">
             <div>Bike</div>
             <div className="text-right">Target</div>
@@ -132,7 +132,7 @@ export default function ValidationPage() {
           Sources: Cycle World, Sport Rider, MCN, Motorcyclist, BikeWale, MotoStatz.
           Conditions: race fuel, professional rider, ideal strip.
         </p>
-        <div className="glass rounded-xl border border-brand-orange/20 overflow-hidden">
+        <div className="card border-brand-orange/20 overflow-hidden">
           <div className="hidden md:grid grid-cols-[36px_1fr_100px_100px_90px_130px] gap-3 px-5 py-3 border-b border-brand-orange/20 bg-white/[0.02] text-[10px] font-mono uppercase tracking-widest text-white/50">
             <div>#</div><div>Bike</div><div className="text-right">Target</div>
             <div className="text-right">Simulated</div><div className="text-right">Δ</div><div className="text-right">Source</div>
@@ -180,7 +180,7 @@ export default function ValidationPage() {
           Positive bias means the simulator predicts slower than reality. A positive bias in the small-cc clusters
           is a known residual from the per-bike calibration work not yet completed — it is not a regression.
         </p>
-        <div className="glass rounded-xl border border-brand-orange/20 overflow-hidden">
+        <div className="card border-brand-orange/20 overflow-hidden">
           {CLUSTERS.map((c, i) => (
             <div key={i} className="flex items-center justify-between gap-4 px-5 py-3.5 border-b border-white/[0.04] last:border-0">
               <div className="flex-1">
@@ -246,13 +246,13 @@ export default function ValidationPage() {
 
       {/* Next */}
       <div className="pt-8 border-t border-brand-orange/10">
-        <div className="font-mono text-[10px] text-white/45 uppercase tracking-[0.25em] mb-4">Next</div>
+        <div className="label-mono mb-4">Next</div>
         <div className="grid sm:grid-cols-2 gap-4">
-          <Link href="/docs/getting-started" className="glass rounded-xl p-4 border border-white/10 hover:border-brand-orange/40 transition-colors group">
+          <Link href="/docs/getting-started" className="card card-hover block p-4 group">
             <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Getting Started →</div>
             <div className="text-xs text-white/50">Run your first simulation in under 60 seconds.</div>
           </Link>
-          <Link href="/simulator" className="glass rounded-xl p-4 border border-white/10 hover:border-brand-orange/40 transition-colors group">
+          <Link href="/simulator" className="card card-hover block p-4 group">
             <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Try the simulator →</div>
             <div className="text-xs text-white/50">501 bikes, free in the browser, no account needed.</div>
           </Link>
