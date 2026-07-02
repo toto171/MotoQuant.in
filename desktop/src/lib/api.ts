@@ -16,6 +16,7 @@ import type {
   CompareRequest,
   CompareResponse,
   LeaderboardResponse,
+  MyRunsResponse,
   PartsCategoriesResponse,
   PartsResponse,
   QuickSimRequest,
@@ -324,6 +325,12 @@ export const api = {
   // Leaderboard (top saved runs from local sim_runs table)
   leaderboard: (params: { limit?: number } = {}) =>
     request<LeaderboardResponse>(`/api/leaderboard${qs(params)}`),
+
+  // Personal saved runs for the signed-in user (GET /api/me/runs — powers the
+  // History tab). Requires a bearer token; the request helper attaches it and
+  // silently refreshes on a 401.
+  myRuns: (params: { limit?: number } = {}) =>
+    request<MyRunsResponse>(`/api/me/runs${qs(params)}`),
 
   // Natural-language chat (Phase A — POST /api/chat)
   chat: (req: ChatRequest) =>

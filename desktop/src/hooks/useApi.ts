@@ -98,6 +98,16 @@ export function useLeaderboard(limit = 20) {
   });
 }
 
+// Personal saved-run history for the signed-in user (History tab). Distinct
+// from useLeaderboard, which is the global top-runs board.
+export function useMyRuns(limit = 25) {
+  return useQuery({
+    queryKey: ["my-runs", limit],
+    queryFn: () => api.myRuns({ limit }),
+    staleTime: 30_000,
+  });
+}
+
 export function useSaveRun() {
   const qc = useQueryClient();
   return useMutation<SaveRunResponse, Error, SaveRunRequest>({
