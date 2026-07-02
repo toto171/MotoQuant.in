@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronLeft, Gauge, Zap, Wind, CircleDot, AlertCircle, Wrench } from 'lucide-react';
+import { ChevronLeft, Gauge, Zap, Wind, CircleDot, AlertCircle, Wrench, SearchX } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { API_URL } from '../../../lib/api';
@@ -11,6 +11,7 @@ import SiteFooter from '../../../components/SiteFooter';
 import CodeComment from '../../../components/CodeComment';
 import { Reveal, Stagger, StaggerItem } from '../../../components/Reveal';
 import { ScoreboardCounter } from '../../../components/ScoreboardDigits';
+import { Skeleton, SkeletonCard } from '../../../components/Skeleton';
 import TopCtaVariant from './TopCtaVariant';
 
 function formatCell(value, suffix = '', decimals = null) {
@@ -25,7 +26,7 @@ function formatCell(value, suffix = '', decimals = null) {
 function SpecRow({ label, value }) {
   return (
     <div className="flex justify-between items-baseline gap-3 py-2 border-b border-white/5 last:border-0">
-      <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">{label}</span>
+      <span className="label-mono">{label}</span>
       <span className="text-sm font-mono text-white tabular-nums text-right">{value}</span>
     </div>
   );
@@ -33,7 +34,7 @@ function SpecRow({ label, value }) {
 
 function SpecBlock({ icon: Icon, title, children }) {
   return (
-    <div className="relative h-full rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
+    <div className="card relative h-full p-5">
       <div
         aria-hidden="true"
         className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-orange/70 to-transparent"
@@ -47,30 +48,83 @@ function SpecBlock({ icon: Icon, title, children }) {
   );
 }
 
+/**
+ * Loading skeleton shaped like the final layout — header block, four stat
+ * tiles, and the two spec cards — so the page doesn't jump when data lands.
+ */
+function DetailSkeleton() {
+  return (
+    <div aria-hidden="true">
+      {/* kicker line */}
+      <Skeleton className="h-3 w-56 mb-6" />
+
+      {/* header block: manufacturer label + title + chips, CTA at right */}
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6">
+        <div className="flex-1 min-w-0">
+          <Skeleton className="h-3 w-28 mb-3" />
+          <Skeleton className="h-10 w-72 max-w-full mb-4" />
+          <div className="flex flex-wrap gap-2">
+            <Skeleton className="h-7 w-16" />
+            <Skeleton className="h-7 w-20" />
+            <Skeleton className="h-7 w-24" />
+          </div>
+        </div>
+        <Skeleton className="h-12 w-52 shrink-0" />
+      </div>
+
+      {/* four headline stat tiles */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        {[0, 1, 2, 3].map(i => (
+          <div key={i} className="card p-5 text-center">
+            <Skeleton className="h-3 w-20 mx-auto mb-4" />
+            <Skeleton className="h-8 w-16 mx-auto" />
+          </div>
+        ))}
+      </div>
+
+      {/* two spec cards */}
+      <div className="grid md:grid-cols-2 gap-4">
+        <SkeletonCard rows={8} />
+        <SkeletonCard rows={8} />
+      </div>
+    </div>
+  );
+}
+
 export default function BikeDetailPage() {
   const params = useParams();
   const bikeId = params?.id;
 
   const [bike, setBike] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null); // { status, message }
 
-  useEffect(() => {
+  const load = useCallback(async () => {
     if (!bikeId) return;
     setLoading(true);
     setError(null);
-    fetch(`${API_URL}/api/bikes/${bikeId}`)
-      .then(async res => {
-        if (!res.ok) {
-          const msg = await res.text();
-          throw new Error(`API error ${res.status}: ${msg}`);
-        }
-        return res.json();
-      })
-      .then(data => setBike(data))
-      .catch(e => setError(e.message || 'Failed to load bike'))
-      .finally(() => setLoading(false));
+    try {
+      const res = await fetch(`${API_URL}/api/bikes/${bikeId}`);
+      if (!res.ok) {
+        let msg = '';
+        try { msg = await res.text(); } catch {}
+        const err = new Error(msg || `API error ${res.status}`);
+        err.status = res.status;
+        throw err;
+      }
+      setBike(await res.json());
+    } catch (e) {
+      setError({ status: e?.status ?? null, message: e?.message || 'Failed to load bike' });
+    } finally {
+      setLoading(false);
+    }
   }, [bikeId]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const notFound = error?.status === 404;
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -85,16 +139,45 @@ export default function BikeDetailPage() {
             <ChevronLeft size={16} /> All bikes
           </Link>
 
-          {loading && (
-            <div className="py-24 text-center font-mono text-[11px] uppercase tracking-[0.25em] text-white/45">
-              Loading bike…
-            </div>
-          )}
+          {loading && <DetailSkeleton />}
 
-          {error && (
-            <div className="p-4 bg-brand-red/10 border border-brand-red/40 rounded-lg text-brand-red/90 text-sm flex items-center gap-2">
-              <AlertCircle size={16} /> {error}
-            </div>
+          {!loading && error && (
+            notFound ? (
+              <div className="card p-8 md:p-12 text-center">
+                <SearchX size={28} className="mx-auto text-brand-amber mb-4" />
+                <CodeComment center className="mb-3">err 404 · no spec sheet at this id</CodeComment>
+                <p className="font-display font-bold text-white text-2xl">
+                  This bike isn&apos;t in the catalog
+                </p>
+                <p className="text-sm text-white/65 mt-3 max-w-md mx-auto">
+                  It may have been re-numbered in a catalog update, or it hasn&apos;t
+                  been modelled yet. Browse the full catalog or suggest it from there.
+                </p>
+                <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+                  <Link href="/bikes" className="btn-primary">
+                    Browse the catalog
+                  </Link>
+                  <Link href="/simulator" className="btn-ghost">
+                    Open the simulator
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="card p-8 md:p-12 text-center">
+                <AlertCircle size={28} className="mx-auto text-brand-red mb-4" />
+                <p className="font-display font-bold text-white text-2xl">
+                  Couldn&apos;t load this bike
+                </p>
+                <p className="text-sm text-white/65 mt-3 max-w-md mx-auto">
+                  The engine may be waking up — retry in a moment.
+                </p>
+                <div className="mt-8">
+                  <button onClick={load} className="btn-primary">
+                    Retry
+                  </button>
+                </div>
+              </div>
+            )
           )}
 
           {!loading && !error && bike && (
@@ -156,15 +239,15 @@ export default function BikeDetailPage() {
                   { label: 'Year', value: formatCell(bike.year) },
                 ].map((s, i) => (
                   <StaggerItem key={i} className="h-full">
-                    <div className="h-full rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 text-center">
-                      <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">
+                    <div className="card h-full p-5 text-center">
+                      <p className="label-mono">
                         {s.label}
                       </p>
                       {'seg' in s ? (
                         s.seg != null ? (
                           <div className="mt-3 flex items-end justify-center gap-1.5">
                             <ScoreboardCounter value={s.seg} h={28} />
-                            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 pb-0.5">
+                            <span className="label-mono pb-0.5">
                               {s.unit}
                             </span>
                           </div>
@@ -247,20 +330,22 @@ export default function BikeDetailPage() {
                 </Reveal>
               )}
 
-              {/* CTA */}
+              {/* Bottom CTA — differentiated from the top EXP-011 CTA:
+                  primary names the concrete run, ghost routes to the
+                  build optimizer instead of repeating "Simulate this bike". */}
               <Reveal y={16}>
                 <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
                   <Link
                     href={`/simulator?bike_id=${bike.id}`}
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-orange hover:bg-brand-orangeLight text-black font-display font-bold rounded-md transition-colors"
+                    className="btn-primary"
                   >
-                    <Gauge size={16} /> Simulate this bike
+                    <Gauge size={16} /> Run the quarter-mile →
                   </Link>
                   <Link
                     href={`/optimize?bike_id=${bike.id}`}
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md border border-brand-orange/40 text-brand-orange hover:bg-brand-orange/10 font-display font-semibold transition-colors"
+                    className="btn-ghost"
                   >
-                    <Wrench size={16} /> Optimize build
+                    <Wrench size={16} /> Build &amp; optimize
                   </Link>
                 </div>
               </Reveal>

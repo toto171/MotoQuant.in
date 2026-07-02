@@ -4,27 +4,30 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Check, AlertCircle, Info } from 'lucide-react';
 import { API_URL } from '../lib/api';
+import useAsyncTask from '../lib/useAsyncTask';
+import ActionButton from './ActionButton';
+
+const EMPTY_FORM = {
+  make: '',
+  model: '',
+  year: '',
+  displacement_cc: '',
+  peak_power_hp: '',
+  dry_mass_kg: '',
+  category: '',
+  notes: '',
+  submitter_email: '',
+  source_url: '',
+};
 
 /**
  * Modal form for submitting a "please add this bike" request.
  * POSTs to /api/bikes/suggest; handles plausibility-flag responses gracefully.
+ * Submission runs through useAsyncTask + ActionButton (staged progress —
+ * the button is the bar) per the Cockpit v3 progress doctrine.
  */
 export default function SuggestBikeForm({ onClose }) {
-  const [form, setForm] = useState({
-    make: '',
-    model: '',
-    year: '',
-    displacement_cc: '',
-    peak_power_hp: '',
-    dry_mass_kg: '',
-    category: '',
-    notes: '',
-    submitter_email: '',
-    source_url: '',
-  });
-  const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState(null); // {id, flagged_out_of_bounds, issues}
-  const [error, setError] = useState(null);
+  const [form, setForm] = useState(EMPTY_FORM);
 
   // Close on ESC
   useEffect(() => {
@@ -39,13 +42,9 @@ export default function SuggestBikeForm({ onClose }) {
     setForm(f => ({ ...f, [k]: v }));
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setError(null);
-
+  const submitTask = useAsyncTask(async (signal) => {
     if (!form.make.trim() || !form.model.trim()) {
-      setError('Make and model are required.');
-      return;
+      throw new Error('Make and model are required.');
     }
 
     const body = {
@@ -81,30 +80,30 @@ export default function SuggestBikeForm({ onClose }) {
     const url = str('source_url');
     if (url) body.source_url = url;
 
-    setSubmitting(true);
-    try {
-      const res = await fetch(`${API_URL}/api/bikes/suggest`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) {
-        let msg = `API error ${res.status}`;
-        try {
-          const j = await res.json();
-          if (j?.detail) msg = typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail);
-        } catch {
-          try { msg = await res.text(); } catch {}
-        }
-        throw new Error(msg);
+    const res = await fetch(`${API_URL}/api/bikes/suggest`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal,
+    });
+    if (!res.ok) {
+      let msg = `API error ${res.status}`;
+      try {
+        const j = await res.json();
+        if (j?.detail) msg = typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail);
+      } catch {
+        try { msg = await res.text(); } catch {}
       }
-      const data = await res.json();
-      setResult(data);
-    } catch (e) {
-      setError(e.message || 'Failed to submit');
-    } finally {
-      setSubmitting(false);
+      throw new Error(msg);
     }
+    return res.json(); // {id, flagged_out_of_bounds, issues}
+  });
+
+  const result = submitTask.result;
+
+  function handleSubmit(e) {
+    e?.preventDefault?.();
+    if (!submitTask.active) submitTask.run();
   }
 
   return (
@@ -127,7 +126,7 @@ export default function SuggestBikeForm({ onClose }) {
           <div>
             <h2 className="font-display font-bold text-2xl text-white">Suggest a Bike</h2>
             <p className="text-sm text-white/60 mt-1">
-              Don't see your bike? Tell us what to add next. Required fields marked *.
+              Don&apos;t see your bike? Tell us what to add next. Required fields marked *.
             </p>
           </div>
           <button
@@ -140,22 +139,22 @@ export default function SuggestBikeForm({ onClose }) {
         </div>
 
         {result ? (
-          <div className="py-4">
-            <div className="flex items-start gap-3 p-4 rounded-lg bg-brand-accent/10 border border-brand-accent/30">
-              <Check className="text-brand-accent shrink-0 mt-0.5" size={20} />
+          <div className="py-2">
+            <div className="card border-brand-green/30 bg-brand-green/5 p-4 flex items-start gap-3">
+              <Check className="text-brand-green shrink-0 mt-0.5" size={20} />
               <div>
-                <p className="font-display font-semibold text-brand-accent">
+                <p className="font-display font-semibold text-brand-green">
                   Submission #{result.id} received.
                 </p>
                 <p className="text-sm text-white/70 mt-1">
-                  Thanks — we'll review and add it to the catalog soon.
+                  Thanks — we&apos;ll review and add it to the catalog soon.
                 </p>
                 {result.flagged_out_of_bounds && result.issues?.length > 0 && (
-                  <div className="mt-3 p-3 rounded bg-amber-500/10 border border-amber-500/30 text-xs font-mono text-amber-200">
+                  <div className="card border-brand-amber/30 bg-brand-amber/10 mt-3 p-3 text-xs font-mono text-brand-amber">
                     <p className="flex items-center gap-1 mb-1 font-semibold">
                       <Info size={14} /> Flagged for manual review
                     </p>
-                    <ul className="list-disc list-inside space-y-0.5 text-amber-200/80">
+                    <ul className="list-disc list-inside space-y-0.5 text-brand-amber/80">
                       {result.issues.map((msg, i) => <li key={i}>{msg}</li>)}
                     </ul>
                   </div>
@@ -165,17 +164,16 @@ export default function SuggestBikeForm({ onClose }) {
 
             <div className="flex gap-3 justify-end mt-6">
               <button
-                onClick={() => { setResult(null); setForm({
-                  make: '', model: '', year: '', displacement_cc: '', peak_power_hp: '',
-                  dry_mass_kg: '', category: '', notes: '', submitter_email: '', source_url: '',
-                }); }}
-                className="px-4 py-2 border border-white/15 hover:border-white/40 rounded-lg text-sm text-white/80 font-mono transition-colors"
+                type="button"
+                onClick={() => { submitTask.reset(); setForm(EMPTY_FORM); }}
+                className="btn-ghost"
               >
                 Submit another
               </button>
               <button
+                type="button"
                 onClick={onClose}
-                className="px-4 py-2 bg-brand-orange hover:bg-brand-orangeLight text-black rounded-lg font-display font-semibold text-sm transition-colors"
+                className="btn-primary"
               >
                 Done
               </button>
@@ -274,27 +272,30 @@ export default function SuggestBikeForm({ onClose }) {
               />
             </div>
 
-            {error && (
-              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-300 text-sm flex items-center gap-2">
-                <AlertCircle size={16} /> {error}
+            {submitTask.error && (
+              <div className="card border-brand-red/40 bg-brand-red/10 p-3 text-brand-red/90 text-sm flex items-center gap-2">
+                <AlertCircle size={16} className="shrink-0" /> {submitTask.error}
               </div>
             )}
+
+            {/* Hidden sentinel keeps Enter-in-field implicit submission working
+                even though the visible submit control is an ActionButton. */}
+            <button type="submit" className="hidden" tabIndex={-1} aria-hidden="true" />
 
             <div className="flex gap-3 justify-end pt-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 border border-white/15 hover:border-white/40 rounded-lg text-sm text-white/80 font-mono transition-colors"
+                className="btn-ghost"
               >
                 Cancel
               </button>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="px-5 py-2 bg-brand-orange hover:bg-brand-orangeLight disabled:opacity-50 disabled:cursor-not-allowed text-black rounded-lg font-display font-semibold text-sm transition-colors"
-              >
-                {submitting ? 'Submitting…' : 'Submit suggestion'}
-              </button>
+              <ActionButton
+                task={submitTask}
+                onRun={handleSubmit}
+                label="Submit suggestion"
+                runningLabel="Submitting"
+              />
             </div>
           </form>
         )}
@@ -307,14 +308,14 @@ function Field({ label, value, onChange, as = 'input', rows = 3, ...rest }) {
   const Common = as === 'textarea' ? 'textarea' : 'input';
   return (
     <label className="block">
-      <span className="block text-[11px] font-mono text-white/60 uppercase tracking-wider mb-1.5">
+      <span className="label-mono block mb-1.5">
         {label}
       </span>
       <Common
         value={value}
         onChange={e => onChange(e.target.value)}
         {...(as === 'textarea' ? { rows } : {})}
-        className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-sm text-white placeholder:text-white/30 focus:border-brand-orange focus:outline-none font-mono"
+        className={`input-base font-mono ${as === 'textarea' ? 'h-auto py-2.5' : ''}`}
         {...rest}
       />
     </label>
