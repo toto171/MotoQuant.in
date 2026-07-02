@@ -58,6 +58,21 @@ _api_mod._db_conn = None
 client = TestClient(app)
 
 
+def setUpModule():
+    """Re-assert this module's tmp DB right before its tests run.
+
+    Module-level MOTOQUANT_DB overrides execute at COLLECTION time, so a
+    sibling module imported after this one (e.g. test_llm_runner also sets
+    MOTOQUANT_DB at import) leaves the env pointing at ITS tmp DB by the time
+    these tests actually run — the API then reads a DB without the
+    bike_suggestions/parts tables and returns 500s. Re-asserting here (after
+    collection, before this module's first test) makes the ordering
+    irrelevant.
+    """
+    os.environ["MOTOQUANT_DB"] = _TMP_DB_PATH
+    _api_mod._db_conn = None
+
+
 def tearDownModule():
     """Remove the tmp DB and restore MOTOQUANT_DB after all tests finish."""
     try:
