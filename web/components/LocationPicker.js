@@ -2,8 +2,9 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Loader2, AlertCircle, Check, Locate, X } from 'lucide-react';
+import { MapPin, AlertCircle, Check, Locate, X } from 'lucide-react';
 import { API_URL } from '../lib/api';
+import SimProgress from './SimProgress';
 
 /**
  * LocationPicker — asks the backend to resolve a race venue from text,
@@ -235,7 +236,7 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
                 disabled={loading || !query.trim()}
                 className="px-3 py-2 bg-brand-orange hover:bg-brand-orangeLight disabled:opacity-40 disabled:cursor-not-allowed text-black font-display font-semibold rounded-lg text-xs transition-colors"
               >
-                {loading ? <Loader2 size={14} className="animate-spin" /> : 'Set'}
+                Set
               </button>
             </div>
             <button
@@ -244,9 +245,11 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
               disabled={loading}
               className="inline-flex items-center gap-1.5 text-xs font-mono text-white/50 hover:text-brand-orange transition-colors disabled:opacity-50"
             >
-              {loading ? <Loader2 size={12} className="animate-spin" /> : <Locate size={12} />}
+              <Locate size={12} />
               Use my GPS location
             </button>
+            {/* Staged progress while resolving (replaces the old spinner) */}
+            {loading && <SimProgress active compact label="Resolving" className="mt-1" />}
           </form>
         </div>
       ) : (
@@ -259,7 +262,7 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-2 p-2 bg-red-500/10 border border-red-500/30 rounded-lg text-red-300 text-xs flex items-start gap-2"
+            className="mt-2 p-2 bg-brand-red/10 border border-brand-red/30 rounded-lg text-brand-red text-xs flex items-start gap-2"
           >
             <AlertCircle size={13} className="shrink-0 mt-0.5" /> {error}
           </motion.div>
