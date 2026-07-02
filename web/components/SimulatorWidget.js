@@ -326,7 +326,7 @@ export default function SimulatorWidget() {
       <div className="flex items-center justify-between mb-6 relative z-10">
         <h3 className="text-xl font-bold flex items-center gap-2">
           <motion.div whileHover={{ scale: 1.1 }} transition={{ type: 'spring', stiffness: 400 }}>
-            <Zap className="text-[#FF5E1F]" size={20} />
+            <Zap className="text-brand-orange" size={20} />
           </motion.div>
           <span className="bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
             Live Simulator
@@ -344,7 +344,7 @@ export default function SimulatorWidget() {
               onClick={() => setWidgetMode(id)}
               className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
                 widgetMode === id
-                  ? 'bg-[#FF5E1F] text-white shadow-sm'
+                  ? 'bg-brand-orange text-white shadow-sm'
                   : 'text-white/50 hover:text-white/80'
               }`}
             >
@@ -385,7 +385,7 @@ export default function SimulatorWidget() {
               onClick={() => setActiveTab(idx)}
               className={`shrink-0 px-3 py-1.5 rounded-md text-xs font-semibold transition-all whitespace-nowrap ${
                 activeTab === idx
-                  ? 'bg-[#FF5E1F] text-white shadow-[0_0_15px_rgba(255,94,31,0.3)]'
+                  ? 'bg-brand-orange text-white shadow-[0_0_15px_rgba(255,94,31,0.3)]'
                   : 'bg-white/[0.04] text-white/60 hover:bg-white/[0.08] hover:text-white/90'
               }`}
             >
@@ -409,7 +409,7 @@ export default function SimulatorWidget() {
                 whileTap={{ scale: 0.98 }}
                 className={`relative p-2.5 sm:p-3 rounded-xl border transition-all duration-300 text-left group ${
                   isSelected
-                    ? 'bg-white/[0.08] border-[#FF5E1F] shadow-[0_0_20px_rgba(255,94,31,0.2)]'
+                    ? 'bg-white/[0.08] border-brand-orange shadow-[0_0_20px_rgba(255,94,31,0.2)]'
                     : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-white/10'
                 }`}
               >
@@ -438,32 +438,35 @@ export default function SimulatorWidget() {
             format: v => `${v} kg`,
           },
           {
+            // Range matches the full simulator page (-20..+50%) so the
+            // landing widget and /simulator agree on what a "build" can do.
             label: 'Power boost',
             value: powerBoost,
             onChange: setPowerBoost,
-            min: -10,
-            max: 30,
+            min: -20,
+            max: 50,
             format: v => `${v > 0 ? '+' : ''}${v}%`,
             // Semantic colour: positive boost = green (faster ET),
             // negative = red (slower), zero = neutral white.
             valueColor:
-              powerBoost > 0 ? 'text-[#00FFB2]'
+              powerBoost > 0 ? 'text-brand-accent'
               : powerBoost < 0 ? 'text-[#FF6B6B]'
               : 'text-white',
           },
           {
+            // Range matches the full simulator page (-30..+30 kg).
             label: 'Mass change',
             value: massChange,
             onChange: setMassChange,
-            min: -15,
-            max: 15,
+            min: -30,
+            max: 30,
             format: v => `${v > 0 ? '+' : ''}${v} kg`,
             // Mass added = red (slower), mass reduced = green (faster),
             // zero = neutral. Inverse of power-boost direction (since
             // adding kg hurts ET while adding hp helps it).
             valueColor:
               massChange > 0 ? 'text-[#FF6B6B]'
-              : massChange < 0 ? 'text-[#00FFB2]'
+              : massChange < 0 ? 'text-brand-accent'
               : 'text-white',
           },
         ].map((slider, idx) => (
@@ -478,7 +481,7 @@ export default function SimulatorWidget() {
                 max={slider.max}
                 value={slider.value}
                 onChange={e => slider.onChange(Number(e.target.value))}
-                className="flex-1 h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-[#FF5E1F] slider-thumb"
+                className="flex-1 h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-brand-orange slider-thumb"
               />
             </div>
             <div className={`text-sm font-mono text-right transition-colors ${slider.valueColor ?? 'text-white'}`}>
@@ -575,10 +578,10 @@ export default function SimulatorWidget() {
           whileHover={{ scale: loading ? 1 : 1.02 }}
           whileTap={{ scale: loading ? 1 : 0.98 }}
           className={[
-            'relative py-3.5 rounded-xl font-semibold text-sm sm:text-[0.95rem] transition-all flex items-center justify-center gap-2 group overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed',
-            simMode === 'quarter'
-              ? 'bg-gradient-to-r from-[#FF5E1F] to-[#FF7A00] text-white shadow-[0_0_30px_rgba(255,94,31,0.35)] hover:shadow-[0_0_45px_rgba(255,94,31,0.5)]'
-              : 'bg-white/[0.04] border border-white/10 text-white/85 hover:bg-white/[0.08] hover:border-[#FF5E1F]/40',
+            // Cockpit v3: the active mode is the primary action, the other
+            // mode is a ghost — the sitewide .btn-* pair (h-11, rounded-xl).
+            'w-full',
+            simMode === 'quarter' ? 'btn-primary' : 'btn-ghost hover:border-brand-orange/40',
           ].join(' ')}
         >
           {loading && simMode === 'quarter' ? (
@@ -597,10 +600,8 @@ export default function SimulatorWidget() {
           whileHover={{ scale: loading ? 1 : 1.02 }}
           whileTap={{ scale: loading ? 1 : 0.98 }}
           className={[
-            'relative py-3.5 rounded-xl font-semibold text-sm sm:text-[0.95rem] transition-all flex items-center justify-center gap-2 group overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed',
-            simMode === 'topspeed'
-              ? 'bg-gradient-to-r from-[#FF5E1F] to-[#FF7A00] text-white shadow-[0_0_30px_rgba(255,94,31,0.35)] hover:shadow-[0_0_45px_rgba(255,94,31,0.5)]'
-              : 'bg-white/[0.04] border border-white/10 text-white/85 hover:bg-white/[0.08] hover:border-[#FF5E1F]/40',
+            'w-full',
+            simMode === 'topspeed' ? 'btn-primary' : 'btn-ghost hover:border-brand-orange/40',
           ].join(' ')}
         >
           {loading && simMode === 'topspeed' ? (
@@ -721,7 +722,7 @@ export default function SimulatorWidget() {
                             className="flex flex-col items-center text-center"
                           >
                             {/* Milestone dot — sits ON the progress track */}
-                            <div className="w-[14px] h-[14px] sm:w-[18px] sm:h-[18px] rounded-full bg-[#FF5E1F] border-2 border-black shadow-[0_0_18px_rgba(255,94,31,0.6)] mb-2.5" />
+                            <div className="w-[14px] h-[14px] sm:w-[18px] sm:h-[18px] rounded-full bg-brand-orange border-2 border-black shadow-[0_0_18px_rgba(255,94,31,0.6)] mb-2.5" />
                             {/* Distance label */}
                             <p className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/45 mb-0.5">
                               {s.label}
@@ -732,7 +733,7 @@ export default function SimulatorWidget() {
                               <span className="text-white/40 text-[10px] sm:text-xs ml-0.5">s</span>
                             </p>
                             {/* Pace tick (% of total ET) */}
-                            <p className="text-[9px] sm:text-[10px] font-mono text-[#FF8F57]/70 tabular-nums mt-1">
+                            <p className="text-[9px] sm:text-[10px] font-mono text-brand-orangeLight/70 tabular-nums mt-1">
                               {pct}%
                             </p>
                           </motion.div>
@@ -749,10 +750,15 @@ export default function SimulatorWidget() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                className="text-sm"
+                className="text-sm min-w-0"
               >
                 <p className="text-white/40 text-xs mb-1">Bike</p>
-                <p className="font-semibold text-white">{result.bike_name?.split(' ').slice(-2).join(' ')}</p>
+                {/* Full catalog name — CSS-truncated, never string-mangled
+                    (the old slice(-2) turned "Suzuki GSX-R 1000 K5" into
+                    "1000 K5"). */}
+                <p className="font-semibold text-white truncate" title={result.bike_name}>
+                  {result.bike_name}
+                </p>
               </motion.div>
               <motion.div
                 initial={{ opacity: 0 }}
@@ -761,7 +767,7 @@ export default function SimulatorWidget() {
                 className="text-sm"
               >
                 <p className="text-white/40 text-xs mb-1">Peak Power</p>
-                <p className="font-semibold text-[#00FFB2]">{result.peak_power_hp.toFixed(0)} hp</p>
+                <p className="font-semibold text-brand-accent">{result.peak_power_hp.toFixed(0)} hp</p>
               </motion.div>
             </div>
           </motion.div>
@@ -791,7 +797,7 @@ export default function SimulatorWidget() {
                 <p className="text-[10px] font-mono text-white/45 mb-2 uppercase tracking-[0.25em]">
                   Top Speed
                 </p>
-                <p className="text-3xl sm:text-5xl font-mono font-bold text-[#FF5E1F]">
+                <p className="text-3xl sm:text-5xl font-mono font-bold text-brand-orange">
                   <AnimatedCounter target={topSpeedResult.terminal_velocity_kmh ?? 0} decimals={1} />
                 </p>
                 <p className="text-xs text-white/40 mt-2">km/h</p>
@@ -808,7 +814,7 @@ export default function SimulatorWidget() {
                 </p>
                 {topSpeedResult.reached_plateau ? (
                   <>
-                    <p className="text-2xl sm:text-3xl font-mono font-bold text-[#00FFB2]">Reached</p>
+                    <p className="text-2xl sm:text-3xl font-mono font-bold text-brand-accent">Reached</p>
                     <p className="text-[11px] text-white/45 mt-1.5 font-mono tabular-nums">
                       in {topSpeedResult.time_to_terminal_s?.toFixed(1) ?? '—'}s
                     </p>
@@ -869,7 +875,7 @@ export default function SimulatorWidget() {
                 </div>
                 <div>
                   <p className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/40 mb-1">Power</p>
-                  <p className="text-base sm:text-lg font-mono font-bold text-[#00FFB2] tabular-nums">
+                  <p className="text-base sm:text-lg font-mono font-bold text-brand-accent tabular-nums">
                     {topSpeedResult.terminal_power_hp?.toFixed(0) ?? '—'}<span className="text-white/40 text-xs ml-0.5">hp</span>
                   </p>
                 </div>
@@ -877,13 +883,15 @@ export default function SimulatorWidget() {
             </motion.div>
 
             <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="text-sm">
+              <div className="text-sm min-w-0">
                 <p className="text-white/40 text-xs mb-1">Bike</p>
-                <p className="font-semibold text-white">{topSpeedResult.bike_name?.split(' ').slice(-2).join(' ')}</p>
+                <p className="font-semibold text-white truncate" title={topSpeedResult.bike_name}>
+                  {topSpeedResult.bike_name}
+                </p>
               </div>
               <div className="text-sm">
                 <p className="text-white/40 text-xs mb-1">Peak Power</p>
-                <p className="font-semibold text-[#00FFB2]">{topSpeedResult.peak_power_hp?.toFixed(0) ?? '—'} hp</p>
+                <p className="font-semibold text-brand-accent">{topSpeedResult.peak_power_hp?.toFixed(0) ?? '—'} hp</p>
               </div>
             </div>
           </motion.div>
