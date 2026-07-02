@@ -100,3 +100,62 @@ class TestNoDeadParamPaths:
         assert not dead, (
             "parts with invalid param paths (silent no-ops):\n" + "\n".join(dead[:20])
         )
+
+
+class TestIdPreservingUpsert:
+    """tire_repo.create() / parts_repo.create() must upsert in place, not
+    DELETE+re-INSERT (INSERT OR REPLACE), which trips the un-cascaded FK from
+    bike_tire_fitments and wipes part_prices/renumbers ids."""
+
+    def _fresh_db(self):
+        from motoquant.database.connection import MotoQuantDB
+
+        db = MotoQuantDB(":memory:")
+        db.initialize()
+        return db
+
+    def test_reseed_with_fitment_does_not_crash(self):
+        from motoquant.database.seed import seed_all
+
+        db = self._fresh_db()
+        try:
+            seed_all(db)
+            t = db._conn.execute("SELECT id FROM tire_models LIMIT 1").fetchone()[0]
+            b = db._conn.execute("SELECT id FROM bike_models LIMIT 1").fetchone()[0]
+            db.tires.link_bike_fitment(b, t, "front", "oem")
+            # Second seed_all used to raise FOREIGN KEY constraint failed.
+            seed_all(db)
+            t2 = db._conn.execute("SELECT id FROM tire_models LIMIT 1").fetchone()[0]
+            assert t == t2, "tire id must be preserved across re-seed"
+        finally:
+            db.close()
+
+    def test_tire_create_preserves_id(self):
+        db = self._fresh_db()
+        try:
+            id1 = db.tires.create("MRF", "Zapper Q", "100/80-17", "sport")
+            id2 = db.tires.create("MRF", "Zapper Q", "100/80-17", "sport")
+            assert id1 == id2
+        finally:
+            db.close()
+
+    def test_part_create_preserves_id(self):
+        db = self._fresh_db()
+        try:
+            id1 = db.parts.create(
+                "exhaust",
+                "Akrapovic",
+                "Test Slip-On",
+                {"x": 1},
+                part_number="AKX-TEST-1",
+            )
+            id2 = db.parts.create(
+                "exhaust",
+                "Akrapovic",
+                "Test Slip-On v2",
+                {"x": 2},
+                part_number="AKX-TEST-1",
+            )
+            assert id1 == id2
+        finally:
+            db.close()
