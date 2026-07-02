@@ -43,6 +43,7 @@ import CodeComment from '../components/CodeComment';
 import ManifestoScrub from '../components/ManifestoScrub';
 import LaunchControl from '../components/LaunchControl';
 import ScoreboardDigits, { ScoreboardCounter } from '../components/ScoreboardDigits';
+import SectionRail from '../components/SectionRail';
 
 // ─── Validation: only the four clusters where the data is good ────────
 // Per the 13 June 2026 weighted sweep (reports/acc_final_2026_06_13.json). Small-cc / 2T / cruiser
@@ -338,6 +339,17 @@ function HomePageInner() {
       />
       <HudFrame />
       <SiteNav />
+      <SectionRail
+        sections={[
+          { id: 'telemetry', label: 'Telemetry' },
+          { id: 'manifesto', label: 'Manifesto' },
+          { id: 'why', label: 'Why MotoQuant' },
+          { id: 'simulator', label: 'Live simulator' },
+          { id: 'physics', label: 'Physics' },
+          { id: 'intelligence', label: 'Intelligence' },
+          { id: 'validation', label: 'Validation' },
+        ]}
+      />
 
       {/* ─── HERO ─────────────────────────────────────────────── */}
       <section

@@ -14,8 +14,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Menu, X } from 'lucide-react';
+import { ChevronDown, Menu, Search, X } from 'lucide-react';
 import { useAuth } from './AuthProvider';
+import CommandPalette from './CommandPalette';
+import MobileToolBar from './MobileToolBar';
 
 const TOOL_LINKS = [
   { href: '/simulator',   label: 'Simulator' },
@@ -48,6 +50,7 @@ export default function SiteNav() {
   const [open, setOpen] = useState(false);
   const [resOpen, setResOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const resRef = useRef(null);
 
   useEffect(() => {
@@ -55,6 +58,18 @@ export default function SiteNav() {
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Global ⌘K / Ctrl+K — the flagship jump-anywhere affordance.
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        setPaletteOpen((v) => !v);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, []);
 
   // Close menus on route change
@@ -173,6 +188,16 @@ export default function SiteNav() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          <button
+            type="button"
+            onClick={() => setPaletteOpen(true)}
+            aria-label="Search — Ctrl+K"
+            title="Search bikes, pages, actions (Ctrl+K)"
+            className="flex items-center gap-2 rounded-md border border-white/10 px-2.5 py-2 text-white/60 transition-colors hover:border-brand-orange/50 hover:text-white"
+          >
+            <Search size={15} aria-hidden="true" />
+            <kbd className="label-mono hidden md:inline">⌘K</kbd>
+          </button>
           {isAuthenticated ? (
             <Link
               href="/account"
@@ -283,6 +308,9 @@ export default function SiteNav() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <MobileToolBar />
     </header>
   );
 }
