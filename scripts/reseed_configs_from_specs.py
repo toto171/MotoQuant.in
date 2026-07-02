@@ -36,16 +36,45 @@ def strip_year(s):
     return _YEAR_SUFFIX.sub("", s or "").strip()
 
 
+def _year_overlap(a_from, a_to, b_from, b_to):
+    """Overlap width of two [from, to] year ranges (0 if disjoint)."""
+    a_to = a_to or a_from
+    b_to = b_to or b_from
+    if a_from is None or b_from is None:
+        return 0
+    return max(0, min(a_to, b_to) - max(a_from, b_from) + 1)
+
+
+def _pick_generation(candidates, row):
+    """From specs sharing a (mfr, stripped-model) key, pick the one whose
+    year range best matches this DB row's generation. Prevents collapsing
+    e.g. GSX-R 1000 K1/K3/K5/K7/K9 to a single spec (the pre-2026-07 bug)."""
+    if len(candidates) == 1:
+        return candidates[0]
+    ryf = row.get("year_from")
+    ryt = row.get("year_to")
+    # Best year-range overlap wins; ties break toward the closest year_from.
+    scored = sorted(
+        candidates,
+        key=lambda s: (
+            _year_overlap(s.year_from, s.year_to, ryf, ryt),
+            -abs((s.year_from or 0) - (ryf or 0)),
+        ),
+        reverse=True,
+    )
+    return scored[0]
+
+
 def match_spec_to_row(row, specs_by_key):
     mfr = (row["manufacturer"] or "").strip().lower()
     model = strip_year(row["model_name"]).lower()
     key = (mfr, model)
     if key in specs_by_key:
-        return specs_by_key[key]
+        return _pick_generation(specs_by_key[key], row)
     mfr_first = mfr.split()[0] if mfr else ""
-    for (km, kmod), spec in specs_by_key.items():
+    for (km, kmod), specs in specs_by_key.items():
         if kmod == model and (km == mfr or km.startswith(mfr_first)):
-            return spec
+            return _pick_generation(specs, row)
     return None
 
 
@@ -54,14 +83,21 @@ def main():
     db = MotoQuantDB(db_path=db_path)
     db.connect()
 
+    # Key on (manufacturer, YEAR-STRIPPED model) -> list of specs. Both the
+    # DB row and the spec have their trailing "(YYYY-YYYY)" stripped so the
+    # keys align symmetrically (the old code stripped only the row, so a spec
+    # whose own name embedded a year suffix bound to the wrong generation).
+    # Multi-generation models keep ALL their specs in the list and
+    # _pick_generation chooses by year-range overlap.
     specs_by_key = {}
     for s in ALL_KNOWN_BIKES:
-        key = (s.manufacturer.strip().lower(), s.model_name.strip().lower())
-        specs_by_key[key] = s
+        key = (s.manufacturer.strip().lower(), strip_year(s.model_name).lower())
+        specs_by_key.setdefault(key, []).append(s)
 
     rows = db.conn.execute(
         "SELECT bc.id AS config_id, bm.id AS model_id, "
-        "m.name AS manufacturer, bm.model_name, bc.config_name "
+        "m.name AS manufacturer, bm.model_name, bc.config_name, "
+        "bm.year_from AS year_from, bm.year_to AS year_to "
         "FROM bike_configs bc "
         "JOIN bike_models bm ON bc.bike_model_id = bm.id "
         "JOIN manufacturers m ON bm.manufacturer_id = m.id "

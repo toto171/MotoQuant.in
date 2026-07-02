@@ -57,12 +57,12 @@
     },
     "Duke 390 (2017-2023)|2017": {
       "cluster": "entry_300",
-      "eighth_s": 9.017302,
-      "et_s": 13.933948,
+      "eighth_s": 9.049428,
+      "et_s": 13.927912,
       "finished": true,
-      "sixty_ft_s": 2.501173,
-      "trap_kmh": 158.3271,
-      "trap_ms": 43.979759
+      "sixty_ft_s": 2.504042,
+      "trap_kmh": 159.987,
+      "trap_ms": 44.440846
     },
     "GSX-R 600 (2006-2007)|2006": {
       "cluster": "sport_600_1000",
@@ -75,21 +75,21 @@
     },
     "GSX-R 750 (2008-2010)|2008": {
       "cluster": "sport_600_1000",
-      "eighth_s": 7.680002,
-      "et_s": 11.478234,
+      "eighth_s": 7.15058,
+      "et_s": 10.512806,
       "finished": true,
-      "sixty_ft_s": 2.240602,
-      "trap_kmh": 210.2463,
-      "trap_ms": 58.401753
+      "sixty_ft_s": 2.143584,
+      "trap_kmh": 238.7724,
+      "trap_ms": 66.325659
     },
     "Hayabusa (2008-2012)|2008": {
       "cluster": "litre_hyper",
-      "eighth_s": 6.896241,
-      "et_s": 10.290918,
+      "eighth_s": 6.923256,
+      "et_s": 10.223321,
       "finished": true,
-      "sixty_ft_s": 1.989258,
-      "trap_kmh": 236.3234,
-      "trap_ms": 65.645379
+      "sixty_ft_s": 2.058639,
+      "trap_kmh": 243.7427,
+      "trap_ms": 67.706313
     },
     "MT-07 (2018-2024)|2018": {
       "cluster": "mid_twin",
@@ -138,12 +138,12 @@
     },
     "Ninja ZX-10R (2004-2005)|2004": {
       "cluster": "litre_sport",
-      "eighth_s": 6.96436,
-      "et_s": 10.123716,
+      "eighth_s": 6.773886,
+      "et_s": 9.906655,
       "finished": true,
-      "sixty_ft_s": 2.112648,
-      "trap_kmh": 255.6156,
-      "trap_ms": 71.00432
+      "sixty_ft_s": 2.034636,
+      "trap_kmh": 256.6419,
+      "trap_ms": 71.28943
     },
     "Ninja ZX-14R (2012-2023)|2012": {
       "cluster": "litre_hyper",
@@ -156,21 +156,21 @@
     },
     "Ninja ZX-6R (2003-2004)|2003": {
       "cluster": "sport_600_1000",
-      "eighth_s": 7.549919,
-      "et_s": 11.15571,
+      "eighth_s": 7.539259,
+      "et_s": 11.15515,
       "finished": true,
-      "sixty_ft_s": 2.243066,
-      "trap_kmh": 223.4128,
-      "trap_ms": 62.059121
+      "sixty_ft_s": 2.2341,
+      "trap_kmh": 221.7214,
+      "trap_ms": 61.589277
     },
     "Panigale V4 (2018-2024)|2018": {
       "cluster": "litre_sport",
-      "eighth_s": 6.976051,
-      "et_s": 10.178965,
+      "eighth_s": 6.901679,
+      "et_s": 10.048925,
       "finished": true,
-      "sixty_ft_s": 2.110503,
-      "trap_kmh": 251.7201,
-      "trap_ms": 69.922245
+      "sixty_ft_s": 2.088299,
+      "trap_kmh": 257.3025,
+      "trap_ms": 71.472909
     },
     "Pulsar NS200 (2012-2016)|2012": {
       "cluster": "entry_200",
@@ -255,12 +255,12 @@
     },
     "S 1000 RR (2015-2018)|2015": {
       "cluster": "litre_sport",
-      "eighth_s": 6.950368,
-      "et_s": 10.100304,
+      "eighth_s": 6.947339,
+      "et_s": 10.12381,
       "finished": true,
-      "sixty_ft_s": 2.106589,
-      "trap_kmh": 257.5737,
-      "trap_ms": 71.548247
+      "sixty_ft_s": 2.10049,
+      "trap_kmh": 254.9766,
+      "trap_ms": 70.826828
     },
     "SV650 (2016-2026)|2016": {
       "cluster": "mid_twin",
@@ -309,12 +309,12 @@
     },
     "YZF-R6 (2006-2007)|2006": {
       "cluster": "sport_600_1000",
-      "eighth_s": 7.577451,
-      "et_s": 11.304878,
+      "eighth_s": 7.410081,
+      "et_s": 11.034896,
       "finished": true,
-      "sixty_ft_s": 2.203845,
-      "trap_kmh": 215.3855,
-      "trap_ms": 59.829299
+      "sixty_ft_s": 2.169916,
+      "trap_kmh": 221.4527,
+      "trap_ms": 61.514648
     }
   },
   "reference": {
