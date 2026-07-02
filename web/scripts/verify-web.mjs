@@ -69,12 +69,46 @@ function walk(dir, out) {
 }
 
 function stripComments(s) {
-  s = s.replace(/\/\/[^\n]*/g, '');
-  s = s.replace(/\/\*[\s\S]*?\*\//g, '');
-  s = s.replace(/`(?:[^`\\]|\\.)*`/g, '""');
-  s = s.replace(/'(?:[^'\\]|\\.)*'/g, '""');
-  s = s.replace(/"(?:[^"\\]|\\.)*"/g, '""');
-  return s;
+  // Single-pass state machine (July 2026). The old sequential regexes had
+  // two false-positive modes that eventually fired on real prose:
+  //   - '//' stripping ran FIRST, so a https:// URL inside a string ate the
+  //     rest of its line (including real closing braces);
+  //   - '…' single-quote stripping ran before "…", so an apostrophe inside a
+  //     double-quoted string ("MotoQuant's…") opened a phantom string that
+  //     swallowed real code parens until the next apostrophe.
+  // A state machine can't be fooled by quote nesting. Regex literals and
+  // apostrophes in bare JSX text are still invisible to it — that residual
+  // noise is what the ±4 skew tolerance is for.
+  const out = [];
+  let i = 0;
+  let mode = null; // null | "'" | '"' | '`' | '//' | '/*'
+  const n = s.length;
+  while (i < n) {
+    const ch = s[i];
+    const next = i + 1 < n ? s[i + 1] : '';
+    if (mode === null) {
+      if (ch === '/' && next === '/') { mode = '//'; i += 2; continue; }
+      if (ch === '/' && next === '*') { mode = '/*'; i += 2; continue; }
+      if (ch === "'" || ch === '"' || ch === '`') { mode = ch; i += 1; continue; }
+      out.push(ch);
+      i += 1;
+      continue;
+    }
+    if (mode === '//') {
+      if (ch === '\n') { mode = null; out.push('\n'); }
+      i += 1;
+      continue;
+    }
+    if (mode === '/*') {
+      if (ch === '*' && next === '/') { mode = null; i += 2; } else { i += 1; }
+      continue;
+    }
+    // inside a ' / " / ` string: honor escapes, ignore everything else
+    if (ch === '\\') { i += 2; continue; }
+    if (ch === mode) { mode = null; }
+    i += 1;
+  }
+  return out.join('');
 }
 
 function checkFile(path) {
