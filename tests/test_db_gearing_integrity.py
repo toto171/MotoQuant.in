@@ -154,9 +154,7 @@ class TestDBGearingIntegrity:
                 drv.get("gear_ratios") != list(cfg.drivetrain.gear_ratios)
                 or drv.get("front_sprocket") != cfg.drivetrain.front_sprocket
                 or drv.get("rear_sprocket") != cfg.drivetrain.rear_sprocket
-                or abs(
-                    (drv.get("primary_ratio") or 0) - cfg.drivetrain.primary_ratio
-                )
+                or abs((drv.get("primary_ratio") or 0) - cfg.drivetrain.primary_ratio)
                 > 1e-3
             ):
                 bad.append(
