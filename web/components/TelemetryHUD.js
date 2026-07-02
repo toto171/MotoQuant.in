@@ -191,13 +191,14 @@ function SpeedTrace({ currentV, currentT, progress }) {
             <stop offset="0" stopColor="#FF5E1F" stopOpacity="0.35" />
             <stop offset="1" stopColor="#FF5E1F" stopOpacity="0" />
           </linearGradient>
-          <filter id="dot-glow" x="-80%" y="-80%" width="260%" height="260%">
-            <feGaussianBlur stdDeviation="4" result="b" />
-            <feMerge>
-              <feMergeNode in="b" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
+          {/* pre-computed glow — the previous feGaussianBlur filter re-ran
+              every frame the spring moved the dot; a radial gradient is the
+              same halo at zero per-frame raster cost */}
+          <radialGradient id="dot-glow-grad">
+            <stop offset="0" stopColor="#FF8F57" stopOpacity="0.9" />
+            <stop offset="0.45" stopColor="#FF5E1F" stopOpacity="0.35" />
+            <stop offset="1" stopColor="#FF5E1F" stopOpacity="0" />
+          </radialGradient>
           <clipPath id="vfill-clip">
             <rect x="0" y="0" width={Math.max(0, Math.min(1, progress)) * 600} height="220" />
           </clipPath>
@@ -285,8 +286,9 @@ function SpeedTrace({ currentV, currentT, progress }) {
           );
         })}
 
-        {/* live dot — glowing */}
-        <circle cx={dotX} cy={dotY} r="6" fill="#FF8F57" filter="url(#dot-glow)" />
+        {/* live dot — glowing (gradient halo + solid core, no SVG filter) */}
+        <circle cx={dotX} cy={dotY} r="14" fill="url(#dot-glow-grad)" />
+        <circle cx={dotX} cy={dotY} r="4.5" fill="#FF8F57" />
         <circle cx={dotX} cy={dotY} r="11" fill="none" stroke="#FF5E1F" strokeWidth="1.5" opacity="0.55" />
         <line x1={dotX} y1={dotY} x2={dotX} y2="200" stroke="#FF5E1F" strokeDasharray="3 4" strokeWidth="1" opacity="0.55" />
       </svg>

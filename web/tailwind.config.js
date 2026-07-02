@@ -31,9 +31,12 @@ module.exports = {
         },
       },
       keyframes: {
+        // opacity-only on purpose: this used to be filter:brightness(), which
+        // forces a per-frame re-raster of the lamp + its box-shadow glow on
+        // every GPU tier (8 lamps x 60fps). Opacity runs on the compositor.
         'lamp-pulse': {
-          '0%, 100%': { filter: 'brightness(1)' },
-          '50%': { filter: 'brightness(1.25)' },
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.72' },
         },
         'live-pulse': {
           '0%, 100%': { opacity: '1' },
