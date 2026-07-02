@@ -85,6 +85,20 @@ export default function CommandPalette({ open, onClose }) {
     return undefined;
   }, [open]);
 
+  // Escape closes from anywhere — not just when the input holds focus
+  // (focus lands 30 ms after open; other elements can also hold it).
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
   // Live bike search (≥2 chars)
   useEffect(() => {
     if (!open) return undefined;
