@@ -374,6 +374,12 @@ def generate_license_key(
     The plaintext key is returned ONCE — store it securely.
     Quota: pro=1 key, studio=5 keys.
     """
+    # require_tier passes anonymous callers through as {} while the open beta
+    # runs (MOTOQUANT_BILLING_ENFORCE=false) so the sim routes stay open — but
+    # a license key MUST belong to an account. Guard explicitly or the
+    # user["id"] below 500s on anonymous requests.
+    if not user.get("id"):
+        raise HTTPException(401, "Sign in to generate a license key.")
     conn = _get_conn()
     try:
         _subs.ensure_tables(conn)

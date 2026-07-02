@@ -486,6 +486,19 @@ class TestLicenseKeyEndpoints(unittest.TestCase):
             )
         return res
 
+    def test_generate_key_anonymous_beta_401_not_500(self):
+        """Open-beta anonymous callers (require_tier passes {} while
+        MOTOQUANT_BILLING_ENFORCE is off) must get a clean 401 from
+        license-key generation, not a KeyError 500 — July 2026
+        functional-audit find."""
+        from fastapi import HTTPException
+
+        from motoquant import subscriptions as sub_mod
+
+        with self.assertRaises(HTTPException) as ctx:
+            sub_mod.generate_license_key(user={})
+        self.assertEqual(ctx.exception.status_code, 401)
+
     def test_validate_key_endpoint_valid(self):
         conn = _mem_conn()
         _bootstrap(conn)
