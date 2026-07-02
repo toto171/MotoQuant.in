@@ -3,19 +3,23 @@ test_db_gearing_integrity.py
 =============================
 Guardrail: every current row in motoquant.db must have gear ratios that match
 either (a) the K5/R1/Busa defaults.py ship config for the three reference bikes,
-or (b) the Tier-1 lookup in motoquant.scraper.gear_ratios for everything else.
+or (b) the gearing that ``spec_to_bike_config`` derives for that bike — i.e. the
+DB must be a faithful reseed of the current specs.
 
 This test exists because on April 22 2026 we shipped production DB rows that
 had K5-leaked gear ratios into 269 bikes — e.g. Royal Enfield Continental GT 650
-reported a 178 km/h terminal velocity in 4th gear (physically impossible; the
-bike's actual top speed is ~160 km/h and 4th redlines at ~110). The root cause
-was the DB having been seeded before the gear_ratios.py audit landed.
+reported a 178 km/h terminal velocity in 4th gear (physically impossible). A
+leaked config would not match its own spec's ``spec_to_bike_config`` output, so
+this still catches that class of bug.
 
-If this test ever fails, run:
-
-    python scripts/refresh_gearing_from_lookup.py
-
-and commit the resulting motoquant.db.
+2026-07-02: the non-reference check now compares against ``spec_to_bike_config``
+(spec-preferred: a bike that ships a real service-manual cassette keeps it), NOT
+the raw Tier-1 lookup. The old pure-lookup invariant was obsolete — it flagged
+~460 bikes whose specs carry more accurate service-manual gearing than the
+generic lookup (e.g. Versys 650's real ER650 box) as "stale", and pointed at the
+superseded ``refresh_gearing_from_lookup.py``. The canonical reseed is
+``scripts/reseed_configs_from_specs.py``; run it and commit motoquant.db if this
+fails.
 """
 
 from __future__ import annotations
@@ -114,31 +118,59 @@ class TestDBGearingIntegrity:
             f"{bad}. Re-run scripts/refresh_gearing_from_lookup.py."
         )
 
-    def test_non_reference_bikes_match_tier1_lookup(self, rows):
-        """Every non-reference bike's DB gearing must equal its Tier-1 lookup."""
+    def test_non_reference_bikes_match_spec_config(self, rows):
+        """Every non-reference bike's DB gearing must equal what
+        ``spec_to_bike_config`` derives for its matched spec — the spec-preferred
+        invariant the reseed maintains (catches K5-leaks without false-flagging
+        bikes that ship a real service-manual cassette)."""
+        from motoquant.scraper.importer import spec_to_bike_config
+        from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
+        from scripts.reseed_configs_from_specs import match_spec_to_row, strip_year
+
+        specs_by_key: dict = {}
+        for s in ALL_KNOWN_BIKES:
+            specs_by_key.setdefault(
+                (s.manufacturer.strip().lower(), strip_year(s.model_name).lower()), []
+            ).append(s)
+
         bad = []
         for bmid, mfr, mdl, yf, yt, dp in rows:
             if _reference_config_for(mdl) is not None:
                 continue
-            clean = mdl.split("(")[0].strip()
-            year = yf or 2024
-            if yt and yf:
-                year = (yf + yt) // 2
-            lookup = lookup_gear_ratios(mfr, clean, year)
-            if lookup is None:
-                continue  # covered by test_every_bike_has_tier1_or_reference_match
-            ratios, front, rear, primary, _ = lookup
+            spec = match_spec_to_row(
+                {
+                    "manufacturer": mfr,
+                    "model_name": mdl,
+                    "year_from": yf,
+                    "year_to": yt,
+                },
+                specs_by_key,
+            )
+            if spec is None:
+                continue  # no spec to reseed from — nothing to assert against
             drv = json.loads(dp)
+            cfg = spec_to_bike_config(spec)
             if (
-                drv.get("gear_ratios") != list(ratios)
-                or drv.get("front_sprocket") != front
-                or drv.get("rear_sprocket") != rear
-                or abs((drv.get("primary_ratio") or 0) - primary) > 1e-3
+                drv.get("gear_ratios") != list(cfg.drivetrain.gear_ratios)
+                or drv.get("front_sprocket") != cfg.drivetrain.front_sprocket
+                or drv.get("rear_sprocket") != cfg.drivetrain.rear_sprocket
+                or abs(
+                    (drv.get("primary_ratio") or 0) - cfg.drivetrain.primary_ratio
+                )
+                > 1e-3
             ):
-                bad.append((mfr, mdl, f"{front}F/{rear}R×{primary}"))
+                bad.append(
+                    (
+                        mfr,
+                        mdl,
+                        f"DB {drv.get('front_sprocket')}F/{drv.get('rear_sprocket')}R "
+                        f"vs spec {cfg.drivetrain.front_sprocket}F/"
+                        f"{cfg.drivetrain.rear_sprocket}R",
+                    )
+                )
         assert not bad, (
-            f"{len(bad)} bikes have stale DB gearing. "
-            f"Run `python scripts/refresh_gearing_from_lookup.py`. First 5: {bad[:5]}"
+            f"{len(bad)} bikes have DB gearing out of sync with spec_to_bike_config. "
+            f"Run `python scripts/reseed_configs_from_specs.py`. First 5: {bad[:5]}"
         )
 
     def test_no_physically_impossible_top_gear_speed_for_reference_bikes(self, rows):
