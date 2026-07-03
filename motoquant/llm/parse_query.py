@@ -224,15 +224,21 @@ TOOL_SCHEMA: dict[str, Any] = {
         },
         "build_tier": {
             "type": "string",
-            "enum": ["stage_1", "stage_2", "all_out"],
+            "enum": ["stage_1", "stage_2", "stage_3", "stage_4", "all_out"],
             "description": (
                 "For recommend intent, infer the build tier from phrasing: "
                 "stage_1 (basic bolt-ons, mentions of 'budget' / 'first mods' / "
                 "'stage 1' / 'starter' / sub-50k INR / quick wins) — "
                 "stage_2 (serious upgrades, 'street-legal sport build' / "
                 "'track-day prep' / 'full Stage 2' / 50-200k INR) — "
+                "stage_3 ('stage 3' / 'serious power' / nitrous mentions / "
+                "~500k INR builds) — "
+                "stage_4 ('stage 4' / 'outlaw class' / 'open class BUILD' / "
+                "'full drag prep' / turbo + extended swingarm + wheelie bar) — "
                 "all_out ('no budget' / 'all out' / 'race build' / 'maximum' / "
                 "'full send' / 'best possible'). "
+                "CAREFUL: 'open class' describing which BIKE to buy/race is "
+                "target_class='litre' on choose_bike, NOT a build tier. "
                 "Default to stage_2 when ambiguous."
             ),
         },
@@ -303,8 +309,11 @@ Bike alias hints:
 Build tier inference hints (set build_tier on recommend intent):
 - "budget" / "first mods" / "under X INR" / "stage 1" / "starter" / "basics" → stage_1
 - "track day" / "serious" / "stage 2" / "50-200k" / "street-legal sport" → stage_2
+- "stage 3" / "serious power" / "nitrous build" / "~5 lakh build" → stage_3
+- "stage 4" / "outlaw class build" / "open class build" / "full drag prep" / "turbo + swingarm + wheelie bar" → stage_4
 - "no budget" / "all out" / "maximum" / "full send" / "best possible" / "race build" / "unlimited" / "money no object" → all_out
 - Default to stage_2 when phrasing is ambiguous.
+- Disambiguation: "which bike for open class" = choose_bike with target_class litre; "open/outlaw class BUILD for my <bike>" = recommend with build_tier stage_4.
 
 Race-class hints (set target_class on choose_bike intent):
 - "litre class" / "open class" / "superbike" / "1000cc" → litre

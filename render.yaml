@@ -72,6 +72,10 @@ services:
       # never land in git. The keys listed in requirements-api.txt comments
       # are all optional — the API serves the simulator and catalog endpoints
       # without any of them.
+      # Chat-agent web lookup (optional): SEARCH_PROVIDER=brave|serper +
+      # SEARCH_API_KEY upgrade the agent's web_search tool from the free
+      # DuckDuckGo HTML fallback to a proper search API. MOTOQUANT_WEB_TOOLS=0
+      # turns the agent's web access off entirely.
     # ──────────────────────────────────────────────────────────────────────
     # ACCOUNT DURABILITY (paid plan only — Render disks are unavailable on the
     # free tier). When upgrading off free, uncomment this block AND repoint

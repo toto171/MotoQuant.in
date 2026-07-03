@@ -28,7 +28,7 @@ from typing_extensions import TypedDict  # py<3.12-safe with pydantic
 
 from ..constants import MS_TO_KMH, MS_TO_MPH
 from ..physics import MotoQuantEngine
-from .client import LLMClient, LLMNotConfiguredError
+from .client import LLMClient, LLMNotConfiguredError, LLMRateLimitError
 from .parse_query import ParsedSimRequest, parse_query
 from .summarize import summarize_result
 
@@ -322,6 +322,12 @@ def run_chat_pipeline(
         result.error = "llm_not_configured"
         result.error_detail = str(e)
         return result
+    except LLMRateLimitError as e:
+        # Typed 429 so the UI can show a polite retry hint instead of a
+        # generic "query failed" (previously swallowed by the branch below).
+        result.error = "rate_limited"
+        result.error_detail = str(e)
+        return result
     except Exception as e:  # noqa: BLE001
         result.error = "parse_failed"
         result.error_detail = f"{type(e).__name__}: {e}"
@@ -341,7 +347,7 @@ def run_chat_pipeline(
     # ── 2. Dispatch on intent ───────────────────────────────────────
     intent = parsed.intent_type
     if intent == "smalltalk":
-        return _run_smalltalk(parsed, client, result)
+        return _run_smalltalk(parsed, client, result, db=db)
     if intent == "explain":
         return _run_explain(parsed, db, client, result, run_summary=run_summary)
     if intent == "rank":
@@ -732,10 +738,35 @@ _TIER_ALL_OUT = _TIER_STAGE_2 + [
     ("wheelie", "Wheelie / launch aid"),
 ]
 
+# Industry-standard drag-build stages 3 and 4 (July 2026). The catalog has no
+# engine-internals categories (cams / pistons / big-bore), so stage_3 is
+# honestly approximated with bolt-on power adders; stage_4 = outlaw/open
+# class — full chassis drag prep on top of everything else.
+_TIER_STAGE_3 = _TIER_STAGE_2 + [
+    ("suspension", "Suspension"),
+    ("nitrous", "Nitrous"),
+]
+
+_TIER_STAGE_4 = _TIER_ALL_OUT + [
+    ("swingarm", "Extended swingarm"),
+    ("lowering", "Lowering kit"),
+    ("air_shifter", "Air shifter"),
+]
+
 _TIER_RECIPES = {
     "stage_1": _TIER_STAGE_1,
     "stage_2": _TIER_STAGE_2,
+    "stage_3": _TIER_STAGE_3,
+    "stage_4": _TIER_STAGE_4,
+    # Legacy alias kept for old clients / prompts; the parser may still
+    # emit all_out for "no budget / full send" phrasing.
     "all_out": _TIER_ALL_OUT,
+}
+
+# "outlaw" / "open class" build phrasing maps onto stage_4.
+_TIER_ALIASES = {
+    "outlaw": "stage_4",
+    "open_class": "stage_4",
 }
 
 # Soft budget caps when the user didn't specify one. These are guidance —
@@ -744,6 +775,8 @@ _TIER_RECIPES = {
 _TIER_DEFAULT_BUDGET_INR = {
     "stage_1": 60_000,
     "stage_2": 200_000,
+    "stage_3": 500_000,
+    "stage_4": None,  # no cap — outlaw/open class
     "all_out": None,  # no cap
 }
 
@@ -796,6 +829,10 @@ def _run_recommend(
         #    in each category (don't blow the budget on the first pick),
         #    stage_2 picks middle-tier, and all_out goes premium-first.
         tier_for_sort = (parsed.build_tier or "stage_2").lower()
+        tier_for_sort = _TIER_ALIASES.get(tier_for_sort, tier_for_sort)
+        if tier_for_sort in ("stage_3", "stage_4"):
+            # Premium-first ordering: serious-power tiers behave like all_out.
+            tier_for_sort = "all_out"
         by_cat: dict[str, list[dict[str, Any]]] = {}
         for p in parts:
             cat = (p.get("category_name") or "uncategorized").lower()
@@ -821,6 +858,7 @@ def _run_recommend(
         #    finished plan). Stage_1 implicitly excludes high-cost categories
         #    (suspension/brakes/weight). All_out skips the budget cap entirely.
         tier = (parsed.build_tier or "stage_2").lower()
+        tier = _TIER_ALIASES.get(tier, tier)
         recipe = _TIER_RECIPES.get(tier, _TIER_STAGE_2)
         # Effective budget: explicit > tier default > infinite
         effective_budget = (
@@ -991,12 +1029,24 @@ def _run_smalltalk(
     parsed: ParsedSimRequest,
     client: LLMClient | None,
     result: ChatResult,
+    db: MotoQuantDB | None = None,
 ) -> ChatResult:
+    # Live counts so the greeting can never go stale again (it sat at
+    # "327 bikes" while the catalog grew past 500).
+    bikes, venues = "500+", "20"
+    if db is not None:
+        try:
+            bikes = str(
+                db.conn.execute("SELECT COUNT(*) FROM bike_models").fetchone()[0]
+            )
+            venues = str(db.conn.execute("SELECT COUNT(*) FROM venues").fetchone()[0])
+        except Exception:  # noqa: BLE001
+            pass
     msg = (
         "MotoQuant Pro: I'm a motorcycle drag-racing simulator. Ask me things "
         "like 'how fast is a Hayabusa', 'compare K5 vs R1', 'what's the fastest "
-        "300cc bike', or 'best mods for R15 V4 under 30k'. I can simulate any of "
-        "327 bikes across 20 venues with real physics."
+        f"300cc bike', or 'best mods for R15 V4 under 30k'. I can simulate any "
+        f"of {bikes} bikes across {venues} venues with real physics."
     )
     result.summary = msg
     return result

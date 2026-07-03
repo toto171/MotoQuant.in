@@ -3269,6 +3269,13 @@ def get_llm_client():
     return get_default_client()
 
 
+class ChatMessage(BaseModel):
+    """One prior conversation turn (client-held history)."""
+
+    role: str = Field(..., pattern="^(user|assistant)$")
+    content: str = Field(..., max_length=8000)
+
+
 class ChatRequest(BaseModel):
     """POST /api/chat -- ask MotoQuant a question in natural language."""
 
@@ -3288,6 +3295,25 @@ class ChatRequest(BaseModel):
             "Set False to skip the second LLM call (saves tokens / latency)."
         ),
     )
+    messages: list[ChatMessage] | None = Field(
+        None,
+        max_length=24,
+        description=(
+            "Optional prior conversation turns (oldest first) so follow-up "
+            "questions keep their context. The server is stateless — the "
+            "client holds the transcript."
+        ),
+    )
+    mode: str = Field(
+        "agent",
+        pattern="^(agent|classic)$",
+        description=(
+            "'agent' (default) = multi-step tool-calling agent: multi-turn "
+            "conversations, real optimizer/autotune access, web lookup, "
+            "estimated sims for unknown bikes. 'classic' = the legacy "
+            "single-shot parse→dispatch→summarize pipeline."
+        ),
+    )
 
 
 class ChatBikeSuggestion(BaseModel):
@@ -3303,13 +3329,22 @@ class ChatResponse(BaseModel):
     Frontends should:
       - if error == "bike_not_found": render bike_suggestions as clickable
         chips so the user can pick a bike and re-run.
-      - if error == "llm_not_configured": show a banner pointing the
-        operator at ANTHROPIC_API_KEY (this is a server-side config issue).
-      - if error == "parse_failed" or "sim_failed": show error_detail.
-      - if error == None: render sim_result tiles + summary text.
+      - if error == "llm_not_configured": show a banner telling the operator
+        to set the provider key (GROQ_API_KEY by default — see LLM_PROVIDER).
+      - if error == "rate_limited": show a polite retry-in-a-minute note.
+      - if error == "parse_failed" / "sim_failed" / "agent_failed": show
+        error_detail.
+      - if error == None: render summary text; agent mode additionally
+        returns ordered `blocks` ([{type, payload}]) — sim_result /
+        top_speed / compare_result / build_result / outlaw_result /
+        autotune_result / estimated_sim / parts / tires / web_citations —
+        for rich per-type tiles. `sim_result` mirrors the LAST sim block
+        for backwards compatibility with older clients.
     """
 
     raw_query: str
+    mode: str = "classic"
+    intent_type: str | None = None
     bike_name: str = ""
     bike_id: int | None = None
     venue_name: str | None = None
@@ -3318,9 +3353,127 @@ class ChatResponse(BaseModel):
     optimization_goal: str = "minimize_et"
     bike_suggestions: list[ChatBikeSuggestion] = Field(default_factory=list)
     sim_result: dict[str, Any] | None = None
+    # Classic-pipeline intent payloads (previously computed then DROPPED at
+    # this boundary — the July 2 audit's "ChatResponse SimDict" item).
+    compare_result: dict[str, Any] | None = None
+    rank_result: dict[str, Any] | None = None
+    recommend_result: dict[str, Any] | None = None
+    explain_result: dict[str, Any] | None = None
+    choose_bike_result: dict[str, Any] | None = None
+    # Agent-mode payloads
+    blocks: list[dict[str, Any]] = Field(default_factory=list)
+    tool_trace: list[dict[str, Any]] = Field(default_factory=list)
+    sims_run: int = 0
     summary: str | None = None
     error: str | None = None
     error_detail: str | None = None
+
+
+def _make_chat_meter(request: Request):
+    """Capture the caller's sim-quota identity at route time; return a
+    meter(n)->bool callback the agent's tool executor calls per full sim.
+
+    Returns True when the sim may run. Metering failures never block chat.
+    """
+    try:
+        identity, tier = _sim_identity_and_tier(request)
+    except Exception:  # noqa: BLE001
+        return None
+
+    def meter(n: int) -> bool:
+        try:
+            from .database.connection import connect as _db_connect
+            from .usage import record_and_check
+
+            conn = _db_connect()
+            try:
+                st = None
+                for _ in range(max(1, int(n))):
+                    st = record_and_check(conn, identity, tier=tier)
+            finally:
+                conn.close()
+            if st is not None and not st.allowed:
+                from . import auth as _auth
+
+                return not _auth.BILLING_ENFORCE
+            return True
+        except Exception:  # noqa: BLE001 — metering must never break chat
+            logging.getLogger(__name__).warning(
+                "chat sim metering failed", exc_info=True
+            )
+            return True
+
+    return meter
+
+
+def _get_surrogate_pair():
+    """Lazy surrogate accessor shared with the optimizer routes."""
+    global _SURROGATE, _SURROGATE_SOURCE
+    if _SURROGATE is None:
+        with _SURROGATE_LOCK:
+            if _SURROGATE is None:
+                _SURROGATE, _SURROGATE_SOURCE = _load_surrogate()
+    return _SURROGATE, _SURROGATE_SOURCE
+
+
+def _chat_impl(req: ChatRequest, client, meter_cb, progress=None) -> dict:
+    """Run one chat turn (agent or classic). Returns a ChatResponse dict."""
+    db = _get_db_facade()
+    if db is None:
+        raise HTTPException(status_code=503, detail="database_unavailable")
+
+    if req.mode == "classic":
+        from .llm import run_chat_pipeline
+
+        result = run_chat_pipeline(
+            req.query, db, client=client, run_summary=req.run_summary
+        )
+        return {
+            "raw_query": result.raw_query,
+            "mode": "classic",
+            "intent_type": result.intent_type,
+            "bike_name": result.bike_name,
+            "bike_id": result.bike_id,
+            "venue_name": result.venue_name,
+            "venue_id": result.venue_id,
+            "parsed_notes": result.parsed_notes,
+            "optimization_goal": result.optimization_goal,
+            "bike_suggestions": result.bike_suggestions,
+            "sim_result": result.sim_result,
+            "compare_result": result.compare_result,
+            "rank_result": result.rank_result,
+            "recommend_result": result.recommend_result,
+            "explain_result": result.explain_result,
+            "choose_bike_result": result.choose_bike_result,
+            "summary": result.summary,
+            "error": result.error,
+            "error_detail": result.error_detail,
+        }
+
+    from .llm.agent import run_agent_chat
+
+    history = [m.model_dump() for m in (req.messages or [])]
+    result = run_agent_chat(
+        req.query,
+        db,
+        client=client,
+        history=history,
+        progress_cb=progress,
+        meter_cb=meter_cb,
+        surrogate_getter=_get_surrogate_pair,
+    )
+    return {
+        "raw_query": result.raw_query,
+        "mode": "agent",
+        "blocks": result.blocks,
+        "tool_trace": result.tool_trace,
+        "sims_run": result.sims_run,
+        # Back-compat: older clients read summary + sim_result only.
+        "summary": result.reply,
+        "sim_result": result.last_block("sim_result"),
+        "error": result.error,
+        "error_detail": result.error_detail,
+    }
 
 
 @app.post(
@@ -3328,36 +3481,39 @@ class ChatResponse(BaseModel):
     response_model=ChatResponse,
     dependencies=[Depends(rate_limit("chat", 20, 60.0))],
 )
-def chat(req: ChatRequest, client=Depends(get_llm_client)) -> ChatResponse:
-    """End-to-end NL chat: parse with Claude, run physics, summarize.
+def chat(
+    req: ChatRequest, request: Request, client=Depends(get_llm_client)
+) -> ChatResponse:
+    """End-to-end NL chat (agent mode by default; mode='classic' for the
+    legacy pipeline).
 
     Always returns 200 with `error` populated on failure modes the user
-    can recover from (bike not found, LLM not configured). Returns 503
-    only if the database itself is unreachable.
+    can recover from (bike not found, LLM not configured, rate limited).
+    Returns 503 only if the database itself is unreachable.
     """
-    db = _get_db_facade()
-    if db is None:
-        raise HTTPException(status_code=503, detail="database_unavailable")
-
-    from .llm import run_chat_pipeline
-
-    result = run_chat_pipeline(
-        req.query, db, client=client, run_summary=req.run_summary
-    )
+    payload = _chat_impl(req, client, _make_chat_meter(request))
+    suggestions = payload.pop("bike_suggestions", None) or []
     return ChatResponse(
-        raw_query=result.raw_query,
-        bike_name=result.bike_name,
-        bike_id=result.bike_id,
-        venue_name=result.venue_name,
-        venue_id=result.venue_id,
-        parsed_notes=result.parsed_notes,
-        optimization_goal=result.optimization_goal,
-        bike_suggestions=[ChatBikeSuggestion(**s) for s in result.bike_suggestions],
-        sim_result=result.sim_result,
-        summary=result.summary,
-        error=result.error,
-        error_detail=result.error_detail,
+        **payload,
+        bike_suggestions=[ChatBikeSuggestion(**s) for s in suggestions],
     )
+
+
+@app.post(
+    "/api/jobs/chat",
+    status_code=202,
+    dependencies=[Depends(rate_limit("chat", 20, 60.0))],
+)
+def job_chat(req: ChatRequest, request: Request, client=Depends(get_llm_client)):
+    """Start a chat turn as a background job with live progress + Stop.
+
+    Agent turns can run multiple sims / an optimizer pass, which on the
+    0.5-CPU prod tier exceeds comfortable request time — same rationale as
+    every other /api/jobs/* route. Poll GET /api/jobs/{id}; result is the
+    ChatResponse-shaped dict.
+    """
+    meter = _make_chat_meter(request)
+    return _start_job("chat", lambda progress: _chat_impl(req, client, meter, progress))
 
 
 # ------- END ws/backend-surrogate-pricing additions ----------------------
@@ -3381,7 +3537,16 @@ class OptimizeBuildRequest(BaseModel):
     bike_preset: str | None = Field(
         None, description="Fallback preset: gsxr1000_k5 | yzfr1_4c8 | hayabusa_gen1"
     )
-    budget_inr: float = Field(..., ge=0, le=5_000_000, description="Max spend [INR]")
+    budget_inr: float | None = Field(
+        None,
+        ge=0,
+        le=5_000_000,
+        description=(
+            "Max spend [INR]. null / omitted / 0 = NO LIMIT (outlaw / open "
+            "class semantics — resolved server-side to the ₹5M internal cap, "
+            "which exceeds the price of every compatible part combined)"
+        ),
+    )
     goal: str = Field(
         "min_et", description='"min_et" (faster ET) or "max_trap" (higher trap)'
     )
@@ -3438,10 +3603,19 @@ def _optimize_impl(req: OptimizeBuildRequest, progress=None):
     from .analysis.build_optimizer import optimize_build
     from .database.parts_repo import PartsRepository
 
+    # None / 0 budget = "no limit": resolve to the ₹5M ceiling. NEVER pass
+    # inf into the knapsack — roi.py allocates one DP bucket per ₹100 and
+    # int(inf // 100) raises OverflowError.
+    resolved_budget = (
+        5_000_000.0
+        if req.budget_inr is None or req.budget_inr <= 0
+        else float(req.budget_inr)
+    )
+
     try:
         result = optimize_build(
             config,
-            req.budget_inr,
+            resolved_budget,
             PartsRepository(conn),
             goal=req.goal,
             profile=req.profile,
@@ -3652,6 +3826,83 @@ def job_optimize(req: OptimizeBuildRequest):
 def job_autotune(req: AutotuneRequest):
     """Start the ECU autotune as a background job (real progress)."""
     return _start_job("autotune", lambda progress: _autotune_impl(req, progress))
+
+
+class OutlawRequest(BaseModel):
+    """POST /api/jobs/outlaw — composed outlaw/open-class max-effort build.
+
+    Pipeline: best drag_prep rubber → full_race parts knapsack (budget
+    unlimited unless capped) → gearing + launch autotune on the modified
+    bike → combined verification sim.
+    """
+
+    bike_id: int | None = Field(None, description="DB bike_models.id")
+    bike_preset: str | None = Field(
+        None, description="Fallback preset: gsxr1000_k5 | yzfr1_4c8 | hayabusa_gen1"
+    )
+    budget_inr: float | None = Field(
+        None, ge=0, le=5_000_000, description="null / 0 = no limit"
+    )
+    goal: str = Field("min_et")
+    rider_weight_kg: float = Field(75.0, ge=40, le=150)
+    venue_id: int | None = Field(None)
+    max_candidates: int | None = Field(None, ge=1, le=200)
+
+
+def _outlaw_impl(req: OutlawRequest, progress=None) -> dict:
+    conn = _get_db()
+    if conn is None:
+        raise HTTPException(503, "Database unavailable")
+    try:
+        config = _build_config(
+            bike_id=req.bike_id,
+            bike_preset=req.bike_preset,
+            power_boost_pct=0.0,
+            mass_delta_kg=0.0,
+            rider_mass_kg=req.rider_weight_kg,
+            venue_id=req.venue_id,
+        )
+    except HTTPException:
+        raise
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(400, f"Config construction failed: {exc}") from exc
+
+    surrogate, surrogate_source = _get_surrogate_pair()
+
+    from .analysis.outlaw import optimize_outlaw
+    from .database.parts_repo import PartsRepository
+    from .database.tire_repo import TireRepository
+
+    try:
+        return optimize_outlaw(
+            config,
+            PartsRepository(conn),
+            TireRepository(conn),
+            bike_model_id=req.bike_id,
+            budget_inr=req.budget_inr,
+            goal=req.goal,
+            surrogate=surrogate,
+            surrogate_source=surrogate_source,
+            max_candidates=req.max_candidates,
+            progress_cb=progress,
+        )
+    except HTTPException:
+        raise
+    except Exception as exc:  # noqa: BLE001
+        logging.getLogger(__name__).error(
+            "optimize_outlaw failed: %s", exc, exc_info=True
+        )
+        raise HTTPException(500, f"Outlaw build failed: {exc}") from exc
+
+
+@app.post(
+    "/api/jobs/outlaw",
+    status_code=202,
+    dependencies=[Depends(rate_limit("optimize", 6, 60.0))],
+)
+def job_outlaw(req: OutlawRequest):
+    """Start the composed outlaw/open-class build as a background job."""
+    return _start_job("outlaw", lambda progress: _outlaw_impl(req, progress))
 
 
 @app.post("/api/jobs/compare", status_code=202)

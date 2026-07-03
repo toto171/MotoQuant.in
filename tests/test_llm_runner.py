@@ -266,7 +266,9 @@ class TestChatEndpoint(unittest.TestCase):
             },
             summary_text="Hayabusa ran cleanly.",
         )
-        r = self.client.post("/api/chat", json={"query": "how fast is my Hayabusa"})
+        r = self.client.post(
+            "/api/chat", json={"query": "how fast is my Hayabusa", "mode": "classic"}
+        )
         self.assertEqual(r.status_code, 200, r.text)
         body = r.json()
         self.assertIsNone(body["error"])
@@ -282,7 +284,7 @@ class TestChatEndpoint(unittest.TestCase):
         )
         r = self.client.post(
             "/api/chat",
-            json={"query": "Hayabusa", "run_summary": False},
+            json={"query": "Hayabusa", "run_summary": False, "mode": "classic"},
         )
         self.assertEqual(r.status_code, 200)
         body = r.json()
@@ -298,7 +300,9 @@ class TestChatEndpoint(unittest.TestCase):
                 "optimization_goal": "minimize_et",
             }
         )
-        r = self.client.post("/api/chat", json={"query": "fake bike query"})
+        r = self.client.post(
+            "/api/chat", json={"query": "fake bike query", "mode": "classic"}
+        )
         # Recoverable error -- still HTTP 200 so frontend can render suggestions
         self.assertEqual(r.status_code, 200)
         body = r.json()
@@ -316,7 +320,7 @@ class TestChatEndpoint(unittest.TestCase):
         self.api.app.dependency_overrides[self.api.get_llm_client] = lambda: LLMClient(
             _call_override=fake
         )
-        r = self.client.post("/api/chat", json={"query": "anything"})
+        r = self.client.post("/api/chat", json={"query": "anything", "mode": "classic"})
         self.assertEqual(r.status_code, 200)
         body = r.json()
         self.assertEqual(body["error"], "llm_not_configured")
