@@ -2927,6 +2927,23 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     ),
 ]
 
+# July 2026 international expansion: each sibling bike module carries its own
+# instrumented benchmark rows next to the specs they validate. Merged here so
+# the corpus stays single-sourced with the catalog.
+from motoquant.scraper.known_bikes_2026_jpeu import (  # noqa: E402
+    ET_BENCHMARKS as _JPEU_ET,
+)
+from motoquant.scraper.known_bikes_2026_us import (  # noqa: E402
+    ET_BENCHMARKS as _US_ET,
+)
+from motoquant.scraper.known_bikes_2026_world import (  # noqa: E402
+    ET_BENCHMARKS as _WORLD_ET,
+)
+
+BENCHMARKS.extend(_US_ET)
+BENCHMARKS.extend(_JPEU_ET)
+BENCHMARKS.extend(_WORLD_ET)
+
 REFERENCE_BIKES: list[tuple[str, int, callable, float, float, str]] = [
     ("Suzuki GSX-R 1000 K5", 2005, gsxr1000_k5, 9.97, 238, "Cycle World 2005"),
     ("Yamaha YZF-R1 4C8", 2007, yzfr1_4c8, 10.30, 240, "Sport Rider 2007"),
