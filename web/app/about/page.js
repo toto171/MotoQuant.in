@@ -90,7 +90,7 @@ export default function AboutPage() {
 
       {/* Hero — unified cockpit voice */}
       <PageHero
-        kicker="founders · pune, india"
+        kicker="founders · india"
         badge="Our story"
         title={<>Built in Pune.<br />For <span className="text-gradient-orange">the strip.</span></>}
         sub={
@@ -141,16 +141,16 @@ export default function AboutPage() {
 
       {/* Founders */}
       <section className="py-20 md:py-28 px-6 border-b border-brand-orange/10 bg-ink-1/30">
-        <div className="max-w-5xl mx-auto">
-          <CodeComment className="mb-10">crew manifest · two entries</CodeComment>
+        <div className="max-w-6xl mx-auto">
+          <CodeComment className="mb-10">crew manifest · three entries</CodeComment>
           <h2 className="font-display font-bold text-3xl md:text-4xl mb-3 text-white">Founders</h2>
           <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-10">
             Engineers first. Racers second. Shipping a tool we&apos;d use ourselves.
           </p>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Reveal>
-              <FounderCard initial="A" name="Arya Desai" role="Co-founder · Pune, India" email="motoquant@gmail.com">
+              <FounderCard initial="A" name="Arya Desai" role="Co-founder & Lead Engineer · Pune, India" email="motoquant@gmail.com">
                 <p>
                   Automobile engineer — M.Tech at NIT Warangal, B.Tech from Manipal Institute of Technology (Automotive System Design). The physics-and-shop-floor side of MotoQuant.
                 </p>
@@ -164,7 +164,7 @@ export default function AboutPage() {
             </Reveal>
 
             <Reveal delay={0.08}>
-              <FounderCard initial="R" name="Ritwik Singh" role="Co-founder · Bengaluru, India" email="dhisetu@gmail.com">
+              <FounderCard initial="R" name="Ritwik Singh" role="Co-founder & Advisor · Bengaluru, India" email="dhisetu@gmail.com">
                 <p>
                   Automobile and AI engineer by experience — the physics, software, and machine-learning side of MotoQuant. Built the 15-sub-model drag simulation engine, the bike-and-parts catalog, and the calibration pipeline that fits sim output to real Dragy traces within ±0.05 s.
                 </p>
@@ -173,6 +173,20 @@ export default function AboutPage() {
                 </p>
                 <p>
                   Outside MotoQuant he&apos;s building Dhisetu, an AI-assisted indie game studio, from Bengaluru — and a hardcore indie gamer, which is where the instinct comes from. His bet: the next wave of studios won&apos;t look like teams but solo creators with AI co-pilots, shipping as fast as ideas come. Same instinct here — one engineer, the right tools, a sim serious tuners keep open on a second monitor.
+                </p>
+              </FounderCard>
+            </Reveal>
+
+            <Reveal delay={0.16}>
+              <FounderCard initial="S" name="Sahil Shetye" role="Co-founder & CMO · Manipal, India" email="motoquant@gmail.com">
+                <p>
+                  Electronics-and-communications engineer — finishing his B.Tech in EEE at Manipal Institute of Technology. The growth-and-market side of MotoQuant, and the electronics half of the hardware roadmap: hands-on with PCB design (KiCad), EV powertrain and battery tech, and low-level C.
+                </p>
+                <p>
+                  Brings the market read the rest of the team doesn&apos;t — built and grew a social-media audience from scratch, stacked industry-standard certifications, and carries real internship experience. Communication and market knowledge are the levers he owns: turning a physics engine into something racers and tuning shops actually hear about.
+                </p>
+                <p className="border-l-2 border-brand-orange/30 pl-4 italic text-white/60">
+                  &ldquo;In my third year of engineering, a major bike accident paused my academic timeline. While recovering, I refused to sit idle — I built a social-media audience and completed multiple industry-standard certifications. I don&apos;t just study engineering; I build, optimize, and execute under pressure.&rdquo;
                 </p>
               </FounderCard>
             </Reveal>
