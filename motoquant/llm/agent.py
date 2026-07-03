@@ -449,6 +449,28 @@ AGENT_TOOLS: list[dict[str, Any]] = [
         ["bike_id"],
     ),
     _tool(
+        "rank_bikes",
+        "Rank catalog bikes by SIMULATED quarter-mile ET within a class. Use "
+        "for 'fastest/quickest X' questions (fastest 300cc, quickest cruiser, "
+        "best litre bike at altitude...). Filters: category (sport/naked/"
+        "cruiser/adventure/touring), displacement window, manufacturer. "
+        "Shortlists by power-to-weight then runs REAL sims on the top "
+        "candidates (costs up to 8 sims).",
+        {
+            "category": {"type": "string"},
+            "min_cc": {"type": "number"},
+            "max_cc": {"type": "number"},
+            "manufacturer": {"type": "string"},
+            "top_n": {
+                "type": "integer",
+                "default": 5,
+                "description": "How many ranked bikes to return (max 5)",
+            },
+            **_ENV_PROPS,
+        },
+        [],
+    ),
+    _tool(
         "resolve_venue",
         "Resolve a location/track name to a seeded venue id (e.g. 'Aamby "
         "Valley', 'Santa Pod', 'BIC'). Falls back to closest match.",
@@ -772,6 +794,73 @@ def _exec_list_tires(ctx: AgentContext, args: dict) -> dict:
     return payload
 
 
+def _exec_rank_bikes(ctx: AgentContext, args: dict) -> dict:
+    """Shortlist by power-to-weight (cheap SQL), then rank by REAL sims."""
+    from ..physics import MotoQuantEngine
+
+    top_n = max(1, min(int(args.get("top_n") or 5), 5))
+    sql = """
+        SELECT bm.id, bm.model_name, m.name AS manufacturer,
+               bm.peak_power_hp, bm.dry_mass_kg, bm.displacement_cc,
+               bm.category
+        FROM bike_models bm JOIN manufacturers m ON bm.manufacturer_id = m.id
+        WHERE bm.peak_power_hp IS NOT NULL AND bm.dry_mass_kg IS NOT NULL
+    """
+    params: list = []
+    if args.get("category"):
+        sql += " AND LOWER(bm.category) = ?"
+        params.append(str(args["category"]).strip().lower())
+    if args.get("min_cc") is not None:
+        sql += " AND bm.displacement_cc >= ?"
+        params.append(float(args["min_cc"]))
+    if args.get("max_cc") is not None:
+        sql += " AND bm.displacement_cc <= ?"
+        params.append(float(args["max_cc"]))
+    if args.get("manufacturer"):
+        sql += " AND LOWER(m.name) LIKE ?"
+        params.append(f"%{str(args['manufacturer']).strip().lower()}%")
+    sql += " ORDER BY (bm.peak_power_hp / bm.dry_mass_kg) DESC LIMIT 12"
+    rows = [dict(r) for r in ctx.db.conn.execute(sql, params).fetchall()]
+    if not rows:
+        return {
+            "error": "no catalog bikes match those filters",
+            "hint": "loosen the displacement window or drop the category",
+        }
+
+    n_sim = min(len(rows), max(top_n + 2, 5), 8)
+    err = ctx.spend_sims(n_sim)
+    if err:
+        return {"error": err}
+    ranked = []
+    for row in rows[:n_sim]:
+        try:
+            config, _ = _build_config_for(
+                ctx, {"bike_id": row["id"], **{k: args.get(k) for k in _ENV_PROPS}}
+            )
+            ctx.tick(0.0, f"Simulating {row['manufacturer']} {row['model_name']}")
+            sim = MotoQuantEngine(config).run()
+            ranked.append(
+                {
+                    "bike_id": row["id"],
+                    "bike_name": f"{row['manufacturer']} {row['model_name']}",
+                    "displacement_cc": row["displacement_cc"],
+                    "power_hp": row["peak_power_hp"],
+                    "et_quarter_s": round(float(sim.time_quarter), 3),
+                    "trap_speed_kmh": round(float(sim.speed_quarter) * MS_TO_KMH, 1),
+                }
+            )
+        except Exception as e:  # noqa: BLE001 — one bad config must not kill the rank
+            logger.warning("rank_bikes sim failed for %s: %s", row["id"], e)
+    ranked.sort(key=lambda r: r["et_quarter_s"])
+    payload = {
+        "method": f"top {n_sim} power-to-weight candidates fully simulated",
+        "candidates_considered": len(rows),
+        "ranking": ranked[:top_n],
+    }
+    ctx.add_block("rank_result", payload)
+    return payload
+
+
 def _exec_resolve_venue(ctx: AgentContext, args: dict) -> dict:
     from .resolver import resolve_venue
 
@@ -976,6 +1065,7 @@ _EXECUTORS: dict[str, Callable[[AgentContext, dict], dict]] = {
     "compare_bikes": _exec_compare_bikes,
     "search_parts": _exec_search_parts,
     "list_tires": _exec_list_tires,
+    "rank_bikes": _exec_rank_bikes,
     "resolve_venue": _exec_resolve_venue,
     "list_venues": _exec_list_venues,
     "optimize_build": _exec_optimize_build,
@@ -1051,6 +1141,8 @@ answer directly; use tools only when they add real numbers.
 - Any question about a specific bike's performance: search_bikes → \
 run_simulation (with venue/conditions when mentioned). Follow-ups inherit \
 context from the conversation — reuse known bike_ids instead of re-searching.
+- "Fastest/quickest <class>" questions: use rank_bikes (one call, real sims) \
+— do NOT search and simulate bikes one at a time.
 - "Best possible / fastest configuration" for a bike = stage_4 outlaw \
 optimize_build. Summarize the result: baseline → final ET, the parts list \
 with prices, the gearing/launch setup, and total cost.

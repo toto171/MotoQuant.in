@@ -28,7 +28,9 @@ For tests, pass `_call_override`:
 from __future__ import annotations
 
 import json
+import logging
 import os
+import re
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
@@ -77,6 +79,49 @@ _PROVIDERS: dict[str, dict[str, str | None]] = {
 DEFAULT_PROVIDER = "groq"
 DEFAULT_MAX_TOKENS = 1024
 DEFAULT_TIMEOUT_S = 30.0
+
+# Retries for the Groq/Llama 'tool_use_failed' flake (see call_tools).
+_TOOL_FLAKE_RETRIES = 2
+
+# Llama's raw function-call syntax as preserved in Groq's failed_generation:
+#   <function=search_bikes{"query": "zx14r"}</function>
+# Variants seen in the wild: optional '>' after the name, optional closing
+# tag, multiple calls concatenated.
+_FAILED_GEN_CALL_RE = re.compile(
+    r"<function=(?P<name>[\w.-]+)>?\s*(?P<args>\{.*?\})?\s*(?:</function>|(?=<function=)|$)",
+    re.DOTALL,
+)
+
+
+def _failed_generation_from_error(exc: Exception) -> str | None:
+    """Extract failed_generation from a provider tool_use_failed 400, else None."""
+    body = getattr(exc, "body", None)
+    if isinstance(body, dict):
+        err = body.get("error") if isinstance(body.get("error"), dict) else body
+        if isinstance(err, dict) and err.get("code") == "tool_use_failed":
+            fg = err.get("failed_generation")
+            return fg if isinstance(fg, str) else ""
+    # Fallback: some SDK versions only surface the payload in str(exc).
+    text = str(exc)
+    if "tool_use_failed" not in text:
+        return None
+    m = re.search(r"'failed_generation':\s*'(.*)'\s*\}\s*\}", text, re.DOTALL)
+    return m.group(1) if m else ""
+
+
+def _parse_failed_generation(failed_gen: str) -> list[tuple[str, dict]]:
+    """Parse '<function=name{json}</function>' call(s). Returns [] if unparseable."""
+    out: list[tuple[str, dict]] = []
+    for m in _FAILED_GEN_CALL_RE.finditer(failed_gen or ""):
+        args_raw = m.group("args")
+        try:
+            args = json.loads(args_raw) if args_raw else {}
+        except (TypeError, ValueError):
+            return []  # half-formed JSON — safer to retry than to guess
+        if not isinstance(args, dict):
+            return []
+        out.append((m.group("name"), args))
+    return out
 
 
 class LLMNotConfiguredError(RuntimeError):
@@ -534,13 +579,52 @@ class LLMClient:
             o_kwargs["tool_choice"] = "auto"
         o_messages = [{"role": "system", "content": system}]
         o_messages.extend(self._neutral_to_openai(messages))
-        msg = self._sdk_create(
-            client.chat.completions.create,
-            model=self._model,
-            max_tokens=max_tok,
-            messages=o_messages,
-            **o_kwargs,
-        )
+        # Groq/Llama flake mode (Sentry MOTOQUANT-API-1): the model sometimes
+        # emits its raw '<function=name{json}</function>' call syntax instead
+        # of a proper tool_calls block; Groq rejects it with HTTP 400
+        # code=tool_use_failed but preserves the intended call verbatim in the
+        # error body's 'failed_generation'. Salvage that call when parseable,
+        # else retry (the failure is stochastic), else raise.
+        msg = None
+        for attempt in range(_TOOL_FLAKE_RETRIES + 1):
+            try:
+                msg = self._sdk_create(
+                    client.chat.completions.create,
+                    model=self._model,
+                    max_tokens=max_tok,
+                    messages=o_messages,
+                    **o_kwargs,
+                )
+                break
+            except LLMRateLimitError:
+                raise
+            except Exception as e:  # noqa: BLE001 — provider-specific 400s
+                failed_gen = _failed_generation_from_error(e)
+                if failed_gen is None:
+                    raise  # not the tool_use_failed flake — real error
+                salvaged = _parse_failed_generation(failed_gen)
+                if salvaged:
+                    logging.getLogger(__name__).warning(
+                        "salvaged %d tool call(s) from a %s tool_use_failed flake",
+                        len(salvaged),
+                        self._provider,
+                    )
+                    return AgentStep(
+                        text=None,
+                        tool_calls=[
+                            ToolCall(id=f"salvaged_{i}", name=name, arguments=args)
+                            for i, (name, args) in enumerate(salvaged)
+                        ],
+                        stop_reason="tool_use",
+                    )
+                if attempt == _TOOL_FLAKE_RETRIES:
+                    raise
+                logging.getLogger(__name__).warning(
+                    "unsalvageable tool_use_failed flake from %s — retry %d/%d",
+                    self._provider,
+                    attempt + 1,
+                    _TOOL_FLAKE_RETRIES,
+                )
         choice = msg.choices[0]
         calls = []
         for tc in getattr(choice.message, "tool_calls", None) or []:
