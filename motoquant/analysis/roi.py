@@ -40,6 +40,7 @@ from __future__ import annotations
 import copy
 import logging
 import math
+import re
 import warnings
 from dataclasses import dataclass
 
@@ -152,8 +153,21 @@ EXCLUSIVE_CATEGORIES: frozenset[str] = frozenset(
         "nitrous",
         "wheelie_bar",
         "swingarm_ext",
+        # July 2026 drag-essentials categories
+        "lowering_kit",
+        "air_shifter",
+        "lockup_clutch",
     }
 )
+
+# Cross-category exclusivity: these categories compete for the same physical
+# slot on the bike, so they share one knapsack group with their sibling —
+# a build can't run a lockup AND a street clutch kit, nor an air shifter AND
+# a quickshifter (the air shifter replaces the shift actuator entirely).
+_EXCLUSIVE_CATEGORY_ALIASES: dict[str, str] = {
+    "lockup_clutch": "clutch_kit",
+    "air_shifter": "quickshifter",
+}
 
 
 def _bucket_weight(price_inr: float, bucket: int = 100) -> int:
@@ -163,6 +177,12 @@ def _bucket_weight(price_inr: float, bucket: int = 100) -> int:
     if price_inr is None or price_inr <= 0:
         return 0
     return int(-(-price_inr // bucket))
+
+
+# Fallback position matcher for sprocket parts whose specifications blob
+# lacks the 'position' key ('520 Front Sprocket 13T Pro', 'JT 530 Rear
+# Sprocket 42T ...' — 14 seeded parts, July-3-2026 audit).
+_SPROCKET_POS_RE = re.compile(r"\b(front|rear)\s+sprocket\b", re.IGNORECASE)
 
 
 def _sprocket_positions(parts_repo, part_ids) -> dict[int, str]:
@@ -192,6 +212,16 @@ def _sprocket_positions(parts_repo, part_ids) -> dict[int, str]:
                 specs = None
         if isinstance(specs, dict) and specs.get("position") in ("front", "rear"):
             out[pid] = specs["position"]
+            continue
+        # Belt-and-braces fallback (July 3, 2026): 14 seeded sprockets ship
+        # without specifications.position but carry it verbatim in the model
+        # name. Without this, each one falls into a ('__solo__', id)
+        # singleton group and the knapsack can stack two front sprockets in
+        # one build. scripts/patch_2026_07_03_sprocket_position.py stamps
+        # the DB rows too; this regex protects fresh seeds / foreign DBs.
+        m = _SPROCKET_POS_RE.search(str(part.get("model_name") or ""))
+        if m:
+            out[pid] = m.group(1).lower()
     return out
 
 
@@ -209,7 +239,7 @@ def _knapsack_group_key(r: PartROIResult, position_of: dict[int, str] | None = N
             return f"sprocket:{pos}"
         return ("__solo__", r.part_id)
     if cat in EXCLUSIVE_CATEGORIES:
-        return cat
+        return _EXCLUSIVE_CATEGORY_ALIASES.get(cat, cat)
     return ("__solo__", r.part_id)
 
 

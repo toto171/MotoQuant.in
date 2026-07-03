@@ -15,6 +15,7 @@ State vector: [x, v, omega_e, T_tire, T_clutch, P_boost]
 After clutch locks, omega_e is derived from v and gear ratio.
 """
 
+import copy
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -239,6 +240,15 @@ class MotoQuantEngine:
             )
         self._profile = get_profile(tag)
 
+        # ── Profile knob wiring (July 3, 2026 — track_surface pattern) ─────
+        # cd_floor: minimum permissible effective Cd, applied to the rider-
+        # dynamic Cd*A each step as cd_floor × frontal_area. Every profile
+        # ships 0.25 today, below the catalog's lowest effective Cd (min
+        # config Cd ≈ 0.31 × the rider model's 0.92 race-crouch factor
+        # ≈ 0.285) → structural no-op until a profile raises it.
+        # tests/test_profile_knobs.py pins both the no-op and the liveness.
+        self._cd_a_floor = self._profile.cd_floor * c.aero.frontal_area_m2
+
     def _init_submodels(self):
         """Instantiate all sub-model classes with precomputed values."""
         self._engine = EngineModel(self.cfg, self.eta_dt, self.power_correction)
@@ -246,7 +256,18 @@ class MotoQuantEngine:
         self._drivetrain = DrivetrainModel(self.cfg, self.eta_dt)
         self._clutch = ClutchModel(self.cfg, self._engine.torque)
         self._chain = ChainModel(self.cfg)
-        self._tire = TireModel(self.cfg, self.mu_prep, self.T_tire_ref_K)
+        # Profile-level mu_peak override (wired July 3, 2026): honoured by
+        # giving TireModel a shallow config copy whose tires block carries
+        # the override — the caller's config is never mutated. Every profile
+        # ships None today → TireModel sees the exact same cfg object and
+        # behaviour is bit-identical until a profile sets a value.
+        tire_cfg = self.cfg
+        _mu_over = self._profile.mu_peak_override
+        if _mu_over is not None:
+            tire_cfg = copy.copy(self.cfg)
+            tire_cfg.tires = copy.copy(self.cfg.tires)
+            tire_cfg.tires.mu_peak = float(_mu_over)
+        self._tire = TireModel(tire_cfg, self.mu_prep, self.T_tire_ref_K)
         self._aero = AeroModel(self.cfg, self.rho, self.cd_a, self.v_wind)
         self._wt = WeightTransferModel(self.cfg, self.anti_squat_frac, self._aero)
         self._braking = BrakingModel(self.cfg, self.N_f_static, self.N_r_static)
@@ -426,12 +447,49 @@ class MotoQuantEngine:
             else 0.0
         )
         omega_e = self._staging.initial_omega_e()  # uses two-step / peak-torque logic
+        # Profile launch-RPM override (wired July 3, 2026): launch RPM
+        # expressed as a fraction of redline (per the CategoryProfile
+        # docstring: 0.55 ≈ K5-style, 0.70 = small-cc revvy launch),
+        # clamped to [idle, redline]. Every profile ships None today →
+        # no-op; tests/test_profile_knobs.py pins liveness so the knob
+        # can never silently go dead again.
+        if self._profile.launch_rpm_factor is not None:
+            _launch_rpm = max(
+                cfg.engine.idle_rpm,
+                min(
+                    cfg.engine.redline_rpm * self._profile.launch_rpm_factor,
+                    cfg.engine.redline_rpm,
+                ),
+            )
+            omega_e = _launch_rpm * RPM_TO_RADS
         r_eff = cfg.tires.rear_rolling_radius_m
         clutch_locked = False
         shifting = False
         shift_timer = 0.0
         shift_target_gear = 0
         fuel_burned = 0.0
+
+        # ── Loop-invariant hoists (July 3, 2026 — bit-identical) ──────────
+        # Pure, config-derived constants pulled out of the hot loop. Every
+        # hoisted expression preserves the original left-to-right float
+        # evaluation order, so results stay bit-identical with the pre-hoist
+        # code (gated on the pinned K5/R1/Hayabusa baselines +
+        # tests/test_regression_snapshot.py).
+        _half_rho = 0.5 * self.rho
+        _v_wind = self.v_wind
+        _F_gradient = self.F_gradient
+        _lock_thresh = 10.0 * RPM_TO_RADS
+        _idle_omega = cfg.engine.idle_rpm * RPM_TO_RADS
+        _redline_omega_clip = cfg.engine.redline_rpm * 1.02 * RPM_TO_RADS
+        # ClutchParams.max_torque() is pure (config fields only) — hoisted.
+        _T_clutch_cap = cfg.clutch.max_torque()
+        _top_gear_idx = cfg.drivetrain.num_gears - 1
+        _shift_time_s = cfg.drivetrain.total_shift_time_ms / 1000.0
+        _cd_a_floor = self._cd_a_floor
+        # Raw torque-curve cache: in the slip branch, engine_torque was
+        # recomputed with byte-identical args (rpm == omega_e*RADS_TO_RPM
+        # while the clutch is unlocked); reuse the value instead.
+        T_e_curve = 0.0
 
         # Collect output arrays
         n_max = int(max_time / dt) + 1
@@ -485,16 +543,17 @@ class MotoQuantEngine:
                     omega_e = rpm * RPM_TO_RADS
 
             if not shifting and clutch_locked:
-                if rpm >= shift_rpms[gear] and gear < cfg.drivetrain.num_gears - 1:
+                if rpm >= shift_rpms[gear] and gear < _top_gear_idx:
                     shifting = True
-                    shift_timer = cfg.drivetrain.total_shift_time_ms / 1000.0
+                    shift_timer = _shift_time_s
                     shift_target_gear = gear + 1
 
             # ── Engine torque ──
             if shifting:
                 T_e = 0.0
             else:
-                T_e = self.engine_torque(rpm, t)
+                T_e_curve = self.engine_torque(rpm, t)
+                T_e = T_e_curve
                 T_e *= self.ram_air_power_mult(v)
                 T_e *= self.forced_induction_torque_mult(rpm, t, P_boost)
                 if (
@@ -511,14 +570,14 @@ class MotoQuantEngine:
                 omega_input = omega_w * i_total
                 slip_speed = omega_e - omega_input
 
-                if abs(slip_speed) < 10.0 * RPM_TO_RADS and v > 1.0:
+                if abs(slip_speed) < _lock_thresh and v > 1.0:
                     clutch_locked = True
                     omega_e = omega_input
                     T_e_crank = self.engine_torque(omega_e * RADS_TO_RPM, t)
                     T_e = T_e_crank
                     Q_clutch = 0.0
                 else:
-                    T_clutch_max = cfg.clutch.max_torque()
+                    T_clutch_max = _T_clutch_cap
                     if T_clutch > cfg.clutch.fade_temp_c:
                         fade = max(
                             0.3, 1.0 - 0.003 * (T_clutch - cfg.clutch.fade_temp_c)
@@ -543,7 +602,14 @@ class MotoQuantEngine:
                             )
                             T_clutch_max *= ramp
 
-                    T_e_crank = self.engine_torque(omega_e * RADS_TO_RPM, t)
+                    # July 3, 2026: reuse the raw curve torque computed at
+                    # the top of this iteration — while the clutch is
+                    # unlocked and not shifting, rpm was set to
+                    # omega_e * RADS_TO_RPM and omega_e has not changed
+                    # since, so engine_torque(omega_e * RADS_TO_RPM, t)
+                    # returns the identical value (engine_torque is pure in
+                    # (rpm, t)). Saves ~1 np.interp round-trip per slip step.
+                    T_e_crank = T_e_curve
 
                     # Apr 27, 2026: rate-limited over-clutching for low-power
                     # bikes. Real launches: rider can pull clutch in beyond
@@ -602,11 +668,11 @@ class MotoQuantEngine:
                         floor_omega = floor_rpm * RPM_TO_RADS
                         if omega_e < floor_omega:
                             omega_e = floor_omega
-                    omega_e = np.clip(
-                        omega_e,
-                        cfg.engine.idle_rpm * RPM_TO_RADS,
-                        cfg.engine.redline_rpm * 1.02 * RPM_TO_RADS,
-                    )
+                    # min/max is value-identical to the former np.clip here
+                    # (np.clip == minimum(hi, maximum(x, lo)); no arithmetic,
+                    # so no float divergence) and skips the numpy scalar
+                    # dispatch overhead on every slip step.
+                    omega_e = min(max(omega_e, _idle_omega), _redline_omega_clip)
                     Q_clutch = T_transmitted * abs(slip_speed)
 
                 dT_clutch = Q_clutch / max(1.0, cfg.clutch.thermal_mass_jk)
@@ -623,13 +689,22 @@ class MotoQuantEngine:
             # Rider transitions from upright staging stance to tuck over
             # tuck_transition_time_s.  This replaces the fixed self.cd_a.
             cd_a_t = self._rider.cd_a(t)
+            # Profile cd_floor (wired July 3, 2026): clamp malformed /
+            # too-slippery effective Cd*A from below. 0.25 in every profile
+            # today — below every catalog Cd — so this is a no-op guard
+            # until a profile raises it (pinned by test_profile_knobs).
+            if cd_a_t < _cd_a_floor:
+                cd_a_t = _cd_a_floor
 
             # ── Weight transfer (iterative) ──
             m_eff = self.effective_mass(gear)
-            F_aero = self.aero_drag(v)  # uses self._aero (fixed cd_a)
-            # Override with rider-dynamic Cd*A for this timestep:
-            v_rel = v + self.v_wind
-            F_aero = 0.5 * self.rho * max(0.0, v_rel) ** 2 * cd_a_t
+            # Rider-dynamic Cd*A drag for this timestep. (A dead
+            # `F_aero = self.aero_drag(v)` call sat here until July 3, 2026 —
+            # its result was immediately overwritten by the line below, so
+            # removing it is provably bit-identical; ~10k wasted pure-function
+            # calls per run.)
+            v_rel = v + _v_wind
+            F_aero = _half_rho * max(0.0, v_rel) ** 2 * cd_a_t
             F_rr = self.rolling_resistance(v, T_tire)
             a_est = (F_drive - F_aero - F_rr) / m_eff
             N_f, N_r = self.weight_transfer(a_est, v, t)
@@ -687,27 +762,55 @@ class MotoQuantEngine:
             # F_aero at the RK4 midpoint/endpoint velocities to get correct
             # 4th-order accuracy.  Drive force and gradient are held constant
             # within the step (they change slowly relative to dt).
-            def _aero_at(v_q):
-                vr = v_q + self.v_wind
-                return 0.5 * self.rho * max(0.0, vr) ** 2 * cd_a_t
-
-            def _a_at(v_q):
-                return max(
-                    0.0, (F_drive - _aero_at(v_q) - F_rr - self.F_gradient) / m_eff
+            #
+            # July 3, 2026 micro-opt: the former _aero_at/_a_at closures were
+            # ALLOCATED FRESH EVERY ITERATION (~10k function objects + 40k
+            # dispatched calls per run). The stage evaluations are now
+            # inlined with the exact same float expression order, so the
+            # trajectory is bit-identical. k1 reuses a_net: a_net above is
+            # literally max(0.0, (F_drive - F_aero(v) - F_rr - F_grad)/m_eff)
+            # with the same post-clip F_drive — the identical expression the
+            # old _a_at(v) recomputed.
+            k1 = a_net
+            v_q1 = v + 0.5 * dt * k1
+            vr_q = v_q1 + _v_wind
+            k2 = max(
+                0.0,
+                (
+                    F_drive
+                    - _half_rho * max(0.0, vr_q) ** 2 * cd_a_t
+                    - F_rr
+                    - _F_gradient
                 )
-
-            k1 = _a_at(v)
-            k2 = _a_at(v + 0.5 * dt * k1)
-            k3 = _a_at(v + 0.5 * dt * k2)
-            k4 = _a_at(v + dt * k3)
+                / m_eff,
+            )
+            v_q2 = v + 0.5 * dt * k2
+            vr_q = v_q2 + _v_wind
+            k3 = max(
+                0.0,
+                (
+                    F_drive
+                    - _half_rho * max(0.0, vr_q) ** 2 * cd_a_t
+                    - F_rr
+                    - _F_gradient
+                )
+                / m_eff,
+            )
+            v_q3 = v + dt * k3
+            vr_q = v_q3 + _v_wind
+            k4 = max(
+                0.0,
+                (
+                    F_drive
+                    - _half_rho * max(0.0, vr_q) ** 2 * cd_a_t
+                    - F_rr
+                    - _F_gradient
+                )
+                / m_eff,
+            )
             v_new = v + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
             # Position uses the velocity Simpsons-rule estimate
-            x_new = x + (dt / 6.0) * (
-                v
-                + 2.0 * (v + 0.5 * dt * k1)
-                + 2.0 * (v + 0.5 * dt * k2)
-                + (v + dt * k3)
-            )
+            x_new = x + (dt / 6.0) * (v + 2.0 * v_q1 + 2.0 * v_q2 + v_q3)
 
             # ── Store outputs ──
             out_t[step] = t
