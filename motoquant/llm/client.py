@@ -98,6 +98,32 @@ class LLMResponse:
     stop_reason: str | None = None
 
 
+@dataclass
+class ToolCall:
+    """One tool invocation requested by the model in an agent step."""
+
+    id: str
+    name: str
+    arguments: dict[str, Any]
+
+
+@dataclass
+class AgentStep:
+    """Result of one :meth:`LLMClient.call_tools` round.
+
+    ``tool_calls`` non-empty → execute them and append tool-result messages;
+    empty → ``text`` is the model's final answer for this turn.
+    """
+
+    text: str | None = None
+    tool_calls: list[ToolCall] = None  # type: ignore[assignment]
+    stop_reason: str | None = None
+
+    def __post_init__(self):
+        if self.tool_calls is None:
+            self.tool_calls = []
+
+
 class LLMClient:
     def __init__(
         self,
@@ -314,6 +340,224 @@ class LLMClient:
             return LLMResponse(tool_input=args, stop_reason=choice.finish_reason)
         raise RuntimeError(
             f"Model did not invoke {tool_name}; finish_reason={choice.finish_reason}"
+        )
+
+    # ── Multi-turn agentic tool use ───────────────────────────────────
+    #
+    # Neutral message format (provider-agnostic, used by llm/agent.py):
+    #   {"role": "user",      "content": str}
+    #   {"role": "assistant", "content": str | None,
+    #    "tool_calls": [{"id": str, "name": str, "arguments": dict}]}   # optional
+    #   {"role": "tool",      "tool_call_id": str, "name": str, "content": str}
+    #
+    # Tools are passed as [{"name", "description", "input_schema"}] and the
+    # model is FREE to pick any tool or answer in plain text (tool_choice
+    # auto) — unlike call_tool, which forces a single named tool.
+
+    @staticmethod
+    def _neutral_to_anthropic(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Convert neutral agent messages to Anthropic messages format."""
+        out: list[dict[str, Any]] = []
+        for m in messages:
+            role = m.get("role")
+            if role == "user":
+                out.append({"role": "user", "content": m.get("content") or ""})
+            elif role == "assistant":
+                blocks: list[dict[str, Any]] = []
+                if m.get("content"):
+                    blocks.append({"type": "text", "text": m["content"]})
+                for tc in m.get("tool_calls") or []:
+                    blocks.append(
+                        {
+                            "type": "tool_use",
+                            "id": tc["id"],
+                            "name": tc["name"],
+                            "input": tc.get("arguments") or {},
+                        }
+                    )
+                out.append({"role": "assistant", "content": blocks or ""})
+            elif role == "tool":
+                # Anthropic wants tool results inside a user turn. Merge
+                # consecutive tool results into one user message.
+                block = {
+                    "type": "tool_result",
+                    "tool_use_id": m.get("tool_call_id") or "",
+                    "content": m.get("content") or "",
+                }
+                if (
+                    out
+                    and out[-1]["role"] == "user"
+                    and isinstance(out[-1]["content"], list)
+                    and out[-1]["content"]
+                    and out[-1]["content"][0].get("type") == "tool_result"
+                ):
+                    out[-1]["content"].append(block)
+                else:
+                    out.append({"role": "user", "content": [block]})
+        return out
+
+    @staticmethod
+    def _neutral_to_openai(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Convert neutral agent messages to OpenAI chat format."""
+        out: list[dict[str, Any]] = []
+        for m in messages:
+            role = m.get("role")
+            if role == "user":
+                out.append({"role": "user", "content": m.get("content") or ""})
+            elif role == "assistant":
+                entry: dict[str, Any] = {
+                    "role": "assistant",
+                    "content": m.get("content"),
+                }
+                tcs = m.get("tool_calls") or []
+                if tcs:
+                    entry["tool_calls"] = [
+                        {
+                            "id": tc["id"],
+                            "type": "function",
+                            "function": {
+                                "name": tc["name"],
+                                "arguments": json.dumps(tc.get("arguments") or {}),
+                            },
+                        }
+                        for tc in tcs
+                    ]
+                out.append(entry)
+            elif role == "tool":
+                out.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": m.get("tool_call_id") or "",
+                        "content": m.get("content") or "",
+                    }
+                )
+        return out
+
+    def call_tools(
+        self,
+        system: str,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        *,
+        max_tokens: int | None = None,
+    ) -> AgentStep:
+        """One agent step: model sees the transcript + tools, freely answers
+        or requests tool calls (``tool_choice`` auto on every provider).
+
+        ``messages`` uses the neutral format documented above. ``tools`` is
+        [{"name", "description", "input_schema"}].
+        """
+        if self._call_override is not None:
+            result = self._call_override(
+                "tools",
+                {"system": system, "messages": messages, "tools": tools},
+            )
+            if isinstance(result, AgentStep):
+                return result
+            if isinstance(result, str):
+                return AgentStep(text=result, stop_reason="end_turn")
+            if isinstance(result, dict):
+                return AgentStep(
+                    text=result.get("text"),
+                    tool_calls=[
+                        ToolCall(
+                            id=tc.get("id") or f"call_{i}",
+                            name=tc["name"],
+                            arguments=tc.get("arguments") or {},
+                        )
+                        for i, tc in enumerate(result.get("tool_calls") or [])
+                    ],
+                    stop_reason=result.get("stop_reason"),
+                )
+            raise TypeError(
+                "_call_override for 'tools' must return AgentStep, str or dict"
+            )
+
+        client = self._get_sdk()
+        max_tok = max_tokens or self._max_tokens
+
+        if self._provider == "anthropic":
+            a_kwargs: dict[str, Any] = {}
+            if tools:
+                # Providers reject an empty tools array — omit entirely when
+                # the caller wants a plain final-answer turn.
+                a_kwargs["tools"] = [
+                    {
+                        "name": t["name"],
+                        "description": t.get("description", ""),
+                        "input_schema": t["input_schema"],
+                    }
+                    for t in tools
+                ]
+            msg = self._sdk_create(
+                client.messages.create,
+                model=self._model,
+                max_tokens=max_tok,
+                system=system,
+                messages=self._neutral_to_anthropic(messages),
+                **a_kwargs,
+            )
+            text_chunks: list[str] = []
+            calls: list[ToolCall] = []
+            for block in msg.content:
+                btype = getattr(block, "type", None)
+                if btype == "text":
+                    text_chunks.append(block.text)
+                elif btype == "tool_use":
+                    calls.append(
+                        ToolCall(
+                            id=block.id,
+                            name=block.name,
+                            arguments=dict(block.input or {}),
+                        )
+                    )
+            return AgentStep(
+                text="".join(text_chunks).strip() or None,
+                tool_calls=calls,
+                stop_reason=msg.stop_reason,
+            )
+
+        # OpenAI-compatible providers (Groq / Gemini / DeepSeek / OpenRouter)
+        o_kwargs: dict[str, Any] = {}
+        if tools:
+            o_kwargs["tools"] = [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": t["name"],
+                        "description": t.get("description", ""),
+                        "parameters": t["input_schema"],
+                    },
+                }
+                for t in tools
+            ]
+            o_kwargs["tool_choice"] = "auto"
+        o_messages = [{"role": "system", "content": system}]
+        o_messages.extend(self._neutral_to_openai(messages))
+        msg = self._sdk_create(
+            client.chat.completions.create,
+            model=self._model,
+            max_tokens=max_tok,
+            messages=o_messages,
+            **o_kwargs,
+        )
+        choice = msg.choices[0]
+        calls = []
+        for tc in getattr(choice.message, "tool_calls", None) or []:
+            fn = getattr(tc, "function", None)
+            if fn is None:
+                continue
+            try:
+                args = json.loads(fn.arguments) if fn.arguments else {}
+            except (TypeError, ValueError):
+                # Malformed JSON args: surface as an empty call so the agent
+                # loop can report a tool error instead of crashing the turn.
+                args = {"__malformed_json__": fn.arguments}
+            calls.append(ToolCall(id=tc.id, name=fn.name, arguments=args))
+        return AgentStep(
+            text=(choice.message.content or "").strip() or None,
+            tool_calls=calls,
+            stop_reason=choice.finish_reason,
         )
 
     def call_text(self, system, user):

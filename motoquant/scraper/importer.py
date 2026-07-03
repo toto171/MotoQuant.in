@@ -340,6 +340,91 @@ _428_PITCH_MODELS = {
     "Xpulse 200",  # Hero Xpulse uses 428 stock
 }
 
+# ── Shaft/belt final-drive ratios (July 3, 2026 sentinel fix) ─────────────
+# BikeSpec uses front_sprocket=0 / rear_sprocket=0 as the DOCUMENTED sentinel
+# for shaft/belt final drives (the same convention
+# scripts/refresh_gearing_from_lookup.py guards against). Until July 2026
+# ``_build_drivetrain_from_spec``'s `or`-chains treated the 0 sentinel as
+# "missing" and fabricated CHAIN gearing for all 20 shaft/belt specs (K5's
+# 17/42 = 2.471 or a Tier-2 category sprocket default). On sentinel we now
+# keep the sprockets at 0 — ``DrivetrainParams.final_ratio`` falls back to
+# ``final_drive_ratio`` when either sprocket is 0 — and resolve the real
+# ratio here, keyed by lower-cased model-name tokens (first match wins, so
+# keep more specific tokens above shorter ones, e.g. "r 12 ninet" before
+# "ninet").
+#
+# Sources (researched July 3, 2026): entries marked VERIFIED cite published
+# tooth counts / spec sheets; entries marked ESTIMATED are category-typical
+# values pending service-manual confirmation — flag for the next
+# weighted-sweep validation pass after reseed.
+_SHAFT_BELT_FINAL_DRIVE: list[tuple[str, float]] = [
+    # BMW boxers / K-series (shaft, bevel drive)
+    ("r 1300 gs", 2.91),  # ESTIMATED: family value carried from R1250GS; new
+    #   2024 gearbox ratio not yet published.
+    ("r 1250 gs", 2.91),  # VERIFIED: 32/11 crown/pinion carried from the late
+    #   R1200GS (BMW press 2010: 2.82→2.91; advrider/BMW MOA gearing tables).
+    ("r1200gs", 2.91),  # VERIFIED: 2.91:1 (32/11) from MY2008 on (BMW press).
+    ("r 1200 gs", 2.91),  # alias spelling
+    ("r 12 ninet", 2.91),  # ESTIMATED: same air/oil boxer platform as R nineT.
+    ("ninet", 2.91),  # VERIFIED: R nineT runs the 2.91 (32/11) final drive
+    #   (ninetowners.com final-drive interchange table).
+    ("k1300", 2.82),  # ESTIMATED: K1200S/K1300S family bevel commonly cited
+    #   2.82:1 (31/11) — verify against the K1300S service manual.
+    ("k1600", 2.75),  # ESTIMATED: BMW six family; MY2022 got taller gearing.
+    ("r 18", 2.75),  # ESTIMATED: BMW does not publish the R 18 bevel ratio;
+    #   boxer-typical value used.
+    # Yamaha shaft
+    ("fjr1300", 2.698),  # VERIFIED: Gen II/III secondary reduction
+    #   35/37 × 21/27 × 33/9 = 2.698 (Yamaha owner's manual / fjrowners.com).
+    ("super tenere", 2.987),  # VERIFIED: XT1200Z secondary reduction ratio
+    ("xt1200z", 2.987),  # 2.987 (21/25 × 32/9), Yamaha owner's manual p.100.
+    # Triumph shaft
+    ("tiger 1200", 2.7),  # ESTIMATED: Triumph doesn't publish; shaft-ADV
+    #   typical (peers: R1250GS 2.91, XT1200Z 2.99, but taller street bias).
+    ("rocket 3", 2.611),  # ESTIMATED: matches the curated Tier-1
+    #   47/18-equivalent already used by the calibrated cruiser cluster.
+    # Belt cruisers / sport
+    ("v-rod", 2.571),  # VERIFIED: 72T rear / 28T front pulleys, 1⅜" belt
+    ("vrsc", 2.571),  # (Zodiac & MSI stock pulley charts, 2002-06 VRSCA/B).
+    ("1125r", 2.593),  # VERIFIED: Buell 1125R 70T rear / 27T front pulleys
+    #   (Buell forums / OEM 145T belt listings).
+    ("chief", 2.2),  # VERIFIED: Indian publishes final drive 2.2:1 belt for
+    #   the 2022+ Chief family (indianmotorcycle.com spec sheet).
+    # Moto Guzzi shaft
+    ("v85", 3.0),  # ESTIMATED: Guzzi doesn't publish; between shaft-ADV
+    #   peers (R1250GS 2.91, XT1200Z 2.99).
+    ("v100 mandello", 2.75),  # ESTIMATED: sport-tourer, FJR1300-adjacent.
+    # CVT scooters (synthetic stepped-gear model; value kept at the prior
+    # effective Tier-2 ratio 43/16 so behaviour is unchanged for these two)
+    ("aerox", 2.6875),  # ESTIMATED: CVT — synthetic gear model.
+    ("ntorq", 2.6875),  # ESTIMATED: CVT — synthetic gear model.
+    # Data-artifact entries (chain bikes carrying the 0/0 sentinel in specs)
+    ("tesi", 2.6),  # ESTIMATED: Bimota Tesi 1D is chain drive (Ducati 851
+    #   platform, 15/39 = 2.6); spec carries the 0/0 sentinel as shipped.
+]
+
+# Category-typical fallback for future shaft/belt specs that miss the table.
+_SHAFT_BELT_DEFAULT_BY_CATEGORY: dict[str, float] = {
+    "cruiser": 2.4,  # belt cruisers run tall (Indian 2.2, H-D ~2.4-2.8)
+    "touring": 2.75,
+    "adventure": 2.9,  # shaft ADV cluster (R1250GS 2.91, XT1200Z 2.99)
+    "scooter": 2.6875,
+}
+_SHAFT_BELT_DEFAULT = 2.75  # generic shaft (ESTIMATED)
+
+
+def _shaft_belt_final_drive(spec: "BikeSpec") -> float:
+    """Resolve the effective final-drive ratio for a shaft/belt spec
+    (front/rear sprocket sentinel 0). Token match first, then a
+    category-typical estimate."""
+    name = (spec.model_name or "").lower()
+    for token, ratio in _SHAFT_BELT_FINAL_DRIVE:
+        if token in name:
+            return ratio
+    return _SHAFT_BELT_DEFAULT_BY_CATEGORY.get(
+        (spec.category or "").lower(), _SHAFT_BELT_DEFAULT
+    )
+
 
 def _infer_chain_pitch(spec: "BikeSpec") -> str | None:
     """
@@ -679,13 +764,32 @@ def _build_drivetrain_from_spec(
     )
     if not ratios:
         ratios = lu_ratios
-    front = front or lu_front
-    rear = rear or lu_rear
     primary = primary or lu_primary
-
-    front = front or base.front_sprocket
-    rear = rear or base.rear_sprocket
     primary = primary or base.primary_ratio
+
+    # July 3, 2026 sentinel fix: front/rear_sprocket == 0 is the DOCUMENTED
+    # shaft/belt sentinel — NOT a missing value — so it must be merged with
+    # `is None` semantics. The old `front = front or lu_front or base...`
+    # chain treated 0 as falsy and fabricated chain gearing (K5 17/42 or a
+    # Tier-2 category sprocket set) for all 20 shaft/belt specs — e.g. the
+    # R1250GS ran final 2.471 instead of its real ~2.91 bevel.
+    if front is None:
+        front = lu_front
+    if rear is None:
+        rear = lu_rear
+
+    if front == 0 or rear == 0:
+        # Shaft/belt: keep the sprockets at the 0 sentinel and set the
+        # researched final-drive ratio. DrivetrainParams.final_ratio only
+        # prefers tooth counts when BOTH sprockets are > 0, so the ratio
+        # below is what the sim actually consumes.
+        front = 0
+        rear = 0
+        final_drive_ratio = _shaft_belt_final_drive(spec)
+    else:
+        front = front or base.front_sprocket
+        rear = rear or base.rear_sprocket
+        final_drive_ratio = float(rear) / float(front)
 
     pitch = _infer_chain_pitch(spec)
     # Pitch in mm: 428 = 12.7, 520 = 15.875, 525 = 15.875, 530 = 15.875.
@@ -705,7 +809,7 @@ def _build_drivetrain_from_spec(
 
     return DrivetrainParams(
         gear_ratios=list(ratios),
-        final_drive_ratio=float(rear) / float(front),
+        final_drive_ratio=float(final_drive_ratio),
         front_sprocket=int(front),
         rear_sprocket=int(rear),
         chain_pitch_mm=chain_pitch_mm,

@@ -126,6 +126,21 @@ BENCHMARKS: list[tuple[str, str, int, float, str]] = [
     ("MV Agusta", "F3 800", 2019, 260, "factory"),
 ]
 
+# July 2026 international expansion — benchmark rows live next to their specs.
+from motoquant.scraper.known_bikes_2026_jpeu import (  # noqa: E402
+    TOPSPEED_BENCHMARKS as _JPEU_TS,
+)
+from motoquant.scraper.known_bikes_2026_us import (  # noqa: E402
+    TOPSPEED_BENCHMARKS as _US_TS,
+)
+from motoquant.scraper.known_bikes_2026_world import (  # noqa: E402
+    TOPSPEED_BENCHMARKS as _WORLD_TS,
+)
+
+BENCHMARKS.extend(_US_TS)
+BENCHMARKS.extend(_JPEU_TS)
+BENCHMARKS.extend(_WORLD_TS)
+
 
 def _sim_spec(spec) -> dict:
     """Run top-speed sim on one spec, return a JSON-friendly dict."""

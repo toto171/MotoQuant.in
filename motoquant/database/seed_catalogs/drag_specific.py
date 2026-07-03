@@ -496,12 +496,22 @@ def seed_drag_specific(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
-                        "manufacturers": ["Harley-Davidson", "Indian Motorcycle"],
+                        # "Indian" = canonical DB manufacturer name post the
+                        # 2026-06-13 merge; "Indian Motorcycle" kept as alias
+                        # for fresh seeds from older specs.
+                        "manufacturers": [
+                            "Harley-Davidson",
+                            "Indian",
+                            "Indian Motorcycle",
+                        ],
                         "engine_configs": ["V2"],
                         "displacement_min_cc": 800,
-                        "displacement_max_cc": 1750,
+                        # 1950 (was 1750) so Harley M8 114/117 (1868/1923cc)
+                        # and Indian Thunderstroke/PowerPlus (1768-1890cc)
+                        # actually match — Trask sells M8 + Indian kits.
+                        "displacement_max_cc": 1950,
                     },
-                    "description": "Trask turbo for Harley/Indian V-twins (belt-drive OK); +85 hp, drag-prepped",
+                    "description": "Trask turbo for Harley/Indian V-twins incl. M8 114/117 (belt-drive OK); +85 hp, drag-prepped",
                 },
                 "price_inr": 380000,
                 "availability": "order",

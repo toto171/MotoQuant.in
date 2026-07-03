@@ -2,7 +2,8 @@
 // on SimulatePage.  Calls POST /api/chat via the useChat() hook and handles
 // all four error cases the server can return:
 //   • bike_not_found        → clickable suggestion chips
-//   • llm_not_configured    → banner asking operator to set ANTHROPIC_API_KEY
+//   • llm_not_configured    → banner asking operator to set the provider key
+//     (GROQ_API_KEY by default; provider selected via LLM_PROVIDER)
 //   • parse_failed          → inline error with detail
 //   • sim_failed            → inline error with detail
 //
@@ -167,8 +168,10 @@ function LlmNotConfiguredBanner() {
       <div>
         <div className="font-medium text-yellow-400 text-sm">LLM not configured</div>
         <div className="text-xs text-carbon-400 mt-1">
-          Set <code className="font-mono bg-carbon-800 px-1 rounded">ANTHROPIC_API_KEY</code> on
-          the server to enable natural-language queries.
+          Set the provider API key on the server (default provider is Groq:{' '}
+          <code className="font-mono bg-carbon-800 px-1 rounded">GROQ_API_KEY</code>; see{' '}
+          <code className="font-mono bg-carbon-800 px-1 rounded">LLM_PROVIDER</code>) to enable
+          natural-language queries.
         </div>
       </div>
     </div>

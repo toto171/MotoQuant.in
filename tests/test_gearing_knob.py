@@ -97,3 +97,80 @@ def test_sobol_gearing_sensitivity_nonzero():
     }
     res = compute_sobol_indices(gsxr1000_k5(), param_specs=specs, n_samples=16, seed=1)
     assert res.to_dict()["et_std"] > 1e-3, "gearing sweep produced no ET variance"
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# July 3, 2026 — shaft/belt sprocket-sentinel fix (production spec path)
+# ─────────────────────────────────────────────────────────────────────────
+# BikeSpec uses front/rear_sprocket == 0 as the documented shaft/belt
+# sentinel. _build_drivetrain_from_spec's `or`-chains treated 0 as missing
+# and fabricated chain gearing (K5 17/42 → final 2.471, or Tier-2 category
+# sprockets) for all 20 shaft/belt specs. The fix keeps the sprockets at 0
+# and resolves the real ratio from importer._SHAFT_BELT_FINAL_DRIVE.
+
+
+def _sentinel_specs():
+    from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
+
+    return [s for s in ALL_KNOWN_BIKES if s.front_sprocket == 0 or s.rear_sprocket == 0]
+
+
+def test_shaft_belt_sentinel_specs_exist():
+    """The catalog carries shaft/belt sentinel specs (BMW R/K, FJR1300,
+    V-Rod, ...) — if this drops to zero the tests below silently vacuously
+    pass, so pin the population."""
+    assert len(_sentinel_specs()) >= 15
+
+
+def test_shaft_belt_specs_keep_zero_sprockets_and_table_ratio():
+    """Production spec path: every 0-sprocket (shaft/belt) spec must come
+    out of spec_to_bike_config with sprockets still 0 and final_ratio from
+    the researched table — never the fabricated K5 chain gearing."""
+    from motoquant.scraper.importer import (
+        _shaft_belt_final_drive,
+        spec_to_bike_config,
+    )
+
+    k5_fabrication = 42.0 / 17.0  # 2.4706 — the old fallthrough value
+    for spec in _sentinel_specs():
+        cfg = spec_to_bike_config(spec)
+        d = cfg.drivetrain
+        assert d.front_sprocket == 0 and d.rear_sprocket == 0, (
+            f"{spec.model_name}: sentinel sprockets were overwritten "
+            f"({d.front_sprocket}/{d.rear_sprocket})"
+        )
+        want = _shaft_belt_final_drive(spec)
+        assert d.final_ratio == pytest.approx(want), (
+            f"{spec.model_name}: final_ratio {d.final_ratio:.4f} != table {want}"
+        )
+        assert d.final_ratio != pytest.approx(k5_fabrication, abs=1e-3), (
+            f"{spec.model_name}: still carries the fabricated K5 2.471 gearing"
+        )
+
+
+def test_r1250gs_gets_real_bevel_ratio():
+    """The flagship case: BMW R 1250 GS (Tier-1 lookup returns 0/0 shaft)
+    must run its real ~2.91 bevel, not K5's 2.471 chain fabrication."""
+    from motoquant.scraper.importer import spec_to_bike_config
+    from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
+
+    spec = next(
+        s
+        for s in ALL_KNOWN_BIKES
+        if s.manufacturer == "BMW" and s.model_name == "R 1250 GS"
+    )
+    cfg = spec_to_bike_config(spec)
+    assert cfg.drivetrain.final_ratio == pytest.approx(2.91)
+
+
+def test_chain_bikes_unaffected_by_sentinel_fix():
+    """None-vs-0 semantics: chain bikes (real or looked-up tooth counts)
+    must keep sprocket-derived gearing exactly as before."""
+    from motoquant.scraper.importer import spec_to_bike_config
+    from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
+
+    spec = next(s for s in ALL_KNOWN_BIKES if s.model_name == "YZF-R15 V4")
+    cfg = spec_to_bike_config(spec)
+    d = cfg.drivetrain
+    assert d.front_sprocket > 0 and d.rear_sprocket > 0
+    assert d.final_ratio == pytest.approx(d.rear_sprocket / d.front_sprocket)

@@ -324,6 +324,33 @@ export function compareJob(body, onProgress, signal) {
 }
 
 /**
+ * One agent-mode chat turn as a background job (POST /api/jobs/chat) —
+ * agent turns can run multiple sims / an optimizer pass, so they stream
+ * live stage text ("Simulating Hayabusa…", "Optimizing stage_4…") through
+ * onProgress and are cancellable via the AbortSignal (runJob cancels the
+ * job server-side on abort). Falls back to the synchronous /api/chat route
+ * with the SAME body on older backends (404/405 on /api/jobs/chat).
+ *
+ * The server is stateless — the client holds the transcript and sends the
+ * prior turns back with every request.
+ *
+ * @param {string} query      The user's new message.
+ * @param {Array} [messages]  Prior turns [{role:'user'|'assistant', content}],
+ *                            oldest first (server caps at 24).
+ * @param {object} [opts]     {signal, onProgress}
+ * @returns {Promise<object>} ChatResponse dict ({summary, blocks, error, …}).
+ */
+export function chatJob(query, messages, { signal, onProgress } = {}) {
+  const body = { query };
+  if (Array.isArray(messages) && messages.length > 0) body.messages = messages;
+  return runJob('chat', body, {
+    onProgress,
+    signal,
+    fallbackPath: '/api/chat',
+  });
+}
+
+/**
  * Persist a simulation result to sim_runs (leaderboard + account Garage).
  * Anonymous saves work; pass the AuthProvider access token to bind the run
  * to the signed-in user so it shows in their Garage.

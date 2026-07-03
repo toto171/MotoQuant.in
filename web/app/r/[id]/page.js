@@ -205,7 +205,7 @@ export default function RunPage() {
                     Simulated by MotoQuant&apos;s RK4 physics engine — 15 coupled sub-models
                     (engine, clutch, tire thermal, aero, weight transfer, wheelie control)
                     integrated at 1&nbsp;ms steps under the venue&apos;s real air density.
-                    Validated against 216 published benchmarks.
+                    Validated against 223 published benchmarks.
                   </p>
                 </Tile>
               </div>

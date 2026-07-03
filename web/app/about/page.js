@@ -14,7 +14,7 @@ const ROADMAP = [
     phase: 'Phase 1–2',
     status: 'complete',
     label: 'Physics engine + Database',
-    desc: '15 sub-models, 501 bikes, 563 parts, 20 venues, 976 tests. Full validation suite.',
+    desc: '15 sub-models, 535 bikes, 594 parts, 20 venues, 976 tests. Full validation suite.',
   },
   {
     phase: 'Phase 3',
@@ -132,7 +132,7 @@ export default function AboutPage() {
                 First-principles physics can. Every sub-model — Pacejka tire, Willans friction engine, RK4 integrator — produces physically interpretable outputs. When the model is wrong, we can find and fix the cause. When you add a part, the physics of that part propagates through the whole system.
               </p>
               <p>
-                Top-10 mean error after our June 2026 calibration pass: <strong className="text-brand-orange">±0.006s</strong>. Reference baselines within 0.001s of targets. That&apos;s what first principles buys you.
+                Top-10 mean error after our July 2026 calibration pass: <strong className="text-brand-orange">±0.009s</strong>. Reference baselines within 0.001s of targets. That&apos;s what first principles buys you.
               </p>
             </div>
           </Reveal>

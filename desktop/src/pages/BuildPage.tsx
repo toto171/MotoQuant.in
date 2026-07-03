@@ -35,6 +35,11 @@ const EXCLUSIVE_CATEGORY_NAMES: ReadonlySet<string> = new Set([
   "nitrous",
   "wheelie_bar",
   "swingarm_ext",
+  // July 2026 drag-essentials categories (mirror roi.py; lockup_clutch and
+  // air_shifter additionally cross-exclude clutch_kit/quickshifter backend-side)
+  "lowering_kit",
+  "air_shifter",
+  "lockup_clutch",
 ]);
 
 // Legacy / display-name aliases. The API returns canonical `category_name`
@@ -47,7 +52,8 @@ const EXCLUSIVE_ALIASES: readonly string[] = [
   "battery", "chain", "clutch", "slipper", "quickshifter",
   "boost", "turbo", "supercharger", "nitrous", "wheelie",
   "swingarm", "front-sprocket", "front_sprocket",
-  "rear-sprocket", "rear_sprocket",
+  "rear-sprocket", "rear_sprocket", "lowering", "air-shifter",
+  "air_shifter", "lockup",
 ];
 
 export function isExclusiveCategory(name: string | null | undefined): boolean {

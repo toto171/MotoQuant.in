@@ -81,10 +81,16 @@ class CategoryProfile:
     # that were inadvertently filled with upright Cd values).
     cd_ceiling: float | None = None
     # Cd floor — minimum permissible aero.cd (catches malformed configs).
+    # WIRED July 3, 2026: physics.run() clamps the rider-dynamic Cd*A at
+    # cd_floor × frontal_area each step. 0.25 is below every catalog Cd
+    # (min ≈ 0.31 × 0.92 race-crouch), so the default is a no-op guard.
     cd_floor: float = 0.25
 
     # ── Tire grip ──────────────────────────────────────────────────────
     # mu_peak override (None = honour the value the importer set).
+    # WIRED July 3, 2026: when set, physics builds TireModel against a
+    # config copy whose tires.mu_peak is replaced by this value (launch
+    # traction + thermal grip path). None in every profile today.
     mu_peak_override: float | None = None
     # Pacejka shape factor C — sport tires 1.65 (peakier), commuter
     # 1.45 (rounder peak, more forgiving but lower max).
@@ -108,6 +114,9 @@ class CategoryProfile:
     # ── Idle / launch RPM tuning ───────────────────────────────────────
     # Launch RPM as fraction of redline. 0.55 = K5, 0.70 = small-cc
     # (rev higher to compensate for narrower torque band).
+    # WIRED July 3, 2026: when set, physics.run() overrides the
+    # StagingModel initial engine speed with
+    # clamp(redline × factor, idle, redline). None in every profile today.
     launch_rpm_factor: float | None = None
 
     # ── Free-form notes (debugging / docs) ─────────────────────────────

@@ -9021,8 +9021,11 @@ def seed_all(db: MotoQuantDB) -> dict:
     present — otherwise fitments will only cover reference bikes.
     """
     from .seed_catalogs.adv_cruiser_exhausts import seed_adv_cruiser_exhausts
+    from .seed_catalogs.drag_essentials import seed_drag_essentials
     from .seed_catalogs.drag_prep_specialty import seed_drag_prep_specialty
     from .seed_catalogs.drag_specific import seed_drag_specific
+    from .seed_catalogs.drag_tires_cruiser import seed_drag_tires_cruiser
+    from .seed_catalogs.euro_brand_exhausts import seed_euro_brand_exhausts
     from .seed_catalogs.indian_retailer_depth import seed_indian_retailer_depth
     from .seed_catalogs.premium_universal import seed_premium_universal
     from .seed_catalogs.two_stroke import seed_two_stroke
@@ -9041,12 +9044,23 @@ def seed_all(db: MotoQuantDB) -> dict:
     n_parts += seed_two_stroke(db)
     n_parts += seed_indian_retailer_depth(db)
     n_parts += seed_drag_prep_specialty(db)
+    # July 2026 international drag expansion: lowering kits / air shifters /
+    # lockup clutches (3 new categories, self-registering), V2-cruiser nitrous,
+    # Trask M8 turbo kits, and exhaust depth for Triumph/MV/Guzzi/CFMoto.
+    n_parts += seed_drag_essentials(db)
+    n_parts += seed_euro_brand_exhausts(db)
     n_fitments = seed_bike_tire_fitments(db)
     # Recommended/drag_prep fitments (Apr 27, 2026): adds upgrade-tier fitments
     # beyond OEM with on-the-fly tire creation when referenced models are missing.
     rec_stats = seed_recommended_fitments(db)
     n_fitments += rec_stats.get("inserted", 0) if isinstance(rec_stats, dict) else 0
     n_tires += rec_stats.get("tires_created", 0) if isinstance(rec_stats, dict) else 0
+    # July 2026 drag + cruiser tire packs. MUST run after OEM + recommended
+    # fitments exist — its fitment planner queries OEM rim/width rows.
+    drag_tire_stats = seed_drag_tires_cruiser(db)
+    if isinstance(drag_tire_stats, dict):
+        n_tires += drag_tire_stats.get("tires_created", 0)
+        n_fitments += drag_tire_stats.get("fitments_inserted", 0)
     summary = {
         "bikes": 3,
         "tires": n_tires,

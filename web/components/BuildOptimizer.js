@@ -59,10 +59,14 @@ const PROFILES = [
   { id: 'all', label: 'All parts' },
   { id: 'street_legal', label: 'Street legal' },
   { id: 'drag_prep', label: 'Drag prep' },
-  { id: 'full_race', label: 'Full race' },
+  { id: 'full_race', label: 'Full race / Outlaw' },
 ];
 
 const BUDGET_PRESETS = [25000, 50000, 100000, 250000, 500000];
+// Outlaw / open class — POST budget_inr: null (the API resolves null/0 to
+// its ₹5M internal ceiling = effectively no limit). Sentinel is null in
+// component state; the slider shows full-right while unlimited.
+const OUTLAW_BUDGET = null;
 
 // One-tap starts for first-time users (shared BikePicker `popular` prop).
 const POPULAR_BIKES = [
@@ -176,14 +180,16 @@ export default function BuildOptimizer() {
               <span className="label-mono flex items-center gap-1.5">
                 <IndianRupee size={11} className="text-brand-orange" aria-hidden="true" /> Budget
               </span>
-              <span className="text-sm font-mono font-bold text-brand-orange tabular-nums">{fmtINR(budget)}</span>
+              <span className="text-sm font-mono font-bold text-brand-orange tabular-nums">
+                {budget == null ? 'No limit' : fmtINR(budget)}
+              </span>
             </div>
             <input
               type="range"
               min={5000}
-              max={800000}
+              max={2000000}
               step={5000}
-              value={budget}
+              value={budget ?? 2000000}
               onChange={(e) => setBudget(Number(e.target.value))}
               aria-label="Budget in rupees"
               className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-brand-orange"
@@ -203,6 +209,18 @@ export default function BuildOptimizer() {
                   {fmtINR(b)}
                 </button>
               ))}
+              <button
+                type="button"
+                onClick={() => setBudget(OUTLAW_BUDGET)}
+                aria-pressed={budget == null}
+                className={`px-2.5 py-1 rounded-full text-[11px] font-mono border transition-colors ${
+                  budget == null
+                    ? 'bg-brand-orange/20 border-brand-orange/50 text-white'
+                    : 'bg-white/[0.04] border-white/10 text-white/60 hover:text-white'
+                }`}
+              >
+                Outlaw — no limit
+              </button>
             </div>
           </div>
 

@@ -12357,3 +12357,18 @@ ALL_KNOWN_BIKES = [
 from .known_bikes_extended import EXTENDED_BIKES  # noqa: E402
 
 ALL_KNOWN_BIKES.extend(EXTENDED_BIKES)
+
+# ────────────────────────────────────────────────────────────
+# July 2026 international commercial-release expansion —
+# three sibling modules (US drag icons / JP legends + EU depth /
+# China + current-year + SE Asia), each carrying its own
+# instrumented ET_BENCHMARKS + TOPSPEED_BENCHMARKS lists that
+# scripts/validation_sweep.py and scripts/topspeed_sweep.py merge.
+# ────────────────────────────────────────────────────────────
+from .known_bikes_2026_jpeu import JPEU_EXPANSION_BIKES  # noqa: E402
+from .known_bikes_2026_us import US_EXPANSION_BIKES  # noqa: E402
+from .known_bikes_2026_world import WORLD_EXPANSION_BIKES  # noqa: E402
+
+ALL_KNOWN_BIKES.extend(US_EXPANSION_BIKES)
+ALL_KNOWN_BIKES.extend(JPEU_EXPANSION_BIKES)
+ALL_KNOWN_BIKES.extend(WORLD_EXPANSION_BIKES)

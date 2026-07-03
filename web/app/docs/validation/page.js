@@ -4,7 +4,7 @@ import CodeComment from '../../../components/CodeComment';
 
 export const metadata = {
   title: 'Validation Data',
-  description: 'MotoQuant Pro accuracy report — 216 benchmarks (236 matched) against published Cycle World, Sport Rider, MotoStatz, MCN, and BikeWale timeslips, 13 June 2026 sweep. Weighted bias −0.015s, weighted mean absolute error 0.262s, top-10 mean error ±0.006s. Per-cluster bias and the open small-cc + 2-stroke calibration gaps. Reference baselines: K5 10.0334s, R1 10.2859s, Hayabusa 10.4712s — Δ ±0.0000 since April 30, 2026.',
+  description: 'MotoQuant Pro accuracy report — 223 benchmarks (246 matched) against published Cycle World, Sport Rider, MotoStatz, MCN, and BikeWale timeslips, 3 July 2026 sweep. Weighted bias −0.026s, weighted mean absolute error 0.242s, top-10 mean error ±0.009s. Per-cluster bias and the open small-cc + 2-stroke calibration gaps. Reference baselines: K5 10.0334s, R1 10.2859s, Hayabusa 10.4712s — Δ ±0.0000 since April 30, 2026.',
   alternates: { canonical: 'https://motoquant.in/docs/validation' },
   keywords: [
     'motorcycle simulator accuracy',
@@ -20,57 +20,57 @@ export const metadata = {
   ],
 };
 
-// Top-10 cleanest validated runs, 13 June 2026 sweep
-// (reports/acc_final_2026_06_13.json — 10 smallest |Δ| among published
-//  (non-derived) benchmarks, mean ±0.006s)
+// Top-10 cleanest validated runs, 3 July 2026 sweep
+// (reports/acc_final_2026_07_03.json — 10 smallest |Δ| among published
+//  (non-derived) benchmarks, mean ±0.009s)
 const TOP10 = [
   { rank: 1, name: "Honda CBR 600RR", year: 2007, cc: "599cc I4", target: 10.844, sim: 10.8447, delta: 0.001, source: "Sport Rider" },
-  { rank: 2, name: "Aprilia Tuono 660", year: 2021, cc: "659cc I2", target: 11.33, sim: 11.3285, delta: -0.002, source: "MotoStatz" },
-  { rank: 3, name: "Harley-Davidson Sportster S", year: 2021, cc: "1252cc V2", target: 11.1, sim: 11.0981, delta: -0.002, source: "HDForums timeslip 2021" },
-  { rank: 4, name: "Kawasaki Z H2 SE", year: 2020, cc: "998cc I4", target: 9.95, sim: 9.9471, delta: -0.003, source: "Cycle World 2020" },
-  { rank: 5, name: "Kawasaki Ninja ZX-9R", year: 2000, cc: "899cc I4", target: 10.5, sim: 10.4968, delta: -0.003, source: "Sport Rider 2000" },
-  { rank: 6, name: "Kawasaki Ninja H2", year: 2015, cc: "998cc I4", target: 9.62, sim: 9.6252, delta: 0.005, source: "MCN 2015" },
-  { rank: 7, name: "BMW R 12 nineT", year: 2014, cc: "1170cc boxer-twin", target: 11.05, sim: 11.0583, delta: 0.008, source: "Cycle World 2014" },
-  { rank: 8, name: "Kawasaki Ninja ZX-10R", year: 2021, cc: "998cc I4", target: 10.0, sim: 10.0106, delta: 0.011, source: "Cycle World 2021" },
-  { rank: 9, name: "Kawasaki ZZR1400", year: 2006, cc: "1352cc I4", target: 9.9, sim: 9.9112, delta: 0.011, source: "MCN 2006" },
-  { rank: 10, name: "Yamaha YZF-R6", year: 2007, cc: "599cc I4", target: 10.854, sim: 10.8653, delta: 0.011, source: "Sport Rider 2007" },
+  { rank: 2, name: "Kawasaki Z H2 SE", year: 2020, cc: "998cc I4", target: 9.95, sim: 9.9471, delta: -0.003, source: "Cycle World 2020" },
+  { rank: 3, name: "Kawasaki Ninja ZX-9R", year: 2000, cc: "899cc I4", target: 10.5, sim: 10.4968, delta: -0.003, source: "Sport Rider 2000" },
+  { rank: 4, name: "Kawasaki Ninja H2", year: 2015, cc: "998cc I4", target: 9.62, sim: 9.6252, delta: 0.005, source: "MCN 2015" },
+  { rank: 5, name: "Kawasaki Ninja ZX-10R", year: 2021, cc: "998cc I4", target: 10.0, sim: 10.0106, delta: 0.011, source: "Cycle World 2021" },
+  { rank: 6, name: "Kawasaki ZZR1400", year: 2006, cc: "1352cc I4", target: 9.9, sim: 9.9112, delta: 0.011, source: "MCN 2006" },
+  { rank: 7, name: "Yamaha YZF-R6", year: 2007, cc: "599cc I4", target: 10.854, sim: 10.8653, delta: 0.011, source: "Sport Rider 2007" },
+  { rank: 8, name: "Kawasaki Z900RS", year: 2020, cc: "948cc I4", target: 11.35, sim: 11.3372, delta: -0.013, source: "MotoStatz 2022" },
+  { rank: 9, name: "Triumph Rocket 3 Storm R", year: 2024, cc: "2458cc I3", target: 10.56, sim: 10.5757, delta: 0.016, source: "Cycle World 2020" },
+  { rank: 10, name: "Aprilia RS 457", year: 2024, cc: "457cc I2", target: 13.3, sim: 13.3158, delta: 0.016, source: "FastestLaps 2024" },
 ];
 
-// Per-cluster weighted bias + weighted |Δ|, 13 June 2026 sweep
-// (reports/acc_final_2026_06_13.json by_cluster). Bias is weighted; N in note.
+// Per-cluster weighted bias + weighted |Δ|, 3 July 2026 sweep
+// (reports/acc_final_2026_07_03.json by_cluster). Bias is weighted; N in note.
 const CLUSTERS = [
   { name: 'Litre sport ≥195 hp', bias: '−0.015s', status: 'closed', note: 'N=31 · weighted |Δ| 0.137s — best instrumented cluster' },
-  { name: '600–1000cc sport', bias: '−0.073s', status: 'good', note: 'N=99 · weighted |Δ| 0.201s — largest cluster, centred' },
-  { name: '500–700cc twin', bias: '+0.059s', status: 'closed', note: 'N=12 · weighted |Δ| 0.141s — tightest |Δ| in the corpus' },
+  { name: '600–1000cc sport', bias: '−0.064s', status: 'good', note: 'N=104 · weighted |Δ| 0.192s — largest cluster, centred' },
+  { name: '500–700cc twin', bias: '+0.047s', status: 'closed', note: 'N=13 · weighted |Δ| 0.132s — tightest |Δ| in the corpus' },
   { name: '300–500cc twin', bias: '−0.086s', status: 'open', note: 'N=23 · weighted |Δ| 0.516s — bidirectional spread, derived-data uncertainty' },
   { name: '200–300cc entry', bias: '+0.071s', status: 'open', note: 'N=15 · weighted |Δ| 0.343s — derived-benchmark data uncertainty' },
   { name: '150–200cc entry', bias: '+0.018s', status: 'open', note: 'N=12 · weighted |Δ| 0.820s — noise-dominated, bias centred' },
-  { name: 'Cruiser 1300+', bias: '+0.312s', status: 'open', note: 'N=3 · weighted |Δ| 0.312s — thin set; muscle-bike slip-launch' },
+  { name: 'Cruiser 1300+', bias: '+0.234s', status: 'open', note: 'N=3 · weighted |Δ| 0.234s — thin set; muscle-bike slip-launch' },
   { name: '2-stroke vintage', bias: '+0.153s', status: 'open', note: 'N=6 · weighted |Δ| 0.584s — off-pipe/on-pipe transition' },
-  { name: 'Other', bias: '+0.124s', status: 'open', note: 'N=35 · weighted |Δ| 0.383s — mixed heavy ADV/tourer bucket' },
+  { name: 'Other', bias: '+0.022s', status: 'open', note: 'N=39 · weighted |Δ| 0.285s — mixed heavy ADV/tourer bucket' },
 ];
 
 export default function ValidationPage() {
   return (
     <article>
       <header className="mb-12">
-        <CodeComment className="mb-3">validation · 216 benchmarks</CodeComment>
-        <h1 className="font-display font-bold text-4xl text-white mb-4 tracking-tight">Benchmark Results — June 2026</h1>
+        <CodeComment className="mb-3">validation · 223 benchmarks</CodeComment>
+        <h1 className="font-display font-bold text-4xl text-white mb-4 tracking-tight">Benchmark Results — July 2026</h1>
         <p className="text-white/60 text-base leading-relaxed">
-          Source-quality-weighted sweep results across 216 published benchmarks (236 matched to a catalog bike).
-          Metrics, per-cluster bias, and methodology. Last updated 13 June 2026.
+          Source-quality-weighted sweep results across 223 published benchmarks (246 matched to a catalog bike).
+          Metrics, per-cluster bias, and methodology. Last updated 3 July 2026.
         </p>
       </header>
 
       {/* Headline stats */}
       <section className="mb-14">
-        <h2 className="font-display font-bold text-2xl text-white mb-6">Aggregate Metrics (236 matched benchmarks)</h2>
+        <h2 className="font-display font-bold text-2xl text-white mb-6">Aggregate Metrics (246 matched benchmarks)</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
           {[
-            { num: '0.262s', label: 'Weighted |Δ|' },
-            { num: '0.207s', label: 'Median |Δ|' },
-            { num: '−0.015s', label: 'Weighted bias (sim − real)' },
-            { num: '±0.006s', label: 'Top-10 mean error' },
+            { num: '0.242s', label: 'Weighted |Δ|' },
+            { num: '0.183s', label: 'Median |Δ|' },
+            { num: '−0.026s', label: 'Weighted bias (sim − real)' },
+            { num: '±0.009s', label: 'Top-10 mean error' },
           ].map((s, i) => (
             <div key={i} className="card p-4 border-brand-orange/20 text-center">
               <div className="font-display font-bold text-xl text-brand-orange tabular-nums">{s.num}</div>
@@ -80,13 +80,13 @@ export default function ValidationPage() {
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { num: '62', label: 'Within ±0.10s' },
-            { num: '113', label: 'Within ±0.20s' },
-            { num: '187', label: 'Within ±0.50s' },
-            { num: '217', label: 'Within ±1.00s' },
+            { num: '72', label: 'Within ±0.10s' },
+            { num: '130', label: 'Within ±0.20s' },
+            { num: '200', label: 'Within ±0.50s' },
+            { num: '227', label: 'Within ±1.00s' },
           ].map((s, i) => (
             <div key={i} className="card p-4 text-center">
-              <div className="font-display font-bold text-xl text-white tabular-nums">{s.num}<span className="text-white/40 text-sm">/236</span></div>
+              <div className="font-display font-bold text-xl text-white tabular-nums">{s.num}<span className="text-white/40 text-sm">/246</span></div>
               <div className="font-mono text-[10px] text-white/50 uppercase tracking-wide mt-1">{s.label}</div>
             </div>
           ))}
@@ -128,8 +128,8 @@ export default function ValidationPage() {
       <section className="mb-14">
         <h2 className="font-display font-bold text-2xl text-white mb-4">Top 10 Most Accurate Bikes</h2>
         <p className="text-white/60 text-sm mb-6">
-          The 10 smallest residuals from published (non-derived) benchmarks — mean absolute error ±0.006s.
-          Sources: Cycle World, Sport Rider, MCN, Motorcyclist, BikeWale, MotoStatz.
+          The 10 smallest residuals from published (non-derived) benchmarks — mean absolute error ±0.009s.
+          Sources: Cycle World, Sport Rider, MCN, MotoStatz, FastestLaps.
           Conditions: race fuel, professional rider, ideal strip.
         </p>
         <div className="card border-brand-orange/20 overflow-hidden">
@@ -254,7 +254,7 @@ export default function ValidationPage() {
           </Link>
           <Link href="/simulator" className="card card-hover block p-4 group">
             <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Try the simulator →</div>
-            <div className="text-xs text-white/50">501 bikes, free in the browser, no account needed.</div>
+            <div className="text-xs text-white/50">535 bikes, free in the browser, no account needed.</div>
           </Link>
         </div>
       </div>

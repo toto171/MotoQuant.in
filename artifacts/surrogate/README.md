@@ -4,12 +4,94 @@
 
 | Name                                | What it is                                          | Size    |
 |-------------------------------------|-----------------------------------------------------|---------|
-| `surrogate_numpy.npz`               | **v2.1 SHIPPED MODEL** — numpy MLP served in prod   | 87 KB   |
+| `surrogate_numpy.npz`               | **v2.2 SHIPPED MODEL** — numpy MLP served in prod   | 88 KB   |
+| `motoquant_surrogate_v2_2.npz`      | v2.2 training dataset (9,560 rows × 26 features)    | 678 KB  |
+| `surrogate_numpy_v2_1.npz.bak`      | v2.1 numpy MLP — rollback copy                      | 87 KB   |
 | `motoquant_surrogate_v2_8k5.npz`    | v2.1 training dataset (8,574 rows × 26 features)    | 610 KB  |
 | `surrogate_numpy_v1.npz.bak`        | v1 numpy MLP (K5-only envelope) — rollback copy     | 39 KB   |
 | `motoquant_surrogate_v1_1k5.npz`    | v1 training dataset (K5 Sobol, 1.5k samples)        | 128 KB  |
 
-## v2.1 (June 12, 2026) — same-night retrain after the physics retune
+## v2.2 (July 3, 2026) — 535-bike catalog + post-audit label refresh
+
+Regen trigger: 34 new bikes (ids 4598–4631 — Harley/Indian cruisers, ZX-12R,
+V-Max 1200, GSX-R600/750 L1, Kove/Benda/QJ/CFMoto/Zontes, Ninja 1100SX,
+CBR600RR '24, Raider R150; `bike_models` 501 → 535) plus the same-day DB
+reseed that corrected ~20 shaft/belt final-drive ratios (fabricated 2.471
+chain gearing → real ratios). **The stock-probe audit then found the drift
+was much wider: 131 of 501 old bikes were stale** — most of it from the
+July 2 audit session (year-aware multi-generation reseed of 498 configs,
+high-power cruiser/ADV grip gate, kerb→dry mass, benchmark spec corrections)
+which was never followed by a surrogate regen. v2.1 had been serving stale
+labels for ~100 bikes for a day. The standing contract stands: **a surrogate
+is a cache of the physics — REGENERATE AFTER ANY RESEED/RETUNE, in the same
+session.**
+
+Smart regen (three staleness gates, then transplant):
+
+* fresh STOCK sims for all 535 bikes → 122 old bikes moved >0.02 s (or had
+  feature drift — final_drive_ratio / rolling radius / spec corrections);
+* free perturb-row audit: 600 already-fresh perturbation rows diffed against
+  their v2.1 counterparts (mean |dET| 1.7 ms) → 2 promotions;
+* MAX-POWER probe on all 361 remaining kept bikes (worst residual before
+  promotion 121.8 ms, mean 1.5 ms) → 7 promotions (Speed Triple 1200 RS/RR,
+  RC8 R, Pan America, 1390 SDR EVO, R 1250 RT, GSX-R 600 K8 — invisible at
+  stock, bind under the optimizer's power scaling);
+* final split: **131 stale regenerated / 354 transplanted / 34 new / 25 eval**;
+* 4,295 fresh sims total (535 stock + 25 mod_eval + 3,735 perturbation) and
+  5,265 rows transplanted tid-aligned from v2.1. 9,560/9,560 rows valid
+  (510 stock + 25 stock_eval + 25 mod_eval + 9,000 perturb).
+
+PLAN NOTE (matters for the next regen): re-running `surrogate_v2_gen.py plan`
+on a grown catalog re-shuffles the eval/base picks (the RNG consumes
+differently) — a fresh plan would have flipped 198 old bikes' roles and
+invalidated their transplantable rows for no physical reason. The v2.2 plan
+was therefore built session-side with the v2.1 roles PRESERVED for all 501
+old bikes (reconstruct roles from the previous dataset: eval = `stock_eval`
+bmids, base = 28 perturb rows, other = 12 — per-bike knob streams are keyed
+`rng(SEED + bmid)` / `rng(SEED + 7e6 + bmid)`, so a bike that keeps its role
+keeps its exact knob sequence) and the 34 new bikes added as dense
+perturbation bases (28 rows each — new structural territory earns dense
+coverage). Plan: 9,560 tasks, 180 bases / 330 others / 25 eval.
+
+Same recipe (hidden 160,96 · epochs 700 · restarts 2 · split seed 42):
+
+| Metric (ET)            | v2.1                 | v2.2                                    |
+|------------------------|----------------------|-----------------------------------------|
+| Holdout MAE            | 58.5 ms (n=1,278)    | **84.1 ms** (n=1,426; 74.3 ms excl. the 2 pathological rows below) |
+| Holdout RMSE           | 105.7 ms             | 309.1 ms (125.1 ms excl. pathological)  |
+| Holdout R²             | 0.9987               | 0.9884                                  |
+| trap MAE               | 0.91 km/h            | 1.27 km/h                               |
+| 25 UNSEEN bikes, stock | 113.6 ms             | 180.1 ms                                |
+| UNSEEN, +20 %/−8 kg    | 102.4 ms             | 147.5 ms                                |
+| delta-sign agreement   | 25/25 (95.9 ms)      | 25/25 (delta MAE **84.4 ms** — better)  |
+| Envelope at stock      | 501/501              | **535/535** (incl. Breakout 117's 240 tire) |
+
+Reference presets: K5 +0.054 s (marginally past the informal ±0.05 gate,
+inside holdout MAE), R1 +0.044 s; hand-curated Hayabusa preset −0.285 s
+(documented structural outlier, was −0.336). Spot suite on the production DB
+path: Hayabusa +0.017 / R15 V4 +0.112 / Duke 390 −0.001 / **ZX-12R +0.001 /
+Breakout 117 +0.028 / Kove 450RR +0.002** — all far inside the 0.5 s gate.
+
+**PHYSICS FLAG (found by this regen, NOT fixed — out of scope):** 9 fresh
+rows (YZF-R1 '04-06, Panigale V4 '18-24, BMW R 18) collapse into a degenerate
+slow regime at power_scale ≥ ~1.45: ET 18–22 s with trap 70–84 km/h on litre
+bikes, and MORE power makes it SLOWER (R1 ×1.55 → 21.2 s, ×1.59 → 22.1 s;
+reproducible, `finished_quarter=True`). v2.1's physics produced ZERO such
+rows under the identical knob distribution — this regime is new since the
+July 2 physics/reseed changes (grip-gate / launch-knob territory, likely a
+wheelie-control or over-clutch spiral). The rows are true labels and were
+kept (they account for most of the holdout MAE/RMSE increase). Prod exposure
+is small — +45 %-power configs essentially only arise from boost kits, which
+`SurrogatePredictor` always full-sims — but a physics session should
+root-cause it.
+
+Optimizer re-proof (4-core sandbox): Hayabusa ₹450k full_race **14.6 s**
+(148 surrogate / 32 full-sim calls + 9 verify, 8 out-of-envelope), base
+10.223 → 9.246 s (Δ −0.978 s), ₹449.8k spend, 6 parts, no duplicate
+exclusives. `tests/test_surrogate_numpy_artifact.py` 8/8 green against the
+new artifact. Rollback: `cp surrogate_numpy_v2_1.npz.bak surrogate_numpy.npz`.
+
+## v2.1 (June 12, 2026) — same-night retrain after the physics retune — SUPERSEDED by v2.2
 
 v2 was generated and the physics moved underneath it THE SAME NIGHT: the
 per-cluster launch knobs were retuned (entry_150_200, entry_200_300,
