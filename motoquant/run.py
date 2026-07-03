@@ -2171,9 +2171,14 @@ def cmd_analysis(args):
                 print("\n  ── CATEGORY SUMMARY ──")
                 cats = rank_categories(results)
                 for c in cats:
+                    # avg_cost_per_tenth is None when no part in the category
+                    # has a finite cost-per-tenth (rank_categories emits null,
+                    # never inf — JSON-safety contract).
+                    avg_cpt = c["avg_cost_per_tenth"]
+                    avg_cpt_s = f"{avg_cpt:,.0f}" if avg_cpt is not None else "no gain"
                     print(
                         f"  {c['category']:<28}  best ΔET={c['best_et_gain_s']:.3f}s  "
-                        f"ROI={c['best_roi']:.3f}  avg ₹/tenth={c['avg_cost_per_tenth']:,.0f}  "
+                        f"ROI={c['best_roi']:.3f}  avg ₹/tenth={avg_cpt_s}  "
                         f"({c['improving_count']}/{c['part_count']} parts help)"
                     )
 

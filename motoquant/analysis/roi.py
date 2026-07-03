@@ -709,8 +709,9 @@ def rank_categories(
 
     Returns a list of dicts:
       {"category": str, "best_roi": float, "best_et_gain": float,
-       "avg_cost_per_tenth": float, "part_count": int}
-    sorted by best_roi descending.
+       "avg_cost_per_tenth": float | None, "part_count": int}
+    sorted by best_roi descending. avg_cost_per_tenth is None when no
+    improving part in the category has a finite cost-per-tenth.
     """
     from collections import defaultdict
 
