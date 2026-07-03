@@ -28,25 +28,11 @@ tires 0-0.05, parts 0.05-0.68, autotune 0.68-0.97, wrap-up to 1.0.
 from __future__ import annotations
 
 import logging
-import math
 from typing import Any
 
+from .roi import json_safe as _finite  # shared JSON-safety net (nulls inf/nan)
+
 logger = logging.getLogger(__name__)
-
-
-def _finite(obj):
-    """Replace non-finite floats with None recursively (JSON-safe).
-
-    rank_categories can emit avg_cost_per_tenth=inf when a category's ET
-    gain rounds to zero; strict JSON encoders (the jobs route) reject it.
-    """
-    if isinstance(obj, dict):
-        return {k: _finite(v) for k, v in obj.items()}
-    if isinstance(obj, list):
-        return [_finite(v) for v in obj]
-    if isinstance(obj, float) and not math.isfinite(obj):
-        return None
-    return obj
 
 
 # The API-level knapsack ceiling (see OptimizeBuildRequest.budget_inr le=5M).

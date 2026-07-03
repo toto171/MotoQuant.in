@@ -4,9 +4,10 @@ Welcome to the project. This doc is the "day one" brief — read it end-to-end, 
 
 **Read order on day one:**
 1. This file (10 min).
-2. `CLAUDE.md` — the live status document, single source of truth for project state (15 min).
+2. `CLAUDE.md` — the live status document, single source of truth for project state. The top entry is always the latest session; the trailing sections (architecture, workflow, physics reference) are evergreen (20 min).
 3. `CONTRIBUTING.md` — dev workflow, branch conventions, Kaizen rule (10 min).
-4. Skim `motoquant/physics.py` and one sub-model like `motoquant/submodels/tire.py` to get a feel for the code style (15 min).
+4. `reports/ROADMAP_2026_07_03.md` — the complete prioritized backlog + the list of operator-only actions (10 min).
+5. Skim `motoquant/physics.py`, one sub-model like `motoquant/submodels/tire.py`, and `docs/CHAT_AGENT.md` to get a feel for the code style and the newest subsystem (15 min).
 
 After that, get the test suite green locally (see `CONTRIBUTING.md` §2) and you're ready to open your first PR.
 
@@ -14,92 +15,93 @@ After that, get the test suite green locally (see `CONTRIBUTING.md` §2) and you
 
 ## 1. What MotoQuant is (in one paragraph)
 
-A first-principles physics engine for predicting and optimising motorcycle quarter-mile drag racing times, aimed at the Indian drag racing community (Aamby Valley, MMRT, BIC, Kari, Hyderabad). It's a Python package with a CLI, a FastAPI web backend, a Streamlit desktop UI, and a Next.js marketing + simulator frontend. Under the hood: 15 independent physics sub-models integrated with adaptive RK4 at 1 ms, validated against real magazine test data to within ±0.07s on calibrated bikes. Built for B2B (Pune/Narhe tuning shops, racing teams) and B2C (enthusiasts running their own builds) with a tiered licensing plan — see `MotoQuant_Monetisation_Plan.pdf`.
+A first-principles physics engine for predicting and optimising motorcycle quarter-mile drag racing times, aimed first at the Indian drag racing community (Aamby Valley, MMRT, BIC, Kari, Hyderabad) and now expanding to the international market (US/EU/JP/CN drag scenes). It's a Python package with a CLI, a FastAPI backend (live on Render), a Next.js web frontend (live at motoquant.in), a Tauri 2 + React desktop app (hosted-only client), and an agentic AI chat that can run the whole product (sims, comparisons, the build optimizer, outlaw-class builds, web lookup, estimated sims for unknown bikes). Under the hood: 15 physics sub-models integrated with RK4 at 1 ms, validated against 223 published benchmarks — weighted mean |Δ| ≈ 0.24 s corpus-wide, ±0.009 s across the 10 cleanest instrumented tests. Commercial plan: B2C freemium + B2B Pro Studio, currently in open beta — see `docs/COMMERCIAL_LAUNCH.md`.
 
 **Tagline:** *"The physics of faster."*
 
 ---
 
-## 2. Current state snapshot (April 2026)
+## 2. Current state snapshot (July 2026)
 
 | Metric | Value |
 |---|---|
-| Phase | 3 (Validation & Calibration) — code complete, deploy pending |
-| Tests passing | 583+ across 13 test files, zero failing |
-| Bikes in catalog | 138 (3 reference + 135 curated) across 20 manufacturers |
-| Tires in catalog | 69 across 15 manufacturers, 5 compound types |
-| Parts in catalog | 70 across 16 categories |
-| Venues | 12 (5 Indian + 7 international) |
-| OEM tire fitments seeded | 209 |
-| Physics validation | 36% pass on 28-bike magazine benchmark, mean bias +0.58s (conservative) |
+| Phase | 6 (commercial launch) — open beta live; payments code-complete, providers not yet configured |
+| Tests | full pytest suite green (runs ~25–35 min; focused subsets in `CONTRIBUTING.md` §4) |
+| Bikes in catalog | 535 across 30+ manufacturers (India, SE Asia, US, EU, JP, CN) |
+| Tires | 257 (incl. drag radials/slicks + cruiser rubber), 1,787 fitments |
+| Parts | 594 across 19 categories (incl. lowering kits, air shifters, lockup clutches) |
+| Venues | 20 (India + international drag strips) |
+| Benchmarks | 223 ET rows + 74 top-speed rows; weighted sweep 246 matched, |Δ| 0.242 s, bias −0.026 s |
+| Reference baselines | K5 10.0334 / R1 10.2859 / Hayabusa 10.4712 — pinned **bit-identical**, CI-gated |
+| Chat AI | multi-step tool-calling agent (`motoquant/llm/agent.py`, `docs/CHAT_AGENT.md`) |
+| Deployed | API: Render free tier (`motoquant-api.onrender.com`); web: Vercel (`motoquant.in`) — both auto-deploy from `main` |
 
-The project is healthy. The code is not the bottleneck — deployment, data (more dyno curves, more real Dragy runs), and the AI/optimisation layer are.
+The code is not the bottleneck. Revenue-launch blockers are operator actions (Render persistent disk, payment-provider setup) and data (instrumented Dragy timeslips for small-cc bikes). See `reports/ROADMAP_2026_07_03.md` §B.
 
 ---
 
-## 3. What's actually live vs. what's pending
+## 3. What's live vs. what's pending
 
 ### Live and working
-- CLI with 11 subcommands (`db`, `bikes`, `sim`, `venues`, `tires`, `parts`, `weather`, `scrape`, `import`, `history`, `leaderboard`, `analysis`).
-- FastAPI web server with 10 endpoints (simulate, compare A-vs-B, Dragy upload, dyno upload, bikes, tires, venues, leaderboard, health).
-- Streamlit desktop simulator (`app.py`) with Basic/Advanced build modes and tire swap dropdowns.
-- 15/15 physics sub-models, adaptive RK4, full calibration pipeline (Dragy + dyno + ECU log import, auto-calibration via differential evolution + Nelder-Mead).
-- Parts ROI engine (knapsack optimiser), Sobol sensitivity analysis, BoTorch Bayesian optimisation, XGBoost + DNN surrogate models, Smart Recommendations engine with synergy detection.
-- Next.js landing + live simulator widget in `web/`.
+- CLI (`python -m motoquant.run --help`) — db/bikes/sim/venues/tires/parts/weather/import/analysis/chat and more.
+- FastAPI backend: sims (quick/full/top-speed/compare), jobs API with real progress + cancel, build optimizer (surrogate-accelerated knapsack), ECU autotune, the composed outlaw pipeline, agentic chat (`/api/chat`, `/api/jobs/chat`), auth + subscriptions (beta mode), Dragy/dyno/ECU calibration uploads, leaderboard, shareable timeslips.
+- Next.js web app: cockpit-themed landing + simulator workbench + optimizer/autotune pages + transcript chat UI + docs/blog/pricing.
+- Tauri desktop app: hosted-only client (talks to the Render API; no local physics) — TS/vitest-green, binaries not yet built (needs per-OS toolchains + signing certs; operator task).
+- Physics: 15 sub-models, adaptive RK4, calibration pipeline, numpy surrogate v2.2 (regenerate after ANY physics/DB reseed — standing contract in `artifacts/surrogate/README.md`).
 
-### Deployed
-- Render API backend (`motoquant-api.onrender.com`) — Docker deploy via `render.yaml`; see `docs/RENDER_MIGRATION.md`.
-- Vercel frontend (`motoquant.in`) — `vercel.json`; the browser reaches the API through the `/api/*` rewrite.
-
-### Not started
-- Phase 5: Tauri 2.0 desktop app with React 19 / TS frontend (replaces Streamlit for v1.0 release).
-- Phase 6: B2C freemium + B2B Pro licensing, PPO RL for launch control, PostgreSQL cloud sync.
-
-See `CLAUDE.md` → "Full project roadmap" for the authoritative list.
+### Pending / known gaps (the honest list)
+- Payments: code-complete, providers unconfigured (`docs/PAYMENTS_SETUP.md` — operator).
+- Prod DB durability: SQLite is baked into the Docker image; every deploy wipes user accounts until the Render persistent-disk flip (operator, ~$7/mo).
+- Small-cc accuracy floor is data-limited, not model-limited — needs real Dragy timeslips.
+- Epoch-gated physics work (do NOT wire casually — moves the pinned baselines): Pacejka slip model, 4-branch clutch dispatch, staging rollout/dead-time. See the July 3 session report.
+- Full backlog: `reports/ROADMAP_2026_07_03.md`.
 
 ---
 
-## 4. Good first issues (pick one of these to start)
+## 4. Good first issues (pick one to start)
 
-Ranked by isolation (least cross-cutting first), so you can ship a PR without learning the whole codebase.
+Ranked by isolation (least cross-cutting first). All of these are in `reports/ROADMAP_2026_07_03.md` with more detail.
 
-### A. Expand the dyno curve library (data work — half a day)
-Currently 25/135 bikes have real dyno curves injected via `motoquant/scraper/dyno_curves.py`. The other 110 use synthetic curves, which is the main cause of the +0.5–1.0s bias on 600cc bikes (see `CLAUDE.md` → "Physics validation baseline"). Pick 5–10 bikes, find published dyno charts (Cycle World, MCN, 2WheelTuner), transcribe the curves, add entries. One PR per manufacturer is fine. Every real dyno curve moves the validation pass rate up.
+### A. Catalog data passes (data work — hours, high value)
+Add well-sourced bikes/parts/tires following the July-2026 pattern: sibling spec modules (`motoquant/scraper/known_bikes_2026_*.py`) with cited sources, explicit gear cassettes, individual aero values, and instrumented benchmark rows where they exist. The project rule is absolute: **no fabricated specs, prices, or benchmarks — skip and document instead**. Open targets: vintage-2T OEM tire fitments, sub-500cc drag hardware (needs real products), pricing follow-ups.
 
-### B. Fix 600cc class accuracy (physics work — 1–2 days)
-Our benchmark shows 600cc screamers run +0.5–1.0s slow. Likely cause: the RPM-to-torque model's drop-off above peak power is too aggressive for high-revving engines. Pick one bike (e.g. Yamaha YZF-R6), enable verbose logging in `motoquant/submodels/engine.py`, and compare the sim's torque-vs-RPM trace against a real dyno. File the bug or ship the fix.
+### B. License-key device unbind route (backend — half a day)
+Device binding is enforced but there's no way for a user who reinstalls to unbind — they're locked out until manual DB surgery. Authenticated unbind endpoint + account-page UI + tests.
 
-### C. Indian parts pricing auto-refresh (new feature — 2–3 days)
-Parts catalog prices are hand-entered in INR and go stale. Build a scraper for 2–3 Indian retailers (Motorcycle Diaries, MotorSportz, Amazon.in) that refreshes `parts.price_inr` weekly. Same stdlib-only pattern as `motoquant/scraper/bikez.py`. CLI: `parts refresh-prices`.
+### C. Web PDF timeslip/build export (web — 1–2 days)
+Port the desktop jsPDF export to the web app as a Pro-tier feature: a one-pager with ET/trap/splits/build/charts.
 
-### D. Phase 4C PINN surrogate (ML work — 1–2 weeks, conditional)
-Only do this if you have PyTorch + physics-informed neural network experience AND the existing DNN surrogate (`surrogate_dnn.py`) shows poor extrapolation outside its training distribution. Bake physics constraints (e.g. power ≤ engine peak, tire slip bounded) into the loss function. Justify with DNN failure evidence in the PR description before building.
+### D. Chat-agent polish (LLM layer — scoped pieces)
+The agent shipped July 3 (`motoquant/llm/agent.py`). Scoped follow-ups: resolver letter/digit tokenization ("ZX10R" → weak match), a `mode=agent` path for the CLI `chat` subcommand, streaming responses. Everything is offline-testable via the `_call_override` seam — see `tests/test_agent.py` for the pattern.
 
-### E. Deployment ops on Render + Vercel (needs credentials)
-Both are live and auto-deploy from `main` (backend rebuilds gated by the `buildFilter` in `render.yaml`). See `docs/RENDER_MIGRATION.md` for the runbook. Requires access to the shared hosting accounts — coordinate before touching.
+### E. Test-coverage signal in CI (tooling — half a day)
+~3k tests but no branch-coverage truth. Add coverage.py + a CI artifact so "which physics branches are exercised" has an answer.
 
 ---
 
 ## 5. Non-negotiable conventions
 
-These are the things that will cause a PR to be rejected even if the code works.
+These will cause a PR to be rejected even if the code works.
 
-1. **Package is `motoquant`, never `dragsim`.** Rename was April 2026. Any `dragsim` string anywhere is a regression.
-2. **SQLite stays until Phase 6.** The WAL-fallback in `motoquant/database/connection.py` is load-bearing on mounted filesystems. Do not replace with PostgreSQL locally.
-3. **CLI tests call handlers directly, not subprocesses.** See `tests/test_cli.py` for the pattern. Subprocess tests break on the mounted dev FS.
-4. **Scraper is stdlib-only.** No BeautifulSoup, no lxml. Use regex + `html.parser`. See `motoquant/scraper/bikez.py`.
-5. **Physics regressions blocked.** GSX-R 1000 K5 must stay at 10.04 ± 0.07s, R1 at 10.3 ± 0.10s, Hayabusa in 10.1–10.7s. If your change moves these, that's a regression — either roll back or justify with real-world data in the PR.
-6. **Kaizen scan before every commit.** Read `CLAUDE.md` → "Kaizen Principle". This is the rule that keeps the codebase healthy; skipping it is how the turbo-kit-moves-ET-by-0.008s bug happened.
-7. **`CLAUDE.md` is the project log.** If you finish a substantive piece of work, update "Current State" and the relevant phase checklist. Both co-owners do this.
+1. **Package is `motoquant`, never `dragsim`.** The 2026 rename is final.
+2. **SQLite stays until Phase 6 cloud sync is genuinely needed.** The WAL-fallback in `motoquant/database/connection.py` is load-bearing.
+3. **CLI tests call handlers directly, not subprocesses.** See `tests/test_cli.py`.
+4. **Scraper is stdlib-only.** No BeautifulSoup/lxml.
+5. **Physics baselines are pinned bit-identical**: K5 10.0334 / R1 10.2859 / Hayabusa 10.4712. If you touch `physics.py`, `submodels/*`, `defaults.py`, or the importer, run the baseline check + `tests/test_regression_snapshot.py` and put the deltas in your PR (template has the table). "±0.0000 at 4 decimals" is the expectation; anything else needs a full weighted-sweep justification.
+6. **After any `spec_to_bike_config` change, reseed the DB** (`scripts/reseed_configs_from_specs.py`) — otherwise `/api/simulate?bike_id=N` silently diverges from the spec path. Then regenerate the surrogate (standing contract).
+7. **After any catalog change, run `python scripts/audit_headline_stats.py --fix`** — the site's stat tiles/OG cards must match the DB.
+8. **Never `git add -A`.** Stage explicit file lists; the tree often carries unrelated WIP.
+9. **No fabricated data.** Honest gaps beat apparent completeness — this is written into multiple session postmortems.
+10. **Kaizen scan before every commit** (`CLAUDE.md` → Kaizen Principle) and **update `CLAUDE.md` after substantive work** (surgical prepend of a session entry — never rewrite the file).
 
 ---
 
 ## 6. Project rhythms
 
-- **Standup:** informal, async via GitHub Issues or DM. The `engineering:standup` skill can generate one from recent commits.
-- **Planning:** roadmap lives in `CLAUDE.md` → "Full project roadmap". Reprioritise quarterly.
-- **Reviews:** all PRs require at least one approving review + green CI before merge — no self-merge, enforced by branch protection. Physics / schema / API / infra paths require CODEOWNER approval (auto-requested via `.github/CODEOWNERS`). Turnaround target is 48h; ping the other owner if a PR has been idle longer.
-- **Model selection:** when using AI assistants (Claude, Cursor), follow `CLAUDE.md` → "Model Selection" rules. Sonnet for coding, Opus for architecture, Haiku for quick lookups.
+- **Standup:** informal, async via GitHub Issues or DM.
+- **Planning:** backlog lives in `reports/ROADMAP_2026_07_03.md`; roadmap phases in `CLAUDE.md`.
+- **Reviews:** all PRs need green CI + one approving review; CODEOWNER approval auto-requested on physics/schema/API/infra paths; no self-merge. Turnaround target 48 h.
+- **AI assistants:** much of this codebase is built by Claude sessions operating under `CLAUDE.md`'s rules. If you use AI tooling, hold it to the same gates (baselines, Kaizen, no-fabrication) — the rules exist because each one was broken once and cost real time.
 
 ---
 
@@ -107,38 +109,30 @@ These are the things that will cause a PR to be rejected even if the code works.
 
 | Role | Owner | Notes |
 |---|---|---|
-| Project lead / founder | Hritwik Mudhai (motoquant@gmail.com) | Original author, primary account holder |
-| Co-developer | *(you — fill in)* | Equal admin on GitHub; coordinate on deployment credentials |
+| Project lead / founder | Hritwik Mudhai (dhisetu@gmail.com) | Original author, primary account holder |
+| Co-founder | Ritwik Singh | See about page |
+| Co-developer | *(you — fill in)* | Coordinate on deployment credentials |
 
-Shared credentials (do not commit):
-- Render API hosting — single account, ask Hritwik.
-- Vercel frontend hosting — single account.
-- Domain registrar (`motoquant.in`) — via GitHub Education pack, single account.
-- OpenWeatherMap API key — in `.env`, ask for a copy.
-
-When a second set of credentials is needed for any of these, open an Issue and we'll add you as a team member on that platform.
+Shared credentials (never committed): Render (API hosting), Vercel (frontend), domain registrar (`motoquant.in`), LLM provider keys (Groq/Gemini — chat), OpenWeatherMap. Ask the project lead; when a second seat is needed on any platform, open an Issue.
 
 ---
 
 ## 8. How to ask for help
 
-The project has a lot of surface area. When you're stuck:
-
-1. Search `CLAUDE.md` with `grep -i <keyword> CLAUDE.md` — most "is this implemented?" questions are answered there.
-2. Run `python -m motoquant.run --help` and then `<subcommand> --help` — CLI is well-documented inline.
-3. Look at the test file for the module you're working on (`tests/test_<module>.py`) — tests are the best executable spec.
-4. Open a GitHub Issue with the question. Prefer Issues over DMs so the answer is searchable later.
+1. `grep -i <keyword> CLAUDE.md` — most "is this implemented?" questions are answered there.
+2. `python -m motoquant.run --help`, then `<subcommand> --help`.
+3. Read the test file for the module you're touching — tests are the executable spec.
+4. Open a GitHub Issue (preferred over DMs — searchable later).
 
 ---
 
 ## 9. First-week checklist
 
-- [ ] Accept GitHub collaborator invite; clone the repo; push a test branch to confirm write access.
-- [ ] Get the full test suite green locally (583+ passing).
-- [ ] Run a simulation: `python -m motoquant.run sim --bike-id 1 --venue-id 1` — should output ≈ 10.04s for the K5.
-- [ ] Launch the Streamlit app and the FastAPI server, hit both in a browser.
-- [ ] Read `CLAUDE.md` end-to-end; ask questions in GitHub Issues on anything unclear.
-- [ ] Pick one item from §4 "Good first issues" and scope it as a GitHub Issue before opening a PR.
-- [ ] Ship one PR, however small — a doc typo fix, a new test, a bike dyno curve. Proving the workflow end-to-end on day one is worth more than a big first contribution.
+- [ ] Accept the GitHub collaborator invite; clone; push a test branch to confirm write access.
+- [ ] Get the test suite green locally (`CONTRIBUTING.md` §2 — use the focused subset first, the full run takes ~30 min).
+- [ ] Run a sim: `python -m motoquant.run sim --bike-id 1 --venue-id 1` → ≈ 10.03 s for the K5.
+- [ ] Boot the API (`uvicorn motoquant.api:app --reload`) and the web app (`cd web && npm install && npm run dev`), click through the simulator and the chat.
+- [ ] Read `CLAUDE.md`'s latest session entry + the trailing evergreen sections.
+- [ ] Pick one §4 good-first-issue, scope it as a GitHub Issue, then ship a PR — however small. Proving the workflow end-to-end on day one beats a big first contribution.
 
 Welcome aboard.

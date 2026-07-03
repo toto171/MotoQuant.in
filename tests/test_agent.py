@@ -159,6 +159,139 @@ class TestNeutralFormatConversion(unittest.TestCase):
 
 
 # ───────────────────────────────────────────────────────────────────
+# Groq/Llama tool_use_failed flake salvage (Sentry MOTOQUANT-API-1)
+# ───────────────────────────────────────────────────────────────────
+
+
+class _FlakeErr(Exception):
+    """Shape-compatible stand-in for openai.BadRequestError on the Groq
+    tool_use_failed 400 (carries the payload on .body like the SDK does)."""
+
+    def __init__(self, failed_generation):
+        self.body = {
+            "error": {
+                "code": "tool_use_failed",
+                "failed_generation": failed_generation,
+            }
+        }
+        super().__init__("Error code: 400 - tool_use_failed")
+
+
+def _fake_sdk_client(create_fn):
+    from types import SimpleNamespace
+
+    client = LLMClient(provider="groq", api_key="fake-key-for-tests")
+    client._sdk_client = SimpleNamespace(
+        chat=SimpleNamespace(completions=SimpleNamespace(create=create_fn))
+    )
+    return client
+
+
+_A_TOOL = [
+    {
+        "name": "search_bikes",
+        "description": "",
+        "input_schema": {"type": "object", "properties": {}},
+    }
+]
+_A_MSG = [{"role": "user", "content": "how fast is a zx14r?"}]
+
+# The EXACT failed_generation Groq returned in production (MOTOQUANT-API-1).
+_PROD_FAILED_GEN = '<function=search_bikes{"query": "zx14r"}</function>'
+
+
+class TestGroqFlakeSalvage(unittest.TestCase):
+    def test_parse_prod_payload(self):
+        from motoquant.llm.client import _parse_failed_generation
+
+        self.assertEqual(
+            _parse_failed_generation(_PROD_FAILED_GEN),
+            [("search_bikes", {"query": "zx14r"})],
+        )
+
+    def test_parse_variants(self):
+        from motoquant.llm.client import _parse_failed_generation
+
+        self.assertEqual(
+            _parse_failed_generation("<function=list_venues{}"),
+            [("list_venues", {})],
+        )
+        self.assertEqual(
+            _parse_failed_generation(
+                '<function=a{"x":1}</function><function=b{"y":2}</function>'
+            ),
+            [("a", {"x": 1}), ("b", {"y": 2})],
+        )
+        # Half-formed JSON must NOT be guessed at — empty means "retry".
+        self.assertEqual(_parse_failed_generation('<function=a{"x":'), [])
+
+    def test_error_extraction_body_and_str(self):
+        from motoquant.llm.client import _failed_generation_from_error
+
+        self.assertEqual(
+            _failed_generation_from_error(_FlakeErr(_PROD_FAILED_GEN)),
+            _PROD_FAILED_GEN,
+        )
+        self.assertIsNone(_failed_generation_from_error(ValueError("boom")))
+
+    def test_salvage_recovers_the_intended_call(self):
+        attempts = {"n": 0}
+
+        def raise_flake(**kw):
+            attempts["n"] += 1
+            raise _FlakeErr(_PROD_FAILED_GEN)
+
+        step = _fake_sdk_client(raise_flake).call_tools("sys", _A_MSG, _A_TOOL)
+        self.assertEqual(attempts["n"], 1)  # salvage, not retry
+        self.assertEqual(step.tool_calls[0].name, "search_bikes")
+        self.assertEqual(step.tool_calls[0].arguments, {"query": "zx14r"})
+
+    def test_unsalvageable_flake_retries_then_succeeds(self):
+        from types import SimpleNamespace
+
+        state = {"n": 0}
+
+        def flaky_then_ok(**kw):
+            state["n"] += 1
+            if state["n"] < 3:
+                raise _FlakeErr('<function=broken{"x":')
+            return SimpleNamespace(
+                choices=[
+                    SimpleNamespace(
+                        message=SimpleNamespace(content="recovered", tool_calls=None),
+                        finish_reason="stop",
+                    )
+                ]
+            )
+
+        step = _fake_sdk_client(flaky_then_ok).call_tools("s", _A_MSG, _A_TOOL)
+        self.assertEqual(step.text, "recovered")
+        self.assertEqual(state["n"], 3)
+
+    def test_persistent_flake_raises_after_retries(self):
+        state = {"n": 0}
+
+        def always_flake(**kw):
+            state["n"] += 1
+            raise _FlakeErr('<function=broken{"x":')
+
+        with self.assertRaises(_FlakeErr):
+            _fake_sdk_client(always_flake).call_tools("s", _A_MSG, _A_TOOL)
+        self.assertEqual(state["n"], 3)
+
+    def test_unrelated_errors_raise_immediately(self):
+        state = {"n": 0}
+
+        def real_error(**kw):
+            state["n"] += 1
+            raise ValueError("schema invalid")
+
+        with self.assertRaises(ValueError):
+            _fake_sdk_client(real_error).call_tools("s", _A_MSG, _A_TOOL)
+        self.assertEqual(state["n"], 1)
+
+
+# ───────────────────────────────────────────────────────────────────
 # Build-tier glossary
 # ───────────────────────────────────────────────────────────────────
 

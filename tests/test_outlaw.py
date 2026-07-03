@@ -184,6 +184,63 @@ class TestOptimizerBudgetApi(unittest.TestCase):
         self.assertEqual(req.goal, "min_et")
 
 
+class TestJsonSafe(unittest.TestCase):
+    """rank_categories can emit avg_cost_per_tenth=inf; bare inf/nan is not
+    JSON-compliant and 500s the optimize route (July-3 full-API stress
+    battery). json_safe is the shared source-level guard."""
+
+    def test_json_safe_nulls_non_finite(self):
+        import json
+
+        from motoquant.analysis.roi import json_safe
+
+        dirty = {
+            "a": float("inf"),
+            "b": float("-inf"),
+            "c": float("nan"),
+            "d": [1.0, float("inf"), {"e": float("nan")}],
+            "ok": 12.5,
+            "s": "x",
+        }
+        clean = json_safe(dirty)
+        self.assertIsNone(clean["a"])
+        self.assertIsNone(clean["b"])
+        self.assertIsNone(clean["c"])
+        self.assertIsNone(clean["d"][1])
+        self.assertIsNone(clean["d"][2]["e"])
+        self.assertEqual(clean["ok"], 12.5)
+        self.assertEqual(clean["s"], "x")
+        json.dumps(clean, allow_nan=False)  # must not raise
+
+    def test_rank_categories_emits_null_not_inf(self):
+        # A category whose only "improving" part has an infinite cost-per-tenth
+        # must serialize avg_cost_per_tenth as null, never inf.
+        import json
+
+        from motoquant.analysis.roi import PartROIResult, rank_categories
+
+        part = PartROIResult(
+            part_id=1,
+            part_name="p",
+            brand="b",
+            category="exhaust",
+            category_display="Exhaust",
+            price_inr=1000.0,
+            price_usd=None,
+            base_et_s=10.0,
+            modified_et_s=9.95,
+            delta_et_s=0.05,
+            delta_trap_ms=0.1,
+            roi_score=1.0,
+            cost_per_tenth_inr=float("inf"),
+            is_compatible=True,
+            availability="in_stock",
+        )
+        summary = rank_categories([part])
+        self.assertIsNone(summary[0]["avg_cost_per_tenth"])
+        json.dumps(summary, allow_nan=False)
+
+
 def setUpModule():
     global _OLD_ENV_DB
     _OLD_ENV_DB = os.environ.get("MOTOQUANT_DB")
