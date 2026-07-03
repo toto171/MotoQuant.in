@@ -9,8 +9,9 @@
 First-principles Python physics engine for motorcycle quarter-mile drag racing
 prediction, optimisation, and parts ROI analysis. Aimed at the Indian drag
 racing community (Aamby Valley, MMRT, BIC, Kari, Hyderabad) with
-535 bikes, 232 tires, 594 parts, and 20 venues modelled, validated
-against 156 published benchmarks by a 1,300+ test pytest suite.
+535 bikes, 257 tires, 594 parts, and 20 venues modelled, validated
+against 223 published benchmarks (weighted mean |Δ| 0.242 s; ±0.009 s across
+the 10 cleanest instrumented tests) by a ~3,000-test pytest suite.
 
 Reference baselines: **GSX-R 1000 K5 → 10.034 s**, **YZF-R1 4C8 → 10.286 s**,
 **Hayabusa Gen1 → 10.472 s**.
@@ -35,16 +36,19 @@ bypass on Windows, Gatekeeper bypass on macOS, FUSE requirement on Linux).
 
 ```bash
 # Install
-pip install -e .
+pip install -r requirements-api.txt && pip install -e .
 
-# Boot the Streamlit UI
-streamlit run app.py
+# API + web app (the primary product)
+uvicorn motoquant.api:app --reload --port 8000
+cd web && npm install && NEXT_PUBLIC_API_URL=http://localhost:8000 npm run dev
 
-# Or use the CLI
-python -m motoquant.run db init
-python -m motoquant.run import --known-bikes
+# Or use the CLI directly (the repo ships a seeded motoquant.db)
 python -m motoquant.run sim --bike-id 1 --venue-id 1
+python -m motoquant.run chat "how fast is a hayabusa at Aamby Valley?"
 ```
+
+New collaborator? Start with [docs/ONBOARDING.md](docs/ONBOARDING.md), then
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Repo layout
 

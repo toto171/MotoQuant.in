@@ -30,6 +30,7 @@ source .venv/bin/activate          # macOS / Linux
 
 # 3. Install dependencies
 pip install -r requirements-api.txt
+pip install -r requirements-dev.txt # pytest + hypothesis (test-only deps)
 pip install -e .                    # editable install of the motoquant package
 
 # 4. Initialise + seed a fresh dev database
@@ -37,11 +38,15 @@ python -m motoquant.run --db /tmp/motoquant-dev.db db init
 python -m motoquant.run --db /tmp/motoquant-dev.db import --known-bikes
 python -m motoquant.run --db /tmp/motoquant-dev.db db seed
 
-# 5. Run the test suite — expect 583+ passing, 0 failing
+# 5. Run the focused test subset first (~3 min) — expect 0 failures
+python -m pytest tests/test_validation.py tests/test_scraper.py \
+    tests/test_database.py tests/test_agent.py -q
+
+# The FULL suite is ~3k tests and takes 25-35 minutes; run it before any PR:
 python -m pytest tests/ -q
 ```
 
-If step 5 is green, you're set.
+If those are green, you're set.
 
 The committed `motoquant.db` in the repo root is the production seeded DB. Do not run migrations against it during dev — always use a `/tmp/` path like above, or `:memory:` for tests.
 
@@ -60,13 +65,24 @@ python -m motoquant.run analysis recommend --bike-id 1 --budget 150000
 
 Full subcommand list is in `CLAUDE.md` → "CLI subcommands available".
 
-### 3b. Streamlit UI
+### 3b. Web frontend (the primary product UI)
 
 ```bash
-streamlit run app.py
+cd web && npm install && npm run dev     # http://localhost:3000
 ```
 
-Opens on http://localhost:8501. Requires the seeded `motoquant.db` in the repo root.
+Point it at a local API with `NEXT_PUBLIC_API_URL=http://localhost:8000` (else it
+proxies to the production Render API). Before committing anything under `web/`,
+run `npx next build` — it is exactly what Vercel runs and catches the
+App-Router prerender class of failure (see `web/CONTRIBUTING.md`).
+
+The desktop app lives in `desktop/` (Tauri 2 + React; hosted-only client):
+`cd desktop && npm install && npx tsc --noEmit && npx vitest run` for the
+JS-side checks. The Rust shell needs a local cargo toolchain (see
+`desktop/RELEASE.md`).
+
+The legacy Streamlit UI (`streamlit run app.py`) still works but is
+superseded by the web app; its retirement is a pending product decision.
 
 ### 3c. FastAPI web server
 
@@ -98,7 +114,9 @@ python -m pytest tests/test_physics.py::test_gsxr1000_k5_benchmark -v
 1. Every new public function needs at least one test that would fail if the function did nothing.
 2. Tests must use `:memory:` or `/tmp/` SQLite paths — never the production `motoquant.db`.
 3. CLI tests import command handlers directly via `redirect_stdout` + `unittest.mock.patch` — do not spawn subprocesses (WAL journal mode fails on the mounted dev filesystem).
-4. Physics regressions: if you touch `motoquant/physics.py` or any `submodels/*.py`, the three benchmark ETs must still match: K5 = 10.04 ± 0.07s, R1 = 10.3 ± 0.10s, Hayabusa = 10.1–10.7s range.
+4. Physics regressions: the three reference baselines are pinned to 4 decimals — K5 **10.0334**, R1 **10.2859**, Hayabusa **10.4712** — and the expectation for refactors is **bit-identical** (Δ +0.0000). If you touch `motoquant/physics.py`, any `submodels/*.py`, `defaults.py`, or `motoquant/scraper/importer.py`: run the baseline check, `tests/test_regression_snapshot.py`, and put the delta table in your PR. A deliberate accuracy change needs the full weighted sweep (`scripts/phys_weighted_sweep.py`) as justification.
+5. After changing `spec_to_bike_config` (importer physics, gear ratios, aero rules): run `MOTOQUANT_DB=motoquant.db python scripts/reseed_configs_from_specs.py`, then regenerate the surrogate (`artifacts/surrogate/README.md` — standing contract).
+6. After any catalog/count change: `python scripts/audit_headline_stats.py --fix` so the site's stat tiles stay truthful.
 
 ---
 
@@ -182,7 +200,8 @@ This is not optional. The current clean state of the codebase is the result of a
 
 ## 8. Things you cannot do
 
-- Commit secrets, API keys, or `.env` files. `.gitignore` catches the common ones; double-check before `git add -A`.
+- Commit secrets, API keys, or `.env` files.
+- Run `git add -A` / `git add .` — **ever**. Stage explicit file lists; the working tree routinely carries unrelated WIP and generated artifacts.
 - Force-push to `main`. Use `feature/*` branches and PRs.
 - Rename the package away from `motoquant`. The 2026 rename from `dragsim` is final.
 - Replace SQLite with PostgreSQL before Phase 6. The WAL-fallback code is load-bearing on Windows / mounted FS.
@@ -206,4 +225,9 @@ Live since April 2026; backend migrated Railway → Render on May 31, 2026:
 - Vercel (web): `motoquant.in` — `vercel.json` + the `/api/*` rewrite in `web/next.config.js` point at Render.
 - Domain: `motoquant.in` (primary), `motoquant.app` (reserve).
 
-See `docs/RENDER_MIGRATION.md` for the deploy + rollback runbook. Do not deploy without coordinating — we only have one set of credentials.
+Merging to `main` IS the production deploy: Render rebuilds the API when the
+diff touches `motoquant/**`, `motoquant.db`, `requirements-api.txt`, `Dockerfile`
+or `render.yaml` (the `buildFilter` — web-only merges do not restart the API),
+and Vercel deploys the frontend on every merge. See `docs/RENDER_MIGRATION.md`
+for the runbook + rollback. Do not touch hosting settings without coordinating —
+we only have one set of credentials.
