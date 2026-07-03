@@ -63,7 +63,7 @@ Build profiles — Street Legal, Drag Prep, Full Race — pre-filter the catalog
     docsLink: '/docs/getting-started',
     docsLabel: 'See build optimizer guide',
     stats: [
-      { num: '563', label: 'Parts' },
+      { num: '594', label: 'Parts' },
       { num: '20', label: 'Categories' },
       { num: '₹100', label: 'Budget granularity' },
     ],
@@ -367,8 +367,8 @@ export default function FeaturesPage() {
         sub="Seven capability areas — from first-principles physics through to a native desktop app, an open REST API, and your saved garage. Every layer is built on the same validated simulation engine."
         stats={[
           { value: 15, label: 'Sub-models' },
-          { value: 563, label: 'Parts' },
-          { value: 216, label: 'Benchmarks' },
+          { value: 594, label: 'Parts' },
+          { value: 223, label: 'Benchmarks' },
         ]}
         className="border-b border-brand-orange/10"
       >

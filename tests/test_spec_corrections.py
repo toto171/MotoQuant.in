@@ -507,17 +507,31 @@ class TestSpecCorrectionsAPI(unittest.TestCase):
         cls.bike_id = row[0] if row else None
         db.close()
 
+        cls._prior_env_db = os.environ.get("MOTOQUANT_DB")
         os.environ["MOTOQUANT_DB"] = cls.db_path
 
-        from motoquant.api import app
+        # Null the api singletons: a sibling module's TestClient may have
+        # cached a connection to ITS (possibly deleted) tmp DB — without the
+        # reset these tests silently talk to the wrong database (the class
+        # of ordering failure fixed for test_api on July 2).
+        import motoquant.api as _api_mod
 
-        cls.client = TestClient(app)
+        _api_mod._db_conn = None
+        _api_mod._db_facade = None
+        cls.client = TestClient(_api_mod.app)
 
     @classmethod
     def tearDownClass(cls):
         if os.path.exists(cls.db_path):
             os.unlink(cls.db_path)
-        os.environ.pop("MOTOQUANT_DB", None)
+        if cls._prior_env_db is None:
+            os.environ.pop("MOTOQUANT_DB", None)
+        else:
+            os.environ["MOTOQUANT_DB"] = cls._prior_env_db
+        import motoquant.api as _api_mod
+
+        _api_mod._db_conn = None
+        _api_mod._db_facade = None
 
     # ── GET /api/specs/correction-fields ─────────────────────────────────────
 

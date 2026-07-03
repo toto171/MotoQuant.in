@@ -20,7 +20,7 @@ export const metadata = {
   alternates: { canonical: 'https://motoquant.in/blog/how-the-motoquant-physics-engine-works' },
   openGraph: {
     title: 'How the MotoQuant Physics Engine Works',
-    description: '15 sub-models, RK4 integration at 1ms, validated against 216 published drag-strip benchmarks (June 2026 sweep). Reference baselines accurate to 4 decimals. A tour of what is under the hood.',
+    description: '15 sub-models, RK4 integration at 1ms, validated against 223 published drag-strip benchmarks (July 2026 sweep). Reference baselines accurate to 4 decimals. A tour of what is under the hood.',
     url: 'https://motoquant.in/blog/how-the-motoquant-physics-engine-works',
     type: 'article',
     publishedTime: '2026-04-27T00:00:00Z',
@@ -90,7 +90,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'In practice, getting the right gear ratios for 501 different bikes was its own multi-month effort. We maintain a Tier-1 lookup table with 150+ named-model entries derived from service manuals (R15 V4: 14F/48R, primary 2.83, gears 2.833 / 1.875 / 1.429 / 1.16 / 0.963 / 0.84 — those numbers come from the YZF-R15 service manual, not from a forum). Bikes without a Tier-1 entry fall back to category-based defaults (sport-1000, naked-mid, cruiser-big, etc.) which are still better than generic numbers but lose the per-model flavor.',
+    text: 'In practice, getting the right gear ratios for 535 different bikes was its own multi-month effort. We maintain a Tier-1 lookup table with 150+ named-model entries derived from service manuals (R15 V4: 14F/48R, primary 2.83, gears 2.833 / 1.875 / 1.429 / 1.16 / 0.963 / 0.84 — those numbers come from the YZF-R15 service manual, not from a forum). Bikes without a Tier-1 entry fall back to category-based defaults (sport-1000, naked-mid, cruiser-big, etc.) which are still better than generic numbers but lose the per-model flavor.',
   },
   {
     type: 'p',
@@ -118,7 +118,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Aero is straightforward: F_drag = 0.5 × rho × v² × Cd × A. The interesting part is that Cd × A is time-varying. The rider transitions from an upright staging stance to a tucked aerodynamic position over roughly 2 seconds after launch, dropping Cd × A by 30–40 %. We model this transition with a sigmoid curve — at 0 seconds, the rider is upright (Cd × A = ~0.55); at 2 seconds, fully tucked (Cd × A = ~0.32). Cd and frontal area come from per-bike values; we measured or estimated each one of the 501 bikes individually after discovering that 71 % of the catalog had inherited a generic 0.32 Cd that is closer to a passenger car than a motorcycle.',
+    text: 'Aero is straightforward: F_drag = 0.5 × rho × v² × Cd × A. The interesting part is that Cd × A is time-varying. The rider transitions from an upright staging stance to a tucked aerodynamic position over roughly 2 seconds after launch, dropping Cd × A by 30–40 %. We model this transition with a sigmoid curve — at 0 seconds, the rider is upright (Cd × A = ~0.55); at 2 seconds, fully tucked (Cd × A = ~0.32). Cd and frontal area come from per-bike values; we measured or estimated each one of the 535 bikes individually after discovering that 71 % of the catalog had inherited a generic 0.32 Cd that is closer to a passenger car than a motorcycle.',
   },
   {
     type: 'p',
@@ -142,7 +142,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'We maintain a list of 216 published drag-strip benchmarks (236 matched to a catalog bike) — sourced from Cycle World, Sport Rider, MCN, Motorcycle Consumer News, MotorcycleDaily, MotoStatz, FastestLaps, and Indian Autos Mag where the magazine published the actual instrumented timeslip. For each benchmark, we run the simulator at the test-day environmental conditions and compare predicted ET against measured ET. Each source is weighted by quality (instrumented timeslip 1.0, magazine 0.7, aggregator 0.5, derived 0.1) and the delta gets bucketed by class (litre-sport-195+, litre-sport-600-1000, mid-twin-300-500, entry-150-200, two-stroke, etc.) so we can see where the physics is honest and where it has systematic bias.',
+    text: 'We maintain a list of 223 published drag-strip benchmarks (246 matched to a catalog bike) — sourced from Cycle World, Sport Rider, MCN, Motorcycle Consumer News, MotorcycleDaily, MotoStatz, FastestLaps, and Indian Autos Mag where the magazine published the actual instrumented timeslip. For each benchmark, we run the simulator at the test-day environmental conditions and compare predicted ET against measured ET. Each source is weighted by quality (instrumented timeslip 1.0, magazine 0.7, aggregator 0.5, derived 0.1) and the delta gets bucketed by class (litre-sport-195+, litre-sport-600-1000, mid-twin-300-500, entry-150-200, two-stroke, etc.) so we can see where the physics is honest and where it has systematic bias.',
   },
   {
     type: 'p',
@@ -150,7 +150,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Current state across 236 matched benchmarks (June 2026 sweep): overall source-quality-weighted mean absolute error is 0.262 seconds, weighted bias is essentially zero (-0.015 s — meaning the simulator is no longer systematically optimistic or pessimistic). Across the ten cleanest validated runs the mean absolute error is ±0.006 s, and 113 of the 236 benchmarks fall within ±0.20 s. The 195+ hp class is among the tightest at 0.137 s weighted |Δ|. The small-cc and 2-stroke clusters have higher variance, partly because their published benchmarks are themselves uncertain (most Indian small-cc ETs are estimated from 0–100 km/h times rather than measured timeslips).',
+    text: 'Current state across 246 matched benchmarks (July 2026 sweep): overall source-quality-weighted mean absolute error is 0.242 seconds, weighted bias is essentially zero (-0.026 s — meaning the simulator is no longer systematically optimistic or pessimistic). Across the ten cleanest validated runs the mean absolute error is ±0.009 s, and 130 of the 246 benchmarks fall within ±0.20 s. The 195+ hp class is among the tightest at 0.137 s weighted |Δ|. The small-cc and 2-stroke clusters have higher variance, partly because their published benchmarks are themselves uncertain (most Indian small-cc ETs are estimated from 0–100 km/h times rather than measured timeslips).',
   },
   {
     type: 'h2',
@@ -178,7 +178,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The sub-models are tested independently. test_validation.py exercises physics conservation laws (energy in == energy out + heat). test_no_silent_failures.py runs all 501 catalog bikes and asserts each finishes within the time budget or is on an explicit DNF whitelist for vintage low-power 2-strokes. test_submodel_kaizen.py catches silent failure modes in clutch, tire thermal, braking, and rider dynamics. The full suite passes 174 fast tests; integration tests exercise the surrogate models, ROI engine, and recommendations layer.',
+    text: 'The sub-models are tested independently. test_validation.py exercises physics conservation laws (energy in == energy out + heat). test_no_silent_failures.py runs all 535 catalog bikes and asserts each finishes within the time budget or is on an explicit DNF whitelist for vintage low-power 2-strokes. test_submodel_kaizen.py catches silent failure modes in clutch, tire thermal, braking, and rider dynamics. The full suite passes 174 fast tests; integration tests exercise the surrogate models, ROI engine, and recommendations layer.',
   },
   {
     type: 'h2',
@@ -298,7 +298,7 @@ export default function Page() {
               ))}
             </div>
             <p className="text-white/40 text-xs mt-4">
-              All claims about cluster bias, mean absolute error, and within-tolerance fractions in this post reflect the June 2026 sweep against 216 published benchmarks (236 matched).
+              All claims about cluster bias, mean absolute error, and within-tolerance fractions in this post reflect the July 2026 sweep against 223 published benchmarks (246 matched).
             </p>
           </div>
         </footer>

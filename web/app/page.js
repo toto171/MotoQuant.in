@@ -47,40 +47,40 @@ import SectionRail from '../components/SectionRail';
 import TronGrid from '../components/TronGrid';
 
 // ─── Validation: only the four clusters where the data is good ────────
-// Per the 13 June 2026 weighted sweep (reports/acc_final_2026_06_13.json). Small-cc / 2T / cruiser
+// Per the 3 July 2026 weighted sweep (reports/acc_final_2026_07_03.json). Small-cc / 2T / cruiser
 // clusters are bounded by benchmark data quality (DERIVED 0-100×1.6
 // estimates with declared ±0.7s uncertainty), not model fidelity, so
 // they're shown in /docs/validation with their full caveat — not on
 // the landing page.
 const HONEST_CLUSTERS = [
   { name: 'Litre Sport ≥195hp',   bias: -0.015, mae: 0.137, n: 31 },
-  { name: 'Litre Sport 600-1000', bias: -0.073, mae: 0.201, n: 99 },
+  { name: 'Litre Sport 600-1000', bias: -0.064, mae: 0.192, n: 104 },
   { name: 'Mid-Twin 300-500',     bias: -0.086, mae: 0.516, n: 23 },
-  { name: 'All clusters · weighted overall', bias: -0.015, mae: 0.262, n: 236 },
+  { name: 'All clusters · weighted overall', bias: -0.026, mae: 0.242, n: 246 },
 ];
 
 // ─── Top-10 most accurate bikes ───────────────────────────────────────
-// MUST equal the docs/validation TOP10 (13 June 2026 sweep,
-// reports/acc_final_2026_06_13.json — 10 smallest |Δ| among published
-// non-derived benchmarks, mean ±0.006s). Sync both together.
+// MUST equal the docs/validation TOP10 (3 July 2026 sweep,
+// reports/acc_final_2026_07_03.json — 10 smallest |Δ| among published
+// non-derived benchmarks, mean ±0.009s). Sync both together.
 const TOP10 = [
-  { rank: 1,  name: 'Honda CBR 600RR',             year: 2007, cc: '599cc I4',          target: 10.844, sim: 10.8447, delta:  0.001, source: 'Sport Rider' },
-  { rank: 2,  name: 'Aprilia Tuono 660',           year: 2021, cc: '659cc I2',          target: 11.33,  sim: 11.3285, delta: -0.002, source: 'MotoStatz' },
-  { rank: 3,  name: 'Harley-Davidson Sportster S', year: 2021, cc: '1252cc V2',         target: 11.1,   sim: 11.0981, delta: -0.002, source: 'HDForums timeslip 2021' },
-  { rank: 4,  name: 'Kawasaki Z H2 SE',            year: 2020, cc: '998cc I4',          target: 9.95,   sim: 9.9471,  delta: -0.003, source: 'Cycle World 2020' },
-  { rank: 5,  name: 'Kawasaki Ninja ZX-9R',        year: 2000, cc: '899cc I4',          target: 10.5,   sim: 10.4968, delta: -0.003, source: 'Sport Rider 2000' },
-  { rank: 6,  name: 'Kawasaki Ninja H2',           year: 2015, cc: '998cc I4',          target: 9.62,   sim: 9.6252,  delta:  0.005, source: 'MCN 2015' },
-  { rank: 7,  name: 'BMW R 12 nineT',              year: 2014, cc: '1170cc boxer-twin', target: 11.05,  sim: 11.0583, delta:  0.008, source: 'Cycle World 2014' },
-  { rank: 8,  name: 'Kawasaki Ninja ZX-10R',       year: 2021, cc: '998cc I4',          target: 10.0,   sim: 10.0106, delta:  0.011, source: 'Cycle World 2021' },
-  { rank: 9,  name: 'Kawasaki ZZR1400',            year: 2006, cc: '1352cc I4',         target: 9.9,    sim: 9.9112,  delta:  0.011, source: 'MCN 2006' },
-  { rank: 10, name: 'Yamaha YZF-R6',               year: 2007, cc: '599cc I4',          target: 10.854, sim: 10.8653, delta:  0.011, source: 'Sport Rider 2007' },
+  { rank: 1,  name: 'Honda CBR 600RR',            year: 2007, cc: '599cc I4',  target: 10.844, sim: 10.8447, delta:  0.001, source: 'Sport Rider' },
+  { rank: 2,  name: 'Kawasaki Z H2 SE',           year: 2020, cc: '998cc I4',  target: 9.95,   sim: 9.9471,  delta: -0.003, source: 'Cycle World 2020' },
+  { rank: 3,  name: 'Kawasaki Ninja ZX-9R',       year: 2000, cc: '899cc I4',  target: 10.5,   sim: 10.4968, delta: -0.003, source: 'Sport Rider 2000' },
+  { rank: 4,  name: 'Kawasaki Ninja H2',          year: 2015, cc: '998cc I4',  target: 9.62,   sim: 9.6252,  delta:  0.005, source: 'MCN 2015' },
+  { rank: 5,  name: 'Kawasaki Ninja ZX-10R',      year: 2021, cc: '998cc I4',  target: 10.0,   sim: 10.0106, delta:  0.011, source: 'Cycle World 2021' },
+  { rank: 6,  name: 'Kawasaki ZZR1400',           year: 2006, cc: '1352cc I4', target: 9.9,    sim: 9.9112,  delta:  0.011, source: 'MCN 2006' },
+  { rank: 7,  name: 'Yamaha YZF-R6',              year: 2007, cc: '599cc I4',  target: 10.854, sim: 10.8653, delta:  0.011, source: 'Sport Rider 2007' },
+  { rank: 8,  name: 'Kawasaki Z900RS',            year: 2020, cc: '948cc I4',  target: 11.35,  sim: 11.3372, delta: -0.013, source: 'MotoStatz 2022' },
+  { rank: 9,  name: 'Triumph Rocket 3 Storm R',   year: 2024, cc: '2458cc I3', target: 10.56,  sim: 10.5757, delta:  0.016, source: 'Cycle World 2020' },
+  { rank: 10, name: 'Aprilia RS 457',             year: 2024, cc: '457cc I2',  target: 13.3,   sim: 13.3158, delta:  0.016, source: 'FastestLaps 2024' },
 ];
 
 // ─── Stats strip — synced to current motoquant.db (Apr 30 2026) ───────
 const STATS = [
-  { num: 501, label: 'BIKES'      },
+  { num: 535, label: 'BIKES'      },
   { num: 232, label: 'TIRES'      },
-  { num: 563, label: 'PARTS'      },
+  { num: 594, label: 'PARTS'      },
   { num: 20,  label: 'VENUES'     },
   { num: 976, label: 'TESTS'      },
   { num: 15,  label: 'SUB-MODELS' },
@@ -425,9 +425,9 @@ function HomePageInner() {
                 >
                   Your bike. Your strip. Your quarter-mile ET — predicted to
                   within{' '}
-                  <span className="text-white">±0.006s</span> on our 10 cleanest validated runs.{' '}
-                  <span className="text-white">501 Indian and global bikes</span>,{' '}
-                  <span className="text-white">563 parts with INR pricing</span>,{' '}
+                  <span className="text-white">±0.009s</span> on our 10 cleanest validated runs.{' '}
+                  <span className="text-white">535 Indian and global bikes</span>,{' '}
+                  <span className="text-white">594 parts with INR pricing</span>,{' '}
                   <span className="text-white">Aamby Valley to MMRT.</span>
                 </p>
               ) : (
@@ -438,10 +438,10 @@ function HomePageInner() {
                 >
                   A first-principles drag simulator for India&rsquo;s motorcycle
                   drag-racing community.{' '}
-                  <span className="text-white">501 bikes</span>,{' '}
-                  <span className="text-white">563 parts</span>,{' '}
+                  <span className="text-white">535 bikes</span>,{' '}
+                  <span className="text-white">594 parts</span>,{' '}
                   <span className="text-white">20 venues</span> — validated
-                  against 216 published quarter-mile tests — ±0.006s across the 10 cleanest.
+                  against 223 published quarter-mile tests — ±0.009s across the 10 cleanest.
                 </p>
               )}
             </Reveal>
@@ -449,7 +449,7 @@ function HomePageInner() {
             <Reveal y={16} duration={0.7} delay={0.22}>
               <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-mono justify-center lg:justify-start">
                 <span className="px-3 py-1.5 rounded-full border border-brand-orange/30 text-brand-orange">
-                  ±0.015s mean bias across 216 benchmarks
+                  −0.026s mean bias across 223 benchmarks
                 </span>
                 <span className="px-3 py-1.5 rounded-full border border-white/10 text-white/55">
                   RK4 · 1ms · 15 sub-models
@@ -520,9 +520,9 @@ function HomePageInner() {
               {
                 icon: Target,
                 title: 'Indian Market-First',
-                body: '501 bikes including 57 Indian commuters (Pulsar N125, NS200, NS400Z, Apache RTR, R15 V4, Duke 390, RE Interceptor 650), 15 SE Asia drag cubs, the Kawasaki Ninja ZX-4R/ZX-4RR 400cc inline-fours, and the complete Indian racing scene. Parts prices in INR with live retailer data. Venues: Aamby Valley, MMRT, BIC, Kari, Hyderabad.',
+                body: '535 bikes including 57 Indian commuters (Pulsar N125, NS200, NS400Z, Apache RTR, R15 V4, Duke 390, RE Interceptor 650), 15 SE Asia drag cubs, the Kawasaki Ninja ZX-4R/ZX-4RR 400cc inline-fours, and the complete Indian racing scene. Parts prices in INR with live retailer data. Venues: Aamby Valley, MMRT, BIC, Kari, Hyderabad.',
                 href: '/bikes',
-                cta: 'Browse all 501 bikes →',
+                cta: 'Browse all 535 bikes →',
               },
               {
                 icon: TrendingUp,
@@ -534,7 +534,7 @@ function HomePageInner() {
               {
                 icon: BarChart3,
                 title: 'Validated',
-                body: 'Kawasaki ZX-10R 2021 at ±0.011s. Top-10 mean error ±0.006s. Reference baselines: K5 10.0334s, R1 10.2859s, Hayabusa 10.4712s — preserved exactly to four decimals across every commit.',
+                body: 'Kawasaki ZX-10R 2021 at ±0.011s. Top-10 mean error ±0.009s. Reference baselines: K5 10.0334s, R1 10.2859s, Hayabusa 10.4712s — preserved exactly to four decimals across every commit.',
                 href: '/docs/validation',
                 cta: 'See benchmark table →',
               },
@@ -736,12 +736,12 @@ function HomePageInner() {
         <div className="max-w-7xl mx-auto">
           <Reveal>
             <div className="mb-12 max-w-3xl">
-              <CodeComment className="mb-5">cross-checking 216 weighted benchmarks</CodeComment>
+              <CodeComment className="mb-5">cross-checking 223 weighted benchmarks</CodeComment>
               <h2 className="font-display font-bold text-4xl md:text-5xl text-white tracking-tight">
                 Validated on Real Telemetry
               </h2>
               <p className="mt-4 text-white/70 text-lg">
-                We don&rsquo;t just predict — we measure. 216 weighted benchmarks
+                We don&rsquo;t just predict — we measure. 223 weighted benchmarks
                 against published Cycle World, Sport Rider, MCN, and
                 Motorcyclist tests. Reference baselines preserved exactly to
                 four decimals across every commit.
@@ -772,10 +772,10 @@ function HomePageInner() {
           <Reveal>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
               {[
-                { num: '216',     label: 'Bikes benchmarked' },
-                { num: '62',      label: 'Within ±0.10s' },
-                { num: '113',     label: 'Within ±0.20s' },
-                { num: '±0.006s', label: 'Top 10 mean error' },
+                { num: '223',     label: 'Bikes benchmarked' },
+                { num: '72',      label: 'Within ±0.10s' },
+                { num: '130',     label: 'Within ±0.20s' },
+                { num: '±0.009s', label: 'Top 10 mean error' },
               ].map((s) => (
                 <div key={s.label} className="rounded-xl border border-brand-orange/20 bg-white/[0.02] p-5 text-center">
                   <div className="font-display font-bold text-2xl md:text-3xl text-brand-orange tabular-nums">
@@ -798,7 +798,7 @@ function HomePageInner() {
                   MotoQuant timing assoc · official accuracy slip
                 </span>
                 <span className="hidden sm:block font-mono text-[10px] tracking-[0.18em] uppercase text-brand-orange/80">
-                  10 cleanest pulls · 216 benchmarks
+                  10 cleanest pulls · 223 benchmarks
                 </span>
               </div>
               <div className="hidden md:grid grid-cols-[40px_1fr_120px_120px_120px_140px] gap-4 px-5 py-3 border-b border-brand-orange/20 bg-white/[0.02] text-[10px] font-mono uppercase tracking-widest text-white/45">
