@@ -152,13 +152,10 @@ export default function AboutPage() {
             <Reveal>
               <FounderCard initial="A" name="Arya Desai" role="Co-founder & Lead Engineer · Pune, India" email="motoquant@gmail.com">
                 <p>
-                  Automobile engineer — M.Tech at NIT Warangal, B.Tech from Manipal Institute of Technology (Automotive System Design). The physics-and-shop-floor side of MotoQuant.
+                  The engineer who started MotoQuant and leads it — M.Tech from NIT Warangal, B.Tech from Manipal (Automotive System Design). He owns the physics: the vehicle-dynamics model, the calibration against real Dragy traces, and where the engine goes next.
                 </p>
                 <p>
-                  At NIT-W his research runs close to MotoQuant&apos;s core stack: a CFD validation study of split-injection strategy in a single-cylinder diesel engine (ANSYS Forte, 28-species n-heptane kinetics, 60° sector mesh, peak-pressure match within 1.6% on the optimal case); a semi-active MR suspension paper that uses six-seed Monte Carlo on ISO 8608 roads to show comfort-optimised skyhook controllers actually lose 18–23% in ride comfort once realistic bump-stops engage — with a full reproducibility artefact; and a design patent filed with NIT-W&apos;s IP Cell.
-                </p>
-                <p>
-                  Hands-on side: diagnosed and performance-tuned 25+ luxury and performance vehicles at Power Solutions Pune — Mercedes AMG, BMW, Audi, Jaguar Land Rover, Lincoln — including a flagship Mercedes AMG SLS valvetronic exhaust install. ECU-tuning certified (Techmaghi / ReynLab). Undergrad research at MIT Manipal on PU-based magnetorheological elastomers delivered a 22% improvement in vibration damping.
+                  Depth from both sides of the workshop door — CFD engine-combustion and magnetorheological-suspension research at NIT-W (plus a filed design patent) on one side; 25+ performance cars tuned by hand at Power Solutions Pune — Mercedes-AMG, BMW, Audi, Jaguar Land Rover — on the other. ECU-tuning certified.
                 </p>
               </FounderCard>
             </Reveal>
@@ -166,13 +163,10 @@ export default function AboutPage() {
             <Reveal delay={0.08}>
               <FounderCard initial="R" name="Ritwik Singh" role="Co-founder & Advisor · Bengaluru, India" email="dhisetu@gmail.com">
                 <p>
-                  Automobile and AI engineer by experience — the physics, software, and machine-learning side of MotoQuant. Built the 15-sub-model drag simulation engine, the bike-and-parts catalog, and the calibration pipeline that fits sim output to real Dragy traces within ±0.05 s.
+                  Automobile-and-AI engineer — the software and machine-learning instinct behind MotoQuant&apos;s early architecture, from the simulation scaffolding to the first surrogate models and ROI ranker. Now a co-founder and advisor, still close to the technical direction.
                 </p>
                 <p>
-                  Wrote the load-bearing physics from the ground up: the RK4 integrator, the Pacejka tire model, the expansion-chamber two-stroke curve, and the clutch-slip thermal model — caring more about which terms actually survive the force balance than about a good-looking regression. The AI layer is his too — a DNN surrogate that predicts an ET in ~1 ms, an XGBoost-backed ROI ranker, a Bayesian build optimiser, and a natural-language tuning interface.
-                </p>
-                <p>
-                  Outside MotoQuant he&apos;s building Dhisetu, an AI-assisted indie game studio, from Bengaluru — and a hardcore indie gamer, which is where the instinct comes from. His bet: the next wave of studios won&apos;t look like teams but solo creators with AI co-pilots, shipping as fast as ideas come. Same instinct here — one engineer, the right tools, a sim serious tuners keep open on a second monitor.
+                  Day to day he&apos;s building Dhisetu, an AI-assisted indie game studio in Bengaluru — a hardcore indie gamer, which is where the instinct comes from. His bet: the next studios won&apos;t be big teams but solo creators with AI co-pilots. Same instinct here.
                 </p>
               </FounderCard>
             </Reveal>
@@ -180,13 +174,13 @@ export default function AboutPage() {
             <Reveal delay={0.16}>
               <FounderCard initial="S" name="Sahil Shetye" role="Co-founder & CMO · Manipal, India" email="motoquant@gmail.com">
                 <p>
-                  Electronics-and-communications engineer — finishing his B.Tech in EEE at Manipal Institute of Technology. The growth-and-market side of MotoQuant, and the electronics half of the hardware roadmap: hands-on with PCB design (KiCad), EV powertrain and battery tech, and low-level C.
+                  Electronics-and-communications engineer, finishing his B.Tech in EEE at Manipal. The growth-and-market side of MotoQuant — and the electronics half of the hardware roadmap: PCB design (KiCad), EV powertrain and battery tech, low-level C.
                 </p>
                 <p>
-                  Brings the market read the rest of the team doesn&apos;t — built and grew a social-media audience from scratch, stacked industry-standard certifications, and carries real internship experience. Communication and market knowledge are the levers he owns: turning a physics engine into something racers and tuning shops actually hear about.
+                  Communication and market knowledge are the levers he owns — plus real internship experience — turning a physics engine into something racers and tuning shops actually hear about.
                 </p>
                 <p className="border-l-2 border-brand-orange/30 pl-4 italic text-white/60">
-                  &ldquo;In my third year of engineering, a major bike accident paused my academic timeline. While recovering, I refused to sit idle — I built a social-media audience and completed multiple industry-standard certifications. I don&apos;t just study engineering; I build, optimize, and execute under pressure.&rdquo;
+                  &ldquo;In my third year, a major bike accident paused my degree. While recovering, I refused to sit idle — I built a social-media audience and finished multiple industry-standard certifications. I don&apos;t just study engineering; I build, optimize, and execute under pressure.&rdquo;
                 </p>
               </FounderCard>
             </Reveal>
