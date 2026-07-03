@@ -47,6 +47,21 @@ from dataclasses import dataclass
 from ..models import BikeConfig
 from ..physics import MotoQuantEngine
 
+
+def json_safe(obj):
+    """Recursively replace non-finite floats (inf / -inf / NaN) with None so
+    the result survives a strict JSON encoder (FastAPI's default and the jobs
+    route both reject bare inf/nan). Shared safety net for optimizer/outlaw
+    responses, where cost-per-tenth ratios can legitimately be infinite."""
+    if isinstance(obj, dict):
+        return {k: json_safe(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [json_safe(v) for v in obj]
+    if isinstance(obj, float) and not math.isfinite(obj):
+        return None
+    return obj
+
+
 # ─────────────────────────────────────────────────────────────────
 # Data classes
 # ─────────────────────────────────────────────────────────────────
@@ -715,13 +730,16 @@ def rank_categories(
             for p in improving
             if not math.isinf(p.cost_per_tenth_inr)
         ]
-        avg_cpt = sum(valid_cpt) / len(valid_cpt) if valid_cpt else float("inf")
+        # None (→ JSON null) when no finite cost-per-tenth exists — a bare
+        # float("inf") here is NOT JSON-compliant and 500s the optimize route
+        # (caught by the full-API stress battery, July 3).
+        avg_cpt = round(sum(valid_cpt) / len(valid_cpt), 0) if valid_cpt else None
         summary.append(
             {
                 "category": cat,
                 "best_roi": round(best_roi, 4),
                 "best_et_gain_s": round(best_gain, 4),
-                "avg_cost_per_tenth": round(avg_cpt, 0),
+                "avg_cost_per_tenth": avg_cpt,
                 "part_count": len(parts),
                 "improving_count": len(improving),
             }

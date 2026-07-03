@@ -3633,7 +3633,12 @@ def _optimize_impl(req: OptimizeBuildRequest, progress=None):
         )
         raise HTTPException(500, f"Optimization failed: {exc}") from exc
 
-    return result.to_dict()
+    # Belt-and-braces: cost-per-tenth ratios can be non-finite (a part that
+    # adds cost with ~0 ET gain); bare inf/nan is not JSON-compliant and 500s
+    # the route. json_safe nulls them so the response always serializes.
+    from .analysis.roi import json_safe
+
+    return json_safe(result.to_dict())
 
 
 @app.post(
