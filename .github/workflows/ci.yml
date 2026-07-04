@@ -37,7 +37,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-api.txt
           pip install -e .
-          pip install ruff pytest SALib scikit-learn  # optional analysis deps so sobol/surrogate tests run in CI
+          pip install ruff pytest pytest-cov SALib scikit-learn  # optional analysis deps so sobol/surrogate tests run in CI
 
       - name: Ruff lint
         run: ruff check .
@@ -54,7 +54,18 @@ jobs:
       - name: Run pytest (fast suite)
         env:
           MOTOQUANT_DB: /tmp/ci.db
-        run: pytest tests/ -q --maxfail=5
+        # Coverage is a non-blocking SIGNAL (no --cov-fail-under gate) so a
+        # branch-coverage dip never blocks a merge; the XML artifact answers
+        # "which physics branches are actually exercised".
+        run: pytest tests/ -q --maxfail=5 --cov=motoquant --cov-report=term-missing:skip-covered --cov-report=xml
+
+      - name: Upload coverage report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: coverage.xml
+          if-no-files-found: ignore
 
       - name: Physics benchmark sanity check
         run: |

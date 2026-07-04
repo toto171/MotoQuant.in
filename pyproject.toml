@@ -65,3 +65,22 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = "-q"
+
+# Coverage is a non-blocking CI signal (see .github/workflows/ci.yml). It
+# answers "which physics branches are actually exercised" without gating merges.
+[tool.coverage.run]
+source = ["motoquant"]
+branch = true
+omit = [
+    "*/tests/*",
+]
+
+[tool.coverage.report]
+skip_covered = true
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+]
