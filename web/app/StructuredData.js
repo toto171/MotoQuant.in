@@ -85,7 +85,7 @@ export function softwareApplicationSchema() {
     downloadUrl: `${SITE_URL}/simulator`,
     softwareVersion: '1.0',
     description:
-      'Physics-based quarter-mile drag racing simulator for motorcycles. 15-submodel engine (engine, drivetrain, clutch, chain, tires, aero, weight-transfer, rider dynamics, staging, environmental, braking, wheelie, parasitic, rolling resistance, forced induction) covering 501 bikes, 563 parts, 232 tires, 20 venues. Validated to K5 GSX-R1000 10.03s, YZF-R1 10.29s, Hayabusa 10.47s.',
+      'Physics-based quarter-mile drag racing simulator for motorcycles. 15-submodel engine (engine, drivetrain, clutch, chain, tires, aero, weight-transfer, rider dynamics, staging, environmental, braking, wheelie, parasitic, rolling resistance, forced induction) covering 541 bikes, 594 parts, 260 tires, 20 venues. Validated to K5 GSX-R1000 10.03s, YZF-R1 10.29s, Hayabusa 10.47s.',
     publisher: { '@id': `${SITE_URL}/#organization` },
     author: { '@id': `${SITE_URL}/#organization` },
     offers: {
@@ -121,7 +121,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'MotoQuant Pro is a physics-based motorcycle quarter-mile drag racing simulator. It predicts ET, trap speed, and split times for 501 production bikes using 15 independent physics sub-models and validated aero, tire, and dyno data.',
+            'MotoQuant Pro is a physics-based motorcycle quarter-mile drag racing simulator. It predicts ET, trap speed, and split times for 541 production bikes using 15 independent physics sub-models and validated aero, tire, and dyno data.',
         },
       },
       {

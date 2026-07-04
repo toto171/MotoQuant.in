@@ -5,7 +5,7 @@
  *
  * One input, three result groups:
  *   - Actions/pages: static route list with keyword aliases (fuzzy-ish match)
- *   - Bikes: live /api/bikes?search= (debounced) — the 501-bike catalog is the
+ *   - Bikes: live /api/bikes?search= (debounced) — the 541-bike catalog is the
  *     product, so "haya…" should take you to the bike, or straight into the
  *     simulator with it preloaded.
  *

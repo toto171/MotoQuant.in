@@ -189,7 +189,7 @@ export default function BikesPage() {
       <SiteNav />
 
       <PageHero
-        kicker="catalog loaded [501/501] · search armed"
+        kicker="catalog loaded [541/541] · search armed"
         badge="Motorcycle Database"
         title={<>Motorcycle Specs &amp; <span className="text-gradient-orange">Quarter-Mile Database</span></>}
         sub={
@@ -216,9 +216,9 @@ export default function BikesPage() {
           </>
         }
         stats={[
-          { value: 501, label: 'BIKES' },
-          { value: 232, label: 'TIRES' },
-          { value: 1253, label: 'FITMENTS' },
+          { value: 541, label: 'BIKES' },
+          { value: 260, label: 'TIRES' },
+          { value: 1860, label: 'FITMENTS' },
         ]}
       >
         <div className="mt-4">

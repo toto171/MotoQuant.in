@@ -67,7 +67,7 @@ function CtaCard() {
             </div>
           </div>
           <div className="shrink-0 hidden sm:flex flex-col items-end font-mono text-[10px] text-white/40 uppercase tracking-widest">
-            <span>501 bikes</span>
+            <span>541 bikes</span>
             <span>1 ms timestep</span>
             <span>15 sub-models</span>
           </div>

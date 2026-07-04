@@ -102,7 +102,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Tire physics is a Pacejka Magic Formula model. Given a slip ratio and a load (vertical force on the tire), the model returns the longitudinal force the tire can deliver. The shape of the curve is controlled by four parameters per tire: B (stiffness), C (shape), D (peak), and E (curvature). These come from a tire library of 232 tires across 16 manufacturers — drag slicks, sport touring, race compounds, Indian commuter rubber (MRF, CEAT), all with calibrated Pacejka coefficients.',
+    text: 'Tire physics is a Pacejka Magic Formula model. Given a slip ratio and a load (vertical force on the tire), the model returns the longitudinal force the tire can deliver. The shape of the curve is controlled by four parameters per tire: B (stiffness), C (shape), D (peak), and E (curvature). These come from a tire library of 260 tires across 16 manufacturers — drag slicks, sport touring, race compounds, Indian commuter rubber (MRF, CEAT), all with calibrated Pacejka coefficients.',
   },
   {
     type: 'p',

@@ -10,11 +10,11 @@
  * Usage
  * -----
  *   <PageHero
- *     kicker="catalog loaded [501/501] · search armed"
+ *     kicker="catalog loaded [541/541] · search armed"
  *     badge="Motorcycle Database"
  *     title={<>Every bike. <span className="text-gradient-orange">Real physics.</span></>}
- *     sub="501 bikes with full physics data — individual aero, dyno curves, gear cassettes."
- *     stats={[{ value: 501, label: 'BIKES' }, { value: 232, label: 'TIRES' }]}
+ *     sub="541 bikes with full physics data — individual aero, dyno curves, gear cassettes."
+ *     stats={[{ value: 541, label: 'BIKES' }, { value: 260, label: 'TIRES' }]}
  *   />
  *
  * Stays opacity/transform-only (Reveal) and reduced-motion-safe by

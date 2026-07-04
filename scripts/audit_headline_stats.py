@@ -385,6 +385,239 @@ PATTERNS = [
         "all_known_bikes",
         "blog 'measured each of N bikes'",
     ),
+    # ── Extended coverage (added 2026-07-04) — catalog-count phrasings the
+    #    original PATTERNS missed. Every catalog/feature change was drifting
+    #    these silently: StructuredData line-88 description + FAQ answer, the
+    #    PageHero doc-comment usage banner, tool-page {value,label} stat tiles,
+    #    the "N bikes" (no "+") metadata descriptions, and several blog
+    #    phrasings. Kept tight so --fix only ever touches the captured count.
+    #    Deliberately NOT matched: "N+ other bikes" CTAs — those are rounded
+    #    lower bounds, not exact counts, so --fix must leave them alone.
+    #
+    # Schema.org SoftwareApplication description (line ~88) + FAQ answer.
+    (
+        "web/app/StructuredData.js",
+        r"covering (\d{2,4}) bikes",
+        "all_known_bikes",
+        "Schema.org description bikes count",
+    ),
+    (
+        "web/app/StructuredData.js",
+        r"bikes, (\d{2,4}) parts",
+        "parts_db",
+        "Schema.org description parts count",
+    ),
+    (
+        "web/app/StructuredData.js",
+        r"parts, (\d{2,4}) tires",
+        "tires_db",
+        "Schema.org description tires count",
+    ),
+    (
+        "web/app/StructuredData.js",
+        r"(\d{2,4}) production bikes",
+        "all_known_bikes",
+        "Schema.org FAQ production bikes",
+    ),
+    # PageHero doc-comment usage banner (component header example).
+    (
+        "web/components/PageHero.js",
+        r"(\d{2,4}) bikes with full physics",
+        "all_known_bikes",
+        "PageHero doc-comment bikes",
+    ),
+    (
+        "web/components/PageHero.js",
+        r"catalog loaded \[(\d{2,4})/",
+        "all_known_bikes",
+        "PageHero doc-comment kicker slot1",
+    ),
+    (
+        "web/components/PageHero.js",
+        r"catalog loaded \[\d{2,4}/(\d{2,4})\]",
+        "all_known_bikes",
+        "PageHero doc-comment kicker slot2",
+    ),
+    (
+        "web/components/PageHero.js",
+        r"value:\s*(\d{2,4})\s*,\s*label:\s*'BIKES'",
+        "all_known_bikes",
+        "PageHero doc-comment BIKES tile",
+    ),
+    (
+        "web/components/PageHero.js",
+        r"value:\s*(\d{2,4})\s*,\s*label:\s*'TIRES'",
+        "tires_db",
+        "PageHero doc-comment TIRES tile",
+    ),
+    # Tool-page PageHero stat tiles ({ value: N, label: 'BIKES' } etc.) —
+    # optimize / autotune / bikes and any future tool page.
+    (
+        "web/app/*/page.js",
+        r"value:\s*(\d{2,4})\s*,\s*label:\s*'BIKES'",
+        "all_known_bikes",
+        "tool-page BIKES stat tile",
+    ),
+    (
+        "web/app/*/page.js",
+        r"value:\s*(\d{2,4})\s*,\s*label:\s*'PARTS'",
+        "parts_db",
+        "tool-page PARTS stat tile",
+    ),
+    (
+        "web/app/*/page.js",
+        r"value:\s*(\d{2,4})\s*,\s*label:\s*'TIRES'",
+        "tires_db",
+        "tool-page TIRES stat tile",
+    ),
+    (
+        "web/app/*/page.js",
+        r"value:\s*(\d{2,5})\s*,\s*label:\s*'FITMENTS'",
+        "fitments_db",
+        "tool-page FITMENTS stat tile",
+    ),
+    (
+        "web/app/*/page.js",
+        r"value:\s*(\d{1,4})\s*,\s*label:\s*'VENUES'",
+        "venues_db",
+        "tool-page VENUES stat tile",
+    ),
+    (
+        "web/app/bikes/page.js",
+        r"catalog loaded \[(\d{2,4})/",
+        "all_known_bikes",
+        "bikes-page kicker slot1",
+    ),
+    (
+        "web/app/bikes/page.js",
+        r"catalog loaded \[\d{2,4}/(\d{2,4})\]",
+        "all_known_bikes",
+        "bikes-page kicker slot2",
+    ),
+    # Landing-page STATS strip TIRES/VENUES num tiles (BIKES/PARTS already
+    # covered above; TIRES + VENUES had no pattern).
+    (
+        "web/app/page.js",
+        r"num:\s*(\d{2,4})\s*,\s*label:\s*'TIRES'",
+        "tires_db",
+        "landing-page TIRES num",
+    ),
+    (
+        "web/app/page.js",
+        r"num:\s*(\d{1,4})\s*,\s*label:\s*'VENUES'",
+        "venues_db",
+        "landing-page VENUES num",
+    ),
+    # Metadata descriptions that say "... for N bikes ..." (no "+").
+    (
+        "web/app/layout.js",
+        r"split for (\d{2,4}) bikes",
+        "all_known_bikes",
+        "layout meta description bikes",
+    ),
+    (
+        "web/app/simulator/layout.js",
+        r"Predictor for (\d{2,4}) Bikes",
+        "all_known_bikes",
+        "simulator title bikes",
+    ),
+    (
+        "web/app/simulator/layout.js",
+        r"split for (\d{2,4}) bikes",
+        "all_known_bikes",
+        "simulator description bikes",
+    ),
+    (
+        "web/app/pricing/layout.js",
+        r"covers (\d{2,4}) bikes",
+        "all_known_bikes",
+        "pricing meta description bikes",
+    ),
+    (
+        "web/app/pricing/page.js",
+        r"Tire library \((\d{2,4}) tires\)",
+        "tires_db",
+        "pricing tier tire-library count",
+    ),
+    (
+        "web/app/docs/getting-started/page.js",
+        r"pick from (\d{2,4}) bikes",
+        "all_known_bikes",
+        "getting-started bikes count",
+    ),
+    (
+        "web/app/not-found.js",
+        r"Browse (\d{2,4}) bikes",
+        "all_known_bikes",
+        "not-found bikes CTA",
+    ),
+    (
+        "web/components/CommandPalette.js",
+        r"the (\d{2,4})-bike catalog",
+        "all_known_bikes",
+        "CommandPalette doc-comment catalog",
+    ),
+    (
+        "web/app/docs/physics/SubModelsCtaVariant.js",
+        r"(\d{2,4}) bikes",
+        "all_known_bikes",
+        "SubModels CTA bikes",
+    ),
+    (
+        "web/app/features/page.js",
+        r"'(\d{2,4}) parts\.",
+        "parts_db",
+        "features parts subtitle",
+    ),
+    (
+        "web/app/features/page.js",
+        r"catalog covers (\d{2,4}) upgrades",
+        "parts_db",
+        "features parts body upgrades",
+    ),
+    # Additional blog-post catalog phrasings.
+    (
+        "web/app/blog/*/page.js",
+        r"(\d{3,4}) bikes with",
+        "all_known_bikes",
+        "blog 'N bikes with'",
+    ),
+    (
+        "web/app/blog/*/page.js",
+        r"catalog of (\d{3,4}) bikes",
+        "all_known_bikes",
+        "blog 'catalog of N bikes'",
+    ),
+    (
+        "web/app/blog/*/page.js",
+        r"(\d{3,4})-bike catalog",
+        "all_known_bikes",
+        "blog 'N-bike catalog'",
+    ),
+    (
+        "web/app/blog/*/page.js",
+        r"(\d{3,4}) parts in the catalog",
+        "parts_db",
+        "blog 'N parts in the catalog'",
+    ),
+    (
+        "web/app/blog/*/page.js",
+        r"(\d{3,4})-part ROI",
+        "parts_db",
+        "blog 'N-part ROI engine'",
+    ),
+    (
+        "web/app/blog/*/page.js",
+        r"(\d{2,4}) tires across",
+        "tires_db",
+        "blog 'N tires across'",
+    ),
+    (
+        "web/app/blog/*/page.js",
+        r"(\d{2,4})-tire fitment",
+        "tires_db",
+        "blog 'N-tire fitment library'",
+    ),
     # README
     ("README.md", r"(\d{2,4})\s*bikes?,", "all_known_bikes", "README bikes count"),
     ("README.md", r"(\d{2,4})\s*parts,", "parts_db", "README parts count"),

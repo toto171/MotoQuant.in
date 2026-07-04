@@ -82,7 +82,7 @@ const CONTENT = [
   },
   {
     type: 'callout',
-    text: 'The H2 SX trap speed of 250.8 km/h is the second-highest in MotoQuant’s 340-bike catalog for any street-legal bike running pump fuel — beaten only by the H2 (no luggage, 24 kg lighter) and matched by the litre superbikes that go 320 km/h on their way to 11.0-second ETs. No naturally-aspirated road bike traps above 248 km/h on a stock quarter-mile pass.',
+    text: 'The H2 SX trap speed of 250.8 km/h is the second-highest in MotoQuant’s 541-bike catalog for any street-legal bike running pump fuel — beaten only by the H2 (no luggage, 24 kg lighter) and matched by the litre superbikes that go 320 km/h on their way to 11.0-second ETs. No naturally-aspirated road bike traps above 248 km/h on a stock quarter-mile pass.',
   },
   {
     type: 'h2',
