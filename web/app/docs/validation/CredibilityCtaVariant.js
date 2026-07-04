@@ -10,7 +10,7 @@
 //                ±0.009s top-10 mean error + Δ ±0.0000 baseline drift into a
 //                first-run promise:
 //                  "Run your bike through the same engine →"
-//                  "535 bikes pre-loaded. Same RK4 integrator. Same ±0.009s
+//                  "541 bikes pre-loaded. Same RK4 integrator. Same ±0.008s
 //                  top-10 mean error. No signup."
 //
 // Hypothesis: visitors who reach the bottom of /docs/validation have just
@@ -64,7 +64,7 @@ function CtaCard() {
               Run your bike through the same engine →
             </div>
             <div className="text-sm text-white/65 leading-relaxed">
-              535 bikes pre-loaded. Same RK4 integrator. Same ±0.009s top-10
+              541 bikes pre-loaded. Same RK4 integrator. Same ±0.008s top-10
               mean error. No signup.
             </div>
           </div>

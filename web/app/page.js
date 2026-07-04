@@ -56,7 +56,7 @@ const HONEST_CLUSTERS = [
   { name: 'Litre Sport ≥195hp',   bias: -0.015, mae: 0.137, n: 31 },
   { name: 'Litre Sport 600-1000', bias: -0.064, mae: 0.192, n: 104 },
   { name: 'Mid-Twin 300-500',     bias: -0.086, mae: 0.516, n: 23 },
-  { name: 'All clusters · weighted overall', bias: -0.026, mae: 0.242, n: 246 },
+  { name: 'All clusters · weighted overall', bias: -0.025, mae: 0.242, n: 246 },
 ];
 
 // ─── Top-10 most accurate bikes ───────────────────────────────────────
@@ -79,7 +79,7 @@ const TOP10 = [
 // ─── Stats strip — synced to current motoquant.db (Apr 30 2026) ───────
 const STATS = [
   { num: 541, label: 'BIKES'      },
-  { num: 232, label: 'TIRES'      },
+  { num: 260, label: 'TIRES'      },
   { num: 594, label: 'PARTS'      },
   { num: 20,  label: 'VENUES'     },
   { num: 976, label: 'TESTS'      },
@@ -425,8 +425,8 @@ function HomePageInner() {
                 >
                   Your bike. Your strip. Your quarter-mile ET — predicted to
                   within{' '}
-                  <span className="text-white">±0.009s</span> on our 10 cleanest validated runs.{' '}
-                  <span className="text-white">535 Indian and global bikes</span>,{' '}
+                  <span className="text-white">±0.008s</span> on our 10 cleanest validated runs.{' '}
+                  <span className="text-white">541 Indian and global bikes</span>,{' '}
                   <span className="text-white">594 parts with INR pricing</span>,{' '}
                   <span className="text-white">Aamby Valley to MMRT.</span>
                 </p>
@@ -441,7 +441,7 @@ function HomePageInner() {
                   <span className="text-white">541 bikes</span>,{' '}
                   <span className="text-white">594 parts</span>,{' '}
                   <span className="text-white">20 venues</span> — validated
-                  against 223 published quarter-mile tests — ±0.009s across the 10 cleanest.
+                  against 224 published quarter-mile tests — ±0.008s across the 10 cleanest.
                 </p>
               )}
             </Reveal>
@@ -449,7 +449,7 @@ function HomePageInner() {
             <Reveal y={16} duration={0.7} delay={0.22}>
               <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-mono justify-center lg:justify-start">
                 <span className="px-3 py-1.5 rounded-full border border-brand-orange/30 text-brand-orange">
-                  −0.026s mean bias across 224 benchmarks
+                  −0.025s mean bias across 224 benchmarks
                 </span>
                 <span className="px-3 py-1.5 rounded-full border border-white/10 text-white/55">
                   RK4 · 1ms · 15 sub-models
@@ -534,7 +534,7 @@ function HomePageInner() {
               {
                 icon: BarChart3,
                 title: 'Validated',
-                body: 'Kawasaki ZX-10R 2021 at ±0.011s. Top-10 mean error ±0.009s. Reference baselines: K5 10.0334s, R1 10.2859s, Hayabusa 10.4712s — preserved exactly to four decimals across every commit.',
+                body: 'Kawasaki ZX-10R 2021 at ±0.011s. Top-10 mean error ±0.008s. Reference baselines: K5 10.0334s, R1 10.2859s, Hayabusa 10.4712s — preserved exactly to four decimals across every commit.',
                 href: '/docs/validation',
                 cta: 'See benchmark table →',
               },
@@ -736,16 +736,23 @@ function HomePageInner() {
         <div className="max-w-7xl mx-auto">
           <Reveal>
             <div className="mb-12 max-w-3xl">
-              <CodeComment className="mb-5">cross-checking 223 weighted benchmarks</CodeComment>
+              <CodeComment className="mb-5">cross-checking 224 weighted benchmarks</CodeComment>
               <h2 className="font-display font-bold text-4xl md:text-5xl text-white tracking-tight">
                 Validated on Real Telemetry
               </h2>
               <p className="mt-4 text-white/70 text-lg">
-                We don&rsquo;t just predict — we measure. 223 weighted benchmarks
-                against published Cycle World, Sport Rider, MCN, and
+                We don&rsquo;t just predict — we measure. 224 weighted benchmarks
+                (246 matched) against published Cycle World, Sport Rider, MCN, and
                 Motorcyclist tests. Reference baselines preserved exactly to
                 four decimals across every commit.
               </p>
+              <Link
+                href="/validation"
+                className="mt-5 inline-flex items-center gap-2 text-brand-accent hover:text-white transition-colors font-mono text-sm"
+              >
+                See the full accuracy report
+                <span aria-hidden="true">→</span>
+              </Link>
             </div>
           </Reveal>
 
@@ -772,10 +779,10 @@ function HomePageInner() {
           <Reveal>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
               {[
-                { num: '223',     label: 'Bikes benchmarked' },
+                { num: '224',     label: 'Bikes benchmarked' },
                 { num: '72',      label: 'Within ±0.10s' },
                 { num: '130',     label: 'Within ±0.20s' },
-                { num: '±0.009s', label: 'Top 10 mean error' },
+                { num: '±0.008s', label: 'Top 10 mean error' },
               ].map((s) => (
                 <div key={s.label} className="rounded-xl border border-brand-orange/20 bg-white/[0.02] p-5 text-center">
                   <div className="font-display font-bold text-2xl md:text-3xl text-brand-orange tabular-nums">

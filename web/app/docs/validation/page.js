@@ -4,7 +4,7 @@ import CodeComment from '../../../components/CodeComment';
 
 export const metadata = {
   title: 'Validation Data',
-  description: 'MotoQuant Pro accuracy report — 223 benchmarks (246 matched) against published Cycle World, Sport Rider, MotoStatz, MCN, and BikeWale timeslips, 3 July 2026 sweep. Weighted bias −0.026s, weighted mean absolute error 0.242s, top-10 mean error ±0.009s. Per-cluster bias and the open small-cc + 2-stroke calibration gaps. Reference baselines: K5 10.0334s, R1 10.2859s, Hayabusa 10.4712s — Δ ±0.0000 since April 30, 2026.',
+  description: 'MotoQuant Pro accuracy report — 224 benchmarks (246 matched) against published Cycle World, Sport Rider, MotoStatz, MCN, and BikeWale timeslips. Weighted bias −0.025s, weighted mean absolute error 0.242s, top-10 mean error ±0.008s. Per-cluster bias and the open small-cc + 2-stroke calibration gaps. Reference baselines: K5 10.0334s, R1 10.2859s, Hayabusa 10.4712s — Δ ±0.0000 since April 30, 2026.',
   alternates: { canonical: 'https://motoquant.in/docs/validation' },
   keywords: [
     'motorcycle simulator accuracy',
@@ -54,12 +54,19 @@ export default function ValidationPage() {
   return (
     <article>
       <header className="mb-12">
-        <CodeComment className="mb-3">validation · 223 benchmarks</CodeComment>
+        <CodeComment className="mb-3">validation · 224 benchmarks</CodeComment>
         <h1 className="font-display font-bold text-4xl text-white mb-4 tracking-tight">Benchmark Results — July 2026</h1>
         <p className="text-white/60 text-base leading-relaxed">
-          Source-quality-weighted sweep results across 223 published benchmarks (246 matched to a catalog bike).
+          Source-quality-weighted sweep results across 224 published benchmarks (246 matched to a catalog bike).
           Metrics, per-cluster bias, and methodology. Last updated 3 July 2026.
         </p>
+        <Link
+          href="/validation"
+          className="mt-4 inline-flex items-center gap-2 text-brand-accent hover:text-white transition-colors font-mono text-sm"
+        >
+          Open the interactive accuracy explorer
+          <span aria-hidden="true">→</span>
+        </Link>
       </header>
 
       {/* Headline stats */}
@@ -69,8 +76,8 @@ export default function ValidationPage() {
           {[
             { num: '0.242s', label: 'Weighted |Δ|' },
             { num: '0.183s', label: 'Median |Δ|' },
-            { num: '−0.026s', label: 'Weighted bias (sim − real)' },
-            { num: '±0.009s', label: 'Top-10 mean error' },
+            { num: '−0.025s', label: 'Weighted bias (sim − real)' },
+            { num: '±0.008s', label: 'Top-10 mean error' },
           ].map((s, i) => (
             <div key={i} className="card p-4 border-brand-orange/20 text-center">
               <div className="font-display font-bold text-xl text-brand-orange tabular-nums">{s.num}</div>
@@ -128,7 +135,7 @@ export default function ValidationPage() {
       <section className="mb-14">
         <h2 className="font-display font-bold text-2xl text-white mb-4">Top 10 Most Accurate Bikes</h2>
         <p className="text-white/60 text-sm mb-6">
-          The 10 smallest residuals from published (non-derived) benchmarks — mean absolute error ±0.009s.
+          The 10 smallest residuals from published (non-derived) benchmarks — top-10 cleanest mean absolute error ±0.008s.
           Sources: Cycle World, Sport Rider, MCN, MotoStatz, FastestLaps.
           Conditions: race fuel, professional rider, ideal strip.
         </p>
@@ -254,7 +261,7 @@ export default function ValidationPage() {
           </Link>
           <Link href="/simulator" className="card card-hover block p-4 group">
             <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Try the simulator →</div>
-            <div className="text-xs text-white/50">535 bikes, free in the browser, no account needed.</div>
+            <div className="text-xs text-white/50">541 bikes, free in the browser, no account needed.</div>
           </Link>
         </div>
       </div>
