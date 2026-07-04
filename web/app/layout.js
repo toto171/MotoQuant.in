@@ -55,7 +55,7 @@ export const viewport = {
 // internal linking. This file handles the first three.
 
 const DESCRIPTION =
-  'Free physics-based motorcycle quarter-mile drag racing simulator — not a power-to-weight formula. Predict ET, trap speed, 60-ft split for 501 bikes including Hayabusa, ZX-14R, R15 V4, KTM Duke 390, Pulsar NS200. Compare builds, quantify parts ROI in INR, upload Dragy runs for auto-calibration. Built for the Indian drag racing community — Aamby Valley, MMRT, BIC, Kari.';
+  'Free physics-based motorcycle quarter-mile drag racing simulator — not a power-to-weight formula. Predict ET, trap speed, 60-ft split for 541 bikes including Hayabusa, ZX-14R, R15 V4, KTM Duke 390, Pulsar NS200. Compare builds, quantify parts ROI in INR, upload Dragy runs for auto-calibration. Built for the Indian drag racing community — Aamby Valley, MMRT, BIC, Kari.';
 
 export const metadata = {
   title: {
@@ -87,7 +87,7 @@ export const metadata = {
         secureUrl: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'MotoQuant Pro — quarter-mile drag racing simulator covering 535 motorcycles, 594 parts, 257 tires, 20 venues',
+        alt: 'MotoQuant Pro — quarter-mile drag racing simulator covering 541 motorcycles, 594 parts, 260 tires, 20 venues',
         type: 'image/png',
       },
     ],
@@ -103,7 +103,7 @@ export const metadata = {
     images: [
       {
         url: `${SITE_URL}/og-image.png`,
-        alt: 'MotoQuant Pro — quarter-mile drag racing simulator covering 535 motorcycles, 594 parts, 257 tires, 20 venues',
+        alt: 'MotoQuant Pro — quarter-mile drag racing simulator covering 541 motorcycles, 594 parts, 260 tires, 20 venues',
       },
     ],
     site: '@motoquant',

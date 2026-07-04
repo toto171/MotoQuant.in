@@ -179,7 +179,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The MotoQuant simulator at motoquant.in lets you sweep rider weight, density altitude, ambient temperature, tire compound, and any combination of the 563 parts in the catalog against either bike, side by side. You can answer the practical questions — "for my 75 kg rider weight and my home strip at 600 m DA, will the Duke or RC be faster after a sprocket drop and a re-flash?" — without trusting a YouTube comparison or a press release. And the moment a real Dragy timeslip from either bike lands in the calibrator, the simulator folds it in and tightens the prediction. The current ±0.4 second cluster bias band is the honest uncertainty number until that data exists.',
+    text: 'The MotoQuant simulator at motoquant.in lets you sweep rider weight, density altitude, ambient temperature, tire compound, and any combination of the 594 parts in the catalog against either bike, side by side. You can answer the practical questions — "for my 75 kg rider weight and my home strip at 600 m DA, will the Duke or RC be faster after a sprocket drop and a re-flash?" — without trusting a YouTube comparison or a press release. And the moment a real Dragy timeslip from either bike lands in the calibrator, the simulator folds it in and tightens the prediction. The current ±0.4 second cluster bias band is the honest uncertainty number until that data exists.',
   },
 ];
 
@@ -298,7 +298,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Simulate the Duke 390 vs RC 390 side by side</div>
             <div className="text-white/60 text-sm">
-              Sweep rider weight, density altitude, sprocket choice, ECU re-flash, and any of the 563 parts in the catalog. See ET delta before you spend a rupee.
+              Sweep rider weight, density altitude, sprocket choice, ECU re-flash, and any of the 594 parts in the catalog. See ET delta before you spend a rupee.
             </div>
           </div>
           <Link

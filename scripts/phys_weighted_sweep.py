@@ -27,47 +27,19 @@ warnings.filterwarnings("ignore")
 from motoquant import MotoQuantEngine
 from motoquant.scraper.importer import spec_to_bike_config
 from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
+from scripts.sweep_lib import (
+    source_weight,  # noqa: F401  (canonical classifier; re-exported)
+)
 from scripts.sweep_with_clusters import _model_specificity_score, _wb_match, cluster_for
 from scripts.validation_sweep import BENCHMARKS
 
-
-def source_weight(src: str) -> float:
-    s = (src or "").lower()
-    if "derived" in s or "0-100" in s:
-        return 0.1
-    if any(k in s for k in ("forum", "timeslip", "hdforums")):
-        return 0.3
-    # instrumented signals
-    if any(
-        k in s
-        for k in (
-            "timing-strip",
-            "instrumented",
-            "dragy",
-            "consumer news",
-            "mcn",
-            "don canet",
-            "carlsbad",
-        )
-    ):
-        return 1.0
-    # aggregator
-    if any(
-        k in s
-        for k in (
-            "fastestlaps",
-            "motorbikecatalog",
-            "motorbike catalog",
-            "accelerationtimes",
-            "bikewale",
-            "motostatz",
-        )
-    ):
-        return 0.5
-    # default magazine (cycle world / sport rider w/o explicit timing-strip)
-    if any(k in s for k in ("cycle world", "sport rider", "motorcyclist", "magazine")):
-        return 0.7
-    return 0.5  # unknown -> aggregator-tier
+# NOTE (roadmap A4-27): source_weight was previously defined locally here and
+# diverged from scripts.sweep_lib.source_quality (bare 'motostatz' -> 1.0 there
+# vs 0.5 here). The two are now unified onto scripts.sweep_lib as the single
+# source of truth; this module imports the canonical scalar weight above. The
+# import is re-exported (still callable as phys_weighted_sweep.source_weight),
+# so the published authoritative sweep is byte-for-byte unchanged. See
+# tests/test_sweep_source_weight.py for the zero-drift proof.
 
 
 def _bench_map():

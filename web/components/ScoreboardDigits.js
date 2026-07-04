@@ -9,7 +9,7 @@
  * assets, zero network cost, perfectly tabular.
  *
  *   <ScoreboardDigits value="10.0334" h={36} />
- *   <ScoreboardCounter value={501} h={34} />   // counts up on first view
+ *   <ScoreboardCounter value={541} h={34} />   // counts up on first view
  *
  * Unlit "ghost" segments render at low opacity behind the lit ones,
  * like a real LED board. Pure static SVG — no rAF unless counting.

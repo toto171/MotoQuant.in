@@ -28,13 +28,6 @@ exclude = [
     "*.egg-info",
     ".ruff_cache",
     "node_modules",
-    # Legacy Streamlit single-file UI being phased out by the Tauri/React
-    # desktop app under desktop/. Uses condensed multi-statement-per-line
-    # patterns and dict() literals that are intentional for the tabular
-    # tire/parts param-binding code; rewriting to ruff-clean form would
-    # hurt readability without functional benefit. Skipped from lint
-    # until the desktop app fully replaces it (Phase 5 post-launch).
-    "app.py",
 ]
 
 [tool.ruff.lint]
@@ -60,7 +53,7 @@ combine-as-imports = true
 # Allow unused imports in __init__.py files (used for public API exports)
 "**/__init__.py" = ["F401"]
 # One-off operational scripts (diagnostics, dated patches, audits, sweeps): debug printf,
-# sys.path-then-import, and condensed audit code are intentional here (same rationale as app.py).
+# sys.path-then-import, and condensed audit code are intentional here.
 "scripts/*" = ["UP031", "E402", "E701"]
 # Test modules set up sys.path / env before importing the package under test.
 "tests/*" = ["E402"]
@@ -72,3 +65,26 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = "-q"
+
+# Coverage is a non-blocking CI signal (see .github/workflows/ci.yml). It
+# answers "which physics branches are actually exercised" without gating merges.
+[tool.coverage.run]
+source = ["motoquant"]
+# Line coverage only (not branch): branch tracing roughly doubles the per-line
+# overhead, and this suite runs thousands of physics sims -- branch coverage
+# pushed the CI job past its timeout. Line coverage is enough for the "which
+# code is exercised" signal.
+branch = false
+omit = [
+    "*/tests/*",
+]
+
+[tool.coverage.report]
+skip_covered = true
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+]

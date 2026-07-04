@@ -23,7 +23,7 @@ export default function AutotunePage() {
         }
         sub="Pick your bike and where you’re running. MotoQuant works out the density altitude and returns gearing, launch RPM, tyre pressure, and fuel/timing — each with the predicted quarter-mile ET change so you know what actually moves the clock."
         stats={[
-          { value: 501, label: 'BIKES' },
+          { value: 541, label: 'BIKES' },
           { value: 20, label: 'VENUES' },
         ]}
       />

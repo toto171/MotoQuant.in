@@ -256,7 +256,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The MotoQuant simulator at motoquant.in/simulator runs the same physics that produced every ET in this post against any of the 563 parts in the catalog, on any of the 20 seeded venues, with sweeps over rider weight, ambient temperature, density altitude, and tire compound. The Pro tier surfaces parts-ROI rankings (cost-per-tenth, ET delta, trap delta, compatibility warning) directly on the build page, and the Dragy upload calibrates the simulator against your own timeslips. Start with the stock RC 390 and Tier 1 — that is the answer for 80 percent of owners and it costs under ₹10,000 to verify.',
+    text: 'The MotoQuant simulator at motoquant.in/simulator runs the same physics that produced every ET in this post against any of the 594 parts in the catalog, on any of the 20 seeded venues, with sweeps over rider weight, ambient temperature, density altitude, and tire compound. The Pro tier surfaces parts-ROI rankings (cost-per-tenth, ET delta, trap delta, compatibility warning) directly on the build page, and the Dragy upload calibrates the simulator against your own timeslips. Start with the stock RC 390 and Tier 1 — that is the answer for 80 percent of owners and it costs under ₹10,000 to verify.',
   },
 ];
 
@@ -375,7 +375,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Build your own RC 390 ladder</div>
             <div className="text-white/60 text-sm">
-              Sweep rider weight, density altitude, sprocket choice, ECU re-flash, exhaust, tire compound, and any of the 563 parts in the catalog. Cost-per-tenth ranks appear on every part toggle in the Pro tier.
+              Sweep rider weight, density altitude, sprocket choice, ECU re-flash, exhaust, tire compound, and any of the 594 parts in the catalog. Cost-per-tenth ranks appear on every part toggle in the Pro tier.
             </div>
           </div>
           {/* GROWTH_EXP_019 — CTA button copy A/B test; see ./EndOfArticleCta.js */}

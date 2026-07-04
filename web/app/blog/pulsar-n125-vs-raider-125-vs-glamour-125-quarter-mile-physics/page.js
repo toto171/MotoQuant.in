@@ -426,7 +426,7 @@ export default function PostPage() {
               >
                 Browse the full bike catalog
               </Link>{" "}
-              — all four 125cc commuters plus 790+ other bikes with full spec sheets, gear cassettes, and OEM tyre fitments.
+              — all four 125cc commuters plus 535+ other bikes with full spec sheets, gear cassettes, and OEM tyre fitments.
             </li>
             <li>
               ·{" "}

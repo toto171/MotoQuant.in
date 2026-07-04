@@ -200,7 +200,7 @@ def seed_drag_specific(db) -> int:
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 1299,
                         "displacement_max_cc": 1341,
-                        "categories": ["sport", "supersport"],
+                        "categories": ["sport"],
                     },
                     "description": "Holley Sniper 75-shot direct-port for Suzuki Hayabusa litre-class drag",
                 },
@@ -347,7 +347,7 @@ def seed_drag_specific(db) -> int:
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 1299,
                         "displacement_max_cc": 1341,
-                        "categories": ["sport", "supersport"],
+                        "categories": ["sport"],
                     },
                     "description": "ORP twin-turbo for Hayabusa drag racing only; +180 hp, 12 psi, competition-grade",
                 },
@@ -666,8 +666,10 @@ def seed_drag_specific(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        # KTM 390 / Husqvarna 401 are I1 singles, not V2
+                        # (patch_2026_06_11 C) — a ['V2'] filter matched nothing.
                         "manufacturers": ["KTM", "Husqvarna"],
-                        "engine_configs": ["V2"],
+                        "engine_configs": ["I1"],
                         "displacement_min_cc": 375,
                         "displacement_max_cc": 410,
                     },
@@ -763,7 +765,7 @@ def seed_drag_specific(db) -> int:
                 "fitment_rules": {
                     "tier": "category",
                     "match": {
-                        "categories": ["sport", "supersport", "naked"],
+                        "categories": ["sport", "naked"],
                         "displacement_min_cc": 600,
                     },
                     "description": "Walbro 450 for drag prep sport bikes; 35% flow over stock, drag-strip proven",
@@ -787,7 +789,7 @@ def seed_drag_specific(db) -> int:
                 "fitment_rules": {
                     "tier": "category",
                     "match": {
-                        "categories": ["sport", "supersport"],
+                        "categories": ["sport"],
                         "displacement_min_cc": 800,
                     },
                     "description": "Aeromotive A1000 drag regulator; adjust 3.5–7 bar on track, works with turbo boost",
@@ -812,7 +814,7 @@ def seed_drag_specific(db) -> int:
                 "fitment_rules": {
                     "tier": "category",
                     "match": {
-                        "categories": ["sport", "supersport", "naked"],
+                        "categories": ["sport", "naked"],
                         "displacement_min_cc": 400,
                     },
                     "description": "Bazzaz BKN fuel map; 16-channel wireless tuning, drag dyno-friendly for power builds",
@@ -954,8 +956,10 @@ def seed_drag_specific(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        # KTM 390 / Husqvarna 401 are I1 singles, not V2
+                        # (patch_2026_06_11 C) — a ['V2'] filter matched nothing.
                         "manufacturers": ["KTM", "Husqvarna"],
-                        "engine_configs": ["V2"],
+                        "engine_configs": ["I1"],
                         "displacement_min_cc": 375,
                         "displacement_max_cc": 410,
                     },

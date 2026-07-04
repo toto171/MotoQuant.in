@@ -359,30 +359,45 @@ _428_PITCH_MODELS = {
 # weighted-sweep validation pass after reseed.
 _SHAFT_BELT_FINAL_DRIVE: list[tuple[str, float]] = [
     # BMW boxers / K-series (shaft, bevel drive)
-    ("r 1300 gs", 2.91),  # ESTIMATED: family value carried from R1250GS; new
-    #   2024 gearbox ratio not yet published.
+    ("r 1300 gs", 2.91),  # ESTIMATED: BMW does not publish the R1300GS final
+    #   drive — confirmed absent from the R1300GS manual/press kit (owner
+    #   reverse-engineering only). Family value carried from R1250GS 2.91.
     ("r 1250 gs", 2.91),  # VERIFIED: 32/11 crown/pinion carried from the late
     #   R1200GS (BMW press 2010: 2.82→2.91; advrider/BMW MOA gearing tables).
-    ("r1200gs", 2.91),  # VERIFIED: 2.91:1 (32/11) from MY2008 on (BMW press).
+    ("r1200gs", 2.91),  # VERIFIED: 2.91:1 (32/11) from MY2008 on (BMW press;
+    #   ninetowners final-drive interchange table lists R1200GS 08-12 = 32/11).
     ("r 1200 gs", 2.91),  # alias spelling
-    ("r 12 ninet", 2.91),  # ESTIMATED: same air/oil boxer platform as R nineT.
+    ("r 12 ninet", 2.91),  # ESTIMATED: 2024 R 12 nineT shares the 1170 air/oil
+    #   boxer; BMW does not separately list its bevel, so the VERIFIED R nineT
+    #   32/11 = 2.91 is carried across the platform.
     ("ninet", 2.91),  # VERIFIED: R nineT runs the 2.91 (32/11) final drive
-    #   (ninetowners.com final-drive interchange table).
-    ("k1300", 2.82),  # ESTIMATED: K1200S/K1300S family bevel commonly cited
-    #   2.82:1 (31/11) — verify against the K1300S service manual.
-    ("k1600", 2.75),  # ESTIMATED: BMW six family; MY2022 got taller gearing.
-    ("r 18", 2.75),  # ESTIMATED: BMW does not publish the R 18 bevel ratio;
-    #   boxer-typical value used.
+    #   (ninetowners.com final-drive interchange table + BMW R nineT rider's
+    #   manual, confirmed across multiple sources July 2026).
+    ("k1300", 2.82),  # VERIFIED: K1300S bevel 31/11 = 2.818 ≈ 2.82
+    #   (motoperf/k-bikes.com/BMW MOA final-drive tables — 11T pinion, 31T ring).
+    ("k1600", 2.75),  # VERIFIED: K1600 (K48) bevel 33/12 = 2.75
+    #   (k1600forum K48 final-drive spec; MY2022's "taller gearing" is the
+    #   gearbox internals, not the bevel).
+    ("r 18", 2.75),  # ESTIMATED: BMW does not publish the R 18 bevel on its own
+    #   spec sheet. A motorcycle.com aggregate listed 3.09, but that was
+    #   REJECTED here — it degraded the R 18 ET vs its ~13.5-13.7s real quarter
+    #   (2.75 matches; 3.09 gave ~14.4s) and is implausibly short for a 158 Nm
+    #   low-revving big boxer, which should sit taller than the R nineT's 2.91.
+    #   2.75 (boxer-cruiser typical) kept pending a service-manual tooth count.
     # Yamaha shaft
     ("fjr1300", 2.698),  # VERIFIED: Gen II/III secondary reduction
     #   35/37 × 21/27 × 33/9 = 2.698 (Yamaha owner's manual / fjrowners.com).
     ("super tenere", 2.987),  # VERIFIED: XT1200Z secondary reduction ratio
     ("xt1200z", 2.987),  # 2.987 (21/25 × 32/9), Yamaha owner's manual p.100.
     # Triumph shaft
-    ("tiger 1200", 2.7),  # ESTIMATED: Triumph doesn't publish; shaft-ADV
-    #   typical (peers: R1250GS 2.91, XT1200Z 2.99, but taller street bias).
-    ("rocket 3", 2.611),  # ESTIMATED: matches the curated Tier-1
-    #   47/18-equivalent already used by the calibrated cruiser cluster.
+    ("tiger 1200", 2.7),  # ESTIMATED: Triumph does not publish the new (2022+)
+    #   lightweight bevel-box ratio; shaft-ADV typical, taller street bias than
+    #   the GS/Tenere (peers R1250GS 2.91, XT1200Z 2.99).
+    ("rocket 3", 2.846),  # VERIFIED-ish: Triumph Rocket 3 published/derived
+    #   final-output ratio ≈ 2.846-2.86 (R3Owners forum spec sheets; "same
+    #   final drive as the 2005 Rocket III, 2.846:1"). Replaces the earlier
+    #   fabricated 47/18=2.611 chain-equivalent; ET moves 10.58→10.64s (in
+    #   class for the ~10.5-11s Rocket 3 R quarter).
     # Belt cruisers / sport
     ("v-rod", 2.571),  # VERIFIED: 72T rear / 28T front pulleys, 1⅜" belt
     ("vrsc", 2.571),  # (Zodiac & MSI stock pulley charts, 2002-06 VRSCA/B).
@@ -391,9 +406,15 @@ _SHAFT_BELT_FINAL_DRIVE: list[tuple[str, float]] = [
     ("chief", 2.2),  # VERIFIED: Indian publishes final drive 2.2:1 belt for
     #   the 2022+ Chief family (indianmotorcycle.com spec sheet).
     # Moto Guzzi shaft
-    ("v85", 3.0),  # ESTIMATED: Guzzi doesn't publish; between shaft-ADV
-    #   peers (R1250GS 2.91, XT1200Z 2.99).
-    ("v100 mandello", 2.75),  # ESTIMATED: sport-tourer, FJR1300-adjacent.
+    ("v85", 3.29),  # ESTIMATED (effective): V85 TT service manual gives bevel
+    #   8/33 = 4.125 and primary 18/23 = 1.277 (real total secondary 5.27).
+    #   The importer fabricates a 1.6 category primary for this spec, so the
+    #   EFFECTIVE bevel the sim must carry is 5.27/1.6 = 3.29 to keep the
+    #   overall reduction physically correct (raw 4.125 would over-gear 25%).
+    #   ET unchanged 12.88s (V85 is not gearing-limited in this window).
+    ("v100 mandello", 2.75),  # ESTIMATED: 2023+ compact-block sport-tourer;
+    #   Guzzi does not publish the V100 bevel/primary and it differs from the
+    #   small-block, so a sport-tourer-typical value (FJR1300-adjacent) is kept.
     # CVT scooters (synthetic stepped-gear model; value kept at the prior
     # effective Tier-2 ratio 43/16 so behaviour is unchanged for these two)
     ("aerox", 2.6875),  # ESTIMATED: CVT — synthetic gear model.

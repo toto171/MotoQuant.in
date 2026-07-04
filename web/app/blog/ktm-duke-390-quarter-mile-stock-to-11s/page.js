@@ -195,7 +195,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The MotoQuant simulator at motoquant.in carries the 2022 KTM Duke 390 in its catalog of 501 bikes, alongside the 2024 third-generation Duke 390 (the longer-stroke 399 cc version), the RC 390, the Adventure 390, and 14 other 390-class platforms. The parts catalog has Powertronic, DNA, Eurogrip, SC-Project, Akrapovic, JT sprockets, DID chains, and a few dozen other Indian-relevant aftermarket options, each priced in INR and fitment-checked against the bike. You can sweep rider weight, ambient temperature, density altitude, tire compound, sprocket combinations, and any subset of compatible mods; the engine returns ET, trap, splits, and a cost-per-tenth ranking in roughly fifty milliseconds per simulation.',
+    text: 'The MotoQuant simulator at motoquant.in carries the 2022 KTM Duke 390 in its catalog of 541 bikes, alongside the 2024 third-generation Duke 390 (the longer-stroke 399 cc version), the RC 390, the Adventure 390, and 14 other 390-class platforms. The parts catalog has Powertronic, DNA, Eurogrip, SC-Project, Akrapovic, JT sprockets, DID chains, and a few dozen other Indian-relevant aftermarket options, each priced in INR and fitment-checked against the bike. You can sweep rider weight, ambient temperature, density altitude, tire compound, sprocket combinations, and any subset of compatible mods; the engine returns ET, trap, splits, and a cost-per-tenth ranking in roughly fifty milliseconds per simulation.',
   },
   {
     type: 'p',

@@ -30,6 +30,7 @@ __all__ = [
     "bind_benchmark_for_record",
     "find_spec_for_benchmark",
     "source_quality",
+    "source_weight",
 ]
 
 _SPLIT_RE = re.compile(r"[\s\-\.]+")
@@ -164,24 +165,80 @@ def find_spec_for_benchmark(mfr: str, model: str, year: int, specs):
     return best
 
 
-# Source-quality weights (April 30 decision: weighted by source quality).
-# Heuristic keyword parse of the benchmark source string; anything
-# containing "DERIVED" / "0-100" / "estimated" is heuristically-derived.
+# ── Canonical benchmark source-quality classifier ───────────────────────────
+# Single source of truth shared by phys_weighted_sweep (which produces the
+# PUBLISHED authoritative sweep, e.g. reports/acc_final_2026_07_03.json quoted
+# sitewide) and benchmark_sweep. Weight semantics are exactly
+# phys_weighted_sweep.source_weight's April-30 policy — preserved bit-for-bit
+# for every source string in the live BENCHMARKS corpus (proven by
+# tests/test_sweep_source_weight.py):
+#
+#     instrumented 1.0 / magazine 0.7 / aggregator 0.5 / forum 0.3 / DERIVED 0.1
+#     unknown -> 0.5 (aggregator-tier)
+#
+# Consolidation note (roadmap A4-27): this replaced an earlier divergent
+# sweep_lib heuristic that scored 'motostatz' as instrumented (1.0) and used a
+# 0.4 default. MotoStatz is an aggregator database that curates Dragy uploads,
+# not a first-party instrumented lab, so the bare 'motostatz' token is
+# aggregator-tier 0.5; the near-universal 'MotoStatz (Dragy, ... instrumented)'
+# rows carry the 'dragy'/'instrumented' token and score 1.0 at the instrumented
+# tier above. The old 'estimated' -> 0.1 keyword was intentionally NOT folded
+# in: it would reclassify the 'MotorBikeCatalog ... (estimated)' aggregator rows
+# from 0.5 to 0.1 and shift the published headline. 'community'/'logged' (forum
+# tier) and 'vbox' (instrumented tier) WERE folded in — verified to change no
+# live source's weight.
 def source_quality(src: str) -> tuple[float, str]:
-    """Return (weight, label) for a benchmark source string."""
-    s = src.lower()
-    if "derived" in s or "0-100" in s or "estimated" in s:
+    """Return ``(weight, label)`` for a benchmark source string.
+
+    Ordering matters: heuristically-derived and owner-timeslip signals are
+    checked before instrumented, so a 'DERIVED (... VBox ...)' row scores 0.1
+    rather than being promoted by its 'vbox' token.
+    """
+    s = (src or "").lower()
+    # 1. Heuristically-derived (0-100 x multiplier, ProfessCars estimates, ...)
+    if "derived" in s or "0-100" in s:
         return (0.1, "derived")
-    if "forum" in s or "community" in s or "logged" in s or "timeslip" in s:
-        # Owner timeslip / forum claim — better than derived but not lab
+    # 2. Owner timeslip / forum claim — better than derived but not lab
+    if any(k in s for k in ("forum", "timeslip", "hdforums", "community", "logged")):
         return (0.3, "forum_or_timeslip")
-    if any(k in s for k in ("instrumented", "motostatz", "dragy", "vbox")):
-        return (1.0, "instrumented")
-    if any(k in s for k in ("cycle world", "sport rider", "mcn", "consumer news")):
-        return (0.7, "magazine")
+    # 3. Instrumented lab test (timing strip / Dragy / VBox / named test rigs)
     if any(
         k in s
-        for k in ("fastestlaps", "motorbikecatalog", "bikewale", "accelerationtimes")
+        for k in (
+            "timing-strip",
+            "instrumented",
+            "dragy",
+            "vbox",
+            "consumer news",
+            "mcn",
+            "don canet",
+            "carlsbad",
+        )
+    ):
+        return (1.0, "instrumented")
+    # 4. Aggregator database
+    if any(
+        k in s
+        for k in (
+            "fastestlaps",
+            "motorbikecatalog",
+            "motorbike catalog",
+            "accelerationtimes",
+            "bikewale",
+            "motostatz",
+        )
     ):
         return (0.5, "aggregator")
-    return (0.4, "unknown")
+    # 5. Magazine road test (no explicit timing-strip)
+    if any(k in s for k in ("cycle world", "sport rider", "motorcyclist", "magazine")):
+        return (0.7, "magazine")
+    return (0.5, "unknown")  # unknown -> aggregator-tier
+
+
+def source_weight(src: str) -> float:
+    """Canonical scalar source weight — ``source_quality(src)[0]``.
+
+    This is the function phys_weighted_sweep imports; it produces the published
+    authoritative sweep, so its output must not drift.
+    """
+    return source_quality(src)[0]

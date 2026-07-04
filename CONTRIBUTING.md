@@ -81,8 +81,8 @@ The desktop app lives in `desktop/` (Tauri 2 + React; hosted-only client):
 JS-side checks. The Rust shell needs a local cargo toolchain (see
 `desktop/RELEASE.md`).
 
-The legacy Streamlit UI (`streamlit run app.py`) still works but is
-superseded by the web app; its retirement is a pending product decision.
+The legacy Streamlit UI (`app.py`) has been removed. The web app (`web/`)
+and the desktop app (`desktop/`) are the supported user interfaces.
 
 ### 3c. FastAPI web server
 

@@ -466,7 +466,7 @@ export default function PostPage() {
               >
                 Browse the full bike catalog
               </Link>{" "}
-              — 501 bikes with individual Cd, gear ratios, and physics params
+              — 541 bikes with individual Cd, gear ratios, and physics params
               pre-loaded.
             </li>
             <li>

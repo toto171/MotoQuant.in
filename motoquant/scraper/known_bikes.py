@@ -12365,6 +12365,7 @@ ALL_KNOWN_BIKES.extend(EXTENDED_BIKES)
 # instrumented ET_BENCHMARKS + TOPSPEED_BENCHMARKS lists that
 # scripts/validation_sweep.py and scripts/topspeed_sweep.py merge.
 # ────────────────────────────────────────────────────────────
+from .known_bikes_2026_china import CHINA_EXPANSION_BIKES  # noqa: E402
 from .known_bikes_2026_jpeu import JPEU_EXPANSION_BIKES  # noqa: E402
 from .known_bikes_2026_us import US_EXPANSION_BIKES  # noqa: E402
 from .known_bikes_2026_world import WORLD_EXPANSION_BIKES  # noqa: E402
@@ -12372,3 +12373,6 @@ from .known_bikes_2026_world import WORLD_EXPANSION_BIKES  # noqa: E402
 ALL_KNOWN_BIKES.extend(US_EXPANSION_BIKES)
 ALL_KNOWN_BIKES.extend(JPEU_EXPANSION_BIKES)
 ALL_KNOWN_BIKES.extend(WORLD_EXPANSION_BIKES)
+# July 2026 GAP-1: six China-brand additions (Kove 800X / Kove 450 Rally /
+# QJ SRK 921 / Zontes 703F / Benda Chinchilla 500 / CFMoto 800MT Sport).
+ALL_KNOWN_BIKES.extend(CHINA_EXPANSION_BIKES)

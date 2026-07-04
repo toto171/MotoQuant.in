@@ -122,6 +122,18 @@ def config_to_db_row(config: BikeConfig) -> dict[str, Any]:
 
     Does NOT include: bike_model_id, version, is_current, etc.
     Those are set by the repository.
+
+    NOTE (env not persisted): there is no environment_params column, so the
+    EnvironmentParams section is NOT serialized. On read-back, db_row_to_config
+    reconstructs a DEFAULT environment (Aamby Valley, 679 m), NOT whatever the
+    source config carried. Consequence: the DB/API path simulates at Aamby
+    Valley by default, while the hand-curated defaults.py reference bikes use
+    "Sea Level Reference" -- so /api/simulate?bike_id={1,2,3} returns the K5/R1/
+    Hayabusa ET at altitude (~+0.15 s) rather than the sea-level 10.0334/10.2859/
+    10.4712 headline baselines. This is by design (the API overrides the
+    environment from the request venue) and is exactly why the reference bikes
+    are excluded from reseed_configs_from_specs. Every other section round-trips
+    byte-identical -- do NOT mistake this for a stale-config bug.
     """
     row = {}
     for db_col, section_key in DB_COLUMN_TO_SECTION.items():

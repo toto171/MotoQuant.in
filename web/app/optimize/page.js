@@ -23,8 +23,8 @@ export default function OptimizePage() {
         }
         sub="Set a bike and a ₹ budget. MotoQuant runs a physics-based knapsack across every compatible upgrade and returns the combination that drops your quarter-mile ET the most — with cost-per-tenth, synergies, and the best next part to buy."
         stats={[
-          { value: 563, label: 'PARTS' },
-          { value: 501, label: 'BIKES' },
+          { value: 594, label: 'PARTS' },
+          { value: 541, label: 'BIKES' },
         ]}
       />
 

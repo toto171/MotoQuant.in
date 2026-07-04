@@ -240,18 +240,195 @@ def _sprocket_positions(parts_repo, part_ids) -> dict[int, str]:
     return out
 
 
-def _knapsack_group_key(r: PartROIResult, position_of: dict[int, str] | None = None):
+# ─────────────────────────────────────────────────────────────────
+# Brake / suspension slot classification (position-aware exclusivity)
+# ─────────────────────────────────────────────────────────────────
+#
+# Brakes and suspension are NOT single-slot like an exhaust. A valid brake
+# build carries front pads + rear pads + steel lines + a rotor together; a
+# valid suspension build carries a fork mod + a rear shock together. What
+# must be prevented is TWO parts fighting for the SAME physical slot (two
+# front-pad sets, two rear rotors, two forks, two rear shocks). So the
+# exclusivity key is (category, subtype, position) — mirroring the sprocket
+# (category, position) treatment — NOT a blunt whole-category lock.
+#
+# CRITICAL SAFETY RULE: if a part's slot can't be confidently determined it
+# is left NON-exclusive (its own singleton group). We never wrongly exclude a
+# part we can't classify — the worst case of an unknown part is that it can
+# co-exist with something it maybe shouldn't, which is far safer than silently
+# dropping a legitimate complementary part from every build.
+
+# specifications.type -> canonical brake slot subtype. Only subtypes that map
+# to one physical brake slot are listed; generic 'brake_component', 'fluid',
+# hydraulic clutch masters, etc. are intentionally absent -> non-exclusive.
+_BRAKE_SUBTYPE: dict[str, str] = {
+    "brake_pads": "pad",
+    "pads": "pad",
+    "pad": "pad",
+    "rotor": "rotor",
+    "brake_rotor": "rotor",
+    "disc": "rotor",
+    "rotor_and_pads": "rotor_and_pads",
+    "caliper": "caliper",
+    "radial_caliper": "caliper",
+    "master_cylinder": "master_cylinder",
+    "line": "line",
+    "brake_hose": "line",
+    "hose": "line",
+}
+
+# specifications.type -> physical suspension slot. Forks always live at the
+# front, shocks at the rear, so the subtype alone fixes the slot. Ambiguous
+# types (bare 'spring'/'spring_kit', 'coilover', steering 'damper', fork
+# 'brace', 'lowering_kit') are intentionally absent -> non-exclusive.
+_SUSP_SLOT: dict[str, str] = {
+    "fork": "fork",
+    "fork_internals": "fork",
+    "fork_cartridge": "fork",
+    "fork_springs": "fork",
+    "cartridge": "fork",
+    "rear_shock": "shock",
+    "shock": "shock",
+    "monoshock": "shock",
+}
+
+# Name-regex fallbacks (used only when specifications.type is missing/unknown).
+# The optional trailing 's' matches the plural forms real part names use
+# ("Brake Pads", "Steel Lines", "Wave Rotors").
+_BRAKE_SUBTYPE_NAME_RE = re.compile(
+    r"\b(pad|rotor|disc|line|hose|caliper|master)s?\b", re.IGNORECASE
+)
+_BRAKE_NAME_SUBTYPE = {
+    "pad": "pad",
+    "rotor": "rotor",
+    "disc": "rotor",
+    "line": "line",
+    "hose": "line",
+    "caliper": "caliper",
+    "master": "master_cylinder",
+}
+_POS_FRONT_RE = re.compile(r"\bfront\b", re.IGNORECASE)
+_POS_REAR_RE = re.compile(r"\brear\b", re.IGNORECASE)
+_SUSP_FORK_NAME_RE = re.compile(r"\b(fork|cartridge)s?\b", re.IGNORECASE)
+_SUSP_SHOCK_NAME_RE = re.compile(r"\b(shock|monoshock)s?\b", re.IGNORECASE)
+
+
+def _brake_susp_slot(
+    category: str | None, specs: dict | None, model_name: str | None
+) -> str | None:
+    """Classify a brakes/suspension part into a physical-slot key.
+
+    Returns a slot key like ``'brakes:pad:front'`` or ``'suspension:fork'``
+    when the slot can be confidently determined, else ``None`` (caller must
+    treat None as NON-exclusive). Reads ``specifications`` first, then falls
+    back to a name regex. Never raises.
+    """
+    cat = (category or "").lower()
+    name = str(model_name or "")
+    specs = specs if isinstance(specs, dict) else {}
+    stype = str(specs.get("type") or "").lower()
+
+    if cat == "suspension":
+        slot = _SUSP_SLOT.get(stype)
+        if slot is None:
+            has_fork = bool(_SUSP_FORK_NAME_RE.search(name))
+            has_shock = bool(_SUSP_SHOCK_NAME_RE.search(name))
+            if has_fork and not has_shock:
+                slot = "fork"
+            elif has_shock and not has_fork:
+                slot = "shock"
+        if slot in ("fork", "shock"):
+            return f"suspension:{slot}"
+        return None
+
+    if cat == "brakes":
+        subtype = _BRAKE_SUBTYPE.get(stype)
+        if subtype is None:
+            m = _BRAKE_SUBTYPE_NAME_RE.search(name)
+            if m:
+                subtype = _BRAKE_NAME_SUBTYPE.get(m.group(1).lower())
+        if subtype is None:
+            return None
+        pos = str(specs.get("position") or "").lower()
+        if pos not in ("front", "rear", "front_rear"):
+            has_f = bool(_POS_FRONT_RE.search(name))
+            has_r = bool(_POS_REAR_RE.search(name))
+            if has_f and has_r:
+                pos = "front_rear"
+            elif has_f:
+                pos = "front"
+            elif has_r:
+                pos = "rear"
+            else:
+                pos = ""
+        if pos not in ("front", "rear", "front_rear"):
+            # Subtype known but no confident position -> non-exclusive.
+            return None
+        return f"brakes:{subtype}:{pos}"
+
+    return None
+
+
+def _brake_susp_slots(parts_repo, part_ids) -> dict[int, str]:
+    """Map part_id -> slot key for brakes/suspension parts (from the repo).
+
+    Mirrors ``_sprocket_positions``: lets the knapsack treat different brake
+    slots (front pad vs rear pad vs steel line vs rotor) and suspension slots
+    (fork vs rear shock) as separate exclusive groups, so complementary parts
+    coexist but two parts fighting for one slot cannot both be selected.
+    Parts whose slot can't be classified are simply omitted (-> non-exclusive).
+    """
+    import json as _json
+
+    out: dict[int, str] = {}
+    getter = getattr(parts_repo, "get", None)
+    if getter is None:
+        return out
+    for pid in part_ids:
+        try:
+            part = getter(pid)
+        except Exception:
+            continue
+        if not part or part.get("category_name") not in ("brakes", "suspension"):
+            continue
+        specs = part.get("specifications")
+        if isinstance(specs, str):
+            try:
+                specs = _json.loads(specs)
+            except (ValueError, TypeError):
+                specs = None
+        slot = _brake_susp_slot(
+            part.get("category_name"), specs, part.get("model_name")
+        )
+        if slot:
+            out[pid] = slot
+    return out
+
+
+def _knapsack_group_key(
+    r: PartROIResult,
+    position_of: dict[int, str] | None = None,
+    slot_of: dict[int, str] | None = None,
+):
     """Exclusivity group for the multiple-choice knapsack.
 
     - exclusive categories -> one shared group per category;
     - sprockets -> one group per position (front/rear) when known;
-    - everything else -> its own singleton group (plain 0/1 item).
+    - brakes / suspension -> one group per physical slot (front pad, rear
+      shock, fork, ...) when known, via ``slot_of``;
+    - everything else (incl. unclassifiable brake/suspension parts) -> its own
+      singleton group (plain 0/1 item, freely selectable).
     """
     cat = (r.category or "").lower()
     if cat == "sprocket":
         pos = (position_of or {}).get(r.part_id)
         if pos in ("front", "rear"):
             return f"sprocket:{pos}"
+        return ("__solo__", r.part_id)
+    if cat in ("brakes", "suspension"):
+        slot = (slot_of or {}).get(r.part_id)
+        if slot:
+            return slot
         return ("__solo__", r.part_id)
     if cat in EXCLUSIVE_CATEGORIES:
         return _EXCLUSIVE_CATEGORY_ALIASES.get(cat, cat)
@@ -653,12 +830,14 @@ def find_best_build(
     # _grouped_knapsack enforces at-most-one part per exclusive category
     # (and per sprocket position), rounds weights UP, and handles free
     # parts (weight 0) uniformly — including at budget ₹0.
-    position_of = _sprocket_positions(parts_repo, [r.part_id for r in candidates])
+    _cand_ids = [r.part_id for r in candidates]
+    position_of = _sprocket_positions(parts_repo, _cand_ids)
+    slot_of = _brake_susp_slots(parts_repo, _cand_ids)
     selected = _grouped_knapsack(
         candidates,
         budget_inr,
         gain_of,
-        lambda r: _knapsack_group_key(r, position_of),
+        lambda r: _knapsack_group_key(r, position_of, slot_of),
     )
 
     # ── Incremental simulation of selected build ──────────────────────

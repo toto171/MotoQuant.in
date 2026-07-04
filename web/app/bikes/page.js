@@ -189,12 +189,12 @@ export default function BikesPage() {
       <SiteNav />
 
       <PageHero
-        kicker="catalog loaded [501/501] · search armed"
+        kicker="catalog loaded [541/541] · search armed"
         badge="Motorcycle Database"
         title={<>Motorcycle Specs &amp; <span className="text-gradient-orange">Quarter-Mile Database</span></>}
         sub={
           <>
-            535 bikes modelled in MotoQuant Pro — Hayabusa, ZX-14R, R15 V4,
+            541 bikes modelled in MotoQuant Pro — Hayabusa, ZX-14R, R15 V4,
             Yamaha MT-15 V1, KTM Duke 390, Pulsar NS200, Pulsar 125 Neon,
             Pulsar N250, Apache RTR, Interceptor 650, Yezdi Roadster, Hero
             Glamour 125, CFMoto 800NK, GSX-R600 K8 and the full Indian +
@@ -216,9 +216,9 @@ export default function BikesPage() {
           </>
         }
         stats={[
-          { value: 501, label: 'BIKES' },
-          { value: 232, label: 'TIRES' },
-          { value: 1253, label: 'FITMENTS' },
+          { value: 541, label: 'BIKES' },
+          { value: 260, label: 'TIRES' },
+          { value: 1860, label: 'FITMENTS' },
         ]}
       >
         <div className="mt-4">

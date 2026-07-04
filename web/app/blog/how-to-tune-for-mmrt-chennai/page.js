@@ -180,7 +180,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The MotoQuant simulator at motoquant.in lets you swap MMRT for Aamby Valley with a single dropdown and re-run the same bike across both venues side by side. Every venue setting in the database — twelve months of weather, surface friction coefficients, prevailing wind, timing system — feeds the physics engine the same way. The 501-bike catalog, the 232-tire fitment library, and the 563-part ROI engine all respond to the venue selection. If you are planning a December MMRT entry on a stock Hayabusa, a modded Duke 390, or a Pulsar NS400Z, you can build the run sheet here before you load the trailer.',
+    text: 'The MotoQuant simulator at motoquant.in lets you swap MMRT for Aamby Valley with a single dropdown and re-run the same bike across both venues side by side. Every venue setting in the database — twelve months of weather, surface friction coefficients, prevailing wind, timing system — feeds the physics engine the same way. The 541-bike catalog, the 260-tire fitment library, and the 594-part ROI engine all respond to the venue selection. If you are planning a December MMRT entry on a stock Hayabusa, a modded Duke 390, or a Pulsar NS400Z, you can build the run sheet here before you load the trailer.',
   },
 ];
 
@@ -299,7 +299,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Simulate your bike at MMRT vs Aamby Valley</div>
             <div className="text-white/60 text-sm">
-              Switch venues with one dropdown. Sweep month, track temperature, rider weight, tire compound, and any of the 563 parts in the catalog. See your ET delta before the entry fee.
+              Switch venues with one dropdown. Sweep month, track temperature, rider weight, tire compound, and any of the 594 parts in the catalog. See your ET delta before the entry fee.
             </div>
           </div>
           <Link
@@ -368,7 +368,7 @@ export default function PostPage() {
               <Link href="/bikes" className="text-brand-accent hover:text-brand-orange transition-colors">
                 Browse the full bike catalog
               </Link>{' '}
-              — 501 bikes with full spec sheets, OEM tire fitments, and venue-aware quarter-mile predictions for every Indian drag strip in the database.
+              — 541 bikes with full spec sheets, OEM tire fitments, and venue-aware quarter-mile predictions for every Indian drag strip in the database.
             </li>
             <li>
               ·{' '}

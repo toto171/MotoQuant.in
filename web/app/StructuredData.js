@@ -27,7 +27,7 @@ export function organizationSchema() {
       height: 512,
     },
     description:
-      'First-principles physics engine for motorcycle quarter-mile drag racing. Predict ET, compare builds, and quantify parts ROI for 535+ bikes.',
+      'First-principles physics engine for motorcycle quarter-mile drag racing. Predict ET, compare builds, and quantify parts ROI for 541+ bikes.',
     foundingDate: '2025-11-01',
     founder: [
       { '@type': 'Person', name: 'Arya Desai' },
@@ -85,7 +85,7 @@ export function softwareApplicationSchema() {
     downloadUrl: `${SITE_URL}/simulator`,
     softwareVersion: '1.0',
     description:
-      'Physics-based quarter-mile drag racing simulator for motorcycles. 15-submodel engine (engine, drivetrain, clutch, chain, tires, aero, weight-transfer, rider dynamics, staging, environmental, braking, wheelie, parasitic, rolling resistance, forced induction) covering 501 bikes, 563 parts, 232 tires, 20 venues. Validated to K5 GSX-R1000 10.03s, YZF-R1 10.29s, Hayabusa 10.47s.',
+      'Physics-based quarter-mile drag racing simulator for motorcycles. 15-submodel engine (engine, drivetrain, clutch, chain, tires, aero, weight-transfer, rider dynamics, staging, environmental, braking, wheelie, parasitic, rolling resistance, forced induction) covering 541 bikes, 594 parts, 260 tires, 20 venues. Validated to K5 GSX-R1000 10.03s, YZF-R1 10.29s, Hayabusa 10.47s.',
     publisher: { '@id': `${SITE_URL}/#organization` },
     author: { '@id': `${SITE_URL}/#organization` },
     offers: {
@@ -97,7 +97,7 @@ export function softwareApplicationSchema() {
     },
     featureList: [
       'Quarter-mile ET prediction to ±0.2s',
-      '535 motorcycles with individual aero + dyno curves',
+      '541 motorcycles with individual aero + dyno curves',
       '594-part catalog with cost-per-tenth ROI analysis',
       '15 independent physics sub-models',
       'Dragy GPS + dyno import and auto-calibration',
@@ -121,7 +121,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'MotoQuant Pro is a physics-based motorcycle quarter-mile drag racing simulator. It predicts ET, trap speed, and split times for 501 production bikes using 15 independent physics sub-models and validated aero, tire, and dyno data.',
+            'MotoQuant Pro is a physics-based motorcycle quarter-mile drag racing simulator. It predicts ET, trap speed, and split times for 541 production bikes using 15 independent physics sub-models and validated aero, tire, and dyno data.',
         },
       },
       {
@@ -139,7 +139,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'The catalog covers 535 bikes across 25+ manufacturers: Suzuki, Yamaha, Honda, Kawasaki, BMW, Ducati, Aprilia, KTM, Triumph, Royal Enfield, Bajaj, TVS, Hero, Harley-Davidson, Indian Motorcycle, CFMoto, Benelli, Husqvarna, MV Agusta, Moto Guzzi, Buell, and more. Includes Indian 200–400cc commuters (Pulsar N125, NS200, NS400Z, Apache RTR, R15 V4), SE Asia underbones, 400cc inline-fours (Kawasaki Ninja ZX-4R, ZX-4RR), retro flagships (Yamaha XSR900 GP), and 20 two-stroke drag bikes (RD350, RX100, RGV250, H2 Mach IV).',
+            'The catalog covers 541 bikes across 25+ manufacturers: Suzuki, Yamaha, Honda, Kawasaki, BMW, Ducati, Aprilia, KTM, Triumph, Royal Enfield, Bajaj, TVS, Hero, Harley-Davidson, Indian Motorcycle, CFMoto, Benelli, Husqvarna, MV Agusta, Moto Guzzi, Buell, and more. Includes Indian 200–400cc commuters (Pulsar N125, NS200, NS400Z, Apache RTR, R15 V4), SE Asia underbones, 400cc inline-fours (Kawasaki Ninja ZX-4R, ZX-4RR), retro flagships (Yamaha XSR900 GP), and 20 two-stroke drag bikes (RD350, RX100, RGV250, H2 Mach IV).',
         },
       },
       {

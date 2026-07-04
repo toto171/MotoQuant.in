@@ -5,7 +5,7 @@ import RunSimCta from './RunSimCta';
 
 export const metadata = {
   title: 'Getting Started — Run Your First Motorcycle Quarter-Mile Simulation',
-  description: 'Step-by-step guide to running your first motorcycle quarter-mile drag simulation in MotoQuant Pro — pick from 501 bikes, choose Aamby Valley or MMRT or BIC as your venue, dial in rider weight + power delta + mass, and interpret the ET, 60-foot, and trap speed output. No physics PhD required.',
+  description: 'Step-by-step guide to running your first motorcycle quarter-mile drag simulation in MotoQuant Pro — pick from 541 bikes, choose Aamby Valley or MMRT or BIC as your venue, dial in rider weight + power delta + mass, and interpret the ET, 60-foot, and trap speed output. No physics PhD required.',
   keywords: [
     'motoquant getting started',
     'how to use motorcycle drag simulator',

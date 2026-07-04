@@ -1,0 +1,12 @@
+{
+  "name": "motoquant-e2e",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Playwright smoke harness for the MotoQuant web app (manual-trigger). See e2e/README.md.",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1"
+  }
+}

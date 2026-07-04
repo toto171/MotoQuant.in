@@ -211,7 +211,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The full venue list lives in the MotoQuant simulator under the Location Picker. Pick any bike from the 340-bike catalog, then pick a venue, then run the sim. The simulator computes density altitude from the seasonal pressure and temperature normals for the month you select, applies the surface grip multiplier, applies the wind correction if you toggle it on, and runs the same physics that produces the validated K5 / R1 / Hayabusa baselines. Switch venues without changing anything else and you see the delta directly. The same workflow on a real bike at a real strip takes a fuel tank, a trailer, and an event entry fee — the simulator gives you the same answer in fifty milliseconds, with the venue physics treated as a first-class variable.',
+    text: 'The full venue list lives in the MotoQuant simulator under the Location Picker. Pick any bike from the 541-bike catalog, then pick a venue, then run the sim. The simulator computes density altitude from the seasonal pressure and temperature normals for the month you select, applies the surface grip multiplier, applies the wind correction if you toggle it on, and runs the same physics that produces the validated K5 / R1 / Hayabusa baselines. Switch venues without changing anything else and you see the delta directly. The same workflow on a real bike at a real strip takes a fuel tank, a trailer, and an event entry fee — the simulator gives you the same answer in fifty milliseconds, with the venue physics treated as a first-class variable.',
   },
   {
     type: 'p',
