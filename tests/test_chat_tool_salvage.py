@@ -72,14 +72,14 @@ class TestParseFailedGeneration(unittest.TestCase):
 
     def test_unparseable_no_function_tag_returns_empty(self):
         """(f) A string with no <function=...> tag returns []."""
-        self.assertEqual(
-            _parse_failed_generation("total garbage no function tag"), []
-        )
+        self.assertEqual(_parse_failed_generation("total garbage no function tag"), [])
 
     def test_half_formed_json_returns_empty(self):
         """Invalid JSON args bail to [] (safer to retry than to guess)."""
         self.assertEqual(
-            _parse_failed_generation("<function=search_bikes{not valid json}</function>"),
+            _parse_failed_generation(
+                "<function=search_bikes{not valid json}</function>"
+            ),
             [],
         )
 
@@ -127,7 +127,9 @@ class TestFailedGenerationFromError(unittest.TestCase):
             "'type': 'invalid_request_error', 'code': 'tool_use_failed', "
             "'failed_generation': '" + _PROD_FAILED_GEN + "'}}"
         )
-        self.assertEqual(_failed_generation_from_error(Exception(text)), _PROD_FAILED_GEN)
+        self.assertEqual(
+            _failed_generation_from_error(Exception(text)), _PROD_FAILED_GEN
+        )
 
     def test_unrelated_exception_returns_none(self):
         """(e) A non-tool_use_failed error is not the flake → returns None → re-raised."""
@@ -230,7 +232,9 @@ def _success_with_tool_call():
     )
 
 
-_TOOLS = [{"name": "search_bikes", "description": "", "input_schema": {"type": "object"}}]
+_TOOLS = [
+    {"name": "search_bikes", "description": "", "input_schema": {"type": "object"}}
+]
 _MESSAGES = [{"role": "user", "content": "how fast is the zx14r"}]
 
 
@@ -273,9 +277,9 @@ class TestCallToolsSalvage(unittest.TestCase):
 
     def test_retries_exhaust_then_raise(self):
         """When every attempt is an unsalvageable flake, the last one raises."""
-        behaviors = [
-            _raise_tool_use_failed("total garbage no function tag")
-        ] * (_TOOL_FLAKE_RETRIES + 1)
+        behaviors = [_raise_tool_use_failed("total garbage no function tag")] * (
+            _TOOL_FLAKE_RETRIES + 1
+        )
         client, comp = _make_client(behaviors)
         with self.assertRaises(_FakeGroq400):
             client.call_tools(system="s", messages=_MESSAGES, tools=_TOOLS)
