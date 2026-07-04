@@ -12,6 +12,7 @@ The website's real progress bars poll ``/api/jobs/*``; these tests pin:
   required, so the suite stays green on a fresh checkout)
 """
 
+import threading
 import time
 import unittest
 
@@ -237,16 +238,49 @@ class TestJobsRoutes(unittest.TestCase):
             stages,
         )
 
-    def test_cancel_route_stops_simulate_job(self):
-        r = self.client.post("/api/jobs/simulate", json={"bike_preset": "gsxr1000_k5"})
-        self.assertEqual(r.status_code, 202)
-        jid = r.json()["job_id"]
-        rc = self.client.post(f"/api/jobs/{jid}/cancel")
+    def test_cancel_route_stops_running_job(self):
+        # Cancel must land while the job is still active. The real
+        # /api/jobs/simulate K5 sim finishes in ~0.3s, so a submit-then-cancel
+        # timing race let the job reach a terminal state before the cancel POST
+        # arrived (cancel-after-done is a no-op) — the old test flaked on fast
+        # runners. Drive the SAME registry + cancel route with a controllable
+        # long-running job so the outcome is deterministic, not timing-based.
+        cancelled_cleanly = threading.Event()
+
+        def _blocking_runner(progress):
+            # Emit progress ticks forever; progress() raises JobCancelled once
+            # the flag is set, unwinding the worker exactly like a real sim
+            # cancels at its ~250-step ticks. The registry maps that to status
+            # "cancelled"; this branch only runs if cancellation is observed.
+            try:
+                for i in range(1, 20_000):
+                    progress(min(0.99, i / 1000.0), stage="Simulating")
+                    time.sleep(0.005)
+            except jobs_mod.JobCancelled:
+                cancelled_cleanly.set()
+                raise
+            return {"unreached": True}  # pragma: no cover
+
+        job = jobs_mod.create_job("simulate", _blocking_runner)
+
+        # Wait until the worker is observably running (bounded poll on state,
+        # never a fixed sleep) so the cancel provably hits an active job.
+        for _ in range(400):
+            if job.status == "running":
+                break
+            time.sleep(0.005)
+        self.assertEqual(job.status, "running")
+
+        rc = self.client.post(f"/api/jobs/{job.id}/cancel")
         self.assertEqual(rc.status_code, 200)
         self.assertTrue(rc.json()["cancel_requested"])
-        final, _ = _poll_until_finished(self.client, jid, timeout_s=30)
+
+        final, _ = _poll_until_finished(self.client, job.id, timeout_s=30)
         self.assertEqual(final["status"], "cancelled")
         self.assertNotIn("result", final)
+        self.assertTrue(
+            cancelled_cleanly.wait(timeout=5), "worker did not unwind via JobCancelled"
+        )
 
     def test_cancel_unknown_job_404(self):
         r = self.client.post("/api/jobs/deadbeef00000000/cancel")
