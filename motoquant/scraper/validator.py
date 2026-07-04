@@ -76,7 +76,11 @@ HP_PER_CC_MAX = 3.0  # highly tuned race engine
 # Allow 30% tolerance (cam timing, measurement variation)
 TORQUE_CONSISTENCY_TOLERANCE = 0.30
 
-TIRE_SIZE_RE = re.compile(r"^\d{2,3}[/\\]\d{2,3}[ZR]?R?\d{2}[WH]?$", re.IGNORECASE)
+# Accepts radial notation (120/70ZR17, 110/70R17) AND Indian commuter bias-ply
+# dash notation where a dash replaces the radial code (100/80-17, 90/90-18).
+TIRE_SIZE_RE = re.compile(
+    r"^\d{2,3}[/\\]\d{2,3}(?:[ZR]?R?|-)\d{2}[WH]?$", re.IGNORECASE
+)
 
 CATEGORY_AERO_DEFAULTS = {
     "sport": (0.32, 0.45),

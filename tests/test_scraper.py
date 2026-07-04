@@ -186,6 +186,26 @@ class TestValidateSpec:
         assert result.is_valid  # warning only
         assert any("rear_tire_size" in w for w in result.warnings)
 
+    @pytest.mark.parametrize(
+        "size",
+        ["100/80-17", "90/90-18", "100/90-18", "130/70-17", "120/80-16"],
+    )
+    def test_tire_size_bias_ply_dash_notation_no_warning(self, good_spec, size):
+        # Indian commuter bias-ply sizes use a dash where the radial code sits.
+        good_spec.front_tire_size = size
+        good_spec.rear_tire_size = size
+        result = validate_spec(good_spec)
+        assert result.is_valid
+        assert not any(
+            "tire_size" in w and "standard format" in w for w in result.warnings
+        )
+
+    def test_tire_size_garbage_still_warns(self, good_spec):
+        good_spec.rear_tire_size = "100/-17"  # missing aspect ratio
+        result = validate_spec(good_spec)
+        assert result.is_valid  # warning only
+        assert any("rear_tire_size" in w for w in result.warnings)
+
     def test_power_kw_auto_converts(self):
         # 520 is out of HP bounds [5, 500], but 520 * 0.7457 ≈ 387 HP is valid
         # → validator should auto-convert with a warning (not an error)
