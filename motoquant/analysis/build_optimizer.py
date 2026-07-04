@@ -55,6 +55,7 @@ from .recommendations import (
 )
 from .roi import (
     PartROIResult,
+    _brake_susp_slot,
     _grouped_knapsack,
     _knapsack_group_key,
     _run_et,
@@ -422,15 +423,19 @@ def _select_build(
     *,
     allow_negative: bool = False,
     position_of: dict[int, str] | None = None,
+    slot_of: dict[int, str] | None = None,
 ) -> list[PartROIResult]:
     """
     Pick the affordable subset maximising the goal metric, with at most one
-    part from each exclusive category (see roi.EXCLUSIVE_CATEGORIES) and at
-    most one sprocket per position when ``position_of`` maps part_id ->
-    'front'/'rear'.  Free parts (price 0) cost no budget.  Delegates to
-    roi._grouped_knapsack, which rounds bucket weights UP so the selected
-    build can never exceed the stated budget (the old floor division let
-    every part under-weigh by up to ₹99 — sub-₹100 parts were free).
+    part from each exclusive category (see roi.EXCLUSIVE_CATEGORIES), at most
+    one sprocket per position when ``position_of`` maps part_id ->
+    'front'/'rear', and at most one brake/suspension part per physical slot
+    when ``slot_of`` maps part_id -> a slot key (e.g. 'brakes:pad:front',
+    'suspension:fork'). Complementary slots (front + rear pads, fork + shock)
+    stay independently selectable. Free parts (price 0) cost no budget.
+    Delegates to roi._grouped_knapsack, which rounds bucket weights UP so the
+    selected build can never exceed the stated budget (the old floor division
+    let every part under-weigh by up to ₹99 — sub-₹100 parts were free).
     """
     gain = (
         (lambda r: r.delta_trap_ms) if goal == "max_trap" else (lambda r: r.delta_et_s)
@@ -448,7 +453,7 @@ def _select_build(
         candidates,
         budget_inr,
         gain,
-        lambda r: _knapsack_group_key(r, position_of),
+        lambda r: _knapsack_group_key(r, position_of, slot_of),
     )
 
 
@@ -580,22 +585,32 @@ def optimize_build(
         (lambda r: r.delta_trap_ms) if goal == "max_trap" else (lambda r: r.delta_et_s)
     )
     # Position map so the knapsack can hold one front AND one rear sprocket
-    # but never two of the same position.
+    # but never two of the same position; slot map so it can hold complementary
+    # brake/suspension parts (front + rear pads, fork + shock) but never two
+    # parts fighting for the same physical slot.
     position_of: dict[int, str] = {}
+    slot_of: dict[int, str] = {}
     for p in filtered:
-        if p.get("category_name") == "sprocket":
-            specs = p.get("specifications")
-            if isinstance(specs, str):
-                try:
-                    import json as _json
+        cat_name = p.get("category_name")
+        if cat_name not in ("sprocket", "brakes", "suspension"):
+            continue
+        specs = p.get("specifications")
+        if isinstance(specs, str):
+            try:
+                import json as _json
 
-                    specs = _json.loads(specs)
-                except (ValueError, TypeError):
-                    specs = None
+                specs = _json.loads(specs)
+            except (ValueError, TypeError):
+                specs = None
+        if cat_name == "sprocket":
             if isinstance(specs, dict) and specs.get("position") in ("front", "rear"):
                 position_of[p["id"]] = specs["position"]
+        else:
+            slot = _brake_susp_slot(cat_name, specs, p.get("model_name"))
+            if slot:
+                slot_of[p["id"]] = slot
     selected = _select_build(
-        individual, float(budget_inr), goal, position_of=position_of
+        individual, float(budget_inr), goal, position_of=position_of, slot_of=slot_of
     )
 
     # Surrogate-scored runs: re-verify the SELECTED parts with the full sim
@@ -646,7 +661,11 @@ def optimize_build(
                     r.delta_et_s = round(d_et, 4)
                     r.delta_trap_ms = round(d_trap, 4)
             reselected = _select_build(
-                individual, float(budget_inr), goal, position_of=position_of
+                individual,
+                float(budget_inr),
+                goal,
+                position_of=position_of,
+                slot_of=slot_of,
             )
             if {r.part_id for r in reselected} == {r.part_id for r in selected}:
                 selected = reselected
