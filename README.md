@@ -9,7 +9,7 @@
 First-principles Python physics engine for motorcycle quarter-mile drag racing
 prediction, optimisation, and parts ROI analysis. Aimed at the Indian drag
 racing community (Aamby Valley, MMRT, BIC, Kari, Hyderabad) with
-535 bikes, 257 tires, 594 parts, and 20 venues modelled, validated
+541 bikes, 257 tires, 594 parts, and 20 venues modelled, validated
 against 223 published benchmarks (weighted mean |Δ| 0.242 s; ±0.009 s across
 the 10 cleanest instrumented tests) by a ~3,000-test pytest suite.
 
@@ -88,7 +88,7 @@ and phase roadmap.
 ## Project state (Jun 2026)
 
 - **Phase 1 -- Core Physics:** complete. 15 sub-models, adaptive RK4.
-- **Phase 2 -- Database & Ingestion:** complete. 535 bikes, 232 tires,
+- **Phase 2 -- Database & Ingestion:** complete. 541 bikes, 232 tires,
   594 parts, 20 venues, 1253 OEM bike-tire fitments.
 - **Phase 3 -- Validation & Calibration:** in progress. Dragy + dyno + ECU
   import done; FastAPI + Next.js frontend live at motoquant.in.
