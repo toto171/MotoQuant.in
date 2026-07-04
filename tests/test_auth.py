@@ -668,3 +668,149 @@ class TestPasswordRoutes(unittest.TestCase):
         self.client.post("/api/auth/verify", json={"token": token})
         user = users_repo.get_user_by_email(self.conn, "verifyme@test.in")
         self.assertEqual(user["email_verified"], 1)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 8. Paid-tooling tier gate — /api/optimize/* + /api/autotune/* (roadmap A1-1)
+# ══════════════════════════════════════════════════════════════════════════════
+
+
+class TestPaidToolingTierGate(unittest.TestCase):
+    """The build optimiser + ECU autotune surface (sync + job variants) is
+    pro-tier gated via Depends(require_tier("pro")).
+
+    The gate is INERT until MOTOQUANT_BILLING_ENFORCE is truthy:
+      * billing OFF (freemium-beta default) → anonymous requests pass the gate
+        exactly as before (no 401/402 regression);
+      * billing ON + no token             → 401 (authentication required);
+      * billing ON + authenticated free   → 402 (upgrade_required — genuine
+        payment-required path, mirroring /api/simulate/save).
+
+    Only the auth gate is under test here, so the request bodies are kept
+    minimal (a preset bike) and responses are checked for the gate status,
+    not the downstream simulation result.  TestClient is built with
+    raise_server_exceptions=False so a downstream 5xx surfaces as a response
+    rather than bubbling out of the client (the gate assertions never depend
+    on the body running).
+    """
+
+    # Every route gated in this change, with a minimal valid JSON body.
+    ROUTES = (
+        ("/api/optimize/build", {"bike_preset": "gsxr1000_k5", "budget_inr": 60000}),
+        (
+            "/api/autotune/ecu",
+            {"bike_preset": "gsxr1000_k5", "gear_span": 1, "launch_steps": 2},
+        ),
+        ("/api/jobs/optimize", {"bike_preset": "gsxr1000_k5", "budget_inr": 60000}),
+        (
+            "/api/jobs/autotune",
+            {"bike_preset": "gsxr1000_k5", "gear_span": 1, "launch_steps": 2},
+        ),
+    )
+
+    @classmethod
+    def setUpClass(cls):
+        try:
+            from fastapi.testclient import TestClient
+
+            from motoquant.api import app
+        except ImportError:
+            raise unittest.SkipTest("fastapi not installed")
+        cls.client = TestClient(app, raise_server_exceptions=False)
+
+    def setUp(self):
+        import motoquant.auth as auth_mod
+
+        self._orig_enforce = auth_mod.BILLING_ENFORCE
+
+    def tearDown(self):
+        import motoquant.auth as auth_mod
+
+        auth_mod.BILLING_ENFORCE = self._orig_enforce
+
+    def _set_enforce(self, value: bool):
+        import motoquant.auth as auth_mod
+
+        auth_mod.BILLING_ENFORCE = value
+
+    def _make_token(self, tier: str) -> str:
+        import motoquant.auth as auth_mod
+
+        return auth_mod._make_access_token(999, "t@t.in", tier, "jti-tooling")
+
+    # (1) NO REGRESSION: billing OFF (default) → gate is inert, anonymous passes.
+    def test_billing_off_routes_pass_anonymously(self):
+        self._set_enforce(False)
+        for path, body in self.ROUTES:
+            with self.subTest(route=path):
+                res = self.client.post(path, json=body)
+                self.assertNotIn(
+                    res.status_code,
+                    (401, 402),
+                    f"{path} unexpectedly auth-blocked with billing OFF: "
+                    f"{res.status_code} {res.text[:200]}",
+                )
+
+    # (2a) billing ON + no token → 401 (require_tier's unauthenticated branch).
+    def test_billing_on_no_token_gets_401(self):
+        self._set_enforce(True)
+        for path, body in self.ROUTES:
+            with self.subTest(route=path):
+                res = self.client.post(path, json=body)
+                self.assertEqual(
+                    res.status_code,
+                    401,
+                    f"{path}: expected 401 with billing ON + no token, "
+                    f"got {res.status_code} {res.text[:200]}",
+                )
+
+    # (2b) billing ON + authenticated free-tier user → 402 payment required.
+    def test_billing_on_free_user_gets_402(self):
+        self._set_enforce(True)
+        token = self._make_token("free")
+        fake_user = {"id": 999, "email": "t@t.in", "tier": "free", "is_active": 1}
+        for path, body in self.ROUTES:
+            with self.subTest(route=path):
+                with (
+                    patch("motoquant.auth._users.is_session_valid", return_value=True),
+                    patch(
+                        "motoquant.auth._users.get_user_by_id", return_value=fake_user
+                    ),
+                ):
+                    res = self.client.post(
+                        path,
+                        json=body,
+                        headers={"Authorization": f"Bearer {token}"},
+                    )
+                self.assertEqual(
+                    res.status_code,
+                    402,
+                    f"{path}: expected 402 for free-tier user, "
+                    f"got {res.status_code} {res.text[:200]}",
+                )
+                self.assertEqual(res.json()["detail"]["error"], "upgrade_required")
+
+    # billing ON + authenticated pro-tier user → gate passes (not 401/402).
+    def test_billing_on_pro_user_passes_gate(self):
+        self._set_enforce(True)
+        token = self._make_token("pro")
+        fake_user = {"id": 999, "email": "t@t.in", "tier": "pro", "is_active": 1}
+        for path, body in self.ROUTES:
+            with self.subTest(route=path):
+                with (
+                    patch("motoquant.auth._users.is_session_valid", return_value=True),
+                    patch(
+                        "motoquant.auth._users.get_user_by_id", return_value=fake_user
+                    ),
+                ):
+                    res = self.client.post(
+                        path,
+                        json=body,
+                        headers={"Authorization": f"Bearer {token}"},
+                    )
+                self.assertNotIn(
+                    res.status_code,
+                    (401, 402),
+                    f"{path}: pro user unexpectedly gate-blocked "
+                    f"{res.status_code} {res.text[:200]}",
+                )

@@ -3524,7 +3524,12 @@ def job_chat(req: ChatRequest, request: Request, client=Depends(get_llm_client))
 
 # ═══════════════════════════════════════════════════════════════════════════
 # BUILD OPTIMIZER + ECU AUTOTUNE  (/api/optimize/*, /api/autotune/*)  — Track B
-# Public (no auth): the free demo surface, like /simulate/quick + /venues/resolve.
+# Pro-tier gated: these are the paid tooling surface (distinct from the free
+# demo routes like /simulate/quick, /simulate/compare, and /chat). The
+# require_tier("pro") dependency is INERT until MOTOQUANT_BILLING_ENFORCE is
+# truthy — with billing off (the freemium-beta default) every request passes
+# anonymously exactly as before; with billing on, an unauthenticated call gets
+# 401 and a lower-tier user gets 402 (upgrade CTA). Still rate-limited.
 # The optimizer scores candidates through the loaded surrogate when available and
 # in-envelope, else falls back to the full physics sim — so it always answers.
 # ═══════════════════════════════════════════════════════════════════════════
@@ -3645,7 +3650,10 @@ def _optimize_impl(req: OptimizeBuildRequest, progress=None):
     "/api/optimize/build",
     dependencies=[Depends(rate_limit("optimize", 6, 60.0))],
 )
-def optimize_build_route(req: OptimizeBuildRequest):
+def optimize_build_route(
+    req: OptimizeBuildRequest,
+    _auth: dict = Depends(require_tier("pro")),  # noqa: B008
+):
     """Synchronous build optimiser (see ``_optimize_impl``)."""
     return _optimize_impl(req)
 
@@ -3766,7 +3774,10 @@ def _autotune_impl(req: AutotuneRequest, progress=None):
     "/api/autotune/ecu",
     dependencies=[Depends(rate_limit("autotune", 6, 60.0))],
 )
-def autotune_ecu_route(req: AutotuneRequest):
+def autotune_ecu_route(
+    req: AutotuneRequest,
+    _auth: dict = Depends(require_tier("pro")),  # noqa: B008
+):
     """Synchronous autotune (see ``_autotune_impl``)."""
     return _autotune_impl(req)
 
@@ -3818,7 +3829,10 @@ def job_topspeed(req: TopSpeedRequest):
     status_code=202,
     dependencies=[Depends(rate_limit("optimize", 6, 60.0))],
 )
-def job_optimize(req: OptimizeBuildRequest):
+def job_optimize(
+    req: OptimizeBuildRequest,
+    _auth: dict = Depends(require_tier("pro")),  # noqa: B008
+):
     """Start the build optimiser as a background job (real progress)."""
     return _start_job("optimize", lambda progress: _optimize_impl(req, progress))
 
@@ -3828,7 +3842,10 @@ def job_optimize(req: OptimizeBuildRequest):
     status_code=202,
     dependencies=[Depends(rate_limit("autotune", 6, 60.0))],
 )
-def job_autotune(req: AutotuneRequest):
+def job_autotune(
+    req: AutotuneRequest,
+    _auth: dict = Depends(require_tier("pro")),  # noqa: B008
+):
     """Start the ECU autotune as a background job (real progress)."""
     return _start_job("autotune", lambda progress: _autotune_impl(req, progress))
 
