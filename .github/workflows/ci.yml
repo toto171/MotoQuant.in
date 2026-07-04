@@ -14,11 +14,12 @@ jobs:
   python:
     name: Python tests + lint
     runs-on: ubuntu-latest
-    # The full suite runs the 502-bike no-silent-failure sweep (~4.5 min) plus
-    # the SALib/sklearn sobol+surrogate tests (installed below on purpose), so
-    # it legitimately needs ~20-25 min. The old 15 was never validated because
-    # a pre-existing ruff E702 failed the job before pytest ever ran.
-    timeout-minutes: 35
+    # The full suite runs the 541-bike no-silent-failure sweep plus the
+    # SALib/sklearn sobol+surrogate tests (installed below on purpose). Base
+    # runtime is ~20-25 min; the non-blocking --cov coverage instrumentation
+    # (line coverage) traces the sim hot loop across every bike and adds a big
+    # multiplier, so the cap is 50 to leave headroom (35 timed the job out).
+    timeout-minutes: 50
     steps:
       - name: Checkout
         uses: actions/checkout@v4

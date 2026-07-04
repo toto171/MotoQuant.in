@@ -70,7 +70,11 @@ addopts = "-q"
 # answers "which physics branches are actually exercised" without gating merges.
 [tool.coverage.run]
 source = ["motoquant"]
-branch = true
+# Line coverage only (not branch): branch tracing roughly doubles the per-line
+# overhead, and this suite runs thousands of physics sims -- branch coverage
+# pushed the CI job past its timeout. Line coverage is enough for the "which
+# code is exercised" signal.
+branch = false
 omit = [
     "*/tests/*",
 ]
