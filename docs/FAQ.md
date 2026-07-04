@@ -16,7 +16,6 @@ Our validation benchmarks show **±0.07 seconds** on known quarter-mile times (G
 
 ### Where does the simulator run?
 - **Web simulator** on motoquant.in — enter your bike and mods, get ET in ~50 ms
-- **Streamlit app** (`streamlit run app.py`) — local installation with full advanced mode
 - **CLI** (`python -m motoquant.run sim ...`) — batch simulations, scripting
 - **API** — FastAPI backend for integration into your own tools
 
@@ -91,7 +90,7 @@ Common causes:
 4. **Staging line grip** — rain, oil, loose surface reduces grip multiplier
 
 ### Can I see a graph of my acceleration over time?
-Yes — the Streamlit app shows **v(t), RPM(t), gear(t), and tire temperature(t)** plots. The web simulator shows these as a future feature.
+Yes — the web simulator's Charts tab shows **v(t), RPM(t), gear(t), and tire temperature(t)** plots after a full sim; the CLI can emit the same timeseries as JSON.
 
 ---
 
@@ -127,7 +126,7 @@ Aerodynamic drag increases with the square of velocity. At high speeds, more pow
 ## Customization & Accuracy
 
 ### Can I upload my own dyno data?
-Yes — the CLI and Streamlit app support dyno CSV import (`python -m motoquant.run calibrate import-dyno FILE`). After import, the simulator uses your real curve instead of estimates. This is the best way to get accurate predictions for a tuned bike.
+Yes — the CLI supports dyno CSV import (`python -m motoquant.run calibrate import-dyno FILE`), and the web app accepts dyno uploads. After import, the simulator uses your real curve instead of estimates. This is the best way to get accurate predictions for a tuned bike.
 
 ### Can I import Dragy GPS data from my runs?
 Yes — the simulator can import Dragy CSV or VBO files from RaceChrono. It detects your real acceleration profile and can auto-calibrate the model to match your actual performance. Use `calibrate import-dragy FILE`.

@@ -52,7 +52,6 @@ body:
         - database / schema
         - CLI
         - FastAPI backend
-        - Streamlit UI
         - Desktop (Tauri + React)
         - Web (Next.js)
         - Calibration (Dragy / dyno / ECU)

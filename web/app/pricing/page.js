@@ -59,7 +59,7 @@ const FAQ = [
   { q: "Can I switch tiers?", a: "Yes — you can upgrade or downgrade at any time from your account page. Upgrades take effect immediately; downgrades apply at the end of your current billing period." },
   { q: "What happens if I cancel?", a: "Your access continues until the end of the paid period. After that, your account moves to the Free tier automatically. No data is deleted — your build history and sim runs are retained." },
   { q: "Do I need an internet connection?", a: "The web app always needs a connection. The MotoQuant desktop app (Pro/Studio) works offline for up to 7 days on a cached license validation — useful at the drag strip where signal can be patchy." },
-  { q: "Is GST included in the price?", a: "Prices shown are exclusive of GST. 18% GST will be added at checkout as per Indian tax regulations. You will receive a GST invoice." },
+  { q: "Is GST included in the price?", a: "Prices shown are exclusive of GST. 18% GST is applied at checkout where applicable, as per Indian tax regulations. Your tax invoice is issued by our payment provider (Razorpay or Stripe)." },
   { q: "What payment methods are accepted?", a: "In India: UPI, credit/debit cards, net banking, and wallets via Razorpay. International riders: credit/debit cards via Stripe. PayPal support is planned." },
   { q: "Is there a refund policy?", a: "Yes. If you are not satisfied within 7 days of your first payment, contact motoquant@gmail.com for a full refund — no questions asked." },
 ];
@@ -375,7 +375,7 @@ function PricingPageInner() {
                 International: <span className="text-white/80 font-medium">Stripe</span> · Cards
               </p>
               <p className="text-xs text-white/35 font-mono">
-                All prices in INR + 18% GST at checkout · Cancel anytime · 7-day refund guarantee
+                All prices in INR + 18% GST at checkout where applicable · Cancel anytime · 7-day refund guarantee
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-[11px] font-mono text-white/45">
                 <span>Aamby Valley</span>

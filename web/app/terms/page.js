@@ -71,7 +71,8 @@ export default function TermsPage() {
           <p>
             MotoQuant Pro offers three tiers: Free, Pro (₹499/mo or ₹4,999/yr), and
             Studio (₹1,999/mo or ₹19,990/yr). Prices are exclusive of GST (18% applicable
-            under Indian GST law). You will receive a GST-compliant invoice.
+            under Indian GST law), which is applied at checkout where applicable. A tax
+            invoice is issued by our payment provider.
           </p>
           <p>
             <strong>Open beta: </strong>while MotoQuant Pro is in open beta, all Pro and

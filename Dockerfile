@@ -8,7 +8,6 @@ RUN pip install --no-cache-dir -r requirements-api.txt
 
 # Copy application code
 COPY motoquant/ ./motoquant/
-COPY app.py .
 COPY motoquant.db .
 COPY artifacts/surrogate/surrogate_numpy.npz ./artifacts/surrogate/surrogate_numpy.npz
 COPY docker-entrypoint.sh .
