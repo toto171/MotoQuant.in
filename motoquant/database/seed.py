@@ -5100,6 +5100,10 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
     # ECU FLASHES (25 target) — exact-tier for 3 seeded bikes + family
     # ══════════════════════════════════════════════════════════════
     # Woolich exact-tier for seeded reference bikes (GSX-R K5, YZF-R1 4C8, Hayabusa Gen1)
+    # Each flash is pinned to the actual platform it is named for (manufacturer
+    # + I4 + a tight displacement window). Folded from patch_2026_06_11 H — a
+    # loose Suzuki+Yamaha/1000cc+ rule matched the Hayabusa but NOT the 999cc
+    # K5 it is named for, and cross-matched the wrong-brand litre bikes.
     woolich_exact = [
         {
             "model": "GSX-R 1000 K5 Stage 1 Flash",
@@ -5108,6 +5112,9 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "tq": 5.0,
             "redline": 13500,
             "price": 18000,
+            "mfr": ["Suzuki"],
+            "dmin": 985,
+            "dmax": 1010,
         },
         {
             "model": "GSX-R 1000 K5 Stage 2 Flash",
@@ -5116,6 +5123,9 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "tq": 9.0,
             "redline": 14000,
             "price": 25000,
+            "mfr": ["Suzuki"],
+            "dmin": 985,
+            "dmax": 1010,
         },
         {
             "model": "YZF-R1 4C8 Stage 1 Flash",
@@ -5124,6 +5134,9 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "tq": 4.5,
             "redline": 13800,
             "price": 18000,
+            "mfr": ["Yamaha"],
+            "dmin": 990,
+            "dmax": 1010,
         },
         {
             "model": "YZF-R1 4C8 Stage 2 Flash",
@@ -5132,6 +5145,9 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "tq": 8.0,
             "redline": 14200,
             "price": 24000,
+            "mfr": ["Yamaha"],
+            "dmin": 990,
+            "dmax": 1010,
         },
         {
             "model": "Hayabusa Gen1 Stage 1 Flash",
@@ -5140,6 +5156,9 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "tq": 7.0,
             "redline": 11200,
             "price": 20000,
+            "mfr": ["Suzuki"],
+            "dmin": 1290,
+            "dmax": 1310,
         },
     ]
     for e in woolich_exact:
@@ -5170,11 +5189,13 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
-                        "manufacturers": ["Suzuki", "Yamaha"],
-                        "displacement_min_cc": 1000,
-                        "categories": ["sport", "supersport"],
+                        "manufacturers": e["mfr"],
+                        "engine_configs": ["I4"],
+                        "displacement_min_cc": e["dmin"],
+                        "displacement_max_cc": e["dmax"],
+                        "categories": ["sport"],
                     },
-                    "description": "Woolich Stage 1/2 flash for 1000cc+ Japanese sportbikes",
+                    "description": "Woolich flash pinned to its I4 platform",
                 },
                 "price_inr": e["price"],
                 "availability": "in_stock",
@@ -5276,12 +5297,15 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {
+                    # 'Yamaha India' / 'Honda India' are not manufacturers-table
+                    # names — the flash was silently skipping the R15/CB350
+                    # class it targets. Real names per patch_2026_06_11 H.
                     "manufacturers": [
                         "Bajaj",
                         "TVS",
                         "Hero",
-                        "Yamaha India",
-                        "Honda India",
+                        "Yamaha",
+                        "Honda",
                     ],
                     "displacement_min_cc": 200,
                     "displacement_max_cc": 450,
@@ -5598,7 +5622,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                     "engine_configs": ["I4"],
                     "displacement_min_cc": 990,
                     "displacement_max_cc": 1050,
-                    "categories": ["sport", "supersport"],
+                    "categories": ["sport"],
                 },
                 "description": "Fits inline-4 1000cc sportbikes (R1, GSX-R, CBR1000RR, etc.)",
             }
@@ -5609,7 +5633,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                     "engine_configs": ["I4"],
                     "displacement_min_cc": 550,
                     "displacement_max_cc": 750,
-                    "categories": ["sport", "supersport"],
+                    "categories": ["sport"],
                 },
                 "description": "Fits 600-750cc inline-4 sportbikes",
             }
@@ -5620,7 +5644,9 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "tier": "family",
                 "match": {
                     "engine_configs": ["V2"],
-                    "categories": ["cruiser"],
+                    # + touring per patch_2026_06_11 L: these 2-into-1 full
+                    # systems also fit V-twin baggers (touring cruisers).
+                    "categories": ["cruiser", "touring"],
                     "displacement_min_cc": 800,
                 },
                 "description": "Fits large V-twin cruisers (Harley-Davidson, Indian Motorcycle, 800cc+)",
@@ -5650,7 +5676,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                     "engine_configs": ["I4"],
                     "displacement_min_cc": 600,
                     "displacement_max_cc": 1050,
-                    "categories": ["sport", "supersport", "naked"],
+                    "categories": ["sport", "naked"],
                 },
                 "description": "Generic sport slip-on for 600-1050cc inline-4 sport/naked bikes",
             }
@@ -5754,7 +5780,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "match": {
                     "engine_configs": ["I4", "V4"],
                     "displacement_min_cc": 1000,
-                    "categories": ["sport", "supersport"],
+                    "categories": ["sport"],
                 },
                 "description": "Yoyodyne drag slipper for litre-class sportbikes",
             },
@@ -5777,7 +5803,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                     "engine_configs": ["I4", "V4"],
                     "displacement_min_cc": 990,
                     "displacement_max_cc": 1200,
-                    "categories": ["sport", "supersport"],
+                    "categories": ["sport"],
                 },
                 "description": "Suter Racing slipper for 1000cc+ drag prep",
             },
@@ -5820,7 +5846,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {
-                    "categories": ["sport", "supersport"],
+                    "categories": ["sport"],
                     "displacement_min_cc": 400,
                 },
                 "description": "Barnett Kevlar clutch plates for sportbikes",
@@ -5927,7 +5953,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_deltas": {"chassis.dry_mass_kg": -2.8},
             "fitment_rules": {
                 "tier": "category",
-                "match": {"categories": ["sport", "supersport", "naked"]},
+                "match": {"categories": ["sport", "naked"]},
                 "description": "Shorai Li-ion battery for sportbikes",
             },
             "price_inr": 12000,
@@ -5947,9 +5973,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_deltas": {"chassis.dry_mass_kg": -2.2},
             "fitment_rules": {
                 "tier": "category",
-                "match": {
-                    "categories": ["sport", "supersport", "adventure", "touring"]
-                },
+                "match": {"categories": ["sport", "adventure", "touring"]},
                 "description": "Antigravity restart-capable Li-ion battery",
             },
             "price_inr": 18000,
@@ -6020,8 +6044,10 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_deltas": {"engine.peak_power_hp": 2.2, "engine.peak_torque_nm": 1.2},
             "fitment_rules": {
                 "tier": "family",
-                "match": {"categories": ["sport", "supersport"]},
-                "description": "BMC race-spec air filter for sportbikes",
+                # 300cc+ floor (patch_2026_06_11): a +2.2 hp race filter was
+                # crediting +12% power on a 155cc R15; small-cc has its own part.
+                "match": {"displacement_min_cc": 300, "categories": ["sport"]},
+                "description": "BMC race-spec air filter for 300cc+ sportbikes",
             },
             "price_inr": 9500,
             "availability": "in_stock",
@@ -6233,7 +6259,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {
-                    "categories": ["sport", "supersport"],
+                    "categories": ["sport"],
                     "displacement_min_cc": 600,
                 },
                 "description": "NX nitrous 20 HP kit for 600cc+ sportbikes",
@@ -6257,7 +6283,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {
-                    "categories": ["sport", "supersport"],
+                    "categories": ["sport"],
                     "displacement_min_cc": 800,
                 },
                 "description": "NX nitrous 40 HP dry kit for 800cc+ sportbikes",
@@ -6280,7 +6306,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {
-                    "categories": ["sport", "supersport"],
+                    "categories": ["sport"],
                     "displacement_min_cc": 700,
                 },
                 "description": "ZEX universal nitrous kit 35 HP for sport bikes",
@@ -6308,7 +6334,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "match": {
                     "engine_configs": ["I4", "V4"],
                     "displacement_min_cc": 1000,
-                    "categories": ["sport", "supersport"],
+                    "categories": ["sport"],
                 },
                 "description": "Brembo Stylema radial calipers for 1000cc+ sportbikes",
             },
@@ -6324,7 +6350,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "specs": {"type": "brake_pads", "material": "sintered"},
             "fitment_rules": {
                 "tier": "family",
-                "match": {"categories": ["sport", "supersport"]},
+                "match": {"categories": ["sport"]},
                 "description": "SBS sintered race pads for sportbikes",
             },
             "price_inr": 8500,
@@ -6363,7 +6389,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_multipliers": {"tires.mu_peak": 1.02},
             "fitment_rules": {
                 "tier": "family",
-                "match": {"categories": ["sport", "supersport"]},
+                "match": {"categories": ["sport"]},
                 "description": "Öhlins STX rear shock for sportbikes",
             },
             "price_inr": 55000,
@@ -6417,7 +6443,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_deltas": {"chassis.dry_mass_kg": -5.0},
             "fitment_rules": {
                 "tier": "family",
-                "match": {"categories": ["sport", "supersport"]},
+                "match": {"categories": ["sport"]},
                 "description": "Catalyst carbon fairing kit for sportbikes",
             },
             "price_inr": 120000,
@@ -6435,7 +6461,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {
-                    "categories": ["sport", "supersport"],
+                    "categories": ["sport"],
                     "displacement_min_cc": 600,
                 },
                 "description": "Armour Bodies race fairing for 600cc+ sportbikes",
@@ -6462,7 +6488,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {
-                    "categories": ["sport", "supersport"],
+                    "categories": ["sport"],
                     "displacement_min_cc": 900,
                 },
                 "description": 'Voodoo 4" wheelie bar for litre-class drag bikes',
@@ -6487,7 +6513,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {
-                    "categories": ["sport", "supersport"],
+                    "categories": ["sport"],
                     "displacement_min_cc": 1000,
                 },
                 "description": 'Schnitzer 6" competition wheelie bar for 1000cc+ drag bikes',
@@ -6513,7 +6539,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {
-                    "categories": ["sport", "supersport"],
+                    "categories": ["sport"],
                     "displacement_min_cc": 900,
                 },
                 "description": 'Voodoo 4" billet swingarm extension for drag bikes',
@@ -6533,7 +6559,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {
-                    "categories": ["sport", "supersport"],
+                    "categories": ["sport"],
                     "displacement_min_cc": 1000,
                 },
                 "description": 'Voodoo 6" billet swingarm extension for 1000cc+ drag bikes',
@@ -6553,7 +6579,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {
-                    "categories": ["sport", "supersport"],
+                    "categories": ["sport"],
                     "displacement_min_cc": 1100,
                 },
                 "description": 'Schnitzer 8" extended swingarm for full drag setup',
@@ -6668,6 +6694,9 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "tier": "family",
                 "match": {
                     "manufacturers": ["Honda"],
+                    # I4 only (patch_2026_06_11 H): keeps the flash off the
+                    # V4 RC213V-S and V2 VTR1000 SP2.
+                    "engine_configs": ["I4"],
                     "displacement_min_cc": 999,
                     "displacement_max_cc": 1001,
                     "categories": ["sport"],
@@ -6723,8 +6752,10 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {
+                    # 'model_name' is not a FitmentMatch constraint key (the
+                    # engine ignores it); the Bajaj 199-201cc window is the real
+                    # rule. Dropped per patch_2026_06_11 K.
                     "manufacturers": ["Bajaj"],
-                    "model_name": "Pulsar NS200",
                     "displacement_min_cc": 199,
                     "displacement_max_cc": 201,
                 },
@@ -6744,9 +6775,11 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {
+                    # Real Duke 390 engine is 373/399cc — the 390-391 window
+                    # matched nothing. Widened per patch_2026_06_11 E.
                     "manufacturers": ["KTM"],
-                    "displacement_min_cc": 390,
-                    "displacement_max_cc": 391,
+                    "displacement_min_cc": 370,
+                    "displacement_max_cc": 400,
                 },
                 "description": "Race Dynamics tune for KTM Duke 390",
             },
@@ -6910,7 +6943,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {
-                    "categories": ["sport", "supersport"],
+                    "categories": ["sport"],
                     "displacement_min_cc": 1000,
                 },
                 "description": "ZEX 50 HP nitrous kit for 1000cc+ sportbikes",
@@ -6954,7 +6987,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {
-                    "categories": ["sport", "supersport"],
+                    "categories": ["sport"],
                     "displacement_min_cc": 1100,
                 },
                 "description": "NX dual-stage 60 HP nitrous for full drag setup",
@@ -7119,7 +7152,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
-                        "categories": ["sport", "supersport"],
+                        "categories": ["sport"],
                         "displacement_min_cc": 500 + i * 200,
                     },
                     "description": f"{brand} {material} fairing for sport bikes",
@@ -7144,7 +7177,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
-                        "categories": ["sport", "supersport"],
+                        "categories": ["sport"],
                         "displacement_min_cc": 800 + i * 200,
                     },
                     "description": f'{length}" wheelie bar for drag bikes',
@@ -7398,13 +7431,15 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "displacement_max_cc": 1103,
             }
         elif "Panigale" in model:
-            # Older V-twin Panigale (1199/1299 Superquadro)
+            # Older V-twin Panigale (1199/1299 Superquadro). categories [sport]
+            # per patch_2026_06_11 I (keeps the full system off the Monster 1200).
             tier_desc = "Ducati Panigale V-twin exhausts (V2 1199-1299cc)"
             match = {
                 "manufacturers": ["Ducati"],
                 "engine_configs": ["V2"],
                 "displacement_min_cc": 1150,
                 "displacement_max_cc": 1299,
+                "categories": ["sport"],
             }
         elif "S1000" in model or "S1KRR" in model:
             tier_desc = "BMW S1000RR exhausts (I4 999cc)"
@@ -7444,7 +7479,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "engine_configs": ["I4"],
                 "displacement_min_cc": 550,
                 "displacement_max_cc": 650,
-                "categories": ["sport", "supersport"],
+                "categories": ["sport"],
             }
         elif "1200" in model:
             tier_desc = "1200cc+ large-displacement I4 exhausts"
@@ -7461,7 +7496,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "engine_configs": ["I4"],
                 "displacement_min_cc": 990,
                 "displacement_max_cc": 1050,
-                "categories": ["sport", "supersport"],
+                "categories": ["sport"],
             }
         elif "600" in model:
             tier_desc = "Generic 600cc I4 supersport exhausts"
@@ -7469,7 +7504,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "engine_configs": ["I4"],
                 "displacement_min_cc": 550,
                 "displacement_max_cc": 650,
-                "categories": ["sport", "supersport"],
+                "categories": ["sport"],
             }
         elif "RE 650" in model or "RE650" in model:
             # Royal Enfield 648cc parallel-twin specific — catches
@@ -7556,7 +7591,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "engine_configs": ["I4"],
                 "displacement_min_cc": 600,
                 "displacement_max_cc": 1050,
-                "categories": ["sport", "supersport", "naked"],
+                "categories": ["sport", "naked"],
             }
 
         parts.append(
@@ -7657,7 +7692,9 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                     "brand": "Regina Pro",
                     "model_name": f"{pitch} Front Sprocket {teeth}T Pro",
                     "part_number": f"REG-{pitch}-F-{teeth}",
-                    "specs": {"teeth": teeth, "pitch": pitch},
+                    # position stamped per patch_2026_07_03 so the build
+                    # optimizer's position-exclusivity knapsack groups it.
+                    "specs": {"teeth": teeth, "pitch": pitch, "position": "front"},
                     "param_overrides": {"drivetrain.front_sprocket": teeth},
                     "fitment_rules": {
                         "tier": "family",

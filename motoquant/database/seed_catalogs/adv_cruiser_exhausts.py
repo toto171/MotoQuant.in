@@ -903,11 +903,13 @@ def seed_adv_cruiser_exhausts(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        # No categories: the DB stores the VMAX as 'naked', so a
+                        # ['cruiser'] filter matched nothing. Dropped per
+                        # patch_2026_06_11 D; the Yamaha/I4/1670-1690 window pins it.
                         "manufacturers": ["Yamaha"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 1670,
                         "displacement_max_cc": 1690,
-                        "categories": ["cruiser"],
                     },
                     "description": "Two Brothers M-1 full system for Yamaha VMAX 1700 I4 muscle cruiser",
                 },
@@ -929,11 +931,12 @@ def seed_adv_cruiser_exhausts(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        # No categories: DB stores the VMAX as 'naked'
+                        # (patch_2026_06_11 D); Yamaha/I4/1670-1690 pins it.
                         "manufacturers": ["Yamaha"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 1670,
                         "displacement_max_cc": 1690,
-                        "categories": ["cruiser"],
                     },
                     "description": "LCE Racing drag exhaust for Yamaha VMAX 1700 muscle muscle-bike",
                 },

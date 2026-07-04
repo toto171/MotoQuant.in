@@ -148,9 +148,11 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        # Widened to the full V4 window (patch_2026_06_11 B): the
+                        # 1100 floor missed the 998cc Panigale V4R this is named for.
                         "manufacturers": ["Ducati"],
                         "engine_configs": ["V4"],
-                        "displacement_min_cc": 1100,
+                        "displacement_min_cc": 990,
                         "displacement_max_cc": 1110,
                     },
                 },
@@ -399,10 +401,12 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        # Low Rider ST is the 117ci (1923cc) M-8 — the 1860-1880
+                        # window missed it. Widened per patch_2026_06_11 M.
                         "manufacturers": ["Harley-Davidson", "HD", "Harley"],
                         "engine_configs": ["V2"],
-                        "displacement_min_cc": 1860,
-                        "displacement_max_cc": 1880,
+                        "displacement_min_cc": 1900,
+                        "displacement_max_cc": 1940,
                         "chain_pitch": None,
                     },
                 },
@@ -431,7 +435,10 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
-                        "manufacturers": ["Indian Motorcycle"],
+                        # The manufacturers table stores this brand as bare
+                        # 'Indian' — accept both so the Scout matches
+                        # (patch_2026_06_11 N).
+                        "manufacturers": ["Indian", "Indian Motorcycle"],
                         "engine_configs": ["V2"],
                         "displacement_min_cc": 1120,
                         "displacement_max_cc": 1150,
@@ -927,6 +934,7 @@ def seed_indian_retailer_depth(db) -> int:
                     "pitch": "520",
                     "teeth": 16,
                     "material": "aluminum",
+                    "position": "front",  # patch_2026_07_03
                 },
                 "param_overrides": {
                     "drivetrain.front_sprocket": 16,
@@ -956,6 +964,7 @@ def seed_indian_retailer_depth(db) -> int:
                     "pitch": "530",
                     "teeth": 17,
                     "material": "aluminum",
+                    "position": "front",  # patch_2026_07_03
                 },
                 "param_overrides": {
                     "drivetrain.front_sprocket": 17,
@@ -1045,6 +1054,7 @@ def seed_indian_retailer_depth(db) -> int:
                     "pitch": "428",
                     "teeth": 45,
                     "material": "steel",
+                    "position": "rear",  # patch_2026_07_03
                 },
                 "param_overrides": {
                     "drivetrain.rear_sprocket": 45,
@@ -1074,6 +1084,7 @@ def seed_indian_retailer_depth(db) -> int:
                     "pitch": "520",
                     "teeth": 43,
                     "material": "steel",
+                    "position": "rear",  # patch_2026_07_03
                 },
                 "param_overrides": {
                     "drivetrain.rear_sprocket": 43,
@@ -1129,6 +1140,7 @@ def seed_indian_retailer_depth(db) -> int:
                     "pitch": "530",
                     "teeth": 42,
                     "material": "aluminum",
+                    "position": "rear",  # patch_2026_07_03
                 },
                 "param_overrides": {
                     "drivetrain.rear_sprocket": 42,
