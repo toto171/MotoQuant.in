@@ -174,10 +174,10 @@ export default function AboutPage() {
             <Reveal delay={0.16}>
               <FounderCard initial="S" name="Sahil Shetye" role="Co-founder & CMO · Manipal, India" email="motoquant@gmail.com">
                 <p>
-                  Electronics-and-communications engineer, finishing his B.Tech in EEE at Manipal. The growth-and-market side of MotoQuant — and the electronics half of the hardware roadmap: PCB design (KiCad), EV powertrain and battery tech, low-level C.
+                  Electrical engineer and our pitchman — finishing his B.Tech in EEE at Manipal. The growth-and-market side of MotoQuant, and the electronics half of the hardware roadmap: PCB design, EV powertrain and battery tech, low-level C.
                 </p>
                 <p>
-                  Communication and market knowledge are the levers he owns — plus real internship experience — turning a physics engine into something racers and tuning shops actually hear about.
+                  Communication and market knowledge are the levers he owns, plus real market experience — turning a physics engine into something racers and tuning shops actually hear about, and want to implement.
                 </p>
                 <p className="border-l-2 border-brand-orange/30 pl-4 italic text-white/60">
                   &ldquo;In my third year, a major bike accident paused my degree. While recovering, I refused to sit idle — I built a social-media audience and finished multiple industry-standard certifications. I don&apos;t just study engineering; I build, optimize, and execute under pressure.&rdquo;
