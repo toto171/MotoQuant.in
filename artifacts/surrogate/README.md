@@ -4,12 +4,59 @@
 
 | Name                                | What it is                                          | Size    |
 |-------------------------------------|-----------------------------------------------------|---------|
-| `surrogate_numpy.npz`               | **v2.2 SHIPPED MODEL** — numpy MLP served in prod   | 88 KB   |
+| `surrogate_numpy.npz`               | **v2.3 SHIPPED MODEL** — numpy MLP served in prod   | 85 KB   |
+| `motoquant_surrogate_v2_3.npz`      | v2.3 training dataset (9,094 rows × 26 features)    | 640 KB  |
+| `surrogate_numpy_v2_2.npz.bak`      | v2.2 numpy MLP — rollback copy                      | 86 KB   |
 | `motoquant_surrogate_v2_2.npz`      | v2.2 training dataset (9,560 rows × 26 features)    | 678 KB  |
 | `surrogate_numpy_v2_1.npz.bak`      | v2.1 numpy MLP — rollback copy                      | 87 KB   |
 | `motoquant_surrogate_v2_8k5.npz`    | v2.1 training dataset (8,574 rows × 26 features)    | 610 KB  |
 | `surrogate_numpy_v1.npz.bak`        | v1 numpy MLP (K5-only envelope) — rollback copy     | 39 KB   |
 | `motoquant_surrogate_v1_1k5.npz`    | v1 training dataset (K5 Sobol, 1.5k samples)        | 128 KB  |
+
+## v2.3 (July 4, 2026) — 541-bike catalog + shaft/belt gearing reseed
+
+Regen trigger: 6 new bikes (bmids 4632–4637 — Kove 800X, Kove 450 Rally,
+QJ Motor SRK 921, Zontes 703F, Benda Chinchilla 500, CFMoto 800MT Sport;
+`bike_models` 535 → 541) plus this session's shaft/belt final-drive gearing
+changes, which moved several bikes' stock configs. The standing contract:
+**a surrogate is a cache of the physics — REGENERATE AFTER ANY RESEED/RETUNE,
+in the same session.**
+
+**FULL regeneration this time (no transplant).** Unlike v2.1/v2.2's smart
+staleness-gated transplant, v2.3 re-simmed EVERY current bike and EVERY
+perturbation fresh. This is the safest path on a grown catalog: it sidesteps
+the PLAN NOTE hazard entirely (re-running `plan` re-shuffles eval/base roles,
+which only invalidates rows when you TRANSPLANT them from the previous
+dataset — with all rows freshly labelled, the reshuffle is harmless). Default
+plan: 541 bikes → 9,094 tasks (146 perturb bases / 25 eval bikes); knob
+streams keyed `rng(SEED + bmid)` / `rng(SEED + 7e6 + bmid)` as before.
+**9,094/9,094 fresh sims, all valid** (516 stock + 25 stock_eval + 25 mod_eval
++ 8,528 perturb). ~4,240 core-seconds on a 4-core sandbox.
+
+Same recipe (hidden 160,96 · epochs 700 · restarts 2 · split seed 42):
+
+| Metric (ET)            | v2.2                 | v2.3                                    |
+|------------------------|----------------------|-----------------------------------------|
+| Holdout MAE            | 84.1 ms (n=1,426)    | **87.7 ms** (n=1,356)                   |
+| Holdout RMSE           | 309.1 ms             | 354.2 ms                                |
+| Holdout R²             | 0.9884               | 0.9853                                  |
+| trap MAE               | 1.27 km/h            | 1.39 km/h                               |
+| Envelope at stock      | 535/535              | **541/541** (incl. all 6 new bikes)     |
+
+Comparable to v2.2, not degraded. The elevated RMSE is again driven by the
+degenerate slow-regime rows flagged under v2.2 (litre bikes going SLOWER at
+power_scale ≥ ~1.45 — the **PHYSICS FLAG below is still open**, not fixed
+here; those rows are true labels and were kept).
+
+The 6 new bikes predict tight against fresh physics on the production DB path
+(surrogate − physics): Kove 800X −0.017 / Kove 450 Rally −0.036 / QJ SRK 921
++0.001 / Zontes 703F +0.018 / Benda Chinchilla 500 −0.007 / CFMoto 800MT
++0.013 s — all well inside the holdout MAE. Reference presets: K5 +0.085 s
+(marginally past the informal ±0.05 gate, inside holdout MAE), R1 +0.000 s;
+hand-curated Hayabusa preset −0.307 s (documented structural outlier).
+`tests/test_surrogate_numpy_artifact.py` unaffected (physics baselines are
+independent of the surrogate). Rollback:
+`cp surrogate_numpy_v2_2.npz.bak surrogate_numpy.npz`.
 
 ## v2.2 (July 3, 2026) — 535-bike catalog + post-audit label refresh
 
