@@ -2,6 +2,17 @@
 """
 MotoQuant Pro — Parts fitment data patch (2026-06-11 part-picker audit).
 
+FOLDED 2026-07-04: the CONTENT fixes below (A Hayabusa manufacturer, C KTM390/
+Husq401 I1, D VMAX categories, E Duke390 window, F supersport/commuter category
+normalisation, H/I/K/L/M/N per-part fixes, plus the mass-multiplier fix P) are
+now emitted directly by the seed sources, so a fresh seed_all() reproduces the
+patched state without this script (regression-guarded by
+tests/test_seed_integrity.py). NOT folded: the `excluded_bike_ids` blocklist
+(pass J) references hardcoded production bike IDs that are NOT stable across
+seeds (a fresh import_batch assigns different IDs), so it cannot be folded
+losslessly — this script remains the production mechanism for that one fix, and
+runs as a no-op against an already-patched motoquant.db.
+
 Idempotent: every change is expressed as a target state; re-running prints
 "already applied" no-ops. Run from repo root:
 

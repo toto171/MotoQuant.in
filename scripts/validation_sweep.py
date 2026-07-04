@@ -1055,6 +1055,22 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         216,
         "MotoStatz (Dragy, stock instrumented 2019+ 636cc)",
     ),
+    # Kawasaki Ninja ZX-6R 636 — 2024-2025 model-year refresh (GAP-1 pass,
+    # 2026-07-04). The 2024+ refresh keeps the SAME 636 cc I4 at 130 hp, so
+    # MotoStatz's Dragy figure (10.74s @ ~134 mph / 216 km/h) applies. This
+    # row binds to the catalog's NEW "ZX-6R" (2024-2025) entry
+    # (KAWASAKI_ZX6R_2024, model_name "ZX-6R", 636 cc) — a DIFFERENT catalog
+    # row than the 2019-2024 "Ninja ZX-6R" entry benchmarked immediately
+    # above. Binding is collision-free (verified against sweep_lib
+    # _bench_map / _best_benchmark_match): the group key ("kawasaki","zx-6r")
+    # is distinct from ("kawasaki","ninja zx-6r"); for the 2024-2025 spec the
+    # "Ninja ZX-6R" pattern fails the word-boundary token test ("ninja" is not
+    # a token of "ZX-6R"), and for the 2019-2024 spec both patterns match but
+    # the 3-token "Ninja ZX-6R" outranks the 2-token "ZX-6R" on specificity —
+    # so the 2019-2024 row keeps its own Dragy benchmark. Source kept at
+    # aggregator tier (0.5) per source_quality (the '636 GPS' phrasing carries
+    # no 'dragy'/'instrumented' token). Previously unbenchmarked.
+    ("Kawasaki", "ZX-6R", 2024, 10.74, 216, "MotoStatz (636 GPS)"),
     # Yamaha YZF-R6 4th-gen (599 cc I4 supersport, 2017-2020 facelift, sold
     # as catalog row 2017-2022 covering the entire pre-discontinuation final
     # generation) — MotoStatz Dragy instrumented stock test: 10.89s @ 133 mph

@@ -2,6 +2,11 @@
 """
 MotoQuant Pro — sprocket specifications.position patch (2026-07-03 audit).
 
+FOLDED 2026-07-04: every seeded sprocket now carries specifications.position
+directly from the seed sources, so this script is an idempotent no-op on a fresh
+seed_all(). Kept as a safety net for legacy DBs. Regression-guarded by
+tests/test_seed_integrity.py.
+
 14 of 59 sprocket parts (ids 266-274, 494, 495, 498, 499, 501) were seeded
 without a ``specifications.position`` key, so the build-optimizer knapsack's
 position-exclusivity (``roi._knapsack_group_key``) degraded each of them to a

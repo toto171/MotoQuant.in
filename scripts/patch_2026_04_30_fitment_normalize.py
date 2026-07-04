@@ -3,6 +3,11 @@
 Normalise parts.fitment_rules JSON to the schema motoquant/parts/compatibility.py
 expects.
 
+FOLDED 2026-07-04: these corrections (tier "model" -> "family", flat constraints
+-> nested "match", drop "model_keywords") are now emitted directly by the seed
+sources, so this script is an idempotent no-op on a fresh seed_all(). Kept as a
+safety net for legacy DBs. Regression-guarded by tests/test_seed_integrity.py.
+
 Two long-standing bugs in the seed catalogs caused the FitmentMatch engine to
 silently reject ~125 of the 555 catalog parts (warning: "Invalid tier: model"
 or "tier 'family' has no match constraints; treating as universal"):
