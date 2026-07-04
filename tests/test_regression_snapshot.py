@@ -43,10 +43,12 @@ diff *before* regenerating, or the guard is worthless.
 
 Opt-in wider sweep
 ------------------
-The always-on test re-sims ~38 bikes (well under the sandbox's per-call budget).
-Setting ``MOTOQUANT_SLOW_TESTS=1`` additionally re-checks every catalog entry in
-the golden (currently identical to the always-on set, but the hook is here so
-the golden can grow without changing the default-CI runtime contract).
+The always-on test re-sims the ~35-bike stratified ``catalog`` sample (well
+under the sandbox's per-call budget). Setting ``MOTOQUANT_SLOW_TESTS=1`` turns
+on ``test_catalog_snapshot_no_drift_full``, which re-sims the golden's
+``catalog_full`` block -- EVERY current bike_config in the catalog (500+ bikes)
+through the same production DB path -- at the same tight tolerance. This is the
+true full-catalog drift guard; it is far too slow for every-PR CI, hence opt-in.
 """
 
 from __future__ import annotations
@@ -237,13 +239,88 @@ def test_snapshot_covers_all_clusters():
 
 @pytest.mark.skipif(
     os.environ.get("MOTOQUANT_SLOW_TESTS") != "1",
-    reason="opt-in wider sweep; set MOTOQUANT_SLOW_TESTS=1",
+    reason="opt-in full-catalog sweep; set MOTOQUANT_SLOW_TESTS=1",
 )
 def test_catalog_snapshot_no_drift_full():
-    """Opt-in alias of the always-on catalog check.
+    """Re-sim EVERY current bike_config in the golden's catalog_full block.
 
-    Kept as a distinct entry point so the golden can later grow a larger
-    'slow' tier (re-simming many more bikes) without changing the default-CI
-    runtime. Today it re-runs the same assertions.
+    This is the true full-catalog drift guard (500+ bikes), not an alias of the
+    ~35-bike always-on sample. It loads each bike through the same production DB
+    path (``db_row_to_config``), runs the same fixed-dt sim, and asserts each ET
+    and trap speed stays within the same tight tolerance the always-on catalog
+    test uses (2 ms ET / 0.03 m/s trap). A bike that no longer resolves, or one
+    that cannot be loaded/simmed, is a hard failure -- never a silent skip.
     """
-    test_catalog_snapshot_no_drift()
+    full = _GOLDEN.get("catalog_full")
+    assert full, (
+        "Golden snapshot has no 'catalog_full' block. Regenerate it with "
+        "`python scripts/generate_regression_snapshot.py` (full is on by default)."
+    )
+
+    # Pin the SHIPPED catalog explicitly (same rationale as the always-on test:
+    # sibling modules transiently repoint $MOTOQUANT_DB at fresh tmp DBs).
+    _repo_db = Path(__file__).resolve().parent.parent / "motoquant.db"
+    db = live_db_copy(_repo_db if _repo_db.exists() else None)
+    if db is None:
+        pytest.skip("live motoquant.db not found (set $MOTOQUANT_DB)")
+
+    drifts: list[str] = []
+    missing: list[str] = []
+    failed: list[str] = []
+    checked = 0
+    try:
+        for key in sorted(full):
+            g = full[key]
+            cfg = _config_from_catalog_key(db, key)
+            if cfg is None:
+                missing.append(key)
+                continue
+            try:
+                et, trap, finished = _sim_scalars(cfg)
+            except Exception as exc:  # noqa: BLE001 -- report, don't swallow
+                failed.append(f"  {key}: {type(exc).__name__}: {exc}")
+                continue
+            checked += 1
+            if finished != g["finished"]:
+                drifts.append(f"  {key}: finished {g['finished']} -> {finished}")
+            if abs(et - g["et_s"]) > CAT_ET_TOL_S:
+                drifts.append(
+                    f"  {key}: ET {g['et_s']:.4f}s -> {et:.4f}s "
+                    f"(delta {et - g['et_s']:+.4f}s, tol {CAT_ET_TOL_S}s)"
+                )
+            if abs(trap - g["trap_ms"]) > CAT_TRAP_TOL_MS:
+                drifts.append(
+                    f"  {key}: trap {g['trap_ms']:.3f} -> {trap:.3f} m/s "
+                    f"(delta {trap - g['trap_ms']:+.3f}, tol {CAT_TRAP_TOL_MS})"
+                )
+    finally:
+        db.close()
+
+    assert not missing, (
+        "Golden bikes in catalog_full no longer resolve against the catalog "
+        "(the full guard is shrinking -- regenerate the golden against the live "
+        "DB):\n" + "\n".join(missing)
+    )
+    assert not failed, (
+        f"{len(failed)} bike(s) in catalog_full could not be loaded/simmed via "
+        "the production DB path (never silently skipped):\n" + "\n".join(failed)
+    )
+    assert not drifts, (
+        f"Physics drift detected in {len(drifts)} check(s) vs the golden's "
+        f"catalog_full. If intentional, regenerate with "
+        f"`python scripts/generate_regression_snapshot.py`:\n" + "\n".join(drifts)
+    )
+
+    # Prove this tier actually exercised the WHOLE catalog, not a 35-bike subset.
+    assert checked == len(full), (
+        f"Full tier checked {checked} bikes but catalog_full has {len(full)}; "
+        "the sweep did not cover the whole golden."
+    )
+    assert checked >= 500, (
+        f"Full tier only exercised {checked} bikes (<500); this is not a true "
+        "full-catalog sweep. Regenerate the golden against the live DB."
+    )
+    print(
+        f"\n[full tier] re-simmed {checked} catalog bikes via the production DB "
+        "path with zero drift vs the golden."
+    )
