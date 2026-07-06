@@ -43,6 +43,7 @@ def _synthetic_torque_curve(
     peak_power_hp: float = None,
     peak_power_rpm: float = None,
     points: int = 100,
+    cylinders: int = None,
 ) -> DynoCurve:
     """
     Generate a realistic inline-4 sportbike torque curve.
@@ -164,7 +165,19 @@ def _synthetic_torque_curve(
         elif peak_power_hp < 30.0:
             torque *= 1.10
         elif peak_power_hp < 60.0:
-            torque *= 1.05
+            # July 6, 2026 (full-corpus recalibration): the flat 1.05 was
+            # derived on a mixed singles+twins population. The 246-row
+            # weighted residual table split by cylinder count showed the
+            # 30-60 hp SINGLES (Duke/RC 390, Apache 310, Speed 400, G310)
+            # simming FAST (w_bias -0.33) while same-band TWINS (Ninja 400,
+            # R3, MT-03) simmed slow (+0.20) — a single multiplier cannot
+            # serve both. Physically, big singles breathe worse at the top
+            # end than twins (one large valve pair, more reciprocating mass
+            # per cylinder), so the "OEMs understate power" uplift is
+            # smaller for them. Singles keep 1.00 (spec-honest); twins and
+            # multis retain the empirically-derived 1.05.
+            if cylinders != 1:
+                torque *= 1.05
 
     return DynoCurve(rpm=rpms, torque_nm=torque, is_at_wheel=True)
 

@@ -1110,23 +1110,26 @@ function SimulatorPageInner() {
                 <CircleDot size={13} className="text-brand-orange" /> Tires
               </h3>
               <div className="space-y-2.5">
+                {/* Size is part of the label: several tires ship the same
+                    model name in multiple sizes (Pilot Power 3 in 180/190/200)
+                    and without it the list reads as duplicate entries. */}
                 <Dropdown label="Front" icon={null}
                   items={[{ id: null, manufacturer: 'Stock', model: 'OEM Default' }, ...allTires]}
                   selected={frontTire || { id: null, manufacturer: 'Stock', model: 'OEM Default' }}
                   onSelect={t => setFrontTire(t.id ? t : null)}
-                  searchKey={t => `${t.manufacturer} ${t.model} ${t.compound_type || ''}`}
+                  searchKey={t => `${t.manufacturer} ${t.model} ${t.size_designation || ''} ${t.compound_type || ''}`}
                   groupKey={t => t.manufacturer || 'Stock'}
-                  renderItem={t => <div className="flex justify-between w-full"><span>{t.model}</span><span className="text-[10px] text-white/35">{t.compound_type || ''}</span></div>}
-                  renderSelected={t => <span className="text-white text-xs">{t.manufacturer} {t.model}</span>}
+                  renderItem={t => <div className="flex justify-between w-full gap-2"><span>{t.model}{t.size_designation ? <span className="text-white/45"> · {t.size_designation}</span> : null}</span><span className="text-[10px] text-white/35 shrink-0">{t.compound_type || ''}</span></div>}
+                  renderSelected={t => <span className="text-white text-xs">{t.manufacturer} {t.model}{t.size_designation ? ` · ${t.size_designation}` : ''}</span>}
                 />
                 <Dropdown label="Rear" icon={null}
                   items={[{ id: null, manufacturer: 'Stock', model: 'OEM Default' }, ...allTires]}
                   selected={rearTire || { id: null, manufacturer: 'Stock', model: 'OEM Default' }}
                   onSelect={t => setRearTire(t.id ? t : null)}
-                  searchKey={t => `${t.manufacturer} ${t.model} ${t.compound_type || ''}`}
+                  searchKey={t => `${t.manufacturer} ${t.model} ${t.size_designation || ''} ${t.compound_type || ''}`}
                   groupKey={t => t.manufacturer || 'Stock'}
-                  renderItem={t => <div className="flex justify-between w-full"><span>{t.model}</span><span className="text-[10px] text-white/35">{t.compound_type || ''}</span></div>}
-                  renderSelected={t => <span className="text-white text-xs">{t.manufacturer} {t.model}</span>}
+                  renderItem={t => <div className="flex justify-between w-full gap-2"><span>{t.model}{t.size_designation ? <span className="text-white/45"> · {t.size_designation}</span> : null}</span><span className="text-[10px] text-white/35 shrink-0">{t.compound_type || ''}</span></div>}
+                  renderSelected={t => <span className="text-white text-xs">{t.manufacturer} {t.model}{t.size_designation ? ` · ${t.size_designation}` : ''}</span>}
                 />
               </div>
             </Card>

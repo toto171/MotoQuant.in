@@ -107,6 +107,94 @@ class TestDeriveCategoryTag:
         )
         assert tag == CATEGORY_CRUISER_1300P
 
+    # ── Taxonomy v2 (July 6, 2026): cylinder-aware branches ────────────
+
+    def test_sport_twin_600_1300(self):
+        from motoquant.category_profiles import CATEGORY_SPORT_TWIN_600_1300
+
+        tag = derive_category_tag(
+            manufacturer="Ducati",
+            model_name="848 EVO",
+            displacement_cc=849,
+            peak_power_hp=140,
+            stroke_type=4,
+            category="sport",
+            cylinders=2,
+        )
+        assert tag == CATEGORY_SPORT_TWIN_600_1300
+
+    def test_sport_twin_beats_195hp_gate(self):
+        # A 195hp Panigale 1199 launches like a big twin, not an I4 —
+        # the cylinder branch is deliberately placed before the hp gate.
+        from motoquant.category_profiles import CATEGORY_SPORT_TWIN_600_1300
+
+        tag = derive_category_tag(
+            manufacturer="Ducati",
+            model_name="1199 Panigale",
+            displacement_cc=1198,
+            peak_power_hp=195,
+            stroke_type=4,
+            category="sport",
+            cylinders=2,
+        )
+        assert tag == CATEGORY_SPORT_TWIN_600_1300
+
+    def test_small_i4_screamer(self):
+        from motoquant.category_profiles import CATEGORY_SMALL_I4_SCREAMER
+
+        tag = derive_category_tag(
+            manufacturer="Kawasaki",
+            model_name="Ninja ZX-4RR",
+            displacement_cc=399,
+            peak_power_hp=77,
+            stroke_type=4,
+            category="sport",
+            cylinders=4,
+        )
+        assert tag == CATEGORY_SMALL_I4_SCREAMER
+
+    def test_single_300_500(self):
+        from motoquant.category_profiles import CATEGORY_SINGLE_300_500
+
+        tag = derive_category_tag(
+            manufacturer="KTM",
+            model_name="390 Duke",
+            displacement_cc=373,
+            peak_power_hp=44,
+            stroke_type=4,
+            category="naked",
+            cylinders=1,
+        )
+        assert tag == CATEGORY_SINGLE_300_500
+
+    def test_cylinders_none_reproduces_v1_taxonomy(self):
+        # Back-compat: without cylinder info the v2 branches never fire —
+        # an old saved config derives exactly the July-3 tag.
+        tag = derive_category_tag(
+            manufacturer="Ducati",
+            model_name="848 EVO",
+            displacement_cc=849,
+            peak_power_hp=140,
+            stroke_type=4,
+            category="sport",
+            cylinders=None,
+        )
+        assert tag == "litre_sport_600_1000"
+
+    def test_600_supersport_i4_unaffected_by_v2(self):
+        # 599cc I4 supersports keep their pre-v2 routing (mid_twin_500_700
+        # hosts the 600-I4 launch calibration; screamer branch is <500cc).
+        tag = derive_category_tag(
+            manufacturer="Yamaha",
+            model_name="YZF-R6",
+            displacement_cc=599,
+            peak_power_hp=118,
+            stroke_type=4,
+            category="sport",
+            cylinders=4,
+        )
+        assert tag == "mid_twin_500_700"
+
     def test_muscle_naked_routed_to_cruiser(self):
         # VMAX 1700 / B-King / Rocket 3 are catalog-tagged sport/naked for
         # engine-inertia tuning but are physically cruiser-class (320 kg).

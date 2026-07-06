@@ -25,6 +25,16 @@ from dataclasses import dataclass
 # ---- Category tag enum (string constants — JSON-friendly) -----------------
 CATEGORY_LITRE_SPORT_195P = "litre_sport_195p"
 CATEGORY_LITRE_SPORT_600_1000 = "litre_sport_600_1000"
+# Taxonomy v2 (July 6, 2026): cylinder-aware sub-clusters. The July-4 246-row
+# weighted residual table showed engine character, not displacement, is the
+# dominant systematic: twins simmed fast (bias -0.20 within the 600-1100
+# sport cluster, w=28.3), 300-500cc singles simmed fast (bias -0.33), and
+# sub-500cc I4 screamers (ZX-4RR/ZX-25R) simmed +1.1..+1.3s slow because they
+# shared the commuter-twin launch profile. I4s >=600cc and triples were
+# already centered (bias +0.005 / +0.017) so their routing is unchanged.
+CATEGORY_SPORT_TWIN_600_1300 = "sport_twin_600_1300"
+CATEGORY_SMALL_I4_SCREAMER = "small_i4_screamer"
+CATEGORY_SINGLE_300_500 = "single_300_500"
 CATEGORY_MID_TWIN_500_700 = "mid_twin_500_700"
 CATEGORY_MID_TWIN_300_500 = "mid_twin_300_500"
 CATEGORY_ENTRY_200_300 = "entry_200_300"
@@ -37,6 +47,9 @@ CATEGORY_UNKNOWN = "unknown"  # fallback for pre-April-30 saved configs
 ALL_CATEGORIES = (
     CATEGORY_LITRE_SPORT_195P,
     CATEGORY_LITRE_SPORT_600_1000,
+    CATEGORY_SPORT_TWIN_600_1300,
+    CATEGORY_SMALL_I4_SCREAMER,
+    CATEGORY_SINGLE_300_500,
     CATEGORY_MID_TWIN_500_700,
     CATEGORY_MID_TWIN_300_500,
     CATEGORY_ENTRY_200_300,
@@ -163,6 +176,93 @@ _PROFILES: dict[str, CategoryProfile] = {
         parasitic_mult=1.0,
         notes="600-1000cc sport (R6, CBR600RR, ZX-6R, GSX-R 600 K6).",
     ),
+    CATEGORY_SPORT_TWIN_600_1300: CategoryProfile(
+        name=CATEGORY_SPORT_TWIN_600_1300,
+        # Sport/naked twins 600-1300cc (Ducati V2 848/959/1098/1199, RS 660,
+        # MT-07, RE 650 twins, Buell 1125R, RC8 R, Monster 1200). Split out
+        # of litre_sport_600_1000 + "other" July 6, 2026: the 40-row twin
+        # sub-population simmed uniformly FAST (w_bias -0.20) while I4s and
+        # triples in the same displacement band were centered. Real twins
+        # give up launch performance to lumpy power delivery — testers short-
+        # shift and launch conservatively vs I4 screamers.
+        # Knob values below are the July-6 full-corpus calibration (see
+        # scripts/tune_cluster_knobs.py); non-launch knobs inherit the
+        # litre_sport_600_1000 parent values.
+        over_clutch_factor=0.0,
+        max_engine_decel_rads2=0.0,
+        launch_floor_factor=0.0,
+        tuck_transition_time_s=1.6,
+        cd_ceiling=0.42,
+        # July 6, 2026 calibration: mu_peak_override is the ONE live knob on
+        # this cluster (parasitic_mult bit-identical — the benchmarked twins
+        # carry at-wheel dyno curves; cd_floor near-dead; launch_rpm_factor
+        # centers bias but degrades spread). Twins cannot use full sport-
+        # radial grip off the line — 270-degree/90-degree V-twin torque
+        # pulses break traction earlier than an I4's smooth delivery, so
+        # the effective launch mu sits below the compound's peak. Grid
+        # 1.20-1.35: w|d| 0.2622 -> 0.1871, w_bias -0.1778 -> +0.0019 at 1.31.
+        mu_peak_override=1.31,
+        pacejka_C=1.60,
+        engine_inertia_mult=1.0,
+        parasitic_mult=1.0,
+        notes="Sport/naked twins 600-1300cc (848 EVO, RS 660, MT-07, 1125R).",
+    ),
+    CATEGORY_SMALL_I4_SCREAMER: CategoryProfile(
+        name=CATEGORY_SMALL_I4_SCREAMER,
+        # Sub-500cc inline-fours (ZX-4RR 399, ZX-25R 249, CB400SF class).
+        # Split out of mid_twin_300_500 July 6, 2026: these 15-17k rpm
+        # screamers launch like 600 supersports (high slip, hard clutch
+        # work), not like 40hp commuter twins — the shared profile's gentle
+        # decel=50 launch left them +1.1..+1.3s slow vs Cycle World data.
+        # July 6, 2026 calibration: launch knobs seeded from the
+        # mid_twin_500_700 600-I4 values (decel 600) still left the pair
+        # +0.63 slow; the sub-500 I4 crank carries a fraction of a 600's
+        # rotating mass, so the achievable angular deceleration during
+        # launch slip is far higher. Grid 600->2800: w_bias +0.776 -> +0.091,
+        # w|d| 0.794 -> 0.351 at 2800 rad/s^2 (~27k rpm/s transient on a
+        # near-massless crank; the extra back-torque is still headroom- and
+        # inertia-bounded to ~20 Nm). Single-knob fit on n=2 by design —
+        # a second knob would be pure overfit.
+        over_clutch_factor=0.30,
+        max_engine_decel_rads2=2800.0,
+        launch_floor_factor=1.0,
+        tuck_transition_time_s=1.8,
+        cd_ceiling=0.50,
+        pacejka_C=1.60,
+        engine_inertia_mult=1.0,
+        parasitic_mult=1.0,
+        chain_efficiency_override=0.96,
+        notes="Sub-500cc I4 screamers (ZX-4RR, ZX-25R).",
+    ),
+    CATEGORY_SINGLE_300_500: CategoryProfile(
+        name=CATEGORY_SINGLE_300_500,
+        # 300-500cc singles (KTM 390 family, RE 350 J-platform, G310,
+        # Himalayan, Speed 400). Split out of mid_twin_300_500 July 6, 2026:
+        # the single-cylinder sub-population simmed FAST (w_bias -0.33,
+        # dominated by the instrumented Duke 390 rows) while the twins in
+        # the same band simmed slightly slow (+0.20) — a single shared
+        # launch profile could not center both. Values below start from the
+        # mid_twin_300_500 parent and are retuned on the singles corpus.
+        over_clutch_factor=0.30,
+        max_engine_decel_rads2=50.0,
+        launch_floor_factor=1.0,
+        tuck_transition_time_s=2.0,
+        cd_ceiling=0.55,
+        # July 6, 2026 calibration: after the cylinder-aware synthetic-curve
+        # tail fix (singles 30-60hp keep 1.00, twins keep 1.05 — defaults.py)
+        # the cluster bias sat at -0.132. Launch knobs are near-dead on these
+        # power-limited bikes; effective launch grip is the one live lever.
+        # Indian-market OEM rubber (MRF Steel Braces, Metzeler M5 on the 390
+        # family) grips well below the sport-radial 1.30 the importer
+        # assigns 300-600cc sport bikes. Grid 1.08-1.12: w|d| 0.488 -> 0.484,
+        # w_bias -0.132 -> -0.046 at 1.10.
+        mu_peak_override=1.10,
+        pacejka_C=1.50,
+        engine_inertia_mult=1.0,
+        parasitic_mult=1.0,
+        chain_efficiency_override=0.95,
+        notes="300-500cc singles (Duke 390, RC 390, Classic 350, G310).",
+    ),
     CATEGORY_MID_TWIN_500_700: CategoryProfile(
         name=CATEGORY_MID_TWIN_500_700,
         # Mild over-clutching — these bikes are power-limited but not
@@ -200,7 +300,12 @@ _PROFILES: dict[str, CategoryProfile] = {
         # Benelli 302R -0.93 at w=0.5 vs Ninja 400 +0.49 at w=1.0). Grid
         # probe 50/120/200: weighted bias centers at 50 (-0.011) with w|D|
         # 0.466 -> 0.450. Baselines exact at every point.
-        max_engine_decel_rads2=50.0,
+        # Raised 50 -> 150 (2026-07-06, taxonomy v2): the singles that
+        # dragged this cluster fast now live in single_300_500, leaving a
+        # twins-only population (Ninja 400, Z400, R3, MT-03, RS 457) that
+        # simmed +0.20 slow. Grid 50/150/300/500: w|d| 0.409 -> 0.393 at
+        # 150 with bias +0.196 -> +0.124.
+        max_engine_decel_rads2=150.0,
         launch_floor_factor=1.0,
         tuck_transition_time_s=2.0,
         cd_ceiling=0.55,
@@ -286,8 +391,12 @@ _PROFILES: dict[str, CategoryProfile] = {
         # ~10000 rpm/s clutch-engagement transients (~1050 rad/s² steady)
         # with peak instantaneous values higher during the chamber-on
         # transition. Reference K5/R1/Hayabusa preserved exactly.
+        # Raised 1500 -> 1800 (2026-07-06 full-corpus retune): cluster bias
+        # +0.153 -> +0.096 with w|d| flat (0.584 -> 0.587); the documented
+        # bimodality (NSR250R/RD350 slow vs RG500/RS250 fast) persists and
+        # is benchmark-quality-limited, not knob-limited.
         over_clutch_factor=0.55,
-        max_engine_decel_rads2=1500.0,
+        max_engine_decel_rads2=1800.0,
         launch_floor_factor=1.0,
         tuck_transition_time_s=2.0,
         cd_ceiling=0.50,
@@ -316,8 +425,14 @@ _PROFILES: dict[str, CategoryProfile] = {
         # harder than the shared "other" default) trims the uniform bias
         # without chasing the thin set to target. Same-direction N=3 so
         # low regression risk; references are litre_sport so untouched.
-        over_clutch_factor=0.45,
-        max_engine_decel_rads2=900.0,
+        # 2026-07-06 (3-bike-pin retired, full-corpus retune): all 3 rows
+        # still simmed uniformly slow (+0.255). Grid oc 0.45-0.75 x decel
+        # 900-1400: knob saturates (headroom-bounded) — oc 0.60 / decel 1100
+        # trims w_bias to +0.231; pushing to 0.75/1400 buys only 0.02 more
+        # on an n=3 cluster and was rejected as overfit. Residual +0.23 is
+        # not launch-reachable (likely aero/mass modelling on VMAX-class).
+        over_clutch_factor=0.60,
+        max_engine_decel_rads2=1100.0,
         launch_floor_factor=1.0,
         tuck_transition_time_s=99.0,  # never tucks
         cd_ceiling=1.10,  # cruisers stay upright
@@ -344,8 +459,13 @@ _PROFILES: dict[str, CategoryProfile] = {
         # weighted stats) — it only guards the over-clutch bog documented
         # Apr 27. Sacred baselines verified exact at every grid point
         # (references carry explicit litre_sport_195p tags).
-        over_clutch_factor=0.30,
-        max_engine_decel_rads2=800.0,
+        # 2026-07-06 (taxonomy v2): the sporty big twins (1125R, RC8 R,
+        # Monster 1200) that used to drag this cluster fast moved to
+        # sport_twin_600_1300, leaving the remainder slightly slow
+        # (+0.084). Grid oc 0.30-0.40 x decel 800-1000: oc 0.40 / decel
+        # 1000 re-centers (w_bias +0.045, w|d| 0.281 -> 0.277).
+        over_clutch_factor=0.40,
+        max_engine_decel_rads2=1000.0,
         launch_floor_factor=1.0,
         tuck_transition_time_s=2.0,
         cd_ceiling=0.95,
@@ -388,12 +508,18 @@ def derive_category_tag(
     peak_power_hp: float | None,
     stroke_type: int | None,
     category: str | None,
+    cylinders: int | None = None,
 ) -> str:
-    """Map (cc, hp, stroke, category) -> canonical category_tag.
+    """Map (cc, hp, stroke, category, cylinders) -> canonical category_tag.
 
-    Mirrors `scripts/sweep_with_clusters.py::cluster_for` exactly so the
-    physics dispatch and the validation grouping share one source of
-    truth. Returns CATEGORY_OTHER when no specific cluster matches.
+    This is the SINGLE source of truth for the taxonomy —
+    `scripts/sweep_with_clusters.py::cluster_for` delegates here so the
+    physics dispatch and the validation grouping can never diverge.
+    Returns CATEGORY_OTHER when no specific cluster matches.
+
+    ``cylinders`` is optional for backward compatibility: when None (old
+    saved configs, callers that predate taxonomy v2) the cylinder-aware
+    branches are skipped and the July-3 taxonomy is reproduced exactly.
     """
     st = stroke_type or 4
     if st == 2:
@@ -408,6 +534,17 @@ def derive_category_tag(
     # for engine-inertia tuning still belong in cruiser-1300p.
     if cc and cc >= 1500 and cat in ("naked", "sport"):
         return CATEGORY_CRUISER_1300P
+
+    # ── Taxonomy v2 (July 6, 2026): cylinder-aware branches ────────────
+    # Placed before the hp>=195 gate on purpose: a 195hp Panigale 1199 V2
+    # launches like a big twin, not like an I4 superbike — the twins-fast
+    # systematic held across the hp boundary in the July-4 residuals.
+    if cylinders == 2 and cc and 600 <= cc < 1300 and cat in ("sport", "naked"):
+        return CATEGORY_SPORT_TWIN_600_1300
+    if cylinders and cylinders >= 4 and cc and cc < 500 and cat in ("sport", "naked"):
+        return CATEGORY_SMALL_I4_SCREAMER
+    if cylinders == 1 and cc and 300 <= cc < 500:
+        return CATEGORY_SINGLE_300_500
 
     if cat in ("sport", "naked") and peak_power_hp and peak_power_hp >= 195:
         return CATEGORY_LITRE_SPORT_195P
@@ -432,6 +569,9 @@ __all__ = [
     "ALL_CATEGORIES",
     "CATEGORY_LITRE_SPORT_195P",
     "CATEGORY_LITRE_SPORT_600_1000",
+    "CATEGORY_SPORT_TWIN_600_1300",
+    "CATEGORY_SMALL_I4_SCREAMER",
+    "CATEGORY_SINGLE_300_500",
     "CATEGORY_MID_TWIN_500_700",
     "CATEGORY_MID_TWIN_300_500",
     "CATEGORY_ENTRY_200_300",

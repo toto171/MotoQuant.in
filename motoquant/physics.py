@@ -237,6 +237,7 @@ class MotoQuantEngine:
                 peak_power_hp=c.engine.peak_power_hp,
                 stroke_type=c.engine.stroke_type,
                 category=None,
+                cylinders=c.engine.cylinder_count,
             )
         self._profile = get_profile(tag)
 

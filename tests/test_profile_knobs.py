@@ -80,13 +80,29 @@ def test_default_knob_values_are_bit_identical():
     )
 
 
-def test_every_registered_profile_ships_inert_knob_values():
-    """Guard: today no profile sets the newly wired knobs to an active
-    value.  If a future calibration pass activates one, this test forces
-    that change to be made consciously (with a weighted-sweep gate) rather
-    than slipping in silently."""
+# July 6, 2026: the full-corpus recalibration (3-bike-pin retired) armed
+# mu_peak_override on exactly two profiles — the values below were chosen
+# by weighted-sweep grid against the 246-row benchmark corpus (see
+# scripts/tune_cluster_knobs.py + category_profiles.py inline rationale).
+# Any OTHER profile arming a knob must still be a conscious, test-updating
+# change — that is this guard's job.
+ACTIVE_MU_OVERRIDES = {
+    "sport_twin_600_1300": 1.31,
+    "single_300_500": 1.10,
+}
+
+
+def test_every_registered_profile_ships_expected_knob_values():
+    """Guard: only the calibrated profiles listed in ACTIVE_MU_OVERRIDES set
+    the July-3-wired knobs to an active value, and to exactly the calibrated
+    numbers. If a future calibration pass activates another one, this test
+    forces that change to be made consciously (with a weighted-sweep gate)
+    rather than slipping in silently."""
     for tag, prof in cp._PROFILES.items():
-        assert prof.mu_peak_override is None, f"{tag}: mu_peak_override active"
+        expected_mu = ACTIVE_MU_OVERRIDES.get(tag)
+        assert prof.mu_peak_override == expected_mu, (
+            f"{tag}: mu_peak_override {prof.mu_peak_override} != {expected_mu}"
+        )
         assert prof.launch_rpm_factor is None, f"{tag}: launch_rpm_factor active"
         # 0.276 = catalog minimum effective Cd (0.30 × 0.92 race crouch);
         # any floor below that is structurally inert.

@@ -29,6 +29,7 @@ class ParasiticModel:
                 peak_power_hp=cfg.engine.peak_power_hp,
                 stroke_type=cfg.engine.stroke_type,
                 category=None,
+                cylinders=cfg.engine.cylinder_count,
             )
         self._mult = get_profile(tag).parasitic_mult
 

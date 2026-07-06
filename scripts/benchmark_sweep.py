@@ -85,6 +85,7 @@ def run_sweep(out_path: str | None):
                 spec.peak_power_hp,
                 getattr(spec, "stroke_type", 4) or 4,
                 getattr(spec, "category", None),
+                cylinders=getattr(spec, "cylinders", None),
             )
             qweight, qlabel = _source_quality(src)
             row = {

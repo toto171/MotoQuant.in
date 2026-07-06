@@ -87,6 +87,7 @@ def _cluster_for_row(row, cfg):
         peak_power_hp=row.get("bm_hp") or cfg.engine.peak_power_hp,
         stroke_type=getattr(cfg.engine, "stroke_type", 4),
         category=row.get("category"),
+        cylinders=getattr(cfg.engine, "cylinder_count", None),
     )
 
 

@@ -663,6 +663,7 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
                 peak_power_hp=float(peak_hp),
                 peak_power_rpm=float(peak_hp_rpm),
                 points=100,
+                cylinders=spec.cylinders,
             )
 
     # 2-strokes have much lower rotating inertia (no valvetrain, lighter crank)
@@ -1156,6 +1157,7 @@ def spec_to_bike_config(spec: BikeSpec) -> BikeConfig:
         peak_power_hp=spec.peak_power_hp,
         stroke_type=spec.stroke_type,
         category=spec.category,
+        cylinders=spec.cylinders,
     )
 
     return BikeConfig(
