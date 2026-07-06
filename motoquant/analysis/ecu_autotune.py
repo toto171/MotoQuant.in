@@ -148,7 +148,9 @@ def _gearing_recommendation(
                 }
             )
         best = min(candidates, key=lambda c: c["et_s"])
-        delta = stock_et - best["et_s"]
+        # Public convention (July 6, 2026): delta_et_s = recommended - stock,
+        # NEGATIVE = faster — matches /api/simulate/quick's et_delta_s.
+        delta = best["et_s"] - stock_et
         if best["rear_sprocket"] == rear:
             rec = f"keep stock {front}/{rear} gearing"
         else:
@@ -168,7 +170,7 @@ def _gearing_recommendation(
             "recommended_final_drive": best["final_drive"],
             "et_s": best["et_s"],
             "trap_kmh": best["trap_kmh"],
-            "delta_et_s": round(delta, 4),
+            "delta_et_s": round(delta, 4) + 0.0,  # +0.0 normalizes -0.0
             "recommendation": rec,
             "candidates": candidates,
         }
@@ -227,7 +229,7 @@ def _launch_recommendation(
         "recommended_rpm": best["launch_rpm"],
         "et_s": best["et_s"],
         "trap_kmh": best["trap_kmh"],
-        "delta_et_s": round(stock_et - best["et_s"], 4),
+        "delta_et_s": round(best["et_s"] - stock_et, 4) + 0.0,  # negative = faster
         "rationale": (
             "higher launch RPM keeps the engine in its powerband off the line"
             if best["launch_rpm"] >= stock_launch
@@ -379,7 +381,7 @@ def autotune(
         combined = {
             "et_s": round(c_et, 4),
             "trap_kmh": round(c_trap * 3.6, 1),
-            "delta_et_s": round(stock_et - c_et, 4),
+            "delta_et_s": round(c_et - stock_et, 4) + 0.0,  # negative = faster
         }
 
     # Overall plain-language rationale tying it to the atmospherics.

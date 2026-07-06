@@ -40,12 +40,12 @@ import LocationPicker, { environmentOverridesFromLocation } from './LocationPick
 const fmtNum = (n, d = 1) => (n == null ? '—' : Number(n).toFixed(d));
 const fmtDelta = (n, d = 3) =>
   n == null ? '—' : `${n > 0 ? '+' : ''}${Number(n).toFixed(d)}`;
-// Sign-aware tone for ET deltas. Backend convention (ecu_autotune.py):
-// delta_et_s = stock − tuned ⇒ positive = faster. Purely presentational.
+// Sign-aware tone for ET deltas. Convention unified July 6, 2026:
+// delta_et_s = tuned − stock ⇒ NEGATIVE = faster (time dropped) = good.
 const deltaTone = (n) =>
   n == null || Number(n) === 0
     ? 'text-white/50'
-    : Number(n) > 0
+    : Number(n) < 0
       ? 'text-brand-accent'
       : 'text-brand-red';
 const fmtInt = (n) => (n == null ? '—' : Math.round(Number(n)).toLocaleString('en-US'));

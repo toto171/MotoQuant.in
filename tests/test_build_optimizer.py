@@ -186,7 +186,8 @@ class TestOptimizeBuildIntegration:
         assert res.total_cost_inr <= 80_000 + 1e-6
         assert res.parts_skipped_incompatible == 0
         # an improving on-budget build should be found for a litre bike
-        assert res.delta_et_s >= 0.0
+        # (delta_et_s = optimized - base since July 6, 2026: negative = faster)
+        assert res.delta_et_s <= 0.0
         # exclusivity holds in the realised build
         from collections import Counter
 

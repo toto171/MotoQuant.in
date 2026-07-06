@@ -237,7 +237,9 @@ function BuildSummary({
               <p className="text-[11px] font-mono text-white/50 tabular-nums shrink-0">
                 {fmtINR(p.price_inr)}
                 {p.delta_et_s != null && (
-                  <span className={`ml-2 ${Number(p.delta_et_s) > 0 ? 'text-brand-accent' : 'text-white/40'}`}>
+                  /* delta_et_s = with-part − without (July 6, 2026 unified
+                     convention): negative = faster = highlight. */
+                  <span className={`ml-2 ${Number(p.delta_et_s) < 0 ? 'text-brand-accent' : 'text-white/40'}`}>
                     Δ {fmtNum(p.delta_et_s)} s
                   </span>
                 )}

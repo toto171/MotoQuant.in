@@ -72,12 +72,13 @@ class TestStructure:
         assert g["adjustable"] is True
         assert len(g["candidates"]) >= 2
         # recommended gearing is never slower than stock
-        assert g["delta_et_s"] >= -1e-6
+        # (delta_et_s = recommended - stock since July 6, 2026: <= 0 = not slower)
+        assert g["delta_et_s"] <= 1e-6
 
     def test_launch_recommendation_present(self, sea):
         lr = sea.launch_rpm
         assert lr["recommended_rpm"] > 0
-        assert lr["delta_et_s"] >= -1e-6
+        assert lr["delta_et_s"] <= 1e-6
         assert len(lr["candidates"]) >= 2
 
     def test_tyre_and_fuel_guidelines(self, sea):

@@ -187,6 +187,26 @@ display the size (`Pilot Power 3 · 190/55ZR17`) — the same model name in 3
 sizes previously rendered as 3 identical entries, which is what read as
 "duplicate titles".
 
+## 4b. ET-delta sign unification (operator follow-up, same session)
+
+The operator spotted modded-vs-stock ETs rendering as "+0.134s" for
+improvements. Root cause: three coexisting sign conventions —
+`/api/simulate/quick`, the outlaw pipeline and `parts --impact` used
+after − before (negative = faster), while `build_optimizer.py`
+(base − optimized) and `ecu_autotune.py` (stock − tuned) used positive =
+faster. Consumers coped inconsistently: the desktop BuildPage hand-flipped
+the sign, the desktop AutotunePage colored improvements wrong, and the web
+showed the "+0.134" the operator saw.
+
+Fix: every public `delta_et_s` is now after − before (negative = faster;
+−0.0 normalized). Internal ROI/knapsack scoring keeps its positive-gain
+semantics; `*_gain_s` fields stay positive-good on the wire and the UI
+renders them as the resulting ET cut. Web tones flipped (negative = green;
+trap deltas keep positive = faster), desktop displays unflipped and types
+annotated, sign-pin tests updated. Proven consistent live: the optimizer's
+per-part delta and quick-sim's `et_delta_s` now return the identical
+−0.1001 for the same part on the same bike.
+
 ## 5. Derived artifacts regenerated
 
 - **Full reseed** — all 541 current bike_configs re-stamped with taxonomy-v2
