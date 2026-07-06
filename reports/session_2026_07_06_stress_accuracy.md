@@ -138,7 +138,45 @@ classes below.
 
 ## 4. Catalog integrity (parts + tires)
 
-<!-- CATALOG_AGENT_SUMMARY -->
+**−3,684 impossible compatibility pairs removed (56,889 → 53,205)**, zero
+unreachable parts, zero bikes without an exhaust, via
+`scripts/patch_2026_07_06_catalog_integrity.py` (idempotent — 0 changes on
+re-run, and 0 changes after a full reseed, proving the seed-source fold):
+
+- **Phantom chain pitches** on 15 belt/shaft/CVT bikes (Indian Scout/Chief
+  family, Rocket 3, R 1300 GS, FJR1300, Tiger 1200, V100 Mandello, Aerox 155
+  CVT) — these matched sprockets/chains/quickshifters they physically cannot
+  take. Root cause fixed at the importer: `_BELT_DRIVE_MAKES` had matched
+  NOTHING since the June-13 "Indian Motorcycle"→"Indian" manufacturer merge;
+  R 1300/R 12, V100, Rocket 3, FJR1300, Tiger 1200, Aerox added to the
+  shaft/CVT exclusions; the chain-drive FTR 1200 kept via an explicit
+  exception.
+- **27 EFI/electronic parts stroke-gated** — quickshifters and fuel-injection
+  controllers were matching carbureted 1970s two-strokes. The Zeeltronic YPVS
+  controller now matches exactly the powervalve bikes (year_min=1983), which
+  also surfaced RD500LC/RZV500R being stored as I4 (they are V4 two-strokes
+  — fixed in DB + importer tokens).
+- **Model-named leaks** category/year-gated: GSX-R1000-named parts off the
+  GSX-S/Katana family, R1 ECU flashes off the carbureted 1989 FZR1000,
+  generation-coded flashes (K5/K7/4C8) year-pinned, Hayabusa bodywork off the
+  B-King, Duke-390 parts off the 390 Adventure, MTC lockup (99-21) off the
+  2024 Gen-3 Hayabusa. Misleadingly-named parts renamed to honest class names
+  (S&S "RE Twin" → "(HD/Indian V-Twin)", 600-supersport class exhausts).
+- **8 ClutchCo SKUs** displacement-banded — each previously matched 414
+  bikes, stacking optimizer candidate pools; now max 2 kits per bike.
+- **Duplicate Walbro pump merged** (parts 594 → 593); displacement-band
+  absurdities fixed (litre nitrous on 800s, "400cc" systems on 200cc bikes).
+- Data fixes: KTM 1390 I2→V2 (+ importer token), GSX-S1000GT →sport_touring,
+  Apache RTR 310 →naked.
+- **API hygiene**: autotune/optimize now return clean 404s for unknown bikes
+  (was a 400 with "404: …" leaked in the body), list routes reject
+  negative/zero limits (limit=-5 previously returned the entire table),
+  save-run validates ET/trap bounds (negative ETs were persistable to the
+  leaderboard). 62 new production-path integrity tests + 13 API tests.
+- Honest residual leaks documented and deliberate: Exciter 155 VVA shares
+  the R15's 155 VVA engine (parts genuinely fit), carb Pulsar 200 keeps
+  NS200 bolt-ons (only the ECU tune was impossible), M 1000 XR is stored
+  'sport' (recategorizing is cluster-coupled — flagged for operator).
 
 Tires: 6 duplicate-title rows merged (notation twins '100/90-17' vs
 '100/90R17' — MRF Zapper ×3, IRC GP-110, Bridgestone Battlax ×2);
@@ -151,7 +189,19 @@ sizes previously rendered as 3 identical entries, which is what read as
 
 ## 5. Derived artifacts regenerated
 
-<!-- ARTIFACTS -->
+- **Full reseed** — all 541 current bike_configs re-stamped with taxonomy-v2
+  category_tags (71 sport twins / 47 singles / 4 screamers); the three
+  July-6 patch scripts re-applied post-reseed with 0 changes (idempotency +
+  fold proven). Any future reseed chain must include them (all idempotent).
+- **Regression golden regenerated** — both tiers green: fast (~35-bike
+  stratified sample) and slow (`MOTOQUANT_SLOW_TESTS=1`, every current bike
+  through the production DB path).
+- **Surrogate v2.4 full regen** — 9,126 tasks cluster-stratified on the v2
+  taxonomy (see artifacts/surrogate/README.md v2.4 entry for metrics).
+- **`/validation` dataset regenerated** (stamp 2026-07-06): within ±0.10s
+  62 → 82 bikes, within ±0.20s 113 → 137, top-10 mean |Δ| ±0.0065s.
+- Sitewide fact sync: counts (541/593/254/1860/20), accuracy claims, corpus
+  221, 12-cluster taxonomy description, OG card.
 
 ## 6. Verification
 
