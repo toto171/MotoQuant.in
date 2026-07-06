@@ -158,6 +158,52 @@ class TestJobRegistry(unittest.TestCase):
         finally:
             jobs_mod.MAX_RUNNING = original
 
+    def test_hung_workers_do_not_starve_the_pool(self):
+        """A worker past MAX_JOB_RUNTIME_S is treated as hung: it stops counting
+        toward MAX_RUNNING (so new jobs can start) and gets cancel_requested,
+        instead of permanently wedging the registry."""
+        with jobs_mod._LOCK:
+            jobs_mod._JOBS.clear()
+            now = time.time()
+            hung_ids = []
+            for _ in range(jobs_mod.MAX_RUNNING):
+                j = jobs_mod.Job("stuck")
+                j.status = "running"
+                j.created_at = now - (jobs_mod.MAX_JOB_RUNTIME_S + 100)
+                jobs_mod._JOBS[j.id] = j
+                hung_ids.append(j.id)
+        try:
+            # Pool is "full" of hung jobs, yet a fresh job must be admitted.
+            job = jobs_mod.create_job("unittest", lambda progress: {"ok": 1})
+            got = self._wait(job)
+            self.assertEqual(got.status, "done")
+            # Every hung job was asked to cancel.
+            for hid in hung_ids:
+                hj = jobs_mod._JOBS.get(hid)
+                if hj is not None:
+                    self.assertTrue(hj.cancel_requested)
+        finally:
+            with jobs_mod._LOCK:
+                jobs_mod._JOBS.clear()
+
+    def test_healthy_full_pool_still_blocks(self):
+        """Regression guard: the hung-job carve-out must not weaken the normal
+        MAX_RUNNING back-pressure for jobs that are running within budget."""
+        with jobs_mod._LOCK:
+            jobs_mod._JOBS.clear()
+            now = time.time()
+            for _ in range(jobs_mod.MAX_RUNNING):
+                j = jobs_mod.Job("busy")
+                j.status = "running"
+                j.created_at = now  # fresh, not hung
+                jobs_mod._JOBS[j.id] = j
+        try:
+            with self.assertRaises(jobs_mod.JobCapacityError):
+                jobs_mod.create_job("unittest", lambda progress: None)
+        finally:
+            with jobs_mod._LOCK:
+                jobs_mod._JOBS.clear()
+
 
 @unittest.skipUnless(HAS_FASTAPI, "fastapi not installed")
 class TestJobsRoutes(unittest.TestCase):
