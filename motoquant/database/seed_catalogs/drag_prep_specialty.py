@@ -116,6 +116,9 @@ def seed_drag_prep_specialty(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "year_max": 2020,
+                        "year_min": 2008,
+                        "categories": ["sport"],
                         "manufacturers": ["Suzuki"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 1330,

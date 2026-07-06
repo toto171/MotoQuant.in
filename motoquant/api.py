@@ -832,8 +832,8 @@ def list_bikes(
     search: str | None = Query(None, description="Search by model/manufacturer"),
     manufacturer: str | None = Query(None),
     category: str | None = Query(None),
-    limit: int = Query(100, le=5000),
-    offset: int = Query(0),
+    limit: int = Query(100, ge=1, le=5000),
+    offset: int = Query(0, ge=0),
 ):
     db = _get_db()
     if not db:
@@ -1050,7 +1050,7 @@ def list_venues():
 def list_tires(
     compound: str | None = Query(None),
     manufacturer: str | None = Query(None),
-    limit: int = Query(1000, le=5000),
+    limit: int = Query(1000, ge=1, le=5000),
 ):
     db = _get_db()
     if not db:
@@ -1508,7 +1508,7 @@ def list_parts(
         "annotation per row.",
     ),
     search: str | None = Query(None),
-    limit: int = Query(500, le=5000),
+    limit: int = Query(500, ge=1, le=5000),
 ):
     """Return parts catalog, optionally filtered by category and bike compatibility.
 
@@ -1627,8 +1627,10 @@ class SaveRunRequest(BaseModel):
 
     bike_id: int
     venue_id: int | None = None
-    et_quarter_s: float
-    trap_speed_kmh: float
+    # Physically-plausible bounds (2026-07-06): negative/zero ETs and
+    # absurd trap speeds were accepted and surfaced on the leaderboard.
+    et_quarter_s: float = Field(gt=0, le=120)
+    trap_speed_kmh: float = Field(gt=0, le=500)
     et_60ft_s: float | None = None
     et_eighth_s: float | None = None
     et_1000ft_s: float | None = None
@@ -3595,6 +3597,11 @@ def _optimize_impl(req: OptimizeBuildRequest, progress=None):
             rider_mass_kg=req.rider_weight_kg,
             venue_id=req.venue_id,
         )
+    except HTTPException:
+        # Let _build_config's own status codes (404 unknown bike_id /
+        # bike_preset) pass through instead of leaking "404: ..." inside
+        # a 400 body (2026-07-06 API-hygiene fix).
+        raise
     except Exception as exc:
         raise HTTPException(400, f"Config construction failed: {exc}") from exc
 
@@ -3716,6 +3723,11 @@ def _autotune_impl(req: AutotuneRequest, progress=None):
             rider_mass_kg=req.rider_weight_kg,
             venue_id=req.venue_id,
         )
+    except HTTPException:
+        # Let _build_config's own status codes (404 unknown bike_id /
+        # bike_preset) pass through instead of leaking "404: ..." inside
+        # a 400 body (2026-07-06 API-hygiene fix).
+        raise
     except Exception as exc:
         raise HTTPException(400, f"Config construction failed: {exc}") from exc
 

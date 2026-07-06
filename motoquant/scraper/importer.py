@@ -234,6 +234,10 @@ _V_TWIN_MODEL_TOKENS = {
     "California",  # Moto Guzzi (also covered by make)
     "VTR",  # Honda VTR250/VTR1000F/VTR1000 SP1/SP2 are all 90-deg V-twins
     "RC51",  # US name for the VTR1000 SP1/SP2 RC51 homologation V-twin
+    # July 6, 2026 (catalog-integrity audit): the 1390 Super Duke R EVO is
+    # the LC8 V2 platform successor to the 1290 — without this token the
+    # importer stamped it I2 (audit fix class F, bike 341).
+    "1390",
 }
 
 # 4-cylinder V4 models (rest are assumed I4).
@@ -248,6 +252,12 @@ _V4_MODEL_TOKENS = {
     "VFR800",
     "RC213V",  # Honda RC213V-S — MotoGP-derived 90-deg V4
     "RC8",
+    # July 6, 2026 (catalog-integrity audit): Yamaha's 1984-86 500cc GP
+    # replicas are 50-deg V4 TWO-strokes — the importer stamped them I4,
+    # which let the Zeeltronic YPVS controller's V4 gate mis-bind (audit
+    # fix classes B/F, bikes 273/274).
+    "RD500",
+    "RZV500",
 }
 
 
@@ -298,26 +308,35 @@ def _infer_cylinder_config(spec: "BikeSpec") -> str | None:
 # ────────────────────────────────────────────────────────
 
 # Makes that predominantly ship belt on larger models (whole-fleet exclusion)
-_BELT_DRIVE_MAKES = {"Indian Motorcycle", "Victory"}
+# July 6, 2026: "Indian" added — the June-13 manufacturer merge canonicalised
+# "Indian Motorcycle" -> "Indian", after which this set matched NOTHING and
+# every Indian model reseeded with a phantom chain pitch (audit fix class A).
+_BELT_DRIVE_MAKES = {"Indian", "Indian Motorcycle", "Victory"}
 # Harley-Davidson is belt drive EXCEPT for Bajaj-built single-cylinder X440 (chain)
 # and Buell uses belt.
 _HD_CHAIN_MODELS = {"X440"}
+# Indian Motorcycle is belt drive EXCEPT the chain-drive FTR family.
+_INDIAN_CHAIN_MODELS = {"FTR"}
 
 # BMW-specific: R-series boxer and K-series inline-4 are shaft drive;
 # S1000/F-series parallel-twin/G-series are chain drive.
 _BMW_SHAFT_MODELS = {
     "R 1250",
     "R1250",
+    "R 1300",  # July 6, 2026: 2024+ boxer generation (audit fix class A)
+    "R1300",
     "R 1200",
     "R1200",
     "R nineT",
+    "R 12",  # 2024+ R 12 / R 12 nineT — shaft, not covered by "R nineT" token
     "K 1600",
     "K1600",
     "K 1300",
     "K1300",
 }
 # Moto Guzzi V-twins are shaft drive
-_MG_SHAFT_MODELS = {"V7", "V9", "V85", "California", "Griso", "Stelvio"}
+# July 6, 2026: "V100" added (Mandello — shaft; audit fix class A)
+_MG_SHAFT_MODELS = {"V7", "V9", "V85", "V100", "California", "Griso", "Stelvio"}
 
 # Individual chain-drive-excluded models from chain-drive makes (edge cases)
 _NON_CHAIN_MODELS = {
@@ -325,6 +344,12 @@ _NON_CHAIN_MODELS = {
     "Gold Wing",  # Honda Gold Wing — shaft drive
     "1125R",  # Buell 1125R — belt drive
     "CB1100",  # Honda CB1100 — shaft drive (the retro 4)
+    # July 6, 2026 (audit fix class A — these reseeded with phantom chain
+    # pitches and matched sprocket/chain parts they can't physically take):
+    "Rocket 3",  # Triumph Rocket 3 — shaft drive
+    "FJR1300",  # Yamaha FJR1300 — shaft drive
+    "Tiger 1200",  # Triumph Tiger 1200 — shaft drive
+    "Aerox",  # Yamaha Aerox 155 — CVT belt scooter, no chain final drive
 }
 # Models with explicit 530 pitch (mostly 1300cc+ drag platforms, older litre sport)
 _530_PITCH_MODELS = {"Hayabusa", "ZX-14R", "ZZR1400", "ZRX1200"}
@@ -470,7 +495,11 @@ def _infer_chain_pitch(spec: "BikeSpec") -> str | None:
 
     # Belt / shaft drive exclusions
     if make in _BELT_DRIVE_MAKES:
-        return None
+        # Chain-drive exceptions within belt-drive makes: the Indian FTR
+        # 1200 family is chain final drive (flat-track lineage), unlike
+        # every other Indian model (July 6, 2026).
+        if not any(tok in model for tok in _INDIAN_CHAIN_MODELS):
+            return None
     if make == "Harley-Davidson":
         # Harley is belt drive except chain-drive exceptions (Bajaj-built X440)
         if not any(tok in model for tok in _HD_CHAIN_MODELS):

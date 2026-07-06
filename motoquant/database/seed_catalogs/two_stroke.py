@@ -795,6 +795,7 @@ def seed_two_stroke(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "year_min": 1983,
                         "manufacturers": ["Yamaha"],
                         "engine_configs": ["I2", "V4"],
                         "displacement_min_cc": 245,

@@ -5104,6 +5104,10 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
     # + I4 + a tight displacement window). Folded from patch_2026_06_11 H — a
     # loose Suzuki+Yamaha/1000cc+ rule matched the Hayabusa but NOT the 999cc
     # K5 it is named for, and cross-matched the wrong-brand litre bikes.
+    # 2026-07-06 catalog-integrity fold: generation-named flashes carry
+    # year_min/year_max pins so a K5 flash can't match the 2001-2004 /
+    # 2007+ GSX-R generations (or the GSX-S litre platform), and the 4C8
+    # flash can't match pre-2007 R1s / the carbureted FZR1000 EXUP.
     woolich_exact = [
         {
             "model": "GSX-R 1000 K5 Stage 1 Flash",
@@ -5115,6 +5119,8 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "mfr": ["Suzuki"],
             "dmin": 985,
             "dmax": 1010,
+            "ymin": 2005,
+            "ymax": 2006,
         },
         {
             "model": "GSX-R 1000 K5 Stage 2 Flash",
@@ -5126,6 +5132,8 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "mfr": ["Suzuki"],
             "dmin": 985,
             "dmax": 1010,
+            "ymin": 2005,
+            "ymax": 2006,
         },
         {
             "model": "YZF-R1 4C8 Stage 1 Flash",
@@ -5137,6 +5145,8 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "mfr": ["Yamaha"],
             "dmin": 990,
             "dmax": 1010,
+            "ymin": 2007,
+            "ymax": 2008,
         },
         {
             "model": "YZF-R1 4C8 Stage 2 Flash",
@@ -5148,6 +5158,8 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "mfr": ["Yamaha"],
             "dmin": 990,
             "dmax": 1010,
+            "ymin": 2007,
+            "ymax": 2008,
         },
         {
             "model": "Hayabusa Gen1 Stage 1 Flash",
@@ -5194,6 +5206,13 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                         "displacement_min_cc": e["dmin"],
                         "displacement_max_cc": e["dmax"],
                         "categories": ["sport"],
+                        # generation pin (2026-07-06) — only present for
+                        # generation-named flashes
+                        **(
+                            {"year_min": e["ymin"], "year_max": e["ymax"]}
+                            if "ymin" in e
+                            else {}
+                        ),
                     },
                     "description": "Woolich flash pinned to its I4 platform",
                 },
@@ -5221,7 +5240,9 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "param_deltas": {"engine.peak_power_hp": hp_delta},
                 "fitment_rules": {
                     "tier": "family",
-                    "match": {"displacement_min_cc": 400},
+                    # stroke_type 4 (2026-07-06): EFI piggyback — must not
+                    # match carbureted 2-strokes in the displacement band.
+                    "match": {"displacement_min_cc": 400, "stroke_type": 4},
                     "description": f"Power Commander PCVI Stage {stage} — universal fuel map for 400cc+",
                 },
                 "price_inr": price,
@@ -5244,7 +5265,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_deltas": {"engine.peak_power_hp": 3.5},
             "fitment_rules": {
                 "tier": "family",
-                "match": {"displacement_min_cc": 600},
+                "match": {"stroke_type": 4, "displacement_min_cc": 600},
                 "description": "Bazzaz ZFi fuel + quickshift for 600cc+ bikes",
             },
             "price_inr": 28000,
@@ -5333,7 +5354,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_overrides": {"staging.two_step": True},
             "fitment_rules": {
                 "tier": "family",
-                "match": {"displacement_min_cc": 300},
+                "match": {"stroke_type": 4, "displacement_min_cc": 300},
                 "description": "Rapid Bike EVO fuel controller for 300cc+ motorcycles",
             },
             "price_inr": 18000,
@@ -5353,7 +5374,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_deltas": {"engine.peak_power_hp": 2.5},
             "fitment_rules": {
                 "tier": "family",
-                "match": {"displacement_min_cc": 400},
+                "match": {"stroke_type": 4, "displacement_min_cc": 400},
                 "description": "HealTech iFlash fuel controller with autotune",
             },
             "price_inr": 22000,
@@ -5658,11 +5679,19 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
         ):
             # Small-cc Indian-market / SE Asia underbone range — restrict to
             # single-cylinder engines so we don't catch RE 650 parallel twins.
+            # 2026-07-06: displacement floor honours the NAME — a "300cc+"
+            # slip-on must not match 155-250cc commuters, a "400cc" full
+            # system must not match sub-380cc bikes.
+            dmin = 150
+            if "300cc" in ex["model"]:
+                dmin = 280
+            if "400cc" in ex["model"]:
+                dmin = 380
             fitment_rules = {
                 "tier": "family",
                 "match": {
                     "engine_configs": ["I1"],
-                    "displacement_min_cc": 150,
+                    "displacement_min_cc": dmin,
                     "displacement_max_cc": 450,
                 },
                 "description": "Small-cc / Indian market slip-on for 150-450cc single-cylinder bikes",
@@ -5891,7 +5920,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             },
             "fitment_rules": {
                 "tier": "family",
-                "match": {"displacement_min_cc": 400},
+                "match": {"stroke_type": 4, "displacement_min_cc": 400},
                 "description": "HM Quickshifter for 400cc+ bikes",
             },
             "price_inr": 22000,
@@ -5930,7 +5959,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             },
             "fitment_rules": {
                 "tier": "family",
-                "match": {"displacement_min_cc": 600},
+                "match": {"stroke_type": 4, "displacement_min_cc": 600},
                 "description": "Dynojet quickshifter for 600cc+ bikes",
             },
             "price_inr": 28000,
@@ -6116,7 +6145,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_deltas": {"engine.peak_power_hp": 1.5},
             "fitment_rules": {
                 "tier": "family",
-                "match": {"displacement_min_cc": 600},
+                "match": {"stroke_type": 4, "displacement_min_cc": 600},
                 "description": "Bosch high-flow fuel pump for 600cc+ bikes",
             },
             "price_inr": 7500,
@@ -6148,7 +6177,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_deltas": {"engine.peak_power_hp": 2.0},
             "fitment_rules": {
                 "tier": "family",
-                "match": {"displacement_min_cc": 400},
+                "match": {"stroke_type": 4, "displacement_min_cc": 400},
                 "description": "HealTech fuel controller for 400cc+ bikes",
             },
             "price_inr": 22000,
@@ -6164,7 +6193,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_deltas": {"engine.peak_power_hp": 1.5},
             "fitment_rules": {
                 "tier": "family",
-                "match": {"displacement_min_cc": 600},
+                "match": {"stroke_type": 4, "displacement_min_cc": 600},
                 "description": "Bazzaz fuel + quickshift control for 600cc+ bikes",
             },
             "price_inr": 28000,
@@ -6622,7 +6651,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_deltas": {"engine.peak_power_hp": 2.5},
             "fitment_rules": {
                 "tier": "family",
-                "match": {"displacement_min_cc": 250},
+                "match": {"stroke_type": 4, "displacement_min_cc": 250},
                 "description": "Rapid Bike EVO for all 250cc+ bikes",
             },
             "price_inr": 18000,
@@ -6638,7 +6667,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_deltas": {"engine.peak_power_hp": 3.0},
             "fitment_rules": {
                 "tier": "family",
-                "match": {"displacement_min_cc": 500},
+                "match": {"stroke_type": 4, "displacement_min_cc": 500},
                 "description": "Bazzaz ZFi standalone for 500cc+ bikes",
             },
             "price_inr": 25000,
@@ -6655,7 +6684,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_overrides": {"drivetrain.quickshifter": True},
             "fitment_rules": {
                 "tier": "family",
-                "match": {"displacement_min_cc": 600},
+                "match": {"stroke_type": 4, "displacement_min_cc": 600},
                 "description": "HealTech quickshifter module for 600cc+ bikes",
             },
             "price_inr": 16000,
@@ -6672,6 +6701,8 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {
+                    "year_max": 2008,
+                    "year_min": 2007,
                     "manufacturers": ["Suzuki"],
                     "displacement_min_cc": 999,
                     "displacement_max_cc": 1001,
@@ -6717,7 +6748,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_deltas": {"engine.peak_power_hp": 4.0},
             "fitment_rules": {
                 "tier": "family",
-                "match": {"displacement_min_cc": 600},
+                "match": {"stroke_type": 4, "displacement_min_cc": 600},
                 "description": "Dynojet auto-tune mapping for 600cc+ bikes",
             },
             "price_inr": 32000,
@@ -6752,6 +6783,8 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {
+                    "year_min": 2013,
+                    "stroke_type": 4,
                     # 'model_name' is not a FitmentMatch constraint key (the
                     # engine ignores it); the Bajaj 199-201cc window is the real
                     # rule. Dropped per patch_2026_06_11 K.
@@ -6775,6 +6808,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {
+                    "categories": ["naked", "sport"],
                     # Real Duke 390 engine is 373/399cc — the 390-391 window
                     # matched nothing. Widened per patch_2026_06_11 E.
                     "manufacturers": ["KTM"],
@@ -6812,16 +6846,24 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
 
     # Additional Clutch Kits (8 more)
     clutch_brands = [
-        ("Kevlar Pro", 13000),
-        ("Carbon Race", 15000),
-        ("Organic Street", 8000),
-        ("Sintered Sport", 10000),
-        ("Heavy Duty Steel", 7000),
-        ("Race Ceramic", 14000),
-        ("Premium Organic", 9000),
-        ("Ultra Slippery", 11000),
+        # 2026-07-06 catalog-integrity fold: the 8 SKUs used to share ONE
+        # 'displacement_min_cc: 250' rule, so all 8 matched every 250cc+
+        # bike (414 each) and stacked in optimizer candidate pools. Banded
+        # by displacement class (street organics small, race compounds big).
+        ("Kevlar Pro", 13000, 750, 1100),
+        ("Carbon Race", 15000, 1100, None),
+        ("Organic Street", 8000, 250, 500),
+        ("Sintered Sport", 10000, 500, 750),
+        ("Heavy Duty Steel", 7000, 500, 750),
+        ("Race Ceramic", 14000, 1100, None),
+        ("Premium Organic", 9000, 250, 500),
+        ("Ultra Slippery", 11000, 750, 1100),
     ]
-    for name, price in clutch_brands:
+    for name, price, cc_min, cc_max in clutch_brands:
+        band = f"{cc_min}-{cc_max}cc" if cc_max else f"{cc_min}cc+"
+        match = {"displacement_min_cc": cc_min}
+        if cc_max is not None:
+            match["displacement_max_cc"] = cc_max
         parts.append(
             {
                 "category": "clutch_kit",
@@ -6831,8 +6873,8 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "specs": {"material": name.split()[0]},
                 "fitment_rules": {
                     "tier": "family",
-                    "match": {"displacement_min_cc": 250},
-                    "description": f"ClutchCo {name} clutch kit for 250cc+ bikes",
+                    "match": match,
+                    "description": f"ClutchCo {name} clutch kit for {band} bikes",
                 },
                 "price_inr": price,
                 "availability": "in_stock",
@@ -7008,10 +7050,14 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "part_number": "WAL-450-PUMP",
             "specs": {"flow_lph": 450, "type": "in_tank"},
             "param_deltas": {"engine.peak_power_hp": 2.0},
+            # 2026-07-06: merged with the duplicate drag_specific.py row
+            # (removed there) — union rule: 600cc+ fuel-injected bikes.
             "fitment_rules": {
                 "tier": "family",
-                "match": {"displacement_min_cc": 1000},
-                "description": "Walbro high-flow pump for 1000cc+ bikes",
+                "match": {"displacement_min_cc": 600, "stroke_type": 4},
+                "description": "Walbro 450 LPH high-flow pump for 600cc+ "
+                "fuel-injected bikes (merged duplicate catalog rows, "
+                "2026-07-06)",
             },
             "price_inr": 15000,
             "availability": "order",
@@ -7044,7 +7090,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_deltas": {"engine.peak_power_hp": 5.0},
             "fitment_rules": {
                 "tier": "family",
-                "match": {"displacement_min_cc": 600},
+                "match": {"stroke_type": 4, "displacement_min_cc": 600},
                 "description": "AEM Infinity full tuning computer for 600cc+ bikes",
             },
             "price_inr": 55000,
@@ -7283,7 +7329,18 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
         ),
         ("FMF", "Powercore 300cc Full", "FMF-300-FULL", 2.5, 1.5, 22000, "in_stock", 0),
         ("Arrow", "RE 650 Full System", "AR-RE650-FS", 3.0, 2.0, 62000, "order", 20),
-        ("S&S", "Grand National RE Twin", "SS-GN-RE", 3.5, 2.5, 88000, "order", 25),
+        # renamed 2026-07-06: the rule always targeted HD/Indian V-twins;
+        # "RE Twin" in the old name wrongly suggested Royal Enfield.
+        (
+            "S&S",
+            "Grand National Slip-On (HD/Indian V-Twin)",
+            "SS-GN-RE",
+            3.5,
+            2.5,
+            88000,
+            "order",
+            25,
+        ),
         (
             "Vance Hines",
             "PowerDual 2-into-1",
@@ -7357,9 +7414,11 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             32,
         ),
         ("Arrow", "GSX-R 1000 Pro-Race", "AR-GSXR-PR", 8.5, 5.5, 168000, "order", 30),
+        # renamed 2026-07-06: these two carry a CLASS rule (any 600
+        # supersport I4), so the names now say the class instead of one model.
         (
             "Two Brothers",
-            "M-2 Full CBR600",
+            "M-2 Full System 600 Supersport",
             "TBR-M2-CBR600",
             5.0,
             3.0,
@@ -7369,7 +7428,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
         ),
         (
             "Leo Vince",
-            "LV-10 YZF-R6 Slip-On",
+            "LV-10 Slip-On 600 Supersport",
             "LV-R6-SLIP",
             3.5,
             2.0,
@@ -7411,6 +7470,9 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "engine_configs": ["I4"],
                 "displacement_min_cc": 1299,
                 "displacement_max_cc": 1341,
+                # sport gate (2026-07-06): the B-King shares the engine but
+                # not the bodywork — a Hayabusa slip-on doesn't bolt on.
+                "categories": ["sport"],
             }
         # RSV4 check MUST come before Panigale V4 — "RSV4 Racing" contains
         # the substring "V4 " which would otherwise trigger the Panigale branch.
@@ -7421,6 +7483,8 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "engine_configs": ["V4"],
                 "displacement_min_cc": 990,
                 "displacement_max_cc": 1100,
+                # sport gate (2026-07-06): excludes the naked Tuono V4 1100
+                "categories": ["sport"],
             }
         elif "Panigale V4" in model or "V4 R-77" in model:
             tier_desc = "Ducati Panigale V4 exhausts (V4 998-1103cc)"
@@ -7429,6 +7493,8 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "engine_configs": ["V4"],
                 "displacement_min_cc": 990,
                 "displacement_max_cc": 1103,
+                # sport gate (2026-07-06): excludes the naked Streetfighter V4s
+                "categories": ["sport"],
             }
         elif "Panigale" in model:
             # Older V-twin Panigale (1199/1299 Superquadro). categories [sport]
@@ -7448,6 +7514,9 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "engine_configs": ["I4"],
                 "displacement_min_cc": 990,
                 "displacement_max_cc": 1010,
+                # sport gate (2026-07-06): excludes S1000R/M1000R naked +
+                # S1000XR ADV (S1000RR + HP4 Race platform family remains)
+                "categories": ["sport"],
             }
         elif "CBR1000" in model or "CBR1K" in model:
             tier_desc = "Honda CBR1000RR exhausts (I4 999-1000cc)"
@@ -7456,6 +7525,8 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "engine_configs": ["I4"],
                 "displacement_min_cc": 990,
                 "displacement_max_cc": 1010,
+                # sport gate (2026-07-06): excludes CB1000R / CB1000 Hornet
+                "categories": ["sport"],
             }
         elif "YZF-R1" in model or "R1 " in model or model.endswith(" R1"):
             tier_desc = "Yamaha YZF-R1 exhausts (I4 998cc)"
@@ -7464,6 +7535,10 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "engine_configs": ["I4"],
                 "displacement_min_cc": 990,
                 "displacement_max_cc": 1010,
+                # sport gate + first-R1-year pin (2026-07-06): excludes the
+                # naked FZ1 Fazer and the carbureted FZR1000 EXUP (1989).
+                "categories": ["sport"],
+                "year_min": 1998,
             }
         elif "GSX-R" in model or "GSXR" in model:
             tier_desc = "Suzuki GSX-R 1000 exhausts (I4 999cc)"
@@ -7472,6 +7547,9 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "engine_configs": ["I4"],
                 "displacement_min_cc": 990,
                 "displacement_max_cc": 1010,
+                # sport gate (2026-07-06): excludes GSX-S950/1000/Katana
+                # naked litres + GSX-S1000GT/GX tourers
+                "categories": ["sport"],
             }
         elif "YZF-R6" in model or "CBR600" in model or " R6" in model:
             tier_desc = "600cc supersport I4 exhausts"
@@ -7518,16 +7596,20 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             }
         elif "Grand National" in model:
             # S&S Grand National race-replica — vintage-style Harley V-twin flat-track.
+            # 2026-07-06: manufacturer canonicalised to "Indian" — the June-13
+            # manufacturer merge keeps the plain name and the compat engine
+            # matches strings exactly, so "Indian Motorcycle" was a dead
+            # token on fresh seeds.
             tier_desc = "S&S Grand National Harley/Indian V-twin race exhaust"
             match = {
-                "manufacturers": ["Harley-Davidson", "Indian Motorcycle"],
+                "manufacturers": ["Harley-Davidson", "Indian"],
                 "engine_configs": ["V2"],
                 "displacement_min_cc": 800,
             }
         elif "PowerDual" in model or "2-into-1" in model or "Vance" in model:
             tier_desc = "Harley-Davidson / Indian V-twin 2-into-1 cruiser exhausts"
             match = {
-                "manufacturers": ["Harley-Davidson", "Indian Motorcycle"],
+                "manufacturers": ["Harley-Davidson", "Indian"],
                 "engine_configs": ["V2"],
                 "displacement_min_cc": 800,
             }
@@ -7629,6 +7711,11 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             ("Bonamici", "Racing Quick Shifter", 26000),
         ]
     ):
+        qs_match = {"displacement_min_cc": 300 + i * 150}
+        if model == "Power Commander QS":
+            # stroke gate (2026-07-06): the PC QS is a 4T EFI-era product;
+            # its displacement floor caught 2T big-bores (GT750/H2 Mach IV).
+            qs_match["stroke_type"] = 4
         parts.append(
             {
                 "category": "quickshifter",
@@ -7639,7 +7726,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "param_overrides": {"drivetrain.quickshifter": True},
                 "fitment_rules": {
                     "tier": "family",
-                    "match": {"displacement_min_cc": 300 + i * 150},
+                    "match": qs_match,
                     "description": f"{brand} quickshifter for 300cc+ bikes",
                 },
                 "price_inr": price,
@@ -7902,6 +7989,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "stroke_type": 4,
                         "manufacturers": [
                             "KTM",
                             "Bajaj",
@@ -7912,8 +8000,8 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                             "Royal Enfield",
                             "Husqvarna",
                         ],
-                        "displacement_min_cc": 150,
-                        "displacement_max_cc": 400,
+                        "displacement_min_cc": 195,
+                        "displacement_max_cc": 410,
                     },
                     "description": "Race Dynamics PowerTRONIC for Indian 150-400cc fuel-injected",
                 },
@@ -7934,6 +8022,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "stroke_type": 4,
                         "displacement_min_cc": 200,
                         "displacement_max_cc": 500,
                         "engine_configs": ["I1", "I2"],
@@ -7957,7 +8046,12 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 },
                 "fitment_rules": {
                     "tier": "family",
-                    "match": {"chain_pitch": "428", "displacement_max_cc": 165},
+                    "match": {
+                        "displacement_min_cc": 140,
+                        "stroke_type": 4,
+                        "chain_pitch": "428",
+                        "displacement_max_cc": 165,
+                    },
                     "description": "Aracer RC Mini for SE Asia 150cc underbones/cubs",
                 },
                 "price_inr": 22000,
@@ -7969,11 +8063,20 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
     )
 
     # High-flow air filters for Indian/SE Asia 150–400cc
-    for brand, model_suffix, hp_delta, price in [
-        ("K&N", "Replacement Air Filter Indian 150-400", 1.2, 3200),
-        ("DNA", "Stage 1 Filter Indian 125-400", 1.5, 4500),
-        ("BMC", "FM-Series Filter Small-cc", 1.0, 5200),
-        ("Green Filter", "Cotton Filter Small-cc", 1.3, 3800),
+    # 2026-07-06: the K&N "150-400" replacement (airbox drop-in, a 4T EFI-era
+    # product) gets its named floor (145) + stroke gate; the generic pod
+    # filters keep the wide 125 floor.
+    for brand, model_suffix, hp_delta, price, extra_match in [
+        (
+            "K&N",
+            "Replacement Air Filter Indian 150-400",
+            1.2,
+            3200,
+            {"displacement_min_cc": 145, "stroke_type": 4},
+        ),
+        ("DNA", "Stage 1 Filter Indian 125-400", 1.5, 4500, {}),
+        ("BMC", "FM-Series Filter Small-cc", 1.0, 5200, {}),
+        ("Green Filter", "Cotton Filter Small-cc", 1.3, 3800, {}),
     ]:
         seg_parts.append(
             {
@@ -7985,7 +8088,11 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "param_deltas": {"engine.peak_power_hp": hp_delta},
                 "fitment_rules": {
                     "tier": "family",
-                    "match": {"displacement_min_cc": 125, "displacement_max_cc": 400},
+                    "match": {
+                        "displacement_min_cc": 125,
+                        "displacement_max_cc": 400,
+                        **extra_match,
+                    },
                     "description": f"{brand} high-flow filter for 125-400cc",
                 },
                 "price_inr": price,
@@ -8069,6 +8176,16 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": [
+                            "sport",
+                            "naked",
+                            "adventure",
+                            "cruiser",
+                            "muscle",
+                            "touring",
+                            "sport_touring",
+                        ],
+                        "stroke_type": 4,
                         "manufacturers": [
                             "KTM",
                             "Bajaj",
@@ -8079,8 +8196,8 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                             "Husqvarna",
                             "Royal Enfield",
                         ],
-                        "displacement_min_cc": 150,
-                        "displacement_max_cc": 450,
+                        "displacement_min_cc": 195,
+                        "displacement_max_cc": 410,
                     },
                     "description": "Healtech iQSE quickshifter for Indian 150-450cc",
                 },
@@ -8098,7 +8215,12 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "param_deltas": {"drivetrain.total_shift_time_ms": -35.0},
                 "fitment_rules": {
                     "tier": "family",
-                    "match": {"chain_pitch": "428", "displacement_max_cc": 165},
+                    "match": {
+                        "displacement_min_cc": 140,
+                        "stroke_type": 4,
+                        "chain_pitch": "428",
+                        "displacement_max_cc": 165,
+                    },
                     "description": "Translogic quickshifter for SE Asia 150cc underbones",
                 },
                 "price_inr": 24000,
@@ -8180,6 +8302,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["naked", "sport"],
                         "manufacturers": ["KTM"],
                         "displacement_min_cc": 350,
                         "displacement_max_cc": 400,
@@ -8256,6 +8379,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "stroke_type": 4,
                         "manufacturers": ["Honda"],
                         "displacement_min_cc": 245,
                         "displacement_max_cc": 260,
@@ -8289,10 +8413,10 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                     "match": {
                         "manufacturers": ["Royal Enfield"],
                         "displacement_min_cc": 340,
-                        "displacement_max_cc": 510,
+                        "displacement_max_cc": 400,
                         "engine_configs": ["I1"],
                     },
-                    "description": "Zard conical slip-on for RE 350/500 singles",
+                    "description": "Zard conical slip-on for RE 350 singles (UCE + J-series; 500 UCE fitment exists but is not expressible without matching the 411-452cc Himalayan/Scram/Guerrilla platform — verify fit for 500s)",
                 },
                 "price_inr": 16500,
                 "availability": "in_stock",
@@ -8488,6 +8612,8 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "stroke_type": 4,
+                        "manufacturers": ["Royal Enfield", "Hero"],
                         "categories": ["adventure"],
                         "displacement_min_cc": 180,
                         "displacement_max_cc": 500,
@@ -8583,6 +8709,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "stroke_type": 4,
                         "engine_configs": ["I2"],
                         "displacement_min_cc": 300,
                         "displacement_max_cc": 500,
@@ -8672,7 +8799,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "param_deltas": {"chassis.dry_mass_kg": -3.5},
                 "fitment_rules": {
                     "tier": "family",
-                    "match": {"displacement_min_cc": 150, "displacement_max_cc": 500},
+                    "match": {"displacement_min_cc": 150, "displacement_max_cc": 410},
                     "description": "Amaron lithium LFP battery for 150-500cc Indian/SE Asia",
                 },
                 "price_inr": 7200,
@@ -8762,8 +8889,8 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                             "Honda",
                             "Kawasaki",
                         ],
-                        "displacement_min_cc": 150,
-                        "displacement_max_cc": 500,
+                        "displacement_min_cc": 195,
+                        "displacement_max_cc": 410,
                         "categories": ["sport", "naked"],
                     },
                     "description": "Puig race windscreen for Indian 150-500cc sport/naked",
@@ -8782,6 +8909,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["KTM"],
                         "displacement_min_cc": 370,
                         "displacement_max_cc": 400,

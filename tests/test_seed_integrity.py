@@ -56,7 +56,9 @@ NESTED_CONSTRAINT_KEYS = {
 
 # Floor for the catalog size — the current fresh-seed part count. Additions are
 # fine (the floor still holds); a drop means parts silently vanished.
-MIN_CATALOG_PARTS = 594
+# 594 -> 593 on 2026-07-06: the duplicate Walbro 450 LPH Fuel Pump row
+# (seed.py + drag_specific.py both seeded one) was merged into a single part.
+MIN_CATALOG_PARTS = 593
 
 
 @pytest.fixture(scope="module")

@@ -1208,6 +1208,7 @@ def seed_premium_universal(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {
+                    "stroke_type": 4,
                     "manufacturers": [],
                     "engine_configs": ["I4", "V4"],
                     "displacement_min_cc": 400,
@@ -1258,6 +1259,7 @@ def seed_premium_universal(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {
+                    "stroke_type": 4,
                     "manufacturers": [],
                     "engine_configs": ["I1", "I2", "I4"],
                     "displacement_min_cc": 150,
@@ -1336,6 +1338,7 @@ def seed_premium_universal(db: MotoQuantDB) -> int:
             "fitment_rules": {
                 "tier": "family",
                 "match": {
+                    "stroke_type": 4,
                     "manufacturers": [],
                     "engine_configs": ["I2", "I4"],
                     "displacement_min_cc": 200,

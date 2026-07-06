@@ -53,9 +53,10 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Yamaha"],
                         "engine_configs": ["I1"],
-                        "displacement_min_cc": 145,
+                        "displacement_min_cc": 150,
                         "displacement_max_cc": 165,
                         "chain_pitch": "428",
                     },
@@ -148,6 +149,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         # Widened to the full V4 window (patch_2026_06_11 B): the
                         # 1100 floor missed the 998cc Panigale V4R this is named for.
                         "manufacturers": ["Ducati"],
@@ -339,6 +341,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["BMW"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -401,6 +404,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["cruiser"],
                         # Low Rider ST is the 117ci (1923cc) M-8 — the 1860-1880
                         # window missed it. Widened per patch_2026_06_11 M.
                         "manufacturers": ["Harley-Davidson", "HD", "Harley"],
@@ -501,6 +505,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["TVS"],
                         "engine_configs": ["I1"],
                         "displacement_min_cc": 305,
@@ -563,10 +568,11 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["naked"],
                         "manufacturers": ["Honda"],
                         "engine_configs": ["I1"],
                         "displacement_min_cc": 280,
-                        "displacement_max_cc": 300,
+                        "displacement_max_cc": 290,
                         "chain_pitch": "520",
                     },
                 },
@@ -603,9 +609,10 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Yamaha"],
                         "engine_configs": ["I1"],
-                        "displacement_min_cc": 145,
+                        "displacement_min_cc": 150,
                         "displacement_max_cc": 165,
                     },
                 },
@@ -693,6 +700,8 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "year_min": 1998,
+                        "categories": ["sport"],
                         "manufacturers": ["Yamaha"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -723,6 +732,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Suzuki"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -783,10 +793,11 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["naked"],
                         "manufacturers": ["Honda"],
                         "engine_configs": ["I1"],
                         "displacement_min_cc": 280,
-                        "displacement_max_cc": 300,
+                        "displacement_max_cc": 290,
                     },
                 },
                 "price_inr": 3500,
@@ -813,6 +824,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Ducati"],
                         "engine_configs": ["V4"],
                         "displacement_min_cc": 1100,
@@ -843,6 +855,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["TVS"],
                         "engine_configs": ["I1"],
                         "displacement_min_cc": 305,
@@ -903,6 +916,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["BMW"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -1134,7 +1148,7 @@ def seed_indian_retailer_depth(db) -> int:
             {
                 "category": "sprocket",
                 "brand": "JT Sprockets",
-                "model_name": "JT 530 Rear Sprocket 42T Litre Sport (Hayabusa Gearing)",
+                "model_name": "JT 530 Rear Sprocket 42T (530 Litre+)",
                 "part_number": "JTS-530-R42",
                 "specs": {
                     "pitch": "530",
@@ -1212,9 +1226,10 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Yamaha"],
                         "engine_configs": ["I1"],
-                        "displacement_min_cc": 145,
+                        "displacement_min_cc": 150,
                         "displacement_max_cc": 165,
                     },
                 },
@@ -1271,6 +1286,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Suzuki"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -1301,6 +1317,8 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "year_min": 1998,
+                        "categories": ["sport"],
                         "manufacturers": ["Yamaha"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -1331,6 +1349,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Ducati"],
                         "engine_configs": ["V4"],
                         "displacement_min_cc": 1100,
@@ -1361,6 +1380,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["BMW"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -1520,8 +1540,10 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "engine_configs": ["I1"],
+                        "categories": ["sport"],
                         "manufacturers": ["Yamaha"],
-                        "displacement_min_cc": 145,
+                        "displacement_min_cc": 150,
                         "displacement_max_cc": 165,
                     },
                 },
@@ -1607,6 +1629,8 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "year_min": 1998,
+                        "categories": ["sport"],
                         "manufacturers": ["Yamaha"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -1667,6 +1691,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["TVS"],
                         "displacement_min_cc": 305,
                         "displacement_max_cc": 315,
@@ -1696,6 +1721,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Suzuki"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -1726,6 +1752,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Ducati"],
                         "engine_configs": ["V4"],
                         "displacement_min_cc": 1100,
@@ -1794,8 +1821,10 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "engine_configs": ["I1"],
+                        "categories": ["sport"],
                         "manufacturers": ["Yamaha"],
-                        "displacement_min_cc": 145,
+                        "displacement_min_cc": 150,
                         "displacement_max_cc": 165,
                     },
                 },
@@ -1850,6 +1879,8 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "year_min": 1998,
+                        "categories": ["sport"],
                         "manufacturers": ["Yamaha"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -1908,6 +1939,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Suzuki"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -1937,6 +1969,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Ducati"],
                         "engine_configs": ["V4"],
                         "displacement_min_cc": 1100,
@@ -1966,6 +1999,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["BMW"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -2091,8 +2125,10 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "engine_configs": ["I1"],
+                        "categories": ["sport"],
                         "manufacturers": ["Yamaha"],
-                        "displacement_min_cc": 145,
+                        "displacement_min_cc": 150,
                         "displacement_max_cc": 165,
                     },
                 },
@@ -2150,6 +2186,8 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "year_min": 1998,
+                        "categories": ["sport"],
                         "manufacturers": ["Yamaha"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -2209,6 +2247,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Suzuki"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -2239,6 +2278,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Ducati"],
                         "engine_configs": ["V4"],
                         "displacement_min_cc": 1100,
@@ -2269,9 +2309,10 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["naked"],
                         "manufacturers": ["Honda"],
                         "displacement_min_cc": 280,
-                        "displacement_max_cc": 300,
+                        "displacement_max_cc": 290,
                     },
                 },
                 "price_inr": 2200,
@@ -2298,6 +2339,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["BMW"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -2366,6 +2408,8 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "year_min": 1998,
+                        "categories": ["sport"],
                         "manufacturers": ["Yamaha"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -2426,6 +2470,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Ducati"],
                         "engine_configs": ["V4"],
                         "displacement_min_cc": 1100,
@@ -2485,6 +2530,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Suzuki"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -2524,6 +2570,8 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "year_min": 1998,
+                        "categories": ["sport"],
                         "manufacturers": ["Yamaha"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -2584,6 +2632,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Suzuki"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -2614,6 +2663,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Ducati"],
                         "engine_configs": ["V4"],
                         "displacement_min_cc": 1100,
@@ -2644,6 +2694,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["BMW"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -2683,6 +2734,8 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "year_min": 1998,
+                        "categories": ["sport"],
                         "manufacturers": ["Yamaha"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -2743,6 +2796,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Suzuki"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,
@@ -2773,6 +2827,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Ducati"],
                         "engine_configs": ["V4"],
                         "displacement_min_cc": 1100,
@@ -2803,6 +2858,7 @@ def seed_indian_retailer_depth(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["BMW"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 990,

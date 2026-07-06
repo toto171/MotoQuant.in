@@ -4650,7 +4650,8 @@ TRIUMPH_ROCKET_3_2020 = spec_from_dict(
         "gear_ratios": [2.352, 1.750, 1.368, 1.130, 0.974, 0.843],
         "front_sprocket": 18,
         "rear_sprocket": 47,
-        "chain_pitch": "530",
+        "chain_pitch": "shaft",  # 2026-07-06: final drive metadata (importer's _infer_chain_pitch
+        # doesn't read this yet — see patch_2026_07_06_catalog_integrity.py)
         "dry_mass_kg": 291.0,  # April 24, 2026 — corrected from 317.5
         # (Triumph official dry weight for R is 291kg;
         # 317.5kg was the WET kerb weight). Spec

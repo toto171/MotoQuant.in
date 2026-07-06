@@ -508,6 +508,8 @@ def seed_drag_essentials(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "year_max": 2020,
+                        "year_min": 1999,
                         "manufacturers": ["Suzuki"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 1280,
@@ -669,7 +671,9 @@ def seed_drag_essentials(db) -> int:
                         "engine_configs": ["V2"],
                         "displacement_min_cc": 1440,
                         "displacement_max_cc": 1950,
-                        "categories": ["cruiser", "muscle", "touring"],
+                        # 2026-07-06: touring dropped — a Softail plate kit
+                        # is not a touring-bagger part (Road Glide leak).
+                        "categories": ["cruiser", "muscle"],
                         "year_min": 2001,
                     },
                     "description": (
