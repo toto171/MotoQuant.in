@@ -48,7 +48,11 @@ from scripts.sweep_with_clusters import (  # noqa: E402
 # hyphenated keys).
 CLUSTER_LABELS = {
     "litre-sport-195+": "Litre hyper-sport (195 hp+)",
-    "litre-sport-600-1000": "600-1000 sport",
+    "litre-sport-600-1000": "600-1000 sport (I4/triple)",
+    # Taxonomy v2 (July 6, 2026) — cylinder-aware clusters
+    "sport-twin-600-1300": "Sport twins (600-1300cc)",
+    "small-i4-screamer": "Small-cc I4 screamers",
+    "single-300-500": "Singles (300-500cc)",
     "mid-twin-500-700": "Mid twins (500-700cc)",
     "mid-twin-300-500": "Mid twins (300-500cc)",
     "entry-200-300": "Entry (200-300cc)",
@@ -125,6 +129,7 @@ def main() -> int:
             rec["power_hp"],
             rec["stroke_type"],
             rec["category"],
+            cylinders=rec.get("cylinders"),
         )
         bikes.append(
             {

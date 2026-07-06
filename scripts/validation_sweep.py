@@ -103,8 +103,10 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # flagged in CLAUDE.md Apr 27). 2011 aligned 10.10/240 -> archive
     # 10.08 @ 146.1 mph (7/11).
     ("Kawasaki", "Ninja ZX-10R", 2004, 9.92, 237.2, "Sport Rider 6/04 (archive)"),
-    ("Kawasaki", "Ninja ZX-10R", 2006, 9.764, 239.9, "Sport Rider 6/06 (archive)"),
-    ("Kawasaki", "Ninja ZX-10R", 2008, 9.93, 236.4, "Sport Rider 6/08 (archive)"),
+    # July 6, 2026 dedup: the bare 2006/2008 Ninja ZX-10R rows that lived here
+    # duplicated the fully-documented C1/C2 rows added 2026-06-11 further down
+    # (identical values; these earlier copies shadowed nothing but double-
+    # counted the key). Removed; see the documented rows for provenance.
     ("Kawasaki", "Ninja ZX-10R", 2011, 10.08, 235.1, "Sport Rider 7/11 (archive)"),
     ("Kawasaki", "Ninja ZX-10R", 2021, 10.00, 241, "Cycle World 2021"),
     # ZX-6R 636 second-gen — Sport Rider 2009 Middleweight Shootout, timing-strip
@@ -156,7 +158,22 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # 2-stroke benchmarks (Cycle World / historical drag tests / magazine)
     ("Yamaha", "RD350", 1973, 14.00, 146, "Cycle World 1973"),
     ("Yamaha", "RD400", 1976, 14.18, 147, "Cycle World 1979 (RD400F Daytona)"),
-    ("Suzuki", "RG500", 1985, 11.60, 180, "Cycle World 1985"),
+    # RG500 AUDIT 2026-07-06: the old row (11.60 @ 180, "Cycle World 1985")
+    # could not be corroborated anywhere — no published 1985-86 test shows
+    # 11.60 or a 180 km/h (111.8 mph) trap. The period-instrumented figure is
+    # Cycle magazine December 1985: 11.37s @ 193 km/h (~120 mph), quoted by
+    # FastestLaps + motoplanete period-test tables and corroborated by Rider
+    # Magazine's 2015 retrospective ("11-second quarter-mile at 120 mph").
+    # The 180 trap looks like a transcription error; source relabeled to the
+    # actual magazine (Cycle, not Cycle World — same 0.7 magazine tier).
+    (
+        "Suzuki",
+        "RG500",
+        1985,
+        11.37,
+        193,
+        "Cycle magazine 12/1985 (11.37s @ 193 km/h; Rider Magazine 2015 retrospective corroborates ~120 mph trap)",
+    ),
     ("Honda", "NSR250R", 1990, 13.40, 162, "MotorBikeCatalog (estimated 1991 MC21)"),
     ("Aprilia", "RS250", 1996, 13.40, 160, "MotorBikeCatalog 1998 (estimated)"),
     # Indian-market small-cc (from local drag strip telemetry collected
@@ -170,7 +187,22 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # ACCURACY 2026-06-11: year 2019 -> 2012 — the cited source IS the 2012
     # test and the catalog spec ranges are [2012-2016] + [2020-2026 BS6];
     # 2019 fell in the gap and the row silently never matched.
-    ("Bajaj", "Pulsar NS200", 2012, 16.90, 130, "MotorBikeCatalog 2012 (verified)"),
+    # AUDIT 2026-07-06: value 16.9 re-confirmed to match the cited
+    # MotorBikeCatalog 2012 Pulsar NS 200 DTS-i performance page exactly, but
+    # that figure is MBC's model-based ESTIMATE, not an instrumented run — the
+    # old "(verified)" suffix meant transcription-verified and read as if it
+    # were instrumented. No published instrumented NS200 quarter-mile exists
+    # (Autocar India's 200NS road test publishes 0-100 only). Value kept;
+    # label honesty-fixed. Weight unchanged (motorbikecatalog -> 0.5
+    # aggregator either way).
+    (
+        "Bajaj",
+        "Pulsar NS200",
+        2012,
+        16.90,
+        130,
+        "MotorBikeCatalog 2012 (site estimate; transcription verified)",
+    ),
     (
         "KTM",
         "Duke 390",
@@ -1067,10 +1099,12 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # "Ninja ZX-6R" pattern fails the word-boundary token test ("ninja" is not
     # a token of "ZX-6R"), and for the 2019-2024 spec both patterns match but
     # the 3-token "Ninja ZX-6R" outranks the 2-token "ZX-6R" on specificity —
-    # so the 2019-2024 row keeps its own Dragy benchmark. Source kept at
-    # aggregator tier (0.5) per source_quality (the '636 GPS' phrasing carries
-    # no 'dragy'/'instrumented' token). Previously unbenchmarked.
-    ("Kawasaki", "ZX-6R", 2024, 10.74, 216, "MotoStatz (636 GPS)"),
+    # so the 2019-2024 row keeps its own Dragy benchmark.
+    # July 6, 2026: the bare tuple that used to sit below this comment was
+    # removed — it duplicated the July-4 instrumented row further down
+    # (identical 10.74/216 values) and, being earlier in the list, SHADOWED
+    # it, silently downgrading the row's weight to aggregator tier. The
+    # instrumented row (weight 1.0) now binds. Previously unbenchmarked.
     # Yamaha YZF-R6 4th-gen (599 cc I4 supersport, 2017-2020 facelift, sold
     # as catalog row 2017-2022 covering the entire pre-discontinuation final
     # generation) — MotoStatz Dragy instrumented stock test: 10.89s @ 133 mph

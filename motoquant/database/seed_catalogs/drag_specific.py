@@ -126,7 +126,7 @@ def seed_drag_specific(db) -> int:
                     "match": {
                         "manufacturers": ["Suzuki", "Yamaha", "Honda", "Kawasaki"],
                         "engine_configs": ["I4", "I3"],
-                        "displacement_min_cc": 800,
+                        "displacement_min_cc": 950,
                         "displacement_max_cc": 1350,
                     },
                     "description": "NOS wet 60-shot for litre-class I4 sport bikes; bolt-on fit",
@@ -227,6 +227,8 @@ def seed_drag_specific(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "year_min": 1998,
+                        "categories": ["sport"],
                         "manufacturers": ["Yamaha"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 998,
@@ -382,6 +384,8 @@ def seed_drag_specific(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "year_min": 2015,
+                        "categories": ["sport", "naked"],
                         "manufacturers": ["Yamaha"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 998,
@@ -420,6 +424,7 @@ def seed_drag_specific(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Ducati"],
                         "engine_configs": ["V4"],
                         "displacement_min_cc": 1103,
@@ -458,6 +463,7 @@ def seed_drag_specific(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["BMW"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 999,
@@ -569,6 +575,7 @@ def seed_drag_specific(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Ducati"],
                         "engine_configs": ["V4"],
                         "displacement_min_cc": 1100,
@@ -750,31 +757,10 @@ def seed_drag_specific(db) -> int:
                 "retailer": "Injector Dynamics USA",
                 "delivery_days": 30,
             },
-            {
-                "category": "fuel_system",
-                "brand": "Walbro",
-                "model_name": "Walbro 450 LPH Fuel Pump",
-                "part_number": "WALBRO-450",
-                "specs": {
-                    "flow_lph": 450,
-                    "pressure_bar": 4.0,
-                    "fuel_type": "pump_gas|e85",
-                    "voltage": 12,
-                },
-                "param_multipliers": {"engine.peak_power_hp": 1.025},
-                "fitment_rules": {
-                    "tier": "category",
-                    "match": {
-                        "categories": ["sport", "naked"],
-                        "displacement_min_cc": 600,
-                    },
-                    "description": "Walbro 450 for drag prep sport bikes; 35% flow over stock, drag-strip proven",
-                },
-                "price_inr": 22000,
-                "availability": "in_stock",
-                "retailer": "Walbro Asia",
-                "delivery_days": 5,
-            },
+            # 2026-07-06: the "Walbro 450 LPH Fuel Pump" that lived here was a
+            # DUPLICATE of the seed.py core-catalog row (same brand + name).
+            # Removed; the surviving core row now carries the merged union
+            # rule (600cc+ fuel-injected).
             {
                 "category": "fuel_system",
                 "brand": "Aeromotive",
@@ -814,6 +800,7 @@ def seed_drag_specific(db) -> int:
                 "fitment_rules": {
                     "tier": "category",
                     "match": {
+                        "stroke_type": 4,
                         "categories": ["sport", "naked"],
                         "displacement_min_cc": 400,
                     },
@@ -875,6 +862,8 @@ def seed_drag_specific(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "year_min": 1998,
+                        "categories": ["sport"],
                         "manufacturers": ["Yamaha"],
                         "engine_configs": ["I4"],
                         "displacement_min_cc": 998,
@@ -929,6 +918,7 @@ def seed_drag_specific(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
+                        "categories": ["sport"],
                         "manufacturers": ["Ducati"],
                         "engine_configs": ["V4"],
                         "displacement_min_cc": 1100,

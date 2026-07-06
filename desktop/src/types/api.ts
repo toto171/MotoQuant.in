@@ -510,6 +510,7 @@ export interface OptimizedPart {
   category: string;
   category_display: string;
   price_inr: number;
+  /** ET change vs base (after − before): negative = faster (July 6, 2026). */
   delta_et_s: number;
   delta_trap_ms: number;
   roi_score: number | null;
@@ -548,6 +549,7 @@ export interface OptimizedBuild {
   base_trap_kmh: number;
   optimized_et_s: number;
   optimized_trap_kmh: number;
+  /** optimized − base: negative = faster (July 6, 2026 unified convention). */
   delta_et_s: number;
   delta_trap_kmh: number;
   total_cost_inr: number;
@@ -626,6 +628,7 @@ export interface AutotuneGearing {
   recommended_final_drive: number;
   et_s: number;
   trap_kmh?: number;
+  /** recommended − stock: negative = faster (July 6, 2026). */
   delta_et_s: number;
   recommendation: string;
   candidates: AutotuneGearingCandidate[];
@@ -643,6 +646,7 @@ export interface AutotuneLaunchRpm {
   recommended_rpm: number;
   et_s: number;
   trap_kmh: number;
+  /** recommended − stock: negative = faster (July 6, 2026). */
   delta_et_s: number;
   rationale: string;
   candidates: AutotuneLaunchCandidate[];

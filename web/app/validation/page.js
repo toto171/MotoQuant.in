@@ -23,11 +23,11 @@ export default function ValidationPage() {
               <span className="text-gradient-orange">measured.</span>
             </>
           }
-          sub="246 benchmarks matched to catalog bikes, cross-checked against published Cycle World, Sport Rider, MCN and MotoStatz timeslips. Weighted mean absolute error 0.24s, bias −0.025s, and the three reference baselines preserved to four decimals since April 2026."
+          sub="246 benchmarks matched to catalog bikes, cross-checked against published Cycle World, Sport Rider, MCN and MotoStatz timeslips. Weighted mean absolute error 0.22s, bias +0.021s, and the three reference baselines preserved to four decimals since April 2026."
           stats={[
             { value: 246, label: 'MATCHED' },
-            { value: 224, label: 'BENCHMARKS' },
-            { value: 130, label: 'WITHIN 0.20s' },
+            { value: 221, label: 'BENCHMARKS' },
+            { value: 137, label: 'WITHIN 0.20s' },
           ]}
         />
         <AccuracyExplorer data={accuracyData} />

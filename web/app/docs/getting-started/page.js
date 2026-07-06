@@ -51,8 +51,8 @@ export default function GettingStartedPage() {
         <CodeComment className="mb-3">getting started · zero to first run</CodeComment>
         <h1 className="font-display font-bold text-4xl text-white mb-4 tracking-tight">Your First Simulation</h1>
         <p className="text-white/60 text-base leading-relaxed">
-          MotoQuant runs in the browser — no installation required to simulate. The desktop app and API
-          are optional for advanced workflows. Start here.
+          MotoQuant runs in the browser — no installation required to simulate. The REST API
+          is optional for advanced workflows. Start here.
         </p>
       </header>
 
@@ -89,42 +89,10 @@ export default function GettingStartedPage() {
         </Step>
       </section>
 
-      {/* Desktop */}
-      <section className="mb-14">
-        <h2 className="font-display font-bold text-2xl text-white mb-6">Option B — Desktop App (beta)</h2>
-        <p className="text-white/70 text-sm leading-relaxed mb-6">
-          The desktop app runs the same physics engine locally with no cloud dependency. It adds five pages:
-          full Simulate, Bikes browser, Build (parts composer), Compare (A-vs-B), and History (local leaderboard).
-        </p>
-        <div className="card p-5 md:p-6 mb-6 border-brand-orange/20">
-          <div className="label-mono text-brand-orange mb-3">Beta access</div>
-          <p className="text-white/60 text-sm">
-            Desktop beta is currently available to tuning shops and racing teams. Email{' '}
-            <a href="mailto:motoquant@gmail.com?subject=MotoQuant%20Desktop%20Beta" className="text-brand-accent hover:text-brand-orange transition-colors">
-              motoquant@gmail.com
-            </a>{' '}
-            with your use case to apply.
-          </p>
-        </div>
-        <Step n="1" title="Prerequisites">
-          <p>The desktop app requires macOS 13+, Windows 10/11 (x64), or Linux (Ubuntu 20+). The Python physics sidecar is bundled — no separate Python install needed.</p>
-        </Step>
-        <Step n="2" title="Install">
-          <p>Download the installer from the release link provided in your beta invite email. Run the installer; it places the <InlineCode>MotoQuant Pro</InlineCode> app in your Applications / Program Files folder.</p>
-        </Step>
-        <Step n="3" title="First launch">
-          <p>On first launch, the app spawns the physics sidecar on a random localhost port. You will see a loading screen for 2–8 seconds while the sidecar starts, then the Simulate page appears. The engine status chip in the top bar should show <strong className="text-brand-accent">Engine online</strong>.</p>
-        </Step>
-        <Step n="4" title="Development mode">
-          <p>If you are contributing to the frontend and want to run against a live API, set:</p>
-          <Code>MOTOQUANT_DEV_BACKEND_URL=http://127.0.0.1:8000</Code>
-          <p>in your environment before launching the app. The app will skip the sidecar spawn and hit your manually-started uvicorn instance instead.</p>
-        </Step>
-      </section>
 
       {/* API */}
       <section className="mb-14">
-        <h2 className="font-display font-bold text-2xl text-white mb-6">Option C — REST API</h2>
+        <h2 className="font-display font-bold text-2xl text-white mb-6">Option B — REST API</h2>
         <p className="text-white/70 text-sm leading-relaxed mb-6">
           The API is public and CORS-open. No authentication for basic simulation (rate-limited to 60 req/min per IP).
         </p>
@@ -162,7 +130,7 @@ Content-Type: application/json
       <section>
         <h2 className="font-display font-bold text-2xl text-white mb-6">Reading the Simulation Chart</h2>
         <p className="text-white/70 text-sm leading-relaxed mb-4">
-          The desktop app (and the full simulator page) shows a 4-panel chart:
+          The full simulator page shows a 4-panel chart:
         </p>
         <div className="space-y-4">
           {[

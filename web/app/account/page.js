@@ -347,8 +347,8 @@ export default function AccountPage() {
           <Reveal y={18}>
           <section className="card p-6 sm:p-8">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="sr-only">Desktop license keys</h2>
-              <CodeComment>license keys · desktop seats</CodeComment>
+              <h2 className="sr-only">License keys</h2>
+              <CodeComment>license keys · device seats</CodeComment>
               <span className="text-xs font-mono text-white/45">
                 {activeKeys.length} / {maxKeys} used
               </span>
@@ -412,7 +412,7 @@ export default function AccountPage() {
                         {revokeTarget === k.id && (
                           <div className="mt-3">
                             <DangerConfirm
-                              prompt="Revoke this key? The desktop seat frees up immediately and the key stops validating."
+                              prompt="Revoke this key? The seat frees up immediately and the key stops validating."
                               actionLabel="Revoke"
                               runningLabel="Revoking"
                               dismissLabel="Keep"

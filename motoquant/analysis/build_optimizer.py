@@ -339,8 +339,14 @@ class OptimizedPart:
     category: str
     category_display: str
     price_inr: float
-    delta_et_s: float  # standalone ET gain (positive = faster)
-    delta_trap_ms: float  # standalone trap gain (m/s, positive = faster)
+    # ET CHANGE vs base (after - before): NEGATIVE = faster. Unified July 6,
+    # 2026 — this field used to carry the internal ROI gain (positive =
+    # faster), the opposite sign of /api/simulate/quick's et_delta_s, and
+    # the web UI rendered improvements as "+0.134s". Every public delta_et_s
+    # now reads as a time change; internal ROI/knapsack math still uses
+    # positive-gain semantics (PartROIResult is untouched).
+    delta_et_s: float
+    delta_trap_ms: float  # trap change (after - before, m/s): positive = faster
     roi_score: float | None
     cost_per_tenth_inr: float | None
     is_compatible: bool
@@ -354,7 +360,9 @@ class OptimizedPart:
             category=r.category,
             category_display=r.category_display,
             price_inr=round(r.price_inr, 2),
-            delta_et_s=round(r.delta_et_s, 4),
+            # PartROIResult.delta_et_s is a positive-good GAIN (scoring
+            # convention); negate to the public after-minus-before delta.
+            delta_et_s=round(-r.delta_et_s, 4) + 0.0,  # +0.0 normalizes -0.0
             delta_trap_ms=round(r.delta_trap_ms, 4),
             roi_score=_round_or_none(r.roi_score, 4),
             cost_per_tenth_inr=_round_or_none(r.cost_per_tenth_inr, 2),
@@ -375,8 +383,8 @@ class OptimizedBuild:
     base_trap_kmh: float
     optimized_et_s: float
     optimized_trap_kmh: float
-    delta_et_s: float
-    delta_trap_kmh: float
+    delta_et_s: float  # optimized - base: NEGATIVE = faster (July 6, 2026)
+    delta_trap_kmh: float  # optimized - base: positive = faster
     total_cost_inr: float
     budget_used_pct: float
     cost_per_tenth_inr: float | None
@@ -693,11 +701,15 @@ def optimize_build(
         combined_et, combined_trap_ms = base_et_s, base_trap_ms
 
     total_cost = sum(r.price_inr for r in selected)
-    delta_et = base_et_s - combined_et
+    # Public convention (July 6, 2026): delta_et_s = optimized - base, so an
+    # improvement is NEGATIVE (time dropped) — same sign language as
+    # /api/simulate/quick's et_delta_s. Cost-per-tenth still divides by the
+    # magnitude of the improvement.
+    delta_et = combined_et - base_et_s
     delta_trap_ms = combined_trap_ms - base_trap_ms
     cost_per_tenth = (
-        round(total_cost / (delta_et * 10.0), 2)
-        if (goal == "min_et" and delta_et > 1e-4)
+        round(total_cost / (-delta_et * 10.0), 2)
+        if (goal == "min_et" and delta_et < -1e-4)
         else None
     )
 
@@ -724,7 +736,7 @@ def optimize_build(
         base_trap_kmh=round(base_trap_ms * 3.6, 2),
         optimized_et_s=round(combined_et, 4),
         optimized_trap_kmh=round(combined_trap_ms * 3.6, 2),
-        delta_et_s=round(delta_et, 4),
+        delta_et_s=round(delta_et, 4) + 0.0,  # +0.0 normalizes -0.0
         delta_trap_kmh=round(delta_trap_ms * 3.6, 2),
         total_cost_inr=round(total_cost, 2),
         budget_used_pct=(

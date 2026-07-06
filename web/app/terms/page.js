@@ -41,8 +41,7 @@ export default function TermsPage() {
           <p>
             MotoQuant Pro provides first-principles physics simulations for motorcycle
             quarter-mile drag racing, parts ROI analysis, and associated tools. The service
-            is available via a web application at motoquant.in, a REST API, and an optional
-            desktop application ("Desktop App") licensed under paid subscription plans.
+            is available via a web application at motoquant.in and a REST API.
           </p>
           <p>
             <strong>Disclaimer: </strong>Simulations are for informational and analytical
@@ -94,17 +93,15 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section title="4. Desktop Application and License Keys">
+        <Section title="4. License Keys">
           <p>
-            Pro subscribers may generate 1 desktop license key; Studio subscribers may
-            generate up to 5 keys. License keys are personal and non-transferable.
-            The Desktop App may operate offline for up to 7 days between license
-            validation checks.
+            Pro subscribers may generate 1 license key; Studio subscribers may generate
+            up to 5 keys. License keys are personal and non-transferable, and bind to a
+            single device.
           </p>
           <p>
             On subscription cancellation or expiry, license keys are invalidated within
-            24 hours of the next validation check. Access to paid features in the Desktop
-            App will be revoked.
+            24 hours of the next validation check.
           </p>
         </Section>
 

@@ -43,7 +43,7 @@ export default function PrivacyPage() {
           <Row label="Simulation runs">ET, trap speed, venue, build configuration. Stored to power the leaderboard and your run history. Not sold to third parties.</Row>
           <Row label="Build configurations">Parts combinations and bike selections you save. Used to provide the service.</Row>
           <Row label="Dragy / Dyno / ECU uploads">(Studio tier only) Files you upload for calibration. Stored temporarily during processing and then deleted within 24 hours unless you explicitly save them.</Row>
-          <Row label="Device ID">(Desktop App) An opaque hardware fingerprint used to bind your license key to a device. Not shared externally.</Row>
+          <Row label="Device ID">(License keys) An opaque device fingerprint used to bind a license key to a single device. Not shared externally.</Row>
           <Row label="Usage metadata">Request timestamps, endpoints called, error logs. Used for debugging and service improvement. Not sold.</Row>
         </Section>
 

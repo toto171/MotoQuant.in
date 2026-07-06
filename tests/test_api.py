@@ -997,3 +997,84 @@ class TestPricingEndpoints(unittest.TestCase):
         item = BikePricingSummaryItem(part_id=1, part_name="x", category="exhaust")
         self.assertIsNone(item.cheapest_live_inr)
         self.assertIsNone(item.in_stock)
+
+
+class TestApiHygiene20260706(unittest.TestCase):
+    """API-hygiene regression pins (2026-07-06 catalog-integrity session).
+
+    M1: /api/autotune/ecu + /api/optimize/build swallowed the inner
+        HTTPException(404) from _build_config and re-raised it as a 400
+        with the literal '404: ...' leaked into the body.
+    L1: /api/bikes, /api/parts, /api/tires accepted negative/zero limit
+        (SQLite treats LIMIT -5 as unlimited) and negative offset.
+    L2: /api/simulate/save accepted negative ETs and absurd trap speeds.
+    """
+
+    # ── M1: unknown bike_id must be a clean 404, not a wrapped 400 ──
+
+    def test_autotune_unknown_bike_returns_404(self):
+        r = client.post("/api/autotune/ecu", json={"bike_id": 99999999})
+        self.assertEqual(r.status_code, 404)
+        detail = r.json().get("detail", "")
+        self.assertNotIn("404:", detail)
+
+    def test_optimize_unknown_bike_returns_404(self):
+        r = client.post(
+            "/api/optimize/build",
+            json={"bike_id": 99999999, "budget_inr": 50000},
+        )
+        self.assertEqual(r.status_code, 404)
+        detail = r.json().get("detail", "")
+        self.assertNotIn("404:", detail)
+
+    # ── L1: list-endpoint pagination bounds ──
+
+    def test_bikes_negative_limit_422(self):
+        self.assertEqual(client.get("/api/bikes?limit=-5").status_code, 422)
+
+    def test_bikes_zero_limit_422(self):
+        self.assertEqual(client.get("/api/bikes?limit=0").status_code, 422)
+
+    def test_bikes_negative_offset_422(self):
+        self.assertEqual(client.get("/api/bikes?offset=-1").status_code, 422)
+
+    def test_parts_negative_limit_422(self):
+        self.assertEqual(client.get("/api/parts?limit=-5").status_code, 422)
+
+    def test_tires_negative_limit_422(self):
+        self.assertEqual(client.get("/api/tires?limit=-5").status_code, 422)
+
+    def test_bikes_valid_limit_still_works(self):
+        r = client.get("/api/bikes?limit=1")
+        self.assertEqual(r.status_code, 200)
+        self.assertLessEqual(len(r.json()["bikes"]), 1)
+
+    # ── L2: save-run plausibility bounds ──
+
+    def test_save_run_negative_et_422(self):
+        r = client.post(
+            "/api/simulate/save",
+            json={"bike_id": 1, "et_quarter_s": -3.0, "trap_speed_kmh": 220.0},
+        )
+        self.assertEqual(r.status_code, 422)
+
+    def test_save_run_absurd_trap_422(self):
+        r = client.post(
+            "/api/simulate/save",
+            json={"bike_id": 1, "et_quarter_s": 10.5, "trap_speed_kmh": 1200.0},
+        )
+        self.assertEqual(r.status_code, 422)
+
+    def test_save_run_zero_et_422(self):
+        r = client.post(
+            "/api/simulate/save",
+            json={"bike_id": 1, "et_quarter_s": 0.0, "trap_speed_kmh": 220.0},
+        )
+        self.assertEqual(r.status_code, 422)
+
+    def test_save_run_legit_values_still_accepted(self):
+        r = client.post(
+            "/api/simulate/save",
+            json={"bike_id": 1, "et_quarter_s": 10.033, "trap_speed_kmh": 239.8},
+        )
+        self.assertEqual(r.status_code, 201)

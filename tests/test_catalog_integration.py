@@ -159,8 +159,14 @@ class TestCoverage:
         )
 
     def test_minimum_parts_per_bike(self, seeded_db):
-        """Every bike should match at least 20 parts across all categories
-        (lower-bound for small-cc bikes; most get 50-150+)."""
+        """Every bike should match at least 19 parts across all categories
+        (lower-bound for small-cc bikes; most get 50-150+).
+
+        Floor 20 -> 19 on 2026-07-06: the catalog-integrity pass removed
+        PHANTOM fitments from sub-140cc commuters (a '150cc FI' piggyback
+        matching the 97cc carbureted Splendor, etc.), which legitimately
+        drops the smallest bikes (Splendor Plus / 125 Duke / GSX-S125 /
+        Svartpilen 125 / NTorq 125) from 20 to 19 real parts."""
         parts = [
             dict(r)
             for r in seeded_db._conn.execute(
@@ -177,9 +183,9 @@ class TestCoverage:
             d = dict(b)
             _enrich_bike_row_for_fitment(seeded_db._conn, d)
             n = sum(1 for p in parts if is_compatible(p, d)[0])
-            if n < 20:
+            if n < 19:
                 low.append((d["model_name"], n))
-        assert not low, f"Bikes with <20 parts: {low[:5]}"
+        assert not low, f"Bikes with <19 parts: {low[:5]}"
 
     def test_catalog_size(self, seeded_db):
         """Total parts catalog must be at least 400 after expansion."""

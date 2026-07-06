@@ -40,10 +40,16 @@ const fmtINR = (n) =>
 const fmtNum = (n, d = 1) => (n == null ? '—' : Number(n).toFixed(d));
 const fmtDelta = (n, d = 3) =>
   n == null ? '—' : `${n > 0 ? '+' : ''}${Number(n).toFixed(d)}`;
-// Sign-aware tone for ET / trap deltas. Backend convention (build_optimizer.py):
-// delta_et_s = base − optimized, delta_trap = optimized − base ⇒ positive = faster.
-// Purely presentational — no data-flow change.
+// Sign-aware tone for ET deltas. Convention unified July 6, 2026:
+// delta_et_s = optimized − base everywhere ⇒ NEGATIVE = faster (time
+// dropped) = good. Trap deltas use the opposite tone (positive = faster).
 const deltaTone = (n) =>
+  n == null || Number(n) === 0
+    ? 'text-white/50'
+    : Number(n) < 0
+      ? 'text-brand-accent'
+      : 'text-brand-red';
+const trapTone = (n) =>
   n == null || Number(n) === 0
     ? 'text-white/50'
     : Number(n) > 0
@@ -419,7 +425,7 @@ export default function BuildOptimizer() {
                   sub={
                     <>
                       from {fmtNum(result.base_trap_kmh, 1)} ·{' '}
-                      <span className={deltaTone(result.delta_trap_kmh)}>
+                      <span className={trapTone(result.delta_trap_kmh)}>
                         {fmtDelta(result.delta_trap_kmh, 1)}
                       </span>{' '}
                       km/h
@@ -545,8 +551,11 @@ export default function BuildOptimizer() {
                       <p className="text-sm font-mono text-white tabular-nums">
                         {fmtINR(result.next_upgrade.marginal_cost_inr)}
                       </p>
-                      <p className={`text-[11px] font-mono tabular-nums ${deltaTone(result.next_upgrade.marginal_et_gain_s)}`}>
-                        {fmtDelta(result.next_upgrade.marginal_et_gain_s, 3)}s
+                      {/* marginal_et_gain_s is a positive-good GAIN on the
+                          wire; render as the resulting ET change (−) so every
+                          ET number on the page reads the same direction. */}
+                      <p className={`text-[11px] font-mono tabular-nums ${deltaTone(-result.next_upgrade.marginal_et_gain_s)}`}>
+                        {fmtDelta(-result.next_upgrade.marginal_et_gain_s, 3)}s
                       </p>
                     </div>
                   </div>
@@ -566,7 +575,7 @@ export default function BuildOptimizer() {
                           {String(c.category || '').replace(/_/g, ' ')}
                         </span>
                         <span className="font-mono text-white/50 shrink-0 tabular-nums text-xs">
-                          best {fmtDelta(c.best_et_gain_s, 3)}s
+                          best {fmtDelta(c.best_et_gain_s != null ? -c.best_et_gain_s : null, 3)}s
                           {c.avg_cost_per_tenth != null && ` · ${fmtINR(c.avg_cost_per_tenth)}/tenth`}
                         </span>
                       </div>

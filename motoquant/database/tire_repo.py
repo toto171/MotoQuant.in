@@ -22,6 +22,24 @@ class TireRepository:
     # Tire Manufacturers
     # ────────────────────────────────────────────
 
+    @staticmethod
+    def normalize_size_designation(size: str) -> str:
+        """Collapse tire-size notation variants onto one canonical form.
+
+        '100/90-17', '100/90R17', '100/90ZR17' and '100/90B17' all describe
+        the same physical size (construction/speed-rating markers are not
+        sizes). Returns e.g. '100/90/17'. Non-standard strings are returned
+        lowercased/stripped so exotic drag sizes ('26x8.5R15') still compare
+        stably.
+        """
+        import re
+
+        s = (size or "").strip().upper()
+        m = re.match(r"^(\d+)\s*/\s*(\d+)\s*(?:Z?R|B|-)\s*(\d+)$", s)
+        if m:
+            return f"{m.group(1)}/{m.group(2)}/{m.group(3)}"
+        return re.sub(r"\s+", "", s.lower())
+
     def get_or_create_manufacturer(self, name: str, country: str = None) -> int:
         row = self._conn.execute(
             "SELECT id FROM tire_manufacturers WHERE name = ?", (name,)
@@ -93,12 +111,25 @@ class TireRepository:
         # the tire (crashing a second seed_all()), and (b) orphans/renumbers
         # tires the rest of the time. Match the id-preserving pattern used by
         # bike_repo.create_model().
-        existing = self._conn.execute(
-            """SELECT id FROM tire_models
-               WHERE manufacturer_id = ? AND model_name = ?
-                 AND size_designation = ?""",
-            (mfr_id, model_name, size_designation),
-        ).fetchone()
+        #
+        # July 6, 2026: the size match is NOTATION-NORMALIZED. Bike specs mix
+        # bias ('100/90-17'), radial ('100/90R17') and speed-rated ('ZR')
+        # notation for the same physical size; exact-string matching minted 5
+        # duplicate tire rows (Zapper/GP-110/Battlax) that showed up as
+        # duplicate titles in the web tire pickers. normalize_size_designation
+        # collapses the notation before comparison so re-seeds converge on
+        # one row per (manufacturer, model, position, physical size).
+        existing = None
+        norm_target = self.normalize_size_designation(size_designation)
+        for cand in self._conn.execute(
+            """SELECT id, size_designation FROM tire_models
+               WHERE manufacturer_id = ? AND model_name = ?""",
+            (mfr_id, model_name),
+        ).fetchall():
+            cand_size = cand["size_designation"] if hasattr(cand, "keys") else cand[1]
+            if self.normalize_size_designation(cand_size) == norm_target:
+                existing = cand
+                break
         if existing:
             tire_id = existing["id"] if hasattr(existing, "keys") else existing[0]
             set_cols = [c for c in cols if c not in ("manufacturer_id",)]

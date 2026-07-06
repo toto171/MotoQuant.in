@@ -548,16 +548,26 @@ def _tire_by_key(key: str) -> dict:
 
 def _ensure_tire(db, spec: dict) -> tuple[int, bool]:
     """Return (tire_model_id, created). Idempotent on
-    (manufacturer, model_name, position, size_designation)."""
-    row = db._conn.execute(
-        "SELECT t.id FROM tire_models t "
+    (manufacturer, model_name, position, NORMALIZED size).
+
+    July 6, 2026: the size comparison goes through
+    TireRepository.normalize_size_designation so notation variants of the
+    same physical size ('150/80B16' vs '150/80R16') match the existing row
+    instead of minting a duplicate — the source of the duplicate-title rows
+    merged by scripts/patch_2026_07_06_tire_dedup.py.
+    """
+    from ..tire_repo import TireRepository
+
+    norm = TireRepository.normalize_size_designation
+    for cand in db._conn.execute(
+        "SELECT t.id, t.size_designation FROM tire_models t "
         "JOIN tire_manufacturers tm ON t.manufacturer_id = tm.id "
         "WHERE LOWER(tm.name) = LOWER(?) AND LOWER(t.model_name) = LOWER(?) "
-        "AND t.position = ? AND t.size_designation = ?",
-        (spec["mfr"], spec["model"], spec["position"], spec["size"]),
-    ).fetchone()
-    if row:
-        return row[0], False
+        "AND t.position = ?",
+        (spec["mfr"], spec["model"], spec["position"]),
+    ).fetchall():
+        if norm(cand[1]) == norm(spec["size"]):
+            return cand[0], False
     row = db._conn.execute(
         "SELECT id FROM tire_manufacturers WHERE LOWER(name) = LOWER(?)",
         (spec["mfr"],),

@@ -1,3 +1,7 @@
+> **DISCONTINUED (July 2026).** The native desktop app was scrapped — the
+> hosted web app at motoquant.in is the product. This document is retained
+> for historical reference only; no desktop releases will be cut.
+
 # MotoQuant Pro — Installation Guide
 
 > **Current version:** see [Releases](https://github.com/da25mem5s02-debug/MotoQuant_v1/releases/latest)

@@ -42,34 +42,45 @@ from scripts.sweep_lib import (
 from scripts.validation_sweep import BENCHMARKS
 
 
-def cluster_for(manufacturer, model_name, disp_cc, power_hp, stroke_type, category):
-    if stroke_type == 2:
-        return "two-stroke"
-    cat = (category or "sport").lower()
-    if cat in ("cruiser", "touring", "muscle") and disp_cc and disp_cc >= 1300:
-        return "cruiser-1300+"
-    # Apr 27, 2026: high-displacement muscle/sport bikes (VMAX 1700,
-    # Triumph Rocket 3, B-King) can be tagged "naked" or "sport" in
-    # known_bikes.py for engine-inertia tuning reasons, but their mass
-    # profile is cruiser-class. Route them to cruiser-1300+ to prevent
-    # the litre-sport-195+ cluster from being polluted by 320 kg muscle
-    # bikes whose ETs are inherently slower than 220 kg sport-1000s.
-    if disp_cc and disp_cc >= 1500 and cat in ("naked", "sport"):
-        return "cruiser-1300+"
-    if cat in ("sport", "naked") and power_hp and power_hp >= 195:
-        return "litre-sport-195+"
-    if disp_cc:
-        if 600 <= disp_cc < 1100 and cat in ("sport", "naked"):
-            return "litre-sport-600-1000"
-        if 500 <= disp_cc < 700:
-            return "mid-twin-500-700"
-        if 300 <= disp_cc < 500:
-            return "mid-twin-300-500"
-        if 200 <= disp_cc < 300:
-            return "entry-200-300"
-        if 150 <= disp_cc < 200:
-            return "entry-150-200"
-    return "other"
+def cluster_for(
+    manufacturer, model_name, disp_cc, power_hp, stroke_type, category, cylinders=None
+):
+    """Report-side cluster label. Delegates to the canonical taxonomy in
+    motoquant.category_profiles.derive_category_tag (single source of truth
+    since July 6, 2026 — previously this function mirrored it by hand and the
+    two could drift). Pass ``cylinders`` for the v2 cylinder-aware clusters;
+    None reproduces the July-3 taxonomy.
+    """
+    from motoquant.category_profiles import derive_category_tag
+
+    tag = derive_category_tag(
+        manufacturer=manufacturer,
+        model_name=model_name,
+        displacement_cc=disp_cc,
+        peak_power_hp=power_hp,
+        stroke_type=stroke_type,
+        category=category,
+        cylinders=cylinders,
+    )
+    return TAG_TO_CLUSTER.get(tag, "other")
+
+
+# category_tag (underscores, physics dispatch) -> report cluster label (dashes)
+TAG_TO_CLUSTER = {
+    "two_stroke": "two-stroke",
+    "cruiser_1300p": "cruiser-1300+",
+    "litre_sport_195p": "litre-sport-195+",
+    "litre_sport_600_1000": "litre-sport-600-1000",
+    "sport_twin_600_1300": "sport-twin-600-1300",
+    "small_i4_screamer": "small-i4-screamer",
+    "single_300_500": "single-300-500",
+    "mid_twin_500_700": "mid-twin-500-700",
+    "mid_twin_300_500": "mid-twin-300-500",
+    "entry_200_300": "entry-200-300",
+    "entry_150_200": "entry-150-200",
+    "other": "other",
+    "unknown": "other",
+}
 
 
 def run_sweep(out_path):
@@ -119,6 +130,7 @@ def run_sweep(out_path):
                     spec.peak_power_hp,
                     getattr(spec, "stroke_type", 4) or 4,
                     getattr(spec, "category", None),
+                    cylinders=getattr(spec, "cylinders", None),
                 ),
                 "finished": bool(r.finished_quarter),
                 "sim_et": float(r.time_quarter) if r.finished_quarter else None,

@@ -217,7 +217,7 @@ export default function BikesPage() {
         }
         stats={[
           { value: 541, label: 'BIKES' },
-          { value: 260, label: 'TIRES' },
+          { value: 254, label: 'TIRES' },
           { value: 1860, label: 'FITMENTS' },
         ]}
       >

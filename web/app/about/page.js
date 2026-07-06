@@ -14,7 +14,7 @@ const ROADMAP = [
     phase: 'Phase 1–2',
     status: 'complete',
     label: 'Physics engine + Database',
-    desc: '15 sub-models, 541 bikes, 594 parts, 20 venues, 976 tests. Full validation suite.',
+    desc: '15 sub-models, 541 bikes, 593 parts, 20 venues, 4,393 tests. Full validation suite.',
   },
   {
     phase: 'Phase 3',
@@ -28,12 +28,9 @@ const ROADMAP = [
     label: 'AI & Optimisation',
     desc: 'Parts ROI knapsack, Bayesian build optimiser, XGBoost & DNN surrogates, Smart Recommendations.',
   },
-  {
-    phase: 'Phase 5',
-    status: 'in-progress',
-    label: 'Native Desktop App',
-    desc: 'Tauri 2 + React 19 shell. Offline physics sidecar. macOS, Windows, Linux. Closed beta.',
-  },
+  // Phase 5 (native desktop app) was DISCONTINUED July 2026 — the hosted web
+  // app is the product. Removed from the public roadmap; the phase numbering
+  // below is unchanged so historical references stay meaningful.
   {
     phase: 'Phase 6',
     status: 'in-progress',
@@ -132,7 +129,7 @@ export default function AboutPage() {
                 First-principles physics can. Every sub-model — Pacejka tire, Willans friction engine, RK4 integrator — produces physically interpretable outputs. When the model is wrong, we can find and fix the cause. When you add a part, the physics of that part propagates through the whole system.
               </p>
               <p>
-                Top-10 mean error after our July 2026 calibration pass: <strong className="text-brand-orange">±0.009s</strong>. Reference baselines within 0.001s of targets. That&apos;s what first principles buys you.
+                Top-10 mean error after our July 2026 calibration pass: <strong className="text-brand-orange">±0.006s</strong>. Reference baselines within 0.001s of targets. That&apos;s what first principles buys you.
               </p>
             </div>
           </Reveal>

@@ -524,7 +524,8 @@ function OptimizeResult({ result }: { result: OptimizedBuild }) {
         <div className="rounded-md bg-carbon-800/50 p-2">
           <div className="text-[10px] uppercase tracking-wider text-carbon-500">ET</div>
           <div className="text-lg font-semibold tabular-nums">{result.optimized_et_s.toFixed(3)}s</div>
-          <div className="text-[10px] text-signal-400">{result.delta_et_s >= 0 ? "−" : "+"}{Math.abs(result.delta_et_s).toFixed(3)}s</div>
+          {/* delta_et_s = optimized − base (July 6, 2026 unified convention): negative = faster */}
+          <div className="text-[10px] text-signal-400">{result.delta_et_s > 0 ? "+" : ""}{result.delta_et_s.toFixed(3)}s</div>
         </div>
         <div className="rounded-md bg-carbon-800/50 p-2">
           <div className="text-[10px] uppercase tracking-wider text-carbon-500">Trap</div>
@@ -552,7 +553,7 @@ function OptimizeResult({ result }: { result: OptimizedBuild }) {
               </div>
               <div className="text-right shrink-0 tabular-nums">
                 <div className="text-carbon-200">₹{part.price_inr.toLocaleString("en-IN")}</div>
-                <div className="text-[10px] text-signal-400">−{part.delta_et_s.toFixed(3)}s</div>
+                <div className="text-[10px] text-signal-400">{part.delta_et_s > 0 ? "+" : ""}{part.delta_et_s.toFixed(3)}s</div>
               </div>
             </li>
           ))}

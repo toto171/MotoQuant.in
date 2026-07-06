@@ -85,7 +85,7 @@ export function softwareApplicationSchema() {
     downloadUrl: `${SITE_URL}/simulator`,
     softwareVersion: '1.0',
     description:
-      'Physics-based quarter-mile drag racing simulator for motorcycles. 15-submodel engine (engine, drivetrain, clutch, chain, tires, aero, weight-transfer, rider dynamics, staging, environmental, braking, wheelie, parasitic, rolling resistance, forced induction) covering 541 bikes, 594 parts, 260 tires, 20 venues. Validated to K5 GSX-R1000 10.03s, YZF-R1 10.29s, Hayabusa 10.47s.',
+      'Physics-based quarter-mile drag racing simulator for motorcycles. 15-submodel engine (engine, drivetrain, clutch, chain, tires, aero, weight-transfer, rider dynamics, staging, environmental, braking, wheelie, parasitic, rolling resistance, forced induction) covering 541 bikes, 593 parts, 254 tires, 20 venues. Validated to K5 GSX-R1000 10.03s, YZF-R1 10.29s, Hayabusa 10.47s.',
     publisher: { '@id': `${SITE_URL}/#organization` },
     author: { '@id': `${SITE_URL}/#organization` },
     offers: {
@@ -98,7 +98,7 @@ export function softwareApplicationSchema() {
     featureList: [
       'Quarter-mile ET prediction to ±0.2s',
       '541 motorcycles with individual aero + dyno curves',
-      '594-part catalog with cost-per-tenth ROI analysis',
+      '593-part catalog with cost-per-tenth ROI analysis',
       '15 independent physics sub-models',
       'Dragy GPS + dyno import and auto-calibration',
       'XGBoost + DNN surrogate models for instant iteration',
@@ -130,7 +130,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'MotoQuant Pro is validated against published magazine tests and Dragy runs: Suzuki GSX-R1000 K5 simulates 10.03s against a real 9.97s; Yamaha YZF-R1 simulates 10.29s against 10.3s; Suzuki Hayabusa simulates 10.47s (real range 10.1–10.7s). The July 2026 sweep covers 223 source-quality-weighted benchmarks (246 matched to catalog bikes) with a weighted mean bias of −0.026s; 130 of 246 land within ±0.20s of the published timeslip.',
+            'MotoQuant Pro is validated against published magazine tests and Dragy runs: Suzuki GSX-R1000 K5 simulates 10.03s against a real 9.97s; Yamaha YZF-R1 simulates 10.29s against 10.3s; Suzuki Hayabusa simulates 10.47s (real range 10.1–10.7s). The July 2026 sweep covers 221 source-quality-weighted benchmarks (246 matched to catalog bikes) with a weighted mean bias of +0.021s; 137 of 246 land within ±0.20s of the published timeslip.',
         },
       },
       {
@@ -166,7 +166,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'Each part in the 594-part catalog is evaluated by running the simulation with and without it. The delta in ET is divided by the part cost in INR to produce a cost-per-tenth metric. A 0/1 knapsack optimizer then picks the best combination under your budget, respecting compatibility rules and known synergy pairs (e.g. exhaust + ECU flash).',
+            'Each part in the 593-part catalog is evaluated by running the simulation with and without it. The delta in ET is divided by the part cost in INR to produce a cost-per-tenth metric. A 0/1 knapsack optimizer then picks the best combination under your budget, respecting compatibility rules and known synergy pairs (e.g. exhaust + ECU flash).',
         },
       },
       {

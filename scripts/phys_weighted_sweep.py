@@ -80,6 +80,7 @@ def run_chunk(state_dir, chunk_size):
                     "power_hp": spec.peak_power_hp,
                     "stroke_type": getattr(spec, "stroke_type", 4) or 4,
                     "category": getattr(spec, "category", None),
+                    "cylinders": getattr(spec, "cylinders", None),
                     "finished": bool(r.finished_quarter),
                     "sim_et": float(r.time_quarter) if r.finished_quarter else None,
                     "sim_trap_kmh": float(r.speed_quarter * 3.6)
@@ -135,6 +136,7 @@ def report(state_dir, out_json):
             rec["power_hp"],
             rec["stroke_type"],
             rec["category"],
+            cylinders=rec.get("cylinders"),
         )
         m_lo = rec["manufacturer"].lower()
         mod_lo = rec["model"].lower()
