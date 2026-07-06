@@ -315,12 +315,17 @@ class SimulateRequest(BaseModel):
         None, description="'gsxr1000_k5' | 'yzfr1_4c8' | 'hayabusa_gen1'"
     )
 
-    # Optional overrides (applied on top of the selected bike's defaults)
+    # Optional overrides (applied on top of the selected bike's defaults).
+    # Bounds mirror the paid routes (OptimizeBuildRequest/AutotuneRequest) so
+    # the free sim surface can't be fed physically-impossible values that make
+    # the engine return ET=0.0 nonsense as a 200 success.
     power_boost_pct: float = Field(
-        0.0, description="Extra power as % of stock (e.g. 10 = +10%)"
+        0.0, ge=-50.0, le=200.0, description="Extra power as % of stock (e.g. 10 = +10%)"
     )
-    mass_delta_kg: float = Field(0.0, description="Mass change in kg (+add, -remove)")
-    rider_mass_kg: float = Field(75.0, description="Rider weight [kg]")
+    mass_delta_kg: float = Field(
+        0.0, ge=-100.0, le=200.0, description="Mass change in kg (+add, -remove)"
+    )
+    rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0, description="Rider weight [kg]")
     front_tire_id: int | None = Field(None, description="Override front tire DB ID")
     rear_tire_id: int | None = Field(None, description="Override rear tire DB ID")
     venue_id: int | None = Field(
@@ -356,9 +361,9 @@ class QuickSimRequest(BaseModel):
 
     bike_id: int | None = None
     bike_preset: str | None = None
-    power_boost_pct: float = 0.0
-    mass_delta_kg: float = 0.0
-    rider_mass_kg: float = 75.0
+    power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
+    mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
+    rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
     part_ids: list[int] = Field(default_factory=list, description="Part IDs to apply")
     front_tire_id: int | None = None
     rear_tire_id: int | None = None
@@ -687,12 +692,17 @@ def _sim_identity_and_tier(request: Request) -> tuple[str, str]:
             pass
     from .usage import anon_identity
 
+    # Rightmost X-Forwarded-For hop = the client IP Render's proxy observed.
+    # The leftmost hop is client-supplied and spoofable, so an attacker could
+    # rotate it to mint unlimited free-tier quota. See ratelimit._client_ip.
     fwd = request.headers.get("x-forwarded-for")
-    ip = (
-        fwd.split(",")[0].strip()
-        if fwd
-        else (request.client.host if request.client else "unknown")
-    )
+    ip = "unknown"
+    if fwd:
+        hops = [h.strip() for h in fwd.split(",") if h.strip()]
+        if hops:
+            ip = hops[-1]
+    elif request.client:
+        ip = request.client.host
     return anon_identity(ip), "free"
 
 
@@ -1285,9 +1295,9 @@ class TopSpeedRequest(BaseModel):
 
     bike_id: int | None = None
     bike_preset: str | None = None
-    power_boost_pct: float = 0.0
-    mass_delta_kg: float = 0.0
-    rider_mass_kg: float = 75.0
+    power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
+    mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
+    rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
     part_ids: list[int] = Field(default_factory=list)
     front_tire_id: int | None = None
     rear_tire_id: int | None = None
@@ -1406,9 +1416,9 @@ class DistanceRunRequest(BaseModel):
     distance_m: float = Field(
         ..., gt=0, le=20000, description="Target distance in meters"
     )
-    power_boost_pct: float = 0.0
-    mass_delta_kg: float = 0.0
-    rider_mass_kg: float = 75.0
+    power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
+    mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
+    rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
     part_ids: list[int] = Field(default_factory=list)
     front_tire_id: int | None = None
     rear_tire_id: int | None = None
@@ -1719,7 +1729,7 @@ def save_simulation(
 
 @app.get("/api/leaderboard")
 def leaderboard(
-    limit: int = Query(20, le=100),
+    limit: int = Query(20, ge=1, le=100),
     venue_id: int | None = Query(None, description="Filter to one venue"),
 ):
     """Return the top simulation runs saved to the local database,
@@ -1797,9 +1807,9 @@ class CompareRequest(BaseModel):
     # Build A (baseline)
     a_bike_id: int | None = None
     a_bike_preset: str | None = None
-    a_power_boost_pct: float = 0.0
-    a_mass_delta_kg: float = 0.0
-    a_rider_mass_kg: float = 75.0
+    a_power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
+    a_mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
+    a_rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
     a_part_ids: list[int] = Field(default_factory=list)
     a_front_tire_id: int | None = None
     a_rear_tire_id: int | None = None
@@ -1807,9 +1817,9 @@ class CompareRequest(BaseModel):
     # Build B (modified)
     b_bike_id: int | None = None
     b_bike_preset: str | None = None
-    b_power_boost_pct: float = 0.0
-    b_mass_delta_kg: float = 0.0
-    b_rider_mass_kg: float = 75.0
+    b_power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
+    b_mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
+    b_rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
     b_part_ids: list[int] = Field(default_factory=list)
     b_front_tire_id: int | None = None
     b_rear_tire_id: int | None = None
@@ -4033,7 +4043,7 @@ try:
     @app.get("/api/me/runs")
     def my_runs(
         user: dict = Depends(_get_current_user),  # noqa: B008
-        limit: int = Query(25, le=100),
+        limit: int = Query(25, ge=1, le=100),
     ):
         """Saved runs for the signed-in user (powers the account Garage)."""
         db = _get_db()
