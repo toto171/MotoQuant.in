@@ -1,0 +1,41 @@
+# docs/ — index
+
+Start here if you're new: **[ONBOARDING.md](ONBOARDING.md)** →
+**[ARCHITECTURE.md](ARCHITECTURE.md)** → [../CONTRIBUTING.md](../CONTRIBUTING.md).
+
+## Orientation (read first)
+| Doc | What it covers |
+|---|---|
+| [ONBOARDING.md](ONBOARDING.md) | Day-one brief: what MotoQuant is, current state, read order. |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Module map + data-flow diagram + "where do I change X?" + the pinned-baseline invariant. |
+| [FAQ.md](FAQ.md) | Common questions. |
+
+## Subsystems
+| Doc | What it covers |
+|---|---|
+| [CHAT_AGENT.md](CHAT_AGENT.md) | The agentic chat: tool-calling loop, tools, budgets. |
+| [MOTOQUANT_LLM_PLAN.md](MOTOQUANT_LLM_PLAN.md) | LLM provider abstraction + roadmap. |
+| [OBSERVABILITY.md](OBSERVABILITY.md) | Sentry wiring (env-gated). |
+| [PARAMETER_AUDIT.txt](PARAMETER_AUDIT.txt) | Physics parameter inventory. |
+| [adr/](adr/) | Architecture Decision Records. |
+| [papers/](papers/) | Reference papers, project plans, validation reports. |
+
+## Deploy & ops
+| Doc | What it covers |
+|---|---|
+| [RENDER_MIGRATION.md](RENDER_MIGRATION.md) | API cutover to Render + rollback runbook. |
+| [PAYMENTS_SETUP.md](PAYMENTS_SETUP.md) | Stripe/Razorpay go-live steps (operator). |
+| [COMMERCIAL_LAUNCH.md](COMMERCIAL_LAUNCH.md) | Freemium/quota launch plan. |
+| [RELEASE.md](RELEASE.md) | Release process (desktop parts deprecated). |
+| [INSTALL.md](INSTALL.md) | Install notes (desktop parts deprecated). |
+| [RUFF_SETUP.md](RUFF_SETUP.md) | Lint/format config. |
+
+## Automation & process (autonomous-ops — not needed for product dev)
+| Doc | What it covers |
+|---|---|
+| [AUTONOMOUS_OPERATIONS_PLAYBOOK.md](AUTONOMOUS_OPERATIONS_PLAYBOOK.md) | The unattended-session orchestration system. |
+| [DISPATCH_PROTOCOL.md](DISPATCH_PROTOCOL.md) | The `DISPATCH_INBOX/OUTBOX.md` async message queue. |
+| [SCHEDULING.md](SCHEDULING.md) | Cron/scheduler layout. |
+| [TASKS_MASTER_LIST.md](TASKS_MASTER_LIST.md) · [TEAM_SCALING.md](TEAM_SCALING.md) · [SEO_STRATEGY.md](SEO_STRATEGY.md) · [phase_plan.md](phase_plan.md) · [motoquant_toolkit.md](motoquant_toolkit.md) | Planning / strategy notes. |
+| [changelog/](changelog/) | Release notes + fix summaries. |
+| [mockups/](mockups/) | Design mockups. |
