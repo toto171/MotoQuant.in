@@ -15,7 +15,7 @@ After that, get the test suite green locally (see `CONTRIBUTING.md` §2) and you
 
 ## 1. What MotoQuant is (in one paragraph)
 
-A first-principles physics engine for predicting and optimising motorcycle quarter-mile drag racing times, aimed first at the Indian drag racing community (Aamby Valley, MMRT, BIC, Kari, Hyderabad) and now expanding to the international market (US/EU/JP/CN drag scenes). It's a Python package with a CLI, a FastAPI backend (live on Render), a Next.js web frontend (live at motoquant.in), a Tauri 2 + React desktop app (hosted-only client), and an agentic AI chat that can run the whole product (sims, comparisons, the build optimizer, outlaw-class builds, web lookup, estimated sims for unknown bikes). Under the hood: 15 physics sub-models integrated with RK4 at 1 ms, validated against 221 published benchmarks — weighted mean |Δ| ≈ 0.22 s corpus-wide, ±0.006 s across the 10 cleanest validated runs. Commercial plan: B2C freemium + B2B Pro Studio, currently in open beta — see `docs/COMMERCIAL_LAUNCH.md`.
+A first-principles physics engine for predicting and optimising motorcycle quarter-mile drag racing times, aimed first at the Indian drag racing community (Aamby Valley, MMRT, BIC, Kari, Hyderabad) and now expanding to the international market (US/EU/JP/CN drag scenes). It's a Python package with a CLI, a FastAPI backend (live on Render), a Next.js web frontend (live at motoquant.in), and an agentic AI chat that can run the whole product (sims, comparisons, the build optimizer, outlaw-class builds, web lookup, estimated sims for unknown bikes). Under the hood: 15 physics sub-models integrated with RK4 at 1 ms, validated against 221 published benchmarks — weighted mean |Δ| ≈ 0.22 s corpus-wide, ±0.006 s across the 10 cleanest validated runs. Commercial plan: B2C freemium + B2B Pro Studio, currently in open beta — see `docs/COMMERCIAL_LAUNCH.md`.
 
 **Tagline:** *"The physics of faster."*
 
@@ -46,7 +46,7 @@ The code is not the bottleneck. Revenue-launch blockers are operator actions (Re
 - CLI (`python -m motoquant.run --help`) — db/bikes/sim/venues/tires/parts/weather/import/analysis/chat and more.
 - FastAPI backend: sims (quick/full/top-speed/compare), jobs API with real progress + cancel, build optimizer (surrogate-accelerated knapsack), ECU autotune, the composed outlaw pipeline, agentic chat (`/api/chat`, `/api/jobs/chat`), auth + subscriptions (beta mode), Dragy/dyno/ECU calibration uploads, leaderboard, shareable timeslips.
 - Next.js web app: cockpit-themed landing + simulator workbench + optimizer/autotune pages + transcript chat UI + docs/blog/pricing.
-- Tauri desktop app: hosted-only client (talks to the Render API; no local physics) — TS/vitest-green, binaries not yet built (needs per-OS toolchains + signing certs; operator task).
+- Tauri desktop app: DISCONTINUED (July 2026) — the hosted web app is the product. The `desktop/` scaffold remains in-tree for reference; no binaries will be built.
 - Physics: 15 sub-models, adaptive RK4, calibration pipeline, numpy surrogate v2.2 (regenerate after ANY physics/DB reseed — standing contract in `artifacts/surrogate/README.md`).
 
 ### Pending / known gaps (the honest list)

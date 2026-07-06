@@ -288,7 +288,7 @@ We're building one — watch motoquant.in for launch. In the meantime, reach out
 ### What's your roadmap?
 - **Phase 3 (Current):** Web launch, calibration pipeline, public leaderboard
 - **Phase 4:** AI optimization (Bayesian tuning within budget)
-- **Phase 5:** Desktop app with live PINN simulation (instant slider feedback)
+- **Phase 5:** ~~Desktop app~~ — discontinued July 2026; the hosted web app is the product
 - **Phase 6:** B2C freemium / B2B pro tiers, OBD-II live telemetry
 
 See the full roadmap at motoquant.in/roadmap.

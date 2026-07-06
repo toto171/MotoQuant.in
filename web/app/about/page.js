@@ -28,12 +28,9 @@ const ROADMAP = [
     label: 'AI & Optimisation',
     desc: 'Parts ROI knapsack, Bayesian build optimiser, XGBoost & DNN surrogates, Smart Recommendations.',
   },
-  {
-    phase: 'Phase 5',
-    status: 'in-progress',
-    label: 'Native Desktop App',
-    desc: 'Tauri 2 + React 19 shell. Offline physics sidecar. macOS, Windows, Linux. Closed beta.',
-  },
+  // Phase 5 (native desktop app) was DISCONTINUED July 2026 — the hosted web
+  // app is the product. Removed from the public roadmap; the phase numbering
+  // below is unchanged so historical references stay meaningful.
   {
     phase: 'Phase 6',
     status: 'in-progress',

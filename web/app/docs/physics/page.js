@@ -171,7 +171,7 @@ export default function PhysicsPage() {
           </Link>
           <Link href="/docs/getting-started" className="card card-hover block p-4 group">
             <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Run your first sim →</div>
-            <div className="text-xs text-white/50">Getting Started guide — web, desktop, and API.</div>
+            <div className="text-xs text-white/50">Getting Started guide — web and API.</div>
           </Link>
         </div>
       </div>

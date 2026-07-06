@@ -1,3 +1,7 @@
+> **DISCONTINUED (July 2026).** The native desktop app was scrapped — the
+> hosted web app at motoquant.in is the product. This document is retained
+> for historical reference only; no desktop releases will be cut.
+
 # MotoQuant Pro — Release Runbook
 
 > This document is for developers cutting a release. For end-user install

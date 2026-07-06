@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import {
-  Cpu, BarChart3, Upload, TrendingUp, Monitor, Code2,
+  Cpu, BarChart3, Upload, TrendingUp, Code2,
   ArrowRight, UserCircle2 } from 'lucide-react';
 import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
@@ -163,46 +163,9 @@ Natural language queries — "optimize my Hayabusa for 35°C at Aamby Valley, bu
     },
   },
   {
-    id: 'desktop',
-    icon: Monitor,
-    label: '05 / Desktop App',
-    title: 'Native Desktop — macOS, Windows, Linux',
-    subtitle: 'Tauri 2 + React 19. Python physics sidecar. Offline-first. No browser required.',
-    body: `The MotoQuant desktop app (currently in closed beta) is a Tauri 2 shell wrapping a React 19 frontend. It spawns a PyInstaller-packaged FastAPI sidecar on an ephemeral port at startup — so you get the full 15-sub-model physics engine locally, with no cloud dependency.
-
-Five pages ship in the current build: Simulate (bike + venue + sliders + 4-panel chart — speed, RPM, g-force, power), Bikes (searchable paginated catalog), Build (parts composer with live ET delta on every toggle), Compare (A-vs-B head-to-head with overlaid v(t) chart), and History (full leaderboard from local DB).
-
-The physics sidecar is the same code that powers the web API — same importer, same gear-ratio library, same 15 sub-models. Results are deterministic across web and desktop.
-
-Desktop beta access is available to tuning shops and racing teams. Contact motoquant@gmail.com to apply.`,
-    docsLink: '/docs/getting-started',
-    docsLabel: 'Desktop beta access',
-    stats: [
-      { num: '5', label: 'Pages' },
-      { num: 'Offline', label: 'No cloud needed' },
-      { num: 'Tauri 2', label: 'Framework' },
-    ],
-    readout: {
-      title: 'sidecar.boot',
-      log: [
-        'ephemeral port bound · 127.0.0.1',
-        'physics sidecar online in 2.4 s',
-        'engine online · zero cloud calls',
-      ],
-      value: '541',
-      unit: 'bikes',
-      valueLabel: 'full catalog · bundled offline',
-      bars: [
-        { label: 'local db', pct: 100 },
-        { label: 'sim engine', pct: 100 },
-        { label: 'cloud dep', pct: 0 },
-      ],
-    },
-  },
-  {
     id: 'api',
     icon: Code2,
-    label: '06 / REST API',
+    label: '05 / REST API',
     title: 'Open REST API',
     subtitle: 'FastAPI. Full timeseries. CORS-open for web integrations.',
     body: `Every feature the web UI uses is accessible via the public REST API hosted at motoquant-api.onrender.com.
@@ -243,7 +206,7 @@ Interactive docs at /docs (FastAPI's automatic OpenAPI UI). No authentication fo
   {
     id: 'accounts',
     icon: UserCircle2,
-    label: '07 / Accounts & Garage',
+    label: '06 / Accounts & Garage',
     title: 'Your Garage, Saved',
     subtitle: 'Free accounts. Saved runs. Shareable builds. Every Pro feature unlocked during the open beta.',
     body: `Create a free account with an email + password (or a passwordless magic link) and your simulator work stops being throwaway: every run you save lands in My Garage on your account page — bike, build, ET, trap speed, venue, date.
@@ -364,7 +327,7 @@ export default function FeaturesPage() {
         kicker="15 submodels · capability index"
         badge="Full feature list"
         title={<>Everything inside <span className="text-gradient-orange">MotoQuant Pro</span></>}
-        sub="Seven capability areas — from first-principles physics through to a native desktop app, an open REST API, and your saved garage. Every layer is built on the same validated simulation engine."
+        sub="Six capability areas — from first-principles physics through to an open REST API and your saved garage. Every layer is built on the same validated simulation engine."
         stats={[
           { value: 15, label: 'Sub-models' },
           { value: 593, label: 'Parts' },
