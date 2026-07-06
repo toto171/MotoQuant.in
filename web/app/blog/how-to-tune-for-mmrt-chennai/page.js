@@ -180,7 +180,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The MotoQuant simulator at motoquant.in lets you swap MMRT for Aamby Valley with a single dropdown and re-run the same bike across both venues side by side. Every venue setting in the database — twelve months of weather, surface friction coefficients, prevailing wind, timing system — feeds the physics engine the same way. The 541-bike catalog, the 260-tire fitment library, and the 594-part ROI engine all respond to the venue selection. If you are planning a December MMRT entry on a stock Hayabusa, a modded Duke 390, or a Pulsar NS400Z, you can build the run sheet here before you load the trailer.',
+    text: 'The MotoQuant simulator at motoquant.in lets you swap MMRT for Aamby Valley with a single dropdown and re-run the same bike across both venues side by side. Every venue setting in the database — twelve months of weather, surface friction coefficients, prevailing wind, timing system — feeds the physics engine the same way. The 541-bike catalog, the 254-tire fitment library, and the 593-part ROI engine all respond to the venue selection. If you are planning a December MMRT entry on a stock Hayabusa, a modded Duke 390, or a Pulsar NS400Z, you can build the run sheet here before you load the trailer.',
   },
 ];
 
@@ -299,7 +299,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Simulate your bike at MMRT vs Aamby Valley</div>
             <div className="text-white/60 text-sm">
-              Switch venues with one dropdown. Sweep month, track temperature, rider weight, tire compound, and any of the 594 parts in the catalog. See your ET delta before the entry fee.
+              Switch venues with one dropdown. Sweep month, track temperature, rider weight, tire compound, and any of the 593 parts in the catalog. See your ET delta before the entry fee.
             </div>
           </div>
           <Link

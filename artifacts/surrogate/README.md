@@ -4,7 +4,9 @@
 
 | Name                                | What it is                                          | Size    |
 |-------------------------------------|-----------------------------------------------------|---------|
-| `surrogate_numpy.npz`               | **v2.3 SHIPPED MODEL** — numpy MLP served in prod   | 85 KB   |
+| `surrogate_numpy.npz`               | **v2.4 SHIPPED MODEL** — numpy MLP served in prod   | 87 KB   |
+| `motoquant_surrogate_v2_4.npz`      | v2.4 training dataset (9,126 rows × 26 features)    | 642 KB  |
+| `surrogate_numpy_v2_3.npz.bak`      | v2.3 numpy MLP — rollback copy                      | 85 KB   |
 | `motoquant_surrogate_v2_3.npz`      | v2.3 training dataset (9,094 rows × 26 features)    | 640 KB  |
 | `surrogate_numpy_v2_2.npz.bak`      | v2.2 numpy MLP — rollback copy                      | 86 KB   |
 | `motoquant_surrogate_v2_2.npz`      | v2.2 training dataset (9,560 rows × 26 features)    | 678 KB  |
@@ -12,6 +14,39 @@
 | `motoquant_surrogate_v2_8k5.npz`    | v2.1 training dataset (8,574 rows × 26 features)    | 610 KB  |
 | `surrogate_numpy_v1.npz.bak`        | v1 numpy MLP (K5-only envelope) — rollback copy     | 39 KB   |
 | `motoquant_surrogate_v1_1k5.npz`    | v1 training dataset (K5 Sobol, 1.5k samples)        | 128 KB  |
+
+## v2.4 (July 6, 2026) — taxonomy-v2 retune + reference-row fix
+
+Regen trigger: the July-6 full-corpus accuracy overhaul (cylinder-aware
+taxonomy v2 + per-cluster knob retune + cylinder-aware synthetic-curve tail
++ reference bike_configs category_tag fix + full reseed) moved runtime
+physics for most of the catalog. Standing contract: **a surrogate is a cache
+of the physics — REGENERATE AFTER ANY RESEED/RETUNE, in the same session.**
+
+FULL regeneration (no transplant), same as v2.3: 541 bikes → 9,126 tasks
+(148 perturb bases / 25 eval bikes), plan cluster-stratified on the NEW
+12-cluster taxonomy (71 sport_twin_600_1300 / 47 single_300_500 /
+4 small_i4_screamer members represented). 9,126/9,126 fresh sims, all valid
+(516 stock + 25 stock_eval + 25 mod_eval + 8,560 perturb).
+
+Same recipe (hidden 160,96 · epochs 700 · restarts 2 · split seed 42):
+
+| Metric (ET)            | v2.3                 | v2.4                                    |
+|------------------------|----------------------|------------------------------------------|
+| Holdout MAE            | 87.7 ms (n=1,356)    | **89.2 ms** (n=1,361)                   |
+| Holdout RMSE           | 354.2 ms             | **191.6 ms**                            |
+| Holdout R²             | 0.9853               | **0.9954**                              |
+| trap MAE               | 1.39 km/h            | 1.40 km/h                               |
+| Envelope at stock      | 541/541              | **541/541**                             |
+
+The RMSE nearly halved and R² improved because the July-6 retune smoothed
+the launch-model behaviour the degenerate slow-regime rows used to hit.
+Reference presets (surrogate − physics): K5 +0.078 / R1 +0.051 /
+**Hayabusa −0.057** — the hand-curated Hayabusa preset's documented v2.2/v2.3
+structural outlier (−0.307) is RESOLVED: its DB row previously carried
+category_tag=NULL and dispatched into the wrong launch cluster; the July-6
+reference-row patch fixed the dispatch, so the training data and the preset
+now agree. Rollback: `cp surrogate_numpy_v2_3.npz.bak surrogate_numpy.npz`.
 
 ## v2.3 (July 4, 2026) — 541-bike catalog + shaft/belt gearing reseed
 

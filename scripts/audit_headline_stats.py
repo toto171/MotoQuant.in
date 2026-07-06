@@ -621,6 +621,15 @@ PATTERNS = [
     # README
     ("README.md", r"(\d{2,4})\s*bikes?,", "all_known_bikes", "README bikes count"),
     ("README.md", r"(\d{2,4})\s*parts,", "parts_db", "README parts count"),
+    # "260 tires" drifted past the audit on 2026-07-06 because only bikes/parts
+    # had README checkers — keep the tires + benchmark counts pinned too.
+    ("README.md", r"(\d{2,4})\s*tires,", "tires_db", "README tires count"),
+    (
+        "README.md",
+        r"against (\d{2,3}) published benchmarks",
+        "benchmarks",
+        "README benchmarks count",
+    ),
     # Reference baselines (4 decimal places) — these MUST stay pinned
     (
         "web/app/page.js",

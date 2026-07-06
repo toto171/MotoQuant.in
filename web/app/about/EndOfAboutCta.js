@@ -10,7 +10,7 @@
 //                without a next-step CTA.
 // B (variant)  = a single end-of-page glass CTA card pinned BELOW the contact
 //                form and ABOVE the SiteFooter. Copy ties the about-page
-//                narrative ("first-principles, ±0.009 s top-10 error") to the
+//                narrative ("first-principles, ±0.006 s top-10 error") to the
 //                concrete next action ("run your own bike, 15 s, free").
 //
 // Hypothesis: visitors land on /about (often via the SiteNav after reading
@@ -68,7 +68,7 @@ export default function EndOfAboutCta() {
               You&apos;ve read the pitch. Now run the numbers.
             </div>
             <div className="text-white/70 text-sm md:text-base leading-relaxed">
-              Same first-principles engine. Same ±0.009 s top-10 error. 15 seconds,
+              Same first-principles engine. Same ±0.006 s top-10 error. 15 seconds,
               no signup — pick your bike and see its quarter-mile ET.
             </div>
           </div>

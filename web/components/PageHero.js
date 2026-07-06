@@ -14,7 +14,7 @@
  *     badge="Motorcycle Database"
  *     title={<>Every bike. <span className="text-gradient-orange">Real physics.</span></>}
  *     sub="541 bikes with full physics data — individual aero, dyno curves, gear cassettes."
- *     stats={[{ value: 541, label: 'BIKES' }, { value: 260, label: 'TIRES' }]}
+ *     stats={[{ value: 541, label: 'BIKES' }, { value: 254, label: 'TIRES' }]}
  *   />
  *
  * Stays opacity/transform-only (Reveal) and reduced-motion-safe by

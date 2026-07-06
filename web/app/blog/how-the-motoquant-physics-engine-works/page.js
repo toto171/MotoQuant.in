@@ -20,7 +20,7 @@ export const metadata = {
   alternates: { canonical: 'https://motoquant.in/blog/how-the-motoquant-physics-engine-works' },
   openGraph: {
     title: 'How the MotoQuant Physics Engine Works',
-    description: '15 sub-models, RK4 integration at 1ms, validated against 223 published drag-strip benchmarks (July 2026 sweep). Reference baselines accurate to 4 decimals. A tour of what is under the hood.',
+    description: '15 sub-models, RK4 integration at 1ms, validated against 221 published drag-strip benchmarks (July 2026 sweep). Reference baselines accurate to 4 decimals. A tour of what is under the hood.',
     url: 'https://motoquant.in/blog/how-the-motoquant-physics-engine-works',
     type: 'article',
     publishedTime: '2026-04-27T00:00:00Z',
@@ -102,7 +102,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Tire physics is a Pacejka Magic Formula model. Given a slip ratio and a load (vertical force on the tire), the model returns the longitudinal force the tire can deliver. The shape of the curve is controlled by four parameters per tire: B (stiffness), C (shape), D (peak), and E (curvature). These come from a tire library of 260 tires across 16 manufacturers — drag slicks, sport touring, race compounds, Indian commuter rubber (MRF, CEAT), all with calibrated Pacejka coefficients.',
+    text: 'Tire physics is a Pacejka Magic Formula model. Given a slip ratio and a load (vertical force on the tire), the model returns the longitudinal force the tire can deliver. The shape of the curve is controlled by four parameters per tire: B (stiffness), C (shape), D (peak), and E (curvature). These come from a tire library of 254 tires across 16 manufacturers — drag slicks, sport touring, race compounds, Indian commuter rubber (MRF, CEAT), all with calibrated Pacejka coefficients.',
   },
   {
     type: 'p',
@@ -142,7 +142,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'We maintain a list of 223 published drag-strip benchmarks (246 matched to a catalog bike) — sourced from Cycle World, Sport Rider, MCN, Motorcycle Consumer News, MotorcycleDaily, MotoStatz, FastestLaps, and Indian Autos Mag where the magazine published the actual instrumented timeslip. For each benchmark, we run the simulator at the test-day environmental conditions and compare predicted ET against measured ET. Each source is weighted by quality (instrumented timeslip 1.0, magazine 0.7, aggregator 0.5, derived 0.1) and the delta gets bucketed by class (litre-sport-195+, litre-sport-600-1000, mid-twin-300-500, entry-150-200, two-stroke, etc.) so we can see where the physics is honest and where it has systematic bias.',
+    text: 'We maintain a list of 221 published drag-strip benchmarks (246 matched to a catalog bike) — sourced from Cycle World, Sport Rider, MCN, Motorcycle Consumer News, MotorcycleDaily, MotoStatz, FastestLaps, and Indian Autos Mag where the magazine published the actual instrumented timeslip. For each benchmark, we run the simulator at the test-day environmental conditions and compare predicted ET against measured ET. Each source is weighted by quality (instrumented timeslip 1.0, magazine 0.7, aggregator 0.5, derived 0.1) and the delta gets bucketed by class on a cylinder-aware 12-cluster taxonomy (litre-sport-195+, litre-sport-600-1000, sport-twin-600-1300, singles-300-500, entry-150-200, two-stroke, etc.) so we can see where the physics is honest and where it has systematic bias.',
   },
   {
     type: 'p',
@@ -150,7 +150,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Current state across 246 matched benchmarks (July 2026 sweep): overall source-quality-weighted mean absolute error is 0.242 seconds, weighted bias is essentially zero (-0.026 s — meaning the simulator is no longer systematically optimistic or pessimistic). Across the ten cleanest validated runs the mean absolute error is ±0.009 s, and 130 of the 246 benchmarks fall within ±0.20 s. The 195+ hp class is among the tightest at 0.137 s weighted |Δ|. The small-cc and 2-stroke clusters have higher variance, partly because their published benchmarks are themselves uncertain (most Indian small-cc ETs are estimated from 0–100 km/h times rather than measured timeslips).',
+    text: 'Current state across 246 matched benchmarks (July 2026 sweep): overall source-quality-weighted mean absolute error is 0.217 seconds, weighted bias is essentially zero (+0.021 s — meaning the simulator is no longer systematically optimistic or pessimistic). Across the ten cleanest validated runs the mean absolute error is ±0.006 s, and 137 of the 246 benchmarks fall within ±0.20 s. The 195+ hp class is the tightest at 0.125 s weighted |Δ|. The small-cc and 2-stroke clusters have higher variance, partly because their published benchmarks are themselves uncertain (most Indian small-cc ETs are estimated from 0–100 km/h times rather than measured timeslips).',
   },
   {
     type: 'h2',
@@ -298,7 +298,7 @@ export default function Page() {
               ))}
             </div>
             <p className="text-white/40 text-xs mt-4">
-              All claims about cluster bias, mean absolute error, and within-tolerance fractions in this post reflect the July 2026 sweep against 223 published benchmarks (246 matched).
+              All claims about cluster bias, mean absolute error, and within-tolerance fractions in this post reflect the July 2026 sweep against 221 published benchmarks (246 matched).
             </p>
           </div>
         </footer>

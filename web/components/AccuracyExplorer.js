@@ -674,7 +674,7 @@ export default function AccuracyExplorer({ data }) {
       <Section
         kicker="04 · by segment"
         title="Litre classes are tight; entry-cc is data-limited"
-        sub="Weighted mean absolute error per cluster. The litre and mid-twin sport clusters — the ones with real instrumented timeslips — sit well under 0.20s. The wide clusters are the small-cc and two-stroke bikes whose benchmarks are DERIVED estimates, not a model failure."
+        sub="Weighted mean absolute error per cluster, on the cylinder-aware 12-cluster taxonomy (twins, singles, and small-cc I4s are split out from same-displacement I4 buckets). The litre, sport-twin, and mid-twin clusters — the ones with real instrumented timeslips — sit well under 0.20s. The wide clusters are the small-cc and two-stroke bikes whose benchmarks are DERIVED estimates, not a model failure."
       >
         <ClusterBreakdown clusters={clusters} />
       </Section>

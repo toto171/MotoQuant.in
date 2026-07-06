@@ -55,11 +55,11 @@ DOMAIN = "motoquant.in"
 
 # Canonical catalog stats. Keep in sync with scripts/audit_headline_stats.py.
 STATS = [
-    ("501", "bikes"),
-    ("563", "parts"),
-    ("232", "tires"),
+    ("541", "bikes"),
+    ("593", "parts"),
+    ("254", "tires"),
     ("20", "venues"),
-    ("156", "benchmarks"),
+    ("221", "benchmarks"),
 ]
 
 # Font search paths (display = geometric bold, mono = stats/labels).

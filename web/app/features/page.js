@@ -30,7 +30,7 @@ The adaptive-dt solver is especially useful for identifying the precise clutch e
     stats: [
       { num: '15', label: 'Sub-models' },
       { num: '1 ms', label: 'Timestep' },
-      { num: '976', label: 'Regression tests' },
+      { num: '4,393', label: 'Regression tests' },
     ],
     readout: {
       title: 'engine.telemetry',
@@ -54,8 +54,8 @@ The adaptive-dt solver is especially useful for identifying the precise clutch e
     icon: BarChart3,
     label: '02 / Parts Catalog',
     title: 'Parts ROI Before You Buy',
-    subtitle: '594 parts. Cost-per-tenth ranking. Budget-constrained knapsack optimiser.',
-    body: `The parts catalog covers 594 upgrades across 20 categories — exhausts, ECU flashes, forced induction kits, slipper clutches, suspension, brakes, wheelie bars. Every part has a physics-accurate parameter delta: an Akrapovič slip-on doesn't add a round number of horsepower, it shifts the entire torque curve.
+    subtitle: '593 parts. Cost-per-tenth ranking. Budget-constrained knapsack optimiser.',
+    body: `The parts catalog covers 593 upgrades across 20 categories — exhausts, ECU flashes, forced induction kits, slipper clutches, suspension, brakes, wheelie bars. Every part has a physics-accurate parameter delta: an Akrapovič slip-on doesn't add a round number of horsepower, it shifts the entire torque curve.
 
 The ROI engine runs a 0/1 knapsack DP at ₹100 bucket resolution across any compatible parts set. Tell it your budget and it finds the combination that minimises your ET. The cost-per-tenth column tells you how many rupees you're paying per 0.1 second of ET gain — the clearest way to compare a ₹15,000 exhaust against a ₹60,000 turbo kit.
 
@@ -63,7 +63,7 @@ Build profiles — Street Legal, Drag Prep, Full Race — pre-filter the catalog
     docsLink: '/docs/getting-started',
     docsLabel: 'See build optimizer guide',
     stats: [
-      { num: '594', label: 'Parts' },
+      { num: '593', label: 'Parts' },
       { num: '20', label: 'Categories' },
       { num: '₹100', label: 'Budget granularity' },
     ],
@@ -367,8 +367,8 @@ export default function FeaturesPage() {
         sub="Seven capability areas — from first-principles physics through to a native desktop app, an open REST API, and your saved garage. Every layer is built on the same validated simulation engine."
         stats={[
           { value: 15, label: 'Sub-models' },
-          { value: 594, label: 'Parts' },
-          { value: 223, label: 'Benchmarks' },
+          { value: 593, label: 'Parts' },
+          { value: 221, label: 'Benchmarks' },
         ]}
         className="border-b border-brand-orange/10"
       >

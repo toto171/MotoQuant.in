@@ -15,7 +15,7 @@ After that, get the test suite green locally (see `CONTRIBUTING.md` §2) and you
 
 ## 1. What MotoQuant is (in one paragraph)
 
-A first-principles physics engine for predicting and optimising motorcycle quarter-mile drag racing times, aimed first at the Indian drag racing community (Aamby Valley, MMRT, BIC, Kari, Hyderabad) and now expanding to the international market (US/EU/JP/CN drag scenes). It's a Python package with a CLI, a FastAPI backend (live on Render), a Next.js web frontend (live at motoquant.in), a Tauri 2 + React desktop app (hosted-only client), and an agentic AI chat that can run the whole product (sims, comparisons, the build optimizer, outlaw-class builds, web lookup, estimated sims for unknown bikes). Under the hood: 15 physics sub-models integrated with RK4 at 1 ms, validated against 223 published benchmarks — weighted mean |Δ| ≈ 0.24 s corpus-wide, ±0.009 s across the 10 cleanest instrumented tests. Commercial plan: B2C freemium + B2B Pro Studio, currently in open beta — see `docs/COMMERCIAL_LAUNCH.md`.
+A first-principles physics engine for predicting and optimising motorcycle quarter-mile drag racing times, aimed first at the Indian drag racing community (Aamby Valley, MMRT, BIC, Kari, Hyderabad) and now expanding to the international market (US/EU/JP/CN drag scenes). It's a Python package with a CLI, a FastAPI backend (live on Render), a Next.js web frontend (live at motoquant.in), a Tauri 2 + React desktop app (hosted-only client), and an agentic AI chat that can run the whole product (sims, comparisons, the build optimizer, outlaw-class builds, web lookup, estimated sims for unknown bikes). Under the hood: 15 physics sub-models integrated with RK4 at 1 ms, validated against 221 published benchmarks — weighted mean |Δ| ≈ 0.22 s corpus-wide, ±0.006 s across the 10 cleanest validated runs. Commercial plan: B2C freemium + B2B Pro Studio, currently in open beta — see `docs/COMMERCIAL_LAUNCH.md`.
 
 **Tagline:** *"The physics of faster."*
 
@@ -27,11 +27,11 @@ A first-principles physics engine for predicting and optimising motorcycle quart
 |---|---|
 | Phase | 6 (commercial launch) — open beta live; payments code-complete, providers not yet configured |
 | Tests | full pytest suite green (runs ~25–35 min; focused subsets in `CONTRIBUTING.md` §4) |
-| Bikes in catalog | 535 across 30+ manufacturers (India, SE Asia, US, EU, JP, CN) |
-| Tires | 257 (incl. drag radials/slicks + cruiser rubber), 1,787 fitments |
-| Parts | 594 across 19 categories (incl. lowering kits, air shifters, lockup clutches) |
+| Bikes in catalog | 541 across 30+ manufacturers (India, SE Asia, US, EU, JP, CN) |
+| Tires | 254 (incl. drag radials/slicks + cruiser rubber), 1,860 fitments |
+| Parts | 593 across 19 categories (incl. lowering kits, air shifters, lockup clutches) |
 | Venues | 20 (India + international drag strips) |
-| Benchmarks | 223 ET rows + 74 top-speed rows; weighted sweep 246 matched, |Δ| 0.242 s, bias −0.026 s |
+| Benchmarks | 221 ET rows + 74 top-speed rows; weighted sweep 246 matched, |Δ| 0.217 s, bias +0.021 s |
 | Reference baselines | K5 10.0334 / R1 10.2859 / Hayabusa 10.4712 — pinned **bit-identical**, CI-gated |
 | Chat AI | multi-step tool-calling agent (`motoquant/llm/agent.py`, `docs/CHAT_AGENT.md`) |
 | Deployed | API: Render free tier (`motoquant-api.onrender.com`); web: Vercel (`motoquant.in`) — both auto-deploy from `main` |

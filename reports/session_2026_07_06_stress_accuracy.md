@@ -196,8 +196,10 @@ sizes previously rendered as 3 identical entries, which is what read as
 - **Regression golden regenerated** — both tiers green: fast (~35-bike
   stratified sample) and slow (`MOTOQUANT_SLOW_TESTS=1`, every current bike
   through the production DB path).
-- **Surrogate v2.4 full regen** — 9,126 tasks cluster-stratified on the v2
-  taxonomy (see artifacts/surrogate/README.md v2.4 entry for metrics).
+- **Surrogate v2.4 full regen** — 9,126 sims cluster-stratified on the v2
+  taxonomy; ET MAE 89.2ms / RMSE 191.6ms / R² 0.9954 (RMSE halved vs v2.3),
+  541/541 stock in-envelope; the Hayabusa preset's documented −0.307
+  structural outlier resolved to −0.057 by the reference-row fix.
 - **`/validation` dataset regenerated** (stamp 2026-07-06): within ±0.10s
   62 → 82 bikes, within ±0.20s 113 → 137, top-10 mean |Δ| ±0.0065s.
 - Sitewide fact sync: counts (541/593/254/1860/20), accuracy claims, corpus

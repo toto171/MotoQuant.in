@@ -173,7 +173,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The MotoQuant simulator at motoquant.in lets you side-by-side the NS400Z and the RC 390, swap rider weight, density altitude, ambient temperature, tire compound, and any of the 594 parts in the catalog. You can answer the actual question a buyer cares about — "for my budget of X and my home strip Y, which of these two bikes runs faster, and what do I need to do to get there" — without trusting a YouTube comparison video or a press release.',
+    text: 'The MotoQuant simulator at motoquant.in lets you side-by-side the NS400Z and the RC 390, swap rider weight, density altitude, ambient temperature, tire compound, and any of the 593 parts in the catalog. You can answer the actual question a buyer cares about — "for my budget of X and my home strip Y, which of these two bikes runs faster, and what do I need to do to get there" — without trusting a YouTube comparison video or a press release.',
   },
   {
     type: 'p',
