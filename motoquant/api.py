@@ -320,12 +320,17 @@ class SimulateRequest(BaseModel):
     # the free sim surface can't be fed physically-impossible values that make
     # the engine return ET=0.0 nonsense as a 200 success.
     power_boost_pct: float = Field(
-        0.0, ge=-50.0, le=200.0, description="Extra power as % of stock (e.g. 10 = +10%)"
+        0.0,
+        ge=-50.0,
+        le=200.0,
+        description="Extra power as % of stock (e.g. 10 = +10%)",
     )
     mass_delta_kg: float = Field(
         0.0, ge=-100.0, le=200.0, description="Mass change in kg (+add, -remove)"
     )
-    rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0, description="Rider weight [kg]")
+    rider_mass_kg: float = Field(
+        75.0, ge=20.0, le=250.0, description="Rider weight [kg]"
+    )
     front_tire_id: int | None = Field(None, description="Override front tire DB ID")
     rear_tire_id: int | None = Field(None, description="Override rear tire DB ID")
     venue_id: int | None = Field(

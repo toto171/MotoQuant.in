@@ -48,13 +48,17 @@ class TestCheckUrl(unittest.TestCase):
 class TestRedirectSSRF(unittest.TestCase):
     def test_redirect_to_cloud_metadata_blocked(self):
         seq = [(302, b"", "http://169.254.169.254/latest/meta-data/")]
-        with mock.patch.object(wt, "_http_get_once", side_effect=lambda u, **k: seq.pop(0)):
+        with mock.patch.object(
+            wt, "_http_get_once", side_effect=lambda u, **k: seq.pop(0)
+        ):
             with self.assertRaises(ValueError):
                 wt._http_get("http://public.example/", timeout=5)
 
     def test_redirect_to_localhost_blocked(self):
         seq = [(301, b"", "http://localhost:8000/admin")]
-        with mock.patch.object(wt, "_http_get_once", side_effect=lambda u, **k: seq.pop(0)):
+        with mock.patch.object(
+            wt, "_http_get_once", side_effect=lambda u, **k: seq.pop(0)
+        ):
             with self.assertRaises(ValueError):
                 wt._http_get("http://public.example/", timeout=5)
 
@@ -63,7 +67,9 @@ class TestRedirectSSRF(unittest.TestCase):
         # only because the base itself would have been blocked — here we assert
         # an absolute internal target expressed via urljoin is re-checked.
         seq = [(307, b"", "//10.0.0.1/x")]
-        with mock.patch.object(wt, "_http_get_once", side_effect=lambda u, **k: seq.pop(0)):
+        with mock.patch.object(
+            wt, "_http_get_once", side_effect=lambda u, **k: seq.pop(0)
+        ):
             with self.assertRaises(ValueError):
                 wt._http_get("http://public.example/", timeout=5)
 
@@ -80,19 +86,25 @@ class TestRedirectSSRF(unittest.TestCase):
             (302, b"", "https://other.example/canonical"),
             (200, b"<p>final</p>", None),
         ]
-        with mock.patch.object(
-            wt, "_http_get_once", side_effect=lambda u, **k: seq.pop(0)
-        ), mock.patch.object(wt, "_check_url", return_value=None):
+        with (
+            mock.patch.object(
+                wt, "_http_get_once", side_effect=lambda u, **k: seq.pop(0)
+            ),
+            mock.patch.object(wt, "_check_url", return_value=None),
+        ):
             status, body = wt._http_get("http://public.example/", timeout=5)
         self.assertEqual(status, 200)
         self.assertIn(b"final", body)
 
     def test_redirect_loop_is_bounded(self):
-        with mock.patch.object(
-            wt,
-            "_http_get_once",
-            side_effect=lambda u, **k: (302, b"", "https://other.example/loop"),
-        ), mock.patch.object(wt, "_check_url", return_value=None):
+        with (
+            mock.patch.object(
+                wt,
+                "_http_get_once",
+                side_effect=lambda u, **k: (302, b"", "https://other.example/loop"),
+            ),
+            mock.patch.object(wt, "_check_url", return_value=None),
+        ):
             with self.assertRaises(ValueError):
                 wt._http_get("http://public.example/", timeout=5)
 
@@ -104,8 +116,11 @@ class TestRedirectSSRF(unittest.TestCase):
             return "blocked" if host in ("127.0.0.1", "localhost") else None
 
         seq = [(302, b"", "http://127.0.0.1/")]
-        with mock.patch.object(wt, "_check_url", side_effect=guard), mock.patch.object(
-            wt, "_http_get_once", side_effect=lambda u, **k: seq.pop(0)
+        with (
+            mock.patch.object(wt, "_check_url", side_effect=guard),
+            mock.patch.object(
+                wt, "_http_get_once", side_effect=lambda u, **k: seq.pop(0)
+            ),
         ):
             out = wt.web_fetch("http://public.example/")
         self.assertIn("error", out)
