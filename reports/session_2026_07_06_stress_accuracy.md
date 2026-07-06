@@ -207,4 +207,21 @@ sizes previously rendered as 3 identical entries, which is what read as
 
 ## 6. Verification
 
-<!-- VERIFICATION -->
+- Full pytest suite green (exit 0; 4,393 collected, ~33 env-gated skips).
+- Slow-tier regression golden green (`MOTOQUANT_SLOW_TESTS=1` — every
+  current bike through the production DB path).
+- `ruff check .` + `ruff format --check .` clean (211 files).
+- `next build` 76/76 (multiple runs) + `verify-web` 183 files clean +
+  Vercel preview deployed green on every push.
+- `audit_headline_stats.py` clean; OG card regenerated and visually checked.
+- References exact at every checkpoint: 10.0334 / 10.2859 / 10.4712.
+- Catalog patch idempotency proven twice (0 changes on re-run AND after a
+  full reseed).
+
+**Test-hygiene item flagged (pre-existing, not fixed here):** some test
+module boots the API against the repo `motoquant.db` (no temp-copy
+override) and the always-on sim metering leaves `sim_usage` residue rows
+in the working tree after a full-suite run. Content-verified harmless
+(only `sim_usage` + `sqlite_sequence` differ) and restored from HEAD this
+session — a follow-up should give that module the same
+setUpModule/temp-copy pattern test_api uses.
