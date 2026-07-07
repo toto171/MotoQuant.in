@@ -723,9 +723,7 @@ def optimize_build(
     next_up = None
     if include_next_upgrade:
         selected_ids = {r.part_id for r in selected}
-        next_up = _next_upgrade_to_dict(
-            _find_next_upgrade(base_config, combined_et, selected_ids, individual)
-        )
+        next_up = _next_upgrade_to_dict(_find_next_upgrade(selected_ids, individual))
 
     return OptimizedBuild(
         bike_name=base_config.name,
