@@ -37,23 +37,32 @@ by what's fun to build.
 | P0-3 | **Fix the shared SQLite connection before multi-worker** (per-thread / pooled conn, or the Postgres migration) | Engineering | KNOWN_TRAPS T14 / ADR-0004: one `check_same_thread=False` connection is shared across request + job threads; concurrent writes can interleave. Fine at 1 worker, corrupts under scale. | 2+ workers pass a concurrent read/write stress test with no interleave/errors. |
 | P0-4 | **Rotate any exposed credentials + wire the secret-scan gate** (done in CI as of PR #100) | Operator + Eng | Tokens have historically been pasted into chats/docs. CI now blocks token-shaped strings; operator must rotate anything already leaked. | `make health` secret scan clean; PATs/keys rotated. |
 
-## P1 — Correctness & hardening (land opportunistically)
+## P1 — Correctness & hardening
 
-The verified-but-deferred findings from the PR #99 + #100 reviews. Each is real;
-each is low-to-medium risk. See `reports/session_2026_07_06_allnighter_review.md`
-and the PR #100 review report.
+**Fixed in PR #100** (was deferred): magic-link token echo in prod (account
+takeover), `consume_magic_link` double-consume race, `get_or_create_user` race,
+`simulate_distance` empty-array 500, `ratelimit` overflow now evicts oldest-first
+(no longer wipes everyone), a `busy_timeout` on the DB connection, the chat
+citation XSS, the login `?next=` backslash open-redirect, and least-privilege
+`permissions` on the read-only CI workflows.
 
-- **Non-atomic write races** — `users_repo.consume_magic_link` /
-  `get_or_create_user`, `subscriptions_repo` upserts. Wrap in transactions /
-  `INSERT ... ON CONFLICT`. (Latent at 1 worker; real once P0-3 lands.)
-- **License-key device binding** — bind-on-first-use or reject when `device_id`
-  is omitted, before commercial launch.
-- **`ratelimit` `_MAX_KEYS` overflow fails open** — consider fail-closed under
-  active abuse.
+**Still deferred** (verified real; each needs a focused/coordinated pass — see the
+PR #100 review report in `reports/`):
+
+- **License-key device binding is bypassable by omitting `device_id`** — but the
+  no-device path is *test-pinned* for legacy clients (`test_subscriptions.py`).
+  Now that the desktop client is scrapped (ADR-0005), make the policy call: drop
+  legacy tolerance, update the pinned test, and decide whether the unauthenticated
+  `/license-key/validate` route should be rate-limited. Do before charging money.
+- **Razorpay webhook has no idempotency ledger** (the Stripe path does) — mirror
+  `record_payment_event` in the Razorpay handler. Payments are beta-inert, so
+  land it alongside the payment-provider go-live (P0-1).
+- **`python-jose` is effectively unmaintained** (known CVEs) — migrate JWT to
+  `PyJWT` (or `authlib`). A dependency swap with its own test pass.
+- **Dockerfile runs as root** — add a non-root `USER`; verify the Render build
+  still works (small deploy risk, hence its own change).
 - **`bike_repo`/`venue_repo`/`tire_repo` `lastrowid==0` misread** — prefer
   `rowcount==0`; import-path only, guarded by idempotency tests (change carefully).
-- **`simulate_distance` empty-array guard** — return 422 not 500 on a degenerate
-  config.
 - **Dead `CategoryProfile` knobs** — either wire (with a liveness test) or delete.
 
 ## P1 — Accuracy (data-limited)
