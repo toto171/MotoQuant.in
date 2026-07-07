@@ -431,6 +431,54 @@ class TestMagicLinkEndpoint(unittest.TestCase):
             self.assertEqual(r2.status_code, 429)
         conn.close()
 
+    def test_no_dev_token_leak_in_deployed_env(self):
+        """PR #100: the magic-link token must NEVER be echoed in the HTTP
+        response on a deployed host — doing so without SMTP configured is an
+        account-takeover vector. Locally (dev) the echo is a convenience."""
+        import motoquant.auth as auth_mod
+
+        # Deployed: no dev_token in the body regardless of SMTP config.
+        conn = _mem_conn()
+        _bootstrap(conn)
+        with self._patch_conn(conn), patch.object(auth_mod, "IN_DEPLOYED_ENV", True):
+            r = self.client.post(
+                "/api/auth/magic-link", json={"email": "deployed@test.in"}
+            )
+        conn.close()
+        self.assertEqual(r.status_code, 200)
+        self.assertIsNone(r.json().get("dev_token"))
+
+        # Local dev (default EMAIL_BACKEND=stdout, not deployed): echo is on.
+        conn2 = _mem_conn()
+        _bootstrap(conn2)
+        with (
+            self._patch_conn(conn2),
+            patch.object(auth_mod, "IN_DEPLOYED_ENV", False),
+            patch.object(auth_mod, "EMAIL_BACKEND", "stdout"),
+        ):
+            r2 = self.client.post(
+                "/api/auth/magic-link", json={"email": "localdev@test.in"}
+            )
+        conn2.close()
+        self.assertEqual(r2.status_code, 200)
+        self.assertTrue(r2.json().get("dev_token"))
+
+
+class TestMagicLinkSingleUse(unittest.TestCase):
+    """PR #100: consuming a magic-link token is atomic single-use — a second
+    (or concurrent) verification of the same token must fail, so one sign-in
+    link can never mint two JWT pairs."""
+
+    def test_consume_is_single_use(self):
+        conn = _mem_conn()
+        from motoquant.database import users_repo as u
+
+        u.ensure_tables(conn)
+        token = u.create_magic_link(conn, "single@use.in")
+        self.assertEqual(u.consume_magic_link(conn, token), "single@use.in")
+        self.assertIsNone(u.consume_magic_link(conn, token))
+        conn.close()
+
 
 if __name__ == "__main__":
     unittest.main()

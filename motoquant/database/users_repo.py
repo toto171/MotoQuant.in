@@ -46,16 +46,26 @@ def get_user_by_id(conn: sqlite3.Connection, user_id: int) -> dict | None:
 
 
 def get_or_create_user(conn: sqlite3.Connection, email: str) -> dict:
-    """Return existing user or insert a new free-tier user."""
+    """Return existing user or insert a new free-tier user.
+
+    Race-safe: two concurrent first-time sign-ins for the same email would both
+    pass a plain SELECT-then-INSERT and the second would hit the UNIQUE(email)
+    constraint. Catch that and fall back to re-reading the row the winner
+    inserted, so both callers get the same user instead of one 500-ing.
+    """
     email = email.lower().strip()
     row = conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
     if row:
         return dict(row)
-    conn.execute(
-        "INSERT INTO users (email, tier, is_active) VALUES (?, 'free', 1)",
-        (email,),
-    )
-    conn.commit()
+    try:
+        conn.execute(
+            "INSERT INTO users (email, tier, is_active) VALUES (?, 'free', 1)",
+            (email,),
+        )
+        conn.commit()
+    except sqlite3.IntegrityError:
+        # Lost the race — the row now exists; fall through to re-select it.
+        conn.rollback()
     return dict(
         conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
     )
@@ -147,8 +157,17 @@ def consume_magic_link(conn: sqlite3.Connection, token: str) -> str | None:
     row = dict(row)
     if row["consumed"]:
         return None
-    conn.execute("UPDATE magic_links SET consumed = 1 WHERE id = ?", (row["id"],))
+    # Consume atomically: the WHERE consumed = 0 guard + rowcount means only the
+    # first of two concurrent verifications for the same token wins. Without it
+    # the SELECT-then-UPDATE is a check-then-act race that could mint two JWT
+    # pairs from a single sign-in link.
+    cur = conn.execute(
+        "UPDATE magic_links SET consumed = 1 WHERE id = ? AND consumed = 0",
+        (row["id"],),
+    )
     conn.commit()
+    if cur.rowcount == 0:
+        return None  # another request consumed it first
     return row["email"]
 
 

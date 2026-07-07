@@ -69,6 +69,14 @@ REFRESH_TOKEN_TTL_S = 30 * 24 * 3600  # 30 days
 MOTOQUANT_BASE_URL = os.environ.get("MOTOQUANT_BASE_URL", "https://www.motoquant.in")
 EMAIL_BACKEND = os.environ.get("MOTOQUANT_EMAIL_BACKEND", "stdout")
 
+# "Am I running on the deployed host?" Render always sets these. Used to make
+# sure the dev-convenience magic-link echo NEVER fires in production (see
+# request_magic_link) — echoing the token in the HTTP response on a prod box
+# without SMTP configured is an account-takeover vector.
+IN_DEPLOYED_ENV = bool(
+    os.environ.get("RENDER") or os.environ.get("RENDER_EXTERNAL_URL")
+)
+
 # Rate-limit: one magic link per email per 60 s
 MAGIC_LINK_COOLDOWN_S = 60
 
@@ -534,8 +542,13 @@ def request_magic_link(body: MagicLinkRequest) -> MagicLinkResponse:
     _send_magic_link_email(email, token)
 
     resp = MagicLinkResponse(message="Sign-in link sent. Check your inbox.")
-    if EMAIL_BACKEND == "stdout" or not os.environ.get("SMTP_HOST"):
-        resp.dev_token = token  # echo token in dev mode for easy testing
+    # Echo the token ONLY in a genuine local dev/test run — never on a deployed
+    # host. Previously this also fired whenever SMTP_HOST was unset, so a prod
+    # box with email not-yet-configured (the beta state) returned the sign-in
+    # token straight to any caller: request a link for any address, read the
+    # token back, verify it → full account takeover with no inbox access.
+    if EMAIL_BACKEND == "stdout" and not IN_DEPLOYED_ENV:
+        resp.dev_token = token
     return resp
 
 
