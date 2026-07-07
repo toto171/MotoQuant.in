@@ -1473,6 +1473,16 @@ def simulate_distance(req: DistanceRunRequest) -> DistanceResultDict:
     except Exception as exc:
         raise HTTPException(500, f"Distance run error: {exc}")
 
+    # A degenerate config can return an empty trajectory; indexing sim.t[-1] /
+    # max(sim.v) below would then raise outside the try above and 500. Surface a
+    # clean 422 instead.
+    if len(sim.t) == 0 or len(sim.v) == 0:
+        raise HTTPException(
+            422,
+            "Simulation produced no trajectory for this configuration "
+            "(check mass / power / distance inputs).",
+        )
+
     # Terminal/trap values at the target distance
     import numpy as np
 
