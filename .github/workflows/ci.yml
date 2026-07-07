@@ -1,5 +1,10 @@
 name: CI
 
+# Least-privilege: this workflow only reads the repo (tests, lint, coverage
+# artifact upload). No write scope on the GITHUB_TOKEN.
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main]
@@ -32,6 +37,10 @@ jobs:
           cache-dependency-path: |
             requirements-api.txt
             pyproject.toml
+
+      - name: Secret scan (no token-shaped strings in tracked files)
+        # stdlib-only + git; fails fast before we spend time installing deps.
+        run: python scripts/health_check.py --secrets-only
 
       - name: Install dependencies
         run: |

@@ -58,12 +58,18 @@ def check(key: str, limit: int, window_s: float) -> tuple[bool, int]:
     now = time.monotonic()
     with _LOCK:
         if len(_WINDOWS) > _MAX_KEYS:
-            # Drop expired windows first; if still oversized, start fresh
-            # (fail-open: better to briefly forget counts than to OOM).
+            # Drop expired windows first.
             for k in [k for k, (t0, _) in _WINDOWS.items() if now - t0 > window_s]:
                 del _WINDOWS[k]
             if len(_WINDOWS) > _MAX_KEYS:
-                _WINDOWS.clear()
+                # Still oversized (a distinct-key flood): evict OLDEST-first
+                # rather than clear() everything. Clearing wiped recent,
+                # legitimate counters too (fail-open), letting a real abuser's
+                # in-window count reset alongside everyone else's. Oldest-first
+                # keeps the freshest counters intact.
+                to_drop = len(_WINDOWS) - _MAX_KEYS + 1
+                for k, _ in sorted(_WINDOWS.items(), key=lambda kv: kv[1][0])[:to_drop]:
+                    _WINDOWS.pop(k, None)
         t0, count = _WINDOWS.get(key, (now, 0))
         if now - t0 > window_s:
             t0, count = now, 0

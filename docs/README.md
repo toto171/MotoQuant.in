@@ -1,13 +1,18 @@
 # docs/ — index
 
-Start here if you're new: **[ONBOARDING.md](ONBOARDING.md)** →
-**[ARCHITECTURE.md](ARCHITECTURE.md)** → [../CONTRIBUTING.md](../CONTRIBUTING.md).
+Start here if you're new: **[../AGENTS.md](../AGENTS.md)** (the working
+contract) → **[ONBOARDING.md](ONBOARDING.md)** → **[ARCHITECTURE.md](ARCHITECTURE.md)**
+→ [../CONTRIBUTING.md](../CONTRIBUTING.md). One-command tour: `make health`.
 
 ## Orientation (read first)
 | Doc | What it covers |
 |---|---|
+| [../AGENTS.md](../AGENTS.md) | The working contract for any contributor (human or AI): the prime directive, the loop (`make check`/`make test`), the non-negotiable rules. |
 | [ONBOARDING.md](ONBOARDING.md) | Day-one brief: what MotoQuant is, current state, read order. |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Module map + data-flow diagram + "where do I change X?" + the pinned-baseline invariant. |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Module map + data-flow diagram + "where do I change X?" |
+| [INVARIANTS.md](INVARIANTS.md) | What must never break, and the automated gate that enforces each. |
+| [KNOWN_TRAPS.md](KNOWN_TRAPS.md) | Bugs & gotchas that keep coming back — read before a big change. |
+| [ROADMAP.md](ROADMAP.md) | Prioritized engineering roadmap + scaling blockers → the $1M/$10M path. |
 | [FAQ.md](FAQ.md) | Common questions. |
 
 ## Subsystems

@@ -1,9 +1,13 @@
 # ADR-0001: Desktop architecture — Tauri UI shell + bundled Python sidecar
 
-**Status:** Accepted
+**Status:** Superseded by [ADR-0005](0005-desktop-discontinued.md) (2026-07-06)
 **Date:** 2026-04-22
 **Deciders:** Hritwik Mudhai
 **Phase:** Phase 5 (Desktop Application v1.0)
+
+> ⚠️ **Superseded.** The desktop app was discontinued in July 2026 — the hosted
+> web app is the product. This ADR is kept for the historical record; the
+> `desktop/` scaffold remains in-tree for reference only. See ADR-0005.
 
 ## Context
 

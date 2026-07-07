@@ -1,5 +1,9 @@
 name: Render keep-alive
 
+# Least-privilege: only makes an outbound HTTP ping; needs no repo access.
+permissions:
+  contents: read
+
 # Render's free tier puts services to sleep after 15 minutes of no inbound
 # traffic. Cold-start on the next request takes ~30-60 seconds, which would
 # tank the live simulator widget on motoquant.in for any visitor who hits

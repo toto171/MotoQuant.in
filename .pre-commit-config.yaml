@@ -1,0 +1,54 @@
+# Pre-commit hooks — local enforcement of the repo invariants.
+#
+# Setup (once):   pip install pre-commit && pre-commit install
+# Run manually:   pre-commit run --all-files
+#
+# These mirror the CI gates so problems surface at commit time, not in CI. The
+# baseline guard only runs when physics-relevant files change (it's the load-
+# bearing invariant — see docs/INVARIANTS.md I1). Nothing here is a substitute
+# for `make test` before a PR.
+
+repos:
+  # Ruff — lint + format (matches `make lint` / `make fmt-check`).
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  # Baseline hygiene from the pre-commit standard library.
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: '\.(md|db|npz|pkl|png|ico)$'
+      - id: end-of-file-fixer
+        exclude: '\.(db|npz|pkl|png|ico)$'
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        # Guard against accidentally committing another 18 MB DB / model blob.
+        # motoquant.db + the surrogate are already tracked, so this only bites
+        # NEW large files.
+        args: [--maxkb=2048]
+      - id: check-yaml
+      - id: check-json
+
+  # Repo-specific guards (local — no external deps).
+  - repo: local
+    hooks:
+      - id: baselines
+        name: physics reference baselines are bit-identical
+        entry: python scripts/check_baselines.py
+        language: system
+        pass_filenames: false
+        # Only fire when something that can move the baselines changes.
+        files: '^motoquant/(physics\.py|defaults\.py|category_profiles\.py|models\.py|submodels/.*\.py|scraper/importer\.py)$'
+
+      - id: no-secrets
+        name: no token-shaped secrets in tracked files
+        entry: python scripts/health_check.py --secrets-only
+        language: system
+        pass_filenames: false
+        # Fast — scans tracked text files for token-shaped strings only.
+        stages: [pre-commit]

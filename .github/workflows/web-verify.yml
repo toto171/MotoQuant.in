@@ -1,5 +1,9 @@
 name: web-verify
 
+# Least-privilege: read-only (builds/verifies web/). No write scope needed.
+permissions:
+  contents: read
+
 # Catches the failure modes that have repeatedly hit web/ this session:
 #   1. NULL bytes in source files (FUSE corruption)
 #   2. Mid-token truncation by the Cowork Write/Edit tool

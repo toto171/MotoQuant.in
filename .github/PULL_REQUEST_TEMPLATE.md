@@ -1,6 +1,8 @@
 <!--
 Thanks for contributing to MotoQuant Pro.
+First time here? Read AGENTS.md (the working contract) and docs/INVARIANTS.md (what must never break).
 Fill every section. Delete sections that don't apply (e.g. "Physics benchmark deltas" for a docs-only PR), but don't delete the Kaizen checklist.
+Run `make check` (fast gate) and `make test` (full suite) before opening this PR.
 -->
 
 ## What changed

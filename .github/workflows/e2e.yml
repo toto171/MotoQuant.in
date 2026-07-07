@@ -1,5 +1,9 @@
 name: E2E smoke (manual)
 
+# Least-privilege: read-only Playwright smoke; no write scope needed.
+permissions:
+  contents: read
+
 # MANUAL-TRIGGER ONLY — never auto-on-PR. This harness is intentionally
 # low-risk while it stabilizes: a flaky Playwright run must never be able to
 # red a pull request. Run it on demand from the Actions tab

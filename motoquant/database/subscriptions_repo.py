@@ -297,8 +297,12 @@ def ensure_tables(conn: sqlite3.Connection) -> None:
             "ALTER TABLE subscriptions ADD COLUMN provider TEXT NOT NULL DEFAULT 'razorpay'"
         )
         conn.commit()
-    except sqlite3.OperationalError:
-        pass  # column already exists
+    except sqlite3.OperationalError as exc:
+        # Only swallow the expected "column already exists" — anything else
+        # (locked DB, disk error, malformed schema) should surface, not be
+        # silently eaten as a no-op migration.
+        if "duplicate column" not in str(exc).lower():
+            raise
 
 
 # ─── PAYMENT EVENT LEDGER (webhook idempotency, June 2026) ────────────────────

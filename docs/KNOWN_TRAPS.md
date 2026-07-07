@@ -1,0 +1,100 @@
+# Known traps — bugs and gotchas that keep coming back
+
+Institutional memory. Every entry here was hit at least once (some several
+times) and cost real debugging time. Read this before a large change; it is
+cheaper than rediscovering these. New contributor — model or human — this is
+the "don't step here" map.
+
+> Rule of thumb from `CLAUDE.md`: *"Fix the same mistake twice, and it is a
+> rule. Fix it three times, and it is a section in the docs."*
+
+---
+
+### T1 — Staging with `git add -A` pulls in unrelated WIP
+The working tree often holds truncated files, CRLF drift, scratch scripts, and
+parallel-session edits. **Always stage explicit paths.** `git status --short`
+first and decide file by file.
+
+### T2 — `motoquant.db` shows "modified" but nothing changed
+Opening the seeded DB in a test rewrites SQLite internal pages. `git diff` flags
+it as binary-modified with **no content change**. Verify row counts against
+`HEAD`; if unchanged, `git checkout -- motoquant.db`. Never commit incidental DB
+churn — it bloats the repo (the file is ~18 MB).
+
+### T3 — Physics/importer change without a reseed → silent DB-path drift
+`/api/simulate?bike_id=N` reads stored `bike_configs` blobs, not live specs.
+Change `spec_to_bike_config` / physics and skip
+`scripts/reseed_configs_from_specs.py`, and the DB path diverges from the sweep
+by seconds — invisible until a DB-vs-spec diff. See invariant I2.
+
+### T4 — "Optimising" the ROI double-fetch breaks the repo seam
+`compute_parts_roi` deliberately routes part application through
+`parts_repo.apply_to_config` so test stubs / alternate repos stay in control.
+Calling the concrete `bridge.apply_part_to_config` directly *looks* like a free
+perf win (avoids one indexed `get`) but bypasses the seam and returns an empty
+build for `FakeRepo`-style tests. It broke `test_parts_integrity` in PR #99 and
+was reverted. Don't redo it. See invariant I4.
+
+### T5 — `ruff check` clean ≠ `ruff format --check` clean
+CI runs **both**. `ruff check` ignores line length (E501); `ruff format` still
+re-wraps long lines. A PR that only ran `ruff check` can still fail the format
+gate (it did in PR #99). Run `make fmt-check` (or just `make check`).
+
+### T6 — pytest under `-n` (xdist) flakes ~15 DB-backed "Live" tests
+`test_chat_resolver.py` "Live" resolver tests and a couple of route tests share
+the seeded DB and env across xdist workers, so parallel runs show spurious
+failures. **They all pass serially.** The authoritative run (and CI) is serial
+(`make test`). Don't chase these as real bugs after a parallel run — re-run the
+failing file serially to confirm.
+
+### T7 — File-write tools can truncate large files
+A `Write`/`Edit` on a big file can silently cut the tail (historically ~5–6 KB).
+After any large write, `wc -l` the file and eyeball the last lines. If truncated,
+rewrite via `cat > file <<'EOF'` (no size limit) or restore from
+`git show HEAD:path`.
+
+### T8 — `CLAUDE.md` is a fragile single-paragraph changelog
+Line ~3 holds the entire nested session history in one paragraph. A `Write` that
+"cleans it up" loses the trailing evergreen sections. **Prepend one line;** never
+regenerate. Substantive write-ups go in `reports/`. (This repo is intentionally
+migrating the durable knowledge *out* of CLAUDE.md into AGENTS.md / INVARIANTS.md
+/ ARCHITECTURE.md / this file.)
+
+### T9 — Vercel rejects unknown committer emails
+A deploy fails with "commit author email is not valid" if the author email
+isn't registered with a provider account. Commit with a real registered email
+(the repo convention) — a bot/no-reply address can break the preview deploy.
+
+### T10 — Headline counts drift across ~30 files on any catalog change
+Changing the bike/part/tire/fitment/benchmark counts leaves stale numbers in
+web pages, README, blog posts, docs, and the OG image. Run
+`scripts/audit_headline_stats.py` (`make audit`) and patch every drift before
+pushing. See invariant I6.
+
+### T11 — Dead knobs: a config field written but never read
+A parameter can be plumbed through config and appear "wired" while nothing in
+the sim reads it (e.g. `power_boost_pct` was once a no-op on the small-cc path;
+several `CategoryProfile` knobs are currently inert). Before trusting a knob,
+prove it moves ET with a quick sweep. When adding one, add a liveness test that
+fails if the knob does nothing.
+
+### T12 — SQLite `LIMIT -1` is unbounded
+A `limit` query param with only an upper bound (`le=100`, no `ge=1`) lets
+`limit=-1` become `LIMIT -1` = dump the whole table. Every list route needs
+`ge=1`. (Fixed on the two that were missed in PR #99; keep it that way for new
+routes.)
+
+### T13 — `cur.lastrowid == 0` misreads an ignored INSERT
+After `INSERT OR IGNORE`, a fresh sqlite3 cursor's `lastrowid` is not reliably
+`0` when the row was ignored — prefer `cur.rowcount == 0` as the "was ignored"
+signal. This is import/seed-path code (`bike_repo`/`venue_repo`/`tire_repo`);
+change it carefully, it's guarded by idempotency tests. (Deferred, still open —
+see `reports/session_2026_07_06_allnighter_review.md`.)
+
+### T14 — One shared SQLite connection across request + job threads
+`api.py` keeps a module-level `sqlite3` connection (`check_same_thread=False`)
+reused by FastAPI request threads *and* `jobs.py` daemon workers. Reads are fine
+on the single-worker Render deploy, but concurrent **writes** (save-run, suggest,
+usage metering, auth session, subscription upsert) can interleave. This is the
+#1 thing to fix before scaling to multiple workers — a per-thread/pooled
+connection. (Deferred; documented in the roadmap.)
