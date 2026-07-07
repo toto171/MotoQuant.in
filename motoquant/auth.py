@@ -412,11 +412,9 @@ def _send_magic_link_email(email: str, token: str) -> None:
 def _get_conn() -> sqlite3.Connection:
     # Lazy import: connection.py is only loaded when a request actually needs the DB,
     # not at module import time (avoids ImportError during tests that mock the DB).
-    from .database.connection import connect as _db_connect  # noqa: PLC0415
+    from .database.connection import row_conn  # noqa: PLC0415
 
-    conn = _db_connect()
-    conn.row_factory = sqlite3.Row
-    return conn
+    return row_conn()
 
 
 def get_current_user(
