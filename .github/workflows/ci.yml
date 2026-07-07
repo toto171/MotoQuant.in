@@ -1,5 +1,10 @@
 name: CI
 
+# Least-privilege: this workflow only reads the repo (tests, lint, coverage
+# artifact upload). No write scope on the GITHUB_TOKEN.
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main]
