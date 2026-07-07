@@ -69,6 +69,13 @@ class MotoQuantDB:
         self._conn.execute("PRAGMA foreign_keys=ON")
         self._conn.execute("PRAGMA synchronous=NORMAL")
         self._conn.execute("PRAGMA cache_size=-64000")  # 64 MB
+        # Wait up to 5 s for a lock instead of failing instantly with "database
+        # is locked" (default busy_timeout is 0). The API shares one connection
+        # across request + job-worker threads (see docs/KNOWN_TRAPS.md T14); this
+        # lets concurrent writers queue on the lock rather than error out. It is
+        # a mitigation, not a substitute for per-thread/pooled connections at
+        # scale (see docs/ROADMAP.md P0-3).
+        self._conn.execute("PRAGMA busy_timeout=5000")
         return self._conn
 
     def close(self):
