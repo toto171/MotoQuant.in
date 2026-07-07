@@ -353,24 +353,53 @@ function AutotuneBlock({ payload }) {
   );
 }
 
+// Only http(s) URLs are safe to put in an href. Citation URLs come from web
+// search results relayed through the chat agent, i.e. external + untrusted; a
+// `javascript:`/`data:` URI would execute on click (React does not sanitize
+// href). Returns the URL if safe, else null.
+function safeHttpUrl(u) {
+  if (typeof u !== "string") return null;
+  try {
+    const parsed = new URL(u, "https://motoquant.in");
+    return parsed.protocol === "http:" || parsed.protocol === "https:" ? u : null;
+  } catch {
+    return null;
+  }
+}
+
 function Citations({ payload }) {
   const results = (payload.results || []).slice(0, 5);
   if (results.length === 0) return null;
   return (
     <div className="space-y-1">
       <p className="label-mono">Sources</p>
-      {results.map((r, i) => (
-        <a
-          key={i}
-          href={r.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-1.5 text-[11px] text-white/45 hover:text-brand-orange transition-colors truncate"
-        >
-          <LinkIcon size={10} className="shrink-0" aria-hidden="true" />
-          <span className="truncate">{r.title || r.url}</span>
-        </a>
-      ))}
+      {results.map((r, i) => {
+        const href = safeHttpUrl(r.url);
+        const label = r.title || r.url || "source";
+        const cls =
+          "flex items-center gap-1.5 text-[11px] text-white/45 hover:text-brand-orange transition-colors truncate";
+        // Unsafe/blocked scheme → render as inert text, never a live link.
+        if (!href) {
+          return (
+            <span key={i} className={cls}>
+              <LinkIcon size={10} className="shrink-0" aria-hidden="true" />
+              <span className="truncate">{label}</span>
+            </span>
+          );
+        }
+        return (
+          <a
+            key={i}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cls}
+          >
+            <LinkIcon size={10} className="shrink-0" aria-hidden="true" />
+            <span className="truncate">{label}</span>
+          </a>
+        );
+      })}
     </div>
   );
 }
