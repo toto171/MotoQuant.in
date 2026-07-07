@@ -82,6 +82,25 @@ BILLING_ENFORCE = os.environ.get(
     "MOTOQUANT_BILLING_ENFORCE", "false"
 ).strip().lower() in ("1", "true", "yes", "on")
 
+# Guard against shipping the public default JWT secret. When billing is
+# enforced (real commercial mode), forgeable tokens = free paid upgrades and
+# cross-account reads, so refuse to start rather than sign with a known key.
+# During the open beta (BILLING_ENFORCE off) auth is advisory, so we only warn
+# loudly — hard-failing here would take down the live beta if the operator
+# hasn't set JWT_SECRET yet (it's a documented pre-commercial TODO).
+_JWT_SECRET_IS_DEFAULT = JWT_SECRET == "dev-insecure-secret-change-me"
+if _JWT_SECRET_IS_DEFAULT:
+    if BILLING_ENFORCE:
+        raise RuntimeError(
+            "JWT_SECRET is the public default while MOTOQUANT_BILLING_ENFORCE is on. "
+            "Set JWT_SECRET to 32+ random bytes before enabling billing — the default "
+            "lets anyone forge access tokens and upgrade themselves for free."
+        )
+    log.warning(
+        "JWT_SECRET is the insecure public default — acceptable only for dev/test. "
+        "Set a real JWT_SECRET before any real deployment; tokens are forgeable."
+    )
+
 # Password auth — stdlib scrypt (RFC 7914), zero external hashing deps.
 _SCRYPT_N = 16384
 _SCRYPT_R = 8

@@ -38,11 +38,18 @@ RATE_LIMIT_ENABLED = os.environ.get("MOTOQUANT_RATE_LIMIT", "true").lower() not 
 
 
 def _client_ip(request: Request) -> str:
-    """Best-effort client IP. Render terminates TLS upstream, so the
-    peer address is the proxy — prefer the first X-Forwarded-For hop."""
+    """Best-effort client IP for rate-limit bucketing.
+
+    Render terminates TLS upstream and *appends* the peer it observed to
+    X-Forwarded-For, so with exactly one trusted proxy the RIGHTMOST hop is
+    the real client. The leftmost hop is whatever the client itself sent — an
+    attacker who rotates a spoofed leftmost value on every request would get a
+    fresh bucket each time and bypass the fuse entirely. Take the rightmost."""
     fwd = request.headers.get("x-forwarded-for")
     if fwd:
-        return fwd.split(",")[0].strip() or "unknown"
+        hops = [h.strip() for h in fwd.split(",") if h.strip()]
+        if hops:
+            return hops[-1]
     return request.client.host if request.client else "unknown"
 
 

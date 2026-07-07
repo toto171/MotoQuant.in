@@ -22,6 +22,12 @@ from typing import Any
 JOB_TTL_S = 900.0  # evict finished jobs this long after their last update
 MAX_JOBS = 200  # hard cap on registry size (memory bound)
 MAX_RUNNING = 6  # concurrent-job guard (free-tier CPU)
+# A worker running past this is treated as hung (wedged network call, runaway
+# loop). We can't kill a daemon thread, but we stop counting it toward
+# MAX_RUNNING and request its cancellation so it can't permanently starve the
+# registry. Deliberately far above any legitimate job (chat ≤ ~8×30s LLM
+# calls, optimizer a few minutes) — this only ever trips a true wedge.
+MAX_JOB_RUNTIME_S = 1800.0
 
 
 class JobCapacityError(RuntimeError):
@@ -72,8 +78,19 @@ _JOBS: dict[str, Job] = {}
 _LOCK = threading.Lock()
 
 
+def _is_hung(job: Job, now: float) -> bool:
+    """A running job that has blown the runtime deadline — a wedged worker."""
+    return job.status == "running" and now - job.created_at > MAX_JOB_RUNTIME_S
+
+
 def _evict_locked(now: float) -> None:
     """Drop expired finished jobs + oldest overflow. Caller holds ``_LOCK``."""
+    # Break wedges: a worker past the deadline is asked to cancel (it unwinds
+    # at its next progress tick) and, more importantly, no longer counts toward
+    # MAX_RUNNING or blocks overflow eviction below.
+    for job in _JOBS.values():
+        if _is_hung(job, now):
+            job.cancel_requested = True
     expired = [
         jid
         for jid, j in _JOBS.items()
@@ -82,14 +99,14 @@ def _evict_locked(now: float) -> None:
     for jid in expired:
         del _JOBS[jid]
     if len(_JOBS) > MAX_JOBS:
-        # Only finished/cancelled jobs are eviction candidates: evicting a
-        # queued/running job would orphan its worker thread and make the
-        # client's poll 404 mid-run ("Progress lost") under load spikes.
+        # Finished/cancelled jobs (and hung ones past the deadline) are the
+        # eviction candidates: evicting a healthy queued/running job would
+        # orphan its worker and 404 the client's poll ("Progress lost").
         overflow = sorted(
             (
                 (jid, j)
                 for jid, j in _JOBS.items()
-                if j.status not in ("queued", "running")
+                if j.status not in ("queued", "running") or _is_hung(j, now)
             ),
             key=lambda kv: kv[1].created_at,
         )
@@ -110,7 +127,11 @@ def create_job(kind: str, runner: Callable[[Callable], Any]) -> Job:
     now = time.time()
     with _LOCK:
         _evict_locked(now)
-        n_active = sum(1 for j in _JOBS.values() if j.status in ("queued", "running"))
+        n_active = sum(
+            1
+            for j in _JOBS.values()
+            if j.status in ("queued", "running") and not _is_hung(j, now)
+        )
         if n_active >= MAX_RUNNING:
             raise JobCapacityError(
                 f"Too many simulations running ({n_active}); try again in a moment"

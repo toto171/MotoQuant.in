@@ -35,6 +35,8 @@ import logging
 import os
 import re
 import socket
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 
@@ -45,6 +47,9 @@ SEARCH_TIMEOUT_S = 10.0
 MAX_RAW_BYTES = 512 * 1024
 MAX_TEXT_CHARS = 8_000
 MAX_RESULTS = 8
+# Redirects are followed manually so the SSRF guard can re-run on every hop
+# (see _http_get). Bound the chain to stop redirect loops.
+MAX_REDIRECTS = 5
 _UA = (
     "Mozilla/5.0 (compatible; MotoQuantBot/1.0; +https://motoquant.in) python-requests"
 )
@@ -104,24 +109,86 @@ def _check_url(url: str) -> str | None:
 # ─── HTTP plumbing ────────────────────────────────────────────────────────
 
 
-def _http_get(
-    url: str, *, timeout: float, headers: dict[str, str] | None = None
-) -> tuple[int, bytes]:
-    """GET `url`, returning (status, body[:MAX_RAW_BYTES])."""
-    hdrs = {"User-Agent": _UA, "Accept-Language": "en"}
-    if headers:
-        hdrs.update(headers)
+class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """urllib redirect handler that never auto-follows — a 3xx surfaces as an
+    HTTPError so the caller can re-validate the target against the SSRF guard."""
+
+    def redirect_request(self, *args, **kwargs):  # noqa: D102
+        return None
+
+
+def _http_get_once(
+    url: str, *, timeout: float, headers: dict[str, str]
+) -> tuple[int, bytes, str | None]:
+    """Single GET with automatic redirects DISABLED.
+
+    Returns (status, body[:MAX_RAW_BYTES], location_header_or_None). The body
+    is only meaningful for a final (non-redirect) response.
+    """
     try:
         import requests  # lazy — transitive dep, pinned in requirements-api.txt
 
-        resp = requests.get(url, timeout=timeout, headers=hdrs, stream=True)
-        body = resp.raw.read(MAX_RAW_BYTES, decode_content=True) or b""
-        return resp.status_code, body
+        # stream=True defers the body download; we read only the first
+        # MAX_RAW_BYTES, so the connection must be explicitly closed or it
+        # leaks out of the pool (we never consume the rest of the stream).
+        resp = requests.get(
+            url, timeout=timeout, headers=headers, stream=True, allow_redirects=False
+        )
+        try:
+            body = resp.raw.read(MAX_RAW_BYTES, decode_content=True) or b""
+            return resp.status_code, body, resp.headers.get("Location")
+        finally:
+            resp.close()
     except ImportError:
         pass
-    req = urllib.request.Request(url, headers=hdrs)
-    with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310
-        return resp.status, resp.read(MAX_RAW_BYTES)
+    opener = urllib.request.build_opener(_NoRedirectHandler)
+    req = urllib.request.Request(url, headers=headers)
+    try:
+        with opener.open(req, timeout=timeout) as resp:  # noqa: S310
+            return resp.status, resp.read(MAX_RAW_BYTES), resp.headers.get("Location")
+    except urllib.error.HTTPError as exc:
+        # With _NoRedirectHandler a 3xx is raised here; read its Location.
+        loc = exc.headers.get("Location") if exc.headers else None
+        return exc.code, b"", loc
+
+
+def _http_get(
+    url: str, *, timeout: float, headers: dict[str, str] | None = None
+) -> tuple[int, bytes]:
+    """GET `url` following redirects MANUALLY, returning (status, body).
+
+    Every redirect hop's target is re-checked with :func:`_check_url` before it
+    is fetched. ``requests``/``urllib`` would otherwise follow a 3xx from an
+    allowed public page straight to an internal address (cloud-metadata
+    169.254.169.254, localhost, RFC-1918), bypassing the initial guard entirely
+    — the classic redirect-based SSRF. (Residual: a host that rebinds DNS
+    between the guard's resolution and the socket's connect is not closed here;
+    the practically-exploitable hole is the unchecked redirect, which is.)
+    """
+    hdrs = {"User-Agent": _UA, "Accept-Language": "en"}
+    if headers:
+        hdrs.update(headers)
+    # `timeout` is the budget for the WHOLE redirect chain, not per hop — else a
+    # server could chain MAX_REDIRECTS slow hops for (MAX_REDIRECTS+1)*timeout
+    # of wall time. Each hop gets whatever is left on the deadline.
+    deadline = time.monotonic() + timeout
+    current = url
+    for _ in range(MAX_REDIRECTS + 1):
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise TimeoutError("fetch exceeded total timeout across redirects")
+        status, body, location = _http_get_once(
+            current, timeout=max(0.5, remaining), headers=hdrs
+        )
+        if status in (301, 302, 303, 307, 308) and location:
+            target = urllib.parse.urljoin(current, location)
+            err = _check_url(target)
+            if err:
+                raise ValueError(f"blocked redirect to a disallowed host ({err})")
+            current = target
+            continue
+        return status, body
+    raise ValueError(f"too many redirects (> {MAX_REDIRECTS})")
 
 
 def _extract_text(raw: bytes) -> str:

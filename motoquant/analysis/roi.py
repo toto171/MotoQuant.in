@@ -662,7 +662,11 @@ def compute_parts_roi(
         if require_compatible and not is_compat:
             continue
 
-        # Apply part and simulate
+        # Apply part and simulate. NOTE: route through parts_repo.apply_to_config
+        # (not the concrete bridge.apply_part_to_config) so an injected repo /
+        # test stub keeps control of how a part mutates the config. The extra
+        # get(pid) inside apply_to_config is a cheap indexed lookup, dwarfed by
+        # the RK4 sim below — not worth breaking the repo-injection seam for.
         try:
             modified_config = parts_repo.apply_to_config(pid, base_config)
             mod_et, mod_trap = _et(modified_config)

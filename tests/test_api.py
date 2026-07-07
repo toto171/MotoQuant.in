@@ -1078,3 +1078,84 @@ class TestApiHygiene20260706(unittest.TestCase):
             json={"bike_id": 1, "et_quarter_s": 10.033, "trap_speed_kmh": 239.8},
         )
         self.assertEqual(r.status_code, 201)
+
+
+class TestApiHygiene20260707(unittest.TestCase):
+    """API-hygiene regression pins (2026-07-07 all-nighter review session).
+
+    Continuation of the 2026-07-06 pass, which bounded /api/bikes|parts|tires
+    but missed two list routes and the free-tier sim request bodies:
+
+    L3: /api/leaderboard and /api/me/runs `limit` had le=100 but no ge, so
+        limit=-1 became an unbounded SQLite `LIMIT -1` (whole-table dump).
+    L4: SimulateRequest / QuickSimRequest / TopSpeedRequest /
+        DistanceRunRequest / CompareRequest accepted unbounded
+        power_boost_pct / mass_delta_kg / rider_mass_kg, so impossible values
+        (mass_delta=-300, power_boost=-100) ran and returned ET=0.0 nonsense
+        as a 200 success. The paid routes already bounded these fields.
+    """
+
+    # ── L3: list-route limit lower bound ──
+
+    def test_leaderboard_negative_limit_422(self):
+        self.assertEqual(client.get("/api/leaderboard?limit=-1").status_code, 422)
+
+    def test_leaderboard_zero_limit_422(self):
+        self.assertEqual(client.get("/api/leaderboard?limit=0").status_code, 422)
+
+    def test_leaderboard_valid_limit_ok(self):
+        self.assertEqual(client.get("/api/leaderboard?limit=10").status_code, 200)
+
+    # ── L4: free-sim request-body physical bounds ──
+
+    def test_quick_sim_absurd_mass_delta_422(self):
+        r = client.post(
+            "/api/simulate/quick",
+            json={"bike_preset": "gsxr1000_k5", "mass_delta_kg": -300},
+        )
+        self.assertEqual(r.status_code, 422)
+
+    def test_quick_sim_power_boost_below_neg50_422(self):
+        r = client.post(
+            "/api/simulate/quick",
+            json={"bike_preset": "gsxr1000_k5", "power_boost_pct": -100},
+        )
+        self.assertEqual(r.status_code, 422)
+
+    def test_quick_sim_absurd_rider_mass_422(self):
+        r = client.post(
+            "/api/simulate/quick",
+            json={"bike_preset": "gsxr1000_k5", "rider_mass_kg": -100000},
+        )
+        self.assertEqual(r.status_code, 422)
+
+    def test_quick_sim_legit_overrides_still_ok(self):
+        r = client.post(
+            "/api/simulate/quick",
+            json={
+                "bike_preset": "gsxr1000_k5",
+                "power_boost_pct": 50,
+                "mass_delta_kg": -20,
+                "rider_mass_kg": 90,
+            },
+        )
+        self.assertEqual(r.status_code, 200)
+        self.assertGreater(r.json().get("et_quarter_s", 0.0), 0.0)
+
+    def test_full_sim_absurd_values_422(self):
+        r = client.post(
+            "/api/simulate",
+            json={"bike_preset": "gsxr1000_k5", "mass_delta_kg": 9999},
+        )
+        self.assertEqual(r.status_code, 422)
+
+    def test_compare_absurd_values_422(self):
+        r = client.post(
+            "/api/simulate/compare",
+            json={
+                "a_bike_preset": "gsxr1000_k5",
+                "b_bike_preset": "gsxr1000_k5",
+                "b_power_boost_pct": 9999,
+            },
+        )
+        self.assertEqual(r.status_code, 422)

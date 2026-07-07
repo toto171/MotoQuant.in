@@ -4,10 +4,11 @@ Welcome to the project. This doc is the "day one" brief — read it end-to-end, 
 
 **Read order on day one:**
 1. This file (10 min).
-2. `CLAUDE.md` — the live status document, single source of truth for project state. The top entry is always the latest session; the trailing sections (architecture, workflow, physics reference) are evergreen (20 min).
-3. `CONTRIBUTING.md` — dev workflow, branch conventions, Kaizen rule (10 min).
-4. `reports/ROADMAP_2026_07_03.md` — the complete prioritized backlog + the list of operator-only actions (10 min).
-5. Skim `motoquant/physics.py`, one sub-model like `motoquant/submodels/tire.py`, and `docs/CHAT_AGENT.md` to get a feel for the code style and the newest subsystem (15 min).
+2. `docs/ARCHITECTURE.md` — the module map + data-flow diagram. Answers "where does X live, and how does a bike spec become a simulated ET?" before you open any code (10 min).
+3. `CLAUDE.md` — the live status document, single source of truth for project state. It is a long single-paragraph changelog: read the **top** entry for the latest session and skim the trailing evergreen sections (architecture, workflow, physics reference). Don't try to read it end-to-end (20 min).
+4. `CONTRIBUTING.md` — dev workflow, branch conventions, Kaizen rule (10 min).
+5. `reports/ROADMAP_2026_07_03.md` — the complete prioritized backlog + the list of operator-only actions (10 min).
+6. Skim `motoquant/physics.py`, one sub-model like `motoquant/submodels/tire.py`, and `docs/CHAT_AGENT.md` to get a feel for the code style and the newest subsystem (15 min).
 
 After that, get the test suite green locally (see `CONTRIBUTING.md` §2) and you're ready to open your first PR.
 

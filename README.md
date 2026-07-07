@@ -30,7 +30,9 @@ python -m motoquant.run sim --bike-id 1 --venue-id 1
 python -m motoquant.run chat "how fast is a hayabusa at Aamby Valley?"
 ```
 
-New collaborator? Start with [docs/ONBOARDING.md](docs/ONBOARDING.md), then
+New collaborator? Start with [docs/ONBOARDING.md](docs/ONBOARDING.md) (the
+day-one brief) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (the module map
++ data-flow diagram — *where does X live?*), then
 [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Repo layout
@@ -66,7 +68,22 @@ Vercel (`motoquant.in`) with a `/api/*` rewrite to Render. See
 
 `CLAUDE.md` is the persistent project-context file read at the start of every
 Claude session -- consult it for the full state-of-the-world, known issues,
-and phase roadmap.
+and phase roadmap. It is a long, single-paragraph changelog; skim the *top*
+entry for the latest state and don't try to read it end-to-end.
+
+### Root files you can ignore while developing
+
+Several root files are **autonomous-operations plumbing**, not part of the
+product or the dev workflow. A newcomer can safely ignore them:
+
+| File(s) | What it is |
+|---|---|
+| `DISPATCH_INBOX.md` / `DISPATCH_OUTBOX.md` / `DISPATCH_*.md` | Async message queue between the operator and unattended Claude sessions (`docs/DISPATCH_PROTOCOL.md`). Read/written by `scripts/session_*flight.sh` — **do not move or rename** them. |
+| `NEXT_SESSION.md`, `STATUS.md` | Session-handoff scratch notes. |
+| `AUTONOMOUS_PAUSED` | A flag file that pauses the scheduled autonomous runs (`scripts/START.sh`). Its presence is intentional. |
+
+Everything you actually need to build, test, and run the product is covered by
+`README.md`, `docs/ONBOARDING.md`, `docs/ARCHITECTURE.md`, and `CONTRIBUTING.md`.
 
 ## Project state (Jun 2026)
 
