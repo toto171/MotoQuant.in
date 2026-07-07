@@ -111,11 +111,9 @@ def _paypal_configured() -> bool:
 
 
 def _get_conn() -> sqlite3.Connection:
-    from .database.connection import connect as _db_connect  # noqa: PLC0415
+    from .database.connection import row_conn  # noqa: PLC0415
 
-    conn = _db_connect()
-    conn.row_factory = sqlite3.Row
-    return conn
+    return row_conn()
 
 
 # ─── Schemas ──────────────────────────────────────────────────────────────────

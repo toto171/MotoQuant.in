@@ -487,8 +487,6 @@ def _detect_warnings(selected_parts: list[PartROIResult]) -> list[CompatibilityW
 
 
 def _find_next_upgrade(
-    current_config: BikeConfig,
-    current_build_et: float,
     selected_part_ids: set[int],
     all_roi: list[PartROIResult],
 ) -> NextUpgrade | None:
@@ -641,8 +639,6 @@ def recommend_build(
     if include_next_upgrade:
         selected_ids = {p.part_id for p in build.selected_parts}
         next_up = _find_next_upgrade(
-            current_config=base_config,
-            current_build_et=build.modified_et_s,
             selected_part_ids=selected_ids,
             all_roi=all_roi,
         )

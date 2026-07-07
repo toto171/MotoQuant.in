@@ -393,3 +393,14 @@ def connect(db_path=None):
     path = db_path or _os.environ.get("MOTOQUANT_DB", "motoquant.db")
     db = MotoQuantDB(path)
     return db.conn
+
+
+def row_conn(db_path=None) -> sqlite3.Connection:
+    """``connect()`` with ``sqlite3.Row`` as the row factory — the exact shape
+    auth / payments / subscriptions each need. Centralised so the row-factory
+    (and any future per-request connection tuning) lives in one place instead
+    of being copy-pasted into every module's ``_get_conn``.
+    """
+    conn = connect(db_path)
+    conn.row_factory = sqlite3.Row
+    return conn
