@@ -37,8 +37,10 @@ RATE_LIMIT_ENABLED = os.environ.get("MOTOQUANT_RATE_LIMIT", "true").lower() not 
 )
 
 
-def _client_ip(request: Request) -> str:
-    """Best-effort client IP for rate-limit bucketing.
+def client_ip(request: Request) -> str:
+    """Best-effort client IP behind the trusted proxy — the ONE place this repo
+    derives a client identity from a request (rate-limit bucketing AND free-tier
+    quota metering both call it).
 
     Render terminates TLS upstream and *appends* the peer it observed to
     X-Forwarded-For, so with exactly one trusted proxy the RIGHTMOST hop is
@@ -92,7 +94,7 @@ def rate_limit(name: str, limit: int, window_s: float = 60.0):
     def _dep(request: Request) -> None:
         if not RATE_LIMIT_ENABLED:
             return
-        ip = _client_ip(request)
+        ip = client_ip(request)
         allowed, retry_after = check(f"{name}:{ip}", limit, window_s)
         if not allowed:
             raise HTTPException(

@@ -695,20 +695,12 @@ def _sim_identity_and_tier(request: Request) -> tuple[str, str]:
                     return user_identity(user["id"]), user.get("tier", "free")
         except Exception:  # noqa: BLE001 -- metering must never break sims
             pass
+    from .ratelimit import client_ip
     from .usage import anon_identity
 
-    # Rightmost X-Forwarded-For hop = the client IP Render's proxy observed.
-    # The leftmost hop is client-supplied and spoofable, so an attacker could
-    # rotate it to mint unlimited free-tier quota. See ratelimit._client_ip.
-    fwd = request.headers.get("x-forwarded-for")
-    ip = "unknown"
-    if fwd:
-        hops = [h.strip() for h in fwd.split(",") if h.strip()]
-        if hops:
-            ip = hops[-1]
-    elif request.client:
-        ip = request.client.host
-    return anon_identity(ip), "free"
+    # Same trusted-proxy client-IP derivation as the rate limiter — the rightmost
+    # X-Forwarded-For hop, never the spoofable leftmost one (see client_ip).
+    return anon_identity(client_ip(request)), "free"
 
 
 def _meter_full_sim(request: Request, response: Response) -> None:
