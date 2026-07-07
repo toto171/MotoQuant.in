@@ -18,22 +18,27 @@ Reference baselines: **GSX-R 1000 K5 → 10.034 s**, **YZF-R1 4C8 → 10.286 s**
 ## Quickstart
 
 ```bash
-# Install
-pip install -r requirements-api.txt && pip install -e .
+make install          # deps + editable package
+make health           # state of the world (baselines, lint, catalog, secrets)
+make check            # fast pre-PR gate: lint + format + baselines + fast tests
+make                  # list every target
 
-# API + web app (the primary product)
-uvicorn motoquant.api:app --reload --port 8000
-cd web && npm install && NEXT_PUBLIC_API_URL=http://localhost:8000 npm run dev
+# Run the product
+make api              # FastAPI backend on :8000
+make web-dev          # Next.js frontend against the local API
 
 # Or use the CLI directly (the repo ships a seeded motoquant.db)
 python -m motoquant.run sim --bike-id 1 --venue-id 1
 python -m motoquant.run chat "how fast is a hayabusa at Aamby Valley?"
 ```
 
-New collaborator? Start with [docs/ONBOARDING.md](docs/ONBOARDING.md) (the
-day-one brief) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (the module map
-+ data-flow diagram — *where does X live?*), then
-[CONTRIBUTING.md](CONTRIBUTING.md).
+> **Contributing (human or AI):** read **[AGENTS.md](AGENTS.md)** first — the
+> one-page working contract (the prime directive, the loop, the non-negotiable
+> rules). New collaborators then read [docs/ONBOARDING.md](docs/ONBOARDING.md)
+> (day-one brief) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (module map +
+> data-flow — *where does X live?*). What must never break lives in
+> [docs/INVARIANTS.md](docs/INVARIANTS.md); the bugs that keep coming back are in
+> [docs/KNOWN_TRAPS.md](docs/KNOWN_TRAPS.md).
 
 ## Repo layout
 
