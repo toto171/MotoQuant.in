@@ -55,12 +55,28 @@ jobs:
           cache: npm
           cache-dependency-path: desktop/package-lock.json
 
+      - name: Install UI deps
+        working-directory: desktop
+        run: npm ci
+
+      # npm ci skips platform-specific optionalDependencies when the
+      # lockfile was generated on another OS (npm/cli#4828) — rollup's
+      # native win32 binary goes missing and `vite build` dies with
+      # "Cannot find module @rollup/rollup-win32-x64-msvc". Install it
+      # explicitly, pinned to the lockfile's resolved rollup version.
+      - name: Install rollup native binary (Windows npm bug workaround)
+        if: runner.os == 'Windows'
+        working-directory: desktop
+        shell: pwsh
+        run: |
+          $v = node -p "require('rollup/package.json').version"
+          npm install --no-save "@rollup/rollup-win32-x64-msvc@$v"
+
       - name: Build UI (Local Lab mode)
         working-directory: desktop
         env:
           VITE_LOCAL_LAB: "1"
         run: |
-          npm ci
           npx tsc --noEmit
           npx vite build
 
