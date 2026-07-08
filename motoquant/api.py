@@ -4116,3 +4116,53 @@ async def _ensure_phase6_schema() -> None:
         logging.getLogger(__name__).warning(
             "phase6 schema ensure failed", exc_info=True
         )
+
+
+# ─── Local Lab static UI (env-gated; inert in production) ────────────────
+# When MOTOQUANT_LOCAL_UI points at a built SPA bundle (local_lab/entry.py
+# sets it to the PyInstaller-extracted ui/ dir), serve it from this same
+# origin: /assets/* from disk, everything else falls back to index.html so
+# BrowserRouter deep links (/build, /compare, ...) survive a hard refresh.
+# The JSON banner at "/" must yield to index.html here — Starlette matches
+# routes in registration order and the banner was registered first, so it
+# is removed rather than shadowed. Unset in production => zero changes.
+_local_ui_dir = os.environ.get("MOTOQUANT_LOCAL_UI", "")
+if _local_ui_dir:
+    from pathlib import Path as _UiPath
+
+    _ui_root = _UiPath(_local_ui_dir).resolve()
+    if (_ui_root / "index.html").is_file():
+        from fastapi.responses import FileResponse as _FileResponse
+        from fastapi.routing import APIRoute as _APIRoute
+        from fastapi.staticfiles import StaticFiles as _StaticFiles
+
+        app.router.routes = [
+            r
+            for r in app.router.routes
+            if not (isinstance(r, _APIRoute) and r.path == "/")
+        ]
+        if (_ui_root / "assets").is_dir():
+            app.mount(
+                "/assets",
+                _StaticFiles(directory=str(_ui_root / "assets")),
+                name="local-ui-assets",
+            )
+
+        @app.get("/{full_path:path}", include_in_schema=False)
+        def _serve_local_ui(full_path: str):
+            # Real API routes were registered earlier and win; anything else
+            # under /api/ is a genuinely unknown endpoint and must 404 as
+            # JSON, not silently receive the SPA's index.html with a 200.
+            if full_path == "api" or full_path.startswith("api/"):
+                raise HTTPException(status_code=404, detail="Unknown API endpoint")
+            candidate = (_ui_root / full_path).resolve()
+            if full_path and candidate.is_file() and candidate.is_relative_to(_ui_root):
+                return _FileResponse(candidate)
+            return _FileResponse(_ui_root / "index.html")
+
+        logging.getLogger(__name__).info("Local Lab UI mounted from %s", _ui_root)
+    else:
+        logging.getLogger(__name__).warning(
+            "MOTOQUANT_LOCAL_UI=%s has no index.html — static UI not mounted",
+            _local_ui_dir,
+        )

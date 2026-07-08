@@ -495,7 +495,8 @@ export interface SurrogateCompareResponse {
 export interface OptimizeBuildRequest {
   bike_id?: number;
   bike_preset?: string;
-  budget_inr: number;
+  /** null = Outlaw / no budget limit (server resolves it to the internal cap). */
+  budget_inr: number | null;
   goal: "min_et" | "max_trap";
   profile?: string;
   rider_weight_kg?: number;

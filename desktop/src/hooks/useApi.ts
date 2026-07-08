@@ -90,21 +90,23 @@ export function useCompare() {
   });
 }
 
-export function useLeaderboard(limit = 20) {
+export function useLeaderboard(limit = 20, enabled = true) {
   return useQuery({
     queryKey: ["leaderboard", limit],
     queryFn: () => api.leaderboard({ limit }),
     staleTime: 30_000, // sim_runs doesn't update often; 30s is fine
+    enabled,
   });
 }
 
 // Personal saved-run history for the signed-in user (History tab). Distinct
 // from useLeaderboard, which is the global top-runs board.
-export function useMyRuns(limit = 25) {
+export function useMyRuns(limit = 25, enabled = true) {
   return useQuery({
     queryKey: ["my-runs", limit],
     queryFn: () => api.myRuns({ limit }),
     staleTime: 30_000,
+    enabled,
   });
 }
 

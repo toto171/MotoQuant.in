@@ -114,6 +114,9 @@ export function BuildPage() {
   const optimize = useOptimizeBuildJob();
   const [optBudget, setOptBudget] = useState(100000);
   const [optGoal, setOptGoal] = useState<"min_et" | "max_trap">("min_et");
+  // Outlaw = no budget limit; mirrors the web BuildOptimizer preset, which
+  // sends budget_inr: null (the server resolves null to its internal cap).
+  const [optOutlaw, setOptOutlaw] = useState(false);
   useEffect(() => {
     optimize.reset();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -465,12 +468,23 @@ export function BuildPage() {
               <IndianRupee className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-carbon-500" />
               <input
                 type="number" min={0} step={5000}
-                className="w-full bg-carbon-800 border border-carbon-700 rounded-md pl-8 pr-3 py-1.5 text-sm tabular-nums focus-visible:outline-2 focus-visible:outline-signal-500"
+                disabled={optOutlaw}
+                className="w-full bg-carbon-800 border border-carbon-700 rounded-md pl-8 pr-3 py-1.5 text-sm tabular-nums focus-visible:outline-2 focus-visible:outline-signal-500 disabled:opacity-40"
                 value={optBudget}
                 onChange={(e) => setOptBudget(Math.max(0, Number(e.target.value) || 0))}
               />
             </div>
           </label>
+          <button
+            onClick={() => setOptOutlaw((v) => !v)}
+            aria-pressed={optOutlaw}
+            className={clsx(
+              "w-full px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
+              optOutlaw ? "bg-signal-600 text-carbon-950" : "bg-carbon-800 text-carbon-400 hover:text-carbon-100",
+            )}
+          >
+            {optOutlaw ? "Outlaw — no limit (on)" : "Outlaw — no limit"}
+          </button>
           <div>
             <span className="text-[10px] uppercase tracking-wider text-carbon-500">Goal</span>
             <div className="mt-1 grid grid-cols-2 gap-2">
@@ -489,7 +503,7 @@ export function BuildPage() {
             </div>
           </div>
           <button
-            onClick={() => bike && optimize.run({ bike_id: bike.id, budget_inr: optBudget, goal: optGoal, max_candidates: 50 })}
+            onClick={() => bike && optimize.run({ bike_id: bike.id, budget_inr: optOutlaw ? null : optBudget, goal: optGoal, max_candidates: 50 })}
             disabled={!bike || optimize.isRunning}
             className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-signal-600 text-carbon-950 font-medium text-sm hover:bg-signal-500 disabled:opacity-50 transition-colors"
           >

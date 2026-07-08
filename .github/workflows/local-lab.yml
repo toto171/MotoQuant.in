@@ -1,0 +1,176 @@
+name: Local Lab build
+
+# Builds the MotoQuant Local Lab one-file executable (full engine + catalog
+# DB + surrogate + desktop UI static build) for Windows and Linux, smoke
+# tests each binary end-to-end, and publishes them as a `local-lab-r<N>`
+# prerelease. Internal operator stress-test tool — see local_lab/README.md.
+#
+# Manual trigger ONLY (workflow_dispatch): these binaries ship the full
+# catalog + engine, which the hosted-only architecture deliberately keeps
+# server-side. Never wire this to push/tag triggers.
+#
+# NOTE: tag is local-lab-r<run_number> on purpose — a v* tag would trigger
+# the retired desktop release pipeline (release.yml), which hard-fails.
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: local-lab-build
+  cancel-in-progress: true
+
+permissions:
+  contents: write   # needed by the release job (gh release create)
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact: MotoQuantLocalLab-windows-x64
+            binary: dist/MotoQuantLocalLab.exe
+          - os: ubuntu-latest
+            artifact: MotoQuantLocalLab-linux-x64
+            binary: dist/MotoQuantLocalLab
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+
+      - name: Build UI (Local Lab mode)
+        working-directory: desktop
+        env:
+          VITE_LOCAL_LAB: "1"
+        run: |
+          npm ci
+          npx tsc --noEmit
+          npx vite build
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-api.txt
+
+      - name: Install Python deps + PyInstaller
+        run: |
+          pip install -r requirements-api.txt pyinstaller
+
+      - name: Freeze binary
+        run: pyinstaller local_lab/motoquant-local-lab.spec --clean --noconfirm
+
+      - name: Smoke test (bash)
+        if: runner.os != 'Windows'
+        run: |
+          set -e
+          ./dist/MotoQuantLocalLab --no-browser --port 8901 --data-dir "$RUNNER_TEMP/mq-lab-data" &
+          LAB_PID=$!
+          trap 'kill $LAB_PID 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8901/api/health > /tmp/health.json; then break; fi
+            sleep 2
+          done
+          cat /tmp/health.json
+          python3 - <<'EOF'
+          import json
+          h = json.load(open("/tmp/health.json"))
+          assert h["status"] == "ok", h
+          assert h["bike_count"] >= 500, h  # full catalog shipped, not an empty DB
+          EOF
+          # Real physics through the frozen binary: quick sim on the K5
+          curl -sf -X POST http://127.0.0.1:8901/api/simulate/quick \
+            -H "Content-Type: application/json" \
+            -d '{"bike_preset": "gsxr1000_k5"}' > /tmp/sim.json
+          cat /tmp/sim.json
+          python3 - <<'EOF'
+          import json
+          s = json.load(open("/tmp/sim.json"))
+          et = s.get("time_quarter") or s.get("et_quarter_s")
+          assert et and 9.5 < float(et) < 10.5, s
+          EOF
+          # Static UI served same-origin with SPA fallback
+          curl -sf http://127.0.0.1:8901/ | grep -qi "<div id=\"root\"" || { echo "UI index missing"; exit 1; }
+          curl -sf http://127.0.0.1:8901/build | grep -qi "<div id=\"root\"" || { echo "SPA fallback broken"; exit 1; }
+          echo "Smoke test PASSED"
+
+      - name: Smoke test (PowerShell)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $proc = Start-Process -FilePath "dist/MotoQuantLocalLab.exe" `
+            -ArgumentList "--no-browser","--port","8901","--data-dir","$env:RUNNER_TEMP\mq-lab-data" `
+            -PassThru -NoNewWindow
+          try {
+            $health = $null
+            foreach ($i in 1..30) {
+              try {
+                $health = Invoke-RestMethod -Uri "http://127.0.0.1:8901/api/health" -TimeoutSec 5
+                break
+              } catch { Start-Sleep -Seconds 2 }
+            }
+            if (-not $health) { throw "engine never came up" }
+            Write-Host ($health | ConvertTo-Json -Compress)
+            if ($health.status -ne "ok") { throw "health not ok" }
+            if ($health.bike_count -lt 500) { throw "catalog missing: $($health.bike_count) bikes" }
+            $sim = Invoke-RestMethod -Uri "http://127.0.0.1:8901/api/simulate/quick" `
+              -Method Post -ContentType "application/json" `
+              -Body '{"bike_preset": "gsxr1000_k5"}'
+            Write-Host ($sim | ConvertTo-Json -Compress)
+            $et = if ($sim.time_quarter) { $sim.time_quarter } else { $sim.et_quarter_s }
+            if (-not $et -or $et -lt 9.5 -or $et -gt 10.5) { throw "implausible K5 ET: $et" }
+            $index = Invoke-WebRequest -Uri "http://127.0.0.1:8901/" -UseBasicParsing
+            if ($index.Content -notmatch '<div id="root"') { throw "UI index missing" }
+            $spa = Invoke-WebRequest -Uri "http://127.0.0.1:8901/build" -UseBasicParsing
+            if ($spa.Content -notmatch '<div id="root"') { throw "SPA fallback broken" }
+            Write-Host "Smoke test PASSED"
+          } finally {
+            Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+          }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.binary }}
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Package + create prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          mkdir -p out
+          mv "artifacts/MotoQuantLocalLab-windows-x64/MotoQuantLocalLab.exe" "out/MotoQuantLocalLab-windows-x64.exe"
+          mv "artifacts/MotoQuantLocalLab-linux-x64/MotoQuantLocalLab" "out/MotoQuantLocalLab-linux-x64"
+          chmod +x "out/MotoQuantLocalLab-linux-x64"
+          (cd out && sha256sum * > SHA256SUMS)
+          TAG="local-lab-r${{ github.run_number }}"
+          gh release create "$TAG" \
+            --target "${{ github.sha }}" \
+            --prerelease \
+            --title "MotoQuant Local Lab build r${{ github.run_number }}" \
+            --notes "Internal operator stress-test build — full engine + 541-bike catalog + desktop UI, running entirely on localhost. Do not distribute. Usage: local_lab/README.md. Windows: SmartScreen will warn on the unsigned exe — More info -> Run anyway." \
+            out/MotoQuantLocalLab-windows-x64.exe \
+            out/MotoQuantLocalLab-linux-x64 \
+            out/SHA256SUMS
+          echo "Release: $TAG"

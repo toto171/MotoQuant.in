@@ -51,6 +51,10 @@ let cachedBaseUrl: string | null = null;
 let baseUrlPromise: Promise<string> | null = null;
 
 const VITE_API_URL = import.meta.env.VITE_API_URL as string | undefined;
+// Local Lab build: the UI is served BY the local engine itself, so the API
+// is same-origin and the base URL is empty. Build-time constant — set via
+// `VITE_LOCAL_LAB=1 vite build` (see local_lab/README.md).
+export const LOCAL_LAB = import.meta.env.VITE_LOCAL_LAB === "1";
 // Hosted API. The packaged app gets this from the Rust get_backend_url command;
 // this constant is only the browser-dev / fallback default. NOT a localhost URL.
 const HOSTED_DEFAULT = "https://motoquant-api.onrender.com";
@@ -60,6 +64,7 @@ function isTauriRuntime(): boolean {
 }
 
 async function resolveBaseUrl(): Promise<string> {
+  if (LOCAL_LAB) return "";
   if (cachedBaseUrl) return cachedBaseUrl;
   if (baseUrlPromise) return baseUrlPromise;
 
@@ -515,6 +520,9 @@ export async function runJob<T>(
 
 // Exposed for dev-tool / about-dialog display only.
 export async function getResolvedBaseUrl(): Promise<string> {
+  if (LOCAL_LAB && typeof window !== "undefined") {
+    return `${window.location.origin} (local engine)`;
+  }
   return resolveBaseUrl();
 }
 

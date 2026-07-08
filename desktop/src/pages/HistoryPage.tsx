@@ -1,11 +1,31 @@
 import { History, Loader2, AlertTriangle } from "lucide-react";
-import { useMyRuns } from "@/hooks/useApi";
+import { useLeaderboard, useMyRuns } from "@/hooks/useApi";
+import { LOCAL_LAB } from "@/lib/api";
 import type { MyRun } from "@/types/api";
 
 export function HistoryPage() {
-  const runs = useMyRuns(50);
+  // Hosted builds show the signed-in user's personal runs (/api/me/runs,
+  // auth-gated). Local Lab has no accounts — the local DB's saved runs ARE
+  // this machine's history, surfaced via the public leaderboard route.
+  // LOCAL_LAB is a build-time constant, so exactly one query is ever live.
+  const myRuns = useMyRuns(50, !LOCAL_LAB);
+  const board = useLeaderboard(50, LOCAL_LAB);
 
-  const entries = runs.data?.runs ?? [];
+  const entries: MyRun[] = LOCAL_LAB
+    ? (board.data?.leaderboard ?? []).map((e) => ({
+        ...e,
+        et_eighth_s: null,
+        time_60ft_s: null,
+        notes: null,
+        venue: null,
+      }))
+    : (myRuns.data?.runs ?? []);
+  const count = LOCAL_LAB
+    ? (board.data?.total ?? entries.length)
+    : (myRuns.data?.count ?? entries.length);
+  const isPending = LOCAL_LAB ? board.isPending : myRuns.isPending;
+  const isError = LOCAL_LAB ? board.isError : myRuns.isError;
+  const errorMessage = LOCAL_LAB ? board.error?.message : myRuns.error?.message;
   const hasEntries = entries.length > 0;
 
   return (
@@ -14,8 +34,9 @@ export function HistoryPage() {
         <div>
           <h1 className="text-2xl font-semibold">Run history</h1>
           <p className="text-sm text-carbon-400 mt-1">
-            Your saved simulation runs, newest first. Save a run on the Simulate
-            tab and it'll show up here.
+            {LOCAL_LAB
+              ? "Runs saved on this machine, fastest first. Save a run on the Simulate tab and it'll show up here."
+              : "Your saved simulation runs, newest first. Save a run on the Simulate tab and it'll show up here."}
           </p>
         </div>
         {hasEntries && (
@@ -23,21 +44,19 @@ export function HistoryPage() {
             <div className="text-[10px] uppercase tracking-wider text-carbon-500">
               Saved runs
             </div>
-            <div className="text-xl font-semibold tabular-nums">
-              {runs.data?.count ?? entries.length}
-            </div>
+            <div className="text-xl font-semibold tabular-nums">{count}</div>
           </div>
         )}
       </header>
 
-      {runs.isPending && (
+      {isPending && (
         <div className="card p-10 flex items-center justify-center gap-3 text-carbon-400">
           <Loader2 className="w-5 h-5 animate-spin" />
           <span className="text-sm">Loading your runs…</span>
         </div>
       )}
 
-      {runs.isError && (
+      {isError && (
         <div className="card p-4 border-stop-500/40 bg-stop-500/5 flex gap-3">
           <AlertTriangle className="w-5 h-5 text-stop-500 shrink-0 mt-0.5" />
           <div>
@@ -45,13 +64,13 @@ export function HistoryPage() {
               Couldn't load your runs
             </div>
             <div className="text-xs text-carbon-400 mt-1">
-              {runs.error?.message || "Unknown error"}
+              {errorMessage || "Unknown error"}
             </div>
           </div>
         </div>
       )}
 
-      {!runs.isPending && !runs.isError && !hasEntries && (
+      {!isPending && !isError && !hasEntries && (
         <div className="card p-10 text-center text-carbon-500 flex flex-col items-center gap-3">
           <History className="w-8 h-8 text-carbon-600" />
           <div>No saved runs yet.</div>

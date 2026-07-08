@@ -14,6 +14,7 @@ import { ToastStack } from "@/components/Toast";
 import { KeyboardShortcutsModal } from "@/components/KeyboardShortcutsModal";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useAuth } from "@/contexts/AuthContext";
+import { LOCAL_LAB } from "@/lib/api";
 
 function AppInner() {
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
@@ -50,7 +51,13 @@ export function App() {
   // Whole-app auth gate: no simulator until the hosted server has issued a
   // valid session. The server is the license authority; the client only
   // presents credentials and reacts to its verdict.
+  // Local Lab builds skip the gate entirely — the engine runs on the
+  // operator's own machine, so there is no hosted license authority to ask.
   const { isAuthenticated, isLoading } = useAuth();
+
+  if (LOCAL_LAB) {
+    return <AppInner />;
+  }
 
   if (isLoading) {
     return (
