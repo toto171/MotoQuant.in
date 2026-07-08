@@ -1,0 +1,6 @@
+# build artifacts
+*.obj
+*.o
+*.exe
+# raw test captures (demo1.png / demo2.png are committed on purpose)
+shot*.png
