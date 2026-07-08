@@ -14,6 +14,16 @@ name: Local Lab build
 
 on:
   workflow_dispatch:
+  # BOOTSTRAP trigger: workflow_dispatch is only registered once this file
+  # lands on the default branch, so pre-merge builds are triggered by
+  # pushing THIS FILE on the PR branch. Scoped to this one branch + path —
+  # ordinary code pushes never rebuild. Inert after merge (branch deleted);
+  # safe to strip then.
+  push:
+    branches:
+      - claude/motoquant-language-migration-lxtn2g
+    paths:
+      - .github/workflows/local-lab.yml
 
 concurrency:
   group: local-lab-build
