@@ -156,3 +156,8 @@ TOKENS_UPDATE_*.md
 # Patch-tool droppings
 *.orig
 *.rej
+
+# ── Added 2026-07-08: Oracle Cloud migration prep ──
+# Deploy-time secrets for the Oracle VM (see .env.oracle.example) — lives
+# only on the VM, filled in from the template, never committed.
+.env.oracle

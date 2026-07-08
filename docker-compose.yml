@@ -1,0 +1,57 @@
+# MotoQuant Pro API — Oracle Cloud (Always Free Ampere A1) deployment.
+# See docs/ORACLE_MIGRATION.md for the full VM setup + cutover runbook.
+#
+# Reuses the existing root Dockerfile verbatim (same one Render/Railway build).
+# The only behavioural difference from the Render deploy: MOTOQUANT_DB points
+# at a bind-mounted volume instead of the baked image path, so
+# docker-entrypoint.sh's existing "seed the persistent disk once, then never
+# overwrite it" logic kicks in automatically — users/saved-runs/subscriptions
+# survive every `docker compose up --build` redeploy. No entrypoint changes
+# needed; that logic was already written for exactly this case (see the
+# comment block at the top of docker-entrypoint.sh).
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - MOTOQUANT_DB=/data/motoquant.db
+      - UVICORN_LOG_LEVEL=info
+      - MOTOQUANT_BILLING_ENFORCE=false
+    # Optional secrets (GEMINI_API_KEY, GROQ_API_KEY, SENTRY_DSN, JWT_SECRET,
+    # RAZORPAY_KEY_ID/SECRET, ...) — copy .env.oracle.example to .env.oracle
+    # on the VM and fill in real values. That file is gitignored; it never
+    # leaves the VM.
+    env_file:
+      - path: .env.oracle
+        required: false
+    volumes:
+      - motoquant-data:/data
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - api
+
+volumes:
+  motoquant-data:   # bind-mounted-equivalent named volume — the persistent DB
+  caddy-data:       # Caddy's ACME account + issued certs (survives redeploys)
+  caddy-config:

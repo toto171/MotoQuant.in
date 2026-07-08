@@ -1,0 +1,20 @@
+# MotoQuant Pro API — reverse proxy + automatic TLS (Let's Encrypt).
+# See docs/ORACLE_MIGRATION.md. Replace api.motoquant.in below if you pick a
+# different subdomain — it must match the DNS A record you point at the VM.
+
+api.motoquant.in {
+	reverse_proxy api:8000
+
+	encode gzip
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		X-XSS-Protection "1; mode=block"
+	}
+}
+
+# Before DNS is wired up, test straight over HTTP on the VM's public IP:
+#   curl http://<vm-ip>:8000/api/health
+# (that hits the api container directly, bypassing Caddy/TLS entirely — see
+# Step 4 of docs/ORACLE_MIGRATION.md).
