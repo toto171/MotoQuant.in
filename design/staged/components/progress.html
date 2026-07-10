@@ -1,0 +1,82 @@
+<!-- @dsCard group="Components" -->
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Progress</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"><style>
+:root{
+  --a0:#07090C; --a1:#0B0E13; --a2:#10141B; --a3:#171C25; --a4:#232A37;
+  --volt:#C9F231; --volt-b:#DBFF57; --volt-d:#9CBE1E;
+  --go:#34D97B; --stage:#FFB224; --foul:#FF5A48; --mint:#6FE3B2;
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.2);
+  --t1:#FFFFFF; --t2:rgba(255,255,255,.65); --t3:rgba(255,255,255,.4);
+}
+*{box-sizing:border-box}
+body{background:var(--a0);color:var(--t2);font-family:'Inter',system-ui,sans-serif;
+  margin:0;padding:28px;font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.disp{font-family:'Barlow Condensed','Arial Narrow',sans-serif;text-transform:uppercase;
+  color:var(--t1);letter-spacing:-.01em;line-height:.95}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.label{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;
+  text-transform:uppercase;letter-spacing:.25em;color:var(--t3)}
+.card{background:rgba(16,20,27,.8);border:1px solid var(--line);border-radius:12px;padding:20px}
+.dots{display:inline-flex;gap:5px;align-items:center}
+.dot{width:6px;height:6px;border-radius:99px}
+.dot-s{background:var(--stage)} .dot-g{background:var(--go)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;
+  padding:0 20px;border-radius:8px;font-family:'Barlow Condensed','Arial Narrow',sans-serif;
+  font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.06em;
+  border:1px solid transparent;cursor:pointer;background:none;color:var(--t1)}
+.btn-primary{background:var(--volt);color:#0B0D07}
+.btn-primary:hover{background:var(--volt-b)}
+.btn-ghost{border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.85)}
+.btn-ghost:hover{border-color:rgba(255,255,255,.3)}
+.btn-danger{border-color:rgba(255,90,72,.4);background:rgba(255,90,72,.1);color:var(--foul)}
+.btn-running{border-color:rgba(255,178,36,.4);background:rgba(255,178,36,.1);color:var(--stage)}
+.btn-sm{height:36px;padding:0 14px;font-size:13px}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.chip{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:4px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;
+  letter-spacing:.2em;border:1px solid var(--line);color:var(--t2)}
+.chip-volt{border-color:rgba(201,242,49,.35);background:rgba(201,242,49,.08);color:var(--volt)}
+.chip-go{border-color:rgba(52,217,123,.35);background:rgba(52,217,123,.08);color:var(--go)}
+.chip-stage{border-color:rgba(255,178,36,.35);background:rgba(255,178,36,.08);color:var(--stage)}
+.chip-foul{border-color:rgba(255,90,72,.35);background:rgba(255,90,72,.08);color:var(--foul)}
+.chip-mint{border-color:rgba(111,227,178,.35);background:rgba(111,227,178,.08);color:var(--mint)}
+.input{height:44px;width:100%;border-radius:8px;border:1px solid var(--line);
+  background:var(--a3);padding:0 14px;font-size:14px;color:var(--t1);outline:none;font-family:'Inter',sans-serif}
+.input:focus{border-color:rgba(201,242,49,.55);box-shadow:0 0 0 1px rgba(201,242,49,.35)}
+.timeslip{background:var(--a1);position:relative;padding:20px 22px;
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+.timeslip::before,.timeslip::after{content:'';position:absolute;left:0;right:0;height:1px;
+  background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.28) 0 6px,transparent 6px 12px)}
+.timeslip::before{top:0}.timeslip::after{bottom:0}
+.ts-row{display:flex;justify-content:space-between;padding:7px 0;
+  border-bottom:1px dashed rgba(255,255,255,.1);font-family:'JetBrains Mono',monospace;
+  font-size:13px;font-variant-numeric:tabular-nums}
+.ts-row:last-child{border-bottom:0}
+.centerline{height:1px;background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.15) 0 8px,transparent 8px 16px);margin:20px 0}
+.delta-down{color:var(--go)} .delta-up{color:var(--foul)}
+h3.section{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.25em;
+  text-transform:uppercase;color:var(--t3);font-weight:500;margin:26px 0 12px}
+h3.section:first-of-type{margin-top:0}
+</style></head>
+<body>
+<div style="max-width:440px">
+<h3 class="section">Determinate — job with live %</h3>
+<div class="card" style="padding:16px">
+  <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+    <span class="label" style="color:var(--stage)">Sweeping gearing</span>
+    <span class="mono" style="font-size:12px;color:var(--t1)">64%</span></div>
+  <div style="height:4px;border-radius:99px;background:var(--a4)">
+    <div style="height:4px;width:64%;border-radius:99px;background:var(--volt)"></div></div>
+</div>
+<h3 class="section">Staged — unknown duration</h3>
+<div class="card" style="padding:16px">
+  <div class="label" style="margin-bottom:8px;color:var(--stage)">Waking the simulation engine — free-tier cold start</div>
+  <div style="height:4px;border-radius:99px;background:var(--a4);overflow:hidden;position:relative">
+    <div style="position:absolute;height:4px;width:30%;left:20%;border-radius:99px;background:var(--volt);opacity:.8"></div></div>
+</div>
+<h3 class="section">Skeleton</h3>
+<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:10px">
+  <div style="height:12px;width:68%;border-radius:6px;background:rgba(255,255,255,.06)"></div><div style="height:12px;width:42%;border-radius:6px;background:rgba(255,255,255,.06)"></div><div style="height:12px;width:55%;border-radius:6px;background:rgba(255,255,255,.06)"></div>
+</div>
+</div>
+</body></html>

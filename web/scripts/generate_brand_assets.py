@@ -19,28 +19,62 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 # ----------------------------------------------------------------------------
-# Brand tokens (from web/tailwind.config.js)
+# Brand tokens (STAGED v4 — from web/tailwind.config.js / web/DESIGN.md)
+# Variable names kept from the v3 script so the 400 lines below need no edits:
+# "ORANGE" now carries the volt accent, "CARBON"/"INK_*" the asphalt scale.
 # ----------------------------------------------------------------------------
-ORANGE = "#FF5E1F"
-ORANGE_LIGHT = "#FF8F57"
-ORANGE_DEEP = "#CC4000"
-ACCENT_MINT = "#00FFB2"
-CARBON = "#0A0A0B"
-INK_2 = "#111113"
-INK_3 = "#1A1A1D"
-INK_4 = "#27272A"
+ORANGE = "#C9F231"          # accent volt
+ORANGE_LIGHT = "#DBFF57"    # accent bright
+ORANGE_DEEP = "#9CBE1E"     # accent deep
+ACCENT_MINT = "#6FE3B2"
+CARBON = "#07090C"          # asphalt-0
+INK_2 = "#10141B"           # asphalt-2
+INK_3 = "#171C25"           # asphalt-3
+INK_4 = "#232A37"           # asphalt-4
 WHITE = "#FFFFFF"
 WHITE_DIM = "#D4D4D7"
 WHITE_SUB = "#8A8A90"
 
-FONT_BOLD_IT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-BoldOblique.ttf"
-FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-FONT_COND_B = "/usr/share/fonts/truetype/dejavu/DejaVuSansCondensed-Bold.ttf"
-FONT_MONO_B = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
-FONT_MONO = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
-FONT_REGULAR = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+def _first_font(*candidates: str) -> str:
+    """Return the first font path that exists (containers vary in font sets)."""
+    for c in candidates:
+        if Path(c).exists():
+            return c
+    raise FileNotFoundError(f"No usable font among: {candidates}")
 
-OUT_DIR = Path("/sessions/charming-vigilant-ptolemy/mnt/Vehicle Dynamics/web/public")
+
+FONT_BOLD_IT = _first_font(
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-BoldOblique.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-BoldItalic.ttf",
+    "/usr/share/fonts/truetype/freefont/FreeSansBoldOblique.ttf",
+)
+FONT_BOLD = _first_font(
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+    "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",
+)
+FONT_COND_B = _first_font(
+    "/usr/share/fonts/truetype/dejavu/DejaVuSansCondensed-Bold.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSansNarrow-Bold.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+)
+FONT_MONO_B = _first_font(
+    "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationMono-Bold.ttf",
+    "/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf",
+)
+FONT_MONO = _first_font(
+    "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf",
+)
+FONT_REGULAR = _first_font(
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+)
+
+# Resolve relative to this script so the generator works from any checkout
+# (the old hardcoded sandbox mount path broke everywhere else).
+OUT_DIR = Path(__file__).resolve().parent.parent / "public"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -172,7 +206,7 @@ def render_og_image(path: Path) -> None:
     # Subtle carbon grid with orange accent lines at specific cols
     draw_grid(d, W, H, color=(255, 255, 255, 9), step=60)
     for x in (60, 300, 540, 720, 900, 1140):
-        d.line([(x, 0), (x, H)], fill=(255, 94, 31, 14), width=1)
+        d.line([(x, 0), (x, H)], fill=(201, 242, 49, 12), width=1)
 
     # Left rail — signal orange vertical accent
     d.rectangle([60, 90, 66, 540], fill=ORANGE)
@@ -220,17 +254,19 @@ def render_og_image(path: Path) -> None:
     sub_font = ImageFont.truetype(FONT_REGULAR, 20)
     d.text(
         (110, 338),
-        "Quarter-mile simulation  ·  ±0.07s accuracy",
+        "Quarter-mile simulation  ·  221 validated benchmarks",
         font=sub_font,
         fill=hex_rgba(WHITE_SUB, 255),
     )
 
-    # Stat strip — 4 stats (dropped 'tires' for horizontal budget)
+    # Stat strip — 4 stats (dropped 'tires' for horizontal budget).
+    # NOTE: scripts/audit_headline_stats.py --regen-og owns the live
+    # og-image.png; these values are the fallback and must track it.
     stats = [
-        ("327", "bikes"),
-        ("465", "parts"),
-        ("12", "venues"),
-        ("739", "tests"),
+        ("541", "bikes"),
+        ("593", "parts"),
+        ("20", "venues"),
+        ("4393", "tests"),
     ]
     stat_x = 110
     stat_y = 420
@@ -258,8 +294,8 @@ def render_og_image(path: Path) -> None:
     cdraw.rounded_rectangle(
         [card_x, card_y, card_x + card_w, card_y + card_h],
         radius=card_r,
-        fill=(17, 17, 19, 255),
-        outline=(255, 94, 31, 120),
+        fill=(16, 20, 27, 255),
+        outline=(201, 242, 49, 110),
         width=2,
     )
     img.paste(Image.alpha_composite(img.convert("RGBA"), card_bg).convert("RGB"))
@@ -324,7 +360,7 @@ def render_og_image(path: Path) -> None:
 
     # Fill under curve
     fill_poly = px + [(plot_x2, plot_y2), (plot_x1, plot_y2)]
-    d.polygon(fill_poly, fill=(255, 94, 31, 40))
+    d.polygon(fill_poly, fill=(201, 242, 49, 34))
 
     # Line
     for i in range(len(px) - 1):
@@ -341,7 +377,7 @@ def render_og_image(path: Path) -> None:
     while y < plot_y2:
         d.line(
             [(et_x, y), (et_x, min(y + dash_len, plot_y2))],
-            fill=(255, 94, 31, 200),
+            fill=(201, 242, 49, 200),
             width=1,
         )
         y += dash_len * 2
@@ -404,8 +440,8 @@ WEBMANIFEST = """{
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
-  "theme_color": "#FF5E1F",
-  "background_color": "#0A0A0B",
+  "theme_color": "#C9F231",
+  "background_color": "#07090C",
   "display": "standalone",
   "start_url": "/"
 }

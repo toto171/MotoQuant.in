@@ -1,59 +1,38 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/* ── Mobile horizontal-overflow safety net ───────────────────────────
-   User-reported bug (Apr 29): mobile screenshots showed the page wider
-   than the viewport, with content shifted left and clipped at edges.
-   Root cause was inside the hero centerpiece (page.js patch addresses
-   it) but this CSS-level guard catches any future overflow from any
-   absolutely-positioned glow / blur / decoration that might escape its
-   parent box. Doesn't disable vertical scroll. */
-html, body {
+
+/* ── STAGED design system (v4, July 2026) — see web/DESIGN.md ─────────────
+   Class NAMES are stable across redesigns (.card, .btn-primary/ghost/danger,
+   .input-base, …) so untouched content pages re-skin automatically.
+   Implementations are v4. */
+
+/* ── Mobile horizontal-overflow safety net (load-bearing since Apr 2026) ── */
+html,
+body {
   overflow-x: clip;
   max-width: 100vw;
 }
-
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: rgb(39, 39, 42);
+  background: #232a37;
   border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: #FF5E1F;
+  background: #9cbe1e;
 }
 
-::-moz-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-moz-scrollbar-track {
-  background: transparent;
-}
-
-::-moz-scrollbar-thumb {
-  background: rgb(39, 39, 42);
-  border-radius: 4px;
-}
-
-::-moz-scrollbar-thumb:hover {
-  background: #FF5E1F;
-}
-
-/* Text selection */
+/* Text selection — volt */
 ::selection {
-  background-color: rgba(255, 94, 31, 0.3);
+  background-color: rgba(201, 242, 49, 0.28);
   color: white;
 }
 
@@ -63,24 +42,21 @@ html {
 }
 
 body {
-  background-color: black;
+  background-color: #07090c;
   color: white;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
 
-/* ── Cockpit v3 component layer (July 2026 redesign) ──────────────────────
-   The shared surface + control vocabulary. Pages compose THESE instead of
-   re-inventing per-page button/card/input class strings. See web/REDESIGN.md.
-   Kept in @layer components so one-off Tailwind utilities can still override. */
 @layer components {
+  /* ── Surfaces ─────────────────────────────────────────────────────────── */
   .card {
-    @apply rounded-2xl border border-white/10 bg-ink-2/60;
+    @apply rounded-xl border border-white/[0.08] bg-asphalt-2/80;
   }
   .card-hover {
     @apply transition-[border-color,background-color,transform,box-shadow]
-      duration-200 hover:-translate-y-0.5 hover:border-white/25 hover:bg-ink-2
+      duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:bg-asphalt-2
       hover:shadow-[0_8px_30px_rgba(0,0,0,0.45)];
   }
   @media (prefers-reduced-motion: reduce) {
@@ -89,49 +65,51 @@ body {
     }
   }
 
+  /* ── Buttons — the ONE run/stop vocabulary sitewide ──────────────────── */
   .btn-primary {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl
-      bg-brand-orange px-5 font-display text-sm font-bold text-black
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-lg
+      bg-accent px-5 font-display text-[15px] font-bold uppercase
+      tracking-wide text-asphalt-0
       transition-all duration-200
-      hover:bg-brand-orangeLight hover:shadow-orange-soft
-      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/70
-      focus-visible:ring-offset-2 focus-visible:ring-offset-black
-      disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-brand-orange
+      hover:bg-accent-bright hover:shadow-volt-soft
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/70
+      focus-visible:ring-offset-2 focus-visible:ring-offset-asphalt-0
+      disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-accent
       disabled:hover:shadow-none;
   }
   .btn-ghost {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl
-      border border-white/15 bg-white/[0.03] px-5 font-display text-sm
-      font-semibold text-white/85 transition-colors duration-200
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-lg
+      border border-white/[0.12] bg-white/[0.03] px-5 font-display
+      text-[15px] font-semibold uppercase tracking-wide text-white/85
+      transition-colors duration-200
       hover:border-white/30 hover:text-white
       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40
-      focus-visible:ring-offset-2 focus-visible:ring-offset-black
+      focus-visible:ring-offset-2 focus-visible:ring-offset-asphalt-0
       disabled:cursor-not-allowed disabled:opacity-40;
   }
   .btn-danger {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl
-      border border-brand-red/40 bg-brand-red/10 px-5 font-display text-sm
-      font-semibold text-brand-red transition-colors duration-200
-      hover:border-brand-red/70 hover:bg-brand-red/20
-      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red/60
-      focus-visible:ring-offset-2 focus-visible:ring-offset-black
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-lg
+      border border-signal-foul/40 bg-signal-foul/10 px-5 font-display
+      text-[15px] font-semibold uppercase tracking-wide text-signal-foul
+      transition-colors duration-200
+      hover:border-signal-foul/70 hover:bg-signal-foul/20
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal-foul/60
+      focus-visible:ring-offset-2 focus-visible:ring-offset-asphalt-0
       disabled:cursor-not-allowed disabled:opacity-40;
   }
-  /* ActionButton's active state: a Stop control that carries its own
-     progress strip. Amber-tinted so "running" reads differently from idle. */
+  /* ActionButton's active state: amber = staged/running; hover flips to
+     foul red — the stop affordance. */
   .btn-running {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl
-      border border-brand-amber/40 bg-brand-amber/10 px-5 text-brand-amber
-      transition-colors duration-200 hover:border-brand-red/60 hover:text-brand-red
-      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-amber/60
-      focus-visible:ring-offset-2 focus-visible:ring-offset-black;
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-lg
+      border border-signal-stage/40 bg-signal-stage/10 px-5 text-signal-stage
+      transition-colors duration-200 hover:border-signal-foul/60 hover:text-signal-foul
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal-stage/60
+      focus-visible:ring-offset-2 focus-visible:ring-offset-asphalt-0;
   }
   .btn-sm {
-    @apply h-9 px-4 text-xs;
+    @apply h-9 px-4 text-[13px];
   }
-  /* Tactile press: every button compresses 2% under the pointer — the
-     cheapest physical micro-interaction there is. Disabled for
-     reduced-motion users. */
+  /* Tactile press — cheapest physical micro-interaction there is. */
   .btn-primary,
   .btn-ghost,
   .btn-danger,
@@ -147,17 +125,20 @@ body {
     }
   }
 
+  /* ── Inputs ───────────────────────────────────────────────────────────── */
   .input-base {
-    @apply h-11 w-full rounded-xl border border-white/10 bg-ink-3 px-3.5
+    @apply h-11 w-full rounded-lg border border-white/[0.08] bg-asphalt-3 px-3.5
       text-sm text-white placeholder:text-white/30
-      focus:border-brand-orange/60 focus:outline-none
-      focus:ring-1 focus:ring-brand-orange/40;
+      focus:border-accent/60 focus:outline-none
+      focus:ring-1 focus:ring-accent/40;
   }
 
+  /* ── Label voice ──────────────────────────────────────────────────────── */
   .label-mono {
     @apply font-mono text-[10px] font-medium uppercase tracking-[0.25em] text-white/45;
   }
 
+  /* ── Skeleton shimmer ─────────────────────────────────────────────────── */
   .skeleton {
     @apply relative overflow-hidden rounded-lg bg-white/[0.06];
   }
@@ -179,6 +160,86 @@ body {
       animation: none;
     }
   }
+
+  /* ── v4: Timeslip — the signature result surface ─────────────────────────
+     Perforated (dashed) top & bottom edges like the printed slip from the
+     timing booth. Compose rows with .timeslip-row. */
+  .timeslip {
+    @apply relative border-x border-white/[0.08] bg-asphalt-1 px-5 py-5;
+  }
+  .timeslip::before,
+  .timeslip::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-image: repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.28) 0 6px,
+      transparent 6px 12px
+    );
+  }
+  .timeslip::before {
+    top: 0;
+  }
+  .timeslip::after {
+    bottom: 0;
+  }
+  .timeslip-row {
+    @apply flex items-baseline justify-between border-b border-dashed
+      border-white/10 py-2 font-mono text-sm tabular-nums;
+  }
+  .timeslip-row:last-child {
+    @apply border-b-0;
+  }
+
+  /* ── v4: Chips — small mono status/meta pills ────────────────────────── */
+  .chip {
+    @apply inline-flex h-6 items-center gap-1 rounded border border-white/[0.12]
+      px-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/65;
+  }
+  .chip-volt {
+    @apply border-accent/35 bg-accent/[0.08] text-accent;
+  }
+  .chip-go {
+    @apply border-signal-go/35 bg-signal-go/[0.08] text-signal-go;
+  }
+  .chip-stage {
+    @apply border-signal-stage/35 bg-signal-stage/[0.08] text-signal-stage;
+  }
+  .chip-foul {
+    @apply border-signal-foul/35 bg-signal-foul/[0.08] text-signal-foul;
+  }
+  .chip-mint {
+    @apply border-mint/35 bg-mint/[0.08] text-mint;
+  }
+
+  /* ── v4: Delta chips — ET sign convention: negative = faster = green ── */
+  .delta-down {
+    @apply font-mono tabular-nums text-signal-go;
+  }
+  .delta-up {
+    @apply font-mono tabular-nums text-signal-foul;
+  }
+
+  /* ── v4: Centerline — the strip's dashed centerline as a divider ─────── */
+  .centerline {
+    @apply h-px w-full;
+    background-image: repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.15) 0 8px,
+      transparent 8px 16px
+    );
+  }
+  .centerline-v {
+    @apply w-px;
+    background-image: repeating-linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.07) 0 10px,
+      transparent 10px 22px
+    );
+  }
 }
 
 @keyframes mq-shimmer {
@@ -189,51 +250,69 @@ body {
 
 /* Utility classes */
 @layer utilities {
+  /* legacy name — now a volt gradient (blog/content compatibility) */
+  .text-gradient-orange {
+    @apply bg-gradient-to-br from-accent-bright via-accent to-accent-deep bg-clip-text text-transparent;
+  }
+  .text-gradient-volt {
+    @apply bg-gradient-to-br from-accent-bright via-accent to-accent-deep bg-clip-text text-transparent;
+  }
+
+  .glow-orange {
+    box-shadow: 0 0 32px rgba(201, 242, 49, 0.22), 0 0 64px rgba(201, 242, 49, 0.08);
+  }
+
+  .glass {
+    @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.08];
+  }
+
+  /* kept for any legacy usage; v4 pages do not mount a grain overlay */
   .grain {
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 50;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    opacity: 0.05;
+    opacity: 0.04;
     mix-blend-mode: overlay;
   }
-
-  .text-gradient-orange {
-    @apply bg-gradient-to-br from-brand-orangeLight via-brand-orange to-brand-orangeDeep bg-clip-text text-transparent;
-  }
-
-  .glow-orange {
-    box-shadow: 0 0 40px rgba(255, 94, 31, 0.25), 0 0 80px rgba(255, 94, 31, 0.1);
-  }
-
-  .glass {
-    @apply bg-white/[0.03] backdrop-blur-xl border border-white/10;
-  }
-
 }
 
-/* ── CodeComment blinking cursor (signature identity pass, Jun 2026) ── */
+/* ── CodeComment label line (kept API — v4 renders as label voice) ── */
 @keyframes cc-blink {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0; }
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
 }
 .cc-cursor {
   display: inline-block;
   animation: cc-blink 1.1s step-end infinite;
 }
 @media (prefers-reduced-motion: reduce) {
-  .cc-cursor { animation: none; }
+  .cc-cursor {
+    animation: none;
+  }
 }
 
-/* ── Route entrance fade (signature identity pass, Jun 2026) ── */
+/* ── Route entrance fade (opacity-only by contract — see app/template.js) ── */
 @keyframes route-fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 .route-fade {
   animation: route-fade-in 0.4s ease-out both;
 }
 @media (prefers-reduced-motion: reduce) {
-  .route-fade { animation: none; }
+  .route-fade {
+    animation: none;
+  }
 }

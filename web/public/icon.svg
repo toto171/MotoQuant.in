@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="MotoQuant">
   <title>MotoQuant</title>
-  <rect x="0" y="0" width="64" height="64" rx="14" ry="14" fill="#0A0A0B"/>
+  <rect x="0" y="0" width="64" height="64" rx="14" ry="14" fill="#07090C"/>
   <!-- drag-strip bar -->
-  <rect x="14" y="53" width="36" height="3.2" fill="#FF5E1F"/>
+  <rect x="14" y="53" width="36" height="3.2" fill="#C9F231"/>
   <!-- bold italic M -->
   <text x="32" y="43"
         font-family="'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif"
@@ -10,6 +10,6 @@
         font-style="italic"
         font-size="50"
         text-anchor="middle"
-        fill="#FF5E1F"
+        fill="#C9F231"
         letter-spacing="-1">M</text>
 </svg>

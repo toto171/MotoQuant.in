@@ -782,13 +782,15 @@ def regenerate_og_card(truth, output_path: Path | None = None, verbose=True) -> 
     out_path = output_path or OG_IMAGE_PATH
 
     W, H = 1200, 630
-    BG = (10, 10, 12)  # near-black
-    PANEL = (20, 20, 24)
-    BORDER = (40, 40, 48)
+    # STAGED v4 brand (July 2026, see web/DESIGN.md): asphalt surfaces +
+    # volt accent. Variable names kept so the layout code below is untouched.
+    BG = (7, 9, 12)  # asphalt-0
+    PANEL = (16, 20, 27)  # asphalt-2
+    BORDER = (35, 42, 55)  # asphalt-4
     TEXT = (240, 240, 240)
     DIM = (140, 140, 150)
-    ORANGE = (255, 122, 0)  # signal orange
-    GREEN = (32, 200, 110)
+    ORANGE = (201, 242, 49)  # accent volt
+    GREEN = (52, 217, 123)  # signal-go
 
     img = Image.new("RGB", (W, H), BG)
     d = ImageDraw.Draw(img)

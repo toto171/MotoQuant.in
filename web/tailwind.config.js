@@ -1,4 +1,39 @@
 /** @type {import('tailwindcss').Config} */
+//
+// STAGED design system (v4, July 2026) — see web/DESIGN.md.
+//
+// Token model:
+//   asphalt-*  surfaces (blue-cast near-black)
+//   accent     volt — THE brand color (primary actions, one detail/viewport)
+//   signal-*   go / stage / foul — state only, never decoration
+//   mint       PRO/Studio tier chips only
+//
+// `ink-*` and `brand-*` are LEGACY ALIASES pointing at the new palette so the
+// ~50 untouched blog/content pages re-skin without churn. New code must use
+// the v4 names — the aliases exist for compatibility, not for new work.
+
+const asphalt = {
+  0: '#07090C',
+  1: '#0B0E13',
+  2: '#10141B',
+  3: '#171C25',
+  4: '#232A37',
+};
+
+const accent = {
+  DEFAULT: '#C9F231',
+  bright: '#DBFF57',
+  deep: '#9CBE1E',
+};
+
+const signal = {
+  go: '#34D97B',
+  stage: '#FFB224',
+  foul: '#FF5A48',
+};
+
+const mint = '#6FE3B2';
+
 module.exports = {
   content: [
     './app/**/*.{js,ts,jsx,tsx,mdx}',
@@ -8,32 +43,29 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
-        display: ['var(--font-space-grotesk)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-display)', 'Arial Narrow', 'system-ui', 'sans-serif'],
         mono: ['var(--font-jetbrains-mono)', 'ui-monospace', 'monospace'],
       },
       colors: {
+        asphalt,
+        accent,
+        signal,
+        mint,
+        // ── legacy aliases (blog/content compatibility — do not use in new code)
+        ink: asphalt,
         brand: {
-          orange: '#FF5E1F',
-          orangeLight: '#FF8F57',
-          orangeDeep: '#CC4000',
-          accent: '#00FFB2',
-          green: '#22C55E',
-          greenGlow: '#16A34A',
-          amber: '#F59E0B',
-          red: '#EF4444',
-        },
-        ink: {
-          0: '#000000',
-          1: '#0A0A0B',
-          2: '#111113',
-          3: '#1A1A1D',
-          4: '#27272A',
+          orange: accent.DEFAULT,
+          orangeLight: accent.bright,
+          orangeDeep: accent.deep,
+          accent: mint,
+          green: signal.go,
+          greenGlow: signal.go,
+          amber: signal.stage,
+          red: signal.foul,
         },
       },
       keyframes: {
-        // opacity-only on purpose: this used to be filter:brightness(), which
-        // forces a per-frame re-raster of the lamp + its box-shadow glow on
-        // every GPU tier (8 lamps x 60fps). Opacity runs on the compositor.
+        // opacity-only on purpose: compositor-friendly on every GPU tier.
         'lamp-pulse': {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.72' },
@@ -42,20 +74,25 @@ module.exports = {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.4' },
         },
+        // StageDots one-shot light-up (amber → amber → green), driven by
+        // per-dot animation-delay. Opacity only.
+        'stage-light': {
+          from: { opacity: '0.25' },
+          to: { opacity: '1' },
+        },
       },
       animation: {
         'lamp-pulse': 'lamp-pulse 1.6s ease-in-out infinite',
         'live-pulse': 'live-pulse 1.4s ease-in-out infinite',
-      },
-      backgroundImage: {
-        'grid-fade': 'radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,1) 70%), linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)',
-        'tree-glow': 'radial-gradient(circle at 50% 50%, rgba(34,197,94,0.30) 0%, rgba(34,197,94,0) 70%)',
+        'stage-light': 'stage-light 0.3s ease-out both',
       },
       boxShadow: {
-        'lamp-amber': '0 0 28px rgba(245,158,11,0.7), inset 0 4px 10px rgba(0,0,0,0.3)',
-        'lamp-green': '0 0 36px rgba(34,197,94,0.85), inset 0 4px 10px rgba(0,0,0,0.3)',
-        'lamp-red':   '0 0 28px rgba(239,68,68,0.7),  inset 0 4px 10px rgba(0,0,0,0.3)',
-        'orange-soft': '0 0 40px rgba(255,94,31,0.25), 0 0 80px rgba(255,94,31,0.10)',
+        'lamp-amber': '0 0 20px rgba(255,178,36,0.55)',
+        'lamp-green': '0 0 24px rgba(52,217,123,0.65)',
+        'lamp-red': '0 0 20px rgba(255,90,72,0.55)',
+        // legacy name — now a volt glow (used by .btn-primary hover)
+        'orange-soft': '0 0 32px rgba(201,242,49,0.22), 0 0 64px rgba(201,242,49,0.08)',
+        'volt-soft': '0 0 32px rgba(201,242,49,0.22), 0 0 64px rgba(201,242,49,0.08)',
       },
     },
   },
