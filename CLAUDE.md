@@ -1,6 +1,8 @@
 # MotoQuant Pro — Persistent Project Context
 > Read this file at the start of every session. It is the single source of truth for project state, roadmap, and working instructions.
+> **Standing doc-system note (July 10, 2026):** Since PR #100, the short **model-agnostic working contract lives in `AGENTS.md`** (prime directive, the `make` loop, non-negotiable rules) — read it FIRST, then the top `Last updated:` entry here. Supporting system: `docs/ARCHITECTURE.md` (module map + data-flow diagram — the fastest "where does X live?"), `docs/INVARIANTS.md` (what must never break + the gate enforcing each), `docs/KNOWN_TRAPS.md` (recurring-bug map), `docs/ONBOARDING.md`, `docs/adr/` (settled decisions — do not re-litigate), `docs/ROADMAP.md`, `CHANGELOG.md` (milestone history), `docs/README.md` (index). The `Makefile` mirrors CI exactly: `make health` → work → `make check` → `make test`. This file remains the session-by-session changelog + deep context; per AGENTS.md rule 7, edits here are surgical prepends, never rewrites.
 > **Standing infra note (May 31, 2026):** Production backend MIGRATED Railway -> **Render free tier** (`motoquant-api.onrender.com`, Singapore, Docker via `render.yaml`, blueprint `motoquant-api`, service `srv-d8di5t4m0tmc73dvq39g`). Railway is abandoned (trial lapsed, no card). Vercel still serves the frontend (`motoquant.in`); the browser reaches the API via Vercel env var `NEXT_PUBLIC_API_URL` (= the Render URL) plus the `/api/*` rewrite in `web/next.config.js` + root `vercel.json` (both point at Render). Keep-alive cron `.github/workflows/keepalive.yml` pings `/api/health` every 14 min (UTC 0-18) to dodge the free-tier 15-min cold-start. `scripts/session_postflight.sh` deploy-verify polls the Render health URL (90s timeout for cold starts). Simulator client fetches bikes/parts/tires at `limit=2000`; API caps raised to `le=5000`. Stale "Railway" strings in old reports/logs are historical. Cutover + rollback runbook: `docs/RENDER_MIGRATION.md`.
+> Last updated: July 10, 2026 (CLAUDE.md DOCS-SYNC — claude-fable-5 remote session on `claude/claude-md-docs-90v7g5`) — **Structural sections of this file synced to the live tree** (they had drifted to April-22 state): CURRENT STATE re-snapshotted to July 10 (541 bikes / 593 parts / 254 tires / 1,860 fitments / 20 venues / 221 benchmarks / ~4,324 tests / weighted |d| 0.2165s verified against motoquant.db + CHANGELOG), REPOSITORY STRUCTURE tree rebuilt (app.py/Streamlit gone; llm/, analysis/, jobs.py, auth/payments/subscriptions/usage/ratelimit, category_profiles.py, web/, scripts/, docs/ now shown), CLI reference completed (calibrate/nl/chat subcommands), DEVELOPMENT WORKFLOW rewritten around the Makefile, physics quick-ref corrected (max_time 26s; exact pinned baselines), NOTES FOR FUTURE SELF refreshed, and the new standing doc-system note added at the top pointing to AGENTS.md + docs/. **Also recorded here for the chain (they post-date the July-6 entry and wrote CHANGELOG.md instead of this file, per the new convention): PR #99 (2026-07-06, security & navigability — chat web_fetch SSRF redirect-hop revalidation, rightmost-XFF rate-limit/quota keying, JWT default-secret boot guard under billing, job-pool starvation fix, bounded sim params + safe pagination, NEW docs/ARCHITECTURE.md; suite 4324 passed), PR #100 (2026-07-06, durability milestone — NEW AGENTS.md contract, Makefile mirroring CI, scripts/check_baselines.py + scripts/health_check.py, docs/INVARIANTS.md + KNOWN_TRAPS.md + ROADMAP.md, ADRs 0002–0005 (pinned baselines / no-Numba / SQLite-until-scale / desktop discontinued), .pre-commit-config.yaml, CI secret-scan gate, .github/copilot-instructions.md, final security sweep; magic-link token-leak + atomicity fixes, busy_timeout + eviction hardening, 422-not-500 degenerate-distance fix, citation-link XSS + login open-redirect fixes, least-privilege CI perms), PR #101 (2026-07-08, audit cleanup — row_conn() centralised row-factory connections, single client-IP derivation shared by rate-limit + quota, dead-param removal in analysis).** No physics, catalog, or web changes this session — docs only; baselines untouched by construction. Previous:
 > Last updated: July 6, 2026 (STRESS-TEST + FULL-CORPUS ACCURACY OVERHAUL -- operator-directed 'scrap the 3-bike baseline, dedupe part titles, make compatibility precise, fix everything'; claude-fable-5 remote session, 4 subagents; shipped on `claude/motoquant-stress-test-accuracy-f7mtx0`, PR #98) -- **THE 3-BIKE BASELINE PIN IS RETIRED as a tuning constraint.** References still sim 10.0334/10.2859/10.4712 (their cluster was already centered -- nothing froze them) but the drift guard is now the full-catalog regression golden and the tuning objective is the FULL weighted benchmark corpus via NEW `scripts/tune_cluster_knobs.py` (per-cluster grid evaluation, mp.Pool, reproduces the published sweep byte-exact). **Fresh authoritative sweep: 246 matched / weighted |d| 0.2418 -> 0.2165s (-10.4%) / bias -0.0247 -> +0.0212 (`reports/acc_final_2026_07_06.json`).** **ROOT CAUSE OF THE PLATEAU: engine character, not displacement** -- the residual table split by cylinders showed twins simming FAST (bias -0.20 within 600-1100 sport, w=28), 300-500 singles FAST (-0.33), sub-500 I4 screamers +1.1s SLOW, while I4s>=600 and triples were centered. **TAXONOMY v2**: `derive_category_tag` gained a `cylinders` kwarg (None reproduces July-3 behaviour bit-exact, pinned) + 3 new clusters -- `sport_twin_600_1300` (42 matched, placed BEFORE the 195hp gate so Panigale 1199 routes here; mu_peak_override=1.31 is the ONE live knob, parasitic dead because the benchmarked twins carry at-wheel curves; w|d| 0.262->0.187, bias +0.002), `single_300_500` (synthetic-curve tail x1.05 now CYLINDER-AWARE in defaults.py -- 30-60hp singles keep spec-honest 1.00, twins keep 1.05 -- plus mu 1.10 for Indian OEM rubber; bias -0.33->-0.046), `small_i4_screamer` (ZX-4RR/ZX-25R were misfiled with commuter twins; decel=2800 single-knob fit on n=2 by design; bias +0.78->+0.09). Knob-only re-centers: mid_twin_300_500 twins decel 50->150, cruiser oc 0.6/decel 1100 (saturates -- residual +0.23 not launch-reachable), 2T decel 1800, other oc 0.40/decel 1000. `cluster_for` now DELEGATES to derive_category_tag -- ONE taxonomy source of truth (was hand-mirrored in 2 files); all sweep/viz/surrogate callers pass cylinders. test_profile_knobs' inert-knob guard consciously updated to pin the two armed mu values. **BENCHMARK HYGIENE (web-verified, honest-data rules)**: RG500 11.60/180 -> 11.37@193 (Cycle 12/1985 -- old trap was a transcription error), NS200 relabelled '(site estimate)', 3 exact-dup rows REMOVED (ZX-10R 2006/2008 double-adds + a ZX-6R 2024 aggregator row that SHADOWED the July-4 instrumented row, silently downgrading its weight 1.0->0.5); corpus 224->221 unique, 246 matched unchanged; 10 outliers verified-and-left (H2 SX SE+/Bandit/R nineT/Z400/VFR800F... sources confirmed = honest model error; RE Classic 350 DERIVED kept but noted Autocar's instrumented 0-100 is 16.23s so its ~14s premise is doubly unreliable). **REFERENCE DB ROWS FIXED (the July-4 'known pre-existing')**: ids 1/2/3 carried category_tag=NULL (excluded from reseed so schema-v6 stamping never reached them) -- runtime derivation put the 1299cc/173hp Hayabusa in 'other' with an over-clutch launch, making /api/simulate?bike_id=3 ~0.36s fast; `patch_2026_07_06_reference_configs.py` stamps litre_sport_195p (K5/R1 delta vs defaults is the DOCUMENTED Aamby-vs-sea-level env, by design -- see bridge docstring). **CATALOG PRECISION (-3,684 impossible pairs, 56,889->53,205)**: 15 belt/shaft/CVT bikes' phantom chain pitches nulled AND fixed at importer source (_BELT_DRIVE_MAKES matched NOTHING since the June-13 'Indian Motorcycle'->'Indian' merge; R 1300/R 12, V100, Rocket 3, FJR1300, Tiger 1200, Aerox CVT added; FTR 1200 kept chain via _INDIAN_CHAIN_MODELS) -- patch reports 0 changes after full reseed, fold PROVEN; 27 EFI/electronic parts stroke_type-gated (quickshifters were matching 1970s drum-shift 2-strokes); Zeeltronic YPVS year_min=1983 -> exactly RD500LC/RZV500R/TZR250 (required RD500LC/RZV500R cylinder_config I4->V4 + importer V4 tokens); model-name leaks category/year-gated (GSX-R1000-named excluded from GSX-S/Katana, R1 flashes off the carbureted FZR1000, gen-coded K5/K7/4C8 flashes year-pinned via EXISTING FitmentMatch year support, Hayabusa slip-on/swingarm off the B-King, MTC lockup 99-21 correctly excludes Gen3); P183/P194/P195/P501 renamed to honest class names; 8 ClutchCo SKUs displacement-banded (was 8x414 bikes stacking optimizer pools, now max 2/bike); Walbro dup merged (594->593); KTM 1390 I2->V2 + GSX-S1000GT ->sport_touring + RTR 310 ->naked; NEW idempotent `patch_2026_07_06_catalog_integrity.py` + 62 production-path tests; honest residual leaks documented in the agent report (Exciter 155 VVA shares the R15 engine, M 1000 XR stored 'sport', carb Pulsar 200 bolt-ons deliberate). **TIRE DEDUP (the operator's 'duplicate titles')**: 6 notation-twin rows merged ('100/90-17' vs '100/90R17' -- MRF Zapper x3, IRC GP-110, Bridgestone Battlax x2; `patch_2026_07_06_tire_dedup.py`); `TireRepository.create` + drag seeder now match on NORMALIZED physical size (new `normalize_size_designation`); web tire pickers now RENDER THE SIZE -- the real complaint was 'Pilot Power 3' in 3 sizes displaying as 3 identical rows; `tests/test_tire_integrity.py` pins no-dupes + normalization. **API HYGIENE (stress: 60 ops x 190 checks, ZERO 500s)**: autotune/optimize re-raise 404 (was '404:...' leaked in a 400), limit ge=1/offset ge=0 on list routes (limit=-5 returned the whole table), save-run ET/trap Field bounds (negative ETs were persistable to the leaderboard); +13 API tests. **ET-DELTA SIGN UNIFICATION (operator follow-up, same session)**: optimizer/autotune showed improvements as '+0.134s' — build_optimizer delta_et_s was base-optimized and ecu_autotune stock-tuned (positive=faster) while /api/simulate/quick + outlaw + CLI --impact were after-before (negative=faster); desktop BuildPage even hand-flipped the sign and desktop AutotunePage colored improvements WRONG. Public delta_et_s now = after-before EVERYWHERE (negative = faster; -0.0 normalized; internal PartROIResult/knapsack gain semantics untouched; *_gain_s fields stay positive-good on the wire, rendered as ET cuts); web BuildOptimizer/EcuAutotune/ChatPanel tones flipped (negative=green), trap keeps positive=faster tone, desktop unflipped + types annotated; sign-pin tests updated; PROVEN consistent live: optimizer part delta == quick-sim et_delta_s == -0.1001 for the same part. **DESKTOP APP SCRAPPED (operator decision, same session)**: Phase 5 discontinued — hosted web is the product; roadmap/progress scrubbed sitewide (about roadmap entry removed, features 05/Desktop section deleted + sections renumbered, pricing seat row + offline-FAQ removed, getting-started Option B deleted, terms section 4 -> 'License Keys', privacy Device-ID row reworded, account 'desktop seats' -> 'device seats'), README download section + badge removed + Phase 5 marked discontinued, INSTALL/RELEASE.md deprecation-bannered, FAQ/ONBOARDING synced; desktop/ scaffold + CI typecheck kept in-tree for reference; license keys survive as device-bound seats. **ARTIFACTS**: full reseed (541 rows re-stamped taxonomy v2), golden regenerated BOTH tiers, surrogate v2.4 full regen (9,126 sims, cluster-stratified on v2 taxonomy; ET MAE 89.2ms RMSE 191.6ms R2 0.9954 -- RMSE HALVED vs v2.3 and the Hayabusa preset's documented -0.307 structural outlier RESOLVED to -0.057 by the reference-row fix; 541/541 stock in-envelope), `/validation` viz data regenerated (within +/-0.10s 62->82, +/-0.20s 113->137, top-10 +/-0.0065s), sitewide fact sync + OG regen. **VERIFICATION**: full pytest green, ruff check+format clean, next build 76/76, Vercel preview green, patch idempotency proven x2. **OPERATOR NOTES**: (1) prod DB deploy ships the patched motoquant.db -- no manual patch run needed, but ANY future reseed chain must include the 3 July-6 patch scripts (all idempotent); (2) the sweep corpus count on the site is now 221 benchmarks -- the 224 figure included the 3 dups. Previous:
 > Last updated: July 4, 2026 (SCOPING -> FULL-SCOPE MULTI-AGENT SESSION -- operator-directed, 'do it all, no limits'; ~11 waves, 16 subagents; shipped on `claude/session-scope-planning-w874bq`, PR #97) -- **Baselines K5 10.0334 / R1 10.2859 / Hayabusa 10.4712 EXACT at every checkpoint; fresh weighted sweep |d| 0.2418s / bias -0.0247s / 246 matched (`reports/acc_final_2026_07_04.json`).** Session began as a verified roadmap SCOPING pass (4-cluster Explore workflow found the July-3 ROADMAP carried stale/done items), then the operator green-lit the full scope. **CATALOG 535->541**: +6 web-verified China/geared bikes (Kove 800X, Kove 450 Rally single, QJ SRK 921 I4, Zontes 703F I3, Benda Chinchilla 500 V2-belt, CFMoto 800MT; `known_bikes_2026_china.py`; 0 fabrication; class-plausible ETs; CVT maxi-scooters SKIPPED -- geared physics can't model them) + a MotoStatz ZX-6R-2024 benchmark (benchmarks 223->224). **SHAFT/BELT final-drive ratios** corrected in importer.py (Rocket 3 2.846, V85 3.29, K1300S/K1600 -> VERIFIED; HD/Indian belt bikes already carried real pulley counts) + full reseed (0 errors; only shaft/belt DB-path ETs move; chain baselines byte-identical). **VINTAGE-2T OEM fitments** for the last 3 zero-fitment bikes (GT750/H2 Mach IV/Yezdi 250; tires 257->260, fitments ->1860). **SEED-SOURCE FOLD** (A3-15): a fresh seed_all() no longer resurrects patched leaks -- supersport/commuter/tier-model/chain_pitch fixes folded into seed.py+seed_catalogs, pinned by NEW tests/test_seed_integrity.py (12); one ZX-10R<->H2 exclusion left as the patch script's job (hardcodes prod ids, can't fold losslessly -- documented). **VALIDATOR** now accepts Indian bias-ply '100/80-17' (A3-19). **ROI**: brake/suspension slot exclusivity so the knapsack can't stack two forks/pad-sets (A4-28, mirrors _sprocket_positions). **SWEEP** source-weight unified onto one classifier, PROVEN zero headline drift over 190 sources (A4-27). **REVENUE**: /api/optimize/build + /api/autotune/ecu (+job variants) tier-gated to 'pro' (INERT until MOTOQUANT_BILLING_ENFORCE) (A1-1); GST-invoice copy softened to provider-native (A1-4). **RETIRED Streamlit** app.py + all fallout (Dockerfile COPY -- would've broken the Render build -- pyproject, FAQ, env, issue template, CONTRIBUTING); deleted orphan bulk_scrape.py. **REGRESSION GUARD** completed 35->541 bikes (slow tier MOTOQUANT_SLOW_TESTS=1 re-sims every current bike via db_row_to_config; golden regenerated) -- supersedes the partial PR #87. **CI** gained a non-blocking coverage signal (pytest-cov + xml artifact). **PLAYWRIGHT** landing->quick-sim smoke harness committed self-contained under e2e/ (manual-trigger workflow only, can't red a PR) -- closes the 'harness lives in scratchpad' gap. **SURROGATE v2.3** full-regen for 541 bikes (9,094 sims, 541/541 in-envelope incl. all 6 new; ET MAE 87.7ms R2 0.985; surrogate_numpy.npz retrained, v2_2 backed up). **CHAT**: regression test pinning the Groq tool_use_failed salvage against the exact prod Sentry event (MOTOQUANT-API-1, already fixed in #92). **ACCURACY VIZ + SITEWIDE FACT SWEEP** (operator: 'recalc + display nicely; nothing outdated; stress-test; fix issues'): NEW flagship `/validation` page (`web/components/AccuracyExplorer.js` -- real-vs-sim scatter with source-confidence-encoded opacity + y=x diagonal + 0.2s band, distribution tiles, diverging residual histogram, per-cluster status bars, best-predictions table, honest DERIVED caveat; data from `scripts/gen_accuracy_viz_data.py`; next build 76/76); accuracy numbers reconciled sitewide (223->224, top-10 +/-0.009->+/-0.008s, bias -0.026->-0.025s, a 40->39 fix); stale CATALOG COUNTS swept across ~30 files (501->541 bikes, 563->594 parts, 232/257->260 tires, 1253->1860 fitments, an impossible '790+' claim) + audit_headline_stats.py EXTENDED to catch the missed phrasings. **STRESS-TEST clean**: full suite 4218 passed / 91 skipped / 0 failed; every endpoint + all 6 new bikes + chat tools + jobs verified; tier-gating confirmed inert. **KNOWN PRE-EXISTING (flagged, NOT fixed -- delicate)**: the 3 reference bikes' DB configs (id 1/2/3) diverge from the hand-curated defaults.py, so /api/simulate?bike_id=1 returns ~10.18s vs the advertised K5 10.0334s -- they're intentionally excluded from reseed; a fix means rewriting reference DB configs + regenerating golden/surrogate, so left for an operator-approved focused pass. **DEFERRED**: models.py ~52-field unread-field audit (A4-26; reseed-coupled). **VERIFICATION**: baselines exact, ruff clean (check+format), next build 76/76, full pytest suite green, regression guard both tiers green. Previous:
 > Last updated: July 3, 2026 (AGENTIC CHAT AI + INTERNATIONAL EXPANSION + PHYSICS PASS — `claude-fable-5`, operator-directed full-freedom session; 2 workflows + 3 agents; shipped on `claude/motoquant-roadmap-ai-n97val`) — **Baselines K5 10.0334 / R1 10.2859 / Hayabusa 10.4712 repr-bit-identical at every checkpoint; full weighted sweep IMPROVED 246 matched / |d| 0.2417s (was 0.2486, -2.8%) / bias -0.026s (`reports/acc_final_2026_07_03.json`).** Full report `reports/session_2026_07_03_ai_agent_expansion.md`; complete outstanding-work + operator-actions inventory `reports/ROADMAP_2026_07_03.md`. **(1) CHAT IS NOW A MULTI-STEP TOOL-CALLING AGENT** (`motoquant/llm/agent.py`, docs/CHAT_AGENT.md): `LLMClient.call_tools` multi-turn tool-use on ALL 5 providers (Anthropic native + OpenAI-compat; `_call_override("tools")` test seam); 15 tools (catalog search/details, full sim, top speed, compare, parts, tires, venues, REAL knapsack optimizer, autotune, composed outlaw pipeline, estimated-bike sim, web_search/web_fetch, live stats); multi-turn conversations via ChatRequest.messages (client-held, server stateless); executor-enforced budgets (8 iters / 20 sims / 2 heavy ops per msg) + chat sims now METERED into sim_usage (was: choose_bike burned ~25 unmetered sims); POST /api/jobs/chat (progress stages + Stop); ChatResponse finally carries intent payloads + agent blocks (the July-2 'dropped at API boundary' item); typed rate_limited error; stage_1..stage_4 BUILD_TIERS glossary ('outlaw'/'open class'=stage_4=full_race+no-limit budget, disambiguated from choose_bike 'open class' litre); web ChatPanel rebuilt as transcript UI (263->727 lines, job-backed, per-block renderers, catch-all error branch, ESTIMATED badge). Unknown-bike estimation: `llm/estimator.py` spec dict -> validate_spec -> spec_to_bike_config -> sim, confidence-capped 0.60/field, logged to bike_suggestions. Web lookup: `llm/webtools.py` (Brave/Serper via SEARCH_PROVIDER+SEARCH_API_KEY env, keyless DDG fallback, SSRF-guarded, MOTOQUANT_WEB_TOOLS=0 kill switch; unverifiable live from sandbox proxy — prod egress proven, failure path verified); requests pinned in requirements-api.txt. OUTLAW PIPELINE `motoquant/analysis/outlaw.py` + POST /api/jobs/outlaw: drag_prep rubber -> full_race knapsack (budget null=no-limit, resolved to 5M cap — NEVER inf, roi DP overflows) -> autotune on modified bike -> combined verify; Hayabusa e2e 10.223->9.211s (-1.013s) in 20s sandbox; OptimizeBuildRequest.budget_inr now Optional; BuildOptimizer 'Outlaw — no limit' preset. KAIZEN CATCH: rider_mass_kg wrote phantom RiderParams.rider_mass_kg (physics reads chassis.rider_mass_kg) — fixed + pinned by knob-liveness test. Tests: test_agent.py (34) + test_outlaw.py (13); ChatBox/api docstring ANTHROPIC_API_KEY banners -> provider-aware; smalltalk live counts (was '327 bikes'). **(2) CATALOG +34 BIKES -> 535** (3 sibling modules carrying their own instrumented benchmark lists, merged by sweep scripts): known_bikes_2026_us.py (12: HD Breakout/Fat Bob/Street Bob/Low Rider S/Iron 883/Forty-Eight, Indian Challenger/101 Scout/Chief Bobber DH, Buell XB12R, EBR 1190RX, CBR1100XX + its CW-1997 benchmark), _jpeu.py (14: ZX-12R, V-Max 1200, GSX-R600/750 L1 2011-24, ZRX1200R, GSX1400, Speed Triple 1050 x2, Street Triple 675, Ducati 996/Diavel 1260 S/Panigale V2 890, MV Dragster 800 RR, Bimota Tesi H2; 6 ET + 8 topspeed benchmarks), _world.py (8: Kove 450RR, Benda LFC 700, QJ SRK 800 RC, CFMoto 1250TR-G, Zontes GK350, Ninja 1100SX, CBR600RR 2024, Raider R150 Fi; ET benchmarks honestly empty — none instrumented). All web-verified, 0 fabrications, 34/34 validate clean, DB-path sanity ETs class-plausible. **PARTS +31 -> 594 (3 NEW categories: lowering_kit/air_shifter/lockup_clutch)** via seed_catalogs/drag_essentials.py + euro_brand_exhausts.py: V2-cruiser nitrous x4, Trask M8 turbos + cap fix 1750->1950 (+'Indian' alias — matched ZERO Indians before), 12 Triumph/MV/Guzzi/CFMoto exhausts; roi EXCLUSIVE_CATEGORIES + cross-slot aliases (lockup<->clutch_kit, air_shifter<->quickshifter) + desktop BuildPage mirror. **TIRES +25 -> 257** via drag_tires_cruiser.py (Shinko Hook-Up/Stealth, M&H, MT slicks, Night Dragon/D408/Cruisetec) with QUERY-DRIVEN fitment planner (519 rows; works for future bikes). Fitments 1253->1787. DB pipeline: import_batch (idempotent x2) -> seeds (idempotent x2) -> reseed (532 updated) -> merge_manufacturers + parts_fitment patches; 0 unreachable parts, 0 bikes w/o exhaust; headline stats synced (42 drifts) + OG regen. Honest gaps kept open: sub-500cc wheelie bars (Apr-30 carry-forward), QJ exhausts, 240/18 rears. **(3) PHYSICS: 19% FASTER BIT-IDENTICAL** (K5 394->319ms: dead aero_drag call, RK4 closure elimination, slip-branch torque cache, hoisted invariants — every batch repr-equal on all 3 baselines); 3 CategoryProfile knobs WIRED as armed no-ops (mu_peak_override/launch_rpm_factor/cd_floor, pinned by test_profile_knobs.py liveness+inertness tests); importer shaft/belt sentinel FIXED (0-sprocket no longer fabricates K5 2.471 chain gearing; _SHAFT_BELT_FINAL_DRIVE 23 researched entries — R1250GS 2.91 bevel etc.; only R1250GS spec-path ET moved 11.4357->11.4164); 14 positionless sprockets stamped (patch_2026_07_03_sprocket_position.py, idempotent) + roi name-regex fallback + co-selection pin. **NUMBA @njit REJECTED with measured rationale — do not re-litigate** (loop is object-access scalar Python, not numpy-heavy; jit = rewrite + voids bit-identical pin + 60-90MB image; use multiprocessing/adaptive-dt/surrogate for speed). Epoch-gated (NOT wired): pacejka_force, 4-branch clutch dispatch (why new lockup_clutch parts are ET-neutral for now), staging dead-time/rollout, tuck_transition. NEW physics finding from parts work: wheelie limit is NOT the binding launch constraint (Hayabusa CoG +55mm GAINS 0.113s) — lowering kits score positive ET; fix physics not data. **(4) SURROGATE v2.2 regenerated** per standing contract (34 new + 20 gearing-corrected bikes made v2.1 stale) — artifacts/surrogate/README.md. Accuracy content synced sitewide to the new sweep (223-benchmark corpus / top-10 recomputed / cluster tables dated Jul 3). **VERIFICATION:** full pytest suite + ruff clean; desktop tsc 0 + vitest 33/33; next build 75/75 x2 + verify-web 180 clean. Pre-existing (NOT this session): test_spec_corrections 4 ordering-dependent full-suite failures (green in isolation; new test modules here use the collection-order-proof setUpModule pattern). **OPERATOR:** new optional env keys SEARCH_PROVIDER/SEARCH_API_KEY (chat web lookup upgrade) + MOTOQUANT_WEB_TOOLS kill switch; agent turns = 2-8 LLM calls (was 2) — if Groq 30 RPM saturates, LLM_PROVIDER=gemini or paid key; new-provider onboarding = one _PROVIDERS entry. Previous:
@@ -131,6 +133,7 @@ For force-pushes (e.g. the `ws/kaizen` rebase that re-authored the 5 `kaizen@mot
 
 ## ⭐ STANDING PRIORITIES — top-3 (refreshed weekly by product-prioritisation agent)
 
+> **STALE as of July 10, 2026 — historical record only.** This block was last truly refreshed 2026-05-21 and predates the Render migration: #1 (restore Railway) was resolved May 31 by moving the backend to Render; #2's auth DDL + analytics landed with the June–July commercial passes (auth routers mounted Jun 7; PostHog wired Jul 2); #3 was retired Jul 6 with the desktop app. **The live prioritized queue is `docs/ROADMAP.md`** (+ `DISPATCH_INBOX.md` for operator-queued work).
 > Set 2026-05-07; re-ranked 2026-05-21 (Railway outage shifted top-1; late-night pass swapped #3 after catalog re-seed gap closed). Confirmed unchanged across eight same-day passes on 2026-05-21 (morning / end-of-day / late-night / Thursday-close / late-Thursday / sixth / seventh / eighth). The daily scheduler should bias its `opportunity_weight` toward these. Re-evaluated every Thursday by `scripts/agents/product-prioritisation.md`. See `reports/product_priorities_2026-05-21.md` for current scoring detail; `reports/product_priorities_2026-05-07.md` for the previous week.
 
 1. **Restore Railway service + redeploy.** Railway has been 404 since 2026-05-17 (trial expiry); 33 identical `Postflight deploy check timed out after 180s` ALERTs in OUTBOX as of 2026-05-21 eighth pass (day 5). Blocks every other Phase 6 item — no `/api/*` route can be tested or shipped while the service is dead. Pure user billing action; sandbox cannot perform. **Success metric:** `/api/health` returns `bike_count >= 637` (current DB volume) within 7 days; ALERT entries stop accumulating. Tracked at `DISPATCH_INBOX.md:140` `[urgent] [blocking]`.
@@ -184,157 +187,107 @@ Self-imposed rules to maximise useful work per context window:
 
 ---
 
-## CURRENT STATE (as of April 22, 2026)
+## CURRENT STATE (as of July 10, 2026)
+
+> Verified against the live tree + `motoquant.db` on July 10, 2026. For how it
+> got here read the `Last updated:` chain at the top of this file; for the
+> milestone view read `CHANGELOG.md`. Headline-number source of truth:
+> `python scripts/audit_headline_stats.py` (or `make audit`).
 
 ### Test suite
-- **739+ tests passing** across 15 test files — 27 integration gated behind `MOTOQUANT_SLOW_TESTS=1`. Breakdown: 244 Phase 1/2 + 56 Phase 3 Dragy + 68 Phase 3 dyno/overlay/calibrator/multi-run + 69 Phase 3 ECU import + Phase 3 API endpoints (~34 with /api/bikes/suggest + /api/venues/resolve coverage) + 69 Phase 4 analysis: ROI + Sobol + 84 Phase 4A/4B surrogate models + 65 Phase 4 recommendations: 38 unit + 27 integration + 27 Phase 4 catalog integration + new Apr 20 web-launch tests (`/api/bikes/suggest`, `/api/venues/resolve`, `bike_suggestions` schema + repo) + test_compatibility + test_tire_fitments
-- **April 20, 2026 web-launch additions:** POST `/api/bikes/suggest` (user-submitted bike requests → `bike_suggestions` table, plausibility-flagged), POST `/api/venues/resolve` (location → race-environment; seeded-venue match first, OWM live fallback with local ρ/DA/PCF compute), `BikeSuggestionsRepository`, `/bikes` Next.js browser (paginated with manufacturer/category filters + detail page with OEM tire fitments), `SuggestBikeForm` component, `LocationPicker` component (text + browser geolocation) wired into `SimulatorWidget` with matched-venue/live-weather status badge. New landing page "Intelligence Layer" section surfaces Phase 4 AI features. Stats strip updated: 267 bikes / 69 tires / 296 parts / 12 venues / 674 tests / 15 sub-models.
-- Integration tests for recommendations engine gated behind `MOTOQUANT_SLOW_TESTS=1` (each runs full physics engine on ~70 parts; ~45s per test)
-- `tests/test_catalog_integration.py` seeds full catalog + all 267 bikes in-memory and asserts: no RE 350 ↔ Harley/RE 650 leak, no Hayabusa ↔ Panigale/RSV4 leak, no Panigale V4 ↔ RSV4 leak, every bike has at least one exhaust, every bike has ≥20 parts, catalog ≥400 parts, `_enrich_bike_row_for_fitment` idempotent + hydrates manufacturer/chain_pitch, `_infer_cylinder_config` + `_infer_chain_pitch` produce expected values for representative specs
-- Scraper + validator tests (78) cover the full 267-bike `ALL_KNOWN_BIKES` catalog end-to-end
-- Run with: `python -m pytest tests/ -q` from the project root
-- **Optional deps** for surrogate/sobol/roi: `pip install scikit-learn SALib --break-system-packages`
+- **~4,324 tests passing** across ~60 test modules (PR #99 count). Run `make test` (~25 min, serial, mirrors CI). Slow tiers gated behind `MOTOQUANT_SLOW_TESTS=1` — including the full-catalog regression re-sim (`tests/test_regression_snapshot.py` slow tier re-sims every current bike via `db_row_to_config`).
+- Fast iteration subset: `make test-fast` (~3 min — validation / scraper / two_stroke / compatibility / submodel_kaizen / category_dispatch).
+- Physics-drift gates: `make baselines` (`scripts/check_baselines.py` — exit 1 on any drift of the three pinned references) + golden snapshots. Run after ANY edit to `physics.py`, `submodels/*`, `defaults.py`, `category_profiles.py`, or `scraper/importer.py`.
+- Single test file / single test: `python -m pytest tests/test_api.py -v` / `python -m pytest tests/test_api.py -k name -q`.
 
-### Production database (`motoquant.db`)
-- Bikes: **270** (3 seeded reference + 267 curated known bikes across 25+ manufacturers)
-- Tires: **69** (full Pacejka + thermal coefficients, 15 manufacturers, 5 compound types)
-- Parts: **424** across 17 categories with **bike-specific mod libraries** — min 24 / max 192 / avg 106.8 parts per bike. **91 exhausts** covering every seeded bike (ADV big-bore, cruiser/muscle V-twin, parallel twin, V4 litre, small-cc Indian + SE Asia). Catalog lives in `motoquant/database/seed.py` (core ~296) plus modular expansion in `motoquant/database/seed_catalogs/`:
-  - `adv_cruiser_exhausts.py` — 32 parts (Akra / SC-Project / Arrow / Termignoni / LeoVince / HP Corse / Remus / S&S / Vance & Hines / Two Brothers / Cobra / Rinehart / Agency Power / Toce / Agostini) — closed 22-bike ADV/cruiser exhaust gap
-  - `drag_specific.py` — 34 parts (7 nitrous / 6 boost kits / 5 clutch kits / 5 fuel system / 5 air filter / 6 quickshifter)
-  - `premium_universal.py` — 62 parts (18 brakes / 18 suspension / 8 batteries / 10 ECU piggybacks / 4 wheelie bars / 4 bodywork)
-  Small-cc Indian + SE Asia underbones still get full sprocket (428/520-pitch) / chain / ECU / filter / slipper / QS / platform-specific exhaust coverage. Fitment uses tight `family`-tier rules with `manufacturers` + `engine_configs` + displacement bounds + `chain_pitch` — verified no cross-brand or cross-segment leaks by 27 catalog-integration tests.
-- Venues: **12** (5 Indian + 7 international: Santa Pod, Pomona, Gainesville, Sydney, Dubai, Al-Ain, Jerez)
-- Bike-tire fitments: **209** OEM links (bike_model_id ↔ tire_model_id, front/rear) — needs extension for new 132 bikes
+### Production database (`motoquant.db` — tracked in git, ships inside the Docker image)
+- Bikes: **541** models / 553 configs. Ids 1–3 are the hand-curated reference bikes from `defaults.py` (excluded from reseed; category-stamped `litre_sport_195p` by `patch_2026_07_06_reference_configs.py`).
+- Parts: **593** across 20 categories (incl. `lowering_kit` / `air_shifter` / `lockup_clutch`); catalog precision patched July 6 (53,205 compatible pairs after removing 3,684 impossible ones).
+- Tires: **254** (notation-twin dedup July 6; physical sizes normalized via `normalize_size_designation`); bike-tire fitments: **1,860**; venues: **20**.
+- Benchmarks: **221 unique** (246 matched in the weighted sweep). Accuracy: weighted |Δ| **0.2165s**, bias **+0.0212s** (`reports/acc_final_2026_07_06.json`).
+- **Re-seed chain** (all idempotent — required after any `spec_to_bike_config`/physics change): `scripts/reseed_configs_from_specs.py` → `patch_2026_07_06_reference_configs.py` → `patch_2026_07_06_catalog_integrity.py` → `patch_2026_07_06_tire_dedup.py` → regenerate golden snapshots + surrogate, same session.
 
-### Bike catalog coverage (ALL_KNOWN_BIKES = 267 bikes)
-- **Sport/superbike fleet (78 bikes):** Suzuki, Yamaha, Honda, Kawasaki, BMW, Ducati, Aprilia
-- **Indian-market additions (30 bikes, April 2026):** KTM (Duke 200/250/390, RC 200/390), Bajaj (Pulsar NS200/RS200/220F, Dominar 250/400), TVS (Apache RR 310, RTR 200/160 4V), Royal Enfield (Continental GT 650, Interceptor 650, Himalayan 450), Yamaha India (R15 V4, MT-15 V2, FZ-X), Honda India (CBR 250R, CB 300R, Hornet 2.0), Kawasaki India (Ninja 300/400, Z650), Triumph (Speed 400, Speed Twin 900), Husqvarna (Svartpilen 401, Vitpilen 401), Hero (Xtreme 160R)
-- **International expansion (27 bikes, April 2026):** Yamaha (R7, XSR900, VMAX 1700), Honda (CB650R, CBR500R, Rebel 1100), Kawasaki (ZX-4RR, Z H2, Vulcan S), Suzuki (SV650, GSX-8S, Katana), Ducati (Panigale V4R, Diavel V4, Scrambler 1100), Triumph (Rocket 3, Trident 660, Tiger 900), BMW (R1250GS, M1000R), Aprilia (RS 660, Tuono 660), MV Agusta (F3 800), Harley-Davidson (Low Rider ST, Road Glide), CFMoto (700CL-X Sport), Benelli (TNT 600i, Leoncino 500), QJ Motor (SRK 400)
-- **Phase 4+ Indian market 200cc+ expansion (57 bikes, April 20, 2026):** Bajaj (Pulsar 200/NS200/N250/F250/NS400Z, Avenger Cruise/Street 220), TVS (Apache RTR 200, Ronin 225), Yamaha India (FZ25, R15 V1/V2/V3, R3, MT-03), Honda India (CB350 H'ness, CB350RS, CB300F), Suzuki India (Gixxer SF 250, Gixxer 250, Intruder 250), Mahindra (Mojo XT300), Hyosung (GT250R, GT650R), Hero (Karizma R, Karizma XMR 210, XPulse 200), Royal Enfield (Classic 350 J, Meteor 350, Hunter 350, Thunderbird 350, Bullet 500, Himalayan 411, Scram 411, Shotgun 650, Guerrilla 450), Jawa (42, Perak), Yezdi (Roadster, Scrambler, Adventure), Benelli India (302R, TNT 300, Imperiale 400, 502C), CFMoto India (300NK, 450NK, 650NK, 300SR), BMW India (G310R, G310GS, G310RR), Harley India (X440), Aprilia India (RS457, Tuono 457), Triumph India (Scrambler 400X), KTM India (Duke 390 early, 390 Adventure)
-- **Phase 4+ Worldwide 300cc+ expansion (45 bikes, April 20, 2026):** Broader Honda/Yamaha/Kawasaki/Suzuki/BMW/Ducati/Aprilia/Triumph/MV Agusta/Harley/Indian/KTM/Moto Guzzi/Husqvarna/Buell lineup covering previously-missed 300–1300cc platforms
-- **Phase 4+ SE Asia small-cc drag bikes (15 bikes, April 20, 2026, ≥149cc):** Honda (RS150R, Winner X, Supra GTR 150, Sonic 150R, CB150R Streetfire, CBR150R, CBR250RR), Yamaha (Y15ZR, Y15ZR V2, Exciter 150, Exciter 155 VVA, Aerox 155, R25), Kawasaki (ZX-25R I4, Ninja RR Mono 250)
-- **All 267 bikes have individual Cd (0.55–0.95) and frontal_area_m2 (0.35–0.68)** — zero over-generalization
-- **New manufacturers added in April 2026:** CFMoto, Benelli, QJ Motor, Mahindra, Hyosung, Jawa, Yezdi, Indian Motorcycle, Moto Guzzi, Buell
+### Physics & accuracy state
+- **Taxonomy v2** — `derive_category_tag(…, cylinders=…)` in `category_profiles.py`; clusters include `sport_twin_600_1300`, `single_300_500`, `small_i4_screamer` on top of the original 8; `cluster_for` DELEGATES to it (one source of truth). Per-cluster knob tuning: `scripts/tune_cluster_knobs.py` against the FULL weighted benchmark corpus — the 3-bike baseline is a drift guard, **not** a tuning target (retired as a constraint July 6).
+- **Surrogate v2.4** (`artifacts/surrogate/`, numpy artifact, no sklearn pickles in prod): ET MAE 89.2ms, R² 0.9954, 541/541 stock configs in-envelope. **A surrogate is a cache of the physics — regenerate after any reseed/retune in the same session.**
+- **Numba @njit REJECTED** with measured rationale (ADR + July 3 chain entry) — do not re-litigate. Speed levers are multiprocessing / adaptive-dt / the surrogate.
 
-### Aero accuracy (fixed April 2026)
-- Previous state: 71% of bikes shared cd=0.32 (car-level, wrong for motorcycles)
-- Current state: Every bike has physics-accurate individual Cd + frontal area
-- CATEGORY_AERO fallback defaults updated: sport=0.65, naked=0.80, cruiser=0.90, adventure=0.85, touring=0.78, scooter=0.70
-- ET accuracy impact: eliminates ±0.25–0.35s systematic error from aero over-generalization
+### Product surfaces
+- **Backend** — FastAPI `motoquant/api.py`: sim / topspeed / compare / optimize / autotune / outlaw (each also job-backed via `jobs.py` with real progress + cancel), agentic chat (`llm/agent.py`, 15 tools, 5 LLM providers, web lookup, unknown-bike estimation), auth (magic-link + password/scrypt, JWT), payments (Stripe + Razorpay, signature-verified fail-closed webhooks), subscriptions/license keys, free-tier sim metering (`usage.py`), per-IP rate limiting (`ratelimit.py`). Billing enforcement env-gated: `MOTOQUANT_BILLING_ENFORCE` (default off = open beta). Public `delta_et_s` = after−before everywhere (negative = faster).
+- **Web** — Next.js App Router in `web/` (~76 static routes) on Vercel at `motoquant.in`; `/api/*` rewrites to Render (`NEXT_PUBLIC_API_URL`). Flagship `/validation` accuracy explorer; command palette (Ctrl/Cmd+K); job-backed progress bars with Stop everywhere.
+- **Desktop app SCRAPPED** (July 6, 2026, operator decision — ADR-0005): the hosted web app is the product; `desktop/` scaffold stays in-tree for reference only; license keys survive as device-bound seats.
+- **Deploy** — Render free tier (`motoquant-api.onrender.com`, Docker, `render.yaml` with backend buildFilter) + Vercel frontend; keep-alive: GH Actions cron + Vercel cron `/api/wake` + in-app `keepwarm.py`.
 
-### Gear ratio library
-- **150+ Tier-1 model families** (service-manual accuracy, confidence 0.75) — up from 121
-- Added Tier-1 entries for all 27 international expansion bikes
-- Tier-2 defaults expanded: added `adventure` and `touring` category fallbacks
-- Coverage now includes: CFMoto, Benelli, QJ Motor gear data
-
-### Physics engine
-- **15 sub-model files** implemented in `motoquant/submodels/`
-- Fixed-step **RK4 at 1 ms** timestep + adaptive solver (`use_adaptive_dt=True`)
-- Validated: GSX-R 1000 K5 → 10.03s / 239.8 km/h ✓
-- **Kaizen hardening (April 15, 2026):**
-  - NaN/inf guard in RK4 loop — logs error and breaks early instead of corrupting trajectory
-  - Velocity floor raised from 0.001 → 0.05 m/s (avoids RPM divergence at near-zero speeds)
-  - Effective tire radius minimum raised from 0.01 → 0.15 m (realistic motorcycle minimum)
-  - `bridge.py`: Fixed tautological dict access; added logging alongside warnings for invalid part paths
-
-### Physics validation baseline (April 15, 2026)
-- **28 bikes** tested against real-world quarter-mile times (magazine test data)
-- **Pass rate: 36%** (10/28 within tolerance) — expected for un-calibrated catalog bikes
-- **Systematic bias: +0.58s** (sim runs slower than real-world) — conservative physics model
-- **Litre superbikes**: best accuracy (mean delta ~+0.2-0.3s)
-- **600cc class**: ~+0.5-1.0s slow (high-RPM screamer engines need dyno curve injection for accuracy)
-- **Indian-market small bikes**: +1.0-3.0s slow (traction model tuned for superbikes, not small singles)
-- **Next step**: Phase 3 calibrator will auto-tune per-bike aero+tire params from Dragy/dyno data
-
-### CLI subcommands available
+### CLI subcommands available (`python -m motoquant.run …`)
 ```
 db          init / seed / stats / reset
-bikes       list/search with --json output; --fitments BIKE_ID for tire fitments
-sim         run simulation, compare-stock, save-run, leaderboard
+bikes       list/search (--json); --fitments BIKE_ID for tire fitments
+sim         quarter-mile sim, compare-stock, save-run
 venues      list, seasonal detail
 tires       list by compound/manufacturer, --grip-rank, --value-rank
-parts       list/search by category; --bike-id N filters to bike-compatible only;
-            --impact PART_ID --bike-id N shows ET/trap delta + cost-per-tenth + compat warning (supports --json)
+parts       list/search; --bike-id N compat filter; --impact PART_ID --bike-id N
+            (ET/trap delta + cost-per-tenth + compat warning, supports --json)
 weather     fetch live OWM, DA trend, --refresh-all
 scrape      crawl bikez.com for a manufacturer
-import      --known-bikes (108 curated) or --spec-json FILE
+import      --known-bikes (541 curated) or --spec-json FILE
+calibrate   import-dragy / import-dyno / overlay / import-ecu
 history     simulation run history
 leaderboard best ETs across all runs
-analysis    roi, sobol, optimize, recommend, surrogate (generate/train/evaluate/predict/train-dnn)
-pricing     refresh / status / stale — Indian-market retailer URL seeding + coverage reports
-            (GST 18 % + ₹250 courier + 30 % import duty landing-cost math)
+analysis    roi / sobol / recommend / optimize / surrogate (generate|train|evaluate|train-dnn|predict)
+pricing     refresh / status / stale — INR landing-cost math (GST + courier + import duty)
+nl          regex-based natural-language tuning (no API key needed)
+chat        LLM-powered NL tuning (needs a provider key; `nl` is the keyless fallback)
 ```
 
 ---
 
 ## REPOSITORY STRUCTURE
 
+> Selective map (July 10, 2026) — the full module map + data-flow diagram lives
+> in `docs/ARCHITECTURE.md`; start there for "where does X live?".
+
 ```
-Vehicle Dynamics/
-├── CLAUDE.md                    ← YOU ARE HERE — read every session
-├── app.py                       ← Streamlit simulation UI (run: streamlit run app.py)
-├── motoquant.db                 ← production SQLite database
-├── motoquant/
-│   ├── __init__.py              ← exports MotoQuantEngine, BikeConfig, defaults
-│   ├── physics.py               ← adaptive-RK4 simulation loop (599 lines)
-│   ├── models.py                ← all Pydantic/dataclass parameter models
-│   ├── defaults.py              ← gsxr1000_k5(), yzfr1_4c8(), hayabusa_gen1(), venues
-│   ├── constants.py             ← G, QUARTER_MILE_M, RPM_TO_RADS, etc.
-│   ├── config_io.py             ← JSON save/load round-trip
-│   ├── run.py                   ← CLI (~1650 lines) — all subcommands + bikes --fitments
+MotoQuant_v1/
+├── AGENTS.md                    ← canonical short contract for ANY contributor — read first
+├── CLAUDE.md                    ← this file — session changelog + deep context
+├── CHANGELOG.md                 ← human-readable milestone history
+├── Makefile                     ← the dev interface; targets mirror CI (make help)
+├── motoquant.db                 ← seeded SQLite catalog (tracked; ships in the Docker image)
+├── Dockerfile / render.yaml / docker-entrypoint.sh   ← Render backend deploy
+├── vercel.json                  ← frontend deploy + /api/* rewrite to Render
+├── motoquant/                   ← the Python package
+│   ├── physics.py               ← RK4 (1 ms) + adaptive-dt simulation loop, MotoQuantEngine
+│   ├── models.py                ← BikeConfig + all parameter dataclasses
+│   ├── defaults.py              ← hand-curated K5/R1/Hayabusa references + synthetic curves
+│   ├── category_profiles.py     ← taxonomy v2 clusters + per-cluster physics knobs
 │   ├── submodels/               ← 15 independent physics sub-models
-│   │   ├── engine.py, forced_induction.py, drivetrain.py, clutch.py
-│   │   ├── chain.py, tire.py, aero.py, weight_transfer.py
-│   │   ├── rider_dynamics.py, staging.py, environmental.py  ← Phase 1 additions
-│   │   ├── braking.py, wheelie.py, parasitic.py, rolling_resistance.py
-│   ├── database/
-│   │   ├── connection.py        ← MotoQuantDB class, WAL-fallback connect()
-│   │   ├── schema.py            ← DDL, SEED_PARTS_CATEGORIES, SEED_VENUES
-│   │   ├── seed.py              ← seed_all(), seed_tire_library(), seed_parts_catalog()
-│   │   ├── seed_catalogs/       ← Phase 4 modular expansion sub-package
-│   │   │   ├── adv_cruiser_exhausts.py   ← 32 ADV + cruiser/muscle exhausts
-│   │   │   ├── drag_specific.py          ← 34 nitrous / boost / clutch / fuel / filter / QS
-│   │   │   └── premium_universal.py      ← 62 brakes / suspension / battery / ECU / wheelie / bodywork
-│   │   ├── bike_repo.py         ← upsert_from_config(), search(), add_provenance()
-│   │   ├── tire_repo.py, parts_repo.py, venue_repo.py, sim_repo.py, weather_repo.py
-│   │   ├── bridge.py            ← BikeConfig ↔ DB row converters
-│   │   ├── weather_refresh.py   ← refresh_all_venues(), staleness checks, RefreshSummary
-│   │   └── pricing_refresh.py   ← retailer URL templates (~50 Indian + import retailers),
-│   │                              estimate_landing_cost_inr (GST+courier+duty),
-│   │                              refresh_retailer_urls, stale_parts, coverage_report
-│   ├── api.py                       ← FastAPI web server (Phase 3 web launch)
-│   │   ├── recommendations.py    ← Smart Build Recommender (profiles, synergies, upgrade paths)
-│   ├── calibration/               ← Phase 3 — real run data import & calibration
-│   │   ├── __init__.py            ← exports all calibration public surface
-│   │   ├── dragy.py              ← Dragy GPS import (CSV/JSON), run-boundary detection
-│   │   ├── dyno.py               ← Dyno CSV import, SAE J1349 correction, DynoResult
-│   │   ├── ecu.py                ← ECU log import (Woolich/PC-Link/MoTeC), ECULog, ECURunWindow
-│   │   ├── overlay.py            ← compare_runs() sim vs real, RunComparison, compute_cost()
-│   │   └── calibrator.py         ← calibrate() DE+Nelder-Mead optimizer, CalibrationResult
-│   └── scraper/
-│       ├── spec.py              ← BikeSpec, ValidationResult dataclasses
-│       ├── validator.py         ← physical bounds, unit auto-correction, confidence scoring
-│       ├── bikez.py             ← bikez.com crawler (stdlib-only, no BS4)
-│       ├── importer.py          ← spec_to_bike_config(), import_batch() — uses gear_ratios
-│       ├── known_bikes.py       ← ALL_KNOWN_BIKES (267 bikes — 78 sport + 30 Indian + 27 intl + 57 Indian 200cc+ + 45 worldwide 300cc+ + 15 SE Asia small-cc)
-│       ├── catalog.py           ← SCRAPE_CATALOG — 17 manufacturers, categories, year ranges
-│       ├── gear_ratios.py       ← Tier-1 named-model lookup (150+ families) + Tier-2 defaults (incl. adventure/touring)
-│       └── bulk_scrape.py       ← BulkScrapeOrchestrator — checkpoint/resume/dedup
-└── tests/
-    ├── test_validation.py       ← physics conservation, ET accuracy (run_tests.py style)
-    ├── test_database.py         ← DB schema, seed, bike/tire/parts repos
-    ├── test_cli.py              ← all CLI subcommands, in-process via redirect_stdout
-    ├── test_scraper.py          ← BikeSpec, validate_spec, import_batch, ALL_KNOWN_BIKES
-    ├── test_weather_refresh.py  ← _is_stale, refresh_all_venues, CLI --refresh-all
-    ├── test_pricing.py          ← 33 tests — URL templates, brand-dedup search,
-    │                              landing-cost math, refresh idempotency, stale thresholds
-    ├── test_dragy.py            ← 56 tests — Dragy GPS parser
-    ├── test_calibration.py      ← 44 tests — dyno, overlay, calibrator end-to-end
-    ├── test_ecu.py              ← 69 tests — ECU log import (Woolich/PC-Link/MoTeC)
-    ├── test_recommendations.py  ← 65 tests — Smart Recommendations Engine (38 unit + 27 integration)
-    ├── test_api.py              ← 24+ tests — FastAPI endpoints (health, quick/full sim, compare, dragy upload, dyno upload, bike suggest)
-    └── test_catalog_integration.py  ← 27 tests — no cross-brand leaks, ≥400 parts, every bike has exhaust + ≥20 parts, enrich idempotent, infer helpers
+│   ├── api.py                   ← FastAPI backend (all routes; ~3k lines, append-only style)
+│   ├── jobs.py                  ← in-memory job registry (progress, cooperative cancel)
+│   ├── auth.py / payments.py / subscriptions.py / usage.py / ratelimit.py
+│   ├── keepwarm.py              ← in-app self-ping (Render free-tier cold-start dodge)
+│   ├── llm/                     ← agentic chat: agent.py (tool loop), client.py (5 providers),
+│   │                              estimator.py, webtools.py (SSRF-guarded), runner.py, resolver.py
+│   ├── analysis/                ← roi, sobol, bayesian_opt, build_optimizer, ecu_autotune,
+│   │                              outlaw (composed pipeline), recommendations, surrogate_*
+│   ├── calibration/             ← dragy, dyno (SAE J1349), ecu, overlay, calibrator
+│   ├── parts/compatibility.py   ← EXACT/FAMILY/CATEGORY/UNIVERSAL fitment matcher
+│   ├── database/                ← connection (WAL-fallback), schema, seed + seed_catalogs/,
+│   │                              *_repo.py, bridge.py (BikeConfig ↔ DB row)
+│   ├── scraper/                 ← BikeSpec, validator, importer (spec_to_bike_config),
+│   │                              known_bikes*.py (541-bike source of truth), gear_ratios.py
+│   └── run.py                   ← CLI entry point (python -m motoquant.run)
+├── web/                         ← Next.js App Router site (motoquant.in) — see web/CONTRIBUTING.md
+├── desktop/                     ← SCRAPPED Tauri app — reference only, do not extend
+├── e2e/                         ← Playwright smoke harness (manual-trigger workflow)
+├── scripts/                     ← check_baselines.py, health_check.py, audit_headline_stats.py,
+│   │                              reseed_configs_from_specs.py, tune_cluster_knobs.py,
+│   │                              phys_weighted_sweep.py, patch_*.py (idempotent DB patches),
+│   │                              session_preflight/postflight.sh, agents/ + subagents/ prompts
+├── tests/                       ← ~60 modules; conftest + golden data under tests/data
+├── docs/                        ← ARCHITECTURE, INVARIANTS, KNOWN_TRAPS, ONBOARDING, adr/,
+│                                  ROADMAP, PAYMENTS_SETUP, RENDER_MIGRATION, CHAT_AGENT, …
+├── reports/                     ← per-session write-ups + authoritative sweep JSONs
+└── artifacts/surrogate/         ← surrogate v2.4 numpy artifact + README contract
 ```
 
 ---
@@ -743,41 +696,53 @@ Parts in the DB use dotted-path notation for parameter changes: `engine.peak_pow
 ## PHYSICS ENGINE QUICK REFERENCE
 
 **State vector:** `[x, v, omega_e, T_tire, T_clutch, gear]`  
-**Integration:** Fixed RK4, dt = 0.001 s (1 ms), max 15 s  
+**Integration:** Fixed RK4, dt = 0.001 s (1 ms), `max_time` default 26 s (API caps `max_time_s` at 300); adaptive-dt mode via `run(use_adaptive_dt=True)`  
 **Outputs (all timesteps):** position, velocity, acceleration, RPM, gear, slip ratio, traction %, front/rear load, tire temp, power kW, torque Nm, DA penalty  
+**Category dispatch:** `category_profiles.py` taxonomy-v2 clusters flavour launch/clutch/parasitic behaviour per bike class — a bike's `category_tag` changes its physics.
 
-**Validation benchmarks (Aamby Valley, ISA conditions):**
-| Bike | Target ET | Sim ET | ΔT |
-|---|---|---|---|
-| GSX-R 1000 K5 | 9.97s | 10.04s | +0.07s |
-| YZF-R1 4C8 | 10.3s | ~10.3s | ±0.10s |
-| Hayabusa Gen1 | 10.1–10.7s | in range | ✓ |
+**Pinned reference baselines (bit-identical, CI-gated — `make baselines`):**
+| Bike | Pinned ET |
+|---|---|
+| GSX-R 1000 K5 | **10.0334 s** |
+| YZF-R1 4C8 | **10.2859 s** |
+| Hayabusa Gen1 | **10.4712 s** |
+
+Any drift, however small, is a regression unless it is a deliberate accuracy change backed by a full weighted sweep and a coordinated update of `scripts/check_baselines.py` + `docs/INVARIANTS.md`.
 
 ---
 
 ## DEVELOPMENT WORKFLOW
 
-```bash
-# Run full test suite
-cd "Vehicle Dynamics" && python -m pytest tests/ -q
+> The `Makefile` is the canonical interface — its targets mirror CI exactly
+> (see `AGENTS.md` §1), so green locally ≈ green in CI. `make` lists everything.
 
-# Run single test file
+```bash
+make install     # deps + editable package (once)
+make health      # state of the world: baselines, lint, catalog, headline drift, secret scan
+make check       # fast pre-PR gate: lint + fmt-check + baselines + fast tests (~3 min)
+make test        # full suite (~25 min) — REQUIRED before opening a PR
+make test-fast   # focused subset while iterating
+make test-slow   # MOTOQUANT_SLOW_TESTS=1 integration tier
+make baselines   # K5/R1/Hayabusa bit-identical guard — after ANY physics/importer/defaults edit
+make audit       # headline-stat sync (bike/part/tire counts sitewide)
+make lint / format / fmt-check   # ruff
+make api         # uvicorn motoquant.api:app --reload --port 8000
+make web-dev     # Next.js against a local API; make web-build = what Vercel runs
+
+# Run a single test file / single test
 python -m pytest tests/test_scraper.py -v
+python -m pytest tests/test_api.py -k test_name -q
 
 # Quick physics smoke test
-python -c "import motoquant; e = motoquant.MotoQuantEngine(motoquant.gsxr1000_k5()); r = e.run(); print(f'{r.time_quarter:.3f}s')"
+python -c "import motoquant; e = motoquant.MotoQuantEngine(motoquant.gsxr1000_k5()); r = e.run(); print(f'{r.time_quarter:.4f}s')"   # → 10.0334s
 
-# CLI with temp DB
+# CLI with temp DB (production motoquant.db works with no --db flag, read-only checks only)
 python -m motoquant.run --db /tmp/test.db db init
 python -m motoquant.run --db /tmp/test.db import --known-bikes
-python -m motoquant.run --db /tmp/test.db bikes
 python -m motoquant.run --db /tmp/test.db sim --bike-id 1 --venue-id 1
-
-# Production DB (read-only checks)
-python -m motoquant.run bikes
-python -m motoquant.run tires
-python -m motoquant.run parts
 ```
+
+**After any physics / `spec_to_bike_config` / importer change:** re-run the re-seed chain (see CURRENT STATE above) or `/api/simulate?bike_id=N` silently diverges from the sweep path. **After any catalog-count change:** `make audit` and patch every drift before pushing. **When touching `web/**`:** `make web-build` before commit (that's what Vercel runs; `useSearchParams()` must be inside `<Suspense>`).
 
 ---
 
@@ -862,7 +827,8 @@ Gemini provided a 6-phase strategic roadmap. Vetted assessment already incorpora
 
 ## NOTES FOR FUTURE SELF
 
-- The `.docx` project plan files (`MotoQuant_Pro_Project_Plan_v2.docx`, etc.) are in the project root and are the original design documents. This `CLAUDE.md` supersedes them as the live status document.
-- When the user says "continue" without further context, pick up from the top of the "Remaining" list in the most recently active phase (currently Phase 2 → Phase 1 remaining).
+- **Start with `AGENTS.md`** (the one-page contract), then the top `Last updated:` entry here. `docs/ARCHITECTURE.md` answers "where does X live?"; `docs/adr/` holds the settled do-not-relitigate decisions (pinned baselines, no-Numba, SQLite-until-scale, desktop discontinued); `CHANGELOG.md` is the milestone view.
+- When the user says "continue" without further context, read `docs/ROADMAP.md` + `DISPATCH_INBOX.md` for queued work — the phase lists in this file are historical records, not the live queue.
 - The user granted a standing override: *"you can override my instructions and use the best approach for the case."*
-- Indian market context: parts pricing in INR, venues are Indian drag strips, target audience is Indian
+- Indian market context: parts pricing in INR, venues are Indian drag strips, target audience is Indian.
+- The dated PARAMETER AUDIT / FULL PROJECT ROADMAP / TOOLKIT / GEMINI sections below the structural sections are preserved historical records — trust their dates, not their tense. The desktop app (Phase 5) is scrapped; the Streamlit `app.py` is retired; Railway strings are pre-Render history.
