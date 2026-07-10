@@ -1,0 +1,3512 @@
+{
+ "scrape_date": "2026-07-10",
+ "coverage": {
+  "catalog": 541,
+  "returned": 189
+ },
+ "bikes": [
+  {
+   "id": 23,
+   "name": "Yamaha MT-10 (2016-2021)",
+   "db": {
+    "peak_power_hp": 163.0,
+    "peak_torque_nm": 111.0,
+    "dry_mass_kg": 193.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_power_hp",
+     "db_value": 163,
+     "web_value": 158.2,
+     "source_url": "https://en.wikipedia.org/wiki/Yamaha_MT-10",
+     "confidence": "high",
+     "note": "Claimed output is 118 kW = 158.2 hp (160.4 PS) @ 11,500. DB 163 hp is ~3% above the hp figure and doesn't match the PS figure either."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "111 Nm @ 9,000 / wet 210 kg confirmed; DB dry 193 plausible."
+  },
+  {
+   "id": 24,
+   "name": "Yamaha MT-09 (2021-2024)",
+   "db": {
+    "peak_power_hp": 119.0,
+    "peak_torque_nm": 93.0,
+    "dry_mass_kg": 175.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "119 PS (117 hp) @ 10,000 / 93 Nm @ 7,000 / wet 189 kg confirmed (MCN/Bennetts). DB matches (hp field holds PS value, within 3%)."
+  },
+  {
+   "id": 25,
+   "name": "Yamaha MT-07 (2018-2024)",
+   "db": {
+    "peak_power_hp": 74.0,
+    "peak_torque_nm": 68.0,
+    "dry_mass_kg": 168.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "74.8 PS @ 9,000 / 68 Nm @ 6,500 confirmed; DB matches within rounding."
+  },
+  {
+   "id": 26,
+   "name": "Honda CBR 1000RR Fireblade (2004-2007)",
+   "db": {
+    "peak_power_hp": 172.0,
+    "peak_torque_nm": 108.0,
+    "dry_mass_kg": 179.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_torque_nm",
+     "db_value": 108,
+     "web_value": 115,
+     "source_url": "https://motorcyclespecifications.com/honda-cbr1000rr-2004-specs/",
+     "confidence": "medium",
+     "note": "Sources list 115 Nm (11.7 kgf-m); DB 108 is ~6% low. Power 172 hp @ 11250 and dry 179 kg match."
+    }
+   ],
+   "benchmarks": []
+  },
+  {
+   "id": 27,
+   "name": "Honda CBR1000RR (2008-2012)",
+   "db": {
+    "peak_power_hp": 178.0,
+    "peak_torque_nm": 112.0,
+    "dry_mass_kg": 178.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Web 176 hp @ 12000 / 115 Nm @ 8500 vs DB 178 hp / 112 Nm \u2014 both within 3% tolerance (178 PS is the official metric claim). Dry ~179 kg matches DB 178."
+  },
+  {
+   "id": 28,
+   "name": "Honda CBR 1000RR Fireblade SP (2017-2019)",
+   "db": {
+    "peak_power_hp": 192.0,
+    "peak_torque_nm": 114.0,
+    "dry_mass_kg": 195.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Official 141 kW = 192 PS = 189 hp @ 13000; DB 192 within 1.6% (PS vs hp ambiguity). Torque 110.9 Nm vs DB 114 under 3%. Kerb SP = 195 kg = DB dry 195 (kerb-as-dry)."
+  },
+  {
+   "id": 29,
+   "name": "Honda CBR1000RR-R Fireblade SP (2020-2024)",
+   "db": {
+    "peak_power_hp": 217.0,
+    "peak_torque_nm": 113.0,
+    "dry_mass_kg": 183.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Official 160 kW = 217.6 PS @ 14500 / 113 Nm @ 12500 matches DB. Kerb 201 kg; DB dry 183 plausible."
+  },
+  {
+   "id": 30,
+   "name": "Honda CBR 600RR (2007-2012)",
+   "db": {
+    "peak_power_hp": 118.0,
+    "peak_torque_nm": 68.0,
+    "dry_mass_kg": 162.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "dry_mass_kg",
+     "db_value": 162,
+     "web_value": 154.7,
+     "source_url": "https://www.moto-data.net/honda/cbr-600rr-2007",
+     "confidence": "medium",
+     "note": "2007 claimed dry weight 154.7 kg (341 lb); DB 162 is ~7 kg heavy. Power 118 hp matches claim."
+    }
+   ],
+   "benchmarks": []
+  },
+  {
+   "id": 31,
+   "name": "Honda CBR650R (2019-2024)",
+   "db": {
+    "peak_power_hp": 95.0,
+    "peak_torque_nm": 64.0,
+    "dry_mass_kg": 191.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "95 PS @ 12000 / 64 Nm @ 8500 factory claim matches DB; kerb 208 kg vs DB dry 191."
+  },
+  {
+   "id": 33,
+   "name": "Kawasaki Ninja ZX-6R (2003-2004)",
+   "db": {
+    "peak_power_hp": 120.0,
+    "peak_torque_nm": 66.0,
+    "dry_mass_kg": 162.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "2003 636 B1 claim 118 hp @ 12500, 69 Nm vs DB 120 hp / 66 Nm \u2014 both within ~3-4% of mixed sources; dry ~161-162 kg matches. No change recorded."
+  },
+  {
+   "id": 34,
+   "name": "Kawasaki Ninja ZX-6R (2009-2012)",
+   "db": {
+    "peak_power_hp": 123.0,
+    "peak_torque_nm": 70.8,
+    "dry_mass_kg": 162.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "displacement_cc",
+     "db_value": 636,
+     "web_value": 599,
+     "source_url": "https://www.autoevolution.com/moto/kawasaki-ninja-zx-6r-2009.html",
+     "confidence": "high",
+     "note": "The 2009-2012 ZX-6R generation is 599 cc \u2014 the 636 cc engine only returned in 2013. DB displacement is wrong for this gen."
+    },
+    {
+     "field": "peak_power_hp",
+     "db_value": 123,
+     "web_value": 128,
+     "source_url": "https://www.autoevolution.com/moto/kawasaki-ninja-zx-6r-2009.html",
+     "confidence": "medium",
+     "note": "2009 claim 128 hp @ 14000 (134 w/ ram) vs DB 123 (3.9%)."
+    },
+    {
+     "field": "peak_torque_nm",
+     "db_value": 70.8,
+     "web_value": 67,
+     "source_url": "https://www.autoevolution.com/moto/kawasaki-ninja-zx-6r-2009.html",
+     "confidence": "medium",
+     "note": "2009 599cc claim ~66.7-67 Nm @ 11800; DB 70.8 Nm is the 2013+ 636 figure (5.4%). Consistent with the displacement mix-up."
+    }
+   ],
+   "benchmarks": []
+  },
+  {
+   "id": 35,
+   "name": "Kawasaki Ninja ZX-6R (2019-2024)",
+   "db": {
+    "peak_power_hp": 128.0,
+    "peak_torque_nm": 70.8,
+    "dry_mass_kg": 193.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Confirmed: 127.9 hp @ 13500, 70.6 Nm (7.20 mkg) @ 11000, kerb 193 kg (ultimatespecs/motoplanete) \u2014 DB matches (DB dry 193 is the kerb figure)."
+  },
+  {
+   "id": 36,
+   "name": "Kawasaki Ninja ZX-9R (2000-2003)",
+   "db": {
+    "peak_power_hp": 143.0,
+    "peak_torque_nm": 100.0,
+    "dry_mass_kg": 183.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Confirmed: 143 hp @ 11000, ~101 Nm, dry 183 kg (autoevolution/moto-data) \u2014 DB matches."
+  },
+  {
+   "id": 37,
+   "name": "Kawasaki Ninja ZX-10R (2004-2005)",
+   "db": {
+    "peak_power_hp": 175.0,
+    "peak_torque_nm": 112.0,
+    "dry_mass_kg": 175.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "dry_mass_kg",
+     "db_value": 175,
+     "web_value": 170,
+     "source_url": "https://www.autoevolution.com/moto/kawasaki-ninja-zx-10r-2004.html",
+     "confidence": "medium",
+     "note": "2004-05 gen claimed dry weight 170 kg (374.8 lb); DB 175 kg is 5 kg high. hp 175 @ 11700 confirmed (184 w/ ram); torque 115 Nm @ 9500 vs DB 112 within 3%."
+    }
+   ],
+   "benchmarks": []
+  },
+  {
+   "id": 38,
+   "name": "Kawasaki Ninja ZX-10R (2006-2007)",
+   "db": {
+    "peak_power_hp": 185.0,
+    "peak_torque_nm": 113.0,
+    "dry_mass_kg": 173.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_power_hp",
+     "db_value": 185,
+     "web_value": 175,
+     "source_url": "https://www.motorcyclenews.com/bike-reviews/kawasaki/zx-10r/2006/",
+     "confidence": "medium",
+     "note": "Static crank claim is 175 hp (MCN: 173 bhp, 181 w/ ram air); DB 185 stores the ram-air figure. Convention question, not a fabrication \u2014 flagging for consistency with other gens."
+    }
+   ],
+   "benchmarks": []
+  },
+  {
+   "id": 39,
+   "name": "Kawasaki Ninja ZX-10R (2008-2010)",
+   "db": {
+    "peak_power_hp": 182.0,
+    "peak_torque_nm": 113.0,
+    "dry_mass_kg": 175.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "2008 claim 188 PS (185.4 hp) @ 12500 vs DB 182 hp = 1.9% diff, under threshold. DB hp_rpm 11700 is low vs claimed 12500 but rpm not a spec_check field."
+  },
+  {
+   "id": 40,
+   "name": "Kawasaki Ninja ZX-10R (2011-2015)",
+   "db": {
+    "peak_power_hp": 207.0,
+    "peak_torque_nm": 115.2,
+    "dry_mass_kg": 182.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_power_hp",
+     "db_value": 207,
+     "web_value": 197.3,
+     "source_url": "https://www.motorcyclenews.com/bike-reviews/kawasaki/zx-10r/2011/",
+     "confidence": "medium",
+     "note": "Kawasaki claim 197.3 bhp (200 PS) @ 13000 without ram air; DB 207 = with-ram figure (210 PS). 4.9% vs static claim. Same ram-air convention issue as other ZX-10R gens."
+    }
+   ],
+   "benchmarks": []
+  },
+  {
+   "id": 41,
+   "name": "Kawasaki Ninja ZX-10R (2021-2024)",
+   "db": {
+    "peak_power_hp": 213.0,
+    "peak_torque_nm": 114.9,
+    "dry_mass_kg": 201.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_power_hp",
+     "db_value": 213,
+     "web_value": 200,
+     "source_url": "https://www.webbikeworld.com/2021-kawasaki-ninja-zx-10r-abs/",
+     "confidence": "medium",
+     "note": "Intl claim 200 hp (150 kW) @ 13200 without ram; DB 213 = ram-air PS figure (213.5 PS). US-market NHTSA rating is only 186 hp. 6.5% vs static claim."
+    }
+   ],
+   "benchmarks": []
+  },
+  {
+   "id": 42,
+   "name": "Kawasaki Ninja ZX-10RR (2021-2024)",
+   "db": {
+    "peak_power_hp": 214.0,
+    "peak_torque_nm": 115.0,
+    "dry_mass_kg": 173.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_power_hp",
+     "db_value": 214,
+     "web_value": 201,
+     "source_url": "https://www.webbikeworld.com/2021-kawasaki-ninja-zx-10rr/",
+     "confidence": "medium",
+     "note": "2021 ZX-10RR claim 201 hp (150 kW) without ram; DB 214 = ram-air figure."
+    },
+    {
+     "field": "wet_mass_kg",
+     "db_value": null,
+     "web_value": 207,
+     "source_url": "https://www.webbikeworld.com/2021-kawasaki-ninja-zx-10rr/",
+     "confidence": "medium",
+     "note": "2021+ ZX-10RR kerb is 207 kg; DB dry 173 kg looks implausibly low for this gen (that is the 2006-era dry figure) \u2014 worth an operator look."
+    }
+   ],
+   "benchmarks": []
+  },
+  {
+   "id": 43,
+   "name": "Kawasaki Ninja ZX-14R (2012-2023)",
+   "db": {
+    "peak_power_hp": 200.0,
+    "peak_torque_nm": 162.5,
+    "dry_mass_kg": 220.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "200 hp @ 10000-10500 (210 w/ ram) confirmed. Torque: autoevolution quotes 154 Nm @ 7500 but Kawasaki's own EU claim for 2012+ is 162.5 Nm @ 7500 (DB matches manufacturer claim) \u2014 conflicting sources, no change recorded."
+  },
+  {
+   "id": 44,
+   "name": "Kawasaki ZZR1400 (2006-2011)",
+   "db": {
+    "peak_power_hp": 197.0,
+    "peak_torque_nm": 155.0,
+    "dry_mass_kg": 215.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "DB 197 hp matches the with-ram-air 2006 claim (190 PS static); 155 Nm and dry 215 kg consistent with published specs. Already benchmarked."
+  },
+  {
+   "id": 46,
+   "name": "Kawasaki Z1000 (2014-2021)",
+   "db": {
+    "peak_power_hp": 142.0,
+    "peak_torque_nm": 111.0,
+    "dry_mass_kg": 207.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Verified: 142 hp @ 10,000 / 111 Nm / 221 kg kerb (motorcyclespecs.co.za, ultimatespecs) \u2014 matches DB; dry 207 plausible vs 221 kerb."
+  },
+  {
+   "id": 47,
+   "name": "Kawasaki Z900 (2020-2024)",
+   "db": {
+    "peak_power_hp": 125.0,
+    "peak_torque_nm": 98.6,
+    "dry_mass_kg": 182.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "wet_mass_kg",
+     "db_value": null,
+     "web_value": 212,
+     "source_url": "https://www.cycleworld.com/story/buyers-guide/2020-kawasaki-z900/",
+     "confidence": "high",
+     "note": "Kerb 212 kg confirmed; DB dry 182 kg implies 30 kg of fluids \u2014 looks ~10-13 kg light (true dry ~195)"
+    }
+   ],
+   "benchmarks": [],
+   "notes": "Power/torque verified (125 PS @ 9,500, 98.6 Nm)."
+  },
+  {
+   "id": 49,
+   "name": "BMW S 1000 RR (2015-2018)",
+   "db": {
+    "peak_power_hp": 199.0,
+    "peak_torque_nm": 113.0,
+    "dry_mass_kg": 193.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Confirmed: 199hp@13,500, 83 lb-ft (113Nm) @10,500, wet 204kg \u2014 DB dry 193 consistent. No drift."
+  },
+  {
+   "id": 50,
+   "name": "BMW S 1000 RR (2019-2024)",
+   "db": {
+    "peak_power_hp": 210.0,
+    "peak_torque_nm": 113.0,
+    "dry_mass_kg": 197.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "wet_mass_kg",
+     "db_value": null,
+     "web_value": 197,
+     "source_url": "https://www.lazerhelmets.net/bmw-s1000rr-specs/",
+     "confidence": "medium",
+     "note": "Curb 434.3 lb (196.95kg); DB dry_kg 197 equals the DIN kerb (mislabel) \u2014 real dry ~184"
+    }
+   ],
+   "benchmarks": [],
+   "notes": "DB 210hp matches 2023+ spec (2019-2022 was 205-207hp \u2014 DB spans the gen, acceptable)."
+  },
+  {
+   "id": 51,
+   "name": "BMW M1000RR (2021-2024)",
+   "db": {
+    "peak_power_hp": 212.0,
+    "peak_torque_nm": 113.0,
+    "dry_mass_kg": 175.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Confirmed: 212hp@14,500, 113Nm, kerb 192kg (webbikeworld/motorcycle.com) \u2014 DB dry 175 is consistent with 192 kerb. No spec drift."
+  },
+  {
+   "id": 52,
+   "name": "BMW S1000R (2021-2024)",
+   "db": {
+    "peak_power_hp": 165.0,
+    "peak_torque_nm": 114.0,
+    "dry_mass_kg": 181.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Confirmed: 165hp@11,000, 114Nm@9,250, kerb 199kg (ZigWheels/paultan) \u2014 DB dry 181 consistent. No drift."
+  },
+  {
+   "id": 62,
+   "name": "Aprilia RSV4 1000 (2009-2014)",
+   "db": {
+    "peak_power_hp": 180.0,
+    "peak_torque_nm": 115.0,
+    "dry_mass_kg": 184.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "180hp@12500 / 115Nm matches claims; dry 184 within claim noise (Aprilia quoted 179-184 across trims)."
+  },
+  {
+   "id": 63,
+   "name": "Aprilia RSV4 Factory (2021-2024)",
+   "db": {
+    "peak_power_hp": 217.0,
+    "peak_torque_nm": 125.0,
+    "dry_mass_kg": 175.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "217hp / 125Nm / dry 175 consistent with claims."
+  },
+  {
+   "id": 64,
+   "name": "Aprilia Tuono V4 1100 (2021-2024)",
+   "db": {
+    "peak_power_hp": 175.0,
+    "peak_torque_nm": 121.0,
+    "dry_mass_kg": 184.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "175hp@11000 / 121Nm matches claims."
+  },
+  {
+   "id": 72,
+   "name": "Bajaj Dominar 400 (2019-2024)",
+   "db": {
+    "peak_power_hp": 40.0,
+    "peak_torque_nm": 35.0,
+    "dry_mass_kg": 168.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "wet_mass_kg",
+     "db_value": null,
+     "web_value": 193,
+     "source_url": "https://www.zigwheels.com/bajaj-bikes/2019-2024-dominar-400/specifications/",
+     "confidence": "high",
+     "note": "Kerb 193kg; DB dry 168 implies 25kg fluids gap \u2014 dry likely ~180"
+    }
+   ],
+   "benchmarks": [],
+   "notes": "40PS@8800 / 35Nm@6500 confirmed (ZigWheels/bajajauto) \u2014 DB values match (DB rpm 8000/6250 slightly off, values fine)."
+  },
+  {
+   "id": 73,
+   "name": "Bajaj Dominar 250 (2020-2024)",
+   "db": {
+    "peak_power_hp": 27.0,
+    "peak_torque_nm": 23.5,
+    "dry_mass_kg": 155.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "wet_mass_kg",
+     "db_value": null,
+     "web_value": 180,
+     "source_url": "https://www.bajajauto.com/bikes/dominar/dominar-250/specifications",
+     "confidence": "high",
+     "note": "Official kerb 180kg; DB dry 155 implies implausible 25kg of fluids"
+    }
+   ],
+   "benchmarks": [
+    {
+     "kind": "zero_to_100",
+     "value": 10.9,
+     "source_label": "IndianAutosBlog acceleration test",
+     "source_url": "https://indianautosblog.com/bajaj-dominar-250-acceleration-test-p321553",
+     "source_type": "magazine",
+     "note": "0-100 km/h, best of two runs (12.5s / 10.9s)"
+    },
+    {
+     "kind": "top_speed",
+     "speed_kmh": 142,
+     "source_label": "CarToq / Dino's Vault video test",
+     "source_url": "https://www.cartoq.com/bajaj-dominar-250-top-speed-0-100-kph/",
+     "source_type": "forum_or_timeslip",
+     "note": "Real-world video top-speed run 142 kmph (speedo-indicated, likely optimistic vs GPS); claimed 132"
+    }
+   ],
+   "notes": "27PS / 23.5Nm confirmed. DB dry 155 vs official kerb 180 (25kg gap \u2014 dry likely ~167, DB light by ~12kg)."
+  },
+  {
+   "id": 83,
+   "name": "Yamaha FZ-X (2021-2024)",
+   "db": {
+    "peak_power_hp": 12.2,
+    "peak_torque_nm": 12.7,
+    "dry_mass_kg": 142.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_torque_nm",
+     "db_value": 12.7,
+     "web_value": 13.3,
+     "source_url": "https://www.bikedekho.com/yamaha/fz-x/specifications",
+     "confidence": "medium",
+     "note": "FZ-X shares the FZ-S V3 BS6 engine: 12.4 PS @ 7,250 / 13.3 Nm @ 5,500. DB torque 12.7 @ 4,500 is low and rpm points are wrong (hp_rpm 6,000 vs 7,250). Also DB dry 142 kg exceeds published 139 kg kerb."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "ZigWheels real-world: 0-60 km/h 5.83s, top speed ~96-112 km/h \u2014 no quarter-mile."
+  },
+  {
+   "id": 84,
+   "name": "Honda CBR 250R (2011-2019)",
+   "db": {
+    "peak_power_hp": 26.0,
+    "peak_torque_nm": 22.6,
+    "dry_mass_kg": 160.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "DB 26 hp / 22.6 Nm matches Honda's global/India claim (26.15 PS @ 8500, 22.9 Nm @ 7000). Some US sources quote 24 hp; source noise, not a DB error."
+  },
+  {
+   "id": 86,
+   "name": "Honda Hornet 2.0 (2020-2024)",
+   "db": {
+    "peak_power_hp": 17.0,
+    "peak_torque_nm": 16.0,
+    "dry_mass_kg": 142.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [
+    {
+     "kind": "zero_to_100",
+     "value": 10.7,
+     "source_label": "IBTimes India road test review",
+     "source_url": "https://www.ibtimes.co.in/honda-hornet-2-0-review-mileage-top-speed-fuel-efficiency-after-300kms-831728",
+     "source_type": "magazine",
+     "year_tested": 2020,
+     "note": "0-100 kph 10.7s reported in a 300-km test review; methodology unclear (likely speedo-based) \u2014 treat as low-weight."
+    }
+   ],
+   "notes": "17.2 PS @ 8500 / 16.1 Nm \u2014 matches DB within tolerance."
+  },
+  {
+   "id": 89,
+   "name": "Kawasaki Z 650 (2017-2024)",
+   "db": {
+    "peak_power_hp": 68.3,
+    "peak_torque_nm": 63.8,
+    "dry_mass_kg": 187.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Confirmed: 68 hp @ 8000, 65 Nm @ 6500 (autoevolution; DB 63.8 within 2%), kerb 187 kg = DB dry figure. No changes."
+  },
+  {
+   "id": 96,
+   "name": "Triumph Street Triple 765 RS (2020-2024)",
+   "db": {
+    "peak_power_hp": 123.0,
+    "peak_torque_nm": 79.0,
+    "dry_mass_kg": 166.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Specs confirmed: 123 PS (121 hp) @ 11,750, 79 Nm; DB dry 166 kg matches Triumph's claimed dry; kerb 187 kg. No meaningful drift."
+  },
+  {
+   "id": 98,
+   "name": "MV Agusta Brutale 1000 RR (2019-2024)",
+   "db": {
+    "peak_power_hp": 208.0,
+    "peak_torque_nm": 116.5,
+    "dry_mass_kg": 186.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Verified: 208 hp @ 13,000-13,450, 116.5 Nm, dry 183-186 kg (mvagusta.com/autoevolution) \u2014 matches DB. Note the 2026 Euro5+ update drops to 201 hp (outside this row's year range)."
+  },
+  {
+   "id": 113,
+   "name": "Honda CB650R (2021-2025)",
+   "db": {
+    "peak_power_hp": 94.0,
+    "peak_torque_nm": 63.0,
+    "dry_mass_kg": 202.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "95 PS (~94 hp) @ 12000 / 63 Nm @ 8500 match DB (91wheels' 57.5 Nm figure is an outlier vs Honda's official 63 Nm \u2014 dismissed). Kerb 206 kg vs DB dry 202."
+  },
+  {
+   "id": 114,
+   "name": "Honda CBR500R (2022-2026)",
+   "db": {
+    "peak_power_hp": 47.0,
+    "peak_torque_nm": 43.2,
+    "dry_mass_kg": 192.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "47 hp / 43.2 Nm platform claim verified via CB500F/CBR500R sources; kerb 192 kg equals DB dry 192 (kerb-as-dry)."
+  },
+  {
+   "id": 115,
+   "name": "Honda Rebel 1100 (2021-2026)",
+   "db": {
+    "peak_power_hp": 86.0,
+    "peak_torque_nm": 98.0,
+    "dry_mass_kg": 223.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "dry_mass_kg",
+     "db_value": 223,
+     "web_value": 209,
+     "source_url": "https://powersports.honda.com/motorcycle/cruiser/rebel-1100",
+     "confidence": "high",
+     "note": "Honda curb weight is 487 lb = 221 kg (MT) \u2014 DB 'dry' 223 exceeds published kerb, i.e. kerb stored as dry. True dry ~209 kg."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "86 hp / 98 Nm match. Already benchmarked."
+  },
+  {
+   "id": 116,
+   "name": "Kawasaki Ninja ZX-4RR (2023-2026)",
+   "db": {
+    "peak_power_hp": 77.0,
+    "peak_torque_nm": 37.2,
+    "dry_mass_kg": 189.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "77 hp base / ~80 PS w/ ram confirmed; curb 188-189 kg matches DB dry 189. Has benchmark already; only aggregator-grade sources found incidentally (fastestlaps low-12s @ ~110 mph), nothing stronger than existing corpus row."
+  },
+  {
+   "id": 117,
+   "name": "Kawasaki Z H2 (2020-2025)",
+   "db": {
+    "peak_power_hp": 197.3,
+    "peak_torque_nm": 137.3,
+    "dry_mass_kg": 240.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Confirmed: 200 PS (197.3 hp) @ 11000, 137 Nm @ 8500, kerb 239-240 kg (Cycle World/webbikeworld) \u2014 DB matches exactly."
+  },
+  {
+   "id": 118,
+   "name": "Kawasaki Vulcan S (2015-2026)",
+   "db": {
+    "peak_power_hp": 61.0,
+    "peak_torque_nm": 63.0,
+    "dry_mass_kg": 226.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [
+    {
+     "kind": "quarter_mile",
+     "value": 13.03,
+     "et_s": 13.03,
+     "trap_kmh": 165.8,
+     "source_label": "MotoStatz Vulcan S acceleration & top speed review (GPS test)",
+     "source_url": "https://motostatz.com/kawasaki-vulcan-s-acceleration-top-speed-review/",
+     "source_type": "instrumented",
+     "note": "MotoStatz structured GPS test: 13.03 s @ 103 mph (165.8 km/h). Figures taken from search snippet; direct page fetch blocked (403). A forum-grade 14.38 @ 83.6 mph also circulates \u2014 MotoStatz figure is the credible one."
+    }
+   ],
+   "notes": "Specs fine: 61 hp @ 7500 / 63 Nm @ 6600 matches published claim."
+  },
+  {
+   "id": 126,
+   "name": "Triumph Trident 660 (2021-2026)",
+   "db": {
+    "peak_power_hp": 80.0,
+    "peak_torque_nm": 64.0,
+    "dry_mass_kg": 189.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "81 PS / 64 Nm confirmed. DB dry 189 kg equals Triumph's published 189 kg kerb (dry=kerb pattern). MotoStatz GPS test exists (12.00 @ 111 mph) \u2014 bike already has_benchmark."
+  },
+  {
+   "id": 127,
+   "name": "Triumph Tiger 900 Rally (2020-2026)",
+   "db": {
+    "peak_power_hp": 93.9,
+    "peak_torque_nm": 87.0,
+    "dry_mass_kg": 228.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "dry_mass_kg",
+     "db_value": 228,
+     "web_value": 196,
+     "source_url": "https://bikez.com/motorcycles/triumph_tiger_900_rally_2020.php",
+     "confidence": "high",
+     "note": "2020 Tiger 900 Rally kerb is 196 kg (Rally Pro 201 kg). DB 'dry' 228 kg exceeds even the kerb figure by 27+ kg \u2014 clear error."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "Power/torque confirmed (~94 hp @ 8,750, 87 Nm @ 7,250)."
+  },
+  {
+   "id": 128,
+   "name": "BMW R 1250 GS (2019-2025)",
+   "db": {
+    "peak_power_hp": 136.0,
+    "peak_torque_nm": 143.0,
+    "dry_mass_kg": 249.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "wet_mass_kg",
+     "db_value": null,
+     "web_value": 249,
+     "source_url": "https://www.zigwheels.com/bmw-bikes/r-1250-gs/specifications/",
+     "confidence": "high",
+     "note": "DIN kerb 249kg; DB dry_kg 249 equals the kerb (mislabel) \u2014 real dry ~229-234"
+    }
+   ],
+   "benchmarks": [],
+   "notes": "136PS@7750 / 143Nm@6250 confirmed."
+  },
+  {
+   "id": 129,
+   "name": "BMW M 1000 R (2023-2026)",
+   "db": {
+    "peak_power_hp": 207.0,
+    "peak_torque_nm": 113.0,
+    "dry_mass_kg": 199.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "wet_mass_kg",
+     "db_value": null,
+     "web_value": 199,
+     "source_url": "https://www.donjacobsbmw.com/bmw-m-1000-r-performance-specs/",
+     "confidence": "medium",
+     "note": "DIN kerb 199kg; DB dry_kg 199 is the kerb weight mislabeled as dry"
+    }
+   ],
+   "benchmarks": [
+    {
+     "kind": "quarter_mile",
+     "et_s": 9.8,
+     "source_label": "MCN (Motorcycle News) dragstrip test",
+     "source_url": "https://www.youtube.com/watch?v=C1RkmqCOhWg",
+     "source_type": "instrumented",
+     "year_tested": 2023,
+     "note": "MCN datalogged run, stock bike; trap speed not published in accessible snippet (MCN review page 403-blocked)"
+    }
+   ],
+   "notes": "BMW claims 210hp@13,750 vs DB 207 (1.4%, under 3% threshold \u2014 not flagged). DB dry 199kg equals BMW DIN kerb 199kg (mislabel); real dry ~183."
+  },
+  {
+   "id": 130,
+   "name": "Aprilia RS 660 (2021-2026)",
+   "db": {
+    "peak_power_hp": 100.0,
+    "peak_torque_nm": 67.0,
+    "dry_mass_kg": 183.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "dry_mass_kg",
+     "db_value": 183,
+     "web_value": 169,
+     "source_url": "https://en.wikipedia.org/wiki/Aprilia_RS660",
+     "confidence": "medium",
+     "note": "DB dry_kg 183 = official kerb weight; dry weight is 169 kg (multiple sources incl. Aprilia tech spec). 100hp/67Nm confirmed."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "Kerb-as-dry misfile pattern."
+  },
+  {
+   "id": 131,
+   "name": "Aprilia Tuono 660 (2021-2026)",
+   "db": {
+    "peak_power_hp": 95.0,
+    "peak_torque_nm": 67.0,
+    "dry_mass_kg": 183.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "dry_mass_kg",
+     "db_value": 183,
+     "web_value": 169,
+     "source_url": "https://storeusa.aprilia.com/files/technical/EN_tuono_660.pdf",
+     "confidence": "medium",
+     "note": "DB dry_kg 183 = official KERB weight (confirmed by Aprilia); Aprilia tech-spec dry is 169 kg (same platform as RS 660 whose 169 dry / 183 kerb is well documented). 95hp confirmed."
+    }
+   ],
+   "benchmarks": []
+  },
+  {
+   "id": 132,
+   "name": "MV Agusta F3 800 (2014-2025)",
+   "db": {
+    "peak_power_hp": 148.0,
+    "peak_torque_nm": 88.0,
+    "dry_mass_kg": 173.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "148 hp @ 13,000 / 88 Nm / dry 173 kg match MV claims across sources. Already benchmarked (fastestlaps has an F3 800 1/4-mile test entry, page 403-blocked \u2014 existing benchmark retained)."
+  },
+  {
+   "id": 139,
+   "name": "Bajaj Pulsar 200 (2007-2012)",
+   "db": {
+    "peak_power_hp": 18.0,
+    "peak_torque_nm": 17.5,
+    "dry_mass_kg": 145.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "18bhp@8000 (DB rpm 8500) / 17.17Nm vs DB 17.5 (1.9%, under threshold) \u2014 matches. Claimed 142kmph top speed is unrealistic marketing (real ~120-125), not recorded. No instrumented quarter-mile from Overdrive/Autocar archives surfaced."
+  },
+  {
+   "id": 141,
+   "name": "Bajaj Avenger Cruise 220 (2015-2024)",
+   "db": {
+    "peak_power_hp": 19.0,
+    "peak_torque_nm": 17.5,
+    "dry_mass_kg": 160.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "19.03PS / 17.55Nm confirmed (bajajauto.com) \u2014 DB matches. Kerb 163kg vs DB dry 160 (gap only 3kg \u2014 dry likely overstated ~10kg). Top speed 120kmph is claimed, not measured. No instrumented ET found."
+  },
+  {
+   "id": 142,
+   "name": "Bajaj Avenger Street 220 (2015-2024)",
+   "db": {
+    "peak_power_hp": 19.0,
+    "peak_torque_nm": 17.5,
+    "dry_mass_kg": 157.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Same 220 DTS-i engine as Cruise 220 \u2014 19.03PS/17.55Nm confirmed, DB matches. No instrumented tests found."
+  },
+  {
+   "id": 148,
+   "name": "Yamaha FZ25 (2017-2023)",
+   "db": {
+    "peak_power_hp": 20.6,
+    "peak_torque_nm": 20.1,
+    "dry_mass_kg": 148.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "20.8 PS (20.5 hp) / 20.1 Nm confirmed \u2014 DB matches. MotorBeam real-world 0-100 km/h 8.58s (2017), no quarter-mile."
+  },
+  {
+   "id": 153,
+   "name": "Yamaha MT-03 (2020-2025)",
+   "db": {
+    "peak_power_hp": 42.0,
+    "peak_torque_nm": 29.6,
+    "dry_mass_kg": 168.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "42 hp @ 10,750 / 29.6 Nm @ 9,000 / wet 167-168 kg confirmed. DB dry 168 equals published wet (dry=kerb pattern)."
+  },
+  {
+   "id": 154,
+   "name": "Honda H'ness CB350 (2020-2025)",
+   "db": {
+    "peak_power_hp": 20.8,
+    "peak_torque_nm": 30.0,
+    "dry_mass_kg": 181.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [
+    {
+     "kind": "zero_to_100",
+     "value": 12.69,
+     "source_label": "Autocar India instrumented road test",
+     "source_url": "https://www.autocarindia.com/bike-reviews/honda-hness-cb350-review-test-ride-419221",
+     "source_type": "instrumented",
+     "year_tested": 2020,
+     "note": "0-60 kph 4.32s, 0-100 kph 12.69s (Autocar India VBox-instrumented). Indicated top speed ~130 kph (not GPS-verified, not recorded)."
+    }
+   ],
+   "notes": "Specs match (20.8 hp / 30 Nm @ 3000)."
+  },
+  {
+   "id": 155,
+   "name": "Honda CB350RS (2021-2025)",
+   "db": {
+    "peak_power_hp": 20.8,
+    "peak_torque_nm": 30.0,
+    "dry_mass_kg": 179.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "20.78 bhp @ 5500 / 30 Nm @ 3000 match DB exactly; kerb 180 kg vs DB dry 179 \u2014 same kerb-as-dry suspicion as CB300F."
+  },
+  {
+   "id": 156,
+   "name": "Honda CB300F (2022-2025)",
+   "db": {
+    "peak_power_hp": 24.5,
+    "peak_torque_nm": 25.6,
+    "dry_mass_kg": 153.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "24.5 PS @ 7500 / 25.6 Nm @ 5500 match DB. Published KERB weight is 153 kg \u2014 DB stores 153 as dry_kg, so DB dry is likely a misfiled kerb value (true dry ~143)."
+  },
+  {
+   "id": 160,
+   "name": "Mahindra Mojo XT300 (2015-2020)",
+   "db": {
+    "peak_power_hp": 27.0,
+    "peak_torque_nm": 30.0,
+    "dry_mass_kg": 165.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Verified: 27 bhp @ 8,000, 30 Nm @ 5,500, kerb ~182 kg (bikedekho/maxabout) \u2014 DB dry 165 plausible. Autocar India tested 0-100 ~10s but no published quarter-mile ET surfaced \u2014 nothing recorded."
+  },
+  {
+   "id": 188,
+   "name": "BMW G310R (2017-2026)",
+   "db": {
+    "peak_power_hp": 34.0,
+    "peak_torque_nm": 28.0,
+    "dry_mass_kg": 158.5,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [
+    {
+     "kind": "top_speed",
+     "speed_kmh": 160,
+     "source_label": "IndianAutosBlog G 310 R top-speed test",
+     "source_url": "https://indianautosblog.com/bmw-g-310-r-top-speed-test-p323664",
+     "source_type": "magazine",
+     "note": "Speedo-indicated 160 km/h in a road test, NOT GPS-verified; owner GPS runs show ~156 km/h. Treat as low-weight."
+    }
+   ],
+   "notes": "PRIORITY hunt: quarter-mile only exists as ProfessCars estimates (15.1s) \u2014 skipped. 34hp/28Nm confirmed. DB dry_kg 158.5 equals BMW's official kerb \u2014 kerb-as-dry misfile likely."
+  },
+  {
+   "id": 189,
+   "name": "BMW G310GS (2017-2026)",
+   "db": {
+    "peak_power_hp": 34.0,
+    "peak_torque_nm": 28.0,
+    "dry_mass_kg": 169.5,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "PRIORITY hunt: nothing instrumented found. 34hp confirmed. DB dry_kg 169.5 equals BMW's official kerb \u2014 kerb-as-dry misfile likely."
+  },
+  {
+   "id": 190,
+   "name": "BMW G310RR (2021-2026)",
+   "db": {
+    "peak_power_hp": 34.0,
+    "peak_torque_nm": 27.3,
+    "dry_mass_kg": 169.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "PRIORITY hunt: nothing instrumented found. 34PS@9700 / 27.3Nm@7700 confirmed (bmw-motorrad.in). Official kerb 174.5 kg; DB dry 169 unverifiable (no published dry). Duplicate of id 318 model line."
+  },
+  {
+   "id": 192,
+   "name": "Aprilia RS 457 (2024-2026)",
+   "db": {
+    "peak_power_hp": 47.6,
+    "peak_torque_nm": 43.5,
+    "dry_mass_kg": 175.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "dry_mass_kg",
+     "db_value": 175,
+     "web_value": 159,
+     "source_url": "https://www.aprilia.com/en_EN/models/rs-457/rs-457-457-parallel-twin-4-stroke-2024/",
+     "confidence": "high",
+     "note": "DB dry_kg 175 is the official KERB weight; Aprilia lists dry 159 kg / kerb 175 kg. hp 47.6@9400 and 43.5Nm@6700 confirmed."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "Specs otherwise match manufacturer claim; has_benchmark already true."
+  },
+  {
+   "id": 193,
+   "name": "Aprilia Tuono 457 (2024-2026)",
+   "db": {
+    "peak_power_hp": 47.0,
+    "peak_torque_nm": 43.5,
+    "dry_mass_kg": 175.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "dry_mass_kg",
+     "db_value": 175,
+     "web_value": 159,
+     "source_url": "https://www.moto-data.net/aprilia/tuono-457-2025",
+     "confidence": "high",
+     "note": "DB dry_kg 175 is the official KERB weight; dry 159 kg / kerb 175 kg. 47.6PS@9400 / 43.5Nm@6700 confirmed."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "PRIORITY hunt: bike too new \u2014 no instrumented quarter-mile test found."
+  },
+  {
+   "id": 197,
+   "name": "Honda CBR929RR Fireblade (2000-2001)",
+   "db": {
+    "peak_power_hp": 152.0,
+    "peak_torque_nm": 104.0,
+    "dry_mass_kg": 170.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "152 PS / 170 kg dry consistent with published specs. Already benchmarked."
+  },
+  {
+   "id": 198,
+   "name": "Honda CBR954RR Fireblade (2002-2003)",
+   "db": {
+    "peak_power_hp": 154.0,
+    "peak_torque_nm": 105.0,
+    "dry_mass_kg": 168.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "154 PS / 168 kg dry consistent with published specs. Already benchmarked."
+  },
+  {
+   "id": 201,
+   "name": "Honda CB500F (2019-2026)",
+   "db": {
+    "peak_power_hp": 47.0,
+    "peak_torque_nm": 43.0,
+    "dry_mass_kg": 189.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [
+    {
+     "kind": "quarter_mile",
+     "et_s": 13.36,
+     "trap_kmh": 157.7,
+     "source_label": "MotoStatz GPS test",
+     "source_url": "https://motostatz.com/honda-cb500f-acceleration-top-speed/",
+     "source_type": "instrumented",
+     "note": "13.36 @ 98.0 mph under optimal conditions, lightweight rider; model year within 2019+ gen unspecified."
+    }
+   ],
+   "notes": "47 hp / 43 Nm matches factory claim; kerb 189 kg equals DB dry 189 (kerb-as-dry pattern)."
+  },
+  {
+   "id": 202,
+   "name": "Honda CRF1100L Africa Twin (2020-2026)",
+   "db": {
+    "peak_power_hp": 101.0,
+    "peak_torque_nm": 105.0,
+    "dry_mass_kg": 226.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "wet_mass_kg",
+     "db_value": null,
+     "web_value": 226,
+     "source_url": "https://www.adventurebikerider.com/article/honda-africa-twin-and-africa-twin-adventure-sports/",
+     "confidence": "high",
+     "note": "Published kerb is 226 kg (MT) \u2014 exactly the DB dry_kg value, i.e. DB stores kerb as dry. True dry ~212-213 kg."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "Power/torque (101 hp / 105 Nm) match Honda claims. Already benchmarked."
+  },
+  {
+   "id": 206,
+   "name": "Yamaha FZ1 Fazer (2006-2015)",
+   "db": {
+    "peak_power_hp": 150.0,
+    "peak_torque_nm": 106.0,
+    "dry_mass_kg": 199.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "150 PS claim (147 hp) @ 11,000 / 106 Nm @ 8,000 confirmed; wet 221 kg, DB dry 199 plausible. No drift."
+  },
+  {
+   "id": 207,
+   "name": "Yamaha FZ6 Fazer (2004-2009)",
+   "db": {
+    "peak_power_hp": 98.0,
+    "peak_torque_nm": 63.0,
+    "dry_mass_kg": 186.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "98 hp @ 12,000 / 63.1 Nm @ 10,000 / dry 187 kg confirmed \u2014 DB matches."
+  },
+  {
+   "id": 208,
+   "name": "Yamaha FJR1300 (2013-2022)",
+   "db": {
+    "peak_power_hp": 146.0,
+    "peak_torque_nm": 138.0,
+    "dry_mass_kg": 289.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [
+    {
+     "kind": "quarter_mile",
+     "value": 10.98,
+     "source_label": "Cycle World 2013 FJR1300A riding impression (spec panel)",
+     "source_url": "https://www.cycleworld.com/2012/11/30/2013-yamaha-fjr1300a-riding-impression/",
+     "source_type": "magazine",
+     "year_tested": 2013,
+     "note": "CW instrumented figure for the 2013 gen (matches DB year range); trap speed not captured in snippet."
+    },
+    {
+     "kind": "quarter_mile",
+     "value": 10.68,
+     "trap_kmh": 203.2,
+     "source_label": "Motorcycle Consumer News 2003 FJR1300 test (quoted in FJRForum thread)",
+     "source_url": "https://www.fjrforum.com/threads/anybody-seen-these-1-4-mile-times.141061/",
+     "source_type": "magazine",
+     "year_tested": 2003,
+     "note": "10.68 @ 126.28 mph \u2014 gen-1 2003 bike, PREDATES the DB 2013-2022 year range; secondhand citation via forum. Motorcycle-USA also reported 10.73 @ 131.9 mph for a later gen but no direct URL found."
+    }
+   ],
+   "notes": "146.2 PS (144 hp) @ 8,000 / 138 Nm confirmed. DB dry 289 kg equals Yamaha's published 289 kg WET weight (dry=kerb pattern; true dry ~264 kg)."
+  },
+  {
+   "id": 209,
+   "name": "Yamaha MT-01 (2005-2012)",
+   "db": {
+    "peak_power_hp": 90.0,
+    "peak_torque_nm": 150.0,
+    "dry_mass_kg": 240.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "90 hp @ 4,750 / 150 Nm @ 3,750 / dry 240 kg confirmed. No STOCK instrumented quarter-mile found: aggregators estimate ~11.9s; the only real timeslip is a Stage 3 MODIFIED Australian record 11.77 @ 113.57 mph (Wikipedia) \u2014 unusable for stock validation. MCN/Wikipedia fetches blocked (403)."
+  },
+  {
+   "id": 211,
+   "name": "Kawasaki Ninja ZX-7R (2000-2003)",
+   "db": {
+    "peak_power_hp": 122.0,
+    "peak_torque_nm": 80.0,
+    "dry_mass_kg": 203.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Confirmed: 122 hp @ 11800, 78 Nm @ 9300, dry 203 kg (ultimatespecs/bikeswiki) \u2014 DB matches within tolerance."
+  },
+  {
+   "id": 212,
+   "name": "Kawasaki Z750 (2007-2012)",
+   "db": {
+    "peak_power_hp": 106.0,
+    "peak_torque_nm": 78.0,
+    "dry_mass_kg": 203.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Specs verified (106 PS @ 10,500, 78 Nm). Benchmark hunt failed honestly: autosnout 11.2s is an ESTIMATE; a '11.5s Z750S' claim is the earlier half-faired 2005-07 model (wrong row); MCN review page 403-blocked. No instrumented ET recorded."
+  },
+  {
+   "id": 213,
+   "name": "Kawasaki Z800 (2013-2016)",
+   "db": {
+    "peak_power_hp": 113.0,
+    "peak_torque_nm": 83.0,
+    "dry_mass_kg": 231.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Specs verified (113 PS, 83 Nm, kerb 229 \u2014 DB dry 231 borderline high but within noise of dry~211+? left alone; sources conflict). Benchmark leads exist but unreachable: MOTORRAD Top-Test measured 0-100 3.3s / 0-200 14.0s (motorradonline.de, page 403) and Cycle World Z800 vs FZ-09 comparison (2016, has strip data, page 403). Worth a retry from a different egress \u2014 no ET recorded now."
+  },
+  {
+   "id": 214,
+   "name": "Kawasaki Versys 650 (2015-2024)",
+   "db": {
+    "peak_power_hp": 68.0,
+    "peak_torque_nm": 64.0,
+    "dry_mass_kg": 216.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [
+    {
+     "kind": "quarter_mile",
+     "value": 12.9,
+     "et_s": 12.9,
+     "trap_kmh": 159.3,
+     "source_label": "zeroto60times.com Kawasaki listing",
+     "source_url": "https://www.zeroto60times.com/vehicle-make/kawasaki-0-60-mph-times/",
+     "source_type": "aggregator",
+     "note": "12.9 s @ 99 mph (159.3 km/h); 0-60 ~4.5-4.9 s. Aggregator quality; autosnout estimate is 13.6 @ 100 mph for the LT. No MotoStatz/instrumented test found for this gen."
+    }
+   ],
+   "notes": "Specs fine: claim 68-69 PS @ 8500, 64 Nm @ 7000 matches DB."
+  },
+  {
+   "id": 215,
+   "name": "Kawasaki Versys 1000 (2019-2024)",
+   "db": {
+    "peak_power_hp": 120.0,
+    "peak_torque_nm": 102.0,
+    "dry_mass_kg": 255.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Confirmed: 120 hp @ 9000, 102 Nm @ 7500, kerb 253 kg (bikez/ultimatespecs) \u2014 DB matches (DB dry 255 ~ kerb)."
+  },
+  {
+   "id": 217,
+   "name": "Kawasaki W800 (2019-2026)",
+   "db": {
+    "peak_power_hp": 52.0,
+    "peak_torque_nm": 62.0,
+    "dry_mass_kg": 221.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_power_hp",
+     "db_value": 52,
+     "web_value": 47.6,
+     "source_url": "https://www.motorcyclenews.com/bike-reviews/kawasaki/w800/2019/",
+     "confidence": "high",
+     "note": "2019+ W800 claim is 48 PS (47.6 hp / 35 kW) @ 6000-6500 \u2014 MCN headlines it as a '47bhp retro'; Kawasaki US 2019 spec sheet agrees. DB 52 hp is ~9% high (52 PS may be a pre-2016 W800 figure). Torque 62.9 Nm @ 4800 matches DB."
+    }
+   ],
+   "benchmarks": [
+    {
+     "kind": "quarter_mile",
+     "value": 13.8,
+     "et_s": 13.8,
+     "source_label": "FastestLaps \u2014 Kawasaki W800 Cafe",
+     "source_url": "https://fastestlaps.com/models/kawasaki-w800-caf",
+     "source_type": "aggregator",
+     "note": "13.8 s quarter, no trap speed given. W800 Cafe variant (same 773cc engine, kerb 222 kg vs street 221-226). User-submitted/aggregator quality."
+    }
+   ]
+  },
+  {
+   "id": 218,
+   "name": "Kawasaki Z400 (2019-2026)",
+   "db": {
+    "peak_power_hp": 45.0,
+    "peak_torque_nm": 38.0,
+    "dry_mass_kg": 167.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "wet_mass_kg",
+     "db_value": null,
+     "web_value": 167,
+     "source_url": "https://www.torquepedia.com/kawasaki/z400/2023",
+     "confidence": "medium",
+     "note": "167 kg is the published CURB weight; DB stores 167 as dry_kg (true dry ~152-155, unpublished) \u2014 sim may double-count fluids"
+    }
+   ],
+   "benchmarks": [],
+   "notes": "Power/torque verified (45 PS @ 10,000, 37-38 Nm @ 8,000)."
+  },
+  {
+   "id": 224,
+   "name": "BMW K1300S (2008-2016)",
+   "db": {
+    "peak_power_hp": 175.0,
+    "peak_torque_nm": 140.0,
+    "dry_mass_kg": 228.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [
+    {
+     "kind": "quarter_mile",
+     "et_s": 10.62,
+     "trap_kmh": 214.05,
+     "source_label": "Motorcyclist (cited via autoevolution)",
+     "source_url": "https://www.autoevolution.com/moto/bmw-k-1300-s-2012.html",
+     "source_type": "magazine",
+     "note": "Motorcyclist tested 10.62s @ 133.03 mph; second source cites 10.5 @ 138 mph"
+    }
+   ],
+   "notes": "Specs confirmed: 175hp@9250, 140Nm, 228kg dry / 254kg wet (autoevolution/Wikipedia) \u2014 DB matches. Incidental instrumented benchmark recorded (bike already has one)."
+  },
+  {
+   "id": 225,
+   "name": "BMW R1200GS (2013-2018)",
+   "db": {
+    "peak_power_hp": 125.0,
+    "peak_torque_nm": 125.0,
+    "dry_mass_kg": 238.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [
+    {
+     "kind": "quarter_mile",
+     "et_s": 11.07,
+     "trap_kmh": 192.18,
+     "source_label": "zeroto60times (BMW motorcycles list)",
+     "source_url": "https://www.zeroto60times.com/vehicle-make/bmw-motorycles-0-60-mph-times/",
+     "source_type": "aggregator",
+     "note": "2013 R1200GS 11.07s @ 119.44 mph, 0-60 2.9s; precision suggests magazine origin (page 403-blocked, taken from search snippet)"
+    }
+   ],
+   "notes": "125hp@7750 / 125Nm@6500 confirmed. 2013 water-cooled GS DIN kerb is 238kg \u2014 DB dry 238 = kerb mislabeled (no fetchable URL this session; MCN page 403). MCN also lists 11.2s 1/4-mile in its 2013 review spec panel."
+  },
+  {
+   "id": 226,
+   "name": "BMW R nineT (2014-2023)",
+   "db": {
+    "peak_power_hp": 110.0,
+    "peak_torque_nm": 119.0,
+    "dry_mass_kg": 222.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "wet_mass_kg",
+     "db_value": null,
+     "web_value": 222,
+     "source_url": "https://ridermagazine.com/2014/08/29/2014-bmw-r-ninet-road-test/",
+     "confidence": "high",
+     "note": "BMW: 489 lb (222kg) with fuel; DB dry_kg 222 is the wet weight mislabeled \u2014 real dry ~208. May explain the documented R nineT sweep outlier"
+    }
+   ],
+   "benchmarks": [],
+   "notes": "110hp / 88 lb-ft (119Nm) confirmed by Rider Magazine."
+  },
+  {
+   "id": 227,
+   "name": "BMW F900R (2020-2026)",
+   "db": {
+    "peak_power_hp": 105.0,
+    "peak_torque_nm": 92.0,
+    "dry_mass_kg": 211.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "PRIORITY hunt: only ProfessCars estimates (11.5s quarter) \u2014 skipped. 105hp@8500 / 92Nm confirmed. DB dry_kg 211 equals BMW's official kerb \u2014 kerb-as-dry misfile likely."
+  },
+  {
+   "id": 228,
+   "name": "BMW F850GS (2018-2026)",
+   "db": {
+    "peak_power_hp": 95.0,
+    "peak_torque_nm": 92.0,
+    "dry_mass_kg": 229.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "PRIORITY hunt: no instrumented quarter-mile found. 95hp confirmed (MCN quotes 94bhp). DB dry_kg 229 equals BMW's official kerb (road-ready) weight \u2014 kerb-as-dry misfile likely; true dry not published."
+  },
+  {
+   "id": 229,
+   "name": "BMW S1000XR (2020-2026)",
+   "db": {
+    "peak_power_hp": 165.0,
+    "peak_torque_nm": 114.0,
+    "dry_mass_kg": 226.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [
+    {
+     "kind": "quarter_mile",
+     "et_s": 10.55,
+     "trap_kmh": 214,
+     "source_label": "The Cuban Rider dragstrip video (Facebook)",
+     "source_url": "https://www.facebook.com/thecubanrider/videos/s1000xr-quarter-mile-time/923891111715462/",
+     "source_type": "forum_or_timeslip",
+     "note": "10.55 @ 133 mph; model year/gen and stock status unverified \u2014 low weight"
+    }
+   ],
+   "notes": "165hp/114Nm match BMW claims. BMW kerb 226kg = DB dry 226 (likely mislabel, not URL-verified this session). Best available 1/4-mile is a dragstrip video run."
+  },
+  {
+   "id": 237,
+   "name": "Aprilia RSV Mille (2001-2004)",
+   "db": {
+    "peak_power_hp": 138.0,
+    "peak_torque_nm": 107.0,
+    "dry_mass_kg": 189.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "138hp@9500 / 107Nm / dry 189 consistent with period claims. DB cyl='I2' is wrong in kind \u2014 engine is a 60-degree V-twin (V2); cylinder_config not in allowed spec_check fields, flagging here."
+  },
+  {
+   "id": 238,
+   "name": "Aprilia Tuono 1000 R (2006-2010)",
+   "db": {
+    "peak_power_hp": 139.0,
+    "peak_torque_nm": 107.0,
+    "dry_mass_kg": 186.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "139hp/107Nm consistent with period claims; V-twin (DB cyl I2 wrong in kind)."
+  },
+  {
+   "id": 241,
+   "name": "Triumph Thruxton 1200 R (2016-2022)",
+   "db": {
+    "peak_power_hp": 97.0,
+    "peak_torque_nm": 112.0,
+    "dry_mass_kg": 203.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [
+    {
+     "kind": "quarter_mile",
+     "value": 12.22,
+     "trap_kmh": 178,
+     "source_label": "TriumphRat forum owner timeslip (Thruxton R at the drag strip)",
+     "source_url": "https://www.triumphrat.net/threads/thruxton-r-at-the-drag-strip.769258/",
+     "source_type": "forum_or_timeslip",
+     "note": "Best owner slip 12.218 @ 110.64 mph, 1.87s 60ft; separate owner drag video shows 12.055 @ 113.36 mph. No magazine instrumented ET found."
+    }
+   ],
+   "notes": "Specs OK (97 PS / 112 Nm / 203 kg dry per Triumph). FastestLaps blocked (403); only forum-grade ETs exist, consistent around 12.0-12.4s."
+  },
+  {
+   "id": 243,
+   "name": "Triumph Tiger 1200 GT Pro (2022-2026)",
+   "db": {
+    "peak_power_hp": 148.0,
+    "peak_torque_nm": 130.0,
+    "dry_mass_kg": 245.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "dry_mass_kg",
+     "db_value": 245,
+     "web_value": 245,
+     "source_url": "https://www.webbikeworld.com/2022-triumph-tiger-1200-gt-pro-explorer/",
+     "confidence": "high",
+     "note": "245 kg is Triumph's published KERB (wet) weight; DB stores it in dry_kg. True dry ~223 kg (unpublished) \u2014 sim likely double-counts fluids."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "Power/torque confirmed (147-148 hp, 130 Nm, Cycle World dyno'd it too). No instrumented quarter-mile test found anywhere."
+  },
+  {
+   "id": 244,
+   "name": "MV Agusta F4 1000 R (2010-2018)",
+   "db": {
+    "peak_power_hp": 186.0,
+    "peak_torque_nm": 114.0,
+    "dry_mass_kg": 192.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_power_hp",
+     "db_value": 186,
+     "web_value": 195,
+     "source_url": "https://www.autoevolution.com/moto/mv-agusta-f4-r-2011.html",
+     "confidence": "medium",
+     "note": "F4 R (2011+) claimed 195 hp @ 13,500 / 113 Nm @ 9,100; DB's 186 hp @ 12,900 matches the BASE F4 \u2014 model name says R, so either rename or bump power"
+    }
+   ],
+   "benchmarks": []
+  },
+  {
+   "id": 245,
+   "name": "MV Agusta Brutale 800 Dragster (2016-2023)",
+   "db": {
+    "peak_power_hp": 140.0,
+    "peak_torque_nm": 87.0,
+    "dry_mass_kg": 167.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_power_hp",
+     "db_value": 140,
+     "web_value": 125,
+     "source_url": "https://www.motorcycle.com/manufacturer/2014-mv-agusta-brutale-800-dragster-review.html",
+     "confidence": "medium",
+     "note": "Base Dragster 800 (2014-2017) claimed 125 hp @ 11,500; 140 hp is the RR trim (separately catalogued as id 4622) / post-2018 figure \u2014 DB row spans 2016-2023 so it's trim/year-dependent"
+    }
+   ],
+   "benchmarks": [],
+   "notes": "No instrumented quarter-mile found for the base Dragster (only an MCN Streetfighter-context 11.4s of unclear attribution \u2014 skipped)."
+  },
+  {
+   "id": 252,
+   "name": "Moto Guzzi V85 TT (2019-2026)",
+   "db": {
+    "peak_power_hp": 80.0,
+    "peak_torque_nm": 80.0,
+    "dry_mass_kg": 229.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "wet_mass_kg",
+     "db_value": null,
+     "web_value": 229,
+     "source_url": "https://www.advpulse.com/adv-bikes/moto-guzzi-v85-tt-specs/",
+     "confidence": "high",
+     "note": "229 kg is the published KERB weight; DB stores 229 as dry_kg \u2014 Guzzi press dry claim is ~208 kg, so sim mass is ~20 kg heavy after fluid add-on"
+    }
+   ],
+   "benchmarks": [],
+   "notes": "80 hp @ 7,750 / 80 Nm verified. No instrumented quarter-mile found (fastestlaps blocked; reviews are non-instrumented)."
+  },
+  {
+   "id": 256,
+   "name": "Honda RS150R (Malaysia) (2017-2026)",
+   "db": {
+    "peak_power_hp": 16.1,
+    "peak_torque_nm": 13.8,
+    "dry_mass_kg": 118.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "15.8 PS @ 9000 / 13.6 Nm @ 7000 / kerb 120 kg (Zigwheels MY, paultan.org) \u2014 DB 16.1 hp / 13.8 Nm within ~3%. No instrumented drag test published despite active drag scene."
+  },
+  {
+   "id": 260,
+   "name": "Honda CB150R StreetFire (Indonesia) (2017-2024)",
+   "db": {
+    "peak_power_hp": 16.0,
+    "peak_torque_nm": 13.8,
+    "dry_mass_kg": 133.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_power_hp",
+     "db_value": 16,
+     "web_value": 16.6,
+     "source_url": "https://www.oto.com/en/motor-baru/honda/cb-150r/spesifikasi",
+     "confidence": "medium",
+     "note": "Indonesian spec 16.6 hp @ 9000 (16.9 PS); DB 16.0 ~3.8% low. Torque 13.8 Nm matches; kerb 136 kg consistent with DB dry 133."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "No instrumented quarter-mile found; Indonesian media only run 0-200m tests."
+  },
+  {
+   "id": 261,
+   "name": "Honda CBR150R (Indonesia) (2021-2026)",
+   "db": {
+    "peak_power_hp": 17.1,
+    "peak_torque_nm": 14.4,
+    "dry_mass_kg": 136.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "16.9 hp @ 9000 / 14.4 Nm @ 7000 / wet 137 kg \u2014 DB 17.1 hp within 1.2%. DB dry 136 vs wet 137 suggests dry is really kerb-1. No instrumented quarter-mile exists."
+  },
+  {
+   "id": 262,
+   "name": "Honda CBR250RR (Indonesia) (2017-2026)",
+   "db": {
+    "peak_power_hp": 42.0,
+    "peak_torque_nm": 25.0,
+    "dry_mass_kg": 165.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_power_hp",
+     "db_value": 42,
+     "web_value": 38,
+     "source_url": "https://en.wikipedia.org/wiki/Honda_CBR250RR_(2017)",
+     "confidence": "medium",
+     "note": "Power progression: 38 PS (2017 launch) -> 40.8 PS (2020) -> 41.5 hp (2022 SP). DB 42 only valid for late SP years; row spans 2017-2026."
+    }
+   ],
+   "benchmarks": []
+  },
+  {
+   "id": 265,
+   "name": "Yamaha Exciter 150 (Vietnam) (2015-2020)",
+   "db": {
+    "peak_power_hp": 15.4,
+    "peak_torque_nm": 13.8,
+    "dry_mass_kg": 115.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "15.4 PS / 13.8 Nm matches published specs. Only YouTube speedo/GPS top-speed clips (124-138 km/h, inconsistent, speedo optimistic) \u2014 nothing citable."
+  },
+  {
+   "id": 266,
+   "name": "Yamaha Exciter 155 VVA (Vietnam) (2021-2026)",
+   "db": {
+    "peak_power_hp": 17.7,
+    "peak_torque_nm": 14.4,
+    "dry_mass_kg": 118.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "17.7 hp / 14.4 Nm confirmed. YouTube/Motorival top-speed clips report 145-157 km/h (speedo vs GPS mixed) \u2014 too inconsistent to record. SE Asia drag scene runs 201m, not 402m."
+  },
+  {
+   "id": 267,
+   "name": "Yamaha Aerox 155 (SE Asia) (2020-2026)",
+   "db": {
+    "peak_power_hp": 15.1,
+    "peak_torque_nm": 13.9,
+    "dry_mass_kg": 122.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "15 PS / 13.9 Nm confirmed (matches DB). Real-world tests (BikeDekho/ZigWheels): 0-60 km/h ~5.5s, GPS top speed ~112 km/h \u2014 no citable instrumented quarter-mile. CVT scooter."
+  },
+  {
+   "id": 269,
+   "name": "Kawasaki Ninja ZX-25R (Indonesia) (2020-2026)",
+   "db": {
+    "peak_power_hp": 50.0,
+    "peak_torque_nm": 22.9,
+    "dry_mass_kg": 183.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Confirmed: 50 hp @ 15500 (51 w/ ram), 22.9 Nm @ 14500, curb 182 kg (Wikipedia/rideapart) \u2014 DB matches (DB dry 183 is essentially the curb figure)."
+  },
+  {
+   "id": 270,
+   "name": "Kawasaki Ninja RR Mono 250 (Indonesia) (2014-2017)",
+   "db": {
+    "peak_power_hp": 27.8,
+    "peak_torque_nm": 22.6,
+    "dry_mass_kg": 152.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Specs confirmed: 27.6 hp @ 9700, 22.6 Nm (16.7 lb-ft) @ 8200, wet 151 kg (motorcycle.com 2014 reveal) \u2014 DB matches within tolerance (DB dry 152 is likely the wet figure). No instrumented quarter-mile test found (Indonesia-market bike); honest empty."
+  },
+  {
+   "id": 284,
+   "name": "Honda NSR250R SP (1990-1993)",
+   "db": {
+    "peak_power_hp": 45.0,
+    "peak_torque_nm": 38.0,
+    "dry_mass_kg": 139.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "45 PS (Japan self-imposed limit) matches DB. Already benchmarked. Note: engine is a 90-degree V2, DB says I2 (config field not in scope)."
+  },
+  {
+   "id": 285,
+   "name": "Honda CR500R (1989-2001)",
+   "db": {
+    "peak_power_hp": 65.0,
+    "peak_torque_nm": 66.0,
+    "dry_mass_kg": 102.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "64.6 PS factory claim matches DB 65 hp. Dirt bike \u2014 no instrumented street quarter-mile exists; only ProfessCars estimates and modified-bike dyno videos."
+  },
+  {
+   "id": 286,
+   "name": "Aprilia RS250 (1995-2002)",
+   "db": {
+    "peak_power_hp": 70.0,
+    "peak_torque_nm": 45.0,
+    "dry_mass_kg": 140.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Has benchmark; no new year-specific instrumented test found incidentally."
+  },
+  {
+   "id": 287,
+   "name": "Aprilia RS125 (1995-2012)",
+   "db": {
+    "peak_power_hp": 33.0,
+    "peak_torque_nm": 22.0,
+    "dry_mass_kg": 118.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "PRIORITY hunt: no instrumented quarter-mile found for the 2T RS125 \u2014 only ProfessCars/motorbikecatalog calculated estimates (skipped per honesty rules; the '19s' figures are for the 4T model anyway). 33hp derestricted claim plausible; dry 118 within claimed range."
+  },
+  {
+   "id": 291,
+   "name": "Honda CBR1000RR-R Fireblade SP (2024-2025)",
+   "db": {
+    "peak_power_hp": 215.0,
+    "peak_torque_nm": 113.0,
+    "dry_mass_kg": 201.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Same 160 kW engine; DB 215 hp fine. DB dry_kg 201 equals the published KERB 201 kg (kerb-as-dry) \u2014 inconsistent with sibling row id 29 which stores dry 183 for essentially the same bike."
+  },
+  {
+   "id": 295,
+   "name": "BMW M 1000 RR (2025)",
+   "db": {
+    "peak_power_hp": 212.0,
+    "peak_torque_nm": 119.0,
+    "dry_mass_kg": 207.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_torque_nm",
+     "db_value": 119,
+     "web_value": 113,
+     "source_url": "https://www.cyclenews.com/2024/10/article/2025-bmw-m-1000-rr-first-look-and-specs/",
+     "confidence": "high",
+     "note": "BMW: 113Nm @ 11,000rpm; DB has 119Nm @ 12,500 \u2014 both value and rpm off"
+    },
+    {
+     "field": "dry_mass_kg",
+     "db_value": 207,
+     "web_value": 193,
+     "source_url": "https://www.zigwheels.com/bmw-bikes/m-1000-rr/specifications/",
+     "confidence": "medium",
+     "note": "Published KERB is 193kg \u2014 DB dry 207 exceeds kerb, physically impossible; dry should be ~178-181"
+    }
+   ],
+   "benchmarks": [],
+   "notes": "2025 EU spec is 218hp@14,500 (+6hp via titanium valves, 14.5:1 CR) vs DB 212 \u2014 2.8%, just under the 3% threshold, but a real model-year change; US spec stays 205hp@13,000. No instrumented 1/4-mile found for the 2025 model yet."
+  },
+  {
+   "id": 296,
+   "name": "Aprilia RS 660 Factory (2025)",
+   "db": {
+    "peak_power_hp": 100.0,
+    "peak_torque_nm": 67.3,
+    "dry_mass_kg": 190.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_power_hp",
+     "db_value": 100,
+     "web_value": 105,
+     "source_url": "https://www.cyclenews.com/2025/03/article/aprilia-release-revised-rs-660-factory-now-with-105-hp-for-2025/",
+     "confidence": "high",
+     "note": "MY2025 RS 660 (incl. Factory) uprated to 105 hp @ 10,400 rpm with 52mm throttle bodies."
+    },
+    {
+     "field": "peak_torque_nm",
+     "db_value": 67.3,
+     "web_value": 70,
+     "source_url": "https://www.cyclenews.com/2025/03/article/aprilia-release-revised-rs-660-factory-now-with-105-hp-for-2025/",
+     "confidence": "high",
+     "note": "MY2025: 70 Nm @ 8,400 rpm."
+    },
+    {
+     "field": "dry_mass_kg",
+     "db_value": 190,
+     "web_value": 183,
+     "source_url": "https://en.wikipedia.org/wiki/Aprilia_RS660",
+     "confidence": "medium",
+     "note": "183 kg is the official KERB of the base RS 660; the Factory (lithium battery) is lighter still. DB 'dry' 190 exceeds even the kerb \u2014 implausible, needs review. Exact 2025 Factory dry weight not verified (spec pages 403'd)."
+    }
+   ],
+   "benchmarks": []
+  },
+  {
+   "id": 298,
+   "name": "Kawasaki ZX-6R (2024-2025)",
+   "db": {
+    "peak_power_hp": 131.0,
+    "peak_torque_nm": 71.8,
+    "dry_mass_kg": 140.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_power_hp",
+     "db_value": 131,
+     "web_value": 122,
+     "source_url": "https://www.cycleworld.com/kawasaki/ninja-zx-6r-abs/",
+     "confidence": "medium",
+     "note": "2024 Euro5 model claims 122 hp @ 13,000 (US 40th Anniversary listed 127 hp); DB 131 hp @ 13,500 is the 2013-2019 pre-Euro5 636 figure"
+    }
+   ],
+   "benchmarks": [],
+   "notes": "Torque OK (71 Nm @ 10,800 vs DB 71.8). Already has July-4 instrumented benchmark."
+  },
+  {
+   "id": 299,
+   "name": "Kawasaki Z H2 SE (2024-2025)",
+   "db": {
+    "peak_power_hp": 239.0,
+    "peak_torque_nm": 137.0,
+    "dry_mass_kg": 239.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_power_hp",
+     "db_value": 239,
+     "web_value": 197.3,
+     "source_url": "https://www.cycleworld.com/kawasaki/ninja-z-h2-se-abs/",
+     "confidence": "high",
+     "note": "DATA ERROR: Z H2 SE uses the same supercharged 998cc engine as the Z H2 \u2014 197 hp @ 11000, 137 Nm @ 8500 (Cycle World buyer's guide; multiple sources agree). DB's 239 hp is 21% high; no Kawasaki source claims 239 hp for the Z H2 SE (the July-6 outlier note 'H2 SX SE+' is a different bike). Torque 137 Nm matches DB."
+    }
+   ],
+   "benchmarks": []
+  },
+  {
+   "id": 302,
+   "name": "MV Agusta Superveloce 1000 Serie Oro (2025)",
+   "db": {
+    "peak_power_hp": 208.0,
+    "peak_torque_nm": 116.0,
+    "dry_mass_kg": 207.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "dry_mass_kg",
+     "db_value": 207,
+     "web_value": 194,
+     "source_url": "https://www.revzilla.com/common-tread/2025-mv-agusta-superveloce-1000-serie-oro-first-look",
+     "confidence": "medium",
+     "note": "Claimed dry 427 lb = 193.7 kg (RevZilla + motorcycle.com spec sheet); DB 207 is ~13 kg heavy"
+    }
+   ],
+   "benchmarks": [],
+   "notes": "IMPORTANT: engine is a 998cc INLINE-FOUR (Brutale 1000-derived), but DB cylinder_config says I3 \u2014 taxonomy/importer fix needed. 208 hp @ 13,000 / 116.5 Nm verified. No instrumented test yet (2025 halo bike)."
+  },
+  {
+   "id": 313,
+   "name": "Honda SP 160 (2024-2025)",
+   "db": {
+    "peak_power_hp": 14.5,
+    "peak_torque_nm": 13.9,
+    "dry_mass_kg": 130.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_power_hp",
+     "db_value": 14.5,
+     "web_value": 13.27,
+     "source_url": "https://www.bikedekho.com/honda/sp160/specifications",
+     "confidence": "medium",
+     "note": "SP160 makes 13.27 bhp @ 7500 rpm (not 14.5 @ 8500) \u2014 DB ~9% high and wrong rpm."
+    },
+    {
+     "field": "peak_torque_nm",
+     "db_value": 13.9,
+     "web_value": 14.58,
+     "source_url": "https://www.bikedekho.com/honda/sp160/specifications",
+     "confidence": "medium",
+     "note": "14.58 Nm \u2014 DB ~5% low."
+    },
+    {
+     "field": "displacement_cc",
+     "db_value": 160,
+     "web_value": 162.71,
+     "source_url": "https://www.bikedekho.com/honda/sp160/specifications",
+     "confidence": "medium",
+     "note": "Actual displacement 162.71 cc (Unicorn-derived engine). Kerb 139/141 kg vs DB dry 130 \u2014 plausible."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "No instrumented test found."
+  },
+  {
+   "id": 314,
+   "name": "Honda Hornet 2.0 (2024-2025)",
+   "db": {
+    "peak_power_hp": 17.3,
+    "peak_torque_nm": 16.3,
+    "dry_mass_kg": 142.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "displacement_cc",
+     "db_value": 194,
+     "web_value": 184.4,
+     "source_url": "https://www.bikedekho.com/honda/hornet-20/specifications",
+     "confidence": "medium",
+     "note": "OBD2B 2024+ Hornet 2.0 is still 184.4 cc (17.27 PS @ 8500, 15.9 Nm @ 6000) \u2014 no displacement bump ever existed. DB 194 cc is wrong; multiple Indian spec sources agree."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "Power/torque within 3% of DB (DB appears to store PS as hp)."
+  },
+  {
+   "id": 315,
+   "name": "Yamaha FZS 25 (2023-2024)",
+   "db": {
+    "peak_power_hp": 20.3,
+    "peak_torque_nm": 20.8,
+    "dry_mass_kg": 155.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_torque_nm",
+     "db_value": 20.8,
+     "web_value": 20.1,
+     "source_url": "https://www.motorbeam.com/2021-yamaha-fzs-25-review-test-ride/",
+     "confidence": "medium",
+     "note": "Official FZS 25: 20.8 PS @ 8,000 / 20.1 Nm @ 6,000. DB torque 20.8 @ 6,500 looks like the PS figure transposed into the Nm field."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "No instrumented quarter-mile found (only 0-100 km/h real-world tests for the FZ25 sibling)."
+  },
+  {
+   "id": 318,
+   "name": "BMW G 310 RR (2024-2025)",
+   "db": {
+    "peak_power_hp": 34.4,
+    "peak_torque_nm": 28.0,
+    "dry_mass_kg": 168.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "PRIORITY hunt: no instrumented quarter-mile found (TVS Apache RR310 twin sister may carry Indian instrumented data under its own entry). 34PS@9700 / 27.3Nm@7700 confirmed. Official kerb 174.5 kg; DB dry 168 unverifiable (no published dry)."
+  },
+  {
+   "id": 319,
+   "name": "Honda CBR900RR Fireblade (1992-1995)",
+   "db": {
+    "peak_power_hp": 124.0,
+    "peak_torque_nm": 90.0,
+    "dry_mass_kg": 185.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "DB specs (124 hp, 90 Nm, 185 kg dry) match period-published figures. Has benchmark already; no year-specific instrumented test found incidentally."
+  },
+  {
+   "id": 320,
+   "name": "Honda CBR900RR (1998-1999)",
+   "db": {
+    "peak_power_hp": 152.0,
+    "peak_torque_nm": 99.0,
+    "dry_mass_kg": 189.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "displacement_cc",
+     "db_value": 893,
+     "web_value": 918.5,
+     "source_url": "https://www.autoevolution.com/moto/honda-cbr-900-rr-fireblade-1998.html",
+     "confidence": "high",
+     "note": "1998-99 SC33 is the 918cc engine; 893cc is the 1992-95 gen. DB row blends generations."
+    },
+    {
+     "field": "peak_power_hp",
+     "db_value": 152,
+     "web_value": 130,
+     "source_url": "https://www.autoevolution.com/moto/honda-cbr-900-rr-fireblade-1998.html",
+     "confidence": "high",
+     "note": "Claimed 130 hp @ 10500 (multiple concordant sources); DB 152 hp @ 11500 looks like CBR929RR (2000) specs leaked in."
+    },
+    {
+     "field": "peak_torque_nm",
+     "db_value": 99,
+     "web_value": 92,
+     "source_url": "https://www.autoevolution.com/moto/honda-cbr-900-rr-fireblade-1998.html",
+     "confidence": "medium",
+     "note": "92 Nm @ 8500 claimed; DB 99 @ 9500 ~7.6% high."
+    },
+    {
+     "field": "dry_mass_kg",
+     "db_value": 189,
+     "web_value": 180,
+     "source_url": "https://www.autoevolution.com/moto/honda-cbr-900-rr-fireblade-1998.html",
+     "confidence": "medium",
+     "note": "Claimed dry 180 kg for 1998-99."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "DB row appears to be a mishmash of 1992-95 CBR900RR displacement and CBR929RR power \u2014 whole config needs correction, and its existing benchmark should be re-checked against whichever generation it actually represents."
+  },
+  {
+   "id": 322,
+   "name": "Yamaha FZR1000 EXUP (1989-1995)",
+   "db": {
+    "peak_power_hp": 145.0,
+    "peak_torque_nm": 107.5,
+    "dry_mass_kg": 214.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "dry_mass_kg",
+     "db_value": 214,
+     "web_value": 209,
+     "source_url": "https://www.autoevolution.com/moto/yamaha-fzr-1000-exup-1989.html",
+     "confidence": "medium",
+     "note": "1989 EXUP dry commonly quoted 209 kg (wet 235); DB 214 kg is 5 kg high \u2014 within source variance across model years."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "145 hp / 107 Nm confirmed (web peak rpm 10,500 vs DB 10,000 \u2014 minor)."
+  },
+  {
+   "id": 323,
+   "name": "Kawasaki ZX-9R Ninja (1994-1997)",
+   "db": {
+    "peak_power_hp": 147.0,
+    "peak_torque_nm": 100.0,
+    "dry_mass_kg": 213.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_power_hp",
+     "db_value": 147,
+     "web_value": 139,
+     "source_url": "https://en.wikipedia.org/wiki/Kawasaki_Ninja_ZX-9R",
+     "confidence": "medium",
+     "note": "B1 (1994) claimed 139 hp @ 10,500; DB 147 @ 11,000 may be a later-B/ram-air figure"
+    },
+    {
+     "field": "peak_torque_nm",
+     "db_value": 100,
+     "web_value": 94,
+     "source_url": "https://en.wikipedia.org/wiki/Kawasaki_Ninja_ZX-9R",
+     "confidence": "medium",
+     "note": "94 Nm @ 9,000 claimed for B1"
+    }
+   ],
+   "benchmarks": [],
+   "notes": "Dry: web ~216 vs DB 213 \u2014 within tolerance."
+  },
+  {
+   "id": 324,
+   "name": "Honda RC30 (VFR750R) (1988-1992)",
+   "db": {
+    "peak_power_hp": 118.0,
+    "peak_torque_nm": 76.0,
+    "dry_mass_kg": 215.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "dry_mass_kg",
+     "db_value": 215,
+     "web_value": 185,
+     "source_url": "https://en.wikipedia.org/wiki/Honda_VFR750R",
+     "confidence": "high",
+     "note": "RC30 dry weight is 185 kg (408 lb) \u2014 DB 215 kg is ~30 kg too heavy (larger than its wet weight)."
+    }
+   ],
+   "benchmarks": [
+    {
+     "kind": "quarter_mile",
+     "et_s": 11.8,
+     "source_label": "FastestLaps (period road-test figure)",
+     "source_url": "https://fastestlaps.com/models/honda-vrf-750-r",
+     "source_type": "aggregator",
+     "note": "High-11s quarters attributed to period testing (tall 80-mph first gear hurts launches). No trap speed published."
+    },
+    {
+     "kind": "top_speed",
+     "speed_kmh": 249.4,
+     "source_label": "Cycle World Feb 1988 (JARI banked oval, measured)",
+     "source_url": "https://magazine.cycleworld.com/article/1988/2/1/honda-rc30",
+     "source_type": "instrumented",
+     "year_tested": 1988,
+     "note": "155 mph measured at JARI \u2014 third-fastest production bike CW had tested at the time."
+    }
+   ],
+   "notes": "118 hp claim consistent with full-power export spec. Engine is a V4, DB says I4 (config field not in scope)."
+  },
+  {
+   "id": 330,
+   "name": "BMW HP4 Race (2017-2018)",
+   "db": {
+    "peak_power_hp": 215.0,
+    "peak_torque_nm": 120.0,
+    "dry_mass_kg": 146.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "PRIORITY hunt: no quarter-mile test exists \u2014 track-only 750-unit homologation-free special; Cycle News/Motorcycle.com tests were circuit-only. Specs confirmed: 215hp claim, dry 146 kg (321 lb) / wet 171 kg (377 lb) \u2014 DB dry 146 correct."
+  },
+  {
+   "id": 331,
+   "name": "Aprilia RSV4 1100 Factory FW1A (2025-2026)",
+   "db": {
+    "peak_power_hp": 220.0,
+    "peak_torque_nm": 125.0,
+    "dry_mass_kg": 168.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "wet_mass_kg",
+     "db_value": null,
+     "web_value": 204,
+     "source_url": "https://www.motoplanete.us/aprilia/11176/RSV4-1100-Factory-2025/contact.html",
+     "confidence": "high",
+     "note": "Official 2025 kerb (fully loaded) 204 kg. DB dry 168 kg looks ~10-15 kg too low \u2014 the 2021-24 RSV4 Factory's claimed dry was ~175-177 (DB id 63 = 175). 220hp@13,100 / 125Nm@10,800 confirmed (DB rpm 13200/11000 within noise)."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "PRIORITY hunt: no instrumented quarter-mile test for the 2025 RSV4 1100 found; 300+ km/h top speed is a manufacturer claim, not measured \u2014 skipped."
+  },
+  {
+   "id": 332,
+   "name": "MV Agusta F4 RC (2017-2019)",
+   "db": {
+    "peak_power_hp": 212.0,
+    "peak_torque_nm": 115.0,
+    "dry_mass_kg": 175.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_power_hp",
+     "db_value": 212,
+     "web_value": 205,
+     "source_url": "https://www.cycleworld.com/sport-rider/new-2017-mv-agusta-f4-rc-first-look/",
+     "confidence": "high",
+     "note": "205 hp road-going trim; 212 hp @ 13,600 only with the racing kit. DB pairs the race-kit 212 hp with the race-trim dry 175 kg (386 lb) \u2014 internally consistent as a race-kit config; road trim is 205 hp / 183 kg (403 lb)"
+    }
+   ],
+   "benchmarks": [],
+   "notes": "No instrumented quarter-mile test found (limited-run 350-unit bike)."
+  },
+  {
+   "id": 333,
+   "name": "Honda RC213V-S (2015-2016)",
+   "db": {
+    "peak_power_hp": 215.0,
+    "peak_torque_nm": 118.0,
+    "dry_mass_kg": 160.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_power_hp",
+     "db_value": 215,
+     "web_value": 159,
+     "source_url": "https://www.motorcyclenews.com/bike-reviews/honda/rc213v-s/2015/",
+     "confidence": "high",
+     "note": "Stock EU bike makes 159 bhp @ 11000; 215 bhp requires the optional (track-only) Sports Kit; US-spec was ~101 hp. DB stores the kit figure \u2014 decide which config the sim models."
+    },
+    {
+     "field": "dry_mass_kg",
+     "db_value": 160,
+     "web_value": 170,
+     "source_url": "https://www.bennetts.co.uk/bikesocial/reviews/bikes/honda/honda-rc213v-s-world-first-full-test",
+     "confidence": "high",
+     "note": "Honda claims 170 kg dry."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "No instrumented quarter-mile test exists (limited-production, no magazine strip test found)."
+  },
+  {
+   "id": 343,
+   "name": "Aprilia Tuareg 660 (2022-2026)",
+   "db": {
+    "peak_power_hp": 80.0,
+    "peak_torque_nm": 70.0,
+    "dry_mass_kg": 204.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "dry_mass_kg",
+     "db_value": 204,
+     "web_value": 187,
+     "source_url": "https://storeusa.aprilia.com/files/technical/2022%20Tuareg%20660%20Spec%20Sheet.pdf",
+     "confidence": "high",
+     "note": "DB dry_kg 204 is the official KERB weight; Aprilia spec sheet lists dry 187 kg / kerb 204 kg. 80hp/70Nm confirmed."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "No instrumented quarter-mile found."
+  },
+  {
+   "id": 345,
+   "name": "Honda NS400R (1985-1987)",
+   "db": {
+    "peak_power_hp": 72.0,
+    "peak_torque_nm": 51.0,
+    "dry_mass_kg": 163.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [
+    {
+     "kind": "quarter_mile",
+     "et_s": 13.03,
+     "trap_kmh": 164.2,
+     "source_label": "Period road test archived at motorcyclespecs.co.za",
+     "source_url": "https://www.motorcyclespecs.co.za/model/Honda/honda_ns400r.htm",
+     "source_type": "magazine",
+     "year_tested": 1985,
+     "note": "Standing quarter 13.03s @ 164.2 km/h. Full-power export spec (72 hp)."
+    }
+   ],
+   "notes": "72 hp @ 9500 / dry 163 kg confirmed. Engine is a 90-degree V3 two-stroke \u2014 DB cyl 'I3' is a config mislabel (field not in scope)."
+  },
+  {
+   "id": 699,
+   "name": "Honda CB750 Hornet (2023-2026)",
+   "db": {
+    "peak_power_hp": 90.5,
+    "peak_torque_nm": 75.0,
+    "dry_mass_kg": 179.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "90.5 hp / 75 Nm match Honda's official claim exactly (hondanews.com); curb ~190-192 kg vs DB dry 179 plausible."
+  },
+  {
+   "id": 700,
+   "name": "Honda CB200X (2022-2026)",
+   "db": {
+    "peak_power_hp": 17.0,
+    "peak_torque_nm": 16.1,
+    "dry_mass_kg": 138.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "17.26 PS (~17.0 hp) @ 8500 and 15.9 Nm match DB within tolerance; kerb 147 kg vs DB dry 138 plausible. No quarter-mile tests exist for this commuter ADV."
+  },
+  {
+   "id": 702,
+   "name": "BMW R 1300 GS (2024-2026)",
+   "db": {
+    "peak_power_hp": 145.0,
+    "peak_torque_nm": 149.0,
+    "dry_mass_kg": 223.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Confirmed by BMW official + ZigWheels: 145bhp@7750, 149Nm@6500, kerb 237kg \u2014 DB dry 223 consistent. No drift."
+  },
+  {
+   "id": 704,
+   "name": "Triumph Tiger Sport 660 (2022-2026)",
+   "db": {
+    "peak_power_hp": 80.0,
+    "peak_torque_nm": 64.0,
+    "dry_mass_kg": 191.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "81 PS / 64 Nm confirmed; kerb 206 kg, DB dry 191 plausible. No instrumented ET; only claimed top speeds (~225 km/h from Indian spec sites, not measured)."
+  },
+  {
+   "id": 709,
+   "name": "Honda NX500 (2024-2026)",
+   "db": {
+    "peak_power_hp": 47.0,
+    "peak_torque_nm": 43.0,
+    "dry_mass_kg": 183.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "46.7 bhp / 43 Nm confirmed (same tune as CB500X). MCN anecdotal 'just over 100 mph' is not a measured figure \u2014 no benchmark recorded."
+  },
+  {
+   "id": 710,
+   "name": "Bajaj Pulsar 150 (2009-2023)",
+   "db": {
+    "peak_power_hp": 14.0,
+    "peak_torque_nm": 13.4,
+    "dry_mass_kg": 138.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "14PS confirmed (bajajauto; @8500rpm vs DB 8000 \u2014 value matches), 13.4Nm ok. Kerb 148kg vs DB dry 138 consistent. Top speed 110-111 kmph figures are claimed/anecdotal, not instrumented \u2014 skipped. No instrumented ET found."
+  },
+  {
+   "id": 717,
+   "name": "Honda SP 125 (2019-2026)",
+   "db": {
+    "peak_power_hp": 10.72,
+    "peak_torque_nm": 10.9,
+    "dry_mass_kg": 108.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "10.72 bhp @ 7500 / 10.9 Nm @ 6000 exactly match DB (BikeDekho/ZigWheels). Kerb 116 kg. No instrumented benchmark found."
+  },
+  {
+   "id": 719,
+   "name": "Kawasaki Z900RS (2018-2026)",
+   "db": {
+    "peak_power_hp": 111.0,
+    "peak_torque_nm": 98.5,
+    "dry_mass_kg": 203.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Verified: 111 hp @ 8,500, 98.5 Nm @ 6,500, wet 215 kg (torquepedia/thebikejunction) \u2014 DB dry 203 + ~12 kg fluids checks out."
+  },
+  {
+   "id": 725,
+   "name": "BMW R 18 (2020-2026)",
+   "db": {
+    "peak_power_hp": 91.0,
+    "peak_torque_nm": 158.0,
+    "dry_mass_kg": 333.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "91hp@4750 / 158Nm@3000 crank claims consistent with Cycle World dyno of R18 B (81.5hp rear wheel). Kerb 345kg; DB dry 333 plausible. No instrumented 1/4-mile found (12.8s ProfessCars estimate skipped)."
+  },
+  {
+   "id": 729,
+   "name": "Honda CBR300R (2014-2018)",
+   "db": {
+    "peak_power_hp": 30.4,
+    "peak_torque_nm": 27.0,
+    "dry_mass_kg": 153.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "30.4 hp @ 8500 / 27 Nm @ 7250 match exactly; curb 162 kg vs DB dry 153 consistent."
+  },
+  {
+   "id": 730,
+   "name": "Kawasaki Versys-X 300 (2017-2024)",
+   "db": {
+    "peak_power_hp": 39.0,
+    "peak_torque_nm": 25.7,
+    "dry_mass_kg": 163.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "wet_mass_kg",
+     "db_value": null,
+     "web_value": 175,
+     "source_url": "https://www.kawasaki.com/en-us/motorcycle/versys/adventure-touring/versys-x-300/2026-versys-x-300-abs",
+     "confidence": "high",
+     "note": "Kawasaki US curb 386 lb (175 kg) for ABS model; DB dry 163 is plausible as true dry, so only filling the missing kerb. hp 39 vs claim 40 within 3%."
+    }
+   ],
+   "benchmarks": [
+    {
+     "kind": "zero_to_100",
+     "value": 8.3,
+     "et_s": 8.3,
+     "source_label": "Autocar India instrumented performance test",
+     "source_url": "https://www.autocarindia.com/auto-features/kawasaki-versys-x-300-performance-tested-436490",
+     "source_type": "instrumented",
+     "note": "Autocar India VBOX-style instrumented test: 0-100 km/h 8.3 s (0-60 km/h 3.41 s). No quarter-mile published in snippet; page fetch blocked (403)."
+    }
+   ]
+  },
+  {
+   "id": 733,
+   "name": "Yamaha FZ-S FI V3 (2019-2026)",
+   "db": {
+    "peak_power_hp": 12.23,
+    "peak_torque_nm": 13.3,
+    "dry_mass_kg": 127.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "12.4 PS @ 7,250 / 13.3 Nm @ 5,500 confirmed \u2014 matches DB. Only 0-60 km/h real-world tests exist for this commuter; no quarter-mile."
+  },
+  {
+   "id": 736,
+   "name": "Bajaj Avenger Street 160 (2016-2020)",
+   "db": {
+    "peak_power_hp": 14.8,
+    "peak_torque_nm": 13.7,
+    "dry_mass_kg": 139.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "14.79bhp@8500 / 13.7Nm@7000 confirmed (team-bhp) \u2014 DB matches. Kerb 156kg vs DB dry 139 (17kg gap, borderline plausible). No instrumented tests found."
+  },
+  {
+   "id": 741,
+   "name": "Honda CRF300L Rally (2021-2026)",
+   "db": {
+    "peak_power_hp": 27.4,
+    "peak_torque_nm": 26.6,
+    "dry_mass_kg": 140.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "27 hp @ 8500 / 26.6 Nm @ 6500 / kerb 153 kg confirmed via Honda News \u2014 DB matches. No instrumented benchmark exists."
+  },
+  {
+   "id": 743,
+   "name": "Aprilia Tuono 660 Factory (2022-2026)",
+   "db": {
+    "peak_power_hp": 100.0,
+    "peak_torque_nm": 67.0,
+    "dry_mass_kg": 169.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "100hp confirmed for Factory; kerb 181 kg (lithium battery), DB dry 169 plausible as true dry."
+  },
+  {
+   "id": 752,
+   "name": "Kawasaki Ninja ZX-4R (2024-2026)",
+   "db": {
+    "peak_power_hp": 77.0,
+    "peak_torque_nm": 37.2,
+    "dry_mass_kg": 191.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Specs confirmed: 77 hp (57 kW), 80 hp w/ ram, curb 188 kg (Wikipedia/Kawasaki). Torque sources conflict (37.6-42 Nm) vs DB 37.2 \u2014 no confident discrepancy. NO ZX-4R-specific instrumented quarter-mile found; circulating low-12s figures are ZX-4RR tests or estimates \u2014 left honestly empty rather than borrowing the RR's numbers."
+  },
+  {
+   "id": 762,
+   "name": "Honda CB500X (2019-2024)",
+   "db": {
+    "peak_power_hp": 47.0,
+    "peak_torque_nm": 43.2,
+    "dry_mass_kg": 197.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Specs match factory claim (47 hp / 43.2 Nm, kerb 197). Only ProfessCars ESTIMATED quarter-miles (14.1-14.3s) found \u2014 skipped per honest-data rules."
+  },
+  {
+   "id": 764,
+   "name": "Yamaha MT-09 SP (2021-2024)",
+   "db": {
+    "peak_power_hp": 119.0,
+    "peak_torque_nm": 93.0,
+    "dry_mass_kg": 175.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Identical drivetrain to MT-09 2021 \u2014 specs confirmed via same sources; SP adds ~1-2 kg (Ohlins/cruise). No drift."
+  },
+  {
+   "id": 766,
+   "name": "Honda CRF1100L Africa Twin Adventure Sports (2020-2026)",
+   "db": {
+    "peak_power_hp": 101.0,
+    "peak_torque_nm": 105.0,
+    "dry_mass_kg": 213.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "wet_mass_kg",
+     "db_value": null,
+     "web_value": 238,
+     "source_url": "https://www.adventurebikerider.com/article/honda-africa-twin-and-africa-twin-adventure-sports/",
+     "confidence": "high",
+     "note": "Kerb 238 kg MT / 248 kg DCT. Adventure Sports is 12 kg HEAVIER than base (bigger 24.8L tank), but DB dry (213) has it 13 kg LIGHTER than base (226) \u2014 masses inverted. True AS dry ~224 kg."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "Power/torque match. Mass relationship vs base model is wrong in DB."
+  },
+  {
+   "id": 770,
+   "name": "Kawasaki Z650RS (2022-2026)",
+   "db": {
+    "peak_power_hp": 68.0,
+    "peak_torque_nm": 65.7,
+    "dry_mass_kg": 171.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Verified: 67-68 hp @ 8,000, 65.8 Nm @ 6,700, kerb 187 kg (torquepedia/kawasaki.com) \u2014 matches DB; dry 171 plausible."
+  },
+  {
+   "id": 771,
+   "name": "Yamaha MT-07 SP (2021-2026)",
+   "db": {
+    "peak_power_hp": 73.4,
+    "peak_torque_nm": 68.0,
+    "dry_mass_kg": 175.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "CATALOG NAMING FLAG: no 'MT-07 SP' model exists in Yamaha's lineup for 2021-2024 (SP variants are MT-09/MT-10; Yamaha USA/EU model lists show only standard MT-07). DB specs mirror the 2021 EU5 MT-07 (73.4 PS @ 8,750 / 67-68 Nm @ 6,500) which are correct for the standard bike."
+  },
+  {
+   "id": 773,
+   "name": "Honda CMX500 Rebel (2017-2026)",
+   "db": {
+    "peak_power_hp": 45.6,
+    "peak_torque_nm": 43.3,
+    "dry_mass_kg": 175.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [
+    {
+     "kind": "top_speed",
+     "speed_kmh": 152.9,
+     "source_label": "MotoStatz GPS test 2026 Rebel 500 (cited via Corner Speed blog)",
+     "source_url": "https://cornerspeedapp.com/blog/honda-rebel-500-review",
+     "source_type": "aggregator",
+     "year_tested": 2026,
+     "note": "95 mph GPS top speed, 0-60 5.2s per MotoStatz; motostatz.com blocked direct fetch so cited secondhand. FastestLaps' '12.7s @ 115 mph Cycle World' figure is physically implausible for 46 hp and appears misattributed \u2014 deliberately NOT recorded."
+    }
+   ],
+   "notes": "Specs match (45.6 hp / 43.3 Nm). No trustworthy instrumented quarter-mile found."
+  },
+  {
+   "id": 774,
+   "name": "Honda NC750X (2021-2026)",
+   "db": {
+    "peak_power_hp": 58.0,
+    "peak_torque_nm": 69.0,
+    "dry_mass_kg": 199.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "58 hp / 69 Nm match published specs. Already benchmarked."
+  },
+  {
+   "id": 776,
+   "name": "Kawasaki Z500 (2024-2026)",
+   "db": {
+    "peak_power_hp": 44.7,
+    "peak_torque_nm": 42.6,
+    "dry_mass_kg": 153.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Specs consistent: 45.4 PS (44.8 hp) @ 9,000, 42.6 Nm @ 6,000, kerb 168 kg (motorcycle.com/MCN) vs DB dry 153 plausible. RideApart's '51 hp' claim is an outlier, ignored. No instrumented quarter-mile test found (bike too new/small; only old EX500 data surfaced)."
+  },
+  {
+   "id": 777,
+   "name": "Bajaj Freedom 125 (2024-2026)",
+   "db": {
+    "peak_power_hp": 9.5,
+    "peak_torque_nm": 9.7,
+    "dry_mass_kg": 138.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "9.3bhp(\u22489.5PS)@8000 / 9.7Nm confirmed \u2014 DB matches. Kerb 147.8kg vs DB dry 138 \u2014 consistent given 2L petrol + CNG tank. World-first CNG bike; no instrumented performance tests found."
+  },
+  {
+   "id": 778,
+   "name": "BMW M 1000 XR (2024-2026)",
+   "db": {
+    "peak_power_hp": 210.0,
+    "peak_torque_nm": 113.0,
+    "dry_mass_kg": 213.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_power_hp",
+     "db_value": 210,
+     "web_value": 201,
+     "source_url": "https://www.bmwmotorcycles.com/en/models/m/m1000xr/technicaldata.html",
+     "confidence": "high",
+     "note": "BMW official: 148kW/201hp @ 12,750rpm (DB has 210 @ 13,750 \u2014 looks copied from S1000RR/M-RR); torque 113Nm @ 11,000 matches DB"
+    }
+   ],
+   "benchmarks": [],
+   "notes": "Only ProfessCars estimates (~10.0s) found for 1/4-mile \u2014 skipped per honest-data rules. 0-124mph 7.2s is a BMW claim, not a test."
+  },
+  {
+   "id": 781,
+   "name": "BMW F 900 XR (2020-2026)",
+   "db": {
+    "peak_power_hp": 105.0,
+    "peak_torque_nm": 92.0,
+    "dry_mass_kg": 219.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "PRIORITY hunt: only ProfessCars estimates (11.5s) \u2014 skipped. 105hp confirmed. DB dry_kg 219 equals BMW's official ROAD-READY (kerb) weight; true dry not published \u2014 kerb-as-dry misfile likely."
+  },
+  {
+   "id": 782,
+   "name": "Honda Grom MSX125 (2022-2026)",
+   "db": {
+    "peak_power_hp": 9.7,
+    "peak_torque_nm": 10.5,
+    "dry_mass_kg": 104.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [
+    {
+     "kind": "quarter_mile",
+     "et_s": 21.02,
+     "trap_kmh": 90.1,
+     "source_label": "hondagrom.net owner drag-strip timeslip (stock Grom)",
+     "source_url": "https://www.hondagrom.net/threads/ran-the-quarter-mile-tonight.11233/",
+     "source_type": "forum_or_timeslip",
+     "note": "Stock Grom 21.02s @ 56 mph. Timeslip is from an earlier-gen Grom; 2022+ gen has near-identical output (9.7 hp) so class-representative. ProfessCars estimates 20.3s agree."
+    }
+   ],
+   "notes": "No magazine instrumented test exists for this class."
+  },
+  {
+   "id": 786,
+   "name": "Honda CB650F (2014-2018)",
+   "db": {
+    "peak_power_hp": 89.85,
+    "peak_torque_nm": 63.0,
+    "dry_mass_kg": 187.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "DB 89.85 hp matches the 2017+ 90 PS bump (2014-16 was 87 PS). Only second-hand forum mention of an '11.8s magazine test' and ProfessCars estimates \u2014 no citable instrumented quarter-mile; left empty."
+  },
+  {
+   "id": 789,
+   "name": "Honda Monkey 125 (2022-2026)",
+   "db": {
+    "peak_power_hp": 9.4,
+    "peak_torque_nm": 11.0,
+    "dry_mass_kg": 104.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "9.25-9.4 hp matches DB. Only ProfessCars estimates + anecdotal 55-60 mph top speed (Ultimate Motorcycling, not GPS-measured) \u2014 nothing recordable."
+  },
+  {
+   "id": 790,
+   "name": "Honda NT1100 (2022-2026)",
+   "db": {
+    "peak_power_hp": 102.0,
+    "peak_torque_nm": 104.0,
+    "dry_mass_kg": 218.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "102 PS / 104 Nm match Honda claims. Only ProfessCars quarter-mile estimates (12.0-12.1s) found \u2014 no instrumented test recorded."
+  },
+  {
+   "id": 794,
+   "name": "BMW R 1250 RT (2021-2024)",
+   "db": {
+    "peak_power_hp": 136.0,
+    "peak_torque_nm": 143.0,
+    "dry_mass_kg": 244.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "136hp/143Nm confirmed (motorbikecatalog). BMW claims ~279kg DIN kerb (not URL-verified this session); DB dry 244 implies a 35kg fluids gap \u2014 suspicious, likely stale. Only ProfessCars estimates (11.3s) for 1/4-mile \u2014 skipped."
+  },
+  {
+   "id": 796,
+   "name": "Kawasaki Versys 1000 SE (2022-2024)",
+   "db": {
+    "peak_power_hp": 120.0,
+    "peak_torque_nm": 102.0,
+    "dry_mass_kg": 260.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Same 120 hp / 102 Nm engine as Versys 1000 confirmed; SE kerb ~257 kg vs DB dry 260 \u2014 close, no confident discrepancy."
+  },
+  {
+   "id": 798,
+   "name": "BMW K1600 GT (2022-2026)",
+   "db": {
+    "peak_power_hp": 160.0,
+    "peak_torque_nm": 180.0,
+    "dry_mass_kg": 290.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "wet_mass_kg",
+     "db_value": null,
+     "web_value": 343,
+     "source_url": "https://www.bennetts.co.uk/bikesocial/reviews/bikes/bmw/k1600-gt-gtl-bagger-grand-america-2022-review",
+     "confidence": "high",
+     "note": "2022+ DIN kerb 343kg (BMW/Bennetts); DB dry 290 implies implausible 53kg fluids \u2014 dry for 2022+ should be ~318-320"
+    }
+   ],
+   "benchmarks": [
+    {
+     "kind": "quarter_mile",
+     "et_s": 10.86,
+     "trap_kmh": 197.68,
+     "source_label": "Cycle World (cited via RoarOnTheShore)",
+     "source_url": "https://roarontheshore.com/bmw-k1600gt/",
+     "source_type": "magazine",
+     "year_tested": 2012,
+     "note": "10.86s @ 122.86 mph \u2014 gen-1 K1600GT test; engine unchanged (160hp) for 2022+, but 2022 bike is ~24kg heavier"
+    }
+   ],
+   "notes": "160hp@6750 / 180Nm@5250 confirmed. DB dry 290kg appears to be gen-1 (2011) dry weight; 2022+ DIN kerb is 343kg. A 2022-specific Dragy forum thread exists (k1600forum.com thread 202875) but was 403-blocked."
+  },
+  {
+   "id": 799,
+   "name": "Honda CL500 (2023-2026)",
+   "db": {
+    "peak_power_hp": 47.0,
+    "peak_torque_nm": 43.2,
+    "dry_mass_kg": 177.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "47 hp / 43.2 Nm match published A2 specs. Only ProfessCars 14.3-14.4s quarter-mile estimates exist \u2014 nothing instrumented, honestly left empty."
+  },
+  {
+   "id": 801,
+   "name": "MV Agusta F3 RR (2024-2026)",
+   "db": {
+    "peak_power_hp": 147.0,
+    "peak_torque_nm": 88.0,
+    "dry_mass_kg": 168.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "147 hp @ 13,000 Euro5 claim matches DB; dry 168 consistent with MV spec."
+  },
+  {
+   "id": 1256,
+   "name": "BMW R 12 nineT (2024-2026)",
+   "db": {
+    "peak_power_hp": 109.0,
+    "peak_torque_nm": 115.0,
+    "dry_mass_kg": 205.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Confirmed 109hp@7000 / 115Nm@6500, kerb 220kg (bikereview.com.au) \u2014 DB dry 205 consistent. Only ProfessCars estimate (11.4s) for 1/4-mile \u2014 skipped."
+  },
+  {
+   "id": 1259,
+   "name": "BSA Gold Star 650 (2022-2026)",
+   "db": {
+    "peak_power_hp": 45.0,
+    "peak_torque_nm": 55.0,
+    "dry_mass_kg": 213.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "45hp / 55Nm confirmed (web says hp @6,000 vs DB @6,500 \u2014 value matches). Kerb reported 201-213kg across sources (conflicting); DB dry 213 likely equals the higher kerb figure. Claimed top speed 103mph is manufacturer claim, not measured \u2014 skipped. No instrumented 1/4-mile exists."
+  },
+  {
+   "id": 1720,
+   "name": "Triumph Tiger Sport 800 (2025-2026)",
+   "db": {
+    "peak_power_hp": 113.0,
+    "peak_torque_nm": 84.0,
+    "dry_mass_kg": 196.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "113 hp @ 10,750 / 84 Nm @ 8,500 confirmed (Visordown/Rider). Visordown mentions 'over 220 km/h on track' \u2014 too vague to record. No quarter-mile tests published yet (new model)."
+  },
+  {
+   "id": 3126,
+   "name": "Moto Guzzi V100 Mandello S (2022-2026)",
+   "db": {
+    "peak_power_hp": 113.0,
+    "peak_torque_nm": 105.0,
+    "dry_mass_kg": 215.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Web: 115 hp @ 8,700 (DB 113, 1.8% \u2014 under threshold), 105 Nm @ 6,750 exact, dry 212 / kerb 233 (Wikipedia/Guzzi tech-spec PDF) vs DB dry 215 \u2014 within tolerance. No instrumented quarter-mile found (fastestlaps/accelerationtimes pages blocked, provenance unclear anyway)."
+  },
+  {
+   "id": 3127,
+   "name": "Aprilia Shiver 900 (2017-2024)",
+   "db": {
+    "peak_power_hp": 95.0,
+    "peak_torque_nm": 90.0,
+    "dry_mass_kg": 198.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "PRIORITY hunt: only ProfessCars-style calculated figures found (11.8s quarter on accelerationtimes/fastestlaps = estimate, skipped). No Cycle World/MCN instrumented strip test surfaced. 95hp@8750 / 90Nm@6500 confirmed. Engine is a 90-degree V-twin, DB cyl='I2' wrong in kind."
+  },
+  {
+   "id": 3604,
+   "name": "Honda CBR650R E-Clutch (2024-2026)",
+   "db": {
+    "peak_power_hp": 95.18,
+    "peak_torque_nm": 63.0,
+    "dry_mass_kg": 191.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "95 hp / 63 Nm @ 9500 matches the 2024 revised claim; kerb ~210 kg."
+  },
+  {
+   "id": 3606,
+   "name": "MV Agusta Brutale 1000 RR Assen (2024-2025)",
+   "db": {
+    "peak_power_hp": 208.0,
+    "peak_torque_nm": 116.5,
+    "dry_mass_kg": 186.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Same platform/claims as Brutale 1000 RR (208 hp / 116.5 Nm / dry ~183-186, mvagusta.com) \u2014 DB consistent."
+  },
+  {
+   "id": 3607,
+   "name": "Honda CL250 (2023-2026)",
+   "db": {
+    "peak_power_hp": 26.5,
+    "peak_torque_nm": 22.0,
+    "dry_mass_kg": 158.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_power_hp",
+     "db_value": 26.5,
+     "web_value": 23.7,
+     "source_url": "https://japan.webike.net/moto_news/latest-news/20230314-cl250-will-be-released-on-5-18-specifications-also-revealed-motorcycle-show-2023/",
+     "confidence": "medium",
+     "note": "Honda Japan spec: 24 PS (23.7 hp) @ 8500 rpm, not 26.5 hp @ 9500. Torque 22.6 Nm @ 6250 vs DB 22 is fine. Kerb 172 kg."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "Only ProfessCars estimates found for 1/4 mile \u2014 no instrumented test recorded."
+  },
+  {
+   "id": 3608,
+   "name": "Aprilia RS 660 Extrema (2024-2025)",
+   "db": {
+    "peak_power_hp": 100.0,
+    "peak_torque_nm": 67.0,
+    "dry_mass_kg": 162.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Web dry 166 kg (motoplanete) vs DB 162 \u2014 4 kg, at threshold, not recorded. 100hp/67Nm confirmed."
+  },
+  {
+   "id": 4090,
+   "name": "Kawasaki W230 (2024-2026)",
+   "db": {
+    "peak_power_hp": 17.5,
+    "peak_torque_nm": 18.0,
+    "dry_mass_kg": 132.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "peak_torque_nm",
+     "db_value": 18,
+     "web_value": 18.6,
+     "source_url": "https://www.bennetts.co.uk/bikesocial/reviews/bikes/kawasaki/w230-2026-review",
+     "confidence": "high",
+     "note": "Claim 18.6 Nm @ 5800 (Bennetts/Kawasaki EU; autoevolution rounds to 19 Nm @ 5800). DB 18 Nm @ 5500 \u2014 small but real drift (3.3%), rpm also off."
+    },
+    {
+     "field": "wet_mass_kg",
+     "db_value": null,
+     "web_value": 143,
+     "source_url": "https://www.kawasaki.com/en-us/motorcycle/w/retro-classic/w230",
+     "confidence": "high",
+     "note": "Kerb 143 kg (Kawasaki). DB dry 132 plausible as dry; filling missing kerb."
+    }
+   ],
+   "benchmarks": [
+    {
+     "kind": "top_speed",
+     "value": 113,
+     "speed_kmh": 113,
+     "source_label": "Bennetts BikeSocial W230 technical review",
+     "source_url": "https://www.bennetts.co.uk/bikesocial/reviews/bikes/kawasaki/w230-2026-review",
+     "source_type": "magazine",
+     "year_tested": 2026,
+     "note": "GPS-measured Vmax ~113 km/h in 6th (limiter-bound; 118 km/h indicated at cut). No quarter-mile test exists for this bike."
+    }
+   ]
+  },
+  {
+   "id": 4094,
+   "name": "Bajaj Pulsar 125 Neon (2019-2024)",
+   "db": {
+    "peak_power_hp": 12.0,
+    "peak_torque_nm": 10.8,
+    "dry_mass_kg": 123.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "wet_mass_kg",
+     "db_value": null,
+     "web_value": 140,
+     "source_url": "https://www.91wheels.com/bikes/bajaj/pulsar-125-neon/specifications",
+     "confidence": "medium",
+     "note": "Kerb reported 140-146kg across sources; DB dry 123 implies 17-23kg fluids gap \u2014 dry likely ~128-130"
+    }
+   ],
+   "benchmarks": [],
+   "notes": "11.64bhp (11.8PS) @8500 vs DB 12.0 \u2014 under 3% threshold with PS interpretation. Torque 10.8Nm matches."
+  },
+  {
+   "id": 4583,
+   "name": "Honda CB400X (2023-2026)",
+   "db": {
+    "peak_power_hp": 46.0,
+    "peak_torque_nm": 38.0,
+    "dry_mass_kg": 170.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "wet_mass_kg",
+     "db_value": null,
+     "web_value": 196,
+     "source_url": "https://motoryk.com/bikes/honda/cb400x",
+     "confidence": "medium",
+     "note": "Curb 196 kg (multiple sources incl. enduro.team concur). DB dry 170 implies ~180 wet \u2014 DB dry likely ~15 kg too light. Power 46 hp / torque 38 Nm match (web rpm 9500/7500 vs DB 8000/6500)."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "No instrumented quarter-mile tests found for this JDM/Asia ADV twin."
+  },
+  {
+   "id": 4585,
+   "name": "Honda CBR 600RR (2013-2020)",
+   "db": {
+    "peak_power_hp": 118.0,
+    "peak_torque_nm": 65.0,
+    "dry_mass_kg": 186.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "118 hp claim matches. DB dry_kg 186 equals the published 2013 CURB weight (186 kg) \u2014 kerb misfiled as dry; true dry ~156."
+  },
+  {
+   "id": 4588,
+   "name": "Yamaha MT-09 Y-AMT (2024-2026)",
+   "db": {
+    "peak_power_hp": 117.0,
+    "peak_torque_nm": 93.0,
+    "dry_mass_kg": 201.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "dry_mass_kg",
+     "db_value": 201,
+     "web_value": 196,
+     "source_url": "https://www.moto-data.net/yamaha/mt-09-y-amt-2025",
+     "confidence": "high",
+     "note": "Published WET weight for the Y-AMT is 196 kg (standard 2024 MT-09 wet 193 + ~3 kg AMT). DB 'dry' 201 kg exceeds the published wet weight \u2014 true dry ~180 kg."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "119 PS (117.3 hp) @ 10,000 / 93 Nm confirmed."
+  },
+  {
+   "id": 4590,
+   "name": "Triumph Tiger 900 GT Pro (2024-2026)",
+   "db": {
+    "peak_power_hp": 108.0,
+    "peak_torque_nm": 90.0,
+    "dry_mass_kg": 198.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "108 PS @ 9,500 / 90 Nm @ 6,850 confirmed. DB dry 198 kg equals Triumph's official 198 kg kerb (same dry=kerb pattern); one aggregator claims 203 dry / 222 kerb but conflicts with Triumph \u2014 left unflagged."
+  },
+  {
+   "id": 4591,
+   "name": "Honda CRF250L (2021-2024)",
+   "db": {
+    "peak_power_hp": 24.5,
+    "peak_torque_nm": 22.6,
+    "dry_mass_kg": 132.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Japan-market 2021+ CRF250L: 24 hp @ 9000, 23 Nm @ 6500 \u2014 within 3% of DB (24.5/22.6). Note DB hp_rpm 8500 vs real 9000. No instrumented quarter-mile."
+  },
+  {
+   "id": 4592,
+   "name": "Aprilia Tuono 457 (2025-2026)",
+   "db": {
+    "peak_power_hp": 47.6,
+    "peak_torque_nm": 43.5,
+    "dry_mass_kg": 148.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [
+    {
+     "field": "dry_mass_kg",
+     "db_value": 148,
+     "web_value": 159,
+     "source_url": "https://www.moto-data.net/aprilia/tuono-457-2025",
+     "confidence": "high",
+     "note": "Official dry 159 kg (kerb 175); DB 148 is ~11 kg too light. Duplicate-generation row of id 193."
+    }
+   ],
+   "benchmarks": [],
+   "notes": "No instrumented quarter-mile test found (too new)."
+  },
+  {
+   "id": 4593,
+   "name": "BMW F 900 GS (2024-2026)",
+   "db": {
+    "peak_power_hp": 105.0,
+    "peak_torque_nm": 93.0,
+    "dry_mass_kg": 198.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "PRIORITY hunt: no instrumented quarter-mile found. 105hp@8500 confirmed; official wet 219 kg with full 14.5L tank \u2014 DB dry 198 plausible as true dry. Torque 93Nm matches claim."
+  },
+  {
+   "id": 4609,
+   "name": "Honda CBR1100XX Super Blackbird (1997-1998)",
+   "db": {
+    "peak_power_hp": 164.0,
+    "peak_torque_nm": 124.0,
+    "dry_mass_kg": 223.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Exact match: 164 hp @ 9500, 124 Nm @ 7250, dry 223 kg (autoevolution/totalmotorcycle). Already carries CW 1997 benchmark."
+  },
+  {
+   "id": 4610,
+   "name": "Kawasaki Ninja ZX-12R (2000-2006)",
+   "db": {
+    "peak_power_hp": 178.0,
+    "peak_torque_nm": 134.0,
+    "dry_mass_kg": 210.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Confirmed: 178 hp (190 w/ ram), 134 Nm @ 7500, dry 210 kg (Wikipedia/motoplanete) \u2014 DB matches exactly."
+  },
+  {
+   "id": 4614,
+   "name": "Kawasaki ZRX1200R (2001-2008)",
+   "db": {
+    "peak_power_hp": 122.0,
+    "peak_torque_nm": 112.0,
+    "dry_mass_kg": 223.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Verified exactly: 122 hp @ 8,500, dry 223 kg (Wikipedia/motorcyclespecifications.com) \u2014 matches DB."
+  },
+  {
+   "id": 4622,
+   "name": "MV Agusta Dragster 800 RR (2018-2026)",
+   "db": {
+    "peak_power_hp": 140.0,
+    "peak_torque_nm": 87.0,
+    "dry_mass_kg": 168.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "140 hp / 87 Nm verified (MV claims 140 @ 12,300; DB hp_rpm 13,100 slightly off but value matches). Already benchmarked."
+  },
+  {
+   "id": 4624,
+   "name": "Kove 450RR (2023-2026)",
+   "db": {
+    "peak_power_hp": 69.7,
+    "peak_torque_nm": 39.0,
+    "dry_mass_kg": 154.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Verified: 443cc I4, 70 hp @ 13,000, 39 Nm, kerb 165 kg (MCN/throttlecraze) \u2014 DB matches (69.7 hp, dry 154)."
+  },
+  {
+   "id": 4630,
+   "name": "Honda CBR600RR (2024-2026)",
+   "db": {
+    "peak_power_hp": 119.0,
+    "peak_torque_nm": 63.0,
+    "dry_mass_kg": 179.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "JDM 89 kW = 121 PS = 119 hp matches DB. Only ProfessCars estimated 11.1s quarter-mile found \u2014 skipped as estimate; no instrumented test yet."
+  },
+  {
+   "id": 4632,
+   "name": "Kove 800X (2023-2026)",
+   "db": {
+    "peak_power_hp": 94.0,
+    "peak_torque_nm": 80.0,
+    "dry_mass_kg": 174.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Web: 94-95 hp (some sources claim 100), 80-81 Nm @ 7,500, kerb 183 kg base (barebonesmc/koverally.info) \u2014 DB 94 hp / 80 Nm / dry 174 consistent. No instrumented quarter-mile found."
+  },
+  {
+   "id": 4633,
+   "name": "Kove 450 Rally (2023-2026)",
+   "db": {
+    "peak_power_hp": 51.0,
+    "peak_torque_nm": 39.0,
+    "dry_mass_kg": 146.0,
+    "wet_mass_kg": null
+   },
+   "researched": true,
+   "spec_checks": [],
+   "benchmarks": [],
+   "notes": "Web: 51-54 hp @ 9,500 (variant-dependent), ~40 Nm @ 7,000, curb 155-167 kg (kovemotousa.com / advpulse.com) \u2014 DB 51 hp / 39 Nm / dry 146 plausible. No instrumented quarter-mile exists (rally bike, niche brand)."
+  }
+ ]
+}

@@ -1,0 +1,421 @@
+{
+ "scrape_date": "2026-07-10",
+ "coverage": {
+  "catalog_families": 120,
+  "returned": 24
+ },
+ "tire_families": [
+  {
+   "manufacturer": "Apollo",
+   "model": "Alpha H1",
+   "tire_ids": [
+    195
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [
+    {
+     "size": "150/60ZR17",
+     "retailer": "TyreDekho (tyres.cardekho.com)",
+     "price_inr": 6710,
+     "source_url": "https://tyres.cardekho.com/apollo/alpha"
+    },
+    {
+     "size": "110/70R17",
+     "retailer": "TyreDekho (tyres.cardekho.com)",
+     "price_inr": 4399,
+     "source_url": "https://tyres.cardekho.com/apollo/alpha"
+    }
+   ],
+   "notes": "Alpha H1 is current and widely sold in India (Apollo product page, Amazon.in, Flipkart, tyremarket.com). SIZE CONTRADICTION: our DB row is 180/55ZR17 rear, but no 180/55ZR17 Alpha H1 exists in any listing \u2014 published lineup is 110/70(Z)R17 front and 150/60(Z)R17 rear (plus R-rated variants). Our 180/55ZR17 row appears to be a fabricated size. TyrePlex quotes overall price range Rs 4,974-6,397 (https://www.tyreplex.com/apollo-tyres/alpha-h1)."
+  },
+  {
+   "manufacturer": "Avon",
+   "model": "AM23A Drag Radial",
+   "tire_ids": [
+    163,
+    216
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "MODEL NAME WRONG: no 'AM23A Drag Radial' exists. The real tire is the Avon AM23 \u2014 a REAR-only, bias, race-use-only (non-DOT) classic ROAD-RACE tire, not a drag radial. Published sizes: 130/65-18, 130/80-17, 150/70-18, 170/60-18, 180/55-18, 130/70R-18 (demon-tweeks.com/us/avon-am23-motorcycle-tyre-2016136) \u2014 neither of our sizes (120/70ZR17 front, 180/55ZR17 rear) exists; the front counterpart is the AM22. Still listed at US retailers (RevZilla https://www.revzilla.com/motorcycle/avon-am23-rear-race-tire, Cycle Gear https://www.cyclegear.com/tires/avon-am23-rear-race-tire) but absent from Avon's 2025 EU relaunch lineup (only Cobra Chrome, Spirit ST, 3D Supersport, Roadrider MkII per https://www.tyrepress.com/2026/02/avon-becomes-a-purely-motorcycle-tyre-brand/) \u2014 likely running-stock/limited production. No Indian retail channel found; DB india=1 is dubious. No concrete price extractable (retail pages blocked)."
+  },
+  {
+   "manufacturer": "Avon",
+   "model": "Cobra Chrome",
+   "tire_ids": [
+    57,
+    190
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [
+    {
+     "size": "",
+     "retailer": "RevZilla (AV91/AV92 family, range $170.61-$550.44)",
+     "price_usd": 170.61,
+     "source_url": "https://www.revzilla.com/motorcycle/avon-cobra-chrome-tires"
+    }
+   ],
+   "notes": "Current \u2014 one of only four models in Avon's 2025 relaunch (now made in Montlucon, France after Melksham factory closed Dec 2023; sources: https://www.tyrepress.com/2026/02/avon-becomes-a-purely-motorcycle-tyre-brand/, https://twotyres.co.uk/avon-motorcycle-tyre-production-2025/). COMPOUND CONTRADICTION: our DB classes it 'drag_dot' \u2014 Cobra Chrome is a CRUISER/touring tire (whitewall options), not a drag DOT tire. RevZilla family price range $170.61-$550.44 depending on size. No Indian retail listing found; DB india=1 dubious."
+  },
+  {
+   "manufacturer": "Avon",
+   "model": "Cobra Chrome AV92",
+   "tire_ids": [
+    95,
+    236
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [
+    {
+     "size": "",
+     "retailer": "Tucker Speed (rear blackwall, sale price; reg $295.57)",
+     "price_usd": 221.68,
+     "source_url": "https://tuckerspeed.com/products/avon-cobra-chrome-rear-tire-blackwall"
+    }
+   ],
+   "notes": "Current (part of 2025 Avon relaunch). 240/50R16 rear IS a genuine AV92 size (confirmed: https://www.motorcycletire.com/product/PU03021265.html, https://www.easternperformance.com/avon-tyres-cobra-chrome-av92-240-50r16-84v-blackwall-bias-rear-motorcycle-tire.html \u2014 note listed as BIAS 84V). COMPOUND CONTRADICTION: DB classes it 'sport' \u2014 AV92 is a cruiser touring tire. ROW ERROR: id 236 (120/70ZR17 front) is misattributed \u2014 AV92 is the REAR Cobra Chrome; fronts are AV91. Tucker Speed price is a variant page (size not bound). No Indian channel found."
+  },
+  {
+   "manufacturer": "Avon",
+   "model": "Roadrunner AM26",
+   "tire_ids": [
+    221,
+    222
+   ],
+   "status": "discontinued",
+   "successor": "Avon Roadrider MkII",
+   "india_available": false,
+   "prices": [],
+   "notes": "MODEL NAME WRONG: AM26 is the 'Roadrider', not 'Roadrunner'. The AM26 Roadrider is no longer made (forum + retailer confirmation: https://www.triumphrat.net/threads/avon-roadriders-am26-superceded.970111/, https://twotyres.co.uk/product/avon-roadrider-mk-2/); successor is the Roadrider MkII, which is current and part of Avon's 2025 relaunch (31 sizes, 15\"-21\", H/V-rated classic bias tire). SIZE CONTRADICTION: our 120/70ZR17 + 180/55ZR17 radial supersport sizes never existed in the AM26/MkII classic range. Compound 'sport' also wrong \u2014 classic sport-touring bias. No Indian retail channel found."
+  },
+  {
+   "manufacturer": "Bridgestone",
+   "model": "Battlax",
+   "tire_ids": [
+    136,
+    138,
+    142,
+    145,
+    146,
+    148,
+    149,
+    151,
+    152,
+    155,
+    186
+   ],
+   "status": "unknown",
+   "successor": null,
+   "india_available": true,
+   "prices": [],
+   "notes": "'Battlax' alone is Bridgestone's sport tire FAMILY name, not a purchasable model \u2014 these 11 rows (mostly small Indian-fitment sizes like 130/70R17, 140/70R17, 150/60-17 at flat Rs 12,000) cannot be verified or priced without a sub-model (BT-39, BT46, S22, SC, etc.). The BT-39 (the likely small-size sport model, e.g. 140/70-17 66H rear) is current (https://www.bridgestone.com/products/motorcycle_tires/products/detail/pr016) but no India pricing surfaced. Battlax line as such is current and sold in India (S22 on amazon.in). Recommend re-tagging these rows with real sub-model names before pricing."
+  },
+  {
+   "manufacturer": "Bridgestone",
+   "model": "Battlax Adventurecross AX41S",
+   "tire_ids": [
+    84,
+    170
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [
+    {
+     "size": "",
+     "retailer": "RevZilla (family, range $169-$296 across sizes)",
+     "price_usd": 169,
+     "source_url": "https://www.revzilla.com/motorcycle/bridgestone-battlax-adventurecross-scrambler-ax41s-tires"
+    }
+   ],
+   "notes": "Current \u2014 'Battlax Adventurecross Scrambler AX41S' (official page https://www.bridgestone.com/products/motorcycle_tires/products/detail/pr177). Rear 180/55(Z)R17 73H VERIFIED as a real size (https://www.americanmototire.com/bridgestone-battlax-adventurecross-ax41s-180-55ZR-17-m-c-73h-rear/) \u2014 note it is H-rated (130 mph). Front 90/90R21 (id 84) NOT confirmed for the S variant in this pass \u2014 90/90-21 is an AX41 (knobby) size; verify before trusting. No Indian retail listing found."
+  },
+  {
+   "manufacturer": "Bridgestone",
+   "model": "Battlax Exedra G852",
+   "tire_ids": [
+    205
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "Current \u2014 high-performance radial cruiser rear, OEM on 2018+ Gold Wing and 2011-14 Yamaha Stryker (https://www.bridgestone.com/products/motorcycle_tires/products/detail/pr032). SIZE CONTRADICTION: our row is 180/55ZR17 \u2014 published G852 sizes seen are 180/55ZR-18 (V-Rod fitment, https://www.westendmotorsports.com/bridgestone-exedra-g852-replacement-tires-for-v-rods-street-rods-rear-180-55zr-18-74w-each/), 200/50R17, 200/55R16, 240/55R16; no 180/55ZR17 found \u2014 our row is probably the 18\" V-Rod size mis-keyed. Compound 'cruiser' is correct. No attributable price captured; no Indian channel found."
+  },
+  {
+   "manufacturer": "Bridgestone",
+   "model": "Battlax Hypersport RS11",
+   "tire_ids": [
+    87,
+    98
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "MODEL NAME WRONG: it is 'Battlax RACING STREET RS11' (successor to RS10), not 'Hypersport' \u2014 a track-day/racing-street tire, so DB compound 'street' undersells it (https://www.bridgestone.com/products/motorcycle_tires/products/detail/pr175). SIZE CONTRADICTION: our rows 130/70R18 and 130/80R17 rear do NOT exist in the RS11 range (RS11: 120/70R17 front; 160/60R17 / 180/55R17 / 190/55R17 / 200/55R17 rears) \u2014 these rows look like data from a different model. Sold at RevZilla/Cycle Gear/motodracing; no attributable price captured; no Indian retail listing found (import-only for Indian track riders)."
+  },
+  {
+   "manufacturer": "Bridgestone",
+   "model": "Battlax Hypersport S22",
+   "tire_ids": [
+    11,
+    78,
+    176
+   ],
+   "status": "current",
+   "successor": "Battlax Hypersport S23",
+   "india_available": true,
+   "prices": [],
+   "notes": "Current and still widely sold, though succeeded as flagship by the S23 (2024). India availability CONFIRMED: Amazon.in listings for 180/55ZR-17 (https://www.amazon.in/Bridgestone-Battlax-Hypersport-Rear-55ZR-17/dp/B07V5VYZHZ) and 190/55ZR-17 (https://www.amazon.in/Bridgestone-Battlax-Hypersport-Rear-55ZR-17/dp/B07NW2SQMD), plus Indian retailer Torque Block 190/55ZR17 (https://www.torqueblock.com/products/BRI-BTX-S22-190~55ZR17) and IndiaMART sellers. INR prices not extractable this pass (Amazon robot-check, Torque Block 403) \u2014 DB Rs 17,500 for 190/55ZR17 is plausible vs US ~$250 street price but unverified. Our sizes 190/55ZR17, 200/55ZR17, 120/70ZR17 are all genuine S22 sizes."
+  },
+  {
+   "manufacturer": "Bridgestone",
+   "model": "Battlax Hypersport S23",
+   "tire_ids": [
+    40,
+    41,
+    71,
+    82,
+    91
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [
+    {
+     "size": "",
+     "retailer": "RevZilla (family, range $172-$311 across sizes)",
+     "price_usd": 172,
+     "source_url": "https://www.revzilla.com/motorcycle/bridgestone-battlax-hypersport-s23-tires"
+    }
+   ],
+   "notes": "Current flagship hypersport (launched 2024, successor to S22; OEM on Kawasaki Ninja 1100SX). India availability confirmed via Indian retailer Tyre Titans selling the 120/70ZR17 + 190/50ZR17 pair (https://tyretitans.in/products/bridgestone-battlax-s23-120-70-zr17-and-190-50-zr17-front-and-rear) \u2014 INR price not extractable (403). Our sizes 120/70ZR17, 190/50ZR17, 160/60ZR17, 200/55ZR17 are genuine S23 sizes; 150/70R17 (id 91) NOT seen in S23 US size listings this pass \u2014 verify (S23 range is 17\" supersport; a 150/70R17 would be unusual). DB INR prices (Rs 12,800-19,000) plausible vs US $172-311."
+  },
+  {
+   "manufacturer": "Bridgestone",
+   "model": "Battlax Racing R11",
+   "tire_ids": [
+    10,
+    66
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "Current DOT track/race tire (official page https://www.bridgestone.com/products/motorcycle_tires/products/detail/pr145 ; live eBay/EU listings in 190/55R17 75V medium). No Indian retailer listing found - race-import channel only; DB india=1 and prices (Rs 20,500 / Rs 15,500) unverified. Note: race notation is 190/55R17 (not ZR). DUPLICATE FAMILY: 'R11 Race' (id 193) is the same product - recommend merging."
+  },
+  {
+   "manufacturer": "Bridgestone",
+   "model": "Battlax RS11",
+   "tire_ids": [
+    12
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "Current product (Bridgestone official Battlax Racing Street RS11 page pr175; sold at RevZilla/CycleGear/Walmart, US range approx $243-$355 at RevZilla - range only, no single price recorded). SIZE FLAG: our 190/50ZR17 could not be verified for RS11 - retail listings are overwhelmingly 190/55ZR17 (75W) rear; 190/50ZR17 appears associated with the older RS10 size chart. No Indian retail listing found (import/special-order only via shops like torqueblock.com, which blocked fetches); DB india=1 and Rs 18,000 unverified. Sources: https://www.bridgestone.com/products/motorcycle_tires/products/detail/pr175 , https://www.revzilla.com/motorcycle/bridgestone-battlax-rs11-tires"
+  },
+  {
+   "manufacturer": "Bridgestone",
+   "model": "Battlax S22",
+   "tire_ids": [
+    212,
+    220
+   ],
+   "status": "current",
+   "successor": "Battlax Hypersport S23",
+   "india_available": true,
+   "prices": [
+    {
+     "size": "180/55ZR17",
+     "retailer": "Amazon.in",
+     "price_inr": 7999,
+     "source_url": "https://www.amazon.in/Bridgestone-Battlax-Hypersport-Rear-55ZR-17/dp/B07V5VYZHZ"
+    },
+    {
+     "size": "180/55ZR17",
+     "retailer": "American Moto Tire (US)",
+     "price_usd": 207,
+     "source_url": "https://www.americanmototire.com/street-cruiser-touring/bridgestone-battlax-s22-180-55zr-17-73w-rear-11450-mc.html"
+    }
+   ],
+   "notes": "Superseded by Battlax Hypersport S23 (launched 2024) but Bridgestone explicitly keeps S22 in the lineup and it remains widely sold, incl. Amazon.in (Rs 7,999 figure from search-result metadata; page blocked direct fetch - treat as marketplace price, moderate confidence). US price $207 (disc. from $303.71). DUPLICATE FAMILY: plain 'S22' (ids 214/234) is the same product - merge. Sources: https://www.bennetts.co.uk/bikesocial/reviews/products/motorcycle-tyres/bridgestone-battlax-hypersport-s23-review"
+  },
+  {
+   "manufacturer": "Bridgestone",
+   "model": "Battlax T32",
+   "tire_ids": [
+    31,
+    162
+   ],
+   "status": "current",
+   "successor": "Battlax Sport Touring T33",
+   "india_available": null,
+   "prices": [
+    {
+     "size": "120/70ZR17",
+     "retailer": "Indy Superbikes (US, T32 GT variant)",
+     "price_usd": 221,
+     "source_url": "https://indysbk.com/products/bridgestone-battlax-sport-touring-t32-gt-tires"
+    }
+   ],
+   "notes": "Successor Battlax Sport Touring T33 launched Jan 2025 (Bridgestone press release https://www.bridgestone.com/corporate/news/2024103102.html ); T32 still widely sold (RevZilla $148.45-$280.47 across sizes). The $221 price is the T32 GT (heavy-bike) variant front. No Indian retail listing found for T32; DB Rs 13,800 unverified. Compound class 'street' vs published 'sport-touring' - consistent."
+  },
+  {
+   "manufacturer": "Bridgestone",
+   "model": "Battlax V02",
+   "tire_ids": [
+    51
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "Current racing slick (official Racing Battlax V02 page https://www.bridgestone.com/products/motorcycle_tires/products/detail/pr150 ; stocked by race suppliers trackaddix.com, bikearmory.net, toxicmotoracing.com, gp-reifen.com - all price pages blocked/no snippet price, none recorded). Size notation 190/650R17 is correct slick racing notation. Non-DOT race tire sold through track-day/race import channels only - no Indian consumer retail; DB india=1 questionable."
+  },
+  {
+   "manufacturer": "Bridgestone",
+   "model": "BT-46",
+   "tire_ids": [
+    207
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "Current \u2014 Bridgestone's bias-ply vintage sport-touring tire (successor to BT-45; official page https://www.bridgestone.com/products/motorcycle_tires/products/detail/pr176). SIZE CONTRADICTION: our row is 180/55ZR17 radial \u2014 the BT-46 is a BIAS tire whose rear sizes top out around 150/70-17 / 150/70-18 (confirmed 150/70-17 69H rear listings at americanmototire.com, svspowersports.com); no 180/55ZR17 exists. No Indian retail listing found (US/EU/JP channels only); DB india=1 dubious. No attributable price captured (retail pages blocked)."
+  },
+  {
+   "manufacturer": "Bridgestone",
+   "model": "R11 Race",
+   "tire_ids": [
+    193
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "DUPLICATE of 'Battlax Racing R11' family (ids 10/66) - same product, model-name synonym that the July-6 tire dedup (which normalized sizes, not names) did not catch. Recommend merging id 193 into the Racing R11 family. Front size 120/70R17 exists in the R11 range (official page pr145)."
+  },
+  {
+   "manufacturer": "Bridgestone",
+   "model": "S22",
+   "tire_ids": [
+    214,
+    234
+   ],
+   "status": "current",
+   "successor": "Battlax Hypersport S23",
+   "india_available": true,
+   "prices": [],
+   "notes": "DUPLICATE of 'Battlax S22' family (ids 212/220) - same product under a truncated name; recommend merging. See that family's entry for verified prices (Amazon.in Rs 7,999 for 180/55ZR17; US $207)."
+  },
+  {
+   "manufacturer": "CEAT",
+   "model": "Gripp",
+   "tire_ids": [
+    108,
+    109,
+    110,
+    119,
+    120,
+    123,
+    125,
+    126,
+    127,
+    128,
+    173
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [
+    {
+     "size": "100/90-17",
+     "retailer": "Flipkart (Gripp X3 variant)",
+     "price_inr": 3015,
+     "source_url": "https://www.flipkart.com/ceat-gripp-x3-tl-55p-100-90-17-rear-two-wheeler-tyre/p/itm0557835634374"
+    },
+    {
+     "size": "100/90-17",
+     "retailer": "DriveSpark (starts-at price)",
+     "price_inr": 2000,
+     "source_url": "https://www.drivespark.com/bike-tyres/ceat-gripp-100-90-r17-580/"
+    }
+   ],
+   "notes": "Current CEAT commuter/adventure family (Gripp / Gripp X3 / Gripp XL / Gripp Rad; ceat.com lists Gripp XL). PRICE FLAG: DB carries Rs 8,000 flat across all sizes - observed Indian retail is Rs 2,000-3,100, i.e. DB ~3x too high. DATA FLAGS: id 173 '180/55ZR17 rear' is NOT a Gripp size (sport-radial size; belongs to CEAT SportRad ST) - misfiled row; 110/80-14 (id 108) not found in the published Gripp range; 130/90B16 (id 119) labeled 'front' is doubtful for this family. Family price only - per-size prices for our exact sizes not published in accessible listings."
+  },
+  {
+   "manufacturer": "CEAT",
+   "model": "Zoom Rad X1",
+   "tire_ids": [
+    37
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [
+    {
+     "size": "150/60R17",
+     "retailer": "CEAT official (ceat.com)",
+     "price_inr": 4433,
+     "source_url": "https://www.ceat.com/bike-tyres/bike-product-listing/product-details/150-60r17-zoom-rad-x1-tl-66h.html"
+    },
+    {
+     "size": "150/60R17",
+     "retailer": "Flipkart",
+     "price_inr": 5111,
+     "source_url": "https://www.flipkart.com/ceat-zoom-rad-x1-150-60-r17-66h-tubeless-bike-150-60-17-rear-two-wheeler-tyre/p/itmf5w59tmm2xdzg"
+    }
+   ],
+   "notes": "Current CEAT sport-touring radial. SIZE FLAG: our 160/60ZR17 (id 37) not found anywhere - the published Zoom Rad X1 rear range tops out at 150/60R17 66H; the 160/60ZR17 CEAT radial does not appear to exist (CEAT's larger radials are SportRad). DB Rs 6,800 is above observed retail for the real 150/60R17 size (Rs 4,125-5,111; DriveSpark starts-at Rs 4,125: https://www.drivespark.com/bike-tyres/ceat-zoom-rad-x1-150-60-r17-66h-626/ )."
+  },
+  {
+   "manufacturer": "CEAT",
+   "model": "Zoom Sport",
+   "tire_ids": [
+    22,
+    184
+   ],
+   "status": "not_found",
+   "successor": "CEAT SportRad ST",
+   "india_available": null,
+   "prices": [],
+   "notes": "No CEAT product named 'Zoom Sport' exists - the Zoom family is Zoom / Zoom Plus / Zoom Rad X1 / Zoom Cruz (ceat.com Zoom listing: https://www.ceat.com/bike-tyres/zoom-tyres.html ), all bias commuter sizes. The CEAT product actually made in our sizes (190/55ZR17 rear + 120/70ZR17 front) is the SportRad ST big-bike radial - ceat.com lists 190/55ZR17 SPORTRAD ST TL 75W ( https://www.ceat.com/car-tyres/car-product-listing/product-details/190-55zr17-sportrad-st-rear-tl-75w.html , page shows Rs 0 placeholder) and TyreDekho quotes SportRad at Rs 5,999-7,500 ( https://tyres.cardekho.com/ceat/sportrad ). Recommend renaming these rows to SportRad ST; DB Rs 7,800 for the 190/55 is inside the SportRad quoted band."
+  },
+  {
+   "manufacturer": "Continental",
+   "model": "ConmiTour",
+   "tire_ids": [
+    238
+   ],
+   "status": "not_found",
+   "successor": null,
+   "india_available": null,
+   "prices": [],
+   "notes": "No Continental tire named 'ConmiTour' exists - name appears garbled. Continental's road products in 180/55ZR17 are Conti Motion / ContiRoadAttack 4 (e.g. https://www.americanmototire.com/street-cruiser-touring/continental-conti-motion-180-55zr-17-73w-rear-02550200000-mc.html ). The similarly-named real product 'ContiTour' is a bias-ply cruiser touring tire (16-inch Harley sizes) and is NOT made in 180/55ZR17. Row needs re-identification (most likely intended: Conti Motion 180/55ZR17)."
+  },
+  {
+   "manufacturer": "Continental",
+   "model": "Conti Twins",
+   "tire_ids": [
+    206
+   ],
+   "status": "not_found",
+   "successor": null,
+   "india_available": null,
+   "prices": [],
+   "notes": "'ContiTwins' is a real Continental line but it is a vintage/classic-bike tire family (RB2/K112 style, inch and small metric vintage sizes) - it is NOT made in 180/55ZR17, so this row as sized cannot be that product. Continental 180/55ZR17 offerings are Conti Motion / RoadAttack 4 / ContiSportAttack. Row needs re-identification; possibly confused with Conti Twinduro TKC80 (which does exist in 180/55-17 as a dual-sport: https://www.walmart.com/ip/180-55-17-Continental-Conti-Twinduro-TKC80-Tubeless-Dual-Sport-Rear-Tire/35047398 ) but that is an off-road-biased tire, not a 'sport' compound."
+  }
+ ]
+}
