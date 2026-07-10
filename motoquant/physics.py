@@ -606,7 +606,13 @@ class MotoQuantEngine:
                 if abs(slip_speed) < _lock_thresh and v > 1.0:
                     clutch_locked = True
                     omega_e = omega_input
-                    T_e_crank = self.engine_torque(omega_e * RADS_TO_RPM, t)
+                    # Lock-transition step: same forced-induction treatment
+                    # as the slip branch below (×1.0 exactly for NA — the
+                    # pinned baselines are unchanged by construction).
+                    _rpm_lock = omega_e * RADS_TO_RPM
+                    T_e_crank = self.engine_torque(
+                        _rpm_lock, t
+                    ) * self.forced_induction_torque_mult(_rpm_lock, t, P_boost)
                     T_e = T_e_crank
                     Q_clutch = 0.0
                 else:
@@ -642,7 +648,25 @@ class MotoQuantEngine:
                     # since, so engine_torque(omega_e * RADS_TO_RPM, t)
                     # returns the identical value (engine_torque is pure in
                     # (rpm, t)). Saves ~1 np.interp round-trip per slip step.
-                    T_e_crank = T_e_curve
+                    #
+                    # July 10, 2026: apply the forced-induction multiplier to
+                    # the crank torque driving the clutch. The slip branch
+                    # used the RAW curve torque, so turbo/supercharger/N2O
+                    # boost contributed ZERO drive force and ZERO engine
+                    # spin-up for the entire launch-slip phase (~3 s / 0-110
+                    # km/h): a steady-1-bar turbo Hayabusa simmed 0.29 s slow
+                    # to the 60-ft and 0.37 s slow on ET vs the physically
+                    # equivalent curve with boost baked in. For NA bikes the
+                    # multiplier is exactly 1.0 and x*1.0 is bit-exact in
+                    # IEEE 754, so the pinned K5/R1/Hayabusa baselines are
+                    # unchanged by construction. Ram-air and the parasitic
+                    # subtraction are still (deliberately) not applied here —
+                    # both are non-1.0 for NA bikes, so folding them in moves
+                    # the pinned baselines and belongs to a coordinated
+                    # rebaseline pass (see docs/ROADMAP.md epoch-gated list).
+                    T_e_crank = T_e_curve * self.forced_induction_torque_mult(
+                        rpm, t, P_boost
+                    )
 
                     # Apr 27, 2026: rate-limited over-clutching for low-power
                     # bikes. Real launches: rider can pull clutch in beyond
