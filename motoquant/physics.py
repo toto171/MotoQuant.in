@@ -517,6 +517,38 @@ class MotoQuantEngine:
         t = 0.0
 
         while x < distance and t < max_time and step < n_max - 1:
+            # ── Step-budget growth (adaptive mode only) ──────────────────
+            # n_max was sized from the constructor dt, but adaptive mode can
+            # halve dt to _dt_min — a run dominated by clutch slip/shifting
+            # (e.g. a clutch that never locks) exhausts the budget and would
+            # silently truncate before max_time/distance (verified: such a
+            # run stopped at exactly max_time/2). Extend the output arrays
+            # when the budget is nearly spent. Growth is bounded: dt never
+            # drops below _dt_min, so total steps ≤ max_time/_dt_min + 1.
+            # Fixed-dt runs advance t by exactly dt per step and can never
+            # enter this branch, so the baseline path is untouched.
+            if use_adaptive_dt and step >= n_max - 2:
+                _z = np.zeros(n_max)
+                out_t = np.concatenate((out_t, _z))
+                out_x = np.concatenate((out_x, _z))
+                out_v = np.concatenate((out_v, _z))
+                out_a = np.concatenate((out_a, _z))
+                out_rpm = np.concatenate((out_rpm, _z))
+                out_gear = np.concatenate((out_gear, np.zeros(n_max, dtype=int)))
+                out_slip = np.concatenate((out_slip, _z))
+                out_trac = np.concatenate((out_trac, _z))
+                out_Nf = np.concatenate((out_Nf, _z))
+                out_Nr = np.concatenate((out_Nr, _z))
+                out_Fd = np.concatenate((out_Fd, _z))
+                out_Fdrag = np.concatenate((out_Fdrag, _z))
+                out_Frr = np.concatenate((out_Frr, _z))
+                out_Ttire = np.concatenate((out_Ttire, _z))
+                out_Tclutch = np.concatenate((out_Tclutch, _z))
+                out_Pboost = np.concatenate((out_Pboost, _z))
+                out_power = np.concatenate((out_power, _z))
+                out_reff = np.concatenate((out_reff, _z))
+                n_max *= 2
+
             # ── Progress reporting (UI only — no effect on the physics) ──
             if progress_cb is not None and step % progress_every_steps == 0:
                 progress_cb(min(1.0, max(x / distance, t / max_time)))
@@ -940,18 +972,29 @@ class MotoQuantEngine:
         # Convert |a| (in g) back to m/s^2
         a_ms2 = np.abs(sim.a) * G
 
-        # Find first index where acceleration has been below threshold for
-        # plateau_window_s continuously
-        dt = sim.dt if sim.dt > 0 else self.dt
-        window_steps = max(1, int(plateau_window_s / dt))
-
+        # Find the first stretch of samples that stays below plateau_accel
+        # for plateau_window_s of SIMULATED TIME.  The window must be
+        # measured on sim.t, not in sample counts: run() uses adaptive dt
+        # here, so samples are non-uniformly spaced (0.5–5 ms) and SimResult
+        # .dt only records the final step size.  The old count-based window
+        # (plateau_window_s / sim.dt samples) shrank to ~0.15 s of real time
+        # wherever dt had adapted down — a single 160 ms gearshift (~300
+        # fine-grained samples of zero net accel while torque is cut)
+        # satisfied it, so /api/simulate/topspeed reported "terminal
+        # velocity reached" at the first shift (e.g. 84 m into a 300 km/h
+        # run) instead of at the actual aero plateau.
         terminal_idx = len(sim.v) - 1  # fallback: last sample
-        if len(a_ms2) >= window_steps:
-            # Rolling max: if the MAX accel over the next window_steps is
-            # below plateau_accel, we've terminaled.
-            for i in range(len(a_ms2) - window_steps):
-                if np.max(a_ms2[i : i + window_steps]) < plateau_accel:
-                    terminal_idx = i
+        found_plateau = False
+        if len(a_ms2) > 1:
+            below = a_ms2 < plateau_accel
+            padded = np.concatenate(([False], below, [False])).astype(np.int8)
+            edges = np.diff(padded)
+            run_starts = np.flatnonzero(edges == 1)
+            run_ends = np.flatnonzero(edges == -1) - 1  # inclusive
+            for s, e in zip(run_starts, run_ends):
+                if sim.t[e] - sim.t[s] >= plateau_window_s:
+                    terminal_idx = int(s)
+                    found_plateau = True
                     break
 
         # Peak velocity across the entire run (the number we quote as "top speed")
@@ -961,7 +1004,7 @@ class MotoQuantEngine:
         # Time / distance to *first enter* the plateau (when acceleration
         # first falls below the threshold and stays there). Falls back to
         # peak-V time if no plateau was detected.
-        reached = terminal_idx < len(sim.v) - 1
+        reached = found_plateau
         reach_idx = terminal_idx if reached else peak_idx
         terminal_t = float(sim.t[reach_idx])
         terminal_x = float(sim.x[reach_idx])
