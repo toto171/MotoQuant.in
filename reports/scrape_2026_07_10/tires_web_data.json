@@ -2,7 +2,7 @@
  "scrape_date": "2026-07-10",
  "coverage": {
   "catalog_families": 120,
-  "returned": 24
+  "returned": 120
  },
  "tire_families": [
   {
@@ -416,6 +416,1798 @@
    "india_available": null,
    "prices": [],
    "notes": "'ContiTwins' is a real Continental line but it is a vintage/classic-bike tire family (RB2/K112 style, inch and small metric vintage sizes) - it is NOT made in 180/55ZR17, so this row as sized cannot be that product. Continental 180/55ZR17 offerings are Conti Motion / RoadAttack 4 / ContiSportAttack. Row needs re-identification; possibly confused with Conti Twinduro TKC80 (which does exist in 180/55-17 as a dual-sport: https://www.walmart.com/ip/180-55-17-Continental-Conti-Twinduro-TKC80-Tubeless-Dual-Sport-Rear-Tire/35047398 ) but that is an off-road-biased tire, not a 'sport' compound."
+  },
+  {
+   "manufacturer": "Continental",
+   "model": "ContiGo",
+   "tire_ids": [
+    199,
+    231
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "Flipkart",
+     "size": "100/90-17",
+     "price_inr": 2061,
+     "source_url": "https://www.flipkart.com/continental-conti-go-100-90-17-rear-two-wheeler-tyre/p/itmee7xkv32eyexf"
+    }
+   ],
+   "notes": "ContiGo is Continental's small/mid-cc cross-ply commuter tire (official range: '50cc commuters through to 1100cc classics'), with confirmed sizes topping out around 140/70-17 (66S, bias-rated 'S' speed rating) per multiple UK retailers (bigtyres.co.uk, moto-tyres.co.uk, cyclespotshop.com) and 90/90-18 / 80/90-17 / 110/90-18 per continental-tires.com and tyretectrading.co.uk. Our stored sizes \u2014 180/55ZR17 rear and 120/70ZR17 front \u2014 are radial supersport dimensions that do not appear in any published ContiGo size chart; this looks like a data/model-mapping error (those sizes belong to a sport-class Continental tire, not ContiGo). Only India price found was for the 100/90-17 rear (different size than our rows), so no verified price exists for our actual stored sizes."
+  },
+  {
+   "manufacturer": "Continental",
+   "model": "ContiRaceAttack Comp Soft",
+   "tire_ids": [
+    188
+   ],
+   "status": "discontinued",
+   "successor": "ContiRaceAttack 2 (Soft/Medium)",
+   "india_available": false,
+   "prices": [],
+   "notes": "Continental's current race-tire lineup is ContiRaceAttack 2 (soft/medium) and ContiRaceAttack 2 Street; multiple sources (continental-tires.com, motorradreifen.com.de, contimotousablog.com) state the prior-generation 'ContiRaceAttack Comp' (incl. Comp Soft) was replaced/superseded by ContiRaceAttack 2. Old-generation stock is still sold at some EU retailers (e.g. pneumaticidiretti.com lists ContiRaceAttack Comp. Soft in 190/55ZR17, not our stored 120/70ZR17 front size). No India retailer or price found for this tire in any size."
+  },
+  {
+   "manufacturer": "Continental",
+   "model": "ContiRoad Attack 4",
+   "tire_ids": [
+    32
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "Product is current (continental-tires.com/products/b2c/motorcycle/tires/contiroadattack-4, marketed as 'The Hyper-Touring Tire'); 190/55ZR17 rear (75W) is a real published size (motomentum.com, drivenpowersports.ca, shopbmwmotorcycle.com). No Indian retailer or INR price found despite targeted search; only non-India pricing seen was a Canadian retailer at CA$578.99 (motomentum.com) \u2014 not recorded as a price entry since it is neither an India price nor a USD price from a US retailer. Sets india_available=false pending confirmation; DB flags india=1 for this row, which is unverified from this search."
+  },
+  {
+   "manufacturer": "Continental",
+   "model": "ContiSportAttack 4",
+   "tire_ids": [
+    45,
+    46,
+    73
+   ],
+   "status": "current",
+   "successor": "ContiSportAttack 5",
+   "india_available": false,
+   "prices": [],
+   "notes": "ContiSportAttack 4 is still actively sold (RevZilla, Cycle Gear, Amazon.com, ARH Custom, ak24parts.com list current stock in 120/70ZR17 front and 180/55ZR17 / 190/55ZR17 / 200/55ZR17 rear \u2014 all our stored sizes confirmed as real published sizes). However, Continental launched the ContiSportAttack 5 in Q1 2026 (press release 2025-10-29, continental.com) as its direct successor for the supersport segment ('even sportier than its predecessor, the ContiSportAttack 4'), so ContiSportAttack 4 is now the prior generation. US pricing for the 190/55ZR17 rear seen in the ~$248-273 range across retailers, but no single retailer+price+URL triple was cleanly captured, so no formal price entries recorded. No India retailer or INR price found."
+  },
+  {
+   "manufacturer": "Continental",
+   "model": "ContiTrack",
+   "tire_ids": [
+    18,
+    68,
+    96
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "ContiTrack is Continental's current NHS (not for highway service) track-day/hobby-racer slick (continental-tires.com/products/b2c/motorcycle/tires/contitrack/). 120/70R17 front (id 68) and 190/55R17 rear (id 18) are consistent with published sizes, but the largest rear size found in any official/retailer listing (battlebornoffroad.net, moto-tyres.co.uk) is 200/55R17 \u2014 no source shows a 240/45ZR17 rear (id 96) for ContiTrack; that size is typical of drag/muscle-bike cruiser tires, not a circuit slick, so it looks like a data error for that specific row. No India retailer/pricing found for any size (matches india=0 already on id 96; india=1 on ids 18/68 is unverified from this search)."
+  },
+  {
+   "manufacturer": "Continental",
+   "model": "Road Attack 4",
+   "tire_ids": [
+    85,
+    89
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "Almost certainly the same product as the separately-catalogued 'ContiRoad Attack 4' family (id 32) with the 'Conti' prefix dropped \u2014 likely a duplicate/inconsistently-named catalog entry that should be merged. Rear size 160/60R17 is a confirmed published ContiRoadAttack4 size (Amazon.com listing '120/70-19, 160/60-17'). Front size 120/70R18 was NOT found in any published ContiRoadAttack4 size chart \u2014 published fronts are 110/80R19, 120/70R17, 120/70R19, and 120/70ZR17; an '18-inch' front does not appear to exist for this model, so that row's size looks like a data error (possibly a typo for R17 or R19). No India pricing found."
+  },
+  {
+   "manufacturer": "Continental",
+   "model": "TKC 70",
+   "tire_ids": [
+    204,
+    233
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [],
+   "notes": "TKC 70 is a well-known current Continental adventure/dual-sport tire. 120/70ZR17 front (58W) and 180/55ZR17 rear (73W) are both confirmed published sizes (motorcycletire.com, motormantires.com, eBay listings). India availability confirmed via transformerz.co.in ('Buy Continental TKC70 Online in India') though the product page itself returned HTTP 403 on fetch, so no INR price could be extracted; no other India price found."
+  },
+  {
+   "manufacturer": "Dunlop",
+   "model": "American Elite",
+   "tire_ids": [
+    237,
+    240
+   ],
+   "status": "discontinued",
+   "successor": "Dunlop American Elite 2 (AE2)",
+   "india_available": false,
+   "prices": [],
+   "notes": "Multiple sources (roadglide.org forum, tuckerspeed.com, triketalk.com) confirm Dunlop has discontinued the original USA-made American Elite in favor of the AE2, now manufactured overseas; retailers are marketing remaining stock as 'last chance' for the original. Bigger issue: American Elite is a Harley-Davidson cruiser/touring BIAS-PLY tire line, not a sport tire \u2014 our compound tag 'sport' is wrong. Its real published sizes are things like MT90B-16 / 140/75R17 / 160/70B17 / 180/55B18 / 200/55R17 (dunlopmotorcycletires.com, eBay listings) \u2014 none of which match our stored 180/55ZR17 rear or 120/70ZR17 front (a radial Z-rated supersport size). Neither the size notation nor the compound classification match any known American Elite spec; this looks like a wholesale data error, not just a pricing gap."
+  },
+  {
+   "manufacturer": "Dunlop",
+   "model": "D407 Harley-Davidson",
+   "tire_ids": [
+    255
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "Current OEM/Harley-Davidson-dealer tire (dunlopmotorcycletires.com/tire-line/d407/, harley-davidson.com product listing). 180/65B16 rear size confirmed as correct/published. US forum-quoted prices ranged roughly $224-$310 (gl1800riders.com, roadglide.org threads) but no single retailer page yielded a clean price+URL pair, so no formal price entries recorded. No India retailer or INR price found (consistent with db india=0)."
+  },
+  {
+   "manufacturer": "Dunlop",
+   "model": "D408F Harley-Davidson",
+   "tire_ids": [
+    254
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "Current OEM/Harley-Davidson-dealer front tire (dunlopmotorcycletires.com/tire-line/d408/, harley-davidson.com product listing). 130/60B19 front size confirmed as correct/published. Only concrete number found was a used/sold eBay listing at $150, not treated as a reliable current price so not recorded. No India retailer or INR price found (consistent with db india=0)."
+  },
+  {
+   "manufacturer": "Dunlop",
+   "model": "Drag Radial D212 GP Pro",
+   "tire_ids": [
+    14
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "Product exists but appears to be mis-named in our catalog: Dunlop markets this tire as 'Sportmax GP Racer D212' / 'D212 GP Pro' (a circuit/track DOT-legal tire, dunlop-moto.com, nationalbiketyres.co.uk), not as a 'Drag Radial' \u2014 Dunlop's actual drag-racing slick lines carry different naming. 190/55ZR17 rear is a confirmed published size (pneumaticisetti.com, moto-vision.com). A newer 'D212 GP Pro 2' variant was also found (cottermc.com) \u2014 possible successor/refresh, unconfirmed. This is primarily a European-market product; not found on US retailers (RevZilla, Cycle Gear) or any India retailer, consistent with db india=0."
+  },
+  {
+   "manufacturer": "Dunlop",
+   "model": "Elite 3",
+   "tire_ids": [
+    239
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "Elite 3 is a current Dunlop product (dunlopmotorcycletires.com/tire-line/elite-3/, dmt.exults.com) but it is a large-touring/cruiser BIAS and bias-belted tire line, not a sport tire \u2014 our compound tag 'sport' is wrong, same issue as Dunlop American Elite above. Confirmed published sizes: front MT90B-16/130/70-18/MR90-18/MM90-19/90/90-21; rear bias MV85B-15/160/80B-16/MU90B-16; rear radial 180/60R16/180/70R-16/200/50R-18; custom-wide radial 240/40R-18/250/40R-18. None of these match our stored 180/55ZR17 rear \u2014 that specific size does not appear anywhere in the Elite 3 lineup, so this row looks like a data error (name possibly confused with a different sport-class Dunlop model, e.g. Sportmax/Roadsmart, which do use 180/55ZR17)."
+  },
+  {
+   "manufacturer": "Dunlop",
+   "model": "KR461 Race",
+   "tire_ids": [
+    194
+   ],
+   "status": "not_found",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "No evidence 'Dunlop KR461' exists anywhere in Dunlop's racing catalog (checked dunlopracing.com, dunlopmotorcycletires.com, and retailer listings). Dunlop's actual race-slick lineup is KR106/KR108/KR109 (worldwide slicks used in EWC/Moto2/IOM TT), KR410, KR448/KR451 (US supermoto), and KR451/KR453 (600-class slick) \u2014 no 'KR461' designation surfaced in any source. Closest real analog for a 120/70ZR17 front race slick would be KR106 or KR451; recommend re-verifying this model name against source data."
+  },
+  {
+   "manufacturer": "Dunlop",
+   "model": "Roadsmart III",
+   "tire_ids": [
+    33
+   ],
+   "status": "current",
+   "successor": "Dunlop Roadsmart IV",
+   "india_available": false,
+   "prices": [
+    {
+     "retailer": "Amazon.com",
+     "size": "180/55ZR17",
+     "price_usd": 240.99,
+     "source_url": "https://www.amazon.com/Dunlop-Roadsmart-55ZR17-Rear-Tire/dp/B075MRDLTX"
+    },
+    {
+     "retailer": "Bob's Cycle Supply",
+     "size": "180/55ZR17",
+     "price_usd": 240.99,
+     "source_url": "https://www.bobscycle.com/dunlop-roadsmart-iii-sport-touring-rear-tire-180-55zr17-sr180-17.html"
+    }
+   ],
+   "notes": "Confirmed real product, still sold at major US retailers though largely superseded by Roadsmart IV in most fitments. No evidence found of Indian distribution (searched tyremarket/bikewale/amazon.in/tyreplex) \u2014 likely not officially imported to India, contradicting the india=1 flag in our data."
+  },
+  {
+   "manufacturer": "Dunlop",
+   "model": "Roadsmart IV",
+   "tire_ids": [
+    15,
+    181
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [
+    {
+     "retailer": "RevZilla (catalog range, not size-specific)",
+     "size": "",
+     "price_usd": 215.99,
+     "source_url": "https://www.revzilla.com/motorcycle/dunlop-roadsmart-4-tires"
+    }
+   ],
+   "notes": "Confirmed real, current Dunlop sport-touring line (dunlopmotorcycletires.com). RevZilla's catalog page shows the line spans roughly $215.99-$305.99 across all sizes but per-size price for 190/55ZR17 rear / 120/70ZR17 front could not be extracted from search results (page fetch blocked, 403). No evidence of Indian distribution found."
+  },
+  {
+   "manufacturer": "Dunlop",
+   "model": "Sportmax GP-A Pro",
+   "tire_ids": [
+    49,
+    50
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [
+    {
+     "retailer": "Race Tire Service Inc",
+     "size": "120/70ZR17",
+     "price_usd": 209,
+     "source_url": "http://stores.racetireservice.com/GPA-PRO-FRONT-120"
+    },
+    {
+     "retailer": "Race Tire Service Inc (sale price)",
+     "size": "120/70ZR17",
+     "price_usd": 155,
+     "source_url": "http://stores.racetireservice.com/GPA-PRO-FRONT-120"
+    }
+   ],
+   "notes": "Confirmed current Dunlop road-race tire (used by MotoAmerica teams). IMPORTANT: the real/published GP-A Pro rear size is 190/60ZR17 (confirmed via Dunlop Racing / eBay listings 'DUNLOP GP-A PRO 190/60 R17 REAR TIRE'), not 200/55ZR17 as stored for row 50 \u2014 likely a size-notation discrepancy worth verifying. No India availability found."
+  },
+  {
+   "manufacturer": "Dunlop",
+   "model": "Sportmax GPR-300",
+   "tire_ids": [
+    42,
+    43,
+    74
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [
+    {
+     "retailer": "American Moto Tire",
+     "size": "150/60R-17",
+     "price_usd": 162.99,
+     "source_url": "https://www.americanmototire.com/street-cruiser-touring/dunlop-sportmax-gpr-300-150-60r-17-66h-rear-45067704-mc.html"
+    }
+   ],
+   "notes": "Confirmed current sport-radial line, commonly OEM/aftermarket-fitted to KTM RC390/Duke 390 (per US retailer fitment notes), which supports plausibility of Indian relevance, but no direct INR retail listing was found this pass \u2014 only a KWD-denominated Ubuy.co.in import listing (https://www.ubuy.co.in/product/1O7WU1Y2), not a genuine India-market price."
+  },
+  {
+   "manufacturer": "Dunlop",
+   "model": "Sportmax Q4",
+   "tire_ids": [
+    13,
+    235
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "Confirmed current Dunlop hypersport DOT tire; 190/55ZR17 rear is a genuine catalog size (dunlopracing.com). No exact numeric price with a working source URL was captured this pass (product pages returned 403 or lacked visible price in search snippets). No India availability evidence found."
+  },
+  {
+   "manufacturer": "Dunlop",
+   "model": "Sportmax Roadsport 2",
+   "tire_ids": [
+    77
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [
+    {
+     "retailer": "Walmart (listed, out of stock)",
+     "size": "160/60ZR17",
+     "price_usd": 160.99,
+     "source_url": "https://www.walmart.com/ip/Dunlop-Sportmax-RoadSport-2-Rear-Tire-160-60ZR-17-45238884/980057865"
+    }
+   ],
+   "notes": "Confirmed real, current mid-tier sport-touring tire. Walmart listing shows it out of stock at time of check."
+  },
+  {
+   "manufacturer": "Dunlop",
+   "model": "TT900 GP",
+   "tire_ids": [
+    64,
+    65
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [],
+   "notes": "Confirmed real, current product via Dunlop's official site (dunlop-moto.com/en_gb/tires/tt900-gp--tt900-gp.html) \u2014 a sport-touring/classic tire aimed at small-displacement bikes, plausible for the Indian commuter/RE market. However, no confirmed direct India retail price was found this pass despite searching tyreplex/bikewale/amazon.in. Known published TT900/TT900GP sizes include 70/100-17, 80/90-17, 90/90-18, 100/80-17, 110/70-17, 110/80-17, 120/80-14, 130/70-17, 140/70-17 \u2014 our 100/80-17 and 130/70-17 rows are consistent with the real range."
+  },
+  {
+   "manufacturer": "FDR",
+   "model": "Genzi 2",
+   "tire_ids": [
+    210,
+    230
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "FDR Genzi is a real Indonesian commuter tire line (fdrtire.com official price-list pages exist for Genzi and Genzi PRO). However FDR is a small-displacement/scooter/commuter brand \u2014 a 180/55ZR17 rear (row 210) is a size typical of 600-1000cc sportbikes and is NOT consistent with any FDR Genzi SKU found; FDR's own rim-17 price list covers narrower sizes (e.g. 70/80-17 up to ~140/70-17). Could not confirm 180/55ZR17 or 120/70ZR17 actually exist as Genzi 2 SKUs \u2014 likely a size/data error. No evidence of FDR distribution in India (FDR is Indonesia/SE-Asia focused) despite india=1 flag."
+  },
+  {
+   "manufacturer": "FDR",
+   "model": "Sportmax",
+   "tire_ids": [
+    99,
+    100,
+    113,
+    114,
+    115,
+    117,
+    118,
+    122,
+    124
+   ],
+   "status": "not_found",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "No evidence of an 'FDR Sportmax' product exists. 'Sportmax' is a Dunlop trademark (Dunlop Sportmax line); FDR's actual sport-oriented tire is called 'FDR Sport XR' / 'Sport XR Evo' (confirmed via fdrtire.com \u2014 e.g. Sport XR 100/70-17 priced at IDR 574,000 effective July 1 2026, https://fdrtire.com/index.php/content/view/page/365/daftar-harga-ban-fdr-sport-xr-evo). This looks like a data error conflating the Dunlop brand name with FDR, or a fabricated entry. The 9 rows also carry sizes inconsistent with FDR's real catalog (110/90-19, 120/60ZR17, 120/65ZR17, 120/70ZR19, 130/60B19 are not FDR fitments \u2014 FDR is a small-bike/commuter-focused Indonesian maker with no 19-inch adventure-bike SKUs found)."
+  },
+  {
+   "manufacturer": "Hoosier",
+   "model": "Quick Time Pro DOT",
+   "tire_ids": [
+    55,
+    191
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "Quick Time Pro D.O.T. is a genuine, current Hoosier drag-radial line (hoosiertirewest.com, JEGS, Summit Racing). However 26x8.5-15 (row 55) is a CAR/light-truck drag-radial size (fits cars like Fox-body Mustangs), not a motorcycle fitment \u2014 this row appears to be a car tire misfiled into a motorcycle family. Similarly, row 191 pairs this with a 120/70ZR17 'front' \u2014 Hoosier does not publish a matching motorcycle-specific counterpart in this line; this front/rear pairing looks inconsistent with an actual product SKU. No exact price with a confirmed URL was captured for 26x8.5-15 this pass; similar 26-inch Hoosier drag radials were quoted around $193.99-$194.99 in unlinked search snippets, not usable as a sourced figure."
+  },
+  {
+   "manufacturer": "IRC",
+   "model": "GP-110",
+   "tire_ids": [
+    107,
+    111,
+    112,
+    132
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "Confirmed real, current IRC product, but it is actually marketed as 'Trail Winner GP-110' \u2014 a dual-sport/trail tire (IRC's own description: '80% on-road / 20% off-road'), not a pure sport-compound tire as tagged in our DB. Typical published sizes are inch-based dual-sport fitments (4.60S-17, 5.10S-17 rear, 100/90-19, 110/80-18, 110/80-19 front) rather than ZR-rated radial sizes \u2014 row 107's '110/70ZR17' does not match any published GP-110 SKU and should be re-verified. No confirmed India retail price found this pass."
+  },
+  {
+   "manufacturer": "IRC",
+   "model": "Road Winner",
+   "tire_ids": [
+    209,
+    229
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [],
+   "notes": "'Road Winner' is IRC's bias-ply sport-street family (current variants sold as RX-01/RX-02); IRC Tire India distributes in India. No published Road Winner size matches DB rows: rear 180/55ZR17 and front 120/70ZR17 are modern radial sportbike sizes for 600cc+ class, but Road Winner is offered in 100/80-17 through 140/70-17 bias sizes (see ircmoto.com/products/road-winner-rx-01 and rx-02). Likely a size/data mismatch; no verifiable price for the stored sizes."
+  },
+  {
+   "manufacturer": "IRC",
+   "model": "Road Winner RX-01",
+   "tire_ids": [
+    62,
+    63
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "MotorcycleTire.com",
+     "size": "130/70-17",
+     "price_usd": 85.95,
+     "source_url": "https://www.motorcycletire.com/product/PU03080039.html"
+    },
+    {
+     "retailer": "Amazon.in",
+     "size": "140/70-17",
+     "price_inr": 28766,
+     "source_url": "https://www.amazon.in/IRC-RX-01-Road-Winner-70-17/dp/B0068EPI68"
+    }
+   ],
+   "notes": "Confirmed real product still sold (ircmoto.com/products/road-winner-rx-01), sizes 100/80-17 and 130/70-17 match our two rows. US rear 130/70-17 price ~$85.95, well below DB's \u20b94,800 (~$58 at ~83 INR/USD, so DB price is plausible in that ballpark actually). Only India price found was for a different size (140/70-17) at \u20b928,766 on Amazon.in \u2014 that figure looks anomalously high for this tire class (likely a mismarked/import single-unit listing) and should not be trusted as representative; flagging rather than asserting it as ground truth."
+  },
+  {
+   "manufacturer": "M&H",
+   "model": "Racemaster 5.5/18",
+   "tire_ids": [
+    165
+   ],
+   "status": "not_found",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "Could not find any M&H Racemaster motorcycle drag slick listed in a '5.5/18' (tread-width/rim) size \u2014 confirmed real sizes in the line are 4.0/26.6-18, 5.0/26.0-16, 6.0/26.0-15, 7.5/23.0-15, 8.5/24.5-15 (mandhtires.com / cokertire.com). DB row's stored size (180/55ZR17) also contradicts the model name's own '5.5/18' designation and doesn't match any M&H drag-slick notation. This is a niche US vintage-drag-bike product line; india=1 in our DB is almost certainly wrong \u2014 M&H Racemaster is not distributed/sold in India."
+  },
+  {
+   "manufacturer": "M&H",
+   "model": "Racemaster 6.0/18",
+   "tire_ids": [
+    215
+   ],
+   "status": "not_found",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "No '6.0/18' size found in M&H's published motorcycle drag slick catalog; closest confirmed size is 6.0/26.0-15 (mandhtires.com/6.0-26.0-15-Motorcycle-Drag-Slick), a different rim size (15\" not 18\"). DB row's stored size (180/55ZR17) contradicts the model name and doesn't match drag-slick notation at all. india=1 in our DB is almost certainly wrong for this US niche vintage-drag product."
+  },
+  {
+   "manufacturer": "M&H",
+   "model": "Racemaster DOT Front Runner",
+   "tire_ids": [
+    251
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [
+    {
+     "retailer": "O&J Performance",
+     "size": "4.5/27-16",
+     "price_usd": 211,
+     "source_url": "https://www.ojperformance.com/product-category/wheels-and-tires/tires/mh-racemaster-front-runner/"
+    },
+    {
+     "retailer": "Summit Racing",
+     "size": "4.5/27-16",
+     "price_usd": 233,
+     "source_url": "https://www.summitracing.com/search/part-type/tires/product-line/m-h-racemaster-front-runner-tires"
+    },
+    {
+     "retailer": "M&H Tires (mandhtires.com)",
+     "size": "4.5/27-16",
+     "source_url": "https://www.mandhtires.com/M-H-Drag-Tires/M-H-Racemaster-Motorcycle-Drag-Slicks?product_id=152"
+    }
+   ],
+   "notes": "Confirmed current, DOT-certified 4.5/27-16 front runner matches our row exactly. Real US price is $211-233, i.e. roughly \u20b917,500-19,300 at ~83 INR/USD \u2014 well below the DB's \u20b931,500, suggesting the stored price includes a large import/duty markup or is simply overestimated. Not available in India (confirmed no India retailer found)."
+  },
+  {
+   "manufacturer": "M&H",
+   "model": "Racemaster Motorcycle Drag Slick",
+   "tire_ids": [
+    250
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [
+    {
+     "retailer": "SpeedFactoryRacing",
+     "size": "7.5/23.0-15",
+     "price_usd": 290,
+     "source_url": "https://www.speedfactoryracing.net/products/m-h-racemaster-drag-slicks-7-5-23-0-15"
+    },
+    {
+     "retailer": "O&J Performance",
+     "size": "7.5/23.0-15",
+     "price_usd": 341,
+     "source_url": "https://www.ojperformance.com/product-category/wheels-and-tires/tires/mh-racemaster-drag-slicks/"
+    },
+    {
+     "retailer": "JEGS",
+     "size": "7.5/23.0-15",
+     "price_usd": 342.99,
+     "source_url": "https://www.jegs.com/p/M-H/M-H-Racemaster-Drag-Slick-Tires/752027/10002/-1"
+    }
+   ],
+   "notes": "Confirmed current product (MHR021), size 7.5/23.0-15 matches our row exactly. Real US price range $290-343 (~\u20b924,000-28,500), notably lower than DB's \u20b945,400. Sold only as pairs at some retailers (min qty 2). Not available in India."
+  },
+  {
+   "manufacturer": "M/T",
+   "model": "Pro Bracket Radial",
+   "tire_ids": [
+    56
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [
+    {
+     "retailer": "ThreePiece.us",
+     "size": "275/60R15",
+     "price_usd": 432,
+     "notes_inline": "price is for the related ET Street Radial Pro, not confirmed exact match to Pro Bracket Radial",
+     "source_url": "https://www.threepiece.us/mickey-thompson-mik-et-street-radial-pro-275-60r15/"
+    }
+   ],
+   "notes": "IMPORTANT CATALOG FLAG: Mickey Thompson 'Pro Bracket Radial' is a car/truck drag-racing radial for bracket & index racing on 15\" automotive wheels (mickeythompsontires.com/drag-tires/pro-bracket-radial; sold by Steeda, JEGS, DragRacingWheels for cars, explicitly 'not for street use'). It is NOT a motorcycle tire. 275/60R15 is a standard automotive drag-radial size. This entry is very likely miscategorized in the motorcycle tire catalog \u2014 recommend removing or re-flagging as non-motorcycle. Could not find a price specifically for 'Pro Bracket Radial' 275/60R15 (only found the related 'ET Street Radial Pro' model at ~$432); DB's \u20b968,000 could not be corroborated against any motorcycle-tire retailer."
+  },
+  {
+   "manufacturer": "Maxxis",
+   "model": "Insane",
+   "tire_ids": [
+    161
+   ],
+   "status": "not_found",
+   "successor": "",
+   "india_available": false,
+   "prices": [],
+   "notes": "No evidence a 'Maxxis Insane' motorcycle tyre exists. Not found on maxxis.com (US), maxxis-europe.com, maxxis.com.ph, or maxxistyres.co.in (India), nor on any retailer searched (RevZilla, MotoSport, Rocky Mountain ATV/MC, tyres.cardekho). Maxxis's real sport/street 17in lineup includes MA-R1, Supermaxx Sport (MA-SP), and Supermaxx ST (MA-ST/MA-ST2) \u2014 none named 'Insane'. Recommend flagging for removal or renaming to a real model."
+  },
+  {
+   "manufacturer": "Maxxis",
+   "model": "Supermaxx Sport",
+   "tire_ids": [
+    23,
+    69
+   ],
+   "status": "current",
+   "successor": "",
+   "india_available": true,
+   "prices": [],
+   "notes": "Confirmed real, current Maxxis product (product code MA-SP). Sold in India via Amazon.in ('MAXXIS TYRE 120/70 ZR17 SUPERMAXX RADIAL' tubeless) and Maxxis-authorized Indian dealers (maxxistyres.co.in), though the live Amazon price could not be scraped (bot-blocked, 403). 190/55ZR17 rear and 120/70ZR17 front are standard sizes for this line internationally (confirmed via UK/Malaysia retailers ghostbikes.com and tyres.com.my). No confirmed exact current INR price found for either size in this search pass."
+  },
+  {
+   "manufacturer": "Metzeler",
+   "model": "Cruisetec",
+   "tire_ids": [
+    256,
+    257,
+    258,
+    259
+   ],
+   "status": "current",
+   "successor": "",
+   "india_available": false,
+   "prices": [
+    {
+     "retailer": "Eastern Performance Cycles (Harley fitment, front)",
+     "price_usd": 227.95,
+     "size": "130/60B19",
+     "source_url": "https://www.easternperformance.com/metzeler-cruisetec-blackwall-130-60b19-front-61h-motorcycle-tire-harley.html"
+    }
+   ],
+   "notes": "Confirmed current global product across all 4 recorded sizes via official metzeler.com catalog (130/60B19 front is OE fitment for the Indian Challenger; 180/65B16, 200/55R17, and 160/70B17 rear are all standard Cruisetec cruiser/touring sizes). No India retail listings found in this search, consistent with the india=0 flag on our rows \u2014 appears to be sold only via US/EU cruiser-touring specialty retailers currently."
+  },
+  {
+   "manufacturer": "Metzeler",
+   "model": "Racetec RR K2",
+   "tire_ids": [
+    16
+   ],
+   "status": "discontinued",
+   "successor": "Racetec RR K3",
+   "india_available": false,
+   "prices": [],
+   "notes": "Metzeler's Racetec RR line uses per-size compound-generation suffixes (K1/K2/K3). Official metzeler.com and current retailers (torqueblock.com, Sierra BMW) show the CURRENT compound for 190/55ZR17 is K3, not K2 (e.g. torqueblock.com SKU 'MET-RAC-TEC-K3-190~55ZR17'). K2-labelled stock for this size only surfaces as residual old inventory on eBay, indicating K2 has been superseded by K3 for this size. A Flipkart India listing for 'Metzeler Racetec Rr 190/55ZR17' exists but does not specify compound generation, so genuine K2-spec India availability is unconfirmed."
+  },
+  {
+   "manufacturer": "Metzeler",
+   "model": "Racetec RR K3",
+   "tire_ids": [
+    52,
+    53
+   ],
+   "status": "current",
+   "successor": "",
+   "india_available": true,
+   "prices": [],
+   "notes": "Confirmed current-generation Metzeler product \u2014 official metzeler.com catalog lists both front 120/70ZR17 and rear 200/55ZR17 explicitly under the K3 compound (the current generation for these sizes). Sold via major international retailers (RevZilla, Cycle Gear, American Moto Tire, Sierra BMW) but no India-specific retail listing or INR price was found in this search pass; India availability is plausible via import/multi-brand dealers but unconfirmed with a direct source."
+  },
+  {
+   "manufacturer": "Metzeler",
+   "model": "Roadtec 01 SE",
+   "tire_ids": [
+    34
+   ],
+   "status": "current",
+   "successor": "",
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "tyres.cardekho (variant ambiguous: SE vs base Roadtec 01)",
+     "price_inr": 21080,
+     "size": "190/55ZR17",
+     "source_url": "https://tyres.cardekho.com/metzeler/roadtec-01"
+    }
+   ],
+   "notes": "Confirmed current product, sold in India \u2014 listed on Flipkart, Tyre Titans (tyretitans.in), and Transformerz.co.in for 190/55ZR17. Best India price found is Rs 21,080 for 'Roadtec 01 190/55 ZR17 75W' via tyres.cardekho, though this could not be confirmed as specifically the 'SE' (Sport Evolution) variant vs. the base Roadtec 01 \u2014 tyretitans.in sells a separate non-SE 'Roadtec 01' listing at the same size, suggesting SE and base are distinct SKUs in the Indian market. Treat this price as approximate for the family/size, not SE-specific confirmed."
+  },
+  {
+   "manufacturer": "Metzeler",
+   "model": "Sportec M7 RR",
+   "tire_ids": [
+    92
+   ],
+   "status": "current",
+   "successor": "Metzeler Sportec M9 RR (and newer Sportec 02)",
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "TorqueBlock/TyreDekho (India, family price range across sizes)",
+     "size": "",
+     "source_url": "https://www.torqueblock.com/tyres/metzeler-sportec-m7-rr"
+    }
+   ],
+   "notes": "M7 RR is Metzeler's older-generation supersport radial, superseded by the M9 RR but still sold in India as a budget option. IMPORTANT SIZE MISMATCH: published M7 RR sizes are only 16\"/17\" rim fitments (130/70-16, 160/60-17, 180/55-17, 190/50-17, 190/55-17) per TyreDekho/Flipkart/TyrePlex listings; no 18\" rim option (e.g. our DB's 200/50R18) was found anywhere for this model \u2014 that row's size looks unlikely to be a genuine M7 RR SKU. India price range cited elsewhere as roughly Rs.7,000-18,000 depending on size, but not tied to any confirmed 200/50R18 listing."
+  },
+  {
+   "manufacturer": "Metzeler",
+   "model": "Sportec M9 RR",
+   "tire_ids": [
+    17
+   ],
+   "status": "current",
+   "successor": "",
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "TyrePlex (India, close but not exact size)",
+     "size": "190/50ZR17",
+     "price_inr": 28792,
+     "source_url": "https://www.tyreplex.com/metzeler-tyres/sportec-m9-rr/sw-190-ar-50-rs-17"
+    }
+   ],
+   "notes": "Current flagship Metzeler supersport tire, full-silica compound (upgrade over M7 RR's dual-compound rear). Confirmed listed in India on Amazon.in (METZELER SPORTEC M9RR 190/55ZR17 75W TL, https://www.amazon.in/METZELER-SPORTEC-M9RR-190-55ZR17/dp/B083F66H6T) and Flipkart, but page fetch was blocked (403) so no confirmed number for the exact 190/55ZR17 size in our row \u2014 the Rs.28,792 figure above is for the adjacent 190/50ZR17 size, not an exact match."
+  },
+  {
+   "manufacturer": "Michelin",
+   "model": "Anakee Adventure",
+   "tire_ids": [
+    171,
+    182
+   ],
+   "status": "current",
+   "successor": "",
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "Sierra BMW Motorcycle (US)",
+     "size": "180/55R17",
+     "price_usd": 277.99,
+     "source_url": "https://www.shopbmwmotorcycle.com/products/michelin-anakee-adventure-2-180-55r17"
+    }
+   ],
+   "notes": "Genuinely current 80/20 adventure-touring tire (not discontinued; Michelin still sells it alongside the newer Anakee Road/Wild). SPEC CONTRADICTIONS: (1) published rear speed rating is V, i.e. '180/55R17 73V' per RevZilla/eBay/MotorMan listings, not the Z-rated '180/55ZR17' in our DB. (2) Our DB's front size '120/70ZR17' does not match any published Anakee Adventure front spec \u2014 real ADV-class fronts for this tire run 19\"/21\" rims (e.g. 90/90-21, 110/80R19); a Z-rated 17\" front is a sportbike fitment, not an adventure tire fitment, and no such SKU was found. India retail: an IndiaMart listing for '120/70R19 Tubeless 60V Front' at \u20b918,000 was found under the 'Anakee Adventure' name (https://www.indiamart.com/proddetail/michelin-anakee-adventure-120-70r19-tubeless-60-v-front-two-wheeler-tyre-2850949566362.html) \u2014 that size matches our Anakee Road row instead, suggesting Indian retailers may mislabel Anakee Road stock as 'Anakee Adventure'."
+  },
+  {
+   "manufacturer": "Michelin",
+   "model": "Anakee Road",
+   "tire_ids": [
+    83
+   ],
+   "status": "current",
+   "successor": "",
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "IndiaMart (India; listed under 'Anakee Adventure' branding but matching size)",
+     "size": "120/70R19",
+     "price_inr": 18000,
+     "source_url": "https://www.indiamart.com/proddetail/michelin-anakee-adventure-120-70r19-tubeless-60-v-front-two-wheeler-tyre-2850949566362.html"
+    }
+   ],
+   "notes": "Anakee Road is Michelin's current 90/10 road-biased ADV tire, launched to replace the older Anakee III (per Michelin USA / Rider Magazine / Ultimate Motorcycling reviews, 2024). Not discontinued. The 120/70R19 front size in our DB matches published specs, though the only India price found for that exact size was on an IndiaMart listing labeled 'Anakee Adventure' rather than 'Anakee Road' \u2014 Indian retailers appear not to distinguish the two sibling product lines clearly by name."
+  },
+  {
+   "manufacturer": "Michelin",
+   "model": "Pilot Activ",
+   "tire_ids": [
+    208,
+    225
+   ],
+   "status": "discontinued",
+   "successor": "",
+   "india_available": false,
+   "prices": [],
+   "notes": "Pilot Activ is no longer listed on Michelin's official site (michelinman.com) and could not be found as a current product on any Indian retailer. A Triumph Rat forum thread (https://www.triumphrat.net/threads/michelin-pilot-activs-discontinued-road-classics.984668/) discusses it being effectively replaced by the newer 'Road Classic' line, but this is not confirmed by an official Michelin source, so 'successor' is left blank rather than asserted. COMPOUND MISMATCH: our DB tags this as 'sport' compound, but the Pilot Activ was historically a classic/touring bias-belted tire for naked/retro bikes, not a sport-compound tire \u2014 no evidence found to support a sport classification. No India pricing found (consistent with likely discontinuation)."
+  },
+  {
+   "manufacturer": "Michelin",
+   "model": "Pilot Power 3",
+   "tire_ids": [
+    4,
+    72,
+    80,
+    177
+   ],
+   "status": "discontinued",
+   "successor": "Michelin Power RS (intermediate), superseded again by Michelin Power 5",
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "DriveSpark (India, close but not exact size)",
+     "size": "190/50ZR17",
+     "price_inr": 18410,
+     "source_url": "https://www.drivespark.com/bike-tyres/michelin-pilot-power-3-190-50-zr17-103/"
+    }
+   ],
+   "notes": "Pilot Power 3 is an older-generation Michelin sport tire, discontinued at the manufacturer level and replaced first by Power RS (also now gone) and currently by Power 5. It remains listed as legacy/residual stock at Indian retailers (TyreMarket lists 120/70ZR17, 180/55ZR17, and 190/50ZR17 pages: https://www.tyremarket.com/Michelin-PILOT-POWER-3-Two-Wheeler-Tyres) but TyreMarket's catalog did NOT show a 200/55ZR17 size (our row id 80) or a 190/55ZR17 size (our row id 4) \u2014 only 190/50ZR17 was found for that rear width in India; the 190/55ZR17 and 200/55ZR17 sizes may be US/EU-market-only or simply unstocked in India now that the model is discontinued."
+  },
+  {
+   "manufacturer": "Michelin",
+   "model": "Pilot Power 5",
+   "tire_ids": [
+    168,
+    179
+   ],
+   "status": "current",
+   "successor": "",
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "IndiaMart (India, close but not exact size)",
+     "size": "190/50ZR17",
+     "price_inr": 22300,
+     "source_url": "https://www.indiamart.com/proddetail/michelin-pilot-power-5-190-50zr17-tubeless-73-w-rear-two-wheeler-tyre-2850949647030.html"
+    }
+   ],
+   "notes": "NAMING NOTE: Michelin's official current product name is simply 'Power 5' (michelinman.com/motorcycle/tires/michelin-power-5) \u2014 'Pilot' was dropped from the sport-tire line branding. Indian retailers (e.g. this IndiaMart listing) still colloquially call it 'Pilot Power 5', which is almost certainly the same tire as our separate 'Power 5' family entry below (rows 167/175) rather than a distinct discontinued product \u2014 recommend the two DB families be merged/cross-checked. No price confirmed for the exact 180/55ZR17 row size."
+  },
+  {
+   "manufacturer": "Michelin",
+   "model": "Pilot Street",
+   "tire_ids": [
+    58,
+    59
+   ],
+   "status": "current",
+   "successor": "",
+   "india_available": false,
+   "prices": [
+    {
+     "retailer": "Amazon.com (US)",
+     "size": "100/80-17",
+     "price_usd": 90.54,
+     "source_url": "https://www.amazon.com/MICHELIN-Pilot-Street-Front-Tire/dp/B07262MSJR"
+    },
+    {
+     "retailer": "CT Racing Services (US)",
+     "size": "130/70-17",
+     "price_usd": 183.99,
+     "source_url": "https://ctracingservices.com/collections/michelin-pilot-street-1"
+    }
+   ],
+   "notes": "Pilot Street (original, non-Radial) is a current small-bike bias tire sold mainly in international/US markets in these exact commuter sizes (100/80-17 front / 130/70-17 rear). Consistent with our DB's india=0 flag \u2014 no India-market listings found for this specific non-radial 'Pilot Street' model (India retailers instead stock 'Pilot Street Radial' or 'Pilot Street 2')."
+  },
+  {
+   "manufacturer": "Michelin",
+   "model": "Pilot Street 2",
+   "tire_ids": [
+    28,
+    29
+   ],
+   "status": "current",
+   "successor": "",
+   "india_available": true,
+   "prices": [],
+   "notes": "Current product; confirmed sold in India (michelin.in/motorbike/tyres/michelin-pilot-street-2, page exists but returned 403 on fetch). Confirmed the 180/55-17 rear + 120/70-17 front combo is a genuine Pilot Street 2 fitment (used on larger commuter/naked bikes), in addition to the smaller scooter sizes (70/90-14, 90/90-10 etc.) this model is more commonly associated with. No specific INR price number could be captured within budget (Flipkart/Michelin India pages did not return price in search snippets)."
+  },
+  {
+   "manufacturer": "Michelin",
+   "model": "Pilot Street Radial",
+   "tire_ids": [
+    211
+   ],
+   "status": "current",
+   "successor": "",
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "India retail (aggregate range, TyreDekho/TyreMarket)",
+     "size": "",
+     "price_inr": 5500,
+     "source_url": "https://tyres.cardekho.com/michelin/pilot-street"
+    }
+   ],
+   "notes": "SIZE MISMATCH: Pilot Street Radial is explicitly a small/medium-bike tire (per Michelin USA and TyreMarket India: sizes only 110/70R17 & 120/70R17 front, 130/70R17 / 140/70R17 / 150/60R17 rear, for ~150cc+ commuters like CBR250/Ninja 300-class bikes). No evidence of a 180/55ZR17 rear SKU (our row id 211) in this line \u2014 that size is far too large for this tire family and looks like a data error, possibly confused with Pilot Street 2 or Power 5. India price range for the tire's real sizes is roughly Rs.4,950-6,500 per tyre."
+  },
+  {
+   "manufacturer": "Michelin",
+   "model": "Power 5",
+   "tire_ids": [
+    167,
+    175
+   ],
+   "status": "current",
+   "successor": "",
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "IndiaMart (India, listed as 'Pilot Power 5', close but not exact size)",
+     "size": "190/50ZR17",
+     "price_inr": 22300,
+     "source_url": "https://www.indiamart.com/proddetail/michelin-pilot-power-5-190-50zr17-tubeless-73-w-rear-two-wheeler-tyre-2850949647030.html"
+    }
+   ],
+   "notes": "Michelin's current-generation sportbike tire, successor to the Power RS/Pilot Power 3 line; actively sold by RevZilla/Cycle Gear/MotoSport (US) and available in India via retailers who call it 'Pilot Power 5' (same product as our separate 'Pilot Power 5' family, rows 168/179 \u2014 recommend merging these two DB entries). No confirmed price for the exact 180/55ZR17 row size."
+  },
+  {
+   "manufacturer": "Michelin",
+   "model": "Power Cup 2",
+   "tire_ids": [
+    1,
+    2,
+    67
+   ],
+   "status": "current",
+   "successor": "",
+   "india_available": true,
+   "prices": [],
+   "notes": "Current DOT track-day tire (600cc supersport / 1000cc superstock class), full 2CT slick-like compound. Confirmed sold in India via TorqueBlock (India's performance-tyre specialist) with dedicated listing pages for exactly our two rear sizes \u2014 190/55ZR17 (https://www.torqueblock.com/michelin-power-cup-2-190-55-zr17-tubeless-75-w-two-wheeler-tyre) and 200/55ZR17 (https://www.torqueblock.com/products/MIC-POW-CUP-2-200~55ZR17) \u2014 as well as a 120/70ZR17 front, matching our DB sizes well. Page fetches were blocked (403) so no confirmed INR number captured within budget; US reference price is roughly $194.82-$337.99 depending on retailer/size (e.g. https://www.thevisorshop.com/Mobile/en/us/Michelin-Power-Cup-2-Motorcycle-Tyre/m-m-29335.aspx)."
+  },
+  {
+   "manufacturer": "Michelin",
+   "model": "Power GP2",
+   "tire_ids": [
+    25,
+    44
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "RevZilla",
+     "size": "120/70ZR17",
+     "price_usd": 227,
+     "source_url": "https://www.revzilla.com/motorcycle/michelin-power-gp2-tires"
+    }
+   ],
+   "notes": "Confirmed current product (50/50 track/road tire, Michelin USA product page live). Widely sold at US retailers (RevZilla, Amazon US, American Moto Tire, Bob's Cycle) in both 200/55ZR17 rear and 120/70ZR17 front. India rupee pricing NOT found despite 2 targeted searches (tyremarket.com/torqueblock.com pages returned 403 on fetch); Indian retailers do stock Michelin two-wheeler tyres generally but no GP2-specific INR price surfaced. db_price_inr (23500 rear / 12500 front) could not be verified or contradicted."
+  },
+  {
+   "manufacturer": "Michelin",
+   "model": "Power Slick 2",
+   "tire_ids": [
+    3,
+    192
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [
+    {
+     "retailer": "MotoMummy",
+     "size": "190/55ZR17",
+     "price_usd": 275.99,
+     "source_url": "https://motomummy.com/products/michelin-power-slick-2-tires-rear-190-55-zr17-75w.html"
+    }
+   ],
+   "notes": "Confirmed current product, not DOT/road-legal (track-day/race-only slick). MSRP $397.95, street price $275.99 at MotoMummy for 190/55ZR17 rear. It is a track-day/road-race slick, not a purpose-built quarter-mile drag slick, despite 'drag_slick' compound tag in our data. Front 120/70ZR17 confirmed to exist (LM2experience, SportBikeTrackGear) but no captured price. Rear row is correctly flagged india=0 in our data (not commonly stocked in India); front row is flagged india=1 which is unverified/questionable given this is a niche track slick."
+  },
+  {
+   "manufacturer": "Michelin",
+   "model": "Road 6",
+   "tire_ids": [
+    5,
+    75,
+    88,
+    180
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "IndiaMART (Torque Block, Bengaluru)",
+     "size": "190/55ZR17",
+     "price_inr": 28500,
+     "source_url": "https://www.indiamart.com/proddetail/michelin-road-6-190-55zr17-tubeless-75-w-reartwo-wheeler-tyre-2850897713562.html"
+    },
+    {
+     "retailer": "IndiaMART (Torque Block, Bengaluru)",
+     "size": "180/55ZR17",
+     "price_inr": 26500,
+     "source_url": "https://www.indiamart.com/proddetail/michelin-road-6-180-55zr17-tubeless-73-w-reartwo-wheeler-tyre-2850897666812.html"
+    },
+    {
+     "retailer": "Flipkart",
+     "size": "120/70ZR17",
+     "price_inr": 19572,
+     "source_url": "https://www.flipkart.com/michelin-road-6-120-70zr17-180-55zr17-front-rear-two-wheeler-tyre/p/itmfd36f77dad117"
+    }
+   ],
+   "notes": "Confirmed current sport-touring product, widely available in India (Torque Block, TyreTitans, Motoblazer, Flipkart, Orion Motors). Current India street prices (\u20b926,500-28,500 for 180/190 rear sizes) run roughly 2x our db_price_inr figures (12800/13500), suggesting our stored prices are stale. Could not confirm a Michelin Road 6 in size 150/70R17 (id 88) -- standard Road 6 rear sizes seen across all listings are 160/60ZR17, 180/55ZR17, 190/50ZR17, 190/55ZR17, 190/60ZR17; 150/70R17 does not appear in any Road 6 size chart found and may be a data/size mismatch (150/70-17 is more typical of a cruiser/ADV rear fitment, not this sport-touring radial line). No price found for 120/70ZR17 alone beyond the combo-pack figure above."
+  },
+  {
+   "manufacturer": "Mickey Thompson",
+   "model": "ET Drag",
+   "tire_ids": [
+    166
+   ],
+   "status": "current",
+   "successor": "",
+   "india_available": false,
+   "prices": [],
+   "notes": "Mickey Thompson does make an 'ET Drag Motorcycle' bias-ply drag slick line (confirmed on mickeythompsontires.com/drag-tires/et-drag-moto), but all real ET Drag Motorcycle SKUs use inch-based bias sizing (e.g. 26.0/7.0-17, 25/7-18), not the radial metric 'ZR' notation used in our size field (180/55ZR17). No evidence of an actual 180/55ZR17 ET Drag SKU -- drag slicks are bias construction and would not carry a 'ZR' (radial) size code. Likely a size/notation data error; could not verify a price for this specific size."
+  },
+  {
+   "manufacturer": "Mickey Thompson",
+   "model": "ET Drag Motorcycle Slick",
+   "tire_ids": [
+    249
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [
+    {
+     "retailer": "eBay",
+     "size": "26.0/7.0-17",
+     "price_usd": 193.75,
+     "source_url": "https://www.ebay.com/itm/Mickey-Thompson-Motorcycle-Drag-Slick-26-x-7-0-17-MT3221-/253217242627"
+    }
+   ],
+   "notes": "Confirmed exact match: Mickey Thompson part# 3221, 26.0\"x7.0\"-17 rear-only bias drag slick, M5 compound. Real product, widely stocked at JEGS/Summit Racing/Schnitz Racing/HTP Performance (JEGS listing currently shows unavailable, suggesting intermittent stock). Not available in India (correctly flagged india=1 in our input though -- note this seems inconsistent, no Indian retailer found for this niche US drag-racing product)."
+  },
+  {
+   "manufacturer": "Mickey Thompson",
+   "model": "ET Drag R",
+   "tire_ids": [
+    54
+   ],
+   "status": "not_found",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "FLAG: size 26x10.5R15 and the 'ET Drag R' naming both trace to Mickey Thompson's AUTOMOTIVE drag-radial catalog (ET Street R bias tire, e.g. 'Mach-E ET Street R Bias Tire 26x10.50R15', part# 90000024651) sold for cars/trucks -- this size is never used on a motorcycle (rim diameter 15in, 10.5in section width). No motorcycle product named 'ET Drag R' was found on mickeythompsontires.com (only 'ET Drag' and 'ET Drag Motorcycle' exist for bikes). This entry appears to be a car-tire catalog entry mistakenly included in the motorcycle tire table; recommend removal or reclassification."
+  },
+  {
+   "manufacturer": "Mickey Thompson",
+   "model": "ET Street SS 29.0x10.5R18",
+   "tire_ids": [
+    26
+   ],
+   "status": "not_found",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "FLAG: size 295/35R18 matches Mickey Thompson's automotive Street Comp / ET Street S/S radial line for cars (e.g. 'Mickey Thompson Street Comp 295/35R18', part# 90000022370, muscle-car fitment), not any motorcycle product. The model name itself is also internally inconsistent -- '29.0x10.5R18' (an inch-based bias truck/car size) does not match the row's own size field '295/35R18' (a metric car radial size), and neither is a motorcycle tire size. This looks like a car-tire catalog entry mistakenly included in the motorcycle tire table; recommend removal or reclassification."
+  },
+  {
+   "manufacturer": "MRF",
+   "model": "Masseter",
+   "tire_ids": [
+    36
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "Flipkart",
+     "size": "130/70-17",
+     "price_inr": 3999,
+     "source_url": "https://www.flipkart.com/mrf-130-70-17-rear-two-wheeler-tyre/p/itmf6u6gpdpd37rw"
+    },
+    {
+     "retailer": "IndiaMART",
+     "size": "140/70-17",
+     "price_inr": 3850,
+     "source_url": "https://www.indiamart.com/proddetail/mrf-masseter-140-70-17-tyres-18345884130.html"
+    },
+    {
+     "retailer": "tyremarket.com",
+     "size": "",
+     "source_url": "https://www.tyremarket.com/tyremantra/mrf-masseter-bike-tyres-price-advantages-specifications-review-features/"
+    }
+   ],
+   "notes": "Confirmed current, 130/70-17 matches our row exactly. Current market price ~\u20b93,999 for 130/70-17, somewhat below DB's \u20b95,200. Widely available in India (MRF is India's largest domestic tire maker)."
+  },
+  {
+   "manufacturer": "MRF",
+   "model": "Mogrip",
+   "tire_ids": [
+    213
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "DriveSpark / Flipkart (Mogrip Moto-D)",
+     "size": "2.75-18",
+     "price_inr": 1475,
+     "source_url": "https://www.drivespark.com/bike-tyres/mrf-mogrip-moto-d-2-75-18-197/"
+    }
+   ],
+   "notes": "MRF Mogrip (base/Moto-D variant) is a real, current small-commuter bias-ply tire sold in 2.75-18 (~\u20b91,475) for 18\" wheel commuter bikes. DB row's size (180/55ZR17 rear) is a modern 17\" radial sportbike size and does not match any published Mogrip size \u2014 likely a size/data mismatch. Widely available in India; price for the actual stored size could not be found because that size doesn't appear to exist for this product."
+  },
+  {
+   "manufacturer": "MRF",
+   "model": "Mogrip Meteor M2",
+   "tire_ids": [
+    196,
+    227
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "TyreDekho / TyrePlex",
+     "size": "130/80-17",
+     "price_inr": 3824,
+     "source_url": "https://tyres.cardekho.com/mrf/mogrip-meteor-m2"
+    }
+   ],
+   "notes": "Confirmed current product, but its real published size is 130/80-17 65S TL (rear), not 180/55ZR17 rear / 120/70ZR17 front as stored in our DB \u2014 a size mismatch. Price \u20b93,824-4,819 for the real 130/80-17 size; no price found for the DB's stored (non-existent) sizes."
+  },
+  {
+   "manufacturer": "MRF",
+   "model": "Nylogrip Plus",
+   "tire_ids": [
+    201,
+    223
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "Flipkart",
+     "size": "2.75-18",
+     "price_inr": 1605,
+     "source_url": "https://www.flipkart.com/mrf-nylogrip-plus-2-75-18-48p-tubeless-rear-tyre/p/itmc3dd609d8634e"
+    },
+    {
+     "retailer": "Flipkart",
+     "size": "3.00-18",
+     "price_inr": 1755,
+     "source_url": "https://www.flipkart.com/mrf-nylogrip-plus-3-00-18-52p-tube-type-bike-rear-two-wheeler-tyre/p/itmf8t8tzfwy6wp5"
+    },
+    {
+     "retailer": "IndiaMART",
+     "size": "2.75-18",
+     "price_inr": 1750,
+     "source_url": "https://www.indiamart.com/proddetail/mrf-nylogrip-plus-2-75-18-3-00-18-tyre-26008802188.html"
+    }
+   ],
+   "notes": "Confirmed current, classic commuter bias-ply tire genuinely sold in 2.75-18 (~\u20b91,605-1,750) and 3.00-18 (~\u20b91,755) for 18\" wheel commuter bikes (Bajaj/Hero-class). DB row sizes (180/55ZR17 rear, 120/70ZR17 front) are modern 17\" radial sportbike sizes that Nylogrip Plus is not offered in \u2014 clear size/data mismatch. Widely available across India (TyreDekho, Flipkart, IndiaMART, DriveSpark)."
+  },
+  {
+   "manufacturer": "MRF",
+   "model": "Revz EF1 Drag",
+   "tire_ids": [
+    21,
+    185
+   ],
+   "status": "not_found",
+   "successor": "",
+   "india_available": false,
+   "prices": [],
+   "notes": "No 'EF1' variant exists anywhere in MRF's Revz lineup. Confirmed real Revz sub-variants (via mrftyres.com official product pages): Revz, Revz S, Revz C, Revz C1, Revz D, Revz FC, Revz FC1, Revz FD, Revz FH, Revz FH1, Revz K, Revz M, Revz MG, Revz Y. MRF does not manufacture any DOT drag-radial/slick motorcycle tyre at all \u2014 Revz is strictly a street/commuter radial line. The 'drag_dot' compound tag plus 190/50ZR17 rear + 120/70ZR17 front sportbike-drag sizing appears fabricated/unsourced. Recommend removing or reclassifying this row."
+  },
+  {
+   "manufacturer": "MRF",
+   "model": "Revz FB",
+   "tire_ids": [
+    20
+   ],
+   "status": "not_found",
+   "successor": "",
+   "india_available": false,
+   "prices": [
+    {
+     "retailer": "IndiaMART (closest size match, MRF Revz FH, NOT confirmed as FB)",
+     "price_inr": 8990,
+     "size": "120/70R17",
+     "source_url": "https://www.indiamart.com/proddetail/mrf-revz-fh-120-70-r17-tubeless-bike-tyre-2851599560655.html"
+    }
+   ],
+   "notes": "No 'FB' designation found anywhere in MRF's Revz range on mrftyres.com or Indian retailers (tyremarket.com, tyres.cardekho.com, tyreplex.com, Flipkart, IndiaMART). Real nearby variants are Revz FC, FC1, FD, FH, FH1 \u2014 'FB' is not among them. The closest plausible real match in this size is Revz FH 120/70R17 58H (~Rs 8,990-10,972 per IndiaMART/Flipkart listings), but the FB designation itself could not be verified as a real product."
+  },
+  {
+   "manufacturer": "MRF",
+   "model": "Revz FC1",
+   "tire_ids": [
+    19,
+    183
+   ],
+   "status": "current",
+   "successor": "",
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "MRF official / IndiaMART (real FC1 size, NOT our recorded sizes)",
+     "price_inr": 3623,
+     "size": "110/70R17 (only real FC1 size \u2014 does not match our 190/50ZR17 or 120/70ZR17 rows)",
+     "source_url": "https://www.mrftyres.com/product/two-wheelers/110-70r17-54s-revz-fc1-tl"
+    }
+   ],
+   "notes": "Confirmed real, current MRF product per official mrftyres.com page ('110/70R17 54S REVZ FC1 TL'). However MRF only sells Revz FC1 in ONE size \u2014 110/70R17 (a front-fitment tyre for ~150-200cc commuters) \u2014 no evidence anywhere (MRF official site, TyreDekho, IndiaMART, Flipkart, eBay, tyreplex) of a 190/50ZR17 rear or 120/70ZR17 front FC1 SKU. The recorded db_price_inr (Rs 8,500 for a nonexistent 190/50ZR17 rear) looks wrong for this size; the real FC1 in its actual 110/70R17 size retails around Rs 3,340-3,623."
+  },
+  {
+   "manufacturer": "MRF",
+   "model": "REVZ Y",
+   "tire_ids": [
+    198
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "IndiaMART",
+     "size": "140/60R17",
+     "price_inr": 3000,
+     "source_url": "https://www.indiamart.com/proddetail/mrf-revz-y-140-60-r17-63p-tubeless-motorcycle-tyre-22624757412.html"
+    },
+    {
+     "retailer": "Flipkart",
+     "size": "140/60R17",
+     "price_inr": 5799,
+     "source_url": "https://www.flipkart.com/mrf-140-60-r17-63p-revz-y-radial-rear-two-wheeler-tyre/p/itm69bd76c07919a"
+    },
+    {
+     "retailer": "DriveSpark",
+     "size": "150/60R17",
+     "price_inr": 5000,
+     "source_url": "https://www.drivespark.com/bike-tyres/mrf-revz-y-150-60-r17-627/"
+    }
+   ],
+   "notes": "Confirmed current product, but published sizes are 140/60R17 and 150/60R17 (radial, entry-sport rear), not the 180/55ZR17 in our DB row \u2014 REVZ Y is not offered that wide (180-section is a 600cc+ superbike rear size). Size/data mismatch flagged. Price range \u20b93,000-5,799 depending on retailer/size."
+  },
+  {
+   "manufacturer": "MRF",
+   "model": "Zapper",
+   "tire_ids": [
+    101,
+    103,
+    106,
+    121,
+    129,
+    141,
+    144,
+    154
+   ],
+   "status": "current",
+   "successor": "",
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "DriveSpark (Zapper C, tube)",
+     "price_inr": 1675,
+     "size": "100/90-17",
+     "source_url": "https://www.drivespark.com/bike-tyres/mrf-zapper-c-100-90-r17-563/"
+    },
+    {
+     "retailer": "DriveSpark (Zapper FY, tubeless)",
+     "price_inr": 1625,
+     "size": "110/70-17",
+     "source_url": "https://www.drivespark.com/bike-tyres/mrf-zapper-fy-110-70-r17-63/"
+    }
+   ],
+   "notes": "'Zapper' is a real, well-established, current MRF commuter/street tyre family umbrella spanning many sub-variants (Zapper C, C1, Q, S, S1, FY, FX1, FS, K, Y, MG etc.) across dozens of sizes for 100-250cc bikes/scooters \u2014 confirmed via mrftyres.com and multiple Indian retailers. Individually confirmed retail prices for family members are far lower than our recorded db_price_inr of Rs 8,000 (front) / Rs 12,000 (rear): real prices run Rs 1,625-2,300 for 110/70-17 and Rs 1,675-2,205 for 100/90-17. Our recorded prices look significantly overstated for this budget-commuter line. Exact sub-variant/SKU matching each of our recorded sizes (100/90-19, 80/100-18, 130/90-15, 140/70-14, 150/80R16) was not individually verified."
+  },
+  {
+   "manufacturer": "MRF",
+   "model": "Zapper FY",
+   "tire_ids": [
+    200,
+    224
+   ],
+   "status": "current",
+   "successor": "",
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "MRF official",
+     "price_inr": 2300,
+     "size": "110/70-17",
+     "source_url": "https://www.mrftyres.com/product/two-wheelers/110-70-17-54h-zapper-fy-tl"
+    },
+    {
+     "retailer": "DriveSpark",
+     "price_inr": 1300,
+     "size": "80/90-17",
+     "source_url": "https://www.drivespark.com/bike-tyres/mrf-zapper-fy-80-90-r17-610/"
+    }
+   ],
+   "notes": "Zapper FY is a real, current MRF product (mrftyres.com official: '110/70-17 54H ZAPPER FY TL'), but it is a small-commuter FRONT-fitment tyre \u2014 the only confirmed real sizes are 80/90-17 and 110/70-17. No evidence found of a 180/55ZR17 SKU (our recorded rear size) \u2014 that is a large sportbike rear size wholly inconsistent with the Zapper FY commuter-front product line and looks like a data error. The 120/70ZR17 front row is closer to real (actual size is 110/70-17) but still not an exact match."
+  },
+  {
+   "manufacturer": "MRF",
+   "model": "Zapper-C",
+   "tire_ids": [
+    35
+   ],
+   "status": "current",
+   "successor": "",
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "tyres.cardekho (Zapper Q, similar sub-variant)",
+     "price_inr": 2050,
+     "size": "130/70-17",
+     "source_url": "https://tyres.cardekho.com/mrf/zapper-q/130-70-17-tubeless"
+    }
+   ],
+   "notes": "MRF Zapper C / C1 are real, current products, but confirmed catalog sizes found are 100/90-17 and 110/80-17 (small commuter fitments). A 130/70-17 Zapper-C SKU specifically was not directly confirmed in any listing searched; 130/70-17 in the MRF Zapper range is more commonly associated with the related Zapper S / S1 / Q sub-variants (Rs 2,050-3,742 range per tyres.cardekho / tyreplex / moglix). The family/line is confirmed real and current; the exact size match for this specific SKU is unverified."
+  },
+  {
+   "manufacturer": "OE Bias-Ply",
+   "model": "OE Bias-Ply 3.25-16",
+   "tire_ids": [
+    262
+   ],
+   "status": "not_found",
+   "successor": null,
+   "india_available": true,
+   "prices": [],
+   "notes": "'OE Bias-Ply' is not an identifiable tire manufacturer/brand -- appears to be a generic placeholder in our catalog representing typical original-equipment bias-ply sizing on a vintage motorcycle, not a real named commercial product. Real-world 90/90-16-equivalent bias replacements in this size are sold under actual brand names (MRF, TVS, Duro, Continental, CEAT) in India, and Coker Tire/vintage specialists in the US, but no single verifiable price exists for a brand called 'OE Bias-Ply'. Recommend re-labeling with an actual manufacturer if a specific real product is intended."
+  },
+  {
+   "manufacturer": "OE Bias-Ply",
+   "model": "OE Bias-Ply 3.25-19",
+   "tire_ids": [
+    260
+   ],
+   "status": "not_found",
+   "successor": null,
+   "india_available": true,
+   "prices": [],
+   "notes": "Same issue as the other 'OE Bias-Ply' entries -- not a real manufacturer/brand, appears to be a generic vintage-OEM-sizing placeholder (90/90-19 front). Coker Tire and other vintage specialists sell equivalent bias tires in comparable sizes (e.g. 3.25-19, 3.50-19) under their own brand names with US prices roughly $60-150, but nothing verifiable under 'OE Bias-Ply' specifically."
+  },
+  {
+   "manufacturer": "OE Bias-Ply",
+   "model": "OE Bias-Ply 4.00-18",
+   "tire_ids": [
+    261
+   ],
+   "status": "not_found",
+   "successor": null,
+   "india_available": true,
+   "prices": [],
+   "notes": "Same issue as the other 'OE Bias-Ply' entries -- not a real manufacturer/brand, generic vintage-OEM-sizing placeholder (110/90-18 rear). Coker Tire's 'Indian Script Motorcycle 4.00-18' confirms 4.00-18 is a real, still-produced vintage size (from an actual named brand, not 'OE Bias-Ply'), so the size itself is plausible even though the brand label is not verifiable."
+  },
+  {
+   "manufacturer": "Pirelli",
+   "model": "Angel City",
+   "tire_ids": [
+    197,
+    232
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [],
+   "notes": "Angel City is a real, currently-sold Pirelli commuter/urban tire line, confirmed present on tyremarket.com's India catalogue ('Pirelli ANGEL-CITY Two Wheeler Tyres' price list page), though the page could not be fetched (403) to extract exact prices. FLAG: sizes 180/55ZR17 (rear) and 120/70ZR17 (front) are large sport-touring dimensions typically associated with Pirelli's Angel GT/Angel ST lines, not Angel City, which is normally sized for smaller commuter wheels (e.g. 80/90-17, 100/90-17, 110/70-17, 130/70-17, 140/70-17). Most search hits for these exact sizes returned Angel GT/Angel ST products instead of Angel City -- possible size mismatch/mislabeling in our catalog worth a follow-up check against Pirelli's official size chart."
+  },
+  {
+   "manufacturer": "Pirelli",
+   "model": "Angel GT II",
+   "tire_ids": [
+    30
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "IndiaMART (Torque Block, Bengaluru)",
+     "size": "190/55ZR17",
+     "price_inr": 26500,
+     "source_url": "https://www.indiamart.com/proddetail/pirelli-angel-gt-2-190-55zr17-tubeless-75-w-rear-two-wheeler-tyre-2850740820673.html"
+    }
+   ],
+   "notes": "Confirmed current product (official Pirelli.com catalogue page live for this exact size/load rating: 190/55 ZR17 M/C 75W TL rear). Current India street price \u20b926,500 is roughly 1.9x our db_price_inr of 14200 -- same stale-pricing pattern seen on the Michelin Road 6 and other premium touring tires in this batch, suggesting our stored prices are outdated across this price tier."
+  },
+  {
+   "manufacturer": "Pirelli",
+   "model": "Angel ST",
+   "tire_ids": [
+    81,
+    86
+   ],
+   "status": "current",
+   "successor": "Angel GT (Pirelli's newer flagship sport-touring tire; ST is still actively sold, especially in India)",
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "Tyremarket.com (aggregate range, low)",
+     "size": "",
+     "price_inr": 9789,
+     "source_url": "https://www.tyremarket.com/Pirelli-ANGEL-ST-Two-Wheeler-Tyres"
+    },
+    {
+     "retailer": "Tyremarket.com (aggregate range, high)",
+     "size": "",
+     "price_inr": 14338,
+     "source_url": "https://www.tyremarket.com/Pirelli-ANGEL-ST-Two-Wheeler-Tyres"
+    }
+   ],
+   "notes": "Only a family-level price range was found (\u20b99,789\u2013\u20b914,338 across all Angel ST variants); no price for the exact sizes 170/60R17 or 180/65R16 was located. IMPORTANT: Pirelli's published Angel ST size list (per pirelli.com and Indian retailers) shows 120/70ZR17, 160/60ZR17, 180/55ZR17, 190/50ZR17, 190/55ZR17 \u2014 sizes 170/60R17 (id 81) and 180/65R16 (id 86) did not turn up in any Angel ST listing searched. 180/65R16 in particular looks more like a cruiser/touring rear size than a sport-touring radial size; possible size/model data error worth double-checking."
+  },
+  {
+   "manufacturer": "Pirelli",
+   "model": "Diablo",
+   "tire_ids": [
+    150,
+    156,
+    157,
+    158,
+    159,
+    160
+   ],
+   "status": "discontinued",
+   "successor": "Diablo Rosso (sport-size range); Diablo Powercruiser (cruiser/muscle sizes such as 240/40ZR18)",
+   "india_available": true,
+   "prices": [],
+   "notes": "Pirelli press materials confirm the original 'Diablo' sport line was replaced by 'Diablo Rosso' in 2008; Pirelli's current official catalogue lists 'Diablo Powercruiser' (not plain 'Diablo') for cruiser sizes like 240/40ZR18. However several Indian/US retailers (Flipkart, Amazon.in, tyremarket.com, tyrereviews.com) still have live listings titled plainly 'Pirelli Diablo 240/40 ZR18' \u2014 likely legacy/residual-stock SKUs rather than an actively produced current line. No confirmed live price was extracted for any of the 6 tracked sizes this pass despite retailer listings existing."
+  },
+  {
+   "manufacturer": "Pirelli",
+   "model": "Diablo Rosso Corsa II",
+   "tire_ids": [
+    8,
+    79
+   ],
+   "status": "current",
+   "successor": "Diablo Rosso IV Corsa (current track-focused flagship)",
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "IndiaMART (Bengaluru)",
+     "size": "180/60ZR17",
+     "price_inr": 26500,
+     "source_url": "https://www.indiamart.com/proddetail/pirelli-diablo-rosso-corsa-2-180-60zr17-tubeless-75-w-rear-two-wheeler-tyre-2850740922897.html"
+    }
+   ],
+   "notes": "Model still actively sold in India under the 'Diablo Rosso Corsa 2/II' name. The only confirmed India price found was for 180/60ZR17 (\u20b926,500) \u2014 a different size than either tracked row. Flipkart also lists a 'Diablo Rosso Corsa II' front/rear pair as 120/70ZR17 + 200/60ZR17, i.e. the real-world rear pairing is 200/60ZR17, not the 200/55ZR17 stored for id 79 (nor the 190/55ZR17 for id 8) \u2014 likely a size-notation mismatch worth checking against source spec sheets. No price found for the exact 190/55ZR17 or 200/55ZR17 rows."
+  },
+  {
+   "manufacturer": "Pirelli",
+   "model": "Diablo Rosso II",
+   "tire_ids": [
+    76,
+    178
+   ],
+   "status": "current",
+   "successor": "Diablo Rosso III / Diablo Rosso IV (current generations; Rosso II is now the budget/legacy tier)",
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "Flipkart (front+rear pair, 120/70ZR17+180/55ZR17)",
+     "size": "180/55ZR17",
+     "price_inr": 40990,
+     "source_url": "https://www.flipkart.com/pirelli-diablo-rosso-ii-120-70zr17-58w-tl-180-55zr17-73w-front-rear-two-wheeler-tyre/p/itm15b299e5790bb"
+    },
+    {
+     "retailer": "Tyremarket.com (front, from)",
+     "size": "120/70ZR17 (approx.)",
+     "price_inr": 6500,
+     "source_url": "https://www.tyremarket.com/Pirelli-DIABLO-ROSSO-II-Two-Wheeler-Tyres"
+    }
+   ],
+   "notes": "CarDekho/TyreDekho give an aggregate Rosso II price range of \u20b96,465\u2013\u20b921,840 across all sizes. No exact price found for our specific rows: id 76 rear 200/55ZR17, id 178 front 120/70ZR17 (its own db_price_inr was already null). The Flipkart pair price is for a 180/55ZR17 rear (different size than id 76's 200/55ZR17), so treat as approximate market context only, not an exact match."
+  },
+  {
+   "manufacturer": "Pirelli",
+   "model": "Diablo Rosso III",
+   "tire_ids": [
+    94
+   ],
+   "status": "current",
+   "successor": "Diablo Rosso IV",
+   "india_available": true,
+   "prices": [],
+   "notes": "Product is confirmed still sold (RevZilla, CycleGear, Pirelli en-in/en-us catalogue pages, and Indian retailers tyremarket.com, torqueblock.com, motoblazer.com, amazon.in all list the 240/45ZR17 rear), but no live price figure was extracted from any snippet this pass for the exact size. Rosso II's same size (240/45ZR17) 'starts from \u20b921,840' per CarDekho aggregate \u2014 cited only as rough neighboring-generation context, not a Rosso III price."
+  },
+  {
+   "manufacturer": "Pirelli",
+   "model": "Diablo Rosso IV",
+   "tire_ids": [
+    38,
+    39,
+    70,
+    90
+   ],
+   "status": "current",
+   "successor": "n/a (current flagship)",
+   "india_available": true,
+   "prices": [],
+   "notes": "Confirmed as Pirelli's current flagship supersport street tire via the official pirelli.com/en-in product page. All specific India price citations found in this search pass were actually for the 'Diablo Rosso IV Corsa' variant (a distinct, track-focused sibling product \u2014 see separate family below), not plain 'Diablo Rosso IV'; no distinct price was located for the 120/70ZR17, 200/55ZR17, 180/55ZR17, or 130/70R18 rows tracked here."
+  },
+  {
+   "manufacturer": "Pirelli",
+   "model": "Diablo Rosso IV Corsa",
+   "tire_ids": [
+    218,
+    219
+   ],
+   "status": "current",
+   "successor": "n/a (current flagship track-day tire)",
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "IndiaMART (Bengaluru)",
+     "size": "180/55ZR17",
+     "price_inr": 27000,
+     "source_url": "https://www.indiamart.com/proddetail/pirelli-diablo-rosso-4-corsa-180-55zr17-73w-tubeless-rear-two-wheeler-tyre-2850664864430.html"
+    }
+   ],
+   "notes": "Confirmed current via official pirelli.com product pages (en-us and en-in). The 180/55ZR17 rear (id 219, DB price currently null) matches a real India listing at \u20b927,000. No price found for the 120/70ZR17 front (id 218, also null in DB)."
+  },
+  {
+   "manufacturer": "Pirelli",
+   "model": "Diablo Rosso Sport",
+   "tire_ids": [
+    60,
+    61
+   ],
+   "status": "current",
+   "successor": "n/a (current)",
+   "india_available": false,
+   "prices": [],
+   "notes": "Product exists and is current per Pirelli's global (en-ww) catalogue, but multiple targeted searches (including site-restricted queries against tyremarket.com/indiamart.com/amazon.in) found zero India-specific retail listings for 'Diablo Rosso Sport' \u2014 only global/US/eBay hits. Marking india_available=false based on this negative search evidence, which conflicts with the input data's india=1 flag for both rows; worth a follow-up check since it may simply be a low-volume niche fitment not indexed by search."
+  },
+  {
+   "manufacturer": "Pirelli",
+   "model": "Diablo Superbike SC0",
+   "tire_ids": [
+    217
+   ],
+   "status": "current",
+   "successor": "n/a (current compound tier)",
+   "india_available": true,
+   "prices": [],
+   "notes": "SC0 is a real compound designation within Pirelli's WSBK-derived Diablo Superbike slick range (SC0/SC1/SC2/SCX, soft-to-hard). No India price found for the 180/55ZR17 rear specifically. Caution: most 'SC0' India retail hits that surfaced (e.g. an IndiaMART listing for 180/60R17 SC0) were labeled 'Diablo Supercorsa SC' rather than 'Diablo Superbike' \u2014 the SC-compound letters are shared across both the pure-slick Superbike range and the DOT-legal Supercorsa SC generation, so cross-checking the exact product line (Superbike vs Supercorsa) against source documentation is recommended."
+  },
+  {
+   "manufacturer": "Pirelli",
+   "model": "Diablo Superbike SC1",
+   "tire_ids": [
+    47
+   ],
+   "status": "current",
+   "successor": "n/a (current compound tier)",
+   "india_available": true,
+   "prices": [],
+   "notes": "Confirmed real product (WSBK official-spec slick); torqueblock.com has a dedicated 'Pirelli Superbike SC1' India product page, but no price figure was captured in the search snippet for the 120/70ZR17 front. A same-family SC2 aggregate price range (\u20b920,119\u2013\u20b933,309, tyreplex.com) is cited only for rough context, not as an SC1 price."
+  },
+  {
+   "manufacturer": "Pirelli",
+   "model": "Diablo Superbike SC2",
+   "tire_ids": [
+    48
+   ],
+   "status": "current",
+   "successor": "n/a (current compound tier)",
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "Tyreplex.com (aggregate range, low)",
+     "size": "",
+     "price_inr": 20119,
+     "source_url": "https://www.tyreplex.com/pirelli-tyres/diablo-supebike-sc2"
+    },
+    {
+     "retailer": "Tyreplex.com (aggregate range, high)",
+     "size": "",
+     "price_inr": 33309,
+     "source_url": "https://www.tyreplex.com/pirelli-tyres/diablo-supebike-sc2"
+    }
+   ],
+   "notes": "Motoblazer.com also lists a 'Diablo Superbike SC2 120/70R17' front tyre for India but no price was extracted from the snippet. No size-specific price found for the tracked 200/60ZR17 rear (id 48); the \u20b920,119\u2013\u20b933,309 figure is a family-wide aggregate across all SC2 sizes."
+  },
+  {
+   "manufacturer": "Pirelli",
+   "model": "Diablo Supercorsa SC1",
+   "tire_ids": [
+    7,
+    97,
+    164
+   ],
+   "status": "discontinued",
+   "successor": "Diablo Supercorsa V3 (current generation; lineage moved SC \u2192 SC2 \u2192 V2 \u2192 V3)",
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "IndiaMART (Raigad) \u2014 SC2 compound, same size",
+     "size": "190/55ZR17",
+     "price_inr": 26880,
+     "source_url": "https://www.indiamart.com/proddetail/pirelli-diablo-supercorsa-sc-2-190-55zr17-75w-20662505688.html"
+    },
+    {
+     "retailer": "LRL Motors \u2014 Supercorsa V3 (current gen), same size",
+     "size": "190/55ZR17",
+     "price_inr": 35999,
+     "source_url": "https://lrlmotors.com/products/pirelli-diablo-supercorsa-v3-190-55zr17-tubeless-75-w-rear-two-wheeler-tyre"
+    }
+   ],
+   "notes": "Pirelli's own product page ('DIABLO Supercorsa V3 SC New') and multiple India retailers confirm the Supercorsa line has moved on through SC \u2192 SC2 \u2192 V2 \u2192 V3 generations; plain 'SC1' as a distinct sold-in-India SKU did not surface in searches (only SC2 and V3 listings did), so it reads as a legacy/superseded compound code rather than a current catalogue item \u2014 marked discontinued with V3 as successor. The two prices above are for the same 190/55ZR17 size but different (SC2, V3) compounds/generations, given as bracketing market context for id 7, not an exact SC1 price. Row id 97 (240/50R16, india=0) is flagged as a likely data anomaly: 240/50R16 is not a documented Supercorsa fitment anywhere found \u2014 that size profile is typical of a cruiser/drag rear (e.g. VMAX/Rocket III class), not a sportbike race-DOT tire; worth verifying against the original source. Row id 164 (120/70ZR17 front) is a standard/plausible Supercorsa front size but no price was found for it this pass."
+  },
+  {
+   "manufacturer": "Pirelli",
+   "model": "Diablo Supercorsa SC2",
+   "tire_ids": [
+    6,
+    9
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "IndiaMART",
+     "size": "190/55ZR17",
+     "price_inr": 26880,
+     "source_url": "https://www.indiamart.com/proddetail/pirelli-diablo-supercorsa-sc-2-190-55zr17-75w-20662505688.html"
+    },
+    {
+     "retailer": "IndiaMART (V4 gen)",
+     "size": "120/70ZR17",
+     "price_inr": 22500,
+     "source_url": "https://www.indiamart.com/proddetail/pirelli-diablo-supercorsa-v4-120-70zr17-58w-tl-m-c-front-tyre-2855068501333.html"
+    },
+    {
+     "retailer": "IndiaMART (V3 gen)",
+     "size": "120/70ZR17",
+     "price_inr": 20000,
+     "source_url": "https://www.indiamart.com/proddetail/pirelli-diablo-supercorsa-v3-120-70zr17-tubeless-58-w-front-two-wheeler-tyre-2851088402597.html"
+    }
+   ],
+   "notes": "Real, current Pirelli product. 'SC2' denotes the medium-soft compound tier within the road-legal DOT 'Diablo Supercorsa' line (now officially 'Diablo Supercorsa V4 SC'), sold alongside SC1 (harder). Caution: Pirelli also sells a separate non-DOT track-only slick line called 'Diablo Superbike SC' that also uses SC1/SC2/SC3 naming, and some Indian retailer listings (e.g. Motoblazer) conflate the two under the same title \u2014 verify which is actually being fitted. INR prices vary a lot by generation (V2/V3/V4) and retailer, roughly \u20b920,000-34,500, so our flat db_price (\u20b925,000 rear / \u20b921,000 front) is plausible but toward the lower-mid end."
+  },
+  {
+   "manufacturer": "Pirelli",
+   "model": "Diablo Supercorsa SP V4",
+   "tire_ids": [
+    24,
+    174
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "IndiaMART (V4 gen, variant unconfirmed SC/SP)",
+     "size": "120/70ZR17",
+     "price_inr": 22500,
+     "source_url": "https://www.indiamart.com/proddetail/pirelli-diablo-supercorsa-v4-120-70zr17-58w-tl-m-c-front-tyre-2855068501333.html"
+    }
+   ],
+   "notes": "Real, current Pirelli product; official name on pirelli.com is 'Diablo Supercorsa V4 SP' (word order flipped vs our 'SP V4' \u2014 same tire). Rear 200/55ZR17 (78W) is a confirmed genuine current size per Pirelli's own catalogue page. Could not find an INR price actually quoted for this specific 200/55ZR17 SKU during this search (Tyremarket/TyreDekho/Torqueblock list it but no price surfaced in results) \u2014 front price below is from a same-generation V4 Supercorsa 120/70ZR17 listing, variant (SC vs SP) not explicitly distinguished on that listing so treat as indicative only."
+  },
+  {
+   "manufacturer": "Pirelli",
+   "model": "Night Dragon",
+   "tire_ids": [
+    172,
+    187,
+    252,
+    253
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [
+    {
+     "retailer": "RevZilla/Cycle Gear/Amazon (general range, not size-specific)",
+     "size": "",
+     "price_usd": 140.97,
+     "source_url": "https://www.revzilla.com/motorcycle/pirelli-night-dragon-tires"
+    }
+   ],
+   "notes": "Real, current Pirelli cruiser tire, but ALL evidence found is from US retailers (Amazon.com, RevZilla, Cycle Gear, Dennis Kirk, J&P Cycles) \u2014 no Indian retailer listing surfaced for any size, so the india=1 flags on rows 172/187 look unsupported. More importantly, size mismatch: Night Dragon's real catalogue is almost entirely bias-ply 'B' sizes for cruisers \u2014 confirmed real sizes include front 130/60B19, and rear options 180/55B18, 180/70R16, 240/40VR18, 170/80B15, 180/60B17. Rows 172 (rear 180/55ZR17, radial) and 187 (front 120/70ZR17, radial) do NOT match any Night Dragon fitment found \u2014 this tire is not offered as a sport-radial 17\" front/rear ZR pair; those two rows look like a data/catalog error (possibly confused with a different sport-oriented Pirelli line). Rows 252 (front 130/60B19) and 253 (rear 180/65B16, close to the confirmed 180/60B17/170/80B15 family) are plausible/consistent with the real lineup."
+  },
+  {
+   "manufacturer": "Pirelli",
+   "model": "Phantom Sportscomp",
+   "tire_ids": [
+    202,
+    228
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [
+    {
+     "retailer": "ChapMoto",
+     "size": "",
+     "price_usd": 113.88,
+     "source_url": "https://www.chapmoto.com/pirelli-phantom-sportscomp-front-tire.html"
+    },
+    {
+     "retailer": "Parts Giant",
+     "size": "",
+     "price_usd": 152.75,
+     "source_url": "https://www.partsgiant.com/p384216-pirelli-phantom-sportscomp-sport-tire"
+    },
+    {
+     "retailer": "Dennis Kirk",
+     "size": "",
+     "price_usd": 146.88,
+     "source_url": "https://www.denniskirk.com/pirelli/phantom-sportscomp-tire.pfp544623.prdf"
+    }
+   ],
+   "notes": "Real, current product (still in Pirelli's US/WW catalogue; a newer 'Phantom Sportscomp RS' variant also exists). No Indian retailer found in this search \u2014 only US (RevZilla, Amazon.com, Dennis Kirk, JPCycles) and EU (Motocard/Spain) listings, so india=1 in our DB is unconfirmed. Sizes 180/55R17 rear + 120/70ZR17 front ARE confirmed real (this is the OE fitment on the Yamaha XSR700). Compound-classification note: Phantom Sportscomp is marketed as a retro/vintage-tread-pattern SPORT tire for classic-styled naked/roadster bikes (e.g. XSR700), not a cruiser tire \u2014 our 'cruiser' compound tag looks like a mis-categorization; it's closer to a sport/street-classic tire."
+  },
+  {
+   "manufacturer": "Pirelli",
+   "model": "Scorpion Rally STR",
+   "tire_ids": [
+    203,
+    226
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "LRL Motors",
+     "size": "180/55R17",
+     "price_inr": 27499,
+     "source_url": "https://lrlmotors.com/products/pirelli-scorpion-rally-str-180-55r17-tubeless-72-v-rear-two-wheeler-tyre"
+    }
+   ],
+   "notes": "Real, current Pirelli adventure tire, confirmed sold in India. Rear 180/55R17 (73V) is a genuine current size. Possible size concern on the front row: Scorpion Rally STR is designed for large ADV bikes (BMW GS, Africa Twin, Multistrada Enduro class) which typically run 21\" front wheels \u2014 its front size is usually 90/90-21, not the 120/70ZR17 recorded in row 226; could not fully verify a 120/70-17 front fitment for this tire in this search pass, worth a closer look."
+  },
+  {
+   "manufacturer": "Pirelli",
+   "model": "Scorpion Trail 2",
+   "tire_ids": [
+    93,
+    169
+   ],
+   "status": "current",
+   "successor": "Scorpion Trail III (newer generation now co-listed on Pirelli's site; Trail II still sold/current)",
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "Moglix",
+     "size": "180/55ZR17",
+     "price_inr": 44943,
+     "source_url": "https://www.moglix.com/pirelli-17-inch-scorpion-trail-ii-180-55-zr-17-m-c-73w-tubeless-tyre-for-bike/mp/msne5n81764ykl"
+    }
+   ],
+   "notes": "Real, current Pirelli adventure/sport-touring tire, sold in India. Rear 180/55ZR17 confirmed available at a real Indian retailer. Size problem on the front row: confirmed genuine Scorpion Trail II front sizes are 110/80R19, 120/70R19/R17, and 90/90-21 \u2014 a front size of 150/80R17 (row 93) does not match any known Trail II fitment found; this looks like a likely data error in our catalog (150/80 width is unusually wide for any motorcycle front tire)."
+  },
+  {
+   "manufacturer": "Shinko",
+   "model": "003 Stealth Ultra-Soft",
+   "tire_ids": [
+    245,
+    246,
+    247
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [
+    {
+     "retailer": "American Moto Tire",
+     "size": "180/55ZR17",
+     "price_usd": 152.48,
+     "source_url": "https://www.americanmototire.com/street-cruiser-touring/shinko-003-stealth-180-55zr-17-73w-rear-radial-ultra-soft-87-4007u-mc.html"
+    },
+    {
+     "retailer": "RevZilla (range across all 3 sizes)",
+     "size": "",
+     "price_usd": 149.99,
+     "source_url": "https://www.revzilla.com/motorcycle/shinko-003-stealth-ultra-soft-tires"
+    }
+   ],
+   "notes": "Real, current Shinko drag-radial (DOT) tire, all three sizes (180/55ZR17, 190/50ZR17, 200/50ZR17) confirmed on Shinko's own site and US retailers. No Indian retailer found \u2014 matches db india=0. Shinko explicitly warns this tire's soft compound is 'not for use on dynamometers.'"
+  },
+  {
+   "manufacturer": "Shinko",
+   "model": "Advance R005",
+   "tire_ids": [
+    248
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [
+    {
+     "retailer": "RevZilla",
+     "size": "240/40R18",
+     "price_usd": 99.99,
+     "source_url": "https://www.revzilla.com/motorcycle/shinko-005-advance-tires"
+    },
+    {
+     "retailer": "Amazon.com",
+     "size": "240/40R18",
+     "price_usd": 187.47,
+     "source_url": "https://www.amazon.com/Shinko-Advance-Rear-Tire-40R-18/dp/B002KR2O0K"
+    }
+   ],
+   "notes": "Real, current Shinko product (official name '005 Advance Radial', SKU/model code R005 e.g. 87-4019); 240/40R18 rear is a genuine size. No Indian retailer found \u2014 matches db india=0. Classification caution: this is marketed by Shinko as a general sport-cruiser/touring radial ('great for drag racing quick warm up' per one listing), not a purpose-built drag slick like the Hook-Up line \u2014 our 'drag_dot' compound tag is a stretch; it's better described as a fat-rear cruiser/touring radial that happens to suit drag applications."
+  },
+  {
+   "manufacturer": "Shinko",
+   "model": "Hook-Up Drag Radial",
+   "tire_ids": [
+    241,
+    242,
+    243
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [
+    {
+     "retailer": "RevZilla (range across the 3 sizes, ~25% off promo)",
+     "size": "",
+     "price_usd": 204.76,
+     "source_url": "https://www.revzilla.com/motorcycle/shinko-hook-up-drag-radial-rear-tires"
+    }
+   ],
+   "notes": "Real, current Shinko DOT drag radial; confirmed offered in exactly the three sizes we carry (180/55ZR17, 190/50ZR17, 200/50ZR17) per Shinko's own product page. No Indian retailer found \u2014 matches db india=0. Spec note: Shinko states max rim width for the 190/50ZR17 is 6.25in; wider rims should use the 200/50ZR17 instead."
+  },
+  {
+   "manufacturer": "Shinko",
+   "model": "Hook-Up Pro Drag Radial",
+   "tire_ids": [
+    244
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": false,
+   "prices": [
+    {
+     "retailer": "Summit Racing",
+     "size": "200/50ZR17",
+     "price_usd": 238.99,
+     "source_url": "https://www.summitracing.com/parts/wpt-87-4652p"
+    },
+    {
+     "retailer": "DME Racing",
+     "size": "200/50ZR17",
+     "price_usd": 243.99,
+     "source_url": "https://dmeracing.com/product/shinko-hook-up-drag-radial/"
+    }
+   ],
+   "notes": "Real, current Shinko product \u2014 the upgraded 'Pro' tier of the Hook-Up drag radial line (competition-developed, larger contact patch at speed). 200/50ZR17 confirmed genuine size. No Indian retailer found \u2014 matches db india=0."
+  },
+  {
+   "manufacturer": "Shinko",
+   "model": "Stealth R265 Drag",
+   "tire_ids": [
+    27,
+    189
+   ],
+   "status": "not_found",
+   "successor": null,
+   "india_available": false,
+   "prices": [],
+   "notes": "Could NOT find any evidence a Shinko tire named/coded 'R265' or 'Stealth R265' exists \u2014 searches of Shinko's own site (shinkotireusa.com) and general web turned up nothing (only an unrelated 'Robalo R265' boat model). Shinko's real current drag-radial 'Stealth' product is the '003 Stealth Radial' / '003 Stealth Ultra-Soft' (SKU family 87-4007/87-4008), which is already a separate family in our catalog (tire_ids 245-247) using the SAME 180/55ZR17 rear size. Strong suspicion this row is a duplicate/fabricated entry for the same real tire under an invented model name \u2014 recommend merging into '003 Stealth Ultra-Soft' or removing. The db_price_inr of \u20b945,000 for 180/55ZR17 is also far above any USD-converted market price seen for the real 003 Stealth (~$150-260, i.e. roughly \u20b913,000-22,000), reinforcing that this entry is unreliable."
+  },
+  {
+   "manufacturer": "TVS",
+   "model": "Eurogrip",
+   "tire_ids": [
+    130,
+    131,
+    134,
+    135,
+    137,
+    139,
+    140
+   ],
+   "status": "current",
+   "successor": null,
+   "india_available": true,
+   "prices": [
+    {
+     "retailer": "IndiaMART",
+     "size": "130/70-17",
+     "price_inr": 1900,
+     "source_url": "https://www.indiamart.com/proddetail/tvs-eurogrip-130-70-r17-tyre-2853277074130.html"
+    }
+   ],
+   "notes": "'Eurogrip' is TVS's tyre BRAND for the Indian market, not a single tyre model/SKU \u2014 under it are many distinct named models (Duratrail EB Plus, ATT455 Remora, Pancer, Protorq Sport/Extreme, Dragon, RoadHound, etc.) covering these commuter sizes, each with very different pricing. Treating 'TVS Eurogrip' as one product with a flat \u20b912,000 price across all 7 sizes (110/80-17, 110/80-18, 120/80-17, 120/80-18, 130/70-18, 130/80-17, 130/80-18) looks like a catalog/data-modeling error. Real-world pricing found for comparable commuter Eurogrip sizes is much lower: ATT455 Remora 130/70-17 sells for roughly \u20b91,900-2,718, and one aggregator source states the whole Eurogrip line spans \u20b9933 (cheapest, Dragon) to \u20b914,999 (priciest, RoadHound) \u2014 so \u20b912,000 flat is plausible only for premium models, not the typical commuter-bias sizes listed here. Recommend re-pricing per actual named model rather than a flat 'Eurogrip' figure."
   }
  ]
 }
