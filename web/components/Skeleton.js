@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Skeleton primitives (Cockpit v3) — shaped loading states for every
+ * Skeleton primitives (STAGED v4) — shaped loading states for every
  * on-mount fetch. A skeleton must approximate the layout it replaces so the
  * page doesn't jump when data lands. Never a bare "Loading…" text line.
  *

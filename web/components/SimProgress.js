@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * SimProgress — real progress bar for simulation work.
+ * SimProgress — real progress bar for simulation work (STAGED v4).
  *
  * Replaces the old rotating spinners across the site. Two data modes:
  *
@@ -12,6 +12,10 @@
  *    an animated sweep runs and the caption escalates to an honest
  *    "waking the engine" message when the wait smells like a free-tier
  *    cold start.
+ *
+ * v4 skin: track = asphalt-4, fill = volt accent, running caption =
+ * .label-mono in signal-stage (amber = staged/running), stop affordance
+ * flips to signal-foul on hover.
  *
  * Variants: default (caption row + bar), `compact` (inline pill for nav
  * chips), `edge` (bare 3px strip pinned to a card's top edge).
@@ -74,11 +78,11 @@ export default function SimProgress({
 
   const fill = determinate ? (
     <div
-      className="h-full rounded-full bg-gradient-to-r from-brand-orange to-brand-orangeLight transition-[width] duration-300 ease-linear"
+      className="h-full rounded-full bg-accent transition-[width] duration-300 ease-linear"
       style={{ width: `${Math.max(pct, 2)}%` }}
     />
   ) : (
-    <div className="mq-progress-sweep h-full w-1/3 rounded-full bg-gradient-to-r from-transparent via-brand-orange to-transparent" />
+    <div className="mq-progress-sweep h-full w-1/3 rounded-full bg-gradient-to-r from-transparent via-accent to-transparent" />
   );
 
   if (edge) {
@@ -94,15 +98,15 @@ export default function SimProgress({
     return (
       <div className={`flex items-center gap-2 ${className}`} {...aria}>
         <style>{SWEEP_CSS}</style>
-        <div className="w-24 h-1 rounded-full bg-white/[0.08] overflow-hidden">{fill}</div>
-        <span className="font-mono text-[10px] text-brand-orange tabular-nums whitespace-nowrap">
+        <div className="w-24 h-1 rounded-full bg-asphalt-4 overflow-hidden">{fill}</div>
+        <span className="font-mono text-[10px] text-signal-stage tabular-nums whitespace-nowrap">
           {pct != null ? `${pct}%` : `${label}…`}
         </span>
         {onStop && (
           <button
             type="button"
             onClick={onStop}
-            className="font-mono text-[10px] text-white/45 hover:text-brand-red transition-colors whitespace-nowrap"
+            className="font-mono text-[10px] text-white/45 hover:text-signal-foul transition-colors whitespace-nowrap"
           >
             ■ Stop
           </button>
@@ -115,11 +119,9 @@ export default function SimProgress({
     <div className={className} {...aria}>
       <style>{SWEEP_CSS}</style>
       <div className="flex items-baseline justify-between mb-1.5 gap-3">
-        <span className="font-mono text-[10px] text-white/45 uppercase tracking-[0.25em] font-medium truncate">
-          {caption}
-        </span>
+        <span className="label-mono text-signal-stage truncate">{caption}</span>
         {pct != null && (
-          <span className="text-xs font-mono font-bold text-brand-orange tabular-nums shrink-0">
+          <span className="text-xs font-mono font-bold text-signal-stage tabular-nums shrink-0">
             {pct}%
           </span>
         )}
@@ -127,13 +129,13 @@ export default function SimProgress({
           <button
             type="button"
             onClick={onStop}
-            className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 hover:text-brand-red transition-colors shrink-0"
+            className="label-mono hover:text-signal-foul transition-colors shrink-0"
           >
             ■ Stop
           </button>
         )}
       </div>
-      <div className="h-1.5 rounded-full bg-white/[0.08] overflow-hidden">{fill}</div>
+      <div className="h-1.5 rounded-full bg-asphalt-4 overflow-hidden">{fill}</div>
     </div>
   );
 }

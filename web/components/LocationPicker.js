@@ -193,9 +193,7 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
         <div className="space-y-2.5">
           {quickPickVenues.length > 0 && (
             <div>
-              <p className="text-[10px] font-mono uppercase tracking-wider text-white/40 mb-1.5">
-                Quick pick
-              </p>
+              <p className="label-mono mb-1.5">Quick pick</p>
               <div className="flex flex-wrap gap-1.5">
                 {quickPickVenues.map((v) => (
                   <button
@@ -203,12 +201,12 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
                     type="button"
                     onClick={() => pickVenue(v)}
                     disabled={loading}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/[0.04] hover:bg-brand-orange/20 hover:border-brand-orange/40 border border-white/10 text-[11px] font-mono text-white/70 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="chip transition-colors hover:border-accent/40 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <MapPin size={10} className="text-brand-orange/80" />
+                    <MapPin size={10} className="text-white/40" aria-hidden="true" />
                     {v.name}
                     {v.altitude_m != null && (
-                      <span className="text-[9px] text-white/40 ml-0.5">
+                      <span className="text-[9px] text-white/40 ml-0.5 tabular-nums">
                         {Math.round(v.altitude_m)}m
                       </span>
                     )}
@@ -228,13 +226,13 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Or type any city / venue (e.g. Pune)"
                   disabled={loading}
-                  className="w-full pl-9 pr-3 py-2 bg-black/40 border border-white/10 rounded-lg text-sm text-white placeholder:text-white/30 focus:border-brand-orange focus:outline-none font-mono disabled:opacity-50"
+                  className="input-base pl-9 font-mono disabled:opacity-50"
                 />
               </div>
               <button
                 type="submit"
                 disabled={loading || !query.trim()}
-                className="px-3 py-2 bg-brand-orange hover:bg-brand-orangeLight disabled:opacity-40 disabled:cursor-not-allowed text-black font-display font-semibold rounded-lg text-xs transition-colors"
+                className="btn-primary btn-sm disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Set
               </button>
@@ -243,9 +241,9 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
               type="button"
               onClick={useMyLocation}
               disabled={loading}
-              className="inline-flex items-center gap-1.5 text-xs font-mono text-white/50 hover:text-brand-orange transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 text-xs font-mono text-white/50 hover:text-white transition-colors disabled:opacity-50"
             >
-              <Locate size={12} />
+              <Locate size={12} aria-hidden="true" />
               Use my GPS location
             </button>
             {/* Staged progress while resolving (replaces the old spinner) */}
@@ -262,7 +260,7 @@ export default function LocationPicker({ value, onResolved, onCleared, compact =
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-2 p-2 bg-brand-red/10 border border-brand-red/30 rounded-lg text-brand-red text-xs flex items-start gap-2"
+            className="mt-2 p-2 bg-signal-foul/10 border border-signal-foul/30 rounded-lg text-signal-foul text-xs flex items-start gap-2"
           >
             <AlertCircle size={13} className="shrink-0 mt-0.5" /> {error}
           </motion.div>
@@ -290,13 +288,15 @@ function ResolvedCard({ value, onClear, compact }) {
     <motion.div
       initial={{ opacity: 0, y: 5 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-lg border border-brand-accent/40 bg-brand-accent/5 p-3"
+      className="rounded-lg border border-signal-go/30 bg-signal-go/[0.05] p-3"
     >
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <Check size={14} className="text-brand-accent shrink-0" />
+          <Check size={14} className="text-signal-go shrink-0" aria-hidden="true" />
           <div className="min-w-0">
-            <p className="text-sm text-white font-semibold truncate">{label}</p>
+            <p className="font-display text-sm font-semibold uppercase text-white truncate">
+              {label}
+            </p>
             <p className="text-[10px] font-mono text-white/50 uppercase tracking-wider">
               {source === 'seeded_venue'
                 ? 'Matched seeded venue'
@@ -321,7 +321,7 @@ function ResolvedCard({ value, onClear, compact }) {
         {rows.map((r, i) => (
           <div key={i} className="text-left">
             <p className="text-[9px] font-mono uppercase tracking-wider text-white/40">{r.label}</p>
-            <p className={`text-xs font-mono tabular-nums mt-0.5 ${r.highlight ? 'text-brand-orange' : 'text-white/90'}`}>
+            <p className={`text-xs font-mono tabular-nums mt-0.5 ${r.highlight ? 'text-accent' : 'text-white/85'}`}>
               {r.v == null ? '—' : `${Number(r.v).toFixed(r.dec)}${r.suffix}`}
             </p>
           </div>

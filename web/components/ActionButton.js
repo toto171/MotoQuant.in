@@ -1,13 +1,13 @@
 'use client';
 
 /**
- * ActionButton — the one run/stop button pattern (Cockpit v3).
+ * ActionButton — the one run/stop button pattern (STAGED v4).
  *
- * Pairs with useAsyncTask: idle it's a normal primary button; while the task
- * runs it becomes a Stop button with live progress — real percentage when the
- * backend reports it (job-backed sims), an animated sweep strip otherwise
- * (plain fetches, cold starts). The button IS the progress bar, so no async
- * action ships with a dead "Working…" label again.
+ * Pairs with useAsyncTask: idle it's the volt primary button; while the task
+ * runs it flips to the amber .btn-running "■ Stop — NN%" state with live
+ * progress — real percentage when the backend reports it (job-backed sims),
+ * an animated sweep strip otherwise (plain fetches, cold starts). The button
+ * IS the progress bar, so no async action ships with a dead "Working…" label.
  *
  *   const task = useAsyncTask((signal, onProgress) => simulateJob(body, onProgress, signal));
  *   <ActionButton task={task} onRun={() => task.run()} label="Run full sim" />
