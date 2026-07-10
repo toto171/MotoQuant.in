@@ -1,9 +1,9 @@
 'use client';
 
 /**
- * CommandPalette — ⌘K / Ctrl+K jump-anywhere (Cockpit v3 flagship nav).
+ * CommandPalette — ⌘K / Ctrl+K jump-anywhere (STAGED v4 skin).
  *
- * One input, three result groups:
+ * One input, grouped results:
  *   - Actions/pages: static route list with keyword aliases (fuzzy-ish match)
  *   - Bikes: live /api/bikes?search= (debounced) — the 541-bike catalog is the
  *     product, so "haya…" should take you to the bike, or straight into the
@@ -15,7 +15,7 @@
  * Reduced-motion safe (opacity-only entrance).
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import {
@@ -210,7 +210,7 @@ export default function CommandPalette({ open, onClose }) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: reduced ? 0 : 0.15 }}
-          className="fixed inset-0 z-[100] flex items-start justify-center bg-black/70 backdrop-blur-sm px-4 pt-[12vh]"
+          className="fixed inset-0 z-[100] flex items-start justify-center bg-asphalt-0/80 backdrop-blur-sm px-4 pt-[12vh]"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) onClose();
           }}
@@ -223,10 +223,11 @@ export default function CommandPalette({ open, onClose }) {
             animate={{ opacity: 1, y: 0 }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, y: -10 }}
             transition={{ duration: reduced ? 0 : 0.18 }}
-            className="w-full max-w-xl overflow-hidden rounded-2xl border border-white/15 bg-ink-1/95 shadow-2xl shadow-black/60"
+            className="w-full max-w-xl overflow-hidden rounded-xl border border-white/10 bg-asphalt-1 shadow-2xl"
           >
-            <div className="flex items-center gap-3 border-b border-white/10 px-4">
-              <Search size={16} className="shrink-0 text-brand-orange" aria-hidden="true" />
+            {/* Input strip — the .input-base voice (asphalt field, quiet placeholder) */}
+            <div className="flex items-center gap-3 border-b border-white/10 bg-asphalt-3/60 px-4">
+              <Search size={16} className="shrink-0 text-white/40" aria-hidden="true" />
               <input
                 ref={inputRef}
                 type="text"
@@ -239,9 +240,9 @@ export default function CommandPalette({ open, onClose }) {
                 onChange={(e) => setQ(e.target.value)}
                 onKeyDown={onKeyDown}
                 placeholder="Search bikes, pages, actions…"
-                className="h-14 w-full bg-transparent text-[15px] text-white placeholder:text-white/35 focus:outline-none"
+                className="h-14 w-full bg-transparent text-[15px] text-white placeholder:text-white/30 focus:outline-none"
               />
-              <kbd className="label-mono shrink-0 rounded border border-white/15 px-1.5 py-0.5">esc</kbd>
+              <kbd className="chip shrink-0">esc</kbd>
             </div>
 
             <div ref={listRef} id="cmdk-results" role="listbox" className="max-h-[46vh] overflow-y-auto p-2">
@@ -252,35 +253,52 @@ export default function CommandPalette({ open, onClose }) {
               )}
               {rows.map((row, i) => {
                 const Icon = row.icon;
+                // Presentational group headers: one before the action hits,
+                // one where the live bike hits begin. aria-hidden so the
+                // listbox's option list stays clean for AT.
+                const header =
+                  i === 0
+                    ? row.kind === 'action'
+                      ? 'Pages & actions'
+                      : 'Bikes'
+                    : row.kind === 'bike' && rows[i - 1]?.kind === 'action'
+                      ? 'Bikes'
+                      : null;
                 return (
-                  <button
-                    key={row.key}
-                    id={`cmdk-${row.key}`}
-                    data-idx={i}
-                    type="button"
-                    role="option"
-                    aria-selected={i === hi}
-                    onClick={() => go(row)}
-                    onMouseEnter={() => setHi(i)}
-                    className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${
-                      i === hi ? 'bg-brand-orange/15' : 'hover:bg-white/5'
-                    }`}
-                  >
-                    <Icon
-                      size={15}
-                      aria-hidden="true"
-                      className={i === hi ? 'text-brand-orange' : 'text-white/40'}
-                    />
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm text-white/90">{row.label}</span>
-                      <span className="block truncate font-mono text-[10px] uppercase tracking-[0.2em] text-white/35">
-                        {row.sub}
-                      </span>
-                    </span>
-                    {i === hi && (
-                      <kbd className="label-mono shrink-0 rounded border border-white/15 px-1.5 py-0.5">↵</kbd>
+                  <Fragment key={row.key}>
+                    {header && (
+                      <div aria-hidden="true" className="label-mono px-3 pb-1.5 pt-3 first:pt-1.5">
+                        {header}
+                      </div>
                     )}
-                  </button>
+                    <button
+                      id={`cmdk-${row.key}`}
+                      data-idx={i}
+                      type="button"
+                      role="option"
+                      aria-selected={i === hi}
+                      onClick={() => go(row)}
+                      onMouseEnter={() => setHi(i)}
+                      className={`flex w-full items-center gap-3 rounded-lg border-l-2 px-3 py-2.5 text-left transition-colors ${
+                        i === hi
+                          ? 'border-accent bg-white/[0.06]'
+                          : 'border-transparent hover:bg-white/5'
+                      }`}
+                    >
+                      <Icon
+                        size={15}
+                        aria-hidden="true"
+                        className={i === hi ? 'text-white/80' : 'text-white/40'}
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm text-white/90">{row.label}</span>
+                        <span className="block truncate font-mono text-[10px] uppercase tracking-[0.2em] text-white/35">
+                          {row.sub}
+                        </span>
+                      </span>
+                      {i === hi && <kbd className="chip shrink-0">↵</kbd>}
+                    </button>
+                  </Fragment>
                 );
               })}
               {bikesLoading && (

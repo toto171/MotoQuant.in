@@ -643,24 +643,20 @@ function rubricFor(slug) {
 function FeaturedPostCard({ post }) {
   return (
     <Link href={`/blog/${post.slug}`} className="block group mb-16">
-      <article className="card card-hover relative overflow-hidden p-6 md:p-8">
-        <span
-          aria-hidden="true"
-          className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/60 to-transparent"
-        />
-        <div className="label-mono text-brand-orange mb-4">
-          Featured dispatch
+      <article className="card card-hover p-6 md:p-8">
+        <div className="mb-4 flex items-center gap-2.5">
+          <span className="chip chip-volt">Featured dispatch</span>
         </div>
         <div className="grid md:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] gap-6 md:gap-10 items-start">
           <div>
-            <h2 className="font-display font-bold text-2xl md:text-3xl text-white leading-snug mb-4 group-hover:text-brand-orange transition-colors">
+            <h2 className="font-display font-semibold text-2xl md:text-3xl text-white leading-snug mb-4 group-hover:text-accent transition-colors">
               {post.title}
             </h2>
-            <p className="text-white/60 text-sm leading-relaxed mb-5">
+            <p className="text-white/65 text-sm leading-relaxed mb-5">
               {post.excerpt}
             </p>
             <div className="flex items-center gap-4">
-              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/45">
+              <span className="label-mono">
                 {new Date(post.date).toLocaleDateString("en-IN", {
                   year: "numeric",
                   month: "long",
@@ -668,17 +664,14 @@ function FeaturedPostCard({ post }) {
                 })}{" "}
                 · {post.readTime} read
               </span>
-              <span className="text-brand-accent text-xs font-mono group-hover:text-brand-orange transition-colors">
+              <span className="text-accent text-xs font-mono group-hover:text-accent-bright transition-colors">
                 Read the deep dive →
               </span>
             </div>
           </div>
           <div className="flex flex-wrap gap-1.5 content-start md:justify-end">
             {post.tags.map((t) => (
-              <span
-                key={t}
-                className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide h-fit"
-              >
+              <span key={t} className="chip h-fit">
                 {t}
               </span>
             ))}
@@ -692,29 +685,22 @@ function FeaturedPostCard({ post }) {
 function PostCard({ post }) {
   return (
     <Link href={`/blog/${post.slug}`} className="block group h-full">
-      <article className="relative h-full overflow-hidden rounded-xl border border-brand-orange/15 bg-ink-1/60 p-6 transition duration-300 hover:border-brand-orange/40 motion-safe:group-hover:-translate-y-1">
-        <span
-          aria-hidden="true"
-          className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent"
-        />
+      <article className="card card-hover h-full p-6">
         <div className="flex flex-wrap gap-1.5 mb-4">
           {post.tags.map((t) => (
-            <span
-              key={t}
-              className="px-2 py-0.5 rounded bg-brand-orange/10 border border-brand-orange/25 text-[10px] font-mono text-brand-orange uppercase tracking-wide"
-            >
+            <span key={t} className="chip">
               {t}
             </span>
           ))}
         </div>
-        <h2 className="font-display font-bold text-xl text-white mb-3 group-hover:text-brand-orange transition-colors leading-snug">
+        <h2 className="font-display font-semibold text-xl text-white mb-3 group-hover:text-accent transition-colors leading-snug">
           {post.title}
         </h2>
-        <p className="text-white/60 text-sm leading-relaxed mb-4">
+        <p className="text-white/65 text-sm leading-relaxed mb-4">
           {post.excerpt}
         </p>
         <div className="flex items-center justify-between gap-3">
-          <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/45">
+          <div className="label-mono">
             {new Date(post.date).toLocaleDateString("en-IN", {
               year: "numeric",
               month: "long",
@@ -722,7 +708,7 @@ function PostCard({ post }) {
             })}{" "}
             · {post.readTime} read
           </div>
-          <span className="shrink-0 text-brand-accent text-xs font-mono group-hover:text-brand-orange transition-colors">
+          <span className="shrink-0 text-white/45 text-xs font-mono group-hover:text-accent transition-colors">
             Read →
           </span>
         </div>
@@ -742,15 +728,15 @@ export default function BlogIndexPage() {
   })).filter((rubric) => rubric.posts.length > 0);
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-asphalt-0 text-white">
       <SiteNav />
 
-      {/* Hero — unified cockpit voice; kicker count stays in lockstep
-          with the POSTS array by construction. */}
+      {/* Hero — v4 voice; kicker count stays in lockstep with the POSTS
+          array by construction. */}
       <PageHero
         kicker={`${POSTS.length} dispatches · physics · tuning · data`}
         badge="MotoQuant Blog"
-        title={<>The physics of <span className="text-gradient-orange">drag racing.</span></>}
+        title={<>The physics of <span className="text-gradient-volt">drag racing.</span></>}
         sub="Technical deep-dives on motorcycle physics, tuning strategy, and data analysis. Written for the Indian drag racing community."
       />
 
@@ -761,7 +747,7 @@ export default function BlogIndexPage() {
           {grouped.map((rubric) => (
             <section key={rubric.id} className="mb-16 last:mb-0">
               <div className="flex flex-wrap items-baseline gap-3 mb-6">
-                <h2 className="font-display font-bold text-2xl text-white">
+                <h2 className="font-display font-bold uppercase tracking-[-0.01em] text-2xl text-white">
                   {rubric.title}
                 </h2>
                 <span className="label-mono">

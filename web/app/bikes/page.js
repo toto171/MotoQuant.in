@@ -44,41 +44,29 @@ function BikeCard({ bike }) {
         href={`/bikes/${bike.id}`}
         className="block group h-full"
       >
-        <div className="card card-hover relative h-full p-5 transition-all duration-200 motion-safe:hover:-translate-y-1">
-          <div
-            aria-hidden="true"
-            className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-orange/70 to-transparent"
-          />
-          <div className="flex items-start justify-between mb-3">
+        <div className="card card-hover h-full p-5">
+          <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="label-mono truncate">
                 {bike.manufacturer}
               </p>
-              <h3 className="font-display font-bold text-white text-lg leading-tight mt-1 line-clamp-2 group-hover:text-brand-orange transition-colors">
+              <h3 className="font-display font-semibold uppercase text-white text-lg leading-[1.05] tracking-[-0.01em] mt-1.5 line-clamp-2 group-hover:text-accent transition-colors">
                 {bike.model}
               </h3>
             </div>
             {bike.year && (
-              <span className="font-mono text-xs text-white/50 shrink-0 ml-2 tabular-nums">{bike.year}</span>
+              <span className="font-mono text-xs text-white/40 shrink-0 tabular-nums">{bike.year}</span>
             )}
           </div>
-          <div className="grid grid-cols-3 gap-2 mt-4">
-            <div>
-              <p className="label-mono">Disp.</p>
-              <p className="text-sm font-mono text-white/90 tabular-nums mt-0.5">{disp}</p>
-            </div>
-            <div>
-              <p className="label-mono">Power</p>
-              <p className="text-sm font-mono text-brand-orange tabular-nums mt-0.5">{power}</p>
-            </div>
-            <div>
-              <p className="label-mono">Mass</p>
-              <p className="text-sm font-mono text-white/90 tabular-nums mt-0.5">{mass}</p>
-            </div>
+          {/* Slip-style ruled figures row — numbers mono, right-aligned */}
+          <div className="mt-4 pt-3 border-t border-dashed border-white/10 flex items-baseline justify-end gap-4 font-mono text-sm tabular-nums">
+            <span className="text-white/55">{disp}</span>
+            <span className="text-white/90">{power}</span>
+            <span className="text-white/55">{mass}</span>
           </div>
           {bike.category && (
-            <div className="mt-4 inline-block px-2 py-0.5 rounded border border-brand-orange/30 bg-brand-orange/5 font-mono text-[10px] uppercase tracking-[0.2em] text-brand-orange">
-              {bike.category}
+            <div className="mt-3">
+              <span className="chip">{bike.category}</span>
             </div>
           )}
         </div>
@@ -185,13 +173,13 @@ export default function BikesPage() {
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-asphalt-0 text-white">
       <SiteNav />
 
       <PageHero
-        kicker="catalog loaded [541/541] · search armed"
-        badge="Motorcycle Database"
-        title={<>Motorcycle Specs &amp; <span className="text-gradient-orange">Quarter-Mile Database</span></>}
+        kicker="Motorcycle database"
+        badge="541 bikes"
+        title={<>Every bike. <span className="text-gradient-volt">Real physics.</span></>}
         sub={
           <>
             541 bikes modelled in MotoQuant Pro — Hayabusa, ZX-14R, R15 V4,
@@ -205,12 +193,15 @@ export default function BikesPage() {
             <button
               type="button"
               onClick={() => setSuggestOpen(true)}
-              className="text-brand-orange hover:underline underline-offset-2"
+              className="text-white underline underline-offset-2 decoration-white/30 hover:text-accent transition-colors"
             >
               Suggest a bike
             </button>
             {' '}or{' '}
-            <Link href="/simulator" className="text-brand-orange hover:underline underline-offset-2">
+            <Link
+              href="/simulator"
+              className="text-white underline underline-offset-2 decoration-white/30 hover:text-accent transition-colors"
+            >
               open the quarter-mile calculator
             </Link>.
           </>
@@ -234,7 +225,7 @@ export default function BikesPage() {
       <main id="main" className="pb-16 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           {/* Filters — sticky below nav */}
-          <div className="sticky top-16 z-40 card bg-ink-1/90 backdrop-blur-xl p-4 mb-6">
+          <div className="sticky top-16 z-40 card bg-asphalt-1/90 backdrop-blur-xl p-4 mb-6">
             <div className="grid grid-cols-1 md:grid-cols-[1fr_180px_180px_auto] gap-3 items-end">
               <div>
                 <label htmlFor="bike-search" className="label-mono block mb-2">
@@ -309,8 +300,8 @@ export default function BikesPage() {
             <SkeletonCards count={12} />
           ) : error ? (
             <div className="card p-8 text-center">
-              <AlertCircle size={24} className="mx-auto text-brand-red mb-3" />
-              <p className="font-display font-bold text-white text-lg">
+              <AlertCircle size={24} className="mx-auto text-signal-foul mb-3" />
+              <p className="font-display font-bold uppercase text-white text-lg">
                 Couldn&apos;t load the catalog
               </p>
               <p className="text-sm text-white/65 mt-2 max-w-md mx-auto">

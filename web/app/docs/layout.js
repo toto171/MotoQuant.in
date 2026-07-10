@@ -30,28 +30,27 @@ export const metadata = {
 
 export default function DocsLayout({ children }) {
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-asphalt-0 text-white">
       <SiteNav />
 
       <div className="flex pt-16 min-h-[calc(100vh-4rem)]">
         {/* Sidebar */}
         <aside className="hidden md:block w-60 shrink-0 border-r border-white/5 pt-12 px-4 sticky top-16 self-start h-[calc(100vh-4rem)] overflow-y-auto">
-          <div className="text-[10px] font-mono text-brand-orange uppercase tracking-[0.25em] mb-4 px-3">
+          <div className="label-mono mb-4 px-3">
             Documentation
           </div>
           <DocsSidebarNav pages={DOC_PAGES} />
           <div className="mt-10 px-3">
-            <div className="font-mono text-[10px] text-white/45 uppercase tracking-[0.25em] mb-3">
+            <div className="label-mono mb-3">
               Reference baselines
             </div>
-            <div className="relative overflow-hidden bg-ink-1/60 border border-brand-orange/20 rounded-lg p-3">
-              <span aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent" />
-              <ul className="space-y-2 text-[11px] font-mono">
-                <li className="text-white/55 flex justify-between"><span>K5</span><span className="tabular-nums text-white/85">10.0334s</span></li>
-                <li className="text-white/55 flex justify-between"><span>R1 4C8</span><span className="tabular-nums text-white/85">10.2859s</span></li>
-                <li className="text-white/55 flex justify-between"><span>Hayabusa</span><span className="tabular-nums text-white/85">10.4712s</span></li>
+            <div className="card p-3">
+              <ul className="space-y-2 text-[11px] font-mono tabular-nums">
+                <li className="text-white/55 flex justify-between"><span>K5</span><span className="text-white/85">10.0334s</span></li>
+                <li className="text-white/55 flex justify-between"><span>R1 4C8</span><span className="text-white/85">10.2859s</span></li>
+                <li className="text-white/55 flex justify-between"><span>Hayabusa</span><span className="text-white/85">10.4712s</span></li>
               </ul>
-              <div className="mt-3 text-[10px] font-mono text-brand-accent">Δ ±0.0000 since Apr 30 2026</div>
+              <div className="mt-3 text-[10px] font-mono text-signal-go">Δ ±0.0000 since Apr 30 2026</div>
             </div>
           </div>
         </aside>

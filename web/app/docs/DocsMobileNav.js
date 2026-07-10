@@ -20,7 +20,7 @@ export default function DocsMobileNav({ pages }) {
     <details className="md:hidden card mb-8 overflow-hidden group">
       <summary className="flex items-center justify-between gap-3 px-4 py-3 cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden min-h-[44px]">
         <span className="flex items-baseline gap-3 min-w-0">
-          <span className="label-mono text-brand-orange shrink-0">Docs</span>
+          <span className="label-mono shrink-0">Docs</span>
           <span className="font-mono text-sm text-white/85 truncate">
             {current ? current.label : 'Documentation'}
           </span>
@@ -43,7 +43,7 @@ export default function DocsMobileNav({ pages }) {
               className={[
                 'block px-4 py-2.5 text-sm font-mono border-l-2 transition-colors min-h-[40px]',
                 active
-                  ? 'border-brand-orange text-white bg-white/5'
+                  ? 'border-accent text-white bg-white/5'
                   : 'border-transparent text-white/65 hover:text-white hover:bg-white/5',
               ].join(' ')}
             >

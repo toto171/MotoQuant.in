@@ -47,9 +47,9 @@ const fmtINR = (n) =>
 // ─── shared tile ────────────────────────────────────────────────────────────
 function Tile({ label, value, accent = false }) {
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-center">
+    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 text-center">
       <p className="label-mono mb-1">{label}</p>
-      <p className={`text-xl font-mono font-bold ${accent ? 'text-brand-orange' : 'text-white'}`}>
+      <p className={`text-xl font-mono font-bold tabular-nums ${accent ? 'text-accent' : 'text-white'}`}>
         {value}
       </p>
     </div>
@@ -58,7 +58,7 @@ function Tile({ label, value, accent = false }) {
 
 function LookupChip({ label }) {
   return (
-    <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[10px] font-mono text-white/40">
+    <span className="chip normal-case tracking-normal text-white/50">
       {label}
     </span>
   );
@@ -84,7 +84,7 @@ function SimTiles({ payload, estimated = false }) {
             <p className="text-xs text-white/50 font-medium">{payload.bike_name}</p>
           )}
           {estimated && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-brand-amber/15 border border-brand-amber/40 text-brand-amber text-[10px] font-mono font-bold uppercase tracking-wider">
+            <span className="chip chip-stage font-bold">
               Estimated{conf != null ? ` — confidence ${conf}%` : ''}
             </span>
           )}
@@ -147,9 +147,9 @@ function CompareBlock({ payload }) {
   ];
   const aWins = payload.winner && payload.winner === a.bike_name;
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 space-y-2 overflow-x-auto">
+    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 space-y-2 overflow-x-auto">
       {payload.winner && (
-        <p className="text-xs font-mono text-brand-accent">
+        <p className="text-xs font-mono text-signal-go">
           {payload.winner} wins{delta != null ? ` by ${Math.abs(delta).toFixed(3)} s` : ''}
         </p>
       )}
@@ -159,10 +159,10 @@ function CompareBlock({ payload }) {
             <th className="label-mono font-medium pb-1.5 pr-2" scope="col">
               <span className="sr-only">Metric</span>
             </th>
-            <th className={`pb-1.5 pr-2 font-medium ${aWins ? 'text-brand-orange' : 'text-white/70'}`} scope="col">
+            <th className={`pb-1.5 pr-2 font-medium ${aWins ? 'text-accent' : 'text-white/70'}`} scope="col">
               {a.bike_name || 'Bike A'}
             </th>
-            <th className={`pb-1.5 font-medium ${!aWins && payload.winner ? 'text-brand-orange' : 'text-white/70'}`} scope="col">
+            <th className={`pb-1.5 font-medium ${!aWins && payload.winner ? 'text-accent' : 'text-white/70'}`} scope="col">
               {b.bike_name || 'Bike B'}
             </th>
           </tr>
@@ -190,7 +190,7 @@ function BuildSummary({
 }) {
   const diff = baseEt != null && finalEt != null ? finalEt - baseEt : null;
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 space-y-3">
+    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 space-y-3">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <p className="text-xs font-medium text-white/70">
           {title}
@@ -204,9 +204,9 @@ function BuildSummary({
       <div className="flex items-baseline gap-2 flex-wrap">
         <span className="font-mono text-white/50 text-sm tabular-nums">{fmtNum(baseEt)} s</span>
         <span className="text-white/30 text-xs" aria-hidden="true">→</span>
-        <span className="font-mono font-bold text-brand-orange text-xl tabular-nums">{fmtNum(finalEt)} s</span>
+        <span className="font-mono font-bold text-accent text-xl tabular-nums">{fmtNum(finalEt)} s</span>
         {diff != null && (
-          <span className={`font-mono text-xs tabular-nums ${diff < 0 ? 'text-brand-accent' : 'text-white/50'}`}>
+          <span className={`font-mono text-xs tabular-nums ${diff < 0 ? 'text-signal-go' : diff > 0 ? 'text-signal-foul' : 'text-white/50'}`}>
             {diff > 0 ? '+' : ''}{diff.toFixed(3)} s
           </span>
         )}
@@ -239,7 +239,7 @@ function BuildSummary({
                 {p.delta_et_s != null && (
                   /* delta_et_s = with-part − without (July 6, 2026 unified
                      convention): negative = faster = highlight. */
-                  <span className={`ml-2 ${Number(p.delta_et_s) < 0 ? 'text-brand-accent' : 'text-white/40'}`}>
+                  <span className={`ml-2 ${Number(p.delta_et_s) < 0 ? 'text-signal-go' : 'text-white/40'}`}>
                     Δ {fmtNum(p.delta_et_s)} s
                   </span>
                 )}
@@ -330,14 +330,14 @@ function AutotuneBlock({ payload }) {
   const stockEt = payload.stock?.et_s;
   const combEt = payload.combined?.et_s;
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 space-y-2">
+    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 space-y-2">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <p className="text-xs font-medium text-white/70 flex items-center gap-1.5">
-          <Timer size={12} className="text-brand-orange" aria-hidden="true" /> Setup autotune
+          <Timer size={12} className="text-white/40" aria-hidden="true" /> Setup autotune
         </p>
         {stockEt != null && combEt != null && (
           <p className="font-mono text-xs tabular-nums text-white/60">
-            {fmtNum(stockEt)} s → <span className="text-brand-orange font-bold">{fmtNum(combEt)} s</span>
+            {fmtNum(stockEt)} s → <span className="text-accent font-bold">{fmtNum(combEt)} s</span>
           </p>
         )}
       </div>
@@ -377,7 +377,7 @@ function Citations({ payload }) {
         const href = safeHttpUrl(r.url);
         const label = r.title || r.url || "source";
         const cls =
-          "flex items-center gap-1.5 text-[11px] text-white/45 hover:text-brand-orange transition-colors truncate";
+          "chip normal-case tracking-normal max-w-full gap-1.5 text-white/60 hover:text-white hover:border-white/30 transition-colors";
         // Unsafe/blocked scheme → render as inert text, never a live link.
         if (!href) {
           return (
@@ -445,8 +445,8 @@ function ChatBlock({ block }) {
 function ErrorBanner({ tone = 'red', icon: Icon = AlertCircle, children }) {
   const cls =
     tone === 'amber'
-      ? 'bg-brand-amber/10 border-brand-amber/30 text-brand-amber'
-      : 'bg-brand-red/10 border-brand-red/30 text-brand-red';
+      ? 'bg-signal-stage/10 border-signal-stage/30 text-signal-stage'
+      : 'bg-signal-foul/10 border-signal-foul/30 text-signal-foul';
   return (
     <div className={`flex gap-2 items-start p-3 rounded-lg border text-xs ${cls}`}>
       <Icon size={14} className="shrink-0 mt-0.5" aria-hidden="true" />
@@ -599,7 +599,7 @@ export default function ChatPanel({ apiUrl }) {
                     setQuery([s.manufacturer, s.model, s.year_range].filter(Boolean).join(' '));
                     textareaRef.current?.focus();
                   }}
-                  className="text-[11px] px-2.5 py-1 rounded-full bg-white/[0.06] text-white/70 border border-white/10 hover:border-brand-orange/50 hover:text-white transition-colors"
+                  className="font-mono text-[11px] px-2.5 py-1 rounded bg-white/[0.06] text-white/70 border border-white/10 hover:border-white/30 hover:text-white transition-colors"
                 >
                   {[s.manufacturer, s.model, s.year_range].filter(Boolean).join(' ')}
                 </button>
@@ -636,7 +636,7 @@ export default function ChatPanel({ apiUrl }) {
     return (
       <div className="space-y-3">
         {turn.content && (
-          <p className="text-sm text-white/70 leading-relaxed border-l-2 border-brand-orange/40 pl-3 whitespace-pre-wrap">
+          <p className="text-sm text-white/70 leading-relaxed whitespace-pre-wrap">
             {turn.content}
           </p>
         )}
@@ -668,13 +668,14 @@ export default function ChatPanel({ apiUrl }) {
           {turns.map((turn) =>
             turn.role === 'user' ? (
               <div key={turn.id} className="flex justify-end">
-                <div className="max-w-[85%] rounded-2xl rounded-br-md bg-brand-orange/10 border border-brand-orange/25 px-3.5 py-2 text-sm text-white/90 whitespace-pre-wrap">
+                <div className="max-w-[85%] rounded-xl rounded-br-sm bg-asphalt-3 border border-white/[0.08] px-3.5 py-2 text-sm text-white/90 whitespace-pre-wrap">
                   {turn.content}
                 </div>
               </div>
             ) : (
               <motion.div
                 key={turn.id}
+                className="card p-3.5"
                 initial={{ opacity: 0, y: reduce ? 0 : 6 }}
                 animate={{ opacity: 1, y: 0 }}
               >
@@ -706,14 +707,14 @@ export default function ChatPanel({ apiUrl }) {
           rows={2}
           aria-label="Chat message"
           placeholder='Ask anything — sims, compares, builds… e.g. "Best outlaw build for a Hayabusa"'
-          className="input-base flex-1 h-auto min-h-[2.75rem] resize-none py-2.5 text-sm bg-ink-1"
+          className="input-base flex-1 h-auto min-h-[2.75rem] resize-none py-2.5 text-sm"
         />
         <motion.button
           onClick={() => send()}
           disabled={!query.trim()}
           whileHover={reduce ? undefined : { scale: 1.05 }}
           whileTap={reduce ? undefined : { scale: 0.95 }}
-          className="shrink-0 p-2.5 rounded-md bg-brand-orange hover:bg-brand-orangeLight disabled:opacity-40 disabled:cursor-not-allowed text-black flex items-center justify-center"
+          className="btn-primary shrink-0 w-11 px-0 disabled:opacity-40 disabled:cursor-not-allowed"
           aria-label="Send chat query"
         >
           <Send size={18} />
@@ -746,7 +747,7 @@ export default function ChatPanel({ apiUrl }) {
                 setQuery(ex);
                 textareaRef.current?.focus();
               }}
-              className="text-[11px] px-2.5 py-1 rounded-full bg-white/[0.04] text-white/50 border border-white/10 hover:text-white/80 hover:border-white/20 transition-colors"
+              className="font-mono text-[11px] px-2.5 py-1.5 rounded bg-white/[0.04] text-white/55 border border-white/10 hover:text-white/85 hover:border-white/25 transition-colors"
             >
               {ex}
             </button>

@@ -12,6 +12,12 @@
  * operator flips MOTOQUANT_BILLING_ENFORCE, the same buttons hit
  * POST /api/payments/checkout (Razorpay for India incl. UPI, Stripe for
  * international cards) and redirect to the hosted checkout.
+ *
+ * STAGED v4 (July 2026): PageHero + three `.card` columns (Pro column
+ * border-accent with a `.chip-volt` "MOST POPULAR" tag, Studio carries the
+ * mint tier chip via TierBadge), prices big mono, feature rows with
+ * signal-colored check marks, FAQ as native <details>. Beta-mode reshaping,
+ * checkout flow, EXP-002 + EXP-005 hooks all unchanged.
  */
 
 import { Suspense, useEffect, useState } from "react";
@@ -65,27 +71,23 @@ const FAQ = [
 
 function CheckIcon() {
   return (
-    <svg className="h-4 w-4 text-brand-accent shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <svg className="h-4 w-4 shrink-0 text-signal-go" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414L8.414 15l-4.121-4.121a1 1 0 011.414-1.414L8.414 12.172l6.879-6.879a1 1 0 011.414 0z" clipRule="evenodd" />
     </svg>
   );
 }
-function CrossIcon() { return <span className="text-white/25 text-sm" aria-hidden="true">—</span>; }
+function CrossIcon() { return <span className="font-mono text-sm text-signal-foul/40" aria-hidden="true">—</span>; }
 
 function FaqItem({ q, a }) {
-  const [open, setOpen] = useState(false);
   return (
-    <div className="border-b border-white/10">
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between py-5 text-left text-sm font-medium text-white/85 hover:text-white"
-        aria-expanded={open}
-      >
+    <details className="group border-b border-white/10 last:border-0">
+      <summary className="flex w-full cursor-pointer list-none items-center justify-between py-5 text-left text-sm font-medium text-white/85 hover:text-white [&::-webkit-details-marker]:hidden">
         {q}
-        <span className="ml-4 text-brand-orange font-mono text-lg leading-none">{open ? "−" : "+"}</span>
-      </button>
-      {open && <p className="pb-5 text-sm text-white/60 leading-relaxed">{a}</p>}
-    </div>
+        <span className="ml-4 font-mono text-lg leading-none text-white/40 group-open:hidden" aria-hidden="true">+</span>
+        <span className="ml-4 hidden font-mono text-lg leading-none text-white/40 group-open:inline" aria-hidden="true">−</span>
+      </summary>
+      <p className="pb-5 text-sm leading-relaxed text-white/60">{a}</p>
+    </details>
   );
 }
 
@@ -184,59 +186,61 @@ function PricingPageInner() {
     return `₹${Math.round(PRICES[tier].yearly / 12).toLocaleString("en-IN")}`;
   };
 
+  const h2Class =
+    "font-display font-bold uppercase text-3xl md:text-4xl leading-[0.95] tracking-[-0.01em] text-white";
+
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-asphalt-0 text-white">
       <SiteNav />
       <PageHero
         align="center"
-        kicker={beta ? "pricing matrix \u00b7 open beta \u00b7 \u20b90" : "pricing matrix \u00b7 plans live"}
-        badge="Pricing"
-        title={<>Simple, <span className="text-gradient-orange">honest pricing</span>.</>}
+        kicker={beta ? "pricing matrix · open beta · ₹0" : "pricing matrix · plans live"}
+        title={<>Simple, <span className="text-gradient-volt">honest pricing</span>.</>}
         sub="Built in Pune. Serving the Indian drag-racing community. INR pricing, GST-compliant, Razorpay + Stripe secured."
       >
-              {beta && (
-                <div className="mt-2 mx-auto max-w-2xl rounded-xl border border-brand-accent/40 bg-brand-accent/10 px-5 py-4">
-                  <p className="text-sm text-brand-accent font-medium">
-                    🏁 Open beta — every Pro &amp; Studio feature is unlocked
-                    free for everyone. Create an account and go racing; paid
-                    plans only start at commercial launch (with advance notice).
-                  </p>
-                </div>
-              )}
-              <div className="mt-4 inline-flex items-center gap-1 rounded-full bg-ink-1 border border-white/10 p-1">
-                <button
-                  onClick={() => setCycle("monthly")}
-                  className={`rounded-full px-5 py-1.5 text-sm font-mono transition-colors ${cycle === "monthly" ? "bg-brand-orange text-black font-bold" : "text-white/55 hover:text-white"}`}
-                >
-                  Monthly
-                </button>
-                <button
-                  onClick={() => setCycle("yearly")}
-                  className={`rounded-full px-5 py-1.5 text-sm font-mono transition-colors flex items-center gap-2 ${cycle === "yearly" ? "bg-brand-orange text-black font-bold" : "text-white/55 hover:text-white"}`}
-                >
-                  Yearly
-                  <span className="rounded bg-brand-green px-2 py-0.5 text-[10px] text-black font-bold">Save ~17%</span>
-                </button>
-              </div>
+        {beta && (
+          <div className="mx-auto mt-2 max-w-2xl rounded-xl border border-accent/40 bg-accent/[0.08] px-5 py-4">
+          <p className="text-sm font-medium text-accent">
+            🏁 Open beta — every Pro &amp; Studio feature is unlocked
+            free for everyone. Create an account and go racing; paid
+            plans only start at commercial launch (with advance notice).
+          </p>
+          </div>
+        )}
+        <div className="mx-auto mt-4 inline-flex items-center gap-1 rounded-full border border-white/10 bg-asphalt-2 p-1">
+          <button
+            onClick={() => setCycle("monthly")}
+            className={`rounded-full px-5 py-1.5 font-mono text-sm transition-colors ${cycle === "monthly" ? "bg-accent font-bold text-asphalt-0" : "text-white/55 hover:text-white"}`}
+          >
+            Monthly
+          </button>
+          <button
+            onClick={() => setCycle("yearly")}
+            className={`flex items-center gap-2 rounded-full px-5 py-1.5 font-mono text-sm transition-colors ${cycle === "yearly" ? "bg-accent font-bold text-asphalt-0" : "text-white/55 hover:text-white"}`}
+          >
+            Yearly
+            <span className="rounded bg-signal-go px-2 py-0.5 text-[10px] font-bold text-asphalt-0 tabular-nums">Save ~17%</span>
+          </button>
+        </div>
       </PageHero>
 
       <main id="main" className="pb-20 px-4 sm:px-6">
         <div className="mx-auto max-w-6xl">
           {checkoutError && (
-            <div className="mb-8 card border-brand-red/40 bg-brand-red/10 px-5 py-4 text-sm text-brand-red/90 text-center">
+            <div className="card mb-8 border-signal-foul/40 bg-signal-foul/10 px-5 py-4 text-center text-sm text-signal-foul">
               {checkoutError}
             </div>
           )}
 
-          <div className="grid gap-5 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-3 md:gap-6">
             <Reveal delay={0.05}>
-              <div className="relative card p-8 flex flex-col h-full">
+              <div className="card flex h-full flex-col p-5 md:p-6">
                 <TierBadge tier="free" size="sm" />
                 <div className="mt-5">
-                  <span className="font-display font-bold text-5xl text-white tabular-nums">₹0</span>
-                  <span className="text-white/45 text-sm ml-1.5 font-mono">/mo</span>
+                  <span className="font-mono font-bold text-5xl text-white tabular-nums">₹0</span>
+                  <span className="ml-1.5 font-mono text-sm text-white/45">/mo</span>
                 </div>
-                <p className="mt-3 text-sm text-white/55">Try the simulator, explore the catalog.</p>
+                <p className="mt-3 text-sm text-white/65">Try the simulator, explore the catalog.</p>
                 <div className="mt-7 flex-1 space-y-3">
                   {FEATURES.map(([label, free]) => (
                     <div key={label} className="flex items-start gap-2.5 text-sm text-white/75">
@@ -254,23 +258,17 @@ function PricingPageInner() {
             </Reveal>
 
             <Reveal delay={0.12}>
-              <div className="relative card border-brand-orange/40 bg-gradient-to-b from-brand-orange/[0.07] to-white/[0.02] p-8 flex flex-col h-full">
-                <div
-                  aria-hidden="true"
-                  className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-orange/70 to-transparent"
-                />
+              <div className="card relative flex h-full flex-col border-accent/40 p-5 md:p-6">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="rounded-full bg-brand-orange px-4 py-1 text-[10px] font-mono uppercase tracking-[0.25em] font-bold text-black shadow-orange-soft">
-                    Most popular
-                  </span>
+                  <span className="chip chip-volt bg-asphalt-1">Most popular</span>
                 </div>
                 <TierBadge tier="pro" size="sm" />
                 <div className="mt-5">
-                  <span className="font-display font-bold text-5xl text-white tabular-nums">{displayPrice("pro")}</span>
-                  <span className="text-white/45 text-sm ml-1.5 font-mono">/mo</span>
+                  <span className="font-mono font-bold text-5xl text-white tabular-nums">{displayPrice("pro")}</span>
+                  <span className="ml-1.5 font-mono text-sm text-white/45">/mo</span>
                 </div>
                 {cycle === "yearly" && (
-                  <p className="mt-1 text-xs text-brand-accent font-mono">
+                  <p className="mt-1 font-mono text-xs text-signal-go tabular-nums">
                     ₹{PRICES.pro.yearly.toLocaleString("en-IN")}/yr · save {yearlyDiscount("pro")}%
                   </p>
                 )}
@@ -293,7 +291,7 @@ function PricingPageInner() {
                 </div>
                 {cfgLoading ? (
                   <div className="mt-8" aria-hidden="true">
-                    <Skeleton className="h-11 w-full rounded-xl" />
+                    <Skeleton className="h-11 w-full rounded-lg" />
                     <Skeleton className="mx-auto mt-3 h-3 w-44" />
                   </div>
                 ) : (
@@ -309,7 +307,7 @@ function PricingPageInner() {
                         className="w-full"
                       />
                     </div>
-                    <p className="mt-3 text-center text-xs text-white/40 font-mono">
+                    <p className="mt-3 text-center font-mono text-xs text-white/40">
                       {beta ? "₹0 until commercial launch" : "7-day money-back guarantee"}
                     </p>
                   </>
@@ -318,18 +316,18 @@ function PricingPageInner() {
             </Reveal>
 
             <Reveal delay={0.19}>
-              <div className="relative card border-brand-accent/30 p-8 flex flex-col h-full">
+              <div className="card flex h-full flex-col p-5 md:p-6">
                 <TierBadge tier="studio" size="sm" />
                 <div className="mt-5">
-                  <span className="font-display font-bold text-5xl text-white tabular-nums">{displayPrice("studio")}</span>
-                  <span className="text-white/45 text-sm ml-1.5 font-mono">/mo</span>
+                  <span className="font-mono font-bold text-5xl text-white tabular-nums">{displayPrice("studio")}</span>
+                  <span className="ml-1.5 font-mono text-sm text-white/45">/mo</span>
                 </div>
                 {cycle === "yearly" && (
-                  <p className="mt-1 text-xs text-brand-accent font-mono">
+                  <p className="mt-1 font-mono text-xs text-signal-go tabular-nums">
                     ₹{PRICES.studio.yearly.toLocaleString("en-IN")}/yr · save {yearlyDiscount("studio")}%
                   </p>
                 )}
-                <p className="mt-3 text-sm text-white/55">For tuning shops and professional teams.</p>
+                <p className="mt-3 text-sm text-white/65">For tuning shops and professional teams.</p>
                 <div className="mt-7 flex-1 space-y-3">
                   {FEATURES.map(([label, , , studio]) => (
                     <div key={label} className="flex items-start gap-2.5 text-sm text-white/75">
@@ -342,7 +340,7 @@ function PricingPageInner() {
                 </div>
                 {cfgLoading ? (
                   <div className="mt-8" aria-hidden="true">
-                    <Skeleton className="h-11 w-full rounded-xl" />
+                    <Skeleton className="h-11 w-full rounded-lg" />
                     <Skeleton className="mx-auto mt-3 h-3 w-44" />
                   </div>
                 ) : (
@@ -355,9 +353,9 @@ function PricingPageInner() {
                       variant="ghost"
                       label={beta ? "Free during beta — create account" : "Subscribe to Studio"}
                       runningLabel="Redirecting to checkout"
-                      className="mt-8 w-full border-brand-accent/40 text-brand-accent"
+                      className="mt-8 w-full"
                     />
-                    <p className="mt-3 text-center text-xs text-white/40 font-mono">
+                    <p className="mt-3 text-center font-mono text-xs text-white/40">
                       {beta ? "₹0 until commercial launch" : "7-day money-back guarantee"}
                     </p>
                   </>
@@ -367,16 +365,16 @@ function PricingPageInner() {
           </div>
 
           <Reveal>
-            <div className="mt-14 text-center space-y-3">
+            <div className="mt-14 space-y-3 text-center">
               <p className="text-sm text-white/50">
-                India: <span className="text-white/80 font-medium">Razorpay</span> · UPI · Cards · Net Banking · Wallets
-                <span className="text-white/25 mx-2">|</span>
-                International: <span className="text-white/80 font-medium">Stripe</span> · Cards
+                India: <span className="font-medium text-white/80">Razorpay</span> · UPI · Cards · Net Banking · Wallets
+                <span className="mx-2 text-white/25">|</span>
+                International: <span className="font-medium text-white/80">Stripe</span> · Cards
               </p>
-              <p className="text-xs text-white/35 font-mono">
+              <p className="font-mono text-xs text-white/35">
                 All prices in INR + 18% GST at checkout where applicable · Cancel anytime · 7-day refund guarantee
               </p>
-              <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-[11px] font-mono text-white/45">
+              <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 font-mono text-[11px] text-white/45">
                 <span>Aamby Valley</span>
                 <span className="text-white/15">·</span>
                 <span>MMRT Chennai</span>
@@ -389,32 +387,33 @@ function PricingPageInner() {
           </Reveal>
 
           <Reveal>
-            <div className="mt-20 pt-16 border-t border-brand-orange/10">
-              <h2 className="font-display font-bold text-2xl md:text-3xl text-white mb-2">Full feature comparison</h2>
-              <p className="text-sm text-white/55 mb-8 max-w-2xl">Everything in every tier, side-by-side.</p>
+            <div className="mt-20">
+              <div className="centerline mb-16" aria-hidden="true" />
+              <h2 className={h2Class}>Full feature comparison</h2>
+              <p className="mb-8 mt-2 max-w-2xl text-sm text-white/65">Everything in every tier, side-by-side.</p>
               <div className="card overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-white/10 bg-white/[0.02]">
-                        <th className="py-4 px-5 text-left label-mono">Feature</th>
-                        <th className="py-4 px-5 text-center label-mono">Free</th>
-                        <th className="py-4 px-5 text-center label-mono text-brand-orange">Pro</th>
-                        <th className="py-4 px-5 text-center label-mono text-brand-accent">Studio</th>
+                        <th className="px-5 py-4 text-left label-mono">Feature</th>
+                        <th className="px-5 py-4 text-center label-mono">Free</th>
+                        <th className="px-5 py-4 text-center label-mono text-accent">Pro</th>
+                        <th className="px-5 py-4 text-center label-mono text-mint">Studio</th>
                       </tr>
                     </thead>
                     <tbody>
                       {FEATURES.map(([label, free, pro, studio]) => (
                         <tr key={label} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                          <td className="py-3 px-5 text-white/80">{label}</td>
-                          <td className="py-3 px-5 text-center">
-                            {free === "✓" ? <CheckIcon /> : free === "—" ? <CrossIcon /> : <span className="text-white/65 font-mono">{free}</span>}
+                          <td className="px-5 py-3 text-white/80">{label}</td>
+                          <td className="px-5 py-3 text-center">
+                            {free === "✓" ? <CheckIcon /> : free === "—" ? <CrossIcon /> : <span className="font-mono text-white/65">{free}</span>}
                           </td>
-                          <td className="py-3 px-5 text-center">
-                            {pro === "✓" ? <CheckIcon /> : pro === "—" ? <CrossIcon /> : <span className="text-brand-orange font-mono">{pro}</span>}
+                          <td className="px-5 py-3 text-center">
+                            {pro === "✓" ? <CheckIcon /> : pro === "—" ? <CrossIcon /> : <span className="font-mono text-white/85">{pro}</span>}
                           </td>
-                          <td className="py-3 px-5 text-center">
-                            {studio === "✓" ? <CheckIcon /> : studio === "—" ? <CrossIcon /> : <span className="text-brand-accent font-mono">{studio}</span>}
+                          <td className="px-5 py-3 text-center">
+                            {studio === "✓" ? <CheckIcon /> : studio === "—" ? <CrossIcon /> : <span className="font-mono text-white/70">{studio}</span>}
                           </td>
                         </tr>
                       ))}
@@ -426,12 +425,19 @@ function PricingPageInner() {
           </Reveal>
 
           <Reveal>
-            <div className="mt-20 pt-16 border-t border-brand-orange/10 max-w-2xl mx-auto">
-              <h2 className="font-display font-bold text-2xl md:text-3xl text-white mb-2 text-center">
+            <div className="mx-auto mt-20 max-w-2xl">
+              <div className="centerline mb-16" aria-hidden="true" />
+              <h2 className={`${h2Class} text-center`}>
                 Frequently asked questions
               </h2>
-              <p className="text-sm text-white/55 text-center mb-6">
-                Anything else? <a href="mailto:motoquant@gmail.com" className="text-brand-accent hover:text-white transition-colors">motoquant@gmail.com</a>
+              <p className="mb-6 mt-2 text-center text-sm text-white/65">
+                Anything else?{" "}
+                <a
+                  href="mailto:motoquant@gmail.com"
+                  className="text-white/80 underline decoration-white/25 underline-offset-2 hover:text-white transition-colors"
+                >
+                  motoquant@gmail.com
+                </a>
               </p>
               <div className="card px-6">
                 {FAQ.map((item) => <FaqItem key={item.q} {...item} />)}

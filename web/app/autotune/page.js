@@ -9,18 +9,12 @@ import EcuAutotune from '../../components/EcuAutotune';
 
 export default function AutotunePage() {
   return (
-    <div className="min-h-screen bg-black text-white overflow-x-hidden">
+    <div className="min-h-screen bg-asphalt-0 text-white overflow-x-hidden">
       <SiteNav />
 
       <PageHero
-        align="center"
-        kicker="density altitude read · gearing sweep armed"
-        badge="ECU Autotune"
-        title={
-          <>
-            A setup sheet for <span className="text-gradient-orange">today&apos;s conditions</span>
-          </>
-        }
+        kicker="ECU Autotune"
+        title="Setup sheet for your strip"
         sub="Pick your bike and where you’re running. MotoQuant works out the density altitude and returns gearing, launch RPM, tyre pressure, and fuel/timing — each with the predicted quarter-mile ET change so you know what actually moves the clock."
         stats={[
           { value: 541, label: 'BIKES' },
@@ -28,8 +22,8 @@ export default function AutotunePage() {
         ]}
       />
 
-      {/* Tool — two-column workbench (controls left, results right; stacks below lg) */}
-      <section className="px-4 sm:px-6 py-20 md:py-28 border-t border-brand-orange/10">
+      {/* Tool — two-column workbench (inputs left, results right; stacks below lg) */}
+      <section className="px-4 sm:px-6 pb-16 md:pb-24">
         <div className="max-w-6xl mx-auto">
           <EcuAutotune />
 

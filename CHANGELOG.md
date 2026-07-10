@@ -4,6 +4,43 @@ Notable changes, newest first. This is the human-readable milestone history;
 the exhaustive session-by-session log lives in `CLAUDE.md` (top entry = latest)
 and `reports/`. Format loosely follows [Keep a Changelog](https://keepachangelog.com).
 
+## [PR #107] — 2026-07-10 — STAGED v4: ground-up website redesign
+
+Operator-directed full redesign ("completely new website, full creative
+freedom, simpler interface, full functionality"). New design language:
+**STAGED — the digital timeslip.** Night-asphalt surfaces, one volt-green
+accent (the green light), Barlow Condensed display type, mono tabular
+numbers, and the printed timeslip as the signature result artifact.
+
+### Added
+- **`web/DESIGN.md`** — the v4 design authority (supersedes `REDESIGN.md`).
+- **`design/staged/`** — 13 design-system preview cards (also synced to the
+  owner's Claude Design project via claude.ai/design).
+- New CSS vocabulary: `.timeslip`, `.chip-*`, `.delta-down/.delta-up`,
+  `.centerline`; `StageDots` signature component (pre-stage · stage · GO).
+
+### Changed
+- Every page + chrome re-skinned; landing page rewritten at half its length
+  around a live quick-sim hero. Tool pages unified on a two-pane workbench.
+  `/r/[id]` and `/leaderboard` are now full timeslip artifacts.
+- Tailwind tokens: `asphalt-*` / `accent` (volt) / `signal-*` / `mint`, with
+  `ink-*`/`brand-*` kept as compatibility aliases so ~50 untouched blog
+  pages re-skin automatically.
+- Brand assets regenerated (volt icon set, webmanifest, OG card); the OG
+  renderer in `scripts/audit_headline_stats.py` re-paletted.
+
+### Removed
+- Cockpit-era decoration: BootSequence, HudFrame, TronGrid, ManifestoScrub,
+  PhysicsDial, ChristmasTree, LaunchControl, TelemetryHUD, SectionRail
+  (seven-segment ScoreboardDigits survives as clean mono digits behind the
+  same API).
+
+### Unchanged (by contract)
+- All functionality: job-backed sims with progress/Stop, save→leaderboard→
+  share loop, auth/billing flows, chat agent UI, experiments, SEO/JSON-LD,
+  `lib/api.js` polling resilience; every headline stat token byte-identical
+  (audit in sync).
+
 ## [PR #100] — 2026-07-06 — Durability milestone
 
 The 100th pull request. Focus: make the codebase keep improving across

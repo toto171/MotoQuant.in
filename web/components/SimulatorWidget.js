@@ -1,5 +1,16 @@
 'use client';
 
+/**
+ * SimulatorWidget — the landing-page live simulator (STAGED v4 skin).
+ *
+ * v4 re-skin ONLY: surfaces are .card / .input-base tokens, the run
+ * buttons use the sitewide .btn-* vocabulary, and results render as the
+ * signature mini .timeslip. ALL logic is preserved verbatim from v3:
+ * BIKE_CATEGORIES + the bikeIdMap catalog-ID self-heal, quick sim via
+ * /api/simulate/quick, the job-backed top-speed run with Stop, the
+ * bike_preset vs bike_id split, telemetry, and the Sim/Chat mode toggle.
+ */
+
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, AlertCircle, MapPin, MessageSquare, Gauge } from 'lucide-react';
@@ -99,9 +110,8 @@ function AnimatedCounter({ target, decimals = 3 }) {
 // ─── Main widget ──────────────────────────────────────────────────────────────
 
 // ── SegEt — the user's own ET on the strip timing board ──────────────
-// ETs render on ScoreboardDigits everywhere (stats strip, telemetry
-// ELAPSED, reference baselines); the sim result is the user's personal
-// timeslip, so it counts up on the same seven-segment board.
+// The sim result is the user's personal timeslip, so the ET counts up on
+// the timing-board numerals (ScoreboardDigits — clean mono in v4).
 function SegEt({ target }) {
   const [val, setVal] = useState(0);
   useEffect(() => {
@@ -118,9 +128,9 @@ function SegEt({ target }) {
     return () => cancelAnimationFrame(raf);
   }, [target]);
   return (
-    <span className="inline-flex items-end gap-1.5 justify-center">
-      <span className="flex sm:hidden"><ScoreboardDigits value={val.toFixed(3)} h={30} label={`${target}s`} /></span>
-      <span className="hidden sm:flex"><ScoreboardDigits value={val.toFixed(3)} h={42} label={`${target}s`} /></span>
+    <span className="inline-flex items-baseline gap-1.5 justify-center">
+      <span className="flex sm:hidden"><ScoreboardDigits value={val.toFixed(3)} h={34} color="#FFFFFF" label={`${target}s`} /></span>
+      <span className="hidden sm:flex"><ScoreboardDigits value={val.toFixed(3)} h={44} color="#FFFFFF" label={`${target}s`} /></span>
       <span className="font-mono text-white/40 text-sm sm:text-base">s</span>
     </span>
   );
@@ -304,12 +314,7 @@ export default function SimulatorWidget() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="relative bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl p-5 sm:p-8 max-w-2xl mx-auto overflow-hidden"
-    >
+    <div className="card relative mx-auto w-full max-w-2xl overflow-hidden rounded-2xl p-5 sm:p-6">
       <AnimatePresence>
         {loading && (
           <motion.div
@@ -323,18 +328,16 @@ export default function SimulatorWidget() {
         )}
       </AnimatePresence>
 
-      <div className="flex items-center justify-between mb-6 relative z-10">
-        <h3 className="text-xl font-bold flex items-center gap-2">
-          <motion.div whileHover={{ scale: 1.1 }} transition={{ type: 'spring', stiffness: 400 }}>
-            <Zap className="text-brand-orange" size={20} />
-          </motion.div>
-          <span className="bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
-            Live Simulator
-          </span>
-        </h3>
+      <div className="relative z-10 mb-6 flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="font-display font-semibold uppercase text-xl text-white">
+            Live simulator
+          </h3>
+          <p className="label-mono mt-1">Real physics · runs in seconds</p>
+        </div>
 
         {/* Mode toggle — Simulate / Chat */}
-        <div className="flex items-center gap-0.5 bg-white/[0.04] rounded-lg p-0.5 border border-white/10">
+        <div className="flex shrink-0 items-center gap-0.5 rounded-lg border border-white/[0.12] bg-asphalt-3 p-0.5">
           {[
             { id: 'sim', icon: Gauge, label: 'Sim' },
             { id: 'chat', icon: MessageSquare, label: 'Chat' },
@@ -342,13 +345,13 @@ export default function SimulatorWidget() {
             <button
               key={id}
               onClick={() => setWidgetMode(id)}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
+              className={`flex h-9 items-center gap-1.5 rounded-md px-3 font-mono text-[11px] uppercase tracking-[0.15em] transition-colors ${
                 widgetMode === id
-                  ? 'bg-brand-orange text-white shadow-sm'
+                  ? 'bg-asphalt-4 text-white'
                   : 'text-white/50 hover:text-white/80'
               }`}
             >
-              <Icon size={12} />
+              <Icon size={12} aria-hidden="true" />
               {label}
             </button>
           ))}
@@ -367,26 +370,24 @@ export default function SimulatorWidget() {
       <>
 
       {/* Bike selector — category tabs + chip grid */}
-      <div className="mb-6 relative z-10">
-        <div className="flex items-center justify-between mb-3">
-          <label className="text-[10px] font-mono text-white/45 uppercase tracking-[0.25em]">
-            Select Bike
-          </label>
-          <span className="text-[10px] font-mono text-white/30">
+      <div className="relative z-10 mb-6">
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <label className="label-mono">Select bike</label>
+          <span className="truncate font-mono text-[10px] tabular-nums text-white/30">
             {selectedBike.label} · {selectedBike.cc} · {selectedBike.hp} hp
           </span>
         </div>
 
         {/* Category tabs */}
-        <div className="flex gap-1 sm:gap-2 mb-3 overflow-x-auto scrollbar-thin">
+        <div className="scrollbar-thin mb-3 flex gap-1.5 overflow-x-auto">
           {BIKE_CATEGORIES.map((cat, idx) => (
             <button
               key={cat.name}
               onClick={() => setActiveTab(idx)}
-              className={`shrink-0 px-3 py-1.5 rounded-md text-xs font-semibold transition-all whitespace-nowrap ${
+              className={`h-10 shrink-0 whitespace-nowrap rounded border px-3 font-mono text-[11px] uppercase tracking-[0.15em] transition-colors ${
                 activeTab === idx
-                  ? 'bg-brand-orange text-white shadow-[0_0_15px_rgba(255,94,31,0.3)]'
-                  : 'bg-white/[0.04] text-white/60 hover:bg-white/[0.08] hover:text-white/90'
+                  ? 'border-white/30 bg-asphalt-4 text-white'
+                  : 'border-white/[0.08] bg-asphalt-3/60 text-white/50 hover:border-white/20 hover:text-white/80'
               }`}
             >
               {cat.name}
@@ -395,39 +396,36 @@ export default function SimulatorWidget() {
         </div>
 
         {/* Bike chip grid for active tab */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-2.5">
           {BIKE_CATEGORIES[activeTab].bikes.map((b) => {
             const key = b.presetId || `id${b.id}`;
             const isSelected =
               (b.presetId && selectedBike.presetId === b.presetId) ||
               (b.id != null && selectedBike.id === b.id);
             return (
-              <motion.button
+              <button
                 key={key}
                 onClick={() => setSelectedBike(b)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={`relative p-2.5 sm:p-3 rounded-xl border transition-all duration-300 text-left group ${
+                className={`min-h-[52px] rounded-lg border p-2.5 text-left transition-colors sm:p-3 ${
                   isSelected
-                    ? 'bg-white/[0.08] border-brand-orange shadow-[0_0_20px_rgba(255,94,31,0.2)]'
-                    : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-white/10'
+                    ? 'border-white/45 bg-white/[0.07]'
+                    : 'border-white/[0.08] bg-asphalt-3/50 hover:border-white/20 hover:bg-asphalt-3'
                 }`}
               >
-                <div className="font-semibold text-xs sm:text-sm leading-tight text-white">
-                  {/* Strip the manufacturer prefix on small chips for tighter layout */}
+                <div className="text-xs font-semibold leading-tight text-white sm:text-sm">
                   {b.label}
                 </div>
-                <div className="text-[10px] text-white/40 mt-1.5 group-hover:text-white/60 transition-colors">
+                <div className="mt-1.5 font-mono text-[10px] tabular-nums text-white/40">
                   {b.cc} · {b.hp} hp
                 </div>
-              </motion.button>
+              </button>
             );
           })}
         </div>
       </div>
 
       {/* Sliders */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-4 mb-8 relative z-10">
+      <div className="relative z-10 mb-8 grid grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-4">
         {[
           {
             label: 'Rider weight',
@@ -449,8 +447,8 @@ export default function SimulatorWidget() {
             // Semantic colour: positive boost = green (faster ET),
             // negative = red (slower), zero = neutral white.
             valueColor:
-              powerBoost > 0 ? 'text-brand-accent'
-              : powerBoost < 0 ? 'text-[#FF6B6B]'
+              powerBoost > 0 ? 'text-signal-go'
+              : powerBoost < 0 ? 'text-signal-foul'
               : 'text-white',
           },
           {
@@ -465,13 +463,13 @@ export default function SimulatorWidget() {
             // zero = neutral. Inverse of power-boost direction (since
             // adding kg hurts ET while adding hp helps it).
             valueColor:
-              massChange > 0 ? 'text-[#FF6B6B]'
-              : massChange < 0 ? 'text-brand-accent'
+              massChange > 0 ? 'text-signal-foul'
+              : massChange < 0 ? 'text-signal-go'
               : 'text-white',
           },
         ].map((slider, idx) => (
           <div key={idx} className="space-y-2">
-            <label className="block text-[10px] font-mono text-white/45 uppercase tracking-[0.25em]">
+            <label className="label-mono block">
               {slider.label}
             </label>
             <div className="flex items-center gap-2">
@@ -481,10 +479,10 @@ export default function SimulatorWidget() {
                 max={slider.max}
                 value={slider.value}
                 onChange={e => slider.onChange(Number(e.target.value))}
-                className="flex-1 h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-brand-orange slider-thumb"
+                className="h-6 flex-1 cursor-pointer accent-white"
               />
             </div>
-            <div className={`text-sm font-mono text-right transition-colors ${slider.valueColor ?? 'text-white'}`}>
+            <div className={`text-right font-mono text-sm tabular-nums transition-colors ${slider.valueColor ?? 'text-white'}`}>
               {slider.format(slider.value)}
             </div>
           </div>
@@ -492,31 +490,6 @@ export default function SimulatorWidget() {
       </div>
 
       <style jsx>{`
-        input[type='range']::-webkit-slider-thumb {
-          appearance: none;
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #FF5E1F, #FF7A00);
-          cursor: pointer;
-          box-shadow: 0 0 20px rgba(255, 94, 31, 0.5);
-          transition: box-shadow 0.2s;
-        }
-        input[type='range']::-webkit-slider-thumb:hover {
-          box-shadow: 0 0 30px rgba(255, 94, 31, 0.8);
-        }
-        input[type='range']::-moz-range-thumb {
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #FF5E1F, #FF7A00);
-          cursor: pointer;
-          border: none;
-          box-shadow: 0 0 20px rgba(255, 94, 31, 0.5);
-        }
-        input[type='range']::-moz-range-thumb:hover {
-          box-shadow: 0 0 30px rgba(255, 94, 31, 0.8);
-        }
         .scrollbar-thin::-webkit-scrollbar { height: 4px; }
         .scrollbar-thin::-webkit-scrollbar-thumb {
           background: rgba(255, 255, 255, 0.1);
@@ -525,19 +498,19 @@ export default function SimulatorWidget() {
       `}</style>
 
       {/* Location picker */}
-      <div className="mb-6 relative z-10">
+      <div className="relative z-10 mb-6">
         <button
           type="button"
           onClick={() => setLocationOpen(v => !v)}
-          className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-white/10 hover:border-brand-orange/40 bg-black/20 text-left transition-colors"
+          className="flex min-h-[44px] w-full items-center justify-between rounded-lg border border-white/[0.08] bg-asphalt-3/60 px-3 py-2.5 text-left transition-colors hover:border-white/25"
         >
-          <div className="flex items-center gap-2 text-sm min-w-0 flex-1">
-            <MapPin size={14} className="text-brand-orange shrink-0" />
+          <div className="flex min-w-0 flex-1 items-center gap-2 text-sm">
+            <MapPin size={14} className="shrink-0 text-white/45" aria-hidden="true" />
             {location ? (
-              <span className="font-mono text-white/80 truncate">
+              <span className="truncate font-mono text-white/80">
                 {location.venue_name || location.location_name || location._label}
                 {location.density_altitude_m != null && (
-                  <span className="ml-2 text-brand-accent text-xs tabular-nums">
+                  <span className="ml-2 text-xs tabular-nums text-white/50">
                     DA {Math.round(location.density_altitude_m)} m
                   </span>
                 )}
@@ -546,7 +519,7 @@ export default function SimulatorWidget() {
               <span className="font-mono text-white/50">Race location (optional)</span>
             )}
           </div>
-          <span className="text-[10px] font-mono text-white/40 ml-2 shrink-0">
+          <span className="label-mono ml-2 shrink-0">
             {locationOpen ? 'CLOSE' : location ? 'CHANGE' : 'ADD'}
           </span>
         </button>
@@ -571,50 +544,48 @@ export default function SimulatorWidget() {
         </AnimatePresence>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 relative z-10">
-        <motion.button
+      <div className="relative z-10 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <button
           onClick={() => (loading && simMode === 'quarter' ? stopSim() : runSim('quarter'))}
           disabled={loading && simMode !== 'quarter'}
-          whileHover={{ scale: loading ? 1 : 1.02 }}
-          whileTap={{ scale: loading ? 1 : 0.98 }}
           className={[
-            // Cockpit v3: the active mode is the primary action, the other
-            // mode is a ghost — the sitewide .btn-* pair (h-11, rounded-xl).
             'w-full',
-            simMode === 'quarter' ? 'btn-primary' : 'btn-ghost hover:border-brand-orange/40',
+            loading && simMode === 'quarter'
+              ? 'btn-running'
+              : simMode === 'quarter' ? 'btn-primary' : 'btn-ghost',
           ].join(' ')}
         >
           {loading && simMode === 'quarter' ? (
-            <span className="tabular-nums">■ Stop</span>
+            <span className="font-mono tabular-nums">■ Stop</span>
           ) : (
             <>
-              <Zap size={15} />
+              <Zap size={15} aria-hidden="true" />
               <span>Quarter-Mile ET</span>
             </>
           )}
-        </motion.button>
+        </button>
 
-        <motion.button
+        <button
           onClick={() => (loading && simMode === 'topspeed' ? stopSim() : runSim('topspeed'))}
           disabled={loading && simMode !== 'topspeed'}
-          whileHover={{ scale: loading ? 1 : 1.02 }}
-          whileTap={{ scale: loading ? 1 : 0.98 }}
           className={[
             'w-full',
-            simMode === 'topspeed' ? 'btn-primary' : 'btn-ghost hover:border-brand-orange/40',
+            loading && simMode === 'topspeed'
+              ? 'btn-running'
+              : simMode === 'topspeed' ? 'btn-primary' : 'btn-ghost',
           ].join(' ')}
         >
           {loading && simMode === 'topspeed' ? (
-            <span className="tabular-nums">
+            <span className="font-mono tabular-nums">
               ■ Stop{prog?.progress != null ? ` — ${Math.round(prog.progress * 100)}%` : ''}
             </span>
           ) : (
             <>
-              <Gauge size={15} />
+              <Gauge size={15} aria-hidden="true" />
               <span>Top Speed Stats</span>
             </>
           )}
-        </motion.button>
+        </button>
       </div>
 
       <AnimatePresence>
@@ -623,14 +594,15 @@ export default function SimulatorWidget() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-4 p-3 bg-brand-red/10 border border-brand-red/30 rounded-lg text-brand-red text-sm flex items-center gap-2 relative z-10"
+            className="relative z-10 mt-4 flex items-center gap-2 rounded-lg border border-signal-foul/30 bg-signal-foul/10 p-3 text-sm text-signal-foul"
           >
-            <AlertCircle size={16} />
+            <AlertCircle size={16} aria-hidden="true" />
             {error}
           </motion.div>
         )}
       </AnimatePresence>
 
+      {/* ── Quarter-mile result — the mini timeslip ─────────────────── */}
       <AnimatePresence>
         {simMode === 'quarter' && result && (
           <motion.div
@@ -638,137 +610,50 @@ export default function SimulatorWidget() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.4 }}
-            className="mt-8 space-y-4 relative z-10"
+            className="relative z-10 mt-8"
           >
-            <div className="grid grid-cols-2 gap-4">
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.1 }}
-                className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-6 text-center backdrop-blur"
-              >
-                <p className="text-[10px] font-mono text-white/45 mb-2 uppercase tracking-[0.25em]">
-                  Quarter-Mile ET
-                </p>
-                <div className="flex justify-center">
-                  <SegEt target={result.et_quarter_s} />
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-6 text-center backdrop-blur"
-              >
-                <p className="text-[10px] font-mono text-white/45 mb-2 uppercase tracking-[0.25em]">
-                  Trap Speed
-                </p>
-                <p className="text-3xl sm:text-5xl font-mono font-bold text-white">
-                  <AnimatedCounter target={result.trap_speed_kmh} decimals={1} />
-                </p>
-                <p className="text-xs text-white/40 mt-2">km/h</p>
-              </motion.div>
-            </div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-6 backdrop-blur"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <p className="text-[10px] font-mono text-white/45 uppercase tracking-[0.25em]">Split Timeline</p>
-                <p className="text-[10px] font-mono text-white/30 tabular-nums">
-                  402 m · 1320 ft
-                </p>
+            <div className="timeslip">
+              <div className="flex items-center justify-between gap-2 pb-2">
+                <span className="label-mono">Quarter-mile · Official slip</span>
+                <span className="label-mono">402 m · 1320 ft</span>
               </div>
-              {(() => {
-                const splits = [
-                  { label: '0 ft',    val: 0,                       distM: 0 },
-                  { label: '60 ft',   val: result.et_60ft_s ?? 0,   distM: 18.3 },
-                  { label: '⅛ mile',  val: result.et_eighth_s ?? 0, distM: 201 },
-                  { label: '¼ mile',  val: result.et_quarter_s ?? 0,distM: 402 },
-                ];
-                const totalT = splits[3].val || 1;
-                return (
-                  <div className="relative">
-                    {/* Progress track: full width, rendered behind the
-                        4 milestone cards. The orange fill width is
-                        always 100 % at the end (the last marker IS the
-                        finish line), but the gradient stops are
-                        positioned by relative time so the eye reads the
-                        pacing — narrow gaps = quick splits, wide gaps
-                        = slow splits. */}
-                    <div className="absolute left-3 right-3 top-[18px] h-[3px] rounded-full bg-white/10 overflow-hidden">
-                      <motion.div
-                        initial={{ scaleX: 0 }}
-                        animate={{ scaleX: 1 }}
-                        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-                        style={{ transformOrigin: 'left' }}
-                        className="h-full bg-gradient-to-r from-[#FF5E1F] via-[#FF8F57] to-[#FFD089]"
-                      />
-                    </div>
 
-                    <div className="grid grid-cols-4 gap-1 sm:gap-2 relative">
-                      {splits.map((s, idx) => {
-                        const pct = totalT > 0 ? Math.round((s.val / totalT) * 100) : 0;
-                        return (
-                          <motion.div
-                            key={idx}
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.4 + idx * 0.08, duration: 0.4 }}
-                            className="flex flex-col items-center text-center"
-                          >
-                            {/* Milestone dot — sits ON the progress track */}
-                            <div className="w-[14px] h-[14px] sm:w-[18px] sm:h-[18px] rounded-full bg-brand-orange border-2 border-black shadow-[0_0_18px_rgba(255,94,31,0.6)] mb-2.5" />
-                            {/* Distance label */}
-                            <p className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/45 mb-0.5">
-                              {s.label}
-                            </p>
-                            {/* Big time value */}
-                            <p className="text-sm sm:text-base font-mono font-bold text-white tabular-nums leading-none">
-                              {s.val === 0 ? '0.000' : s.val.toFixed(3)}
-                              <span className="text-white/40 text-[10px] sm:text-xs ml-0.5">s</span>
-                            </p>
-                            {/* Pace tick (% of total ET) */}
-                            <p className="text-[9px] sm:text-[10px] font-mono text-brand-orangeLight/70 tabular-nums mt-1">
-                              {pct}%
-                            </p>
-                          </motion.div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })()}
-            </motion.div>
+              <div className="border-b border-dashed border-white/10 py-4 text-center">
+                <p className="label-mono mb-2">Elapsed time</p>
+                <SegEt target={result.et_quarter_s} />
+              </div>
 
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="text-sm min-w-0"
-              >
-                <p className="text-white/40 text-xs mb-1">Bike</p>
+              <div className="timeslip-row">
+                <span className="text-white/45">60 FT</span>
+                <span className="text-white">{(result.et_60ft_s ?? 0).toFixed(3)} s</span>
+              </div>
+              <div className="timeslip-row">
+                <span className="text-white/45">⅛ MILE</span>
+                <span className="text-white">{(result.et_eighth_s ?? 0).toFixed(3)} s</span>
+              </div>
+              <div className="timeslip-row">
+                <span className="text-white/45">¼ MILE</span>
+                <span className="font-bold text-white">{(result.et_quarter_s ?? 0).toFixed(3)} s</span>
+              </div>
+              <div className="timeslip-row">
+                <span className="text-white/45">TRAP SPEED</span>
+                <span className="text-white">
+                  <AnimatedCounter target={result.trap_speed_kmh} decimals={1} /> km/h
+                </span>
+              </div>
+              <div className="timeslip-row">
+                <span className="shrink-0 text-white/45">BIKE</span>
                 {/* Full catalog name — CSS-truncated, never string-mangled
                     (the old slice(-2) turned "Suzuki GSX-R 1000 K5" into
                     "1000 K5"). */}
-                <p className="font-semibold text-white truncate" title={result.bike_name}>
+                <span className="min-w-0 truncate text-right text-white/85" title={result.bike_name}>
                   {result.bike_name}
-                </p>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="text-sm"
-              >
-                <p className="text-white/40 text-xs mb-1">Peak Power</p>
-                <p className="font-semibold text-brand-accent">{result.peak_power_hp.toFixed(0)} hp</p>
-              </motion.div>
+                </span>
+              </div>
+              <div className="timeslip-row">
+                <span className="text-white/45">PEAK POWER</span>
+                <span className="text-white">{result.peak_power_hp.toFixed(0)} hp</span>
+              </div>
             </div>
           </motion.div>
         )}
@@ -785,113 +670,81 @@ export default function SimulatorWidget() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.4 }}
-            className="mt-8 space-y-4 relative z-10"
+            className="relative z-10 mt-8"
           >
-            <div className="grid grid-cols-2 gap-4">
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.1 }}
-                className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-6 text-center backdrop-blur"
-              >
-                <p className="text-[10px] font-mono text-white/45 mb-2 uppercase tracking-[0.25em]">
-                  Top Speed
-                </p>
-                <p className="text-3xl sm:text-5xl font-mono font-bold text-brand-orange">
-                  <AnimatedCounter target={topSpeedResult.terminal_velocity_kmh ?? 0} decimals={1} />
-                </p>
-                <p className="text-xs text-white/40 mt-2">km/h</p>
-              </motion.div>
-
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-6 text-center backdrop-blur flex flex-col justify-center"
-              >
-                <p className="text-[10px] font-mono text-white/45 mb-2 uppercase tracking-[0.25em]">
-                  Plateau
-                </p>
+            <div className="timeslip">
+              <div className="flex items-center justify-between gap-2 pb-2">
+                <span className="label-mono">Top speed · Official slip</span>
                 {topSpeedResult.reached_plateau ? (
-                  <>
-                    <p className="text-2xl sm:text-3xl font-mono font-bold text-brand-accent">Reached</p>
-                    <p className="text-[11px] text-white/45 mt-1.5 font-mono tabular-nums">
-                      in {topSpeedResult.time_to_terminal_s?.toFixed(1) ?? '—'}s
-                    </p>
-                  </>
+                  <span className="chip chip-go">Plateau reached</span>
                 ) : (
-                  <>
-                    <p className="text-2xl sm:text-3xl font-mono font-bold text-brand-amber/85">Limited</p>
-                    <p className="text-[11px] text-white/45 mt-1.5 font-mono tabular-nums">
-                      gearing or wind
-                    </p>
-                  </>
+                  <span className="chip chip-stage">Limited</span>
                 )}
-              </motion.div>
-            </div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-white/[0.04] border border-white/10 rounded-xl p-4 sm:p-6 backdrop-blur"
-            >
-              <p className="text-xs font-semibold text-white/55 mb-4 uppercase tracking-wider">Run Detail</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-                <div>
-                  <p className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/40 mb-1">Time</p>
-                  <p className="text-base sm:text-lg font-mono font-bold text-white tabular-nums">
-                    {topSpeedResult.time_to_terminal_s?.toFixed(1) ?? '—'}<span className="text-white/40 text-xs ml-0.5">s</span>
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/40 mb-1">Distance</p>
-                  <p className="text-base sm:text-lg font-mono font-bold text-white tabular-nums">
-                    {topSpeedResult.distance_to_terminal_m == null
-                      ? '—'
-                      : topSpeedResult.distance_to_terminal_m >= 1000
-                        ? (topSpeedResult.distance_to_terminal_m / 1000).toFixed(2)
-                        : Math.round(topSpeedResult.distance_to_terminal_m)}
-                    <span className="text-white/40 text-xs ml-0.5">{topSpeedResult.distance_to_terminal_m >= 1000 ? 'km' : 'm'}</span>
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/40 mb-1">mph</p>
-                  <p className="text-base sm:text-lg font-mono font-bold text-white tabular-nums">
-                    {topSpeedResult.terminal_velocity_mph?.toFixed(1) ?? '—'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/40 mb-1">Gear</p>
-                  <p className="text-base sm:text-lg font-mono font-bold text-white tabular-nums">
-                    {topSpeedResult.terminal_gear ?? '—'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/40 mb-1">RPM</p>
-                  <p className="text-base sm:text-lg font-mono font-bold text-white tabular-nums">
-                    {topSpeedResult.terminal_rpm?.toLocaleString('en-US') ?? '—'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/40 mb-1">Power</p>
-                  <p className="text-base sm:text-lg font-mono font-bold text-brand-accent tabular-nums">
-                    {topSpeedResult.terminal_power_hp?.toFixed(0) ?? '—'}<span className="text-white/40 text-xs ml-0.5">hp</span>
-                  </p>
-                </div>
               </div>
-            </motion.div>
 
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="text-sm min-w-0">
-                <p className="text-white/40 text-xs mb-1">Bike</p>
-                <p className="font-semibold text-white truncate" title={topSpeedResult.bike_name}>
-                  {topSpeedResult.bike_name}
+              <div className="border-b border-dashed border-white/10 py-4 text-center">
+                <p className="label-mono mb-2">Terminal velocity</p>
+                <p className="font-mono text-4xl font-bold tabular-nums text-white sm:text-5xl">
+                  <AnimatedCounter target={topSpeedResult.terminal_velocity_kmh ?? 0} decimals={1} />
+                  <span className="ml-1.5 text-sm font-medium text-white/40">km/h</span>
                 </p>
+                {!topSpeedResult.reached_plateau && (
+                  <p className="mt-2 font-mono text-[11px] text-white/45">
+                    gearing or wind limited
+                  </p>
+                )}
               </div>
-              <div className="text-sm">
-                <p className="text-white/40 text-xs mb-1">Peak Power</p>
-                <p className="font-semibold text-brand-accent">{topSpeedResult.peak_power_hp?.toFixed(0) ?? '—'} hp</p>
+
+              <div className="timeslip-row">
+                <span className="text-white/45">TIME</span>
+                <span className="text-white">
+                  {topSpeedResult.time_to_terminal_s?.toFixed(1) ?? '—'} s
+                </span>
+              </div>
+              <div className="timeslip-row">
+                <span className="text-white/45">DISTANCE</span>
+                <span className="text-white">
+                  {topSpeedResult.distance_to_terminal_m == null
+                    ? '—'
+                    : topSpeedResult.distance_to_terminal_m >= 1000
+                      ? (topSpeedResult.distance_to_terminal_m / 1000).toFixed(2)
+                      : Math.round(topSpeedResult.distance_to_terminal_m)}
+                  {' '}{topSpeedResult.distance_to_terminal_m >= 1000 ? 'km' : 'm'}
+                </span>
+              </div>
+              <div className="timeslip-row">
+                <span className="text-white/45">MPH</span>
+                <span className="text-white">
+                  {topSpeedResult.terminal_velocity_mph?.toFixed(1) ?? '—'}
+                </span>
+              </div>
+              <div className="timeslip-row">
+                <span className="text-white/45">GEAR</span>
+                <span className="text-white">{topSpeedResult.terminal_gear ?? '—'}</span>
+              </div>
+              <div className="timeslip-row">
+                <span className="text-white/45">RPM</span>
+                <span className="text-white">
+                  {topSpeedResult.terminal_rpm?.toLocaleString('en-US') ?? '—'}
+                </span>
+              </div>
+              <div className="timeslip-row">
+                <span className="text-white/45">POWER</span>
+                <span className="text-white">
+                  {topSpeedResult.terminal_power_hp?.toFixed(0) ?? '—'} hp
+                </span>
+              </div>
+              <div className="timeslip-row">
+                <span className="shrink-0 text-white/45">BIKE</span>
+                <span className="min-w-0 truncate text-right text-white/85" title={topSpeedResult.bike_name}>
+                  {topSpeedResult.bike_name}
+                </span>
+              </div>
+              <div className="timeslip-row">
+                <span className="text-white/45">PEAK POWER</span>
+                <span className="text-white">
+                  {topSpeedResult.peak_power_hp?.toFixed(0) ?? '—'} hp
+                </span>
               </div>
             </div>
           </motion.div>
@@ -902,9 +755,9 @@ export default function SimulatorWidget() {
       </>
       )}
 
-      <p className="text-xs text-white/30 text-center mt-6 relative z-10">
+      <p className="relative z-10 mt-6 text-center text-xs text-white/30">
         First-principles RK4 physics · 15 sub-models · 1 ms timestep
       </p>
-    </motion.div>
+    </div>
   );
 }

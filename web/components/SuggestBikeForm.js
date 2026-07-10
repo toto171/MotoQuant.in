@@ -24,7 +24,7 @@ const EMPTY_FORM = {
  * Modal form for submitting a "please add this bike" request.
  * POSTs to /api/bikes/suggest; handles plausibility-flag responses gracefully.
  * Submission runs through useAsyncTask + ActionButton (staged progress —
- * the button is the bar) per the Cockpit v3 progress doctrine.
+ * the button is the bar) per the progress doctrine.
  */
 export default function SuggestBikeForm({ onClose }) {
   const [form, setForm] = useState(EMPTY_FORM);
@@ -112,7 +112,7 @@ export default function SuggestBikeForm({ onClose }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
-      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-start justify-center p-4 overflow-y-auto"
+      className="fixed inset-0 bg-asphalt-0/85 backdrop-blur-sm z-[100] flex items-start justify-center p-4 overflow-y-auto"
     >
       <motion.div
         initial={{ scale: 0.95, y: 20, opacity: 0 }}
@@ -120,18 +120,20 @@ export default function SuggestBikeForm({ onClose }) {
         exit={{ scale: 0.95, y: 20, opacity: 0 }}
         transition={{ duration: 0.2 }}
         onClick={e => e.stopPropagation()}
-        className="w-full max-w-xl glass border border-brand-orange/30 rounded-2xl p-6 sm:p-8 my-10 bg-ink-0/95"
+        className="card w-full max-w-xl rounded-2xl bg-asphalt-1 p-6 sm:p-8 my-10"
       >
         <div className="flex items-start justify-between mb-5">
           <div>
-            <h2 className="font-display font-bold text-2xl text-white">Suggest a Bike</h2>
-            <p className="text-sm text-white/60 mt-1">
+            <h2 className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-2xl text-white">
+              Suggest a bike
+            </h2>
+            <p className="text-sm text-white/65 mt-2">
               Don&apos;t see your bike? Tell us what to add next. Required fields marked *.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 -mt-1 -mr-2 text-white/60 hover:text-white transition-colors"
+            className="p-2 -mt-1 -mr-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-white/60 hover:text-white transition-colors"
             aria-label="Close"
           >
             <X size={20} />
@@ -140,21 +142,21 @@ export default function SuggestBikeForm({ onClose }) {
 
         {result ? (
           <div className="py-2">
-            <div className="card border-brand-green/30 bg-brand-green/5 p-4 flex items-start gap-3">
-              <Check className="text-brand-green shrink-0 mt-0.5" size={20} />
+            <div className="card border-signal-go/30 bg-signal-go/[0.06] p-4 flex items-start gap-3">
+              <Check className="text-signal-go shrink-0 mt-0.5" size={20} />
               <div>
-                <p className="font-display font-semibold text-brand-green">
-                  Submission #{result.id} received.
+                <p className="font-semibold text-signal-go">
+                  Submission <span className="font-mono tabular-nums">#{result.id}</span> received.
                 </p>
-                <p className="text-sm text-white/70 mt-1">
+                <p className="text-sm text-white/65 mt-1">
                   Thanks — we&apos;ll review and add it to the catalog soon.
                 </p>
                 {result.flagged_out_of_bounds && result.issues?.length > 0 && (
-                  <div className="card border-brand-amber/30 bg-brand-amber/10 mt-3 p-3 text-xs font-mono text-brand-amber">
+                  <div className="card border-signal-stage/30 bg-signal-stage/[0.08] mt-3 p-3 text-xs font-mono text-signal-stage">
                     <p className="flex items-center gap-1 mb-1 font-semibold">
                       <Info size={14} /> Flagged for manual review
                     </p>
-                    <ul className="list-disc list-inside space-y-0.5 text-brand-amber/80">
+                    <ul className="list-disc list-inside space-y-0.5 text-signal-stage/80">
                       {result.issues.map((msg, i) => <li key={i}>{msg}</li>)}
                     </ul>
                   </div>
@@ -273,7 +275,7 @@ export default function SuggestBikeForm({ onClose }) {
             </div>
 
             {submitTask.error && (
-              <div className="card border-brand-red/40 bg-brand-red/10 p-3 text-brand-red/90 text-sm flex items-center gap-2">
+              <div className="card border-signal-foul/40 bg-signal-foul/[0.08] p-3 text-signal-foul text-sm flex items-center gap-2">
                 <AlertCircle size={16} className="shrink-0" /> {submitTask.error}
               </div>
             )}

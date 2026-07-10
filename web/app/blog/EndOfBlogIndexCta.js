@@ -43,13 +43,13 @@ export default function EndOfBlogIndexCta() {
     <div
       data-exp="EXP-006"
       data-variant="B"
-      className="mt-10 glass rounded-xl border border-brand-orange/40 bg-brand-orange/10 p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center gap-5"
+      className="mt-10 card border-accent/30 p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center gap-5"
     >
       <div className="flex-1">
-        <div className="font-display font-bold text-white text-xl md:text-2xl mb-2">
+        <div className="font-display font-semibold uppercase text-white text-xl md:text-2xl mb-2">
           Stop reading. Run the numbers on your bike.
         </div>
-        <div className="text-white/70 text-sm md:text-base leading-relaxed">
+        <div className="text-white/65 text-sm md:text-base leading-relaxed">
           Pick your bike, pick a venue, see your quarter-mile ET in 50 ms.
           Free, no signup — the same physics engine these posts are written from.
         </div>
@@ -59,7 +59,7 @@ export default function EndOfBlogIndexCta() {
         data-exp="EXP-006"
         data-variant="B"
         data-cta="end-of-blog-index"
-        className="shrink-0 px-6 py-3 bg-brand-orange text-black font-display font-bold rounded-lg text-sm md:text-base hover:bg-brand-orangeLight transition-colors"
+        className="btn-primary shrink-0"
       >
         Run the simulator →
       </Link>

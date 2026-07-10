@@ -200,28 +200,27 @@ function Section({ s }) {
   return (
     <section id={s.id} className="scroll-mt-24 mb-16">
       <div className="flex items-baseline gap-4 mb-5">
-        <span className="font-mono text-brand-orange text-sm tabular-nums">§{s.n}</span>
-        <h2 className="font-display font-bold text-3xl tracking-tight text-white">
+        <span className="font-mono text-white/40 text-sm tabular-nums">§{s.n}</span>
+        <h2 className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-3xl text-white">
           {s.title}
         </h2>
       </div>
       {s.body && s.body.map((p, i) => (
-        <p key={`b${i}`} className="text-white/75 leading-relaxed mb-4">
+        <p key={`b${i}`} className="text-white/65 leading-relaxed mb-4">
           {p}
         </p>
       ))}
       {s.list && (
-        <div className="relative overflow-hidden my-6 rounded-xl border border-brand-orange/15 bg-ink-1/60 p-5">
-          <span aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent" />
+        <div className="card my-6 p-5">
           {s.list.title && (
-            <div className="font-mono text-[11px] uppercase tracking-[0.25em] text-brand-orange mb-3">
+            <div className="label-mono mb-3">
               {s.list.title}
             </div>
           )}
-          <ul className="space-y-2 text-sm text-white/70 leading-relaxed">
+          <ul className="space-y-2 text-sm text-white/65 leading-relaxed">
             {s.list.items.map((item, i) => (
               <li key={i} className="flex gap-3">
-                <span className="text-brand-orange shrink-0">›</span>
+                <span className="text-white/40 shrink-0">›</span>
                 <span>{item}</span>
               </li>
             ))}
@@ -229,63 +228,64 @@ function Section({ s }) {
         </div>
       )}
       {s.table && (
-        <div className="relative my-6 rounded-xl border border-brand-orange/15 bg-ink-1/40 overflow-hidden">
-          <span aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent" />
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-white/[0.03] border-b border-white/10">
-                {s.table.head.map((h, i) => (
-                  <th
-                    key={i}
-                    className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45"
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {s.table.rows.map((row, i) => {
-                const isOverall = row[0]?.includes?.('All clusters');
-                return (
-                  <tr
-                    key={i}
-                    className={[
-                      'border-b border-white/5 last:border-0',
-                      isOverall ? 'bg-brand-orange/5' : '',
-                    ].join(' ')}
-                  >
-                    {row.map((cell, j) => (
-                      <td
-                        key={j}
-                        className={[
-                          'px-4 py-3',
-                          j === 0 ? 'text-white/85' : 'text-white/65 font-mono tabular-nums',
-                          isOverall ? 'font-semibold text-white' : '',
-                        ].join(' ')}
-                      >
-                        {cell}
-                      </td>
-                    ))}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="card my-6 p-0 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-white/[0.03] border-b border-white/10">
+                  {s.table.head.map((h, i) => (
+                    <th
+                      key={i}
+                      className="text-left px-4 py-3 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {s.table.rows.map((row, i) => {
+                  const isOverall = row[0]?.includes?.('All clusters');
+                  return (
+                    <tr
+                      key={i}
+                      className={[
+                        'border-b border-white/5 last:border-0',
+                        isOverall ? 'bg-white/[0.04]' : '',
+                      ].join(' ')}
+                    >
+                      {row.map((cell, j) => (
+                        <td
+                          key={j}
+                          className={[
+                            'px-4 py-3 whitespace-nowrap',
+                            j === 0 ? 'text-white/85' : 'text-white/65 font-mono tabular-nums',
+                            isOverall ? 'font-semibold text-white' : '',
+                          ].join(' ')}
+                        >
+                          {cell}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
       {s.body2 && s.body2.map((p, i) => (
-        <p key={`b2${i}`} className="text-white/75 leading-relaxed mb-4">
+        <p key={`b2${i}`} className="text-white/65 leading-relaxed mb-4">
           {p}
         </p>
       ))}
       {s.extra && s.extra.map((p, i) => (
-        <p key={`e${i}`} className="text-white/75 leading-relaxed mb-4">
+        <p key={`e${i}`} className="text-white/65 leading-relaxed mb-4">
           {p}
         </p>
       ))}
       {s.citation && (
-        <pre className="my-4 p-5 rounded-xl border border-brand-orange/15 bg-ink-1/60 text-xs font-mono text-white/75 whitespace-pre-wrap leading-relaxed">
+        <pre className="card my-4 p-5 text-xs font-mono text-white/75 whitespace-pre-wrap leading-relaxed">
           {s.citation}
         </pre>
       )}
@@ -295,27 +295,27 @@ function Section({ s }) {
 
 export default function WhitepaperPage() {
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-asphalt-0 text-white">
       <SiteNav />
 
       <main id="main" className="pt-32 pb-20 px-6">
         <article className="max-w-4xl mx-auto">
           {/* Cover */}
           <Reveal>
-          <div className="mb-16 pb-12 border-b border-brand-orange/10">
+          <div className="mb-16 pb-12">
             <CodeComment className="mb-4">formal specification · rk4 · 1ms</CodeComment>
-            <div className="text-[11px] font-mono uppercase tracking-[0.3em] text-brand-orange mb-4">
+            <div className="label-mono mb-4">
               Whitepaper · Version 1.0 · April 30, 2026 · validation data: July 2026 sweep
             </div>
-            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl tracking-[-0.03em] leading-[1.05] text-white mb-6">
+            <h1 className="font-display font-bold uppercase text-4xl sm:text-5xl lg:text-6xl tracking-[-0.01em] leading-[0.95] text-white mb-6">
               MotoQuant Pro:<br />A First-Principles Drag-Racing Physics Engine for Motorcycles
             </h1>
-            <p className="text-white/60 text-base mb-2">
+            <p className="text-white/65 text-base mb-2">
               Ritwik Singh &nbsp;·&nbsp; Arya Desai
             </p>
             <p className="text-white/40 text-sm font-mono">
               MotoQuant Pro &middot; Pune, India &middot;{' '}
-              <a href="mailto:motoquant@gmail.com" className="text-brand-accent hover:text-white transition-colors">
+              <a href="mailto:motoquant@gmail.com" className="text-white/70 hover:text-white transition-colors">
                 motoquant@gmail.com
               </a>
             </p>
@@ -331,38 +331,38 @@ export default function WhitepaperPage() {
                 { seg: '221', label: 'Weighted benchmarks' },
                 { seg: '0.021', pre: '+', post: 's', label: 'Weighted bias' },
               ].map(t => (
-                <div key={t.label} className="relative overflow-hidden rounded-xl border border-brand-orange/20 bg-ink-1/60 p-4">
-                  <span aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent" />
+                <div key={t.label} className="card p-4">
                   <div className="flex items-end justify-center gap-1">
-                    {t.pre && <span className="font-mono text-sm text-brand-orange mb-0.5">{t.pre}</span>}
+                    {t.pre && <span className="font-mono text-sm text-white/40 mb-0.5">{t.pre}</span>}
                     <ScoreboardDigits value={t.seg} h={24} label={`${t.pre || ''}${t.seg}${t.post || ''}`} />
                     {t.post && <span className="font-mono text-sm text-white/40 mb-0.5">{t.post}</span>}
                   </div>
-                  <div className="font-mono text-[10px] text-white/45 tracking-[0.25em] mt-2 uppercase text-center">{t.label}</div>
+                  <div className="label-mono mt-2 text-center">{t.label}</div>
                 </div>
               ))}
             </div>
+            <div className="centerline mt-12" aria-hidden="true" />
           </div>
           </Reveal>
 
           {/* Abstract */}
           <section id="abstract" className="mb-16 scroll-mt-24">
-            <div className="font-mono text-[11px] uppercase tracking-[0.25em] text-brand-orange mb-3">Abstract</div>
-            <p className="text-white/75 leading-relaxed text-[15px] border-l-2 border-brand-orange/50 pl-5">
+            <div className="label-mono mb-3">Abstract</div>
+            <p className="text-white/75 leading-relaxed text-[15px] border-l-2 border-accent/60 pl-5">
               {ABSTRACT}
             </p>
           </section>
 
           {/* Table of contents */}
           <nav id="toc" className="mb-16 scroll-mt-24">
-            <div className="font-mono text-[11px] uppercase tracking-[0.25em] text-brand-orange mb-3">Contents</div>
+            <div className="label-mono mb-3">Contents</div>
             <ol className="space-y-2 columns-1 sm:columns-2 gap-x-10">
               {SECTIONS.map(s => (
                 <li key={s.id} className="flex items-baseline gap-3 break-inside-avoid">
-                  <span className="font-mono text-brand-orange/70 text-sm tabular-nums">§{s.n}</span>
+                  <span className="font-mono text-white/40 text-sm tabular-nums">§{s.n}</span>
                   <a
                     href={`#${s.id}`}
-                    className="text-white/75 hover:text-brand-orange transition-colors text-sm"
+                    className="text-white/75 hover:text-white transition-colors text-sm"
                   >
                     {s.title}
                   </a>
@@ -375,21 +375,19 @@ export default function WhitepaperPage() {
           {SECTIONS.map(s => <Section key={s.id} s={s} />)}
 
           {/* Footer / next steps */}
-          <div className="mt-20 pt-10 border-t border-brand-orange/10">
-            <div className="font-mono text-[11px] uppercase tracking-[0.25em] text-brand-orange mb-3">
+          <div className="mt-20 pt-10 border-t border-white/5">
+            <div className="label-mono mb-3">
               Continue reading
             </div>
             <div className="grid sm:grid-cols-3 gap-4">
-              <Link href="/docs/physics" className="group relative overflow-hidden rounded-xl border border-brand-orange/15 hover:border-brand-orange/40 bg-ink-1/60 p-5 transition-colors">
-                <span aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent" />
-                <div className="font-display font-bold text-white group-hover:text-brand-orange transition-colors">
+              <Link href="/docs/physics" className="group card card-hover p-5">
+                <div className="font-display font-semibold uppercase text-white group-hover:text-accent transition-colors">
                   Physics docs →
                 </div>
                 <div className="text-sm text-white/55 mt-1">Sub-model deep-dives.</div>
               </Link>
-              <Link href="/docs/validation" className="group relative overflow-hidden rounded-xl border border-brand-orange/15 hover:border-brand-orange/40 bg-ink-1/60 p-5 transition-colors">
-                <span aria-hidden="true" className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent" />
-                <div className="font-display font-bold text-white group-hover:text-brand-orange transition-colors">
+              <Link href="/docs/validation" className="group card card-hover p-5">
+                <div className="font-display font-semibold uppercase text-white group-hover:text-accent transition-colors">
                   Validation data →
                 </div>
                 <div className="text-sm text-white/55 mt-1">Per-bike benchmark table.</div>

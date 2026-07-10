@@ -12,15 +12,17 @@
  * Arriving with ?signup=1 opens register mode.
  * ?next=/path is honoured after auth (same-origin paths only).
  *
- * Cockpit v3 (July 2026): the submit is an ActionButton + useAsyncTask
- * (staged progress, cold-start caption for free), the ?token= verification
- * shows a staged SimProgress bar, inputs are `.input-base`, labels
- * `.label-mono`. Auth flows + EXP-007 unchanged.
+ * STAGED v4 (July 2026): single centered `.card` on asphalt, mode tabs as
+ * `.chip` toggles (volt when active), `.input-base` fields, `.label-mono`
+ * labels, magic-link sent state on `.chip-go`. The submit stays an
+ * ActionButton + useAsyncTask (staged progress, cold-start caption for
+ * free) and the ?token= verification shows a staged SimProgress bar.
+ * Auth flows + EXP-007 unchanged.
  */
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Mail, KeyRound, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { useAuth } from "../../components/AuthProvider";
 import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
@@ -160,7 +162,7 @@ function LoginPageInner() {
   }
 
   const headings = {
-    signin: ["Sign in", "Welcome back — pick up where you left off."],
+    signin: ["Sign in to the strip", "Welcome back — pick up where you left off."],
     register: ["Create your account", "Free during the open beta — every Pro feature unlocked."],
     magic: ["Magic-link sign-in", "No password needed — we’ll email you a sign-in link."],
   };
@@ -169,37 +171,37 @@ function LoginPageInner() {
 
   const tabClass = (m) =>
     [
-      "flex-1 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] rounded-md transition-colors whitespace-nowrap",
+      "chip h-10 flex-1 justify-center whitespace-nowrap transition-colors",
       mode === m
-        ? "bg-brand-orange/15 text-brand-orange border border-brand-orange/40"
-        : "text-white/45 hover:text-white border border-transparent",
+        ? "chip-volt"
+        : "border-transparent text-white/45 hover:text-white",
     ].join(" ");
 
+  const quietLink =
+    "text-white/60 underline decoration-white/25 underline-offset-2 hover:text-white transition-colors";
+
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-asphalt-0 text-white">
       <SiteNav />
-      <main id="main" className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 pt-20 pb-12">
-        <div className="relative w-full max-w-sm space-y-8">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -inset-x-24 -top-24 -bottom-16 bg-[radial-gradient(ellipse_at_center,rgba(255,94,31,0.10),transparent_65%)]"
-          />
-          <div className="relative text-center space-y-3">
-            <CodeComment center>auth gate · jwt session</CodeComment>
-            <p className="font-display font-bold text-2xl text-gradient-orange">
+      <main
+        id="main"
+        className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 pt-24 pb-16"
+      >
+        <div className="w-full max-w-md space-y-6">
+          <div className="text-center space-y-3">
+            <CodeComment center>account access</CodeComment>
+            <p className="font-display font-bold uppercase text-2xl leading-[0.95] tracking-[-0.01em] text-white">
               The physics of faster
             </p>
           </div>
 
-          <div className="relative card bg-ink-1/70 p-8 shadow-2xl">
-            <div
-              aria-hidden="true"
-              className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-orange/70 to-transparent"
-            />
+          <div className="card p-6 sm:p-8">
             {status === "verifying" && (
-              <div className="text-center text-white/85 py-4">
-                <KeyRound className="w-8 h-8 mx-auto text-brand-orange mb-4" />
-                <p className="font-display font-bold text-lg mb-4">Verifying your sign-in link</p>
+              <div className="py-4 text-center">
+                <span className="chip chip-stage">Verifying</span>
+                <p className="mt-4 mb-4 font-display font-bold uppercase text-xl leading-[0.95] tracking-[-0.01em] text-white">
+                  Verifying your sign-in link
+                </p>
                 <SimProgress
                   active
                   progress={null}
@@ -210,20 +212,23 @@ function LoginPageInner() {
             )}
 
             {status === "sent" && (
-              <div className="text-center text-white/85">
-                <Mail className="w-8 h-8 mx-auto text-brand-orange mb-3" />
-                <h2 className="font-display font-bold text-xl text-white">Check your inbox</h2>
-                <p className="mt-3 text-sm text-white/60">
-                  We sent a sign-in link to <strong className="text-white">{email}</strong>.
+              <div className="text-center">
+                <span className="chip chip-go">Link sent</span>
+                <h2 className="mt-4 font-display font-bold uppercase text-2xl leading-[0.95] tracking-[-0.01em] text-white">
+                  Check your inbox
+                </h2>
+                <p className="mt-3 text-sm text-white/65">
+                  We sent a sign-in link to{" "}
+                  <strong className="font-medium text-white">{email}</strong>.
                   It expires in 10 minutes.
                 </p>
                 {devToken && (
-                  <div className="mt-5 rounded-lg bg-brand-amber/10 border border-brand-amber/30 p-3 text-left">
-                    <p className="label-mono text-brand-amber font-bold">DEV TOKEN</p>
-                    <p className="mt-1 text-xs text-brand-amber/80 break-all font-mono">{devToken}</p>
+                  <div className="mt-5 rounded-lg border border-signal-stage/30 bg-signal-stage/10 p-3 text-left">
+                    <p className="label-mono text-signal-stage">Dev token</p>
+                    <p className="mt-1 break-all font-mono text-xs text-signal-stage/80">{devToken}</p>
                     <button
                       onClick={() => verifyToken(devToken)}
-                      className="mt-2 rounded bg-brand-amber px-3 py-1 text-xs font-semibold text-black hover:bg-brand-amber/85 transition-colors"
+                      className="mt-2 rounded bg-signal-stage px-3 py-1 text-xs font-semibold text-asphalt-0 hover:bg-signal-stage/85 transition-colors"
                     >
                       Auto-verify (dev only)
                     </button>
@@ -231,7 +236,7 @@ function LoginPageInner() {
                 )}
                 <button
                   onClick={() => { setStatus("idle"); setDevToken(""); submitTask.reset(); }}
-                  className="mt-6 text-sm text-brand-accent hover:text-white transition-colors"
+                  className={`mt-6 text-sm ${quietLink}`}
                 >
                   Try a different email
                 </button>
@@ -240,7 +245,7 @@ function LoginPageInner() {
 
             {(status === "idle" || status === "error") && (
               <>
-                <div className="flex gap-1.5 mb-6">
+                <div className="mb-6 flex gap-1.5" role="tablist" aria-label="Sign-in method">
                   <button onClick={() => switchMode("signin")} className={tabClass("signin")}>
                     Sign in
                   </button>
@@ -252,19 +257,21 @@ function LoginPageInner() {
                   </button>
                 </div>
 
-                <h2 className="font-display font-bold text-2xl text-white">{heading}</h2>
-                <p className="mt-1 text-sm text-white/55">{subheading}</p>
+                <h2 className="font-display font-bold uppercase text-2xl leading-[0.95] tracking-[-0.01em] text-white">
+                  {heading}
+                </h2>
+                <p className="mt-2 text-sm text-white/65">{subheading}</p>
 
                 {formError && (
-                  <div className="mt-5 rounded-lg bg-brand-red/10 border border-brand-red/40 px-4 py-3 text-sm text-brand-red/90 flex items-start gap-2">
-                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <div className="mt-5 flex items-start gap-2 rounded-lg border border-signal-foul/40 bg-signal-foul/10 px-4 py-3 text-sm text-signal-foul">
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                     <span>{formError}</span>
                   </div>
                 )}
 
                 <form ref={formRef} onSubmit={handleSubmit} className="mt-6 space-y-4">
                   <div>
-                    <label htmlFor="email" className="block label-mono mb-2">
+                    <label htmlFor="email" className="mb-2 block label-mono">
                       Email address
                     </label>
                     <input
@@ -281,7 +288,7 @@ function LoginPageInner() {
 
                   {mode !== "magic" && (
                     <div>
-                      <label htmlFor="password" className="block label-mono mb-2">
+                      <label htmlFor="password" className="mb-2 block label-mono">
                         Password
                       </label>
                       <input
@@ -300,7 +307,7 @@ function LoginPageInner() {
 
                   {mode === "register" && (
                     <div>
-                      <label htmlFor="password2" className="block label-mono mb-2">
+                      <label htmlFor="password2" className="mb-2 block label-mono">
                         Confirm password
                       </label>
                       <input
@@ -348,7 +355,7 @@ function LoginPageInner() {
                 {mode === "signin" && (
                   <button
                     onClick={() => switchMode("magic")}
-                    className="mt-4 text-xs text-brand-accent hover:text-white transition-colors"
+                    className={`mt-4 text-xs ${quietLink}`}
                   >
                     Forgot password? Sign in with a magic link instead →
                   </button>
@@ -356,9 +363,9 @@ function LoginPageInner() {
 
                 <p className="mt-6 text-center text-xs text-white/40">
                   By signing in you agree to our{" "}
-                  <a href="/terms" className="text-brand-accent hover:text-white transition-colors">Terms</a>{" "}
+                  <a href="/terms" className={quietLink}>Terms</a>{" "}
                   and{" "}
-                  <a href="/privacy" className="text-brand-accent hover:text-white transition-colors">Privacy Policy</a>.
+                  <a href="/privacy" className={quietLink}>Privacy Policy</a>.
                 </p>
               </>
             )}
@@ -368,14 +375,14 @@ function LoginPageInner() {
             {mode === "register" ? (
               <>
                 Already racing with us?{" "}
-                <button onClick={() => switchMode("signin")} className="text-brand-orange hover:text-brand-orangeLight transition-colors">
+                <button onClick={() => switchMode("signin")} className={quietLink}>
                   Sign in →
                 </button>
               </>
             ) : (
               <>
                 New to MotoQuant?{" "}
-                <button onClick={() => switchMode("register")} className="text-brand-orange hover:text-brand-orangeLight transition-colors">
+                <button onClick={() => switchMode("register")} className={quietLink}>
                   Create a free account →
                 </button>
               </>
@@ -392,8 +399,8 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-black flex items-center justify-center px-4">
-          <div className="w-full max-w-sm">
+        <div className="flex min-h-screen items-center justify-center bg-asphalt-0 px-4">
+          <div className="w-full max-w-md">
             <SkeletonCard rows={4} />
           </div>
         </div>
