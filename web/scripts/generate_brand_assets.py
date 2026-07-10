@@ -23,17 +23,18 @@ from PIL import Image, ImageDraw, ImageFont
 # Variable names kept from the v3 script so the 400 lines below need no edits:
 # "ORANGE" now carries the volt accent, "CARBON"/"INK_*" the asphalt scale.
 # ----------------------------------------------------------------------------
-ORANGE = "#C9F231"          # accent volt
-ORANGE_LIGHT = "#DBFF57"    # accent bright
-ORANGE_DEEP = "#9CBE1E"     # accent deep
+ORANGE = "#C9F231"  # accent volt
+ORANGE_LIGHT = "#DBFF57"  # accent bright
+ORANGE_DEEP = "#9CBE1E"  # accent deep
 ACCENT_MINT = "#6FE3B2"
-CARBON = "#07090C"          # asphalt-0
-INK_2 = "#10141B"           # asphalt-2
-INK_3 = "#171C25"           # asphalt-3
-INK_4 = "#232A37"           # asphalt-4
+CARBON = "#07090C"  # asphalt-0
+INK_2 = "#10141B"  # asphalt-2
+INK_3 = "#171C25"  # asphalt-3
+INK_4 = "#232A37"  # asphalt-4
 WHITE = "#FFFFFF"
 WHITE_DIM = "#D4D4D7"
 WHITE_SUB = "#8A8A90"
+
 
 def _first_font(*candidates: str) -> str:
     """Return the first font path that exists (containers vary in font sets)."""
