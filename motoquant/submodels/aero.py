@@ -33,11 +33,20 @@ class AeroModel:
         )
 
     def ram_air_power_mult(self, v: float) -> float:
-        """Power multiplier from ram air effect. Significant above 100 km/h."""
+        """Power multiplier from ram air effect. Significant above 100 km/h.
+
+        Uses AIRSPEED (v + headwind), consistent with drag()/lift(): ram
+        recovery is a dynamic-pressure phenomenon, so a headwind that raises
+        drag also raises intake pressure (July 10, 2026 — previously this
+        used ground speed, charging the drag penalty while withholding the
+        ram benefit). Bit-identical for zero-wind configs (v + 0.0 == v),
+        so the pinned baselines and windless golden snapshots are unmoved.
+        """
         eta = self.cfg.aero.ram_air_efficiency
-        if eta <= 0 or v < 20.0:
+        v_rel = v + self.v_wind
+        if eta <= 0 or v_rel < 20.0:
             return 1.0
-        P_ram = 0.5 * self.rho * v**2 * eta
+        P_ram = 0.5 * self.rho * v_rel**2 * eta
         P_atm = self.rho * 287.058 * (self.cfg.environment.ambient_temp_c + 273.15)
         if P_atm <= 0:
             P_atm = 101325.0
