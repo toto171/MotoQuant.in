@@ -205,13 +205,18 @@ class EngineParams:
             return 0.0
 
         tuned = self.tuned_rpm or self.peak_power_rpm
-        # Widths as fractions of the tuned RPM.  Kept in sync with
-        # `_synthetic_2stroke_torque_curve` in defaults.py.  April 22, 2026:
-        # re-synced to match the April 21 narrowed bands in defaults.py — the
-        # two curves must produce identical values or hand-built configs
-        # diverge silently from scraped configs.  Also added the cylinders>=3
-        # vintage-triple branch introduced alongside the GT750 / H2 Mach IV
-        # fix.
+        # Widths as fractions of the tuned RPM.  Band constants (band_lo /
+        # band_hi / baseline per branch) are kept in sync with
+        # `_synthetic_2stroke_torque_curve` in defaults.py.  NOTE (July 10,
+        # 2026): the two paths are no longer value-identical — defaults.py
+        # additionally applies calibration tail factors (×1.10 <50 hp,
+        # ×1.07 <80 hp, plus the rated-HP rescale) that this continuous
+        # fallback does not.  That is acceptable because every production
+        # config carries a generated dyno_curve (verified: 541/541 current
+        # bike_configs), so this fallback only serves hand-built test
+        # configs; if you ever route curve-less 2T configs into production,
+        # re-sync the tail factors too.  The cylinders>=3 vintage-triple
+        # branch mirrors the GT750 / H2 Mach IV fix.
         cyls = self.cylinder_count or 1
         if self.powervalve:
             band_lo = 0.18
