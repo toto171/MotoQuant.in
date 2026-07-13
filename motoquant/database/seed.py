@@ -4843,7 +4843,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
         parts.append(
             {
                 "category": "sprocket",
-                "brand": "Sprocket Specialists",
+                "brand": "Generic",  # 2026-07-13 honesty fold: fictional brand (scrape audit)
                 "model_name": f"525 Front Sprocket {teeth}T",
                 "part_number": f"SS-525-F-{teeth}",
                 "specs": {"teeth": teeth, "pitch": "525", "position": "front"},
@@ -4913,7 +4913,7 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
         parts.append(
             {
                 "category": "sprocket",
-                "brand": "Sprocket Specialists",
+                "brand": "Generic",  # 2026-07-13 honesty fold: fictional brand (scrape audit)
                 "model_name": f"525 Rear Sprocket {teeth}T",
                 "part_number": f"SS-525-R-{teeth}",
                 "specs": {"teeth": teeth, "pitch": "525", "position": "rear"},
@@ -6859,6 +6859,11 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
         ("Premium Organic", 9000, 250, 500),
         ("Ultra Slippery", 11000, 750, 1100),
     ]
+    # 2026-07-13 honesty fold: 'ClutchCo' does not exist as a brand (the
+    # July-10 scrape found no evidence for any of the 8 SKUs as named), so
+    # these seed as honest class-typical parts under 'Generic' — matching
+    # scripts/patch_2026_07_13_scrape_data.py so a fresh seed_all() cannot
+    # resurrect the fictional brand.
     for name, price, cc_min, cc_max in clutch_brands:
         band = f"{cc_min}-{cc_max}cc" if cc_max else f"{cc_min}cc+"
         match = {"displacement_min_cc": cc_min}
@@ -6867,18 +6872,18 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
         parts.append(
             {
                 "category": "clutch_kit",
-                "brand": "ClutchCo",
-                "model_name": f"ClutchCo {name} Kit",
+                "brand": "Generic",
+                "model_name": f"{name} Clutch Kit ({band})",
                 "part_number": f"CC-{name.replace(' ', '-')}",
                 "specs": {"material": name.split()[0]},
                 "fitment_rules": {
                     "tier": "family",
                     "match": match,
-                    "description": f"ClutchCo {name} clutch kit for {band} bikes",
+                    "description": f"{name} clutch kit for {band} bikes",
                 },
                 "price_inr": price,
                 "availability": "in_stock",
-                "retailer": "ClutchCo India",
+                "retailer": "generic aftermarket",
             }
         )
 
@@ -7776,8 +7781,8 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             misc_parts.append(
                 {
                     "category": "sprocket",
-                    "brand": "Regina Pro",
-                    "model_name": f"{pitch} Front Sprocket {teeth}T Pro",
+                    "brand": "Generic",  # 2026-07-13 honesty fold: no 'Regina Pro' line exists (scrape audit)
+                    "model_name": f"{pitch} Front Sprocket {teeth}T",
                     "part_number": f"REG-{pitch}-F-{teeth}",
                     # position stamped per patch_2026_07_03 so the build
                     # optimizer's position-exclusivity knapsack groups it.
