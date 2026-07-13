@@ -4,22 +4,24 @@
  * /leaderboard — public venue-filterable leaderboard of saved sim runs.
  *
  * Reads GET /api/leaderboard?venue_id=N (venue filter added July 2026) and
- * renders the timing-board aesthetic: seven-segment ETs, trophy on P1.
- * Saved runs come from /api/simulate/save (the account Garage flow), so this
- * page is also the "why save a run?" answer — your run lands here.
+ * renders "THE BOARD": timeslip-strip rows ranked by quarter-mile ET, each
+ * linking to its public /r/[id] slip. Saved runs come from /api/simulate/save
+ * (the account Garage flow), so this page is also the "why save a run?"
+ * answer — your run lands here.
  *
- * Cockpit v3 (July 2026): shared Skeleton loading rows, `.card`/`.card-hover`
- * row surfaces, `.input-base` venue select, and a `.card` error state with a
- * Retry button (brand-red, no raw Tailwind reds).
+ * STAGED v4 (July 2026): PageHero, `.card` strip rows (rank mono / bike name
+ * condensed uppercase / venue `.chip` / big mono ET), `.input-base` venue
+ * select, shared Skeleton rows, signal-foul error card with Retry. House
+ * reference sims hold an empty board (honestly chipped "HOUSE REFERENCE");
+ * the first real saved run replaces them.
  */
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Trophy, MapPin, AlertCircle } from 'lucide-react';
+import { MapPin, AlertCircle } from 'lucide-react';
 import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
 import PageHero from '../../components/PageHero';
-import ScoreboardDigits from '../../components/ScoreboardDigits';
 import { Skeleton } from '../../components/Skeleton';
 import { API_URL } from '../../lib/api';
 
@@ -44,6 +46,19 @@ function fmtDate(iso) {
   } catch {
     return iso.slice(0, 10);
   }
+}
+
+function Rank({ pos }) {
+  return (
+    <span
+      className={`w-8 shrink-0 text-right font-mono tabular-nums text-sm ${
+        pos === 1 ? 'font-bold text-accent' : 'text-white/40'
+      }`}
+      aria-label={`Position ${pos}`}
+    >
+      {String(pos).padStart(2, '0')}
+    </span>
+  );
 }
 
 export default function LeaderboardPage() {
@@ -79,25 +94,21 @@ export default function LeaderboardPage() {
   }, [venueId, venues]);
 
   return (
-    <main id="main" className="min-h-screen bg-black text-white">
+    <main id="main" className="min-h-screen bg-asphalt-0 text-white">
       <SiteNav />
       <PageHero
-        kicker="// leaderboard: saved runs sorted by ET · venue filter armed"
-        badge="Public Leaderboard"
-        title={
-          <>
-            The quickest <span className="text-gradient-orange">saved runs.</span>
-          </>
-        }
+        kicker="Public leaderboard"
+        badge="Saved runs · ranked by ET"
+        title={<>The board.</>}
         sub="Every run saved to a MotoQuant garage lands here — ranked by quarter-mile ET, filterable by venue. Sign in, simulate, save, and put your build on the board."
       />
 
-      <section className="px-6 pb-24">
+      <section className="px-6 pb-16 md:pb-24">
         <div className="max-w-4xl mx-auto">
           {/* venue filter */}
           <div className="flex flex-wrap items-center gap-3 mb-8">
-            <MapPin size={16} className="text-brand-orange" aria-hidden="true" />
-            <label htmlFor="venue-filter" className="label-mono text-[11px]">
+            <MapPin size={16} className="text-white/40" aria-hidden="true" />
+            <label htmlFor="venue-filter" className="label-mono">
               Venue
             </label>
             <select
@@ -116,8 +127,8 @@ export default function LeaderboardPage() {
           </div>
 
           {error && (
-            <div className="card border-brand-red/30 px-5 py-4 flex flex-wrap items-center gap-3 text-sm text-brand-red/90">
-              <AlertCircle size={16} className="shrink-0 text-brand-red" aria-hidden="true" />
+            <div className="card border-signal-foul/30 px-5 py-4 flex flex-wrap items-center gap-3 text-sm text-signal-foul/90">
+              <AlertCircle size={16} className="shrink-0 text-signal-foul" aria-hidden="true" />
               <span className="flex-1 min-w-[200px]">
                 Could not load the leaderboard ({error}). The engine may be waking
                 up — a cold start can take up to a minute.
@@ -135,51 +146,44 @@ export default function LeaderboardPage() {
           {!error && rows === null && (
             <div className="space-y-2" aria-busy="true" aria-label="Loading leaderboard">
               {[...Array(6)].map((_, i) => (
-                <Skeleton key={i} className="h-16 rounded-2xl" />
+                <Skeleton key={i} className="h-16 rounded-xl" />
               ))}
             </div>
           )}
 
           {!error && rows !== null && rows.length === 0 && (
             <div>
-              <p className="label-mono text-[11px] mb-3">
+              <p className="label-mono mb-3">
                 {venueName} · no saved runs yet — house reference sims hold the board
               </p>
               <ol className="space-y-2" aria-label="House reference runs">
                 {HOUSE_RUNS.map((r, i) => (
                   <li
                     key={r.key}
-                    className={`card flex items-center gap-4 px-4 py-3 opacity-90 ${
-                      i === 0 ? 'border-brand-orange/40 bg-brand-orange/[0.06]' : ''
-                    }`}
+                    className="card flex items-center gap-3 md:gap-4 px-4 py-3"
                   >
-                    <span className="w-8 shrink-0 font-mono text-sm text-white/40 text-right">
-                      {i === 0 ? (
-                        <Trophy size={16} className="inline text-brand-orange" aria-label="P1" />
-                      ) : (
-                        `P${i + 1}`
-                      )}
-                    </span>
+                    <Rank pos={i + 1} />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">
+                      <p className="truncate font-display font-semibold uppercase text-base md:text-lg leading-tight">
                         {r.bike}
                         <span className="text-white/40"> · {r.year}</span>
                       </p>
-                      <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-white/35">
-                        MotoQuant reference sim · Aamby Valley · stock
-                      </p>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                        <span className="chip">House reference</span>
+                        <span className="label-mono">Aamby Valley · stock sim</span>
+                      </div>
                     </div>
                     <div className="shrink-0 text-right">
-                      <ScoreboardDigits value={r.et} h={22} />
-                      <p className="font-mono text-[10px] tracking-[0.2em] text-white/40 mt-1">
-                        {r.trap}
+                      <p className="font-mono font-bold tabular-nums text-xl md:text-2xl leading-none">
+                        {r.et}
                       </p>
+                      <p className="label-mono mt-1.5">{r.trap}</p>
                     </div>
                   </li>
                 ))}
               </ol>
               <div className="card mt-4 text-center py-10 px-6">
-                <p className="text-white/70 mb-5">
+                <p className="text-white/65 mb-5">
                   Take P1 from the house — run a sim and save it to the board.
                 </p>
                 <Link href="/simulator" className="btn-primary">
@@ -197,29 +201,26 @@ export default function LeaderboardPage() {
                       loop starts here, not just from the save flow. */}
                   <Link
                     href={`/r/${r.id}`}
-                    className={`card card-hover flex items-center gap-4 px-4 py-3 ${
-                      i === 0 ? 'border-brand-orange/40 bg-brand-orange/[0.06]' : ''
+                    className={`card card-hover flex items-center gap-3 md:gap-4 px-4 py-3 ${
+                      i === 0 ? 'border-accent/30' : ''
                     }`}
                   >
-                    <span className="w-8 shrink-0 font-mono text-sm text-white/40 text-right">
-                      {i === 0 ? (
-                        <Trophy size={16} className="inline text-brand-orange" aria-label="P1" />
-                      ) : (
-                        `P${i + 1}`
-                      )}
-                    </span>
+                    <Rank pos={i + 1} />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">
+                      <p className="truncate font-display font-semibold uppercase text-base md:text-lg leading-tight">
                         {(r.manufacturer || '—') + ' ' + (r.model || '')}
                         {r.year ? <span className="text-white/40"> · {r.year}</span> : null}
                       </p>
-                      <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-white/35">
-                        {r.venue || 'venue —'} · {fmtDate(r.created_at)} · view timeslip →
-                      </p>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                        <span className="chip max-w-[180px] truncate">{r.venue || 'venue —'}</span>
+                        <span className="label-mono">{fmtDate(r.created_at)} · view slip →</span>
+                      </div>
                     </div>
                     <div className="shrink-0 text-right">
-                      <ScoreboardDigits value={Number(r.et_quarter_s).toFixed(3)} h={22} />
-                      <p className="font-mono text-[10px] tracking-[0.2em] text-white/40 mt-1">
+                      <p className="font-mono font-bold tabular-nums text-xl md:text-2xl leading-none">
+                        {Number(r.et_quarter_s).toFixed(3)}
+                      </p>
+                      <p className="label-mono mt-1.5">
                         {r.trap_speed_kmh ? `${Number(r.trap_speed_kmh).toFixed(1)} km/h` : ''}
                       </p>
                     </div>

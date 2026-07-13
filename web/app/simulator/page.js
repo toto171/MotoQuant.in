@@ -63,15 +63,14 @@ function pickDefaultBikeForVariant(bikes, variant) {
    REUSABLE COMPONENTS
    ═══════════════════════════════════════════════════════════════════════════ */
 
-// ─── Panel Card — Cockpit v3 `.card` surface (rest props spread so
+// ─── Panel Card — STAGED v4 `.card` surface (rest props spread so
 //     data-exp / role="tabpanel" attributes reach the DOM) ────────────────
 function Card({ children, className = '', glow = false, ...rest }) {
   return (
     <div
-      className={`card relative ${glow ? 'border-brand-orange/25' : ''} ${className}`}
+      className={`card relative ${glow ? 'border-white/[0.14]' : ''} ${className}`}
       {...rest}
     >
-      {glow && <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-orange/70 to-transparent" aria-hidden="true" />}
       {children}
     </div>
   );
@@ -104,27 +103,27 @@ function Dropdown({ label, items, selected, onSelect, renderItem, renderSelected
         onClick={() => setOpen(!open)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="w-full p-2.5 rounded-xl border border-white/10 bg-ink-1 text-left flex items-center justify-between hover:border-brand-orange/40 hover:bg-ink-2 transition-all text-sm group">
+        className="w-full p-2.5 rounded-lg border border-white/[0.08] bg-asphalt-3 text-left flex items-center justify-between hover:border-white/25 transition-colors text-sm group">
         {selected ? renderSelected(selected) : <span className="text-white/35">Select...</span>}
-        <ChevronDown size={13} className={`text-white/35 group-hover:text-brand-orange transition-all ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown size={13} className={`text-white/35 group-hover:text-white/70 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="absolute z-50 mt-1.5 w-full bg-ink-1 border border-white/10 rounded-xl shadow-2xl shadow-black/50 max-h-72 overflow-hidden">
+        <div className="absolute z-50 mt-1.5 w-full bg-asphalt-2 border border-white/[0.12] rounded-lg shadow-2xl shadow-black/50 max-h-72 overflow-hidden">
           <div className="p-2 border-b border-white/[0.06]">
             <div className="relative">
               <Search size={12} className="absolute left-2.5 top-2.5 text-white/35 z-10" />
               <input type="text" value={q} onChange={e => setQ(e.target.value)} placeholder="Search..."
-                className="input-base h-9 pl-8 pr-3 text-xs rounded-lg bg-ink-2" autoFocus />
+                className="input-base h-9 pl-8 pr-3 text-xs rounded-lg" autoFocus />
             </div>
           </div>
           <div className="overflow-y-auto max-h-56 scrollbar-thin" role="listbox">
             {grouped ? Object.keys(grouped).sort().map(g => (
               <div key={g}>
-                <div className="label-mono px-3 py-1 font-semibold bg-ink-2 sticky top-0">{g}</div>
+                <div className="label-mono px-3 py-1 font-semibold bg-asphalt-2 sticky top-0">{g}</div>
                 {grouped[g].map((item, i) => (
                   <button key={i} role="option" aria-selected={selected === item}
                     onClick={() => { onSelect(item); setOpen(false); setQ(''); }}
-                    className="w-full px-3 py-2 text-left text-xs hover:bg-brand-orange/10 transition-colors text-white/75 hover:text-brand-orangeLight">
+                    className="w-full px-3 py-2 text-left text-xs hover:bg-white/[0.05] transition-colors text-white/75 hover:text-white">
                     {renderItem(item)}
                   </button>
                 ))}
@@ -132,7 +131,7 @@ function Dropdown({ label, items, selected, onSelect, renderItem, renderSelected
             )) : filtered.map((item, i) => (
               <button key={i} role="option" aria-selected={selected === item}
                 onClick={() => { onSelect(item); setOpen(false); setQ(''); }}
-                className="w-full px-3 py-2 text-left text-xs hover:bg-brand-orange/10 transition-colors text-white/75 hover:text-brand-orangeLight">
+                className="w-full px-3 py-2 text-left text-xs hover:bg-white/[0.05] transition-colors text-white/75 hover:text-white">
                 {renderItem(item)}
               </button>
             ))}
@@ -158,7 +157,7 @@ function Slider({ label, value, onChange, min, max, step = 1, unit = '', colorFn
         onChange={e => onChange(Number(e.target.value))}
         aria-label={label}
         aria-valuetext={`${display}${unit}`}
-        className="w-full h-1 accent-brand-orange cursor-pointer" />
+        className="w-full h-1 accent-accent cursor-pointer" />
     </div>
   );
 }
@@ -166,9 +165,9 @@ function Slider({ label, value, onChange, min, max, step = 1, unit = '', colorFn
 // ─── Part Chip ───────────────────────────────────────────────────────────
 function PartChip({ part, onRemove }) {
   return (
-    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-brand-orange/10 border border-brand-orange/20 rounded-full text-[10px] text-brand-orangeLight group">
+    <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded border border-white/[0.12] bg-white/[0.04] font-mono text-[10px] text-white/75 group">
       <span className="font-medium">{partLabel(part.brand, part.model_name)}</span>
-      {part.price_inr > 0 && <span className="text-brand-orange/50">₹{(part.price_inr / 1000).toFixed(1)}k</span>}
+      {part.price_inr > 0 && <span className="text-white/40">₹{(part.price_inr / 1000).toFixed(1)}k</span>}
       <button onClick={onRemove} className="opacity-50 group-hover:opacity-100 hover:text-white transition-opacity"><X size={10} /></button>
     </div>
   );
@@ -179,7 +178,7 @@ function Metric({ label, value, unit, large, accent }) {
   return (
     <div className="text-center">
       <p className="label-mono mb-1">{label}</p>
-      <p className={`font-display font-bold tabular-nums ${large ? 'text-3xl' : 'text-xl'} ${accent ? 'text-brand-orange' : 'text-white'}`}>
+      <p className={`font-mono font-bold tabular-nums ${large ? 'text-3xl' : 'text-xl'} ${accent ? 'text-accent' : 'text-white'}`}>
         {value}<span className={`${large ? 'text-base' : 'text-xs'} font-mono text-white/40 ml-0.5`}>{unit}</span>
       </p>
     </div>
@@ -193,9 +192,9 @@ function Tab({ active, onClick, icon, label }) {
       role="tab"
       aria-selected={active}
       aria-controls="sim-tabpanel"
-      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+      className={`flex items-center gap-1.5 px-3 py-1.5 rounded font-mono text-[11px] uppercase tracking-wide transition-colors ${
         active
-          ? 'bg-brand-orange/15 text-brand-orange border border-brand-orange/30'
+          ? 'bg-accent/[0.12] text-accent border border-accent/30'
           : 'text-white/45 hover:text-white/75 hover:bg-white/[0.03] border border-transparent'
       }`}>
       {icon}{label}
@@ -206,7 +205,7 @@ function Tab({ active, onClick, icon, label }) {
 // ─── Inline error tile with Retry — the one branded error pattern ───────
 function ErrorTile({ message, onRetry, retryLabel = 'Retry', className = '' }) {
   return (
-    <div className={`rounded-xl border border-brand-red/20 bg-brand-red/5 p-3 text-brand-red text-xs flex items-center justify-between gap-3 ${className}`}>
+    <div className={`rounded-lg border border-signal-foul/25 bg-signal-foul/5 p-3 text-signal-foul text-xs flex items-center justify-between gap-3 ${className}`}>
       <span className="flex items-start gap-1.5 min-w-0">
         <AlertCircle size={13} className="shrink-0 mt-0.5" />
         <span className="break-words">{message}</span>
@@ -222,7 +221,7 @@ function ErrorTile({ message, onRetry, retryLabel = 'Retry', className = '' }) {
    CHART COMPONENTS
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const CHART_COLORS = { a: '#FF5E1F', b: '#00FFB2' };
+const CHART_COLORS = { a: '#C9F231', b: '#6FE3B2' };
 
 function SimChart({ data, dataKey, label, unit, color = CHART_COLORS.a, domain }) {
   const gradId = useId();
@@ -243,7 +242,7 @@ function SimChart({ data, dataKey, label, unit, color = CHART_COLORS.a, domain }
           <XAxis dataKey="t" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} tickFormatter={v => `${v}s`} />
           <YAxis tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} domain={domain} />
           <Tooltip
-            contentStyle={{ background: '#0A0A0B', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 11 }}
+            contentStyle={{ background: '#10141B', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 11 }}
             labelFormatter={v => `${v}s`}
             formatter={v => [`${typeof v === 'number' ? v.toFixed(1) : v} ${unit}`, label]}
           />
@@ -834,13 +833,13 @@ function SimulatorPageInner() {
      RENDER
      ═════════════════════════════════════════════════════════════════════ */
   return (
-    <div className="min-h-screen bg-black text-white pt-16">
+    <div className="min-h-screen bg-asphalt-0 text-white pt-16">
       <SiteNav />
 
       {/* ─── Simulator toolbar (slim, sticky under SiteNav) ───────────── */}
-      <div className="sticky top-16 z-40 bg-black/85 backdrop-blur-xl border-b border-brand-orange/15">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-5 py-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
-          <span className="label-mono text-brand-orange/80">Simulator</span>
+      <div className="sticky top-16 z-40 bg-asphalt-0/85 backdrop-blur-xl border-b border-white/[0.08]">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-5 py-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <span className="label-mono text-white/60">Simulator</span>
           <button
             type="button"
             onClick={() => setLiveSim((v) => !v)}
@@ -849,11 +848,11 @@ function SimulatorPageInner() {
               : 'Manual mode — the quick sim runs only when you press Run. Click to go live.'}
             className={`flex items-center gap-1.5 font-mono text-[11px] px-2 py-1 rounded-md border transition-colors ${
               liveSim
-                ? 'border-brand-green/30 bg-brand-green/10 text-brand-green'
+                ? 'border-signal-go/30 bg-signal-go/10 text-signal-go'
                 : 'border-white/[0.08] bg-white/[0.02] text-white/45 hover:text-white/75'
             }`}
           >
-            <span className={`w-1.5 h-1.5 rounded-full ${liveSim ? 'bg-brand-green' : 'bg-white/30'}`} />
+            <span className={`w-1.5 h-1.5 rounded-full ${liveSim ? 'bg-signal-go' : 'bg-white/30'}`} />
             {liveSim ? 'Live' : 'Manual'}
           </button>
           {!liveSim && (
@@ -894,11 +893,11 @@ function SimulatorPageInner() {
         )}
       </div>
 
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-5 py-5">
+      <div id="main" className="max-w-[1400px] mx-auto px-4 sm:px-5 py-5">
         {/* Boot failure — branded error card with Retry */}
         {loadError && !loading && (
-          <div className="card border-brand-red/30 bg-brand-red/5 p-4 mb-4">
-            <div className="flex items-start gap-2 text-brand-red text-xs">
+          <div className="card border-signal-foul/30 bg-signal-foul/5 p-4 mb-4">
+            <div className="flex items-start gap-2 text-signal-foul text-xs">
               <AlertCircle size={14} className="shrink-0 mt-0.5" />
               <span>{loadError}</span>
             </div>
@@ -911,7 +910,7 @@ function SimulatorPageInner() {
         {/* Natural-language chat */}
         <Card glow className="mb-5 p-5">
           <div className="flex items-center gap-2 mb-3">
-            <MessageSquare size={14} className="text-brand-orange" />
+            <MessageSquare size={14} className="text-white/40" />
             <CodeComment>ask motoquant</CodeComment>
             <h3 className="sr-only">Ask MotoQuant</h3>
           </div>
@@ -967,15 +966,15 @@ function SimulatorPageInner() {
             <Card className="p-4 z-10 overflow-visible" data-exp="EXP-003" data-variant={defaultBikeVariant}>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="label-mono font-semibold flex items-center gap-2">
-                  <Gauge size={13} className="text-brand-orange" /> Motorcycle
+                  <Gauge size={13} className="text-white/40" /> Motorcycle
                 </h3>
                 <button
                   onClick={shareBuild}
                   disabled={!bike}
                   title="Copy a link to this exact build"
-                  className="label-mono flex items-center gap-1 hover:text-brand-orange disabled:opacity-40 transition-colors"
+                  className="label-mono flex items-center gap-1 hover:text-white disabled:opacity-40 transition-colors"
                 >
-                  {shareCopied ? <Check size={11} className="text-brand-green" /> : <Share2 size={11} />}
+                  {shareCopied ? <Check size={11} className="text-signal-go" /> : <Share2 size={11} />}
                   {shareCopied ? 'Link copied' : 'Share'}
                 </button>
               </div>
@@ -992,7 +991,7 @@ function SimulatorPageInner() {
                   </div>
                 )}
                 renderSelected={b => (
-                  <span className="text-white text-xs"><span className="text-brand-orange font-medium">{b.manufacturer}</span> {b.model} <span className="text-white/35">({b.displacement_cc}cc)</span></span>
+                  <span className="text-white text-xs"><span className="font-medium">{b.manufacturer}</span> {b.model} <span className="text-white/35">({b.displacement_cc}cc)</span></span>
                 )}
                 emptyMsg="No bikes found"
               />
@@ -1006,9 +1005,9 @@ function SimulatorPageInner() {
                       <button
                         key={label}
                         onClick={() => { setBike(match); setSelectedParts([]); setFrontTire(null); setRearTire(null); setFullResult(null); }}
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-mono border transition-colors ${
+                        className={`px-2 py-0.5 rounded text-[10px] font-mono border transition-colors ${
                           active
-                            ? 'border-brand-orange/60 text-brand-orange bg-brand-orange/10'
+                            ? 'border-accent/50 text-accent bg-accent/[0.08]'
                             : 'border-white/10 text-white/45 hover:text-white hover:border-white/25'
                         }`}
                       >
@@ -1034,9 +1033,9 @@ function SimulatorPageInner() {
                 <Slider label="Rider" value={riderKg} onChange={setRiderKg} min={50} max={130} unit=" kg"
                   colorFn={() => 'text-white'} />
                 <Slider label="Power" value={powerBoost} onChange={setPowerBoost} min={-20} max={50} unit="%"
-                  colorFn={v => v > 0 ? 'text-brand-green' : v < 0 ? 'text-brand-red' : 'text-white'} />
+                  colorFn={v => v > 0 ? 'text-signal-go' : v < 0 ? 'text-signal-foul' : 'text-white'} />
                 <Slider label="Mass" value={massChange} onChange={setMassChange} min={-30} max={30} unit=" kg"
-                  colorFn={v => v < 0 ? 'text-brand-green' : v > 0 ? 'text-brand-red' : 'text-white'} />
+                  colorFn={v => v < 0 ? 'text-signal-go' : v > 0 ? 'text-signal-foul' : 'text-white'} />
               </div>
             </Card>
 
@@ -1045,23 +1044,23 @@ function SimulatorPageInner() {
               <button onClick={() => setShowEnv(!showEnv)}
                 aria-expanded={showEnv}
                 className="label-mono w-full flex items-center justify-between font-semibold">
-                <span className="flex items-center gap-2"><Thermometer size={13} className="text-brand-orange" /> Environment</span>
+                <span className="flex items-center gap-2"><Thermometer size={13} className="text-white/40" /> Environment</span>
                 <ChevronDown size={12} className={`transition-transform ${showEnv ? 'rotate-180' : ''}`} />
               </button>
               {showEnv && (
                 <div className="mt-3 space-y-3">
                   <Slider label="Air Temp" value={ambientTemp} onChange={setAmbientTemp} min={0} max={50} unit="°C"
-                    colorFn={v => v > 35 ? 'text-brand-red' : v < 15 ? 'text-brand-accent' : 'text-white'} />
+                    colorFn={v => v > 35 ? 'text-signal-foul' : v < 15 ? 'text-signal-go' : 'text-white'} />
                   <Slider label="Track Temp" value={trackTemp} onChange={setTrackTemp} min={10} max={65} unit="°C"
-                    colorFn={v => v > 50 ? 'text-brand-red' : 'text-white'} />
+                    colorFn={v => v > 50 ? 'text-signal-foul' : 'text-white'} />
                   <Slider label="Humidity" value={humidity} onChange={setHumidity} min={0} max={100} unit="%"
                     colorFn={() => 'text-white'} />
                   <Slider label="Headwind" value={headwind} onChange={setHeadwind} min={-30} max={30} unit=" km/h"
-                    colorFn={v => v > 0 ? 'text-brand-red' : v < 0 ? 'text-brand-green' : 'text-white'} />
+                    colorFn={v => v > 0 ? 'text-signal-foul' : v < 0 ? 'text-signal-go' : 'text-white'} />
 
                   {/* Venue */}
                   <Dropdown
-                    label="Venue" icon={<MapPin size={10} className="text-brand-orange" />}
+                    label="Venue" icon={<MapPin size={10} className="text-white/40" />}
                     items={[{ id: null, name: 'Standard (ISA)', country: 'Default' }, ...venues]}
                     selected={venue || { id: null, name: 'Standard (ISA)', country: 'Default' }}
                     onSelect={v => setVenue(v.id ? v : null)}
@@ -1079,9 +1078,9 @@ function SimulatorPageInner() {
                       type="button"
                       onClick={useMyLocation}
                       disabled={geoLoading}
-                      className="w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-lg border border-white/[0.08] hover:border-brand-orange/30 bg-white/[0.02] hover:bg-brand-orange/5 text-xs text-white/55 hover:text-brand-orangeLight transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-lg border border-white/[0.1] hover:border-white/25 bg-white/[0.03] text-xs text-white/60 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <Locate size={12} className="text-brand-orange" />
+                      <Locate size={12} className="text-white/40" />
                       {geoLoading ? 'Locating…' : 'Use my location'}
                     </button>
                     {geoLoading && (
@@ -1090,8 +1089,8 @@ function SimulatorPageInner() {
                     {geoMessage && (
                       <div className={`flex items-start gap-1.5 px-2 py-1.5 rounded-md text-[11px] ${
                         geoMessage.tone === 'ok'
-                          ? 'bg-brand-green/10 border border-brand-green/20 text-brand-green'
-                          : 'bg-brand-red/10 border border-brand-red/30 text-brand-red'
+                          ? 'bg-signal-go/10 border border-signal-go/20 text-signal-go'
+                          : 'bg-signal-foul/10 border border-signal-foul/30 text-signal-foul'
                       }`}>
                         {geoMessage.tone === 'ok'
                           ? <Locate size={11} className="shrink-0 mt-0.5" />
@@ -1107,7 +1106,7 @@ function SimulatorPageInner() {
             {/* Tires — z-[6] so tire dropdowns overlap cards/buttons below */}
             <Card className="p-4 z-[6] overflow-visible">
               <h3 className="label-mono font-semibold mb-3 flex items-center gap-2">
-                <CircleDot size={13} className="text-brand-orange" /> Tires
+                <CircleDot size={13} className="text-white/40" /> Tires
               </h3>
               <div className="space-y-2.5">
                 {/* Size is part of the label: several tires ship the same
@@ -1146,9 +1145,9 @@ function SimulatorPageInner() {
           <div className="col-span-12 lg:col-span-4">
             <Card className="p-4 h-full flex flex-col">
               <h3 className="label-mono font-semibold mb-3 flex items-center gap-2">
-                <Wrench size={13} className="text-brand-orange" /> Parts Catalog
+                <Wrench size={13} className="text-white/40" /> Parts Catalog
                 {selectedParts.length > 0 && (
-                  <span className="ml-auto text-[10px] bg-brand-orange/15 text-brand-orange px-2 py-0.5 rounded-full font-medium">
+                  <span className="ml-auto font-mono text-[10px] bg-accent/[0.12] text-accent px-2 py-0.5 rounded">
                     {selectedParts.length} selected · ₹{(buildCost / 1000).toFixed(1)}k
                   </span>
                 )}
@@ -1175,8 +1174,8 @@ function SimulatorPageInner() {
                       <button
                         onClick={() => setActiveCategory(isActive ? null : cat)}
                         aria-expanded={isActive}
-                        className={`w-full px-3 py-2 rounded-xl text-left text-xs flex items-center justify-between transition-all ${
-                          isActive ? 'bg-brand-orange/10 text-brand-orangeLight border border-brand-orange/20' : 'hover:bg-white/[0.03] text-white/55 border border-transparent'
+                        className={`w-full px-3 py-2 rounded-lg text-left text-xs flex items-center justify-between transition-colors ${
+                          isActive ? 'bg-white/[0.06] text-white border border-white/[0.1]' : 'hover:bg-white/[0.03] text-white/55 border border-transparent'
                         }`}>
                         <div className="flex items-center gap-2">
                           <ChevronRight size={11} className={`transition-transform ${isActive ? 'rotate-90' : ''}`} />
@@ -1186,7 +1185,7 @@ function SimulatorPageInner() {
                           </span>
                         </div>
                         {selectedInCat > 0 && (
-                          <span className="text-[9px] bg-brand-orange text-black px-1.5 py-0.5 rounded-full font-bold">{selectedInCat}</span>
+                          <span className="font-mono text-[9px] bg-accent text-asphalt-0 px-1.5 py-0.5 rounded font-bold">{selectedInCat}</span>
                         )}
                       </button>
 
@@ -1204,9 +1203,9 @@ function SimulatorPageInner() {
                               <button key={part.id} onClick={() => { if (!disabled) togglePart(part); }}
                                 disabled={disabled}
                                 title={compat ? undefined : `Not compatible: ${part.fitment_reason || 'does not fit this bike'}`}
-                                className={`w-full px-3 py-2.5 rounded-xl text-left text-xs transition-all border ${
+                                className={`w-full px-3 py-2.5 rounded-lg text-left text-xs transition-colors border ${
                                   sel
-                                    ? 'bg-brand-orange/10 border-brand-orange/30 text-brand-orangeLight'
+                                    ? 'bg-accent/[0.08] border-accent/30 text-white'
                                     : disabled
                                       ? 'border-white/[0.03] text-white/35 opacity-50 cursor-not-allowed'
                                       : 'border-white/[0.04] hover:border-white/[0.08] text-white/55 hover:text-white/75'
@@ -1216,7 +1215,7 @@ function SimulatorPageInner() {
                                     <div className="font-medium text-[11px] flex items-center gap-1.5">
                                       {partLabel(part.brand, part.model_name)}
                                       {!compat && (
-                                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-brand-red/10 text-brand-red font-normal">
+                                        <span className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-signal-foul/10 text-signal-foul font-normal">
                                           no fit
                                         </span>
                                       )}
@@ -1227,18 +1226,18 @@ function SimulatorPageInner() {
                                     {part.price_inr > 0 && (
                                       <div className="text-[10px] text-white/45">₹{part.price_inr.toLocaleString('en-IN')}</div>
                                     )}
-                                    {sel && <div className="text-[10px] text-brand-orange mt-0.5">✓ Added</div>}
+                                    {sel && <div className="text-[10px] text-accent mt-0.5">✓ Added</div>}
                                   </div>
                                 </div>
                                 {(part.param_deltas || part.param_multipliers) && (
                                   <div className="mt-1.5 flex flex-wrap gap-1">
                                     {part.param_deltas && typeof part.param_deltas === 'object' && Object.entries(part.param_deltas).map(([k, v]) => (
-                                      <span key={k} className={`text-[9px] px-1.5 py-0.5 rounded-full ${v > 0 ? 'bg-brand-green/10 text-brand-green' : 'bg-brand-red/10 text-brand-red'}`}>
+                                      <span key={k} className={`text-[9px] px-1.5 py-0.5 rounded ${v > 0 ? 'bg-signal-go/10 text-signal-go' : 'bg-signal-foul/10 text-signal-foul'}`}>
                                         {k.split('.').pop()}: {v > 0 ? '+' : ''}{v}
                                       </span>
                                     ))}
                                     {part.param_multipliers && typeof part.param_multipliers === 'object' && Object.entries(part.param_multipliers).map(([k, v]) => (
-                                      <span key={k} className={`text-[9px] px-1.5 py-0.5 rounded-full ${v > 1 ? 'bg-brand-green/10 text-brand-green' : 'bg-brand-red/10 text-brand-red'}`}>
+                                      <span key={k} className={`text-[9px] px-1.5 py-0.5 rounded ${v > 1 ? 'bg-signal-go/10 text-signal-go' : 'bg-signal-foul/10 text-signal-foul'}`}>
                                         {k.split('.').pop()}: ×{v}
                                       </span>
                                     ))}
@@ -1292,58 +1291,50 @@ function SimulatorPageInner() {
                 )}
                 {result ? (
                   <div className="space-y-4">
-                    {/* Primary metrics */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-gradient-to-br from-brand-orange/5 to-transparent rounded-xl p-5 text-center border border-brand-orange/10">
-                        <p className="label-mono mb-2">Quarter-Mile ET</p>
-                        {result.et_quarter_s != null ? (
-                          <div className="flex items-end justify-center gap-1.5">
-                            <ScoreboardDigits value={result.et_quarter_s.toFixed(3)} h={34} label={`${result.et_quarter_s.toFixed(3)} seconds`} />
-                            <span className="font-mono text-xs text-white/40 mb-0.5">s</span>
-                          </div>
-                        ) : (
-                          <p className="font-display font-bold text-3xl text-brand-orange">—</p>
-                        )}
-                      </div>
-                      <div className="bg-white/[0.02] rounded-xl p-5 text-center border border-white/[0.04]">
-                        <Metric label="Trap Speed" value={result.trap_speed_kmh?.toFixed(1) ?? '—'} unit="km/h" large />
+                    {/* The slip — big mono ET + ruled split rows */}
+                    <div className="timeslip">
+                      <p className="label-mono mb-2">Quarter-Mile ET</p>
+                      {result.et_quarter_s != null ? (
+                        <div className="flex items-end gap-1.5">
+                          <ScoreboardDigits value={result.et_quarter_s.toFixed(3)} h={44} label={`${result.et_quarter_s.toFixed(3)} seconds`} />
+                          <span className="font-mono text-sm text-white/40 mb-0.5">s</span>
+                        </div>
+                      ) : (
+                        <p className="font-mono font-bold text-4xl text-white">—</p>
+                      )}
+                      <div className="mt-3">
+                        <div className="timeslip-row"><span className="text-white/45">60 ft</span><span className="text-white">{result.et_60ft_s?.toFixed(3) ?? '—'}s</span></div>
+                        <div className="timeslip-row"><span className="text-white/45">⅛ mile</span><span className="text-white">{result.et_eighth_s?.toFixed(3) ?? '—'}s</span></div>
+                        <div className="timeslip-row"><span className="text-white/45">Trap speed</span><span className="text-white">{result.trap_speed_kmh?.toFixed(1) ?? '—'} km/h</span></div>
+                        <div className="timeslip-row"><span className="text-white/45">Power</span><span className="text-white">{result.peak_power_hp?.toFixed(0) ?? '—'} hp</span></div>
+                        <div className="timeslip-row"><span className="text-white/45">Total mass</span><span className="text-white">{result.total_mass_kg?.toFixed(0) ?? '—'} kg</span></div>
                       </div>
                     </div>
 
-                    {/* Stock vs Modified */}
+                    {/* Stock vs Modified — negative ET delta = faster = green */}
                     {result.stock_et_s && result.et_delta_s !== null && (
-                      <div className={`p-3 rounded-xl border text-center ${
-                        result.et_delta_s < 0 ? 'bg-brand-green/5 border-brand-green/20' : result.et_delta_s > 0 ? 'bg-brand-red/5 border-brand-red/20' : 'bg-white/[0.02] border-white/[0.04]'
+                      <div className={`p-3 rounded-lg border text-center ${
+                        result.et_delta_s < 0 ? 'bg-signal-go/5 border-signal-go/25' : result.et_delta_s > 0 ? 'bg-signal-foul/5 border-signal-foul/25' : 'bg-white/[0.02] border-white/[0.06]'
                       }`}>
-                        <div className="flex items-center justify-center gap-4 text-xs">
+                        <div className="flex items-center justify-center gap-4 font-mono text-xs tabular-nums">
                           <div><span className="text-white/45">Stock </span><span className="text-white font-medium">{result.stock_et_s.toFixed(3)}s</span></div>
-                          <div className={`text-lg font-bold ${result.et_delta_s < 0 ? 'text-brand-green' : 'text-brand-red'}`}>
+                          <div className={`text-lg font-bold ${result.et_delta_s < 0 ? 'delta-down' : 'delta-up'}`}>
                             {result.et_delta_s < 0 ? '' : '+'}{result.et_delta_s.toFixed(3)}s
                           </div>
-                          <div><span className="text-white/45">Modified </span><span className="text-brand-orange font-medium">{result.et_quarter_s?.toFixed(3)}s</span></div>
+                          <div><span className="text-white/45">Modified </span><span className="text-white font-medium">{result.et_quarter_s?.toFixed(3)}s</span></div>
                         </div>
                       </div>
                     )}
 
-                    {/* Splits & specs grid */}
-                    <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
-                      <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs">
-                        <div className="flex justify-between"><span className="text-white/45">60 ft</span><span className="text-white font-medium tabular-nums">{result.et_60ft_s?.toFixed(3) ?? '—'}s</span></div>
-                        <div className="flex justify-between"><span className="text-white/45">⅛ mile</span><span className="text-white font-medium tabular-nums">{result.et_eighth_s?.toFixed(3) ?? '—'}s</span></div>
-                        <div className="flex justify-between"><span className="text-white/45">Power</span><span className="text-white font-medium tabular-nums">{result.peak_power_hp?.toFixed(0) ?? '—'} hp</span></div>
-                        <div className="flex justify-between"><span className="text-white/45">Total mass</span><span className="text-white font-medium tabular-nums">{result.total_mass_kg?.toFixed(0) ?? '—'} kg</span></div>
-                      </div>
-                    </div>
-
                     {/* Build summary */}
                     {selectedParts.length > 0 && (
-                      <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
+                      <div className="bg-white/[0.02] rounded-lg p-4 border border-white/[0.06]">
                         <div className="flex justify-between items-center text-xs mb-2">
-                          <span className="text-white/55 font-medium">Build Summary</span>
-                          <span className="text-brand-orange font-bold">₹{buildCost.toLocaleString('en-IN')}</span>
+                          <span className="label-mono">Build summary</span>
+                          <span className="font-mono font-bold text-white tabular-nums">₹{buildCost.toLocaleString('en-IN')}</span>
                         </div>
                         {result.et_delta_s && result.et_delta_s < 0 && buildCost > 0 && (
-                          <div className="text-[10px] text-brand-green">
+                          <div className="font-mono text-[10px] text-white/50 tabular-nums">
                             Cost per tenth: ₹{Math.round(buildCost / (Math.abs(result.et_delta_s) * 10)).toLocaleString('en-IN')}
                           </div>
                         )}
@@ -1355,7 +1346,7 @@ function SimulatorPageInner() {
                       savedRun ? (
                         <Link
                           href="/leaderboard"
-                          className="w-full h-9 inline-flex items-center justify-center gap-2 rounded-xl border border-brand-green/30 bg-brand-green/10 text-brand-green text-xs font-display font-semibold transition-colors hover:bg-brand-green/15"
+                          className="w-full h-9 inline-flex items-center justify-center gap-2 rounded-lg border border-signal-go/30 bg-signal-go/10 text-signal-go text-xs font-display font-semibold uppercase tracking-wide transition-colors hover:bg-signal-go/15"
                         >
                           <Check size={13} /> Saved — view leaderboard
                         </Link>
@@ -1412,7 +1403,7 @@ function SimulatorPageInner() {
                   </div>
                 ) : topSpeedTask.error ? (
                   <div className="text-center py-12 text-xs">
-                    <div className="text-brand-red mb-3">Top speed simulation failed</div>
+                    <div className="text-signal-foul mb-3">Top speed simulation failed</div>
                     <div className="text-white/35 text-[10px] mb-4">{topSpeedTask.error}</div>
                     <ActionButton
                       task={topSpeedTask}
@@ -1426,24 +1417,24 @@ function SimulatorPageInner() {
                 ) : topSpeedResult ? (
                   <div className="space-y-4">
                     {/* Primary terminal velocity */}
-                    <div className="bg-gradient-to-br from-brand-orange/10 via-brand-orange/5 to-transparent rounded-xl p-6 text-center border border-brand-orange/20">
-                      <div className="label-mono text-brand-orange/80 mb-2">Terminal Velocity</div>
-                      <div className="font-display font-bold text-5xl text-brand-orange tabular-nums leading-none">
+                    <div className="timeslip text-center">
+                      <div className="label-mono mb-2">Terminal Velocity</div>
+                      <div className="font-mono font-bold text-5xl text-white tabular-nums leading-none">
                         {topSpeedResult.terminal_velocity_kmh?.toFixed(1) ?? '—'}
-                        <span className="text-xl text-brand-orange/60 ml-2 font-mono">km/h</span>
+                        <span className="text-xl text-white/40 ml-2">km/h</span>
                       </div>
-                      <div className="text-sm text-white/55 mt-2 tabular-nums">
+                      <div className="font-mono text-sm text-white/55 mt-2 tabular-nums">
                         {topSpeedResult.terminal_velocity_mph?.toFixed(1)} mph
                         <span className="text-white/35 mx-2">·</span>
                         {topSpeedResult.terminal_velocity_ms?.toFixed(1)} m/s
                       </div>
                       {topSpeedResult.reached_plateau ? (
-                        <div className="inline-flex items-center gap-1.5 mt-3 px-2.5 py-1 bg-brand-green/10 border border-brand-green/20 rounded-full text-[10px] text-brand-green">
-                          <span className="w-1.5 h-1.5 rounded-full bg-brand-green motion-safe:animate-pulse" />
+                        <div className="chip chip-go mt-3">
+                          <span className="w-1.5 h-1.5 rounded-full bg-signal-go" />
                           Plateau reached
                         </div>
                       ) : (
-                        <div className="inline-flex items-center gap-1.5 mt-3 px-2.5 py-1 bg-brand-amber/10 border border-brand-amber/20 rounded-full text-[10px] text-brand-amber">
+                        <div className="chip chip-stage mt-3 normal-case tracking-normal">
                           Still accelerating at sim end — extend max_time
                         </div>
                       )}
@@ -1451,13 +1442,13 @@ function SimulatorPageInner() {
 
                     {/* Time / distance / power grid */}
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
+                      <div className="bg-white/[0.02] rounded-lg p-4 border border-white/[0.06]">
                         <div className="label-mono mb-1">Time to terminal</div>
-                        <div className="font-display text-2xl text-white tabular-nums">{topSpeedResult.time_to_terminal_s?.toFixed(2)}<span className="text-sm text-white/45 ml-1">s</span></div>
+                        <div className="font-mono text-2xl text-white tabular-nums">{topSpeedResult.time_to_terminal_s?.toFixed(2)}<span className="text-sm text-white/45 ml-1">s</span></div>
                       </div>
-                      <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
+                      <div className="bg-white/[0.02] rounded-lg p-4 border border-white/[0.06]">
                         <div className="label-mono mb-1">Distance to terminal</div>
-                        <div className="font-display text-2xl text-white tabular-nums">
+                        <div className="font-mono text-2xl text-white tabular-nums">
                           {topSpeedResult.distance_to_terminal_m >= 1000
                             ? `${(topSpeedResult.distance_to_terminal_m / 1000).toFixed(2)}`
                             : topSpeedResult.distance_to_terminal_m?.toFixed(0)}
@@ -1467,27 +1458,27 @@ function SimulatorPageInner() {
                     </div>
 
                     {/* Terminal power / gear / rpm */}
-                    <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
+                    <div className="bg-white/[0.02] rounded-lg p-4 border border-white/[0.06]">
                       <div className="grid grid-cols-3 gap-3 text-center">
                         <div>
                           <div className="label-mono mb-1">Power @ terminal</div>
-                          <div className="font-display text-lg text-white tabular-nums">{topSpeedResult.terminal_power_hp?.toFixed(0)}<span className="text-[10px] text-white/45 ml-1">hp</span></div>
+                          <div className="font-mono text-lg text-white tabular-nums">{topSpeedResult.terminal_power_hp?.toFixed(0)}<span className="text-[10px] text-white/45 ml-1">hp</span></div>
                           <div className="text-[10px] text-white/35 tabular-nums">{topSpeedResult.terminal_power_kw?.toFixed(1)} kW</div>
                         </div>
                         <div>
                           <div className="label-mono mb-1">Gear</div>
-                          <div className="font-display text-lg text-white tabular-nums">{topSpeedResult.terminal_gear}</div>
+                          <div className="font-mono text-lg text-white tabular-nums">{topSpeedResult.terminal_gear}</div>
                         </div>
                         <div>
                           <div className="label-mono mb-1">Engine RPM</div>
-                          <div className="font-display text-lg text-white tabular-nums">{topSpeedResult.terminal_rpm?.toLocaleString('en-US')}</div>
+                          <div className="font-mono text-lg text-white tabular-nums">{topSpeedResult.terminal_rpm?.toLocaleString('en-US')}</div>
                         </div>
                       </div>
                     </div>
 
                     {/* LSR splits table */}
                     {topSpeedResult.lsr_splits && Object.keys(topSpeedResult.lsr_splits).length > 0 && (
-                      <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
+                      <div className="bg-white/[0.02] rounded-lg p-4 border border-white/[0.06]">
                         <div className="flex items-center justify-between mb-3">
                           <div className="label-mono font-medium">Land Speed Splits</div>
                           <div className="text-[9px] text-white/35">SAE J1349</div>
@@ -1507,9 +1498,9 @@ function SimulatorPageInner() {
                                   <div className="text-white font-medium">{s.label}</div>
                                   <div className="text-[9px] text-white/35">{s.sub}</div>
                                 </div>
-                                <div className="text-right tabular-nums text-white/75">{v.time_s?.toFixed(3)}<span className="text-white/35 ml-0.5">s</span></div>
-                                <div className="text-right tabular-nums text-brand-orange/90">{v.speed_kmh?.toFixed(1)}<span className="text-white/35 ml-0.5 text-[9px]">km/h</span></div>
-                                <div className="text-right tabular-nums text-white/55 text-[10px]">{v.speed_mph?.toFixed(1)} mph</div>
+                                <div className="text-right font-mono tabular-nums text-white/75">{v.time_s?.toFixed(3)}<span className="text-white/35 ml-0.5">s</span></div>
+                                <div className="text-right font-mono tabular-nums text-white">{v.speed_kmh?.toFixed(1)}<span className="text-white/35 ml-0.5 text-[9px]">km/h</span></div>
+                                <div className="text-right font-mono tabular-nums text-white/55 text-[10px]">{v.speed_mph?.toFixed(1)} mph</div>
                               </div>
                             );
                           })}
@@ -1519,7 +1510,7 @@ function SimulatorPageInner() {
 
                     {/* Velocity chart if timeseries present */}
                     {topSpeedResult.timeseries?.t?.length > 0 && (
-                      <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
+                      <div className="bg-white/[0.02] rounded-lg p-4 border border-white/[0.06]">
                         <SimChart
                           data={topSpeedResult.timeseries.t.map((t, i) => ({
                             t: +t.toFixed(2),
@@ -1528,7 +1519,7 @@ function SimulatorPageInner() {
                           dataKey="speed"
                           label="Velocity vs Time"
                           unit="km/h"
-                          color="#FF5E1F"
+                          color="#C9F231"
                         />
                       </div>
                     )}
@@ -1594,12 +1585,12 @@ function SimulatorPageInner() {
                           <SimChart data={chartData} dataKey="rpm" label="Engine RPM" unit="rpm" />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                          <SimChart data={chartData} dataKey="gear" label="Gear" unit="" color="#00FFB2" />
-                          <SimChart data={chartData} dataKey="traction" label="Traction" unit="%" color="#22C55E" domain={[0, 110]} />
+                          <SimChart data={chartData} dataKey="gear" label="Gear" unit="" color="#6FE3B2" />
+                          <SimChart data={chartData} dataKey="traction" label="Traction" unit="%" color="#34D97B" domain={[0, 110]} />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                          <SimChart data={chartData} dataKey="power" label="Power" unit="kW" color="#F59E0B" />
-                          <SimChart data={chartData} dataKey="tire_temp" label="Tire Temp" unit="°C" color="#EF4444" />
+                          <SimChart data={chartData} dataKey="power" label="Power" unit="kW" color="#FFB224" />
+                          <SimChart data={chartData} dataKey="tire_temp" label="Tire Temp" unit="°C" color="#FF5A48" />
                         </div>
                       </div>
                     ) : (
@@ -1625,11 +1616,11 @@ function SimulatorPageInner() {
             {activeTab === 'splits' && (
               <Card className="p-5">
                 {fullResult ? (
-                  <div>
+                  <div className="timeslip overflow-x-auto">
                     <h4 className="label-mono font-semibold mb-3">Split Times</h4>
                     <table className="w-full text-xs">
                       <thead>
-                        <tr className="text-white/35 border-b border-white/[0.04]">
+                        <tr className="label-mono border-b border-dashed border-white/15">
                           <th className="text-left py-2 font-medium">Distance</th>
                           <th className="text-right py-2 font-medium">Time</th>
                           <th className="text-right py-2 font-medium">Speed</th>
@@ -1643,10 +1634,10 @@ function SimulatorPageInner() {
                           { d: '1000 ft (304.8m)', t: fullResult.splits?.['1000ft_s'], s: null },
                           { d: '¼ mile (402.3m)', t: fullResult.splits?.['1320ft_s'], s: fullResult.trap_speed_kmh },
                         ].map(row => (
-                          <tr key={row.d} className="border-b border-white/[0.03]">
+                          <tr key={row.d} className="border-b border-dashed border-white/10">
                             <td className="py-2 text-white/45">{row.d}</td>
-                            <td className="py-2 text-right font-medium tabular-nums">{row.t?.toFixed(3) ?? '—'}s</td>
-                            <td className="py-2 text-right tabular-nums text-white/45">{row.s ? `${row.s.toFixed(1)} km/h` : '—'}</td>
+                            <td className="py-2 text-right font-mono font-medium tabular-nums">{row.t?.toFixed(3) ?? '—'}s</td>
+                            <td className="py-2 text-right font-mono tabular-nums text-white/45">{row.s ? `${row.s.toFixed(1)} km/h` : '—'}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -1657,7 +1648,7 @@ function SimulatorPageInner() {
                     {result ? (
                       <>
                         <p className="mb-1">Quick splits from last run:</p>
-                        <p className="text-white font-medium tabular-nums">60ft: {result.et_60ft_s?.toFixed(3)}s · ⅛: {result.et_eighth_s?.toFixed(3)}s · ¼: {result.et_quarter_s?.toFixed(3)}s</p>
+                        <p className="font-mono text-white font-medium tabular-nums">60ft: {result.et_60ft_s?.toFixed(3)}s · ⅛: {result.et_eighth_s?.toFixed(3)}s · ¼: {result.et_quarter_s?.toFixed(3)}s</p>
                         <div className="mt-3 flex justify-center">
                           <ActionButton
                             task={fullSimTask}
@@ -1686,23 +1677,23 @@ function SimulatorPageInner() {
             {activeTab === 'compare' && (
               <Card className="p-5 overflow-visible">
                 <h4 className="label-mono font-semibold mb-4 flex items-center gap-2">
-                  <Layers size={13} className="text-brand-orange" /> A vs B Comparison
+                  <Layers size={13} className="text-white/40" /> A vs B Comparison
                 </h4>
 
                 {/* Build B config */}
                 <div className="space-y-3 mb-4">
-                  <div className="bg-white/[0.02] rounded-xl p-3 border border-white/[0.04]">
-                    <p className="label-mono text-brand-orange font-medium mb-2">Build A — Current Setup</p>
+                  <div className="bg-white/[0.02] rounded-lg p-3 border border-white/[0.04]">
+                    <p className="label-mono text-accent font-medium mb-2">Build A — Current Setup</p>
                     <p className="text-xs text-white/55">
                       {bike?.manufacturer} {bike?.model} · {powerBoost !== 0 ? `${powerBoost > 0 ? '+' : ''}${powerBoost}% power` : 'Stock power'} · {selectedParts.length} parts
                     </p>
                   </div>
 
-                  <div className="bg-white/[0.02] rounded-xl p-3 border border-brand-accent/20">
-                    <p className="label-mono text-brand-accent font-medium mb-2">Build B — Comparison</p>
+                  <div className="bg-white/[0.02] rounded-lg p-3 border border-mint/20">
+                    <p className="label-mono text-mint font-medium mb-2">Build B — Comparison</p>
                     <div className="space-y-2">
                       <Dropdown
-                        label="Bike" icon={<Gauge size={10} className="text-brand-accent" />}
+                        label="Bike" icon={<Gauge size={10} className="text-mint" />}
                         items={bikes}
                         selected={compareBike || bike}
                         onSelect={b => setCompareBike(b)}
@@ -1718,9 +1709,9 @@ function SimulatorPageInner() {
                       />
                       <div className="grid grid-cols-2 gap-2">
                         <Slider label="Power" value={comparePower} onChange={setComparePower} min={-20} max={50} unit="%"
-                          colorFn={v => v > 0 ? 'text-brand-green' : v < 0 ? 'text-brand-red' : 'text-white'} />
+                          colorFn={v => v > 0 ? 'text-signal-go' : v < 0 ? 'text-signal-foul' : 'text-white'} />
                         <Slider label="Mass" value={compareMass} onChange={setCompareMass} min={-30} max={30} unit=" kg"
-                          colorFn={v => v < 0 ? 'text-brand-green' : v > 0 ? 'text-brand-red' : 'text-white'} />
+                          colorFn={v => v < 0 ? 'text-signal-go' : v > 0 ? 'text-signal-foul' : 'text-white'} />
                       </div>
                     </div>
                   </div>
@@ -1758,16 +1749,16 @@ function SimulatorPageInner() {
                 {compareResult && (
                   <div className="mt-4 space-y-3">
                     {/* Delta banner */}
-                    <div className={`p-4 rounded-xl border text-center ${
-                      compareResult.delta.et_s < 0 ? 'bg-brand-accent/5 border-brand-accent/20' : compareResult.delta.et_s > 0 ? 'bg-brand-orange/5 border-brand-orange/20' : 'bg-white/[0.02] border-white/[0.04]'
+                    <div className={`p-4 rounded-lg border text-center ${
+                      compareResult.delta.et_s < 0 ? 'bg-signal-go/5 border-signal-go/25' : compareResult.delta.et_s > 0 ? 'bg-signal-foul/5 border-signal-foul/25' : 'bg-white/[0.02] border-white/[0.06]'
                     }`}>
                       <div className="label-mono mb-1">
                         {compareResult.delta.faster === 'B' ? 'Build B is faster' : compareResult.delta.faster === 'A' ? 'Build A is faster' : 'Dead heat'}
                       </div>
-                      <div className={`text-2xl font-bold ${compareResult.delta.et_s < 0 ? 'text-brand-accent' : compareResult.delta.et_s > 0 ? 'text-brand-orange' : 'text-white'}`}>
+                      <div className={`text-2xl font-bold ${compareResult.delta.et_s < 0 ? 'delta-down' : compareResult.delta.et_s > 0 ? 'delta-up' : 'font-mono tabular-nums text-white'}`}>
                         {compareResult.delta.et_s > 0 ? '+' : ''}{compareResult.delta.et_s.toFixed(3)}s
                       </div>
-                      <div className="text-[10px] text-white/45 mt-1">
+                      <div className="font-mono text-[10px] text-white/45 mt-1 tabular-nums">
                         Trap: {compareResult.delta.trap_kmh > 0 ? '+' : ''}{compareResult.delta.trap_kmh.toFixed(1)} km/h
                         {compareResult.delta.cost_diff_inr !== 0 && ` · Cost: ${compareResult.delta.cost_diff_inr > 0 ? '+' : ''}₹${Math.abs(compareResult.delta.cost_diff_inr).toLocaleString('en-IN')}`}
                       </div>
@@ -1779,14 +1770,14 @@ function SimulatorPageInner() {
                         { label: 'Build A', data: compareResult.a, color: 'orange' },
                         { label: 'Build B', data: compareResult.b, color: 'blue' },
                       ].map(({ label, data, color }) => (
-                        <div key={label} className={`bg-white/[0.02] rounded-xl p-3 border ${color === 'orange' ? 'border-brand-orange/20' : 'border-brand-accent/20'}`}>
-                          <p className={`label-mono font-medium mb-2 ${color === 'orange' ? 'text-brand-orange' : 'text-brand-accent'}`}>{label}</p>
+                        <div key={label} className={`bg-white/[0.02] rounded-lg p-3 border ${color === 'orange' ? 'border-accent/25' : 'border-mint/25'}`}>
+                          <p className={`label-mono font-medium mb-2 ${color === 'orange' ? 'text-accent' : 'text-mint'}`}>{label}</p>
                           <div className="space-y-1 text-xs">
                             <div className="flex justify-between"><span className="text-white/45">ET</span><span className="text-white font-bold tabular-nums">{data.et_quarter_s?.toFixed(3)}s</span></div>
-                            <div className="flex justify-between"><span className="text-white/45">Trap</span><span className="text-white tabular-nums">{data.trap_speed_kmh?.toFixed(1)} km/h</span></div>
-                            <div className="flex justify-between"><span className="text-white/45">60ft</span><span className="text-white tabular-nums">{data.et_60ft_s?.toFixed(3)}s</span></div>
-                            <div className="flex justify-between"><span className="text-white/45">Power</span><span className="text-white tabular-nums">{data.peak_power_hp?.toFixed(0)} hp</span></div>
-                            <div className="flex justify-between"><span className="text-white/45">Mass</span><span className="text-white tabular-nums">{data.total_mass_kg?.toFixed(0)} kg</span></div>
+                            <div className="flex justify-between"><span className="text-white/45">Trap</span><span className="font-mono text-white tabular-nums">{data.trap_speed_kmh?.toFixed(1)} km/h</span></div>
+                            <div className="flex justify-between"><span className="text-white/45">60ft</span><span className="font-mono text-white tabular-nums">{data.et_60ft_s?.toFixed(3)}s</span></div>
+                            <div className="flex justify-between"><span className="text-white/45">Power</span><span className="font-mono text-white tabular-nums">{data.peak_power_hp?.toFixed(0)} hp</span></div>
+                            <div className="flex justify-between"><span className="text-white/45">Mass</span><span className="font-mono text-white tabular-nums">{data.total_mass_kg?.toFixed(0)} kg</span></div>
                           </div>
                         </div>
                       ))}
@@ -1819,11 +1810,11 @@ function SimulatorPageInner() {
                                   <XAxis dataKey="t" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} tickFormatter={v => `${v}s`} />
                                   <YAxis tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} />
                                   <Tooltip
-                                    contentStyle={{ background: '#0A0A0B', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 11 }}
+                                    contentStyle={{ background: '#10141B', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 11 }}
                                     labelFormatter={v => `${v}s`}
                                   />
-                                  <Line type="monotone" dataKey={`a_${chart.key}`} stroke="#FF5E1F" strokeWidth={1.5} dot={false} name="Build A" />
-                                  <Line type="monotone" dataKey={`b_${chart.key}`} stroke="#00FFB2" strokeWidth={1.5} dot={false} name="Build B" />
+                                  <Line type="monotone" dataKey={`a_${chart.key}`} stroke="#C9F231" strokeWidth={1.5} dot={false} name="Build A" />
+                                  <Line type="monotone" dataKey={`b_${chart.key}`} stroke="#6FE3B2" strokeWidth={1.5} dot={false} name="Build B" />
                                 </LineChart>
                               </ResponsiveContainer>
                             </div>
@@ -1840,7 +1831,7 @@ function SimulatorPageInner() {
             {activeTab === 'upload' && (
               <Card className="p-5">
                 <h4 className="label-mono font-semibold mb-4 flex items-center gap-2">
-                  <Upload size={13} className="text-brand-orange" /> Upload Run Data
+                  <Upload size={13} className="text-white/40" /> Upload Run Data
                 </h4>
 
                 {/* Upload buttons */}
@@ -1848,19 +1839,19 @@ function SimulatorPageInner() {
                   <div>
                     <input type="file" ref={fileInputRef} accept=".csv,.json" onChange={onDragyFile} className="hidden" />
                     <button onClick={() => fileInputRef.current?.click()} disabled={dragyTask.active || dynoTask.active}
-                      className="w-full p-4 bg-white/[0.02] hover:bg-brand-orange/5 border border-white/[0.06] hover:border-brand-orange/20 rounded-xl transition-all text-center disabled:opacity-50">
-                      <Zap size={20} className="mx-auto mb-2 text-brand-orange" />
+                      className="w-full p-4 bg-white/[0.02] rounded-lg border border-dashed border-white/15 hover:border-white/30 transition-colors text-center disabled:opacity-50">
+                      <Zap size={20} className="mx-auto mb-2 text-white/50" />
                       <p className="text-xs font-medium text-white">Dragy GPS</p>
-                      <p className="text-[10px] text-white/35 mt-1">CSV or JSON export</p>
+                      <p className="font-mono text-[10px] text-white/35 mt-1">CSV or JSON export</p>
                     </button>
                   </div>
                   <div>
                     <input type="file" ref={dynoInputRef} accept=".csv,.txt" onChange={onDynoFile} className="hidden" />
                     <button onClick={() => dynoInputRef.current?.click()} disabled={dragyTask.active || dynoTask.active}
-                      className="w-full p-4 bg-white/[0.02] hover:bg-brand-accent/5 border border-white/[0.06] hover:border-brand-accent/20 rounded-xl transition-all text-center disabled:opacity-50">
-                      <BarChart3 size={20} className="mx-auto mb-2 text-brand-accent" />
+                      className="w-full p-4 bg-white/[0.02] rounded-lg border border-dashed border-white/15 hover:border-white/30 transition-colors text-center disabled:opacity-50">
+                      <BarChart3 size={20} className="mx-auto mb-2 text-white/50" />
                       <p className="text-xs font-medium text-white">Dyno Curve</p>
-                      <p className="text-[10px] text-white/35 mt-1">DynoJet / MoTeC CSV</p>
+                      <p className="font-mono text-[10px] text-white/35 mt-1">DynoJet / MoTeC CSV</p>
                     </button>
                   </div>
                 </div>
@@ -1895,9 +1886,9 @@ function SimulatorPageInner() {
                 {/* Dragy results */}
                 {uploadResult?.type === 'dragy' && (
                   <div className="space-y-3">
-                    <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
+                    <div className="bg-white/[0.02] rounded-lg p-4 border border-white/[0.06]">
                       <div className="flex justify-between items-center mb-2">
-                        <p className="label-mono text-brand-orange font-medium">Dragy Run — Best of {uploadResult.runs_detected}</p>
+                        <p className="label-mono text-white/60 font-medium">Dragy Run — Best of {uploadResult.runs_detected}</p>
                         <p className="text-[10px] text-white/35">{uploadResult.filename}</p>
                       </div>
                       <div className="grid grid-cols-2 gap-4 mb-3">
@@ -1909,7 +1900,7 @@ function SimulatorPageInner() {
                           {Object.entries(uploadResult.best_run.splits).map(([k, v]) => (
                             <div key={k} className="flex justify-between">
                               <span className="text-white/45">{k}</span>
-                              <span className="text-white tabular-nums">{v?.toFixed(3)}s</span>
+                              <span className="font-mono text-white tabular-nums">{v?.toFixed(3)}s</span>
                             </div>
                           ))}
                         </div>
@@ -1918,14 +1909,14 @@ function SimulatorPageInner() {
 
                     {/* Overlay vs sim */}
                     {uploadResult.overlay && (
-                      <div className={`rounded-xl p-4 border ${Math.abs(uploadResult.overlay.et_error_s) < 0.15 ? 'bg-brand-green/5 border-brand-green/20' : 'bg-brand-amber/5 border-brand-amber/20'}`}>
-                        <p className={`label-mono mb-2 font-medium ${Math.abs(uploadResult.overlay.et_error_s) < 0.15 ? 'text-brand-green' : 'text-brand-amber'}`}>
+                      <div className={`rounded-lg p-4 border ${Math.abs(uploadResult.overlay.et_error_s) < 0.15 ? 'bg-signal-go/5 border-signal-go/25' : 'bg-signal-stage/5 border-signal-stage/25'}`}>
+                        <p className={`label-mono mb-2 font-medium ${Math.abs(uploadResult.overlay.et_error_s) < 0.15 ? 'text-signal-go' : 'text-signal-stage'}`}>
                           Sim vs Real — {uploadResult.overlay.bike_name}
                         </p>
                         <div className="grid grid-cols-3 gap-3 text-xs">
-                          <div><span className="text-white/45 block">Sim ET</span><span className="text-white font-medium tabular-nums">{uploadResult.overlay.sim_et_s?.toFixed(3)}s</span></div>
-                          <div><span className="text-white/45 block">Error</span><span className={`font-bold tabular-nums ${Math.abs(uploadResult.overlay.et_error_s) < 0.15 ? 'text-brand-green' : 'text-brand-amber'}`}>{uploadResult.overlay.et_error_s > 0 ? '+' : ''}{uploadResult.overlay.et_error_s?.toFixed(3)}s</span></div>
-                          <div><span className="text-white/45 block">RMSE</span><span className="text-white tabular-nums">{uploadResult.overlay.v_rmse_kmh?.toFixed(1)} km/h</span></div>
+                          <div><span className="text-white/45 block">Sim ET</span><span className="font-mono text-white font-medium tabular-nums">{uploadResult.overlay.sim_et_s?.toFixed(3)}s</span></div>
+                          <div><span className="text-white/45 block">Error</span><span className={`font-mono font-bold tabular-nums ${Math.abs(uploadResult.overlay.et_error_s) < 0.15 ? 'text-signal-go' : 'text-signal-stage'}`}>{uploadResult.overlay.et_error_s > 0 ? '+' : ''}{uploadResult.overlay.et_error_s?.toFixed(3)}s</span></div>
+                          <div><span className="text-white/45 block">RMSE</span><span className="font-mono text-white tabular-nums">{uploadResult.overlay.v_rmse_kmh?.toFixed(1)} km/h</span></div>
                         </div>
                       </div>
                     )}
@@ -1951,9 +1942,9 @@ function SimulatorPageInner() {
                               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                               <XAxis dataKey="t" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} tickFormatter={v => `${v}s`} />
                               <YAxis tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} />
-                              <Tooltip contentStyle={{ background: '#0A0A0B', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 11 }} labelFormatter={v => `${v}s`} />
-                              <Line type="monotone" dataKey="real" stroke="#22C55E" strokeWidth={2} dot={false} name="Real (Dragy)" />
-                              <Line type="monotone" dataKey="sim" stroke="#FF5E1F" strokeWidth={1.5} strokeDasharray="4 2" dot={false} name="Sim" />
+                              <Tooltip contentStyle={{ background: '#10141B', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 11 }} labelFormatter={v => `${v}s`} />
+                              <Line type="monotone" dataKey="real" stroke="#34D97B" strokeWidth={2} dot={false} name="Real (Dragy)" />
+                              <Line type="monotone" dataKey="sim" stroke="#C9F231" strokeWidth={1.5} strokeDasharray="4 2" dot={false} name="Sim" />
                             </LineChart>
                           </ResponsiveContainer>
                         </div>
@@ -1965,9 +1956,9 @@ function SimulatorPageInner() {
                 {/* Dyno results */}
                 {uploadResult?.type === 'dyno' && (
                   <div className="space-y-3">
-                    <div className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
+                    <div className="bg-white/[0.02] rounded-lg p-4 border border-white/[0.06]">
                       <div className="flex justify-between items-center mb-3">
-                        <p className="label-mono text-brand-accent font-medium">Dyno Curve</p>
+                        <p className="label-mono text-white/60 font-medium">Dyno Curve</p>
                         <p className="text-[10px] text-white/35">{uploadResult.filename}</p>
                       </div>
                       <div className="grid grid-cols-2 gap-4 mb-3">
@@ -1975,10 +1966,10 @@ function SimulatorPageInner() {
                         <Metric label="Peak Torque" value={uploadResult.peak_torque_nm?.toFixed(1) ?? '—'} unit="Nm" large />
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="flex justify-between"><span className="text-white/45">RPM @ peak power</span><span className="text-white tabular-nums">{uploadResult.rpm_at_peak_power?.toFixed(0)}</span></div>
-                        <div className="flex justify-between"><span className="text-white/45">RPM @ peak torque</span><span className="text-white tabular-nums">{uploadResult.rpm_at_peak_torque?.toFixed(0)}</span></div>
-                        <div className="flex justify-between"><span className="text-white/45">SAE CF</span><span className="text-white tabular-nums">{uploadResult.correction_factor?.toFixed(4)}</span></div>
-                        <div className="flex justify-between"><span className="text-white/45">Data points</span><span className="text-white tabular-nums">{uploadResult.n_points}</span></div>
+                        <div className="flex justify-between"><span className="text-white/45">RPM @ peak power</span><span className="font-mono text-white tabular-nums">{uploadResult.rpm_at_peak_power?.toFixed(0)}</span></div>
+                        <div className="flex justify-between"><span className="text-white/45">RPM @ peak torque</span><span className="font-mono text-white tabular-nums">{uploadResult.rpm_at_peak_torque?.toFixed(0)}</span></div>
+                        <div className="flex justify-between"><span className="text-white/45">SAE CF</span><span className="font-mono text-white tabular-nums">{uploadResult.correction_factor?.toFixed(4)}</span></div>
+                        <div className="flex justify-between"><span className="text-white/45">Data points</span><span className="font-mono text-white tabular-nums">{uploadResult.n_points}</span></div>
                       </div>
                     </div>
 
@@ -1996,11 +1987,11 @@ function SimulatorPageInner() {
                             <LineChart data={curveData} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
                               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                               <XAxis dataKey="rpm" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} tickFormatter={v => `${(v/1000).toFixed(0)}k`} />
-                              <YAxis yAxisId="power" tick={{ fontSize: 9, fill: '#FF5E1F' }} orientation="left" />
-                              <YAxis yAxisId="torque" tick={{ fontSize: 9, fill: '#00FFB2' }} orientation="right" />
-                              <Tooltip contentStyle={{ background: '#0A0A0B', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 11 }} labelFormatter={v => `${v} RPM`} />
-                              <Line yAxisId="power" type="monotone" dataKey="power" stroke="#FF5E1F" strokeWidth={2} dot={false} name="Power (hp)" />
-                              <Line yAxisId="torque" type="monotone" dataKey="torque" stroke="#00FFB2" strokeWidth={1.5} dot={false} name="Torque (Nm)" />
+                              <YAxis yAxisId="power" tick={{ fontSize: 9, fill: '#C9F231' }} orientation="left" />
+                              <YAxis yAxisId="torque" tick={{ fontSize: 9, fill: '#6FE3B2' }} orientation="right" />
+                              <Tooltip contentStyle={{ background: '#10141B', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 11 }} labelFormatter={v => `${v} RPM`} />
+                              <Line yAxisId="power" type="monotone" dataKey="power" stroke="#C9F231" strokeWidth={2} dot={false} name="Power (hp)" />
+                              <Line yAxisId="torque" type="monotone" dataKey="torque" stroke="#6FE3B2" strokeWidth={1.5} dot={false} name="Torque (Nm)" />
                             </LineChart>
                           </ResponsiveContainer>
                         </div>
@@ -2039,9 +2030,9 @@ function SimulatorPageInner() {
                         ['Power Boost', powerBoost !== 0 ? `${powerBoost > 0 ? '+' : ''}${powerBoost}%` : 'Stock'],
                         ['Mass Change', massChange !== 0 ? `${massChange > 0 ? '+' : ''}${massChange} kg` : 'Stock'],
                       ].map(([k, v]) => (
-                        <div key={k} className="flex justify-between py-1 border-b border-white/[0.03]">
+                        <div key={k} className="flex justify-between py-1 border-b border-dashed border-white/10">
                           <span className="text-white/45">{k}</span>
-                          <span className="text-white font-medium tabular-nums">{v}</span>
+                          <span className="font-mono text-white font-medium tabular-nums">{v}</span>
                         </div>
                       ))}
                     </div>
@@ -2057,9 +2048,9 @@ function SimulatorPageInner() {
                         ['Front Tire', frontTire ? `${frontTire.manufacturer} ${frontTire.model}` : 'OEM'],
                         ['Rear Tire', rearTire ? `${rearTire.manufacturer} ${rearTire.model}` : 'OEM'],
                       ].map(([k, v]) => (
-                        <div key={k} className="flex justify-between py-1 border-b border-white/[0.03]">
+                        <div key={k} className="flex justify-between py-1 border-b border-dashed border-white/10">
                           <span className="text-white/45">{k}</span>
-                          <span className="text-white font-medium">{v}</span>
+                          <span className="font-mono text-white font-medium">{v}</span>
                         </div>
                       ))}
                     </div>

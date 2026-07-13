@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * BikePicker — the ONE bike-selection control (Cockpit v3).
+ * BikePicker — the ONE bike-selection control (STAGED v4).
  *
  * Replaces the byte-identical pickers that lived inside BuildOptimizer.js and
  * EcuAutotune.js. Same visual language, upgraded to a real combobox:
@@ -124,7 +124,7 @@ export default function BikePicker({ value, onSelect, label = 'Bike', popular = 
   return (
     <div className="relative" ref={ref}>
       <span className="label-mono mb-1.5 flex items-center gap-1.5">
-        <Wrench size={11} className="text-brand-orange" aria-hidden="true" /> {label}
+        <Wrench size={11} className="text-white/40" aria-hidden="true" /> {label}
       </span>
       <button
         type="button"
@@ -132,12 +132,12 @@ export default function BikePicker({ value, onSelect, label = 'Bike', popular = 
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={open ? LIST_ID : undefined}
-        className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-ink-1 px-3.5 py-2.5 text-left transition-colors hover:border-brand-orange/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/50"
+        className="input-base flex items-center justify-between gap-2 text-left transition-colors hover:border-white/20"
       >
         <span className={`truncate text-sm ${value ? 'text-white' : 'text-white/40'}`}>
           {display}
           {value?.displacement_cc != null && (
-            <span className="ml-2 font-mono text-[11px] text-white/40">
+            <span className="label-mono ml-2">
               {Math.round(value.displacement_cc)}cc
               {value.peak_power_hp != null && ` · ${Math.round(value.peak_power_hp)} hp`}
             </span>
@@ -157,7 +157,7 @@ export default function BikePicker({ value, onSelect, label = 'Bike', popular = 
               key={p.label}
               type="button"
               onClick={() => pickPopular(p.search)}
-              className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 font-mono text-[10px] text-white/60 transition-colors hover:border-brand-orange/50 hover:text-brand-orange"
+              className="chip transition-colors hover:border-accent/40 hover:text-white"
             >
               {p.label}
             </button>
@@ -172,9 +172,9 @@ export default function BikePicker({ value, onSelect, label = 'Bike', popular = 
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.15 }}
-            className="absolute z-30 mt-1.5 w-full overflow-hidden rounded-xl border border-white/10 bg-ink-2 shadow-2xl"
+            className="absolute z-30 mt-1.5 w-full overflow-hidden rounded-lg border border-white/10 bg-asphalt-1 shadow-2xl"
           >
-            <div className="border-b border-white/5 p-2">
+            <div className="border-b border-white/[0.08] p-2">
               <div className="relative">
                 <Search
                   size={14}
@@ -193,7 +193,7 @@ export default function BikePicker({ value, onSelect, label = 'Bike', popular = 
                   onChange={(e) => setQ(e.target.value)}
                   onKeyDown={onKeyDown}
                   placeholder="Search bikes…"
-                  className="w-full rounded-md border border-white/10 bg-ink-1 py-2 pl-8 pr-3 font-mono text-sm text-white placeholder:text-white/30 focus:border-brand-orange/60 focus:outline-none"
+                  className="input-base h-10 pl-8 pr-3 font-mono"
                 />
               </div>
             </div>
@@ -217,14 +217,16 @@ export default function BikePicker({ value, onSelect, label = 'Bike', popular = 
                     aria-selected={value?.id === b.id}
                     onClick={() => pick(b)}
                     onMouseEnter={() => setHi(i)}
-                    className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left transition-colors ${
-                      i === hi ? 'bg-brand-orange/10' : 'hover:bg-brand-orange/10'
+                    className={`flex w-full items-center justify-between gap-2 border-l-2 px-3 py-2 text-left transition-colors ${
+                      i === hi
+                        ? 'border-accent bg-white/[0.06]'
+                        : 'border-transparent hover:bg-white/[0.06]'
                     }`}
                   >
                     <span className="truncate text-sm text-white/90">
                       {b.manufacturer} {b.model}
                     </span>
-                    <span className="shrink-0 font-mono text-[10px] text-white/40">
+                    <span className="label-mono shrink-0">
                       {b.displacement_cc ? `${Math.round(b.displacement_cc)}cc` : ''}
                     </span>
                   </button>

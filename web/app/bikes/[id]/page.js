@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
-import { ChevronLeft, Gauge, Zap, Wind, CircleDot, AlertCircle, Wrench, SearchX } from 'lucide-react';
+import { ChevronLeft, Gauge, Zap, Wind, Cog, CircleDot, AlertCircle, Wrench, SearchX } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { API_URL } from '../../../lib/api';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 import CodeComment from '../../../components/CodeComment';
+import StageDots from '../../../components/StageDots';
 import { Reveal, Stagger, StaggerItem } from '../../../components/Reveal';
 import { ScoreboardCounter } from '../../../components/ScoreboardDigits';
 import { Skeleton, SkeletonCard } from '../../../components/Skeleton';
@@ -23,24 +23,21 @@ function formatCell(value, suffix = '', decimals = null) {
   return String(value);
 }
 
+/** Ruled mono key-value row — the timeslip voice (DESIGN.md §3). */
 function SpecRow({ label, value }) {
   return (
-    <div className="flex justify-between items-baseline gap-3 py-2 border-b border-white/5 last:border-0">
+    <div className="timeslip-row gap-3">
       <span className="label-mono">{label}</span>
-      <span className="text-sm font-mono text-white tabular-nums text-right">{value}</span>
+      <span className="text-white text-right">{value}</span>
     </div>
   );
 }
 
 function SpecBlock({ icon: Icon, title, children }) {
   return (
-    <div className="card relative h-full p-5">
-      <div
-        aria-hidden="true"
-        className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-orange/70 to-transparent"
-      />
-      <h3 className="flex items-center gap-2 font-display font-bold text-white text-base mb-3">
-        <Icon size={16} className="text-brand-orange" />
+    <div className="card h-full p-5">
+      <h3 className="flex items-center gap-2 font-display font-semibold uppercase text-white text-base mb-3">
+        <Icon size={16} className="text-white/40" aria-hidden="true" />
         {title}
       </h3>
       <div>{children}</div>
@@ -127,14 +124,14 @@ export default function BikeDetailPage() {
   const notFound = error?.status === 404;
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-asphalt-0 text-white">
       <SiteNav />
 
       <main id="main" className="pt-24 pb-16 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <Link
             href="/bikes"
-            className="inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.2em] text-white/55 hover:text-brand-orange transition-colors mb-6"
+            className="inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.2em] text-white/55 hover:text-white transition-colors mb-6"
           >
             <ChevronLeft size={16} /> All bikes
           </Link>
@@ -144,9 +141,12 @@ export default function BikeDetailPage() {
           {!loading && error && (
             notFound ? (
               <div className="card p-8 md:p-12 text-center">
-                <SearchX size={28} className="mx-auto text-brand-amber mb-4" />
-                <CodeComment center className="mb-3">err 404 · no spec sheet at this id</CodeComment>
-                <p className="font-display font-bold text-white text-2xl">
+                <SearchX size={28} className="mx-auto text-signal-stage mb-4" />
+                <div className="flex items-center justify-center gap-2.5 mb-3" aria-hidden="true">
+                  <StageDots foul />
+                  <span className="label-mono">err 404 · no spec sheet at this id</span>
+                </div>
+                <p className="font-display font-bold uppercase text-white text-2xl">
                   This bike isn&apos;t in the catalog
                 </p>
                 <p className="text-sm text-white/65 mt-3 max-w-md mx-auto">
@@ -164,8 +164,8 @@ export default function BikeDetailPage() {
               </div>
             ) : (
               <div className="card p-8 md:p-12 text-center">
-                <AlertCircle size={28} className="mx-auto text-brand-red mb-4" />
-                <p className="font-display font-bold text-white text-2xl">
+                <AlertCircle size={28} className="mx-auto text-signal-foul mb-4" />
+                <p className="font-display font-bold uppercase text-white text-2xl">
                   Couldn&apos;t load this bike
                 </p>
                 <p className="text-sm text-white/65 mt-3 max-w-md mx-auto">
@@ -181,40 +181,30 @@ export default function BikeDetailPage() {
           )}
 
           {!loading && !error && bike && (
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-            >
-              {/* Kicker — engine-log voice */}
+            <Reveal y={12} duration={0.4}>
+              {/* Kicker — plain label voice */}
               <CodeComment className="mb-4">
-                {`specs loaded · ${bike.tire_fitments?.length ?? 0} tire fitments`}
+                {`Spec sheet · ${bike.tire_fitments?.length ?? 0} tire fitments`}
               </CodeComment>
 
               {/* Header */}
               <div className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6">
                 <div>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-orange mb-2">
+                  <p className="label-mono mb-2">
                     {bike.manufacturer}
                   </p>
-                  <h1 className="font-display font-bold text-3xl sm:text-5xl text-white leading-tight">
+                  <h1 className="font-display font-bold uppercase text-4xl sm:text-6xl leading-[0.95] tracking-[-0.01em] text-white">
                     {bike.model}
                   </h1>
                   <div className="flex flex-wrap gap-2 mt-4">
                     {bike.year && (
-                      <span className="px-2 py-1 rounded border border-white/10 bg-white/5 font-mono text-xs text-white/70 tabular-nums">
-                        {bike.year}
-                      </span>
+                      <span className="chip tabular-nums">{bike.year}</span>
                     )}
                     {bike.category && (
-                      <span className="px-2 py-1 rounded border border-brand-orange/30 bg-brand-orange/5 font-mono text-xs uppercase tracking-[0.15em] text-brand-orange">
-                        {bike.category}
-                      </span>
+                      <span className="chip">{bike.category}</span>
                     )}
                     {bike.data_quality && (
-                      <span className="px-2 py-1 rounded border border-brand-accent/30 bg-brand-accent/5 font-mono text-xs uppercase tracking-[0.15em] text-brand-accent">
-                        Data · {bike.data_quality}
-                      </span>
+                      <span className="chip">Data · {bike.data_quality}</span>
                     )}
                   </div>
                 </div>
@@ -222,7 +212,7 @@ export default function BikeDetailPage() {
                 <TopCtaVariant bikeId={bike.id} />
               </div>
 
-              {/* Headline stats — power + displacement on the timing board */}
+              {/* Headline stats — mono tiles */}
               <Stagger className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" stagger={0.07}>
                 {[
                   {
@@ -252,10 +242,10 @@ export default function BikeDetailPage() {
                             </span>
                           </div>
                         ) : (
-                          <p className="font-display font-bold text-2xl md:text-3xl text-white/40 mt-2">—</p>
+                          <p className="font-mono font-bold text-2xl md:text-3xl text-white/40 mt-2">—</p>
                         )
                       ) : (
-                        <p className="font-display font-bold text-2xl md:text-3xl tabular-nums text-white mt-2">
+                        <p className="font-mono font-bold text-2xl md:text-3xl tabular-nums text-white mt-2">
                           {s.value}
                         </p>
                       )}
@@ -264,8 +254,8 @@ export default function BikeDetailPage() {
                 ))}
               </Stagger>
 
-              {/* Detail blocks */}
-              <Reveal y={20} className="grid md:grid-cols-2 gap-4 mb-8">
+              {/* Detail blocks — ruled mono spec tables */}
+              <Reveal y={20} className="grid md:grid-cols-2 gap-4 mb-4">
                 <SpecBlock icon={Zap} title="Engine">
                   <SpecRow label="Cylinders" value={formatCell(bike.cylinder_count)} />
                   <SpecRow label="Config" value={formatCell(bike.cylinder_config)} />
@@ -277,26 +267,31 @@ export default function BikeDetailPage() {
                   <SpecRow label="Redline" value={formatCell(bike.redline_rpm, ' rpm', 0)} />
                 </SpecBlock>
 
-                <SpecBlock icon={Wind} title="Aero & Chassis">
-                  <SpecRow label="Cd" value={formatCell(bike.cd, '', 2)} />
-                  <SpecRow label="Frontal Area" value={formatCell(bike.frontal_area_m2, ' m²', 2)} />
-                  <SpecRow label="Wheelbase" value={formatCell(bike.wheelbase_m, ' m', 3)} />
-                  <SpecRow
-                    label="CoG Height"
-                    value={
-                      bike.cog_height_mm != null
-                        ? `${Number(bike.cog_height_mm).toFixed(0)} mm`
-                        : formatCell(bike.cog_height_m, ' m', 2)
-                    }
-                  />
-                  <SpecRow
-                    label={bike.wet_mass_derived ? 'Wet Mass (est.)' : 'Wet Mass'}
-                    value={formatCell(bike.wet_mass_kg, ' kg', 0)}
-                  />
-                  <SpecRow label="Chain Pitch" value={formatCell(bike.chain_pitch)} />
-                  <SpecRow label="Front Sprocket" value={formatCell(bike.front_sprocket)} />
-                  <SpecRow label="Rear Sprocket" value={formatCell(bike.rear_sprocket)} />
-                </SpecBlock>
+                <div className="grid gap-4 content-start">
+                  <SpecBlock icon={Wind} title="Chassis & Aero">
+                    <SpecRow label="Cd" value={formatCell(bike.cd, '', 2)} />
+                    <SpecRow label="Frontal Area" value={formatCell(bike.frontal_area_m2, ' m²', 2)} />
+                    <SpecRow label="Wheelbase" value={formatCell(bike.wheelbase_m, ' m', 3)} />
+                    <SpecRow
+                      label="CoG Height"
+                      value={
+                        bike.cog_height_mm != null
+                          ? `${Number(bike.cog_height_mm).toFixed(0)} mm`
+                          : formatCell(bike.cog_height_m, ' m', 2)
+                      }
+                    />
+                    <SpecRow
+                      label={bike.wet_mass_derived ? 'Wet Mass (est.)' : 'Wet Mass'}
+                      value={formatCell(bike.wet_mass_kg, ' kg', 0)}
+                    />
+                  </SpecBlock>
+
+                  <SpecBlock icon={Cog} title="Drivetrain">
+                    <SpecRow label="Chain Pitch" value={formatCell(bike.chain_pitch)} />
+                    <SpecRow label="Front Sprocket" value={formatCell(bike.front_sprocket)} />
+                    <SpecRow label="Rear Sprocket" value={formatCell(bike.rear_sprocket)} />
+                  </SpecBlock>
+                </div>
               </Reveal>
 
               {/* Tire fitments */}
@@ -307,19 +302,19 @@ export default function BikeDetailPage() {
                       {bike.tire_fitments.map((f, i) => (
                         <div
                           key={i}
-                          className="grid grid-cols-[72px_1fr_auto] gap-3 items-baseline py-2 border-b border-white/5 last:border-0"
+                          className="grid grid-cols-[72px_1fr_auto] gap-3 items-baseline py-2 border-b border-dashed border-white/10 last:border-0"
                         >
-                          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-brand-orange">
+                          <span className="label-mono">
                             {f.position}
                           </span>
                           <div>
                             <p className="text-sm font-semibold text-white">{f.manufacturer} {f.model}</p>
-                            <p className="text-xs font-mono text-white/50">{f.size_designation} · {f.compound_type}</p>
+                            <p className="text-xs font-mono text-white/50 tabular-nums">{f.size_designation} · {f.compound_type}</p>
                           </div>
-                          <span className={`text-[10px] font-mono uppercase tracking-[0.15em] px-2 py-0.5 rounded border ${
+                          <span className={`chip ${
                             f.fitment_type === 'oem'
-                              ? 'text-brand-accent border-brand-accent/40 bg-brand-accent/5'
-                              : 'text-white/60 border-white/20 bg-white/5'
+                              ? 'border-white/25 text-white/85'
+                              : ''
                           }`}>
                             {f.fitment_type}
                           </span>
@@ -349,7 +344,7 @@ export default function BikeDetailPage() {
                   </Link>
                 </div>
               </Reveal>
-            </motion.div>
+            </Reveal>
           )}
         </div>
       </main>

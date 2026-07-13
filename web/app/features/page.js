@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import {
   Cpu, BarChart3, Upload, TrendingUp, Code2,
   ArrowRight, UserCircle2 } from 'lucide-react';
@@ -240,51 +239,41 @@ While MotoQuant is in open beta, everything in the Pro and Studio tiers — unli
   },
 ];
 
-/* ── Mock cockpit readout panel — replaces the old "Screenshot coming
-      soon" placeholder with a self-contained instrument view. Pure
-      JSX/CSS: terminal header + engine-log lines + one seven-segment
-      figure + static readout bars. Zero new deps, zero network cost.
+/* ── Mock instrument readout panel — replaces the old "Screenshot coming
+      soon" placeholder with a self-contained readout. Pure JSX/CSS:
+      timeslip surface + ruled log lines + one big mono figure + static
+      readout bars. Zero new deps, zero network cost.
       HONESTY: these are illustrative compositions (the headline figures
       are real — e.g. the K5 10.0334s reference ET — but the bars and log
       lines are staged), so the panel says so instead of claiming "live". ── */
 function FeatureReadout({ readout }) {
   return (
-    <div className="relative rounded-xl border border-brand-orange/15 bg-ink-1/60 overflow-hidden">
-      <span
-        aria-hidden="true"
-        className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/60 to-transparent"
-      />
-      {/* terminal header */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/5 bg-black/40">
-        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">
+    <div className="timeslip">
+      {/* slip header */}
+      <div className="flex items-center justify-between pb-2.5 border-b border-dashed border-white/10">
+        <span className="label-mono">
           {readout.title}
         </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-white/25" aria-hidden="true" />
-          <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/40">demo</span>
-        </span>
+        <span className="chip">demo</span>
       </div>
 
-      <div className="p-5">
+      <div className="pt-4">
         {/* engine-log lines */}
         <div className="space-y-1.5 font-mono text-[11px] leading-relaxed" aria-hidden="true">
           {readout.log.map((line, i) => (
             <div key={i} className="text-white/40">
-              <span className="text-brand-orange/60">//&nbsp;</span>
+              <span className="text-white/25">//&nbsp;</span>
               {line}
-              {i === readout.log.length - 1 && (
-                <span className="cc-cursor text-brand-orange/70">_</span>
-              )}
             </div>
           ))}
         </div>
 
-        {/* seven-segment figure */}
+        {/* headline mono figure */}
         <div className="mt-5 flex items-end gap-2">
           <ScoreboardDigits value={readout.value} h={34} label={`${readout.value} ${readout.unit}`} />
           <span className="font-mono text-xs text-white/40 mb-0.5">{readout.unit}</span>
         </div>
-        <div className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">
+        <div className="label-mono mt-1.5">
           {readout.valueLabel}
         </div>
 
@@ -297,7 +286,7 @@ function FeatureReadout({ readout }) {
               </span>
               <span className="flex-1 h-1 rounded-full bg-white/5 overflow-hidden">
                 <span
-                  className="block h-full rounded-full bg-gradient-to-r from-brand-orangeDeep to-brand-orange"
+                  className="block h-full rounded-full bg-white/30"
                   style={{ width: `${b.pct}%` }}
                 />
               </span>
@@ -319,21 +308,20 @@ function FeatureReadout({ readout }) {
 
 export default function FeaturesPage() {
   return (
-    <div className="min-h-screen bg-black text-white overflow-x-hidden">
+    <div className="min-h-screen bg-asphalt-0 text-white overflow-x-hidden">
       <SiteNav />
 
-      {/* Hero — unified cockpit voice */}
+      {/* Hero — v4 voice */}
       <PageHero
         kicker="15 submodels · capability index"
         badge="Full feature list"
-        title={<>Everything inside <span className="text-gradient-orange">MotoQuant Pro</span></>}
+        title={<>Everything inside <span className="text-gradient-volt">MotoQuant Pro</span></>}
         sub="Six capability areas — from first-principles physics through to an open REST API and your saved garage. Every layer is built on the same validated simulation engine."
         stats={[
           { value: 15, label: 'Sub-models' },
           { value: 593, label: 'Parts' },
           { value: 221, label: 'Benchmarks' },
         ]}
-        className="border-b border-brand-orange/10"
       >
         {/* Quick-jump nav */}
         <Reveal y={10} duration={0.5} delay={0.28}>
@@ -342,7 +330,7 @@ export default function FeaturesPage() {
               <a
                 key={f.id}
                 href={`#${f.id}`}
-                className="px-3 py-1.5 rounded-full border border-brand-orange/25 bg-brand-orange/5 text-xs font-mono text-brand-orange/80 hover:border-brand-orange hover:text-brand-orange transition-colors"
+                className="btn-ghost btn-sm"
               >
                 {f.label.split(' / ')[1]}
               </a>
@@ -360,31 +348,31 @@ export default function FeaturesPage() {
             <Reveal key={feature.id}>
               <section
                 id={feature.id}
-                className={`py-20 md:py-28 border-b border-brand-orange/10 ${idx === FEATURES.length - 1 ? 'border-none' : ''}`}
+                className={`py-16 md:py-24 border-b border-white/5 ${idx === FEATURES.length - 1 ? 'border-none' : ''}`}
               >
                 <div className={`grid md:grid-cols-2 gap-12 md:gap-16 items-start ${isEven ? '' : 'md:[&>*:first-child]:order-2'}`}>
                   {/* Text side */}
                   <div>
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="w-10 h-10 rounded-lg bg-brand-orange/10 border border-brand-orange/30 flex items-center justify-center">
-                        <Icon size={20} className="text-brand-orange" />
+                      <div className="w-10 h-10 rounded-lg bg-asphalt-2 border border-white/[0.08] flex items-center justify-center">
+                        <Icon size={20} className="text-white/70" />
                       </div>
-                      <span className="font-mono text-[10px] text-brand-orange/70 uppercase tracking-[0.25em]">{feature.label}</span>
+                      <span className="label-mono">{feature.label}</span>
                     </div>
-                    <h2 className="font-display font-bold text-3xl md:text-4xl mb-3 text-white leading-tight">
+                    <h2 className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-3xl md:text-4xl mb-3 text-white">
                       {feature.title}
                     </h2>
-                    <p className="text-brand-orange/80 font-mono text-sm mb-6 leading-relaxed">
+                    <p className="text-white/65 font-mono text-sm mb-6 leading-relaxed">
                       {feature.subtitle}
                     </p>
                     <div className="prose prose-sm prose-invert max-w-none">
                       {feature.body.split('\n\n').map((para, i) => (
-                        <p key={i} className="text-white/70 text-sm leading-relaxed mb-4">{para}</p>
+                        <p key={i} className="text-white/65 text-sm leading-relaxed mb-4">{para}</p>
                       ))}
                     </div>
                     <a
                       href={feature.docsLink}
-                      className="inline-flex items-center gap-1.5 mt-4 text-sm text-brand-accent font-mono hover:text-brand-orange transition-colors"
+                      className="inline-flex items-center gap-1.5 mt-4 text-sm text-accent font-mono hover:text-accent-bright transition-colors"
                     >
                       {feature.docsLabel} <ArrowRight size={14} />
                     </a>
@@ -392,20 +380,16 @@ export default function FeaturesPage() {
 
                   {/* Instrument side */}
                   <div className="space-y-4">
-                    {/* Stats row — cockpit cards */}
+                    {/* Stats row — mono readout cards */}
                     <div className="grid grid-cols-3 gap-3">
                       {feature.stats.map((s, i) => (
-                        <div key={i} className="relative overflow-hidden rounded-xl bg-ink-1/60 p-4 border border-brand-orange/20 text-center">
-                          <span
-                            aria-hidden="true"
-                            className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/50 to-transparent"
-                          />
-                          <div className="font-display font-bold text-xl text-brand-orange tabular-nums">{s.num}</div>
-                          <div className="font-mono text-[10px] text-white/45 uppercase tracking-[0.25em] mt-1">{s.label}</div>
+                        <div key={i} className="card p-4 text-center">
+                          <div className="font-mono font-bold text-xl text-white tabular-nums">{s.num}</div>
+                          <div className="label-mono mt-1">{s.label}</div>
                         </div>
                       ))}
                     </div>
-                    {/* Mock cockpit readout */}
+                    {/* Mock instrument readout */}
                     <FeatureReadout readout={feature.readout} />
                   </div>
                 </div>
@@ -416,7 +400,7 @@ export default function FeaturesPage() {
       </div>
 
       {/* Bottom CTA — EXP-008: variant-aware via ?variant=B */}
-      <section className="py-20 md:py-28 px-6 border-t border-brand-orange/10 bg-ink-1/30">
+      <section className="py-16 md:py-24 px-6 border-t border-white/5 bg-asphalt-1/30">
         <Reveal>
           <BottomCta />
         </Reveal>

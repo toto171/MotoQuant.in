@@ -56,18 +56,18 @@ export default function EndOfAboutCta() {
     <section
       data-exp="EXP-012"
       data-variant="B"
-      className="py-20 px-6 border-b border-brand-orange/10"
+      className="py-20 px-6 border-b border-white/5"
     >
       <div className="max-w-4xl mx-auto">
-        <div className="glass rounded-2xl border border-brand-orange/40 bg-brand-orange/[0.06] p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center gap-6">
+        <div className="card border-accent/30 p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center gap-6">
           <div className="flex-1">
-            <div className="text-xs font-mono text-brand-orange/80 uppercase tracking-widest mb-3">
+            <div className="label-mono mb-3">
               Next step
             </div>
-            <div className="font-display font-bold text-white text-2xl md:text-3xl mb-3">
+            <div className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-white text-2xl md:text-3xl mb-3">
               You&apos;ve read the pitch. Now run the numbers.
             </div>
-            <div className="text-white/70 text-sm md:text-base leading-relaxed">
+            <div className="text-white/65 text-sm md:text-base leading-relaxed">
               Same first-principles engine. Same ±0.006 s top-10 error. 15 seconds,
               no signup — pick your bike and see its quarter-mile ET.
             </div>
@@ -77,7 +77,7 @@ export default function EndOfAboutCta() {
             data-exp="EXP-012"
             data-variant="B"
             data-cta="about-end-of-page"
-            className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-brand-orange text-black font-display font-bold rounded-lg glow-orange text-base hover:bg-brand-orangeLight transition-colors shrink-0"
+            className="btn-primary shrink-0"
           >
             <Zap size={18} /> Run a sim
           </Link>

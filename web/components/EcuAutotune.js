@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * EcuAutotune — environment-aware ECU / setup recommendation tool (Cockpit v3).
+ * EcuAutotune — environment-aware ECU / setup recommendation tool (STAGED v4).
  *
  * Pick a bike, set a race location (via the shared LocationPicker, which
  * resolves text / GPS / a seeded venue into a full environment) and
@@ -16,18 +16,18 @@
  *   - fuel / timing guideline (trim % + timing° + rationale)
  *   - combined net ET improvement + overall rationale
  *
- * v3 changes: shared BikePicker (+ popular chips), two-column workbench
- * (controls left / results right, stacked below lg), useAsyncTask +
- * ActionButton run/stop pattern (real % in the button), validated manual
- * condition inputs (min/max/step + clamped before request — non-numeric
- * input never enters the body), .card/.label-mono/.input-base surfaces.
+ * FUNCTION IS FROZEN (v4 is a re-skin): shared BikePicker + LocationPicker,
+ * useAsyncTask + ActionButton run/stop pattern (real % in the button),
+ * validated manual condition inputs (min/max/step + clamped before request —
+ * non-numeric input never enters the body). v4 layout: input card stack
+ * left, results card stack right (lg:grid-cols-[0.9fr_1.1fr]).
  */
 
 import { useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
   Sliders, AlertCircle, MapPin, Thermometer, Wind,
-  Droplets, Mountain, Cog, Flag, CircleDot, Flame, Sparkles,
+  Droplets, Mountain, Cog, Flag, CircleDot, Flame,
 } from 'lucide-react';
 import { autotuneEcuJob } from '../lib/api';
 import useAsyncTask from '../lib/useAsyncTask';
@@ -41,13 +41,16 @@ const fmtNum = (n, d = 1) => (n == null ? '—' : Number(n).toFixed(d));
 const fmtDelta = (n, d = 3) =>
   n == null ? '—' : `${n > 0 ? '+' : ''}${Number(n).toFixed(d)}`;
 // Sign-aware tone for ET deltas. Convention unified July 6, 2026:
-// delta_et_s = tuned − stock ⇒ NEGATIVE = faster (time dropped) = good.
+// delta_et_s = tuned − stock ⇒ NEGATIVE = faster (time dropped) = good
+// = signal-go.
 const deltaTone = (n) =>
   n == null || Number(n) === 0
-    ? 'text-white/50'
+    ? 'font-mono tabular-nums text-white/50'
     : Number(n) < 0
-      ? 'text-brand-accent'
-      : 'text-brand-red';
+      ? 'delta-down'
+      : 'delta-up';
+const deltaChip = (n) =>
+  n == null || Number(n) === 0 ? 'chip' : Number(n) < 0 ? 'chip chip-go' : 'chip chip-foul';
 const fmtInt = (n) => (n == null ? '—' : Math.round(Number(n)).toLocaleString('en-US'));
 
 // One-tap starts for first-time users (shared BikePicker `popular` prop).
@@ -103,16 +106,12 @@ function RecCard({ icon: Icon, title, children, delta, badge }) {
     <div className="card p-5 md:p-6">
       <div className="flex items-center justify-between mb-3">
         <p className="label-mono flex items-center gap-1.5">
-          {Icon && <Icon size={13} className="text-brand-orange" aria-hidden="true" />} {title}
+          {Icon && <Icon size={13} className="text-white/40" aria-hidden="true" />} {title}
         </p>
         <div className="flex items-center gap-2">
-          {badge && (
-            <span className="px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/10 text-[9px] font-mono uppercase tracking-wide text-white/50">
-              {badge}
-            </span>
-          )}
+          {badge && <span className="chip">{badge}</span>}
           {delta != null && (
-            <span className={`text-xs font-mono tabular-nums ${deltaTone(delta)}`}>{fmtDelta(delta, 3)}s</span>
+            <span className={`text-xs ${deltaTone(delta)}`}>{fmtDelta(delta, 3)}s</span>
           )}
         </div>
       </div>
@@ -184,45 +183,42 @@ export default function EcuAutotune() {
   const combined = result?.combined;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-5 lg:items-start">
-      {/* ── Controls (left column) ───────────────────────────────────── */}
-      <div className="lg:col-span-2 card relative border-brand-orange/20 p-5 md:p-6">
-        {/* orange hairline — promoted controls panel */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-orange/70 to-transparent"
-        />
+    <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+      {/* ── Inputs (left column) ─────────────────────────────────────── */}
+      <div className="relative space-y-4">
         <AnimatePresence>
           {task.active && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute top-0 left-1 right-1 z-20"
+              className="absolute -top-1 left-1 right-1 z-20"
             >
               <SimProgress active edge progress={task.progress} />
             </motion.div>
           )}
         </AnimatePresence>
 
-        <div className="relative z-10 space-y-5">
+        <div className="card p-5 md:p-6">
           <BikePicker value={bike} onSelect={setBike} popular={POPULAR_BIKES} />
+        </div>
 
-          {/* Location */}
+        {/* Location + conditions */}
+        <div className="card p-5 md:p-6 space-y-5">
           <div>
             <span className="label-mono block mb-1.5">Race location</span>
             <button
               type="button"
               onClick={() => setLocationOpen((v) => !v)}
-              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-white/10 hover:border-brand-orange/40 bg-ink-1 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/50"
+              className="w-full flex items-center justify-between rounded-lg border border-white/10 hover:border-white/25 bg-asphalt-3 px-3.5 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
             >
               <div className="flex items-center gap-2 text-sm min-w-0 flex-1">
-                <MapPin size={14} className="text-brand-orange shrink-0" aria-hidden="true" />
+                <MapPin size={14} className="text-white/40 shrink-0" aria-hidden="true" />
                 {location ? (
                   <span className="font-mono text-white/80 truncate">
                     {location.venue_name || location.location_name || location._label}
                     {location.density_altitude_m != null && (
-                      <span className="ml-2 text-brand-accent text-xs tabular-nums">
+                      <span className="ml-2 text-accent text-xs tabular-nums">
                         DA {Math.round(location.density_altitude_m)} m
                       </span>
                     )}
@@ -267,7 +263,7 @@ export default function EcuAutotune() {
             <button
               type="button"
               onClick={() => setShowManual((v) => !v)}
-              className="label-mono hover:text-brand-orange transition-colors"
+              className="label-mono hover:text-white transition-colors"
             >
               {showManual ? '− Hide manual conditions' : '+ Set conditions manually'}
             </button>
@@ -305,11 +301,11 @@ export default function EcuAutotune() {
                             placeholder={f.ph}
                             aria-invalid={st.invalid || undefined}
                             className={`input-base font-mono ${
-                              flagged ? 'border-brand-amber/60 focus:border-brand-amber/70' : ''
+                              flagged ? 'border-signal-stage/60 focus:border-signal-stage/70' : ''
                             }`}
                           />
                           {flagged && (
-                            <p className="text-[10px] font-mono text-brand-amber mt-1">
+                            <p className="text-[10px] font-mono text-signal-stage mt-1">
                               {st.invalid ? `Enter a number (${f.hint})` : `Clamped to ${f.hint}`}
                             </p>
                           )}
@@ -338,41 +334,41 @@ export default function EcuAutotune() {
               value={riderKg}
               onChange={(e) => setRiderKg(Number(e.target.value))}
               aria-label="Rider weight in kilograms"
-              className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-brand-orange"
+              className="w-full h-1.5 bg-asphalt-4 rounded-full appearance-none cursor-pointer accent-accent"
             />
           </div>
-
-          {task.active && (
-            <SimProgress
-              active
-              progress={task.progress}
-              stage={task.stage}
-              label="Computing setup"
-            />
-          )}
-
-          <ActionButton
-            task={task}
-            onRun={run}
-            label={
-              <>
-                <Sliders size={16} aria-hidden="true" /> Get setup
-              </>
-            }
-            runningLabel="Computing setup"
-            disabled={!bike}
-            className="w-full"
-          />
-          {!bike && (
-            <p className="text-[11px] text-white/35 font-mono text-center">
-              Pick a bike to arm the setup sweep.
-            </p>
-          )}
         </div>
+
+        {task.active && (
+          <SimProgress
+            active
+            progress={task.progress}
+            stage={task.stage}
+            label="Computing setup"
+          />
+        )}
+
+        <ActionButton
+          task={task}
+          onRun={run}
+          label={
+            <>
+              <Sliders size={16} aria-hidden="true" /> Get setup
+            </>
+          }
+          runningLabel="Computing setup"
+          disabled={!bike}
+          className="w-full"
+        />
+        {!bike && (
+          <p className="text-[11px] text-white/40 font-mono text-center">
+            Pick a bike to arm the setup sweep.
+          </p>
+        )}
       </div>
 
       {/* ── Results (right column) ───────────────────────────────────── */}
-      <div className="lg:col-span-3 space-y-5">
+      <div className="space-y-4">
         {/* Error */}
         <AnimatePresence>
           {task.error && (
@@ -380,7 +376,7 @@ export default function EcuAutotune() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="card border-brand-red/30 bg-brand-red/10 p-3 text-brand-red text-sm flex items-center gap-2"
+              className="card border-signal-foul/30 bg-signal-foul/10 p-3 text-signal-foul text-sm flex items-center gap-2"
             >
               <AlertCircle size={16} aria-hidden="true" /> {task.error}
             </motion.div>
@@ -390,7 +386,7 @@ export default function EcuAutotune() {
         {/* Idle / running placeholder */}
         {!result && !task.error && (
           <div className="card p-8 md:p-10 text-center">
-            <Sliders size={22} className="mx-auto text-brand-orange/60 mb-3" aria-hidden="true" />
+            <Sliders size={22} className="mx-auto text-white/30 mb-3" aria-hidden="true" />
             <p className="label-mono mb-2">
               {task.active ? 'Setup sweep running' : 'Setup sheet standing by'}
             </p>
@@ -415,27 +411,44 @@ export default function EcuAutotune() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: reduce ? 0 : 12 }}
               transition={{ duration: 0.35 }}
-              className="space-y-5"
+              className="space-y-4"
             >
               {/* Header */}
               <div className="flex items-center justify-between flex-wrap gap-2">
-                <h3 className="font-display text-lg font-bold text-white">
+                <h3 className="font-display text-xl md:text-2xl font-semibold uppercase text-white leading-[0.95]">
                   {result.bike_name}
                   <span className="label-mono ml-2">setup</span>
                 </h3>
-                {result.scoring_method && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-accent/10 border border-brand-accent/30 text-[11px] font-mono text-brand-accent">
-                    {result.scoring_method}
-                  </span>
-                )}
+                {result.scoring_method && <span className="chip">{result.scoring_method}</span>}
               </div>
+
+              {/* Combined net result — the setup slip headline */}
+              {combined && (
+                <div className="card p-5 md:p-6">
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                    <div className="min-w-0">
+                      <p className="label-mono">Tuned ET</p>
+                      <p className="font-mono text-3xl md:text-4xl font-bold text-white tabular-nums mt-1.5">
+                        {fmtNum(combined.et_s, 3)}
+                        <span className="text-base text-white/40 ml-1">s</span>
+                      </p>
+                      <p className="text-xs font-mono text-white/40 tabular-nums mt-1.5">
+                        trap {fmtNum(combined.trap_kmh, 1)} km/h
+                      </p>
+                    </div>
+                    <span className={`${deltaChip(combined.delta_et_s)} h-7 px-2.5 text-xs shrink-0`}>
+                      {fmtDelta(combined.delta_et_s, 3)}s net
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* Environment summary */}
               {env && (
                 <div className="card p-5 md:p-6">
                   <div className="flex items-center justify-between mb-3">
                     <p className="label-mono flex items-center gap-1.5">
-                      <MapPin size={13} className="text-brand-orange" aria-hidden="true" />
+                      <MapPin size={13} className="text-white/40" aria-hidden="true" />
                       {env.location || 'Conditions'}
                     </p>
                     {result.environment_source && (
@@ -447,36 +460,14 @@ export default function EcuAutotune() {
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3">
                     <EnvStat icon={Thermometer} label="Temp" value={`${fmtNum(env.temperature_c, 1)}°C`} />
                     <EnvStat icon={Droplets} label="Humidity" value={`${fmtNum(env.humidity_pct, 0)}%`} />
-                    <EnvStat icon={Mountain} label="Density alt" value={`${fmtInt(env.density_altitude_ft)} ft`} accent="text-brand-orange" />
+                    <EnvStat icon={Mountain} label="Density alt" value={`${fmtInt(env.density_altitude_ft)} ft`} accent="text-accent" />
                     <EnvStat icon={Wind} label="Air density" value={`${fmtNum(env.air_density_kgm3, 3)}`} />
                     <EnvStat label="Pressure" value={`${fmtNum(env.pressure_hpa, 0)} hPa`} />
                     <EnvStat
                       label="Power corr"
                       value={`${fmtDelta(env.power_correction_pct, 1)}%`}
-                      accent={env.power_correction_pct < 0 ? 'text-brand-red' : 'text-brand-accent'}
+                      accent={env.power_correction_pct < 0 ? 'text-signal-foul' : 'text-signal-go'}
                     />
-                  </div>
-                </div>
-              )}
-
-              {/* Combined net result — 3-up tiles */}
-              {combined && (
-                <div className="grid grid-cols-3 gap-3 md:gap-4">
-                  <div className="card p-4 text-center">
-                    <p className="label-mono mb-1.5">Tuned ET</p>
-                    <p className="text-2xl sm:text-3xl font-mono font-bold text-brand-orange">
-                      {fmtNum(combined.et_s, 3)}<span className="text-base ml-1">s</span>
-                    </p>
-                  </div>
-                  <div className="card p-4 text-center">
-                    <p className="label-mono mb-1.5">Trap</p>
-                    <p className="text-2xl sm:text-3xl font-mono font-bold text-white">{fmtNum(combined.trap_kmh, 1)}</p>
-                    <p className="text-[11px] text-white/40 mt-1 font-mono">km/h</p>
-                  </div>
-                  <div className="card p-4 text-center">
-                    <p className="label-mono mb-1.5">Net gain</p>
-                    <p className={`text-2xl sm:text-3xl font-mono font-bold ${deltaTone(combined.delta_et_s)}`}>{fmtDelta(combined.delta_et_s, 3)}</p>
-                    <p className="text-[11px] text-white/40 mt-1 font-mono">seconds</p>
                   </div>
                 </div>
               )}
@@ -610,10 +601,8 @@ export default function EcuAutotune() {
 
               {/* Overall rationale */}
               {result.rationale && (
-                <div className="card border-brand-accent/25 bg-brand-accent/[0.06] p-4 md:p-5">
-                  <p className="label-mono flex items-center gap-1.5 !text-brand-accent mb-2">
-                    <Sparkles size={13} aria-hidden="true" /> Summary
-                  </p>
+                <div className="card p-4 md:p-5">
+                  <p className="label-mono mb-2">Summary</p>
                   <p className="text-sm text-white/80">{result.rationale}</p>
                 </div>
               )}

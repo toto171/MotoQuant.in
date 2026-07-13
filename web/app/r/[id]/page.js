@@ -3,14 +3,12 @@
 /**
  * /r/[id] — public shareable timeslip page for one saved sim run.
  *
- * Reads GET /api/runs/{id} (public, immutable). Renders the drag-strip
- * timeslip identity: seven-segment ET, split times, bike + venue, and a
- * "Simulate your own" CTA. WhatsApp-first share button for the Indian
- * market; OG metadata comes from the server layout.
- *
- * Cockpit v3 (July 2026): shared Skeleton loading state shaped like the
- * timeslip, `.card` surfaces, `.btn-primary` share button with the
- * copied-state flip, and a `.card` error state with Retry (brand-red).
+ * Reads GET /api/runs/{id} (public, immutable). THE showcase of the STAGED
+ * v4 identity: a full-page centered `.timeslip` — perforated edges, timing-
+ * assoc masthead with StageDots, giant mono ET, dashed split rows with the
+ * quarter-mile line highlighted, trap speed — then a WhatsApp-first share
+ * button (navigator.share → clipboard fallback) and a "Run your own" CTA.
+ * OG metadata comes from the server layout.
  */
 
 import { useEffect, useMemo, useState } from 'react';
@@ -19,19 +17,9 @@ import Link from 'next/link';
 import { Share2, Check, AlertCircle } from 'lucide-react';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
-import ScoreboardDigits from '../../../components/ScoreboardDigits';
-import CodeComment from '../../../components/CodeComment';
+import StageDots from '../../../components/StageDots';
 import { Skeleton } from '../../../components/Skeleton';
 import { API_URL } from '../../../lib/api';
-
-function Tile({ label, children }) {
-  return (
-    <div className="card px-4 py-3">
-      <p className="label-mono mb-1.5">{label}</p>
-      {children}
-    </div>
-  );
-}
 
 export default function RunPage() {
   const { id } = useParams();
@@ -87,103 +75,124 @@ export default function RunPage() {
   };
 
   return (
-    <main id="main" className="min-h-screen bg-black text-white">
+    <main id="main" className="min-h-screen bg-asphalt-0 text-white">
       <SiteNav />
-      <section className="pt-28 md:pt-32 pb-24 px-6">
-        <div className="max-w-2xl mx-auto">
-          <CodeComment>
-            {`// timeslip #${id || '—'} · motoquant timing assoc · official accuracy slip`}
-          </CodeComment>
-
+      <section className="pt-28 md:pt-32 pb-16 md:pb-24 px-6">
+        <div className="max-w-md mx-auto">
           {error && (
-            <div className="mt-8 card border-brand-red/30 px-5 py-4 flex flex-wrap items-center gap-3 text-sm text-brand-red/90">
-              <AlertCircle size={16} className="shrink-0 text-brand-red" aria-hidden="true" />
-              <span className="flex-1 min-w-[200px]">
-                {error === '404'
-                  ? 'This run does not exist (or was removed).'
-                  : `Could not load this run (${error}). The engine may be waking up — a cold start can take up to a minute.`}
-              </span>
-              {error !== '404' ? (
-                <button
-                  type="button"
-                  onClick={() => setAttempt((a) => a + 1)}
-                  className="btn-ghost btn-sm"
-                >
-                  Retry
-                </button>
-              ) : (
-                <Link href="/simulator" className="btn-ghost btn-sm">
-                  Run your own
-                </Link>
-              )}
+            <div className="card border-signal-foul/30 px-5 py-4">
+              <div className="flex flex-wrap items-center gap-3 text-sm text-signal-foul/90">
+                {error === '404' ? (
+                  <StageDots foul className="shrink-0" />
+                ) : (
+                  <AlertCircle size={16} className="shrink-0 text-signal-foul" aria-hidden="true" />
+                )}
+                <span className="flex-1 min-w-[200px]">
+                  {error === '404'
+                    ? 'This run does not exist (or was removed).'
+                    : `Could not load this run (${error}). The engine may be waking up — a cold start can take up to a minute.`}
+                </span>
+                {error !== '404' ? (
+                  <button
+                    type="button"
+                    onClick={() => setAttempt((a) => a + 1)}
+                    className="btn-ghost btn-sm"
+                  >
+                    Retry
+                  </button>
+                ) : (
+                  <Link href="/simulator" className="btn-ghost btn-sm">
+                    Run your own
+                  </Link>
+                )}
+              </div>
             </div>
           )}
 
           {!error && !run && (
-            <div className="mt-6 space-y-4" aria-busy="true" aria-label="Loading run">
-              <div className="card overflow-hidden">
-                <div className="px-6 py-4 border-b border-dashed border-white/15">
-                  <Skeleton className="h-7 w-2/3 mb-2" />
-                  <Skeleton className="h-3 w-1/3" />
+            <div className="space-y-4" aria-busy="true" aria-label="Loading run">
+              <div className="timeslip">
+                <div className="flex items-center justify-between mb-4">
+                  <Skeleton className="h-3 w-40" />
+                  <Skeleton className="h-3 w-10" />
                 </div>
-                <div className="px-6 py-8 flex flex-col items-center gap-3">
-                  <Skeleton className="h-3 w-32" />
+                <Skeleton className="h-8 w-2/3 mb-2" />
+                <Skeleton className="h-3 w-1/3 mb-6" />
+                <div className="flex flex-col items-center gap-3 py-6">
+                  <Skeleton className="h-3 w-24" />
                   <Skeleton className="h-14 w-52" />
-                  <Skeleton className="h-4 w-28" />
+                </div>
+                <div className="space-y-2.5 pt-2">
+                  {[...Array(5)].map((_, i) => (
+                    <Skeleton key={i} className="h-4 w-full" />
+                  ))}
                 </div>
               </div>
               <div className="flex flex-wrap gap-3">
-                <Skeleton className="h-11 w-44 rounded-xl" />
-                <Skeleton className="h-11 w-52 rounded-xl" />
+                <Skeleton className="h-11 w-44 rounded-lg" />
+                <Skeleton className="h-11 w-36 rounded-lg" />
               </div>
             </div>
           )}
 
           {run && (
             <>
-              <div className="mt-6 card overflow-hidden">
-                {/* masthead */}
-                <div className="border-b border-dashed border-white/15 px-6 py-4">
-                  <h1 className="font-display font-bold text-2xl md:text-3xl">
-                    {bikeName || 'Motorcycle'}
-                    {run.year ? <span className="text-white/40"> · {run.year}</span> : null}
-                  </h1>
-                  <p className="font-mono text-[11px] tracking-[0.2em] uppercase text-white/40 mt-1">
-                    {run.venue || 'venue —'}
-                    {run.created_at ? ` · ${String(run.created_at).slice(0, 10)}` : ''}
+              <article className="timeslip">
+                {/* masthead — the timing booth's letterhead */}
+                <div className="flex items-center justify-between gap-3">
+                  <p className="label-mono">Motoquant timing assoc</p>
+                  <StageDots animate className="shrink-0" />
+                </div>
+                <p className="label-mono mt-1 text-white/25">
+                  Official timeslip · run #{id || '—'}
+                </p>
+
+                <h1 className="mt-5 font-display font-bold uppercase text-2xl leading-[0.95] tracking-[-0.01em]">
+                  {bikeName || 'Motorcycle'}
+                  {run.year ? <span className="text-white/40"> · {run.year}</span> : null}
+                </h1>
+                <p className="label-mono mt-2">
+                  {run.venue || 'venue —'}
+                  {run.created_at ? ` · ${String(run.created_at).slice(0, 10)}` : ''}
+                </p>
+
+                <div className="centerline mt-5" aria-hidden="true" />
+
+                {/* headline ET */}
+                <div className="py-8 text-center">
+                  <p className="label-mono mb-3">Quarter-mile ET</p>
+                  <p className="font-mono font-bold tabular-nums text-6xl leading-none">
+                    {Number(run.et_quarter_s).toFixed(3)}
+                    <span className="text-2xl text-white/40">s</span>
                   </p>
                 </div>
-                {/* headline ET */}
-                <div className="px-6 py-8 text-center">
-                  <p className="font-mono text-[11px] tracking-[0.3em] uppercase text-white/40 mb-3">
-                    Quarter-mile ET
-                  </p>
-                  <div className="flex justify-center">
-                    <ScoreboardDigits
-                      value={Number(run.et_quarter_s).toFixed(3)}
-                      h={56}
-                    />
+
+                {/* split rows — the ruled slip body */}
+                <div>
+                  {splits.map((s) => (
+                    <div key={s.label} className="timeslip-row">
+                      <span className="text-white/40 uppercase tracking-[0.15em] text-xs">
+                        {s.label}
+                      </span>
+                      <span className="font-semibold">{Number(s.value).toFixed(3)}s</span>
+                    </div>
+                  ))}
+                  <div className="timeslip-row text-accent">
+                    <span className="uppercase tracking-[0.15em] text-xs">1/4 mile</span>
+                    <span className="font-bold">{Number(run.et_quarter_s).toFixed(3)}s</span>
                   </div>
                   {run.trap_speed_kmh ? (
-                    <p className="font-mono text-sm text-white/60 mt-4">
-                      trap {Number(run.trap_speed_kmh).toFixed(1)} km/h
-                    </p>
+                    <div className="timeslip-row">
+                      <span className="text-white/40 uppercase tracking-[0.15em] text-xs">
+                        Trap speed
+                      </span>
+                      <span className="font-semibold">
+                        {Number(run.trap_speed_kmh).toFixed(1)} km/h
+                      </span>
+                    </div>
                   ) : null}
                 </div>
-                {/* splits */}
-                {splits.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/5 border-t border-white/10">
-                    {splits.map((s) => (
-                      <div key={s.label} className="bg-black px-4 py-3 text-center">
-                        <p className="label-mono">{s.label}</p>
-                        <p className="font-mono font-bold tabular-nums mt-1">
-                          {Number(s.value).toFixed(3)}s
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              </article>
 
               <div className="mt-6 flex flex-wrap gap-3">
                 <button type="button" onClick={doShare} className="btn-primary">
@@ -195,19 +204,18 @@ export default function RunPage() {
                   {copied ? 'Link copied' : 'Share this timeslip'}
                 </button>
                 <Link href="/simulator" className="btn-ghost">
-                  Simulate your own build
+                  Run your own
                 </Link>
               </div>
 
-              <div className="mt-10">
-                <Tile label="How this number is made">
-                  <p className="text-sm text-white/60 leading-relaxed">
-                    Simulated by MotoQuant&apos;s RK4 physics engine — 15 coupled sub-models
-                    (engine, clutch, tire thermal, aero, weight transfer, wheelie control)
-                    integrated at 1&nbsp;ms steps under the venue&apos;s real air density.
-                    Validated against 221 published benchmarks.
-                  </p>
-                </Tile>
+              <div className="mt-10 card px-4 py-3">
+                <p className="label-mono mb-1.5">How this number is made</p>
+                <p className="text-sm text-white/65 leading-relaxed">
+                  Simulated by MotoQuant&apos;s RK4 physics engine — 15 coupled sub-models
+                  (engine, clutch, tire thermal, aero, weight transfer, wheelie control)
+                  integrated at 1&nbsp;ms steps under the venue&apos;s real air density.
+                  Validated against 221 published benchmarks.
+                </p>
               </div>
             </>
           )}

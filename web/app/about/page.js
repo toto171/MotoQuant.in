@@ -39,39 +39,36 @@ const ROADMAP = [
   },
 ];
 
-/* ── status-dot voice: brand-green = shipped · brand-amber pulse = in
-      progress · hollow white/30 = future. One language, no ad-hoc hues. ── */
+/* ── status voice: signal-go = shipped · signal-stage = in progress ·
+      hollow white/30 = future. Signal colors carry state only; no
+      infinite pulse (motion doctrine). ── */
 const STATUS_DOT = {
-  complete: 'bg-brand-green border-brand-green',
-  'in-progress': 'bg-brand-amber border-brand-amber animate-pulse',
+  complete: 'bg-signal-go border-signal-go',
+  'in-progress': 'bg-signal-stage border-signal-stage',
   planned: 'bg-transparent border-white/30',
 };
 const STATUS_PILL = {
-  complete: 'bg-brand-green/10 text-brand-green',
-  'in-progress': 'bg-brand-amber/15 text-brand-amber',
-  planned: 'bg-white/5 text-white/40',
+  complete: 'chip chip-go',
+  'in-progress': 'chip chip-stage',
+  planned: 'chip',
 };
 
 function FounderCard({ initial, name, role, email, children }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-brand-orange/20 bg-ink-1/60 p-8">
-      <span
-        aria-hidden="true"
-        className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/60 to-transparent"
-      />
+    <div className="card h-full p-6 md:p-8">
       <div className="flex items-start gap-5 mb-5">
-        <div className="w-14 h-14 rounded-full bg-brand-orange/20 border border-brand-orange/40 flex items-center justify-center shrink-0">
-          <span className="text-brand-orange font-display font-bold text-xl">{initial}</span>
+        <div className="w-14 h-14 rounded-full bg-asphalt-3 border border-white/10 flex items-center justify-center shrink-0">
+          <span className="text-white font-display font-bold text-xl">{initial}</span>
         </div>
         <div>
-          <div className="font-display font-bold text-xl text-white mb-0.5">{name}</div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45">{role}</div>
+          <div className="font-display font-semibold uppercase text-xl text-white mb-0.5">{name}</div>
+          <div className="label-mono">{role}</div>
         </div>
       </div>
-      <div className="space-y-3 text-white/70 text-sm leading-relaxed">{children}</div>
+      <div className="space-y-3 text-white/65 text-sm leading-relaxed">{children}</div>
       <a
         href={`mailto:${email}`}
-        className="inline-flex items-center gap-1.5 mt-5 text-sm text-brand-accent font-mono hover:text-brand-orange transition-colors"
+        className="inline-flex items-center gap-1.5 mt-5 text-sm text-white/60 font-mono hover:text-white transition-colors"
       >
         {email} <ChevronRight size={14} />
       </a>
@@ -81,30 +78,29 @@ function FounderCard({ initial, name, role, email, children }) {
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-ink-0 text-white overflow-x-hidden">
+    <div className="min-h-screen bg-asphalt-0 text-white overflow-x-hidden">
       {/* Nav */}
       <SiteNav />
 
-      {/* Hero — unified cockpit voice */}
+      {/* Hero — v4 voice */}
       <PageHero
         kicker="founders · india"
         badge="Our story"
-        title={<>Built in Pune.<br />For <span className="text-gradient-orange">the strip.</span></>}
+        title={<>Built in Pune.<br />For <span className="text-gradient-volt">the strip.</span></>}
         sub={
           <>
             MotoQuant started as a single question at a drag strip outside Pune: <em>&ldquo;How do I know which part will actually move my ET?&rdquo;</em> Every tuner, racer, and weekend warrior we talked to had the same problem. The answers were guesswork, YouTube comments, or ₹50,000 test runs. There had to be a better way.
           </>
         }
-        className="border-b border-brand-orange/10"
       />
 
       {/* Story */}
-      <section className="py-20 md:py-28 px-6 border-b border-brand-orange/10 max-w-6xl mx-auto">
+      <section className="py-16 md:py-24 px-6 border-b border-white/5 max-w-6xl mx-auto">
         <CodeComment className="mb-10">problem statement · loaded</CodeComment>
         <div className="grid md:grid-cols-2 gap-12 items-start">
           <Reveal>
-            <h2 className="font-display font-bold text-3xl mb-6 text-white">The Problem We Solve</h2>
-            <div className="space-y-4 text-white/70 text-sm leading-relaxed">
+            <h2 className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-3xl mb-6 text-white">The Problem We Solve</h2>
+            <div className="space-y-4 text-white/65 text-sm leading-relaxed">
               <p>
                 Indian drag racing has exploded over the last decade. Aamby Valley, MMRT, BIC, Kari, Hyderabad — the strips are full. But the tooling hasn&apos;t kept up. Racers still tune by feel and magazine estimates. Tuning shops quote improvements from memory. Parts distributors can&apos;t tell you how much faster that exhaust will actually make you.
               </p>
@@ -117,8 +113,8 @@ export default function AboutPage() {
             </div>
           </Reveal>
           <Reveal delay={0.08}>
-            <h2 className="font-display font-bold text-3xl mb-6 text-white">Why First Principles?</h2>
-            <div className="space-y-4 text-white/70 text-sm leading-relaxed">
+            <h2 className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-3xl mb-6 text-white">Why First Principles?</h2>
+            <div className="space-y-4 text-white/65 text-sm leading-relaxed">
               <p>
                 We could have built a regression. Train on a database of published ETs, predict new ones by interpolation. Fast to build, reasonable accuracy for common bikes.
               </p>
@@ -129,7 +125,7 @@ export default function AboutPage() {
                 First-principles physics can. Every sub-model — Pacejka tire, Willans friction engine, RK4 integrator — produces physically interpretable outputs. When the model is wrong, we can find and fix the cause. When you add a part, the physics of that part propagates through the whole system.
               </p>
               <p>
-                Top-10 mean error after our July 2026 calibration pass: <strong className="text-brand-orange">±0.006s</strong>. Reference baselines within 0.001s of targets. That&apos;s what first principles buys you.
+                Top-10 mean error after our July 2026 calibration pass: <strong className="font-mono tabular-nums text-accent">±0.006s</strong>. Reference baselines within 0.001s of targets. That&apos;s what first principles buys you.
               </p>
             </div>
           </Reveal>
@@ -137,15 +133,15 @@ export default function AboutPage() {
       </section>
 
       {/* Founders */}
-      <section className="py-20 md:py-28 px-6 border-b border-brand-orange/10 bg-ink-1/30">
+      <section className="py-16 md:py-24 px-6 border-b border-white/5 bg-asphalt-1/30">
         <div className="max-w-6xl mx-auto">
           <CodeComment className="mb-10">crew manifest · three entries</CodeComment>
-          <h2 className="font-display font-bold text-3xl md:text-4xl mb-3 text-white">Founders</h2>
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-10">
+          <h2 className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-3xl md:text-4xl mb-3 text-white">Founders</h2>
+          <p className="label-mono mb-10">
             Engineers first. Racers second. Shipping a tool we&apos;d use ourselves.
           </p>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             <Reveal>
               <FounderCard initial="A" name="Arya Desai" role="Co-founder & Lead Engineer · Pune, India" email="motoquant@gmail.com">
                 <p>
@@ -176,7 +172,7 @@ export default function AboutPage() {
                 <p>
                   Communication and market knowledge are the levers he owns, plus real market experience — turning a physics engine into something racers and tuning shops actually hear about, and want to implement.
                 </p>
-                <p className="border-l-2 border-brand-orange/30 pl-4 italic text-white/60">
+                <p className="border-l-2 border-white/15 pl-4 italic text-white/60">
                   &ldquo;In my third year, a major bike accident paused my degree. While recovering, I refused to sit idle — I built a social-media audience and finished multiple industry-standard certifications. I don&apos;t just study engineering; I build, optimize, and execute under pressure.&rdquo;
                 </p>
               </FounderCard>
@@ -186,15 +182,15 @@ export default function AboutPage() {
       </section>
 
       {/* Roadmap */}
-      <section className="py-20 md:py-28 px-6 border-b border-brand-orange/10">
+      <section className="py-16 md:py-24 px-6 border-b border-white/5">
         <div className="max-w-4xl mx-auto">
           <CodeComment className="mb-10">mission plan · phase 6 in progress</CodeComment>
-          <h2 className="font-display font-bold text-3xl md:text-4xl mb-3 text-white">Where We&apos;re Going</h2>
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-12">
+          <h2 className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-3xl md:text-4xl mb-3 text-white">Where We&apos;re Going</h2>
+          <p className="label-mono mb-12">
             Roadmap — no specific dates, shipping when it&apos;s right
           </p>
 
-          <div className="relative pl-6 border-l border-brand-orange/20 space-y-10">
+          <div className="relative pl-6 border-l border-white/10 space-y-10">
             {ROADMAP.map((item, i) => (
               <Reveal key={i} y={14} duration={0.45} delay={i * 0.08} className="relative">
                 {/* Dot */}
@@ -203,13 +199,13 @@ export default function AboutPage() {
                 />
 
                 <div className="flex items-center gap-3 mb-1.5">
-                  <span className="font-mono text-[10px] text-white/45 uppercase tracking-[0.25em]">{item.phase}</span>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wide ${STATUS_PILL[item.status] ?? STATUS_PILL.planned}`}>
+                  <span className="label-mono">{item.phase}</span>
+                  <span className={STATUS_PILL[item.status] ?? STATUS_PILL.planned}>
                     {item.status === 'complete' ? 'Done' : item.status === 'in-progress' ? 'In progress' : 'Planned'}
                   </span>
                 </div>
-                <h3 className="font-display font-bold text-lg text-white mb-1">{item.label}</h3>
-                <p className="text-white/60 text-sm leading-relaxed">{item.desc}</p>
+                <h3 className="font-display font-semibold uppercase text-lg text-white mb-1">{item.label}</h3>
+                <p className="text-white/65 text-sm leading-relaxed">{item.desc}</p>
               </Reveal>
             ))}
           </div>
@@ -217,29 +213,29 @@ export default function AboutPage() {
       </section>
 
       {/* Contact */}
-      <section className="py-20 md:py-28 px-6 border-b border-brand-orange/10 bg-ink-1/30">
+      <section className="py-16 md:py-24 px-6 border-b border-white/5 bg-asphalt-1/30">
         <div className="max-w-4xl mx-auto">
           <CodeComment className="mb-10">comms channel · open</CodeComment>
           <div className="grid md:grid-cols-2 gap-12">
             <div>
-              <h2 className="font-display font-bold text-3xl mb-4 text-white">Get in Touch</h2>
-              <p className="text-white/60 text-sm leading-relaxed mb-6">
+              <h2 className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-3xl mb-4 text-white">Get in Touch</h2>
+              <p className="text-white/65 text-sm leading-relaxed mb-6">
                 Whether you&apos;re a tuning shop interested in the Pro plan, a racer who found a bug, or just want to talk drag racing — reach out.
               </p>
               <div className="space-y-3">
                 <div>
-                  <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1">Email</div>
-                  <a href="mailto:motoquant@gmail.com" className="font-mono text-brand-accent hover:text-brand-orange transition-colors text-sm">
+                  <div className="label-mono mb-1">Email</div>
+                  <a href="mailto:motoquant@gmail.com" className="font-mono text-white/80 hover:text-white transition-colors text-sm">
                     motoquant@gmail.com
                   </a>
                 </div>
                 <div>
-                  <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1">Location</div>
+                  <div className="label-mono mb-1">Location</div>
                   <span className="font-mono text-white/70 text-sm">Pune, Maharashtra, India</span>
                 </div>
                 <div>
-                  <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/45 mb-1">Pro licensing</div>
-                  <a href="mailto:motoquant@gmail.com?subject=MotoQuant%20Pro%20Licensing" className="font-mono text-brand-accent hover:text-brand-orange transition-colors text-sm">
+                  <div className="label-mono mb-1">Pro licensing</div>
+                  <a href="mailto:motoquant@gmail.com?subject=MotoQuant%20Pro%20Licensing" className="font-mono text-white/80 hover:text-white transition-colors text-sm">
                     Request a quote →
                   </a>
                 </div>
@@ -248,16 +244,12 @@ export default function AboutPage() {
 
             {/* Honest direct-contact card — no fake form, no fake "sent"
                 state. One mailto action; email is the real channel. */}
-            <div className="relative overflow-hidden card p-6 md:p-8">
-              <span
-                aria-hidden="true"
-                className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-orange/60 to-transparent"
-              />
+            <div className="card p-6 md:p-8">
               <div className="label-mono mb-3">Direct line</div>
-              <h3 className="font-display font-bold text-xl text-white mb-3">
+              <h3 className="font-display font-semibold uppercase text-xl text-white mb-3">
                 Email us — a founder replies
               </h3>
-              <p className="text-white/60 text-sm leading-relaxed mb-6">
+              <p className="text-white/65 text-sm leading-relaxed mb-6">
                 No contact form, no ticket queue. Mail lands straight in the
                 founders&apos; inbox and we reply within 48 hours — usually much
                 faster. Bug reports with a share link or a Dragy CSV attached
@@ -269,7 +261,7 @@ export default function AboutPage() {
               >
                 <Mail size={14} /> Email motoquant@gmail.com
               </a>
-              <p className="mt-4 text-center font-mono text-[10px] uppercase tracking-[0.25em] text-white/35">
+              <p className="label-mono mt-4 text-center">
                 replies within 48h · IST working hours
               </p>
             </div>

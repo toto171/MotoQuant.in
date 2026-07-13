@@ -1,12 +1,15 @@
 'use client';
 
 /**
- * SiteFooter — unified footer with secondary nav, contact, legal,
- * and the brand wordmark. Replaces every per-page <footer> across
- * the marketing site.
+ * SiteFooter — quiet 4-column footer on asphalt (STAGED v4 skin).
+ * Secondary nav, contact, legal, the brand wordmark and the pinned
+ * reference-baselines line. Replaces every per-page <footer> across
+ * the marketing site. No glows — the footer is the quietest surface
+ * on the slip.
  */
 
 import Link from 'next/link';
+import StageDots from './StageDots';
 
 const COLS = [
   {
@@ -21,7 +24,7 @@ const COLS = [
     ],
   },
   {
-    title: 'Documentation',
+    title: 'Data',
     links: [
       { href: '/docs/getting-started', label: 'Getting started' },
       { href: '/docs/physics',         label: 'Physics docs' },
@@ -48,33 +51,30 @@ const COLS = [
 
 export default function SiteFooter() {
   return (
-    <footer className="relative border-t border-brand-orange/15 bg-black mt-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-16 pb-10">
+    <footer className="relative border-t border-white/[0.08] bg-asphalt-0 mt-24">
+      <div className="max-w-6xl mx-auto px-6 pt-16 pb-10">
         <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(4,1fr)]">
           {/* Brand block */}
           <div>
-            <Link href="/" className="inline-flex items-center gap-2 group mb-4">
-              <span className="text-2xl font-display font-bold tracking-tight">
-                <span className="text-gradient-orange">Moto</span>
-                <span className="text-white">Quant</span>
-              </span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold text-brand-accent border border-brand-accent/30 bg-brand-accent/5 tracking-widest">
-                PRO
+            <Link href="/" className="inline-flex items-center gap-2.5 group mb-4">
+              <StageDots size={5} />
+              <span className="font-display font-bold uppercase text-xl tracking-[0.04em] text-white">
+                MotoQuant
               </span>
             </Link>
-            <p className="text-sm text-white/55 leading-relaxed max-w-sm">
+            <p className="text-sm text-white/50 leading-relaxed max-w-sm">
               First-principles physics for motorcycle drag racing.
               Built in Pune for the Indian racing community —
               made for the strip and the salt.
             </p>
-            <p className="mt-4 text-[10px] font-mono uppercase tracking-widest text-white/35">
-              motoquant.in &middot; Made in India
+            <p className="mt-4 label-mono">
+              motoquant.in &middot; Built in India &middot; Free during beta
             </p>
           </div>
 
           {COLS.map(col => (
             <div key={col.title}>
-              <div className="text-[10px] font-mono uppercase tracking-widest text-brand-orange mb-3">
+              <div className="label-mono mb-3">
                 {col.title}
               </div>
               <ul className="space-y-2">
@@ -93,7 +93,7 @@ export default function SiteFooter() {
           ))}
         </div>
 
-        <div className="mt-14 pt-8 border-t border-white/5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-xs font-mono text-white/40">
+        <div className="mt-14 pt-8 border-t border-white/[0.08] flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-xs font-mono tabular-nums text-white/40">
           <p>
             &copy; {new Date().getFullYear()} MotoQuant Pro. Not affiliated with
             any motorcycle manufacturer.
@@ -105,7 +105,7 @@ export default function SiteFooter() {
             <span className="text-white/20">·</span>
             <span>Hayabusa · 10.4712s</span>
             <span className="text-white/20">·</span>
-            <span className="text-brand-accent">±0.0000 since Apr 30, 2026</span>
+            <span>±0.0000 since Apr 30, 2026</span>
           </p>
         </div>
       </div>

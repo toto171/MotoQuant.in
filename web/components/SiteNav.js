@@ -2,12 +2,12 @@
 
 /**
  * SiteNav — single source of truth for the top navigation across every
- * surface (Cockpit v3: including /simulator, whose bespoke nav is retired).
- * Fixed top, blurs on scroll, exposes the mobile drawer.
+ * surface (STAGED v4 skin). Fixed top, blurs over the page, exposes the
+ * mobile drawer and mounts CommandPalette + MobileToolBar once sitewide.
  *
- * Structure (July 2026 redesign): the five product tools stay first-class
- * links; the five content pages fold into a Resources dropdown so the bar
- * reads as product-first instead of a ten-link strip.
+ * Structure (July 2026): the five product tools stay first-class links;
+ * the five content pages fold into a Resources dropdown so the bar reads
+ * as product-first instead of a ten-link strip.
  */
 
 import Link from 'next/link';
@@ -18,6 +18,7 @@ import { ChevronDown, Menu, Search, X } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import CommandPalette from './CommandPalette';
 import MobileToolBar from './MobileToolBar';
+import StageDots from './StageDots';
 
 const TOOL_LINKS = [
   { href: '/simulator',   label: 'Simulator' },
@@ -97,29 +98,37 @@ export default function SiteNav() {
 
   const resourcesActive = RESOURCE_LINKS.some((l) => isActive(pathname, l));
 
+  // Active link = white with a 2px volt underline; inactive = quiet white.
   const linkCls = (active) =>
     [
       'transition-colors duration-200',
-      active ? 'text-brand-orange' : 'text-white/60 hover:text-white',
+      active
+        ? 'text-white underline decoration-accent decoration-2 underline-offset-[10px]'
+        : 'text-white/60 hover:text-white',
+    ].join(' ');
+
+  const drawerLinkCls = (active) =>
+    [
+      'px-4 py-3 rounded-md border-l-2 transition-colors',
+      active
+        ? 'border-accent bg-white/[0.06] text-white'
+        : 'border-transparent text-white/70 hover:text-white hover:bg-white/5',
     ].join(' ');
 
   return (
     <header
       className={[
-        'fixed top-0 inset-x-0 z-50 h-16 border-b transition-colors duration-300',
+        'fixed top-0 inset-x-0 z-50 h-16 border-b border-white/[0.08] transition-colors duration-300',
         scrolled
-          ? 'bg-black/80 backdrop-blur-xl border-brand-orange/15'
-          : 'bg-black/40 backdrop-blur-md border-white/5',
+          ? 'bg-asphalt-0/90 backdrop-blur-xl'
+          : 'bg-asphalt-0/85 backdrop-blur',
       ].join(' ')}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group">
-          <span className="text-xl font-display font-bold tracking-tight">
-            <span className="text-gradient-orange">Moto</span>
-            <span className="text-white">Quant</span>
-          </span>
-          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold text-brand-accent border border-brand-accent/30 bg-brand-accent/5 tracking-widest">
-            PRO
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <StageDots size={5} />
+          <span className="font-display font-bold uppercase text-xl tracking-[0.04em] text-white">
+            MotoQuant
           </span>
         </Link>
 
@@ -148,7 +157,7 @@ export default function SiteNav() {
               className={[
                 'flex items-center gap-1 transition-colors duration-200',
                 resourcesActive || resOpen
-                  ? 'text-brand-orange'
+                  ? 'text-white'
                   : 'text-white/60 hover:text-white',
               ].join(' ')}
             >
@@ -167,7 +176,7 @@ export default function SiteNav() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 top-full mt-3 w-44 overflow-hidden rounded-xl border border-white/10 bg-ink-1/95 backdrop-blur-xl shadow-2xl"
+                  className="absolute right-0 top-full mt-3 w-44 overflow-hidden rounded-xl border border-white/10 bg-asphalt-1/95 backdrop-blur-xl shadow-2xl"
                 >
                   {RESOURCE_LINKS.map((link) => (
                     <Link
@@ -177,7 +186,7 @@ export default function SiteNav() {
                       className={[
                         'block px-4 py-2.5 text-sm transition-colors',
                         isActive(pathname, link)
-                          ? 'text-brand-orange bg-brand-orange/10'
+                          ? 'text-white bg-white/[0.06]'
                           : 'text-white/70 hover:text-white hover:bg-white/5',
                       ].join(' ')}
                     >
@@ -196,7 +205,7 @@ export default function SiteNav() {
             onClick={() => setPaletteOpen(true)}
             aria-label="Search — Ctrl+K"
             title="Search bikes, pages, actions (Ctrl+K)"
-            className="flex items-center gap-2 rounded-md border border-white/10 px-2.5 py-2 text-white/60 transition-colors hover:border-brand-orange/50 hover:text-white"
+            className="flex items-center gap-2 rounded-md border border-white/10 px-2.5 py-2 text-white/60 transition-colors hover:border-white/30 hover:text-white"
           >
             <Search size={15} aria-hidden="true" />
             <kbd className="label-mono hidden md:max-lg:inline xl:inline">⌘K</kbd>
@@ -205,16 +214,16 @@ export default function SiteNav() {
             <Link
               href="/account"
               title="Your account"
-              className="hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-white/10 hover:border-brand-orange/50 transition-colors"
+              className="hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-white/10 hover:border-white/30 transition-colors"
             >
-              <span className="w-5 h-5 rounded-full bg-brand-orange/20 text-brand-orange text-[10px] font-bold flex items-center justify-center uppercase">
+              <span className="w-5 h-5 rounded-full bg-white/10 text-white/80 text-[10px] font-bold flex items-center justify-center uppercase">
                 {user?.email?.[0] ?? 'U'}
               </span>
               <span className="text-xs font-mono text-white/70 max-w-[9rem] truncate">
                 {user?.email?.split('@')[0]}
               </span>
               {user?.tier && user.tier !== 'free' && (
-                <span className="text-[9px] font-mono uppercase tracking-wider text-brand-accent">
+                <span className="text-[9px] font-mono uppercase tracking-wider text-mint">
                   {user.tier}
                 </span>
               )}
@@ -227,13 +236,14 @@ export default function SiteNav() {
               Sign in
             </Link>
           )}
-          <Link
-            href="/simulator"
-            className="px-3 sm:px-4 py-2 bg-brand-orange hover:bg-brand-orangeLight text-black font-display font-bold rounded-md text-xs sm:text-sm transition-colors whitespace-nowrap shadow-orange-soft"
-          >
-            {/* Full label only where it fits: below sm and in the tight
-                lg..xl band the CTA reads "Launch" so the cluster never clips. */}
-            Launch <span className="hidden sm:max-lg:inline xl:inline">Simulator</span>
+          <Link href="/simulator" className="btn-primary btn-sm whitespace-nowrap">
+            {/* Full label only where it fits: below lg and at xl+ the CTA reads
+                "Run a sim"; in the tight lg..xl band it shortens to "Run" so
+                the cluster never clips. */}
+            <span>
+              Run
+              <span className="hidden sm:max-lg:inline xl:inline"> a sim</span>
+            </span>
           </Link>
           <button
             type="button"
@@ -241,7 +251,7 @@ export default function SiteNav() {
             aria-label={open ? 'Close menu' : 'Open menu'}
             aria-expanded={open}
             aria-controls="site-nav-mobile"
-            className="lg:hidden p-2 rounded-md border border-white/10 text-white/80 hover:text-white hover:border-brand-orange/50 transition-colors"
+            className="lg:hidden p-2 rounded-md border border-white/10 text-white/80 hover:text-white hover:border-white/30 transition-colors"
           >
             {open ? <X size={18} /> : <Menu size={18} />}
           </button>
@@ -256,54 +266,35 @@ export default function SiteNav() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.18 }}
-            className="lg:hidden absolute top-16 left-0 right-0 bg-black/95 backdrop-blur-xl border-b border-brand-orange/20 max-h-[calc(100vh-4rem)] overflow-y-auto"
+            className="lg:hidden absolute top-16 left-0 right-0 bg-asphalt-0/95 backdrop-blur-xl border-b border-white/[0.08] max-h-[calc(100vh-4rem)] overflow-y-auto"
           >
             <nav className="max-w-6xl mx-auto px-4 py-4 grid gap-1 font-mono text-sm">
               <span className="label-mono px-4 pt-1 pb-1.5">Tools</span>
-              {TOOL_LINKS.map((link) => {
-                const active = isActive(pathname, link);
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={[
-                      'px-4 py-3 rounded-md transition-colors',
-                      active
-                        ? 'text-brand-orange bg-brand-orange/10'
-                        : 'text-white/70 hover:text-white hover:bg-white/5',
-                    ].join(' ')}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
+              {TOOL_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={drawerLinkCls(isActive(pathname, link))}
+                >
+                  {link.label}
+                </Link>
+              ))}
               <span className="label-mono px-4 pt-3 pb-1.5">Resources</span>
-              {[...RESOURCE_LINKS, PRICING_LINK].map((link) => {
-                const active = isActive(pathname, link);
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={[
-                      'px-4 py-3 rounded-md transition-colors',
-                      active
-                        ? 'text-brand-orange bg-brand-orange/10'
-                        : 'text-white/70 hover:text-white hover:bg-white/5',
-                    ].join(' ')}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
+              {[...RESOURCE_LINKS, PRICING_LINK].map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={drawerLinkCls(isActive(pathname, link))}
+                >
+                  {link.label}
+                </Link>
+              ))}
               <div className="my-1 border-t border-white/10" />
               <Link
                 href={isAuthenticated ? '/account' : '/login'}
-                className={[
-                  'px-4 py-3 rounded-md transition-colors',
+                className={drawerLinkCls(
                   isActive(pathname, { href: isAuthenticated ? '/account' : '/login' })
-                    ? 'text-brand-orange bg-brand-orange/10'
-                    : 'text-white/70 hover:text-white hover:bg-white/5',
-                ].join(' ')}
+                )}
               >
                 {isAuthenticated
                   ? `Account — ${user?.email?.split('@')[0] ?? ''}`

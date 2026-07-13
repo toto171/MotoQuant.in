@@ -57,9 +57,9 @@ function Card({ variant }) {
       data-exp="EXP-013"
       data-variant={variant}
       data-cta="whitepaper-terminal"
-      className="group rounded-xl border border-brand-orange/40 hover:border-brand-orange bg-brand-orange/[0.05] p-5 transition-colors"
+      className="group rounded-xl border border-accent/40 hover:border-accent bg-asphalt-2/80 p-5 transition-colors"
     >
-      <div className="font-display font-bold text-brand-orange">{c.title}</div>
+      <div className="font-display font-semibold uppercase text-accent">{c.title}</div>
       <div className="text-sm text-white/65 mt-1">{c.subhead}</div>
     </Link>
   );

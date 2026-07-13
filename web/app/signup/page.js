@@ -4,8 +4,8 @@
  * MotoQuant Pro — Signup Page
  * ============================
  * Signup = login (register tab opens via ?signup=1).
- * Redirect stub only — the interim frame renders the engine-log voice
- * via the shared CodeComment primitive (Cockpit v3).
+ * Redirect stub only — the interim frame renders the STAGED v4 label
+ * voice via the shared CodeComment primitive (StageDots + mono label).
  */
 
 import { useEffect } from "react";
@@ -21,7 +21,7 @@ export default function SignupPage() {
   }, [router]);
 
   return (
-    <main id="main" className="flex min-h-screen items-center justify-center bg-black">
+    <main id="main" className="flex min-h-screen items-center justify-center bg-asphalt-0">
       <CodeComment center>redirecting to /login…</CodeComment>
     </main>
   );

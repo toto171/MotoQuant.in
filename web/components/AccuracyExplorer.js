@@ -1,7 +1,8 @@
 'use client';
 
 /**
- * AccuracyExplorer — the flagship "real vs simulated" accuracy surface.
+ * AccuracyExplorer — the flagship "real vs simulated" accuracy surface
+ * (STAGED v4 skin — see web/DESIGN.md).
  *
  * Everything is computed from web/app/validation/accuracy_data.json (passed
  * in as `data`) so the page can never drift from the sweep. Five panels:
@@ -10,32 +11,39 @@
  *      a dashed y=x perfect-prediction diagonal + a ±0.2s tolerance band.
  *      Source confidence is encoded as dot opacity + radius, so the low-
  *      confidence DERIVED estimates visibly recede — that's the honesty
- *      story. Single hue (brand-orange). Hover tooltip + filter + a table
+ *      story. Single data hue (volt). Hover tooltip + filter + a table
  *      fallback for screen readers / no-hover.
- *   2. DISTRIBUTION  — timing-board stat tiles (within ±0.05/0.10/0.20/0.50,
+ *   2. DISTRIBUTION  — mono stat tiles (within ±0.05/0.10/0.20/0.50,
  *      overall |Δ|, mean bias, top-10 cleanest).
- *   3. RESIDUAL HISTOGRAM — Δ = sim−real, diverging mint (sim faster) /
- *      amber (sim slower), neutral centre, mean-bias marker.
+ *   3. RESIDUAL HISTOGRAM — Δ = sim−real, diverging signal-go (sim faster)
+ *      / signal-foul (sim slower), neutral centre, volt mean-bias marker.
  *   4. PER-CLUSTER — horizontal weighted-|Δ| bars, status-coloured with the
  *      numeric label always present (colour is never the only signal).
  *   5. BEST PREDICTIONS — the ten cleanest published (non-derived) runs,
  *      plus the honest callout about the DERIVED entry-cc / 2T benchmarks.
  *
- * Dark cockpit identity (the site is dark-only — no theme toggle exists).
+ * Chart palette (v4): primary series = volt #C9F231; positive residuals
+ * (sim slower) = signal-foul #FF5A48; negative (sim faster) = signal-go
+ * #34D97B; neutral grid rgba(255,255,255,0.08); tolerance band
+ * rgba(201,242,49,0.06). Chart backgrounds are transparent on .card panels.
+ *
  * Reduced-motion safe (Reveal handles it; the SVGs are static + hover-only).
- * Responsive: SVGs scale via viewBox (no body overflow); the wide table
- * scrolls inside its own overflow-x container.
+ * Responsive: SVGs scale via viewBox (no body overflow); the wide tables
+ * scroll inside their own overflow-x containers.
  */
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Reveal } from './Reveal';
 import ScoreboardDigits from './ScoreboardDigits';
+import CodeComment from './CodeComment';
 
-const ORANGE = '#FF5E1F';
-const MINT = '#00FFB2';
-const AMBER = '#F59E0B';
-const NEUTRAL = '#52525B';
+const VOLT = '#C9F231'; // accent — primary data series
+const GO = '#34D97B'; // signal-go — negative residual (sim faster)
+const FOUL = '#FF5A48'; // signal-foul — positive residual (sim slower)
+const GRID = 'rgba(255,255,255,0.08)'; // neutral gridlines / frames
+const BAND = 'rgba(201,242,49,0.06)'; // ±0.2s tolerance band fill
+const NEUTRAL_BIN = 'rgba(255,255,255,0.30)'; // |Δ| < 0.05 centre bin
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const signed = (n, d = 3) => (n > 0 ? '+' : n < 0 ? '−' : '±') + Math.abs(n).toFixed(d);
@@ -47,19 +55,11 @@ function shortSource(src) {
   return cut.length > 30 ? cut.slice(0, 29) + '…' : cut;
 }
 
-function StatusPill({ mae }) {
+// Cluster status chip — colour never the only signal (word is always present).
+function StatusChip({ mae }) {
   const status = mae < 0.2 ? 'tight' : mae < 0.5 ? 'fair' : 'data-limited';
-  const cls =
-    mae < 0.2
-      ? 'bg-brand-green/10 text-brand-green'
-      : mae < 0.5
-        ? 'bg-brand-amber/10 text-brand-amber'
-        : 'bg-brand-red/10 text-brand-red';
-  return (
-    <span className={`px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wide ${cls}`}>
-      {status}
-    </span>
-  );
+  const cls = mae < 0.2 ? 'chip-go' : mae < 0.5 ? 'chip-stage' : 'chip-foul';
+  return <span className={`chip ${cls}`}>{status}</span>;
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -159,10 +159,10 @@ function Scatter({ bikes }) {
               }}
               aria-pressed={on}
               className={[
-                'px-3 py-1.5 rounded-full font-mono text-[10px] uppercase tracking-[0.15em] transition-colors',
+                'px-3.5 py-2 rounded-full font-mono text-[10px] uppercase tracking-[0.15em] transition-colors',
                 on
-                  ? 'border border-brand-orange/60 bg-brand-orange/15 text-brand-orange'
-                  : 'border border-white/12 bg-white/[0.02] text-white/55 hover:text-white hover:border-white/30',
+                  ? 'border border-accent/60 bg-accent/10 text-accent'
+                  : 'border border-white/[0.12] bg-white/[0.02] text-white/55 hover:text-white hover:border-white/30',
               ].join(' ')}
             >
               {f.label}
@@ -171,24 +171,24 @@ function Scatter({ bikes }) {
         })}
       </div>
 
-      <div className="card border-white/10 p-3 sm:p-4">
+      <div className="card p-3 sm:p-4">
         <svg
           viewBox={`0 0 ${W} ${H}`}
           className="w-full h-auto block"
           role="img"
           aria-label="Scatter plot of real quarter-mile ET versus simulated ET for every matched benchmark. Dots cluster tightly on the perfect-prediction diagonal."
         >
-          {/* plot frame */}
-          <rect x={M.l} y={M.t} width={S} height={S} fill="#0A0A0B" stroke="#27272A" strokeWidth="1" />
+          {/* plot frame — transparent fill; the .card carries the surface */}
+          <rect x={M.l} y={M.t} width={S} height={S} fill="none" stroke={GRID} strokeWidth="1" />
 
           {/* ±0.2s tolerance band */}
-          <polygon points={band} fill="rgba(255,94,31,0.07)" />
+          <polygon points={band} fill={BAND} />
 
           {/* gridlines + tick labels */}
           {ticks.map((t) => (
             <g key={t}>
-              <line x1={sx(t)} y1={M.t} x2={sx(t)} y2={M.t + S} stroke="#1A1A1D" strokeWidth="0.75" />
-              <line x1={M.l} y1={sy(t)} x2={M.l + S} y2={sy(t)} stroke="#1A1A1D" strokeWidth="0.75" />
+              <line x1={sx(t)} y1={M.t} x2={sx(t)} y2={M.t + S} stroke={GRID} strokeWidth="0.75" />
+              <line x1={M.l} y1={sy(t)} x2={M.l + S} y2={sy(t)} stroke={GRID} strokeWidth="0.75" />
               <text x={sx(t)} y={M.t + S + 16} fill="#FFFFFF" opacity="0.4" fontSize="10" fontFamily="monospace" textAnchor="middle">
                 {t}
               </text>
@@ -204,16 +204,16 @@ function Scatter({ bikes }) {
             y1={sy(lo)}
             x2={sx(hi)}
             y2={sy(hi)}
-            stroke="#FF8F57"
-            strokeWidth="1.4"
+            stroke={VOLT}
+            strokeWidth="1.2"
             strokeDasharray="6 5"
-            opacity="0.85"
+            opacity="0.7"
           />
           <text
             x={sx(hi) - 4}
             y={sy(hi) + 16}
-            fill="#FF8F57"
-            opacity="0.9"
+            fill={VOLT}
+            opacity="0.8"
             fontSize="10.5"
             fontFamily="monospace"
             textAnchor="end"
@@ -248,7 +248,7 @@ function Scatter({ bikes }) {
                 cx={sx(b.real_et)}
                 cy={sy(b.sim_et)}
                 r={isH ? r + 2 : r}
-                fill={ORANGE}
+                fill={VOLT}
                 fillOpacity={isH ? 1 : o}
                 stroke={isH ? '#FFFFFF' : 'none'}
                 strokeWidth={isH ? 1.2 : 0}
@@ -264,20 +264,20 @@ function Scatter({ bikes }) {
           {/* hover tooltip */}
           {tip && (
             <g pointerEvents="none">
-              <line x1={tip.px} y1={tip.py} x2={tip.x + (tip.x < tip.px ? tip.tw : 0)} y2={tip.y + tip.th / 2} stroke="#FF5E1F" strokeWidth="0.75" opacity="0.5" />
-              <rect x={tip.x} y={tip.y} width={tip.tw} height={tip.th} rx="7" fill="#111113" stroke="#FF5E1F" strokeOpacity="0.5" strokeWidth="1" />
+              <line x1={tip.px} y1={tip.py} x2={tip.x + (tip.x < tip.px ? tip.tw : 0)} y2={tip.y + tip.th / 2} stroke="rgba(255,255,255,0.35)" strokeWidth="0.75" />
+              <rect x={tip.x} y={tip.y} width={tip.tw} height={tip.th} rx="7" fill="#0B0E13" stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
               <text x={tip.x + 12} y={tip.y + 20} fill="#FFFFFF" fontSize="12" fontFamily="monospace" fontWeight="600">
                 {`${hb.make} ${hb.model}`.slice(0, 26)}
               </text>
-              <text x={tip.x + 12} y={tip.y + 36} fill="#A1A1AA" fontSize="10.5" fontFamily="monospace">
+              <text x={tip.x + 12} y={tip.y + 36} fill="rgba(255,255,255,0.5)" fontSize="10.5" fontFamily="monospace">
                 {`${hb.year} · ${hb.disp_cc}cc · ${hb.cluster_label}`.slice(0, 32)}
               </text>
               <text x={tip.x + 12} y={tip.y + 53} fill="#FFFFFF" fontSize="11" fontFamily="monospace">
                 {`real ${hb.real_et}s   sim ${hb.sim_et}s`}
               </text>
               <text x={tip.x + 12} y={tip.y + 70} fontSize="11" fontFamily="monospace">
-                <tspan fill={hb.delta < 0 ? MINT : AMBER}>{`Δ ${signed(hb.delta)}s`}</tspan>
-                <tspan fill="#A1A1AA">{`  ${shortSource(hb.source)}`}</tspan>
+                <tspan fill={hb.delta < 0 ? GO : FOUL}>{`Δ ${signed(hb.delta)}s`}</tspan>
+                <tspan fill="rgba(255,255,255,0.5)">{`  ${shortSource(hb.source)}`}</tspan>
               </text>
             </g>
           )}
@@ -296,7 +296,7 @@ function Scatter({ bikes }) {
             return (
               <span key={s.label} className="inline-flex items-center gap-1.5 text-[11px] text-white/55">
                 <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-                  <circle cx="8" cy="8" r={r} fill={ORANGE} fillOpacity={o} />
+                  <circle cx="8" cy="8" r={r} fill={VOLT} fillOpacity={o} />
                 </svg>
                 {s.label}
               </span>
@@ -312,10 +312,10 @@ function Scatter({ bikes }) {
 
       {/* accessible table fallback */}
       <details className="mt-4 group">
-        <summary className="cursor-pointer label-mono text-white/50 hover:text-brand-orange transition-colors select-none">
+        <summary className="cursor-pointer label-mono hover:text-accent transition-colors select-none">
           Show all {bikes.length} matched benchmarks as a table ▸
         </summary>
-        <div className="mt-3 overflow-x-auto card border-white/10">
+        <div className="mt-3 overflow-x-auto card">
           <table className="w-full text-left border-collapse min-w-[640px]">
             <thead>
               <tr className="text-[10px] font-mono uppercase tracking-widest text-white/45 border-b border-white/10">
@@ -336,7 +336,7 @@ function Scatter({ bikes }) {
                     <td className="px-3 py-1.5 text-white/45 font-mono text-xs">{b.year}</td>
                     <td className="px-3 py-1.5 text-right font-mono text-white/70 tabular-nums">{b.real_et}s</td>
                     <td className="px-3 py-1.5 text-right font-mono text-white/70 tabular-nums">{b.sim_et}s</td>
-                    <td className={`px-3 py-1.5 text-right font-mono tabular-nums ${b.delta < 0 ? 'text-brand-accent' : 'text-brand-amber'}`}>{signed(b.delta)}s</td>
+                    <td className={`px-3 py-1.5 text-right ${b.delta > 0 ? 'delta-up' : 'delta-down'}`}>{signed(b.delta)}s</td>
                     <td className="px-3 py-1.5 text-white/40 text-xs">{shortSource(b.source)}</td>
                   </tr>
                 ))}
@@ -351,15 +351,15 @@ function Scatter({ bikes }) {
 // ─────────────────────────────────────────────────────────────────────────
 // 2. DISTRIBUTION TILES
 // ─────────────────────────────────────────────────────────────────────────
-function StatTile({ value, unit, pre, label, sub, accent = true }) {
+function StatTile({ value, unit, pre, label, sub }) {
   return (
-    <div className="card border-brand-orange/15 p-4 sm:p-5 flex flex-col">
+    <div className="card p-4 sm:p-5 flex flex-col">
       <div className="flex items-end gap-1 leading-none min-h-[26px]">
-        {pre && <span className={`font-mono text-sm mb-0.5 ${accent ? 'text-brand-orange' : 'text-white/50'}`}>{pre}</span>}
-        <ScoreboardDigits value={value} h={26} color={accent ? ORANGE : '#FFFFFF'} label={`${pre || ''}${value}${unit || ''}`} />
+        {pre && <span className="font-mono text-sm mb-0.5 text-white/50">{pre}</span>}
+        <ScoreboardDigits value={value} h={26} color="#FFFFFF" label={`${pre || ''}${value}${unit || ''}`} />
         {unit && <span className="font-mono text-xs text-white/40 mb-0.5">{unit}</span>}
       </div>
-      <div className="font-mono text-[10px] text-white/50 uppercase tracking-[0.18em] mt-3">{label}</div>
+      <div className="label-mono mt-3">{label}</div>
       {sub && <div className="font-mono text-[10px] text-white/35 mt-1">{sub}</div>}
     </div>
   );
@@ -420,23 +420,23 @@ function Histogram({ bikes, bias }) {
   const center = (i) => BMIN + (i + 0.5) * BINW;
   const colorFor = (i) => {
     const c = center(i);
-    if (c < -0.05) return MINT;
-    if (c > 0.05) return AMBER;
-    return NEUTRAL;
+    if (c < -0.05) return GO;
+    if (c > 0.05) return FOUL;
+    return NEUTRAL_BIN;
   };
   const dx = M.l + ((clamp(bias, BMIN, BMIN + NB * BINW) - BMIN) / (NB * BINW)) * PW;
 
   const xLabels = [-1, -0.5, 0, 0.5, 1];
 
   return (
-    <div className="card border-white/10 p-3 sm:p-4">
+    <div className="card p-3 sm:p-4">
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto block" role="img" aria-label="Histogram of the residual delta (sim minus real) across all matched benchmarks, sharply centred near zero.">
         {/* count gridlines */}
         {[0.25, 0.5, 0.75, 1].map((f) => (
-          <line key={f} x1={M.l} y1={cy(maxCount * f)} x2={M.l + PW} y2={cy(maxCount * f)} stroke="#1A1A1D" strokeWidth="0.75" />
+          <line key={f} x1={M.l} y1={cy(maxCount * f)} x2={M.l + PW} y2={cy(maxCount * f)} stroke={GRID} strokeWidth="0.75" />
         ))}
         {/* zero line */}
-        <line x1={M.l + PW / 2} y1={M.t} x2={M.l + PW / 2} y2={M.t + PH} stroke="#3F3F46" strokeWidth="1" strokeDasharray="3 4" />
+        <line x1={M.l + PW / 2} y1={M.t} x2={M.l + PW / 2} y2={M.t + PH} stroke="rgba(255,255,255,0.18)" strokeWidth="1" strokeDasharray="3 4" />
 
         {/* bars */}
         {bins.map((c, i) => {
@@ -460,9 +460,9 @@ function Histogram({ bikes, bias }) {
           );
         })}
 
-        {/* mean-bias marker */}
-        <line x1={dx} y1={M.t - 2} x2={dx} y2={M.t + PH} stroke="#FF5E1F" strokeWidth="1.4" />
-        <text x={dx} y={M.t - 4} fill="#FF8F57" fontSize="10" fontFamily="monospace" textAnchor="middle">
+        {/* mean-bias marker — the one volt detail on this panel */}
+        <line x1={dx} y1={M.t - 2} x2={dx} y2={M.t + PH} stroke={VOLT} strokeWidth="1.4" />
+        <text x={dx} y={M.t - 4} fill={VOLT} opacity="0.9" fontSize="10" fontFamily="monospace" textAnchor="middle">
           bias {signed(bias)}s
         </text>
 
@@ -475,8 +475,8 @@ function Histogram({ bikes, bias }) {
             </text>
           );
         })}
-        <text x={M.l} y={H - 3} fill={MINT} opacity="0.7" fontSize="9.5" fontFamily="monospace">◀ sim faster</text>
-        <text x={M.l + PW} y={H - 3} fill={AMBER} opacity="0.75" fontSize="9.5" fontFamily="monospace" textAnchor="end">sim slower ▶</text>
+        <text x={M.l} y={H - 3} fill={GO} opacity="0.8" fontSize="9.5" fontFamily="monospace">◀ sim faster</text>
+        <text x={M.l + PW} y={H - 3} fill={FOUL} opacity="0.8" fontSize="9.5" fontFamily="monospace" textAnchor="end">sim slower ▶</text>
 
         {/* hover count */}
         {hover != null && bins[hover] > 0 && (
@@ -501,9 +501,10 @@ function ClusterBreakdown({ clusters }) {
     [clusters],
   );
   const DOMAIN = 0.9;
-  const fill = (mae) => (mae < 0.2 ? '#22C55E' : mae < 0.5 ? '#F59E0B' : '#EF4444');
+  const barCls = (mae) =>
+    mae < 0.2 ? 'bg-signal-go' : mae < 0.5 ? 'bg-signal-stage' : 'bg-signal-foul';
   return (
-    <div className="card border-white/10 p-4 sm:p-6">
+    <div className="card p-4 sm:p-6">
       <div className="space-y-3.5">
         {rows.map((c) => {
           const w = Math.min(100, (c.w_mean_abs / DOMAIN) * 100);
@@ -511,19 +512,19 @@ function ClusterBreakdown({ clusters }) {
             <div key={c.label} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1">
               <div className="min-w-0">
                 <div className="flex items-baseline gap-2">
-                  <span className="font-display font-semibold text-sm text-white truncate">{c.label}</span>
+                  <span className="font-display font-semibold uppercase tracking-wide text-sm text-white truncate">{c.label}</span>
                   <span className="font-mono text-[10px] text-white/40 shrink-0">N={c.n}</span>
                 </div>
               </div>
               <div className="flex items-center gap-3 justify-self-end">
                 <span className="font-mono text-xs text-white/45 tabular-nums w-16 text-right">bias {signed(c.w_bias, 2)}</span>
-                <StatusPill mae={c.w_mean_abs} />
+                <StatusChip mae={c.w_mean_abs} />
               </div>
               <div className="col-span-2 flex items-center gap-3">
                 <div className="h-2.5 flex-1 rounded-full bg-white/[0.05] overflow-hidden">
                   <div
-                    className="h-full rounded-full transition-[width] duration-500"
-                    style={{ width: `${w}%`, backgroundColor: fill(c.w_mean_abs) }}
+                    className={`h-full rounded-full ${barCls(c.w_mean_abs)}`}
+                    style={{ width: `${w}%` }}
                   />
                 </div>
                 <span className="font-mono text-sm text-white tabular-nums w-14 text-right">{c.w_mean_abs.toFixed(3)}s</span>
@@ -534,9 +535,9 @@ function ClusterBreakdown({ clusters }) {
       </div>
       <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11px] text-white/45">
         <span className="label-mono">Weighted |Δ|</span>
-        <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#22C55E' }} /> tight &lt; 0.20s</span>
-        <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#F59E0B' }} /> fair &lt; 0.50s</span>
-        <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#EF4444' }} /> data-limited ≥ 0.50s</span>
+        <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-signal-go" /> tight &lt; 0.20s</span>
+        <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-signal-stage" /> fair &lt; 0.50s</span>
+        <span className="inline-flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-signal-foul" /> data-limited ≥ 0.50s</span>
       </div>
     </div>
   );
@@ -555,15 +556,15 @@ function BestPredictions({ bikes }) {
     [bikes],
   );
   return (
-    <div className="card border-brand-orange/20 overflow-hidden">
-      <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-2.5 border-b border-dashed border-white/15 bg-ink-1/70">
-        <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-white/45">MotoQuant timing assoc · cleanest published runs</span>
-        <span className="hidden sm:block font-mono text-[10px] tracking-[0.18em] uppercase text-brand-orange/80">10 smallest |Δ| · non-derived</span>
+    <div className="card overflow-hidden">
+      <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-2.5 border-b border-dashed border-white/15 bg-asphalt-1/70">
+        <span className="label-mono">MotoQuant timing assoc · cleanest published runs</span>
+        <span className="hidden sm:block font-mono text-[10px] tracking-[0.18em] uppercase text-white/40">10 smallest |Δ| · non-derived</span>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-[600px]">
           <thead>
-            <tr className="text-[10px] font-mono uppercase tracking-widest text-white/45 border-b border-brand-orange/20 bg-white/[0.02]">
+            <tr className="text-[10px] font-mono uppercase tracking-widest text-white/45 border-b border-white/10 bg-white/[0.02]">
               <th className="px-4 py-2.5 font-medium">#</th>
               <th className="px-4 py-2.5 font-medium">Bike</th>
               <th className="px-4 py-2.5 font-medium text-right">Real ET</th>
@@ -573,23 +574,19 @@ function BestPredictions({ bikes }) {
             </tr>
           </thead>
           <tbody>
-            {top.map((b, i) => {
-              const abs = b.abs_delta;
-              const col = abs < 0.05 ? 'text-brand-accent' : abs < 0.1 ? 'text-brand-green' : 'text-brand-amber';
-              return (
-                <tr key={i} className="border-b border-white/[0.04] last:border-0 hover:bg-brand-orange/[0.03] transition-colors">
-                  <td className="px-4 py-3 font-display font-bold text-brand-orange">{i + 1}</td>
-                  <td className="px-4 py-3">
-                    <div className="font-display font-bold text-white text-sm whitespace-nowrap">{b.make} {b.model}</div>
-                    <div className="font-mono text-[11px] text-white/40">{b.year} · {b.disp_cc}cc</div>
-                  </td>
-                  <td className="px-4 py-3 text-right font-mono text-white/70 tabular-nums text-sm">{b.real_et.toFixed(2)}s</td>
-                  <td className="px-4 py-3 text-right font-mono text-white tabular-nums text-sm font-semibold">{b.sim_et.toFixed(2)}s</td>
-                  <td className={`px-4 py-3 text-right font-display font-bold tabular-nums text-sm ${col}`}>{signed(b.delta)}s</td>
-                  <td className="px-4 py-3 font-mono text-[11px] text-white/40">{shortSource(b.source)}</td>
-                </tr>
-              );
-            })}
+            {top.map((b, i) => (
+              <tr key={i} className="border-b border-white/[0.04] last:border-0 hover:bg-white/[0.03] transition-colors">
+                <td className="px-4 py-3 font-mono text-white/40 tabular-nums">{i + 1}</td>
+                <td className="px-4 py-3">
+                  <div className="font-display font-semibold uppercase tracking-wide text-white text-sm whitespace-nowrap">{b.make} {b.model}</div>
+                  <div className="font-mono text-[11px] text-white/40">{b.year} · {b.disp_cc}cc</div>
+                </td>
+                <td className="px-4 py-3 text-right font-mono text-white/70 tabular-nums text-sm">{b.real_et.toFixed(2)}s</td>
+                <td className="px-4 py-3 text-right font-mono text-white tabular-nums text-sm font-semibold">{b.sim_et.toFixed(2)}s</td>
+                <td className={`px-4 py-3 text-right text-sm font-semibold ${b.delta > 0 ? 'delta-up' : 'delta-down'}`}>{signed(b.delta)}s</td>
+                <td className="px-4 py-3 font-mono text-[11px] text-white/40">{shortSource(b.source)}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
@@ -605,9 +602,9 @@ function Section({ kicker, title, sub, children }) {
     <section className="mb-16 md:mb-24">
       <Reveal>
         <div className="mb-6 max-w-2xl">
-          <div className="label-mono text-brand-orange mb-2.5">{kicker}</div>
-          <h2 className="font-display font-bold text-2xl sm:text-3xl text-white tracking-tight">{title}</h2>
-          {sub && <p className="mt-3 text-white/60 text-sm sm:text-base leading-relaxed">{sub}</p>}
+          <CodeComment className="mb-3">{kicker}</CodeComment>
+          <h2 className="font-display font-bold uppercase text-3xl md:text-4xl leading-[0.95] tracking-[-0.01em] text-white">{title}</h2>
+          {sub && <p className="mt-3 text-white/65 text-sm sm:text-base leading-relaxed">{sub}</p>}
         </div>
       </Reveal>
       <Reveal delay={0.05}>{children}</Reveal>
@@ -634,13 +631,13 @@ export default function AccuracyExplorer({ data }) {
     <div className="max-w-6xl mx-auto px-6 pb-24">
       {/* reference-baseline strip */}
       <Reveal>
-        <div className="card border-brand-orange/15 px-4 sm:px-6 py-4 mb-14 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
-          <div className="label-mono text-white/50 shrink-0">Reference baselines · Δ ±0.0000 since Apr 2026</div>
+        <div className="card px-4 sm:px-6 py-4 mb-14 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
+          <div className="label-mono shrink-0">Reference baselines · Δ ±0.0000 since Apr 2026</div>
           <div className="flex flex-wrap gap-x-8 gap-y-2">
             {REFS.map((r) => (
               <div key={r.name} className="flex items-baseline gap-2">
                 <span className="font-mono text-xs text-white/55">{r.name}</span>
-                <span className="font-mono text-sm text-brand-accent tabular-nums font-semibold">{r.et.toFixed(4)}s</span>
+                <span className="font-mono text-sm text-white tabular-nums font-semibold">{r.et.toFixed(4)}s</span>
               </div>
             ))}
           </div>
@@ -666,7 +663,7 @@ export default function AccuracyExplorer({ data }) {
       <Section
         kicker="03 · residual shape"
         title="A tight, near-symmetric error distribution"
-        sub="The residual Δ = sim − real, binned at 0.1s. Mint bins are runs we call faster than reality, amber bins slower; the mass is stacked on the centre with only a whisker of bias."
+        sub="The residual Δ = sim − real, binned at 0.1s. Green bins are runs we call faster than reality, red bins slower; the mass is stacked on the centre with only a whisker of bias."
       >
         <Histogram bikes={bikes} bias={overall.w_bias} />
       </Section>
@@ -686,15 +683,15 @@ export default function AccuracyExplorer({ data }) {
       >
         <BestPredictions bikes={bikes} />
         {/* honest callout */}
-        <div className="mt-6 card border-brand-amber/25 bg-brand-amber/[0.04] p-5 sm:p-6">
-          <div className="label-mono text-brand-amber mb-2">Honest caveat · data, not physics</div>
+        <div className="mt-6 card border-signal-stage/25 bg-signal-stage/[0.04] p-5 sm:p-6">
+          <div className="label-mono text-signal-stage mb-2">Honest caveat · data, not physics</div>
           <p className="text-white/70 text-sm leading-relaxed">
             The <span className="text-white font-semibold">entry 150–200cc</span> and{' '}
             <span className="text-white font-semibold">two-stroke</span> clusters carry large |Δ| because most of their
-            benchmarks are <span className="text-brand-amber font-mono">DERIVED</span> — 0-100 km/h times multiplied by 1.6,
+            benchmarks are <span className="text-signal-stage font-mono">DERIVED</span> — 0-100 km/h times multiplied by 1.6,
             with a declared ±0.7s uncertainty. That is a benchmark-data limit, not a physics limit. A single real Dragy
             timeslip replaces the estimate and collapses the residual. If you have run your bike,{' '}
-            <Link href="/simulator" className="text-brand-accent hover:text-white underline underline-offset-2 transition-colors">
+            <Link href="/simulator" className="text-accent hover:text-accent-bright underline underline-offset-2 transition-colors">
               simulate it
             </Link>{' '}
             and send us your slip — measured data goes straight into the corpus.
@@ -703,13 +700,13 @@ export default function AccuracyExplorer({ data }) {
       </Section>
 
       {/* cross-links */}
-      <div className="pt-8 border-t border-brand-orange/10 grid sm:grid-cols-2 gap-4">
+      <div className="pt-8 border-t border-white/10 grid sm:grid-cols-2 gap-4">
         <Link href="/docs/validation" className="card card-hover block p-4 group">
-          <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Per-bike benchmark table →</div>
+          <div className="font-display font-bold uppercase text-white mb-1 group-hover:text-accent transition-colors">Per-bike benchmark table →</div>
           <div className="text-xs text-white/50">Methodology, per-cluster bias, and the full source list.</div>
         </Link>
         <Link href="/whitepaper" className="card card-hover block p-4 group">
-          <div className="font-display font-bold text-white mb-1 group-hover:text-brand-orange transition-colors">Read the whitepaper →</div>
+          <div className="font-display font-bold uppercase text-white mb-1 group-hover:text-accent transition-colors">Read the whitepaper →</div>
           <div className="text-xs text-white/50">The physics, the validation method, the honest error budget.</div>
         </Link>
       </div>

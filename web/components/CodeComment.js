@@ -1,30 +1,30 @@
 'use client';
 
 /**
- * CodeComment — section-transition microcopy in engine-log voice.
+ * CodeComment — section-transition microcopy (STAGED v4 skin).
  *
- * BITKRAFT decorates section breaks with fake code comments
- * (`// ENTERING 3RD DIMENSION...`). Ours are real engine vocabulary:
+ * Legacy API kept (children, className, center) so blog posts, simulator,
+ * account and whitepaper call sites re-skin without churn. v4 renders the
+ * label voice with the StageDots motif instead of the engine-log `//` +
+ * blinking cursor.
  *
  *   <CodeComment>staging: two-step armed</CodeComment>
- *   → // STAGING: TWO-STEP ARMED_
- *
- * Static text + CSS-blinking cursor. Zero JS work after mount.
  */
+
+import StageDots from './StageDots';
 
 export default function CodeComment({ children, className = '', center = false }) {
   return (
     <div
       className={[
-        'font-mono text-[11px] tracking-[0.22em] uppercase text-white/35 select-none',
-        center ? 'text-center' : '',
+        'flex items-center gap-2.5 font-mono text-[10px] font-medium tracking-[0.25em] uppercase text-white/40 select-none',
+        center ? 'justify-center text-center' : '',
         className,
       ].join(' ')}
       aria-hidden="true"
     >
-      <span className="text-brand-orange/70">//&nbsp;</span>
-      {children}
-      <span className="cc-cursor text-brand-orange/70">_</span>
+      <StageDots size={5} />
+      <span>{children}</span>
     </div>
   );
 }

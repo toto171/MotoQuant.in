@@ -7,9 +7,11 @@
  * saved-run garage, password management.
  * Requires authentication — redirects to /login if not signed in.
  *
- * Cockpit v3 (July 2026): shared `.card` surfaces + `.label-mono` voice,
- * SkeletonTable while the garage loads, branded inline confirms (no
- * alert()/confirm() anywhere), and ActionButton + useAsyncTask on every
+ * STAGED v4 (July 2026): PageHero ("YOUR GARAGE") + stacked `.card`
+ * sections — Profile/Tier, Garage (bike names condensed, ETs mono, venue
+ * chips, rows link to /r/[id]), License keys as `.timeslip` rows with
+ * `.btn-danger` revokes, Security, Danger zone. Branded inline confirms
+ * (no alert()/confirm() anywhere) and ActionButton + useAsyncTask on every
  * submit so the button itself is the progress bar.
  * Subscription / license-key API calls unchanged.
  */
@@ -21,7 +23,7 @@ import { useAuth } from "../../components/AuthProvider";
 import TierBadge from "../../components/TierBadge";
 import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
-import CodeComment from "../../components/CodeComment";
+import PageHero from "../../components/PageHero";
 import { Reveal } from "../../components/Reveal";
 import ActionButton from "../../components/ActionButton";
 import { SkeletonCard, SkeletonTable } from "../../components/Skeleton";
@@ -31,7 +33,7 @@ import { API_URL_DIRECT as API_BASE } from "../../lib/api";
 
 /**
  * DangerConfirm — the branded inline confirm pattern (replaces confirm()).
- * Renders a small red-tinted row: prompt + [danger action] [Keep — ghost].
+ * Renders a small foul-tinted row: prompt + [danger action] [Keep — ghost].
  * While the task runs, the danger button becomes the ActionButton
  * running-state (progress strip in the button).
  */
@@ -45,10 +47,10 @@ function DangerConfirm({
   onDismiss,
 }) {
   return (
-    <div className="rounded-xl border border-brand-red/30 bg-brand-red/5 p-4">
+    <div className="rounded-xl border border-signal-foul/30 bg-signal-foul/5 p-4">
       <p className="text-sm text-white/75">{prompt}</p>
       {task.error && (
-        <p className="mt-2 text-sm text-brand-red/90">{task.error}</p>
+        <p className="mt-2 text-sm text-signal-foul">{task.error}</p>
       )}
       <div className="mt-3 flex flex-wrap items-center gap-2">
         {task.active ? (
@@ -220,7 +222,7 @@ export default function AccountPage() {
 
   if (isLoading || !user) {
     return (
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen bg-asphalt-0 text-white">
         <SiteNav />
         <main id="main" className="pt-32 pb-20 px-4 sm:px-6">
           <div
@@ -259,55 +261,51 @@ export default function AccountPage() {
   const maxKeys = { free: 0, pro: 1, studio: 5 }[user.tier] ?? 0;
   const activeKeys = keys.filter((k) => !k.revoked);
 
+  const sectionTitle =
+    "font-display font-semibold uppercase text-xl md:text-2xl leading-[0.95] tracking-[-0.01em] text-white";
+
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-asphalt-0 text-white">
       <SiteNav />
-      <main className="pt-32 pb-20 px-4 sm:px-6">
+      <PageHero
+        align="center"
+        kicker="account"
+        title="Your garage"
+        sub="Saved runs, license seats and security for your MotoQuant account."
+      />
+      <main id="main" className="pb-20 px-4 sm:px-6">
         <div className="mx-auto max-w-3xl space-y-6">
           {checkoutBanner && (
-            <div className="rounded-xl bg-brand-green/10 border border-brand-green/40 px-5 py-4 text-sm text-brand-green/90">
+            <div className="rounded-xl border border-signal-go/40 bg-signal-go/10 px-5 py-4 text-sm text-signal-go">
               Payment received — thank you! Your plan activates within a minute
               (your tier refreshes automatically).
             </div>
           )}
-          <div className="relative card p-6 sm:p-8 flex items-center justify-between">
-            <div
-              aria-hidden="true"
-              className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-orange/70 to-transparent"
-            />
-            <div>
-              <div className="label-mono text-brand-orange mb-1">Account</div>
-              <h1 className="font-display font-bold text-3xl sm:text-4xl text-white tracking-tight">
-                {user.email.split("@")[0]}
-              </h1>
-            </div>
-            <button
-              onClick={logout}
-              className="text-sm font-mono text-white/55 hover:text-brand-red transition-colors"
-            >
-              Sign out
-            </button>
-          </div>
 
+          {/* ── Profile / tier ─────────────────────────────────────────── */}
           <Reveal y={18}>
           <section className="card p-6 sm:p-8">
-            <h2 className="sr-only">Subscription</h2>
-            <CodeComment className="mb-4">subscription · tier status</CodeComment>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <p className="text-white font-medium">{user.email}</p>
+                <h2 className={sectionTitle}>Profile</h2>
+                <p className="mt-3 font-medium text-white">{user.email}</p>
                 <p className="mt-1 text-sm text-white/55">
                   {user.subscription_status
                     ? `Subscription: ${user.subscription_status}`
                     : "No active subscription"}
                 </p>
               </div>
-              <TierBadge tier={user.tier} size="md" />
+              <div className="flex items-center gap-3">
+                <TierBadge tier={user.tier} size="md" />
+                <button onClick={logout} className="btn-ghost btn-sm">
+                  Sign out
+                </button>
+              </div>
             </div>
 
             {user.tier === "free" && (
-              <div className="mt-5 rounded-xl bg-brand-orange/10 border border-brand-orange/30 p-4">
-                <p className="text-sm text-brand-orangeLight">
+              <div className="mt-5 rounded-xl border border-accent/30 bg-accent/[0.06] p-4">
+                <p className="text-sm text-white/75">
                   Upgrade to <strong className="text-white">Pro</strong> for unlimited sims, full analysis suite, and leaderboard saves.
                 </p>
                 <a href="/pricing" className="btn-primary btn-sm mt-3">
@@ -315,143 +313,18 @@ export default function AccountPage() {
                 </a>
               </div>
             )}
-
-            {user.tier !== "free" && (
-              <div className="mt-4 space-y-3">
-                {subMsg && (
-                  <p className="text-sm text-brand-amber">{subMsg}</p>
-                )}
-                {cancelOpen ? (
-                  <DangerConfirm
-                    prompt="Cancel your subscription? You keep access until the end of the billing period."
-                    actionLabel="Cancel subscription"
-                    runningLabel="Cancelling"
-                    dismissLabel="Keep my plan"
-                    task={cancelTask}
-                    onConfirm={confirmCancelSub}
-                    onDismiss={() => setCancelOpen(false)}
-                  />
-                ) : (
-                  <button
-                    onClick={() => { setCancelOpen(true); cancelTask.reset(); }}
-                    className="text-sm text-white/45 hover:text-brand-red transition-colors underline"
-                  >
-                    Cancel subscription
-                  </button>
-                )}
-              </div>
-            )}
           </section>
           </Reveal>
 
+          {/* ── Garage — saved runs ────────────────────────────────────── */}
           <Reveal y={18}>
           <section className="card p-6 sm:p-8">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="sr-only">License keys</h2>
-              <CodeComment>license keys · device seats</CodeComment>
-              <span className="text-xs font-mono text-white/45">
-                {activeKeys.length} / {maxKeys} used
-              </span>
-            </div>
-
-            {!canGenerateKey && (
-              <p className="text-sm text-white/55">
-                License keys are available on Pro and Studio plans.{" "}
-                <a href="/pricing" className="text-brand-orange hover:text-brand-orangeLight">Upgrade →</a>
-              </p>
-            )}
-
-            {canGenerateKey && (
-              <>
-                {newKey && (
-                  <div className="mb-5 rounded-xl bg-brand-green/10 border border-brand-green/40 p-4">
-                    <p className="text-xs text-brand-green font-semibold mb-2">
-                      {keyMsg} Copy it now — you won&rsquo;t see it again.
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 rounded bg-ink-0/60 px-3 py-2 text-xs text-brand-green/90 font-mono break-all">
-                        {newKey}
-                      </code>
-                      <button
-                        onClick={copyKey}
-                        className="rounded bg-brand-green/15 hover:bg-brand-green/25 border border-brand-green/40 px-3 py-2 text-xs font-mono text-brand-green inline-flex items-center gap-1.5 transition-colors"
-                      >
-                        {copied ? <Check size={12} /> : <Copy size={12} />}
-                        {copied ? "Copied" : "Copy"}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {activeKeys.length > 0 && (
-                  <ul className="mb-5 space-y-2">
-                    {activeKeys.map((k) => (
-                      <li
-                        key={k.id}
-                        className="rounded-xl bg-ink-1 border border-white/10 px-4 py-3"
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="text-sm text-white/80">
-                            <span className="font-mono text-xs text-white/40">#{k.id}</span>
-                            <span className="mx-2 text-white/20">·</span>
-                            {k.device_id ? (
-                              <span>Activated · last seen {k.last_seen_at ? new Date(k.last_seen_at).toLocaleDateString() : "never"}</span>
-                            ) : (
-                              <span className="text-brand-amber">Not yet activated</span>
-                            )}
-                          </div>
-                          {revokeTarget !== k.id && (
-                            <button
-                              onClick={() => { setRevokeTarget(k.id); revokeTask.reset(); }}
-                              className="text-xs text-brand-red/80 hover:text-brand-red underline"
-                            >
-                              Revoke
-                            </button>
-                          )}
-                        </div>
-                        {revokeTarget === k.id && (
-                          <div className="mt-3">
-                            <DangerConfirm
-                              prompt="Revoke this key? The seat frees up immediately and the key stops validating."
-                              actionLabel="Revoke"
-                              runningLabel="Revoking"
-                              dismissLabel="Keep"
-                              task={revokeTask}
-                              onConfirm={() => confirmRevoke(k.id)}
-                              onDismiss={() => setRevokeTarget(null)}
-                            />
-                          </div>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-
-                {activeKeys.length < maxKeys && (
-                  <div className="space-y-2">
-                    {genTask.error && (
-                      <p className="text-sm text-brand-red/90">{genTask.error}</p>
-                    )}
-                    <ActionButton
-                      task={genTask}
-                      onRun={() => genTask.run()}
-                      label="+ Generate new license key"
-                      runningLabel="Generating key"
-                      stoppable={false}
-                    />
-                  </div>
-                )}
-              </>
-            )}
-          </section>
-          </Reveal>
-
-          <Reveal y={18}>
-          <section className="card p-6 sm:p-8">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="sr-only">My garage — saved runs</h2>
-              <CodeComment>garage · saved runs</CodeComment>
-              <a href="/simulator" className="text-xs font-mono text-brand-orange hover:text-brand-orangeLight transition-colors">
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className={sectionTitle}>Garage</h2>
+              <a
+                href="/simulator"
+                className="font-mono text-xs text-accent hover:text-accent-bright transition-colors"
+              >
                 + New sim →
               </a>
             </div>
@@ -459,7 +332,7 @@ export default function AccountPage() {
               <SkeletonTable rows={4} cols={4} aria-label="Loading your saved runs" />
             )}
             {!runsLoading && runs.length === 0 && (
-              <p className="text-sm text-white/55">
+              <p className="text-sm text-white/65">
                 No saved runs yet. Run a simulation and hit{" "}
                 <strong className="text-white">Save this run</strong> while signed
                 in — it lands here.
@@ -469,28 +342,39 @@ export default function AccountPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-left label-mono border-b border-white/10">
-                      <th className="py-2 pr-4">Bike</th>
-                      <th className="py-2 pr-4 text-right">¼-mile</th>
-                      <th className="py-2 pr-4 text-right">Trap</th>
-                      <th className="py-2 pr-4 hidden sm:table-cell">Venue</th>
-                      <th className="py-2 hidden sm:table-cell">Date</th>
+                    <tr className="border-b border-white/10 text-left label-mono">
+                      <th className="py-2 pr-4 font-medium">Bike</th>
+                      <th className="py-2 pr-4 text-right font-medium">¼-mile</th>
+                      <th className="py-2 pr-4 text-right font-medium">Trap</th>
+                      <th className="hidden py-2 pr-4 font-medium sm:table-cell">Venue</th>
+                      <th className="hidden py-2 font-medium sm:table-cell">Date</th>
                     </tr>
                   </thead>
                   <tbody>
                     {runs.map((r) => (
                       <tr key={r.id} className="border-b border-white/5">
-                        <td className="py-2.5 pr-4 text-white/85">
-                          {r.manufacturer ? `${r.manufacturer} ${r.model}` : `Run #${r.id}`}
+                        <td className="py-2.5 pr-4">
+                          <a
+                            href={`/r/${r.id}`}
+                            className="font-display font-semibold uppercase text-white/90 hover:text-white transition-colors"
+                          >
+                            {r.manufacturer ? `${r.manufacturer} ${r.model}` : `Run #${r.id}`}
+                          </a>
                         </td>
-                        <td className="py-2.5 pr-4 text-right font-mono tabular-nums text-brand-orange">
+                        <td className="py-2.5 pr-4 text-right font-mono tabular-nums font-medium text-white">
                           {r.et_quarter_s != null ? `${r.et_quarter_s.toFixed(3)}s` : "—"}
                         </td>
                         <td className="py-2.5 pr-4 text-right font-mono tabular-nums text-white/70">
                           {r.trap_speed_kmh != null ? `${r.trap_speed_kmh.toFixed(1)} km/h` : "—"}
                         </td>
-                        <td className="py-2.5 pr-4 text-white/55 hidden sm:table-cell">{r.venue || "—"}</td>
-                        <td className="py-2.5 text-white/45 hidden sm:table-cell">
+                        <td className="hidden py-2.5 pr-4 sm:table-cell">
+                          {r.venue ? (
+                            <span className="chip">{r.venue}</span>
+                          ) : (
+                            <span className="text-white/40">—</span>
+                          )}
+                        </td>
+                        <td className="hidden py-2.5 font-mono text-xs text-white/45 sm:table-cell">
                           {r.created_at ? new Date(r.created_at).toLocaleDateString() : "—"}
                         </td>
                       </tr>
@@ -502,21 +386,131 @@ export default function AccountPage() {
           </section>
           </Reveal>
 
+          {/* ── License keys — device seats ────────────────────────────── */}
           <Reveal y={18}>
           <section className="card p-6 sm:p-8">
-            <h2 className="sr-only">Security</h2>
-            <CodeComment className="mb-4">security · password</CodeComment>
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className={sectionTitle}>License keys</h2>
+              <span className="chip">
+                {activeKeys.length} / {maxKeys} used
+              </span>
+            </div>
+
+            {!canGenerateKey && (
+              <p className="text-sm text-white/65">
+                License keys are available on Pro and Studio plans.{" "}
+                <a
+                  href="/pricing"
+                  className="text-white/80 underline decoration-white/25 underline-offset-2 hover:text-white transition-colors"
+                >
+                  Upgrade →
+                </a>
+              </p>
+            )}
+
+            {canGenerateKey && (
+              <>
+                {newKey && (
+                  <div className="mb-5 rounded-xl border border-signal-go/40 bg-signal-go/10 p-4">
+                    <p className="mb-2 text-xs font-semibold text-signal-go">
+                      {keyMsg} Copy it now — you won&rsquo;t see it again.
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 break-all rounded bg-asphalt-0/60 px-3 py-2 font-mono text-xs text-signal-go/90">
+                        {newKey}
+                      </code>
+                      <button
+                        onClick={copyKey}
+                        className="inline-flex items-center gap-1.5 rounded border border-signal-go/40 bg-signal-go/15 px-3 py-2 font-mono text-xs text-signal-go hover:bg-signal-go/25 transition-colors"
+                      >
+                        {copied ? <Check size={12} /> : <Copy size={12} />}
+                        {copied ? "Copied" : "Copy"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {activeKeys.length > 0 && (
+                  <div className="timeslip mb-5">
+                    {activeKeys.map((k) => (
+                      <div key={k.id}>
+                        <div className="timeslip-row items-center">
+                          <span className="text-white/80">
+                            <span className="text-white/40">#{k.id}</span>
+                            <span className="mx-2 text-white/20">·</span>
+                            {k.device_id ? (
+                              <span>
+                                Activated · last seen{" "}
+                                {k.last_seen_at
+                                  ? new Date(k.last_seen_at).toLocaleDateString()
+                                  : "never"}
+                              </span>
+                            ) : (
+                              <span className="text-signal-stage">Not yet activated</span>
+                            )}
+                          </span>
+                          {revokeTarget !== k.id && (
+                            <button
+                              onClick={() => { setRevokeTarget(k.id); revokeTask.reset(); }}
+                              className="btn-danger btn-sm"
+                            >
+                              Revoke
+                            </button>
+                          )}
+                        </div>
+                        {revokeTarget === k.id && (
+                          <div className="my-3">
+                            <DangerConfirm
+                              prompt="Revoke this key? The seat frees up immediately and the key stops validating."
+                              actionLabel="Revoke"
+                              runningLabel="Revoking"
+                              dismissLabel="Keep"
+                              task={revokeTask}
+                              onConfirm={() => confirmRevoke(k.id)}
+                              onDismiss={() => setRevokeTarget(null)}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {activeKeys.length < maxKeys && (
+                  <div className="space-y-2">
+                    {genTask.error && (
+                      <p className="text-sm text-signal-foul">{genTask.error}</p>
+                    )}
+                    <ActionButton
+                      task={genTask}
+                      onRun={() => genTask.run()}
+                      label="+ Generate new license key"
+                      runningLabel="Generating key"
+                      stoppable={false}
+                      variant="ghost"
+                    />
+                  </div>
+                )}
+              </>
+            )}
+          </section>
+          </Reveal>
+
+          {/* ── Security — password ────────────────────────────────────── */}
+          <Reveal y={18}>
+          <section className="card p-6 sm:p-8">
+            <h2 className={`${sectionTitle} mb-4`}>Security</h2>
             {!user.has_password && (
-              <p className="mb-4 text-sm text-white/55">
+              <p className="mb-4 text-sm text-white/65">
                 You currently sign in via magic link. Add a password to sign in
                 directly — the magic-link option stays available either way.
               </p>
             )}
             {pwMsg && (
-              <p className="mb-3 text-sm text-brand-green">{pwMsg.text}</p>
+              <p className="mb-3 text-sm text-signal-go">{pwMsg.text}</p>
             )}
             {pwTask.error && (
-              <p className="mb-3 text-sm text-brand-red/90">{pwTask.error}</p>
+              <p className="mb-3 text-sm text-signal-foul">{pwTask.error}</p>
             )}
             <form
               ref={pwFormRef}
@@ -524,7 +518,7 @@ export default function AccountPage() {
                 e.preventDefault();
                 if (!pwTask.active) pwTask.run();
               }}
-              className="space-y-3 max-w-sm"
+              className="max-w-sm space-y-3"
             >
               {user.has_password && (
                 <input
@@ -555,10 +549,50 @@ export default function AccountPage() {
                 label={user.has_password ? "Change password" : "Set a password"}
                 runningLabel="Saving"
                 stoppable={false}
+                variant="ghost"
               />
             </form>
           </section>
           </Reveal>
+
+          {/* ── Danger zone — cancel subscription ──────────────────────── */}
+          {user.tier !== "free" && (
+            <Reveal y={18}>
+            <section className="card border-signal-foul/20 p-6 sm:p-8">
+              <h2 className={sectionTitle}>Danger zone</h2>
+              {subMsg && (
+                <p className="mt-3 text-sm text-signal-stage">{subMsg}</p>
+              )}
+              <div className="mt-4">
+                {cancelOpen ? (
+                  <DangerConfirm
+                    prompt="Cancel your subscription? You keep access until the end of the billing period."
+                    actionLabel="Cancel subscription"
+                    runningLabel="Cancelling"
+                    dismissLabel="Keep my plan"
+                    task={cancelTask}
+                    onConfirm={confirmCancelSub}
+                    onDismiss={() => setCancelOpen(false)}
+                  />
+                ) : (
+                  <>
+                    <p className="text-sm text-white/55">
+                      Cancelling keeps your access until the end of the current
+                      billing period; after that your account moves to the Free
+                      tier. Your runs and builds are retained.
+                    </p>
+                    <button
+                      onClick={() => { setCancelOpen(true); cancelTask.reset(); }}
+                      className="btn-danger btn-sm mt-3"
+                    >
+                      Cancel subscription
+                    </button>
+                  </>
+                )}
+              </div>
+            </section>
+            </Reveal>
+          )}
         </div>
       </main>
       <SiteFooter />

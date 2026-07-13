@@ -24,24 +24,21 @@ function BottomCtaInner() {
       data-exp="EXP-008"
       data-variant={variant}
     >
-      <h2 className="font-display font-bold text-4xl mb-4 text-white">
+      <h2 className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-4xl mb-4 text-white">
         Ready to run your first sim?
       </h2>
-      <p className="text-white/60 mb-10 text-lg">{subhead}</p>
+      <p className="text-white/65 mb-10 text-lg">{subhead}</p>
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <Link
           href="/simulator"
           data-exp="EXP-008"
           data-variant={variant}
           data-cta="features-bottom-primary"
-          className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-brand-orange text-black font-display font-bold rounded-lg glow-orange text-base hover:bg-brand-orangeLight transition-colors"
+          className="btn-primary"
         >
           <Zap size={18} /> {primaryLabel}
         </Link>
-        <Link
-          href="/pricing"
-          className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-brand-orange text-brand-orange font-display font-bold rounded-lg transition-colors text-base"
-        >
+        <Link href="/pricing" className="btn-ghost">
           See pricing
         </Link>
       </div>
@@ -54,23 +51,17 @@ export default function BottomCta() {
     <Suspense
       fallback={
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-display font-bold text-4xl mb-4 text-white">
+          <h2 className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-4xl mb-4 text-white">
             Ready to run your first sim?
           </h2>
-          <p className="text-white/60 mb-10 text-lg">
+          <p className="text-white/65 mb-10 text-lg">
             Free in the browser. No account required to start.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/simulator"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-brand-orange text-black font-display font-bold rounded-lg glow-orange text-base hover:bg-brand-orangeLight transition-colors"
-            >
+            <Link href="/simulator" className="btn-primary">
               <Zap size={18} /> Try it free
             </Link>
-            <Link
-              href="/pricing"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-brand-orange text-brand-orange font-display font-bold rounded-lg transition-colors text-base"
-            >
+            <Link href="/pricing" className="btn-ghost">
               See pricing
             </Link>
           </div>
