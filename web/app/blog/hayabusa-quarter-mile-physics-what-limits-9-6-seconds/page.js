@@ -6,7 +6,7 @@ import StructuredData, { articleSchema } from '../../StructuredData';
 const SLUG = 'hayabusa-quarter-mile-physics-what-limits-9-6-seconds';
 const TITLE = 'Hayabusa Quarter-Mile Physics: What Limits the 9.6';
 const DESCRIPTION =
-  'MotoQuant simulates the Suzuki Hayabusa Gen1 at exactly 10.4712 seconds — a reference baseline locked across every physics commit since April 2024. What stops a stock Hayabusa from running 9.6 on a strip, and where the seven tenths come from on a drag-prepped build.';
+  'MotoQuant simulates the Suzuki Hayabusa Gen1 at exactly 10.3633 seconds — a reference baseline locked across every physics commit since July 13, 2026. What stops a stock Hayabusa from running 9.6 on a strip, and where the seven tenths come from on a drag-prepped build.';
 
 export const metadata = {
   title: 'Hayabusa Quarter-Mile Physics: What Limits the 9.6 Seconds',
@@ -38,23 +38,23 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'MotoQuant simulates the Suzuki Hayabusa Gen1 at exactly 10.4712 seconds — a reference baseline pinned to four decimal places that every physics commit since April 2024 has had to preserve. A drag-prepped Hayabusa with a stretched swingarm, 14-tooth front sprocket, sticky DOT drag rear, and a Power Commander tune runs the strip in 9.5 to 9.7 seconds. The seven tenths between those two numbers are not engine power. They are traction, geometry, gearing, and air. Here is exactly where each tenth lives, what it costs in rupees, and why a stock Hayabusa cannot break 10 seconds no matter how good the rider is.',
+    text: 'MotoQuant simulates the Suzuki Hayabusa Gen1 at exactly 10.3633 seconds — a reference baseline pinned to four decimal places that every physics commit since July 13, 2026 has had to preserve. A drag-prepped Hayabusa with a stretched swingarm, 14-tooth front sprocket, sticky DOT drag rear, and a Power Commander tune runs the strip in 9.5 to 9.7 seconds. The seven-to-eight tenths between those two numbers are not engine power. They are traction, geometry, gearing, and air. Here is exactly where each tenth lives, what it costs in rupees, and why a stock Hayabusa cannot break 10 seconds no matter how good the rider is.',
   },
   {
     type: 'h2',
-    text: 'The 10.4712 Number, and What It Means',
+    text: 'The 10.3633 Number, and What It Means',
   },
   {
     type: 'p',
-    text: 'The Hayabusa Gen1 reference configuration inside MotoQuant is a 1999-2007 spec — 1299 cc inline-four, 170 hp at the rear wheel, 220 kg dry, 1485 mm wheelbase, 530 mm centre of gravity height, 51 percent front weight, 25 degrees of rake, 190/50ZR17 OEM Bridgestone Battlax BT-014 rear. Run that configuration in MotoQuant\'s 15-sub-model RK4 physics engine under matched Aamby Valley November conditions — density altitude around 1100 m, 22 degrees Celsius ambient, dry concrete with mu_peak around 1.30, 75 kg rider, two-step rev limiter set at peak torque RPM — and the simulator returns 10.4712 seconds at roughly 235 km/h trap, on the first run and on the thousandth.',
+    text: 'The Hayabusa Gen1 reference configuration inside MotoQuant is a 1999-2007 spec — 1299 cc inline-four, 170 hp at the rear wheel, 220 kg dry, 1485 mm wheelbase, 530 mm centre of gravity height, 51 percent front weight, 25 degrees of rake, 190/50ZR17 OEM Bridgestone Battlax BT-014 rear. Run that configuration in MotoQuant\'s 15-sub-model RK4 physics engine under matched Aamby Valley November conditions — density altitude around 1100 m, 22 degrees Celsius ambient, dry concrete with mu_peak around 1.30, 75 kg rider, two-step rev limiter set at peak torque RPM — and the simulator returns 10.3633 seconds at roughly 235 km/h trap, on the first run and on the thousandth.',
   },
   {
     type: 'p',
-    text: 'That number is contractually load-bearing. The other two reference baselines pinned alongside it are the Suzuki GSX-R 1000 K5 at 10.0334 seconds and the Yamaha YZF-R1 4C8 at 10.2859 seconds. Every commit to the physics engine — every tweak to the torque curve generator, every change to the clutch slip model, every adjustment to the Pacejka tire coefficients, every new gear cassette in the Tier-1 lookup — has to leave all three numbers at delta plus 0.0000 seconds. The K5 and R1 baselines are validated against magazine ETs of 9.97s and 10.30s respectively, so MotoQuant runs a tiny touch conservative on those two. The Hayabusa sits inside the published range of 10.1 to 10.7 seconds for a stock Gen1 on a prepared strip.',
+    text: 'That number is contractually load-bearing. The other two reference baselines pinned alongside it are the Suzuki GSX-R 1000 K5 at 9.9331 seconds and the Yamaha YZF-R1 4C8 at 10.1436 seconds. Every commit to the physics engine — every tweak to the torque curve generator, every change to the clutch slip model, every adjustment to the Pacejka tire coefficients, every new gear cassette in the Tier-1 lookup — has to leave all three numbers at delta plus 0.0000 seconds. The K5 and R1 baselines are validated against magazine ETs of 9.97s and 10.30s respectively; the July 2026 physics-recalibration epoch traded exact agreement on those two magazine numbers for a tighter fit across the full 250-benchmark corpus, so both baselines now run a little quick against their individual magazine targets. The Hayabusa sits inside the published range of 10.1 to 10.7 seconds for a stock Gen1 on a prepared strip.',
   },
   {
     type: 'p',
-    text: 'So 10.4712 is the simulator answer for a stock Hayabusa under near-ideal conditions. The question is why it is not 9.7. Or 9.6. Or the 10.05 that the 2024 Hayabusa Gen3 magazine tests report on US strips. The seven-to-eight-tenths gap between the simulator stock baseline and a drag-prepped strip car comes from four specific physics constraints that no amount of engine power touches.',
+    text: 'So 10.3633 is the simulator answer for a stock Hayabusa under near-ideal conditions. The question is why it is not 9.7. Or 9.6. Or the 10.05 that the 2024 Hayabusa Gen3 magazine tests report on US strips. The seven-to-eight-tenths gap between the simulator stock baseline and a drag-prepped strip car comes from four specific physics constraints that no amount of engine power touches.',
   },
   {
     type: 'h2',
@@ -186,7 +186,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The simulator at motoquant.in carries the Hayabusa Gen1, Gen2, and Gen3 as separate catalog entries with their own spec sheets, plus 333 other bikes you can compare against. Pick your bike, pick your venue, pick your conditions, then sweep mods and read the ET delta directly. The Hayabusa Gen1 number is reference-locked at 10.4712 seconds and will not move; the Gen2 and Gen3 sit inside the litre-plus hyper-sport cluster with the documented ±0.15 second bias band. If you upload a Dragy timeslip from your own Hayabusa, the calibrator will pull that data point in and tighten the bias on your specific build.',
+    text: 'The simulator at motoquant.in carries the Hayabusa Gen1, Gen2, and Gen3 as separate catalog entries with their own spec sheets, plus 333 other bikes you can compare against. Pick your bike, pick your venue, pick your conditions, then sweep mods and read the ET delta directly. The Hayabusa Gen1 number is reference-locked at 10.3633 seconds and will not move; the Gen2 and Gen3 sit inside the litre-plus hyper-sport cluster with the documented ±0.15 second bias band. If you upload a Dragy timeslip from your own Hayabusa, the calibrator will pull that data point in and tighten the bias on your specific build.',
   },
   {
     type: 'p',
@@ -336,7 +336,7 @@ export default function PostPage() {
               <Link href="/blog/how-the-motoquant-physics-engine-works" className="text-brand-accent hover:text-brand-orange transition-colors">
                 How the MotoQuant Physics Engine Works
               </Link>{' '}
-              — the 15-sub-model RK4 architecture that locks the Hayabusa Gen1 baseline at 10.4712s and keeps it there across every commit.
+              — the 15-sub-model RK4 architecture that locks the Hayabusa Gen1 baseline at 10.3633s and keeps it there across every commit.
             </li>
             <li>
               ·{' '}

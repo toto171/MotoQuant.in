@@ -46,11 +46,11 @@ export default function DocsLayout({ children }) {
             </div>
             <div className="card p-3">
               <ul className="space-y-2 text-[11px] font-mono tabular-nums">
-                <li className="text-white/55 flex justify-between"><span>K5</span><span className="text-white/85">10.0334s</span></li>
-                <li className="text-white/55 flex justify-between"><span>R1 4C8</span><span className="text-white/85">10.2859s</span></li>
-                <li className="text-white/55 flex justify-between"><span>Hayabusa</span><span className="text-white/85">10.4712s</span></li>
+                <li className="text-white/55 flex justify-between"><span>K5</span><span className="text-white/85">9.9331s</span></li>
+                <li className="text-white/55 flex justify-between"><span>R1 4C8</span><span className="text-white/85">10.1436s</span></li>
+                <li className="text-white/55 flex justify-between"><span>Hayabusa</span><span className="text-white/85">10.3633s</span></li>
               </ul>
-              <div className="mt-3 text-[10px] font-mono text-signal-go">Δ ±0.0000 since Apr 30 2026</div>
+              <div className="mt-3 text-[10px] font-mono text-signal-go">Δ ±0.0000 since Jul 13 2026</div>
             </div>
           </div>
         </aside>

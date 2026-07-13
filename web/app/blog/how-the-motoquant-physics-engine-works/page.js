@@ -20,7 +20,7 @@ export const metadata = {
   alternates: { canonical: 'https://motoquant.in/blog/how-the-motoquant-physics-engine-works' },
   openGraph: {
     title: 'How the MotoQuant Physics Engine Works',
-    description: '15 sub-models, RK4 integration at 1ms, validated against 221 published drag-strip benchmarks (July 2026 sweep). Reference baselines accurate to 4 decimals. A tour of what is under the hood.',
+    description: '15 sub-models, RK4 integration at 1ms, validated against 250 published drag-strip benchmarks (July 2026 sweep). Reference baselines accurate to 4 decimals. A tour of what is under the hood.',
     url: 'https://motoquant.in/blog/how-the-motoquant-physics-engine-works',
     type: 'article',
     publishedTime: '2026-04-27T00:00:00Z',
@@ -142,15 +142,15 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'We maintain a list of 221 published drag-strip benchmarks (246 matched to a catalog bike) — sourced from Cycle World, Sport Rider, MCN, Motorcycle Consumer News, MotorcycleDaily, MotoStatz, FastestLaps, and Indian Autos Mag where the magazine published the actual instrumented timeslip. For each benchmark, we run the simulator at the test-day environmental conditions and compare predicted ET against measured ET. Each source is weighted by quality (instrumented timeslip 1.0, magazine 0.7, aggregator 0.5, derived 0.1) and the delta gets bucketed by class on a cylinder-aware 12-cluster taxonomy (litre-sport-195+, litre-sport-600-1000, sport-twin-600-1300, singles-300-500, entry-150-200, two-stroke, etc.) so we can see where the physics is honest and where it has systematic bias.',
+    text: 'We maintain a list of 250 published drag-strip benchmarks (277 matched to a catalog bike) — sourced from Cycle World, Sport Rider, MCN, Motorcycle Consumer News, MotorcycleDaily, MotoStatz, FastestLaps, and Indian Autos Mag where the magazine published the actual instrumented timeslip. For each benchmark, we run the simulator at the test-day environmental conditions and compare predicted ET against measured ET. Each source is weighted by quality (instrumented timeslip 1.0, magazine 0.7, aggregator 0.5, derived 0.1) and the delta gets bucketed by class on a cylinder-aware 12-cluster taxonomy (litre-sport-195+, litre-sport-600-1000, sport-twin-600-1300, singles-300-500, entry-150-200, two-stroke, etc.) so we can see where the physics is honest and where it has systematic bias.',
   },
   {
     type: 'p',
-    text: 'Three reference baselines are protected absolutely: GSX-R 1000 K5 (10.0334 s), YZF-R1 4C8 (10.2859 s), and Hayabusa Gen1 (10.4712 s). Every code change must preserve these to four decimals. They are the regression test that catches "improvements" that secretly broke the engine.',
+    text: 'Three reference baselines are protected absolutely: GSX-R 1000 K5 (9.9331 s), YZF-R1 4C8 (10.1436 s), and Hayabusa Gen1 (10.3633 s). Every code change must preserve these to four decimals. They are the regression test that catches "improvements" that secretly broke the engine.',
   },
   {
     type: 'p',
-    text: 'Current state across 246 matched benchmarks (July 2026 sweep): overall source-quality-weighted mean absolute error is 0.217 seconds, weighted bias is essentially zero (+0.021 s — meaning the simulator is no longer systematically optimistic or pessimistic). Across the ten cleanest validated runs the mean absolute error is ±0.006 s, and 137 of the 246 benchmarks fall within ±0.20 s. The 195+ hp class is the tightest at 0.125 s weighted |Δ|. The small-cc and 2-stroke clusters have higher variance, partly because their published benchmarks are themselves uncertain (most Indian small-cc ETs are estimated from 0–100 km/h times rather than measured timeslips).',
+    text: 'Current state across 277 matched benchmarks (July 2026 sweep): overall source-quality-weighted mean absolute error is 0.253 seconds, weighted bias is essentially zero (+0.017 s — meaning the simulator is no longer systematically optimistic or pessimistic). Across the ten cleanest validated runs the mean absolute error is ±0.009 s, and 137 of the 277 benchmarks fall within ±0.20 s. The 195+ hp class is the tightest at 0.147 s weighted |Δ|. The small-cc and 2-stroke clusters have higher variance, partly because their published benchmarks are themselves uncertain (most Indian small-cc ETs are estimated from 0–100 km/h times rather than measured timeslips).',
   },
   {
     type: 'h2',
@@ -284,9 +284,9 @@ export default function Page() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
-                ['GSX-R 1000 K5', '10.0334'],
-                ['YZF-R1 4C8', '10.2859'],
-                ['Hayabusa Gen1', '10.4712'],
+                ['GSX-R 1000 K5', '9.9331'],
+                ['YZF-R1 4C8', '10.1436'],
+                ['Hayabusa Gen1', '10.3633'],
               ].map(([bike, et]) => (
                 <div key={bike}>
                   <div className="flex items-end gap-1">
@@ -298,7 +298,7 @@ export default function Page() {
               ))}
             </div>
             <p className="text-white/40 text-xs mt-4">
-              All claims about cluster bias, mean absolute error, and within-tolerance fractions in this post reflect the July 2026 sweep against 221 published benchmarks (246 matched).
+              All claims about cluster bias, mean absolute error, and within-tolerance fractions in this post reflect the July 2026 sweep against 250 published benchmarks (277 matched).
             </p>
           </div>
         </footer>

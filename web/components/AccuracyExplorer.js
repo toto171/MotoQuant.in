@@ -632,7 +632,7 @@ export default function AccuracyExplorer({ data }) {
       {/* reference-baseline strip */}
       <Reveal>
         <div className="card px-4 sm:px-6 py-4 mb-14 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
-          <div className="label-mono shrink-0">Reference baselines · Δ ±0.0000 since Apr 2026</div>
+          <div className="label-mono shrink-0">Reference baselines · Δ ±0.0000 since Jul 2026</div>
           <div className="flex flex-wrap gap-x-8 gap-y-2">
             {REFS.map((r) => (
               <div key={r.name} className="flex items-baseline gap-2">

@@ -9,7 +9,7 @@ First-principles Python physics engine for motorcycle quarter-mile drag racing
 prediction, optimisation, and parts ROI analysis. Aimed at the Indian drag
 racing community (Aamby Valley, MMRT, BIC, Kari, Hyderabad) with
 541 bikes, 254 tires, 593 parts, and 20 venues modelled, validated
-against 221 published benchmarks (weighted mean |Δ| 0.217 s; ±0.006 s across
+against 250 published benchmarks (weighted mean |Δ| 0.253 s; ±0.009 s across
 the 10 cleanest validated runs) by a ~4,400-test pytest suite.
 
 Reference baselines: **GSX-R 1000 K5 → 10.034 s**, **YZF-R1 4C8 → 10.286 s**,

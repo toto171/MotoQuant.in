@@ -39,35 +39,35 @@ import SimulatorWidget from '../components/SimulatorWidget';
 import { ScoreboardCounter } from '../components/ScoreboardDigits';
 
 // ─── Validation: only the four clusters where the data is good ────────
-// Per the 6 July 2026 weighted sweep (reports/acc_final_2026_07_06.json,
-// cylinder-aware 12-cluster taxonomy). Small-cc / 2T / cruiser
-// clusters are bounded by benchmark data quality (DERIVED 0-100×1.6
-// estimates with declared ±0.7s uncertainty), not model fidelity, so
-// they're shown in /docs/validation with their full caveat — not on
-// the landing page.
+// Per the 13 July 2026 weighted sweep (reports/acc_final_2026_07_13.json,
+// cylinder-aware 12-cluster taxonomy — post physics-recalibration epoch +
+// benchmark-corpus expansion). Small-cc / 2T / cruiser clusters are
+// bounded by benchmark data quality (DERIVED 0-100×1.6 estimates with
+// declared ±0.7s uncertainty), not model fidelity, so they're shown in
+// /docs/validation with their full caveat — not on the landing page.
 const HONEST_CLUSTERS = [
-  { name: 'Litre Sport ≥195hp',   bias: 0.007, mae: 0.125, n: 29 },
-  { name: 'Litre Sport 600-1000', bias: 0.005, mae: 0.158, n: 69 },
-  { name: 'Sport Twin 600-1300',  bias: 0.002, mae: 0.187, n: 42 },
-  { name: 'All clusters · weighted overall', bias: 0.021, mae: 0.217, n: 246 },
+  { name: 'Litre Sport ≥195hp',   bias: 0.0377,  mae: 0.1471, n: 30 },
+  { name: 'Litre Sport 600-1000', bias: 0.0023,  mae: 0.1772, n: 72 },
+  { name: 'Sport Twin 600-1300',  bias: -0.0003, mae: 0.2561, n: 48 },
+  { name: 'All clusters · weighted overall', bias: 0.0166, mae: 0.2533, n: 277 },
 ];
 
 // ─── Top-10 most accurate bikes ───────────────────────────────────────
-// MUST equal the docs/validation TOP10 (6 July 2026 sweep,
-// reports/acc_final_2026_07_06.json — 10 smallest |Δ| across the matched
-// corpus, mean ±0.006s; rank 7 is a DERIVED estimate, flagged in Source).
+// MUST equal the docs/validation TOP10 (13 July 2026 sweep,
+// reports/acc_final_2026_07_13.json — 10 smallest |Δ| across the matched
+// corpus, mean ±0.009s; rank 3 is a DERIVED estimate, flagged in Source).
 // Sync both together.
 const TOP10 = [
-  { rank: 1,  name: 'Honda CBR 600RR',            year: 2007, cc: '599cc I4',    target: 10.844, sim: 10.8447, delta:  0.001, source: 'Sport Rider 2007' },
-  { rank: 2,  name: 'Kawasaki Z H2 SE',           year: 2024, cc: '998cc I4',    target: 9.95,   sim: 9.9471,  delta: -0.003, source: 'Cycle World 2020' },
-  { rank: 3,  name: 'Kawasaki Ninja ZX-9R',       year: 2000, cc: '899cc I4',    target: 10.5,   sim: 10.4968, delta: -0.003, source: 'Sport Rider 2000' },
-  { rank: 4,  name: 'Ducati 1299 Panigale',       year: 2015, cc: '1285cc V2',   target: 9.95,   sim: 9.9535,  delta:  0.004, source: 'Sport Rider 2015' },
-  { rank: 5,  name: 'Kawasaki Ninja H2',          year: 2015, cc: '998cc I4',    target: 9.62,   sim: 9.6252,  delta:  0.005, source: 'MCN 2015' },
-  { rank: 6,  name: 'KTM Duke 390',               year: 2017, cc: '373cc single', target: 14.0,  sim: 13.994,  delta: -0.006, source: 'Consumer News' },
-  { rank: 7,  name: 'Honda CB1000R',              year: 2021, cc: '998cc I4',    target: 10.8,   sim: 10.8104, delta:  0.010, source: 'DERIVED est.' },
-  { rank: 8,  name: 'Kawasaki Ninja ZX-10R',      year: 2021, cc: '998cc I4',    target: 10.0,   sim: 10.0106, delta:  0.011, source: 'Cycle World 2021' },
-  { rank: 9,  name: 'KTM Duke 390',               year: 2013, cc: '373cc single', target: 14.0,  sim: 13.9889, delta: -0.011, source: 'Consumer News' },
-  { rank: 10, name: 'Yamaha YZF-R6',              year: 2006, cc: '599cc I4',    target: 10.854, sim: 10.8653, delta:  0.011, source: 'Sport Rider 2007' },
+  { rank: 1,  name: 'Honda CBR 1000RR Fireblade SP', year: 2017, cc: '999cc I4', target: 10.10, sim: 10.0984, delta: -0.002, source: 'Sport Rider 2017' },
+  { rank: 2,  name: 'Kawasaki Z H2 SE',              year: 2024, cc: '998cc I4', target: 9.95,  sim: 9.9534,  delta:  0.003, source: 'Cycle World' },
+  { rank: 3,  name: 'KTM 790 Adventure',              year: 2019, cc: '799cc I2', target: 12.00, sim: 12.0062, delta:  0.006, source: 'DERIVED (flagged)' },
+  { rank: 4,  name: 'MV Agusta Brutale 1000 RR Assen', year: 2024, cc: '998cc I4', target: 10.15, sim: 10.1571, delta:  0.007, source: 'Cycle World' },
+  { rank: 5,  name: 'Honda CBR 1000RR Fireblade',    year: 2004, cc: '998cc I4', target: 10.30, sim: 10.2917, delta: -0.008, source: 'Sport Rider 2004' },
+  { rank: 6,  name: 'Honda CBR929RR Fireblade',      year: 2000, cc: '929cc I4', target: 10.31, sim: 10.3016, delta: -0.008, source: 'Sport Rider (instrumented)' },
+  { rank: 7,  name: 'Yamaha MT-10 SP',               year: 2022, cc: '998cc I4', target: 10.35, sim: 10.3624, delta:  0.012, source: 'Cycle World' },
+  { rank: 8,  name: 'Honda CBR650R',                 year: 2019, cc: '649cc I4', target: 11.45, sim: 11.4369, delta: -0.013, source: 'MotoStatz (instrumented)' },
+  { rank: 9,  name: 'Kawasaki Ninja ZX-10R',         year: 2011, cc: '998cc I4', target: 10.08, sim: 10.0933, delta:  0.013, source: 'Sport Rider 7/11' },
+  { rank: 10, name: 'Kawasaki ZX-9R Ninja',          year: 1994, cc: '899cc I4', target: 10.65, sim: 10.6343, delta: -0.016, source: 'Cycle World 1994 (timing-strip)' },
 ];
 
 // ─── Stats strip — synced to current motoquant.db (Jul 6 2026) ────────
@@ -82,17 +82,17 @@ const STATS = [
 
 // ─── Reference baselines — pinned to four decimals across every commit ─
 const BASELINES = [
-  { name: 'GSX-R 1000 K5',  et: '10.0334', hp: '178 hp', year: '2005' },
-  { name: 'YZF-R1 4C8',     et: '10.2859', hp: '180 hp', year: '2007' },
-  { name: 'Hayabusa Gen1',  et: '10.4712', hp: '197 hp', year: '1999' },
+  { name: 'GSX-R 1000 K5',  et: '9.9331',  hp: '178 hp', year: '2005' },
+  { name: 'YZF-R1 4C8',     et: '10.1436', hp: '180 hp', year: '2007' },
+  { name: 'Hayabusa Gen1',  et: '10.3633', hp: '197 hp', year: '1999' },
 ];
 
-// ─── Aggregate accuracy tiles (July 2026 sweep) ───────────────────────
+// ─── Aggregate accuracy tiles (13 July 2026 sweep) ────────────────────
 const ACCURACY_TILES = [
-  { num: '221',     label: 'Published benchmarks' },
-  { num: '82',      label: 'Within ±0.10s' },
+  { num: '250',     label: 'Published benchmarks' },
+  { num: '74',      label: 'Within ±0.10s' },
   { num: '137',     label: 'Within ±0.20s' },
-  { num: '±0.006s', label: 'Top 10 mean error' },
+  { num: '±0.009s', label: 'Top 10 mean error' },
 ];
 
 // ─── Tool cards ───────────────────────────────────────────────────────
@@ -159,7 +159,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'How accurate is the quarter-mile prediction?',
-    a: 'MotoQuant Pro is validated against published magazine tests and Dragy runs: Suzuki GSX-R1000 K5 simulates 10.03s against a real 9.97s; Yamaha YZF-R1 simulates 10.29s against 10.3s; Suzuki Hayabusa simulates 10.47s (real range 10.1–10.7s). The July 2026 sweep covers 221 source-quality-weighted benchmarks (246 matched to catalog bikes) with a weighted mean bias of +0.021s; 137 of 246 land within ±0.20s of the published timeslip.',
+    a: 'MotoQuant Pro is validated against published magazine tests and Dragy runs: Suzuki GSX-R1000 K5 simulates 9.93s against a real 9.97s; Yamaha YZF-R1 simulates 10.14s against 10.3s; Suzuki Hayabusa simulates 10.36s (real range 10.1–10.7s). The July 2026 sweep covers 250 source-quality-weighted benchmarks (277 matched to catalog bikes) with a weighted mean bias of +0.017s; 137 of 277 land within ±0.20s of the published timeslip.',
   },
   {
     q: 'Which bikes are supported?',
@@ -273,7 +273,7 @@ function HowItWorks() {
               </div>
               <div className="timeslip-row">
                 <span className="text-white/45">¼-MILE ET</span>
-                <span className="font-bold text-white">10.0334 s</span>
+                <span className="font-bold text-white">9.9331 s</span>
               </div>
               <div className="timeslip-row">
                 <span className="text-white/45">BASELINE</span>
@@ -375,7 +375,7 @@ function ProofSection() {
             We publish the error bars
           </h2>
           <p className="mt-4 max-w-2xl text-white/65">
-            221 weighted benchmarks (246 matched) against published Cycle
+            250 weighted benchmarks (277 matched) against published Cycle
             World, Sport Rider, MCN and Motorcyclist tests. Where the data is
             good, we are within 0.20s — and where it isn&rsquo;t, we say so.
           </p>
@@ -435,7 +435,7 @@ function ProofSection() {
                 MotoQuant timing assoc · official accuracy slip
               </span>
               <span className="label-mono hidden sm:block">
-                10 cleanest pulls · 221 benchmarks
+                10 cleanest pulls · 250 benchmarks
               </span>
             </div>
             <div className="overflow-x-auto">
@@ -675,7 +675,7 @@ function HomePageInner() {
                 >
                   Your bike. Your strip. Your quarter-mile ET — predicted to
                   within{' '}
-                  <span className="text-white">±0.006s</span> on our 10 cleanest validated runs.{' '}
+                  <span className="text-white">±0.009s</span> on our 10 cleanest validated runs.{' '}
                   <span className="text-white">541 Indian and global bikes</span>,{' '}
                   <span className="text-white">593 parts with INR pricing</span>,{' '}
                   <span className="text-white">Aamby Valley to MMRT.</span>
@@ -691,7 +691,7 @@ function HomePageInner() {
                   <span className="text-white">541 bikes</span>,{' '}
                   <span className="text-white">593 parts</span>,{' '}
                   <span className="text-white">20 venues</span> — validated
-                  against 221 published quarter-mile tests — ±0.006s across the 10 cleanest.
+                  against 250 published quarter-mile tests — ±0.009s across the 10 cleanest.
                 </p>
               )}
 
@@ -711,7 +711,7 @@ function HomePageInner() {
               </div>
 
               <div className="mt-6 font-mono text-xs text-white/40 tabular-nums">
-                RK4 · 1ms · 15 sub-models · +0.021s mean bias across 221 benchmarks
+                RK4 · 1ms · 15 sub-models · +0.017s mean bias across 250 benchmarks
               </div>
             </div>
 

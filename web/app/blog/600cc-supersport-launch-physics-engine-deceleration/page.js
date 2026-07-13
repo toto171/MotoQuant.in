@@ -48,7 +48,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The benchmark quality was not the problem. All eight come from instrumented Sport Rider and MotoStatz tests, with documented launch protocols and fifth-wheel or Dragy GPS verification. The bikes were not the problem either. K5 GSX-R 1000, R1 4C8, and Hayabusa Gen 1 — our three load-bearing reference baselines — were nailed to four decimal places (10.0334s / 10.2859s / 10.4712s). The litre-sport-195+ cluster mean absolute delta sat at 0.138 seconds. Whatever was wrong was specific to 600cc inline-fours, not to inline-fours in general and not to the launch model overall.",
+    text: "The benchmark quality was not the problem. All eight come from instrumented Sport Rider and MotoStatz tests, with documented launch protocols and fifth-wheel or Dragy GPS verification. The bikes were not the problem either. K5 GSX-R 1000, R1 4C8, and Hayabusa Gen 1 — our three load-bearing reference baselines — were nailed to four decimal places (10.0334s / 10.2859s / 10.4712s — the pins of that era; the July 2026 physics epoch later re-based them). The litre-sport-195+ cluster mean absolute delta sat at 0.138 seconds. Whatever was wrong was specific to 600cc inline-fours, not to inline-fours in general and not to the launch model overall.", // [historical baselines]
   },
   {
     type: "table",
@@ -275,7 +275,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The K5 GSX-R 1000, R1 4C8, and Hayabusa Gen 1 reference baselines sat at 10.0334s, 10.2859s, and 10.4712s before the change and at exactly those same four-decimal numbers after. K5 and R1 are in the litre-sport-195+ profile (≥600cc sport ≥195hp). Hayabusa Gen 1 is in the other profile (touring category). None of those clusters were touched. Cross-cluster regression was checked across all nine clusters in the bias map; the largest drift was +8 milliseconds on litre-sport-600-1000, and that 8 millisecond drift was entirely caused by six new benchmark matches added independently in the same session (CBR900RR, Fireblade, 929RR, GSX-R 750 1985, GSX-R 750 2008, FZ1 Fazer 2006). On the same-bike subset, the litre-sport-600-1000 cluster numbers are bit-identical before and after.",
+    text: "The K5 GSX-R 1000, R1 4C8, and Hayabusa Gen 1 reference baselines sat at 10.0334s, 10.2859s, and 10.4712s before the change and at exactly those same four-decimal numbers after (the era's pins — since re-based by the July 2026 epoch). K5 and R1 are in the litre-sport-195+ profile (≥600cc sport ≥195hp). Hayabusa Gen 1 is in the other profile (touring category). None of those clusters were touched. Cross-cluster regression was checked across all nine clusters in the bias map; the largest drift was +8 milliseconds on litre-sport-600-1000, and that 8 millisecond drift was entirely caused by six new benchmark matches added independently in the same session (CBR900RR, Fireblade, 929RR, GSX-R 750 1985, GSX-R 750 2008, FZ1 Fazer 2006). On the same-bike subset, the litre-sport-600-1000 cluster numbers are bit-identical before and after.", // [historical baselines]
   },
   {
     type: "p",
