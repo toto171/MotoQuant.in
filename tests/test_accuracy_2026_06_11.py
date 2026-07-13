@@ -125,9 +125,9 @@ class TestLegacyAnchors:
 
     def test_reference_baselines_exact(self):
         for fn, tgt in (
-            (gsxr1000_k5, 10.0334),
-            (yzfr1_4c8, 10.2859),
-            (hayabusa_gen1, 10.4712),
+            (gsxr1000_k5, 9.9331),
+            (yzfr1_4c8, 10.1436),
+            (hayabusa_gen1, 10.3633),
         ):
             r = MotoQuantEngine(fn()).run()
             assert abs(float(r.time_quarter) - tgt) < 5e-5

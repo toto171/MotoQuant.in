@@ -4,7 +4,9 @@
 
 | Name                                | What it is                                          | Size    |
 |-------------------------------------|-----------------------------------------------------|---------|
-| `surrogate_numpy.npz`               | **v2.4 SHIPPED MODEL** — numpy MLP served in prod   | 87 KB   |
+| `surrogate_numpy.npz`               | **v2.5 SHIPPED MODEL** — numpy MLP served in prod   | 87 KB   |
+| `motoquant_surrogate_v2_5.npz`      | v2.5 training dataset (9,124 rows × 26 features)    | 660 KB  |
+| `surrogate_numpy_v2_4.npz.bak`      | v2.4 numpy MLP — rollback copy                      | 87 KB   |
 | `motoquant_surrogate_v2_4.npz`      | v2.4 training dataset (9,126 rows × 26 features)    | 642 KB  |
 | `surrogate_numpy_v2_3.npz.bak`      | v2.3 numpy MLP — rollback copy                      | 85 KB   |
 | `motoquant_surrogate_v2_3.npz`      | v2.3 training dataset (9,094 rows × 26 features)    | 640 KB  |
@@ -14,6 +16,31 @@
 | `motoquant_surrogate_v2_8k5.npz`    | v2.1 training dataset (8,574 rows × 26 features)    | 610 KB  |
 | `surrogate_numpy_v1.npz.bak`        | v1 numpy MLP (K5-only envelope) — rollback copy     | 39 KB   |
 | `motoquant_surrogate_v1_1k5.npz`    | v1 training dataset (K5 Sobol, 1.5k samples)        | 128 KB  |
+
+## v2.5 (July 13, 2026) — physics-epoch + spec-fix regen
+
+Regen trigger: the July-13 physics epoch (locked-clutch deceleration,
+iterated weight-transfer→traction cap, slip-phase ram-air+parasitic,
+front-wheel inertia radius, per-cluster mu_peak_scale recalibration) moved
+the pinned baselines and every catalog bike; 56 spec fixes + full reseed on
+top. Standing contract: **a surrogate is a cache of the physics —
+REGENERATE AFTER ANY RESEED/RETUNE, in the same session.**
+
+FULL regeneration, same recipe as v2.4 (541 bikes → 9,126 tasks, cluster-
+stratified; 9,124 valid rows; hidden 160,96 · epochs 700 · restarts 2):
+
+| Metric (ET)            | v2.4                 | v2.5                                    |
+|------------------------|----------------------|------------------------------------------|
+| Holdout MAE            | 89.2 ms (n=1,361)    | **105.5 ms** (n=1,361)                   |
+| Holdout RMSE           | 191.6 ms             | **254.3 ms**                             |
+| Holdout R²             | 0.9954               | **0.9914**                               |
+| trap MAE               | 1.40 km/h            | 1.58 km/h                                |
+
+The modest accuracy step back is expected: the epoch's converged traction
+cap + shift-window deceleration add launch/shift dynamics the 26-feature
+vector only partially encodes. References: K5 surrogate 10.028 vs physics
+9.933 (+0.095), R1 +0.008, Hayabusa −0.039 — the optimizer's
+full-sim-verify loop covers the K5-class residual as before.
 
 ## v2.4 (July 6, 2026) — taxonomy-v2 retune + reference-row fix
 

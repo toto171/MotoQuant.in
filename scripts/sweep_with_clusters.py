@@ -265,7 +265,7 @@ def _summarize(results):
 def _print_summary(s):
     print("\n=== REFERENCES ===")
     for label, et in s.get("references", {}).items():
-        targets = {"K5": 10.0334, "R1": 10.2859, "Hayabusa": 10.4712}
+        targets = {"K5": 9.9331, "R1": 10.1436, "Hayabusa": 10.3633}
         t = targets.get(label, 0)
         print(f"  {label:10} ET={et:.4f}  target={t:.4f}  Δ={et - t:+.4f}")
     print(

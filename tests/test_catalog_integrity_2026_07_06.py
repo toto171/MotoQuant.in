@@ -372,11 +372,20 @@ class TestNoDuplicateParts:
         assert not dups, f"duplicate (brand, model_name) parts: {dups}"
 
     def test_clutchco_kits_banded_not_stacked(self, conn, repo):
-        """The 8 ClutchCo SKUs must never ALL match one bike — bands cap the
-        per-bike overlap at 2 (plus the boundary case)."""
+        """The 8 banded clutch-kit SKUs must never ALL match one bike — bands
+        cap the per-bike overlap at 2 (plus the boundary case).
+
+        July 13, 2026: the fictional 'ClutchCo' brand was renamed to honest
+        class names under 'Generic' (scrape honesty triage); the rows keep
+        their stable CC-* part numbers, so the banding invariant is tracked
+        through those."""
         clutchco_ids = {
             r["id"]
-            for r in conn.execute("SELECT id FROM parts WHERE brand = 'ClutchCo'")
+            for r in conn.execute(
+                "SELECT p.id FROM parts p JOIN parts_categories c"
+                " ON p.category_id = c.id"
+                " WHERE p.part_number LIKE 'CC-%' AND c.name = 'clutch_kit'"
+            )
         }
         assert len(clutchco_ids) == 8
         for bike_id in (1, 3):  # K5 999cc, Hayabusa 1299cc
@@ -384,7 +393,7 @@ class TestNoDuplicateParts:
                 p["id"] for p in repo.list_compatible_for_bike(bike_id)
             } & clutchco_ids
             assert len(matched) <= 2, (
-                f"bike {bike_id} matches {len(matched)} ClutchCo kits: {matched}"
+                f"bike {bike_id} matches {len(matched)} banded clutch kits: {matched}"
             )
 
 

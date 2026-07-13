@@ -75,6 +75,17 @@ PR #100 review report in `reports/`):
 - **Epoch-gated physics** (Pacejka slip, 4-branch clutch dispatch, staging
   rollout/dead-time) — do NOT wire casually; they move the pinned baselines
   (ADR-0002). Only behind a deliberate, sweep-justified accuracy pass.
+  *(July 13, 2026: the first such epoch landed — locked-clutch deceleration,
+  converged weight-transfer→traction cap, slip-phase ram-air+parasitic,
+  front-wheel inertia radius, per-cluster `mu_peak_scale` recalibration.
+  New pins 9.9331 / 10.1436 / 10.3633; see
+  `reports/session_2026_07_13_epoch_data_hardening.md`.)*
+- **Factory speed-limiter model** — the +20–40 km/h litre top-speed
+  overshoot is NOT the decel clamp (A/B-disproven July 13): sims run to
+  their aero-limited 320–340 km/h against 299-limited published figures.
+  Add a `speed_limiter_kmh` spec field consumed by `run_top_speed` (many
+  top-speed benchmark rows already carry "factory-limited"). Would collapse
+  the top-speed sweep's +28.5 km/h bias.
 
 ## P2 — Growth & moat
 

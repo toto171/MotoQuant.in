@@ -41,7 +41,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'The Suzuki Hayabusa and the Kawasaki Ninja ZX-14R have shared the title of "fastest production motorcycle on a public road" for over twenty years. The two bikes trade wins on every dyno chart, every magazine timing run, and every Sunday morning argument outside Pune coffee shops. MotoQuant simulates the Hayabusa Gen1 reference baseline at 10.4712 seconds and pegs the ZX-14R 2012 in the same hyper-sport cluster. The numbers tell a clearer story than the marketing does — and the answer to "which is faster off the line" depends on what you mean by "off the line".',
+    text: 'The Suzuki Hayabusa and the Kawasaki Ninja ZX-14R have shared the title of "fastest production motorcycle on a public road" for over twenty years. The two bikes trade wins on every dyno chart, every magazine timing run, and every Sunday morning argument outside Pune coffee shops. MotoQuant simulates the Hayabusa Gen1 reference baseline at 10.3633 seconds and pegs the ZX-14R 2012 in the same hyper-sport cluster. The numbers tell a clearer story than the marketing does — and the answer to "which is faster off the line" depends on what you mean by "off the line".',
   },
   {
     type: 'h2',
@@ -53,7 +53,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Below is the spec-sheet comparison MotoQuant uses as input for the simulation. Numbers come from the catalog entries seeded in the project (SUZUKI_HAYABUSA_GEN2 and KAWASAKI_ZX14R_2012). The Hayabusa Gen1 reference baseline used for the validated 10.4712 s ET is a slightly older variant (1999-2007, 170 hp at the wheel) defined separately in defaults.py.',
+    text: 'Below is the spec-sheet comparison MotoQuant uses as input for the simulation. Numbers come from the catalog entries seeded in the project (SUZUKI_HAYABUSA_GEN2 and KAWASAKI_ZX14R_2012). The Hayabusa Gen1 reference baseline used for the validated 10.3633 s ET is a slightly older variant (1999-2007, 170 hp at the wheel) defined separately in defaults.py.',
   },
   {
     type: 'table',
@@ -89,8 +89,8 @@ const CONTENT = [
     type: 'table',
     rows: [
       ['Metric', 'Hayabusa Gen1 (reference)', 'ZX-14R 2012 (sim)'],
-      ['Quarter-mile ET', '10.471 s (validated)', '~10.35 s (sim)'],
-      ['Trap speed', '~235 km/h', '~240 km/h'],
+      ['Quarter-mile ET', '10.363 s (validated)', '~10.11 s (sim)'],
+      ['Trap speed', '~235 km/h', '~254 km/h'],
       ['60-foot time', '~1.74 s', '~1.71 s'],
       ['1/8-mile ET', '~6.9 s', '~6.8 s'],
       ['Top gear at trap', '4th, ~9,200 rpm', '4th, ~9,400 rpm'],
@@ -99,7 +99,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Hayabusa Gen1 number is one of three reference baselines pinned in the simulator at exactly 10.4712 seconds — a fixed-step RK4 integration result that has been load-bearing for every physics change since April 2024. The ZX-14R is a regular catalog bike, so its number lives inside the litre-plus hyper-sport cluster bias band of roughly ±0.15 seconds. The simulator says the ZX-14R has a slim ET advantage of around 0.12 seconds and a slim trap-speed advantage of around 5 km/h, both of which are within the run-to-run variance a real strip would show.',
+    text: 'The Hayabusa Gen1 number is one of three reference baselines pinned in the simulator at exactly 10.3633 seconds — a fixed-step RK4 integration result that has been load-bearing for every physics change since July 13, 2026. The ZX-14R is a regular catalog bike, so its number lives inside the litre-plus hyper-sport cluster bias band of roughly ±0.15 seconds. The simulator says the ZX-14R has a slim ET advantage of around 0.25 seconds and a trap-speed advantage of around 19 km/h, both of which are within the run-to-run variance a real strip would show.',
   },
   {
     type: 'callout',
@@ -146,11 +146,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The 10.4712-second Hayabusa Gen1 ET is one of three reference baselines that every physics change in MotoQuant has to preserve to four decimal places. The other two are the Suzuki GSX-R 1000 K5 at 10.0334 seconds and the Yamaha YZF-R1 4C8 at 10.2859 seconds. These three numbers function as the simulator equivalent of a unit test — every commit that touches engine torque curves, gear ratio handling, clutch dynamics, aero, or tire physics has to leave them at exactly Δ +0.0000s.',
+    text: 'The 10.3633-second Hayabusa Gen1 ET is one of three reference baselines that every physics change in MotoQuant has to preserve to four decimal places. The other two are the Suzuki GSX-R 1000 K5 at 9.9331 seconds and the Yamaha YZF-R1 4C8 at 10.1436 seconds. These three numbers function as the simulator equivalent of a unit test — every commit that touches engine torque curves, gear ratio handling, clutch dynamics, aero, or tire physics has to leave them at exactly Δ +0.0000s.',
   },
   {
     type: 'p',
-    text: 'The reason this matters for a Hayabusa-vs-ZX-14R comparison is that the Hayabusa side of the answer is locked. It is not a magazine number, it is not a simulator estimate, it is a fixed contractual output of the physics engine that has survived hundreds of commits. The ZX-14R number, by contrast, sits inside the wider catalog and carries the litre-plus hyper-sport cluster bias band of about ±0.15 seconds. So the answer "ZX-14R is roughly 0.12 seconds faster" should be read as "the simulator says ZX-14R is faster by an amount that is well within its own uncertainty band".',
+    text: 'The reason this matters for a Hayabusa-vs-ZX-14R comparison is that the Hayabusa side of the answer is locked. It is not a magazine number, it is not a simulator estimate, it is a fixed contractual output of the physics engine that has survived hundreds of commits. The ZX-14R number, by contrast, sits inside the wider catalog and carries the litre-plus hyper-sport cluster bias band of about ±0.15 seconds. So the answer "ZX-14R is roughly 0.25 seconds faster" should be read as "the simulator says ZX-14R is faster by an amount that is well within its own uncertainty band".',
   },
   {
     type: 'p',
@@ -206,11 +206,11 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The honest answer to "Hayabusa vs ZX-14R, which is faster off the line" is: the ZX-14R has a roughly 0.12 second simulator-measured advantage on the quarter mile under matched stock-tune conditions, and that advantage is well inside the bike-to-bike and run-to-run variance both bikes will show on a real strip. On a launch-control 60-foot, the Hayabusa is more consistent because of its more forgiving chassis geometry. On a top-speed run, the ZX-14R wins by 8-12 km/h because of its better aero. On the wallet, the Hayabusa is the easier Indian-market ownership story.',
+    text: 'The honest answer to "Hayabusa vs ZX-14R, which is faster off the line" is: the ZX-14R has a roughly 0.25 second simulator-measured advantage on the quarter mile under matched stock-tune conditions, and that advantage is well inside the bike-to-bike and run-to-run variance both bikes will show on a real strip. On a launch-control 60-foot, the Hayabusa is more consistent because of its more forgiving chassis geometry. On a top-speed run, the ZX-14R wins by 8-12 km/h because of its better aero. On the wallet, the Hayabusa is the easier Indian-market ownership story.',
   },
   {
     type: 'p',
-    text: 'If you own one of these bikes (or are deciding between a used 2018 ZX-14R and a 2024 Hayabusa Gen3 at the same Pune dealer), the simulator at motoquant.in lets you sweep rider weight, ambient temperature, density altitude, tire choice, gearing, and parts-catalog mods to see exactly where your tenths come from. The Hayabusa Gen1 reference number is reference-locked at 10.4712 seconds; the catalog Hayabusa Gen2 and Gen3 entries plus the ZX-14R 2012 entry all run through the same physics with their own spec-sheet inputs.',
+    text: 'If you own one of these bikes (or are deciding between a used 2018 ZX-14R and a 2024 Hayabusa Gen3 at the same Pune dealer), the simulator at motoquant.in lets you sweep rider weight, ambient temperature, density altitude, tire choice, gearing, and parts-catalog mods to see exactly where your tenths come from. The Hayabusa Gen1 reference number is reference-locked at 10.3633 seconds; the catalog Hayabusa Gen2 and Gen3 entries plus the ZX-14R 2012 entry all run through the same physics with their own spec-sheet inputs.',
   },
   {
     type: 'p',
@@ -350,7 +350,7 @@ export default function PostPage() {
               <Link href="/blog/how-the-motoquant-physics-engine-works" className="text-brand-accent hover:text-brand-orange transition-colors">
                 How the MotoQuant Physics Engine Works
               </Link>{' '}
-              — the 15-sub-model RK4 architecture that locks the Hayabusa Gen1 baseline at 10.4712s.
+              — the 15-sub-model RK4 architecture that locks the Hayabusa Gen1 baseline at 10.3633s.
             </li>
             <li>
               ·{' '}

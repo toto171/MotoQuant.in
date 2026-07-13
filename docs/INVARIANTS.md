@@ -8,8 +8,8 @@ invariant deliberately, change its enforcement and this doc in the same PR.
 
 ## I1 — Reference baselines are bit-identical
 
-**What.** `GSX-R 1000 K5 = 10.0334 s`, `YZF-R1 4C8 = 10.2859 s`,
-`Hayabusa Gen1 = 10.4712 s` (full precision in `scripts/check_baselines.py`).
+**What.** `GSX-R 1000 K5 = 9.9331 s`, `YZF-R1 4C8 = 10.1436 s`,
+`Hayabusa Gen1 = 10.3633 s` (full precision in `scripts/check_baselines.py`).
 Refactors must produce Δ = 0.0000.
 
 **Why.** These three are the only hand-curated, human-validated configs. They

@@ -98,7 +98,13 @@ BENCHMARKS: list[tuple[str, str, int, float, str]] = [
     ("Kawasaki", "H2 Mach IV", 1973, 201, "factory"),
     ("Suzuki", "RG500", 1985, 220, "factory"),
     # ── Indian market 150-250cc ──────────────────────────────────────────────
-    ("KTM", "Duke 200", 2019, 145, "factory"),
+    (
+        "KTM",
+        "Duke 200",
+        2019,
+        140.3,
+        "MotoStatz (GPS instrumented; replaces factory-claim 145)",
+    ),
     ("KTM", "Duke 250", 2019, 148, "factory"),
     ("KTM", "RC 390", 2019, 175, "factory / reviews"),
     ("Bajaj", "Dominar 400", 2019, 148, "factory / reviews"),
@@ -124,6 +130,21 @@ BENCHMARKS: list[tuple[str, str, int, float, str]] = [
     ("BMW", "F 900 R", 2020, 200, "factory"),
     ("BMW", "G 310 R", 2017, 148, "factory"),
     ("MV Agusta", "F3 800", 2019, 260, "factory"),
+    # ── July 13, 2026: verified top-speed finds from the 2026-07-10 scrape
+    # corpus (reports/scrape_2026_07_10/bikes_web_data.json). Skipped as
+    # implausible/duplicate: Hayabusa 25th Anniversary "312.1" (Gen3 is
+    # 299-limited like the existing rows), G310R "160" (existing factory 148;
+    # the 160 is likely speedo-indicated), Benda LFC 700 181.9 (existing
+    # Visordown 182 measured row already covers it).
+    ("Bajaj", "Dominar 250", 2021, 142, "owner video test (CarToq / Dino's Vault)"),
+    ("Suzuki", "Gixxer 250", 2020, 151, "IndianAutosBlog top-speed test"),
+    ("Hero", "Karizma R", 2010, 126, "MotorBeam test ride review"),
+    ("Honda", "RC30 (VFR750R)", 1988, 249.4, "Cycle World Feb 1988 (measured)"),
+    ("Honda", "CB Hornet 160R", 2018, 119, "MotorBeam (VBOX tested)"),
+    ("Hero", "Xtreme 250R", 2024, 153, "autoX first ride (real-world)"),
+    ("Hero", "Xtreme 200R", 2019, 110.72, "BikeDekho road test (V-Box tested)"),
+    ("Honda", "CMX500 Rebel", 2022, 152.9, "MotoStatz GPS (cited)"),
+    ("Kawasaki", "W230", 2024, 113, "Bennetts BikeSocial technical review"),
 ]
 
 # July 2026 international expansion — benchmark rows live next to their specs.

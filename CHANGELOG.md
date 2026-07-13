@@ -4,6 +4,65 @@ Notable changes, newest first. This is the human-readable milestone history;
 the exhaustive session-by-session log lives in `CLAUDE.md` (top entry = latest)
 and `reports/`. Format loosely follows [Keep a Changelog](https://keepachangelog.com).
 
+## [PR #109] — 2026-07-13 — Physics epoch + scrape-consumption + hardening
+
+The operator-ordered "all 3 things" pass over the July-11 validation
+scope-out. **The pinned reference baselines moved** (deliberate epoch per
+ADR-0002): K5 10.0334 → **9.9331 s**, R1 10.2859 → **10.1436 s**, Hayabusa
+10.4712 → **10.3633 s** — now tracking their real-world figures (9.97 /
+10.30 / 10.40) closer than the old pins did.
+
+### Changed — physics (epoch items 1–4 from the July-10 review)
+- Deceleration is real once the clutch locks (`a_net` clamp now
+  slip-only): drag/RR act through gearshift torque cuts.
+- Weight-transfer→traction cap converged via fixed-point refinement — wet/
+  salt venue penalties are now honest (the single pass overstated clipped
+  rear load by up to 46% of static).
+- Slip + lock-transition torque now mirrors the locked branch (ram-air ×
+  FI − parasitic).
+- Front-wheel inertia over the FRONT rolling radius in effective mass.
+- New `CategoryProfile.mu_peak_scale` recalibration knob, grid-tuned per
+  cluster against the 277-match corpus (guard + liveness pinned).
+
+### Added — data (scrape-consumption pass)
+- ET benchmark corpus 221 → **250 unique rows** (277 matched); 6
+  conflicting finds adjudicated and rejected with web verification.
+  Top-speed corpus 77 → 86.
+- 56 high-confidence spec fixes applied to the `known_bikes*.py` sources
+  (R9 117.4 hp, RC213V-S 159 hp street, Z H2 SE 197.3 hp, GSX-R K1/K3
+  160/164 hp, 23 kerb masses …).
+- `scripts/patch_2026_07_13_scrape_data.py` (idempotent): 282 part
+  reprices from live listings (72 INR direct + 210 USD landed-cost),
+  6 discontinued units flagged, 25 fictional-brand SKUs renamed to honest
+  class names (folded into `seed.py` so a fresh seed can't resurrect
+  them), 24 discontinued/not-found tire families flagged, 19 tire prices.
+- New authoritative sweep `reports/acc_final_2026_07_13.json`: weighted
+  |Δ| **0.2533 s** / bias **+0.0166 s** (honest decomposition in
+  `reports/session_2026_07_13_epoch_data_hardening.md`: 0.2166 → 0.2404
+  corpus expansion, → 0.2533 physics epoch after retune).
+
+### Fixed
+- `config_io` save/load dropped `category_tag` — loaded configs silently
+  ran the "unknown" physics profile (file-based twin of the July-2 bridge
+  bug; exposed by the epoch's cluster grip knobs).
+- Unknown `boost_type` strings now raise at engine construction (were
+  silently granted the ×0.97 boosted-DA floor with zero boost); API
+  returns 422 naming the offending part.
+- `max_time_s` request floor (`ge=0.1`) — sub-dt values crashed the
+  engine with an unhandled ValueError.
+
+### Removed
+- Dead knobs: `AeroParams.headwind_ms`/`crosswind_ms`; the never-called
+  `RiderDynamicsModel.cog_shift`/`wheelbase_weight_split` pair.
+
+### Docs / site
+- Golden + surrogate regenerated; `/validation` data + sitewide stats
+  synced to the new sweep on the STAGED v4 design; new pins in
+  `AGENTS.md`, `docs/INVARIANTS.md`, `scripts/check_baselines.py`.
+- Finding: the litre top-speed overshoot is a missing factory
+  speed-limiter model, NOT the decel clamp (A/B-proven; scoped for a
+  future pass).
+
 ## [PR #108] — 2026-07-11 — PR #105/#106 post-merge validation & measurement
 
 Full validation pass over the two July-10 auto-session merges (operator

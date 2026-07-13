@@ -674,6 +674,15 @@ PATTERNS = [
 ]
 
 
+# Lines carrying this marker narrate a DATED historical episode (e.g. "the
+# baselines sat at 10.0334s before/after that change") — the numbers are
+# facts about a past epoch, not live claims, so rewriting them to the
+# current pins would falsify history. Writers must pair the marker with an
+# explicit date/epoch reference in the same passage. Added July 13, 2026
+# when the physics epoch re-based the reference pins.
+HISTORICAL_LINE_MARKER = "[historical baselines]"
+
+
 def _scan_file(path: Path, pattern: str, truth_value):
     """Return list of (line_num, declared, drift_bool, line_preview, match_obj) tuples."""
     out = []
@@ -682,6 +691,8 @@ def _scan_file(path: Path, pattern: str, truth_value):
     except Exception:
         return out
     for i, line in enumerate(text.splitlines(), start=1):
+        if HISTORICAL_LINE_MARKER in line:
+            continue
         for m in re.finditer(pattern, line):
             declared = m.group(1)
             try:
@@ -702,7 +713,11 @@ def _scan_file(path: Path, pattern: str, truth_value):
 
 
 def _patch_file(path: Path, pattern: str, truth_value) -> int:
-    """Apply pattern in-place, replacing group(1) with truth_value. Returns count of edits."""
+    """Apply pattern in-place, replacing group(1) with truth_value. Returns count of edits.
+
+    Lines carrying HISTORICAL_LINE_MARKER are never patched (see the marker's
+    doc comment) — _scan_file skips them, so they are never reported as drift
+    either; this guard is belt-and-braces for direct callers."""
     if isinstance(truth_value, str) and (
         truth_value.startswith(("ERROR", TEST_COUNT_SKIP_PREFIX))
     ):
@@ -741,7 +756,14 @@ def _patch_file(path: Path, pattern: str, truth_value) -> int:
         edits += 1
         return full[:start_in_match] + truth_str + full[end_in_match:]
 
-    new_text = re.sub(pattern, _replacer, text)
+    # Patch line-by-line so HISTORICAL_LINE_MARKER lines are never touched.
+    out_lines = []
+    for line in text.splitlines(keepends=True):
+        if HISTORICAL_LINE_MARKER in line:
+            out_lines.append(line)
+            continue
+        out_lines.append(re.sub(pattern, _replacer, line))
+    new_text = "".join(out_lines)
     if edits > 0 and new_text != text:
         path.write_text(new_text, encoding="utf-8")
     return edits
@@ -854,10 +876,11 @@ def regenerate_og_card(truth, output_path: Path | None = None, verbose=True) -> 
     d.text((60, 132), "MotoQuant", font=f_brand, fill=TEXT)
     d.text((60, 240), "The Physics of Faster", font=f_tag, fill=ORANGE)
 
-    # Top-10 mean accuracy from latest sweep. Fallback = the June-13 2026
-    # published corpus value (docs/validation top-10 mean ±0.006s) — the old
-    # ±0.032 fallback predated two accuracy passes and understated the site.
-    top10 = "±0.006"
+    # Top-10 mean accuracy from latest sweep. Fallback = the July-13 2026
+    # published corpus value (docs/validation top-10 mean ±0.009s) — the old
+    # ±0.006 fallback predated the physics-recalibration + corpus-expansion
+    # epoch and understated the site.
+    top10 = "±0.009"
     try:
         sweep_files = sorted(REPO.glob("reports/sweep_et_*.json"), reverse=True)
         if sweep_files:

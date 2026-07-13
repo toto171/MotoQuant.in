@@ -9,7 +9,7 @@ import TerminalCtaVariant from './TerminalCtaVariant';
 export const metadata = {
   title: 'Whitepaper — MotoQuant Pro Physics Engine (Pacejka Tire Model + RK4)',
   description:
-    'MotoQuant Pro whitepaper: a free Pacejka tire-model motorcycle quarter-mile calculator built on 15 sub-models and RK4 integration at 1 ms, validated against 221 source-quality-weighted benchmarks across a cylinder-aware 12-cluster taxonomy. Reference baselines K5 / R1 / Hayabusa accurate to four decimals across every commit.',
+    'MotoQuant Pro whitepaper: a free Pacejka tire-model motorcycle quarter-mile calculator built on 15 sub-models and RK4 integration at 1 ms, validated against 250 source-quality-weighted benchmarks across a cylinder-aware 12-cluster taxonomy. Reference baselines K5 / R1 / Hayabusa accurate to four decimals across every commit.',
   alternates: { canonical: 'https://motoquant.in/whitepaper' },
   keywords: [
     'motoquant whitepaper',
@@ -30,7 +30,7 @@ export const metadata = {
   },
 };
 
-const ABSTRACT = `MotoQuant Pro is a first-principles physics engine for predicting motorcycle quarter-mile drag-racing elapsed times. The model couples 15 independent sub-models — engine torque (Willans friction), Pacejka tire grip with thermal evolution, gear-shift and clutch slip dynamics, weight transfer and rider centre-of-gravity shift, aerodynamic drag with per-bike Cd × A, environmental conditions (density altitude, surface μ, ambient temp), and parasitic loss budget — through a fixed-step fourth-order Runge–Kutta integrator running at one-millisecond resolution. As of the July 2026 sweep we validate against 221 source-quality-weighted published quarter-mile benchmarks (246 matched) across a cylinder-aware 12-cluster taxonomy. Overall weighted bias is +0.021 s; weighted mean absolute error is 0.217 s. Within instrumented-magazine-data clusters (litre-sport ≥195 hp), weighted bias is +0.007 s and |Δ| is 0.125 s; across the ten cleanest validated runs the mean absolute error is ±0.006 s. Three reference baselines — GSX-R 1000 K5, YZF-R1 4C8, and Suzuki Hayabusa Gen1 — are preserved exactly to the fourth decimal place across every code change since April 30, 2026.`;
+const ABSTRACT = `MotoQuant Pro is a first-principles physics engine for predicting motorcycle quarter-mile drag-racing elapsed times. The model couples 15 independent sub-models — engine torque (Willans friction), Pacejka tire grip with thermal evolution, gear-shift and clutch slip dynamics, weight transfer and rider centre-of-gravity shift, aerodynamic drag with per-bike Cd × A, environmental conditions (density altitude, surface μ, ambient temp), and parasitic loss budget — through a fixed-step fourth-order Runge–Kutta integrator running at one-millisecond resolution. As of the July 2026 sweep we validate against 250 source-quality-weighted published quarter-mile benchmarks (277 matched) across a cylinder-aware 12-cluster taxonomy. Overall weighted bias is +0.017 s; weighted mean absolute error is 0.253 s. Within instrumented-magazine-data clusters (litre-sport ≥195 hp), weighted bias is +0.038 s and |Δ| is 0.147 s; across the ten cleanest validated runs the mean absolute error is ±0.009 s. Three reference baselines — GSX-R 1000 K5, YZF-R1 4C8, and Suzuki Hayabusa Gen1 — are preserved exactly to the fourth decimal place across every code change since July 13, 2026.`;
 
 const SECTIONS = [
   {
@@ -84,7 +84,7 @@ const SECTIONS = [
     n: '4',
     title: 'Validation Methodology',
     body: [
-      'As of the July 2026 sweep we benchmark against 221 published quarter-mile elapsed times (246 matched to a catalog bike) where the bike, year range, and venue conditions are unambiguous. Sources are classified by quality and weighted accordingly:',
+      'As of the July 2026 sweep we benchmark against 250 published quarter-mile elapsed times (277 matched to a catalog bike) where the bike, year range, and venue conditions are unambiguous. Sources are classified by quality and weighted accordingly:',
     ],
     list: {
       title: 'Source-quality weights',
@@ -108,23 +108,23 @@ const SECTIONS = [
     table: {
       head: ['Cluster', 'N', 'Weighted bias', 'Weighted |Δ|'],
       rows: [
-        ['Litre Sport ≥195 hp',          '29',  '+0.007 s', '0.125 s'],
-        ['Litre Sport 600–1000 (I4/I3)', '69',  '+0.005 s', '0.158 s'],
-        ['Sport Twin 600–1300',          '42',  '+0.002 s', '0.187 s'],
-        ['Mid-Twin 500–700',             '13',  '+0.047 s', '0.132 s'],
-        ['Mid-Twin 300–500',             '7',   '+0.124 s', '0.394 s'],
-        ['Single 300–500',               '15',  '−0.046 s', '0.484 s'],
-        ['Entry 200–300',                '14',  '+0.114 s', '0.282 s'],
-        ['Entry 150–200',                '12',  '+0.018 s', '0.820 s'],
-        ['Small-cc I4 screamer',         '2',   '+0.091 s', '0.351 s'],
-        ['Two-stroke',                   '6',   '+0.146 s', '0.537 s'],
-        ['Cruiser 1300+',                '3',   '+0.231 s', '0.231 s'],
-        ['Other',                        '34',  '+0.045 s', '0.277 s'],
-        ['All clusters · weighted',      '246', '+0.021 s', '0.217 s'],
+        ['Litre Sport ≥195 hp',          '30',  '+0.038 s', '0.147 s'],
+        ['Litre Sport 600–1000 (I4/I3)', '72',  '+0.002 s', '0.177 s'],
+        ['Sport Twin 600–1300',          '48',  '−0.000 s', '0.256 s'],
+        ['Mid-Twin 500–700',             '18',  '−0.014 s', '0.152 s'],
+        ['Mid-Twin 300–500',             '8',   '+0.124 s', '0.400 s'],
+        ['Single 300–500',               '16',  '−0.040 s', '0.492 s'],
+        ['Entry 200–300',                '14',  '+0.137 s', '0.295 s'],
+        ['Entry 150–200',                '13',  '−0.030 s', '0.754 s'],
+        ['Small-cc I4 screamer',         '2',   '+0.032 s', '0.417 s'],
+        ['Two-stroke',                   '9',   '+0.130 s', '0.659 s'],
+        ['Cruiser 1300+',                '5',   '+0.050 s', '0.210 s'],
+        ['Other',                        '42',  '+0.024 s', '0.302 s'],
+        ['All clusters · weighted',      '277', '+0.017 s', '0.253 s'],
       ],
     },
     body: [
-      'The most accurate clusters are litre-sport ≥195 hp (+0.007 s weighted bias, 0.125 s weighted MAE) and mid-twin 500–700 (0.132 s weighted MAE) — well within the ±0.20 s tolerance the modern instrumented Cycle World and Sport Rider tests themselves report as 1-σ test-to-test variation; across the ten cleanest validated runs the mean absolute error is ±0.006 s. Overall weighted bias of +0.021 s indicates the model is essentially centred at zero, and 137 of the 246 matched benchmarks fall within ±0.20 s (82 within ±0.10 s, 44 within ±0.05 s). The remaining residual is bounded by benchmark-data quality, not by physics model fidelity: the small-cc and two-stroke clusters draw heavily from derived benchmarks with declared ±0.7 s uncertainty, fundamentally limiting validation precision regardless of how well the physics is modelled.',
+      'The most accurate clusters are litre-sport ≥195 hp (+0.038 s weighted bias, 0.147 s weighted MAE) and mid-twin 500–700 (0.152 s weighted MAE) — well within the ±0.20 s tolerance the modern instrumented Cycle World and Sport Rider tests themselves report as 1-σ test-to-test variation; across the ten cleanest validated runs the mean absolute error is ±0.009 s. Overall weighted bias of +0.017 s indicates the model is essentially centred at zero, and 137 of the 277 matched benchmarks fall within ±0.20 s (74 within ±0.10 s, 36 within ±0.05 s). The remaining residual is bounded by benchmark-data quality, not by physics model fidelity: the small-cc and two-stroke clusters draw heavily from derived benchmarks with declared ±0.7 s uncertainty, fundamentally limiting validation precision regardless of how well the physics is modelled.',
     ],
   },
   {
@@ -137,13 +137,13 @@ const SECTIONS = [
     table: {
       head: ['Bike', 'Year', 'Power', 'Reference ET', 'Δ (current)'],
       rows: [
-        ['Suzuki GSX-R 1000 K5',  '2005', '178 hp', '10.0334 s', '±0.0000 s'],
-        ['Yamaha YZF-R1 4C8',     '2007', '180 hp', '10.2859 s', '±0.0000 s'],
-        ['Suzuki Hayabusa Gen1',  '1999', '197 hp', '10.4712 s', '±0.0000 s'],
+        ['Suzuki GSX-R 1000 K5',  '2005', '178 hp', '9.9331 s', '±0.0000 s'],
+        ['Yamaha YZF-R1 4C8',     '2007', '180 hp', '10.1436 s', '±0.0000 s'],
+        ['Suzuki Hayabusa Gen1',  '1999', '197 hp', '10.3633 s', '±0.0000 s'],
       ],
     },
     body2: [
-      'These baselines have not drifted since April 30, 2026 — across catalog expansions, physics tuning passes, importer changes, and two generations of the cluster taxonomy. Drift protection now comes from a full-catalog regression golden rather than a special-cased tuning constraint on these three bikes, and a regression in any of them still fails CI immediately.',
+      'These baselines were re-pinned on July 13, 2026 as part of a physics-recalibration epoch paired with a benchmark-corpus expansion (221 → 250 unique tests); since that pin they have not drifted across catalog expansions, physics tuning passes, importer changes, or further cluster-taxonomy revisions. Drift protection comes from a full-catalog regression golden rather than a special-cased tuning constraint on these three bikes, and a regression in any of them still fails CI immediately.',
     ],
   },
   {
@@ -321,15 +321,15 @@ export default function WhitepaperPage() {
             </p>
 
             {/* Top-level stats — timing-board tiles, regenerated from the
-                6 July 2026 sweep (reports/acc_final_2026_07_06.json): 221 benchmarks,
-                246 matched, weighted bias +0.021 s. Same corpus as /features and
+                13 July 2026 sweep (reports/acc_final_2026_07_13.json): 250 benchmarks,
+                277 matched, weighted bias +0.017 s. Same corpus as /features and
                 /docs/validation. */}
             <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { seg: '15', label: 'Sub-models' },
                 { seg: '541', label: 'Catalog bikes' },
-                { seg: '221', label: 'Weighted benchmarks' },
-                { seg: '0.021', pre: '+', post: 's', label: 'Weighted bias' },
+                { seg: '250', label: 'Weighted benchmarks' },
+                { seg: '0.017', pre: '+', post: 's', label: 'Weighted bias' },
               ].map(t => (
                 <div key={t.label} className="card p-4">
                   <div className="flex items-end justify-center gap-1">

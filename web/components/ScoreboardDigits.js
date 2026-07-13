@@ -8,7 +8,7 @@
  * exact component API so every call site (blog posts, features, whitepaper,
  * /r/[id], simulator) re-skins without churn:
  *
- *   <ScoreboardDigits value="10.0334" h={36} />
+ *   <ScoreboardDigits value="9.9331" h={36} />
  *   <ScoreboardCounter value={541} h={34} />   // counts up on first view
  *
  * `h` is the legacy digit-height prop — mapped to font-size. Legacy brand

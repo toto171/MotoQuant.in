@@ -125,7 +125,7 @@ export default function AboutPage() {
                 First-principles physics can. Every sub-model — Pacejka tire, Willans friction engine, RK4 integrator — produces physically interpretable outputs. When the model is wrong, we can find and fix the cause. When you add a part, the physics of that part propagates through the whole system.
               </p>
               <p>
-                Top-10 mean error after our July 2026 calibration pass: <strong className="font-mono tabular-nums text-accent">±0.006s</strong>. Reference baselines within 0.001s of targets. That&apos;s what first principles buys you.
+                Top-10 mean error after our July 2026 calibration pass: <strong className="font-mono tabular-nums text-accent">±0.009s</strong>. Reference baselines pinned bit-identical across every commit. That&apos;s what first principles buys you.
               </p>
             </div>
           </Reveal>

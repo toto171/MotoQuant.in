@@ -8,10 +8,15 @@ Computes torque multiplier and boost pressure dynamics.
 from ..constants import RPM_TO_RADS
 from ..models import (
     BOOST_N2O,
+    BOOST_NA,
     BOOST_SC_CENTRIFUGAL,
     BOOST_SC_ROOTS,
     BOOST_TURBO,
     BikeConfig,
+)
+
+VALID_BOOST_TYPES = frozenset(
+    {BOOST_NA, BOOST_TURBO, BOOST_SC_ROOTS, BOOST_SC_CENTRIFUGAL, BOOST_N2O}
 )
 
 
@@ -19,6 +24,15 @@ class ForcedInductionModel:
     """Forced induction torque multiplier and boost dynamics."""
 
     def __init__(self, cfg: BikeConfig, rho: float):
+        bt = cfg.forced_induction.boost_type
+        if bt not in VALID_BOOST_TYPES:
+            # An unrecognized string previously slipped through silently:
+            # torque_mult fell through to 1.0 (zero boost) while is_boosted
+            # still granted the x0.97 density-altitude floor — the config
+            # simmed almost-but-not-quite like NA with no warning.
+            raise ValueError(
+                f"unknown boost_type {bt!r} — valid values: {sorted(VALID_BOOST_TYPES)}"
+            )
         self.cfg = cfg
         self.rho = rho
 

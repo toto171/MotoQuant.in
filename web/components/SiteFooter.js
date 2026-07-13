@@ -99,13 +99,13 @@ export default function SiteFooter() {
             any motorcycle manufacturer.
           </p>
           <p className="flex flex-wrap gap-x-4 gap-y-1">
-            <span>K5 · 10.0334s</span>
+            <span>K5 · 9.9331s</span>
             <span className="text-white/20">·</span>
-            <span>R1 · 10.2859s</span>
+            <span>R1 · 10.1436s</span>
             <span className="text-white/20">·</span>
-            <span>Hayabusa · 10.4712s</span>
+            <span>Hayabusa · 10.3633s</span>
             <span className="text-white/20">·</span>
-            <span>±0.0000 since Apr 30, 2026</span>
+            <span>±0.0000 since Jul 13, 2026</span>
           </p>
         </div>
       </div>

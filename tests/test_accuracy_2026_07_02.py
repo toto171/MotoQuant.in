@@ -102,9 +102,9 @@ class TestReferenceBaselinesUntouched:
         from motoquant.defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 
         for fn, target in [
-            (gsxr1000_k5, 10.0334),
-            (yzfr1_4c8, 10.2859),
-            (hayabusa_gen1, 10.4712),
+            (gsxr1000_k5, 9.9331),
+            (yzfr1_4c8, 10.1436),
+            (hayabusa_gen1, 10.3633),
         ]:
             r = motoquant.MotoQuantEngine(fn()).run()
             assert r.time_quarter == pytest.approx(target, abs=0.02)

@@ -105,6 +105,14 @@ class CategoryProfile:
     # config copy whose tires.mu_peak is replaced by this value (launch
     # traction + thermal grip path). None in every profile today.
     mu_peak_override: float | None = None
+    # Multiplicative launch-grip recalibration, applied AFTER the override
+    # (tires.mu_peak × scale). WIRED July 13, 2026 for the traction-cap
+    # epoch: the iterated weight-transfer→traction fix removed the
+    # inflated rear-load feed the old per-cluster grip calibration was
+    # implicitly tuned against, so clusters re-center with a scale that
+    # PRESERVES each bike's relative rubber (unlike the hard override).
+    # 1.0 = bit-identical no-op.
+    mu_peak_scale: float = 1.0
     # Pacejka shape factor C — sport tires 1.65 (peakier), commuter
     # 1.45 (rounder peak, more forgiving but lower max).
     pacejka_C: float | None = None
@@ -159,6 +167,13 @@ _PROFILES: dict[str, CategoryProfile] = {
         tuck_transition_time_s=1.5,
         cd_ceiling=0.40,
         mu_peak_override=None,  # use importer default (sport ≥600cc → 1.40)
+        # July 13, 2026 epoch recalibration: the iterated weight-
+        # transfer→traction-cap fix removed the inflated rear-load feed
+        # the previous grip calibration was implicitly tuned against;
+        # mu_peak_scale re-centers the cluster on the 277-match weighted
+        # corpus while preserving each bike's relative rubber
+        # (scripts/tune_cluster_knobs.py grids, session 2026-07-13).
+        mu_peak_scale=1.08,
         pacejka_C=1.65,
         engine_inertia_mult=1.0,
         parasitic_mult=1.0,
@@ -166,6 +181,13 @@ _PROFILES: dict[str, CategoryProfile] = {
     ),
     CATEGORY_LITRE_SPORT_600_1000: CategoryProfile(
         name=CATEGORY_LITRE_SPORT_600_1000,
+        # July 13, 2026 epoch recalibration: the iterated weight-
+        # transfer→traction-cap fix removed the inflated rear-load feed
+        # the previous grip calibration was implicitly tuned against;
+        # mu_peak_scale re-centers the cluster on the 277-match weighted
+        # corpus while preserving each bike's relative rubber
+        # (scripts/tune_cluster_knobs.py grids, session 2026-07-13).
+        mu_peak_scale=1.07,
         over_clutch_factor=0.0,
         max_engine_decel_rads2=0.0,
         launch_floor_factor=0.0,
@@ -202,6 +224,13 @@ _PROFILES: dict[str, CategoryProfile] = {
         # the effective launch mu sits below the compound's peak. Grid
         # 1.20-1.35: w|d| 0.2622 -> 0.1871, w_bias -0.1778 -> +0.0019 at 1.31.
         mu_peak_override=1.31,
+        # July 13, 2026 epoch recalibration: the iterated weight-
+        # transfer→traction-cap fix removed the inflated rear-load feed
+        # the previous grip calibration was implicitly tuned against;
+        # mu_peak_scale re-centers the cluster on the 277-match weighted
+        # corpus while preserving each bike's relative rubber
+        # (scripts/tune_cluster_knobs.py grids, session 2026-07-13).
+        mu_peak_scale=1.085,
         pacejka_C=1.60,
         engine_inertia_mult=1.0,
         parasitic_mult=1.0,
@@ -209,6 +238,16 @@ _PROFILES: dict[str, CategoryProfile] = {
     ),
     CATEGORY_SMALL_I4_SCREAMER: CategoryProfile(
         name=CATEGORY_SMALL_I4_SCREAMER,
+        # July 13, 2026 epoch recalibration: the iterated weight-
+        # transfer→traction-cap fix removed the inflated rear-load feed
+        # the previous grip calibration was implicitly tuned against;
+        # mu_peak_scale re-centers the cluster on the 277-match weighted
+        # corpus while preserving each bike's relative rubber
+        # (scripts/tune_cluster_knobs.py grids, session 2026-07-13).
+        # (n=2 cluster — ZX-25R/ZX-4RR; the pre-epoch fit used the
+        # decel=2800 over-clutch fudge for the same reason. Effective
+        # launch mu ~1.8 is the single-knob fit, honest about thinness.)
+        mu_peak_scale=1.30,
         # Sub-500cc inline-fours (ZX-4RR 399, ZX-25R 249, CB400SF class).
         # Split out of mid_twin_300_500 July 6, 2026: these 15-17k rpm
         # screamers launch like 600 supersports (high slip, hard clutch
@@ -256,7 +295,7 @@ _PROFILES: dict[str, CategoryProfile] = {
         # family) grips well below the sport-radial 1.30 the importer
         # assigns 300-600cc sport bikes. Grid 1.08-1.12: w|d| 0.488 -> 0.484,
         # w_bias -0.132 -> -0.046 at 1.10.
-        mu_peak_override=1.10,
+        mu_peak_override=1.18,
         pacejka_C=1.50,
         engine_inertia_mult=1.0,
         parasitic_mult=1.0,
@@ -265,6 +304,13 @@ _PROFILES: dict[str, CategoryProfile] = {
     ),
     CATEGORY_MID_TWIN_500_700: CategoryProfile(
         name=CATEGORY_MID_TWIN_500_700,
+        # July 13, 2026 epoch recalibration: the iterated weight-
+        # transfer→traction-cap fix removed the inflated rear-load feed
+        # the previous grip calibration was implicitly tuned against;
+        # mu_peak_scale re-centers the cluster on the 277-match weighted
+        # corpus while preserving each bike's relative rubber
+        # (scripts/tune_cluster_knobs.py grids, session 2026-07-13).
+        mu_peak_scale=1.14,
         # Mild over-clutching — these bikes are power-limited but not
         # ridiculously so. Helps fight the +0.5-0.8s residual bias on
         # SV650/Z650/Ninja 650/MT-07 documented in CLAUDE.md.
@@ -293,6 +339,13 @@ _PROFILES: dict[str, CategoryProfile] = {
     ),
     CATEGORY_MID_TWIN_300_500: CategoryProfile(
         name=CATEGORY_MID_TWIN_300_500,
+        # July 13, 2026 epoch recalibration: the iterated weight-
+        # transfer→traction-cap fix removed the inflated rear-load feed
+        # the previous grip calibration was implicitly tuned against;
+        # mu_peak_scale re-centers the cluster on the 277-match weighted
+        # corpus while preserving each bike's relative rubber
+        # (scripts/tune_cluster_knobs.py grids, session 2026-07-13).
+        mu_peak_scale=1.12,
         # Moderate over-clutching. Legacy `peak_hp < 60` 0.30 factor.
         over_clutch_factor=0.30,
         # max_engine_decel_rads2 lowered 200 -> 50 (2026-06-11 calibration):
@@ -404,6 +457,13 @@ _PROFILES: dict[str, CategoryProfile] = {
         # 2T tires: vintage rubber (RD350, NSR250) are bias-ply with low
         # peak grip; modern 2T (KTM 300 EXC) more like 1.20.
         mu_peak_override=None,  # honor importer default (varies by year)
+        # July 13, 2026 epoch recalibration: the iterated weight-
+        # transfer→traction-cap fix removed the inflated rear-load feed
+        # the previous grip calibration was implicitly tuned against;
+        # mu_peak_scale re-centers the cluster on the 277-match weighted
+        # corpus while preserving each bike's relative rubber
+        # (scripts/tune_cluster_knobs.py grids, session 2026-07-13).
+        mu_peak_scale=1.15,
         engine_inertia_mult=0.60,  # half-stroke + lighter crank
         parasitic_mult=0.20,  # no valvetrain, premix oil pump only
         chain_efficiency_override=0.95,
@@ -411,6 +471,13 @@ _PROFILES: dict[str, CategoryProfile] = {
     ),
     CATEGORY_CRUISER_1300P: CategoryProfile(
         name=CATEGORY_CRUISER_1300P,
+        # July 13, 2026 epoch recalibration: the iterated weight-
+        # transfer→traction-cap fix removed the inflated rear-load feed
+        # the previous grip calibration was implicitly tuned against;
+        # mu_peak_scale re-centers the cluster on the 277-match weighted
+        # corpus while preserving each bike's relative rubber
+        # (scripts/tune_cluster_knobs.py grids, session 2026-07-13).
+        mu_peak_scale=1.20,
         # Cruisers & muscle bikes (VMAX 1700, Rocket 3) torque off the
         # line. Heavy flywheel.
         # 2026-06-11 calibration: both benchmarked rows (VMAX 1700 +0.477,
@@ -444,6 +511,13 @@ _PROFILES: dict[str, CategoryProfile] = {
     ),
     CATEGORY_OTHER: CategoryProfile(
         name=CATEGORY_OTHER,
+        # July 13, 2026 epoch recalibration: the iterated weight-
+        # transfer→traction-cap fix removed the inflated rear-load feed
+        # the previous grip calibration was implicitly tuned against;
+        # mu_peak_scale re-centers the cluster on the 277-match weighted
+        # corpus while preserving each bike's relative rubber
+        # (scripts/tune_cluster_knobs.py grids, session 2026-07-13).
+        mu_peak_scale=1.15,
         # Catch-all for ADV / touring / scooter / unknown. Conservative
         # mid-tier over-clutching, generous tuck timing.
         # 2026-06-11 calibration: the 15 benchmarked "other" bikes (heavy

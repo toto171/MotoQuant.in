@@ -600,6 +600,7 @@ def _apply_parts_to_config(
 
     try:
         from .database.bridge import apply_part_to_config
+        from .submodels.forced_induction import VALID_BOOST_TYPES
 
         for pid in part_ids:
             row = db.execute("SELECT * FROM parts WHERE id=?", (pid,)).fetchone()
@@ -607,6 +608,17 @@ def _apply_parts_to_config(
                 continue
             part_dict = dict(row)
             cfg = apply_part_to_config(cfg, part_dict)
+            # A part carrying a typo'd boost_type would otherwise surface as
+            # a 500 when the engine's ForcedInductionModel guard fires — turn
+            # it into a client-visible 422 naming the offending part.
+            bt = cfg.forced_induction.boost_type
+            if bt not in VALID_BOOST_TYPES:
+                raise HTTPException(
+                    422,
+                    f"Part {part_dict['id']} ({part_dict.get('model_name', '')}) "
+                    f"sets invalid boost_type {bt!r}; valid: "
+                    f"{sorted(VALID_BOOST_TYPES)}",
+                )
             summary: AppliedPartDict = {
                 "id": part_dict["id"],
                 "name": part_dict.get("model_name", ""),
@@ -617,6 +629,8 @@ def _apply_parts_to_config(
             parts_applied.append(summary)
             if part_dict.get("price_inr"):
                 build_cost += float(part_dict["price_inr"])
+    except HTTPException:
+        raise  # the invalid-boost_type 422 above must reach the client
     except Exception as exc:  # noqa: BLE001
         logging.getLogger(__name__).warning(
             "Failed to apply parts %s: %s", part_ids, exc
@@ -1304,9 +1318,12 @@ class TopSpeedRequest(BaseModel):
     humidity_pct: float | None = None
     headwind_kmh: float | None = None
     # LSR-specific: optional override for max time/distance.
-    # Bounded: n_max preallocates 17 float64 arrays of max_time_s/dt slots,
-    # so an unbounded value is a remotely-triggerable memory bomb.
-    max_time_s: float = Field(120.0, gt=0, le=300.0)
+    # Bounded: n_max preallocates 18 float64 arrays of max_time_s/dt slots
+    # (they grow on demand only under adaptive dt), so an unbounded value is
+    # a remotely-triggerable memory bomb. Floor at 0.1 s: a max_time below
+    # the solver dt raised an unhandled ValueError deep in the engine
+    # (found July 11, 2026 review) — reject it at validation instead.
+    max_time_s: float = Field(120.0, ge=0.1, le=300.0)
     include_timeseries: bool = False
 
 
@@ -1424,7 +1441,8 @@ class DistanceRunRequest(BaseModel):
     track_temp_c: float | None = None
     humidity_pct: float | None = None
     headwind_kmh: float | None = None
-    max_time_s: float = Field(120.0, gt=0, le=300.0)
+    # Same floor rationale as TopSpeedRequest.max_time_s (>= dt).
+    max_time_s: float = Field(120.0, ge=0.1, le=300.0)
 
 
 @app.post("/api/simulate/distance", dependencies=[Depends(_meter_full_sim)])

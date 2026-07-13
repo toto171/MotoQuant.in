@@ -254,9 +254,9 @@ def test_larger_frontal_area_means_slower_et(bike_factory, fa_low, fa_high):
 @pytest.mark.parametrize(
     ("factory", "target"),
     [
-        (gsxr1000_k5, 10.0334),
-        (yzfr1_4c8, 10.2859),
-        (hayabusa_gen1, 10.4712),
+        (gsxr1000_k5, 9.9331),
+        (yzfr1_4c8, 10.1436),
+        (hayabusa_gen1, 10.3633),
     ],
 )
 def test_reference_baselines_pinned_after_property_runs(factory, target):

@@ -89,7 +89,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Start with the bike that anchors the simulator. The Hayabusa Gen 1 is one of three reference baselines that every MotoQuant build holds to four decimal places: 10.4712 s at the reference Aamby Valley November condition (679 m, 22 °C, 40 percent RH). That number is locked. The other four Indian venues run the same engine through the same drivetrain into the same tyres, with only the environmental block changed. Here is what falls out.',
+    text: 'Start with the bike that anchors the simulator. The Hayabusa Gen 1 is one of three reference baselines that every MotoQuant build holds to four decimal places: 10.3633 s at the reference Aamby Valley November condition (679 m, 22 °C, 40 percent RH). That number is locked. The other four Indian venues run the same engine through the same drivetrain into the same tyres, with only the environmental block changed. Here is what falls out.',
   },
   {
     type: 'table',
@@ -199,7 +199,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Hayabusa numbers are anchored to a baseline that has not moved in eighteen months — 10.4712 s at Aamby Valley November conditions. The K5 GSX-R 1000 holds 10.0334 s at the same reference. The R1 4C8 holds 10.2859 s. These are not predictions, they are validation pins; the simulator is required to produce them to four decimal places on every code change, and the regression suite fails if they drift by more than a millisecond. Re-running each of them across the other four Indian venues changes only the environment block, which means the venue-deltas in the tables above are first-principles outputs of the environmental sub-model rather than fitted offsets.',
+    text: 'The Hayabusa numbers are anchored to a baseline that was re-pinned on July 13, 2026 as part of a physics-recalibration epoch — 10.3633 s at Aamby Valley November conditions. The K5 GSX-R 1000 holds 9.9331 s at the same reference. The R1 4C8 holds 10.1436 s. These are not predictions, they are validation pins; the simulator is required to produce them to four decimal places on every code change, and the regression suite fails if they drift by more than a millisecond. Re-running each of them across the other four Indian venues changes only the environment block, which means the venue-deltas in the tables above are first-principles outputs of the environmental sub-model rather than fitted offsets.',
   },
   {
     type: 'p',

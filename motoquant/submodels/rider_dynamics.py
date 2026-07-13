@@ -21,20 +21,22 @@ from ..models import BikeConfig
 
 class RiderDynamicsModel:
     """
-    Encapsulates how rider body movement influences weight distribution
-    and aerodynamic drag during a drag run.
+    Rider-position aerodynamics: time-varying Cd*A from upright (staging)
+    to full tuck.
 
     Usage in physics loop
     ─────────────────────
     At each timestep *t* (seconds since lights-out):
 
-        cog_x_shift, cog_h_delta = rider.cog_shift(t)
-        # cog_x_shift  : signed offset (m) from nominal CoG along wheelbase.
-        #                Positive → toward front axle.
-        # cog_h_delta  : change in combined CoG height (m). Negative in tuck.
-
         cd_a_rider = rider.cd_a(t)
         # Full rider+bike Cd*A to use for aero drag this timestep.
+
+    History (July 13, 2026): the never-called ``cog_shift()`` /
+    ``wheelbase_weight_split()`` pair was DELETED — rider CoG shift is
+    handled by the simpler live path ``RiderParams.cog_offset()`` consumed
+    by WeightTransfer/Wheelie (see the July-10 physics-foundations review,
+    epoch-gated item 5). Wiring a dynamic CoG-height model back in is a
+    deliberate rebaseline-scale change, not a refactor.
     """
 
     def __init__(self, cfg: BikeConfig):
@@ -71,29 +73,6 @@ class RiderDynamicsModel:
     # PUBLIC API
     # ─────────────────────────────────────────
 
-    def cog_shift(self, t: float):
-        """
-        Return (cog_x_shift_m, cog_h_delta_m) at time *t* (s from launch).
-
-        cog_x_shift_m  — longitudinal shift along wheelbase (m).
-                         Positive = toward front wheel.
-        cog_h_delta_m  — change in combined bike+rider CoG height (m).
-                         Negative means CoG moved lower (favourable for tuck).
-        """
-        frac = self._transition_frac(t)
-
-        # Longitudinal: starts shifted forward, relaxes to slight rearward tuck
-        cog_x_shift = self._launch_shift_m * (1.0 - frac) - 0.03 * frac
-
-        # Height: rider CoG interpolates from upright to tuck
-        rider_h = self._rider_upright_h * (1.0 - frac) + self._rider_tuck_h * frac
-        # Combined CoG height weighted by rider mass fraction
-        f_rider = self.m_rider / max(self.m_total, 1.0)
-        h_combined = self.h_nominal + f_rider * (rider_h - self._rider_upright_h)
-        cog_h_delta = h_combined - self.h_nominal
-
-        return cog_x_shift, cog_h_delta
-
     def cd_a(self, t: float) -> float:
         """
         Effective Cd*A (m²) for drag calculation at time *t*.
@@ -101,31 +80,6 @@ class RiderDynamicsModel:
         """
         frac = self._transition_frac(t)
         return self._cd_a_upright * (1.0 - frac) + self._cd_a_full * frac
-
-    def wheelbase_weight_split(self, t: float):
-        """
-        Return updated (front_weight_pct, rear_weight_pct) accounting for
-        rider longitudinal CoG shift at time *t*.
-
-        This is a *static* correction layered on top of the dynamic weight
-        transfer computed by WeightTransferModel; it only captures the slow
-        body-position change, not the inertial transfer during acceleration.
-        """
-        cog_x_shift, _ = self.cog_shift(t)
-        c = self.cfg.chassis
-        L = max(c.wheelbase_m, 0.01)
-
-        # New front weight percentage
-        # Front load = m*g*(L_r + cog_x_shift) / L  [standard 2-axle formula]
-        # where L_r is distance from CoG to rear axle
-        L_r_new = c.L_r - cog_x_shift  # shift forward → L_r shrinks
-        front_pct = L_r_new / L
-        front_pct = max(0.30, min(0.70, front_pct))  # physical bounds
-        return front_pct, 1.0 - front_pct
-
-    # ─────────────────────────────────────────
-    # INTERNAL HELPERS
-    # ─────────────────────────────────────────
 
     def _transition_frac(self, t: float) -> float:
         """Smooth sigmoid fraction [0→1] from launch to full tuck."""

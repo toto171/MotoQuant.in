@@ -23,8 +23,11 @@ jobs:
     # SALib/sklearn sobol+surrogate tests (installed below on purpose). Base
     # runtime is ~20-25 min; the non-blocking --cov coverage instrumentation
     # (line coverage) traces the sim hot loop across every bike and adds a big
-    # multiplier, so the cap is 50 to leave headroom (35 timed the job out).
-    timeout-minutes: 50
+    # multiplier. Cap raised 50 -> 70 on 2026-07-13: the physics epoch added
+    # ~30 tests and per-sim cost (traction-cap refinement, slip-phase
+    # losses), and shared runners were already finishing at ~46 min — the
+    # first epoch run was cancelled at exactly 50:00 while mid-suite.
+    timeout-minutes: 70
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -150,7 +150,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'See the broader methodology in the post on how the MotoQuant physics engine works — it covers the 15-sub-model RK4 architecture, the Pacejka tire model, the clutch slip dynamics, and the validation gates that lock the Suzuki GSX-R 1000 K5 baseline at 10.0334 seconds across every commit.',
+    text: 'See the broader methodology in the post on how the MotoQuant physics engine works — it covers the 15-sub-model RK4 architecture, the Pacejka tire model, the clutch slip dynamics, and the validation gates that lock the Suzuki GSX-R 1000 K5 baseline at 9.9331 seconds across every commit.',
   },
   {
     type: 'h2',

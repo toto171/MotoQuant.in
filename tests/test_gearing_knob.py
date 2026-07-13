@@ -66,9 +66,9 @@ def test_bayesian_gearing_knob_is_live():
 
 def test_reference_baselines_unchanged():
     for name, (fn, target) in {
-        "K5": (gsxr1000_k5, 10.0334),
-        "R1": (yzfr1_4c8, 10.2859),
-        "Hayabusa": (hayabusa_gen1, 10.4712),
+        "K5": (gsxr1000_k5, 9.9331),
+        "R1": (yzfr1_4c8, 10.1436),
+        "Hayabusa": (hayabusa_gen1, 10.3633),
     }.items():
         assert abs(_et(fn()) - target) < 1e-4, name
 

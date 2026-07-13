@@ -154,7 +154,10 @@ class TestBoostedConfigsNeverSurrogateScored(unittest.TestCase):
         pred(base)  # baseline call captures the reference feature vector
 
         boosted = copy.deepcopy(base)
-        boosted.forced_induction.boost_type = "nitrous"
+        # "n2o" is the real boost-type constant — the invalid "nitrous"
+        # string this test previously used now raises at engine
+        # construction (July-13 hardening), which is the desired behaviour.
+        boosted.forced_induction.boost_type = "n2o"
         boosted.forced_induction.n2o_hp_per_stage = 40.0
         self.assertTrue(boosted.forced_induction.is_boosted)
         # features unchanged — without the blind-signature gate the surrogate

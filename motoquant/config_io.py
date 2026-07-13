@@ -103,6 +103,11 @@ def dataclass_to_dict(obj) -> dict:
 def config_to_dict(config: BikeConfig) -> dict:
     """Convert a BikeConfig to a JSON-serializable dict."""
     d = {"name": config.name, "_version": "0.2.0"}
+    # category_tag selects the CategoryProfile physics dispatch — dropping
+    # it on a save/load round trip silently changes the loaded bike's
+    # cluster to "unknown" (the file-based twin of the July-2 DB-bridge
+    # bug; exposed July 13 when the epoch armed per-cluster grip knobs).
+    d["category_tag"] = config.category_tag
     for section_name, _ in _SECTION_MAP.items():
         section_obj = getattr(config, section_name)
         d[section_name] = dataclass_to_dict(section_obj)
@@ -112,7 +117,7 @@ def config_to_dict(config: BikeConfig) -> dict:
 def config_from_dict(d: dict) -> BikeConfig:
     """Reconstruct a BikeConfig from a dict (e.g., loaded from JSON)."""
     name = d.get("name", "Custom Bike")
-    kwargs = {"name": name}
+    kwargs = {"name": name, "category_tag": d.get("category_tag")}
 
     for section_name, cls in _SECTION_MAP.items():
         if section_name not in d:
