@@ -4,6 +4,36 @@ Notable changes, newest first. This is the human-readable milestone history;
 the exhaustive session-by-session log lives in `CLAUDE.md` (top entry = latest)
 and `reports/`. Format loosely follows [Keep a Changelog](https://keepachangelog.com).
 
+## [PR #108] — 2026-07-11 — PR #105/#106 post-merge validation & measurement
+
+Full validation pass over the two July-10 auto-session merges (operator
+request). Verdict: **merged properly, nothing broken, published accuracy
+numbers unchanged and re-proven.**
+
+### Verified
+- Fresh full weighted sweep **byte-identical** to `acc_final_2026_07_06.json`
+  (246 matched / weighted |Δ| 0.2165 s / bias +0.0212 s) — committed as
+  `reports/acc_verify_2026_07_11.json`; `/validation` viz data regenerates
+  identically. PR #105 is thereby proven NA-bit-identical across the whole
+  catalog, not just the three pinned references.
+- Full suite 4,472 ran / 0 failed / 91 skipped (twice); slow-tier
+  full-catalog golden regression green; `make health` HEALTHY.
+- PR #105 improvements measured A/B vs pre-merge main: boosted builds gain
+  −0.23 to −0.38 s ET that was previously lost in the clutch-slip phase
+  (real Schnitzer turbo part: advertised gain −0.900 → −1.191 s); top-speed
+  plateau and adaptive-truncation repros fixed; all 541 stock configs
+  verified unaffected. PR #106 scrape corpus recounted line-item against
+  `motoquant.db` — no fabrication tells, all headline claims reproduce.
+
+### Added
+- `tests/test_ram_air_wind.py` — the ram-air airspeed fix (40cf813) had
+  shipped with **no pinning test** (reverting it left the suite green);
+  4 new production-path tests, 2 verified to fail on revert.
+- `reports/session_2026_07_11_pr105_106_validation.md` — full report incl.
+  the benchmark-consumption triage (4 new instrumented + 11 magazine + 15
+  lower-weight finds, 6 conflicts to adjudicate, 31 corroborating
+  duplicates) and the scope-out for the next data-update pass.
+
 ## [PR #100] — 2026-07-06 — Durability milestone
 
 The 100th pull request. Focus: make the codebase keep improving across
