@@ -1052,8 +1052,6 @@ def _build_aero_from_spec(spec: BikeSpec) -> AeroParams:
         belly_pan=base.belly_pan,
         ram_air_efficiency=base.ram_air_efficiency,
         ram_air_area_cm2=base.ram_air_area_cm2,
-        headwind_ms=base.headwind_ms,
-        crosswind_ms=base.crosswind_ms,
     )
 
 

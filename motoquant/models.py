@@ -523,8 +523,10 @@ class AeroParams:
     belly_pan: bool = False  # Reduces Cd by 10%
     ram_air_efficiency: float = 0.0  # Scoop efficiency (0 = no ram air)
     ram_air_area_cm2: float = 0.0  # Scoop area
-    headwind_ms: float = 0.0  # Positive = headwind
-    crosswind_ms: float = 0.0  # Lateral wind
+    # NOTE (July 13, 2026): headwind_ms/crosswind_ms were REMOVED — they were
+    # dead knobs no physics read. The live wind path is
+    # EnvironmentParams.wind_speed_ms + wind_direction_deg (0 = headwind).
+    # Old DB blobs carrying the keys are filtered by bridge.db_row_to_config.
 
     @property
     def cd_a_effective(self) -> float:
