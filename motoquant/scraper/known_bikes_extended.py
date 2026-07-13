@@ -30,7 +30,7 @@ NORTON_V4SV_2022 = spec_from_dict(
         "stroke_mm": 56.8,
         "compression_ratio": 13.6,
         "cylinders": 4,
-        "peak_power_hp": 200.0,
+        "peak_power_hp": 185.0,
         "peak_power_rpm": 12500,
         "peak_torque_nm": 125.0,
         "peak_torque_rpm": 9500,
@@ -121,6 +121,7 @@ APRILIA_RSV4_FACTORY_FW1A_2025 = spec_from_dict(
         "rear_sprocket": 41,
         "chain_pitch": "525",
         "dry_mass_kg": 168.0,
+        "wet_mass_kg": 204.0,
         "wheelbase_mm": 1439.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "200/55ZR17",
@@ -187,7 +188,7 @@ HONDA_RC213V_S_2015 = spec_from_dict(
         "stroke_mm": 48.5,
         "compression_ratio": 13.0,
         "cylinders": 4,
-        "peak_power_hp": 215.0,  # with race kit; street is 159
+        "peak_power_hp": 159.0,  # street trim (159 hp); optional race kit takes it to 215 hp
         "peak_power_rpm": 14000,
         "peak_torque_nm": 118.0,
         "peak_torque_rpm": 11500,
@@ -199,7 +200,7 @@ HONDA_RC213V_S_2015 = spec_from_dict(
         "front_sprocket": 16,
         "rear_sprocket": 39,
         "chain_pitch": "520",
-        "dry_mass_kg": 160.0,
+        "dry_mass_kg": 170.0,
         "wheelbase_mm": 1465.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "190/55ZR17",
@@ -376,7 +377,7 @@ APRILIA_TUAREG_660_2022 = spec_from_dict(
         "front_sprocket": 15,
         "rear_sprocket": 45,  # ADV taller than RS660's 15/43
         "chain_pitch": "525",
-        "dry_mass_kg": 204.0,
+        "dry_mass_kg": 187.0,
         "wheelbase_mm": 1525.0,
         "front_tire_size": "90/90-21",
         "rear_tire_size": "150/70R18",
@@ -690,9 +691,9 @@ HERO_XTREME_250R_2024 = spec_from_dict(
         "stroke_mm": 60.8,
         "compression_ratio": 11.2,
         "cylinders": 1,
-        "peak_power_hp": 25.31,  # 25.31 PS = 24.96 hp
+        "peak_power_hp": 29.6,  # 30 PS = 29.6 hp @ 9250 rpm — Hero official spec
         "peak_power_rpm": 9000,
-        "peak_torque_nm": 22.0,
+        "peak_torque_nm": 25.0,
         "peak_torque_rpm": 7250,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -893,14 +894,14 @@ TRIUMPH_SPEED_T4_2024 = spec_from_dict(
         "year_from": 2024,
         "year_to": 2026,
         "category": "naked",
-        "displacement_cc": 398,
+        "displacement_cc": 349,
         "bore_mm": 90.0,
         "stroke_mm": 62.0,
         "compression_ratio": 10.5,  # detuned from Speed 400's 11.0
         "cylinders": 1,
-        "peak_power_hp": 31.0,
+        "peak_power_hp": 28.6,
         "peak_power_rpm": 7000,
-        "peak_torque_nm": 36.0,
+        "peak_torque_nm": 31.0,
         "peak_torque_rpm": 5000,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -2856,6 +2857,7 @@ KAWASAKI_VERSYS_X_300_2017 = spec_from_dict(
         "rear_sprocket": 46,  # taller than Ninja 300's R42 for ADV
         "chain_pitch": "520",
         "dry_mass_kg": 163.0,  # 175 kg kerb - ~12 kg fuel (17 L tank)
+        "wet_mass_kg": 175.0,
         "wheelbase_mm": 1450.0,
         "front_tire_size": "100/90-19",  # off-road biased front 19"
         "rear_tire_size": "130/80-17",
@@ -3079,7 +3081,7 @@ BAJAJ_PULSAR_N150_2022 = spec_from_dict(
         "stroke_mm": 58.6,
         "compression_ratio": 10.5,
         "cylinders": 1,
-        "peak_power_hp": 13.80,  # 14.0 PS @ 8500 rpm = 13.80 hp
+        "peak_power_hp": 14.3,  # 14.5 PS @ 8500 rpm = 14.3 hp — Bajaj official spec
         "peak_power_rpm": 8500,
         "peak_torque_nm": 13.5,
         "peak_torque_rpm": 6000,
@@ -4113,7 +4115,7 @@ CFMOTO_800NK_2023 = spec_from_dict(
         "stroke_mm": 65.7,
         "compression_ratio": 12.5,
         "cylinders": 2,
-        "peak_power_hp": 95.0,
+        "peak_power_hp": 100.0,
         "peak_power_rpm": 9000,
         "peak_torque_nm": 81.0,
         "peak_torque_rpm": 8000,
@@ -4794,7 +4796,7 @@ KTM_890_DUKE_2020 = spec_from_dict(
         "stroke_mm": 73.0,
         "compression_ratio": 13.5,
         "cylinders": 2,
-        "peak_power_hp": 105.0,  # 105 hp @ 8,000 rpm per KTM spec sheet
+        "peak_power_hp": 115.0,  # 115 hp @ 8,000 rpm — KTM/Rider Magazine (was showing the 790 Duke figure)
         "peak_power_rpm": 8000,
         "peak_torque_nm": 92.0,  # 92 Nm @ 6,500 rpm per KTM spec sheet
         "peak_torque_rpm": 6500,
@@ -5011,7 +5013,7 @@ KTM_890_SMT_2023 = spec_from_dict(
         "front_sprocket": 16,
         "rear_sprocket": 42,
         "chain_pitch": "520",  # 520-pitch per KTM spec sheet
-        "dry_mass_kg": 163.0,  # 163 kg ready-to-ride (EU dry) — KTM press release 2023
+        "dry_mass_kg": 194.0,  # 194 kg dry (428 lb) — KTM press release/autoevolution (was likely copied from the lighter 890 Duke naked)
         "wheelbase_mm": 1478.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "150/70R18",
@@ -5067,6 +5069,7 @@ HONDA_CRF1100L_AS_2020 = spec_from_dict(
         "rear_sprocket": 42,
         "chain_pitch": "525",  # 525-pitch — Honda spec sheet SD09
         "dry_mass_kg": 213.0,  # 213 kg dry (with oil+coolant) — Honda EU spec sheet 2020
+        "wet_mass_kg": 238.0,
         "wheelbase_mm": 1575.0,
         "front_tire_size": "90/90-21",
         "rear_tire_size": "150/70R18",
@@ -5785,7 +5788,7 @@ BMW_M_1000_XR_2024 = spec_from_dict(
         "stroke_mm": 49.7,
         "compression_ratio": 13.3,
         "cylinders": 4,
-        "peak_power_hp": 210.0,  # 210 hp (154 kW) @ 13,750 rpm — BMW press kit
+        "peak_power_hp": 201.0,  # 201 hp (148 kW) @ 12,750 rpm — BMW official spec (was showing the S1000RR/M1000RR figure)
         "peak_power_rpm": 13750,
         "peak_torque_nm": 113.0,  # 113 Nm @ 11,000 rpm — BMW press kit
         "peak_torque_rpm": 11000,
@@ -6185,7 +6188,7 @@ HONDA_X_BLADE_160_BS6_2018 = spec_from_dict(
         "stroke_mm": 57.8,
         "compression_ratio": 10.7,
         "cylinders": 1,
-        "peak_power_hp": 17.0,  # 12.7 kW = 17.02 hp @ 8750 rpm — Honda spec
+        "peak_power_hp": 13.8,  # 13.8 hp @ 8000 rpm — Honda India spec (bikedekho/maxabout/motoroctane corroborated)
         "peak_power_rpm": 8750,
         "peak_torque_nm": 14.48,  # 14.48 Nm @ 6500 rpm — Honda India spec
         "peak_torque_rpm": 6500,
@@ -7162,6 +7165,7 @@ BMW_K1600_GT_2022 = spec_from_dict(
         "rear_sprocket": 0,  # shaft drive — Paralever final drive
         "chain_pitch": None,  # no chain — shaft final drive
         "dry_mass_kg": 290.0,  # 343 kg wet kerb − 26.5L fuel (18.5kg) − 7L
+        "wet_mass_kg": 343.0,
         # other fluids = 290 kg dry est (BMW EU spec sheet)
         "wheelbase_mm": 1618.0,  # BMW EU spec sheet K48
         "front_tire_size": "120/70ZR17",
@@ -7291,8 +7295,9 @@ SUZUKI_GSXR125_2017 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 45,  # F14/R45 428-pitch — typical small-cc geometry
         "chain_pitch": "428",
-        "dry_mass_kg": 119.0,  # 134 kg wet kerb − ~15 kg fluids (11L fuel +
-        # 1L oil + coolant) — Suzuki EU + MCN weighbridge
+        "dry_mass_kg": 134.0,  # 134 kg dry — autoevolution/ultimatespecs/
+        # servicemanualsgsxr.com (previous 119 kg mistakenly treated this
+        # figure as kerb and subtracted ~15 kg fluids from it)
         "wheelbase_mm": 1300.0,  # Suzuki EU spec sheet — short for sport handling
         "front_tire_size": "90/80-17",  # bias-ply hyphen format per CLAUDE.md May 4
         # validator widening (Indian/SEA small-cc)
@@ -9584,7 +9589,7 @@ KAWASAKI_W230_2024 = spec_from_dict(
         "peak_power_hp": 17.5,  # 17.5 hp (13 kW) @ 7000 rpm
         # Kawasaki India press release Aug 2024
         "peak_power_rpm": 7000,
-        "peak_torque_nm": 18.0,  # 18 Nm @ 5500 rpm — Kawasaki spec
+        "peak_torque_nm": 18.6,  # 18 Nm @ 5500 rpm — Kawasaki spec
         "peak_torque_rpm": 5500,
         "fuel_system": "fi",  # EFI (28 mm throttle body)
         "cooling": "air",  # air-cooled with cooling fins
@@ -9598,6 +9603,7 @@ KAWASAKI_W230_2024 = spec_from_dict(
         "rear_sprocket": 47,
         "chain_pitch": "428",  # 428 pitch — entry single standard
         "dry_mass_kg": 132.0,  # 132 kg dry (142 kg kerb minus ~10 kg
+        "wet_mass_kg": 143.0,
         # fluids — 12L tank + oil + brake fluid)
         # Kawasaki India spec sheet Aug 2024
         "wheelbase_mm": 1335.0,  # 1335 mm — Kawasaki India spec
@@ -10579,10 +10585,9 @@ APRILIA_TUONO_457_2025 = spec_from_dict(
         # as RS 457)
         "rear_sprocket": 43,
         "chain_pitch": "520",  # 520 pitch — Tuono 457 standard
-        "dry_mass_kg": 148.0,  # 148 kg dry — Aprilia spec 2025
-        # (kerb 159 kg incl. 13 L fuel +
-        # oils; -11 kg vs RS 457 from no
-        # fairing + lighter subframe)
+        "dry_mass_kg": 159.0,  # 159 kg dry — corrected to match the RS 457
+        # platform figure (moto-data.net); an earlier 148 kg entry
+        # conflated kerb-minus-fuel math with the wrong fuel load
         "wheelbase_mm": 1370.0,  # 1370 mm — Aprilia spec
         # (10 mm shorter than RS 457)
         "front_tire_size": "110/70R17",  # 17" front (cast wheel) —

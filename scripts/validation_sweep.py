@@ -1174,7 +1174,7 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     #   * GSX-R 750 2008:  sim 10.348s vs bench 10.260 — Δ +0.088s ✓
     # All within the litre-sport / 600-1000cc cluster bias bands per
     # CLAUDE.md. Reference baselines preserved exact:
-    # K5 10.0334s / R1 10.2859s / Hayabusa 10.4712s, Δ +0.0000s on all three.
+    # K5 9.9331s / R1 10.1436s / Hayabusa 10.3633s, Δ +0.0000s on all three.
     # Matcher specificity verified: each entry binds to exactly one catalog
     # row (the intended one) via the _best_benchmark_match probe — pre-add
     # matched-N 115, post-add matched-N 121 (delta +6, no collisions).
@@ -1306,7 +1306,7 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # same authoritative timing-strip archive backing 24+ existing entries).
     # Verified via WebFetch this session; each entry binds to exactly one
     # catalog row via _best_benchmark_match (collision probe clean).
-    # Reference baselines preserved: K5 10.0334 / R1 10.2859 / Hayabusa 10.4712.
+    # Reference baselines preserved: K5 9.9331 / R1 10.1436 / Hayabusa 10.3633.
     #
     # Aprilia RSV Mille (998 cc 60° V-twin sport, 2001-2004 chassis) — Sport
     # Rider / Cycle World sportbike-performance-numbers archive timing-strip
@@ -1622,7 +1622,7 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # catalog). Each entry below was checked via _best_benchmark_match probe
     # to confirm no collision and clean year-range binding.
     # Reference baselines preserved EXACTLY (verified pre + post add):
-    #   K5 10.0334s / R1 10.2859s / Hayabusa 10.4712s, Δ +0.0000s.
+    #   K5 9.9331s / R1 10.1436s / Hayabusa 10.3633s, Δ +0.0000s.
     # Pre-commit sim sanity (production spec_to_bike_config path):
     #   * Honda CB1100 2013-2020:    sim 12.675s @ 179.5 km/h vs bench
     #     11.79s @ 178 km/h — ΔET +0.885s (naked-1100cc cluster slow bias,
@@ -1780,7 +1780,7 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # cluster mean|Δ|=0.138s band, consistent with the well-documented
     # 4C8 platform optimistic-dyno-claim bias (factory claimed 180 hp
     # crank but dyno consistently measured 158-162 hp wheel; the
-    # YZFR1_4C8 reference baseline at 10.2859s is a hand-calibrated
+    # YZFR1_4C8 reference baseline at 10.1436s is a hand-calibrated
     # exception). The 9.2 km/h trap delta is within the I4 cluster's
     # documented ±10 km/h band.
     # URL: https://www.cycleworld.com/sport-rider/tech/sportbike-performance-numbers/
@@ -1855,7 +1855,7 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # Catalog year ranges verified via find_spec(). No collisions with existing
     # benchmarks per _best_benchmark_match probe — each entry binds to exactly
     # one previously-unbenchmarked catalog row. Reference baselines preserved
-    # EXACT pre- and post-add: K5 10.0334s / R1 10.2859s / Hayabusa 10.4712s.
+    # EXACT pre- and post-add: K5 9.9331s / R1 10.1436s / Hayabusa 10.3633s.
     #
     # Rejected this pass (logged for the report):
     #   * Kawasaki Z900RS — MotoStatz article (11.35 @ 120.7 mph) DOES NOT
@@ -1967,7 +1967,7 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # historical first-9-second discussions, etc.). Both target catalog rows
     # are previously unbenchmarked (pre-add probe via _best_benchmark_match
     # returned None for each). Reference baselines preserved EXACT pre-edit:
-    # K5 10.0334s / R1 10.2859s / Hayabusa 10.4712s.
+    # K5 9.9331s / R1 10.1436s / Hayabusa 10.3633s.
     #
     # Rejected this pass (logged so future passes don't re-investigate):
     #   * Honda CB1000R (998 cc 145 hp naked) — no instrumented MCN / CW /
@@ -2974,6 +2974,181 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         12.40,
         195,
         "DERIVED (689 CP2; MT-07 12.13 base + touring weight)",
+    ),
+    # ── July 13, 2026: new-coverage rows from the 2026-07-10 web-scrape corpus
+    # (reports/scrape_2026_07_10/bikes_web_data.json; triage in
+    # reports/session_2026_07_11_pr105_106_validation.md). Only bikes with NO
+    # existing benchmark row were added; the 6 conflicting finds were
+    # adjudicated and REJECTED (best-case outliers vs the representative
+    # instrumented rows already in the corpus — e.g. Hayabusa Gen3 8.97 was a
+    # Bruce Dunn best-case pass vs pro tests spanning 8.97-10.03; Duke 390
+    # 13.3 was MotoStatz's perfect-execution figure vs real stock strip
+    # passes at 13.6-13.95). Trap 0.0 = no trap published (trap is
+    # report-only; accuracy math uses ET). Source labels are worded so
+    # scripts/sweep_lib.source_quality assigns the scrape's honest
+    # source_type (instrumented 1.0 / magazine 0.7 / aggregator 0.5 /
+    # forum 0.3).
+    ("KTM", "Duke 200", 2020, 16.10, 125.5, "MotoStatz (GPS instrumented)"),
+    ("Kawasaki", "Vulcan S", 2020, 13.03, 165.8, "MotoStatz (GPS instrumented)"),
+    (
+        "BMW",
+        "M 1000 R",
+        2023,
+        9.80,
+        0.0,
+        "MCN dragstrip test (instrumented; no trap published)",
+    ),
+    ("Honda", "CB500F", 2021, 13.36, 157.7, "MotoStatz (GPS instrumented)"),
+    (
+        "Indian",
+        "Scout",
+        2015,
+        11.93,
+        0.0,
+        "Motorcycle Consumer-News 2015 Scout test figure (magazine, secondhand)",
+    ),
+    ("Hyosung", "GT650R", 2012, 12.84, 164.5, "Cycle World test (via Digest Africa)"),
+    (
+        "Yamaha",
+        "FJR1300",
+        2013,
+        10.98,
+        0.0,
+        "Cycle World 2013 FJR1300A (magazine; no trap published)",
+    ),
+    (
+        "Suzuki",
+        "V-Strom 650 (DL650)",
+        2015,
+        12.54,
+        162.5,
+        "Motorcycle Consumer-News data quoted by zeroto60times (magazine)",
+    ),
+    (
+        "Yamaha",
+        "RZV500R (Japan)",
+        1985,
+        11.77,
+        188.3,
+        "Cycle magazine 1984-85 (via Hagerty retrospective)",
+    ),
+    (
+        "Kawasaki",
+        "750 H2 Mach IV",
+        1972,
+        12.00,
+        0.0,
+        "period magazine road test (cited via Wikipedia; no trap published)",
+    ),
+    (
+        "KTM",
+        "990 RC R",
+        2025,
+        11.20,
+        0.0,
+        "Corner Speed Blog road test (magazine tier; no trap published)",
+    ),
+    (
+        "Honda",
+        "NS400R",
+        1985,
+        13.03,
+        164.2,
+        "period magazine road test (via motorcyclespecs.co.za archive)",
+    ),
+    (
+        "BMW",
+        "K1600 GT",
+        2022,
+        10.86,
+        197.7,
+        "Cycle World figure (cited via RoarOnTheShore)",
+    ),
+    (
+        "Harley-Davidson",
+        "Fat Bob 114",
+        2019,
+        12.76,
+        0.0,
+        "Australian Motorcycle News dragstrip test (magazine; no trap published)",
+    ),
+    ("Ducati", "Scrambler 1100", 2019, 11.89, 180.6, "Ducati.ms owner forum timeslip"),
+    ("Kawasaki", "Versys 650", 2017, 12.90, 159.3, "zeroto60times aggregator listing"),
+    (
+        "Kawasaki",
+        "W800",
+        2020,
+        13.80,
+        0.0,
+        "FastestLaps (W800 Cafe; no trap published)",
+    ),
+    ("BMW", "R1200GS", 2014, 11.07, 192.2, "zeroto60times aggregator (BMW list)"),
+    (
+        "BMW",
+        "S1000XR",
+        2021,
+        10.55,
+        214.0,
+        "owner dragstrip video timeslip (The Cuban Rider)",
+    ),
+    (
+        "Triumph",
+        "Thruxton 1200 R",
+        2017,
+        12.22,
+        178.0,
+        "TriumphRat owner forum timeslip",
+    ),
+    ("KTM", "690 Duke R", 2014, 12.30, 0.0, "FastestLaps figure (no trap published)"),
+    (
+        "Husqvarna",
+        "Vitpilen 701",
+        2019,
+        12.10,
+        0.0,
+        "zeroto60times aggregator (no trap published)",
+    ),
+    (
+        "Honda",
+        "RC30 (VFR750R)",
+        1989,
+        11.80,
+        0.0,
+        "FastestLaps period road-test figure (no trap published)",
+    ),
+    ("Yamaha", "SR400", 2015, 16.70, 0.0, "0to60times aggregator (no trap published)"),
+    ("Suzuki", "V-Strom 800DE", 2023, 12.40, 173.9, "FastestLaps"),
+    (
+        "Honda",
+        "Grom MSX125",
+        2023,
+        21.02,
+        90.1,
+        "hondagrom.net owner drag-strip timeslip (stock)",
+    ),
+    (
+        "Suzuki",
+        "SV650X",
+        2019,
+        12.10,
+        0.0,
+        "motorcyclespecs.com aggregator figure (no trap published)",
+    ),
+    (
+        "Indian",
+        "Scout Bobber",
+        2025,
+        12.70,
+        0.0,
+        "TopSpeed.com aggregator summary (no trap published)",
+    ),
+    (
+        "Husqvarna",
+        "701 Supermoto",
+        2018,
+        12.50,
+        0.0,
+        "zeroto60times aggregator (no trap published)",
     ),
 ]
 
