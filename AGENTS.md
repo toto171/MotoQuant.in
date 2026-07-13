@@ -15,7 +15,7 @@ app, agentic chat). Python package `motoquant/` + a seeded SQLite catalog.
 Three reference bikes are pinned **bit-identical** and CI-gated:
 
 ```
-GSX-R 1000 K5 → 10.0334 s   YZF-R1 4C8 → 10.2859 s   Hayabusa Gen1 → 10.4712 s
+GSX-R 1000 K5 → 9.9331 s   YZF-R1 4C8 → 10.1436 s   Hayabusa Gen1 → 10.3633 s
 ```
 
 Any change that moves them by even 1e-9 s is a regression — no matter how

@@ -24,9 +24,9 @@ import motoquant
 from motoquant.defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 
 _BASELINES = {
-    "K5": (gsxr1000_k5, 10.0334),
-    "R1": (yzfr1_4c8, 10.2859),
-    "Hayabusa": (hayabusa_gen1, 10.4712),
+    "K5": (gsxr1000_k5, 9.9331),
+    "R1": (yzfr1_4c8, 10.1436),
+    "Hayabusa": (hayabusa_gen1, 10.3633),
 }
 
 

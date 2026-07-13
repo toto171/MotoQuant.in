@@ -722,9 +722,9 @@ class TestReferenceBaselinesPreserved(unittest.TestCase):
     TOLERANCE_S = 0.02  # ±20 ms — same as CLAUDE.md validation criterion
 
     BASELINES = [
-        ("gsxr1000_k5", 10.0334),
-        ("yzfr1_4c8", 10.2859),
-        ("hayabusa_gen1", 10.4712),
+        ("gsxr1000_k5", 9.9331),
+        ("yzfr1_4c8", 10.1436),
+        ("hayabusa_gen1", 10.3633),
     ]
 
     def _run_et(self, config_fn_name):
@@ -740,27 +740,27 @@ class TestReferenceBaselinesPreserved(unittest.TestCase):
         et = self._run_et("gsxr1000_k5")
         self.assertAlmostEqual(
             et,
-            10.0334,
+            9.9331,
             delta=self.TOLERANCE_S,
-            msg=f"K5 ET {et:.4f}s drifted from baseline 10.0334s",
+            msg=f"K5 ET {et:.4f}s drifted from baseline 9.9331s",
         )
 
     def test_r1_baseline(self):
         et = self._run_et("yzfr1_4c8")
         self.assertAlmostEqual(
             et,
-            10.2859,
+            10.1436,
             delta=self.TOLERANCE_S,
-            msg=f"R1 ET {et:.4f}s drifted from baseline 10.2859s",
+            msg=f"R1 ET {et:.4f}s drifted from baseline 10.1436s",
         )
 
     def test_hayabusa_baseline(self):
         et = self._run_et("hayabusa_gen1")
         self.assertAlmostEqual(
             et,
-            10.4712,
+            10.3633,
             delta=self.TOLERANCE_S,
-            msg=f"Hayabusa ET {et:.4f}s drifted from baseline 10.4712s",
+            msg=f"Hayabusa ET {et:.4f}s drifted from baseline 10.3633s",
         )
 
 

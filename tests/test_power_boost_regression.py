@@ -163,9 +163,9 @@ class TestReferenceBaselines(unittest.TestCase):
     in CLAUDE.md's session entry. Never widen the delta to "make the test pass".
     """
 
-    K5_BASELINE_S = 10.0334
-    R1_BASELINE_S = 10.2859
-    HAYABUSA_BASELINE_S = 10.4712
+    K5_BASELINE_S = 9.9331
+    R1_BASELINE_S = 10.1436
+    HAYABUSA_BASELINE_S = 10.3633
     BASELINE_TOLERANCE = 0.001  # 1 ms — sim is exact to 4 decimals
 
     def test_k5(self):

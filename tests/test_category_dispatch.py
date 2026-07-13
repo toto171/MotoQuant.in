@@ -295,9 +295,9 @@ class TestReferenceBaselinesPreserved:
     @pytest.mark.parametrize(
         "factory,expected_et",
         [
-            (gsxr1000_k5, 10.0334),
-            (yzfr1_4c8, 10.2859),
-            (hayabusa_gen1, 10.4712),
+            (gsxr1000_k5, 9.9331),
+            (yzfr1_4c8, 10.1436),
+            (hayabusa_gen1, 10.3633),
         ],
     )
     def test_reference_et_within_1ms(self, factory, expected_et):

@@ -33,7 +33,7 @@ A first-principles physics engine for predicting and optimising motorcycle quart
 | Parts | 593 across 19 categories (incl. lowering kits, air shifters, lockup clutches) |
 | Venues | 20 (India + international drag strips) |
 | Benchmarks | 221 ET rows + 74 top-speed rows; weighted sweep 246 matched, |Δ| 0.217 s, bias +0.021 s |
-| Reference baselines | K5 10.0334 / R1 10.2859 / Hayabusa 10.4712 — pinned **bit-identical**, CI-gated |
+| Reference baselines | K5 9.9331 / R1 10.1436 / Hayabusa 10.3633 — pinned **bit-identical**, CI-gated |
 | Chat AI | multi-step tool-calling agent (`motoquant/llm/agent.py`, `docs/CHAT_AGENT.md`) |
 | Deployed | API: Render free tier (`motoquant-api.onrender.com`); web: Vercel (`motoquant.in`) — both auto-deploy from `main` |
 
@@ -88,7 +88,7 @@ These will cause a PR to be rejected even if the code works.
 2. **SQLite stays until Phase 6 cloud sync is genuinely needed.** The WAL-fallback in `motoquant/database/connection.py` is load-bearing.
 3. **CLI tests call handlers directly, not subprocesses.** See `tests/test_cli.py`.
 4. **Scraper is stdlib-only.** No BeautifulSoup/lxml.
-5. **Physics baselines are pinned bit-identical**: K5 10.0334 / R1 10.2859 / Hayabusa 10.4712. If you touch `physics.py`, `submodels/*`, `defaults.py`, or the importer, run the baseline check + `tests/test_regression_snapshot.py` and put the deltas in your PR (template has the table). "±0.0000 at 4 decimals" is the expectation; anything else needs a full weighted-sweep justification.
+5. **Physics baselines are pinned bit-identical**: K5 9.9331 / R1 10.1436 / Hayabusa 10.3633. If you touch `physics.py`, `submodels/*`, `defaults.py`, or the importer, run the baseline check + `tests/test_regression_snapshot.py` and put the deltas in your PR (template has the table). "±0.0000 at 4 decimals" is the expectation; anything else needs a full weighted-sweep justification.
 6. **After any `spec_to_bike_config` change, reseed the DB** (`scripts/reseed_configs_from_specs.py`) — otherwise `/api/simulate?bike_id=N` silently diverges from the spec path. Then regenerate the surrogate (standing contract).
 7. **After any catalog change, run `python scripts/audit_headline_stats.py --fix`** — the site's stat tiles/OG cards must match the DB.
 8. **Never `git add -A`.** Stage explicit file lists; the tree often carries unrelated WIP.

@@ -57,15 +57,15 @@ class TestReferenceBaselines(unittest.TestCase):
 
     def test_k5_unchanged(self):
         r = _run(gsxr1000_k5())
-        self.assertAlmostEqual(r.time_quarter, 10.0334, delta=0.02)
+        self.assertAlmostEqual(r.time_quarter, 9.9331, delta=0.02)
 
     def test_r1_unchanged(self):
         r = _run(yzfr1_4c8())
-        self.assertAlmostEqual(r.time_quarter, 10.2859, delta=0.02)
+        self.assertAlmostEqual(r.time_quarter, 10.1436, delta=0.02)
 
     def test_hayabusa_unchanged(self):
         r = _run(hayabusa_gen1())
-        self.assertAlmostEqual(r.time_quarter, 10.4712, delta=0.02)
+        self.assertAlmostEqual(r.time_quarter, 10.3633, delta=0.02)
 
 
 class TestClusterBiases(unittest.TestCase):

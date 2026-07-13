@@ -149,6 +149,29 @@ def main():
                     row["config_id"],
                 ),
             )
+            # July 13, 2026: also sync the bike_models HEADLINE columns from
+            # the spec. Spec-source corrections previously reached only the
+            # bike_configs physics blobs — /api/bikes and the web bike pages
+            # kept displaying the old figures (a bypass path: the headline
+            # columns are otherwise written only at import time).
+            db.conn.execute(
+                "UPDATE bike_models SET "
+                "displacement_cc=COALESCE(?, displacement_cc), "
+                "peak_power_hp=COALESCE(?, peak_power_hp), "
+                "peak_torque_nm=COALESCE(?, peak_torque_nm), "
+                "dry_mass_kg=COALESCE(?, dry_mass_kg), "
+                "wet_mass_kg=COALESCE(?, wet_mass_kg), "
+                "updated_at=CURRENT_TIMESTAMP "
+                "WHERE id=?",
+                (
+                    getattr(spec, "displacement_cc", None),
+                    getattr(spec, "peak_power_hp", None),
+                    getattr(spec, "peak_torque_nm", None),
+                    getattr(spec, "dry_mass_kg", None),
+                    getattr(spec, "wet_mass_kg", None),
+                    row["model_id"],
+                ),
+            )
             updated += 1
         except Exception as exc:
             errors += 1

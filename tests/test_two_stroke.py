@@ -371,9 +371,9 @@ class TestReferenceBaselinesPreserved:
 
         e = motoquant.MotoQuantEngine(motoquant.gsxr1000_k5())
         r = e.run()
-        # Allow ±0.010s drift from the canonical 10.034s baseline
-        assert 10.02 <= r.time_quarter <= 10.05, (
-            f"K5 regressed: {r.time_quarter:.3f}s (expected ~10.034)"
+        # Allow ±0.010s drift from the canonical 9.933s baseline
+        assert 9.92 <= r.time_quarter <= 9.95, (
+            f"K5 regressed: {r.time_quarter:.3f}s (expected ~9.933)"
         )
 
     def test_hayabusa_baseline(self):
@@ -381,6 +381,6 @@ class TestReferenceBaselinesPreserved:
 
         e = motoquant.MotoQuantEngine(motoquant.hayabusa_gen1())
         r = e.run()
-        assert 10.45 <= r.time_quarter <= 10.50, (
-            f"Hayabusa regressed: {r.time_quarter:.3f}s (expected ~10.472)"
+        assert 10.35 <= r.time_quarter <= 10.38, (
+            f"Hayabusa regressed: {r.time_quarter:.3f}s (expected ~10.363)"
         )

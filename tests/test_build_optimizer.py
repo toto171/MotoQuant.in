@@ -126,7 +126,7 @@ class TestPredictor:
     def test_k5_baseline_preserved(self):
         # roi.py was extended for the optimizer — the reference baseline must not move.
         et, _ = make_predictor(None)(gsxr1000_k5())
-        assert et == pytest.approx(10.0334, abs=2e-3)
+        assert et == pytest.approx(9.9331, abs=2e-3)
 
     def test_valid_goals(self):
         assert VALID_GOALS == ("min_et", "max_trap")

@@ -63,9 +63,9 @@ class TestNoSilentFailures:
     def test_reference_baselines_preserved(self):
         """K5, R1 4C8, and Hayabusa remain within baseline tolerance."""
         refs = [
-            ("GSX-R 1000 K5", gsxr1000_k5(), 10.034, 0.020),
-            ("YZF-R1 4C8", yzfr1_4c8(), 10.286, 0.030),
-            ("Hayabusa Gen1", hayabusa_gen1(), 10.472, 0.030),
+            ("GSX-R 1000 K5", gsxr1000_k5(), 9.933, 0.020),
+            ("YZF-R1 4C8", yzfr1_4c8(), 10.144, 0.030),
+            ("Hayabusa Gen1", hayabusa_gen1(), 10.363, 0.030),
         ]
 
         for name, cfg, expected_et, tolerance in refs:

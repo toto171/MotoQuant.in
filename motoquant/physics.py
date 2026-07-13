@@ -264,10 +264,15 @@ class MotoQuantEngine:
         # behaviour is bit-identical until a profile sets a value.
         tire_cfg = self.cfg
         _mu_over = self._profile.mu_peak_override
-        if _mu_over is not None:
+        _mu_scale = self._profile.mu_peak_scale
+        if _mu_over is not None or _mu_scale != 1.0:
             tire_cfg = copy.copy(self.cfg)
             tire_cfg.tires = copy.copy(self.cfg.tires)
-            tire_cfg.tires.mu_peak = float(_mu_over)
+            if _mu_over is not None:
+                tire_cfg.tires.mu_peak = float(_mu_over)
+            # July 13, 2026 epoch knob: multiplicative recalibration that
+            # preserves per-bike rubber ordering (see CategoryProfile).
+            tire_cfg.tires.mu_peak = tire_cfg.tires.mu_peak * _mu_scale
         self._tire = TireModel(tire_cfg, self.mu_prep, self.T_tire_ref_K)
         self._aero = AeroModel(self.cfg, self.rho, self.cd_a, self.v_wind)
         self._wt = WeightTransferModel(self.cfg, self.anti_squat_frac, self._aero)
@@ -362,10 +367,6 @@ class MotoQuantEngine:
         return self._drivetrain.should_shift(rpm, gear)
 
     # ── Phase-1 Remaining: new sub-model delegations ─────────────────────────
-
-    def rider_cog_shift(self, t: float):
-        """(cog_x_shift_m, cog_h_delta_m) from RiderDynamicsModel at time t."""
-        return self._rider.cog_shift(t)
 
     def rider_cd_a(self, t: float) -> float:
         """Time-varying Cd*A accounting for rider position transition."""
@@ -606,13 +607,21 @@ class MotoQuantEngine:
                 if abs(slip_speed) < _lock_thresh and v > 1.0:
                     clutch_locked = True
                     omega_e = omega_input
-                    # Lock-transition step: same forced-induction treatment
-                    # as the slip branch below (×1.0 exactly for NA — the
-                    # pinned baselines are unchanged by construction).
+                    # Lock-transition step: this IS the first locked step, so
+                    # it now mirrors the locked branch exactly — ram-air +
+                    # forced induction + parasitic (July 13, 2026 epoch;
+                    # previously FI-only for baseline safety).
                     _rpm_lock = omega_e * RADS_TO_RPM
-                    T_e_crank = self.engine_torque(
-                        _rpm_lock, t
-                    ) * self.forced_induction_torque_mult(_rpm_lock, t, P_boost)
+                    T_e_crank = (
+                        self.engine_torque(_rpm_lock, t)
+                        * self.ram_air_power_mult(v)
+                        * self.forced_induction_torque_mult(_rpm_lock, t, P_boost)
+                    )
+                    if (
+                        cfg.engine.dyno_curve is None
+                        or not cfg.engine.dyno_curve.is_at_wheel
+                    ) and omega_e > 10:
+                        T_e_crank -= self.parasitic_power_loss(_rpm_lock) / omega_e
                     T_e = T_e_crank
                     Q_clutch = 0.0
                 else:
@@ -650,23 +659,28 @@ class MotoQuantEngine:
                     # (rpm, t)). Saves ~1 np.interp round-trip per slip step.
                     #
                     # July 10, 2026: apply the forced-induction multiplier to
-                    # the crank torque driving the clutch. The slip branch
-                    # used the RAW curve torque, so turbo/supercharger/N2O
-                    # boost contributed ZERO drive force and ZERO engine
-                    # spin-up for the entire launch-slip phase (~3 s / 0-110
-                    # km/h): a steady-1-bar turbo Hayabusa simmed 0.29 s slow
-                    # to the 60-ft and 0.37 s slow on ET vs the physically
-                    # equivalent curve with boost baked in. For NA bikes the
-                    # multiplier is exactly 1.0 and x*1.0 is bit-exact in
-                    # IEEE 754, so the pinned K5/R1/Hayabusa baselines are
-                    # unchanged by construction. Ram-air and the parasitic
-                    # subtraction are still (deliberately) not applied here —
-                    # both are non-1.0 for NA bikes, so folding them in moves
-                    # the pinned baselines and belongs to a coordinated
-                    # rebaseline pass (see docs/ROADMAP.md epoch-gated list).
-                    T_e_crank = T_e_curve * self.forced_induction_torque_mult(
-                        rpm, t, P_boost
+                    # the crank torque driving the clutch (the slip branch
+                    # previously used the RAW curve — turbo/SC/N2O were dead
+                    # for the whole launch; a 1-bar turbo Hayabusa simmed
+                    # 0.37 s slow vs its baked-curve twin).
+                    #
+                    # July 13, 2026 (epoch): ram-air + parasitic now applied
+                    # here too, mirroring the locked branch — during clutch
+                    # slip NA bikes previously got no ram-air recovery and
+                    # paid no parasitic drag on the transmitted torque
+                    # (July-10 review, epoch-gated item 3). This moves the
+                    # pinned baselines; new pins + full weighted sweep ship
+                    # with this epoch.
+                    T_e_crank = (
+                        T_e_curve
+                        * self.ram_air_power_mult(v)
+                        * self.forced_induction_torque_mult(rpm, t, P_boost)
                     )
+                    if (
+                        cfg.engine.dyno_curve is None
+                        or not cfg.engine.dyno_curve.is_at_wheel
+                    ) and omega_e > 10:
+                        T_e_crank -= self.parasitic_power_loss(rpm) / omega_e
 
                     # Apr 27, 2026: rate-limited over-clutching for low-power
                     # bikes. Real launches: rider can pull clutch in beyond
@@ -769,10 +783,27 @@ class MotoQuantEngine:
             # ── Traction limit ──
             F_max_tire = self.tire_max_force(N_r, T_tire, v)
             if F_drive > F_max_tire:
+                # July 13, 2026 (epoch): fixed-point refinement. The single
+                # pass fed the cap a rear load computed from the UNCLAMPED
+                # accel estimate — when traction-limited, weight transfer
+                # (and therefore the cap itself) was overstated (wet K5:
+                # +488 N mean rear load over the first 2 s ≈ 46% of static;
+                # dry K5 clipped on 41% of steps — July-10 review item 2).
+                # Two extra passes of (capped accel → weight transfer → cap)
+                # converge the pair; the demand F_drive stays the slip-ratio
+                # reference. Unclipped steps never enter this branch, so
+                # their float stream is untouched.
+                F_demand = F_drive
+                F_cap = F_max_tire
+                for _ in range(2):
+                    a_cap = (F_cap - F_aero - F_rr) / m_eff
+                    N_f, N_r = self.weight_transfer(a_cap, v, t)
+                    F_max_tire = self.tire_max_force(N_r, T_tire, v)
+                    F_cap = min(F_demand, F_max_tire)
                 slip_ratio = min(
-                    0.3, (F_drive - F_max_tire) / max(F_max_tire, 1.0) * 0.1
+                    0.3, (F_demand - F_max_tire) / max(F_max_tire, 1.0) * 0.1
                 )
-                F_drive = F_max_tire
+                F_drive = F_cap
             else:
                 slip_ratio = abs(F_drive) / max(F_max_tire, 1.0) * 0.05
 
@@ -785,7 +816,17 @@ class MotoQuantEngine:
 
             # ── Net acceleration (including track gradient) ──
             a_net = (F_drive - F_aero - F_rr - self.F_gradient) / m_eff
-            a_net = max(0.0, a_net)
+            # July 13, 2026 (epoch): deceleration is allowed once the clutch
+            # is locked — drag/RR genuinely slow the bike during gearshift
+            # torque cuts (0.755 m/s of previously-unapplied drag loss across
+            # the K5's own shifts) and let a top-speed overshoot decay
+            # instead of holding inflated speed forever (July-10 review,
+            # epoch-gated item 1). The max(0,·) clamp is kept while the
+            # clutch slips: it is the launch anti-rollback guard (staging on
+            # a gradient, pre-lock float noise), and the same condition
+            # gates the RK4 stage clamps below.
+            if not clutch_locked:
+                a_net = max(0.0, a_net)
 
             # ── Tire thermal update ──
             dT_tire = self.tire_thermal_rate(
@@ -831,40 +872,25 @@ class MotoQuantEngine:
             k1 = a_net
             v_q1 = v + 0.5 * dt * k1
             vr_q = v_q1 + _v_wind
-            k2 = max(
-                0.0,
-                (
-                    F_drive
-                    - _half_rho * max(0.0, vr_q) ** 2 * cd_a_t
-                    - F_rr
-                    - _F_gradient
-                )
-                / m_eff,
-            )
+            k2 = (
+                F_drive - _half_rho * max(0.0, vr_q) ** 2 * cd_a_t - F_rr - _F_gradient
+            ) / m_eff
+            if not clutch_locked:
+                k2 = max(0.0, k2)
             v_q2 = v + 0.5 * dt * k2
             vr_q = v_q2 + _v_wind
-            k3 = max(
-                0.0,
-                (
-                    F_drive
-                    - _half_rho * max(0.0, vr_q) ** 2 * cd_a_t
-                    - F_rr
-                    - _F_gradient
-                )
-                / m_eff,
-            )
+            k3 = (
+                F_drive - _half_rho * max(0.0, vr_q) ** 2 * cd_a_t - F_rr - _F_gradient
+            ) / m_eff
+            if not clutch_locked:
+                k3 = max(0.0, k3)
             v_q3 = v + dt * k3
             vr_q = v_q3 + _v_wind
-            k4 = max(
-                0.0,
-                (
-                    F_drive
-                    - _half_rho * max(0.0, vr_q) ** 2 * cd_a_t
-                    - F_rr
-                    - _F_gradient
-                )
-                / m_eff,
-            )
+            k4 = (
+                F_drive - _half_rho * max(0.0, vr_q) ** 2 * cd_a_t - F_rr - _F_gradient
+            ) / m_eff
+            if not clutch_locked:
+                k4 = max(0.0, k4)
             v_new = v + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
             # Position uses the velocity Simpsons-rule estimate
             x_new = x + (dt / 6.0) * (v + 2.0 * v_q1 + 2.0 * v_q2 + v_q3)

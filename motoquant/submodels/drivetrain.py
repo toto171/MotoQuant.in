@@ -32,7 +32,14 @@ class DrivetrainModel:
             eng.engine_inertia_kgm2 + self.cfg.clutch.basket_inertia_kgm2
         ) * (i_total / r_w) ** 2
         m_rot_rear = tire.rear_inertia_kgm2 / r_w**2
-        m_rot_front = tire.front_inertia_kgm2 / r_w**2
+        # July 13, 2026 (epoch): the front wheel spins at v/r_FRONT, so its
+        # inertia contributes I_f/r_f² — it was divided by the REAR radius
+        # (−1.2 ms on each reference when fixed; July-10 review item 4). The
+        # CLI front-tire override writes front_rolling_radius_m expecting
+        # exactly this effect. Guard: fall back to r_w when the front radius
+        # is unset/zero (legacy configs).
+        r_f = tire.front_rolling_radius_m or r_w
+        m_rot_front = tire.front_inertia_kgm2 / r_f**2
         return m_total + m_rot_engine + m_rot_rear + m_rot_front
 
     def engine_rpm_from_speed(self, v: float, gear: int, r_eff: float) -> float:

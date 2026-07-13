@@ -28,9 +28,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # The pinned targets (see docs/INVARIANTS.md). These are the exact values the
 # current engine produces; the contract is Δ = 0.0000, i.e. bit-identical.
 BASELINES = {
-    "GSX-R 1000 K5": ("gsxr1000_k5", 10.033404935811529),
-    "YZF-R1 4C8": ("yzfr1_4c8", 10.285930649053409),
-    "Hayabusa Gen1": ("hayabusa_gen1", 10.471201919790467),
+    "GSX-R 1000 K5": ("gsxr1000_k5", 9.933056382451884),
+    "YZF-R1 4C8": ("yzfr1_4c8", 10.143589715692835),
+    "Hayabusa Gen1": ("hayabusa_gen1", 10.363345081274984),
 }
 
 

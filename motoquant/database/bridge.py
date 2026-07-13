@@ -129,8 +129,8 @@ def config_to_db_row(config: BikeConfig) -> dict[str, Any]:
     source config carried. Consequence: the DB/API path simulates at Aamby
     Valley by default, while the hand-curated defaults.py reference bikes use
     "Sea Level Reference" -- so /api/simulate?bike_id={1,2,3} returns the K5/R1/
-    Hayabusa ET at altitude (~+0.15 s) rather than the sea-level 10.0334/10.2859/
-    10.4712 headline baselines. This is by design (the API overrides the
+    Hayabusa ET at altitude (~+0.15 s) rather than the sea-level 9.9331/10.1436/
+    10.3633 headline baselines. This is by design (the API overrides the
     environment from the request venue) and is exactly why the reference bikes
     are excluded from reseed_configs_from_specs. Every other section round-trips
     byte-identical -- do NOT mistake this for a stale-config bug.

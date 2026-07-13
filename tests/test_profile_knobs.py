@@ -31,9 +31,9 @@ from motoquant.defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 _SYNTH_TAG = "test_synth_profile_knobs"
 
 _BASELINES = {
-    "K5": (gsxr1000_k5, 10.0334),
-    "R1": (yzfr1_4c8, 10.2859),
-    "Hayabusa": (hayabusa_gen1, 10.4712),
+    "K5": (gsxr1000_k5, 9.9331),
+    "R1": (yzfr1_4c8, 10.1436),
+    "Hayabusa": (hayabusa_gen1, 10.3633),
 }
 
 
@@ -81,32 +81,59 @@ def test_default_knob_values_are_bit_identical():
 
 
 # July 6, 2026: the full-corpus recalibration (3-bike-pin retired) armed
-# mu_peak_override on exactly two profiles — the values below were chosen
-# by weighted-sweep grid against the 246-row benchmark corpus (see
-# scripts/tune_cluster_knobs.py + category_profiles.py inline rationale).
+# mu_peak_override on two profiles. July 13, 2026: the traction-cap epoch
+# re-centered every cluster with the new multiplicative mu_peak_scale knob
+# (grids vs the 277-match weighted corpus; see category_profiles.py inline
+# rationale) and moved single_300_500's override 1.10 → 1.18.
 # Any OTHER profile arming a knob must still be a conscious, test-updating
 # change — that is this guard's job.
 ACTIVE_MU_OVERRIDES = {
     "sport_twin_600_1300": 1.31,
-    "single_300_500": 1.10,
+    "single_300_500": 1.18,
+}
+
+ACTIVE_MU_SCALES = {
+    "litre_sport_195p": 1.08,
+    "litre_sport_600_1000": 1.07,
+    "sport_twin_600_1300": 1.085,
+    "mid_twin_500_700": 1.14,
+    "mid_twin_300_500": 1.12,
+    "two_stroke": 1.15,
+    "cruiser_1300p": 1.20,
+    "other": 1.15,
+    "small_i4_screamer": 1.30,
 }
 
 
 def test_every_registered_profile_ships_expected_knob_values():
-    """Guard: only the calibrated profiles listed in ACTIVE_MU_OVERRIDES set
-    the July-3-wired knobs to an active value, and to exactly the calibrated
-    numbers. If a future calibration pass activates another one, this test
-    forces that change to be made consciously (with a weighted-sweep gate)
-    rather than slipping in silently."""
+    """Guard: only the calibrated profiles listed in ACTIVE_MU_OVERRIDES /
+    ACTIVE_MU_SCALES set the wired grip knobs to an active value, and to
+    exactly the calibrated numbers. If a future calibration pass activates
+    another one, this test forces that change to be made consciously (with
+    a weighted-sweep gate) rather than slipping in silently."""
     for tag, prof in cp._PROFILES.items():
         expected_mu = ACTIVE_MU_OVERRIDES.get(tag)
         assert prof.mu_peak_override == expected_mu, (
             f"{tag}: mu_peak_override {prof.mu_peak_override} != {expected_mu}"
         )
+        expected_scale = ACTIVE_MU_SCALES.get(tag, 1.0)
+        assert prof.mu_peak_scale == expected_scale, (
+            f"{tag}: mu_peak_scale {prof.mu_peak_scale} != {expected_scale}"
+        )
         assert prof.launch_rpm_factor is None, f"{tag}: launch_rpm_factor active"
         # 0.276 = catalog minimum effective Cd (0.30 × 0.92 race crouch);
         # any floor below that is structurally inert.
         assert prof.cd_floor < 0.276, f"{tag}: cd_floor {prof.cd_floor} is active"
+
+
+def test_mu_peak_scale_moves_et():
+    """Liveness for the July-13 epoch knob: scaling grip down must slow a
+    traction-limited litre bike substantially (production engine path)."""
+    base = _et(gsxr1000_k5())
+    low_grip = _et_with_profile(mu_peak_scale=0.80)
+    assert low_grip > base + 0.3, (
+        f"mu_peak_scale is dead: {low_grip:.4f} vs base {base:.4f}"
+    )
 
 
 # ─────────────────────────────────────────────────────────────────────────

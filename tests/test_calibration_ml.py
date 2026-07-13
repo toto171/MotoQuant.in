@@ -510,7 +510,7 @@ class TestReferenceBaselinesPreserved(unittest.TestCase):
         cfg = gsxr1000_k5()
         new = CorrectionTargets().apply(cfg)
         et = MotoQuantEngine(new).run().time_quarter
-        self.assertAlmostEqual(et, 10.0334, places=3)
+        self.assertAlmostEqual(et, 9.9331, places=3)
 
     def test_identity_on_r1_matches_baseline(self):
         from motoquant.physics import MotoQuantEngine
@@ -518,7 +518,7 @@ class TestReferenceBaselinesPreserved(unittest.TestCase):
         cfg = yzfr1_4c8()
         new = CorrectionTargets().apply(cfg)
         et = MotoQuantEngine(new).run().time_quarter
-        self.assertAlmostEqual(et, 10.2859, places=3)
+        self.assertAlmostEqual(et, 10.1436, places=3)
 
     def test_identity_on_hayabusa_matches_baseline(self):
         from motoquant.physics import MotoQuantEngine
@@ -526,7 +526,7 @@ class TestReferenceBaselinesPreserved(unittest.TestCase):
         cfg = hayabusa_gen1()
         new = CorrectionTargets().apply(cfg)
         et = MotoQuantEngine(new).run().time_quarter
-        self.assertAlmostEqual(et, 10.4712, places=3)
+        self.assertAlmostEqual(et, 10.3633, places=3)
 
 
 if __name__ == "__main__":
