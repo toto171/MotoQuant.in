@@ -80,54 +80,89 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # ----------------------------------------------------------------------------
-# Logo mark: bold italic "M" in orange on carbon rounded square,
-# with a staging dot top-right and a drag-strip bar at the bottom.
+# Logo mark (STAGED v4): the stage-dots signature (pre-stage · stage · GO)
+# over a bold Barlow Condensed "M" on an asphalt rounded square.
 # Rendered at master size then downscaled — sharper than per-size render.
+#
+# The brand face ships as an OFL-licensed latin subset in scripts/fonts/
+# (extracted from the next/font build output) so this generator reproduces
+# the exact wordmark glyphs on any machine.
 # ----------------------------------------------------------------------------
-def render_mark(size: int, *, include_accents: bool = True) -> Image.Image:
+SIGNAL_STAGE = "#FFB224"  # signal-stage amber (StageDots motif)
+SIGNAL_GO = "#34D97B"  # signal-go green
+
+FONT_BARLOW_BOLD = _first_font(
+    str(Path(__file__).resolve().parent / "fonts" / "BarlowCondensedBold.ttf"),
+    "/usr/share/fonts/truetype/liberation/LiberationSansNarrow-Bold.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+)
+
+
+def render_mark(
+    size: int, *, include_accents: bool = True, m_fill: str | None = None
+) -> Image.Image:
     """Render the MotoQuant logo mark at the given pixel size.
 
     include_accents=False is used for the 16x16 / 32x32 rasters so the tiny
-    dot + bar don't become sub-pixel mush — at that size the M alone is
-    cleaner.
+    stage dots don't become sub-pixel mush — at that size the M alone is
+    cleaner (and rendered in volt so the favicon stays distinctive).
     """
     img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
 
-    # Carbon rounded-square background
+    # Asphalt rounded-square background + hairline inner edge for definition
+    # against pure-black contexts (browser dark tabs, Android trays).
     radius = max(2, int(size * 0.22))
     d.rounded_rectangle([0, 0, size - 1, size - 1], radius=radius, fill=CARBON)
+    if size >= 128:
+        d.rounded_rectangle(
+            [1, 1, size - 2, size - 2],
+            radius=radius - 1,
+            outline=(255, 255, 255, 16),
+            width=max(1, size // 256),
+        )
 
     if include_accents:
-        # Drag-strip bar at the bottom — the sole secondary mark.
-        # An earlier design had a staging-light dot in the top-right too,
-        # but the dot visually collided with the italic M's top-right
-        # serif at every size ≥48px, so it's been removed.
-        bar_y1 = int(size * 0.83)
-        bar_h = max(1, int(size * 0.05))
-        bar_x1 = int(size * 0.22)
-        bar_x2 = int(size * 0.78)
-        d.rectangle([bar_x1, bar_y1, bar_x2, bar_y1 + bar_h], fill=ORANGE)
+        # StageDots — the v4 signature: amber · amber · GO green, centered
+        # above the M like a tree armed over the stripe.
+        r = size * 0.042
+        gap = size * 0.135
+        cy = size * 0.235
+        cxs = [size / 2 - gap, size / 2, size / 2 + gap]
+        # soft glow under the GO dot only
+        glow_r = r * 2.4
+        glow = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+        gd = ImageDraw.Draw(glow)
+        gd.ellipse(
+            [cxs[2] - glow_r, cy - glow_r, cxs[2] + glow_r, cy + glow_r],
+            fill=(52, 217, 123, 70),
+        )
+        from PIL import ImageFilter
 
-    # Bold italic M — the hero mark. Fills the square but leaves breathing
-    # room above (for the italic top-right reach to not clip the corner)
-    # and below (for the drag-strip bar).
+        glow = glow.filter(ImageFilter.GaussianBlur(radius=max(2, size // 40)))
+        img.alpha_composite(glow)
+        d = ImageDraw.Draw(img)
+        for cx, color in zip(cxs, [SIGNAL_STAGE, SIGNAL_STAGE, SIGNAL_GO]):
+            d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=color)
+
+    # Bold condensed M — the hero glyph, in the brand display face.
     if include_accents:
-        font_size = int(size * 0.76)
-        cy_target = int(size * 0.46)
+        font_size = int(size * 0.62)
+        cy_target = int(size * 0.615)
+        fill = m_fill or WHITE
     else:
-        # No accents at 16/32 → M takes more vertical space
-        font_size = int(size * 0.86)
-        cy_target = int(size * 0.50)
+        font_size = int(size * 0.80)
+        cy_target = int(size * 0.52)
+        fill = m_fill or ORANGE  # volt keeps the tiny favicon distinctive
 
-    font = ImageFont.truetype(FONT_BOLD_IT, font_size)
+    font = ImageFont.truetype(FONT_BARLOW_BOLD, font_size)
     text = "M"
     bbox = d.textbbox((0, 0), text, font=font)
     tw = bbox[2] - bbox[0]
     th = bbox[3] - bbox[1]
     tx = (size - tw) // 2 - bbox[0]
     ty = cy_target - th // 2 - bbox[1]
-    d.text((tx, ty), text, fill=ORANGE, font=font)
+    d.text((tx, ty), text, fill=fill, font=font)
 
     return img
 
@@ -139,23 +174,37 @@ def render_mark_hires(size: int) -> Image.Image:
 
 
 # ----------------------------------------------------------------------------
-# SVG source — hand-written, matches the raster logic.
-# This is the scalable "truth" for any future editing.
+# SVG source — matches the raster logic. The M is the actual Barlow Condensed
+# Bold glyph outline (OFL) extracted via fontTools, so the vector renders
+# identically everywhere with zero font dependencies.
 # ----------------------------------------------------------------------------
+_M_PATH = (
+    "M36.17 25.47H40.77Q40.97 25.47 41.11 25.61Q41.25 25.75 41.25 25.95V52.77"
+    "Q41.25 52.97 41.11 53.11Q40.97 53.25 40.77 53.25H36.13Q35.93 53.25 35.79 53.11"
+    "Q35.65 52.97 35.65 52.77V34.96Q35.65 34.8 35.57 34.8Q35.49 34.8 35.41 34.92"
+    "L32.32 40.39Q32.12 40.71 32 40.71Q31.88 40.71 31.68 40.39L28.59 34.92"
+    "Q28.51 34.8 28.43 34.8Q28.35 34.8 28.35 34.96V52.77Q28.35 52.97 28.21 53.11"
+    "Q28.07 53.25 27.87 53.25H23.23Q23.03 53.25 22.89 53.11Q22.75 52.97 22.75 52.77"
+    "V25.95Q22.75 25.75 22.89 25.61Q23.03 25.47 23.23 25.47H27.79"
+    "Q28.19 25.47 28.39 25.79L31.92 32.1Q32.04 32.26 32.16 32.1L35.57 25.79"
+    "Q35.73 25.47 36.17 25.47Z"
+)
+
 ICON_SVG = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="MotoQuant">
   <title>MotoQuant</title>
+  <defs>
+    <filter id="go-glow" x="-120%" y="-120%" width="340%" height="340%">
+      <feGaussianBlur stdDeviation="2.4"/>
+    </filter>
+  </defs>
   <rect x="0" y="0" width="64" height="64" rx="14" ry="14" fill="{CARBON}"/>
-  <!-- drag-strip bar -->
-  <rect x="14" y="53" width="36" height="3.2" fill="{ORANGE}"/>
-  <!-- bold italic M -->
-  <text x="32" y="43"
-        font-family="'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif"
-        font-weight="900"
-        font-style="italic"
-        font-size="50"
-        text-anchor="middle"
-        fill="{ORANGE}"
-        letter-spacing="-1">M</text>
+  <!-- stage dots: pre-stage / stage / GO -->
+  <circle cx="40.64" cy="15" r="6.4" fill="{SIGNAL_GO}" opacity="0.28" filter="url(#go-glow)"/>
+  <circle cx="23.36" cy="15" r="2.7" fill="{SIGNAL_STAGE}"/>
+  <circle cx="32" cy="15" r="2.7" fill="{SIGNAL_STAGE}"/>
+  <circle cx="40.64" cy="15" r="2.7" fill="{SIGNAL_GO}"/>
+  <!-- Barlow Condensed Bold M (glyph outline) -->
+  <path d="{_M_PATH}" fill="{WHITE}"/>
 </svg>
 """
 
@@ -255,7 +304,7 @@ def render_og_image(path: Path) -> None:
     sub_font = ImageFont.truetype(FONT_REGULAR, 20)
     d.text(
         (110, 338),
-        "Quarter-mile simulation  ·  221 validated benchmarks",
+        "Quarter-mile simulation  ·  250 validated benchmarks",
         font=sub_font,
         fill=hex_rgba(WHITE_SUB, 255),
     )

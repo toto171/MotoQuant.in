@@ -1,15 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="MotoQuant">
   <title>MotoQuant</title>
+  <defs>
+    <filter id="go-glow" x="-120%" y="-120%" width="340%" height="340%">
+      <feGaussianBlur stdDeviation="2.4"/>
+    </filter>
+  </defs>
   <rect x="0" y="0" width="64" height="64" rx="14" ry="14" fill="#07090C"/>
-  <!-- drag-strip bar -->
-  <rect x="14" y="53" width="36" height="3.2" fill="#C9F231"/>
-  <!-- bold italic M -->
-  <text x="32" y="43"
-        font-family="'Helvetica Neue', 'Arial', 'DejaVu Sans', sans-serif"
-        font-weight="900"
-        font-style="italic"
-        font-size="50"
-        text-anchor="middle"
-        fill="#C9F231"
-        letter-spacing="-1">M</text>
+  <!-- stage dots: pre-stage / stage / GO -->
+  <circle cx="40.64" cy="15" r="6.4" fill="#34D97B" opacity="0.28" filter="url(#go-glow)"/>
+  <circle cx="23.36" cy="15" r="2.7" fill="#FFB224"/>
+  <circle cx="32" cy="15" r="2.7" fill="#FFB224"/>
+  <circle cx="40.64" cy="15" r="2.7" fill="#34D97B"/>
+  <!-- Barlow Condensed Bold M (glyph outline) -->
+  <path d="M36.17 25.47H40.77Q40.97 25.47 41.11 25.61Q41.25 25.75 41.25 25.95V52.77Q41.25 52.97 41.11 53.11Q40.97 53.25 40.77 53.25H36.13Q35.93 53.25 35.79 53.11Q35.65 52.97 35.65 52.77V34.96Q35.65 34.8 35.57 34.8Q35.49 34.8 35.41 34.92L32.32 40.39Q32.12 40.71 32 40.71Q31.88 40.71 31.68 40.39L28.59 34.92Q28.51 34.8 28.43 34.8Q28.35 34.8 28.35 34.96V52.77Q28.35 52.97 28.21 53.11Q28.07 53.25 27.87 53.25H23.23Q23.03 53.25 22.89 53.11Q22.75 52.97 22.75 52.77V25.95Q22.75 25.75 22.89 25.61Q23.03 25.47 23.23 25.47H27.79Q28.19 25.47 28.39 25.79L31.92 32.1Q32.04 32.26 32.16 32.1L35.57 25.79Q35.73 25.47 36.17 25.47Z" fill="#FFFFFF"/>
 </svg>
