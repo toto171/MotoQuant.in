@@ -23,23 +23,23 @@ permissions:
 # available from the Actions tab.
 
 on:
-  schedule:
-    # Every 14 minutes during IST waking hours only — UTC 00:00-18:59
-    # maps to roughly 05:30 AM - 11:59 PM IST. Outside that window
-    # (~12:00 AM - 5:30 AM IST) we let the service sleep, since
-    # MotoQuant's traffic is Indian-market and overnight visitors are
-    # rare. First-visitor cold start at 7 AM IST is the only UX cost.
-    #
-    # Why this matters: Render's free tier caps instance-hours at 750/mo.
-    # A 31-day month with a 24/7 cron uses 744 hrs — only 6 hrs of slack
-    # before month-end suspension. This restricted schedule uses
-    # ~595 hrs/mo (19 hrs/day x 31 days), leaving 155+ hrs of headroom.
-    #
-    # Free Render sleep threshold is 15 min from last request, and GH
-    # Actions cron can drift by several minutes under load, so the
-    # 14-min interval gives a 1-min safety margin against jitter.
-    - cron: "*/14 0-18 * * *"
-  workflow_dispatch:        # allow manual triggering for debugging
+  # SCHEDULE PAUSED (July 14, 2026, operator decision): the account crossed
+  # its 3,000 Actions-minutes/month cap, and this cron was the dominant
+  # consumer — each throttled run can burn up to ~11 billed minutes in the
+  # 4x150s cold-start retry loop (~77 scheduled runs/day). The other two
+  # keep-alive layers cost zero Actions minutes and stay active:
+  #   1. Vercel cron -> /api/wake (vercel.json, 3x daily)
+  #   2. in-app self-ping (motoquant/keepwarm.py) holding the day once woken
+  # Re-enable by uncommenting the schedule block below if ever needed —
+  # moot after the planned move off Render's free tier to Oracle.
+  #
+  # schedule:
+  #   # Every 14 minutes during IST waking hours only — UTC 00:00-18:59
+  #   # maps to roughly 05:30 AM - 11:59 PM IST. 14-min interval = 1-min
+  #   # safety margin under Render's 15-min sleep threshold; the 0-18 UTC
+  #   # window keeps Render instance-hours (~595/mo) under the 750 cap.
+  #   - cron: "*/14 0-18 * * *"
+  workflow_dispatch:        # manual triggering stays available
 
 # Cancel any backed-up runs if a new one starts — no point pinging twice
 # in quick succession if GH was lagging.
