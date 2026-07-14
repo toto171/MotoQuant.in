@@ -977,9 +977,13 @@ def regenerate_og_card(truth, output_path: Path | None = None, verbose=True) -> 
     plot_x1 = panel_x + panel_w - pad_r
     plot_y1 = panel_y + panel_h - pad_b
 
-    # Approx K5 v(t) curve (0 → 10.03s, 0 → 239 km/h) — sigmoid-ish ramp
+    # Approx K5 v(t) curve — sigmoid-ish ramp. ET comes from the LIVE pinned
+    # baseline in `truth` so the card can never quote a stale reference time
+    # (the July-13 physics epoch moved K5 10.0334 → 9.9331); trap speed is
+    # illustrative.
     n_pts = 80
-    t_max = 10.0334
+    k5 = truth.get("baseline_k5")
+    t_max = k5 if isinstance(k5, (int, float)) else 9.9331
     v_max = 239.8
     pts = []
     for i in range(n_pts):
