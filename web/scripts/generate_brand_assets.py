@@ -10,8 +10,10 @@ Outputs (written to web/public/):
   - icon-192.png           (Android / PWA)
   - icon-512.png           (Android / PWA / high-res)
   - icon.svg               (scalable source)
-  - og-image.png           (1200x630, WhatsApp/Instagram/Twitter link preview)
   - site.webmanifest       (PWA manifest)
+
+og-image.png is NOT written here — scripts/audit_headline_stats.py owns it
+(single ownership; its card is evergreen by design, July 2026).
 """
 
 from pathlib import Path
@@ -467,10 +469,10 @@ def main() -> None:
     (OUT_DIR / "site.webmanifest").write_text(WEBMANIFEST, encoding="utf-8")
     print("wrote site.webmanifest")
 
-    # OG image
-    og_path = OUT_DIR / "og-image.png"
-    render_og_image(og_path)
-    print(f"wrote {og_path.name}")
+    # og-image.png deliberately NOT written here — the evergreen card is
+    # owned by scripts/audit_headline_stats.py (single ownership; the
+    # render_og_image() above is retained only as a reference layout for
+    # future marketing banners).
 
 
 if __name__ == "__main__":

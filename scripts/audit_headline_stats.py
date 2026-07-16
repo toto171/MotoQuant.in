@@ -793,7 +793,16 @@ def apply_fixes(truth, verbose=True):
 
 
 def regenerate_og_card(truth, output_path: Path | None = None, verbose=True) -> Path:
-    """Render a 1200×630 OG social card matching the existing layout."""
+    """Render the 1200x630 OG social card.
+
+    EVERGREEN BY DESIGN (July 2026, operator decision): the card carries no
+    catalog counts, no accuracy figures, no beta copy — nothing that goes
+    stale when the DB grows or a physics epoch moves the pins. It is pure
+    brand: the identity-kit redline-Q mark, the Moto/Quant lockup, the
+    tagline, an unlabeled v(t) curve, and the domain. `truth` is accepted
+    for call-site compatibility but deliberately unused.
+    """
+    del truth  # evergreen — see docstring
     try:
         from PIL import Image, ImageDraw, ImageFont
     except ImportError as exc:
@@ -804,34 +813,29 @@ def regenerate_og_card(truth, output_path: Path | None = None, verbose=True) -> 
     out_path = output_path or OG_IMAGE_PATH
 
     W, H = 1200, 630
-    # IGNITION v5 brand (July 2026, identity kit): ink surfaces + signal
-    # orange. Variable names kept so the layout code below is untouched.
-    BG = (10, 10, 11)  # ink (identity kit)
-    PANEL = (17, 17, 19)  # ink-2
-    BORDER = (39, 39, 42)  # ink-4
+    # IGNITION v5 brand (identity kit): Ink surfaces + Signal orange.
+    BG = (10, 10, 11)
     TEXT = (240, 240, 240)
     DIM = (140, 140, 150)
-    ORANGE = (255, 94, 31)  # signal (identity kit)
-    GREEN = (34, 197, 94)  # signal-go
+    ORANGE = (255, 94, 31)
 
     img = Image.new("RGB", (W, H), BG)
     d = ImageDraw.Draw(img)
 
     def _font(size, weight="regular"):
-        # Try common system fonts; fall back to default
-        candidates = []
-        if weight == "bold":
-            candidates = [
+        candidates = (
+            [
                 "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-                "/usr/share/fonts/TTF/DejaVuSans-Bold.ttf",
+                "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
                 "/Library/Fonts/Arial Bold.ttf",
             ]
-        else:
-            candidates = [
+            if weight == "bold"
+            else [
                 "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-                "/usr/share/fonts/TTF/DejaVuSans.ttf",
+                "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
                 "/Library/Fonts/Arial.ttf",
             ]
+        )
         for path in candidates:
             try:
                 return ImageFont.truetype(path, size)
@@ -839,181 +843,81 @@ def regenerate_og_card(truth, output_path: Path | None = None, verbose=True) -> 
                 continue
         return ImageFont.load_default()
 
-    f_pill = _font(20)
-    f_brand = _font(96, "bold")
-    f_tag = _font(38, "bold")
-    f_sub = _font(20)
-    f_stat_n = _font(64, "bold")
-    f_stat_l = _font(18, "bold")
+    f_brand = _font(92, "bold")
+    f_tag = _font(36, "bold")
+    f_sub = _font(21)
     f_url = _font(22, "bold")
-    f_chart = _font(22, "bold")
-    f_chart_sub = _font(16)
+    f_chart = _font(20, "bold")
 
-    # ── Top pill ────────────────────────────────────────────────────────
-    # NOT "Open Source" — the product is deliberately hosted-only/closed
-    # (June 2026 desktop re-arch chose the architecture that protects the
-    # IP). The old pill was a trust liability on every social share.
-    pill_text = "Free during beta  ·  Built in India"
-    pill_x, pill_y = 60, 56
-    bbox = d.textbbox((0, 0), pill_text, font=f_pill)
-    pw = bbox[2] - bbox[0] + 60
-    ph = bbox[3] - bbox[1] + 22
-    d.rounded_rectangle(
-        (pill_x, pill_y, pill_x + pw, pill_y + ph),
-        radius=ph // 2,
-        fill=PANEL,
-        outline=BORDER,
-        width=1,
-    )
-    # Orange dot
-    d.ellipse(
-        (pill_x + 18, pill_y + ph // 2 - 5, pill_x + 28, pill_y + ph // 2 + 5),
-        fill=ORANGE,
-    )
-    d.text((pill_x + 36, pill_y + 10), pill_text, font=f_pill, fill=TEXT)
+    # ── Redline-Q mark (identity-kit geometry, 512 reference frame) ──────
+    def draw_mark(cx0, cy0, size):
+        """Supersampled mark pasted at (cx0, cy0) top-left, side = size."""
+        ss = 4
+        m = Image.new("RGBA", (size * ss, size * ss), (0, 0, 0, 0))
+        md = ImageDraw.Draw(m)
+        k = size * ss / 512.0
+        cx, cy = 256 * k, 263.6 * k
+        r_out, r_in = 153.6 * k, 107.52 * k
+        md.ellipse(
+            [cx - r_out, cy - r_out, cx + r_out, cy + r_out], fill=(255, 255, 255, 255)
+        )
+        md.ellipse([cx - r_in, cy - r_in, cx + r_in, cy + r_in], fill=(*BG, 255))
+        gr = r_out * 1.25
+        md.pieslice([cx - gr, cy - gr, cx + gr, cy + gr], -60, -30, fill=(*BG, 255))
+        quad = [(296.89, 240.25), (397.22, 152.95), (392.58, 95.69), (278.97, 222.33)]
+        md.polygon([(x * k, y * k) for x, y in quad], fill=(*ORANGE, 255))
+        hub = 13.6 * k
+        md.ellipse([cx - hub, cy - hub, cx + hub, cy + hub], fill=(*ORANGE, 255))
+        m = m.resize((size, size), Image.LANCZOS)
+        img.paste(m, (cx0, cy0), m)
 
-    # ── Brand wordmark ──────────────────────────────────────────────────
-    d.text((60, 132), "MotoQuant", font=f_brand, fill=TEXT)
-    d.text((60, 240), "The Physics of Faster", font=f_tag, fill=ORANGE)
+    # ── v(t) sweep — unlabeled, drawn first so type always wins ──────────
+    pts = []
+    n_pts = 110
+    for i in range(n_pts):
+        t = i / (n_pts - 1)
+        v = 1 - 2.71828 ** (-4.2 * t)
+        x = 80 + (1120 - 80) * t
+        yy = 548 - (548 - 408) * v
+        pts.append((x, yy))
+    d.line(pts, fill=(120, 48, 20), width=6)
+    d.line(pts, fill=ORANGE, width=3)
+    ex, ey = pts[-1]
+    d.ellipse((ex - 8, ey - 8, ex + 8, ey + 8), fill=ORANGE)
+    d.ellipse((ex - 3, ey - 3, ex + 3, ey + 3), fill=(255, 255, 255))
+    d.text((830, 438), "v(t)  ·  quarter mile", font=f_chart, fill=(96, 96, 100))
 
-    # Top-10 mean accuracy from latest sweep. Fallback = the July-13 2026
-    # published corpus value (docs/validation top-10 mean ±0.009s) — the old
-    # ±0.006 fallback predated the physics-recalibration + corpus-expansion
-    # epoch and understated the site.
-    top10 = "±0.009"
-    try:
-        sweep_files = sorted(REPO.glob("reports/sweep_et_*.json"), reverse=True)
-        if sweep_files:
-            data = json.loads(sweep_files[0].read_text())
-            # data structure varies; look for top-10 mean in summary
-            summary = data.get("summary") or {}
-            if isinstance(summary, dict):
-                for k in (
-                    "top10_mean_abs_delta_s",
-                    "top_10_mean_abs",
-                    "top10_mean_delta",
-                ):
-                    if k in summary:
-                        top10 = f"±{float(summary[k]):.3f}"
-                        break
-    except Exception:
-        pass
+    # ── Dashed centerline motif (the strip) under the curve ──────────────
+    y = 548
+    x = 60
+    while x < 900:
+        d.line([(x, y), (x + 26, y)], fill=(58, 58, 62), width=3)
+        x += 52
 
-    sub = f"Quarter-mile simulation  ·  {top10}s top-10 mean accuracy"
-    d.text((60, 296), sub, font=f_sub, fill=DIM)
-
-    # ── 4-stat grid in orange ───────────────────────────────────────────
-    bikes_n = truth.get("all_known_bikes", "—")
-    parts_n = truth.get("parts_db", "—")
-    venues_n = truth.get("venues_db", "—")
-    tests_n = truth.get("tests_collected", "—")
-    if isinstance(tests_n, str) and (
-        tests_n.startswith(("ERROR", TEST_COUNT_SKIP_PREFIX))
-    ):
-        tests_n = "1000+"
-
-    stats = [
-        (str(bikes_n), "BIKES"),
-        (str(parts_n), "PARTS"),
-        (str(venues_n), "VENUES"),
-        (str(tests_n), "TESTS"),
-    ]
-
-    grid_x, grid_y = 60, 380
-    cell_w = 130
-    gap = 20
-    for i, (n, lbl) in enumerate(stats):
-        x = grid_x + i * (cell_w + gap)
-        y = grid_y
-        d.text((x, y), n, font=f_stat_n, fill=ORANGE)
-        d.text((x, y + 78), lbl, font=f_stat_l, fill=DIM)
-
-    # ── motoquant.in pill (bottom-right) ────────────────────────────────
-    url = "motoquant.in"
-    bbox = d.textbbox((0, 0), url, font=f_url)
-    uw = bbox[2] - bbox[0] + 42
-    uh = bbox[3] - bbox[1] + 22
-    ux = W - uw - 60
-    uy = H - uh - 50
-    d.rounded_rectangle(
-        (ux, uy, ux + uw, uy + uh), radius=uh // 2, fill=ORANGE, outline=ORANGE
-    )
-    d.text((ux + 21, uy + 8), url, font=f_url, fill=(8, 8, 8))
-
-    # ── Right panel: GSX-R K5 v(t) curve ─────────────────────────────────
-    panel_x = 700
-    panel_y = 100
-    panel_w = 440
-    panel_h = 300
-    d.rounded_rectangle(
-        (panel_x, panel_y, panel_x + panel_w, panel_y + panel_h),
-        radius=14,
-        fill=PANEL,
-        outline=BORDER,
-        width=1,
-    )
-
-    # Header strip
+    # ── Brand block: mark + lockup + tagline + evergreen sub ─────────────
+    draw_mark(52, 96, 190)
+    moto_w = d.textbbox((0, 0), "Moto", font=f_brand)[2]
+    d.text((262, 138), "Moto", font=f_brand, fill=TEXT)
+    d.text((262 + moto_w, 138), "Quant", font=f_brand, fill=ORANGE)
+    d.text((266, 258), "The physics of faster", font=f_tag, fill=TEXT)
     d.text(
-        (panel_x + 22, panel_y + 18),
-        "GSX-R 1000 K5  ·  Aamby Valley",
-        font=f_chart,
-        fill=TEXT,
-    )
-    d.text(
-        (panel_x + 22, panel_y + 50),
-        "Reference baseline · preserved exactly",
-        font=f_chart_sub,
+        (266, 316),
+        "Physics-based quarter-mile simulation for motorcycles",
+        font=f_sub,
         fill=DIM,
     )
 
-    # Plot region
-    pad_l = 28
-    pad_r = 28
-    pad_t = 96
-    pad_b = 56
-    plot_x0 = panel_x + pad_l
-    plot_y0 = panel_y + pad_t
-    plot_x1 = panel_x + panel_w - pad_r
-    plot_y1 = panel_y + panel_h - pad_b
-
-    # Approx K5 v(t) curve — sigmoid-ish ramp. ET comes from the LIVE pinned
-    # baseline in `truth` so the card can never quote a stale reference time
-    # (the July-13 physics epoch moved K5 10.0334 → 9.9331); trap speed is
-    # illustrative.
-    n_pts = 80
-    k5 = truth.get("baseline_k5")
-    t_max = k5 if isinstance(k5, (int, float)) else 9.9331
-    v_max = 239.8
-    pts = []
-    for i in range(n_pts):
-        t = i * t_max / (n_pts - 1)
-        # Empirical-ish K5 acceleration: rapid early ramp, then taper
-        v = v_max * (1 - 2.71828 ** (-0.42 * t))
-        x = plot_x0 + (plot_x1 - plot_x0) * (t / t_max)
-        y = plot_y1 - (plot_y1 - plot_y0) * (v / v_max)
-        pts.append((x, y))
-
-    # Axis baseline
-    d.line([(plot_x0, plot_y1), (plot_x1, plot_y1)], fill=BORDER, width=1)
-    # Curve
-    d.line(pts, fill=ORANGE, width=3)
-    # End-point dot
-    d.ellipse(
-        (pts[-1][0] - 6, pts[-1][1] - 6, pts[-1][0] + 6, pts[-1][1] + 6), fill=ORANGE
+    # ── Bottom row: origin line + domain pill ─────────────────────────────
+    d.text(
+        (60, 572), "Built in India for the drag racing community", font=f_sub, fill=DIM
     )
-
-    # Footer badge
-    badge_text = f"{t_max:.2f}s  ·  {v_max:.0f} km/h"
-    bbox = d.textbbox((0, 0), badge_text, font=f_chart)
-    bw = bbox[2] - bbox[0] + 30
-    bh = bbox[3] - bbox[1] + 18
-    bx = panel_x + panel_w - bw - 20
-    by = panel_y + panel_h - bh - 16
-    d.rounded_rectangle(
-        (bx, by, bx + bw, by + bh), radius=bh // 2, fill=GREEN, outline=GREEN
-    )
-    d.text((bx + 15, by + 7), badge_text, font=f_chart, fill=(8, 8, 8))
+    dom_text = "motoquant.in"
+    bbox = d.textbbox((0, 0), dom_text, font=f_url)
+    dw = bbox[2] - bbox[0] + 44
+    dh = 46
+    dx, dy = W - dw - 60, H - dh - 34
+    d.rounded_rectangle((dx, dy, dx + dw, dy + dh), radius=dh // 2, fill=ORANGE)
+    d.text((dx + 22, dy + 11), dom_text, font=f_url, fill=(10, 10, 11))
 
     img.save(out_path, "PNG", optimize=True)
     if verbose:
