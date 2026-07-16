@@ -804,15 +804,15 @@ def regenerate_og_card(truth, output_path: Path | None = None, verbose=True) -> 
     out_path = output_path or OG_IMAGE_PATH
 
     W, H = 1200, 630
-    # STAGED v4 brand (July 2026, see web/DESIGN.md): asphalt surfaces +
-    # volt accent. Variable names kept so the layout code below is untouched.
-    BG = (7, 9, 12)  # asphalt-0
-    PANEL = (16, 20, 27)  # asphalt-2
-    BORDER = (35, 42, 55)  # asphalt-4
+    # IGNITION v5 brand (July 2026, identity kit): ink surfaces + signal
+    # orange. Variable names kept so the layout code below is untouched.
+    BG = (10, 10, 11)  # ink (identity kit)
+    PANEL = (17, 17, 19)  # ink-2
+    BORDER = (39, 39, 42)  # ink-4
     TEXT = (240, 240, 240)
     DIM = (140, 140, 150)
-    ORANGE = (201, 242, 49)  # accent volt
-    GREEN = (52, 217, 123)  # signal-go
+    ORANGE = (255, 94, 31)  # signal (identity kit)
+    GREEN = (34, 197, 94)  # signal-go
 
     img = Image.new("RGB", (W, H), BG)
     d = ImageDraw.Draw(img)

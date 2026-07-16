@@ -73,7 +73,7 @@ const SECTIONS = [
   {
     id: 'category-profiles',
     n: '3',
-    title: 'Category-Flavoured Physics',
+    title: 'Category-flavoured physics',
     body: [
       'A single set of physics constants would either over-tune for litre-class superbikes (which dominate published benchmarks) or under-tune for small-cc commuters where engine inertia, basket inertia, and chassis fluid mass are systematically smaller. Every catalog bike is auto-tagged into one of a cylinder-aware 12-cluster taxonomy — litre_sport_195p, litre_sport_600_1000, sport_twin_600_1300, mid_twin_500_700, mid_twin_300_500, single_300_500, small_i4_screamer, entry_200_300, entry_150_200, two_stroke, cruiser_1300p, other — with per-cluster knobs for over-clutching factor, engine-deceleration limit, parasitic loss multiplier, and launch RPM floor. The July 2026 revision split twins, singles, and small-cc I4 screamers out of the original displacement-only buckets after the sweep showed sport twins simming ~0.2 s fast and small-cc I4s ~1.1 s slow, then re-centred every cluster against the full weighted corpus.',
       'The dispatch is back-compat-safe: bikes constructed before the taxonomy existed reproduce their pre-April-30 results bit-exactly through an "unknown" profile that preserves the legacy code path. Our three reference baselines (K5, R1, Hayabusa) have not drifted by more than 0.0000 s during the entire taxonomy roll-out.',
@@ -82,7 +82,7 @@ const SECTIONS = [
   {
     id: 'validation',
     n: '4',
-    title: 'Validation Methodology',
+    title: 'Validation methodology',
     body: [
       'As of the July 2026 sweep we benchmark against 250 published quarter-mile elapsed times (277 matched to a catalog bike) where the bike, year range, and venue conditions are unambiguous. Sources are classified by quality and weighted accordingly:',
     ],
@@ -130,7 +130,7 @@ const SECTIONS = [
   {
     id: 'baselines',
     n: '6',
-    title: 'Reference Baselines',
+    title: 'Reference baselines',
     body: [
       'Three bikes are designated reference baselines and gated in the test suite to reproduce exactly to the fourth decimal place across every commit:',
     ],
@@ -170,7 +170,7 @@ const SECTIONS = [
   {
     id: 'limitations',
     n: '8',
-    title: 'Known Limitations',
+    title: 'Known limitations',
     body: [
       'We are honest about where the model is bounded. The two-stroke cluster still carries a +0.146 s weighted bias and a 0.537 s weighted |Δ| because piston-port 2T launch dynamics include an off-pipe / on-pipe transition whose integral-of-power-over-time is not perfectly captured by the current expansion-chamber Gaussian curve. The Indian entry small-cc cluster (entry-150-200) carries the largest weighted |Δ| in the corpus at 0.820 s — bias-centred at +0.018 s but noise-dominated, bounded by the declared ±0.7 s uncertainty of its derived benchmarks; reaching the published ≤0.05 s stretch goal requires per-bike Dragy / VBox-measured stock data, not further physics tuning.',
       'The cruiser 1300+ cluster has only N=3 and the small-cc I4 screamer cluster only N=2 — too small to draw statistically meaningful conclusions. The Apache RTR 200 4V is a documented outlier (sim 18.7 s vs derived 15.9 s) where the derived benchmark is suspiciously fast for a 20.5 hp / 153 kg bike; we have flagged it for audit but have not adjusted the model on the strength of one data point.',
@@ -201,7 +201,7 @@ function Section({ s }) {
     <section id={s.id} className="scroll-mt-24 mb-16">
       <div className="flex items-baseline gap-4 mb-5">
         <span className="font-mono text-white/40 text-sm tabular-nums">§{s.n}</span>
-        <h2 className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-3xl text-white">
+        <h2 className="font-display font-bold text-3xl tracking-tight text-white">
           {s.title}
         </h2>
       </div>
@@ -307,8 +307,8 @@ export default function WhitepaperPage() {
             <div className="label-mono mb-4">
               Whitepaper · Version 1.0 · April 30, 2026 · validation data: July 2026 sweep
             </div>
-            <h1 className="font-display font-bold uppercase text-4xl sm:text-5xl lg:text-6xl tracking-[-0.01em] leading-[0.95] text-white mb-6">
-              MotoQuant Pro:<br />A First-Principles Drag-Racing Physics Engine for Motorcycles
+            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-white mb-6">
+              MotoQuant Pro:<br />A first-principles drag-racing <span className="text-accent">physics engine</span> for motorcycles
             </h1>
             <p className="text-white/65 text-base mb-2">
               Ritwik Singh &nbsp;·&nbsp; Arya Desai
@@ -381,13 +381,13 @@ export default function WhitepaperPage() {
             </div>
             <div className="grid sm:grid-cols-3 gap-4">
               <Link href="/docs/physics" className="group card card-hover p-5">
-                <div className="font-display font-semibold uppercase text-white group-hover:text-accent transition-colors">
+                <div className="font-display font-semibold text-white group-hover:text-accent transition-colors">
                   Physics docs →
                 </div>
                 <div className="text-sm text-white/55 mt-1">Sub-model deep-dives.</div>
               </Link>
               <Link href="/docs/validation" className="group card card-hover p-5">
-                <div className="font-display font-semibold uppercase text-white group-hover:text-accent transition-colors">
+                <div className="font-display font-semibold text-white group-hover:text-accent transition-colors">
                   Validation data →
                 </div>
                 <div className="text-sm text-white/55 mt-1">Per-bike benchmark table.</div>

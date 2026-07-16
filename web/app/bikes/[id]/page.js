@@ -36,7 +36,7 @@ function SpecRow({ label, value }) {
 function SpecBlock({ icon: Icon, title, children }) {
   return (
     <div className="card h-full p-5">
-      <h3 className="flex items-center gap-2 font-display font-semibold uppercase text-white text-base mb-3">
+      <h3 className="flex items-center gap-2 font-display font-semibold text-white text-base mb-3">
         <Icon size={16} className="text-white/40" aria-hidden="true" />
         {title}
       </h3>
@@ -146,7 +146,7 @@ export default function BikeDetailPage() {
                   <StageDots foul />
                   <span className="label-mono">err 404 · no spec sheet at this id</span>
                 </div>
-                <p className="font-display font-bold uppercase text-white text-2xl">
+                <p className="font-display font-semibold text-white text-xl md:text-2xl">
                   This bike isn&apos;t in the catalog
                 </p>
                 <p className="text-sm text-white/65 mt-3 max-w-md mx-auto">
@@ -165,7 +165,7 @@ export default function BikeDetailPage() {
             ) : (
               <div className="card p-8 md:p-12 text-center">
                 <AlertCircle size={28} className="mx-auto text-signal-foul mb-4" />
-                <p className="font-display font-bold uppercase text-white text-2xl">
+                <p className="font-display font-semibold text-white text-xl md:text-2xl">
                   Couldn&apos;t load this bike
                 </p>
                 <p className="text-sm text-white/65 mt-3 max-w-md mx-auto">
@@ -193,7 +193,7 @@ export default function BikeDetailPage() {
                   <p className="label-mono mb-2">
                     {bike.manufacturer}
                   </p>
-                  <h1 className="font-display font-bold uppercase text-4xl sm:text-6xl leading-[0.95] tracking-[-0.01em] text-white">
+                  <h1 className="font-display font-bold text-4xl sm:text-6xl tracking-tight text-white">
                     {bike.model}
                   </h1>
                   <div className="flex flex-wrap gap-2 mt-4">
@@ -236,7 +236,7 @@ export default function BikeDetailPage() {
                       {'seg' in s ? (
                         s.seg != null ? (
                           <div className="mt-3 flex items-end justify-center gap-1.5">
-                            <ScoreboardCounter value={s.seg} h={28} />
+                            <ScoreboardCounter value={s.seg} h={24} />
                             <span className="label-mono pb-0.5">
                               {s.unit}
                             </span>
@@ -268,7 +268,7 @@ export default function BikeDetailPage() {
                 </SpecBlock>
 
                 <div className="grid gap-4 content-start">
-                  <SpecBlock icon={Wind} title="Chassis & Aero">
+                  <SpecBlock icon={Wind} title="Chassis & aero">
                     <SpecRow label="Cd" value={formatCell(bike.cd, '', 2)} />
                     <SpecRow label="Frontal Area" value={formatCell(bike.frontal_area_m2, ' m²', 2)} />
                     <SpecRow label="Wheelbase" value={formatCell(bike.wheelbase_m, ' m', 3)} />
@@ -297,7 +297,7 @@ export default function BikeDetailPage() {
               {/* Tire fitments */}
               {bike.tire_fitments && bike.tire_fitments.length > 0 && (
                 <Reveal y={20}>
-                  <SpecBlock icon={CircleDot} title={`OEM & Recommended Tires (${bike.tire_fitments.length})`}>
+                  <SpecBlock icon={CircleDot} title={`OEM & recommended tires (${bike.tire_fitments.length})`}>
                     <div className="grid gap-2 mt-1">
                       {bike.tire_fitments.map((f, i) => (
                         <div

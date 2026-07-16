@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * BikePicker — the ONE bike-selection control (STAGED v4).
+ * BikePicker — the ONE bike-selection control (IGNITION v5).
  *
  * Replaces the byte-identical pickers that lived inside BuildOptimizer.js and
  * EcuAutotune.js. Same visual language, upgraded to a real combobox:

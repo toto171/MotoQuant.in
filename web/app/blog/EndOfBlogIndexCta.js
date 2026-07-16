@@ -46,7 +46,7 @@ export default function EndOfBlogIndexCta() {
       className="mt-10 card border-accent/30 p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center gap-5"
     >
       <div className="flex-1">
-        <div className="font-display font-semibold uppercase text-white text-xl md:text-2xl mb-2">
+        <div className="font-display font-semibold text-white text-xl md:text-2xl mb-2">
           Stop reading. Run the numbers on your bike.
         </div>
         <div className="text-white/65 text-sm md:text-base leading-relaxed">

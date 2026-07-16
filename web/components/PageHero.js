@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * PageHero — unified inner-page hero (STAGED v4 skin, same API).
+ * PageHero — unified inner-page hero (IGNITION v5 skin, same API).
  *
  * One drop-in block giving every inner page the v4 voice: StageDots +
  * label kicker, condensed uppercase display title, quiet Inter subcopy,
@@ -51,7 +51,7 @@ export default function PageHero({
           </Reveal>
         )}
         <Reveal y={20} duration={0.65} delay={0.1}>
-          <h1 className="font-display font-bold uppercase text-5xl md:text-6xl leading-[0.95] tracking-[-0.01em] text-white max-w-3xl">
+          <h1 className="font-display font-bold text-4xl md:text-6xl tracking-tight text-white max-w-3xl">
             {title}
           </h1>
         </Reveal>

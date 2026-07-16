@@ -64,7 +64,7 @@ export default function EndOfAboutCta() {
             <div className="label-mono mb-3">
               Next step
             </div>
-            <div className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-white text-2xl md:text-3xl mb-3">
+            <div className="font-display font-bold tracking-tight text-white text-2xl md:text-3xl mb-3">
               You&apos;ve read the pitch. Now run the numbers.
             </div>
             <div className="text-white/65 text-sm md:text-base leading-relaxed">

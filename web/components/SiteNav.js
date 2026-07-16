@@ -2,8 +2,11 @@
 
 /**
  * SiteNav — single source of truth for the top navigation across every
- * surface (STAGED v4 skin). Fixed top, blurs over the page, exposes the
+ * surface (IGNITION v5 skin). Fixed top, blurs over the page, exposes the
  * mobile drawer and mounts CommandPalette + MobileToolBar once sitewide.
+ *
+ * Brand lockup: GaugeMark (the redline Q) + the sentence-case wordmark —
+ * Moto white / Quant signal-orange, per the identity kit.
  *
  * Structure (July 2026): the five product tools stay first-class links;
  * the five content pages fold into a Resources dropdown so the bar reads
@@ -17,8 +20,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Menu, Search, X } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import CommandPalette from './CommandPalette';
+import GaugeMark from './GaugeMark';
 import MobileToolBar from './MobileToolBar';
-import StageDots from './StageDots';
 
 const TOOL_LINKS = [
   { href: '/simulator',   label: 'Simulator' },
@@ -98,7 +101,7 @@ export default function SiteNav() {
 
   const resourcesActive = RESOURCE_LINKS.some((l) => isActive(pathname, l));
 
-  // Active link = white with a 2px volt underline; inactive = quiet white.
+  // Active link = white with a 2px signal-orange underline; inactive = quiet white.
   const linkCls = (active) =>
     [
       'transition-colors duration-200',
@@ -126,9 +129,10 @@ export default function SiteNav() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5 group">
-          <StageDots size={5} />
-          <span className="font-display font-bold uppercase text-xl tracking-[0.04em] text-white">
-            MotoQuant
+          <GaugeMark size={26} />
+          <span className="font-display font-bold text-xl tracking-tight">
+            <span className="text-white">Moto</span>
+            <span className="text-accent">Quant</span>
           </span>
         </Link>
 

@@ -1,4 +1,4 @@
-import { Inter, Barlow_Condensed, JetBrains_Mono } from 'next/font/google';
+import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '../components/AuthProvider';
 import StructuredData, {
@@ -16,8 +16,9 @@ const inter = Inter({
   weight: ['400', '500', '600', '700'],
 });
 
-// STAGED v4 display face — motorsport-livery condensed grotesque.
-const barlowCondensed = Barlow_Condensed({
+// IGNITION v5 display face — the identity kit's own type (Space Grotesk 700
+// is the wordmark face; web, app and logo speak one voice).
+const spaceGrotesk = Space_Grotesk({
   variable: '--font-display',
   subsets: ['latin'],
   display: 'swap',
@@ -32,7 +33,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const viewport = {
-  themeColor: '#07090C',
+  themeColor: '#0A0A0B',
   width: 'device-width',
   initialScale: 1,
   // Allow zoom — Lighthouse flags "user-scalable=no" as an accessibility failure
@@ -245,7 +246,7 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      className={[inter.variable, barlowCondensed.variable, jetbrainsMono.variable].join(' ')}
+      className={[inter.variable, spaceGrotesk.variable, jetbrainsMono.variable].join(' ')}
     >
       <head>
         {/* Preconnect to the API origin — shaves ~100-300ms off first sim call */}
@@ -261,7 +262,7 @@ export default function RootLayout({ children }) {
             harmless anchor behavior. */}
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:font-display focus:text-sm focus:font-bold focus:uppercase focus:text-asphalt-0"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-xl focus:bg-accent focus:px-4 focus:py-2 focus:font-display focus:text-sm focus:font-bold focus:text-black"
         >
           Skip to content
         </a>

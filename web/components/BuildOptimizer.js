@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * BuildOptimizer — budget-constrained parts build optimiser (STAGED v4).
+ * BuildOptimizer — budget-constrained parts build optimiser (IGNITION v5).
  *
  * Lets a user pick a bike, set a ₹ budget, choose an optimisation goal
  * (min ET vs max trap) and a build profile (all / street-legal / drag-prep
@@ -14,7 +14,7 @@
  *   - detected part synergies + compatibility warnings
  *   - the suggested next upgrade beyond the budget
  *
- * FUNCTION IS FROZEN (v4 is a re-skin): job wrapper via useAsyncTask +
+ * FUNCTION IS FROZEN (v5 is a re-skin): job wrapper via useAsyncTask +
  * ActionButton (real % in the button, Stop always live), the ?bike_id
  * deep-link preselect reads window.location post-mount (NOT
  * useSearchParams) so the page keeps static-prerendering without a
@@ -32,6 +32,7 @@ import useAsyncTask from '../lib/useAsyncTask';
 import ActionButton from './ActionButton';
 import SimProgress from './SimProgress';
 import BikePicker from './BikePicker';
+import ScoreboardDigits from './ScoreboardDigits';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 const fmtINR = (n) =>
@@ -361,7 +362,7 @@ export default function BuildOptimizer() {
             >
               {/* Header row: bike + scoring chip */}
               <div className="flex items-center justify-between flex-wrap gap-2">
-                <h3 className="font-display text-xl md:text-2xl font-semibold uppercase text-white leading-[0.95]">
+                <h3 className="font-display font-semibold text-lg md:text-xl tracking-tight text-white">
                   {result.bike_name}
                   <span className="label-mono ml-2">
                     {result.goal === 'max_trap' ? 'max trap' : 'min ET'} · {result.profile}
@@ -384,10 +385,33 @@ export default function BuildOptimizer() {
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div className="min-w-0">
                     <p className="label-mono">Base → optimised</p>
-                    <p className="font-mono text-3xl md:text-4xl font-bold text-white tabular-nums mt-1.5">
-                      {fmtNum(result.base_et_s, 3)} → {fmtNum(result.optimized_et_s, 3)}
-                      <span className="text-base text-white/40 ml-1">s</span>
-                    </p>
+                    {result.base_et_s != null && result.optimized_et_s != null ? (
+                      /* Headline ET pair on the seven-seg timing board — the
+                         optimised time is the moving part, so it carries the
+                         orange; the base time stays white. */
+                      <div className="flex flex-wrap items-end gap-2 mt-2">
+                        <ScoreboardDigits
+                          value={Number(result.base_et_s).toFixed(3)}
+                          h={28}
+                          color="#FFFFFF"
+                          label={`Base ET ${Number(result.base_et_s).toFixed(3)} seconds`}
+                        />
+                        <span className="font-mono text-lg text-white/40 leading-none pb-1" aria-hidden="true">
+                          →
+                        </span>
+                        <ScoreboardDigits
+                          value={Number(result.optimized_et_s).toFixed(3)}
+                          h={28}
+                          label={`Optimised ET ${Number(result.optimized_et_s).toFixed(3)} seconds`}
+                        />
+                        <span className="font-mono text-sm text-white/40 pb-0.5">s</span>
+                      </div>
+                    ) : (
+                      <p className="font-mono text-3xl md:text-4xl font-bold text-white tabular-nums mt-1.5">
+                        {fmtNum(result.base_et_s, 3)} → {fmtNum(result.optimized_et_s, 3)}
+                        <span className="text-base text-white/40 ml-1">s</span>
+                      </p>
+                    )}
                     <p className="text-xs font-mono text-white/40 tabular-nums mt-1.5">
                       trap {fmtNum(result.base_trap_kmh, 1)} → {fmtNum(result.optimized_trap_kmh, 1)} km/h ·{' '}
                       <span className={trapTone(result.delta_trap_kmh)}>

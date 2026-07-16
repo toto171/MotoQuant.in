@@ -9,7 +9,7 @@ export const metadata = {
 };
 
 /**
- * Branded 404 (STAGED v4). A red-light foul, not a dead end: the page
+ * Branded 404 (IGNITION v5). A red-light foul, not a dead end: the page
  * routes lost visitors straight back into the product. Server component —
  * StageDots is the only client leaf beyond the shared chrome.
  */
@@ -23,7 +23,7 @@ export default function NotFound() {
             <StageDots foul size={8} />
             <span className="label-mono">red light — foul</span>
           </div>
-          <h1 className="mt-6 font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-white">
+          <h1 className="mt-6 font-display font-bold tracking-tight text-white">
             <span className="block font-mono font-bold text-7xl md:text-8xl tabular-nums">404</span>
             <span className="mt-3 block text-2xl md:text-3xl">Red light — this page fouled.</span>
           </h1>

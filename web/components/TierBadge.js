@@ -1,10 +1,11 @@
 'use client';
 
 /**
- * MotoQuant Pro — Tier Badge Component (STAGED v4)
- * ================================================
+ * MotoQuant Pro — Tier Badge Component (IGNITION v5)
+ * ==================================================
  * A small chip that displays the user's subscription tier, on the shared
- * .chip system: Free = neutral .chip, Pro = .chip-volt, Studio = .chip-mint
+ * .chip system: Free = neutral .chip, Pro = .chip-volt (legacy-named class,
+ * renders the signal-orange accent tint), Studio = .chip-mint
  * (mint is reserved for tier chips — see DESIGN.md §2.1).
  *
  * Usage

@@ -36,7 +36,7 @@ export default function PrivacyPage() {
           Technology Act, 2000.
         </p>
 
-        <Section title="1. Data We Collect">
+        <Section title="1. Data we collect">
           <Row label="Email address">Required to create an account and deliver sign-in links. Stored in our database indefinitely until you request deletion.</Row>
           <Row label="Password (optional)">If you choose password sign-in, we store only a salted scrypt hash — we cannot read your password. Magic-link sign-in requires no password at all.</Row>
           <Row label="Payment details">Handled entirely by our payment processors — Razorpay (India) and Stripe (international). Card, UPI and bank details never touch MotoQuant servers; we store only your subscription id, plan, and billing status.</Row>
@@ -47,7 +47,7 @@ export default function PrivacyPage() {
           <Row label="Usage metadata">Request timestamps, endpoints called, error logs. Used for debugging and service improvement. Not sold.</Row>
         </Section>
 
-        <Section title="2. Data Residency">
+        <Section title="2. Data residency">
           <p className="text-white/65 text-sm leading-relaxed">
             Data is currently stored on servers in <strong>Singapore</strong> via
             Render (backend) and Vercel (frontend). We are evaluating migration to India-based
@@ -56,7 +56,7 @@ export default function PrivacyPage() {
           </p>
         </Section>
 
-        <Section title="3. Cookies and Tracking">
+        <Section title="3. Cookies and tracking">
           <p className="text-white/65 text-sm leading-relaxed">
             We use <strong>session cookies only</strong> — a single JWT-backed session identifier
             stored in sessionStorage (not localStorage or a cookie) to maintain your login state.
@@ -69,7 +69,7 @@ export default function PrivacyPage() {
           </p>
         </Section>
 
-        <Section title="4. How We Use Your Data">
+        <Section title="4. How we use your data">
           <ul className="list-disc pl-5 space-y-1 text-white/65 text-sm">
             <li>Authenticate you and maintain your session</li>
             <li>Deliver subscription-gated features based on your tier</li>
@@ -83,7 +83,7 @@ export default function PrivacyPage() {
           </p>
         </Section>
 
-        <Section title="5. Data Sharing">
+        <Section title="5. Data sharing">
           <p className="text-white/65 text-sm leading-relaxed">
             We share data only with:
           </p>
@@ -93,7 +93,7 @@ export default function PrivacyPage() {
           </ul>
         </Section>
 
-        <Section title="6. Your Rights">
+        <Section title="6. Your rights">
           <ul className="list-disc pl-5 space-y-2 text-white/65 text-sm">
             <li><strong>Access:</strong> Request a copy of the personal data we hold about you.</li>
             <li><strong>Correction:</strong> Request correction of inaccurate data.</li>
@@ -106,7 +106,7 @@ export default function PrivacyPage() {
           </p>
         </Section>
 
-        <Section title="7. Data Retention">
+        <Section title="7. Data retention">
           <p className="text-white/65 text-sm leading-relaxed">
             Active accounts and their data are retained for the lifetime of the account.
             Inactive free-tier accounts with no activity for 24 months may be soft-deleted
@@ -124,7 +124,7 @@ export default function PrivacyPage() {
           </p>
         </Section>
 
-        <Section title="9. Changes to This Policy">
+        <Section title="9. Changes to this policy">
           <p className="text-white/65 text-sm leading-relaxed">
             We will notify registered users by email at least 14 days before making material
             changes to this policy. Continued use of the service after that period constitutes
@@ -150,7 +150,7 @@ export default function PrivacyPage() {
 function Section({ title, children }) {
   return (
     <section className="card mt-6 p-5 md:p-6">
-      <h2 className="font-display font-semibold uppercase text-xl text-white mb-3 border-l-2 border-white/15 pl-3">{title}</h2>
+      <h2 className="font-display font-semibold text-lg md:text-xl text-white mb-3 border-l-2 border-white/15 pl-3">{title}</h2>
       <div className="space-y-3">{children}</div>
     </section>
   );

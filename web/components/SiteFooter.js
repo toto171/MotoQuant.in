@@ -1,15 +1,15 @@
 'use client';
 
 /**
- * SiteFooter — quiet 4-column footer on asphalt (STAGED v4 skin).
- * Secondary nav, contact, legal, the brand wordmark and the pinned
- * reference-baselines line. Replaces every per-page <footer> across
- * the marketing site. No glows — the footer is the quietest surface
- * on the slip.
+ * SiteFooter — quiet 4-column footer on asphalt (IGNITION v5 skin).
+ * Secondary nav, contact, legal, the brand lockup (GaugeMark + the
+ * sentence-case Moto/Quant wordmark) and the pinned reference-baselines
+ * line. Replaces every per-page <footer> across the marketing site.
+ * No glows — the footer is the quietest surface on the slip.
  */
 
 import Link from 'next/link';
-import StageDots from './StageDots';
+import GaugeMark from './GaugeMark';
 
 const COLS = [
   {
@@ -57,9 +57,10 @@ export default function SiteFooter() {
           {/* Brand block */}
           <div>
             <Link href="/" className="inline-flex items-center gap-2.5 group mb-4">
-              <StageDots size={5} />
-              <span className="font-display font-bold uppercase text-xl tracking-[0.04em] text-white">
-                MotoQuant
+              <GaugeMark size={30} />
+              <span className="font-display font-bold text-xl tracking-tight">
+                <span className="text-white">Moto</span>
+                <span className="text-accent">Quant</span>
               </span>
             </Link>
             <p className="text-sm text-white/50 leading-relaxed max-w-sm">

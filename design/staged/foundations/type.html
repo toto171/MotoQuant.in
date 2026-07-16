@@ -1,17 +1,17 @@
 <!-- @dsCard group="Foundations" -->
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Typography</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"><style>
+<title>Typography</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"><style>
 :root{
-  --a0:#07090C; --a1:#0B0E13; --a2:#10141B; --a3:#171C25; --a4:#232A37;
-  --volt:#C9F231; --volt-b:#DBFF57; --volt-d:#9CBE1E;
-  --go:#34D97B; --stage:#FFB224; --foul:#FF5A48; --mint:#6FE3B2;
+  --a0:#050506; --a1:#0A0A0B; --a2:#111113; --a3:#1A1A1D; --a4:#27272A;
+  --volt:#FF5E1F; --volt-b:#FF8F57; --volt-d:#CC4000;
+  --go:#22C55E; --stage:#F59E0B; --foul:#EF4444; --mint:#00FFB2;
   --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.2);
   --t1:#FFFFFF; --t2:rgba(255,255,255,.65); --t3:rgba(255,255,255,.4);
 }
 *{box-sizing:border-box}
 body{background:var(--a0);color:var(--t2);font-family:'Inter',system-ui,sans-serif;
   margin:0;padding:28px;font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
-.disp{font-family:'Barlow Condensed','Arial Narrow',sans-serif;text-transform:uppercase;
+.disp{font-family:'Space Grotesk',system-ui,sans-serif;
   color:var(--t1);letter-spacing:-.01em;line-height:.95}
 .mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
 .label{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;
@@ -21,28 +21,28 @@ body{background:var(--a0);color:var(--t2);font-family:'Inter',system-ui,sans-ser
 .dot{width:6px;height:6px;border-radius:99px}
 .dot-s{background:var(--stage)} .dot-g{background:var(--go)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;
-  padding:0 20px;border-radius:8px;font-family:'Barlow Condensed','Arial Narrow',sans-serif;
-  font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.06em;
+  padding:0 20px;border-radius:8px;font-family:'Space Grotesk',system-ui,sans-serif;
+  font-weight:700;font-size:14px;
   border:1px solid transparent;cursor:pointer;background:none;color:var(--t1)}
-.btn-primary{background:var(--volt);color:#0B0D07}
+.btn-primary{background:var(--volt);color:#000}
 .btn-primary:hover{background:var(--volt-b)}
 .btn-ghost{border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.85)}
 .btn-ghost:hover{border-color:rgba(255,255,255,.3)}
-.btn-danger{border-color:rgba(255,90,72,.4);background:rgba(255,90,72,.1);color:var(--foul)}
-.btn-running{border-color:rgba(255,178,36,.4);background:rgba(255,178,36,.1);color:var(--stage)}
+.btn-danger{border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.1);color:var(--foul)}
+.btn-running{border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.1);color:var(--stage)}
 .btn-sm{height:36px;padding:0 14px;font-size:13px}
 .btn[disabled]{opacity:.4;cursor:not-allowed}
 .chip{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:4px;
   font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;
   letter-spacing:.2em;border:1px solid var(--line);color:var(--t2)}
-.chip-volt{border-color:rgba(201,242,49,.35);background:rgba(201,242,49,.08);color:var(--volt)}
-.chip-go{border-color:rgba(52,217,123,.35);background:rgba(52,217,123,.08);color:var(--go)}
-.chip-stage{border-color:rgba(255,178,36,.35);background:rgba(255,178,36,.08);color:var(--stage)}
-.chip-foul{border-color:rgba(255,90,72,.35);background:rgba(255,90,72,.08);color:var(--foul)}
-.chip-mint{border-color:rgba(111,227,178,.35);background:rgba(111,227,178,.08);color:var(--mint)}
+.chip-volt{border-color:rgba(255,94,31,.35);background:rgba(255,94,31,.08);color:var(--volt)}
+.chip-go{border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.08);color:var(--go)}
+.chip-stage{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.08);color:var(--stage)}
+.chip-foul{border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.08);color:var(--foul)}
+.chip-mint{border-color:rgba(0,255,178,.35);background:rgba(0,255,178,.08);color:var(--mint)}
 .input{height:44px;width:100%;border-radius:8px;border:1px solid var(--line);
   background:var(--a3);padding:0 14px;font-size:14px;color:var(--t1);outline:none;font-family:'Inter',sans-serif}
-.input:focus{border-color:rgba(201,242,49,.55);box-shadow:0 0 0 1px rgba(201,242,49,.35)}
+.input:focus{border-color:rgba(255,94,31,.55);box-shadow:0 0 0 1px rgba(255,94,31,.35)}
 .timeslip{background:var(--a1);position:relative;padding:20px 22px;
   border-left:1px solid var(--line);border-right:1px solid var(--line)}
 .timeslip::before,.timeslip::after{content:'';position:absolute;left:0;right:0;height:1px;
@@ -59,8 +59,8 @@ h3.section{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:
 h3.section:first-of-type{margin-top:0}
 </style></head>
 <body>
-<h3 class="section">Display — Barlow Condensed · uppercase</h3>
-<div class="disp" style="font-size:64px;font-weight:700">Know your time<br>before you stage</div>
+<h3 class="section">Display — Space Grotesk · sentence case</h3>
+<div class="disp" style="font-size:64px;font-weight:700">Know your time<br>before you <span style="color:var(--volt)">stage</span></div>
 <div class="disp" style="font-size:34px;font-weight:600;margin-top:18px">Section heading — build the slip</div>
 <div class="disp" style="font-size:21px;font-weight:600;margin-top:12px">Card title voice</div>
 <h3 class="section">Body — Inter</h3>

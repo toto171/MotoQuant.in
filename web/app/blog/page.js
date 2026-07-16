@@ -731,12 +731,12 @@ export default function BlogIndexPage() {
     <div className="min-h-screen bg-asphalt-0 text-white">
       <SiteNav />
 
-      {/* Hero — v4 voice; kicker count stays in lockstep with the POSTS
-          array by construction. */}
+      {/* Hero — IGNITION v5 voice; kicker count stays in lockstep with the
+          POSTS array by construction. */}
       <PageHero
         kicker={`${POSTS.length} dispatches · physics · tuning · data`}
         badge="MotoQuant Blog"
-        title={<>The physics of <span className="text-gradient-volt">drag racing.</span></>}
+        title={<>The physics of <span className="text-gradient-orange">drag racing.</span></>}
         sub="Technical deep-dives on motorcycle physics, tuning strategy, and data analysis. Written for the Indian drag racing community."
       />
 
@@ -747,7 +747,7 @@ export default function BlogIndexPage() {
           {grouped.map((rubric) => (
             <section key={rubric.id} className="mb-16 last:mb-0">
               <div className="flex flex-wrap items-baseline gap-3 mb-6">
-                <h2 className="font-display font-bold uppercase tracking-[-0.01em] text-2xl text-white">
+                <h2 className="font-display font-bold text-2xl tracking-tight text-white">
                   {rubric.title}
                 </h2>
                 <span className="label-mono">

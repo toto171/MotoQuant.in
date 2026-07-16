@@ -2,13 +2,13 @@
 
 /**
  * MobileToolBar — app-style fixed bottom tab bar for the five product tools
- * (STAGED v4 skin). Rendered only below lg and only on tool routes, where
+ * (IGNITION v5 skin). Rendered only below lg and only on tool routes, where
  * the hamburger drawer buried the product two taps deep. Mounted once from
  * SiteNav so every page gets it without per-page wiring.
  *
  * Translucent blur so overlapping the page tail stays readable; safe-area
- * inset respected for gesture-nav phones. Active tab = volt text + volt
- * tint pill (the one accent detail in this viewport strip).
+ * inset respected for gesture-nav phones. Active tab = signal-orange text +
+ * orange tint pill (the one accent detail in this viewport strip).
  */
 
 import Link from 'next/link';

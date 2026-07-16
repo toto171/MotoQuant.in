@@ -50,7 +50,7 @@ function BikeCard({ bike }) {
               <p className="label-mono truncate">
                 {bike.manufacturer}
               </p>
-              <h3 className="font-display font-semibold uppercase text-white text-lg leading-[1.05] tracking-[-0.01em] mt-1.5 line-clamp-2 group-hover:text-accent transition-colors">
+              <h3 className="font-display font-semibold text-white text-lg mt-1.5 line-clamp-2 group-hover:text-accent transition-colors">
                 {bike.model}
               </h3>
             </div>
@@ -179,7 +179,7 @@ export default function BikesPage() {
       <PageHero
         kicker="Motorcycle database"
         badge="541 bikes"
-        title={<>Every bike. <span className="text-gradient-volt">Real physics.</span></>}
+        title={<>Every bike. <span className="text-gradient-orange">Real physics.</span></>}
         sub={
           <>
             541 bikes modelled in MotoQuant Pro — Hayabusa, ZX-14R, R15 V4,
@@ -301,7 +301,7 @@ export default function BikesPage() {
           ) : error ? (
             <div className="card p-8 text-center">
               <AlertCircle size={24} className="mx-auto text-signal-foul mb-3" />
-              <p className="font-display font-bold uppercase text-white text-lg">
+              <p className="font-display font-semibold text-white text-lg md:text-xl">
                 Couldn&apos;t load the catalog
               </p>
               <p className="text-sm text-white/65 mt-2 max-w-md mx-auto">

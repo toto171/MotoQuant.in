@@ -13,19 +13,19 @@ const ROADMAP = [
   {
     phase: 'Phase 1–2',
     status: 'complete',
-    label: 'Physics engine + Database',
+    label: 'Physics engine + database',
     desc: '15 sub-models, 541 bikes, 593 parts, 20 venues, 4,393 tests. Full validation suite.',
   },
   {
     phase: 'Phase 3',
     status: 'complete',
-    label: 'Web launch + Calibration pipeline',
+    label: 'Web launch + calibration pipeline',
     desc: 'FastAPI backend, Next.js frontend live at motoquant.in. Dragy/dyno/ECU import + auto-calibrator.',
   },
   {
     phase: 'Phase 4',
     status: 'in-progress',
-    label: 'AI & Optimisation',
+    label: 'AI & optimisation',
     desc: 'Parts ROI knapsack, Bayesian build optimiser, XGBoost & DNN surrogates, Smart Recommendations.',
   },
   // Phase 5 (native desktop app) was DISCONTINUED July 2026 — the hosted web
@@ -61,7 +61,7 @@ function FounderCard({ initial, name, role, email, children }) {
           <span className="text-white font-display font-bold text-xl">{initial}</span>
         </div>
         <div>
-          <div className="font-display font-semibold uppercase text-xl text-white mb-0.5">{name}</div>
+          <div className="font-display font-semibold text-lg md:text-xl text-white mb-0.5">{name}</div>
           <div className="label-mono">{role}</div>
         </div>
       </div>
@@ -82,11 +82,11 @@ export default function AboutPage() {
       {/* Nav */}
       <SiteNav />
 
-      {/* Hero — v4 voice */}
+      {/* Hero — IGNITION v5 voice */}
       <PageHero
         kicker="founders · india"
         badge="Our story"
-        title={<>Built in Pune.<br />For <span className="text-gradient-volt">the strip.</span></>}
+        title={<>Built in Pune.<br />For <span className="text-gradient-orange">the strip.</span></>}
         sub={
           <>
             MotoQuant started as a single question at a drag strip outside Pune: <em>&ldquo;How do I know which part will actually move my ET?&rdquo;</em> Every tuner, racer, and weekend warrior we talked to had the same problem. The answers were guesswork, YouTube comments, or ₹50,000 test runs. There had to be a better way.
@@ -99,7 +99,7 @@ export default function AboutPage() {
         <CodeComment className="mb-10">problem statement · loaded</CodeComment>
         <div className="grid md:grid-cols-2 gap-12 items-start">
           <Reveal>
-            <h2 className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-3xl mb-6 text-white">The Problem We Solve</h2>
+            <h2 className="font-display font-bold text-3xl tracking-tight mb-6 text-white">The <span className="text-accent">problem</span> we solve</h2>
             <div className="space-y-4 text-white/65 text-sm leading-relaxed">
               <p>
                 Indian drag racing has exploded over the last decade. Aamby Valley, MMRT, BIC, Kari, Hyderabad — the strips are full. But the tooling hasn&apos;t kept up. Racers still tune by feel and magazine estimates. Tuning shops quote improvements from memory. Parts distributors can&apos;t tell you how much faster that exhaust will actually make you.
@@ -113,7 +113,7 @@ export default function AboutPage() {
             </div>
           </Reveal>
           <Reveal delay={0.08}>
-            <h2 className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-3xl mb-6 text-white">Why First Principles?</h2>
+            <h2 className="font-display font-bold text-3xl tracking-tight mb-6 text-white">Why <span className="text-accent">first principles</span>?</h2>
             <div className="space-y-4 text-white/65 text-sm leading-relaxed">
               <p>
                 We could have built a regression. Train on a database of published ETs, predict new ones by interpolation. Fast to build, reasonable accuracy for common bikes.
@@ -136,7 +136,7 @@ export default function AboutPage() {
       <section className="py-16 md:py-24 px-6 border-b border-white/5 bg-asphalt-1/30">
         <div className="max-w-6xl mx-auto">
           <CodeComment className="mb-10">crew manifest · three entries</CodeComment>
-          <h2 className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-3xl md:text-4xl mb-3 text-white">Founders</h2>
+          <h2 className="font-display font-bold text-3xl md:text-4xl tracking-tight mb-3 text-white">Founders</h2>
           <p className="label-mono mb-10">
             Engineers first. Racers second. Shipping a tool we&apos;d use ourselves.
           </p>
@@ -185,7 +185,7 @@ export default function AboutPage() {
       <section className="py-16 md:py-24 px-6 border-b border-white/5">
         <div className="max-w-4xl mx-auto">
           <CodeComment className="mb-10">mission plan · phase 6 in progress</CodeComment>
-          <h2 className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-3xl md:text-4xl mb-3 text-white">Where We&apos;re Going</h2>
+          <h2 className="font-display font-bold text-3xl md:text-4xl tracking-tight mb-3 text-white">Where we&apos;re <span className="text-accent">going</span></h2>
           <p className="label-mono mb-12">
             Roadmap — no specific dates, shipping when it&apos;s right
           </p>
@@ -204,7 +204,7 @@ export default function AboutPage() {
                     {item.status === 'complete' ? 'Done' : item.status === 'in-progress' ? 'In progress' : 'Planned'}
                   </span>
                 </div>
-                <h3 className="font-display font-semibold uppercase text-lg text-white mb-1">{item.label}</h3>
+                <h3 className="font-display font-semibold text-lg text-white mb-1">{item.label}</h3>
                 <p className="text-white/65 text-sm leading-relaxed">{item.desc}</p>
               </Reveal>
             ))}
@@ -218,7 +218,7 @@ export default function AboutPage() {
           <CodeComment className="mb-10">comms channel · open</CodeComment>
           <div className="grid md:grid-cols-2 gap-12">
             <div>
-              <h2 className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-3xl mb-4 text-white">Get in Touch</h2>
+              <h2 className="font-display font-bold text-3xl tracking-tight mb-4 text-white">Get in touch</h2>
               <p className="text-white/65 text-sm leading-relaxed mb-6">
                 Whether you&apos;re a tuning shop interested in the Pro plan, a racer who found a bug, or just want to talk drag racing — reach out.
               </p>
@@ -246,7 +246,7 @@ export default function AboutPage() {
                 state. One mailto action; email is the real channel. */}
             <div className="card p-6 md:p-8">
               <div className="label-mono mb-3">Direct line</div>
-              <h3 className="font-display font-semibold uppercase text-xl text-white mb-3">
+              <h3 className="font-display font-semibold text-lg md:text-xl text-white mb-3">
                 Email us — a founder replies
               </h3>
               <p className="text-white/65 text-sm leading-relaxed mb-6">

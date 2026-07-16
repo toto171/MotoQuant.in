@@ -1,9 +1,9 @@
 'use client';
 
 /**
- * SimulatorWidget — the landing-page live simulator (STAGED v4 skin).
+ * SimulatorWidget — the landing-page live simulator (IGNITION v5 skin).
  *
- * v4 re-skin ONLY: surfaces are .card / .input-base tokens, the run
+ * v5 re-voice ONLY: surfaces are .card / .input-base tokens, the run
  * buttons use the sitewide .btn-* vocabulary, and results render as the
  * signature mini .timeslip. ALL logic is preserved verbatim from v3:
  * BIKE_CATEGORIES + the bikeIdMap catalog-ID self-heal, quick sim via
@@ -111,7 +111,8 @@ function AnimatedCounter({ target, decimals = 3 }) {
 
 // ── SegEt — the user's own ET on the strip timing board ──────────────
 // The sim result is the user's personal timeslip, so the ET counts up on
-// the timing-board numerals (ScoreboardDigits — clean mono in v4).
+// the timing-board numerals (ScoreboardDigits — seven-segment again in
+// v5, default signal orange: the live number is the moving part).
 function SegEt({ target }) {
   const [val, setVal] = useState(0);
   useEffect(() => {
@@ -129,8 +130,8 @@ function SegEt({ target }) {
   }, [target]);
   return (
     <span className="inline-flex items-baseline gap-1.5 justify-center">
-      <span className="flex sm:hidden"><ScoreboardDigits value={val.toFixed(3)} h={34} color="#FFFFFF" label={`${target}s`} /></span>
-      <span className="hidden sm:flex"><ScoreboardDigits value={val.toFixed(3)} h={44} color="#FFFFFF" label={`${target}s`} /></span>
+      <span className="flex sm:hidden"><ScoreboardDigits value={val.toFixed(3)} h={26} label={`${target}s`} /></span>
+      <span className="hidden sm:flex"><ScoreboardDigits value={val.toFixed(3)} h={34} label={`${target}s`} /></span>
       <span className="font-mono text-white/40 text-sm sm:text-base">s</span>
     </span>
   );
@@ -330,7 +331,7 @@ export default function SimulatorWidget() {
 
       <div className="relative z-10 mb-6 flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="font-display font-semibold uppercase text-xl text-white">
+          <h3 className="font-display font-semibold text-lg md:text-xl text-white">
             Live simulator
           </h3>
           <p className="label-mono mt-1">Real physics · runs in seconds</p>
@@ -560,7 +561,7 @@ export default function SimulatorWidget() {
           ) : (
             <>
               <Zap size={15} aria-hidden="true" />
-              <span>Quarter-Mile ET</span>
+              <span>Quarter-mile ET</span>
             </>
           )}
         </button>
@@ -582,7 +583,7 @@ export default function SimulatorWidget() {
           ) : (
             <>
               <Gauge size={15} aria-hidden="true" />
-              <span>Top Speed Stats</span>
+              <span>Top speed stats</span>
             </>
           )}
         </button>

@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * EcuAutotune — environment-aware ECU / setup recommendation tool (STAGED v4).
+ * EcuAutotune — environment-aware ECU / setup recommendation tool (IGNITION v5).
  *
  * Pick a bike, set a race location (via the shared LocationPicker, which
  * resolves text / GPS / a seeded venue into a full environment) and
@@ -16,7 +16,7 @@
  *   - fuel / timing guideline (trim % + timing° + rationale)
  *   - combined net ET improvement + overall rationale
  *
- * FUNCTION IS FROZEN (v4 is a re-skin): shared BikePicker + LocationPicker,
+ * FUNCTION IS FROZEN (v5 is a re-skin): shared BikePicker + LocationPicker,
  * useAsyncTask + ActionButton run/stop pattern (real % in the button),
  * validated manual condition inputs (min/max/step + clamped before request —
  * non-numeric input never enters the body). v4 layout: input card stack
@@ -34,6 +34,7 @@ import useAsyncTask from '../lib/useAsyncTask';
 import ActionButton from './ActionButton';
 import SimProgress from './SimProgress';
 import BikePicker from './BikePicker';
+import ScoreboardDigits from './ScoreboardDigits';
 import LocationPicker, { environmentOverridesFromLocation } from './LocationPicker';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -415,7 +416,7 @@ export default function EcuAutotune() {
             >
               {/* Header */}
               <div className="flex items-center justify-between flex-wrap gap-2">
-                <h3 className="font-display text-xl md:text-2xl font-semibold uppercase text-white leading-[0.95]">
+                <h3 className="font-display font-semibold text-lg md:text-xl tracking-tight text-white">
                   {result.bike_name}
                   <span className="label-mono ml-2">setup</span>
                 </h3>
@@ -428,10 +429,23 @@ export default function EcuAutotune() {
                   <div className="flex items-start justify-between gap-3 flex-wrap">
                     <div className="min-w-0">
                       <p className="label-mono">Tuned ET</p>
-                      <p className="font-mono text-3xl md:text-4xl font-bold text-white tabular-nums mt-1.5">
-                        {fmtNum(combined.et_s, 3)}
-                        <span className="text-base text-white/40 ml-1">s</span>
-                      </p>
+                      {combined.et_s != null ? (
+                        /* The setup sheet's one hero number — seven-seg
+                           timing board, brand orange (live data). */
+                        <div className="flex items-end gap-2 mt-2">
+                          <ScoreboardDigits
+                            value={Number(combined.et_s).toFixed(3)}
+                            h={32}
+                            label={`Tuned ET ${Number(combined.et_s).toFixed(3)} seconds`}
+                          />
+                          <span className="font-mono text-sm text-white/40 pb-0.5">s</span>
+                        </div>
+                      ) : (
+                        <p className="font-mono text-3xl md:text-4xl font-bold text-white tabular-nums mt-1.5">
+                          {fmtNum(combined.et_s, 3)}
+                          <span className="text-base text-white/40 ml-1">s</span>
+                        </p>
+                      )}
                       <p className="text-xs font-mono text-white/40 tabular-nums mt-1.5">
                         trap {fmtNum(combined.trap_kmh, 1)} km/h
                       </p>

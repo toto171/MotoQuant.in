@@ -1,15 +1,23 @@
-# MotoQuant Web — "STAGED" Design System (v4, July 2026)
+# MotoQuant Web — "IGNITION" Design System (v5, July 2026)
 
-> Ground-up visual rebuild. This file is THE authority for the v4 site —
-> when it disagrees with old page code or with `REDESIGN.md` (Cockpit v3,
-> now historical), this spec wins. Every page agent reads this FIRST.
+> The orange cockpit identity, rebuilt flagship on the v4 structural
+> architecture. This file is THE authority — when it disagrees with old
+> page code, with `REDESIGN.md` (Cockpit v3) or with v4 (STAGED) remnants,
+> this spec wins. Every page agent reads this FIRST.
+>
+> v5 = v4's simplicity (timeslip artifact, two-pane workbench, tool-first
+> IA, no decoration chrome) re-voiced in the brand's real identity:
+> **MotoQuant_Identity_Kit** (the "redline Q" mark, Ink #0A0A0B, Signal
+> #FF5E1F, Space Grotesk 700). Web, app and logo speak one voice.
 
 ## 0. The idea
 
-**The digital timeslip.** Drag racing has exactly one sacred artifact: the
-printed slip the timing booth hands you after a run. The whole site now
-reads like that slip — dark asphalt, ruled mono numbers, one volt-green
-accent (the green light you launch on), generous space, zero chrome.
+**The digital timeslip, in cockpit orange.** Drag racing has exactly one
+sacred artifact: the printed slip the timing booth hands you after a run.
+The whole site reads like that slip — carbon-ink night, ruled mono numbers,
+one signal-orange accent (the needle past redline), generous space, zero
+chrome. The seven-segment timing-board numerals return for hero figures:
+strip scoreboards are OUR pixel font.
 
 Audience: the Indian drag scene — mobile-first riders on R15s, Dukes,
 Pulsars and Hayabusas, Instagram/WhatsApp-native, budget-conscious (₹),
@@ -17,9 +25,9 @@ racing at Aamby Valley / MMRT / BIC / Kari. They want their number, what
 to buy to lower it, and a slip to share. The interface must be simple
 enough to use one-handed on a phone at a strip at midnight.
 
-What v4 removes (complexity budget): boot sequences, HUD corner brackets,
-scroll-scrubbed manifestos, canvas backdrops, hold-to-launch gates,
-seven-segment SVG fonts, scroll-replay telemetry. What replaces them:
+What stays removed (complexity budget, since v4): boot sequences, HUD
+corner brackets, scroll-scrubbed manifestos, canvas backdrops,
+hold-to-launch gates, scroll-replay telemetry. What replaces them:
 typography, whitespace, and three signal colors used with discipline.
 
 ## 1. Non-negotiable constraints (inherited, still binding)
@@ -28,12 +36,12 @@ typography, whitespace, and three signal colors used with discipline.
    `<Suspense>` (or reads `window.location` post-mount).
 2. **Stat-audit token shapes survive** (`scripts/audit_headline_stats.py`):
    `num: 541, label: 'BIKES'`-style objects, `NNN bikes|parts|tires|venues`,
-   `NNN-bike catalog`, `numberOfItems: NNN`, `K5=10.0334s` / `K5 … 10.0334s`
-   prose. Canonical numbers (July 2026): **541 bikes · 254 tires · 593
-   parts · 20 venues · 4393 tests · 15 sub-models · 221 benchmarks · 82
-   within ±0.10s · 137 within ±0.20s · ±0.006s top-10 · +0.021s bias ·
-   K5 10.0334s / R1 10.2859s / Hayabusa 10.4712s**. Do NOT invent counts.
-   Landing TOP10 == docs/validation TOP10.
+   `NNN-bike catalog`, `numberOfItems: NNN`, baseline prose. Canonical
+   numbers (July-13 2026 epoch): **541 bikes · 254 tires · 593 parts · 20
+   venues · 4393 tests · 15 sub-models · 250 benchmarks (277 matched) · 74
+   within ±0.10s · 137 within ±0.20s · ±0.009s top-10 · +0.017s bias ·
+   K5 9.9331s / R1 10.1436s / Hayabusa 10.3633s**. Do NOT invent or alter
+   counts — reuse existing constants. Landing TOP10 == docs/validation.
 3. **Palette bans**: no `gray-*`, no raw Tailwind `orange-N`/`lime-N`, no
    inline hex backgrounds in components. Use `asphalt-*`, `accent`,
    `signal-*`, `white/N` only (legacy `ink-*`/`brand-*` aliases exist so
@@ -58,13 +66,13 @@ typography, whitespace, and three signal colors used with discipline.
 ### 2.1 Color — `tailwind.config.js`
 
 ```
-asphalt: 0 #07090C (page)  1 #0B0E13  2 #10141B (card)  3 #171C25 (input)
-         4 #232A37 (hover lines)
-accent:  DEFAULT #C9F231 (volt — THE brand color)  bright #DBFF57 (hover)
-         deep #9CBE1E (borders/pressed)
-signal:  go #34D97B (success / faster / PB)   stage #FFB224 (running /
-         warning / ESTIMATED)                 foul #FF5A48 (error / slower)
-mint:    #6FE3B2 (PRO/Studio tier chips ONLY)
+asphalt: 0 #050506 (page)  1 #0A0A0B (kit Ink / timeslip)  2 #111113 (card)
+         3 #1A1A1D (input)  4 #27272A (hover lines)
+accent:  DEFAULT #FF5E1F (Signal — THE brand color)  bright #FF8F57 (hover)
+         deep #CC4000 (borders/pressed)
+signal:  go #22C55E (success / faster / PB)   stage #F59E0B (running /
+         warning / ESTIMATED)                 foul #EF4444 (error / slower)
+mint:    #00FFB2 (PRO/Studio tier chips ONLY)
 ```
 
 Text: headings `text-white`, body `text-white/65`, hints `text-white/40`.
@@ -72,33 +80,38 @@ Text on accent fills: `text-asphalt-0` (near-black). Legacy aliases:
 `ink-0..4 → asphalt`, `brand.orange→accent`, `brand.orangeLight→bright`,
 `brand.orangeDeep→deep`, `brand.green/amber/red→signal`, `brand.accent→mint`.
 
-Color discipline: **volt appears once or twice per viewport** — the primary
-action and at most one accent detail. Signal colors ONLY carry meaning
-(status, delta, tier), never decoration. Everything else is white-on-asphalt.
+Color discipline (the kit rule): **orange is reserved for the moving
+part(s)** — the primary action, live data, at most one accent detail per
+viewport. Signal colors ONLY carry meaning (status, delta, tier), never
+decoration. Everything static is white or ink.
 
 ### 2.2 Type
 
-- **Display: Barlow Condensed** (`--font-display`, weights 500/600/700) —
-  motorsport-livery DNA. Headings are UPPERCASE, tight leading:
-  h1 `font-display font-bold uppercase text-5xl md:text-7xl leading-[0.95]
-  tracking-[-0.01em]`; h2 `text-4xl md:text-5xl` same treatment; card
-  titles `text-xl md:text-2xl font-semibold uppercase`.
+- **Display: Space Grotesk** (`--font-display`, weights 500/600/700) — the
+  identity kit's wordmark face. Headings are **sentence case**, never
+  uppercase: h1 `font-display font-bold text-4xl md:text-6xl
+  tracking-tight`; h2 `text-3xl md:text-4xl font-bold tracking-tight`;
+  card titles `text-lg md:text-xl font-semibold`. Orange lives INSIDE the
+  heading as a `text-accent` (or `.text-gradient-orange`) span on the one
+  load-bearing word — the QUANT pattern from the lockup.
 - **Body: Inter** (`--font-inter`) — never uppercase, `text-white/65`.
 - **Data: JetBrains Mono** (`--font-jetbrains-mono`) — ALL numbers, always
-  `tabular-nums`. ETs/traps/₹/stats are mono, sized big, weight 500-700.
-  The label voice stays `.label-mono` (10px mono uppercase tracked).
+  `tabular-nums`. The label voice stays `.label-mono` (10px mono uppercase
+  tracked). HERO numbers (headline ETs, marquee stats) render on the
+  restored seven-segment `ScoreboardDigits`/`ScoreboardCounter` (default
+  orange); table/inline numbers stay plain mono.
 
-Rule of thumb: if it's a **number the rider cares about**, it's mono and
-big. If it's a **section name**, it's condensed uppercase. Everything else
-is quiet Inter.
+Rule of thumb: if it's a **number the rider cares about**, it's mono (or
+seven-seg when it's the hero of its panel). If it's a **section name**,
+it's Space Grotesk sentence case. Everything else is quiet Inter.
 
 ### 2.3 Space, radius, borders
 
 Sections `py-16 md:py-24`; containers `max-w-6xl px-6` (workbenches
-`max-w-[1400px]`). Cards `rounded-xl p-5 md:p-6` (v4 is squarer than v3 —
-`rounded-2xl` only on heroes/modals). Borders `border-white/8`; hover
-`border-white/20`; focus ring `accent`. Grids `gap-4 md:gap-6`. Never more
-than two stacked surface levels.
+`max-w-[1400px]`). Cards `rounded-xl p-5 md:p-6`; buttons/inputs
+`rounded-xl`. Borders `border-white/8`; hover `border-white/20`; focus
+ring `accent`. Grids `gap-4 md:gap-6`. Never more than two stacked
+surface levels.
 
 ## 3. CSS component layer (same class NAMES as v3 — new skin)
 
@@ -107,13 +120,13 @@ API is stable. Implementations change; names don't.
 
 - `.card` — `rounded-xl border border-white/8 bg-asphalt-2/80`.
 - `.card-hover` — border-white/20 + subtle lift; reduced-motion-safe.
-- `.btn-primary` — **volt fill, near-black text**, `h-11 rounded-lg
-  font-display font-bold uppercase tracking-wide`; hover `accent-bright`.
+- `.btn-primary` — **signal-orange fill, black text**, `h-11 rounded-xl
+  font-display text-sm font-bold` (sentence case); hover `accent-bright`.
 - `.btn-ghost` — white/12 border, white/85 text; hover border-white/30.
 - `.btn-danger` — signal-foul tinted outline.
 - `.btn-running` — signal-stage tinted (amber = staged/running), hover
   flips to foul (stop affordance).
-- `.btn-sm`, `.input-base` (asphalt-3, volt focus ring), `.label-mono`,
+- `.btn-sm`, `.input-base` (asphalt-3, orange focus ring), `.label-mono`,
   `.skeleton` (shimmer, reduced-motion freezes) — same APIs.
 
 New v4 classes:
@@ -129,17 +142,25 @@ New v4 classes:
   up=red=slower).
 - `.centerline` — horizontal dashed divider with a center gap (the strip's
   centerline); section separator.
-- `.text-gradient-orange` — kept as alias, now a volt gradient.
+- `.text-gradient-orange` — the heading-accent gradient (orange).
 
-## 4. Signature element: StageDots
+## 4. Signature elements: GaugeMark + StageDots
+
+`components/GaugeMark.js` — the identity kit "redline Q" as an inline SVG
+(`{size, ring, className}`). THE brand mark: nav lockup (GaugeMark +
+"MOTOQUANT" in Space Grotesk 700, MOTO white / QUANT orange), footer, and
+anywhere the brand signs its work. Kit rules: never rotate the mark; the
+315° needle axis is the identity; orange only on the moving parts.
+
+### StageDots
 
 `components/StageDots.js` — three 6px dots (stage · stage · go): two
 `signal-stage`, one `signal-go`. Props: `{ animate=false, className }`.
 Static by default; `animate` runs ONE amber→amber→green light-up sequence
 on first view (opacity keyframes only, reduced-motion renders static).
 Used as: section eyebrows (dots + `.label-mono` text), list bullets,
-loading accents. This is the ONLY decorative motif — use it instead of
-inventing new ornaments.
+loading accents. GaugeMark signs the brand; StageDots marks sections —
+use these two instead of inventing new ornaments.
 
 ## 5. Shared components — keep-API list (re-skin internals ONLY)
 

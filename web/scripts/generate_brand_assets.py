@@ -19,18 +19,16 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 # ----------------------------------------------------------------------------
-# Brand tokens (STAGED v4 — from web/tailwind.config.js / web/DESIGN.md)
-# Variable names kept from the v3 script so the 400 lines below need no edits:
-# "ORANGE" now carries the volt accent, "CARBON"/"INK_*" the asphalt scale.
+# Brand tokens (IGNITION v5 — MotoQuant_Identity_Kit + web/tailwind.config.js)
 # ----------------------------------------------------------------------------
-ORANGE = "#C9F231"  # accent volt
-ORANGE_LIGHT = "#DBFF57"  # accent bright
-ORANGE_DEEP = "#9CBE1E"  # accent deep
-ACCENT_MINT = "#6FE3B2"
-CARBON = "#07090C"  # asphalt-0
-INK_2 = "#10141B"  # asphalt-2
-INK_3 = "#171C25"  # asphalt-3
-INK_4 = "#232A37"  # asphalt-4
+ORANGE = "#FF5E1F"  # Signal (identity kit)
+ORANGE_LIGHT = "#FF8F57"
+ORANGE_DEEP = "#CC4000"
+ACCENT_MINT = "#00FFB2"
+CARBON = "#0A0A0B"  # Ink (identity kit)
+INK_2 = "#111113"
+INK_3 = "#1A1A1D"
+INK_4 = "#27272A"
 WHITE = "#FFFFFF"
 WHITE_DIM = "#D4D4D7"
 WHITE_SUB = "#8A8A90"
@@ -80,133 +78,61 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # ----------------------------------------------------------------------------
-# Logo mark (STAGED v4): the stage-dots signature (pre-stage · stage · GO)
-# over a bold Barlow Condensed "M" on an asphalt rounded square.
-# Rendered at master size then downscaled — sharper than per-size render.
-#
-# The brand face ships as an OFL-licensed latin subset in scripts/fonts/
-# (extracted from the next/font build output) so this generator reproduces
-# the exact wordmark glyphs on any machine.
+# Logo mark: the identity kit "redline Q" (MotoQuant_Identity_Kit, July 2026).
+# Heavyweight dial ring, 30-degree sector gap at 315, tapered needle that
+# accelerates outward through the gap, hub dot at large sizes (the kit app
+# icon drops the hub below 64px). Geometry lifted from the kit SVGs verbatim
+# and scaled from the 512 reference frame. Rendered supersampled 4x.
 # ----------------------------------------------------------------------------
-SIGNAL_STAGE = "#FFB224"  # signal-stage amber (StageDots motif)
-SIGNAL_GO = "#34D97B"  # signal-go green
-
-FONT_BARLOW_BOLD = _first_font(
-    str(Path(__file__).resolve().parent / "fonts" / "BarlowCondensedBold.ttf"),
-    "/usr/share/fonts/truetype/liberation/LiberationSansNarrow-Bold.ttf",
-    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
-)
 
 
-def render_mark(
-    size: int, *, include_accents: bool = True, m_fill: str | None = None
-) -> Image.Image:
-    """Render the MotoQuant logo mark at the given pixel size.
+def render_mark(size: int, *, include_accents: bool = True) -> Image.Image:
+    """Render the redline-Q app icon at the given pixel size.
 
-    include_accents=False is used for the 16x16 / 32x32 rasters so the tiny
-    stage dots don't become sub-pixel mush — at that size the M alone is
-    cleaner (and rendered in volt so the favicon stays distinctive).
+    include_accents toggles the hub dot (kept for API compatibility; the
+    ring + needle always render — they ARE the mark).
     """
     img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
+    k = size / 512.0  # kit app-icon reference frame
 
-    # Asphalt rounded-square background + hairline inner edge for definition
-    # against pure-black contexts (browser dark tabs, Android trays).
-    radius = max(2, int(size * 0.22))
+    # Ink rounded square
+    radius = max(2, int(112 * k))
     d.rounded_rectangle([0, 0, size - 1, size - 1], radius=radius, fill=CARBON)
-    if size >= 128:
-        d.rounded_rectangle(
-            [1, 1, size - 2, size - 2],
-            radius=radius - 1,
-            outline=(255, 255, 255, 16),
-            width=max(1, size // 256),
-        )
 
-    if include_accents:
-        # StageDots — the v4 signature: amber · amber · GO green, centered
-        # above the M like a tree armed over the stripe.
-        r = size * 0.042
-        gap = size * 0.135
-        cy = size * 0.235
-        cxs = [size / 2 - gap, size / 2, size / 2 + gap]
-        # soft glow under the GO dot only
-        glow_r = r * 2.4
-        glow = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-        gd = ImageDraw.Draw(glow)
-        gd.ellipse(
-            [cxs[2] - glow_r, cy - glow_r, cxs[2] + glow_r, cy + glow_r],
-            fill=(52, 217, 123, 70),
-        )
-        from PIL import ImageFilter
+    # Dial: white annulus, center (256, 263.6), r_out 153.6, r_in 107.52
+    cx, cy = 256 * k, 263.6 * k
+    r_out, r_in = 153.6 * k, 107.52 * k
+    d.ellipse([cx - r_out, cy - r_out, cx + r_out, cy + r_out], fill="#FFFFFF")
+    d.ellipse([cx - r_in, cy - r_in, cx + r_in, cy + r_in], fill=CARBON)
+    # 30-degree gap centered on the 315 axis (PIL angles: y-down, from 3 o'clock)
+    gap_r = r_out * 1.25
+    d.pieslice([cx - gap_r, cy - gap_r, cx + gap_r, cy + gap_r], -60, -30, fill=CARBON)
 
-        glow = glow.filter(ImageFilter.GaussianBlur(radius=max(2, size // 40)))
-        img.alpha_composite(glow)
-        d = ImageDraw.Draw(img)
-        for cx, color in zip(cxs, [SIGNAL_STAGE, SIGNAL_STAGE, SIGNAL_GO]):
-            d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=color)
+    # Needle — tapered quad, exact kit coordinates (512 frame)
+    quad = [(296.89, 240.25), (397.22, 152.95), (392.58, 95.69), (278.97, 222.33)]
+    d.polygon([(x * k, y * k) for x, y in quad], fill=ORANGE)
 
-    # Bold condensed M — the hero glyph, in the brand display face.
-    if include_accents:
-        font_size = int(size * 0.62)
-        cy_target = int(size * 0.615)
-        fill = m_fill or WHITE
-    else:
-        font_size = int(size * 0.80)
-        cy_target = int(size * 0.52)
-        fill = m_fill or ORANGE  # volt keeps the tiny favicon distinctive
-
-    font = ImageFont.truetype(FONT_BARLOW_BOLD, font_size)
-    text = "M"
-    bbox = d.textbbox((0, 0), text, font=font)
-    tw = bbox[2] - bbox[0]
-    th = bbox[3] - bbox[1]
-    tx = (size - tw) // 2 - bbox[0]
-    ty = cy_target - th // 2 - bbox[1]
-    d.text((tx, ty), text, fill=fill, font=font)
+    # Hub dot — only at sizes where it survives (the kit's full mark has it,
+    # the app icon drops it; we keep it for >=128px renders)
+    if include_accents and size >= 128:
+        hub_r = 13.6 * k
+        d.ellipse([cx - hub_r, cy - hub_r, cx + hub_r, cy + hub_r], fill=ORANGE)
 
     return img
 
 
 def render_mark_hires(size: int) -> Image.Image:
     """Downscale from a 4× master for extra sharpness."""
-    master = render_mark(size * 4, include_accents=(size >= 48))
+    master = render_mark(size * 4, include_accents=(size >= 128))
     return master.resize((size, size), Image.LANCZOS)
 
 
 # ----------------------------------------------------------------------------
-# SVG source — matches the raster logic. The M is the actual Barlow Condensed
-# Bold glyph outline (OFL) extracted via fontTools, so the vector renders
-# identically everywhere with zero font dependencies.
+# SVG source — the identity kit app icon VERBATIM (its README nominates it
+# as the drop-in replacement for web/public/icon.svg).
 # ----------------------------------------------------------------------------
-_M_PATH = (
-    "M36.17 25.47H40.77Q40.97 25.47 41.11 25.61Q41.25 25.75 41.25 25.95V52.77"
-    "Q41.25 52.97 41.11 53.11Q40.97 53.25 40.77 53.25H36.13Q35.93 53.25 35.79 53.11"
-    "Q35.65 52.97 35.65 52.77V34.96Q35.65 34.8 35.57 34.8Q35.49 34.8 35.41 34.92"
-    "L32.32 40.39Q32.12 40.71 32 40.71Q31.88 40.71 31.68 40.39L28.59 34.92"
-    "Q28.51 34.8 28.43 34.8Q28.35 34.8 28.35 34.96V52.77Q28.35 52.97 28.21 53.11"
-    "Q28.07 53.25 27.87 53.25H23.23Q23.03 53.25 22.89 53.11Q22.75 52.97 22.75 52.77"
-    "V25.95Q22.75 25.75 22.89 25.61Q23.03 25.47 23.23 25.47H27.79"
-    "Q28.19 25.47 28.39 25.79L31.92 32.1Q32.04 32.26 32.16 32.1L35.57 25.79"
-    "Q35.73 25.47 36.17 25.47Z"
-)
-
-ICON_SVG = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="MotoQuant">
-  <title>MotoQuant</title>
-  <defs>
-    <filter id="go-glow" x="-120%" y="-120%" width="340%" height="340%">
-      <feGaussianBlur stdDeviation="2.4"/>
-    </filter>
-  </defs>
-  <rect x="0" y="0" width="64" height="64" rx="14" ry="14" fill="{CARBON}"/>
-  <!-- stage dots: pre-stage / stage / GO -->
-  <circle cx="40.64" cy="15" r="6.4" fill="{SIGNAL_GO}" opacity="0.28" filter="url(#go-glow)"/>
-  <circle cx="23.36" cy="15" r="2.7" fill="{SIGNAL_STAGE}"/>
-  <circle cx="32" cy="15" r="2.7" fill="{SIGNAL_STAGE}"/>
-  <circle cx="40.64" cy="15" r="2.7" fill="{SIGNAL_GO}"/>
-  <!-- Barlow Condensed Bold M (glyph outline) -->
-  <path d="{_M_PATH}" fill="{WHITE}"/>
-</svg>
-"""
+ICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"><rect width="512" height="512" rx="112" fill="#0A0A0B"/><path d="M 389.02 186.42 A 153.6 153.6 0 1 1 332.80 130.20 L 309.76 170.10 A 107.52 107.52 0 1 0 349.12 209.46 Z" fill="#FFFFFF"/><path d="M 296.89 240.25 L 397.22 152.95 L 392.58 95.69 L 278.97 222.33 Z" fill="#FF5E1F"/></svg>"""
 
 
 # ----------------------------------------------------------------------------
@@ -256,7 +182,7 @@ def render_og_image(path: Path) -> None:
     # Subtle carbon grid with orange accent lines at specific cols
     draw_grid(d, W, H, color=(255, 255, 255, 9), step=60)
     for x in (60, 300, 540, 720, 900, 1140):
-        d.line([(x, 0), (x, H)], fill=(201, 242, 49, 12), width=1)
+        d.line([(x, 0), (x, H)], fill=(255, 94, 31, 14), width=1)
 
     # Left rail — signal orange vertical accent
     d.rectangle([60, 90, 66, 540], fill=ORANGE)
@@ -344,8 +270,8 @@ def render_og_image(path: Path) -> None:
     cdraw.rounded_rectangle(
         [card_x, card_y, card_x + card_w, card_y + card_h],
         radius=card_r,
-        fill=(16, 20, 27, 255),
-        outline=(201, 242, 49, 110),
+        fill=(17, 17, 19, 255),
+        outline=(255, 94, 31, 120),
         width=2,
     )
     img.paste(Image.alpha_composite(img.convert("RGBA"), card_bg).convert("RGB"))
@@ -410,7 +336,7 @@ def render_og_image(path: Path) -> None:
 
     # Fill under curve
     fill_poly = px + [(plot_x2, plot_y2), (plot_x1, plot_y2)]
-    d.polygon(fill_poly, fill=(201, 242, 49, 34))
+    d.polygon(fill_poly, fill=(255, 94, 31, 40))
 
     # Line
     for i in range(len(px) - 1):
@@ -427,7 +353,7 @@ def render_og_image(path: Path) -> None:
     while y < plot_y2:
         d.line(
             [(et_x, y), (et_x, min(y + dash_len, plot_y2))],
-            fill=(201, 242, 49, 200),
+            fill=(255, 94, 31, 200),
             width=1,
         )
         y += dash_len * 2
@@ -490,8 +416,8 @@ WEBMANIFEST = """{
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
-  "theme_color": "#C9F231",
-  "background_color": "#07090C",
+  "theme_color": "#FF5E1F",
+  "background_color": "#0A0A0B",
   "display": "standalone",
   "start_url": "/"
 }
