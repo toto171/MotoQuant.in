@@ -24,8 +24,8 @@ function BottomCtaInner() {
       data-exp="EXP-008"
       data-variant={variant}
     >
-      <h2 className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-4xl mb-4 text-white">
-        Ready to run your first sim?
+      <h2 className="font-display font-bold text-4xl tracking-tight mb-4 text-white">
+        Ready to run your <span className="text-accent">first sim</span>?
       </h2>
       <p className="text-white/65 mb-10 text-lg">{subhead}</p>
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -51,8 +51,8 @@ export default function BottomCta() {
     <Suspense
       fallback={
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-4xl mb-4 text-white">
-            Ready to run your first sim?
+          <h2 className="font-display font-bold text-4xl tracking-tight mb-4 text-white">
+            Ready to run your <span className="text-accent">first sim</span>?
           </h2>
           <p className="text-white/65 mb-10 text-lg">
             Free in the browser. No account required to start.

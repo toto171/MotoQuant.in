@@ -1,10 +1,10 @@
 """
 Generate the landing-page hero image: "THE LAUNCH".
 
-A procedural night-drag-strip scene in the STAGED v4 palette
-(web/DESIGN.md): asphalt night, perspective strip with dashed centerline
-and timing gates, and a single volt light-trail launching toward the
-vanishing point, staged behind the amber-amber-green tree dots.
+A procedural night-drag-strip scene in the IGNITION v5 palette
+(web/DESIGN.md): carbon night, perspective strip with dashed centerline
+and timing gates, and a single signal-orange light-trail launching toward
+the vanishing point, staged behind the amber-amber-green tree lamps.
 
 Deterministic (seeded) so re-runs are reproducible. Outputs:
   - web/public/hero/launch.png   (2400x1200 master, optimized)
@@ -25,13 +25,13 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 W, H = 2400, 1200
 VP = (int(W * 0.66), int(H * 0.34))  # vanishing point
 
-# STAGED v4 palette
-ASPHALT_0 = (7, 9, 12)
-ASPHALT_SKY = (5, 6, 9)
-VOLT = (201, 242, 49)
-VOLT_BRIGHT = (219, 255, 87)
-GO = (52, 217, 123)
-STAGE = (255, 178, 36)
+# IGNITION v5 palette (identity kit: Ink #0A0A0B / Signal #FF5E1F)
+ASPHALT_0 = (10, 10, 11)
+ASPHALT_SKY = (5, 5, 6)
+VOLT = (255, 94, 31)  # legacy variable names; now the signal orange
+VOLT_BRIGHT = (255, 143, 87)
+GO = (34, 197, 94)
+STAGE = (245, 158, 11)
 
 rng = random.Random(402)  # 402m — the quarter mile
 
@@ -139,11 +139,11 @@ def draw_streak(img: Image.Image) -> None:
 
     # pass spec: (blur radius, base width, color, alpha at head)
     passes = [
-        (70, 90, VOLT, 95),
-        (30, 40, VOLT, 160),
-        (11, 14, VOLT_BRIGHT, 225),
-        (3, 4.5, (255, 255, 255), 245),
-        (1, 2, VOLT_BRIGHT, 255),
+        (70, 90, VOLT, 125),
+        (30, 40, VOLT_BRIGHT, 200),
+        (11, 14, VOLT_BRIGHT, 235),
+        (3, 4.5, (255, 255, 255), 250),
+        (1, 2, (255, 220, 190), 255),
     ]
     for blur, base_w, color, head_alpha in passes:
         layer = Image.new("RGBA", (W, H), (0, 0, 0, 0))

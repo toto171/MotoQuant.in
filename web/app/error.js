@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Route error boundary (STAGED v4). Catches render/runtime errors below
+ * Route error boundary (IGNITION v5). Catches render/runtime errors below
  * the root layout and offers an honest retry instead of a white screen.
  * Client component by Next.js convention (receives error + reset).
  */
@@ -16,7 +16,7 @@ export default function Error({ error, reset }) {
           <StageDots foul size={8} />
           <span className="label-mono">engine fault — run interrupted</span>
         </div>
-        <h1 className="mt-6 font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-3xl md:text-4xl">
+        <h1 className="mt-6 font-display font-bold text-3xl md:text-4xl tracking-tight">
           Something broke mid-run.
         </h1>
         <p className="mt-4 text-white/65 leading-relaxed">

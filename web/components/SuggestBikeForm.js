@@ -124,7 +124,7 @@ export default function SuggestBikeForm({ onClose }) {
       >
         <div className="flex items-start justify-between mb-5">
           <div>
-            <h2 className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-2xl text-white">
+            <h2 className="font-display font-bold tracking-tight text-2xl text-white">
               Suggest a bike
             </h2>
             <p className="text-sm text-white/65 mt-2">

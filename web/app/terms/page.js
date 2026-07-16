@@ -1,7 +1,7 @@
 /**
  * MotoQuant Pro — Terms of Service
  * Last updated: July 2, 2026 (§2 corrected: password + magic-link sign-in;
- * STAGED v4 typographic skin)
+ * IGNITION v5 typographic skin)
  */
 
 import SiteNav from "../../components/SiteNav";
@@ -37,7 +37,7 @@ export default function TermsPage() {
           to these Terms.
         </p>
 
-        <Section title="1. Description of Service">
+        <Section title="1. Description of service">
           <p>
             MotoQuant Pro provides first-principles physics simulations for motorcycle
             quarter-mile drag racing, parts ROI analysis, and associated tools. The service
@@ -52,7 +52,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section title="2. Accounts and Authentication">
+        <Section title="2. Accounts and authentication">
           <p>
             You must provide a valid email address to create an account. You can sign in
             with a password — which we store only as a salted scrypt hash, never in
@@ -66,7 +66,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section title="3. Subscription Plans and Billing">
+        <Section title="3. Subscription plans and billing">
           <p>
             MotoQuant Pro offers three tiers: Free, Pro (₹499/mo or ₹4,999/yr), and
             Studio (₹1,999/mo or ₹19,990/yr). Prices are exclusive of GST (18% applicable
@@ -93,7 +93,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section title="4. License Keys">
+        <Section title="4. License keys">
           <p>
             Pro subscribers may generate 1 license key; Studio subscribers may generate
             up to 5 keys. License keys are personal and non-transferable, and bind to a
@@ -105,7 +105,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section title="5. Acceptable Use">
+        <Section title="5. Acceptable use">
           <p>You may not:</p>
           <ul className="text-white/65 list-disc pl-5 space-y-1">
             <li>Reverse-engineer, decompile, or extract the physics model code</li>
@@ -116,7 +116,7 @@ export default function TermsPage() {
           </ul>
         </Section>
 
-        <Section title="6. Data You Submit">
+        <Section title="6. Data you submit">
           <p>
             We collect your email address, simulation runs, build configurations, and any
             files you voluntarily upload (Dragy GPS, dyno CSVs, ECU logs). This data is
@@ -129,7 +129,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section title="7. Intellectual Property">
+        <Section title="7. Intellectual property">
           <p>
             All physics models, software code, and data compilations in MotoQuant Pro are
             the intellectual property of MotoQuant Pro and are protected under applicable
@@ -139,7 +139,7 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section title="8. Limitation of Liability">
+        <Section title="8. Limitation of liability">
           <p>
             To the maximum extent permitted by applicable law, MotoQuant Pro shall not be
             liable for any indirect, incidental, special, consequential, or exemplary
@@ -149,14 +149,14 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section title="9. Governing Law">
+        <Section title="9. Governing law">
           <p>
             These Terms are governed by the laws of India. Any disputes shall be subject
             to the exclusive jurisdiction of the courts in Pune, Maharashtra, India.
           </p>
         </Section>
 
-        <Section title="10. Changes to Terms">
+        <Section title="10. Changes to terms">
           <p>
             We may update these Terms with 14 days' notice via email to registered users.
             Continued use after the notice period constitutes acceptance of the updated Terms.
@@ -181,7 +181,7 @@ export default function TermsPage() {
 function Section({ title, children }) {
   return (
     <section className="card mt-6 p-5 md:p-6">
-      <h2 className="font-display font-semibold uppercase text-xl text-white mb-3 border-l-2 border-white/15 pl-3">{title}</h2>
+      <h2 className="font-display font-semibold text-lg md:text-xl text-white mb-3 border-l-2 border-white/15 pl-3">{title}</h2>
       <div className="space-y-3 text-white/65 text-sm leading-relaxed">{children}</div>
     </section>
   );

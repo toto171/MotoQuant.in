@@ -12,11 +12,11 @@
  * Arriving with ?signup=1 opens register mode.
  * ?next=/path is honoured after auth (same-origin paths only).
  *
- * STAGED v4 (July 2026): single centered `.card` on asphalt, mode tabs as
- * `.chip` toggles (volt when active), `.input-base` fields, `.label-mono`
- * labels, magic-link sent state on `.chip-go`. The submit stays an
- * ActionButton + useAsyncTask (staged progress, cold-start caption for
- * free) and the ?token= verification shows a staged SimProgress bar.
+ * IGNITION v5 (July 2026): single centered `.card` on asphalt, mode tabs as
+ * `.chip` toggles (accent orange when active), `.input-base` fields,
+ * `.label-mono` labels, magic-link sent state on `.chip-go`. The submit
+ * stays an ActionButton + useAsyncTask (staged progress, cold-start caption
+ * for free) and the ?token= verification shows a staged SimProgress bar.
  * Auth flows + EXP-007 unchanged.
  */
 
@@ -190,8 +190,8 @@ function LoginPageInner() {
         <div className="w-full max-w-md space-y-6">
           <div className="text-center space-y-3">
             <CodeComment center>account access</CodeComment>
-            <p className="font-display font-bold uppercase text-2xl leading-[0.95] tracking-[-0.01em] text-white">
-              The physics of faster
+            <p className="font-display font-bold text-2xl tracking-tight text-white">
+              The physics of <span className="text-accent">faster</span>
             </p>
           </div>
 
@@ -199,7 +199,7 @@ function LoginPageInner() {
             {status === "verifying" && (
               <div className="py-4 text-center">
                 <span className="chip chip-stage">Verifying</span>
-                <p className="mt-4 mb-4 font-display font-bold uppercase text-xl leading-[0.95] tracking-[-0.01em] text-white">
+                <p className="mt-4 mb-4 font-display font-semibold text-lg md:text-xl text-white">
                   Verifying your sign-in link
                 </p>
                 <SimProgress
@@ -214,7 +214,7 @@ function LoginPageInner() {
             {status === "sent" && (
               <div className="text-center">
                 <span className="chip chip-go">Link sent</span>
-                <h2 className="mt-4 font-display font-bold uppercase text-2xl leading-[0.95] tracking-[-0.01em] text-white">
+                <h2 className="mt-4 font-display font-bold text-2xl tracking-tight text-white">
                   Check your inbox
                 </h2>
                 <p className="mt-3 text-sm text-white/65">
@@ -257,7 +257,7 @@ function LoginPageInner() {
                   </button>
                 </div>
 
-                <h2 className="font-display font-bold uppercase text-2xl leading-[0.95] tracking-[-0.01em] text-white">
+                <h2 className="font-display font-bold text-2xl tracking-tight text-white">
                   {heading}
                 </h2>
                 <p className="mt-2 text-sm text-white/65">{subheading}</p>

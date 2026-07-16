@@ -59,7 +59,7 @@ function Card({ variant }) {
       data-cta="whitepaper-terminal"
       className="group rounded-xl border border-accent/40 hover:border-accent bg-asphalt-2/80 p-5 transition-colors"
     >
-      <div className="font-display font-semibold uppercase text-accent">{c.title}</div>
+      <div className="font-display font-semibold text-accent">{c.title}</div>
       <div className="text-sm text-white/65 mt-1">{c.subhead}</div>
     </Link>
   );

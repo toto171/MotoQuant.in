@@ -14,7 +14,7 @@ export default function OptimizePage() {
 
       <PageHero
         kicker="Build optimizer"
-        title="Fastest build for the budget"
+        title={<>The <span className="text-accent">fastest</span> build for the budget</>}
         sub="Set a bike and a ₹ budget. MotoQuant runs a physics-based knapsack across every compatible upgrade and returns the combination that drops your quarter-mile ET the most — with cost-per-tenth, synergies, and the best next part to buy."
         stats={[
           { value: 593, label: 'PARTS' },

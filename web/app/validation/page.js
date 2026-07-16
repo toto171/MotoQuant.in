@@ -1,4 +1,4 @@
-// Accuracy — the flagship real-vs-simulated report (STAGED v4 skin).
+// Accuracy — the flagship real-vs-simulated report (IGNITION v5 skin).
 // Server component: imports the frozen sweep JSON statically and hands it to
 // the client-side <AccuracyExplorer/>. Chrome (SiteNav/SiteFooter) matches
 // every other route; metadata lives in the sibling layout.js.
@@ -28,7 +28,7 @@ export default function ValidationPage() {
           kicker="Accuracy report · weighted benchmark sweep"
           title={
             <>
-              How honest is <span className="text-gradient-volt">the physics?</span>
+              How <span className="text-gradient-orange">honest</span> is the physics?
             </>
           }
           sub="277 benchmarks matched to catalog bikes, cross-checked against published Cycle World, Sport Rider, MCN and MotoStatz timeslips. Weighted mean absolute error 0.25s, bias +0.017s, and the three reference baselines preserved to four decimals since July 13, 2026."
@@ -37,12 +37,16 @@ export default function ValidationPage() {
             <div className="mt-2 flex flex-wrap gap-x-10 gap-y-4">
               {HERO_TILES.map((s) => (
                 <div key={s.label} className="flex flex-col gap-1.5">
-                  <ScoreboardCounter value={s.value} h={24} />
+                  <ScoreboardCounter value={s.value} h={28} />
                   <span className="label-mono">{s.label}</span>
                 </div>
               ))}
               <div className="flex flex-col gap-1.5">
-                <ScoreboardDigits value="±0.009s" h={24} color="#FFFFFF" label="±0.009s" />
+                <div className="flex items-end gap-1">
+                  <span className="mb-0.5 font-mono text-sm text-white/50" aria-hidden="true">±</span>
+                  <ScoreboardDigits value="0.009" h={28} label="±0.009s" />
+                  <span className="mb-0.5 font-mono text-xs text-white/40" aria-hidden="true">s</span>
+                </div>
                 <span className="label-mono">TOP-10 MEAN |Δ|</span>
               </div>
             </div>

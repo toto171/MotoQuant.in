@@ -1,8 +1,8 @@
 'use client';
 
 /**
- * MotoQuant — Landing Page (STAGED v4 · "the digital timeslip")
- * ==============================================================
+ * MotoQuant — Landing Page (IGNITION v5 · "the digital timeslip, in cockpit orange")
+ * ===================================================================
  * Full rewrite per web/DESIGN.md §7. Half the length of the Cockpit v3
  * landing: no boot sequence, no HUD chrome, no scroll-scrubbed manifesto,
  * no canvas backdrops, no hold-to-launch gate. Typography, whitespace and
@@ -36,7 +36,7 @@ import SiteFooter from '../components/SiteFooter';
 import StageDots from '../components/StageDots';
 import { Reveal, Stagger, StaggerItem } from '../components/Reveal';
 import SimulatorWidget from '../components/SimulatorWidget';
-import { ScoreboardCounter } from '../components/ScoreboardDigits';
+import ScoreboardDigits, { ScoreboardCounter } from '../components/ScoreboardDigits';
 
 // ─── Validation: only the four clusters where the data is good ────────
 // Per the 13 July 2026 weighted sweep (reports/acc_final_2026_07_13.json,
@@ -230,15 +230,15 @@ function HowItWorks() {
       <div className="max-w-6xl mx-auto">
         <Reveal>
           <Eyebrow>How it works</Eyebrow>
-          <h2 className="mt-4 font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-4xl md:text-5xl text-white">
-            Three steps to your number
+          <h2 className="mt-4 font-display font-bold text-3xl md:text-4xl tracking-tight text-white">
+            Three steps to your <span className="text-accent">number</span>
           </h2>
         </Reveal>
 
         <Stagger className="mt-10 grid md:grid-cols-3 gap-4 md:gap-6">
           <StaggerItem className="card p-5 md:p-6">
             <div className="label-mono">Step 01</div>
-            <h3 className="mt-3 font-display font-semibold uppercase text-xl md:text-2xl text-white">
+            <h3 className="mt-3 font-display font-semibold text-lg md:text-xl text-white">
               Pick your bike
             </h3>
             <p className="mt-3 text-sm text-white/65 leading-relaxed">
@@ -250,7 +250,7 @@ function HowItWorks() {
 
           <StaggerItem className="card p-5 md:p-6">
             <div className="label-mono">Step 02</div>
-            <h3 className="mt-3 font-display font-semibold uppercase text-xl md:text-2xl text-white">
+            <h3 className="mt-3 font-display font-semibold text-lg md:text-xl text-white">
               Set your strip
             </h3>
             <p className="mt-3 text-sm text-white/65 leading-relaxed">
@@ -262,7 +262,7 @@ function HowItWorks() {
 
           <StaggerItem className="card p-5 md:p-6">
             <div className="label-mono">Step 03</div>
-            <h3 className="mt-3 font-display font-semibold uppercase text-xl md:text-2xl text-white">
+            <h3 className="mt-3 font-display font-semibold text-lg md:text-xl text-white">
               Get your slip
             </h3>
             <div className="timeslip mt-4 text-[13px]" aria-hidden="true">
@@ -273,7 +273,10 @@ function HowItWorks() {
               </div>
               <div className="timeslip-row">
                 <span className="text-white/45">¼-MILE ET</span>
-                <span className="font-bold text-white">9.9331 s</span>
+                <span className="inline-flex items-baseline gap-1">
+                  <ScoreboardDigits value="9.9331" h={22} label="9.9331 s" />
+                  <span className="font-mono text-xs text-white/40">s</span>
+                </span>
               </div>
               <div className="timeslip-row">
                 <span className="text-white/45">BASELINE</span>
@@ -294,8 +297,8 @@ function ToolCards() {
       <div className="max-w-6xl mx-auto">
         <Reveal>
           <Eyebrow>The toolbox</Eyebrow>
-          <h2 className="mt-4 font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-4xl md:text-5xl text-white">
-            Every tool points at one number
+          <h2 className="mt-4 font-display font-bold text-3xl md:text-4xl tracking-tight text-white">
+            Every tool points at <span className="text-accent">one number</span>
           </h2>
         </Reveal>
 
@@ -306,7 +309,7 @@ function ToolCards() {
                 <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/[0.12] bg-asphalt-3">
                   <Icon className="text-white/70" size={18} aria-hidden="true" />
                 </span>
-                <h3 className="mt-4 font-display font-semibold uppercase text-xl text-white">
+                <h3 className="mt-4 font-display font-semibold text-lg md:text-xl text-white">
                   {title}
                 </h3>
                 <p className="mt-2 flex-1 text-sm text-white/65 leading-relaxed">{body}</p>
@@ -323,7 +326,7 @@ function ToolCards() {
               className="card card-hover flex items-center justify-between gap-4 px-5 py-4"
             >
               <div className="min-w-0">
-                <div className="font-display font-semibold uppercase text-lg text-white">
+                <div className="font-display font-semibold text-lg md:text-xl text-white">
                   Bikes database
                 </div>
                 <div className="text-sm text-white/55 truncate">
@@ -339,7 +342,7 @@ function ToolCards() {
               className="card card-hover flex items-center justify-between gap-4 px-5 py-4"
             >
               <div className="min-w-0">
-                <div className="font-display font-semibold uppercase text-lg text-white">
+                <div className="font-display font-semibold text-lg md:text-xl text-white">
                   Leaderboard
                 </div>
                 <div className="text-sm text-white/55 truncate">
@@ -365,14 +368,36 @@ function DeltaCell({ delta }) {
   );
 }
 
+// Accuracy-tile numerals — seven-segment digits for the hero figure, with
+// any non-digit prefix/suffix ('±', 's') rendered as quiet mono beside the
+// board (the LED board only has segments for 0-9, '.', '-').
+function TileDigits({ value }) {
+  const m = String(value).match(/^([^0-9]*)([0-9][0-9.]*)(.*)$/);
+  if (!m) {
+    return (
+      <span className="font-mono font-bold tabular-nums text-2xl text-white">
+        {value}
+      </span>
+    );
+  }
+  const [, prefix, digits, suffix] = m;
+  return (
+    <span className="inline-flex items-baseline gap-1">
+      {prefix ? <span className="font-mono text-sm text-white/45">{prefix}</span> : null}
+      <ScoreboardDigits value={digits} h={26} label={String(value)} />
+      {suffix ? <span className="font-mono text-sm text-white/45">{suffix}</span> : null}
+    </span>
+  );
+}
+
 function ProofSection() {
   return (
     <section className="py-16 md:py-24 px-6 border-t border-white/[0.08] bg-asphalt-1/40">
       <div className="max-w-6xl mx-auto">
         <Reveal>
           <Eyebrow>Validation</Eyebrow>
-          <h2 className="mt-4 font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-4xl md:text-5xl text-white">
-            We publish the error bars
+          <h2 className="mt-4 font-display font-bold text-3xl md:text-4xl tracking-tight text-white">
+            We publish the <span className="text-accent">error bars</span>
           </h2>
           <p className="mt-4 max-w-2xl text-white/65">
             250 weighted benchmarks (277 matched) against published Cycle
@@ -385,8 +410,8 @@ function ProofSection() {
         <Stagger className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {ACCURACY_TILES.map((s) => (
             <StaggerItem key={s.label} className="card p-5 text-center">
-              <div className="font-mono font-bold tabular-nums text-2xl md:text-3xl text-white">
-                {s.num}
+              <div className="flex justify-center">
+                <TileDigits value={s.num} />
               </div>
               <div className="label-mono mt-2">{s.label}</div>
             </StaggerItem>
@@ -397,7 +422,7 @@ function ProofSection() {
         <Reveal className="mt-6">
           <div className="card p-5 md:p-6">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h3 className="font-display font-semibold uppercase text-xl md:text-2xl text-white">
+              <h3 className="font-display font-semibold text-lg md:text-xl text-white">
                 Cluster bias · weighted sweep
               </h3>
               <span className="label-mono">Source-quality weighted</span>
@@ -462,7 +487,7 @@ function ProofSection() {
                           {b.rank}
                         </td>
                         <td className="px-3 py-3">
-                          <div className="font-display font-semibold uppercase text-white">
+                          <div className="font-display font-semibold text-white">
                             {b.name}
                           </div>
                           <div className="font-mono text-xs text-white/40 tabular-nums">
@@ -533,8 +558,8 @@ function IndianStrip() {
       <div className="max-w-6xl mx-auto">
         <Reveal>
           <Eyebrow>Home turf</Eyebrow>
-          <h2 className="mt-4 font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-4xl md:text-5xl text-white">
-            Built for the Indian strip
+          <h2 className="mt-4 font-display font-bold text-3xl md:text-4xl tracking-tight text-white">
+            Built for the <span className="text-accent">Indian strip</span>
           </h2>
         </Reveal>
 
@@ -544,7 +569,7 @@ function IndianStrip() {
               <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/[0.12] bg-asphalt-3">
                 <Icon size={18} className="text-white/70" aria-hidden="true" />
               </span>
-              <h3 className="mt-4 font-display font-semibold uppercase text-lg text-white">
+              <h3 className="mt-4 font-display font-semibold text-lg md:text-xl text-white">
                 {title}
               </h3>
               <p className="mt-2 text-sm text-white/65 leading-relaxed">{body}</p>
@@ -563,8 +588,8 @@ function FaqSection() {
       <div className="max-w-3xl mx-auto">
         <Reveal>
           <Eyebrow center>Questions</Eyebrow>
-          <h2 className="mt-4 text-center font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-4xl md:text-5xl text-white">
-            Straight answers
+          <h2 className="mt-4 text-center font-display font-bold text-3xl md:text-4xl tracking-tight text-white">
+            Straight <span className="text-accent">answers</span>
           </h2>
         </Reveal>
 
@@ -572,7 +597,7 @@ function FaqSection() {
           {FAQ_ITEMS.map(({ q, a }) => (
             <details key={q} className="card group px-5 py-4">
               <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between gap-4 [&::-webkit-details-marker]:hidden">
-                <span className="font-display font-semibold uppercase text-base md:text-lg text-white">
+                <span className="font-display font-semibold text-base md:text-lg text-white">
                   {q}
                 </span>
                 <span
@@ -598,8 +623,8 @@ function CtaBand() {
       <div className="max-w-3xl mx-auto text-center">
         <Reveal>
           <div className="centerline mb-10" aria-hidden="true" />
-          <h2 className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-4xl md:text-6xl text-white">
-            Run the number before you buy the parts
+          <h2 className="font-display font-bold text-3xl md:text-4xl tracking-tight text-white">
+            Run the <span className="text-accent">number</span> before you buy the parts
           </h2>
         </Reveal>
         <Reveal delay={0.1}>
@@ -641,8 +666,8 @@ function HomePageInner() {
       <main id="main">
         {/* ─── ① HERO ───────────────────────────────────────────── */}
         <section className="relative overflow-hidden pt-16">
-          {/* Backdrop: the static "launch" strip render (volt trail on night
-              asphalt, generated by web/scripts/generate_hero_image.py) under
+          {/* Backdrop: the static "launch" strip render (signal-orange trail
+              on night asphalt, web/scripts/generate_hero_image.py) under
               readability fades — darkest over the left text column. Still a
               single static image: no canvas, no scroll effects. */}
           <div className="pointer-events-none absolute inset-0" aria-hidden="true">
@@ -663,7 +688,7 @@ function HomePageInner() {
                 <span className="label-mono">Physics-based · Free during beta</span>
               </div>
 
-              <h1 className="mt-6 font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-5xl md:text-7xl text-white">
+              <h1 className="mt-6 font-display font-bold text-4xl md:text-6xl tracking-tight text-white">
                 Know your time before you{' '}
                 <span className="text-accent">stage</span>
               </h1>

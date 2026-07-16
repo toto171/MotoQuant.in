@@ -7,9 +7,9 @@
  * saved-run garage, password management.
  * Requires authentication — redirects to /login if not signed in.
  *
- * STAGED v4 (July 2026): PageHero ("YOUR GARAGE") + stacked `.card`
- * sections — Profile/Tier, Garage (bike names condensed, ETs mono, venue
- * chips, rows link to /r/[id]), License keys as `.timeslip` rows with
+ * IGNITION v5 (July 2026): PageHero ("Your garage") + stacked `.card`
+ * sections — Profile/Tier, Garage (bike names in display face, ETs mono,
+ * venue chips, rows link to /r/[id]), License keys as `.timeslip` rows with
  * `.btn-danger` revokes, Security, Danger zone. Branded inline confirms
  * (no alert()/confirm() anywhere) and ActionButton + useAsyncTask on every
  * submit so the button itself is the progress bar.
@@ -262,7 +262,7 @@ export default function AccountPage() {
   const activeKeys = keys.filter((k) => !k.revoked);
 
   const sectionTitle =
-    "font-display font-semibold uppercase text-xl md:text-2xl leading-[0.95] tracking-[-0.01em] text-white";
+    "font-display font-semibold text-lg md:text-xl text-white";
 
   return (
     <div className="min-h-screen bg-asphalt-0 text-white">
@@ -270,7 +270,7 @@ export default function AccountPage() {
       <PageHero
         align="center"
         kicker="account"
-        title="Your garage"
+        title={<>Your <span className="text-accent">garage</span></>}
         sub="Saved runs, license seats and security for your MotoQuant account."
       />
       <main id="main" className="pb-20 px-4 sm:px-6">
@@ -356,7 +356,7 @@ export default function AccountPage() {
                         <td className="py-2.5 pr-4">
                           <a
                             href={`/r/${r.id}`}
-                            className="font-display font-semibold uppercase text-white/90 hover:text-white transition-colors"
+                            className="font-display font-semibold text-white/90 hover:text-white transition-colors"
                           >
                             {r.manufacturer ? `${r.manufacturer} ${r.model}` : `Run #${r.id}`}
                           </a>

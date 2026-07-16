@@ -13,8 +13,8 @@
  * POST /api/payments/checkout (Razorpay for India incl. UPI, Stripe for
  * international cards) and redirect to the hosted checkout.
  *
- * STAGED v4 (July 2026): PageHero + three `.card` columns (Pro column
- * border-accent with a `.chip-volt` "MOST POPULAR" tag, Studio carries the
+ * IGNITION v5 (July 2026): PageHero + three `.card` columns (Pro column
+ * border-accent with a `.chip-volt` "Most popular" tag, Studio carries the
  * mint tier chip via TierBadge), prices big mono, feature rows with
  * signal-colored check marks, FAQ as native <details>. Beta-mode reshaping,
  * checkout flow, EXP-002 + EXP-005 hooks all unchanged.
@@ -187,7 +187,7 @@ function PricingPageInner() {
   };
 
   const h2Class =
-    "font-display font-bold uppercase text-3xl md:text-4xl leading-[0.95] tracking-[-0.01em] text-white";
+    "font-display font-bold text-3xl md:text-4xl tracking-tight text-white";
 
   return (
     <div className="min-h-screen bg-asphalt-0 text-white">
@@ -195,7 +195,7 @@ function PricingPageInner() {
       <PageHero
         align="center"
         kicker={beta ? "pricing matrix · open beta · ₹0" : "pricing matrix · plans live"}
-        title={<>Simple, <span className="text-gradient-volt">honest pricing</span>.</>}
+        title={<>Simple, <span className="text-gradient-orange">honest pricing</span>.</>}
         sub="Built in Pune. Serving the Indian drag-racing community. INR pricing, GST-compliant, Razorpay + Stripe secured."
       >
         {beta && (
@@ -389,7 +389,9 @@ function PricingPageInner() {
           <Reveal>
             <div className="mt-20">
               <div className="centerline mb-16" aria-hidden="true" />
-              <h2 className={h2Class}>Full feature comparison</h2>
+              <h2 className={h2Class}>
+                Full feature <span className="text-accent">comparison</span>
+              </h2>
               <p className="mb-8 mt-2 max-w-2xl text-sm text-white/65">Everything in every tier, side-by-side.</p>
               <div className="card overflow-hidden">
                 <div className="overflow-x-auto">
@@ -428,7 +430,7 @@ function PricingPageInner() {
             <div className="mx-auto mt-20 max-w-2xl">
               <div className="centerline mb-16" aria-hidden="true" />
               <h2 className={`${h2Class} text-center`}>
-                Frequently asked questions
+                Frequently asked <span className="text-accent">questions</span>
               </h2>
               <p className="mb-6 mt-2 text-center text-sm text-white/65">
                 Anything else?{" "}

@@ -294,7 +294,7 @@ function ResolvedCard({ value, onClear, compact }) {
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <Check size={14} className="text-signal-go shrink-0" aria-hidden="true" />
           <div className="min-w-0">
-            <p className="font-display text-sm font-semibold uppercase text-white truncate">
+            <p className="font-display text-sm font-semibold text-white truncate">
               {label}
             </p>
             <p className="text-[10px] font-mono text-white/50 uppercase tracking-wider">

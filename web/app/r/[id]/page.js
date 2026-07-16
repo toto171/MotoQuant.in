@@ -3,12 +3,12 @@
 /**
  * /r/[id] — public shareable timeslip page for one saved sim run.
  *
- * Reads GET /api/runs/{id} (public, immutable). THE showcase of the STAGED
- * v4 identity: a full-page centered `.timeslip` — perforated edges, timing-
- * assoc masthead with StageDots, giant mono ET, dashed split rows with the
- * quarter-mile line highlighted, trap speed — then a WhatsApp-first share
- * button (navigator.share → clipboard fallback) and a "Run your own" CTA.
- * OG metadata comes from the server layout.
+ * Reads GET /api/runs/{id} (public, immutable). THE showcase of the IGNITION
+ * v5 identity: a full-page centered `.timeslip` — perforated edges, timing-
+ * assoc masthead with StageDots, giant seven-segment ET in signal orange,
+ * dashed split rows with the quarter-mile line highlighted, trap speed —
+ * then a WhatsApp-first share button (navigator.share → clipboard fallback)
+ * and a "Run your own" CTA. OG metadata comes from the server layout.
  */
 
 import { useEffect, useMemo, useState } from 'react';
@@ -18,6 +18,7 @@ import { Share2, Check, AlertCircle } from 'lucide-react';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 import StageDots from '../../../components/StageDots';
+import ScoreboardDigits from '../../../components/ScoreboardDigits';
 import { Skeleton } from '../../../components/Skeleton';
 import { API_URL } from '../../../lib/api';
 
@@ -147,7 +148,7 @@ export default function RunPage() {
                   Official timeslip · run #{id || '—'}
                 </p>
 
-                <h1 className="mt-5 font-display font-bold uppercase text-2xl leading-[0.95] tracking-[-0.01em]">
+                <h1 className="mt-5 font-display font-bold text-2xl tracking-tight">
                   {bikeName || 'Motorcycle'}
                   {run.year ? <span className="text-white/40"> · {run.year}</span> : null}
                 </h1>
@@ -158,13 +159,17 @@ export default function RunPage() {
 
                 <div className="centerline mt-5" aria-hidden="true" />
 
-                {/* headline ET */}
+                {/* headline ET — the seven-segment timing board, in signal orange */}
                 <div className="py-8 text-center">
                   <p className="label-mono mb-3">Quarter-mile ET</p>
-                  <p className="font-mono font-bold tabular-nums text-6xl leading-none">
-                    {Number(run.et_quarter_s).toFixed(3)}
-                    <span className="text-2xl text-white/40">s</span>
-                  </p>
+                  <div className="flex items-end justify-center gap-2">
+                    <ScoreboardDigits
+                      value={Number(run.et_quarter_s).toFixed(3)}
+                      h={56}
+                      label={`${Number(run.et_quarter_s).toFixed(3)} seconds`}
+                    />
+                    <span className="font-mono text-2xl text-white/40 leading-none">s</span>
+                  </div>
                 </div>
 
                 {/* split rows — the ruled slip body */}

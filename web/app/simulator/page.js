@@ -63,7 +63,7 @@ function pickDefaultBikeForVariant(bikes, variant) {
    REUSABLE COMPONENTS
    ═══════════════════════════════════════════════════════════════════════════ */
 
-// ─── Panel Card — STAGED v4 `.card` surface (rest props spread so
+// ─── Panel Card — IGNITION v5 `.card` surface (rest props spread so
 //     data-exp / role="tabpanel" attributes reach the DOM) ────────────────
 function Card({ children, className = '', glow = false, ...rest }) {
   return (
@@ -221,7 +221,7 @@ function ErrorTile({ message, onRetry, retryLabel = 'Retry', className = '' }) {
    CHART COMPONENTS
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const CHART_COLORS = { a: '#C9F231', b: '#6FE3B2' };
+const CHART_COLORS = { a: '#FF5E1F', b: '#6FE3B2' };
 
 function SimChart({ data, dataKey, label, unit, color = CHART_COLORS.a, domain }) {
   const gradId = useId();
@@ -1346,7 +1346,7 @@ function SimulatorPageInner() {
                       savedRun ? (
                         <Link
                           href="/leaderboard"
-                          className="w-full h-9 inline-flex items-center justify-center gap-2 rounded-lg border border-signal-go/30 bg-signal-go/10 text-signal-go text-xs font-display font-semibold uppercase tracking-wide transition-colors hover:bg-signal-go/15"
+                          className="w-full h-9 inline-flex items-center justify-center gap-2 rounded-lg border border-signal-go/30 bg-signal-go/10 text-signal-go text-xs font-display font-semibold transition-colors hover:bg-signal-go/15"
                         >
                           <Check size={13} /> Saved — view leaderboard
                         </Link>
@@ -1419,10 +1419,18 @@ function SimulatorPageInner() {
                     {/* Primary terminal velocity */}
                     <div className="timeslip text-center">
                       <div className="label-mono mb-2">Terminal Velocity</div>
-                      <div className="font-mono font-bold text-5xl text-white tabular-nums leading-none">
-                        {topSpeedResult.terminal_velocity_kmh?.toFixed(1) ?? '—'}
-                        <span className="text-xl text-white/40 ml-2">km/h</span>
-                      </div>
+                      {topSpeedResult.terminal_velocity_kmh != null ? (
+                        <div className="flex items-end justify-center gap-2">
+                          <ScoreboardDigits
+                            value={topSpeedResult.terminal_velocity_kmh.toFixed(1)}
+                            h={40}
+                            label={`${topSpeedResult.terminal_velocity_kmh.toFixed(1)} km/h`}
+                          />
+                          <span className="font-mono text-xl text-white/40 mb-0.5">km/h</span>
+                        </div>
+                      ) : (
+                        <div className="font-mono font-bold text-5xl text-white tabular-nums leading-none">—</div>
+                      )}
                       <div className="font-mono text-sm text-white/55 mt-2 tabular-nums">
                         {topSpeedResult.terminal_velocity_mph?.toFixed(1)} mph
                         <span className="text-white/35 mx-2">·</span>
@@ -1519,7 +1527,7 @@ function SimulatorPageInner() {
                           dataKey="speed"
                           label="Velocity vs Time"
                           unit="km/h"
-                          color="#C9F231"
+                          color="#FF5E1F"
                         />
                       </div>
                     )}
@@ -1813,7 +1821,7 @@ function SimulatorPageInner() {
                                     contentStyle={{ background: '#10141B', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 11 }}
                                     labelFormatter={v => `${v}s`}
                                   />
-                                  <Line type="monotone" dataKey={`a_${chart.key}`} stroke="#C9F231" strokeWidth={1.5} dot={false} name="Build A" />
+                                  <Line type="monotone" dataKey={`a_${chart.key}`} stroke="#FF5E1F" strokeWidth={1.5} dot={false} name="Build A" />
                                   <Line type="monotone" dataKey={`b_${chart.key}`} stroke="#6FE3B2" strokeWidth={1.5} dot={false} name="Build B" />
                                 </LineChart>
                               </ResponsiveContainer>
@@ -1944,7 +1952,7 @@ function SimulatorPageInner() {
                               <YAxis tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} />
                               <Tooltip contentStyle={{ background: '#10141B', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 11 }} labelFormatter={v => `${v}s`} />
                               <Line type="monotone" dataKey="real" stroke="#34D97B" strokeWidth={2} dot={false} name="Real (Dragy)" />
-                              <Line type="monotone" dataKey="sim" stroke="#C9F231" strokeWidth={1.5} strokeDasharray="4 2" dot={false} name="Sim" />
+                              <Line type="monotone" dataKey="sim" stroke="#FF5E1F" strokeWidth={1.5} strokeDasharray="4 2" dot={false} name="Sim" />
                             </LineChart>
                           </ResponsiveContainer>
                         </div>
@@ -1987,10 +1995,10 @@ function SimulatorPageInner() {
                             <LineChart data={curveData} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
                               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                               <XAxis dataKey="rpm" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} tickFormatter={v => `${(v/1000).toFixed(0)}k`} />
-                              <YAxis yAxisId="power" tick={{ fontSize: 9, fill: '#C9F231' }} orientation="left" />
+                              <YAxis yAxisId="power" tick={{ fontSize: 9, fill: '#FF5E1F' }} orientation="left" />
                               <YAxis yAxisId="torque" tick={{ fontSize: 9, fill: '#6FE3B2' }} orientation="right" />
                               <Tooltip contentStyle={{ background: '#10141B', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 11 }} labelFormatter={v => `${v} RPM`} />
-                              <Line yAxisId="power" type="monotone" dataKey="power" stroke="#C9F231" strokeWidth={2} dot={false} name="Power (hp)" />
+                              <Line yAxisId="power" type="monotone" dataKey="power" stroke="#FF5E1F" strokeWidth={2} dot={false} name="Power (hp)" />
                               <Line yAxisId="torque" type="monotone" dataKey="torque" stroke="#6FE3B2" strokeWidth={1.5} dot={false} name="Torque (Nm)" />
                             </LineChart>
                           </ResponsiveContainer>

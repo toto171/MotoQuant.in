@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── STAGED design system (v4, July 2026) — see web/DESIGN.md ─────────────
+/* ── IGNITION design system (v5, July 2026) — see web/DESIGN.md ───────────
    Class NAMES are stable across redesigns (.card, .btn-primary/ghost/danger,
    .input-base, …) so untouched content pages re-skin automatically.
    Implementations are v4. */
@@ -23,16 +23,16 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #232a37;
+  background: #27272a;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #9cbe1e;
+  background: #ff5e1f;
 }
 
 /* Text selection — volt */
 ::selection {
-  background-color: rgba(201, 242, 49, 0.28);
+  background-color: rgba(255, 94, 31, 0.3);
   color: white;
 }
 
@@ -42,7 +42,7 @@ html {
 }
 
 body {
-  background-color: #07090c;
+  background-color: #050506;
   color: white;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -67,9 +67,8 @@ body {
 
   /* ── Buttons — the ONE run/stop vocabulary sitewide ──────────────────── */
   .btn-primary {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-lg
-      bg-accent px-5 font-display text-[15px] font-bold uppercase
-      tracking-wide text-asphalt-0
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl
+      bg-accent px-5 font-display text-sm font-bold text-black
       transition-all duration-200
       hover:bg-accent-bright hover:shadow-volt-soft
       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/70
@@ -78,9 +77,9 @@ body {
       disabled:hover:shadow-none;
   }
   .btn-ghost {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-lg
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl
       border border-white/[0.12] bg-white/[0.03] px-5 font-display
-      text-[15px] font-semibold uppercase tracking-wide text-white/85
+      text-sm font-semibold text-white/85
       transition-colors duration-200
       hover:border-white/30 hover:text-white
       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40
@@ -88,9 +87,9 @@ body {
       disabled:cursor-not-allowed disabled:opacity-40;
   }
   .btn-danger {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-lg
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl
       border border-signal-foul/40 bg-signal-foul/10 px-5 font-display
-      text-[15px] font-semibold uppercase tracking-wide text-signal-foul
+      text-sm font-semibold text-signal-foul
       transition-colors duration-200
       hover:border-signal-foul/70 hover:bg-signal-foul/20
       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal-foul/60
@@ -100,14 +99,14 @@ body {
   /* ActionButton's active state: amber = staged/running; hover flips to
      foul red — the stop affordance. */
   .btn-running {
-    @apply inline-flex h-11 items-center justify-center gap-2 rounded-lg
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl
       border border-signal-stage/40 bg-signal-stage/10 px-5 text-signal-stage
       transition-colors duration-200 hover:border-signal-foul/60 hover:text-signal-foul
       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal-stage/60
       focus-visible:ring-offset-2 focus-visible:ring-offset-asphalt-0;
   }
   .btn-sm {
-    @apply h-9 px-4 text-[13px];
+    @apply h-9 px-4 text-xs;
   }
   /* Tactile press — cheapest physical micro-interaction there is. */
   .btn-primary,
@@ -127,7 +126,7 @@ body {
 
   /* ── Inputs ───────────────────────────────────────────────────────────── */
   .input-base {
-    @apply h-11 w-full rounded-lg border border-white/[0.08] bg-asphalt-3 px-3.5
+    @apply h-11 w-full rounded-xl border border-white/[0.08] bg-asphalt-3 px-3.5
       text-sm text-white placeholder:text-white/30
       focus:border-accent/60 focus:outline-none
       focus:ring-1 focus:ring-accent/40;

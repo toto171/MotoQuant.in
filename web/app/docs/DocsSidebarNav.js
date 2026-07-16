@@ -8,7 +8,7 @@ import { usePathname } from 'next/navigation';
  *
  * Client leaf so the server layout stays fully static. usePathname is
  * SSG-safe (unlike useSearchParams it needs no Suspense boundary): the
- * build prerenders the neutral state and the active volt rail
+ * build prerenders the neutral state and the active accent rail
  * hydrates client-side.
  */
 export default function DocsSidebarNav({ pages }) {

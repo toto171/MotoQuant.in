@@ -17,7 +17,7 @@ const FEATURES = [
     id: 'physics',
     icon: Cpu,
     label: '01 / Physics Engine',
-    title: 'First-Principles Simulation',
+    title: <>First-principles <span className="text-accent">simulation</span></>,
     subtitle: '15 independent sub-models. No curve-fitting. Every coefficient traceable to a physical measurement.',
     body: `MotoQuant's physics engine integrates 15 coupled differential equations at a 1 ms timestep using a fixed-step RK4 integrator (with an optional adaptive solver). Unlike spreadsheet calculators that treat power-to-weight ratio as the only variable, MotoQuant models:
 
@@ -52,7 +52,7 @@ The adaptive-dt solver is especially useful for identifying the precise clutch e
     id: 'catalog',
     icon: BarChart3,
     label: '02 / Parts Catalog',
-    title: 'Parts ROI Before You Buy',
+    title: <>Parts <span className="text-accent">ROI</span> before you buy</>,
     subtitle: '593 parts. Cost-per-tenth ranking. Budget-constrained knapsack optimiser.',
     body: `The parts catalog covers 593 upgrades across 20 categories — exhausts, ECU flashes, forced induction kits, slipper clutches, suspension, brakes, wheelie bars. Every part has a physics-accurate parameter delta: an Akrapovič slip-on doesn't add a round number of horsepower, it shifts the entire torque curve.
 
@@ -87,7 +87,7 @@ Build profiles — Street Legal, Drag Prep, Full Race — pre-filter the catalog
     id: 'calibration',
     icon: Upload,
     label: '03 / Calibration',
-    title: 'Import Real Run Data',
+    title: <>Import <span className="text-accent">real</span> run data</>,
     subtitle: 'Dragy GPS, dyno sheets, ECU logs. Auto-calibrate Cd and μ to match your actual strip times.',
     body: `Physics is only as good as its inputs. MotoQuant accepts three data sources:
 
@@ -126,7 +126,7 @@ Once you have a real run imported, the auto-calibrator fits Cd + μ_peak jointly
     id: 'roi',
     icon: TrendingUp,
     label: '04 / ROI & Optimization',
-    title: 'Bayesian Build Optimization',
+    title: <>Bayesian build <span className="text-accent">optimization</span></>,
     subtitle: 'BoTorch Gaussian-process optimizer. 7-parameter continuous search. Budget-aware.',
     body: `Beyond the parts catalog, MotoQuant ships a full optimization stack:
 
@@ -165,7 +165,7 @@ Natural language queries — "optimize my Hayabusa for 35°C at Aamby Valley, bu
     id: 'api',
     icon: Code2,
     label: '05 / REST API',
-    title: 'Open REST API',
+    title: <>Open <span className="text-accent">REST API</span></>,
     subtitle: 'FastAPI. Full timeseries. CORS-open for web integrations.',
     body: `Every feature the web UI uses is accessible via the public REST API hosted at motoquant-api.onrender.com.
 
@@ -206,7 +206,7 @@ Interactive docs at /docs (FastAPI's automatic OpenAPI UI). No authentication fo
     id: 'accounts',
     icon: UserCircle2,
     label: '06 / Accounts & Garage',
-    title: 'Your Garage, Saved',
+    title: <>Your <span className="text-accent">garage</span>, saved</>,
     subtitle: 'Free accounts. Saved runs. Shareable builds. Every Pro feature unlocked during the open beta.',
     body: `Create a free account with an email + password (or a passwordless magic link) and your simulator work stops being throwaway: every run you save lands in My Garage on your account page — bike, build, ET, trap speed, venue, date.
 
@@ -311,11 +311,11 @@ export default function FeaturesPage() {
     <div className="min-h-screen bg-asphalt-0 text-white overflow-x-hidden">
       <SiteNav />
 
-      {/* Hero — v4 voice */}
+      {/* Hero — IGNITION v5 voice */}
       <PageHero
         kicker="15 submodels · capability index"
         badge="Full feature list"
-        title={<>Everything inside <span className="text-gradient-volt">MotoQuant Pro</span></>}
+        title={<>Everything inside <span className="text-gradient-orange">MotoQuant Pro</span></>}
         sub="Six capability areas — from first-principles physics through to an open REST API and your saved garage. Every layer is built on the same validated simulation engine."
         stats={[
           { value: 15, label: 'Sub-models' },
@@ -359,7 +359,7 @@ export default function FeaturesPage() {
                       </div>
                       <span className="label-mono">{feature.label}</span>
                     </div>
-                    <h2 className="font-display font-bold uppercase leading-[0.95] tracking-[-0.01em] text-3xl md:text-4xl mb-3 text-white">
+                    <h2 className="font-display font-bold text-3xl md:text-4xl tracking-tight mb-3 text-white">
                       {feature.title}
                     </h2>
                     <p className="text-white/65 font-mono text-sm mb-6 leading-relaxed">

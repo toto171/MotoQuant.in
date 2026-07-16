@@ -1,9 +1,9 @@
 'use client';
 
 /**
- * ActionButton — the one run/stop button pattern (STAGED v4).
+ * ActionButton — the one run/stop button pattern (IGNITION v5).
  *
- * Pairs with useAsyncTask: idle it's the volt primary button; while the task
+ * Pairs with useAsyncTask: idle it's the signal-orange primary button; while the task
  * runs it flips to the amber .btn-running "■ Stop — NN%" state with live
  * progress — real percentage when the backend reports it (job-backed sims),
  * an animated sweep strip otherwise (plain fetches, cold starts). The button

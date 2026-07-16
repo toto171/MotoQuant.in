@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * SimProgress — real progress bar for simulation work (STAGED v4).
+ * SimProgress — real progress bar for simulation work (IGNITION v5).
  *
  * Replaces the old rotating spinners across the site. Two data modes:
  *
@@ -13,7 +13,7 @@
  *    "waking the engine" message when the wait smells like a free-tier
  *    cold start.
  *
- * v4 skin: track = asphalt-4, fill = volt accent, running caption =
+ * v5 skin: track = asphalt-4, fill = signal-orange accent, running caption =
  * .label-mono in signal-stage (amber = staged/running), stop affordance
  * flips to signal-foul on hover.
  *

@@ -2,7 +2,7 @@
 
 /**
  * AccuracyExplorer — the flagship "real vs simulated" accuracy surface
- * (STAGED v4 skin — see web/DESIGN.md).
+ * (IGNITION v5 skin — see web/DESIGN.md).
  *
  * Everything is computed from web/app/validation/accuracy_data.json (passed
  * in as `data`) so the page can never drift from the sweep. Five panels:
@@ -11,21 +11,22 @@
  *      a dashed y=x perfect-prediction diagonal + a ±0.2s tolerance band.
  *      Source confidence is encoded as dot opacity + radius, so the low-
  *      confidence DERIVED estimates visibly recede — that's the honesty
- *      story. Single data hue (volt). Hover tooltip + filter + a table
- *      fallback for screen readers / no-hover.
- *   2. DISTRIBUTION  — mono stat tiles (within ±0.05/0.10/0.20/0.50,
+ *      story. Single data hue (signal orange). Hover tooltip + filter + a
+ *      table fallback for screen readers / no-hover.
+ *   2. DISTRIBUTION  — seven-seg stat tiles (within ±0.05/0.10/0.20/0.50,
  *      overall |Δ|, mean bias, top-10 cleanest).
  *   3. RESIDUAL HISTOGRAM — Δ = sim−real, diverging signal-go (sim faster)
- *      / signal-foul (sim slower), neutral centre, volt mean-bias marker.
+ *      / signal-foul (sim slower), neutral centre, orange mean-bias marker.
  *   4. PER-CLUSTER — horizontal weighted-|Δ| bars, status-coloured with the
  *      numeric label always present (colour is never the only signal).
  *   5. BEST PREDICTIONS — the ten cleanest published (non-derived) runs,
  *      plus the honest callout about the DERIVED entry-cc / 2T benchmarks.
  *
- * Chart palette (v4): primary series = volt #C9F231; positive residuals
- * (sim slower) = signal-foul #FF5A48; negative (sim faster) = signal-go
- * #34D97B; neutral grid rgba(255,255,255,0.08); tolerance band
- * rgba(201,242,49,0.06). Chart backgrounds are transparent on .card panels.
+ * Chart palette (v5): primary series = signal orange #FF5E1F (#FF8F57 on
+ * hover); positive residuals (sim slower) = signal-foul #EF4444; negative
+ * (sim faster) = signal-go #22C55E; neutral grid rgba(255,255,255,0.08);
+ * tolerance band rgba(255,94,31,0.06). Chart backgrounds are transparent
+ * on .card panels.
  *
  * Reduced-motion safe (Reveal handles it; the SVGs are static + hover-only).
  * Responsive: SVGs scale via viewBox (no body overflow); the wide tables
@@ -38,11 +39,12 @@ import { Reveal } from './Reveal';
 import ScoreboardDigits from './ScoreboardDigits';
 import CodeComment from './CodeComment';
 
-const VOLT = '#C9F231'; // accent — primary data series
-const GO = '#34D97B'; // signal-go — negative residual (sim faster)
-const FOUL = '#FF5A48'; // signal-foul — positive residual (sim slower)
+const ACCENT = '#FF5E1F'; // signal orange — primary data series
+const ACCENT_BRIGHT = '#FF8F57'; // hover / active state of the primary series
+const GO = '#22C55E'; // signal-go — negative residual (sim faster)
+const FOUL = '#EF4444'; // signal-foul — positive residual (sim slower)
 const GRID = 'rgba(255,255,255,0.08)'; // neutral gridlines / frames
-const BAND = 'rgba(201,242,49,0.06)'; // ±0.2s tolerance band fill
+const BAND = 'rgba(255,94,31,0.06)'; // ±0.2s tolerance band fill
 const NEUTRAL_BIN = 'rgba(255,255,255,0.30)'; // |Δ| < 0.05 centre bin
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -204,7 +206,7 @@ function Scatter({ bikes }) {
             y1={sy(lo)}
             x2={sx(hi)}
             y2={sy(hi)}
-            stroke={VOLT}
+            stroke={ACCENT}
             strokeWidth="1.2"
             strokeDasharray="6 5"
             opacity="0.7"
@@ -212,7 +214,7 @@ function Scatter({ bikes }) {
           <text
             x={sx(hi) - 4}
             y={sy(hi) + 16}
-            fill={VOLT}
+            fill={ACCENT}
             opacity="0.8"
             fontSize="10.5"
             fontFamily="monospace"
@@ -248,7 +250,7 @@ function Scatter({ bikes }) {
                 cx={sx(b.real_et)}
                 cy={sy(b.sim_et)}
                 r={isH ? r + 2 : r}
-                fill={VOLT}
+                fill={isH ? ACCENT_BRIGHT : ACCENT}
                 fillOpacity={isH ? 1 : o}
                 stroke={isH ? '#FFFFFF' : 'none'}
                 strokeWidth={isH ? 1.2 : 0}
@@ -265,7 +267,7 @@ function Scatter({ bikes }) {
           {tip && (
             <g pointerEvents="none">
               <line x1={tip.px} y1={tip.py} x2={tip.x + (tip.x < tip.px ? tip.tw : 0)} y2={tip.y + tip.th / 2} stroke="rgba(255,255,255,0.35)" strokeWidth="0.75" />
-              <rect x={tip.x} y={tip.y} width={tip.tw} height={tip.th} rx="7" fill="#0B0E13" stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
+              <rect x={tip.x} y={tip.y} width={tip.tw} height={tip.th} rx="7" fill="#0A0A0B" stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
               <text x={tip.x + 12} y={tip.y + 20} fill="#FFFFFF" fontSize="12" fontFamily="monospace" fontWeight="600">
                 {`${hb.make} ${hb.model}`.slice(0, 26)}
               </text>
@@ -296,7 +298,7 @@ function Scatter({ bikes }) {
             return (
               <span key={s.label} className="inline-flex items-center gap-1.5 text-[11px] text-white/55">
                 <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-                  <circle cx="8" cy="8" r={r} fill={VOLT} fillOpacity={o} />
+                  <circle cx="8" cy="8" r={r} fill={ACCENT} fillOpacity={o} />
                 </svg>
                 {s.label}
               </span>
@@ -354,9 +356,9 @@ function Scatter({ bikes }) {
 function StatTile({ value, unit, pre, label, sub }) {
   return (
     <div className="card p-4 sm:p-5 flex flex-col">
-      <div className="flex items-end gap-1 leading-none min-h-[26px]">
+      <div className="flex items-end gap-1 leading-none min-h-[28px]">
         {pre && <span className="font-mono text-sm mb-0.5 text-white/50">{pre}</span>}
-        <ScoreboardDigits value={value} h={26} color="#FFFFFF" label={`${pre || ''}${value}${unit || ''}`} />
+        <ScoreboardDigits value={value} h={28} color="#FFFFFF" label={`${pre || ''}${value}${unit || ''}`} />
         {unit && <span className="font-mono text-xs text-white/40 mb-0.5">{unit}</span>}
       </div>
       <div className="label-mono mt-3">{label}</div>
@@ -460,9 +462,9 @@ function Histogram({ bikes, bias }) {
           );
         })}
 
-        {/* mean-bias marker — the one volt detail on this panel */}
-        <line x1={dx} y1={M.t - 2} x2={dx} y2={M.t + PH} stroke={VOLT} strokeWidth="1.4" />
-        <text x={dx} y={M.t - 4} fill={VOLT} opacity="0.9" fontSize="10" fontFamily="monospace" textAnchor="middle">
+        {/* mean-bias marker — the one orange detail on this panel */}
+        <line x1={dx} y1={M.t - 2} x2={dx} y2={M.t + PH} stroke={ACCENT} strokeWidth="1.4" />
+        <text x={dx} y={M.t - 4} fill={ACCENT} opacity="0.9" fontSize="10" fontFamily="monospace" textAnchor="middle">
           bias {signed(bias)}s
         </text>
 
@@ -512,7 +514,7 @@ function ClusterBreakdown({ clusters }) {
             <div key={c.label} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1">
               <div className="min-w-0">
                 <div className="flex items-baseline gap-2">
-                  <span className="font-display font-semibold uppercase tracking-wide text-sm text-white truncate">{c.label}</span>
+                  <span className="font-display font-semibold text-sm text-white truncate">{c.label}</span>
                   <span className="font-mono text-[10px] text-white/40 shrink-0">N={c.n}</span>
                 </div>
               </div>
@@ -578,7 +580,7 @@ function BestPredictions({ bikes }) {
               <tr key={i} className="border-b border-white/[0.04] last:border-0 hover:bg-white/[0.03] transition-colors">
                 <td className="px-4 py-3 font-mono text-white/40 tabular-nums">{i + 1}</td>
                 <td className="px-4 py-3">
-                  <div className="font-display font-semibold uppercase tracking-wide text-white text-sm whitespace-nowrap">{b.make} {b.model}</div>
+                  <div className="font-display font-semibold text-white text-sm whitespace-nowrap">{b.make} {b.model}</div>
                   <div className="font-mono text-[11px] text-white/40">{b.year} · {b.disp_cc}cc</div>
                 </td>
                 <td className="px-4 py-3 text-right font-mono text-white/70 tabular-nums text-sm">{b.real_et.toFixed(2)}s</td>
@@ -603,7 +605,7 @@ function Section({ kicker, title, sub, children }) {
       <Reveal>
         <div className="mb-6 max-w-2xl">
           <CodeComment className="mb-3">{kicker}</CodeComment>
-          <h2 className="font-display font-bold uppercase text-3xl md:text-4xl leading-[0.95] tracking-[-0.01em] text-white">{title}</h2>
+          <h2 className="font-display font-bold text-3xl md:text-4xl tracking-tight text-white">{title}</h2>
           {sub && <p className="mt-3 text-white/65 text-sm sm:text-base leading-relaxed">{sub}</p>}
         </div>
       </Reveal>
@@ -646,7 +648,7 @@ export default function AccuracyExplorer({ data }) {
 
       <Section
         kicker="01 · real vs simulated"
-        title="Every prediction against its timeslip"
+        title={<>Every prediction against its <span className="text-accent">timeslip</span></>}
         sub={`One dot per matched benchmark: the published real ET on the x-axis, MotoQuant's simulated ET on the y-axis, on the same scale. The dashed line is a perfect prediction; the shaded stripe is the ±0.2s tolerance band that instrumented magazine tests report as their own run-to-run spread. Dot weight = source confidence, so the low-confidence DERIVED estimates recede.`}
       >
         <Scatter bikes={bikes} />
@@ -654,7 +656,7 @@ export default function AccuracyExplorer({ data }) {
 
       <Section
         kicker="02 · the numbers"
-        title="Where the residuals land"
+        title={<>Where the <span className="text-accent">residuals</span> land</>}
         sub={`Across ${n_matched} matched benchmarks the model is essentially centred at zero, and more than half land inside a fifth of a second.`}
       >
         <Distribution dist={distribution} overall={overall} n={n_matched} topTen={topTen} />
@@ -662,7 +664,7 @@ export default function AccuracyExplorer({ data }) {
 
       <Section
         kicker="03 · residual shape"
-        title="A tight, near-symmetric error distribution"
+        title={<>A tight, <span className="text-accent">near-symmetric</span> error distribution</>}
         sub="The residual Δ = sim − real, binned at 0.1s. Green bins are runs we call faster than reality, red bins slower; the mass is stacked on the centre with only a whisker of bias."
       >
         <Histogram bikes={bikes} bias={overall.w_bias} />
@@ -670,7 +672,7 @@ export default function AccuracyExplorer({ data }) {
 
       <Section
         kicker="04 · by segment"
-        title="Litre classes are tight; entry-cc is data-limited"
+        title={<>Litre classes are <span className="text-accent">tight</span>; entry-cc is data-limited</>}
         sub="Weighted mean absolute error per cluster, on the cylinder-aware 12-cluster taxonomy (twins, singles, and small-cc I4s are split out from same-displacement I4 buckets). The litre, sport-twin, and mid-twin clusters — the ones with real instrumented timeslips — sit well under 0.20s. The wide clusters are the small-cc and two-stroke bikes whose benchmarks are DERIVED estimates, not a model failure."
       >
         <ClusterBreakdown clusters={clusters} />
@@ -678,7 +680,7 @@ export default function AccuracyExplorer({ data }) {
 
       <Section
         kicker="05 · cleanest predictions"
-        title="Ten runs, ten real timeslips"
+        title={<>Ten runs, ten <span className="text-accent">real</span> timeslips</>}
         sub="The ten smallest residuals among fully published (non-derived) benchmarks — Cycle World, Sport Rider, MCN, MotoStatz, FastestLaps. Race fuel, professional rider, ideal strip."
       >
         <BestPredictions bikes={bikes} />
@@ -702,11 +704,11 @@ export default function AccuracyExplorer({ data }) {
       {/* cross-links */}
       <div className="pt-8 border-t border-white/10 grid sm:grid-cols-2 gap-4">
         <Link href="/docs/validation" className="card card-hover block p-4 group">
-          <div className="font-display font-bold uppercase text-white mb-1 group-hover:text-accent transition-colors">Per-bike benchmark table →</div>
+          <div className="font-display font-semibold text-white mb-1 group-hover:text-accent transition-colors">Per-bike benchmark table →</div>
           <div className="text-xs text-white/50">Methodology, per-cluster bias, and the full source list.</div>
         </Link>
         <Link href="/whitepaper" className="card card-hover block p-4 group">
-          <div className="font-display font-bold uppercase text-white mb-1 group-hover:text-accent transition-colors">Read the whitepaper →</div>
+          <div className="font-display font-semibold text-white mb-1 group-hover:text-accent transition-colors">Read the whitepaper →</div>
           <div className="text-xs text-white/50">The physics, the validation method, the honest error budget.</div>
         </Link>
       </div>

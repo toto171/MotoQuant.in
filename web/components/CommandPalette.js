@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * CommandPalette — ⌘K / Ctrl+K jump-anywhere (STAGED v4 skin).
+ * CommandPalette — ⌘K / Ctrl+K jump-anywhere (IGNITION v5 skin).
  *
  * One input, grouped results:
  *   - Actions/pages: static route list with keyword aliases (fuzzy-ish match)

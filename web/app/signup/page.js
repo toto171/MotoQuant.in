@@ -4,7 +4,7 @@
  * MotoQuant Pro — Signup Page
  * ============================
  * Signup = login (register tab opens via ?signup=1).
- * Redirect stub only — the interim frame renders the STAGED v4 label
+ * Redirect stub only — the interim frame renders the IGNITION v5 label
  * voice via the shared CodeComment primitive (StageDots + mono label).
  */
 

@@ -9,11 +9,11 @@
  * (the account Garage flow), so this page is also the "why save a run?"
  * answer — your run lands here.
  *
- * STAGED v4 (July 2026): PageHero, `.card` strip rows (rank mono / bike name
- * condensed uppercase / venue `.chip` / big mono ET), `.input-base` venue
- * select, shared Skeleton rows, signal-foul error card with Retry. House
- * reference sims hold an empty board (honestly chipped "HOUSE REFERENCE");
- * the first real saved run replaces them.
+ * IGNITION v5 (July 2026): PageHero, `.card` strip rows (rank mono / bike
+ * name in Space Grotesk sentence case / venue `.chip` / seven-segment row
+ * ET), `.input-base` venue select, shared Skeleton rows, signal-foul error
+ * card with Retry. House reference sims hold an empty board (honestly
+ * chipped "HOUSE REFERENCE"); the first real saved run replaces them.
  */
 
 import { useEffect, useMemo, useState } from 'react';
@@ -22,6 +22,7 @@ import { MapPin, AlertCircle } from 'lucide-react';
 import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
 import PageHero from '../../components/PageHero';
+import ScoreboardDigits from '../../components/ScoreboardDigits';
 import { Skeleton } from '../../components/Skeleton';
 import { API_URL } from '../../lib/api';
 
@@ -99,7 +100,7 @@ export default function LeaderboardPage() {
       <PageHero
         kicker="Public leaderboard"
         badge="Saved runs · ranked by ET"
-        title={<>The board.</>}
+        title={<>The <span className="text-accent">board</span>.</>}
         sub="Every run saved to a MotoQuant garage lands here — ranked by quarter-mile ET, filterable by venue. Sign in, simulate, save, and put your build on the board."
       />
 
@@ -164,7 +165,7 @@ export default function LeaderboardPage() {
                   >
                     <Rank pos={i + 1} />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-display font-semibold uppercase text-base md:text-lg leading-tight">
+                      <p className="truncate font-display font-semibold text-base md:text-lg leading-tight">
                         {r.bike}
                         <span className="text-white/40"> · {r.year}</span>
                       </p>
@@ -174,9 +175,12 @@ export default function LeaderboardPage() {
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
-                      <p className="font-mono font-bold tabular-nums text-xl md:text-2xl leading-none">
-                        {r.et}
-                      </p>
+                      <ScoreboardDigits
+                        value={r.et}
+                        h={24}
+                        color="#FFFFFF"
+                        label={`${r.et} seconds`}
+                      />
                       <p className="label-mono mt-1.5">{r.trap}</p>
                     </div>
                   </li>
@@ -207,7 +211,7 @@ export default function LeaderboardPage() {
                   >
                     <Rank pos={i + 1} />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-display font-semibold uppercase text-base md:text-lg leading-tight">
+                      <p className="truncate font-display font-semibold text-base md:text-lg leading-tight">
                         {(r.manufacturer || '—') + ' ' + (r.model || '')}
                         {r.year ? <span className="text-white/40"> · {r.year}</span> : null}
                       </p>
@@ -217,9 +221,12 @@ export default function LeaderboardPage() {
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
-                      <p className="font-mono font-bold tabular-nums text-xl md:text-2xl leading-none">
-                        {Number(r.et_quarter_s).toFixed(3)}
-                      </p>
+                      <ScoreboardDigits
+                        value={Number(r.et_quarter_s).toFixed(3)}
+                        h={24}
+                        color="#FFFFFF"
+                        label={`${Number(r.et_quarter_s).toFixed(3)} seconds`}
+                      />
                       <p className="label-mono mt-1.5">
                         {r.trap_speed_kmh ? `${Number(r.trap_speed_kmh).toFixed(1)} km/h` : ''}
                       </p>

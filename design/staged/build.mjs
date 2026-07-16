@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * build.mjs — generates the STAGED design-system preview cards.
+ * build.mjs — generates the IGNITION design-system preview cards.
  *
  * Each card is a self-contained HTML file whose FIRST LINE is a
  * `<!-- @dsCard group="…" -->` marker (consumed by the claude.ai/design
@@ -14,20 +14,20 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 
-const FONTS = `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">`;
+const FONTS = `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">`;
 
 const BASE_CSS = `
 :root{
-  --a0:#07090C; --a1:#0B0E13; --a2:#10141B; --a3:#171C25; --a4:#232A37;
-  --volt:#C9F231; --volt-b:#DBFF57; --volt-d:#9CBE1E;
-  --go:#34D97B; --stage:#FFB224; --foul:#FF5A48; --mint:#6FE3B2;
+  --a0:#050506; --a1:#0A0A0B; --a2:#111113; --a3:#1A1A1D; --a4:#27272A;
+  --volt:#FF5E1F; --volt-b:#FF8F57; --volt-d:#CC4000;
+  --go:#22C55E; --stage:#F59E0B; --foul:#EF4444; --mint:#00FFB2;
   --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.2);
   --t1:#FFFFFF; --t2:rgba(255,255,255,.65); --t3:rgba(255,255,255,.4);
 }
 *{box-sizing:border-box}
 body{background:var(--a0);color:var(--t2);font-family:'Inter',system-ui,sans-serif;
   margin:0;padding:28px;font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
-.disp{font-family:'Barlow Condensed','Arial Narrow',sans-serif;text-transform:uppercase;
+.disp{font-family:'Space Grotesk',system-ui,sans-serif;
   color:var(--t1);letter-spacing:-.01em;line-height:.95}
 .mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
 .label{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;
@@ -37,28 +37,28 @@ body{background:var(--a0);color:var(--t2);font-family:'Inter',system-ui,sans-ser
 .dot{width:6px;height:6px;border-radius:99px}
 .dot-s{background:var(--stage)} .dot-g{background:var(--go)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;
-  padding:0 20px;border-radius:8px;font-family:'Barlow Condensed','Arial Narrow',sans-serif;
-  font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.06em;
+  padding:0 20px;border-radius:8px;font-family:'Space Grotesk',system-ui,sans-serif;
+  font-weight:700;font-size:14px;
   border:1px solid transparent;cursor:pointer;background:none;color:var(--t1)}
-.btn-primary{background:var(--volt);color:#0B0D07}
+.btn-primary{background:var(--volt);color:#000}
 .btn-primary:hover{background:var(--volt-b)}
 .btn-ghost{border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.85)}
 .btn-ghost:hover{border-color:rgba(255,255,255,.3)}
-.btn-danger{border-color:rgba(255,90,72,.4);background:rgba(255,90,72,.1);color:var(--foul)}
-.btn-running{border-color:rgba(255,178,36,.4);background:rgba(255,178,36,.1);color:var(--stage)}
+.btn-danger{border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.1);color:var(--foul)}
+.btn-running{border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.1);color:var(--stage)}
 .btn-sm{height:36px;padding:0 14px;font-size:13px}
 .btn[disabled]{opacity:.4;cursor:not-allowed}
 .chip{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:4px;
   font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;
   letter-spacing:.2em;border:1px solid var(--line);color:var(--t2)}
-.chip-volt{border-color:rgba(201,242,49,.35);background:rgba(201,242,49,.08);color:var(--volt)}
-.chip-go{border-color:rgba(52,217,123,.35);background:rgba(52,217,123,.08);color:var(--go)}
-.chip-stage{border-color:rgba(255,178,36,.35);background:rgba(255,178,36,.08);color:var(--stage)}
-.chip-foul{border-color:rgba(255,90,72,.35);background:rgba(255,90,72,.08);color:var(--foul)}
-.chip-mint{border-color:rgba(111,227,178,.35);background:rgba(111,227,178,.08);color:var(--mint)}
+.chip-volt{border-color:rgba(255,94,31,.35);background:rgba(255,94,31,.08);color:var(--volt)}
+.chip-go{border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.08);color:var(--go)}
+.chip-stage{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.08);color:var(--stage)}
+.chip-foul{border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.08);color:var(--foul)}
+.chip-mint{border-color:rgba(0,255,178,.35);background:rgba(0,255,178,.08);color:var(--mint)}
 .input{height:44px;width:100%;border-radius:8px;border:1px solid var(--line);
   background:var(--a3);padding:0 14px;font-size:14px;color:var(--t1);outline:none;font-family:'Inter',sans-serif}
-.input:focus{border-color:rgba(201,242,49,.55);box-shadow:0 0 0 1px rgba(201,242,49,.35)}
+.input:focus{border-color:rgba(255,94,31,.55);box-shadow:0 0 0 1px rgba(255,94,31,.35)}
 .timeslip{background:var(--a1);position:relative;padding:20px 22px;
   border-left:1px solid var(--line);border-right:1px solid var(--line)}
 .timeslip::before,.timeslip::after{content:'';position:absolute;left:0;right:0;height:1px;
@@ -89,34 +89,34 @@ const files = {};
 files['foundations/colors.html'] = page('Colors', 'Foundations', `
 <h3 class="section">Asphalt — surfaces</h3>
 <div style="display:flex;gap:10px;flex-wrap:wrap">
-  ${[['asphalt-0','#07090C','page'],['asphalt-1','#0B0E13','timeslip'],['asphalt-2','#10141B','card'],['asphalt-3','#171C25','input'],['asphalt-4','#232A37','hover line']]
+  ${[['asphalt-0','#050506','page'],['asphalt-1','#0A0A0B','timeslip'],['asphalt-2','#111113','card'],['asphalt-3','#1A1A1D','input'],['asphalt-4','#27272A','hover line']]
     .map(([n,h,use])=>`<div style="width:118px"><div style="height:64px;border-radius:10px;background:${h};border:1px solid var(--line)"></div>
     <div class="mono" style="font-size:11px;color:var(--t1);margin-top:8px">${h}</div>
     <div class="label" style="margin-top:2px">${n}</div><div style="font-size:11px;color:var(--t3)">${use}</div></div>`).join('')}
 </div>
-<h3 class="section">Accent — volt (the green light)</h3>
+<h3 class="section">Accent — Signal orange (the needle past redline)</h3>
 <div style="display:flex;gap:10px;flex-wrap:wrap">
-  ${[['accent','#C9F231','primary action'],['accent-bright','#DBFF57','hover'],['accent-deep','#9CBE1E','borders / pressed']]
+  ${[['accent','#FF5E1F','primary action'],['accent-bright','#FF8F57','hover'],['accent-deep','#CC4000','borders / pressed']]
     .map(([n,h,use])=>`<div style="width:118px"><div style="height:64px;border-radius:10px;background:${h}"></div>
     <div class="mono" style="font-size:11px;color:var(--t1);margin-top:8px">${h}</div>
     <div class="label" style="margin-top:2px">${n}</div><div style="font-size:11px;color:var(--t3)">${use}</div></div>`).join('')}
 </div>
 <h3 class="section">Signal — meaning only, never decoration</h3>
 <div style="display:flex;gap:10px;flex-wrap:wrap">
-  ${[['signal-go','#34D97B','success · faster · PB'],['signal-stage','#FFB224','running · warning · estimated'],['signal-foul','#FF5A48','error · slower'],['mint','#6FE3B2','PRO / Studio chips only']]
+  ${[['signal-go','#22C55E','success · faster · PB'],['signal-stage','#F59E0B','running · warning · estimated'],['signal-foul','#EF4444','error · slower'],['mint','#00FFB2','PRO / Studio chips only']]
     .map(([n,h,use])=>`<div style="width:140px"><div style="height:64px;border-radius:10px;background:${h}"></div>
     <div class="mono" style="font-size:11px;color:var(--t1);margin-top:8px">${h}</div>
     <div class="label" style="margin-top:2px">${n}</div><div style="font-size:11px;color:var(--t3)">${use}</div></div>`).join('')}
 </div>
 <div class="centerline"></div>
-<p style="max-width:560px;font-size:12.5px;color:var(--t3)">Discipline: volt appears once or twice per viewport —
-the primary action and at most one accent detail. Text is white on asphalt. Signal colors carry
+<p style="max-width:560px;font-size:12.5px;color:var(--t3)">Discipline (the kit rule): orange is reserved for the moving parts —
+the primary action, live data, at most one accent detail per viewport. Text is white on asphalt. Signal colors carry
 state (delta, status, tier) and are never used to decorate.</p>
 `);
 
 files['foundations/type.html'] = page('Typography', 'Foundations', `
-<h3 class="section">Display — Barlow Condensed · uppercase</h3>
-<div class="disp" style="font-size:64px;font-weight:700">Know your time<br>before you stage</div>
+<h3 class="section">Display — Space Grotesk · sentence case</h3>
+<div class="disp" style="font-size:64px;font-weight:700">Know your time<br>before you <span style="color:var(--volt)">stage</span></div>
 <div class="disp" style="font-size:34px;font-weight:600;margin-top:18px">Section heading — build the slip</div>
 <div class="disp" style="font-size:21px;font-weight:600;margin-top:12px">Card title voice</div>
 <h3 class="section">Body — Inter</h3>
@@ -175,7 +175,7 @@ This is the only decorative ornament in the system.</p>
 `);
 
 files['components/buttons.html'] = page('Buttons', 'Components', `
-<h3 class="section">Primary — the green light</h3>
+<h3 class="section">Primary — the signal</h3>
 <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
   <button class="btn btn-primary">Run a sim</button>
   <button class="btn btn-primary btn-sm">Save this run</button>
@@ -202,7 +202,7 @@ files['components/inputs.html'] = page('Inputs & chips', 'Components', `
 <h3 class="section">Text / search</h3>
 <input class="input" placeholder="Search 541 bikes — try 'Hayabusa'">
 <div style="height:12px"></div>
-<input class="input" style="border-color:rgba(201,242,49,.55);box-shadow:0 0 0 1px rgba(201,242,49,.35)" value="Kawasaki Ninja ZX-10R">
+<input class="input" style="border-color:rgba(255,94,31,.55);box-shadow:0 0 0 1px rgba(255,94,31,.35)" value="Kawasaki Ninja ZX-10R">
 <h3 class="section">Select + slider</h3>
 <select class="input"><option>Aamby Valley — 640m DA</option></select>
 <div style="margin-top:18px">
@@ -309,7 +309,7 @@ files['components/nav.html'] = page('Navigation', 'Components', `
 <div style="border:1px solid var(--line);border-radius:14px;background:rgba(7,9,12,.95);padding:10px 6px;display:flex;max-width:390px">
   ${[['Sim',1],['Optimize',0],['Autotune',0],['Bikes',0],['Board',0]]
     .map(([l,on])=>`<div style="flex:1;text-align:center">
-      <div style="width:22px;height:22px;border-radius:6px;margin:0 auto 4px;background:${on?'rgba(201,242,49,.18)':'var(--a3)'};border:1px solid ${on?'rgba(201,242,49,.5)':'var(--line)'}"></div>
+      <div style="width:22px;height:22px;border-radius:6px;margin:0 auto 4px;background:${on?'rgba(255,94,31,.18)':'var(--a3)'};border:1px solid ${on?'rgba(255,94,31,.5)':'var(--line)'}"></div>
       <div class="label" style="letter-spacing:.12em;color:${on?'var(--volt)':'var(--t3)'}">${l}</div></div>`).join('')}
 </div>
 `);
@@ -340,14 +340,14 @@ ${[
 files['patterns/landing-hero.html'] = page('Landing hero', 'Patterns', `
 <div style="position:relative;padding:48px 8px 40px;max-width:1040px;overflow:hidden">
   <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background-image:repeating-linear-gradient(180deg,rgba(255,255,255,.07) 0 10px,transparent 10px 22px)"></div>
-  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 45% at 30% 0%,rgba(201,242,49,.06),transparent 70%)"></div>
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 45% at 30% 0%,rgba(255,94,31,.06),transparent 70%)"></div>
   <div style="position:relative;display:grid;grid-template-columns:1.15fr .85fr;gap:44px;align-items:center">
     <div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px">
         <span class="dots"><span class="dot dot-s"></span><span class="dot dot-s"></span><span class="dot dot-g"></span></span>
         <span class="label">Physics-based · free during beta</span>
       </div>
-      <div class="disp" style="font-size:58px;font-weight:700">Know your time<br>before you <span style="color:var(--volt)">stage</span></div>
+      <div class="disp" style="font-size:54px;font-weight:700;letter-spacing:-0.02em">Know your time<br>before you <span style="color:var(--volt)">stage</span></div>
       <p style="max-width:440px;margin:18px 0 24px;font-size:15px">Full quarter-mile physics for 541 bikes —
       real dyno curves, gears and aero. Indian strips, parts priced in ₹, slips you can share on WhatsApp.</p>
       <div style="display:flex;gap:12px">
