@@ -32,17 +32,22 @@ Closes #
 python -m pytest tests/ -q
 ```
 
-## Physics benchmark deltas (required if you touched `motoquant/physics.py`, any `submodels/*`, or `defaults.py`)
+## Physics benchmark deltas (required if you touched `motoquant/physics.py`, any `submodels/*`, `defaults.py`, or `category_profiles.py`)
 
-<!-- Paste output from the benchmark sanity check. All three must stay in tolerance:
-     K5 = 10.034s ± 0.07   R1 = 10.286s ± 0.10   Hayabusa = 10.472s ± 0.30
--->
+<!-- Paste the output of `python scripts/check_baselines.py` — the single
+     source of truth for the pinned references (bit-identical contract,
+     see docs/INVARIANTS.md). Do NOT hardcode target numbers here; they
+     move only on a deliberate epoch (ADR-0002). -->
 
-| Bike | Target | This PR | Δ |
+```
+python scripts/check_baselines.py
+```
+
+| Bike | Pinned | This PR | Δ |
 |---|---|---|---|
-| K5 | 10.034 s |  |  |
-| R1 | 10.286 s |  |  |
-| Hayabusa | 10.472 s |  |  |
+| K5 |  |  |  |
+| R1 |  |  |  |
+| Hayabusa |  |  |  |
 
 ## Kaizen checklist (from CLAUDE.md)
 

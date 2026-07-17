@@ -51,7 +51,13 @@ env:
 
 on:
   workflow_run:
-    workflows: ["CI"]
+    # CI is python-only and path-filtered since 2026-07-17, so web-only pushes
+    # to main never trigger it; web-verify (which builds web/ on web/** paths)
+    # is the gate for those. Caveat: a push touching BOTH python and web fires
+    # both workflows and deploy-production runs on whichever succeeds first —
+    # acceptable on the free tier where Vercel's native integration deploys
+    # owner pushes ungated anyway.
+    workflows: ["CI", "web-verify"]
     types: [completed]
     branches: [main]
   pull_request:
