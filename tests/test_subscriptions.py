@@ -225,9 +225,52 @@ class TestLicenseKeys(unittest.TestCase):
             "SELECT last_seen_at, device_id FROM license_keys"
         ).fetchone()
         self.assertEqual(dict(before), dict(after), "mismatch must not mutate")
-        # Legacy clients that omit device_id are still tolerated
-        legacy = sr.validate_license_key(self.conn, key)
-        self.assertIsNotNone(legacy)
+
+    def test_first_device_call_binds_key(self):
+        """Policy (a): the first validate carrying a device_id binds the key."""
+        from motoquant.database import subscriptions_repo as sr
+
+        key = sr.create_license_key(self.conn, self.pro_user["id"], "pro")
+        row = sr.validate_license_key(self.conn, key, device_id="device-abc")
+        self.assertIsNotNone(row)
+        stored = self.conn.execute(
+            "SELECT device_id, activated_at FROM license_keys"
+        ).fetchone()
+        self.assertEqual(stored["device_id"], "device-abc")
+        self.assertIsNotNone(stored["activated_at"])
+
+    def test_bound_key_rejects_omitted_device_id(self):
+        """Policy (b) — July 17 2026: the omit-device_id tolerance is GONE.
+        It existed for pre-device desktop builds; the desktop app was
+        scrapped July 6 (ADR-0005), so a bound key presented without a
+        device_id is a shared/scripted key and must be rejected, leaving
+        the row untouched."""
+        from motoquant.database import subscriptions_repo as sr
+
+        key = sr.create_license_key(self.conn, self.pro_user["id"], "pro")
+        sr.validate_license_key(self.conn, key, device_id="device-abc")
+        before = self.conn.execute(
+            "SELECT last_seen_at, device_id FROM license_keys"
+        ).fetchone()
+        with self.assertRaises(sr.DeviceMismatchError):
+            sr.validate_license_key(self.conn, key)
+        after = self.conn.execute(
+            "SELECT last_seen_at, device_id FROM license_keys"
+        ).fetchone()
+        self.assertEqual(dict(before), dict(after), "omission must not mutate")
+
+    def test_unbound_key_validates_without_device_id(self):
+        """Policy (c): a key never bound (device_id NULL) still validates
+        without one — binding only happens on the first device-carrying
+        call."""
+        from motoquant.database import subscriptions_repo as sr
+
+        key = sr.create_license_key(self.conn, self.pro_user["id"], "pro")
+        for _ in range(2):
+            row = sr.validate_license_key(self.conn, key)
+            self.assertIsNotNone(row)
+        stored = self.conn.execute("SELECT device_id FROM license_keys").fetchone()
+        self.assertIsNone(stored["device_id"], "id-less calls must not bind")
 
     def test_device_mismatch_endpoint_message(self):
         """The public validate route reports the mismatch distinctly."""
@@ -255,9 +298,18 @@ class TestLicenseKeys(unittest.TestCase):
                 "/api/subscriptions/license-key/validate",
                 json={"key": key, "device_id": "dev-B"},
             )
+            # A bound key validated WITHOUT a device_id gets the same
+            # rejection through the route (policy (b), July 17 2026).
+            r3 = client.post(
+                "/api/subscriptions/license-key/validate",
+                json={"key": key},
+            )
         body = r2.json()
         self.assertFalse(body["valid"])
         self.assertIn("another device", body["message"])
+        body3 = r3.json()
+        self.assertFalse(body3["valid"])
+        self.assertIn("another device", body3["message"])
 
     def test_revoke_key(self):
         from motoquant.database import subscriptions_repo as sr
@@ -530,6 +582,62 @@ class TestLicenseKeyEndpoints(unittest.TestCase):
         body = res.json()
         self.assertFalse(body["valid"])
         conn.close()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 5. Rate limit on the unauthenticated validate route
+# ══════════════════════════════════════════════════════════════════════════════
+
+
+class TestValidateRateLimit(unittest.TestCase):
+    """POST /license-key/validate is unauthenticated — the 'license' bucket
+    (10 req / 60 s per IP, July 2026) fuses key-guessing and scripted
+    hammering."""
+
+    @classmethod
+    def setUpClass(cls):
+        try:
+            from fastapi import FastAPI
+            from fastapi.testclient import TestClient
+
+            import motoquant.subscriptions as sub_mod
+        except ImportError:
+            cls.skipTest(None, "fastapi not installed")
+            return
+
+        mini = FastAPI()
+        mini.include_router(sub_mod.router, prefix="/api/subscriptions")
+        cls.client = TestClient(mini, raise_server_exceptions=False)
+
+    def setUp(self):
+        from motoquant import ratelimit
+
+        ratelimit.reset()
+
+    def tearDown(self):
+        from motoquant import ratelimit
+
+        ratelimit.reset()
+
+    def test_eleventh_rapid_validate_429s(self):
+        conn = _mem_conn()
+        _bootstrap(conn)
+        wrapped = _NoCloseConn(conn)
+        with patch("motoquant.subscriptions._get_conn", return_value=wrapped):
+            for i in range(10):
+                res = self.client.post(
+                    "/api/subscriptions/license-key/validate",
+                    json={"key": f"guess-{i}"},
+                )
+                self.assertEqual(res.status_code, 200, f"call {i + 1} must pass")
+            res = self.client.post(
+                "/api/subscriptions/license-key/validate",
+                json={"key": "guess-11"},
+            )
+        conn.close()
+        self.assertEqual(res.status_code, 429)
+        self.assertEqual(res.json()["detail"]["error"], "rate_limited")
+        self.assertIn("Retry-After", res.headers)
 
 
 if __name__ == "__main__":

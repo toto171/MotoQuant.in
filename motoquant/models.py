@@ -337,6 +337,13 @@ class DrivetrainParams:
     post_shift_retard_ms: float = 40.0  # Retard ramp after shift
     quickshifter: bool = False  # QS installed
     total_shift_time_ms: float = 100.0  # Total shift time
+    # Factory top-speed limiter (July 17, 2026). None = unrestricted. When set,
+    # the sim clamps net acceleration to <= 0 at/above this speed, so the
+    # gentleman's-agreement 299 km/h fleet plateaus at the limiter instead of
+    # running to its aero-limited 320-340 km/h. Lives inside the dataclass so
+    # the DB bridge + config_io round-trip it via dataclasses.fields (the
+    # category_tag top-level-field trap does not apply).
+    speed_limiter_kmh: float | None = None
 
     @property
     def final_ratio(self) -> float:

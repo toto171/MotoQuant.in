@@ -40,6 +40,18 @@
     {
       "path": "/api/wake",
       "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/wake",
+      "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/wake",
+      "schedule": "0 16 * * *"
+    },
+    {
+      "path": "/api/wake",
+      "schedule": "0 18 * * *"
     }
   ]
 }

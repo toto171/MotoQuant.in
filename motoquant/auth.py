@@ -49,15 +49,15 @@ from .database import users_repo as _users
 
 log = logging.getLogger("motoquant.auth")
 
-# ─── JWT (python-jose optional; falls back to stdlib hmac if absent) ──────────
+# ─── JWT (PyJWT optional; falls back to stdlib hmac if absent) ────────────────
 
 try:
-    from jose import JWTError, jwt as _jose_jwt  # type: ignore
+    import jwt as _pyjwt  # type: ignore
 
-    _JOSE_AVAILABLE = True
+    _JWT_AVAILABLE = True
 except ImportError:  # pragma: no cover
-    _JOSE_AVAILABLE = False
-    log.warning("python-jose not installed — JWT issuing disabled (tests use mock)")
+    _JWT_AVAILABLE = False
+    log.warning("PyJWT not installed — JWT issuing disabled (tests use mock)")
 
 # ─── Config from env ──────────────────────────────────────────────────────────
 
@@ -194,8 +194,8 @@ def _make_access_token(user_id: int, email: str, tier: str, jti: str) -> str:
         "type": "access",
         "exp": datetime.now(timezone.utc) + timedelta(seconds=ACCESS_TOKEN_TTL_S),
     }
-    if _JOSE_AVAILABLE:
-        return _jose_jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    if _JWT_AVAILABLE:
+        return _pyjwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
     # Fallback: base64-encoded JSON (dev/test only — NOT secure for production)
     import base64
     import json
@@ -211,8 +211,8 @@ def _make_refresh_token(user_id: int, jti: str) -> str:
         "type": "refresh",
         "exp": datetime.now(timezone.utc) + timedelta(seconds=REFRESH_TOKEN_TTL_S),
     }
-    if _JOSE_AVAILABLE:
-        return _jose_jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    if _JWT_AVAILABLE:
+        return _pyjwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
     import base64
     import json
 
@@ -222,12 +222,12 @@ def _make_refresh_token(user_id: int, jti: str) -> str:
 
 def _decode_token(token: str) -> dict | None:
     """Decode and verify a JWT. Returns the payload dict or None on failure."""
-    # The unsigned "dev." token format is ONLY honoured when jose is
-    # unavailable (the same condition under which it is issued). Before
-    # 2026-07-02 this branch ran unconditionally, so in production (jose
+    # The unsigned "dev." token format is ONLY honoured when the JWT library
+    # is unavailable (the same condition under which it is issued). Before
+    # 2026-07-02 this branch ran unconditionally, so in production (JWT lib
     # present) an attacker could hand-craft a "dev." token with an
     # arbitrary payload and skip signature verification entirely.
-    if token.startswith("dev.") and not _JOSE_AVAILABLE:
+    if token.startswith("dev.") and not _JWT_AVAILABLE:
         import base64
         import json
 
@@ -239,11 +239,11 @@ def _decode_token(token: str) -> dict | None:
             return data
         except Exception:
             return None
-    if not _JOSE_AVAILABLE:
+    if not _JWT_AVAILABLE:
         return None
     try:
-        return _jose_jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-    except JWTError:
+        return _pyjwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+    except _pyjwt.PyJWTError:
         return None
 
 

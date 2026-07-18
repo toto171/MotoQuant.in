@@ -5,11 +5,42 @@ name: CI
 permissions:
   contents: read
 
+# 2026-07-17 minutes-budget rework (repo is private → Actions minutes are
+# capped; the cap was crossed July 13 and every job insta-failed for days):
+#   - Workflow is now PYTHON-ONLY and path-filtered. Web builds are covered by
+#     web-verify.yml (which builds on web/** paths); the old in-file `web` job
+#     had been committed TRUNCATED (no build steps) since June and gated
+#     nothing. Desktop + sidecar-smoke jobs removed — the desktop app was
+#     scrapped 2026-07-06 (ADR-0005); ~25-35 min/run for a dead product.
+#   - PRs run the fast tier (~3 min: lint + fast tests + bit-identical
+#     baseline gate). Pushes to main run the full suite + coverage (~46 min).
+#     Net: per-PR cost drops from ~100 min to <10.
+#   - deploy.yml gates production deploys on this workflow OR web-verify, so
+#     web-only pushes (which skip CI entirely via the paths filter) still get
+#     a gated deploy.
 on:
   push:
     branches: [main]
+    paths:
+      - "motoquant/**"
+      - "tests/**"
+      - "scripts/**"
+      - "motoquant.db"
+      - "requirements-api.txt"
+      - "pyproject.toml"
+      - "Makefile"
+      - ".github/workflows/ci.yml"
   pull_request:
     branches: [main]
+    paths:
+      - "motoquant/**"
+      - "tests/**"
+      - "scripts/**"
+      - "motoquant.db"
+      - "requirements-api.txt"
+      - "pyproject.toml"
+      - "Makefile"
+      - ".github/workflows/ci.yml"
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -19,14 +50,11 @@ jobs:
   python:
     name: Python tests + lint
     runs-on: ubuntu-latest
-    # The full suite runs the 541-bike no-silent-failure sweep plus the
-    # SALib/sklearn sobol+surrogate tests (installed below on purpose). Base
-    # runtime is ~20-25 min; the non-blocking --cov coverage instrumentation
-    # (line coverage) traces the sim hot loop across every bike and adds a big
-    # multiplier. Cap raised 50 -> 70 on 2026-07-13: the physics epoch added
-    # ~30 tests and per-sim cost (traction-cap refinement, slip-phase
-    # losses), and shared runners were already finishing at ~46 min — the
-    # first epoch run was cancelled at exactly 50:00 while mid-suite.
+    # The full suite (main pushes only) runs the 541-bike no-silent-failure
+    # sweep plus the SALib/sklearn sobol+surrogate tests. Base runtime is
+    # ~20-25 min; the non-blocking --cov coverage instrumentation traces the
+    # sim hot loop across every bike and adds a big multiplier. Cap raised
+    # 50 -> 70 on 2026-07-13 (physics epoch); PR runs finish in ~5 min.
     timeout-minutes: 70
     steps:
       - name: Checkout
@@ -50,7 +78,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-api.txt
           pip install -e .
-          pip install ruff pytest pytest-cov SALib scikit-learn  # optional analysis deps so sobol/surrogate tests run in CI
+          # SALib/sklearn: optional analysis deps so sobol/surrogate tests run.
+          # hypothesis: the 7 physics-invariant property tests
+          # (tests/test_physics_invariants.py) importorskip on it — before
+          # 2026-07-17 they had NEVER run in CI.
+          pip install ruff pytest pytest-cov SALib scikit-learn hypothesis
 
       - name: Ruff lint
         run: ruff check .
@@ -58,13 +90,34 @@ jobs:
       - name: Ruff format check
         run: ruff format --check .
 
+      - name: Physics baselines — bit-identical gate
+        # Single source of truth for the pinned references (K5 / R1 /
+        # Hayabusa). Replaces the old inline heredoc that still carried the
+        # PRE-epoch pins with a ±0.15 band (R1's real margin had shrunk to
+        # 7.6 ms — one more legitimate epoch away from a false red).
+        run: python scripts/check_baselines.py
+
       - name: Seed dev database
         run: |
           python -m motoquant.run --db /tmp/ci.db db init
           python -m motoquant.run --db /tmp/ci.db import --known-bikes
           python -m motoquant.run --db /tmp/ci.db db seed
 
-      - name: Run pytest (fast suite)
+      - name: Run pytest (fast tier — pull requests)
+        if: github.event_name == 'pull_request'
+        env:
+          MOTOQUANT_DB: /tmp/ci.db
+        # Mirrors `make test-fast` + the always-on regression-snapshot guard.
+        # The full suite still gates the merge itself via the push run on main.
+        run: >
+          pytest tests/test_validation.py tests/test_scraper.py
+          tests/test_two_stroke.py tests/test_compatibility.py
+          tests/test_submodel_kaizen.py tests/test_category_dispatch.py
+          tests/test_physics_invariants.py tests/test_regression_snapshot.py
+          -q --maxfail=5
+
+      - name: Run pytest (full suite + coverage — main pushes)
+        if: github.event_name == 'push'
         env:
           MOTOQUANT_DB: /tmp/ci.db
         # Coverage is a non-blocking SIGNAL (no --cov-fail-under gate) so a
@@ -73,160 +126,9 @@ jobs:
         run: pytest tests/ -q --maxfail=5 --cov=motoquant --cov-report=term-missing:skip-covered --cov-report=xml
 
       - name: Upload coverage report
-        if: ${{ always() }}
+        if: ${{ always() && github.event_name == 'push' }}
         uses: actions/upload-artifact@v4
         with:
           name: coverage-xml
           path: coverage.xml
           if-no-files-found: ignore
-
-      - name: Physics benchmark sanity check
-        run: |
-          python - <<'PY'
-          import motoquant
-          tol = 0.15
-          cases = {
-              "K5":       (motoquant.gsxr1000_k5(),  10.034),
-              "R1":       (motoquant.yzfr1_4c8(),    10.286),
-              "Hayabusa": (motoquant.hayabusa_gen1(),10.472),
-          }
-          failed = []
-          for name, (cfg, target) in cases.items():
-              et = motoquant.MotoQuantEngine(cfg).run().time_quarter
-              delta = et - target
-              print(f"{name:10s} sim={et:.3f}s  target={target:.3f}s  delta={delta:+.3f}s")
-              if abs(delta) > tol:
-                  failed.append(name)
-          if failed:
-              raise SystemExit(f"Benchmark regression on: {failed}")
-          PY
-
-  desktop:
-    name: Desktop (Tauri + React) typecheck + build
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    defaults:
-      run:
-        working-directory: desktop
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Node 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: npm
-          cache-dependency-path: desktop/package-lock.json
-
-      - name: Install npm dependencies
-        run: npm ci
-
-      - name: TypeScript typecheck
-        run: npx tsc --noEmit
-
-      - name: Vite build
-        run: npx vite build
-
-  sidecar-smoke:
-    name: Sidecar smoke test (Linux)
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    # Runs on every PR so the PyInstaller spec can't silently rot.
-    # Uses ubuntu-latest for speed (Linux PyInstaller → Linux binary).
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: pip
-          cache-dependency-path: requirements-api.txt
-
-      - name: Install deps
-        if: ${{ hashFiles('desktop/sidecar/requirements-sidecar.txt') != '' }}
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-api.txt
-          pip install -e .
-          pip install -r desktop/sidecar/requirements-sidecar.txt
-
-      - name: Verify tracked database
-        run: |
-          # The tracked motoquant.db IS the canonical seeded catalog. Re-seeding
-          # an already-populated DB raises a FOREIGN KEY IntegrityError (known
-          # idempotency artifact — same fix as release.yml f0d956d), so verify
-          # the checkout instead of regenerating it.
-          test -f motoquant.db || { echo "::error::motoquant.db missing from checkout"; exit 1; }
-          python -c "import sqlite3; n=sqlite3.connect('motoquant.db').execute('select count(*) from bike_models').fetchone()[0]; print(f'Tracked catalog: {n} bikes'); assert n >= 450, f'tracked catalog too small: {n}'"
-
-      - name: Build sidecar with PyInstaller
-        if: ${{ hashFiles('desktop/sidecar/requirements-sidecar.txt') != '' }}
-        working-directory: desktop/sidecar
-        run: |
-          pyinstaller motoquant-backend.spec --clean --noconfirm
-          echo "Binary size: $(du -h dist/motoquant-backend | cut -f1)"
-          [ -x dist/motoquant-backend ] || (echo "Binary missing or not executable" && exit 1)
-
-      - name: Smoke test — spawn binary, curl /api/health
-        if: ${{ hashFiles('desktop/sidecar/requirements-sidecar.txt') != '' }}
-        working-directory: desktop/sidecar
-        run: |
-          PORT=$(python - <<'PY'
-          import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1]); s.close()
-          PY
-          )
-          ./dist/motoquant-backend --host 127.0.0.1 --port "$PORT" --log-level warning &
-          PID=$!
-          trap 'kill $PID 2>/dev/null || true' EXIT
-
-          echo "Sidecar PID=$PID on port $PORT — waiting for /api/health..."
-          STATUS=0
-          for i in $(seq 1 40); do
-            sleep 0.5
-            if curl -fsS "http://127.0.0.1:$PORT/api/health" > /tmp/health.json 2>/dev/null; then
-              echo "✓ Health response: $(cat /tmp/health.json)"
-              STATUS=0
-              break
-            fi
-            STATUS=1
-          done
-
-          kill $PID 2>/dev/null || true
-          wait $PID 2>/dev/null || true
-
-          if [ $STATUS -ne 0 ]; then
-            echo "❌ Sidecar did not respond to /api/health within 20 s"
-            exit 1
-          fi
-
-          # Extra: verify bike_count > 0 (DB is seeded)
-          python - <<'PY'
-          import json, sys
-          with open("/tmp/health.json") as f:
-              data = json.load(f)
-          assert data.get("status") == "ok",     f"status != ok: {data}"
-          assert data.get("database") == "connected", f"db not connected: {data}"
-          assert data.get("bike_count", 0) > 0,  f"bike_count=0: {data}"
-          print(f"✓ bike_count={data['bike_count']}")
-          PY
-
-  web:
-    name: Web (Next.js) build
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    defaults:
-      run:
-        working-directory: web
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Node 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: npm
-          cache-dependency-path: web/package-lock.json

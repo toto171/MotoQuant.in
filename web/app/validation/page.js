@@ -31,7 +31,7 @@ export default function ValidationPage() {
               How <span className="text-gradient-orange">honest</span> is the physics?
             </>
           }
-          sub="277 benchmarks matched to catalog bikes, cross-checked against published Cycle World, Sport Rider, MCN and MotoStatz timeslips. Weighted mean absolute error 0.25s, bias +0.017s, and the three reference baselines preserved to four decimals since July 13, 2026."
+          sub="277 benchmarks matched to catalog bikes, cross-checked against published Cycle World, Sport Rider, MCN and MotoStatz timeslips. Weighted mean absolute error 0.27s, bias −0.005s, and the three reference baselines preserved to four decimals since July 13, 2026."
         >
           <Reveal y={14} duration={0.6} delay={0.22}>
             <div className="mt-2 flex flex-wrap gap-x-10 gap-y-4">

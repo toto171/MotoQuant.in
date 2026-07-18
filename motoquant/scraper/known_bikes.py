@@ -166,6 +166,9 @@ SUZUKI_GSXR1000_L7 = spec_from_dict(
         "rear_tire_size": "190/50ZR17",
         "cd": 0.65,
         "frontal_area_m2": 0.46,
+        # 299 km/h limiter (scripts/topspeed_sweep.py: GSX-R 1000 2017 = 299
+        # "factory-limited")
+        "speed_limiter_kmh": 299.0,
     },
     source_name="spec_sheet",
 )
@@ -201,6 +204,9 @@ SUZUKI_HAYABUSA_GEN2 = spec_from_dict(
         "rear_tire_size": "190/50ZR17",
         "cd": 0.62,
         "frontal_area_m2": 0.5,
+        # 299 km/h gentleman's-agreement limiter (scripts/topspeed_sweep.py:
+        # Hayabusa 2008 = 299 "factory-limited")
+        "speed_limiter_kmh": 299.0,
     },
     source_name="spec_sheet",
 )
@@ -236,6 +242,9 @@ SUZUKI_HAYABUSA_GEN3 = spec_from_dict(
         "rear_tire_size": "190/50ZR17",
         "cd": 0.6,
         "frontal_area_m2": 0.5,
+        # 299 km/h gentleman's-agreement limiter (scripts/topspeed_sweep.py:
+        # Hayabusa 2021 = 299 "factory-limited")
+        "speed_limiter_kmh": 299.0,
     },
     source_name="spec_sheet",
 )
@@ -790,6 +799,9 @@ DUCATI_PANIGALE_V4 = spec_from_dict(
         "rear_tire_size": "200/60ZR17",
         "cd": 0.6,
         "frontal_area_m2": 0.45,
+        # 299 km/h limiter (scripts/topspeed_sweep.py: Panigale V4 2018 = 299
+        # "MCN" — the published figure IS the limiter)
+        "speed_limiter_kmh": 299.0,
     },
     source_name="spec_sheet",
 )
@@ -907,6 +919,9 @@ KAWASAKI_ZX14R_2012 = spec_from_dict(
         "rear_tire_size": "200/50ZR17",
         "cd": 0.58,
         "frontal_area_m2": 0.52,
+        # 299 km/h gentleman's-agreement limiter (scripts/topspeed_sweep.py:
+        # Ninja ZX-14R 2012 = 299 "factory-limited")
+        "speed_limiter_kmh": 299.0,
     },
     source_name="scraped_confirmed",
 )
@@ -1196,6 +1211,9 @@ HONDA_CBR1000RR_R_2020 = spec_from_dict(
         "rear_tire_size": "190/55ZR17",
         "cd": 0.62,
         "frontal_area_m2": 0.46,
+        # 299 km/h limiter (scripts/topspeed_sweep.py: CBR1000RR 2020 = 299
+        # "MCN" — the published figure IS the limiter on the SC82 RR-R)
+        "speed_limiter_kmh": 299.0,
     },
     source_name="spec_sheet",
 )
@@ -2521,6 +2539,9 @@ KAWASAKI_ZZR1400_2006 = spec_from_dict(
         "rear_tire_size": "200/50ZR17",
         "cd": 0.58,
         "frontal_area_m2": 0.52,
+        # 299 km/h gentleman's-agreement limiter (scripts/topspeed_sweep.py:
+        # ZZR1400 2006 = 299 "factory-limited")
+        "speed_limiter_kmh": 299.0,
     },
     source_name="spec_sheet",
 )
@@ -11013,6 +11034,10 @@ SUZUKI_HAYABUSA_25TH_ANNIVERSARY_2024 = spec_from_dict(
         "rear_tire_size": "190/50ZR17",
         "cd": 0.60,
         "frontal_area_m2": 0.50,
+        # 299 km/h limiter — Gen3 platform (scripts/topspeed_sweep.py July-13
+        # note: 25th Anniversary "312.1" scrape figure REJECTED, Gen3 is
+        # 299-limited like the existing Hayabusa rows)
+        "speed_limiter_kmh": 299.0,
     },
     source_name="spec_sheet",
 )

@@ -35,7 +35,9 @@ class VenueRepository:
             vals,
         )
         self._conn.commit()
-        if cur.lastrowid == 0:
+        # rowcount is 0 when INSERT OR IGNORE hit the UNIQUE constraint; lastrowid
+        # would keep the previous successful insert's rowid and never read 0 here.
+        if cur.rowcount == 0:
             row = self._conn.execute(
                 "SELECT id FROM venues WHERE name = ?", (name,)
             ).fetchone()

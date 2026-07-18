@@ -173,10 +173,11 @@ use these two instead of inventing new ornaments.
 `ScoreboardDigits`/`ScoreboardCounter`.
 
 - **`ScoreboardDigits`** keeps its exact props (`value,h,color,ghost,
-  className,label`) but now renders **clean mono digits** (JetBrains,
-  tabular, weight 700, sized off `h`) — no more seven-segment SVG. Default
-  `color` becomes `#FFFFFF`; callers passing legacy orange get volt via a
-  small in-component remap of the old default hex.
+  className,label`) and renders the **seven-segment SVG numerals**
+  (hand-rolled polygons, unlit ghost segments, zero font assets) — the
+  v4 "clean mono digits" swap was never shipped; v5 restored the
+  scoreboard face for hero figures (see §2.2). Default `color` is the
+  signal orange `#FF5E1F`.
 - **`PageHero`** keeps its props (`kicker,badge,title,sub,stats,align,
   children`) — new skin: StageDots+label-mono kicker, condensed uppercase
   title, mono stat row, volt glow REPLACED by a plain `.centerline` under
@@ -198,16 +199,17 @@ logic; `app/api/wake/route.js`; `next.config.js`; `vercel.json` crons.
 
 ## 6. Page shell
 
-- **SiteNav** (fixed, `bg-asphalt-0/85 backdrop-blur`): wordmark
-  "MOTOQUANT" in Barlow Condensed 700 + a 3-dot StageDots mark. Links:
+- **SiteNav** (fixed, `bg-asphalt-0/85 backdrop-blur`): brand lockup =
+  GaugeMark + "MotoQuant" wordmark in Space Grotesk 700 (`font-display`,
+  Moto white / Quant orange — per §4). Links:
   Simulator · Optimize · Autotune · Bikes · Leaderboard · Pricing ·
   Resources ▾ (Validation, Docs, Blog, Whitepaper, Features, About). ⌘K
   search button, auth chip, volt CTA "Run a sim". Keep the 1024-1126px
   width fixes (collapse CTA label, hide ⌘K hint in lg..xl band). Mobile:
   drawer + MobileToolBar (5 tools, safe-area).
 - **SiteFooter**: 4 columns (Product/Data/Company/Legal), baselines line
-  (`K5 10.0334s · R1 10.2859s · Hayabusa 10.4712s`), "Built in India" +
-  beta note. Quiet — no glow.
+  (`K5 9.9331s · R1 10.1436s · Hayabusa 10.3633s` — always the CURRENT
+  pinned references, §1.2), "Built in India" + beta note. Quiet — no glow.
 - **template.js**: unchanged concept (opacity fade only); drop the HudFrame
   mount if one exists there.
 
@@ -278,5 +280,8 @@ of the above (bars still fill — that's information).
 4. Playwright (or manual) pass: every key route renders at 1440 and 390
    with zero console errors and zero horizontal overflow; progress bars
    move; Stop works; share/save work.
-5. `og-image.png` + icons regenerated to the volt/asphalt brand via
-   `scripts/generate_brand_assets.py` (update its token constants).
+5. `og-image.png` regenerated via `scripts/audit_headline_stats.py
+   --regen-og` (OG-card ownership moved to the audit script in 81c10b8;
+   `scripts/generate_brand_assets.py` no longer exists). The card is
+   evergreen by design — mark, lockup, tagline, v(t) curve, domain; no
+   counts or accuracy figures baked in.

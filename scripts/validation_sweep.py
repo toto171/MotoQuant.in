@@ -195,13 +195,22 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # (Autocar India's 200NS road test publishes 0-100 only). Value kept;
     # label honesty-fixed. Weight unchanged (motorbikecatalog -> 0.5
     # aggregator either way).
+    # OVERTURNED 2026-07-17: an instrumented NS200 QM DOES exist — the
+    # July-6 audit checked Indian/Western sources only, but the 200NS sold
+    # in Indonesia as "Kawasaki Bajaj Pulsar 200NS" and Otomotif
+    # Racelogic-tested it: 0-100 10.1s measured, 402m 17.3s (identical
+    # figure in two independent renderings of the article). Tier 0.5
+    # aggregator -> 1.0 instrumented; ET 16.90 -> 17.3. Trap not published;
+    # the prior row's 130 estimate retained. Same article as the Apache
+    # RTR 200 4V comparo row above.
+    # URL: https://otomotifnet.gridoto.com/read/231124191/komparasi-tvs-apache-rtr-200-4v-kawasaki-bajaj-pulsar-200ns-duel-duo-india
     (
         "Bajaj",
         "Pulsar NS200",
         2012,
-        16.90,
+        17.30,
         130,
-        "MotorBikeCatalog 2012 (site estimate; transcription verified)",
+        "Otomotif Racelogic instrumented 402m comparo (Indonesia, Kawasaki Bajaj Pulsar 200NS)",
     ),
     (
         "KTM",
@@ -224,7 +233,19 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     ("Bajaj", "Pulsar RS 200", 2015, 15.70, 132, "DERIVED (0-100 × 1.6, ±0.7s)"),
     ("Bajaj", "Pulsar N250", 2021, 15.45, 135, "DERIVED (0-100 × 1.6, ±0.7s)"),
     ("Bajaj", "Pulsar NS400Z", 2024, 14.10, 155, "DERIVED (0-100 × 1.6, ±0.7s)"),
-    ("KTM", "Duke 250", 2017, 15.20, 140, "DERIVED (0-100 × 1.6, ±0.7s)"),
+    # Duke 250 INSTRUMENTED 2026-07-17 (was DERIVED 15.20 @ 140): Otomotifnet
+    # Racelogic at Sentul — 0-100 7.3s / 201m 9.7s @ 113.7 / 402m 15.5s @
+    # 132.4; Racelogic top 148 (speedo 153). Indonesian 2017+ Duke 250 is the
+    # Indian model (same engine/gearing).
+    # URL: https://otomotifnet.gridoto.com/read/231123192/test-ride-ktm-duke-250-stabil-dan-ringan
+    (
+        "KTM",
+        "Duke 250",
+        2017,
+        15.50,
+        132.4,
+        "Otomotifnet Racelogic instrumented 402m test, Sentul circuit (Indonesia)",
+    ),
     (
         "KTM",
         "RC 390",
@@ -241,10 +262,44 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         135,
         "FastestLaps + BikeWale (verified stock)",
     ),
-    ("TVS", "Apache RTR 200 4V", 2016, 15.90, 128, "DERIVED (0-100 × 1.6, ±0.7s)"),
+    # Apache RTR 200 4V INSTRUMENTED 2026-07-17 (was DERIVED 15.90 @ 128):
+    # Otomotif Racelogic comparo vs Pulsar 200NS, 2016 carb press unit —
+    # 0-100 11.7s measured, 402m 18.1s (one search rendering of the article
+    # says 18.3 — the site 403s from this sandbox; either value confirms
+    # INBOX:164's ">17.5s" prediction; re-verify against the article when
+    # egress allows). Trap not published: ~115 est. from the
+    # Racelogic-verified ~125 km/h top speed.
+    # URL: https://otomotifnet.gridoto.com/read/231124191/komparasi-tvs-apache-rtr-200-4v-kawasaki-bajaj-pulsar-200ns-duel-duo-india
+    (
+        "TVS",
+        "Apache RTR 200 4V",
+        2016,
+        18.10,
+        115,
+        "Otomotif Racelogic instrumented 402m comparo vs Pulsar 200NS (Indonesia, carb)",
+    ),
     ("Yamaha", "R15 V4", 2021, 17.62, 118, "MotoStatz 2021 (instrumented)"),
-    ("Yamaha", "MT-15", 2019, 15.80, 130, "DERIVED (0-100 × 1.6, ±0.7s)"),
-    ("Yamaha", "R3", 2015, 14.00, 145, "FastestLaps 2015 (verified)"),
+    # MT-15 INSTRUMENTED 2026-07-17 (was DERIVED 15.80 @ 130): OtoRider GPS
+    # 402m test (Indonesia) — 0-100 15.8s, 402m 19.6s. Sibling XSR 155
+    # (identical 155 VVA engine) measured 18.9s with a 111 km/h in-run max,
+    # so trap ~108 est. (not published). Largest DERIVED-optimism correction
+    # of the 2026-07-17 batch (+3.8s); confirms INBOX:164's ">18.0s".
+    # Indonesian MT-15 = Indian MT-15 V1/V2 platform (155 VVA, 18.4 PS).
+    # URL: https://otorider.com/berita/2020/data-akselerasi-yamaha-xsr-155-lebih-kencang-daripada-mt-15-datbiecht15
+    (
+        "Yamaha",
+        "MT-15",
+        2019,
+        19.60,
+        108,
+        "OtoRider GPS-instrumented 402m test (Indonesia)",
+    ),
+    # R3 source upgrade 2026-07-17 (scrape-consumption honesty batch):
+    # FastestLaps carried the same 14.0s; the primary source is MotoStatz's own
+    # GPS test — 14.0 @ 152.9 km/h (95 mph), so the trap moves 145 -> 153 with
+    # the source of record.
+    # URL: https://motostatz.com/yamaha-yzf-r3-acceleration/
+    ("Yamaha", "R3", 2015, 14.00, 153, "MotoStatz GPS test (instrumented)"),
     ("Yamaha", "MT-03", 2020, 14.05, 92, "AccelerationTimes 2020 (DERIVED)"),
     ("Honda", "CB350RS", 2021, 15.50, 138, "DERIVED (0-100 × 1.6, ±0.7s)"),
     ("Honda", "CBR500R", 2022, 13.51, 98, "MotoStatz 2022 (DERIVED)"),
@@ -263,10 +318,25 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # ACCURACY 2026-06-11: year 2018 -> 2019 — the Gixxer 250 launched in
     # 2019 (spec range [2019-2025]); the 2018 row never matched.
     ("Suzuki", "Gixxer 250", 2019, 16.10, 126, "DERIVED (0-100 × 1.6, ±0.7s)"),
-    ("Kawasaki", "Ninja 300", 2013, 14.10, 150, "FastestLaps (verified, 93 mph)"),
+    # Ninja 300 source upgrade 2026-07-17 (scrape-consumption honesty batch):
+    # the FastestLaps aggregator row carried the identical figure (14.1 @
+    # 93 mph); the primary source is MotoStatz's own GPS acceleration test
+    # (149.64 km/h trap). Instrumented tier per the MotoStatz-with-device-token
+    # policy in sweep_lib.
+    # URL: https://motostatz.com/kawasaki-ninja-300-acceleration/
+    ("Kawasaki", "Ninja 300", 2013, 14.10, 150, "MotoStatz GPS test (instrumented)"),
     # Mid-range global expansion (April 2026)
-    ("Suzuki", "SV650", 2016, 11.82, 115, "FastestLaps 2016"),
+    # SV650 source upgrade 2026-07-17: FastestLaps carried the same 11.82s; the
+    # primary source is MotoStatz's own GPS test. Also fixes the trap
+    # transcription — the old `115` was MotoStatz's mph figure left
+    # un-converted (= 185 km/h), same bug class as the YZF-R7 fix below.
+    # URL: https://motostatz.com/suzuki-sv650-acceleration/
+    ("Suzuki", "SV650", 2016, 11.82, 185, "MotoStatz GPS test (instrumented)"),
     # ("Kawasaki", "Ninja 300", 2013, ...) — moved up + verified figure used
+    # Ninja 400 deliberately NOT tier-promoted 2026-07-17: the 2026-07-10
+    # scrape find for this bike is the same MotoStatz test relabeled, not an
+    # independent higher-tier source (its trap `102` is also the mph figure —
+    # left for a dedicated trap-column audit; ET/label/weight unchanged).
     ("Kawasaki", "Ninja 400", 2018, 12.98, 102, "MotoStatz 2018"),
     ("Kawasaki", "Ninja 650", 2020, 12.30, 111, "MotoStatz 2020"),
     ("Kawasaki", "Z 650", 2017, 12.40, 110, "MotoStatz 2017"),
@@ -2707,17 +2777,25 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         "Otomotifnet VBox/Racelogic (instrumented 0-402m 15.6s, top 147 km/h)",
     ),
     # Harley-Davidson VRSCA V-Rod (1130cc Revolution V-twin, 2002-2006) —
-    # HDForums/DragTimes owner timeslips: a bone-stock 2006 VRSCA ran 11.6s at
-    # a Daytona dyno-drag. The V-Rod's long-low stance + 240 rear launches like
-    # a dragster; stock low-11s is widely reported. Forum/timeslip tier (0.3).
-    # URL: https://www.hdforums.com/forum/vrsc-models/507272-quarter-mile-times-for-v-rods.html
+    # UPGRADED 2026-07-17 forum (0.3) -> magazine (0.7): the 2026-07-10 scrape
+    # corroborated the old HDForums/DragTimes timeslip (bone-stock 2006 VRSCA
+    # 11.6s @ Daytona) with the widely-cited Motorcycle Consumer News stock
+    # quarter-mile test of the 2002 VRSCA — 11.38s, cited via the Wikipedia
+    # VRSC article (11.3-11.4s consistently reported across press summaries).
+    # The primary MCN article itself was NOT located, so this stays magazine
+    # tier, not instrumented — the label deliberately hyphenates
+    # "Consumer-News" so sweep_lib's 'consumer news' instrumented-tier token
+    # doesn't over-promote a second-hand citation. Trap 185 km/h is retained
+    # from the prior forum-timeslip row (the magazine citation carries no
+    # trap; a stock V-Rod trapping ~115 mph is consistent with both sources).
+    # URL: https://en.wikipedia.org/wiki/Harley-Davidson_VRSC
     (
         "Harley-Davidson",
         "VRSCA V-Rod",
-        2004,
-        11.60,
+        2002,
+        11.38,
         185,
-        "HDForums/DragTimes timeslip (bone-stock 2006 VRSCA 11.6s @ Daytona)",
+        "Motorcycle Consumer-News stock QM test via Wikipedia VRSC (magazine)",
     ),
     # Kawasaki Versys 1000 (1043cc I4 ADV-tourer, 2019-2024) — owner-logged
     # timeslip on the Kawasaki Versys forum: 12.96s @ 99.15 mph (160 km/h).
@@ -2753,17 +2831,21 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         160,
         "DERIVED (0-60mph 3.7s FastestLaps; 62hp 2T V-twin, NSR250/RS250 cluster)",
     ),
-    # Kawasaki Ninja ZX-25R (Indonesia, 249.8cc I4 sport, 2020-2026) — DERIVED
-    # (0.1). 51hp inline-four revving to 17,000 rpm, 0-100 km/h <6s, MotorBeam
-    # top 187-190 km/h. Quicker than the CBR250RR (14.6s) twin — derived ~13.8s.
-    # URL: https://www.motorbeam.com/kawasaki-zx-25r-top-speed-is-190-km-hr-achieved-on-race-track/
+    # Kawasaki Ninja ZX-25R (Indonesia, 249.8cc I4 sport, 2020-2026) —
+    # INSTRUMENTED 2026-07-17 (was DERIVED 13.80 @ 160): TMCBlog/Otomotif
+    # Racelogic 402m test of the stock Indonesian press unit (~sea level):
+    # 0-60 2.5s / 0-100 5.4s / 201m 9.0s / 402m 14.1s @ 153.6 km/h; GPS top
+    # 183 (speedo 192). GridOto's separate CBR250RR comparo independently
+    # repeats 14.1s. Grows the small_i4_screamer benchmark base beyond its
+    # documented n=2 single-knob fit.
+    # URL: https://tmcblog.com/2020/07/17/test-akselerasi-kawasaki-ninja-zx-25r-paling-ngacir-se-250-cc/
     (
         "Kawasaki",
         "Ninja ZX-25R",
         2020,
-        13.80,
-        160,
-        "DERIVED (51hp 250 I4, 0-100<6s, top 187-190 km/h MotorBeam)",
+        14.10,
+        153.6,
+        "TMCBlog/Otomotif Racelogic instrumented 402m test (Indonesia)",
     ),
     # Honda CB 300R (286cc single naked, 2019-2024) — DERIVED (0.1). rushlane
     # 0-100 km/h 6.2s; MotorBikeCatalog QM estimate ~15.1s. 30hp single.
@@ -2816,26 +2898,33 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         "DERIVED (RR 310 platform 312cc; RR 310 verified 15.46 @135 FastestLaps)",
     ),
     # Harley-Davidson V-Rod Muscle (1247cc Revolution V-twin muscle, 2009-2017)
-    # — DERIVED (0.1). Same Revolution V-twin as the VRSCA V-Rod (11.6 timeslip
-    # above); the Muscle is heavier (massive rear), so ~11.8s.
+    # — UPGRADED 2026-07-17 (scrape-consumption honesty batch): the old
+    # DERIVED ~11.8s platform estimate is superseded by Rider Magazine's
+    # Feb-2009 road test — timed runs at the Infineon Raceway dragstrip, best
+    # of 14 quarter-mile passes at the press intro: 11.875s @ 114.19 mph
+    # (183.7 km/h). Instrumented tier (1.0).
+    # URL: https://ridermagazine.com/2009/01/12/2009-harley-davidson-v-rod-muscle-road-test/
     (
         "Harley-Davidson",
         "V-Rod Muscle",
-        2010,
-        11.80,
-        183,
-        "DERIVED (1247cc Revolution V-Rod platform; heavier muscle body)",
+        2009,
+        11.875,
+        183.7,
+        "Rider Magazine 2/2009 (instrumented, Infineon dragstrip timed runs)",
     ),
     # Harley-Davidson Nightster (975cc Revolution Max V-twin cruiser, 2022-2026)
-    # — DERIVED (0.1). 89hp 975T; the Sportster S (1250 RevMax) runs 11.10
-    # (HDForums timeslip in list); the lighter-powered Nightster lands ~12.2s.
+    # — UPGRADED 2026-07-17: the old DERIVED ~12.2s estimate is superseded by
+    # Cycle World's 2022 test of the RH975 — 11.99s @ 110.4 mph (177.6 km/h),
+    # the same figure the site's own Nightster physics post quotes. Magazine
+    # tier (0.7): no explicit timing-device attribution located per the
+    # project's instrumented bar.
     (
         "Harley-Davidson",
         "Nightster",
         2022,
-        12.20,
-        175,
-        "DERIVED (975 Revolution Max 89hp; Sportster S 11.10 base in list)",
+        11.99,
+        177.6,
+        "Cycle World 2022",
     ),
     # Hero Xpulse 200 (199.6cc single ADV, 2019-2025) — DERIVED (0.1). Autocar
     # India 0-100 km/h 13.5s (4V) ×1.6 ~= 21.6s; 19hp ADV single, top ~123 km/h.

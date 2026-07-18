@@ -24,6 +24,7 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "../../components/AuthProvider";
+import { track } from "../../lib/telemetry";
 import TierBadge from "../../components/TierBadge";
 import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
@@ -145,6 +146,9 @@ function PricingPageInner() {
     : "Everything you need to go faster.";
 
   async function subscribe(tier, signal) {
+    // Funnel event fires on intent (the click), not checkout completion —
+    // completion lands server-side via the payment webhooks.
+    track("upgrade_clicked", { tier, cycle, beta });
     if (beta) {
       // Open beta: no checkout — route to account creation, everything is free.
       window.location.href = isAuthenticated ? "/simulator" : "/login?signup=1";

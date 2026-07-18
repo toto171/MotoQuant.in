@@ -13,9 +13,16 @@ COPY artifacts/surrogate/surrogate_numpy.npz ./artifacts/surrogate/surrogate_num
 COPY docker-entrypoint.sh .
 RUN chmod +x docker-entrypoint.sh
 
+# Run as an unprivileged user. /app must stay writable by it: SQLite creates
+# journal/WAL sibling files next to /app/motoquant.db, so the DB's DIRECTORY
+# (not just the file) needs write permission.
+RUN useradd -m app && chown -R app:app /app
+
 # Railway injects PORT at runtime
 ENV PORT=8000
 ENV MOTOQUANT_DB=/app/motoquant.db
+
+USER app
 
 # Startup
 # Entrypoint seeds a persistent-disk DB on first boot, then execs uvicorn.

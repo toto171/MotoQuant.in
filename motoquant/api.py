@@ -677,6 +677,27 @@ def health():
     }
 
 
+@app.get("/api/debug/sentry-test")
+def sentry_test():
+    """Deliberately raise so the FastAPI Sentry integration reports a real
+    event (operator smoke test for the DSN wiring).
+
+    Hidden (404) unless MOTOQUANT_SENTRY_SELFTEST is truthy — never exposed
+    on a default deploy."""
+    enabled = os.environ.get("MOTOQUANT_SENTRY_SELFTEST", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    )
+    if not enabled:
+        raise HTTPException(404, "Not found")
+    raise RuntimeError(
+        "MotoQuant Sentry self-test — this event is deliberate "
+        "(MOTOQUANT_SENTRY_SELFTEST is set)"
+    )
+
+
 # ─────────────────────────────────────────────────────────────────────────
 # Free-tier sim metering (commercial launch, July 2026)
 # ─────────────────────────────────────────────────────────────────────────
@@ -3969,8 +3990,12 @@ def _outlaw_impl(req: OutlawRequest, progress=None) -> dict:
     status_code=202,
     dependencies=[Depends(rate_limit("optimize", 6, 60.0))],
 )
-def job_outlaw(req: OutlawRequest):
+def job_outlaw(
+    req: OutlawRequest,
+    _auth: dict = Depends(require_tier("pro")),  # noqa: B008
+):
     """Start the composed outlaw/open-class build as a background job."""
+    # Pro tier is unmetered, so the tier gate is the access control here.
     return _start_job("outlaw", lambda progress: _outlaw_impl(req, progress))
 
 

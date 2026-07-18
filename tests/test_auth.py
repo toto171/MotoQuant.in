@@ -213,16 +213,16 @@ class TestJwtHelpers(unittest.TestCase):
     """Test the _make_access_token / _decode_token path using the dev fallback."""
 
     def setUp(self):
-        # Force dev fallback (no jose) for deterministic testing
+        # Force dev fallback (no JWT lib) for deterministic testing
         import motoquant.auth as auth_mod
 
-        self._orig_jose = auth_mod._JOSE_AVAILABLE
-        auth_mod._JOSE_AVAILABLE = False
+        self._orig_jwt = auth_mod._JWT_AVAILABLE
+        auth_mod._JWT_AVAILABLE = False
 
     def tearDown(self):
         import motoquant.auth as auth_mod
 
-        auth_mod._JOSE_AVAILABLE = self._orig_jose
+        auth_mod._JWT_AVAILABLE = self._orig_jwt
 
     def test_make_and_decode_access_token(self):
         import motoquant.auth as auth_mod
@@ -318,10 +318,10 @@ class TestRequireTier(unittest.TestCase):
     def _make_token(self, tier: str) -> str:
         """Create an access token for a fake user.
 
-        Uses the current jose state so the issue and decode paths agree —
-        forcing jose off here (as this helper used to) would mint an
+        Uses the current JWT-lib state so the issue and decode paths agree —
+        forcing the lib off here (as this helper used to) would mint an
         unsigned "dev." token that the 2026-07-02 security fix now rejects
-        whenever jose is actually installed (which it is in CI).
+        whenever a JWT lib is actually installed (which it is in CI).
         """
         import motoquant.auth as auth_mod
 
@@ -528,7 +528,7 @@ class TestRequireTierBetaMode(unittest.TestCase):
     def test_authenticated_user_attached_in_beta(self):
         import motoquant.auth as auth_mod
 
-        # Use the real jose state so issue/decode agree (see _make_token note).
+        # Use the real JWT-lib state so issue/decode agree (see _make_token note).
         token = auth_mod._make_access_token(7, "beta@t.in", "free", "jti-beta")
         fake_user = {"id": 7, "email": "beta@t.in", "tier": "free", "is_active": 1}
         with (

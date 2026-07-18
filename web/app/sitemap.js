@@ -11,7 +11,10 @@ export const revalidate = 86400;
 
 async function fetchAllBikes() {
   try {
-    const res = await fetch(`${API_BASE}/api/bikes?limit=500`, {
+    // limit=2000 is the simulator client's full-catalog convention (API caps
+    // le=5000). limit=500 silently dropped 41 of the 541 bike pages once the
+    // catalog outgrew it — always keep this ceiling far above the catalog.
+    const res = await fetch(`${API_BASE}/api/bikes?limit=2000`, {
       next: { revalidate: 86400 },
     });
     if (!res.ok) throw new Error(`Sitemap bike fetch: ${res.status}`);
@@ -21,7 +24,12 @@ async function fetchAllBikes() {
     if (process.env.NODE_ENV !== "production") {
       console.warn("[sitemap] API unreachable, using ID range fallback:", err);
     }
-    return Array.from({ length: 310 }, (_, i) => ({ id: i + 1 }));
+    // Static ceiling for the API-unreachable build-time fallback. There is no
+    // way to derive the live count here (the API is exactly what just failed),
+    // so this number can only go stale — it sat at 310 from the 310-bike era
+    // while the catalog grew to 541. Keep it a GENEROUS ceiling (a few phantom
+    // high-IDs in the sitemap are harmless; missing real bike pages is not).
+    return Array.from({ length: 600 }, (_, i) => ({ id: i + 1 }));
   }
 }
 

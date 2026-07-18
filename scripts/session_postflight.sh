@@ -4,6 +4,8 @@
 #
 # What it does:
 #   1. Re-verify K5/R1/Hayabusa baselines (catch regressions before push).
+#   1.5. Bike-suggest smoke test against prod (INBOX:79) — non-fatal, gated
+#      on /api/health ok; ALERTs to DISPATCH_OUTBOX.md if the form is broken.
 #   2. Run a focused-test subset (scraper / validation / two_stroke /
 #      compatibility / submodel_kaizen / power_boost_regression).
 #   3. Stage explicit-list of files (NEVER `git add -A`).
@@ -42,10 +44,6 @@ readonly DEPLOY_WAIT_SECONDS=180   # max wait for Render to redeploy
 readonly DEPLOY_POLL_SECONDS=15
 readonly BASELINE_TOLERANCE_S=0.005
 
-readonly TARGET_K5=10.0334
-readonly TARGET_R1=10.2859
-readonly TARGET_BUSA=10.4712
-
 log()   { printf "\033[36m[postflight]\033[0m %s\n" "$*"; }
 warn()  { printf "\033[33m[postflight WARN]\033[0m %s\n" "$*" >&2; }
 fatal() { printf "\033[31m[postflight FATAL]\033[0m %s\n" "$*" >&2; exit "${2:-1}"; }
@@ -80,26 +78,100 @@ log "starting postflight from ${MQ_WORKDIR}/repo"
 log "HEAD: $(git log -1 --format='%h %s')"
 
 # ─── 1. Baseline regression (catch physics drift before push) ────────────
+# Delegates to the canonical guard (scripts/check_baselines.py) so the pinned
+# targets live in exactly ONE place. This script previously carried its own
+# inline copy of the pins, which went stale at the July-13 physics epoch
+# (still 10.0334/10.2859/10.4712 vs the current 9.9331/10.1436/10.3633) and
+# would have hard-failed every postflight run at step 1.
 verify_baselines() {
-  log "re-verifying K5/R1/Hayabusa baselines..."
-  python3 -c "
-import sys, motoquant
-from motoquant import MotoQuantEngine
-TOL = ${BASELINE_TOLERANCE_S}
-fails = []
-for name, cfg, target in [
-    ('K5', motoquant.gsxr1000_k5(), ${TARGET_K5}),
-    ('R1', motoquant.yzfr1_4c8(), ${TARGET_R1}),
-    ('Busa', motoquant.hayabusa_gen1(), ${TARGET_BUSA}),
-]:
-    et = MotoQuantEngine(cfg).run().time_quarter
-    delta = et - target
-    s = 'PASS' if abs(delta) < TOL else 'FAIL'
-    print(f'  {name:6s} sim={et:.4f}s target={target:.4f}s delta={delta:+.4f}s {s}')
-    if s == 'FAIL': fails.append(name)
-sys.exit(1 if fails else 0)
-" || fatal "baseline regression FAILED — refusing to push" 2
+  log "re-verifying K5/R1/Hayabusa baselines (scripts/check_baselines.py)..."
+  python3 scripts/check_baselines.py --tol "${BASELINE_TOLERANCE_S}" \
+    || fatal "baseline regression FAILED — refusing to push" 2
   log "baselines: ALL PASS"
+}
+
+# ─── 1.5. Bike-suggest smoke test (INBOX:79) ─────────────────────────────
+# The bike_suggestions table has sat empty since launch; without a synthetic
+# probe, "no users" and "form is broken" are indistinguishable. Steps:
+#   1. Gate on prod /api/health returning ok — skip cleanly on Render
+#      cold starts so a sleeping container never blocks postflight.
+#   2. POST /api/bikes/suggest with the fixed TEST-SMOKE payload.
+#   3. Verify HTTP 200/201 and that the response carries a row id.
+#   4. Best-effort cleanup via python+sqlite3 (no DELETE endpoint exists).
+#      NOTE: with MOTOQUANT_DB=/app/motoquant.db on Render, the row lives in
+#      the container's own copy of the DB — unreachable from here and wiped
+#      on the next image deploy. The local delete is therefore usually a
+#      no-op; the payload is stamped submitter_email=smoke@motoquant.in so
+#      triage runs filter synthetic rows either way.
+#   5. On any write-path failure, queue an ALERT to DISPATCH_OUTBOX.md.
+# Non-fatal by design — a broken suggest form must page us, not block a push.
+smoke_bike_suggest() {
+  log "bike-suggest smoke test (INBOX:79)..."
+  local api_base="${RENDER_HEALTH%/api/health}"
+
+  local health
+  health=$(curl -fsS --max-time 30 "${RENDER_HEALTH}" 2>/dev/null || echo "")
+  if [[ "${health}" != *'"status":"ok"'* ]]; then
+    log "  /api/health not ok — skipping smoke test (Render cold start?)"
+    return 0
+  fi
+
+  local body_file http_code
+  body_file=$(mktemp /tmp/mq-suggest-smoke.XXXXXX)
+  http_code=$(curl -sS --max-time 60 -o "${body_file}" -w '%{http_code}' \
+      -H 'Content-Type: application/json' \
+      -d '{"make":"TEST-SMOKE","model":"postflight-check","year":2026,"submitter_email":"smoke@motoquant.in"}' \
+      "${api_base}/api/bikes/suggest" 2>/dev/null || echo "000")
+
+  local suggestion_id=""
+  if [[ "${http_code}" == "200" || "${http_code}" == "201" ]]; then
+    suggestion_id=$(python3 -c "
+import json, sys
+try:
+    d = json.load(open('${body_file}'))
+    sid = d.get('id')
+    print(sid if isinstance(sid, int) and sid > 0 else '')
+except Exception:
+    print('')
+" 2>/dev/null || echo "")
+  fi
+  rm -f "${body_file}"
+
+  if [[ -z "${suggestion_id}" ]]; then
+    warn "bike-suggest smoke FAILED (http=${http_code}, no row id in response)"
+    _queue_alert "Bike-suggest smoke test FAILED — POST /api/bikes/suggest returned http=${http_code} with no row id. The suggestion form may be broken in prod (INBOX:79)."
+    return 0
+  fi
+  log "  suggest write path ok — row id=${suggestion_id} (http ${http_code})"
+
+  # Cleanup — delete only an exact smoke-row match (see header note on why
+  # this is usually a no-op against the local DB).
+  python3 - "${suggestion_id}" <<'PYEOF' || warn "  smoke-row cleanup errored (non-fatal)"
+import os
+import sqlite3
+import sys
+
+sid = int(sys.argv[1])
+db = os.environ.get("MOTOQUANT_DB", "motoquant.db")
+conn = sqlite3.connect(db)
+try:
+    row = conn.execute(
+        "SELECT id FROM bike_suggestions WHERE id=? AND make='TEST-SMOKE' "
+        "AND submitter_email='smoke@motoquant.in'",
+        (sid,),
+    ).fetchone()
+    if row is None:
+        print(
+            f"  no local smoke row id={sid} (prod row is container-local; "
+            "wiped on next deploy, filtered by smoke@motoquant.in)"
+        )
+    else:
+        conn.execute("DELETE FROM bike_suggestions WHERE id=?", (sid,))
+        conn.commit()
+        print(f"  deleted local smoke row id={sid}")
+finally:
+    conn.close()
+PYEOF
 }
 
 # ─── 2. Focused test subset ──────────────────────────────────────────────
@@ -374,6 +446,7 @@ main() {
   trap 'release_mutex' EXIT
 
   verify_baselines
+  smoke_bike_suggest
   run_focused_tests
   headline_sync_gate
   stamp_status_timestamps

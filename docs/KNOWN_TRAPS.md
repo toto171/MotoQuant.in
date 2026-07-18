@@ -87,9 +87,10 @@ routes.)
 ### T13 — `cur.lastrowid == 0` misreads an ignored INSERT
 After `INSERT OR IGNORE`, a fresh sqlite3 cursor's `lastrowid` is not reliably
 `0` when the row was ignored — prefer `cur.rowcount == 0` as the "was ignored"
-signal. This is import/seed-path code (`bike_repo`/`venue_repo`/`tire_repo`);
-change it carefully, it's guarded by idempotency tests. (Deferred, still open —
-see `reports/session_2026_07_06_allnighter_review.md`.)
+signal. This is import/seed-path code; change it carefully, it's guarded by
+idempotency tests. (`tire_repo` was fixed July 6; `bike_repo`/`venue_repo`
+remained open and are in scope for the 2026-07-17 orchestrated run — see
+`reports/SCOPE_2026_07_17_next_orchestrated_run.md`.)
 
 ### T14 — One shared SQLite connection across request + job threads
 `api.py` keeps a module-level `sqlite3` connection (`check_same_thread=False`)
@@ -98,3 +99,33 @@ on the single-worker Render deploy, but concurrent **writes** (save-run, suggest
 usage metering, auth session, subscription upsert) can interleave. This is the
 #1 thing to fix before scaling to multiple workers — a per-thread/pooled
 connection. (Deferred; documented in the roadmap.)
+
+### T15 — Every config serialization path must round-trip `category_tag` (and any new top-level `BikeConfig` field)
+Hit TWICE. July 2: the DB bridge dropped `category_tag` on the round-trip, so
+44 bikes silently ran a different cluster profile on `/api/simulate` than the
+sweep. July 13: `config_io` save/load dropped it AGAIN in the file-based twin
+of the same bug — loaded bikes silently ran the `unknown` profile. The rule: a
+new top-level `BikeConfig` field is not "wired" until EVERY serializer (DB
+bridge, `config_io`, API DTOs) carries it. The gate: a round-trip test that
+recursively diffs the full config (including the new field) on every path —
+add it in the same session the field lands.
+
+### T16 — Enum-ish string fields validate at construction or silently take a wrong branch
+`boost_type` accepted any unknown string until July 13: the forced-induction
+torque multiplier fell through to ×1.0 (zero boost) while the model still
+applied the ×0.97 boosted-DA floor — a pure penalty masquerading as a turbo,
+with no warning anywhere. The rule: any string field that selects a physics
+or logic branch must raise at construction on unknown values, and the API must
+return a 422 naming the offending part/field — never default silently. The
+gate: a test that constructs with a bogus value and asserts the raise.
+
+### T17 — Every new idempotent DB patch script joins the documented reseed chain the same session
+Third occurrence July 13: `patch_2026_07_13_scrape_data.py` (282 reprices,
+discontinued flags, tire-availability flags) was written, run, and proven
+idempotent — but NOT appended to the documented reseed chain, so a fresh
+reseed would silently drop all of it (real data loss, invisible until a
+price/tire diff). Same shape as the seed-source resurrection closed July 4
+(A3-15) and the July-6 patch trio. The rule: the session that lands a
+`scripts/patch_*.py` also updates the reseed chain in `CLAUDE.md` CURRENT
+STATE (and anywhere else the chain is written out). The gate: re-prove the
+FULL chain idempotent (×2) whenever a script is added.

@@ -171,8 +171,10 @@ class BikeRepository:
         )
         self._conn.commit()
 
-        if cur.lastrowid == 0:
+        if cur.rowcount == 0:
             # Already existed (UNIQUE constraint on manufacturer+model+code+year hit).
+            # NB: rowcount is 0 for an ignored INSERT OR IGNORE; lastrowid is NOT — it
+            # keeps the previous successful insert's rowid, so testing it misfires.
             # Try strict 4-key match first (matches the UNIQUE constraint exactly).
             row = self._conn.execute(
                 """SELECT id FROM bike_models

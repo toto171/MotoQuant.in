@@ -39,7 +39,7 @@ import SimulatorWidget from '../components/SimulatorWidget';
 import ScoreboardDigits, { ScoreboardCounter } from '../components/ScoreboardDigits';
 
 // ─── Validation: only the four clusters where the data is good ────────
-// Per the 13 July 2026 weighted sweep (reports/acc_final_2026_07_13.json,
+// Per the 17 July 2026 weighted sweep (reports/acc_final_2026_07_17.json,
 // cylinder-aware 12-cluster taxonomy — post physics-recalibration epoch +
 // benchmark-corpus expansion). Small-cc / 2T / cruiser clusters are
 // bounded by benchmark data quality (DERIVED 0-100×1.6 estimates with
@@ -47,14 +47,14 @@ import ScoreboardDigits, { ScoreboardCounter } from '../components/ScoreboardDig
 // /docs/validation with their full caveat — not on the landing page.
 const HONEST_CLUSTERS = [
   { name: 'Litre Sport ≥195hp',   bias: 0.0377,  mae: 0.1471, n: 30 },
-  { name: 'Litre Sport 600-1000', bias: 0.0023,  mae: 0.1772, n: 72 },
-  { name: 'Sport Twin 600-1300',  bias: -0.0003, mae: 0.2561, n: 48 },
-  { name: 'All clusters · weighted overall', bias: 0.0166, mae: 0.2533, n: 277 },
+  { name: 'Litre Sport 600-1000', bias: 0.0005,  mae: 0.1753, n: 72 },
+  { name: 'Sport Twin 600-1300',  bias: 0.0036,  mae: 0.2566, n: 48 },
+  { name: 'All clusters · weighted overall', bias: -0.0047, mae: 0.2721, n: 277 },
 ];
 
 // ─── Top-10 most accurate bikes ───────────────────────────────────────
-// MUST equal the docs/validation TOP10 (13 July 2026 sweep,
-// reports/acc_final_2026_07_13.json — 10 smallest |Δ| across the matched
+// MUST equal the docs/validation TOP10 (17 July 2026 sweep,
+// reports/acc_final_2026_07_17.json — 10 smallest |Δ| across the matched
 // corpus, mean ±0.009s; rank 3 is a DERIVED estimate, flagged in Source).
 // Sync both together.
 const TOP10 = [
@@ -87,11 +87,11 @@ const BASELINES = [
   { name: 'Hayabusa Gen1',  et: '10.3633', hp: '197 hp', year: '1999' },
 ];
 
-// ─── Aggregate accuracy tiles (13 July 2026 sweep) ────────────────────
+// ─── Aggregate accuracy tiles (17 July 2026 sweep) ────────────────────
 const ACCURACY_TILES = [
   { num: '250',     label: 'Published benchmarks' },
-  { num: '74',      label: 'Within ±0.10s' },
-  { num: '137',     label: 'Within ±0.20s' },
+  { num: '75',      label: 'Within ±0.10s' },
+  { num: '138',     label: 'Within ±0.20s' },
   { num: '±0.009s', label: 'Top 10 mean error' },
 ];
 
@@ -159,7 +159,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'How accurate is the quarter-mile prediction?',
-    a: 'MotoQuant Pro is validated against published magazine tests and Dragy runs: Suzuki GSX-R1000 K5 simulates 9.93s against a real 9.97s; Yamaha YZF-R1 simulates 10.14s against 10.3s; Suzuki Hayabusa simulates 10.36s (real range 10.1–10.7s). The July 2026 sweep covers 250 source-quality-weighted benchmarks (277 matched to catalog bikes) with a weighted mean bias of +0.017s; 137 of 277 land within ±0.20s of the published timeslip.',
+    a: 'MotoQuant Pro is validated against published magazine tests and Dragy runs: Suzuki GSX-R1000 K5 simulates 9.93s against a real 9.97s; Yamaha YZF-R1 simulates 10.14s against 10.3s; Suzuki Hayabusa simulates 10.36s (real range 10.1–10.7s). The July 2026 sweep covers 250 source-quality-weighted benchmarks (277 matched to catalog bikes) with a weighted mean bias of −0.005s; 138 of 277 land within ±0.20s of the published timeslip.',
   },
   {
     q: 'Which bikes are supported?',
@@ -738,7 +738,7 @@ function HomePageInner() {
               </div>
 
               <div className="mt-6 font-mono text-xs text-white/40 tabular-nums">
-                RK4 · 1ms · 15 sub-models · +0.017s mean bias across 250 benchmarks
+                RK4 · 1ms · 15 sub-models · −0.005s mean bias across 250 benchmarks
               </div>
             </div>
 

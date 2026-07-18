@@ -671,6 +671,54 @@ PATTERNS = [
         "baseline_busa",
         "blog Hayabusa baseline",
     ),
+    # ── Baseline free-prose forms (added 2026-07-17) — "…pinned/preserved in
+    #    the simulator at NN.NNNN s" and "(around NN.NN s sim …)" phrasings.
+    #    The H2 SX blog quoted the retired Hayabusa pin as "Gen 1 baseline
+    #    preserved in the simulator at 10.4712 s" and survived the gate
+    #    because the structured patterns above require the literal
+    #    "Gen1"/"4C8" tokens. Anchored on the three reference bikes; [^.]*?
+    #    keeps each match inside one sentence (and refuses to hop across an
+    #    earlier decimal number); 4-decimal figures are the pin tell for the
+    #    "at" form, while 2-decimal "around" claims that honestly round the
+    #    current pin pass via the existing 0.005 float tolerance. Era-marked
+    #    lines stay exempt (HISTORICAL_LINE_MARKER, handled in _scan_file /
+    #    _patch_file).
+    (
+        "web/app/blog/*/page.js",
+        r"K5\b[^.]*?\bat\s+([0-9]+\.[0-9]{4})\s*s",
+        "baseline_k5",
+        "blog K5 'at N.NNNN s' prose baseline",
+    ),
+    (
+        "web/app/blog/*/page.js",
+        r"\bR1\b[^.]*?\bat\s+([0-9]+\.[0-9]{4})\s*s",
+        "baseline_r1",
+        "blog R1 'at N.NNNN s' prose baseline",
+    ),
+    (
+        "web/app/blog/*/page.js",
+        r"Hayabusa\b[^.]*?\bat\s+([0-9]+\.[0-9]{4})\s*s",
+        "baseline_busa",
+        "blog Hayabusa 'at N.NNNN s' prose baseline",
+    ),
+    (
+        "web/app/blog/*/page.js",
+        r"K5\b[^.]*?\baround\s+([0-9]+\.[0-9]{2,4})\s*s\s+sim\b",
+        "baseline_k5",
+        "blog K5 'around N.NN s sim' prose baseline",
+    ),
+    (
+        "web/app/blog/*/page.js",
+        r"\bR1\b[^.]*?\baround\s+([0-9]+\.[0-9]{2,4})\s*s\s+sim\b",
+        "baseline_r1",
+        "blog R1 'around N.NN s sim' prose baseline",
+    ),
+    (
+        "web/app/blog/*/page.js",
+        r"Hayabusa\b[^.]*?\baround\s+([0-9]+\.[0-9]{2,4})\s*s\s+sim\b",
+        "baseline_busa",
+        "blog Hayabusa 'around N.NN s sim' prose baseline",
+    ),
 ]
 
 
