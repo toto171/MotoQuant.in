@@ -488,6 +488,17 @@ class MotoQuantEngine:
         _top_gear_idx = cfg.drivetrain.num_gears - 1
         _shift_time_s = cfg.drivetrain.total_shift_time_ms / 1000.0
         _cd_a_floor = self._cd_a_floor
+        # Factory speed limiter (July 17, 2026): converted to m/s once, out of
+        # the hot loop. None (and a defensive 0/negative) = unrestricted — the
+        # unlimited path pays only an `is not None` check per clamp site and
+        # stays BIT-IDENTICAL (gated by scripts/check_baselines.py +
+        # tests/test_speed_limiter.py).
+        _limiter_raw = cfg.drivetrain.speed_limiter_kmh
+        _v_limiter = (
+            _limiter_raw / 3.6
+            if _limiter_raw is not None and _limiter_raw > 0
+            else None
+        )
         # Raw torque-curve cache: in the slip branch, engine_torque was
         # recomputed with byte-identical args (rpm == omega_e*RADS_TO_RPM
         # while the clutch is unlocked); reuse the value instead.
@@ -827,6 +838,14 @@ class MotoQuantEngine:
             # gates the RK4 stage clamps below.
             if not clutch_locked:
                 a_net = max(0.0, a_net)
+            # ── Factory speed limiter ──
+            # At/above the limiter speed the ECU cuts drive: net acceleration
+            # is clamped to <= 0 so v holds at the limiter (raw a_net > 0 →
+            # exactly 0), while genuine deceleration above it (drag, shifts,
+            # downhill overshoot decay) stays untouched. The same gate is
+            # applied to the RK4 stages below at their stage velocities.
+            if _v_limiter is not None and v >= _v_limiter:
+                a_net = min(0.0, a_net)
 
             # ── Tire thermal update ──
             dT_tire = self.tire_thermal_rate(
@@ -877,6 +896,8 @@ class MotoQuantEngine:
             ) / m_eff
             if not clutch_locked:
                 k2 = max(0.0, k2)
+            if _v_limiter is not None and v_q1 >= _v_limiter:
+                k2 = min(0.0, k2)
             v_q2 = v + 0.5 * dt * k2
             vr_q = v_q2 + _v_wind
             k3 = (
@@ -884,6 +905,8 @@ class MotoQuantEngine:
             ) / m_eff
             if not clutch_locked:
                 k3 = max(0.0, k3)
+            if _v_limiter is not None and v_q2 >= _v_limiter:
+                k3 = min(0.0, k3)
             v_q3 = v + dt * k3
             vr_q = v_q3 + _v_wind
             k4 = (
@@ -891,6 +914,8 @@ class MotoQuantEngine:
             ) / m_eff
             if not clutch_locked:
                 k4 = max(0.0, k4)
+            if _v_limiter is not None and v_q3 >= _v_limiter:
+                k4 = min(0.0, k4)
             v_new = v + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
             # Position uses the velocity Simpsons-rule estimate
             x_new = x + (dt / 6.0) * (v + 2.0 * v_q1 + 2.0 * v_q2 + v_q3)

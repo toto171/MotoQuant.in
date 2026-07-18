@@ -68,6 +68,15 @@ class CategoryProfile:
     Default values reproduce the legacy pre-April-30 hard-coded behaviour
     when category_tag is unset / unknown — so adding category_tag to a
     BikeConfig is opt-in safe.
+
+    Tombstone (2026-07-17): six dead knobs DELETED — tuck_transition_time_s,
+    cd_ceiling, pacejka_C, load_sensitivity_k, engine_inertia_mult,
+    chain_efficiency_override. Zero consumers anywhere; profiles ASSIGNED
+    non-default values that nothing read (KNOWN_TRAPS T11 pattern). The
+    intended per-cluster values are recorded in
+    reports/session_2026_07_10_physics_foundations_review.md; wiring any of
+    them back is epoch-gated (ADR-0002). The same-named TireParams /
+    RiderDynamicsParams fields are LIVE and unrelated — do not confuse them.
     """
 
     name: str = CATEGORY_UNKNOWN
@@ -85,14 +94,7 @@ class CategoryProfile:
     # torque sweet-spot. 1.0 = clamp at peak; 0.0 = no clamp (legacy).
     launch_floor_factor: float = 0.0
 
-    # ── Aero / rider position ──────────────────────────────────────────
-    # Tuck transition time (s) — how fast rider gets into tuck after
-    # launch. Sport bikes ~1.5s, cruisers never tuck (~99s = effectively
-    # never), commuters intermediate.
-    tuck_transition_time_s: float = 2.0
-    # Cd ceiling — clamp on the imported aero.cd (catches catalog rows
-    # that were inadvertently filled with upright Cd values).
-    cd_ceiling: float | None = None
+    # ── Aero ───────────────────────────────────────────────────────────
     # Cd floor — minimum permissible aero.cd (catches malformed configs).
     # WIRED July 3, 2026: physics.run() clamps the rider-dynamic Cd*A at
     # cd_floor × frontal_area each step. 0.25 is below every catalog Cd
@@ -113,24 +115,10 @@ class CategoryProfile:
     # PRESERVES each bike's relative rubber (unlike the hard override).
     # 1.0 = bit-identical no-op.
     mu_peak_scale: float = 1.0
-    # Pacejka shape factor C — sport tires 1.65 (peakier), commuter
-    # 1.45 (rounder peak, more forgiving but lower max).
-    pacejka_C: float | None = None
-    # Load sensitivity k — sport radials 3e-5 1/N, commuter bias-ply
-    # ~6e-5 1/N (more grip loss with load).
-    load_sensitivity_k: float | None = None
 
-    # ── Engine inertia + parasitic ─────────────────────────────────────
-    # Multiplier on the displacement-derived engine inertia. 1.0 default;
-    # cruisers 1.35 (heavy flywheel), 2T 0.60 (no valvetrain).
-    engine_inertia_mult: float = 1.0
+    # ── Parasitic losses ───────────────────────────────────────────────
     # Multiplier on parasitic (alternator + oil pump + valvetrain).
     parasitic_mult: float = 1.0
-
-    # ── Drivetrain efficiency ──────────────────────────────────────────
-    # Override chain efficiency when None. K5 default 0.97; small-cc
-    # bikes with thin chains/sprockets are around 0.94-0.95.
-    chain_efficiency_override: float | None = None
 
     # ── Idle / launch RPM tuning ───────────────────────────────────────
     # Launch RPM as fraction of redline. 0.55 = K5, 0.70 = small-cc
@@ -164,8 +152,6 @@ _PROFILES: dict[str, CategoryProfile] = {
         over_clutch_factor=0.0,
         max_engine_decel_rads2=0.0,
         launch_floor_factor=0.0,
-        tuck_transition_time_s=1.5,
-        cd_ceiling=0.40,
         mu_peak_override=None,  # use importer default (sport ≥600cc → 1.40)
         # July 13, 2026 epoch recalibration: the iterated weight-
         # transfer→traction-cap fix removed the inflated rear-load feed
@@ -174,8 +160,6 @@ _PROFILES: dict[str, CategoryProfile] = {
         # corpus while preserving each bike's relative rubber
         # (scripts/tune_cluster_knobs.py grids, session 2026-07-13).
         mu_peak_scale=1.08,
-        pacejka_C=1.65,
-        engine_inertia_mult=1.0,
         parasitic_mult=1.0,
         notes="Litre superbikes ≥195hp. Best-data cluster.",
     ),
@@ -191,10 +175,6 @@ _PROFILES: dict[str, CategoryProfile] = {
         over_clutch_factor=0.0,
         max_engine_decel_rads2=0.0,
         launch_floor_factor=0.0,
-        tuck_transition_time_s=1.6,
-        cd_ceiling=0.42,
-        pacejka_C=1.65,
-        engine_inertia_mult=1.0,
         parasitic_mult=1.0,
         notes="600-1000cc sport (R6, CBR600RR, ZX-6R, GSX-R 600 K6).",
     ),
@@ -213,8 +193,6 @@ _PROFILES: dict[str, CategoryProfile] = {
         over_clutch_factor=0.0,
         max_engine_decel_rads2=0.0,
         launch_floor_factor=0.0,
-        tuck_transition_time_s=1.6,
-        cd_ceiling=0.42,
         # July 6, 2026 calibration: mu_peak_override is the ONE live knob on
         # this cluster (parasitic_mult bit-identical — the benchmarked twins
         # carry at-wheel dyno curves; cd_floor near-dead; launch_rpm_factor
@@ -231,8 +209,6 @@ _PROFILES: dict[str, CategoryProfile] = {
         # corpus while preserving each bike's relative rubber
         # (scripts/tune_cluster_knobs.py grids, session 2026-07-13).
         mu_peak_scale=1.085,
-        pacejka_C=1.60,
-        engine_inertia_mult=1.0,
         parasitic_mult=1.0,
         notes="Sport/naked twins 600-1300cc (848 EVO, RS 660, MT-07, 1125R).",
     ),
@@ -265,12 +241,7 @@ _PROFILES: dict[str, CategoryProfile] = {
         over_clutch_factor=0.30,
         max_engine_decel_rads2=2800.0,
         launch_floor_factor=1.0,
-        tuck_transition_time_s=1.8,
-        cd_ceiling=0.50,
-        pacejka_C=1.60,
-        engine_inertia_mult=1.0,
         parasitic_mult=1.0,
-        chain_efficiency_override=0.96,
         notes="Sub-500cc I4 screamers (ZX-4RR, ZX-25R).",
     ),
     CATEGORY_SINGLE_300_500: CategoryProfile(
@@ -285,8 +256,6 @@ _PROFILES: dict[str, CategoryProfile] = {
         over_clutch_factor=0.30,
         max_engine_decel_rads2=50.0,
         launch_floor_factor=1.0,
-        tuck_transition_time_s=2.0,
-        cd_ceiling=0.55,
         # July 6, 2026 calibration: after the cylinder-aware synthetic-curve
         # tail fix (singles 30-60hp keep 1.00, twins keep 1.05 — defaults.py)
         # the cluster bias sat at -0.132. Launch knobs are near-dead on these
@@ -296,10 +265,7 @@ _PROFILES: dict[str, CategoryProfile] = {
         # assigns 300-600cc sport bikes. Grid 1.08-1.12: w|d| 0.488 -> 0.484,
         # w_bias -0.132 -> -0.046 at 1.10.
         mu_peak_override=1.18,
-        pacejka_C=1.50,
-        engine_inertia_mult=1.0,
         parasitic_mult=1.0,
-        chain_efficiency_override=0.95,
         notes="300-500cc singles (Duke 390, RC 390, Classic 350, G310).",
     ),
     CATEGORY_MID_TWIN_500_700: CategoryProfile(
@@ -329,12 +295,7 @@ _PROFILES: dict[str, CategoryProfile] = {
         # tightens with max worst-case at +0.34s (GSX-R 600 K6, was +0.48s).
         max_engine_decel_rads2=600.0,
         launch_floor_factor=1.0,
-        tuck_transition_time_s=1.8,
-        cd_ceiling=0.50,
-        pacejka_C=1.55,
-        engine_inertia_mult=1.0,
         parasitic_mult=1.0,
-        chain_efficiency_override=0.96,
         notes="500-700cc parallel/V twins (SV650, Z650, MT-07).",
     ),
     CATEGORY_MID_TWIN_300_500: CategoryProfile(
@@ -360,12 +321,7 @@ _PROFILES: dict[str, CategoryProfile] = {
         # 150 with bias +0.196 -> +0.124.
         max_engine_decel_rads2=150.0,
         launch_floor_factor=1.0,
-        tuck_transition_time_s=2.0,
-        cd_ceiling=0.55,
-        pacejka_C=1.50,
-        engine_inertia_mult=1.0,
         parasitic_mult=1.0,
-        chain_efficiency_override=0.95,
         notes="300-500cc twins (Ninja 400, R3, MT-03, Duke 390).",
     ),
     CATEGORY_ENTRY_200_300: CategoryProfile(
@@ -381,13 +337,7 @@ _PROFILES: dict[str, CategoryProfile] = {
         # of dead. Weighted bias lands -0.015.
         max_engine_decel_rads2=40.0,
         launch_floor_factor=1.0,
-        tuck_transition_time_s=2.2,
-        cd_ceiling=0.55,
-        pacejka_C=1.45,
-        load_sensitivity_k=4e-5,
-        engine_inertia_mult=1.0,
         parasitic_mult=0.85,
-        chain_efficiency_override=0.95,
         launch_rpm_factor=None,  # use peak_torque_rpm (importer default)
         notes="200-300cc entry (Pulsar NS200/N250, FZ25, RC 390).",
     ),
@@ -406,13 +356,7 @@ _PROFILES: dict[str, CategoryProfile] = {
         # the NS200 (-1.14) for no pair gain. Baselines exact at every point.
         max_engine_decel_rads2=900.0,
         launch_floor_factor=1.0,
-        tuck_transition_time_s=2.5,
-        cd_ceiling=0.55,
-        pacejka_C=1.45,
-        load_sensitivity_k=4e-5,
-        engine_inertia_mult=1.0,
         parasitic_mult=0.85,
-        chain_efficiency_override=0.94,
         notes="150-200cc commuters (R15, Apache RTR 200, CB350RS).",
     ),
     CATEGORY_TWO_STROKE: CategoryProfile(
@@ -430,8 +374,8 @@ _PROFILES: dict[str, CategoryProfile] = {
         # Knob probe across 5-bike benchmark sub-cluster (NSR250R SP, RD350,
         # RD400 Daytona, RG500 Gamma, RS250) showed max_engine_decel_rads2
         # is the ONE live knob for the 2T cluster (over_clutch_factor,
-        # engine_inertia_mult, parasitic_mult, mu_peak_override, chain_eff
-        # all return identical bias/mae at every value). At 800, NSR250R
+        # parasitic_mult, mu_peak_override and the since-deleted inertia/
+        # chain-eff knobs all return identical bias/mae at every value). At 800, NSR250R
         # +1.410 and RD350 +1.054 dominated cluster mean|Δ|=0.683. Sweep
         # 800→2000 shows monotonic bias reduction; mae bottoms at decel=1500
         # (0.630, -53ms vs 0.683, crosses 50ms gate). Bias collapses
@@ -451,9 +395,6 @@ _PROFILES: dict[str, CategoryProfile] = {
         over_clutch_factor=0.55,
         max_engine_decel_rads2=1800.0,
         launch_floor_factor=1.0,
-        tuck_transition_time_s=2.0,
-        cd_ceiling=0.50,
-        pacejka_C=1.50,
         # 2T tires: vintage rubber (RD350, NSR250) are bias-ply with low
         # peak grip; modern 2T (KTM 300 EXC) more like 1.20.
         mu_peak_override=None,  # honor importer default (varies by year)
@@ -464,9 +405,7 @@ _PROFILES: dict[str, CategoryProfile] = {
         # corpus while preserving each bike's relative rubber
         # (scripts/tune_cluster_knobs.py grids, session 2026-07-13).
         mu_peak_scale=1.15,
-        engine_inertia_mult=0.60,  # half-stroke + lighter crank
         parasitic_mult=0.20,  # no valvetrain, premix oil pump only
-        chain_efficiency_override=0.95,
         notes="2-stroke (RD350, NSR250, RGV250, RX100, KTM 300 EXC).",
     ),
     CATEGORY_CRUISER_1300P: CategoryProfile(
@@ -501,11 +440,6 @@ _PROFILES: dict[str, CategoryProfile] = {
         over_clutch_factor=0.60,
         max_engine_decel_rads2=1100.0,
         launch_floor_factor=1.0,
-        tuck_transition_time_s=99.0,  # never tucks
-        cd_ceiling=1.10,  # cruisers stay upright
-        pacejka_C=1.50,
-        load_sensitivity_k=6e-5,  # heavier touring tires
-        engine_inertia_mult=1.0,  # already applied via cruiser k_cat in importer
         parasitic_mult=0.65,
         notes="≥1300cc cruisers + muscle (VMAX 1700, Rocket 3).",
     ),
@@ -541,10 +475,6 @@ _PROFILES: dict[str, CategoryProfile] = {
         over_clutch_factor=0.40,
         max_engine_decel_rads2=1000.0,
         launch_floor_factor=1.0,
-        tuck_transition_time_s=2.0,
-        cd_ceiling=0.95,
-        pacejka_C=1.55,
-        engine_inertia_mult=1.0,
         parasitic_mult=1.0,
         notes="Catch-all: ADV, touring, scooter, unknown.",
     ),
@@ -557,10 +487,6 @@ _PROFILES: dict[str, CategoryProfile] = {
         over_clutch_factor=0.0,  # legacy `peak_hp < 60` block in physics.py
         max_engine_decel_rads2=0.0,
         launch_floor_factor=0.0,  # legacy 0 = no clamp
-        tuck_transition_time_s=2.0,
-        cd_ceiling=None,
-        pacejka_C=None,
-        engine_inertia_mult=1.0,
         parasitic_mult=1.0,
         notes="Legacy default. Triggers in-physics.py legacy peak_hp gate.",
     ),

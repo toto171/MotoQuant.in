@@ -868,6 +868,11 @@ def _build_drivetrain_from_spec(
         chain_links=base.chain_links,
         primary_ratio=float(primary),
         chain_efficiency=chain_eff,
+        speed_limiter_kmh=(
+            float(spec.speed_limiter_kmh)
+            if spec.speed_limiter_kmh is not None
+            else None
+        ),
     )
 
 

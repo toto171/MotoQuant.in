@@ -65,6 +65,10 @@ class BikeSpec:
     rear_sprocket: int | None = None
     final_drive: str | None = None  # chain / shaft / belt
     chain_pitch: str | None = None  # 520 / 525 / 530
+    # Factory electronic top-speed limiter in km/h (299 for the gentleman's-
+    # agreement hyperbike fleet). None = unrestricted / unknown. Annotate ONLY
+    # when the published top-speed figure is credibly the limiter itself.
+    speed_limiter_kmh: float | None = None
 
     # ── Chassis / Mass ────────────────────────────────────────────────────
     dry_mass_kg: float | None = None

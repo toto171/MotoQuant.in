@@ -239,7 +239,6 @@ class TestProfileLookup:
         assert p.max_engine_decel_rads2 == 0.0
         assert p.launch_floor_factor == 0.0
         assert p.parasitic_mult == 1.0
-        assert p.engine_inertia_mult == 1.0
 
 
 class TestImporterAutoTags:

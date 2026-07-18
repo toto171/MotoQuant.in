@@ -66,6 +66,13 @@ BOUNDS = {
     "frontal_area_m2": (0.25, 0.90),
     "stroke_type": (2, 4),
     "tuned_rpm": (3000, 18000),
+    # Factory electronic top-speed limiter. Lower bound 120 covers restricted
+    # A2/learner-market variants; upper 340 is above every known street
+    # limiter (299 gentleman's agreement, H2's ~337 derestricted ceiling).
+    # Presence carries NO confidence penalty — it is a curated annotation,
+    # not a scraped physical spec (deliberately absent from score_spec's
+    # CRITICAL list).
+    "speed_limiter_kmh": (120, 340),
 }
 
 # HP per cc sanity range (naturally aspirated)

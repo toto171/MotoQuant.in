@@ -104,6 +104,34 @@ ACTIVE_MU_SCALES = {
     "small_i4_screamer": 1.30,
 }
 
+# July 17, 2026: the LIVE CategoryProfile knob inventory, pinned as an exact
+# set. The six dead knobs (tuck_transition_time_s, cd_ceiling, pacejka_C,
+# load_sensitivity_k, engine_inertia_mult, chain_efficiency_override) were
+# DELETED that day — zero consumers; intended values recorded in
+# reports/session_2026_07_10_physics_foundations_review.md; re-wiring any of
+# them is epoch-gated (ADR-0002). Adding a profile field — or resurrecting a
+# deleted one — must consciously update this set AND wire + liveness-test it.
+LIVE_PROFILE_KNOBS = {
+    "over_clutch_factor",
+    "max_engine_decel_rads2",
+    "launch_floor_factor",
+    "cd_floor",
+    "mu_peak_override",
+    "mu_peak_scale",
+    "parasitic_mult",
+    "launch_rpm_factor",
+}
+
+
+def test_profile_field_inventory_is_exact():
+    """CategoryProfile carries EXACTLY the live knobs plus name/notes —
+    no dead fields may accumulate again (KNOWN_TRAPS T11 pattern)."""
+    actual = {f.name for f in dataclasses.fields(cp.CategoryProfile)}
+    assert actual == LIVE_PROFILE_KNOBS | {"name", "notes"}, (
+        f"CategoryProfile field drift: unexpected {actual - LIVE_PROFILE_KNOBS - {'name', 'notes'}}, "
+        f"missing {(LIVE_PROFILE_KNOBS | {'name', 'notes'}) - actual}"
+    )
+
 
 def test_every_registered_profile_ships_expected_knob_values():
     """Guard: only the calibrated profiles listed in ACTIVE_MU_OVERRIDES /

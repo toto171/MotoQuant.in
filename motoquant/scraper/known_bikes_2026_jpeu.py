@@ -90,6 +90,10 @@ KAWASAKI_ZX12R_2000 = spec_from_dict(
         # vs those catalogue anchors
         "frontal_area_m2": 0.50,  # est: between ZX-14R (0.52) and
         # H2 (0.48) — big but low hyperbike
+        # 299 km/h limiter — the sources block above cites Cycle World's
+        # June-2000 road test: "top speed electronically limited 186 mph"
+        # (= 299.3 km/h); 2001+ models fall under the gentleman's agreement.
+        "speed_limiter_kmh": 299.0,
     },
     source_name="spec_sheet",
 )
@@ -893,6 +897,10 @@ BIMOTA_TESI_H2_2021 = spec_from_dict(
         # worse than the Ninja H2 (0.63)
         "frontal_area_m2": 0.47,  # est: hub-steer front is slimmer than
         # the H2's fork crown (0.48)
+        # 299 km/h limiter — the sources block above cites MCN's Tesi H2 Tera
+        # review (2025): "top speed shares the H2's electronic 299 km/h
+        # limiter".
+        "speed_limiter_kmh": 299.0,
     },
     source_name="spec_sheet",
 )
@@ -936,8 +944,13 @@ ET_BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     ("Yamaha", "VMAX 1200", 1985, 10.89, 207.2, "Cycle World 1985"),
     # Cycle World 2001 ZRX1200R instrumented test: 10.85 s @ 125.7 mph
     ("Kawasaki", "ZRX1200R", 2001, 10.85, 202.3, "Cycle World 2001"),
-    # MotoStatz aggregate (instrumented sources): 10.89 s @ 126 mph
-    ("Triumph", "Speed Triple 1050", 2005, 10.89, 202.8, "MotoStatz aggregate"),
+    # UPGRADED 2026-07-17 (scrape-consumption honesty batch): the scrape holds
+    # the underlying primary source — Sport Rider's instrumented 1050 test,
+    # 11.01 s @ 197.4 km/h — a genuinely different, higher-tier source than
+    # the MotoStatz aggregate (10.89 @ 202.8) this row previously cited.
+    # Magazine tier 0.7 (was aggregator 0.5). Label deliberately omits the
+    # "MotoStatz" token — sweep_lib's classifier would demote it to 0.5.
+    ("Triumph", "Speed Triple 1050", 2005, 11.01, 197.4, "Sport Rider 2005"),
     # MotoStatz aggregate (instrumented sources): 11.25 s @ 122 mph
     ("Triumph", "Street Triple 675", 2007, 11.25, 196.3, "MotoStatz aggregate"),
 ]

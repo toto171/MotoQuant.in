@@ -6,7 +6,7 @@ import StructuredData, { articleSchema } from '../../StructuredData';
 const SLUG = 'harley-nightster-rh975-quarter-mile-physics';
 const TITLE = 'Harley Nightster RH975: Revolution Max Quarter-Mile Physics';
 const DESCRIPTION =
-  'Harley-Davidson Nightster RH975 quarter-mile physics deep-dive. MotoQuant simulates the 975cc Revolution Max 975T V-twin at 12.45s; Cycle World clocked 11.99s at 110.4 mph. Honest breakdown of the gap — and why a 90 hp Harley keeps up with 600cc middleweights. Indian context included.';
+  'Harley-Davidson Nightster RH975 quarter-mile physics deep-dive. MotoQuant simulates the 975cc Revolution Max 975T V-twin at 12.38s; Cycle World clocked 11.99s at 110.4 mph. Honest breakdown of the gap — and why a 90 hp Harley keeps up with 600cc middleweights. Indian context included.';
 
 export const metadata = {
   title: 'Harley Nightster RH975 Quarter-Mile Physics — MotoQuant',
@@ -36,7 +36,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'Cycle World\'s 2022 instrumented test put the Harley-Davidson Nightster RH975 through the quarter mile in 11.99 seconds at 110.4 mph. That makes a stock Nightster quicker than a Triumph Street Triple 765 R on the drag strip — and within tenths of a Kawasaki Ninja 650. The Revolution Max 975T V-twin is not the sluggish cruiser motor most people assume it is. MotoQuant simulates the Nightster at 12.45 seconds, a 0.46-second gap from the Cycle World benchmark, which sits inside the cruiser cluster\'s documented bias band. Here is what the physics actually says about why a 90 hp belt-drive Harley runs an 11.x.',
+    text: 'Cycle World\'s 2022 instrumented test put the Harley-Davidson Nightster RH975 through the quarter mile in 11.99 seconds at 110.4 mph. That makes a stock Nightster quicker than a Triumph Street Triple 765 R on the drag strip — and within tenths of a Kawasaki Ninja 650. The Revolution Max 975T V-twin is not the sluggish cruiser motor most people assume it is. MotoQuant simulates the Nightster at 12.38 seconds, a 0.39-second gap from the Cycle World benchmark, which sits inside the cruiser cluster\'s documented bias band. Here is what the physics actually says about why a 90 hp belt-drive Harley runs an 11.x.',
   },
   {
     type: 'h2',
@@ -72,7 +72,7 @@ const CONTENT = [
       ['Cd', '0.88 (upright cruiser)', '0.72 (naked sport)', '0.80 (naked sport)'],
       ['Frontal area', '0.52 m²', '0.44 m²', '0.46 m²'],
       ['Cycle World / MCN ET', '11.99 s @ 110.4 mph', '10.9 s @ ~132 mph', '~13.4 s'],
-      ['MotoQuant sim ET', '12.45 s @ 184.7 km/h', '10.74 s @ 213 km/h', 'N/A in this post'],
+      ['MotoQuant sim ET', '12.38 s @ 181.8 km/h', '10.74 s @ 213 km/h', 'N/A in this post'],
     ],
   },
   {
@@ -81,23 +81,23 @@ const CONTENT = [
   },
   {
     type: 'h2',
-    text: 'Sim vs Cycle World: The 0.46-Second Gap',
+    text: 'Sim vs Cycle World: The 0.39-Second Gap',
   },
   {
     type: 'p',
-    text: 'MotoQuant simulates the stock Nightster RH975 at 12.450 seconds and 184.7 km/h (114.7 mph) trap. Cycle World clocked 11.99 seconds at 110.4 mph (177.6 km/h) in their 2022 instrumented test, run under California conditions. The gap is 0.46 seconds of ET and 7.1 km/h (4.3 mph) of trap speed.',
+    text: 'MotoQuant simulates the stock Nightster RH975 at 12.377 seconds and 181.8 km/h (113.0 mph) trap. Cycle World clocked 11.99 seconds at 110.4 mph (177.6 km/h) in their 2022 instrumented test, run under California conditions. The gap is 0.39 seconds of ET and 4.2 km/h (2.6 mph) of trap speed.',
   },
   {
     type: 'callout',
-    text: 'The trap speed inversion — MotoQuant simulates a higher trap speed (184.7 km/h) than Cycle World recorded (177.6 km/h) while also simulating a slower ET (12.45 s vs 11.99 s) — is a known signature of the cruiser cluster\'s bias pattern. It means the simulator is getting the bike to the 402 m mark on a slower trajectory overall, but is reaching a similar terminal velocity. The most likely cause: the launch and clutch engagement phase is more conservative in the model than Cycle World\'s instrumented rider achieved in their test. Cycle World tests are done with professional riders performing optimal launches. The simulator uses a stock launch-RPM profile without manual optimisation.',
+    text: 'The trap speed inversion — MotoQuant simulates a higher trap speed (181.8 km/h) than Cycle World recorded (177.6 km/h) while also simulating a slower ET (12.38 s vs 11.99 s) — is a known signature of the cruiser cluster\'s bias pattern. It means the simulator is getting the bike to the 402 m mark on a slower trajectory overall, but is reaching a similar terminal velocity. The most likely cause: the launch and clutch engagement phase is more conservative in the model than Cycle World\'s instrumented rider achieved in their test. Cycle World tests are done with professional riders performing optimal launches. The simulator uses a stock launch-RPM profile without manual optimisation.',
   },
   {
     type: 'p',
-    text: 'For context: the MotoQuant cruiser-1300+ cluster — which the Nightster sits adjacent to as a large V-twin — has a documented mean absolute error of 0.407 seconds and a positive bias of 0.407 seconds (simulator runs slower than reality). The Nightster\'s 0.46-second gap is within that range. This is not a physics error specific to the Nightster; it reflects the fundamental challenge of modelling the launch phase on heavy bikes with belt drives and tall final gearing.',
+    text: 'For context: the MotoQuant cruiser-1300+ cluster — which the Nightster sits adjacent to as a large V-twin — has a documented mean absolute error of 0.407 seconds and a positive bias of 0.407 seconds (simulator runs slower than reality). The Nightster\'s 0.39-second gap is within that range. This is not a physics error specific to the Nightster; it reflects the fundamental challenge of modelling the launch phase on heavy bikes with belt drives and tall final gearing.',
   },
   {
     type: 'p',
-    text: 'The full split breakdown from MotoQuant: 60-foot at 2.339 seconds, 330-foot at 5.589 seconds, 1/8-mile at 8.212 seconds and 153.7 km/h, 1,000-foot at 10.494 seconds. A real Nightster with an optimal launch typically runs the 60-foot in roughly 2.05-2.10 seconds, which explains most of the gap — the simulator\'s modelled clutch engagement is conservative, losing about 0.25 seconds in the first 60 feet.',
+    text: 'The full split breakdown from MotoQuant: 60-foot at 2.295 seconds, 330-foot at 5.498 seconds, 1/8-mile at 8.116 seconds and 152.2 km/h, 1,000-foot at 10.405 seconds. A real Nightster with an optimal launch typically runs the 60-foot in roughly 2.05-2.10 seconds, which explains roughly half of the gap — the simulator\'s modelled clutch engagement is conservative, losing about 0.2 seconds in the first 60 feet.',
   },
   {
     type: 'h2',
@@ -133,7 +133,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'In MotoQuant\'s split data, the Nightster uses all six gears by the time it crosses the quarter-mile. A well-set-up drag bike at this power level would ideally be in 3rd or 4th gear at the 402 m mark, maximising power delivery per gear. The Nightster\'s tall gearing forces it through the cassette, losing engine efficiency at each shift transition. This is the primary mechanical reason MotoQuant\'s sim ET is 0.46 seconds slower than the Cycle World benchmark — the model\'s launch RPM and clutch engagement are set conservatively, but the gearing analysis is correct.',
+    text: 'In MotoQuant\'s split data, the Nightster uses all six gears by the time it crosses the quarter-mile. A well-set-up drag bike at this power level would ideally be in 3rd or 4th gear at the 402 m mark, maximising power delivery per gear. The Nightster\'s tall gearing forces it through the cassette, losing engine efficiency at each shift transition. This is the primary mechanical reason MotoQuant\'s sim ET is 0.39 seconds slower than the Cycle World benchmark — the model\'s launch RPM and clutch engagement are set conservatively, but the gearing analysis is correct.',
   },
   {
     type: 'h2',
@@ -156,7 +156,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The cost-per-tenth numbers for the Nightster are substantially worse than for Indian commuter bikes or even most 600cc middleweights. This is not a failure of the parts — the ECU flash and exhaust are genuine improvements. It is a consequence of the Nightster\'s starting point: at 11.99-12.45 seconds stock, the absolute gains from bolt-on mods are smaller in percentage terms than on a 14-17 second commuter bike, and the parts are priced for the premium cruiser segment rather than the performance segment.',
+    text: 'The cost-per-tenth numbers for the Nightster are substantially worse than for Indian commuter bikes or even most 600cc middleweights. This is not a failure of the parts — the ECU flash and exhaust are genuine improvements. It is a consequence of the Nightster\'s starting point: at 11.99-12.38 seconds stock, the absolute gains from bolt-on mods are smaller in percentage terms than on a 14-17 second commuter bike, and the parts are priced for the premium cruiser segment rather than the performance segment.',
   },
   {
     type: 'p',
@@ -208,7 +208,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The MotoQuant sim result of 12.45 seconds is the physics prediction under conservative launch conditions and stock tune. The Cycle World 11.99 seconds is the instrumented benchmark with a professional rider performing optimal launches at sea-level California conditions. The 0.46-second gap is almost entirely accounted for by launch optimisation — the Nightster\'s belt drive and V-twin character make it tractable to ride aggressively from the line without significant wheel spin, so a competent rider can consistently improve on the sim\'s conservative launch model.',
+    text: 'The MotoQuant sim result of 12.38 seconds is the physics prediction under conservative launch conditions and stock tune. The Cycle World 11.99 seconds is the instrumented benchmark with a professional rider performing optimal launches at sea-level California conditions. The 0.39-second gap is almost entirely accounted for by launch optimisation — the Nightster\'s belt drive and V-twin character make it tractable to ride aggressively from the line without significant wheel spin, so a competent rider can consistently improve on the sim\'s conservative launch model.',
   },
   {
     type: 'p',
@@ -366,14 +366,14 @@ export default function PostPage() {
               <Link href="/blog/how-the-motoquant-physics-engine-works" className="text-brand-accent hover:text-brand-orange transition-colors">
                 How the MotoQuant Physics Engine Works
               </Link>{' '}
-              — the full methodology behind the 12.45 s prediction: clutch model, belt-drive efficiency, V-twin torque curve synthesis, and why the cruiser cluster has a +0.4 s bias.
+              — the full methodology behind the 12.38 s prediction: clutch model, belt-drive efficiency, V-twin torque curve synthesis, and why the cruiser cluster has a +0.4 s bias.
             </li>
             <li>
               ·{' '}
               <Link href="/blog/the-physics-of-a-perfect-launch" className="text-brand-accent hover:text-brand-orange transition-colors">
                 The Physics of a Perfect Launch
               </Link>{' '}
-              — most of the Nightster's 0.46 s gap to Cycle World's benchmark lives in the first 60 feet. Clutch engagement RPM, weight transfer, and slip ratio on a 212 kg V-twin.
+              — most of the Nightster's 0.39 s gap to Cycle World's benchmark lives in the first 60 feet. Clutch engagement RPM, weight transfer, and slip ratio on a 212 kg V-twin.
             </li>
             <li>
               ·{' '}
