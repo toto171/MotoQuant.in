@@ -76,7 +76,10 @@ Compare against: <prior report or benchmark>
 
 ---
 
-## INSTRUCTION — 2026-05-31 — wire bike-suggest smoke test into postflight
+## DONE — 2026-05-31 — wire bike-suggest smoke test into postflight
+
+### Result
+Implemented in the 2026-07-17 orchestrated run (Wave 3, INBOX:79 — a sibling agent in the same session is landing the postflight smoke test). See `reports/SCOPE_2026_07_17_next_orchestrated_run.md` §Wave3.
 [opportunistic]
 
 **Filed by:** customer-support agent (2026-05-31 triage)
@@ -147,6 +150,8 @@ Also update the ET from 10.50 → 10.56 to match the actual Cycle World cite. Co
 ## INSTRUCTION — 2026-05-25 — [urgent] fix BENCHMARKS matcher specificity bug
 [urgent]
 
+> **Status note (2026-07-17):** still OPEN — verified live in the 2026-07-17 scope pass and queued in the orchestrated-run work order (`reports/SCOPE_2026_07_17_next_orchestrated_run.md`); not yet implemented.
+
 **Filed by:** benchmark-import agent (fourth pass, 2026-05-25)
 **Blocking:** Cannot add an instrumented Kawasaki Ninja H2 SX 2018 benchmark (Cycle World 10.04s @ 144 mph, verified via WebFetch on `https://www.cycleworld.com/best-open-class-streetbike-2018-kawasaki-ninja-h2-sx-se/`) because the matcher in `scripts/sweep_with_clusters.py::run_sweep` and `scripts/validation_sweep.py::_model_match` binds the catalog row `"Ninja H2 SX (2018-2023)"` to the existing `"Ninja H2", 2015, 9.62` benchmark — tokens `{ninja, h2}` are a subset of `{ninja, h2, sx, ...}` so the less-specific benchmark matches first via dict iteration order.
 
@@ -161,7 +166,10 @@ Also update the ET from 10.50 → 10.56 to match the actual Cycle World cite. Co
 
 ---
 
-## INSTRUCTION — 2026-05-20 — research: verify entry_150_200 DERIVED benchmarks
+## DONE — 2026-05-20 — research: verify entry_150_200 DERIVED benchmarks
+
+### Result
+Folded into the 2026-07-17 orchestrated run's Wave-2 entry-cluster DERIVED research pass (together with the entry_200_300 twin, INBOX:688). See `reports/SCOPE_2026_07_17_next_orchestrated_run.md` §Wave2.
 [research]
 
 Context: physics-calibration agent (2026-05-20) found that the entry_150_200 cluster mean|Δ| of 1.483s is dominated by Apache RTR 200 4V (sim=19.3s vs bench=15.9s DERIVED) and Yamaha MT-15 V2 (sim=19.1s vs bench=15.8s DERIVED). Both benchmarks use the 0-100 x 1.6 DERIVED methodology (±0.7s uncertainty). The physics model appears correct — the instrumented R15 V4 (same 18.1hp, 155cc class) benchmarks at 17.62s (instrumented MotoStatz), consistent with sim predictions. The DERIVED benchmarks appear too optimistic for this power class.
@@ -207,7 +215,10 @@ add bike Aprilia Tuono V4 1100 Factory 2024
 investigate why ZX-25R sim trap is 5 km/h slow
 ```
 
-## INSTRUCTION — 2026-05-18 — [opportunistic] marketing-content blog post for whichever of {CFMoto 800NK, Yamaha MT-125, Yamaha XSR125} the parallel run does NOT pick tonight
+## STALE — 2026-05-18 — [opportunistic] marketing-content blog post for whichever of {CFMoto 800NK, Yamaha MT-125, Yamaha XSR125} the parallel run does NOT pick tonight
+
+### Result
+Railway-era content queue superseded by `data/seo_opportunities.json` (the live SEO priority list) and operator-directed content passes. Marked stale 2026-07-17.
 [opportunistic]
 
 **Context:** SEO agent fifth pass 2026-05-18 confirmed via WebSearch that all three of today's new catalog additions (CFMoto 800NK, Yamaha MT-125, Yamaha XSR125) have SERP gaps for quarter-mile ET data — top results are spec/dealer pages with empty ET cells on AccelerationTimes / FastestLaps / MotoStatz. The parallel marketing-content agent tonight is writing ONE blog post for one of the three (the agent prompt suggests CFMoto 800NK).
@@ -222,7 +233,10 @@ investigate why ZX-25R sim trap is 5 km/h slow
 
 **Expected deliverable:** 1-2 blog post(s) under `web/app/blog/`, sitemap updated, blog index updated, SEO opportunities priorities 21-23 marked `action: done`.
 
-## INSTRUCTION — 2026-05-17 — [urgent] Railway API offline: production 404 "Application not found"
+## STALE — 2026-05-17 — [urgent] Railway API offline: production 404 "Application not found"
+
+### Result
+Superseded by the May-31 Railway → Render migration (`docs/RENDER_MIGRATION.md`); Railway is abandoned (trial lapsed, no card). Marked stale 2026-07-17.
 [urgent] [blocking]
 
 **Detected by:** perf-monitor agent run 11, session 1779049840-773, 2026-05-17. Report: `reports/perf_monitor_2026-05-17.md` (Run 11 section). Timeseries: `data/perf_timeseries.json` row index 10 (run_index 11).
@@ -353,7 +367,10 @@ Source: user dispatch 2026-05-07 with WhatsApp screenshot showing 287 BIKES / 46
 
 ---
 
-## INSTRUCTION — 2026-05-07 — preflight: /sessions disk-guard
+## STALE — 2026-05-07 — preflight: /sessions disk-guard
+
+### Result
+The `/sessions` disk failure mode belongs to the paused WSL autonomous loop's sandbox (`AUTONOMOUS_PAUSED`, June 6). Marked stale 2026-07-17 — re-open only if the loop is un-paused.
 [opportunistic]
 
 Add `scripts/preflight_disk_guard.sh` invoked from `scripts/session_preflight.sh`.
@@ -368,7 +385,10 @@ mocks `df` output below threshold and asserts non-zero exit.
 
 ---
 
-## INSTRUCTION — 2026-05-07 — investigate: health-check side-channel via GH Actions
+## STALE — 2026-05-07 — investigate: health-check side-channel via GH Actions
+
+### Result
+Superseded: remote sessions reach Render directly, keep-alive is covered by Vercel `/api/wake` crons + in-app `keepwarm.py`, and the WSL loop that needed the side-channel is paused. GH Actions itself is DEAD since July 13 (minutes cap — see `reports/SCOPE_2026_07_17_next_orchestrated_run.md`), so a GH-cron side-channel would not even run. Marked stale 2026-07-17.
 [research]
 
 Context: 3/3 of the last daily sessions logged "Production health NOT VERIFIED —
@@ -427,7 +447,10 @@ Source: `reports/support_triage_2026-05-07.md`; promoted by `reports/self_review
 
 ---
 
-## INSTRUCTION — 2026-05-07 — bootstrap: analytics + apply S5 auth-DDL on prod DB
+## STALE — 2026-05-07 — bootstrap: analytics + apply S5 auth-DDL on prod DB
+
+### Result
+Superseded on both halves: the S5 auth DDL applies idempotently at startup via `users_repo`/`subscriptions_repo.ensure_tables()` (auth routers mounted June 7), and the analytics half is superseded by the PostHog client-capture + funnel-events work landing in the 2026-07-17 orchestrated run (Wave 3). Marked stale 2026-07-17.
 [opportunistic]
 
 This is the new top-1 standing priority (see CLAUDE.md "STANDING PRIORITIES" + `reports/product_priorities_2026-05-07.md`). Three sub-tasks, ship together:
@@ -442,7 +465,10 @@ Source: `reports/product_priorities_2026-05-07.md` (top-1).
 
 ---
 
-## INSTRUCTION — 2026-05-07 — research: bootstrap data/competitive_landscape.md
+## STALE — 2026-05-07 — research: bootstrap data/competitive_landscape.md
+
+### Result
+The competitive-intel agent + master-scheduler infrastructure this fed is paused (`AUTONOMOUS_PAUSED`); no weekly runs will diff against the baseline. Marked stale 2026-07-17 — fold into a future operator-directed research pass if still wanted.
 [research]
 
 Context: the `competitive-intel` agent's output file `data/competitive_landscape.md` does not exist yet (verified 2026-05-07). This makes `opportunity_weight` in the master scheduler dead-input and product-prioritisation cannot factor competitor moves into ranking.
@@ -460,7 +486,10 @@ Source: `reports/product_priorities_2026-05-07.md` (escalation: missing data).
 
 ---
 
-## INSTRUCTION — 2026-05-07 — research: widen scraper tire-format validator for Indian bias-ply notation
+## DONE — 2026-05-07 — research: widen scraper tire-format validator for Indian bias-ply notation
+
+### Result
+Landed July 4, 2026 (item A3-19): `motoquant/scraper/validator.py` `TIRE_SIZE_RE` now accepts Indian bias-ply dash notation (`100/80-17`, `90/90-18`) alongside radial notation — verified in-tree 2026-07-17 (validator.py ~lines 79-81).
 [research]
 
 Three consecutive autonomous catalog runs (May 4 Hero Xtreme 200S 4V, May 7 AM TVS Apache RTR 180, May 7 PM Hero Mavrick 440) hit cosmetic warnings from the scraper validator's tire-size regex. The current regex is hardcoded for ZR/R radial notation (`120/70ZR17`); Indian-market and small-cc commuter bikes commonly carry bias-ply notation like `100/80-17`, `90/90-17`, `110/70-17`, `150/60-17`. Each run produces 1-2 cosmetic warnings that drop the spec confidence score from ~0.85 to ~0.82 even though the spec itself is valid.
@@ -473,7 +502,10 @@ Source: `reports/catalog_expansion_2026-05-07_pm.md` + carry-forward from May 4.
 
 ---
 
-## INSTRUCTION — 2026-05-16 — [self-review] design notes for GH-Actions side-channel (read before implementing)
+## STALE — 2026-05-16 — [self-review] design notes for GH-Actions side-channel (read before implementing)
+
+### Result
+The GH-Actions heartbeat side-channel was never built and is now moot — see the STALE dispositions on the companion blocks (remote sessions + Vercel crons + paused WSL loop; GH Actions dead since July 13). Marked stale 2026-07-17.
 [urgent]
 
 **Attribution:** self-review M1 2026-05-16 follow-up Section A. Companion to the existing `[urgent]` INSTRUCTION below ("build GH-Actions health-check side-channel"). Read `reports/self_review_2026-05-16_followup.md` Section A in full before writing any YAML.
@@ -529,7 +561,10 @@ Source: `reports/self_review_2026-05-16_followup.md` Section B.2 + B.3.
 
 ---
 
-## INSTRUCTION — 2026-05-16 — [self-review] build GH-Actions health-check side-channel
+## STALE — 2026-05-16 — [self-review] build GH-Actions health-check side-channel
+
+### Result
+Never built; now moot: remote sessions reach Render directly, keep-alive is Vercel `/api/wake` crons + `keepwarm.py`, the WSL loop it watched is paused, and GH Actions is dead since July 13 (minutes cap). Marked stale 2026-07-17.
 [urgent]
 
 **Attribution:** self-review M1 2026-05-16 Finding 2.1 + the May 9-15 dark-window incident (zero commits for 7.5 days, no `## INCIDENT` block written because no observer existed).
@@ -549,7 +584,10 @@ A `[research]` instruction queued 2026-05-07 already proposed investigating this
 
 ---
 
-## INSTRUCTION — 2026-05-16 — [self-review] promote standing-priorities → queue_weight boost
+## STALE — 2026-05-16 — [self-review] promote standing-priorities → queue_weight boost
+
+### Result
+The master-scheduler/queue-weight system belongs to the paused WSL autonomous loop, and the CLAUDE.md STANDING PRIORITIES block it would parse was itself marked stale July 10. The live prioritized queue is `docs/ROADMAP.md`. Marked stale 2026-07-17.
 [opportunistic]
 
 **Attribution:** self-review M1 2026-05-16 Finding 2.4. The top-1 standing priority "bootstrap analytics + apply S5 auth-DDL" sits in INBOX tagged `[opportunistic]` (queue_weight = +10) for 9 days while being CLAUDE.md's #1 priority. Severity tag and CLAUDE.md priority disagree.
@@ -564,7 +602,10 @@ A `[research]` instruction queued 2026-05-07 already proposed investigating this
 
 ---
 
-## INSTRUCTION — 2026-05-16 — [self-review] fix postflight outbox truncation bug
+## STALE — 2026-05-16 — [self-review] fix postflight outbox truncation bug
+
+### Result
+Cosmetic bug in the paused WSL loop's postflight outbox embed; no data was ever lost (session logs + commits were always intact). Marked stale 2026-07-17 — re-open only if the loop is un-paused.
 [opportunistic]
 
 **Attribution:** self-review M1 2026-05-16 Finding 2.5. Multiple `## SESSION` blocks in DISPATCH_OUTBOX.md show `> ## Work performed` as the final line of the embedded session-log heredoc — content after the header is being eaten by the postflight script's quoting / heredoc handling.
@@ -577,7 +618,10 @@ A `[research]` instruction queued 2026-05-07 already proposed investigating this
 
 ---
 
-## INSTRUCTION — 2026-05-16 — [self-review] bootstrap motoquant.skill for Claude
+## STALE — 2026-05-16 — [self-review] bootstrap motoquant.skill for Claude
+
+### Result
+Superseded — the skill idea survives as a next-session headline in the 2026-07-17 scope report (`reports/SCOPE_2026_07_17_next_orchestrated_run.md` §3); this 2026-05-16 block (and its 2026-05-24 twin below) is not the live spec. Marked stale 2026-07-17.
 [opportunistic]
 
 **Attribution:** self-review M1 2026-05-16 Layer 3 + CLAUDE.md TOOLKIT REFERENCE "Adopt this quarter ★".
@@ -596,7 +640,10 @@ A `[research]` instruction queued 2026-05-07 already proposed investigating this
 
 ---
 
-## INSTRUCTION — 2026-05-16 — [self-review] add wrapper smoke-test in preflight
+## STALE — 2026-05-16 — [self-review] add wrapper smoke-test in preflight
+
+### Result
+The `run_autonomous_session.sh` wrapper this smoke-tests is part of the paused WSL loop (`AUTONOMOUS_PAUSED`). Marked stale 2026-07-17 — re-open only if the loop is un-paused.
 [opportunistic]
 
 **Attribution:** self-review M1 2026-05-16 Finding 2.1 root-cause prevention. After May 7 saw THREE wrapper regressions in one day (CRLF, stdin-redirect, MINGW path), the system shipped to production without a smoke-test for the wrapper itself. May 9-15 silence suggests at least one more wrapper-class regression occurred and went unnoticed.
@@ -615,7 +662,10 @@ Invoked from `scripts/session_preflight.sh` before mutex acquisition.
 
 ---
 
-## INSTRUCTION — 2026-05-17 — [self-review] META: 14 INSTRUCTIONs unprocessed — pick a remediation path
+## STALE — 2026-05-17 — [self-review] META: 14 INSTRUCTIONs unprocessed — pick a remediation path
+
+### Result
+The WSL autonomous-ops queue this META triages is paused (`AUTONOMOUS_PAUSED`, June 6); the prioritized queue is now `docs/ROADMAP.md` + operator-directed orchestrated runs (the 2026-07-17 sweep dispositioning this file is one). Path C was partially executed 2026-05-17 (see RESPONDED below). Marked stale 2026-07-17.
 [urgent]
 
 **Attribution:** self-review M3 2026-05-17 (`reports/self_review_2026-05-17.md` Layer 4 + Finding 3.1). Replaces issuing more individual INBOX items per the brief's "if dominant signal is M1/M2 queued items still unprocessed, write ONE meta-INSTRUCTION instead".
@@ -659,7 +709,10 @@ Backlog now: 13 pending (was 14). One down. Path A (build `inbox-implementer`) r
 
 ---
 
-## INSTRUCTION — 2026-05-16 — [self-review] add `inbox-implementer` agent (meta-fix for stalled kaizen queue)
+## STALE — 2026-05-16 — [self-review] add `inbox-implementer` agent (meta-fix for stalled kaizen queue)
+
+### Result
+The agent-scheduler infrastructure this would extend is paused (`AUTONOMOUS_PAUSED`); inbox consumption now happens in operator-directed orchestrated runs. Marked stale 2026-07-17.
 [urgent]
 
 **Attribution:** self-review M2 2026-05-16 (`reports/self_review_2026-05-16_m2.md` Layer 4 + capability-frontier sections). Last 14 days produced 7 `[self-review]`-tagged INSTRUCTIONS (INBOX:300, 322, 341, 361, 376, 389, 408) plus 6 carry-over from 2026-05-07 — none implemented. Root cause: the 14 agents in `scripts/scheduler_weights.json::agents` all *generate* work, none *consume* INBOX backlog. Toolkit star-list (CLAUDE.md TOOLKIT REFERENCE) has 6 of 8 items untouched 17 days after listing — same shape.
@@ -685,7 +738,10 @@ Backlog now: 13 pending (was 14). One down. Path A (build `inbox-implementer`) r
 
 ---
 
-## INSTRUCTION — 2026-05-20 — research: verify entry_200_300 DERIVED benchmarks
+## DONE — 2026-05-20 — research: verify entry_200_300 DERIVED benchmarks
+
+### Result
+Folded into the 2026-07-17 orchestrated run's Wave-2 entry-cluster DERIVED research pass (together with the entry_150_200 twin, INBOX:164). See `reports/SCOPE_2026_07_17_next_orchestrated_run.md` §Wave2.
 [research]
 
 Context: physics-calibration agent (2026-05-20, third pass) found that the entry_200_300 cluster mean|Δ| of 0.533s is dominated by Bajaj Pulsar N250 (sim=16.47s vs bench=15.45s DERIVED, Δ=+1.02) and Yamaha FZ25 (sim=16.93s vs bench=16.00s DERIVED, Δ=+0.93). 5 of 6 cluster benchmarks use the 0-100×1.6 DERIVED methodology (±0.7s uncertainty). The only verified benchmark (Kawasaki Ninja 300, FastestLaps 14.10s) is within +0.29s.
@@ -826,7 +882,10 @@ Source: `reports/self_review_2026-05-21.md` Finding 2.2.
 
 ---
 
-## INSTRUCTION — 2026-05-24 — [claude-feature-monitor] [opportunistic] package `motoquant.skill` using native Claude Skills system
+## STALE — 2026-05-24 — [claude-feature-monitor] [opportunistic] package `motoquant.skill` using native Claude Skills system
+
+### Result
+Same item as the 2026-05-16 bootstrap block above — superseded; motoquant.skill is a next-session headline per `reports/SCOPE_2026_07_17_next_orchestrated_run.md` §3. Marked stale 2026-07-17.
 [opportunistic]
 
 **Attribution:** `reports/claude_feature_scan_2026-05-24.md` (bootstrap baseline scan).
@@ -900,7 +959,10 @@ fi
 
 ---
 
-## INSTRUCTION — 2026-05-24 — [opportunistic] [kaizen] fix postflight deploy-alert suppression (40 dup alerts in 7 days)
+## STALE — 2026-05-24 — [opportunistic] [kaizen] fix postflight deploy-alert suppression (40 dup alerts in 7 days)
+
+### Result
+The dup-alert noise came from the paused WSL loop's postflight (`AUTONOMOUS_PAUSED`), and the underlying outage class ended with the May-31 Render migration. Marked stale 2026-07-17 — re-open only if the loop is un-paused.
 [opportunistic] [kaizen]
 
 **Detected by:** customer-support agent triage, session 1779647439-649, 2026-05-24. Report: `reports/support_triage_2026-05-24.md`.
@@ -930,7 +992,10 @@ fi
 
 > _Add new `## INSTRUCTION` blocks above this divider. Claude marks them `## DONE` once handled._
 
-## INSTRUCTION — 2026-05-25 — [opportunistic] blog: Harley-Davidson Nightster RH975 quarter-mile physics
+## DONE — 2026-05-25 — [opportunistic] blog: Harley-Davidson Nightster RH975 quarter-mile physics
+
+### Result
+The post exists at `web/app/blog/harley-nightster-rh975-quarter-mile-physics/` (verified in-tree 2026-07-17); the 2026-07-17 orchestrated run's Wave-2 pass is additionally correcting its corpus-vs-blog benchmark contradiction.
 
 Queued by: seo-keyword agent (2026-05-25 SEO audit pass, priority 50 in data/seo_opportunities.json).
 
@@ -968,7 +1033,10 @@ Write `/blog/harley-nightster-rh975-quarter-mile-physics` — physics breakdown 
 
 ---
 
-## INSTRUCTION — 2026-05-25 — [urgent] [needs-user] supervised ghost-row cleanup for bike_models
+## DONE — 2026-05-25 — [urgent] [needs-user] supervised ghost-row cleanup for bike_models
+
+### Result
+Resolved by the June-1 catalog de-dup session: `bike_models` purged 799 → 498 (301 phantom duplicates removed, FKs re-pointed, 0 sim_runs lost) and the import path made fully idempotent — `reports/bike_dedup_2026_06_01.md`. Baselines preserved exactly.
 
 **Attribution:** spawned by the DONE block above for INBOX:308. The 301 phantom rows that accumulated before today's code fix still exist in `motoquant.db`. The cleanup SQL proposed in the original INBOX:308 (`MIN(rowid)` per `(manufacturer_id, model_name)` group) is unsafe because `bike_configs.bike_model_id` FK references may already point at rows that the DELETE would remove.
 
@@ -1009,7 +1077,10 @@ fi
 
 ---
 
-## INSTRUCTION — 2026-05-25 — [self-review] [opportunistic] technical-debt-pass: add pytest-regressions golden-file contract
+## DONE — 2026-05-25 — [self-review] [opportunistic] technical-debt-pass: add pytest-regressions golden-file contract
+
+### Result
+Implemented in substance without the pytest-regressions dep: `tests/test_regression_snapshot.py` + golden data (June 13) fail CI on any physics drift across the full catalog, and `scripts/check_baselines.py` (PR #100) gates the three pinned reference ETs.
 [opportunistic]
 
 **Attribution:** self-review M6 2026-05-25, Layer 3. CLAUDE.md TOOLKIT REFERENCE ★ item "pytest-regressions" has been deferred 25 days. This is the highest-ROI capability-frontier move available.
@@ -1026,7 +1097,10 @@ fi
 
 ---
 
-## INSTRUCTION — 2026-05-26 — [self-review] [urgent] [needs-approval] fix master_scheduler.sh queue_bonus to honour [urgent] tag
+## STALE — 2026-05-26 — [self-review] [urgent] [needs-approval] fix master_scheduler.sh queue_bonus to honour [urgent] tag
+
+### Result
+`master_scheduler.sh` belongs to the paused WSL loop (`AUTONOMOUS_PAUSED`); the [urgent]-tag dispatch mechanism it would arm is no longer the dispatch path — `docs/ROADMAP.md` + operator-directed runs are. Marked stale 2026-07-17.
 
 **Severity promoted from `[needs-approval]` → `[urgent] [needs-approval]` by self-review M8 2026-05-30 (Proposal #2).** Reason: 4 days sat un-actioned during host-machine gap. This is the single highest-impact pending kaizen item because it structurally unblocks the `[urgent]` tag mechanism every other self-review run has been queuing items into. Single-knob severity bump, same pattern as M5's successful INBOX:308 `[opportunistic] → [urgent]` promotion which landed in 1 day.
 
@@ -1077,7 +1151,10 @@ queue_bonus = 50 * inbox_count_per_agent.get(agent, 0) + 50 * inbox_urgent_per_a
 
 ---
 
-## INSTRUCTION — 2026-05-26 — [self-review] [opportunistic] verify web/app/page.js stats strip uses DISTINCT bike count
+## STALE — 2026-05-26 — [self-review] [opportunistic] verify web/app/page.js stats strip uses DISTINCT bike count
+
+### Result
+Premise resolved: the 301 phantom rows were purged June 1 (799 → 498, `reports/bike_dedup_2026_06_01.md`) and `scripts/audit_headline_stats.py` (`make audit`) has gated headline sync ever since. Marked stale 2026-07-17.
 
 **Attribution:** self-review M7 2026-05-26, Finding 2.2. The DB currently has `bike_models` raw=790 / distinct=489. 301 phantom rows from the pre-`31b36a4` regression remain pending the ghost-row cleanup at INBOX:879. If the landing-page stats strip reads `COUNT(*)` (790) instead of `COUNT(DISTINCT manufacturer_id || '|' || model_name)` (489), prod website is overstating catalog size by 62% — a customer-facing trust issue.
 
@@ -1092,7 +1169,10 @@ queue_bonus = 50 * inbox_count_per_agent.get(agent, 0) + 50 * inbox_urgent_per_a
 
 ---
 
-## INSTRUCTION — 2026-05-30 — [self-review] [opportunistic] [needs-user] open question: relax auto-apply boundary for low-blast-radius self-review script edits?
+## STALE — 2026-05-30 — [self-review] [opportunistic] [needs-user] open question: relax auto-apply boundary for low-blast-radius self-review script edits?
+
+### Result
+Open policy question about the paused WSL self-review loop's auto-apply boundary; moot while `AUTONOMOUS_PAUSED` stands. Marked stale 2026-07-17.
 
 **Attribution:** self-review M8 2026-05-30, Finding 2.3 + Proposal #3. M-class observation: in 7 historical M-runs, the auto-apply boundary has produced 5 weight tweaks (single-knob, all held) and 2 INBOX bookkeeping flips. **Zero script/code edits have ever auto-applied**, by design. But the most impactful pending kaizen item right now (INBOX:939 — queue_bonus fix) has sat 4 days untouched because it's a 5-line Python edit in `scripts/master_scheduler.sh` and the auto-apply table forbids script edits.
 
@@ -1117,7 +1197,10 @@ queue_bonus = 50 * inbox_count_per_agent.get(agent, 0) + 50 * inbox_urgent_per_a
 
 ---
 
-## INSTRUCTION — 2026-05-31 — [self-review] [urgent] add Vercel pre-build gate to session_postflight.sh
+## STALE — 2026-05-31 — [self-review] [urgent] add Vercel pre-build gate to session_postflight.sh
+
+### Result
+The postflight belongs to the paused WSL loop. The protection now comes from the hygiene rule (`make web-build` before any `web/**` commit), the `scripts/git-hooks/pre-push` hook, and `.github/workflows/web-verify.yml` — though NOTE GH Actions is currently dead (July-13 minutes cap), so local `make web-build` discipline is the live gate. Marked stale 2026-07-17.
 
 **Attribution:** self-review M9 2026-05-31, Finding 2.1 + Proposal #2. The Saturday user-rescue session (DISPATCH_OUTBOX:1839) found that **every Vercel prod deploy had silently failed since ~May 26** — an unescaped apostrophe in a single-quoted data string in `web/app/blog/royal-enfield-hunter-350-quarter-mile-physics/page.js` broke `next build`. Production frontend was frozen on the May-25 build pointing at dead Railway for 5 days. Marketing-content and catalog-expansion agents pushed web/app changes after May 26 with zero visibility into the silent failure.
 
@@ -1152,7 +1235,10 @@ Exit code 7 is a new postflight code (current table: 0/1/2/3/4/5/6 documented in
 
 ---
 
-## INSTRUCTION — 2026-05-31 — [self-review] [opportunistic] add Render cold-start warm-up to verify_deploy
+## STALE — 2026-05-31 — [self-review] [opportunistic] add Render cold-start warm-up to verify_deploy
+
+### Result
+Substantially covered: postflight's deploy-verify already polls the Render health URL with a 90s cold-start timeout (May-31 infra note), and the WSL loop that ran it is paused. Marked stale 2026-07-17.
 
 **Attribution:** self-review M9 2026-05-31, Finding 2.3 + Proposal #3. The 2026-05-30 Railway → Render migration switched the production backend to Render free tier, which sleeps after 15 min idle and cold-starts in 30-60s. The Saturday rescue session bumped the `session_postflight.sh` health-check timeout from the Railway default to 90s. This handles a warm cold-start but a worst-case 60s cold + ~30s for the first physics import will still trip the timeout and write an ALERT.
 
@@ -1180,7 +1266,10 @@ The main verify loop stays as-is. This adds at most 50s when Render is asleep, z
 
 ---
 
-## INSTRUCTION — 2026-05-31 — [claude-feature-monitor] [opportunistic] migrate default Opus routing to Claude Opus 4.8
+## STALE — 2026-05-31 — [claude-feature-monitor] [opportunistic] migrate default Opus routing to Claude Opus 4.8
+
+### Result
+Model-routing convention for the paused WSL harness; long sessions have since moved to operator-selected models (currently claude-fable-5 remote sessions). Marked stale 2026-07-17.
 
 **From:** `scripts/agents/claude-feature-monitor.md` (A13)
 **Source delta:** Claude Opus 4.8 released 2026-05-28. See `reports/claude_feature_scan_2026-05-31.md` and `data/claude_capabilities_snapshot.json` for full evidence.
@@ -1217,5 +1306,8 @@ The main verify loop stays as-is. This adds at most 50s when Render is asleep, z
 
 (none yet)
 
-## INSTRUCTION — 2026-06-12 — [operator] [next-long-session] work from NEXT_SESSION.md
+## STALE — 2026-06-12 — [operator] [next-long-session] work from NEXT_SESSION.md
+
+### Result
+Consumed: the June-13 sessions executed the briefing (desktop hosted-only hardening + account-durability decision), and the desktop app was subsequently scrapped July 6 (ADR-0005). The live work order is `reports/SCOPE_2026_07_17_next_orchestrated_run.md`. Marked stale 2026-07-17.
 Operator-authorized briefing for the next long session lives at repo root: **NEXT_SESSION.md** (written at the close of the June-12 rehaul+cleanup, operator-reviewed). P0 = desktop app pass + account-durability decision. Read it before picking any other work; it supersedes older queued cleanup items below where they overlap.

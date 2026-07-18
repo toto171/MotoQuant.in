@@ -12,6 +12,7 @@ import StageDots from '../../../components/StageDots';
 import { Reveal, Stagger, StaggerItem } from '../../../components/Reveal';
 import { ScoreboardCounter } from '../../../components/ScoreboardDigits';
 import { Skeleton, SkeletonCard } from '../../../components/Skeleton';
+import TimeslipCTA from '../../../components/TimeslipCTA';
 import TopCtaVariant from './TopCtaVariant';
 
 function formatCell(value, suffix = '', decimals = null) {
@@ -324,6 +325,14 @@ export default function BikeDetailPage() {
                   </SpecBlock>
                 </Reveal>
               )}
+
+              {/* Dragy timeslip ask — real instrumented runs are the accuracy
+                  lever for this bike (A3-20). Sits between the spec tables and
+                  the bottom CTA pair so it reads as part of the data story,
+                  not as a third competing simulate button. */}
+              <Reveal y={16} className="mt-4">
+                <TimeslipCTA bikeId={bike.id} />
+              </Reveal>
 
               {/* Bottom CTA — differentiated from the top EXP-011 CTA:
                   primary names the concrete run, ghost routes to the

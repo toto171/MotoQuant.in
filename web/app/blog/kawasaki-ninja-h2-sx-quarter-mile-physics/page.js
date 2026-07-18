@@ -42,7 +42,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'MotoQuant simulates the 2018-2023 Kawasaki Ninja H2 SX at 10.222 seconds with a 250.8 km/h trap under Aamby Valley November conditions. That ET puts a 238 kg sport-touring bike with hard luggage mounts inside half a tenth of a stock Hayabusa Gen 1 and within 0.25 seconds of a stock ZX-14R. The trap speed is higher than either of them. The whole story of the H2 SX on a quarter mile is what a centrifugal supercharger does to a tourer that everyone assumes is heavy and soft.',
+    text: 'MotoQuant simulates the 2018-2023 Kawasaki Ninja H2 SX at 10.222 seconds with a 250.8 km/h trap under Aamby Valley November conditions. That ET puts a 238 kg sport-touring bike with hard luggage mounts ahead of the simulator’s stock Hayabusa Gen 1 reference and within two tenths of a stock ZX-14R. The trap speed is higher than either of them. The whole story of the H2 SX on a quarter mile is what a centrifugal supercharger does to a tourer that everyone assumes is heavy and soft.',
   },
   {
     type: 'h2',
@@ -78,7 +78,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The H2 SX sits in MotoQuant’s litre_sport_195p cluster — bikes over 600 cc making at least 195 hp. That cluster has a documented mean absolute delta of 0.162 seconds across 24 matched benchmarks and a near-zero bias of −0.035 s. In plain terms: the simulator is calibrated to within roughly an eighth of a second on this class of bike, with no systematic fast or slow tendency. A real H2 SX in skilled hands, warmed tires, and a measured launch should run within a tenth of the 10.222 s number, with the trap speed coming in close to 251 km/h provided the rider holds the throttle pinned all the way through the lights instead of rolling out at the 268 km/h limiter.',
+    text: 'The H2 SX sits in MotoQuant’s litre_sport_195p cluster — bikes over 600 cc making at least 195 hp. When this post was written (May 2026, before the July 2026 recalibration epoch) that cluster carried a documented mean absolute delta of 0.162 seconds across 24 matched benchmarks and a near-zero bias of −0.035 s. In plain terms: the simulator is calibrated to within roughly an eighth of a second on this class of bike, with no systematic fast or slow tendency. A real H2 SX in skilled hands, warmed tires, and a measured launch should run within a tenth of the 10.222 s number, with the trap speed coming in close to 251 km/h provided the rider holds the throttle pinned all the way through the lights instead of rolling out at the 268 km/h limiter.', // [historical baselines]
   },
   {
     type: 'callout',
@@ -90,7 +90,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Indian gray-market drag scene has three obvious flagships in the litre-plus class: the Suzuki Hayabusa (Gen 1 baseline preserved in the simulator at 10.4712 s), the Kawasaki ZX-14R (around 10.05 s sim under matched conditions), and now the Ninja H2 SX. They are not the same bike. The Hayabusa is naturally aspirated, 197 hp, 220 kg dry. The ZX-14R is naturally aspirated, 197 hp, 218 kg dry. The H2 SX is supercharged, 200 hp, 238 kg dry. The interesting question is what each of those decisions costs at the strip.',
+    text: 'The Indian gray-market drag scene has three obvious flagships in the litre-plus class: the Suzuki Hayabusa (Gen 1 reference pinned in the simulator at 10.3633 s), the Kawasaki ZX-14R, and now the Ninja H2 SX. They are not the same bike. The Hayabusa is naturally aspirated, 197 hp, 220 kg dry. The ZX-14R is naturally aspirated, 197 hp, 218 kg dry. The H2 SX is supercharged, 200 hp, 238 kg dry. The interesting question is what each of those decisions costs at the strip.',
   },
   {
     type: 'table',
@@ -98,7 +98,7 @@ const CONTENT = [
       ['Bike', 'Sim ET', 'Trap', 'Dry mass', 'Peak hp', 'Forced induction'],
       ['Kawasaki Ninja H2 SX (2018-2023)', '10.222 s', '250.8 km/h', '238 kg', '200', 'Supercharger (0.6 bar)'],
       ['Kawasaki ZX-14R (2012-2020)', '~10.05 s', '~244 km/h', '218 kg', '197', 'NA'],
-      ['Suzuki Hayabusa Gen 1', '10.4712 s', '~239 km/h', '220 kg', '197', 'NA'],
+      ['Suzuki Hayabusa Gen 1', '10.3633 s', '~239 km/h', '220 kg', '197', 'NA'],
       ['Suzuki Hayabusa Gen 3 (2021+)', '~10.40 s', '~244 km/h', '212 kg', '188', 'NA'],
       ['Kawasaki Ninja H2 (road)', '~9.95 s', '~256 km/h', '214 kg', '231', 'Supercharger (0.7 bar)'],
     ],
@@ -109,7 +109,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Second, the H2 SX is a faster bike than a stock Hayabusa Gen 1 by 0.25 seconds even with 18 kg of extra mass. The reason is the supercharger fattens the torque curve from 6,000 rpm onward, exactly where the Hayabusa’s naturally-aspirated 1340 cc engine starts running into its diminishing-returns region. The H2 SX produces around 175 Nm at the rear wheel between 9,500 and 11,000 rpm — meaningfully above the Hayabusa’s 155 Nm peak. On a quarter-mile pass that gear-by-gear shove from second through fifth is what wins the race against displacement.',
+    text: 'Second, the H2 SX is a faster bike than a stock Hayabusa Gen 1 by 0.14 seconds even with 18 kg of extra mass. The reason is the supercharger fattens the torque curve from 6,000 rpm onward, exactly where the Hayabusa’s naturally-aspirated 1340 cc engine starts running into its diminishing-returns region. The H2 SX produces around 175 Nm at the rear wheel between 9,500 and 11,000 rpm — meaningfully above the Hayabusa’s 155 Nm peak. On a quarter-mile pass that gear-by-gear shove from second through fifth is what wins the race against displacement.',
   },
   {
     type: 'p',
@@ -208,7 +208,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'For everything the H2 SX is, the headline is simple: 10.222 seconds at 250.8 km/h trap with hard luggage mounts still bolted on. There is no other sport-tourer in the world that touches that. Compared to the Hayabusa Gen 1 it gives up a quarter-second to the displacement but takes 12 km/h back at the trap. Compared to the ZX-14R it gives up two tenths to the lighter chassis but ties on top-end pull. Compared to the Ninja H2 it gives up a quarter-second to the spec sheet and 5 km/h at the trap because of the touring kit. The supercharger is the equalizer — and in a market where every other 200 hp bike has been carrying the same naturally-aspirated playbook for fifteen years, that equalizer is what makes the H2 SX worth simulating.',
+    text: 'For everything the H2 SX is, the headline is simple: 10.222 seconds at 250.8 km/h trap with hard luggage mounts still bolted on. There is no other sport-tourer in the world that touches that. Compared to the Hayabusa Gen 1 it takes 0.14 seconds out of the bigger displacement and 12 km/h at the trap. Compared to the ZX-14R it gives up two tenths to the lighter chassis but ties on top-end pull. Compared to the Ninja H2 it gives up a quarter-second to the spec sheet and 5 km/h at the trap because of the touring kit. The supercharger is the equalizer — and in a market where every other 200 hp bike has been carrying the same naturally-aspirated playbook for fifteen years, that equalizer is what makes the H2 SX worth simulating.',
   },
 ];
 

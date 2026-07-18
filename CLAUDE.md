@@ -191,15 +191,15 @@ Self-imposed rules to maximise useful work per context window:
 
 ---
 
-## CURRENT STATE (as of July 10, 2026)
+## CURRENT STATE (as of July 17, 2026)
 
-> Verified against the live tree + `motoquant.db` on July 10, 2026. For how it
+> Verified against the live tree + `motoquant.db` on July 17, 2026. For how it
 > got here read the `Last updated:` chain at the top of this file; for the
 > milestone view read `CHANGELOG.md`. Headline-number source of truth:
 > `python scripts/audit_headline_stats.py` (or `make audit`).
 
 ### Test suite
-- **~4,324 tests passing** across ~60 test modules (PR #99 count). Run `make test` (~25 min, serial, mirrors CI). Slow tiers gated behind `MOTOQUANT_SLOW_TESTS=1` — including the full-catalog regression re-sim (`tests/test_regression_snapshot.py` slow tier re-sims every current bike via `db_row_to_config`).
+- **~4,472 tests ran / 0 failed / 91 skipped** across ~60 test modules (July-11 full-suite figure, run twice). Run `make test` (~25 min, serial, mirrors CI). Slow tiers gated behind `MOTOQUANT_SLOW_TESTS=1` — including the full-catalog regression re-sim (`tests/test_regression_snapshot.py` slow tier re-sims every current bike via `db_row_to_config`).
 - Fast iteration subset: `make test-fast` (~3 min — validation / scraper / two_stroke / compatibility / submodel_kaizen / category_dispatch).
 - Physics-drift gates: `make baselines` (`scripts/check_baselines.py` — exit 1 on any drift of the three pinned references) + golden snapshots. Run after ANY edit to `physics.py`, `submodels/*`, `defaults.py`, `category_profiles.py`, or `scraper/importer.py`.
 - Single test file / single test: `python -m pytest tests/test_api.py -v` / `python -m pytest tests/test_api.py -k name -q`.
@@ -209,11 +209,11 @@ Self-imposed rules to maximise useful work per context window:
 - Parts: **593** across 20 categories (incl. `lowering_kit` / `air_shifter` / `lockup_clutch`); catalog precision patched July 6 (53,205 compatible pairs after removing 3,684 impossible ones).
 - Tires: **254** (notation-twin dedup July 6; physical sizes normalized via `normalize_size_designation`); bike-tire fitments: **1,860**; venues: **20**.
 - Benchmarks: **250 unique** (277 matched in the weighted sweep). Accuracy: weighted |Δ| **0.2533s**, bias **+0.0166s** (`reports/acc_final_2026_07_13.json`; the July-13 physics epoch moved the pins — see that day's chain entry).
-- **Re-seed chain** (all idempotent — required after any `spec_to_bike_config`/physics change): `scripts/reseed_configs_from_specs.py` → `patch_2026_07_06_reference_configs.py` → `patch_2026_07_06_catalog_integrity.py` → `patch_2026_07_06_tire_dedup.py` → regenerate golden snapshots + surrogate, same session.
+- **Re-seed chain** (all idempotent — required after any `spec_to_bike_config`/physics change): `scripts/reseed_configs_from_specs.py` → `patch_2026_07_06_reference_configs.py` → `patch_2026_07_06_catalog_integrity.py` → `patch_2026_07_06_tire_dedup.py` → `patch_2026_07_13_scrape_data.py` → regenerate golden snapshots + surrogate, same session.
 
 ### Physics & accuracy state
 - **Taxonomy v2** — `derive_category_tag(…, cylinders=…)` in `category_profiles.py`; clusters include `sport_twin_600_1300`, `single_300_500`, `small_i4_screamer` on top of the original 8; `cluster_for` DELEGATES to it (one source of truth). Per-cluster knob tuning: `scripts/tune_cluster_knobs.py` against the FULL weighted benchmark corpus — the 3-bike baseline is a drift guard, **not** a tuning target (retired as a constraint July 6).
-- **Surrogate v2.4** (`artifacts/surrogate/`, numpy artifact, no sklearn pickles in prod): ET MAE 89.2ms, R² 0.9954, 541/541 stock configs in-envelope. **A surrogate is a cache of the physics — regenerate after any reseed/retune in the same session.**
+- **Surrogate v2.5** (`artifacts/surrogate/`, numpy artifact, no sklearn pickles in prod; trained 2026-07-13, post-epoch full regen — see `artifacts/surrogate/README.md`): holdout ET MAE 105.5ms, R² 0.9914. MAE honestly REGRESSED vs v2.4's 89.2ms — the epoch's cluster-dependent launch/shift dynamics (per-cluster `mu_peak_scale` spans 1.0–1.30) exceed the category-blind 26-feature schema; category-aware features are the v2.6 candidate. **A surrogate is a cache of the physics — regenerate after any reseed/retune in the same session.**
 - **Numba @njit REJECTED** with measured rationale (ADR + July 3 chain entry) — do not re-litigate. Speed levers are multiprocessing / adaptive-dt / the surrogate.
 
 ### Product surfaces

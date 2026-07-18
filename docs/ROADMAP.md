@@ -61,9 +61,16 @@ PR #100 review report in `reports/`):
   `PyJWT` (or `authlib`). A dependency swap with its own test pass.
 - **Dockerfile runs as root** — add a non-root `USER`; verify the Render build
   still works (small deploy risk, hence its own change).
-- **`bike_repo`/`venue_repo`/`tire_repo` `lastrowid==0` misread** — prefer
+- **`bike_repo`/`venue_repo` `lastrowid==0` misread** — prefer
   `rowcount==0`; import-path only, guarded by idempotency tests (change carefully).
+  *(`tire_repo` was already fixed July 6 — the earlier mention of it here was
+  stale; bike/venue repos are in scope for the 2026-07-17 orchestrated run.)*
 - **Dead `CategoryProfile` knobs** — either wire (with a liveness test) or delete.
+- *Already resolved — do NOT re-implement:* the license-key **revoke route** and
+  the auth **timing-safe compare + bounded fail-tracker** hardening (July-3
+  inventory items A1-5/A1-6) landed long ago; sessions keep re-scoping them from
+  the stale `reports/ROADMAP_2026_07_03.md` inventory. Verified done in the
+  2026-07-17 scope pass (`reports/SCOPE_2026_07_17_next_orchestrated_run.md` §5).
 
 ## P1 — Accuracy (data-limited)
 

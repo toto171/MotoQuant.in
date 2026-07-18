@@ -31,6 +31,7 @@ import SimProgress from "../../components/SimProgress";
 import ActionButton from "../../components/ActionButton";
 import { SkeletonCard } from "../../components/Skeleton";
 import useAsyncTask from "../../lib/useAsyncTask";
+import { track } from "../../lib/telemetry";
 
 import { API_URL_DIRECT as API_BASE } from "../../lib/api";
 
@@ -143,6 +144,9 @@ function LoginPageInner() {
       throw new Error(detail);
     }
     applyLoginTokens(data);
+    if (mode === "register") {
+      track("signup_completed", { method: "password" });
+    }
     router.replace(nextPath);
     return data;
   });

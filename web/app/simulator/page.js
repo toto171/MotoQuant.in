@@ -378,6 +378,11 @@ function SimulatorPageInner() {
   const fullSimTask = useAsyncTask(async (signal, onProgress) => {
     const data = await simulateJob(baseSimBody(), onProgress, signal);
     setFullResult(data);
+    track('sim_run_success', {
+      surface: 'simulator_page',
+      mode: 'full',
+      bike_id: bike?.id ?? null,
+    });
     return data;
   });
 

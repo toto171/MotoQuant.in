@@ -14,11 +14,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Share2, Check, AlertCircle } from 'lucide-react';
+import { Share2, Check, AlertCircle, Printer } from 'lucide-react';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 import StageDots from '../../../components/StageDots';
 import ScoreboardDigits from '../../../components/ScoreboardDigits';
+import PrintTimeslip from '../../../components/PrintTimeslip';
 import { Skeleton } from '../../../components/Skeleton';
 import { API_URL } from '../../../lib/api';
 
@@ -76,9 +77,15 @@ export default function RunPage() {
   };
 
   return (
-    <main id="main" className="min-h-screen bg-asphalt-0 text-white">
-      <SiteNav />
-      <section className="pt-28 md:pt-32 pb-16 md:pb-24 px-6">
+    <main
+      id="main"
+      className="min-h-screen bg-asphalt-0 text-white print:min-h-0 print:bg-white print:text-black"
+    >
+      {/* screen chrome — hidden when printing so the slip is the whole page */}
+      <div className="print:hidden">
+        <SiteNav />
+      </div>
+      <section className="pt-28 md:pt-32 pb-16 md:pb-24 px-6 print:hidden">
         <div className="max-w-md mx-auto">
           {error && (
             <div className="card border-signal-foul/30 px-5 py-4">
@@ -208,6 +215,13 @@ export default function RunPage() {
                   )}
                   {copied ? 'Link copied' : 'Share this timeslip'}
                 </button>
+                {/* Print-to-PDF export (zero deps — PrintTimeslip supplies the
+                    print layout). Free for everyone during beta; candidate Pro
+                    gate once MOTOQUANT_BILLING_ENFORCE billing goes live. */}
+                <button type="button" onClick={() => window.print()} className="btn-ghost">
+                  <Printer size={15} aria-hidden="true" />
+                  Download PDF
+                </button>
                 <Link href="/simulator" className="btn-ghost">
                   Run your own
                 </Link>
@@ -226,7 +240,11 @@ export default function RunPage() {
           )}
         </div>
       </section>
-      <SiteFooter />
+      {/* print-only face of the page — light-on-white one-page timeslip */}
+      {run ? <PrintTimeslip run={run} id={id} /> : null}
+      <div className="print:hidden">
+        <SiteFooter />
+      </div>
     </main>
   );
 }

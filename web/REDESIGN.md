@@ -1,5 +1,7 @@
 # MotoQuant Web — Cockpit v3 Redesign Spec (July 2026)
 
+> **Superseded by `DESIGN.md` (v5 IGNITION)** — kept as historical record; token names and stats below are v3-era.
+
 > Working spec for the July 2026 full-site revamp. Every page agent reads this
 > FIRST. It encodes the design language, the shared component APIs, the
 > progress-feedback doctrine, and the constraints that must survive verbatim.
