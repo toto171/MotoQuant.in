@@ -184,6 +184,65 @@ class TestOptimizerBudgetApi(unittest.TestCase):
         self.assertEqual(req.goal, "min_et")
 
 
+class TestOutlawTierGate(unittest.TestCase):
+    """POST /api/jobs/outlaw composes the two heaviest pro-gated surfaces
+    (optimize + autotune) yet shipped with only a rate limit (2026-07-17
+    find), so it carries the same Depends(require_tier("pro")) gate as
+    /api/jobs/optimize. Mirrors tests/test_auth.py::TestPaidToolingTierGate:
+
+      * billing OFF (freemium-beta default) → anonymous requests pass the
+        gate exactly as before (no 401/402 regression);
+      * billing ON + no token → 401 (require_tier's unauthenticated branch).
+    """
+
+    BODY = {"bike_preset": "gsxr1000_k5", "max_candidates": 1}
+
+    @classmethod
+    def setUpClass(cls):
+        try:
+            from fastapi.testclient import TestClient
+
+            from motoquant.api import app
+        except ImportError:
+            raise unittest.SkipTest("fastapi not installed")
+        cls.client = TestClient(app, raise_server_exceptions=False)
+
+    def setUp(self):
+        import motoquant.auth as auth_mod
+
+        self._auth_mod = auth_mod
+        self._orig_enforce = auth_mod.BILLING_ENFORCE
+
+    def tearDown(self):
+        self._auth_mod.BILLING_ENFORCE = self._orig_enforce
+
+    def test_billing_off_anonymous_passes_gate(self):
+        self._auth_mod.BILLING_ENFORCE = False
+        res = self.client.post("/api/jobs/outlaw", json=self.BODY)
+        self.assertNotIn(
+            res.status_code,
+            (401, 402),
+            f"outlaw unexpectedly auth-blocked with billing OFF: "
+            f"{res.status_code} {res.text[:200]}",
+        )
+        # Don't leave the accepted job burning a daemon thread for the rest
+        # of the suite — cancellation is cooperative and immediate.
+        if res.status_code == 202:
+            job_id = res.json().get("job_id")
+            if job_id:
+                self.client.post(f"/api/jobs/{job_id}/cancel")
+
+    def test_billing_on_anonymous_gets_401(self):
+        self._auth_mod.BILLING_ENFORCE = True
+        res = self.client.post("/api/jobs/outlaw", json=self.BODY)
+        self.assertEqual(
+            res.status_code,
+            401,
+            f"outlaw: expected 401 with billing ON + no token, "
+            f"got {res.status_code} {res.text[:200]}",
+        )
+
+
 class TestJsonSafe(unittest.TestCase):
     """rank_categories can emit avg_cost_per_tenth=inf; bare inf/nan is not
     JSON-compliant and 500s the optimize route (July-3 full-API stress

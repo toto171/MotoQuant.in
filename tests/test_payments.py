@@ -392,5 +392,125 @@ class TestPaymentEventLedger(unittest.TestCase):
         )
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# 6. Razorpay webhook idempotency (replay protection, July 2026)
+# ══════════════════════════════════════════════════════════════════════════════
+
+
+def _make_subs_app():
+    from fastapi import FastAPI
+
+    from motoquant.subscriptions import router as subs_router
+
+    app = FastAPI()
+    app.include_router(subs_router, prefix="/api/subscriptions")
+    return app
+
+
+def _rzp_sig(payload: bytes, secret: str) -> str:
+    return hmac.new(secret.encode(), payload, hashlib.sha256).hexdigest()
+
+
+class TestRazorpayWebhookIdempotency(unittest.TestCase):
+    """Mirror of TestStripeWebhook's duplicate-drop coverage for the Razorpay
+    handler: before July 2026 the signature was verified but events were
+    never ledgered, so a REPLAYED subscription.cancelled could downgrade a
+    re-activated user."""
+
+    _WEBHOOK_SECRET = "rzp_whsec_test"
+
+    @classmethod
+    def setUpClass(cls):
+        from fastapi.testclient import TestClient
+
+        cls.client = TestClient(_make_subs_app(), raise_server_exceptions=False)
+
+    def setUp(self):
+        from motoquant.database import users_repo
+
+        self.conn = _mem_conn()
+        _bootstrap(self.conn)
+        self.user = users_repo.get_or_create_user(self.conn, "rzp@test.in")
+        self._patchers = [
+            patch(
+                "motoquant.subscriptions._get_conn",
+                return_value=_NoCloseConn(self.conn),
+            ),
+            patch("motoquant.subscriptions.RZP_WEBHOOK_SECRET", self._WEBHOOK_SECRET),
+        ]
+        for p in self._patchers:
+            p.start()
+
+    def tearDown(self):
+        for p in self._patchers:
+            p.stop()
+        self.conn.close()
+
+    def _event(self, event_type: str, sub_id: str, tier: str = "pro") -> bytes:
+        return json.dumps(
+            {
+                "event": event_type,
+                "payload": {
+                    "subscription": {
+                        "entity": {
+                            "id": sub_id,
+                            "plan_id": "plan_test",
+                            "notes": {
+                                "user_id": str(self.user["id"]),
+                                "tier": tier,
+                                "billing_cycle": "monthly",
+                            },
+                        }
+                    }
+                },
+            }
+        ).encode()
+
+    def _send(self, body: bytes, event_id: str | None = None):
+        headers = {"x-razorpay-signature": _rzp_sig(body, self._WEBHOOK_SECRET)}
+        if event_id:
+            headers["x-razorpay-event-id"] = event_id
+        return self.client.post(
+            "/api/subscriptions/webhook", content=body, headers=headers
+        )
+
+    def test_duplicate_event_id_is_dropped(self):
+        body = self._event("subscription.activated", "sub_rzp_1")
+        res1 = self._send(body, event_id="evt_rzp_1")
+        self.assertEqual(res1.json()["status"], "ok")
+        res2 = self._send(body, event_id="evt_rzp_1")
+        self.assertEqual(res2.json()["status"], "duplicate")
+
+    def test_replayed_cancellation_cannot_downgrade_reactivated_user(self):
+        from motoquant.database import users_repo
+
+        self._send(self._event("subscription.activated", "sub_rzp_2"), "evt_act_1")
+        cancel_body = self._event("subscription.cancelled", "sub_rzp_2")
+        self._send(cancel_body, "evt_cancel_1")
+        self.assertEqual(
+            users_repo.get_user_by_id(self.conn, self.user["id"])["tier"], "free"
+        )
+        # Re-activation carries a FRESH event id (same body as the first
+        # activation — proves the header id wins over the body-hash fallback).
+        self._send(self._event("subscription.activated", "sub_rzp_2"), "evt_act_2")
+        self.assertEqual(
+            users_repo.get_user_by_id(self.conn, self.user["id"])["tier"], "pro"
+        )
+        res = self._send(cancel_body, "evt_cancel_1")
+        self.assertEqual(res.json()["status"], "duplicate")
+        self.assertEqual(
+            users_repo.get_user_by_id(self.conn, self.user["id"])["tier"],
+            "pro",
+            "replayed cancellation must not downgrade a re-activated user",
+        )
+
+    def test_missing_event_id_header_dedupes_on_body_hash(self):
+        body = self._event("subscription.activated", "sub_rzp_3")
+        res1 = self._send(body)
+        self.assertEqual(res1.json()["status"], "ok")
+        res2 = self._send(body)
+        self.assertEqual(res2.json()["status"], "duplicate")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -12,6 +12,9 @@ The website's real progress bars poll ``/api/jobs/*``; these tests pin:
   required, so the suite stays green on a fresh checkout)
 """
 
+import os
+import sys
+import tempfile
 import threading
 import time
 import unittest
@@ -25,6 +28,53 @@ try:  # route tests are gated on fastapi being installed (CI always has it)
     HAS_FASTAPI = True
 except ImportError:  # pragma: no cover
     HAS_FASTAPI = False
+
+# ---------------------------------------------------------------------------
+# Isolated DB -- the metered routes (/api/jobs/simulate, /api/jobs/topspeed)
+# record sim_usage rows via connect(), which falls back to the repo's tracked
+# motoquant.db when MOTOQUANT_DB is unset. Point it at a throwaway tmp DB so
+# a suite run never dirties the working tree (same pattern as test_api.py).
+# No seeding needed: these tests use bike_presets only, and record_and_check
+# creates the sim_usage table on demand.
+# ---------------------------------------------------------------------------
+_tmp_db_file = tempfile.NamedTemporaryFile(
+    prefix="motoquant_jobs_test_", suffix=".db", delete=False
+)
+_tmp_db_file.close()
+_TMP_DB_PATH = _tmp_db_file.name
+_PRIOR_MOTOQUANT_DB = os.environ.get("MOTOQUANT_DB")
+os.environ["MOTOQUANT_DB"] = _TMP_DB_PATH
+
+
+def setUpModule():
+    """Re-assert this module's tmp DB right before its tests run.
+
+    Module-level MOTOQUANT_DB overrides execute at COLLECTION time, so a
+    sibling module imported after this one (e.g. test_api also sets
+    MOTOQUANT_DB at import) leaves the env pointing at ITS tmp DB by the
+    time these tests actually run. Re-asserting here makes ordering
+    irrelevant.
+    """
+    os.environ["MOTOQUANT_DB"] = _TMP_DB_PATH
+
+
+def tearDownModule():
+    """Remove the tmp DB and restore MOTOQUANT_DB after all tests finish."""
+    _api_mod = sys.modules.get("motoquant.api")
+    if _api_mod is not None and getattr(_api_mod, "_db_conn", None) is not None:
+        try:
+            _api_mod._db_conn.close()
+        except Exception:  # noqa: BLE001
+            pass
+        _api_mod._db_conn = None
+    try:
+        os.unlink(_TMP_DB_PATH)
+    except OSError:
+        pass
+    if _PRIOR_MOTOQUANT_DB is None:
+        os.environ.pop("MOTOQUANT_DB", None)
+    else:
+        os.environ["MOTOQUANT_DB"] = _PRIOR_MOTOQUANT_DB
 
 
 def _poll_until_finished(client, job_id, timeout_s=180.0, interval_s=0.05):

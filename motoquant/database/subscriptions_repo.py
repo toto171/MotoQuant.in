@@ -178,11 +178,14 @@ def validate_license_key(
     Returns the license_keys row dict on success, None on invalid/revoked.
 
     Device binding is ENFORCED (July 2026 — was write-only before): once a
-    key is bound, presenting a *different* device_id raises
-    DeviceMismatchError and the row is left untouched (no last_seen bump).
-    Requests that omit device_id entirely are tolerated for older desktop
-    builds that predate device reporting — binding only tightens when both
-    sides send ids.
+    key is bound, EVERY validate must present the bound device_id — a
+    different id AND an omitted id both raise DeviceMismatchError, leaving
+    the row untouched (no last_seen bump). The omit-device_id tolerance
+    existed for pre-device-reporting desktop builds; the desktop app was
+    scrapped July 6 2026 (ADR-0005), so an id-less call against a bound key
+    is a shared/scripted key, not a legacy client. A never-bound key
+    (device_id NULL) still validates without one — binding happens on the
+    first device-carrying call. Reset path: revoke + regenerate.
     """
     key_hash = _sha256(plaintext_key)
     row = conn.execute(
@@ -194,7 +197,7 @@ def validate_license_key(
     if row["revoked"]:
         return None
 
-    if device_id and row["device_id"] and device_id != row["device_id"]:
+    if row["device_id"] and device_id != row["device_id"]:
         raise DeviceMismatchError("License key is already activated on another device")
 
     updates: list = [_now_utc()]

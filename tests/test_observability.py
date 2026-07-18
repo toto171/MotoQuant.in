@@ -19,6 +19,9 @@ real -- the no-DSN path returns before any ``sentry_sdk.init`` call.
 
 from __future__ import annotations
 
+import sys
+from unittest.mock import patch
+
 import pytest
 
 import motoquant.observability as obs
@@ -101,3 +104,89 @@ def test_importing_api_does_not_initialise_sentry_without_dsn():
     except Exception as exc:  # pragma: no cover - import must not raise
         pytest.fail(f"Importing motoquant.api raised unexpectedly: {exc!r}")
     assert obs._INITIALISED is False
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# Activation visibility (2026-07-17, re-implementation of PR #88's content):
+# a successful init MUST land an exact marker line on STDOUT (Render surfaces
+# stdout; log.info is invisible without a logging config), and a DSN with a
+# missing sentry-sdk must say so. DSN-free runs stay completely silent.
+# ─────────────────────────────────────────────────────────────────────────
+
+
+class TestActivationVisibility:
+    def test_no_dsn_stays_completely_silent(self, capsys):
+        assert obs.init_sentry() is False
+        assert obs.is_initialised() is False
+        out, err = capsys.readouterr()
+        assert out == ""
+        assert err == ""
+
+    def test_dsn_and_sdk_prints_exact_active_line(self, capsys, monkeypatch):
+        pytest.importorskip("sentry_sdk")
+        monkeypatch.setenv("SENTRY_DSN", "https://key@o0.ingest.sentry.io/1")
+        monkeypatch.setenv("SENTRY_ENVIRONMENT", "unittest")
+        monkeypatch.setenv("SENTRY_RELEASE", "motoquant-api@test")
+        with patch("sentry_sdk.init") as mock_init:
+            assert obs.init_sentry(app_name="motoquant-api") is True
+        mock_init.assert_called_once()
+        assert obs.is_initialised() is True
+        out, _ = capsys.readouterr()
+        assert out.strip() == (
+            "[observability] Sentry active — "
+            "environment=unittest release=motoquant-api@test"
+        )
+
+    def test_dsn_but_sdk_missing_prints_exact_not_active_line(
+        self, capsys, monkeypatch
+    ):
+        monkeypatch.setenv("SENTRY_DSN", "https://key@o0.ingest.sentry.io/1")
+        # None in sys.modules makes `import sentry_sdk` raise ImportError --
+        # the production missing-package branch, without uninstalling anything.
+        monkeypatch.setitem(sys.modules, "sentry_sdk", None)
+        assert obs.init_sentry() is False
+        assert obs.is_initialised() is False
+        out, _ = capsys.readouterr()
+        assert out.strip() == "[observability] Sentry NOT active — sentry-sdk missing"
+
+    def test_active_line_fires_once_across_repeat_calls(self, capsys, monkeypatch):
+        pytest.importorskip("sentry_sdk")
+        monkeypatch.setenv("SENTRY_DSN", "https://key@o0.ingest.sentry.io/1")
+        with patch("sentry_sdk.init") as mock_init:
+            assert obs.init_sentry() is True
+            assert obs.init_sentry() is True
+        mock_init.assert_called_once()
+        out, _ = capsys.readouterr()
+        assert out.count("[observability] Sentry active") == 1
+
+
+@pytest.fixture()
+def client():
+    try:
+        from fastapi.testclient import TestClient
+
+        from motoquant.api import app
+    except ImportError:
+        pytest.skip("fastapi not installed")
+    return TestClient(app, raise_server_exceptions=False)
+
+
+class TestSentryTestRoute:
+    """GET /api/debug/sentry-test — 404 unless MOTOQUANT_SENTRY_SELFTEST is
+    truthy; when enabled it raises RuntimeError (surfaced as 500 here) so the
+    FastAPI Sentry integration reports a real event."""
+
+    def test_404_by_default(self, client, monkeypatch):
+        monkeypatch.delenv("MOTOQUANT_SENTRY_SELFTEST", raising=False)
+        res = client.get("/api/debug/sentry-test")
+        assert res.status_code == 404
+
+    def test_404_on_falsy_value(self, client, monkeypatch):
+        monkeypatch.setenv("MOTOQUANT_SENTRY_SELFTEST", "0")
+        res = client.get("/api/debug/sentry-test")
+        assert res.status_code == 404
+
+    def test_500_when_enabled(self, client, monkeypatch):
+        monkeypatch.setenv("MOTOQUANT_SENTRY_SELFTEST", "1")
+        res = client.get("/api/debug/sentry-test")
+        assert res.status_code == 500

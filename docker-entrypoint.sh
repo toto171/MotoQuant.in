@@ -20,6 +20,8 @@ TARGET_DB="${MOTOQUANT_DB:-/app/motoquant.db}"
 
 if [ "$TARGET_DB" != "$SEED_DB" ]; then
   TARGET_DIR=$(dirname "$TARGET_DB")
+  # The image runs as unprivileged user "app" (Dockerfile USER); the /data disk
+  # mount must be writable by it — mount-point ownership is Render's to provide.
   mkdir -p "$TARGET_DIR"
   if [ ! -f "$TARGET_DB" ]; then
     echo "[entrypoint] persistent DB $TARGET_DB not found — seeding from image copy $SEED_DB"

@@ -63,6 +63,10 @@ def init_sentry(*, app_name: str = "motoquant-api") -> bool:
         from sentry_sdk.integrations.fastapi import FastApiIntegration
         from sentry_sdk.integrations.logging import LoggingIntegration
     except ImportError:
+        # STDOUT on purpose: Render surfaces stdout in the deploy log, while
+        # log.warning is invisible without a logging config. DSN-free runs
+        # never reach this branch, so local/CI stays completely silent.
+        print("[observability] Sentry NOT active — sentry-sdk missing")
         log.warning(
             "SENTRY_DSN is set but sentry-sdk is not installed. "
             "Run `pip install sentry-sdk[fastapi]` to enable error tracking."
@@ -99,8 +103,18 @@ def init_sentry(*, app_name: str = "motoquant-api") -> bool:
         before_send=lambda event, _hint: _tag_app(event, app_name),
     )
     _INITIALISED = True
+    # STDOUT on purpose (see the ImportError branch above): only fires when a
+    # DSN is present, so DSN-free local/CI runs stay completely silent.
+    print(
+        f"[observability] Sentry active — environment={environment} release={release}"
+    )
     log.info("Sentry initialised — environment=%s release=%s", environment, release)
     return True
+
+
+def is_initialised() -> bool:
+    """True once init_sentry() has successfully initialised the SDK."""
+    return _INITIALISED
 
 
 def _safe_float(env_var: str, default: float) -> float:
@@ -126,4 +140,4 @@ def _tag_app(event: dict[str, Any], app_name: str) -> dict[str, Any]:
     return event
 
 
-__all__ = ["init_sentry"]
+__all__ = ["init_sentry", "is_initialised"]

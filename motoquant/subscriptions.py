@@ -48,6 +48,7 @@ from pydantic import BaseModel
 
 from .auth import get_current_user, require_tier
 from .database import subscriptions_repo as _subs, users_repo as _users
+from .ratelimit import rate_limit
 
 log = logging.getLogger("motoquant.subscriptions")
 
@@ -267,7 +268,9 @@ async def razorpay_webhook(request: Request) -> dict:
     """
     Razorpay sends events here. We verify the signature, then update tier.
     This endpoint is unauthenticated (Razorpay calls it server-to-server).
-    Idempotent: upserting the same subscription row is safe.
+    Deliveries are idempotent via the payment_events ledger (mirrors the
+    Stripe webhook in payments.py) — a REPLAYED subscription.cancelled must
+    not downgrade a re-activated user.
     """
     payload_bytes = await request.body()
     signature = request.headers.get("x-razorpay-signature", "")
@@ -280,6 +283,13 @@ async def razorpay_webhook(request: Request) -> dict:
         event = json.loads(payload_bytes)
     except Exception:
         raise HTTPException(400, "Malformed JSON payload")
+
+    # Razorpay stamps every delivery with a unique x-razorpay-event-id and
+    # replays reuse it. If a proxy strips the header, fall back to a digest
+    # of the raw body so replayed deliveries still dedupe.
+    event_id = request.headers.get("x-razorpay-event-id", "").strip()
+    if not event_id:
+        event_id = hashlib.sha256(payload_bytes).hexdigest()
 
     event_type: str = event.get("event", "")
     entity = event.get("payload", {}).get("subscription", {}).get("entity", {})
@@ -300,6 +310,16 @@ async def razorpay_webhook(request: Request) -> dict:
     try:
         _users.ensure_tables(conn)
         _subs.ensure_tables(conn)
+
+        if not _subs.record_payment_event(
+            conn,
+            "razorpay",
+            event_id,
+            event_type,
+            payload_bytes.decode(errors="replace"),
+        ):
+            log.info("Duplicate Razorpay event %s ignored", event_id)
+            return {"status": "duplicate", "event": event_type}
 
         # Resolve user_id — prefer DB lookup to avoid note-tampering
         existing_sub = _subs.get_subscription_by_rzp_id(conn, rzp_sub_id)
@@ -399,10 +419,17 @@ def generate_license_key(
     )
 
 
-@router.post("/license-key/validate", response_model=ValidateKeyResponse)
+@router.post(
+    "/license-key/validate",
+    response_model=ValidateKeyResponse,
+    # Unauthenticated route — the license bucket fuses key-guessing and
+    # scripted hammering (July 2026 hardening; same pattern as api.py's
+    # chat/optimize/autotune fuses).
+    dependencies=[Depends(rate_limit("license", 10, 60.0))],
+)
 def validate_license_key(body: ValidateKeyRequest) -> ValidateKeyResponse:
     """
-    Desktop app startup validation. No auth header required.
+    Client startup validation. No auth header required.
     Verifies key_hash, updates last_seen_at, returns tier.
     """
     conn = _get_conn()
