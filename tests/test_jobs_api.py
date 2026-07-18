@@ -42,7 +42,14 @@ _tmp_db_file = tempfile.NamedTemporaryFile(
 )
 _tmp_db_file.close()
 _TMP_DB_PATH = _tmp_db_file.name
-_PRIOR_MOTOQUANT_DB = os.environ.get("MOTOQUANT_DB")
+# Captured at import as a solo-run fallback ONLY. In a full-suite run this
+# value is unreliable for restore: collection imports every module before any
+# test runs, so by the time THIS module imports, an alphabetically-earlier
+# module (test_api) has already pointed MOTOQUANT_DB at ITS tmp copy — and
+# restoring that path after test_api's teardown deleted it left every later
+# module (test_llm_runner, test_power_boost_regression) reading an empty DB.
+_IMPORT_PRIOR_MOTOQUANT_DB = os.environ.get("MOTOQUANT_DB")
+_PRIOR_MOTOQUANT_DB = _IMPORT_PRIOR_MOTOQUANT_DB
 os.environ["MOTOQUANT_DB"] = _TMP_DB_PATH
 
 
@@ -54,7 +61,17 @@ def setUpModule():
     MOTOQUANT_DB at import) leaves the env pointing at ITS tmp DB by the
     time these tests actually run. Re-asserting here makes ordering
     irrelevant.
+
+    The restore value is captured HERE (run time), not at import: the
+    previous env-overriding module's tearDownModule has restored the true
+    session value by now, whereas the import-time snapshot may hold a
+    sibling's since-deleted tmp path. If the current value is our own tmp
+    (solo-file run — nothing ran in between), keep the import-time capture.
     """
+    global _PRIOR_MOTOQUANT_DB
+    current = os.environ.get("MOTOQUANT_DB")
+    if current != _TMP_DB_PATH:
+        _PRIOR_MOTOQUANT_DB = current
     os.environ["MOTOQUANT_DB"] = _TMP_DB_PATH
 
 
