@@ -1,5 +1,5 @@
 {
- "generated": "2026-07-13",
+ "generated": "2026-07-17",
  "references": {
   "K5": 9.9331,
   "R1": 10.1436,
@@ -8,37 +8,37 @@
  "n_matched": 277,
  "overall": {
   "n": 277,
-  "w_mean_abs": 0.2533,
-  "w_bias": 0.0166,
-  "raw_mean_abs": 0.3945
+  "w_mean_abs": 0.2721,
+  "w_bias": -0.0047,
+  "raw_mean_abs": 0.3758
  },
  "distribution": {
-  "within_0_05": 36,
-  "within_0_10": 74,
-  "within_0_20": 137,
+  "within_0_05": 38,
+  "within_0_10": 75,
+  "within_0_20": 138,
   "within_0_50": 225,
   "within_1_00": 257
  },
  "clusters": {
   "litre-sport-600-1000": {
    "n": 72,
-   "w_mean_abs": 0.1772,
-   "w_bias": 0.0023,
-   "raw_mean_abs": 0.1799,
+   "w_mean_abs": 0.1753,
+   "w_bias": 0.0005,
+   "raw_mean_abs": 0.1778,
    "label": "600-1000 sport (I4/triple)"
   },
   "sport-twin-600-1300": {
    "n": 48,
-   "w_mean_abs": 0.2561,
-   "w_bias": -0.0003,
+   "w_mean_abs": 0.2566,
+   "w_bias": 0.0036,
    "raw_mean_abs": 0.2768,
    "label": "Sport twins (600-1300cc)"
   },
   "other": {
    "n": 42,
-   "w_mean_abs": 0.3018,
-   "w_bias": 0.0243,
-   "raw_mean_abs": 0.3672,
+   "w_mean_abs": 0.3314,
+   "w_bias": 0.032,
+   "raw_mean_abs": 0.3792,
    "label": "Other"
   },
   "litre-sport-195+": {
@@ -64,16 +64,16 @@
   },
   "entry-200-300": {
    "n": 14,
-   "w_mean_abs": 0.2947,
-   "w_bias": 0.1365,
-   "raw_mean_abs": 0.5614,
+   "w_mean_abs": 0.2718,
+   "w_bias": 0.1368,
+   "raw_mean_abs": 0.5438,
    "label": "Entry (200-300cc)"
   },
   "entry-150-200": {
    "n": 13,
-   "w_mean_abs": 0.7544,
-   "w_bias": -0.0298,
-   "raw_mean_abs": 1.5751,
+   "w_mean_abs": 0.7742,
+   "w_bias": -0.4019,
+   "raw_mean_abs": 1.1467,
    "label": "Entry (150-200cc)"
   },
   "two-stroke": {
@@ -85,8 +85,8 @@
   },
   "mid-twin-300-500": {
    "n": 8,
-   "w_mean_abs": 0.4002,
-   "w_bias": 0.1237,
+   "w_mean_abs": 0.3637,
+   "w_bias": 0.1166,
    "raw_mean_abs": 0.3706,
    "label": "Mid twins (300-500cc)"
   },
@@ -99,9 +99,9 @@
   },
   "small-i4-screamer": {
    "n": 2,
-   "w_mean_abs": 0.4167,
-   "w_bias": 0.0319,
-   "raw_mean_abs": 0.8977,
+   "w_mean_abs": 1.1874,
+   "w_bias": -0.9763,
+   "raw_mean_abs": 1.0477,
    "label": "Small-cc I4 screamers"
   }
  },
@@ -464,6 +464,23 @@
    "quality": "magazine"
   },
   {
+   "make": "KTM",
+   "model": "Duke 250",
+   "year": 2017,
+   "disp_cc": 248,
+   "real_et": 15.5,
+   "sim_et": 15.4733,
+   "delta": -0.0267,
+   "abs_delta": 0.0267,
+   "real_trap": 132.4,
+   "sim_trap": 140.6,
+   "cluster": "entry-200-300",
+   "cluster_label": "Entry (200-300cc)",
+   "source": "Otomotifnet Racelogic instrumented 402m test, Sentul circuit (Indonesia)",
+   "weight": 1.0,
+   "quality": "instrumented"
+  },
+  {
    "make": "Aprilia",
    "model": "RSV4 1000",
    "year": 2009,
@@ -669,6 +686,23 @@
   },
   {
    "make": "Triumph",
+   "model": "Speed Triple 1050 (2011-2015)",
+   "year": 2011,
+   "disp_cc": 1050,
+   "real_et": 11.01,
+   "sim_et": 10.9637,
+   "delta": -0.0463,
+   "abs_delta": 0.0463,
+   "real_trap": 197.4,
+   "sim_trap": 214.7,
+   "cluster": "litre-sport-600-1000",
+   "cluster_label": "600-1000 sport (I4/triple)",
+   "source": "Sport Rider 2005",
+   "weight": 0.7,
+   "quality": "magazine"
+  },
+  {
+   "make": "Triumph",
    "model": "Daytona 675",
    "year": 2013,
    "disp_cc": 675,
@@ -812,13 +846,13 @@
    "sim_et": 14.057,
    "delta": 0.057,
    "abs_delta": 0.057,
-   "real_trap": 145,
+   "real_trap": 153,
    "sim_trap": 168.7,
    "cluster": "mid-twin-300-500",
    "cluster_label": "Mid twins (300-500cc)",
-   "source": "FastestLaps 2015 (verified)",
-   "weight": 0.5,
-   "quality": "aggregator"
+   "source": "MotoStatz GPS test (instrumented)",
+   "weight": 1.0,
+   "quality": "instrumented"
   },
   {
    "make": "Suzuki",
@@ -1091,23 +1125,6 @@
    "source": "Sport Rider 2009 (timing-strip)",
    "weight": 1.0,
    "quality": "instrumented"
-  },
-  {
-   "make": "Triumph",
-   "model": "Speed Triple 1050 (2011-2015)",
-   "year": 2011,
-   "disp_cc": 1050,
-   "real_et": 10.89,
-   "sim_et": 10.9637,
-   "delta": 0.0737,
-   "abs_delta": 0.0737,
-   "real_trap": 202.8,
-   "sim_trap": 214.7,
-   "cluster": "litre-sport-600-1000",
-   "cluster_label": "600-1000 sport (I4/triple)",
-   "source": "MotoStatz aggregate",
-   "weight": 0.5,
-   "quality": "aggregator"
   },
   {
    "make": "Aprilia",
@@ -1499,6 +1516,23 @@
    "source": "MotoStatz 2022 (Dragy, stock instrumented, SC-Project decat noted as neutral)",
    "weight": 1.0,
    "quality": "instrumented"
+  },
+  {
+   "make": "Triumph",
+   "model": "Speed Triple 1050 (2005-2010)",
+   "year": 2005,
+   "disp_cc": 1050,
+   "real_et": 11.01,
+   "sim_et": 11.1192,
+   "delta": 0.1092,
+   "abs_delta": 0.1092,
+   "real_trap": 197.4,
+   "sim_trap": 208.4,
+   "cluster": "litre-sport-600-1000",
+   "cluster_label": "600-1000 sport (I4/triple)",
+   "source": "Sport Rider 2005",
+   "weight": 0.7,
+   "quality": "magazine"
   },
   {
    "make": "Suzuki",
@@ -2198,23 +2232,6 @@
    "quality": "instrumented"
   },
   {
-   "make": "Harley-Davidson",
-   "model": "Nightster",
-   "year": 2022,
-   "disp_cc": 975,
-   "real_et": 12.2,
-   "sim_et": 12.3765,
-   "delta": 0.1765,
-   "abs_delta": 0.1765,
-   "real_trap": 175,
-   "sim_trap": 181.8,
-   "cluster": "other",
-   "cluster_label": "Other",
-   "source": "DERIVED (975 Revolution Max 89hp; Sportster S 11.10 base in list)",
-   "weight": 0.1,
-   "quality": "derived"
-  },
-  {
    "make": "Honda",
    "model": "Rebel 1100",
    "year": 2021,
@@ -2606,23 +2623,6 @@
    "quality": "derived"
   },
   {
-   "make": "Triumph",
-   "model": "Speed Triple 1050 (2005-2010)",
-   "year": 2005,
-   "disp_cc": 1050,
-   "real_et": 10.89,
-   "sim_et": 11.1192,
-   "delta": 0.2292,
-   "abs_delta": 0.2292,
-   "real_trap": 202.8,
-   "sim_trap": 208.4,
-   "cluster": "litre-sport-600-1000",
-   "cluster_label": "600-1000 sport (I4/triple)",
-   "source": "MotoStatz aggregate",
-   "weight": 0.5,
-   "quality": "aggregator"
-  },
-  {
    "make": "Suzuki",
    "model": "GSX-S1000GT",
    "year": 2022,
@@ -2946,23 +2946,6 @@
    "quality": "derived"
   },
   {
-   "make": "KTM",
-   "model": "Duke 250",
-   "year": 2017,
-   "disp_cc": 248,
-   "real_et": 15.2,
-   "sim_et": 15.4733,
-   "delta": 0.2733,
-   "abs_delta": 0.2733,
-   "real_trap": 140,
-   "sim_trap": 140.6,
-   "cluster": "entry-200-300",
-   "cluster_label": "Entry (200-300cc)",
-   "source": "DERIVED (0-100 \u00d7 1.6, \u00b10.7s)",
-   "weight": 0.1,
-   "quality": "derived"
-  },
-  {
    "make": "Yamaha",
    "model": "VMAX 1700",
    "year": 2009,
@@ -3141,13 +3124,13 @@
    "sim_et": 12.1187,
    "delta": 0.2987,
    "abs_delta": 0.2987,
-   "real_trap": 115,
+   "real_trap": 185,
    "sim_trap": 186.2,
    "cluster": "sport-twin-600-1300",
    "cluster_label": "Sport twins (600-1300cc)",
-   "source": "FastestLaps 2016",
-   "weight": 0.5,
-   "quality": "aggregator"
+   "source": "MotoStatz GPS test (instrumented)",
+   "weight": 1.0,
+   "quality": "instrumented"
   },
   {
    "make": "Suzuki",
@@ -3745,6 +3728,23 @@
    "quality": "instrumented"
   },
   {
+   "make": "Harley-Davidson",
+   "model": "Nightster",
+   "year": 2022,
+   "disp_cc": 975,
+   "real_et": 11.99,
+   "sim_et": 12.3765,
+   "delta": 0.3865,
+   "abs_delta": 0.3865,
+   "real_trap": 177.6,
+   "sim_trap": 181.8,
+   "cluster": "other",
+   "cluster_label": "Other",
+   "source": "Cycle World 2022",
+   "weight": 0.7,
+   "quality": "magazine"
+  },
+  {
    "make": "Aprilia",
    "model": "Tuono V4 1100",
    "year": 2021,
@@ -3927,9 +3927,9 @@
    "sim_trap": 164.7,
    "cluster": "entry-200-300",
    "cluster_label": "Entry (200-300cc)",
-   "source": "FastestLaps (verified, 93 mph)",
-   "weight": 0.5,
-   "quality": "aggregator"
+   "source": "MotoStatz GPS test (instrumented)",
+   "weight": 1.0,
+   "quality": "instrumented"
   },
   {
    "make": "Honda",
@@ -3996,23 +3996,6 @@
    "cluster": "sport-twin-600-1300",
    "cluster_label": "Sport twins (600-1300cc)",
    "source": "DERIVED (689 CP2; MT-07 12.13 base + touring weight)",
-   "weight": 0.1,
-   "quality": "derived"
-  },
-  {
-   "make": "Harley-Davidson",
-   "model": "V-Rod Muscle",
-   "year": 2009,
-   "disp_cc": 1247,
-   "real_et": 11.8,
-   "sim_et": 11.2702,
-   "delta": -0.5298,
-   "abs_delta": 0.5298,
-   "real_trap": 183,
-   "sim_trap": 198.4,
-   "cluster": "other",
-   "cluster_label": "Other",
-   "source": "DERIVED (1247cc Revolution V-Rod platform; heavier muscle body)",
    "weight": 0.1,
    "quality": "derived"
   },
@@ -4187,6 +4170,23 @@
    "quality": "magazine"
   },
   {
+   "make": "Harley-Davidson",
+   "model": "V-Rod Muscle",
+   "year": 2009,
+   "disp_cc": 1247,
+   "real_et": 11.875,
+   "sim_et": 11.2702,
+   "delta": -0.6048,
+   "abs_delta": 0.6048,
+   "real_trap": 183.7,
+   "sim_trap": 198.4,
+   "cluster": "other",
+   "cluster_label": "Other",
+   "source": "Rider Magazine 2/2009 (instrumented, Infineon dragstrip timed runs)",
+   "weight": 1.0,
+   "quality": "instrumented"
+  },
+  {
    "make": "BMW",
    "model": "R1200GS",
    "year": 2013,
@@ -4287,6 +4287,23 @@
    "source": "AfricaTwinForum timeslip 2020 (drag strip, 103 mph trap)",
    "weight": 0.3,
    "quality": "forum_or_timeslip"
+  },
+  {
+   "make": "TVS",
+   "model": "Apache RTR 200 4V",
+   "year": 2016,
+   "disp_cc": 197,
+   "real_et": 18.1,
+   "sim_et": 18.7765,
+   "delta": 0.6765,
+   "abs_delta": 0.6765,
+   "real_trap": 115,
+   "sim_trap": 111.0,
+   "cluster": "entry-150-200",
+   "cluster_label": "Entry (150-200cc)",
+   "source": "Otomotif Racelogic instrumented 402m comparo vs Pulsar 200NS (Indonesia, carb)",
+   "weight": 1.0,
+   "quality": "instrumented"
   },
   {
    "make": "Husqvarna",
@@ -4391,21 +4408,21 @@
    "quality": "aggregator"
   },
   {
-   "make": "Bajaj",
-   "model": "Pulsar NS200",
-   "year": 2012,
-   "disp_cc": 199.5,
-   "real_et": 16.9,
-   "sim_et": 16.0433,
-   "delta": -0.8567,
-   "abs_delta": 0.8567,
-   "real_trap": 130,
-   "sim_trap": 130.4,
+   "make": "Yamaha",
+   "model": "MT-15 V2",
+   "year": 2021,
+   "disp_cc": 155,
+   "real_et": 19.6,
+   "sim_et": 18.7298,
+   "delta": -0.8702,
+   "abs_delta": 0.8702,
+   "real_trap": 108,
+   "sim_trap": 112.4,
    "cluster": "entry-150-200",
    "cluster_label": "Entry (150-200cc)",
-   "source": "MotorBikeCatalog 2012 (site estimate; transcription verified)",
-   "weight": 0.5,
-   "quality": "aggregator"
+   "source": "OtoRider GPS-instrumented 402m test (Indonesia)",
+   "weight": 1.0,
+   "quality": "instrumented"
   },
   {
    "make": "Honda",
@@ -4459,23 +4476,6 @@
    "quality": "magazine"
   },
   {
-   "make": "Harley-Davidson",
-   "model": "VRSCA V-Rod",
-   "year": 2002,
-   "disp_cc": 1130.0,
-   "real_et": 11.6,
-   "sim_et": 12.5868,
-   "delta": 0.9868,
-   "abs_delta": 0.9868,
-   "real_trap": 185,
-   "sim_trap": 186.6,
-   "cluster": "other",
-   "cluster_label": "Other",
-   "source": "HDForums/DragTimes timeslip (bone-stock 2006 VRSCA 11.6s @ Daytona)",
-   "weight": 0.3,
-   "quality": "forum_or_timeslip"
-  },
-  {
    "make": "Honda",
    "model": "NSR250R SP",
    "year": 1990,
@@ -4491,6 +4491,23 @@
    "source": "MotorBikeCatalog (estimated 1991 MC21)",
    "weight": 0.5,
    "quality": "aggregator"
+  },
+  {
+   "make": "Yamaha",
+   "model": "MT-15 V1",
+   "year": 2019,
+   "disp_cc": 155.09,
+   "real_et": 19.6,
+   "sim_et": 18.5544,
+   "delta": -1.0456,
+   "abs_delta": 1.0456,
+   "real_trap": 108,
+   "sim_trap": 113.2,
+   "cluster": "entry-150-200",
+   "cluster_label": "Entry (150-200cc)",
+   "source": "OtoRider GPS-instrumented 402m test (Indonesia)",
+   "weight": 1.0,
+   "quality": "instrumented"
   },
   {
    "make": "Kawasaki",
@@ -4561,6 +4578,23 @@
    "quality": "derived"
   },
   {
+   "make": "Harley-Davidson",
+   "model": "VRSCA V-Rod",
+   "year": 2002,
+   "disp_cc": 1130.0,
+   "real_et": 11.38,
+   "sim_et": 12.5868,
+   "delta": 1.2068,
+   "abs_delta": 1.2068,
+   "real_trap": 185,
+   "sim_trap": 186.6,
+   "cluster": "other",
+   "cluster_label": "Other",
+   "source": "Motorcycle Consumer-News stock QM test via Wikipedia VRSC (magazine)",
+   "weight": 0.7,
+   "quality": "magazine"
+  },
+  {
    "make": "Yamaha",
    "model": "FZ25",
    "year": 2017,
@@ -4576,6 +4610,23 @@
    "source": "DERIVED (0-100 \u00d7 1.6, \u00b10.7s)",
    "weight": 0.1,
    "quality": "derived"
+  },
+  {
+   "make": "Bajaj",
+   "model": "Pulsar NS200",
+   "year": 2012,
+   "disp_cc": 199.5,
+   "real_et": 17.3,
+   "sim_et": 16.0433,
+   "delta": -1.2567,
+   "abs_delta": 1.2567,
+   "real_trap": 130,
+   "sim_trap": 130.4,
+   "cluster": "entry-150-200",
+   "cluster_label": "Entry (150-200cc)",
+   "source": "Otomotif Racelogic instrumented 402m comparo (Indonesia, Kawasaki Bajaj Pulsar 200NS)",
+   "weight": 1.0,
+   "quality": "instrumented"
   },
   {
    "make": "Bajaj",
@@ -4608,23 +4659,6 @@
    "cluster": "single-300-500",
    "cluster_label": "Singles (300-500cc)",
    "source": "DERIVED (0-100 8.23s x1.6, CarBlogIndia; top speed 148 km/h)",
-   "weight": 0.1,
-   "quality": "derived"
-  },
-  {
-   "make": "Kawasaki",
-   "model": "Ninja ZX-25R (Indonesia)",
-   "year": 2020,
-   "disp_cc": 249.8,
-   "real_et": 13.8,
-   "sim_et": 12.2608,
-   "delta": -1.5392,
-   "abs_delta": 1.5392,
-   "real_trap": 160,
-   "sim_trap": 175.9,
-   "cluster": "small-i4-screamer",
-   "cluster_label": "Small-cc I4 screamers",
-   "source": "DERIVED (51hp 250 I4, 0-100<6s, top 187-190 km/h MotorBeam)",
    "weight": 0.1,
    "quality": "derived"
   },
@@ -4680,55 +4714,21 @@
    "quality": "forum_or_timeslip"
   },
   {
-   "make": "Yamaha",
-   "model": "MT-15 V1",
-   "year": 2019,
-   "disp_cc": 155.09,
-   "real_et": 15.8,
-   "sim_et": 18.5544,
-   "delta": 2.7544,
-   "abs_delta": 2.7544,
-   "real_trap": 130,
-   "sim_trap": 113.2,
-   "cluster": "entry-150-200",
-   "cluster_label": "Entry (150-200cc)",
-   "source": "DERIVED (0-100 \u00d7 1.6, \u00b10.7s)",
-   "weight": 0.1,
-   "quality": "derived"
-  },
-  {
-   "make": "TVS",
-   "model": "Apache RTR 200 4V",
-   "year": 2016,
-   "disp_cc": 197,
-   "real_et": 15.9,
-   "sim_et": 18.7765,
-   "delta": 2.8765,
-   "abs_delta": 2.8765,
-   "real_trap": 128,
-   "sim_trap": 111.0,
-   "cluster": "entry-150-200",
-   "cluster_label": "Entry (150-200cc)",
-   "source": "DERIVED (0-100 \u00d7 1.6, \u00b10.7s)",
-   "weight": 0.1,
-   "quality": "derived"
-  },
-  {
-   "make": "Yamaha",
-   "model": "MT-15 V2",
-   "year": 2021,
-   "disp_cc": 155,
-   "real_et": 15.8,
-   "sim_et": 18.7298,
-   "delta": 2.9298,
-   "abs_delta": 2.9298,
-   "real_trap": 130,
-   "sim_trap": 112.4,
-   "cluster": "entry-150-200",
-   "cluster_label": "Entry (150-200cc)",
-   "source": "DERIVED (0-100 \u00d7 1.6, \u00b10.7s)",
-   "weight": 0.1,
-   "quality": "derived"
+   "make": "Kawasaki",
+   "model": "Ninja ZX-25R (Indonesia)",
+   "year": 2020,
+   "disp_cc": 249.8,
+   "real_et": 14.1,
+   "sim_et": 12.2608,
+   "delta": -1.8392,
+   "abs_delta": 1.8392,
+   "real_trap": 153.6,
+   "sim_trap": 175.9,
+   "cluster": "small-i4-screamer",
+   "cluster_label": "Small-cc I4 screamers",
+   "source": "TMCBlog/Otomotif Racelogic instrumented 402m test (Indonesia)",
+   "weight": 1.0,
+   "quality": "instrumented"
   },
   {
    "make": "Hero",

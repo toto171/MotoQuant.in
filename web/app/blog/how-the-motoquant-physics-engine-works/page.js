@@ -150,7 +150,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Current state across 277 matched benchmarks (July 2026 sweep): overall source-quality-weighted mean absolute error is 0.253 seconds, weighted bias is essentially zero (+0.017 s — meaning the simulator is no longer systematically optimistic or pessimistic). Across the ten cleanest validated runs the mean absolute error is ±0.009 s, and 137 of the 277 benchmarks fall within ±0.20 s. The 195+ hp class is the tightest at 0.147 s weighted |Δ|. The small-cc and 2-stroke clusters have higher variance, partly because their published benchmarks are themselves uncertain (most Indian small-cc ETs are estimated from 0–100 km/h times rather than measured timeslips).',
+    text: 'Current state across 277 matched benchmarks (July 2026 sweep): overall source-quality-weighted mean absolute error is 0.272 seconds, weighted bias is essentially zero (−0.005 s — meaning the simulator is no longer systematically optimistic or pessimistic). Across the ten cleanest validated runs the mean absolute error is ±0.009 s, and 138 of the 277 benchmarks fall within ±0.20 s. The 195+ hp class is the tightest at 0.147 s weighted |Δ|. The small-cc and 2-stroke clusters have higher variance, partly because their published benchmarks are themselves uncertain (most Indian small-cc ETs are estimated from 0–100 km/h times rather than measured timeslips).',
   },
   {
     type: 'h2',
