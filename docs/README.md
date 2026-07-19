@@ -30,6 +30,7 @@ contract) → **[ONBOARDING.md](ONBOARDING.md)** → **[ARCHITECTURE.md](ARCHITE
 |---|---|
 | [RENDER_MIGRATION.md](RENDER_MIGRATION.md) | API cutover to Render + rollback runbook. |
 | [PAYMENTS_SETUP.md](PAYMENTS_SETUP.md) | Stripe/Razorpay go-live steps (operator). |
+| [GOOGLE_AI_CREDITS_RUNBOOK.md](GOOGLE_AI_CREDITS_RUNBOOK.md) | $300 Google credit → paid Gemini setup (Cowork/operator, July 2026). |
 | [COMMERCIAL_LAUNCH.md](COMMERCIAL_LAUNCH.md) | Freemium/quota launch plan. |
 | [RELEASE.md](RELEASE.md) | Release process (desktop parts deprecated). |
 | [INSTALL.md](INSTALL.md) | Install notes (desktop parts deprecated). |
