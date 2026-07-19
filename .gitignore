@@ -156,3 +156,6 @@ TOKENS_UPDATE_*.md
 # Patch-tool droppings
 *.orig
 *.rej
+
+# Scrapling toolkit raw-HTML disk cache (scripts/scrape_bike_specs.py)
+scrape_cache/

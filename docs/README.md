@@ -21,6 +21,7 @@ contract) → **[ONBOARDING.md](ONBOARDING.md)** → **[ARCHITECTURE.md](ARCHITE
 | [CHAT_AGENT.md](CHAT_AGENT.md) | The agentic chat: tool-calling loop, tools, budgets. |
 | [MOTOQUANT_LLM_PLAN.md](MOTOQUANT_LLM_PLAN.md) | LLM provider abstraction + roadmap. |
 | [OBSERVABILITY.md](OBSERVABILITY.md) | Sentry wiring (env-gated). |
+| [SCRAPING.md](SCRAPING.md) | Scrapling toolkit (dev-side): polite fetch tiers → validator gate. |
 | [PARAMETER_AUDIT.txt](PARAMETER_AUDIT.txt) | Physics parameter inventory. |
 | [adr/](adr/) | Architecture Decision Records. |
 | [papers/](papers/) | Reference papers, project plans, validation reports. |

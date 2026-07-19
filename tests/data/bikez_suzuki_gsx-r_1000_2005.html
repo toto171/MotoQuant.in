@@ -1,0 +1,44 @@
+<!--
+  Test fixture: reconstruction of a bikez.com detail-page spec table
+  (structure per the documented format in motoquant/scraper/bikez.py —
+  <table class="zebra-table"> of <tr><td>label</td><td>value</td></tr>).
+  Values are the 2005 Suzuki GSX-R 1000 (K5). This is a SYNTHETIC fixture:
+  bikez.com is bot-walled and could not be fetched from the sandbox, so
+  formatting quirks (e.g. the doubled paren in the Power row) are
+  reproduced from the parser's documented expectations, not a live copy.
+  Rows like "Front brakes" / "Rake" intentionally have no FIELD_MAP entry —
+  they exercise the unmapped-row surfacing in scripts/scrape_bike_specs.py.
+-->
+<html>
+<head><title>Suzuki GSX-R 1000 2005 specifications and pictures</title></head>
+<body>
+<div id="header"><a href="/motorcycles/suzuki_motorcycles.php">Suzuki motorcycles</a></div>
+<h1>Suzuki GSX-R 1000 2005</h1>
+<table class="zebra-table">
+  <tr><td>Year</td><td>2005</td></tr>
+  <tr><td>Category</td><td>Sport</td></tr>
+  <tr><td>Displacement</td><td>999.00 ccm (60.96 cubic inches)</td></tr>
+  <tr><td>Engine Type</td><td>In-line four, DOHC, four-stroke</td></tr>
+  <tr><td>Number of Cylinders</td><td>4</td></tr>
+  <tr><td>Valves Per Cylinder</td><td>4</td></tr>
+  <tr><td>Power</td><td>178.00 HP (129.9 kW)) @ 11000 RPM</td></tr>
+  <tr><td>Torque</td><td>110.00 Nm (11.2 kgf-m or 81.1 ft.lbs) @ 9000 RPM</td></tr>
+  <tr><td>Compression</td><td>12.5:1</td></tr>
+  <tr><td>Bore x Stroke</td><td>73.4 x 59.0 mm (2.9 x 2.3 inches)</td></tr>
+  <tr><td>Fuel System</td><td>Injection</td></tr>
+  <tr><td>Cooling System</td><td>Liquid</td></tr>
+  <tr><td>Number of Gears</td><td>6-speed</td></tr>
+  <tr><td>Drive</td><td>Chain</td></tr>
+  <tr><td>Dry weight</td><td>166.0 kg (366.0 pounds)</td></tr>
+  <tr><td>Wheelbase</td><td>1,405 mm (55.3 inches)</td></tr>
+  <tr><td>Seat Height</td><td>810 mm (31.9 inches)</td></tr>
+  <tr><td>Fuel Capacity</td><td>18.00 litres (4.76 gallons)</td></tr>
+  <tr><td>Front Tires</td><td>120/70 ZR17</td></tr>
+  <tr><td>Rear Tires</td><td>190/50 ZR17</td></tr>
+  <tr><td>Front brakes</td><td>Double disc</td></tr>
+  <tr><td>Rear brakes</td><td>Single disc</td></tr>
+  <tr><td>Rake (fork angle)</td><td>23.8&deg;</td></tr>
+</table>
+<div id="footer">Specs, pictures, rating and discussion.</div>
+</body>
+</html>
