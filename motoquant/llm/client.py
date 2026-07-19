@@ -40,10 +40,14 @@ _PROVIDERS: dict[str, dict[str, str | None]] = {
     "gemini": {
         # Free-tier eligibility for specific model IDs varies by project /
         # region (Google sometimes returns "limit: 0" on a model the docs
-        # claim is free). Override via GEMINI_MODEL env var if needed —
-        # known-good free options: gemini-2.5-flash, gemini-2.5-flash-lite,
-        # gemini-2.0-flash, gemini-2.0-flash-lite.
-        "model": "gemini-2.5-flash",
+        # claim is free). Override via GEMINI_MODEL env var if needed.
+        # The 2.x generation was deprecated 2026-06-17 (shutdown Oct 2026,
+        # 404s reported from July 2026), so the default tracks the current
+        # GA free-tier model. July-2026 alternatives: gemini-3.5-flash
+        # (GA workhorse, pricier paid tier), gemini-3-flash-preview;
+        # paid-only flagship: gemini-3.1-pro-preview. Paid-tier setup:
+        # docs/GOOGLE_AI_CREDITS_RUNBOOK.md.
+        "model": "gemini-3.1-flash-lite",
         "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
         "api_key_env": "GEMINI_API_KEY",
         "model_env": "GEMINI_MODEL",
