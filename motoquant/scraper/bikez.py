@@ -447,6 +447,45 @@ def _parse_bikez_spec_table(
 # ────────────────────────────────────────────────────────
 
 
+def parse_bikez_detail(html: str, url: str) -> BikeSpec:
+    """
+    Parse a Bikez.com detail page (already-fetched HTML) into a BikeSpec.
+
+    Pure function — no network. Manufacturer / model / year are derived
+    from the URL slug exactly as ``scrape_bikez`` always did; the spec
+    table is parsed by ``_parse_bikez_spec_table``. This is the single
+    parsing entry point shared by the legacy requests-based crawler and
+    the Scrapling-backed toolkit (``scripts/scrape_bike_specs.py``).
+    """
+    # Extract manufacturer and model from URL
+    url_path = urllib.parse.urlparse(url).path
+    # e.g. /motorcycles/suzuki_gsx-r_1000_2005.php
+    fn = url_path.split("/")[-1].replace(".php", "")
+    parts = fn.split("_")
+
+    manufacturer = parts[0].replace("-", " ").title() if parts else ""
+    year_from_url = None
+    model_parts = []
+    for i, p in enumerate(parts[1:]):
+        # The year is the LAST slug segment on bikez detail URLs. A bare
+        # displacement token earlier in the slug (gsx-r_1000_2005,
+        # s_1000_rr_2019) also matches \d{4} — the old first-match rule
+        # truncated those models to "GSX R" and read year=1000.
+        is_last = i == len(parts) - 2
+        if is_last and re.match(r"^(19[5-9]\d|20[0-4]\d)$", p):
+            year_from_url = int(p)
+            break
+        model_parts.append(p)
+    model_name = " ".join(p.replace("-", " ").upper() for p in model_parts)
+
+    spec = _parse_bikez_spec_table(html, url, manufacturer, model_name)
+
+    if year_from_url and spec.year_from is None:
+        spec.year_from = year_from_url
+
+    return spec
+
+
 def scrape_bikez(url: str, session=None) -> BikeSpec | None:
     """
     Scrape a single Bikez.com detail page.
@@ -470,28 +509,7 @@ def scrape_bikez(url: str, session=None) -> BikeSpec | None:
     if html is None:
         return None
 
-    # Extract manufacturer and model from URL
-    url_path = urllib.parse.urlparse(url).path
-    # e.g. /motorcycles/suzuki_gsx-r_1000_2005.php
-    fn = url_path.split("/")[-1].replace(".php", "")
-    parts = fn.split("_")
-
-    manufacturer = parts[0].replace("-", " ").title() if parts else ""
-    year_from_url = None
-    model_parts = []
-    for p in parts[1:]:
-        if re.match(r"^\d{4}$", p):
-            year_from_url = int(p)
-            break
-        model_parts.append(p)
-    model_name = " ".join(p.replace("-", " ").upper() for p in model_parts)
-
-    spec = _parse_bikez_spec_table(html, url, manufacturer, model_name)
-
-    if year_from_url and spec.year_from is None:
-        spec.year_from = year_from_url
-
-    return spec
+    return parse_bikez_detail(html, url)
 
 
 def crawl_bikez(

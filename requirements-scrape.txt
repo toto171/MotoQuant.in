@@ -1,0 +1,22 @@
+# MotoQuant Pro -- dev-side scraping toolkit dependencies
+# Install with: pip install -r requirements-scrape.txt
+#
+# HARD RULE: none of this ever goes into requirements-api.txt. The prod
+# image (Render, 512 MB) must not carry a scraping stack; the motoquant
+# package only soft-imports scrapling (lazy, typed error when absent).
+#
+# scrapling[fetchers] provides:
+#   - Fetcher          (curl_cffi, Chrome TLS impersonation)  -> "basic" tier
+#   - DynamicFetcher   (Playwright Chromium, renders JS)      -> "browser" tier
+#   - StealthyFetcher  (Camoufox anti-bot browser)            -> "stealth" tier
+#   - protego          (robots.txt parsing -- politeness gate)
+#
+# Browser-tier setup: uses an existing Chromium. In Claude sandboxes pass
+# --browser-executable /opt/pw-browsers/chromium (PLAYWRIGHT_BROWSERS_PATH
+# is preconfigured; do NOT run `playwright install`). On a dev machine:
+# `playwright install chromium` once.
+#
+# Stealth-tier setup (OPT-IN, operator machines only): `camoufox fetch`
+# downloads a ~700 MB hardened Firefox. Only justified against hard
+# anti-bot walls; never needed for parsing or tests.
+scrapling[fetchers]>=0.4.11,<0.5
