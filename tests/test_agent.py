@@ -512,6 +512,31 @@ class TestAgentLoop(unittest.TestCase):
         self.assertGreater(et({"mass_delta_kg": 40}), base + 0.05)
         self.assertLess(et({"power_boost_pct": 25}), base - 0.05)
 
+    def test_search_bikes_tolerates_loosely_typed_args(self):
+        """Regression: MOTOQUANTAPI-2 — the model returned tool arguments
+        loosely typed (e.g. limit="5"/"5.0"/"5 bikes"/bike_id="11"), and a
+        bare int() blew up search_bikes with 'invalid literal for int() with
+        base 10'. Every shape must resolve instead of raising."""
+        from motoquant.llm.agent import (
+            AgentChatResult,
+            AgentContext,
+            _as_int,
+            _exec_search_bikes,
+        )
+
+        db = _get_db()
+        ctx = AgentContext(db=db, result=AgentChatResult(raw_query=""))
+        for bad_limit in ("5", "5.0", 5.0, " 5 ", "5 bikes", "all", "", None):
+            out = _exec_search_bikes(ctx, {"query": "hayabusa", "limit": bad_limit})
+            self.assertNotIn("error", out)  # must not raise / must resolve
+            self.assertIn("candidates", out)
+
+        # helper contract
+        self.assertEqual(_as_int("5.0"), 5)
+        self.assertEqual(_as_int("top 3"), 3)
+        self.assertEqual(_as_int("all", 7), 7)
+        self.assertIsNone(_as_int("all"))
+
     def test_compare_costs_two_sims(self):
         client, _ = _scripted_client(
             [[("compare_bikes", {"bike_a_id": 11, "bike_b_id": 1})], "compared"]

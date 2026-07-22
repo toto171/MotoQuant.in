@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -55,6 +56,40 @@ TOOL_RESULT_MAX_CHARS = 6_000
 HISTORY_MAX_MESSAGES = 16
 HISTORY_MAX_CHARS = 16_000
 AGENT_MAX_TOKENS = 2_048
+
+
+def _as_int(value: Any, default: int | None = None) -> int | None:
+    """Coerce a loosely-typed tool argument to int without raising.
+
+    LLM function-calling returns arguments only loosely typed: an integer
+    can arrive as ``5``, ``5.0``, ``"5"``, ``"5.0"``, ``" 5 "``, or garbage
+    like ``"5 bikes"`` / ``"top 3"`` / ``"all"``. A bare ``int(value)`` on
+    any of those raises ``ValueError: invalid literal for int() with base
+    10`` and aborts the whole tool call (this is the search_bikes crash in
+    Sentry). Coerce defensively instead: read a whole number where one is
+    present, otherwise fall back to ``default``.
+    """
+    if value is None or isinstance(value, bool):
+        return default
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value)
+    s = str(value).strip()
+    if not s:
+        return default
+    try:
+        return int(s)
+    except ValueError:
+        pass
+    try:
+        return int(float(s))
+    except ValueError:
+        pass
+    # last resort: pull the first integer token out of e.g. "top 3"
+    m = re.search(r"-?\d+", s)
+    return int(m.group()) if m else default
+
 
 # ─── Build-tier glossary (single source of truth for chat) ────────────────
 # Industry-standard motorcycle drag-build stages. stage_3 is honestly
@@ -256,17 +291,16 @@ def _build_config_for(ctx: AgentContext, args: dict[str, Any]):
     user-meaningful message.
     """
     db = ctx.db
-    bike_id = args.get("bike_id")
+    bike_id = _as_int(args.get("bike_id"))
     if not bike_id:
         raise ValueError("bike_id is required (use search_bikes first)")
-    bike_id = int(bike_id)
 
     config_row = db.bikes.get_current_config(bike_id)
     if config_row is None:
         raise ValueError(
             f"no physics config for bike_id {bike_id} — is the id correct?"
         )
-    env = _venue_env(db, args.get("venue_id"))
+    env = _venue_env(db, _as_int(args.get("venue_id")))
     config = db.bikes.to_config(config_row["id"], environment=env)
     if config is None:
         raise ValueError(f"config load failed for bike_id {bike_id}")
@@ -288,15 +322,16 @@ def _build_config_for(ctx: AgentContext, args: dict[str, Any]):
         from ..database.parts_repo import PartsRepository
 
         repo = PartsRepository(db.conn)
-        config = repo.apply_multiple([int(p) for p in part_ids], config)
-        cost = repo.estimate_build_cost([int(p) for p in part_ids])
-        notes.append(f"{len(part_ids)} parts applied (₹{cost.get('total', 0):,.0f})")
+        ids = [pid for pid in (_as_int(p) for p in part_ids) if pid is not None]
+        config = repo.apply_multiple(ids, config)
+        cost = repo.estimate_build_cost(ids)
+        notes.append(f"{len(ids)} parts applied (₹{cost.get('total', 0):,.0f})")
 
-    rear_tire_id = args.get("rear_tire_id")
+    rear_tire_id = _as_int(args.get("rear_tire_id"))
     if rear_tire_id:
         row = db.conn.execute(
             "SELECT mu_peak, pacejka_D FROM tire_models WHERE id=?",
-            (int(rear_tire_id),),
+            (rear_tire_id,),
         ).fetchone()
         if row:
             r = dict(row)
@@ -571,7 +606,7 @@ def _exec_search_bikes(ctx: AgentContext, args: dict) -> dict:
     query = (args.get("query") or "").strip()
     if not query:
         return {"error": "empty query"}
-    limit = max(1, min(int(args.get("limit") or 5), 10))
+    limit = max(1, min(_as_int(args.get("limit"), 5) or 5, 10))
     match_id, suggestions = resolve_bike(query, ctx.db)
     out: dict[str, Any] = {"query": query}
     if match_id is not None:
@@ -602,7 +637,7 @@ def _exec_search_bikes(ctx: AgentContext, args: dict) -> dict:
 
 
 def _exec_get_bike_details(ctx: AgentContext, args: dict) -> dict:
-    bike_id = int(args.get("bike_id") or 0)
+    bike_id = _as_int(args.get("bike_id"), 0)
     row = ctx.db.conn.execute(
         """SELECT bm.*, m.name AS manufacturer_name
            FROM bike_models bm JOIN manufacturers m ON bm.manufacturer_id=m.id
@@ -655,7 +690,7 @@ def _exec_run_simulation(ctx: AgentContext, args: dict) -> dict:
         config, notes = _build_config_for(ctx, args)
     except ValueError as e:
         return {"error": str(e)}
-    bike_name = _bike_display_name(ctx.db, int(args["bike_id"]))
+    bike_name = _bike_display_name(ctx.db, _as_int(args.get("bike_id"), 0))
     ctx.tick(0.0, f"Simulating {bike_name}")
     try:
         sim = MotoQuantEngine(config).run()
@@ -676,7 +711,7 @@ def _exec_run_top_speed(ctx: AgentContext, args: dict) -> dict:
         config, notes = _build_config_for(ctx, args)
     except ValueError as e:
         return {"error": str(e)}
-    bike_name = _bike_display_name(ctx.db, int(args["bike_id"]))
+    bike_name = _bike_display_name(ctx.db, _as_int(args.get("bike_id"), 0))
     ctx.tick(0.0, f"Top-speed run: {bike_name}")
     try:
         ts = MotoQuantEngine(config).run_top_speed()
@@ -711,7 +746,7 @@ def _exec_compare_bikes(ctx: AgentContext, args: dict) -> dict:
             config, notes = _build_config_for(ctx, sub_args)
         except ValueError as e:
             return {"error": f"bike {key}: {e}"}
-        name = _bike_display_name(ctx.db, int(args[id_key]))
+        name = _bike_display_name(ctx.db, _as_int(args.get(id_key), 0))
         ctx.tick(0.0, f"Simulating {name}")
         try:
             sim = MotoQuantEngine(config).run()
@@ -734,8 +769,8 @@ def _exec_compare_bikes(ctx: AgentContext, args: dict) -> dict:
 def _exec_search_parts(ctx: AgentContext, args: dict) -> dict:
     from ..database.parts_repo import PartsRepository
 
-    bike_id = int(args.get("bike_id") or 0)
-    limit = max(1, min(int(args.get("limit") or 12), 30))
+    bike_id = _as_int(args.get("bike_id"), 0)
+    limit = max(1, min(_as_int(args.get("limit"), 12) or 12, 30))
     repo = PartsRepository(ctx.db.conn)
     try:
         rows = repo.search(
@@ -769,7 +804,7 @@ def _exec_search_parts(ctx: AgentContext, args: dict) -> dict:
 
 
 def _exec_list_tires(ctx: AgentContext, args: dict) -> dict:
-    bike_id = int(args.get("bike_id") or 0)
+    bike_id = _as_int(args.get("bike_id"), 0)
     try:
         fitments = ctx.db.tires.get_bike_fitments(
             bike_id, fitment_type=args.get("fitment_type") or None
@@ -798,7 +833,7 @@ def _exec_rank_bikes(ctx: AgentContext, args: dict) -> dict:
     """Shortlist by power-to-weight (cheap SQL), then rank by REAL sims."""
     from ..physics import MotoQuantEngine
 
-    top_n = max(1, min(int(args.get("top_n") or 5), 5))
+    top_n = max(1, min(_as_int(args.get("top_n"), 5) or 5, 5))
     sql = """
         SELECT bm.id, bm.model_name, m.name AS manufacturer,
                bm.peak_power_hp, bm.dry_mass_kg, bm.displacement_cc,
@@ -894,7 +929,7 @@ def _exec_optimize_build(ctx: AgentContext, args: dict) -> dict:
     err = ctx.spend_heavy()
     if err:
         return {"error": err}
-    bike_id = int(args.get("bike_id") or 0)
+    bike_id = _as_int(args.get("bike_id"), 0)
     tier = resolve_build_tier(args.get("build_tier"))
     tier_info = BUILD_TIERS[tier]
     budget = args.get("budget_inr")
@@ -981,7 +1016,7 @@ def _exec_autotune_setup(ctx: AgentContext, args: dict) -> dict:
         return {"error": str(e)}
     from ..analysis.ecu_autotune import autotune
 
-    bike_name = _bike_display_name(ctx.db, int(args["bike_id"]))
+    bike_name = _bike_display_name(ctx.db, _as_int(args.get("bike_id"), 0))
     ctx.tick(0.0, f"Autotuning setup: {bike_name}")
     try:
         result = autotune(config, progress_cb=lambda f, s=None: ctx.tick(f, s))
@@ -1022,7 +1057,7 @@ def _exec_web_search(ctx: AgentContext, args: dict) -> dict:
 
     ctx.tick(0.0, "Searching the web")
     payload = web_search(
-        args.get("query") or "", max_results=int(args.get("max_results") or 5)
+        args.get("query") or "", max_results=_as_int(args.get("max_results"), 5) or 5
     )
     if payload.get("results"):
         ctx.add_block(
