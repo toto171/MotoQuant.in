@@ -55,10 +55,14 @@ readonly BASELINE_TOLERANCE_S=0.005
 readonly GIT_NAME="Arya Desai"
 readonly GIT_EMAIL="da25mem5s02@student.nitw.ac.in"
 
-# Reference baselines pinned by motoquant/defaults.py
-readonly TARGET_K5=10.0334
-readonly TARGET_R1=10.2859
-readonly TARGET_BUSA=10.4712
+# Reference baselines are NOT duplicated here. They live in exactly one place —
+# scripts/check_baselines.py — and verify_baselines() below delegates to it.
+# This script used to carry its own inline copy of the pins; that copy went
+# stale at the July-13 physics epoch (10.0334/10.2859/10.4712 vs the current
+# 9.9331/10.1436/10.3633) and, at ±0.005 s tolerance, hard-failed step 5 with a
+# false "physics drift" on a perfectly healthy tree — aborting every autonomous
+# session at exit 3. session_postflight.sh had the identical bug and was fixed
+# on 2026-07-17; this twin was missed and is fixed here (2026-07-25 audit).
 
 # ─── Logging helpers ─────────────────────────────────────────────────────
 log()   { printf "\033[36m[preflight]\033[0m %s\n" "$*"; }
@@ -214,24 +218,7 @@ verify_baselines() {
   cd "${MQ_WORKDIR}/repo"
   log "running K5/R1/Hayabusa baseline regression..."
 
-  if ! python3 -c "
-import sys, motoquant
-from motoquant import MotoQuantEngine
-TOL = ${BASELINE_TOLERANCE_S}
-fails = []
-for name, cfg, target in [
-    ('K5', motoquant.gsxr1000_k5(), ${TARGET_K5}),
-    ('R1', motoquant.yzfr1_4c8(), ${TARGET_R1}),
-    ('Busa', motoquant.hayabusa_gen1(), ${TARGET_BUSA}),
-]:
-    et = MotoQuantEngine(cfg).run().time_quarter
-    delta = et - target
-    status = 'PASS' if abs(delta) < TOL else 'FAIL'
-    print(f'  {name:6s} sim={et:.4f}s target={target:.4f}s delta={delta:+.4f}s {status}')
-    if status == 'FAIL':
-        fails.append((name, et, target, delta))
-sys.exit(1 if fails else 0)
-" 2>&1; then
+  if ! python3 scripts/check_baselines.py --tol "${BASELINE_TOLERANCE_S}" 2>&1; then
     fatal "baseline regression FAILED — physics drift detected, aborting" 3
   fi
   log "baselines: ALL PASS (within ±${BASELINE_TOLERANCE_S}s)"
