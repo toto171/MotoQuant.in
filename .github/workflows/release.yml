@@ -1,6 +1,23 @@
-name: Release
+name: Release (RETIRED — desktop app discontinued)
 
-# Trigger: push any tag starting with "v" (e.g. v0.1.0, v1.2.3-rc1).
+# ┌───────────────────────────────────────────────────────────────────────────┐
+# │ RETIRED 2026-07-25. DO NOT RE-ENABLE WITHOUT FIXING IT FIRST.             │
+# │                                                                           │
+# │ This workflow builds the native desktop app, which was SCRAPPED on        │
+# │ 2026-07-06 (docs/adr/0005). It is also unconditionally BROKEN: its build  │
+# │ matrix installs from and runs PyInstaller inside `desktop/sidecar/`, a    │
+# │ directory deleted six weeks ago. On its old trigger (push of any `v*`     │
+# │ tag) it therefore hard-failed on all four platform runners — burning      │
+# │ four runners' minutes on an account that is already over its Actions cap. │
+# │                                                                           │
+# │ The trigger is now `workflow_dispatch` only, so a stray `v*` tag can no   │
+# │ longer set it off. The file is kept in-tree for reference, matching how   │
+# │ the rest of the desktop surface was retired (docs/INSTALL.md and          │
+# │ docs/RELEASE.md carry deprecation banners; the `desktop/` scaffold stays  │
+# │ for reference). Deleting it outright is a reasonable operator call.       │
+# └───────────────────────────────────────────────────────────────────────────┘
+#
+# Historical trigger: push any tag starting with "v" (e.g. v0.1.0, v1.2.3-rc1).
 # The tag IS the release — CI builds all four platform bundles, uploads them
 # to the matching GitHub Release draft, then generates the Tauri updater
 # manifest (latest.json) as a final step.
@@ -25,9 +42,9 @@ name: Release
 #   APPLE_TEAM_ID              10-character team ID
 
 on:
-  push:
-    tags:
-      - "v*"
+  # Retired: was `push: tags: ["v*"]`. Manual-only so a stray tag cannot
+  # burn four runners on a scrapped, already-broken build.
+  workflow_dispatch:
 
 concurrency:
   group: release-${{ github.ref }}

@@ -15,3 +15,25 @@ pytest>=7.0,<10
 # The test file is gated on `pytest.importorskip("hypothesis")` so
 # the rest of the suite still runs without this dependency.
 hypothesis>=6.100,<7
+
+# ── Parity with CI (added 2026-07-25 audit) ─────────────────────────────────
+# AGENTS.md §1 and the Makefile both promise "the make targets mirror CI
+# exactly, so green locally ≈ green in CI". They did not: `make install`
+# installs only requirements-api.txt + requirements-dev.txt, and none of the
+# packages below were in either — while .github/workflows/ci.yml installs all
+# of them. Consequences on a fresh checkout: `make check` died immediately with
+# "ruff: command not found" (it is the very first command of the documented
+# loop), and `make test` silently SKIPPED the sobol/surrogate tests that CI
+# actually executes. Keep this list in sync with the CI install step.
+
+# Lint + format. `make lint`, `make fmt-check`, `make check` and the
+# pre-commit hook all shell out to it; CI runs it as its first two steps.
+ruff>=0.6,<1
+
+# Coverage instrumentation for the main-push CI tier (`--cov=motoquant`).
+pytest-cov>=5,<8
+
+# Optional analysis deps. Without them tests/test_analysis.py (sobol) and
+# tests/test_surrogate.py skip large blocks that CI runs for real.
+SALib>=1.4,<2
+scikit-learn>=1.3,<2
