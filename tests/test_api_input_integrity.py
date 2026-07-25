@@ -301,3 +301,60 @@ class TestDuplicatePartIdsAreNotStacked(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestCostBearingRoutesAreFused(unittest.TestCase):
+    """Per-IP fuses on the unauthenticated routes that spend real resources.
+
+    Both survived adversarial verification in the 2026-07-25 audit:
+
+    * ``/api/pricing/refresh/{id}`` is a SYNC route making a blocking outbound
+      fetch, so each in-flight call holds one anyio threadpool worker (default
+      40) for a measured worst case of 44.4 s. Unfused, a loop over the 72
+      parts carrying a retailer_url starved every other sync route — including
+      ``/api/health``, which is Render's healthCheckPath and the keep-alive
+      target, so the instance would be marked unhealthy.
+    * ``/api/venues/resolve`` falls through to a live OpenWeatherMap call on the
+      operator's key when a venue misses, with no caching of the miss.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        # raise_server_exceptions=False: this module's tmp DB has no catalog
+        # tables, so the pricing handler raises once the fuse lets a request
+        # through. That is irrelevant here — the assertion is about the
+        # dependency firing BEFORE the handler, so we observe status codes
+        # (including 500s) rather than letting the handler abort the test.
+        try:
+            from fastapi.testclient import TestClient
+
+            from motoquant.api import app
+
+            cls.client = TestClient(app, raise_server_exceptions=False)
+        except Exception:  # noqa: BLE001
+            cls.client = None
+
+    def setUp(self):
+        if self.client is None:
+            self.skipTest("fastapi not installed")
+        from motoquant import ratelimit
+
+        ratelimit.reset()
+
+    def test_pricing_refresh_is_rate_limited(self):
+        codes = [
+            self.client.post("/api/pricing/refresh/8?force=true").status_code
+            for _ in range(9)
+        ]
+        self.assertIn(429, codes, f"pricing refresh never rate-limited: {codes}")
+        # The fuse must precede the handler, i.e. the 429s come at the tail.
+        self.assertEqual(codes[-1], 429, f"limit not enforced on later calls: {codes}")
+
+    def test_venue_resolve_is_rate_limited(self):
+        codes = [
+            self.client.post(
+                "/api/venues/resolve", json={"lat": 18.5 + i * 0.01, "lon": 73.8}
+            ).status_code
+            for i in range(26)
+        ]
+        self.assertIn(429, codes, f"venue resolve never rate-limited: {codes}")

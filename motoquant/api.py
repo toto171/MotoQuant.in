@@ -2753,7 +2753,15 @@ def _fetch_owm_for_location(
     }
 
 
-@app.post("/api/venues/resolve")
+@app.post(
+    "/api/venues/resolve",
+    # Rate-limited per IP (2026-07-25 audit): on a venue miss this falls
+    # through to a live OpenWeatherMap call on the operator's server-side
+    # key, with no auth and no caching of the miss — an unauthenticated
+    # loop over random lat/lon drains the free allowance (60/min, 1M/mo),
+    # after which the real LocationPicker on /simulator stops working.
+    dependencies=[Depends(rate_limit("venue_resolve", 20, 60.0))],
+)
 def resolve_venue(req: VenueResolveRequest):
     """
     Resolve a race location into ready-to-simulate environment parameters.
@@ -3305,7 +3313,11 @@ def pricing_for_bike(bike_id: int, limit: int = Query(50, ge=1, le=500)):
     )
 
 
-@app.post("/api/pricing/refresh/{part_id}", response_model=PricingRefreshOut)
+@app.post(
+    "/api/pricing/refresh/{part_id}",
+    response_model=PricingRefreshOut,
+    dependencies=[Depends(rate_limit("pricing_refresh", 5, 60.0))],
+)
 def refresh_part_price(part_id: int, force: bool = Query(False)):
     """
     Trigger a live price refresh for a single part.
@@ -3313,8 +3325,19 @@ def refresh_part_price(part_id: int, force: bool = Query(False)):
     Uses the part's ``retailer_url`` field to hit the live retailer page.
     Set ``force=true`` to bypass the 14-day freshness check.
 
-    NOTE: This endpoint is intentionally open for now.  Stream 5 (auth)
-    will wrap it with admin-role gating via ``app.include_router(auth_router)``.
+    Rate-limited per IP (2026-07-25 audit). This is a *sync* route that makes a
+    blocking outbound HTTP request to a third-party retailer, so each in-flight
+    call occupies one anyio threadpool worker (default 40) for as long as the
+    fetch takes — measured worst case 44.4 s (3 attempts x 10 s timeout plus
+    2+4+8 s backoff). Unauthenticated and unthrottled, a loop over the 72 parts
+    that carry a retailer_url exhausted the pool and starved every other sync
+    route, including ``/api/health`` — which is Render's healthCheckPath and the
+    keep-alive target, so the instance would be marked unhealthy. ``force=true``
+    made it worse by bypassing the 14-day freshness check so repeats could never
+    become no-ops.
+
+    NOTE: still open (no auth) by design during the beta; the admin-role gate
+    remains the eventual fix. The rate limit is the fuse until then.
     """
     db = _get_db()
     if db is None:
