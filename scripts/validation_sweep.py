@@ -54,6 +54,35 @@ warnings.filterwarnings("ignore")
 # ── Real-world ET benchmarks (same source list as validation_run.py) ─────────
 # Each: (manufacturer_substr, model_substr, year_hint, target_et_s,
 #         trap_kmh, source_label)
+# ── TRAP-COLUMN UNIT AUDIT — 2026-07-25 ──────────────────────────────────────
+# The trap column is km/h. Eleven rows carried their source's *mph* figure
+# un-converted; each was caught by an assumption-free physical bound rather
+# than by eye: for a monotonically accelerating vehicle the trap speed must
+# exceed the average speed over the quarter (402.336 m / ET). All eleven —
+# and only these eleven, out of 250 rows — violated it, by 6.8–11.9 km/h.
+# Multiplying each by 1.609344 makes every one physically consistent.
+#
+#   MT-03 2020        92 -> 148.1     Ninja 650 2020    111 -> 178.6
+#   CBR500R 2022      98 -> 157.7     Z 650 2017        110 -> 177.0
+#   CB650R 2021      115 -> 185.1     Sportster S 2021  122 -> 196.3
+#   Ninja 400 2018   102 -> 164.2     RE Cont GT 650'20  97 -> 156.1
+#   Trident 660 2021 111 -> 178.6     TNT 600i 2014     108 -> 173.8
+#   RS 457 2024       97 -> 156.1
+#
+# Same class of defect, and the same fix, as the YZF-R7 2022 correction made
+# 2026-05-31 (see its comment further down). ET values are untouched, so the
+# published weighted-ET headline cannot move: phys_weighted_sweep scores
+# `d = sim_et - te` only — the trap element is unpacked but never scored.
+# What it does fix is the public /validation explorer, which exports these as
+# `real_trap` against a km/h `sim_trap`: mean |trap error| over these 11 rows
+# was 75.2 km/h as published and is 10.8 km/h once the units agree.
+#
+# Corroboration that these are unit errors rather than bad measurements: the
+# Continental GT 650 appears twice with the SAME ET (13.90) — once at trap 155
+# (km/h, 2019 row) and once at trap 97 (mph, 2020 row). 97 mph = 156.1 km/h.
+# They are one measurement recorded in two units. That duplication is a
+# separate catalog defect, tracked in the 2026-07-25 audit report.
+# ─────────────────────────────────────────────────────────────────────────────
 BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # Hayabusa family
     ("Suzuki", "Hayabusa", 2008, 9.85, 250, "Cycle World 2008"),
@@ -300,10 +329,10 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # the source of record.
     # URL: https://motostatz.com/yamaha-yzf-r3-acceleration/
     ("Yamaha", "R3", 2015, 14.00, 153, "MotoStatz GPS test (instrumented)"),
-    ("Yamaha", "MT-03", 2020, 14.05, 92, "AccelerationTimes 2020 (DERIVED)"),
+    ("Yamaha", "MT-03", 2020, 14.05, 148.1, "AccelerationTimes 2020 (DERIVED)"),
     ("Honda", "CB350RS", 2021, 15.50, 138, "DERIVED (0-100 × 1.6, ±0.7s)"),
-    ("Honda", "CBR500R", 2022, 13.51, 98, "MotoStatz 2022 (DERIVED)"),
-    ("Honda", "CB650R", 2021, 11.80, 115, "AccelerationTimes 2021 (DERIVED)"),
+    ("Honda", "CBR500R", 2022, 13.51, 157.7, "MotoStatz 2022 (DERIVED)"),
+    ("Honda", "CB650R", 2021, 11.80, 185.1, "AccelerationTimes 2021 (DERIVED)"),
     (
         "Honda",
         # ACCURACY 2026-06-11: "CBR250R" -> "CBR 250R" to match the catalog
@@ -335,18 +364,18 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # ("Kawasaki", "Ninja 300", 2013, ...) — moved up + verified figure used
     # Ninja 400 deliberately NOT tier-promoted 2026-07-17: the 2026-07-10
     # scrape find for this bike is the same MotoStatz test relabeled, not an
-    # independent higher-tier source (its trap `102` is also the mph figure —
-    # left for a dedicated trap-column audit; ET/label/weight unchanged).
-    ("Kawasaki", "Ninja 400", 2018, 12.98, 102, "MotoStatz 2018"),
-    ("Kawasaki", "Ninja 650", 2020, 12.30, 111, "MotoStatz 2020"),
-    ("Kawasaki", "Z 650", 2017, 12.40, 110, "MotoStatz 2017"),
-    ("Harley-Davidson", "Sportster S", 2021, 11.10, 122, "HDForums timeslip 2021"),
-    ("Royal Enfield", "Continental GT 650", 2020, 13.90, 97, "FastestLaps 2020"),
-    ("Triumph", "Trident 660", 2021, 12.00, 111, "MotoStatz 2021"),
+    # independent higher-tier source. (Its trap `102` was also the mph figure;
+    # converted to km/h in the 2026-07-25 trap-column audit below.)
+    ("Kawasaki", "Ninja 400", 2018, 12.98, 164.2, "MotoStatz 2018"),
+    ("Kawasaki", "Ninja 650", 2020, 12.30, 178.6, "MotoStatz 2020"),
+    ("Kawasaki", "Z 650", 2017, 12.40, 177.0, "MotoStatz 2017"),
+    ("Harley-Davidson", "Sportster S", 2021, 11.10, 196.3, "HDForums timeslip 2021"),
+    ("Royal Enfield", "Continental GT 650", 2020, 13.90, 156.1, "FastestLaps 2020"),
+    ("Triumph", "Trident 660", 2021, 12.00, 178.6, "MotoStatz 2021"),
     ("Triumph", "Speed 400", 2023, 14.50, 140, "Derived from 0-100 (bikewale 2023)"),
     ("Benelli", "302R", 2017, 15.80, 120, "MotorbikeCatalog 2017"),
-    ("Benelli", "TNT 600i", 2014, 12.60, 108, "MotorbikeCatalog 2014"),
-    ("Aprilia", "RS 457", 2024, 13.30, 97, "FastestLaps 2024"),
+    ("Benelli", "TNT 600i", 2014, 12.60, 173.8, "MotorbikeCatalog 2014"),
+    ("Aprilia", "RS 457", 2024, 13.30, 156.1, "FastestLaps 2024"),
     # SE Asia enthusiast 150cc expansion (April 2026)
     # YZF-R7 2022 — trap-speed transcription fixed 2026-05-31 (benchmark-import
     # pass 4). The prior `116` value was MotoStatz's mph figure left un-converted
