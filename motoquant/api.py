@@ -337,12 +337,22 @@ class SimulateRequest(BaseModel):
         None, description="Venue for DA and surface conditions"
     )
 
-    # Environment overrides (applied on top of venue defaults if set)
-    ambient_temp_c: float | None = Field(None, description="Ambient temperature C")
-    track_temp_c: float | None = Field(None, description="Track surface temperature C")
-    humidity_pct: float | None = Field(None, description="Relative humidity 0-100%")
+    # Environment overrides (applied on top of venue defaults if set).
+    # Bounds match AutotuneRequest, which had them from the start. Without
+    # them (2026-07-25 audit) physically impossible input was absorbed as a
+    # 200 success with a silently meaningless answer: humidity_pct=1e9 or
+    # ambient_temp_c=500 returned et_quarter_s 0.0 / trap 0.0.
+    ambient_temp_c: float | None = Field(
+        None, ge=-30, le=60, description="Ambient temperature C"
+    )
+    track_temp_c: float | None = Field(
+        None, ge=-30, le=80, description="Track surface temperature C"
+    )
+    humidity_pct: float | None = Field(
+        None, ge=0, le=100, description="Relative humidity 0-100%"
+    )
     headwind_kmh: float | None = Field(
-        None, description="Headwind km/h (negative = tailwind)"
+        None, ge=-200, le=200, description="Headwind km/h (negative = tailwind)"
     )
 
     # Simulation options
@@ -374,10 +384,10 @@ class QuickSimRequest(BaseModel):
     rear_tire_id: int | None = None
     venue_id: int | None = None
     # Environment overrides
-    ambient_temp_c: float | None = None
-    track_temp_c: float | None = None
-    humidity_pct: float | None = None
-    headwind_kmh: float | None = None
+    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
+    track_temp_c: float | None = Field(None, ge=-30, le=80)
+    humidity_pct: float | None = Field(None, ge=0, le=100)
+    headwind_kmh: float | None = Field(None, ge=-200, le=200)
 
 
 # ─── Config builder ────────────────────────────────────────────────────────
@@ -602,7 +612,19 @@ def _apply_parts_to_config(
         from .database.bridge import apply_part_to_config
         from .submodels.forced_induction import VALID_BOOST_TYPES
 
+        # De-duplicate while preserving order. A repeated id used to be applied
+        # once per occurrence, stacking that part's param_deltas: part_ids
+        # [56, 56, 56] applied ONE Akrapovic system three times (+36 hp,
+        # -20.4 kg from a single exhaust) and returned the fabricated ET as a
+        # 200 success (2026-07-25 audit). You cannot bolt the same exhaust on
+        # twice, so the physically meaningful reading of a repeated id is one
+        # part — the same rule the ROI knapsack already enforces via its
+        # exclusive-category groups.
+        seen: set[int] = set()
         for pid in part_ids:
+            if pid in seen:
+                continue
+            seen.add(pid)
             row = db.execute("SELECT * FROM parts WHERE id=?", (pid,)).fetchone()
             if not row:
                 continue
@@ -1334,10 +1356,10 @@ class TopSpeedRequest(BaseModel):
     front_tire_id: int | None = None
     rear_tire_id: int | None = None
     venue_id: int | None = None
-    ambient_temp_c: float | None = None
-    track_temp_c: float | None = None
-    humidity_pct: float | None = None
-    headwind_kmh: float | None = None
+    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
+    track_temp_c: float | None = Field(None, ge=-30, le=80)
+    humidity_pct: float | None = Field(None, ge=0, le=100)
+    headwind_kmh: float | None = Field(None, ge=-200, le=200)
     # LSR-specific: optional override for max time/distance.
     # Bounded: n_max preallocates 18 float64 arrays of max_time_s/dt slots
     # (they grow on demand only under adaptive dt), so an unbounded value is
@@ -1458,10 +1480,10 @@ class DistanceRunRequest(BaseModel):
     front_tire_id: int | None = None
     rear_tire_id: int | None = None
     venue_id: int | None = None
-    ambient_temp_c: float | None = None
-    track_temp_c: float | None = None
-    humidity_pct: float | None = None
-    headwind_kmh: float | None = None
+    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
+    track_temp_c: float | None = Field(None, ge=-30, le=80)
+    humidity_pct: float | None = Field(None, ge=0, le=100)
+    headwind_kmh: float | None = Field(None, ge=-200, le=200)
     # Same floor rationale as TopSpeedRequest.max_time_s (>= dt).
     max_time_s: float = Field(120.0, ge=0.1, le=300.0)
 
@@ -1872,10 +1894,10 @@ class CompareRequest(BaseModel):
 
     # Shared conditions
     venue_id: int | None = None
-    ambient_temp_c: float | None = None
-    track_temp_c: float | None = None
-    humidity_pct: float | None = None
-    headwind_kmh: float | None = None
+    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
+    track_temp_c: float | None = Field(None, ge=-30, le=80)
+    humidity_pct: float | None = Field(None, ge=0, le=100)
+    headwind_kmh: float | None = Field(None, ge=-200, le=200)
 
 
 def _run_build(
