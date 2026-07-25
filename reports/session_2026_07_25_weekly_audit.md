@@ -205,6 +205,21 @@ already carry their banded rules, and the step's counts are unchanged after
 removal (`111 already applied` both before and after, twice), so it was
 contributing nothing but noise.
 
+### 2.12 — A ₹450,000 catalog part 422'd every simulation `[catalog, HIGH]`
+
+Part 340 declared `boost_type: "supercharger"`, not a member of
+`VALID_BOOST_TYPES`. The July-13 T16 hardening correctly made the engine raise
+on unknown values, but **the catalog data was never migrated to match**, so the
+row has hard-failed ever since — verified live: part 340 → HTTP 422, valid
+sibling part 138 → HTTP 200. It was also silently dropped from every
+ROI/optimizer result, and it is the only bad value among 20 forced-induction
+SKUs.
+
+Corrected to `sc_roots` (its own specs declare a **Lysholm screw** compressor —
+positive-displacement, not centrifugal) with `target_boost_bar` derived from
+its own declared 5.0 psi. No number invented. Post-fix: HTTP 200, 9.9331 →
+9.5498 s. `tests/test_catalog_enum_integrity.py` guards the class.
+
 ### 2.11 — Doc set, `make install`, and a live CI landmine
 
 ROADMAP listed six hardening items as deferred that **all landed in PR #114**
@@ -311,6 +326,77 @@ first. **77 (bike, position) groups across 65 bikes now carry two mutually
 exclusive "default OEM" tires** (27 with different sizes), growing ~7 per seed
 run — including the GSX-R 1000 K5 rear.
 
+### 3.3c — `drivetrain.quickshifter` is a dead knob behind 8 priced parts `[HIGH]`
+
+`DrivetrainParams.quickshifter` has **no reader in the physics engine** — the
+sim reads only `total_shift_time_ms`. Eight shipped catalog parts priced
+₹12,640–₹42,000 carry it as their **only** `param_override`, so selecting them
+changes ET by exactly **0.000000 s**, while twelve functionally identical
+sibling parts that also set `total_shift_time_ms` deliver −0.084 to −0.094 s.
+
+This is the Kaizen checklist's own example made real ("a 15 psi turbo kit that
+moves ET by 0.008 s is a bug, not a feature"). Fixing it is a data change
+across 8 SKUs, so it wants its own pass.
+
+### 3.3d — `venues.has_vht`: track prep is unreachable for the whole catalog `[HIGH]`
+
+`venues.has_vht` is populated for 6 of 20 venues and **read by nothing** —
+`venue_row_to_environment` never sets a track-prep field, and the physics prep
+multiplier reads `cfg.tires.track_prep_type`, which is `'none'` for 550 of 553
+configs. **Simulating at Santa Pod (VHT-prepped concrete) is bit-identical to
+an unprepped strip.** Wiring it moves baselines, so it is epoch-gated.
+
+Compounding it, `nlp.py` parses `VHT`/`PJ1` phrases correctly but assigns them
+to `EnvironmentParams.track_prep`, a field with **zero readers** — the `nl` CLI
+accepts and echoes a track-prep instruction worth 0.571 s that has no effect.
+A second defect sits behind it: `_extract_track_prep` returns the literal
+`'rubber'`, which does not equal the `TRACK_RUBBER` constant `'rubber_buildup'`,
+so even after redirecting the write that branch stays inert.
+
+### 3.3e — Dependency supply chain `[HIGH]`
+
+- **Next.js is pinned to 14.2.35, an end-of-life major.** It reached EOL
+  2025-10-26, took its last patch in December 2025, and `npm audit --omit=dev`
+  reports **21 advisories** whose fixed ranges all terminate in 15.5.x/16.2.x —
+  **there is no upgrade target inside 14.x**. The 15/16 migration is now a
+  security requirement, not a nice-to-have.
+- **All 13 production deps are `>=` with no upper bound, and there is no
+  lockfile**, so two Docker builds of the *same git commit* at different times
+  install different dependency sets. Three floors (`python-multipart`,
+  `requests`, `sentry-sdk`) sit at or below versions with published CVEs —
+  including the multipart parser reachable from the two upload endpoints.
+
+*Verified clean here:* `pip-audit -r requirements-api.txt` reports no known
+vulnerabilities **as resolved today**, and PR #116's scrapling isolation claim
+holds under test — importing `motoquant.api` pulls 853 modules and **zero**
+from `{scrapling, curl_cffi, playwright, camoufox, protego, lxml}`.
+
+### 3.3f — Scrapling toolkit review (PR #116) `[HIGH]`
+
+The honest-data claim **holds** (no path can write `motoquant.db`; verified by
+transitive import trace), stealth is genuinely opt-in, and the URL-slug year
+fix is correct across 20 constructed edge cases. The defects cluster in the two
+advertised *safety gates*:
+
+- **The validator gate fails open.** `parse_bikez_detail` always synthesises
+  manufacturer/model/year from the URL slug and `validate_spec` only requires
+  those to be non-empty, so a 404 / JS-shell / layout-drifted page becomes a
+  "validator-clean", import-ready spec **with a clean drift signal** — exactly
+  inverting the tool's purpose.
+- **Cache poisoning.** `looks_blocked()` flags only 403/429/503, so 404/500/
+  502/504 are treated as successful fetches, written to the disk cache with no
+  TTL, and re-served forever. A 5xx also stops tier escalation dead.
+- **Multi-word manufacturers split silently**: `manufacturer='Moto'`,
+  `model='GUZZI V7 III'` — and it passes the validator. The legacy
+  `crawl_bikez` repairs this; the new script never does.
+- **robots.txt fails open on 5xx** (RFC 9309 §2.3.1.4 requires assuming
+  complete disallow), and **Crawl-delay is never honoured**.
+- **The robots layer has zero test coverage** — every test sets
+  `respect_robots=False`, so deleting the layer `docs/SCRAPING.md` calls a
+  "hard rule" leaves all 22 tests green.
+- The stealth tier passes `solve_cloudflare=True` — i.e. it programmatically
+  defeats an anti-bot interstitial — which no operator-facing doc discloses.
+
 ### 3.4 — Other confirmed-but-deferred
 
 - **25 specs publish bore/stroke that cannot produce their own displacement**
@@ -402,14 +488,10 @@ with §3.1, the retune should not proceed as written.
 
 ## 6. Method note
 
-12 finder agents were dispatched; **8 completed** within the session (data
-honesty, physics/accuracy, security, test quality, docs truth, CI/ops, web,
-API/jobs) producing **59 raw findings** (2 critical / 17 high / 30 medium / 10
-low). The remaining four (dead code, DB/catalog, dependencies, PR #116 review)
-did not finish before the session's compute budget was reached — the box is
-4-core, capping agent concurrency at 2. Their scope is partially covered
-inline: §3.1 is a dead-knob finding and §3.3 a catalog finding, both verified
-directly by the session.
+**All 12 finder dimensions completed**, producing **82 raw findings**. The box
+is 4-core, which caps agent concurrency at 2, so the last four dimensions (dead
+code, DB/catalog, dependencies, PR #116 review) landed well after the first
+eight; their findings are folded in above.
 
 **Everything in §2 was independently re-verified by the session before being
 acted on** — not taken from an agent's summary. Every fix was proven
@@ -419,14 +501,27 @@ acted on** — not taken from an agent's summary. Every fix was proven
 
 ## 7. Suggested next session, in order
 
-1. **Gearing data fix for the four heavies** (§3.2) — unblocks the whole
+1. **Next.js 15/16 migration** (§3.3e) — newly urgent: 14.x is end-of-life with
+   21 advisories and **no fix path inside the major**. This is now the only
+   finding with an external clock on it.
+2. **Gearing data fix for the four heavies** (§3.2) — unblocks the whole
    speed-limiter annotation pass, and removes a test whitelist that is
    currently protecting a data bug.
-2. **Decide the `is_at_wheel` question** (§3.1) — it is a prerequisite for any
-   cluster retune, and it is an epoch-scale decision (ADR-0002).
-3. **Catalog de-duplication** (§3.3) — mechanical, but touches the DB and
-   headline counts, so it wants its own reseed + sweep + stat sync.
-4. **Close the remaining pre-revenue gaps** (§3.4 quota/rate-limit cluster)
+3. **Decide the `is_at_wheel` question** (§3.1) — a prerequisite for any
+   cluster retune, and an epoch-scale decision (ADR-0002). §3.3d (`has_vht`)
+   is the same shape and should be decided in the same pass.
+4. **Pin the production dependency set** (§3.3e) — `>=`-only with no lockfile
+   means the Docker image is not reproducible from a git commit. Cheap to fix,
+   and it is a prerequisite for trusting any future security audit.
+5. **Catalog de-duplication** (§3.3) — mechanical, but touches the DB and
+   headline counts, so it wants its own reseed + sweep + stat sync. Fix the
+   `import` vs `reseed` winner disagreement at the same time.
+6. **Harden the Scrapling safety gates** (§3.3f) — the validator gate failing
+   open and the 404/5xx cache poisoning both undermine the toolkit's stated
+   purpose; neither is hard to fix.
+7. **The 8 quickshifter parts** (§3.3c) — priced SKUs that move ET by exactly
+   zero.
+8. **Close the remaining pre-revenue gaps** (§3.4 quota/rate-limit cluster)
    before `MOTOQUANT_BILLING_ENFORCE` is ever flipped.
-5. **`test_patch_2026_07_13` vacuity** (§3.4) — it guards a mandatory link in
+9. **`test_patch_2026_07_13` vacuity** (§3.4) — it guards a mandatory link in
    the reseed chain and currently guards nothing.
