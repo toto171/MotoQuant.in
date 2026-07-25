@@ -8,7 +8,7 @@ quarter-mile ET and trap speed of:
 
   * the 3 hand-curated REFERENCE bikes (GSX-R 1000 K5 / YZF-R1 4C8 / Hayabusa
     Gen1) built from ``motoquant.defaults`` -- pinned to **zero** tolerance, so
-    the canonical baselines 10.0334 / 10.2859 / 10.4712 s can never silently
+    the canonical baselines 9.9331 / 10.1436 / 10.3633 s can never silently
     move; and
   * a deterministic, stratified ~35-bike CATALOG sample loaded through the
     **production DB path** (``live_db_copy`` -> ``bike_configs`` row ->
@@ -67,7 +67,7 @@ from tests._helpers import live_db_copy
 # ── Tolerances ───────────────────────────────────────────────────────────────
 # Reference bikes: "exact" to 6 decimals (the golden stores 6-decimal values),
 # so 1e-6 absorbs only JSON-storage rounding -- 100x tighter than the 4-decimal
-# baseline contract (10.0334 / 10.2859 / 10.4712); a real 0.001s move trips it.
+# baseline contract (9.9331 / 10.1436 / 10.3633); a real 0.001s move trips it.
 REF_ET_TOL_S = 1e-6
 REF_TRAP_TOL_MS = 1e-6
 # Catalog bikes: tight, because fixed-dt is deterministic. 2 ms ET, ~0.1 km/h

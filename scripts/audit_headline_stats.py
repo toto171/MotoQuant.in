@@ -630,6 +630,45 @@ PATTERNS = [
         "benchmarks",
         "README benchmarks count",
     ),
+    # ── README + issue-template baselines (added 2026-07-25 audit) ──────────
+    #    docs/INVARIANTS.md I6 claims this script enforces the headline stats
+    #    "quoted in web pages, README, and docs", but every baseline pattern
+    #    was scoped to web/app/**. README.md therefore published the RETIRED
+    #    pre-epoch pins (10.034 / 10.286 / 10.472) as the current contract on
+    #    the repo's front page, and the bug-report template asked reporters to
+    #    confirm K5 ≤ 10.034 ± 0.07 — a box a healthy tree cannot tick — while
+    #    `make audit` reported "All headline numbers in sync". These close
+    #    that gap so the claim in I6 is true.
+    (
+        "README.md",
+        r"K5\s*→\s*([0-9]+\.[0-9]{1,4})\s*s",
+        "baseline_k5",
+        "README K5 baseline",
+    ),
+    (
+        "README.md",
+        r"R1\s+4C8\s*→\s*([0-9]+\.[0-9]{1,4})\s*s",
+        "baseline_r1",
+        "README R1 baseline",
+    ),
+    (
+        "README.md",
+        r"Hayabusa\s+Gen1\s*→\s*([0-9]+\.[0-9]{1,4})\s*s",
+        "baseline_busa",
+        "README Hayabusa baseline",
+    ),
+    (
+        ".github/ISSUE_TEMPLATE/bug_report.yml",
+        r"K5 sim is within\s+([0-9]+\.[0-9]{1,4})s",
+        "baseline_k5",
+        "bug-report template K5 baseline",
+    ),
+    (
+        ".github/ISSUE_TEMPLATE/bug_report.yml",
+        r"R1 sim is within\s+([0-9]+\.[0-9]{1,4})s",
+        "baseline_r1",
+        "bug-report template R1 baseline",
+    ),
     # Reference baselines (4 decimal places) — these MUST stay pinned
     (
         "web/app/page.js",
