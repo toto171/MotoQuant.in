@@ -23,7 +23,7 @@ const FEATURES = [
 
 Pacejka tire model with thermal evolution, so grip changes as the tyre heats. Aerodynamic drag with a per-bike Cd×A (0.308–0.68 m²) — no two bikes share the same number. Gear shifting and clutch engagement dynamics including slipper clutch behaviour. Forced induction — turbo lag, supercharger mechanical loss, nitrous injection windows. Engine inertia and parasitic losses (alternator, oil pump, water pump, valvetrain).
 
-The adaptive-dt solver is especially useful for identifying the precise clutch engagement window that produces the minimum 60-ft time. Reference baselines — GSX-R 1000 K5 at 9.933s, R1 at 10.144s, Hayabusa Gen1 at 10.363s — are pinned bit-identical on every code change and validated against the July 2026 weighted benchmark corpus (250 published tests, weighted mean |Δ| 0.253s).`,
+The adaptive-dt solver is especially useful for identifying the precise clutch engagement window that produces the minimum 60-ft time. Reference baselines — GSX-R 1000 K5 at 9.933s, R1 at 10.144s, Hayabusa Gen1 at 10.363s — are pinned bit-identical on every code change and validated against the July 2026 weighted benchmark corpus (250 published tests, weighted mean |Δ| 0.272s).`,
     docsLink: '/docs/physics',
     docsLabel: 'Read the physics whitepaper',
     stats: [
