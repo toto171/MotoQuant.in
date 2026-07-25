@@ -46,6 +46,7 @@ from pydantic import BaseModel, EmailStr, Field
 # database imports are lazy (inside _get_conn) so auth.py can be imported
 # by tests without needing a real DB file or the connection module available.
 from .database import users_repo as _users
+from .ratelimit import rate_limit
 
 log = logging.getLogger("motoquant.auth")
 
@@ -516,9 +517,32 @@ def require_tier(minimum_tier: str):
 
 
 # ─── Endpoints ────────────────────────────────────────────────────────────────
+#
+# Per-IP rate limits on the credential-burning routes (2026-07-25 audit). The
+# auth router was mounted with no throttle at all, and the only existing brake
+# (_login_locked) keys on the SUBMITTED EMAIL, so rotating the address defeats
+# it while every request still pays a full scrypt (~53 ms here, materially more
+# on Render's 0.5-CPU free tier) — verify_password deliberately runs one even
+# for a non-existent account, which is correct for timing-safety but makes an
+# unauthenticated flood a cheap CPU-exhaustion lever against the whole API.
+# /magic-link additionally SENDS AN EMAIL per call.
+#
+# Deliberately NOT limited: /me, /refresh and /logout. They are cheap, and a
+# signed-in client polls them — throttling those would break the UI without
+# closing an abuse channel. Limits follow the existing house convention
+# (license-key/validate is 10/60 s).
+_rl_login = rate_limit("auth_login", 10, 60.0)
+_rl_register = rate_limit("auth_register", 5, 60.0)
+_rl_magic = rate_limit("auth_magic_link", 5, 60.0)
+_rl_verify = rate_limit("auth_verify", 10, 60.0)
+_rl_pwchange = rate_limit("auth_password_change", 10, 60.0)
 
 
-@router.post("/magic-link", response_model=MagicLinkResponse)
+@router.post(
+    "/magic-link",
+    response_model=MagicLinkResponse,
+    dependencies=[Depends(_rl_magic)],
+)
 def request_magic_link(body: MagicLinkRequest) -> MagicLinkResponse:
     """
     Issue a magic-link sign-in email.
@@ -550,7 +574,9 @@ def request_magic_link(body: MagicLinkRequest) -> MagicLinkResponse:
     return resp
 
 
-@router.post("/verify", response_model=TokenResponse)
+@router.post(
+    "/verify", response_model=TokenResponse, dependencies=[Depends(_rl_verify)]
+)
 def verify_magic_link(body: VerifyRequest) -> TokenResponse:
     """Exchange a magic-link token for an access + refresh JWT pair."""
     conn = _get_conn()
@@ -645,7 +671,12 @@ def me(user: dict = Depends(get_current_user)) -> MeResponse:
 # ─── Password auth endpoints (Phase 6, June 2026) ─────────────────────────────
 
 
-@router.post("/register", response_model=TokenResponse, status_code=201)
+@router.post(
+    "/register",
+    response_model=TokenResponse,
+    status_code=201,
+    dependencies=[Depends(_rl_register)],
+)
 def register(body: RegisterRequest) -> TokenResponse:
     """
     Create an account with email + password and sign in immediately.
@@ -679,7 +710,7 @@ def register(body: RegisterRequest) -> TokenResponse:
     )
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=TokenResponse, dependencies=[Depends(_rl_login)])
 def password_login(body: PasswordLoginRequest) -> TokenResponse:
     """
     Email + password sign-in. Returns the same JWT pair as /verify.
@@ -720,7 +751,7 @@ def password_login(body: PasswordLoginRequest) -> TokenResponse:
     )
 
 
-@router.post("/password/change")
+@router.post("/password/change", dependencies=[Depends(_rl_pwchange)])
 def change_password(
     body: ChangePasswordRequest,
     user: dict = Depends(get_current_user),
