@@ -136,6 +136,63 @@ class TestEnvironmentOverrideBounds(unittest.TestCase):
         self.assertGreater(r.json()["et_quarter_s"], 0.0)
 
 
+class TestCalibrationUploadCap(unittest.TestCase):
+    """Oversized uploads must 413, not be buffered whole into memory.
+
+    Both calibration routes did a bare ``await file.read()``, materialising the
+    entire body as one bytes object with no ceiling and then writing it to a
+    second temp file — an unauthenticated OOM + disk-fill lever on the 512 MB
+    Render instance. The ``require_tier("studio")`` gate does not stop it:
+    require_tier passes anonymous callers through whenever
+    MOTOQUANT_BILLING_ENFORCE is falsy, which render.yaml ships as the default.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.client = _client()
+
+    def _upload(self, url, payload, name="x.csv"):
+        import io
+
+        if self.client is None:
+            self.skipTest("fastapi not installed")
+        return self.client.post(
+            url, files={"file": (name, io.BytesIO(payload), "text/csv")}
+        )
+
+    def test_oversized_upload_is_413(self):
+        from motoquant.api import MAX_UPLOAD_BYTES
+
+        payload = b"a,b,c\n" * ((MAX_UPLOAD_BYTES // 6) + 200_000)
+        self.assertGreater(len(payload), MAX_UPLOAD_BYTES)
+        for url in ("/api/calibrate/dragy", "/api/calibrate/dyno"):
+            with self.subTest(url=url):
+                r = self._upload(url, payload)
+                self.assertEqual(r.status_code, 413, r.text)
+                self.assertEqual(r.json()["detail"]["error"], "upload_too_large")
+
+    def test_413_is_not_remasked_as_400(self):
+        """The enclosing `except Exception` must let the 413 through.
+
+        Both routes wrap the read in `try: ... except Exception: raise
+        HTTPException(400, ...)`. HTTPException is an Exception, so without an
+        explicit pass-through the size rejection surfaced as a generic
+        "Failed to read upload" 400 and hid the real reason.
+        """
+        from motoquant.api import MAX_UPLOAD_BYTES
+
+        payload = b"x" * (MAX_UPLOAD_BYTES + 4096)
+        r = self._upload("/api/calibrate/dragy", payload)
+        self.assertNotEqual(r.status_code, 400, "413 was remasked as a 400")
+        self.assertEqual(r.status_code, 413)
+
+    def test_normal_sized_upload_reaches_the_parser(self):
+        """The cap must not block real files — a small CSV gets past it."""
+        r = self._upload("/api/calibrate/dragy", b"time,speed\n0,0\n1,10\n")
+        # 422 = the parser ran and rejected the content, i.e. the cap allowed it.
+        self.assertIn(r.status_code, (200, 422), r.text)
+
+
 class TestDuplicatePartIdsAreNotStacked(unittest.TestCase):
     """A repeated part id must be applied once, not once per occurrence.
 

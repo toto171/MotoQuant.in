@@ -2052,6 +2052,54 @@ def simulate_compare(req: CompareRequest):
     return _compare_impl(req)
 
 
+# ─────────────────────────────────────────────────────────────────────────
+# Upload size cap
+# ─────────────────────────────────────────────────────────────────────────
+# Both calibration routes used to do a bare `await file.read()`, materialising
+# the entire body as one bytes object with no ceiling (2026-07-25 audit).
+# Starlette spools a large part to a temp file, but `.read()` pulls all of it
+# back into memory and it is then written to a SECOND temp file — so a single
+# unauthenticated POST of a few hundred MB is an OOM kill plus a disk fill on
+# the 512 MB Render instance. (The `require_tier("studio")` gate does not stop
+# it: require_tier passes anonymous callers through whenever
+# MOTOQUANT_BILLING_ENFORCE is falsy, which render.yaml ships as the default.)
+#
+# 25 MB is ~100x the largest realistic Dragy/dyno export, which are text CSVs
+# of a few hundred KB.
+MAX_UPLOAD_BYTES = 25 * 1024 * 1024
+
+
+async def _read_upload_capped(file: UploadFile) -> bytes:
+    """Read an UploadFile, refusing anything over MAX_UPLOAD_BYTES.
+
+    Reads in chunks so an oversized body is rejected without ever being fully
+    held in memory — reading first and checking len() afterwards would already
+    have done the damage.
+    """
+    chunks: list[bytes] = []
+    total = 0
+    while True:
+        chunk = await file.read(1024 * 1024)
+        if not chunk:
+            break
+        total += len(chunk)
+        if total > MAX_UPLOAD_BYTES:
+            raise HTTPException(
+                413,
+                detail={
+                    "error": "upload_too_large",
+                    "message": (
+                        f"Upload exceeds the {MAX_UPLOAD_BYTES // (1024 * 1024)} MB "
+                        "limit. Dragy and dyno exports are text files of a few "
+                        "hundred KB."
+                    ),
+                    "max_bytes": MAX_UPLOAD_BYTES,
+                },
+            )
+        chunks.append(chunk)
+    return b"".join(chunks)
+
+
 # --- Dragy / Dyno Upload -------------------------------------------------
 
 
@@ -2070,13 +2118,18 @@ async def upload_dragy(
     log = logging.getLogger(__name__)
 
     try:
-        content = await file.read()
+        content = await _read_upload_capped(file)
         suffix = (
             ".json" if file.filename and file.filename.endswith(".json") else ".csv"
         )
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
             tmp.write(content)
             tmp_path = tmp.name
+    except HTTPException:
+        # Pass through the 413 from _read_upload_capped — a bare
+        # `except Exception` here would remask it as a generic 400 and hide
+        # the real reason from the client.
+        raise
     except Exception as exc:
         raise HTTPException(400, f"Failed to read upload: {exc}")
 
@@ -2188,11 +2241,16 @@ async def upload_dyno(
     log = logging.getLogger(__name__)
 
     try:
-        content = await file.read()
+        content = await _read_upload_capped(file)
         suffix = ".txt" if file.filename and file.filename.endswith(".txt") else ".csv"
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
             tmp.write(content)
             tmp_path = tmp.name
+    except HTTPException:
+        # Pass through the 413 from _read_upload_capped — a bare
+        # `except Exception` here would remask it as a generic 400 and hide
+        # the real reason from the client.
+        raise
     except Exception as exc:
         raise HTTPException(400, f"Failed to read upload: {exc}")
 
