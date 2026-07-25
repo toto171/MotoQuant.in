@@ -220,6 +220,41 @@ positive-displacement, not centrifugal) with `target_boost_bar` derived from
 its own declared 5.0 psi. No number invented. Post-fix: HTTP 200, 9.9331 →
 9.5498 s. `tests/test_catalog_enum_integrity.py` guards the class.
 
+### 2.13 — SAE J1349 dyno correction was inverted `[calibration, MEDIUM]`
+
+`sae_j1349_correction_factor` computed `sqrt(T_ref / T_measured)` where the SAE
+standard **and this module's own documented formula** require
+`sqrt(T_measured / T_ref)`. Hot air is less dense, so a dyno run on a hot day
+must be corrected **up**; the inverted form corrected it down:
+
+| inlet temp | shipped CF | correct CF |
+|---|---|---|
+| 0 °C | 1.0448 | 0.9572 |
+| 25 °C | 1.0000 | 1.0000 |
+| 40 °C | 0.9758 | 1.0248 |
+
+A 190 hp run measured on a 40 °C Pune/Chennai dyno day — an ordinary Indian
+test day, i.e. **the project's core market** — was reported as 185.4 hp where
+SAE requires 194.7 hp; the error reaches ~8 % at 0 °C. The corrected curve
+feeds straight into `BikeConfig`, so a user's own dyno sheet was silently
+degrading their sim.
+
+It survived because **a test pinned the inverted direction** — and that test's
+docstring visibly reasoned itself in a circle ("Wait — let's just check
+monotonicity"). The neighbouring `test_hot_humid_correction_factor_above_one`
+passed either way, because at 40 °C/80 % RH the pressure term dominates. That
+is how the inversion hid in a 69-test module.
+
+### 2.14 — Fused the two unauthenticated cost-bearing routes `[security, HIGH]`
+
+`/api/pricing/refresh/{id}` survived **six** refutation attempts. It is a sync
+route making a blocking outbound fetch, so each call holds one of 40 threadpool
+workers for a measured worst case of **44.4 s**; unfused, a loop over the 72
+parts with a `retailer_url` starves every other sync route — **including
+`/api/health`, which is Render's healthCheckPath**, so the instance gets marked
+unhealthy. `/api/venues/resolve` spends the operator's OpenWeatherMap key on
+every miss with no caching. Fused at 5/60 s and 20/60 s.
+
 ### 2.11 — Doc set, `make install`, and a live CI landmine
 
 ROADMAP listed six hardening items as deferred that **all landed in PR #114**
@@ -448,6 +483,55 @@ with §3.1, the retune should not proceed as written.
 
 ---
 
+## 3.5 — Found by the completeness critic (the dimensions missed these)
+
+The twelve dimensions left roughly a third of the package unowned — `llm/*`
+(~5.4k lines), `analysis/*` (~4.5k), `calibration/*` (~2.6k), `config_io.py`,
+the surrogate pipeline. A critic pass over that gap found four things, one of
+which is a **live correctness bug in user-facing physics** (fixed, §2.13):
+
+- **[HIGH] The pro-gated surfaces are fully exposed through the chat agent.**
+  Build Optimizer, ECU Autotune and the Outlaw pipeline — the three things
+  `docs/COMMERCIAL_LAUNCH.md` calls "the conversion lever", each behind
+  `require_tier("pro")` — are callable by any anonymous request via
+  `/api/chat`, which carries a rate limit and **no tier gate**. The moment the
+  operator performs the documented launch flip, `POST /api/optimize/build`
+  returns 401 while *asking the chatbot for the same thing* still works. This
+  is a product/gating decision (does chat tier-gate its heavy tools, or does
+  the agent executor inherit the caller's tier?), so it is flagged rather than
+  unilaterally changed — but it should be settled **before** billing is
+  enforced, not after.
+- **[MEDIUM] Chat sim metering covers only agent-mode single sims.**
+  `docs/CHAT_AGENT.md` states chat sims are metered, but the meter fires in
+  exactly one place. Classic mode — client-selectable — can burn **25 full RK4
+  sims per request** unmetered, and agent heavy ops (~54 sims) likewise.
+- **[MEDIUM] `/api/telemetry/event` is a forgeable funnel writer.** No auth, no
+  rate limit, no origin check: anyone can POST `signup_completed` in a loop and
+  manufacture the exact numbers the roadmap uses to decide pricing and the
+  raise. Once `POSTHOG_API_KEY` is set (operator item O2) each beacon also
+  spawns an **unbounded** thread.
+
+*Verified healthy by the critic and worth recording:* `config_io` round-trips
+every `BikeConfig` field including `speed_limiter_kmh`; the shipped surrogate
+artifact is genuinely post-epoch (measured against real physics on 30 random
+configs: bias +0.013 s, MAE 0.036 s — the optimizer is **not** scoring on
+pre-epoch physics); every `is_compatible()` call site enriches the bike row
+first; `_grouped_knapsack` exclusivity is correct.
+
+## 3.6 — A second consequence of the dead parasitic path
+
+The verifier that confirmed §3.1 found an additional consequence nobody had
+reported: **21 catalog parts model their entire benefit as
+`drivetrain.chain_efficiency` multipliers** — e.g. part 32 (RK GB520GXW,
+₹11,777, `{"drivetrain.chain_efficiency": 1.02}`) — and measure
+**−0.000036 s** of ET, because the at-wheel curve cancels the efficiency term
+exactly on the drive-force path.
+
+Combined with the 8 quickshifter-only parts in §3.3c, that is **29 priced
+catalog SKUs that move ET by essentially zero** while appearing in ROI tables
+and optimizer pools. This is the single strongest argument for resolving the
+`is_at_wheel` question.
+
 ## 4. Production signals
 
 - **Sentry — 2 open issues, both in the chat agent.**
@@ -488,10 +572,21 @@ with §3.1, the retune should not proceed as written.
 
 ## 6. Method note
 
-**All 12 finder dimensions completed**, producing **82 raw findings**. The box
-is 4-core, which caps agent concurrency at 2, so the last four dimensions (dead
-code, DB/catalog, dependencies, PR #116 review) landed well after the first
-eight; their findings are folded in above.
+**All 12 finder dimensions completed**, plus adversarial verification of every
+critical/high finding and a completeness-critic pass — **39 agents, 0 errors,
+82 raw findings**.
+
+Verification outcome: **16 findings confirmed** (survived a verifier explicitly
+instructed to refute them) and **10 refuted**. Every one of the 10 was refuted
+*as stale* — i.e. the verifier independently confirmed the defect was real and
+then found it already fixed at HEAD by this session's commits. That is the
+useful signal: ten adversarial passes, each trying to knock down a fix, each
+concluding "real defect, already remediated".
+
+Medium/low findings were deliberately **not** sent to verifiers (a
+proportionality call on a 4-core box that caps agent concurrency at 2), so they
+are reported as claimed rather than confirmed. Where this report acts on one, it
+says so and shows the measurement.
 
 **Everything in §2 was independently re-verified by the session before being
 acted on** — not taken from an agent's summary. Every fix was proven
@@ -501,27 +596,32 @@ acted on** — not taken from an agent's summary. Every fix was proven
 
 ## 7. Suggested next session, in order
 
-1. **Next.js 15/16 migration** (§3.3e) — newly urgent: 14.x is end-of-life with
-   21 advisories and **no fix path inside the major**. This is now the only
-   finding with an external clock on it.
-2. **Gearing data fix for the four heavies** (§3.2) — unblocks the whole
+1. **Settle the chat tier-gate** (§3.5) — the pro-gated Build Optimizer, ECU
+   Autotune and Outlaw pipeline are all reachable unauthenticated through
+   `/api/chat`. This must be decided **before** billing is enforced, or the
+   conversion lever is void on day one. It is a product decision, not a patch.
+2. **Next.js 15/16 migration** (§3.3e) — 14.x is end-of-life with 21 advisories
+   and **no fix path inside the major**. The only finding with an external
+   clock on it.
+3. **Gearing data fix for the four heavies** (§3.2) — unblocks the whole
    speed-limiter annotation pass, and removes a test whitelist that is
    currently protecting a data bug.
-3. **Decide the `is_at_wheel` question** (§3.1) — a prerequisite for any
+4. **Decide the `is_at_wheel` question** (§3.1) — a prerequisite for any
    cluster retune, and an epoch-scale decision (ADR-0002). §3.3d (`has_vht`)
    is the same shape and should be decided in the same pass.
-4. **Pin the production dependency set** (§3.3e) — `>=`-only with no lockfile
+5. **Pin the production dependency set** (§3.3e) — `>=`-only with no lockfile
    means the Docker image is not reproducible from a git commit. Cheap to fix,
    and it is a prerequisite for trusting any future security audit.
-5. **Catalog de-duplication** (§3.3) — mechanical, but touches the DB and
+6. **Catalog de-duplication** (§3.3) — mechanical, but touches the DB and
    headline counts, so it wants its own reseed + sweep + stat sync. Fix the
    `import` vs `reseed` winner disagreement at the same time.
-6. **Harden the Scrapling safety gates** (§3.3f) — the validator gate failing
+7. **Harden the Scrapling safety gates** (§3.3f) — the validator gate failing
    open and the 404/5xx cache poisoning both undermine the toolkit's stated
    purpose; neither is hard to fix.
-7. **The 8 quickshifter parts** (§3.3c) — priced SKUs that move ET by exactly
-   zero.
-8. **Close the remaining pre-revenue gaps** (§3.4 quota/rate-limit cluster)
+8. **The 29 inert priced parts** (§3.3c + §3.6) — 8 quickshifter-only and 21
+   chain-efficiency-only SKUs that move ET by essentially zero while appearing
+   in ROI tables and optimizer pools.
+9. **Close the remaining pre-revenue gaps** (§3.4 quota/rate-limit cluster)
    before `MOTOQUANT_BILLING_ENFORCE` is ever flipped.
-9. **`test_patch_2026_07_13` vacuity** (§3.4) — it guards a mandatory link in
+10. **`test_patch_2026_07_13` vacuity** (§3.4) — it guards a mandatory link in
    the reseed chain and currently guards nothing.
