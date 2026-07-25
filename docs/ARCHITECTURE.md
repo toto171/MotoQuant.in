@@ -123,6 +123,10 @@ flowchart TD
 | `motoquant/analysis/` | Parts ROI, Sobol sensitivity, Bayesian/knapsack build optimizer, ECU autotune, the outlaw pipeline, surrogate models | `roi.py`, then `build_optimizer.py` |
 | `motoquant/llm/` | Agentic chat: multi-provider client, tool-calling agent, query parsing, bike estimation, web tools | `agent.py`, `client.py` |
 | `motoquant/parts/compatibility.py` | Which parts fit which bikes (tiered matcher) | `is_compatible()` |
+| `motoquant/config_io.py` | Save/load a `BikeConfig` to/from a file (must round-trip every physics-read field — see KNOWN_TRAPS T15) | `save_config()` |
+| `motoquant/calibration_ml/` | ML-assisted calibration helpers layered on `calibration/` | package `__init__` |
+| `motoquant/nlp.py` | Keyless regex natural-language query parser (the `nl` CLI; the fallback when no LLM key is set) | `NLQueryParser` |
+| `motoquant/scraper/fetcher.py` | `PoliteFetcher` — dev-only Scrapling-backed scraping (cache → robots.txt → rate limit → tier escalation). Soft-imported; **not** a production dependency | `PoliteFetcher.fetch()` |
 | `motoquant/api.py` | FastAPI app + all HTTP routes | grep `@app.` |
 | `motoquant/run.py` | CLI (`python -m motoquant.run <subcommand>`) | `main()` |
 | `motoquant/auth.py` | Magic-link + password auth, JWT, `require_tier()` | bottom (endpoints) |

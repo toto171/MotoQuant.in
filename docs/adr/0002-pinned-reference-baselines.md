@@ -45,4 +45,4 @@ the model: measure, refactor, prove Δ = 0.0000 on all three).
 
 - `scripts/check_baselines.py` (the executable guard)
 - `docs/INVARIANTS.md` I1
-- `.github/workflows/ci.yml` → "Physics benchmark sanity check"
+- `.github/workflows/ci.yml` → "Physics baselines — bit-identical gate"

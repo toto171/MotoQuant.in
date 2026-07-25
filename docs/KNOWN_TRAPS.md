@@ -74,9 +74,17 @@ pushing. See invariant I6.
 ### T11 — Dead knobs: a config field written but never read
 A parameter can be plumbed through config and appear "wired" while nothing in
 the sim reads it (e.g. `power_boost_pct` was once a no-op on the small-cc path;
-several `CategoryProfile` knobs are currently inert). Before trusting a knob,
-prove it moves ET with a quick sweep. When adding one, add a liveness test that
-fails if the knob does nothing.
+six inert `CategoryProfile` knobs were deleted on 2026-07-17). Before trusting a
+knob, prove it moves ET with a quick sweep. When adding one, add a liveness test
+that fails if the knob does nothing.
+
+Still live as of the 2026-07-25 audit: `CategoryProfile.parasitic_mult` is in
+`tests/test_profile_knobs.LIVE_PROFILE_KNOBS` and carries calibrated non-1.0
+values, but every one of the 542 catalog configs ships
+`dyno_curve.is_at_wheel=True`, which bypasses the parasitic subtraction — 5x-ing
+every parasitic wattage moves ET by 0.0000 s. Treat the "live knob" inventory as
+necessary but not sufficient: a knob can be wired and still be unreachable for
+the data the catalog actually carries.
 
 ### T12 — SQLite `LIMIT -1` is unbounded
 A `limit` query param with only an upper bound (`le=100`, no `ge=1`) lets
@@ -88,9 +96,8 @@ routes.)
 After `INSERT OR IGNORE`, a fresh sqlite3 cursor's `lastrowid` is not reliably
 `0` when the row was ignored — prefer `cur.rowcount == 0` as the "was ignored"
 signal. This is import/seed-path code; change it carefully, it's guarded by
-idempotency tests. (`tire_repo` was fixed July 6; `bike_repo`/`venue_repo`
-remained open and are in scope for the 2026-07-17 orchestrated run — see
-`reports/SCOPE_2026_07_17_next_orchestrated_run.md`.)
+idempotency tests. (Fixed everywhere: `tire_repo` July 6, `bike_repo`/`venue_repo`
+in the July-17 run. Kept as a trap because the misreading is easy to reintroduce.)
 
 ### T14 — One shared SQLite connection across request + job threads
 `api.py` keeps a module-level `sqlite3` connection (`check_same_thread=False`)
