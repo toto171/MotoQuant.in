@@ -143,7 +143,17 @@ def sae_j1349_correction_factor(
     p_vapour = (rh_pct / 100.0) * p_sat
     p_dry = max(pressure_kpa - p_vapour, 0.1)
 
-    cf = (SAE_REF_PRESSURE_KPA / p_dry) * math.sqrt(SAE_REF_TEMP_K / temp_k)
+    # NOTE the direction of the temperature ratio: sqrt(Tm / Tref), NOT
+    # sqrt(Tref / Tm). This shipped inverted until the 2026-07-25 audit, which
+    # contradicted BOTH the SAE J1349 standard and this module's own documented
+    # formula at the top of the file (`CF = (99.0 / Pd) x sqrt(Tm / 298.15)`).
+    #
+    # Physically: hot air is less dense, so the engine makes LESS power on the
+    # dyno, and the correction to standard 25 C must scale it UP -> CF must rise
+    # with temperature. The inverted form fell instead, so a 190 hp run measured
+    # on a 40 C Pune/Chennai dyno day was reported as 185.4 hp when SAE requires
+    # 194.7 hp -- a ~5% error in the wrong direction, growing to ~8% at 0 C.
+    cf = (SAE_REF_PRESSURE_KPA / p_dry) * math.sqrt(temp_k / SAE_REF_TEMP_K)
     return float(cf)
 
 
