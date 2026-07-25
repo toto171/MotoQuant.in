@@ -583,57 +583,25 @@ RULE_FIXES: list[dict] = [
         "name": "JT 530 Rear Sprocket 42T Litre Sport (Hayabusa Gearing)",
         "rename": "JT 530 Rear Sprocket 42T (530 Litre+)",
     },
-    # ── E. ClutchCo 8-SKU set banded by displacement class (was 8 rules
-    #      of identical 'displacement_min_cc: 250' matching 414 bikes each,
-    #      stacking in every optimizer candidate pool) ──────────────────
-    {
-        "brand": "ClutchCo",
-        "name": "Organic Street Kit",
-        "set": {"displacement_min_cc": 250, "displacement_max_cc": 500},
-        "desc": "ClutchCo Organic Street clutch kit for 250-500cc bikes",
-    },
-    {
-        "brand": "ClutchCo",
-        "name": "Premium Organic Kit",
-        "set": {"displacement_min_cc": 250, "displacement_max_cc": 500},
-        "desc": "ClutchCo Premium Organic clutch kit for 250-500cc bikes",
-    },
-    {
-        "brand": "ClutchCo",
-        "name": "Sintered Sport Kit",
-        "set": {"displacement_min_cc": 500, "displacement_max_cc": 750},
-        "desc": "ClutchCo Sintered Sport clutch kit for 500-750cc bikes",
-    },
-    {
-        "brand": "ClutchCo",
-        "name": "Heavy Duty Steel Kit",
-        "set": {"displacement_min_cc": 500, "displacement_max_cc": 750},
-        "desc": "ClutchCo Heavy Duty Steel clutch kit for 500-750cc bikes",
-    },
-    {
-        "brand": "ClutchCo",
-        "name": "Kevlar Pro Kit",
-        "set": {"displacement_min_cc": 750, "displacement_max_cc": 1100},
-        "desc": "ClutchCo Kevlar Pro clutch kit for 750-1100cc bikes",
-    },
-    {
-        "brand": "ClutchCo",
-        "name": "Ultra Slippery Kit",
-        "set": {"displacement_min_cc": 750, "displacement_max_cc": 1100},
-        "desc": "ClutchCo Ultra Slippery clutch kit for 750-1100cc bikes",
-    },
-    {
-        "brand": "ClutchCo",
-        "name": "Carbon Race Kit",
-        "set": {"displacement_min_cc": 1100},
-        "desc": "ClutchCo Carbon Race clutch kit for 1100cc+ bikes",
-    },
-    {
-        "brand": "ClutchCo",
-        "name": "Race Ceramic Kit",
-        "set": {"displacement_min_cc": 1100},
-        "desc": "ClutchCo Race Ceramic clutch kit for 1100cc+ bikes",
-    },
+    # ── E. ClutchCo 8-SKU set — SUPERSEDED, intentionally removed ────────
+    #      This section banded 8 clutch SKUs that all carried an identical
+    #      'displacement_min_cc: 250' rule matching 414 bikes each (they
+    #      stacked in every optimizer candidate pool). The July-13 honesty
+    #      rename then moved all 8 from the fictional brand 'ClutchCo' to
+    #      'Generic' and folded the band into the SKU name at the seed
+    #      source (seed.py) — e.g. 'Organic Street Kit' became
+    #      'Organic Street Clutch Kit (250-500cc)'.
+    #
+    #      The lookups here keyed on brand='ClutchCo', which now matches
+    #      ZERO rows, so every run emitted 8 "WARN: part not found" lines
+    #      that were indistinguishable from a real missing-part signal —
+    #      false alarms in the exact channel you need to trust when a patch
+    #      genuinely fails (2026-07-25 audit).
+    #
+    #      Verified before removal: all 8 SKUs (ids 129-136) exist under
+    #      brand='Generic' and already carry their banded displacement
+    #      rules (250-500 / 500-750 / 750-1100 / 1100+), so this step has
+    #      nothing left to do. Do NOT re-add it.
 ]
 
 # ClutchCo band changes REMOVE no keys; but Walbro merge rewrites the whole

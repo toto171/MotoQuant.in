@@ -4,6 +4,16 @@
 across 12 dimensions with adversarial verification, plus independent
 verification by the session of everything acted on.
 
+**Also verified clean, rigorously** (DB/catalog dimension): INVARIANT I2 — all
+538 spec-matched `bike_configs` rebuilt from source and deep-diffed across all
+13 JSON blobs, **byte-identical**, with only the 3 deliberately-excluded
+reference bikes unmatched. INVARIANT I3 — the full 541x593 matrix evaluated
+through the production `is_compatible` engine (**53,141 pairs**): every match
+satisfies every declared constraint, 0 parts with no compatible bike, 0 bikes
+without an exhaust. The reseed chain is a fixed point (identical content md5
+across base + two passes, every script reporting 0 changes). T15/speed-limiter
+round-trip lossless, with exactly the 10 annotated specs carrying 299.0.
+
 **Branch:** `claude/weekly-audit-yvwyyt` → **PR #118** (draft).
 
 ---
@@ -181,7 +191,21 @@ while the distribution tiles one section below read 75 / 138 from
 now **derives** from the data file, so it cannot drift again. `/features`
 separately quoted the July-13 `0.253 s` where every other surface says `0.272`.
 
-### 2.10 — Doc set, `make install`, and a live CI landmine
+### 2.10 — Dead patch section emitted 8 false "part not found" warnings `[LOW]`
+
+The E-section of `patch_2026_07_06_catalog_integrity.py` looked parts up by
+`brand='ClutchCo'`, but the July-13 honesty rename moved all 8 SKUs to
+`brand='Generic'` and folded the band into the SKU name at the seed source. So
+every run of a mandatory reseed-chain step emitted 8 `WARN: part not found`
+lines **indistinguishable from a real missing-part signal** — false alarms in
+the exact channel you need to trust when a patch genuinely fails.
+
+Verified before removal: all 8 SKUs (ids 129–136) exist under `Generic` and
+already carry their banded rules, and the step's counts are unchanged after
+removal (`111 already applied` both before and after, twice), so it was
+contributing nothing but noise.
+
+### 2.11 — Doc set, `make install`, and a live CI landmine
 
 ROADMAP listed six hardening items as deferred that **all landed in PR #114**
 (two flagged "do before charging money"); ONBOARDING pointed day-one readers at
@@ -247,16 +271,45 @@ whitelist entry, re-seeding, re-sweeping and re-syncing stats — a coordinated
 pass. **Do this before any broader limiter-annotation work**, or the annotation
 is inert on exactly the bikes it targets.
 
-### 3.3 — Duplicate catalog entries with contradictory specs `[MEDIUM]`
+### 3.3 — Duplicate catalog entries, and the two regen paths disagree `[HIGH]`
 
-~9 bikes appear twice in `ALL_KNOWN_BIKES` with **identical or overlapping**
-year ranges and contradictory mass/geometry, so `_pick_generation` cannot
-disambiguate and which config a bike gets depends on list order. Worst cases —
-byte-identical year ranges: **Versys 650** (2015-2024 twice, mass 216 vs 196),
-**Hunter 350** (2022-2026 twice, 181 vs 171), **Yezdi Roadster/Adventure**.
-Overlapping with different engines: **V-Strom SX 250** (bore×stroke 67×70.5 vs
-76×54.9), **RE Continental GT 650** and **Interceptor 650** (84×58 vs 78×67.8 —
-the real 648 cc twin is 78×67.8).
+`ALL_KNOWN_BIKES` holds **542 entries for 541 bikes**. Four are exact-key
+duplicates — same manufacturer, model *and* year range — because
+`known_bikes_extended` re-defines bikes already in the base list with
+materially different mass/gearing/aero:
+
+```
+('royal enfield','hunter 350',2022,2026)   ('yezdi','roadster',2022,2026)
+('yezdi','adventure',2022,2026)            ('kawasaki','versys 650',2015,2024)
+```
+
+**The two documented DB-regen steps pick different winners**, so a bike's
+stored physics depends on whether `import --known-bikes` or
+`reseed_configs_from_specs.py` ran last — flipping catalog ET by up to
+**0.38 s**. That is a reproducibility hole in the regen chain, not just
+untidy data.
+
+A wider set (~9) overlaps rather than matching exactly, with contradictory
+geometry: **V-Strom SX 250** (bore×stroke 67×70.5 vs 76×54.9 — different
+engines), **RE Continental GT 650** and **Interceptor 650** (84×58 vs 78×67.8;
+the real 648 cc twin is 78×67.8). The Continental GT duplication is the same
+one that produced the two-unit benchmark row in §2.1.
+
+### 3.3b — OEM tire fitments record drag slicks as OEM `[MEDIUM]`
+
+`seed_bike_tire_fitments`' fallback excludes `('race','drag_dot','drag_slick')`
+but the catalog also carries 10 tires with compound `'drag'` (mu_peak 1.85, the
+highest-grip rows). Since candidates are ordered by mu_peak DESC, those win the
+±20 mm fallback — so **the shipped DB asserts a drag tire as the OEM fitment
+for 24 bikes**, contradicting the function's own docstring ("never use
+race/drag for OEM fitments").
+
+Separately, `link_bike_fitment` uses `INSERT OR REPLACE` against a UNIQUE key
+that *includes the tire*, so picking a different tire for the same
+(bike, position) appends a second `is_default=1` row instead of superseding the
+first. **77 (bike, position) groups across 65 bikes now carry two mutually
+exclusive "default OEM" tires** (27 with different sizes), growing ~7 per seed
+run — including the GSX-R 1000 K5 rear.
 
 ### 3.4 — Other confirmed-but-deferred
 
