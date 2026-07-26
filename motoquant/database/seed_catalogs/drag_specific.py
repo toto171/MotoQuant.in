@@ -459,7 +459,24 @@ def seed_drag_specific(db) -> int:
                     "engine.peak_torque_nm": 50,
                     "chassis.dry_mass_kg": 7.5,
                 },
-                "param_overrides": {"forced_induction.boost_type": "supercharger"},
+                # boost_type must be a VALID_BOOST_TYPES member. This shipped as
+                # the bare string "supercharger", which is NOT in the enum — and
+                # since the 2026-07-13 T16 hardening made ForcedInductionModel
+                # raise on an unknown value, every simulation including this part
+                # hard-failed with a 422 (verified live: part 340 -> HTTP 422,
+                # sibling part 138 -> HTTP 200). The data was never migrated to
+                # match the new validation. Found in the 2026-07-25 audit.
+                #
+                # sc_roots (not sc_centrifugal) because this part's own specs
+                # declare a "Lysholm screw" compressor — a twin-screw positive-
+                # displacement blower, the same family as a Roots. target_boost_bar
+                # comes from its own declared boost_psi 5.0 (= 0.345 bar); every
+                # other supercharger/turbo SKU in this catalog carries one, and
+                # without it the model would see a boosted flag with zero boost.
+                "param_overrides": {
+                    "forced_induction.boost_type": "sc_roots",
+                    "forced_induction.target_boost_bar": 0.345,
+                },
                 "fitment_rules": {
                     "tier": "family",
                     "match": {

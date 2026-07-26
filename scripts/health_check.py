@@ -133,13 +133,20 @@ def check_headline_stats() -> Check:
         c.status = "warn"
         c.detail = "audit script missing"
         return c
-    rc, out = _run([sys.executable, script])
-    low = out.lower()
-    if "no action" in low or "in sync" in low or rc == 0:
+    # --fail-on-drift is REQUIRED: without it audit_headline_stats.py always
+    # exits 0 by its own contract, so the old `... or rc == 0` short-circuit
+    # made this row report "in sync" unconditionally — a gate that could never
+    # fire (found in the 2026-07-25 audit; README had been publishing retired
+    # baselines while `make health` reported no drift).
+    rc, out = _run([sys.executable, script, "--fail-on-drift"])
+    if rc == 0:
         c.detail = "in sync"
     else:
         c.status = "warn"  # drift is a doc issue, not a build failure
-        c.detail = "drift detected — run `python scripts/audit_headline_stats.py`"
+        n = len([ln for ln in out.splitlines() if ln.strip().startswith("DRIFT")])
+        c.detail = (
+            f"{n or 'some'} drift(s) — run `python scripts/audit_headline_stats.py`"
+        )
     return c
 
 

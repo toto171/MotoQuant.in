@@ -17,7 +17,7 @@ are the fixed point the whole physics model is trusted against. If a "harmless"
 refactor moves them, it changed the physics — silently.
 
 **Enforcement.** `make baselines` / `scripts/check_baselines.py` (exit 1 on
-drift), the `Physics benchmark sanity check` CI job, and
+drift), the `Physics baselines — bit-identical gate` CI step, and
 `tests/test_regression_snapshot.py`. A *deliberate* accuracy change is allowed
 but must ship the full weighted sweep (`scripts/phys_weighted_sweep.py`) as
 justification and update the pinned values everywhere at once.
@@ -95,8 +95,8 @@ check, and the release checklist.
   `tests/test_auth.py`.
 - **SQL is always parameterized.** No f-string/format into queries with user
   data.
-- **No secrets in tracked files.** — `scripts/health_check.py` secret scan
-  (wire into CI before public repo).
+- **No secrets in tracked files.** — `scripts/health_check.py` secret scan,
+  which also runs as the first step of the CI job.
 
 ## I8 — Tests exercise the production path
 

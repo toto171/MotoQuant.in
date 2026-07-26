@@ -76,6 +76,6 @@ body:
       label: Physics baseline still green?
       description: If you suspect a physics regression, run the three reference benchmarks.
       options:
-        - label: K5 sim is within 10.034s ± 0.07 (or I confirmed this bug moves it)
-        - label: R1 sim is within 10.286s ± 0.10 (or I confirmed this bug moves it)
+        - label: K5 sim is within 9.9331s ± 0.07 (or I confirmed this bug moves it)
+        - label: R1 sim is within 10.1436s ± 0.10 (or I confirmed this bug moves it)
         - label: Hayabusa sim is in 10.1–10.7s range (or I confirmed this bug moves it)

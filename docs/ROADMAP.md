@@ -46,31 +46,30 @@ takeover), `consume_magic_link` double-consume race, `get_or_create_user` race,
 citation XSS, the login `?next=` backslash open-redirect, and least-privilege
 `permissions` on the read-only CI workflows.
 
-**Still deferred** (verified real; each needs a focused/coordinated pass — see the
-PR #100 review report in `reports/`):
+**Landed in PR #114 (2026-07-17) — do NOT re-scope these.** Every item that
+used to sit in this "still deferred" block is done and verified in the tree
+(re-verified in the 2026-07-25 audit). Recorded here because sessions have
+repeatedly re-scoped completed work from stale backlog text:
 
-- **License-key device binding is bypassable by omitting `device_id`** — but the
-  no-device path is *test-pinned* for legacy clients (`test_subscriptions.py`).
-  Now that the desktop client is scrapped (ADR-0005), make the policy call: drop
-  legacy tolerance, update the pinned test, and decide whether the unauthenticated
-  `/license-key/validate` route should be rate-limited. Do before charging money.
-- **Razorpay webhook has no idempotency ledger** (the Stripe path does) — mirror
-  `record_payment_event` in the Razorpay handler. Payments are beta-inert, so
-  land it alongside the payment-provider go-live (P0-1).
-- **`python-jose` is effectively unmaintained** (known CVEs) — migrate JWT to
-  `PyJWT` (or `authlib`). A dependency swap with its own test pass.
-- **Dockerfile runs as root** — add a non-root `USER`; verify the Render build
-  still works (small deploy risk, hence its own change).
-- **`bike_repo`/`venue_repo` `lastrowid==0` misread** — prefer
-  `rowcount==0`; import-path only, guarded by idempotency tests (change carefully).
-  *(`tire_repo` was already fixed July 6 — the earlier mention of it here was
-  stale; bike/venue repos are in scope for the 2026-07-17 orchestrated run.)*
-- **Dead `CategoryProfile` knobs** — either wire (with a liveness test) or delete.
-- *Already resolved — do NOT re-implement:* the license-key **revoke route** and
-  the auth **timing-safe compare + bounded fail-tracker** hardening (July-3
-  inventory items A1-5/A1-6) landed long ago; sessions keep re-scoping them from
-  the stale `reports/ROADMAP_2026_07_03.md` inventory. Verified done in the
-  2026-07-17 scope pass (`reports/SCOPE_2026_07_17_next_orchestrated_run.md` §5).
+- ~~License-key device binding bypassable by omitting `device_id`~~ — bound keys
+  now reject device_id-omitting validates, and `/license-key/validate` is
+  rate-limited (10/60 s).
+- ~~Razorpay webhook has no idempotency ledger~~ — ledger mirrored from the
+  Stripe path, with a sha256(body) fallback event id.
+- ~~`python-jose` unmaintained~~ — migrated to `PyJWT`; algorithms pinned, no
+  alg-confusion path, and the unsigned `dev.` branch stays gated on the
+  library-absent case.
+- ~~Dockerfile runs as root~~ — non-root `USER app`, verified against a real
+  Docker build.
+- ~~`bike_repo`/`venue_repo` `lastrowid==0` misread~~ — both use `rowcount`.
+- ~~Dead `CategoryProfile` knobs~~ — the six inert knobs were deleted and the
+  live-knob inventory is pinned as an exact set in `tests/test_profile_knobs.py`.
+  *(Caveat found 2026-07-25: `parasitic_mult` is still listed as live but is
+  bypassed for all 542 catalog configs — see the audit report.)*
+- *Also already resolved — do NOT re-implement:* the license-key **revoke route**
+  and the auth **timing-safe compare + bounded fail-tracker** hardening (July-3
+  inventory items A1-5/A1-6). Sessions keep re-scoping them from the stale
+  `reports/ROADMAP_2026_07_03.md` inventory — treat that file as history only.
 
 ## P1 — Accuracy (data-limited)
 
@@ -87,12 +86,16 @@ PR #100 review report in `reports/`):
   front-wheel inertia radius, per-cluster `mu_peak_scale` recalibration.
   New pins 9.9331 / 10.1436 / 10.3633; see
   `reports/session_2026_07_13_epoch_data_hardening.md`.)*
-- **Factory speed-limiter model** — the +20–40 km/h litre top-speed
-  overshoot is NOT the decel clamp (A/B-disproven July 13): sims run to
-  their aero-limited 320–340 km/h against 299-limited published figures.
-  Add a `speed_limiter_kmh` spec field consumed by `run_top_speed` (many
-  top-speed benchmark rows already carry "factory-limited"). Would collapse
-  the top-speed sweep's +28.5 km/h bias.
+- **Factory speed-limiter model** — *shipped in PR #114*: `speed_limiter_kmh`
+  is a validated spec field, plumbed through the bridge and config_io
+  round-trip, clamped at all four RK4 stage velocities, with a green test
+  module. Ten specs are annotated at 299 km/h and the top-speed sweep bias
+  fell +28.5 → +25.4 km/h. **What remains is a broader annotation pass** —
+  and one blocker found in the 2026-07-25 audit: four of the ten annotated
+  heavies (Hayabusa Gen2/Gen3, ZX-14R, ZZR1400) never reach their own
+  limiter because their catalog top-gear ratio is ~21–25 % too short, so
+  they rev-limit at 264–289 km/h. Fix the gearing data before annotating
+  more bikes, or the annotation is inert. See the audit report.
 
 ## P2 — Growth & moat
 

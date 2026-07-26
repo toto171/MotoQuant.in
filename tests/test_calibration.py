@@ -75,23 +75,51 @@ class TestSAECorrection(unittest.TestCase):
         cf_hot = sae_j1349_correction_factor(40.0, 100.0, 80.0)
         self.assertGreater(cf_hot, 1.0)
 
-    def test_cold_dense_air_increases_power(self):
-        """Cold air → CF > 1 (engine underperforms at cold reference temp?)
-        Actually cold dense air makes more power → measured > reference → CF < 1.
-        But low pressure reduces power → CF > 1.  High altitude cold = complex.
-        At cold temp + standard pressure: CF > 1 because engine measured more power
-        than the SAE ref of 25 °C.  Wait — let's just check monotonicity."""
+    def test_cf_rises_with_temperature(self):
+        """Hotter inlet air → CF > 1; colder → CF < 1.
+
+        This test previously asserted the OPPOSITE (cf_25 > cf_40) and its own
+        docstring reasoned itself in a circle ("Wait — let's just check
+        monotonicity"). It was pinning an inverted implementation:
+        sae_j1349_correction_factor computed sqrt(Tref / Tm) instead of the
+        sqrt(Tm / Tref) that SAE J1349 — and dyno.py's own module docstring —
+        specify. Corrected in the 2026-07-25 audit.
+
+        The physics is not ambiguous: hot air is less dense, so the engine makes
+        LESS power on the dyno, and correcting that run to standard 25 °C must
+        scale it UP. A 190 hp run measured at 40 °C / 99 kPa was reported as
+        185.4 hp; SAE requires 194.7 hp.
+        """
         from motoquant.calibration.dyno import sae_j1349_correction_factor
 
+        cf_0 = sae_j1349_correction_factor(0.0, 99.0, 0.0)
         cf_25 = sae_j1349_correction_factor(25.0, 99.0, 0.0)
         cf_40 = sae_j1349_correction_factor(40.0, 99.0, 0.0)
-        # Hotter = less dense = engine should make less power → measured is lower?
-        # No: CF corrects MEASURED power UP if cold (measured power is HIGHER in cold),
-        # so CF_cold < CF_hot... Actually SAE says CF = ref/actual, so:
-        # CF_hot_temp = sqrt(ref_temp / hot_temp) → smaller (we measured MORE in cold)
-        self.assertGreater(
-            cf_25, cf_40
-        )  # colder at same pressure → CF smaller (already near standard)
+
+        self.assertLess(cf_0, cf_25, "cold air makes more power → correct DOWN")
+        self.assertGreater(cf_40, cf_25, "hot air makes less power → correct UP")
+        self.assertAlmostEqual(cf_40, 1.0248, delta=0.002)
+        self.assertAlmostEqual(cf_0, 0.9572, delta=0.002)
+
+    def test_temperature_term_matches_the_documented_formula(self):
+        """Pin the exact ratio direction against dyno.py's own docstring.
+
+        With pressure held at the reference, CF reduces to sqrt(Tm / Tref).
+        Asserting the closed form makes a future re-inversion fail loudly
+        rather than merely shifting a monotonicity relation.
+        """
+        import math
+
+        from motoquant.calibration.dyno import (
+            SAE_REF_PRESSURE_KPA,
+            SAE_REF_TEMP_K,
+            sae_j1349_correction_factor,
+        )
+
+        for temp_c in (0.0, 15.0, 25.0, 35.0, 45.0):
+            cf = sae_j1349_correction_factor(temp_c, SAE_REF_PRESSURE_KPA, 0.0)
+            expected = math.sqrt((temp_c + 273.15) / SAE_REF_TEMP_K)
+            self.assertAlmostEqual(cf, expected, places=6, msg=f"at {temp_c} C")
 
     def test_high_altitude_cf_greater_than_one(self):
         """High altitude (low pressure) → engine makes less power → CF > 1 to correct up."""

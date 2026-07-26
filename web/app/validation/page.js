@@ -11,12 +11,17 @@ import ScoreboardDigits, { ScoreboardCounter } from '../../components/Scoreboard
 import { Reveal } from '../../components/Reveal';
 import accuracyData from './accuracy_data.json';
 
-// Aggregate hero tiles — canonical July-2026 corpus numbers. Do NOT edit
-// without a fresh sweep + sitewide stat sync (scripts/audit_headline_stats.py).
+// Aggregate hero tiles — DERIVED from accuracy_data.json, never hardcoded.
+// These used to be literals and drifted: after the July-17 sweep the hero read
+// "74 WITHIN ±0.10s / 137 WITHIN ±0.20s" while the Distribution tiles rendered
+// one section below on the SAME page read 75 and 138 from this very file, so
+// the flagship accuracy page stated two different values for one metric
+// (2026-07-25 audit). Reading them from the data makes that impossible: a
+// regenerated accuracy_data.json now updates the hero automatically.
 const HERO_TILES = [
-  { value: 250, label: 'BENCHMARKS' },
-  { value: 74, label: 'WITHIN ±0.10s' },
-  { value: 137, label: 'WITHIN ±0.20s' },
+  { value: accuracyData.n_matched, label: 'MATCHED RUNS' },
+  { value: accuracyData.distribution.within_0_10, label: 'WITHIN ±0.10s' },
+  { value: accuracyData.distribution.within_0_20, label: 'WITHIN ±0.20s' },
 ];
 
 export default function ValidationPage() {

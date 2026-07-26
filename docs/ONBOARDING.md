@@ -7,7 +7,9 @@ Welcome to the project. This doc is the "day one" brief — read it end-to-end, 
 2. `docs/ARCHITECTURE.md` — the module map + data-flow diagram. Answers "where does X live, and how does a bike spec become a simulated ET?" before you open any code (10 min).
 3. `CLAUDE.md` — the live status document, single source of truth for project state. It is a long single-paragraph changelog: read the **top** entry for the latest session and skim the trailing evergreen sections (architecture, workflow, physics reference). Don't try to read it end-to-end (20 min).
 4. `CONTRIBUTING.md` — dev workflow, branch conventions, Kaizen rule (10 min).
-5. `reports/ROADMAP_2026_07_03.md` — the complete prioritized backlog + the list of operator-only actions (10 min).
+5. `docs/ROADMAP.md` — the live prioritized backlog + the operator-only actions (10 min).
+   *(`reports/ROADMAP_2026_07_03.md` is a dated snapshot, kept as history only —
+   sessions have repeatedly re-scoped already-finished work out of it.)*
 6. Skim `motoquant/physics.py`, one sub-model like `motoquant/submodels/tire.py`, and `docs/CHAT_AGENT.md` to get a feel for the code style and the newest subsystem (15 min).
 
 After that, get the test suite green locally (see `CONTRIBUTING.md` §2) and you're ready to open your first PR.
@@ -32,12 +34,12 @@ A first-principles physics engine for predicting and optimising motorcycle quart
 | Tires | 254 (incl. drag radials/slicks + cruiser rubber), 1,860 fitments |
 | Parts | 593 across 19 categories (incl. lowering kits, air shifters, lockup clutches) |
 | Venues | 20 (India + international drag strips) |
-| Benchmarks | 221 ET rows + 74 top-speed rows; weighted sweep 246 matched, |Δ| 0.217 s, bias +0.021 s |
+| Benchmarks | 250 ET rows + 86 top-speed rows; weighted sweep 277 matched, |Δ| 0.272 s, bias −0.005 s |
 | Reference baselines | K5 9.9331 / R1 10.1436 / Hayabusa 10.3633 — pinned **bit-identical**, CI-gated |
 | Chat AI | multi-step tool-calling agent (`motoquant/llm/agent.py`, `docs/CHAT_AGENT.md`) |
 | Deployed | API: Render free tier (`motoquant-api.onrender.com`); web: Vercel (`motoquant.in`) — both auto-deploy from `main` |
 
-The code is not the bottleneck. Revenue-launch blockers are operator actions (Render persistent disk, payment-provider setup) and data (instrumented Dragy timeslips for small-cc bikes). See `reports/ROADMAP_2026_07_03.md` §B.
+The code is not the bottleneck. Revenue-launch blockers are operator actions (Render persistent disk, payment-provider setup) and data (instrumented Dragy timeslips for small-cc bikes). See `docs/ROADMAP.md`.
 
 ---
 
@@ -48,20 +50,20 @@ The code is not the bottleneck. Revenue-launch blockers are operator actions (Re
 - FastAPI backend: sims (quick/full/top-speed/compare), jobs API with real progress + cancel, build optimizer (surrogate-accelerated knapsack), ECU autotune, the composed outlaw pipeline, agentic chat (`/api/chat`, `/api/jobs/chat`), auth + subscriptions (beta mode), Dragy/dyno/ECU calibration uploads, leaderboard, shareable timeslips.
 - Next.js web app: cockpit-themed landing + simulator workbench + optimizer/autotune pages + transcript chat UI + docs/blog/pricing.
 - Tauri desktop app: DISCONTINUED (July 2026) — the hosted web app is the product. The `desktop/` scaffold remains in-tree for reference; no binaries will be built.
-- Physics: 15 sub-models, adaptive RK4, calibration pipeline, numpy surrogate v2.2 (regenerate after ANY physics/DB reseed — standing contract in `artifacts/surrogate/README.md`).
+- Physics: 15 sub-models, adaptive RK4, calibration pipeline, numpy surrogate v2.5 (regenerate after ANY physics/DB reseed — standing contract in `artifacts/surrogate/README.md`).
 
 ### Pending / known gaps (the honest list)
 - Payments: code-complete, providers unconfigured (`docs/PAYMENTS_SETUP.md` — operator).
 - Prod DB durability: SQLite is baked into the Docker image; every deploy wipes user accounts until the Render persistent-disk flip (operator, ~$7/mo).
 - Small-cc accuracy floor is data-limited, not model-limited — needs real Dragy timeslips.
 - Epoch-gated physics work (do NOT wire casually — moves the pinned baselines): Pacejka slip model, 4-branch clutch dispatch, staging rollout/dead-time. See the July 3 session report.
-- Full backlog: `reports/ROADMAP_2026_07_03.md`.
+- Full backlog: `docs/ROADMAP.md`.
 
 ---
 
 ## 4. Good first issues (pick one to start)
 
-Ranked by isolation (least cross-cutting first). All of these are in `reports/ROADMAP_2026_07_03.md` with more detail.
+Ranked by isolation (least cross-cutting first). All of these are in `docs/ROADMAP.md` with more detail.
 
 ### A. Catalog data passes (data work — hours, high value)
 Add well-sourced bikes/parts/tires following the July-2026 pattern: sibling spec modules (`motoquant/scraper/known_bikes_2026_*.py`) with cited sources, explicit gear cassettes, individual aero values, and instrumented benchmark rows where they exist. The project rule is absolute: **no fabricated specs, prices, or benchmarks — skip and document instead**. Open targets: vintage-2T OEM tire fitments, sub-500cc drag hardware (needs real products), pricing follow-ups.
@@ -100,7 +102,7 @@ These will cause a PR to be rejected even if the code works.
 ## 6. Project rhythms
 
 - **Standup:** informal, async via GitHub Issues or DM.
-- **Planning:** backlog lives in `reports/ROADMAP_2026_07_03.md`; roadmap phases in `CLAUDE.md`.
+- **Planning:** backlog lives in `docs/ROADMAP.md`; roadmap phases in `CLAUDE.md`.
 - **Reviews:** all PRs need green CI + one approving review; CODEOWNER approval auto-requested on physics/schema/API/infra paths; no self-merge. Turnaround target 48 h.
 - **AI assistants:** much of this codebase is built by Claude sessions operating under `CLAUDE.md`'s rules. If you use AI tooling, hold it to the same gates (baselines, Kaizen, no-fabrication) — the rules exist because each one was broken once and cost real time.
 

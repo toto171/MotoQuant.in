@@ -337,12 +337,22 @@ class SimulateRequest(BaseModel):
         None, description="Venue for DA and surface conditions"
     )
 
-    # Environment overrides (applied on top of venue defaults if set)
-    ambient_temp_c: float | None = Field(None, description="Ambient temperature C")
-    track_temp_c: float | None = Field(None, description="Track surface temperature C")
-    humidity_pct: float | None = Field(None, description="Relative humidity 0-100%")
+    # Environment overrides (applied on top of venue defaults if set).
+    # Bounds match AutotuneRequest, which had them from the start. Without
+    # them (2026-07-25 audit) physically impossible input was absorbed as a
+    # 200 success with a silently meaningless answer: humidity_pct=1e9 or
+    # ambient_temp_c=500 returned et_quarter_s 0.0 / trap 0.0.
+    ambient_temp_c: float | None = Field(
+        None, ge=-30, le=60, description="Ambient temperature C"
+    )
+    track_temp_c: float | None = Field(
+        None, ge=-30, le=80, description="Track surface temperature C"
+    )
+    humidity_pct: float | None = Field(
+        None, ge=0, le=100, description="Relative humidity 0-100%"
+    )
     headwind_kmh: float | None = Field(
-        None, description="Headwind km/h (negative = tailwind)"
+        None, ge=-200, le=200, description="Headwind km/h (negative = tailwind)"
     )
 
     # Simulation options
@@ -374,10 +384,10 @@ class QuickSimRequest(BaseModel):
     rear_tire_id: int | None = None
     venue_id: int | None = None
     # Environment overrides
-    ambient_temp_c: float | None = None
-    track_temp_c: float | None = None
-    humidity_pct: float | None = None
-    headwind_kmh: float | None = None
+    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
+    track_temp_c: float | None = Field(None, ge=-30, le=80)
+    humidity_pct: float | None = Field(None, ge=0, le=100)
+    headwind_kmh: float | None = Field(None, ge=-200, le=200)
 
 
 # ─── Config builder ────────────────────────────────────────────────────────
@@ -602,7 +612,19 @@ def _apply_parts_to_config(
         from .database.bridge import apply_part_to_config
         from .submodels.forced_induction import VALID_BOOST_TYPES
 
+        # De-duplicate while preserving order. A repeated id used to be applied
+        # once per occurrence, stacking that part's param_deltas: part_ids
+        # [56, 56, 56] applied ONE Akrapovic system three times (+36 hp,
+        # -20.4 kg from a single exhaust) and returned the fabricated ET as a
+        # 200 success (2026-07-25 audit). You cannot bolt the same exhaust on
+        # twice, so the physically meaningful reading of a repeated id is one
+        # part — the same rule the ROI knapsack already enforces via its
+        # exclusive-category groups.
+        seen: set[int] = set()
         for pid in part_ids:
+            if pid in seen:
+                continue
+            seen.add(pid)
             row = db.execute("SELECT * FROM parts WHERE id=?", (pid,)).fetchone()
             if not row:
                 continue
@@ -1334,10 +1356,10 @@ class TopSpeedRequest(BaseModel):
     front_tire_id: int | None = None
     rear_tire_id: int | None = None
     venue_id: int | None = None
-    ambient_temp_c: float | None = None
-    track_temp_c: float | None = None
-    humidity_pct: float | None = None
-    headwind_kmh: float | None = None
+    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
+    track_temp_c: float | None = Field(None, ge=-30, le=80)
+    humidity_pct: float | None = Field(None, ge=0, le=100)
+    headwind_kmh: float | None = Field(None, ge=-200, le=200)
     # LSR-specific: optional override for max time/distance.
     # Bounded: n_max preallocates 18 float64 arrays of max_time_s/dt slots
     # (they grow on demand only under adaptive dt), so an unbounded value is
@@ -1458,10 +1480,10 @@ class DistanceRunRequest(BaseModel):
     front_tire_id: int | None = None
     rear_tire_id: int | None = None
     venue_id: int | None = None
-    ambient_temp_c: float | None = None
-    track_temp_c: float | None = None
-    humidity_pct: float | None = None
-    headwind_kmh: float | None = None
+    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
+    track_temp_c: float | None = Field(None, ge=-30, le=80)
+    humidity_pct: float | None = Field(None, ge=0, le=100)
+    headwind_kmh: float | None = Field(None, ge=-200, le=200)
     # Same floor rationale as TopSpeedRequest.max_time_s (>= dt).
     max_time_s: float = Field(120.0, ge=0.1, le=300.0)
 
@@ -1872,10 +1894,10 @@ class CompareRequest(BaseModel):
 
     # Shared conditions
     venue_id: int | None = None
-    ambient_temp_c: float | None = None
-    track_temp_c: float | None = None
-    humidity_pct: float | None = None
-    headwind_kmh: float | None = None
+    ambient_temp_c: float | None = Field(None, ge=-30, le=60)
+    track_temp_c: float | None = Field(None, ge=-30, le=80)
+    humidity_pct: float | None = Field(None, ge=0, le=100)
+    headwind_kmh: float | None = Field(None, ge=-200, le=200)
 
 
 def _run_build(
@@ -2030,6 +2052,54 @@ def simulate_compare(req: CompareRequest):
     return _compare_impl(req)
 
 
+# ─────────────────────────────────────────────────────────────────────────
+# Upload size cap
+# ─────────────────────────────────────────────────────────────────────────
+# Both calibration routes used to do a bare `await file.read()`, materialising
+# the entire body as one bytes object with no ceiling (2026-07-25 audit).
+# Starlette spools a large part to a temp file, but `.read()` pulls all of it
+# back into memory and it is then written to a SECOND temp file — so a single
+# unauthenticated POST of a few hundred MB is an OOM kill plus a disk fill on
+# the 512 MB Render instance. (The `require_tier("studio")` gate does not stop
+# it: require_tier passes anonymous callers through whenever
+# MOTOQUANT_BILLING_ENFORCE is falsy, which render.yaml ships as the default.)
+#
+# 25 MB is ~100x the largest realistic Dragy/dyno export, which are text CSVs
+# of a few hundred KB.
+MAX_UPLOAD_BYTES = 25 * 1024 * 1024
+
+
+async def _read_upload_capped(file: UploadFile) -> bytes:
+    """Read an UploadFile, refusing anything over MAX_UPLOAD_BYTES.
+
+    Reads in chunks so an oversized body is rejected without ever being fully
+    held in memory — reading first and checking len() afterwards would already
+    have done the damage.
+    """
+    chunks: list[bytes] = []
+    total = 0
+    while True:
+        chunk = await file.read(1024 * 1024)
+        if not chunk:
+            break
+        total += len(chunk)
+        if total > MAX_UPLOAD_BYTES:
+            raise HTTPException(
+                413,
+                detail={
+                    "error": "upload_too_large",
+                    "message": (
+                        f"Upload exceeds the {MAX_UPLOAD_BYTES // (1024 * 1024)} MB "
+                        "limit. Dragy and dyno exports are text files of a few "
+                        "hundred KB."
+                    ),
+                    "max_bytes": MAX_UPLOAD_BYTES,
+                },
+            )
+        chunks.append(chunk)
+    return b"".join(chunks)
+
+
 # --- Dragy / Dyno Upload -------------------------------------------------
 
 
@@ -2048,13 +2118,18 @@ async def upload_dragy(
     log = logging.getLogger(__name__)
 
     try:
-        content = await file.read()
+        content = await _read_upload_capped(file)
         suffix = (
             ".json" if file.filename and file.filename.endswith(".json") else ".csv"
         )
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
             tmp.write(content)
             tmp_path = tmp.name
+    except HTTPException:
+        # Pass through the 413 from _read_upload_capped — a bare
+        # `except Exception` here would remask it as a generic 400 and hide
+        # the real reason from the client.
+        raise
     except Exception as exc:
         raise HTTPException(400, f"Failed to read upload: {exc}")
 
@@ -2166,11 +2241,16 @@ async def upload_dyno(
     log = logging.getLogger(__name__)
 
     try:
-        content = await file.read()
+        content = await _read_upload_capped(file)
         suffix = ".txt" if file.filename and file.filename.endswith(".txt") else ".csv"
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
             tmp.write(content)
             tmp_path = tmp.name
+    except HTTPException:
+        # Pass through the 413 from _read_upload_capped — a bare
+        # `except Exception` here would remask it as a generic 400 and hide
+        # the real reason from the client.
+        raise
     except Exception as exc:
         raise HTTPException(400, f"Failed to read upload: {exc}")
 
@@ -2673,7 +2753,15 @@ def _fetch_owm_for_location(
     }
 
 
-@app.post("/api/venues/resolve")
+@app.post(
+    "/api/venues/resolve",
+    # Rate-limited per IP (2026-07-25 audit): on a venue miss this falls
+    # through to a live OpenWeatherMap call on the operator's server-side
+    # key, with no auth and no caching of the miss — an unauthenticated
+    # loop over random lat/lon drains the free allowance (60/min, 1M/mo),
+    # after which the real LocationPicker on /simulator stops working.
+    dependencies=[Depends(rate_limit("venue_resolve", 20, 60.0))],
+)
 def resolve_venue(req: VenueResolveRequest):
     """
     Resolve a race location into ready-to-simulate environment parameters.
@@ -3225,7 +3313,11 @@ def pricing_for_bike(bike_id: int, limit: int = Query(50, ge=1, le=500)):
     )
 
 
-@app.post("/api/pricing/refresh/{part_id}", response_model=PricingRefreshOut)
+@app.post(
+    "/api/pricing/refresh/{part_id}",
+    response_model=PricingRefreshOut,
+    dependencies=[Depends(rate_limit("pricing_refresh", 5, 60.0))],
+)
 def refresh_part_price(part_id: int, force: bool = Query(False)):
     """
     Trigger a live price refresh for a single part.
@@ -3233,8 +3325,19 @@ def refresh_part_price(part_id: int, force: bool = Query(False)):
     Uses the part's ``retailer_url`` field to hit the live retailer page.
     Set ``force=true`` to bypass the 14-day freshness check.
 
-    NOTE: This endpoint is intentionally open for now.  Stream 5 (auth)
-    will wrap it with admin-role gating via ``app.include_router(auth_router)``.
+    Rate-limited per IP (2026-07-25 audit). This is a *sync* route that makes a
+    blocking outbound HTTP request to a third-party retailer, so each in-flight
+    call occupies one anyio threadpool worker (default 40) for as long as the
+    fetch takes — measured worst case 44.4 s (3 attempts x 10 s timeout plus
+    2+4+8 s backoff). Unauthenticated and unthrottled, a loop over the 72 parts
+    that carry a retailer_url exhausted the pool and starved every other sync
+    route, including ``/api/health`` — which is Render's healthCheckPath and the
+    keep-alive target, so the instance would be marked unhealthy. ``force=true``
+    made it worse by bypassing the 14-day freshness check so repeats could never
+    become no-ops.
+
+    NOTE: still open (no auth) by design during the beta; the admin-role gate
+    remains the eventual fix. The rate limit is the fuse until then.
     """
     db = _get_db()
     if db is None:

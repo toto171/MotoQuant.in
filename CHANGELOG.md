@@ -4,6 +4,61 @@ Notable changes, newest first. This is the human-readable milestone history;
 the exhaustive session-by-session log lives in `CLAUDE.md` (top entry = latest)
 and `reports/`. Format loosely follows [Keep a Changelog](https://keepachangelog.com).
 
+## [PR #116] — 2026-07-19 — Scrapling dev-side scraping toolkit
+
+Dev-only scraping toolkit; **nothing in it writes `motoquant.db`** — scraped
+specs are unverified adjudication inputs.
+
+### Added
+- `motoquant/scraper/fetcher.py` — `PoliteFetcher`: disk cache → robots.txt
+  (protego) → per-domain rate limit → tier escalation (basic → curl_cffi →
+  browser/Playwright → stealth/Camoufox, stealth opt-in only). Scrapling is
+  soft-imported with a typed `ScraplingNotInstalled`; it lives in a new
+  dev-only `requirements-scrape.txt`, never `requirements-api.txt`.
+- `scripts/scrape_bike_specs.py` — bikez scrape → `validate_spec` gate →
+  import-ready JSON, plus a triage report that surfaces unmapped spec-table
+  rows as the site-drift signal. `docs/SCRAPING.md` is the runbook.
+- `tests/test_scrapling_fetcher.py` (22 tests, zero network via a
+  `fetch_fns` injection seam; parser pinned on a committed fixture).
+
+### Fixed
+- `bikez.py` URL-slug year detection took the FIRST 4-digit token, so
+  `gsx-r_1000_2005` parsed as model "GSX R", year 1000. Year is now the
+  trailing plausible-year segment only. Public `parse_bikez_detail()`
+  extracted so scrape and parse share one source of truth.
+
+## [PR #114] — 2026-07-17 — Orchestrated run: scope + full execution
+
+New authoritative sweep: **250 benchmarks / 277 matched / weighted |Δ|
+0.2721 / bias −0.0047** (`reports/acc_final_2026_07_17.json`). The |Δ| rise
+from 0.2533 is deliberate honesty, not regression — optimistic DERIVED rows
+were replaced with slower instrumented truth (12 rows, including five new
+Indonesian Racelogic/GPS measurements), and bias is now essentially zero.
+
+### Added
+- **Factory speed limiter** — `DrivetrainParams.speed_limiter_kmh`, clamped
+  at all four RK4 stage velocities, validated 120–340, round-tripped through
+  the bridge and `config_io`. Ten specs annotated at 299 km/h. Top-speed
+  sweep: mean |Δ| 35.0 → 32.0 km/h, bias +28.5 → +25.4. Shipped NON-epoch —
+  baselines stay bit-identical (`None` = unrestricted).
+- Growth funnel on the existing `track()` pipeline (`sim_run_success`,
+  `signup_completed`, `upgrade_clicked`), a timeslip CTA on bike pages, and
+  a zero-dependency print-PDF timeslip on `/r/[id]`.
+
+### Security / hardening (the "before charging money" bundle)
+- Bound license keys reject `device_id`-omitting validates;
+  `/license-key/validate` rate-limited (10/60 s).
+- Razorpay webhook idempotency ledger (header id + sha256-body fallback).
+- `/api/jobs/outlaw` pro-gate closed; `python-jose` → `PyJWT`; non-root
+  `USER app` in the Dockerfile (verified against a real Docker build);
+  `lastrowid` → `rowcount` in the bike/venue repos.
+
+### Changed
+- Six dead `CategoryProfile` knobs deleted; the live-knob inventory is now
+  pinned as an exact set.
+- CI reworked to a python-only, path-filtered workflow: ~3 min PR fast tier
+  vs full suite + coverage on main pushes.
+
 ## [PR #109] — 2026-07-13 — Physics epoch + scrape-consumption + hardening
 
 The operator-ordered "all 3 things" pass over the July-11 validation
