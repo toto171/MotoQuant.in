@@ -97,11 +97,20 @@ class TestScoreCandidate(unittest.TestCase):
 
 
 def _live_db_path():
-    """Locate motoquant.db — skip these tests if absent."""
+    """Locate the SHIPPED motoquant.db — skip these tests if absent.
+
+    The repo DB is preferred over $MOTOQUANT_DB deliberately. These Live tests
+    resolve real bike/venue names against the real catalog, and $MOTOQUANT_DB is
+    transiently repointed at freshly-seeded (sometimes EMPTY) tmp DBs by sibling
+    modules whose import-time overrides execute during the collection phase —
+    which made this class fail purely as a function of collection order in a
+    full `pytest tests/` run while passing standalone. Env var stays as the
+    fallback for environments that ship no repo DB (e.g. CI's seeded /tmp DB).
+    """
     for cand in [
-        os.environ.get("MOTOQUANT_DB"),
-        "motoquant.db",
         os.path.join(os.path.dirname(__file__), "..", "motoquant.db"),
+        "motoquant.db",
+        os.environ.get("MOTOQUANT_DB"),
     ]:
         if cand and os.path.exists(cand):
             return cand

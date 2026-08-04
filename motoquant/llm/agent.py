@@ -287,10 +287,20 @@ def _build_config_for(ctx: AgentContext, args: dict[str, Any]):
     if part_ids:
         from ..database.parts_repo import PartsRepository
 
+        # De-duplicate — you cannot bolt the same exhaust on twice. Stacking a
+        # repeated id fabricates ET gains and multiplies the quoted build cost
+        # (the same fix applied to the API path in _apply_parts_to_config).
+        seen: set[int] = set()
+        unique_ids: list[int] = []
+        for p in part_ids:
+            pid = int(p)
+            if pid not in seen:
+                seen.add(pid)
+                unique_ids.append(pid)
         repo = PartsRepository(db.conn)
-        config = repo.apply_multiple([int(p) for p in part_ids], config)
-        cost = repo.estimate_build_cost([int(p) for p in part_ids])
-        notes.append(f"{len(part_ids)} parts applied (₹{cost.get('total', 0):,.0f})")
+        config = repo.apply_multiple(unique_ids, config)
+        cost = repo.estimate_build_cost(unique_ids)
+        notes.append(f"{len(unique_ids)} parts applied (₹{cost.get('total', 0):,.0f})")
 
     rear_tire_id = args.get("rear_tire_id")
     if rear_tire_id:
@@ -309,9 +319,14 @@ def _build_config_for(ctx: AgentContext, args: dict[str, Any]):
 
 
 def _sim_to_dict(sim, bike_name: str, notes: list[str]) -> dict[str, Any]:
+    from ..physics import effective_et
+
     out: dict[str, Any] = {
         "bike_name": bike_name,
-        "et_quarter_s": round(float(sim.time_quarter), 4),
+        "finished_quarter": bool(getattr(sim, "finished_quarter", True)),
+        # effective_et maps a did-not-finish to a large sentinel so it never
+        # reads as the fastest ET (0.0 s) to the winner/rank logic downstream.
+        "et_quarter_s": round(effective_et(sim), 4),
         "trap_speed_kmh": round(float(sim.speed_quarter) * MS_TO_KMH, 1),
         "trap_speed_mph": round(float(sim.speed_quarter) * MS_TO_MPH, 1),
         "et_60ft_s": round(float(sim.time_60ft), 4),
@@ -796,7 +811,7 @@ def _exec_list_tires(ctx: AgentContext, args: dict) -> dict:
 
 def _exec_rank_bikes(ctx: AgentContext, args: dict) -> dict:
     """Shortlist by power-to-weight (cheap SQL), then rank by REAL sims."""
-    from ..physics import MotoQuantEngine
+    from ..physics import MotoQuantEngine, effective_et
 
     top_n = max(1, min(int(args.get("top_n") or 5), 5))
     sql = """
@@ -845,7 +860,9 @@ def _exec_rank_bikes(ctx: AgentContext, args: dict) -> dict:
                     "bike_name": f"{row['manufacturer']} {row['model_name']}",
                     "displacement_cc": row["displacement_cc"],
                     "power_hp": row["peak_power_hp"],
-                    "et_quarter_s": round(float(sim.time_quarter), 3),
+                    "finished_quarter": bool(getattr(sim, "finished_quarter", True)),
+                    # effective_et: a DNF sorts to the bottom, not the top.
+                    "et_quarter_s": round(effective_et(sim), 3),
                     "trap_speed_kmh": round(float(sim.speed_quarter) * MS_TO_KMH, 1),
                 }
             )
@@ -900,6 +917,13 @@ def _exec_optimize_build(ctx: AgentContext, args: dict) -> dict:
     budget = args.get("budget_inr")
     if budget is None:
         budget = tier_info["default_budget_inr"]
+    # Clamp an LLM-supplied budget to the same ceiling the API enforces
+    # (OptimizeBuildRequest.budget_inr Field(le=5_000_000)). Unclamped, a chat
+    # request for a "₹10 billion build" makes roi._grouped_knapsack allocate
+    # budget//100 DP buckets — an OOM kill on the 512 MB instance. None stays
+    # None (stage_4/outlaw resolves its own no-limit cap internally).
+    if budget is not None:
+        budget = min(float(budget), 5_000_000.0)
     goal = args.get("goal") or "min_et"
 
     try:

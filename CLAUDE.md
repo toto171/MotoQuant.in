@@ -209,7 +209,7 @@ Self-imposed rules to maximise useful work per context window:
 - Bikes: **541** models / 553 configs. Ids 1–3 are the hand-curated reference bikes from `defaults.py` (excluded from reseed; category-stamped `litre_sport_195p` by `patch_2026_07_06_reference_configs.py`).
 - Parts: **593** across 20 categories (incl. `lowering_kit` / `air_shifter` / `lockup_clutch`); catalog precision patched July 6 (53,205 compatible pairs after removing 3,684 impossible ones).
 - Tires: **254** (notation-twin dedup July 6; physical sizes normalized via `normalize_size_designation`); bike-tire fitments: **1,860**; venues: **20**.
-- Benchmarks: **250 unique** (277 matched in the weighted sweep). Accuracy: weighted |Δ| **0.2533s**, bias **+0.0166s** (`reports/acc_final_2026_07_13.json`; the July-13 physics epoch moved the pins — see that day's chain entry).
+- Benchmarks: **250 unique** (277 matched in the weighted sweep). Accuracy: weighted |Δ| **0.2721s**, bias **−0.0047s** (`reports/acc_final_2026_07_17.json` — the authoritative sweep, reproduced byte-identically by the July-25 audit and displayed sitewide). The |Δ| RISE from the July-13 figure (0.2533 / +0.0166, `acc_final_2026_07_13.json`) is deliberate honesty, not regression: the July-17 corpus batch replaced optimistic DERIVED rows with slower instrumented truth. Do NOT quote the July-13 pair as current.
 - **Re-seed chain** (all idempotent — required after any `spec_to_bike_config`/physics change): `scripts/reseed_configs_from_specs.py` → `patch_2026_07_06_reference_configs.py` → `patch_2026_07_06_catalog_integrity.py` → `patch_2026_07_06_tire_dedup.py` → `patch_2026_07_13_scrape_data.py` → regenerate golden snapshots + surrogate, same session.
 
 ### Physics & accuracy state

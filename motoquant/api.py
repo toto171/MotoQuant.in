@@ -379,7 +379,9 @@ class QuickSimRequest(BaseModel):
     power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
     rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
-    part_ids: list[int] = Field(default_factory=list, description="Part IDs to apply")
+    part_ids: list[int] = Field(
+        default_factory=list, max_length=50, description="Part IDs to apply"
+    )
     front_tire_id: int | None = None
     rear_tire_id: int | None = None
     venue_id: int | None = None
@@ -1031,7 +1033,12 @@ def get_bike(bike_id: int):
 
             # Expose common simulation-relevant fields at top level
             if engine:
-                for k in ("redline_rpm", "cylinder_count", "cylinder_config"):
+                for k in (
+                    "redline_rpm",
+                    "cylinder_count",
+                    "cylinder_config",
+                    "stroke_type",
+                ):
                     v = engine.get(k)
                     if v is not None and d.get(k) in (None, ""):
                         d[k] = v
@@ -1041,7 +1048,12 @@ def get_bike(bike_id: int):
                     if v is not None:
                         d[k] = v
             if drive:
-                for k in ("front_sprocket", "rear_sprocket", "chain_pitch"):
+                for k in (
+                    "front_sprocket",
+                    "rear_sprocket",
+                    "chain_pitch",
+                    "gear_ratios",
+                ):
                     v = drive.get(k)
                     if v is not None:
                         d[k] = v
@@ -1352,7 +1364,7 @@ class TopSpeedRequest(BaseModel):
     power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
     rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
-    part_ids: list[int] = Field(default_factory=list)
+    part_ids: list[int] = Field(default_factory=list, max_length=50)
     front_tire_id: int | None = None
     rear_tire_id: int | None = None
     venue_id: int | None = None
@@ -1476,7 +1488,7 @@ class DistanceRunRequest(BaseModel):
     power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
     rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
-    part_ids: list[int] = Field(default_factory=list)
+    part_ids: list[int] = Field(default_factory=list, max_length=50)
     front_tire_id: int | None = None
     rear_tire_id: int | None = None
     venue_id: int | None = None
@@ -1878,7 +1890,7 @@ class CompareRequest(BaseModel):
     a_power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     a_mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
     a_rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
-    a_part_ids: list[int] = Field(default_factory=list)
+    a_part_ids: list[int] = Field(default_factory=list, max_length=50)
     a_front_tire_id: int | None = None
     a_rear_tire_id: int | None = None
 
@@ -1888,7 +1900,7 @@ class CompareRequest(BaseModel):
     b_power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     b_mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
     b_rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
-    b_part_ids: list[int] = Field(default_factory=list)
+    b_part_ids: list[int] = Field(default_factory=list, max_length=50)
     b_front_tire_id: int | None = None
     b_rear_tire_id: int | None = None
 
@@ -2696,14 +2708,22 @@ def _fetch_owm_for_location(
         resp.raise_for_status()
         data = resp.json()
     except Exception as exc:
+        msg = str(exc)
+        # This string is surfaced to the caller in a 502 (see the owm_error
+        # branch below). A requests.HTTPError embeds the full request URL, which
+        # carries the appid (the operator's API key) as a query param — an OWM
+        # 404 (unknown city) or 401 (bad key) would exfiltrate it in one
+        # anonymous request. Redact the key before it leaves the process.
+        if api_key:
+            msg = msg.replace(api_key, "***")
         logging.getLogger(__name__).warning(
             "OWM fetch failed for location=%r lat=%s lon=%s: %s",
             location,
             lat,
             lon,
-            exc,
+            msg,
         )
-        return {"_error": f"owm_error: {exc}"}
+        return {"_error": f"owm_error: {msg}"}
 
     # Parse response -- OWM returns Celsius + hPa + m/s when units=metric
     main = data.get("main", {}) or {}

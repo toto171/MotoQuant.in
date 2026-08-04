@@ -4,6 +4,35 @@ Notable changes, newest first. This is the human-readable milestone history;
 the exhaustive session-by-session log lives in `CLAUDE.md` (top entry = latest)
 and `reports/`. Format loosely follows [Keep a Changelog](https://keepachangelog.com).
 
+## [PR #118] — 2026-07-26 — Weekly audit: trap units, dead gates, doc + CI truth
+
+A 39-agent, 12-dimension audit with adversarial verification of every
+high/critical finding. 82 raw findings; 16 survived a verifier instructed to
+refute them.
+
+### Fixed
+- **SAE J1349 dyno correction had its temperature ratio inverted**, so every
+  imported dyno curve was corrected in the wrong direction.
+- **11 benchmark trap speeds were transcribed in mph but stored as km/h**;
+  `tests/test_benchmark_units.py` now guards the whole class against the real
+  pre-fix row.
+- Catalog part 340 shipped an invalid `boost_type` that 422'd every simulation
+  it was applied to.
+- Two unauthenticated cost-bearing routes fused: `/api/venues/resolve` (spends
+  the OpenWeatherMap key) and `/api/pricing/refresh/{id}` are now rate-limited.
+- Calibration uploads are size-capped (an unauthenticated OOM lever).
+- Per-IP rate limits on the credential-burning auth routes.
+- `/api/simulate` rejects impossible environment input and no longer stacks
+  duplicate `part_ids`.
+- Preflight aborted every autonomous session on a false physics-drift reading.
+- `/validation` hero tiles derive from the data; `/features` |Δ| synced.
+- Tests no longer write metering rows into the tracked `motoquant.db`.
+
+### Changed
+- Pre-epoch baselines retired from the gates that had missed them; the durable
+  doc set resynced to the tree; CI `make install` made sufficient and the
+  retired release workflow defused.
+
 ## [PR #116] — 2026-07-19 — Scrapling dev-side scraping toolkit
 
 Dev-only scraping toolkit; **nothing in it writes `motoquant.db`** — scraped

@@ -356,6 +356,18 @@ def _send_magic_link_email(email: str, token: str) -> None:
     link = f"{MOTOQUANT_BASE_URL}/login?token={token}"
 
     if EMAIL_BACKEND == "stdout" or not os.environ.get("SMTP_HOST"):
+        if IN_DEPLOYED_ENV:
+            # NEVER print a live magic-link token to prod logs — it is a
+            # single-use, 10-minute account-takeover credential and log streams
+            # are readable/shippable. Without SMTP configured the link is simply
+            # undeliverable here (the honest state); configure SMTP_HOST to
+            # enable delivery. Mirrors the response-echo guard below.
+            log.warning(
+                "Magic link requested for %s but no email backend is configured "
+                "(SMTP_HOST unset); link not delivered.",
+                email,
+            )
+            return
         # Dev mode — print to server stdout
         log.info("=== MAGIC LINK (dev mode) ===")
         log.info("To: %s", email)

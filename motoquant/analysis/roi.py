@@ -45,7 +45,7 @@ import warnings
 from dataclasses import dataclass
 
 from ..models import BikeConfig
-from ..physics import MotoQuantEngine
+from ..physics import MotoQuantEngine, effective_et
 
 
 def json_safe(obj):
@@ -480,10 +480,16 @@ def _grouped_knapsack(
 
 
 def _run_et(config: BikeConfig) -> tuple[float, float]:
-    """Run a quick simulation and return (ET_s, trap_speed_ms)."""
+    """Run a quick simulation and return (ET_s, trap_speed_ms).
+
+    A run that never reaches the quarter-mile leaves ``time_quarter`` at its 0.0
+    default; ``effective_et`` maps that DNF to a large sentinel so an argmin over
+    ET (gearing/launch sweeps, ROI deltas) never treats a did-not-finish as the
+    fastest candidate.
+    """
     engine = MotoQuantEngine(config)
     result = engine.run()
-    return result.time_quarter, result.speed_quarter
+    return effective_et(result), result.speed_quarter
 
 
 def _roi_metrics(

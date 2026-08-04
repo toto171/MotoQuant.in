@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import copy
 import unittest
+from pathlib import Path
 
 import motoquant
 from motoquant.database.bridge import db_row_to_config
@@ -27,8 +28,17 @@ from tests._helpers import live_db_copy
 
 
 def _open_db():
-    """Open DB via writable-fs copy (dodges FUSE-mount sqlite I/O errors)."""
-    return live_db_copy()
+    """Open a writable copy of the SHIPPED catalog (dodges FUSE sqlite I/O).
+
+    Pin the repo motoquant.db explicitly. Bare live_db_copy() prefers
+    $MOTOQUANT_DB, which sibling modules (test_api / test_llm_runner /
+    test_spec_corrections) transiently repoint at freshly-seeded tmp DBs during
+    the same pytest session — so this stale-DB guard would validate a DB that
+    matches spec_to_bike_config by construction instead of the tracked artifact
+    that ships to prod. Same pin as tests/test_regression_snapshot.py.
+    """
+    repo_db = Path(__file__).resolve().parent.parent / "motoquant.db"
+    return live_db_copy(repo_db if repo_db.exists() else None)
 
 
 def _load_db_r15_v3():

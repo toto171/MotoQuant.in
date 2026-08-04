@@ -66,7 +66,11 @@ export function track(event, props = {}) {
   // Skip on localhost / preview unless explicitly enabled — keeps dev iterations
   // out of the prod usage funnel.
   const host = window.location.hostname;
-  const isDev = host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local');
+  const isDev =
+    host === 'localhost' ||
+    host === '127.0.0.1' ||
+    host.endsWith('.local') ||
+    host.endsWith('.vercel.app'); // preview deployments — keep them out of the prod funnel
   if (isDev && !window.__MOTOQUANT_TELEMETRY_FORCE) return;
 
   // Strip anything funky from props — only allow numbers, booleans, short

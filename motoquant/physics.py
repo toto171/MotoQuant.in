@@ -172,6 +172,22 @@ class SimResult:
         self.finished_quarter = self.time_quarter > 0.0
 
 
+# Sentinel ET (s) for a run that never reached the quarter-mile. A DNF leaves
+# time_quarter at its 0.0 default; feeding that raw to a min()/sort makes a
+# did-not-finish read as the fastest possible ET (0.0 s) — a bike that could not
+# complete the quarter gets crowned the winner. Ranking/argmin consumers must use
+# effective_et() so a DNF sorts as slowest, never fastest. 999 s is far above the
+# 26 s max_time ceiling and finite (unlike inf, which breaks a-b arithmetic).
+DNF_ET_SENTINEL_S = 999.0
+
+
+def effective_et(sim: "SimResult") -> float:
+    """ET in seconds for ranking/argmin — a DNF maps to DNF_ET_SENTINEL_S."""
+    if getattr(sim, "finished_quarter", True):
+        return float(sim.time_quarter)
+    return DNF_ET_SENTINEL_S
+
+
 # ═══════════════════════════════════════════
 # PHYSICS ENGINE (orchestrator)
 # ═══════════════════════════════════════════

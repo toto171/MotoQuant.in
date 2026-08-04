@@ -40,12 +40,29 @@ CI runs **both**. `ruff check` ignores line length (E501); `ruff format` still
 re-wraps long lines. A PR that only ran `ruff check` can still fail the format
 gate (it did in PR #99). Run `make fmt-check` (or just `make check`).
 
-### T6 — pytest under `-n` (xdist) flakes ~15 DB-backed "Live" tests
+### T6 — `$MOTOQUANT_DB` leaks between test modules (xdist AND serial)
 `test_chat_resolver.py` "Live" resolver tests and a couple of route tests share
-the seeded DB and env across xdist workers, so parallel runs show spurious
-failures. **They all pass serially.** The authoritative run (and CI) is serial
-(`make test`). Don't chase these as real bugs after a parallel run — re-run the
-failing file serially to confirm.
+the seeded DB and env, so parallel (xdist) runs show spurious failures. Re-run
+the failing file serially before chasing it as a real bug.
+
+**Serial is not automatically safe, either.** Several modules set
+`MOTOQUANT_DB` at *import* (collection) time, so by the time the run phase
+starts the env points at whichever such module sorted last — potentially an
+**empty** tmp DB. On 2026-08-04 this made 14 `TestResolve*Live` tests fail in a
+full `pytest tests/` run while passing standalone; the whole class of "full
+suite green" claims in between came from per-module runs that never saw it.
+
+Two rules keep it fixed:
+1. **Setting** the env belongs in `setUpModule`/`tearDownModule` (run time, with
+   restore + tmp-file unlink) — never at module import. See `tests/test_agent.py`
+   and `tests/test_llm_runner.py`.
+2. **Consumers** that need the real shipped catalog must pin the repo
+   `motoquant.db` explicitly rather than trusting `$MOTOQUANT_DB`. See
+   `tests/test_regression_snapshot.py`, `test_db_gearing_integrity.py`,
+   `test_power_boost_regression.py`, `test_chat_resolver.py`.
+
+Repro for the serial variant:
+`python -m pytest tests/ -k "TestResolveBikeLive or TestResolveVenueLive"`
 
 ### T7 — File-write tools can truncate large files
 A `Write`/`Edit` on a big file can silently cut the tail (historically ~5–6 KB).

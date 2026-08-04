@@ -178,8 +178,11 @@ print(m.MotoQuantEngine(m.gsxr1000_k5()).run().time_quarter, \
 ## 6. Deployment topology (July 2026)
 
 - **API**: FastAPI on **Render** free tier (`motoquant-api.onrender.com`),
-  Docker via `render.yaml`. Cold-start-guarded by `keepwarm.py` + a GitHub
-  Actions keep-alive cron. Migration runbook: `docs/RENDER_MIGRATION.md`.
+  Docker via `render.yaml`. Cold-start-guarded by the in-app `keepwarm.py`
+  self-ping plus **Vercel crons hitting `/api/wake`**. (The GitHub Actions
+  keep-alive cron in `keepalive.yml` has had its schedule commented out since
+  2026-07-14 and Actions has no runners assigned regardless — do not treat it
+  as a live layer.) Migration runbook: `docs/RENDER_MIGRATION.md`.
 - **Web**: Next.js on **Vercel** (`motoquant.in`); reaches the API via the
   `NEXT_PUBLIC_API_URL` env var + an `/api/*` rewrite.
 - **DB**: `motoquant.db` is tracked in git and ships inside the Docker image

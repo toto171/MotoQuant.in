@@ -16,12 +16,18 @@ import unittest
 from typing import Any
 from unittest.mock import MagicMock
 
-# Point the API at an isolated DB BEFORE importing api / runner.
+# Isolated empty tmp DB for this module. MOTOQUANT_DB is asserted in
+# setUpModule (run time), NOT at import/collection time. An import-time write
+# leaks this module's EMPTY-DB path into the shared env for the entire
+# collection phase, so a sibling whose tests run before this one's — e.g.
+# test_chat_resolver, whose Live tests read $MOTOQUANT_DB — resolves to this
+# empty DB and fails: an ordering-dependent red serial suite. (July-2026 lesson;
+# same deferred pattern as tests/test_agent.py.)
 _tmp_db_file = tempfile.NamedTemporaryFile(
     prefix="mq_chat_test_", suffix=".db", delete=False
 )
 _tmp_db_file.close()
-os.environ["MOTOQUANT_DB"] = _tmp_db_file.name
+_OLD_ENV_DB = None
 
 from motoquant.database.connection import MotoQuantDB  # noqa: E402
 from motoquant.database.seed import seed_all  # noqa: E402
@@ -49,6 +55,50 @@ def _get_shared_db() -> MotoQuantDB:
     seed_all(db)
     _SHARED_DB = db
     return db
+
+
+def setUpModule():
+    """Re-assert this module's tmp DB right before its tests run.
+
+    Module-level MOTOQUANT_DB overrides execute at COLLECTION time, so setting
+    it here (run time) instead keeps collection ordering irrelevant, and nulling
+    the api singletons forces a reconnect to this DB rather than a sibling's.
+    """
+    global _OLD_ENV_DB
+    _OLD_ENV_DB = os.environ.get("MOTOQUANT_DB")
+    os.environ["MOTOQUANT_DB"] = _tmp_db_file.name
+    try:
+        import motoquant.api as _api_mod
+
+        _api_mod._db_conn = None
+        _api_mod._db_facade = None
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def tearDownModule():
+    # Restore the env + null/close the api singletons so later modules reconnect
+    # to their own DB, not this deleted tmp path; then remove the tmp file.
+    try:
+        import motoquant.api as _api_mod
+
+        if _api_mod._db_conn is not None:
+            try:
+                _api_mod._db_conn.close()
+            except Exception:  # noqa: BLE001
+                pass
+        _api_mod._db_conn = None
+        _api_mod._db_facade = None
+    except Exception:  # noqa: BLE001
+        pass
+    if _OLD_ENV_DB is None:
+        os.environ.pop("MOTOQUANT_DB", None)
+    else:
+        os.environ["MOTOQUANT_DB"] = _OLD_ENV_DB
+    try:
+        os.unlink(_tmp_db_file.name)
+    except OSError:
+        pass
 
 
 def _make_mock_client(
