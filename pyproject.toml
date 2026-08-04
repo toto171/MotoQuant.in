@@ -28,6 +28,14 @@ exclude = [
     "*.egg-info",
     ".ruff_cache",
     "node_modules",
+    # Ruff >=0.16 formats Python code blocks embedded in Markdown. Our .md files
+    # are prose (session reports, ADRs, the dispatch inbox) whose snippets are
+    # deliberately partial or deliberately "wrong" — before/after examples,
+    # bare keyword-arg fragments. Formatting them corrupts the illustration:
+    # `started_at=_utcnow_iso(),` became `started_at = (_utcnow_iso(),)`.
+    # This made `ruff format --check .` fail on 20 untouched documents and red
+    # every CI run on main. Prose is not source; keep the formatter out of it.
+    "*.md",
 ]
 
 [tool.ruff.lint]
