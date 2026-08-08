@@ -1,8 +1,11 @@
 """
 MotoQuant Pro — Auth module tests
 ===================================
-Tests for magic-link issuance, JWT lifecycle, tier gating, and rate limiting.
+Tests for magic-link issuance, JWT lifecycle, the default-secret boot guard,
+tier gating, and rate limiting.
 All tests use in-memory SQLite — no network calls, no file system I/O beyond /tmp.
+Section 4b spawns short-lived subprocesses (the boot guard is import-time code,
+so the only honest way to exercise it is a fresh interpreter).
 
 Run with:
     python -m pytest tests/test_auth.py -v
@@ -10,11 +13,18 @@ Run with:
 
 from __future__ import annotations
 
+import importlib.util
 import json
+import os
 import sqlite3
+import subprocess
+import sys
 import unittest
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from unittest.mock import patch
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
 
 # ─── helpers shared across tests ─────────────────────────────────────────────
 
@@ -266,6 +276,142 @@ class TestJwtHelpers(unittest.TestCase):
 
         result = auth_mod._decode_token("not-a-valid-token")
         self.assertIsNone(result)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 4b. JWT default-secret boot guard  (docs/INVARIANTS.md I7, AGENTS.md §4)
+# ══════════════════════════════════════════════════════════════════════════════
+# `motoquant/auth.py` refuses to import when JWT_SECRET is still the public
+# default AND MOTOQUANT_BILLING_ENFORCE is on — a forgeable signing key in
+# commercial mode means anyone can mint themselves a paid tier. During the open
+# beta the same condition only warns, because hard-failing there would take the
+# live beta down over a documented pre-commercial TODO.
+#
+# INVARIANTS I7 has named `tests/test_auth.py` as this guarantee's enforcement
+# since the invariant was written, but no such test existed (weekly audit
+# 2026-07-25, §3.4). These are it.
+#
+# The guard is *module-level* code, so it cannot be exercised by importing the
+# already-imported module or by patching `auth.BILLING_ENFORCE` after the fact
+# — either would test a re-implementation rather than the guard. Each case
+# therefore boots a fresh interpreter with the real environment and asserts on
+# the real process outcome. `importlib.reload` is deliberately NOT used: it
+# would rebuild `auth.router` under the running FastAPI app that already holds
+# a reference to the old one.
+
+_BOOT_PROBE = (
+    "import motoquant.auth as a;"
+    "print('BOOTED default=%s enforce=%s' % (a._JWT_SECRET_IS_DEFAULT,"
+    " a.BILLING_ENFORCE))"
+)
+_DEFAULT_JWT_SECRET = "dev-insecure-secret-change-me"
+
+
+def _boot_auth(*, jwt_secret=None, billing_enforce=None):
+    """Import `motoquant.auth` in a fresh interpreter under the given env.
+
+    `None` means "leave the variable unset", which is the shipped default for
+    both (render.yaml ships MOTOQUANT_BILLING_ENFORCE=false and no JWT_SECRET).
+    """
+    env = dict(os.environ)
+    env.pop("JWT_SECRET", None)
+    env.pop("MOTOQUANT_BILLING_ENFORCE", None)
+    if jwt_secret is not None:
+        env["JWT_SECRET"] = jwt_secret
+    if billing_enforce is not None:
+        env["MOTOQUANT_BILLING_ENFORCE"] = billing_enforce
+    env["PYTHONPATH"] = os.pathsep.join(
+        [str(REPO_ROOT), env.get("PYTHONPATH", "")]
+    ).rstrip(os.pathsep)
+    return subprocess.run(
+        [sys.executable, "-c", _BOOT_PROBE],
+        capture_output=True,
+        text=True,
+        cwd=str(REPO_ROOT),
+        env=env,
+        timeout=120,
+    )
+
+
+@unittest.skipIf(
+    importlib.util.find_spec("fastapi") is None,
+    "fastapi not installed — motoquant.auth cannot be imported at all, so a "
+    "failed boot would not prove the guard fired",
+)
+class TestJwtDefaultSecretBootGuard(unittest.TestCase):
+    def test_default_secret_under_billing_refuses_to_boot(self):
+        proc = _boot_auth(billing_enforce="true")
+        self.assertNotEqual(
+            proc.returncode,
+            0,
+            "motoquant.auth booted with the public default JWT_SECRET while "
+            "billing is enforced — the boot guard is gone; tokens are forgeable "
+            "and any caller can self-upgrade to a paid tier.\n"
+            f"stdout: {proc.stdout!r}",
+        )
+        self.assertIn("RuntimeError", proc.stderr)
+        self.assertIn("JWT_SECRET", proc.stderr)
+        self.assertIn("MOTOQUANT_BILLING_ENFORCE", proc.stderr)
+        self.assertNotIn("BOOTED", proc.stdout)
+
+    def test_default_secret_set_explicitly_also_refuses(self):
+        """The guard must key on the value, not on "was the env var absent" —
+        an operator who copies the documented placeholder into their dashboard
+        is in exactly the same danger as one who never set it."""
+        proc = _boot_auth(
+            jwt_secret=_DEFAULT_JWT_SECRET,
+            billing_enforce="true",
+        )
+        self.assertNotEqual(proc.returncode, 0, proc.stdout)
+        self.assertIn("RuntimeError", proc.stderr)
+
+    def test_every_truthy_enforce_spelling_triggers_the_guard(self):
+        """`BILLING_ENFORCE` accepts 1/true/yes/on (case- and space-insensitive).
+        Every spelling that turns billing on must also arm the guard, or one of
+        them is a silent bypass."""
+        for spelling in ("1", "true", "TRUE", "  True  ", "yes", "on"):
+            with self.subTest(enforce=spelling):
+                proc = _boot_auth(billing_enforce=spelling)
+                self.assertNotEqual(
+                    proc.returncode,
+                    0,
+                    f"MOTOQUANT_BILLING_ENFORCE={spelling!r} booted on the "
+                    "default secret",
+                )
+
+    def test_real_secret_boots_under_billing(self):
+        """The guard must not be a blanket refusal: a properly configured
+        deployment has to start."""
+        proc = _boot_auth(
+            jwt_secret="a" * 64,  # stands in for 32+ random bytes, hex-encoded
+            billing_enforce="true",
+        )
+        self.assertEqual(
+            proc.returncode,
+            0,
+            f"a real JWT_SECRET was rejected under billing: {proc.stderr[-800:]}",
+        )
+        self.assertIn("BOOTED default=False enforce=True", proc.stdout)
+
+    def test_default_secret_is_allowed_in_open_beta(self):
+        """Billing off (the shipped render.yaml default) is the open-beta
+        posture: auth is advisory, so the guard only warns. Hard-failing here
+        would take the live beta down."""
+        proc = _boot_auth(billing_enforce="false")
+        self.assertEqual(
+            proc.returncode,
+            0,
+            "the boot guard fired during the open beta — this takes the live "
+            f"site down: {proc.stderr[-800:]}",
+        )
+        self.assertIn("BOOTED default=True enforce=False", proc.stdout)
+        self.assertIn("insecure public default", proc.stderr)
+
+    def test_default_secret_is_allowed_when_enforce_is_unset(self):
+        """Neither variable set — a fresh clone, and every CI job."""
+        proc = _boot_auth()
+        self.assertEqual(proc.returncode, 0, proc.stderr[-800:])
+        self.assertIn("BOOTED default=True enforce=False", proc.stdout)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
