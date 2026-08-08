@@ -87,6 +87,50 @@ class TestRecordAndCheck:
         assert usage.peek(conn, "user:9") == 1
 
 
+class TestBatchCharge:
+    """``n`` — routes that run more than one RK4 pass per request.
+
+    /api/simulate/compare runs two, a classic chat turn's rank/choose
+    dispatch runs up to 25, and an agent heavy op costs a nominal batch.
+    Before this they either charged 1 (understating the quota) or nothing
+    at all (2026-07-25 audit §3.4/§3.5).
+    """
+
+    def test_n_charges_that_many_units(self, conn):
+        st = usage.record_and_check(conn, "user:1", day="2026-07-02", n=2)
+        assert st.count == 2
+        assert st.remaining == usage.FREE_DAILY_SIMS - 2
+
+    def test_n_accumulates_on_an_existing_row(self, conn):
+        usage.record_and_check(conn, "user:1", day="2026-07-02", n=3)
+        st = usage.record_and_check(conn, "user:1", day="2026-07-02", n=4)
+        assert st.count == 7
+
+    def test_default_is_still_one(self, conn):
+        st = usage.record_and_check(conn, "user:1", day="2026-07-02")
+        assert st.count == 1
+
+    def test_batch_can_cross_the_quota_line(self, conn):
+        st = usage.record_and_check(
+            conn, "anon:x", day="2026-07-02", n=usage.FREE_DAILY_SIMS + 1
+        )
+        assert st.allowed is False
+        assert st.remaining == 0
+
+    def test_zero_or_negative_never_decrements(self, conn):
+        usage.record_and_check(conn, "user:1", day="2026-07-02", n=5)
+        st = usage.record_and_check(conn, "user:1", day="2026-07-02", n=0)
+        assert st.count == 6  # clamped to a minimum charge of 1
+        st = usage.record_and_check(conn, "user:1", day="2026-07-02", n=-10)
+        assert st.count == 7
+
+    def test_paid_tier_batch_is_counted_but_never_blocked(self, conn):
+        st = usage.record_and_check(conn, "user:2", tier="pro", day="2026-07-02", n=40)
+        assert st.count == 40
+        assert st.allowed is True
+        assert st.limit is None
+
+
 class TestPeek:
     def test_peek_without_rows(self, conn):
         assert usage.peek(conn, "user:404", day="2026-07-02") == 0
