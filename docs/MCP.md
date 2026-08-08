@@ -237,11 +237,13 @@ and will happily over-claim on your behalf.
 
 ## Honest limits
 
-* Accuracy is **weighted mean |error| ≈ 0.27 s over 277 matched benchmarks**
-  (`reports/acc_final_2026_07_17.json`). Good for ranking builds and answering
+* Accuracy is **weighted mean |error| ≈ 0.26 s over 276 matched benchmarks**
+  (`reports/acc_final_2026_08_08.json`). Good for ranking builds and answering
   what-ifs; not a promise that a given bike will run an exact ET.
-* Top-speed predictions are weaker than ET: the fleet still carries a
-  ~+25 km/h bias after the speed-limiter pass.
+* Top-speed predictions are weaker than ET: over 83 matched top-speed
+  benchmarks the mean |error| is ~28 km/h and the fleet still carries a
+  ~+24 km/h bias after the speed-limiter and gearing passes
+  (`reports/sweep_topspeed_2026-08-08.json`).
 * The parts catalog is Indian-market priced (INR) and does not cover engine
   internals (cams, big-bore) — "stage 3" is approximated with bolt-on power
   adders.
