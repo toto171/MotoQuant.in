@@ -73,6 +73,7 @@ over HTTP:
 
 ```python
 import motoquant
+
 et = motoquant.MotoQuantEngine(motoquant.gsxr1000_k5()).run().time_quarter
 # → 9.9330563825, pinned bit-identical
 ```

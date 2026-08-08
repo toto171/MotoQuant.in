@@ -62,6 +62,7 @@ def _apply_parts_to_config(
     parts_applied.append(summary)
     ...
 
+
 @app.post("/api/simulate/quick")
 def simulate_quick(req: QuickSimRequest):
     ...
@@ -105,6 +106,7 @@ def _apply_parts_to_config(
     ...
     summary: AppliedPartDict = {...}
     ...
+
 
 @app.post("/api/simulate/quick")
 def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:

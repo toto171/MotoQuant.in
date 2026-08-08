@@ -404,6 +404,6 @@ from motoquant.analysis.surrogate_numpy import NumpySurrogate
 from motoquant.analysis.surrogate_data import config_to_feature_vector
 
 surr = NumpySurrogate.load("artifacts/surrogate/surrogate_numpy.npz")
-et_s, trap_mps = surr.predict_config(cfg)      # any BikeConfig
-env_min, env_max = surr.envelope               # v2 artifacts only
+et_s, trap_mps = surr.predict_config(cfg)  # any BikeConfig
+env_min, env_max = surr.envelope  # v2 artifacts only
 ```

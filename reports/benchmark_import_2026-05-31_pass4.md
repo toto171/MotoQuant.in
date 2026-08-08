@@ -23,7 +23,16 @@ The `DISPATCH_INBOX.md` `[urgent]` block is marked `## DONE` at the top. The
 fix already landed in `scripts/validation_sweep.py:131`:
 
 ```python
-("Triumph", "Rocket 3 R", 2020, 10.56, 203, "Cycle World 2020 (Gadson 17-pass tuned at Silver Dollar Motorsport Park)"),
+(
+    (
+        "Triumph",
+        "Rocket 3 R",
+        2020,
+        10.56,
+        203,
+        "Cycle World 2020 (Gadson 17-pass tuned at Silver Dollar Motorsport Park)",
+    ),
+)
 ```
 
 Source: [Cycle World "Rickey Gadson and the Triumph Rocket 3 R"](https://www.cycleworld.com/story/motorcycle-racing/rickey-gadson-and-the-triumph-rocket-3-r/)

@@ -56,9 +56,9 @@
 
 **Current BENCHMARKS entries:**
 ```python
-("Kawasaki", "Ninja ZX-10R", 2004, 10.30, 240, "Sport Rider 2004"),
-("Kawasaki", "Ninja ZX-10R", 2011, 10.10, 240, "Sport Rider 2011"),
-("Kawasaki", "Ninja ZX-10R", 2021, 10.00, 241, "Cycle World 2021"),
+(("Kawasaki", "Ninja ZX-10R", 2004, 10.30, 240, "Sport Rider 2004"),)
+(("Kawasaki", "Ninja ZX-10R", 2011, 10.10, 240, "Sport Rider 2011"),)
+(("Kawasaki", "Ninja ZX-10R", 2021, 10.00, 241, "Cycle World 2021"),)
 ```
 
 **Decision:** DO NOT ADD 2006/2008 entries. 

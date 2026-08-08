@@ -59,7 +59,9 @@ if os.path.isfile(inbox_file):
         for line in f:
             for agent in weights["agents"]:
                 if f"@{agent}" in line:
-                    inbox_count_per_agent[agent] = inbox_count_per_agent.get(agent, 0) + 1
+                    inbox_count_per_agent[agent] = (
+                        inbox_count_per_agent.get(agent, 0) + 1
+                    )
 ```
 
 Then at line 229: `queue_bonus = 50 * inbox_count_per_agent.get(agent, 0)`.
@@ -178,7 +180,9 @@ if os.path.isfile(inbox_file):
             for agent in weights["agents"]:
                 if f"@{agent}" in line or f"[{agent}]" in line:
                     boost = 50 + (50 if current_block_urgent else 0)
-                    inbox_count_per_agent[agent] = inbox_count_per_agent.get(agent, 0) + 1
+                    inbox_count_per_agent[agent] = (
+                        inbox_count_per_agent.get(agent, 0) + 1
+                    )
 ```
 
 This: (a) accepts both `@agent` AND `[agent]` syntax (current inbox already uses `[agent]` for self-review tagging); (b) doubles the boost when the surrounding INSTRUCTION block is `[urgent]`. Effort ~30 min. Queue as INSTRUCTION.
