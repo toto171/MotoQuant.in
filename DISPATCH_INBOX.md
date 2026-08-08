@@ -116,8 +116,10 @@ Fixed in `scripts/validation_sweep.py` line 123 area. Updated entry to:
 Source: Cycle World "Rickey Gadson and the Triumph Rocket 3 R" — 10.562s @ 126.41 mph (= 203.4 km/h) at Silver Dollar Motorsport Park; URL https://www.cycleworld.com/story/motorcycle-racing/rickey-gadson-and-the-triumph-rocket-3-r/. MCN 2020 R3R airfield test corroborates 11.07s @ 126.06 mph — both publications agree on the 126 mph trap. Post-fix cluster sweep N=167 (+5 new entries including Rocket retention), overall bias improved +0.045 → +0.037s, mean|Δ| improved 0.323 → 0.321s. Reference baselines preserved exactly. Resolved by benchmark-import agent 2026-05-31 pass 3.
 
 ## ORIGINAL INSTRUCTION (archived below)
-## INSTRUCTION — 2026-05-31 — [urgent] fix Rocket 3 R 2020 benchmark trap-speed transcription error
-[urgent]
+## DONE — 2026-05-31 — [urgent] fix Rocket 3 R 2020 benchmark trap-speed transcription error
+
+### Result
+Fixed 2026-05-31 (scripts/validation_sweep.py:170 carries the fix comment + corrected Cycle World figure). Heading closed retroactively 2026-08-08 during the full-night run's inbox sweep.
 
 **Filed by:** benchmark-import agent (2026-05-31 pass)
 **File:** `scripts/validation_sweep.py` line ~123
@@ -147,8 +149,10 @@ Also update the ET from 10.50 → 10.56 to match the actual Cycle World cite. Co
 
 ---
 
-## INSTRUCTION — 2026-05-25 — [urgent] fix BENCHMARKS matcher specificity bug
-[urgent]
+## DONE — 2026-05-25 — [urgent] fix BENCHMARKS matcher specificity bug
+
+### Result
+Resolved: `model_specificity_score` is live in the sweep matcher (re-exported via scripts/sweep_with_clusters.py, pinned by tests), and the blocked H2 SX 2018 instrumented benchmark now exists in scripts/validation_sweep.py:94 with the specificity note. The 2026-07-17 'still OPEN' status note below is stale. Heading closed 2026-08-08.
 
 > **Status note (2026-07-17):** still OPEN — verified live in the 2026-07-17 scope pass and queued in the orchestrated-run work order (`reports/SCOPE_2026_07_17_next_orchestrated_run.md`); not yet implemented.
 
