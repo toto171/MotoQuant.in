@@ -53,5 +53,7 @@ requests>=2.32.4,<3
 # Soft-dep: motoquant.observability.init_sentry() no-ops if SENTRY_DSN env
 # var is not set. Enable on Railway by setting SENTRY_DSN to your project's
 # DSN URL (https://...sentry.io/...).
-# Floor 2.8.0: CVE-2024-40647 (env-var exposure to subprocesses, fixed 2.8.0).
-sentry-sdk[fastapi]>=2.8.0,<3
+# Floor 2.11.0: CVE-2024-40647 (env-var exposure, fixed 2.8.0) + the
+# `disabled_integrations` init kwarg used by motoquant/observability.py
+# (added in 2.11.0).
+sentry-sdk[fastapi]>=2.11.0,<3
