@@ -3,6 +3,12 @@
 
 import { SITE_URL } from "./StructuredData";
 import { serverApiBase } from "../lib/api";
+// Committed snapshot of the real catalog IDs, used only when the live API is
+// unreachable at build time. REGENERATE with `python web/scripts/gen_bike_ids.py`
+// whenever the bike catalog changes — it belongs to the same ritual as
+// `python scripts/audit_headline_stats.py` (AGENTS.md rule 5), and
+// `--check` will tell you if it has gone stale.
+import BIKE_ID_MANIFEST from "../data/bike-ids.json";
 
 // Same-origin via the production rewrite unless an env override is set.
 const API_BASE = serverApiBase(SITE_URL);
@@ -24,12 +30,17 @@ async function fetchAllBikes() {
     if (process.env.NODE_ENV !== "production") {
       console.warn("[sitemap] API unreachable, using ID range fallback:", err);
     }
-    // Static ceiling for the API-unreachable build-time fallback. There is no
-    // way to derive the live count here (the API is exactly what just failed),
-    // so this number can only go stale — it sat at 310 from the 310-bike era
-    // while the catalog grew to 541. Keep it a GENEROUS ceiling (a few phantom
-    // high-IDs in the sitemap are harmless; missing real bike pages is not).
-    return Array.from({ length: 600 }, (_, i) => ({ id: i + 1 }));
+    // API-unreachable build-time fallback: the REAL ids, from a committed
+    // manifest generated off motoquant.db.
+    //
+    // This used to be `Array.from({length: 600}, (_, i) => i + 1)` — a
+    // contiguous range, on the assumption that catalog ids are dense. They
+    // are not. Reseeds have left 541 rows scattered up to id 4637, so the
+    // range fallback omitted 198 real bike pages and emitted 257 URLs for
+    // bikes that do not exist (Google reports those as soft-404s). A ceiling
+    // can only ever trade one of those errors for the other; a manifest of
+    // real ids has neither failure mode.
+    return BIKE_ID_MANIFEST.ids.map((id) => ({ id }));
   }
 }
 
