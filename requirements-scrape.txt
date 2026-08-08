@@ -20,3 +20,10 @@
 # downloads a ~700 MB hardened Firefox. Only justified against hard
 # anti-bot walls; never needed for parsing or tests.
 scrapling[fetchers]>=0.4.11,<0.5
+
+# robots.txt parsing. scrapling already pulls protego in, but the
+# politeness gate is a hard rule (docs/SCRAPING.md) and must not depend on
+# another package's transitive choices — pin it explicitly. If it is ever
+# absent, fetcher.py falls back to stdlib urllib.robotparser rather than
+# skipping the gate, but protego handles wildcards far better.
+protego>=0.3

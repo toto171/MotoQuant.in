@@ -447,36 +447,89 @@ def _parse_bikez_spec_table(
 # ────────────────────────────────────────────────────────
 
 
-def parse_bikez_detail(html: str, url: str) -> BikeSpec:
-    """
-    Parse a Bikez.com detail page (already-fetched HTML) into a BikeSpec.
+# Brands whose bikez URL slug spans more than one underscore-separated
+# token. Without this the first token is taken as the whole brand and the
+# rest leaks into the model name (manufacturer="Moto", model="GUZZI V7
+# III") — which passes the validator, because both fields are non-empty.
+# Longest match wins, so 3-token entries beat their 2-token prefixes.
+MULTIWORD_BRAND_SLUGS: tuple[tuple[str, ...], ...] = (
+    ("moto", "guzzi"),
+    ("moto", "morini"),
+    ("royal", "enfield"),
+    ("mv", "agusta"),
+    ("harley", "davidson"),
+    ("indian", "motorcycle"),
+    ("big", "dog"),
+    ("boss", "hoss"),
+    ("can", "am"),
+    ("gas", "gas"),
+    ("qj", "motor"),
+    ("cf", "moto"),
+    ("american", "ironhorse"),
+    ("big", "bear", "choppers"),
+    ("orange", "county", "choppers"),
+    ("west", "coast", "choppers"),
+)
 
-    Pure function — no network. Manufacturer / model / year are derived
-    from the URL slug exactly as ``scrape_bikez`` always did; the spec
-    table is parsed by ``_parse_bikez_spec_table``. This is the single
-    parsing entry point shared by the legacy requests-based crawler and
-    the Scrapling-backed toolkit (``scripts/scrape_bike_specs.py``).
+
+def parse_slug_identity(url: str) -> tuple[str, str, int | None]:
+    """Derive (manufacturer, model_name, year) from a bikez detail URL.
+
+    Pure string work, shared by every caller so the identity rules live in
+    exactly one place. Two rules earn their keep:
+
+    * **Multi-word brands.** Bikez slugs separate every token with ``_``,
+      so ``moto_guzzi_v7_iii_2021`` naively reads as manufacturer "Moto",
+      model "GUZZI V7 III". ``MULTIWORD_BRAND_SLUGS`` restores the brand
+      (longest match first) and keeps it out of the model name.
+    * **Trailing year only.** A bare displacement token mid-slug
+      (``gsx-r_1000_2005``, ``s_1000_rr_2019``) also matches ``\\d{4}``;
+      only the LAST segment may be read as the year.
     """
-    # Extract manufacturer and model from URL
     url_path = urllib.parse.urlparse(url).path
     # e.g. /motorcycles/suzuki_gsx-r_1000_2005.php
     fn = url_path.split("/")[-1].replace(".php", "")
-    parts = fn.split("_")
+    parts = [p for p in fn.split("_") if p]
+    if not parts:
+        return "", "", None
 
-    manufacturer = parts[0].replace("-", " ").title() if parts else ""
+    # Brand: longest known multi-word slug prefix, else the first token.
+    brand_tokens = 1
+    lowered = [p.lower() for p in parts]
+    for slug in MULTIWORD_BRAND_SLUGS:
+        n = len(slug)
+        if n <= len(lowered) and tuple(lowered[:n]) == slug:
+            brand_tokens = max(brand_tokens, n)
+    manufacturer = " ".join(p.replace("-", " ").title() for p in parts[:brand_tokens])
+
     year_from_url = None
     model_parts = []
-    for i, p in enumerate(parts[1:]):
-        # The year is the LAST slug segment on bikez detail URLs. A bare
-        # displacement token earlier in the slug (gsx-r_1000_2005,
-        # s_1000_rr_2019) also matches \d{4} — the old first-match rule
-        # truncated those models to "GSX R" and read year=1000.
-        is_last = i == len(parts) - 2
+    for i, p in enumerate(parts[brand_tokens:], start=brand_tokens):
+        is_last = i == len(parts) - 1
         if is_last and re.match(r"^(19[5-9]\d|20[0-4]\d)$", p):
             year_from_url = int(p)
             break
         model_parts.append(p)
     model_name = " ".join(p.replace("-", " ").upper() for p in model_parts)
+    return manufacturer, model_name, year_from_url
+
+
+def parse_bikez_detail(html: str, url: str) -> BikeSpec:
+    """
+    Parse a Bikez.com detail page (already-fetched HTML) into a BikeSpec.
+
+    Pure function — no network. Manufacturer / model / year come from the
+    URL slug (``parse_slug_identity``); the spec table is parsed by
+    ``_parse_bikez_spec_table``. This is the single parsing entry point
+    shared by the legacy requests-based crawler and the Scrapling-backed
+    toolkit (``scripts/scrape_bike_specs.py``).
+
+    NOTE for callers: identity coming from the slug means this function
+    ALWAYS returns a spec with a manufacturer and model, even for a 404 or
+    a JS shell. Never treat "validator-clean" as "the page parsed" — check
+    that the spec table actually yielded fields (``spec.raw_data``).
+    """
+    manufacturer, model_name, year_from_url = parse_slug_identity(url)
 
     spec = _parse_bikez_spec_table(html, url, manufacturer, model_name)
 
