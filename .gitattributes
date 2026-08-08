@@ -3,3 +3,9 @@
 *.sh text eol=lf
 scripts/agents/*.md text eol=lf
 scripts/subagents/*.md text eol=lf
+
+# Python sources must be LF (2026-08-08): defaults.py silently flipped
+# CRLF->LF inside a physics commit, burying a 76-line change under ~1,510
+# lines of line-ending noise and voiding git blame. Governing *.py ends the
+# mixed-endings era; the one-time normalization ships in the same commit.
+*.py text eol=lf
