@@ -194,9 +194,15 @@ SUZUKI_HAYABUSA_GEN2 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        "gear_ratios": [2.619, 2.181, 1.857, 1.619, 1.448, 1.304],
-        "front_sprocket": 17,
-        "rear_sprocket": 40,
+        # Real GSX1300R box (Suzuki service manual; 2026-08-08 fix — the old
+        # cassette's 1.304 6th was ~25% short, so the bike rev-limited at
+        # ~271 km/h and its 299 limiter annotation was structurally inert):
+        # 34/13, 31/16, 29/19, 27/21, 25/22, 24/23; primary 83/52 = 1.596;
+        # final 18/43 = 2.389 (Gen2/Gen3).
+        "gear_ratios": [2.615, 1.937, 1.526, 1.285, 1.136, 1.043],
+        "primary_ratio": 1.596,
+        "front_sprocket": 18,
+        "rear_sprocket": 43,
         "chain_pitch": "530",
         "dry_mass_kg": 220.0,
         "wheelbase_mm": 1480.0,
@@ -232,9 +238,15 @@ SUZUKI_HAYABUSA_GEN3 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        "gear_ratios": [2.619, 2.181, 1.857, 1.619, 1.448, 1.304],
-        "front_sprocket": 17,
-        "rear_sprocket": 40,
+        # Real GSX1300R box (Suzuki service manual; 2026-08-08 fix — the old
+        # cassette's 1.304 6th was ~25% short, so the bike rev-limited at
+        # ~271 km/h and its 299 limiter annotation was structurally inert):
+        # 34/13, 31/16, 29/19, 27/21, 25/22, 24/23; primary 83/52 = 1.596;
+        # final 18/43 = 2.389 (Gen2/Gen3).
+        "gear_ratios": [2.615, 1.937, 1.526, 1.285, 1.136, 1.043],
+        "primary_ratio": 1.596,
+        "front_sprocket": 18,
+        "rear_sprocket": 43,
         "chain_pitch": "530",
         "dry_mass_kg": 264.0,
         "wheelbase_mm": 1480.0,  # includes IMU/ABS
@@ -502,6 +514,9 @@ KAWASAKI_ZX10R_2011 = spec_from_dict(
         "rear_tire_size": "190/55ZR17",
         "cd": 0.66,
         "frontal_area_m2": 0.48,
+        # 299 km/h gentleman's-agreement limiter (2026-08-08 annotation
+        # pass; every period road test notes the 186 mph cap).
+        "speed_limiter_kmh": 299.0,
     },
     source_name="scraped_confirmed",
 )
@@ -537,6 +552,9 @@ KAWASAKI_ZX10R_2021 = spec_from_dict(
         "rear_tire_size": "190/55ZR17",
         "cd": 0.66,
         "frontal_area_m2": 0.48,
+        # 299 km/h gentleman's-agreement limiter (2026-08-08 annotation
+        # pass; every period road test notes the 186 mph cap).
+        "speed_limiter_kmh": 299.0,
     },
     source_name="spec_sheet",
 )
@@ -690,6 +708,9 @@ BMW_S1000RR_2015 = spec_from_dict(
         "rear_tire_size": "190/55ZR17",
         "cd": 0.64,
         "frontal_area_m2": 0.46,
+        # 299 km/h gentleman's-agreement limiter (2026-08-08 annotation
+        # pass; every period road test notes the 186 mph cap).
+        "speed_limiter_kmh": 299.0,
     },
     source_name="spec_sheet",
 )
@@ -725,6 +746,9 @@ BMW_S1000RR_2023 = spec_from_dict(
         "rear_tire_size": "190/55ZR17",
         "cd": 0.62,
         "frontal_area_m2": 0.46,
+        # 299 km/h gentleman's-agreement limiter (2026-08-08 annotation
+        # pass; every period road test notes the 186 mph cap).
+        "speed_limiter_kmh": 299.0,
     },
     source_name="spec_sheet",
 )
@@ -909,9 +933,14 @@ KAWASAKI_ZX14R_2012 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        "gear_ratios": [2.571, 2.000, 1.667, 1.444, 1.304, 1.185],
+        # Real ZX-14R box (2026-08-08 fix — the old cassette's 1.185 6th
+        # rev-limited the bike ~35 km/h below its own 299 limiter):
+        # 47/18, 37/19, 34/22, 32/24, 30/26, 29/28; primary 84/54 = 1.556;
+        # 2012+ final 42/17 = 2.471 (Kawasaki spec sheet).
+        "gear_ratios": [2.611, 1.947, 1.545, 1.333, 1.154, 1.036],
+        "primary_ratio": 1.556,
         "front_sprocket": 17,
-        "rear_sprocket": 43,
+        "rear_sprocket": 42,
         "chain_pitch": "530",
         "dry_mass_kg": 220.0,
         "wheelbase_mm": 1480.0,
@@ -992,6 +1021,9 @@ KAWASAKI_ZX10RR_2021 = spec_from_dict(
         "rear_tire_size": "190/55ZR17",
         "cd": 0.64,
         "frontal_area_m2": 0.48,
+        # 299 km/h gentleman's-agreement limiter (2026-08-08 annotation
+        # pass; every period road test notes the 186 mph cap).
+        "speed_limiter_kmh": 299.0,
     },
     source_name="scraped_confirmed",
 )
@@ -2395,6 +2427,9 @@ KAWASAKI_ZX10R_2004 = spec_from_dict(
         "rear_tire_size": "190/50ZR17",
         "cd": 0.66,
         "frontal_area_m2": 0.48,
+        # 299 km/h gentleman's-agreement limiter (2026-08-08 annotation
+        # pass; every period road test notes the 186 mph cap).
+        "speed_limiter_kmh": 299.0,
     },
     source_name="spec_sheet",
 )
@@ -2431,6 +2466,9 @@ KAWASAKI_ZX10R_2006 = spec_from_dict(
         "rear_tire_size": "190/50ZR17",
         "cd": 0.66,
         "frontal_area_m2": 0.48,
+        # 299 km/h gentleman's-agreement limiter (2026-08-08 annotation
+        # pass; every period road test notes the 186 mph cap).
+        "speed_limiter_kmh": 299.0,
     },
     source_name="spec_sheet",
 )
@@ -2467,6 +2505,9 @@ KAWASAKI_ZX10R_2008 = spec_from_dict(
         "rear_tire_size": "190/55ZR17",
         "cd": 0.66,
         "frontal_area_m2": 0.48,
+        # 299 km/h gentleman's-agreement limiter (2026-08-08 annotation
+        # pass; every period road test notes the 186 mph cap).
+        "speed_limiter_kmh": 299.0,
     },
     source_name="spec_sheet",
 )
@@ -2529,9 +2570,13 @@ KAWASAKI_ZZR1400_2006 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        "gear_ratios": [2.533, 1.909, 1.526, 1.296, 1.167, 1.059],
+        # Real ZX-14/ZZR1400 box (2026-08-08 fix; Kawasaki spec sheet):
+        # 47/18, 37/19, 34/22, 32/24, 30/26, 29/28; primary 84/54 = 1.556;
+        # 2006-2011 final 41/17 = 2.412.
+        "gear_ratios": [2.611, 1.947, 1.545, 1.333, 1.154, 1.036],
+        "primary_ratio": 1.556,
         "front_sprocket": 17,
-        "rear_sprocket": 43,
+        "rear_sprocket": 41,
         "chain_pitch": "530",
         "dry_mass_kg": 215.0,
         "wheelbase_mm": 1460.0,
@@ -4251,6 +4296,9 @@ YAMAHA_VMAX_2009 = spec_from_dict(
         # for VMAX in tuck is 0.55-0.65 (Yamaha press kit + MCN tunnel).
         "cd": 0.55,
         "frontal_area_m2": 0.58,
+        # Factory limiter: VMAX 1700 is electronically limited to 220 km/h
+        # (137 mph) — widely documented in period tests (2026-08-08).
+        "speed_limiter_kmh": 220.0,
     },
     source_name="spec_sheet",
 )
@@ -11144,8 +11192,12 @@ SUZUKI_HAYABUSA_25TH_ANNIVERSARY_2024 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        "gear_ratios": [2.500, 1.944, 1.533, 1.227, 1.025, 0.871],
-        "front_sprocket": 17,
+        # Gen3 platform — identical box to the base Gen3 Hayabusa (2026-08-08
+        # fix; the previous cassette was not a Suzuki box): 34/13..24/23,
+        # primary 83/52 = 1.596, final 18/43 = 2.389.
+        "gear_ratios": [2.615, 1.937, 1.526, 1.285, 1.136, 1.043],
+        "primary_ratio": 1.596,
+        "front_sprocket": 18,
         "rear_sprocket": 43,
         "chain_pitch": "530",
         "dry_mass_kg": 221.0,

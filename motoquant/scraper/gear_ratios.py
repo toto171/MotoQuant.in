@@ -74,23 +74,37 @@ _DB: list[dict] = [
         "rear": 45,
         "primary": 1.590,
     },
+    # GSX1300R Hayabusa — real service-manual box, all three generations
+    # (2026-08-08 fix; the old entries carried a fabricated cassette whose
+    # 1.20 6th could never reach the 299 limiter): 34/13, 31/16, 29/19,
+    # 27/21, 25/22, 24/23; primary 83/52 = 1.596. Final drive: Gen1 40/17,
+    # Gen2/Gen3 43/18.
     {
         "mfr": "suzuki",
         "model": "hayabusa",
-        "year": (1999, 2012),
-        "ratios": [2.615, 2.062, 1.714, 1.500, 1.333, 1.200],
+        "year": (1999, 2007),
+        "ratios": [2.615, 1.937, 1.526, 1.285, 1.136, 1.043],
         "front": 17,
         "rear": 40,
-        "primary": 1.543,
+        "primary": 1.596,
+    },
+    {
+        "mfr": "suzuki",
+        "model": "hayabusa",
+        "year": (2008, 2020),
+        "ratios": [2.615, 1.937, 1.526, 1.285, 1.136, 1.043],
+        "front": 18,
+        "rear": 43,
+        "primary": 1.596,
     },
     {
         "mfr": "suzuki",
         "model": "hayabusa",
         "year": (2021, 2026),
-        "ratios": [2.615, 2.062, 1.714, 1.500, 1.333, 1.200],
+        "ratios": [2.615, 1.937, 1.526, 1.285, 1.136, 1.043],
         "front": 18,
-        "rear": 40,
-        "primary": 1.543,
+        "rear": 43,
+        "primary": 1.596,
     },
     {
         "mfr": "suzuki",
@@ -514,14 +528,27 @@ _DB: list[dict] = [
         "rear": 43,
         "primary": 2.071,
     },
+    # ZX-14R / ZZR1400 — real Kawasaki box (2026-08-08 fix; the old entry
+    # was fabricated: 0.857 6th, 37T rear match no Kawasaki document):
+    # 47/18, 37/19, 34/22, 32/24, 30/26, 29/28; primary 84/54 = 1.556.
+    # Final: ZZR1400 (06-11) 41/17, ZX-14R (12+) 42/17.
     {
         "mfr": "kawasaki",
         "model": "zx-14r",
-        "year": (2006, 2021),
-        "ratios": [2.294, 1.714, 1.379, 1.138, 0.958, 0.857],
+        "year": (2012, 2026),
+        "ratios": [2.611, 1.947, 1.545, 1.333, 1.154, 1.036],
         "front": 17,
-        "rear": 37,
-        "primary": 1.545,
+        "rear": 42,
+        "primary": 1.556,
+    },
+    {
+        "mfr": "kawasaki",
+        "model": "zzr1400",
+        "year": (2006, 2011),
+        "ratios": [2.611, 1.947, 1.545, 1.333, 1.154, 1.036],
+        "front": 17,
+        "rear": 41,
+        "primary": 1.556,
     },
     {
         "mfr": "kawasaki",
