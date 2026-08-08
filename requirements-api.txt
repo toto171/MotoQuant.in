@@ -1,25 +1,32 @@
 # MotoQuant Pro -- API server dependencies (production)
 # Install with: pip install -r requirements-api.txt
+#
+# Every dependency carries an upper bound (next major) so a surprise major
+# release can never walk into a production image. The Docker image installs
+# the fully-pinned transitive closure from requirements-api.lock instead —
+# regenerate it with `make lock` whenever this file changes.
 
 # Web framework
-fastapi>=0.110.0
-uvicorn[standard]>=0.27.0
-pydantic>=2.0.0
+fastapi>=0.110.0,<1.0
+uvicorn[standard]>=0.27.0,<1.0
+pydantic>=2.0.0,<3
 
 # Physics engine core
-numpy>=1.24.0
-scipy>=1.10.0
+numpy>=1.24.0,<3
+scipy>=1.10.0,<2
 
 # File uploads
-python-multipart>=0.0.6
+# Floor 0.0.18: CVE-2024-53981 (multipart boundary DoS) fixed in 0.0.18;
+# the parser is reachable from the two unauthenticated calibration uploads.
+python-multipart>=0.0.18,<1.0
 
 # Database
 # (sqlite3 is stdlib -- no extra package needed)
 
 # Auth and subscriptions (commercial launch)
-PyJWT>=2.8
-email-validator>=2.0.0
-razorpay>=1.4.0
+PyJWT>=2.8,<3
+email-validator>=2.0.0,<3
+razorpay>=1.4.0,<3
 
 # NL chat layer (POST /api/chat, `motoquant chat`).
 # The LLMClient supports multiple providers selected via the LLM_PROVIDER
@@ -29,8 +36,8 @@ razorpay>=1.4.0
 # Set ONE of: GEMINI_API_KEY (default), ANTHROPIC_API_KEY, DEEPSEEK_API_KEY,
 # GROQ_API_KEY, OPENROUTER_API_KEY. Falls through gracefully if missing --
 # callers get a typed LLMNotConfiguredError.
-anthropic>=0.34.0
-openai>=1.40.0
+anthropic>=0.34.0,<1.0
+openai>=1.40.0,<3
 
 # Chat-agent web lookup (motoquant/llm/webtools.py). requests already ships
 # transitively via the razorpay SDK — pinned here explicitly so a dependency
@@ -38,10 +45,13 @@ openai>=1.40.0
 # Optional env: SEARCH_PROVIDER=brave|serper + SEARCH_API_KEY for a paid
 # search API; without a key the DuckDuckGo HTML fallback is used.
 # MOTOQUANT_WEB_TOOLS=0 disables web tools entirely.
-requests>=2.31.0
+# Floor 2.32.4: CVE-2024-35195 (cert-verify bypass, fixed 2.32.0) +
+# CVE-2024-47081 (.netrc credential leak, fixed 2.32.4).
+requests>=2.32.4,<3
 
 # Optional production observability — error tracking + performance traces.
 # Soft-dep: motoquant.observability.init_sentry() no-ops if SENTRY_DSN env
 # var is not set. Enable on Railway by setting SENTRY_DSN to your project's
 # DSN URL (https://...sentry.io/...).
-sentry-sdk[fastapi]>=2.0.0
+# Floor 2.8.0: CVE-2024-40647 (env-var exposure to subprocesses, fixed 2.8.0).
+sentry-sdk[fastapi]>=2.8.0,<3
