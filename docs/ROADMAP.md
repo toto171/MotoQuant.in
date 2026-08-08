@@ -105,10 +105,12 @@ repeatedly re-scoped completed work from stale backlog text:
 - **Content & SEO**: the accuracy/validation story is the differentiator. More
   blog posts, the `/validation` explorer, and honest benchmark tables compound
   into organic traffic (see `docs/SEO_STRATEGY.md`).
-- **Distribution channels**: an **MCP server** wrapping the existing `/api/*`
+- **Distribution channels**: ~~an **MCP server** wrapping the existing `/api/*`
   surface ("ask your AI what 16/45 does to your 60-foot") and a **MotoQuant
-  skill** — cheap given the OpenAPI surface already exists; both are demos that
-  market themselves.
+  skill**~~ — **SHIPPED 2026-08-08**: `motoquant/mcp_server.py` (stdlib-only
+  stdio MCP, 9 tools, HTTP + local backends, `docs/MCP.md`) and
+  `skills/motoquant/`. Remaining: announce it (README badge, blog post, a
+  30-second demo clip of the sprocket what-if).
 - **Test-coverage signal → gate**: CI already emits coverage XML (non-blocking).
   Once the funnel is stable, ratchet a floor on the physics/critical modules.
 
