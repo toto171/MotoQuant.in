@@ -368,22 +368,81 @@ class TireRepository:
         is_default: bool = False,
         notes: str = None,
     ) -> int:
-        """Link a tire to a bike as OEM or recommended fitment."""
-        cur = self._conn.execute(
-            """INSERT OR REPLACE INTO bike_tire_fitments
-               (bike_model_id, tire_model_id, position, fitment_type, is_default, notes)
-               VALUES (?, ?, ?, ?, ?, ?)""",
-            (
-                bike_model_id,
-                tire_model_id,
-                position,
-                fitment_type,
-                1 if is_default else 0,
-                notes,
-            ),
-        )
+        """Link a tire to a bike as an OEM / recommended / drag_prep fitment.
+
+        `is_default=True` means "this is THE tire selected by default for this
+        (bike, position)" — singular by contract. Linking a default therefore
+        SUPERSEDES the previous one:
+
+        * the previous default of the SAME fitment_type is **deleted** — a
+          superseded pick is not a second OEM fitment, and both the API
+          bike-detail route and `bikes --fitments` list every row by
+          fitment_type (the API does not even select is_default), so demoting
+          it would leave the table still asserting a tire the factory never
+          fitted;
+        * a default of a DIFFERENT fitment_type is demoted to is_default=0 —
+          it stays a real recommendation, it just is not the default any more.
+
+        To register a second legitimate OEM option (a market/trim variant),
+        pass is_default=False; nothing is superseded then.
+
+        July 2026 - Aug 2026 bug: this was INSERT OR REPLACE, whose conflict
+        target UNIQUE(bike_model_id, tire_model_id, position, fitment_type)
+        INCLUDES the tire — so seeding a *different* tire into the same slot
+        appended a SECOND is_default=1 row rather than replacing the first.
+        77 (bike, position) groups accumulated two mutually exclusive "default
+        OEM" tires, growing ~7 per seed run. The upsert below is also
+        id-preserving; OR REPLACE deletes and re-inserts, renumbering the row
+        (the same class of bug fixed in `create()` above).
+        """
+        # Id-preserving upsert on the table's UNIQUE key.
+        existing = self._conn.execute(
+            """SELECT id FROM bike_tire_fitments
+               WHERE bike_model_id = ? AND tire_model_id = ?
+                 AND position = ? AND fitment_type = ?""",
+            (bike_model_id, tire_model_id, position, fitment_type),
+        ).fetchone()
+        if existing is not None:
+            fitment_id = existing["id"] if hasattr(existing, "keys") else existing[0]
+            self._conn.execute(
+                "UPDATE bike_tire_fitments SET is_default = ?, notes = ? WHERE id = ?",
+                (1 if is_default else 0, notes, fitment_id),
+            )
+        else:
+            cur = self._conn.execute(
+                """INSERT INTO bike_tire_fitments
+                   (bike_model_id, tire_model_id, position, fitment_type,
+                    is_default, notes)
+                   VALUES (?, ?, ?, ?, ?, ?)""",
+                (
+                    bike_model_id,
+                    tire_model_id,
+                    position,
+                    fitment_type,
+                    1 if is_default else 0,
+                    notes,
+                ),
+            )
+            fitment_id = cur.lastrowid
+
+        if is_default:
+            # Supersede the previous same-type default for this slot.
+            self._conn.execute(
+                """DELETE FROM bike_tire_fitments
+                   WHERE bike_model_id = ? AND position = ? AND fitment_type = ?
+                     AND is_default = 1 AND id != ?""",
+                (bike_model_id, position, fitment_type, fitment_id),
+            )
+            # Keep "one default per (bike, position)" true across types.
+            self._conn.execute(
+                """UPDATE bike_tire_fitments SET is_default = 0
+                   WHERE bike_model_id = ? AND position = ?
+                     AND is_default = 1 AND id != ?""",
+                (bike_model_id, position, fitment_id),
+            )
+
         self._conn.commit()
-        return cur.lastrowid
+        return fitment_id
 
     def tire_to_params(self, tire_model_id: int) -> TireParams | None:
         """
