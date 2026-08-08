@@ -185,6 +185,38 @@ def _truth_values():
 # Each entry: (file_glob, regex_pattern, truth_key, description)
 # Group 1 of the regex must capture the declared numeric value.
 PATTERNS = [
+    # MCP server tool descriptions + the Claude skill (2026-08-08: two new
+    # count-bearing surfaces the audit previously did not scan)
+    (
+        "motoquant/mcp_server.py",
+        r"(\d{2,4})-bike catalog",
+        "all_known_bikes",
+        "mcp search_bikes tool description",
+    ),
+    (
+        "motoquant/mcp_server.py",
+        r"(\d{2,4})-part catalog",
+        "parts_db",
+        "mcp search_parts tool description",
+    ),
+    (
+        "skills/motoquant/SKILL.md",
+        r"(\d{2,4})\s*bikes?,",
+        "all_known_bikes",
+        "skill catalog bikes count",
+    ),
+    (
+        "skills/motoquant/SKILL.md",
+        r"(\d{2,4})\s*parts?,",
+        "parts_db",
+        "skill catalog parts count",
+    ),
+    (
+        "skills/motoquant/SKILL.md",
+        r"(\d{2,4})\s*tires?,",
+        "tires_db",
+        "skill catalog tires count",
+    ),
     # Landing page stats strip
     (
         "web/app/page.js",

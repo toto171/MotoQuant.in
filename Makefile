@@ -69,6 +69,7 @@ baselines: ## Assert the K5/R1/Hayabusa reference baselines are bit-identical
 .PHONY: audit
 audit: ## Check headline stats (bike/part/tire counts) are in sync sitewide
 	$(PY) scripts/audit_headline_stats.py
+	$(PY) web/scripts/gen_bike_ids.py --check
 
 .PHONY: health
 health: ## Fast state-of-the-world dashboard (baselines, lint, catalog, secrets)

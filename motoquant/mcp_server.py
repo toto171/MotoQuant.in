@@ -1168,7 +1168,7 @@ def selftest() -> int:
         print(f"  [{'ok' if cond else 'FAIL'}] {label}")
 
     print(f"MotoQuant MCP selftest — backend={server.backend.kind}")
-    check("3 responses (notification produced none)", len(replies) == 4)
+    check("4 responses (notification produced none)", len(replies) == 4)
     init = replies[0].get("result", {})
     check(
         "initialize returns a supported protocolVersion",

@@ -356,14 +356,11 @@ function SimulatorPageInner() {
 
   /* ─── Per-op async tasks (own {loading, progress, error} each) ─────── */
 
-  // TELEMETRY DOCTRINE for every sim flow on this page: open a trackSimRun
-  // handle as the FIRST statement of the task body, and settle it on every
-  // exit path (success / error / abort). Emitting the pair from inside the
-  // task — rather than from the button wrapper — is what keeps them honest:
-  // the wrapper can early-return before the sim ever starts, which is how
-  // `sim_run_start` came to fire for top-speed runs that never ran while
-  // `sim_run_success` fired only for full sims, leaving a funnel that could
-  // not convert. Errors are re-thrown so useAsyncTask still owns the UI state.
+  // Every sim flow on this page: open a trackSimRun handle as the FIRST
+  // statement of the TASK BODY (never the button wrapper — wrappers can
+  // early-return before the sim starts, logging phantom starts) and settle
+  // it on every exit path. Errors are re-thrown so useAsyncTask still owns
+  // the UI state. Full history: lib/telemetry.js.
 
   // Quick sim (~50 ms warm) — staged feedback only, per the progress doctrine.
   // `trigger` distinguishes the Live-mode debounced auto-run from an explicit

@@ -19,6 +19,7 @@ ChatResult — no printing or HTTP coupling lives in this module.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
@@ -310,6 +311,11 @@ def _reserve_sims(meter_cb: Any, n: int) -> bool:
     try:
         return bool(meter_cb(n))
     except Exception:  # noqa: BLE001 — metering must never break chat
+        # Fail-open is deliberate; invisible is not — api._meter_sims logs
+        # the identical failure, and a silently dead meter is unbilled load.
+        logging.getLogger(__name__).warning(
+            "chat sim metering failed — allowing the run", exc_info=True
+        )
         return True
 
 

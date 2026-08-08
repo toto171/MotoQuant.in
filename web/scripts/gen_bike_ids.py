@@ -97,11 +97,19 @@ def main() -> int:
         if not args.out.exists():
             print(f"STALE: {args.out} does not exist")
             return 1
-        if args.out.read_text(encoding="utf-8") != rendered:
-            existing = json.loads(args.out.read_text(encoding="utf-8"))
+        existing_text = args.out.read_text(encoding="utf-8")
+        if existing_text != rendered:
+            # The comparison is byte-exact; the message should still explain
+            # the id-set delta even when the counts happen to be equal.
+            try:
+                existing_ids = set(json.loads(existing_text).get("ids", []))
+            except (json.JSONDecodeError, AttributeError):
+                existing_ids = set()
+            diff = existing_ids.symmetric_difference(ids)
             print(
-                f"STALE: {args.out} has {existing.get('count')} ids, "
-                f"database has {len(ids)}. Re-run: python {Path(__file__).name}"
+                f"STALE: {args.out} has {len(existing_ids)} ids, database has "
+                f"{len(ids)} ({len(diff)} id(s) differ). "
+                f"Re-run: python {Path(__file__).name}"
             )
             return 1
         print(f"OK: {args.out.name} in sync ({len(ids)} bike ids)")

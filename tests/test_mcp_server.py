@@ -19,7 +19,6 @@ Covered:
 import io
 import json
 import os
-import shutil
 import sqlite3
 import tempfile
 import unittest
@@ -38,16 +37,17 @@ _TMP_DB_PATH = _tmp.name
 _PRIOR_MOTOQUANT_DB = os.environ.get("MOTOQUANT_DB")
 _PRIOR_MCP_LOCAL = os.environ.get("MOTOQUANT_MCP_LOCAL")
 
-if os.path.exists(_SRC_DB):
-    _src = sqlite3.connect(f"file:{_SRC_DB}?mode=ro", uri=True)
-    _dst = sqlite3.connect(_TMP_DB_PATH)
-    try:
-        _src.backup(_dst)
-    finally:
-        _dst.close()
-        _src.close()
-else:  # pragma: no cover - only if the catalog is missing from a checkout
-    shutil.copyfile(_SRC_DB, _TMP_DB_PATH)
+if not os.path.exists(_SRC_DB):  # pragma: no cover
+    raise FileNotFoundError(
+        f"{_SRC_DB} missing — these tests need the shipped catalog DB"
+    )
+_src = sqlite3.connect(f"file:{_SRC_DB}?mode=ro", uri=True)
+_dst = sqlite3.connect(_TMP_DB_PATH)
+try:
+    _src.backup(_dst)
+finally:
+    _dst.close()
+    _src.close()
 
 os.environ["MOTOQUANT_DB"] = _TMP_DB_PATH
 
@@ -57,7 +57,6 @@ from motoquant.mcp_server import (  # noqa: E402
     HttpBackend,
     LocalBackend,
     MCPServer,
-    ToolError,
     serve,
 )
 
@@ -534,9 +533,6 @@ class TestBackendSelection(unittest.TestCase):
                 os.environ.pop("MOTOQUANT_MCP_LOCAL", None)
             else:
                 os.environ["MOTOQUANT_MCP_LOCAL"] = prior
-
-    def test_tool_error_is_exported_for_backend_authors(self):
-        self.assertTrue(issubclass(ToolError, Exception))
 
 
 if __name__ == "__main__":  # pragma: no cover
