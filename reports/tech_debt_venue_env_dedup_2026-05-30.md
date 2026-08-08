@@ -27,9 +27,7 @@ Extract three identical 7-9 line "build EnvironmentParams from `parsed.venue_id`
 env = None
 if parsed.venue_id is not None:
     try:
-        env = db.venues.to_environment(
-            parsed.venue_id, month=datetime.now().month
-        )
+        env = db.venues.to_environment(parsed.venue_id, month=datetime.now().month)
     except Exception:
         env = None
 
@@ -45,9 +43,7 @@ if parsed.venue_id is not None:
 env = None
 if parsed.venue_id is not None:
     try:
-        env = db.venues.to_environment(
-            parsed.venue_id, month=datetime.now().month
-        )
+        env = db.venues.to_environment(parsed.venue_id, month=datetime.now().month)
     except Exception:
         env = None
 ```
@@ -69,6 +65,7 @@ def _resolve_venue_env(db: MotoQuantDB, parsed: ParsedSimRequest) -> Any:
         return db.venues.to_environment(parsed.venue_id, month=datetime.now().month)
     except Exception:
         return None
+
 
 # Call sites now uniform:
 env = _resolve_venue_env(db, parsed)

@@ -130,7 +130,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'MotoQuant Pro is validated against published magazine tests and Dragy runs: Suzuki GSX-R1000 K5 simulates 9.93s against a real 9.97s; Yamaha YZF-R1 simulates 10.14s against 10.3s; Suzuki Hayabusa simulates 10.36s (real range 10.1–10.7s). The July 2026 sweep covers 250 source-quality-weighted benchmarks (277 matched to catalog bikes) with a weighted mean bias of −0.005s; 138 of 277 land within ±0.20s of the published timeslip.',
+            'MotoQuant Pro is validated against published magazine tests and Dragy runs: Suzuki GSX-R1000 K5 simulates 9.93s against a real 9.97s; Yamaha YZF-R1 simulates 10.14s against 10.3s; Suzuki Hayabusa simulates 10.36s (real range 10.1–10.7s). The August 2026 sweep covers 250 source-quality-weighted benchmarks (276 matched to catalog bikes) with a weighted mean bias of +0.007s; 138 of 276 land within ±0.20s of the published timeslip.',
         },
       },
       {

@@ -28,7 +28,11 @@ hypothesis>=6.100,<7
 
 # Lint + format. `make lint`, `make fmt-check`, `make check` and the
 # pre-commit hook all shell out to it; CI runs it as its first two steps.
-ruff>=0.6,<1
+# Floor 0.16.2: ruff 0.16 began formatting Python code blocks inside .md
+# files, so an unpinned CI resolving a newer ruff than the dev box flags
+# files the local `make check` calls clean (bit us 2026-08-08, the day CI
+# came back to life). Keep the window one minor wide so local == CI.
+ruff>=0.16.2,<0.17
 
 # Coverage instrumentation for the main-push CI tier (`--cov=motoquant`).
 pytest-cov>=5,<8

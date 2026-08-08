@@ -70,7 +70,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The mid-twin-500-700 cluster is one of the better-calibrated bands in the simulator — N=14 matched benchmarks with mean absolute error of 0.615 seconds and a near-zero bias of -0.133 seconds (centred). The GT 650 result is sim-only as of this writing; no published Indian Autos Mag or Sport Rider instrumented quarter-mile has surfaced for the bike. MCN ran an Interceptor 650 in 2018 and clocked roughly 14.2 seconds at 162 km/h with a competent UK rider on a warmed bike, which lines up almost exactly with the simulator output once you account for the difference in rider weight and density altitude.",
+    text: "The mid-twin-500-700 cluster is one of the better-calibrated bands in the simulator — N=17 matched benchmarks with a source-quality-weighted mean absolute error of 0.145 seconds and a near-zero bias of +0.001 seconds (centred). The GT 650 result is sim-only as of this writing; no published Indian Autos Mag or Sport Rider instrumented quarter-mile has surfaced for the bike. MCN ran an Interceptor 650 in 2018 and clocked roughly 14.2 seconds at 162 km/h with a competent UK rider on a warmed bike, which lines up almost exactly with the simulator output once you account for the difference in rider weight and density altitude.",
   },
   {
     type: "callout",
@@ -205,7 +205,7 @@ const CONTENT = [
   },
   {
     type: "p",
-    text: "The mid-twin-500-700 cluster sits at a mean absolute error of 0.615 seconds with a bias of -0.133 seconds across 14 matched benchmarks. The entry-200-300 cluster (Pulsar NS200, Apache RTR 200 4V, Hero Xtreme 200S 4V) sits at +0.211 seconds bias across only 6 benchmarks. The mid-twin band is more accurate because the underlying benchmark data is denser and more reliable — Sport Rider, Cycle World, and MCN all run mid-twin parallel twins regularly, the published quarter-mile times are real instrumented runs rather than 0-100 km/h numbers multiplied by 1.6, and the bikes are popular enough that multiple independent magazine tests agree to within ~0.2 seconds.",
+    text: "The mid-twin-500-700 cluster sits at a weighted mean absolute error of 0.145 seconds with a bias of +0.001 seconds across 17 matched benchmarks. The entry-200-300 cluster (Pulsar NS200, Apache RTR 200 4V, Hero Xtreme 200S 4V) sits at a weighted mean absolute error of 0.231 seconds and a bias of -0.018 seconds across 14 matched benchmarks. The mid-twin band is more accurate because the underlying benchmark data is denser and more reliable — Sport Rider, Cycle World, and MCN all run mid-twin parallel twins regularly, the published quarter-mile times are real instrumented runs rather than 0-100 km/h numbers multiplied by 1.6, and the bikes are popular enough that multiple independent magazine tests agree to within ~0.2 seconds.",
   },
   {
     type: "p",

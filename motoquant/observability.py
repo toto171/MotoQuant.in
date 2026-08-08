@@ -86,6 +86,28 @@ def init_sentry(*, app_name: str = "motoquant-api") -> bool:
         except Exception:
             release = None
 
+    # The OpenAI/Anthropic AUTO-integrations capture LLM-provider errors at
+    # the SDK boundary as handled:no BEFORE our llm/client.py except blocks
+    # ever run — e.g. the Groq tool_use_failed 400 (Sentry MOTOQUANT-API-1)
+    # is salvaged correctly by our code, yet still lands in Sentry as an
+    # unhandled error, polluting a near-empty error stream with benign noise.
+    # Our LLM layer owns provider-error handling; keep SDK-boundary capture
+    # off. (`disabled_integrations` needs sentry-sdk >= 2.11 — see the floor
+    # in requirements-api.txt.)
+    disabled_integrations: list[Any] = []
+    try:
+        from sentry_sdk.integrations.openai import OpenAIIntegration
+
+        disabled_integrations.append(OpenAIIntegration())
+    except ImportError:
+        pass
+    try:
+        from sentry_sdk.integrations.anthropic import AnthropicIntegration
+
+        disabled_integrations.append(AnthropicIntegration())
+    except ImportError:
+        pass
+
     sentry_sdk.init(
         dsn=dsn,
         environment=environment,
@@ -99,6 +121,7 @@ def init_sentry(*, app_name: str = "motoquant-api") -> bool:
             FastApiIntegration(transaction_style="endpoint"),
             LoggingIntegration(level=logging.INFO, event_level=logging.ERROR),
         ],
+        disabled_integrations=disabled_integrations,
         # Tag every event with the app name so multi-app projects can filter
         before_send=lambda event, _hint: _tag_app(event, app_name),
     )

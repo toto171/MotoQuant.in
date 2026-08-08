@@ -50,7 +50,12 @@ from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
 # ── Whitelist: bikes whose top gear is legitimately >= 1.30 ──────────────────
 # Each entry is (manufacturer_fragment, model_fragment) — both case-insensitive
 TOP_GEAR_WHITELIST: list[tuple[str, str]] = [
-    ("suzuki", "hayabusa"),  # Gen1/2/3: 6th = 1.304 (confirmed service manual)
+    # ("suzuki", "hayabusa") REMOVED 2026-08-08: that entry was protecting a
+    # data bug, not documenting reality. The old catalog cassette's 1.304 6th
+    # (labelled "confirmed service manual" — it wasn't) rev-limited the bike
+    # ~30 km/h below its own 299 limiter annotation. The real GSX1300R box
+    # (34/13..24/23, service manual) has 6th = 1.043, which passes the
+    # ordinary bound.
     ("honda", "cbr 600rr"),  # PC40 close-ratio race box: 6th = 1.315
     ("honda", "cbr600rr"),  # alternate model_name spelling
 ]

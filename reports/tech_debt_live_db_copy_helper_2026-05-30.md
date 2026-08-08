@@ -26,6 +26,7 @@ Extract the duplicated "copy the live `motoquant.db` to /tmp and open a MotoQuan
 ```python
 _DB = Path(__file__).parent.parent / "motoquant.db"
 
+
 def _open_db():
     """Open DB via writable-fs copy (dodges FUSE-mount sqlite I/O errors)."""
     if not _DB.exists():
@@ -45,6 +46,7 @@ def _open_db(path: str):
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".db").name
     shutil.copy(path, tmp)
     from motoquant.database.connection import MotoQuantDB
+
     db = MotoQuantDB(tmp)
     db.connect()
     return db
@@ -101,6 +103,7 @@ Call sites:
 def _open_db():
     """Open DB via writable-fs copy (dodges FUSE-mount sqlite I/O errors)."""
     return live_db_copy()
+
 
 # tests/test_chat_resolver.py
 def _open_db(path: str):

@@ -54,12 +54,14 @@ TAGLINE = "The physics of faster"
 DOMAIN = "motoquant.in"
 
 # Canonical catalog stats. Keep in sync with scripts/audit_headline_stats.py.
+# (2026-08-08: the benchmark tile had sat at 221 — the July-6 count — through
+# two corpus epochs because nothing audited the rendered card's numbers.)
 STATS = [
     ("541", "bikes"),
     ("593", "parts"),
     ("254", "tires"),
     ("20", "venues"),
-    ("221", "benchmarks"),
+    ("250", "benchmarks"),
 ]
 
 # Font search paths (display = geometric bold, mono = stats/labels).

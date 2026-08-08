@@ -38,6 +38,7 @@ services:
         - motoquant/**
         - motoquant.db
         - requirements-api.txt
+        - requirements-api.lock
         - Dockerfile
         - docker-entrypoint.sh
         - render.yaml

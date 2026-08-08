@@ -33,21 +33,26 @@ if req.part_ids:
     if db:
         try:
             from .database.bridge import apply_part_to_config
+
             for pid in req.part_ids:
                 row = db.execute("SELECT * FROM parts WHERE id=?", (pid,)).fetchone()
                 if row:
                     part_dict = dict(row)
                     cfg = apply_part_to_config(cfg, part_dict)
-                    parts_applied.append({
-                        "id": part_dict["id"],
-                        "name": part_dict.get("model_name", ""),
-                        "brand": part_dict.get("brand", ""),
-                        "price_inr": part_dict.get("price_inr"),
-                    })
+                    parts_applied.append(
+                        {
+                            "id": part_dict["id"],
+                            "name": part_dict.get("model_name", ""),
+                            "brand": part_dict.get("brand", ""),
+                            "price_inr": part_dict.get("price_inr"),
+                        }
+                    )
                     if part_dict.get("price_inr"):
                         build_cost_inr += float(part_dict["price_inr"])
         except Exception as e:
-            logging.getLogger(__name__).warning("Failed to apply parts %s: %s", req.part_ids, e)
+            logging.getLogger(__name__).warning(
+                "Failed to apply parts %s: %s", req.part_ids, e
+            )
 
 # simulate_top_speed (line 956) — identical 27-line block
 # simulate_distance (line 1084) — same loop, no parts_applied/cost surfaced
@@ -76,6 +81,7 @@ def _apply_parts_to_config(
         return cfg, parts_applied, build_cost
     try:
         from .database.bridge import apply_part_to_config
+
         for pid in part_ids:
             row = db.execute("SELECT * FROM parts WHERE id=?", (pid,)).fetchone()
             if not row:
@@ -93,14 +99,21 @@ def _apply_parts_to_config(
             if part_dict.get("price_inr"):
                 build_cost += float(part_dict["price_inr"])
     except Exception as exc:
-        logging.getLogger(__name__).warning("Failed to apply parts %s: %s", part_ids, exc)
+        logging.getLogger(__name__).warning(
+            "Failed to apply parts %s: %s", part_ids, exc
+        )
     return cfg, parts_applied, build_cost
 
+
 # Call sites now uniform:
-cfg, parts_applied, build_cost_inr = _apply_parts_to_config(cfg, req.part_ids)              # simulate_quick
-cfg, parts_applied, build_cost_inr = _apply_parts_to_config(cfg, req.part_ids)              # simulate_top_speed
-cfg, _, _                          = _apply_parts_to_config(cfg, req.part_ids)              # simulate_distance
-cfg, parts_applied, build_cost     = _apply_parts_to_config(                                # _run_build
+cfg, parts_applied, build_cost_inr = _apply_parts_to_config(
+    cfg, req.part_ids
+)  # simulate_quick
+cfg, parts_applied, build_cost_inr = _apply_parts_to_config(
+    cfg, req.part_ids
+)  # simulate_top_speed
+cfg, _, _ = _apply_parts_to_config(cfg, req.part_ids)  # simulate_distance
+cfg, parts_applied, build_cost = _apply_parts_to_config(  # _run_build
     cfg, part_ids, include_price_in_summary=False
 )
 ```

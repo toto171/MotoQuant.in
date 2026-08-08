@@ -116,6 +116,61 @@ export function track(event, props = {}) {
 }
 
 /**
+ * Begin a tracked simulation run. Returns a handle whose terminal methods
+ * emit the matching end-of-flow event.
+ *
+ *   const run = trackSimRun('simulator_page', 'full', { bike_id: 12 });
+ *   try   { const data = await …; run.success({ et_quarter_s: data.et }); }
+ *   catch { run.error(e); }
+ *
+ * WHY THIS EXISTS — the funnel it fixes
+ * -------------------------------------
+ * `sim_run_start` and `sim_run_success` were emitted from hand-written,
+ * unpaired call sites, and drifted onto disjoint flows: on /simulator the
+ * start fired only for top-speed runs and the success only for full sims, so
+ * no session could ever produce both and the funnel's conversion rate was
+ * structurally 0 %. The default quick-sim path emitted neither.
+ *
+ * Emitting the pair from one object makes that class of drift impossible:
+ * every start has exactly one terminal event, and both carry an identical
+ * `surface` + `mode`, which is what the funnel joins on.
+ *
+ * Event names are the shipped, documented set — `sim_run_start`,
+ * `sim_run_success`, `sim_run_error` (see motoquant/api.py's telemetry
+ * endpoint) — and must stay stable.
+ *
+ * Cancellation deliberately emits NOTHING. A run the user stopped is not a
+ * conversion and is not a failure, so `.cancelled()` just closes the handle.
+ * That matches the pre-existing behaviour of the landing widget.
+ *
+ * @param {string} surface  where the run was triggered ('landing_widget', …)
+ * @param {string} mode     which flow ('quarter' | 'full' | 'topspeed' | …)
+ * @param {object} props    extra props echoed on BOTH the start and the end
+ * @returns {{success: Function, error: Function, cancelled: Function}}
+ */
+export function trackSimRun(surface, mode, props = {}) {
+  const base = { surface, mode, ...props };
+  track('sim_run_start', base);
+
+  let settled = false;
+  const settle = (event, extra) => {
+    if (settled) return; // a run reports its outcome exactly once
+    settled = true;
+    if (event) track(event, { ...base, ...extra });
+  };
+
+  return {
+    success: (extra = {}) => settle('sim_run_success', extra),
+    error: (err, extra = {}) =>
+      settle('sim_run_error', {
+        error: String(err?.message ?? err ?? 'unknown').slice(0, 200),
+        ...extra,
+      }),
+    cancelled: () => settle(null),
+  };
+}
+
+/**
  * Install global handlers for uncaught JS errors and unhandled promise
  * rejections. Idempotent — safe to call from multiple components.
  */

@@ -35,6 +35,20 @@ db: ## Initialise + seed a fresh dev database (motoquant.db ships seeded)
 	$(PY) -m motoquant.run db init
 	$(PY) -m motoquant.run db seed
 
+.PHONY: lock
+lock: ## Regenerate requirements-api.lock (clean-venv resolve of requirements-api.txt)
+	rm -rf /tmp/mq-lockenv
+	$(PY) -m venv /tmp/mq-lockenv
+	/tmp/mq-lockenv/bin/pip install -q --upgrade pip
+	/tmp/mq-lockenv/bin/pip install -q -r requirements-api.txt
+	@{ echo "# requirements-api.lock -- fully-pinned transitive closure of requirements-api.txt"; \
+	   echo "# Regenerate with: make lock   (clean venv resolve + pip freeze; python 3.11 / linux)"; \
+	   echo "# The Docker image installs THIS file so two builds of the same commit are identical."; \
+	   echo "# Generated: $$(date +%Y-%m-%d) against requirements-api.txt"; \
+	   /tmp/mq-lockenv/bin/pip freeze --exclude-editable | grep -v '^pip=='; } > requirements-api.lock
+	rm -rf /tmp/mq-lockenv
+	@echo "requirements-api.lock regenerated ($$(grep -c '==' requirements-api.lock) pins)"
+
 # ── Quality gates (mirror CI) ──────────────────────────────────────────────
 .PHONY: lint
 lint: ## Ruff lint

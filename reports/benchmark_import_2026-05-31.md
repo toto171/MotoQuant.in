@@ -118,7 +118,7 @@ add as a parallel benchmark — but the existing entry at line ~123 of
 `scripts/validation_sweep.py`:
 
 ```python
-("Triumph", "Rocket 3 R", 2020, 10.50, 226, "Cycle World 2020"),
+(("Triumph", "Rocket 3 R", 2020, 10.50, 226, "Cycle World 2020"),)
 ```
 
 has a **trap speed (226 km/h = 140 mph) that's internally inconsistent

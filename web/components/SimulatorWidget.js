@@ -19,7 +19,7 @@ import ChatPanel from './ChatPanel';
 import { API_URL, runJob } from '../lib/api';
 import SimProgress from './SimProgress';
 import ScoreboardDigits from './ScoreboardDigits';
-import { track, installErrorHandlers } from '../lib/telemetry';
+import { track, trackSimRun, installErrorHandlers } from '../lib/telemetry';
 
 // Curated bike list — popular India-market machines first, then global
 // dream bikes. Each entry uses bike_id (catalog primary key) so we can
@@ -232,9 +232,8 @@ export default function SimulatorWidget() {
     setTopSpeedResult(null);
     const controller = new AbortController();
     abortRef.current = controller;
-    track('sim_run_start', {
-      surface: 'landing_widget',
-      mode,
+    // One handle → guaranteed start/end pair on the same surface + mode.
+    const runEvent = trackSimRun('landing_widget', mode, {
       bike_label: selectedBike?.label ?? 'unknown',
       bike_id: selectedBike?.id ?? null,
       bike_preset: selectedBike?.presetId ?? null,
@@ -290,24 +289,19 @@ export default function SimulatorWidget() {
       }
       if (mode === 'quarter') setResult(data);
       else setTopSpeedResult(data);
-      track('sim_run_success', {
-        surface: 'landing_widget',
-        mode,
-        bike_label: selectedBike?.label ?? 'unknown',
+      runEvent.success({
         et_quarter_s: data?.et_quarter_s ?? null,
         trap_speed_kmh: data?.trap_speed_kmh ?? null,
         terminal_velocity_kmh: data?.terminal_velocity_kmh ?? null,
         reached_plateau: data?.reached_plateau ?? null,
       });
     } catch (e) {
-      if (e?.name === 'AbortError') return; // user pressed Stop
+      if (e?.name === 'AbortError') {
+        runEvent.cancelled(); // user pressed Stop — neither success nor error
+        return;
+      }
       setError(e.message);
-      track('sim_run_error', {
-        surface: 'landing_widget',
-        mode,
-        bike_label: selectedBike?.label ?? 'unknown',
-        error: String(e?.message ?? e).slice(0, 200),
-      });
+      runEvent.error(e);
     } finally {
       setLoading(false);
       setProg(null);

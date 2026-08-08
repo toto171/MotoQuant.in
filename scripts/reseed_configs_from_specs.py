@@ -48,21 +48,32 @@ def _year_overlap(a_from, a_to, b_from, b_to):
 def _pick_generation(candidates, row):
     """From specs sharing a (mfr, stripped-model) key, pick the one whose
     year range best matches this DB row's generation. Prevents collapsing
-    e.g. GSX-R 1000 K1/K3/K5/K7/K9 to a single spec (the pre-2026-07 bug)."""
+    e.g. GSX-R 1000 K1/K3/K5/K7/K9 to a single spec (the pre-2026-07 bug).
+
+    The winner must be a pure function of ALL_KNOWN_BIKES, never of sort
+    implementation details: two specs can tie on BOTH year-overlap and
+    year_from distance (e.g. the two V-Strom SX 250 entries against the
+    2022-2024 DB row), and this used to be resolved only by CPython's sort
+    stability. The declaration index is now an explicit third key, so the
+    earliest-declared spec wins ties by contract, not by accident. See
+    tests/test_catalog_no_duplicates.py::TestReseedWinnerIsDeterministic.
+    """
     if len(candidates) == 1:
         return candidates[0]
     ryf = row.get("year_from")
     ryt = row.get("year_to")
-    # Best year-range overlap wins; ties break toward the closest year_from.
+    # Best year-range overlap wins; ties break toward the closest year_from,
+    # then toward the spec declared first in ALL_KNOWN_BIKES.
     scored = sorted(
-        candidates,
-        key=lambda s: (
-            _year_overlap(s.year_from, s.year_to, ryf, ryt),
-            -abs((s.year_from or 0) - (ryf or 0)),
+        enumerate(candidates),
+        key=lambda pair: (
+            _year_overlap(pair[1].year_from, pair[1].year_to, ryf, ryt),
+            -abs((pair[1].year_from or 0) - (ryf or 0)),
+            -pair[0],
         ),
         reverse=True,
     )
-    return scored[0]
+    return scored[0][1]
 
 
 def match_spec_to_row(row, specs_by_key):

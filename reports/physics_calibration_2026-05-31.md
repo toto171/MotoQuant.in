@@ -141,12 +141,12 @@ cross-checks stay within band." Today's bump to 1500 takes the next
 
 **Before:**
 ```python
-max_engine_decel_rads2=800.0,
+max_engine_decel_rads2 = (800.0,)
 ```
 
 **After:**
 ```python
-max_engine_decel_rads2=1500.0,
+max_engine_decel_rads2 = (1500.0,)
 ```
 
 Plus an explanatory block comment recording the 5/31 calibration

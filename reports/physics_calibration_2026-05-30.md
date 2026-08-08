@@ -108,17 +108,17 @@ The chosen value of 600 rad/s² is conservative relative to the 800 used for `tw
 
 **Before:**
 ```python
-over_clutch_factor=0.20,
-max_engine_decel_rads2=150.0,
-launch_floor_factor=1.0,
+over_clutch_factor = (0.20,)
+max_engine_decel_rads2 = (150.0,)
+launch_floor_factor = (1.0,)
 ```
 
 **After:**
 ```python
-over_clutch_factor=0.20,
+over_clutch_factor = (0.20,)
 # (long block-comment justifying the change — see source)
-max_engine_decel_rads2=600.0,
-launch_floor_factor=1.0,
+max_engine_decel_rads2 = (600.0,)
+launch_floor_factor = (1.0,)
 ```
 
 ---

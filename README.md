@@ -41,6 +41,11 @@ python -m motoquant.run chat "how fast is a hayabusa at Aamby Valley?"
 > [docs/INVARIANTS.md](docs/INVARIANTS.md); the bugs that keep coming back are in
 > [docs/KNOWN_TRAPS.md](docs/KNOWN_TRAPS.md).
 
+**Use MotoQuant from your AI:** the repo ships a stdio **MCP server**
+(`python -m motoquant.mcp_server`) exposing sims, catalog search and
+sprocket/part what-ifs as tools — wire-up in [docs/MCP.md](docs/MCP.md) —
+plus a Claude skill under `skills/motoquant/`.
+
 ## Repo layout
 
 ```

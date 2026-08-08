@@ -97,11 +97,17 @@ ACTIVE_MU_SCALES = {
     "litre_sport_600_1000": 1.07,
     "sport_twin_600_1300": 1.085,
     "mid_twin_500_700": 1.14,
-    "mid_twin_300_500": 1.12,
+    # 2026-08-08 crank-semantics retune (see category_profiles.py comments
+    # + reports/session_2026_08_08_full_night_run.md): mid_twin_300_500
+    # 1.12 -> 1.20, small_i4_screamer 1.30 -> 1.00 (the 1.30 was fit to the
+    # pre-instrumented optimistic ZX-25R row), entry_200_300 newly active
+    # at 1.12. Final weighted sweep: w|d| 0.2721 -> 0.2645, bias +0.0089.
+    "mid_twin_300_500": 1.20,
     "two_stroke": 1.15,
     "cruiser_1300p": 1.20,
     "other": 1.15,
-    "small_i4_screamer": 1.30,
+    "small_i4_screamer": 1.00,
+    "entry_200_300": 1.12,
 }
 
 # July 17, 2026: the LIVE CategoryProfile knob inventory, pinned as an exact

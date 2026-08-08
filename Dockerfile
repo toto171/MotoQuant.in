@@ -2,9 +2,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install dependencies
-COPY requirements-api.txt .
-RUN pip install --no-cache-dir -r requirements-api.txt
+# Install dependencies from the fully-pinned lockfile so two builds of the
+# same git commit install identical dependency sets (requirements-api.txt is
+# the human-maintained source; `make lock` regenerates the lock from it).
+COPY requirements-api.lock .
+RUN pip install --no-cache-dir -r requirements-api.lock
 
 # Copy application code
 COPY motoquant/ ./motoquant/

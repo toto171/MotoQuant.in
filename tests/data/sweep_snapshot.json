@@ -3,66 +3,66 @@
   "catalog": {
     "Apache RR 310 (2018-2024)|2018": {
       "cluster": "entry_300",
-      "eighth_s": 10.182199,
-      "et_s": 15.354192,
+      "eighth_s": 10.275874,
+      "et_s": 15.488708,
       "finished": true,
-      "sixty_ft_s": 2.909785,
-      "trap_kmh": 153.5169,
-      "trap_ms": 42.643572
+      "sixty_ft_s": 2.938921,
+      "trap_kmh": 152.2471,
+      "trap_ms": 42.290861
     },
     "Apache RTR 200 4V (2016-2024)|2016": {
       "cluster": "entry_200",
-      "eighth_s": 12.016552,
-      "et_s": 19.105354,
+      "eighth_s": 12.277238,
+      "et_s": 19.372754,
       "finished": true,
-      "sixty_ft_s": 2.817658,
-      "trap_kmh": 109.3059,
-      "trap_ms": 30.362739
+      "sixty_ft_s": 3.02221,
+      "trap_kmh": 109.2461,
+      "trap_ms": 30.346133
     },
     "CBR 600RR (2007-2012)|2007": {
       "cluster": "sport_600_1000",
-      "eighth_s": 7.447817,
-      "et_s": 11.010953,
+      "eighth_s": 7.455048,
+      "et_s": 11.027666,
       "finished": true,
-      "sixty_ft_s": 2.233083,
-      "trap_kmh": 225.04,
-      "trap_ms": 62.511101
+      "sixty_ft_s": 2.233708,
+      "trap_kmh": 224.3609,
+      "trap_ms": 62.322463
     },
     "Classic 350 (2021-2026)|2021": {
       "cluster": "cruiser",
-      "eighth_s": 11.805805,
-      "et_s": 18.522854,
+      "eighth_s": 11.866195,
+      "et_s": 18.618895,
       "finished": true,
-      "sixty_ft_s": 3.133604,
-      "trap_kmh": 115.4503,
-      "trap_ms": 32.069532
+      "sixty_ft_s": 3.14984,
+      "trap_kmh": 114.835,
+      "trap_ms": 31.898615
     },
     "Diavel V4 (2023-2026)|2023": {
       "cluster": "cruiser",
-      "eighth_s": 6.987068,
-      "et_s": 10.543828,
+      "eighth_s": 6.977997,
+      "et_s": 10.523327,
       "finished": true,
-      "sixty_ft_s": 2.023882,
-      "trap_kmh": 221.1939,
-      "trap_ms": 61.442758
+      "sixty_ft_s": 2.023108,
+      "trap_kmh": 222.0237,
+      "trap_ms": 61.673243
     },
     "Dominar 250 (2020-2024)|2020": {
       "cluster": "entry_200",
-      "eighth_s": 10.170336,
-      "et_s": 15.846952,
+      "eighth_s": 10.142061,
+      "et_s": 15.854832,
       "finished": true,
-      "sixty_ft_s": 2.685896,
-      "trap_kmh": 136.9536,
-      "trap_ms": 38.042672
+      "sixty_ft_s": 2.630842,
+      "trap_kmh": 135.9959,
+      "trap_ms": 37.776652
     },
     "Duke 390 (2017-2023)|2017": {
       "cluster": "entry_300",
-      "eighth_s": 9.273868,
-      "et_s": 14.253432,
+      "eighth_s": 9.307972,
+      "et_s": 14.318996,
       "finished": true,
-      "sixty_ft_s": 2.596254,
-      "trap_kmh": 156.7565,
-      "trap_ms": 43.543476
+      "sixty_ft_s": 2.597589,
+      "trap_kmh": 155.7226,
+      "trap_ms": 43.256282
     },
     "GSX-R 600 (2006-2007)|2006": {
       "cluster": "sport_600_1000",
@@ -75,57 +75,57 @@
     },
     "GSX-R 750 (2008-2010)|2008": {
       "cluster": "sport_600_1000",
-      "eighth_s": 7.077514,
-      "et_s": 10.437668,
+      "eighth_s": 7.069034,
+      "et_s": 10.41743,
       "finished": true,
-      "sixty_ft_s": 2.132383,
-      "trap_kmh": 238.3972,
-      "trap_ms": 66.221435
+      "sixty_ft_s": 2.131202,
+      "trap_kmh": 238.5963,
+      "trap_ms": 66.276737
     },
     "Hayabusa (2008-2012)|2008": {
       "cluster": "litre_hyper",
-      "eighth_s": 6.922428,
-      "et_s": 10.225257,
+      "eighth_s": 6.957744,
+      "et_s": 10.235212,
       "finished": true,
-      "sixty_ft_s": 2.079009,
-      "trap_kmh": 243.2534,
-      "trap_ms": 67.570378
+      "sixty_ft_s": 2.09611,
+      "trap_kmh": 245.4461,
+      "trap_ms": 68.179475
     },
     "MT-07 (2018-2024)|2018": {
       "cluster": "mid_twin",
-      "eighth_s": 7.976715,
-      "et_s": 12.182808,
+      "eighth_s": 7.998063,
+      "et_s": 12.223936,
       "finished": true,
-      "sixty_ft_s": 2.267718,
-      "trap_kmh": 186.1232,
-      "trap_ms": 51.700893
+      "sixty_ft_s": 2.268779,
+      "trap_kmh": 185.192,
+      "trap_ms": 51.442218
     },
     "Meteor 350 (2020-2026)|2020": {
       "cluster": "cruiser",
-      "eighth_s": 11.687802,
-      "et_s": 18.35261,
+      "eighth_s": 11.746919,
+      "et_s": 18.447822,
       "finished": true,
-      "sixty_ft_s": 3.076486,
-      "trap_kmh": 116.3248,
-      "trap_ms": 32.312455
+      "sixty_ft_s": 3.092379,
+      "trap_kmh": 115.7136,
+      "trap_ms": 32.142654
     },
     "NSR250R SP (1990-1993)|1990": {
       "cluster": "two_stroke",
-      "eighth_s": 9.025961,
-      "et_s": 14.674957,
+      "eighth_s": 8.946276,
+      "et_s": 14.587203,
       "finished": true,
-      "sixty_ft_s": 2.153656,
-      "trap_kmh": 142.462,
-      "trap_ms": 39.572783
+      "sixty_ft_s": 2.119793,
+      "trap_kmh": 142.5074,
+      "trap_ms": 39.585384
     },
     "Ninja 400 (2018-2024)|2018": {
       "cluster": "entry_300",
-      "eighth_s": 8.884943,
-      "et_s": 13.577892,
+      "eighth_s": 8.744451,
+      "et_s": 13.458627,
       "finished": true,
-      "sixty_ft_s": 2.425256,
-      "trap_kmh": 169.9514,
-      "trap_ms": 47.208715
+      "sixty_ft_s": 2.305481,
+      "trap_kmh": 169.0632,
+      "trap_ms": 46.962
     },
     "Ninja H2 (2015-2023)|2015": {
       "cluster": "litre_super",
@@ -147,12 +147,12 @@
     },
     "Ninja ZX-14R (2012-2023)|2012": {
       "cluster": "litre_hyper",
-      "eighth_s": 6.924868,
-      "et_s": 10.144604,
+      "eighth_s": 6.918187,
+      "et_s": 10.118132,
       "finished": true,
-      "sixty_ft_s": 2.100041,
-      "trap_kmh": 249.4557,
-      "trap_ms": 69.293237
+      "sixty_ft_s": 2.099643,
+      "trap_kmh": 250.4422,
+      "trap_ms": 69.567266
     },
     "Ninja ZX-6R (2003-2004)|2003": {
       "cluster": "sport_600_1000",
@@ -174,138 +174,138 @@
     },
     "Pulsar NS200 (2012-2016)|2012": {
       "cluster": "entry_200",
-      "eighth_s": 10.359928,
-      "et_s": 16.353041,
+      "eighth_s": 11.212226,
+      "et_s": 17.286529,
       "finished": true,
-      "sixty_ft_s": 2.705347,
-      "trap_kmh": 128.5353,
-      "trap_ms": 35.704258
+      "sixty_ft_s": 3.137638,
+      "trap_kmh": 127.0008,
+      "trap_ms": 35.277999
     },
     "RD350 (1973-1975)|1973": {
       "cluster": "two_stroke",
-      "eighth_s": 9.288927,
-      "et_s": 14.882931,
+      "eighth_s": 9.081138,
+      "et_s": 14.646304,
       "finished": true,
-      "sixty_ft_s": 2.308801,
-      "trap_kmh": 145.107,
-      "trap_ms": 40.307498
+      "sixty_ft_s": 2.191023,
+      "trap_kmh": 145.3786,
+      "trap_ms": 40.382958
     },
     "RG500 Gamma (1985-1987)|1985": {
       "cluster": "two_stroke",
-      "eighth_s": 7.377207,
-      "et_s": 11.123645,
+      "eighth_s": 7.356654,
+      "et_s": 11.101526,
       "finished": true,
-      "sixty_ft_s": 2.146385,
-      "trap_kmh": 214.0546,
-      "trap_ms": 59.4596
+      "sixty_ft_s": 2.136497,
+      "trap_kmh": 214.1064,
+      "trap_ms": 59.473999
     },
     "RGV250 Gamma (1991-1996)|1991": {
       "cluster": "two_stroke",
-      "eighth_s": 8.224767,
-      "et_s": 13.094075,
+      "eighth_s": 8.212961,
+      "et_s": 13.084699,
       "finished": true,
-      "sixty_ft_s": 2.126268,
-      "trap_kmh": 159.0846,
-      "trap_ms": 44.190153
+      "sixty_ft_s": 2.118181,
+      "trap_kmh": 159.0075,
+      "trap_ms": 44.16875
     },
     "RS 660 (2021-2026)|2021": {
       "cluster": "mid_twin",
-      "eighth_s": 7.512638,
-      "et_s": 11.160076,
+      "eighth_s": 7.54322,
+      "et_s": 11.203861,
       "finished": true,
-      "sixty_ft_s": 2.204246,
-      "trap_kmh": 219.9277,
-      "trap_ms": 61.091034
+      "sixty_ft_s": 2.212421,
+      "trap_kmh": 219.1155,
+      "trap_ms": 60.865427
     },
     "RSV4 1000 (2009-2014)|2009": {
       "cluster": "litre_sport",
-      "eighth_s": 7.217292,
-      "et_s": 10.455416,
+      "eighth_s": 7.209042,
+      "et_s": 10.435708,
       "finished": true,
-      "sixty_ft_s": 2.215495,
-      "trap_kmh": 248.9683,
-      "trap_ms": 69.157853
+      "sixty_ft_s": 2.214201,
+      "trap_kmh": 249.0547,
+      "trap_ms": 69.181851
     },
     "RX100 (1985-1996)|1985": {
       "cluster": "two_stroke",
-      "eighth_s": 13.018409,
-      "et_s": 21.087053,
+      "eighth_s": 12.814097,
+      "et_s": 20.881252,
       "finished": true,
-      "sixty_ft_s": 2.748686,
-      "trap_kmh": 95.4263,
-      "trap_ms": 26.507311
+      "sixty_ft_s": 2.591355,
+      "trap_kmh": 95.3901,
+      "trap_ms": 26.497247
     },
     "Rebel 1100 (2021-2026)|2021": {
       "cluster": "cruiser",
-      "eighth_s": 8.074637,
-      "et_s": 12.488103,
+      "eighth_s": 8.071283,
+      "et_s": 12.482224,
       "finished": true,
-      "sixty_ft_s": 2.199901,
-      "trap_kmh": 175.903,
-      "trap_ms": 48.861948
+      "sixty_ft_s": 2.199687,
+      "trap_kmh": 175.9901,
+      "trap_ms": 48.886125
     },
     "Rocket 3 R (2020-2026)|2020": {
       "cluster": "muscle",
-      "eighth_s": 7.147463,
-      "et_s": 10.835455,
+      "eighth_s": 7.135097,
+      "et_s": 10.811863,
       "finished": true,
-      "sixty_ft_s": 2.008479,
-      "trap_kmh": 214.827,
-      "trap_ms": 59.674177
+      "sixty_ft_s": 2.007873,
+      "trap_kmh": 215.3432,
+      "trap_ms": 59.81756
     },
     "S 1000 RR (2015-2018)|2015": {
       "cluster": "litre_sport",
-      "eighth_s": 6.836815,
-      "et_s": 9.999398,
+      "eighth_s": 6.829703,
+      "et_s": 9.980643,
       "finished": true,
-      "sixty_ft_s": 2.079564,
-      "trap_kmh": 255.4905,
-      "trap_ms": 70.969578
+      "sixty_ft_s": 2.078282,
+      "trap_kmh": 256.5757,
+      "trap_ms": 71.271015
     },
     "SV650 (2016-2026)|2016": {
       "cluster": "mid_twin",
-      "eighth_s": 8.022971,
-      "et_s": 12.311773,
+      "eighth_s": 8.05438,
+      "et_s": 12.362824,
       "finished": true,
-      "sixty_ft_s": 2.241068,
-      "trap_kmh": 183.1585,
-      "trap_ms": 50.877371
+      "sixty_ft_s": 2.245155,
+      "trap_kmh": 182.2629,
+      "trap_ms": 50.628573
     },
     "Tuono 660 (2021-2026)|2021": {
       "cluster": "mid_twin",
-      "eighth_s": 7.65592,
-      "et_s": 11.566014,
+      "eighth_s": 7.690183,
+      "et_s": 11.61487,
       "finished": true,
-      "sixty_ft_s": 2.202983,
-      "trap_kmh": 200.7824,
-      "trap_ms": 55.77288
+      "sixty_ft_s": 2.213896,
+      "trap_kmh": 200.0652,
+      "trap_ms": 55.573672
     },
     "VMAX 1700 (2009-2020)|2009": {
       "cluster": "muscle",
-      "eighth_s": 6.916049,
-      "et_s": 10.45132,
+      "eighth_s": 6.900482,
+      "et_s": 10.428421,
       "finished": true,
-      "sixty_ft_s": 1.964231,
-      "trap_kmh": 224.4249,
-      "trap_ms": 62.340256
+      "sixty_ft_s": 1.963607,
+      "trap_kmh": 220.0029,
+      "trap_ms": 61.111912
     },
     "YZF-R15 V4 (2021-2024)|2021": {
       "cluster": "entry_150",
-      "eighth_s": 11.721858,
-      "et_s": 18.343607,
+      "eighth_s": 12.19147,
+      "et_s": 18.82998,
       "finished": true,
-      "sixty_ft_s": 2.782057,
-      "trap_kmh": 119.8586,
-      "trap_ms": 33.294061
+      "sixty_ft_s": 3.132328,
+      "trap_kmh": 119.6518,
+      "trap_ms": 33.236623
     },
     "YZF-R3 (2015-2022)|2015": {
       "cluster": "entry_300",
-      "eighth_s": 9.6027,
-      "et_s": 14.434776,
+      "eighth_s": 9.35233,
+      "et_s": 14.193367,
       "finished": true,
-      "sixty_ft_s": 2.760369,
-      "trap_kmh": 165.1001,
-      "trap_ms": 45.861152
+      "sixty_ft_s": 2.63022,
+      "trap_kmh": 164.5357,
+      "trap_ms": 45.704372
     },
     "YZF-R6 (2006-2007)|2006": {
       "cluster": "sport_600_1000",
@@ -319,44 +319,44 @@
   },
   "catalog_full": {
     "101 Scout (2025-2026)|2025": {
-      "eighth_s": 7.727749,
-      "et_s": 11.830095,
+      "eighth_s": 7.720596,
+      "et_s": 11.815525,
       "finished": true,
-      "sixty_ft_s": 2.176315,
-      "trap_kmh": 190.9138,
-      "trap_ms": 53.031613
+      "sixty_ft_s": 2.175927,
+      "trap_kmh": 191.3017,
+      "trap_ms": 53.13935
     },
     "1098 (2007-2008)|2007": {
-      "eighth_s": 7.200873,
-      "et_s": 10.514903,
+      "eighth_s": 7.193318,
+      "et_s": 10.496962,
       "finished": true,
-      "sixty_ft_s": 2.192103,
-      "trap_kmh": 243.1417,
-      "trap_ms": 67.539362
+      "sixty_ft_s": 2.191046,
+      "trap_kmh": 244.0053,
+      "trap_ms": 67.779238
     },
     "1125R (2008-2010)|2008": {
-      "eighth_s": 7.212606,
-      "et_s": 10.608861,
+      "eighth_s": 7.204292,
+      "et_s": 10.590719,
       "finished": true,
-      "sixty_ft_s": 2.173154,
-      "trap_kmh": 237.1716,
-      "trap_ms": 65.880992
+      "sixty_ft_s": 2.172219,
+      "trap_kmh": 237.0289,
+      "trap_ms": 65.841354
     },
     "1190 RC8 R (2009-2013)|2009": {
-      "eighth_s": 7.090763,
-      "et_s": 10.343566,
+      "eighth_s": 7.082152,
+      "et_s": 10.324244,
       "finished": true,
-      "sixty_ft_s": 2.157766,
-      "trap_kmh": 246.2189,
-      "trap_ms": 68.394145
+      "sixty_ft_s": 2.156666,
+      "trap_kmh": 247.1334,
+      "trap_ms": 68.64816
     },
     "1190RX (2014-2016)|2014": {
-      "eighth_s": 7.114007,
-      "et_s": 10.312739,
+      "eighth_s": 7.105731,
+      "et_s": 10.293965,
       "finished": true,
-      "sixty_ft_s": 2.179945,
-      "trap_kmh": 251.8645,
-      "trap_ms": 69.962368
+      "sixty_ft_s": 2.178717,
+      "trap_kmh": 252.8182,
+      "trap_ms": 70.227269
     },
     "1199 Panigale (2012-2014)|2012": {
       "eighth_s": 6.999472,
@@ -367,28 +367,28 @@
       "trap_ms": 72.601197
     },
     "125 Duke (2017-2026)|2017": {
-      "eighth_s": 11.802049,
-      "et_s": 18.516312,
+      "eighth_s": 11.93292,
+      "et_s": 18.730869,
       "finished": true,
-      "sixty_ft_s": 3.096629,
-      "trap_kmh": 116.3637,
-      "trap_ms": 32.323237
+      "sixty_ft_s": 3.131005,
+      "trap_kmh": 114.8368,
+      "trap_ms": 31.899107
     },
     "1250TR-G (2021-2026)|2021": {
-      "eighth_s": 7.703412,
-      "et_s": 11.63614,
+      "eighth_s": 7.694712,
+      "et_s": 11.616886,
       "finished": true,
-      "sixty_ft_s": 2.231,
-      "trap_kmh": 200.6863,
-      "trap_ms": 55.746187
+      "sixty_ft_s": 2.230414,
+      "trap_kmh": 201.3086,
+      "trap_ms": 55.919062
     },
     "1290 Super Adventure R (2021-2026)|2021": {
-      "eighth_s": 7.674121,
-      "et_s": 11.395618,
+      "eighth_s": 7.666491,
+      "et_s": 11.37721,
       "finished": true,
-      "sixty_ft_s": 2.279813,
-      "trap_kmh": 210.4297,
-      "trap_ms": 58.452682
+      "sixty_ft_s": 2.279182,
+      "trap_kmh": 211.1054,
+      "trap_ms": 58.640391
     },
     "1290 Super Duke R (2022-2024)|2022": {
       "eighth_s": 6.620179,
@@ -399,724 +399,724 @@
       "trap_ms": 66.611546
     },
     "1299 Panigale (2015-2017)|2015": {
-      "eighth_s": 7.045079,
-      "et_s": 10.148369,
+      "eighth_s": 7.042283,
+      "et_s": 10.137712,
       "finished": true,
-      "sixty_ft_s": 2.151577,
-      "trap_kmh": 260.8301,
-      "trap_ms": 72.452798
+      "sixty_ft_s": 2.15036,
+      "trap_kmh": 261.7144,
+      "trap_ms": 72.698452
     },
     "1390 Super Duke R EVO (2024-2026)|2024": {
-      "eighth_s": 6.73659,
-      "et_s": 10.112644,
+      "eighth_s": 6.734157,
+      "et_s": 10.099868,
       "finished": true,
-      "sixty_ft_s": 1.921813,
-      "trap_kmh": 233.8087,
-      "trap_ms": 64.946847
+      "sixty_ft_s": 1.92103,
+      "trap_kmh": 234.6682,
+      "trap_ms": 65.185614
     },
     "250 Adventure (2020-2026)|2020": {
-      "eighth_s": 11.503776,
-      "et_s": 17.262797,
+      "eighth_s": 11.212994,
+      "et_s": 16.946287,
       "finished": true,
-      "sixty_ft_s": 3.351378,
-      "trap_kmh": 136.9055,
-      "trap_ms": 38.029301
+      "sixty_ft_s": 3.231067,
+      "trap_kmh": 137.2727,
+      "trap_ms": 38.131316
     },
     "250 Classic (1978-1996)|1978": {
-      "eighth_s": 11.936047,
-      "et_s": 19.208408,
+      "eighth_s": 11.89371,
+      "et_s": 19.169276,
       "finished": true,
-      "sixty_ft_s": 2.390482,
-      "trap_kmh": 109.0586,
-      "trap_ms": 30.294068
+      "sixty_ft_s": 2.357507,
+      "trap_kmh": 109.0282,
+      "trap_ms": 30.285618
     },
     "250 SX (2020-2024)|2020": {
-      "eighth_s": 8.546726,
-      "et_s": 13.668996,
+      "eighth_s": 8.497833,
+      "et_s": 13.585292,
       "finished": true,
-      "sixty_ft_s": 2.111557,
-      "trap_kmh": 147.7489,
-      "trap_ms": 41.04135
+      "sixty_ft_s": 2.101966,
+      "trap_kmh": 150.1201,
+      "trap_ms": 41.70002
     },
     "300 EXC TPI (2018-2024)|2018": {
-      "eighth_s": 8.544951,
-      "et_s": 13.689723,
+      "eighth_s": 8.503715,
+      "et_s": 13.604083,
       "finished": true,
-      "sixty_ft_s": 2.127548,
-      "trap_kmh": 149.8723,
-      "trap_ms": 41.63119
+      "sixty_ft_s": 2.117143,
+      "trap_kmh": 151.2403,
+      "trap_ms": 42.01119
     },
     "300NK (2024-2026)|2024": {
-      "eighth_s": 10.217515,
-      "et_s": 15.833798,
+      "eighth_s": 10.128491,
+      "et_s": 15.77731,
       "finished": true,
-      "sixty_ft_s": 2.814689,
-      "trap_kmh": 138.7265,
-      "trap_ms": 38.535145
+      "sixty_ft_s": 2.742527,
+      "trap_kmh": 137.8738,
+      "trap_ms": 38.298272
     },
     "300SR (2024-2026)|2024": {
-      "eighth_s": 10.109266,
-      "et_s": 15.384549,
+      "eighth_s": 10.022863,
+      "et_s": 15.326206,
       "finished": true,
-      "sixty_ft_s": 2.816278,
-      "trap_kmh": 150.0979,
-      "trap_ms": 41.693851
+      "sixty_ft_s": 2.744062,
+      "trap_kmh": 149.1885,
+      "trap_ms": 41.441252
     },
     "302R (2017-2022)|2017": {
-      "eighth_s": 10.226766,
-      "et_s": 15.361502,
+      "eighth_s": 9.917939,
+      "et_s": 15.056651,
       "finished": true,
-      "sixty_ft_s": 2.945418,
-      "trap_kmh": 154.6566,
-      "trap_ms": 42.960171
+      "sixty_ft_s": 2.797488,
+      "trap_kmh": 154.209,
+      "trap_ms": 42.835823
     },
     "390 Adventure (2020-2026)|2020": {
-      "eighth_s": 9.546078,
-      "et_s": 14.780661,
+      "eighth_s": 9.533147,
+      "et_s": 14.76388,
       "finished": true,
-      "sixty_ft_s": 2.628299,
-      "trap_kmh": 148.6527,
-      "trap_ms": 41.292405
+      "sixty_ft_s": 2.623435,
+      "trap_kmh": 148.7698,
+      "trap_ms": 41.324957
     },
     "390 Adventure SW (2024-2025)|2024": {
-      "eighth_s": 9.474742,
-      "et_s": 14.713372,
+      "eighth_s": 9.462794,
+      "et_s": 14.697789,
       "finished": true,
-      "sixty_ft_s": 2.560946,
-      "trap_kmh": 149.5618,
-      "trap_ms": 41.544933
+      "sixty_ft_s": 2.555871,
+      "trap_kmh": 149.6817,
+      "trap_ms": 41.578258
     },
     "390 Duke (2023-2024)|2023": {
-      "eighth_s": 9.031997,
-      "et_s": 13.895365,
+      "eighth_s": 9.071314,
+      "et_s": 13.964509,
       "finished": true,
-      "sixty_ft_s": 2.528044,
-      "trap_kmh": 161.0402,
-      "trap_ms": 44.733379
+      "sixty_ft_s": 2.530108,
+      "trap_kmh": 160.0492,
+      "trap_ms": 44.458121
     },
     "390 Duke Gen 3 (2024-2026)|2024": {
-      "eighth_s": 9.081385,
-      "et_s": 13.935427,
+      "eighth_s": 9.145619,
+      "et_s": 14.032392,
       "finished": true,
-      "sixty_ft_s": 2.492106,
-      "trap_kmh": 162.4983,
-      "trap_ms": 45.138419
+      "sixty_ft_s": 2.509124,
+      "trap_kmh": 161.3787,
+      "trap_ms": 44.827403
     },
     "42 Bobber (2023-2026)|2023": {
-      "eighth_s": 10.361739,
-      "et_s": 15.94985,
+      "eighth_s": 10.378596,
+      "et_s": 15.977438,
       "finished": true,
-      "sixty_ft_s": 2.813958,
-      "trap_kmh": 140.4643,
-      "trap_ms": 39.01785
+      "sixty_ft_s": 2.817838,
+      "trap_kmh": 140.1674,
+      "trap_ms": 38.935379
     },
     "450 Rally (2023-2026)|2023": {
-      "eighth_s": 9.092827,
-      "et_s": 13.811141,
+      "eighth_s": 9.087691,
+      "et_s": 13.802349,
       "finished": true,
-      "sixty_ft_s": 2.623063,
-      "trap_kmh": 161.6791,
-      "trap_ms": 44.910873
+      "sixty_ft_s": 2.622819,
+      "trap_kmh": 161.6794,
+      "trap_ms": 44.910942
     },
     "450MT (2024-2026)|2024": {
-      "eighth_s": 9.03312,
-      "et_s": 14.075073,
+      "eighth_s": 8.858915,
+      "et_s": 13.89291,
       "finished": true,
-      "sixty_ft_s": 2.372796,
-      "trap_kmh": 154.8572,
-      "trap_ms": 43.015902
+      "sixty_ft_s": 2.255357,
+      "trap_kmh": 155.0263,
+      "trap_ms": 43.062866
     },
     "450NK (2024-2026)|2024": {
-      "eighth_s": 9.176718,
-      "et_s": 14.130936,
+      "eighth_s": 8.991324,
+      "et_s": 13.963464,
       "finished": true,
-      "sixty_ft_s": 2.543143,
-      "trap_kmh": 156.5089,
-      "trap_ms": 43.474686
+      "sixty_ft_s": 2.424971,
+      "trap_kmh": 155.7288,
+      "trap_ms": 43.258005
     },
     "450RR (2023-2026)|2023": {
-      "eighth_s": 7.59696,
-      "et_s": 11.732277,
+      "eighth_s": 8.596008,
+      "et_s": 12.824878,
       "finished": true,
-      "sixty_ft_s": 2.061506,
-      "trap_kmh": 193.0959,
-      "trap_ms": 53.637753
+      "sixty_ft_s": 2.543289,
+      "trap_kmh": 189.8329,
+      "trap_ms": 52.731371
     },
     "450SR (2022-2026)|2022": {
-      "eighth_s": 8.642003,
-      "et_s": 13.114346,
+      "eighth_s": 8.487419,
+      "et_s": 12.976666,
       "finished": true,
-      "sixty_ft_s": 2.40423,
-      "trap_kmh": 178.6497,
-      "trap_ms": 49.624906
+      "sixty_ft_s": 2.290758,
+      "trap_kmh": 177.8626,
+      "trap_ms": 49.406265
     },
     "502C (2020-2025)|2020": {
-      "eighth_s": 9.111231,
-      "et_s": 14.324005,
+      "eighth_s": 9.104458,
+      "et_s": 14.312455,
       "finished": true,
-      "sixty_ft_s": 2.315168,
-      "trap_kmh": 149.6555,
-      "trap_ms": 41.570959
+      "sixty_ft_s": 2.314703,
+      "trap_kmh": 149.7803,
+      "trap_ms": 41.605635
     },
     "650NK (2023-2026)|2023": {
-      "eighth_s": 8.890816,
-      "et_s": 13.600475,
+      "eighth_s": 8.949559,
+      "et_s": 13.686022,
       "finished": true,
-      "sixty_ft_s": 2.494682,
-      "trap_kmh": 165.6246,
-      "trap_ms": 46.006823
+      "sixty_ft_s": 2.512769,
+      "trap_kmh": 164.6421,
+      "trap_ms": 45.733911
     },
     "675SR-R (2024-2026)|2024": {
-      "eighth_s": 7.62078,
-      "et_s": 11.441503,
+      "eighth_s": 7.641887,
+      "et_s": 11.477701,
       "finished": true,
-      "sixty_ft_s": 2.188126,
-      "trap_kmh": 209.5153,
-      "trap_ms": 58.198696
+      "sixty_ft_s": 2.189331,
+      "trap_kmh": 208.6241,
+      "trap_ms": 57.951133
     },
     "690 Duke R (2012-2017)|2012": {
-      "eighth_s": 7.698713,
-      "et_s": 11.920092,
+      "eighth_s": 7.722082,
+      "et_s": 11.963132,
       "finished": true,
-      "sixty_ft_s": 2.111511,
-      "trap_kmh": 185.27,
-      "trap_ms": 51.463897
+      "sixty_ft_s": 2.112702,
+      "trap_kmh": 184.3948,
+      "trap_ms": 51.220784
     },
     "690 SMC R (2019-2024)|2019": {
-      "eighth_s": 7.824844,
-      "et_s": 12.053586,
+      "eighth_s": 7.845677,
+      "et_s": 12.093773,
       "finished": true,
-      "sixty_ft_s": 2.173488,
-      "trap_kmh": 184.4885,
-      "trap_ms": 51.246814
+      "sixty_ft_s": 2.174622,
+      "trap_kmh": 183.5725,
+      "trap_ms": 50.992354
     },
     "700CL-X Sport (2022-2026)|2022": {
-      "eighth_s": 8.091314,
-      "et_s": 12.422051,
+      "eighth_s": 8.136665,
+      "et_s": 12.488654,
       "finished": true,
-      "sixty_ft_s": 2.237019,
-      "trap_kmh": 180.2228,
-      "trap_ms": 50.061889
+      "sixty_ft_s": 2.251164,
+      "trap_kmh": 179.3445,
+      "trap_ms": 49.817912
     },
     "701 Supermoto (2016-2023)|2016": {
-      "eighth_s": 7.740278,
-      "et_s": 11.947495,
+      "eighth_s": 7.761549,
+      "et_s": 11.988048,
       "finished": true,
-      "sixty_ft_s": 2.146832,
-      "trap_kmh": 185.9955,
-      "trap_ms": 51.665407
+      "sixty_ft_s": 2.147896,
+      "trap_kmh": 185.1179,
+      "trap_ms": 51.421626
     },
     "703F (2024-2026)|2024": {
-      "eighth_s": 7.886125,
-      "et_s": 12.00697,
+      "eighth_s": 7.872413,
+      "et_s": 11.981319,
       "finished": true,
-      "sixty_ft_s": 2.245213,
-      "trap_kmh": 191.5541,
-      "trap_ms": 53.209471
+      "sixty_ft_s": 2.244473,
+      "trap_kmh": 192.1772,
+      "trap_ms": 53.382553
     },
     "750 H2 Mach IV (1972-1975)|1972": {
-      "eighth_s": 7.449785,
-      "et_s": 11.581842,
+      "eighth_s": 7.400361,
+      "et_s": 11.502941,
       "finished": true,
-      "sixty_ft_s": 1.876845,
-      "trap_kmh": 191.5551,
-      "trap_ms": 53.209754
+      "sixty_ft_s": 1.863121,
+      "trap_kmh": 193.0146,
+      "trap_ms": 53.615171
     },
     "790 Adventure (2019-2022)|2019": {
-      "eighth_s": 7.946214,
-      "et_s": 12.14303,
+      "eighth_s": 7.937826,
+      "et_s": 12.125443,
       "finished": true,
-      "sixty_ft_s": 2.256409,
-      "trap_kmh": 186.6184,
-      "trap_ms": 51.838449
+      "sixty_ft_s": 2.255895,
+      "trap_kmh": 187.0787,
+      "trap_ms": 51.966316
     },
     "790 Duke (2018-2022)|2018": {
-      "eighth_s": 7.748201,
-      "et_s": 11.6896,
+      "eighth_s": 7.737636,
+      "et_s": 11.668301,
       "finished": true,
-      "sixty_ft_s": 2.254429,
-      "trap_kmh": 199.0829,
-      "trap_ms": 55.300819
+      "sixty_ft_s": 2.253661,
+      "trap_kmh": 199.6881,
+      "trap_ms": 55.468904
     },
     "800MT Sport (2022-2026)|2022": {
-      "eighth_s": 8.074535,
-      "et_s": 12.285638,
+      "eighth_s": 8.065838,
+      "et_s": 12.270285,
       "finished": true,
-      "sixty_ft_s": 2.289881,
-      "trap_kmh": 183.4271,
-      "trap_ms": 50.951965
+      "sixty_ft_s": 2.289395,
+      "trap_kmh": 183.5116,
+      "trap_ms": 50.975447
     },
     "800NK (2023-2026)|2023": {
-      "eighth_s": 7.671327,
-      "et_s": 11.609533,
+      "eighth_s": 7.662815,
+      "et_s": 11.591393,
       "finished": true,
-      "sixty_ft_s": 2.206603,
-      "trap_kmh": 200.9897,
-      "trap_ms": 55.830476
+      "sixty_ft_s": 2.205954,
+      "trap_kmh": 201.5361,
+      "trap_ms": 55.982249
     },
     "800X (2023-2026)|2023": {
-      "eighth_s": 7.826985,
-      "et_s": 11.860155,
+      "eighth_s": 7.818968,
+      "et_s": 11.843573,
       "finished": true,
-      "sixty_ft_s": 2.251207,
-      "trap_kmh": 195.2101,
-      "trap_ms": 54.225034
+      "sixty_ft_s": 2.250629,
+      "trap_kmh": 195.5274,
+      "trap_ms": 54.313163
     },
     "848 EVO (2008-2013)|2008": {
-      "eighth_s": 7.265626,
-      "et_s": 10.696107,
+      "eighth_s": 7.24725,
+      "et_s": 10.655611,
       "finished": true,
-      "sixty_ft_s": 2.186591,
-      "trap_kmh": 233.5737,
-      "trap_ms": 64.88157
+      "sixty_ft_s": 2.184441,
+      "trap_kmh": 235.3918,
+      "trap_ms": 65.386625
     },
     "848 EVO (2011-2013)|2011": {
-      "eighth_s": 7.347668,
-      "et_s": 10.774944,
+      "eighth_s": 7.33715,
+      "et_s": 10.752436,
       "finished": true,
-      "sixty_ft_s": 2.222222,
-      "trap_kmh": 234.5957,
-      "trap_ms": 65.165474
+      "sixty_ft_s": 2.221187,
+      "trap_kmh": 235.4965,
+      "trap_ms": 65.415698
     },
     "890 Adventure R (2021-2024)|2021": {
-      "eighth_s": 7.811857,
-      "et_s": 11.813957,
+      "eighth_s": 7.803106,
+      "et_s": 11.795457,
       "finished": true,
-      "sixty_ft_s": 2.25916,
-      "trap_kmh": 197.2118,
-      "trap_ms": 54.781044
+      "sixty_ft_s": 2.258583,
+      "trap_kmh": 197.7378,
+      "trap_ms": 54.927166
     },
     "890 Duke (2020-2023)|2020": {
-      "eighth_s": 7.533316,
-      "et_s": 11.336495,
+      "eighth_s": 7.524737,
+      "et_s": 11.31836,
       "finished": true,
-      "sixty_ft_s": 2.190777,
-      "trap_kmh": 208.4053,
-      "trap_ms": 57.890365
+      "sixty_ft_s": 2.190172,
+      "trap_kmh": 208.8786,
+      "trap_ms": 58.021838
     },
     "890 Duke R (2020-2024)|2020": {
-      "eighth_s": 7.326631,
-      "et_s": 11.082605,
+      "eighth_s": 7.318067,
+      "et_s": 11.063166,
       "finished": true,
-      "sixty_ft_s": 2.135035,
-      "trap_kmh": 209.3023,
-      "trap_ms": 58.139535
+      "sixty_ft_s": 2.134132,
+      "trap_kmh": 209.9979,
+      "trap_ms": 58.332746
     },
     "890 SMT (2023-2026)|2023": {
-      "eighth_s": 7.604975,
-      "et_s": 11.647128,
+      "eighth_s": 7.579473,
+      "et_s": 11.610898,
       "finished": true,
-      "sixty_ft_s": 2.147092,
-      "trap_kmh": 193.3001,
-      "trap_ms": 53.694474
+      "sixty_ft_s": 2.138522,
+      "trap_kmh": 193.8484,
+      "trap_ms": 53.846788
     },
     "959 Panigale (2016-2019)|2016": {
-      "eighth_s": 7.071246,
-      "et_s": 10.407043,
+      "eighth_s": 7.063931,
+      "et_s": 10.388598,
       "finished": true,
-      "sixty_ft_s": 2.132776,
-      "trap_kmh": 241.8356,
-      "trap_ms": 67.176561
+      "sixty_ft_s": 2.131813,
+      "trap_kmh": 242.7357,
+      "trap_ms": 67.426587
     },
     "990 Duke (2024-2026)|2024": {
-      "eighth_s": 7.477047,
-      "et_s": 11.144694,
+      "eighth_s": 7.467274,
+      "et_s": 11.124768,
       "finished": true,
-      "sixty_ft_s": 2.212176,
-      "trap_kmh": 215.885,
-      "trap_ms": 59.968056
+      "sixty_ft_s": 2.211279,
+      "trap_kmh": 216.548,
+      "trap_ms": 60.152233
     },
     "990 RC R (2025)|2025": {
-      "eighth_s": 7.566783,
-      "et_s": 11.405172,
+      "eighth_s": 7.555904,
+      "et_s": 11.382931,
       "finished": true,
-      "sixty_ft_s": 2.204208,
-      "trap_kmh": 204.446,
-      "trap_ms": 56.790553
+      "sixty_ft_s": 2.203327,
+      "trap_kmh": 205.0887,
+      "trap_ms": 56.969091
     },
     "996 Biposto (1999-2001)|1999": {
-      "eighth_s": 7.542047,
-      "et_s": 11.30541,
+      "eighth_s": 7.534491,
+      "et_s": 11.290609,
       "finished": true,
-      "sixty_ft_s": 2.190225,
-      "trap_kmh": 209.9582,
-      "trap_ms": 58.321728
+      "sixty_ft_s": 2.189614,
+      "trap_kmh": 210.1575,
+      "trap_ms": 58.377083
     },
     "999 (2003-2006)|2003": {
-      "eighth_s": 7.296212,
-      "et_s": 10.764922,
+      "eighth_s": 7.286388,
+      "et_s": 10.744061,
       "finished": true,
-      "sixty_ft_s": 2.186606,
-      "trap_kmh": 232.3972,
-      "trap_ms": 64.554778
+      "sixty_ft_s": 2.185649,
+      "trap_kmh": 232.6405,
+      "trap_ms": 64.622371
     },
     "Adventure (2022-2026)|2022": {
-      "eighth_s": 11.221985,
-      "et_s": 17.257047,
+      "eighth_s": 11.171636,
+      "et_s": 17.206149,
       "finished": true,
-      "sixty_ft_s": 3.158031,
-      "trap_kmh": 128.912,
-      "trap_ms": 35.808887
+      "sixty_ft_s": 3.129336,
+      "trap_kmh": 128.6525,
+      "trap_ms": 35.736798
     },
     "Aerox 155 (SE Asia) (2020-2026)|2020": {
-      "eighth_s": 11.265037,
-      "et_s": 17.83904,
+      "eighth_s": 11.946241,
+      "et_s": 18.564759,
       "finished": true,
-      "sixty_ft_s": 2.82649,
-      "trap_kmh": 117.094,
-      "trap_ms": 32.526117
+      "sixty_ft_s": 3.247049,
+      "trap_kmh": 116.4327,
+      "trap_ms": 32.34243
     },
     "Apache RR 310 (2018-2024)|2018": {
-      "eighth_s": 10.182199,
-      "et_s": 15.354192,
+      "eighth_s": 10.275874,
+      "et_s": 15.488708,
       "finished": true,
-      "sixty_ft_s": 2.909785,
-      "trap_kmh": 153.5169,
-      "trap_ms": 42.643572
+      "sixty_ft_s": 2.938921,
+      "trap_kmh": 152.2471,
+      "trap_ms": 42.290861
     },
     "Apache RTR 160 2V (2018-2026)|2018": {
-      "eighth_s": 11.278369,
-      "et_s": 17.906459,
+      "eighth_s": 12.121746,
+      "et_s": 18.847041,
       "finished": true,
-      "sixty_ft_s": 2.793603,
-      "trap_kmh": 116.45,
-      "trap_ms": 32.34723
+      "sixty_ft_s": 3.279661,
+      "trap_kmh": 114.8663,
+      "trap_ms": 31.907299
     },
     "Apache RTR 160 4V (2018-2024)|2018": {
-      "eighth_s": 11.075273,
-      "et_s": 17.549113,
+      "eighth_s": 11.709058,
+      "et_s": 18.257626,
       "finished": true,
-      "sixty_ft_s": 2.719362,
-      "trap_kmh": 119.3774,
-      "trap_ms": 33.160383
+      "sixty_ft_s": 3.125079,
+      "trap_kmh": 117.9727,
+      "trap_ms": 32.770186
     },
     "Apache RTR 165 RP (2024-2026)|2024": {
-      "eighth_s": 11.126515,
-      "et_s": 17.389123,
+      "eighth_s": 12.133536,
+      "et_s": 18.507684,
       "finished": true,
-      "sixty_ft_s": 2.930995,
-      "trap_kmh": 125.1644,
-      "trap_ms": 34.76788
+      "sixty_ft_s": 3.441153,
+      "trap_kmh": 123.4309,
+      "trap_ms": 34.286363
     },
     "Apache RTR 180 (2009-2024)|2009": {
-      "eighth_s": 11.126921,
-      "et_s": 17.478772,
+      "eighth_s": 12.065345,
+      "et_s": 18.527324,
       "finished": true,
-      "sixty_ft_s": 2.886765,
-      "trap_kmh": 123.0331,
-      "trap_ms": 34.17587
+      "sixty_ft_s": 3.378012,
+      "trap_kmh": 121.3494,
+      "trap_ms": 33.708157
     },
     "Apache RTR 200 (2007-2015)|2007": {
-      "eighth_s": 10.669274,
-      "et_s": 16.876278,
+      "eighth_s": 11.508269,
+      "et_s": 17.807857,
       "finished": true,
-      "sixty_ft_s": 2.751214,
-      "trap_kmh": 124.4265,
-      "trap_ms": 34.562909
+      "sixty_ft_s": 3.18645,
+      "trap_kmh": 123.016,
+      "trap_ms": 34.171103
     },
     "Apache RTR 200 4V (2016-2024)|2016": {
-      "eighth_s": 12.016552,
-      "et_s": 19.105354,
+      "eighth_s": 12.277238,
+      "et_s": 19.372754,
       "finished": true,
-      "sixty_ft_s": 2.817658,
-      "trap_kmh": 109.3059,
-      "trap_ms": 30.362739
+      "sixty_ft_s": 3.02221,
+      "trap_kmh": 109.2461,
+      "trap_ms": 30.346133
     },
     "Apache RTR 310 (2024-2025)|2024": {
-      "eighth_s": 10.574849,
-      "et_s": 15.803634,
+      "eighth_s": 10.679678,
+      "et_s": 15.950424,
       "finished": true,
-      "sixty_ft_s": 3.069743,
-      "trap_kmh": 152.6977,
-      "trap_ms": 42.416035
+      "sixty_ft_s": 3.103116,
+      "trap_kmh": 151.4305,
+      "trap_ms": 42.064017
     },
     "Avenger Cruise 220 (2015-2024)|2015": {
-      "eighth_s": 12.353934,
-      "et_s": 19.064799,
+      "eighth_s": 12.032216,
+      "et_s": 18.735769,
       "finished": true,
-      "sixty_ft_s": 3.464639,
-      "trap_kmh": 115.3133,
-      "trap_ms": 32.031477
+      "sixty_ft_s": 3.304323,
+      "trap_kmh": 115.2611,
+      "trap_ms": 32.01698
     },
     "Avenger Street 160 (2016-2020)|2016": {
-      "eighth_s": 11.488062,
-      "et_s": 18.317332,
+      "eighth_s": 12.461522,
+      "et_s": 19.358974,
       "finished": true,
-      "sixty_ft_s": 2.801221,
-      "trap_kmh": 112.9572,
-      "trap_ms": 31.377
+      "sixty_ft_s": 3.380785,
+      "trap_kmh": 112.167,
+      "trap_ms": 31.157488
     },
     "Avenger Street 220 (2015-2024)|2015": {
-      "eighth_s": 12.276317,
-      "et_s": 18.918915,
+      "eighth_s": 11.957992,
+      "et_s": 18.593458,
       "finished": true,
-      "sixty_ft_s": 3.445378,
-      "trap_kmh": 116.6065,
-      "trap_ms": 32.390683
+      "sixty_ft_s": 3.286013,
+      "trap_kmh": 116.5493,
+      "trap_ms": 32.374799
     },
     "B-King (2008-2012)|2008": {
-      "eighth_s": 6.793149,
-      "et_s": 10.284658,
+      "eighth_s": 6.782245,
+      "et_s": 10.261654,
       "finished": true,
-      "sixty_ft_s": 1.95761,
-      "trap_kmh": 226.592,
-      "trap_ms": 62.942221
+      "sixty_ft_s": 1.956893,
+      "trap_kmh": 227.4171,
+      "trap_ms": 63.171413
     },
     "Bear 650 (2024-2025)|2024": {
-      "eighth_s": 9.567061,
-      "et_s": 14.78391,
+      "eighth_s": 9.565375,
+      "et_s": 14.781668,
       "finished": true,
-      "sixty_ft_s": 2.572294,
-      "trap_kmh": 150.8159,
-      "trap_ms": 41.893317
+      "sixty_ft_s": 2.572082,
+      "trap_kmh": 150.8318,
+      "trap_ms": 41.897719
     },
     "Bonneville Bobber (2017-2024)|2017": {
-      "eighth_s": 8.368208,
-      "et_s": 12.864244,
+      "eighth_s": 8.368664,
+      "et_s": 12.865193,
       "finished": true,
-      "sixty_ft_s": 2.275885,
-      "trap_kmh": 175.2761,
-      "trap_ms": 48.687803
+      "sixty_ft_s": 2.275761,
+      "trap_kmh": 175.2578,
+      "trap_ms": 48.682708
     },
     "Bonneville T100 (2017-2026)|2017": {
-      "eighth_s": 8.658715,
-      "et_s": 13.327326,
+      "eighth_s": 8.656069,
+      "et_s": 13.325524,
       "finished": true,
-      "sixty_ft_s": 2.362082,
-      "trap_kmh": 168.7149,
-      "trap_ms": 46.865254
+      "sixty_ft_s": 2.360148,
+      "trap_kmh": 168.662,
+      "trap_ms": 46.850548
     },
     "Bonneville T120 (2016-2026)|2016": {
-      "eighth_s": 8.203935,
-      "et_s": 12.749669,
+      "eighth_s": 8.205205,
+      "et_s": 12.752617,
       "finished": true,
-      "sixty_ft_s": 2.176468,
-      "trap_kmh": 171.6599,
-      "trap_ms": 47.683297
+      "sixty_ft_s": 2.176291,
+      "trap_kmh": 171.5968,
+      "trap_ms": 47.665772
     },
     "Breakout 117 (2023-2026)|2023": {
-      "eighth_s": 8.032152,
-      "et_s": 12.394656,
+      "eighth_s": 8.021231,
+      "et_s": 12.373533,
       "finished": true,
-      "sixty_ft_s": 2.179771,
-      "trap_kmh": 179.6279,
-      "trap_ms": 49.896643
+      "sixty_ft_s": 2.179285,
+      "trap_kmh": 180.0887,
+      "trap_ms": 50.024636
     },
     "Brutale 1000 RR (2019-2024)|2019": {
-      "eighth_s": 7.025162,
-      "et_s": 10.305115,
+      "eighth_s": 7.018554,
+      "et_s": 10.287693,
       "finished": true,
-      "sixty_ft_s": 2.117643,
-      "trap_kmh": 241.5677,
-      "trap_ms": 67.102132
+      "sixty_ft_s": 2.116175,
+      "trap_kmh": 242.5738,
+      "trap_ms": 67.381602
     },
     "Brutale 1000 RR Assen (2024-2025)|2024": {
-      "eighth_s": 6.969284,
-      "et_s": 10.223603,
+      "eighth_s": 6.959849,
+      "et_s": 10.200853,
       "finished": true,
-      "sixty_ft_s": 2.102749,
-      "trap_kmh": 244.7006,
-      "trap_ms": 67.97239
+      "sixty_ft_s": 2.101296,
+      "trap_kmh": 245.8712,
+      "trap_ms": 68.297569
     },
     "Brutale 800 Dragster (2016-2023)|2016": {
-      "eighth_s": 7.074722,
-      "et_s": 10.639868,
+      "eighth_s": 7.063941,
+      "et_s": 10.616195,
       "finished": true,
-      "sixty_ft_s": 2.086006,
-      "trap_kmh": 220.0553,
-      "trap_ms": 61.126481
+      "sixty_ft_s": 2.084743,
+      "trap_kmh": 220.9274,
+      "trap_ms": 61.36872
     },
     "Bullet 350 (2023-2026)|2023": {
-      "eighth_s": 11.661866,
-      "et_s": 18.3251,
+      "eighth_s": 11.720855,
+      "et_s": 18.420096,
       "finished": true,
-      "sixty_ft_s": 3.085084,
-      "trap_kmh": 116.2714,
-      "trap_ms": 32.297598
+      "sixty_ft_s": 3.101043,
+      "trap_kmh": 115.6543,
+      "trap_ms": 32.126197
     },
     "Bullet 500 (2008-2020)|2008": {
-      "eighth_s": 10.531393,
-      "et_s": 16.592235,
+      "eighth_s": 10.56681,
+      "et_s": 16.650144,
       "finished": true,
-      "sixty_ft_s": 2.718667,
-      "trap_kmh": 127.7292,
-      "trap_ms": 35.48034
+      "sixty_ft_s": 2.72719,
+      "trap_kmh": 127.2536,
+      "trap_ms": 35.348215
     },
     "CB 300R (2019-2024)|2019": {
-      "eighth_s": 10.56869,
-      "et_s": 16.298942,
+      "eighth_s": 10.503878,
+      "et_s": 16.268017,
       "finished": true,
-      "sixty_ft_s": 2.891239,
-      "trap_kmh": 135.4874,
-      "trap_ms": 37.635377
+      "sixty_ft_s": 2.819781,
+      "trap_kmh": 134.5909,
+      "trap_ms": 37.386373
     },
     "CB Hornet 160R (2016-2022)|2016": {
-      "eighth_s": 11.468144,
-      "et_s": 18.151275,
+      "eighth_s": 12.172995,
+      "et_s": 18.956551,
       "finished": true,
-      "sixty_ft_s": 2.794321,
-      "trap_kmh": 117.2005,
-      "trap_ms": 32.555705
+      "sixty_ft_s": 3.236144,
+      "trap_kmh": 115.6517,
+      "trap_ms": 32.125479
     },
     "CB1000 Hornet (2025-2026)|2025": {
-      "eighth_s": 7.153537,
-      "et_s": 10.756302,
+      "eighth_s": 7.122354,
+      "et_s": 10.710462,
       "finished": true,
-      "sixty_ft_s": 2.083345,
-      "trap_kmh": 218.8609,
-      "trap_ms": 60.794696
+      "sixty_ft_s": 2.076378,
+      "trap_kmh": 219.8106,
+      "trap_ms": 61.05849
     },
     "CB1000 Hornet SP (2025-2026)|2025": {
-      "eighth_s": 7.141816,
-      "et_s": 10.715568,
+      "eighth_s": 7.132932,
+      "et_s": 10.69468,
       "finished": true,
-      "sixty_ft_s": 2.105716,
-      "trap_kmh": 221.4392,
-      "trap_ms": 61.510882
+      "sixty_ft_s": 2.104663,
+      "trap_kmh": 221.2286,
+      "trap_ms": 61.452399
     },
     "CB1000R (2021-2024)|2021": {
-      "eighth_s": 7.384014,
-      "et_s": 11.050375,
+      "eighth_s": 7.373343,
+      "et_s": 11.027275,
       "finished": true,
-      "sixty_ft_s": 2.178068,
-      "trap_kmh": 215.8823,
-      "trap_ms": 59.967303
+      "sixty_ft_s": 2.177067,
+      "trap_kmh": 216.5926,
+      "trap_ms": 60.164619
     },
     "CB1100 (2013-2020)|2013": {
-      "eighth_s": 7.748685,
-      "et_s": 12.179837,
+      "eighth_s": 7.744228,
+      "et_s": 12.172489,
       "finished": true,
-      "sixty_ft_s": 1.952345,
-      "trap_kmh": 177.8231,
-      "trap_ms": 49.395309
+      "sixty_ft_s": 1.951481,
+      "trap_kmh": 177.9542,
+      "trap_ms": 49.431727
     },
     "CB125R (2018-2026)|2018": {
-      "eighth_s": 11.34093,
-      "et_s": 17.788268,
+      "eighth_s": 11.463222,
+      "et_s": 17.990256,
       "finished": true,
-      "sixty_ft_s": 2.931645,
-      "trap_kmh": 120.5651,
-      "trap_ms": 33.490306
+      "sixty_ft_s": 2.962716,
+      "trap_kmh": 119.6538,
+      "trap_ms": 33.237165
     },
     "CB150R StreetFire (Indonesia) (2017-2024)|2017": {
-      "eighth_s": 11.580137,
-      "et_s": 18.205405,
+      "eighth_s": 11.698501,
+      "et_s": 18.403039,
       "finished": true,
-      "sixty_ft_s": 3.103308,
-      "trap_kmh": 117.5126,
-      "trap_ms": 32.642387
+      "sixty_ft_s": 3.135856,
+      "trap_kmh": 116.0425,
+      "trap_ms": 32.234015
     },
     "CB200X (2022-2026)|2022": {
-      "eighth_s": 11.316281,
-      "et_s": 17.735921,
+      "eighth_s": 12.185283,
+      "et_s": 18.666245,
       "finished": true,
-      "sixty_ft_s": 2.952767,
-      "trap_kmh": 122.1616,
-      "trap_ms": 33.933783
+      "sixty_ft_s": 3.425823,
+      "trap_kmh": 121.3337,
+      "trap_ms": 33.703793
     },
     "CB300F (2022-2025)|2022": {
-      "eighth_s": 10.847525,
-      "et_s": 16.800169,
+      "eighth_s": 10.77739,
+      "et_s": 16.771946,
       "finished": true,
-      "sixty_ft_s": 2.990006,
-      "trap_kmh": 130.5211,
-      "trap_ms": 36.255874
+      "sixty_ft_s": 2.918143,
+      "trap_kmh": 129.5043,
+      "trap_ms": 35.973421
     },
     "CB350RS (2021-2025)|2021": {
-      "eighth_s": 11.101299,
-      "et_s": 17.483822,
+      "eighth_s": 11.252353,
+      "et_s": 17.712063,
       "finished": true,
-      "sixty_ft_s": 2.861006,
-      "trap_kmh": 121.0889,
-      "trap_ms": 33.635817
+      "sixty_ft_s": 2.906555,
+      "trap_kmh": 119.5174,
+      "trap_ms": 33.199277
     },
     "CB400X (2023-2026)|2023": {
-      "eighth_s": 9.226697,
-      "et_s": 14.097061,
+      "eighth_s": 8.99573,
+      "et_s": 13.851018,
       "finished": true,
-      "sixty_ft_s": 2.590087,
-      "trap_kmh": 160.2381,
-      "trap_ms": 44.510592
+      "sixty_ft_s": 2.456866,
+      "trap_kmh": 160.5938,
+      "trap_ms": 44.609389
     },
     "CB500F (2019-2026)|2019": {
-      "eighth_s": 9.210885,
-      "et_s": 14.201604,
+      "eighth_s": 9.063145,
+      "et_s": 14.076849,
       "finished": true,
-      "sixty_ft_s": 2.52879,
-      "trap_kmh": 157.0832,
-      "trap_ms": 43.63422
+      "sixty_ft_s": 2.419342,
+      "trap_kmh": 156.2228,
+      "trap_ms": 43.395215
     },
     "CB500X (2019-2024)|2019": {
-      "eighth_s": 9.305816,
-      "et_s": 14.365387,
+      "eighth_s": 9.079204,
+      "et_s": 14.124865,
       "finished": true,
-      "sixty_ft_s": 2.552914,
-      "trap_kmh": 154.5922,
-      "trap_ms": 42.94227
+      "sixty_ft_s": 2.419107,
+      "trap_kmh": 154.9378,
+      "trap_ms": 43.038275
     },
     "CB650F (2014-2018)|2014": {
-      "eighth_s": 8.107917,
-      "et_s": 12.173404,
+      "eighth_s": 8.123988,
+      "et_s": 12.206107,
       "finished": true,
-      "sixty_ft_s": 2.356926,
-      "trap_kmh": 195.049,
-      "trap_ms": 54.180288
+      "sixty_ft_s": 2.357837,
+      "trap_kmh": 194.1884,
+      "trap_ms": 53.941234
     },
     "CB650R (2021-2025)|2021": {
-      "eighth_s": 7.972748,
-      "et_s": 12.1384,
+      "eighth_s": 8.009991,
+      "et_s": 12.193262,
       "finished": true,
-      "sixty_ft_s": 2.246256,
-      "trap_kmh": 189.2745,
-      "trap_ms": 52.576241
+      "sixty_ft_s": 2.257363,
+      "trap_kmh": 188.446,
+      "trap_ms": 52.346098
     },
     "CB750 Hornet (2023-2026)|2023": {
-      "eighth_s": 7.795361,
-      "et_s": 11.852754,
+      "eighth_s": 7.785397,
+      "et_s": 11.833563,
       "finished": true,
-      "sixty_ft_s": 2.210721,
-      "trap_kmh": 195.2001,
-      "trap_ms": 54.222257
+      "sixty_ft_s": 2.210062,
+      "trap_kmh": 195.6825,
+      "trap_ms": 54.356258
     },
     "CBR 1000RR Fireblade (2004-2007)|2004": {
-      "eighth_s": 7.09666,
-      "et_s": 10.388666,
+      "eighth_s": 7.08659,
+      "et_s": 10.36708,
       "finished": true,
-      "sixty_ft_s": 2.15075,
-      "trap_kmh": 244.1428,
-      "trap_ms": 67.817445
+      "sixty_ft_s": 2.149603,
+      "trap_kmh": 244.8521,
+      "trap_ms": 68.014477
     },
     "CBR 1000RR Fireblade SP (2017-2019)|2017": {
-      "eighth_s": 6.974007,
-      "et_s": 10.186485,
+      "eighth_s": 6.965108,
+      "et_s": 10.165628,
       "finished": true,
-      "sixty_ft_s": 2.121322,
-      "trap_kmh": 251.3333,
-      "trap_ms": 69.814798
+      "sixty_ft_s": 2.120007,
+      "trap_kmh": 252.3874,
+      "trap_ms": 70.1076
     },
     "CBR 250R (2011-2019)|2011": {
-      "eighth_s": 10.820272,
-      "et_s": 16.32974,
+      "eighth_s": 10.726926,
+      "et_s": 16.267918,
       "finished": true,
-      "sixty_ft_s": 3.081498,
-      "trap_kmh": 144.5535,
-      "trap_ms": 40.153746
+      "sixty_ft_s": 3.008196,
+      "trap_kmh": 143.6101,
+      "trap_ms": 39.891694
     },
     "CBR 600RR (2007-2012)|2007": {
-      "eighth_s": 7.447817,
-      "et_s": 11.010953,
+      "eighth_s": 7.455048,
+      "et_s": 11.027666,
       "finished": true,
-      "sixty_ft_s": 2.233083,
-      "trap_kmh": 225.04,
-      "trap_ms": 62.511101
+      "sixty_ft_s": 2.233708,
+      "trap_kmh": 224.3609,
+      "trap_ms": 62.322463
     },
     "CBR 600RR (2013-2020)|2013": {
-      "eighth_s": 7.48737,
-      "et_s": 11.091482,
+      "eighth_s": 7.496059,
+      "et_s": 11.109999,
       "finished": true,
-      "sixty_ft_s": 2.228634,
-      "trap_kmh": 223.1848,
-      "trap_ms": 61.995787
+      "sixty_ft_s": 2.229263,
+      "trap_kmh": 222.504,
+      "trap_ms": 61.806677
     },
     "CBR1000RR (2008-2012)|2008": {
       "eighth_s": 7.029838,
@@ -1127,628 +1127,628 @@
       "trap_ms": 69.760735
     },
     "CBR1000RR-R Fireblade SP (2020-2024)|2020": {
-      "eighth_s": 7.100133,
-      "et_s": 10.206115,
+      "eighth_s": 7.093651,
+      "et_s": 10.188617,
       "finished": true,
-      "sixty_ft_s": 2.182809,
-      "trap_kmh": 261.4749,
-      "trap_ms": 72.63192
+      "sixty_ft_s": 2.181467,
+      "trap_kmh": 262.5992,
+      "trap_ms": 72.944231
     },
     "CBR1000RR-R Fireblade SP (2024-2025)|2024": {
-      "eighth_s": 6.784393,
-      "et_s": 9.882625,
+      "eighth_s": 6.77713,
+      "et_s": 9.864444,
       "finished": true,
-      "sixty_ft_s": 2.073185,
-      "trap_kmh": 259.6814,
-      "trap_ms": 72.133721
+      "sixty_ft_s": 2.071821,
+      "trap_kmh": 260.7598,
+      "trap_ms": 72.433271
     },
     "CBR1100XX Super Blackbird (1997-1998)|1997": {
-      "eighth_s": 6.898862,
-      "et_s": 10.300902,
+      "eighth_s": 6.888733,
+      "et_s": 10.279265,
       "finished": true,
-      "sixty_ft_s": 2.008332,
-      "trap_kmh": 236.795,
-      "trap_ms": 65.776387
+      "sixty_ft_s": 2.007551,
+      "trap_kmh": 237.6584,
+      "trap_ms": 66.016224
     },
     "CBR150R (Indonesia) (2021-2026)|2021": {
-      "eighth_s": 11.257452,
-      "et_s": 17.313376,
+      "eighth_s": 11.368729,
+      "et_s": 17.493178,
       "finished": true,
-      "sixty_ft_s": 3.069177,
-      "trap_kmh": 131.4428,
-      "trap_ms": 36.511876
+      "sixty_ft_s": 3.100386,
+      "trap_kmh": 129.9806,
+      "trap_ms": 36.105714
     },
     "CBR250RR (Indonesia) (2017-2026)|2017": {
-      "eighth_s": 10.389785,
-      "et_s": 15.286875,
+      "eighth_s": 10.129608,
+      "et_s": 15.017444,
       "finished": true,
-      "sixty_ft_s": 3.087026,
-      "trap_kmh": 164.2278,
-      "trap_ms": 45.618829
+      "sixty_ft_s": 2.988759,
+      "trap_kmh": 164.1856,
+      "trap_ms": 45.607114
     },
     "CBR300R (2014-2018)|2014": {
-      "eighth_s": 10.598159,
-      "et_s": 15.936719,
+      "eighth_s": 10.464271,
+      "et_s": 15.826345,
       "finished": true,
-      "sixty_ft_s": 3.04314,
-      "trap_kmh": 148.511,
-      "trap_ms": 41.253044
+      "sixty_ft_s": 2.964779,
+      "trap_kmh": 147.6861,
+      "trap_ms": 41.023929
     },
     "CBR500R (2022-2026)|2022": {
-      "eighth_s": 8.994067,
-      "et_s": 13.715223,
+      "eighth_s": 8.878781,
+      "et_s": 13.624417,
       "finished": true,
-      "sixty_ft_s": 2.457778,
-      "trap_kmh": 169.1237,
-      "trap_ms": 46.978808
+      "sixty_ft_s": 2.345535,
+      "trap_kmh": 168.1708,
+      "trap_ms": 46.714099
     },
     "CBR600RR (2024-2026)|2024": {
-      "eighth_s": 7.388376,
-      "et_s": 10.965218,
+      "eighth_s": 7.398254,
+      "et_s": 10.985508,
       "finished": true,
-      "sixty_ft_s": 2.193225,
-      "trap_kmh": 225.0302,
-      "trap_ms": 62.508394
+      "sixty_ft_s": 2.193842,
+      "trap_kmh": 224.3376,
+      "trap_ms": 62.315997
     },
     "CBR650R (2019-2024)|2019": {
-      "eighth_s": 7.824731,
-      "et_s": 11.725235,
+      "eighth_s": 7.861889,
+      "et_s": 11.778897,
       "finished": true,
-      "sixty_ft_s": 2.246777,
-      "trap_kmh": 205.6477,
-      "trap_ms": 57.124352
+      "sixty_ft_s": 2.258512,
+      "trap_kmh": 204.768,
+      "trap_ms": 56.879992
     },
     "CBR650R E-Clutch (2024-2026)|2024": {
-      "eighth_s": 7.834231,
-      "et_s": 11.711296,
+      "eighth_s": 7.871406,
+      "et_s": 11.764635,
       "finished": true,
-      "sixty_ft_s": 2.261345,
-      "trap_kmh": 206.7748,
-      "trap_ms": 57.437431
+      "sixty_ft_s": 2.27318,
+      "trap_kmh": 205.886,
+      "trap_ms": 57.190567
     },
     "CBR900RR (1998-1999)|1998": {
-      "eighth_s": 7.103909,
-      "et_s": 10.581149,
+      "eighth_s": 7.092859,
+      "et_s": 10.558128,
       "finished": true,
-      "sixty_ft_s": 2.105729,
-      "trap_kmh": 230.3987,
-      "trap_ms": 63.999629
+      "sixty_ft_s": 2.104622,
+      "trap_kmh": 231.256,
+      "trap_ms": 64.237788
     },
     "CBR900RR Fireblade (1992-1995)|1992": {
-      "eighth_s": 7.257751,
-      "et_s": 10.854504,
+      "eighth_s": 7.246624,
+      "et_s": 10.832575,
       "finished": true,
-      "sixty_ft_s": 2.130457,
-      "trap_kmh": 223.5171,
-      "trap_ms": 62.088072
+      "sixty_ft_s": 2.129526,
+      "trap_kmh": 224.195,
+      "trap_ms": 62.276381
     },
     "CBR929RR Fireblade (2000-2001)|2000": {
-      "eighth_s": 7.061107,
-      "et_s": 10.413486,
+      "eighth_s": 7.051345,
+      "et_s": 10.392303,
       "finished": true,
-      "sixty_ft_s": 2.121378,
-      "trap_kmh": 239.9062,
-      "trap_ms": 66.640625
+      "sixty_ft_s": 2.120248,
+      "trap_kmh": 240.8576,
+      "trap_ms": 66.904887
     },
     "CBR954RR Fireblade (2002-2003)|2002": {
-      "eighth_s": 7.098025,
-      "et_s": 10.429495,
+      "eighth_s": 7.088463,
+      "et_s": 10.408084,
       "finished": true,
-      "sixty_ft_s": 2.142318,
-      "trap_kmh": 242.0346,
-      "trap_ms": 67.231835
+      "sixty_ft_s": 2.141163,
+      "trap_kmh": 242.936,
+      "trap_ms": 67.48223
     },
     "CL250 (2023-2026)|2023": {
-      "eighth_s": 10.908983,
-      "et_s": 16.604553,
+      "eighth_s": 10.774205,
+      "et_s": 16.497572,
       "finished": true,
-      "sixty_ft_s": 3.097522,
-      "trap_kmh": 138.1801,
-      "trap_ms": 38.383369
+      "sixty_ft_s": 3.017113,
+      "trap_kmh": 137.4019,
+      "trap_ms": 38.167184
     },
     "CL500 (2023-2026)|2023": {
-      "eighth_s": 8.957658,
-      "et_s": 13.891406,
+      "eighth_s": 8.831843,
+      "et_s": 13.791808,
       "finished": true,
-      "sixty_ft_s": 2.410672,
-      "trap_kmh": 158.5359,
-      "trap_ms": 44.037738
+      "sixty_ft_s": 2.296484,
+      "trap_kmh": 157.652,
+      "trap_ms": 43.792217
     },
     "CMX500 Rebel (2017-2026)|2017": {
-      "eighth_s": 9.311999,
-      "et_s": 14.413462,
+      "eighth_s": 9.121613,
+      "et_s": 14.2148,
       "finished": true,
-      "sixty_ft_s": 2.513357,
-      "trap_kmh": 152.5584,
-      "trap_ms": 42.377324
+      "sixty_ft_s": 2.375814,
+      "trap_kmh": 152.7762,
+      "trap_ms": 42.437826
     },
     "CR500R (1989-2001)|1989": {
-      "eighth_s": 8.211633,
-      "et_s": 12.778961,
+      "eighth_s": 8.161296,
+      "et_s": 12.708278,
       "finished": true,
-      "sixty_ft_s": 2.1422,
-      "trap_kmh": 162.8423,
-      "trap_ms": 45.233983
+      "sixty_ft_s": 2.129381,
+      "trap_kmh": 163.0158,
+      "trap_ms": 45.282164
     },
     "CRF1100L Africa Twin (2020-2026)|2020": {
-      "eighth_s": 7.957792,
-      "et_s": 12.188506,
+      "eighth_s": 7.951851,
+      "et_s": 12.175984,
       "finished": true,
-      "sixty_ft_s": 2.254552,
-      "trap_kmh": 184.5539,
-      "trap_ms": 51.264985
+      "sixty_ft_s": 2.254202,
+      "trap_kmh": 184.882,
+      "trap_ms": 51.356119
     },
     "CRF1100L Africa Twin Adventure Sports (2020-2026)|2020": {
-      "eighth_s": 7.951846,
-      "et_s": 12.159042,
+      "eighth_s": 7.946035,
+      "et_s": 12.146632,
       "finished": true,
-      "sixty_ft_s": 2.263222,
-      "trap_kmh": 185.6348,
-      "trap_ms": 51.565225
+      "sixty_ft_s": 2.262863,
+      "trap_kmh": 185.9694,
+      "trap_ms": 51.65816
     },
     "CRF250L (2021-2024)|2021": {
-      "eighth_s": 10.579741,
-      "et_s": 16.394951,
+      "eighth_s": 10.412473,
+      "et_s": 16.222625,
       "finished": true,
-      "sixty_ft_s": 2.903859,
-      "trap_kmh": 132.2932,
-      "trap_ms": 36.748107
+      "sixty_ft_s": 2.804517,
+      "trap_kmh": 132.3054,
+      "trap_ms": 36.751506
     },
     "CRF300L Rally (2021-2026)|2021": {
-      "eighth_s": 9.990289,
-      "et_s": 15.622879,
+      "eighth_s": 9.85607,
+      "et_s": 15.483044,
       "finished": true,
-      "sixty_ft_s": 2.660037,
-      "trap_kmh": 137.5395,
-      "trap_ms": 38.20541
+      "sixty_ft_s": 2.572177,
+      "trap_kmh": 137.6574,
+      "trap_ms": 38.238178
     },
     "Challenger (2020-2026)|2020": {
-      "eighth_s": 8.079283,
-      "et_s": 12.336975,
+      "eighth_s": 8.064223,
+      "et_s": 12.307602,
       "finished": true,
-      "sixty_ft_s": 2.242303,
-      "trap_kmh": 185.879,
-      "trap_ms": 51.633057
+      "sixty_ft_s": 2.241657,
+      "trap_kmh": 186.5101,
+      "trap_ms": 51.808364
     },
     "Chief Bobber Dark Horse (2022-2026)|2022": {
-      "eighth_s": 8.59068,
-      "et_s": 13.363619,
+      "eighth_s": 8.583586,
+      "et_s": 13.351325,
       "finished": true,
-      "sixty_ft_s": 2.25716,
-      "trap_kmh": 163.7223,
-      "trap_ms": 45.47841
+      "sixty_ft_s": 2.256706,
+      "trap_kmh": 163.8564,
+      "trap_ms": 45.515673
     },
     "Chief Dark Horse (2022-2026)|2022": {
-      "eighth_s": 8.529599,
-      "et_s": 13.066579,
+      "eighth_s": 8.518421,
+      "et_s": 13.046308,
       "finished": true,
-      "sixty_ft_s": 2.361995,
-      "trap_kmh": 172.6492,
-      "trap_ms": 47.958118
+      "sixty_ft_s": 2.361486,
+      "trap_kmh": 172.9129,
+      "trap_ms": 48.031351
     },
     "Chieftain Dark Horse (2023-2026)|2023": {
-      "eighth_s": 8.44691,
-      "et_s": 13.178411,
+      "eighth_s": 8.433263,
+      "et_s": 13.155158,
       "finished": true,
-      "sixty_ft_s": 2.187315,
-      "trap_kmh": 166.1539,
-      "trap_ms": 46.153849
+      "sixty_ft_s": 2.186125,
+      "trap_kmh": 166.4952,
+      "trap_ms": 46.248664
     },
     "Chinchilla 500 (2024-2026)|2024": {
-      "eighth_s": 9.848849,
-      "et_s": 14.952641,
+      "eighth_s": 9.433116,
+      "et_s": 14.501902,
       "finished": true,
-      "sixty_ft_s": 2.818925,
-      "trap_kmh": 154.2875,
-      "trap_ms": 42.85764
+      "sixty_ft_s": 2.633226,
+      "trap_kmh": 154.9579,
+      "trap_ms": 43.043857
     },
     "Classic 350 (2021-2026)|2021": {
-      "eighth_s": 11.805805,
-      "et_s": 18.522854,
+      "eighth_s": 11.866195,
+      "et_s": 18.618895,
       "finished": true,
-      "sixty_ft_s": 3.133604,
-      "trap_kmh": 115.4503,
-      "trap_ms": 32.069532
+      "sixty_ft_s": 3.14984,
+      "trap_kmh": 114.835,
+      "trap_ms": 31.898615
     },
     "Classic 350 Halcyon (2024-2025)|2024": {
-      "eighth_s": 11.423657,
-      "et_s": 17.892762,
+      "eighth_s": 11.471111,
+      "et_s": 17.974733,
       "finished": true,
-      "sixty_ft_s": 2.870808,
-      "trap_kmh": 120.7238,
-      "trap_ms": 33.534381
+      "sixty_ft_s": 2.874959,
+      "trap_kmh": 120.0434,
+      "trap_ms": 33.345393
     },
     "Classic 650 (2025-2026)|2025": {
-      "eighth_s": 9.151887,
-      "et_s": 14.275197,
+      "eighth_s": 9.149863,
+      "et_s": 14.27252,
       "finished": true,
-      "sixty_ft_s": 2.348714,
-      "trap_kmh": 153.2952,
-      "trap_ms": 42.582003
+      "sixty_ft_s": 2.348398,
+      "trap_kmh": 153.3012,
+      "trap_ms": 42.583666
     },
     "Commando 961 SP (2023-2026)|2023": {
-      "eighth_s": 9.248944,
-      "et_s": 13.817546,
+      "eighth_s": 9.239255,
+      "et_s": 13.805118,
       "finished": true,
-      "sixty_ft_s": 2.702022,
-      "trap_kmh": 172.7039,
-      "trap_ms": 47.973309
+      "sixty_ft_s": 2.698584,
+      "trap_kmh": 172.8,
+      "trap_ms": 47.999989
     },
     "Continental GT 650 (2018-2024)|2018": {
-      "eighth_s": 9.084884,
-      "et_s": 14.074831,
+      "eighth_s": 9.12921,
+      "et_s": 14.153175,
       "finished": true,
-      "sixty_ft_s": 2.42116,
-      "trap_kmh": 156.5002,
-      "trap_ms": 43.472283
+      "sixty_ft_s": 2.423422,
+      "trap_kmh": 155.3443,
+      "trap_ms": 43.151202
     },
     "Continental GT 650 (2020-2024)|2020": {
-      "eighth_s": 8.699995,
-      "et_s": 13.436554,
+      "eighth_s": 8.760609,
+      "et_s": 13.531375,
       "finished": true,
-      "sixty_ft_s": 2.301943,
-      "trap_kmh": 165.9405,
-      "trap_ms": 46.094575
+      "sixty_ft_s": 2.315675,
+      "trap_kmh": 164.7415,
+      "trap_ms": 45.761541
     },
     "Daytona 660 (2024-2025)|2024": {
-      "eighth_s": 7.799043,
-      "et_s": 11.692753,
+      "eighth_s": 7.838839,
+      "et_s": 11.749175,
       "finished": true,
-      "sixty_ft_s": 2.244668,
-      "trap_kmh": 204.7289,
-      "trap_ms": 56.869126
+      "sixty_ft_s": 2.257612,
+      "trap_kmh": 203.8546,
+      "trap_ms": 56.626291
     },
     "Daytona 675 (2013-2017)|2013": {
-      "eighth_s": 7.277758,
-      "et_s": 10.848146,
+      "eighth_s": 7.298103,
+      "et_s": 10.879606,
       "finished": true,
-      "sixty_ft_s": 2.131428,
-      "trap_kmh": 223.7872,
-      "trap_ms": 62.163111
+      "sixty_ft_s": 2.133985,
+      "trap_kmh": 223.0506,
+      "trap_ms": 61.958504
     },
     "Daytona 955i (2002-2005)|2002": {
-      "eighth_s": 7.060506,
-      "et_s": 10.568432,
+      "eighth_s": 7.042839,
+      "et_s": 10.538646,
       "finished": true,
-      "sixty_ft_s": 2.058263,
-      "trap_kmh": 229.3831,
-      "trap_ms": 63.717517
+      "sixty_ft_s": 2.057002,
+      "trap_kmh": 230.2633,
+      "trap_ms": 63.962029
     },
     "DesertX (2022-2026)|2022": {
-      "eighth_s": 7.956241,
-      "et_s": 12.018721,
+      "eighth_s": 7.948307,
+      "et_s": 12.00112,
       "finished": true,
-      "sixty_ft_s": 2.312154,
-      "trap_kmh": 192.876,
-      "trap_ms": 53.576665
+      "sixty_ft_s": 2.311659,
+      "trap_kmh": 193.4089,
+      "trap_ms": 53.724704
     },
     "Diavel 1260 S (2019-2022)|2019": {
-      "eighth_s": 7.672139,
-      "et_s": 11.317176,
+      "eighth_s": 7.666591,
+      "et_s": 11.300526,
       "finished": true,
-      "sixty_ft_s": 2.289798,
-      "trap_kmh": 217.9324,
-      "trap_ms": 60.53677
+      "sixty_ft_s": 2.289197,
+      "trap_kmh": 218.698,
+      "trap_ms": 60.749453
     },
     "Diavel V4 (2023-2026)|2023": {
-      "eighth_s": 6.987068,
-      "et_s": 10.543828,
+      "eighth_s": 6.977997,
+      "et_s": 10.523327,
       "finished": true,
-      "sixty_ft_s": 2.023882,
-      "trap_kmh": 221.1939,
-      "trap_ms": 61.442758
+      "sixty_ft_s": 2.023108,
+      "trap_kmh": 222.0237,
+      "trap_ms": 61.673243
     },
     "Dominar 250 (2020-2024)|2020": {
-      "eighth_s": 10.170336,
-      "et_s": 15.846952,
+      "eighth_s": 10.142061,
+      "et_s": 15.854832,
       "finished": true,
-      "sixty_ft_s": 2.685896,
-      "trap_kmh": 136.9536,
-      "trap_ms": 38.042672
+      "sixty_ft_s": 2.630842,
+      "trap_kmh": 135.9959,
+      "trap_ms": 37.776652
     },
     "Dominar 400 (2019-2024)|2019": {
-      "eighth_s": 9.528204,
-      "et_s": 14.750251,
+      "eighth_s": 9.571082,
+      "et_s": 14.829831,
       "finished": true,
-      "sixty_ft_s": 2.588193,
-      "trap_kmh": 149.8063,
-      "trap_ms": 41.612851
+      "sixty_ft_s": 2.589653,
+      "trap_kmh": 148.7192,
+      "trap_ms": 41.310902
     },
     "Dragster 800 RR (2018-2026)|2018": {
-      "eighth_s": 7.406275,
-      "et_s": 11.002111,
+      "eighth_s": 7.394782,
+      "et_s": 10.977931,
       "finished": true,
-      "sixty_ft_s": 2.211657,
-      "trap_kmh": 218.6288,
-      "trap_ms": 60.730223
+      "sixty_ft_s": 2.210386,
+      "trap_kmh": 219.5057,
+      "trap_ms": 60.973796
     },
     "Duke 200 (2017-2023)|2017": {
-      "eighth_s": 10.179458,
-      "et_s": 15.979922,
+      "eighth_s": 10.576107,
+      "et_s": 16.427561,
       "finished": true,
-      "sixty_ft_s": 2.582473,
-      "trap_kmh": 134.149,
-      "trap_ms": 37.263603
+      "sixty_ft_s": 2.836489,
+      "trap_kmh": 133.0104,
+      "trap_ms": 36.947345
     },
     "Duke 250 (2017-2023)|2017": {
-      "eighth_s": 10.198673,
-      "et_s": 15.840867,
+      "eighth_s": 10.16379,
+      "et_s": 15.843585,
       "finished": true,
-      "sixty_ft_s": 2.737772,
-      "trap_kmh": 138.4857,
-      "trap_ms": 38.468263
+      "sixty_ft_s": 2.677105,
+      "trap_kmh": 137.5323,
+      "trap_ms": 38.20343
     },
     "Duke 390 (2013-2016)|2013": {
-      "eighth_s": 9.151741,
-      "et_s": 14.167857,
+      "eighth_s": 9.216888,
+      "et_s": 14.266889,
       "finished": true,
-      "sixty_ft_s": 2.514107,
-      "trap_kmh": 155.4033,
-      "trap_ms": 43.167584
+      "sixty_ft_s": 2.531394,
+      "trap_kmh": 154.3534,
+      "trap_ms": 42.875948
     },
     "Duke 390 (2017-2023)|2017": {
-      "eighth_s": 9.273868,
-      "et_s": 14.253432,
+      "eighth_s": 9.307972,
+      "et_s": 14.318996,
       "finished": true,
-      "sixty_ft_s": 2.596254,
-      "trap_kmh": 156.7565,
-      "trap_ms": 43.543476
+      "sixty_ft_s": 2.597589,
+      "trap_kmh": 155.7226,
+      "trap_ms": 43.256282
     },
     "Eliminator 450 (2024-2026)|2024": {
-      "eighth_s": 9.052737,
-      "et_s": 13.975616,
+      "eighth_s": 8.895579,
+      "et_s": 13.810757,
       "finished": true,
-      "sixty_ft_s": 2.431726,
-      "trap_kmh": 158.9766,
-      "trap_ms": 44.160157
+      "sixty_ft_s": 2.316574,
+      "trap_kmh": 159.1803,
+      "trap_ms": 44.216741
     },
     "Exciter 150 (Vietnam) (2015-2020)|2015": {
-      "eighth_s": 10.903705,
-      "et_s": 17.012989,
+      "eighth_s": 11.024384,
+      "et_s": 17.207623,
       "finished": true,
-      "sixty_ft_s": 2.812147,
-      "trap_kmh": 128.839,
-      "trap_ms": 35.788606
+      "sixty_ft_s": 2.842935,
+      "trap_kmh": 127.1818,
+      "trap_ms": 35.328279
     },
     "Exciter 155 VVA (Vietnam) (2021-2026)|2021": {
-      "eighth_s": 10.558181,
-      "et_s": 16.389009,
+      "eighth_s": 11.54242,
+      "et_s": 17.487732,
       "finished": true,
-      "sixty_ft_s": 2.820289,
-      "trap_kmh": 134.6876,
-      "trap_ms": 37.41322
+      "sixty_ft_s": 3.284872,
+      "trap_kmh": 133.1513,
+      "trap_ms": 36.986464
     },
     "F 900 GS (2024-2026)|2024": {
-      "eighth_s": 7.821022,
-      "et_s": 11.904392,
+      "eighth_s": 7.813945,
+      "et_s": 11.888239,
       "finished": true,
-      "sixty_ft_s": 2.248929,
-      "trap_kmh": 190.6866,
-      "trap_ms": 52.968498
+      "sixty_ft_s": 2.248448,
+      "trap_kmh": 191.144,
+      "trap_ms": 53.095543
     },
     "F 900 XR (2020-2026)|2020": {
-      "eighth_s": 7.934442,
-      "et_s": 11.890046,
+      "eighth_s": 7.924408,
+      "et_s": 11.871012,
       "finished": true,
-      "sixty_ft_s": 2.302419,
-      "trap_kmh": 200.9211,
-      "trap_ms": 55.811409
+      "sixty_ft_s": 2.301854,
+      "trap_kmh": 201.4082,
+      "trap_ms": 55.946716
     },
     "F3 800 (2014-2025)|2014": {
-      "eighth_s": 7.057598,
-      "et_s": 10.415576,
+      "eighth_s": 7.047975,
+      "et_s": 10.394254,
       "finished": true,
-      "sixty_ft_s": 2.123062,
-      "trap_kmh": 239.2032,
-      "trap_ms": 66.44532
+      "sixty_ft_s": 2.121859,
+      "trap_kmh": 240.1669,
+      "trap_ms": 66.713014
     },
     "F3 RR (2024-2026)|2024": {
-      "eighth_s": 7.01182,
-      "et_s": 10.344686,
+      "eighth_s": 7.002171,
+      "et_s": 10.323422,
       "finished": true,
-      "sixty_ft_s": 2.111262,
-      "trap_kmh": 240.2619,
-      "trap_ms": 66.73941
+      "sixty_ft_s": 2.110038,
+      "trap_kmh": 241.2038,
+      "trap_ms": 67.001056
     },
     "F4 1000 R (2010-2018)|2010": {
-      "eighth_s": 6.965579,
-      "et_s": 10.183098,
+      "eighth_s": 6.957459,
+      "et_s": 10.163001,
       "finished": true,
-      "sixty_ft_s": 2.116564,
-      "trap_kmh": 250.7368,
-      "trap_ms": 69.6491
+      "sixty_ft_s": 2.115307,
+      "trap_kmh": 251.8108,
+      "trap_ms": 69.947455
     },
     "F4 RC (2017-2019)|2017": {
-      "eighth_s": 6.756845,
-      "et_s": 9.818282,
+      "eighth_s": 6.749931,
+      "et_s": 9.800492,
       "finished": true,
-      "sixty_ft_s": 2.066006,
-      "trap_kmh": 264.6523,
-      "trap_ms": 73.514523
+      "sixty_ft_s": 2.064669,
+      "trap_kmh": 265.8242,
+      "trap_ms": 73.840069
     },
     "F850GS (2018-2026)|2018": {
-      "eighth_s": 8.016889,
-      "et_s": 12.330856,
+      "eighth_s": 8.00694,
+      "et_s": 12.311719,
       "finished": true,
-      "sixty_ft_s": 2.246589,
-      "trap_kmh": 180.0483,
-      "trap_ms": 50.013417
+      "sixty_ft_s": 2.246145,
+      "trap_kmh": 180.423,
+      "trap_ms": 50.1175
     },
     "F900R (2020-2026)|2020": {
-      "eighth_s": 7.840597,
-      "et_s": 11.935557,
+      "eighth_s": 7.831442,
+      "et_s": 11.916835,
       "finished": true,
-      "sixty_ft_s": 2.231807,
-      "trap_kmh": 191.1761,
-      "trap_ms": 53.10448
+      "sixty_ft_s": 2.231204,
+      "trap_kmh": 191.636,
+      "trap_ms": 53.232225
     },
     "FJR1300 (2013-2022)|2013": {
-      "eighth_s": 7.800428,
-      "et_s": 11.707613,
+      "eighth_s": 7.790793,
+      "et_s": 11.686365,
       "finished": true,
-      "sixty_ft_s": 2.275589,
-      "trap_kmh": 202.3684,
-      "trap_ms": 56.213447
+      "sixty_ft_s": 2.275056,
+      "trap_kmh": 203.0492,
+      "trap_ms": 56.402563
     },
     "FTR 1200 S (2019-2024)|2019": {
-      "eighth_s": 7.315474,
-      "et_s": 11.11983,
+      "eighth_s": 7.306069,
+      "et_s": 11.100766,
       "finished": true,
-      "sixty_ft_s": 2.076025,
-      "trap_kmh": 207.5709,
-      "trap_ms": 57.658586
+      "sixty_ft_s": 2.075354,
+      "trap_kmh": 208.1118,
+      "trap_ms": 57.808847
     },
     "FZ-S FI V3 (2019-2026)|2019": {
-      "eighth_s": 12.020274,
-      "et_s": 19.107141,
+      "eighth_s": 12.191125,
+      "et_s": 19.384921,
       "finished": true,
-      "sixty_ft_s": 2.958943,
-      "trap_kmh": 108.8797,
-      "trap_ms": 30.244351
+      "sixty_ft_s": 2.997496,
+      "trap_kmh": 107.13,
+      "trap_ms": 29.758322
     },
     "FZ-X (2021-2024)|2021": {
-      "eighth_s": 12.575638,
-      "et_s": 20.125043,
+      "eighth_s": 12.788297,
+      "et_s": 20.476667,
       "finished": true,
-      "sixty_ft_s": 2.888776,
-      "trap_kmh": 103.4627,
-      "trap_ms": 28.739629
+      "sixty_ft_s": 2.937053,
+      "trap_kmh": 101.389,
+      "trap_ms": 28.163614
     },
     "FZ1 Fazer (2006-2015)|2006": {
-      "eighth_s": 7.141694,
-      "et_s": 10.754971,
+      "eighth_s": 7.130764,
+      "et_s": 10.731514,
       "finished": true,
-      "sixty_ft_s": 2.096587,
-      "trap_kmh": 217.935,
-      "trap_ms": 60.537494
+      "sixty_ft_s": 2.095543,
+      "trap_kmh": 218.7793,
+      "trap_ms": 60.772018
     },
     "FZ25 (2017-2023)|2017": {
-      "eighth_s": 11.378922,
-      "et_s": 17.619883,
+      "eighth_s": 11.296649,
+      "et_s": 17.584648,
       "finished": true,
-      "sixty_ft_s": 3.138543,
-      "trap_kmh": 123.8101,
-      "trap_ms": 34.391708
+      "sixty_ft_s": 3.057578,
+      "trap_kmh": 122.7284,
+      "trap_ms": 34.091229
     },
     "FZ6 Fazer (2004-2009)|2004": {
-      "eighth_s": 7.917298,
-      "et_s": 11.981433,
+      "eighth_s": 7.953128,
+      "et_s": 12.033644,
       "finished": true,
-      "sixty_ft_s": 2.278602,
-      "trap_kmh": 194.083,
-      "trap_ms": 53.911939
+      "sixty_ft_s": 2.289973,
+      "trap_kmh": 193.323,
+      "trap_ms": 53.700845
     },
     "FZR1000 EXUP (1989-1995)|1989": {
-      "eighth_s": 7.139029,
-      "et_s": 10.663952,
+      "eighth_s": 7.120021,
+      "et_s": 10.63262,
       "finished": true,
-      "sixty_ft_s": 2.088619,
-      "trap_kmh": 227.0371,
-      "trap_ms": 63.065849
+      "sixty_ft_s": 2.087201,
+      "trap_kmh": 227.8975,
+      "trap_ms": 63.304856
     },
     "FZS 25 (2023-2024)|2023": {
-      "eighth_s": 11.330149,
-      "et_s": 17.383331,
+      "eighth_s": 11.233179,
+      "et_s": 17.329105,
       "finished": true,
-      "sixty_ft_s": 3.150049,
-      "trap_kmh": 129.1733,
-      "trap_ms": 35.881477
+      "sixty_ft_s": 3.070963,
+      "trap_kmh": 128.1255,
+      "trap_ms": 35.590406
     },
     "Fat Bob 114 (2018-2026)|2018": {
-      "eighth_s": 8.079699,
-      "et_s": 12.546041,
+      "eighth_s": 8.067167,
+      "et_s": 12.523552,
       "finished": true,
-      "sixty_ft_s": 2.143846,
-      "trap_kmh": 176.0541,
-      "trap_ms": 48.903913
+      "sixty_ft_s": 2.143162,
+      "trap_kmh": 176.4537,
+      "trap_ms": 49.014929
     },
     "Forty-Eight (2016-2022)|2016": {
-      "eighth_s": 8.573386,
-      "et_s": 13.432232,
+      "eighth_s": 8.581666,
+      "et_s": 13.447483,
       "finished": true,
-      "sixty_ft_s": 2.160543,
-      "trap_kmh": 160.8808,
-      "trap_ms": 44.6891
+      "sixty_ft_s": 2.160864,
+      "trap_kmh": 160.6356,
+      "trap_ms": 44.621013
     },
     "Freedom 125 (2024-2026)|2024": {
-      "eighth_s": 13.479236,
-      "et_s": 21.483126,
+      "eighth_s": 13.70408,
+      "et_s": 21.873356,
       "finished": true,
-      "sixty_ft_s": 3.315151,
-      "trap_kmh": 97.4766,
-      "trap_ms": 27.076829
+      "sixty_ft_s": 3.365844,
+      "trap_kmh": 95.4185,
+      "trap_ms": 26.50514
     },
     "G 310 RR (2024-2025)|2024": {
-      "eighth_s": 10.458241,
-      "et_s": 15.673824,
+      "eighth_s": 10.558081,
+      "et_s": 15.8158,
       "finished": true,
-      "sixty_ft_s": 3.022396,
-      "trap_kmh": 152.8049,
-      "trap_ms": 42.445796
+      "sixty_ft_s": 3.053662,
+      "trap_kmh": 151.5201,
+      "trap_ms": 42.088929
     },
     "G310GS (2017-2026)|2017": {
-      "eighth_s": 11.515054,
-      "et_s": 17.325279,
+      "eighth_s": 11.512069,
+      "et_s": 17.325147,
       "finished": true,
-      "sixty_ft_s": 3.34562,
-      "trap_kmh": 133.0077,
-      "trap_ms": 36.946576
+      "sixty_ft_s": 3.344487,
+      "trap_kmh": 132.9477,
+      "trap_ms": 36.929918
     },
     "G310R (2017-2026)|2017": {
-      "eighth_s": 11.049075,
-      "et_s": 16.658953,
+      "eighth_s": 11.155734,
+      "et_s": 16.811053,
       "finished": true,
-      "sixty_ft_s": 3.212148,
-      "trap_kmh": 139.7069,
-      "trap_ms": 38.807478
+      "sixty_ft_s": 3.244423,
+      "trap_kmh": 138.5103,
+      "trap_ms": 38.47509
     },
     "G310RR (2021-2026)|2021": {
-      "eighth_s": 10.296351,
-      "et_s": 15.563792,
+      "eighth_s": 10.390795,
+      "et_s": 15.701324,
       "finished": true,
-      "sixty_ft_s": 2.923363,
-      "trap_kmh": 151.3391,
-      "trap_ms": 42.038636
+      "sixty_ft_s": 2.952647,
+      "trap_kmh": 150.0962,
+      "trap_ms": 41.693401
     },
     "GK350 (2022-2026)|2022": {
-      "eighth_s": 10.228275,
-      "et_s": 15.579228,
+      "eighth_s": 10.312148,
+      "et_s": 15.702459,
       "finished": true,
-      "sixty_ft_s": 2.911559,
-      "trap_kmh": 146.0456,
-      "trap_ms": 40.568231
+      "sixty_ft_s": 2.93721,
+      "trap_kmh": 144.9222,
+      "trap_ms": 40.256159
     },
     "GSF1250 Bandit (2007-2016)|2007": {
-      "eighth_s": 7.740404,
-      "et_s": 11.998176,
+      "eighth_s": 7.734782,
+      "et_s": 11.989034,
       "finished": true,
-      "sixty_ft_s": 2.039868,
-      "trap_kmh": 184.0103,
-      "trap_ms": 51.113972
+      "sixty_ft_s": 2.03911,
+      "trap_kmh": 184.1743,
+      "trap_ms": 51.159539
     },
     "GSX-8R (2024-2026)|2024": {
-      "eighth_s": 8.044101,
-      "et_s": 12.127005,
+      "eighth_s": 8.036375,
+      "et_s": 12.112246,
       "finished": true,
-      "sixty_ft_s": 2.293358,
-      "trap_kmh": 195.8504,
-      "trap_ms": 54.402883
+      "sixty_ft_s": 2.292857,
+      "trap_kmh": 196.1743,
+      "trap_ms": 54.492867
     },
     "GSX-8S (2023-2026)|2023": {
-      "eighth_s": 8.230416,
-      "et_s": 12.593789,
+      "eighth_s": 8.222047,
+      "et_s": 12.577803,
       "finished": true,
-      "sixty_ft_s": 2.306944,
-      "trap_kmh": 180.0907,
-      "trap_ms": 50.025192
+      "sixty_ft_s": 2.306421,
+      "trap_kmh": 180.4162,
+      "trap_ms": 50.115619
     },
     "GSX-R 1000 (2001-2002)|2001": {
-      "eighth_s": 6.880389,
-      "et_s": 10.163201,
+      "eighth_s": 6.872104,
+      "et_s": 10.14359,
       "finished": true,
-      "sixty_ft_s": 2.06804,
-      "trap_kmh": 244.6511,
-      "trap_ms": 67.958625
+      "sixty_ft_s": 2.066855,
+      "trap_kmh": 245.6027,
+      "trap_ms": 68.222976
     },
     "GSX-R 1000 (2003-2004)|2003": {
       "eighth_s": 6.801215,
@@ -1775,12 +1775,12 @@
       "trap_ms": 69.49749
     },
     "GSX-R 1000 (2017-2023)|2017": {
-      "eighth_s": 6.783955,
-      "et_s": 9.863252,
+      "eighth_s": 6.777265,
+      "et_s": 9.845257,
       "finished": true,
-      "sixty_ft_s": 2.069354,
-      "trap_kmh": 262.9665,
-      "trap_ms": 73.04626
+      "sixty_ft_s": 2.067939,
+      "trap_kmh": 262.958,
+      "trap_ms": 73.043884
     },
     "GSX-R 1000 K5/K6|2005": {
       "eighth_s": 6.683328,
@@ -1799,60 +1799,60 @@
       "trap_ms": 61.179208
     },
     "GSX-R 600 (2008-2010)|2008": {
-      "eighth_s": 7.150519,
-      "et_s": 10.589774,
+      "eighth_s": 7.158889,
+      "et_s": 10.60727,
       "finished": true,
-      "sixty_ft_s": 2.137546,
-      "trap_kmh": 232.9913,
-      "trap_ms": 64.719797
+      "sixty_ft_s": 2.138169,
+      "trap_kmh": 232.3506,
+      "trap_ms": 64.541823
     },
     "GSX-R 600 (2011-2024)|2011": {
-      "eighth_s": 7.188081,
-      "et_s": 10.637135,
+      "eighth_s": 7.196098,
+      "et_s": 10.653955,
       "finished": true,
-      "sixty_ft_s": 2.153509,
-      "trap_kmh": 232.2651,
-      "trap_ms": 64.518088
+      "sixty_ft_s": 2.154136,
+      "trap_kmh": 231.5983,
+      "trap_ms": 64.332866
     },
     "GSX-R 750 (1985-1987)|1985": {
-      "eighth_s": 7.576926,
-      "et_s": 11.375774,
+      "eighth_s": 7.558171,
+      "et_s": 11.345714,
       "finished": true,
-      "sixty_ft_s": 2.181254,
-      "trap_kmh": 209.7791,
-      "trap_ms": 58.271965
+      "sixty_ft_s": 2.178944,
+      "trap_kmh": 210.3456,
+      "trap_ms": 58.429343
     },
     "GSX-R 750 (2008-2010)|2008": {
-      "eighth_s": 7.077514,
-      "et_s": 10.437668,
+      "eighth_s": 7.069034,
+      "et_s": 10.41743,
       "finished": true,
-      "sixty_ft_s": 2.132383,
-      "trap_kmh": 238.3972,
-      "trap_ms": 66.221435
+      "sixty_ft_s": 2.131202,
+      "trap_kmh": 238.5963,
+      "trap_ms": 66.276737
     },
     "GSX-R 750 (2011-2024)|2011": {
-      "eighth_s": 7.093321,
-      "et_s": 10.435709,
+      "eighth_s": 7.083564,
+      "et_s": 10.413857,
       "finished": true,
-      "sixty_ft_s": 2.137983,
-      "trap_kmh": 240.8938,
-      "trap_ms": 66.914941
+      "sixty_ft_s": 2.136789,
+      "trap_kmh": 241.9124,
+      "trap_ms": 67.197888
     },
     "GSX-R125 (2017-2026)|2017": {
-      "eighth_s": 11.464262,
-      "et_s": 17.688843,
+      "eighth_s": 11.58631,
+      "et_s": 17.885302,
       "finished": true,
-      "sixty_ft_s": 3.05198,
-      "trap_kmh": 127.2186,
-      "trap_ms": 35.338499
+      "sixty_ft_s": 3.084575,
+      "trap_kmh": 125.6632,
+      "trap_ms": 34.906443
     },
     "GSX-R750 K5 (2005-2006)|2005": {
-      "eighth_s": 7.062577,
-      "et_s": 10.394649,
+      "eighth_s": 7.053548,
+      "et_s": 10.373796,
       "finished": true,
-      "sixty_ft_s": 2.130176,
-      "trap_kmh": 240.1825,
-      "trap_ms": 66.717347
+      "sixty_ft_s": 2.128972,
+      "trap_kmh": 241.1553,
+      "trap_ms": 66.987587
     },
     "GSX-S1000 (2021-2024)|2021": {
       "eighth_s": 7.052898,
@@ -1863,188 +1863,188 @@
       "trap_ms": 62.938353
     },
     "GSX-S1000GT (2022-2026)|2022": {
-      "eighth_s": 7.090535,
-      "et_s": 10.52272,
+      "eighth_s": 7.070834,
+      "et_s": 10.490076,
       "finished": true,
-      "sixty_ft_s": 2.103816,
-      "trap_kmh": 234.6303,
-      "trap_ms": 65.175091
+      "sixty_ft_s": 2.102698,
+      "trap_kmh": 235.5625,
+      "trap_ms": 65.434025
     },
     "GSX-S1000GX (2024-2026)|2024": {
-      "eighth_s": 7.372984,
-      "et_s": 10.982851,
+      "eighth_s": 7.366022,
+      "et_s": 10.964757,
       "finished": true,
-      "sixty_ft_s": 2.183352,
-      "trap_kmh": 219.4584,
-      "trap_ms": 60.960658
+      "sixty_ft_s": 2.182639,
+      "trap_kmh": 220.2606,
+      "trap_ms": 61.183503
     },
     "GSX-S125 (2017-2026)|2017": {
-      "eighth_s": 12.051093,
-      "et_s": 18.779795,
+      "eighth_s": 12.176778,
+      "et_s": 18.978984,
       "finished": true,
-      "sixty_ft_s": 3.307059,
-      "trap_kmh": 114.7947,
-      "trap_ms": 31.887419
+      "sixty_ft_s": 3.341766,
+      "trap_kmh": 113.4454,
+      "trap_ms": 31.512598
     },
     "GSX-S750 (2015-2021)|2015": {
-      "eighth_s": 7.494267,
-      "et_s": 11.350513,
+      "eighth_s": 7.483539,
+      "et_s": 11.328064,
       "finished": true,
-      "sixty_ft_s": 2.15644,
-      "trap_kmh": 204.5367,
-      "trap_ms": 56.815744
+      "sixty_ft_s": 2.155556,
+      "trap_kmh": 205.2071,
+      "trap_ms": 57.001962
     },
     "GSX-S950 (2022-2026)|2022": {
-      "eighth_s": 7.681065,
-      "et_s": 11.760605,
+      "eighth_s": 7.657328,
+      "et_s": 11.727996,
       "finished": true,
-      "sixty_ft_s": 2.150629,
-      "trap_kmh": 192.6696,
-      "trap_ms": 53.519346
+      "sixty_ft_s": 2.142226,
+      "trap_kmh": 193.1212,
+      "trap_ms": 53.644778
     },
     "GSX1400 (2001-2008)|2001": {
-      "eighth_s": 7.398486,
-      "et_s": 11.522311,
+      "eighth_s": 7.393767,
+      "et_s": 11.51369,
       "finished": true,
-      "sixty_ft_s": 1.950899,
-      "trap_kmh": 190.3256,
-      "trap_ms": 52.868234
+      "sixty_ft_s": 1.95061,
+      "trap_kmh": 190.4967,
+      "trap_ms": 52.915745
     },
     "GT250R (2008-2016)|2008": {
-      "eighth_s": 11.129321,
-      "et_s": 16.619331,
+      "eighth_s": 10.914099,
+      "et_s": 16.419714,
       "finished": true,
-      "sixty_ft_s": 3.240801,
-      "trap_kmh": 145.0159,
-      "trap_ms": 40.282187
+      "sixty_ft_s": 3.135416,
+      "trap_kmh": 144.4111,
+      "trap_ms": 40.114201
     },
     "GT650R (2010-2017)|2010": {
-      "eighth_s": 8.083646,
-      "et_s": 12.189926,
+      "eighth_s": 8.128953,
+      "et_s": 12.255182,
       "finished": true,
-      "sixty_ft_s": 2.286896,
-      "trap_kmh": 194.4364,
-      "trap_ms": 54.010099
+      "sixty_ft_s": 2.301461,
+      "trap_kmh": 193.4657,
+      "trap_ms": 53.74047
     },
     "GT750 'Water Buffalo' (1971-1977)|1971": {
-      "eighth_s": 7.815403,
-      "et_s": 12.17456,
+      "eighth_s": 7.767054,
+      "et_s": 12.095548,
       "finished": true,
-      "sixty_ft_s": 1.911412,
-      "trap_kmh": 182.2932,
-      "trap_ms": 50.636999
+      "sixty_ft_s": 1.899473,
+      "trap_kmh": 183.6588,
+      "trap_ms": 51.016326
     },
     "Gixxer 155 (2014-2024)|2014": {
-      "eighth_s": 11.695387,
-      "et_s": 18.579579,
+      "eighth_s": 12.517468,
+      "et_s": 19.508074,
       "finished": true,
-      "sixty_ft_s": 2.865584,
-      "trap_kmh": 112.2123,
-      "trap_ms": 31.170075
+      "sixty_ft_s": 3.352422,
+      "trap_kmh": 110.575,
+      "trap_ms": 30.715279
     },
     "Gixxer 250 (2019-2025)|2019": {
-      "eighth_s": 10.778687,
-      "et_s": 16.61083,
+      "eighth_s": 10.676039,
+      "et_s": 16.540726,
       "finished": true,
-      "sixty_ft_s": 3.004747,
-      "trap_kmh": 133.1055,
-      "trap_ms": 36.973738
+      "sixty_ft_s": 2.928199,
+      "trap_kmh": 132.2301,
+      "trap_ms": 36.730597
     },
     "Gixxer SF 150 (2019-2026)|2019": {
-      "eighth_s": 11.638096,
-      "et_s": 18.193344,
+      "eighth_s": 12.478965,
+      "et_s": 19.144959,
       "finished": true,
-      "sixty_ft_s": 2.905598,
-      "trap_kmh": 120.8642,
-      "trap_ms": 33.573393
+      "sixty_ft_s": 3.400978,
+      "trap_kmh": 118.9519,
+      "trap_ms": 33.042186
     },
     "Gixxer SF 250 (2019-2025)|2019": {
-      "eighth_s": 10.612993,
-      "et_s": 16.082245,
+      "eighth_s": 10.513763,
+      "et_s": 16.01285,
       "finished": true,
-      "sixty_ft_s": 2.994693,
-      "trap_kmh": 145.6108,
-      "trap_ms": 40.447451
+      "sixty_ft_s": 2.918406,
+      "trap_kmh": 144.732,
+      "trap_ms": 40.203336
     },
     "Glamour 125 (2020-2026)|2020": {
-      "eighth_s": 12.514595,
-      "et_s": 19.829035,
+      "eighth_s": 12.708969,
+      "et_s": 20.156919,
       "finished": true,
-      "sixty_ft_s": 3.147634,
-      "trap_kmh": 106.2064,
-      "trap_ms": 29.501772
+      "sixty_ft_s": 3.195615,
+      "trap_kmh": 104.382,
+      "trap_ms": 28.995007
     },
     "Goan Classic 350 (2024-2025)|2024": {
-      "eighth_s": 11.423657,
-      "et_s": 17.892762,
+      "eighth_s": 11.471111,
+      "et_s": 17.974733,
       "finished": true,
-      "sixty_ft_s": 2.870808,
-      "trap_kmh": 120.7238,
-      "trap_ms": 33.534381
+      "sixty_ft_s": 2.874959,
+      "trap_kmh": 120.0434,
+      "trap_ms": 33.345393
     },
     "Gold Star 650 (2022-2026)|2022": {
-      "eighth_s": 9.409448,
-      "et_s": 14.466311,
+      "eighth_s": 9.494834,
+      "et_s": 14.591913,
       "finished": true,
-      "sixty_ft_s": 2.56045,
-      "trap_kmh": 155.1715,
-      "trap_ms": 43.103205
+      "sixty_ft_s": 2.587204,
+      "trap_kmh": 153.9283,
+      "trap_ms": 42.757873
     },
     "Grom MSX125 (2022-2026)|2022": {
-      "eighth_s": 12.591473,
-      "et_s": 19.676469,
+      "eighth_s": 12.787469,
+      "et_s": 20.006463,
       "finished": true,
-      "sixty_ft_s": 3.343744,
-      "trap_kmh": 111.6193,
-      "trap_ms": 31.005355
+      "sixty_ft_s": 3.396724,
+      "trap_kmh": 109.4572,
+      "trap_ms": 30.404786
     },
     "Guerrilla 450 (2024-2026)|2024": {
-      "eighth_s": 9.868309,
-      "et_s": 15.232018,
+      "eighth_s": 9.955093,
+      "et_s": 15.361329,
       "finished": true,
-      "sixty_ft_s": 2.720547,
-      "trap_kmh": 145.8475,
-      "trap_ms": 40.5132
+      "sixty_ft_s": 2.746941,
+      "trap_kmh": 144.6576,
+      "trap_ms": 40.182677
     },
     "H'ness CB350 (2020-2025)|2020": {
-      "eighth_s": 11.181182,
-      "et_s": 17.668444,
+      "eighth_s": 11.238532,
+      "et_s": 17.758088,
       "finished": true,
-      "sixty_ft_s": 2.857437,
-      "trap_kmh": 119.0843,
-      "trap_ms": 33.078964
+      "sixty_ft_s": 2.873588,
+      "trap_kmh": 118.4689,
+      "trap_ms": 32.90803
     },
     "HP4 Race (2017-2018)|2017": {
-      "eighth_s": 6.817882,
-      "et_s": 9.800702,
+      "eighth_s": 6.81382,
+      "et_s": 9.788335,
       "finished": true,
-      "sixty_ft_s": 2.093557,
-      "trap_kmh": 273.8538,
-      "trap_ms": 76.070502
+      "sixty_ft_s": 2.092067,
+      "trap_kmh": 274.8642,
+      "trap_ms": 76.351171
     },
     "Hayabusa (2008-2012)|2008": {
-      "eighth_s": 6.922428,
-      "et_s": 10.225257,
+      "eighth_s": 6.957744,
+      "et_s": 10.235212,
       "finished": true,
-      "sixty_ft_s": 2.079009,
-      "trap_kmh": 243.2534,
-      "trap_ms": 67.570378
+      "sixty_ft_s": 2.09611,
+      "trap_kmh": 245.4461,
+      "trap_ms": 68.179475
     },
     "Hayabusa (2021-2024)|2021": {
-      "eighth_s": 6.73655,
-      "et_s": 10.119536,
+      "eighth_s": 6.751502,
+      "et_s": 10.110518,
       "finished": true,
-      "sixty_ft_s": 1.952479,
-      "trap_kmh": 236.5032,
-      "trap_ms": 65.695339
+      "sixty_ft_s": 1.966343,
+      "trap_kmh": 238.721,
+      "trap_ms": 66.311395
     },
     "Hayabusa 25th Anniversary (2024)|2024": {
-      "eighth_s": 6.894553,
-      "et_s": 10.141235,
+      "eighth_s": 6.90937,
+      "et_s": 10.141497,
       "finished": true,
-      "sixty_ft_s": 2.077133,
-      "trap_kmh": 247.1064,
-      "trap_ms": 68.640653
+      "sixty_ft_s": 2.084037,
+      "trap_kmh": 248.988,
+      "trap_ms": 69.163343
     },
     "Hayabusa GSX1300R Gen1|1999": {
       "eighth_s": 6.993092,
@@ -2055,316 +2055,316 @@
       "trap_ms": 63.292975
     },
     "Himalayan 411 (2016-2023)|2016": {
-      "eighth_s": 11.14812,
-      "et_s": 17.490606,
+      "eighth_s": 11.187448,
+      "et_s": 17.555446,
       "finished": true,
-      "sixty_ft_s": 2.944433,
-      "trap_kmh": 122.3992,
-      "trap_ms": 33.999769
+      "sixty_ft_s": 2.953802,
+      "trap_kmh": 121.8997,
+      "trap_ms": 33.861023
     },
     "Himalayan 450 (2024)|2024": {
-      "eighth_s": 9.700491,
-      "et_s": 15.125705,
+      "eighth_s": 9.703153,
+      "et_s": 15.130835,
       "finished": true,
-      "sixty_ft_s": 2.552354,
-      "trap_kmh": 143.4398,
-      "trap_ms": 39.844392
+      "sixty_ft_s": 2.552413,
+      "trap_kmh": 143.3487,
+      "trap_ms": 39.819072
     },
     "Hornet 2.0 (2020-2024)|2020": {
-      "eighth_s": 11.081056,
-      "et_s": 17.546388,
+      "eighth_s": 11.831132,
+      "et_s": 18.398367,
       "finished": true,
-      "sixty_ft_s": 2.681988,
-      "trap_kmh": 120.1071,
-      "trap_ms": 33.363071
+      "sixty_ft_s": 3.123341,
+      "trap_kmh": 118.6282,
+      "trap_ms": 32.952266
     },
     "Hornet 2.0 (2024-2025)|2024": {
-      "eighth_s": 10.961676,
-      "et_s": 17.232007,
+      "eighth_s": 11.903613,
+      "et_s": 18.30956,
       "finished": true,
-      "sixty_ft_s": 2.757251,
-      "trap_kmh": 124.6017,
-      "trap_ms": 34.611575
+      "sixty_ft_s": 3.264086,
+      "trap_kmh": 122.0283,
+      "trap_ms": 33.896761
     },
     "Hunk 160R (2022-2026)|2022": {
-      "eighth_s": 11.850427,
-      "et_s": 18.650632,
+      "eighth_s": 13.083838,
+      "et_s": 20.02529,
       "finished": true,
-      "sixty_ft_s": 3.169791,
-      "trap_kmh": 114.3895,
-      "trap_ms": 31.774855
+      "sixty_ft_s": 3.734957,
+      "trap_kmh": 112.3787,
+      "trap_ms": 31.216304
     },
     "Hunter 350 (2022-2026)|2022": {
-      "eighth_s": 11.462831,
-      "et_s": 17.911443,
+      "eighth_s": 11.49053,
+      "et_s": 18.000811,
       "finished": true,
-      "sixty_ft_s": 3.04417,
-      "trap_kmh": 120.8333,
-      "trap_ms": 33.564804
+      "sixty_ft_s": 3.002986,
+      "trap_kmh": 119.178,
+      "trap_ms": 33.104987
     },
     "Hypermotard 698 Mono (2024-2026)|2024": {
-      "eighth_s": 7.626808,
-      "et_s": 11.688785,
+      "eighth_s": 7.651917,
+      "et_s": 11.731726,
       "finished": true,
-      "sixty_ft_s": 2.141022,
-      "trap_kmh": 191.961,
-      "trap_ms": 53.322507
+      "sixty_ft_s": 2.143073,
+      "trap_kmh": 191.1008,
+      "trap_ms": 53.083555
     },
     "Hypermotard 950 (2019-2026)|2019": {
-      "eighth_s": 7.693843,
-      "et_s": 11.60776,
+      "eighth_s": 7.684176,
+      "et_s": 11.58768,
       "finished": true,
-      "sixty_ft_s": 2.247195,
-      "trap_kmh": 199.8449,
-      "trap_ms": 55.512478
+      "sixty_ft_s": 2.246444,
+      "trap_kmh": 200.4241,
+      "trap_ms": 55.673372
     },
     "Imperiale 400 (2019-2024)|2019": {
-      "eighth_s": 11.756157,
-      "et_s": 18.39718,
+      "eighth_s": 11.816394,
+      "et_s": 18.491896,
       "finished": true,
-      "sixty_ft_s": 3.149272,
-      "trap_kmh": 116.7395,
-      "trap_ms": 32.427632
+      "sixty_ft_s": 3.166479,
+      "trap_kmh": 116.1513,
+      "trap_ms": 32.264244
     },
     "Interceptor 650 (2018-2024)|2018": {
-      "eighth_s": 9.09195,
-      "et_s": 14.096709,
+      "eighth_s": 9.136438,
+      "et_s": 14.1753,
       "finished": true,
-      "sixty_ft_s": 2.421362,
-      "trap_kmh": 155.8487,
-      "trap_ms": 43.291297
+      "sixty_ft_s": 2.423618,
+      "trap_kmh": 154.6983,
+      "trap_ms": 42.97176
     },
     "Interceptor 650 (2020-2024)|2020": {
-      "eighth_s": 8.76796,
-      "et_s": 13.574199,
+      "eighth_s": 8.813288,
+      "et_s": 13.653801,
       "finished": true,
-      "sixty_ft_s": 2.330989,
-      "trap_kmh": 162.9229,
-      "trap_ms": 45.256373
+      "sixty_ft_s": 2.334394,
+      "trap_kmh": 161.7136,
+      "trap_ms": 44.920445
     },
     "Intruder 250 (2018-2022)|2018": {
-      "eighth_s": 11.050919,
-      "et_s": 17.120243,
+      "eighth_s": 10.805826,
+      "et_s": 16.863333,
       "finished": true,
-      "sixty_ft_s": 3.059284,
-      "trap_kmh": 127.6464,
-      "trap_ms": 35.457337
+      "sixty_ft_s": 2.925923,
+      "trap_kmh": 127.8201,
+      "trap_ms": 35.505588
     },
     "Iron 883 (2016-2022)|2016": {
-      "eighth_s": 8.969093,
-      "et_s": 14.145403,
+      "eighth_s": 8.979842,
+      "et_s": 14.165027,
       "finished": true,
-      "sixty_ft_s": 2.179869,
-      "trap_kmh": 151.5629,
-      "trap_ms": 42.100806
+      "sixty_ft_s": 2.180386,
+      "trap_kmh": 151.281,
+      "trap_ms": 42.022492
     },
     "Jawa 42 (2018-2026)|2018": {
-      "eighth_s": 10.805313,
-      "et_s": 16.686657,
+      "eighth_s": 10.749853,
+      "et_s": 16.670792,
       "finished": true,
-      "sixty_ft_s": 3.00919,
-      "trap_kmh": 132.0434,
-      "trap_ms": 36.678727
+      "sixty_ft_s": 2.943602,
+      "trap_kmh": 131.1541,
+      "trap_ms": 36.431703
     },
     "K1300S (2008-2016)|2008": {
-      "eighth_s": 6.956636,
-      "et_s": 10.357569,
+      "eighth_s": 6.950482,
+      "et_s": 10.340734,
       "finished": true,
-      "sixty_ft_s": 2.012454,
-      "trap_kmh": 236.1335,
-      "trap_ms": 65.592639
+      "sixty_ft_s": 2.011922,
+      "trap_kmh": 236.9986,
+      "trap_ms": 65.83295
     },
     "K1600 GT (2022-2026)|2022": {
-      "eighth_s": 7.465502,
-      "et_s": 11.1961,
+      "eighth_s": 7.45372,
+      "et_s": 11.16891,
       "finished": true,
-      "sixty_ft_s": 2.180709,
-      "trap_kmh": 212.3047,
-      "trap_ms": 58.973515
+      "sixty_ft_s": 2.180057,
+      "trap_kmh": 213.2785,
+      "trap_ms": 59.24403
     },
     "KLR 650 (2022-2024)|2022": {
-      "eighth_s": 9.702055,
-      "et_s": 15.182123,
+      "eighth_s": 9.721757,
+      "et_s": 15.212766,
       "finished": true,
-      "sixty_ft_s": 2.510955,
-      "trap_kmh": 142.1995,
-      "trap_ms": 39.499865
+      "sixty_ft_s": 2.516445,
+      "trap_kmh": 141.9219,
+      "trap_ms": 39.422755
     },
     "KLX 230 (2020-2026)|2020": {
-      "eighth_s": 10.996526,
-      "et_s": 17.278337,
+      "eighth_s": 10.8762,
+      "et_s": 17.166694,
       "finished": true,
-      "sixty_ft_s": 2.880379,
-      "trap_kmh": 123.2184,
-      "trap_ms": 34.227328
+      "sixty_ft_s": 2.786479,
+      "trap_kmh": 122.9927,
+      "trap_ms": 34.164635
     },
     "KLX300 (2021-2026)|2021": {
-      "eighth_s": 9.774834,
-      "et_s": 15.298145,
+      "eighth_s": 9.538258,
+      "et_s": 15.052895,
       "finished": true,
-      "sixty_ft_s": 2.60047,
-      "trap_kmh": 140.4959,
-      "trap_ms": 39.026626
+      "sixty_ft_s": 2.425616,
+      "trap_kmh": 140.6528,
+      "trap_ms": 39.070226
     },
     "KR-1S (1990-1992)|1990": {
-      "eighth_s": 8.702102,
-      "et_s": 13.620162,
+      "eighth_s": 8.692009,
+      "et_s": 13.612755,
       "finished": true,
-      "sixty_ft_s": 2.159835,
-      "trap_kmh": 164.2942,
-      "trap_ms": 45.637288
+      "sixty_ft_s": 2.150877,
+      "trap_kmh": 164.2453,
+      "trap_ms": 45.623694
     },
     "Karizma R (2003-2014)|2003": {
-      "eighth_s": 12.111585,
-      "et_s": 18.361126,
+      "eighth_s": 12.001491,
+      "et_s": 18.301869,
       "finished": true,
-      "sixty_ft_s": 3.444201,
-      "trap_kmh": 126.5283,
-      "trap_ms": 35.146746
+      "sixty_ft_s": 3.361347,
+      "trap_kmh": 125.3595,
+      "trap_ms": 34.82207
     },
     "Karizma XMR 210 (2023-2026)|2023": {
-      "eighth_s": 11.099402,
-      "et_s": 16.651643,
+      "eighth_s": 10.981522,
+      "et_s": 16.561449,
       "finished": true,
-      "sixty_ft_s": 3.199321,
-      "trap_kmh": 143.4532,
-      "trap_ms": 39.848107
+      "sixty_ft_s": 3.123849,
+      "trap_kmh": 142.6039,
+      "trap_ms": 39.612208
     },
     "Karizma XMR 250 (2024-2025)|2024": {
-      "eighth_s": 10.282201,
-      "et_s": 15.660362,
+      "eighth_s": 10.188144,
+      "et_s": 15.593318,
       "finished": true,
-      "sixty_ft_s": 2.864231,
-      "trap_kmh": 148.0366,
-      "trap_ms": 41.121285
+      "sixty_ft_s": 2.793617,
+      "trap_kmh": 147.1755,
+      "trap_ms": 40.882085
     },
     "Katana (2019-2024)|2019": {
-      "eighth_s": 7.20691,
-      "et_s": 10.886887,
+      "eighth_s": 7.187423,
+      "et_s": 10.854359,
       "finished": true,
-      "sixty_ft_s": 2.085349,
-      "trap_kmh": 213.0934,
-      "trap_ms": 59.192619
+      "sixty_ft_s": 2.084072,
+      "trap_kmh": 213.8941,
+      "trap_ms": 59.415025
     },
     "LFC 700 (2022-2026)|2022": {
-      "eighth_s": 9.155218,
-      "et_s": 13.822829,
+      "eighth_s": 9.131935,
+      "et_s": 13.788688,
       "finished": true,
-      "sixty_ft_s": 2.622534,
-      "trap_kmh": 167.6164,
-      "trap_ms": 46.560105
+      "sixty_ft_s": 2.615376,
+      "trap_kmh": 168.0558,
+      "trap_ms": 46.682171
     },
     "Leoncino 500 (2018-2026)|2018": {
-      "eighth_s": 8.888937,
-      "et_s": 13.957118,
+      "eighth_s": 8.930947,
+      "et_s": 14.03176,
       "finished": true,
-      "sixty_ft_s": 2.226653,
-      "trap_kmh": 154.5216,
-      "trap_ms": 42.922658
+      "sixty_ft_s": 2.229247,
+      "trap_kmh": 153.514,
+      "trap_ms": 42.642775
     },
     "Low Rider S 117 (2022-2026)|2022": {
-      "eighth_s": 7.93739,
-      "et_s": 12.260145,
+      "eighth_s": 7.925874,
+      "et_s": 12.238223,
       "finished": true,
-      "sixty_ft_s": 2.145377,
-      "trap_kmh": 181.2966,
-      "trap_ms": 50.360176
+      "sixty_ft_s": 2.14483,
+      "trap_kmh": 181.7751,
+      "trap_ms": 50.493094
     },
     "Low Rider ST (2022-2026)|2022": {
-      "eighth_s": 7.964758,
-      "et_s": 12.38935,
+      "eighth_s": 7.949529,
+      "et_s": 12.364273,
       "finished": true,
-      "sixty_ft_s": 2.084212,
-      "trap_kmh": 175.4732,
-      "trap_ms": 48.742559
+      "sixty_ft_s": 2.08341,
+      "trap_kmh": 175.9039,
+      "trap_ms": 48.8622
     },
     "M 1000 R (2023-2026)|2023": {
-      "eighth_s": 6.873915,
-      "et_s": 10.193149,
+      "eighth_s": 6.866883,
+      "et_s": 10.174761,
       "finished": true,
-      "sixty_ft_s": 2.058707,
-      "trap_kmh": 237.6452,
-      "trap_ms": 66.012559
+      "sixty_ft_s": 2.057369,
+      "trap_kmh": 238.6329,
+      "trap_ms": 66.286915
     },
     "M 1000 RR (2025)|2025": {
-      "eighth_s": 6.790247,
-      "et_s": 9.91248,
+      "eighth_s": 6.761745,
+      "et_s": 9.867778,
       "finished": true,
-      "sixty_ft_s": 2.053536,
-      "trap_kmh": 258.1904,
-      "trap_ms": 71.719549
+      "sixty_ft_s": 2.05146,
+      "trap_kmh": 259.5955,
+      "trap_ms": 72.10986
     },
     "M 1000 XR (2024-2026)|2024": {
-      "eighth_s": 7.03089,
-      "et_s": 10.284811,
+      "eighth_s": 7.024101,
+      "et_s": 10.265963,
       "finished": true,
-      "sixty_ft_s": 2.132946,
-      "trap_kmh": 247.8448,
-      "trap_ms": 68.845766
+      "sixty_ft_s": 2.131824,
+      "trap_kmh": 248.9036,
+      "trap_ms": 69.139882
     },
     "M1000RR (2021-2024)|2021": {
-      "eighth_s": 6.826355,
-      "et_s": 9.909246,
+      "eighth_s": 6.820068,
+      "et_s": 9.892028,
       "finished": true,
-      "sixty_ft_s": 2.087748,
-      "trap_kmh": 262.5846,
-      "trap_ms": 72.940156
+      "sixty_ft_s": 2.086392,
+      "trap_kmh": 263.7208,
+      "trap_ms": 73.255772
     },
     "MT-01 (2005-2012)|2005": {
-      "eighth_s": 7.693747,
-      "et_s": 12.077514,
+      "eighth_s": 7.683371,
+      "et_s": 12.05947,
       "finished": true,
-      "sixty_ft_s": 1.919164,
-      "trap_kmh": 177.8075,
-      "trap_ms": 49.390969
+      "sixty_ft_s": 1.918332,
+      "trap_kmh": 177.9949,
+      "trap_ms": 49.443029
     },
     "MT-03 (2020-2025)|2020": {
-      "eighth_s": 9.809012,
-      "et_s": 14.921787,
+      "eighth_s": 9.545436,
+      "et_s": 14.668268,
       "finished": true,
-      "sixty_ft_s": 2.797228,
-      "trap_kmh": 152.2029,
-      "trap_ms": 42.278584
+      "sixty_ft_s": 2.665268,
+      "trap_kmh": 151.6043,
+      "trap_ms": 42.112298
     },
     "MT-07 (2018-2024)|2018": {
-      "eighth_s": 7.976715,
-      "et_s": 12.182808,
+      "eighth_s": 7.998063,
+      "et_s": 12.223936,
       "finished": true,
-      "sixty_ft_s": 2.267718,
-      "trap_kmh": 186.1232,
-      "trap_ms": 51.700893
+      "sixty_ft_s": 2.268779,
+      "trap_kmh": 185.192,
+      "trap_ms": 51.442218
     },
     "MT-07 SP (2021-2026)|2021": {
-      "eighth_s": 8.016508,
-      "et_s": 12.232208,
+      "eighth_s": 8.03839,
+      "et_s": 12.273911,
       "finished": true,
-      "sixty_ft_s": 2.274394,
-      "trap_kmh": 185.7563,
-      "trap_ms": 51.598958
+      "sixty_ft_s": 2.27547,
+      "trap_kmh": 184.854,
+      "trap_ms": 51.348339
     },
     "MT-09 (2021-2024)|2021": {
-      "eighth_s": 7.545327,
-      "et_s": 11.387529,
+      "eighth_s": 7.534695,
+      "et_s": 11.365365,
       "finished": true,
-      "sixty_ft_s": 2.197391,
-      "trap_kmh": 205.007,
-      "trap_ms": 56.9464
+      "sixty_ft_s": 2.196468,
+      "trap_kmh": 205.655,
+      "trap_ms": 57.126394
     },
     "MT-09 SP (2021-2024)|2021": {
-      "eighth_s": 7.545327,
-      "et_s": 11.387529,
+      "eighth_s": 7.534695,
+      "et_s": 11.365365,
       "finished": true,
-      "sixty_ft_s": 2.197391,
-      "trap_kmh": 205.007,
-      "trap_ms": 56.9464
+      "sixty_ft_s": 2.196468,
+      "trap_kmh": 205.655,
+      "trap_ms": 57.126394
     },
     "MT-09 Y-AMT (2024-2026)|2024": {
-      "eighth_s": 7.543555,
-      "et_s": 11.433252,
+      "eighth_s": 7.532666,
+      "et_s": 11.411815,
       "finished": true,
-      "sixty_ft_s": 2.167992,
-      "trap_kmh": 201.9176,
-      "trap_ms": 56.088222
+      "sixty_ft_s": 2.167101,
+      "trap_kmh": 202.526,
+      "trap_ms": 56.257233
     },
     "MT-10 (2016-2021)|2016": {
       "eighth_s": 7.004996,
@@ -2375,236 +2375,236 @@
       "trap_ms": 61.500387
     },
     "MT-10 SP (2022-2026)|2022": {
-      "eighth_s": 6.963182,
-      "et_s": 10.447089,
+      "eighth_s": 6.954386,
+      "et_s": 10.426086,
       "finished": true,
-      "sixty_ft_s": 2.058976,
-      "trap_kmh": 225.5958,
-      "trap_ms": 62.66551
+      "sixty_ft_s": 2.057715,
+      "trap_kmh": 226.4978,
+      "trap_ms": 62.916047
     },
     "MT-125 (2020-2026)|2020": {
-      "eighth_s": 11.576704,
-      "et_s": 18.255866,
+      "eighth_s": 11.700834,
+      "et_s": 18.463533,
       "finished": true,
-      "sixty_ft_s": 2.990154,
-      "trap_kmh": 116.3706,
-      "trap_ms": 32.325175
+      "sixty_ft_s": 3.022071,
+      "trap_kmh": 114.9837,
+      "trap_ms": 31.93991
     },
     "MT-15 V1 (2019-2020)|2019": {
-      "eighth_s": 11.874184,
-      "et_s": 18.861443,
+      "eighth_s": 12.207236,
+      "et_s": 19.205308,
       "finished": true,
-      "sixty_ft_s": 2.825154,
-      "trap_kmh": 111.4665,
-      "trap_ms": 30.962927
+      "sixty_ft_s": 3.063676,
+      "trap_kmh": 111.3566,
+      "trap_ms": 30.932399
     },
     "MT-15 V2 (2021-2024)|2021": {
-      "eighth_s": 12.007072,
-      "et_s": 19.0547,
+      "eighth_s": 12.316129,
+      "et_s": 19.372443,
       "finished": true,
-      "sixty_ft_s": 2.844986,
-      "trap_kmh": 110.5601,
-      "trap_ms": 30.711152
+      "sixty_ft_s": 3.078781,
+      "trap_kmh": 110.4732,
+      "trap_ms": 30.686995
     },
     "MT-25 (2014-2026)|2014": {
-      "eighth_s": 10.566583,
-      "et_s": 15.888254,
+      "eighth_s": 10.333081,
+      "et_s": 15.662207,
       "finished": true,
-      "sixty_ft_s": 3.067971,
-      "trap_kmh": 148.4989,
-      "trap_ms": 41.249688
+      "sixty_ft_s": 2.962608,
+      "trap_kmh": 148.0477,
+      "trap_ms": 41.124364
     },
     "Mavrick 440 (2024-2026)|2024": {
-      "eighth_s": 10.132719,
-      "et_s": 15.926042,
+      "eighth_s": 10.242901,
+      "et_s": 16.096003,
       "finished": true,
-      "sixty_ft_s": 2.559795,
-      "trap_kmh": 134.0544,
-      "trap_ms": 37.237332
+      "sixty_ft_s": 2.590139,
+      "trap_kmh": 132.6001,
+      "trap_ms": 36.833354
     },
     "Meteor 350 (2020-2026)|2020": {
-      "eighth_s": 11.687802,
-      "et_s": 18.35261,
+      "eighth_s": 11.746919,
+      "et_s": 18.447822,
       "finished": true,
-      "sixty_ft_s": 3.076486,
-      "trap_kmh": 116.3248,
-      "trap_ms": 32.312455
+      "sixty_ft_s": 3.092379,
+      "trap_kmh": 115.7136,
+      "trap_ms": 32.142654
     },
     "Mojo XT300 (2015-2020)|2015": {
-      "eighth_s": 10.242227,
-      "et_s": 15.783963,
+      "eighth_s": 10.196872,
+      "et_s": 15.773969,
       "finished": true,
-      "sixty_ft_s": 2.778178,
-      "trap_kmh": 142.3814,
-      "trap_ms": 39.550389
+      "sixty_ft_s": 2.720184,
+      "trap_kmh": 141.4079,
+      "trap_ms": 39.279959
     },
     "Monkey 125 (2022-2026)|2022": {
-      "eighth_s": 12.81892,
-      "et_s": 20.41876,
+      "eighth_s": 13.029895,
+      "et_s": 20.783223,
       "finished": true,
-      "sixty_ft_s": 3.281325,
-      "trap_kmh": 102.2376,
-      "trap_ms": 28.399334
+      "sixty_ft_s": 3.335649,
+      "trap_kmh": 100.1351,
+      "trap_ms": 27.815311
     },
     "Monster 1200 (2014-2021)|2014": {
-      "eighth_s": 7.37335,
-      "et_s": 10.928748,
+      "eighth_s": 7.367234,
+      "et_s": 10.913492,
       "finished": true,
-      "sixty_ft_s": 2.203747,
-      "trap_kmh": 221.671,
-      "trap_ms": 61.575277
+      "sixty_ft_s": 2.202776,
+      "trap_kmh": 222.3715,
+      "trap_ms": 61.769854
     },
     "Monster 821 (2017-2020)|2017": {
-      "eighth_s": 7.746547,
-      "et_s": 11.692701,
+      "eighth_s": 7.736363,
+      "et_s": 11.671516,
       "finished": true,
-      "sixty_ft_s": 2.250371,
-      "trap_kmh": 199.2901,
-      "trap_ms": 55.358362
+      "sixty_ft_s": 2.249632,
+      "trap_kmh": 199.9138,
+      "trap_ms": 55.531603
     },
     "Monster 937 (2021-2026)|2021": {
-      "eighth_s": 7.733351,
-      "et_s": 11.60787,
+      "eighth_s": 7.723972,
+      "et_s": 11.588512,
       "finished": true,
-      "sixty_ft_s": 2.27625,
-      "trap_kmh": 203.0122,
-      "trap_ms": 56.392289
+      "sixty_ft_s": 2.275508,
+      "trap_kmh": 203.5942,
+      "trap_ms": 56.553938
     },
     "Multistrada V2 S (2022-2026)|2022": {
-      "eighth_s": 7.769213,
-      "et_s": 11.668107,
+      "eighth_s": 7.761419,
+      "et_s": 11.65043,
       "finished": true,
-      "sixty_ft_s": 2.273894,
-      "trap_kmh": 202.4281,
-      "trap_ms": 56.230026
+      "sixty_ft_s": 2.273345,
+      "trap_kmh": 203.009,
+      "trap_ms": 56.391398
     },
     "Multistrada V4 (2021-2026)|2021": {
-      "eighth_s": 7.062751,
-      "et_s": 10.642928,
+      "eighth_s": 7.055969,
+      "et_s": 10.623379,
       "finished": true,
-      "sixty_ft_s": 2.057588,
-      "trap_kmh": 220.9506,
-      "trap_ms": 61.375161
+      "sixty_ft_s": 2.056904,
+      "trap_kmh": 221.7654,
+      "trap_ms": 61.601502
     },
     "Multistrada V4 RS (2024-2026)|2024": {
-      "eighth_s": 7.014472,
-      "et_s": 10.553662,
+      "eighth_s": 7.008812,
+      "et_s": 10.536524,
       "finished": true,
-      "sixty_ft_s": 2.035861,
-      "trap_kmh": 222.8599,
-      "trap_ms": 61.905538
+      "sixty_ft_s": 2.035207,
+      "trap_kmh": 223.7801,
+      "trap_ms": 62.161131
     },
     "NC750X (2021-2026)|2021": {
-      "eighth_s": 8.648019,
-      "et_s": 13.458348,
+      "eighth_s": 8.64845,
+      "et_s": 13.459662,
       "finished": true,
-      "sixty_ft_s": 2.304174,
-      "trap_kmh": 161.6296,
-      "trap_ms": 44.897118
+      "sixty_ft_s": 2.304108,
+      "trap_kmh": 161.5974,
+      "trap_ms": 44.888172
     },
     "NS400R (1985-1987)|1985": {
-      "eighth_s": 8.261262,
-      "et_s": 13.00544,
+      "eighth_s": 8.246987,
+      "et_s": 12.992208,
       "finished": true,
-      "sixty_ft_s": 2.133415,
-      "trap_kmh": 172.4227,
-      "trap_ms": 47.895197
+      "sixty_ft_s": 2.124217,
+      "trap_kmh": 172.362,
+      "trap_ms": 47.878322
     },
     "NSR250R SP (1990-1993)|1990": {
-      "eighth_s": 9.025961,
-      "et_s": 14.674957,
+      "eighth_s": 8.946276,
+      "et_s": 14.587203,
       "finished": true,
-      "sixty_ft_s": 2.153656,
-      "trap_kmh": 142.462,
-      "trap_ms": 39.572783
+      "sixty_ft_s": 2.119793,
+      "trap_kmh": 142.5074,
+      "trap_ms": 39.585384
     },
     "NT1100 (2022-2026)|2022": {
-      "eighth_s": 7.98322,
-      "et_s": 12.062151,
+      "eighth_s": 7.976632,
+      "et_s": 12.048979,
       "finished": true,
-      "sixty_ft_s": 2.284244,
-      "trap_kmh": 193.5015,
-      "trap_ms": 53.750411
+      "sixty_ft_s": 2.283857,
+      "trap_kmh": 193.8352,
+      "trap_ms": 53.843117
     },
     "NTorq 125 Race XP (2021-2026)|2021": {
-      "eighth_s": 12.894587,
-      "et_s": 20.432541,
+      "eighth_s": 13.008455,
+      "et_s": 20.636093,
       "finished": true,
-      "sixty_ft_s": 3.417466,
-      "trap_kmh": 102.8175,
-      "trap_ms": 28.560414
+      "sixty_ft_s": 3.446559,
+      "trap_kmh": 101.5428,
+      "trap_ms": 28.206337
     },
     "NX500 (2024-2026)|2024": {
-      "eighth_s": 9.000725,
-      "et_s": 13.997778,
+      "eighth_s": 8.834502,
+      "et_s": 13.821461,
       "finished": true,
-      "sixty_ft_s": 2.3991,
-      "trap_kmh": 156.3088,
-      "trap_ms": 43.41911
+      "sixty_ft_s": 2.282613,
+      "trap_kmh": 156.5207,
+      "trap_ms": 43.477975
     },
     "Nightster (2022-2026)|2022": {
-      "eighth_s": 8.203849,
-      "et_s": 12.529133,
+      "eighth_s": 8.197623,
+      "et_s": 12.517633,
       "finished": true,
-      "sixty_ft_s": 2.299475,
-      "trap_kmh": 180.3437,
-      "trap_ms": 50.095473
+      "sixty_ft_s": 2.299131,
+      "trap_kmh": 180.4478,
+      "trap_ms": 50.124389
     },
     "Ninja 1000 (Z1000SX) (2011-2019)|2011": {
-      "eighth_s": 7.268972,
-      "et_s": 10.88562,
+      "eighth_s": 7.257831,
+      "et_s": 10.863182,
       "finished": true,
-      "sixty_ft_s": 2.128167,
-      "trap_kmh": 221.6261,
-      "trap_ms": 61.562809
+      "sixty_ft_s": 2.127281,
+      "trap_kmh": 222.3128,
+      "trap_ms": 61.753548
     },
     "Ninja 1000SX (2020-2026)|2020": {
-      "eighth_s": 7.244159,
-      "et_s": 10.834162,
+      "eighth_s": 7.233741,
+      "et_s": 10.812652,
       "finished": true,
-      "sixty_ft_s": 2.127192,
-      "trap_kmh": 223.338,
-      "trap_ms": 62.038336
+      "sixty_ft_s": 2.126296,
+      "trap_kmh": 224.0246,
+      "trap_ms": 62.229044
     },
     "Ninja 1100SX (2025-2026)|2025": {
-      "eighth_s": 7.348104,
-      "et_s": 10.999917,
+      "eighth_s": 7.338884,
+      "et_s": 10.981688,
       "finished": true,
-      "sixty_ft_s": 2.146927,
-      "trap_kmh": 216.8275,
-      "trap_ms": 60.22987
+      "sixty_ft_s": 2.146129,
+      "trap_kmh": 217.1381,
+      "trap_ms": 60.316149
     },
     "Ninja 300 (2013-2024)|2013": {
-      "eighth_s": 9.856791,
-      "et_s": 14.813177,
+      "eighth_s": 9.599543,
+      "et_s": 14.570906,
       "finished": true,
-      "sixty_ft_s": 2.829162,
-      "trap_kmh": 161.379,
-      "trap_ms": 44.82749
+      "sixty_ft_s": 2.630211,
+      "trap_kmh": 160.7516,
+      "trap_ms": 44.653212
     },
     "Ninja 400 (2018-2024)|2018": {
-      "eighth_s": 8.884943,
-      "et_s": 13.577892,
+      "eighth_s": 8.744451,
+      "et_s": 13.458627,
       "finished": true,
-      "sixty_ft_s": 2.425256,
-      "trap_kmh": 169.9514,
-      "trap_ms": 47.208715
+      "sixty_ft_s": 2.305481,
+      "trap_kmh": 169.0632,
+      "trap_ms": 46.962
     },
     "Ninja 500 (2024-2026)|2024": {
-      "eighth_s": 8.797908,
-      "et_s": 13.432528,
+      "eighth_s": 8.681887,
+      "et_s": 13.341243,
       "finished": true,
-      "sixty_ft_s": 2.398209,
-      "trap_kmh": 172.1782,
-      "trap_ms": 47.827273
+      "sixty_ft_s": 2.28628,
+      "trap_kmh": 171.1761,
+      "trap_ms": 47.548919
     },
     "Ninja 650 (2020-2024)|2020": {
-      "eighth_s": 8.020065,
-      "et_s": 12.113718,
+      "eighth_s": 8.044066,
+      "et_s": 12.158246,
       "finished": true,
-      "sixty_ft_s": 2.276454,
-      "trap_kmh": 195.2606,
-      "trap_ms": 54.239047
+      "sixty_ft_s": 2.277537,
+      "trap_kmh": 194.2308,
+      "trap_ms": 53.952996
     },
     "Ninja H2 (2015-2023)|2015": {
       "eighth_s": 6.784419,
@@ -2615,36 +2615,36 @@
       "trap_ms": 77.534065
     },
     "Ninja H2 SX (2018-2023)|2018": {
-      "eighth_s": 6.940797,
-      "et_s": 10.217233,
+      "eighth_s": 6.939903,
+      "et_s": 10.205485,
       "finished": true,
-      "sixty_ft_s": 2.032976,
-      "trap_kmh": 245.9333,
-      "trap_ms": 68.314815
+      "sixty_ft_s": 2.031776,
+      "trap_kmh": 246.9219,
+      "trap_ms": 68.58941
     },
     "Ninja H2 SX SE+ (2024-2026)|2024": {
-      "eighth_s": 7.18522,
-      "et_s": 10.563346,
+      "eighth_s": 7.179512,
+      "et_s": 10.54568,
       "finished": true,
-      "sixty_ft_s": 2.148544,
-      "trap_kmh": 236.096,
-      "trap_ms": 65.582217
+      "sixty_ft_s": 2.147762,
+      "trap_kmh": 236.7914,
+      "trap_ms": 65.775383
     },
     "Ninja H2R (2015-2026)|2015": {
-      "eighth_s": 6.863432,
-      "et_s": 9.82061,
+      "eighth_s": 6.863514,
+      "et_s": 9.81349,
       "finished": true,
-      "sixty_ft_s": 2.019372,
-      "trap_kmh": 281.3503,
-      "trap_ms": 78.152848
+      "sixty_ft_s": 2.019065,
+      "trap_kmh": 282.4556,
+      "trap_ms": 78.459901
     },
     "Ninja RR Mono 250 (Indonesia) (2014-2017)|2014": {
-      "eighth_s": 10.502765,
-      "et_s": 15.813779,
+      "eighth_s": 10.369903,
+      "et_s": 15.702852,
       "finished": true,
-      "sixty_ft_s": 3.012328,
-      "trap_kmh": 149.6938,
-      "trap_ms": 41.581615
+      "sixty_ft_s": 2.935524,
+      "trap_kmh": 148.9092,
+      "trap_ms": 41.363679
     },
     "Ninja ZX-10R (2004-2005)|2004": {
       "eighth_s": 6.776722,
@@ -2679,60 +2679,60 @@
       "trap_ms": 67.43984
     },
     "Ninja ZX-10R (2021-2024)|2021": {
-      "eighth_s": 6.787863,
-      "et_s": 9.927589,
+      "eighth_s": 6.760668,
+      "et_s": 9.885111,
       "finished": true,
-      "sixty_ft_s": 2.050568,
-      "trap_kmh": 256.4319,
-      "trap_ms": 71.231095
+      "sixty_ft_s": 2.048742,
+      "trap_kmh": 257.8092,
+      "trap_ms": 71.613658
     },
     "Ninja ZX-10RR (2021-2024)|2021": {
-      "eighth_s": 6.691451,
-      "et_s": 9.768136,
+      "eighth_s": 6.670772,
+      "et_s": 9.733743,
       "finished": true,
-      "sixty_ft_s": 2.033236,
-      "trap_kmh": 261.3797,
-      "trap_ms": 72.60548
+      "sixty_ft_s": 2.031934,
+      "trap_kmh": 262.6503,
+      "trap_ms": 72.958414
     },
     "Ninja ZX-12R (2000-2006)|2000": {
-      "eighth_s": 6.61928,
-      "et_s": 9.889082,
+      "eighth_s": 6.606812,
+      "et_s": 9.864329,
       "finished": true,
-      "sixty_ft_s": 1.93748,
-      "trap_kmh": 245.4659,
-      "trap_ms": 68.184978
+      "sixty_ft_s": 1.936604,
+      "trap_kmh": 246.4708,
+      "trap_ms": 68.464119
     },
     "Ninja ZX-14R (2012-2023)|2012": {
-      "eighth_s": 6.924868,
-      "et_s": 10.144604,
+      "eighth_s": 6.918187,
+      "et_s": 10.118132,
       "finished": true,
-      "sixty_ft_s": 2.100041,
-      "trap_kmh": 249.4557,
-      "trap_ms": 69.293237
+      "sixty_ft_s": 2.099643,
+      "trap_kmh": 250.4422,
+      "trap_ms": 69.567266
     },
     "Ninja ZX-25R (Indonesia) (2020-2026)|2020": {
-      "eighth_s": 7.817963,
-      "et_s": 12.388668,
+      "eighth_s": 8.831932,
+      "et_s": 13.517362,
       "finished": true,
-      "sixty_ft_s": 2.089514,
-      "trap_kmh": 172.5946,
-      "trap_ms": 47.942951
+      "sixty_ft_s": 2.561518,
+      "trap_kmh": 169.1608,
+      "trap_ms": 46.989115
     },
     "Ninja ZX-4R (2024-2026)|2024": {
-      "eighth_s": 8.175632,
-      "et_s": 12.426172,
+      "eighth_s": 9.10379,
+      "et_s": 13.427061,
       "finished": true,
-      "sixty_ft_s": 2.229548,
-      "trap_kmh": 188.6617,
-      "trap_ms": 52.406028
+      "sixty_ft_s": 2.728426,
+      "trap_kmh": 186.1743,
+      "trap_ms": 51.715072
     },
     "Ninja ZX-4RR (2023-2026)|2023": {
-      "eighth_s": 8.210233,
-      "et_s": 12.454027,
+      "eighth_s": 9.156075,
+      "et_s": 13.476081,
       "finished": true,
-      "sixty_ft_s": 2.2482,
-      "trap_kmh": 189.3164,
-      "trap_ms": 52.58789
+      "sixty_ft_s": 2.749779,
+      "trap_kmh": 186.678,
+      "trap_ms": 51.855012
     },
     "Ninja ZX-6R (2003-2004)|2003": {
       "eighth_s": 7.551847,
@@ -2743,76 +2743,76 @@
       "trap_ms": 61.379441
     },
     "Ninja ZX-6R (2009-2012)|2009": {
-      "eighth_s": 7.340983,
-      "et_s": 10.875864,
+      "eighth_s": 7.347629,
+      "et_s": 10.891041,
       "finished": true,
-      "sixty_ft_s": 2.194118,
-      "trap_kmh": 226.9497,
-      "trap_ms": 63.041584
+      "sixty_ft_s": 2.194714,
+      "trap_kmh": 226.3281,
+      "trap_ms": 62.868927
     },
     "Ninja ZX-6R (2019-2024)|2019": {
-      "eighth_s": 7.482628,
-      "et_s": 11.087773,
+      "eighth_s": 7.490613,
+      "et_s": 11.104842,
       "finished": true,
-      "sixty_ft_s": 2.232204,
-      "trap_kmh": 223.2084,
-      "trap_ms": 62.00233
+      "sixty_ft_s": 2.23286,
+      "trap_kmh": 222.5787,
+      "trap_ms": 61.827403
     },
     "Ninja ZX-7R (2000-2003)|2000": {
-      "eighth_s": 7.411618,
-      "et_s": 11.090298,
+      "eighth_s": 7.389487,
+      "et_s": 11.054825,
       "finished": true,
-      "sixty_ft_s": 2.156144,
-      "trap_kmh": 217.1657,
-      "trap_ms": 60.323819
+      "sixty_ft_s": 2.154035,
+      "trap_kmh": 218.0064,
+      "trap_ms": 60.557322
     },
     "Ninja ZX-9R (2000-2003)|2000": {
-      "eighth_s": 7.326254,
-      "et_s": 10.793302,
+      "eighth_s": 7.315097,
+      "et_s": 10.77029,
       "finished": true,
-      "sixty_ft_s": 2.201668,
-      "trap_kmh": 230.8397,
-      "trap_ms": 64.122141
+      "sixty_ft_s": 2.200601,
+      "trap_kmh": 231.7263,
+      "trap_ms": 64.368415
     },
     "Norden 901 (2022-2026)|2022": {
-      "eighth_s": 7.920293,
-      "et_s": 12.041469,
+      "eighth_s": 7.910756,
+      "et_s": 12.022062,
       "finished": true,
-      "sixty_ft_s": 2.274218,
-      "trap_kmh": 188.9787,
-      "trap_ms": 52.494083
+      "sixty_ft_s": 2.273635,
+      "trap_kmh": 189.4639,
+      "trap_ms": 52.628853
     },
     "Norden 901 Expedition (2025)|2025": {
-      "eighth_s": 8.090804,
-      "et_s": 12.245588,
+      "eighth_s": 8.081444,
+      "et_s": 12.226702,
       "finished": true,
-      "sixty_ft_s": 2.332913,
-      "trap_kmh": 188.7652,
-      "trap_ms": 52.434779
+      "sixty_ft_s": 2.332439,
+      "trap_kmh": 189.2647,
+      "trap_ms": 52.57354
     },
     "Pan America 1250 (2021-2026)|2021": {
-      "eighth_s": 7.64389,
-      "et_s": 11.531283,
+      "eighth_s": 7.637581,
+      "et_s": 11.514601,
       "finished": true,
-      "sixty_ft_s": 2.240702,
-      "trap_kmh": 202.8379,
-      "trap_ms": 56.343851
+      "sixty_ft_s": 2.240162,
+      "trap_kmh": 203.4972,
+      "trap_ms": 56.527004
     },
     "Panigale V2 (2020-2024)|2020": {
-      "eighth_s": 7.02436,
-      "et_s": 10.353623,
+      "eighth_s": 7.017407,
+      "et_s": 10.335915,
       "finished": true,
-      "sixty_ft_s": 2.12051,
-      "trap_kmh": 241.549,
-      "trap_ms": 67.096955
+      "sixty_ft_s": 2.119491,
+      "trap_kmh": 242.4704,
+      "trap_ms": 67.352888
     },
     "Panigale V2 (2025-2026)|2025": {
-      "eighth_s": 7.30397,
-      "et_s": 10.867236,
+      "eighth_s": 7.294321,
+      "et_s": 10.846855,
       "finished": true,
-      "sixty_ft_s": 2.17057,
-      "trap_kmh": 224.9816,
-      "trap_ms": 62.494892
+      "sixty_ft_s": 2.169656,
+      "trap_kmh": 225.7179,
+      "trap_ms": 62.699424
     },
     "Panigale V4 (2018-2024)|2018": {
       "eighth_s": 6.859029,
@@ -2831,540 +2831,540 @@
       "trap_ms": 70.054205
     },
     "Panigale V4R (2019-2025)|2019": {
-      "eighth_s": 6.841337,
-      "et_s": 9.887977,
+      "eighth_s": 6.835443,
+      "et_s": 9.872017,
       "finished": true,
-      "sixty_ft_s": 2.097541,
-      "trap_kmh": 266.8222,
-      "trap_ms": 74.117279
+      "sixty_ft_s": 2.096204,
+      "trap_kmh": 267.9696,
+      "trap_ms": 74.436
     },
     "Passion XPro 110 (2024-2026)|2024": {
-      "eighth_s": 13.194268,
-      "et_s": 21.364708,
+      "eighth_s": 13.412699,
+      "et_s": 21.751551,
       "finished": true,
-      "sixty_ft_s": 3.217329,
-      "trap_kmh": 94.1908,
-      "trap_ms": 26.164106
+      "sixty_ft_s": 3.268822,
+      "trap_kmh": 92.1854,
+      "trap_ms": 25.607059
     },
     "Perak (2020-2026)|2020": {
-      "eighth_s": 10.664491,
-      "et_s": 16.615413,
+      "eighth_s": 10.674146,
+      "et_s": 16.634676,
       "finished": true,
-      "sixty_ft_s": 2.886466,
-      "trap_kmh": 129.6612,
-      "trap_ms": 36.017013
+      "sixty_ft_s": 2.88751,
+      "trap_kmh": 129.4296,
+      "trap_ms": 35.952675
     },
     "Pulsar 125 Neon (2019-2024)|2019": {
-      "eighth_s": 12.476426,
-      "et_s": 19.683439,
+      "eighth_s": 12.641589,
+      "et_s": 19.963601,
       "finished": true,
-      "sixty_ft_s": 3.290492,
-      "trap_kmh": 108.0752,
-      "trap_ms": 30.0209
+      "sixty_ft_s": 3.334503,
+      "trap_kmh": 106.3003,
+      "trap_ms": 29.527859
     },
     "Pulsar 150 (2009-2023)|2009": {
-      "eighth_s": 11.77633,
-      "et_s": 18.625019,
+      "eighth_s": 11.925073,
+      "et_s": 18.863861,
       "finished": true,
-      "sixty_ft_s": 2.889648,
-      "trap_kmh": 112.7762,
-      "trap_ms": 31.326719
+      "sixty_ft_s": 2.923279,
+      "trap_kmh": 111.287,
+      "trap_ms": 30.913069
     },
     "Pulsar 200 (2007-2012)|2007": {
-      "eighth_s": 11.157499,
-      "et_s": 17.666388,
+      "eighth_s": 11.99067,
+      "et_s": 18.597066,
       "finished": true,
-      "sixty_ft_s": 2.829642,
-      "trap_kmh": 118.9414,
-      "trap_ms": 33.039268
+      "sixty_ft_s": 3.294534,
+      "trap_kmh": 117.5041,
+      "trap_ms": 32.640029
     },
     "Pulsar 220F (2007-2024)|2007": {
-      "eighth_s": 10.937065,
-      "et_s": 17.145884,
+      "eighth_s": 10.931834,
+      "et_s": 17.193763,
       "finished": true,
-      "sixty_ft_s": 2.799411,
-      "trap_kmh": 126.2896,
-      "trap_ms": 35.080449
+      "sixty_ft_s": 2.746696,
+      "trap_kmh": 125.1723,
+      "trap_ms": 34.770073
     },
     "Pulsar F250 (2021-2024)|2021": {
-      "eighth_s": 10.932046,
-      "et_s": 16.634687,
+      "eighth_s": 10.846374,
+      "et_s": 16.585551,
       "finished": true,
-      "sixty_ft_s": 3.064609,
-      "trap_kmh": 139.1305,
-      "trap_ms": 38.647352
+      "sixty_ft_s": 2.985971,
+      "trap_kmh": 138.161,
+      "trap_ms": 38.37805
     },
     "Pulsar N125 (2024-2026)|2024": {
-      "eighth_s": 12.271287,
-      "et_s": 19.45477,
+      "eighth_s": 12.441236,
+      "et_s": 19.745276,
       "finished": true,
-      "sixty_ft_s": 3.054571,
-      "trap_kmh": 108.8085,
-      "trap_ms": 30.224572
+      "sixty_ft_s": 3.094611,
+      "trap_kmh": 107.0035,
+      "trap_ms": 29.723196
     },
     "Pulsar N150 (2022-2026)|2022": {
-      "eighth_s": 11.915327,
-      "et_s": 18.771232,
+      "eighth_s": 12.057304,
+      "et_s": 19.007392,
       "finished": true,
-      "sixty_ft_s": 3.009038,
-      "trap_kmh": 113.7008,
-      "trap_ms": 31.583542
+      "sixty_ft_s": 3.043227,
+      "trap_kmh": 112.2156,
+      "trap_ms": 31.170992
     },
     "Pulsar N160 (2023-2024)|2023": {
-      "eighth_s": 11.432656,
-      "et_s": 17.857525,
+      "eighth_s": 12.393464,
+      "et_s": 18.925918,
       "finished": true,
-      "sixty_ft_s": 2.968838,
-      "trap_kmh": 121.4877,
-      "trap_ms": 33.746581
+      "sixty_ft_s": 3.474942,
+      "trap_kmh": 119.6641,
+      "trap_ms": 33.240025
     },
     "Pulsar N250 (2021-2024)|2021": {
-      "eighth_s": 11.120571,
-      "et_s": 17.144033,
+      "eighth_s": 11.03012,
+      "et_s": 17.092001,
       "finished": true,
-      "sixty_ft_s": 3.090893,
-      "trap_kmh": 128.8092,
-      "trap_ms": 35.780333
+      "sixty_ft_s": 3.011548,
+      "trap_kmh": 127.8574,
+      "trap_ms": 35.515932
     },
     "Pulsar NS 200 (2017-2024)|2017": {
-      "eighth_s": 10.431654,
-      "et_s": 16.377819,
+      "eighth_s": 11.057035,
+      "et_s": 17.067132,
       "finished": true,
-      "sixty_ft_s": 2.636261,
-      "trap_kmh": 131.6929,
-      "trap_ms": 36.58135
+      "sixty_ft_s": 3.033167,
+      "trap_kmh": 130.4228,
+      "trap_ms": 36.228548
     },
     "Pulsar NS125 (2021-2026)|2021": {
-      "eighth_s": 12.31158,
-      "et_s": 19.483147,
+      "eighth_s": 12.474227,
+      "et_s": 19.758801,
       "finished": true,
-      "sixty_ft_s": 3.127831,
-      "trap_kmh": 108.5148,
-      "trap_ms": 30.142998
+      "sixty_ft_s": 3.168455,
+      "trap_kmh": 106.8746,
+      "trap_ms": 29.687398
     },
     "Pulsar NS160 (2017-2024)|2017": {
-      "eighth_s": 11.365092,
-      "et_s": 17.988326,
+      "eighth_s": 12.185325,
+      "et_s": 18.913831,
       "finished": true,
-      "sixty_ft_s": 2.827387,
-      "trap_kmh": 117.9895,
-      "trap_ms": 32.77485
+      "sixty_ft_s": 3.299659,
+      "trap_kmh": 116.4055,
+      "trap_ms": 32.334871
     },
     "Pulsar NS200 (2012-2016)|2012": {
-      "eighth_s": 10.359928,
-      "et_s": 16.353041,
+      "eighth_s": 11.212226,
+      "et_s": 17.286529,
       "finished": true,
-      "sixty_ft_s": 2.705347,
-      "trap_kmh": 128.5353,
-      "trap_ms": 35.704258
+      "sixty_ft_s": 3.137638,
+      "trap_kmh": 127.0008,
+      "trap_ms": 35.277999
     },
     "Pulsar NS200 BS6 (2020-2026)|2020": {
-      "eighth_s": 10.101077,
-      "et_s": 15.927419,
+      "eighth_s": 10.767063,
+      "et_s": 16.66176,
       "finished": true,
-      "sixty_ft_s": 2.544319,
-      "trap_kmh": 134.0977,
-      "trap_ms": 37.249358
+      "sixty_ft_s": 2.936589,
+      "trap_kmh": 132.7224,
+      "trap_ms": 36.867344
     },
     "Pulsar NS250 (2024-2026)|2024": {
-      "eighth_s": 10.579959,
-      "et_s": 16.244115,
+      "eighth_s": 10.502045,
+      "et_s": 16.198549,
       "finished": true,
-      "sixty_ft_s": 2.961918,
-      "trap_kmh": 137.0721,
-      "trap_ms": 38.075587
+      "sixty_ft_s": 2.888663,
+      "trap_kmh": 136.18,
+      "trap_ms": 37.827785
     },
     "Pulsar NS400Z (2024-2026)|2024": {
-      "eighth_s": 10.086388,
-      "et_s": 15.407882,
+      "eighth_s": 10.17233,
+      "et_s": 15.532165,
       "finished": true,
-      "sixty_ft_s": 2.859892,
-      "trap_kmh": 146.1047,
-      "trap_ms": 40.584648
+      "sixty_ft_s": 2.886383,
+      "trap_kmh": 144.9838,
+      "trap_ms": 40.273266
     },
     "Pulsar P125 (2024-2026)|2024": {
-      "eighth_s": 12.283201,
-      "et_s": 19.468585,
+      "eighth_s": 12.454107,
+      "et_s": 19.760067,
       "finished": true,
-      "sixty_ft_s": 3.04049,
-      "trap_kmh": 108.7419,
-      "trap_ms": 30.206091
+      "sixty_ft_s": 3.079989,
+      "trap_kmh": 106.964,
+      "trap_ms": 29.712235
     },
     "Pulsar P150 (2023-2024)|2023": {
-      "eighth_s": 11.518901,
-      "et_s": 18.23074,
+      "eighth_s": 11.658451,
+      "et_s": 18.459679,
       "finished": true,
-      "sixty_ft_s": 2.810675,
-      "trap_kmh": 116.5845,
-      "trap_ms": 32.384575
+      "sixty_ft_s": 2.840935,
+      "trap_kmh": 114.9371,
+      "trap_ms": 31.926986
     },
     "Pulsar RS 200 (2015-2024)|2015": {
-      "eighth_s": 10.35151,
-      "et_s": 15.984271,
+      "eighth_s": 10.985244,
+      "et_s": 16.684187,
       "finished": true,
-      "sixty_ft_s": 2.654547,
-      "trap_kmh": 141.4368,
-      "trap_ms": 39.287999
+      "sixty_ft_s": 3.055619,
+      "trap_kmh": 140.0374,
+      "trap_ms": 38.899289
     },
     "Pursuit Dark Horse (2024-2025)|2024": {
-      "eighth_s": 8.441258,
-      "et_s": 12.585381,
+      "eighth_s": 8.427818,
+      "et_s": 12.558169,
       "finished": true,
-      "sixty_ft_s": 2.580141,
-      "trap_kmh": 189.8248,
-      "trap_ms": 52.729121
+      "sixty_ft_s": 2.5795,
+      "trap_kmh": 190.5207,
+      "trap_ms": 52.922405
     },
     "R 12 nineT (2024-2026)|2024": {
-      "eighth_s": 7.704897,
-      "et_s": 11.645472,
+      "eighth_s": 7.698707,
+      "et_s": 11.632962,
       "finished": true,
-      "sixty_ft_s": 2.206957,
-      "trap_kmh": 200.1317,
-      "trap_ms": 55.592139
+      "sixty_ft_s": 2.206496,
+      "trap_kmh": 200.4915,
+      "trap_ms": 55.69209
     },
     "R 1250 GS (2019-2025)|2019": {
-      "eighth_s": 7.77429,
-      "et_s": 11.675833,
+      "eighth_s": 7.766575,
+      "et_s": 11.658336,
       "finished": true,
-      "sixty_ft_s": 2.284797,
-      "trap_kmh": 200.7436,
-      "trap_ms": 55.762116
+      "sixty_ft_s": 2.284199,
+      "trap_kmh": 201.2903,
+      "trap_ms": 55.913968
     },
     "R 1250 RT (2021-2024)|2021": {
-      "eighth_s": 7.594663,
-      "et_s": 11.337986,
+      "eighth_s": 7.584636,
+      "et_s": 11.317739,
       "finished": true,
-      "sixty_ft_s": 2.237691,
-      "trap_kmh": 211.0098,
-      "trap_ms": 58.613831
+      "sixty_ft_s": 2.236897,
+      "trap_kmh": 211.6482,
+      "trap_ms": 58.79117
     },
     "R 1300 GS (2024-2026)|2024": {
-      "eighth_s": 7.64173,
-      "et_s": 11.327901,
+      "eighth_s": 7.635977,
+      "et_s": 11.312711,
       "finished": true,
-      "sixty_ft_s": 2.277078,
-      "trap_kmh": 215.2469,
-      "trap_ms": 59.790803
+      "sixty_ft_s": 2.276444,
+      "trap_kmh": 215.8355,
+      "trap_ms": 59.954312
     },
     "R 18 (2020-2026)|2020": {
-      "eighth_s": 9.082273,
-      "et_s": 14.000976,
+      "eighth_s": 9.071822,
+      "et_s": 13.988381,
       "finished": true,
-      "sixty_ft_s": 2.635185,
-      "trap_kmh": 150.001,
-      "trap_ms": 41.666953
+      "sixty_ft_s": 2.634801,
+      "trap_kmh": 150.0002,
+      "trap_ms": 41.666721
     },
     "R nineT (2014-2023)|2014": {
-      "eighth_s": 7.697376,
-      "et_s": 11.740932,
+      "eighth_s": 7.689723,
+      "et_s": 11.725699,
       "finished": true,
-      "sixty_ft_s": 2.193848,
-      "trap_kmh": 193.0318,
-      "trap_ms": 53.619937
+      "sixty_ft_s": 2.193221,
+      "trap_kmh": 193.4037,
+      "trap_ms": 53.723253
     },
     "R1200GS (2013-2018)|2013": {
-      "eighth_s": 7.799675,
-      "et_s": 11.8018,
+      "eighth_s": 7.79104,
+      "et_s": 11.78373,
       "finished": true,
-      "sixty_ft_s": 2.260838,
-      "trap_kmh": 195.0097,
-      "trap_ms": 54.169349
+      "sixty_ft_s": 2.260261,
+      "trap_kmh": 195.4728,
+      "trap_ms": 54.298005
     },
     "RC 125 (2017-2026)|2017": {
-      "eighth_s": 11.19769,
-      "et_s": 17.403427,
+      "eighth_s": 11.32254,
+      "et_s": 17.606345,
       "finished": true,
-      "sixty_ft_s": 2.918743,
-      "trap_kmh": 128.0229,
-      "trap_ms": 35.561904
+      "sixty_ft_s": 2.951034,
+      "trap_kmh": 126.3849,
+      "trap_ms": 35.106911
     },
     "RC 200 (2022-2024)|2022": {
-      "eighth_s": 10.034562,
-      "et_s": 15.474591,
+      "eighth_s": 10.408923,
+      "et_s": 15.898659,
       "finished": true,
-      "sixty_ft_s": 2.596236,
-      "trap_kmh": 146.2811,
-      "trap_ms": 40.633647
+      "sixty_ft_s": 2.832648,
+      "trap_kmh": 145.0461,
+      "trap_ms": 40.29057
     },
     "RC 390 (2022-2024)|2022": {
-      "eighth_s": 9.168314,
-      "et_s": 13.851231,
+      "eighth_s": 9.201334,
+      "et_s": 13.912661,
       "finished": true,
-      "sixty_ft_s": 2.61257,
-      "trap_kmh": 169.406,
-      "trap_ms": 47.057218
+      "sixty_ft_s": 2.613828,
+      "trap_kmh": 168.3032,
+      "trap_ms": 46.750876
     },
     "RC 390 Gen 3 (2024-2026)|2024": {
-      "eighth_s": 9.089609,
-      "et_s": 13.735521,
+      "eighth_s": 9.119161,
+      "et_s": 13.792605,
       "finished": true,
-      "sixty_ft_s": 2.590087,
-      "trap_kmh": 171.4949,
-      "trap_ms": 47.637485
+      "sixty_ft_s": 2.591197,
+      "trap_kmh": 170.4356,
+      "trap_ms": 47.34322
     },
     "RC213V-S (2015-2016)|2015": {
-      "eighth_s": 6.711712,
-      "et_s": 9.79302,
+      "eighth_s": 6.700662,
+      "et_s": 9.769898,
       "finished": true,
-      "sixty_ft_s": 2.038801,
-      "trap_kmh": 262.2265,
-      "trap_ms": 72.840706
+      "sixty_ft_s": 2.037464,
+      "trap_kmh": 263.3439,
+      "trap_ms": 73.15109
     },
     "RC30 (VFR750R) (1988-1992)|1988": {
-      "eighth_s": 7.417921,
-      "et_s": 11.094153,
+      "eighth_s": 7.399484,
+      "et_s": 11.06287,
       "finished": true,
-      "sixty_ft_s": 2.164257,
-      "trap_kmh": 218.6502,
-      "trap_ms": 60.736178
+      "sixty_ft_s": 2.163154,
+      "trap_kmh": 219.4586,
+      "trap_ms": 60.960716
     },
     "RD350 (1973-1975)|1973": {
-      "eighth_s": 9.288927,
-      "et_s": 14.882931,
+      "eighth_s": 9.081138,
+      "et_s": 14.646304,
       "finished": true,
-      "sixty_ft_s": 2.308801,
-      "trap_kmh": 145.107,
-      "trap_ms": 40.307498
+      "sixty_ft_s": 2.191023,
+      "trap_kmh": 145.3786,
+      "trap_ms": 40.382958
     },
     "RD400 Daytona (1976-1979)|1976": {
-      "eighth_s": 9.028124,
-      "et_s": 14.165664,
+      "eighth_s": 9.001791,
+      "et_s": 14.136801,
       "finished": true,
-      "sixty_ft_s": 2.127674,
-      "trap_kmh": 158.8428,
-      "trap_ms": 44.123008
+      "sixty_ft_s": 2.116959,
+      "trap_kmh": 158.8787,
+      "trap_ms": 44.132961
     },
     "RD500LC (1984-1986)|1984": {
-      "eighth_s": 8.214108,
-      "et_s": 13.032469,
+      "eighth_s": 8.1968,
+      "et_s": 13.015293,
       "finished": true,
-      "sixty_ft_s": 2.142074,
-      "trap_kmh": 159.7045,
-      "trap_ms": 44.362358
+      "sixty_ft_s": 2.131711,
+      "trap_kmh": 159.6865,
+      "trap_ms": 44.357358
     },
     "RG500 Gamma (1985-1987)|1985": {
-      "eighth_s": 7.377207,
-      "et_s": 11.123645,
+      "eighth_s": 7.356654,
+      "et_s": 11.101526,
       "finished": true,
-      "sixty_ft_s": 2.146385,
-      "trap_kmh": 214.0546,
-      "trap_ms": 59.4596
+      "sixty_ft_s": 2.136497,
+      "trap_kmh": 214.1064,
+      "trap_ms": 59.473999
     },
     "RGV250 Gamma (1991-1996)|1991": {
-      "eighth_s": 8.224767,
-      "et_s": 13.094075,
+      "eighth_s": 8.212961,
+      "et_s": 13.084699,
       "finished": true,
-      "sixty_ft_s": 2.126268,
-      "trap_kmh": 159.0846,
-      "trap_ms": 44.190153
+      "sixty_ft_s": 2.118181,
+      "trap_kmh": 159.0075,
+      "trap_ms": 44.16875
     },
     "RS 457 (2024-2026)|2024": {
-      "eighth_s": 8.66396,
-      "et_s": 13.207431,
+      "eighth_s": 8.529554,
+      "et_s": 13.094069,
       "finished": true,
-      "sixty_ft_s": 2.386183,
-      "trap_kmh": 175.0767,
-      "trap_ms": 48.632404
+      "sixty_ft_s": 2.268944,
+      "trap_kmh": 174.1328,
+      "trap_ms": 48.370209
     },
     "RS 660 (2021-2026)|2021": {
-      "eighth_s": 7.512638,
-      "et_s": 11.160076,
+      "eighth_s": 7.54322,
+      "et_s": 11.203861,
       "finished": true,
-      "sixty_ft_s": 2.204246,
-      "trap_kmh": 219.9277,
-      "trap_ms": 61.091034
+      "sixty_ft_s": 2.212421,
+      "trap_kmh": 219.1155,
+      "trap_ms": 60.865427
     },
     "RS 660 Extrema (2024-2025)|2024": {
-      "eighth_s": 7.364321,
-      "et_s": 10.916679,
+      "eighth_s": 7.383694,
+      "et_s": 10.948398,
       "finished": true,
-      "sixty_ft_s": 2.189193,
-      "trap_kmh": 225.5743,
-      "trap_ms": 62.659534
+      "sixty_ft_s": 2.19063,
+      "trap_kmh": 224.7867,
+      "trap_ms": 62.440759
     },
     "RS 660 Factory (2025)|2025": {
-      "eighth_s": 7.594563,
-      "et_s": 11.361115,
+      "eighth_s": 7.626752,
+      "et_s": 11.407342,
       "finished": true,
-      "sixty_ft_s": 2.209422,
-      "trap_kmh": 213.61,
-      "trap_ms": 59.336121
+      "sixty_ft_s": 2.219965,
+      "trap_kmh": 212.8656,
+      "trap_ms": 59.129324
     },
     "RS125 (1995-2012)|1995": {
-      "eighth_s": 9.552679,
-      "et_s": 15.467093,
+      "eighth_s": 9.284139,
+      "et_s": 15.195276,
       "finished": true,
-      "sixty_ft_s": 2.750289,
-      "trap_kmh": 124.4825,
-      "trap_ms": 34.578482
+      "sixty_ft_s": 2.642319,
+      "trap_kmh": 124.4816,
+      "trap_ms": 34.57821
     },
     "RS150R (Malaysia) (2017-2026)|2017": {
-      "eighth_s": 10.899733,
-      "et_s": 16.929153,
+      "eighth_s": 11.011118,
+      "et_s": 17.109747,
       "finished": true,
-      "sixty_ft_s": 2.886745,
-      "trap_kmh": 130.1185,
-      "trap_ms": 36.144026
+      "sixty_ft_s": 2.916532,
+      "trap_kmh": 129.1856,
+      "trap_ms": 35.884891
     },
     "RS250 (1995-2002)|1995": {
-      "eighth_s": 8.088273,
-      "et_s": 12.764963,
+      "eighth_s": 8.076056,
+      "et_s": 12.754116,
       "finished": true,
-      "sixty_ft_s": 2.115777,
-      "trap_kmh": 170.0456,
-      "trap_ms": 47.234884
+      "sixty_ft_s": 2.107876,
+      "trap_kmh": 169.958,
+      "trap_ms": 47.21055
     },
     "RSV Mille (2001-2004)|2001": {
-      "eighth_s": 7.179132,
-      "et_s": 10.667838,
+      "eighth_s": 7.170917,
+      "et_s": 10.649028,
       "finished": true,
-      "sixty_ft_s": 2.134565,
-      "trap_kmh": 230.224,
-      "trap_ms": 63.951119
+      "sixty_ft_s": 2.133665,
+      "trap_kmh": 231.0179,
+      "trap_ms": 64.171639
     },
     "RSV4 1000 (2009-2014)|2009": {
-      "eighth_s": 7.217292,
-      "et_s": 10.455416,
+      "eighth_s": 7.209042,
+      "et_s": 10.435708,
       "finished": true,
-      "sixty_ft_s": 2.215495,
-      "trap_kmh": 248.9683,
-      "trap_ms": 69.157853
+      "sixty_ft_s": 2.214201,
+      "trap_kmh": 249.0547,
+      "trap_ms": 69.181851
     },
     "RSV4 1100 Factory FW1A (2025-2026)|2025": {
-      "eighth_s": 6.825013,
-      "et_s": 9.845407,
+      "eighth_s": 6.821229,
+      "et_s": 9.833004,
       "finished": true,
-      "sixty_ft_s": 2.092216,
-      "trap_kmh": 268.3284,
-      "trap_ms": 74.535677
+      "sixty_ft_s": 2.090882,
+      "trap_kmh": 268.2327,
+      "trap_ms": 74.509088
     },
     "RSV4 Factory (2021-2024)|2021": {
-      "eighth_s": 7.074496,
-      "et_s": 10.176663,
+      "eighth_s": 7.070126,
+      "et_s": 10.162442,
       "finished": true,
-      "sixty_ft_s": 2.169213,
-      "trap_kmh": 262.6285,
-      "trap_ms": 72.952353
+      "sixty_ft_s": 2.167856,
+      "trap_kmh": 263.5916,
+      "trap_ms": 73.219879
     },
     "RX100 (1985-1996)|1985": {
-      "eighth_s": 13.018409,
-      "et_s": 21.087053,
+      "eighth_s": 12.814097,
+      "et_s": 20.881252,
       "finished": true,
-      "sixty_ft_s": 2.748686,
-      "trap_kmh": 95.4263,
-      "trap_ms": 26.507311
+      "sixty_ft_s": 2.591355,
+      "trap_kmh": 95.3901,
+      "trap_ms": 26.497247
     },
     "RX135 (5-speed India) (1997-2005)|1997": {
-      "eighth_s": 11.586756,
-      "et_s": 18.891067,
+      "eighth_s": 11.339447,
+      "et_s": 18.637637,
       "finished": true,
-      "sixty_ft_s": 2.713552,
-      "trap_kmh": 103.548,
-      "trap_ms": 28.763346
+      "sixty_ft_s": 2.553107,
+      "trap_kmh": 103.5885,
+      "trap_ms": 28.774597
     },
     "RXZ135 (Malaysia) (1985-2000)|1985": {
-      "eighth_s": 11.372119,
-      "et_s": 18.365913,
+      "eighth_s": 11.102515,
+      "et_s": 18.085759,
       "finished": true,
-      "sixty_ft_s": 2.772057,
-      "trap_kmh": 106.7407,
-      "trap_ms": 29.650191
+      "sixty_ft_s": 2.613707,
+      "trap_kmh": 106.7676,
+      "trap_ms": 29.657659
     },
     "RZV500R (Japan) (1984-1986)|1984": {
-      "eighth_s": 8.256692,
-      "et_s": 13.585863,
+      "eighth_s": 8.238265,
+      "et_s": 13.57082,
       "finished": true,
-      "sixty_ft_s": 2.1523,
-      "trap_kmh": 157.3406,
-      "trap_ms": 43.705712
+      "sixty_ft_s": 2.141024,
+      "trap_kmh": 157.2892,
+      "trap_ms": 43.691442
     },
     "Raider 125 (2021-2026)|2021": {
-      "eighth_s": 12.246092,
-      "et_s": 19.40023,
+      "eighth_s": 12.430278,
+      "et_s": 19.704103,
       "finished": true,
-      "sixty_ft_s": 3.036301,
-      "trap_kmh": 107.8443,
-      "trap_ms": 29.956741
+      "sixty_ft_s": 3.080086,
+      "trap_kmh": 106.5362,
+      "trap_ms": 29.593383
     },
     "Raider 125 (2022-2024)|2022": {
-      "eighth_s": 12.343063,
-      "et_s": 19.470298,
+      "eighth_s": 12.518228,
+      "et_s": 19.758757,
       "finished": true,
-      "sixty_ft_s": 3.075318,
-      "trap_kmh": 109.0455,
-      "trap_ms": 30.290412
+      "sixty_ft_s": 3.115933,
+      "trap_kmh": 107.2489,
+      "trap_ms": 29.791369
     },
     "Raider R150 Fi (2017-2026)|2017": {
-      "eighth_s": 10.304173,
-      "et_s": 15.968745,
+      "eighth_s": 10.398298,
+      "et_s": 16.120303,
       "finished": true,
-      "sixty_ft_s": 2.760089,
-      "trap_kmh": 139.5497,
-      "trap_ms": 38.763811
+      "sixty_ft_s": 2.785482,
+      "trap_kmh": 138.117,
+      "trap_ms": 38.365824
     },
     "Rebel 1100 (2021-2026)|2021": {
-      "eighth_s": 8.074637,
-      "et_s": 12.488103,
+      "eighth_s": 8.071283,
+      "et_s": 12.482224,
       "finished": true,
-      "sixty_ft_s": 2.199901,
-      "trap_kmh": 175.903,
-      "trap_ms": 48.861948
+      "sixty_ft_s": 2.199687,
+      "trap_kmh": 175.9901,
+      "trap_ms": 48.886125
     },
     "Road Glide (2023-2026)|2023": {
-      "eighth_s": 8.407696,
-      "et_s": 13.101546,
+      "eighth_s": 8.394665,
+      "et_s": 13.079349,
       "finished": true,
-      "sixty_ft_s": 2.134241,
-      "trap_kmh": 166.3044,
-      "trap_ms": 46.195656
+      "sixty_ft_s": 2.133641,
+      "trap_kmh": 166.5886,
+      "trap_ms": 46.27462
     },
     "Roadster (2022-2026)|2022": {
-      "eighth_s": 10.681779,
-      "et_s": 16.498614,
+      "eighth_s": 10.886126,
+      "et_s": 16.74467,
       "finished": true,
-      "sixty_ft_s": 2.955074,
-      "trap_kmh": 134.147,
-      "trap_ms": 37.263067
+      "sixty_ft_s": 3.04748,
+      "trap_kmh": 133.0005,
+      "trap_ms": 36.94458
     },
     "Rocket 3 R (2020-2026)|2020": {
-      "eighth_s": 7.147463,
-      "et_s": 10.835455,
+      "eighth_s": 7.135097,
+      "et_s": 10.811863,
       "finished": true,
-      "sixty_ft_s": 2.008479,
-      "trap_kmh": 214.827,
-      "trap_ms": 59.674177
+      "sixty_ft_s": 2.007873,
+      "trap_kmh": 215.3432,
+      "trap_ms": 59.81756
     },
     "Rocket 3 Storm R (2024-2026)|2024": {
-      "eighth_s": 7.066848,
-      "et_s": 10.699896,
+      "eighth_s": 7.054736,
+      "et_s": 10.673962,
       "finished": true,
-      "sixty_ft_s": 2.016736,
-      "trap_kmh": 217.2774,
-      "trap_ms": 60.354831
+      "sixty_ft_s": 2.016335,
+      "trap_kmh": 218.1923,
+      "trap_ms": 60.608974
     },
     "Ronin 225 (2022-2025)|2022": {
-      "eighth_s": 11.550127,
-      "et_s": 17.943579,
+      "eighth_s": 11.55313,
+      "et_s": 18.002704,
       "finished": true,
-      "sixty_ft_s": 3.148481,
-      "trap_kmh": 121.53,
-      "trap_ms": 33.758336
+      "sixty_ft_s": 3.094104,
+      "trap_kmh": 120.4035,
+      "trap_ms": 33.445421
     },
     "S 1000 RR (2015-2018)|2015": {
-      "eighth_s": 6.836815,
-      "et_s": 9.999398,
+      "eighth_s": 6.829703,
+      "et_s": 9.980643,
       "finished": true,
-      "sixty_ft_s": 2.079564,
-      "trap_kmh": 255.4905,
-      "trap_ms": 70.969578
+      "sixty_ft_s": 2.078282,
+      "trap_kmh": 256.5757,
+      "trap_ms": 71.271015
     },
     "S 1000 RR (2019-2024)|2019": {
-      "eighth_s": 6.829399,
-      "et_s": 9.963809,
+      "eighth_s": 6.822551,
+      "et_s": 9.945331,
       "finished": true,
-      "sixty_ft_s": 2.081848,
-      "trap_kmh": 258.1742,
-      "trap_ms": 71.715066
+      "sixty_ft_s": 2.080566,
+      "trap_kmh": 259.3223,
+      "trap_ms": 72.033969
     },
     "S1000R (2021-2024)|2021": {
       "eighth_s": 6.998981,
@@ -3375,332 +3375,332 @@
       "trap_ms": 63.951841
     },
     "S1000XR (2020-2026)|2020": {
-      "eighth_s": 7.02549,
-      "et_s": 10.609625,
+      "eighth_s": 7.011331,
+      "et_s": 10.581772,
       "finished": true,
-      "sixty_ft_s": 2.040941,
-      "trap_kmh": 220.3433,
-      "trap_ms": 61.206482
+      "sixty_ft_s": 2.040167,
+      "trap_kmh": 219.9657,
+      "trap_ms": 61.101571
     },
     "SP 125 (2019-2026)|2019": {
-      "eighth_s": 12.408805,
-      "et_s": 19.761214,
+      "eighth_s": 12.591487,
+      "et_s": 20.07958,
       "finished": true,
-      "sixty_ft_s": 3.139565,
-      "trap_kmh": 106.248,
-      "trap_ms": 29.513326
+      "sixty_ft_s": 3.186538,
+      "trap_kmh": 104.2455,
+      "trap_ms": 28.957094
     },
     "SP 160 (2024-2025)|2024": {
-      "eighth_s": 11.503529,
-      "et_s": 18.028663,
+      "eighth_s": 12.489134,
+      "et_s": 19.134734,
       "finished": true,
-      "sixty_ft_s": 2.955595,
-      "trap_kmh": 119.7709,
-      "trap_ms": 33.269688
+      "sixty_ft_s": 3.476888,
+      "trap_kmh": 118.0229,
+      "trap_ms": 32.784129
     },
     "SP160 (2023-2026)|2023": {
-      "eighth_s": 11.840654,
-      "et_s": 18.767165,
+      "eighth_s": 12.745489,
+      "et_s": 19.793753,
       "finished": true,
-      "sixty_ft_s": 2.939795,
-      "trap_kmh": 112.4994,
-      "trap_ms": 31.249823
+      "sixty_ft_s": 3.456473,
+      "trap_kmh": 110.8101,
+      "trap_ms": 30.780588
     },
     "SR400 (2014-2020)|2014": {
-      "eighth_s": 10.859634,
-      "et_s": 17.110898,
+      "eighth_s": 10.906973,
+      "et_s": 17.195937,
       "finished": true,
-      "sixty_ft_s": 2.645368,
-      "trap_kmh": 125.4964,
-      "trap_ms": 34.8601
+      "sixty_ft_s": 2.649386,
+      "trap_kmh": 124.7489,
+      "trap_ms": 34.652465
     },
     "SRK 400 (2022-2026)|2022": {
-      "eighth_s": 9.362153,
-      "et_s": 14.492433,
+      "eighth_s": 9.220436,
+      "et_s": 14.374512,
       "finished": true,
-      "sixty_ft_s": 2.525672,
-      "trap_kmh": 151.8137,
-      "trap_ms": 42.170478
+      "sixty_ft_s": 2.414077,
+      "trap_kmh": 150.9601,
+      "trap_ms": 41.933361
     },
     "SRK 800 RC (2023-2026)|2023": {
-      "eighth_s": 7.411114,
-      "et_s": 11.039985,
+      "eighth_s": 7.399971,
+      "et_s": 11.017144,
       "finished": true,
-      "sixty_ft_s": 2.189439,
-      "trap_kmh": 220.0945,
-      "trap_ms": 61.137348
+      "sixty_ft_s": 2.188519,
+      "trap_kmh": 220.8747,
+      "trap_ms": 61.35407
     },
     "SRK 921 (2025-2026)|2025": {
-      "eighth_s": 7.665488,
-      "et_s": 11.491074,
+      "eighth_s": 7.632487,
+      "et_s": 11.444898,
       "finished": true,
-      "sixty_ft_s": 2.228433,
-      "trap_kmh": 206.8185,
-      "trap_ms": 57.449587
+      "sixty_ft_s": 2.21775,
+      "trap_kmh": 207.5397,
+      "trap_ms": 57.64993
     },
     "SV650 (2016-2026)|2016": {
-      "eighth_s": 8.022971,
-      "et_s": 12.311773,
+      "eighth_s": 8.05438,
+      "et_s": 12.362824,
       "finished": true,
-      "sixty_ft_s": 2.241068,
-      "trap_kmh": 183.1585,
-      "trap_ms": 50.877371
+      "sixty_ft_s": 2.245155,
+      "trap_kmh": 182.2629,
+      "trap_ms": 50.628573
     },
     "SV650X (2018-2024)|2018": {
-      "eighth_s": 7.980586,
-      "et_s": 12.02073,
+      "eighth_s": 8.0251,
+      "et_s": 12.084433,
       "finished": true,
-      "sixty_ft_s": 2.261712,
-      "trap_kmh": 198.4757,
-      "trap_ms": 55.132126
+      "sixty_ft_s": 2.276119,
+      "trap_kmh": 197.4955,
+      "trap_ms": 54.85985
     },
     "Scout (2015-2024)|2015": {
-      "eighth_s": 8.2658,
-      "et_s": 12.519467,
+      "eighth_s": 8.259719,
+      "et_s": 12.507858,
       "finished": true,
-      "sixty_ft_s": 2.367108,
-      "trap_kmh": 184.0038,
-      "trap_ms": 51.112169
+      "sixty_ft_s": 2.366788,
+      "trap_kmh": 184.2513,
+      "trap_ms": 51.180921
     },
     "Scout Bobber (2025-2026)|2025": {
-      "eighth_s": 8.143586,
-      "et_s": 12.276406,
+      "eighth_s": 8.136863,
+      "et_s": 12.262787,
       "finished": true,
-      "sixty_ft_s": 2.375503,
-      "trap_kmh": 190.3811,
-      "trap_ms": 52.883643
+      "sixty_ft_s": 2.375108,
+      "trap_kmh": 190.7284,
+      "trap_ms": 52.980107
     },
     "Scram 411 (2022-2026)|2022": {
-      "eighth_s": 10.92437,
-      "et_s": 17.121336,
+      "eighth_s": 10.962963,
+      "et_s": 17.184895,
       "finished": true,
-      "sixty_ft_s": 2.880213,
-      "trap_kmh": 125.6097,
-      "trap_ms": 34.891592
+      "sixty_ft_s": 2.889368,
+      "trap_kmh": 125.1016,
+      "trap_ms": 34.750454
     },
     "Scram 450 (2024-2026)|2024": {
-      "eighth_s": 9.610516,
-      "et_s": 14.97403,
+      "eighth_s": 9.613117,
+      "et_s": 14.979024,
       "finished": true,
-      "sixty_ft_s": 2.546143,
-      "trap_kmh": 145.057,
-      "trap_ms": 40.293615
+      "sixty_ft_s": 2.546191,
+      "trap_kmh": 144.968,
+      "trap_ms": 40.268882
     },
     "Scrambler (2022-2026)|2022": {
-      "eighth_s": 10.92406,
-      "et_s": 16.773738,
+      "eighth_s": 11.032645,
+      "et_s": 16.934979,
       "finished": true,
-      "sixty_ft_s": 3.077245,
-      "trap_kmh": 132.9013,
-      "trap_ms": 36.917029
+      "sixty_ft_s": 3.110815,
+      "trap_kmh": 131.7749,
+      "trap_ms": 36.604148
     },
     "Scrambler 1100 (2018-2024)|2018": {
-      "eighth_s": 8.261779,
-      "et_s": 12.664172,
+      "eighth_s": 8.259518,
+      "et_s": 12.659811,
       "finished": true,
-      "sixty_ft_s": 2.308631,
-      "trap_kmh": 177.0075,
-      "trap_ms": 49.168752
+      "sixty_ft_s": 2.30849,
+      "trap_kmh": 177.0941,
+      "trap_ms": 49.192816
     },
     "Scrambler 1200 XE (2023-2026)|2023": {
-      "eighth_s": 8.109702,
-      "et_s": 12.342914,
+      "eighth_s": 8.107459,
+      "et_s": 12.33864,
       "finished": true,
-      "sixty_ft_s": 2.296821,
-      "trap_kmh": 186.4221,
-      "trap_ms": 51.783914
+      "sixty_ft_s": 2.296604,
+      "trap_kmh": 186.5158,
+      "trap_ms": 51.809953
     },
     "Scrambler 400X (2023-2026)|2023": {
-      "eighth_s": 9.811421,
-      "et_s": 15.210838,
+      "eighth_s": 9.807467,
+      "et_s": 15.206832,
       "finished": true,
-      "sixty_ft_s": 2.695999,
-      "trap_kmh": 144.1817,
-      "trap_ms": 40.050475
+      "sixty_ft_s": 2.694014,
+      "trap_kmh": 144.1758,
+      "trap_ms": 40.048821
     },
     "Scrambler Icon 800 (2015-2022)|2015": {
-      "eighth_s": 8.397191,
-      "et_s": 12.900758,
+      "eighth_s": 8.388172,
+      "et_s": 12.888149,
       "finished": true,
-      "sixty_ft_s": 2.331658,
-      "trap_kmh": 172.8407,
-      "trap_ms": 48.011301
+      "sixty_ft_s": 2.328591,
+      "trap_kmh": 172.9847,
+      "trap_ms": 48.051309
     },
     "Shine 125 (2019-2024)|2019": {
-      "eighth_s": 12.332796,
-      "et_s": 19.688483,
+      "eighth_s": 12.514419,
+      "et_s": 20.004476,
       "finished": true,
-      "sixty_ft_s": 3.101999,
-      "trap_kmh": 105.8776,
-      "trap_ms": 29.410458
+      "sixty_ft_s": 3.148055,
+      "trap_kmh": 103.8916,
+      "trap_ms": 28.85877
     },
     "Shiver 900 (2017-2024)|2017": {
-      "eighth_s": 7.829824,
-      "et_s": 11.864066,
+      "eighth_s": 7.821411,
+      "et_s": 11.847466,
       "finished": true,
-      "sixty_ft_s": 2.233745,
-      "trap_kmh": 196.8157,
-      "trap_ms": 54.671024
+      "sixty_ft_s": 2.233084,
+      "trap_kmh": 197.2058,
+      "trap_ms": 54.779401
     },
     "Shotgun 650 (2024-2026)|2024": {
-      "eighth_s": 9.122179,
-      "et_s": 14.329601,
+      "eighth_s": 9.120559,
+      "et_s": 14.327514,
       "finished": true,
-      "sixty_ft_s": 2.279699,
-      "trap_kmh": 149.3871,
-      "trap_ms": 41.496419
+      "sixty_ft_s": 2.279462,
+      "trap_kmh": 149.3925,
+      "trap_ms": 41.497913
     },
     "Sonic 150R (Indonesia) (2015-2022)|2015": {
-      "eighth_s": 11.186508,
-      "et_s": 17.259948,
+      "eighth_s": 11.306465,
+      "et_s": 17.454723,
       "finished": true,
-      "sixty_ft_s": 3.005707,
-      "trap_kmh": 130.7853,
-      "trap_ms": 36.329258
+      "sixty_ft_s": 3.038098,
+      "trap_kmh": 129.2022,
+      "trap_ms": 35.88949
     },
     "Speed 400 (2023-2024)|2023": {
-      "eighth_s": 9.786086,
-      "et_s": 15.133263,
+      "eighth_s": 9.868458,
+      "et_s": 15.255594,
       "finished": true,
-      "sixty_ft_s": 2.674535,
-      "trap_kmh": 146.6739,
-      "trap_ms": 40.742748
+      "sixty_ft_s": 2.700094,
+      "trap_kmh": 145.5281,
+      "trap_ms": 40.424472
     },
     "Speed T4 (2024-2026)|2024": {
-      "eighth_s": 10.189062,
-      "et_s": 15.883341,
+      "eighth_s": 10.290816,
+      "et_s": 16.037884,
       "finished": true,
-      "sixty_ft_s": 2.673017,
-      "trap_kmh": 136.9596,
-      "trap_ms": 38.044323
+      "sixty_ft_s": 2.704297,
+      "trap_kmh": 135.77,
+      "trap_ms": 37.713884
     },
     "Speed Triple 1050 (2005-2010)|2005": {
-      "eighth_s": 7.471546,
-      "et_s": 11.245596,
+      "eighth_s": 7.46174,
+      "et_s": 11.226645,
       "finished": true,
-      "sixty_ft_s": 2.179582,
-      "trap_kmh": 206.8897,
-      "trap_ms": 57.469358
+      "sixty_ft_s": 2.17883,
+      "trap_kmh": 207.1632,
+      "trap_ms": 57.545333
     },
     "Speed Triple 1050 (2011-2015)|2011": {
-      "eighth_s": 7.380642,
-      "et_s": 11.088718,
+      "eighth_s": 7.370203,
+      "et_s": 11.067727,
       "finished": true,
-      "sixty_ft_s": 2.165607,
-      "trap_kmh": 212.4166,
-      "trap_ms": 59.004618
+      "sixty_ft_s": 2.16465,
+      "trap_kmh": 212.8858,
+      "trap_ms": 59.134932
     },
     "Speed Triple 1200 RR (2022-2026)|2022": {
-      "eighth_s": 6.667759,
-      "et_s": 9.945779,
+      "eighth_s": 6.661485,
+      "et_s": 9.929003,
       "finished": true,
-      "sixty_ft_s": 1.950075,
-      "trap_kmh": 242.8445,
-      "trap_ms": 67.45681
+      "sixty_ft_s": 1.949264,
+      "trap_kmh": 243.7379,
+      "trap_ms": 67.704969
     },
     "Speed Triple 1200 RS (2021-2024)|2021": {
-      "eighth_s": 6.89324,
-      "et_s": 10.286063,
+      "eighth_s": 6.882852,
+      "et_s": 10.264083,
       "finished": true,
-      "sixty_ft_s": 2.030579,
-      "trap_kmh": 231.9125,
-      "trap_ms": 64.420133
+      "sixty_ft_s": 2.029678,
+      "trap_kmh": 232.82,
+      "trap_ms": 64.672218
     },
     "Speed Twin 1200 (2019-2026)|2019": {
-      "eighth_s": 7.859213,
-      "et_s": 12.038352,
+      "eighth_s": 7.854893,
+      "et_s": 12.029734,
       "finished": true,
-      "sixty_ft_s": 2.18997,
-      "trap_kmh": 187.7911,
-      "trap_ms": 52.164196
+      "sixty_ft_s": 2.189675,
+      "trap_kmh": 188.0099,
+      "trap_ms": 52.224964
     },
     "Speed Twin 1200 RS (2024-2026)|2024": {
-      "eighth_s": 7.772156,
-      "et_s": 11.774202,
+      "eighth_s": 7.766328,
+      "et_s": 11.763052,
       "finished": true,
-      "sixty_ft_s": 2.218823,
-      "trap_kmh": 197.6978,
-      "trap_ms": 54.916059
+      "sixty_ft_s": 2.218348,
+      "trap_kmh": 197.9972,
+      "trap_ms": 54.999211
     },
     "Speed Twin 900 (2019-2024)|2019": {
-      "eighth_s": 8.510392,
-      "et_s": 13.099145,
+      "eighth_s": 8.507177,
+      "et_s": 13.092696,
       "finished": true,
-      "sixty_ft_s": 2.342178,
-      "trap_kmh": 170.1364,
-      "trap_ms": 47.260109
+      "sixty_ft_s": 2.341871,
+      "trap_kmh": 170.2661,
+      "trap_ms": 47.296137
     },
     "Splendor Plus (2020-2026)|2020": {
-      "eighth_s": 13.200089,
-      "et_s": 21.240389,
+      "eighth_s": 13.432239,
+      "et_s": 21.644821,
       "finished": true,
-      "sixty_ft_s": 3.331616,
-      "trap_kmh": 95.7675,
-      "trap_ms": 26.602073
+      "sixty_ft_s": 3.38793,
+      "trap_kmh": 93.6172,
+      "trap_ms": 26.004788
     },
     "Sport Chief (2023-2026)|2023": {
-      "eighth_s": 8.272805,
-      "et_s": 12.485969,
+      "eighth_s": 8.260649,
+      "et_s": 12.466893,
       "finished": true,
-      "sixty_ft_s": 2.43412,
-      "trap_kmh": 179.7347,
-      "trap_ms": 49.926311
+      "sixty_ft_s": 2.433501,
+      "trap_kmh": 179.7308,
+      "trap_ms": 49.925223
     },
     "Sportster S (2021-2024)|2021": {
-      "eighth_s": 7.353584,
-      "et_s": 11.311563,
+      "eighth_s": 7.34415,
+      "et_s": 11.292731,
       "finished": true,
-      "sixty_ft_s": 2.033644,
-      "trap_kmh": 198.3414,
-      "trap_ms": 55.094837
+      "sixty_ft_s": 2.033032,
+      "trap_kmh": 198.843,
+      "trap_ms": 55.234164
     },
     "Sprint ST 955i (2003-2004)|2003": {
-      "eighth_s": 7.574368,
-      "et_s": 11.352321,
+      "eighth_s": 7.545217,
+      "et_s": 11.311624,
       "finished": true,
-      "sixty_ft_s": 2.19069,
-      "trap_kmh": 210.7168,
-      "trap_ms": 58.532454
+      "sixty_ft_s": 2.181054,
+      "trap_kmh": 211.3436,
+      "trap_ms": 58.706544
     },
     "Street Bob 114 (2021-2026)|2021": {
-      "eighth_s": 8.100936,
-      "et_s": 12.580122,
+      "eighth_s": 8.089069,
+      "et_s": 12.558492,
       "finished": true,
-      "sixty_ft_s": 2.160436,
-      "trap_kmh": 175.2031,
-      "trap_ms": 48.667529
+      "sixty_ft_s": 2.159828,
+      "trap_kmh": 175.5825,
+      "trap_ms": 48.772908
     },
     "Street Triple 675 (2007-2012)|2007": {
-      "eighth_s": 7.467641,
-      "et_s": 11.286051,
+      "eighth_s": 7.486666,
+      "et_s": 11.319214,
       "finished": true,
-      "sixty_ft_s": 2.159491,
-      "trap_kmh": 206.8063,
-      "trap_ms": 57.446187
+      "sixty_ft_s": 2.160602,
+      "trap_kmh": 206.1746,
+      "trap_ms": 57.270726
     },
     "Street Triple 765 R (2023-2026)|2023": {
-      "eighth_s": 7.50427,
-      "et_s": 11.235864,
+      "eighth_s": 7.493147,
+      "et_s": 11.212543,
       "finished": true,
-      "sixty_ft_s": 2.204362,
-      "trap_kmh": 213.3083,
-      "trap_ms": 59.252305
+      "sixty_ft_s": 2.203345,
+      "trap_kmh": 213.9936,
+      "trap_ms": 59.442654
     },
     "Street Triple 765 RS (2020-2024)|2020": {
-      "eighth_s": 7.520661,
-      "et_s": 11.268942,
+      "eighth_s": 7.509233,
+      "et_s": 11.245624,
       "finished": true,
-      "sixty_ft_s": 2.21494,
-      "trap_kmh": 209.1089,
-      "trap_ms": 58.085799
+      "sixty_ft_s": 2.21391,
+      "trap_kmh": 209.8254,
+      "trap_ms": 58.284831
     },
     "Streetfighter V2 (2022-2025)|2022": {
-      "eighth_s": 7.257603,
-      "et_s": 10.755366,
+      "eighth_s": 7.249026,
+      "et_s": 10.73475,
       "finished": true,
-      "sixty_ft_s": 2.16681,
-      "trap_kmh": 227.3616,
-      "trap_ms": 63.156004
+      "sixty_ft_s": 2.165794,
+      "trap_kmh": 228.259,
+      "trap_ms": 63.405275
     },
     "Streetfighter V4 (2020-2024)|2020": {
       "eighth_s": 6.934101,
@@ -3711,660 +3711,660 @@
       "trap_ms": 66.147777
     },
     "Streetfighter V4 SP (2022-2024)|2022": {
-      "eighth_s": 6.967869,
-      "et_s": 10.209731,
+      "eighth_s": 6.964092,
+      "et_s": 10.197135,
       "finished": true,
-      "sixty_ft_s": 2.100862,
-      "trap_kmh": 245.1605,
-      "trap_ms": 68.100126
+      "sixty_ft_s": 2.099559,
+      "trap_kmh": 246.0778,
+      "trap_ms": 68.354944
     },
     "Streetfighter V4S (2024-2025)|2024": {
-      "eighth_s": 6.883737,
-      "et_s": 10.164584,
+      "eighth_s": 6.876083,
+      "et_s": 10.144972,
       "finished": true,
-      "sixty_ft_s": 2.067977,
-      "trap_kmh": 241.7168,
-      "trap_ms": 67.143554
+      "sixty_ft_s": 2.066623,
+      "trap_kmh": 242.7478,
+      "trap_ms": 67.429941
     },
     "Super Meteor 650 (2023-2024)|2023": {
-      "eighth_s": 9.20154,
-      "et_s": 14.259678,
+      "eighth_s": 9.199345,
+      "et_s": 14.25678,
       "finished": true,
-      "sixty_ft_s": 2.422564,
-      "trap_kmh": 154.6027,
-      "trap_ms": 42.945205
+      "sixty_ft_s": 2.422179,
+      "trap_kmh": 154.6147,
+      "trap_ms": 42.948517
     },
     "Super Meteor 650 (2023-2026)|2023": {
-      "eighth_s": 8.988526,
-      "et_s": 14.091708,
+      "eighth_s": 8.983373,
+      "et_s": 14.085122,
       "finished": true,
-      "sixty_ft_s": 2.265656,
-      "trap_kmh": 153.894,
-      "trap_ms": 42.748339
+      "sixty_ft_s": 2.263847,
+      "trap_kmh": 153.9349,
+      "trap_ms": 42.759697
     },
     "Super Tenere XT1200Z (2014-2021)|2014": {
-      "eighth_s": 8.008862,
-      "et_s": 12.226592,
+      "eighth_s": 8.002356,
+      "et_s": 12.21294,
       "finished": true,
-      "sixty_ft_s": 2.271373,
-      "trap_kmh": 185.3153,
-      "trap_ms": 51.476464
+      "sixty_ft_s": 2.271002,
+      "trap_kmh": 185.6569,
+      "trap_ms": 51.571375
     },
     "Superveloce 1000 Serie Oro (2025)|2025": {
-      "eighth_s": 6.744978,
-      "et_s": 9.903498,
+      "eighth_s": 6.720217,
+      "et_s": 9.86332,
       "finished": true,
-      "sixty_ft_s": 2.031833,
-      "trap_kmh": 255.4049,
-      "trap_ms": 70.945794
+      "sixty_ft_s": 2.03028,
+      "trap_kmh": 256.7943,
+      "trap_ms": 71.331747
     },
     "Supra GTR 150 (Indonesia) (2018-2024)|2018": {
-      "eighth_s": 11.18509,
-      "et_s": 17.329069,
+      "eighth_s": 11.305091,
+      "et_s": 17.524545,
       "finished": true,
-      "sixty_ft_s": 2.940354,
-      "trap_kmh": 128.764,
-      "trap_ms": 35.767773
+      "sixty_ft_s": 2.971512,
+      "trap_kmh": 127.2495,
+      "trap_ms": 35.34707
     },
     "Svartpilen 125 (2024-2026)|2024": {
-      "eighth_s": 11.566555,
-      "et_s": 18.11547,
+      "eighth_s": 11.68941,
+      "et_s": 18.320061,
       "finished": true,
-      "sixty_ft_s": 3.024787,
-      "trap_kmh": 119.8985,
-      "trap_ms": 33.305142
+      "sixty_ft_s": 3.057544,
+      "trap_kmh": 118.4543,
+      "trap_ms": 32.90397
     },
     "Svartpilen 250 (2024-2026)|2024": {
-      "eighth_s": 10.173485,
-      "et_s": 15.629468,
+      "eighth_s": 10.102833,
+      "et_s": 15.590036,
       "finished": true,
-      "sixty_ft_s": 2.801712,
-      "trap_kmh": 143.4285,
-      "trap_ms": 39.841247
+      "sixty_ft_s": 2.733014,
+      "trap_kmh": 142.5122,
+      "trap_ms": 39.586719
     },
     "Svartpilen 401 (2020-2024)|2020": {
-      "eighth_s": 9.272497,
-      "et_s": 14.251967,
+      "eighth_s": 9.30652,
+      "et_s": 14.31743,
       "finished": true,
-      "sixty_ft_s": 2.597513,
-      "trap_kmh": 156.7048,
-      "trap_ms": 43.529101
+      "sixty_ft_s": 2.598849,
+      "trap_kmh": 155.6711,
+      "trap_ms": 43.241966
     },
     "TL1000R (1998-2003)|1998": {
-      "eighth_s": 7.214311,
-      "et_s": 10.754979,
+      "eighth_s": 7.205085,
+      "et_s": 10.73547,
       "finished": true,
-      "sixty_ft_s": 2.136407,
-      "trap_kmh": 225.2336,
-      "trap_ms": 62.56488
+      "sixty_ft_s": 2.135489,
+      "trap_kmh": 225.969,
+      "trap_ms": 62.769179
     },
     "TNT 300 (2018-2022)|2018": {
-      "eighth_s": 10.469719,
-      "et_s": 15.925059,
+      "eighth_s": 10.142948,
+      "et_s": 15.604163,
       "finished": true,
-      "sixty_ft_s": 2.993641,
-      "trap_kmh": 143.9232,
-      "trap_ms": 39.978667
+      "sixty_ft_s": 2.843171,
+      "trap_kmh": 143.4469,
+      "trap_ms": 39.846374
     },
     "TNT 600i (2014-2024)|2014": {
-      "eighth_s": 8.663996,
-      "et_s": 13.075431,
+      "eighth_s": 8.7111,
+      "et_s": 13.142675,
       "finished": true,
-      "sixty_ft_s": 2.496659,
-      "trap_kmh": 177.9757,
-      "trap_ms": 49.437695
+      "sixty_ft_s": 2.511602,
+      "trap_kmh": 177.138,
+      "trap_ms": 49.205013
     },
     "TRK 502 (2017-2024)|2017": {
-      "eighth_s": 9.536616,
-      "et_s": 14.884999,
+      "eighth_s": 9.346536,
+      "et_s": 14.684919,
       "finished": true,
-      "sixty_ft_s": 2.555877,
-      "trap_kmh": 145.2262,
-      "trap_ms": 40.340605
+      "sixty_ft_s": 2.429622,
+      "trap_kmh": 145.4635,
+      "trap_ms": 40.406523
     },
     "TZR250 Reverse-Cylinder (1989-1991)|1989": {
-      "eighth_s": 8.856417,
-      "et_s": 14.212605,
+      "eighth_s": 8.823164,
+      "et_s": 14.179745,
       "finished": true,
-      "sixty_ft_s": 2.144225,
-      "trap_kmh": 147.4596,
-      "trap_ms": 40.961006
+      "sixty_ft_s": 2.133623,
+      "trap_kmh": 147.3403,
+      "trap_ms": 40.927849
     },
     "Tenere 700 (2019-2026)|2019": {
-      "eighth_s": 8.375731,
-      "et_s": 12.771144,
+      "eighth_s": 8.367292,
+      "et_s": 12.753156,
       "finished": true,
-      "sixty_ft_s": 2.40088,
-      "trap_kmh": 176.863,
-      "trap_ms": 49.128613
+      "sixty_ft_s": 2.400334,
+      "trap_kmh": 177.2597,
+      "trap_ms": 49.238817
     },
     "Tenere 700 World Raid (2022-2026)|2022": {
-      "eighth_s": 8.453888,
-      "et_s": 12.953845,
+      "eighth_s": 8.442432,
+      "et_s": 12.932646,
       "finished": true,
-      "sixty_ft_s": 2.381451,
-      "trap_kmh": 173.2111,
-      "trap_ms": 48.114198
+      "sixty_ft_s": 2.380927,
+      "trap_kmh": 173.6149,
+      "trap_ms": 48.226355
     },
     "Tesi 1D (1991-1995)|1991": {
-      "eighth_s": 7.493203,
-      "et_s": 11.236947,
+      "eighth_s": 7.475293,
+      "et_s": 11.208499,
       "finished": true,
-      "sixty_ft_s": 2.163436,
-      "trap_kmh": 214.6941,
-      "trap_ms": 59.637239
+      "sixty_ft_s": 2.161048,
+      "trap_kmh": 215.383,
+      "trap_ms": 59.828599
     },
     "Tesi H2 (2021-2026)|2021": {
-      "eighth_s": 6.782324,
-      "et_s": 9.87904,
+      "eighth_s": 6.778605,
+      "et_s": 9.864541,
       "finished": true,
-      "sixty_ft_s": 2.018689,
-      "trap_kmh": 260.0785,
-      "trap_ms": 72.244029
+      "sixty_ft_s": 2.017743,
+      "trap_kmh": 261.1618,
+      "trap_ms": 72.544949
     },
     "Thruxton 1200 R (2016-2022)|2016": {
-      "eighth_s": 7.6747,
-      "et_s": 11.661795,
+      "eighth_s": 7.670506,
+      "et_s": 11.653909,
       "finished": true,
-      "sixty_ft_s": 2.162596,
-      "trap_kmh": 198.7779,
-      "trap_ms": 55.216093
+      "sixty_ft_s": 2.162279,
+      "trap_kmh": 198.9576,
+      "trap_ms": 55.265999
     },
     "Thunderbird 350 (2012-2019)|2012": {
-      "eighth_s": 11.793435,
-      "et_s": 18.465282,
+      "eighth_s": 11.863144,
+      "et_s": 18.572324,
       "finished": true,
-      "sixty_ft_s": 3.136375,
-      "trap_kmh": 115.2688,
-      "trap_ms": 32.019106
+      "sixty_ft_s": 3.15695,
+      "trap_kmh": 114.9797,
+      "trap_ms": 31.938811
     },
     "Tiger 1200 GT Pro (2022-2026)|2022": {
-      "eighth_s": 7.661726,
-      "et_s": 11.490432,
+      "eighth_s": 7.654292,
+      "et_s": 11.472013,
       "finished": true,
-      "sixty_ft_s": 2.25132,
-      "trap_kmh": 204.3462,
-      "trap_ms": 56.762834
+      "sixty_ft_s": 2.250701,
+      "trap_kmh": 204.9906,
+      "trap_ms": 56.941845
     },
     "Tiger 900 GT Pro (2024-2026)|2024": {
-      "eighth_s": 7.911696,
-      "et_s": 11.96507,
+      "eighth_s": 7.903678,
+      "et_s": 11.94685,
       "finished": true,
-      "sixty_ft_s": 2.297353,
-      "trap_kmh": 193.8061,
-      "trap_ms": 53.83502
+      "sixty_ft_s": 2.296802,
+      "trap_kmh": 194.366,
+      "trap_ms": 53.990542
     },
     "Tiger 900 Rally (2020-2026)|2020": {
-      "eighth_s": 8.100435,
-      "et_s": 12.402518,
+      "eighth_s": 8.092091,
+      "et_s": 12.385388,
       "finished": true,
-      "sixty_ft_s": 2.295979,
-      "trap_kmh": 181.3795,
-      "trap_ms": 50.383187
+      "sixty_ft_s": 2.295539,
+      "trap_kmh": 181.774,
+      "trap_ms": 50.492791
     },
     "Tiger Sport 660 (2022-2026)|2022": {
-      "eighth_s": 8.028156,
-      "et_s": 12.314065,
+      "eighth_s": 8.015464,
+      "et_s": 12.290817,
       "finished": true,
-      "sixty_ft_s": 2.203107,
-      "trap_kmh": 184.3054,
-      "trap_ms": 51.195951
+      "sixty_ft_s": 2.202511,
+      "trap_kmh": 184.7331,
+      "trap_ms": 51.314758
     },
     "Tiger Sport 800 (2025-2026)|2025": {
-      "eighth_s": 7.928523,
-      "et_s": 11.794878,
+      "eighth_s": 7.918794,
+      "et_s": 11.774085,
       "finished": true,
-      "sixty_ft_s": 2.353427,
-      "trap_kmh": 205.998,
-      "trap_ms": 57.221668
+      "sixty_ft_s": 2.352729,
+      "trap_kmh": 206.6706,
+      "trap_ms": 57.408501
     },
     "Tracer 7 (2020-2026)|2020": {
-      "eighth_s": 7.984183,
-      "et_s": 12.083463,
+      "eighth_s": 8.010608,
+      "et_s": 12.129324,
       "finished": true,
-      "sixty_ft_s": 2.253777,
-      "trap_kmh": 194.8072,
-      "trap_ms": 54.113124
+      "sixty_ft_s": 2.255263,
+      "trap_kmh": 193.8279,
+      "trap_ms": 53.841094
     },
     "Tracer 9 GT (2021-2026)|2021": {
-      "eighth_s": 7.797677,
-      "et_s": 11.669789,
+      "eighth_s": 7.787919,
+      "et_s": 11.649333,
       "finished": true,
-      "sixty_ft_s": 2.284125,
-      "trap_kmh": 204.6591,
-      "trap_ms": 56.84976
+      "sixty_ft_s": 2.283431,
+      "trap_kmh": 205.3022,
+      "trap_ms": 57.028376
     },
     "Trident 660 (2021-2026)|2021": {
-      "eighth_s": 8.079655,
-      "et_s": 12.416176,
+      "eighth_s": 8.125207,
+      "et_s": 12.483439,
       "finished": true,
-      "sixty_ft_s": 2.226047,
-      "trap_kmh": 181.209,
-      "trap_ms": 50.335825
+      "sixty_ft_s": 2.24018,
+      "trap_kmh": 180.2762,
+      "trap_ms": 50.076732
     },
     "Tuareg 660 (2022-2026)|2022": {
-      "eighth_s": 8.200175,
-      "et_s": 12.597172,
+      "eighth_s": 8.18977,
+      "et_s": 12.575381,
       "finished": true,
-      "sixty_ft_s": 2.324824,
-      "trap_kmh": 176.1647,
-      "trap_ms": 48.934652
+      "sixty_ft_s": 2.324158,
+      "trap_kmh": 176.657,
+      "trap_ms": 49.071399
     },
     "Tuono 1000 R (2006-2010)|2006": {
-      "eighth_s": 7.279946,
-      "et_s": 10.960696,
+      "eighth_s": 7.270914,
+      "et_s": 10.940177,
       "finished": true,
-      "sixty_ft_s": 2.13239,
-      "trap_kmh": 213.9843,
-      "trap_ms": 59.440083
+      "sixty_ft_s": 2.131428,
+      "trap_kmh": 214.7683,
+      "trap_ms": 59.657869
     },
     "Tuono 457 (2024-2026)|2024": {
-      "eighth_s": 8.759895,
-      "et_s": 13.600052,
+      "eighth_s": 8.626388,
+      "et_s": 13.491113,
       "finished": true,
-      "sixty_ft_s": 2.356915,
-      "trap_kmh": 161.6591,
-      "trap_ms": 44.905297
+      "sixty_ft_s": 2.240166,
+      "trap_kmh": 160.783,
+      "trap_ms": 44.661957
     },
     "Tuono 457 (2025-2026)|2025": {
-      "eighth_s": 8.672713,
-      "et_s": 13.369522,
+      "eighth_s": 8.544279,
+      "et_s": 13.263297,
       "finished": true,
-      "sixty_ft_s": 2.34867,
-      "trap_kmh": 168.2079,
-      "trap_ms": 46.724419
+      "sixty_ft_s": 2.239265,
+      "trap_kmh": 167.3152,
+      "trap_ms": 46.476443
     },
     "Tuono 660 (2021-2026)|2021": {
-      "eighth_s": 7.65592,
-      "et_s": 11.566014,
+      "eighth_s": 7.690183,
+      "et_s": 11.61487,
       "finished": true,
-      "sixty_ft_s": 2.202983,
-      "trap_kmh": 200.7824,
-      "trap_ms": 55.77288
+      "sixty_ft_s": 2.213896,
+      "trap_kmh": 200.0652,
+      "trap_ms": 55.573672
     },
     "Tuono 660 Factory (2022-2026)|2022": {
-      "eighth_s": 7.547284,
-      "et_s": 11.301812,
+      "eighth_s": 7.581291,
+      "et_s": 11.350061,
       "finished": true,
-      "sixty_ft_s": 2.20503,
-      "trap_kmh": 211.7238,
-      "trap_ms": 58.812161
+      "sixty_ft_s": 2.215954,
+      "trap_kmh": 210.9157,
+      "trap_ms": 58.587695
     },
     "Tuono V4 1100 (2021-2024)|2021": {
-      "eighth_s": 7.322934,
-      "et_s": 10.765516,
+      "eighth_s": 7.315038,
+      "et_s": 10.746337,
       "finished": true,
-      "sixty_ft_s": 2.212976,
-      "trap_kmh": 231.1519,
-      "trap_ms": 64.208851
+      "sixty_ft_s": 2.211757,
+      "trap_kmh": 231.9323,
+      "trap_ms": 64.425629
     },
     "Unicorn (2020-2026)|2020": {
-      "eighth_s": 11.704778,
-      "et_s": 18.594213,
+      "eighth_s": 12.399659,
+      "et_s": 19.389672,
       "finished": true,
-      "sixty_ft_s": 2.781489,
-      "trap_kmh": 111.958,
-      "trap_ms": 31.099458
+      "sixty_ft_s": 3.214745,
+      "trap_kmh": 111.015,
+      "trap_ms": 30.837498
     },
     "V-Rod Muscle (2009-2017)|2009": {
-      "eighth_s": 7.405811,
-      "et_s": 11.414787,
+      "eighth_s": 7.394132,
+      "et_s": 11.392456,
       "finished": true,
-      "sixty_ft_s": 2.052145,
-      "trap_kmh": 195.4315,
-      "trap_ms": 54.286534
+      "sixty_ft_s": 2.051532,
+      "trap_kmh": 195.981,
+      "trap_ms": 54.439174
     },
     "V-Strom 1050 (2020-2026)|2020": {
-      "eighth_s": 7.927654,
-      "et_s": 12.156489,
+      "eighth_s": 7.91862,
+      "et_s": 12.138159,
       "finished": true,
-      "sixty_ft_s": 2.238618,
-      "trap_kmh": 186.536,
-      "trap_ms": 51.815547
+      "sixty_ft_s": 2.238214,
+      "trap_kmh": 186.9761,
+      "trap_ms": 51.937804
     },
     "V-Strom 650 (DL650) (2012-2023)|2012": {
-      "eighth_s": 8.378125,
-      "et_s": 12.866098,
+      "eighth_s": 8.365247,
+      "et_s": 12.842186,
       "finished": true,
-      "sixty_ft_s": 2.326353,
-      "trap_kmh": 175.3386,
-      "trap_ms": 48.70517
+      "sixty_ft_s": 2.32587,
+      "trap_kmh": 175.5648,
+      "trap_ms": 48.767992
     },
     "V-Strom 800DE (2023-2026)|2023": {
-      "eighth_s": 8.273683,
-      "et_s": 12.615311,
+      "eighth_s": 8.266015,
+      "et_s": 12.599788,
       "finished": true,
-      "sixty_ft_s": 2.332991,
-      "trap_kmh": 181.6476,
-      "trap_ms": 50.45766
+      "sixty_ft_s": 2.332608,
+      "trap_kmh": 182.0086,
+      "trap_ms": 50.557937
     },
     "V-Strom SX 250 (2022-2024)|2022": {
-      "eighth_s": 10.942006,
-      "et_s": 16.866998,
+      "eighth_s": 10.770419,
+      "et_s": 16.58493,
       "finished": true,
-      "sixty_ft_s": 3.031289,
-      "trap_kmh": 132.3148,
-      "trap_ms": 36.75411
+      "sixty_ft_s": 2.978127,
+      "trap_kmh": 134.061,
+      "trap_ms": 37.239171
     },
     "V-Strom SX 250 (2022-2026)|2022": {
-      "eighth_s": 10.851008,
-      "et_s": 16.741519,
+      "eighth_s": 10.648379,
+      "et_s": 16.528744,
       "finished": true,
-      "sixty_ft_s": 3.024269,
-      "trap_kmh": 131.0889,
-      "trap_ms": 36.413582
+      "sixty_ft_s": 2.916888,
+      "trap_kmh": 131.2302,
+      "trap_ms": 36.452835
     },
     "V100 Mandello S (2022-2026)|2022": {
-      "eighth_s": 7.416652,
-      "et_s": 11.255265,
+      "eighth_s": 7.408231,
+      "et_s": 11.237624,
       "finished": true,
-      "sixty_ft_s": 2.124551,
-      "trap_kmh": 207.5238,
-      "trap_ms": 57.64549
+      "sixty_ft_s": 2.123974,
+      "trap_kmh": 207.9932,
+      "trap_ms": 57.775887
     },
     "V4SV (2022-2026)|2022": {
-      "eighth_s": 6.631484,
-      "et_s": 9.812582,
+      "eighth_s": 6.626141,
+      "et_s": 9.797024,
       "finished": true,
-      "sixty_ft_s": 1.929983,
-      "trap_kmh": 251.9527,
-      "trap_ms": 69.98685
+      "sixty_ft_s": 1.929355,
+      "trap_kmh": 252.3319,
+      "trap_ms": 70.092207
     },
     "V85 TT (2019-2026)|2019": {
-      "eighth_s": 8.39585,
-      "et_s": 12.995021,
+      "eighth_s": 8.389176,
+      "et_s": 12.982917,
       "finished": true,
-      "sixty_ft_s": 2.285387,
-      "trap_kmh": 170.7984,
-      "trap_ms": 47.444003
+      "sixty_ft_s": 2.285083,
+      "trap_kmh": 171.0198,
+      "trap_ms": 47.505506
     },
     "VFR800F Interceptor (2014-2021)|2014": {
-      "eighth_s": 7.850479,
-      "et_s": 11.80617,
+      "eighth_s": 7.822054,
+      "et_s": 11.76576,
       "finished": true,
-      "sixty_ft_s": 2.243597,
-      "trap_kmh": 202.0946,
-      "trap_ms": 56.1374
+      "sixty_ft_s": 2.234146,
+      "trap_kmh": 202.7472,
+      "trap_ms": 56.318657
     },
     "VMAX 1200 (1985-2007)|1985": {
-      "eighth_s": 7.290198,
-      "et_s": 11.097475,
+      "eighth_s": 7.279578,
+      "et_s": 11.075214,
       "finished": true,
-      "sixty_ft_s": 2.058407,
-      "trap_kmh": 208.6158,
-      "trap_ms": 57.948844
+      "sixty_ft_s": 2.057796,
+      "trap_kmh": 209.2411,
+      "trap_ms": 58.122519
     },
     "VMAX 1700 (2009-2020)|2009": {
-      "eighth_s": 6.916049,
-      "et_s": 10.45132,
+      "eighth_s": 6.900482,
+      "et_s": 10.428421,
       "finished": true,
-      "sixty_ft_s": 1.964231,
-      "trap_kmh": 224.4249,
-      "trap_ms": 62.340256
+      "sixty_ft_s": 1.963607,
+      "trap_kmh": 220.0029,
+      "trap_ms": 61.111912
     },
     "VRSCA V-Rod (2002-2006)|2002": {
-      "eighth_s": 8.474871,
-      "et_s": 12.74852,
+      "eighth_s": 8.466824,
+      "et_s": 12.732246,
       "finished": true,
-      "sixty_ft_s": 2.456896,
-      "trap_kmh": 183.6386,
-      "trap_ms": 51.010714
+      "sixty_ft_s": 2.456583,
+      "trap_kmh": 184.0142,
+      "trap_ms": 51.115064
     },
     "VTR1000 SP2 (RC51) (2002-2006)|2002": {
-      "eighth_s": 7.410547,
-      "et_s": 10.97272,
+      "eighth_s": 7.400632,
+      "et_s": 10.952268,
       "finished": true,
-      "sixty_ft_s": 2.209308,
-      "trap_kmh": 225.2671,
-      "trap_ms": 62.574197
+      "sixty_ft_s": 2.208421,
+      "trap_kmh": 225.9998,
+      "trap_ms": 62.777713
     },
     "Versys 1000 (2019-2024)|2019": {
-      "eighth_s": 7.869408,
-      "et_s": 11.959141,
+      "eighth_s": 7.860509,
+      "et_s": 11.940205,
       "finished": true,
-      "sixty_ft_s": 2.264527,
-      "trap_kmh": 191.3581,
-      "trap_ms": 53.155034
+      "sixty_ft_s": 2.264032,
+      "trap_kmh": 191.8454,
+      "trap_ms": 53.290377
     },
     "Versys 1000 SE (2022-2024)|2022": {
-      "eighth_s": 7.880274,
-      "et_s": 11.982645,
+      "eighth_s": 7.87112,
+      "et_s": 11.963321,
       "finished": true,
-      "sixty_ft_s": 2.263978,
-      "trap_kmh": 190.8103,
-      "trap_ms": 53.002851
+      "sixty_ft_s": 2.263489,
+      "trap_kmh": 191.2983,
+      "trap_ms": 53.138423
     },
     "Versys 650 (2015-2024)|2015": {
-      "eighth_s": 8.330068,
-      "et_s": 12.884054,
+      "eighth_s": 8.318549,
+      "et_s": 12.862195,
       "finished": true,
-      "sixty_ft_s": 2.275552,
-      "trap_kmh": 172.3676,
-      "trap_ms": 47.87989
+      "sixty_ft_s": 2.274994,
+      "trap_kmh": 172.7567,
+      "trap_ms": 47.987985
     },
     "Versys-X 300 (2017-2024)|2017": {
-      "eighth_s": 10.046448,
-      "et_s": 15.202152,
+      "eighth_s": 9.762964,
+      "et_s": 14.891381,
       "finished": true,
-      "sixty_ft_s": 2.88174,
-      "trap_kmh": 152.4067,
-      "trap_ms": 42.335188
+      "sixty_ft_s": 2.754899,
+      "trap_kmh": 153.0717,
+      "trap_ms": 42.519926
     },
     "Vitpilen 401 (2020-2024)|2020": {
-      "eighth_s": 9.16458,
-      "et_s": 13.842532,
+      "eighth_s": 9.197495,
+      "et_s": 13.903823,
       "finished": true,
-      "sixty_ft_s": 2.613752,
-      "trap_kmh": 169.5922,
-      "trap_ms": 47.108955
+      "sixty_ft_s": 2.61501,
+      "trap_kmh": 168.4877,
+      "trap_ms": 46.802128
     },
     "Vitpilen 701 (2018-2022)|2018": {
-      "eighth_s": 7.69797,
-      "et_s": 11.920828,
+      "eighth_s": 7.722308,
+      "et_s": 11.964385,
       "finished": true,
-      "sixty_ft_s": 2.098648,
-      "trap_kmh": 185.0947,
-      "trap_ms": 51.415185
+      "sixty_ft_s": 2.100145,
+      "trap_kmh": 184.1936,
+      "trap_ms": 51.164882
     },
     "Vulcan S (2015-2026)|2015": {
-      "eighth_s": 8.74087,
-      "et_s": 13.500928,
+      "eighth_s": 8.731593,
+      "et_s": 13.48456,
       "finished": true,
-      "sixty_ft_s": 2.369247,
-      "trap_kmh": 163.8979,
-      "trap_ms": 45.527207
+      "sixty_ft_s": 2.368735,
+      "trap_kmh": 164.149,
+      "trap_ms": 45.596932
     },
     "W230 (2024-2026)|2024": {
-      "eighth_s": 11.345211,
-      "et_s": 17.670098,
+      "eighth_s": 11.312998,
+      "et_s": 17.697962,
       "finished": true,
-      "sixty_ft_s": 3.044899,
-      "trap_kmh": 122.7428,
-      "trap_ms": 34.095217
+      "sixty_ft_s": 2.973103,
+      "trap_kmh": 121.477,
+      "trap_ms": 33.74361
     },
     "W800 (2019-2026)|2019": {
-      "eighth_s": 9.522032,
-      "et_s": 14.733746,
+      "eighth_s": 9.535676,
+      "et_s": 14.756786,
       "finished": true,
-      "sixty_ft_s": 2.601091,
-      "trap_kmh": 150.1182,
-      "trap_ms": 41.699491
+      "sixty_ft_s": 2.604286,
+      "trap_kmh": 149.8302,
+      "trap_ms": 41.619488
     },
     "Winner X (Vietnam) (2019-2026)|2019": {
-      "eighth_s": 11.297327,
-      "et_s": 17.50181,
+      "eighth_s": 11.420016,
+      "et_s": 17.702647,
       "finished": true,
-      "sixty_ft_s": 2.98522,
-      "trap_kmh": 127.6571,
-      "trap_ms": 35.460318
+      "sixty_ft_s": 3.017375,
+      "trap_kmh": 126.1002,
+      "trap_ms": 35.027822
     },
     "X-ADV 750 (2021-2026)|2021": {
-      "eighth_s": 8.836092,
-      "et_s": 13.626845,
+      "eighth_s": 8.836874,
+      "et_s": 13.628788,
       "finished": true,
-      "sixty_ft_s": 2.377898,
-      "trap_kmh": 164.3869,
-      "trap_ms": 45.663035
+      "sixty_ft_s": 2.377846,
+      "trap_kmh": 164.3437,
+      "trap_ms": 45.651029
     },
     "X-Blade 160 (2018-2024)|2018": {
-      "eighth_s": 11.745373,
-      "et_s": 18.627715,
+      "eighth_s": 12.80247,
+      "et_s": 19.814352,
       "finished": true,
-      "sixty_ft_s": 3.039385,
-      "trap_kmh": 112.6394,
-      "trap_ms": 31.288722
+      "sixty_ft_s": 3.56215,
+      "trap_kmh": 110.8082,
+      "trap_ms": 30.780046
     },
     "X440 (2023-2026)|2023": {
-      "eighth_s": 10.372097,
-      "et_s": 16.45984,
+      "eighth_s": 10.399877,
+      "et_s": 16.507374,
       "finished": true,
-      "sixty_ft_s": 2.575038,
-      "trap_kmh": 127.086,
-      "trap_ms": 35.301659
+      "sixty_ft_s": 2.579931,
+      "trap_kmh": 126.6784,
+      "trap_ms": 35.188453
     },
     "XB12R Firebolt (2004-2010)|2004": {
-      "eighth_s": 7.402392,
-      "et_s": 11.171674,
+      "eighth_s": 7.397727,
+      "et_s": 11.16224,
       "finished": true,
-      "sixty_ft_s": 2.11217,
-      "trap_kmh": 211.4057,
-      "trap_ms": 58.723794
+      "sixty_ft_s": 2.111716,
+      "trap_kmh": 211.6958,
+      "trap_ms": 58.804399
     },
     "XL750 Transalp (2023-2026)|2023": {
-      "eighth_s": 8.104185,
-      "et_s": 12.270274,
+      "eighth_s": 8.095769,
+      "et_s": 12.252621,
       "finished": true,
-      "sixty_ft_s": 2.326305,
-      "trap_kmh": 190.0239,
-      "trap_ms": 52.784423
+      "sixty_ft_s": 2.325845,
+      "trap_kmh": 190.4549,
+      "trap_ms": 52.904152
     },
     "XPulse 200T (2021-2026)|2021": {
-      "eighth_s": 10.926192,
-      "et_s": 17.410424,
+      "eighth_s": 11.481242,
+      "et_s": 18.000591,
       "finished": true,
-      "sixty_ft_s": 2.624357,
-      "trap_kmh": 119.911,
-      "trap_ms": 33.308604
+      "sixty_ft_s": 3.005082,
+      "trap_kmh": 119.4222,
+      "trap_ms": 33.172844
     },
     "XSR125 (2021-2026)|2021": {
-      "eighth_s": 11.226181,
-      "et_s": 17.914128,
+      "eighth_s": 11.35501,
+      "et_s": 18.124748,
       "finished": true,
-      "sixty_ft_s": 2.607133,
-      "trap_kmh": 115.7159,
-      "trap_ms": 32.143296
+      "sixty_ft_s": 2.633365,
+      "trap_kmh": 114.2336,
+      "trap_ms": 31.731566
     },
     "XSR155 (2019-2026)|2019": {
-      "eighth_s": 10.506166,
-      "et_s": 16.564784,
+      "eighth_s": 10.8739,
+      "et_s": 16.995028,
       "finished": true,
-      "sixty_ft_s": 2.614086,
-      "trap_kmh": 128.8282,
-      "trap_ms": 35.785616
+      "sixty_ft_s": 2.826475,
+      "trap_kmh": 127.5648,
+      "trap_ms": 35.43468
     },
     "XSR700 (2018-2024)|2018": {
-      "eighth_s": 7.914696,
-      "et_s": 12.134046,
+      "eighth_s": 7.939148,
+      "et_s": 12.178512,
       "finished": true,
-      "sixty_ft_s": 2.211036,
-      "trap_kmh": 185.9071,
-      "trap_ms": 51.640854
+      "sixty_ft_s": 2.21221,
+      "trap_kmh": 184.9701,
+      "trap_ms": 51.380581
     },
     "XSR900 (2022-2026)|2022": {
-      "eighth_s": 7.473639,
-      "et_s": 11.374284,
+      "eighth_s": 7.463605,
+      "et_s": 11.35338,
       "finished": true,
-      "sixty_ft_s": 2.146121,
-      "trap_kmh": 200.1395,
-      "trap_ms": 55.594303
+      "sixty_ft_s": 2.145283,
+      "trap_kmh": 200.7157,
+      "trap_ms": 55.754354
     },
     "XSR900 GP (2024-2026)|2024": {
-      "eighth_s": 7.368005,
-      "et_s": 11.042284,
+      "eighth_s": 7.355607,
+      "et_s": 11.019104,
       "finished": true,
-      "sixty_ft_s": 2.142278,
-      "trap_kmh": 217.7959,
-      "trap_ms": 60.498868
+      "sixty_ft_s": 2.141497,
+      "trap_kmh": 218.4678,
+      "trap_ms": 60.685488
     },
     "Xpulse 200 (2019-2025)|2019": {
-      "eighth_s": 11.100523,
-      "et_s": 17.773221,
+      "eighth_s": 11.74912,
+      "et_s": 18.458817,
       "finished": true,
-      "sixty_ft_s": 2.716249,
-      "trap_kmh": 115.0214,
-      "trap_ms": 31.950381
+      "sixty_ft_s": 3.133271,
+      "trap_kmh": 114.5154,
+      "trap_ms": 31.809847
     },
     "Xpulse 210 (2025-2026)|2025": {
-      "eighth_s": 10.781089,
-      "et_s": 16.803357,
+      "eighth_s": 10.624242,
+      "et_s": 16.640326,
       "finished": true,
-      "sixty_ft_s": 2.933706,
-      "trap_kmh": 129.0126,
-      "trap_ms": 35.836846
+      "sixty_ft_s": 2.835611,
+      "trap_kmh": 129.1098,
+      "trap_ms": 35.863831
     },
     "Xtreme 125R (2024-2026)|2024": {
-      "eighth_s": 12.600054,
-      "et_s": 19.962291,
+      "eighth_s": 12.779186,
+      "et_s": 20.269092,
       "finished": true,
-      "sixty_ft_s": 3.181846,
-      "trap_kmh": 106.0651,
-      "trap_ms": 29.462521
+      "sixty_ft_s": 3.225827,
+      "trap_kmh": 104.2304,
+      "trap_ms": 28.952888
     },
     "Xtreme 160R (2020-2024)|2020": {
-      "eighth_s": 11.359606,
-      "et_s": 18.10868,
+      "eighth_s": 11.85809,
+      "et_s": 18.69124,
       "finished": true,
-      "sixty_ft_s": 2.67863,
-      "trap_kmh": 115.2651,
-      "trap_ms": 32.018081
+      "sixty_ft_s": 3.00455,
+      "trap_kmh": 113.7746,
+      "trap_ms": 31.604069
     },
     "Xtreme 200R (2018-2024)|2018": {
-      "eighth_s": 10.852069,
-      "et_s": 17.275101,
+      "eighth_s": 11.511167,
+      "et_s": 18.009019,
       "finished": true,
-      "sixty_ft_s": 2.630484,
-      "trap_kmh": 120.1549,
-      "trap_ms": 33.376361
+      "sixty_ft_s": 3.043186,
+      "trap_kmh": 118.8117,
+      "trap_ms": 33.003261
     },
     "Xtreme 200S 4V (2023-2026)|2023": {
-      "eighth_s": 11.026438,
-      "et_s": 17.372428,
+      "eighth_s": 11.770546,
+      "et_s": 18.206518,
       "finished": true,
-      "sixty_ft_s": 2.735577,
-      "trap_kmh": 123.3644,
-      "trap_ms": 34.267877
+      "sixty_ft_s": 3.180371,
+      "trap_kmh": 121.9439,
+      "trap_ms": 33.873302
     },
     "Xtreme 250R (2024-2025)|2024": {
-      "eighth_s": 10.114849,
-      "et_s": 15.587719,
+      "eighth_s": 10.040185,
+      "et_s": 15.540676,
       "finished": true,
-      "sixty_ft_s": 2.793661,
-      "trap_kmh": 142.032,
-      "trap_ms": 39.453334
+      "sixty_ft_s": 2.73086,
+      "trap_kmh": 141.1846,
+      "trap_ms": 39.217933
     },
     "Y15ZR (Malaysia) (2015-2020)|2015": {
-      "eighth_s": 10.913927,
-      "et_s": 17.035053,
+      "eighth_s": 11.035205,
+      "et_s": 17.230819,
       "finished": true,
-      "sixty_ft_s": 2.812228,
-      "trap_kmh": 128.5578,
-      "trap_ms": 35.710505
+      "sixty_ft_s": 2.843018,
+      "trap_kmh": 126.8949,
+      "trap_ms": 35.24858
     },
     "Y15ZR V2 (Malaysia) (2021-2026)|2021": {
-      "eighth_s": 10.958917,
-      "et_s": 17.092291,
+      "eighth_s": 11.08039,
+      "et_s": 17.287967,
       "finished": true,
-      "sixty_ft_s": 2.830629,
-      "trap_kmh": 128.3259,
-      "trap_ms": 35.646081
+      "sixty_ft_s": 2.861631,
+      "trap_kmh": 126.6759,
+      "trap_ms": 35.187757
     },
     "YZF-R1 (2002-2003)|2002": {
-      "eighth_s": 7.002549,
-      "et_s": 10.349823,
+      "eighth_s": 6.993351,
+      "et_s": 10.329799,
       "finished": true,
-      "sixty_ft_s": 2.097697,
-      "trap_kmh": 239.3609,
-      "trap_ms": 66.489152
+      "sixty_ft_s": 2.0966,
+      "trap_kmh": 240.2605,
+      "trap_ms": 66.739029
     },
     "YZF-R1 (2004-2006)|2004": {
       "eighth_s": 6.959526,
@@ -4391,12 +4391,12 @@
       "trap_ms": 67.385893
     },
     "YZF-R1 (2015-2019)|2015": {
-      "eighth_s": 6.843011,
-      "et_s": 10.012577,
+      "eighth_s": 6.835244,
+      "et_s": 9.992865,
       "finished": true,
-      "sixty_ft_s": 2.08086,
-      "trap_kmh": 254.2178,
-      "trap_ms": 70.616047
+      "sixty_ft_s": 2.079543,
+      "trap_kmh": 255.3273,
+      "trap_ms": 70.924255
     },
     "YZF-R1 4C8|2007": {
       "eighth_s": 6.879925,
@@ -4407,84 +4407,84 @@
       "trap_ms": 63.211214
     },
     "YZF-R125 (2019-2024)|2019": {
-      "eighth_s": 11.070571,
-      "et_s": 17.362026,
+      "eighth_s": 11.198225,
+      "et_s": 17.568269,
       "finished": true,
-      "sixty_ft_s": 2.611896,
-      "trap_kmh": 125.9322,
-      "trap_ms": 34.981168
+      "sixty_ft_s": 2.638202,
+      "trap_kmh": 124.3467,
+      "trap_ms": 34.540755
     },
     "YZF-R15 V1 (2008-2011)|2008": {
-      "eighth_s": 10.469204,
-      "et_s": 16.43973,
+      "eighth_s": 10.571282,
+      "et_s": 16.608788,
       "finished": true,
-      "sixty_ft_s": 2.465737,
-      "trap_kmh": 132.7501,
-      "trap_ms": 36.875016
+      "sixty_ft_s": 2.481892,
+      "trap_kmh": 131.2521,
+      "trap_ms": 36.458904
     },
     "YZF-R15 V2 (2011-2017)|2011": {
-      "eighth_s": 10.660156,
-      "et_s": 16.679145,
+      "eighth_s": 10.751915,
+      "et_s": 16.838249,
       "finished": true,
-      "sixty_ft_s": 2.553348,
-      "trap_kmh": 131.7359,
-      "trap_ms": 36.593303
+      "sixty_ft_s": 2.560414,
+      "trap_kmh": 130.2495,
+      "trap_ms": 36.180403
     },
     "YZF-R15 V3 (2018-2021)|2018": {
-      "eighth_s": 11.620363,
-      "et_s": 18.215893,
+      "eighth_s": 12.167715,
+      "et_s": 18.785901,
       "finished": true,
-      "sixty_ft_s": 2.754897,
-      "trap_kmh": 120.2699,
-      "trap_ms": 33.408316
+      "sixty_ft_s": 3.142883,
+      "trap_kmh": 119.9878,
+      "trap_ms": 33.329939
     },
     "YZF-R15 V4 (2021-2024)|2021": {
-      "eighth_s": 11.721858,
-      "et_s": 18.343607,
+      "eighth_s": 12.19147,
+      "et_s": 18.82998,
       "finished": true,
-      "sixty_ft_s": 2.782057,
-      "trap_kmh": 119.8586,
-      "trap_ms": 33.294061
+      "sixty_ft_s": 3.132328,
+      "trap_kmh": 119.6518,
+      "trap_ms": 33.236623
     },
     "YZF-R15M (2021-2024)|2021": {
-      "eighth_s": 10.745784,
-      "et_s": 16.63591,
+      "eighth_s": 10.912031,
+      "et_s": 16.857496,
       "finished": true,
-      "sixty_ft_s": 2.733596,
-      "trap_kmh": 134.6556,
-      "trap_ms": 37.404332
+      "sixty_ft_s": 2.808313,
+      "trap_kmh": 133.3923,
+      "trap_ms": 37.053418
     },
     "YZF-R1M (2015-2023)|2015": {
-      "eighth_s": 6.934697,
-      "et_s": 10.073347,
+      "eighth_s": 6.926049,
+      "et_s": 10.052265,
       "finished": true,
-      "sixty_ft_s": 2.116878,
-      "trap_kmh": 258.1972,
-      "trap_ms": 71.721444
+      "sixty_ft_s": 2.115513,
+      "trap_kmh": 259.2863,
+      "trap_ms": 72.023975
     },
     "YZF-R25 (Indonesia) (2014-2018)|2014": {
-      "eighth_s": 10.933665,
-      "et_s": 16.099268,
+      "eighth_s": 10.652828,
+      "et_s": 15.815006,
       "finished": true,
-      "sixty_ft_s": 3.238941,
-      "trap_kmh": 154.707,
-      "trap_ms": 42.974164
+      "sixty_ft_s": 3.125038,
+      "trap_kmh": 154.4527,
+      "trap_ms": 42.903524
     },
     "YZF-R3 (2015-2022)|2015": {
-      "eighth_s": 9.6027,
-      "et_s": 14.434776,
+      "eighth_s": 9.35233,
+      "et_s": 14.193367,
       "finished": true,
-      "sixty_ft_s": 2.760369,
-      "trap_kmh": 165.1001,
-      "trap_ms": 45.861152
+      "sixty_ft_s": 2.63022,
+      "trap_kmh": 164.5357,
+      "trap_ms": 45.704372
     },
     "YZF-R6 (13S) (2008-2016)|2008": {
-      "eighth_s": 7.161602,
-      "et_s": 10.630644,
+      "eighth_s": 7.17071,
+      "et_s": 10.648734,
       "finished": true,
-      "sixty_ft_s": 2.125925,
-      "trap_kmh": 230.6786,
-      "trap_ms": 64.077395
+      "sixty_ft_s": 2.126527,
+      "trap_kmh": 230.0159,
+      "trap_ms": 63.893294
     },
     "YZF-R6 (2006-2007)|2006": {
       "eighth_s": 7.319798,
@@ -4503,148 +4503,148 @@
       "trap_ms": 59.806329
     },
     "YZF-R6 (5SL) (2003-2005)|2003": {
-      "eighth_s": 7.237614,
-      "et_s": 10.720254,
+      "eighth_s": 7.246184,
+      "et_s": 10.738537,
       "finished": true,
-      "sixty_ft_s": 2.158935,
-      "trap_kmh": 230.9538,
-      "trap_ms": 64.153834
+      "sixty_ft_s": 2.159599,
+      "trap_kmh": 230.2819,
+      "trap_ms": 63.967197
     },
     "YZF-R7 (2022-2026)|2022": {
-      "eighth_s": 7.950963,
-      "et_s": 12.011407,
+      "eighth_s": 7.976443,
+      "et_s": 12.056659,
       "finished": true,
-      "sixty_ft_s": 2.247737,
-      "trap_kmh": 197.6472,
-      "trap_ms": 54.901995
+      "sixty_ft_s": 2.248926,
+      "trap_kmh": 196.6218,
+      "trap_ms": 54.61717
     },
     "YZF-R9 (2025)|2025": {
-      "eighth_s": 7.146327,
-      "et_s": 10.56815,
+      "eighth_s": 7.1364,
+      "et_s": 10.545511,
       "finished": true,
-      "sixty_ft_s": 2.136046,
-      "trap_kmh": 235.6827,
-      "trap_ms": 65.46743
+      "sixty_ft_s": 2.134924,
+      "trap_kmh": 236.6423,
+      "trap_ms": 65.733981
     },
     "Z 650 (2017-2024)|2017": {
-      "eighth_s": 8.221548,
-      "et_s": 12.589955,
+      "eighth_s": 8.245003,
+      "et_s": 12.634802,
       "finished": true,
-      "sixty_ft_s": 2.301889,
-      "trap_kmh": 180.1804,
-      "trap_ms": 50.05012
+      "sixty_ft_s": 2.303036,
+      "trap_kmh": 179.2216,
+      "trap_ms": 49.78377
     },
     "Z H2 (2020-2025)|2020": {
-      "eighth_s": 6.890299,
-      "et_s": 10.321847,
+      "eighth_s": 6.88009,
+      "et_s": 10.297717,
       "finished": true,
-      "sixty_ft_s": 2.035051,
-      "trap_kmh": 230.7217,
-      "trap_ms": 64.08937
+      "sixty_ft_s": 2.033724,
+      "trap_kmh": 231.0585,
+      "trap_ms": 64.182913
     },
     "Z H2 SE (2024-2025)|2024": {
-      "eighth_s": 6.740739,
-      "et_s": 9.989101,
+      "eighth_s": 6.719816,
+      "et_s": 9.953102,
       "finished": true,
-      "sixty_ft_s": 2.013178,
-      "trap_kmh": 247.1506,
-      "trap_ms": 68.652936
+      "sixty_ft_s": 2.011862,
+      "trap_kmh": 248.3854,
+      "trap_ms": 68.995951
     },
     "Z1000 (2014-2021)|2014": {
-      "eighth_s": 7.165679,
-      "et_s": 10.855742,
+      "eighth_s": 7.146723,
+      "et_s": 10.824087,
       "finished": true,
-      "sixty_ft_s": 2.069816,
-      "trap_kmh": 213.517,
-      "trap_ms": 59.310278
+      "sixty_ft_s": 2.068389,
+      "trap_kmh": 214.3137,
+      "trap_ms": 59.531582
     },
     "Z400 (2019-2026)|2019": {
-      "eighth_s": 8.98612,
-      "et_s": 13.957115,
+      "eighth_s": 8.845661,
+      "et_s": 13.839357,
       "finished": true,
-      "sixty_ft_s": 2.418493,
-      "trap_kmh": 157.1841,
-      "trap_ms": 43.662261
+      "sixty_ft_s": 2.313255,
+      "trap_kmh": 156.3837,
+      "trap_ms": 43.439919
     },
     "Z500 (2024-2026)|2024": {
-      "eighth_s": 8.909809,
-      "et_s": 13.740414,
+      "eighth_s": 8.789278,
+      "et_s": 13.645866,
       "finished": true,
-      "sixty_ft_s": 2.434369,
-      "trap_kmh": 161.9746,
-      "trap_ms": 44.992937
+      "sixty_ft_s": 2.318366,
+      "trap_kmh": 160.9804,
+      "trap_ms": 44.716775
     },
     "Z650RS (2022-2026)|2022": {
-      "eighth_s": 8.065894,
-      "et_s": 12.35459,
+      "eighth_s": 8.088963,
+      "et_s": 12.398744,
       "finished": true,
-      "sixty_ft_s": 2.263415,
-      "trap_kmh": 182.5291,
-      "trap_ms": 50.702516
+      "sixty_ft_s": 2.264571,
+      "trap_kmh": 181.5831,
+      "trap_ms": 50.43976
     },
     "Z750 (2007-2012)|2007": {
-      "eighth_s": 7.658619,
-      "et_s": 11.699053,
+      "eighth_s": 7.63792,
+      "et_s": 11.66556,
       "finished": true,
-      "sixty_ft_s": 2.155289,
-      "trap_kmh": 194.7528,
-      "trap_ms": 54.098006
+      "sixty_ft_s": 2.152541,
+      "trap_kmh": 195.4138,
+      "trap_ms": 54.281607
     },
     "Z800 (2013-2016)|2013": {
-      "eighth_s": 7.851265,
-      "et_s": 11.914068,
+      "eighth_s": 7.819488,
+      "et_s": 11.868821,
       "finished": true,
-      "sixty_ft_s": 2.233858,
-      "trap_kmh": 194.5827,
-      "trap_ms": 54.050739
+      "sixty_ft_s": 2.223451,
+      "trap_kmh": 195.2053,
+      "trap_ms": 54.223703
     },
     "Z900 (2020-2024)|2020": {
-      "eighth_s": 7.44705,
-      "et_s": 11.239213,
+      "eighth_s": 7.437034,
+      "et_s": 11.218129,
       "finished": true,
-      "sixty_ft_s": 2.167411,
-      "trap_kmh": 207.6605,
-      "trap_ms": 57.683474
+      "sixty_ft_s": 2.166526,
+      "trap_kmh": 208.1597,
+      "trap_ms": 57.822128
     },
     "Z900RS (2018-2026)|2018": {
-      "eighth_s": 7.657974,
-      "et_s": 11.582544,
+      "eighth_s": 7.647997,
+      "et_s": 11.56277,
       "finished": true,
-      "sixty_ft_s": 2.192204,
-      "trap_kmh": 201.8494,
-      "trap_ms": 56.069281
+      "sixty_ft_s": 2.191497,
+      "trap_kmh": 202.3009,
+      "trap_ms": 56.1947
     },
     "ZRX1200R (2001-2008)|2001": {
-      "eighth_s": 7.144705,
-      "et_s": 11.013705,
+      "eighth_s": 7.135312,
+      "et_s": 10.995219,
       "finished": true,
-      "sixty_ft_s": 1.955456,
-      "trap_kmh": 203.922,
-      "trap_ms": 56.645007
+      "sixty_ft_s": 1.954876,
+      "trap_kmh": 204.4053,
+      "trap_ms": 56.779241
     },
     "ZX-6R (2024-2025)|2024": {
-      "eighth_s": 7.295352,
-      "et_s": 10.694261,
+      "eighth_s": 7.302178,
+      "et_s": 10.709653,
       "finished": true,
-      "sixty_ft_s": 2.208252,
-      "trap_kmh": 237.4072,
-      "trap_ms": 65.946445
+      "sixty_ft_s": 2.209001,
+      "trap_kmh": 236.733,
+      "trap_ms": 65.759165
     },
     "ZX-9R Ninja (1994-1997)|1994": {
-      "eighth_s": 7.247453,
-      "et_s": 10.763484,
+      "eighth_s": 7.236279,
+      "et_s": 10.739793,
       "finished": true,
-      "sixty_ft_s": 2.150003,
-      "trap_kmh": 229.1811,
-      "trap_ms": 63.66142
+      "sixty_ft_s": 2.148956,
+      "trap_kmh": 230.0122,
+      "trap_ms": 63.892265
     },
     "ZZR1400 (2006-2011)|2006": {
-      "eighth_s": 6.769156,
-      "et_s": 10.071412,
+      "eighth_s": 6.747332,
+      "et_s": 10.046476,
       "finished": true,
-      "sixty_ft_s": 1.994691,
-      "trap_kmh": 240.4262,
-      "trap_ms": 66.785043
+      "sixty_ft_s": 1.953048,
+      "trap_kmh": 240.5857,
+      "trap_ms": 66.829373
     }
   },
   "reference": {
