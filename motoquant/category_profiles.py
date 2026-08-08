@@ -223,7 +223,14 @@ _PROFILES: dict[str, CategoryProfile] = {
         # (n=2 cluster — ZX-25R/ZX-4RR; the pre-epoch fit used the
         # decel=2800 over-clutch fudge for the same reason. Effective
         # launch mu ~1.8 is the single-knob fit, honest about thinness.)
-        mu_peak_scale=1.30,
+        # 2026-08-08 crank-semantics retune: the July-17 honest-data batch
+        # (ZX-25R Racelogic 14.1 replacing its DERIVED fit) showed this
+        # cluster sim-FAST by -0.95 weighted — the 1.30 grip fudge plus the
+        # 2800 decel fudge were both fit to the optimistic pre-instrumented
+        # rows. Grid mu{1.30..1.00} x decel{2800,1400}: w|d| 1.184 -> 0.962
+        # at mu 1.00 / decel 1400. The residual is the documented n=2
+        # conflict (ZX-25R vs ZX-4RR pull opposite) — knob-unfixable.
+        mu_peak_scale=1.00,
         # Sub-500cc inline-fours (ZX-4RR 399, ZX-25R 249, CB400SF class).
         # Split out of mid_twin_300_500 July 6, 2026: these 15-17k rpm
         # screamers launch like 600 supersports (high slip, hard clutch
@@ -239,7 +246,7 @@ _PROFILES: dict[str, CategoryProfile] = {
         # inertia-bounded to ~20 Nm). Single-knob fit on n=2 by design —
         # a second knob would be pure overfit.
         over_clutch_factor=0.30,
-        max_engine_decel_rads2=2800.0,
+        max_engine_decel_rads2=1400.0,
         launch_floor_factor=1.0,
         parasitic_mult=1.0,
         notes="Sub-500cc I4 screamers (ZX-4RR, ZX-25R).",
@@ -306,7 +313,10 @@ _PROFILES: dict[str, CategoryProfile] = {
         # mu_peak_scale re-centers the cluster on the 277-match weighted
         # corpus while preserving each bike's relative rubber
         # (scripts/tune_cluster_knobs.py grids, session 2026-07-13).
-        mu_peak_scale=1.12,
+        # 2026-08-08 crank-semantics retune: under crank curves + the
+        # global recal the twins drifted +0.19 slow; grid mu{1.12,1.16,
+        # 1.20} x decel{150,400}: w|d| 0.407 -> 0.361 at 1.20/400.
+        mu_peak_scale=1.20,
         # Moderate over-clutching. Legacy `peak_hp < 60` 0.30 factor.
         over_clutch_factor=0.30,
         # max_engine_decel_rads2 lowered 200 -> 50 (2026-06-11 calibration):
@@ -319,7 +329,8 @@ _PROFILES: dict[str, CategoryProfile] = {
         # twins-only population (Ninja 400, Z400, R3, MT-03, RS 457) that
         # simmed +0.20 slow. Grid 50/150/300/500: w|d| 0.409 -> 0.393 at
         # 150 with bias +0.196 -> +0.124.
-        max_engine_decel_rads2=150.0,
+        # Raised 150 -> 400 in the 2026-08-08 retune (see mu note above).
+        max_engine_decel_rads2=400.0,
         launch_floor_factor=1.0,
         parasitic_mult=1.0,
         notes="300-500cc twins (Ninja 400, R3, MT-03, Duke 390).",
@@ -335,8 +346,13 @@ _PROFILES: dict[str, CategoryProfile] = {
         # 0/40/80/160/220/280/500/800: w|D| bottoms at 0-40 (0.433-0.434)
         # vs 0.543 at 280; 40 keeps the over-clutch mechanism armed instead
         # of dead. Weighted bias lands -0.015.
-        max_engine_decel_rads2=40.0,
+        # 2026-08-08 crank-semantics retune: with crank curves + the global
+        # recal + the now-live parasitic path (par 0.85), the cluster sat
+        # +0.23 slow. Grid mu{1.00,1.06,1.12} x decel{40,200} x par{0.85,
+        # 0.50}: w|d| 0.300 -> 0.231 at mu 1.12 / decel 200 / par 0.85.
+        max_engine_decel_rads2=200.0,
         launch_floor_factor=1.0,
+        mu_peak_scale=1.12,  # 2026-08-08 retune, see decel note above
         parasitic_mult=0.85,
         launch_rpm_factor=None,  # use peak_torque_rpm (importer default)
         notes="200-300cc entry (Pulsar NS200/N250, FZ25, RC 390).",
@@ -354,7 +370,17 @@ _PROFILES: dict[str, CategoryProfile] = {
         # 900/1300 on the 6-bike weighted sub-cluster: w|D| 0.673 -> 0.542 at
         # 900 with the R15 V3/V4 pair landing +0.20/+0.31; 1300 over-speeds
         # the NS200 (-1.14) for no pair gain. Baselines exact at every point.
-        max_engine_decel_rads2=900.0,
+        # Lowered 900 -> 150 (2026-08-08 crank-semantics retune): the
+        # July-17 honest-data batch (five Indonesian Racelogic-instrumented
+        # rows: MT-15 19.6, Apache RTR 200 4V 18.1, ...) exposed the 900
+        # value as fit to optimistic DERIVED rows — the cluster simmed
+        # -0.37 weighted FAST. The <22hp power rung is nearly inert here
+        # (these bikes are launch-limited: rung sweep 1.13 -> 0.96 moved
+        # bias only -0.37 -> -0.33), so the honest lever is launch
+        # aggression. Grid 900/500/250/200/150/100/50: bias centers at 150
+        # (-0.01) with w|d| 0.749 -> 0.701. over_clutch_factor is inert in
+        # this regime (decel binds first in the over-clutch min()).
+        max_engine_decel_rads2=150.0,
         launch_floor_factor=1.0,
         parasitic_mult=0.85,
         notes="150-200cc commuters (R15, Apache RTR 200, CB350RS).",
@@ -393,7 +419,12 @@ _PROFILES: dict[str, CategoryProfile] = {
         # bimodality (NSR250R/RD350 slow vs RG500/RS250 fast) persists and
         # is benchmark-quality-limited, not knob-limited.
         over_clutch_factor=0.55,
-        max_engine_decel_rads2=1800.0,
+        # Raised 1800 -> 2400 (2026-08-08 crank-semantics retune, with
+        # parasitic_mult 0.20 -> 0.10 below): under crank curves the 2T
+        # parasitic path went live for the first time; grid par{0.20,0.10}
+        # x decel{1800,2400}: w|d| 0.669 -> 0.642, bias +0.132 -> +0.077.
+        # The documented NSR/RD-vs-RG/RS bimodality persists (data-limited).
+        max_engine_decel_rads2=2400.0,
         launch_floor_factor=1.0,
         # 2T tires: vintage rubber (RD350, NSR250) are bias-ply with low
         # peak grip; modern 2T (KTM 300 EXC) more like 1.20.
@@ -405,7 +436,7 @@ _PROFILES: dict[str, CategoryProfile] = {
         # corpus while preserving each bike's relative rubber
         # (scripts/tune_cluster_knobs.py grids, session 2026-07-13).
         mu_peak_scale=1.15,
-        parasitic_mult=0.20,  # no valvetrain, premix oil pump only
+        parasitic_mult=0.10,  # no valvetrain, premix oil pump only (2026-08-08: 0.20->0.10, see decel note)
         notes="2-stroke (RD350, NSR250, RGV250, RX100, KTM 300 EXC).",
     ),
     CATEGORY_CRUISER_1300P: CategoryProfile(
