@@ -1,5 +1,30 @@
 # 2026-08-04 — codebase audit (delta over July-25) + deferred-work backlog
 
+> **PARTIALLY SUPERSEDED — read this first (added 2026-08-10).** PR #120
+> ("full-night run", merged to main 2026-08-09) independently closed a large
+> share of the §2 backlog below. **Do NOT re-scope these — they are DONE on
+> main:** the `is_at_wheel`/parasitic decision (shipped as the crank-semantics
+> epoch + retune), the gearing fix for the four speed-limiter heavies (+9 new
+> annotations), catalog de-duplication (regen made deterministic), the
+> Next.js 14→15 migration (27 advisories → 0), the chat tier-gate decision
+> (settled: the executor inherits the caller's tier), production dependency
+> pinning (lockfile + CVE floors), the Scrapling safety gates (now fail
+> closed), the 8 inert quickshifter SKUs (armed), the OEM drag-tire fitment
+> defaults, and three previously-vacuous test gates. The MCP server + skill
+> also shipped. `tests/test_llm_runner.py`'s env leak was fixed on main too,
+> more thoroughly than here (it also stops metering rows writing into the
+> shipped catalog) — main's version is the one in the tree.
+>
+> **Still open and still valid** (verified absent from main at 270074e): the
+> three HIGHs this PR fixes — the DNF-sentinel ranking bug, the OWM API-key
+> leak, and the magic-link token reaching production logs — plus the
+> `part_ids` caps, the chat-agent duplicate-part/budget clamps, and the
+> `stroke_type`/`gear_ratios` gap behind the 2-stroke structured data.
+>
+> **Accuracy figures quoted below are superseded.** The authoritative sweep is
+> now `reports/acc_final_2026_08_08.json`: **276 matched / weighted |Δ|
+> 0.2629 s / bias +0.0073 s**. The three pinned references are unchanged.
+
 **Branch:** `claude/codebase-audit-backlog-fdqcnb`
 **Method:** four parallel finder agents (physics/analysis/LLM · API/security/DB ·
 web frontend · tests/CI/scripts/docs), each briefed on
