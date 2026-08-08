@@ -2619,6 +2619,19 @@ KAWASAKI_ZX6R_2019 = spec_from_dict(
 )
 
 # Ducati 848 / 848 EVO (2008-13) — 134 hp twin, nimble drag machine
+# GEOMETRY CORRECTED 2026-08-08. This entry carried 90.0 x 67.0 mm; the
+# Testastretta Evoluzione in both the 848 and the 848 EVO is 94.0 x 61.2 mm
+# for 849.4 cc. The catalogue's other 848 EVO entry (2011-2013) already had
+# the right numbers, so the same engine was modelled two different ways
+# depending on which row a DB regen matched.
+# Sources: Wikipedia "Ducati 848" and Motorcycle.com's 2011/2013 848 EVO
+#          specification pages (849.4 cc, 94.0 x 61.2 mm, 13.2:1,
+#          140 bhp @ 10,500 rpm, 98 Nm @ 9750 rpm).
+# KNOWN, NOT FIXED HERE (renaming would re-key the bike_models row and
+# strand the existing one): this entry is really the PRE-EVO 848
+# (2008-2010) but is named "848 EVO" and spans 2008-2013, which is why it
+# overlaps the genuine 848 EVO entry at all. Splitting the two generations
+# wants its own pass with a DB migration.
 DUCATI_848 = spec_from_dict(
     {
         "manufacturer": "Ducati",
@@ -2628,14 +2641,14 @@ DUCATI_848 = spec_from_dict(
         "year_to": 2013,
         "category": "sport",
         "displacement_cc": 849,
-        "bore_mm": 90.0,
-        "stroke_mm": 67.0,
+        "bore_mm": 94.0,  # was 90.0
+        "stroke_mm": 61.2,  # was 67.0
         "compression_ratio": 13.2,
         "cylinders": 2,
         "peak_power_hp": 140.0,
         "peak_power_rpm": 10500,
-        "peak_torque_nm": 96.8,
-        "peak_torque_rpm": 8250,
+        "peak_torque_nm": 98.0,  # was 96.8
+        "peak_torque_rpm": 9750,  # was 8250
         "fuel_system": "fi",
         "cooling": "liquid",
         "valve_config": "dohc",
@@ -3430,6 +3443,22 @@ TVS_APACHE_RTR_160_4V_2018 = spec_from_dict(
 # Royal Enfield — heritage Indian brand, growing performance segment
 # ────────────────────────────────────────────────────────
 
+# ── Royal Enfield Continental GT 650 (2018-2024) ────────────────────────
+# GEOMETRY CORRECTED 2026-08-08. This entry carried an 84.0 x 58.0 mm
+# over-square twin; Royal Enfield's 648 cc air/oil-cooled 270-degree
+# parallel twin is 78.0 x 67.8 mm at 9.5:1, identical in the Continental
+# GT and the Interceptor. The 84 x 58 figures made the same engine look
+# like two different engines depending on which of the two catalogue
+# generations a DB row matched.
+# Sources: Wikipedia "Royal Enfield Interceptor 650" and IndianAutosBlog's
+#          leaked-specification piece (648 cc, 78 x 67.8 mm, SOHC 8-valve,
+#          270-degree crank, ~47 bhp / 52 Nm, 6-speed with slipper clutch);
+#          Royal Enfield Continental GT 650 technical specification.
+# NOT changed (source spread, and outside the geometry defect): the 47.2 hp
+# @ 7250 / 52 Nm @ 5250 figures here sit inside the published spread
+# (47 PS @ 7250 with 52.3 Nm @ 5150 per RE Europe; 47 bhp @ 7100 with
+# 52 Nm @ 5200 per Wikipedia), and the F17/R45 final drive still disagrees
+# with the 2020-2024 entry's F16/R43 and with gear_ratios.py's F14/R43.
 ROYAL_ENFIELD_CONTINENTAL_GT_650_2018 = spec_from_dict(
     {
         "manufacturer": "Royal Enfield",
@@ -3439,9 +3468,9 @@ ROYAL_ENFIELD_CONTINENTAL_GT_650_2018 = spec_from_dict(
         "year_to": 2024,
         "category": "naked",
         "displacement_cc": 648,
-        "bore_mm": 84.0,
-        "stroke_mm": 58.0,
-        "compression_ratio": 9.0,
+        "bore_mm": 78.0,  # was 84.0
+        "stroke_mm": 67.8,  # was 58.0
+        "compression_ratio": 9.5,  # was 9.0
         "cylinders": 2,
         "peak_power_hp": 47.2,
         "peak_power_rpm": 7250,
@@ -3465,6 +3494,11 @@ ROYAL_ENFIELD_CONTINENTAL_GT_650_2018 = spec_from_dict(
     source_name="spec_sheet",
 )
 
+# ── Royal Enfield Interceptor 650 (2018-2024) ───────────────────────────
+# GEOMETRY CORRECTED 2026-08-08 — same defect and same sources as the
+# Continental GT 650 entry above (the two share one engine): the 648 cc
+# air/oil-cooled 270-degree parallel twin is 78.0 x 67.8 mm at 9.5:1, not
+# 84.0 x 58.0 at 9.0:1.
 ROYAL_ENFIELD_INTERCEPTOR_650_2018 = spec_from_dict(
     {
         "manufacturer": "Royal Enfield",
@@ -3474,9 +3508,9 @@ ROYAL_ENFIELD_INTERCEPTOR_650_2018 = spec_from_dict(
         "year_to": 2024,
         "category": "naked",
         "displacement_cc": 648,
-        "bore_mm": 84.0,
-        "stroke_mm": 58.0,
-        "compression_ratio": 9.0,
+        "bore_mm": 78.0,  # was 84.0
+        "stroke_mm": 67.8,  # was 58.0
+        "compression_ratio": 9.5,  # was 9.0
         "cylinders": 2,
         "peak_power_hp": 47.2,
         "peak_power_rpm": 7250,
@@ -3738,6 +3772,20 @@ HONDA_CB300R_2019 = spec_from_dict(
     source_name="spec_sheet",
 )
 
+# ── Honda Hornet 2.0 (2020-2024) ────────────────────────────────────────
+# GEOMETRY CORRECTED 2026-08-08. The Hornet 2.0's 184.4 cc air-cooled
+# single measures 61.0 x 63.1 mm (published bore 61.0 mm; the stroke
+# follows from the published 184.4 cc swept volume). This entry had
+# 64.0 x 57.0 and the 2024-2025 entry had 63.0 x 77.8 with a 194 cc
+# displacement that does not exist — the same engine modelled three ways.
+# Sources: 91Wheels / ZigWheels / BikeWale / Haritha Honda Hornet 2.0
+#          specification (184.4 cc single, bore 61.0 mm, 17.03 bhp @ 8500,
+#          15.9 Nm @ 6000, 142 kg kerb, 1355 mm wheelbase, 5-speed,
+#          air-cooled).
+# NOT changed (unsourced): this entry's 520 chain vs the 2024-2025 entry's
+# 428 - a 520 chain on a 184 cc commuter is implausible but no OEM part
+# reference was found; and the two entries' F16/R46 vs F17/R44 final drives
+# still disagree (gear_ratios.py's Tier-1 entry backs F16/R46).
 HONDA_HORNET_2_0_2020 = spec_from_dict(
     {
         "manufacturer": "Honda",
@@ -3746,17 +3794,17 @@ HONDA_HORNET_2_0_2020 = spec_from_dict(
         "year_from": 2020,
         "year_to": 2024,
         "category": "naked",
-        "displacement_cc": 184,
-        "bore_mm": 64.0,
-        "stroke_mm": 57.0,
+        "displacement_cc": 184.4,  # was 184
+        "bore_mm": 61.0,  # was 64.0
+        "stroke_mm": 63.1,  # was 57.0
         "compression_ratio": 10.0,
         "cylinders": 1,
         "peak_power_hp": 17.0,
         "peak_power_rpm": 8500,
-        "peak_torque_nm": 16.0,
-        "peak_torque_rpm": 6500,
+        "peak_torque_nm": 15.9,  # was 16.0 @ 6500
+        "peak_torque_rpm": 6000,
         "fuel_system": "fi",
-        "cooling": "liquid",
+        "cooling": "air",  # air-cooled; was mislabelled liquid
         "valve_config": "dohc",
         "gears": 5,
         "gear_ratios": [3.313, 1.842, 1.157, 0.862, 0.688],
@@ -3764,7 +3812,7 @@ HONDA_HORNET_2_0_2020 = spec_from_dict(
         "rear_sprocket": 46,
         "chain_pitch": "520",
         "dry_mass_kg": 142.0,
-        "wheelbase_mm": 1320.0,
+        "wheelbase_mm": 1355.0,  # published wheelbase (was 1320)
         "front_tire_size": "100/70R17",
         "rear_tire_size": "130/70R17",
         "cd": 0.80,
@@ -6216,6 +6264,30 @@ RE_METEOR_350_2020 = spec_from_dict(
     source_name="spec_sheet",
 )
 
+# ── Royal Enfield Hunter 350 (2022-2026) ────────────────────────────────
+# CANONICAL ENTRY (2026-08-08 de-duplication). An exact-key duplicate of
+# this bike also lived in known_bikes_extended.py; it was removed because
+# this entry is family-consistent with the other J-platform siblings
+# (Classic 350 / Meteor 350 / Bullet 350 all carry the same cassette) and
+# its 181 kg matches Royal Enfield's published kerb weight, whereas the
+# extended twin carried an unsourced 171 kg and a lone-outlier cassette.
+# rear_sprocket corrected 39 -> 42 the same pass: BOTH duplicates were
+# wrong. RE's Hunter 350 owner's manual states a secondary (final drive)
+# ratio of 2.800:1, and the OEM chain/sprocket kit KAA00059/A is 15T/42T
+# (42/15 = 2.800 exactly; 39/15 = 2.600 does not match any RE figure).
+# Sources: Royal Enfield Hunter 350 owner's manual (secondary ratio
+#          2.800:1, 5-speed constant mesh);
+#          Royal Enfield genuine chain & sprocket kit KAA00059/A
+#          (15T front / 42T rear, 104-link chain — shared with Meteor 350
+#          and Classic 350 Reborn);
+#          ZigWheels / BikeWale / Royal Enfield technical specification
+#          (349.34 cc, 72.0 x 85.8 mm, 20.2 bhp @ 6100, 27 Nm @ 4000,
+#          181 kg kerb, 1370 mm wheelbase, 110/70-17 & 140/70-17).
+# NOTE for a follow-up pass (deliberately NOT changed here — out of the
+# de-duplication scope): Classic 350 / Meteor 350 / Bullet 350 carry the
+# same 39T rear and should almost certainly also be 42T, and the RE
+# owner's-manual internal ratios (2.615 / 1.706 / 1.300 / 1.040 / 0.875,
+# primary 2.313) differ from the whole family's catalogued cassette.
 RE_HUNTER_350_2022 = spec_from_dict(
     {
         "manufacturer": "Royal Enfield",
@@ -6239,7 +6311,9 @@ RE_HUNTER_350_2022 = spec_from_dict(
         "gears": 5,
         "gear_ratios": [2.917, 1.938, 1.474, 1.167, 0.955],
         "front_sprocket": 15,
-        "rear_sprocket": 39,
+        # 42T verified: RE owner's manual secondary ratio 2.800:1 and OEM
+        # kit KAA00059/A. Was 39 (this entry) / 40 (deleted extended twin).
+        "rear_sprocket": 42,
         "chain_pitch": "428",
         "dry_mass_kg": 181.0,
         "wheelbase_mm": 1370.0,
@@ -6532,6 +6606,23 @@ JAWA_PERAK_2020 = spec_from_dict(
     source_name="spec_sheet",
 )
 
+# ── Yezdi Roadster 334 (2022-2026) ──────────────────────────────────────
+# CANONICAL ENTRY (2026-08-08 de-duplication). An exact-key duplicate lived
+# in known_bikes_extended.py and was removed; this entry survives because
+# its 29.0 hp is the better read of the published 29.7 PS crank claim (the
+# twin said 28.6 hp) and its mass follows the same kerb-based convention as
+# the rest of the Indian catalogue. Two fields were taken FROM the deleted
+# twin because they were verifiably right and this entry was wrong: the
+# tyre sizes. Mass corrected 188 -> 184 kg (the published kerb figure).
+# Sources: ZigWheels / BikeDekho Yezdi Roadster specification
+#          (334 cc, 81.0 x 65.0 mm bore x stroke, 29.7 PS, 29.0 Nm,
+#          184 kg kerb, 1440 mm wheelbase, 100/90-18 front and
+#          130/80-17 rear tyres, 6-speed, 12.5 L tank);
+#          Yezdi Scrambler brochure (shared 334 cc BG6 platform,
+#          81 x 65 mm confirmed across Roadster / Scrambler / Adventure).
+# Follow-up (NOT changed here, unsourced either way): this entry's F15/R40
+# final drive and the deleted twin's F15/R37 disagree; neither could be
+# confirmed against a Classic Legends parts catalogue.
 YEZDI_ROADSTER_2022 = spec_from_dict(
     {
         "manufacturer": "Yezdi",
@@ -6557,10 +6648,11 @@ YEZDI_ROADSTER_2022 = spec_from_dict(
         "front_sprocket": 15,
         "rear_sprocket": 40,
         "chain_pitch": "520",
-        "dry_mass_kg": 188.0,
+        "dry_mass_kg": 184.0,  # published kerb weight (was an unsourced 188)
         "wheelbase_mm": 1440.0,
-        "front_tire_size": "100/90-17",
-        "rear_tire_size": "140/60-17",
+        # 18" front / 17" rear per the factory tyre specification.
+        "front_tire_size": "100/90-18",
+        "rear_tire_size": "130/80-17",
         "cd": 0.82,
         "frontal_area_m2": 0.55,
     },
@@ -6602,6 +6694,19 @@ YEZDI_SCRAMBLER_2022 = spec_from_dict(
     source_name="spec_sheet",
 )
 
+# ── Yezdi Adventure 334 (2022-2026) ─────────────────────────────────────
+# CANONICAL ENTRY (2026-08-08 de-duplication). An exact-key duplicate lived
+# in known_bikes_extended.py and was removed; this entry survives because
+# its engine figures match the published Adventure tune (30 bhp @ 8000 rpm,
+# 29.9 Nm @ 6500 — the deleted twin carried the Roadster's 28.6 hp @ 7300)
+# and its 187 kg is the published kerb weight. BOTH duplicates had the
+# wheels wrong: the Adventure runs a 21" front, not a 19".
+# Sources: ZigWheels / BikeWale / CarDekho Yezdi Adventure specification
+#          (334 cc, 29.6 PS class figure @ 8000 rpm, 29.9 Nm, 187 kg kerb,
+#          1465 mm wheelbase, 21" front and 17" rear spoke wheels wearing
+#          90/90-21 and 130/80-17 CEAT Gripp XL tyres);
+#          Yezdi Scrambler brochure (shared 334 cc BG6 platform,
+#          81 x 65 mm bore x stroke across all three variants).
 YEZDI_ADVENTURE_2022 = spec_from_dict(
     {
         "manufacturer": "Yezdi",
@@ -6629,8 +6734,10 @@ YEZDI_ADVENTURE_2022 = spec_from_dict(
         "chain_pitch": "520",
         "dry_mass_kg": 187.0,
         "wheelbase_mm": 1465.0,
-        "front_tire_size": "100/90-19",
-        "rear_tire_size": "140/80-17",
+        # 21"/17" ADV wheel pair (was 100/90-19 + 140/80-17 here and
+        # 100/90-19 + 130/80-17 on the deleted twin — both wrong up front).
+        "front_tire_size": "90/90-21",
+        "rear_tire_size": "130/80-17",
         "cd": 0.86,
         "frontal_area_m2": 0.60,
     },
@@ -7851,6 +7958,19 @@ KAWASAKI_Z800_2013 = spec_from_dict(
     source_name="spec_sheet",
 )
 
+# ── Kawasaki Versys 650 KLE650F (2015-2024) ─────────────────────────────
+# CANONICAL ENTRY (2026-08-08 de-duplication). An exact-key duplicate lived
+# in known_bikes_extended.py and was removed; every field the two disagreed
+# on resolves in this entry's favour against Kawasaki's own published
+# figures: 1415 mm wheelbase (the twin said 1450), a 15T/46T final drive
+# (the twin said 15/43 — Kawasaki publishes a final reduction ratio of
+# 3.067, and 46/15 = 3.067 exactly while 43/15 = 2.867 matches nothing),
+# 216 kg curb mass, and radial 120/70ZR17 / 160/60ZR17 rubber.
+# Sources: Kawasaki 2015 Versys 650 specification (649 cc, 51 kW @ 8500,
+#          216 kg curb, 1415 mm wheelbase, final reduction 3.067,
+#          21 L tank) via motorcyclespecifications.com and ultimatespecs;
+#          Dennis Kirk / JT OEM fitment data for the 2015 KLE650F
+#          (520 chain, 114 links, 15T front, 46T rear).
 KAWASAKI_VERSYS_650_2015 = spec_from_dict(
     {
         "manufacturer": "Kawasaki",
@@ -11485,6 +11605,12 @@ HONDA_SP_160_2024 = spec_from_dict(
     source_name="spec_sheet",
 )
 
+# ── Honda Hornet 2.0 (2024-2025 OBD-2B refresh) ─────────────────────────
+# GEOMETRY CORRECTED 2026-08-08 — same defect and same sources as the
+# 2020-2024 entry above. This entry declared a 194 cc, 63.0 x 77.8 mm
+# engine; 63.0 x 77.8 mm sweeps 242 cc, and Honda has never sold a 194 cc
+# Hornet. The 2024 OBD-2B refresh kept the 184.4 cc air-cooled single
+# (61.0 x 63.1 mm) unchanged.
 HONDA_HORNET_2_0_2024 = spec_from_dict(
     {
         "manufacturer": "Honda",
@@ -11492,15 +11618,15 @@ HONDA_HORNET_2_0_2024 = spec_from_dict(
         "year_from": 2024,
         "year_to": 2025,
         "category": "naked",
-        "displacement_cc": 194,
-        "bore_mm": 63.0,
-        "stroke_mm": 77.8,
+        "displacement_cc": 184.4,  # was 194 — no such Honda
+        "bore_mm": 61.0,  # was 63.0
+        "stroke_mm": 63.1,  # was 77.8 (63.0 x 77.8 sweeps 242 cc)
         "compression_ratio": 9.8,
         "cylinders": 1,
-        "peak_power_hp": 17.3,
+        "peak_power_hp": 17.0,  # 17.03 bhp @ 8500 (was 17.3)
         "peak_power_rpm": 8500,
-        "peak_torque_nm": 16.3,
-        "peak_torque_rpm": 6500,
+        "peak_torque_nm": 15.9,  # was 16.3 @ 6500
+        "peak_torque_rpm": 6000,
         "fuel_system": "fi",
         "cooling": "air",
         "valve_config": "sohc",
@@ -11510,7 +11636,7 @@ HONDA_HORNET_2_0_2024 = spec_from_dict(
         "rear_sprocket": 44,
         "chain_pitch": "428",
         "dry_mass_kg": 142.0,
-        "wheelbase_mm": 1330.0,
+        "wheelbase_mm": 1355.0,  # published wheelbase (was 1330)
         "front_tire_size": "110/70R17",
         "rear_tire_size": "140/70R17",
         "cd": 0.76,
@@ -11553,6 +11679,23 @@ YAMAHA_FZS_25_2023 = spec_from_dict(
     source_name="spec_sheet",
 )
 
+# ── Suzuki V-Strom SX 250 (2022-2024) ───────────────────────────────────
+# GEOMETRY CORRECTED 2026-08-08. This entry carried a 67.0 x 70.5 mm
+# long-stroke single that does not exist in Suzuki's Indian line-up. The
+# V-Strom SX is built on the Gixxer 250 / SG250 oil-cooled SOHC single:
+# 76.0 x 54.9 mm, 249 cc, 26.15 bhp @ 9300 rpm, 22.2 Nm @ 7300 rpm. The
+# 1355 mm "wheelbase" was in fact the bike's OVERALL HEIGHT (2180 x 880 x
+# 1355 mm); the real wheelbase is 1440 mm. Engine, drivetrain, tyres and
+# dimensions are now aligned with the separately-keyed 2022-2026 entry in
+# known_bikes_extended.py, which carries the full citation set — the two
+# rows describe the same motorcycle and previously disagreed on every
+# engine dimension, so DB regen produced different physics for each.
+# Sources: Suzuki Motorcycle India V-Strom SX specification and 91Wheels /
+#          BikeWale / BikeDekho spec sheets (249 cc oil-cooled single,
+#          26.15 bhp @ 9300, 22.2 Nm @ 7300, 167 kg kerb, 1440 mm
+#          wheelbase, 205 mm ground clearance, 100/90-19 front and
+#          140/70-17 rear tyres);
+#          Gixxer 250 specification (76.0 x 54.9 mm shared engine).
 SUZUKI_V_STROM_SX_250_2022 = spec_from_dict(
     {
         "manufacturer": "Suzuki",
@@ -11561,26 +11704,27 @@ SUZUKI_V_STROM_SX_250_2022 = spec_from_dict(
         "year_to": 2024,
         "category": "adventure",
         "displacement_cc": 249,
-        "bore_mm": 67.0,
-        "stroke_mm": 70.5,
-        "compression_ratio": 9.3,
+        "bore_mm": 76.0,  # was 67.0 — not a Suzuki 250 dimension
+        "stroke_mm": 54.9,  # was 70.5
+        "compression_ratio": 10.7,  # was 9.3
         "cylinders": 1,
-        "peak_power_hp": 24.7,
-        "peak_power_rpm": 8000,
-        "peak_torque_nm": 22.9,
-        "peak_torque_rpm": 6250,
+        "peak_power_hp": 26.1,  # 26.15 bhp @ 9300 (was 24.7 @ 8000)
+        "peak_power_rpm": 9300,
+        "peak_torque_nm": 22.2,  # was 22.9 @ 6250
+        "peak_torque_rpm": 7300,
         "fuel_system": "fi",
-        "cooling": "liquid",
+        "cooling": "air",  # oil-cooled (SOCS), was mislabelled liquid
         "valve_config": "sohc",
         "gears": 6,
-        "gear_ratios": [3.357, 2.357, 1.727, 1.333, 1.050, 0.857],
-        "front_sprocket": 17,
-        "rear_sprocket": 46,
+        # Gixxer 250 cassette + Suzuki India F14/R44 final drive.
+        "gear_ratios": [2.800, 1.895, 1.500, 1.261, 1.087, 0.960],
+        "front_sprocket": 14,
+        "rear_sprocket": 44,
         "chain_pitch": "520",
-        "dry_mass_kg": 168.0,
-        "wheelbase_mm": 1355.0,
-        "front_tire_size": "110/80R19",
-        "rear_tire_size": "150/70R17",
+        "dry_mass_kg": 167.0,  # published kerb weight (was 168)
+        "wheelbase_mm": 1440.0,  # was 1355 — that is the overall HEIGHT
+        "front_tire_size": "100/90-19",
+        "rear_tire_size": "140/70-17",
         "cd": 0.80,
         "frontal_area_m2": 0.46,
     },
