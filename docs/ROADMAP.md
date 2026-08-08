@@ -64,8 +64,11 @@ repeatedly re-scoped completed work from stale backlog text:
 - ~~`bike_repo`/`venue_repo` `lastrowid==0` misread~~ — both use `rowcount`.
 - ~~Dead `CategoryProfile` knobs~~ — the six inert knobs were deleted and the
   live-knob inventory is pinned as an exact set in `tests/test_profile_knobs.py`.
-  *(Caveat found 2026-07-25: `parasitic_mult` is still listed as live but is
-  bypassed for all 542 catalog configs — see the audit report.)*
+  *(Caveat found 2026-07-25: `parasitic_mult` was listed as live but bypassed
+  for the whole catalog. RESOLVED 2026-08-08: synthetic catalog curves now
+  declare crank semantics, so the parasitic + chain-efficiency paths — and
+  the 29 previously-inert priced SKUs behind them — are live; see
+  reports/session_2026_08_08_full_night_run.md.)*
 - *Also already resolved — do NOT re-implement:* the license-key **revoke route**
   and the auth **timing-safe compare + bounded fail-tracker** hardening (July-3
   inventory items A1-5/A1-6). Sessions keep re-scoping them from the stale
