@@ -209,7 +209,7 @@ export default function BikesPage() {
         stats={[
           { value: 541, label: 'BIKES' },
           { value: 254, label: 'TIRES' },
-          { value: 1860, label: 'FITMENTS' },
+          { value: 1783, label: 'FITMENTS' },
         ]}
       >
         <div className="mt-4">

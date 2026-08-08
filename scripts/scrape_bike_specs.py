@@ -14,6 +14,18 @@ every spec with ``validator.validate_spec``, and emits:
      stats, and any spec-table rows the parser did NOT map (so silent
      label drift on the source site is visible, not swallowed).
 
+Two gates stand between a fetched page and the import-ready JSON:
+
+  * the **substance gate** (``page_parse_failures``) — the spec table must
+    actually have parsed (displacement + power + >= MIN_MAPPED_ROWS mapped
+    rows). Identity alone is not evidence: manufacturer/model/year come
+    from the URL slug, so a 404 body or a drifted layout would otherwise
+    validate clean. Pages that fail this are reported as FAILURES.
+  * the **validator gate** (``validate_spec``) — physical bounds.
+
+Exit codes: 0 = specs accepted and nothing failed, 1 = nothing accepted,
+2 = specs accepted but some pages failed to fetch/parse (read the report).
+
 Scraped specs are UNVERIFIED data. The honest-data contract applies: an
 operator (or session) must adjudicate the triage report BEFORE importing —
 nothing here writes to motoquant.db.
@@ -99,6 +111,50 @@ EXPORT_FIELDS = (
 
 DETAIL_PAGE_RE = re.compile(r"\d{4}\.php$")
 
+# ── Page-substance gate (the validator alone is NOT a gate) ──────────────
+# parse_bikez_detail always synthesises manufacturer/model/year from the
+# URL slug, and validate_spec only requires those two to be non-empty. So
+# a 404 body, a JS shell, or a page whose table labels drifted would sail
+# through as a "validator-clean", import-ready spec WITH a clean drift
+# signal — the exact inversion of this tool's purpose. A page therefore
+# has to prove it actually parsed before its spec can be exported.
+MIN_MAPPED_ROWS = 6
+# (spec attribute, source row label) pairs that must come FROM THE PAGE.
+REQUIRED_PAGE_FIELDS = (
+    ("displacement_cc", "Displacement"),
+    ("peak_power_hp", "Power"),
+)
+
+# Reject kinds that mean "something is wrong with the fetch or the site",
+# as opposed to "this bike was deliberately filtered out".
+FAILURE_KINDS = ("fetch", "robots", "drift")
+
+
+def page_parse_failures(spec, html: str) -> list[str]:
+    """Reasons the PAGE itself yielded too little to trust the spec.
+
+    Empty list → the spec table really parsed. Anything else must be
+    reported as a fetch/drift failure, never as a clean spec.
+    """
+    rows = _parse_table_rows(html)
+    mapped = len(getattr(spec, "raw_data", None) or {})
+    failures: list[str] = []
+    if mapped < MIN_MAPPED_ROWS:
+        if not rows:
+            failures.append(
+                f"no spec table found (0 rows, {len(html)} bytes) — error page, "
+                "JS shell, or a layout change"
+            )
+        else:
+            failures.append(
+                f"{len(rows)} table row(s) on the page but only {mapped} mapped "
+                f"(need >= {MIN_MAPPED_ROWS}) — likely label drift"
+            )
+    for attr, label in REQUIRED_PAGE_FIELDS:
+        if getattr(spec, attr, None) is None:
+            failures.append(f"no '{label}' row parsed ({attr} missing)")
+    return failures
+
 
 def spec_to_export_dict(spec) -> dict:
     """Non-None EXPORT_FIELDS of a BikeSpec as a plain importable dict."""
@@ -135,8 +191,8 @@ def discover_detail_urls(
     slug = manufacturer.lower().replace(" ", "_")
     listing_url = f"{BASE_URL}/motorcycles/{slug}_motorcycles.php"
     result = fetcher.fetch(listing_url)
-    if result.blocked:
-        print(f"  !! listing page blocked (status {result.status}): {listing_url}")
+    if not result.ok:
+        print(f"  !! listing page unusable ({result.failure_reason()}): {listing_url}")
         return []
     links = _find_links_matching(
         result.html, r"/motorcycles/" + slug + r"[_-].+\.php", BASE_URL
@@ -152,8 +208,11 @@ def run_scrape(
 ) -> tuple[list[dict], list[dict]]:
     """Fetch+parse+validate every URL. Returns (accepted, rejected) rows.
 
-    Each row: {url, spec, validation, unmapped, tier, from_cache} for the
-    report; accepted rows also carry the import-ready "export" dict.
+    Each row: {url, spec, validation, unmapped, tier, from_cache, kind} for
+    the report; accepted rows also carry the import-ready "export" dict.
+    ``kind`` is one of fetch / robots / drift (things that need
+    investigating) or filter / invalid (things that were legitimately
+    turned away).
     """
     accepted: list[dict] = []
     rejected: list[dict] = []
@@ -161,21 +220,21 @@ def run_scrape(
         try:
             result: FetchResult = fetcher.fetch(url)
         except RobotsDisallowedError as exc:
-            rejected.append({"url": url, "reason": f"robots.txt: {exc}"})
+            rejected.append(
+                {"url": url, "kind": "robots", "reason": f"robots.txt: {exc}"}
+            )
             print(f"  -- robots disallow: {url}")
             continue
         except Exception as exc:
-            rejected.append({"url": url, "reason": f"fetch failed: {exc}"})
+            rejected.append(
+                {"url": url, "kind": "fetch", "reason": f"fetch failed: {exc}"}
+            )
             print(f"  !! fetch failed: {url} — {exc}")
             continue
-        if result.blocked:
-            rejected.append(
-                {
-                    "url": url,
-                    "reason": f"blocked at every tier (status {result.status})",
-                }
-            )
-            print(f"  !! blocked: {url} (status {result.status})")
+        if not result.ok:
+            reason = result.failure_reason()
+            rejected.append({"url": url, "kind": "fetch", "reason": reason})
+            print(f"  !! {reason}: {url}")
             continue
 
         spec = parse_bikez_detail(result.html, url)
@@ -187,7 +246,18 @@ def run_scrape(
             "from_cache": result.from_cache,
         }
 
+        # The substance gate runs BEFORE the validator so a page that never
+        # parsed can never be reported as validator-clean.
+        drift = page_parse_failures(spec, result.html)
+        if drift:
+            row["kind"] = "drift"
+            row["reason"] = "; ".join(drift)
+            rejected.append(row)
+            print(f"  !! did not parse: {url} — {row['reason']}")
+            continue
+
         if min_cc and spec.displacement_cc and spec.displacement_cc < min_cc:
+            row["kind"] = "filter"
             row["reason"] = f"below --min-cc ({spec.displacement_cc:.0f}cc)"
             rejected.append(row)
             continue
@@ -204,6 +274,7 @@ def run_scrape(
                 f"{', cache' if result.from_cache else ''}]"
             )
         else:
+            row["kind"] = "invalid"
             row["reason"] = "; ".join(validation.errors) or "validation failed"
             rejected.append(row)
             print(f"  -- invalid: {url} — {row['reason']}")
@@ -217,14 +288,18 @@ def write_report(
     fetcher: PoliteFetcher,
     out_json: Path,
 ) -> None:
+    failures = [r for r in rejected if r.get("kind") in FAILURE_KINDS]
+    skipped = [r for r in rejected if r.get("kind") not in FAILURE_KINDS]
     lines = [
         "# Scrape triage report",
         "",
         f"Generated {datetime.now(timezone.utc).isoformat(timespec='seconds')} "
         f"by scripts/scrape_bike_specs.py",
         "",
-        f"- Accepted (validator-clean): **{len(accepted)}** → `{out_json}`",
-        f"- Rejected / skipped: **{len(rejected)}**",
+        f"- Accepted (parsed **and** validator-clean): **{len(accepted)}** "
+        f"→ `{out_json}`",
+        f"- Fetch / parse failures (investigate): **{len(failures)}**",
+        f"- Skipped or invalid: **{len(skipped)}**",
         f"- Fetch stats: {fetcher.stats}",
         "",
         "> Scraped specs are **UNVERIFIED**. Adjudicate below, then dry-run:",
@@ -245,10 +320,31 @@ def write_report(
             f"| {s.displacement_cc or '?'} | {s.peak_power_hp or '?'} "
             f"| {s.dry_mass_kg or s.wet_mass_kg or '?'} | {row['tier']} | {warns} |"
         )
-    lines += ["", "## Rejected / skipped", ""]
-    if rejected:
-        for row in rejected:
-            lines.append(f"- {row['url']} — {row.get('reason', 'unknown')}")
+    lines += [
+        "",
+        "## Fetch / parse failures — INVESTIGATE",
+        "",
+        "> A page that did not parse is never exported. These are blocked "
+        "fetches, HTTP errors, robots refusals, and pages whose spec table "
+        "was missing or unrecognised (site-layout drift).",
+        "",
+    ]
+    if failures:
+        for row in failures:
+            lines.append(
+                f"- [{row.get('kind', '?')}] {row['url']} — "
+                f"{row.get('reason', 'unknown')}"
+            )
+    else:
+        lines.append("(none)")
+
+    lines += ["", "## Skipped / invalid", ""]
+    if skipped:
+        for row in skipped:
+            lines.append(
+                f"- [{row.get('kind', '?')}] {row['url']} — "
+                f"{row.get('reason', 'unknown')}"
+            )
     else:
         lines.append("(none)")
 
@@ -264,6 +360,11 @@ def write_report(
     if all_unmapped:
         for key, n in sorted(all_unmapped.items(), key=lambda kv: -kv[1]):
             lines.append(f"- `{key}` × {n}")
+    elif failures:
+        lines.append(
+            "(no unmapped rows — but see the failures above; a page that "
+            "returned nothing to parse also reports nothing here)"
+        )
     else:
         lines.append("(none — every row mapped)")
     lines.append("")
@@ -333,12 +434,22 @@ def main(argv: list[str] | None = None) -> int:
     report_path.parent.mkdir(parents=True, exist_ok=True)
     write_report(report_path, accepted, rejected, fetcher, out_json)
 
+    failures = [r for r in rejected if r.get("kind") in FAILURE_KINDS]
     print(
-        f"\nDone: {len(accepted)} accepted / {len(rejected)} rejected."
+        f"\nDone: {len(accepted)} accepted / {len(failures)} fetch-parse "
+        f"failures / {len(rejected) - len(failures)} skipped."
         f"\n  specs  → {out_json}\n  triage → {report_path}"
         f"\nNext: adjudicate the triage report, then dry-run the import."
     )
-    return 0 if accepted else 1
+    if not accepted:
+        return 1
+    if failures:
+        print(
+            "WARNING: some pages did not fetch or did not parse — see the "
+            "'Fetch / parse failures' section before trusting this run."
+        )
+        return 2
+    return 0
 
 
 if __name__ == "__main__":

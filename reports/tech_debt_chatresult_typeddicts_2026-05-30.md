@@ -29,11 +29,12 @@ so the chat dispatch surface is fully typed end-to-end.
 @dataclass
 class ChatResult:
     ...
-    sim_result: SimDict | None = None            # typed
-    compare_result: CompareDict | None = None    # typed
-    rank_result: dict[str, Any] | None = None    # ❌ untyped
+    sim_result: SimDict | None = None  # typed
+    compare_result: CompareDict | None = None  # typed
+    rank_result: dict[str, Any] | None = None  # ❌ untyped
     recommend_result: dict[str, Any] | None = None  # ❌ untyped
-    explain_result: dict[str, Any] | None = None    # ❌ untyped
+    explain_result: dict[str, Any] | None = None  # ❌ untyped
+
 
 def _summarize_rank(parsed, rk: dict[str, Any], client): ...
 def _summarize_recommend(parsed, rec: dict[str, Any], client): ...

@@ -65,7 +65,10 @@ from .ratelimit import rate_limit
 # Wrapped in try/except so the server still starts without python-jose installed
 # (tests stub this out; production must have all deps in requirements-api.txt).
 try:
-    from .auth import require_tier as require_tier  # noqa: PLC0414
+    from .auth import (
+        get_optional_user as get_optional_user,  # noqa: PLC0414
+        require_tier as require_tier,  # noqa: PLC0414
+    )
 except ImportError:  # pragma: no cover
 
     def require_tier(_tier: str):  # type: ignore[misc]
@@ -75,6 +78,10 @@ except ImportError:  # pragma: no cover
             return {}
 
         return _noop  # callers wrap with Depends(require_tier(...))
+
+    def get_optional_user() -> dict | None:  # type: ignore[misc]
+        """Stub — no auth layer, so every caller is anonymous."""
+        return None
 
 
 # ─── App init ─────────────────────────────────────────────────────────────
@@ -762,9 +769,14 @@ def _sim_identity_and_tier(request: Request) -> tuple[str, str]:
     return anon_identity(client_ip(request)), "free"
 
 
-def _meter_full_sim(request: Request, response: Response) -> None:
-    """FastAPI dependency: count this full sim and (when billing is
-    enforced) 402 free-tier callers past the daily quota."""
+def _meter_sims(request: Request, response: Response, n: int) -> None:
+    """Count ``n`` full sims for this caller and (when billing is enforced)
+    402 free-tier callers past the daily quota.
+
+    ``n`` is the number of RK4 runs the route actually performs, so the
+    quota unit stays "one full simulation" no matter how many the endpoint
+    bundles — /api/simulate/compare runs two and used to charge nothing,
+    which was a straight quota bypass (2026-07-25 audit §3.4)."""
     try:
         from .database.connection import connect as _db_connect
         from .usage import record_and_check
@@ -772,7 +784,7 @@ def _meter_full_sim(request: Request, response: Response) -> None:
         identity, tier = _sim_identity_and_tier(request)
         conn = _db_connect()
         try:
-            st = record_and_check(conn, identity, tier=tier)
+            st = record_and_check(conn, identity, tier=tier, n=n)
         finally:
             conn.close()
     except Exception:  # noqa: BLE001 -- metering must never break sims
@@ -800,6 +812,20 @@ def _meter_full_sim(request: Request, response: Response) -> None:
             )
 
 
+def _meter_full_sim(request: Request, response: Response) -> None:
+    """FastAPI dependency: meter one full sim (the common case)."""
+    _meter_sims(request, response, 1)
+
+
+def _meter_full_sims(n: int):
+    """FastAPI dependency factory for routes that run ``n`` full sims."""
+
+    def _dep(request: Request, response: Response) -> None:
+        _meter_sims(request, response, n)
+
+    return _dep
+
+
 # ─────────────────────────────────────────────────────────────────────────
 # Anonymous telemetry endpoint
 # ─────────────────────────────────────────────────────────────────────────
@@ -812,24 +838,60 @@ def _meter_full_sim(request: Request, response: Response) -> None:
 # without changing the client.
 
 
+# Bounds (2026-07-25 audit §3.5): the beacon is unauthenticated and writes
+# the funnel numbers the roadmap uses for pricing decisions, so every axis it
+# can be pushed on gets a ceiling — body bytes, field count, field length,
+# requests per IP, and in-flight forwarding threads.
+TELEMETRY_MAX_BODY_BYTES = 8 * 1024  # ~40x the largest real beacon
+TELEMETRY_MAX_PROPS = 16
+TELEMETRY_MAX_INFLIGHT = 8  # concurrent PostHog forwards, hard ceiling
+
+_telemetry_pool: Any = None
+_telemetry_pool_lock = threading.Lock()
+_telemetry_slots = threading.BoundedSemaphore(TELEMETRY_MAX_INFLIGHT)
+
+
+def _get_telemetry_pool():
+    """Lazily build the bounded forwarding pool (only if a key is set)."""
+    global _telemetry_pool
+    if _telemetry_pool is None:
+        with _telemetry_pool_lock:
+            if _telemetry_pool is None:
+                from concurrent.futures import ThreadPoolExecutor
+
+                _telemetry_pool = ThreadPoolExecutor(
+                    max_workers=2, thread_name_prefix="mq-telemetry"
+                )
+    return _telemetry_pool
+
+
 def _forward_telemetry_posthog(
     event: str,
     session_id: str,
     path: str,
     props: dict,
-) -> None:
+) -> str:
     """Env-gated server-side forward to PostHog (project "Motoquant", EU).
 
     No-op unless POSTHOG_API_KEY is set, so behaviour without the key is
-    unchanged (stdout log only). Fires on a daemon thread -- the beacon
-    route is async and a blocking HTTP call would starve the event loop.
-    Server-side capture, no cookies: stays inside the privacy page's
-    consent promise.
+    unchanged (stdout log only). Runs off the event loop -- the beacon route
+    is async and a blocking HTTP call would starve it. Server-side capture,
+    no cookies: stays inside the privacy page's consent promise.
+
+    Concurrency is BOUNDED (2026-07-25 audit): this used to spawn one raw
+    daemon thread per beacon, so with the key set a flood of forged events
+    minted unbounded threads against a 512 MB instance. Work now goes to a
+    2-worker pool behind an 8-slot semaphore; beyond that beacons are dropped
+    rather than queued, because telemetry must never be able to push real
+    request handling off the box. Returns the disposition for tests/logs.
     """
     api_key = os.environ.get("POSTHOG_API_KEY")
     if not api_key:
-        return
+        return "disabled"
     host = os.environ.get("POSTHOG_HOST", "https://eu.i.posthog.com").rstrip("/")
+
+    if not _telemetry_slots.acquire(blocking=False):
+        return "dropped_backpressure"
 
     def _post() -> None:
         try:
@@ -851,22 +913,52 @@ def _forward_telemetry_posthog(
             urllib.request.urlopen(req, timeout=5).read()
         except Exception:  # noqa: BLE001 -- telemetry must never surface
             pass
+        finally:
+            _telemetry_slots.release()
 
-    threading.Thread(target=_post, daemon=True).start()
+    try:
+        _get_telemetry_pool().submit(_post)
+    except Exception:  # noqa: BLE001 -- pool creation/submit must never 500
+        _telemetry_slots.release()
+        return "dropped_error"
+    return "queued"
 
 
-@app.post("/api/telemetry/event")
-async def telemetry_event(payload: dict = None):
+@app.post(
+    "/api/telemetry/event",
+    dependencies=[Depends(rate_limit("telemetry", 60, 60.0))],
+)
+async def telemetry_event(request: Request):
     """Log one anonymous client telemetry event. Always 200 — telemetry
-    must never surface as a user-facing error."""
-    if payload is None or not isinstance(payload, dict):
+    must never surface as a user-facing error.
+
+    Per-IP rate limited and body-capped: the funnel events this writes
+    (`signup_completed`, `sim_run_success`, …) are the numbers the roadmap
+    reads, and an unfused writer lets anyone manufacture them.
+
+    The body is read off the stream with a running ceiling rather than
+    declared as a `dict` parameter — FastAPI would have parsed the whole
+    thing before the handler could object.
+    """
+    total = 0
+    chunks: list[bytes] = []
+    try:
+        async for chunk in request.stream():
+            total += len(chunk)
+            if total > TELEMETRY_MAX_BODY_BYTES:
+                return {"ok": True, "dropped": "payload_too_large"}
+            chunks.append(chunk)
+        payload = json.loads(b"".join(chunks) or b"null")
+    except Exception:  # noqa: BLE001 -- malformed beacons are dropped, not 4xx'd
+        return {"ok": True, "dropped": "malformed"}
+    if not isinstance(payload, dict):
         return {"ok": True}
     event = str(payload.get("event", ""))[:64] or "unknown"
     session_id = str(payload.get("session_id", ""))[:64]
     props = payload.get("props") if isinstance(payload.get("props"), dict) else {}
     safe_props = {
         str(k)[:64]: (str(v)[:200] if isinstance(v, str) else v)
-        for k, v in list(props.items())[:32]
+        for k, v in list(props.items())[:TELEMETRY_MAX_PROPS]
         if isinstance(v, (str, int, float, bool, type(None)))
     }
     viewport = (
@@ -1724,16 +1816,30 @@ class SaveRunRequest(BaseModel):
     et_60ft_s: float | None = None
     et_eighth_s: float | None = None
     et_1000ft_s: float | None = None
-    notes: str | None = None
+    # Bounded (2026-07-25 audit §3.4): unbounded free text on an anonymous
+    # writer whose rows render on the PUBLIC leaderboard. 500 chars is well
+    # past any real "K5, 32C, street tyres" note.
+    notes: str | None = Field(None, max_length=500)
 
 
-@app.post("/api/simulate/save", status_code=201)
+@app.post(
+    "/api/simulate/save",
+    status_code=201,
+    dependencies=[Depends(rate_limit("save_run", 10, 60.0))],
+)
 def save_simulation(
     req: SaveRunRequest,
     auth_user: dict = Depends(require_tier("pro")),  # noqa: B008
 ):
     """Persist a single sim result to sim_runs. Resolves the incoming
-    bike_models.id to a bike_configs.id using the seed's 1:1 mapping."""
+    bike_models.id to a bike_configs.id using the seed's 1:1 mapping.
+
+    Rate-limited per IP (2026-07-25 audit): the route is effectively
+    anonymous during the beta (`require_tier` passes everyone through while
+    MOTOQUANT_BILLING_ENFORCE is falsy) and it trusts the client-supplied ET,
+    so an unfused loop simply owns /api/leaderboard. The field bounds above
+    stop absurd values; this stops volume.
+    """
     from . import __version__
 
     db = _get_db()
@@ -2058,9 +2164,18 @@ def _compare_impl(req: CompareRequest, progress=None):
     }
 
 
-@app.post("/api/simulate/compare")
+@app.post(
+    "/api/simulate/compare",
+    dependencies=[Depends(_meter_full_sims(2))],
+)
 def simulate_compare(req: CompareRequest):
-    """Run two builds side-by-side and return full results for both."""
+    """Run two builds side-by-side and return full results for both.
+
+    Metered at TWO sim units (2026-07-25 audit §3.4): this runs two full RK4
+    passes and was charging nothing, so it was the cheapest way to bypass the
+    free-tier quota entirely. /api/simulate/quick stays unmetered by design —
+    the slider UI auto-runs it on every drag.
+    """
     return _compare_impl(req)
 
 
@@ -3227,6 +3342,9 @@ class PricingRefreshOut(BaseModel):
     in_stock: bool | None = None
     fetched_at: str | None = None
     status: str
+    # Set when a server-side floor short-circuited the outbound fetch, so the
+    # caller can tell "we looked and it is unchanged" from "we did not look".
+    note: str | None = None
 
 
 @app.get("/api/pricing/part/{part_id}", response_model=PartPricingOut)
@@ -3333,6 +3451,47 @@ def pricing_for_bike(bike_id: int, limit: int = Query(50, ge=1, le=500)):
     )
 
 
+# Hard server-side floor on how often ONE part may hit its retailer, even
+# with force=true (2026-07-25 audit §3.4). force exists so an operator can
+# re-check a part that just changed price; it was never meant to be a way to
+# aim the 44 s worst-case outbound fetch at the same URL in a loop. The rate
+# limit bounds the caller; this bounds the third party we call.
+PRICING_FORCE_FLOOR_S = 3600.0
+
+
+def _last_price_fetch(db, part_id: int) -> tuple[str, float, dict] | None:
+    """Most recent part_prices row for ``part_id`` as (fetched_at, age_s, row).
+
+    Parses in Python rather than comparing in SQL: fetched_at is written as
+    ``datetime.isoformat()`` ('T' separator, sometimes a +00:00 offset) while
+    SQLite's ``datetime('now')`` yields a space separator, so a string
+    comparison between the two is not reliably ordered. Returns None when
+    there is no row, no parseable timestamp, or no table.
+    """
+    try:
+        rows = db.execute(
+            "SELECT retailer, price_inr, in_stock, fetched_at FROM part_prices "
+            "WHERE part_id = ? AND fetched_at IS NOT NULL",
+            (part_id,),
+        ).fetchall()
+    except sqlite3.Error:
+        return None
+    now = datetime.now(timezone.utc)
+    best: tuple[str, float, dict] | None = None
+    for row in rows:
+        raw = str(row["fetched_at"])
+        try:
+            ts = datetime.fromisoformat(raw.replace(" ", "T"))
+        except ValueError:
+            continue
+        if ts.tzinfo is None:  # stored naive == UTC by convention
+            ts = ts.replace(tzinfo=timezone.utc)
+        age = (now - ts).total_seconds()
+        if best is None or age < best[1]:
+            best = (raw, age, dict(row))
+    return best
+
+
 @app.post(
     "/api/pricing/refresh/{part_id}",
     response_model=PricingRefreshOut,
@@ -3355,6 +3514,13 @@ def refresh_part_price(part_id: int, force: bool = Query(False)):
     keep-alive target, so the instance would be marked unhealthy. ``force=true``
     made it worse by bypassing the 14-day freshness check so repeats could never
     become no-ops.
+
+    ``force=true`` now still honours a one-hour server-side floor
+    (``PRICING_FORCE_FLOOR_S``): within that window the last stored price is
+    returned as ``status="floor_cached"`` with an explanatory ``note`` and no
+    outbound request is made. That keeps force useful (re-check a part that
+    genuinely changed today) while making a repeat loop a cheap no-op instead
+    of an amplifier pointed at a third-party retailer.
 
     NOTE: still open (no auth) by design during the beta; the admin-role gate
     remains the eventual fix. The rate limit is the fuse until then.
@@ -3379,6 +3545,25 @@ def refresh_part_price(part_id: int, force: bool = Query(False)):
             fetched_at=None,
             status="no_url",
         )
+
+    if force:
+        recent = _last_price_fetch(db, part_id)
+        if recent is not None and recent[1] < PRICING_FORCE_FLOOR_S:
+            fetched_at, age_s, row = recent
+            return PricingRefreshOut(
+                part_id=part_id,
+                retailer=row.get("retailer") or part_row["retailer"],
+                price_inr=row.get("price_inr"),
+                in_stock=None if row.get("in_stock") is None else bool(row["in_stock"]),
+                fetched_at=fetched_at,
+                status="floor_cached",
+                note=(
+                    f"force ignored: this part was priced {int(age_s // 60)} min "
+                    f"ago and the server enforces a "
+                    f"{int(PRICING_FORCE_FLOOR_S // 60)}-minute minimum between "
+                    "live retailer fetches. Returning the stored price."
+                ),
+            )
 
     from motoquant.database.pricing_refresh import fetch_live_price
 
@@ -3513,6 +3698,9 @@ class ChatResponse(BaseModel):
       - if error == "llm_not_configured": show a banner telling the operator
         to set the provider key (GROQ_API_KEY by default — see LLM_PROVIDER).
       - if error == "rate_limited": show a polite retry-in-a-minute note.
+      - if error == "quota_exceeded": the caller's free daily sim quota is
+        spent (classic mode only — in agent mode the model relays it in
+        prose); show error_detail plus an upgrade CTA.
       - if error == "parse_failed" / "sim_failed" / "agent_failed": show
         error_detail.
       - if error == None: render summary text; agent mode additionally
@@ -3568,9 +3756,7 @@ def _make_chat_meter(request: Request):
 
             conn = _db_connect()
             try:
-                st = None
-                for _ in range(max(1, int(n))):
-                    st = record_and_check(conn, identity, tier=tier)
+                st = record_and_check(conn, identity, tier=tier, n=max(1, int(n)))
             finally:
                 conn.close()
             if st is not None and not st.allowed:
@@ -3597,7 +3783,22 @@ def _get_surrogate_pair():
     return _SURROGATE, _SURROGATE_SOURCE
 
 
-def _chat_impl(req: ChatRequest, client, meter_cb, progress=None) -> dict:
+def _chat_tier(user: dict | None) -> str | None:
+    """Caller's subscription tier for the agent executor. None == anonymous.
+
+    The chat agent can reach the three pro-gated surfaces (build optimizer,
+    ECU autotune, outlaw pipeline), so it must inherit the caller's tier —
+    otherwise flipping MOTOQUANT_BILLING_ENFORCE would 401 the direct routes
+    while /api/chat happily ran the same work for free (2026-07-25 audit
+    §3.5). The gate itself lives in llm/agent.py and is inert while billing
+    is off.
+    """
+    if not user:
+        return None
+    return str(user.get("tier") or "free")
+
+
+def _chat_impl(req: ChatRequest, client, meter_cb, progress=None, tier=None) -> dict:
     """Run one chat turn (agent or classic). Returns a ChatResponse dict."""
     db = _get_db_facade()
     if db is None:
@@ -3607,7 +3808,14 @@ def _chat_impl(req: ChatRequest, client, meter_cb, progress=None) -> dict:
         from .llm import run_chat_pipeline
 
         result = run_chat_pipeline(
-            req.query, db, client=client, run_summary=req.run_summary
+            req.query,
+            db,
+            client=client,
+            run_summary=req.run_summary,
+            # Classic mode runs 1-25 real RK4 sims per request and was
+            # entirely unmetered until now. No tier plumbing needed: this
+            # pipeline has no pro-gated tools.
+            meter_cb=meter_cb,
         )
         return {
             "raw_query": result.raw_query,
@@ -3642,6 +3850,7 @@ def _chat_impl(req: ChatRequest, client, meter_cb, progress=None) -> dict:
         progress_cb=progress,
         meter_cb=meter_cb,
         surrogate_getter=_get_surrogate_pair,
+        tier=tier,
     )
     return {
         "raw_query": result.raw_query,
@@ -3663,16 +3872,21 @@ def _chat_impl(req: ChatRequest, client, meter_cb, progress=None) -> dict:
     dependencies=[Depends(rate_limit("chat", 20, 60.0))],
 )
 def chat(
-    req: ChatRequest, request: Request, client=Depends(get_llm_client)
+    req: ChatRequest,
+    request: Request,
+    client=Depends(get_llm_client),
+    user: dict | None = Depends(get_optional_user),  # noqa: B008
 ) -> ChatResponse:
     """End-to-end NL chat (agent mode by default; mode='classic' for the
     legacy pipeline).
 
     Always returns 200 with `error` populated on failure modes the user
-    can recover from (bike not found, LLM not configured, rate limited).
-    Returns 503 only if the database itself is unreachable.
+    can recover from (bike not found, LLM not configured, rate limited,
+    quota exhausted). Returns 503 only if the database itself is
+    unreachable. The caller's tier (anonymous when unauthenticated) is
+    passed to the agent so its pro-gated tools match the direct routes.
     """
-    payload = _chat_impl(req, client, _make_chat_meter(request))
+    payload = _chat_impl(req, client, _make_chat_meter(request), tier=_chat_tier(user))
     suggestions = payload.pop("bike_suggestions", None) or []
     return ChatResponse(
         **payload,
@@ -3685,16 +3899,27 @@ def chat(
     status_code=202,
     dependencies=[Depends(rate_limit("chat", 20, 60.0))],
 )
-def job_chat(req: ChatRequest, request: Request, client=Depends(get_llm_client)):
+def job_chat(
+    req: ChatRequest,
+    request: Request,
+    client=Depends(get_llm_client),
+    user: dict | None = Depends(get_optional_user),  # noqa: B008
+):
     """Start a chat turn as a background job with live progress + Stop.
 
     Agent turns can run multiple sims / an optimizer pass, which on the
     0.5-CPU prod tier exceeds comfortable request time — same rationale as
     every other /api/jobs/* route. Poll GET /api/jobs/{id}; result is the
     ChatResponse-shaped dict.
+
+    Identity and tier are captured HERE, on the request thread, because the
+    job body runs later on a worker with no Request in scope.
     """
     meter = _make_chat_meter(request)
-    return _start_job("chat", lambda progress: _chat_impl(req, client, meter, progress))
+    tier = _chat_tier(user)
+    return _start_job(
+        "chat", lambda progress: _chat_impl(req, client, meter, progress, tier)
+    )
 
 
 # ------- END ws/backend-surrogate-pricing additions ----------------------
@@ -4122,13 +4347,17 @@ def job_outlaw(
     return _start_job("outlaw", lambda progress: _outlaw_impl(req, progress))
 
 
-@app.post("/api/jobs/compare", status_code=202)
+@app.post(
+    "/api/jobs/compare",
+    status_code=202,
+    dependencies=[Depends(_meter_full_sims(2))],
+)
 def job_compare(req: CompareRequest):
     """Start an A-vs-B comparison as a background job (real progress).
 
-    No metering dependency on purpose — the synchronous /api/simulate/compare
-    route has never been metered, and the job route must stay behaviourally
-    identical to the sync route it wraps (deploy-skew fallback contract)."""
+    Metered at two sim units, matching the sync /api/simulate/compare route
+    it wraps — the two must stay behaviourally identical (deploy-skew
+    fallback contract), so they gained the meter together."""
     return _start_job("compare", lambda progress: _compare_impl(req, progress))
 
 

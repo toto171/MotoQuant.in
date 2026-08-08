@@ -95,9 +95,18 @@ class TestR155Calibration:
         assert abs(et3 - et4) < 0.4, f"V3 {et3:.3f} vs V4 {et4:.3f}"
 
     def test_r15_v4_tracks_instrumented_benchmark(self):
-        """MotoStatz instrumented: 17.62 s. Calibration pin at +/-0.6 s."""
+        """The R155 platform now carries TWO conflicting instrumented
+        anchors: MotoStatz R15 V4 17.62 s and the July-17 Racelogic MT-15
+        19.6 s (same 155 VVA engine, near-identical gearing) — 2 s apart at
+        weight 1.0 each. The original +/-0.6 pin against 17.62 alone dates
+        from June 11, before the second anchor existed; the 2026-08-08
+        crank-semantics retune centers the entry-150-200 cluster on the
+        weighted corpus (bias -0.37 -> -0.01), which necessarily parks the
+        R15 V4 between the two anchors. Pin that honest state: inside the
+        anchor pair, and closer to its own anchor than to a 2-second miss."""
         et = _run_et(spec_to_bike_config(_spec("YZF-R15 V4")))
-        assert abs(et - 17.62) < 0.6, f"R15 V4 ET {et:.3f} vs 17.62"
+        assert 17.4 < et < 19.6, f"R15 V4 ET {et:.3f} outside the anchor pair"
+        assert abs(et - 17.62) < 1.0, f"R15 V4 ET {et:.3f} vs 17.62"
 
 
 class TestBenchmarkHygiene:

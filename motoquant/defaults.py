@@ -34,6 +34,24 @@ from .models import (
     WheelieParams,
 )
 
+# Crank-mode recalibration for synthetic CRANK curves (2026-08-08 epoch).
+# See the comment above its application inside _synthetic_torque_curve (the
+# 2-stroke builder applies the same factor). Module-level so tuning scripts
+# can sweep it; treat the committed value as calibrated against the weighted
+# benchmark corpus, not hand-picked. Honest decomposition: wheel dynos
+# support ~1.00-1.03 of pure claim-conservatism, so the remainder absorbs
+# effects the model deliberately does not yet carry — magazine ETs' 1-ft
+# rollout convention and pro-rider launches (staging rollout is epoch-gated;
+# when it is wired, re-tune this DOWN in the same pass).
+_CRANK_MODE_RECAL = 1.08
+
+# The small-cc claim-to-truth ladder rungs (see the Apr-27-2026 comment block
+# inside _synthetic_torque_curve). Promoted to module constants 2026-08-08 so
+# tuning passes sweep them like _CRANK_MODE_RECAL instead of editing literals.
+_CLAIM_LADDER_LT22 = 1.13  # <22 hp — retuned against the July-17 honest rows
+_CLAIM_LADDER_LT30 = 1.10  # 22-30 hp
+_CLAIM_LADDER_LT60_MULTI = 1.05  # 30-60 hp twins/multis (singles stay 1.00)
+
 
 def _synthetic_torque_curve(
     peak_torque_nm: float,
@@ -44,6 +62,7 @@ def _synthetic_torque_curve(
     peak_power_rpm: float = None,
     points: int = 100,
     cylinders: int = None,
+    is_at_wheel: bool = True,
 ) -> DynoCurve:
     """
     Generate a realistic inline-4 sportbike torque curve.
@@ -55,6 +74,18 @@ def _synthetic_torque_curve(
 
     Uses an asymmetric bell: gentle Gaussian below peak, shaped falloff
     above peak calibrated so torque at peak_power_rpm produces the rated HP.
+
+    ``is_at_wheel`` semantics (2026-08-08 epoch):
+      The curve is built to reproduce the spec's rated figures, which are
+      manufacturer CRANK claims — so a synthetic curve is physically a crank
+      estimate. The catalog importer passes ``is_at_wheel=False`` so the
+      engine applies drivetrain efficiency + parasitic losses on the way to
+      the wheel (this is what makes chain/parasitic parts and the
+      ``parasitic_mult`` cluster knob live for catalog bikes).
+      The three hand-curated reference bikes in THIS file deliberately keep
+      the default ``True``: their curves were hand-calibrated end-to-end
+      against instrumented runs as effective at-wheel curves, and their
+      pinned baselines are the bit-identical drift guard (ADR-0002).
     """
     rpms = np.linspace(idle_rpm, redline_rpm, points)
     torque = np.zeros_like(rpms)
@@ -161,9 +192,16 @@ def _synthetic_torque_curve(
             # treating the crank claim as 100 % wheel power AND in-curve shape
             # was peaky. Calibration factor of 1.13 reconciles to drag-strip
             # benchmarks within ~0.5 s.
-            torque *= 1.13
+            # 2026-08-08 sweep note: under crank semantics this rung is
+            # nearly INERT for ET (rung 1.13 -> 0.96 moved the entry-150-200
+            # bias only -0.37 -> -0.33 — these bikes are launch-limited in
+            # the sim), so the July-17 honest-data recentering was done on
+            # the cluster's launch knob (category_profiles.py entry_150_200
+            # max_engine_decel_rads2 900 -> 150), and 1.13 keeps its
+            # original documented meaning.
+            torque *= _CLAIM_LADDER_LT22
         elif peak_power_hp < 30.0:
-            torque *= 1.10
+            torque *= _CLAIM_LADDER_LT30
         elif peak_power_hp < 60.0:
             # July 6, 2026 (full-corpus recalibration): the flat 1.05 was
             # derived on a mixed singles+twins population. The 246-row
@@ -177,9 +215,30 @@ def _synthetic_torque_curve(
             # smaller for them. Singles keep 1.00 (spec-honest); twins and
             # multis retain the empirically-derived 1.05.
             if cylinders != 1:
-                torque *= 1.05
+                torque *= _CLAIM_LADDER_LT60_MULTI
 
-    return DynoCurve(rpm=rpms, torque_nm=torque, is_at_wheel=True)
+    # 2026-08-08 epoch: crank-mode recalibration, applied to EVERY synthetic
+    # crank curve (the catalog path) UNDER the class ladder above. When the
+    # curve is honestly declared a crank estimate, drivetrain efficiency
+    # (~0.926-0.946 chain, ~0.83 shaft) + parasitics are subtracted on the
+    # way to the wheel — physically right, but it re-based every synthetic
+    # bike's wheel power ~8 % below the level the class ladder was calibrated
+    # to deliver against the 277-match corpus. This factor (~1/eta_chain,
+    # corpus-tuned: {1.00..1.08} swept, 1.08 optimal, overall w|d|
+    # 0.3332→0.2960 with every >=60 hp cluster bias inside ±0.065) restores
+    # that calibrated level, so the ladder rungs KEEP their documented
+    # meanings and per-cluster honesty moves stay deliberate knob/rung
+    # decisions. What stays structurally honest regardless: chain/parasitic
+    # parts are live, per-bike eta differences are real (a shaft bike now
+    # pays ~8 % more loss than a chain bike instead of zero), and
+    # parasitic_mult reaches the whole catalog. When staging rollout (epoch-
+    # gated) is wired, re-tune this DOWN in the same pass.
+    # References are untouched by construction: they build at-wheel curves,
+    # so this branch cannot reach them (ADR-0002 pins hold bit-identical).
+    if not is_at_wheel:
+        torque *= _CRANK_MODE_RECAL
+
+    return DynoCurve(rpm=rpms, torque_nm=torque, is_at_wheel=is_at_wheel)
 
 
 def _synthetic_2stroke_torque_curve(
@@ -193,6 +252,7 @@ def _synthetic_2stroke_torque_curve(
     cylinders: int = 1,
     displacement_cc: float | None = None,
     points: int = 100,
+    is_at_wheel: bool = True,
 ) -> DynoCurve:
     """
     Generate a 2-stroke expansion-chamber torque curve.
@@ -324,7 +384,13 @@ def _synthetic_2stroke_torque_curve(
         elif peak_power_hp < 80.0:
             torque *= 1.07
 
-    return DynoCurve(rpm=rpms, torque_nm=torque, is_at_wheel=True)
+    # 2026-08-08 epoch: same crank-mode recalibration as the 4T builder —
+    # restores the calibrated wheel-power level under crank semantics so the
+    # 2T rungs above keep their documented meanings. See _CRANK_MODE_RECAL.
+    if not is_at_wheel:
+        torque *= _CRANK_MODE_RECAL
+
+    return DynoCurve(rpm=rpms, torque_nm=torque, is_at_wheel=is_at_wheel)
 
 
 def gsxr1000_k5() -> BikeConfig:

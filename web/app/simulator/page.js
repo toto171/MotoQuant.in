@@ -22,7 +22,7 @@ import { Skeleton, SkeletonCard } from '../../components/Skeleton';
 import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
 import { useAuth } from '../../components/AuthProvider';
-import { track, installErrorHandlers } from '../../lib/telemetry';
+import { track, trackSimRun, installErrorHandlers } from '../../lib/telemetry';
 import ChatPanel from '../../components/ChatPanel';
 import CodeComment from '../../components/CodeComment';
 import ScoreboardDigits from '../../components/ScoreboardDigits';
@@ -356,45 +356,93 @@ function SimulatorPageInner() {
 
   /* ─── Per-op async tasks (own {loading, progress, error} each) ─────── */
 
+  // TELEMETRY DOCTRINE for every sim flow on this page: open a trackSimRun
+  // handle as the FIRST statement of the task body, and settle it on every
+  // exit path (success / error / abort). Emitting the pair from inside the
+  // task — rather than from the button wrapper — is what keeps them honest:
+  // the wrapper can early-return before the sim ever starts, which is how
+  // `sim_run_start` came to fire for top-speed runs that never ran while
+  // `sim_run_success` fired only for full sims, leaving a funnel that could
+  // not convert. Errors are re-thrown so useAsyncTask still owns the UI state.
+
   // Quick sim (~50 ms warm) — staged feedback only, per the progress doctrine.
-  const quickTask = useAsyncTask(async (signal) => {
+  // `trigger` distinguishes the Live-mode debounced auto-run from an explicit
+  // Run/Retry press, so the funnel can be read either way.
+  const quickTask = useAsyncTask(async (signal, _onProgress, trigger = 'auto') => {
     if (!bike) return null;
-    const body = baseSimBody({ part_ids: selectedParts.map(p => p.id) });
-    const res = await fetch(`${API}/api/simulate/quick`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-      signal,
+    const runEvent = trackSimRun('simulator_page', 'quarter', {
+      trigger,
+      bike_id: bike?.id ?? null,
+      part_count: selectedParts.length,
     });
-    if (!res.ok) throw new Error(`API ${res.status}`);
-    const data = await res.json();
-    setResult(data);
-    return data;
+    try {
+      const body = baseSimBody({ part_ids: selectedParts.map(p => p.id) });
+      const res = await fetch(`${API}/api/simulate/quick`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal,
+      });
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      const data = await res.json();
+      setResult(data);
+      runEvent.success({
+        et_quarter_s: data?.et_quarter_s ?? null,
+        trap_speed_kmh: data?.trap_speed_kmh ?? null,
+      });
+      return data;
+    } catch (e) {
+      if (e?.name === 'AbortError') runEvent.cancelled();
+      else runEvent.error(e);
+      throw e;
+    }
   });
 
   // Full sim — job-backed with real RK4 progress.
   // NOTE (preserved behaviour): the full-sim body deliberately mirrors the
   // pre-redesign request and does NOT attach part_ids.
   const fullSimTask = useAsyncTask(async (signal, onProgress) => {
-    const data = await simulateJob(baseSimBody(), onProgress, signal);
-    setFullResult(data);
-    track('sim_run_success', {
-      surface: 'simulator_page',
-      mode: 'full',
+    const runEvent = trackSimRun('simulator_page', 'full', {
       bike_id: bike?.id ?? null,
     });
-    return data;
+    try {
+      const data = await simulateJob(baseSimBody(), onProgress, signal);
+      setFullResult(data);
+      runEvent.success({
+        et_quarter_s: data?.et_quarter_s ?? null,
+        trap_speed_kmh: data?.trap_speed_kmh ?? null,
+      });
+      return data;
+    } catch (e) {
+      if (e?.name === 'AbortError') runEvent.cancelled();
+      else runEvent.error(e);
+      throw e;
+    }
   });
 
   // Top speed / LSR — job-backed.
   const topSpeedTask = useAsyncTask(async (signal, onProgress) => {
-    const body = baseSimBody({
-      part_ids: selectedParts.map(p => p.id),
-      include_timeseries: true,
+    const runEvent = trackSimRun('simulator_page', 'topspeed', {
+      bike_label: bike?.model_name ?? bike?.model ?? 'unknown',
+      bike_id: bike?.id ?? null,
     });
-    const data = await topspeedJob(body, onProgress, signal);
-    setTopSpeedResult(data);
-    return data;
+    try {
+      const body = baseSimBody({
+        part_ids: selectedParts.map(p => p.id),
+        include_timeseries: true,
+      });
+      const data = await topspeedJob(body, onProgress, signal);
+      setTopSpeedResult(data);
+      runEvent.success({
+        terminal_velocity_kmh: data?.terminal_velocity_kmh ?? null,
+        reached_plateau: data?.reached_plateau ?? null,
+      });
+      return data;
+    } catch (e) {
+      if (e?.name === 'AbortError') runEvent.cancelled();
+      else runEvent.error(e);
+      throw e;
+    }
   });
 
   // A vs B compare — job-backed (falls back to the sync route on old backends).
@@ -421,9 +469,24 @@ function SimulatorPageInner() {
       humidity_pct: humidity,
       headwind_kmh: headwind,
     };
-    const data = await compareJob(body, onProgress, signal);
-    setCompareResult(data);
-    return data;
+    const runEvent = trackSimRun('simulator_page', 'compare', {
+      bike_id: bike?.id ?? null,
+      compare_bike_id: bBike?.id ?? null,
+    });
+    try {
+      const data = await compareJob(body, onProgress, signal);
+      setCompareResult(data);
+      runEvent.success({
+        // Response shape is { a, b, delta: { et_s, trap_kmh, … } }.
+        delta_et_s: data?.delta?.et_s ?? null,
+        faster: data?.delta?.faster ?? null,
+      });
+      return data;
+    } catch (e) {
+      if (e?.name === 'AbortError') runEvent.cancelled();
+      else runEvent.error(e);
+      throw e;
+    }
   });
 
   // Uploads — plain POSTs with staged feedback + Retry (file kept in a ref).
@@ -490,8 +553,11 @@ function SimulatorPageInner() {
     fullSimTask.run();
   }, [bike, fullSimTask]);
 
+  // sim_run_start for this flow is emitted inside topSpeedTask, not here —
+  // it used to fire above the guard below, so a click with no bike selected
+  // (or while a run was already active) logged a start for a sim that never
+  // happened, and no success could ever match it.
   const startTopSpeed = useCallback(() => {
-    track('sim_run_start', { surface: 'simulator_page', mode: 'topspeed', bike_label: bike?.model_name ?? 'unknown', bike_id: bike?.id ?? null });
     if (!bike || topSpeedTask.active) return;
     setActiveTab('topspeed');
     topSpeedTask.run();
@@ -675,7 +741,8 @@ function SimulatorPageInner() {
   useEffect(() => {
     if (!bike || !liveSim) return; // Manual mode: quick sim only fires from the Run button
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => runQuick(), 400);
+    // 'auto' → the trigger prop on this flow's sim_run_start/success pair.
+    debounceRef.current = setTimeout(() => runQuick('auto'), 400);
     return () => clearTimeout(debounceRef.current);
   }, [bike, selectedParts, frontTire, rearTire, venue, riderKg, powerBoost, massChange,
       ambientTemp, trackTemp, humidity, headwind, liveSim, runQuick]);
@@ -863,7 +930,7 @@ function SimulatorPageInner() {
           {!liveSim && (
             <ActionButton
               task={quickTask}
-              onRun={() => quickTask.run()}
+              onRun={() => quickTask.run('manual')}
               label="Run quick sim"
               runningLabel="Quick sim"
               disabled={!bike}
@@ -1281,7 +1348,7 @@ function SimulatorPageInner() {
             {quickTask.error && !quickTask.active && (
               <ErrorTile
                 message={`Quick sim failed — ${quickTask.error}`}
-                onRetry={() => quickTask.run()}
+                onRetry={() => quickTask.run('manual')}
               />
             )}
 

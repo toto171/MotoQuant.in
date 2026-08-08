@@ -668,7 +668,17 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
         model_code=spec.model_code,
     )
 
-    # If no known curve found, generate a synthetic one based on peak power/torque
+    # If no known curve found, generate a synthetic one based on peak power/torque.
+    #
+    # 2026-08-08 epoch: synthetic curves are CRANK estimates (is_at_wheel=False).
+    # They are built to reproduce the spec's rated figures, which are
+    # manufacturer crank claims; flagging them at-wheel made the engine skip
+    # drivetrain efficiency + parasitic losses, so every catalog bike
+    # delivered full rated crank power at the rear wheel (2026-07-25 audit
+    # §3.1) and 29 priced chain/parasitic parts moved ET by ~0. Real measured
+    # curves from get_dyno_curve() stay at-wheel — a chassis dyno measures the
+    # wheel. Cluster knobs were retuned against the weighted corpus in the
+    # same pass (see category_profiles.py).
     if dyno is None:
         if is_two_stroke:
             dyno = _synthetic_2stroke_torque_curve(
@@ -682,6 +692,7 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
                 cylinders=int(cyls or 1),
                 displacement_cc=float(cc),
                 points=100,
+                is_at_wheel=False,
             )
         else:
             dyno = _synthetic_torque_curve(
@@ -693,6 +704,7 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
                 peak_power_rpm=float(peak_hp_rpm),
                 points=100,
                 cylinders=spec.cylinders,
+                is_at_wheel=False,
             )
 
     # 2-strokes have much lower rotating inertia (no valvetrain, lighter crank)

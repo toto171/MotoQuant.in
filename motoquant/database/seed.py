@@ -6681,7 +6681,16 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "model_name": "QuickShifter Controller Module",
             "part_number": "HT-QS-MOD",
             "specs": {"type": "quickshift"},
-            "param_overrides": {"drivetrain.quickshifter": True},
+            # 2026-08-08 dead-knob fix (see the quickshifter block below):
+            # ``drivetrain.quickshifter`` has no reader in physics.py, so this
+            # module used to move ET by exactly 0.000000 s. HealTech's own
+            # functional siblings bracket it at 50 ms (iQSE-1 absolute) and
+            # 60 ms (iQSE Indian, -40 ms off the 100 ms stock); take the
+            # conservative end for this generic controller SKU.
+            "param_overrides": {
+                "drivetrain.quickshifter": True,
+                "drivetrain.total_shift_time_ms": 60.0,
+            },
             "fitment_rules": {
                 "tier": "family",
                 "match": {"stroke_type": 4, "displacement_min_cc": 600},
@@ -7705,15 +7714,36 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
         )
 
     # Additional Quickshifters (7 more)
-    for i, (brand, model, price) in enumerate(
+    #
+    # 2026-08-08 dead-knob fix: these seven shipped with
+    # ``drivetrain.quickshifter`` as their ONLY param_override. That field has
+    # no reader in physics.py (the sim reads ``total_shift_time_ms`` alone), so
+    # every one of them moved ET by exactly 0.000000 s while carrying a
+    # Rs12,640-Rs42,000 price tag and sitting in the ROI/optimizer pools.
+    # Each now also carries an absolute shift-time override, mirroring the
+    # convention of the twelve functional sibling quickshifters (48-70 ms,
+    # against a 100 ms stock baseline on 538 of 541 configs).
+    # Chosen conservatively — see the per-part rationale in the third tuple
+    # slot; where a brand has no functional sibling to anchor on, the value
+    # falls back to the 60 ms band midpoint rather than the fastest claim.
+    for i, (brand, model, price, shift_ms) in enumerate(
         [
-            ("HM", "HM QS Mid-Range", 24000),
-            ("Translogic", "QS Pro V2", 42000),
-            ("Dynojet", "Power Commander QS", 30000),
-            ("GPR", "Gear Box QS", 35000),
-            ("Helix", "Helix QS Universal", 28000),
-            ("Shift Assist", "Shift Assist Pro", 25000),
-            ("Bonamici", "Racing Quick Shifter", 26000),
+            # HM's own Super Lite (HM-QS-SLT) is the 60 ms top-tier unit in
+            # this line; the Mid-Range sits a rung below it.
+            ("HM", "HM QS Mid-Range", 24000, 70.0),
+            # QS Pro V2 is the generation preceding the QS Pro III
+            # Bidirectional (TL-QS3-BD, 50 ms) / IntelliShift Sport (55 ms).
+            ("Translogic", "QS Pro V2", 42000, 60.0),
+            # Same product line and same street price as DJ-PCQS, which is
+            # already seeded at 55 ms — mirror it exactly.
+            ("Dynojet", "Power Commander QS", 30000, 55.0),
+            # No functional sibling for these four brands -> 60 ms band
+            # midpoint (= HM Super Lite / RapidBike QS4, and the value the
+            # Healtech -40 ms delta sibling implies off the 100 ms stock).
+            ("GPR", "Gear Box QS", 35000, 60.0),
+            ("Helix", "Helix QS Universal", 28000, 60.0),
+            ("Shift Assist", "Shift Assist Pro", 25000, 60.0),
+            ("Bonamici", "Racing Quick Shifter", 26000, 60.0),
         ]
     ):
         qs_match = {"displacement_min_cc": 300 + i * 150}
@@ -7728,7 +7758,12 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
                 "model_name": model,
                 "part_number": f"QS-{brand[:3].upper()}-{i + 4}",
                 "specs": {"type": "quickshift"},
-                "param_overrides": {"drivetrain.quickshifter": True},
+                "param_overrides": {
+                    # honest metadata, inert in physics (kept deliberately)
+                    "drivetrain.quickshifter": True,
+                    # the knob the sim actually reads
+                    "drivetrain.total_shift_time_ms": shift_ms,
+                },
                 "fitment_rules": {
                     "tier": "family",
                     "match": qs_match,
@@ -9040,20 +9075,126 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
     return count
 
 
+# Compound types that are plausible as factory (OEM) rubber.
+#
+# Deliberately an ALLOWLIST, not a denylist. The ±20 mm fallback below used to
+# skip ('race', 'drag_dot', 'drag_slick'); the catalog later gained a 'drag'
+# compound (10 rows, mu_peak 1.85 — the highest-grip rows in the table) which
+# the denylist did not name. Because fallback candidates are ordered mu_peak
+# DESC, those drag slicks WON the fallback and the shipped DB ended up
+# asserting M&H Racemaster / Avon AM23A drag rubber as the OEM fitment for 24
+# bikes — including all three pinned reference bikes — contradicting this
+# function's own docstring. With an allowlist, a compound nobody has vetted is
+# excluded until someone consciously adds it here: an honestly-absent fitment
+# beats a confidently-wrong one.
+#
+# Membership rule: the compound must be something a manufacturer could bolt on
+# at the factory and sell to a road-legal customer. Track-only and drag rubber
+# ('race', 'drag', 'drag_dot', 'drag_slick') never qualifies — those belong to
+# the 'recommended' / 'drag_prep' fitment tiers, not 'oem'.
+OEM_COMPOUNDS = frozenset(
+    {"sport", "street", "commuter", "cruiser", "adventure", "vintage"}
+)
+
+
+def parse_tire_size(size_str: str | None) -> tuple[int | None, int | None]:
+    """Parse '190/50-17' / '190/55ZR17' -> (width_mm, rim_inch), else (None, None)."""
+    if not size_str:
+        return None, None
+    # Remove common construction / speed-rating markers.
+    s = size_str.replace("ZR", "/").replace("R", "/").replace("Z", "")
+    parts = s.split("/")
+    try:
+        if len(parts) >= 2:
+            width = int(parts[0])
+            # Rim lives in the third part, or trails the second one.
+            if len(parts) >= 3:
+                rim = int(parts[2].split("-")[-1])
+            else:
+                rim = int(parts[1].split("-")[-1])
+            return width, rim
+    except (ValueError, IndexError):
+        pass
+    return None, None
+
+
+# Compounds rejected by pick_oem_tire, logged once each per process so a
+# newly-added compound surfaces instead of silently vanishing from OEM picks.
+_NON_OEM_COMPOUNDS_SEEN: set = set()
+
+
+def pick_oem_tire(db: MotoQuantDB, position: str, size_str: str) -> dict | None:
+    """Pick the tire a factory (OEM) fitment for `position`/`size_str` should use.
+
+    Two strategies, in order:
+      1. Exact size-designation match, sport compound preferred over street.
+      2. Fallback: same rim diameter, width within ±20 mm, compound in
+         OEM_COMPOUNDS (see the constant for why that is an allowlist).
+
+    Returns the tire row (dict) or None when nothing acceptable exists — the
+    caller must treat None as "this bike has no known OEM fitment" and write
+    nothing, rather than reaching for the nearest high-grip row.
+
+    Shared with scripts/patch_2026_08_08_fitment_integrity.py so the cleaned
+    shipped DB is a fixed point of this seeder.
+    """
+    import logging
+
+    logger = logging.getLogger(__name__)
+
+    if not size_str:
+        return None
+
+    # Strategy 1: exact size match with a preferred compound.
+    for compound in ("sport", "street"):
+        tires = db.tires.search(
+            position=position,
+            compound_type=compound,
+            size=size_str,
+            limit=5,
+        )
+        if tires:
+            return tires[0]
+
+    # Strategy 2: rim + width proximity, restricted to street-plausible rubber.
+    width, rim = parse_tire_size(size_str)
+    if not (width and rim):
+        return None
+    for tire in db.tires.search(position=position, limit=100):
+        compound = tire.get("compound_type")
+        if compound not in OEM_COMPOUNDS:
+            if compound not in _NON_OEM_COMPOUNDS_SEEN:
+                _NON_OEM_COMPOUNDS_SEEN.add(compound)
+                logger.debug(
+                    "pick_oem_tire: compound %r not in OEM_COMPOUNDS — skipped "
+                    "for OEM fitments (add it there if it is street rubber)",
+                    compound,
+                )
+            continue
+        t_width = tire.get("width_mm")
+        t_rim = tire.get("rim_diameter_inch")
+        if t_rim == rim and t_width and abs(t_width - width) <= 20:
+            return tire
+    return None
+
+
 def seed_bike_tire_fitments(db: MotoQuantDB) -> int:
     """
     Link bikes to tires based on OEM fitments extracted from bike configs.
 
     For each bike in the database with a tire_params config:
     1. Extracts front_size and rear_size from the bike_config's tire_params JSON
-    2. Finds matching tires in tire_models by size_designation
-    3. Links them with link_bike_fitment() as OEM fitments
+    2. Finds a matching tire via pick_oem_tire()
+    3. Links it with link_bike_fitment(is_default=True) as the OEM fitment
 
-    Matching strategy:
-    - First try exact size_designation match with compound_type IN ('sport', 'street')
-    - If no match, try matching rim diameter + width within ±20mm
-    - If still no match, skip gracefully with a warning
-    - Prefer sport compound over street; never use race/drag for OEM fitments
+    Matching strategy (see pick_oem_tire): exact size_designation match with
+    compound_type IN ('sport', 'street') first, else rim + width within ±20 mm
+    restricted to OEM_COMPOUNDS. No match => no row is written (honest
+    absence); race/drag rubber is never an OEM fitment.
+
+    Re-running is convergent: link_bike_fitment(is_default=True) supersedes the
+    previous default for the same (bike, position), so a changed pick replaces
+    the old row instead of appending a second "default OEM" tire.
 
     Returns count of fitments created.
     """
@@ -9087,70 +9228,15 @@ def seed_bike_tire_fitments(db: MotoQuantDB) -> int:
                 )
                 continue
 
-            # Helper function to extract rim diameter and width from size string
-            def parse_tire_size(size_str):
-                """Parse "190/50-17" or "190/55ZR17" -> (width_mm, rim_in) or (None, None)"""
-                if not size_str:
-                    return None, None
-                # Remove common markers
-                s = size_str.replace("ZR", "/").replace("R", "/").replace("Z", "")
-                parts = s.split("/")
-                try:
-                    if len(parts) >= 2:
-                        width = int(parts[0])
-                        # Extract rim from third part or second part
-                        if len(parts) >= 3:
-                            rim = int(parts[2].split("-")[-1])
-                        else:
-                            # Try to parse second part
-                            rim_str = parts[1].split("-")[-1]
-                            rim = int(rim_str)
-                        return width, rim
-                except (ValueError, IndexError):
-                    pass
-                return None, None
-
-            rear_width, rear_rim = parse_tire_size(rear_size)
-            front_width, front_rim = parse_tire_size(front_size)
-
             # For each position (rear, front), find a matching tire
-            for position, size_str, width, rim in [
-                ("rear", rear_size, rear_width, rear_rim),
-                ("front", front_size, front_width, front_rim),
+            for position, size_str in [
+                ("rear", rear_size),
+                ("front", front_size),
             ]:
                 if not size_str:
                     continue
 
-                # Strategy 1: exact size match with preferred compound
-                matched_tire = None
-                for compound in ["sport", "street"]:
-                    tires = db.tires.search(
-                        position=position,
-                        compound_type=compound,
-                        size=size_str,
-                        limit=5,
-                    )
-                    if tires:
-                        # Prefer sport over street, pick first match
-                        matched_tire = tires[0]
-                        break
-
-                # Strategy 2: if no exact match, try matching rim + width
-                if matched_tire is None and width and rim:
-                    all_tires = db.tires.search(position=position, limit=100)
-                    for tire in all_tires:
-                        t_width = tire.get("width_mm")
-                        t_rim = tire.get("rim_diameter_inch")
-                        t_compound = tire.get("compound_type")
-
-                        # Skip race/drag compounds for OEM fitments
-                        if t_compound in ("race", "drag_dot", "drag_slick"):
-                            continue
-
-                        # Check rim match and width within ±20mm
-                        if t_rim == rim and t_width and abs(t_width - width) <= 20:
-                            matched_tire = tire
-                            break
+                matched_tire = pick_oem_tire(db, position, size_str)
 
                 if matched_tire:
                     db.tires.link_bike_fitment(

@@ -95,21 +95,31 @@ def record_and_check(
     identity: str,
     tier: str = "free",
     day: str | None = None,
+    n: int = 1,
 ) -> UsageStatus:
-    """Increment today's sim count for ``identity`` and report quota state.
+    """Charge ``n`` full sims to ``identity`` today and report quota state.
+
+    ``n`` exists because several callers spend more than one RK4 run per
+    request — /api/simulate/compare runs two, a chat turn's rank/choose
+    dispatch runs up to 25, a heavy op (optimizer / autotune) costs a
+    nominal batch. Charging them in ONE atomic statement keeps the increment
+    lossless under concurrency (a Python-side loop would open the same race
+    the ON CONFLICT clause exists to close) and costs one round trip
+    instead of n.
 
     Never raises on quota — the caller decides whether ``allowed=False``
     becomes an HTTP 402 (enforced mode) or just a response header (beta).
     """
     ensure_table(conn)
     day = day or _today()
+    n = max(1, int(n))
     row = conn.execute(
         """
-        INSERT INTO sim_usage (identity, day, count) VALUES (?, ?, 1)
-        ON CONFLICT(identity, day) DO UPDATE SET count = count + 1
+        INSERT INTO sim_usage (identity, day, count) VALUES (?, ?, ?)
+        ON CONFLICT(identity, day) DO UPDATE SET count = count + ?
         RETURNING count
         """,
-        (identity, day),
+        (identity, day, n, n),
     ).fetchone()
     conn.commit()
     count = int(row[0])

@@ -25,16 +25,20 @@ Replace all 5 call sites of the deprecated `datetime.utcnow().isoformat()` with 
 ```python
 # motoquant/scraper/spec.py
 from datetime import datetime
+
 ...
+
+
 def __post_init__(self):
     if self.scraped_at is None:
-        self.scraped_at = datetime.utcnow().isoformat()   # ❌ DeprecationWarning
+        self.scraped_at = datetime.utcnow().isoformat()  # ❌ DeprecationWarning
 
 
 # motoquant/scraper/bulk_scrape.py
 from datetime import datetime
+
 ...
-started_at=datetime.utcnow().isoformat(),     # ❌ DeprecationWarning x2
+started_at = (datetime.utcnow().isoformat(),)  # ❌ DeprecationWarning x2
 prog.finished_at = datetime.utcnow().isoformat()  # ❌ DeprecationWarning
 result.finished_at = datetime.utcnow().isoformat()  # ❌ DeprecationWarning
 ```
@@ -44,23 +48,26 @@ result.finished_at = datetime.utcnow().isoformat()  # ❌ DeprecationWarning
 ```python
 # motoquant/scraper/spec.py
 from datetime import datetime, timezone
+
 ...
+
+
 def __post_init__(self):
     if self.scraped_at is None:
-        self.scraped_at = (
-            datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
-        )
+        self.scraped_at = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
 
 
 # motoquant/scraper/bulk_scrape.py
 from datetime import datetime, timezone
 
+
 def _utcnow_iso() -> str:
     """Naive UTC ISO timestamp (Python 3.12+ safe replacement)."""
     return datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
 
+
 ...
-started_at=_utcnow_iso(),
+started_at = (_utcnow_iso(),)
 prog.finished_at = _utcnow_iso()
 result.finished_at = _utcnow_iso()
 ```

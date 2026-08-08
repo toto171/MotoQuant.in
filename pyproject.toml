@@ -5,6 +5,10 @@ description = "The physics of faster — First-principles motorcycle quarter-mil
 authors = [{name = "Hritwik Mudhai", email = "dhisetu@gmail.com"}]
 requires-python = ">=3.10"
 
+[project.scripts]
+# Stdio MCP server exposing the sim API as tools (docs/MCP.md).
+motoquant-mcp = "motoquant.mcp_server:main"
+
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"

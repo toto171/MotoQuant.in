@@ -18,7 +18,7 @@ After that, get the test suite green locally (see `CONTRIBUTING.md` §2) and you
 
 ## 1. What MotoQuant is (in one paragraph)
 
-A first-principles physics engine for predicting and optimising motorcycle quarter-mile drag racing times, aimed first at the Indian drag racing community (Aamby Valley, MMRT, BIC, Kari, Hyderabad) and now expanding to the international market (US/EU/JP/CN drag scenes). It's a Python package with a CLI, a FastAPI backend (live on Render), a Next.js web frontend (live at motoquant.in), and an agentic AI chat that can run the whole product (sims, comparisons, the build optimizer, outlaw-class builds, web lookup, estimated sims for unknown bikes). Under the hood: 15 physics sub-models integrated with RK4 at 1 ms, validated against 250 published benchmarks (277 matched) — weighted mean |Δ| 0.272 s corpus-wide, ±0.009 s across the 10 cleanest validated runs. Commercial plan: B2C freemium + B2B Pro Studio, currently in open beta — see `docs/COMMERCIAL_LAUNCH.md`.
+A first-principles physics engine for predicting and optimising motorcycle quarter-mile drag racing times, aimed first at the Indian drag racing community (Aamby Valley, MMRT, BIC, Kari, Hyderabad) and now expanding to the international market (US/EU/JP/CN drag scenes). It's a Python package with a CLI, a FastAPI backend (live on Render), a Next.js web frontend (live at motoquant.in), and an agentic AI chat that can run the whole product (sims, comparisons, the build optimizer, outlaw-class builds, web lookup, estimated sims for unknown bikes). Under the hood: 15 physics sub-models integrated with RK4 at 1 ms, validated against 250 published benchmarks — weighted mean |Δ| ≈ 0.26 s corpus-wide, ±0.007 s across the 10 cleanest validated runs. Commercial plan: B2C freemium + B2B Pro Studio, currently in open beta — see `docs/COMMERCIAL_LAUNCH.md`.
 
 **Tagline:** *"The physics of faster."*
 
@@ -31,10 +31,10 @@ A first-principles physics engine for predicting and optimising motorcycle quart
 | Phase | 6 (commercial launch) — open beta live; payments code-complete, providers not yet configured |
 | Tests | full pytest suite green (runs ~25–35 min; focused subsets in `CONTRIBUTING.md` §4) |
 | Bikes in catalog | 541 across 30+ manufacturers (India, SE Asia, US, EU, JP, CN) |
-| Tires | 254 (incl. drag radials/slicks + cruiser rubber), 1,860 fitments |
+| Tires | 254 (incl. drag radials/slicks + cruiser rubber), 1,783 fitments |
 | Parts | 593 across 19 categories (incl. lowering kits, air shifters, lockup clutches) |
 | Venues | 20 (India + international drag strips) |
-| Benchmarks | 250 ET rows + 86 top-speed rows; weighted sweep 277 matched, |Δ| 0.272 s, bias −0.005 s |
+| Benchmarks | 250 ET rows + 86 top-speed rows; weighted sweep 276 matched, |Δ| 0.263 s, bias +0.007 s |
 | Reference baselines | K5 9.9331 / R1 10.1436 / Hayabusa 10.3633 — pinned **bit-identical**, CI-gated |
 | Chat AI | multi-step tool-calling agent (`motoquant/llm/agent.py`, `docs/CHAT_AGENT.md`) |
 | Deployed | API: Render free tier (`motoquant-api.onrender.com`); web: Vercel (`motoquant.in`) — both auto-deploy from `main` |
@@ -77,11 +77,8 @@ Port the desktop jsPDF export to the web app as a Pro-tier feature: a one-pager 
 ### D. Chat-agent polish (LLM layer — scoped pieces)
 The agent shipped July 3 (`motoquant/llm/agent.py`). Scoped follow-ups: resolver letter/digit tokenization ("ZX10R" → weak match), a `mode=agent` path for the CLI `chat` subcommand, streaming responses. Everything is offline-testable via the `_call_override` seam — see `tests/test_agent.py` for the pattern.
 
-### E. Ratchet a coverage floor on the critical modules (tooling — half a day)
-CI already runs `--cov=motoquant` and uploads a coverage XML artifact on main
-pushes (`ci.yml`) — so the signal exists; what is missing is a **gate**. Pick a
-floor for the physics/critical modules from the current report and fail the
-build below it. (~4.5k tests collect today.)
+### E. Test-coverage signal in CI (tooling — half a day)
+~3k tests but no branch-coverage truth. Add coverage.py + a CI artifact so "which physics branches are exercised" has an answer.
 
 ---
 

@@ -11,23 +11,21 @@ Run with:  python -m pytest tests/test_llm_runner.py -v
 from __future__ import annotations
 
 import os
+import sys
 import tempfile
 import unittest
 from typing import Any
 from unittest.mock import MagicMock
 
-# Isolated empty tmp DB for this module. MOTOQUANT_DB is asserted in
-# setUpModule (run time), NOT at import/collection time. An import-time write
-# leaks this module's EMPTY-DB path into the shared env for the entire
-# collection phase, so a sibling whose tests run before this one's — e.g.
-# test_chat_resolver, whose Live tests read $MOTOQUANT_DB — resolves to this
-# empty DB and fails: an ordering-dependent red serial suite. (July-2026 lesson;
-# same deferred pattern as tests/test_agent.py.)
+# Point the API at an isolated DB BEFORE importing api / runner.
 _tmp_db_file = tempfile.NamedTemporaryFile(
     prefix="mq_chat_test_", suffix=".db", delete=False
 )
 _tmp_db_file.close()
-_OLD_ENV_DB = None
+_TMP_DB_PATH = _tmp_db_file.name
+_IMPORT_PRIOR_MOTOQUANT_DB = os.environ.get("MOTOQUANT_DB")
+_PRIOR_MOTOQUANT_DB = _IMPORT_PRIOR_MOTOQUANT_DB
+os.environ["MOTOQUANT_DB"] = _TMP_DB_PATH
 
 from motoquant.database.connection import MotoQuantDB  # noqa: E402
 from motoquant.database.seed import seed_all  # noqa: E402
@@ -36,6 +34,61 @@ from motoquant.llm import (  # noqa: E402
     LLMClient,
     run_chat_pipeline,
 )
+
+
+def setUpModule():
+    """Re-assert this module's tmp DB right before its tests run.
+
+    The import-time override above executes at COLLECTION time, so by the
+    time these tests actually run an alphabetically-earlier module
+    (test_jobs_api, test_api…) has pointed MOTOQUANT_DB at ITS tmp copy and
+    then RESTORED the session value in its tearDownModule — leaving this
+    module's ``/api/chat`` calls reading the tracked motoquant.db.
+
+    That was harmless while chat was unmetered. It stopped being harmless
+    when classic-mode chat sims joined the free-tier meter (2026-07-25 audit
+    §3.5): ``pytest tests/test_api.py tests/test_llm_runner.py`` wrote real
+    sim_usage rows into the shipped catalog. Same class of leak as commit
+    e873308; same fix as tests/test_jobs_api.py.
+    """
+    global _PRIOR_MOTOQUANT_DB
+    current = os.environ.get("MOTOQUANT_DB")
+    if current != _TMP_DB_PATH:
+        _PRIOR_MOTOQUANT_DB = current
+    os.environ["MOTOQUANT_DB"] = _TMP_DB_PATH
+    api_mod = sys.modules.get("motoquant.api")
+    if api_mod is not None:
+        api_mod._db_conn = None
+        api_mod._db_facade = None
+
+
+def tearDownModule():
+    """Close handles, drop the tmp DB, restore the env for later modules."""
+    global _SHARED_DB
+    if _SHARED_DB is not None:
+        try:
+            _SHARED_DB.close()
+        except Exception:  # noqa: BLE001
+            pass
+        _SHARED_DB = None
+    api_mod = sys.modules.get("motoquant.api")
+    if api_mod is not None:
+        if getattr(api_mod, "_db_conn", None) is not None:
+            try:
+                api_mod._db_conn.close()
+            except Exception:  # noqa: BLE001
+                pass
+        api_mod._db_conn = None
+        api_mod._db_facade = None
+    try:
+        os.unlink(_TMP_DB_PATH)
+    except OSError:
+        pass
+    if _PRIOR_MOTOQUANT_DB is None:
+        os.environ.pop("MOTOQUANT_DB", None)
+    else:
+        os.environ["MOTOQUANT_DB"] = _PRIOR_MOTOQUANT_DB
+
 
 # ───────────────────────────────────────────────────────────────────
 # Shared fixtures
@@ -50,55 +103,11 @@ def _get_shared_db() -> MotoQuantDB:
     global _SHARED_DB
     if _SHARED_DB is not None:
         return _SHARED_DB
-    db = MotoQuantDB(_tmp_db_file.name)
+    db = MotoQuantDB(_TMP_DB_PATH)
     db.initialize()
     seed_all(db)
     _SHARED_DB = db
     return db
-
-
-def setUpModule():
-    """Re-assert this module's tmp DB right before its tests run.
-
-    Module-level MOTOQUANT_DB overrides execute at COLLECTION time, so setting
-    it here (run time) instead keeps collection ordering irrelevant, and nulling
-    the api singletons forces a reconnect to this DB rather than a sibling's.
-    """
-    global _OLD_ENV_DB
-    _OLD_ENV_DB = os.environ.get("MOTOQUANT_DB")
-    os.environ["MOTOQUANT_DB"] = _tmp_db_file.name
-    try:
-        import motoquant.api as _api_mod
-
-        _api_mod._db_conn = None
-        _api_mod._db_facade = None
-    except Exception:  # noqa: BLE001
-        pass
-
-
-def tearDownModule():
-    # Restore the env + null/close the api singletons so later modules reconnect
-    # to their own DB, not this deleted tmp path; then remove the tmp file.
-    try:
-        import motoquant.api as _api_mod
-
-        if _api_mod._db_conn is not None:
-            try:
-                _api_mod._db_conn.close()
-            except Exception:  # noqa: BLE001
-                pass
-        _api_mod._db_conn = None
-        _api_mod._db_facade = None
-    except Exception:  # noqa: BLE001
-        pass
-    if _OLD_ENV_DB is None:
-        os.environ.pop("MOTOQUANT_DB", None)
-    else:
-        os.environ["MOTOQUANT_DB"] = _OLD_ENV_DB
-    try:
-        os.unlink(_tmp_db_file.name)
-    except OSError:
-        pass
 
 
 def _make_mock_client(

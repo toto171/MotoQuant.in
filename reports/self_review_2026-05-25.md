@@ -108,7 +108,8 @@ INBOX:308 is 18 days old. Provide a concrete diff so the next session can implem
 ```python
 # In bike_repo.py::create_model, before the lenient fallback match:
 import re
-_norm = lambda s: re.sub(r'\s*\(\d{4}-\d{4}\)$', '', s.strip())
+
+_norm = lambda s: re.sub(r"\s*\(\d{4}-\d{4}\)$", "", s.strip())
 # Compare _norm(model_name) against existing _norm(existing.model_name)
 ```
 

@@ -24,6 +24,7 @@ Extract the repeated `for part in parts: try: db.parts.create(...) except: logge
 **Before (repeated in 4 files, ~25 lines each):**
 ```python
 import logging
+
 logger = logging.getLogger(__name__)
 # ... parts list built ...
 count = 0

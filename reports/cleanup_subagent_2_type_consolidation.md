@@ -18,9 +18,9 @@ Both tech-debt reports from 2026-05-20 were **actioned and complete**:
 ### HIGH — `SurrogatePredictRequest` Python annotation vs runtime (api.py:2487–2496)
 Three fields carry `Field(None)` defaults (nullable at runtime) but their Python annotations declare a non-nullable primitive:
 ```python
-bike_id: int = Field(None, ...)           # should be int | None
-aero_cd_override: float = Field(None, ...) # should be float | None
-tire_mu_override: float = Field(None, ...) # should be float | None
+bike_id: int = Field(None, ...)  # should be int | None
+aero_cd_override: float = Field(None, ...)  # should be float | None
+tire_mu_override: float = Field(None, ...)  # should be float | None
 ```
 Pydantic v2 accepts these today because `populate_by_name=True` relaxes coercion, but mypy/pyright will reject them and a future pydantic upgrade may break validation. The TS mirror (`SurrogatePredictRequest`) correctly marks all three optional (`?`). Fix: add `| None` to each annotation.
 

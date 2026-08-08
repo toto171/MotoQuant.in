@@ -4,7 +4,9 @@
 
 | Name                                | What it is                                          | Size    |
 |-------------------------------------|-----------------------------------------------------|---------|
-| `surrogate_numpy.npz`               | **v2.5 SHIPPED MODEL** — numpy MLP served in prod   | 87 KB   |
+| `surrogate_numpy.npz`               | **v2.6 SHIPPED MODEL** — numpy MLP served in prod   | 54 KB   |
+| `motoquant_surrogate_v2_6.npz`      | v2.6 training dataset (9,124 rows × 26 features)    | 660 KB  |
+| `surrogate_numpy_v2_5.npz.bak`      | v2.5 numpy MLP — rollback copy                      | 87 KB   |
 | `motoquant_surrogate_v2_5.npz`      | v2.5 training dataset (9,124 rows × 26 features)    | 660 KB  |
 | `surrogate_numpy_v2_4.npz.bak`      | v2.4 numpy MLP — rollback copy                      | 87 KB   |
 | `motoquant_surrogate_v2_4.npz`      | v2.4 training dataset (9,126 rows × 26 features)    | 642 KB  |
@@ -16,6 +18,33 @@
 | `motoquant_surrogate_v2_8k5.npz`    | v2.1 training dataset (8,574 rows × 26 features)    | 610 KB  |
 | `surrogate_numpy_v1.npz.bak`        | v1 numpy MLP (K5-only envelope) — rollback copy     | 39 KB   |
 | `motoquant_surrogate_v1_1k5.npz`    | v1 training dataset (K5 Sobol, 1.5k samples)        | 128 KB  |
+
+## v2.6 (August 8, 2026) — crank-semantics epoch regen
+
+Regen trigger: the 2026-08-08 crank-semantics pass (synthetic catalog curves
+declared crank + `_CRANK_MODE_RECAL`, cluster retune against the July-17
+honest rows, catalog dedup, gearing fix for the 299-limited heavies,
+fitment/quickshifter patches, full reseed). Standing contract unchanged:
+**a surrogate is a cache of the physics — regenerate after any
+reseed/retune, in the same session.**
+
+FULL regeneration, same recipe (541 bikes → 9,126 tasks, cluster-stratified;
+9,124 valid rows; hidden 128,64 · epochs 600 · restarts 3):
+
+| Metric (ET)            | v2.5                 | v2.6                  |
+|------------------------|----------------------|-----------------------|
+| Holdout MAE            | 105.5 ms (n=1,361)   | **110.5 ms** (n=1,361)|
+| Holdout RMSE           | 254.3 ms             | **174.9 ms**          |
+| Holdout R²             | 0.9914               | **0.9962**            |
+| trap MAE               | 1.58 km/h            | **1.67 km/h**         |
+
+RMSE nearly halved and R² recovered past the v2.4 level — the crank recal
+made the power-to-wheel mapping more uniform across the catalog, which the
+26-feature schema captures better than the July-13 state. MAE is flat-to-
+slightly-worse (the per-cluster launch knobs remain category-dependent
+dynamics the schema is blind to; category-aware features stay the v2.7
+candidate). Reference sanity: K5 −0.016 / R1 +0.058 / Busa +0.021 s vs
+physics.
 
 ## v2.5 (July 13, 2026) — physics-epoch + spec-fix regen
 
@@ -375,6 +404,6 @@ from motoquant.analysis.surrogate_numpy import NumpySurrogate
 from motoquant.analysis.surrogate_data import config_to_feature_vector
 
 surr = NumpySurrogate.load("artifacts/surrogate/surrogate_numpy.npz")
-et_s, trap_mps = surr.predict_config(cfg)      # any BikeConfig
-env_min, env_max = surr.envelope               # v2 artifacts only
+et_s, trap_mps = surr.predict_config(cfg)  # any BikeConfig
+env_min, env_max = surr.envelope  # v2 artifacts only
 ```

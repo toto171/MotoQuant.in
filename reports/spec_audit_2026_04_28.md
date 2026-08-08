@@ -140,8 +140,8 @@
 
 **KNOWN ISSUE:** The `scripts/validation_sweep.py::BENCHMARKS` list has no year-specific entries for ZX-10R 2006 or 2008. The `sweep_with_clusters.py` fallback logic (line 153: `if best is None: best = entries[0]`) applies the **Sport Rider 2004** (10.30s) benchmark to the 2006 and 2008 models. This produces artificially inflated cluster deltas for those rows. **Recommended fix (out of current scope):** add to `BENCHMARKS`:
 ```python
-("Kawasaki", "Ninja ZX-10R", 2006, 10.05, 225.5, "Motorcycle Daily 2006"),
-("Kawasaki", "Ninja ZX-10R", 2008, 10.01, 226.0, "Cycle World 2008"),
+(("Kawasaki", "Ninja ZX-10R", 2006, 10.05, 225.5, "Motorcycle Daily 2006"),)
+(("Kawasaki", "Ninja ZX-10R", 2008, 10.01, 226.0, "Cycle World 2008"),)
 ```
 Simulated ETs with the new Gen2/Gen3 curves: 2006 = 9.782s, 2008 = 9.818s.
 
@@ -234,8 +234,8 @@ No change expected in overall mean|Δ| from these spec fixes alone. The primary 
 
 2. **Add ZX-10R year-specific benchmarks** to `scripts/validation_sweep.py::BENCHMARKS`:
    ```python
-   ("Kawasaki", "Ninja ZX-10R", 2006, 10.05, 225.5, "Motorcycle Daily 2006 road test"),
-   ("Kawasaki", "Ninja ZX-10R", 2008, 10.01, 226.0, "Cycle World 2008 road test"),
+   (("Kawasaki", "Ninja ZX-10R", 2006, 10.05, 225.5, "Motorcycle Daily 2006 road test"),)
+   (("Kawasaki", "Ninja ZX-10R", 2008, 10.01, 226.0, "Cycle World 2008 road test"),)
    ```
 
 3. **Flag DERIVED benchmarks in BENCHMARKS list** — CB350RS (15.50s), Pulsar N250 (15.45s), FZ25 (16.00s), MT-15 V2 (15.80s) are all 0-100×1.6 estimates with ±0.7s uncertainty. Add a `DERIVED` source tag so the sweep code can filter them from cluster statistics. Until measured data is available, these bikes produce misleading cluster bias numbers.

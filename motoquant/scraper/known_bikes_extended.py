@@ -4343,121 +4343,29 @@ BAJAJ_PULSAR_N125_2024 = spec_from_dict(
 )
 
 
-# ── Yezdi Roadster 334 (2022-2026 — Indian retro naked gap fill) ────────
-# Yezdi (revived under Mahindra-owned Classic Legends in 2022 alongside Jawa)
-# launched the Roadster as its retro-modern naked sibling to the Jawa 42.
-# Powered by a brand-new 334.0 cc liquid-cooled 4-valve DOHC single
-# (Mahindra-designed but built at Mahindra's Pithampur facility, shared
-# with Jawa 42 Bobber 350 and Scrambler), the engine is internally
-# code-named "BG6" and produces 29.0 PS (28.6 hp) @ 7300 rpm with
-# 29.0 Nm @ 6500 rpm. 6-speed gearbox with assist-and-slipper clutch,
-# F15/R37 sprocket on a 520 chain. 184 kg kerb - ~9 kg fuel (12.5 L
-# tank) ≈ 175 kg dry. Twin-shock retro chassis with 18"/17" alloy wheels,
-# semi-knobby tires. Falls in mid_twin_300_500 cluster despite being
-# a single because of its 334cc displacement and ~29 hp output.
-# Sources: Yezdi Motorcycles official Roadster spec page (yezdimotorcycles.
-# com/roadster/specifications), BikeWale spec sheet 2022 (bikewale.com/
-# yezdi-bikes/roadster/specifications/ — confirms 29 PS / 29 Nm / 184 kg
-# kerb / 6-speed), ZigWheels spec database (zigwheels.com/newbikes/yezdi/
-# roadster/specifications), Autocar India first ride 2022-01-15
-# (autocarindia.com/bike-reviews/2022-yezdi-roadster-first-ride-review
-# — confirms F15/R37 sprocket + 520 chain), Team-BHP launch thread
-# (team-bhp.com/forum/two-wheelers/231784-yezdi-roadster.html), service
-# manual YEZ-BG6-001 (gear ratios — assist-and-slipper 6-speed cassette
-# shared with Yezdi Scrambler/Adventure and Jawa 42 Bobber 350).
-YEZDI_ROADSTER_2022 = spec_from_dict(
-    {
-        "manufacturer": "Yezdi",
-        "model_name": "Roadster",
-        "model_code": "BG6-RDS",
-        "year_from": 2022,
-        "year_to": 2026,
-        "category": "naked",
-        "displacement_cc": 334.0,
-        "bore_mm": 81.0,
-        "stroke_mm": 65.0,
-        "compression_ratio": 10.5,
-        "cylinders": 1,
-        "peak_power_hp": 28.6,  # 29.0 PS @ 7300 rpm = 28.6 hp
-        "peak_power_rpm": 7300,
-        "peak_torque_nm": 29.0,
-        "peak_torque_rpm": 6500,
-        "fuel_system": "fi",
-        "cooling": "liquid",
-        "valve_config": "dohc",
-        "gears": 6,
-        # Classic Legends BG6 6-speed cassette (assist-and-slipper clutch),
-        # shared with Yezdi Scrambler/Adventure and Jawa 42 Bobber 350.
-        # Service manual YEZ-BG6-001 (Classic Legends 2022).
-        "gear_ratios": [2.692, 1.937, 1.500, 1.227, 1.045, 0.913],
-        "front_sprocket": 15,
-        "rear_sprocket": 37,
-        "chain_pitch": "520",
-        "dry_mass_kg": 175.0,  # 184 kg kerb - ~9 kg fuel (12.5 L tank)
-        "wheelbase_mm": 1440.0,
-        "front_tire_size": "100/90-18",
-        "rear_tire_size": "130/80-17",
-        "cd": 0.78,  # retro naked, upright posture, exposed rider
-        "frontal_area_m2": 0.48,
-    },
-    source_name="spec_sheet",
-)
+# ── Yezdi Roadster 334 (2022-2026) — REMOVED 2026-08-08 (duplicate) ─────
+# This module defined a SECOND Yezdi Roadster on the exact same key
+# (manufacturer, model, 2022-2026) as the entry in known_bikes.py, with a
+# different mass, cassette, sprocket and tyre pair. The two DB-regen paths
+# picked different winners (`import --known-bikes` took the last list entry,
+# reseed_configs_from_specs.py's stable sort took the first), so a bike's
+# stored physics depended on which script ran last. known_bikes.py now holds
+# the single canonical entry; its 29.0 hp is the better read of the published
+# 29.7 PS claim, and the two fields this entry got right (100/90-18 front,
+# 130/80-17 rear) plus the published 184 kg kerb were merged into it.
+# Do NOT re-add a Yezdi Roadster here — tests/test_catalog_no_duplicates.py
+# fails on any exact-key duplicate.
 
 
-# ── Yezdi Adventure 334 (2022-2026 — Indian ADV mid-cc gap fill) ────────
-# The Adventure is Yezdi's ADV variant on the BG6 334cc platform —
-# same engine as Roadster/Scrambler (28.6 hp / 29 Nm) but with longer
-# travel suspension, 19"/17" wire-spoke off-road wheels, taller
-# windscreen, and engine guard. Detuned slightly per Classic Legends'
-# 2022 launch documentation (same crank claim but with leaner mid-range
-# fuel mapping — net peak unchanged, area-under-curve marginally fatter).
-# Final drive uses a taller R39 rear sprocket vs Roadster's R37 for
-# the lower-geared adventure cruising character (Classic Legends parts
-# catalogue 2022). 187 kg kerb - ~11 kg fuel (15.5 L larger ADV tank)
-# ≈ 176 kg dry. Falls in mid_twin_300_500 cluster.
-# Sources: Yezdi Motorcycles Adventure spec page (yezdimotorcycles.com/
-# adventure/specifications), BikeWale 2022 spec (bikewale.com/yezdi-bikes/
-# adventure/specifications/ — confirms 29 PS / 29 Nm / 187 kg kerb /
-# F15/R39), ZigWheels spec (zigwheels.com/newbikes/yezdi/adventure/
-# specifications), Autocar India first ride 2022-01-22 (autocarindia.com/
-# bike-reviews/2022-yezdi-adventure-first-ride-review — confirms 19"/17"
-# spoked wheels + 200mm suspension travel), service manual YEZ-BG6-001
-# (gear ratios identical to Roadster/Scrambler, only sprocket differs).
-YEZDI_ADVENTURE_2022 = spec_from_dict(
-    {
-        "manufacturer": "Yezdi",
-        "model_name": "Adventure",
-        "model_code": "BG6-ADV",
-        "year_from": 2022,
-        "year_to": 2026,
-        "category": "adventure",
-        "displacement_cc": 334.0,
-        "bore_mm": 81.0,
-        "stroke_mm": 65.0,
-        "compression_ratio": 10.5,
-        "cylinders": 1,
-        "peak_power_hp": 28.6,
-        "peak_power_rpm": 7300,
-        "peak_torque_nm": 29.0,
-        "peak_torque_rpm": 6500,
-        "fuel_system": "fi",
-        "cooling": "liquid",
-        "valve_config": "dohc",
-        "gears": 6,
-        "gear_ratios": [2.692, 1.937, 1.500, 1.227, 1.045, 0.913],
-        "front_sprocket": 15,
-        "rear_sprocket": 39,  # taller than Roadster's R37 for ADV cruising
-        "chain_pitch": "520",
-        "dry_mass_kg": 176.0,  # 187 kg kerb - ~11 kg fuel (15.5 L tank)
-        "wheelbase_mm": 1465.0,
-        "front_tire_size": "100/90-19",
-        "rear_tire_size": "130/80-17",
-        "cd": 0.85,  # adventure with screen + luggage rack, ref
-        # RE Himalayan 411 at 0.84 + slight increment
-        "frontal_area_m2": 0.52,
-    },
-    source_name="spec_sheet",
-)
+# ── Yezdi Adventure 334 (2022-2026) — REMOVED 2026-08-08 (duplicate) ────
+# Exact-key duplicate of the Yezdi Adventure in known_bikes.py (see the
+# Roadster tombstone above for why duplicates broke DB-regen determinism).
+# The canonical entry won on engine figures: the published Adventure tune is
+# 30 bhp @ 8000 rpm / 29.9 Nm, whereas this entry carried the Roadster's
+# 28.6 hp @ 7300, and its 187 kg matches the published kerb weight. This
+# entry's 130/80-17 rear tyre was correct and was merged across; the front
+# was fixed to the factory 90/90-21 (both duplicates said 100/90-19).
+# Do NOT re-add a Yezdi Adventure here.
 
 
 # ── Hero Glamour 125 (2020-2026 — Indian high-volume commuter gap) ──────
@@ -4520,67 +4428,15 @@ HERO_GLAMOUR_125_2020 = spec_from_dict(
 )
 
 
-# ── Royal Enfield Hunter 350 (2022-2026 — Indian-market roadster gap) ──
-# The Hunter 350 is RE's urban roadster on the J-platform, sharing the
-# 349.34 cc air/oil-cooled SOHC 2-valve "J-Series" single with the
-# Classic 350, Meteor 350, and Bullet 350 (Gen 2). 20.2 hp @ 6100 rpm
-# and 27 Nm @ 4000 rpm per Royal Enfield press kit + Autocar India
-# instrumented test. Shorter wheelbase (1370 mm vs 1390 mm Classic),
-# 17"/17" alloy wheels (Classic runs 19"/18" wire spokes), and a
-# tube-pivoted swingarm tuned for urban commute character. 5-speed
-# constant-mesh box per RE service manual J-PLAT-2021 (ratios identical
-# to Classic 350 / Meteor 350 / Bullet 350 J-platform siblings).
-# 181 kg kerb - ~10 kg fuel (13 L tank) ≈ 171 kg dry. Cluster: this is
-# a quintessential entry_200_300 + commute platform (349 cc → entry
-# cluster, +0.5-1.4s slow bias band per CLAUDE.md).
-# Sources: Royal Enfield official Hunter 350 spec page (royalenfield.com/
-# in/en/motorcycles/hunter/specifications/ — confirms 20.2 bhp / 27 Nm /
-# 181 kg kerb / 5-speed / F15/R40 sprockets), BikeWale spec database
-# (bikewale.com/royalenfield-bikes/hunter-350/specifications/), ZigWheels
-# (zigwheels.com/newbikes/royal-enfield/hunter-350/specifications),
-# Autocar India review 2022-08-07 (autocarindia.com/bike-reviews/2022-
-# royal-enfield-hunter-350-review — confirms power band + gear ratios
-# match Classic/Meteor J-platform), Team-BHP launch thread (team-bhp.com/
-# forum/two-wheelers/240518-royal-enfield-hunter-350.html — owner
-# 1/4 mile timings ~18.5-19.0s consistent with entry cluster), RE service
-# manual J-PLAT-2021 (gearbox ratios verified shared with Classic 350).
-ROYAL_ENFIELD_HUNTER_350_2022 = spec_from_dict(
-    {
-        "manufacturer": "Royal Enfield",
-        "model_name": "Hunter 350",
-        "model_code": "J-HUN-350",
-        "year_from": 2022,
-        "year_to": 2026,
-        "category": "naked",
-        "displacement_cc": 349.34,
-        "bore_mm": 72.0,
-        "stroke_mm": 85.8,
-        "compression_ratio": 9.5,
-        "cylinders": 1,
-        "peak_power_hp": 20.2,  # 20.2 bhp @ 6100 rpm (RE press kit)
-        "peak_power_rpm": 6100,
-        "peak_torque_nm": 27.0,
-        "peak_torque_rpm": 4000,
-        "fuel_system": "fi",
-        "cooling": "air",  # air + oil-cooled per RE spec
-        "valve_config": "sohc",
-        "gears": 5,
-        # J-platform 5-speed constant-mesh cassette, shared verbatim with
-        # Classic 350 / Meteor 350 / Bullet 350 J-platform. RE service
-        # bulletin J-PLAT-2021 (kept identical for Hunter 350).
-        "gear_ratios": [2.857, 1.928, 1.476, 1.190, 1.000],
-        "front_sprocket": 15,
-        "rear_sprocket": 40,
-        "chain_pitch": "428",
-        "dry_mass_kg": 171.0,  # 181 kg kerb - ~10 kg fuel (13 L tank)
-        "wheelbase_mm": 1370.0,
-        "front_tire_size": "110/70-17",
-        "rear_tire_size": "140/70-17",
-        "cd": 0.74,  # urban roadster, upright but compact frame
-        "frontal_area_m2": 0.45,
-    },
-    source_name="spec_sheet",
-)
+# ── Royal Enfield Hunter 350 (2022-2026) — REMOVED 2026-08-08 (dup) ─────
+# Exact-key duplicate of the Hunter 350 in known_bikes.py. The canonical
+# entry won because it is family-consistent with the other J-platform bikes
+# (Classic 350 / Meteor 350 / Bullet 350 share its cassette) and because its
+# 181 kg is Royal Enfield's published kerb weight. Both duplicates had the
+# rear sprocket wrong (39 here-in-base / 40 in this entry); RE's owner's
+# manual gives a 2.800:1 secondary ratio and the OEM kit KAA00059/A is
+# 15T/42T, so the canonical entry was corrected to 42T.
+# Do NOT re-add a Hunter 350 here.
 
 
 # ── TVS Raider 125 (2021-2026 — Indian high-volume 125cc commuter sport) ─
@@ -8650,77 +8506,16 @@ BENELLI_TRK_502_2017 = spec_from_dict(
 )
 
 
-# ── Kawasaki Versys 650 (2015-2024 — long-running mid-ADV parallel twin) ──
-# The Kawasaki Versys 650 (KLE650E/F) is Kawasaki's core mid-capacity ADV
-# offering, sharing the 649cc ER650 parallel-twin engine with the Ninja 650
-# and Z650 naked. The 2015+ (KLE650E) received a major restyle; the 2022
-# (KLE650G) added a quickshifter and TFT dash. Engine specs are essentially
-# identical to Ninja 650 (68 hp / 64 Nm) but the Versys is tuned for
-# midrange (peak torque at 6500–7000 rpm) and rides higher (suspension
-# +30mm travel). The Versys 650 is the best-selling mid-ADV in India and
-# EU, and a popular drag-strip comparison subject.
-# Gear ratios: share the canonical ER650 cassette [2.438, 1.714, 1.333,
-# 1.111, 0.966, 0.852] corrected April 22, 2026 per Kawasaki ER650H
-# service manual; F15/R46 520 chain (same as Ninja 650). Note: the Versys
-# uses a slightly shorter secondary-drive rear sprocket (R43 vs Ninja 650's
-# R46) for slightly higher top-end gearing on the ADV variant per
-# Kawasaki's official parts catalog (EPC.kawasaki.com 2020, KLE650EFF).
-# Top-gear ratio at R43: 0.852 × (15/43) = 0.297 — appropriate for
-# ~160 km/h cruise capability.
-# Cluster: mid_twin_500_700 — 68 hp, 649cc parallel twin ADV.
-# Sources: Kawasaki UK/India press kit 2015 (kawasaki.co.uk/press);
-#          MCN Versys 650 road test 2015 (MCN.co.uk);
-#          Bikez.com KLE650 2020 spec sheet;
-#          Kawasaki EPC parts catalog (epc.kawasaki.com) KLE650EFF 2020;
-#          BikeWale Versys 650 spec page 2022 (bikewaale.com).
-KAWASAKI_VERSYS_650_2015 = spec_from_dict(
-    {
-        "manufacturer": "Kawasaki",
-        "model_name": "Versys 650",
-        "model_code": "KLE650",
-        "year_from": 2015,
-        "year_to": 2024,
-        "category": "adventure",  # mid-ADV; upright ergonomics,
-        # longer suspension vs Ninja 650
-        "displacement_cc": 649.0,  # 649 cc — same ER650 engine
-        "bore_mm": 83.0,  # 83.0 × 60.0 mm per Kawasaki spec
-        "stroke_mm": 60.0,
-        "compression_ratio": 10.8,  # Kawasaki ER650 spec
-        "cylinders": 2,
-        "peak_power_hp": 68.0,  # 50.5 kW / 68 hp @ 8500 rpm
-        # Kawasaki press kit 2015 / MCN test
-        "peak_power_rpm": 8500,
-        "peak_torque_nm": 64.0,  # 64 Nm @ 7000 rpm (Kawasaki spec)
-        "peak_torque_rpm": 7000,
-        "fuel_system": "fi",  # Keihin DFI (Kawasaki proprietary)
-        "cooling": "liquid",  # liquid-cooled (standard ER650)
-        "valve_config": "dohc",  # DOHC 4-valve — ER650 architecture
-        "gears": 6,
-        # ER650 6-speed cassette per Kawasaki ER650H service manual.
-        # Corrected April 22, 2026 — canonical ER650 ratios now in
-        # gear_ratios.py. Versys 650 uses same internal cassette.
-        "gear_ratios": [2.438, 1.714, 1.333, 1.111, 0.966, 0.852],
-        "front_sprocket": 15,
-        "rear_sprocket": 43,  # F15/R43 520 — Versys 650 OEM
-        # (taller than Ninja 650's R46
-        # for ADV highway gearing per
-        # Kawasaki EPC KLE650EFF 2020)
-        "chain_pitch": "520",
-        "dry_mass_kg": 196.0,  # 196 kg dry (Kawasaki press kit
-        # 2015; 216 kg wet with 21 L tank)
-        "wheelbase_mm": 1450.0,  # 1450 mm — Versys 650 spec
-        "front_tire_size": "120/70-17",  # 17" front (sport-ADV — not 19")
-        "rear_tire_size": "160/60-17",  # 17" rear — Versys 650 spec
-        "cd": 0.88,  # upright ADV with full fairing +
-        # tall screen; comparable to Honda
-        # CB500X (0.88) in this catalog
-        "frontal_area_m2": 0.58,  # ADV fairing + upright ergonomics;
-        # 0.58 m² consistent with 650cc ADV
-        # class (CB500X 0.55, Versys slightly
-        # wider)
-    },
-    source_name="spec_sheet",
-)
+# ── Kawasaki Versys 650 (2015-2024) — REMOVED 2026-08-08 (duplicate) ────
+# Exact-key duplicate of the Versys 650 in known_bikes.py. Every disputed
+# field resolves against this entry: Kawasaki publishes a 1415 mm wheelbase
+# (this said 1450) and a final reduction ratio of 3.067, which is 46/15
+# exactly — this entry's 15/43 gives 2.867 and matches no Kawasaki figure;
+# OEM fitment data for the KLE650F confirms a 15T/46T 520 chain. The 196 kg
+# "dry" claim here is the one point in its favour (the canonical entry keeps
+# the 216 kg curb mass, consistent with the rest of the catalogue's
+# kerb-based convention) — see the session report for that open question.
+# Do NOT re-add a Versys 650 here.
 
 
 # ── Triumph Bonneville Bobber 1200 (2017-2024 — modern classic muscle) ──
@@ -11117,11 +10912,8 @@ EXTENDED_BIKES = [
     KAWASAKI_ZX4R_2024,
     BAJAJ_PULSAR_N125_2024,
     # ── Daily improvement run 2026-05-18 (Monday — Catalog A1 seventh pass) ──
-    YEZDI_ROADSTER_2022,
-    YEZDI_ADVENTURE_2022,
     HERO_GLAMOUR_125_2020,
     # ── Daily improvement run 2026-05-18 (Monday — Catalog A1 eighth pass) ──
-    ROYAL_ENFIELD_HUNTER_350_2022,
     TVS_RAIDER_125_2021,
     # ── Daily improvement run 2026-05-18 (Monday — Catalog A1 ninth pass) ──
     KTM_RC_125_2017,
@@ -11206,7 +10998,6 @@ EXTENDED_BIKES = [
     HONDA_SP160_2023,
     # ── Daily improvement run 2026-05-21 (Thursday — Catalog A1 eleventh pass) ──
     BENELLI_TRK_502_2017,
-    KAWASAKI_VERSYS_650_2015,
     # ── Daily improvement run 2026-05-21 (Thursday — Catalog A1 twelfth pass) ──
     TRIUMPH_BONNEVILLE_BOBBER_1200_2017,
     MOTO_GUZZI_V100_MANDELLO_S_2022,

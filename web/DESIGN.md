@@ -37,9 +37,10 @@ typography, whitespace, and three signal colors used with discipline.
 2. **Stat-audit token shapes survive** (`scripts/audit_headline_stats.py`):
    `num: 541, label: 'BIKES'`-style objects, `NNN bikes|parts|tires|venues`,
    `NNN-bike catalog`, `numberOfItems: NNN`, baseline prose. Canonical
-   numbers (July-13 2026 epoch): **541 bikes · 254 tires · 593 parts · 20
-   venues · 4393 tests · 15 sub-models · 250 benchmarks (277 matched) · 74
-   within ±0.10s · 137 within ±0.20s · ±0.009s top-10 · +0.017s bias ·
+   numbers (8 August 2026 sweep, `reports/acc_final_2026_08_08.json`): **541
+   bikes · 254 tires · 593 parts · 20 venues · 4393 tests · 15 sub-models ·
+   250 benchmarks (276 matched) · 75 within ±0.10s · 138 within ±0.20s ·
+   ±0.007s top-10 · +0.007s bias ·
    K5 9.9331s / R1 10.1436s / Hayabusa 10.3633s**. Do NOT invent or alter
    counts — reuse existing constants. Landing TOP10 == docs/validation.
 3. **Palette bans**: no `gray-*`, no raw Tailwind `orange-N`/`lime-N`, no

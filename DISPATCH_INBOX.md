@@ -111,19 +111,30 @@ Implemented in the 2026-07-17 orchestrated run (Wave 3, INBOX:79 — a sibling a
 ### Result
 Fixed in `scripts/validation_sweep.py` line 123 area. Updated entry to:
 ```python
-("Triumph", "Rocket 3 R", 2020, 10.56, 203, "Cycle World 2020 (Gadson 17-pass tuned at Silver Dollar Motorsport Park)"),
+(
+    (
+        "Triumph",
+        "Rocket 3 R",
+        2020,
+        10.56,
+        203,
+        "Cycle World 2020 (Gadson 17-pass tuned at Silver Dollar Motorsport Park)",
+    ),
+)
 ```
 Source: Cycle World "Rickey Gadson and the Triumph Rocket 3 R" — 10.562s @ 126.41 mph (= 203.4 km/h) at Silver Dollar Motorsport Park; URL https://www.cycleworld.com/story/motorcycle-racing/rickey-gadson-and-the-triumph-rocket-3-r/. MCN 2020 R3R airfield test corroborates 11.07s @ 126.06 mph — both publications agree on the 126 mph trap. Post-fix cluster sweep N=167 (+5 new entries including Rocket retention), overall bias improved +0.045 → +0.037s, mean|Δ| improved 0.323 → 0.321s. Reference baselines preserved exactly. Resolved by benchmark-import agent 2026-05-31 pass 3.
 
 ## ORIGINAL INSTRUCTION (archived below)
-## INSTRUCTION — 2026-05-31 — [urgent] fix Rocket 3 R 2020 benchmark trap-speed transcription error
-[urgent]
+## DONE — 2026-05-31 — [urgent] fix Rocket 3 R 2020 benchmark trap-speed transcription error
+
+### Result
+Fixed 2026-05-31 (scripts/validation_sweep.py:170 carries the fix comment + corrected Cycle World figure). Heading closed retroactively 2026-08-08 during the full-night run's inbox sweep.
 
 **Filed by:** benchmark-import agent (2026-05-31 pass)
 **File:** `scripts/validation_sweep.py` line ~123
 **Current entry (suspect):**
 ```python
-("Triumph", "Rocket 3 R", 2020, 10.50, 226, "Cycle World 2020"),
+(("Triumph", "Rocket 3 R", 2020, 10.50, 226, "Cycle World 2020"),)
 ```
 **Issue:** The trap speed `226` km/h (= 140.4 mph) is internally inconsistent with the ET `10.50` s. A 10.50 ET on a 294 kg / 165 hp muscle naked traps at ~126 mph (203 km/h), not 140 mph. Same transcription-error pattern flagged in the seventh-pass note for ZX-9R 2000 (`scripts/validation_sweep.py` line ~668: *"a 10.50 ET should trap ~135 mph (217 km/h) for a 143 hp middleweight, not 143 mph (230 km/h)"*).
 
@@ -137,7 +148,16 @@ Both reputable independent instrumented sources agree on the 126 mph (203 km/h) 
 
 **Fix:** Update the existing entry to
 ```python
-("Triumph", "Rocket 3 R", 2020, 10.56, 203, "Cycle World 2020 (Gadson 17-pass tuned at Silver Dollar Motorsport Park)"),
+(
+    (
+        "Triumph",
+        "Rocket 3 R",
+        2020,
+        10.56,
+        203,
+        "Cycle World 2020 (Gadson 17-pass tuned at Silver Dollar Motorsport Park)",
+    ),
+)
 ```
 Also update the ET from 10.50 → 10.56 to match the actual Cycle World cite. Consider optionally adding a parallel MCN entry (11.07 @ 203) as a journalist-test reference point (would NOT bind because the matcher picks one most-specific entry per spec).
 
@@ -147,8 +167,10 @@ Also update the ET from 10.50 → 10.56 to match the actual Cycle World cite. Co
 
 ---
 
-## INSTRUCTION — 2026-05-25 — [urgent] fix BENCHMARKS matcher specificity bug
-[urgent]
+## DONE — 2026-05-25 — [urgent] fix BENCHMARKS matcher specificity bug
+
+### Result
+Resolved: `model_specificity_score` is live in the sweep matcher (re-exported via scripts/sweep_with_clusters.py, pinned by tests), and the blocked H2 SX 2018 instrumented benchmark now exists in scripts/validation_sweep.py:94 with the specificity note. The 2026-07-17 'still OPEN' status note below is stale. Heading closed 2026-08-08.
 
 > **Status note (2026-07-17):** still OPEN — verified live in the 2026-07-17 scope pass and queued in the orchestrated-run work order (`reports/SCOPE_2026_07_17_next_orchestrated_run.md`); not yet implemented.
 
@@ -1140,7 +1162,9 @@ if os.path.isfile(inbox_file):
 
 Then at scoring line 229:
 ```python
-queue_bonus = 50 * inbox_count_per_agent.get(agent, 0) + 50 * inbox_urgent_per_agent.get(agent, 0)
+queue_bonus = 50 * inbox_count_per_agent.get(
+    agent, 0
+) + 50 * inbox_urgent_per_agent.get(agent, 0)
 ```
 
 **Verification:** after fix, `--dry-run` should show `queue_bonus > 0` for self-review agent (5 `[self-review]` items currently in inbox) and `queue_bonus > 0` for catalog-expansion (queued items if any tagged).

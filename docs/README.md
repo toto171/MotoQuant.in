@@ -19,6 +19,7 @@ contract) → **[ONBOARDING.md](ONBOARDING.md)** → **[ARCHITECTURE.md](ARCHITE
 | Doc | What it covers |
 |---|---|
 | [CHAT_AGENT.md](CHAT_AGENT.md) | The agentic chat: tool-calling loop, tools, budgets. |
+| [MCP.md](MCP.md) | Stdio MCP server: wire MotoQuant sims into Claude Code / Desktop. |
 | [MOTOQUANT_LLM_PLAN.md](MOTOQUANT_LLM_PLAN.md) | LLM provider abstraction + roadmap. |
 | [OBSERVABILITY.md](OBSERVABILITY.md) | Sentry wiring (env-gated). |
 | [SCRAPING.md](SCRAPING.md) | Scrapling toolkit (dev-side): polite fetch tiers → validator gate. |

@@ -95,13 +95,14 @@ six inert `CategoryProfile` knobs were deleted on 2026-07-17). Before trusting a
 knob, prove it moves ET with a quick sweep. When adding one, add a liveness test
 that fails if the knob does nothing.
 
-Still live as of the 2026-07-25 audit: `CategoryProfile.parasitic_mult` is in
-`tests/test_profile_knobs.LIVE_PROFILE_KNOBS` and carries calibrated non-1.0
-values, but every one of the 542 catalog configs ships
-`dyno_curve.is_at_wheel=True`, which bypasses the parasitic subtraction — 5x-ing
-every parasitic wattage moves ET by 0.0000 s. Treat the "live knob" inventory as
-necessary but not sufficient: a knob can be wired and still be unreachable for
-the data the catalog actually carries.
+The 2026-07-25 audit's canonical example — `CategoryProfile.parasitic_mult`
+wired but unreachable because every catalog config shipped
+`dyno_curve.is_at_wheel=True` — was RESOLVED 2026-08-08 (synthetic catalog
+curves now declare crank semantics, so the parasitic path is live). The
+lesson stands: treat the "live knob" inventory as necessary but not
+sufficient — a knob can be wired and still be unreachable for the data the
+catalog actually carries. When auditing a knob, check reachability against
+the real catalog rows, not just against a hand-built config.
 
 ### T12 — SQLite `LIMIT -1` is unbounded
 A `limit` query param with only an upper bound (`le=100`, no `ge=1`) lets

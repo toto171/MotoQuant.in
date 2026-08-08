@@ -12,16 +12,28 @@
   "dependencies": {
     "animejs": "^4.4.1",
     "framer-motion": "^11.18.2",
-    "lucide-react": "^0.383.0",
-    "next": "14.2.35",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "recharts": "^2.12.7",
-    "styled-jsx": "^5.1.1"
+    "lucide-react": "^0.577.0",
+    "next": "15.5.23",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "recharts": "^2.15.4",
+    "styled-jsx": "^5.1.7"
   },
   "devDependencies": {
-    "autoprefixer": "^10.4.19",
-    "postcss": "^8.4.38",
-    "tailwindcss": "^3.4.1"
+    "autoprefixer": "^10.5.4",
+    "postcss": "^8.5.26",
+    "tailwindcss": "^3.4.19"
+  },
+  "overridesComment": [
+    "Both overrides below patch packages nested INSIDE next@15.5.x that npm audit flags high.",
+    "Neither has a fix inside the 15.x line — npm's own remediation is `next@16`, a major we are",
+    "deliberately not taking yet. postcss: next bundles 8.4.31 (4 advisories, all fixed in 8.5.23+);",
+    "8.4 -> 8.5 is a semver-minor bump within the same major. sharp: next's OPTIONAL dep for the",
+    "Image Optimization API, which this app does not use (zero `next/image` imports).",
+    "Re-evaluate and most likely drop both when this app moves to Next 16."
+  ],
+  "overrides": {
+    "postcss": "^8.5.26",
+    "sharp": "^0.35.3"
   }
 }

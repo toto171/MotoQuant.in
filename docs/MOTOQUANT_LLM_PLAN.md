@@ -224,26 +224,65 @@ from trl import SFTTrainer, SFTConfig
 from datasets import load_dataset
 
 model, tok = FastLanguageModel.from_pretrained(
-    "unsloth/Qwen3-4B-Instruct-2507",   # PIN the revision hash in prod
-    max_seq_length=8192,                # 16 tool schemas + multi-turn are large
-    load_in_4bit=True)
+    "unsloth/Qwen3-4B-Instruct-2507",  # PIN the revision hash in prod
+    max_seq_length=8192,  # 16 tool schemas + multi-turn are large
+    load_in_4bit=True,
+)
 model = FastLanguageModel.get_peft_model(
-    model, r=16, lora_alpha=16, lora_dropout=0.0,   # r=32 for 8B / heavy compositions
-    target_modules=["q_proj","k_proj","v_proj","o_proj","gate_proj","up_proj","down_proj"],
-    use_gradient_checkpointing="unsloth", random_state=42)
+    model,
+    r=16,
+    lora_alpha=16,
+    lora_dropout=0.0,  # r=32 for 8B / heavy compositions
+    target_modules=[
+        "q_proj",
+        "k_proj",
+        "v_proj",
+        "o_proj",
+        "gate_proj",
+        "up_proj",
+        "down_proj",
+    ],
+    use_gradient_checkpointing="unsloth",
+    random_state=42,
+)
 
 ds = load_dataset("json", data_files="data/agent_sft.jsonl", split="train").map(
-    lambda ex: {"text": tok.apply_chat_template(ex["messages"], tools=ex["tools"],
-                                                tokenize=False, add_generation_prompt=False)})
-tr = SFTTrainer(model=model, tokenizer=tok, train_dataset=ds,
-    args=SFTConfig(per_device_train_batch_size=8, gradient_accumulation_steps=2,
-        num_train_epochs=2, learning_rate=2e-4, lr_scheduler_type="cosine",
-        warmup_ratio=0.03, optim="adamw_8bit", weight_decay=0.01, bf16=True,
-        packing=False,                 # OFF: preserve turn boundaries (packing drifts tool format)
-        max_seq_length=8192, seed=42, output_dir="out/motoquant-agent-v1"))
-tr = train_on_responses_only(tr,           # loss on assistant turns only; mask system/user/tool
-        instruction_part="<|im_start|>user\n", response_part="<|im_start|>assistant\n")
-tr.train(); model.save_pretrained("out/motoquant-agent-v1-lora")  # ~50–200 MB
+    lambda ex: {
+        "text": tok.apply_chat_template(
+            ex["messages"],
+            tools=ex["tools"],
+            tokenize=False,
+            add_generation_prompt=False,
+        )
+    }
+)
+tr = SFTTrainer(
+    model=model,
+    tokenizer=tok,
+    train_dataset=ds,
+    args=SFTConfig(
+        per_device_train_batch_size=8,
+        gradient_accumulation_steps=2,
+        num_train_epochs=2,
+        learning_rate=2e-4,
+        lr_scheduler_type="cosine",
+        warmup_ratio=0.03,
+        optim="adamw_8bit",
+        weight_decay=0.01,
+        bf16=True,
+        packing=False,  # OFF: preserve turn boundaries (packing drifts tool format)
+        max_seq_length=8192,
+        seed=42,
+        output_dir="out/motoquant-agent-v1",
+    ),
+)
+tr = train_on_responses_only(
+    tr,  # loss on assistant turns only; mask system/user/tool
+    instruction_part="<|im_start|>user\n",
+    response_part="<|im_start|>assistant\n",
+)
+tr.train()
+model.save_pretrained("out/motoquant-agent-v1-lora")  # ~50–200 MB
 ```
 
 **Serve command:**
