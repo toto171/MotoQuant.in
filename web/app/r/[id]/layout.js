@@ -29,7 +29,11 @@ async function fetchRun(id) {
 }
 
 export async function generateMetadata({ params }) {
-  const run = await fetchRun(params.id);
+  // Next 15: `params` is a Promise — await before reading. (This route is
+  // dynamic, so `next build` never executes this function and cannot catch
+  // a sync access; the sibling /bikes/[id]/layout.js already awaits.)
+  const { id } = await params;
+  const run = await fetchRun(id);
   if (!run) {
     return {
       title: 'Simulated Run | MotoQuant',
@@ -46,11 +50,11 @@ export async function generateMetadata({ params }) {
   return {
     title,
     description,
-    alternates: { canonical: `/r/${params.id}` },
+    alternates: { canonical: `/r/${id}` },
     openGraph: {
       title,
       description,
-      url: `${SITE_URL}/r/${params.id}`,
+      url: `${SITE_URL}/r/${id}`,
       type: 'article',
     },
     twitter: { card: 'summary_large_image', title, description },
