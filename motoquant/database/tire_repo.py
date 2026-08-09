@@ -386,14 +386,11 @@ class TireRepository:
         To register a second legitimate OEM option (a market/trim variant),
         pass is_default=False; nothing is superseded then.
 
-        July 2026 - Aug 2026 bug: this was INSERT OR REPLACE, whose conflict
-        target UNIQUE(bike_model_id, tire_model_id, position, fitment_type)
-        INCLUDES the tire — so seeding a *different* tire into the same slot
-        appended a SECOND is_default=1 row rather than replacing the first.
-        77 (bike, position) groups accumulated two mutually exclusive "default
-        OEM" tires, growing ~7 per seed run. The upsert below is also
-        id-preserving; OR REPLACE deletes and re-inserts, renumbering the row
-        (the same class of bug fixed in `create()` above).
+        Do NOT revert to INSERT OR REPLACE: its conflict target INCLUDES the
+        tire id, so a different tire in the same slot appends a second
+        is_default=1 row instead of superseding — and OR REPLACE renumbers
+        row ids (same class of bug fixed in `create()` above). Root-cause
+        history: scripts/patch_2026_08_08_fitment_integrity.py.
         """
         # Id-preserving upsert on the table's UNIQUE key.
         existing = self._conn.execute(

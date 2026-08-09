@@ -30,16 +30,9 @@ async function fetchAllBikes() {
     if (process.env.NODE_ENV !== "production") {
       console.warn("[sitemap] API unreachable, using ID range fallback:", err);
     }
-    // API-unreachable build-time fallback: the REAL ids, from a committed
-    // manifest generated off motoquant.db.
-    //
-    // This used to be `Array.from({length: 600}, (_, i) => i + 1)` — a
-    // contiguous range, on the assumption that catalog ids are dense. They
-    // are not. Reseeds have left 541 rows scattered up to id 4637, so the
-    // range fallback omitted 198 real bike pages and emitted 257 URLs for
-    // bikes that do not exist (Google reports those as soft-404s). A ceiling
-    // can only ever trade one of those errors for the other; a manifest of
-    // real ids has neither failure mode.
+    // API-unreachable build-time fallback: the REAL (sparse) catalog ids
+    // from the committed manifest — see web/scripts/gen_bike_ids.py for why
+    // an id range can never work here.
     return BIKE_ID_MANIFEST.ids.map((id) => ({ id }));
   }
 }
