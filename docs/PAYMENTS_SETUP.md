@@ -46,16 +46,66 @@ shared instance becomes the constraint.
 
 | Env var (Render dashboard) | Value |
 |---|---|
-| `JWT_SECRET` | 32+ random bytes (`openssl rand -hex 32`). **Required before real users** — the code default is dev-insecure. |
-| `SMTP_HOST/PORT/USER/PASS/FROM` *or* `RESEND_API_KEY` | Enables magic-link email delivery. Until set, magic-link runs in dev mode (token echoed in the API response); password login works regardless. |
+| `JWT_SECRET` | 32+ random bytes (`openssl rand -hex 32`). **Required before real users** — the code default is dev-insecure, and the server now refuses to boot with it once billing is enforced. |
+| `RESEND_API_KEY` + `SMTP_FROM` *(recommended)* | Enables magic-link email. Resend's free tier covers launch volume and needs no SMTP server — but the sending domain must be verified in the Resend dashboard first, or the API returns 403. |
+| *or* `SMTP_HOST/PORT/USER/PASS/FROM` | Same thing over plain SMTP. |
+
+The transport is **derived from whichever of those you set** — there is no
+separate enable flag. Precedence: `MOTOQUANT_EMAIL_BACKEND` (explicit
+override) → Resend → SMTP → stdout. Set `SMTP_FROM` in both cases; it is the
+From address for either transport.
+
+> **Fixed 2026-08-10 — this used to be a trap.** `MOTOQUANT_EMAIL_BACKEND`
+> defaulted to `stdout` and the send guard short-circuited on it, so following
+> the SMTP row above *exactly* still sent zero email while the API answered
+> "Sign-in link sent. Check your inbox." Resend was named here and in
+> `auth.py`'s docstring but had **no implementation at all**. Both are now
+> real, and a deployed host with no transport configured returns 503 from
+> `/api/auth/magic-link` instead of falsely reporting success (it also warns
+> at boot). Password sign-in was, and remains, unaffected.
+
+## Step 1b — Backups (do this WITH the disk, not after)
+
+`scripts/backup_db.py` takes a hot, integrity-checked, gzipped snapshot using
+the SQLite online-backup API (safe against concurrent writers — verified
+against a WAL database taking ~1,300 commits mid-backup) and prunes to the
+newest N. 18 MB DB → ~3 MB snapshot.
+
+```bash
+python scripts/backup_db.py --db /data/motoquant.db --keep 14
+```
+
+Snapshots default to `<db-dir>/backups`. That protects against a bad
+migration or an errant DELETE, but **not** against losing the disk — set
+`MOTOQUANT_BACKUP_UPLOAD_CMD` to copy each one off-box (`{path}` is
+substituted):
+
+```
+MOTOQUANT_BACKUP_UPLOAD_CMD='rclone copy {path} r2:motoquant-backups/'
+```
+
+Exit codes: `0` ok · `1` backup failed · `2` snapshot good but upload failed.
+Schedule it as a Render Cron Job (daily) once you are on a paid plan.
 
 ## Step 2 — Razorpay (India: UPI, cards, netbanking, wallets)
 
 1. Complete KYC at dashboard.razorpay.com.
 2. Create 4 subscription **plans** matching the price book in
    `motoquant/payments.py` (`PRICES_INR`):
-   Pro ₹499/mo, Pro ₹4,999/yr, Studio ₹1,999/mo, Studio ₹19,990/yr
-   (GST collected on top — enable GST in Razorpay settings).
+   Pro ₹499/mo, Pro ₹4,999/yr, Studio ₹1,999/mo, Studio ₹19,990/yr.
+
+   **Do NOT enable GST in Razorpay settings.** MotoQuant currently operates as
+   an unregistered sole proprietorship below the ₹20 lakh turnover threshold
+   for services, so it has no GSTIN and cannot legally collect GST. The plan
+   amounts above are the total payable. Site copy (terms, pricing, refunds,
+   `/api/payments/config`) states this explicitly as of 2026-08-10 — it
+   previously promised "18% GST added at checkout" and a provider-issued tax
+   invoice, neither of which was deliverable.
+
+   On crossing ₹20 lakh: register for a GSTIN within 30 days, then charge 18%
+   on software services from that date forward. That is a coordinated change —
+   Razorpay GST settings, `PRICES_INR`, `gst_note` in `payments.py`, and the
+   GST wording in `/terms` §3, `/refunds` §7 and `/pricing` all move together.
 3. Set env vars: `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`,
    `PLAN_ID_PRO_MONTHLY`, `PLAN_ID_PRO_YEARLY`,
    `PLAN_ID_STUDIO_MONTHLY`, `PLAN_ID_STUDIO_YEARLY`.

@@ -5,7 +5,7 @@
 import StructuredData, { SITE_URL } from '../StructuredData';
 
 const TITLE = "Pricing — Free, Pro & Studio Plans for MotoQuant Drag Simulator (India)";
-const DESCRIPTION = "Transparent INR pricing for MotoQuant Pro motorcycle drag simulator — free during the open beta. Free tier covers 541 bikes; Pro at Rs.499/mo adds unlimited sims and the parts ROI cost-per-tenth engine; Studio at Rs.1,999/mo adds Dragy GPS import and dyno calibration. GST-compliant, Razorpay + Stripe secured, monthly or yearly.";
+const DESCRIPTION = "Transparent INR pricing for MotoQuant Pro motorcycle drag simulator — free during the open beta. Free tier covers 541 bikes; Pro at Rs.499/mo adds unlimited sims and the parts ROI cost-per-tenth engine; Studio at Rs.1,999/mo adds Dragy GPS import and dyno calibration. No GST added, Razorpay + Stripe secured, monthly or yearly.";
 
 export const metadata = {
   title: TITLE,
@@ -22,7 +22,7 @@ export const metadata = {
     "quarter mile calculator pro",
     "motoquant studio plan",
     "motoquant free plan",
-    "motorcycle drag tool gst invoice",
+    "motorcycle drag tool pricing india",
     "indian motorcycle simulator subscription",
     "drag racing app monthly plan india",
     "free quarter mile simulator india",

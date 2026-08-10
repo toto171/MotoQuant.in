@@ -14,17 +14,29 @@ Run with:
 from __future__ import annotations
 
 import importlib.util
+import io
 import json
 import os
 import sqlite3
 import subprocess
 import sys
 import unittest
+import urllib.error
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+
+# motoquant.auth imports fastapi at module scope, so the email-backend tests
+# below can only run where it is installed (CI has it; a bare checkout may not).
+try:
+    from fastapi import HTTPException
+
+    _FASTAPI_OK = True
+except ImportError:  # pragma: no cover — mirrors the gating other classes use
+    HTTPException = Exception
+    _FASTAPI_OK = False
 
 # ─── helpers shared across tests ─────────────────────────────────────────────
 
@@ -583,16 +595,38 @@ class TestMagicLinkEndpoint(unittest.TestCase):
         account-takeover vector. Locally (dev) the echo is a convenience."""
         import motoquant.auth as auth_mod
 
-        # Deployed: no dev_token in the body regardless of SMTP config.
+        # Deployed with no email backend: 503, and critically no token in the
+        # body. (This used to answer 200 "Sign-in link sent" while sending
+        # nothing — see TestEmailBackendResolution for why that changed.)
         conn = _mem_conn()
         _bootstrap(conn)
-        with self._patch_conn(conn), patch.object(auth_mod, "IN_DEPLOYED_ENV", True):
+        with (
+            self._patch_conn(conn),
+            patch.object(auth_mod, "IN_DEPLOYED_ENV", True),
+            patch.object(auth_mod, "EMAIL_BACKEND", "stdout"),
+        ):
             r = self.client.post(
                 "/api/auth/magic-link", json={"email": "deployed@test.in"}
             )
         conn.close()
-        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.status_code, 503)
         self.assertIsNone(r.json().get("dev_token"))
+
+        # Deployed WITH a working backend: 200, still no token echoed.
+        conn3 = _mem_conn()
+        _bootstrap(conn3)
+        with (
+            self._patch_conn(conn3),
+            patch.object(auth_mod, "IN_DEPLOYED_ENV", True),
+            patch.object(auth_mod, "EMAIL_BACKEND", "resend"),
+            patch.object(auth_mod, "_send_via_resend", lambda *a, **k: None),
+        ):
+            r3 = self.client.post(
+                "/api/auth/magic-link", json={"email": "deployed2@test.in"}
+            )
+        conn3.close()
+        self.assertEqual(r3.status_code, 200)
+        self.assertIsNone(r3.json().get("dev_token"))
 
         # Local dev (default EMAIL_BACKEND=stdout, not deployed): echo is on.
         conn2 = _mem_conn()
@@ -608,6 +642,217 @@ class TestMagicLinkEndpoint(unittest.TestCase):
         conn2.close()
         self.assertEqual(r2.status_code, 200)
         self.assertTrue(r2.json().get("dev_token"))
+
+
+@unittest.skipUnless(_FASTAPI_OK, "fastapi not installed")
+class TestEmailBackendResolution(unittest.TestCase):
+    """The magic-link transport must follow from what the operator configured.
+
+    Regression cover for a silent production bug: MOTOQUANT_EMAIL_BACKEND
+    defaulted to "stdout" and the send guard read
+    ``if EMAIL_BACKEND == "stdout" or not SMTP_HOST``, so the first clause
+    short-circuited true unconditionally. Following docs/PAYMENTS_SETUP.md
+    exactly (set SMTP_HOST/PORT/USER/PASS/FROM — the only vars that doc named)
+    sent no mail at all, while the API still answered "Sign-in link sent."
+    Resend was documented in three places and had no implementation whatsoever.
+    """
+
+    _EMAIL_VARS = ("MOTOQUANT_EMAIL_BACKEND", "RESEND_API_KEY", "SMTP_HOST")
+
+    def _resolve(self, **env):
+        import motoquant.auth as auth_mod
+
+        cleaned = {k: v for k, v in env.items() if v is not None}
+        with patch.dict(os.environ, cleaned, clear=False):
+            for var in self._EMAIL_VARS:
+                if var not in cleaned:
+                    os.environ.pop(var, None)
+            return auth_mod._resolve_email_backend()
+
+    def test_nothing_configured_is_stdout(self):
+        self.assertEqual(self._resolve(), "stdout")
+
+    def test_smtp_host_alone_selects_smtp(self):
+        """THE regression: SMTP_HOST alone used to leave the backend on stdout."""
+        self.assertEqual(self._resolve(SMTP_HOST="smtp.example.com"), "smtp")
+
+    def test_resend_key_alone_selects_resend(self):
+        self.assertEqual(self._resolve(RESEND_API_KEY="re_test"), "resend")
+
+    def test_resend_outranks_smtp(self):
+        self.assertEqual(
+            self._resolve(RESEND_API_KEY="re_test", SMTP_HOST="smtp.example.com"),
+            "resend",
+        )
+
+    def test_explicit_override_wins(self):
+        self.assertEqual(
+            self._resolve(
+                MOTOQUANT_EMAIL_BACKEND="stdout",
+                RESEND_API_KEY="re_test",
+                SMTP_HOST="smtp.example.com",
+            ),
+            "stdout",
+        )
+
+    def test_override_is_case_insensitive(self):
+        self.assertEqual(self._resolve(MOTOQUANT_EMAIL_BACKEND="  ReSend "), "resend")
+
+
+@unittest.skipUnless(_FASTAPI_OK, "fastapi not installed")
+class TestResendTransport(unittest.TestCase):
+    """The Resend path builds a correct API request and reports failures."""
+
+    def _capture_request(self):
+        import motoquant.auth as auth_mod
+
+        captured = {}
+
+        class _Resp:
+            status = 200
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+        def fake_urlopen(req, timeout=None):
+            captured["url"] = req.full_url
+            captured["method"] = req.get_method()
+            captured["headers"] = {k.lower(): v for k, v in req.headers.items()}
+            captured["body"] = json.loads(req.data.decode("utf-8"))
+            captured["timeout"] = timeout
+            return _Resp()
+
+        with (
+            patch.dict(
+                os.environ,
+                {"RESEND_API_KEY": "re_test_key", "SMTP_FROM": "no-reply@motoquant.in"},
+                clear=False,
+            ),
+            patch.object(auth_mod.urllib.request, "urlopen", fake_urlopen),
+        ):
+            auth_mod._send_via_resend("rider@example.com", "Subject line", "<p>hi</p>")
+        return captured
+
+    def test_posts_to_resend_api(self):
+        cap = self._capture_request()
+        self.assertEqual(cap["url"], "https://api.resend.com/emails")
+        self.assertEqual(cap["method"], "POST")
+
+    def test_sends_bearer_token_and_json(self):
+        cap = self._capture_request()
+        self.assertEqual(cap["headers"]["authorization"], "Bearer re_test_key")
+        self.assertEqual(cap["headers"]["content-type"], "application/json")
+
+    def test_payload_shape(self):
+        cap = self._capture_request()
+        self.assertEqual(cap["body"]["to"], ["rider@example.com"])
+        self.assertEqual(cap["body"]["from"], "no-reply@motoquant.in")
+        self.assertEqual(cap["body"]["subject"], "Subject line")
+        self.assertEqual(cap["body"]["html"], "<p>hi</p>")
+
+    def test_request_is_bounded_by_timeout(self):
+        # An unbounded call would hang a worker on the 0.5-CPU instance.
+        self.assertIsNotNone(self._capture_request()["timeout"])
+
+    def test_http_error_surfaces_resend_detail(self):
+        """Resend names the real cause (unverified domain, bad key) in the body."""
+        import motoquant.auth as auth_mod
+
+        err = urllib.error.HTTPError(
+            "https://api.resend.com/emails",
+            403,
+            "Forbidden",
+            {},
+            io.BytesIO(b'{"message":"domain is not verified"}'),
+        )
+
+        def boom(req, timeout=None):
+            raise err
+
+        with (
+            patch.dict(os.environ, {"RESEND_API_KEY": "re_bad"}, clear=False),
+            patch.object(auth_mod.urllib.request, "urlopen", boom),
+            self.assertRaises(RuntimeError) as ctx,
+        ):
+            auth_mod._send_via_resend("a@b.in", "s", "<p>h</p>")
+        self.assertIn("domain is not verified", str(ctx.exception))
+
+
+@unittest.skipUnless(_FASTAPI_OK, "fastapi not installed")
+class TestMagicLinkDispatch(unittest.TestCase):
+    """_send_magic_link_email routes to the resolved transport."""
+
+    def test_resend_backend_calls_resend(self):
+        import motoquant.auth as auth_mod
+
+        calls = []
+        with (
+            patch.object(auth_mod, "EMAIL_BACKEND", "resend"),
+            patch.object(auth_mod, "_send_via_resend", lambda *a, **k: calls.append(a)),
+        ):
+            auth_mod._send_magic_link_email("rider@example.com", "tok123")
+        self.assertEqual(len(calls), 1)
+        self.assertIn("tok123", calls[0][2])  # link embedded in the html body
+
+    def test_smtp_backend_calls_smtp(self):
+        import motoquant.auth as auth_mod
+
+        calls = []
+        with (
+            patch.object(auth_mod, "EMAIL_BACKEND", "smtp"),
+            patch.object(auth_mod, "_send_via_smtp", lambda *a, **k: calls.append(a)),
+        ):
+            auth_mod._send_magic_link_email("rider@example.com", "tok456")
+        self.assertEqual(len(calls), 1)
+
+    def test_transport_failure_becomes_503(self):
+        import motoquant.auth as auth_mod
+
+        def boom(*a, **k):
+            raise RuntimeError("smtp exploded")
+
+        with (
+            patch.object(auth_mod, "EMAIL_BACKEND", "smtp"),
+            patch.object(auth_mod, "_send_via_smtp", boom),
+            self.assertRaises(HTTPException) as ctx,
+        ):
+            auth_mod._send_magic_link_email("rider@example.com", "tok")
+        self.assertEqual(ctx.exception.status_code, 503)
+
+    def test_unknown_backend_is_503_not_silent(self):
+        import motoquant.auth as auth_mod
+
+        with (
+            patch.object(auth_mod, "EMAIL_BACKEND", "sendgrid"),
+            self.assertRaises(HTTPException) as ctx,
+        ):
+            auth_mod._send_magic_link_email("rider@example.com", "tok")
+        self.assertEqual(ctx.exception.status_code, 503)
+
+    def test_deployed_without_backend_raises_rather_than_lying(self):
+        import motoquant.auth as auth_mod
+
+        with (
+            patch.object(auth_mod, "EMAIL_BACKEND", "stdout"),
+            patch.object(auth_mod, "IN_DEPLOYED_ENV", True),
+            self.assertRaises(HTTPException) as ctx,
+        ):
+            auth_mod._send_magic_link_email("rider@example.com", "tok")
+        self.assertEqual(ctx.exception.status_code, 503)
+
+    def test_local_dev_still_prints_the_link(self):
+        import motoquant.auth as auth_mod
+
+        with (
+            patch.object(auth_mod, "EMAIL_BACKEND", "stdout"),
+            patch.object(auth_mod, "IN_DEPLOYED_ENV", False),
+            patch("sys.stdout", new_callable=io.StringIO) as out,
+        ):
+            auth_mod._send_magic_link_email("rider@example.com", "tok789")
+        self.assertIn("tok789", out.getvalue())
 
 
 class TestMagicLinkSingleUse(unittest.TestCase):

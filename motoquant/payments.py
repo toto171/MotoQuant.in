@@ -145,7 +145,11 @@ def payments_config() -> dict:
         "billing_enforced": _auth.BILLING_ENFORCE,
         "beta": not _auth.BILLING_ENFORCE,
         "currency": "INR",
-        "gst_note": "Prices exclude 18% GST (added at checkout for Indian customers).",
+        "gst_note": (
+            "No GST is charged — the listed price is the total payable. "
+            "MotoQuant Pro is operated by an unregistered sole proprietorship "
+            "below the Rs.20 lakh GST registration threshold for services."
+        ),
         "prices_inr": PRICES_INR,
         "prices_usd_display": PRICES_USD_DISPLAY,
         "providers": {

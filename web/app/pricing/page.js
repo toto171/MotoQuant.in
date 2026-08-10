@@ -65,7 +65,7 @@ const FAQ = [
   { q: "Can I switch tiers?", a: "Yes — you can upgrade or downgrade at any time from your account page. Upgrades take effect immediately; downgrades apply at the end of your current billing period." },
   { q: "What happens if I cancel?", a: "Your access continues until the end of the paid period. After that, your account moves to the Free tier automatically. No data is deleted — your build history and sim runs are retained." },
   { q: "Do I need an internet connection?", a: "Yes — MotoQuant is a hosted web app, so simulations run on our servers and need a connection. Quick sims are ~50 ms round-trip, so even patchy strip-side data is usually enough." },
-  { q: "Is GST included in the price?", a: "Prices shown are exclusive of GST. 18% GST is applied at checkout where applicable, as per Indian tax regulations. Your tax invoice is issued by our payment provider (Razorpay or Stripe)." },
+  { q: "Is GST added at checkout?", a: "No. MotoQuant Pro is run by an unregistered sole proprietorship with turnover below the Rs.20 lakh GST registration threshold for services, so no GST is charged — the price you see is the total you pay. You get a payment receipt from the processor. If we register for GST later, we'll give notice before it starts applying." },
   { q: "What payment methods are accepted?", a: "In India: UPI, credit/debit cards, net banking, and wallets via Razorpay. International riders: credit/debit cards via Stripe. PayPal support is planned." },
   { q: "Is there a refund policy?", a: "Yes. If you are not satisfied within 7 days of your first payment, contact motoquant@gmail.com for a full refund — no questions asked." },
 ];
@@ -200,7 +200,7 @@ function PricingPageInner() {
         align="center"
         kicker={beta ? "pricing matrix · open beta · ₹0" : "pricing matrix · plans live"}
         title={<>Simple, <span className="text-gradient-orange">honest pricing</span>.</>}
-        sub="Built in Pune. Serving the Indian drag-racing community. INR pricing, GST-compliant, Razorpay + Stripe secured."
+        sub="Built in Pune. Serving the Indian drag-racing community. INR pricing, no GST added, Razorpay + Stripe secured."
       >
         {beta && (
           <div className="mx-auto mt-2 max-w-2xl rounded-xl border border-accent/40 bg-accent/[0.08] px-5 py-4">
@@ -376,7 +376,7 @@ function PricingPageInner() {
                 International: <span className="font-medium text-white/80">Stripe</span> · Cards
               </p>
               <p className="font-mono text-xs text-white/35">
-                All prices in INR + 18% GST at checkout where applicable · Cancel anytime · 7-day refund guarantee
+                All prices in INR, no GST added · Cancel anytime · 7-day refund guarantee
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 font-mono text-[11px] text-white/45">
                 <span>Aamby Valley</span>
