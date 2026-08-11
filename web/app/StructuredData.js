@@ -100,9 +100,9 @@ export function softwareApplicationSchema() {
       '541 motorcycles with individual aero + dyno curves',
       '593-part catalog with cost-per-tenth ROI analysis',
       '15 independent physics sub-models',
-      'Dragy GPS + dyno import and auto-calibration',
-      'XGBoost + DNN surrogate models for instant iteration',
-      'Bayesian build optimization under budget',
+      'Dragy GPS + dyno import with sim overlay',
+      'Calibrated surrogate model for instant iteration',
+      'Budget-aware build optimization',
       'Natural-language tuning queries',
     ],
     inLanguage: 'en',
@@ -175,7 +175,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'Yes. MotoQuant Pro imports Dragy GPS logs (CSV or VBO), DynoJet/MoTeC dyno sheets, and ECU logs (Woolich, Power Commander, MoTeC). An auto-calibration loop (differential evolution + Nelder-Mead) fits aero and tire parameters to your run for ±0.05s overlay accuracy.',
+            'Yes. MotoQuant Pro imports Dragy GPS logs (CSV or VBO) and DynoJet/MoTeC dyno sheets with SAE J1349 atmospheric correction, then overlays your real run against the simulation — ET, trap speed and split-by-split residuals for your specific bike.',
         },
       },
     ],
@@ -215,10 +215,12 @@ export default function StructuredData({ data }) {
   // Injected via a plain <script> tag — crawlers parse this even though React
   // normally reserves <script> for client-side execution. Next.js is happy to
   // serialise it as-is because we're passing JSON through dangerouslySetInnerHTML.
+  // "<" is escaped to \u003c (identical once JSON-parsed) so a "</script>"
+  // inside any data value can never terminate the tag early (XSS hardening).
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, '\\u003c') }}
     />
   );
 }

@@ -88,22 +88,20 @@ Build profiles — Street Legal, Drag Prep, Full Race — pre-filter the catalog
     icon: Upload,
     label: '03 / Calibration',
     title: <>Import <span className="text-accent">real</span> run data</>,
-    subtitle: 'Dragy GPS, dyno sheets, ECU logs. Auto-calibrate Cd and μ to match your actual strip times.',
-    body: `Physics is only as good as its inputs. MotoQuant accepts three data sources:
+    subtitle: 'Dragy GPS logs and dyno sheets. Overlay your real runs against the sim and see exactly where prediction and reality diverge.',
+    body: `Physics is only as good as its inputs. MotoQuant accepts two data sources:
 
 Dragy GPS logs (CSV, JSON, or RaceChrono VBO-derived exports) — the importer detects run boundaries, finds the staged position, integrates v(t) to distance, and interpolates ET at exactly 402.336 m with sub-sample accuracy. The best-run selector removes outliers from multi-run files.
 
 Dyno sheets (DynoJet CSV, generic metric CSV, MoTeC tab-delimited) with full SAE J1349 atmospheric correction so power figures are apples-to-apples regardless of dyno location.
 
-ECU logs (Woolich Racing, Power Commander PC-Link, MoTeC i2) with automatic channel mapping and run-window detection from the speed channel.
-
-Once you have a real run imported, the auto-calibrator fits Cd + μ_peak jointly using differential evolution (global) followed by Nelder-Mead refinement (local). The result is a BikeConfig that matches your specific bike, rider, and track surface — not a generic factory spec.`,
+Once a real run is imported, the sim-overlay compare lines your Dragy trace up against the simulated run for the same bike and venue: ET and trap-speed error, split-by-split deltas at every standard mark, and the v(t) residual — so you can see whether the gap is in your launch, your shifts, or your top-end pull, and tune the setup that actually matches your bike.`,
     docsLink: '/docs/getting-started',
     docsLabel: 'Calibration walkthrough',
     stats: [
-      { num: '3', label: 'Data sources' },
-      { num: 'DE + NM', label: 'Optimizer' },
-      { num: '<0.2s', label: 'Typical post-cal error' },
+      { num: '2', label: 'Data sources' },
+      { num: 'J1349', label: 'SAE dyno correction' },
+      { num: '10 Hz', label: 'Dragy GPS rate' },
     ],
     readout: {
       title: 'dragy.import',
@@ -117,8 +115,8 @@ Once you have a real run imported, the auto-calibrator fits Cd + μ_peak jointly
       valueLabel: 'quarter mile · sub-sample accuracy',
       bars: [
         { label: 'gps fix', pct: 92 },
-        { label: 'fit cd', pct: 71 },
-        { label: 'fit μ peak', pct: 64 },
+        { label: 'sim overlay', pct: 71 },
+        { label: 'split match', pct: 64 },
       ],
     },
   },
@@ -126,13 +124,13 @@ Once you have a real run imported, the auto-calibrator fits Cd + μ_peak jointly
     id: 'roi',
     icon: TrendingUp,
     label: '04 / ROI & Optimization',
-    title: <>Bayesian build <span className="text-accent">optimization</span></>,
-    subtitle: 'BoTorch Gaussian-process optimizer. 7-parameter continuous search. Budget-aware.',
+    title: <>Budget-aware build <span className="text-accent">optimization</span></>,
+    subtitle: 'Surrogate-accelerated build optimizer. Compatibility-filtered candidates. Budget-aware to ₹100.',
     body: `Beyond the parts catalog, MotoQuant ships a full optimization stack:
 
-Sobol global sensitivity analysis quantifies which parameters matter most for your specific bike. On a stock Hayabusa, aero Cd and μ_peak have similar sensitivity. On a built Pulsar NS200, the clutch engagement RPM dominates.
+The Build Optimizer scores candidate builds through a trained surrogate (R² > 0.99 against the full RK4 sim) and transparently falls back to full simulation whenever a build leaves the surrogate's training envelope — then verifies the winning build with a real sim. Candidates are compatibility-filtered for your bike, and the knapsack enforces exclusivity so it never stacks two exhausts or two ECUs.
 
-Bayesian optimization (BoTorch) searches a 7-parameter continuous space — power, mass, Cd, frontal area, tire μ, tire pressure, final drive ratio — within a budget constraint. It converges in 30–50 iterations using expected improvement acquisition. No grid search required.
+ECU Autotune is a conditions-aware setup advisor: it sweeps gearing and launch RPM on the full simulator under your venue's actual air density, and adds tyre-pressure and fuel-trim guidance. The Outlaw pipeline chains it all — drag-prep rubber, a no-limit full-race build, then autotune on the modified bike.
 
 The Smart Recommendations engine wraps the knapsack with synergy detection: if you've selected an exhaust, it weights ECU flashes higher because the pair delivers super-linear gains. Compatibility rules block physically nonsensical combinations (dual exhausts, stacked ECUs).
 
@@ -140,16 +138,16 @@ Natural language queries — "optimize my Hayabusa for 35°C at Aamby Valley, bu
     docsLink: '/docs/physics',
     docsLabel: 'How the optimizer works',
     stats: [
-      { num: '7', label: 'Opt. parameters' },
-      { num: '30–50', label: 'Iterations to converge' },
+      { num: '4', label: 'Optimization tools' },
+      { num: '₹100', label: 'Budget granularity' },
       { num: 'R² > 0.99', label: 'Surrogate accuracy' },
     ],
     readout: {
       title: 'optimizer.trace',
       log: [
-        'sobol indices ranked · 14 features',
-        'gp acquisition: expected improvement',
-        'converged in 37 iterations',
+        'candidates compatibility-filtered',
+        'surrogate scoring · full-sim fallback',
+        'best build verified · full rk4',
       ],
       value: '0.99',
       unit: 'R²',

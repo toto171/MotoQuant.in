@@ -194,6 +194,26 @@ def unified_checkout(
     if body.provider not in VALID_PROVIDERS:
         raise HTTPException(400, f"provider must be one of {VALID_PROVIDERS}")
 
+    # One active subscription per account, provider-agnostic. Without this,
+    # every extra checkout minted a new provider subscription that /status and
+    # /cancel could never see — invisible double billing (2026-08-11 audit).
+    # The Razorpay path re-checks inside create_checkout; this covers Stripe
+    # and keeps the failure mode consistent across providers.
+    if user.get("id"):
+        conn = _get_conn()
+        try:
+            _subs.ensure_tables(conn)
+            existing = _subs.get_active_subscription(conn, user["id"])
+        finally:
+            conn.close()
+        if existing:
+            raise HTTPException(
+                409,
+                f"You already have an active {existing['tier']} subscription. "
+                "Cancel it from your account page first (access continues to "
+                "the end of the paid period), then subscribe to the new plan.",
+            )
+
     provider = body.provider
     if provider == "auto":
         if _razorpay_configured():
@@ -270,6 +290,15 @@ def _stripe_api_post(path: str, fields: dict) -> dict:
     except urllib.error.URLError as exc:
         log.error("Stripe API unreachable: %s", exc)
         raise HTTPException(502, "Stripe API unreachable — try again shortly.") from exc
+
+
+def stripe_cancel_subscription(sub_id: str) -> None:
+    """Cancel a Stripe subscription at period end (mirrors the Razorpay
+    cancel_at_cycle_end behaviour). Called by subscriptions.cancel_subscription
+    when the stored subscription's provider is 'stripe' — that route was
+    hardwired to the Razorpay SDK, leaving Stripe subscribers unable to cancel
+    (2026-08-11 audit). Raises HTTPException(502/503) on API failure."""
+    _stripe_api_post(f"/v1/subscriptions/{sub_id}", {"cancel_at_period_end": "true"})
 
 
 def _create_stripe_checkout(user: dict, tier: str, cycle: str) -> dict:
@@ -506,7 +535,15 @@ async def stripe_webhook(request: Request) -> dict:
         ):
             log.info("Duplicate Stripe event %s ignored", event_id)
             return {"status": "duplicate", "event": etype}
-        return _handle_stripe_event(conn, etype, event)
+        try:
+            return _handle_stripe_event(conn, etype, event)
+        except Exception:
+            # The ledger row above already committed; un-record it so Stripe's
+            # retry gets a fresh attempt instead of a "duplicate" swallow
+            # (2026-08-11 audit — mid-apply failure lost the event forever).
+            if event_id:
+                _subs.delete_payment_event(conn, "stripe", event_id)
+            raise
     finally:
         conn.close()
 

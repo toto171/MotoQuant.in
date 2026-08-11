@@ -125,7 +125,7 @@ export default function TermsPage() {
         <Section title="6. Data you submit">
           <p>
             We collect your email address, simulation runs, build configurations, and any
-            files you voluntarily upload (Dragy GPS, dyno CSVs, ECU logs). This data is
+            files you voluntarily upload (Dragy GPS logs, dyno CSVs). This data is
             used to provide and improve the service. See our Privacy Policy for details.
           </p>
           <p>

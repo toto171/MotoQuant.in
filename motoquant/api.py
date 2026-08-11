@@ -49,6 +49,7 @@ from fastapi import (
     UploadFile,
 )
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from pydantic import BaseModel, Field
 
 # TypedDict must come from typing_extensions on Python < 3.12 when used in
@@ -108,6 +109,12 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
+
+# Response compression -- the origin serves 50-600 KB JSON payloads (full
+# catalog fetches, sim timeseries) uncompressed, which is pure egress waste
+# on the free-tier instance and slow on Indian mobile links. minimum_size
+# keeps tiny health/quick-sim responses uncompressed (gzip overhead > win).
+app.add_middleware(GZipMiddleware, minimum_size=1024)
 
 # ─── DB helper ────────────────────────────────────────────────────────────
 
@@ -386,7 +393,13 @@ class QuickSimRequest(BaseModel):
     power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
     rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
-    part_ids: list[int] = Field(default_factory=list, description="Part IDs to apply")
+    # Capped: each id costs a DB lookup + config mutation, and the list was
+    # unbounded (2026-08-11 hardening) — a single request carrying tens of
+    # thousands of ids became a free CPU/DB amplifier. No real build exceeds
+    # ~15 parts; 30 leaves 2x headroom.
+    part_ids: list[int] = Field(
+        default_factory=list, max_length=30, description="Part IDs to apply"
+    )
     front_tire_id: int | None = None
     rear_tire_id: int | None = None
     venue_id: int | None = None
@@ -1351,13 +1364,33 @@ def _simulate_impl(req: SimulateRequest, progress=None):
     }
 
 
-@app.post("/api/simulate", dependencies=[Depends(_meter_full_sim)])
+@app.post(
+    "/api/simulate",
+    dependencies=[
+        # Cost fuse (2026-08-11 hardening): metering alone is advisory while
+        # MOTOQUANT_BILLING_ENFORCE is off, so an anonymous loop could run
+        # unlimited full RK4 sims. 30/60s is generous for human-paced UI use
+        # and fatal to loops. Bucket shared with /api/jobs/simulate — the
+        # client falls back between the two (deploy-skew contract), so a
+        # split bucket would double the effective limit.
+        Depends(rate_limit("simulate", 30, 60.0)),
+        Depends(_meter_full_sim),
+    ],
+)
 def simulate(req: SimulateRequest):
     """Synchronous full simulation (see ``_simulate_impl``)."""
     return _simulate_impl(req)
 
 
-@app.post("/api/simulate/quick")
+@app.post(
+    "/api/simulate/quick",
+    # Rate-limited but deliberately UNMETERED (pinned design: quick stays
+    # free — the slider UI auto-runs it). The limit exists because each call
+    # is still a full RK4 pass (~50-100 ms CPU; TWO passes with part_ids),
+    # and the route previously had neither fuse (2026-08-11 hardening).
+    # Live-mode drags answer client-side now, so 30/60s covers real use.
+    dependencies=[Depends(rate_limit("quick_sim", 30, 60.0))],
+)
 def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
     """
     Quick ET-only simulation -- no time-series arrays.
@@ -1444,7 +1477,8 @@ class TopSpeedRequest(BaseModel):
     power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
     rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
-    part_ids: list[int] = Field(default_factory=list)
+    # Same cap rationale as QuickSimRequest.part_ids (2026-08-11 hardening).
+    part_ids: list[int] = Field(default_factory=list, max_length=30)
     front_tire_id: int | None = None
     rear_tire_id: int | None = None
     venue_id: int | None = None
@@ -1458,7 +1492,11 @@ class TopSpeedRequest(BaseModel):
     # a remotely-triggerable memory bomb. Floor at 0.1 s: a max_time below
     # the solver dt raised an unhandled ValueError deep in the engine
     # (found July 11, 2026 review) — reject it at validation instead.
-    max_time_s: float = Field(120.0, ge=0.1, le=300.0)
+    # Ceiling 120 s (2026-08-11 hardening): le=300 meant ~43 MB of upfront
+    # numpy allocation per fixed-dt sim on the 512 MB instance. Top-speed
+    # plateaus detect at ~35 s, so 120 leaves 3x headroom (~17 MB ceiling).
+    # DistanceRunRequest keeps le=300 — a 20 km LSR run genuinely needs it.
+    max_time_s: float = Field(120.0, ge=0.1, le=120.0)
     include_timeseries: bool = False
 
 
@@ -1551,7 +1589,15 @@ def _topspeed_impl(req: TopSpeedRequest, progress=None) -> TopSpeedResultDict:
     return response
 
 
-@app.post("/api/simulate/top-speed", dependencies=[Depends(_meter_full_sim)])
+@app.post(
+    "/api/simulate/top-speed",
+    dependencies=[
+        # Same cost-fuse rationale as /api/simulate (2026-08-11 hardening);
+        # bucket shared with /api/jobs/topspeed.
+        Depends(rate_limit("topspeed", 30, 60.0)),
+        Depends(_meter_full_sim),
+    ],
+)
 def simulate_top_speed(req: TopSpeedRequest) -> TopSpeedResultDict:
     """Synchronous top-speed simulation (see ``_topspeed_impl``)."""
     return _topspeed_impl(req)
@@ -1568,7 +1614,8 @@ class DistanceRunRequest(BaseModel):
     power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
     rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
-    part_ids: list[int] = Field(default_factory=list)
+    # Same cap rationale as QuickSimRequest.part_ids (2026-08-11 hardening).
+    part_ids: list[int] = Field(default_factory=list, max_length=30)
     front_tire_id: int | None = None
     rear_tire_id: int | None = None
     venue_id: int | None = None
@@ -1576,7 +1623,10 @@ class DistanceRunRequest(BaseModel):
     track_temp_c: float | None = Field(None, ge=-30, le=80)
     humidity_pct: float | None = Field(None, ge=0, le=100)
     headwind_kmh: float | None = Field(None, ge=-200, le=200)
-    # Same floor rationale as TopSpeedRequest.max_time_s (>= dt).
+    # Same floor rationale as TopSpeedRequest.max_time_s (>= dt). Ceiling
+    # DELIBERATELY stays at 300 (not the 2026-08-11 le=120 top-speed cap):
+    # distance_m allows up to 20 km, and a Bonneville-course run at ~80 m/s
+    # legitimately needs >120 s of sim time to reach the line.
     max_time_s: float = Field(120.0, ge=0.1, le=300.0)
 
 
@@ -1984,7 +2034,8 @@ class CompareRequest(BaseModel):
     a_power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     a_mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
     a_rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
-    a_part_ids: list[int] = Field(default_factory=list)
+    # Same cap rationale as QuickSimRequest.part_ids (2026-08-11 hardening).
+    a_part_ids: list[int] = Field(default_factory=list, max_length=30)
     a_front_tire_id: int | None = None
     a_rear_tire_id: int | None = None
 
@@ -1994,7 +2045,7 @@ class CompareRequest(BaseModel):
     b_power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     b_mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)
     b_rider_mass_kg: float = Field(75.0, ge=20.0, le=250.0)
-    b_part_ids: list[int] = Field(default_factory=list)
+    b_part_ids: list[int] = Field(default_factory=list, max_length=30)
     b_front_tire_id: int | None = None
     b_rear_tire_id: int | None = None
 
@@ -2218,7 +2269,14 @@ async def _read_upload_capped(file: UploadFile) -> bytes:
 # --- Dragy / Dyno Upload -------------------------------------------------
 
 
-@app.post("/api/calibrate/dragy")
+@app.post(
+    "/api/calibrate/dragy",
+    # The studio tier gate is inert while MOTOQUANT_BILLING_ENFORCE is off,
+    # so during beta these uploads are effectively anonymous and each one
+    # parses up to 25 MB in memory (2026-08-11 hardening). 6/60s is plenty
+    # for a human uploading timeslips; a loop gets cut off fast.
+    dependencies=[Depends(rate_limit("calibrate_upload", 6, 60.0))],
+)
 async def upload_dragy(
     file: UploadFile = File(..., description="Dragy CSV or JSON export"),
     bike_id: int | None = Form(None, description="Bike to overlay sim against"),
@@ -2342,7 +2400,12 @@ async def upload_dragy(
     return result
 
 
-@app.post("/api/calibrate/dyno")
+@app.post(
+    "/api/calibrate/dyno",
+    # Same upload-fuse rationale as /api/calibrate/dragy; shared bucket so
+    # alternating the two routes doesn't double the effective limit.
+    dependencies=[Depends(rate_limit("calibrate_upload", 6, 60.0))],
+)
 async def upload_dyno(
     file: UploadFile = File(
         ..., description="Dyno CSV export (DynoJet, generic, or MoTeC)"
@@ -4203,7 +4266,12 @@ def _start_job(kind: str, runner) -> dict:
 @app.post(
     "/api/jobs/simulate",
     status_code=202,
-    dependencies=[Depends(_meter_full_sim)],
+    dependencies=[
+        # Cost fuse shared with the sync /api/simulate route it wraps
+        # (2026-08-11 hardening) — see that route for the rationale.
+        Depends(rate_limit("simulate", 30, 60.0)),
+        Depends(_meter_full_sim),
+    ],
 )
 def job_simulate(req: SimulateRequest):
     """Start a full simulation as a background job (real progress)."""
@@ -4213,7 +4281,11 @@ def job_simulate(req: SimulateRequest):
 @app.post(
     "/api/jobs/topspeed",
     status_code=202,
-    dependencies=[Depends(_meter_full_sim)],
+    dependencies=[
+        # Cost fuse shared with the sync /api/simulate/top-speed route.
+        Depends(rate_limit("topspeed", 30, 60.0)),
+        Depends(_meter_full_sim),
+    ],
 )
 def job_topspeed(req: TopSpeedRequest):
     """Start a top-speed run as a background job (real progress)."""

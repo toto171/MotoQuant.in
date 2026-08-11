@@ -164,7 +164,7 @@ const SECTIONS = [
       ],
     },
     extra: [
-      'External calibration is supported through the Phase 3 import pipeline: Dragy GPS logs (CSV / JSON / VBO), dyno sheets (DynoJet, generic metric, MoTeC) with full SAE J1349 atmospheric correction, and ECU logs (Woolich Racing, Power Commander PC-Link, MoTeC i2). The auto-calibrator fits Cd and μ-peak jointly via differential evolution followed by Nelder–Mead refinement.',
+      'External calibration is supported through the Phase 3 import pipeline. The hosted service accepts Dragy GPS logs (CSV / JSON / VBO) and dyno sheets (DynoJet, generic metric, MoTeC) with full SAE J1349 atmospheric correction, and overlays each real run against the simulation split by split. The offline engine toolchain additionally parses ECU logs (Woolich Racing, Power Commander PC-Link, MoTeC i2) and includes an auto-calibrator that fits Cd and μ-peak jointly via differential evolution followed by Nelder–Mead refinement.',
     ],
   },
   {

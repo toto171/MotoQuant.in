@@ -20,13 +20,13 @@ const ROADMAP = [
     phase: 'Phase 3',
     status: 'complete',
     label: 'Web launch + calibration pipeline',
-    desc: 'FastAPI backend, Next.js frontend live at motoquant.in. Dragy/dyno/ECU import + auto-calibrator.',
+    desc: 'FastAPI backend, Next.js frontend live at motoquant.in. Dragy + dyno import with sim overlay.',
   },
   {
     phase: 'Phase 4',
     status: 'in-progress',
     label: 'AI & optimisation',
-    desc: 'Parts ROI knapsack, Bayesian build optimiser, XGBoost & DNN surrogates, Smart Recommendations.',
+    desc: 'Parts ROI knapsack, budget-aware build optimiser, surrogate-accelerated scoring, Smart Recommendations.',
   },
   // Phase 5 (native desktop app) was DISCONTINUED July 2026 — the hosted web
   // app is the product. Removed from the public roadmap; the phase numbering

@@ -26,6 +26,28 @@ const nextConfig = {
       },
     ];
   },
+
+  // ─── Cache headers for /public assets ──────────────────────────────────
+  // /surrogate/{model,bikes}.json (~330 KB pair, fetched by lib/surrogate.js
+  // on every simulator boot) only change on a surrogate regen, so an hour of
+  // freshness + a day of stale-while-revalidate kills the repeat-visit
+  // transfer. Safe to serve stale: surrogate.js fingerprint-checks the pair
+  // and falls back to the server sim path on any mismatch. Nothing else in
+  // /public is content-hashed (Next already stamps /_next/static/* immutable
+  // itself), so no immutable rule here.
+  async headers() {
+    return [
+      {
+        source: '/surrogate/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, stale-while-revalidate=86400',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

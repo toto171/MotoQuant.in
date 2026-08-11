@@ -204,6 +204,21 @@ def create_checkout(
     # Ensure Razorpay customer exists for this user
     conn = _get_conn()
     try:
+        # One active subscription per account. Without this guard every extra
+        # checkout minted a NEW provider subscription while /status and
+        # /cancel only ever see the newest row — the older ones kept billing
+        # invisibly (2026-08-11 audit, confirmed). Upgrades go through
+        # cancel-then-resubscribe until proration is built.
+        _subs.ensure_tables(conn)
+        existing = _subs.get_active_subscription(conn, user["id"])
+        if existing:
+            raise HTTPException(
+                409,
+                f"You already have an active {existing['tier']} subscription. "
+                "Cancel it from your account page first (access continues to the "
+                "end of the paid period), then subscribe to the new plan.",
+            )
+
         db_user = _users.get_user_by_id(conn, user["id"])
         rzp_customer_id = db_user.get("razorpay_customer_id") if db_user else None
 
@@ -238,7 +253,24 @@ def create_checkout(
         )
 
         rzp_sub_id = sub["id"]
-        checkout_url = f"https://rzp.io/l/{rzp_sub_id}"
+        # The hosted authorization link comes back on the create response as
+        # short_url (rzp.io/i/<code>). The old code FABRICATED
+        # f"https://rzp.io/l/{sub_id}" — the Payment-Links namespace with a
+        # subscription id in it, a dead URL — so the in-app redirect 404'd on
+        # every real checkout (2026-08-11 audit, confirmed; recoverable only
+        # because customer_notify emails the correct link out-of-band).
+        checkout_url = sub.get("short_url") or ""
+        if not checkout_url:
+            log.error(
+                "Razorpay subscription.create response for %s carried no "
+                "short_url — cannot hand the user a checkout link",
+                rzp_sub_id,
+            )
+            raise HTTPException(
+                502,
+                "Razorpay did not return a checkout link. No charge was made — "
+                "please try again or contact support.",
+            )
 
         # Persist subscription record (status = created)
         _subs.ensure_tables(conn)
@@ -321,61 +353,102 @@ async def razorpay_webhook(request: Request) -> dict:
             log.info("Duplicate Razorpay event %s ignored", event_id)
             return {"status": "duplicate", "event": event_type}
 
-        # Resolve user_id — prefer DB lookup to avoid note-tampering
-        existing_sub = _subs.get_subscription_by_rzp_id(conn, rzp_sub_id)
-        if existing_sub:
-            user_id = existing_sub["user_id"]
-        elif user_id_str.isdigit():
-            user_id = int(user_id_str)
-        else:
-            log.warning("Webhook: cannot resolve user for sub %s", rzp_sub_id)
-            return {"status": "user_not_found"}
+        # From here on, a failure must NOT leave the event marked as
+        # processed — the ledger row above already committed, so a provider
+        # retry would be swallowed as "duplicate" and the event lost forever
+        # (2026-08-11 audit, confirmed). Compensate: delete the ledger row on
+        # any failure and answer non-2xx so Razorpay redelivers.
+        try:
+            # Resolve user_id — prefer DB lookup to avoid note-tampering
+            existing_sub = _subs.get_subscription_by_rzp_id(conn, rzp_sub_id)
+            if existing_sub:
+                user_id = existing_sub["user_id"]
+            elif user_id_str.isdigit():
+                user_id = int(user_id_str)
+            else:
+                log.warning("Webhook: cannot resolve user for sub %s", rzp_sub_id)
+                _subs.delete_payment_event(conn, "razorpay", event_id)
+                raise HTTPException(
+                    400,
+                    f"No MotoQuant user for subscription {rzp_sub_id} — "
+                    "redeliver after linking (dashboard-created subscription?).",
+                )
 
-        # Parse period end
-        current_end_ts = entity.get("current_end")
-        current_period_end = (
-            datetime.fromtimestamp(current_end_ts, tz=timezone.utc).isoformat()
-            if current_end_ts
-            else None
-        )
-
-        STATUS_MAP = {
-            "subscription.activated": ("active", tier),
-            "subscription.charged": ("active", None),  # keep existing tier
-            "subscription.halted": ("halted", None),
-            "subscription.cancelled": ("cancelled", "free"),
-            "subscription.completed": ("completed", "free"),
-            "subscription.paused": ("halted", None),
-            "subscription.authenticated": ("authenticated", tier),
-        }
-
-        if event_type not in STATUS_MAP:
-            log.debug("Unhandled webhook event: %s", event_type)
-            return {"status": "unhandled_event"}
-
-        new_status, new_tier = STATUS_MAP[event_type]
-
-        # Update subscription row
-        _subs.upsert_subscription(
-            conn,
-            user_id=user_id,
-            razorpay_subscription_id=rzp_sub_id,
-            tier=tier,
-            status=new_status,
-            current_period_end=current_period_end,
-            plan_id=plan_id,
-            billing_cycle=billing_cycle,
-        )
-
-        # Upgrade / downgrade user tier
-        if new_tier == "free":
-            _users.set_user_tier(conn, user_id, "free")
-            log.info("User %d downgraded to free (event: %s)", user_id, event_type)
-        elif new_tier in ("pro", "studio"):
-            _users.set_user_tier(conn, user_id, new_tier)
-            log.info(
-                "User %d upgraded to %s (event: %s)", user_id, new_tier, event_type
+            # Parse period end
+            current_end_ts = entity.get("current_end")
+            current_period_end = (
+                datetime.fromtimestamp(current_end_ts, tz=timezone.utc).isoformat()
+                if current_end_ts
+                else None
             )
+
+            STATUS_MAP = {
+                "subscription.activated": ("active", tier),
+                "subscription.charged": ("active", None),  # keep existing tier
+                "subscription.halted": ("halted", None),
+                "subscription.cancelled": ("cancelled", "free"),
+                "subscription.completed": ("completed", "free"),
+                "subscription.paused": ("halted", None),
+                # authenticated = mandate authorized, money NOT captured yet.
+                # Was ("authenticated", tier) — granting the paid tier before
+                # any charge (2026-08-11 audit, confirmed). Tier now arrives
+                # on activated/charged only; status is still recorded.
+                "subscription.authenticated": ("authenticated", None),
+            }
+
+            if event_type not in STATUS_MAP:
+                log.debug("Unhandled webhook event: %s", event_type)
+                return {"status": "unhandled_event", "event": event_type}
+
+            new_status, new_tier = STATUS_MAP[event_type]
+
+            # Update subscription row
+            _subs.upsert_subscription(
+                conn,
+                user_id=user_id,
+                razorpay_subscription_id=rzp_sub_id,
+                tier=tier,
+                status=new_status,
+                current_period_end=current_period_end,
+                plan_id=plan_id,
+                billing_cycle=billing_cycle,
+            )
+
+            # Upgrade / downgrade user tier
+            if new_tier == "free":
+                # Late/out-of-order cancellation events for an OLD subscription
+                # must not clobber a newer active one (2026-08-11 audit): only
+                # downgrade when no OTHER subscription is still active — the
+                # upsert above already moved THIS one out of the active set.
+                still_active = _subs.get_active_subscription(conn, user_id)
+                if still_active and (
+                    still_active["razorpay_subscription_id"] != rzp_sub_id
+                ):
+                    log.info(
+                        "User %d keeps tier: %s is for old sub %s, newer sub %s "
+                        "is still active",
+                        user_id,
+                        event_type,
+                        rzp_sub_id,
+                        still_active["razorpay_subscription_id"],
+                    )
+                else:
+                    _users.set_user_tier(conn, user_id, "free")
+                    log.info(
+                        "User %d downgraded to free (event: %s)", user_id, event_type
+                    )
+            elif new_tier in ("pro", "studio"):
+                _users.set_user_tier(conn, user_id, new_tier)
+                log.info(
+                    "User %d upgraded to %s (event: %s)", user_id, new_tier, event_type
+                )
+        except HTTPException:
+            raise
+        except Exception:
+            # Unexpected failure mid-apply: un-record the event so the
+            # provider's retry gets a fresh attempt instead of "duplicate".
+            _subs.delete_payment_event(conn, "razorpay", event_id)
+            raise
 
     finally:
         conn.close()
@@ -485,14 +558,32 @@ def cancel_subscription(user: dict = Depends(get_current_user)) -> dict:
     if not sub:
         raise HTTPException(404, "No active subscription found.")
 
-    client = _rzp_client()
-    try:
-        client.subscription.cancel(
-            sub["razorpay_subscription_id"], {"cancel_at_cycle_end": 1}
+    # The subscriptions table stores ANY provider's sub id (the column name is
+    # legacy); route the cancel to the provider that owns it. This route was
+    # hardwired to the Razorpay SDK, so Stripe subscribers could not cancel at
+    # all — their sub id was fed to Razorpay, which 400s (2026-08-11 audit).
+    provider = sub.get("provider") or "razorpay"
+    provider_sub_id = sub["razorpay_subscription_id"]
+
+    if provider == "stripe":
+        # Lazy import — payments.py imports this module at top level, so the
+        # reverse import must stay function-local to avoid a cycle.
+        from .payments import stripe_cancel_subscription  # noqa: PLC0415
+
+        stripe_cancel_subscription(provider_sub_id)  # raises HTTPException on error
+    elif provider == "razorpay":
+        client = _rzp_client()
+        try:
+            client.subscription.cancel(provider_sub_id, {"cancel_at_cycle_end": 1})
+        except Exception as exc:
+            log.error("Failed to cancel Razorpay subscription: %s", exc)
+            raise HTTPException(502, f"Razorpay error: {exc}") from exc
+    else:
+        raise HTTPException(
+            502,
+            f"Subscription {provider_sub_id} belongs to unsupported provider "
+            f"'{provider}' — contact support.",
         )
-    except Exception as exc:
-        log.error("Failed to cancel Razorpay subscription: %s", exc)
-        raise HTTPException(502, f"Razorpay error: {exc}") from exc
 
     return {
         "message": "Subscription will be cancelled at the end of the current billing period.",

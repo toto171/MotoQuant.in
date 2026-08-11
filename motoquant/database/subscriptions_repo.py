@@ -200,6 +200,17 @@ def validate_license_key(
     if row["device_id"] and device_id != row["device_id"]:
         raise DeviceMismatchError("License key is already activated on another device")
 
+    # Refuse keys whose owning account has been deactivated — BEFORE the
+    # last-seen bump / device bind, so an invalid key leaves the row untouched
+    # exactly like the revoked path does. (2026-08-11 audit: a banned/closed
+    # account's device-bound keys kept validating forever, because only the
+    # key's own revoked flag was checked.)
+    user_row = conn.execute(
+        "SELECT tier, is_active FROM users WHERE id = ?", (row["user_id"],)
+    ).fetchone()
+    if user_row is not None and not user_row["is_active"]:
+        return None
+
     updates: list = [_now_utc()]
     sql_set = "last_seen_at = ?"
 
@@ -213,9 +224,6 @@ def validate_license_key(
     conn.commit()
 
     # Attach tier from user
-    user_row = conn.execute(
-        "SELECT tier FROM users WHERE id = ?", (row["user_id"],)
-    ).fetchone()
     row["tier"] = user_row["tier"] if user_row else "free"
     row["last_seen_at"] = _now_utc()
     return row
@@ -331,3 +339,21 @@ def record_payment_event(
         return True
     except sqlite3.IntegrityError:
         return False
+
+
+def delete_payment_event(
+    conn: sqlite3.Connection, provider: str, event_id: str
+) -> None:
+    """Un-record a webhook event whose side effects FAILED to apply.
+
+    The ledger insert commits before the handler runs, so without this
+    compensation a mid-apply failure leaves the event marked processed and
+    every provider retry is swallowed as "duplicate" — the event is lost
+    forever (2026-08-11 audit). Callers delete the row and answer non-2xx so
+    the provider redelivers onto a clean slate.
+    """
+    conn.execute(
+        "DELETE FROM payment_events WHERE provider = ? AND event_id = ?",
+        (provider, event_id),
+    )
+    conn.commit()
