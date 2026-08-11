@@ -91,6 +91,18 @@ export default async function sitemap() {
       priority: 0.3,
     },
     {
+      url: `${SITE_URL}/refunds`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
+    {
+      url: `${SITE_URL}/contact`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.4,
+    },
+    {
       url: `${SITE_URL}/features`,
       lastModified: now,
       changeFrequency: "monthly",

@@ -8,26 +8,34 @@
 
 ## The one-paragraph verdict
 
-The plumbing is done; the product isn't. Auth, unified Razorpay+Stripe payments,
-license keys, and the garage all exist and work. But the paid tier barely exists:
-the entire tier-gated surface is three routes (save-run @ pro, Dragy import @ studio,
-dyno import @ studio) while the crown jewels — Build Optimizer, ECU Autotune,
-unlimited sims, AI chat — are ungated public routes. Flipping
-`MOTOQUANT_BILLING_ENFORCE=true` today would gate almost nothing worth paying for.
-Fix what's free-vs-paid first; the payment keys come last.
+> **Status refreshed 2026-08-10.** The July-2 verdict below is superseded on its
+> central point: the paid tier now exists. Build Optimizer, ECU Autotune and the
+> Outlaw pipeline (direct **and** job variants), save-run, and the chat agent's
+> pro tools are all `require_tier("pro")`; Dragy and dyno import are
+> `require_tier("studio")`. What remains is almost entirely operator/account
+> work — one purchase (Render Starter + disk) plus env vars — with the code-side
+> gaps closed on 2026-08-10.
+
+*(July 2, retained for the record:)* The plumbing is done; the product isn't.
+Auth, unified Razorpay+Stripe payments, license keys, and the garage all exist
+and work. But the paid tier barely exists: the entire tier-gated surface is
+three routes… Flipping `MOTOQUANT_BILLING_ENFORCE=true` today would gate almost
+nothing worth paying for.
 
 ## Launch blockers (ordered)
 
 | # | Blocker | State | Action |
 |---|---------|-------|--------|
-| B1 | **Account durability** — accounts/runs/subscriptions wiped on every deploy (free tier, no disk) | Mechanism shipped (`docker-entrypoint.sh`), disk block ready-but-commented in `render.yaml` | Operator: Render paid plan (~$7/mo) + uncomment disk block + `MOTOQUANT_DB=/data/motoquant.db` |
-| B2 | **No paid product** — only 3 routes tier-gated | Gates exist (`require_tier`) but unused on the valuable routes | Gate Build Optimizer + ECU Autotune @ pro; keep calibration @ studio; meter free sims (B3) |
-| B3 | **Free-tier metering** | ✅ Shipped this session: `motoquant/usage.py` + `sim_usage` table + quota dependency on `/api/simulate*` (records always; blocks only when billing enforced) | Tune `MOTOQUANT_FREE_DAILY_SIMS` (default 30) |
-| B4 | **Abuse/cost protection** — `/api/chat` spends LLM tokens, optimizer pins the 0.5-CPU instance, zero rate limiting | ✅ Shipped this session: in-memory per-IP rate limiter on chat/optimize/autotune | Tune limits after observing real traffic |
-| B5 | **Secrets** — dev-insecure `JWT_SECRET` default, SMTP unset | Env vars documented in PAYMENTS_SETUP.md | Operator: set before real accounts |
-| B6 | **End-to-end billing test** in provider test mode | Untested against live providers (tests use mocks) | Operator: PAYMENTS_SETUP Step 4 flow |
-| B7 | **Backups** — no backup job even with a disk | Missing | Cron `sqlite3 .backup` to object storage; do with B1 |
-| B8 | **GST invoice promise** — terms/pricing promise invoices; no generator exists | Missing | Use provider-native invoicing (Razorpay/Stripe both emit) or soften copy |
+| B1 | **Account durability** — accounts/runs/subscriptions wiped on every deploy (free tier, no disk) | ❌ **OPEN — the one hard blocker.** Mechanism shipped (`docker-entrypoint.sh`), disk block ready-but-commented in `render.yaml` | Operator: Render paid plan (~$7/mo) + uncomment disk block + `MOTOQUANT_DB=/data/motoquant.db`. Also fixes free-tier cold starts for paying users. |
+| B2 | **No paid product** — only 3 routes tier-gated | ✅ **CLOSED 2026-08-08.** Optimizer / Autotune / Outlaw (+job variants) @ pro, save-run @ pro, calibration @ studio, chat pro tools return typed `upgrade_required` | Pricing-ladder tuning only |
+| B3 | **Free-tier metering** | ✅ Shipped: `motoquant/usage.py` + `sim_usage` table | Tune `MOTOQUANT_FREE_DAILY_SIMS` (default 30) |
+| B4 | **Abuse/cost protection** | ✅ Shipped: per-IP rate limiter on chat/optimize/autotune | Tune after observing real traffic |
+| B5 | **Secrets** — dev-insecure `JWT_SECRET` default, email unset | ❌ OPEN (operator env). Boot now *hard-fails* on the default JWT secret when billing is enforced | Operator: PAYMENTS_SETUP Step 1 |
+| B6 | **End-to-end billing test** in provider test mode | ❌ OPEN — untested against live providers (tests use mocks) | Operator: PAYMENTS_SETUP Step 4 flow |
+| B7 | **Backups** | ✅ **CLOSED 2026-08-10:** `scripts/backup_db.py` — hot online-backup, integrity-verified, gzipped, rotated, optional off-box upload hook | Operator: schedule as a Render Cron Job once the disk exists |
+| B8 | **GST invoice promise** — terms/pricing promised 18% GST + provider-issued tax invoices | ✅ **CLOSED 2026-08-10:** operator confirmed unregistered sole proprietorship below the ₹20 L services threshold → no GSTIN, cannot collect GST. All copy corrected to "no GST charged" with a forward clause for crossing the threshold | Revisit at ₹20 L turnover |
+| B9 | **Payment-provider website checklist** — no contact page, no address/phone, refund policy buried in ToS §5 and not footer-linked | ✅ **CLOSED 2026-08-10:** standalone `/refunds` + `/contact`, both footer-linked, sitemapped and crawlable | Operator: fill `BUSINESS` in `web/app/contact/page.js` with the exact KYC address/phone |
+| B10 | **Magic-link sign-in was silently dead in prod** — backend defaulted to `stdout` and short-circuited the send guard, so configuring SMTP per the runbook sent nothing while the API answered "Sign-in link sent"; Resend was documented in 3 places with zero implementation | ✅ **CLOSED 2026-08-10:** transport derived from configured env vars, Resend implemented (stdlib urllib), deployed-without-transport returns 503 instead of lying, boot warning added, 18 regression tests | — |
 
 ## Operator env checklist (July 2 functional audit — features that work, waiting only on keys)
 
@@ -38,7 +46,7 @@ Fix what's free-vs-paid first; the payment keys come last.
 
 | Feature | Current behavior (unset) | Env vars to set |
 |---|---|---|
-| **Magic-link EMAILS** | Flow works; token minted + verified, but no email sent (stdout backend; login page shows the dev-token box) | `SMTP_HOST` `SMTP_PORT` `SMTP_USER` `SMTP_PASS` `SMTP_FROM` — or `RESEND_API_KEY` + `SMTP_FROM` |
+| **Magic-link EMAILS** | Deployed + unconfigured now returns a clear 503 (was: silently sent nothing while reporting success). Password sign-in unaffected | `RESEND_API_KEY` + `SMTP_FROM` (recommended — verify the sending domain first) or `SMTP_HOST/PORT/USER/PASS/FROM`. Transport is auto-detected; no enable flag |
 | **AI chat** | Honest "LLM not configured" banner in the UI | `GROQ_API_KEY` + `LLM_PROVIDER=groq` (or `ANTHROPIC_API_KEY`) |
 | **Live weather for un-seeded cities** | Seeded 20 venues resolve fine; unknown cities → clean 503 | `OPENWEATHERMAP_API_KEY` |
 | **Real checkout** | Beta CTA routes to free signup; `/api/payments/checkout` → friendly 503 | Razorpay keys + plan IDs, Stripe keys + price IDs per `PAYMENTS_SETUP.md`, then `MOTOQUANT_BILLING_ENFORCE=true` |

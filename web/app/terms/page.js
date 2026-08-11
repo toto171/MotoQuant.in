@@ -69,9 +69,13 @@ export default function TermsPage() {
         <Section title="3. Subscription plans and billing">
           <p>
             MotoQuant Pro offers three tiers: Free, Pro (₹499/mo or ₹4,999/yr), and
-            Studio (₹1,999/mo or ₹19,990/yr). Prices are exclusive of GST (18% applicable
-            under Indian GST law), which is applied at checkout where applicable. A tax
-            invoice is issued by our payment provider.
+            Studio (₹1,999/mo or ₹19,990/yr). MotoQuant Pro is operated by an
+            unregistered sole proprietorship with turnover below the ₹20 lakh GST
+            registration threshold for services, so <strong>no GST is charged</strong> —
+            the listed price is the total amount payable. You receive a payment
+            receipt from the payment processor. Should we become GST-registered in
+            future, we will give notice before GST begins to apply, and it will apply
+            only to payments made after that date.
           </p>
           <p>
             <strong>Open beta: </strong>while MotoQuant Pro is in open beta, all Pro and
@@ -89,7 +93,9 @@ export default function TermsPage() {
           <p>
             <strong>7-day refund policy: </strong>If you are not satisfied within 7 calendar
             days of your first payment, contact us at motoquant@gmail.com for a full refund.
-            Refunds are not available after the 7-day window or for renewals.
+            Refunds are not available after the 7-day window or for renewals. Full terms,
+            including how cancellations and failed payments are handled, are set out in our{" "}
+            <a href="/refunds" className="text-accent hover:text-accent-bright transition-colors">Refund &amp; Cancellation Policy</a>.
           </p>
         </Section>
 
@@ -166,8 +172,10 @@ export default function TermsPage() {
         <div className="card mt-8 p-5 md:p-6 text-sm text-white/45">
           <p>MotoQuant Pro · Pune, Maharashtra, India</p>
           <p>Contact: <a href="mailto:motoquant@gmail.com" className="font-mono text-white/80 hover:text-white transition-colors">motoquant@gmail.com</a></p>
-          <div className="mt-4 flex gap-4">
+          <div className="mt-4 flex flex-wrap gap-4">
             <a href="/privacy" className="text-accent hover:text-accent-bright transition-colors">Privacy Policy</a>
+            <a href="/refunds" className="text-accent hover:text-accent-bright transition-colors">Refunds</a>
+            <a href="/contact" className="text-accent hover:text-accent-bright transition-colors">Contact</a>
             <a href="/pricing" className="text-accent hover:text-accent-bright transition-colors">Pricing</a>
           </div>
         </div>

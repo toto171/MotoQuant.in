@@ -88,7 +88,7 @@ export default function PrivacyPage() {
             We share data only with:
           </p>
           <ul className="list-disc pl-5 space-y-1 text-white/65 text-sm mt-2">
-            <li><strong>Razorpay</strong> — payment processor. Your email and billing information are shared to process subscriptions and issue GST invoices. Governed by Razorpay's privacy policy.</li>
+            <li><strong>Razorpay</strong> — payment processor. Your email and billing information are shared to process subscriptions and issue payment receipts. Governed by Razorpay's privacy policy.</li>
             <li><strong>Render / Vercel</strong> — infrastructure providers hosting our servers. Data is subject to their data-processing terms.</li>
           </ul>
         </Section>

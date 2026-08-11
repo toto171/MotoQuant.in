@@ -37,7 +37,7 @@ const COLS = [
     links: [
       { href: '/about',                label: 'About' },
       { href: '/blog',                 label: 'Blog' },
-      { href: 'mailto:motoquant@gmail.com', label: 'Contact' },
+      { href: '/contact',              label: 'Contact' },
     ],
   },
   {
@@ -45,6 +45,7 @@ const COLS = [
     links: [
       { href: '/terms',                label: 'Terms' },
       { href: '/privacy',              label: 'Privacy' },
+      { href: '/refunds',              label: 'Refunds' },
     ],
   },
 ];

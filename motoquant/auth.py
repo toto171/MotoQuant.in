@@ -18,21 +18,31 @@ FastAPI dependency
 
 Email backends (env-var driven)
 --------------------------------
-- Dev: MOTOQUANT_EMAIL_BACKEND=stdout (default) — prints token to stdout
-- Prod via SMTP: set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM
-- Prod via Resend: set RESEND_API_KEY, SMTP_FROM
+The transport is DERIVED from what is configured — setting a provider's env
+vars is sufficient, no separate opt-in flag required:
+
+- Prod via Resend: set RESEND_API_KEY + SMTP_FROM   (highest precedence)
+- Prod via SMTP:   set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM
+- Dev:             neither set — the link is printed to stdout
+
+MOTOQUANT_EMAIL_BACKEND ("resend" | "smtp" | "stdout") force-overrides the
+detection. On a deployed host with no transport configured, POST
+/api/auth/magic-link returns 503 rather than falsely reporting a sent email.
 """
 
 from __future__ import annotations
 
 import hashlib
 import hmac
+import json
 import logging
 import os
 import secrets
 import smtplib
 import sqlite3
 import time
+import urllib.error
+import urllib.request
 import uuid
 from datetime import datetime, timedelta, timezone
 from email.mime.multipart import MIMEMultipart
@@ -68,7 +78,33 @@ ACCESS_TOKEN_TTL_S = 15 * 60  # 15 minutes
 REFRESH_TOKEN_TTL_S = 30 * 24 * 3600  # 30 days
 
 MOTOQUANT_BASE_URL = os.environ.get("MOTOQUANT_BASE_URL", "https://www.motoquant.in")
-EMAIL_BACKEND = os.environ.get("MOTOQUANT_EMAIL_BACKEND", "stdout")
+
+
+def _resolve_email_backend() -> str:
+    """Pick the email transport from whatever is actually configured.
+
+    This is DERIVED, not opt-in, because the opt-in version shipped broken:
+    MOTOQUANT_EMAIL_BACKEND defaulted to "stdout" and the send guard read
+    ``if EMAIL_BACKEND == "stdout" or not SMTP_HOST``, so the first clause
+    short-circuited true no matter what. An operator who followed
+    docs/PAYMENTS_SETUP.md exactly (set SMTP_HOST/PORT/USER/PASS/FROM, which
+    is all that doc ever mentioned) still sent zero email — while the API
+    cheerfully answered "Sign-in link sent. Check your inbox." Configuring a
+    provider is now sufficient on its own.
+
+    Precedence: explicit override → Resend → SMTP → stdout (dev).
+    """
+    explicit = os.environ.get("MOTOQUANT_EMAIL_BACKEND", "").strip().lower()
+    if explicit:
+        return explicit
+    if os.environ.get("RESEND_API_KEY"):
+        return "resend"
+    if os.environ.get("SMTP_HOST"):
+        return "smtp"
+    return "stdout"
+
+
+EMAIL_BACKEND = _resolve_email_backend()
 
 # "Am I running on the deployed host?" Render always sets these. Used to make
 # sure the dev-convenience magic-link echo NEVER fires in production (see
@@ -108,6 +144,16 @@ if _JWT_SECRET_IS_DEFAULT:
     log.warning(
         "JWT_SECRET is the insecure public default — acceptable only for dev/test. "
         "Set a real JWT_SECRET before any real deployment; tokens are forgeable."
+    )
+
+# Same class of foot-gun as the JWT default: silent in dev, invisible in prod
+# until a user reports that the sign-in email never arrived. Warn at boot so
+# it shows up in the deploy log rather than only at the first request.
+if EMAIL_BACKEND == "stdout" and IN_DEPLOYED_ENV:
+    log.warning(
+        "No email backend configured on a deployed host (neither RESEND_API_KEY "
+        "nor SMTP_HOST is set) — magic-link sign-in will return 503. Password "
+        "sign-in is unaffected. See docs/PAYMENTS_SETUP.md Step 1."
     )
 
 # Password auth — stdlib scrypt (RFC 7914), zero external hashing deps.
@@ -352,26 +398,17 @@ def _clear_login_failures(email: str) -> None:
 # ─── Email delivery ───────────────────────────────────────────────────────────
 
 
-def _send_magic_link_email(email: str, token: str) -> None:
-    link = f"{MOTOQUANT_BASE_URL}/login?token={token}"
+_MAGIC_LINK_SUBJECT = "Your MotoQuant sign-in link"
+RESEND_API_URL = "https://api.resend.com/emails"
+RESEND_TIMEOUT_S = 10
 
-    if EMAIL_BACKEND == "stdout" or not os.environ.get("SMTP_HOST"):
-        # Dev mode — print to server stdout
-        log.info("=== MAGIC LINK (dev mode) ===")
-        log.info("To: %s", email)
-        log.info("Link: %s", link)
-        log.info("Token: %s", token)
-        log.info("============================")
-        print(f"\n[DEV] Magic link for {email}: {link}\n", flush=True)
-        return
 
-    smtp_host = os.environ["SMTP_HOST"]
-    smtp_port = int(os.environ.get("SMTP_PORT", "587"))
-    smtp_user = os.environ.get("SMTP_USER", "")
-    smtp_pass = os.environ.get("SMTP_PASS", "")
-    smtp_from = os.environ.get("SMTP_FROM", "noreply@motoquant.in")
+def _from_address() -> str:
+    return os.environ.get("SMTP_FROM", "noreply@motoquant.in")
 
-    body_html = f"""
+
+def _magic_link_html(link: str) -> str:
+    return f"""
     <html><body>
     <p>Hi,</p>
     <p>Click the button below to sign in to <strong>MotoQuant Pro</strong>.
@@ -389,19 +426,99 @@ def _send_magic_link_email(email: str, token: str) -> None:
     </body></html>
     """
 
+
+def _send_via_smtp(email: str, subject: str, html: str) -> None:
+    smtp_host = os.environ["SMTP_HOST"]
+    smtp_port = int(os.environ.get("SMTP_PORT", "587"))
+    smtp_user = os.environ.get("SMTP_USER", "")
+    smtp_pass = os.environ.get("SMTP_PASS", "")
+    smtp_from = _from_address()
+
     msg = MIMEMultipart("alternative")
-    msg["Subject"] = "Your MotoQuant sign-in link"
+    msg["Subject"] = subject
     msg["From"] = smtp_from
     msg["To"] = email
-    msg.attach(MIMEText(body_html, "html"))
+    msg.attach(MIMEText(html, "html"))
+
+    with smtplib.SMTP(smtp_host, smtp_port) as server:
+        server.ehlo()
+        server.starttls()
+        if smtp_user:
+            server.login(smtp_user, smtp_pass)
+        server.sendmail(smtp_from, [email], msg.as_string())
+
+
+def _send_via_resend(email: str, subject: str, html: str) -> None:
+    """POST one transactional email to the Resend API.
+
+    stdlib urllib rather than the `resend` SDK, matching how payments.py
+    drives Stripe — no new production dependency for one HTTP call.
+    """
+    payload = json.dumps(
+        {"from": _from_address(), "to": [email], "subject": subject, "html": html}
+    ).encode("utf-8")
+    req = urllib.request.Request(  # noqa: S310 — constant https endpoint
+        RESEND_API_URL,
+        data=payload,
+        headers={
+            "Authorization": f"Bearer {os.environ['RESEND_API_KEY']}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=RESEND_TIMEOUT_S) as resp:  # noqa: S310
+            if resp.status >= 300:
+                raise RuntimeError(f"Resend returned HTTP {resp.status}")
+    except urllib.error.HTTPError as exc:
+        # Surface Resend's own error body — it names the actual cause
+        # (unverified sending domain, bad key), which a bare 4xx does not.
+        detail = exc.read().decode("utf-8", "replace")[:300]
+        raise RuntimeError(f"Resend HTTP {exc.code}: {detail}") from exc
+
+
+def _send_magic_link_email(email: str, token: str) -> None:
+    link = f"{MOTOQUANT_BASE_URL}/login?token={token}"
+    html = _magic_link_html(link)
+
+    if EMAIL_BACKEND == "stdout":
+        if IN_DEPLOYED_ENV:
+            # No transport configured on a deployed host. Previously this
+            # branch printed to stdout and let the caller answer "Sign-in
+            # link sent. Check your inbox." — a flat lie that left the user
+            # waiting on mail that was never going to arrive, with no signal
+            # anywhere except the server log. Fail loudly instead; password
+            # sign-in still works and the UI can say so.
+            log.error(
+                "Magic link requested for %s but no email backend is configured "
+                "(set RESEND_API_KEY or SMTP_HOST). Refusing to report success.",
+                email,
+            )
+            raise HTTPException(
+                503,
+                "Email sign-in is temporarily unavailable. "
+                "Please sign in with your password, or try again later.",
+            )
+        log.info("=== MAGIC LINK (dev mode) ===")
+        log.info("To: %s", email)
+        log.info("Link: %s", link)
+        log.info("Token: %s", token)
+        log.info("============================")
+        print(f"\n[DEV] Magic link for {email}: {link}\n", flush=True)
+        return
 
     try:
-        with smtplib.SMTP(smtp_host, smtp_port) as server:
-            server.ehlo()
-            server.starttls()
-            if smtp_user:
-                server.login(smtp_user, smtp_pass)
-            server.sendmail(smtp_from, [email], msg.as_string())
+        if EMAIL_BACKEND == "resend":
+            _send_via_resend(email, _MAGIC_LINK_SUBJECT, html)
+        elif EMAIL_BACKEND == "smtp":
+            _send_via_smtp(email, _MAGIC_LINK_SUBJECT, html)
+        else:
+            raise RuntimeError(
+                f"unknown MOTOQUANT_EMAIL_BACKEND {EMAIL_BACKEND!r} "
+                "(expected 'resend', 'smtp' or 'stdout')"
+            )
+    except HTTPException:
+        raise
     except Exception as exc:
         log.error("Failed to send magic-link email to %s: %s", email, exc)
         raise HTTPException(503, f"Email delivery failed: {exc}") from exc
