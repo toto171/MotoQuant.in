@@ -15,6 +15,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, AlertCircle, MapPin, MessageSquare, Gauge } from 'lucide-react';
 import LocationPicker, { environmentOverridesFromLocation } from './LocationPicker';
+import { predictQuick, preloadSurrogate } from '../lib/surrogate';
 import ChatPanel from './ChatPanel';
 import { API_URL, runJob } from '../lib/api';
 import SimProgress from './SimProgress';
@@ -179,7 +180,32 @@ export default function SimulatorWidget() {
   useEffect(() => {
     installErrorHandlers();
     track('widget_view', { surface: 'landing_widget' });
+    preloadSurrogate(); // warm the in-browser surrogate for the live readout
   }, []);
+
+  // ── Live in-browser estimate ──────────────────────────────────────────
+  // Updates as the sliders move, computed locally by the surrogate
+  // (lib/surrogate.js — proven equal to the server surrogate to <1e-9 s).
+  // Purely additive: the Run buttons below remain the exact server sims.
+  // null whenever the surrogate honestly can't answer (preset-only reference
+  // bikes, unresolved catalog id, out-of-envelope build, assets unavailable).
+  const [estimate, setEstimate] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    const bikeId = selectedBike.presetId
+      ? null
+      : bikeIdMap[selectedBike.label] ?? selectedBike.id;
+    if (bikeId == null) { setEstimate(null); return undefined; }
+    const env = environmentOverridesFromLocation(location);
+    predictQuick({
+      bikeId,
+      riderMassKg: riderKg,
+      powerBoostPct: powerBoost,
+      massDeltaKg: massChange,
+      venueId: env.venue_id ?? null,
+    }).then((r) => { if (!cancelled) setEstimate(r.ok ? r : null); });
+    return () => { cancelled = true; };
+  }, [selectedBike, bikeIdMap, riderKg, powerBoost, massChange, location]);
 
   useEffect(() => {
     let cancelled = false;
@@ -538,6 +564,18 @@ export default function SimulatorWidget() {
           )}
         </AnimatePresence>
       </div>
+
+      {estimate && (
+        <div
+          className="relative z-10 mb-3 flex items-center justify-between rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2"
+          title="Computed instantly in your browser by the calibrated surrogate model (±0.11 s typical). Run the sim for the exact physics number with splits."
+        >
+          <span className="label-mono">instant estimate</span>
+          <span className="font-mono text-sm font-semibold tabular-nums text-white/85">
+            {estimate.etS.toFixed(2)}s <span className="text-white/40">@</span> {estimate.trapKmh.toFixed(0)} km/h
+          </span>
+        </div>
+      )}
 
       <div className="relative z-10 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <button

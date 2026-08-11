@@ -165,6 +165,21 @@ class TestUnifiedCheckout(unittest.TestCase):
         }
         cls.client = TestClient(cls.app, raise_server_exceptions=False)
 
+    def setUp(self):
+        # The duplicate-subscription guard reads the subscriptions table, so
+        # every checkout request now touches a DB — pin it to an in-memory one
+        # (the route must NEVER reach the tracked motoquant.db from tests).
+        self.conn = _mem_conn()
+        _bootstrap(self.conn)
+        self._patcher = patch(
+            "motoquant.payments._get_conn", return_value=_NoCloseConn(self.conn)
+        )
+        self._patcher.start()
+
+    def tearDown(self):
+        self._patcher.stop()
+        self.conn.close()
+
     def _post(self, body):
         return self.client.post("/api/payments/checkout", json=body)
 
@@ -198,6 +213,153 @@ class TestUnifiedCheckout(unittest.TestCase):
         bare = TestClient(_make_app(), raise_server_exceptions=False)
         res = bare.post("/api/payments/checkout", json={"tier": "pro"})
         self.assertEqual(res.status_code, 401)
+
+    def test_active_subscription_blocks_second_checkout(self):
+        """2026-08-11 audit: every extra checkout minted a NEW provider
+        subscription while /status and /cancel only ever saw the newest row —
+        the older ones kept billing invisibly. A user with an active sub must
+        get a 409 pointing at cancel-first, before any provider is called."""
+        from motoquant.database import subscriptions_repo as sr
+
+        sr.upsert_subscription(
+            self.conn,
+            user_id=1,
+            razorpay_subscription_id="sub_active_dup",
+            tier="pro",
+            status="active",
+            plan_id="plan_x",
+            billing_cycle="monthly",
+        )
+        with patch.dict("os.environ", {"STRIPE_SECRET_KEY": "sk_test_x"}):
+            res = self._post({"tier": "studio", "provider": "stripe"})
+        self.assertEqual(res.status_code, 409)
+        self.assertIn("already have an active pro subscription", res.json()["detail"])
+
+
+class TestStripeCancel(unittest.TestCase):
+    """The /api/subscriptions/cancel route must route by provider — it was
+    hardwired to the Razorpay SDK, so Stripe subscribers could not cancel at
+    all (their Stripe sub id was fed to Razorpay). 2026-08-11 audit."""
+
+    def _mini(self):
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+
+        import motoquant.subscriptions as sub_mod
+
+        app = FastAPI()
+        app.include_router(sub_mod.router, prefix="/api/subscriptions")
+        app.dependency_overrides[sub_mod.get_current_user] = lambda: {
+            "id": 1,
+            "email": "s@test.in",
+            "tier": "pro",
+        }
+        return TestClient(app, raise_server_exceptions=False), sub_mod
+
+    def test_stripe_subscription_cancels_via_stripe(self):
+        from motoquant.database import subscriptions_repo as sr
+
+        conn = _mem_conn()
+        _bootstrap(conn)
+        sr.upsert_subscription(
+            conn,
+            user_id=1,
+            razorpay_subscription_id="sub_stripe_123",
+            tier="pro",
+            status="active",
+            plan_id="price_x",
+            billing_cycle="monthly",
+            provider="stripe",
+        )
+        client, sub_mod = self._mini()
+        stripe_calls = []
+        with (
+            patch(
+                "motoquant.subscriptions._get_conn",
+                return_value=_NoCloseConn(conn),
+            ),
+            patch(
+                "motoquant.payments.stripe_cancel_subscription",
+                side_effect=lambda sid: stripe_calls.append(sid),
+            ),
+            # The Razorpay SDK must NOT be touched on the Stripe path — a
+            # call here means the pre-fix hardwiring is back.
+            patch.object(
+                sub_mod,
+                "_rzp_client",
+                side_effect=AssertionError("Razorpay SDK called for a Stripe sub"),
+            ),
+        ):
+            res = client.post("/api/subscriptions/cancel")
+        conn.close()
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(stripe_calls, ["sub_stripe_123"])
+
+    def test_stripe_cancel_helper_hits_cancel_endpoint(self):
+        from motoquant import payments
+
+        seen = {}
+
+        def fake_post(path, fields):
+            seen["path"], seen["fields"] = path, fields
+            return {"id": "sub_x", "cancel_at_period_end": True}
+
+        with patch.object(payments, "_stripe_api_post", side_effect=fake_post):
+            payments.stripe_cancel_subscription("sub_x")
+        self.assertEqual(seen["path"], "/v1/subscriptions/sub_x")
+        self.assertEqual(seen["fields"], {"cancel_at_period_end": "true"})
+
+
+class TestStripeWebhookCompensation(unittest.TestCase):
+    """A mid-apply failure must un-record the ledger row so Stripe's retry is
+    processed instead of swallowed as 'duplicate' (2026-08-11 audit)."""
+
+    def test_failed_apply_allows_retry(self):
+        import hashlib
+        import hmac as hmac_mod
+        import time as time_mod
+
+        from fastapi.testclient import TestClient
+
+        conn = _mem_conn()
+        _bootstrap(conn)
+        client = TestClient(_make_app(), raise_server_exceptions=False)
+        secret = "whsec_comp_test"
+        body = json.dumps(
+            {"id": "evt_comp_1", "type": "customer.subscription.updated", "data": {}}
+        ).encode()
+        ts = str(int(time_mod.time()))
+        sig = hmac_mod.new(
+            secret.encode(), f"{ts}.".encode() + body, hashlib.sha256
+        ).hexdigest()
+        headers = {"stripe-signature": f"t={ts},v1={sig}"}
+
+        calls = {"n": 0}
+
+        def flaky_handler(conn_, etype, event):
+            calls["n"] += 1
+            if calls["n"] == 1:
+                raise RuntimeError("transient DB hiccup")
+            return {"status": "ok", "event": etype}
+
+        with (
+            patch.dict("os.environ", {"STRIPE_WEBHOOK_SECRET": secret}),
+            patch("motoquant.payments._get_conn", return_value=_NoCloseConn(conn)),
+            patch("motoquant.payments._handle_stripe_event", side_effect=flaky_handler),
+        ):
+            first = client.post(
+                "/api/payments/webhook/stripe", content=body, headers=headers
+            )
+            # First delivery fails mid-apply → 500, and the ledger row must be
+            # gone so the retry is NOT treated as a duplicate.
+            self.assertEqual(first.status_code, 500)
+            retry = client.post(
+                "/api/payments/webhook/stripe", content=body, headers=headers
+            )
+        conn.close()
+        self.assertEqual(retry.status_code, 200)
+        self.assertEqual(retry.json()["status"], "ok")
+        self.assertEqual(calls["n"], 2, "retry must reach the handler again")
 
 
 # ══════════════════════════════════════════════════════════════════════════════

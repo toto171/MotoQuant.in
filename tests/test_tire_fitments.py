@@ -166,7 +166,7 @@ class TestTireFitments:
         assert len(missing_rims) == 0, f"Missing tires for rim sizes: {missing_rims}"
 
     def test_fitment_completeness_summary(self, temp_db):
-        """Print a summary of fitment coverage."""
+        """Fitment coverage must span both positions and include OEM rows."""
         # Count by position
         cursor = temp_db._conn.execute(
             "SELECT position, COUNT(*) FROM bike_tire_fitments GROUP BY position"
@@ -179,17 +179,30 @@ class TestTireFitments:
         )
         by_type = dict(cursor.fetchall())
 
-        print("\nFitment summary:")
-        print(f"  By position: {by_position}")
-        print(f"  By type: {by_type}")
+        # Both wheel positions must be covered, with no stray position values
+        assert set(by_position) == {"front", "rear"}, (
+            f"Unexpected position set: {by_position}"
+        )
+        assert by_position["front"] > 0 and by_position["rear"] > 0
 
+        # The OEM tier is the simulator's stock-tyre fallback — it must exist
+        assert by_type.get("oem", 0) > 0, f"No OEM fitments seeded: {by_type}"
+
+        # Every fitment carries exactly one position and one type — the two
+        # groupings must account for the same rows
+        assert sum(by_position.values()) == sum(by_type.values())
+
+        # Each seeded bike gets at least front + rear (pinned per-bike above;
+        # this asserts the aggregate can't silently shrink below that floor)
         total_bikes = temp_db._conn.execute(
             "SELECT COUNT(*) FROM bike_models"
         ).fetchone()[0]
         total_fitments = sum(by_position.values())
-        print(f"  Total bikes: {total_bikes}")
-        print(f"  Total fitments: {total_fitments}")
-        print(f"  Average fitments/bike: {total_fitments / total_bikes:.1f}")
+        assert total_bikes > 0
+        assert total_fitments >= 2 * total_bikes, (
+            f"{total_fitments} fitments for {total_bikes} bikes "
+            f"(expected >= {2 * total_bikes})"
+        )
 
 
 if __name__ == "__main__":

@@ -16,6 +16,7 @@ import {
   API_URL as API, simulateJob, topspeedJob, compareJob, saveRun, partLabel,
 } from '../../lib/api';
 import useAsyncTask from '../../lib/useAsyncTask';
+import { predictQuick, preloadSurrogate } from '../../lib/surrogate';
 import SimProgress from '../../components/SimProgress';
 import ActionButton from '../../components/ActionButton';
 import { Skeleton, SkeletonCard } from '../../components/Skeleton';
@@ -316,6 +317,11 @@ function SimulatorPageInner() {
   const [activeTab, setActiveTab] = useState('results');
   const [showEnv, setShowEnv] = useState(false);
   const debounceRef = useRef(null);
+  // Which bike id the current allParts payload is annotated for (set by boot
+  // and by the re-annotate effect). Boot fetches the catalog already annotated
+  // for its chosen bike, so this stops setBike() from immediately re-fetching
+  // the same 593-part payload a second time.
+  const annotatedBikeRef = useRef(null);
 
   // ─── A vs B Comparison config ───────────────────────────────────────
   const [compareBike, setCompareBike] = useState(null);
@@ -367,8 +373,59 @@ function SimulatorPageInner() {
   // Run/Retry press, so the funnel can be read either way.
   const quickTask = useAsyncTask(async (signal, _onProgress, trigger = 'auto') => {
     if (!bike) return null;
+
+    // ── Live mode answers locally when it can ─────────────────────────────
+    // The in-browser surrogate (lib/surrogate.js) reproduces the server
+    // surrogate pipeline to <1e-9 s, so Live-mode slider drags cost the
+    // server nothing. It refuses (and we fall through to the server) when
+    // anything it cannot see is in play: parts, tire swaps, weather sliders
+    // off their defaults, presets, or a bike outside the training envelope.
+    // The explicit Run button (trigger 'manual') is ALWAYS the exact server
+    // sim — that is where splits and the authoritative number come from.
+    const weatherDefault =
+      ambientTemp === 25 && trackTemp === 30 && humidity === 40 && headwind === 0;
+    if (
+      trigger === 'auto' &&
+      bike?.id != null &&
+      weatherDefault &&
+      selectedParts.length === 0 &&
+      frontTire?.id == null &&
+      rearTire?.id == null
+    ) {
+      const est = await predictQuick({
+        bikeId: bike.id,
+        riderMassKg: riderKg,
+        powerBoostPct: powerBoost,
+        massDeltaKg: massChange,
+        venueId: venue?.id ?? null,
+      });
+      if (est.ok) {
+        const runEvent = trackSimRun('simulator_page', 'quarter', {
+          trigger,
+          engine: 'client-surrogate',
+          bike_id: bike?.id ?? null,
+          part_count: 0,
+        });
+        const data = {
+          et_quarter_s: est.etS,
+          trap_speed_kmh: est.trapKmh,
+          peak_power_hp: est.peakPowerHp,
+          total_mass_kg: est.totalMassKg,
+          estimated: true,
+        };
+        setResult(data);
+        runEvent.success({
+          et_quarter_s: data.et_quarter_s,
+          trap_speed_kmh: data.trap_speed_kmh,
+        });
+        return data;
+      }
+      // est.ok === false → fall through to the server path below.
+    }
+
     const runEvent = trackSimRun('simulator_page', 'quarter', {
       trigger,
+      engine: 'server',
       bike_id: bike?.id ?? null,
       part_count: selectedParts.length,
     });
@@ -616,36 +673,51 @@ function SimulatorPageInner() {
         setBootProgress((v) => Math.min(1, v + 0.2));
         return r;
       });
-      const [bikesRes, catsRes, partsRes, tiresRes, venuesRes] = await Promise.all([
-        tick(fetch(`${API}/api/bikes?limit=2000`)),
-        tick(fetch(`${API}/api/parts/categories`)),
-        tick(fetch(`${API}/api/parts?limit=2000`)),
-        tick(fetch(`${API}/api/tires?limit=2000`)),
-        tick(fetch(`${API}/api/venues`)),
-      ]);
-      const [bikesData, catsData, partsData, tiresData, venuesData] = await Promise.all([
-        safeJson(bikesRes, { bikes: [] }),
-        safeJson(catsRes, { categories: [] }),
-        safeJson(partsRes, { parts: [] }),
-        safeJson(tiresRes, { tires: [] }),
-        safeJson(venuesRes, { venues: [] }),
+      // Bikes resolve first so the parts fetch can go out already annotated
+      // for the boot bike — ONE transfer of the full 593-part catalog instead
+      // of the old plain-fetch + immediate setBike()-triggered re-annotate
+      // pair (the catalog is the heaviest boot payload). Categories, tires
+      // and venues still run fully in parallel.
+      const bikesReady = tick(fetch(`${API}/api/bikes?limit=2000`))
+        .then((r) => safeJson(r, { bikes: [] }));
+      let bootBike = null;
+      const partsReady = bikesReady.then((bikesData) => {
+        const list = bikesData.bikes || [];
+        // Shared-build links win over the GROWTH_EXP_003 variant-aware default
+        // (A=Hayabusa, B=Pulsar NS 200). `?bike_id=` (used by the /bikes/[id]
+        // CTAs) is accepted as an alias of `?bike=`.
+        const sharedBikeId = parseInt(
+          searchParams?.get('bike') ?? searchParams?.get('bike_id') ?? '', 10,
+        );
+        bootBike = (Number.isFinite(sharedBikeId)
+          ? list.find((b) => b.id === sharedBikeId)
+          : null)
+          || (list.length ? pickDefaultBikeForVariant(list, defaultBikeVariant) : null);
+        const partsUrl = bootBike
+          ? `${API}/api/parts?bike_id=${bootBike.id}&compatible_only=false&limit=2000`
+          : `${API}/api/parts?limit=2000`;
+        return tick(fetch(partsUrl)).then((r) => safeJson(r, { parts: [] }));
+      });
+      const [bikesData, partsData, catsData, tiresData, venuesData] = await Promise.all([
+        bikesReady,
+        partsReady,
+        tick(fetch(`${API}/api/parts/categories`)).then((r) => safeJson(r, { categories: [] })),
+        tick(fetch(`${API}/api/tires?limit=2000`)).then((r) => safeJson(r, { tires: [] })),
+        tick(fetch(`${API}/api/venues`)).then((r) => safeJson(r, { venues: [] })),
       ]);
       setBikes(bikesData.bikes || []);
       setCategories(catsData.categories || []);
       setAllParts(partsData.parts || []);
       setAllTires(tiresData.tires || []);
       setVenues(venuesData.venues || []);
-      // Shared-build links win over the GROWTH_EXP_003 variant-aware default
-      // (A=Hayabusa, B=Pulsar NS 200). `?bike_id=` (used by the /bikes/[id]
-      // CTAs) is accepted as an alias of `?bike=`.
-      const sharedBikeId = parseInt(
-        searchParams?.get('bike') ?? searchParams?.get('bike_id') ?? '', 10,
-      );
-      const sharedBike = Number.isFinite(sharedBikeId)
-        ? (bikesData.bikes || []).find((b) => b.id === sharedBikeId)
-        : null;
-      if (sharedBike) setBike(sharedBike);
-      else if (bikesData.bikes?.length) setBike(pickDefaultBikeForVariant(bikesData.bikes, defaultBikeVariant));
+      if (bootBike) {
+        // The boot parts payload is already annotated for this bike — record
+        // that BEFORE setBike() so the re-annotate effect skips its duplicate
+        // fetch. Only when the payload actually has rows: an empty/failed
+        // parts response should let the effect retry and recover the catalog.
+        if (partsData.parts?.length) annotatedBikeRef.current = bootBike.id;
+        setBike(bootBike);
+      }
       const sharedVenueId = parseInt(searchParams?.get('venue') ?? '', 10);
       if (Number.isFinite(sharedVenueId)) {
         const sv = (venuesData.venues || []).find((v) => v.id === sharedVenueId);
@@ -664,7 +736,10 @@ function SimulatorPageInner() {
         const ids = partIdsRaw.split(',').map((s) => parseInt(s, 10)).filter(Number.isFinite);
         const found = ids
           .map((id) => (partsData.parts || []).find((p) => p.id === id))
-          .filter(Boolean);
+          .filter(Boolean)
+          // Boot parts are bike-annotated now — apply the same incompatible-
+          // part drop the re-annotate effect used to do on its first run.
+          .filter((p) => p.compatible !== false);
         if (found.length) setSelectedParts(found);
       }
       const ftId = parseInt(searchParams?.get('ft') ?? '', 10);
@@ -708,6 +783,9 @@ function SimulatorPageInner() {
   // so the user can still discover what's available for other bikes).
   useEffect(() => {
     if (!bike?.id) return;
+    // Boot already fetched the catalog annotated for its chosen bike — skip
+    // the duplicate transfer its setBike() would otherwise trigger here.
+    if (annotatedBikeRef.current === bike.id) return;
     let cancelled = false;
     (async () => {
       try {
@@ -717,6 +795,7 @@ function SimulatorPageInner() {
         if (!res.ok) return;
         const data = await res.json();
         if (!cancelled && Array.isArray(data.parts)) {
+          annotatedBikeRef.current = bike.id;
           setAllParts(data.parts);
           // Drop any already-selected parts that are now incompatible with the
           // newly-picked bike -- silently, because the UI already cleared
@@ -735,6 +814,12 @@ function SimulatorPageInner() {
 
   // ─── Quick sim auto-run (Live mode, 400 ms debounce) ─────────────────
   const runQuick = quickTask.run;
+
+  // Warm the client-surrogate assets once — ~330 KB (gzipped far smaller),
+  // cached by the browser; failure is silent (Live mode just stays on the
+  // server path).
+  useEffect(() => { preloadSurrogate(); }, []);
+
   useEffect(() => {
     if (!bike || !liveSim) return; // Manual mode: quick sim only fires from the Run button
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -1362,7 +1447,17 @@ function SimulatorPageInner() {
                   <div className="space-y-4">
                     {/* The slip — big mono ET + ruled split rows */}
                     <div className="timeslip">
-                      <p className="label-mono mb-2">Quarter-Mile ET</p>
+                      <div className="mb-2 flex items-center justify-between gap-2">
+                        <p className="label-mono">Quarter-Mile ET</p>
+                        {result.estimated && (
+                          <span
+                            className="label-mono rounded border border-signal-stage/40 bg-signal-stage/10 px-1.5 py-0.5 text-signal-stage"
+                            title="Computed instantly in your browser by the calibrated surrogate model (±0.11 s typical vs the full physics). Press Run for the exact RK4 number with 60 ft and ⅛-mile splits."
+                          >
+                            instant estimate
+                          </span>
+                        )}
+                      </div>
                       {result.et_quarter_s != null ? (
                         <div className="flex items-end gap-1.5">
                           <ScoreboardDigits value={result.et_quarter_s.toFixed(3)} h={44} label={`${result.et_quarter_s.toFixed(3)} seconds`} />
@@ -1410,8 +1505,10 @@ function SimulatorPageInner() {
                       </div>
                     )}
 
-                    {/* Save this run — anonymous allowed (beta); token binds to Garage */}
-                    {bike?.id != null && result.et_quarter_s != null && (
+                    {/* Save this run — anonymous allowed (beta); token binds to Garage.
+                        NEVER offered on an estimated (client-surrogate) result: only
+                        exact server RK4 numbers may reach the leaderboard. */}
+                    {bike?.id != null && result.et_quarter_s != null && !result.estimated && (
                       savedRun ? (
                         <Link
                           href="/leaderboard"
@@ -1724,8 +1821,8 @@ function SimulatorPageInner() {
                   <div className="text-center py-12 text-white/35 text-xs">
                     {result ? (
                       <>
-                        <p className="mb-1">Quick splits from last run:</p>
-                        <p className="font-mono text-white font-medium tabular-nums">60ft: {result.et_60ft_s?.toFixed(3)}s · ⅛: {result.et_eighth_s?.toFixed(3)}s · ¼: {result.et_quarter_s?.toFixed(3)}s</p>
+                        <p className="mb-1">{result.estimated ? 'Instant estimate from last change (run the sim for splits):' : 'Quick splits from last run:'}</p>
+                        <p className="font-mono text-white font-medium tabular-nums">{result.estimated ? `¼: ${result.et_quarter_s?.toFixed(3)}s (est.)` : `60ft: ${result.et_60ft_s?.toFixed(3)}s · ⅛: ${result.et_eighth_s?.toFixed(3)}s · ¼: ${result.et_quarter_s?.toFixed(3)}s`}</p>
                         <div className="mt-3 flex justify-center">
                           <ActionButton
                             task={fullSimTask}

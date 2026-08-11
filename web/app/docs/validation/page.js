@@ -248,9 +248,10 @@ export default function ValidationPage() {
           </p>
           <p>
             <strong className="text-white">Known limitations:</strong> Residual small-cc and 2T bias is a calibration
-            gap, not a physics gap. The correct fix is per-bike Cd and μ calibration using real strip data — the
-            auto-calibrator in <code className="font-mono text-brand-accent">/api/calibrate/dragy</code> handles this
-            once you supply a Dragy CSV for your specific bike.
+            gap, not a physics gap. The correct fix is per-bike Cd and μ calibration using real strip data — upload
+            a Dragy CSV to <code className="font-mono text-brand-accent">/api/calibrate/dragy</code> to overlay your
+            real run against the sim and quantify the gap for your specific bike; the engine&apos;s offline
+            calibrator then fits Cd and μ from measured runs.
           </p>
           <p>
             <strong className="text-white">Regression testing:</strong> 10 dedicated regression tests in

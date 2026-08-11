@@ -289,6 +289,12 @@ class TestCmdSim:
         )
         with _patch_ensure_db(db):
             result, out = capture_output(cmd_sim, args)
+        # cmd_sim returns the SimResult — the run must actually finish the
+        # quarter with a physically plausible ET/trap (bike 1 = GSX-R K5 ref)
+        assert result is not None
+        assert result.finished_quarter
+        assert 8.0 < result.time_quarter < 14.0
+        assert result.speed_quarter > 0
 
     def test_sim_with_venue_and_month(self, db):
         args = make_args(

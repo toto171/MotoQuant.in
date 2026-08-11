@@ -42,21 +42,21 @@ const PRICES = {
 };
 
 const FEATURES = [
-  ["Simulations per day",                "10", "Unlimited", "Unlimited"],
-  ["Parts in a build",                   "3",  "Unlimited", "Unlimited"],
+  ["Simulations per day",                "30", "Unlimited", "Unlimited"],
   ["Bike catalog (541 bikes)",           "✓",  "✓",         "✓"],
   ["Tire library (254 tires)",           "✓",  "✓",         "✓"],
   ["Venue conditions (20 venues)",       "✓",  "✓",         "✓"],
-  ["ROI & Sobol analysis",               "—",  "✓",         "✓"],
-  ["Build optimiser (BoTorch)",          "—",  "✓",         "✓"],
+  ["A vs B comparison",                  "✓",  "✓",         "✓"],
+  ["Live parts pricing",                 "✓",  "✓",         "✓"],
+  ["Parts ROI analysis",                 "—",  "✓",         "✓"],
+  ["Build optimiser",                    "—",  "✓",         "✓"],
+  ["ECU autotune (setup advisor)",       "—",  "✓",         "✓"],
+  ["Outlaw pipeline (full-race build)",  "—",  "✓",         "✓"],
   ["Smart recommendations engine",       "—",  "✓",         "✓"],
+  ["Saved runs, garage & leaderboard",   "—",  "✓",         "✓"],
   ["PDF report export",                  "—",  "✓",         "✓"],
-  ["Live parts pricing",                 "—",  "✓",         "✓"],
-  ["Leaderboard saves",                  "—",  "✓",         "✓"],
   ["Dragy GPS import & overlay",         "—",  "—",         "✓"],
   ["Dyno CSV import & calibration",      "—",  "—",         "✓"],
-  ["ECU log import (Woolich / PC-Link)", "—",  "—",         "✓"],
-  ["A vs B comparison",                  "—",  "—",         "✓"],
   ["Priority email support",             "—",  "—",         "✓"],
 ];
 

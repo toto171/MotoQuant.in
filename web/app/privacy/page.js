@@ -42,7 +42,7 @@ export default function PrivacyPage() {
           <Row label="Payment details">Handled entirely by our payment processors — Razorpay (India) and Stripe (international). Card, UPI and bank details never touch MotoQuant servers; we store only your subscription id, plan, and billing status.</Row>
           <Row label="Simulation runs">ET, trap speed, venue, build configuration. Stored to power the leaderboard and your run history. Not sold to third parties.</Row>
           <Row label="Build configurations">Parts combinations and bike selections you save. Used to provide the service.</Row>
-          <Row label="Dragy / Dyno / ECU uploads">(Studio tier only) Files you upload for calibration. Stored temporarily during processing and then deleted within 24 hours unless you explicitly save them.</Row>
+          <Row label="Dragy / dyno uploads">(Studio tier only) Dragy GPS logs and dyno CSV files you upload for calibration. Stored temporarily during processing and then deleted within 24 hours unless you explicitly save them.</Row>
           <Row label="Device ID">(License keys) An opaque device fingerprint used to bind a license key to a single device. Not shared externally.</Row>
           <Row label="Usage metadata">Request timestamps, endpoints called, error logs. Used for debugging and service improvement. Not sold.</Row>
         </Section>
@@ -120,7 +120,8 @@ export default function PrivacyPage() {
             We use industry-standard practices: HTTPS everywhere, JWT tokens with short
             (15-minute) access lifetimes, rotating refresh tokens, license keys stored
             as SHA-256 hashes (never in plaintext), and database access restricted to
-            server-side code. No passwords are stored.
+            server-side code. Passwords are never stored in plaintext — only salted
+            scrypt hashes.
           </p>
         </Section>
 

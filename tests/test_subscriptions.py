@@ -503,6 +503,301 @@ class TestWebhookHandling(unittest.TestCase):
 # ══════════════════════════════════════════════════════════════════════════════
 
 
+class TestHardening20260811(unittest.TestCase):
+    """Regression pins for the 2026-08-11 payments audit fixes.
+
+    Every test here exercises the production route/repo path and FAILS if the
+    corresponding fix is reverted (repo rule: no tautological tests).
+    """
+
+    # ── checkout: short_url + duplicate guard ────────────────────────────
+
+    def _checkout_client(self):
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+
+        import motoquant.subscriptions as sub_mod
+
+        app = FastAPI()
+        app.include_router(sub_mod.router, prefix="/api/subscriptions")
+        app.dependency_overrides[sub_mod.get_current_user] = lambda: {
+            "id": 1,
+            "email": "buyer@test.in",
+            "tier": "free",
+        }
+        return TestClient(app, raise_server_exceptions=False), sub_mod
+
+    def _fake_rzp_client(self, short_url="https://rzp.io/i/abc123"):
+        from unittest.mock import MagicMock
+
+        client = MagicMock()
+        client.customer.create.return_value = {"id": "cust_test"}
+        create_resp = {"id": "sub_new_001"}
+        if short_url is not None:
+            create_resp["short_url"] = short_url
+        client.subscription.create.return_value = create_resp
+        return client
+
+    def test_checkout_url_is_the_api_short_url(self):
+        """The checkout link must come from Razorpay's create response —
+        the old code FABRICATED https://rzp.io/l/{sub_id}, a dead URL."""
+        client, sub_mod = self._checkout_client()
+        conn = _mem_conn()
+        _bootstrap(conn)
+        _make_user(conn, "buyer@test.in", "free")
+        with (
+            patch.object(sub_mod, "_rzp_client", return_value=self._fake_rzp_client()),
+            patch.object(
+                sub_mod, "PLAN_IDS", {"pro": {"monthly": "plan_p"}, "studio": {}}
+            ),
+            patch("motoquant.subscriptions._get_conn", return_value=_NoCloseConn(conn)),
+        ):
+            res = client.post(
+                "/api/subscriptions/checkout",
+                json={"tier": "pro", "billing_cycle": "monthly"},
+            )
+        conn.close()
+        self.assertEqual(res.status_code, 200, res.text)
+        self.assertEqual(res.json()["checkout_url"], "https://rzp.io/i/abc123")
+
+    def test_checkout_502_when_short_url_missing(self):
+        client, sub_mod = self._checkout_client()
+        conn = _mem_conn()
+        _bootstrap(conn)
+        _make_user(conn, "buyer@test.in", "free")
+        with (
+            patch.object(
+                sub_mod,
+                "_rzp_client",
+                return_value=self._fake_rzp_client(short_url=None),
+            ),
+            patch.object(
+                sub_mod, "PLAN_IDS", {"pro": {"monthly": "plan_p"}, "studio": {}}
+            ),
+            patch("motoquant.subscriptions._get_conn", return_value=_NoCloseConn(conn)),
+        ):
+            res = client.post(
+                "/api/subscriptions/checkout",
+                json={"tier": "pro", "billing_cycle": "monthly"},
+            )
+        conn.close()
+        self.assertEqual(res.status_code, 502)
+
+    def test_checkout_409_when_subscription_already_active(self):
+        """Every extra checkout used to mint a NEW provider subscription the
+        account page could never see — invisible double billing."""
+        from motoquant.database import subscriptions_repo as sr
+
+        client, sub_mod = self._checkout_client()
+        conn = _mem_conn()
+        _bootstrap(conn)
+        _make_user(conn, "buyer@test.in", "pro")
+        sr.upsert_subscription(
+            conn,
+            user_id=1,
+            razorpay_subscription_id="sub_existing",
+            tier="pro",
+            status="active",
+            plan_id="plan_p",
+            billing_cycle="monthly",
+        )
+        rzp = self._fake_rzp_client()
+        with (
+            patch.object(sub_mod, "_rzp_client", return_value=rzp),
+            patch.object(
+                sub_mod,
+                "PLAN_IDS",
+                {"pro": {"monthly": "plan_p"}, "studio": {"monthly": "plan_s"}},
+            ),
+            patch("motoquant.subscriptions._get_conn", return_value=_NoCloseConn(conn)),
+        ):
+            res = client.post(
+                "/api/subscriptions/checkout",
+                json={"tier": "studio", "billing_cycle": "monthly"},
+            )
+        conn.close()
+        self.assertEqual(res.status_code, 409)
+        rzp.subscription.create.assert_not_called()
+
+    # ── webhook: authenticated must not grant tier ───────────────────────
+
+    def _webhook_env(self):
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+
+        import motoquant.subscriptions as sub_mod
+
+        mini = FastAPI()
+        mini.include_router(sub_mod.router, prefix="/api/subscriptions")
+        return TestClient(mini, raise_server_exceptions=False), sub_mod
+
+    def _event(self, event_type, rzp_sub_id, user_id, tier="pro", nonce=""):
+        from datetime import datetime, timedelta, timezone
+
+        return {
+            "event": event_type,
+            "nonce": nonce,  # varies payload → distinct sha-derived event ids
+            "payload": {
+                "subscription": {
+                    "entity": {
+                        "id": rzp_sub_id,
+                        "plan_id": "plan_test_pro",
+                        "current_end": int(
+                            (
+                                datetime.now(timezone.utc) + timedelta(days=30)
+                            ).timestamp()
+                        ),
+                        "notes": {
+                            "user_id": str(user_id),
+                            "tier": tier,
+                            "billing_cycle": "monthly",
+                        },
+                    }
+                }
+            },
+        }
+
+    def _post_event(self, client, conn, payload, event_id=None):
+        headers = {"x-razorpay-signature": "mocked"}
+        if event_id:
+            headers["x-razorpay-event-id"] = event_id
+        with (
+            patch(
+                "motoquant.subscriptions._verify_webhook_signature", return_value=True
+            ),
+            patch("motoquant.subscriptions._get_conn", return_value=_NoCloseConn(conn)),
+        ):
+            return client.post(
+                "/api/subscriptions/webhook",
+                content=json.dumps(payload).encode(),
+                headers=headers,
+            )
+
+    def test_authenticated_event_does_not_grant_tier(self):
+        """subscription.authenticated = mandate authorized, no money captured.
+        Granting the paid tier here gave free access to anyone who authorized
+        and then let the first charge fail."""
+        from motoquant.database import users_repo as ur
+
+        client, _ = self._webhook_env()
+        conn = _mem_conn()
+        _bootstrap(conn)
+        user = _make_user(conn, "auth-only@test.in", "free")
+        res = self._post_event(
+            conn=conn,
+            client=client,
+            payload=self._event("subscription.authenticated", "sub_auth_1", user["id"]),
+        )
+        self.assertEqual(res.status_code, 200, res.text)
+        self.assertEqual(
+            ur.get_user_by_id(conn, user["id"])["tier"],
+            "free",
+            "tier must not be granted before money is captured",
+        )
+        conn.close()
+
+    def test_late_cancel_of_old_sub_keeps_newer_active_tier(self):
+        """An out-of-order cancelled event for an OLD subscription must not
+        downgrade a user whose NEWER subscription is still active."""
+        from motoquant.database import users_repo as ur
+
+        client, _ = self._webhook_env()
+        conn = _mem_conn()
+        _bootstrap(conn)
+        user = _make_user(conn, "two-subs@test.in", "free")
+        # Old sub activates, then the user re-subscribes (new sub activates).
+        r1 = self._post_event(
+            conn=conn,
+            client=client,
+            payload=self._event(
+                "subscription.activated", "sub_old", user["id"], nonce="a"
+            ),
+        )
+        r2 = self._post_event(
+            conn=conn,
+            client=client,
+            payload=self._event(
+                "subscription.activated", "sub_new", user["id"], nonce="b"
+            ),
+        )
+        self.assertEqual((r1.status_code, r2.status_code), (200, 200))
+        # Late cancellation of the OLD sub arrives after the new one is live.
+        r3 = self._post_event(
+            conn=conn,
+            client=client,
+            payload=self._event(
+                "subscription.cancelled", "sub_old", user["id"], nonce="c"
+            ),
+        )
+        self.assertEqual(r3.status_code, 200, r3.text)
+        self.assertEqual(
+            ur.get_user_by_id(conn, user["id"])["tier"],
+            "pro",
+            "newer active subscription must keep the paid tier",
+        )
+        # And a cancellation of the CURRENT sub does downgrade.
+        r4 = self._post_event(
+            conn=conn,
+            client=client,
+            payload=self._event(
+                "subscription.cancelled", "sub_new", user["id"], nonce="d"
+            ),
+        )
+        self.assertEqual(r4.status_code, 200)
+        self.assertEqual(ur.get_user_by_id(conn, user["id"])["tier"], "free")
+        conn.close()
+
+    def test_user_not_found_is_retryable_not_swallowed(self):
+        """user_not_found used to return 200 AFTER committing the ledger row —
+        every provider retry was then dropped as 'duplicate' and the event was
+        lost forever. It must answer non-2xx AND un-record the ledger row so a
+        redelivery (same event id) gets a fresh attempt."""
+        from motoquant.database import users_repo as ur
+
+        client, _ = self._webhook_env()
+        conn = _mem_conn()
+        _bootstrap(conn)
+        # Sub unknown to the DB, notes carry a non-numeric user id.
+        payload = self._event("subscription.activated", "sub_orphan", "not-a-user")
+        payload["payload"]["subscription"]["entity"]["notes"]["user_id"] = ""
+        first = self._post_event(
+            conn=conn, client=client, payload=payload, event_id="evt_orphan_1"
+        )
+        self.assertEqual(first.status_code, 400)
+        # Operator links the sub (user now resolvable), provider redelivers
+        # the SAME event id — it must be processed, not "duplicate".
+        user = _make_user(conn, "linked-later@test.in", "free")
+        payload["payload"]["subscription"]["entity"]["notes"]["user_id"] = str(
+            user["id"]
+        )
+        retry = self._post_event(
+            conn=conn, client=client, payload=payload, event_id="evt_orphan_1"
+        )
+        self.assertEqual(retry.status_code, 200, retry.text)
+        self.assertEqual(retry.json()["status"], "ok")
+        self.assertEqual(ur.get_user_by_id(conn, user["id"])["tier"], "pro")
+        conn.close()
+
+    # ── license keys: deactivated owner ──────────────────────────────────
+
+    def test_deactivated_account_key_stops_validating(self):
+        from motoquant.database import subscriptions_repo as sr, users_repo as ur
+
+        conn = _mem_conn()
+        _bootstrap(conn)
+        user = _make_user(conn, "banned@test.in", "pro")
+        plaintext = sr.create_license_key(conn, user["id"], "pro")
+        self.assertIsNotNone(
+            sr.validate_license_key(conn, plaintext, device_id="dev-1")
+        )
+        ur.deactivate_user(conn, user["id"])
+        self.assertIsNone(
+            sr.validate_license_key(conn, plaintext, device_id="dev-1"),
+            "a deactivated account's key must stop validating",
+        )
+        conn.close()
+
+
 class TestLicenseKeyEndpoints(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

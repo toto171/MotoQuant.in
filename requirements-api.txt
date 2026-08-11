@@ -11,9 +11,14 @@ fastapi>=0.110.0,<1.0
 uvicorn[standard]>=0.27.0,<1.0
 pydantic>=2.0.0,<3
 
-# Physics engine core
+# Physics engine core (numpy ONLY — physics.py + submodels are numpy+stdlib).
+# scipy was removed 2026-08-11: the API's only reachable scipy sites are the
+# CLI-only auto-calibrator (calibrator.py, guarded try-import with graceful
+# fallback) and the CLI-only Sobol sampler (surrogate_data.py, lazy import
+# with a numpy fallback) — no API route executes either, verified by tracing
+# every calibration/analysis import from api.py. ~113 MB off the Docker image
+# and one CVE surface less. scipy lives in requirements-dev.txt for CLI work.
 numpy>=1.24.0,<3
-scipy>=1.10.0,<2
 
 # File uploads
 # Floor 0.0.18: CVE-2024-53981 (multipart boundary DoS) fixed in 0.0.18;

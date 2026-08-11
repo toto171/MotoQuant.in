@@ -71,6 +71,11 @@ audit: ## Check headline stats (bike/part/tire counts) are in sync sitewide
 	$(PY) scripts/audit_headline_stats.py
 	$(PY) web/scripts/gen_bike_ids.py --check
 
+.PHONY: surrogate-web
+surrogate-web: ## Regenerate the in-browser surrogate assets (run after ANY reseed/retune/surrogate regen)
+	$(PY) scripts/gen_surrogate_web.py
+	$(PYTEST) tests/test_surrogate_web_export.py -q
+
 .PHONY: health
 health: ## Fast state-of-the-world dashboard (baselines, lint, catalog, secrets)
 	$(PY) scripts/health_check.py

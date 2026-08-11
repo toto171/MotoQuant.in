@@ -142,7 +142,7 @@ const INDIA_CARDS = [
   {
     icon: Upload,
     title: 'Dragy import',
-    body: 'Upload Dragy GPS or dyno CSVs and auto-calibrate the sim to your bike, rider style and venue.',
+    body: 'Upload Dragy GPS or dyno CSVs and overlay your real runs against the sim — ET, trap and splits for your bike and venue.',
   },
   {
     icon: Share2,
@@ -175,7 +175,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Can I upload my own Dragy or dyno data?',
-    a: 'Yes. MotoQuant Pro imports Dragy GPS logs (CSV or VBO), DynoJet/MoTeC dyno sheets, and ECU logs (Woolich, Power Commander, MoTeC). An auto-calibration loop (differential evolution + Nelder-Mead) fits aero and tire parameters to your run for ±0.05s overlay accuracy.',
+    a: 'Yes. MotoQuant Pro imports Dragy GPS logs (CSV or VBO) and DynoJet/MoTeC dyno sheets with SAE J1349 atmospheric correction, then overlays your real run against the simulation — ET, trap speed and split-by-split residuals for your specific bike.',
   },
 ];
 
