@@ -26,16 +26,24 @@ nothing worth paying for.
 
 | # | Blocker | State | Action |
 |---|---------|-------|--------|
-| B1 | **Account durability** — accounts/runs/subscriptions wiped on every deploy (free tier, no disk) | ❌ **OPEN — the one hard blocker.** Mechanism shipped (`docker-entrypoint.sh`), disk block ready-but-commented in `render.yaml` | Operator: Render paid plan (~$7/mo) + uncomment disk block + `MOTOQUANT_DB=/data/motoquant.db`. Also fixes free-tier cold starts for paying users. |
+| B1 | **Account durability** — accounts/runs/subscriptions wiped on every deploy (free tier, no disk) | ❌ **OPEN — the one hard blocker.** Mechanism shipped (`docker-entrypoint.sh`), disk block ready-but-commented in `render.yaml` | Operator: **`docs/LAUNCH_RUNBOOK.md` Step 0** (Render Starter + disk + `MOTOQUANT_DB=/data/motoquant.db`, one commit). Also fixes free-tier cold starts for paying users. |
 | B2 | **No paid product** — only 3 routes tier-gated | ✅ **CLOSED 2026-08-08.** Optimizer / Autotune / Outlaw (+job variants) @ pro, save-run @ pro, calibration @ studio, chat pro tools return typed `upgrade_required` | Pricing-ladder tuning only |
 | B3 | **Free-tier metering** | ✅ Shipped: `motoquant/usage.py` + `sim_usage` table | Tune `MOTOQUANT_FREE_DAILY_SIMS` (default 30) |
 | B4 | **Abuse/cost protection** | ✅ Shipped: per-IP rate limiter on chat/optimize/autotune | Tune after observing real traffic |
-| B5 | **Secrets** — dev-insecure `JWT_SECRET` default, email unset | ❌ OPEN (operator env). Boot now *hard-fails* on the default JWT secret when billing is enforced | Operator: PAYMENTS_SETUP Step 1 |
-| B6 | **End-to-end billing test** in provider test mode | ❌ OPEN — untested against live providers (tests use mocks) | Operator: PAYMENTS_SETUP Step 4 flow |
+| B5 | **Secrets** — dev-insecure `JWT_SECRET` default, email unset | ❌ OPEN (operator env). Boot now *hard-fails* on the default JWT secret when billing is enforced | Operator: **`docs/LAUNCH_RUNBOOK.md` Step 1** (env table, order load-bearing) |
+| B6 | **End-to-end billing test** in provider test mode | ❌ OPEN — untested against live providers (tests use mocks) | Operator: **`docs/LAUNCH_RUNBOOK.md` Step 5** (test-mode purchase with exact curls) |
 | B7 | **Backups** | ✅ **CLOSED 2026-08-10:** `scripts/backup_db.py` — hot online-backup, integrity-verified, gzipped, rotated, optional off-box upload hook | Operator: schedule as a Render Cron Job once the disk exists |
 | B8 | **GST invoice promise** — terms/pricing promised 18% GST + provider-issued tax invoices | ✅ **CLOSED 2026-08-10:** operator confirmed unregistered sole proprietorship below the ₹20 L services threshold → no GSTIN, cannot collect GST. All copy corrected to "no GST charged" with a forward clause for crossing the threshold | Revisit at ₹20 L turnover |
 | B9 | **Payment-provider website checklist** — no contact page, no address/phone, refund policy buried in ToS §5 and not footer-linked | ✅ **CLOSED 2026-08-10:** standalone `/refunds` + `/contact`, both footer-linked, sitemapped and crawlable | Operator: fill `BUSINESS` in `web/app/contact/page.js` with the exact KYC address/phone |
 | B10 | **Magic-link sign-in was silently dead in prod** — backend defaulted to `stdout` and short-circuited the send guard, so configuring SMTP per the runbook sent nothing while the API answered "Sign-in link sent"; Resend was documented in 3 places with zero implementation | ✅ **CLOSED 2026-08-10:** transport derived from configured env vars, Resend implemented (stdlib urllib), deployed-without-transport returns 503 instead of lying, boot warning added, 18 regression tests | — |
+
+> **2026-08-21 (launch-prep PR):** the remaining open items (B1/B5/B6) are pure
+> operator execution — the ordered go-live checklist is **`docs/LAUNCH_RUNBOOK.md`**.
+> Same PR landed the frontend 402/upgrade UX (typed `quota_exceeded` /
+> `upgrade_required` handling in the web client), the evergreen site copy pass,
+> and the in-app daily backup scheduler (`motoquant/backup.py`,
+> `MOTOQUANT_BACKUP_ENABLE`) — superseding B7's "schedule as a Render Cron Job"
+> action.
 
 ## Operator env checklist (July 2 functional audit — features that work, waiting only on keys)
 

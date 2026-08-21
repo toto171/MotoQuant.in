@@ -182,13 +182,20 @@ Railway project entirely.
 | Uptime SLA | best-effort, no formal SLA on hobby | best-effort, same |
 | Build minutes | unlimited | 500 free build min/mo (we use ~5/build, ~5 builds/wk = ~100 min/mo) |
 | Outbound bandwidth | unlimited (within reason) | 100 GB/mo free (we use <1 GB) |
-| Persistent disk | ephemeral (rebuilds wipe) | ephemeral (rebuilds wipe) — same |
+| Persistent disk | ephemeral (rebuilds wipe) | ephemeral (rebuilds wipe) — same *(superseded, see note below)* |
 | Region | `us-west2` | `singapore` (closer to India — actually a win) |
 | Cost | $5/mo | $0/mo |
 
 The cold-start risk is the only real downside, and the keep-alive cron
 mitigates it for the URLs that visitors actually hit (`/api/health` warms
 the worker, `/api/bikes` and `/api/simulate/*` share that warm worker).
+
+> **Superseded 2026-08-21:** the "ephemeral — same" row above stopped being
+> acceptable the moment real accounts/money entered the picture. Render *does*
+> offer persistent disks on paid plans; the 3-step flip (plan `starter` +
+> `disk:` block + `MOTOQUANT_DB=/data/motoquant.db`) is written as commented
+> diffs in `render.yaml` and is **Step 0 of `docs/LAUNCH_RUNBOOK.md`** — a
+> launch prerequisite, not a scale-up option.
 
 ---
 
@@ -198,6 +205,9 @@ In order of effort (low → high):
 
 1. **Render Starter ($7/mo)** — same dashboard, no sleep, persistent disk.
    One-click upgrade from the free plan once revenue covers it.
+   *(Superseded 2026-08-21: this is no longer a "when you outgrow free"
+   item — it is the commercial-launch prerequisite. Execution:
+   `docs/LAUNCH_RUNBOOK.md` Step 0 + the commented diffs in `render.yaml`.)*
 2. **Fly.io pay-as-you-go (~$1.50-2/mo)** — slightly cheaper than Render
    Starter, no sleep, requires Docker (already have one) + `flyctl` install.
 3. **Oracle Cloud Always Free** — 4× ARM Ampere cores + 24 GB RAM forever

@@ -1,5 +1,8 @@
 # NEXT_SESSION.md — briefing for the next long session
 
+> **HISTORICAL (2026-06-12) — kept as record; the state described is no longer current** (e.g. origin now carries ~27 branches, the desktop app was scrapped 2026-07-06, and the commercial-launch prep superseded this queue).
+> Live launch plan: `docs/LAUNCH_RUNBOOK.md`. Live roadmap: `docs/ROADMAP.md`.
+
 > Written 2026-06-12 at the close of the overnight rehaul + cleanup, operator-reviewed scope.
 > Read together with `reports/rehaul_2026_06_12.md` (what shipped) and `reports/cleanup_2026_06_12.md` (what was removed/queued).
 > State you can trust without re-litigating: origin = `main` only (+17 `archive/*` tags) · baselines K5 10.0334 / R1 10.2859 / Hayabusa 10.4712 exact · the 156-row weighted sweep (`reports/acc_final_2026_06_11.json`) is the accuracy truth · DB regen order is reseed → parts-patch · **regenerate the surrogate after ANY reseed/retune, same session** · autotune is full-sim BY DESIGN (surrogate is launch-RPM-blind) · payments untouched BY DESIGN (beta on, providers unconfigured).
