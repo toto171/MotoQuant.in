@@ -24,6 +24,15 @@ def _now_utc() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def _sqlite_utc_now() -> str:
+    # SQLite's own "YYYY-MM-DD HH:MM:SS" (UTC) format, so string comparison
+    # against datetime('now', ...) is exact. The schema's legacy column default
+    # datetime('now','utc') DOUBLE-shifts on non-UTC hosts ('now' is already
+    # UTC; the modifier re-interprets it as localtime), so time-window queries
+    # must never rely on the default — write created_at explicitly with this.
+    return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+
+
 def _sha256(value: str) -> str:
     return hashlib.sha256(value.encode()).hexdigest()
 
@@ -87,8 +96,9 @@ def upsert_subscription(
         conn.execute(
             """INSERT INTO subscriptions
                (user_id, razorpay_subscription_id, tier, status,
-                current_period_end, plan_id, billing_cycle, provider)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                current_period_end, plan_id, billing_cycle, provider,
+                created_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 user_id,
                 razorpay_subscription_id,
@@ -98,6 +108,7 @@ def upsert_subscription(
                 plan_id,
                 billing_cycle,
                 provider,
+                _sqlite_utc_now(),
             ),
         )
     conn.commit()
@@ -123,6 +134,40 @@ def get_active_subscription(conn: sqlite3.Connection, user_id: int) -> dict | No
         (user_id,),
     ).fetchone()
     return dict(row) if row else None
+
+
+def get_recent_created_subscription(
+    conn: sqlite3.Connection, user_id: int, max_age_min: int = 30
+) -> dict | None:
+    """Return the newest still-open checkout placeholder (status "created")
+    younger than max_age_min minutes, or None. created_at is written
+    explicitly by upsert_subscription via _sqlite_utc_now() (true Python UTC
+    in SQLite's space-separated format) — NOT the column default, whose
+    datetime('now','utc') double-shifts on non-UTC hosts — so comparing it
+    against datetime('now', ...) (always UTC in SQLite) is host-TZ-safe.
+    Used by the checkout routes to time-box the "one open checkout at a
+    time" 409 guard."""
+    row = conn.execute(
+        """SELECT * FROM subscriptions
+           WHERE user_id = ? AND status = 'created'
+             AND created_at >= datetime('now', ?)
+           ORDER BY created_at DESC LIMIT 1""",
+        (user_id, f"-{int(max_age_min)} minutes"),
+    ).fetchone()
+    return dict(row) if row else None
+
+
+def resolve_created_checkout(conn: sqlite3.Connection, session_id: str) -> None:
+    """Delete the Stripe checkout placeholder row (the cs_… session id was
+    parked in the razorpay_subscription_id column at checkout time) once
+    checkout.session.completed has upserted the REAL subscription row.
+    Status-scoped so a real subscription row can never be deleted."""
+    conn.execute(
+        "DELETE FROM subscriptions "
+        "WHERE razorpay_subscription_id = ? AND status = 'created'",
+        (session_id,),
+    )
+    conn.commit()
 
 
 def list_subscriptions_for_user(conn: sqlite3.Connection, user_id: int) -> list[dict]:
@@ -209,6 +254,13 @@ def validate_license_key(
         "SELECT tier, is_active FROM users WHERE id = ?", (row["user_id"],)
     ).fetchone()
     if user_row is not None and not user_row["is_active"]:
+        return None
+
+    # Refuse keys whose owner no longer holds a paid tier — a cancelled-and-
+    # downgraded subscriber must stop validating (the public /refunds page
+    # promises invalidation within 24h). Like the is_active check above, this
+    # runs BEFORE the last-seen bump / device bind so the row stays untouched.
+    if user_row is not None and user_row["tier"] not in ("pro", "studio"):
         return None
 
     updates: list = [_now_utc()]

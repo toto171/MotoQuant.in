@@ -798,6 +798,293 @@ class TestHardening20260811(unittest.TestCase):
         conn.close()
 
 
+class TestCommercialHardening20260821(unittest.TestCase):
+    """Regression pins for the 2026-08-21 pre-launch money-path hardening.
+
+    Yearly renewal cycles, no-silent-tier-grant on unknown plan ids, per-user
+    checkout locking, the 30-min open-checkout guard, and the stuck-
+    'authenticated' cancel escape hatch. Every test drives the production
+    route path.
+    """
+
+    # ── helpers (mirror TestHardening20260811) ───────────────────────────
+
+    def _checkout_client(self):
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+
+        import motoquant.subscriptions as sub_mod
+
+        app = FastAPI()
+        app.include_router(sub_mod.router, prefix="/api/subscriptions")
+        app.dependency_overrides[sub_mod.get_current_user] = lambda: {
+            "id": 1,
+            "email": "buyer@test.in",
+            "tier": "free",
+        }
+        return TestClient(app, raise_server_exceptions=False), sub_mod
+
+    def _fake_rzp_client(self, short_url="https://rzp.io/i/abc123"):
+        from unittest.mock import MagicMock
+
+        client = MagicMock()
+        client.customer.create.return_value = {"id": "cust_test"}
+        create_resp = {"id": "sub_new_001"}
+        if short_url is not None:
+            create_resp["short_url"] = short_url
+        client.subscription.create.return_value = create_resp
+        return client
+
+    def _webhook_env(self):
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+
+        import motoquant.subscriptions as sub_mod
+
+        mini = FastAPI()
+        mini.include_router(sub_mod.router, prefix="/api/subscriptions")
+        return TestClient(mini, raise_server_exceptions=False), sub_mod
+
+    def _post_event(self, client, conn, payload, event_id=None):
+        headers = {"x-razorpay-signature": "mocked"}
+        if event_id:
+            headers["x-razorpay-event-id"] = event_id
+        with (
+            patch(
+                "motoquant.subscriptions._verify_webhook_signature", return_value=True
+            ),
+            patch("motoquant.subscriptions._get_conn", return_value=_NoCloseConn(conn)),
+        ):
+            return client.post(
+                "/api/subscriptions/webhook",
+                content=json.dumps(payload).encode(),
+                headers=headers,
+            )
+
+    # ── Task 1: yearly renewals ──────────────────────────────────────────
+
+    def test_total_count_is_billing_cycles_not_one(self):
+        """Razorpay total_count = number of BILLING CYCLES. Yearly was 1, so
+        the plan billed once and subscription.completed downgraded the user
+        at their first renewal anniversary."""
+        for cycle, expected in (("monthly", 120), ("yearly", 10)):
+            with self.subTest(cycle=cycle):
+                client, sub_mod = self._checkout_client()
+                conn = _mem_conn()
+                _bootstrap(conn)
+                _make_user(conn, "buyer@test.in", "free")
+                rzp = self._fake_rzp_client()
+                with (
+                    patch.object(sub_mod, "_rzp_client", return_value=rzp),
+                    patch.object(
+                        sub_mod,
+                        "PLAN_IDS",
+                        {
+                            "pro": {"monthly": "plan_m", "yearly": "plan_y"},
+                            "studio": {},
+                        },
+                    ),
+                    patch(
+                        "motoquant.subscriptions._get_conn",
+                        return_value=_NoCloseConn(conn),
+                    ),
+                ):
+                    res = client.post(
+                        "/api/subscriptions/checkout",
+                        json={"tier": "pro", "billing_cycle": cycle},
+                    )
+                conn.close()
+                self.assertEqual(res.status_code, 200, res.text)
+                payload = rzp.subscription.create.call_args[0][0]
+                self.assertEqual(payload["total_count"], expected)
+
+    # ── Task 3c: unknown plan id must never silently grant pro ───────────
+
+    def test_unknown_plan_id_is_retryable_and_grants_after_env_fix(self):
+        """_tier_from_plan defaulted to 'pro' — an unset/mistyped PLAN_ID_*
+        env silently granted pro on every webhook. Now: 400 + ledger row
+        deleted (the handler's `except HTTPException: raise` bypasses the
+        generic compensation, so the delete is explicit), and a redelivery of
+        the SAME event id after the env fix applies cleanly."""
+        from motoquant.database import users_repo as ur
+
+        client, sub_mod = self._webhook_env()
+        conn = _mem_conn()
+        _bootstrap(conn)
+        user = _make_user(conn, "planless@test.in", "free")
+        payload = {
+            "event": "subscription.activated",
+            "payload": {
+                "subscription": {
+                    "entity": {
+                        "id": "sub_plan_x",
+                        "plan_id": "plan_mystery",
+                        # No tier in notes — the plan-id ladder is the last rung.
+                        "notes": {
+                            "user_id": str(user["id"]),
+                            "billing_cycle": "monthly",
+                        },
+                    }
+                }
+            },
+        }
+        first = self._post_event(client, conn, payload, event_id="evt_plan_1")
+        self.assertEqual(first.status_code, 400, first.text)
+        self.assertIn("plan_id", first.json()["detail"])
+        ledger = conn.execute(
+            "SELECT COUNT(*) FROM payment_events "
+            "WHERE provider='razorpay' AND event_id='evt_plan_1'"
+        ).fetchone()[0]
+        self.assertEqual(ledger, 0, "ledger row must be gone so redelivery works")
+        self.assertEqual(
+            ur.get_user_by_id(conn, user["id"])["tier"],
+            "free",
+            "an unknown plan must never grant a tier",
+        )
+        # Operator sets PLAN_ID_* env; Razorpay redelivers the same event id.
+        with patch.object(
+            sub_mod, "PLAN_IDS", {"pro": {"monthly": "plan_mystery"}, "studio": {}}
+        ):
+            retry = self._post_event(client, conn, payload, event_id="evt_plan_1")
+        self.assertEqual(retry.status_code, 200, retry.text)
+        self.assertEqual(retry.json()["status"], "ok")
+        self.assertEqual(ur.get_user_by_id(conn, user["id"])["tier"], "pro")
+        conn.close()
+
+    # ── Task 5: per-user checkout lock ───────────────────────────────────
+
+    def test_checkout_lock_is_reentrant_and_per_user(self):
+        import motoquant.subscriptions as sub_mod
+
+        lock = sub_mod.checkout_lock(424242)
+        self.assertIs(lock, sub_mod.checkout_lock(424242), "one lock per user")
+        self.assertIsNot(lock, sub_mod.checkout_lock(424243))
+        with lock:
+            # RLock contract is load-bearing: payments.unified_checkout holds
+            # the lock and calls subscriptions.create_checkout on the same
+            # thread, which re-acquires it.
+            self.assertTrue(lock.acquire(blocking=False))
+            lock.release()
+
+    # ── Task 6: 30-minute open-checkout guard ────────────────────────────
+
+    def test_second_checkout_within_30min_409s_without_provider_call(self):
+        client, sub_mod = self._checkout_client()
+        conn = _mem_conn()
+        _bootstrap(conn)
+        _make_user(conn, "buyer@test.in", "free")
+        rzp = self._fake_rzp_client()
+        with (
+            patch.object(sub_mod, "_rzp_client", return_value=rzp),
+            patch.object(
+                sub_mod, "PLAN_IDS", {"pro": {"monthly": "plan_p"}, "studio": {}}
+            ),
+            patch("motoquant.subscriptions._get_conn", return_value=_NoCloseConn(conn)),
+        ):
+            r1 = client.post(
+                "/api/subscriptions/checkout",
+                json={"tier": "pro", "billing_cycle": "monthly"},
+            )
+            r2 = client.post(
+                "/api/subscriptions/checkout",
+                json={"tier": "pro", "billing_cycle": "monthly"},
+            )
+        conn.close()
+        self.assertEqual(r1.status_code, 200, r1.text)
+        self.assertEqual(r2.status_code, 409)
+        self.assertIn("still open", r2.json()["detail"])
+        self.assertEqual(
+            rzp.subscription.create.call_count,
+            1,
+            "the second checkout must never reach the provider",
+        )
+
+    def test_stale_created_row_does_not_block_checkout(self):
+        from motoquant.database import subscriptions_repo as sr
+
+        client, sub_mod = self._checkout_client()
+        conn = _mem_conn()
+        _bootstrap(conn)
+        _make_user(conn, "buyer@test.in", "free")
+        sr.upsert_subscription(
+            conn,
+            user_id=1,
+            razorpay_subscription_id="sub_stale_checkout",
+            tier="pro",
+            status="created",
+            plan_id="plan_p",
+            billing_cycle="monthly",
+        )
+        # Backdate past the 30-min window — the guard must not fire.
+        conn.execute(
+            "UPDATE subscriptions SET created_at = datetime('now', '-2 hours') "
+            "WHERE razorpay_subscription_id = 'sub_stale_checkout'"
+        )
+        conn.commit()
+        rzp = self._fake_rzp_client()
+        with (
+            patch.object(sub_mod, "_rzp_client", return_value=rzp),
+            patch.object(
+                sub_mod, "PLAN_IDS", {"pro": {"monthly": "plan_p"}, "studio": {}}
+            ),
+            patch("motoquant.subscriptions._get_conn", return_value=_NoCloseConn(conn)),
+        ):
+            res = client.post(
+                "/api/subscriptions/checkout",
+                json={"tier": "pro", "billing_cycle": "monthly"},
+            )
+        conn.close()
+        self.assertEqual(res.status_code, 200, res.text)
+
+    # ── Task 7: stuck-authenticated escape hatch ─────────────────────────
+
+    def test_stuck_authenticated_cancel_is_immediate_and_checkout_reopens(self):
+        """'authenticated' = mandate authorized, nothing captured. Cancel must
+        be immediate (cancel_at_cycle_end 0 — at-cycle-end is undefined
+        pre-activation) AND clear the local row so the one-active-sub 409
+        lifts without waiting for the webhook."""
+        from motoquant.database import subscriptions_repo as sr
+
+        client, sub_mod = self._checkout_client()
+        conn = _mem_conn()
+        _bootstrap(conn)
+        _make_user(conn, "buyer@test.in", "pro")
+        sr.upsert_subscription(
+            conn,
+            user_id=1,
+            razorpay_subscription_id="sub_auth_stuck",
+            tier="pro",
+            status="authenticated",
+            plan_id="plan_p",
+            billing_cycle="monthly",
+        )
+        rzp = self._fake_rzp_client()
+        with (
+            patch.object(sub_mod, "_rzp_client", return_value=rzp),
+            patch.object(
+                sub_mod, "PLAN_IDS", {"pro": {"monthly": "plan_p"}, "studio": {}}
+            ),
+            patch("motoquant.subscriptions._get_conn", return_value=_NoCloseConn(conn)),
+        ):
+            res = client.post("/api/subscriptions/cancel")
+            self.assertEqual(res.status_code, 200, res.text)
+            rzp.subscription.cancel.assert_called_once_with(
+                "sub_auth_stuck", {"cancel_at_cycle_end": 0}
+            )
+            row = sr.get_subscription_by_rzp_id(conn, "sub_auth_stuck")
+            self.assertEqual(
+                row["status"],
+                "cancelled",
+                "local row must clear immediately, not wait for the webhook",
+            )
+            res2 = client.post(
+                "/api/subscriptions/checkout",
+                json={"tier": "pro", "billing_cycle": "monthly"},
+            )
+        conn.close()
+        self.assertEqual(res2.status_code, 200, res2.text)
+
+
 class TestLicenseKeyEndpoints(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -933,6 +1220,64 @@ class TestValidateRateLimit(unittest.TestCase):
         self.assertEqual(res.status_code, 429)
         self.assertEqual(res.json()["detail"]["error"], "rate_limited")
         self.assertIn("Retry-After", res.headers)
+
+
+class TestLicenseKeyTierDowngrade(unittest.TestCase):
+    """A cancelled-and-downgraded subscriber's license key must stop
+    validating — the public /refunds page promises invalidation within 24h.
+    Exercised through the real HTTP route (production path)."""
+
+    @classmethod
+    def setUpClass(cls):
+        try:
+            from fastapi import FastAPI
+            from fastapi.testclient import TestClient
+
+            import motoquant.subscriptions as sub_mod
+        except ImportError:
+            cls.skipTest(None, "fastapi not installed")
+            return
+
+        mini = FastAPI()
+        mini.include_router(sub_mod.router, prefix="/api/subscriptions")
+        cls.client = TestClient(mini, raise_server_exceptions=False)
+
+    def setUp(self):
+        from motoquant import ratelimit
+
+        ratelimit.reset()
+
+    def tearDown(self):
+        from motoquant import ratelimit
+
+        ratelimit.reset()
+
+    def test_downgraded_user_key_stops_validating(self):
+        from motoquant.database import subscriptions_repo as sr, users_repo as ur
+
+        conn = _mem_conn()
+        _bootstrap(conn)
+        user = _make_user(conn, "downgraded@test.in", "pro")
+        key = sr.create_license_key(conn, user["id"], "pro")
+        self.assertIsNotNone(key)
+        wrapped = _NoCloseConn(conn)
+        with patch("motoquant.subscriptions._get_conn", return_value=wrapped):
+            ok = self.client.post(
+                "/api/subscriptions/license-key/validate",
+                json={"key": key, "device_id": "dev-dg"},
+            )
+            self.assertTrue(ok.json()["valid"], ok.text)
+            self.assertEqual(ok.json()["tier"], "pro")
+            # Subscription lapses → user tier drops to free.
+            ur.set_user_tier(conn, user["id"], "free")
+            bad = self.client.post(
+                "/api/subscriptions/license-key/validate",
+                json={"key": key, "device_id": "dev-dg"},
+            )
+        conn.close()
+        body = bad.json()
+        self.assertFalse(body["valid"], "a downgraded owner's key must be invalid")
+        self.assertIn("Invalid or revoked", body["message"])
 
 
 if __name__ == "__main__":

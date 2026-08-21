@@ -23,6 +23,11 @@ services:
   - type: web
     name: motoquant-api
     runtime: docker
+    # PAID DURABILITY FLIP: three steps, ONE deploy — 1) plan: free -> starter,
+    # 2) uncomment the disk: block at the bottom of this file, 3) repoint
+    # MOTOQUANT_DB below to /data/motoquant.db. All three together: a blueprint
+    # re-apply with the disk block enabled on a free plan FAILS (Render disks
+    # need a paid plan). See docs/PAYMENTS_SETUP.md Step 0 Option A.
     plan: free
     region: singapore           # closest free region to Indian users
     dockerfilePath: ./Dockerfile
@@ -52,6 +57,10 @@ services:
         value: /app/motoquant.db
       - key: PYTHON_VERSION
         value: "3.11"
+      # Canonical site host (apex, no www) — checkout success/cancel callbacks,
+      # magic links and 402 upgrade URLs are all built from this.
+      - key: MOTOQUANT_BASE_URL
+        value: https://motoquant.in
       # Optional: surface FastAPI / uvicorn logs at INFO level
       - key: UVICORN_LOG_LEVEL
         value: info

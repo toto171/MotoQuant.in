@@ -41,6 +41,8 @@ import json
 import logging
 import os
 import sqlite3
+import threading
+from contextlib import contextmanager
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -69,7 +71,7 @@ except ImportError:
 RZP_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "")
 RZP_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "")
 RZP_WEBHOOK_SECRET = os.environ.get("RAZORPAY_WEBHOOK_SECRET", "")
-MOTOQUANT_BASE_URL = os.environ.get("MOTOQUANT_BASE_URL", "https://www.motoquant.in")
+MOTOQUANT_BASE_URL = os.environ.get("MOTOQUANT_BASE_URL", "https://motoquant.in")
 
 PLAN_IDS = {
     "pro": {
@@ -96,12 +98,12 @@ def _rzp_client():
         raise HTTPException(
             503,
             "Razorpay SDK not installed on this server. "
-            "Contact support: hello@motoquant.in",
+            "Contact support: motoquant@gmail.com",
         )
     if not RZP_KEY_ID or not RZP_KEY_SECRET:
         raise HTTPException(
             503,
-            "Razorpay credentials not configured. Contact support: hello@motoquant.in",
+            "Razorpay credentials not configured. Contact support: motoquant@gmail.com",
         )
     return _rzp_sdk.Client(auth=(RZP_KEY_ID, RZP_KEY_SECRET))
 
@@ -120,13 +122,63 @@ def _verify_webhook_signature(payload_bytes: bytes, signature: str) -> bool:
     return hmac.compare_digest(expected, signature)
 
 
-def _tier_from_plan(plan_id: str) -> str:
-    """Infer tier from the Razorpay plan_id."""
+def _tier_from_plan(plan_id: str) -> str | None:
+    """Infer tier from the Razorpay plan_id. Returns None when the plan id is
+    unknown — the old silent "pro" fallback meant a mistyped/unset PLAN_ID_*
+    env granted pro to ANY plan; callers must treat None as unresolvable."""
+    if not plan_id:
+        # Guard: with PLAN_ID_* env unset every cycles.values() is "" and an
+        # empty plan_id would spuriously match the first tier.
+        return None
     for tier, cycles in PLAN_IDS.items():
         if plan_id in cycles.values():
             return tier
-    # Fallback — check tier embedded in the subscription notes or items
-    return "pro"
+    return None
+
+
+# ─── Per-user checkout lock (concurrency guard) ───────────────────────────────
+# Two simultaneous checkout requests from the same account could both pass the
+# duplicate-subscription guard and mint TWO provider subscriptions. RLock (not
+# Lock) is load-bearing: payments.unified_checkout holds the lock and then
+# calls create_checkout below on the same thread, which re-acquires it.
+
+_CHECKOUT_LOCKS: dict[int, threading.RLock] = {}
+_CHECKOUT_LOCKS_GUARD = threading.Lock()
+
+_CHECKOUT_PENDING_MSG = (
+    "A checkout you started in the last 30 minutes is still open — "
+    "complete it, or wait a few minutes and try again."
+)
+
+
+def checkout_lock(user_id: int) -> threading.RLock:
+    """Return the (lazily created) per-user re-entrant checkout lock."""
+    with _CHECKOUT_LOCKS_GUARD:
+        lock = _CHECKOUT_LOCKS.get(user_id)
+        if lock is None:
+            lock = _CHECKOUT_LOCKS[user_id] = threading.RLock()
+        return lock
+
+
+@contextmanager
+def acquire_checkout_lock(user_id: int, timeout_s: float = 30.0):
+    """Bounded acquire of the per-user checkout lock. The lock is held across
+    provider network calls, so a hung provider connection would otherwise park
+    every later checkout request from that user on an unbounded acquire —
+    a threadpool-exhaustion hazard on the 0.5-CPU prod tier. Re-entrant on the
+    same thread (RLock), so the payments-layer wrapper composing with
+    create_checkout's own acquire is fine."""
+    lock = checkout_lock(user_id)
+    if not lock.acquire(timeout=timeout_s):
+        raise HTTPException(
+            503,
+            "Another checkout for this account is still being processed — "
+            "try again in a minute.",
+        )
+    try:
+        yield
+    finally:
+        lock.release()
 
 
 # ─── Pydantic schemas ─────────────────────────────────────────────────────────
@@ -196,13 +248,24 @@ def create_checkout(
         raise HTTPException(
             503,
             f"Plan not configured for {body.tier}/{body.billing_cycle}. "
-            "Contact support: hello@motoquant.in",
+            "Contact support: motoquant@gmail.com",
         )
 
     client = _rzp_client()
 
-    # Ensure Razorpay customer exists for this user
+    # Ensure Razorpay customer exists for this user. The per-user lock makes
+    # guard-check → provider-create → row-persist atomic against a concurrent
+    # checkout from the same account (conn opens BEFORE acquire so an open
+    # failure can never leave the lock held).
     conn = _get_conn()
+    lock = checkout_lock(user["id"])
+    if not lock.acquire(timeout=30.0):
+        conn.close()
+        raise HTTPException(
+            503,
+            "Another checkout for this account is still being processed — "
+            "try again in a minute.",
+        )
     try:
         # One active subscription per account. Without this guard every extra
         # checkout minted a NEW provider subscription while /status and
@@ -218,6 +281,13 @@ def create_checkout(
                 "Cancel it from your account page first (access continues to the "
                 "end of the paid period), then subscribe to the new plan.",
             )
+
+        # Time-boxed guard: a still-open checkout (status "created", younger
+        # than 30 min) must finish or expire before another provider
+        # subscription is minted for the same account.
+        pending = _subs.get_recent_created_subscription(conn, user["id"])
+        if pending:
+            raise HTTPException(409, _CHECKOUT_PENDING_MSG)
 
         db_user = _users.get_user_by_id(conn, user["id"])
         rzp_customer_id = db_user.get("razorpay_customer_id") if db_user else None
@@ -238,7 +308,12 @@ def create_checkout(
             {
                 "plan_id": plan_id,
                 "customer_id": rzp_customer_id,
-                "total_count": 1 if body.billing_cycle == "yearly" else 120,
+                # total_count = number of BILLING CYCLES, not years: a yearly
+                # plan with total_count=1 bills ONCE and then fires
+                # subscription.completed, silently downgrading the user at
+                # their first renewal. 10 yearly cycles / 120 monthly cycles
+                # both mean "renew for ~10 years".
+                "total_count": 10 if body.billing_cycle == "yearly" else 120,
                 "quantity": 1,
                 "customer_notify": 1,
                 "notes": {
@@ -285,6 +360,7 @@ def create_checkout(
         )
     finally:
         conn.close()
+        lock.release()
 
     return CheckoutResponse(
         razorpay_subscription_id=rzp_sub_id,
@@ -336,7 +412,7 @@ async def razorpay_webhook(request: Request) -> dict:
     notes = entity.get("notes", {})
     user_id_str = notes.get("user_id", "")
     billing_cycle = notes.get("billing_cycle", "monthly")
-    tier = notes.get("tier") or _tier_from_plan(plan_id)
+    notes_tier = notes.get("tier") if notes.get("tier") in ("pro", "studio") else None
 
     conn = _get_conn()
     try:
@@ -366,13 +442,24 @@ async def razorpay_webhook(request: Request) -> dict:
             elif user_id_str.isdigit():
                 user_id = int(user_id_str)
             else:
-                log.warning("Webhook: cannot resolve user for sub %s", rzp_sub_id)
+                # error-level on purpose: this is the operator's launch-week
+                # log signal for webhook/user linkage problems.
+                log.error("Webhook: cannot resolve user for sub %s", rzp_sub_id)
                 _subs.delete_payment_event(conn, "razorpay", event_id)
                 raise HTTPException(
                     400,
                     f"No MotoQuant user for subscription {rzp_sub_id} — "
                     "redeliver after linking (dashboard-created subscription?).",
                 )
+
+            # Tier resolution ladder: our own subscription row → validated
+            # notes tier → plan-id lookup. No silent "pro" default — an
+            # unrecognised plan must never grant a tier.
+            tier = (
+                (existing_sub or {}).get("tier")
+                or notes_tier
+                or _tier_from_plan(plan_id)
+            )
 
             # Parse period end
             current_end_ts = entity.get("current_end")
@@ -399,6 +486,28 @@ async def razorpay_webhook(request: Request) -> dict:
             if event_type not in STATUS_MAP:
                 log.debug("Unhandled webhook event: %s", event_type)
                 return {"status": "unhandled_event", "event": event_type}
+
+            if tier is None:
+                # Retryable: the operator fixes PLAN_ID_* env and Razorpay
+                # redelivers. The `except HTTPException: raise` below BYPASSES
+                # the generic compensation path, so the ledger row must be
+                # deleted HERE or the redelivery is swallowed as a duplicate.
+                _subs.delete_payment_event(conn, "razorpay", event_id)
+                # log.error is the operator's launch-week signal (the 400
+                # detail goes back to Razorpay, not into the Render logs).
+                log.error(
+                    "Razorpay webhook: unknown plan_id %r for subscription %s "
+                    "and no tier in notes — PLAN_ID_* env missing or typo'd; "
+                    "returning 400 so Razorpay redelivers after the fix.",
+                    plan_id,
+                    rzp_sub_id,
+                )
+                raise HTTPException(
+                    400,
+                    f"Unknown Razorpay plan_id '{plan_id}' for subscription "
+                    f"{rzp_sub_id} and no tier in notes — set PLAN_ID_* env "
+                    "and redeliver.",
+                )
 
             new_status, new_tier = STATUS_MAP[event_type]
 
@@ -564,6 +673,7 @@ def cancel_subscription(user: dict = Depends(get_current_user)) -> dict:
     # all — their sub id was fed to Razorpay, which 400s (2026-08-11 audit).
     provider = sub.get("provider") or "razorpay"
     provider_sub_id = sub["razorpay_subscription_id"]
+    cancelled_immediately = False
 
     if provider == "stripe":
         # Lazy import — payments.py imports this module at top level, so the
@@ -573,11 +683,39 @@ def cancel_subscription(user: dict = Depends(get_current_user)) -> dict:
         stripe_cancel_subscription(provider_sub_id)  # raises HTTPException on error
     elif provider == "razorpay":
         client = _rzp_client()
+        # "authenticated" = mandate authorized, nothing captured yet.
+        # cancel_at_cycle_end is undefined pre-activation (there is no cycle),
+        # so cancel immediately — and clear the local row NOW so the one-
+        # active-subscription 409 on checkout lifts without waiting for the
+        # webhook (the later subscription.cancelled delivery upserts the same
+        # state, so this is idempotent with it).
+        stuck_authenticated = cancelled_immediately = (
+            sub.get("status") == "authenticated"
+        )
         try:
-            client.subscription.cancel(provider_sub_id, {"cancel_at_cycle_end": 1})
+            client.subscription.cancel(
+                provider_sub_id,
+                {"cancel_at_cycle_end": 0 if stuck_authenticated else 1},
+            )
         except Exception as exc:
             log.error("Failed to cancel Razorpay subscription: %s", exc)
             raise HTTPException(502, f"Razorpay error: {exc}") from exc
+        if stuck_authenticated:
+            conn = _get_conn()
+            try:
+                _subs.upsert_subscription(
+                    conn,
+                    user_id=sub["user_id"],
+                    razorpay_subscription_id=provider_sub_id,
+                    tier=sub["tier"],
+                    status="cancelled",
+                    current_period_end=sub.get("current_period_end"),
+                    plan_id=sub.get("plan_id"),
+                    billing_cycle=sub.get("billing_cycle") or "monthly",
+                    provider="razorpay",
+                )
+            finally:
+                conn.close()
     else:
         raise HTTPException(
             502,
@@ -585,6 +723,12 @@ def cancel_subscription(user: dict = Depends(get_current_user)) -> dict:
             f"'{provider}' — contact support.",
         )
 
+    if cancelled_immediately:
+        # Never-activated mandate: there is no billing period to run out.
+        return {
+            "message": "Pending subscription cancelled — you can start a new checkout now.",
+            "current_period_end": None,
+        }
     return {
         "message": "Subscription will be cancelled at the end of the current billing period.",
         "current_period_end": sub.get("current_period_end"),

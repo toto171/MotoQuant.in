@@ -57,7 +57,7 @@ log = logging.getLogger("motoquant.payments")
 
 router = APIRouter(tags=["payments"])
 
-MOTOQUANT_BASE_URL = os.environ.get("MOTOQUANT_BASE_URL", "https://www.motoquant.in")
+MOTOQUANT_BASE_URL = os.environ.get("MOTOQUANT_BASE_URL", "https://motoquant.in")
 
 # ─── Canonical price book (display + checkout metadata) ───────────────────────
 # INR prices are the source of truth (Razorpay plans must match). USD prices
@@ -194,68 +194,98 @@ def unified_checkout(
     if body.provider not in VALID_PROVIDERS:
         raise HTTPException(400, f"provider must be one of {VALID_PROVIDERS}")
 
-    # One active subscription per account, provider-agnostic. Without this,
-    # every extra checkout minted a new provider subscription that /status and
-    # /cancel could never see — invisible double billing (2026-08-11 audit).
-    # The Razorpay path re-checks inside create_checkout; this covers Stripe
-    # and keeps the failure mode consistent across providers.
-    if user.get("id"):
-        conn = _get_conn()
-        try:
-            _subs.ensure_tables(conn)
-            existing = _subs.get_active_subscription(conn, user["id"])
-        finally:
-            conn.close()
-        if existing:
-            raise HTTPException(
-                409,
-                f"You already have an active {existing['tier']} subscription. "
-                "Cancel it from your account page first (access continues to "
-                "the end of the paid period), then subscribe to the new plan.",
+    # Per-user checkout lock: two simultaneous requests from the same account
+    # must not both pass the guards below and mint two provider subscriptions.
+    # The lock is an RLock because the Razorpay branch calls into
+    # _rzp.create_checkout on the same thread, which re-acquires it.
+    with _rzp.acquire_checkout_lock(user.get("id") or 0):
+        # One active subscription per account, provider-agnostic. Without
+        # this, every extra checkout minted a new provider subscription that
+        # /status and /cancel could never see — invisible double billing
+        # (2026-08-11 audit). The Razorpay path re-checks inside
+        # create_checkout; this covers Stripe and keeps the failure mode
+        # consistent across providers.
+        if user.get("id"):
+            conn = _get_conn()
+            try:
+                _subs.ensure_tables(conn)
+                existing = _subs.get_active_subscription(conn, user["id"])
+                pending = _subs.get_recent_created_subscription(conn, user["id"])
+            finally:
+                conn.close()
+            if existing:
+                raise HTTPException(
+                    409,
+                    f"You already have an active {existing['tier']} subscription. "
+                    "Cancel it from your account page first (access continues to "
+                    "the end of the paid period), then subscribe to the new plan.",
+                )
+            # Time-boxed: an open checkout (status "created", < 30 min old)
+            # must complete or expire before another one is minted.
+            if pending:
+                raise HTTPException(409, _rzp._CHECKOUT_PENDING_MSG)
+
+        provider = body.provider
+        if provider == "auto":
+            if _razorpay_configured():
+                provider = "razorpay"
+            elif _stripe_configured():
+                provider = "stripe"
+            else:
+                raise HTTPException(
+                    503,
+                    "Payments aren't live yet — everything is free during the "
+                    "open beta. Subscriptions open at commercial launch.",
+                )
+
+        if provider == "razorpay":
+            rzp_resp = _rzp.create_checkout(
+                _rzp.CheckoutRequest(tier=body.tier, billing_cycle=body.billing_cycle),
+                user,
+            )
+            return UnifiedCheckoutResponse(
+                provider="razorpay",
+                checkout_url=rzp_resp.checkout_url,
+                provider_subscription_id=rzp_resp.razorpay_subscription_id,
+                tier=body.tier,
+                billing_cycle=body.billing_cycle,
             )
 
-    provider = body.provider
-    if provider == "auto":
-        if _razorpay_configured():
-            provider = "razorpay"
-        elif _stripe_configured():
-            provider = "stripe"
-        else:
-            raise HTTPException(
-                503,
-                "Payments aren't live yet — everything is free during the open "
-                "beta. Subscriptions open at commercial launch.",
+        if provider == "stripe":
+            sess = _create_stripe_checkout(user, body.tier, body.billing_cycle)
+            # Persist a placeholder row so the 30-min guard above sees this
+            # open checkout. The cs_… session id is parked in the (legacy-
+            # named) razorpay_subscription_id column; checkout.session.completed
+            # deletes it via resolve_created_checkout once the real sub_… row
+            # exists.
+            if user.get("id") and sess.get("id"):
+                conn = _get_conn()
+                try:
+                    _subs.upsert_subscription(
+                        conn,
+                        user_id=user["id"],
+                        razorpay_subscription_id=sess["id"],
+                        tier=body.tier,
+                        status="created",
+                        billing_cycle=body.billing_cycle,
+                        provider="stripe",
+                    )
+                finally:
+                    conn.close()
+            return UnifiedCheckoutResponse(
+                provider="stripe",
+                checkout_url=sess["url"],
+                provider_subscription_id=sess.get("id"),
+                tier=body.tier,
+                billing_cycle=body.billing_cycle,
             )
 
-    if provider == "razorpay":
-        rzp_resp = _rzp.create_checkout(
-            _rzp.CheckoutRequest(tier=body.tier, billing_cycle=body.billing_cycle),
-            user,
+        # paypal
+        raise HTTPException(
+            503,
+            "PayPal support is planned — use Razorpay (UPI/cards/netbanking) or "
+            "Stripe (international cards) for now.",
         )
-        return UnifiedCheckoutResponse(
-            provider="razorpay",
-            checkout_url=rzp_resp.checkout_url,
-            provider_subscription_id=rzp_resp.razorpay_subscription_id,
-            tier=body.tier,
-            billing_cycle=body.billing_cycle,
-        )
-
-    if provider == "stripe":
-        sess = _create_stripe_checkout(user, body.tier, body.billing_cycle)
-        return UnifiedCheckoutResponse(
-            provider="stripe",
-            checkout_url=sess["url"],
-            provider_subscription_id=sess.get("id"),
-            tier=body.tier,
-            billing_cycle=body.billing_cycle,
-        )
-
-    # paypal
-    raise HTTPException(
-        503,
-        "PayPal support is planned — use Razorpay (UPI/cards/netbanking) or "
-        "Stripe (international cards) for now.",
-    )
 
 
 # ─── Stripe (stdlib HTTP client) ──────────────────────────────────────────────
@@ -307,7 +337,7 @@ def _create_stripe_checkout(user: dict, tier: str, cycle: str) -> dict:
         raise HTTPException(
             503,
             f"Stripe price not configured for {tier}/{cycle}. "
-            "Contact support: hello@motoquant.in",
+            "Contact support: motoquant@gmail.com",
         )
 
     fields = {
@@ -378,6 +408,19 @@ def _iso_from_ts(ts: int | None) -> str | None:
     return datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
 
 
+def _stripe_period_end_ts(obj: dict) -> int | None:
+    """Extract current_period_end from a Stripe subscription object. On
+    current Stripe API versions the field lives on the subscription ITEMS,
+    not the subscription object — fall back to items.data[0]."""
+    ts = obj.get("current_period_end")
+    if ts:
+        return ts
+    items = (obj.get("items") or {}).get("data") or []
+    if items:
+        return items[0].get("current_period_end")
+    return None
+
+
 def _resolve_stripe_user(
     conn: sqlite3.Connection, obj: dict, sub_row: dict | None
 ) -> int | None:
@@ -416,12 +459,38 @@ def _handle_stripe_event(conn: sqlite3.Connection, etype: str, event: dict) -> d
     if etype == "checkout.session.completed":
         user_id = _resolve_stripe_user(conn, obj, None)
         if user_id is None:
-            log.warning("Stripe checkout.session.completed: cannot resolve user")
-            return {"status": "user_not_found"}
+            # Retryable: the outer stripe_webhook handler catches this,
+            # deletes the ledger row and re-raises, so Stripe redelivers
+            # after the operator links the customer. The old 200 +
+            # "user_not_found" left the ledger row committed — Stripe never
+            # retried and the paid upgrade was lost forever.
+            log.error("Stripe checkout.session.completed: cannot resolve user")
+            raise HTTPException(
+                400,
+                "No MotoQuant user for this checkout session — link the "
+                "Stripe customer to a user (users.stripe_customer_id), then "
+                "redeliver the event.",
+            )
         meta = obj.get("metadata") or {}
-        tier = meta.get("tier") if meta.get("tier") in VALID_TIERS else "pro"
+        tier = meta.get("tier")
+        if tier not in VALID_TIERS:
+            # NEVER default to "pro". Non-retryable ON PURPOSE (ledger row
+            # kept, HTTP 200): the event payload is immutable, so redelivery
+            # can never add the missing metadata — a dashboard-created
+            # payment link lands here and must be reconciled manually.
+            log.error(
+                "Stripe checkout.session.completed %s: metadata tier %r "
+                "missing/invalid — NOT granting any tier; reconcile manually",
+                obj.get("id"),
+                tier,
+            )
+            return {"status": "ignored_no_tier", "event": etype}
         cycle = meta.get("billing_cycle", "monthly")
         sub_id = obj.get("subscription") or f"cs_{obj.get('id', 'unknown')}"
+        if obj.get("subscription") and obj.get("id"):
+            # The real sub_… id exists — clear the checkout placeholder row
+            # keyed on the cs_… session id (30-min duplicate-checkout guard).
+            _subs.resolve_created_checkout(conn, obj["id"])
         if obj.get("customer"):
             _users.set_stripe_customer(conn, user_id, obj["customer"])
         _subs.upsert_subscription(
@@ -444,14 +513,31 @@ def _handle_stripe_event(conn: sqlite3.Connection, etype: str, event: dict) -> d
         sub_row = _subs.get_subscription_by_rzp_id(conn, sub_id)
         user_id = _resolve_stripe_user(conn, obj, sub_row)
         if user_id is None:
-            log.warning("Stripe %s: cannot resolve user for %s", etype, sub_id)
-            return {"status": "user_not_found"}
+            # Retryable (see checkout.session.completed above): the outer
+            # handler un-records the ledger row so Stripe's redelivery gets a
+            # fresh attempt once the customer is linked.
+            log.error("Stripe %s: cannot resolve user for %s", etype, sub_id)
+            raise HTTPException(
+                400,
+                f"No MotoQuant user for Stripe subscription {sub_id} — link "
+                "the Stripe customer to a user (users.stripe_customer_id), "
+                "then redeliver the event.",
+            )
         meta = obj.get("metadata") or {}
-        tier = (
-            (sub_row or {}).get("tier")
-            or (meta.get("tier") if meta.get("tier") in VALID_TIERS else None)
-            or "pro"
+        # Tier ladder: our own subscription row → validated metadata tier.
+        # NEVER default to "pro" — an event for a subscription we've never
+        # seen, with no usable metadata, must not grant (or revoke) anything.
+        tier = (sub_row or {}).get("tier") or (
+            meta.get("tier") if meta.get("tier") in VALID_TIERS else None
         )
+        if tier is None:
+            log.error(
+                "Stripe %s for unknown subscription %s with no usable tier "
+                "metadata — ignoring (no upsert, no tier change)",
+                etype,
+                sub_id,
+            )
+            return {"status": "ignored_unknown_subscription", "event": etype}
         cycle = (sub_row or {}).get("billing_cycle") or meta.get(
             "billing_cycle", "monthly"
         )
@@ -467,13 +553,29 @@ def _handle_stripe_event(conn: sqlite3.Connection, etype: str, event: dict) -> d
             razorpay_subscription_id=sub_id,
             tier=tier,
             status=status,
-            current_period_end=_iso_from_ts(obj.get("current_period_end")),
+            current_period_end=_iso_from_ts(_stripe_period_end_ts(obj)),
             billing_cycle=cycle,
             provider="stripe",
         )
         if new_tier == "free":
-            _users.set_user_tier(conn, user_id, "free")
-            log.info("User %d downgraded to free (stripe %s)", user_id, etype)
+            # Mirror the Razorpay late-cancel guard (subscriptions.py): an
+            # out-of-order deleted/canceled event for an OLD subscription
+            # must not downgrade a user whose NEWER subscription is still
+            # active — the upsert above already moved THIS sub out of the
+            # active set.
+            still_active = _subs.get_active_subscription(conn, user_id)
+            if still_active and (still_active["razorpay_subscription_id"] != sub_id):
+                log.info(
+                    "User %d keeps tier: stripe %s is for old sub %s, newer "
+                    "sub %s is still active",
+                    user_id,
+                    etype,
+                    sub_id,
+                    still_active["razorpay_subscription_id"],
+                )
+            else:
+                _users.set_user_tier(conn, user_id, "free")
+                log.info("User %d downgraded to free (stripe %s)", user_id, etype)
         elif new_tier in VALID_TIERS:
             _users.set_user_tier(conn, user_id, new_tier)
         return {"status": "ok", "event": etype}

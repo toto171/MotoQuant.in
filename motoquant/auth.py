@@ -77,7 +77,7 @@ JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_TTL_S = 15 * 60  # 15 minutes
 REFRESH_TOKEN_TTL_S = 30 * 24 * 3600  # 30 days
 
-MOTOQUANT_BASE_URL = os.environ.get("MOTOQUANT_BASE_URL", "https://www.motoquant.in")
+MOTOQUANT_BASE_URL = os.environ.get("MOTOQUANT_BASE_URL", "https://motoquant.in")
 
 
 def _resolve_email_backend() -> str:

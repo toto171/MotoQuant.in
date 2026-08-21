@@ -27,13 +27,16 @@ across all later deploys. On the free tier it is a verified no-op (seed path ==
 target path). To turn durability on, do ONE of:
 
 **Option A — Render persistent disk (recommended, ~$1/mo + paid instance).**
-Render disks require a paid plan (Starter+). Then it's a 2-step flip in
-`render.yaml` (both changes are already written as commented diffs in that file):
-1. Uncomment the `disk:` block (`name: motoquant-data`, `mountPath: /data`, `sizeGB: 1`).
-2. Change `MOTOQUANT_DB` from `/app/motoquant.db` to `/data/motoquant.db`.
+Render disks require a paid plan (Starter+). It's a 3-step flip in
+`render.yaml`, all three in ONE deploy (the disk/env changes are already
+written as commented diffs in that file):
+1. Change `plan: free` to `plan: starter` — a blueprint re-apply with the
+   disk block enabled on a free plan FAILS.
+2. Uncomment the `disk:` block (`name: motoquant-data`, `mountPath: /data`, `sizeGB: 1`).
+3. Change `MOTOQUANT_DB` from `/app/motoquant.db` to `/data/motoquant.db`.
 Push → first boot copies the seeded catalog to `/data`, and every deploy
 thereafter keeps the accumulated users/runs/subscriptions. Verify with
-`/api/health` (`bike_count` stays 501) and by registering a test account,
+`/api/health` (`bike_count` stays 541) and by registering a test account,
 deploying, and confirming the account survives.
 
 **Option B — managed Postgres for auth/subscription tables (Supabase free
@@ -66,26 +69,33 @@ From address for either transport.
 
 ## Step 1b — Backups (do this WITH the disk, not after)
 
-`scripts/backup_db.py` takes a hot, integrity-checked, gzipped snapshot using
-the SQLite online-backup API (safe against concurrent writers — verified
-against a WAL database taking ~1,300 commits mid-backup) and prunes to the
-newest N. 18 MB DB → ~3 MB snapshot.
+Backups run **inside the API service itself** (`motoquant/backup.py`, wired
+at app startup): hot, integrity-checked, gzipped snapshots via the SQLite
+online-backup API (safe against concurrent writers — verified against a WAL
+database taking ~1,300 commits mid-backup), pruned to the newest N.
+18 MB DB → ~3 MB snapshot. In-process is not a convenience, it is the only
+option: a Render disk mounts to exactly one service and `scripts/` is not
+COPY'd into the Docker image, so an external Render Cron Job can never reach
+the DB. Enable with env vars (Render dashboard):
 
-```bash
-python scripts/backup_db.py --db /data/motoquant.db --keep 14
+```
+MOTOQUANT_BACKUP_ENABLE=true
+MOTOQUANT_BACKUP_DIR=/data/backups
+MOTOQUANT_BACKUP_INTERVAL_H=24        # optional, default 24
+MOTOQUANT_BACKUP_KEEP=14              # optional, default 14
 ```
 
-Snapshots default to `<db-dir>/backups`. That protects against a bad
-migration or an errant DELETE, but **not** against losing the disk — set
-`MOTOQUANT_BACKUP_UPLOAD_CMD` to copy each one off-box (`{path}` is
-substituted):
+On-disk snapshots protect against a bad migration or an errant DELETE, but
+**not** against losing the disk — also set `MOTOQUANT_BACKUP_UPLOAD_CMD` to
+copy each one off-box (`{path}` is substituted):
 
 ```
 MOTOQUANT_BACKUP_UPLOAD_CMD='rclone copy {path} r2:motoquant-backups/'
 ```
 
-Exit codes: `0` ok · `1` backup failed · `2` snapshot good but upload failed.
-Schedule it as a Render Cron Job (daily) once you are on a paid plan.
+`scripts/backup_db.py` remains the manual/local wrapper around the same code
+(`python scripts/backup_db.py --db /data/motoquant.db --keep 14`; exit codes
+`0` ok · `1` backup failed · `2` snapshot good but upload failed).
 
 ## Step 2 — Razorpay (India: UPI, cards, netbanking, wallets)
 
@@ -110,8 +120,10 @@ Schedule it as a Render Cron Job (daily) once you are on a paid plan.
    `PLAN_ID_PRO_MONTHLY`, `PLAN_ID_PRO_YEARLY`,
    `PLAN_ID_STUDIO_MONTHLY`, `PLAN_ID_STUDIO_YEARLY`.
 4. Add webhook: `https://motoquant-api.onrender.com/api/subscriptions/webhook`
-   — events: `subscription.activated/charged/halted/cancelled/completed/paused`.
-   Set the webhook secret as `RAZORPAY_WEBHOOK_SECRET`.
+   — events: `subscription.authenticated/activated/charged/halted/cancelled/completed/paused`
+   (all seven — `authenticated` is how the API learns a mandate was
+   authorized before first capture, which drives the stuck-mandate cancel
+   path). Set the webhook secret as `RAZORPAY_WEBHOOK_SECRET`.
 
 ## Step 3 — Stripe (international cards)
 

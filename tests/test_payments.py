@@ -235,6 +235,33 @@ class TestUnifiedCheckout(unittest.TestCase):
         self.assertEqual(res.status_code, 409)
         self.assertIn("already have an active pro subscription", res.json()["detail"])
 
+    def test_stripe_checkout_persists_placeholder_and_blocks_second(self):
+        """2026-08-21 hardening: the Stripe path now parks a status='created'
+        placeholder row (cs_… session id) so a second checkout within 30 min
+        gets a 409 BEFORE the provider is called — the Razorpay path already
+        persisted its created row; Stripe persisted nothing, so a user could
+        open unlimited Stripe checkout sessions."""
+        fake_sess = {"url": "https://checkout.stripe.com/pay/x", "id": "cs_test_1"}
+        with (
+            patch.dict("os.environ", {"STRIPE_SECRET_KEY": "sk_test_x"}),
+            patch(
+                "motoquant.payments._create_stripe_checkout", return_value=fake_sess
+            ) as mk,
+        ):
+            first = self._post({"tier": "pro", "provider": "stripe"})
+            self.assertEqual(first.status_code, 200, first.text)
+            row = self.conn.execute(
+                "SELECT * FROM subscriptions WHERE razorpay_subscription_id='cs_test_1'"
+            ).fetchone()
+            self.assertIsNotNone(row, "placeholder row must be persisted")
+            self.assertEqual(row["status"], "created")
+            self.assertEqual(row["provider"], "stripe")
+            self.assertEqual(row["tier"], "pro")
+            second = self._post({"tier": "pro", "provider": "stripe"})
+        self.assertEqual(second.status_code, 409)
+        self.assertIn("still open", second.json()["detail"])
+        self.assertEqual(mk.call_count, 1, "second checkout must not reach Stripe")
+
 
 class TestStripeCancel(unittest.TestCase):
     """The /api/subscriptions/cancel route must route by provider — it was
@@ -472,15 +499,185 @@ class TestStripeWebhook(unittest.TestCase):
         ).fetchone()
         self.assertEqual(row["status"], "past_due")
 
-    def test_unresolvable_user_reported(self):
+    def _ledger_count(self, event_id: str) -> int:
+        return self.conn.execute(
+            "SELECT COUNT(*) FROM payment_events "
+            "WHERE provider = 'stripe' AND event_id = ?",
+            (event_id,),
+        ).fetchone()[0]
+
+    def test_unresolvable_user_is_retryable_not_swallowed(self):
+        """user_not_found used to answer 200 with the ledger row committed —
+        Stripe never retried and the paid upgrade was lost forever. It must
+        400 AND un-record the ledger row so a redelivery of the SAME event id
+        (after the operator links the Stripe customer) gets applied."""
+        from motoquant.database import users_repo
+
+        event = {
+            "id": "evt_4",
+            "type": "checkout.session.completed",
+            "data": {
+                "object": {
+                    "id": "cs_x",
+                    "subscription": "sub_orphan",
+                    "customer": "cus_orphan",
+                    "metadata": {"tier": "pro", "billing_cycle": "monthly"},
+                }
+            },
+        }
+        first = self._send(event)
+        self.assertEqual(first.status_code, 400)
+        self.assertEqual(
+            self._ledger_count("evt_4"),
+            0,
+            "failed delivery must leave NO ledger row (else retry = duplicate)",
+        )
+        # Operator links the Stripe customer; Stripe redelivers the same event.
+        users_repo.set_stripe_customer(self.conn, self.user["id"], "cus_orphan")
+        retry = self._send(event)
+        self.assertEqual(retry.status_code, 200, retry.text)
+        self.assertEqual(retry.json()["status"], "ok")
+        user = users_repo.get_user_by_id(self.conn, self.user["id"])
+        self.assertEqual(user["tier"], "pro")
+
+    def test_missing_tier_metadata_never_defaults_to_pro(self):
+        """A checkout.session.completed with no usable tier metadata (e.g. a
+        dashboard-created payment link) must NOT grant any tier. Non-retryable
+        on purpose: the payload is immutable, redelivery can never add the
+        metadata — ledger row kept, 200, manual reconciliation."""
+        from motoquant.database import users_repo
+
+        event = {
+            "id": "evt_no_tier",
+            "type": "checkout.session.completed",
+            "data": {
+                "object": {
+                    "id": "cs_nt",
+                    "subscription": "sub_nt",
+                    "metadata": {"user_id": str(self.user["id"])},
+                }
+            },
+        }
+        res = self._send(event)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json()["status"], "ignored_no_tier")
+        user = users_repo.get_user_by_id(self.conn, self.user["id"])
+        self.assertEqual(user["tier"], "free", "no tier may be granted")
+        self.assertEqual(self._ledger_count("evt_no_tier"), 1, "ledger row kept")
+        redelivery = self._send(event)
+        self.assertEqual(redelivery.json()["status"], "duplicate")
+
+    def test_unknown_subscription_update_ignored_no_grant_no_downgrade(self):
+        """subscription.updated/deleted for a sub we've never seen, with no
+        usable tier metadata, used to default the tier to 'pro'. It must be
+        ignored — no upsert, no tier change."""
+        from motoquant.database import users_repo
+
         res = self._send(
             {
-                "id": "evt_4",
-                "type": "checkout.session.completed",
-                "data": {"object": {"id": "cs_x", "metadata": {}}},
+                "id": "evt_unknown_sub",
+                "type": "customer.subscription.updated",
+                "data": {
+                    "object": {
+                        "id": "sub_never_seen",
+                        "status": "active",
+                        "metadata": {"user_id": str(self.user["id"])},
+                    }
+                },
             }
         )
-        self.assertEqual(res.json()["status"], "user_not_found")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json()["status"], "ignored_unknown_subscription")
+        user = users_repo.get_user_by_id(self.conn, self.user["id"])
+        self.assertEqual(user["tier"], "free")
+        row = self.conn.execute(
+            "SELECT * FROM subscriptions WHERE razorpay_subscription_id='sub_never_seen'"
+        ).fetchone()
+        self.assertIsNone(row, "no subscription row may be created")
+
+    def test_stripe_late_cancel_of_old_sub_keeps_newer_active_tier(self):
+        """Stripe parity with the Razorpay late-cancel guard: a deleted event
+        for an OLD sub must not downgrade a user whose NEWER sub is active."""
+        from motoquant.database import users_repo
+
+        self._send(self._checkout_completed("evt_lc_1", "sub_lc_old"))
+        self._send(self._checkout_completed("evt_lc_2", "sub_lc_new"))
+        res = self._send(
+            {
+                "id": "evt_lc_3",
+                "type": "customer.subscription.deleted",
+                "data": {"object": {"id": "sub_lc_old", "status": "canceled"}},
+            }
+        )
+        self.assertEqual(res.json()["status"], "ok")
+        user = users_repo.get_user_by_id(self.conn, self.user["id"])
+        self.assertEqual(
+            user["tier"], "pro", "newer active sub must keep the paid tier"
+        )
+        # Deleting the CURRENT sub does downgrade.
+        res = self._send(
+            {
+                "id": "evt_lc_4",
+                "type": "customer.subscription.deleted",
+                "data": {"object": {"id": "sub_lc_new", "status": "canceled"}},
+            }
+        )
+        self.assertEqual(res.json()["status"], "ok")
+        user = users_repo.get_user_by_id(self.conn, self.user["id"])
+        self.assertEqual(user["tier"], "free")
+
+    def test_period_end_read_from_subscription_items_fallback(self):
+        """Current Stripe API versions carry current_period_end on the
+        subscription ITEMS, not the subscription object — it must be stored
+        from items.data[0] when the top-level field is absent."""
+        self._send(self._checkout_completed())
+        period_end_ts = 2_000_000_000
+        res = self._send(
+            {
+                "id": "evt_items_pe",
+                "type": "customer.subscription.updated",
+                "data": {
+                    "object": {
+                        "id": "sub_abc",
+                        "status": "active",
+                        "items": {"data": [{"current_period_end": period_end_ts}]},
+                    }
+                },
+            }
+        )
+        self.assertEqual(res.json()["status"], "ok")
+        row = self.conn.execute(
+            "SELECT current_period_end FROM subscriptions "
+            "WHERE razorpay_subscription_id='sub_abc'"
+        ).fetchone()
+        self.assertIsNotNone(row["current_period_end"])
+        self.assertTrue(row["current_period_end"].startswith("2033-05-18"))
+
+    def test_completed_webhook_clears_checkout_placeholder(self):
+        """The Stripe checkout placeholder (cs_… id, status 'created') that
+        time-boxes duplicate checkouts must be deleted once the real sub_…
+        row lands via checkout.session.completed."""
+        from motoquant.database import subscriptions_repo as sr
+
+        sr.upsert_subscription(
+            self.conn,
+            user_id=self.user["id"],
+            razorpay_subscription_id="cs_1",
+            tier="pro",
+            status="created",
+            billing_cycle="monthly",
+            provider="stripe",
+        )
+        res = self._send(self._checkout_completed("evt_ph_1", "sub_abc"))
+        self.assertEqual(res.json()["status"], "ok")
+        placeholder = self.conn.execute(
+            "SELECT * FROM subscriptions WHERE razorpay_subscription_id='cs_1'"
+        ).fetchone()
+        self.assertIsNone(placeholder, "placeholder must be deleted")
+        real = self.conn.execute(
+            "SELECT status FROM subscriptions WHERE razorpay_subscription_id='sub_abc'"
+        ).fetchone()
+        self.assertEqual(real["status"], "active")
 
     def test_unhandled_event_acknowledged(self):
         res = self._send(
