@@ -18,6 +18,9 @@
  *   task.progress      → 0..1 float | null (null = indeterminate/staged)
  *   task.stage         → string ('' when none)
  *   task.error         → string | null
+ *   task.errorObj      → the raw thrown error object | null (ApiRequestError
+ *                        fields — status/code/upgradeUrl/… — when the API
+ *                        threw; set/cleared in lockstep with task.error)
  *   task.result        → last successful result | null
  *   task.reset()       → clears error + result
  *
@@ -32,6 +35,7 @@ export default function useAsyncTask(fn) {
   const [progress, setProgress] = useState(null);
   const [stage, setStage] = useState('');
   const [error, setError] = useState(null);
+  const [errorObj, setErrorObj] = useState(null);
   const [result, setResult] = useState(null);
 
   const abortRef = useRef(null);
@@ -52,6 +56,7 @@ export default function useAsyncTask(fn) {
 
   const reset = useCallback(() => {
     setError(null);
+    setErrorObj(null);
     setResult(null);
     setProgress(null);
     setStage('');
@@ -64,6 +69,7 @@ export default function useAsyncTask(fn) {
 
     setActive(true);
     setError(null);
+    setErrorObj(null);
     setProgress(null);
     setStage('');
 
@@ -87,6 +93,7 @@ export default function useAsyncTask(fn) {
       if (e?.name === 'AbortError') return undefined; // user pressed Stop
       if (mountedRef.current) {
         setError(e?.message || 'Something went wrong — please try again');
+        setErrorObj(e ?? null);
       }
       return undefined;
     } finally {
@@ -98,5 +105,5 @@ export default function useAsyncTask(fn) {
     }
   }, []);
 
-  return { run, stop, reset, active, progress, stage, error, result };
+  return { run, stop, reset, active, progress, stage, error, errorObj, result };
 }

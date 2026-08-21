@@ -148,7 +148,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'MotoQuant Pro is free during the open beta — create a free account and every Pro and Studio feature is unlocked, including saved runs, the build optimizer, and calibration uploads. At commercial launch, paid tiers begin at Pro ₹499/month and Studio ₹1,999/month; registered users get advance notice by email before billing starts.',
+            'MotoQuant Pro has a free tier: 30 full simulations a day across the entire 541-bike catalog, no card required. Pro (₹499/month or ₹4,999/year) adds unlimited sims, the build optimizer, parts ROI analysis and saved runs. Studio (₹1,999/month or ₹19,990/year) adds Dragy GPS import and dyno calibration on top.',
         },
       },
       {

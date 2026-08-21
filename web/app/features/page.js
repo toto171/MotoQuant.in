@@ -205,16 +205,16 @@ Interactive docs at /docs (FastAPI's automatic OpenAPI UI). No authentication fo
     icon: UserCircle2,
     label: '06 / Accounts & Garage',
     title: <>Your <span className="text-accent">garage</span>, saved</>,
-    subtitle: 'Free accounts. Saved runs. Shareable builds. Every Pro feature unlocked during the open beta.',
+    subtitle: 'Free accounts. Shareable builds. 30 free sims a day — Pro unlocks the rest.',
     body: `Create a free account with an email + password (or a passwordless magic link) and your simulator work stops being throwaway: every run you save lands in My Garage on your account page — bike, build, ET, trap speed, venue, date.
 
 Found a setup worth bragging about? Hit Share on the simulator and send a link that reopens your exact bike, venue and tuning sliders on any device.
 
-While MotoQuant is in open beta, everything in the Pro and Studio tiers — unlimited sims, the build optimiser, ECU autotune, Dragy/dyno imports — is unlocked free for every account. Paid plans only begin at commercial launch, with advance notice.`,
+The Free tier gives every account 30 full simulations a day across the entire 541-bike catalog — no card required. Pro (₹499/mo) adds unlimited sims, the build optimiser, parts ROI and saved runs; Studio (₹1,999/mo) adds Dragy GPS import and dyno calibration.`,
     docsLink: '/login?signup=1',
     docsLabel: 'Create a free account',
     stats: [
-      { num: '₹0', label: 'During open beta' },
+      { num: '30', label: 'Free sims per day' },
       { num: '25+', label: 'Runs in your garage' },
       { num: '1-tap', label: 'Build sharing' },
     ],
@@ -223,7 +223,7 @@ While MotoQuant is in open beta, everything in the Pro and Studio tiers — unli
       log: [
         'run saved → my garage',
         'share link armed · ?bike&venue&rider',
-        'open beta: pro tier unlocked',
+        'free tier: 30 sims/day',
       ],
       value: '9.62',
       unit: 's',

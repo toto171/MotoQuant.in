@@ -48,36 +48,176 @@ export function serverApiBase(fallback) {
   );
 }
 
+// --- Structured API errors ---------------------------------------------------
+// The backend's billing/quota error `detail` payloads are structured dicts
+// (see motoquant/auth.py require_tier and motoquant/api.py _meter_sims):
+//   402 upgrade_required: {error, required_tier, current_tier, upgrade_url}
+//   402 quota_exceeded:   {error, message, upgrade_url}
+//   429 rate limits carry a Retry-After header.
+// ApiRequestError carries those fields so UI (UpgradeNotice) can branch on
+// them. `message` stays the compatibility surface — every existing caller
+// renders err.message, so it must always be a HUMAN sentence, never
+// stringified JSON.
+export class ApiRequestError extends Error {
+  constructor(message, fields = {}) {
+    super(message);
+    this.name = 'ApiRequestError';
+    this.status = fields.status ?? 0;
+    this.code = fields.code ?? null;
+    this.upgradeUrl = fields.upgradeUrl ?? null;
+    this.requiredTier = fields.requiredTier ?? null;
+    this.currentTier = fields.currentTier ?? null;
+    this.retryAfterS = fields.retryAfterS ?? null;
+    this.detail = fields.detail ?? null;
+  }
+}
+
+const capitalize = (s) =>
+  typeof s === 'string' && s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+
+// The ONE place a FastAPI error `detail` (string | dict | pydantic-422 array)
+// becomes a user-visible sentence. Never JSON.stringify a detail object into
+// an error message again.
+function messageFromDetail(detail, status) {
+  if (typeof detail === 'string' && detail) return detail;
+  if (detail && typeof detail === 'object' && !Array.isArray(detail)) {
+    if (typeof detail.message === 'string' && detail.message) return detail.message;
+    if (detail.error === 'upgrade_required') {
+      const need = capitalize(detail.required_tier) || 'Pro';
+      const cur = detail.current_tier || 'free';
+      return `This feature needs the ${need} plan — your account is on the ${cur} tier.`;
+    }
+    if (detail.error === 'quota_exceeded') {
+      return 'Daily free simulation limit reached. Upgrade to Pro for unlimited runs, or come back tomorrow.';
+    }
+  }
+  if (Array.isArray(detail) && detail.length > 0) {
+    // pydantic-422 validation array — surface the first human msg, prefixed
+    // with the offending field when the loc names one.
+    const first = detail[0];
+    if (first && typeof first.msg === 'string') {
+      const loc = Array.isArray(first.loc)
+        ? first.loc.filter((p) => p !== 'body').join('.')
+        : '';
+      return loc ? `${loc}: ${first.msg}` : first.msg;
+    }
+  }
+  if (status === 401) return 'Sign in to use this feature.';
+  if (status === 402) return 'This feature requires an upgraded plan.';
+  return `API error ${status}`;
+}
+
+// Parse a non-2xx response into an ApiRequestError — the single error path
+// shared by postJson + saveRun.
+async function apiErrorFromResponse(res) {
+  let detail = null;
+  let msg = `API error ${res.status}`;
+  try {
+    const j = await res.json();
+    if (j && j.detail !== undefined) {
+      detail = j.detail;
+      msg = messageFromDetail(detail, res.status);
+    } else if (res.status === 401 || res.status === 402) {
+      msg = messageFromDetail(null, res.status);
+    }
+  } catch {
+    try {
+      const t = await res.text();
+      if (t) msg = `${msg}: ${t}`;
+    } catch {
+      /* keep the status-only message */
+    }
+  }
+  let retryAfterS = null;
+  try {
+    const ra = res.headers.get('retry-after');
+    if (ra && /^\d+$/.test(ra.trim())) retryAfterS = parseInt(ra.trim(), 10);
+  } catch {
+    /* header access can throw in exotic embeddings — retryAfterS stays null */
+  }
+  const d = detail && typeof detail === 'object' && !Array.isArray(detail) ? detail : null;
+  return new ApiRequestError(msg, {
+    status: res.status,
+    code: d?.error ?? null,
+    upgradeUrl: d?.upgrade_url ?? null,
+    requiredTier: d?.required_tier ?? null,
+    currentTier: d?.current_tier ?? null,
+    retryAfterS,
+    detail,
+  });
+}
+
+// --- Anonymous client id -----------------------------------------------------
+// A random, non-identifying id persisted in localStorage so the free-tier sim
+// quota survives IP churn (CGNAT / mobile networks share IPs across users).
+// Sent as X-MQ-Client-Id; the backend validates it against [A-Za-z0-9_-]{8,64}
+// and falls back to the IP bucket when absent. Returns null wherever storage
+// is unavailable (SSR, private mode, blocked storage) — never throws.
+export function getClientId() {
+  try {
+    let cid = window.localStorage.getItem('mq_cid');
+    if (!cid || !/^[A-Za-z0-9_-]{8,64}$/.test(cid)) {
+      cid = crypto.randomUUID().replace(/-/g, '');
+      window.localStorage.setItem('mq_cid', cid);
+    }
+    return cid;
+  } catch {
+    return null;
+  }
+}
+
+// --- Sims-quota capture ------------------------------------------------------
+// Metered sim routes attach X-Sims-Remaining / X-Sims-Limit response headers.
+// Snapshot them module-level and broadcast a "mq:sims-quota" CustomEvent so
+// any mounted UI (quota meters, upgrade nudges) can react without threading
+// state through every caller.
+export const simsQuota = { remaining: null, limit: null };
+
+function captureSimsQuota(res) {
+  try {
+    // Headers.get() returns null when absent and Number(null) === 0, so an
+    // unmetered route's response would broadcast a false "0 sims left" —
+    // bail on the raw strings before coercing.
+    const rawRemaining = res.headers.get('x-sims-remaining');
+    const rawLimit = res.headers.get('x-sims-limit');
+    if (rawRemaining == null || rawRemaining === '' || rawLimit == null || rawLimit === '') return;
+    const remaining = Number(rawRemaining);
+    const limit = Number(rawLimit);
+    if (!Number.isFinite(remaining) || !Number.isFinite(limit)) return;
+    simsQuota.remaining = remaining;
+    simsQuota.limit = limit;
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('mq:sims-quota', { detail: { remaining, limit } })
+      );
+    }
+  } catch {
+    /* quota headers are a courtesy — never break the response path */
+  }
+}
+
 // --- Shared POST helper -----------------------------------------------------
 // Mirrors the fetch + error-extraction pattern used inline in
 // LocationPicker.resolve / SimulatorWidget.runSim: POST JSON, and on a
-// non-2xx response try to surface the FastAPI `detail` field (string or
-// JSON) before falling back to the raw body text. Throws Error on failure
-// so callers can `try/catch` and render the message in an error tile.
+// non-2xx response surface the FastAPI `detail` as a human message (see
+// messageFromDetail) before falling back to the raw body text. Throws
+// ApiRequestError on failure so callers can `try/catch` and render
+// err.message in an error tile (or branch on err.status/err.code).
 async function postJson(path, body, signal) {
+  const cid = getClientId();
   const res = await fetch(`${API_URL}${path}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(cid ? { 'X-MQ-Client-Id': cid } : {}),
+    },
     body: JSON.stringify(body),
     signal,
   });
   if (!res.ok) {
-    let msg = `API error ${res.status}`;
-    try {
-      const j = await res.json();
-      if (j?.detail) {
-        msg = typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail);
-      }
-    } catch {
-      try {
-        const t = await res.text();
-        if (t) msg = `${msg}: ${t}`;
-      } catch {
-        /* keep the status-only message */
-      }
-    }
-    throw new Error(msg);
+    throw await apiErrorFromResponse(res);
   }
+  captureSimsQuota(res);
   return res.json();
 }
 
@@ -185,7 +325,12 @@ export async function runJob(kind, body, { onProgress, fallbackPath, pollMs = 35
     started = await startJob(kind, body, signal);
   } catch (e) {
     if (e?.name === 'AbortError') throw e;
-    if (fallbackPath && /API error (404|405)/.test(e.message || '')) {
+    // Deploy skew / older backends: /api/jobs/* is absent. ApiRequestError
+    // carries the status directly; the message regex stays as a belt for
+    // plain Errors thrown by intermediaries (edge 404 pages, proxies).
+    const missing =
+      e?.status === 404 || e?.status === 405 || /API error (404|405)/.test(e.message || '');
+    if (fallbackPath && missing) {
       onProgress?.({ status: 'running', progress: null, stage: '' });
       return postJson(fallbackPath, body, signal);
     }
@@ -360,27 +505,21 @@ export function chatJob(query, messages, { signal, onProgress } = {}) {
  * @param {string|null} accessToken
  */
 export async function saveRun(body, accessToken = null, signal) {
+  const cid = getClientId();
   const res = await fetch(`${API_URL}/api/simulate/save`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      ...(cid ? { 'X-MQ-Client-Id': cid } : {}),
       ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
     },
     body: JSON.stringify(body),
     signal,
   });
   if (!res.ok) {
-    let msg = `API error ${res.status}`;
-    try {
-      const j = await res.json();
-      if (j?.detail) {
-        msg = typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail);
-      }
-    } catch {
-      /* keep the status-only message */
-    }
-    throw new Error(msg);
+    throw await apiErrorFromResponse(res);
   }
+  captureSimsQuota(res);
   return res.json();
 }
 

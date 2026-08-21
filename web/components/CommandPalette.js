@@ -35,7 +35,7 @@ const ACTIONS = [
   { label: 'ECU autotune setup', href: '/autotune', kw: 'tune gearing launch rpm tyre pressure conditions ecu', icon: Zap, group: 'Tools' },
   { label: 'Browse the bike catalog', href: '/bikes', kw: 'bikes motorcycles catalog database specs', icon: Search, group: 'Tools' },
   { label: 'Leaderboard', href: '/leaderboard', kw: 'top runs fastest board ranking times', icon: Trophy, group: 'Tools' },
-  { label: 'Pricing & plans', href: '/pricing', kw: 'price pro studio subscribe beta free cost', icon: ArrowRight, group: 'Pages' },
+  { label: 'Pricing & plans', href: '/pricing', kw: 'price pro studio subscribe free cost', icon: ArrowRight, group: 'Pages' },
   { label: 'Docs — getting started', href: '/docs/getting-started', kw: 'documentation guide help how to start', icon: BookOpen, group: 'Pages' },
   { label: 'Docs — physics engine', href: '/docs/physics', kw: 'rk4 submodels engine model documentation', icon: BookOpen, group: 'Pages' },
   { label: 'Docs — validation data', href: '/docs/validation', kw: 'accuracy benchmarks validation error', icon: BookOpen, group: 'Pages' },

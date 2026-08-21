@@ -96,6 +96,11 @@ export default function AccountPage() {
   const [runs, setRuns] = useState([]);
   const [runsLoading, setRunsLoading] = useState(false);
   const [checkoutBanner, setCheckoutBanner] = useState(false);
+  // Post-checkout activation: "polling" until the payment webhook flips the
+  // tier, "active" once it does, "timeout" after the poll cap. Drives the
+  // banner copy so a just-paid customer never sees "Free + upgrade box" with
+  // no explanation while the webhook is still in flight.
+  const [activation, setActivation] = useState("polling");
   const pwFormRef = useRef(null);
 
   useEffect(() => {
@@ -140,6 +145,30 @@ export default function AccountPage() {
       window.history.replaceState({}, "", "/account");
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // While the success banner is up and the tier is still free, poll /me every
+  // 5s (30 ticks = 2.5 min cap) — the webhook that upgrades the tier usually
+  // lands within a minute of the redirect, i.e. AFTER the single refetch
+  // above. Interval survives refetches (dep is user?.tier, not the user
+  // object) and clears on unmount, on tier change, or at the cap.
+  useEffect(() => {
+    if (!checkoutBanner || !user || activation !== "polling") return;
+    if (user.tier !== "free") {
+      setActivation("active");
+      return;
+    }
+    let ticks = 0;
+    const id = setInterval(() => {
+      ticks += 1;
+      if (ticks > 30) {
+        clearInterval(id);
+        setActivation("timeout");
+        return;
+      }
+      refetchUser();
+    }, 5000);
+    return () => clearInterval(id);
+  }, [checkoutBanner, user?.tier, activation]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── async tasks (one per submit — the button is the progress bar) ──────
 
@@ -261,6 +290,20 @@ export default function AccountPage() {
   const maxKeys = { free: 0, pro: 1, studio: 5 }[user.tier] ?? 0;
   const activeKeys = keys.filter((k) => !k.revoked);
 
+  // A subscription can be live while the tier is still "free" — e.g. a
+  // Razorpay mandate stuck at "authenticated" (authorized, never charged).
+  // Those users need the cancel escape hatch too: the backend 409s any new
+  // checkout while one is open, so without it they're wedged.
+  const subStatus = user.subscription_status;
+  const hasLiveSub =
+    !!subStatus && !["cancelled", "completed", "expired"].includes(subStatus);
+  const showDangerZone = user.tier !== "free" || hasLiveSub;
+  const subStatusNote = {
+    authenticated: "payment authorized — activating",
+    created: "checkout in progress",
+  }[subStatus];
+  const tierLabel = user.tier.charAt(0).toUpperCase() + user.tier.slice(1);
+
   const sectionTitle =
     "font-display font-semibold text-lg md:text-xl text-white";
 
@@ -275,10 +318,26 @@ export default function AccountPage() {
       />
       <main id="main" className="pb-20 px-4 sm:px-6">
         <div className="mx-auto max-w-3xl space-y-6">
-          {checkoutBanner && (
+          {checkoutBanner && activation === "polling" && (
             <div className="rounded-xl border border-signal-go/40 bg-signal-go/10 px-5 py-4 text-sm text-signal-go">
-              Payment received — thank you! Your plan activates within a minute
-              (your tier refreshes automatically).
+              Payment received — activating your plan&hellip; this page
+              refreshes automatically (usually under a minute).
+            </div>
+          )}
+          {checkoutBanner && activation === "active" && (
+            <div className="rounded-xl border border-signal-go/40 bg-signal-go/10 px-5 py-4 text-sm text-signal-go">
+              Your {tierLabel} plan is active.
+            </div>
+          )}
+          {checkoutBanner && activation === "timeout" && (
+            <div className="rounded-xl border border-signal-stage/40 bg-signal-stage/10 px-5 py-4 text-sm text-signal-stage">
+              Payment received — activation is taking longer than usual. Your
+              tier updates as soon as the payment provider confirms the charge;
+              refresh this page in a few minutes, or email{" "}
+              <a href="mailto:motoquant@gmail.com" className="underline decoration-signal-stage/40 underline-offset-2">
+                motoquant@gmail.com
+              </a>{" "}
+              if it still hasn&rsquo;t switched.
             </div>
           )}
 
@@ -303,7 +362,10 @@ export default function AccountPage() {
               </div>
             </div>
 
-            {user.tier === "free" && (
+            {/* Hide the upgrade pitch while a just-paid checkout is activating
+                — "tier Free + upgrade box" right after paying reads as a
+                failed payment. */}
+            {user.tier === "free" && !(checkoutBanner && activation === "polling") && (
               <div className="mt-5 rounded-xl border border-accent/30 bg-accent/[0.06] p-4">
                 <p className="text-sm text-white/75">
                   Upgrade to <strong className="text-white">Pro</strong> for unlimited sims, full analysis suite, and leaderboard saves.
@@ -556,10 +618,15 @@ export default function AccountPage() {
           </Reveal>
 
           {/* ── Danger zone — cancel subscription ──────────────────────── */}
-          {user.tier !== "free" && (
+          {showDangerZone && (
             <Reveal y={18}>
             <section className="card border-signal-foul/20 p-6 sm:p-8">
               <h2 className={sectionTitle}>Danger zone</h2>
+              {subStatusNote && (
+                <p className="mt-2 font-mono text-xs text-signal-stage">
+                  Subscription status: {subStatusNote}
+                </p>
+              )}
               {subMsg && (
                 <p className="mt-3 text-sm text-signal-stage">{subMsg}</p>
               )}

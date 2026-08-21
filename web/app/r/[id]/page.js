@@ -216,8 +216,8 @@ export default function RunPage() {
                   {copied ? 'Link copied' : 'Share this timeslip'}
                 </button>
                 {/* Print-to-PDF export (zero deps — PrintTimeslip supplies the
-                    print layout). Free for everyone during beta; candidate Pro
-                    gate once MOTOQUANT_BILLING_ENFORCE billing goes live. */}
+                    print layout). Ungated by design; candidate Pro gate
+                    post-launch. */}
                 <button type="button" onClick={() => window.print()} className="btn-ghost">
                   <Printer size={15} aria-hidden="true" />
                   Download PDF

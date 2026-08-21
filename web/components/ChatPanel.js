@@ -22,9 +22,11 @@
 //     surfaces error_detail (previously unknown errors rendered nothing).
 
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
-  AlertCircle, Send, KeyRound, RotateCcw, Timer, Link as LinkIcon,
+  AlertCircle, Send, KeyRound, RotateCcw, Timer, Link as LinkIcon, Lock,
 } from 'lucide-react';
 import SimProgress from './SimProgress';
 import { chatJob, partLabel } from '../lib/api';
@@ -468,6 +470,7 @@ export default function ChatPanel({ apiUrl }) {
   const scrollRef = useRef(null);
   const idRef = useRef(0);
   const reduce = useReducedMotion();
+  const pathname = usePathname(); // for the 401 sign-in ?next= return path
 
   // Job-backed chat turn — useAsyncTask owns AbortController + live progress;
   // chatJob cancels the job server-side when the signal aborts (■ Stop).
@@ -493,6 +496,10 @@ export default function ChatPanel({ apiUrl }) {
             role: 'assistant',
             content: '',
             failed: e?.message || 'Request failed — please try again',
+            // Structured billing/auth fields off ApiRequestError (lib/api) so
+            // the banner can offer an upgrade / sign-in link for 402/401.
+            failedStatus: e?.status ?? null,
+            failedUpgradeUrl: e?.upgradeUrl ?? null,
           },
         ]);
       }
@@ -551,6 +558,31 @@ export default function ChatPanel({ apiUrl }) {
   // Renders one assistant turn: error branches → blocks → summary prose.
   function renderAssistant(turn) {
     if (turn.failed) {
+      // 402 (upgrade / quota) and 401 (sign in) get an actionable link —
+      // status + upgrade URL ride on the turn from the ApiRequestError.
+      if (turn.failedStatus === 402 || turn.failedStatus === 401) {
+        let href = `/login?next=${encodeURIComponent(pathname || '/')}`;
+        let cta = 'Sign in';
+        if (turn.failedStatus === 402) {
+          href = '/pricing';
+          cta = 'Upgrade to Pro';
+          if (turn.failedUpgradeUrl) {
+            try {
+              href = new URL(turn.failedUpgradeUrl, 'https://motoquant.in').pathname || '/pricing';
+            } catch {
+              /* malformed URL → keep /pricing */
+            }
+          }
+        }
+        return (
+          <ErrorBanner tone="amber" icon={Lock}>
+            {turn.failed}{' '}
+            <Link href={href} className="font-semibold underline underline-offset-2 hover:opacity-80">
+              {cta}
+            </Link>
+          </ErrorBanner>
+        );
+      }
       return <ErrorBanner>{turn.failed}</ErrorBanner>;
     }
     const r = turn.result || {};

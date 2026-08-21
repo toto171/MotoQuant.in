@@ -167,7 +167,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Is MotoQuant Pro free?',
-    a: 'MotoQuant Pro is free during the open beta — create a free account and every Pro and Studio feature is unlocked, including saved runs, the build optimizer, and calibration uploads. At commercial launch, paid tiers begin at Pro ₹499/month and Studio ₹1,999/month; registered users get advance notice by email before billing starts.',
+    a: 'MotoQuant Pro has a free tier: 30 full simulations a day across the entire 541-bike catalog, no card required. Pro (₹499/month or ₹4,999/year) adds unlimited sims, the build optimizer, parts ROI analysis and saved runs. Studio (₹1,999/month or ₹19,990/year) adds Dragy GPS import and dyno calibration on top.',
   },
   {
     q: 'Can I use MotoQuant Pro for Indian drag strips?',
@@ -629,7 +629,7 @@ function CtaBand() {
         </Reveal>
         <Reveal delay={0.1}>
           <p className="mt-5 text-lg text-white/65">
-            Pick a bike. Pick a strip. We&rsquo;ll run the physics — free during beta.
+            Pick a bike. Pick a strip. We&rsquo;ll run the physics — free to start.
           </p>
         </Reveal>
         <Reveal delay={0.2}>
@@ -685,7 +685,7 @@ function HomePageInner() {
             <div>
               <div className="flex items-center gap-3">
                 <StageDots animate />
-                <span className="label-mono">Physics-based · Free during beta</span>
+                <span className="label-mono">Physics-based · Free to start</span>
               </div>
 
               <h1 className="mt-6 font-display font-bold text-4xl md:text-6xl tracking-tight text-white">

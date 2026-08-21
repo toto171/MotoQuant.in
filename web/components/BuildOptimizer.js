@@ -33,6 +33,7 @@ import ActionButton from './ActionButton';
 import SimProgress from './SimProgress';
 import BikePicker from './BikePicker';
 import ScoreboardDigits from './ScoreboardDigits';
+import UpgradeNotice from './UpgradeNotice';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 const fmtINR = (n) =>
@@ -305,16 +306,22 @@ export default function BuildOptimizer() {
 
       {/* ── Results (right column) ───────────────────────────────────── */}
       <div className="space-y-4">
-        {/* Error */}
+        {/* Error — 401/402 (sign-in / upgrade / quota) get the shared
+            UpgradeNotice with CTA; everything else keeps the foul tile. */}
         <AnimatePresence>
           {task.error && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="card border-signal-foul/30 bg-signal-foul/10 p-3 text-signal-foul text-sm flex items-center gap-2"
             >
-              <AlertCircle size={16} aria-hidden="true" /> {task.error}
+              {task.errorObj?.status === 401 || task.errorObj?.status === 402 ? (
+                <UpgradeNotice error={task.errorObj} onRetry={run} />
+              ) : (
+                <div className="card border-signal-foul/30 bg-signal-foul/10 p-3 text-signal-foul text-sm flex items-center gap-2">
+                  <AlertCircle size={16} aria-hidden="true" /> {task.error}
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

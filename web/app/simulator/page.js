@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, useMemo, useId, Suspense } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import {
   Zap, Search, ChevronDown, ChevronRight, X, MapPin, Gauge, Wrench,
@@ -9,13 +10,12 @@ import {
   BarChart3, Table2, Settings2, Upload, RotateCcw, Layers, MessageSquare,
   Locate, AlertCircle, Share2, Check } from 'lucide-react';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  AreaChart, Area
-} from 'recharts';
-import {
   API_URL as API, simulateJob, topspeedJob, compareJob, saveRun, partLabel,
+  simsQuota,
 } from '../../lib/api';
 import useAsyncTask from '../../lib/useAsyncTask';
+import { usePaymentsConfig } from '../../lib/usePaymentsConfig';
+import UpgradeNotice from '../../components/UpgradeNotice';
 import { predictQuick, preloadSurrogate } from '../../lib/surrogate';
 import SimProgress from '../../components/SimProgress';
 import ActionButton from '../../components/ActionButton';
@@ -218,42 +218,79 @@ function ErrorTile({ message, onRetry, retryLabel = 'Retry', className = '' }) {
   );
 }
 
+// ─── 401/402-aware error tile — billing/auth failures (ApiRequestError via
+//     useAsyncTask.errorObj) render the shared UpgradeNotice CTA; everything
+//     else keeps the standard foul ErrorTile exactly. ──────────────────────
+function TaskErrorTile({ task, message, onRetry, className = '' }) {
+  const status = task.errorObj?.status;
+  if (status === 401 || status === 402) {
+    return (
+      <div className={className}>
+        <UpgradeNotice error={task.errorObj} onRetry={onRetry} />
+      </div>
+    );
+  }
+  return <ErrorTile message={message} onRetry={onRetry} className={className} />;
+}
+
+// ─── Free-sims quota chip — listens for the "mq:sims-quota" CustomEvent that
+//     lib/api broadcasts whenever a metered sim response carries the
+//     X-Sims-Remaining/X-Sims-Limit headers. Renders nothing until a value
+//     has arrived (no layout shift) and never for pro/studio viewers (their
+//     sims are unmetered). Seeds from the module-level snapshot so a re-mount
+//     doesn't lose an already-captured value. ────────────────────────────────
+function SimsQuotaChip({ tier }) {
+  const [quota, setQuota] = useState(() =>
+    simsQuota.remaining != null
+      ? { remaining: simsQuota.remaining, limit: simsQuota.limit }
+      : null
+  );
+  useEffect(() => {
+    const onQuota = (e) => {
+      if (e?.detail && typeof e.detail.remaining === 'number') setQuota(e.detail);
+    };
+    window.addEventListener('mq:sims-quota', onQuota);
+    return () => window.removeEventListener('mq:sims-quota', onQuota);
+  }, []);
+  if (!quota || tier === 'pro' || tier === 'studio') return null;
+  const n = Math.max(0, quota.remaining);
+  if (n === 0) {
+    return (
+      <Link
+        href="/pricing"
+        className="label-mono text-signal-stage underline underline-offset-2 hover:text-white transition-colors"
+      >
+        0 free sims left today
+      </Link>
+    );
+  }
+  return <span className="label-mono">{n} free sims left today</span>;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
-   CHART COMPONENTS
+   CHART COMPONENTS — code-split (components/SimCharts.js)
+   recharts is ~90-100 KB gzip and every chart renders only inside conditional
+   result branches, so each export loads on first render via next/dynamic
+   (ssr: false — one shared chunk) with a Skeleton sized like the chart block.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const CHART_COLORS = { a: '#FF5E1F', b: '#6FE3B2' };
-
-function SimChart({ data, dataKey, label, unit, color = CHART_COLORS.a, domain }) {
-  const gradId = useId();
-  if (!data || data.length === 0) return null;
-  const gid = `grad-${dataKey}-${gradId}`;
-  return (
-    <div className="h-44">
-      <p className="label-mono mb-2">{label}</p>
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-          <defs>
-            <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity={0.2} />
-              <stop offset="100%" stopColor={color} stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-          <XAxis dataKey="t" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} tickFormatter={v => `${v}s`} />
-          <YAxis tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} domain={domain} />
-          <Tooltip
-            contentStyle={{ background: '#10141B', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 11 }}
-            labelFormatter={v => `${v}s`}
-            formatter={v => [`${typeof v === 'number' ? v.toFixed(1) : v} ${unit}`, label]}
-          />
-          <Area type="monotone" dataKey={dataKey} stroke={color} strokeWidth={1.5}
-            fill={`url(#${gid})`} dot={false} />
-        </AreaChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
+const simChartsChunk = () => import('../../components/SimCharts');
+const SimChart = dynamic(() => simChartsChunk().then((m) => m.SimChart), {
+  ssr: false,
+  loading: () => <Skeleton className="h-44" />,
+});
+const CompareOverlayCharts = dynamic(
+  () => simChartsChunk().then((m) => m.CompareOverlayCharts),
+  { ssr: false, loading: () => <Skeleton className="h-44" /> }
+);
+const DragySpeedOverlay = dynamic(
+  () => simChartsChunk().then((m) => m.DragySpeedOverlay),
+  { ssr: false, loading: () => <Skeleton className="h-48" /> }
+);
+const DynoCurveChart = dynamic(
+  () => simChartsChunk().then((m) => m.DynoCurveChart),
+  { ssr: false, loading: () => <Skeleton className="h-52" /> }
+);
 
 /* ═══════════════════════════════════════════════════════════════════════════
    MAIN PAGE
@@ -336,8 +373,23 @@ function SimulatorPageInner() {
   const lastDynoFileRef = useRef(null);
 
   // ─── Auth (read-only) — bearer token for "Save this run" ────────────
-  const { accessToken } = useAuth();
+  const { accessToken, user, isLoading: authLoading } = useAuth();
   const [savedRun, setSavedRun] = useState(null);
+
+  // ─── Proactive save gate — /api/simulate/save is pro-gated once billing
+  //     is enforced, so don't offer a button that can only 401/402. While
+  //     beta (or while cfg/auth is still unknown) behaviour is unchanged:
+  //     gating on tier alone would lie while enforcement is off. The
+  //     reactive TaskErrorTile 401/402 branch stays as the net either way.
+  const { cfg: paymentsCfg } = usePaymentsConfig();
+  const billingEnforced = paymentsCfg != null && paymentsCfg.beta === false && !authLoading;
+  const saveGate = !billingEnforced
+    ? null
+    : !user
+      ? { href: '/login?next=/simulator', label: 'Sign in to save runs' }
+      : user.tier !== 'pro' && user.tier !== 'studio'
+        ? { href: '/pricing?intent=pro_monthly', label: 'Save runs with Pro' }
+        : null;
 
   // ─── Shared sim request body ─────────────────────────────────────────
   // Read fresh from state at call time (useAsyncTask keeps its fn current).
@@ -1028,6 +1080,7 @@ function SimulatorPageInner() {
               onStop={activeOp.task.stop}
             />
           )}
+          <SimsQuotaChip tier={user?.tier} />
           <div className="ml-auto hidden sm:flex items-center gap-3 label-mono">
             <span>{loading ? '—' : bikes.length} bikes</span>
             <span className="text-white/20">·</span>
@@ -1428,7 +1481,8 @@ function SimulatorPageInner() {
 
             {/* Quick-sim error (own state — never collides with full/topspeed/compare) */}
             {quickTask.error && !quickTask.active && (
-              <ErrorTile
+              <TaskErrorTile
+                task={quickTask}
                 message={`Quick sim failed — ${quickTask.error}`}
                 onRetry={() => quickTask.run('manual')}
               />
@@ -1507,7 +1561,10 @@ function SimulatorPageInner() {
 
                     {/* Save this run — anonymous allowed (beta); token binds to Garage.
                         NEVER offered on an estimated (client-surrogate) result: only
-                        exact server RK4 numbers may reach the leaderboard. */}
+                        exact server RK4 numbers may reach the leaderboard. Once
+                        billing is enforced the save route is pro-gated, so the
+                        button is replaced by the matching sign-in/upgrade link
+                        (saveGate) instead of a guaranteed 401/402. */}
                     {bike?.id != null && result.et_quarter_s != null && !result.estimated && (
                       savedRun ? (
                         <Link
@@ -1515,6 +1572,10 @@ function SimulatorPageInner() {
                           className="w-full h-9 inline-flex items-center justify-center gap-2 rounded-lg border border-signal-go/30 bg-signal-go/10 text-signal-go text-xs font-display font-semibold transition-colors hover:bg-signal-go/15"
                         >
                           <Check size={13} /> Saved — view leaderboard
+                        </Link>
+                      ) : saveGate ? (
+                        <Link href={saveGate.href} className="btn-ghost btn-sm w-full">
+                          {saveGate.label}
                         </Link>
                       ) : (
                         <div className="space-y-1.5">
@@ -1527,7 +1588,11 @@ function SimulatorPageInner() {
                             className="w-full btn-sm"
                           />
                           {saveTask.error && !saveTask.active && (
-                            <ErrorTile message={saveTask.error} onRetry={() => saveTask.run()} />
+                            <TaskErrorTile
+                              task={saveTask}
+                              message={saveTask.error}
+                              onRetry={() => saveTask.run()}
+                            />
                           )}
                         </div>
                       )
@@ -1568,6 +1633,11 @@ function SimulatorPageInner() {
                     <div className="text-[10px] text-white/30 mt-2 text-center">Simulating up to 120 s of terminal velocity</div>
                   </div>
                 ) : topSpeedTask.error ? (
+                  topSpeedTask.errorObj?.status === 401 || topSpeedTask.errorObj?.status === 402 ? (
+                    <div className="py-8 px-6 max-w-md mx-auto">
+                      <UpgradeNotice error={topSpeedTask.errorObj} onRetry={startTopSpeed} />
+                    </div>
+                  ) : (
                   <div className="text-center py-12 text-xs">
                     <div className="text-signal-foul mb-3">Top speed simulation failed</div>
                     <div className="text-white/35 text-[10px] mb-4">{topSpeedTask.error}</div>
@@ -1580,6 +1650,7 @@ function SimulatorPageInner() {
                       className="btn-sm"
                     />
                   </div>
+                  )
                 ) : topSpeedResult ? (
                   <div className="space-y-4">
                     {/* Primary terminal velocity */}
@@ -1746,7 +1817,8 @@ function SimulatorPageInner() {
                 ) : (
                   <>
                     {fullSimTask.error && (
-                      <ErrorTile
+                      <TaskErrorTile
+                        task={fullSimTask}
                         className="mb-4"
                         message={`Full simulation failed — ${fullSimTask.error}`}
                         onRetry={startFullSim}
@@ -1834,7 +1906,8 @@ function SimulatorPageInner() {
                           />
                         </div>
                         {fullSimTask.error && !fullSimTask.active && (
-                          <ErrorTile
+                          <TaskErrorTile
+                            task={fullSimTask}
                             className="mt-3 text-left"
                             message={fullSimTask.error}
                             onRetry={startFullSim}
@@ -1912,7 +1985,8 @@ function SimulatorPageInner() {
                   </div>
                 )}
                 {compareTask.error && !compareTask.active && (
-                  <ErrorTile
+                  <TaskErrorTile
+                    task={compareTask}
                     className="mt-3"
                     message={`Comparison failed — ${compareTask.error}`}
                     onRetry={startCompare}
@@ -1958,44 +2032,9 @@ function SimulatorPageInner() {
                     </div>
 
                     {/* Overlay charts */}
-                    {compareResult.a?.timeseries && compareResult.b?.timeseries && (() => {
-                      const overlayData = compareResult.a.timeseries.t_s.map((t, i) => ({
-                        t: +t.toFixed(2),
-                        a_speed: compareResult.a.timeseries.v_kmh?.[i] ?? 0,
-                        b_speed: compareResult.b.timeseries.v_kmh?.[i] ?? 0,
-                        a_rpm: compareResult.a.timeseries.rpm?.[i] ?? 0,
-                        b_rpm: compareResult.b.timeseries.rpm?.[i] ?? 0,
-                        a_power: compareResult.a.timeseries.power_kw?.[i] ?? 0,
-                        b_power: compareResult.b.timeseries.power_kw?.[i] ?? 0,
-                      }));
-                      return (
-                        <div className="space-y-4">
-                          <p className="label-mono">Overlay Charts</p>
-                          {[
-                            { key: 'speed', label: 'Speed (km/h)', unit: 'km/h' },
-                            { key: 'rpm', label: 'Engine RPM', unit: 'rpm' },
-                            { key: 'power', label: 'Power (kW)', unit: 'kW' },
-                          ].map(chart => (
-                            <div key={chart.key} className="h-44">
-                              <p className="label-mono mb-2">{chart.label}</p>
-                              <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={overlayData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                                  <XAxis dataKey="t" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} tickFormatter={v => `${v}s`} />
-                                  <YAxis tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} />
-                                  <Tooltip
-                                    contentStyle={{ background: '#10141B', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 11 }}
-                                    labelFormatter={v => `${v}s`}
-                                  />
-                                  <Line type="monotone" dataKey={`a_${chart.key}`} stroke="#FF5E1F" strokeWidth={1.5} dot={false} name="Build A" />
-                                  <Line type="monotone" dataKey={`b_${chart.key}`} stroke="#6FE3B2" strokeWidth={1.5} dot={false} name="Build B" />
-                                </LineChart>
-                              </ResponsiveContainer>
-                            </div>
-                          ))}
-                        </div>
-                      );
-                    })()}
+                    {compareResult.a?.timeseries && compareResult.b?.timeseries && (
+                      <CompareOverlayCharts compareResult={compareResult} />
+                    )}
                   </div>
                 )}
               </Card>
@@ -2043,14 +2082,16 @@ function SimulatorPageInner() {
 
                 {/* Per-upload inline errors with Retry (same file, from ref) */}
                 {dragyTask.error && !dragyTask.active && (
-                  <ErrorTile
+                  <TaskErrorTile
+                    task={dragyTask}
                     className="mb-3"
                     message={`Dragy upload failed — ${dragyTask.error}`}
                     onRetry={lastDragyFileRef.current ? () => dragyTask.run(lastDragyFileRef.current) : undefined}
                   />
                 )}
                 {dynoTask.error && !dynoTask.active && (
-                  <ErrorTile
+                  <TaskErrorTile
+                    task={dynoTask}
                     className="mb-3"
                     message={`Dyno upload failed — ${dynoTask.error}`}
                     onRetry={lastDynoFileRef.current ? () => dynoTask.run(lastDynoFileRef.current) : undefined}
@@ -2096,34 +2137,12 @@ function SimulatorPageInner() {
                     )}
 
                     {/* Real vs Sim speed overlay chart */}
-                    {uploadResult.best_run?.timeseries && uploadResult.overlay?.sim_timeseries && (() => {
-                      const realTs = uploadResult.best_run.timeseries;
-                      const simTs = uploadResult.overlay.sim_timeseries;
-                      const maxLen = Math.max(realTs.t_s.length, simTs.t_s.length);
-                      const overlayData = [];
-                      for (let i = 0; i < maxLen; i++) {
-                        overlayData.push({
-                          t: (realTs.t_s[i] ?? simTs.t_s[i] ?? 0).toFixed(2),
-                          real: realTs.v_kmh?.[i] ?? null,
-                          sim: simTs.v_kmh?.[i] ?? null,
-                        });
-                      }
-                      return (
-                        <div className="h-48">
-                          <p className="label-mono mb-2">Speed Overlay — Real vs Sim</p>
-                          <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={overlayData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                              <XAxis dataKey="t" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} tickFormatter={v => `${v}s`} />
-                              <YAxis tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} />
-                              <Tooltip contentStyle={{ background: '#10141B', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 11 }} labelFormatter={v => `${v}s`} />
-                              <Line type="monotone" dataKey="real" stroke="#34D97B" strokeWidth={2} dot={false} name="Real (Dragy)" />
-                              <Line type="monotone" dataKey="sim" stroke="#FF5E1F" strokeWidth={1.5} strokeDasharray="4 2" dot={false} name="Sim" />
-                            </LineChart>
-                          </ResponsiveContainer>
-                        </div>
-                      );
-                    })()}
+                    {uploadResult.best_run?.timeseries && uploadResult.overlay?.sim_timeseries && (
+                      <DragySpeedOverlay
+                        realTs={uploadResult.best_run.timeseries}
+                        simTs={uploadResult.overlay.sim_timeseries}
+                      />
+                    )}
                   </div>
                 )}
 
@@ -2148,29 +2167,7 @@ function SimulatorPageInner() {
                     </div>
 
                     {/* Dyno chart */}
-                    {uploadResult.curve && (() => {
-                      const curveData = uploadResult.curve.rpm.map((rpm, i) => ({
-                        rpm,
-                        power: uploadResult.curve.power_hp?.[i] ?? 0,
-                        torque: uploadResult.curve.torque_nm?.[i] ?? 0,
-                      }));
-                      return (
-                        <div className="h-52">
-                          <p className="label-mono mb-2">Power & Torque vs RPM</p>
-                          <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={curveData} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
-                              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                              <XAxis dataKey="rpm" tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.4)' }} tickFormatter={v => `${(v/1000).toFixed(0)}k`} />
-                              <YAxis yAxisId="power" tick={{ fontSize: 9, fill: '#FF5E1F' }} orientation="left" />
-                              <YAxis yAxisId="torque" tick={{ fontSize: 9, fill: '#6FE3B2' }} orientation="right" />
-                              <Tooltip contentStyle={{ background: '#10141B', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontSize: 11 }} labelFormatter={v => `${v} RPM`} />
-                              <Line yAxisId="power" type="monotone" dataKey="power" stroke="#FF5E1F" strokeWidth={2} dot={false} name="Power (hp)" />
-                              <Line yAxisId="torque" type="monotone" dataKey="torque" stroke="#6FE3B2" strokeWidth={1.5} dot={false} name="Torque (Nm)" />
-                            </LineChart>
-                          </ResponsiveContainer>
-                        </div>
-                      );
-                    })()}
+                    {uploadResult.curve && <DynoCurveChart curve={uploadResult.curve} />}
                   </div>
                 )}
 

@@ -35,7 +35,7 @@ const ROADMAP = [
     phase: 'Phase 6',
     status: 'in-progress',
     label: 'Commercial launch + AI layer',
-    desc: 'Accounts + freemium tiers live (free during open beta). Razorpay + Stripe payment rails wired. Conversational AI tuning shipped. PPO launch control next.',
+    desc: 'Accounts + freemium tiers live. Razorpay + Stripe payment rails wired. Conversational AI tuning shipped. PPO launch control next.',
   },
 ];
 

@@ -167,7 +167,7 @@ function LoginPageInner() {
 
   const headings = {
     signin: ["Sign in to the strip", "Welcome back — pick up where you left off."],
-    register: ["Create your account", "Free during the open beta — every Pro feature unlocked."],
+    register: ["Create your account", "Start free — 30 sims a day on the full 541-bike catalog. No card required."],
     magic: ["Magic-link sign-in", "No password needed — we’ll email you a sign-in link."],
   };
   const [heading, subheading] = headings[mode];

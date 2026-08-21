@@ -78,11 +78,10 @@ export default function TermsPage() {
             only to payments made after that date.
           </p>
           <p>
-            <strong>Open beta: </strong>while MotoQuant Pro is in open beta, all Pro and
-            Studio features are provided free of charge to all registered accounts. We
-            will give registered users advance notice by email before paid billing
-            begins. Beta access does not create an entitlement to free access after
-            commercial launch.
+            <strong>Free tier: </strong>the Free tier is provided at no charge and is
+            subject to a daily simulation limit. We may change free-tier limits with
+            notice. Free access does not create an entitlement to paid-tier features
+            or to any particular free-tier limit.
           </p>
           <p>
             Payments are processed by Razorpay (India — UPI, cards, net banking,
@@ -101,13 +100,13 @@ export default function TermsPage() {
 
         <Section title="4. License keys">
           <p>
-            Pro subscribers may generate 1 license key; Studio subscribers may generate
-            up to 5 keys. License keys are personal and non-transferable, and bind to a
-            single device.
+            License keys are device-bound seats for MotoQuant tooling and API
+            integrations. A Pro subscription includes 1 seat; Studio includes up to 5.
+            Keys are personal and non-transferable, and each binds to a single device.
           </p>
           <p>
-            On subscription cancellation or expiry, license keys are invalidated within
-            24 hours of the next validation check.
+            On subscription cancellation or expiry, seats are invalidated within
+            24 hours.
           </p>
         </Section>
 

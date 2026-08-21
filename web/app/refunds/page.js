@@ -43,12 +43,11 @@ export default function RefundsPage() {
             .
           </p>
 
-          <Section title="1. Open beta">
+          <Section title="1. Scope">
             <p>
-              While MotoQuant Pro is in open beta, all tiers are provided free of
-              charge and no payments are collected. Nothing in this policy applies
-              until paid billing begins. Registered users will receive advance
-              notice by email before that happens.
+              This policy applies to paid Pro and Studio subscriptions. The Free
+              tier is not billed, so nothing in this policy applies to free
+              accounts — there is nothing to cancel and nothing to refund.
             </p>
           </Section>
 

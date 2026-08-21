@@ -20,10 +20,11 @@
  * checkout flow, EXP-002 + EXP-005 hooks all unchanged.
  */
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "../../components/AuthProvider";
+import usePaymentsConfig from "../../lib/usePaymentsConfig";
 import { track } from "../../lib/telemetry";
 import TierBadge from "../../components/TierBadge";
 import SiteNav from "../../components/SiteNav";
@@ -60,9 +61,13 @@ const FEATURES = [
   ["Priority email support",             "—",  "—",         "✓"],
 ];
 
+// Beta-only FAQ entry — rendered only while /api/payments/config says beta,
+// so the "everything is free" promise disappears the day billing flips on.
+const FAQ_BETA_ENTRY = { q: "Is the open beta really free?", a: "Yes. While MotoQuant is in open beta, every Pro and Studio feature is unlocked for all accounts at ₹0 — unlimited sims, the build optimiser, ECU autotune, Dragy/dyno imports, all of it. When we flip to paid plans at commercial launch you'll get advance notice by email, and the Free tier stays free forever." };
+
 const FAQ = [
-  { q: "Is the open beta really free?", a: "Yes. While MotoQuant is in open beta, every Pro and Studio feature is unlocked for all accounts at ₹0 — unlimited sims, the build optimiser, ECU autotune, Dragy/dyno imports, all of it. When we flip to paid plans at commercial launch you'll get advance notice by email, and the Free tier stays free forever." },
-  { q: "Can I switch tiers?", a: "Yes — you can upgrade or downgrade at any time from your account page. Upgrades take effect immediately; downgrades apply at the end of your current billing period." },
+  { q: "Is there a free tier?", a: "Yes — the Free tier gives you 30 simulations a day on the full 541-bike catalog, with venue conditions, A-vs-B comparison and live parts pricing. No card required, and it stays free after commercial launch." },
+  { q: "Can I switch tiers?", a: "To change plans, cancel your current plan from the account page — your access continues to the end of the paid period — then subscribe to the new plan. In-place plan switching with proration is on the roadmap." },
   { q: "What happens if I cancel?", a: "Your access continues until the end of the paid period. After that, your account moves to the Free tier automatically. No data is deleted — your build history and sim runs are retained." },
   { q: "Do I need an internet connection?", a: "Yes — MotoQuant is a hosted web app, so simulations run on our servers and need a connection. Quick sims are ~50 ms round-trip, so even patchy strip-side data is usually enough." },
   { q: "Is GST added at checkout?", a: "No. MotoQuant Pro is run by an unregistered sole proprietorship with turnover below the Rs.20 lakh GST registration threshold for services, so no GST is charged — the price you see is the total you pay. You get a payment receipt from the processor. If we register for GST later, we'll give notice before it starts applying." },
@@ -101,19 +106,22 @@ function PricingPageInner() {
   // Defaults to beta=true until /config answers (safe: checkout isn't
   // configured before launch anyway). While the fetch is in flight the CTA
   // labels show a skeleton instead of flashing the beta default; a failed
-  // fetch settles onto the beta default (cfgLoading goes false either way).
-  const [payCfg, setPayCfg] = useState(null);
-  const [cfgLoading, setCfgLoading] = useState(true);
-  useEffect(() => {
-    let cancelled = false;
-    fetch(`${API_BASE}/api/payments/config`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((cfg) => { if (!cancelled && cfg) setPayCfg(cfg); })
-      .catch(() => {})
-      .finally(() => { if (!cancelled) setCfgLoading(false); });
-    return () => { cancelled = true; };
-  }, []);
-  const beta = payCfg ? !!payCfg.beta : true;
+  // fetch settles onto the beta default (cfgLoading goes false either way —
+  // usePaymentsConfig resolves cfg=null on failure).
+  const { cfg: payCfg, loading: cfgLoading } = usePaymentsConfig();
+  // While the config is in flight, keep today's (beta) rendering to avoid a
+  // flash of paid copy. On a SETTLED failed fetch, fail toward PAID copy:
+  // once billing is live, wrongly promising "free during beta" routes paying
+  // intent to a dead end, which is worse than a beta-weekend visitor seeing
+  // paid CTAs (checkout answers with the friendly beta 503 either way).
+  const beta = payCfg ? !!payCfg.beta : cfgLoading;
+
+  // Live price book from /api/payments/config; the hardcoded PRICES stays the
+  // fallback so prices still render when the config fetch fails or is inflight.
+  const prices =
+    payCfg?.prices_inr?.pro && payCfg?.prices_inr?.studio
+      ? payCfg.prices_inr
+      : PRICES;
 
   // ── EXP-002: Pro-CTA copy A/B test (live 2026-05-08) ────────────────
   // Hypothesis: "Subscribe to Pro" is high-commitment language; framing
@@ -155,7 +163,10 @@ function PricingPageInner() {
       return;
     }
     if (!isAuthenticated) {
-      window.location.href = `/login?next=/pricing&intent=${tier}_${cycle}`;
+      // Intent goes INSIDE next so the login page's same-origin ?next=
+      // sanitizer carries it back here after auth (a sibling &intent= param
+      // on /login was silently dropped — the login page never read it).
+      window.location.href = `/login?next=${encodeURIComponent(`/pricing?intent=${tier}_${cycle}`)}`;
       return;
     }
     const res = await fetch(`${API_BASE}/api/payments/checkout`, {
@@ -179,16 +190,54 @@ function PricingPageInner() {
   const studioTask = useAsyncTask((signal) => subscribe("studio", signal));
   const checkoutError = proTask.error || studioTask.error;
 
+  // ── Intent funnel: /pricing?intent=pro_monthly | pro_yearly | studio_* ──
+  // Set when an unauthenticated buyer clicks Subscribe (see subscribe()) so
+  // their selection survives the login round trip. Accepted gap: the
+  // magic-link EMAIL round trip drops next (the backend hardcodes the login
+  // URL in the email) — password login preserves it; not worth growing the
+  // email surface in launch week.
+  const intentParam = searchParams?.get("intent") || "";
+  const intentMatch = /^(pro|studio)_(monthly|yearly)$/.exec(intentParam);
+  const intentFiredRef = useRef(false);
+
+  useEffect(() => {
+    // Always preselect the asked-for billing cycle (beta + unauthenticated
+    // arrivals get the preselect only — no checkout).
+    if (intentMatch) setCycle(intentMatch[2]);
+  }, [intentParam]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    // Auto-resume checkout exactly once: authed, config loaded, billing live.
+    if (!intentMatch || intentFiredRef.current) return;
+    if (cfgLoading || beta || !isAuthenticated) return;
+    if (cycle !== intentMatch[2]) return; // wait for the preselect to land
+    intentFiredRef.current = true;
+    // Strip ONLY the consumed intent param (keep utm_* etc. + hash) so a
+    // refresh mid-checkout can't re-fire it but attribution survives.
+    const params = new URLSearchParams(window.location.search);
+    params.delete("intent");
+    const rest = params.toString();
+    window.history.replaceState(
+      {},
+      "",
+      `/pricing${rest ? `?${rest}` : ""}${window.location.hash || ""}`
+    );
+    (intentMatch[1] === "pro" ? proTask : studioTask).run();
+  }, [intentParam, cfgLoading, beta, isAuthenticated, cycle]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const yearlyDiscount = (tier) => {
-    const m = PRICES[tier].monthly * 12;
-    const y = PRICES[tier].yearly;
+    const m = prices[tier].monthly * 12;
+    const y = prices[tier].yearly;
     return Math.round(((m - y) / m) * 100);
   };
 
   const displayPrice = (tier) => {
-    if (cycle === "monthly") return `₹${PRICES[tier].monthly.toLocaleString("en-IN")}`;
-    return `₹${Math.round(PRICES[tier].yearly / 12).toLocaleString("en-IN")}`;
+    if (cycle === "monthly") return `₹${prices[tier].monthly.toLocaleString("en-IN")}`;
+    return `₹${Math.round(prices[tier].yearly / 12).toLocaleString("en-IN")}`;
   };
+
+  // The beta-only FAQ entry drops out the day billing flips on.
+  const faq = beta ? [FAQ_BETA_ENTRY, ...FAQ] : FAQ;
 
   const h2Class =
     "font-display font-bold text-3xl md:text-4xl tracking-tight text-white";
@@ -273,7 +322,7 @@ function PricingPageInner() {
                 </div>
                 {cycle === "yearly" && (
                   <p className="mt-1 font-mono text-xs text-signal-go tabular-nums">
-                    ₹{PRICES.pro.yearly.toLocaleString("en-IN")}/yr · save {yearlyDiscount("pro")}%
+                    ₹{prices.pro.yearly.toLocaleString("en-IN")}/yr · save {yearlyDiscount("pro")}%
                   </p>
                 )}
                 <p
@@ -328,7 +377,7 @@ function PricingPageInner() {
                 </div>
                 {cycle === "yearly" && (
                   <p className="mt-1 font-mono text-xs text-signal-go tabular-nums">
-                    ₹{PRICES.studio.yearly.toLocaleString("en-IN")}/yr · save {yearlyDiscount("studio")}%
+                    ₹{prices.studio.yearly.toLocaleString("en-IN")}/yr · save {yearlyDiscount("studio")}%
                   </p>
                 )}
                 <p className="mt-3 text-sm text-white/65">For tuning shops and professional teams.</p>
@@ -446,7 +495,7 @@ function PricingPageInner() {
                 </a>
               </p>
               <div className="card px-6">
-                {FAQ.map((item) => <FaqItem key={item.q} {...item} />)}
+                {faq.map((item) => <FaqItem key={item.q} {...item} />)}
               </div>
             </div>
           </Reveal>

@@ -70,7 +70,7 @@ export default function SiteFooter() {
               made for the strip and the salt.
             </p>
             <p className="mt-4 label-mono">
-              motoquant.in &middot; Built in India &middot; Free during beta
+              motoquant.in &middot; Built in India &middot; The physics of faster
             </p>
           </div>
 
