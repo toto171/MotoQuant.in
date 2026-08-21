@@ -404,5 +404,131 @@ class TestJobsRoutes(unittest.TestCase):
         self.assertEqual(r.status_code, 404)
 
 
+@unittest.skipUnless(HAS_FASTAPI, "fastapi not installed")
+class TestJobOwnerScoping(unittest.TestCase):
+    """Owner-scoped job polling/cancel (2026-08-21 hardening).
+
+    Jobs created by an authenticated user must 404 for anyone else — with
+    EXACTLY the unknown-job message, so the response is never an existence
+    oracle on job ids — while anonymous jobs stay world-pollable (their
+    random 64-bit id remains the capability token, as before)."""
+
+    @classmethod
+    def setUpClass(cls):
+        from motoquant import api as api_mod
+
+        cls.api = api_mod
+        cls.client = TestClient(api_mod.app)
+
+    def tearDown(self):
+        self.api.app.dependency_overrides.pop(self.api.get_optional_user, None)
+
+    def _login_as(self, user_id):
+        """Simulate an authenticated caller via the get_optional_user seam."""
+        self.api.app.dependency_overrides[self.api.get_optional_user] = lambda: {
+            "id": user_id,
+            "email": f"u{user_id}@example.com",
+            "tier": "free",
+            "is_active": 1,
+        }
+
+    def _logout(self):
+        self.api.app.dependency_overrides.pop(self.api.get_optional_user, None)
+
+    def _finished_job(self, owner_id):
+        """Directly-seeded finished registry job — deterministic, no sim."""
+        job = jobs_mod.create_job(
+            "unittest", lambda progress: {"ok": 1}, owner_id=owner_id
+        )
+        deadline = time.time() + 10.0
+        while time.time() < deadline:
+            got = jobs_mod.get_job(job.id)
+            if got is not None and got.status == "done":
+                return job
+            time.sleep(0.02)
+        raise AssertionError("seed job did not finish")
+
+    def test_owned_job_polled_anonymously_404s_like_unknown(self):
+        job = self._finished_job(owner_id=7)
+        r = self.client.get(f"/api/jobs/{job.id}")
+        self.assertEqual(r.status_code, 404)
+        # EXACT same body as a genuinely unknown job — no existence oracle.
+        unknown = self.client.get("/api/jobs/deadbeef00000000")
+        self.assertEqual(r.json(), unknown.json())
+
+    def test_owned_job_polled_by_owner_200(self):
+        job = self._finished_job(owner_id=7)
+        self._login_as(7)
+        r = self.client.get(f"/api/jobs/{job.id}")
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.json()["status"], "done")
+        self.assertEqual(r.json()["result"], {"ok": 1})
+
+    def test_owned_job_polled_by_other_user_404(self):
+        job = self._finished_job(owner_id=7)
+        self._login_as(8)
+        r = self.client.get(f"/api/jobs/{job.id}")
+        self.assertEqual(r.status_code, 404)
+
+    def test_owned_job_cancel_scoping(self):
+        def _slow_runner(progress):
+            for i in range(20_000):  # ~100 s unless cancelled at a tick
+                progress(min(0.99, i / 20_000.0))
+                time.sleep(0.005)
+            return {"unreached": True}  # pragma: no cover
+
+        job = jobs_mod.create_job("unittest", _slow_runner, owner_id=7)
+        try:
+            # Anonymous cancel → 404 AND the cancel flag must not be set
+            # (authorization happens before the mutation).
+            r = self.client.post(f"/api/jobs/{job.id}/cancel")
+            self.assertEqual(r.status_code, 404)
+            self.assertFalse(jobs_mod.get_job(job.id).cancel_requested)
+            # A different user → same 404, still no flag.
+            self._login_as(8)
+            r = self.client.post(f"/api/jobs/{job.id}/cancel")
+            self.assertEqual(r.status_code, 404)
+            self.assertFalse(jobs_mod.get_job(job.id).cancel_requested)
+            # The owner → 200 and the flag is set.
+            self._login_as(7)
+            r = self.client.post(f"/api/jobs/{job.id}/cancel")
+            self.assertEqual(r.status_code, 200)
+            self.assertTrue(r.json()["cancel_requested"])
+        finally:
+            jobs_mod.cancel_job(job.id)  # belt-and-braces cleanup
+
+    def test_anonymous_job_stays_world_pollable(self):
+        job = self._finished_job(owner_id=None)
+        r = self.client.get(f"/api/jobs/{job.id}")  # anonymous caller
+        self.assertEqual(r.status_code, 200)
+        self._login_as(7)
+        r = self.client.get(f"/api/jobs/{job.id}")  # any signed-in user too
+        self.assertEqual(r.status_code, 200)
+
+    def test_creation_route_attaches_owner(self):
+        self._login_as(7)
+        r = self.client.post("/api/jobs/simulate", json={"bike_preset": "gsxr1000_k5"})
+        self.assertEqual(r.status_code, 202)
+        self.assertEqual(jobs_mod.get_job(r.json()["job_id"]).owner_id, 7)
+        # Anonymous creation leaves owner None (world-pollable, as before).
+        self._logout()
+        r = self.client.post("/api/jobs/simulate", json={"bike_preset": "gsxr1000_k5"})
+        self.assertEqual(r.status_code, 202)
+        self.assertIsNone(jobs_mod.get_job(r.json()["job_id"]).owner_id)
+
+    def test_progated_route_attaches_owner_from_require_tier(self):
+        # require_tier resolves through get_optional_user, so the same
+        # override flows into /api/jobs/autotune's auth dict.
+        self._login_as(9)
+        r = self.client.post(
+            "/api/jobs/autotune",
+            json={"bike_preset": "gsxr1000_k5", "gear_span": 1, "launch_steps": 2},
+        )
+        self.assertEqual(r.status_code, 202)
+        job_id = r.json()["job_id"]
+        self.assertEqual(jobs_mod.get_job(job_id).owner_id, 9)
+        self.client.post(f"/api/jobs/{job_id}/cancel")  # as owner — cleanup
+
+
 if __name__ == "__main__":
     unittest.main()

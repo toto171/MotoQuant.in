@@ -16,8 +16,12 @@ Design constraints (mirrors the auth/payments house style):
   requests can't lose a count.
 
 Identity resolution (done by the caller in api.py):
-  authenticated  -> "user:<id>"
-  anonymous      -> "anon:<sha256(client session id or IP)[:16]>"
+  authenticated                    -> "user:<id>"
+  anonymous w/ X-MQ-Client-Id      -> "anon:<sha256('cid:' + client id)[:16]>"
+  anonymous (no/invalid header)    -> "anon:<sha256(client IP)[:16]>"
+The client-id path exists because CGNAT (Indian mobile carriers) puts
+thousands of users behind one IP; the "cid:" prefix keeps the two anonymous
+namespaces disjoint.
 """
 
 from __future__ import annotations

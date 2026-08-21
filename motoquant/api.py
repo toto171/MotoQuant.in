@@ -31,6 +31,7 @@ import copy
 import json
 import logging
 import os
+import re
 import sqlite3
 import tempfile
 import threading
@@ -108,6 +109,9 @@ app.add_middleware(
     allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
+    # Quota + throttle headers the browser JS must be able to read on
+    # cross-origin responses (CORS hides non-safelisted headers otherwise).
+    expose_headers=["X-Sims-Limit", "X-Sims-Remaining", "Retry-After"],
 )
 
 # Response compression -- the origin serves 50-600 KB JSON payloads (full
@@ -752,9 +756,20 @@ def sentry_test():
 # nothing is blocked. Flipping the env var arms the 402.
 
 
+# Anonymous quota identity: an optional client-generated id (the web app
+# stores one in localStorage and sends it as X-MQ-Client-Id) so the free-sim
+# bucket isn't keyed on IP alone — CGNAT (Jio/Airtel mobile) puts thousands
+# of users behind one address sharing a single 30/day bucket. Accepted
+# tradeoff: a rotated id farms free sims, but the quota is a conversion
+# lever, not a security boundary — per-IP rate limits still bound compute;
+# a signed-token scheme is the post-launch escalation.
+_CLIENT_ID_RE = re.compile(r"[A-Za-z0-9_-]{8,64}")
+
+
 def _sim_identity_and_tier(request: Request) -> tuple[str, str]:
     """Resolve the metering identity: user id when a valid bearer token is
-    present, else a hashed client IP (never stored raw -- privacy page)."""
+    present, else the client's self-issued session id (X-MQ-Client-Id) or a
+    hashed client IP (never stored raw -- privacy page)."""
     authz = request.headers.get("authorization", "")
     if authz.lower().startswith("bearer "):
         try:
@@ -775,6 +790,12 @@ def _sim_identity_and_tier(request: Request) -> tuple[str, str]:
     from .ratelimit import client_ip
     from .usage import anon_identity
 
+    cid = request.headers.get("x-mq-client-id", "")
+    if cid and _CLIENT_ID_RE.fullmatch(cid):
+        # The "cid:" prefix keeps this namespace disjoint from IP-hash
+        # identities — a client id that happens to equal an IP string can
+        # never collide with (or hijack) that IP's bucket.
+        return anon_identity("cid:" + cid), "free"
     # Same trusted-proxy client-IP derivation as the rate limiter — the rightmost
     # X-Forwarded-For hop, never the spoofable leftmost one (see client_ip).
     return anon_identity(client_ip(request)), "free"
@@ -1462,8 +1483,10 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
         "parts_applied": parts_applied,
         "build_cost_inr": round(build_cost_inr, 0),
         "stock_et_s": stock_et,
+        # `is not None`, not truthiness — a legitimate 0.0 baseline ET must
+        # not silently drop the delta.
         "et_delta_s": round(float(sim.time_quarter) - stock_et, 4)
-        if stock_et
+        if stock_et is not None
         else None,
     }
     return result
@@ -3961,7 +3984,9 @@ def job_chat(
     meter = _make_chat_meter(request)
     tier = _chat_tier(user)
     return _start_job(
-        "chat", lambda progress: _chat_impl(req, client, meter, progress, tier)
+        "chat",
+        lambda progress: _chat_impl(req, client, meter, progress, tier),
+        owner_id=_job_owner_id(user),  # defined below, resolved at call time
     )
 
 
@@ -4253,14 +4278,25 @@ def autotune_ecu_route(
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-def _start_job(kind: str, runner) -> dict:
+def _start_job(kind: str, runner, owner_id: int | None = None) -> dict:
     from .jobs import JobCapacityError, create_job
 
     try:
-        job = create_job(kind, runner)
+        job = create_job(kind, runner, owner_id=owner_id)
     except JobCapacityError as exc:
         raise HTTPException(429, str(exc)) from exc
     return {"job_id": job.id, "kind": kind, "status": job.status}
+
+
+def _job_owner_id(user: dict | None) -> int | None:
+    """Owner id for a new job: the authenticated caller's user id, or None.
+
+    Accepts both ``get_optional_user`` results (dict | None) and the
+    ``require_tier`` auth dict (empty dict for anonymous during beta)."""
+    if not user:
+        return None
+    uid = user.get("id")
+    return int(uid) if uid is not None else None
 
 
 @app.post(
@@ -4273,9 +4309,16 @@ def _start_job(kind: str, runner) -> dict:
         Depends(_meter_full_sim),
     ],
 )
-def job_simulate(req: SimulateRequest):
+def job_simulate(
+    req: SimulateRequest,
+    user: dict | None = Depends(get_optional_user),  # noqa: B008
+):
     """Start a full simulation as a background job (real progress)."""
-    return _start_job("simulate", lambda progress: _simulate_impl(req, progress))
+    return _start_job(
+        "simulate",
+        lambda progress: _simulate_impl(req, progress),
+        owner_id=_job_owner_id(user),
+    )
 
 
 @app.post(
@@ -4287,9 +4330,16 @@ def job_simulate(req: SimulateRequest):
         Depends(_meter_full_sim),
     ],
 )
-def job_topspeed(req: TopSpeedRequest):
+def job_topspeed(
+    req: TopSpeedRequest,
+    user: dict | None = Depends(get_optional_user),  # noqa: B008
+):
     """Start a top-speed run as a background job (real progress)."""
-    return _start_job("topspeed", lambda progress: _topspeed_impl(req, progress))
+    return _start_job(
+        "topspeed",
+        lambda progress: _topspeed_impl(req, progress),
+        owner_id=_job_owner_id(user),
+    )
 
 
 @app.post(
@@ -4302,7 +4352,11 @@ def job_optimize(
     _auth: dict = Depends(require_tier("pro")),  # noqa: B008
 ):
     """Start the build optimiser as a background job (real progress)."""
-    return _start_job("optimize", lambda progress: _optimize_impl(req, progress))
+    return _start_job(
+        "optimize",
+        lambda progress: _optimize_impl(req, progress),
+        owner_id=_job_owner_id(_auth),
+    )
 
 
 @app.post(
@@ -4315,7 +4369,11 @@ def job_autotune(
     _auth: dict = Depends(require_tier("pro")),  # noqa: B008
 ):
     """Start the ECU autotune as a background job (real progress)."""
-    return _start_job("autotune", lambda progress: _autotune_impl(req, progress))
+    return _start_job(
+        "autotune",
+        lambda progress: _autotune_impl(req, progress),
+        owner_id=_job_owner_id(_auth),
+    )
 
 
 class OutlawRequest(BaseModel):
@@ -4396,7 +4454,11 @@ def job_outlaw(
 ):
     """Start the composed outlaw/open-class build as a background job."""
     # Pro tier is unmetered, so the tier gate is the access control here.
-    return _start_job("outlaw", lambda progress: _outlaw_impl(req, progress))
+    return _start_job(
+        "outlaw",
+        lambda progress: _outlaw_impl(req, progress),
+        owner_id=_job_owner_id(_auth),
+    )
 
 
 @app.post(
@@ -4404,23 +4466,53 @@ def job_outlaw(
     status_code=202,
     dependencies=[Depends(_meter_full_sims(2))],
 )
-def job_compare(req: CompareRequest):
+def job_compare(
+    req: CompareRequest,
+    user: dict | None = Depends(get_optional_user),  # noqa: B008
+):
     """Start an A-vs-B comparison as a background job (real progress).
 
     Metered at two sim units, matching the sync /api/simulate/compare route
     it wraps — the two must stay behaviourally identical (deploy-skew
     fallback contract), so they gained the meter together."""
-    return _start_job("compare", lambda progress: _compare_impl(req, progress))
+    return _start_job(
+        "compare",
+        lambda progress: _compare_impl(req, progress),
+        owner_id=_job_owner_id(user),
+    )
+
+
+# 404 body for owner-scoped denials MUST match the unknown-job message exactly
+# — a distinct "not yours" response would be an existence oracle on job ids.
+_UNKNOWN_JOB_MSG = "Unknown or expired job (results are kept ~15 min)"
+
+
+def _job_visible_to(job, user: dict | None) -> bool:
+    """Owned jobs are visible only to their owner; anonymous jobs to anyone."""
+    if job.owner_id is None:
+        return True
+    return user is not None and _job_owner_id(user) == job.owner_id
 
 
 @app.get("/api/jobs/{job_id}")
-def job_status(job_id: str):
-    """Poll a background job: status, progress (0..1), stage, result/error."""
+def job_status(
+    job_id: str,
+    user: dict | None = Depends(get_optional_user),  # noqa: B008
+):
+    """Poll a background job: status, progress (0..1), stage, result/error.
+
+    Owner-scoping contract: a job CREATED with an Authorization bearer is
+    visible only to that user — polls (and cancels) must send the same
+    user's bearer or they 404 exactly like an unknown id. API clients that
+    authenticate creation but poll anonymously (or let a 15-min access token
+    expire mid-poll) will see 404s their retry logic may misread as registry
+    loss. Jobs created anonymously stay pollable by anyone with the id.
+    """
     from .jobs import get_job
 
     job = get_job(job_id)
-    if job is None:
-        raise HTTPException(404, "Unknown or expired job (results are kept ~15 min)")
+    if job is None or not _job_visible_to(job, user):
+        raise HTTPException(404, _UNKNOWN_JOB_MSG)
     out = {
         "job_id": job.id,
         "kind": job.kind,
@@ -4436,19 +4528,30 @@ def job_status(job_id: str):
 
 
 @app.post("/api/jobs/{job_id}/cancel")
-def job_cancel(job_id: str):
+def job_cancel(
+    job_id: str,
+    user: dict | None = Depends(get_optional_user),  # noqa: B008
+):
     """
     Request cancellation of a running job (the website's Stop button).
 
     Cooperative: the worker thread stops at its next progress tick. Terminal
     jobs (done / error / cancelled) are returned unchanged — cancelling a
     finished job is a no-op, not an error.
-    """
-    from .jobs import cancel_job
 
+    Owner-scoping: same contract as GET /api/jobs/{id} — a job created with
+    a bearer can only be cancelled with that user's bearer (else 404).
+    """
+    from .jobs import cancel_job, get_job
+
+    # Ownership check BEFORE cancel_job — cancel_job mutates (sets the
+    # cancel flag), so an unauthorized caller must be rejected first.
+    existing = get_job(job_id)
+    if existing is None or not _job_visible_to(existing, user):
+        raise HTTPException(404, _UNKNOWN_JOB_MSG)
     job = cancel_job(job_id)
-    if job is None:
-        raise HTTPException(404, "Unknown or expired job (results are kept ~15 min)")
+    if job is None:  # evicted between the two lookups — same client contract
+        raise HTTPException(404, _UNKNOWN_JOB_MSG)
     return {
         "job_id": job.id,
         "kind": job.kind,
@@ -4474,6 +4577,24 @@ async def _start_keepwarm_loop() -> None:
         start_keepwarm()
     except Exception:  # noqa: BLE001 — keep-warm is best-effort only
         logging.getLogger(__name__).warning("keep-warm init failed", exc_info=True)
+
+
+@app.on_event("startup")
+async def _start_backup_scheduler_loop() -> None:
+    # In-process scheduling is the only path that reaches the DB on prod: the
+    # Render persistent disk mounts to exactly ONE service, and scripts/ is
+    # not COPYd into the Docker image, so no external cron can run
+    # scripts/backup_db.py against it — motoquant/backup.py rides the
+    # existing `COPY motoquant/` layer instead. No-op unless
+    # MOTOQUANT_BACKUP_ENABLE is set (see motoquant/backup.py).
+    try:
+        from .backup import start_backup_scheduler
+
+        start_backup_scheduler()
+    except Exception:  # noqa: BLE001 — backups must never block boot
+        logging.getLogger(__name__).warning(
+            "backup scheduler init failed", exc_info=True
+        )
 
 
 # ═══════════════════════════════════════════════════════════════════════════

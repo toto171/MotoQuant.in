@@ -750,3 +750,147 @@ class TestStaleLivePrices(unittest.TestCase):
         self.assertIn(
             2, part_ids, "price from 20 days ago is stale at 14-day threshold"
         )
+
+
+class TestFetchedAtFormats(unittest.TestCase):
+    """_parse_fetched_date/_is_stale (2026-08-21): fetched_at holds TWO string
+    shapes — ISO-with-T from the adapter upsert and space-separated from the
+    schema's datetime('now','utc') default — and the old string compares
+    against a date-only cutoff misclassified junk values and skewed same-day
+    ordering. All formats must classify identically at the 14-day boundary."""
+
+    def setUp(self):
+        self.cutoff = datetime.date.today() - datetime.timedelta(days=14)
+
+    @staticmethod
+    def _fmt(d, style):
+        if style == "T":
+            return d.isoformat() + "T10:30:00"
+        if style == "space":
+            return d.isoformat() + " 10:30:00"
+        return d.isoformat()  # date-only
+
+    def test_parse_all_formats_to_same_date(self):
+        from motoquant.database.pricing_refresh import _parse_fetched_date
+
+        d = datetime.date(2026, 8, 7)
+        for style in ("T", "space", "date"):
+            self.assertEqual(_parse_fetched_date(self._fmt(d, style)), d, style)
+
+    def test_junk_parses_none_and_is_stale(self):
+        from motoquant.database.pricing_refresh import _is_stale, _parse_fetched_date
+
+        for junk in (None, "", "not-a-date", "2026-13-45T99:99:99", "yesterday"):
+            self.assertIsNone(_parse_fetched_date(junk), repr(junk))
+            self.assertTrue(_is_stale(junk, self.cutoff), repr(junk))
+
+    def test_boundary_day_classifies_identically_across_formats(self):
+        from motoquant.database.pricing_refresh import _is_stale
+
+        on_cutoff = self.cutoff  # exactly 14 days old → still fresh
+        one_older = self.cutoff - datetime.timedelta(days=1)  # 15 days → stale
+        for style in ("T", "space", "date"):
+            self.assertFalse(
+                _is_stale(self._fmt(on_cutoff, style), self.cutoff),
+                f"{style}: cutoff-day row must NOT be stale",
+            )
+            self.assertTrue(
+                _is_stale(self._fmt(one_older, style), self.cutoff),
+                f"{style}: cutoff+1-day-old row must be stale",
+            )
+
+
+class TestStaleLivePricesFormats(unittest.TestCase):
+    """stale_live_prices/get_cheapest_prices over the mixed stored formats."""
+
+    def _make_db(self):
+        import sqlite3
+
+        conn = sqlite3.connect(":memory:")
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA journal_mode=DELETE")
+        conn.executescript("""
+            CREATE TABLE parts (
+                id INTEGER PRIMARY KEY, brand TEXT, model_name TEXT,
+                retailer TEXT, price_inr REAL, retailer_url TEXT
+            );
+            CREATE TABLE part_prices (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                part_id INTEGER NOT NULL,
+                retailer TEXT NOT NULL,
+                source_url TEXT NOT NULL,
+                price_inr REAL,
+                in_stock INTEGER NOT NULL DEFAULT 1,
+                fetched_at TEXT NOT NULL DEFAULT (datetime('now','utc')),
+                created_at TEXT DEFAULT (datetime('now','utc')),
+                UNIQUE(part_id, retailer)
+            );
+        """)
+        conn.execute(
+            "INSERT INTO parts (id, brand, model_name, retailer) "
+            "VALUES (1, 'Akra', 'Evo Ti', 'Akrapovic India')"
+        )
+        conn.execute(
+            "INSERT INTO parts (id, brand, model_name, retailer) "
+            "VALUES (2, 'KN', 'HA-1099', 'K&N India')"
+        )
+        conn.commit()
+        return conn
+
+    def _insert_price(self, conn, part_id, retailer, fetched_at, price=1000.0):
+        conn.execute(
+            "INSERT INTO part_prices (part_id, retailer, source_url, price_inr, "
+            "in_stock, fetched_at) VALUES (?, ?, 'http://x.com', ?, 1, ?)",
+            (part_id, retailer, price, fetched_at),
+        )
+        conn.commit()
+
+    def test_fresh_rows_in_both_formats_are_not_stale(self):
+        from motoquant.database.pricing_refresh import stale_live_prices
+
+        conn = self._make_db()
+        today = datetime.date.today().isoformat()
+        self._insert_price(conn, 1, "Akrapovic India", today + "T08:00:00")
+        self._insert_price(conn, 2, "K&N India", today + " 08:00:00")
+        self.assertEqual(stale_live_prices(conn, days_threshold=14), [])
+
+    def test_junk_fetched_at_is_stale_and_sorts_first(self):
+        from motoquant.database.pricing_refresh import stale_live_prices
+
+        conn = self._make_db()
+        twenty_days_ago = (
+            datetime.date.today() - datetime.timedelta(days=20)
+        ).isoformat() + " 00:00:00"
+        self._insert_price(conn, 1, "Akrapovic India", "corrupted-timestamp")
+        self._insert_price(conn, 2, "K&N India", twenty_days_ago)
+        stale = stale_live_prices(conn, days_threshold=14)
+        self.assertEqual([s[0] for s in stale], [1, 2])  # unparseable first
+
+    def test_get_cheapest_prices_boundary_both_formats(self):
+        from motoquant.database.pricing_refresh import get_cheapest_prices
+
+        conn = self._make_db()
+        on_cutoff = datetime.date.today() - datetime.timedelta(days=14)
+        one_older = on_cutoff - datetime.timedelta(days=1)
+        # Cheapest row sits ON the cutoff day (space format) → fresh;
+        # second row is one day past it (T format) → stale.
+        self._insert_price(
+            conn, 1, "Akrapovic India", on_cutoff.isoformat() + " 23:59:59", 900.0
+        )
+        self._insert_price(
+            conn, 1, "Grand Pitstop", one_older.isoformat() + "T00:00:01", 950.0
+        )
+        prices = get_cheapest_prices(conn, 1, stale_days=14)
+        self.assertEqual(len(prices), 2)
+        self.assertFalse(prices[0]["is_stale"], prices[0])
+        self.assertTrue(prices[1]["is_stale"], prices[1])
+
+    def test_get_cheapest_prices_junk_fetched_at_is_stale(self):
+        from motoquant.database.pricing_refresh import get_cheapest_prices
+
+        conn = self._make_db()
+        self._insert_price(conn, 1, "Akrapovic India", "zzzz-not-a-date")
+        prices = get_cheapest_prices(conn, 1, stale_days=14)
+        # The old lexicographic compare called junk "fresh" ('z' > '2');
+        # an unreadable timestamp is not evidence of freshness.
+        self.assertTrue(prices[0]["is_stale"])

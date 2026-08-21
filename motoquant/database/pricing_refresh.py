@@ -411,15 +411,26 @@ def fetch_live_price(
         return None
 
     if not force:
-        # Check if we already have a fresh price in part_prices
-        existing = cur.execute(
+        # Check if we already have a fresh price in part_prices. Freshness is
+        # decided in Python via _is_stale — the old SQL comparison mixed the
+        # column's two string formats AND used the datetime('now', …, 'utc')
+        # modifier, which double-shifts on non-UTC hosts ('now' is already
+        # UTC; 'utc' re-interprets it as localtime).
+        candidate = cur.execute(
             """
-            SELECT fetched_at FROM part_prices
+            SELECT MAX(fetched_at) AS fetched_at FROM part_prices
              WHERE part_id = ? AND retailer = ?
-               AND fetched_at >= datetime('now', ?, 'utc')
             """,
-            (part_id, retailer or "", f"-{STALE_DAYS} days"),
+            (part_id, retailer or ""),
         ).fetchone()
+        cutoff = datetime.date.today() - datetime.timedelta(days=STALE_DAYS)
+        existing = (
+            candidate
+            if candidate
+            and candidate["fetched_at"]
+            and not _is_stale(candidate["fetched_at"], cutoff)
+            else None
+        )
         if existing:
             log.debug(
                 "part_id=%d retailer=%s — price fresh (fetched %s), skipping",
@@ -466,6 +477,38 @@ def fetch_live_price(
     return result
 
 
+def _parse_fetched_date(value: str | None) -> datetime.date | None:
+    """Parse a ``fetched_at`` string to a date, tolerating both stored formats.
+
+    ``part_prices.fetched_at`` holds TWO shapes: the live-fetch upsert writes
+    ISO with a ``T`` separator (PriceResult.fetched_at.isoformat()) while the
+    schema default writes SQLite's space-separated ``datetime('now','utc')``.
+    Comparing those raw strings against a date-only cutoff string skews the
+    ordering (``"2026-08-07 …" < "2026-08-07T…" < "2026-08-07"`` is all over
+    the place), so staleness math parses to a real date first. Returns None
+    for unparseable values — callers treat that as stale.
+    """
+    if not value:
+        return None
+    text = str(value).strip().replace(" ", "T")
+    try:
+        return datetime.datetime.fromisoformat(text).date()
+    except ValueError:
+        pass
+    try:
+        return datetime.date.fromisoformat(text[:10])
+    except ValueError:
+        return None
+
+
+def _is_stale(fetched_at: str | None, cutoff_date: datetime.date) -> bool:
+    """True when ``fetched_at`` parses to a date before ``cutoff_date`` (or
+    doesn't parse at all — an unreadable timestamp is not evidence of
+    freshness)."""
+    parsed = _parse_fetched_date(fetched_at)
+    return parsed is None or parsed < cutoff_date
+
+
 def get_cheapest_prices(
     conn,
     part_id: int,
@@ -478,7 +521,7 @@ def get_cheapest_prices(
     Each dict has: retailer, price_inr, in_stock, fetched_at, source_url, is_stale.
     Sorted by price_inr ASC (NULLs last).
     """
-    cutoff = (datetime.date.today() - datetime.timedelta(days=stale_days)).isoformat()
+    cutoff = datetime.date.today() - datetime.timedelta(days=stale_days)
     cur = conn.cursor()
     rows = cur.execute(
         """
@@ -498,7 +541,7 @@ def get_cheapest_prices(
             "in_stock": bool(r["in_stock"]),
             "fetched_at": r["fetched_at"],
             "source_url": r["source_url"],
-            "is_stale": (r["fetched_at"] or "1970-01-01") < cutoff,
+            "is_stale": _is_stale(r["fetched_at"], cutoff),
         }
         for r in rows
     ]
@@ -512,12 +555,14 @@ def stale_live_prices(
     """
     Return (part_id, brand, model_name, fetched_at) for every part whose live
     price in ``part_prices`` is older than *days_threshold* days, OR has no
-    entry at all.  Sorted oldest-first.
+    entry at all.  Sorted oldest-first (unparseable timestamps first — they
+    are the most urgent to refresh).
     """
-    cutoff = (
-        datetime.date.today() - datetime.timedelta(days=days_threshold)
-    ).isoformat()
+    cutoff = datetime.date.today() - datetime.timedelta(days=days_threshold)
     cur = conn.cursor()
+    # Staleness is decided in Python via _is_stale, not a SQL HAVING string
+    # compare — fetched_at mixes 'T' and space separators, and lexicographic
+    # comparison against a date-only cutoff misorders same-day rows.
     rows = cur.execute(
         """
         SELECT p.id,
@@ -527,12 +572,11 @@ def stale_live_prices(
           FROM parts p
           LEFT JOIN part_prices pp ON pp.part_id = p.id
          GROUP BY p.id
-        HAVING last_fetched < ?
-         ORDER BY last_fetched ASC
-        """,
-        (cutoff,),
+        """
     ).fetchall()
-    return [(r[0], r[1], r[2], r[3]) for r in rows]
+    stale = [(r[0], r[1], r[2], r[3]) for r in rows if _is_stale(r[3], cutoff)]
+    stale.sort(key=lambda row: _parse_fetched_date(row[3]) or datetime.date.min)
+    return stale
 
 
 __all__ = [

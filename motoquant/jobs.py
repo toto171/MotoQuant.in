@@ -59,9 +59,10 @@ class Job:
         "created_at",
         "updated_at",
         "cancel_requested",
+        "owner_id",
     )
 
-    def __init__(self, kind: str):
+    def __init__(self, kind: str, owner_id: int | None = None):
         self.id = uuid.uuid4().hex[:16]
         self.kind = kind
         self.status = "queued"  # queued | running | done | error
@@ -72,6 +73,11 @@ class Job:
         self.created_at = time.time()
         self.updated_at = self.created_at
         self.cancel_requested = False
+        # Authenticated creator's user id, or None for anonymous jobs. Owned
+        # jobs are only pollable/cancellable by their owner (api.py enforces
+        # it); anonymous jobs stay world-pollable — the random 64-bit id is
+        # their only capability token, exactly as before owner-scoping.
+        self.owner_id = owner_id
 
 
 _JOBS: dict[str, Job] = {}
@@ -114,13 +120,17 @@ def _evict_locked(now: float) -> None:
             del _JOBS[jid]
 
 
-def create_job(kind: str, runner: Callable[[Callable], Any]) -> Job:
+def create_job(
+    kind: str, runner: Callable[[Callable], Any], owner_id: int | None = None
+) -> Job:
     """
     Start ``runner(progress)`` on a daemon thread and return its Job.
 
     ``runner`` receives ``progress(frac: float, stage: str | None = None)``
     and must return a JSON-serialisable result. Progress is clamped to
     [0, 1] and made monotonic so the client bar can never run backwards.
+
+    ``owner_id`` scopes the job to an authenticated creator (see ``Job``).
 
     Raises ``JobCapacityError`` when ``MAX_RUNNING`` jobs are already active.
     """
@@ -136,7 +146,7 @@ def create_job(kind: str, runner: Callable[[Callable], Any]) -> Job:
             raise JobCapacityError(
                 f"Too many simulations running ({n_active}); try again in a moment"
             )
-        job = Job(kind)
+        job = Job(kind, owner_id=owner_id)
         _JOBS[job.id] = job
 
     def _progress(frac: float, stage: str | None = None) -> None:
