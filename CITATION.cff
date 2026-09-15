@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use MotoQuant Pro in research, please cite it as below."
+title: "MotoQuant Pro: a first-principles motorcycle quarter-mile simulator"
+type: software
+authors:
+  - family-names: Mudhai
+    given-names: Hritwik
+    email: dhisetu@gmail.com
+  - name: "The MotoQuant Pro contributors"
+version: "4.0.0"
+date-released: "2026-09-15"
+url: "https://motoquant.in"
+repository-code: "https://github.com/da25mem5s02-debug/MotoQuant_v1"
+license: Apache-2.0
+keywords:
+  - motorcycle
+  - drag racing
+  - vehicle dynamics
+  - quarter mile
+  - physics simulation
+abstract: >-
+  A Python physics engine (RK4 integration at 1 ms, Pacejka tyre model,
+  clutch-slip launch dynamics, weight transfer, aerodynamic drag and
+  density-altitude correction) that predicts motorcycle quarter-mile elapsed
+  time and trap speed for a 541-bike catalog, validated against 250 published
+  benchmarks. Data is licensed separately under ODbL 1.0; see LICENSE-DATA
+  and docs/DATA_PROVENANCE.md for the caveats on estimated values.

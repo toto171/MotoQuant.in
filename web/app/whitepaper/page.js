@@ -39,7 +39,7 @@ const SECTIONS = [
     title: 'Introduction',
     body: [
       'Motorcycle drag racing in India has grown rapidly across Aamby Valley (Lonavala, Maharashtra), MMRT Chennai, the Buddh International Circuit, Kari Motor Speedway (Coimbatore), and the Hyderabad strips. The community has outgrown the available tooling: spreadsheet calculators that treat power-to-weight as the sole input, regression-based estimators trained on limited international data, and per-bike rules of thumb that fail to generalise across mass, aero, gearing, traction, and venue conditions.',
-      'MotoQuant Pro is built to fill that gap. We aim for an open, audit-able simulator whose every coefficient traces back to a physical measurement — not a fitted curve. This whitepaper documents the architecture, validation methodology, and the honest residual error budget against which we benchmark every release.',
+      'MotoQuant Pro is built to fill that gap: an open-source (Apache-2.0), auditable simulator that is first-principles in structure and honest about where it is calibrated. A small set of per-class constants is fitted against the benchmark corpus, and coefficients that have no per-bike measurement (aerodynamic Cd×A, tyre Pacejka shape, synthetic torque-curve shape) are class templates — the repository documents which is which in docs/DATA_PROVENANCE.md. This whitepaper documents the architecture, validation methodology, and the honest residual error budget against which we benchmark every release.',
     ],
   },
   {

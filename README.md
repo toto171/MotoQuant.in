@@ -4,6 +4,9 @@
 
 [![CI](https://github.com/da25mem5s02-debug/MotoQuant_v1/actions/workflows/ci.yml/badge.svg)](https://github.com/da25mem5s02-debug/MotoQuant_v1/actions/workflows/ci.yml)
 [![Web](https://img.shields.io/badge/web-motoquant.in-orange)](https://www.motoquant.in)
+[![Code: Apache-2.0](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
+[![Data: ODbL 1.0](https://img.shields.io/badge/data-ODbL_1.0-blue)](LICENSE-DATA)
+[![Docs: CC BY 4.0](https://img.shields.io/badge/docs-CC_BY_4.0-blue)](LICENSE-DOCS)
 
 First-principles Python physics engine for motorcycle quarter-mile drag racing
 prediction, optimisation, and parts ROI analysis. Aimed at the Indian drag
@@ -64,11 +67,11 @@ desktop/            Tauri 2 + React 19 MVP (Phase 5 — DISCONTINUED July 2026; 
 web/                Next.js 14 marketing + simulator (motoquant.in)
 scripts/            Validation harnesses + one-off automation
 artifacts/          ML model outputs (surrogate .pkl, training data)
-reports/            Validation JSON reports (one per sweep)
+reports/            Validation JSON sweep artefacts + the July-2026 provenance scrape
 docs/               All non-deploy documentation
   ├── adr/          Architecture decision records
-  ├── changelog/    Release notes, fix summaries
-  └── papers/       Reference papers, project plans, validation reports
+  ├── DATA_PROVENANCE.md   What is measured, what is estimated, what is a placeholder
+  └── OPEN_SOURCE_RELEASE.md   Licensing + the public-release runbook
 ```
 
 Deployment configs (`render.yaml`, `Dockerfile`, `vercel.json`,
@@ -82,19 +85,18 @@ Claude session -- consult it for the full state-of-the-world, known issues,
 and phase roadmap. It is a long, single-paragraph changelog; skim the *top*
 entry for the latest state and don't try to read it end-to-end.
 
-### Root files you can ignore while developing
+### Licensing
 
-Several root files are **autonomous-operations plumbing**, not part of the
-product or the dev workflow. A newcomer can safely ignore them:
-
-| File(s) | What it is |
-|---|---|
-| `DISPATCH_INBOX.md` / `DISPATCH_OUTBOX.md` / `DISPATCH_*.md` | Async message queue between the operator and unattended Claude sessions (`docs/DISPATCH_PROTOCOL.md`). Read/written by `scripts/session_*flight.sh` — **do not move or rename** them. |
-| `NEXT_SESSION.md`, `STATUS.md` | Session-handoff scratch notes. |
-| `AUTONOMOUS_PAUSED` | A flag file that pauses the scheduled autonomous runs (`scripts/START.sh`). Its presence is intentional. |
-
-Everything you actually need to build, test, and run the product is covered by
-`README.md`, `docs/ONBOARDING.md`, `docs/ARCHITECTURE.md`, and `CONTRIBUTING.md`.
+MotoQuant Pro is open source. **Code** (`motoquant/`, `web/`, `scripts/`, `tests/`,
+`e2e/`, `desktop/`) is licensed under the [Apache License 2.0](LICENSE). **Data**
+(the bike spec catalog, the benchmark corpus, the parts/tire/fitment/venue tables,
+`motoquant.db` and the JSON sweep artefacts) is licensed under the
+[Open Database License 1.0](LICENSE-DATA). **Documentation**, the whitepaper and the
+blog are [CC BY 4.0](LICENSE-DOCS). Read [docs/DATA_PROVENANCE.md](docs/DATA_PROVENANCE.md)
+before relying on the data: it says which values are measured, which are
+class-level estimates and which are placeholders. Contributions are accepted under
+the same licences; there is no CLA. To cite the project see [CITATION.cff](CITATION.cff);
+to report a vulnerability see [SECURITY.md](SECURITY.md).
 
 ## Project state (Jun 2026)
 

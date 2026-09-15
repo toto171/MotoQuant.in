@@ -18,10 +18,10 @@ const FEATURES = [
     icon: Cpu,
     label: '01 / Physics Engine',
     title: <>First-principles <span className="text-accent">simulation</span></>,
-    subtitle: '15 independent sub-models. No curve-fitting. Every coefficient traceable to a physical measurement.',
+    subtitle: '15 coupled sub-models, first-principles in structure, calibrated per bike class against 250 published runs. Every constant is in the open-source code.',
     body: `MotoQuant's physics engine integrates 15 coupled differential equations at a 1 ms timestep using a fixed-step RK4 integrator (with an optional adaptive solver). Unlike spreadsheet calculators that treat power-to-weight ratio as the only variable, MotoQuant models:
 
-Pacejka tire model with thermal evolution, so grip changes as the tyre heats. Aerodynamic drag with a per-bike Cd×A (0.308–0.68 m²) — no two bikes share the same number. Gear shifting and clutch engagement dynamics including slipper clutch behaviour. Forced induction — turbo lag, supercharger mechanical loss, nitrous injection windows. Engine inertia and parasitic losses (alternator, oil pump, water pump, valvetrain).
+Pacejka tire model with thermal evolution, so grip changes as the tyre heats. Aerodynamic drag with a per-class Cd×A (0.308–0.68 m²), hand-adjusted where published data exists. Gear shifting and clutch engagement dynamics including slipper clutch behaviour. Forced induction — turbo lag, supercharger mechanical loss, nitrous injection windows. Engine inertia and parasitic losses (alternator, oil pump, water pump, valvetrain).
 
 The adaptive-dt solver is especially useful for identifying the precise clutch engagement window that produces the minimum 60-ft time. Reference baselines — GSX-R 1000 K5 at 9.933s, R1 at 10.144s, Hayabusa Gen1 at 10.363s — are pinned bit-identical on every code change and validated against the August 2026 weighted benchmark corpus (250 published tests, weighted mean |Δ| 0.263s).`,
     docsLink: '/docs/physics',

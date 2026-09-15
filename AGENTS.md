@@ -64,7 +64,7 @@ before a big change.
    `useSearchParams()` must sit inside a `<Suspense>` boundary or the static
    build fails.
 7. **Don't rewrite `CLAUDE.md`** — it's a fragile single-paragraph changelog;
-   prepend one line at most. Put substantive write-ups in `reports/`.
+   prepend one line at most. Put substantive write-ups in the PR description or `CHANGELOG.md` (prose reports are no longer kept in `reports/`).
 8. **Verify file length after a large Write** (`wc -l`) — write tools can
    truncate; a suspiciously short file lost its tail.
 
@@ -108,5 +108,5 @@ before a big change.
 A change is done when: `make check` passes, `make test` is green, baselines are
 bit-identical (or a justified sweep is attached), the headline stats are in
 sync, no secret is in the diff, and the PR body explains the why. If you
-deferred something, write it down (in the PR or `reports/`) so the next
+deferred something, write it down (in the PR or `CHANGELOG.md`) so the next
 contributor — model or human — can pick it up.

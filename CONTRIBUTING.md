@@ -231,3 +231,11 @@ or `render.yaml` (the `buildFilter` — web-only merges do not restart the API),
 and Vercel deploys the frontend on every merge. See `docs/RENDER_MIGRATION.md`
 for the runbook + rollback. Do not touch hosting settings without coordinating —
 we only have one set of credentials.
+
+## Licensing of contributions
+
+MotoQuant Pro is open source: code under Apache-2.0 (`LICENSE`), data under
+ODbL 1.0 (`LICENSE-DATA`), documentation under CC BY 4.0 (`LICENSE-DOCS`).
+By opening a pull request you agree that your contribution is licensed under
+the same terms as the files it touches (inbound = outbound). There is no CLA.
+Data corrections must carry a source URL — see `docs/DATA_PROVENANCE.md`.

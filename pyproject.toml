@@ -4,6 +4,13 @@ version = "4.0.0"
 description = "The physics of faster — First-principles motorcycle quarter-mile simulation & optimization"
 authors = [{name = "Hritwik Mudhai", email = "dhisetu@gmail.com"}]
 requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+readme = "README.md"
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Physics",
+]
 
 [project.scripts]
 # Stdio MCP server exposing the sim API as tools (docs/MCP.md).

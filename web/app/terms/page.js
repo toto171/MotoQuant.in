@@ -137,10 +137,13 @@ export default function TermsPage() {
 
         <Section title="7. Intellectual property">
           <p>
-            All physics models, software code, and data compilations in MotoQuant Pro are
-            the intellectual property of MotoQuant Pro and are protected under applicable
-            copyright and trade-secret law. Manufacturer specifications used in the bike
-            catalog are publicly available data and remain the property of their respective
+            MotoQuant Pro is open source. The software code is licensed under the Apache
+            License 2.0, the bike catalog, benchmark corpus and other data tables under the
+            Open Database License 1.0, and the documentation under CC BY 4.0 &mdash; the
+            licence texts ship with the source repository. You may use, modify and
+            redistribute them under those terms. The MotoQuant name and logo are not
+            covered by those licences. Manufacturer specifications used in the bike catalog
+            are publicly available facts and remain the property of their respective
             manufacturers.
           </p>
         </Section>

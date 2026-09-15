@@ -37,12 +37,15 @@ contract) → **[ONBOARDING.md](ONBOARDING.md)** → **[ARCHITECTURE.md](ARCHITE
 | [INSTALL.md](INSTALL.md) | Install notes (desktop parts deprecated). |
 | [RUFF_SETUP.md](RUFF_SETUP.md) | Lint/format config. |
 
-## Automation & process (autonomous-ops — not needed for product dev)
+## Licensing & data
 | Doc | What it covers |
 |---|---|
-| [AUTONOMOUS_OPERATIONS_PLAYBOOK.md](AUTONOMOUS_OPERATIONS_PLAYBOOK.md) | The unattended-session orchestration system. |
-| [DISPATCH_PROTOCOL.md](DISPATCH_PROTOCOL.md) | The `DISPATCH_INBOX/OUTBOX.md` async message queue. |
-| [SCHEDULING.md](SCHEDULING.md) | Cron/scheduler layout. |
-| [TASKS_MASTER_LIST.md](TASKS_MASTER_LIST.md) · [TEAM_SCALING.md](TEAM_SCALING.md) · [SEO_STRATEGY.md](SEO_STRATEGY.md) · [phase_plan.md](phase_plan.md) · [motoquant_toolkit.md](motoquant_toolkit.md) | Planning / strategy notes. |
+| [OPEN_SOURCE_RELEASE.md](OPEN_SOURCE_RELEASE.md) | Licence choices (Apache-2.0 code / ODbL data / CC BY docs) and the public-release runbook. |
+| [DATA_PROVENANCE.md](DATA_PROVENANCE.md) | Table-by-table statement of what is measured, estimated or placeholder. Read before citing any number. |
+
+## Planning notes
+| Doc | What it covers |
+|---|---|
+| [SEO_STRATEGY.md](SEO_STRATEGY.md) · [motoquant_toolkit.md](motoquant_toolkit.md) · [MOTOQUANT_LLM_PLAN.md](MOTOQUANT_LLM_PLAN.md) | Strategy notes (historical; dates inside). |
 | [changelog/](changelog/) | Release notes + fix summaries. |
 | [mockups/](mockups/) | Design mockups. |

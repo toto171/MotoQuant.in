@@ -4,6 +4,36 @@ Notable changes, newest first. This is the human-readable milestone history;
 the exhaustive session-by-session log lives in `CLAUDE.md` (top entry = latest)
 and `reports/`. Format loosely follows [Keep a Changelog](https://keepachangelog.com).
 
+## [Unreleased] — 2026-09-15 — Open-source release preparation
+
+Follows the September market study (private repo, zero users, nothing
+defensible, the one credible asset already free): the project is opened.
+
+### Added
+- `LICENSE` (Apache-2.0, code), `LICENSE-DATA` (ODbL 1.0, catalog + benchmark
+  corpus + `motoquant.db`), `LICENSE-DOCS` (CC BY 4.0), `NOTICE`, `CITATION.cff`,
+  `SECURITY.md`, `web/scripts/fonts/OFL.txt` (the Barlow subsets shipped without
+  the SIL notice the OFL requires), `license` metadata in `pyproject.toml` and
+  `web/package.json`.
+- `docs/OPEN_SOURCE_RELEASE.md` — the operator runbook for flipping visibility.
+- `docs/DATA_PROVENANCE.md` — what is measured, estimated or placeholder, per table.
+
+### Changed
+- Terms §7 now names the open licences instead of claiming trade-secret protection.
+- Features page and whitepaper no longer claim "no curve-fitting / every
+  coefficient traceable to a physical measurement" or "no two bikes share the
+  same Cd×A"; they describe the per-class calibration and templated coefficients.
+
+### Removed (all retained in git history)
+- The autonomous-operations scaffold (`scripts/START.sh`, scheduler, session
+  pre/postflight, `scripts/agents/`, `scripts/subagents/`, `AUTONOMOUS_PAUSED`),
+  the dispatch queue (`DISPATCH_*.md`, `STATUS.md`, `NEXT_SESSION.md`), unsent
+  sales drafts (`outreach/`), internal business papers (`docs/papers/`),
+  workstream prompts (`prompts/`), scaffold outputs (`data/*.json`), internal
+  planning docs, the two tests that only exercised the scaffold, and all prose
+  reports under `reports/` (JSON sweep artefacts + the July-2026 provenance
+  scrape stay; see `reports/README.md`).
+
 ## [PR #116] — 2026-07-19 — Scrapling dev-side scraping toolkit
 
 Dev-only scraping toolkit; **nothing in it writes `motoquant.db`** — scraped
