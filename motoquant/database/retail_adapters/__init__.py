@@ -86,8 +86,11 @@ def _throttled_fetch(
     domain_lock = _domain_lock(url)
     default_headers = {
         "User-Agent": (
+            # The "+URL" is where a retailer's ops team learns who we are.
+            # It used to be motoquant.in/pricing-bot — a page that never
+            # existed. The open-source repo documents exactly what this does.
             "Mozilla/5.0 (compatible; MotoQuantPricingBot/1.0; "
-            "+https://motoquant.in/pricing-bot)"
+            "+https://github.com/da25mem5s02-debug/MotoQuant_v1)"
         ),
         "Accept": "text/html,application/xhtml+xml;q=0.9",
         "Accept-Language": "en-IN,en;q=0.8",

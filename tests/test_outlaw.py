@@ -184,16 +184,11 @@ class TestOptimizerBudgetApi(unittest.TestCase):
         self.assertEqual(req.goal, "min_et")
 
 
-class TestOutlawTierGate(unittest.TestCase):
-    """POST /api/jobs/outlaw composes the two heaviest pro-gated surfaces
-    (optimize + autotune) yet shipped with only a rate limit (2026-07-17
-    find), so it carries the same Depends(require_tier("pro")) gate as
-    /api/jobs/optimize. Mirrors tests/test_auth.py::TestPaidToolingTierGate:
-
-      * billing OFF (freemium-beta default) → anonymous requests pass the
-        gate exactly as before (no 401/402 regression);
-      * billing ON + no token → 401 (require_tier's unauthenticated branch).
-    """
+class TestOutlawIsOpenAndFused(unittest.TestCase):
+    """POST /api/jobs/outlaw is free and anonymous (open-source pivot,
+    2026-10-23 — it used to sit behind a pro-tier gate). Its only protection
+    is the rate limit it SHARES with /api/jobs/optimize ("optimize" bucket,
+    6/60 s): the outlaw pipeline IS an optimizer pass plus an autotune."""
 
     BODY = {"bike_preset": "gsxr1000_k5", "max_candidates": 1}
 
@@ -208,39 +203,40 @@ class TestOutlawTierGate(unittest.TestCase):
         cls.client = TestClient(app, raise_server_exceptions=False)
 
     def setUp(self):
-        import motoquant.auth as auth_mod
+        from motoquant import ratelimit
 
-        self._auth_mod = auth_mod
-        self._orig_enforce = auth_mod.BILLING_ENFORCE
+        ratelimit.reset()
 
-    def tearDown(self):
-        self._auth_mod.BILLING_ENFORCE = self._orig_enforce
-
-    def test_billing_off_anonymous_passes_gate(self):
-        self._auth_mod.BILLING_ENFORCE = False
-        res = self.client.post("/api/jobs/outlaw", json=self.BODY)
-        self.assertNotIn(
-            res.status_code,
-            (401, 402),
-            f"outlaw unexpectedly auth-blocked with billing OFF: "
-            f"{res.status_code} {res.text[:200]}",
-        )
-        # Don't leave the accepted job burning a daemon thread for the rest
-        # of the suite — cancellation is cooperative and immediate.
+    def _cancel(self, res):
+        # Don't leave an accepted job burning a daemon thread for the rest of
+        # the suite — cancellation is cooperative and immediate.
         if res.status_code == 202:
             job_id = res.json().get("job_id")
             if job_id:
                 self.client.post(f"/api/jobs/{job_id}/cancel")
 
-    def test_billing_on_anonymous_gets_401(self):
-        self._auth_mod.BILLING_ENFORCE = True
+    def test_anonymous_request_is_accepted(self):
         res = self.client.post("/api/jobs/outlaw", json=self.BODY)
+        self._cancel(res)
         self.assertEqual(
             res.status_code,
-            401,
-            f"outlaw: expected 401 with billing ON + no token, "
-            f"got {res.status_code} {res.text[:200]}",
+            202,
+            f"anonymous outlaw job was not accepted: {res.status_code} "
+            f"{res.text[:200]}",
         )
+
+    def test_shares_the_optimize_bucket(self):
+        # Drain the shared bucket through the OPTIMIZE route with an unknown
+        # preset (404 before any RK4 work, but the limiter has counted it)...
+        unknown = {"bike_preset": "no_such_preset", "budget_inr": 60000}
+        for _ in range(6):
+            r = self.client.post("/api/optimize/build", json=unknown)
+            self.assertNotEqual(r.status_code, 429, r.text[:200])
+        # ...then the outlaw job route must already be fused off.
+        res = self.client.post("/api/jobs/outlaw", json=self.BODY)
+        self._cancel(res)
+        self.assertEqual(res.status_code, 429, res.text[:200])
+        self.assertEqual(res.json()["detail"]["error"], "rate_limited")
 
 
 class TestJsonSafe(unittest.TestCase):

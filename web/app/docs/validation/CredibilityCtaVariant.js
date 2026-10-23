@@ -38,7 +38,8 @@
 // itself so click-attribution survives without analytics infra.
 //
 // No page conflict: /docs/validation had zero live experiments. Existing
-// experiments hit landing (EXP-001), /pricing (EXP-002, EXP-005), /simulator
+// experiments hit landing (EXP-001), /pricing (EXP-002, EXP-005 — retired
+// Oct 2026 with the page), /simulator
 // (EXP-003), two blog posts (EXP-004, EXP-010), /blog index (EXP-006),
 // /login (EXP-007), /features (EXP-008), /bikes index (EXP-009),
 // /bikes/[id] (EXP-011), /about (EXP-012), /whitepaper (EXP-013), and

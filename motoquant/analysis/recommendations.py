@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Smart Build Recommender (Phase 4)
-==================================================
+MotoQuant — Smart Build Recommender (Phase 4)
+=============================================
 Intelligent part selection and build planning that goes beyond raw ROI
 ranking.  Adds compatibility rules, synergy detection, tiered build
 generation, and human-readable upgrade paths.

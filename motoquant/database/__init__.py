@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Database Layer
-============================
+MotoQuant — Database Layer
+==========================
 SQLite-backed storage for motorcycles, tires, venues, weather, and parts.
 
 Phase 2 of MotoQuant: persistent, queryable, provenance-tracked data.

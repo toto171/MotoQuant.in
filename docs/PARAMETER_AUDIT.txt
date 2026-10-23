@@ -1,5 +1,5 @@
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║           MOTOQUANT PRO — GENERALIZATION & FEATURE ANALYSIS                  ║
+║             MOTOQUANT — GENERALIZATION & FEATURE ANALYSIS                    ║
 ║                        April 13, 2026                                         ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 

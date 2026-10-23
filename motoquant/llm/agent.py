@@ -30,7 +30,6 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -57,73 +56,18 @@ HISTORY_MAX_MESSAGES = 16
 HISTORY_MAX_CHARS = 16_000
 AGENT_MAX_TOKENS = 2_048
 
-# ─── Quota cost of a heavy op, in full-sim units ──────────────────────────
+# ─── Sim-count accounting for heavy ops ───────────────────────────────────
 # A heavy op is not one RK4 run: ecu_autotune.autotune's own progress total is
 # 1 baseline + (2*gear_span+3 = 9) gearing + (launch_steps+1 = 7) launch + 1
 # combined = 18 sims at the default spans, and build_optimizer's verification
-# loop full-sims the selected build after surrogate-scoring candidates. Charge
-# both a flat 18 units so a chat turn that runs one is not billed like a
-# single sim; the outlaw pipeline composes an optimizer pass AND an autotune
-# pass, so it is charged double. Nominal by design — the exact count is
-# data-dependent (surrogate hit rate, tooth dedup) — but honest to the order
-# of magnitude, which is the point of the meter.
+# loop full-sims the selected build after surrogate-scoring candidates. Each
+# one therefore adds a flat 18 to the turn's reported ``sims_run``; the outlaw
+# pipeline composes an optimizer pass AND an autotune pass, so it counts
+# double. Nominal by design — the exact count is data-dependent (surrogate
+# hit rate, tooth dedup) — but honest to the order of magnitude. This is
+# reporting, not a charge: the per-turn CPU fuse is HEAVY_OP_BUDGET above.
 HEAVY_OP_SIM_COST = 18
 OUTLAW_SIM_COST = 2 * HEAVY_OP_SIM_COST
-
-# ─── Pro-tier gating ──────────────────────────────────────────────────────
-# The three surfaces docs/COMMERCIAL_LAUNCH.md calls "the conversion lever"
-# each sit behind require_tier("pro") on their own routes — but the chat agent
-# can invoke all three, and /api/chat has no tier gate at all. The moment the
-# operator flips MOTOQUANT_BILLING_ENFORCE, POST /api/optimize/build would 401
-# while ASKING THE CHATBOT for the same thing still worked (2026-07-25 audit
-# §3.5). Settled decision: the executor inherits the caller's tier.
-#
-# Inert during the open beta, exactly like require_tier: with billing off,
-# every caller — anonymous included — keeps full access.
-PRO_TOOLS = ("optimize_build", "autotune_setup")
-_PRO_TIERS = frozenset({"pro", "studio"})
-
-
-def _billing_enforced() -> bool:
-    """Read the live flag (tests patch motoquant.auth.BILLING_ENFORCE)."""
-    try:
-        from .. import auth as _auth
-
-        return bool(_auth.BILLING_ENFORCE)
-    except Exception:  # noqa: BLE001 — no auth layer installed ⇒ open beta
-        return False
-
-
-def pro_tools_locked(tier: str | None) -> bool:
-    """True when this caller must not reach the pro-gated agent tools."""
-    if not _billing_enforced():
-        return False
-    return (tier or "free").strip().lower() not in _PRO_TIERS
-
-
-def _upgrade_required(tool_label: str, tier: str | None) -> dict[str, Any]:
-    """Tool-result payload for a locked pro tool.
-
-    Returned as ordinary tool DATA (not an exception) so the model reads it,
-    stops trying, and relays the upgrade path in its own voice — the same way
-    it handles every other error-as-data result in this executor.
-    """
-    base = os.environ.get("MOTOQUANT_BASE_URL", "https://motoquant.in").rstrip("/")
-    current = (tier or "free").strip().lower() or "free"
-    return {
-        "error": "upgrade_required",
-        "required_tier": "pro",
-        "current_tier": current,
-        "upgrade_url": f"{base}/pricing",
-        "message": (
-            f"{tool_label} is a MotoQuant Pro feature and this user is on the "
-            f"'{current}' plan. Do NOT try to reproduce it with other tools. "
-            "Tell them plainly that it needs Pro, point at "
-            f"{base}/pricing, and offer what IS free: full simulations, "
-            "top-speed runs, A/B compares, catalog and parts search."
-        ),
-    }
-
 
 # ─── Build-tier glossary (single source of truth for chat) ────────────────
 # Industry-standard motorcycle drag-build stages. stage_3 is honestly
@@ -221,28 +165,9 @@ class AgentContext:
     db: Any
     result: AgentChatResult
     progress_cb: Callable[[float, str | None], None] | None = None
-    meter_cb: Callable[[int], bool] | None = None  # False → quota exhausted
     surrogate_getter: Callable[[], tuple[Any, str]] | None = None
-    # Caller's subscription tier, resolved at route time. None == anonymous.
-    # Only consulted when billing is enforced (see pro_tools_locked).
-    tier: str | None = None
     full_sims_left: int = FULL_SIM_BUDGET
     heavy_ops_left: int = HEAVY_OP_BUDGET
-
-    def _meter(self, n: int) -> bool:
-        """Charge n full-sim units to the caller's daily quota.
-
-        The callback owns the record-always / block-only-when-enforced
-        policy (api._make_chat_meter); a missing callback — CLI, tests,
-        library use — always allows.
-        """
-        if self.meter_cb is None or n <= 0:
-            return True
-        try:
-            return bool(self.meter_cb(n))
-        except Exception:  # noqa: BLE001 — metering must never break chat
-            logger.warning("chat meter callback failed", exc_info=True)
-            return True
 
     def spend_sims(self, n: int) -> str | None:
         """Reserve n full sims. Returns an error string when over budget."""
@@ -252,33 +177,17 @@ class AgentContext:
                 f"({FULL_SIM_BUDGET} full sims/turn) — answer with the "
                 f"results you already have"
             )
-        if not self._meter(n):
-            return (
-                "the user's free daily simulation quota is exhausted — "
-                "explain this politely and suggest upgrading or returning "
-                "tomorrow"
-            )
         self.full_sims_left -= n
         self.result.sims_run += n
         return None
 
     def spend_heavy(self, sim_cost: int = HEAVY_OP_SIM_COST) -> str | None:
-        """Reserve one heavy op AND meter its sim cost.
-
-        Heavy ops run tens of RK4 sims apiece and used to charge the quota
-        nothing at all (2026-07-25 audit §3.5) — the per-turn heavy_ops_left
-        budget capped one message, not one day.
-        """
+        """Reserve one heavy op (per-turn CPU fuse) and add its nominal sim
+        count to ``sims_run``."""
         if self.heavy_ops_left < 1:
             return (
                 f"per-message optimizer budget exhausted ({HEAVY_OP_BUDGET} "
                 f"heavy operations/turn) — answer with what you have"
-            )
-        if not self._meter(sim_cost):
-            return (
-                "the user's free daily simulation quota is exhausted — "
-                "explain this politely and suggest upgrading or returning "
-                "tomorrow"
             )
         self.heavy_ops_left -= 1
         self.result.sims_run += sim_cost
@@ -991,10 +900,6 @@ def _exec_list_venues(ctx: AgentContext, args: dict) -> dict:
 
 
 def _exec_optimize_build(ctx: AgentContext, args: dict) -> dict:
-    # Tier gate BEFORE any budget/quota spend — a locked caller must not be
-    # charged for work that will not run.
-    if pro_tools_locked(ctx.tier):
-        return _upgrade_required("The build optimizer", ctx.tier)
     bike_id = int(args.get("bike_id") or 0)
     tier = resolve_build_tier(args.get("build_tier"))
     tier_info = BUILD_TIERS[tier]
@@ -1076,8 +981,6 @@ def _exec_optimize_build(ctx: AgentContext, args: dict) -> dict:
 
 
 def _exec_autotune_setup(ctx: AgentContext, args: dict) -> dict:
-    if pro_tools_locked(ctx.tier):
-        return _upgrade_required("ECU / setup autotune", ctx.tier)
     err = ctx.spend_heavy()
     if err:
         return {"error": err}
@@ -1212,21 +1115,11 @@ def _system_prompt(ctx: AgentContext) -> str:
             f"  - {info['label']}: {info['description']} (default budget: {budget_txt})"
         )
     tiers = "\n".join(tier_lines)
-    # Tell the model up front when the pro tools will refuse, so it spends
-    # its iterations on something useful instead of discovering the lock.
-    access = ""
-    if pro_tools_locked(ctx.tier):
-        access = (
-            f"\nACCESS: this user is on the '{(ctx.tier or 'free')}' plan. "
-            "optimize_build and autotune_setup are MotoQuant Pro features and "
-            "WILL refuse — do not call them. If asked for a build or a setup, "
-            "say it needs Pro, point at the pricing page, and offer the free "
-            "tools instead (simulations, top speed, compares, parts search).\n"
-        )
-    return f"""{access}You are the MotoQuant race engineer — the AI assistant of MotoQuant Pro, \
-a first-principles motorcycle drag-racing physics simulator (15 validated \
-sub-models, RK4 solver, weighted-benchmark accuracy |Δ|≈0.25s across 216 \
-instrumented benchmarks). Today is {datetime.now():%d %b %Y}.
+    return f"""You are the MotoQuant race engineer — the AI assistant of MotoQuant, \
+a free, open-source, first-principles motorcycle drag-racing physics \
+simulator (15 sub-models, RK4 solver, validated against a weighted corpus of \
+published drag-strip benchmarks — motoquant.in/validation). Every tool you \
+have is free for every user. Today is {datetime.now():%d %b %Y}.
 
 Catalog right now: {stats.get("bikes")} bikes, {stats.get("parts")} parts, \
 {stats.get("tires")} tires, {stats.get("venues")} venues.
@@ -1300,17 +1193,14 @@ def run_agent_chat(
     client: LLMClient | None = None,
     history: list[dict[str, Any]] | None = None,
     progress_cb: Callable[[float, str | None], None] | None = None,
-    meter_cb: Callable[[int], bool] | None = None,
     surrogate_getter: Callable[[], tuple[Any, str]] | None = None,
-    tier: str | None = None,
     max_iterations: int = MAX_ITERATIONS,
 ) -> AgentChatResult:
     """Run one agent chat turn. Never raises — errors land on the result.
 
-    ``tier`` is the caller's subscription tier (resolved by the route from
-    the bearer token, None for anonymous). It gates the pro-only tools —
-    but only once MOTOQUANT_BILLING_ENFORCE is on; during the open beta the
-    gate is inert and everyone keeps full access.
+    Cost is bounded per turn by MAX_ITERATIONS / FULL_SIM_BUDGET /
+    HEAVY_OP_BUDGET (enforced by the executor) and per client by the API's
+    rate limits (see api._chat_daily_cap).
     """
     result = AgentChatResult(raw_query=query)
     if client is None:
@@ -1330,9 +1220,7 @@ def run_agent_chat(
         db=db,
         result=result,
         progress_cb=progress_cb,
-        meter_cb=meter_cb,
         surrogate_getter=surrogate_getter,
-        tier=tier,
     )
 
     system = _system_prompt(ctx)

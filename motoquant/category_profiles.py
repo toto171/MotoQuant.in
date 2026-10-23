@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Category Profiles
-==================================
+MotoQuant — Category Profiles
+=============================
 
 Canonical 8-cluster taxonomy + per-cluster physics knobs. Single source of
 truth for cluster-flavoured sub-model dispatch (April 30, 2026 rewrite).

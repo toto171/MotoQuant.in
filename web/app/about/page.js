@@ -1,13 +1,20 @@
 'use client';
 
 import { Suspense } from 'react';
-import { Mail, ChevronRight } from 'lucide-react';
+import { Mail, ChevronRight, GitFork } from 'lucide-react';
 import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
 import PageHero from '../../components/PageHero';
 import CodeComment from '../../components/CodeComment';
 import { Reveal } from '../../components/Reveal';
 import EndOfAboutCta from './EndOfAboutCta';
+import {
+  CONTRIBUTING_URL,
+  ISSUES_URL,
+  LICENSE_NAME,
+  LICENSE_URL,
+  REPO_URL,
+} from '../../lib/site';
 
 const ROADMAP = [
   {
@@ -31,11 +38,13 @@ const ROADMAP = [
   // Phase 5 (native desktop app) was DISCONTINUED July 2026 — the hosted web
   // app is the product. Removed from the public roadmap; the phase numbering
   // below is unchanged so historical references stay meaningful.
+  // Phase 6 was "commercial launch" until October 2026, when monetization
+  // was scrapped and the project went free & open source (Apache-2.0).
   {
     phase: 'Phase 6',
     status: 'in-progress',
-    label: 'Commercial launch + AI layer',
-    desc: 'Accounts + freemium tiers live (free during open beta). Razorpay + Stripe payment rails wired. Conversational AI tuning shipped. PPO launch control next.',
+    label: 'Open-source release + AI layer',
+    desc: 'MotoQuant is free and open source — no tiers, no paywalls. Optional accounts + saved-run garage and conversational AI tuning shipped. Community-contributed instrumented benchmarks and PPO launch control next.',
   },
 ];
 
@@ -181,6 +190,72 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Open source — /refunds redirects here (Oct 2026), so this section is
+          also the answer to "what happened to paid plans?". */}
+      <section id="open-source" className="py-16 md:py-24 px-6 border-b border-white/5 scroll-mt-20">
+        <div className="max-w-4xl mx-auto">
+          <CodeComment className="mb-10">license · {LICENSE_NAME.toLowerCase()}</CodeComment>
+          <div className="grid md:grid-cols-[1.2fr_1fr] gap-10 items-start">
+            <Reveal>
+              <h2 className="font-display font-bold text-3xl md:text-4xl tracking-tight mb-5 text-white">
+                Free and <span className="text-accent">open source</span>
+              </h2>
+              <div className="space-y-4 text-white/65 text-sm leading-relaxed">
+                <p>
+                  MotoQuant is free for everyone and always will be. There are no paid
+                  plans, no subscriptions and no features held back &mdash; the simulator,
+                  build optimizer, ECU autotune, chat assistant and Dragy/dyno calibration
+                  are the same for every rider, signed in or not.
+                </p>
+                <p>
+                  The whole project &mdash; physics engine, bike catalog, benchmark corpus,
+                  API and this website &mdash; is published under the {LICENSE_NAME}. A
+                  drag simulator you can&apos;t inspect is a black box; this one you can
+                  audit line by line, correct, and run yourself.
+                </p>
+                <p>
+                  The most valuable contribution isn&apos;t code: it&apos;s an instrumented
+                  Dragy or RaceBox run from an Indian strip. Every real timeslip tightens
+                  the model for everyone.
+                </p>
+              </div>
+            </Reveal>
+            <Reveal delay={0.08}>
+              <div className="card p-6 md:p-8">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-asphalt-2 border border-white/[0.08] flex items-center justify-center">
+                    <GitFork size={20} className="text-white/70" />
+                  </div>
+                  <span className="label-mono">github</span>
+                </div>
+                <ul className="space-y-3 text-sm">
+                  <li>
+                    <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className="font-mono text-accent hover:text-accent-bright transition-colors">
+                      Source repository →
+                    </a>
+                  </li>
+                  <li>
+                    <a href={ISSUES_URL} target="_blank" rel="noopener noreferrer" className="font-mono text-white/80 hover:text-white transition-colors">
+                      Report a bug or wrong spec →
+                    </a>
+                  </li>
+                  <li>
+                    <a href={CONTRIBUTING_URL} target="_blank" rel="noopener noreferrer" className="font-mono text-white/80 hover:text-white transition-colors">
+                      Contributing guide →
+                    </a>
+                  </li>
+                  <li>
+                    <a href={LICENSE_URL} target="_blank" rel="noopener noreferrer" className="font-mono text-white/80 hover:text-white transition-colors">
+                      {LICENSE_NAME} →
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
       {/* Roadmap */}
       <section className="py-16 md:py-24 px-6 border-b border-white/5">
         <div className="max-w-4xl mx-auto">
@@ -220,7 +295,7 @@ export default function AboutPage() {
             <div>
               <h2 className="font-display font-bold text-3xl tracking-tight mb-4 text-white">Get in touch</h2>
               <p className="text-white/65 text-sm leading-relaxed mb-6">
-                Whether you&apos;re a tuning shop interested in the Pro plan, a racer who found a bug, or just want to talk drag racing — reach out.
+                Whether you&apos;re a racer who found a bug, a tuner with dyno or Dragy data to share, a developer who wants to contribute, or you just want to talk drag racing — reach out.
               </p>
               <div className="space-y-3">
                 <div>
@@ -234,9 +309,9 @@ export default function AboutPage() {
                   <span className="font-mono text-white/70 text-sm">Pune, Maharashtra, India</span>
                 </div>
                 <div>
-                  <div className="label-mono mb-1">Pro licensing</div>
-                  <a href="mailto:motoquant@gmail.com?subject=MotoQuant%20Pro%20Licensing" className="font-mono text-white/80 hover:text-white transition-colors text-sm">
-                    Request a quote →
+                  <div className="label-mono mb-1">Bugs &amp; data fixes</div>
+                  <a href={ISSUES_URL} target="_blank" rel="noopener noreferrer" className="font-mono text-white/80 hover:text-white transition-colors text-sm">
+                    Open a GitHub issue →
                   </a>
                 </div>
               </div>

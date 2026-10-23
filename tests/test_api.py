@@ -145,7 +145,7 @@ class TestHealthEndpoints(unittest.TestCase):
         r = client.get("/")
         self.assertEqual(r.status_code, 200)
         body = r.json()
-        self.assertEqual(body["service"], "MotoQuant Pro API")
+        self.assertEqual(body["service"], "MotoQuant API")
         self.assertEqual(body["status"], "ok")
 
     def test_health(self):
@@ -1084,7 +1084,7 @@ class TestApiHygiene20260707(unittest.TestCase):
     """API-hygiene regression pins (2026-07-07 all-nighter review session).
 
     Continuation of the 2026-07-06 pass, which bounded /api/bikes|parts|tires
-    but missed two list routes and the free-tier sim request bodies:
+    but missed two list routes and the public sim request bodies:
 
     L3: /api/leaderboard and /api/me/runs `limit` had le=100 but no ge, so
         limit=-1 became an unbounded SQLite `LIMIT -1` (whole-table dump).

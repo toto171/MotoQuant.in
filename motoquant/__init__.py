@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Motorcycle Drag Racing Simulation & Optimization Engine
-=====================================================================
+MotoQuant — Motorcycle Drag Racing Simulation & Optimization Engine
+===================================================================
 A first-principles physics engine for quarter-mile performance prediction.
 
 15 sub-models, 200+ input parameters, RK4 integration at 1 ms timestep.

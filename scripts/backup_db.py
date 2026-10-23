@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Hot-backup the production SQLite DB, gzip it, and rotate old snapshots.
 
-Launch blocker B7 in docs/COMMERCIAL_LAUNCH.md: once real users and
-subscription rows live on a persistent disk, losing that file loses paying
-customers' accounts while the payment processor keeps charging them.
+Once a deployment keeps its DB on a persistent disk (docs/SELF_HOSTING.md),
+that one file holds every optional account and every saved run on the
+leaderboard and in users' garages. Losing it loses all of them.
 
 Why the sqlite3 backup API and not `cp`
 ---------------------------------------

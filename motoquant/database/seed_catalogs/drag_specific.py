@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Drag-Specific Performance Parts Catalog
-========================================================
+MotoQuant — Drag-Specific Performance Parts Catalog
+===================================================
 Seeds ~60 drag-focused performance parts across 6 categories:
   - Nitrous oxide systems (10 parts): small-cc through litre-class
   - Boost kits: turbo & supercharger (10 parts): litre-class sport, Harley, BMW, Ducati

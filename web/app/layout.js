@@ -5,6 +5,7 @@ import StructuredData, {
   organizationSchema,
   websiteSchema,
   softwareApplicationSchema,
+  softwareSourceCodeSchema,
   faqSchema,
   SITE_URL,
 } from './StructuredData';
@@ -45,7 +46,7 @@ export const viewport = {
 // SEO strategy
 // ──────────────────────────────────────────────────────────────────────────
 // Targets grouped by intent:
-//   - Brand: "motoquant", "moto quant pro"
+//   - Brand: "motoquant", "moto quant"
 //   - Product category: "motorcycle drag simulator", "quarter mile calculator"
 //   - Bike-specific long tail: "hayabusa quarter mile time", "zx-10r 1/4 mile"
 //   - Geographic: "drag racing india", "aamby valley drag strip", "kari speedway"
@@ -57,17 +58,17 @@ export const viewport = {
 // internal linking. This file handles the first three.
 
 const DESCRIPTION =
-  'Free physics-based motorcycle quarter-mile drag racing simulator — not a power-to-weight formula. Predict ET, trap speed, 60-ft split for 541 bikes including Hayabusa, ZX-14R, R15 V4, KTM Duke 390, Pulsar NS200. Compare builds, quantify parts ROI in INR, overlay Dragy runs against the sim. Built for the Indian drag racing community — Aamby Valley, MMRT, BIC, Kari.';
+  'Free, open-source physics-based motorcycle quarter-mile drag racing simulator — not a power-to-weight formula. Predict ET, trap speed, 60-ft split for 541 bikes including Hayabusa, ZX-14R, R15 V4, KTM Duke 390, Pulsar NS200. Compare builds, quantify parts ROI in INR, overlay Dragy runs against the sim. Built for the Indian drag racing community — Aamby Valley, MMRT, BIC, Kari.';
 
 export const metadata = {
   title: {
     default:
-      'MotoQuant Pro — Motorcycle Quarter-Mile Drag Racing Simulator | ET Predictor & Build Optimizer',
-    template: '%s · MotoQuant Pro',
+      'MotoQuant — Open-Source Motorcycle Quarter-Mile Drag Racing Simulator | ET Predictor & Build Optimizer',
+    template: '%s · MotoQuant',
   },
   description: DESCRIPTION,
   metadataBase: new URL(SITE_URL),
-  applicationName: 'MotoQuant Pro',
+  applicationName: 'MotoQuant',
   manifest: '/site.webmanifest',
   alternates: {
     canonical: '/',
@@ -79,17 +80,17 @@ export const metadata = {
   },
   openGraph: {
     title:
-      'MotoQuant Pro — Motorcycle Quarter-Mile Drag Racing Simulator',
+      'MotoQuant — Open-Source Motorcycle Quarter-Mile Drag Racing Simulator',
     description: DESCRIPTION,
     url: SITE_URL,
-    siteName: 'MotoQuant Pro',
+    siteName: 'MotoQuant',
     images: [
       {
         url: `${SITE_URL}/og-image.png`,
         secureUrl: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'MotoQuant Pro — quarter-mile drag racing simulator covering 541 motorcycles, 593 parts, 254 tires, 20 venues',
+        alt: 'MotoQuant — quarter-mile drag racing simulator covering 541 motorcycles, 593 parts, 254 tires, 20 venues',
         type: 'image/png',
       },
     ],
@@ -100,12 +101,12 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title:
-      'MotoQuant Pro — Motorcycle Quarter-Mile Drag Racing Simulator',
+      'MotoQuant — Open-Source Motorcycle Quarter-Mile Drag Racing Simulator',
     description: DESCRIPTION,
     images: [
       {
         url: `${SITE_URL}/og-image.png`,
-        alt: 'MotoQuant Pro — quarter-mile drag racing simulator covering 541 motorcycles, 593 parts, 254 tires, 20 venues',
+        alt: 'MotoQuant — quarter-mile drag racing simulator covering 541 motorcycles, 593 parts, 254 tires, 20 venues',
       },
     ],
     site: '@motoquant',
@@ -114,8 +115,8 @@ export const metadata = {
   keywords: [
     // Brand
     'motoquant',
-    'motoquant pro',
     'motoquant simulator',
+    'motoquant github',
     // Primary category
     'motorcycle drag racing simulator',
     'motorcycle quarter mile calculator',
@@ -186,10 +187,12 @@ export const metadata = {
     'drag sim alternative',
     'motorcycle calculator online',
     'free quarter mile simulator',
+    'open source drag racing simulator',
+    'open source motorcycle simulator',
   ],
   authors: [{ name: 'Ritwik Singh', url: SITE_URL }],
   creator: 'Ritwik Singh',
-  publisher: 'MotoQuant Pro',
+  publisher: 'MotoQuant',
   category: 'Automotive Simulation',
   classification: 'Motorcycle Racing Simulation Software',
   robots: {
@@ -266,12 +269,13 @@ export default function RootLayout({ children }) {
         >
           Skip to content
         </a>
-        {/* Three site-wide JSON-LD blocks. Keeping them in <body> (rather than
+        {/* Site-wide JSON-LD blocks. Keeping them in <body> (rather than
             <head>) is equivalent per the schema.org + Google guidance, and
             lets us render them as React children without <Script> wrappers. */}
         <StructuredData data={organizationSchema()} />
         <StructuredData data={websiteSchema()} />
         <StructuredData data={softwareApplicationSchema()} />
+        <StructuredData data={softwareSourceCodeSchema()} />
         <StructuredData data={faqSchema()} />
         <AuthProvider>{children}</AuthProvider>
       </body>

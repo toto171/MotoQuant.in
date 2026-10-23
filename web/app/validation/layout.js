@@ -6,7 +6,7 @@ import StructuredData, { SITE_URL } from '../StructuredData';
 
 const TITLE = 'Accuracy — Real vs Simulated Quarter-Mile ET (276 Benchmarks)';
 const DESCRIPTION =
-  "MotoQuant Pro's accuracy report: every simulated quarter-mile ET plotted against its published real timeslip. 250 source-quality-weighted benchmarks (276 matched), weighted mean absolute error 0.26s, bias +0.007s, top-10 cleanest ±0.007s, 138/276 within 0.20s. Interactive scatter, residual histogram, and per-cluster breakdown against Cycle World, Sport Rider, MCN and MotoStatz data. Reference baselines K5 9.9331s, R1 10.1436s, Hayabusa 10.3633s — Δ ±0.0000 since July 13, 2026.";
+  "MotoQuant's accuracy report: every simulated quarter-mile ET plotted against its published real timeslip. 250 source-quality-weighted benchmarks (276 matched), weighted mean absolute error 0.26s, bias +0.007s, top-10 cleanest ±0.007s, 138/276 within 0.20s. Interactive scatter, residual histogram, and per-cluster breakdown against Cycle World, Sport Rider, MCN and MotoStatz data. Reference baselines K5 9.9331s, R1 10.1436s, Hayabusa 10.3633s — Δ ±0.0000 since July 13, 2026.";
 
 export const metadata = {
   title: TITLE,

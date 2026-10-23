@@ -28,8 +28,8 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 // 2) API_URL_DIRECT — same env override, but falls back to the absolute
-//    Render URL instead of the rewrite. Used by the auth + billing surfaces
-//    (AuthProvider, /login, /pricing, /account) which were built against the
+//    Render URL instead of the rewrite. Used by the auth surfaces
+//    (AuthProvider, /login, /account) which were built against the
 //    direct cross-origin base and must keep identical fetch/cookie semantics
 //    even when NEXT_PUBLIC_API_URL is unset.
 export const API_URL_DIRECT =

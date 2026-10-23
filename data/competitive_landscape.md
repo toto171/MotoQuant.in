@@ -1,4 +1,4 @@
-# MotoQuant Pro — Competitive Landscape
+# MotoQuant — Competitive Landscape
 
 Tracking competitors, adjacent products, and market signals. Updated weekly by the `competitive-intel` agent.
 

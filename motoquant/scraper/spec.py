@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — BikeSpec Dataclass
-===================================
+MotoQuant — BikeSpec Dataclass
+==============================
 Intermediate representation between raw scraped data and BikeConfig.
 Carries provenance (source URL, scrape timestamp) and per-field confidence.
 """

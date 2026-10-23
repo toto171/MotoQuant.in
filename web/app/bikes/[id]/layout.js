@@ -65,11 +65,12 @@ export async function generateMetadata({ params }) {
     // Google re-crawls periodically and will pick up the full metadata
     // once the API is responsive again.
     const fallbackTitle =
-      'Motorcycle Quarter-Mile Drag Simulator — MotoQuant Pro';
+      'Motorcycle Quarter-Mile Drag Simulator — MotoQuant';
     const fallbackDesc =
-      'Physics-based quarter-mile drag-racing simulator for this motorcycle. 541 bikes in the catalog. Free and in-browser.';
+      'Physics-based quarter-mile drag-racing simulator for this motorcycle. 541 bikes in the catalog. Free, open source and in-browser.';
     return {
-      title: fallbackTitle,
+      // absolute: already branded — skip the '%s · MotoQuant' template
+      title: { absolute: fallbackTitle },
       description: fallbackDesc,
       alternates: { canonical: `/bikes/${id}` },
       openGraph: {
@@ -96,7 +97,7 @@ export async function generateMetadata({ params }) {
   const title = `${name} — Quarter-Mile ET, Drag Simulator & Full Specs`;
 
   const descParts = [
-    `Simulate ${name} quarter-mile drag times with MotoQuant Pro.`,
+    `Simulate ${name} quarter-mile drag times with MotoQuant.`,
     disp && power && mass
       ? `${disp} · ${power} · ${mass} dry.`
       : [disp, power, mass].filter(Boolean).join(' · '),
@@ -146,7 +147,7 @@ export async function generateMetadata({ params }) {
           url: `${SITE_URL}/og-image.png`,
           width: 1200,
           height: 630,
-          alt: `${name} — quarter-mile drag simulation data on MotoQuant Pro`,
+          alt: `${name} — quarter-mile drag simulation data on MotoQuant`,
         },
       ],
     },
@@ -247,7 +248,7 @@ function vehicleSchema(bike) {
         : undefined,
     url: `${SITE_URL}/bikes/${bike.id}`,
     image: `${SITE_URL}/og-image.png`,
-    description: `Full physics-based quarter-mile drag simulation data for the ${name} on MotoQuant Pro.`,
+    description: `Full physics-based quarter-mile drag simulation data for the ${name} on MotoQuant.`,
     offers: {
       '@type': 'Offer',
       url: `${SITE_URL}/simulator?bike_id=${bike.id}`,
@@ -255,7 +256,7 @@ function vehicleSchema(bike) {
       price: '0',
       availability: 'https://schema.org/InStock',
       itemCondition: 'https://schema.org/NewCondition',
-      description: 'Free quarter-mile simulation for this motorcycle on MotoQuant Pro.',
+      description: 'Free quarter-mile simulation for this motorcycle on MotoQuant.',
     },
   };
 }

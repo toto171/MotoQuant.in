@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MotoQuant Pro — Catalog-integrity patch (2026-07-06 audit).
+MotoQuant — Catalog-integrity patch (2026-07-06 audit).
 
 Fixes the catalog-integrity defects surfaced by the July-6 discovery pass
 (leak matrix over every part x bike pair). Every fix below is ALSO folded

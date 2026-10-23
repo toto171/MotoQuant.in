@@ -5,7 +5,7 @@ import ScoreboardDigits from '../../../components/ScoreboardDigits';
 
 export const metadata = {
   title: 'Physics Whitepaper',
-  description: 'First-principles physics behind MotoQuant Pro: 15 sub-models, RK4 integrator at 1 ms step, Pacejka magic-formula tire model with thermal evolution, Willans friction, 2T expansion-chamber Gaussian curve, weight transfer, weighted-benchmark validation. The complete methodology document for the motorcycle quarter-mile simulator.',
+  description: 'First-principles physics behind MotoQuant (open source, Apache-2.0): 15 sub-models, RK4 integrator at 1 ms step, Pacejka magic-formula tire model with thermal evolution, Willans friction, 2T expansion-chamber Gaussian curve, weight transfer, weighted-benchmark validation. The complete methodology document for the motorcycle quarter-mile simulator.',
   alternates: { canonical: 'https://motoquant.in/docs/physics' },
   keywords: [
     'pacejka tire model motorcycle',

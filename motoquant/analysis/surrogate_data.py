@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Surrogate Training Data Generator (Phase 4B v2)
-===============================================================
+MotoQuant — Surrogate Training Data Generator (Phase 4B v2)
+===========================================================
 Generates a quasi-random dataset of (BikeConfig parameters → ET, trap speed)
 pairs by Sobol-sampling the physical parameter space and running the full
 physics engine on each sample.

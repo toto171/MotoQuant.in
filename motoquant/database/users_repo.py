@@ -1,8 +1,14 @@
 """
-MotoQuant Pro -- Users Repository
-=================================
-CRUD layer for users, sessions, and magic_links tables.
+MotoQuant -- Users Repository
+=============================
+CRUD layer for the OPTIONAL-accounts tables: users, sessions, magic_links.
 All methods accept a sqlite3.Connection so callers control transactions.
+
+There are no tiers, plans or payment-customer ids. Databases created before
+the open-source pivot (2026-10-23) may still carry a ``users.tier`` column
+(``NOT NULL DEFAULT 'free'``) and the two old payment-customer columns until
+scripts/patch_2026_10_23_drop_monetization.py runs; every INSERT below omits
+them, so such databases keep working unchanged.
 """
 
 from __future__ import annotations
@@ -46,7 +52,7 @@ def get_user_by_id(conn: sqlite3.Connection, user_id: int) -> dict | None:
 
 
 def get_or_create_user(conn: sqlite3.Connection, email: str) -> dict:
-    """Return existing user or insert a new free-tier user.
+    """Return the existing user or insert a new one.
 
     Race-safe: two concurrent first-time sign-ins for the same email would both
     pass a plain SELECT-then-INSERT and the second would hit the UNIQUE(email)
@@ -59,7 +65,7 @@ def get_or_create_user(conn: sqlite3.Connection, email: str) -> dict:
         return dict(row)
     try:
         conn.execute(
-            "INSERT INTO users (email, tier, is_active) VALUES (?, 'free', 1)",
+            "INSERT INTO users (email, is_active) VALUES (?, 1)",
             (email,),
         )
         conn.commit()
@@ -69,23 +75,6 @@ def get_or_create_user(conn: sqlite3.Connection, email: str) -> dict:
     return dict(
         conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
     )
-
-
-def set_user_tier(conn: sqlite3.Connection, user_id: int, tier: str) -> None:
-    assert tier in ("free", "pro", "studio")
-    conn.execute(
-        "UPDATE users SET tier = ?, updated_at = ? WHERE id = ?",
-        (tier, _now_utc(), user_id),
-    )
-    conn.commit()
-
-
-def set_razorpay_customer(conn: sqlite3.Connection, user_id: int, rzp_id: str) -> None:
-    conn.execute(
-        "UPDATE users SET razorpay_customer_id = ?, updated_at = ? WHERE id = ?",
-        (rzp_id, _now_utc(), user_id),
-    )
-    conn.commit()
 
 
 def deactivate_user(conn: sqlite3.Connection, user_id: int) -> None:
@@ -248,11 +237,7 @@ def ensure_tables(conn: sqlite3.Connection) -> None:
         CREATE TABLE IF NOT EXISTS users (
             id                      INTEGER PRIMARY KEY AUTOINCREMENT,
             email                   TEXT    NOT NULL UNIQUE,
-            tier                    TEXT    NOT NULL DEFAULT 'free'
-                                            CHECK(tier IN ('free','pro','studio')),
             is_active               INTEGER NOT NULL DEFAULT 1,
-            razorpay_customer_id    TEXT,
-            stripe_customer_id      TEXT,
             password_hash           TEXT,
             email_verified          INTEGER NOT NULL DEFAULT 0,
             created_at              TEXT    DEFAULT (datetime('now','utc')),
@@ -286,7 +271,7 @@ def ensure_tables(conn: sqlite3.Connection) -> None:
     )
     conn.commit()
 
-    # ── v5 columns (password auth / Stripe) — guarded ALTERs for old DBs ──
+    # ── v5 columns (password auth) — guarded ALTERs for old DBs ──
     for ddl in (
         "ALTER TABLE users ADD COLUMN password_hash TEXT",
         "ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0",
@@ -298,18 +283,17 @@ def ensure_tables(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
-# --- PASSWORD AUTH + STRIPE HELPERS (Phase 6, June 2026) ------------------------
+# --- PASSWORD AUTH HELPERS (Phase 6, June 2026) -------------------------------
 
 
 def create_user_with_password(
     conn: sqlite3.Connection, email: str, password_hash: str
 ) -> dict:
-    """Insert a new free-tier user with a password hash. Caller must ensure
-    the email does not already exist (raises sqlite3.IntegrityError otherwise)."""
+    """Insert a new user with a password hash. Caller must ensure the email
+    does not already exist (raises sqlite3.IntegrityError otherwise)."""
     email = email.lower().strip()
     conn.execute(
-        "INSERT INTO users (email, tier, is_active, password_hash) "
-        "VALUES (?, 'free', 1, ?)",
+        "INSERT INTO users (email, is_active, password_hash) VALUES (?, 1, ?)",
         (email, password_hash),
     )
     conn.commit()
@@ -332,20 +316,3 @@ def mark_email_verified(conn: sqlite3.Connection, user_id: int) -> None:
         (_now_utc(), user_id),
     )
     conn.commit()
-
-
-def set_stripe_customer(conn: sqlite3.Connection, user_id: int, stripe_id: str) -> None:
-    conn.execute(
-        "UPDATE users SET stripe_customer_id = ?, updated_at = ? WHERE id = ?",
-        (stripe_id, _now_utc(), user_id),
-    )
-    conn.commit()
-
-
-def get_user_by_stripe_customer(
-    conn: sqlite3.Connection, stripe_id: str
-) -> dict | None:
-    row = conn.execute(
-        "SELECT * FROM users WHERE stripe_customer_id = ?", (stripe_id,)
-    ).fetchone()
-    return dict(row) if row else None

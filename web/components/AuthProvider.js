@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * MotoQuant Pro — Auth Context Provider
- * =======================================
+ * MotoQuant — Auth Context Provider
+ * ===================================
  * Manages JWT access/refresh tokens in memory (never localStorage).
  * Exposes useAuth() hook to all child components.
  *
@@ -37,7 +37,7 @@ import { API_URL_DIRECT as API_BASE } from "../lib/api";
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);       // { id, email, tier, subscription_status, license_keys }
+  const [user, setUser] = useState(null);       // { id, email, has_password, email_verified, … } from /api/auth/me
   const [accessToken, setAccessToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const refreshTimerRef = useRef(null);
@@ -89,7 +89,7 @@ export function AuthProvider({ children }) {
 
   const _applyTokens = useCallback(
     (data) => {
-      // data = { access_token, refresh_token, tier }
+      // data = { access_token, refresh_token }
       setAccessToken(data.access_token);
       sessionStorage.setItem("mq_refresh", data.refresh_token);
       // Decode expiry from JWT (middle segment) to schedule refresh
@@ -137,7 +137,7 @@ export function AuthProvider({ children }) {
   // ── public API ────────────────────────────────────────────────────────────
 
   /**
-   * Call after POST /api/auth/verify returns { access_token, refresh_token, tier }.
+   * Call after POST /api/auth/verify returns { access_token, refresh_token }.
    */
   const applyLoginTokens = useCallback(
     (data) => {

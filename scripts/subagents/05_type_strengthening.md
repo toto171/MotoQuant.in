@@ -1,19 +1,16 @@
 # Subagent 5: TYPE STRENGTHENING
 
-You are SUBAGENT 5: TYPE STRENGTHENING for the MotoQuant Pro codebase. Read CLAUDE.md first.
+You are SUBAGENT 5: TYPE STRENGTHENING for the MotoQuant codebase. Read CLAUDE.md first.
 
 ## Context
 
-Mostly Python 3.10+ (PEP 604 union syntax `X | Y` is in use). Desktop is TypeScript 5.6 in strict mode. Web is plain JS, type strengthening N/A there.
+Mostly Python 3.10+ (PEP 604 union syntax `X | Y` is in use). Web is plain JS, type strengthening N/A there.
 
 ## Your job — find
 
 - Python: function signatures missing type hints, esp. on public functions
 - Python: `Any`, `dict`, `list`, `tuple` used where a specific shape is known (`dict[str, Any]` should often be a `TypedDict` or `dataclass`)
 - Python: bare `Optional[T]` patterns that lose information
-- TypeScript: `any` types in `desktop/src/` (strict mode usually catches but not always)
-- TypeScript: `unknown` used where the actual shape is known
-- TypeScript: type assertions `as X` that should be type guards instead
 - Pydantic: fields typed as `Any` when they should be a model
 
 ## Where to focus first
@@ -21,8 +18,7 @@ Mostly Python 3.10+ (PEP 604 union syntax `X | Y` is in use). Desktop is TypeScr
 1. `motoquant/scraper/importer.py` — `extract_headline_specs` and `spec_to_bike_config` likely return loose dicts
 2. `motoquant/api.py` — Pydantic responses with `Any` fields
 3. `motoquant/database/connection.py` — DB row results often `dict[str, Any]`
-4. `desktop/src/lib/api.ts` — request/response shapes
-5. `motoquant/llm/runner.py` — recently rewritten, weak types likely
+4. `motoquant/llm/runner.py` — recently rewritten, weak types likely
 
 ## Critical: research the real type before strengthening
 

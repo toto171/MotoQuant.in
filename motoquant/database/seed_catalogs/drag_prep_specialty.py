@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Drag-Prep Specialty Parts Catalog
-==================================================
+MotoQuant — Drag-Prep Specialty Parts Catalog
+=============================================
 Seeds 7 well-sourced drag-prep parts targeting two of the thinnest catalog
 categories (swingarm_ext = 4 -> 8 parts, chain = 22 -> 25 parts) with focus
 on the Indian Aamby Valley + MMRT drag scene plus the global Hayabusa Pro

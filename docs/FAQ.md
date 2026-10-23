@@ -1,9 +1,12 @@
-# MotoQuant Pro — Frequently Asked Questions
+# MotoQuant — Frequently Asked Questions
 
 ## General Questions
 
-### What is MotoQuant Pro?
-MotoQuant Pro is a physics-based quarter-mile drag racing simulator for motorcycles. It uses first-principles aerodynamics, tire physics (Pacejka slip characteristics), drivetrain dynamics, and engine modeling to predict your bike's quarter-mile ET (elapsed time) and trap speed. The simulator lets you test modifications—power increases, gear ratios, tire swaps, weight reduction—and see their impact on performance *before* spending money at the tuner or parts shop.
+### What is MotoQuant?
+MotoQuant is a free, open-source, physics-based quarter-mile drag racing simulator for motorcycles. It uses first-principles aerodynamics, tire physics (Pacejka slip characteristics), drivetrain dynamics, and engine modeling to predict your bike's quarter-mile ET (elapsed time) and trap speed. The simulator lets you test modifications—power increases, gear ratios, tire swaps, weight reduction—and see their impact on performance *before* spending money at the tuner or parts shop.
+
+### Is it free? Is it open source?
+Yes to both. Everything (the simulator, parts ROI, build optimizer, autotune, Dragy/dyno calibration, chat) is free, with no paid tiers, no quotas and no license keys. The code is open source under the **Apache License 2.0**: <https://github.com/da25mem5s02-debug/MotoQuant_v1>. You can use the hosted site at motoquant.in or run your own copy ([SELF_HOSTING.md](SELF_HOSTING.md)). An account is optional and only keeps your saved runs in a personal garage.
 
 ### Who should use it?
 - **Drag racers** — predict ET gains from mods, plan builds within budget constraints
@@ -12,12 +15,13 @@ MotoQuant Pro is a physics-based quarter-mile drag racing simulator for motorcyc
 - **Students** — learn motorcycle physics with a working model
 
 ### Is it accurate?
-Our validation benchmarks show **±0.07 seconds** on known quarter-mile times (GSX-R 1000 K5: 9.97 s actual vs. 10.04 s simulated). The engine is validated on 3 reference bikes. For bikes not in the library, results are estimates — use them to guide decisions, not as law.
+MotoQuant is validated against **250 published benchmarks** (magazine road tests, instrumented GPS runs, timeslips), weighted by source quality. Across 276 matched runs the weighted mean error is about **0.26 s** and the mean bias **+0.007 s**. Reference bikes track closely: GSX-R 1000 K5 9.93 s simulated vs 9.97 s real, Hayabusa Gen1 10.36 s vs a 10.1–10.7 s real range. Small-cc bikes are less certain because few instrumented benchmarks exist for them. For bikes not in the library, results are estimates; use them to guide decisions, not as law. The full breakdown is at motoquant.in/validation.
 
 ### Where does the simulator run?
 - **Web simulator** on motoquant.in — enter your bike and mods, get ET in ~50 ms
 - **CLI** (`python -m motoquant.run sim ...`) — batch simulations, scripting
 - **API** — FastAPI backend for integration into your own tools
+- **Your own server** — self-host the whole stack from the open-source repo ([SELF_HOSTING.md](SELF_HOSTING.md))
 
 ---
 
@@ -270,28 +274,31 @@ CLI: `python -m motoquant.run sim --bike-id 1 --part-ids 10,20,30 --json > resul
 ## Support & Feedback
 
 ### How do I report a bug?
-Email us at **support@motoquant.in** with:
+Open a [GitHub issue](https://github.com/da25mem5s02-debug/MotoQuant_v1/issues/new/choose) with the bug-report template, and include:
 - Your bike model (make, year)
 - Modifications you applied
 - The unexpected result
 - Expected result (if you know)
 - Actual quarter-mile time (if you've run it)
 
-Or use the bug report form on motoquant.in.
+Security problems should be reported privately instead; see [SECURITY.md](../SECURITY.md).
 
 ### Can I request a new bike or tire?
-Yes — email **requests@motoquant.in** with the make, model, year, and any available specs (power, weight, dimensions, OEM tire fitment). We prioritize Indian-market bikes and popular international models.
+Yes. Open a GitHub issue with the **bike data** template and include the make, model, year and any available specs (power, weight, dimensions, OEM tire fitment), with sources. Better still, add it yourself in a PR (see [CONTRIBUTING.md](../CONTRIBUTING.md)). Indian-market bikes and popular international models are prioritized. Every spec needs a citable source; we never fabricate data.
+
+### Can I contribute a real timeslip or dyno sheet?
+Please do. Instrumented runs (Dragy, VBOX, Racelogic, timeslips with conditions) are the single most valuable contribution, because small-cc accuracy is limited by data rather than by the model. Use the **calibration data** issue template.
 
 ### Is there a community or forum?
-We're building one — watch motoquant.in for launch. In the meantime, reach out directly or join our Discord (link at motoquant.in).
+GitHub is the community hub: [issues](https://github.com/da25mem5s02-debug/MotoQuant_v1/issues) for bugs and data corrections, and [discussions](https://github.com/da25mem5s02-debug/MotoQuant_v1/discussions) for questions and ideas. Please follow the [Code of Conduct](../CODE_OF_CONDUCT.md).
 
 ### What's your roadmap?
-- **Phase 3 (Current):** Web launch, calibration pipeline, public leaderboard
-- **Phase 4:** AI optimization (Bayesian tuning within budget)
-- **Phase 5:** ~~Desktop app~~ — discontinued July 2026; the hosted web app is the product
-- **Phase 6:** B2C freemium / B2B pro tiers, OBD-II live telemetry
+- **Done:** physics engine, catalog, calibration pipeline, public leaderboard, AI build optimization and chat, MCP server.
+- **Discontinued:** the desktop app (July 2026). The web app is the product.
+- **Now:** open-source launch, community benchmark contributions, the optional Rust core (exact sims in the browser), accuracy work on small-cc bikes.
+- **Later:** OBD-II live telemetry.
 
-See the full roadmap at motoquant.in/roadmap.
+The prioritized backlog is [ROADMAP.md](ROADMAP.md).
 
 ---
 
@@ -300,13 +307,15 @@ See the full roadmap at motoquant.in/roadmap.
 ### Is this simulator a substitute for real testing?
 No. This is a **predictive tool**, not ground truth. Real quarter-mile results vary with weather, driver skill, tire temperature, surface condition, and equipment wear. Use the simulator to make informed decisions, not as a guarantee.
 
-### Can I use your data in a tuning shop?
-Yes, if you include proper attribution: "Simulated with MotoQuant Pro." For commercial use (shops, racing teams, OEMs), contact us about licensing.
+### Can I use MotoQuant in a tuning shop, a racing team or a commercial product?
+Yes. The code is licensed under the **Apache License 2.0**, which permits commercial use, modification and redistribution as long as you keep the license and the `NOTICE` file and mark modified files. Attribution such as "Simulated with MotoQuant" is appreciated. Benchmark figures are cited facts from their original publishers, and bike and parts names are trademarks of their owners (see `NOTICE`). For heavy automated use, please self-host rather than hammering the public instance, which is rate-limited.
 
 ### What data do you collect?
 - Simulation runs (anonymized: bike ID, mods, results — no personal info)
 - Dragy/dyno imports you choose to upload
 - Leaderboard submissions (you can opt out)
+- Optional account data (email, saved runs) only if you sign in
+- Anonymous usage events (no user id or IP correlation); third-party analytics forwarding is opt-in per deployment and off unless the operator enables it
 
 See our Privacy Policy at motoquant.in/privacy.
 
@@ -315,5 +324,5 @@ Yes — simulation runs are your own unless you explicitly submit to the public 
 
 ---
 
-**Last updated:** April 2026  
-**Questions?** Contact support@motoquant.in or visit motoquant.in
+**Last updated:** October 2026  
+**Questions?** Open a [GitHub discussion](https://github.com/da25mem5s02-debug/MotoQuant_v1/discussions) or visit motoquant.in

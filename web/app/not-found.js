@@ -4,7 +4,7 @@ import SiteFooter from '../components/SiteFooter';
 import StageDots from '../components/StageDots';
 
 export const metadata = {
-  title: '404 — Off the racing line | MotoQuant Pro',
+  title: '404 — Off the racing line',
   robots: { index: false },
 };
 

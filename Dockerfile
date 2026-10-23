@@ -8,7 +8,9 @@ WORKDIR /app
 COPY requirements-api.lock .
 RUN pip install --no-cache-dir -r requirements-api.lock
 
-# Copy application code
+# Copy application code (+ the Apache-2.0 LICENSE, which must travel with
+# every redistributed copy — the image is one).
+COPY LICENSE .
 COPY motoquant/ ./motoquant/
 COPY motoquant.db .
 COPY artifacts/surrogate/surrogate_numpy.npz ./artifacts/surrogate/surrogate_numpy.npz

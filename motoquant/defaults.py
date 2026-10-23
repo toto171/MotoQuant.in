@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Default Bike Configurations
-==========================================
+MotoQuant — Default Bike Configurations
+=======================================
 Real-world specifications for the three reference platforms.
 All data from manufacturer service manuals and published dyno results.
 """

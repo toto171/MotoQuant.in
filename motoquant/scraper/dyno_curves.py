@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Dyno Curves for Top 20 Drag Racing Bikes
-=========================================================
+MotoQuant — Dyno Curves for Top 20 Drag Racing Bikes
+====================================================
 Realistic torque curves for the 20 most popular drag racing motorcycles.
 Data sourced from published dyno results, magazine tests, and OEM specs.
 

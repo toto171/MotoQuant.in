@@ -1,5 +1,5 @@
 /**
- * MotoQuant Pro — robots.txt route
+ * MotoQuant — robots.txt route
  * =================================
  * Generates /robots.txt via the Next.js metadata convention (returned as a
  * MetadataRoute.Robots object).

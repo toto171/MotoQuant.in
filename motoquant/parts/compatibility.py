@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Part Fitment Compatibility Engine
-==================================================
+MotoQuant — Part Fitment Compatibility Engine
+=============================================
 Determines whether a performance part fits a given motorcycle,
 using tiered fitment rules (exact, family, category, universal).
 """

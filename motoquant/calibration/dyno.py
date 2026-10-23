@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Dyno Curve Import
-===================================
+MotoQuant — Dyno Curve Import
+=============================
 Parse dynamometer output files (CSV), apply SAE J1349 atmospheric correction,
 and return a DynoCurve ready for injection into BikeConfig.engine.dyno_curve.
 

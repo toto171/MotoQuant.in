@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Drag Essentials Catalog (July 2026)
-====================================================
+MotoQuant — Drag Essentials Catalog (July 2026)
+===============================================
 Seeds the three most-requested real-world drag-prep part families that the
 catalog was missing entirely, plus a V2-cruiser nitrous family and verified
 Trask M8 turbo kits.

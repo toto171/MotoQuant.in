@@ -2,7 +2,8 @@
 
 /**
  * SiteFooter — quiet 4-column footer on asphalt (IGNITION v5 skin).
- * Secondary nav, contact, legal, the brand lockup (GaugeMark + the
+ * Secondary nav, project/community links (incl. the GitHub source and
+ * the Apache-2.0 license), legal, the brand lockup (GaugeMark + the
  * sentence-case Moto/Quant wordmark) and the pinned reference-baselines
  * line. Replaces every per-page <footer> across the marketing site.
  * No glows — the footer is the quietest surface on the slip.
@@ -10,6 +11,7 @@
 
 import Link from 'next/link';
 import GaugeMark from './GaugeMark';
+import { COPYRIGHT_HOLDER, LICENSE_SPDX, LICENSE_URL, REPO_URL } from '../lib/site';
 
 const COLS = [
   {
@@ -17,7 +19,6 @@ const COLS = [
     links: [
       { href: '/simulator',            label: 'Simulator' },
       { href: '/features',             label: 'Features' },
-      { href: '/pricing',              label: 'Pricing' },
       { href: '/leaderboard',          label: 'Leaderboard' },
       { href: '/login',                label: 'Sign in / Account' },
       { href: '/bikes',                label: 'Bikes catalog' },
@@ -33,11 +34,12 @@ const COLS = [
     ],
   },
   {
-    title: 'Company',
+    title: 'Project',
     links: [
       { href: '/about',                label: 'About' },
       { href: '/blog',                 label: 'Blog' },
-      { href: '/contact',              label: 'Contact' },
+      { href: '/contact',              label: 'Contact & community' },
+      { href: REPO_URL,                label: 'Source on GitHub', external: true },
     ],
   },
   {
@@ -45,7 +47,7 @@ const COLS = [
     links: [
       { href: '/terms',                label: 'Terms' },
       { href: '/privacy',              label: 'Privacy' },
-      { href: '/refunds',              label: 'Refunds' },
+      { href: LICENSE_URL,             label: `License (${LICENSE_SPDX})`, external: true },
     ],
   },
 ];
@@ -70,7 +72,7 @@ export default function SiteFooter() {
               made for the strip and the salt.
             </p>
             <p className="mt-4 label-mono">
-              motoquant.in &middot; Built in India &middot; Free during beta
+              motoquant.in &middot; Built in India &middot; Free &amp; open source
             </p>
           </div>
 
@@ -82,12 +84,23 @@ export default function SiteFooter() {
               <ul className="space-y-2">
                 {col.links.map(l => (
                   <li key={l.href}>
-                    <Link
-                      href={l.href}
-                      className="text-sm text-white/65 hover:text-white transition-colors"
-                    >
-                      {l.label}
-                    </Link>
+                    {l.external ? (
+                      <a
+                        href={l.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-white/65 hover:text-white transition-colors"
+                      >
+                        {l.label}
+                      </a>
+                    ) : (
+                      <Link
+                        href={l.href}
+                        className="text-sm text-white/65 hover:text-white transition-colors"
+                      >
+                        {l.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -97,8 +110,16 @@ export default function SiteFooter() {
 
         <div className="mt-14 pt-8 border-t border-white/[0.08] flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-xs font-mono tabular-nums text-white/40">
           <p>
-            &copy; {new Date().getFullYear()} MotoQuant Pro. Not affiliated with
-            any motorcycle manufacturer.
+            &copy; {new Date().getFullYear()} {COPYRIGHT_HOLDER} &middot;{' '}
+            <a
+              href={LICENSE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline decoration-white/20 underline-offset-2 hover:text-white/70"
+            >
+              {LICENSE_SPDX} licensed
+            </a>
+            . Not affiliated with any motorcycle manufacturer.
           </p>
           <p className="flex flex-wrap gap-x-4 gap-y-1">
             <span>K5 · 9.9331s</span>

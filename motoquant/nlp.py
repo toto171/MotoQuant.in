@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Natural Language Tuning Interface
-==================================================
+MotoQuant — Natural Language Tuning Interface
+=============================================
 Pure Python NLP parser for translating natural language queries like
 "optimize my Hayabusa for 35°C at Aamby Valley with a 50000 INR budget"
 into structured parameter overrides.

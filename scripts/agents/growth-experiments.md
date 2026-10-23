@@ -10,7 +10,7 @@ Propose ONE A/B-able UI/copy variant per session. Implement it as a feature-flag
 
 1. CTA copy variants (current "Try it free" → "Predict your bike's ET")
 2. Above-the-fold value prop (current physics-first → maybe Indian-first or comparison-first)
-3. Pricing-page friction reduction (signup form fields, plan-selector layout)
+3. Contribution funnel (how fast a visitor finds the GitHub repo, the benchmark-submission template, or the self-hosting guide)
 4. Simulator default bike (currently Hayabusa — try a Pulsar NS200 or RE 650 to localise)
 5. Blog-post pull-quote placement / CTA density
 

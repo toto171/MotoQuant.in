@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — ECU / Setup Autotune
-====================================
+MotoQuant — ECU / Setup Autotune
+================================
 Conditions-aware drag setup advisor (Track B).
 
 Given a bike + a *resolved race environment* (temperature, humidity, density

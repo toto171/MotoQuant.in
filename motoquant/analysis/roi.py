@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Parts ROI Engine
-=================================
+MotoQuant — Parts ROI Engine
+============================
 Quantifies the return-on-investment of each performance part in the catalog
 relative to a baseline simulation.
 

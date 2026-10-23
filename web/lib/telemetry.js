@@ -1,8 +1,8 @@
 'use client';
 
 /**
- * MotoQuant Pro — Anonymous client telemetry.
- * =============================================
+ * MotoQuant — Anonymous client telemetry.
+ * =========================================
  * Goal: catch bugs and usage signals from real users without storing PII.
  *
  * What we send to /api/telemetry/event:
@@ -24,9 +24,11 @@
  * all errors silently — telemetry MUST NEVER break the page.
  *
  * Backend: see motoquant/api.py @app.post('/api/telemetry/event'). The
- * Render log stream is the source-of-truth; for prod-scale aggregation
- * later, the same JSON can be rerouted to PostHog/Logfire without changing
- * the client.
+ * server log stream is the source of truth. Forwarding to PostHog is
+ * OPT-IN on the server: it is off unless the operator of a deployment sets
+ * POSTHOG_API_KEY, and nothing in this client talks to PostHog directly.
+ * Self-hosters who leave the key unset send events nowhere but their own
+ * logs.
  */
 
 import { API_URL } from './api';

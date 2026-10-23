@@ -1,17 +1,32 @@
 /**
- * MotoQuant Pro — Terms of Service
- * Last updated: July 2, 2026 (§2 corrected: password + magic-link sign-in;
- * IGNITION v5 typographic skin)
+ * MotoQuant — Terms of Service
+ * Last updated: October 23, 2026 — rewritten for the open-source project:
+ * MotoQuant is free (no plans, payments, refunds or license keys) and its
+ * code is released under the Apache License 2.0. These Terms govern the
+ * HOSTED service at motoquant.in; the code itself is governed by the
+ * license, which wins wherever the two overlap on the code.
+ * (IGNITION v5 typographic skin.)
  */
 
 import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
 import PageHero from "../../components/PageHero";
+import { CONTACT_EMAIL, LICENSE_NAME, LICENSE_URL, REPO_URL } from "../../lib/site";
 
 export const metadata = {
-  title: "Terms of Service — MotoQuant Pro",
+  title: "Terms of Service",
   alternates: { canonical: "https://motoquant.in/terms" },
 };
+
+const linkCls = "text-accent hover:text-accent-bright transition-colors";
+
+function Ext({ href, children }) {
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className={linkCls}>
+      {children}
+    </a>
+  );
+}
 
 export default function TermsPage() {
   return (
@@ -22,161 +37,196 @@ export default function TermsPage() {
         kicker="legal · terms of service · pune jurisdiction"
         badge="Legal"
         title="Terms of Service"
-        sub="The agreement governing your access to and use of MotoQuant Pro."
+        sub="The terms for using the free, open-source MotoQuant service at motoquant.in."
         className="pb-8 md:pb-10"
       >
-        <p className="label-mono">Last updated · 2 July 2026</p>
+        <p className="label-mono">Last updated · 23 October 2026</p>
       </PageHero>
 
       <main id="main" className="pt-10 pb-20 px-4 sm:px-6">
         <div className="mx-auto max-w-3xl">
         <p className="text-white/65 text-sm leading-relaxed">
-          These Terms of Service ("Terms") govern your access to and use of MotoQuant Pro
-          ("MotoQuant", "we", "us"), a motorcycle drag-racing physics simulation platform
-          operated from Pune, India. By creating an account or using the service, you agree
-          to these Terms.
+          These Terms of Service (&ldquo;Terms&rdquo;) govern your use of the hosted
+          MotoQuant service at motoquant.in and its API (&ldquo;the service&rdquo;,
+          &ldquo;MotoQuant&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;), a motorcycle
+          drag-racing physics simulator maintained from Pune, India. By using the
+          service you agree to these Terms. The MotoQuant source code is a separate
+          matter: it is licensed under the {LICENSE_NAME} (see section 7).
         </p>
 
-        <Section title="1. Description of service">
+        <Section title="1. The service">
           <p>
-            MotoQuant Pro provides first-principles physics simulations for motorcycle
-            quarter-mile drag racing, parts ROI analysis, and associated tools. The service
-            is available via a web application at motoquant.in and a REST API.
+            MotoQuant provides first-principles physics simulations for motorcycle
+            quarter-mile drag racing, parts cost-per-tenth analysis, a build optimizer,
+            setup (autotune) suggestions, an AI chat assistant, and calibration against
+            your own Dragy and dyno data, via a website and a REST API.
           </p>
           <p>
-            <strong>Disclaimer: </strong>Simulations are for informational and analytical
-            purposes only. Predicted quarter-mile elapsed times and trap speeds are estimates
-            based on physical models and publicly available specifications. Do not rely on
-            predicted ET for race strategy in any life-safety context. Real-world performance
-            is affected by many factors outside the simulation model.
-          </p>
-        </Section>
-
-        <Section title="2. Accounts and authentication">
-          <p>
-            You must provide a valid email address to create an account. You can sign in
-            with a password — which we store only as a salted scrypt hash, never in
-            plaintext — or with a passwordless magic-link email. You are responsible for
-            keeping your email account and any password you set secure, as they control
-            access to MotoQuant Pro.
-          </p>
-          <p>
-            You must be at least 18 years old to create a paid account. By subscribing
-            you confirm that you are 18 or over.
+            <strong>MotoQuant is free.</strong> There are no plans, subscriptions,
+            payments, refunds or license keys. Some features are rate-limited per
+            visitor to keep the free hosted instance available for everyone.
           </p>
         </Section>
 
-        <Section title="3. Subscription plans and billing">
+        <Section title="2. Simulation results are estimates">
           <p>
-            MotoQuant Pro offers three tiers: Free, Pro (₹499/mo or ₹4,999/yr), and
-            Studio (₹1,999/mo or ₹19,990/yr). MotoQuant Pro is operated by an
-            unregistered sole proprietorship with turnover below the ₹20 lakh GST
-            registration threshold for services, so <strong>no GST is charged</strong> —
-            the listed price is the total amount payable. You receive a payment
-            receipt from the payment processor. Should we become GST-registered in
-            future, we will give notice before GST begins to apply, and it will apply
-            only to payments made after that date.
+            Predicted elapsed times, trap speeds, split times, part gains and setup
+            suggestions are <strong>estimates</strong> produced by a physical model from
+            published specifications. They are for information and analysis only and
+            can be wrong. Real-world performance depends on the rider, the machine&rsquo;s
+            condition, the track, the weather and many factors the model does not
+            capture. Parts prices are indicative estimates, not offers to sell.
           </p>
           <p>
-            <strong>Open beta: </strong>while MotoQuant Pro is in open beta, all Pro and
-            Studio features are provided free of charge to all registered accounts. We
-            will give registered users advance notice by email before paid billing
-            begins. Beta access does not create an entitlement to free access after
-            commercial launch.
-          </p>
-          <p>
-            Payments are processed by Razorpay (India — UPI, cards, net banking,
-            wallets) and Stripe (international cards). By subscribing you agree to the
-            processor's payment terms in addition to these Terms. Subscriptions
-            auto-renew unless cancelled before the end of the billing period.
-          </p>
-          <p>
-            <strong>7-day refund policy: </strong>If you are not satisfied within 7 calendar
-            days of your first payment, contact us at motoquant@gmail.com for a full refund.
-            Refunds are not available after the 7-day window or for renewals. Full terms,
-            including how cancellations and failed payments are handled, are set out in our{" "}
-            <a href="/refunds" className="text-accent hover:text-accent-bright transition-colors">Refund &amp; Cancellation Policy</a>.
+            Answers from the chat assistant are generated by third-party AI models and
+            may be inaccurate. Check anything important against a reliable source.
           </p>
         </Section>
 
-        <Section title="4. License keys">
+        <Section title="3. Riding safely">
           <p>
-            Pro subscribers may generate 1 license key; Studio subscribers may generate
-            up to 5 keys. License keys are personal and non-transferable, and bind to a
-            single device.
+            Drag racing and high-performance riding are dangerous and can cause serious
+            injury or death. Race only at sanctioned events on closed, prepared tracks,
+            with proper protective gear and in line with the organiser&rsquo;s rules.
+            <strong> Never race on public roads.</strong>
           </p>
           <p>
-            On subscription cancellation or expiry, license keys are invalidated within
-            24 hours of the next validation check.
+            Modifying a motorcycle can affect its safety, roadworthiness, emissions
+            compliance, warranty and insurance. Have modifications fitted and checked by
+            a competent mechanic. Do not rely on a MotoQuant prediction for any decision
+            where your safety, or anyone else&rsquo;s, is at stake.
+          </p>
+        </Section>
+
+        <Section title="4. Accounts">
+          <p>
+            You can use the simulator without an account. An optional account lets you
+            keep a garage of saved runs. You need a valid email address and must be at
+            least 18 years old to create one. You can sign in with a password (stored
+            only as a salted scrypt hash, never in plaintext) or a passwordless
+            magic-link email. Keep your email account and any password secure &mdash; they
+            control access to your MotoQuant account.
           </p>
         </Section>
 
         <Section title="5. Acceptable use">
-          <p>You may not:</p>
+          <p>When using the hosted service, you may not:</p>
           <ul className="text-white/65 list-disc pl-5 space-y-1">
-            <li>Reverse-engineer, decompile, or extract the physics model code</li>
-            <li>Use the API at volumes exceeding fair-use limits (contact us for high-volume B2B arrangements)</li>
-            <li>Share subscription credentials or license keys with third parties</li>
-            <li>Use the service for any unlawful purpose under Indian law or the law of your jurisdiction</li>
-            <li>Attempt to circumvent tier gating or rate-limit mechanisms</li>
+            <li>Use it for anything unlawful under Indian law or the law where you are</li>
+            <li>
+              Attempt to disrupt, overload or gain unauthorised access to the service, or
+              to circumvent its rate limits and abuse protections
+            </li>
+            <li>
+              Send automated traffic at volumes that degrade the service for others &mdash;
+              for heavy or bulk use, run your own copy from the{" "}
+              <Ext href={REPO_URL}>source code</Ext>
+            </li>
+            <li>
+              Upload malware, or content you do not have the right to share
+            </li>
+            <li>
+              Post offensive, misleading or impersonating notes on saved runs or the
+              leaderboard
+            </li>
           </ul>
-        </Section>
-
-        <Section title="6. Data you submit">
           <p>
-            We collect your email address, simulation runs, build configurations, and any
-            files you voluntarily upload (Dragy GPS logs, dyno CSVs). This data is
-            used to provide and improve the service. See our Privacy Policy for details.
-          </p>
-          <p>
-            <strong>Right to delete: </strong>You may request account deletion at any time
-            by emailing motoquant@gmail.com. We will soft-delete your account within 7
-            business days and permanently purge all personal data within 30 days.
+            We may remove content or restrict access that breaks these rules.
           </p>
         </Section>
 
-        <Section title="7. Intellectual property">
+        <Section title="6. Content you submit">
           <p>
-            All physics models, software code, and data compilations in MotoQuant Pro are
-            the intellectual property of MotoQuant Pro and are protected under applicable
-            copyright and trade-secret law. Manufacturer specifications used in the bike
-            catalog are publicly available data and remain the property of their respective
-            manufacturers.
+            You keep ownership of the runs, notes and files (Dragy GPS logs, dyno CSVs)
+            you submit. You give us permission to store, process and display them to
+            operate the service &mdash; for example, a saved run gets a public, shareable
+            timeslip page and may appear on the leaderboard. See the{" "}
+            <a href="/privacy" className={linkCls}>Privacy Policy</a> for details.
+          </p>
+          <p>
+            <strong>Right to delete: </strong>you can ask us to delete your account and
+            saved runs at any time by emailing {CONTACT_EMAIL} from the address on the
+            account. We remove account data within 30 days.
           </p>
         </Section>
 
-        <Section title="8. Limitation of liability">
+        <Section title="7. Open-source code, data and names">
           <p>
-            To the maximum extent permitted by applicable law, MotoQuant Pro shall not be
-            liable for any indirect, incidental, special, consequential, or exemplary
-            damages arising from use of or inability to use the service. Our total aggregate
-            liability to you shall not exceed the amount paid by you in the 12 months
-            preceding the claim.
+            The MotoQuant source code &mdash; physics engine, catalog tooling, API and
+            website &mdash; is published at <Ext href={REPO_URL}>GitHub</Ext> under the{" "}
+            <Ext href={LICENSE_URL}>{LICENSE_NAME}</Ext>. You may use, modify and
+            redistribute it under that license&rsquo;s terms, including running your own
+            copy. Where these Terms and the license overlap on the code, the license
+            controls. Contributions you submit to the project are licensed under the
+            same license.
+          </p>
+          <p>
+            Manufacturer specifications in the bike catalog come from public sources and
+            remain the property of their respective owners; benchmark results are
+            credited to the publications and timing sources they come from. Brand and
+            model names are used only to identify motorcycles and parts. MotoQuant is
+            not affiliated with any manufacturer.
+          </p>
+          <p>
+            The license does not grant rights to the MotoQuant name or logo beyond
+            describing where the work came from. If you run a modified public copy,
+            please name it so nobody mistakes it for motoquant.in.
           </p>
         </Section>
 
-        <Section title="9. Governing law">
+        <Section title="8. Third-party services">
           <p>
-            These Terms are governed by the laws of India. Any disputes shall be subject
-            to the exclusive jurisdiction of the courts in Pune, Maharashtra, India.
+            The hosted service relies on third parties for hosting, email delivery, AI
+            models (for the chat assistant) and error monitoring. Their availability is
+            outside our control, and their own terms apply to the parts they provide.
           </p>
         </Section>
 
-        <Section title="10. Changes to terms">
+        <Section title="9. No warranty">
           <p>
-            We may update these Terms with 14 days' notice via email to registered users.
-            Continued use after the notice period constitutes acceptance of the updated Terms.
+            The service is provided free of charge, <strong>&ldquo;as is&rdquo; and
+            &ldquo;as available&rdquo;</strong>, without warranties of any kind, express or
+            implied, including accuracy, fitness for a particular purpose and
+            non-infringement. It runs on modest hosting and may be slow, unavailable or
+            changed, and we may discontinue the hosted service at any time. The source
+            code is covered by the warranty disclaimer in its license.
+          </p>
+        </Section>
+
+        <Section title="10. Limitation of liability">
+          <p>
+            To the maximum extent permitted by applicable law, MotoQuant and its
+            contributors are not liable for any indirect, incidental, special,
+            consequential or exemplary damages, or for any injury, loss or damage arising
+            from riding, racing or modifying a motorcycle, or from relying on any
+            simulation result, estimate or chat answer. Nothing in these Terms excludes
+            liability that cannot be excluded by law.
+          </p>
+        </Section>
+
+        <Section title="11. Governing law">
+          <p>
+            These Terms are governed by the laws of India. Any disputes are subject to
+            the exclusive jurisdiction of the courts in Pune, Maharashtra, India.
+          </p>
+        </Section>
+
+        <Section title="12. Changes to these Terms">
+          <p>
+            We may update these Terms. Material changes are announced on this page and,
+            for registered users, by email at least 14 days before they take effect.
+            Continuing to use the service after that means you accept the updated
+            Terms. Earlier versions are in the project&rsquo;s public git history.
           </p>
         </Section>
 
         <div className="card mt-8 p-5 md:p-6 text-sm text-white/45">
-          <p>MotoQuant Pro · Pune, Maharashtra, India</p>
-          <p>Contact: <a href="mailto:motoquant@gmail.com" className="font-mono text-white/80 hover:text-white transition-colors">motoquant@gmail.com</a></p>
+          <p>MotoQuant · Pune, Maharashtra, India · free &amp; open source</p>
+          <p>Contact: <a href={`mailto:${CONTACT_EMAIL}`} className="font-mono text-white/80 hover:text-white transition-colors">{CONTACT_EMAIL}</a></p>
           <div className="mt-4 flex flex-wrap gap-4">
-            <a href="/privacy" className="text-accent hover:text-accent-bright transition-colors">Privacy Policy</a>
-            <a href="/refunds" className="text-accent hover:text-accent-bright transition-colors">Refunds</a>
-            <a href="/contact" className="text-accent hover:text-accent-bright transition-colors">Contact</a>
-            <a href="/pricing" className="text-accent hover:text-accent-bright transition-colors">Pricing</a>
+            <a href="/privacy" className={linkCls}>Privacy Policy</a>
+            <a href="/contact" className={linkCls}>Contact &amp; community</a>
+            <Ext href={LICENSE_URL}>License</Ext>
           </div>
         </div>
         </div>

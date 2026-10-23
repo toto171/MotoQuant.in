@@ -2,6 +2,7 @@ import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 import StructuredData, { articleSchema } from '../../StructuredData';
+import { REPO_URL } from '../../../lib/site';
 
 const SLUG = 'pulsar-ns400z-quarter-mile-physics';
 const TITLE = 'Bajaj Pulsar NS400Z Quarter-Mile Physics (and Why an RC 390 Still Wins)';
@@ -340,10 +341,15 @@ export default function PostPage() {
             </li>
             <li>
               ·{' '}
-              <Link href="/pricing" className="text-brand-accent hover:text-brand-orange transition-colors">
-                Pricing
-              </Link>{' '}
-              — free tier covers stock-tune sims on either bike; Pro unlocks the full parts-ROI engine and Dragy timeslip calibration against your own runs.
+              <a
+                href={REPO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-accent hover:text-brand-orange transition-colors"
+              >
+                MotoQuant on GitHub
+              </a>{' '}
+              — free and open source: audit the physics behind every number in this post, or run it yourself.
             </li>
           </ul>
         </div>

@@ -30,12 +30,11 @@ except ImportError:  # pragma: no cover
     HAS_FASTAPI = False
 
 # ---------------------------------------------------------------------------
-# Isolated DB -- the metered routes (/api/jobs/simulate, /api/jobs/topspeed)
-# record sim_usage rows via connect(), which falls back to the repo's tracked
-# motoquant.db when MOTOQUANT_DB is unset. Point it at a throwaway tmp DB so
-# a suite run never dirties the working tree (same pattern as test_api.py).
-# No seeding needed: these tests use bike_presets only, and record_and_check
-# creates the sim_usage table on demand.
+# Isolated DB -- the job routes run through the real app, and connect() falls
+# back to the repo's tracked motoquant.db when MOTOQUANT_DB is unset. Point it
+# at a throwaway tmp DB so a suite run never dirties the working tree (the
+# retired sim-quota meter once leaked rows into it exactly this way; same
+# pattern as test_api.py). No seeding needed: these tests use bike_presets.
 # ---------------------------------------------------------------------------
 _tmp_db_file = tempfile.NamedTemporaryFile(
     prefix="motoquant_jobs_test_", suffix=".db", delete=False

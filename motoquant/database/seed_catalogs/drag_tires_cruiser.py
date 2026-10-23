@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Drag Rubber + Cruiser Tire Pack (July 2026)
-============================================================
+MotoQuant — Drag Rubber + Cruiser Tire Pack (July 2026)
+=======================================================
 Two tire families following the seed_recommended_fitments auto-create
 pattern (_ensure_tire_exists + honest Pacejka templates), plus
 DB-QUERY-DRIVEN fitment seeding — fitments are derived from each bike's

@@ -1,7 +1,7 @@
 ---
 name: motoquant
 description: Answers motorcycle drag-racing and performance-tuning questions with real physics instead of guesswork — quarter-mile ET and trap speed, 60-foot launch times, top speed, sprocket/gearing what-ifs, parts ROI in INR, and bike-vs-bike comparisons — by driving the MotoQuant simulator through its MCP tools or REST API. Use this whenever someone asks how fast a bike is, what a modification is worth, which sprockets or parts to run, how altitude or weather changes a run, or how two bikes compare over a quarter mile. Also use it when working on the MotoQuant codebase itself, for the drag-racing vocabulary (ET, trap, 60-foot, density altitude, over-clutching, stage/outlaw build tiers) and the project's honest-accuracy conventions.
-license: Proprietary — MotoQuant Pro
+license: Apache-2.0
 ---
 
 # MotoQuant
@@ -177,8 +177,14 @@ mean something.
   exposes `validation_source`; read it before citing a benchmark as truth.
 - **Prices are Indian-market INR** including duty and GST on imports. They are
   point-in-time and drift.
-- **The hosted API sleeps.** Free tier, ~50 s cold start. A slow first tool
-  call is normal, not a failure — wait, do not retry in a loop.
+- **The hosted API sleeps.** It runs on Render's free hosting tier, so expect a
+  ~50 s cold start. A slow first tool call is normal, not a failure — wait,
+  do not retry in a loop. It is also rate-limited per IP (HTTP 429 with
+  `Retry-After`); for heavy or batch use, run the MCP server in local mode
+  or self-host.
+- **MotoQuant is free and open source (Apache-2.0).** There are no paid
+  tiers, quotas or licence keys. Never tell a user a feature needs an
+  upgrade.
 
 ## Reference files
 

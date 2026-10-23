@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Catalog Duplicate / Regen-Determinism Guard
-===========================================================
+MotoQuant — Catalog Duplicate / Regen-Determinism Guard
+=======================================================
 The 2026-07-25 weekly audit (reports/session_2026_07_25_weekly_audit.md
 section 3.3) found that ``ALL_KNOWN_BIKES`` held 542 entries for 541 bikes.
 Four were *exact-key* duplicates — same manufacturer, model and year range —

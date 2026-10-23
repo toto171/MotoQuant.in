@@ -3,6 +3,11 @@
 > Source: MotoQuant v1 Phase Plan (April 2026, Arya Desai).
 > This is the 28-week strategic roadmap. Week-by-week task issues on GitHub
 > reference this doc for the sub-task prompts.
+>
+> **Dated plan (April 2026).** Read it as history: the desktop phase was
+> discontinued (ADR-0005; `desktop/` deleted 2026-10-23) and monetization was
+> scrapped in favour of open source (ADR-0006). The live backlog is
+> [ROADMAP.md](ROADMAP.md).
 
 ## Executive summary
 
@@ -51,8 +56,9 @@ Sub-tasks:
 3. **1.3 DNN ensemble member.** Retrain existing DNN on same 50k dataset,
    ensemble XGB + DNN predictions.
 4. **1.4 Deploy `/api/surrogate/predict` + `/sensitivity` routes.** Load
-   ensemble at FastAPI startup, target inference <5 ms, gate behind
-   `require_tier("pro")`.
+   ensemble at FastAPI startup, target inference <5 ms, behind a per-IP
+   `rate_limit(...)` fuse (there are no tiers since the 2026-10-23
+   open-source pivot).
 
 ## Phase 2 — Cornering + lateral dynamics (Wk 5–12)
 

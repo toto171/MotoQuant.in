@@ -6,7 +6,7 @@ import ScoreboardDigits from '../../../components/ScoreboardDigits';
 
 export const metadata = {
   title: 'How the MotoQuant Physics Engine Works — MotoQuant Blog',
-  description: 'A first-principles tour of the 15-sub-model RK4 physics engine that powers MotoQuant Pro. From engine torque curves to Pacejka tire models to launch slip dynamics — what we simulate, what we validate against, and what the residual error actually means.',
+  description: 'A first-principles tour of the 15-sub-model RK4 physics engine that powers MotoQuant. From engine torque curves to Pacejka tire models to launch slip dynamics — what we simulate, what we validate against, and what the residual error actually means.',
   keywords: [
     'motorcycle physics simulation',
     'drag racing simulator',
@@ -30,7 +30,7 @@ export const metadata = {
 const CONTENT = [
   {
     type: 'lead',
-    text: 'MotoQuant Pro is a first-principles physics simulator for motorcycle quarter-mile drag racing. It is built around 15 independent sub-models — engine, clutch, drivetrain, chain, tires, aero, weight transfer, rider dynamics, staging, environmental, parasitic losses, rolling resistance, braking, wheelie, forced induction — coupled by a fixed-step RK4 integrator running at one-millisecond resolution. This post is a tour of what each sub-model does, what we validate against, and where the simulator is honest about its limits.',
+    text: 'MotoQuant is a free, open-source, first-principles physics simulator for motorcycle quarter-mile drag racing. It is built around 15 independent sub-models — engine, clutch, drivetrain, chain, tires, aero, weight transfer, rider dynamics, staging, environmental, parasitic losses, rolling resistance, braking, wheelie, forced induction — coupled by a fixed-step RK4 integrator running at one-millisecond resolution. This post is a tour of what each sub-model does, what we validate against, and where the simulator is honest about its limits.',
   },
   {
     type: 'h2',
@@ -174,7 +174,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Every simulation MotoQuant runs is reproducible. Given the same BikeConfig and Race environment, you get the same ET to four decimals every time. The state vector is exposed in the timeseries output, so you can plot RPM, gear, slip ratio, drive force, and aero drag against time and see exactly what the simulator did. When the prediction disagrees with reality, the timeseries tells you whether it is a launch problem, a gearing problem, an aero problem, or something else.',
+    text: 'MotoQuant is open source under the Apache License 2.0 — the complete engine, catalog, tests and validation reports are published at github.com/da25mem5s02-debug/MotoQuant_v1, so every claim in this post can be checked against the code that produces it. Every simulation MotoQuant runs is also reproducible. Given the same BikeConfig and Race environment, you get the same ET to four decimals every time. The state vector is exposed in the timeseries output, so you can plot RPM, gear, slip ratio, drive force, and aero drag against time and see exactly what the simulator did. When the prediction disagrees with reality, the timeseries tells you whether it is a launch problem, a gearing problem, an aero problem, or something else.',
   },
   {
     type: 'p',
@@ -229,7 +229,7 @@ const articleSchema = {
   '@context': 'https://schema.org',
   '@type': 'Article',
   headline: 'How the MotoQuant Physics Engine Works',
-  description: 'A first-principles tour of the 15-sub-model RK4 physics engine that powers MotoQuant Pro.',
+  description: 'A first-principles tour of the 15-sub-model RK4 physics engine that powers MotoQuant.',
   author: { '@type': 'Organization', name: 'MotoQuant' },
   publisher: { '@type': 'Organization', name: 'MotoQuant', logo: { '@type': 'ImageObject', url: 'https://motoquant.in/logo.png' } },
   datePublished: '2026-04-27',

@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Calibration & Validation Pipeline
-==================================================
+MotoQuant — Calibration & Validation Pipeline
+=============================================
 Phase 3: import real run data, overlay with simulation, auto-calibrate physics.
 
 Public surface:

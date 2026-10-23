@@ -2,6 +2,7 @@ import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 import StructuredData, { articleSchema } from '../../StructuredData';
+import { REPO_URL } from '../../../lib/site';
 
 const SLUG = 'ktm-duke-390-quarter-mile-stock-to-11s';
 const TITLE = 'KTM Duke 390 Quarter Mile: From 13.3s Stock to an 11.342s Record';
@@ -199,7 +200,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The free tier covers unlimited stock-tune simulations. Pro unlocks the full parts-ROI engine, the cluster-bias-aware Dragy calibrator, and the build optimiser that solves the 0/1 knapsack of "best ET under ₹X budget" exactly. The Fast Track Racing 11.342 second pass is not on the free tier — but the path from a stock 13.30 to a realistic 12.55 absolutely is, and that is the gap that matters to most Duke 390 owners.',
+    text: 'Everything is free and open source — stock-tune simulations, the full parts-ROI engine, the cluster-bias-aware Dragy calibrator, and the build optimiser that solves the 0/1 knapsack of "best ET under ₹X budget" exactly. The Fast Track Racing 11.342 second pass is a pro-built race bike the simulator can describe but not hand you — the path from a stock 13.30 to a realistic 12.55, though, is one you can plan in the simulator before you buy a single part, and that is the gap that matters to most Duke 390 owners.',
   },
 ];
 
@@ -391,10 +392,15 @@ export default function PostPage() {
             </li>
             <li>
               ·{' '}
-              <Link href="/pricing" className="text-brand-accent hover:text-brand-orange transition-colors">
-                Pricing
-              </Link>{' '}
-              — free tier covers stock-tune Duke 390 simulations; Pro unlocks the parts-ROI engine, the Dragy calibrator, and the build optimiser.
+              <a
+                href={REPO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-accent hover:text-brand-orange transition-colors"
+              >
+                MotoQuant on GitHub
+              </a>{' '}
+              — free and open source: audit the physics behind every number in this post, or run it yourself.
             </li>
           </ul>
         </div>

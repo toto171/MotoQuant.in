@@ -21,8 +21,8 @@ Security posture:
   * All failures return {"error": ...} instead of raising — the agent loop
     treats tool errors as data.
 
-Uses `requests` (ships transitively via the razorpay SDK and is now pinned in
-requirements-api.txt) with a stdlib urllib fallback, mirroring the
+Uses `requests` (pinned explicitly in requirements-api.txt) with a stdlib
+urllib fallback, mirroring the
 weather_repo / bikez lazy-import pattern.
 """
 

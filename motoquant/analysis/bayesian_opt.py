@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Bayesian Optimization Engine for Build Tuning
-==============================================================
+MotoQuant — Bayesian Optimization Engine for Build Tuning
+=========================================================
 Multi-variable budget-constrained motorcycle build optimization using BoTorch.
 
 Unlike the knapsack DP in ``roi.py`` which picks discrete parts, the Bayesian

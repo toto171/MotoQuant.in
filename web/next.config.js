@@ -27,6 +27,23 @@ const nextConfig = {
     ];
   },
 
+  // ─── Retired commercial routes (Oct 2026: free & open source) ──────────
+  // /pricing and /refunds were indexed by search engines and linked from
+  // old blog posts / backlinks, so they 308 (permanent) instead of 404ing.
+  // /pricing -> / : the landing page FAQ answers "is it free?" (yes,
+  //   Apache-2.0, no paid tiers) and is where every old CTA wanted to go.
+  // /refunds -> /about : nothing is sold, so there is nothing to refund;
+  //   /about carries the "Free and open source" section that explains why.
+  // /contact is NOT redirected — it was rewritten as the community page.
+  async redirects() {
+    return [
+      { source: '/pricing', destination: '/', permanent: true },
+      { source: '/pricing/:path*', destination: '/', permanent: true },
+      { source: '/refunds', destination: '/about', permanent: true },
+      { source: '/refunds/:path*', destination: '/about', permanent: true },
+    ];
+  },
+
   // ─── Cache headers for /public assets ──────────────────────────────────
   // /surrogate/{model,bikes}.json (~330 KB pair, fetched by lib/surrogate.js
   // on every simulator boot) only change on a surrogate regen, so an hour of

@@ -28,7 +28,7 @@
 // Link itself so click-attribution survives without analytics infra.
 //
 // No page conflict: /whitepaper had zero live experiments. EXP-001 landing,
-// EXP-002+005 /pricing, EXP-003 /simulator, EXP-004 /blog/the-physics-of-a-
+// EXP-002+005 /pricing (retired Oct 2026 with the page), EXP-003 /simulator, EXP-004 /blog/the-physics-of-a-
 // perfect-launch post body, EXP-006 /blog index, EXP-007 /login, EXP-008
 // /features, EXP-009 /bikes catalog, EXP-010 /blog/pulsar-ns200-vs-apache-rtr-
 // 200-quarter-mile-physics, EXP-011 /bikes/[id], EXP-012 /about.

@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Build Optimizer
-===============================
+MotoQuant — Build Optimizer
+===========================
 Product-facing parts-build optimizer (Track B).
 
 Given a bike + budget (₹) + goal, return the best parts combination with

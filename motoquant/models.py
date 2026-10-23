@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Parameter Models
-==============================
+MotoQuant — Parameter Models
+============================
 All input parameters organized into dataclasses by category.
 Every parameter that affects prediction by >= 0.1% is represented.
 """

@@ -78,7 +78,7 @@ export const metadata = {
         url: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'MotoQuant Pro bike catalog — 541 motorcycles with full spec data',
+        alt: 'MotoQuant bike catalog — 541 motorcycles with full spec data',
       },
     ],
   },
@@ -108,7 +108,7 @@ function collectionSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: 'Motorcycle Catalog — MotoQuant Pro',
+    name: 'Motorcycle Catalog — MotoQuant',
     description: DESCRIPTION,
     url: `${SITE_URL}/bikes`,
     isPartOf: { '@id': `${SITE_URL}/#website` },

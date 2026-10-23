@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Curated Bike Dataset
-=====================================
+MotoQuant — Curated Bike Dataset
+================================
 Manually curated, cross-referenced specifications for ~30 high-performance
 motorcycles relevant to Indian drag racing (2005-2024 era).
 

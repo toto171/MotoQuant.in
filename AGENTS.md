@@ -6,9 +6,12 @@
 > `CLAUDE.md` is a *different* thing — a long session changelog; skim only its
 > top entry. Start here, not there.
 
-MotoQuant Pro is a first-principles physics engine for motorcycle quarter-mile
-drag racing, plus the product built on it (CLI, FastAPI backend, Next.js web
-app, agentic chat). Python package `motoquant/` + a seeded SQLite catalog.
+MotoQuant is a free, open-source (Apache-2.0) first-principles physics engine
+for motorcycle quarter-mile drag racing, plus the product built on it (CLI,
+FastAPI backend, Next.js web app, agentic chat, MCP server). Python package
+`motoquant/` + a seeded SQLite catalog. There are no paid tiers, quotas or
+license keys, and none may be reintroduced
+([ADR-0006](docs/adr/0006-open-source-pivot.md)).
 
 ## 0. The prime directive (never violate)
 
@@ -73,7 +76,11 @@ before a big change.
 - **Architecture / "where does X live?"** → [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
   (module map + data-flow diagram).
 - **Day-one orientation** → [docs/ONBOARDING.md](docs/ONBOARDING.md).
-- **Dev workflow detail** → [CONTRIBUTING.md](CONTRIBUTING.md).
+- **Dev workflow detail** → [CONTRIBUTING.md](CONTRIBUTING.md) (incl. how
+  contributions are licensed: Apache-2.0, inbound = outbound).
+- **Running / deploying it** → [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md).
+- **Community policy** → [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md),
+  [SECURITY.md](SECURITY.md) (report vulnerabilities privately).
 - **Why things are the way they are** → [docs/adr/](docs/adr/) (Architecture
   Decision Records — read before relitigating a settled decision).
 - **What must never break** → [docs/INVARIANTS.md](docs/INVARIANTS.md).
@@ -82,12 +89,17 @@ before a big change.
 
 ## 4. Security posture (keep it)
 
-- Auth: magic-link + password (scrypt), JWT with a boot guard against the
-  default secret under billing. Don't reintroduce the `dev.` unsigned-token
-  path outside the jose-absent branch.
-- Webhooks (Stripe/Razorpay) verify signatures and **fail closed**.
-- Rate-limit + free-quota key on the **rightmost** `X-Forwarded-For` hop (single
-  trusted proxy = Render); never the client-spoofable leftmost.
+- Accounts are **optional**: magic-link + password (scrypt), JWT sessions.
+  Every sim/analysis route must keep working anonymously. A deployed host
+  (`RENDER` / `RENDER_EXTERNAL_URL` / `MOTOQUANT_DEPLOYED=1`) never signs
+  with the public dev JWT secret: with no `JWT_SECRET` it uses an ephemeral
+  per-process secret and warns. Don't reintroduce the `dev.` unsigned-token
+  path outside the JWT-library-absent branch.
+- Everything is free, so **per-IP rate limits are the abuse fuse**. Every
+  compute-heavy public route gets a `rate_limit(...)` dependency, plus the
+  daily chat cap (`MOTOQUANT_CHAT_DAILY_LIMIT`) for the LLM bill. Buckets
+  key on the **rightmost** `X-Forwarded-For` hop (single trusted proxy =
+  Render), never the client-spoofable leftmost.
 - The chat agent's `web_fetch` re-checks the SSRF guard on **every redirect
   hop**. Any server-side fetch of a user/LLM-controlled URL must do the same.
 - SQL is always parameterized. No secrets in tracked files (the health check
@@ -97,8 +109,9 @@ before a big change.
 
 - Imperative subject ≤ 72 chars; explain the *why* in the body.
 - One logical change per commit (atomic). Test each batch.
-- Author email must be a real, provider-registered address (Vercel rejects
-  unknown committer emails on deploy).
+- Use your real git identity. Contributions are licensed Apache-2.0
+  (inbound = outbound); no CLA. Never commit credentials, and never ask a
+  contributor for one. Normal `git` over your own fork is all you need.
 - Open PRs as **draft**; fill the PR template; put the K5/R1/Hayabusa delta
   table in any physics-adjacent PR.
 - CI must be green (`make test` + `make check` locally first).

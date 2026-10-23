@@ -83,9 +83,17 @@ check, and the release checklist.
 ## I7 — Security guarantees
 
 **What / Why / Enforcement.**
-- **Webhooks fail closed.** Unset signing secret ⇒ reject, never trust. (Stripe
-  + Razorpay signature verification, constant-time.) — `tests/test_payments.py`.
-- **Client IP for rate-limit/quota = rightmost `X-Forwarded-For` hop** (single
+- **Everything is free; per-IP fuses replace quotas.** There are no tiers, no
+  quota and no payment code (ADR-0006). Every compute-heavy public route
+  carries a `rate_limit(...)` dependency, and chat also has a per-IP daily cap
+  (`MOTOQUANT_CHAT_DAILY_LIMIT`, default 200; `0` disables), which is the
+  LLM-bill fuse. Rate-limit buckets expire on their **own** window, so a
+  short-window call can never evict a daily counter. —
+  `tests/test_public_route_fuses.py`, `tests/test_ratelimit.py::TestPerKeyWindows`,
+  `tests/test_open_source_pivot.py::TestChatDailyCap`, and
+  `tests/test_open_source_pivot.py::TestMonetizationIsGone` (no payment or
+  subscription routes, no quota headers, no paywall can creep back).
+- **Client IP for rate limiting = rightmost `X-Forwarded-For` hop** (single
   trusted proxy). The leftmost is client-spoofable. Implemented in
   `client_ip()` (`motoquant/ratelimit.py`). **Partially enforced:**
   `test_x_forwarded_for_distinguishes_clients` in `tests/test_ratelimit.py`
@@ -96,15 +104,18 @@ check, and the release checklist.
 - **`web_fetch` re-checks the SSRF guard on every redirect hop** and bounds the
   whole chain to one timeout. Any server-side fetch of a user/LLM-controlled URL
   must too. — `tests/test_webtools_ssrf.py`.
-- **`motoquant.auth` refuses to *import* while `JWT_SECRET` is the public
-  default and `MOTOQUANT_BILLING_ENFORCE` is truthy** — a forgeable signing key
-  in commercial mode is a free self-upgrade to any paid tier. With billing off
-  (the shipped open-beta posture) the same condition only logs a warning, since
-  hard-failing there would take the live beta down over a documented
-  pre-commercial TODO. The guard keys on the secret's *value*, not on whether
-  the env var was set. — `tests/test_auth.py::TestJwtDefaultSecretBootGuard`
-  (boots a fresh interpreter per case; the guard is module-level code, so
-  reload/monkeypatch would test a re-implementation instead).
+- **A deployed host never signs sessions with the public dev JWT secret.**
+  On a deployed host (`RENDER`, `RENDER_EXTERNAL_URL` or
+  `MOTOQUANT_DEPLOYED=1`) with `JWT_SECRET` unset or equal to the public
+  default, `motoquant.auth` signs with an **ephemeral per-process random
+  secret** and logs a loud warning. Sessions reset on restart; tokens are
+  never forgeable; boot never fails, because accounts are optional and must
+  not take the simulator down. Local dev and tests keep the documented dev
+  default. The policy keys on the secret's *value*, not on whether the env
+  var is set. (This replaced the old guard, which was keyed on the deleted
+  billing switch.) — `tests/test_auth.py::TestJwtSecretPolicy`. Relatedly, a
+  deployed host never echoes magic-link tokens in HTTP responses —
+  `tests/test_auth.py` (`test_no_dev_token_leak_in_deployed_env`).
 - **SQL is always parameterized.** No f-string/format into queries with user
   data.
 - **No secrets in tracked files.** — `scripts/health_check.py` secret scan,

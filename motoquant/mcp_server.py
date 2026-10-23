@@ -1065,7 +1065,7 @@ class MCPServer:
             "capabilities": {"tools": {"listChanged": False}},
             "serverInfo": {
                 "name": SERVER_NAME,
-                "title": "MotoQuant Pro — motorcycle drag physics",
+                "title": "MotoQuant — motorcycle drag physics",
                 "version": SERVER_VERSION,
             },
             "instructions": INSTRUCTIONS,

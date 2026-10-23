@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Spec Validator
-==============================
+MotoQuant — Spec Validator
+==========================
 Physical-bounds checking and confidence scoring for scraped BikeSpec objects.
 
 Validation checks:

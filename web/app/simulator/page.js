@@ -576,7 +576,7 @@ function SimulatorPageInner() {
     return data;
   });
 
-  // Save this run — anonymous saves allowed (beta); the bearer token binds
+  // Save this run — anonymous saves allowed (rate-limited server-side); the bearer token binds
   // the run to the signed-in user's Garage when present.
   const saveTask = useAsyncTask(async (signal) => {
     const r = result;
@@ -1505,7 +1505,7 @@ function SimulatorPageInner() {
                       </div>
                     )}
 
-                    {/* Save this run — anonymous allowed (beta); token binds to Garage.
+                    {/* Save this run — anonymous allowed; token binds to Garage.
                         NEVER offered on an estimated (client-surrogate) result: only
                         exact server RK4 numbers may reach the leaderboard. */}
                     {bike?.id != null && result.et_quarter_s != null && !result.estimated && (

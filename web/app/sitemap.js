@@ -91,12 +91,6 @@ export default async function sitemap() {
       priority: 0.3,
     },
     {
-      url: `${SITE_URL}/refunds`,
-      lastModified: now,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
-    {
       url: `${SITE_URL}/contact`,
       lastModified: now,
       changeFrequency: "yearly",
@@ -113,12 +107,6 @@ export default async function sitemap() {
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.7,
-    },
-    {
-      url: `${SITE_URL}/pricing`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.85,
     },
     {
       url: `${SITE_URL}/blog`,

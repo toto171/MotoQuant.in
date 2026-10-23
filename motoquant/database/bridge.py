@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — BikeConfig ↔ Database Bridge
-============================================
+MotoQuant — BikeConfig ↔ Database Bridge
+========================================
 Lossless conversion between the in-memory dataclass hierarchy (BikeConfig)
 and the relational database representation.
 

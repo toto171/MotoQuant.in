@@ -1,4 +1,4 @@
-# CODEOWNERS for MotoQuant Pro
+# CODEOWNERS for MotoQuant
 #
 # Every PR touching a matched path will auto-request review from the listed
 # owner(s). Combined with branch protection ("Require review from Code Owners"),
@@ -40,9 +40,6 @@
 /motoquant/database/seed.py         @da25mem5s02-debug
 /motoquant/database/seed_catalogs/  @da25mem5s02-debug
 
-# ---- Desktop app (Tauri + React) ----
-/desktop/                           @da25mem5s02-debug
-
 # ---- Web (Next.js marketing + simulator) ----
 /web/                               @da25mem5s02-debug
 
@@ -56,5 +53,12 @@
 
 # ---- Project docs (any maintainer can approve) ----
 /CLAUDE.md                          @da25mem5s02-debug
+/AGENTS.md                          @da25mem5s02-debug
 /CONTRIBUTING.md                    @da25mem5s02-debug
-/ONBOARDING.md                      @da25mem5s02-debug
+/docs/ONBOARDING.md                 @da25mem5s02-debug
+
+# ---- Licensing + community policy ----
+/LICENSE                            @da25mem5s02-debug
+/NOTICE                             @da25mem5s02-debug
+/SECURITY.md                        @da25mem5s02-debug
+/CODE_OF_CONDUCT.md                 @da25mem5s02-debug

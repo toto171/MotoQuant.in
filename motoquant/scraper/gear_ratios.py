@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Gear Ratio Lookup Library
-==========================================
+MotoQuant — Gear Ratio Lookup Library
+=====================================
 Bikez.com does NOT publish gear ratios. This module provides a two-tier
 fallback so every bike in the DB gets a usable drivetrain even without
 service-manual data:

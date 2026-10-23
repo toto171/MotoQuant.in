@@ -36,7 +36,7 @@
 // survives without analytics infra.
 //
 // No page conflict: /docs/physics had zero live experiments. Existing experiments:
-// EXP-001 landing, EXP-002 + EXP-005 /pricing, EXP-003 /simulator, EXP-004
+// EXP-001 landing, EXP-002 + EXP-005 /pricing (retired Oct 2026), EXP-003 /simulator, EXP-004
 // /blog/the-physics-of-a-perfect-launch, EXP-006 /blog index, EXP-007 /login,
 // EXP-008 /features, EXP-009 /bikes catalog, EXP-010
 // /blog/pulsar-ns200-vs-apache-rtr-200-quarter-mile-physics, EXP-011 /bikes/[id],

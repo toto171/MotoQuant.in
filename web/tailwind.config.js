@@ -6,7 +6,7 @@
 //   asphalt-*  surfaces (blue-cast near-black)
 //   accent     signal orange — THE brand color (primary actions + live data)
 //   signal-*   go / stage / foul — state only, never decoration
-//   mint       PRO/Studio tier chips only
+//   mint       secondary accent/meta (e.g. simulator readouts, brand.accent)
 //
 // `ink-*` and `brand-*` are LEGACY ALIASES pointing at the new palette so the
 // ~50 untouched blog/content pages re-skin without churn. New code must use

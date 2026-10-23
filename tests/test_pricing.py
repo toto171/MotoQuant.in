@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Indian-Market Parts Pricing Tests
-=================================================
+MotoQuant — Indian-Market Parts Pricing Tests
+=============================================
 Covers :mod:`motoquant.database.pricing_refresh`:
 
 * Retailer URL template coverage + format correctness

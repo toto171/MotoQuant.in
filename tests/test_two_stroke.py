@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Two-Stroke Physics + Parts Tests
-================================================
+MotoQuant — Two-Stroke Physics + Parts Tests
+============================================
 Covers:
   - 2-stroke bike specs validate and convert to sim-ready BikeConfig
   - 2T synthetic torque curve has Gaussian expansion-chamber shape

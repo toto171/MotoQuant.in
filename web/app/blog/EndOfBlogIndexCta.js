@@ -21,7 +21,7 @@
 // SEO-safe. data-exp/data-variant on the wrapper + Link for analytics
 // attribution. Wrapped in <Suspense> at the call site per the Vercel
 // static-prerender rule. EXP-001 is on landing-hero, EXP-002 + EXP-005 on
-// /pricing, EXP-003 on /simulator, EXP-004 on /blog/the-physics-of-a-
+// /pricing (retired Oct 2026 with the page), EXP-003 on /simulator, EXP-004 on /blog/the-physics-of-a-
 // perfect-launch — no page conflict (EXP-004 is the post body, EXP-006 is
 // the index).
 

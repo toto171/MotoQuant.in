@@ -1,26 +1,25 @@
 "use client";
 
 /**
- * MotoQuant Pro — Account Page
- * ==============================
- * Displays: email, tier, subscription status, license keys (copy + revoke),
- * saved-run garage, password management.
+ * MotoQuant — Account Page
+ * ==========================
+ * Displays: email, saved-run garage, password management, sign out.
  * Requires authentication — redirects to /login if not signed in.
  *
  * IGNITION v5 (July 2026): PageHero ("Your garage") + stacked `.card`
- * sections — Profile/Tier, Garage (bike names in display face, ETs mono,
- * venue chips, rows link to /r/[id]), License keys as `.timeslip` rows with
- * `.btn-danger` revokes, Security, Danger zone. Branded inline confirms
- * (no alert()/confirm() anywhere) and ActionButton + useAsyncTask on every
- * submit so the button itself is the progress bar.
- * Subscription / license-key API calls unchanged.
+ * sections — Profile, Garage (bike names in display face, ETs mono, venue
+ * chips, rows link to /r/[id]), Security. ActionButton + useAsyncTask on the
+ * password submit so the button itself is the progress bar.
+ *
+ * October 2026: MotoQuant is free and open source — the tier badge,
+ * subscription status, license-key seats, cancel-subscription danger zone
+ * and post-checkout banner were removed with the payment stack. Accounts
+ * remain optional and exist only to keep a garage of saved runs.
  */
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Copy, Check } from "lucide-react";
 import { useAuth } from "../../components/AuthProvider";
-import TierBadge from "../../components/TierBadge";
 import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
 import PageHero from "../../components/PageHero";
@@ -30,81 +29,22 @@ import { SkeletonCard, SkeletonTable } from "../../components/Skeleton";
 import useAsyncTask from "../../lib/useAsyncTask";
 
 import { API_URL_DIRECT as API_BASE } from "../../lib/api";
-
-/**
- * DangerConfirm — the branded inline confirm pattern (replaces confirm()).
- * Renders a small foul-tinted row: prompt + [danger action] [Keep — ghost].
- * While the task runs, the danger button becomes the ActionButton
- * running-state (progress strip in the button).
- */
-function DangerConfirm({
-  prompt,
-  actionLabel,
-  runningLabel,
-  dismissLabel = "Keep",
-  task,
-  onConfirm,
-  onDismiss,
-}) {
-  return (
-    <div className="rounded-xl border border-signal-foul/30 bg-signal-foul/5 p-4">
-      <p className="text-sm text-white/75">{prompt}</p>
-      {task.error && (
-        <p className="mt-2 text-sm text-signal-foul">{task.error}</p>
-      )}
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        {task.active ? (
-          <ActionButton
-            task={task}
-            label={actionLabel}
-            runningLabel={runningLabel}
-            stoppable={false}
-            className="btn-sm"
-          />
-        ) : (
-          <button type="button" className="btn-danger btn-sm" onClick={onConfirm}>
-            {actionLabel}
-          </button>
-        )}
-        <button
-          type="button"
-          className="btn-ghost btn-sm"
-          onClick={onDismiss}
-          disabled={task.active}
-        >
-          {dismissLabel}
-        </button>
-      </div>
-    </div>
-  );
-}
+import { CONTACT_EMAIL } from "../../lib/site";
 
 export default function AccountPage() {
   const router = useRouter();
   const { user, accessToken, isLoading, isAuthenticated, logout, refetchUser } = useAuth();
 
-  const [keys, setKeys] = useState([]);
-  const [keyMsg, setKeyMsg] = useState("");
-  const [newKey, setNewKey] = useState("");
-  const [copied, setCopied] = useState(false);
-  const [revokeTarget, setRevokeTarget] = useState(null); // key id awaiting confirm
-  const [cancelOpen, setCancelOpen] = useState(false); // sub-cancel confirm open
-  const [subMsg, setSubMsg] = useState("");
   const [pwCurrent, setPwCurrent] = useState("");
   const [pwNew, setPwNew] = useState("");
   const [pwMsg, setPwMsg] = useState(null); // { tone: 'ok', text } — errors live on pwTask.error
   const [runs, setRuns] = useState([]);
   const [runsLoading, setRunsLoading] = useState(false);
-  const [checkoutBanner, setCheckoutBanner] = useState(false);
   const pwFormRef = useRef(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) router.replace("/login");
   }, [isLoading, isAuthenticated, router]);
-
-  useEffect(() => {
-    if (user) setKeys(user.license_keys ?? []);
-  }, [user]);
 
   // My Garage — saved runs for this account
   useEffect(() => {
@@ -129,66 +69,7 @@ export default function AccountPage() {
     return () => { cancelled = true; };
   }, [accessToken]);
 
-  // Post-checkout landing (?checkout=success) — window.location avoids a
-  // useSearchParams/Suspense prerender dependency on this page.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const qp = new URLSearchParams(window.location.search);
-    if (qp.get("checkout") === "success") {
-      setCheckoutBanner(true);
-      refetchUser();
-      window.history.replaceState({}, "", "/account");
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── async tasks (one per submit — the button is the progress bar) ──────
-
-  const genTask = useAsyncTask(async (signal) => {
-    setKeyMsg("");
-    setNewKey("");
-    setCopied(false);
-    const res = await fetch(`${API_BASE}/api/subscriptions/license-key`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${accessToken}` },
-      signal,
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || "Failed to generate key.");
-    setNewKey(data.key);
-    setKeyMsg(data.message);
-    refetchUser();
-    return data;
-  });
-
-  const revokeTask = useAsyncTask(async (signal, onProgress, keyId) => {
-    const res = await fetch(`${API_BASE}/api/subscriptions/license-key/revoke`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ key_id: keyId }),
-      signal,
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || "Revoke failed.");
-    refetchUser();
-    return data;
-  });
-
-  const cancelTask = useAsyncTask(async (signal) => {
-    setSubMsg("");
-    const res = await fetch(`${API_BASE}/api/subscriptions/cancel`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${accessToken}` },
-      signal,
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || "Cancellation failed.");
-    setSubMsg(data.message || "Subscription cancellation scheduled.");
-    refetchUser();
-    return data;
-  });
+  // ── async task (the button is the progress bar) ──────────────────────
 
   const pwTask = useAsyncTask(async (signal) => {
     setPwMsg(null);
@@ -239,28 +120,6 @@ export default function AccountPage() {
     );
   }
 
-  async function confirmRevoke(keyId) {
-    const res = await revokeTask.run(keyId);
-    if (res !== undefined) setRevokeTarget(null);
-  }
-
-  async function confirmCancelSub() {
-    const res = await cancelTask.run();
-    if (res !== undefined) setCancelOpen(false);
-  }
-
-  async function copyKey() {
-    try {
-      await navigator.clipboard.writeText(newKey);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-    } catch (e) {}
-  }
-
-  const canGenerateKey = user.tier !== "free";
-  const maxKeys = { free: 0, pro: 1, studio: 5 }[user.tier] ?? 0;
-  const activeKeys = keys.filter((k) => !k.revoked);
-
   const sectionTitle =
     "font-display font-semibold text-lg md:text-xl text-white";
 
@@ -271,18 +130,11 @@ export default function AccountPage() {
         align="center"
         kicker="account"
         title={<>Your <span className="text-accent">garage</span></>}
-        sub="Saved runs, license seats and security for your MotoQuant account."
+        sub="Saved runs and sign-in settings for your MotoQuant account."
       />
       <main id="main" className="pb-20 px-4 sm:px-6">
         <div className="mx-auto max-w-3xl space-y-6">
-          {checkoutBanner && (
-            <div className="rounded-xl border border-signal-go/40 bg-signal-go/10 px-5 py-4 text-sm text-signal-go">
-              Payment received — thank you! Your plan activates within a minute
-              (your tier refreshes automatically).
-            </div>
-          )}
-
-          {/* ── Profile / tier ─────────────────────────────────────────── */}
+          {/* ── Profile ───────────────────────────────────────────────── */}
           <Reveal y={18}>
           <section className="card p-6 sm:p-8">
             <div className="flex flex-wrap items-start justify-between gap-4">
@@ -290,29 +142,24 @@ export default function AccountPage() {
                 <h2 className={sectionTitle}>Profile</h2>
                 <p className="mt-3 font-medium text-white">{user.email}</p>
                 <p className="mt-1 text-sm text-white/55">
-                  {user.subscription_status
-                    ? `Subscription: ${user.subscription_status}`
-                    : "No active subscription"}
+                  {user.email_verified ? "Email verified · " : ""}
+                  Every feature is free &mdash; there are no plans or tiers.
                 </p>
               </div>
-              <div className="flex items-center gap-3">
-                <TierBadge tier={user.tier} size="md" />
-                <button onClick={logout} className="btn-ghost btn-sm">
-                  Sign out
-                </button>
-              </div>
+              <button onClick={logout} className="btn-ghost btn-sm">
+                Sign out
+              </button>
             </div>
-
-            {user.tier === "free" && (
-              <div className="mt-5 rounded-xl border border-accent/30 bg-accent/[0.06] p-4">
-                <p className="text-sm text-white/75">
-                  Upgrade to <strong className="text-white">Pro</strong> for unlimited sims, full analysis suite, and leaderboard saves.
-                </p>
-                <a href="/pricing" className="btn-primary btn-sm mt-3">
-                  See plans →
-                </a>
-              </div>
-            )}
+            <p className="mt-5 text-xs text-white/45">
+              Want your account and saved runs deleted? Email{" "}
+              <a
+                href={`mailto:${CONTACT_EMAIL}?subject=Delete%20my%20account`}
+                className="text-white/70 underline decoration-white/25 underline-offset-2 hover:text-white transition-colors"
+              >
+                {CONTACT_EMAIL}
+              </a>{" "}
+              from this address.
+            </p>
           </section>
           </Reveal>
 
@@ -386,116 +233,6 @@ export default function AccountPage() {
           </section>
           </Reveal>
 
-          {/* ── License keys — device seats ────────────────────────────── */}
-          <Reveal y={18}>
-          <section className="card p-6 sm:p-8">
-            <div className="mb-5 flex items-center justify-between">
-              <h2 className={sectionTitle}>License keys</h2>
-              <span className="chip">
-                {activeKeys.length} / {maxKeys} used
-              </span>
-            </div>
-
-            {!canGenerateKey && (
-              <p className="text-sm text-white/65">
-                License keys are available on Pro and Studio plans.{" "}
-                <a
-                  href="/pricing"
-                  className="text-white/80 underline decoration-white/25 underline-offset-2 hover:text-white transition-colors"
-                >
-                  Upgrade →
-                </a>
-              </p>
-            )}
-
-            {canGenerateKey && (
-              <>
-                {newKey && (
-                  <div className="mb-5 rounded-xl border border-signal-go/40 bg-signal-go/10 p-4">
-                    <p className="mb-2 text-xs font-semibold text-signal-go">
-                      {keyMsg} Copy it now — you won&rsquo;t see it again.
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 break-all rounded bg-asphalt-0/60 px-3 py-2 font-mono text-xs text-signal-go/90">
-                        {newKey}
-                      </code>
-                      <button
-                        onClick={copyKey}
-                        className="inline-flex items-center gap-1.5 rounded border border-signal-go/40 bg-signal-go/15 px-3 py-2 font-mono text-xs text-signal-go hover:bg-signal-go/25 transition-colors"
-                      >
-                        {copied ? <Check size={12} /> : <Copy size={12} />}
-                        {copied ? "Copied" : "Copy"}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {activeKeys.length > 0 && (
-                  <div className="timeslip mb-5">
-                    {activeKeys.map((k) => (
-                      <div key={k.id}>
-                        <div className="timeslip-row items-center">
-                          <span className="text-white/80">
-                            <span className="text-white/40">#{k.id}</span>
-                            <span className="mx-2 text-white/20">·</span>
-                            {k.device_id ? (
-                              <span>
-                                Activated · last seen{" "}
-                                {k.last_seen_at
-                                  ? new Date(k.last_seen_at).toLocaleDateString()
-                                  : "never"}
-                              </span>
-                            ) : (
-                              <span className="text-signal-stage">Not yet activated</span>
-                            )}
-                          </span>
-                          {revokeTarget !== k.id && (
-                            <button
-                              onClick={() => { setRevokeTarget(k.id); revokeTask.reset(); }}
-                              className="btn-danger btn-sm"
-                            >
-                              Revoke
-                            </button>
-                          )}
-                        </div>
-                        {revokeTarget === k.id && (
-                          <div className="my-3">
-                            <DangerConfirm
-                              prompt="Revoke this key? The seat frees up immediately and the key stops validating."
-                              actionLabel="Revoke"
-                              runningLabel="Revoking"
-                              dismissLabel="Keep"
-                              task={revokeTask}
-                              onConfirm={() => confirmRevoke(k.id)}
-                              onDismiss={() => setRevokeTarget(null)}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {activeKeys.length < maxKeys && (
-                  <div className="space-y-2">
-                    {genTask.error && (
-                      <p className="text-sm text-signal-foul">{genTask.error}</p>
-                    )}
-                    <ActionButton
-                      task={genTask}
-                      onRun={() => genTask.run()}
-                      label="+ Generate new license key"
-                      runningLabel="Generating key"
-                      stoppable={false}
-                      variant="ghost"
-                    />
-                  </div>
-                )}
-              </>
-            )}
-          </section>
-          </Reveal>
-
           {/* ── Security — password ────────────────────────────────────── */}
           <Reveal y={18}>
           <section className="card p-6 sm:p-8">
@@ -554,45 +291,6 @@ export default function AccountPage() {
             </form>
           </section>
           </Reveal>
-
-          {/* ── Danger zone — cancel subscription ──────────────────────── */}
-          {user.tier !== "free" && (
-            <Reveal y={18}>
-            <section className="card border-signal-foul/20 p-6 sm:p-8">
-              <h2 className={sectionTitle}>Danger zone</h2>
-              {subMsg && (
-                <p className="mt-3 text-sm text-signal-stage">{subMsg}</p>
-              )}
-              <div className="mt-4">
-                {cancelOpen ? (
-                  <DangerConfirm
-                    prompt="Cancel your subscription? You keep access until the end of the billing period."
-                    actionLabel="Cancel subscription"
-                    runningLabel="Cancelling"
-                    dismissLabel="Keep my plan"
-                    task={cancelTask}
-                    onConfirm={confirmCancelSub}
-                    onDismiss={() => setCancelOpen(false)}
-                  />
-                ) : (
-                  <>
-                    <p className="text-sm text-white/55">
-                      Cancelling keeps your access until the end of the current
-                      billing period; after that your account moves to the Free
-                      tier. Your runs and builds are retained.
-                    </p>
-                    <button
-                      onClick={() => { setCancelOpen(true); cancelTask.reset(); }}
-                      className="btn-danger btn-sm mt-3"
-                    >
-                      Cancel subscription
-                    </button>
-                  </>
-                )}
-              </div>
-            </section>
-            </Reveal>
-          )}
         </div>
       </main>
       <SiteFooter />

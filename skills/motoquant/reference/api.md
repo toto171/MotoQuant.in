@@ -39,22 +39,25 @@ values are rejected with 422 rather than absorbed into a meaningless answer.
 |---|---|---|
 | `POST /api/simulate/quick` | `part_ids: [int]` | `{et_quarter_s, trap_speed_kmh, et_60ft_s, et_eighth_s, bike_name, peak_power_hp, total_mass_kg, parts_applied, build_cost_inr, stock_et_s, et_delta_s}`. ~50 ms. **The workhorse.** |
 | `POST /api/simulate` | `use_adaptive_dt` | Everything above plus all five splits and 100 Hz time-series arrays (`v_kmh`, `rpm`, `gear`, `accel_g`, `traction_pct`, …). No `part_ids` on this route. |
-| `POST /api/simulate/top-speed` | `part_ids`, `max_time_s` (0.1–300), `include_timeseries` | Terminal velocity in m/s, km/h and mph; time and distance to reach it; terminal gear, RPM, power; LSR splits. |
+| `POST /api/simulate/top-speed` | `part_ids`, `max_time_s` (0.1–120), `include_timeseries` | Terminal velocity in m/s, km/h and mph; time and distance to reach it; terminal gear, RPM, power; LSR splits. |
 | `POST /api/simulate/distance` | `distance_m` | Arbitrary-distance run, for land-speed events. |
-| `POST /api/simulate/compare` | `a_*` and `b_*` copies of the fields above, shared conditions at the top level | `{a, b, delta:{et_s, trap_kmh, faster, cost_diff_inr}}`. Metered as two sims. |
-| `POST /api/chat` | `message`, `messages` | The agentic chat — 15 tools, multi-step. |
+| `POST /api/simulate/compare` | `a_*` and `b_*` copies of the fields above, shared conditions at the top level | `{a, b, delta:{et_s, trap_kmh, faster, cost_diff_inr}}`. |
+| `POST /api/chat` | `query`, `messages` | The agentic chat — 15 tools, multi-step. |
 | `POST /api/jobs/{simulate\|topspeed\|compare\|optimize\|autotune\|outlaw\|chat}` | same bodies | Returns `{job_id}`; poll `GET /api/jobs/{id}` for `{status, progress, stage, result}` and `POST /api/jobs/{id}/cancel` to stop. Use for anything slow. |
 
 `POST /api/optimize/build` (knapsack build optimizer under a budget) and
-`POST /api/autotune/ecu` (conditions-aware gearing + launch-RPM advisor) exist
-but are **Pro-tier gated**. Do not present them as freely available.
+`POST /api/autotune/ecu` (conditions-aware gearing + launch-RPM advisor) are
+free like everything else. They are slow, so prefer their `/api/jobs/*`
+variants.
 
-### Deltas and metering
+### Deltas and rate limits
 
 - Public `delta_et_s` / `et_delta_s` is **after − before**: negative = faster.
 - `*_gain_s` fields are positive-is-good. Do not mix the two conventions.
-- Anonymous sims are metered on the free tier (`X-Sims-Remaining` header).
-  `/api/simulate/quick` is deliberately unmetered so slider UIs work.
+- Everything is free and anonymous; there is no quota. Compute-heavy routes
+  carry per-IP rate limits and answer **HTTP 429** with `Retry-After` when
+  tripped (chat also has a daily per-IP cap). Back off and retry later rather
+  than looping.
 
 ### There is no gearing parameter
 

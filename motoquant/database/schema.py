@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Database Schema
-==============================
+MotoQuant — Database Schema
+===========================
 SQLite schema with 15 tables covering bikes, tires, venues, weather, and parts.
 
 Design principles for quantitative accuracy:

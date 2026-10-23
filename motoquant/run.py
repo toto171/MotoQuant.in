@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-MotoQuant Pro — CLI Runner (Phase 2)
-====================================
+MotoQuant — CLI Runner (Phase 2)
+================================
 Full-featured CLI for quarter-mile simulations with database integration.
 
 Phase 1 (legacy) commands — fully backward-compatible:
@@ -142,7 +142,7 @@ def print_banner():
     from . import __version__
 
     print(f"\n{'=' * 72}")
-    print(f"  MotoQuant Pro v{__version__} — Motorcycle Drag Racing Simulation Engine")
+    print(f"  MotoQuant v{__version__} — Motorcycle Drag Racing Simulation Engine")
     print("  15 sub-models | RK4 @ 1ms | Phase 2 Database-Integrated")
     print(f"{'=' * 72}")
 
@@ -1676,7 +1676,7 @@ def legacy_main(args_list=None):
     """
     parser = argparse.ArgumentParser(
         prog="motoquant",
-        description="MotoQuant Pro — Motorcycle Drag Racing Simulation Engine",
+        description="MotoQuant — Motorcycle Drag Racing Simulation Engine",
         epilog="Phase 2 commands: db, bikes, sim, venues, tires, parts, weather, leaderboard, history\n"
         "Run 'python -m motoquant.run <command> --help' for details.\n\n"
         "Legacy examples:\n"
@@ -2943,7 +2943,7 @@ def cmd_chat(args):
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="motoquant",
-        description="MotoQuant Pro — Motorcycle Drag Racing Simulation Engine (Phase 4)",
+        description="MotoQuant — Motorcycle Drag Racing Simulation Engine (Phase 4)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(

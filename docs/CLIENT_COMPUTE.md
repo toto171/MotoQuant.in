@@ -1,8 +1,15 @@
 # Client-Side Compute — using the rider's hardware to scale
 
-> Written 2026-08-11 (commercial-launch readiness). Operator directive: move
-> quick sims — and eventually main sims — onto the user's device so the
-> 0.5-CPU Render instance stops being the scaling bottleneck.
+> Written 2026-08-11. Operator directive: move quick sims, and eventually
+> main sims, onto the user's device so the 0.5-CPU Render instance stops
+> being the scaling bottleneck.
+>
+> **Updated 2026-10-23 ([ADR-0006](adr/0006-open-source-pivot.md)):**
+> MotoQuant is free and open source, so nothing is kept server-side to
+> protect a paid tier any more; the "pro-gated" rows below are superseded.
+> A Rust core compiled to wasm32 now provides exact full sims in the browser
+> at ~93 KB gzip ([RUST_CORE.md](RUST_CORE.md)), which changes the Tier 2
+> picture below.
 
 ## What runs where (the contract)
 
@@ -10,8 +17,8 @@
 |---|---|---|
 | Live/quick estimates (slider drags) | **Browser** — `web/lib/surrogate.js` | Shipped 2026-08-11. Zero server cost, ~0.01 ms, proven equal to the server surrogate to <1e-9 s |
 | Exact quarter-mile (splits, timeseries) | **Server** (RK4) | The authoritative number; the Run button |
-| Full sims in-browser (future) | **Browser** — Pyodide/WASM, gated on CI proof | See "Main sims" below |
-| Build Optimizer / Autotune / Outlaw | **Server only, pro-gated** | The paid product — never shipped to the client |
+| Full sims in-browser (future) | **Browser** — Rust wasm32 core (`web/lib/engine.js`, see RUST_CORE.md) or Pyodide, gated on parity proof | See "Main sims" below |
+| Build Optimizer / Autotune / Outlaw | **Server, free for everyone** (no tier gate since 2026-10-23) | They orchestrate hundreds of sims plus the knapsack/ROI machinery, so they stay server-side for practical reasons. They are now *candidates* for client-side execution like everything else; there is no paid product to protect |
 | Leaderboard saves | **Server only** | Estimated results can never be saved (enforced in the simulator page) |
 
 ## Tier 1 — the in-browser surrogate (SHIPPED)
@@ -43,8 +50,8 @@ Honesty rules baked into the UI:
   documented accuracy (±0.11 s typical vs the physics — see
   `artifacts/surrogate/README.md`)
 - "Save this run" is never offered on an estimated result
-- the funnel event stream tags `engine: 'client-surrogate' | 'server'` so
-  conversion and load-shift are both measurable
+- the (opt-in) telemetry event stream tags `engine: 'client-surrogate' |
+  'server'` so load shift is measurable
 
 **REGEN CONTRACT (extends the standing surrogate contract):** the web export
 is a cache of the surrogate, which is a cache of the physics. After ANY
@@ -86,15 +93,20 @@ What client full sims deliberately do NOT change:
   `/api/simulate/save` currently trusts the client-supplied ET — a documented,
   rate-limited beta posture. Client-side sims neither worsen nor fix that;
   the fix is server-side recomputation at save time, tracked separately.)
-- **The paid tier** — Optimizer/Autotune/Outlaw orchestrate hundreds of sims
-  plus the knapsack/ROI machinery server-side and stay pro-gated. Shipping
-  the engine for single free sims does not ship the analysis product.
+- ~~**The paid tier** — Optimizer/Autotune/Outlaw stay pro-gated~~ —
+  *superseded 2026-10-23 (ADR-0006).* There is no paid tier. The whole
+  engine and analysis layer are open source, so moving more of them to the
+  client is purely an engineering trade-off (payload, speed, parity proof).
 
 ## Rejected alternatives (do not re-litigate without new facts)
 
 - **JS/Dart port of the RK4 engine** — a second implementation of 15
   submodels that must track the bit-identical baseline contract forever;
   every divergence is a credibility bug on the site's accuracy claims.
+  *(2026-10-23: the Rust core answers this objection with a different
+  design. Only the integrator is ported, all policy stays in Python, and
+  drift is caught mechanically by parity gates. See
+  [RUST_CORE.md](RUST_CORE.md). A hand-written JS port is still rejected.)*
 - **A mobile app for local compute** — reverses ADR-0005 (hosted-only)
   for a distribution bet that a PWA + this client-compute stack covers.
 - **numpy-shim to run the engine on Pyodide-core without the CDN** — a

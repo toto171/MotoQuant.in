@@ -7,8 +7,11 @@ import { Stagger, StaggerItem } from "../../components/Reveal";
 import EndOfBlogIndexCta from "./EndOfBlogIndexCta";
 
 export const metadata = {
-  title:
-    "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
+  // absolute: already branded — skip the '%s · MotoQuant' template
+  title: {
+    absolute:
+      "MotoQuant Blog — Motorcycle Drag Racing Physics & Indian Bike Breakdowns",
+  },
   // ≤160 chars; the per-post pages carry their own long-tail metadata —
   // stuffing the index was a keyword-cannibalisation risk, not a win.
   description:

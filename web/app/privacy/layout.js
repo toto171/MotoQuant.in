@@ -4,8 +4,8 @@
 
 import StructuredData, { SITE_URL } from '../StructuredData';
 
-const TITLE = "Privacy Policy — MotoQuant Pro";
-const DESCRIPTION = "Privacy Policy for MotoQuant Pro. DPDP Act compliant. We never sell your data.";
+const TITLE = "Privacy Policy — MotoQuant";
+const DESCRIPTION = "Privacy Policy for the free, open-source MotoQuant service: what we collect, every third party that processes it, and your DPDP Act rights. We never sell your data.";
 
 export const metadata = {
   title: TITLE,
