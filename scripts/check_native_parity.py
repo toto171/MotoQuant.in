@@ -48,7 +48,6 @@ import numpy as np  # noqa: E402
 
 import motoquant as mq  # noqa: E402
 from motoquant import native  # noqa: E402
-from motoquant.category_profiles import get_profile  # noqa: E402
 from motoquant.database.bridge import db_row_to_config  # noqa: E402
 from motoquant.models import DynoCurve  # noqa: E402
 from motoquant.physics import MotoQuantEngine  # noqa: E402
@@ -160,13 +159,10 @@ def run_case(case: dict) -> dict:
         py_exc = nat_exc = None
         rp = rn = None
 
-        py_eng = MotoQuantEngine(copy.deepcopy(cfg), dt=dt)
-        _patch_profile(py_eng, patch)
-        nat_eng = native.NativeEngine(copy.deepcopy(cfg), dt=dt)
-        _patch_profile(nat_eng, patch)
-
         tp = time.perf_counter()
         try:
+            py_eng = MotoQuantEngine(copy.deepcopy(cfg), dt=dt)
+            _patch_profile(py_eng, patch)
             if mode == "topspeed":
                 rp = py_eng.run_top_speed(**kwargs)
             else:
@@ -175,6 +171,8 @@ def run_case(case: dict) -> dict:
             py_exc = f"{type(exc).__name__}: {exc}"
         tn = time.perf_counter()
         try:
+            nat_eng = native.NativeEngine(copy.deepcopy(cfg), dt=dt)
+            _patch_profile(nat_eng, patch)
             if mode == "topspeed":
                 rn = nat_eng.run_top_speed(**kwargs)
             else:
@@ -269,13 +267,16 @@ def build_stress_cases(catalog: list[tuple[str, dict]]) -> list[dict]:
             picks["limiter"] = (label, row)
         if "shaft" not in picks and drv.get("drive_type") == "shaft":
             picks["shaft"] = (label, row)
-        if "small" not in picks and (eng.get("displacement_cc") or 999) < 200 and eng.get(
-            "stroke_type", 4
-        ) == 4:
+        if (
+            "small" not in picks
+            and (eng.get("displacement_cc") or 999) < 200
+            and eng.get("stroke_type", 4) == 4
+        ):
             picks["small"] = (label, row)
-        if "crank_dyno" not in picks and (eng.get("dyno_curve") or {}).get(
-            "is_at_wheel"
-        ) is False:
+        if (
+            "crank_dyno" not in picks
+            and (eng.get("dyno_curve") or {}).get("is_at_wheel") is False
+        ):
             picks["crank_dyno"] = (label, row)
     bases = {"busa": ("Hayabusa Gen1 (ref)", busa), "k5": ("GSX-R K5 (ref)", k5)}
     for k, (label, row) in picks.items():
@@ -284,7 +285,9 @@ def build_stress_cases(catalog: list[tuple[str, dict]]) -> list[dict]:
     cases: list[dict] = []
 
     def add(label, cfg, mode="fixed", **extra):
-        cases.append({"section": "stress", "label": label, "cfg": cfg, "mode": mode, **extra})
+        cases.append(
+            {"section": "stress", "label": label, "cfg": cfg, "mode": mode, **extra}
+        )
 
     def both(label, cfg, **extra):
         add(label + " [fixed]", cfg, "fixed", **extra)
@@ -338,28 +341,60 @@ def build_stress_cases(catalog: list[tuple[str, dict]]) -> list[dict]:
             continue
         _, bcfg = bases[bname]
         for vname, pv in {
-            "slider engage 3000": {"clutch.clutch_type": "slider", "clutch.engage_rpm": 3000.0},
-            "slider engage 6500": {"clutch.clutch_type": "slider", "clutch.engage_rpm": 6500.0},
+            "slider engage 3000": {
+                "clutch.clutch_type": "slider",
+                "clutch.engage_rpm": 3000.0,
+            },
+            "slider engage 6500": {
+                "clutch.clutch_type": "slider",
+                "clutch.engage_rpm": 6500.0,
+            },
             "multistage": {"clutch.clutch_type": "multistage"},
             "slipper": {"clutch.clutch_type": "slipper"},
-            "lockup fade 90C": {"clutch.fade_temp_c": 90.0, "clutch.thermal_mass_jk": 60.0},
+            "lockup fade 90C": {
+                "clutch.fade_temp_c": 90.0,
+                "clutch.thermal_mass_jk": 60.0,
+            },
             "weak clutch": {"clutch.spring_preload_n": 250.0},
         }.items():
             both(f"{bname}: clutch {vname}", _mut(bcfg, _set(pv)))
 
     # ── never-locking clutch: stalls to max_time (adaptive array growth) ──
-    stall = _mut(busa, _set({"clutch.clutch_type": "slider", "clutch.engage_rpm": 99999.0}))
+    stall = _mut(
+        busa, _set({"clutch.clutch_type": "slider", "clutch.engage_rpm": 99999.0})
+    )
     both("busa: slider never engages (stall to max_time)", stall)
 
     # ── track surfaces ──
-    for surf in ("concrete", "prepped", "wet", "damp", "dusty", "salt", "dry_lake_bed", "gravel?"):
-        both(f"busa: surface {surf}", _mut(busa, _set({"environment.track_surface": surf})))
+    for surf in (
+        "concrete",
+        "prepped",
+        "wet",
+        "damp",
+        "dusty",
+        "salt",
+        "dry_lake_bed",
+        "gravel?",
+    ):
+        both(
+            f"busa: surface {surf}",
+            _mut(busa, _set({"environment.track_surface": surf})),
+        )
 
     # ── wind / ram air / gradient / environment ──
     for vname, pv in {
-        "headwind 6m/s": {"environment.wind_speed_ms": 6.0, "environment.wind_direction_deg": 0.0},
-        "tailwind 6m/s": {"environment.wind_speed_ms": 6.0, "environment.wind_direction_deg": 180.0},
-        "crosswind 45deg": {"environment.wind_speed_ms": 9.0, "environment.wind_direction_deg": 45.0},
+        "headwind 6m/s": {
+            "environment.wind_speed_ms": 6.0,
+            "environment.wind_direction_deg": 0.0,
+        },
+        "tailwind 6m/s": {
+            "environment.wind_speed_ms": 6.0,
+            "environment.wind_direction_deg": 180.0,
+        },
+        "crosswind 45deg": {
+            "environment.wind_speed_ms": 9.0,
+            "environment.wind_direction_deg": 45.0,
+        },
         "ram air 0.6 + headwind": {
             "aero.ram_air_efficiency": 0.6,
             "environment.wind_speed_ms": 4.0,
@@ -374,16 +409,35 @@ def build_stress_cases(catalog: list[tuple[str, dict]]) -> list[dict]:
             "environment.track_temp_c": 58.0,
         },
         "cold 4C": {"environment.ambient_temp_c": 4.0, "environment.track_temp_c": 6.0},
-        "track_temp None (ambient+5 path)": {"environment.track_temp_c": None},
-        "VHT prep fresh": {"tires.track_prep_type": "vht", "tires.track_prep_passes": 3},
-        "rubber prep": {"tires.track_prep_type": "rubber_buildup", "tires.track_prep_passes": 50},
+        "track_temp None (ambient+5 path)": {
+            "environment.track_temp_c": None,
+            "tires.track_prep_type": "none",
+        },
+        "VHT prep fresh": {
+            "tires.track_prep_type": "vht",
+            "tires.track_prep_passes": 3,
+        },
+        "rubber prep": {
+            "tires.track_prep_type": "rubber_buildup",
+            "tires.track_prep_passes": 50,
+        },
     }.items():
         both(f"busa: {vname}", _mut(busa, _set(pv)))
 
     # ── speed limiters ──
-    both("busa: limiter 140 km/h (engages in the 1/4)", _mut(busa, _set({"drivetrain.speed_limiter_kmh": 140.0})))
-    both("busa: limiter 0 (treated as none)", _mut(busa, _set({"drivetrain.speed_limiter_kmh": 0.0})))
-    add("busa: limiter 140 km/h topspeed", _mut(busa, _set({"drivetrain.speed_limiter_kmh": 140.0})), "topspeed")
+    both(
+        "busa: limiter 140 km/h (engages in the 1/4)",
+        _mut(busa, _set({"drivetrain.speed_limiter_kmh": 140.0})),
+    )
+    both(
+        "busa: limiter 0 (treated as none)",
+        _mut(busa, _set({"drivetrain.speed_limiter_kmh": 0.0})),
+    )
+    add(
+        "busa: limiter 140 km/h topspeed",
+        _mut(busa, _set({"drivetrain.speed_limiter_kmh": 140.0})),
+        "topspeed",
+    )
     if "limiter" in bases:
         lab, bc = bases["limiter"]
         add(f"catalog limiter bike {lab} topspeed", bc, "topspeed")
@@ -392,17 +446,24 @@ def build_stress_cases(catalog: list[tuple[str, dict]]) -> list[dict]:
     # ── dyno: at-wheel vs crank, curve-less fallbacks ──
     def flip_wheel(c):
         dc = c.engine.dyno_curve
-        c.engine.dyno_curve = DynoCurve(rpm=dc.rpm, torque_nm=dc.torque_nm, is_at_wheel=not dc.is_at_wheel)
+        c.engine.dyno_curve = DynoCurve(
+            rpm=dc.rpm, torque_nm=dc.torque_nm, is_at_wheel=not dc.is_at_wheel
+        )
 
     for bname in ("busa", "k5", "crank_dyno"):
         if bname in bases and bases[bname][1].engine.dyno_curve is not None:
-            both(f"{bname}: dyno is_at_wheel flipped", _mut(bases[bname][1], flip_wheel))
+            both(
+                f"{bname}: dyno is_at_wheel flipped", _mut(bases[bname][1], flip_wheel)
+            )
     both("busa: no dyno (parabolic 4T)", _mut(busa, _set({"engine.dyno_curve": None})))
     if "two_stroke" in bases:
         _, tcfg = bases["two_stroke"]
         for vname, pv in {
             "2T curve-less default": {"engine.dyno_curve": None},
-            "2T curve-less powervalve": {"engine.dyno_curve": None, "engine.powervalve": True},
+            "2T curve-less powervalve": {
+                "engine.dyno_curve": None,
+                "engine.powervalve": True,
+            },
             "2T curve-less 1cyl <200cc": {
                 "engine.dyno_curve": None,
                 "engine.cylinder_count": 1,
@@ -415,9 +476,20 @@ def build_stress_cases(catalog: list[tuple[str, dict]]) -> list[dict]:
                 "engine.displacement_cc": 249.0,
                 "engine.powervalve": False,
             },
-            "2T curve-less 2cyl": {"engine.dyno_curve": None, "engine.cylinder_count": 2, "engine.powervalve": False},
-            "2T curve-less 3cyl": {"engine.dyno_curve": None, "engine.cylinder_count": 3, "engine.powervalve": False},
-            "2T curve-less tuned None": {"engine.dyno_curve": None, "engine.tuned_rpm": None},
+            "2T curve-less 2cyl": {
+                "engine.dyno_curve": None,
+                "engine.cylinder_count": 2,
+                "engine.powervalve": False,
+            },
+            "2T curve-less 3cyl": {
+                "engine.dyno_curve": None,
+                "engine.cylinder_count": 3,
+                "engine.powervalve": False,
+            },
+            "2T curve-less tuned None": {
+                "engine.dyno_curve": None,
+                "engine.tuned_rpm": None,
+            },
         }.items():
             both(vname, _mut(tcfg, _set(pv)))
 
@@ -427,8 +499,14 @@ def build_stress_cases(catalog: list[tuple[str, dict]]) -> list[dict]:
         "rider 150kg": {"chassis.rider_mass_kg": 150.0},
         "wheelie bar": {"wheelie.wheelie_bar": True, "wheelie.bar_length_mm": 600.0},
         "counter-rotating crank": {"engine.counter_rotating": True},
-        "high CoG short wheelbase": {"chassis.cog_height_mm": 720.0, "chassis.wheelbase_mm": 1300.0},
-        "belly pan + upright": {"aero.belly_pan": True, "aero.rider_position": "upright"},
+        "high CoG short wheelbase": {
+            "chassis.cog_height_mm": 720.0,
+            "chassis.wheelbase_mm": 1300.0,
+        },
+        "belly pan + upright": {
+            "aero.belly_pan": True,
+            "aero.rider_position": "upright",
+        },
         "race crouch, high lift": {"aero.rider_position": "race", "aero.cl": 0.3},
         "no alternator, e-pump, -5hp parasitic": {
             "parasitic.alternator_present": False,
@@ -441,7 +519,10 @@ def build_stress_cases(catalog: list[tuple[str, dict]]) -> list[dict]:
         "chain -> shaft": {"drivetrain.drive_type": "shaft"},
         "two-step 9500": {"staging.two_step": True, "staging.launch_rpm": 9500.0},
         "tuck 0s": {"rider.tuck_transition_time_s": 0.0},
-        "reversion-prone tire": {"tires.reversion_temp_c": 45.0, "tires.burnout_end_temp_c": 90.0},
+        "reversion-prone tire": {
+            "tires.reversion_temp_c": 45.0,
+            "tires.burnout_end_temp_c": 90.0,
+        },
     }.items():
         both(f"busa: {vname}", _mut(busa, _set(pv)))
     for bname in ("shaft", "small", "two_stroke", "crank_dyno"):
@@ -453,14 +534,25 @@ def build_stress_cases(catalog: list[tuple[str, dict]]) -> list[dict]:
     for tag in PROFILE_TAGS + (None,):
         for bname in ("busa", "small"):
             if bname in bases:
-                both(f"{bname}: category_tag={tag}", _mut(bases[bname][1], _set({"category_tag": tag})))
+                both(
+                    f"{bname}: category_tag={tag}",
+                    _mut(bases[bname][1], _set({"category_tag": tag})),
+                )
 
     # ── patched profile knobs (launch_rpm_factor, over-clutch on a litre bike) ──
-    both("busa: profile launch_rpm_factor=0.6", copy.deepcopy(busa), profile_patch={"launch_rpm_factor": 0.6})
+    both(
+        "busa: profile launch_rpm_factor=0.6",
+        copy.deepcopy(busa),
+        profile_patch={"launch_rpm_factor": 0.6},
+    )
     both(
         "busa: profile over-clutch 0.4/300/floor1.0",
         copy.deepcopy(busa),
-        profile_patch={"over_clutch_factor": 0.4, "max_engine_decel_rads2": 300.0, "launch_floor_factor": 1.0},
+        profile_patch={
+            "over_clutch_factor": 0.4,
+            "max_engine_decel_rads2": 300.0,
+            "launch_floor_factor": 1.0,
+        },
     )
 
     # ── dt / horizon variants ──
@@ -468,10 +560,18 @@ def build_stress_cases(catalog: list[tuple[str, dict]]) -> list[dict]:
     add("busa: dt 2ms", copy.deepcopy(busa), "fixed", dt=0.002)
     add("busa: dt 2ms adaptive", copy.deepcopy(busa), "adaptive", dt=0.002)
     both("busa: max_time 4s (time cap)", copy.deepcopy(busa), kwargs={"max_time": 4.0})
-    both("busa: distance 1000m", copy.deepcopy(busa), kwargs={"distance": 1000.0, "max_time": 60.0})
+    both(
+        "busa: distance 1000m",
+        copy.deepcopy(busa),
+        kwargs={"distance": 1000.0, "max_time": 60.0},
+    )
     both("busa: distance 60ft", copy.deepcopy(busa), kwargs={"distance": 18.288})
-    add("busa: run_top_speed custom window", copy.deepcopy(busa), "topspeed",
-        kwargs={"plateau_accel": 0.2, "plateau_window_s": 0.5, "max_time": 60.0})
+    add(
+        "busa: run_top_speed custom window",
+        copy.deepcopy(busa),
+        "topspeed",
+        kwargs={"plateau_accel": 0.2, "plateau_window_s": 0.5, "max_time": 60.0},
+    )
     both("busa: distance 0 (both raise)", copy.deepcopy(busa), kwargs={"distance": 0.0})
     return cases
 
@@ -483,7 +583,11 @@ def build_stress_cases(catalog: list[tuple[str, dict]]) -> list[dict]:
 
 def bench(catalog, n_bikes: int = 20, repeats: int = 3) -> dict:
     mc = native._require_core()
-    cfgs = [("K5", mq.gsxr1000_k5()), ("R1", mq.yzfr1_4c8()), ("Busa", mq.hayabusa_gen1())]
+    cfgs = [
+        ("K5", mq.gsxr1000_k5()),
+        ("R1", mq.yzfr1_4c8()),
+        ("Busa", mq.hayabusa_gen1()),
+    ]
     step = max(1, len(catalog) // n_bikes)
     for label, row in catalog[::step][:n_bikes]:
         cfgs.append((label, cfg_from_row(row, label)))
@@ -526,8 +630,16 @@ def bench(catalog, n_bikes: int = 20, repeats: int = 3) -> dict:
     t0 = time.perf_counter()
     for _, cfg in cfgs:
         native.resolve_config(cfg)
-    rows.append({"mode": "resolve_only", "ms_per_config": 1000 * (time.perf_counter() - t0) / len(cfgs)})
-    return {"cases": rows, "note": "best-of-%d wall time, serial, single core" % repeats}
+    rows.append(
+        {
+            "mode": "resolve_only",
+            "ms_per_config": 1000 * (time.perf_counter() - t0) / len(cfgs),
+        }
+    )
+    return {
+        "cases": rows,
+        "note": "best-of-%d wall time, serial, single core" % repeats,
+    }
 
 
 # ═══════════════════════════════════════════
@@ -544,7 +656,9 @@ def summarize(results: list[dict]) -> dict:
         out[sec] = {
             "cases": len(rs),
             "ok": sum(1 for r in rs if r.get("ok")),
-            "failed": [r["label"] + f" ({r.get('mode')})" for r in rs if not r.get("ok")],
+            "failed": [
+                r["label"] + f" ({r.get('mode')})" for r in rs if not r.get("ok")
+            ],
             "worst_dET_s": max(dets) if dets else 0.0,
             "worst_dtrap_ms": max(dtraps) if dtraps else 0.0,
             "over_tol": sum(1 for d in dets if d > TOL_S),
@@ -557,20 +671,36 @@ def summarize(results: list[dict]) -> dict:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--quick", action="store_true", help="refs + a 40-bike sample (CI-sized)")
-    ap.add_argument("--topspeed-sample", type=int, default=80, help="catalog bikes for top-speed mode (0 = all)")
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    ap.add_argument(
+        "--quick", action="store_true", help="refs + a 40-bike sample (CI-sized)"
+    )
+    ap.add_argument(
+        "--topspeed-sample",
+        type=int,
+        default=80,
+        help="catalog bikes for top-speed mode (0 = all)",
+    )
     ap.add_argument("--workers", type=int, default=os.cpu_count() or 2)
     ap.add_argument("--no-bench", action="store_true")
     ap.add_argument("--db", default=str(ROOT / "motoquant.db"))
-    ap.add_argument("--report", default=str(ROOT / "reports" / "native_parity_2026-10-23.json"))
+    ap.add_argument(
+        "--report", default=str(ROOT / "reports" / "native_parity_2026-10-23.json")
+    )
     args = ap.parse_args()
 
     if not native.available():
-        print("FAIL: motoquant_core not importable — run `make native` first.", file=sys.stderr)
+        print(
+            "FAIL: motoquant_core not importable — run `make native` first.",
+            file=sys.stderr,
+        )
         return 2
     info = native.native_info()
-    print(f"native core {info.get('version')}  schema {info['schema']}  exp_impl={info.get('exp_impl')}  exact={info.get('exact')}")
+    print(
+        f"native core {info.get('version')}  schema {info['schema']}  exp_impl={info.get('exp_impl')}  exact={info.get('exact')}"
+    )
 
     catalog = load_catalog_rows(Path(args.db))
     if args.quick:
@@ -583,16 +713,28 @@ def main() -> int:
     for f in REFS:
         cfg = getattr(mq, f)()
         for mode in ("fixed", "adaptive", "topspeed"):
-            cases.append({"section": "references", "label": f, "cfg": cfg, "mode": mode})
+            cases.append(
+                {"section": "references", "label": f, "cfg": cfg, "mode": mode}
+            )
     for label, row in catalog_run:
-        cases.append({"section": "catalog", "label": label, "row": row, "mode": "fixed"})
+        cases.append(
+            {"section": "catalog", "label": label, "row": row, "mode": "fixed"}
+        )
     for label, row in catalog_run:
-        cases.append({"section": "adaptive", "label": label, "row": row, "mode": "adaptive"})
-    ts = catalog_run if (args.topspeed_sample == 0 or args.quick) else catalog_run[:: max(1, len(catalog_run) // args.topspeed_sample)]
+        cases.append(
+            {"section": "adaptive", "label": label, "row": row, "mode": "adaptive"}
+        )
+    ts = (
+        catalog_run
+        if (args.topspeed_sample == 0 or args.quick)
+        else catalog_run[:: max(1, len(catalog_run) // args.topspeed_sample)]
+    )
     if args.quick:
         ts = ts[:8]
     for label, row in ts:
-        cases.append({"section": "topspeed", "label": label, "row": row, "mode": "topspeed"})
+        cases.append(
+            {"section": "topspeed", "label": label, "row": row, "mode": "topspeed"}
+        )
     stress = build_stress_cases(catalog)
     if args.quick:
         stress = stress[::6]
@@ -606,12 +748,18 @@ def main() -> int:
         for i, r in enumerate(pool.imap_unordered(run_case, cases, chunksize=2), 1):
             results.append(r)
             if not r.get("ok"):
-                print(f"  MISMATCH [{r['section']}] {r['label']} ({r['mode']}): "
-                      f"dET={r.get('dET')} first_div={r.get('first_divergence')} "
-                      f"py_exc={r.get('py_exception')} nat_exc={r.get('native_exception')} "
-                      f"err={r.get('harness_error')}", flush=True)
+                print(
+                    f"  MISMATCH [{r['section']}] {r['label']} ({r['mode']}): "
+                    f"dET={r.get('dET')} first_div={r.get('first_divergence')} "
+                    f"py_exc={r.get('py_exception')} nat_exc={r.get('native_exception')} "
+                    f"err={r.get('harness_error')}",
+                    flush=True,
+                )
             if i % 100 == 0:
-                print(f"  {i}/{len(cases)} done ({time.perf_counter() - t0:.0f}s)", flush=True)
+                print(
+                    f"  {i}/{len(cases)} done ({time.perf_counter() - t0:.0f}s)",
+                    flush=True,
+                )
     elapsed = time.perf_counter() - t0
 
     summary = summarize(results)
@@ -621,12 +769,16 @@ def main() -> int:
     n_bit = sum(1 for r in results if r.get("channels_identical"))
     print()
     for sec, s in summary.items():
-        print(f"  {sec:11s} {s['ok']:4d}/{s['cases']:<4d} ok  worst|dET|={s['worst_dET_s']:.3e}s  "
-              f"over-tol={s['over_tol']}  bit-identical={s['channels_bit_identical']}  "
-              f"py={s['py_time_s']:.1f}s native={s['native_time_s']:.1f}s")
-    print(f"\n  ALL: {len(results) - n_fail}/{len(results)} ok, worst |dET| = {worst:.3e} s, "
-          f"worst |dtrap| = {worst_trap:.3e} m/s, channel-bit-identical {n_bit}/{len(results)} "
-          f"({elapsed:.0f}s)")
+        print(
+            f"  {sec:11s} {s['ok']:4d}/{s['cases']:<4d} ok  worst|dET|={s['worst_dET_s']:.3e}s  "
+            f"over-tol={s['over_tol']}  bit-identical={s['channels_bit_identical']}  "
+            f"py={s['py_time_s']:.1f}s native={s['native_time_s']:.1f}s"
+        )
+    print(
+        f"\n  ALL: {len(results) - n_fail}/{len(results)} ok, worst |dET| = {worst:.3e} s, "
+        f"worst |dtrap| = {worst_trap:.3e} m/s, channel-bit-identical {n_bit}/{len(results)} "
+        f"({elapsed:.0f}s)"
+    )
 
     report = {
         "generated": "2026-10-23",
@@ -646,7 +798,10 @@ def main() -> int:
         "cases_failed": n_fail,
         "channels_bit_identical": n_bit,
         "results": sorted(
-            [{k: v for k, v in r.items() if k != "traceback" or not r.get("ok")} for r in results],
+            [
+                {k: v for k, v in r.items() if k != "traceback" or not r.get("ok")}
+                for r in results
+            ],
             key=lambda r: (r["section"], r["label"], r["mode"]),
         ),
     }
@@ -654,7 +809,13 @@ def main() -> int:
         print("\n  benchmarking (serial) ...", flush=True)
         report["bench"] = bench(catalog)
         for row in report["bench"]["cases"]:
-            print("   ", {k: (round(v, 3) if isinstance(v, float) else v) for k, v in row.items()})
+            print(
+                "   ",
+                {
+                    k: (round(v, 3) if isinstance(v, float) else v)
+                    for k, v in row.items()
+                },
+            )
     Path(args.report).parent.mkdir(parents=True, exist_ok=True)
     Path(args.report).write_text(json.dumps(report, indent=1, default=str) + "\n")
     print(f"\n  report -> {os.path.relpath(args.report, ROOT)}")

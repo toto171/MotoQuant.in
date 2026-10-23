@@ -40,7 +40,7 @@ from functools import lru_cache
 
 import numpy as np
 
-from .constants import G, QUARTER_MILE_M, RADS_TO_RPM, RPM_TO_RADS
+from .constants import QUARTER_MILE_M, RADS_TO_RPM, RPM_TO_RADS, G
 from .models import CLUTCH_SLIDER, DRIVE_CHAIN, BikeConfig
 from .physics import MotoQuantEngine, SimResult
 
@@ -129,7 +129,7 @@ def _require_core():
 def _probe_points() -> list[float]:
     """Deterministic probe inputs spanning the tire thermal-factor domain."""
     pts = [-((i * 0.0731) % 30.0) - (i % 7) * 1e-3 for i in range(1, 600)]
-    pts += [-(k / 25.0) ** 2 for k in range(0, 400)]
+    pts += [-((k / 25.0) ** 2) for k in range(400)]
     return pts
 
 
