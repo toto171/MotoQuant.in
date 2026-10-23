@@ -159,3 +159,6 @@ TOKENS_UPDATE_*.md
 
 # Scrapling toolkit raw-HTML disk cache (scripts/scrape_bike_specs.py)
 scrape_cache/
+
+# Rust core build output
+rust/target/
