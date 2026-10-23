@@ -121,3 +121,34 @@ web-build: ## Production build of the frontend (what Vercel runs)
 clean: ## Remove Python caches and build artefacts
 	find . -type d -name __pycache__ -prune -exec rm -rf {} + 2>/dev/null || true
 	rm -rf .pytest_cache .ruff_cache *.egg-info build dist coverage.xml
+
+# ── Rust physics core (optional accelerator; Python stays the reference) ───
+# docs/RUST_CORE.md. `native` builds the PyO3 extension (motoquant_core) and
+# installs it into the current interpreter; `native-parity` is the full
+# Python-vs-Rust bit-parity sweep; `wasm` rebuilds the committed browser
+# engine + fixtures and proves parity under node.
+RUST_DIR := rust
+WASM_OUT := $(RUST_DIR)/target/wasm32-unknown-unknown/wasm-release/motoquant_core.wasm
+NODE ?= node
+
+.PHONY: native
+native: ## Build + install the Rust physics core (PyO3 abi3 wheel via maturin)
+	@$(PY) -c "import maturin" 2>/dev/null || $(PY) -m pip install "maturin>=1.5,<2"
+	rm -rf $(RUST_DIR)/target/wheels
+	cd $(RUST_DIR) && $(PY) -m maturin build --release -m motoquant-core/Cargo.toml -o target/wheels
+	$(PY) -m pip install --force-reinstall --no-deps $(RUST_DIR)/target/wheels/motoquant_core-*.whl
+	$(PY) -c "from motoquant import native; print(native.native_info())"
+
+.PHONY: native-test
+native-test: ## Rust unit + fixture tests (cargo) and the pytest native gate
+	cd $(RUST_DIR) && cargo test -p motoquant-core --release
+	$(PYTEST) tests/test_native_engine.py -q
+
+.PHONY: native-parity
+native-parity: ## Full Python-vs-Rust parity sweep (catalog, adaptive, top speed, stress) + bench
+	$(PY) scripts/check_native_parity.py
+
+.PHONY: wasm
+wasm: ## Rebuild web/public/engine/*.wasm + fixtures, then prove parity under node
+	$(PY) scripts/gen_engine_web.py --build
+	$(NODE) web/scripts/engine-parity.mjs

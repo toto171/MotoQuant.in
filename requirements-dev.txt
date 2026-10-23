@@ -48,3 +48,8 @@ scikit-learn>=1.3,<2
 # both guard their scipy imports and degrade gracefully when it is absent,
 # which is exactly what production now does.
 scipy>=1.10.0,<2
+
+# Builds the optional Rust physics core's PyO3 extension (`make native`;
+# rust/motoquant-core, docs/RUST_CORE.md). Not needed to run anything — the
+# pure-Python engine is the reference and remains the default.
+maturin>=1.5,<2
