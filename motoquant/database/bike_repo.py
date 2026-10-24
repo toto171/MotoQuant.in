@@ -6,13 +6,18 @@ Handles BikeConfig ↔ DB conversion via the bridge module.
 """
 
 import json
+import math
 import re
 import sqlite3
 
 import numpy as np
 
+from ..config_io import dyno_from_dict
 from ..models import BikeConfig, DynoCurve, EnvironmentParams
 from .bridge import (
+    DB_COLUMN_TO_SECTION,
+    _deserialize_section,
+    _serialize_section,
     compute_data_completeness,
     config_to_db_row,
     db_row_to_config,
@@ -45,6 +50,44 @@ def _norm_model(s: str) -> str:
     if not s:
         return s
     return _YEAR_SUFFIX_RE.sub("", s.strip())
+
+
+def _json_equivalent(a, b, rel_tol: float = 1e-12, abs_tol: float = 1e-12) -> bool:
+    """Structural JSON equality with a float tolerance (ULP-level noise)."""
+    if isinstance(a, dict) and isinstance(b, dict):
+        return a.keys() == b.keys() and all(
+            _json_equivalent(a[k], b[k], rel_tol, abs_tol) for k in a
+        )
+    if isinstance(a, list) and isinstance(b, list):
+        return len(a) == len(b) and all(
+            _json_equivalent(x, y, rel_tol, abs_tol) for x, y in zip(a, b)
+        )
+    if isinstance(a, bool) or isinstance(b, bool):
+        return a is b
+    if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+        return math.isclose(a, b, rel_tol=rel_tol, abs_tol=abs_tol)
+    return a == b
+
+
+def _param_blobs_equivalent(stored: str | None, new: str | None, db_col: str) -> bool:
+    """True when two bike_configs param blobs describe the same physics.
+
+    The stored blob is round-tripped through its dataclass first, which drops
+    keys of fields that no longer exist (the bridge ignores them on read too),
+    then compared to the new blob with a ULP-level float tolerance.
+    """
+    if stored == new:
+        return True
+    if stored is None or new is None:
+        return False
+    try:
+        section = DB_COLUMN_TO_SECTION[db_col]
+        normalised = json.loads(
+            _serialize_section(_deserialize_section(stored, section))
+        )
+        return _json_equivalent(normalised, json.loads(new))
+    except (KeyError, TypeError, ValueError):
+        return False
 
 
 class BikeRepository:
@@ -321,18 +364,33 @@ class BikeRepository:
         # 650 / Yezdi Adventure) — otherwise the two specs would ping-pong the
         # "current" flag and append a new version on every pass. If a match is
         # found, make it current and reuse it instead of inserting a duplicate.
+        #
+        # The comparison is SEMANTIC, not byte-for-byte (October 2026 audit):
+        # stored blobs that still carry keys of since-removed dataclass fields
+        # (AeroParams.headwind_ms/crosswind_ms) or differ only in the last ULP
+        # of a regenerated float never matched, so every `db seed` minted a
+        # phantom new version of the reference bikes. And the category_tag
+        # — which selects the physics CategoryProfile at runtime — was not
+        # compared at all, so a taxonomy-only re-derive never persisted via
+        # the import path; it is now written onto the reused row.
         for ev in self._conn.execute(
-            "SELECT id, "
+            "SELECT id, category_tag, "
             + ", ".join(_PARAM_COLS)
             + " FROM bike_configs WHERE bike_model_id = ? AND config_name = ?",
             (bike_model_id, config_name),
         ).fetchall():
-            if all(ev[c] == row_data[c] for c in _PARAM_COLS):
+            if all(_param_blobs_equivalent(ev[c], row_data[c], c) for c in _PARAM_COLS):
                 self._conn.execute(
                     "UPDATE bike_configs SET is_current = (id = ?)"
                     " WHERE bike_model_id = ? AND config_name = ?",
                     (ev["id"], bike_model_id, config_name),
                 )
+                new_tag = row_data.get("category_tag")
+                if new_tag and new_tag != ev["category_tag"]:
+                    self._conn.execute(
+                        "UPDATE bike_configs SET category_tag = ? WHERE id = ?",
+                        (new_tag, ev["id"]),
+                    )
                 self._conn.commit()
                 return ev["id"]
 
@@ -435,6 +493,40 @@ class BikeRepository:
         ).fetchone()
         return dict(row) if row else None
 
+    def sync_headline_specs(self, bike_model_id: int, config: BikeConfig) -> list[str]:
+        """Rewrite the bike_models headline columns from ``config``.
+
+        The headline columns (bore/stroke/CR/rpm points/wheelbase/...) are a
+        searchable copy of the physics blob. Paths that rewrite only the blob
+        leave them stale, so /api/bikes showed rpm/wheelbase figures the sim
+        does not use (e.g. V-Strom SX 250 wheelbase 1355 vs 1440 in physics).
+        Returns the names of the columns that changed (empty = already in
+        sync). Idempotent.
+        """
+        current = self._conn.execute(
+            "SELECT * FROM bike_models WHERE id = ?", (bike_model_id,)
+        ).fetchone()
+        if current is None:
+            return []
+        changed = {}
+        for col, val in extract_headline_specs(config).items():
+            old = current[col]
+            if isinstance(val, (int, float)) and isinstance(old, (int, float)):
+                same = math.isclose(float(old), float(val), rel_tol=1e-9, abs_tol=1e-9)
+            else:
+                same = old == val
+            if not same:
+                changed[col] = val
+        if changed:
+            assignments = ", ".join(f"{c} = ?" for c in changed)
+            self._conn.execute(
+                f"UPDATE bike_models SET {assignments}, "
+                "updated_at = datetime('now','utc') WHERE id = ?",
+                [*changed.values(), bike_model_id],
+            )
+            self._conn.commit()
+        return sorted(changed)
+
     def to_config(
         self,
         config_id: int,
@@ -454,29 +546,47 @@ class BikeRepository:
         if model.get("model_code"):
             name += f" {model['model_code']}"
 
-        # Check for a separate dyno curve
-        dyno_row = self._conn.execute(
-            """SELECT * FROM dyno_curves
-               WHERE bike_config_id = ?
-               ORDER BY created_at DESC LIMIT 1""",
-            (config_id,),
-        ).fetchone()
-
+        # The engine_params JSON blob is the single source of truth for the
+        # torque curve — it is what /api/simulate (db_row_to_config), the
+        # golden snapshot and every reseed/patch read and write. The
+        # dyno_curves table is a derived copy written once at insert time and
+        # never refreshed by reseeds, so preferring it here made CLI, chat and
+        # NL sims run a stale curve (508 of 541 bikes, up to 2.28 s off the
+        # API for the same bike — October 2026 audit). Fall back to the table
+        # ONLY for a legacy blob that carries no curve at all.
         dyno_override = None
-        if dyno_row:
-            rpm = np.array(json.loads(dyno_row["rpm_points"]))
-            torque = np.array(json.loads(dyno_row["torque_values"]))
-            dyno_override = DynoCurve(
-                rpm=rpm,
-                torque_nm=torque,
-                is_at_wheel=bool(dyno_row["is_at_wheel"]),
-            )
+        engine_blob = config_row.get("engine_params")
+        blob_has_curve = False
+        if engine_blob:
+            try:
+                blob_has_curve = json.loads(engine_blob).get("dyno_curve") is not None
+            except (json.JSONDecodeError, TypeError, AttributeError):
+                blob_has_curve = False
+        if not blob_has_curve:
+            dyno_override = self._dyno_curve_from_table(config_id)
 
         return db_row_to_config(
             config_row,
             name=name,
             environment=environment,
             dyno_override=dyno_override,
+        )
+
+    def _dyno_curve_from_table(self, config_id: int) -> DynoCurve | None:
+        """Latest dyno_curves row for a config (legacy / analysis copy)."""
+        row = self._conn.execute(
+            """SELECT * FROM dyno_curves
+               WHERE bike_config_id = ?
+               ORDER BY confidence DESC, created_at DESC, id DESC
+               LIMIT 1""",
+            (config_id,),
+        ).fetchone()
+        if row is None:
+            return None
+        return DynoCurve(
+            rpm=np.array(json.loads(row["rpm_points"])),
+            torque_nm=np.array(json.loads(row["torque_values"])),
+            is_at_wheel=bool(row["is_at_wheel"]),
         )
 
     # ────────────────────────────────────────────
@@ -539,21 +649,23 @@ class BikeRepository:
     # ────────────────────────────────────────────
 
     def get_dyno_curve(self, config_id: int) -> DynoCurve | None:
-        """Load the dyno curve for a config."""
+        """Load the dyno curve for a config — the one its physics runs on.
+
+        Reads the config's engine_params blob (the source of truth, see
+        ``to_config``); the dyno_curves table is consulted only for a legacy
+        blob without a curve.
+        """
         row = self._conn.execute(
-            """SELECT * FROM dyno_curves
-               WHERE bike_config_id = ?
-               ORDER BY confidence DESC, created_at DESC
-               LIMIT 1""",
-            (config_id,),
+            "SELECT engine_params FROM bike_configs WHERE id = ?", (config_id,)
         ).fetchone()
-        if row is None:
-            return None
-        return DynoCurve(
-            rpm=np.array(json.loads(row["rpm_points"])),
-            torque_nm=np.array(json.loads(row["torque_values"])),
-            is_at_wheel=bool(row["is_at_wheel"]),
-        )
+        if row is not None and row["engine_params"]:
+            try:
+                dc = json.loads(row["engine_params"]).get("dyno_curve")
+            except (json.JSONDecodeError, TypeError, AttributeError):
+                dc = None
+            if dc is not None:
+                return dyno_from_dict(dc)
+        return self._dyno_curve_from_table(config_id)
 
     def compare_dyno_curves(self, config_ids: list[int]) -> dict[int, DynoCurve]:
         """Load dyno curves for multiple configs (for comparison plots)."""
@@ -578,7 +690,28 @@ class BikeRepository:
         source_url: str = None,
         notes: str = None,
     ):
-        """Record provenance for a specific data field."""
+        """Record provenance for a specific data field.
+
+        Idempotent: an identical record (same entity, field, source and notes)
+        is not inserted twice, so re-running a seed does not grow the table.
+        """
+        if self._conn.execute(
+            """SELECT 1 FROM data_provenance
+               WHERE entity_type = ? AND entity_id = ? AND field_path = ?
+                 AND source_type = ? AND source_url IS ? AND confidence = ?
+                 AND notes IS ?
+               LIMIT 1""",
+            (
+                entity_type,
+                entity_id,
+                field_path,
+                source_type,
+                source_url,
+                confidence,
+                notes,
+            ),
+        ).fetchone():
+            return
         self._conn.execute(
             """INSERT INTO data_provenance
                (entity_type, entity_id, field_path, source_type,
@@ -603,14 +736,20 @@ class BikeRepository:
         trap_kmh: float,
         source: str,
     ):
-        """Set the known quarter-mile benchmark for a bike model."""
+        """Set the known quarter-mile benchmark for a bike model.
+
+        A no-op (no updated_at churn) when the row already holds these values.
+        """
         self._conn.execute(
             """UPDATE bike_models
                SET validation_et_s = ?, validation_trap_kmh = ?,
                    validation_source = ?, data_quality = 'track_validated',
                    updated_at = datetime('now','utc')
-               WHERE id = ?""",
-            (et_s, trap_kmh, source, model_id),
+               WHERE id = ?
+                 AND (validation_et_s IS NOT ? OR validation_trap_kmh IS NOT ?
+                      OR validation_source IS NOT ?
+                      OR data_quality IS NOT 'track_validated')""",
+            (et_s, trap_kmh, source, model_id, et_s, trap_kmh, source),
         )
         self._conn.commit()
 

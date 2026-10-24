@@ -212,7 +212,16 @@ def refresh_retailer_urls(
     dry_run: bool = False,
 ) -> RefreshSummary:
     """
-    Populate ``retailer_url`` + ``last_price_check`` for every part.
+    Populate ``retailer_url`` (a retailer SEARCH url) for every part.
+
+    This builds URLs; it does not look at any price, so it no longer touches
+    ``last_price_check`` (it used to stamp today on every part with a
+    retailer — "bookkeeping, harmless" — which made ``stale_parts()`` /
+    ``coverage_report()`` report prices as freshly checked that nobody had
+    checked; October 2026 audit). ``last_price_check`` now moves only when a
+    price is actually fetched (``fetch_live_price``) or changed
+    (``PartsRepository.create``). ``RefreshSummary.check_stamps_updated`` is
+    kept for callers and is always 0.
 
     Parameters
     ----------
@@ -225,10 +234,8 @@ def refresh_retailer_urls(
     cur = conn.cursor()
     rows = cur.execute("SELECT id, brand, model_name, retailer FROM parts").fetchall()
 
-    today = datetime.date.today().isoformat()
-
     filled = 0
-    stamped = 0
+    stamped = 0  # always 0 — URL building is not a price check (see docstring)
     skipped = 0
 
     for pid, brand, model_name, retailer in rows:
@@ -236,19 +243,11 @@ def refresh_retailer_urls(
             skipped += 1
             continue
 
-        # Always refresh the check-date (bookkeeping — harmless)
-        stamped += 1
-
         # Only fill URL if missing (or if caller wants overwrite)
         existing_url = cur.execute(
             "SELECT retailer_url FROM parts WHERE id = ?", (pid,)
         ).fetchone()[0]
         if existing_url and only_missing:
-            if not dry_run:
-                cur.execute(
-                    "UPDATE parts SET last_price_check = ? WHERE id = ?",
-                    (today, pid),
-                )
             continue
 
         url = _search_url(retailer, brand or "", model_name or "")
@@ -258,12 +257,11 @@ def refresh_retailer_urls(
             cur.execute(
                 """
                 UPDATE parts
-                   SET retailer_url    = ?,
-                       last_price_check = ?,
-                       updated_at       = datetime('now', 'utc')
+                   SET retailer_url = ?,
+                       updated_at   = datetime('now', 'utc')
                  WHERE id = ?
                 """,
-                (url, today, pid),
+                (url, pid),
             )
 
     if not dry_run:
@@ -365,6 +363,31 @@ __all__ = [
 STALE_DAYS: int = 14  # prices older than this are considered stale
 
 
+def _stored_price_result(row) -> PriceResult | None:
+    """Rebuild a :class:`PriceResult` from a stored ``part_prices`` row.
+
+    ``fetched_at`` is stored by ``datetime.isoformat()`` ('T' separator, a
+    +00:00 offset on current rows, none on older ones — naive means UTC by
+    convention). Returns None for a timestamp that does not parse, so the
+    caller falls through to a live fetch instead of serving a bad row.
+    """
+    from .retail_adapters import PriceResult  # lazy, like fetch_price
+
+    try:
+        ts = datetime.datetime.fromisoformat(str(row["fetched_at"]).replace(" ", "T"))
+    except ValueError:
+        return None
+    if ts.tzinfo is None:
+        ts = ts.replace(tzinfo=datetime.timezone.utc)
+    return PriceResult(
+        price_inr=row["price_inr"],
+        in_stock=bool(row["in_stock"]),
+        fetched_at=ts,
+        source_url=row["source_url"],
+        retailer=row["retailer"],
+    )
+
+
 def fetch_live_price(
     conn,
     part_id: int,
@@ -378,9 +401,14 @@ def fetch_live_price(
     ----------
     conn      : sqlite3 connection
     part_id   : parts.id to refresh
-    force     : if False (default), skip if a fresh price exists (<14 days old)
+    force     : if False (default) and a fresh price (<14 days old) is stored
+                for this url, return it instead of fetching
 
-    Returns the :class:`PriceResult` on success, None on failure or skip.
+    Returns the :class:`PriceResult` on success — either a fresh fetch or,
+    when a price for this url was stored within ``STALE_DAYS`` and ``force``
+    is False, the stored price (its ``fetched_at`` says when it was really
+    fetched). Returns None when the part does not exist, has no
+    ``retailer_url``, or the live fetch failed.
     """
     try:
         from .retail_adapters import fetch_price  # lazy import
@@ -411,23 +439,36 @@ def fetch_live_price(
         return None
 
     if not force:
-        # Check if we already have a fresh price in part_prices
+        # Fresh price already stored for THIS url? Keyed on the url that was
+        # fetched (= the stored source_url). It used to be keyed on
+        # parts.retailer ('superbikestore.in'), but the row is stored under the
+        # adapter's retailer name ('Superbike Store') — 70 of the 72 url-bearing
+        # parts never matched, so every non-forced call re-fetched. julianday()
+        # parses the stored ISO-8601 timestamp ('T' separator + offset), which a
+        # plain string compare against datetime() did not.
         existing = cur.execute(
             """
-            SELECT fetched_at FROM part_prices
-             WHERE part_id = ? AND retailer = ?
-               AND fetched_at >= datetime('now', ?, 'utc')
+            SELECT retailer, source_url, price_inr, in_stock, fetched_at
+              FROM part_prices
+             WHERE part_id = ? AND source_url = ?
+               AND julianday(fetched_at) >= julianday('now', ?)
+             ORDER BY julianday(fetched_at) DESC
+             LIMIT 1
             """,
-            (part_id, retailer or "", f"-{STALE_DAYS} days"),
+            (part_id, retailer_url, f"-{STALE_DAYS} days"),
         ).fetchone()
-        if existing:
+        cached = _stored_price_result(existing) if existing else None
+        if cached is not None:
+            # A cache hit is a success, not a skip: return the stored fresh
+            # price. Returning None here made POST /api/pricing/refresh report
+            # 'fetch_failed' with a null price for a part priced minutes ago.
             log.debug(
-                "part_id=%d retailer=%s — price fresh (fetched %s), skipping",
+                "part_id=%d retailer=%s — price fresh (fetched %s), not re-fetching",
                 part_id,
                 retailer,
                 existing["fetched_at"],
             )
-            return None
+            return cached
 
     # Hit the retailer
     result: PriceResult | None = fetch_price(retailer_url)
@@ -454,6 +495,12 @@ def fetch_live_price(
             int(result.in_stock),
             result.fetched_at.isoformat(),
         ),
+    )
+    # A price was actually checked: this (and a real price change) is the only
+    # thing that moves parts.last_price_check.
+    cur.execute(
+        "UPDATE parts SET last_price_check = ? WHERE id = ?",
+        (result.fetched_at.date().isoformat(), part_id),
     )
     conn.commit()
     log.info(

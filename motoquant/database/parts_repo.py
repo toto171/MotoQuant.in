@@ -110,6 +110,11 @@ class PartsRepository:
 
     def __init__(self, conn: sqlite3.Connection):
         self._conn = conn
+        # Rows with id <= this watermark are never overwritten by create().
+        # Set by seed_all() while it re-seeds a populated catalog, so curated
+        # patch data (prices, names, availability, fitment rules) survives a
+        # `db seed` / `make db` on the shipped DB. None = no protection.
+        self.protect_ids_upto: int | None = None
 
     # ────────────────────────────────────────────
     # CRUD
@@ -136,8 +141,16 @@ class PartsRepository:
         retailer_url: str = None,
         availability: str = "in_stock",
         estimated_delivery_days: int = None,
+        update_existing: bool = True,
     ) -> int:
-        """Create a part entry with simulation impact parameters."""
+        """Create a part entry with simulation impact parameters.
+
+        An existing row with the same (brand, part_number) is updated in place
+        (id-preserving) unless ``update_existing`` is False or the row is
+        protected by ``protect_ids_upto`` — then it is returned untouched.
+        ``last_price_check`` moves only when the price actually changes: a
+        re-seed that rewrites an identical price has not checked anything.
+        """
         # NOTE: model_name is intentionally NOT normalized here — the fresh
         # seed_all() path (used by in-memory catalog-integration tests) relies
         # on the original brand-prefixed names for leak-detection assertions.
@@ -209,11 +222,19 @@ class PartsRepository:
             ).fetchone()
         if existing:
             part_id = existing["id"] if hasattr(existing, "keys") else existing[0]
+            protected = (
+                self.protect_ids_upto is not None and part_id <= self.protect_ids_upto
+            )
+            if not update_existing or protected:
+                return part_id
             assignments = ", ".join(f"{c} = ?" for c in col_names)
+            # RHS column references read the PRE-update row, so this compares
+            # the stored price with the incoming one.
             self._conn.execute(
-                f"UPDATE parts SET {assignments}, last_price_check = date('now') "
+                f"UPDATE parts SET {assignments}, last_price_check = CASE "
+                "WHEN price_inr IS ? THEN last_price_check ELSE date('now') END "
                 "WHERE id = ?",
-                [*col_vals, part_id],
+                [*col_vals, price_inr, part_id],
             )
             self._conn.commit()
             return part_id
@@ -299,10 +320,15 @@ class PartsRepository:
             bike_row = self._conn.execute(
                 "SELECT * FROM bike_models WHERE id = ?", (bike_model_id,)
             ).fetchone()
-            if bike_row:
-                bike_row = dict(bike_row)
-                enrich_bike_row_for_fitment(self._conn, bike_row)
-                result = [r for r in result if is_compatible(r, bike_row)[0]]
+            if bike_row is None:
+                # Fail CLOSED: an unknown bike id used to skip the filter and
+                # return the whole catalog as "compatible" (593 parts vs 205
+                # for a real litre bike). Nothing is known to fit a bike that
+                # does not exist.
+                return []
+            bike_row = dict(bike_row)
+            enrich_bike_row_for_fitment(self._conn, bike_row)
+            result = [r for r in result if is_compatible(r, bike_row)[0]]
             result = result[: limit if limit is not None else len(result)]
 
         return result

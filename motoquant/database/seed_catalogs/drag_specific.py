@@ -304,12 +304,21 @@ def seed_drag_specific(db) -> int:
                     "compressor_size": "GT2560R",
                     "intercooler": "air_to_air",
                 },
+                # The gain comes from the boost model: target_boost_bar is this
+                # kit's own boost_psi (6.5 psi). It used to be encoded as
+                # peak_power_hp/peak_torque_nm deltas with no target_boost_bar;
+                # the bridge discards hp deltas on forced-induction parts, so
+                # the kit made zero boost (2026-10-24 fix wave). Same for every
+                # turbo/SC kit below.
                 "param_deltas": {
-                    "engine.peak_power_hp": 100,
-                    "engine.peak_torque_nm": 85,
                     "chassis.dry_mass_kg": 8.5,  # turbo assembly + intercooler
                 },
-                "param_overrides": {"forced_induction.boost_type": "turbo"},
+                "param_overrides": {
+                    "forced_induction.boost_type": "turbo",
+                    "forced_induction.target_boost_bar": 0.448,
+                    "forced_induction.turbo_spool_time_s": 0.55,
+                    "forced_induction.intercooler_type": "a2a",
+                },
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
@@ -337,11 +346,14 @@ def seed_drag_specific(db) -> int:
                     "intercooler": "air_to_air_dual",
                 },
                 "param_deltas": {
-                    "engine.peak_power_hp": 180,
-                    "engine.peak_torque_nm": 150,
                     "chassis.dry_mass_kg": 15.0,
                 },
-                "param_overrides": {"forced_induction.boost_type": "turbo"},
+                "param_overrides": {
+                    "forced_induction.boost_type": "turbo",
+                    "forced_induction.target_boost_bar": 0.827,  # 12 psi
+                    "forced_induction.turbo_spool_time_s": 0.5,  # twin small turbos
+                    "forced_induction.intercooler_type": "a2a",
+                },
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
@@ -376,11 +388,14 @@ def seed_drag_specific(db) -> int:
                     "intercooler": "air_to_air",
                 },
                 "param_deltas": {
-                    "engine.peak_power_hp": 95,
-                    "engine.peak_torque_nm": 80,
                     "chassis.dry_mass_kg": 9.0,
                 },
-                "param_overrides": {"forced_induction.boost_type": "turbo"},
+                "param_overrides": {
+                    "forced_induction.boost_type": "turbo",
+                    "forced_induction.target_boost_bar": 0.483,  # 7 psi
+                    "forced_induction.turbo_spool_time_s": 0.55,
+                    "forced_induction.intercooler_type": "a2a",
+                },
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
@@ -416,11 +431,14 @@ def seed_drag_specific(db) -> int:
                     "intercooler": "liquid_cooled",
                 },
                 "param_deltas": {
-                    "engine.peak_power_hp": 85,
-                    "engine.peak_torque_nm": 70,
                     "chassis.dry_mass_kg": 9.5,
                 },
-                "param_overrides": {"forced_induction.boost_type": "turbo"},
+                "param_overrides": {
+                    "forced_induction.boost_type": "turbo",
+                    "forced_induction.target_boost_bar": 0.414,  # 6 psi
+                    "forced_induction.turbo_spool_time_s": 0.55,
+                    "forced_induction.intercooler_type": "a2w",  # liquid-cooled
+                },
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
@@ -454,9 +472,9 @@ def seed_drag_specific(db) -> int:
                     "compressor_size": "Lysholm screw",
                     "intercooler": "air_to_air",
                 },
+                # target_boost_bar below carries the gain; the former +60 hp /
+                # +50 Nm deltas were discarded for boosted parts (dead data).
                 "param_deltas": {
-                    "engine.peak_power_hp": 60,
-                    "engine.peak_torque_nm": 50,
                     "chassis.dry_mass_kg": 7.5,
                 },
                 # boost_type must be a VALID_BOOST_TYPES member. This shipped as
@@ -511,11 +529,14 @@ def seed_drag_specific(db) -> int:
                     "intercooler": "liquid",
                 },
                 "param_deltas": {
-                    "engine.peak_power_hp": 85,
-                    "engine.peak_torque_nm": 90,
                     "chassis.dry_mass_kg": 10.0,
                 },
-                "param_overrides": {"forced_induction.boost_type": "turbo"},
+                "param_overrides": {
+                    "forced_induction.boost_type": "turbo",
+                    "forced_induction.target_boost_bar": 0.517,  # 7.5 psi
+                    "forced_induction.turbo_spool_time_s": 0.55,
+                    "forced_induction.intercooler_type": "a2w",  # liquid
+                },
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
@@ -657,7 +678,14 @@ def seed_drag_specific(db) -> int:
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
-                        "manufacturers": ["Harley-Davidson", "Indian Motorcycle"],
+                        # "Indian" = canonical DB manufacturer name since the
+                        # 2026-06-13 merge; listing only the alias meant a
+                        # fresh seed matched NO Indian bike for this part.
+                        "manufacturers": [
+                            "Harley-Davidson",
+                            "Indian",
+                            "Indian Motorcycle",
+                        ],
                         "engine_configs": ["V2"],
                         "displacement_min_cc": 800,
                         "displacement_max_cc": 1750,
@@ -1164,6 +1192,7 @@ def seed_drag_specific(db) -> int:
                     "match": {
                         "manufacturers": [
                             "Harley-Davidson",
+                            "Indian",  # canonical name (see Rekluse note)
                             "Indian Motorcycle",
                             "Triumph",
                         ],
