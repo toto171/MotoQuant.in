@@ -327,15 +327,20 @@ make wasm                 # cargo build wasm32 + copy + manifest + fixtures + no
 ```python
 from motoquant import engine_select, native
 
-eng = engine_select.make_engine(cfg)   # NativeEngine or MotoQuantEngine (MOTOQUANT_ENGINE)
-r = eng.run()                          # SimResult — identical either way
-engine_select.engine_info()            # what /api/health reports
+# NativeEngine or MotoQuantEngine, chosen by MOTOQUANT_ENGINE
+eng = engine_select.make_engine(cfg)
+r = eng.run()  # SimResult, identical either way
+engine_select.engine_info()  # what /api/health reports
 
 if native.available():
-    r = native.run_native(cfg)          # SimResult, identical to MotoQuantEngine(cfg).run()
-    ts = native.run_top_speed_native(cfg)  # TopSpeedResult via Python's own post-processing
-    s = native.summary_native(cfg)      # splits only, no channel arrays (fastest)
-    native.native_info()                # version, schema, fingerprint, stale, exp_impl, exact
+    # SimResult, identical to MotoQuantEngine(cfg).run()
+    r = native.run_native(cfg)
+    # TopSpeedResult via Python's own post-processing
+    ts = native.run_top_speed_native(cfg)
+    # splits only, no channel arrays (fastest)
+    s = native.summary_native(cfg)
+    # version, schema, fingerprint, stale, exp_impl, exact
+    native.native_info()
 ```
 
 ```js
