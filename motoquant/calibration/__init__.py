@@ -5,7 +5,7 @@ Phase 3: import real run data, overlay with simulation, auto-calibrate physics.
 
 Public surface:
     from motoquant.calibration.dragy      import parse_dragy_file, DragRunData, DragParseError
-    from motoquant.calibration.dyno       import parse_dyno_file, DynoResult, DynoParseError
+    from motoquant.calibration.dyno       import parse_dyno_file, DynoResult, DynoParseError, DynoInputError
     from motoquant.calibration.ecu        import parse_ecu_file, ECULog, ECURunWindow, ECUParseError
     from motoquant.calibration.overlay    import compare_runs, RunComparison, compute_cost
     from motoquant.calibration.calibrator import calibrate, CalibrationResult, PRESET_AERO_TIRE
@@ -22,7 +22,7 @@ from .calibrator import (
     calibrate_multi_run,
 )
 from .dragy import DragParseError, DragRunData, best_run, parse_dragy_file
-from .dyno import DynoParseError, DynoResult, parse_dyno_file
+from .dyno import DynoInputError, DynoParseError, DynoResult, parse_dyno_file
 from .ecu import ECULog, ECUParseError, ECURunWindow, parse_ecu_file
 from .overlay import (
     MultiRunStats,
@@ -41,6 +41,7 @@ __all__ = [
     "best_run",
     "DynoResult",
     "DynoParseError",
+    "DynoInputError",
     "parse_dyno_file",
     "ECULog",
     "ECURunWindow",

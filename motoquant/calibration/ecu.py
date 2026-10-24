@@ -41,6 +41,7 @@ Public API
 """
 
 import csv
+import math
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -306,6 +307,7 @@ def parse_ecu_file(
     path: str | Path,
     min_speed_ms: float = LAUNCH_VEL_THRESHOLD_MS,
     staged_frames: int = MIN_STAGE_FRAMES,
+    sample_rate_hz: float | None = None,
 ) -> ECULog:
     """
     Parse a motorcycle ECU log file and extract drag runs.
@@ -315,6 +317,8 @@ def parse_ecu_file(
     path           : Path to the ECU log file (.csv or .tsv or .txt)
     min_speed_ms   : Speed threshold [m/s] to detect staged position (default 0.8)
     staged_frames  : Consecutive sub-threshold frames needed to confirm staging
+    sample_rate_hz : Logger sample rate [Hz]; used ONLY when the file has no
+                     time column (otherwise ECUParseError is raised)
 
     Returns
     -------
@@ -359,10 +363,9 @@ def parse_ecu_file(
         unit_cols = _split_row(lines[units_row_idx], delimiter)
         col_map = _apply_unit_overrides(col_map, unit_cols)
 
-    # Gather units row for MoTeC (row after header is units) — skip when parsing data
-    skip_units = logger_type == "motec"
-
-    # Parse data rows into per-column float arrays
+    # Parse data rows into per-column float arrays. (data_start_row already
+    # points past a units row; a former skip-one-more-row flag dropped the
+    # first real MoTeC sample.)
     raw_cols: dict[int, list[float]] = {i: [] for i in col_map}
 
     # For extra channels not in col_map
@@ -375,36 +378,32 @@ def parse_ecu_file(
                 extra_col_map[i] = clean
     extra_cols: dict[int, list[float]] = {i: [] for i in extra_col_map}
 
-    units_skipped = False
-    for line_no, line in enumerate(lines[data_start_row:], start=data_start_row):
+    # Core channels must be numeric for a row to count; every other channel
+    # (gear, AFR, temps, unmapped extras such as 'Lap Name' or a time-of-day
+    # column) is parsed best-effort and becomes NaN where it is not a number.
+    # One text column used to reject EVERY row ("No numeric data rows").
+    core_cols = [i for i, (std, _) in col_map.items() if std in _CORE_CHANNELS]
+    for line in lines[data_start_row:]:
         line = line.strip()
         if not line:
             continue
-        if skip_units and not units_skipped:
-            units_skipped = True
-            continue
         parts = _split_row(line, delimiter)
-        if len(parts) < max(col_map.keys(), default=0) + 1:
-            continue
-        # Try to parse numeric
-        row_ok = True
-        row_vals: dict[int, float] = {}
-        for i in list(col_map.keys()) + list(extra_col_map.keys()):
-            if i >= len(parts):
-                row_ok = False
+        core_vals = {}
+        for i in core_cols:
+            x = _to_float(parts[i]) if i < len(parts) else None
+            if x is None:
                 break
-            try:
-                row_vals[i] = float(parts[i])
-            except (ValueError, IndexError):
-                row_ok = False
-                break
-        if not row_ok:
-            continue
-        for i in col_map:
-            raw_cols[i].append(row_vals[i])
-        for i in extra_col_map:
-            if i in row_vals:
-                extra_cols[i].append(row_vals[i])
+            core_vals[i] = x
+        else:
+            for i in col_map:
+                if i in core_vals:
+                    raw_cols[i].append(core_vals[i])
+                else:
+                    x = _to_float(parts[i]) if i < len(parts) else None
+                    raw_cols[i].append(math.nan if x is None else x)
+            for i in extra_col_map:
+                x = _to_float(parts[i]) if i < len(parts) else None
+                extra_cols[i].append(math.nan if x is None else x)
 
     if not raw_cols or all(len(v) == 0 for v in raw_cols.values()):
         raise ECUParseError(f"No numeric data rows found in {path.name}")
@@ -415,6 +414,8 @@ def parse_ecu_file(
     std_arrays: dict[str, np.ndarray] = {}
     for i, (std_name, conv) in col_map.items():
         arr = np.array(raw_cols[i][:n_rows], dtype=float)
+        if not np.any(np.isfinite(arr)):
+            continue  # channel present in the header but never numeric
         if conv is not None:
             if callable(conv):
                 arr = np.vectorize(conv)(arr)
@@ -428,7 +429,7 @@ def parse_ecu_file(
     extra_arrays: dict[str, np.ndarray] = {}
     for i, name in extra_col_map.items():
         arr = np.array(extra_cols[i][:n_rows], dtype=float)
-        if len(arr) == n_rows:
+        if len(arr) == n_rows and np.any(np.isfinite(arr)):
             extra_arrays[name] = arr
 
     # Time axis
@@ -438,9 +439,16 @@ def parse_ecu_file(
         if len(t) > 1 and (t[1] - t[0]) > 0.5:  # likely ms if step > 0.5
             t = t / 1000.0
         t = t - t[0]  # normalise to start at 0
+    elif sample_rate_hz is not None and sample_rate_hz > 0:
+        # No time column: the caller states the logger's sample rate.
+        t = np.arange(n_rows, dtype=float) / float(sample_rate_hz)
     else:
-        # Infer time from sample index — use median dt
-        t = np.arange(n_rows, dtype=float) / max(n_rows - 1, 1)
+        # Never invent a time axis: the old fallback arange(n)/(n-1) squashed
+        # ANY log into exactly 1.0 s (a 16 s run read as 1600 Hz, ET nan).
+        raise ECUParseError(
+            f"{path.name} has no time column; pass the logger's sample rate "
+            "(sample_rate_hz=..., CLI --sample-rate HZ) to build the time axis."
+        )
 
     # Compute sample rate
     if len(t) > 1:
@@ -495,14 +503,25 @@ def _detect_format(text: str, path: Path) -> tuple[str, str, int, int, int | Non
     """
     lines = text.splitlines()
 
-    # MoTeC i2: starts with "Segment" or "Format" metadata block
+    # MoTeC i2: starts with a "Segment" / "Format" / ... key-value metadata
+    # block, then a TAB-delimited channel row and a units row. The keyword
+    # line must be a key/value line (keyword, a tab/comma/colon, a value) and
+    # the channel row must come after it and be tab-delimited: a plain CSV
+    # whose HEADER merely starts with 'Vehicle Speed' / 'Session Time' /
+    # 'Event' used to be taken for a MoTeC preamble, tab-split, and its first
+    # data row eaten as 'units' — "No numeric data rows found".
     for i, line in enumerate(lines[:20]):
         if re.match(
-            r"^\s*(Segment|Format|Venue|Vehicle|Driver|Event|Session)", line, re.I
+            r"^\s*\"?(Segment|Format|Venue|Vehicle|Driver|Event|Session)\"?"
+            r"\s*[\t,:]\s*\S",
+            line,
+            re.I,
         ):
             # Find the row that looks like channel names (has RPM or Engine Speed)
-            for j in range(i, min(i + 30, len(lines))):
-                if re.search(r"rpm|engine.?speed|time", lines[j], re.I):
+            for j in range(i + 1, min(i + 30, len(lines))):
+                if "\t" in lines[j] and re.search(
+                    r"rpm|engine.?speed|time", lines[j], re.I
+                ):
                     return ("motec", "\t", j, j + 2, j + 1)  # j+1 is units, j+2 is data
             break
 
@@ -511,6 +530,11 @@ def _detect_format(text: str, path: Path) -> tuple[str, str, int, int, int | Non
     if "\t" in first_data:
         for i, line in enumerate(lines[:10]):
             if re.search(r"rpm|time|speed", line, re.I):
+                # A non-numeric row right under the header is a units row.
+                nxt = lines[i + 1] if i + 1 < len(lines) else ""
+                cells = [c.strip() for c in nxt.split("\t") if c.strip()]
+                if cells and not any(_is_number(c) for c in cells):
+                    return ("motec", "\t", i, i + 2, i + 1)
                 return ("motec", "\t", i, i + 1, None)
 
     # Woolich Racing: "Time,RPM,TPS%,..." — comma, first line is header
@@ -545,68 +569,128 @@ def _detect_format(text: str, path: Path) -> tuple[str, str, int, int, int | Non
     )
 
 
+def _f_to_c(v):
+    return (v - 32) * 5.0 / 9.0
+
+
+_NO_OVERRIDE = object()
+
+
+def _unit_conversion(std_name: str, unit: str):
+    """Conversion for a channel given its physical unit string.
+
+    Returns the conversion (factor, callable, or None for identity), or
+    ``_NO_OVERRIDE`` when the unit is not one this channel understands — the
+    caller then keeps the name-pattern default. Single source of truth for
+    BOTH a MoTeC units row and a unit written into the column header
+    ("Speed (mph)", "MAP [psi]", "coolant_temp_f").
+
+    Supported:
+      speed : m/s (identity) · km/h → KMH_TO_MS · mph → MPH_TO_MS
+      temps : °F → °C · °C (identity)
+      MAP   : psi → kPa · kPa (identity) · bar → kPa · hPa/mbar → kPa
+    """
+    unit = unit.strip().lower().replace(" ", "")
+    if not unit:
+        return _NO_OVERRIDE
+    if std_name == "vehicle_speed_ms":
+        if unit in ("m/s", "ms", "mps", "meters/s", "metres/s", "m/sec"):
+            return None  # already m/s
+        if unit in ("km/h", "kmh", "kph", "km/hr", "kmph", "km_h"):
+            return KMH_TO_MS
+        if unit in ("mph", "mi/h", "mi/hr"):
+            return MPH_TO_MS
+    elif std_name in ("coolant_temp_c", "air_temp_c"):
+        if unit in ("°f", "f", "fahrenheit", "degf", "deg.f", "ºf"):
+            return _f_to_c
+        if unit in ("°c", "c", "celsius", "degc", "deg.c", "ºc"):
+            return None
+    elif std_name == "map_kpa":
+        if unit == "psi":
+            return 6.89476
+        if unit == "kpa":
+            return None
+        if unit == "bar":
+            return 100.0  # bar → kPa
+        if unit in ("hpa", "mbar"):
+            return 0.1
+    return _NO_OVERRIDE
+
+
 def _apply_unit_overrides(
     col_map: dict[int, tuple[str, object | None]],
     unit_cols: list[str],
 ) -> dict[int, tuple[str, object | None]]:
     """
     For MoTeC (and similar) logs where units appear in a separate row,
-    override the column conversion based on the physical unit string.
-
-    Supported unit overrides:
-      m/s   → speed channel: no conversion (identity)
-      km/h  → speed channel: KMH_TO_MS
-      mph   → speed channel: MPH_TO_MS
-      °f/f  → temp channel: Fahrenheit → Celsius
-      psi   → pressure: psi → kPa
+    override the column conversion based on the physical unit string
+    (see _unit_conversion for the table).
     """
     new_map = dict(col_map)
-    for i, (std_name, conv) in col_map.items():
+    for i, (std_name, _conv) in col_map.items():
         if i >= len(unit_cols):
             continue
-        unit = unit_cols[i].strip().lower()
-        if not unit:
-            continue
-
-        if std_name == "vehicle_speed_ms":
-            if unit in ("m/s", "ms", "meters/s"):
-                new_map[i] = (std_name, None)  # already m/s
-            elif unit in ("km/h", "kmh", "kph", "km/hr"):
-                new_map[i] = (std_name, KMH_TO_MS)
-            elif unit in ("mph", "mi/h"):
-                new_map[i] = (std_name, MPH_TO_MS)
-
-        elif std_name in ("coolant_temp_c", "air_temp_c"):
-            if unit in ("°f", "f", "fahrenheit", "degf"):
-                new_map[i] = (std_name, lambda v: (v - 32) * 5.0 / 9.0)
-            elif unit in ("°c", "c", "celsius", "degc"):
-                new_map[i] = (std_name, None)
-
-        elif std_name == "map_kpa":
-            if unit in ("psi",):
-                new_map[i] = (std_name, 6.89476)
-            elif unit in ("kpa", "bar"):
-                if unit == "bar":
-                    new_map[i] = (std_name, 100.0)  # bar → kPa
-                else:
-                    new_map[i] = (std_name, None)
-
+        conv = _unit_conversion(std_name, unit_cols[i])
+        if conv is not _NO_OVERRIDE:
+            new_map[i] = (std_name, conv)
     return new_map
 
 
 # ─── Column mapping ────────────────────────────────────────────────────────
 
 
+_HEADER_UNIT_RE = re.compile(r"[(\[]\s*([^)\]]*?)\s*[)\]]")
+
+
+def _header_unit(col_lower: str) -> str | None:
+    """The unit a column header names: '(mph)' / '[psi]' / a trailing token."""
+    m = _HEADER_UNIT_RE.search(col_lower)
+    if m:
+        return m.group(1)
+    tokens = [t for t in re.split(r"[\s_]+", col_lower.strip()) if t]
+    return tokens[-1] if len(tokens) >= 2 else None
+
+
 def _map_column(col_name: str) -> tuple[str | None, object | None]:
-    """Map a raw column name to a standard channel name + conversion."""
+    """Map a raw column name to a standard channel name + conversion.
+
+    The channel is found by name (unit stripped), then the unit the header
+    itself names overrides the name-pattern default conversion. Matching
+    the unit-stripped name first used to throw the unit away: 'Speed (mph)'
+    and 'Vehicle Speed (m/s)' were read as km/h, 'Coolant Temp (F)' as °C
+    and 'MAP (psi)' as kPa, because the generic km/h / °C / kPa patterns
+    matched before the unit-specific ones.
+    """
     col_lower = col_name.lower().strip()
     # Strip units in parentheses for matching: "Speed (km/h)" → "Speed"
-    col_clean = re.sub(r"\s*\([^)]*\)", "", col_lower).strip()
+    col_clean = re.sub(r"\s*[(\[][^)\]]*[)\]]", "", col_lower).strip()
 
     for pattern, std, conv in _COMPILED_ALIASES:
         if pattern.match(col_clean) or pattern.match(col_lower):
+            unit = _header_unit(col_lower)
+            if unit is not None:
+                override = _unit_conversion(std, unit)
+                if override is not _NO_OVERRIDE:
+                    conv = override
             return std, conv
     return None, None
+
+
+# Channels a row must carry as numbers to be kept (when the log maps them).
+_CORE_CHANNELS = frozenset({"time_s", "vehicle_speed_ms", "rpm"})
+
+
+def _to_float(cell: str) -> float | None:
+    """float(cell) when it is a finite number, else None."""
+    try:
+        x = float(cell)
+    except (TypeError, ValueError):
+        return None
+    return x if math.isfinite(x) else None
+
+
+def _is_number(cell: str) -> bool:
+    return _to_float(cell) is not None
 
 
 def _split_row(line: str, delimiter: str) -> list[str]:
@@ -644,7 +728,13 @@ def _extract_runs_from_speed(
     min_speed_ms: float,
     staged_frames: int,
 ) -> list[ECURunWindow]:
-    """Extract runs using vehicle speed channel."""
+    """Extract runs using vehicle speed channel.
+
+    Linear in the log length: every sub-threshold window is walked once.
+    (The old loop restarted one frame later whenever a window was too short
+    or ran to end-of-file, re-walking the same window from every index —
+    O(n^2) on logs that end stationary; 24k idle rows took ~60 s.)
+    """
     speed = log.vehicle_speed_ms
     t = log.time_s
     n = len(speed)
@@ -653,49 +743,45 @@ def _extract_runs_from_speed(
 
     i = 0
     while i < n - staged_frames:
-        # Find staged window: consecutive frames with speed < threshold
-        if speed[i] < min_speed_ms:
-            stage_end = i
-            count = 0
-            while stage_end < n and speed[stage_end] < min_speed_ms:
-                count += 1
-                stage_end += 1
+        if speed[i] >= min_speed_ms:
+            i += 1
+            continue
 
-            if count >= staged_frames and stage_end < n:
-                # launch_idx = first frame where speed rises above threshold
-                launch_idx = stage_end
-                while launch_idx < n and speed[launch_idx] < min_speed_ms:
-                    launch_idx += 1
+        # Staged window: consecutive frames with speed < threshold
+        stage_end = i
+        while stage_end < n and speed[stage_end] < min_speed_ms:
+            stage_end += 1
+        if stage_end - i < staged_frames or stage_end >= n:
+            # Too short to be staging, or the file ends idle.
+            i = stage_end
+            continue
 
-                if launch_idx >= n:
-                    break
+        # launch_idx = first frame where speed rises above threshold
+        launch_idx = stage_end
 
-                # Verify it's a genuine launch: speed must keep increasing
-                # (check average acceleration over next 0.5 s)
-                half_s_frames = max(1, int(0.5 * log.sample_rate_hz))
-                end_check = min(launch_idx + half_s_frames, n - 1)
-                if end_check > launch_idx:
-                    avg_accel = (speed[end_check] - speed[launch_idx]) / (
-                        t[end_check] - t[launch_idx] + 1e-9
-                    )
-                    if avg_accel < MIN_ACCEL_MS2:
-                        i = launch_idx + 1
-                        continue
-
-                # Scan forward to find run end
-                run_end = _find_run_end_speed(speed, t, launch_idx)
-
-                # Extract window
-                window = slice(launch_idx, run_end)
-                run = _build_run_window(log, window, run_index, t[launch_idx])
-                if run is not None:
-                    runs.append(run)
-                    run_index += 1
-
-                i = run_end
+        # Verify it's a genuine launch: speed must keep increasing
+        # (check average acceleration over next 0.5 s)
+        half_s_frames = max(1, int(0.5 * log.sample_rate_hz))
+        end_check = min(launch_idx + half_s_frames, n - 1)
+        if end_check > launch_idx:
+            avg_accel = (speed[end_check] - speed[launch_idx]) / (
+                t[end_check] - t[launch_idx] + 1e-9
+            )
+            if avg_accel < MIN_ACCEL_MS2:
+                i = launch_idx + 1
                 continue
 
-        i += 1
+        # Scan forward to find run end
+        run_end = _find_run_end_speed(speed, t, launch_idx)
+
+        # Extract window
+        window = slice(launch_idx, run_end)
+        run = _build_run_window(log, window, run_index, t[launch_idx])
+        if run is not None:
+            runs.append(run)
+            run_index += 1
+
+        i = run_end
 
     return runs
 
@@ -751,31 +837,36 @@ def _extract_runs_from_rpm(log: ECULog) -> list[ECURunWindow]:
     LAUNCH_RPM = 4000.0
 
     while i < n - 10:
-        if rpm[i] < IDLE_RPM:
-            # Scan for RPM rise
-            j = i
-            while j < n and rpm[j] < IDLE_RPM:
-                j += 1
-            if j < n and j - i >= MIN_STAGE_FRAMES:
-                # Find where RPM sustains > LAUNCH_RPM
-                k = j
-                while k < n and rpm[k] < LAUNCH_RPM:
-                    k += 1
-                if k < n:
-                    # Run end: RPM drops back below LAUNCH_RPM
-                    end = k
-                    while end < n and rpm[end] > LAUNCH_RPM:
-                        end += 1
-                    duration = float(t[min(end, n - 1)] - t[k])
-                    if duration >= MIN_RUN_DURATION_S:
-                        window = slice(j, min(end + 20, n))
-                        run = _build_run_window(log, window, run_index, t[j])
-                        if run is not None:
-                            runs.append(run)
-                            run_index += 1
-                    i = end
-                    continue
-        i += 1
+        if rpm[i] >= IDLE_RPM:
+            i += 1
+            continue
+        # Scan for RPM rise (each idle window is walked once — the old loop
+        # re-scanned it from every index when it was too short, ran to EOF,
+        # or never rose past LAUNCH_RPM: O(n^2) on idle-ending logs)
+        j = i
+        while j < n and rpm[j] < IDLE_RPM:
+            j += 1
+        if j >= n or j - i < MIN_STAGE_FRAMES:
+            i = j
+            continue
+        # Find where RPM sustains > LAUNCH_RPM
+        k = j
+        while k < n and rpm[k] < LAUNCH_RPM:
+            k += 1
+        if k >= n:
+            break  # never rises past LAUNCH_RPM again
+        # Run end: RPM drops back below LAUNCH_RPM
+        end = k
+        while end < n and rpm[end] > LAUNCH_RPM:
+            end += 1
+        duration = float(t[min(end, n - 1)] - t[k])
+        if duration >= MIN_RUN_DURATION_S:
+            window = slice(j, min(end + 20, n))
+            run = _build_run_window(log, window, run_index, t[j])
+            if run is not None:
+                runs.append(run)
+                run_index += 1
+        i = end
 
     return runs
 

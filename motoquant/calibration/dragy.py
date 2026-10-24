@@ -39,6 +39,9 @@ the best run (lowest ET) or the most recent.
 
 import csv
 import json
+import logging
+import math
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -46,6 +49,8 @@ import numpy as np
 
 # ─── Physical constants ────────────────────────────────────────────────────
 from ..constants import QUARTER_MILE_M  # single source of truth (402.336 m)
+
+log = logging.getLogger(__name__)
 
 EIGHTH_MILE_M: float = 201.168  # 1/8 mile in metres
 
@@ -62,6 +67,11 @@ MIN_RUN_DURATION_S: float = 5.0  # discard anything shorter
 MAX_RUN_DURATION_S: float = 30.0  # discard implausibly slow runs
 POST_TRAP_MARGIN_S: float = 1.0  # keep this many seconds past 1/4 mile
 MIN_PEAK_SPEED_MS: float = 20.0  # ≥ 72 km/h peak — rejects noise runs
+
+# Hard cap on samples per file. Dragy logs at 10-25 Hz, so 400k samples is
+# 4.4 h of continuous recording at 25 Hz — far beyond any real session. The
+# cap bounds parse memory/CPU for anonymous uploads (/api/calibrate/dragy).
+MAX_SAMPLES: int = 400_000
 
 # Standard split distances in metres  (60 ft, 330 ft, 660 ft, 1000 ft, 1320 ft)
 SPLIT_DISTANCES_M: dict[str, float] = {
@@ -167,43 +177,92 @@ class DragRunData:
 # ─── Internal helpers ─────────────────────────────────────────────────────
 
 
-def _detect_csv_units(header: list[str]) -> tuple[str, str, str]:
+def _speed_unit_from_label(label: str) -> str | None:
+    """Speed unit named by ONE column label, or None when it names none."""
+    lab = label.strip().lower()
+    if any(tok in lab for tok in ("km/h", "kmh", "km_h", "kph", "km/hr")):
+        return "kmh"
+    if "mph" in lab or "mi/h" in lab:
+        return "mph"
+    if "m/s" in lab or "mps" in lab or re.search(r"(^|[\s_(\[])ms[)\]]?$", lab):
+        return "ms"
+    return None
+
+
+def _dist_unit_from_label(label: str) -> str | None:
+    """Distance unit named by ONE column label, or None when it names none."""
+    lab = label.strip().lower()
+    if any(tok in lab for tok in ("(ft)", "[ft]", "_ft", "feet", "foot")) or (
+        re.search(r"\sft$", lab)
+    ):
+        return "ft"
+    if any(tok in lab for tok in ("(m)", "[m]", "_m", "meter", "metre")) or (
+        re.search(r"\sm$", lab)
+    ):
+        return "m"
+    return None
+
+
+def _detect_csv_units(
+    header: list[str], speed_col: int = -1, dist_col: int = -1
+) -> tuple[str, str, str]:
     """
-    Infer speed and distance units from column headers.
+    Infer speed and distance units from the SELECTED columns' own labels.
 
     Returns (speed_unit, dist_unit, time_unit) where each is one of:
         speed_unit : 'mph' | 'kmh' | 'ms'
         dist_unit  : 'ft'  | 'm'
         time_unit  : 's'
+
+    Units are read from the speed / distance column label only — never from
+    the joined header. A joined-header scan let an unrelated column flip the
+    speed unit: 'Accel (m/s2)' next to 'Speed (mph)' made every mph value be
+    read as m/s (ET 7.05 s / 357 km/h for an 11.3 s run). With no unit in the
+    speed label the historical imperial default (mph) is kept and a warning
+    is logged so the assumption is never silent.
     """
-    header_lower = [h.lower() for h in header]
-    combined = " ".join(header_lower)
+    speed_unit = None
+    if 0 <= speed_col < len(header):
+        speed_unit = _speed_unit_from_label(header[speed_col])
+    if speed_unit is None:
+        speed_unit = "mph"  # default (older Dragy is imperial)
+        if 0 <= speed_col < len(header):
+            log.warning(
+                "Dragy CSV: speed column %r names no unit; assuming mph",
+                header[speed_col],
+            )
 
-    speed_unit = "mph"  # default (older Dragy is imperial)
-    dist_unit = "ft"
-
-    if "km/h" in combined or "kmh" in combined or "km_h" in combined:
-        speed_unit = "kmh"
-    elif "m/s" in combined:
-        speed_unit = "ms"
-
-    if any(tok in combined for tok in ["(m)", "dist_m", "distance_m", " m,", "meters"]):
-        dist_unit = "m"
-    elif any(
-        tok in combined for tok in ["(ft)", "dist_ft", "distance_ft", " ft,", "feet"]
-    ):
+    dist_unit = None
+    if 0 <= dist_col < len(header):
+        dist_unit = _dist_unit_from_label(header[dist_col])
+    if dist_unit is None:
         dist_unit = "ft"
 
     return speed_unit, dist_unit, "s"
 
 
-def _col_index(header: list[str], candidates: list[str]) -> int:
-    """Return index of first matching column name (case-insensitive). -1 if none."""
+def _col_index(
+    header: list[str], candidates: list[str], exclude: tuple[int, ...] = ()
+) -> int:
+    """Return index of first matching column name (case-insensitive). -1 if none.
+
+    Candidates of one or two characters ('t', 'v', 'd') must match a column
+    label EXACTLY (optionally followed by a parenthesised unit). As substrings
+    they matched almost anything: 't' found the 'Distance' column before the
+    'elapsed' candidate was ever tried, and 'd' matched 'Speed'. Columns in
+    ``exclude`` (already assigned to another channel) are never returned.
+    """
     h = [c.strip().lower() for c in header]
+    bare = [re.sub(r"\s*[(\[][^)\]]*[)\]]\s*$", "", c).strip() for c in h]
     for candidate in candidates:
         c = candidate.lower()
         for i, col in enumerate(h):
-            if c == col or col.startswith(c) or c in col:
+            if i in exclude:
+                continue
+            if len(c) <= 2:
+                if c == col or c == bare[i]:
+                    return i
+            elif c == col or col.startswith(c) or c in col:
                 return i
     return -1
 
@@ -289,30 +348,24 @@ def _find_staged_windows(v_ms: np.ndarray) -> list[tuple[int, int]]:
     """
     Return list of (start_idx, end_idx) for every consecutive window where
     v < LAUNCH_VEL_THRESHOLD_MS for at least MIN_STAGE_FRAMES frames.
-    end_idx is inclusive.
+    end_idx is inclusive.  Vectorised: one numpy pass over the file.
     """
-    below = v_ms < LAUNCH_VEL_THRESHOLD_MS
-    windows = []
-    start = None
-    for i, b in enumerate(below):
-        if b and start is None:
-            start = i
-        elif not b and start is not None:
-            length = i - start
-            if length >= MIN_STAGE_FRAMES:
-                windows.append((start, i - 1))
-            start = None
-    if start is not None:
-        length = len(below) - start
-        if length >= MIN_STAGE_FRAMES:
-            windows.append((start, len(below) - 1))
-    return windows
+    below = np.asarray(v_ms) < LAUNCH_VEL_THRESHOLD_MS
+    if not below.any():
+        return []
+    edges = np.diff(np.concatenate(([0], below.astype(np.int8), [0])))
+    starts = np.flatnonzero(edges == 1)
+    ends = np.flatnonzero(edges == -1)  # exclusive
+    keep = (ends - starts) >= MIN_STAGE_FRAMES
+    return list(zip(starts[keep].tolist(), (ends[keep] - 1).tolist()))
 
 
 def _detect_runs(
     t: np.ndarray,
     v_ms: np.ndarray,
-    d_m: np.ndarray,
+    d_m: np.ndarray | None = None,
+    *,
+    sample_rate: float | None = None,
 ) -> list[tuple[int, int, float, float]]:
     """
     Find all drag runs in continuous telemetry.
@@ -320,53 +373,123 @@ def _detect_runs(
     Returns list of (launch_idx, trap_idx, et_quarter, trap_speed_ms).
     Each run begins immediately after a staged window and ends when the bike
     crosses or exceeds QUARTER_MILE_M from that launch point.
+
+    ``d_m`` is accepted for backward compatibility and ignored: detection
+    always integrates v(t) so GPS distance drift never moves the boundary.
+    ``sample_rate`` (Hz) is computed from ``t`` when not given.
+
+    Cost is O(N log N) in the file length, whatever the number of staged
+    windows. The previous version re-integrated the WHOLE remainder of the
+    file (and re-took the median sample rate) for every staged window —
+    O(windows x N) — so a ~1 MB crafted upload of "5 idle rows + 1 fast row"
+    repeated pinned the API CPU for tens of seconds, and the 25 MB upload cap
+    for hours. Now one cumulative-distance prefix sum answers "where does
+    this launch reach 402 m" by binary search, and only ACCEPTED runs are
+    re-integrated locally (over their own <= 30 s + 1 s slice). Accepted runs
+    report exactly the ET / trap the old per-window integration produced
+    (same prefix of the same cumulative sum).
+
+    A launch whose bike re-stages (the next staged window begins) before it
+    has covered 402 m is an aborted run and is rejected. Previously such a
+    launch "reached the quarter" by integrating straight through the stop
+    and the relaunch, producing a bogus extra run (e.g. ET 21.3 s with a
+    5.9 m/s trap) overlapping the real one.
     """
+    v_ms = np.asarray(v_ms, dtype=float)
+    t = np.asarray(t, dtype=float)
+    n = len(v_ms)
+    if n < 2:
+        return []
     staged_windows = _find_staged_windows(v_ms)
     if not staged_windows:
         return []
 
+    if sample_rate is None:
+        sample_rate = _detect_sample_rate(t)
+    min_frames = int(sample_rate * MIN_RUN_DURATION_S)
+    post_samples = int(sample_rate * POST_TRAP_MARGIN_S)
+
+    # One pass each, shared by every candidate launch below.
+    cum = _integrate_distance(t, v_ms)  # distance from file start
+    suffix_peak = np.maximum.accumulate(v_ms[::-1])[::-1]  # max(v[i:])
+
     runs = []
 
-    for win_start, win_end in staged_windows:
-        # Launch = first frame after staged window where v > threshold
+    for w, (_win_start, win_end) in enumerate(staged_windows):
+        # Launch = first frame after the (maximal) staged window, which is
+        # above threshold by construction.
         launch_idx = win_end + 1
-        while launch_idx < len(v_ms) and v_ms[launch_idx] < LAUNCH_VEL_THRESHOLD_MS:
-            launch_idx += 1
-        if launch_idx >= len(v_ms):
+        if launch_idx >= n:
             continue
 
         # Check there are enough frames after launch
-        remaining = len(v_ms) - launch_idx
-        if remaining < int(_detect_sample_rate(t) * MIN_RUN_DURATION_S):
+        if n - launch_idx < min_frames:
+            continue
+        # Peak-speed sanity check over the rest of the file (same span the
+        # per-window version tested), in O(1).
+        if float(suffix_peak[launch_idx]) < MIN_PEAK_SPEED_MS:
             continue
 
-        # Slice from launch
-        t_run = t[launch_idx:] - t[launch_idx]  # re-zero time
-        v_run = v_ms[launch_idx:]
-        d_run = _integrate_distance(t_run, v_run)
-
-        # Must reach 1/4 mile
-        et = _interpolate_et(t_run, d_run, QUARTER_MILE_M)
-        if et is None:
+        # Must reach 1/4 mile: binary search the prefix sum.
+        base = cum[launch_idx]
+        k = launch_idx + int(np.searchsorted(cum[launch_idx:], base + QUARTER_MILE_M))
+        if k >= n:
             continue
+        # Aborted run: the bike re-staged (next staged window) before 402 m.
+        if w + 1 < len(staged_windows) and staged_windows[w + 1][0] < k:
+            continue
+        d0, d1 = cum[k - 1] - base, cum[k] - base
+        t0, t1 = t[k - 1] - t[launch_idx], t[k] - t[launch_idx]
+        frac = (QUARTER_MILE_M - d0) / (d1 - d0) if (d1 - d0) > 0 else 0.0
+        et = float(t0 + frac * (t1 - t0))
+        trap_speed = float(v_ms[k - 1] + frac * (v_ms[k] - v_ms[k - 1]))
 
         # Sanity checks
         if et < MIN_RUN_DURATION_S or et > MAX_RUN_DURATION_S:
             continue
-        if float(np.max(v_run)) < MIN_PEAK_SPEED_MS:
-            continue
 
-        # Speed at trap
-        trap_speed = _interpolate_speed_at_distance(v_run, d_run, QUARTER_MILE_M)
-        if trap_speed is None:
-            trap_speed = float(v_run[int(np.searchsorted(d_run, QUARTER_MILE_M))])
-
-        # Find trap index (how many samples past launch to keep)
+        # Accepted. Re-integrate locally from the launch frame to just past
+        # the crossing, so the reported ET / trap are bit-identical to the
+        # old per-window integration (the local cumsum is a prefix of the
+        # old whole-remainder cumsum). The +3 margin absorbs rounding
+        # between the global and local sums.
+        hi = min(k + 3, n)
+        t_run = t[launch_idx:hi] - t[launch_idx]  # re-zero time
+        v_run = v_ms[launch_idx:hi]
+        d_run = _integrate_distance(t_run, v_run)
+        et_local = _interpolate_et(t_run, d_run, QUARTER_MILE_M)
         trap_raw_idx = int(np.searchsorted(d_run, QUARTER_MILE_M))
-        post_samples = int(_detect_sample_rate(t) * POST_TRAP_MARGIN_S)
-        end_idx_local = min(trap_raw_idx + post_samples, len(v_run) - 1)
+        if et_local is not None and trap_raw_idx < len(d_run):
+            et = et_local
+            trap_speed = _interpolate_speed_at_distance(v_run, d_run, QUARTER_MILE_M)
+        else:
+            trap_raw_idx = k - launch_idx
 
-        runs.append((launch_idx, launch_idx + end_idx_local, et, trap_speed))
+        # Find trap index (how many samples past launch to keep): the
+        # POST_TRAP_MARGIN_S worth of frames at the file's median rate, but
+        # never more than 1.5x that margin in TIME. The time cap only bites
+        # on files whose local sample density differs from the median (it
+        # stops crafted dense/sparse mixes from making every accepted run's
+        # slice — and the arrays _build_run_list copies — span most of the
+        # file); on uniform-rate files the frame count is always tighter.
+        trap_idx = launch_idx + trap_raw_idx
+        end_by_frames = launch_idx + min(
+            trap_raw_idx + post_samples, n - launch_idx - 1
+        )
+        end_by_time = trap_idx + max(
+            int(
+                np.searchsorted(
+                    t[trap_idx:],
+                    t[trap_idx] + 1.5 * POST_TRAP_MARGIN_S,
+                    side="right",
+                )
+            )
+            - 1,
+            0,
+        )
+        end_idx = min(end_by_frames, end_by_time)
+
+        runs.append((launch_idx, end_idx, et, trap_speed))
 
     return runs
 
@@ -374,103 +497,141 @@ def _detect_runs(
 # ─── CSV parsing ──────────────────────────────────────────────────────────
 
 
+_T_CANDIDATES = ["time (s)", "time_s", "time", "elapsed", "t"]
+_V_CANDIDATES = [
+    "speed (mph)",
+    "speed_mph",
+    "speed (km/h)",
+    "speed_kmh",
+    "speed (m/s)",
+    "speed_ms",
+    "speed",
+    "velocity",
+    "v",
+]
+_D_CANDIDATES = [
+    "distance (ft)",
+    "dist_ft",
+    "distance_ft",
+    "distance (m)",
+    "distance_m",
+    "dist_m",
+    "distance",
+    "dist",
+    "d",
+]
+
+
+def _resolve_csv_columns(header: list[str]) -> tuple[int, int, int]:
+    """(t_col, v_col, d_col) for a CSV header; each channel gets its own column."""
+    t_col = _col_index(header, _T_CANDIDATES)
+    v_col = _col_index(header, _V_CANDIDATES, exclude=(t_col,))
+    d_col = _col_index(header, _D_CANDIDATES, exclude=(t_col, v_col))
+    if t_col == -1:
+        raise DragParseError(f"Cannot find time column in CSV header: {header}")
+    if v_col == -1:
+        raise DragParseError(f"Cannot find speed column in CSV header: {header}")
+    return t_col, v_col, d_col
+
+
+def _parse_float(cell) -> float | None:
+    """float(cell) when it is a finite number, else None (blank/null/text/nan)."""
+    try:
+        x = float(cell)
+    except (TypeError, ValueError):
+        return None
+    return x if math.isfinite(x) else None
+
+
+def _check_sample_cap(n: int) -> None:
+    if n > MAX_SAMPLES:
+        raise DragParseError(
+            f"File has more than {MAX_SAMPLES:,} samples — too long for a "
+            "Dragy session export. Trim it to the runs you want to analyse."
+        )
+
+
 def _parse_csv_body(
-    rows: list[list[str]],
+    rows,
     header: list[str],
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray | None]:
     """
     Parse CSV rows into (t_s, v_ms, d_m_or_None) numpy arrays.
     d_m is None when there is no distance column (we integrate from v later).
+
+    A row is kept only when BOTH its time and speed cells are finite numbers;
+    the cells are parsed into locals and appended together, so a blank or
+    non-numeric cell skips the whole row. (Appending field by field left the
+    time list one longer than the speed list after a blank speed cell, and
+    the parse died on a numpy broadcast error instead of skipping the row.)
+    The optional distance column is parsed best-effort: one bad distance cell
+    discards the distance channel, never a time/speed row.
     """
-    speed_unit, dist_unit, _ = _detect_csv_units(header)
-
-    t_col = _col_index(header, ["time (s)", "time_s", "time", "t", "elapsed"])
-    v_col = _col_index(
-        header,
-        [
-            "speed (mph)",
-            "speed_mph",
-            "speed (km/h)",
-            "speed_kmh",
-            "speed (m/s)",
-            "speed_ms",
-            "speed",
-            "v",
-            "velocity",
-        ],
-    )
-    d_col = _col_index(
-        header,
-        [
-            "distance (ft)",
-            "dist_ft",
-            "distance_ft",
-            "distance (m)",
-            "distance_m",
-            "dist_m",
-            "distance",
-            "dist",
-            "d",
-        ],
-    )
-
-    if t_col == -1:
-        raise DragParseError(f"Cannot find time column in CSV header: {header}")
-    if v_col == -1:
-        raise DragParseError(f"Cannot find speed column in CSV header: {header}")
+    t_col, v_col, d_col = _resolve_csv_columns(header)
+    speed_unit, dist_unit, _ = _detect_csv_units(header, v_col, d_col)
 
     ts, vs, ds = [], [], []
+    d_ok = d_col != -1
     for row in rows:
-        try:
-            ts.append(float(row[t_col]))
-            vs.append(float(row[v_col]))
-            if d_col != -1 and d_col < len(row):
-                ds.append(float(row[d_col]))
-        except (ValueError, IndexError):
+        if not row or not any(str(c).strip() for c in row):
+            continue
+        tv = _parse_float(row[t_col]) if t_col < len(row) else None
+        vv = _parse_float(row[v_col]) if v_col < len(row) else None
+        if tv is None or vv is None:
             continue  # skip malformed rows
+        ts.append(tv)
+        vs.append(vv)
+        _check_sample_cap(len(ts))
+        if d_ok:
+            dv = _parse_float(row[d_col]) if d_col < len(row) else None
+            if dv is None:
+                d_ok = False
+            else:
+                ds.append(dv)
 
     if len(ts) < 10:
         raise DragParseError("CSV contains fewer than 10 valid data rows.")
 
     t_arr = np.array(ts)
     v_arr = _to_si_velocity(np.array(vs), speed_unit)
-    d_arr = _to_si_distance(np.array(ds), dist_unit) if ds else None
+    d_arr = _to_si_distance(np.array(ds), dist_unit) if d_ok and ds else None
 
     return t_arr, v_arr, d_arr
 
 
 def _parse_csv(path: Path) -> list[DragRunData]:
-    """Parse a Dragy-format CSV file. Returns list of DragRunData."""
+    """Parse a Dragy-format CSV file. Returns list of DragRunData.
+
+    Streams the file (never holds every row in memory) and stops with a
+    DragParseError past MAX_SAMPLES data rows.
+    """
     metadata: dict = {}
 
     with open(path, newline="", encoding="utf-8-sig") as fh:
         reader = csv.reader(fh)
-        all_rows = list(reader)
 
-    # Skip blank/comment lines at top; find header
-    header_idx = 0
-    for i, row in enumerate(all_rows):
-        if not row or all(c.strip() == "" for c in row):
-            continue
-        # Heuristic: header has at least one of these words
-        combined = " ".join(row).lower()
-        if any(
-            kw in combined for kw in ["time", "speed", "velocity", "distance", "dist"]
-        ):
-            header_idx = i
-            break
-        # Otherwise treat as metadata key=value
-        if "=" in " ".join(row) or (len(row) >= 2 and row[1] == ""):
-            metadata[row[0].strip()] = row[1].strip() if len(row) > 1 else ""
+        # Skip blank/comment lines at top; find header
+        header = None
+        for row in reader:
+            if not row or all(c.strip() == "" for c in row):
+                continue
+            # Heuristic: header has at least one of these words
+            combined = " ".join(row).lower()
+            if any(
+                kw in combined
+                for kw in ["time", "speed", "velocity", "distance", "dist"]
+            ):
+                header = [c.strip() for c in row]
+                break
+            # Otherwise treat as metadata key=value
+            if "=" in " ".join(row) or (len(row) >= 2 and row[1] == ""):
+                metadata[row[0].strip()] = row[1].strip() if len(row) > 1 else ""
 
-    header = [c.strip() for c in all_rows[header_idx]]
-    data_rows = [
-        [c.strip() for c in row]
-        for row in all_rows[header_idx + 1 :]
-        if row and any(c.strip() for c in row)
-    ]
+        if header is None:
+            raise DragParseError("CSV has no recognisable header row.")
 
-    t_arr, v_arr, d_arr_raw = _parse_csv_body(data_rows, header)
+        data_rows = ([c.strip() for c in row] for row in reader)
+        t_arr, v_arr, d_arr_raw = _parse_csv_body(data_rows, header)
 
     # Use provided distance only if monotonically non-decreasing from launch
     if d_arr_raw is not None and np.all(np.diff(d_arr_raw) >= -0.01):
@@ -485,22 +646,50 @@ def _parse_csv(path: Path) -> list[DragRunData]:
 
 
 def _parse_json(path: Path) -> list[DragRunData]:
-    """Parse a Dragy-app JSON file. Returns list of DragRunData."""
+    """Parse a Dragy-app JSON file. Returns list of DragRunData.
+
+    Expected shape: an object, optionally with "meta" (object) and "runs"
+    (array of objects, each with a "samples" or "data" array of sample
+    objects). A single-run file may omit "runs". Anything else raises a
+    DragParseError — never an AttributeError/TypeError from deep inside.
+    """
     with open(path, encoding="utf-8-sig") as fh:
         payload = json.load(fh)
 
+    if not isinstance(payload, dict):
+        raise DragParseError(
+            "Dragy JSON must be an object with a 'runs' list "
+            f"(got a top-level {type(payload).__name__})."
+        )
+
     metadata = payload.get("meta", {})
+    if not isinstance(metadata, dict):
+        metadata = {}
     runs_raw = payload.get("runs", [payload])  # single-run files omit "runs" key
+    if not isinstance(runs_raw, list):
+        raise DragParseError("Dragy JSON 'runs' must be a list of run objects.")
 
     results: list[DragRunData] = []
+    total_samples = 0
 
     for run_idx, run_obj in enumerate(runs_raw):
+        if not isinstance(run_obj, dict):
+            raise DragParseError(f"JSON run {run_idx}: expected an object.")
         samples = run_obj.get("samples", run_obj.get("data", []))
+        if not isinstance(samples, list):
+            raise DragParseError(f"JSON run {run_idx}: 'samples' must be a list.")
         if not samples:
             continue
+        total_samples += len(samples)
+        _check_sample_cap(total_samples)
 
         # Auto-detect speed/distance keys
         first = samples[0]
+        if not isinstance(first, dict):
+            raise DragParseError(
+                f"JSON run {run_idx}: samples must be objects, "
+                f"got {type(first).__name__}."
+            )
         t_key = next((k for k in ["t", "time", "time_s"] if k in first), None)
         v_keys_mph = [k for k in first if "mph" in k.lower() or k in ("v", "speed")]
         v_keys_kmh = [k for k in first if "km" in k.lower() or "kmh" in k.lower()]
@@ -537,27 +726,40 @@ def _parse_json(path: Path) -> list[DragRunData]:
         elif d_keys_ft:
             d_key, d_unit = d_keys_ft[0], "ft"
 
+        # Same row-atomic rule as the CSV path: a sample is kept only when
+        # both t and speed are finite numbers (a null speed used to append
+        # t but not v, desyncing the arrays).
         ts, vs, ds = [], [], []
+        d_ok = d_key is not None
         for s in samples:
-            try:
-                ts.append(float(s[t_key]))
-                vs.append(float(s[v_key]))
-                if d_key and d_key in s:
-                    ds.append(float(s[d_key]))
-            except (KeyError, ValueError, TypeError):
+            if not isinstance(s, dict):
                 continue
+            tv = _parse_float(s.get(t_key))
+            vv = _parse_float(s.get(v_key))
+            if tv is None or vv is None:
+                continue
+            ts.append(tv)
+            vs.append(vv)
+            if d_ok:
+                dv = _parse_float(s.get(d_key))
+                if dv is None:
+                    d_ok = False
+                else:
+                    ds.append(dv)
 
         if len(ts) < 10:
             continue
 
         t_arr = np.array(ts)
         v_arr = _to_si_velocity(np.array(vs), v_unit)
-        d_arr = _to_si_distance(np.array(ds), d_unit) if ds else None
+        d_arr = _to_si_distance(np.array(ds), d_unit) if d_ok and ds else None
 
         run_meta = {**metadata, **{k: run_obj[k] for k in run_obj if k != "samples"}}
         partial = _build_run_list(t_arr, v_arr, d_arr, str(path), run_meta)
-        for r in partial:
-            r.run_index = run_idx + len(results)
+        # 0-based index across the whole file. (Was run_idx + len(results),
+        # which double-counted and numbered three runs 0, 2, 4.)
+        for k, r in enumerate(partial):
+            r.run_index = len(results) + k
         results.extend(partial)
 
     return results
@@ -577,14 +779,14 @@ def _build_run_list(
     Given full-file SI arrays, detect run boundaries and return DragRunData
     objects (one per valid run).
     """
+    _check_sample_cap(len(t_arr))
     sample_rate = _detect_sample_rate(t_arr)
 
-    # Use provided distance for boundary checks only if it's plausible;
-    # we always re-integrate from v within each detected run to stay
-    # independent of GPS drift accumulation.
-    d_for_detection = d_arr if d_arr is not None else _integrate_distance(t_arr, v_arr)
-
-    detected = _detect_runs(t_arr, v_arr, d_for_detection)
+    # A provided GPS distance column is never used for detection: we always
+    # integrate v(t) from each launch to stay independent of GPS drift
+    # accumulation. The sample rate is computed once per file (it used to be
+    # recomputed — a full-file median — for every staged window).
+    detected = _detect_runs(t_arr, v_arr, sample_rate=sample_rate)
     if not detected:
         return []
 

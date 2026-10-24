@@ -46,6 +46,8 @@ Phase 2 (database) commands — new:
     python -m motoquant.run leaderboard                   # Best ETs
     python -m motoquant.run history --bike-id 3            # Run history
 
+    python -m motoquant.run engine                        # Rust core or Python?
+
     python -m motoquant.run nl "optimize my Hayabusa for 35C at Aamby Valley"
                             # Phase 4C: NL tuning interface
 """
@@ -61,6 +63,7 @@ from pathlib import Path
 
 import numpy as np
 
+from . import engine_select
 from .config_io import load_config, save_config
 from .constants import MS_TO_KMH, MS_TO_MPH, QUARTER_MILE_M, G
 from .defaults import (
@@ -71,7 +74,7 @@ from .defaults import (
     yzfr1_4c8,
 )
 from .models import BikeConfig
-from .physics import MotoQuantEngine, SimResult
+from .physics import SimResult
 
 __all__ = ["main"]
 
@@ -192,6 +195,12 @@ def print_result(
             print(
                 f"  {name:<16} {t:.3f} s  {s * MS_TO_KMH:8.1f} km/h  {s * MS_TO_MPH:8.1f} mph"
             )
+    if result.time_quarter <= 0:
+        # Never let a missing quarter-mile row read as a silent omission.
+        print(
+            f"  {'1/4 mile':<16} not reached — {result.max_distance_m:.0f} m "
+            f"in {result.elapsed_time_s:.1f} s"
+        )
 
     if not compact:
         # Performance metrics
@@ -212,7 +221,7 @@ def print_result(
         if len(result.traction_pct) > 0:
             print(f"    Peak traction use:   {np.max(result.traction_pct):.1f}%")
 
-        engine = MotoQuantEngine(config)
+        engine = engine_select.make_engine(config)
         m_eff = engine.effective_mass(0)
         print(
             f"    Effective mass (1st): {m_eff:.1f} kg ({m_eff / config.chassis.total_mass_kg * 100:.1f}% of static)"
@@ -274,6 +283,12 @@ def result_to_dict(config: BikeConfig, result: SimResult) -> dict:
         "simulation": {
             "steps": len(result.t),
             "dt_ms": result.dt * 1000,
+            # quarter_mile_s is 0.0 when the run never reached the line;
+            # these say so explicitly instead of leaving a bare 0.0.
+            "finished_quarter": bool(result.finished_quarter),
+            "max_distance_m": round(float(result.max_distance_m), 2),
+            "elapsed_time_s": round(float(result.elapsed_time_s), 3),
+            "engine": "native" if engine_select.native_active() else "python",
         },
     }
 
@@ -392,10 +407,16 @@ def run_bike(
     verbose: bool = True,
     label: str = None,
 ) -> SimResult:
-    """Run simulation for a single bike configuration."""
-    engine = MotoQuantEngine(config, dt=dt)
+    """Run simulation for a single bike configuration.
+
+    Uses the engine ``motoquant.engine_select`` picks (Rust core when
+    available) and the engine's own 26 s time window. A hard-coded 20 s
+    window here made every bike slower than 20 s (RX100: 20.85 s) report a
+    0.0 s quarter mile from the CLI while the API reported the real ET.
+    """
+    engine = engine_select.make_engine(config, dt=dt)
     t0 = time.perf_counter()
-    result = engine.run(distance=distance, max_time=20.0)
+    result = engine.run(distance=distance)
     elapsed = (time.perf_counter() - t0) * 1000.0
     if verbose:
         print_result(config, result, elapsed, label=label)
@@ -526,11 +547,13 @@ def cmd_bikes(args):
 
     # Handle fitments subcommand
     if getattr(args, "fitments", None):
-        bike = db.bikes.get(args.fitments)
+        # get_model(): BikeRepository has no .get() — the old call crashed
+        # every `bikes --fitments` with AttributeError.
+        bike = db.bikes.get_model(args.fitments)
         if not bike:
             print(f"\n  Error: no bike found with ID {args.fitments}")
             db.close()
-            return
+            return 1
 
         fitments = db.tires.get_bike_fitments(args.fitments)
         if not fitments:
@@ -1156,11 +1179,9 @@ def cmd_parts(args):
         compatible, reason = is_compatible(part, bike_row)
 
         # Run base + modified simulations (venue bakes into config via env params)
-        from .physics import MotoQuantEngine
-
-        base_result = MotoQuantEngine(config).run()
+        base_result = engine_select.make_engine(config).run()
         modified_config = db.parts.apply_to_config(part_id, config)
-        mod_result = MotoQuantEngine(modified_config).run()
+        mod_result = engine_select.make_engine(modified_config).run()
 
         delta_et = mod_result.time_quarter - base_result.time_quarter
         delta_trap = mod_result.speed_quarter - base_result.speed_quarter
@@ -1826,7 +1847,8 @@ def cmd_calibrate(args):
         except FileNotFoundError:
             print(f"  File not found: {args.file}")
             return 1
-        except DragParseError as exc:
+        except (DragParseError, ValueError, UnicodeDecodeError) as exc:
+            # ValueError covers malformed JSON (json.JSONDecodeError) too.
             print(f"  Parse error: {exc}")
             return 1
 
@@ -1859,7 +1881,11 @@ def cmd_calibrate(args):
 
     if args.cal_command == "import-dyno":
         try:
-            from .calibration.dyno import DynoParseError, parse_dyno_file
+            from .calibration.dyno import (
+                DynoInputError,
+                DynoParseError,
+                parse_dyno_file,
+            )
         except ImportError as exc:
             print(f"  Calibration module not available: {exc}")
             return 1
@@ -1878,12 +1904,36 @@ def cmd_calibrate(args):
         except FileNotFoundError:
             print(f"  File not found: {args.file}")
             return 1
+        except DynoInputError as exc:
+            print(f"  Invalid ambient conditions: {exc}")
+            return 1
         except DynoParseError as exc:
             print(f"  Parse error: {exc}")
             return 1
 
+        notes = [
+            result.raw_metadata[k]
+            for k in ("pressure_input_note", "cf_advisory")
+            if result.raw_metadata.get(k)
+        ]
+        for key, label in (
+            ("torque_unit_inferred", "inferred from power/torque consistency"),
+            ("torque_unit_assumed", "assumed (no unit in header)"),
+        ):
+            if result.raw_metadata.get(key):
+                unit = "lb-ft" if result.raw_metadata[key] == "lbft" else "Nm"
+                notes.append(f"torque column unit {unit} — {label}")
+        if result.raw_metadata.get("power_torque_mismatch_pct"):
+            notes.append(
+                "power and torque columns disagree by "
+                f"{result.raw_metadata['power_torque_mismatch_pct']}%"
+            )
+
         if args.output_json:
-            print(_json.dumps(result.to_dict(), indent=2))
+            out = result.to_dict()
+            if notes:
+                out["notes"] = notes
+            print(_json.dumps(out, indent=2))
         else:
             print(f"\n  Dyno import: {args.file}")
             print(
@@ -1899,6 +1949,8 @@ def cmd_calibrate(args):
                 f"  ({'corrected' if result.correction_factor != 1.0 else 'uncorrected'})"
             )
             print(f"  At wheel    : {result.is_at_wheel}")
+            for note in notes:
+                print(f"  Note        : {note}")
         return 0
 
     if args.cal_command == "overlay":
@@ -1912,7 +1964,7 @@ def cmd_calibrate(args):
 
         try:
             runs = parse_dragy_file(args.file)
-        except (FileNotFoundError, DragParseError) as exc:
+        except (FileNotFoundError, DragParseError, ValueError) as exc:
             print(f"  {exc}")
             return 1
         if not runs:
@@ -1921,34 +1973,38 @@ def cmd_calibrate(args):
 
         real = best_run(runs) if args.best else runs[0]
 
-        # Load config from DB if --bike-id given, else use default K5
-        db_path = getattr(args, "db", None)
-        cfg = None
-        if getattr(args, "bike_id", None):
+        # Load the bike's current config from the DB when --bike-id is given
+        # (same path as `sim --bike-id`), else the K5 reference. The old code
+        # imported a nonexistent bridge.bike_row_to_config, swallowed the
+        # ImportError and ALWAYS simulated the K5 — every bike's overlay
+        # printed the K5's 9.9331 s without saying which bike it was.
+        bike_id = getattr(args, "bike_id", None)
+        if bike_id:
+            db = ensure_db(args)
             try:
-                from .database.bridge import bike_row_to_config
-                from .database.connection import connect
-
-                conn = connect(db_path)
-                row = conn.execute(
-                    "SELECT * FROM bike_models WHERE id=?", (args.bike_id,)
-                ).fetchone()
-                if row:
-                    cfg = bike_row_to_config(dict(row))
-            except Exception:
-                # DB unavailable or row malformed: fall through to the K5
-                # reference config below (documented demo fallback).
-                pass
-        if cfg is None:
+                config_row = db.bikes.get_current_config(bike_id)
+                cfg = (
+                    db.bikes.to_config(config_row["id"])
+                    if config_row is not None
+                    else None
+                )
+            finally:
+                db.close()
+            if cfg is None:
+                print(f"  Error: no config found for bike model ID {bike_id}")
+                return 1
+        else:
             cfg = gsxr1000_k5()
 
-        from .physics import MotoQuantEngine
-
-        sim = MotoQuantEngine(cfg).run()
+        sim = engine_select.make_engine(cfg).run()
         cmp = compare_runs(real, sim)
         if args.output_json:
-            print(_json.dumps(cmp.to_dict(), indent=2))
+            out = cmp.to_dict()
+            out["bike"] = cfg.name
+            out["bike_id"] = bike_id
+            print(_json.dumps(out, indent=2))
         else:
+            print(f"\n  Simulated bike: {cfg.name}" + ("" if bike_id else " (default)"))
             cmp.print_report()
         return 0
 
@@ -1960,7 +2016,9 @@ def cmd_calibrate(args):
             return 1
 
         try:
-            log = parse_ecu_file(args.file)
+            log = parse_ecu_file(
+                args.file, sample_rate_hz=getattr(args, "sample_rate", None)
+            )
         except FileNotFoundError:
             print(f"  File not found: {args.file}")
             return 1
@@ -2429,23 +2487,25 @@ def _cmd_analysis_surrogate(args) -> int:
     from .analysis.surrogate_xgb import XGBSurrogate, train_surrogate
 
     sub2 = getattr(args, "surrogate_command", None)
-    db_path = getattr(args, "db", None) or "motoquant.db"
 
     def _load_config(bike_id):
-        """Load BikeConfig from DB by ID, or fall back to K5 default."""
-        if bike_id is not None:
-            from .database.bridge import db_row_to_config
-            from .database.connection import MotoQuantDB
+        """Load the bike model's current config from the DB, or the K5 default.
 
-            db = MotoQuantDB(db_path)
-            with db.connect() as conn:
-                row = conn.execute(
-                    "SELECT * FROM bikes WHERE id = ?", (bike_id,)
-                ).fetchone()
-            if row is None:
+        Same path as `sim --bike-id`. The old loader queried a nonexistent
+        'bikes' table (the schema has bike_models / bike_configs), so every
+        per-bike surrogate generate/train/evaluate crashed with
+        sqlite3.OperationalError.
+        """
+        if bike_id is not None:
+            db = ensure_db(args)
+            try:
+                row = db.bikes.get_current_config(bike_id)
+                cfg = db.bikes.to_config(row["id"]) if row is not None else None
+            finally:
+                db.close()
+            if cfg is None:
                 print(f"  Bike ID {bike_id} not found in DB.")
-                return None
-            return db_row_to_config(dict(row))
+            return cfg
         from .defaults import gsxr1000_k5
 
         return gsxr1000_k5()
@@ -2940,6 +3000,33 @@ def cmd_chat(args):
     return 0
 
 
+def cmd_engine(args) -> int:
+    """Handle 'engine': report the physics engine selection (engine_select)."""
+    info = engine_select.engine_info()
+    if getattr(args, "output_json", False):
+        print(json.dumps(info, indent=2, default=str))
+        return 0
+    print("\n  Physics engine")
+    print(f"  Mode (MOTOQUANT_ENGINE) : {info.get('mode')}")
+    print(f"  Running on              : {info.get('engine')}")
+    if info.get("fallback_reason"):
+        print(f"  Why not native          : {info['fallback_reason']}")
+    native = info.get("native") or {}
+    if native:
+        print(f"  Rust core available     : {native.get('available')}")
+        if native.get("version"):
+            print(f"  Rust core version       : {native.get('version')}")
+        if "stale" in native:
+            print(f"  Rust core stale         : {native.get('stale')}")
+        if "exact" in native:
+            print(f"  Host math reproduced    : {native.get('exact')}")
+    for key in ("error", "native_error"):
+        if info.get(key):
+            print(f"  Error                   : {info[key]}")
+    print()
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="motoquant",
@@ -3269,7 +3356,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--pressure",
         type=float,
         metavar="kPa",
-        help="Absolute barometric pressure (kPa) for SAE J1349",
+        help=(
+            "Absolute barometric pressure (kPa, 60-110) for SAE J1349; an "
+            "unambiguous inHg (e.g. 29.92), hPa, bar or psi value is converted"
+        ),
     )
     p_cal_dyno.add_argument(
         "--rh",
@@ -3321,6 +3411,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_cal_ecu.add_argument(
         "--channels", action="store_true", help="List all channels detected in the file"
+    )
+    p_cal_ecu.add_argument(
+        "--sample-rate",
+        type=float,
+        metavar="HZ",
+        dest="sample_rate",
+        help="Logger sample rate (Hz) — required only when the log has no time column",
     )
     p_cal_ecu.add_argument(
         "--json",
@@ -3768,6 +3865,15 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print parsed structure + debug info on error",
     )
 
+    # ── engine (diagnostics) ─────────────────────────────────────────────────
+    p_engine = subparsers.add_parser(
+        "engine",
+        help="Show which physics engine runs simulations (Rust core or Python)",
+    )
+    p_engine.add_argument(
+        "--json", action="store_true", dest="output_json", help="Output as JSON"
+    )
+
     return parser
 
 
@@ -3792,6 +3898,7 @@ SUBCOMMAND_MAP = {
     "nl": cmd_nl,
     "chat": cmd_chat,
     "pricing": cmd_pricing,
+    "engine": cmd_engine,
 }
 
 
@@ -3809,7 +3916,12 @@ def main(args_list=None):
         parser.print_help()
         return 1
 
-    return handler(args)
+    # Handlers may return a non-int (cmd_sim returns its SimResult for
+    # in-process callers). Only an int is an exit status: passing the
+    # SimResult to sys.exit() printed its ~4 KB repr to stderr and exited 1
+    # on every SUCCESSFUL `sim` run, breaking `&&` / `set -e` scripting.
+    rc = handler(args)
+    return rc if isinstance(rc, int) else 0
 
 
 if __name__ == "__main__":
