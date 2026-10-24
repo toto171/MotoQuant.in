@@ -150,6 +150,28 @@ def _canonical_manufacturer(name: str | None) -> str:
     return _MANUFACTURER_ALIASES.get(n, n)
 
 
+def _names_only_a_manufacturer(query: str, manufacturer: str | None) -> bool:
+    """True when ``query`` names a brand but no model.
+
+    "honda", "Harley Davidson", "RE" (Royal Enfield) and "yamaha r" (a lone
+    1-char token carries nothing) leave nothing that identifies a model once
+    the brand is removed. Every model of that brand then token-contains the
+    query, so the top score is just the oldest, shortest-named model (or,
+    for "re", any name with "re" inside it, e.g. "Fireblade"). The caller
+    must ask which bike was meant instead of simulating a guess.
+
+    ``manufacturer`` is the best candidate's own manufacturer; its words are
+    removed too, so a query made only of them ("Royal", "Davidson") is
+    caught even when it is not a known brand prefix. What is left counts as
+    a model once it has two or more characters with the separators removed,
+    so "Yamaha R 1" ("r1") and "R 1" still resolve to the YZF-R1.
+    """
+    stripped, _ = _strip_manufacturer_prefix(query)
+    brand = set(_canonical_manufacturer(manufacturer).split())
+    rest = "".join(t for t in stripped.split() if t not in brand)
+    return len(rest) < _MIN_TOKEN_LEN
+
+
 def _compact_windows(seq: list[str]) -> dict[str, int]:
     """Every contiguous run of tokens joined with no separator, mapped to the
     fewest tokens left outside that run.
@@ -378,6 +400,12 @@ def resolve_bike(
     suggestions = [r for _, r in scored[:SUGGESTIONS_LIMIT]]
     best_score, best_row = scored[0]
 
+    # A brand-only query clears the bar against EVERY model of that brand;
+    # keep the suggestions (the chips / the agent's candidate list) but do
+    # not pick one. Checked here, after every strategy, so no search path
+    # (including the whole-catalog scan above) can return a guess.
+    if _names_only_a_manufacturer(raw, best_row.get("manufacturer_name")):
+        return None, suggestions
     if best_score >= MATCH_THRESHOLD:
         return best_row["id"], suggestions
     return None, suggestions

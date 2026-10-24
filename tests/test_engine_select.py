@@ -45,7 +45,12 @@ _tmp = tempfile.NamedTemporaryFile(
 )
 _tmp.close()
 _TMP_DB = _tmp.name
-_PRIOR_DB = os.environ.get("MOTOQUANT_DB")
+# The prior MOTOQUANT_DB is captured in setup_module(), NOT here: at import
+# (collection) time the env holds whatever a sibling module set at ITS import
+# — e.g. test_api's tmp DB, which that module deletes in its own teardown.
+# Restoring that value later pointed every following API test at a missing
+# path (SQLite then created an empty DB: "no such table: bike_models").
+_PRIOR_DB: str | None = None
 _src = sqlite3.connect(f"file:{_SRC_DB}?mode=ro", uri=True)
 _dst = sqlite3.connect(_TMP_DB)
 try:
@@ -56,10 +61,23 @@ finally:
 
 
 def setup_module():
+    global _PRIOR_DB
+    _PRIOR_DB = os.environ.get("MOTOQUANT_DB")
     os.environ["MOTOQUANT_DB"] = _TMP_DB
     import motoquant.api as api_mod
 
     api_mod._db_conn = None
+
+
+def _restore_db_env():
+    """Undo setup_module's override — but only if the env still points at
+    this module's tmp DB (never clobber a value something else set since)."""
+    if os.environ.get("MOTOQUANT_DB") != _TMP_DB:
+        return
+    if _PRIOR_DB is None:
+        os.environ.pop("MOTOQUANT_DB", None)
+    else:
+        os.environ["MOTOQUANT_DB"] = _PRIOR_DB
 
 
 def teardown_module():
@@ -71,10 +89,7 @@ def teardown_module():
         except Exception:
             pass
         api_mod._db_conn = None
-    if _PRIOR_DB is None:
-        os.environ.pop("MOTOQUANT_DB", None)
-    else:
-        os.environ["MOTOQUANT_DB"] = _PRIOR_DB
+    _restore_db_env()
     try:
         os.unlink(_TMP_DB)
     except OSError:
@@ -106,6 +121,45 @@ def native_calls(monkeypatch):
     return calls
 
 
+# ── module env hygiene (the MOTOQUANT_DB leak of 2026-10-24) ─────────────────
+
+
+def _fresh_copy_of_this_module():
+    """Execute this file again as a separate module object — the same
+    import-time code pytest runs at collection — without collecting it."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("_engine_select_env_copy", __file__)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_teardown_never_restores_a_collection_time_db(tmp_path, monkeypatch):
+    """A sibling module (test_api) points MOTOQUANT_DB at its own tmp DB at
+    import and restores/deletes it in ITS teardown. Capturing the 'prior'
+    value at import used to resurrect that deleted path after this module's
+    teardown, so later API tests opened an empty DB."""
+    sibling_db = str(tmp_path / "sibling_deleted.db")
+    monkeypatch.setenv("MOTOQUANT_DB", sibling_db)  # sibling's import
+    mod = _fresh_copy_of_this_module()  # this module's collection
+    monkeypatch.delenv("MOTOQUANT_DB")  # sibling teardown restored "unset"
+    mod.setup_module()
+    assert os.environ["MOTOQUANT_DB"] == mod._TMP_DB
+    mod.teardown_module()
+    assert "MOTOQUANT_DB" not in os.environ
+    assert not os.path.exists(mod._TMP_DB)
+
+
+def test_teardown_leaves_a_db_someone_else_set(monkeypatch):
+    mod = _fresh_copy_of_this_module()
+    monkeypatch.setenv("MOTOQUANT_DB", "/prior.db")
+    mod.setup_module()
+    monkeypatch.setenv("MOTOQUANT_DB", "/set-later-by-another-fixture.db")
+    mod.teardown_module()
+    assert os.environ["MOTOQUANT_DB"] == "/set-later-by-another-fixture.db"
+
+
 # ── mode parsing ─────────────────────────────────────────────────────────────
 
 
@@ -122,14 +176,40 @@ def test_mode_parsing(monkeypatch, raw, mode):
     assert engine_select.engine_mode() == mode
 
 
-def test_invalid_mode_raises_but_health_info_survives(monkeypatch):
+def test_invalid_mode_falls_back_to_python_and_says_so(monkeypatch, caplog):
+    import logging
+
     monkeypatch.setenv("MOTOQUANT_ENGINE", "rust-please")
+    monkeypatch.setattr(engine_select, "_warned_invalid", set())
     with pytest.raises(ValueError, match="MOTOQUANT_ENGINE"):
-        engine_select.engine_mode()
-    with pytest.raises(ValueError):
-        engine_select.make_engine(mq.gsxr1000_k5())
+        engine_select.engine_mode()  # the strict validator still rejects it
+    with caplog.at_level(logging.WARNING, logger="motoquant.engine_select"):
+        assert engine_select.effective_mode() == "python"
+        assert type(engine_select.make_engine(mq.gsxr1000_k5())) is MotoQuantEngine
+        assert engine_select.native_active() is False
+    warned = [r for r in caplog.records if "rust-please" in r.getMessage()]
+    assert len(warned) == 1, "warn once per distinct invalid value, not per sim"
     info = engine_select.engine_info()
     assert info["mode"] == "invalid" and info["engine"] == "python"
+    assert "rust-please" in info["error"]
+
+
+def test_invalid_mode_health_matches_what_the_routes_run(client, monkeypatch):
+    """Regression (2026-10-24): with a typo'd MOTOQUANT_ENGINE, /api/health
+    said ``ok`` / engine ``python`` while EVERY simulation route returned 500.
+    Now the routes run the Python reference — exactly what health reports —
+    and return the same numbers as the explicit kill switch."""
+    body = {"bike_id": 11, "venue_id": 1}
+    monkeypatch.setenv("MOTOQUANT_ENGINE", "python")
+    ref_quick = _post(client, "/api/simulate/quick", body)
+    ref_full = _post(client, "/api/simulate", body)
+    monkeypatch.setenv("MOTOQUANT_ENGINE", "Rust")
+    health = client.get("/api/health").json()
+    assert health["status"] == "ok"
+    assert health["engine"]["mode"] == "invalid"
+    assert health["engine"]["engine"] == "python"
+    assert _post(client, "/api/simulate/quick", body) == ref_quick
+    assert _post(client, "/api/simulate", body) == ref_full
 
 
 def test_kill_switch_forces_the_python_reference(monkeypatch):

@@ -202,9 +202,12 @@ _EXCLUSIVE_CATEGORY_ALIASES: dict[str, str] = {
 }
 
 # Categories whose parts flip the engine to forced induction. They are
-# applied AFTER every naturally-aspirated part: bridge.apply_part_to_config
-# only scales the dyno curve for NA power mods while the engine is still NA,
-# so a PCVI applied after a turbo kit added 0 hp (turbo+PCVI == turbo alone).
+# applied AFTER every naturally-aspirated part. The old
+# bridge.apply_part_to_config only scaled the dyno curve for NA power mods
+# while the engine was still NA, so a PCVI applied after a turbo kit added
+# 0 hp (turbo+PCVI == turbo alone). The bridge now decides curve scaling per
+# part, so builds are order-independent; this order is kept as the single
+# deterministic convention every consumer shares (applied_part_ids).
 _BOOST_CATEGORIES: frozenset[str] = frozenset({"boost_kit", "nitrous"})
 
 

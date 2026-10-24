@@ -60,6 +60,8 @@ remains the reference implementation.
     Python.
   - `python`: the kill switch, no rebuild needed.
   - `native`: require the Rust core, and raise if it is missing or stale.
+  - Any other value falls back to `python` with a one-time warning;
+    `/api/health` reports `mode: "invalid"` and the error.
 
   Every API simulation route uses it (simulate, quick incl. its stock
   baseline, top speed, distance, compare, the Dragy overlay), as do the

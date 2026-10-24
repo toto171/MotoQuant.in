@@ -18,6 +18,11 @@ One place that decides which integrator runs a simulation:
   otherwise Python.
 * ``python`` — always the reference engine (kill switch).
 * ``native`` — require the Rust core; raises if it is unavailable or stale.
+* anything else (a dashboard typo such as ``rust``) — the Python reference,
+  with a one-time WARNING log. ``engine_info()`` (and so ``/api/health``)
+  reports ``mode: "invalid"`` plus the error, and that matches what actually
+  runs: simulations keep working instead of every route returning 500 while
+  the health probe says ``ok``.
 
 The choice is read on every call, so tests and operators can flip the env
 var at runtime without re-importing anything.
@@ -35,16 +40,31 @@ from .physics import MotoQuantEngine, SimResult
 log = logging.getLogger(__name__)
 
 _VALID_MODES = ("auto", "python", "native")
+_warned_invalid: set[str] = set()
 
 
 def engine_mode() -> str:
-    """The configured mode (``MOTOQUANT_ENGINE``), validated."""
+    """The configured mode (``MOTOQUANT_ENGINE``), validated (strict: raises
+    ``ValueError`` on an unknown value)."""
     mode = os.environ.get("MOTOQUANT_ENGINE", "auto").strip().lower() or "auto"
     if mode not in _VALID_MODES:
         raise ValueError(
             f"MOTOQUANT_ENGINE={mode!r} is invalid; expected one of {_VALID_MODES}"
         )
     return mode
+
+
+def effective_mode() -> str:
+    """The mode simulations actually use: :func:`engine_mode`, except that an
+    invalid value degrades to ``python`` (warned once per distinct value)."""
+    try:
+        return engine_mode()
+    except ValueError as exc:
+        raw = os.environ.get("MOTOQUANT_ENGINE", "")
+        if raw not in _warned_invalid:
+            _warned_invalid.add(raw)
+            log.warning("%s; using the Python reference engine.", exc)
+        return "python"
 
 
 def fallback_reason() -> str | None:
@@ -62,7 +82,7 @@ def fallback_reason() -> str | None:
 
 def native_active() -> bool:
     """True when simulations will run on the Rust core."""
-    mode = engine_mode()
+    mode = effective_mode()
     if mode == "python":
         return False
     if mode == "native":
@@ -113,6 +133,9 @@ def engine_info() -> dict:
     try:
         mode = engine_mode()
     except ValueError as exc:
+        # Same fallback the simulations take (effective_mode): the Python
+        # reference serves, and the bad value stays visible here.
+        effective_mode()  # emit the one-time warning on a health probe too
         return {"engine": "python", "mode": "invalid", "error": str(exc)}
     info: dict = {"mode": mode}
     try:

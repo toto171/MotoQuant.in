@@ -52,6 +52,13 @@ def _http_error_with_response(status: int) -> requests.HTTPError:
 @pytest.fixture
 def client(monkeypatch):
     monkeypatch.setenv("OPENWEATHERMAP_API_KEY", SECRET)
+    # Sweep scripts imported by earlier test modules run
+    # ``logging.getLogger("motoquant").setLevel(logging.ERROR)`` at import,
+    # which would filter the route's WARNING before caplog sees it (the
+    # full-suite failure of 2026-10-24). Neutralise inherited logger state
+    # for the duration of each test so the log assertions are order-proof.
+    monkeypatch.setattr(logging.getLogger("motoquant"), "level", logging.NOTSET)
+    monkeypatch.setattr(logging.getLogger("motoquant.api"), "disabled", False)
     # Skip the seeded-venue lookup: the OWM fallback is the path under test.
     monkeypatch.setattr(api, "_get_db", lambda: None)
     return TestClient(api.app)
@@ -80,7 +87,7 @@ def test_upstream_error_never_leaks_the_key(
         return _Resp(exc)
 
     monkeypatch.setattr(requests, "get", fake_get)
-    with caplog.at_level(logging.DEBUG):
+    with caplog.at_level(logging.DEBUG, logger="motoquant.api"):
         r = client.post("/api/venues/resolve", json={"location": "Atlantis Nowhere"})
     assert r.status_code == 502
     assert SECRET not in r.text
@@ -100,3 +107,21 @@ def test_redact_secrets_helper():
         assert f"={leaked}" not in out
     assert "appid=[REDACTED]" in out
     assert api._redact_secrets("no secrets here", None) == "no secrets here"
+
+
+def test_log_assertions_survive_a_muted_motoquant_logger(client, monkeypatch, caplog):
+    """Regression: the sweep scripts mute the ``motoquant`` logger at import.
+
+    Simulate that inherited state inside the test (AFTER the fixture reset)
+    and assert the redacted failure record is still captured — the old
+    ``caplog.at_level(logging.DEBUG)`` (root only) failed exactly here.
+    """
+    logging.getLogger("motoquant").setLevel(logging.ERROR)
+    exc = requests.HTTPError(f"401 Client Error: Unauthorized for url: {URL}")
+    monkeypatch.setattr(requests, "get", lambda *a, **k: _Resp(exc))
+    with caplog.at_level(logging.DEBUG, logger="motoquant.api"):
+        r = client.post("/api/venues/resolve", json={"location": "Atlantis Nowhere"})
+    assert r.status_code == 502 and SECRET not in r.text
+    logged = "\n".join(rec.getMessage() for rec in caplog.records)
+    assert "OWM fetch failed" in logged
+    assert SECRET not in logged

@@ -11,6 +11,13 @@ queries (audit 2026-10-23, motoquant/llm/resolver.py).
 When the resolver misses, the agent reports "bike not found" or runs an
 LLM-recalled estimate instead of the curated config, so these go through the
 real ``resolve_bike`` against a copy of the shipped catalog.
+
+Review follow-up (2026-10-24): the whole-catalog fallback added for those
+fixes made a BRAND-ONLY query resolve confidently. Every model of the brand
+token-contains "honda", so the oldest, shortest-named one won ("honda" ->
+NS400R, "ktm" -> 1190 RC8 R, "bmw" -> K1300S), and the chat simulated that
+bike without saying so instead of asking which one was meant. "re" (Royal
+Enfield) even matched a Honda "Fireblade" through the "re" inside it.
 """
 
 from __future__ import annotations
@@ -106,3 +113,97 @@ def test_hyphenated_brand_prefix_is_stripped():
         "fat bob",
         "harley davidson",
     )
+
+
+# ── Brand-only queries must not pick a model ───────────────────────────────
+
+_BRAND_ONLY = [
+    ("honda", "honda"),
+    ("ktm", "ktm"),
+    ("harley", "harley-davidson"),
+    ("Harley Davidson", "harley-davidson"),
+    ("bmw", "bmw"),
+    ("suzuki", "suzuki"),
+    ("royal enfield", "royal enfield"),
+    ("re", None),  # matched a Honda "Fireblade" before
+    ("jawa", "jawa"),  # three Jawa models in the catalog
+    ("yamaha r", "yamaha"),  # a lone 1-char token names no model
+    ("Royal", "royal enfield"),  # brand words that are not a known prefix
+    ("Davidson", "harley-davidson"),
+]
+
+
+@pytest.mark.parametrize("query, brand", _BRAND_ONLY)
+def test_brand_only_query_does_not_resolve(db, query, brand):
+    bike_id, suggestions = resolve_bike(query, db)
+    assert bike_id is None, f"{query!r} guessed bike {bike_id}"
+    # The chips / the agent's candidate list still get the brand's models,
+    # so the caller can ask which one was meant.
+    assert suggestions, query
+    if brand is not None:
+        mfrs = {str(s.get("manufacturer_name") or "").lower() for s in suggestions}
+        assert mfrs == {brand}, (query, mfrs)
+
+
+@pytest.mark.parametrize(
+    "query, expected",
+    [
+        # A remainder of 2+ characters with the separators removed is a model.
+        ("Yamaha R 1", "yzf-r1 "),
+        ("R 1", "yzf-r1 "),
+        ("Jawa 42", "jawa 42"),
+        ("Jawa Perak", "perak"),
+        ("Kawasaki H2", "h2"),
+        ("BMW R 18", "r 18"),
+        ("HD Fat Bob", "fat bob"),
+        ("Indian Scout", "scout"),
+    ],
+)
+def test_brand_plus_model_still_resolves(db, query, expected):
+    assert expected in _resolved_name(db, query)
+
+
+def test_guard_changes_no_model_bearing_catalog_query(db, monkeypatch):
+    """Over every '<brand> <model>' and '<model>' spelling in the catalog,
+    the brand-only guard never changes which bike resolves."""
+    rows = db._conn.execute(
+        "SELECT m.name AS mfr, bm.model_name FROM bike_models bm "
+        "JOIN manufacturers m ON m.id = bm.manufacturer_id"
+    ).fetchall()
+    queries = set()
+    for r in rows:
+        model = resolver._YEAR_RANGE_RE.sub(" ", r["model_name"]).strip()
+        queries.update({f"{r['mfr']} {model}", model})
+    guarded = {q: resolve_bike(q, db)[0] for q in sorted(queries)}
+    monkeypatch.setattr(resolver, "_names_only_a_manufacturer", lambda *a: False)
+    changed = [q for q in sorted(queries) if resolve_bike(q, db)[0] != guarded[q]]
+    assert not changed, changed[:10]
+
+
+def test_chat_parse_path_leaves_bike_unset_for_a_brand(db):
+    """The production chat path: the LLM extracted only a brand, so
+    parsed.bike_id must stay None (the runner then answers bike_not_found
+    with suggestions) rather than silently pinning an arbitrary model."""
+    from motoquant.llm.parse_query import ParsedSimRequest, _resolve_against_db
+
+    for brand in ("Honda", "KTM", "Harley", "BMW"):
+        parsed = ParsedSimRequest(raw_query=f"simulate my {brand}", bike_name=brand)
+        _resolve_against_db(parsed, db)
+        assert parsed.bike_id is None, (brand, parsed.bike_id)
+
+    parsed = ParsedSimRequest(raw_query="simulate my RC 390", bike_name="KTM RC 390")
+    _resolve_against_db(parsed, db)
+    assert parsed.bike_id is not None
+
+
+def test_agent_search_bikes_reports_no_best_match_for_a_brand(db):
+    from motoquant.llm.agent import AgentChatResult, AgentContext, _exec_search_bikes
+
+    ctx = AgentContext(db=db, result=AgentChatResult(raw_query=""))
+    out = _exec_search_bikes(ctx, {"query": "Honda"})
+    assert "best_match" not in out, out.get("best_match")
+    assert out["candidates"]
+    assert all(c["manufacturer"] == "Honda" for c in out["candidates"])
+
+    out = _exec_search_bikes(ctx, {"query": "Honda CBR1000RR-R"})
+    assert "cbr1000rr-r" in out["best_match"]["model"].lower()

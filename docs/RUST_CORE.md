@@ -72,6 +72,7 @@ every call:
 | `auto` (default) | Native when the extension imports, its schema matches, it is **not stale** (`native.is_stale()`) and `native.host_math()["exact"]` is true. Otherwise Python; `engine_info()["fallback_reason"]` says why |
 | `python` | Always the reference engine. The kill switch: no rebuild needed, set it in the host's dashboard |
 | `native` | Require the Rust core: `RuntimeError` if it is unavailable or stale |
+| anything else | A typo such as `rust`: the Python reference, with a one-time WARNING log. `/api/health` shows `mode: "invalid"` plus the error, and that is what actually runs (simulations keep working; they used to return 500 while health said `ok`) |
 
 Wired into every simulation call site of:
 

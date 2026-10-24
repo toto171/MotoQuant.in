@@ -162,17 +162,25 @@ class TestForcedInductionSlot:
         boost = [p for p in res.parts if p.category in ("boost_kit", "nitrous")]
         assert len(boost) <= 1, [p.part_id for p in boost]
 
-    def test_na_power_parts_are_applied_before_boost(self, conn, repo):
-        # Price order put the ₹95k nitrous before the ₹238k exhaust, so the
-        # exhaust's dyno-curve scaling was skipped (engine already boosted).
+    def test_boost_build_et_does_not_depend_on_apply_order(self, conn, repo):
+        # Audit repro: price order put the ₹95k nitrous before the ₹238k
+        # exhaust, and the old bridge then skipped the exhaust's dyno-curve
+        # scaling (it gated on the config's boost state, not on the part).
+        # bridge.apply_part_to_config now decides curve scaling per part, so
+        # both orders must build the same bike. The optimizer still applies in
+        # its canonical order (NA parts first, roi._apply_order) and must
+        # report that bike.
         cfg = _cfg(conn, 11)
         res = optimize_build(cfg, 400_000, _PoolRepo(repo, [143, 56]), bike_model_id=11)
         assert sorted(p.part_id for p in res.parts) == [56, 143]
         assert res.applied_part_ids == [56, 143]
-        good = _full_et(repo, cfg, [56, 143])
-        bad = _full_et(repo, cfg, [143, 56])
-        assert good < bad
-        assert res.optimized_et_s == pytest.approx(round(good, 4), abs=1e-4)
+        na_first = _full_et(repo, cfg, [56, 143])
+        boost_first = _full_et(repo, cfg, [143, 56])
+        assert na_first == pytest.approx(boost_first, abs=1e-9)
+        # The exhaust's gain survives on top of the nitrous in the boost-first
+        # order too (the old bridge made it dead: [143, 56] == [143]).
+        assert boost_first < _full_et(repo, cfg, [143]) - 0.02
+        assert res.optimized_et_s == pytest.approx(round(na_first, 4), abs=1e-4)
 
 
 # ─────────────────────── slot stacking ───────────────────────

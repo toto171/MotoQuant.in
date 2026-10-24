@@ -60,6 +60,28 @@ _MAX_HOP_LEN = 64
 
 _warned_bad_env: set[str] = set()
 
+# Address ranges a reverse proxy we may trust under AUTO can connect from:
+# RFC 1918 private IPv4 and RFC 4193 unique-local IPv6 (loopback is handled
+# separately). Listed explicitly rather than via ``is_private``, which is
+# also True for the documentation ranges (192.0.2.0/24, 198.51.100.0/24,
+# 203.0.113.0/24), link-local, 0.0.0.0/8 and more: none of those is where a
+# proxy we run lives, and a client that reaches the API from one of them
+# must not be able to choose its own bucket key.
+_PRIVATE_PROXY_NETS = tuple(
+    ipaddress.ip_network(n)
+    for n in ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "fc00::/7")
+)
+
+# One-time notes on what AUTO decided, so the choice is visible in the log
+# rather than silent (keyed by decision; never logs header contents).
+_auto_notes: set[str] = set()
+
+
+def _note_once(key: str, level: int, msg: str, *args) -> None:
+    if key not in _auto_notes:
+        _auto_notes.add(key)
+        logger.log(level, msg, *args)
+
 
 def trusted_proxy_hops() -> int | None:
     """Configured trusted-proxy hop count, or None for AUTO.
@@ -87,32 +109,81 @@ def trusted_proxy_hops() -> int | None:
     return hops
 
 
-def _peer_is_same_host(peer: str | None) -> bool:
-    """True when the socket peer can only be a proxy on this machine: a
-    loopback address, a unix socket (no peer address) or an in-process
-    transport (Starlette's TestClient reports "testclient"). A remote client
-    always shows up as a routable IP here."""
+def _peer_kind(peer: str | None) -> str:
+    """Classify the socket peer for AUTO trust.
+
+    * ``"local"``: a loopback address, a unix socket (no peer address) or an
+      in-process transport (Starlette's TestClient reports "testclient").
+    * ``"private"``: an RFC 1918 / RFC 4193 address, e.g. the Docker bridge
+      gateway (172.17.0.1) that a host-side Caddy or nginx reaches a
+      ``-p 8000:8000`` container from, or a proxy container on a user
+      network (172.18.0.x).
+    * ``"public"``: anything else, including a client hitting the API
+      directly over the internet.
+
+    IPv4-mapped IPv6 (``::ffff:172.17.0.1``, what a dual-stack listener
+    reports for an IPv4 peer) is judged as the IPv4 address it carries.
+    """
     if not peer:
-        return True
+        return "local"
     try:
-        return ipaddress.ip_address(peer).is_loopback
+        addr = ipaddress.ip_address(peer)
     except ValueError:
-        return True  # not an IP at all -> not a network peer
+        return "local"  # not an IP at all -> not a network peer
+    mapped = getattr(addr, "ipv4_mapped", None)
+    if mapped is not None:
+        addr = mapped
+    if addr.is_loopback:
+        return "local"
+    if any(addr in net for net in _PRIVATE_PROXY_NETS):
+        return "private"
+    return "public"
 
 
-def _effective_hops(peer: str | None) -> int:
+def _effective_hops(peer: str | None, has_xff: bool = False) -> int:
     hops = trusted_proxy_hops()
     if hops is not None:
         return hops
     # AUTO. Render injects RENDER=true into every service and its edge proxy
-    # APPENDS the peer it saw, so exactly one hop is trusted there. Off
-    # Render, trust one hop only from a same-host reverse proxy; an API
-    # reached directly (the open-source `uvicorn motoquant.api:app` path)
-    # ignores the header, so a client cannot mint a fresh bucket per request
-    # by rotating a spoofed X-Forwarded-For.
+    # APPENDS the peer it saw, so exactly one hop is trusted there.
     if os.environ.get("RENDER"):
         return 1
-    return 1 if _peer_is_same_host(peer) else 0
+    # Off Render, trust one hop when the peer is on this machine or on a
+    # private network: that is where the reverse proxy of a self-hosted
+    # deployment connects from (docs/SELF_HOSTING.md section 4b). An API
+    # reached directly over the internet sees a public peer and ignores the
+    # header, so such a client cannot mint a fresh bucket per request by
+    # rotating a spoofed X-Forwarded-For. A private peer that is NOT a proxy
+    # (clients on the same LAN, or an L4 NAT such as rootless Docker or a
+    # Kubernetes NodePort that rewrites every source to a private address)
+    # needs MOTOQUANT_TRUSTED_PROXY_HOPS=0.
+    kind = _peer_kind(peer)
+    if kind == "local":
+        return 1
+    if kind == "private":
+        if has_xff:
+            _note_once(
+                "private",
+                logging.INFO,
+                "rate limits: trusting one X-Forwarded-For hop from private "
+                "peer %s (AUTO). If clients reach the API directly from a "
+                "private network or through an L4 NAT, set %s=0.",
+                peer,
+                TRUSTED_PROXY_HOPS_ENV,
+            )
+        return 1
+    if has_xff:
+        _note_once(
+            "public",
+            logging.WARNING,
+            "rate limits: ignoring X-Forwarded-For from public peer %s (AUTO); "
+            "every request from it shares one bucket. If a reverse proxy you "
+            "run connects from a public address, set %s=1; otherwise the "
+            "header was client-sent and ignoring it is correct.",
+            peer,
+            TRUSTED_PROXY_HOPS_ENV,
+        )
+    return 0
 
 
 def client_ip(request: Request) -> str:
@@ -120,20 +191,21 @@ def client_ip(request: Request) -> str:
     identity from a request (every rate-limit bucket keys on it).
 
     X-Forwarded-For is honoured only for the configured number of trusted
-    proxies (``MOTOQUANT_TRUSTED_PROXY_HOPS``; AUTO = 1 on Render or behind a
-    same-host proxy, else 0). Each trusted proxy APPENDS the peer it observed,
-    so with N trusted proxies the client is the N-th hop from the RIGHT. Every
-    hop left of that is whatever the client itself sent — an attacker who
-    rotates a spoofed value on every request would otherwise get a fresh
-    bucket each time and bypass the fuse entirely.
+    proxies (``MOTOQUANT_TRUSTED_PROXY_HOPS``; AUTO = 1 on Render or when the
+    socket peer is loopback or a private RFC 1918 / ULA address, else 0).
+    Each trusted proxy APPENDS the peer it observed, so with N trusted
+    proxies the client is the N-th hop from the RIGHT. Every hop left of that
+    is whatever the client itself sent — an attacker who rotates a spoofed
+    value on every request would otherwise get a fresh bucket each time and
+    bypass the fuse entirely.
 
     Repeated X-Forwarded-For header lines are joined in order, so a spoofed
     first line cannot shadow the line a proxy added.
     """
     peer = request.client.host if request.client else None
-    hops_trusted = _effective_hops(peer)
+    lines = request.headers.getlist("x-forwarded-for")
+    hops_trusted = _effective_hops(peer, has_xff=bool(lines))
     if hops_trusted > 0:
-        lines = request.headers.getlist("x-forwarded-for")
         hops = [h.strip() for line in lines for h in line.split(",") if h.strip()]
         if hops:
             # Fewer entries than trusted proxies means every entry was added
