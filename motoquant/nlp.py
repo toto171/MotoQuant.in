@@ -13,8 +13,9 @@ import re
 from dataclasses import dataclass, field
 
 from .database.connection import MotoQuantDB
-from .models import BikeConfig
-from .physics import MotoQuantEngine, SimResult
+from .engine_select import make_engine
+from .models import TRACK_PJ1, TRACK_RUBBER, TRACK_VHT, BikeConfig
+from .physics import SimResult
 
 __all__ = ["ParsedQuery", "NLQueryParser", "NLSimRunner", "format_nl_result"]
 
@@ -121,30 +122,74 @@ class NLQueryParser:
         "jerez": "jerez",
     }
 
-    # Part keywords by category
+    # Part keywords by mention key. Matched on WORD boundaries (an optional
+    # plural "s"/"es" allowed): substring matching made "brake discs" mention
+    # a supercharger ("sc") and "wet track" a clutch ("wet"), and "tune my
+    # bike" an ECU ("tune" is the verb, not a part).
     PART_KEYWORDS = {
         "turbo": ["turbo", "turbocharged", "turbocharger"],
-        "supercharger": ["supercharger", "sc", "roots", "centrifugal"],
+        "supercharger": ["supercharger", "supercharged", "sc", "roots", "centrifugal"],
         "nitrous": ["nitrous", "n2o", "nos"],
-        "exhaust": ["exhaust", "pipes", "headers"],
-        "air_filter": ["air filter", "intake", "pod"],
-        "ecu": ["ecu", "flash", "tune", "map"],
-        "clutch": ["clutch", "slipper", "wet"],
-        "chain": ["chain", "sprocket"],
+        "exhaust": ["exhaust", "pipe", "header", "slip-on", "full system"],
+        "air_filter": ["air filter", "intake", "pod filter"],
+        "ecu": ["ecu", "flash", "remap", "piggyback", "power commander", "fuel map"],
+        "clutch": ["clutch", "slipper"],
+        "chain": ["chain"],
+        "sprocket": ["sprocket", "gearing"],
         "weight_reduction": [
             "weight reduction",
             "carbon",
             "lightweight",
             "ti-6al",
             "aluminum",
+            "fairing",
         ],
-        "fuel_system": ["fuel pump", "injector", "rail"],
-        "suspension": ["suspension", "coilover", "spring"],
-        "brakes": ["brake", "pad", "disc", "rotor"],
+        "fuel_system": ["fuel pump", "injector", "fuel rail"],
+        "suspension": ["suspension", "coilover", "shock", "fork", "spring"],
+        "brakes": ["brake", "pad", "disc", "rotor", "caliper"],
         "wheelie_bar": ["wheelie bar"],
-        "quickshifter": ["quickshifter", "quick shift"],
+        "quickshifter": ["quickshifter", "quick shift", "quick shifter"],
         "battery": ["battery", "lithium"],
-        "tire": ["slick", "drag tire", "r-compound"],
+        "tire": ["slick", "drag tire", "drag tyre", "r-compound"],
+    }
+
+    # Mention key -> real parts_categories.name in the catalog. "tire" is not
+    # a parts category: drag rubber comes from the tyre fitment table.
+    CATEGORY_FOR_MENTION = {
+        "turbo": "boost_kit",
+        "supercharger": "boost_kit",
+        "nitrous": "nitrous",
+        "exhaust": "exhaust",
+        "air_filter": "air_filter",
+        "ecu": "ecu",
+        "clutch": "clutch_kit",
+        "chain": "chain",
+        "sprocket": "sprocket",
+        "weight_reduction": "bodywork",
+        "fuel_system": "fuel_system",
+        "suspension": "suspension",
+        "brakes": "brakes",
+        "wheelie_bar": "wheelie_bar",
+        "quickshifter": "quickshifter",
+        "battery": "battery",
+    }
+
+    # Model-code / nickname aliases that a substring search resolves wrongly
+    # ("k5" matched BMW's model code K52, "r1" matched "R 12 nineT"): each maps
+    # to (model_name substring, preferred model_code).
+    CANONICAL_BIKES = {
+        "k5": ("GSX-R 1000", "K5"),
+        "k6": ("GSX-R 1000", "K5"),
+        "gsxr": ("GSX-R 1000", "K5"),
+        "gsxr1000": ("GSX-R 1000", "K5"),
+        "r1": ("YZF-R1", "4C8"),
+        "yzfr1": ("YZF-R1", "4C8"),
+        "4c8": ("YZF-R1", "4C8"),
+        "crossplane": ("YZF-R1", "4C8"),
+        "busa": ("Hayabusa", None),
+        "gsx1300": ("Hayabusa", None),
+        "gsx1300r": ("Hayabusa", None),
+        "hayabusa": ("Hayabusa", None),
     }
 
     def __init__(self):
@@ -254,10 +299,13 @@ class NLQueryParser:
         return None
 
     def _extract_altitude(self, query_lower: str) -> float | None:
-        """Extract altitude (meters) from query."""
+        """Extract altitude (meters) from query.
+
+        A speed in m/s is NOT an altitude ("3 m/s headwind" used to set
+        altitude_m=3)."""
         patterns = [
-            r"(\d+)\s*m\b(?:\s+altitude)?",  # 1000m or 1000m altitude
-            r"altitude\s+(?:of\s+)?(\d+)\s*m",  # altitude of 1000m
+            r"altitude\s+(?:of\s+)?(\d+)\s*m(?:eters?|etres?)?\b(?!\s*/\s*s)",
+            r"(\d+)\s*m(?:eters?|etres?)?\b(?!\s*/\s*s)(?:\s+altitude)?",
         ]
         for pattern in patterns:
             match = re.search(pattern, query_lower)
@@ -266,49 +314,88 @@ class NLQueryParser:
         return None
 
     def _extract_headwind(self, query_lower: str) -> float | None:
-        """Extract headwind speed (m/s) from query."""
+        """Extract the wind along the strip (m/s): positive = headwind,
+        negative = tailwind."""
+        num = r"(\d+(?:\.\d+)?)\s*m\s*/\s*s"
         patterns = [
-            r"(\d+(?:\.\d+)?)\s*(?:m/s|m\/s)\s+(?:wind|headwind)",
-            r"headwind\s+(?:of\s+)?(\d+(?:\.\d+)?)\s*(?:m/s|m\/s)",
+            (num + r"\s+(?:head\s*wind|wind)", 1.0),
+            (r"head\s*wind\s+(?:of\s+)?" + num, 1.0),
+            (num + r"\s+tail\s*wind", -1.0),
+            (r"tail\s*wind\s+(?:of\s+)?" + num, -1.0),
         ]
-        for pattern in patterns:
+        for pattern, sign in patterns:
             match = re.search(pattern, query_lower)
             if match:
-                return float(match.group(1))
+                return sign * float(match.group(1))
         return None
 
+    # Indian money words: "50k", "1.5 lakh", "2 crore".
+    _MONEY_UNITS = {
+        "k": 1_000,
+        "lakh": 100_000,
+        "lakhs": 100_000,
+        "lac": 100_000,
+        "lacs": 100_000,
+        "crore": 10_000_000,
+        "crores": 10_000_000,
+        "cr": 10_000_000,
+    }
+    _AMOUNT = r"(\d[\d,]*(?:\.\d+)?)\s*(k|lakhs?|lacs?|crores?|cr)?\b"
+
     def _extract_budget(self, query_lower: str) -> int | None:
-        """Extract budget in INR from query."""
+        """Extract budget in INR from query.
+
+        Accepts thousands separators ("50,000"), k / lakh / crore units
+        ("50k", "1.5 lakh") and ₹ / rs / inr markers. The old pattern stopped
+        at the first comma ("budget of 50,000 inr" -> ₹50) and read
+        "1.5 lakh" as ₹1."""
+        amount = self._AMOUNT
         patterns = [
-            r"(?:budget|spend)\s+(?:of\s+)?₹?(\d+)(?:\s*(?:inr|rupees?))?",
-            r"₹(\d+)",
+            r"(?:budget|spend(?:ing)?)\s+(?:of\s+|is\s+|:\s*)?(?:₹|\brs\.?|\binr)?\s*"
+            + amount,
+            r"(?:₹|\brs\.?\s|\binr\s)\s*" + amount,
+            r"(\d[\d,]*(?:\.\d+)?)\s*(k|lakhs?|lacs?|crores?|cr)?\s*(?:inr|rupees?)\b",
+            r"(\d+(?:\.\d+)?)\s*(lakhs?|lacs?|crores?)\b",
         ]
         for pattern in patterns:
             match = re.search(pattern, query_lower)
-            if match:
-                return int(match.group(1))
+            if not match:
+                continue
+            try:
+                value = float(match.group(1).replace(",", ""))
+            except ValueError:
+                continue
+            unit = (match.group(2) or "").strip()
+            value *= self._MONEY_UNITS.get(unit, 1)
+            return int(round(value))
         return None
+
+    @staticmethod
+    def _keyword_in(keyword: str, text: str) -> bool:
+        """Whole-word match (optional plural) — never a substring."""
+        pat = rf"(?<![a-z0-9]){re.escape(keyword)}(?:e?s)?(?![a-z0-9])"
+        return re.search(pat, text) is not None
 
     def _extract_parts(self, query_lower: str) -> list[str]:
         """Extract parts mentioned in query."""
         mentioned = []
         for category, keywords in self.PART_KEYWORDS.items():
             for keyword in keywords:
-                if keyword in query_lower:
+                if self._keyword_in(keyword, query_lower):
                     mentioned.append(category)
                     break  # Only add category once
         return mentioned
 
     def _extract_track_prep(self, query_lower: str) -> str | None:
-        """Extract track prep type from query."""
+        """Extract track prep type (a models.TRACK_* constant) from query."""
         prep_map = {
-            "vht": ["vht", "victor"],
-            "pj1": ["pj1", "paint"],
-            "rubber": ["rubber", "buildup"],
+            TRACK_VHT: ["vht", "victor"],
+            TRACK_PJ1: ["pj1", "paint"],
+            TRACK_RUBBER: ["rubber", "buildup", "rubbered"],
         }
         for prep_type, keywords in prep_map.items():
             for keyword in keywords:
-                if keyword in query_lower:
+                if self._keyword_in(keyword, query_lower):
                     return prep_type
         return None
 
@@ -382,17 +469,31 @@ class NLSimRunner:
                 "error": f"No configuration found for {bike_model['manufacturer_name']} {bike_model['model_name']}"
             }
 
-        config = self.db.bikes.to_config(config_row["id"])
         bike_name = f"{bike_model['manufacturer_name']} {bike_model['model_name']}"
         if bike_model.get("model_code"):
             bike_name += f" {bike_model['model_code']}"
+        # Build the config exactly like /api/simulate does (the config row's
+        # JSON physics blob). BikeRepository.to_config prefers a stale
+        # dyno_curves row over that blob, so NL answers diverged from the API
+        # by up to 2.28 s for the same bike (October 2026 audit).
+        from .database.bridge import db_row_to_config
 
-        # Resolve venue and apply environment
+        config = db_row_to_config(dict(config_row), name=bike_name)
+
+        # Resolve venue and apply environment (the same fields /api/simulate
+        # applies for a venue_id: altitude + track surface). The alias table
+        # yields "aamby valley" but the catalog row is "Aamby Valley Airstrip
+        # (TVR)" — the old exact-name lookup never matched, so every NL venue
+        # was silently ignored.
         if parsed.venue_query:
-            venue = self.db.venues.get_by_name(parsed.venue_query)
+            venue = self._resolve_venue(parsed.venue_query)
             if venue:
                 config.environment.venue_name = venue["name"]
-                config.environment.altitude_m = venue["altitude_m"]
+                if venue.get("altitude_m") is not None:
+                    config.environment.altitude_m = float(venue["altitude_m"])
+                config.environment.track_surface = (
+                    venue.get("surface_type") or "asphalt"
+                ).lower()
 
         # Apply parsed environmental conditions
         if parsed.temperature_c is not None:
@@ -402,35 +503,47 @@ class NLSimRunner:
         if parsed.altitude_m is not None:
             config.environment.altitude_m = parsed.altitude_m
         if parsed.headwind_ms is not None:
-            config.environment.wind_speed_ms = parsed.headwind_ms
-            config.environment.wind_direction_deg = 0  # Headwind
+            # Wind direction is measured against the strip heading
+            # (EnvironmentParams.headwind_component): heading = pure headwind,
+            # heading + 180 = pure tailwind.
+            heading = float(getattr(config.environment, "track_heading_deg", 0.0))
+            config.environment.wind_speed_ms = abs(parsed.headwind_ms)
+            config.environment.wind_direction_deg = (
+                heading if parsed.headwind_ms >= 0 else (heading + 180.0) % 360.0
+            )
         if parsed.track_prep_type:
-            config.environment.track_prep = parsed.track_prep_type
+            # Physics reads the prep compound from the tyre model
+            # (TireParams.track_prep_multiplier); environment.track_prep is
+            # never read.
+            config.tires.track_prep_type = parsed.track_prep_type
 
-        # Apply parts if mentioned
-        applied_parts = []
+        # Apply parts if mentioned: the best COMPATIBLE part in each category
+        # (by simulated ET gain on this bike, within the remaining budget).
+        # The old runner took the first alphabetical row of the whole
+        # category (a Harley nitrous kit and a Rocket 3 exhaust on a
+        # Hayabusa) and then DISCARDED apply_part_to_config's return value,
+        # so the "modified" ET was the stock ET.
+        applied_parts: list[str] = []
+        applied_part_ids: list[int] = []
+        unavailable_parts: list[str] = []
+        applied_cost = 0.0
         if parsed.parts_mentioned:
-            # Find parts by category
-            for category in parsed.parts_mentioned:
-                parts = self.db.parts.search(category=category)
-                if parts:
-                    # Take the first part in that category
-                    best_part = parts[0]
-                    part_display = (
-                        best_part.get("model_name")
-                        or best_part.get("name")
-                        or "Unknown Part"
-                    )
-                    applied_parts.append(part_display)
-                    # Apply the part's overrides to config
-                    self._apply_part_overrides(config, best_part)
+            config, applied_cost = self._apply_mentioned_parts(
+                config,
+                bike_model["id"],
+                parsed,
+                applied_parts,
+                applied_part_ids,
+                unavailable_parts,
+            )
 
-        # Run simulation
-        engine = MotoQuantEngine(config)
-        result = engine.run()
+        # Run simulation (Rust core when active).
+        result = make_engine(config).run()
 
         # Generate suggestions
-        suggestions = self._generate_suggestions(parsed, config, result, applied_parts)
+        suggestions = self._generate_suggestions(
+            parsed, config, result, applied_parts, applied_cost
+        )
 
         return {
             "parsed_query": {
@@ -439,6 +552,7 @@ class NLSimRunner:
                 "venue_query": parsed.venue_query,
                 "temperature_c": parsed.temperature_c,
                 "humidity_pct": parsed.humidity_pct,
+                "budget_inr": parsed.budget_inr,
                 "parts_mentioned": parsed.parts_mentioned,
                 "optimization_goal": parsed.optimization_goal,
             },
@@ -452,6 +566,9 @@ class NLSimRunner:
                 "density_altitude_ft": config.environment.density_altitude_ft(),
             },
             "applied_parts": applied_parts,
+            "applied_part_ids": applied_part_ids,
+            "unavailable_parts": unavailable_parts,
+            "applied_cost_inr": round(applied_cost, 2),
             "et_s": round(result.time_quarter, 4),
             "trap_speed_kmh": round(result.speed_quarter * 3.6, 1),  # m/s to km/h
             "trap_speed_mph": round(result.speed_quarter * 2.237, 1),  # m/s to mph
@@ -460,57 +577,215 @@ class NLSimRunner:
             "suggestions": suggestions,
         }
 
+    def _apply_mentioned_parts(
+        self,
+        config: BikeConfig,
+        bike_model_id: int,
+        parsed: ParsedQuery,
+        applied_parts: list[str],
+        applied_part_ids: list[int],
+        unavailable_parts: list[str],
+    ) -> tuple[BikeConfig, float]:
+        """Apply the best compatible part per mentioned category.
+
+        Naturally-aspirated categories go first and forced induction last —
+        bridge.apply_part_to_config only scales the dyno curve while the
+        engine is still NA. Returns (modified config, total part cost).
+        """
+        from .analysis.outlaw import _best_drag_tire
+        from .analysis.roi import CANDIDATE_LIMIT, compute_parts_roi
+
+        boost = {"boost_kit", "nitrous"}
+        mentions = sorted(
+            parsed.parts_mentioned,
+            key=lambda m: self.parser.CATEGORY_FOR_MENTION.get(m) in boost,
+        )
+        budget_left = float(parsed.budget_inr) if parsed.budget_inr else None
+        spent = 0.0
+        used_categories: set[str] = set()
+        for mention in mentions:
+            if mention == "tire":
+                best = _best_drag_tire(self.db.tires, bike_model_id)
+                if best and float(best.get("mu_peak") or 0) > config.tires.mu_peak:
+                    config.tires.mu_peak = float(best["mu_peak"])
+                    applied_parts.append(
+                        f"{best.get('tire_manufacturer', '')} "
+                        f"{best.get('model_name', '')}".strip()
+                    )
+                    spent += float(best.get("price_inr") or 0.0)
+                else:
+                    unavailable_parts.append("drag tyre (none better than stock)")
+                continue
+            category = self.parser.CATEGORY_FOR_MENTION.get(mention)
+            if category is None:
+                continue
+            # turbo + supercharger both map to boost_kit: one forced-induction
+            # system per bike.
+            if category in used_categories or (
+                category in boost and used_categories & boost
+            ):
+                continue
+            rows = self.db.parts.search(
+                category=category,
+                bike_model_id=bike_model_id,
+                limit=CANDIDATE_LIMIT,
+            )
+            if mention in self._BOOST_FLAVOUR:
+                # "turbo" must not silently fit a supercharger (both are
+                # boost_kit rows) — filter on the kit's boost_type override.
+                rows = [r for r in rows if self._boost_flavour(r) == mention]
+            if budget_left is not None:
+                rows = [
+                    r for r in rows if float(r.get("price_inr") or 0.0) <= budget_left
+                ]
+            if not rows:
+                unavailable_parts.append(mention)
+                continue
+            rois = compute_parts_roi(
+                config, [r["id"] for r in rows], self.db.parts, min_delta_et_ms=0.0
+            )
+            if not rois:
+                unavailable_parts.append(mention)
+                continue
+            best_roi = max(rois, key=lambda r: r.delta_et_s)
+            part = next(r for r in rows if r["id"] == best_roi.part_id)
+            config = self._apply_part_overrides(config, part)
+            used_categories.add(category)
+            applied_parts.append(
+                f"{part.get('brand', '')} {part.get('model_name', '')}".strip()
+            )
+            applied_part_ids.append(part["id"])
+            price = float(part.get("price_inr") or 0.0)
+            spent += price
+            if budget_left is not None:
+                budget_left -= price
+        return config, spent
+
+    def _resolve_venue(self, venue_query: str) -> dict | None:
+        """Venue row for a parsed venue name (exact, then fuzzy)."""
+        venue = self.db.venues.get_by_name(venue_query)
+        if venue:
+            return venue
+        try:
+            from .llm.resolver import resolve_venue
+
+            venue_id = resolve_venue(venue_query, self.db)
+        except Exception:  # noqa: BLE001 — no venue is better than a crash
+            venue_id = None
+        return self.db.venues.get(venue_id) if venue_id is not None else None
+
+    _BOOST_FLAVOUR = ("turbo", "supercharger")
+
+    @staticmethod
+    def _boost_flavour(part: dict) -> str | None:
+        """'turbo' / 'supercharger' from a boost kit's boost_type override."""
+        import json as _json
+
+        raw = part.get("param_overrides") or {}
+        if isinstance(raw, str):
+            try:
+                raw = _json.loads(raw)
+            except (ValueError, TypeError):
+                raw = {}
+        bt = str((raw or {}).get("forced_induction.boost_type") or "")
+        if bt.startswith("turbo"):
+            return "turbo"
+        if bt.startswith("sc"):
+            return "supercharger"
+        return None
+
     def _resolve_bike(self, bike_query: str) -> dict | None:
         """
         Resolve a bike query string to a bike model in the database.
         Returns the bike model row or None if not found.
+
+        Order: canonical nicknames/model codes ("k5", "r1", "busa") ->
+        whole-word catalog match on model name / exact model code -> the
+        scored fuzzy resolver (llm.resolver) -> manufacturer alias ->
+        category. A bare substring search is never trusted for short codes:
+        "k5" used to resolve to BMW "R 1250 RT" (model code K52) and "r1" to
+        "R 12 nineT".
         """
         if not bike_query:
             return None
+        q = bike_query.lower().strip()
+        key = re.sub(r"[\s\-_]+", "", q)
 
-        # Try name_contains match (searches model_name and model_code)
-        rows = self.db.bikes.search(name_contains=bike_query)
-        if rows:
-            return rows[0]
-
-        # Try code match (for things like "K5", "K6", "K7", etc.)
-        # Map common codes to their manufacturer
-        code_manufacturer_map = {
-            "k5": "suzuki",
-            "k6": "suzuki",
-            "k7": "suzuki",
-            "k9": "suzuki",
-            "l7": "suzuki",
-            "gen1": "suzuki",
-            "gen2": "suzuki",
-            "gen3": "suzuki",
-        }
-        if bike_query.lower() in code_manufacturer_map:
-            mfg = code_manufacturer_map[bike_query.lower()]
-            rows = self.db.bikes.search(manufacturer=mfg)
+        canon = self.parser.CANONICAL_BIKES.get(key)
+        if canon is not None:
+            name_part, code = canon
+            rows = self.db.bikes.search(name_contains=name_part, limit=200)
+            if code:
+                coded = [
+                    r
+                    for r in rows
+                    if str(r.get("model_code") or "").lower() == code.lower()
+                ]
+                rows = coded or rows
             if rows:
-                return rows[0]
+                return sorted(rows, key=lambda r: r["id"])[0]
 
-        # Try manufacturer only
-        rows = self.db.bikes.search(manufacturer=bike_query)
+        # "<model> <model code>" ("hayabusa gen2", "gsx-r 1000 k7", "r1 rn32").
+        tokens = q.split()
+        if len(tokens) > 1:
+            for i, tok in enumerate(tokens):
+                rest = " ".join(t for j, t in enumerate(tokens) if j != i)
+                rows = self.db.bikes.search(name_contains=rest, limit=200)
+                coded = [
+                    r for r in rows if str(r.get("model_code") or "").lower() == tok
+                ]
+                if coded:
+                    return coded[0]
+
+        word = rf"(?<![a-z0-9]){re.escape(q)}(?![a-z0-9])"
+        rows = self.db.bikes.search(name_contains=q, limit=200)
+        exact = [
+            r
+            for r in rows
+            if re.search(word, str(r.get("model_name") or "").lower())
+            or str(r.get("model_code") or "").lower() == q
+        ]
+        if exact:
+            return exact[0]
+
+        try:
+            from .llm.resolver import resolve_bike
+
+            bike_id, _suggestions = resolve_bike(bike_query, self.db)
+        except Exception:  # noqa: BLE001 — fall through to the simple paths
+            bike_id = None
+        if bike_id is not None:
+            model = self.db.bikes.get_model(bike_id)
+            if model:
+                return model
+
+        mfg = self.parser.BIKE_ALIASES.get(key, q)
+        rows = self.db.bikes.search(manufacturer=mfg)
         if rows:
             return rows[0]
 
         # Try category match (e.g., "sport")
-        rows = self.db.bikes.search(category=bike_query)
+        rows = self.db.bikes.search(category=q)
         if rows:
             return rows[0]
 
         return None
 
-    def _apply_part_overrides(self, config: BikeConfig, part: dict):
-        """Apply a part's parameter overrides to a config."""
+    def _apply_part_overrides(self, config: BikeConfig, part: dict) -> BikeConfig:
+        """Apply a part to ``config`` and RETURN the modified config.
+
+        apply_part_to_config never mutates its input; callers must use the
+        returned config (the old version discarded it, so NL "with exhaust"
+        queries simulated the stock bike)."""
         from .database.bridge import apply_part_to_config
 
         try:
-            apply_part_to_config(config, part)
+            return apply_part_to_config(config, part)
         except Exception as e:
-            print(f"Warning: could not apply part {part['name']}: {e}")
+            print(
+                f"Warning: could not apply part {part.get('model_name', part.get('id'))}: {e}"
+            )
+            return config
 
     def _generate_suggestions(
         self,
@@ -518,6 +793,7 @@ class NLSimRunner:
         config: BikeConfig,
         result: SimResult,
         applied_parts: list[str],
+        applied_cost: float = 0.0,
     ) -> list[str]:
         """Generate optimization suggestions based on the result."""
         suggestions = []
@@ -543,29 +819,17 @@ class NLSimRunner:
                 "High ambient temperature reduces tire grip. Consider slick tires or track prep."
             )
 
-        # Budget suggestions
+        # Budget suggestions (priced from the parts actually applied)
         if parsed.budget_inr and applied_parts:
-            try:
-                applied_cost = 0
-                for part_name in applied_parts:
-                    # Search for the part by name_contains
-                    parts_list = self.db.parts.search(name_contains=part_name)
-                    if parts_list:
-                        price = parts_list[0].get("price_inr", 0)
-                        applied_cost += price
-
-                remaining = parsed.budget_inr - applied_cost
-                if remaining > 0:
-                    suggestions.append(
-                        f"₹{remaining:,} remaining in budget. Explore additional parts."
-                    )
-                elif remaining < 0:
-                    suggestions.append(
-                        f"Budget exceeded by ₹{abs(remaining):,}. Consider lower-cost alternatives."
-                    )
-            except Exception:
-                # Silently fail on budget calculation
-                pass
+            remaining = parsed.budget_inr - applied_cost
+            if remaining > 0:
+                suggestions.append(
+                    f"₹{remaining:,.0f} remaining in budget. Explore additional parts."
+                )
+            elif remaining < 0:
+                suggestions.append(
+                    f"Budget exceeded by ₹{abs(remaining):,.0f}. Consider lower-cost alternatives."
+                )
 
         return suggestions
 

@@ -45,8 +45,8 @@ from pathlib import Path
 
 import numpy as np
 
+from .. import engine_select
 from ..models import BikeConfig
-from ..physics import MotoQuantEngine
 
 logger = logging.getLogger(__name__)
 
@@ -638,7 +638,7 @@ def generate_training_data(
         try:
             cfg = _apply_features_to_config(base_config, feat)
             feat = {**feat, **_extras_from_config(cfg)}
-            engine = MotoQuantEngine(cfg)
+            engine = engine_select.make_engine(cfg)
             result = engine.run()
 
             if result.time_quarter is None or not np.isfinite(result.time_quarter):

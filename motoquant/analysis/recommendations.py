@@ -45,13 +45,19 @@ from enum import Enum
 
 from ..models import BikeConfig
 from .roi import (
+    _EXCLUSIVE_CATEGORY_ALIASES,
+    CANDIDATE_LIMIT,
     EXCLUSIVE_CATEGORIES,
     BuildROIResult,
     PartROIResult,
+    _knapsack_group_key,
+    _part_slots_from_repo,
     _run_et,
+    _sprocket_positions,
     compute_parts_roi,
     find_best_build,
     rank_categories,
+    score_build,
 )
 
 # ─────────────────────────────────────────────────────────────────
@@ -135,7 +141,18 @@ _PROFILE_CATEGORIES: dict[BuildProfile, set[str]] = {
 # nitrous / wheelie_bar / swingarm_ext added — a build can no more carry
 # two chains or two turbo kits than two exhausts. Sprockets are handled
 # position-aware (one front + one rear) inside the knapsack itself.
-EXCLUSIVE_GROUPS: list[set[str]] = [{cat} for cat in sorted(EXCLUSIVE_CATEGORIES)]
+# Categories that share one physical slot (roi._EXCLUSIVE_CATEGORY_ALIASES:
+# lockup clutch + clutch kit, air shifter + quickshifter, nitrous + turbo/SC)
+# form ONE group, so the duplicate check below flags a nitrous kit next to a
+# supercharger exactly like two exhausts.
+def _build_exclusive_groups() -> list[set[str]]:
+    by_slot: dict[str, set[str]] = {}
+    for cat in sorted(EXCLUSIVE_CATEGORIES):
+        by_slot.setdefault(_EXCLUSIVE_CATEGORY_ALIASES.get(cat, cat), set()).add(cat)
+    return [by_slot[k] for k in sorted(by_slot)]
+
+
+EXCLUSIVE_GROUPS: list[set[str]] = _build_exclusive_groups()
 
 # Synergy pairs: categories that gain more when combined.
 # The multiplier is applied to the *combined* delta_et prediction
@@ -472,16 +489,17 @@ def _detect_warnings(selected_parts: list[PartROIResult]) -> list[CompatibilityW
         cat_counts[p.category] = cat_counts.get(p.category, 0) + 1
 
     for group in EXCLUSIVE_GROUPS:
-        for cat in group:
-            if cat_counts.get(cat, 0) > 1:
-                warns.append(
-                    CompatibilityWarning(
-                        severity="critical",
-                        category_a=cat,
-                        category_b=None,
-                        message=f"Multiple {cat} parts selected — only one can be installed at a time",
-                    )
+        present = sorted(cat for cat in group if cat_counts.get(cat, 0) > 0)
+        if sum(cat_counts.get(cat, 0) for cat in group) > 1:
+            label = " / ".join(present)
+            warns.append(
+                CompatibilityWarning(
+                    severity="critical",
+                    category_a=present[0],
+                    category_b=present[1] if len(present) > 1 else None,
+                    message=f"Multiple {label} parts selected — only one can be installed at a time",
                 )
+            )
 
     return warns
 
@@ -489,20 +507,39 @@ def _detect_warnings(selected_parts: list[PartROIResult]) -> list[CompatibilityW
 def _find_next_upgrade(
     selected_part_ids: set[int],
     all_roi: list[PartROIResult],
+    *,
+    group_key=None,
+    occupied_groups=None,
+    marginal_fn=None,
+    max_probes: int = 5,
+    min_gain_s: float = 0.005,
 ) -> NextUpgrade | None:
     """
     Find the single best part to add next, excluding already-selected parts.
 
-    Rather than re-simulating, uses the individual ROI results as estimates.
-    The marginal gain is approximate (ignores interactions with existing parts)
-    but is fast and directionally correct.
+    Candidates are ranked by their individual ROI. Two corrections (October
+    2026 audit — the old version offered a second front sprocket for a build
+    that already had one, and a second air filter, and those "upgrades" made
+    the build 0.04-0.13 s SLOWER):
+
+    * ``group_key`` + ``occupied_groups``: parts whose knapsack slot the build
+      already fills are not offered (no second sprocket in the same position,
+      no second filter / exhaust / fairing...).
+    * ``marginal_fn(part) -> real ET gain of build+part``: when given, the
+      top ``max_probes`` candidates are re-scored on the actual build and the
+      reported marginal gain is that real number; candidates that do not
+      really help (< ``min_gain_s``) are skipped. Without it the individual
+      stock-bike delta is used as an approximation (no interaction effects).
     """
+    occupied = set(occupied_groups or ())
     candidates = [
         r
         for r in all_roi
         if r.part_id not in selected_part_ids
-        and r.delta_et_s > 0.005  # at least 5 ms gain
+        and r.delta_et_s > min_gain_s
         and r.price_inr > 0
+        and r.is_compatible
+        and (group_key is None or group_key(r) not in occupied)
     ]
 
     if not candidates:
@@ -516,24 +553,35 @@ def _find_next_upgrade(
         )
     )
 
-    best = candidates[0]
-    marginal_roi, _ = (
-        (best.delta_et_s / best.price_inr * 100_000, None)
-        if best.price_inr > 0
-        else (float("inf"), None)
-    )
+    best, gain = None, 0.0
+    if marginal_fn is None:
+        best, gain = candidates[0], candidates[0].delta_et_s
+    else:
+        for r in candidates[: max(1, max_probes)]:
+            try:
+                g = float(marginal_fn(r))
+            except Exception:  # noqa: BLE001 — skip a candidate that can't be scored
+                continue
+            if g > min_gain_s:
+                best, gain = r, g
+                break
+        if best is None:
+            return None
+
+    marginal_roi = gain / best.price_inr * 100_000
 
     # Generate reason
-    if best.roi_score > 1.0:
-        reason = f"Excellent ROI — {best.category_display or best.category} upgrade"
-    elif best.delta_et_s > 0.1:
-        reason = f"Large ET gain ({best.delta_et_s:.3f}s) — {best.category_display or best.category}"
+    label = best.category_display or best.category
+    if marginal_roi > 1.0:
+        reason = f"Excellent ROI — {label} upgrade"
+    elif gain > 0.1:
+        reason = f"Large ET gain ({gain:.3f}s) — {label}"
     else:
-        reason = f"Best remaining value in {best.category_display or best.category}"
+        reason = f"Best remaining value in {label}"
 
     return NextUpgrade(
         part=best,
-        marginal_et_gain_s=best.delta_et_s,
+        marginal_et_gain_s=gain,
         marginal_cost_inr=best.price_inr,
         marginal_roi=marginal_roi,
         reason=reason,
@@ -581,7 +629,7 @@ def recommend_build(
     # Get all candidate parts, filtered by profile
     all_parts = parts_repo.search(
         bike_model_id=bike_model_id,
-        limit=200,
+        limit=CANDIDATE_LIMIT,
     )
     filtered_parts = _filter_parts_by_profile(all_parts, profile)
     filtered_ids = [p["id"] for p in filtered_parts]
@@ -634,13 +682,28 @@ def recommend_build(
     # Category priority
     cat_priority = rank_categories(all_roi)
 
-    # Next upgrade
+    # Next upgrade — never for a slot the build already fills, and scored on
+    # the real build (one sim per probed candidate) rather than the stock bike.
     next_up = None
     if include_next_upgrade:
-        selected_ids = {p.part_id for p in build.selected_parts}
+        selected = list(build.selected_parts)
+        ids = [r.part_id for r in all_roi]
+        position_of = _sprocket_positions(parts_repo, ids)
+        slot_of = _part_slots_from_repo(parts_repo, ids)
+
+        def group_key(r):
+            return _knapsack_group_key(r, position_of, slot_of)
+
+        def marginal(r):
+            et, _trap = score_build(base_config, selected + [r], parts_repo, _run_et)
+            return build.modified_et_s - et
+
         next_up = _find_next_upgrade(
-            selected_part_ids=selected_ids,
+            selected_part_ids={p.part_id for p in selected},
             all_roi=all_roi,
+            group_key=group_key,
+            occupied_groups={group_key(r) for r in selected},
+            marginal_fn=marginal,
         )
 
     return BuildRecommendation(
@@ -694,7 +757,7 @@ def generate_upgrade_path(
     n_tiers = max(2, min(5, n_tiers))
 
     # Discover available parts
-    all_parts = parts_repo.search(bike_model_id=bike_model_id, limit=200)
+    all_parts = parts_repo.search(bike_model_id=bike_model_id, limit=CANDIDATE_LIMIT)
     filtered_parts = _filter_parts_by_profile(all_parts, profile)
 
     if not filtered_parts:
@@ -767,7 +830,7 @@ def get_category_upgrade_order(
 
     Useful for building a "what to buy first" guide.
     """
-    all_parts = parts_repo.search(bike_model_id=bike_model_id, limit=200)
+    all_parts = parts_repo.search(bike_model_id=bike_model_id, limit=CANDIDATE_LIMIT)
     filtered_parts = _filter_parts_by_profile(all_parts, profile)
     filtered_ids = [p["id"] for p in filtered_parts]
 
