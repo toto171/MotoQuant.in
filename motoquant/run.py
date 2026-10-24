@@ -1677,8 +1677,10 @@ def cmd_import(args):
         try:
             from .database.seed import seed_bike_tire_fitments
 
-            n_fits = seed_bike_tire_fitments(db)
-            print(f"    Tire fitments:   {n_fits} (rebuilt for new bikes)")
+            # preserve_existing: only fill bikes that have no OEM fitment, so
+            # curated fitment fixes on the shipped DB are never overwritten.
+            n_fits = seed_bike_tire_fitments(db, preserve_existing=True)
+            print(f"    Tire fitments:   {n_fits} (filled for new bikes)")
         except Exception as e:
             print(f"    Tire fitment refresh skipped: {e}")
 
@@ -2765,7 +2767,6 @@ def cmd_pricing(args):
         payload = {
             "total": summary.total,
             "urls_filled": summary.urls_filled,
-            "check_stamps_updated": summary.check_stamps_updated,
             "skipped_no_retailer": summary.skipped_no_retailer,
             "dry_run": bool(getattr(args, "dry_run", False)),
         }
@@ -2778,7 +2779,6 @@ def cmd_pricing(args):
             )
             print(f"    Total parts .............. {summary.total}")
             print(f"    URLs filled .............. {summary.urls_filled}")
-            print(f"    Check-stamps updated ..... {summary.check_stamps_updated}")
             print(f"    Skipped (no retailer) .... {summary.skipped_no_retailer}")
         db.close()
         return 0

@@ -192,9 +192,19 @@ def main():
             )
 
     db.conn.commit()
+    db.close()
+
+    # Keep the derived tables in step with the rewritten blobs: the
+    # dyno_curves rows and the bike_models headline columns are read by
+    # other surfaces (CLI/chat via to_config, catalog listings). Without
+    # this, every reseed silently re-staled them (2026-10-24 audit).
+    from scripts.patch_2026_10_24_config_sync import apply as sync_derived_tables
+
+    sync = sync_derived_tables(db_path)
 
     print("", flush=True)
     print("Summary:", flush=True)
+    print("  Derived sync:   %s" % sync, flush=True)
     print("  Updated:        %d" % updated, flush=True)
     print("  No spec match:  %d" % skipped_no_spec, flush=True)
     print("  Errors:         %d" % errors, flush=True)
@@ -207,7 +217,6 @@ def main():
         if len(unmatched) > 30:
             print("  ... and %d more" % (len(unmatched) - 30), flush=True)
 
-    db.close()
     return 0 if errors == 0 else 1
 
 

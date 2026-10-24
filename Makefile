@@ -1,4 +1,4 @@
-# MotoQuant Pro — developer entry point.
+# MotoQuant — developer entry point.
 #
 # The one interface every contributor (human or AI) should use. It encodes the
 # same commands CI runs, so "green locally" ≈ "green in CI". Run `make` (or
@@ -17,7 +17,7 @@ FAST_TESTS := tests/test_validation.py tests/test_scraper.py \
 
 .PHONY: help
 help: ## Show this help
-	@echo "MotoQuant Pro — make targets:"
+	@echo "MotoQuant — make targets:"
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 	  | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
 	@echo ""
@@ -31,9 +31,13 @@ install: ## Install runtime + dev dependencies and the package (editable)
 	$(PY) -m pip install -e .
 
 .PHONY: db
-db: ## Initialise + seed a fresh dev database (motoquant.db ships seeded)
-	$(PY) -m motoquant.run db init
-	$(PY) -m motoquant.run db seed
+DEV_DB ?= /tmp/motoquant-dev.db
+
+db: ## Build a fresh dev database at $(DEV_DB) (the tracked motoquant.db ships seeded)
+	rm -f $(DEV_DB)
+	$(PY) -m motoquant.run --db $(DEV_DB) db init
+	$(PY) -m motoquant.run --db $(DEV_DB) db seed
+	@echo "Dev DB at $(DEV_DB) -- use it with MOTOQUANT_DB=$(DEV_DB)
 
 .PHONY: lock
 lock: ## Regenerate requirements-api.lock (clean-venv resolve of requirements-api.txt)

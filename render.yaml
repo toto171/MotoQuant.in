@@ -64,6 +64,11 @@ services:
       # /api/health -> engine shows what is live. docs/RUST_CORE.md.
       - key: MOTOQUANT_ENGINE
         value: auto
+      # Render's edge is exactly one appending proxy: rate limits key on the
+      # client IP it reports, never on a spoofable leftmost X-Forwarded-For.
+      # (Auto mode also picks 1 on Render; this pins it explicitly.)
+      - key: MOTOQUANT_TRUSTED_PROXY_HOPS
+        value: "1"
       # Optional: surface FastAPI / uvicorn logs at INFO level
       - key: UVICORN_LOG_LEVEL
         value: info

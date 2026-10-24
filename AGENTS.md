@@ -98,8 +98,9 @@ before a big change.
 - Everything is free, so **per-IP rate limits are the abuse fuse**. Every
   compute-heavy public route gets a `rate_limit(...)` dependency, plus the
   daily chat cap (`MOTOQUANT_CHAT_DAILY_LIMIT`) for the LLM bill. Buckets
-  key on the **rightmost** `X-Forwarded-For` hop (single trusted proxy =
-  Render), never the client-spoofable leftmost.
+  key on the client IP derived from `X-Forwarded-For` only for the trusted
+  proxy hops (`MOTOQUANT_TRUSTED_PROXY_HOPS`; auto = 1 on Render), never the
+  client-spoofable leftmost hop.
 - The chat agent's `web_fetch` re-checks the SSRF guard on **every redirect
   hop**. Any server-side fetch of a user/LLM-controlled URL must do the same.
 - SQL is always parameterized. No secrets in tracked files (the health check

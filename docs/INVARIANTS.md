@@ -93,14 +93,14 @@ check, and the release checklist.
   `tests/test_open_source_pivot.py::TestChatDailyCap`, and
   `tests/test_open_source_pivot.py::TestMonetizationIsGone` (no payment or
   subscription routes, no quota headers, no paywall can creep back).
-- **Client IP for rate limiting = rightmost `X-Forwarded-For` hop** (single
-  trusted proxy). The leftmost is client-spoofable. Implemented in
-  `client_ip()` (`motoquant/ratelimit.py`). **Partially enforced:**
-  `test_x_forwarded_for_distinguishes_clients` in `tests/test_ratelimit.py`
-  pins that the header is used for keying, but it sends a *single-hop* value,
-  so it cannot tell rightmost from leftmost; nothing currently pins the hop
-  selection, and `tests/test_api.py` (named here previously) has no
-  `X-Forwarded-For` test at all. A multi-hop case is the missing pin.
+- **Client IP for rate limiting = the N-th `X-Forwarded-For` hop from the
+  right, for N = trusted proxy hops** (`MOTOQUANT_TRUSTED_PROXY_HOPS`; unset =
+  1 on Render or behind a loopback/unix/private-network proxy, else 0 = key
+  on the socket peer). The leftmost hop is client-spoofable and is never
+  used. Implemented in `client_ip()` (`motoquant/ratelimit.py`). Enforced
+  by `tests/test_fixwave_sec_xff.py` (multi-hop selection, spoofing without
+  a trusted proxy, invalid values failing closed) and
+  `test_x_forwarded_for_distinguishes_clients` in `tests/test_ratelimit.py`.
 - **`web_fetch` re-checks the SSRF guard on every redirect hop** and bounds the
   whole chain to one timeout. Any server-side fetch of a user/LLM-controlled URL
   must too. — `tests/test_webtools_ssrf.py`.

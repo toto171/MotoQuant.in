@@ -3937,6 +3937,29 @@ class OptimizeBuildRequest(BaseModel):
     model_config = {"populate_by_name": True}
 
 
+# Reference presets → their catalog rows, so preset requests still get a
+# compatibility-filtered parts pool (parts_repo.search fails closed for an
+# unknown bike and returns nothing useful for bike_model_id=None).
+_PRESET_MODEL_NAMES = {
+    "gsxr1000_k5": "GSX-R 1000 K5/K6",
+    "yzfr1_4c8": "YZF-R1 4C8",
+    "hayabusa_gen1": "Hayabusa GSX1300R Gen1",
+}
+
+
+def _parts_model_id(conn, bike_id: int | None, bike_preset: str | None) -> int | None:
+    """bike_models.id to filter parts by: the request's bike, else its preset's row."""
+    if bike_id is not None:
+        return bike_id
+    name = _PRESET_MODEL_NAMES.get(bike_preset or "gsxr1000_k5")
+    if name is None:
+        return None
+    row = conn.execute(
+        "SELECT id FROM bike_models WHERE model_name = ? ORDER BY id LIMIT 1", (name,)
+    ).fetchone()
+    return int(row[0]) if row else None
+
+
 def _optimize_impl(req: OptimizeBuildRequest, progress=None):
     """
     Return the best parts combination for a bike within a budget, optimised for
@@ -3992,7 +4015,7 @@ def _optimize_impl(req: OptimizeBuildRequest, progress=None):
             PartsRepository(conn),
             goal=req.goal,
             profile=req.profile,
-            bike_model_id=req.bike_id,
+            bike_model_id=_parts_model_id(conn, req.bike_id, req.bike_preset),
             surrogate=_SURROGATE,
             surrogate_source=_SURROGATE_SOURCE,
             max_candidates=req.max_candidates,
@@ -4268,7 +4291,7 @@ def _outlaw_impl(req: OutlawRequest, progress=None) -> dict:
             config,
             PartsRepository(conn),
             TireRepository(conn),
-            bike_model_id=req.bike_id,
+            bike_model_id=_parts_model_id(conn, req.bike_id, req.bike_preset),
             budget_inr=req.budget_inr,
             goal=req.goal,
             surrogate=surrogate,

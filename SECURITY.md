@@ -75,7 +75,8 @@ Out of scope:
 
 So that a report can focus on what is new: SQL is parameterized; the chat
 agent's `web_fetch` re-checks the SSRF guard on every redirect hop; per-IP
-rate limits key on the rightmost `X-Forwarded-For` hop; magic-link tokens are
+rate limits trust `X-Forwarded-For` only for the configured proxy hops
+(`MOTOQUANT_TRUSTED_PROXY_HOPS`); magic-link tokens are
 never echoed in responses on a deployed host; a deployed host never signs
 sessions with the public development JWT secret (it uses an ephemeral secret
 if none is configured). [docs/INVARIANTS.md](docs/INVARIANTS.md) lists the

@@ -208,10 +208,21 @@ Every simulation and analysis route is free and anonymous, so each
 compute-heavy route has a per-IP fixed-window rate limit (`motoquant/ratelimit.py`):
 simulate, top speed, distance, compare, optimizer, autotune, calibration
 uploads, saving a run, telemetry, and chat. Over the limit, a route answers
-`429` with a `Retry-After` header. The client IP is the **rightmost**
-`X-Forwarded-For` hop, which assumes exactly one trusted proxy in front of
-the API (Render's edge). If you put more proxies in front, adjust
-`client_ip()` accordingly.
+`429` with a `Retry-After` header.
+
+The client IP comes from `X-Forwarded-For` only as far as you trust it,
+set by `MOTOQUANT_TRUSTED_PROXY_HOPS`:
+
+- **unset (auto):** trust 1 hop on Render (the `RENDER` env var) or when the
+  connection comes from loopback, a unix socket or a private-network peer
+  (Docker bridge + nginx/Caddy); otherwise trust none and key on the socket
+  peer.
+- **`0`:** never trust the header (API exposed directly to the internet).
+- **`N`:** you run N appending proxies; the client is the N-th hop from the
+  right.
+
+Invalid values fail closed to 0 with a warning. Trusting more hops than you
+actually run lets clients spoof their IP and dodge the limits.
 
 `MOTOQUANT_RATE_LIMIT=false` disables every limit. Use it for tests, not for
 a public instance. These counters are in-process; for multi-replica or
