@@ -24,3 +24,8 @@ CLAUDE.md
 Dockerfile
 railway.toml
 nixpacks.toml
+# Rust core: the builder stage compiles rust/ from source. Never send local
+# build output (rust/target can be several GB) or the parity fixtures (test
+# data only) into the build context.
+rust/target
+rust/fixtures

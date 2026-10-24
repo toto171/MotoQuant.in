@@ -658,7 +658,7 @@ def _exec_run_simulation(ctx: AgentContext, args: dict) -> dict:
     err = ctx.spend_sims(1)
     if err:
         return {"error": err}
-    from ..physics import MotoQuantEngine
+    from ..engine_select import make_engine
 
     try:
         config, notes = _build_config_for(ctx, args)
@@ -667,7 +667,7 @@ def _exec_run_simulation(ctx: AgentContext, args: dict) -> dict:
     bike_name = _bike_display_name(ctx.db, int(args["bike_id"]))
     ctx.tick(0.0, f"Simulating {bike_name}")
     try:
-        sim = MotoQuantEngine(config).run()
+        sim = make_engine(config).run()
     except Exception as e:  # noqa: BLE001
         return {"error": f"simulation failed: {type(e).__name__}: {e}"}
     out = _sim_to_dict(sim, bike_name, notes)
@@ -679,7 +679,7 @@ def _exec_run_top_speed(ctx: AgentContext, args: dict) -> dict:
     err = ctx.spend_sims(1)
     if err:
         return {"error": err}
-    from ..physics import MotoQuantEngine
+    from ..engine_select import make_engine
 
     try:
         config, notes = _build_config_for(ctx, args)
@@ -688,7 +688,7 @@ def _exec_run_top_speed(ctx: AgentContext, args: dict) -> dict:
     bike_name = _bike_display_name(ctx.db, int(args["bike_id"]))
     ctx.tick(0.0, f"Top-speed run: {bike_name}")
     try:
-        ts = MotoQuantEngine(config).run_top_speed()
+        ts = make_engine(config).run_top_speed()
     except Exception as e:  # noqa: BLE001
         return {"error": f"top-speed sim failed: {type(e).__name__}: {e}"}
     out = {
@@ -711,7 +711,7 @@ def _exec_compare_bikes(ctx: AgentContext, args: dict) -> dict:
     err = ctx.spend_sims(2)
     if err:
         return {"error": err}
-    from ..physics import MotoQuantEngine
+    from ..engine_select import make_engine
 
     results = {}
     for key, id_key in (("a", "bike_a_id"), ("b", "bike_b_id")):
@@ -723,7 +723,7 @@ def _exec_compare_bikes(ctx: AgentContext, args: dict) -> dict:
         name = _bike_display_name(ctx.db, int(args[id_key]))
         ctx.tick(0.0, f"Simulating {name}")
         try:
-            sim = MotoQuantEngine(config).run()
+            sim = make_engine(config).run()
         except Exception as e:  # noqa: BLE001
             return {"error": f"bike {key} sim failed: {type(e).__name__}: {e}"}
         results[key] = _sim_to_dict(sim, name, notes)
@@ -805,7 +805,7 @@ def _exec_list_tires(ctx: AgentContext, args: dict) -> dict:
 
 def _exec_rank_bikes(ctx: AgentContext, args: dict) -> dict:
     """Shortlist by power-to-weight (cheap SQL), then rank by REAL sims."""
-    from ..physics import MotoQuantEngine
+    from ..engine_select import make_engine
 
     top_n = max(1, min(int(args.get("top_n") or 5), 5))
     sql = """
@@ -847,7 +847,7 @@ def _exec_rank_bikes(ctx: AgentContext, args: dict) -> dict:
                 ctx, {"bike_id": row["id"], **{k: args.get(k) for k in _ENV_PROPS}}
             )
             ctx.tick(0.0, f"Simulating {row['manufacturer']} {row['model_name']}")
-            sim = MotoQuantEngine(config).run()
+            sim = make_engine(config).run()
             ranked.append(
                 {
                     "bike_id": row["id"],

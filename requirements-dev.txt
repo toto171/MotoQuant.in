@@ -50,6 +50,9 @@ scikit-learn>=1.3,<2
 scipy>=1.10.0,<2
 
 # Builds the optional Rust physics core's PyO3 extension (`make native`;
-# rust/motoquant-core, docs/RUST_CORE.md). Not needed to run anything — the
-# pure-Python engine is the reference and remains the default.
+# rust/motoquant-core, docs/RUST_CORE.md). Not needed to run anything: the
+# pure-Python engine is the reference, and the engine selector
+# (MOTOQUANT_ENGINE=auto, motoquant/engine_select.py) only switches to the
+# Rust core when it is installed, current and bit-exact on this host.
+# `make native-test` needs it plus a Rust toolchain.
 maturin>=1.5,<2

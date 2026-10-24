@@ -183,6 +183,13 @@ provider's key (`GROQ_API_KEY`, `GEMINI_API_KEY`, `ANTHROPIC_API_KEY`, …).
 Without a key, chat answers `llm_not_configured` and everything else still
 works. The CLI's `nl` subcommand needs no key at all.
 
+The chat is a multi-step tool-calling agent (up to 8 tool rounds per turn),
+so tool-use reliability matters more than raw speed. Free providers are fine
+for a public demo; `anthropic` (Claude) gives the most reliable multi-step
+tool use but is billed per token — each chat turn makes 2-8 LLM calls, so pair
+it with a sensible daily cap. `ANTHROPIC_MODEL` (and `GEMINI_MODEL` /
+`GROQ_MODEL`) override the default model per provider.
+
 Whoever runs a deployment pays for its LLM key, so chat has two fuses:
 
 - a per-minute per-IP rate limit, and

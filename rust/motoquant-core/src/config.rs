@@ -14,8 +14,13 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::error::SimError;
+
 /// Resolved-config schema version. Must equal `native.SCHEMA_VERSION`.
-pub const SCHEMA_VERSION: u32 = 1;
+///
+/// History: 1 = initial (2026-10-23); 2 = `mass.m_total_cfg` (the live
+/// `chassis.total_mass_kg` Python re-reads from step 1 onward).
+pub const SCHEMA_VERSION: u32 = 2;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -29,8 +34,13 @@ pub struct Constants {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Mass {
-    /// `chassis.total_mass_kg` at t = 0 (fuel burn mutates it in-loop).
+    /// `MotoQuantEngine.m_total` at run start — the mass step 0 uses. Python
+    /// sets it at construction and restores it from the config after every
+    /// run, so it can lag a config mutated after construction.
     pub m_total0: f64,
+    /// `chassis.total_mass_kg` at run start: from step 1 on Python computes
+    /// `self.m_total = cfg.chassis.total_mass_kg - fuel_burned` (schema 2).
+    pub m_total_cfg: f64,
     pub fuel_consumption_gs: f64,
     /// `MotoQuantEngine.F_gradient` (frozen at the initial mass, as in Python).
     pub f_gradient: f64,
@@ -257,47 +267,52 @@ pub struct ResolvedConfig {
 
 impl ResolvedConfig {
     /// Parse + validate a resolved config (schema version, array shapes).
-    pub fn from_json(s: &str) -> Result<ResolvedConfig, String> {
-        let cfg: ResolvedConfig =
-            serde_json::from_str(s).map_err(|e| format!("resolved config: {e}"))?;
+    pub fn from_json(s: &str) -> Result<ResolvedConfig, SimError> {
+        let cfg: ResolvedConfig = serde_json::from_str(s)
+            .map_err(|e| SimError::value(format!("resolved config: {e}")))?;
         cfg.validate()?;
         Ok(cfg)
     }
 
-    pub fn validate(&self) -> Result<(), String> {
+    pub fn validate(&self) -> Result<(), SimError> {
         if self.schema != SCHEMA_VERSION {
-            return Err(format!(
+            return Err(SimError::value(format!(
                 "resolved-config schema {} != engine schema {} — rebuild the native \
                  module / wasm (see docs/RUST_CORE.md, regen contract)",
                 self.schema, SCHEMA_VERSION
-            ));
+            )));
         }
         if crate::fmath::ExpImpl::parse(&self.exp_impl).is_none() {
-            return Err(format!("unknown exp_impl {:?}", self.exp_impl));
+            return Err(SimError::value(format!("unknown exp_impl {:?}", self.exp_impl)));
         }
         let n = self.drivetrain.overall_ratios.len();
         if n == 0 {
-            return Err("drivetrain.overall_ratios is empty".into());
+            return Err(SimError::value("drivetrain.overall_ratios is empty"));
         }
         if self.drivetrain.shift_rpms.len() != n || self.mass.m_rot_engine.len() != n {
-            return Err(format!(
+            return Err(SimError::value(format!(
                 "per-gear arrays disagree: ratios={} shift_rpms={} m_rot_engine={}",
                 n,
                 self.drivetrain.shift_rpms.len(),
                 self.mass.m_rot_engine.len()
-            ));
+            )));
         }
         if let Curve::Dyno { rpm, torque_nm } = &self.engine.curve {
             if rpm.is_empty() || rpm.len() != torque_nm.len() {
-                return Err(format!(
+                return Err(SimError::value(format!(
                     "dyno curve shape: rpm={} torque={}",
                     rpm.len(),
                     torque_nm.len()
-                ));
+                )));
             }
         }
+        // Python: `int(max_time / dt)` — dt == 0 raises ZeroDivisionError;
+        // a negative dt sizes a negative array (ValueError).
+        if self.dt == 0.0 {
+            return Err(SimError::zero_division("float division by zero (dt == 0)"));
+        }
         if !(self.dt > 0.0) {
-            return Err(format!("dt must be > 0 (got {})", self.dt));
+            return Err(SimError::value(format!("dt must be > 0 (got {})", self.dt)));
         }
         Ok(())
     }

@@ -27,7 +27,7 @@ import numpy as np
 from typing_extensions import TypedDict  # py<3.12-safe with pydantic
 
 from ..constants import MS_TO_KMH, MS_TO_MPH
-from ..physics import MotoQuantEngine
+from ..engine_select import make_engine
 from .client import LLMClient, LLMNotConfiguredError, LLMRateLimitError
 from .parse_query import ParsedSimRequest, parse_query
 from .summarize import summarize_result
@@ -538,7 +538,8 @@ def _run_rank(
     1. Parse query for displacement/category/'stock'/'modded' keywords.
     2. Fetch matching catalog rows.
     3. Take top-N by power-to-weight (rough first cut).
-    4. RUN REAL SIMS on those N bikes via MotoQuantEngine — venue-aware.
+    4. RUN REAL SIMS on those N bikes (engine_select.make_engine — the Rust
+       core when available, else MotoQuantEngine) — venue-aware.
     5. Sort by sim ET ascending; return top 10 with sim numbers.
 
     This is slower than a pure-DB query (~80-150ms per sim × 12-15 candidates
@@ -638,7 +639,7 @@ def _run_rank(
                 _apply_env_overrides(config, parsed)
                 _apply_archetype(config, parsed, db)
                 _apply_power_boost(config, parsed)
-                engine = MotoQuantEngine(config)
+                engine = make_engine(config)
                 sim = engine.run()
                 sim_rows.append(
                     {
@@ -1092,7 +1093,7 @@ def _run_one_sim(
     _apply_power_boost(config, parsed)
 
     try:
-        engine = MotoQuantEngine(config)
+        engine = make_engine(config)
         sim = engine.run()
     except Exception as e:  # noqa: BLE001
         return f"MotoQuantEngine.run: {type(e).__name__}: {e}"
@@ -1673,7 +1674,7 @@ def _run_choose_bike(parsed, db, client, result, *, run_summary):
             _apply_env_overrides(cfg, parsed)
             _apply_archetype(cfg, parsed, db)
             _apply_power_boost(cfg, parsed)
-            engine = MotoQuantEngine(cfg)
+            engine = make_engine(cfg)
             sim = engine.run()
             sim_rows.append(
                 {

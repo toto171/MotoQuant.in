@@ -37,6 +37,7 @@ import json
 import logging
 import math
 from functools import lru_cache
+from pathlib import Path
 
 import numpy as np
 
@@ -47,7 +48,12 @@ from .physics import MotoQuantEngine, SimResult
 log = logging.getLogger(__name__)
 
 #: Resolved-config schema version — must equal the Rust crate's SCHEMA_VERSION.
-SCHEMA_VERSION = 1
+#: 1 = initial; 2 = ``mass.m_total_cfg`` (Python re-reads
+#: ``cfg.chassis.total_mass_kg`` every step from step 1 on).
+SCHEMA_VERSION = 2
+
+#: The crate whose sources the extension's ``SOURCE_FINGERPRINT`` hashes.
+CRATE_DIR = Path(__file__).resolve().parent.parent / "rust" / "motoquant-core"
 
 # Channel order produced by the Rust core (engine::FLOAT_CHANNELS) mapped to
 # SimResult attribute names.
@@ -114,6 +120,68 @@ def _core():
 def available() -> bool:
     """True when the Rust extension is importable and schema-compatible."""
     return _core() is not None
+
+
+_FNV_OFFSET = 0xCBF29CE484222325
+_FNV_PRIME = 0x100000001B3
+
+
+def _fnv1a(h: int, data: bytes) -> int:
+    for b in data:
+        h = ((h ^ b) * _FNV_PRIME) & 0xFFFFFFFFFFFFFFFF
+    return h
+
+
+def fingerprint_sources(crate_dir: Path = CRATE_DIR) -> str | None:
+    """FNV-1a 64 of the crate's sources — the exact scheme of
+    ``rust/motoquant-core/build.rs`` (``Cargo.toml``, every ``src/**/*.rs`` and
+    the workspace ``Cargo.lock``, sorted by relative POSIX path; each file
+    contributes ``path \\0 bytes \\0``). ``None`` when the sources are not on
+    disk (an installed wheel / the Docker runtime image)."""
+    crate_dir = Path(crate_dir)
+    src = crate_dir / "src"
+    if not (crate_dir / "Cargo.toml").is_file() or not src.is_dir():
+        return None
+    files = [("Cargo.toml", crate_dir / "Cargo.toml")]
+    files += [
+        (p.relative_to(crate_dir).as_posix(), p)
+        for p in src.rglob("*.rs")
+        if p.is_file()
+    ]
+    lock = crate_dir.parent / "Cargo.lock"
+    if lock.is_file():
+        files.append(("../Cargo.lock", lock))
+    h = _FNV_OFFSET
+    for rel, path in sorted(files, key=lambda f: f[0]):
+        h = _fnv1a(h, rel.encode())
+        h = _fnv1a(h, b"\0")
+        h = _fnv1a(h, path.read_bytes())
+        h = _fnv1a(h, b"\0")
+    return f"{h:016x}"
+
+
+@lru_cache(maxsize=1)
+def _checkout_fingerprint() -> str | None:
+    try:
+        return fingerprint_sources()
+    except OSError as exc:  # unreadable checkout: unknown, not stale
+        log.warning("native: could not fingerprint %s: %s", CRATE_DIR, exc)
+        return None
+
+
+def built_fingerprint() -> str | None:
+    """The source fingerprint compiled into the loaded extension."""
+    mc = _core()
+    return None if mc is None else getattr(mc, "SOURCE_FINGERPRINT", None)
+
+
+def is_stale() -> bool:
+    """True when the loaded extension was built from different Rust sources
+    than the ones in this checkout (edit ``engine.rs`` without ``make native``
+    and this flips). False when either side is unknown — e.g. the Docker
+    runtime image ships the wheel but not the sources."""
+    built, here = built_fingerprint(), _checkout_fingerprint()
+    return built is not None and here is not None and built != here
 
 
 def _require_core():
@@ -191,6 +259,8 @@ def native_info() -> dict:
     out = {"available": mc is not None, "schema": SCHEMA_VERSION}
     if mc is not None:
         out["version"] = getattr(mc, "__version__", "?")
+        out["source_fingerprint"] = built_fingerprint()
+        out["stale"] = is_stale()
         out.update(host_math())
     return out
 
@@ -325,6 +395,8 @@ def resolve_engine(eng: MotoQuantEngine, *, exp_impl: str | None = None) -> dict
         "dt": _f(eng.dt),
         "mass": {
             "m_total0": _f(m0),
+            # run() re-reads the live config mass from step 1 on (schema 2).
+            "m_total_cfg": _f(c.chassis.total_mass_kg),
             "fuel_consumption_gs": _f(c.chassis.fuel_consumption_gs),
             "f_gradient": _f(eng.F_gradient),
             "m_rot_engine": [_f(v) for v in m_rot_engine],
@@ -505,7 +577,9 @@ class NativeEngine(MotoQuantEngine):
     reference's, so ``run_top_speed()`` / ``run_distance()`` reuse Python's
     post-processing (plateau detection, LSR splits) verbatim. The config is
     re-resolved on every ``run()`` because the Python loop also reads the
-    live config at run time.
+    live config at run time — and, like ``MotoQuantEngine.run``, ``run()``
+    leaves ``self.m_total`` restored from the config afterwards, so a reused
+    engine starts its next run from the same mass in both implementations.
     """
 
     def run(
@@ -519,6 +593,8 @@ class NativeEngine(MotoQuantEngine):
         if progress_cb is not None:
             progress_cb(0.0)
         res = run_resolved(resolve_engine(self), distance, max_time, use_adaptive_dt)
+        # MotoQuantEngine.run: "Restore original mass for engine reuse".
+        self.m_total = self.cfg.chassis.total_mass_kg
         if progress_cb is not None:
             progress_cb(1.0)
         return res

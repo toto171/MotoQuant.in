@@ -40,8 +40,13 @@ services:
         - requirements-api.txt
         - requirements-api.lock
         - Dockerfile
+        - .dockerignore
         - docker-entrypoint.sh
         - render.yaml
+        # The Rust physics core is compiled into the image (Dockerfile stage 1).
+        - rust/Cargo.toml
+        - rust/Cargo.lock
+        - rust/motoquant-core/**
     envVars:
       - key: MOTOQUANT_DB
         # FREE HOSTING PLAN (current): baked image copy — wiped on every
@@ -53,6 +58,12 @@ services:
         value: /app/motoquant.db
       - key: PYTHON_VERSION
         value: "3.11"
+      # Physics engine: auto = the Rust core baked into the image when it
+      # loads, else the Python reference (same numbers, ~50x slower). Set to
+      # `python` here or in the dashboard as a no-rebuild kill switch;
+      # /api/health -> engine shows what is live. docs/RUST_CORE.md.
+      - key: MOTOQUANT_ENGINE
+        value: auto
       # Optional: surface FastAPI / uvicorn logs at INFO level
       - key: UVICORN_LOG_LEVEL
         value: info

@@ -31,6 +31,7 @@ import copy
 import json
 import logging
 import os
+import re
 import sqlite3
 import tempfile
 import threading
@@ -56,9 +57,9 @@ from pydantic import BaseModel, Field
 # python:3.11-slim in prod hit exactly that and crash-looped — 2026-06-06.
 from typing_extensions import TypedDict
 
+from . import engine_select
 from .defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 from .models import BikeConfig
-from .physics import MotoQuantEngine
 from .ratelimit import rate_limit
 
 # ─── Optional accounts (imported early so Depends() default-args resolve) ─────
@@ -714,6 +715,10 @@ def health():
         "status": "ok",
         "database": "connected" if db_ok else "unavailable",
         "bike_count": bike_count,
+        # Which integrator serves simulations (Rust core or the Python
+        # reference) and why. Cheap: the extension import, host-math probe
+        # and source fingerprint are each computed once per process.
+        "engine": engine_select.engine_info(),
     }
 
 
@@ -1190,7 +1195,7 @@ def _simulate_impl(req: SimulateRequest, progress=None):
         raise HTTPException(400, f"Config error: {exc}")
 
     try:
-        engine = MotoQuantEngine(cfg)
+        engine = engine_select.make_engine(cfg)
         sim = engine.run(
             use_adaptive_dt=req.use_adaptive_dt,
             progress_cb=(lambda f: progress(f, "Integrating physics"))
@@ -1340,7 +1345,7 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
                 humidity_pct=req.humidity_pct,
                 headwind_kmh=req.headwind_kmh,
             )
-            stock_sim = MotoQuantEngine(stock_cfg).run()
+            stock_sim = engine_select.make_engine(stock_cfg).run()
             stock_et = round(float(stock_sim.time_quarter), 4)
         except Exception:
             # Baseline comparison is optional; stock_et stays None and the
@@ -1348,7 +1353,7 @@ def simulate_quick(req: QuickSimRequest) -> QuickSimResultDict:
             pass
 
     try:
-        engine = MotoQuantEngine(cfg)
+        engine = engine_select.make_engine(cfg)
         sim = engine.run()
     except Exception as exc:
         raise HTTPException(500, f"Simulation error: {exc}")
@@ -1434,7 +1439,7 @@ def _topspeed_impl(req: TopSpeedRequest, progress=None) -> TopSpeedResultDict:
     cfg, parts_applied, build_cost_inr = _apply_parts_to_config(cfg, req.part_ids)
 
     try:
-        engine = MotoQuantEngine(cfg)
+        engine = engine_select.make_engine(cfg)
         ts = engine.run_top_speed(
             max_time=req.max_time_s,
             progress_cb=(lambda f: progress(f, "Running to terminal velocity"))
@@ -1572,7 +1577,7 @@ def simulate_distance(req: DistanceRunRequest) -> DistanceResultDict:
     cfg, _, _ = _apply_parts_to_config(cfg, req.part_ids)
 
     try:
-        engine = MotoQuantEngine(cfg)
+        engine = engine_select.make_engine(cfg)
         sim = engine.run_distance(req.distance_m, max_time=req.max_time_s)
     except Exception as exc:
         raise HTTPException(500, f"Distance run error: {exc}")
@@ -2004,7 +2009,7 @@ def _run_build(
         cfg, part_ids, include_price_in_summary=False
     )
 
-    sim = MotoQuantEngine(cfg).run(progress_cb=progress_cb)
+    sim = engine_select.make_engine(cfg).run(progress_cb=progress_cb)
     return sim, cfg, parts_applied, build_cost
 
 
@@ -2286,7 +2291,7 @@ async def upload_dragy(
             )
             # Full RK4 run takes seconds on prod hardware — keep it off
             # the event loop.
-            sim = await asyncio.to_thread(MotoQuantEngine(cfg).run)
+            sim = await asyncio.to_thread(engine_select.make_engine(cfg).run)
             from .calibration.overlay import compare_runs
 
             comparison = compare_runs(best, sim)
@@ -2744,6 +2749,25 @@ def _match_seeded_venue(db, location: str) -> dict | None:
         return None
 
 
+# Upstream HTTP errors (requests' HTTPError / ConnectionError messages) embed
+# the full request URL — including `appid=<key>` — so any error text that
+# came from an outbound call must pass through this before it is logged or
+# returned. 2026-10-24: /api/venues/resolve echoed the OWM key in its 502.
+_SECRET_QUERY_RE = re.compile(
+    r"(?i)\b(appid|api_?key|access_token|token|key)=([^&\s'\"<>]+)"
+)
+
+
+def _redact_secrets(text: object, *secrets: str | None) -> str:
+    """Remove every given secret value and any ``appid=``/``key=``-style query
+    parameter value from ``text``."""
+    out = str(text)
+    for secret in secrets:
+        if secret:
+            out = out.replace(secret, "[REDACTED]")
+    return _SECRET_QUERY_RE.sub(lambda m: f"{m.group(1)}=[REDACTED]", out)
+
+
 def _fetch_owm_for_location(
     *,
     location: str | None,
@@ -2794,9 +2818,14 @@ def _fetch_owm_for_location(
             location,
             lat,
             lon,
-            exc,
+            _redact_secrets(f"{type(exc).__name__}: {exc}", api_key),
         )
-        return {"_error": f"owm_error: {exc}"}
+        # The client gets a coarse, key-free reason only (status code or
+        # exception class) — never the upstream message, which carries the
+        # request URL with the server's API key in it.
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+        reason = f"HTTP {status}" if status else type(exc).__name__
+        return {"_error": f"owm_error: {_redact_secrets(reason, api_key)}"}
 
     # Parse response -- OWM returns Celsius + hPa + m/s when units=metric
     main = data.get("main", {}) or {}
@@ -4343,6 +4372,25 @@ async def _start_keepwarm_loop() -> None:
         start_keepwarm()
     except Exception:  # noqa: BLE001 — keep-warm is best-effort only
         logging.getLogger(__name__).warning("keep-warm init failed", exc_info=True)
+
+
+@app.on_event("startup")
+async def _probe_physics_engine() -> None:
+    """Run the engine selector's one-time probes (extension import, host-math
+    check, source fingerprint) at boot instead of on the first /api/health or
+    simulation, and log which integrator this process serves with."""
+    try:
+        info = engine_select.engine_info()
+        logging.getLogger(__name__).info(
+            "physics engine: %s (mode=%s%s)",
+            info.get("engine"),
+            info.get("mode"),
+            f", fallback: {info['fallback_reason']}"
+            if info.get("fallback_reason")
+            else "",
+        )
+    except Exception:  # noqa: BLE001 — diagnostics only; sims still select per call
+        logging.getLogger(__name__).warning("engine probe failed", exc_info=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════

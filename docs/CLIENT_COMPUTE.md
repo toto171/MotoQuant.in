@@ -8,8 +8,14 @@
 > MotoQuant is free and open source, so nothing is kept server-side to
 > protect a paid tier any more; the "pro-gated" rows below are superseded.
 > A Rust core compiled to wasm32 now provides exact full sims in the browser
-> at ~93 KB gzip ([RUST_CORE.md](RUST_CORE.md)), which changes the Tier 2
+> at ~94 KB gzip ([RUST_CORE.md](RUST_CORE.md)), which changes the Tier 2
 > picture below.
+>
+> **Updated 2026-10-24 ([ADR-0007](adr/0007-rust-physics-core.md)):** the
+> Pyodide plan for Tier 2 is **retired**. Its harness
+> (`e2e/pyodide-mainsim-parity.mjs`) and manual workflow
+> (`.github/workflows/pyodide-parity.yml`) were deleted. They had never been
+> run. The Rust wasm32 engine replaces them, with parity proven in CI.
 
 ## What runs where (the contract)
 
@@ -17,7 +23,7 @@
 |---|---|---|
 | Live/quick estimates (slider drags) | **Browser** — `web/lib/surrogate.js` | Shipped 2026-08-11. Zero server cost, ~0.01 ms, proven equal to the server surrogate to <1e-9 s |
 | Exact quarter-mile (splits, timeseries) | **Server** (RK4) | The authoritative number; the Run button |
-| Full sims in-browser (future) | **Browser** — Rust wasm32 core (`web/lib/engine.js`, see RUST_CORE.md) or Pyodide, gated on parity proof | See "Main sims" below |
+| Full sims in-browser (future) | **Browser** — the Rust wasm32 core (`web/lib/engine.js`); parity proven, UI not wired yet | See "Tier 2" below |
 | Build Optimizer / Autotune / Outlaw | **Server, free for everyone** (no tier gate since 2026-10-23) | They orchestrate hundreds of sims plus the knapsack/ROI machinery, so they stay server-side for practical reasons. They are now *candidates* for client-side execution like everything else; there is no paid product to protect |
 | Leaderboard saves | **Server only** | Estimated results can never be saved (enforced in the simulator page) |
 
@@ -60,33 +66,44 @@ the same session. The two JSON files carry the npz's sha256 and the JS
 refuses a mismatched pair, so a forgotten regen degrades to server-only
 (slow, correct) rather than serving stale numbers.
 
-## Tier 2 — main sims in the browser (HARNESS SHIPPED, UI GATED ON PROOF)
+## Tier 2 — main sims in the browser (ENGINE + PARITY SHIPPED, UI NOT WIRED)
 
-The full RK4 engine's import surface is numpy + stdlib only (verified by
-blocking every other import and reproducing all three pinned baselines to
-<5e-11 s). That makes the **unmodified Python engine** runnable in the
-browser via Pyodide — no JS port, no second implementation, no baseline
-drift risk from a rewrite.
+Exact full simulations in the browser use the **Rust core compiled to
+wasm32** (`web/public/engine/motoquant_core.wasm`, ~274 KB raw / ~94 KB gzip,
+loaded by `web/lib/engine.js`). It is the same source that serves the API on
+the server (ADR-0007), so the browser and the server run one integrator. The
+port covers only the integrator: the browser receives a *resolved* config,
+and Python has already applied every policy decision (category profile,
+venue, parts, tire scaling).
 
-Two open questions gate the UI work, and both are answered by
-`e2e/pyodide-mainsim-parity.mjs` (manual-trigger workflow
-`.github/workflows/pyodide-parity.yml`):
+**Proof, not hope.** `node web/scripts/engine-parity.mjs` runs the REAL
+`engine.js` (fetch shim → instantiate → schema check → simulate → decode)
+against Python-reference fixtures. It **fails** on drift beyond 1e-9 s in ET,
+trap or any split, and on any change in sample count, loop step count, final
+`dt` or the `finished` flag. Status 2026-10-24:
 
-1. **Numerics.** WASM float64 arithmetic is IEEE-exact but libm
-   transcendentals can differ by 1 ulp from glibc. The harness runs the three
-   pinned references inside WASM and asserts the same 1e-9 s tolerance
-   `scripts/check_baselines.py` uses. The Claude sandbox cannot reach the
-   Pyodide CDN (numpy wasm wheel), so the proof runs on Actions where egress
-   is open — trigger it from the Actions tab.
-2. **Speed.** Native full sim is ~320-380 ms; interpreted-Python-on-WASM is
-   expected 3-10× slower. The harness reports wall-clock per sim so the UX
-   call (acceptable for an explicit "run locally" action?) is made on real
-   numbers.
+- 53/53 committed fixture cases are exact;
+- 1,082/1,082 catalog runs (every bike, fixed + adaptive,
+  `scripts/gen_engine_web.py --full-catalog`) are exact;
+- force-type channels show 1-ULP noise from Rust's pure libm, absorbed by the
+  integrator (RUST_CORE.md, "wasm32 parity").
 
-If the harness passes: wire a lazy-loaded "run locally" path for the FREE
-full-sim action (payload ~15 MB, cached; worth it for offline + zero server).
-If it drifts: record the deltas here and stop — an "exact" number that
-disagrees with the server by more than the baseline tolerance must not ship.
+The CI job `.github/workflows/native.yml` runs the committed-fixture check on
+every relevant change.
+
+Pyodide was the previous plan: the unmodified Python engine on WebAssembly.
+It was rejected on the numbers. Its payload is ~15 MB against 94 KB, and its
+expected speed was 3–10× *slower* than native Python, against ~30–80×
+*faster* for the Rust engine.
+
+What is still missing before a "run locally" button ships:
+
+1. A resolved-config route (`GET /api/resolve?bike_id=&venue_id=&parts=` →
+   `native.resolved_json(native.resolve_config(cfg))`, ~5–9 KB, cacheable per
+   selection).
+2. Simulator wiring, labelled "exact — computed on your device", with a
+   server fallback when the wasm fails to load (`loadEngine()` evicts a failed
+   load, so a retry re-fetches).
 
 What client full sims deliberately do NOT change:
 - **Leaderboard integrity** — saved runs stay server-authoritative. (Note:
@@ -112,3 +129,6 @@ What client full sims deliberately do NOT change:
 - **numpy-shim to run the engine on Pyodide-core without the CDN** — a
   hand-rolled mini-numpy with exact-float64 semantics is precisely the
   silent-numerical-drift risk this architecture exists to avoid.
+- **Pyodide for full sims** — retired 2026-10-24 (ADR-0007): ~15 MB and
+  seconds per sim, versus the Rust wasm engine's ~94 KB and milliseconds
+  with CI-proven parity.

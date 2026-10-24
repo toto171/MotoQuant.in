@@ -15,13 +15,24 @@
 
 pub mod config;
 pub mod engine;
+pub mod error;
 pub mod fmath;
 pub mod interp;
 pub mod splits;
 
 pub use config::{ResolvedConfig, SCHEMA_VERSION};
-pub use engine::{Engine, RunOutput};
+pub use engine::{Engine, RunOutput, MAX_SAMPLES};
+pub use error::{ErrorKind, SimError};
 pub use splits::Splits;
+
+// `SOURCE_FINGERPRINT: u64` — FNV-1a 64 of this crate's sources, stamped by
+// build.rs. native.py compares it with the checkout to detect a stale build.
+include!(concat!(env!("OUT_DIR"), "/fingerprint.rs"));
+
+/// [`SOURCE_FINGERPRINT`] as 16 lowercase hex digits.
+pub fn source_fingerprint_hex() -> String {
+    format!("{SOURCE_FINGERPRINT:016x}")
+}
 
 use serde::Deserialize;
 
@@ -32,7 +43,7 @@ pub fn simulate(
     distance: f64,
     max_time: f64,
     use_adaptive_dt: bool,
-) -> Result<(RunOutput, Splits), String> {
+) -> Result<(RunOutput, Splits), SimError> {
     let eng = Engine::new(cfg)?;
     let out = eng.run(distance, max_time, use_adaptive_dt)?;
     let sp = splits::extract_splits(&out.ch.t, &out.ch.x, &out.ch.v);
@@ -78,12 +89,18 @@ fn default_true() -> bool {
 pub fn simulate_request_bytes(input: &[u8]) -> Vec<u8> {
     match run_request(input) {
         Ok(buf) => buf,
-        Err(e) => encode(&serde_json::json!({ "ok": false, "error": e }), 0, &[], None),
+        Err(e) => encode(
+            &serde_json::json!({ "ok": false, "error": e.msg, "kind": e.kind.as_str() }),
+            0,
+            &[],
+            None,
+        ),
     }
 }
 
-fn run_request(input: &[u8]) -> Result<Vec<u8>, String> {
-    let req: Request = serde_json::from_slice(input).map_err(|e| format!("request: {e}"))?;
+fn run_request(input: &[u8]) -> Result<Vec<u8>, SimError> {
+    let req: Request =
+        serde_json::from_slice(input).map_err(|e| SimError::value(format!("request: {e}")))?;
     req.config.validate()?;
     let (out, sp) = simulate(&req.config, req.distance, req.max_time, req.adaptive)?;
     let n = out.ch.len();
@@ -181,6 +198,18 @@ mod wasm_abi {
     pub extern "C" fn schema_version() -> u32 {
         crate::SCHEMA_VERSION
     }
+
+    /// High 32 bits of the build's source fingerprint (see build.rs).
+    #[no_mangle]
+    pub extern "C" fn source_fingerprint_hi() -> u32 {
+        (crate::SOURCE_FINGERPRINT >> 32) as u32
+    }
+
+    /// Low 32 bits of the build's source fingerprint (see build.rs).
+    #[no_mangle]
+    pub extern "C" fn source_fingerprint_lo() -> u32 {
+        crate::SOURCE_FINGERPRINT as u32
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -188,12 +217,23 @@ mod wasm_abi {
 // ═══════════════════════════════════════════════════════════════════════════
 #[cfg(feature = "python")]
 mod python {
-    use pyo3::exceptions::PyValueError;
+    use pyo3::exceptions::{PyMemoryError, PyOverflowError, PyValueError, PyZeroDivisionError};
     use pyo3::prelude::*;
     use pyo3::types::{PyBytes, PyDict};
 
     use crate::config::ResolvedConfig;
+    use crate::error::{ErrorKind, SimError};
     use crate::fmath::{self, ExpImpl};
+
+    /// Re-raise with the exception class the Python reference raises.
+    fn to_py(e: SimError) -> PyErr {
+        match e.kind {
+            ErrorKind::Value => PyValueError::new_err(e.msg),
+            ErrorKind::Memory => PyMemoryError::new_err(e.msg),
+            ErrorKind::Overflow => PyOverflowError::new_err(e.msg),
+            ErrorKind::ZeroDivision => PyZeroDivisionError::new_err(e.msg),
+        }
+    }
 
     fn f64_bytes(v: &[f64]) -> Vec<u8> {
         let mut b = Vec::with_capacity(v.len() * 8);
@@ -223,11 +263,11 @@ mod python {
         channels: bool,
     ) -> PyResult<Bound<'py, PyDict>> {
         let owned = config_json.to_owned();
-        let res = py.allow_threads(move || -> Result<_, String> {
+        let res = py.allow_threads(move || -> Result<_, SimError> {
             let cfg = ResolvedConfig::from_json(&owned)?;
             crate::simulate(&cfg, distance, max_time, adaptive)
         });
-        let (out, sp) = res.map_err(PyValueError::new_err)?;
+        let (out, sp) = res.map_err(to_py)?;
         let d = PyDict::new(py);
         d.set_item("dt", out.dt)?;
         d.set_item("steps", out.steps)?;
@@ -274,7 +314,7 @@ mod python {
     /// Parse a resolved config and serialise it back (JSON round-trip check).
     #[pyfunction]
     fn echo_config(config_json: &str) -> PyResult<String> {
-        let cfg = ResolvedConfig::from_json(config_json).map_err(PyValueError::new_err)?;
+        let cfg = ResolvedConfig::from_json(config_json).map_err(to_py)?;
         serde_json::to_string(&cfg).map_err(|e| PyValueError::new_err(e.to_string()))
     }
 
@@ -318,6 +358,8 @@ mod python {
     fn motoquant_core_module(m: &Bound<'_, PyModule>) -> PyResult<()> {
         m.add("__version__", env!("CARGO_PKG_VERSION"))?;
         m.add("SCHEMA_VERSION", crate::SCHEMA_VERSION)?;
+        m.add("SOURCE_FINGERPRINT", crate::source_fingerprint_hex())?;
+        m.add("MAX_SAMPLES", crate::MAX_SAMPLES)?;
         m.add_function(wrap_pyfunction!(schema_version, m)?)?;
         m.add_function(wrap_pyfunction!(simulate, m)?)?;
         m.add_function(wrap_pyfunction!(simulate_binary, m)?)?;

@@ -13,7 +13,25 @@
 //!   property is re-derived here.
 
 use crate::config::{BoostType, Curve, ResolvedConfig};
+use crate::error::SimError;
 use crate::fmath::{self, ExpImpl};
+
+/// Hard ceiling on stored samples per run (~70 simulated minutes at 1 ms;
+/// 4.2 M samples × 18 channels × 8 B ≈ 604 MB). Python sizes its output with
+/// `np.zeros(int(max_time / dt) + 1)` and raises `MemoryError` when that
+/// cannot be allocated; the native engine instead grows its buffers on demand
+/// and returns a `MemoryError`-kind error once a run would store more than
+/// this many samples — never an allocator abort that kills the host process.
+/// The longest legitimate request (API top speed: 120 s adaptive, ≤ 240 k
+/// samples) is ~17× below it. Also keeps the wasm result's u32 length field
+/// from overflowing.
+pub const MAX_SAMPLES: usize = 1 << 22;
+
+/// Samples reserved up front (a 26 s quarter-mile needs 26,001). Beyond this
+/// the buffers double on demand via `try_reserve`.
+const PREALLOC_SAMPLES: usize = 1 << 18;
+
+const _: () = assert!(MAX_SAMPLES * 18 * 8 < u32::MAX as usize - (1 << 20));
 
 /// Python `max(a, b)`: returns `a` unless `b > a`.
 #[inline(always)]
@@ -64,29 +82,62 @@ pub const FLOAT_CHANNELS: [&str; 17] = [
     "F_drag", "F_rr", "T_tire", "T_clutch", "P_boost", "power_kw", "r_eff",
 ];
 
+fn try_grow<T>(v: &mut Vec<T>, additional: usize) -> Result<(), SimError> {
+    v.try_reserve(additional).map_err(|e| {
+        SimError::memory(format!(
+            "native engine could not allocate output buffers ({e}); \
+             lower max_time"
+        ))
+    })
+}
+
 impl Channels {
-    fn with_capacity(n: usize) -> Channels {
-        let v = || Vec::with_capacity(n);
-        Channels {
-            t: v(),
-            x: v(),
-            v: v(),
-            a: v(),
-            rpm: v(),
-            gear: Vec::with_capacity(n),
-            slip: v(),
-            traction_pct: v(),
-            n_front: v(),
-            n_rear: v(),
-            f_drive: v(),
-            f_drag: v(),
-            f_rr: v(),
-            t_tire: v(),
-            t_clutch: v(),
-            p_boost: v(),
-            power_kw: v(),
-            r_eff: v(),
-        }
+    /// Reserve room for `additional` more samples in every channel without
+    /// ever aborting on allocation failure. Returns the new common capacity.
+    fn try_reserve(&mut self, additional: usize) -> Result<usize, SimError> {
+        try_grow(&mut self.t, additional)?;
+        try_grow(&mut self.x, additional)?;
+        try_grow(&mut self.v, additional)?;
+        try_grow(&mut self.a, additional)?;
+        try_grow(&mut self.rpm, additional)?;
+        try_grow(&mut self.gear, additional)?;
+        try_grow(&mut self.slip, additional)?;
+        try_grow(&mut self.traction_pct, additional)?;
+        try_grow(&mut self.n_front, additional)?;
+        try_grow(&mut self.n_rear, additional)?;
+        try_grow(&mut self.f_drive, additional)?;
+        try_grow(&mut self.f_drag, additional)?;
+        try_grow(&mut self.f_rr, additional)?;
+        try_grow(&mut self.t_tire, additional)?;
+        try_grow(&mut self.t_clutch, additional)?;
+        try_grow(&mut self.p_boost, additional)?;
+        try_grow(&mut self.power_kw, additional)?;
+        try_grow(&mut self.r_eff, additional)?;
+        Ok(self.min_capacity())
+    }
+
+    fn min_capacity(&self) -> usize {
+        let caps = [
+            self.t.capacity(),
+            self.x.capacity(),
+            self.v.capacity(),
+            self.a.capacity(),
+            self.rpm.capacity(),
+            self.gear.capacity(),
+            self.slip.capacity(),
+            self.traction_pct.capacity(),
+            self.n_front.capacity(),
+            self.n_rear.capacity(),
+            self.f_drive.capacity(),
+            self.f_drag.capacity(),
+            self.f_rr.capacity(),
+            self.t_tire.capacity(),
+            self.t_clutch.capacity(),
+            self.p_boost.capacity(),
+            self.power_kw.capacity(),
+            self.r_eff.capacity(),
+        ];
+        caps.into_iter().min().unwrap_or(0)
     }
 
     pub fn len(&self) -> usize {
@@ -166,7 +217,7 @@ pub struct Engine<'a> {
 }
 
 impl<'a> Engine<'a> {
-    pub fn new(c: &'a ResolvedConfig) -> Result<Engine<'a>, String> {
+    pub fn new(c: &'a ResolvedConfig) -> Result<Engine<'a>, SimError> {
         c.validate()?;
         let exp_impl = ExpImpl::parse(&c.exp_impl).ok_or("bad exp_impl")?;
         Ok(Engine {
@@ -542,7 +593,7 @@ impl<'a> Engine<'a> {
     }
 
     /// `MotoQuantEngine.run(distance, max_time, use_adaptive_dt)`.
-    pub fn run(&self, distance: f64, max_time: f64, use_adaptive_dt: bool) -> Result<RunOutput, String> {
+    pub fn run(&self, distance: f64, max_time: f64, use_adaptive_dt: bool) -> Result<RunOutput, SimError> {
         let c = self.c;
         let g_const = self.g;
         let rpm_to_rads = self.rpm_to_rads;
@@ -585,16 +636,39 @@ impl<'a> Engine<'a> {
         let boosted = c.fi.boost_type != BoostType::Na;
         let mut t_e_curve = 0.0;
 
-        // n_max = int(max_time / dt) + 1  (Python int() truncates toward 0)
+        // n_max = int(max_time / dt) + 1, then np.zeros(n_max) — mirrored
+        // exception-for-exception: int(nan) -> ValueError, int(±inf) ->
+        // OverflowError, a negative n_max -> np.zeros' ValueError. (dt == 0
+        // is refused by ResolvedConfig::validate as ZeroDivisionError.)
         let q = max_time / dt;
-        if !(q > -1.0) {
-            return Err(format!(
-                "negative dimensions are not allowed (max_time={max_time}, dt={dt})"
-            ));
+        if q.is_nan() {
+            return Err(SimError::value(format!(
+                "cannot convert float NaN to integer (max_time={max_time}, dt={dt})"
+            )));
         }
+        if q.is_infinite() {
+            return Err(SimError::overflow(format!(
+                "cannot convert float infinity to integer (max_time={max_time}, dt={dt})"
+            )));
+        }
+        // `as i64` truncates toward 0 like int() and saturates past ±2^63.
         let mut n_max: i64 = (q as i64).saturating_add(1);
-        let cap = (n_max.clamp(0, 1 << 22)) as usize;
-        let mut ch = Channels::with_capacity(cap);
+        if n_max < 0 {
+            return Err(SimError::value(format!(
+                "negative dimensions are not allowed (max_time={max_time}, dt={dt})"
+            )));
+        }
+        let mut ch = Channels::default();
+        let mut room = ch
+            .try_reserve((n_max as u64).min(PREALLOC_SAMPLES as u64) as usize)?
+            .min(MAX_SAMPLES);
+        let dt0 = dt;
+        let over_cap = move || {
+            SimError::memory(format!(
+                "native engine refuses to store more than {MAX_SAMPLES} samples \
+                 (max_time={max_time}, dt={dt0}, distance={distance}); lower max_time"
+            ))
+        };
 
         let mut step: i64 = 0;
         let mut t: f64 = 0.0;
@@ -616,7 +690,7 @@ impl<'a> Engine<'a> {
             ran_once = true;
             // Step-budget growth (adaptive mode only).
             if use_adaptive_dt && step >= n_max - 2 {
-                n_max *= 2;
+                n_max = n_max.saturating_mul(2);
             }
 
             // ── Current RPM and wheel speed ──
@@ -811,7 +885,9 @@ impl<'a> Engine<'a> {
 
             // ── Fuel mass decrease ──
             fuel_burned += c.mass.fuel_consumption_gs * dt / 1000.0;
-            m_total = c.mass.m_total0 - fuel_burned;
+            // Python: `self.m_total = cfg.chassis.total_mass_kg - fuel_burned`
+            // — the LIVE config mass (step 0 used the engine's m_total).
+            m_total = c.mass.m_total_cfg - fuel_burned;
 
             // ── Adaptive step size ──
             if use_adaptive_dt && clutch_locked && !shifting {
@@ -859,6 +935,16 @@ impl<'a> Engine<'a> {
             let x_new = x + (dt / 6.0) * (v + 2.0 * v_q1 + 2.0 * v_q2 + v_q3);
 
             // ── Store outputs ──
+            if ch.len() == room {
+                if room >= MAX_SAMPLES {
+                    return Err(over_cap());
+                }
+                // try_reserve may over-allocate (amortized growth); `room`
+                // is clamped so the cap check above fires exactly at MAX_SAMPLES.
+                room = ch
+                    .try_reserve(room.max(1024).min(MAX_SAMPLES - room))?
+                    .min(MAX_SAMPLES);
+            }
             ch.t.push(t);
             ch.x.push(x);
             ch.v.push(v);
@@ -895,9 +981,15 @@ impl<'a> Engine<'a> {
             if !ran_once {
                 // Python reads loop locals (a_net, rpm, …) here that were
                 // never bound → UnboundLocalError. Mirror it as an error.
-                return Err(format!(
+                return Err(SimError::value(format!(
                     "distance must be > 0 (got {distance}): the loop never ran"
-                ));
+                )));
+            }
+            if ch.len() == room {
+                if room >= MAX_SAMPLES {
+                    return Err(over_cap());
+                }
+                ch.try_reserve(1)?;
             }
             ch.t.push(t);
             ch.x.push(x);

@@ -88,7 +88,10 @@ flowchart TD
    the 15 sub-models in `submodels/` and integrates the state vector with
    fixed-step RK4 at 1 ms. Per-cluster tuning knobs come from
    `category_profiles.py`. Output is a `SimResult` (ET, trap speed, splits,
-   full timeseries).
+   full timeseries). Production code does not construct the engine directly:
+   it calls `engine_select.make_engine(cfg)`, which returns the bit-identical
+   Rust core (`native.NativeEngine`, a `MotoQuantEngine` subclass) when it is
+   installed and current, else the Python engine (ADR-0007).
 
 5. **The DB is a cache of specs + configs, not the source of truth.**
    `database/seed.py` (+ `seed_catalogs/`) writes the catalog into
@@ -135,7 +138,8 @@ flowchart TD
 | `motoquant/observability.py` | Sentry wiring (env-gated, no-op without DSN) | top of file |
 | `motoquant/keepwarm.py` | In-app self-ping that keeps a free-tier host awake during the day | `start_keepwarm()` |
 | `motoquant/mcp_server.py` | Stdlib-only stdio MCP server exposing sims/catalog/what-ifs as tools (`docs/MCP.md`) | `main()` |
-| `motoquant/native.py` + `rust/` | Optional Rust physics core (PyO3 + wasm32), bit-identical to `physics.py`, which stays the reference (`docs/RUST_CORE.md`) | `available()` |
+| `motoquant/engine_select.py` | The ONE place that picks the integrator for every production simulation: `make_engine(cfg)` → Rust core or `MotoQuantEngine`, per `MOTOQUANT_ENGINE` (`auto` / `python` kill switch / `native`); reported by `/api/health` | `make_engine()` |
+| `motoquant/native.py` + `rust/` | Rust physics core (PyO3 extension + wasm32 browser engine), bit-identical to `physics.py`, which stays the reference. Python resolves the config (`resolve_engine`), Rust integrates; schema-versioned + source-fingerprinted (stale builds are refused). `docs/RUST_CORE.md`, ADR-0007 | `available()`, `resolve_engine()` |
 | `web/` | Next.js frontend (app router, components, `lib/api.js`) | `web/app/page.js` |
 | `tests/` | pytest suite (thousands of tests; `make test-fast` for the quick subset) | `conftest.py` |
 | `scripts/` | Sweeps, reseed, patches, audits, autonomous-ops orchestration | `reseed_configs_from_specs.py` |
@@ -181,7 +185,8 @@ print(m.MotoQuantEngine(m.gsxr1000_k5()).run().time_quarter, \
 ## 6. Deployment topology (October 2026)
 
 - **API**: FastAPI on **Render** free tier (`motoquant-api.onrender.com`),
-  Docker via `render.yaml`. Cold-start-guarded by `keepwarm.py` + a GitHub
+  Docker via `render.yaml`. The Dockerfile's first stage compiles the Rust
+  physics core wheel; `/api/health` → `engine` shows which integrator is live. Cold-start-guarded by `keepwarm.py` + a GitHub
   Actions keep-alive cron. Migration runbook: `docs/RENDER_MIGRATION.md`.
 - **Web**: Next.js on **Vercel** (`motoquant.in`). The browser calls
   same-origin `/api/*`, which is rewritten to the API (`web/next.config.js` +

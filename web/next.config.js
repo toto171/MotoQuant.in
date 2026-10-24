@@ -52,16 +52,31 @@ const nextConfig = {
   // and falls back to the server sim path on any mismatch. Nothing else in
   // /public is content-hashed (Next already stamps /_next/static/* immutable
   // itself), so no immutable rule here.
+  //
+  // /engine/* (the Rust physics core compiled to wasm32, ~94 KB gzip, plus its
+  // manifest — docs/RUST_CORE.md) follows the same rule for the same reason:
+  // it only changes on a Rust-core rebuild, and a stale copy is safe because
+  // lib/engine.js checks the module's own schema_version() export on load and
+  // throws on a mismatch (the caller falls back to the server). The explicit
+  // Content-Type keeps WebAssembly.instantiateStreaming (streaming compile)
+  // available whatever MIME table the host uses.
   async headers() {
+    const shortCache = {
+      key: 'Cache-Control',
+      value: 'public, max-age=3600, stale-while-revalidate=86400',
+    };
     return [
       {
         source: '/surrogate/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=3600, stale-while-revalidate=86400',
-          },
-        ],
+        headers: [shortCache],
+      },
+      {
+        source: '/engine/:path*',
+        headers: [shortCache],
+      },
+      {
+        source: '/engine/motoquant_core.wasm',
+        headers: [{ key: 'Content-Type', value: 'application/wasm' }],
       },
     ];
   },

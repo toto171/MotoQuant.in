@@ -9,7 +9,8 @@ compares every SimResult channel element-by-element, plus splits/ET/trap):
   references  the 3 pinned bikes (K5 / R1 / Hayabusa): fixed, adaptive, top speed
   catalog     EVERY current bike_config in motoquant.db (db_row_to_config), fixed dt
   adaptive    every catalog bike again with use_adaptive_dt=True
-  topspeed    run_top_speed() on a catalog sample (Python's own plateau logic)
+  topspeed    run_top_speed() on EVERY catalog bike (Python's own plateau logic;
+              --topspeed-sample N subsamples it)
   stress      boosted (turbo / SC roots / SC centrifugal / N2O), curve-less 2T and
               4T curves, every clutch type, every track surface, head/tail/cross
               wind + ram air, gradient, speed limiters, at-wheel vs crank dyno,
@@ -20,9 +21,15 @@ compares every SimResult channel element-by-element, plus splits/ET/trap):
 Target: worst |dET| <= 1e-9 s everywhere (the same bit-identical bar as
 scripts/check_baselines.py). Exit 0 on pass, 1 on any parity failure.
 
-    python scripts/check_native_parity.py                   # full run
-    python scripts/check_native_parity.py --quick           # refs + 40-bike sample
+    python scripts/check_native_parity.py                   # FULL documented sweep:
+                                                            # 541 bikes x fixed/adaptive/
+                                                            # top speed + every stress case
+    python scripts/check_native_parity.py --quick           # CI slice: refs + 40-bike
+                                                            # sample + 8 top speed + 1/6 stress
+    python scripts/check_native_parity.py --topspeed-sample 80   # subsample top speed only
     python scripts/check_native_parity.py --report PATH     # JSON report path
+                                                            # (default reports/native_parity_<today>.json;
+                                                            # --quick writes none unless given)
 """
 
 from __future__ import annotations
@@ -30,6 +37,7 @@ from __future__ import annotations
 import argparse
 import copy
 import dataclasses
+import datetime as _dt
 import json
 import math
 import multiprocessing as mp
@@ -145,6 +153,18 @@ def _patch_profile(eng, patch):
         eng._profile = dataclasses.replace(eng._profile, **patch)
 
 
+# Documented exception-class differences (docs/RUST_CORE.md, "Error
+# behaviour"): Python's run(distance <= 0) fails by accident — the final-store
+# block reads loop locals that were never bound (UnboundLocalError) — while
+# the native core refuses the input up front with a ValueError. Every other
+# error must raise the SAME class on both engines.
+EXC_EQUIV = {("UnboundLocalError", "ValueError")}
+
+
+def _exc_class(exc: str | None) -> str | None:
+    return None if exc is None else exc.split(":")[0]
+
+
 def run_case(case: dict) -> dict:
     """Execute one case dict → result dict. Never raises."""
     label = case["label"]
@@ -156,6 +176,12 @@ def run_case(case: dict) -> dict:
         dt = case.get("dt", 0.001)
         kwargs = case.get("kwargs", {})
         patch = case.get("profile_patch")
+        # Config edits applied AFTER engine construction (path -> value), and
+        # how many times to run the same engine (the last run is compared):
+        # Python's run() re-reads parts of the live config and restores
+        # self.m_total afterwards, and the native engine must track both.
+        post = case.get("post_construct") or {}
+        runs = int(case.get("runs", 1))
         py_exc = nat_exc = None
         rp = rn = None
 
@@ -163,20 +189,24 @@ def run_case(case: dict) -> dict:
         try:
             py_eng = MotoQuantEngine(copy.deepcopy(cfg), dt=dt)
             _patch_profile(py_eng, patch)
-            if mode == "topspeed":
-                rp = py_eng.run_top_speed(**kwargs)
-            else:
-                rp = py_eng.run(use_adaptive_dt=(mode == "adaptive"), **kwargs)
+            _set(post)(py_eng.cfg)
+            for _ in range(runs):
+                if mode == "topspeed":
+                    rp = py_eng.run_top_speed(**kwargs)
+                else:
+                    rp = py_eng.run(use_adaptive_dt=(mode == "adaptive"), **kwargs)
         except Exception as exc:  # noqa: BLE001
             py_exc = f"{type(exc).__name__}: {exc}"
         tn = time.perf_counter()
         try:
             nat_eng = native.NativeEngine(copy.deepcopy(cfg), dt=dt)
             _patch_profile(nat_eng, patch)
-            if mode == "topspeed":
-                rn = nat_eng.run_top_speed(**kwargs)
-            else:
-                rn = nat_eng.run(use_adaptive_dt=(mode == "adaptive"), **kwargs)
+            _set(post)(nat_eng.cfg)
+            for _ in range(runs):
+                if mode == "topspeed":
+                    rn = nat_eng.run_top_speed(**kwargs)
+                else:
+                    rn = nat_eng.run(use_adaptive_dt=(mode == "adaptive"), **kwargs)
         except Exception as exc:  # noqa: BLE001
             nat_exc = f"{type(exc).__name__}: {exc}"
         te = time.perf_counter()
@@ -186,10 +216,11 @@ def run_case(case: dict) -> dict:
         if py_exc or nat_exc:
             res["py_exception"] = py_exc
             res["native_exception"] = nat_exc
+            pc, nc = _exc_class(py_exc), _exc_class(nat_exc)
             same = (
-                py_exc is not None
-                and nat_exc is not None
-                and py_exc.split(":")[0] == nat_exc.split(":")[0]
+                pc is not None
+                and nc is not None
+                and (pc == nc or (pc, nc) in EXC_EQUIV)
             )
             res["ok"] = same
             res["dET"] = 0.0 if same else math.inf
@@ -573,6 +604,45 @@ def build_stress_cases(catalog: list[tuple[str, dict]]) -> list[dict]:
         kwargs={"plateau_accel": 0.2, "plateau_window_s": 0.5, "max_time": 60.0},
     )
     both("busa: distance 0 (both raise)", copy.deepcopy(busa), kwargs={"distance": 0.0})
+    # Output sizing `np.zeros(int(max_time / dt) + 1)` — error classes mirrored.
+    both(
+        "busa: max_time -1 (both raise)", copy.deepcopy(busa), kwargs={"max_time": -1.0}
+    )
+    both(
+        "busa: max_time NaN (both ValueError)",
+        copy.deepcopy(busa),
+        kwargs={"max_time": float("nan")},
+    )
+    both(
+        "busa: max_time inf (both OverflowError)",
+        copy.deepcopy(busa),
+        kwargs={"max_time": float("inf")},
+    )
+    both(
+        "busa: max_time -1.5 dt (n_max 0, empty)",
+        copy.deepcopy(busa),
+        kwargs={"max_time": -0.0015},
+    )
+    add("busa: dt 0 (both ZeroDivisionError)", copy.deepcopy(busa), "fixed", dt=0.0)
+
+    # ── config edited after construction / engine reuse (schema 2) ──
+    # Python's step 0 uses the construction-time self.m_total, later steps
+    # the live cfg.chassis.total_mass_kg; run() then restores self.m_total.
+    for vname, post in {
+        "rider +20kg after construct": {"chassis.rider_mass_kg": 95.0},
+        "dry mass -15kg after construct": {"chassis.dry_mass_kg": 200.0},
+        "fuel burn x10 after construct": {"chassis.fuel_consumption_gs": 30.0},
+    }.items():
+        both(f"busa: {vname}", copy.deepcopy(busa), post_construct=post)
+        both(
+            f"busa: {vname}, 2nd run", copy.deepcopy(busa), post_construct=post, runs=2
+        )
+    add(
+        "busa: rider +20kg after construct, top speed",
+        copy.deepcopy(busa),
+        "topspeed",
+        post_construct={"chassis.rider_mass_kg": 95.0},
+    )
     return cases
 
 
@@ -680,16 +750,23 @@ def main() -> int:
     ap.add_argument(
         "--topspeed-sample",
         type=int,
-        default=80,
-        help="catalog bikes for top-speed mode (0 = all)",
+        default=0,
+        help="subsample the top-speed section to ~N catalog bikes (default 0 = all)",
     )
     ap.add_argument("--workers", type=int, default=os.cpu_count() or 2)
     ap.add_argument("--no-bench", action="store_true")
     ap.add_argument("--db", default=str(ROOT / "motoquant.db"))
     ap.add_argument(
-        "--report", default=str(ROOT / "reports" / "native_parity_2026-10-23.json")
+        "--report",
+        default=None,
+        help="JSON report path (default reports/native_parity_<today>.json)",
     )
     args = ap.parse_args()
+    today = _dt.date.today().isoformat()
+    # The quick (CI) slice writes no report unless asked: it is a gate, not
+    # evidence, and must not dirty the tree on every local run.
+    if args.report is None and not args.quick:
+        args.report = str(ROOT / "reports" / f"native_parity_{today}.json")
 
     if not native.available():
         print(
@@ -781,7 +858,9 @@ def main() -> int:
     )
 
     report = {
-        "generated": "2026-10-23",
+        "generated": today,
+        "mode": "quick" if args.quick else "full",
+        "topspeed_sample": args.topspeed_sample,
         "tolerance_s": TOL_S,
         "host": {
             "python": sys.version.split()[0],
@@ -816,9 +895,10 @@ def main() -> int:
                     for k, v in row.items()
                 },
             )
-    Path(args.report).parent.mkdir(parents=True, exist_ok=True)
-    Path(args.report).write_text(json.dumps(report, indent=1, default=str) + "\n")
-    print(f"\n  report -> {os.path.relpath(args.report, ROOT)}")
+    if args.report:
+        Path(args.report).parent.mkdir(parents=True, exist_ok=True)
+        Path(args.report).write_text(json.dumps(report, indent=1, default=str) + "\n")
+        print(f"\n  report -> {os.path.relpath(args.report, ROOT)}")
     return 0 if n_fail == 0 else 1
 
 

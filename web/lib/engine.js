@@ -15,7 +15,8 @@
  * carry ULP-level drift from the server's numbers; the harness measures it.
  *
  * ABI (raw C, no wasm-bindgen): alloc(len)->ptr, dealloc(ptr,len),
- * simulate(ptr,len)->resultPtr, schema_version(). The result buffer is
+ * simulate(ptr,len)->resultPtr, schema_version(), source_fingerprint_hi/lo().
+ * The result buffer is
  *   u32 total | u32 headerLen | u32 n | u32 nFloat | header JSON | pad8 |
  *   nFloat×n f64 (channel-major) | n f64 gear
  *
@@ -23,13 +24,20 @@
  *   import { simulate } from '@/lib/engine';
  *   const r = await simulate(resolvedConfig, { adaptive: false });
  *   r.et, r.trap, r.splits, r.channels.v, r.gear
+ *
+ * Errors: a failed simulation throws an Error whose `.kind` mirrors the
+ * Python exception class the reference engine raises ('value' | 'memory' |
+ * 'overflow' | 'zero_division').
  */
 
-export const ENGINE_SCHEMA = 1;
+export const ENGINE_SCHEMA = 2;
 const DEFAULT_URL = '/engine/motoquant_core.wasm';
 
-let _engine = null; // { exports, url }
-let _loading = null;
+// One cache entry per wasm URL: url -> Promise<{ exports, url }>. Keyed by
+// URL so two different engines (e.g. a preview build next to the default)
+// never share an instance; a failed load is evicted so the next call retries.
+const _engines = new Map();
+const _loaded = new Map(); // url -> resolved { exports, url } (for simulateLoaded)
 
 async function instantiate(url) {
   const resp = await fetch(url);
@@ -50,20 +58,26 @@ async function instantiate(url) {
   return { exports, url };
 }
 
-/** Fetch + instantiate the wasm once (concurrent callers share the promise). */
+/**
+ * Fetch + instantiate the wasm at `url` once. Concurrent callers for the SAME
+ * url share one promise; different urls get different engines.
+ */
 export function loadEngine(url = DEFAULT_URL) {
-  if (_engine && _engine.url === url) return Promise.resolve(_engine);
-  if (!_loading) {
-    _loading = instantiate(url)
-      .then((e) => {
-        _engine = e;
+  let p = _engines.get(url);
+  if (!p) {
+    p = instantiate(url).then(
+      (e) => {
+        _loaded.set(url, e);
         return e;
-      })
-      .finally(() => {
-        _loading = null;
-      });
+      },
+      (err) => {
+        _engines.delete(url);
+        throw err;
+      },
+    );
+    _engines.set(url, p);
   }
-  return _loading;
+  return p;
 }
 
 /** Warm the engine without running anything (e.g. on simulator mount). */
@@ -108,18 +122,19 @@ function decodeResult(exports, ptr) {
 /**
  * Run one simulation.
  *
- * @param {object} resolvedConfig  motoquant/native.py resolve_config() output (schema 1)
+ * @param {object} resolvedConfig  motoquant/native.py resolve_config() output (schema 2)
  * @param {object} [opts]
  * @param {number} [opts.distance=402.336]  metres
  * @param {number} [opts.maxTime=26]        seconds
  * @param {boolean} [opts.adaptive=false]   adaptive-dt integration
  * @param {boolean} [opts.channels=true]    return per-step channels (else splits only)
+ * @param {string}  [opts.url]              wasm URL (default /engine/motoquant_core.wasm)
  * @returns {Promise<{et:number, trap:number, trapKmh:number, finished:boolean,
  *   splits:object, dt:number, steps:number, n:number, nanBreak:boolean,
  *   channels:object|null, gear:Float64Array|null, elapsedMs:number}>}
  */
 export async function simulate(resolvedConfig, opts = {}) {
-  const { exports } = await loadEngine(opts.url);
+  const { exports } = await loadEngine(opts.url ?? DEFAULT_URL);
   return simulateSync(exports, resolvedConfig, opts);
 }
 
@@ -144,7 +159,11 @@ function simulateSync(exports, resolvedConfig, opts) {
   const { total, header, channels, gear, n } = decodeResult(exports, resPtr);
   exports.dealloc(resPtr, total);
   const t1 = typeof performance !== 'undefined' ? performance.now() : Date.now();
-  if (!header.ok) throw new Error(`engine: ${header.error}`);
+  if (!header.ok) {
+    const err = new Error(`engine: ${header.error}`);
+    err.kind = header.kind || 'value';
+    throw err;
+  }
   const s = header.splits;
   return {
     et: s.time_quarter,
@@ -162,8 +181,9 @@ function simulateSync(exports, resolvedConfig, opts) {
   };
 }
 
-/** Synchronous variant for callers that already awaited loadEngine(). */
+/** Synchronous variant for callers that already awaited loadEngine(opts.url). */
 export function simulateLoaded(resolvedConfig, opts = {}) {
-  if (!_engine) throw new Error('engine: call loadEngine() first');
-  return simulateSync(_engine.exports, resolvedConfig, opts);
+  const e = _loaded.get(opts.url ?? DEFAULT_URL);
+  if (!e) throw new Error('engine: call loadEngine() first');
+  return simulateSync(e.exports, resolvedConfig, opts);
 }

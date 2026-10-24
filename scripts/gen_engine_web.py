@@ -5,12 +5,16 @@ parity fixtures that prove it reproduces the Python reference.
 
     python scripts/gen_engine_web.py            # fixtures only
     python scripts/gen_engine_web.py --build    # cargo build wasm32 + copy + fixtures
+    python scripts/gen_engine_web.py --full-catalog /tmp/all.json
+        # every catalog bike, fixed + adaptive (1,082 cases), for
+        # `node web/scripts/engine-parity.mjs /tmp/all.json`
 
 Outputs
 -------
 web/public/engine/motoquant_core.wasm   the in-browser engine (raw C ABI,
                                         loaded by web/lib/engine.js)
-web/public/engine/engine.json           manifest: schema, sha256, sizes
+web/public/engine/engine.json           manifest: schema + source fingerprint READ
+                                        FROM THE WASM'S OWN EXPORTS, sha256, sizes
 rust/fixtures/engine_parity.json        resolved configs + Python reference
                                         results (ET/trap/splits/sample count +
                                         a sha256 per output channel). Consumed by
@@ -78,6 +82,124 @@ SPLITS = (
 )  # fmt: skip
 
 
+# ═══════════════════════════════════════════
+# Static wasm reader (no runtime needed)
+# ═══════════════════════════════════════════
+#
+# The manifest's schema/fingerprint must come from the BINARY, not from
+# Python constants — otherwise a stale committed wasm would be certified by
+# the very values it is supposed to be checked against. The four metadata
+# exports are constant functions (`i32.const N; end`), so they can be read by
+# parsing the module instead of instantiating it.
+
+
+def _uleb(b: bytes, i: int) -> tuple[int, int]:
+    val = shift = 0
+    while True:
+        byte = b[i]
+        i += 1
+        val |= (byte & 0x7F) << shift
+        shift += 7
+        if not byte & 0x80:
+            return val, i
+
+
+def _sleb(b: bytes, i: int) -> tuple[int, int]:
+    val = shift = 0
+    while True:
+        byte = b[i]
+        i += 1
+        val |= (byte & 0x7F) << shift
+        shift += 7
+        if not byte & 0x80:
+            if byte & 0x40:
+                val -= 1 << shift
+            return val, i
+
+
+def wasm_const_exports(data: bytes, names: tuple[str, ...]) -> dict[str, int]:
+    """Return the u32 constant each named exported function returns.
+
+    Raises ValueError if the module is malformed, an export is missing, or a
+    function body is not exactly ``i32.const N; end`` (no locals).
+    """
+    if data[:8] != b"\0asm\x01\0\0\0":
+        raise ValueError("not a wasm v1 module")
+    i, n_imported_funcs = 8, 0
+    exports: dict[str, int] = {}
+    bodies: list[bytes] = []
+    while i < len(data):
+        sec_id = data[i]
+        size, i = _uleb(data, i + 1)
+        sec, i = data[i : i + size], i + size
+        if sec_id == 2:  # imports: imported functions shift the index space
+            count, j = _uleb(sec, 0)
+            for _ in range(count):
+                for _ in range(2):  # module name, field name
+                    ln, j = _uleb(sec, j)
+                    j += ln
+                kind = sec[j]
+                j += 1
+                if kind == 0:
+                    n_imported_funcs += 1
+                    _, j = _uleb(sec, j)
+                elif kind == 1:  # table: reftype + limits
+                    j += 1
+                    flags, j = _uleb(sec, j + 0)
+                    _, j = _uleb(sec, j)
+                    if flags & 1:
+                        _, j = _uleb(sec, j)
+                elif kind == 2:  # memory: limits
+                    flags, j = _uleb(sec, j)
+                    _, j = _uleb(sec, j)
+                    if flags & 1:
+                        _, j = _uleb(sec, j)
+                elif kind == 3:  # global: valtype + mut
+                    j += 2
+                else:
+                    raise ValueError(f"unknown import kind {kind}")
+        elif sec_id == 7:  # exports
+            count, j = _uleb(sec, 0)
+            for _ in range(count):
+                ln, j = _uleb(sec, j)
+                name = sec[j : j + ln].decode()
+                j += ln
+                kind = sec[j]
+                idx, j = _uleb(sec, j + 1)
+                if kind == 0:
+                    exports[name] = idx
+        elif sec_id == 10:  # code
+            count, j = _uleb(sec, 0)
+            for _ in range(count):
+                ln, j = _uleb(sec, j)
+                bodies.append(sec[j : j + ln])
+                j += ln
+    out = {}
+    for name in names:
+        if name not in exports:
+            raise ValueError(f"wasm has no exported function {name!r}")
+        body = bodies[exports[name] - n_imported_funcs]
+        n_locals, j = _uleb(body, 0)
+        if n_locals != 0 or body[j] != 0x41:
+            raise ValueError(f"{name}: body is not a bare i32.const")
+        val, j = _sleb(body, j + 1)
+        if body[j:] != b"\x0b":
+            raise ValueError(f"{name}: body is not `i32.const N; end`")
+        out[name] = val & 0xFFFFFFFF
+    return out
+
+
+def wasm_metadata(path: Path) -> dict:
+    """``{"schema": int, "source_fingerprint": "16 hex"}`` read from the
+    wasm's own ``schema_version`` / ``source_fingerprint_hi|lo`` exports."""
+    c = wasm_const_exports(
+        Path(path).read_bytes(),
+        ("schema_version", "source_fingerprint_hi", "source_fingerprint_lo"),
+    )
+    fp = (c["source_fingerprint_hi"] << 32) | c["source_fingerprint_lo"]
+    return {"schema": c["schema_version"], "source_fingerprint": f"{fp:016x}"}
+
+
 def build_wasm() -> None:
     cmd = [
         "cargo", "build", "-p", "motoquant-core", "--profile", "wasm-release",
@@ -89,15 +211,38 @@ def build_wasm() -> None:
     shutil.copyfile(WASM_SRC, WEB_ENGINE / "motoquant_core.wasm")
 
 
-def write_manifest() -> dict:
-    data = (WEB_ENGINE / "motoquant_core.wasm").read_bytes()
+def write_manifest(*, built: bool) -> dict:
+    wasm = WEB_ENGINE / "motoquant_core.wasm"
+    data = wasm.read_bytes()
+    meta = wasm_metadata(wasm)
+    if meta["schema"] != native.SCHEMA_VERSION:
+        raise SystemExit(
+            f"wasm exports schema {meta['schema']} but native.SCHEMA_VERSION is "
+            f"{native.SCHEMA_VERSION} — the committed wasm is stale; run `make wasm`"
+        )
+    here = native.fingerprint_sources()
+    if built and here is not None and meta["source_fingerprint"] != here:
+        raise SystemExit(
+            f"freshly built wasm fingerprint {meta['source_fingerprint']} != "
+            f"checkout {here} (build.rs / native.fingerprint_sources drifted?)"
+        )
+    if here is not None and meta["source_fingerprint"] != here:
+        print(
+            f"WARNING: wasm was built from other Rust sources "
+            f"({meta['source_fingerprint']} != {here}); rebuild with --build",
+            file=sys.stderr,
+        )
     manifest = {
-        "schema": native.SCHEMA_VERSION,
+        "schema": meta["schema"],
+        "source_fingerprint": meta["source_fingerprint"],
         "file": "motoquant_core.wasm",
         "sha256": hashlib.sha256(data).hexdigest(),
         "bytes": len(data),
         "gzip_bytes": len(gzip.compress(data, compresslevel=9)),
-        "abi": "raw C ABI: alloc(len)->ptr, dealloc(ptr,len), simulate(ptr,len)->ptr, schema_version()",
+        "abi": (
+            "raw C ABI: alloc(len)->ptr, dealloc(ptr,len), simulate(ptr,len)->ptr, "
+            "schema_version(), source_fingerprint_hi(), source_fingerprint_lo()"
+        ),
         "note": "Generated by scripts/gen_engine_web.py --build; do not edit.",
     }
     (WEB_ENGINE / "engine.json").write_text(json.dumps(manifest, indent=1) + "\n")
@@ -120,6 +265,11 @@ def _python_case(
         kw["max_time"] = max_time
     r = MotoQuantEngine(copy.deepcopy(cfg), dt=dt).run(**kw)
     resolved = native.resolve_config(copy.deepcopy(cfg), dt=dt)
+    dist = float(kw.get("distance", 402.336))
+    # Python does not expose its step counter: every loop iteration stores one
+    # sample, and the finish-line crossing stores one more (x >= distance).
+    n = int(len(r.t))
+    steps = n - 1 if n and float(r.x[-1]) >= dist else n
     return {
         "label": label,
         "request": {
@@ -129,7 +279,8 @@ def _python_case(
         },
         "config": resolved,
         "expected": {
-            "n": int(len(r.t)),
+            "n": n,
+            "steps": steps,
             "dt": float(r.dt),
             "finished_quarter": bool(r.finished_quarter),
             **{k: float(getattr(r, k)) for k in SPLITS},
@@ -209,6 +360,40 @@ def select_cases() -> list[tuple]:
     return out
 
 
+def _full_catalog_worker(item):
+    from check_native_parity import cfg_from_row
+
+    label, row, kw = item
+    return _python_case(label, cfg_from_row(row, label), **kw)
+
+
+def export_full_catalog(path: Path, workers: int | None = None) -> dict:
+    """Every current catalog bike, fixed + adaptive, as a fixture file for
+    the node harness (not committed: ~1,082 cases)."""
+    import multiprocessing as mp
+    import os
+
+    from check_native_parity import load_catalog_rows
+
+    items = []
+    for label, row in load_catalog_rows(ROOT / "motoquant.db"):
+        items.append((label, row, {}))
+        items.append((label + " adaptive", row, {"adaptive": True}))
+    with mp.get_context("fork").Pool(workers or os.cpu_count() or 2) as pool:
+        cases = pool.map(_full_catalog_worker, items, chunksize=4)
+    info = native.host_math() if native.available() else {"exp_impl": "libm"}
+    fixture = {
+        "schema": native.SCHEMA_VERSION,
+        "tolerance_s": 1e-9,
+        "generated_by": "scripts/gen_engine_web.py --full-catalog",
+        "host": {"numpy": np.__version__, "exp_impl": info.get("exp_impl")},
+        "cases": cases,
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(fixture, separators=(",", ":")) + "\n")
+    return fixture
+
+
 def export_fixtures() -> dict:
     cases = []
     for label, cfg, kw in select_cases():
@@ -245,11 +430,20 @@ def main() -> int:
         help="cargo build the wasm32 engine and copy it into web/public/engine/",
     )
     ap.add_argument("--no-fixtures", action="store_true")
+    ap.add_argument(
+        "--full-catalog",
+        metavar="PATH",
+        help="write an every-bike (fixed + adaptive) fixture to PATH and exit",
+    )
     args = ap.parse_args()
+    if args.full_catalog:
+        fx = export_full_catalog(Path(args.full_catalog))
+        print(f"full-catalog fixture: {len(fx['cases'])} cases -> {args.full_catalog}")
+        return 0
     if args.build:
         build_wasm()
     if (WEB_ENGINE / "motoquant_core.wasm").exists():
-        m = write_manifest()
+        m = write_manifest(built=args.build)
         print(
             f"wasm: {m['bytes']} B raw / {m['gzip_bytes']} B gzip  sha256={m['sha256'][:16]}…"
         )

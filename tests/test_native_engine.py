@@ -3,8 +3,11 @@ Native (Rust) physics core — parity gate.
 
 ``motoquant/physics.py`` is the reference; ``motoquant_core`` (built from
 rust/motoquant-core by ``make native``) is a float-op-for-float-op port that
-must reproduce it bit-for-bit. Skipped entirely when the extension is not
-built, so a pure-Python checkout stays green.
+must reproduce it bit-for-bit. Native-dependent tests skip when the extension
+is not built, so a pure-Python checkout stays green — UNLESS
+``MOTOQUANT_REQUIRE_NATIVE=1`` (``make native-test``, the CI native job):
+then a missing, schema-incompatible or STALE build (compiled from different
+Rust sources than this checkout) fails instead of skipping.
 
 The full-catalog / stress / top-speed sweep lives in
 ``scripts/check_native_parity.py`` (``make native-parity``); this module is
@@ -16,10 +19,15 @@ resolved-config schema contract.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
+import os
 import random
+import re
+import shutil
 import sqlite3
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -30,13 +38,16 @@ from motoquant import native
 from motoquant.database.bridge import db_row_to_config
 from motoquant.physics import MotoQuantEngine
 
-# Native-dependent tests are skipped when the extension is not built; the
-# fixture/manifest freshness guards at the bottom always run (pure Python).
-needs_native = pytest.mark.skipif(
-    not native.available(), reason="motoquant_core not built (make native)"
-)
-
 ROOT = Path(__file__).resolve().parent.parent
+REQUIRE_NATIVE = os.environ.get("MOTOQUANT_REQUIRE_NATIVE") == "1"
+
+# Native-dependent tests are skipped when the extension is not built (and
+# REQUIRE_NATIVE is off); the fixture/manifest freshness guards at the bottom
+# always run (pure Python).
+needs_native = pytest.mark.skipif(
+    not native.available() and not REQUIRE_NATIVE,
+    reason="motoquant_core not built (make native)",
+)
 TOL = 1e-9
 CHANNELS = (
     "t", "x", "v", "a", "rpm", "gear", "slip", "traction_pct", "N_front",
@@ -48,6 +59,23 @@ REFS = {
     "yzfr1_4c8": 10.143589715692835,
     "hayabusa_gen1": 10.363345081274984,
 }
+
+
+def test_native_build_is_present_and_fresh_when_required():
+    """``make native-test`` / CI must not go green on a missing or stale build."""
+    if not REQUIRE_NATIVE:
+        pytest.skip("MOTOQUANT_REQUIRE_NATIVE != 1")
+    info = native.native_info()
+    assert native.available(), (
+        f"MOTOQUANT_REQUIRE_NATIVE=1 but the Rust core is unavailable or built "
+        f"for another schema ({info}) — run `make native`"
+    )
+    assert not native.is_stale(), (
+        f"motoquant_core was built from different Rust sources "
+        f"(built {native.built_fingerprint()} != checkout "
+        f"{native.fingerprint_sources()}) — run `make native`"
+    )
+    assert native.host_math()["exact"], info
 
 
 def _assert_same(rp, rn, label):
@@ -162,11 +190,58 @@ def test_degenerate_inputs_raise_like_python():
     with pytest.raises(UnboundLocalError):
         MotoQuantEngine(cfg).run(distance=0.0)
     # The native path rejects distance=0 up front with a clear ValueError
-    # instead of reproducing Python's accidental UnboundLocalError.
+    # instead of reproducing Python's accidental UnboundLocalError
+    # (documented in docs/RUST_CORE.md, "Error behaviour").
     with pytest.raises(ValueError):
         native.run_native(cfg, distance=0.0)
-    with pytest.raises(ValueError):
-        native.run_native(cfg, max_time=-1.0)
+    # Output sizing `np.zeros(int(max_time / dt) + 1)`: same class as Python.
+    for kw, exc in (
+        ({"max_time": -1.0}, ValueError),
+        ({"max_time": float("nan")}, ValueError),
+        ({"max_time": float("inf")}, OverflowError),
+    ):
+        with pytest.raises(exc):
+            MotoQuantEngine(mq.gsxr1000_k5()).run(**kw)
+        with pytest.raises(exc):
+            native.run_native(mq.gsxr1000_k5(), **kw)
+    with pytest.raises(ZeroDivisionError):
+        MotoQuantEngine(mq.gsxr1000_k5(), dt=0.0).run()
+    with pytest.raises(ZeroDivisionError):
+        native.run_native(mq.gsxr1000_k5(), dt=0.0)
+
+
+@needs_native
+def test_oversized_run_raises_memoryerror_instead_of_aborting():
+    """A run that would store more than MAX_SAMPLES samples must raise a
+    Python MemoryError (Python's own np.zeros raises MemoryError for it) —
+    before the cap this aborted the whole interpreter in the allocator."""
+    cfg = mq.gsxr1000_k5()
+    with pytest.raises(MemoryError):
+        native.run_native(cfg, distance=1e12, max_time=1e9)
+    # A huge horizon that the bike never needs is fine: buffers grow lazily.
+    r = native.run_native(cfg, max_time=1e6)
+    assert abs(float(r.time_quarter) - REFS["gsxr1000_k5"]) <= TOL
+
+
+@needs_native
+@pytest.mark.parametrize(
+    "path,value",
+    [("rider_mass_kg", 95.0), ("dry_mass_kg", 160.0), ("fluid_mass_kg", 30.0)],
+)
+def test_config_mass_edited_after_construction_matches_python(path, value):
+    """Python's step 0 uses the construction-time ``self.m_total``; every later
+    step re-reads ``cfg.chassis.total_mass_kg`` (schema 2). Engine reuse: both
+    restore ``self.m_total`` from the config after a run."""
+    py = MotoQuantEngine(mq.gsxr1000_k5())
+    na = native.NativeEngine(mq.gsxr1000_k5())
+    setattr(py.cfg.chassis, path, value)
+    setattr(na.cfg.chassis, path, value)
+    r1p, r1n = py.run(), na.run()
+    _assert_same(r1p, r1n, f"{path} first run")
+    assert na.m_total == py.m_total == py.cfg.chassis.total_mass_kg
+    _assert_same(py.run(), na.run(), f"{path} reused engine")
+    # And the edit is real physics, not a no-op on either side.
+    assert r1n.time_quarter != native.run_native(mq.gsxr1000_k5()).time_quarter
 
 
 # ── unit-level primitives ────────────────────────────────────────────────────
@@ -278,13 +353,106 @@ def test_engine_fixtures_are_fresh(factory):
     )
 
 
-def test_wasm_manifest_matches_binary():
-    import hashlib
+def _gen_engine_web():
+    sys.path.insert(0, str(ROOT / "scripts"))
+    try:
+        import gen_engine_web  # noqa: PLC0415
+    finally:
+        sys.path.remove(str(ROOT / "scripts"))
+    return gen_engine_web
 
+
+def test_wasm_manifest_matches_binary():
+    """The committed browser engine must be the current one — checked against
+    the wasm's OWN exports (schema_version, source fingerprint), never against
+    the Python constants that also wrote the manifest."""
     eng = ROOT / "web" / "public" / "engine"
-    if not (eng / "motoquant_core.wasm").exists():
+    wasm = eng / "motoquant_core.wasm"
+    if not wasm.exists():
         pytest.skip("browser engine not built")
     manifest = json.loads((eng / "engine.json").read_text())
-    data = (eng / "motoquant_core.wasm").read_bytes()
-    assert manifest["sha256"] == hashlib.sha256(data).hexdigest()
-    assert manifest["schema"] == native.SCHEMA_VERSION
+    assert manifest["sha256"] == hashlib.sha256(wasm.read_bytes()).hexdigest()
+    meta = _gen_engine_web().wasm_metadata(wasm)
+    assert meta["schema"] == native.SCHEMA_VERSION == manifest["schema"], (
+        f"committed wasm exports schema {meta['schema']}, native.py is "
+        f"{native.SCHEMA_VERSION} — run `make wasm`"
+    )
+    js = (ROOT / "web" / "lib" / "engine.js").read_text()
+    m = re.search(r"export const ENGINE_SCHEMA = (\d+);", js)
+    assert m and int(m.group(1)) == native.SCHEMA_VERSION, "engine.js ENGINE_SCHEMA"
+    fx = json.loads(FIXTURES.read_text())
+    assert fx["schema"] == native.SCHEMA_VERSION, "fixture schema"
+    assert manifest["source_fingerprint"] == meta["source_fingerprint"]
+    here = native.fingerprint_sources()
+    if here is not None:
+        assert meta["source_fingerprint"] == here, (
+            "web/public/engine/motoquant_core.wasm was built from different Rust "
+            "sources than this checkout — run `make wasm`"
+        )
+
+
+def test_wasm_reader_rejects_non_constant_exports():
+    gen = _gen_engine_web()
+    data = (ROOT / "web" / "public" / "engine" / "motoquant_core.wasm").read_bytes()
+    with pytest.raises(ValueError, match="i32.const"):
+        gen.wasm_const_exports(data, ("simulate",))
+    with pytest.raises(ValueError, match="no exported function"):
+        gen.wasm_const_exports(data, ("nope",))
+
+
+def test_source_fingerprint_tracks_rust_sources(tmp_path):
+    """fingerprint_sources() must change when any engine source changes (the
+    staleness signal) and be stable otherwise."""
+    crate = tmp_path / "rust" / "motoquant-core"
+    shutil.copytree(native.CRATE_DIR / "src", crate / "src")
+    shutil.copy(native.CRATE_DIR / "Cargo.toml", crate / "Cargo.toml")
+    shutil.copy(native.CRATE_DIR.parent / "Cargo.lock", crate.parent / "Cargo.lock")
+    a = native.fingerprint_sources(crate)
+    assert a == native.fingerprint_sources()  # same bytes -> same hash
+    eng = crate / "src" / "engine.rs"
+    eng.write_text(eng.read_text() + "\n// edit\n")
+    assert native.fingerprint_sources(crate) != a
+    assert native.fingerprint_sources(tmp_path / "missing") is None
+
+
+def test_is_stale_compares_build_with_checkout(monkeypatch):
+    monkeypatch.setattr(native, "built_fingerprint", lambda: "aaaaaaaaaaaaaaaa")
+    monkeypatch.setattr(native, "_checkout_fingerprint", lambda: "bbbbbbbbbbbbbbbb")
+    assert native.is_stale()
+    monkeypatch.setattr(native, "_checkout_fingerprint", lambda: None)
+    assert not native.is_stale()  # sources absent (wheel install): unknown
+
+
+@needs_native
+def test_built_extension_matches_checkout_sources():
+    assert native.built_fingerprint() == native.fingerprint_sources(), (
+        "stale build — run `make native`"
+    )
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node not available")
+def test_next_config_serves_the_engine_with_cache_and_wasm_type():
+    """web/next.config.js headers() — the function `next build` calls — must
+    give /engine/* the stale-safe short cache and the wasm its MIME type
+    (instantiateStreaming needs `application/wasm`)."""
+    import subprocess
+
+    out = subprocess.run(
+        [
+            "node",
+            "-e",
+            "require('./next.config.js').headers()"
+            ".then((h) => console.log(JSON.stringify(h)))",
+        ],
+        cwd=ROOT / "web",
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert out.returncode == 0, out.stderr
+    rules = {r["source"]: r["headers"] for r in json.loads(out.stdout)}
+    cache = {h["key"]: h["value"] for h in rules["/engine/:path*"]}
+    assert "max-age=3600" in cache["Cache-Control"]
+    assert "immutable" not in cache["Cache-Control"]  # file name is not hashed
+    wasm = {h["key"]: h["value"] for h in rules["/engine/motoquant_core.wasm"]}
+    assert wasm["Content-Type"] == "application/wasm"
