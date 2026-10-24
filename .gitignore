@@ -162,3 +162,26 @@ scrape_cache/
 
 # Rust core build output
 rust/target/
+
+# ── Added 2026-10-24: open-source secret hygiene ──
+# Environment files at any depth. The committed templates (.env.example,
+# web/.env.local.example) stay tracked via the negations below.
+.env
+.env.*
+!.env.example
+!*.example
+# Keys, certificates and credential exports
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+*credentials*.json
+# npm auth tokens live in .npmrc
+.npmrc
+# Vercel CLI project link (org/project ids + cached env pulled by `vercel pull`)
+.vercel/
+# Test / coverage output
+coverage.xml
+.hypothesis/

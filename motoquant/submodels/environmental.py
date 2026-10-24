@@ -22,7 +22,13 @@ All values are computed once at construction and are read-only during the
 simulation loop.
 """
 
-from ..models import BikeConfig
+from ..models import (
+    BOOST_SC_CENTRIFUGAL,
+    BOOST_SC_ROOTS,
+    BOOST_TURBO,
+    BikeConfig,
+    ForcedInductionParams,
+)
 
 # ── Track surface grip multipliers (baseline, no prep compound) ──────────────
 # Values are relative to clean dry asphalt = 1.00
@@ -59,6 +65,22 @@ _SURFACE_RR: dict = {
 # ── Power correction denominator at standard conditions (ISO 1585) ────────────
 _RHO_SL_STD = 1.2250  # kg/m³  (sea level, 15 °C, 0 % RH)
 
+# ── Density floor for boost that compensates thin air ─────────────────────────
+# A turbo or supercharger making real boost recovers most of the charge
+# density a high-DA venue takes away, so its base-engine correction is floored.
+# Nitrous carries its own oxidiser and does NOTHING for the base engine's air
+# charge, and a compressor with zero target boost compensates nothing either:
+# both take the plain NA correction rho / rho_std.
+_BOOSTED_DA_FLOOR = 0.97
+_DENSITY_COMPENSATING_BOOST = frozenset(
+    {BOOST_TURBO, BOOST_SC_ROOTS, BOOST_SC_CENTRIFUGAL}
+)
+
+
+def boost_compensates_density(fi: ForcedInductionParams) -> bool:
+    """True only for a turbo / supercharger with a positive boost target."""
+    return fi.boost_type in _DENSITY_COMPENSATING_BOOST and fi.target_boost_bar > 0.0
+
 
 class EnvironmentalModel:
     """
@@ -85,13 +107,15 @@ class EnvironmentalModel:
         self.density_alt_ft: float = env.density_altitude_ft()
 
         # ── Engine power correction ──────────────────────────────────────────
-        # Naturally aspirated: power ∝ ρ / ρ_std
-        # Forced induction: boost compensates for density loss; apply a floor
-        if not cfg.forced_induction.is_boosted:
+        # Naturally aspirated (and nitrous, and zero-boost FI): power ∝ ρ / ρ_std.
+        # A turbo / supercharger making real boost compensates for the density
+        # loss, so it gets a floor (it still loses a little at extreme DA).
+        # The floor used to key on is_boosted alone, so a zero-shot N2O kit or
+        # a 0-bar turbo gained up to ~0.09 s at Aamby from nothing.
+        if not boost_compensates_density(cfg.forced_induction):
             self.power_correction: float = self.rho / _RHO_SL_STD
         else:
-            # Boosted engines still lose a little at extreme DA
-            self.power_correction = max(0.97, self.rho / _RHO_SL_STD)
+            self.power_correction = max(_BOOSTED_DA_FLOOR, self.rho / _RHO_SL_STD)
 
         # Informational: % power lost relative to sea level standard
         self.da_power_loss_pct: float = max(0.0, (1.0 - self.power_correction) * 100.0)

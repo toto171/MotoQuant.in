@@ -1,0 +1,52 @@
+# Dependabot — weekly dependency and security updates.
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+#
+# Minor and patch bumps are grouped into one PR per ecosystem to keep the
+# queue reviewable; majors arrive one PR each. Security updates are not
+# limited by these settings.
+#
+# Notes for reviewers:
+#   * pip: the Docker image installs requirements-api.lock, not
+#     requirements-api.txt. After merging a pip bump, run `make lock` and
+#     commit the regenerated lock (or Dependabot's own lock change, if any).
+#   * Any bump that can touch numerics (numpy, the Rust core's deps) must pass
+#     `make baselines` and the golden snapshot before merge (docs/INVARIANTS.md).
+#   * The Vercel CLI used by .github/workflows/deploy.yml is a pinned global
+#     npm install (VERCEL_CLI_VERSION); Dependabot does not track it.
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      python-minor-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: "/web"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      web-minor-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: cargo
+    directory: "/rust"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      rust-minor-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      actions-minor-patch:
+        update-types: [minor, patch]

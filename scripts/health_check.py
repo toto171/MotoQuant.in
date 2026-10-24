@@ -27,14 +27,27 @@ sys.path.insert(0, ROOT)
 
 # Secret-shaped patterns to refuse in tracked files. Deliberately conservative —
 # these are real token prefixes, not generic entropy, to keep false positives low.
+# Every pattern must stay at ZERO hits on the clean tree (run
+# `python scripts/health_check.py --secrets-only`); tests that need a sample
+# token build it at runtime so this scan never flags the test itself.
 _SECRET_PATTERNS = [
-    r"github_pat_[A-Za-z0-9_]{40,}",
-    r"ghp_[A-Za-z0-9]{36,}",
-    r"gsk_[A-Za-z0-9]{40,}",
-    r"sk-[A-Za-z0-9]{40,}",
-    r"AIza[0-9A-Za-z_-]{35}",
-    r"xox[baprs]-[A-Za-z0-9-]{20,}",
-    r"-----BEGIN (RSA|EC|OPENSSH|PRIVATE) ",
+    r"github_pat_[A-Za-z0-9_]{40,}",  # GitHub fine-grained PAT
+    r"gh[pousr]_[A-Za-z0-9]{36,}",  # GitHub classic PAT / OAuth / app tokens
+    r"gsk_[A-Za-z0-9]{40,}",  # Groq
+    r"sk-[A-Za-z0-9]{40,}",  # OpenAI (legacy)
+    r"sk-(?:proj|svcacct|admin)-[A-Za-z0-9_-]{40,}",  # OpenAI (project/service)
+    r"sk-ant-[A-Za-z0-9_-]{32,}",  # Anthropic
+    r"\b(?:sk|rk)_live_[A-Za-z0-9]{16,}",  # Stripe live secret / restricted key
+    r"\bwhsec_[A-Za-z0-9+/=]{24,}",  # Stripe webhook signing secret
+    r"\brzp_live_[A-Za-z0-9]{10,}",  # Razorpay live key
+    r"\bre_[A-Za-z0-9]{8}_[A-Za-z0-9]{20,}\b",  # Resend API key
+    r"\b(?:AKIA|ASIA)[0-9A-Z]{16}\b",  # AWS access key id
+    r"\bph[cx]_[A-Za-z0-9]{32,}",  # PostHog project / personal key
+    r"appid=[0-9a-fA-F]{32}\b",  # OpenWeatherMap key in a URL
+    r"AIza[0-9A-Za-z_-]{35}",  # Google API key
+    r"xox[baprs]-[A-Za-z0-9-]{20,}",  # Slack
+    # PEM / OpenSSH / PGP private keys, incl. PKCS#8 "ENCRYPTED PRIVATE KEY".
+    r"-----BEGIN (?:RSA |EC |DSA |OPENSSH |ENCRYPTED |PGP )?PRIVATE KEY",
 ]
 
 

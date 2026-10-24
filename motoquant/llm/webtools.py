@@ -14,8 +14,11 @@ Two capabilities, both server-side and defensive:
                         whitespace collapsed, hard-capped size).
 
 Security posture:
-  * web_fetch refuses non-http(s) schemes and private/loopback/link-local
-    hosts (SSRF guard — the API runs on Render next to internal endpoints).
+  * web_fetch refuses non-http(s) schemes, any host that is not public
+    unicast (private/loopback/link-local/CGNAT/reserved — SSRF guard; the API
+    runs on Render next to internal endpoints), embedded credentials, and
+    URLs whose host two parsers would read differently (backslash/whitespace
+    tricks). Every redirect hop is re-checked.
   * Responses are size-capped (512 KB raw, 8 KB extracted text) so a hostile
     page cannot balloon the LLM context or the process memory.
   * All failures return {"error": ...} instead of raising — the agent loop
@@ -67,8 +70,31 @@ def web_enabled() -> bool:
 # ─── SSRF guard ───────────────────────────────────────────────────────────
 
 
+def _ip_is_blocked(ip: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
+    """True for any address that is not plain public unicast.
+
+    ``not ip.is_global`` is the load-bearing test: it also covers ranges the
+    individual flags miss, e.g. 100.64.0.0/10 (shared / carrier-grade NAT,
+    which holds Alibaba Cloud's metadata service 100.100.100.200 and Tailscale
+    nodes), 192.0.0.0/24 and the benchmarking ranges. The explicit flags stay
+    as belt-and-braces (multicast can be "global").
+    """
+    mapped = getattr(ip, "ipv4_mapped", None)
+    if mapped is not None and _ip_is_blocked(mapped):
+        return True
+    return (
+        not ip.is_global
+        or ip.is_private
+        or ip.is_loopback
+        or ip.is_link_local
+        or ip.is_reserved
+        or ip.is_multicast
+        or ip.is_unspecified
+    )
+
+
 def _host_is_private(host: str) -> bool:
-    """True when `host` resolves to a private / loopback / link-local IP."""
+    """True when `host` resolves to any non-public address (fail closed)."""
     try:
         infos = socket.getaddrinfo(host, None)
     except OSError:
@@ -79,28 +105,64 @@ def _host_is_private(host: str) -> bool:
             ip = ipaddress.ip_address(ip_str)
         except ValueError:
             return True
-        if (
-            ip.is_private
-            or ip.is_loopback
-            or ip.is_link_local
-            or ip.is_reserved
-            or ip.is_multicast
-            or ip.is_unspecified
-        ):
+        if _ip_is_blocked(ip):
             return True
     return False
 
 
+# Characters that let two URL parsers disagree about where the authority ends.
+# urllib.parse treats "\" as an ordinary userinfo character, while urllib3 /
+# requests (WHATWG-style) treat it as a path separator, so
+# "http://127.0.0.1\@example.com/" validated as example.com and CONNECTED to
+# 127.0.0.1. Whitespace and control characters are stripped or reinterpreted
+# differently by each parser, so they are refused outright too.
+_URL_FORBIDDEN_RE = re.compile(r"[\\\s\x00-\x1f\x7f]")
+
+
+def _norm_host(host: str) -> str:
+    """Lower-case, bracket-free, IDNA-encoded host for parser comparison
+    (urllib3 punycodes 'bücher.de' while urllib.parse keeps it as typed)."""
+    host = (host or "").strip("[]").lower()
+    if not host.isascii():
+        try:
+            host = host.encode("idna").decode("ascii")
+        except UnicodeError:
+            return "\x00invalid"  # never equal to a real host -> refused
+    return host
+
+
+def _requests_host(url: str) -> str | None:
+    """Host as the HTTP client (requests -> urllib3) will see it, or None if
+    urllib3 is unavailable (the stdlib fallback parses like urllib.parse)."""
+    try:
+        from urllib3.util import parse_url
+    except ImportError:  # pragma: no cover - urllib3 ships with requests
+        return None
+    try:
+        host = parse_url(url).host
+    except Exception:  # noqa: BLE001 - urllib3 raises LocationParseError & co.
+        return ""
+    return _norm_host(host or "")
+
+
 def _check_url(url: str) -> str | None:
     """Return an error string if `url` must not be fetched, else None."""
+    if _URL_FORBIDDEN_RE.search(url):
+        return "URL contains a backslash, whitespace or control character"
     try:
         parsed = urllib.parse.urlparse(url)
+        parsed.port  # noqa: B018 - raises ValueError on a malformed port
     except ValueError:
         return "invalid URL"
     if parsed.scheme not in ("http", "https"):
         return f"unsupported scheme {parsed.scheme!r} (http/https only)"
     if not parsed.hostname:
         return "URL has no host"
+    if "@" in parsed.netloc or parsed.username or parsed.password:
+        return "URLs with embedded credentials (user@host) are not fetched"
+    client_host = _requests_host(url)
+    if client_host is not None and client_host != _norm_host(parsed.hostname):
+        return "URL host is ambiguous (parsers disagree)"
     if _host_is_private(parsed.hostname):
         return "host resolves to a private or reserved address"
     return None

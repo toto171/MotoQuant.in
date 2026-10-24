@@ -20,11 +20,15 @@ fuse.
 
 from __future__ import annotations
 
+import ipaddress
+import logging
 import os
 import threading
 import time
 
 from fastapi import HTTPException, Request
+
+logger = logging.getLogger(__name__)
 
 # key -> (window_start_monotonic, count, window_s). Fixed-window counting:
 # simple, O(1), and precise enough for a cost fuse (worst case a burst of
@@ -44,22 +48,99 @@ RATE_LIMIT_ENABLED = os.environ.get("MOTOQUANT_RATE_LIMIT", "true").lower() not 
 )
 
 
-def client_ip(request: Request) -> str:
-    """Best-effort client IP behind the trusted proxy — the ONE place this repo
-    derives a client identity from a request (every rate-limit bucket keys on
-    it).
+# How many reverse proxies in front of the API append to X-Forwarded-For.
+# Explicit integer >= 0; 0 means "never trust the header". Unset means AUTO
+# (see trusted_proxy_hops()). Read per request so an operator (or a test)
+# can change it without re-importing.
+TRUSTED_PROXY_HOPS_ENV = "MOTOQUANT_TRUSTED_PROXY_HOPS"
 
-    Render terminates TLS upstream and *appends* the peer it observed to
-    X-Forwarded-For, so with exactly one trusted proxy the RIGHTMOST hop is
-    the real client. The leftmost hop is whatever the client itself sent — an
-    attacker who rotates a spoofed leftmost value on every request would get a
-    fresh bucket each time and bypass the fuse entirely. Take the rightmost."""
-    fwd = request.headers.get("x-forwarded-for")
-    if fwd:
-        hops = [h.strip() for h in fwd.split(",") if h.strip()]
+# Longest X-Forwarded-For hop we will use as a bucket key (bounds memory if a
+# trusted proxy ever forwards garbage).
+_MAX_HOP_LEN = 64
+
+_warned_bad_env: set[str] = set()
+
+
+def trusted_proxy_hops() -> int | None:
+    """Configured trusted-proxy hop count, or None for AUTO.
+
+    An unparseable or negative value fails CLOSED to 0 (the header is never
+    trusted) with a one-time warning, rather than silently trusting it.
+    """
+    raw = os.environ.get(TRUSTED_PROXY_HOPS_ENV)
+    if raw is None or raw.strip() == "":
+        return None
+    try:
+        hops = int(raw.strip())
+        if hops < 0:
+            raise ValueError
+    except ValueError:
+        if raw not in _warned_bad_env:
+            _warned_bad_env.add(raw)
+            logger.warning(
+                "%s=%r is not a non-negative integer; X-Forwarded-For will "
+                "NOT be trusted (every client keys on the socket peer)",
+                TRUSTED_PROXY_HOPS_ENV,
+                raw,
+            )
+        return 0
+    return hops
+
+
+def _peer_is_same_host(peer: str | None) -> bool:
+    """True when the socket peer can only be a proxy on this machine: a
+    loopback address, a unix socket (no peer address) or an in-process
+    transport (Starlette's TestClient reports "testclient"). A remote client
+    always shows up as a routable IP here."""
+    if not peer:
+        return True
+    try:
+        return ipaddress.ip_address(peer).is_loopback
+    except ValueError:
+        return True  # not an IP at all -> not a network peer
+
+
+def _effective_hops(peer: str | None) -> int:
+    hops = trusted_proxy_hops()
+    if hops is not None:
+        return hops
+    # AUTO. Render injects RENDER=true into every service and its edge proxy
+    # APPENDS the peer it saw, so exactly one hop is trusted there. Off
+    # Render, trust one hop only from a same-host reverse proxy; an API
+    # reached directly (the open-source `uvicorn motoquant.api:app` path)
+    # ignores the header, so a client cannot mint a fresh bucket per request
+    # by rotating a spoofed X-Forwarded-For.
+    if os.environ.get("RENDER"):
+        return 1
+    return 1 if _peer_is_same_host(peer) else 0
+
+
+def client_ip(request: Request) -> str:
+    """Best-effort client IP — the ONE place this repo derives a client
+    identity from a request (every rate-limit bucket keys on it).
+
+    X-Forwarded-For is honoured only for the configured number of trusted
+    proxies (``MOTOQUANT_TRUSTED_PROXY_HOPS``; AUTO = 1 on Render or behind a
+    same-host proxy, else 0). Each trusted proxy APPENDS the peer it observed,
+    so with N trusted proxies the client is the N-th hop from the RIGHT. Every
+    hop left of that is whatever the client itself sent — an attacker who
+    rotates a spoofed value on every request would otherwise get a fresh
+    bucket each time and bypass the fuse entirely.
+
+    Repeated X-Forwarded-For header lines are joined in order, so a spoofed
+    first line cannot shadow the line a proxy added.
+    """
+    peer = request.client.host if request.client else None
+    hops_trusted = _effective_hops(peer)
+    if hops_trusted > 0:
+        lines = request.headers.getlist("x-forwarded-for")
+        hops = [h.strip() for line in lines for h in line.split(",") if h.strip()]
         if hops:
-            return hops[-1]
-    return request.client.host if request.client else "unknown"
+            # Fewer entries than trusted proxies means every entry was added
+            # by a trusted proxy; the leftmost is then the outermost peer.
+            idx = -hops_trusted if len(hops) >= hops_trusted else 0
+            return hops[idx][:_MAX_HOP_LEN]
+    return peer or "unknown"
 
 
 def _evict_locked(now: float) -> None:
