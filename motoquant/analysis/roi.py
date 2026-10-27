@@ -50,6 +50,7 @@ import numpy as np
 
 from .. import engine_select
 from ..models import BikeConfig
+from ..physics import effective_et
 
 # Candidate-discovery cap for every optimizer / recommender pass. The catalog
 # holds ~600 parts and some bikes have 205 compatible ones, so the old
@@ -854,10 +855,11 @@ def _run_et(config: BikeConfig) -> tuple[float, float]:
 
     Routed through ``engine_select.make_engine`` so the Rust core is used when
     it is active (bit-identical results, ~60x faster); the Python reference
-    engine otherwise.
+    engine otherwise. A did-not-finish maps to ``DNF_ET_SENTINEL_S`` so the
+    autotune gearing/launch argmin and ROI deltas never pick it as fastest.
     """
     result = engine_select.make_engine(config).run()
-    return result.time_quarter, result.speed_quarter
+    return effective_et(result), result.speed_quarter
 
 
 def _roi_metrics(

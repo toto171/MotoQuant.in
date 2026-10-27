@@ -659,6 +659,15 @@ class TestPartsEndpoint(unittest.TestCase):
         r = client.get("/api/parts", params={"bike_id": 99999})
         self.assertEqual(r.status_code, 404)
 
+    def test_bike_detail_exposes_stroke_type_and_gear_ratios(self):
+        """The bike page's JSON-LD reads stroke_type and gear_ratios from this
+        payload; they live inside the param blobs and must be merged to the
+        top level (2-strokes were published as 4-stroke without it)."""
+        bike = client.get("/api/bikes/1").json()
+        self.assertEqual(bike.get("stroke_type"), 4)
+        self.assertIsInstance(bike.get("gear_ratios"), list)
+        self.assertGreaterEqual(len(bike["gear_ratios"]), 5)
+
     def test_bike_id_filters_out_2stroke_parts(self):
         """
         Kaizen guard: the 2T catalog has stroke_type=2 in its fitment rules.

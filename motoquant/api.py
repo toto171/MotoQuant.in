@@ -1044,7 +1044,14 @@ def get_bike(bike_id: int):
 
             # Expose common simulation-relevant fields at top level
             if engine:
-                for k in ("redline_rpm", "cylinder_count", "cylinder_config"):
+                # stroke_type feeds the bike page's JSON-LD (2-strokes were
+                # all published as "4-stroke" without it).
+                for k in (
+                    "redline_rpm",
+                    "cylinder_count",
+                    "cylinder_config",
+                    "stroke_type",
+                ):
                     v = engine.get(k)
                     if v is not None and d.get(k) in (None, ""):
                         d[k] = v
@@ -1054,7 +1061,12 @@ def get_bike(bike_id: int):
                     if v is not None:
                         d[k] = v
             if drive:
-                for k in ("front_sprocket", "rear_sprocket", "chain_pitch"):
+                for k in (
+                    "front_sprocket",
+                    "rear_sprocket",
+                    "chain_pitch",
+                    "gear_ratios",
+                ):
                     v = drive.get(k)
                     if v is not None:
                         d[k] = v
