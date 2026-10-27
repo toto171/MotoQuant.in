@@ -259,7 +259,7 @@ class LocalBackend:
         fields ``DrivetrainParams.final_ratio`` actually reads.
         """
         api = self._mod()
-        from .physics import MotoQuantEngine
+        from .engine_select import make_engine
 
         def _run() -> dict:
             cfg = api._build_config(
@@ -276,7 +276,7 @@ class LocalBackend:
             cfg = copy.deepcopy(cfg)
             cfg.drivetrain.front_sprocket = int(front)
             cfg.drivetrain.rear_sprocket = int(rear)
-            sim = MotoQuantEngine(cfg).run()
+            sim = make_engine(cfg).run()
             return {
                 "front_sprocket": int(front),
                 "rear_sprocket": int(rear),
@@ -1065,7 +1065,7 @@ class MCPServer:
             "capabilities": {"tools": {"listChanged": False}},
             "serverInfo": {
                 "name": SERVER_NAME,
-                "title": "MotoQuant Pro — motorcycle drag physics",
+                "title": "MotoQuant — motorcycle drag physics",
                 "version": SERVER_VERSION,
             },
             "instructions": INSTRUCTIONS,

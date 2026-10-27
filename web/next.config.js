@@ -27,6 +27,23 @@ const nextConfig = {
     ];
   },
 
+  // ─── Retired commercial routes (Oct 2026: free & open source) ──────────
+  // /pricing and /refunds were indexed by search engines and linked from
+  // old blog posts / backlinks, so they 308 (permanent) instead of 404ing.
+  // /pricing -> / : the landing page FAQ answers "is it free?" (yes,
+  //   Apache-2.0, no paid tiers) and is where every old CTA wanted to go.
+  // /refunds -> /about : nothing is sold, so there is nothing to refund;
+  //   /about carries the "Free and open source" section that explains why.
+  // /contact is NOT redirected — it was rewritten as the community page.
+  async redirects() {
+    return [
+      { source: '/pricing', destination: '/', permanent: true },
+      { source: '/pricing/:path*', destination: '/', permanent: true },
+      { source: '/refunds', destination: '/about', permanent: true },
+      { source: '/refunds/:path*', destination: '/about', permanent: true },
+    ];
+  },
+
   // ─── Cache headers for /public assets ──────────────────────────────────
   // /surrogate/{model,bikes}.json (~330 KB pair, fetched by lib/surrogate.js
   // on every simulator boot) only change on a surrogate regen, so an hour of
@@ -35,16 +52,31 @@ const nextConfig = {
   // and falls back to the server sim path on any mismatch. Nothing else in
   // /public is content-hashed (Next already stamps /_next/static/* immutable
   // itself), so no immutable rule here.
+  //
+  // /engine/* (the Rust physics core compiled to wasm32, ~94 KB gzip, plus its
+  // manifest — docs/RUST_CORE.md) follows the same rule for the same reason:
+  // it only changes on a Rust-core rebuild, and a stale copy is safe because
+  // lib/engine.js checks the module's own schema_version() export on load and
+  // throws on a mismatch (the caller falls back to the server). The explicit
+  // Content-Type keeps WebAssembly.instantiateStreaming (streaming compile)
+  // available whatever MIME table the host uses.
   async headers() {
+    const shortCache = {
+      key: 'Cache-Control',
+      value: 'public, max-age=3600, stale-while-revalidate=86400',
+    };
     return [
       {
         source: '/surrogate/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=3600, stale-while-revalidate=86400',
-          },
-        ],
+        headers: [shortCache],
+      },
+      {
+        source: '/engine/:path*',
+        headers: [shortCache],
+      },
+      {
+        source: '/engine/motoquant_core.wasm',
+        headers: [{ key: 'Content-Type', value: 'application/wasm' }],
       },
     ];
   },

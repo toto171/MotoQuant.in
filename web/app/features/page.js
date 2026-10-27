@@ -2,13 +2,14 @@
 
 import {
   Cpu, BarChart3, Upload, TrendingUp, Code2,
-  ArrowRight, UserCircle2 } from 'lucide-react';
+  ArrowRight, UserCircle2, GitFork } from 'lucide-react';
 import SiteNav from '../../components/SiteNav';
 import SiteFooter from '../../components/SiteFooter';
 import PageHero from '../../components/PageHero';
 import { Reveal } from '../../components/Reveal';
 import ScoreboardDigits from '../../components/ScoreboardDigits';
 import BottomCta from './BottomCta';
+import { LICENSE_NAME, LICENSE_SPDX, REPO_URL } from '../../lib/site';
 
 const SITE_URL = 'https://motoquant.in';
 
@@ -168,27 +169,27 @@ Natural language queries — "optimize my Hayabusa for 35°C at Aamby Valley, bu
     body: `Every feature the web UI uses is accessible via the public REST API hosted at motoquant-api.onrender.com.
 
 POST /api/simulate — full simulation returning complete v(t), RPM, gear, acceleration, and ET. Typical latency 80–150 ms.
-POST /api/simulate/quick — ET + trap speed + splits only, ~50 ms. Used by the slider-driven BuildPage.
+POST /api/simulate/quick — ET + trap speed + splits only, ~50 ms. Used by the simulator's live mode.
 POST /api/simulate/compare — A-vs-B comparison, returns both timeseries with delta ET/trap and cost-to-tenth.
 POST /api/calibrate/dragy — upload a Dragy CSV and get run-boundary detection + best-run ET/trap/splits, with optional sim overlay.
 POST /api/calibrate/dyno — upload a dyno CSV and get the corrected torque curve ready for injection.
 GET /api/bikes — paginated catalog with manufacturer/category filters.
 GET /api/venues — all 20 venues with 12-month seasonal weather data.
 
-Interactive docs at /docs (FastAPI's automatic OpenAPI UI). No authentication for basic simulation — rate-limited to 60 requests/minute per IP. Authenticated API keys (email to request) unlock higher limits and private run storage.`,
+Interactive docs at /docs (FastAPI's automatic OpenAPI UI). No authentication and no API keys — simulation endpoints are rate-limited per IP (30 sims a minute) so the free hosted instance stays fair for everyone. Need more than that? The whole stack is open source: run your own instance and set your own limits.`,
     docsLink: '/docs/getting-started',
     docsLabel: 'API reference',
     stats: [
       { num: '12', label: 'Endpoints' },
       { num: '~100ms', label: 'Full sim latency' },
-      { num: '60/min', label: 'Rate limit' },
+      { num: '30/min', label: 'Sims per IP' },
     ],
     readout: {
       title: 'api.monitor',
       log: [
         'post /api/simulate/quick · 200 ok',
         'p50 latency steady · warm engine',
-        'cors open · 60 req/min per ip',
+        'cors open · 30 sims/min per ip',
       ],
       value: '50',
       unit: 'ms',
@@ -205,16 +206,16 @@ Interactive docs at /docs (FastAPI's automatic OpenAPI UI). No authentication fo
     icon: UserCircle2,
     label: '06 / Accounts & Garage',
     title: <>Your <span className="text-accent">garage</span>, saved</>,
-    subtitle: 'Free accounts. Saved runs. Shareable builds. Every Pro feature unlocked during the open beta.',
-    body: `Create a free account with an email + password (or a passwordless magic link) and your simulator work stops being throwaway: every run you save lands in My Garage on your account page — bike, build, ET, trap speed, venue, date.
+    subtitle: 'Optional free accounts. Saved runs. Shareable builds. No plans, no tiers, nothing locked.',
+    body: `You don't need an account to use MotoQuant — every tool works without one. Create a free account with an email + password (or a passwordless magic link) when you want your simulator work to stop being throwaway: every run you save lands in My Garage on your account page — bike, build, ET, trap speed, venue, date.
 
-Found a setup worth bragging about? Hit Share on the simulator and send a link that reopens your exact bike, venue and tuning sliders on any device.
+Found a setup worth bragging about? Hit Share on the simulator and send a link that reopens your exact bike, venue and tuning sliders on any device. Saved runs get a public timeslip page built for WhatsApp.
 
-While MotoQuant is in open beta, everything in the Pro and Studio tiers — unlimited sims, the build optimiser, ECU autotune, Dragy/dyno imports — is unlocked free for every account. Paid plans only begin at commercial launch, with advance notice.`,
+There is nothing to upgrade to. The build optimiser, ECU autotune, Dragy/dyno imports and the chat assistant are free for everyone, signed in or not.`,
     docsLink: '/login?signup=1',
     docsLabel: 'Create a free account',
     stats: [
-      { num: '₹0', label: 'During open beta' },
+      { num: '₹0', label: 'Forever' },
       { num: '25+', label: 'Runs in your garage' },
       { num: '1-tap', label: 'Build sharing' },
     ],
@@ -223,7 +224,7 @@ While MotoQuant is in open beta, everything in the Pro and Studio tiers — unli
       log: [
         'run saved → my garage',
         'share link armed · ?bike&venue&rider',
-        'open beta: pro tier unlocked',
+        'no tiers · every tool unlocked',
       ],
       value: '9.62',
       unit: 's',
@@ -232,6 +233,41 @@ While MotoQuant is in open beta, everything in the Pro and Studio tiers — unli
         { label: 'runs', pct: 74 },
         { label: 'builds', pct: 52 },
         { label: 'shares', pct: 31 },
+      ],
+    },
+  },  {
+    id: 'open-source',
+    icon: GitFork,
+    label: '07 / Open Source',
+    title: <>Every line is <span className="text-accent">public</span></>,
+    subtitle: `Free and open source under the ${LICENSE_NAME}. Audit the physics, fix a spec, run your own copy.`,
+    body: `MotoQuant is free and open source. The physics engine, the bike catalog and its sources, the parts and tire libraries, the benchmark corpus, the API and this website are all published on GitHub under the ${LICENSE_NAME}.
+
+That matters for a simulator: you don't have to trust a number you can't inspect. Every sub-model, every cluster knob and every benchmark the accuracy figures are computed from is in the repository, and the reference baselines are pinned by tests that run on every change.
+
+Spotted a wrong spec, a part that fits the wrong bike, or a result that looks physically off? Open an issue or a pull request. Have an instrumented Dragy timeslip from an Indian strip? That is the most valuable contribution of all — it makes the model better for every rider. And if you need more than the shared hosted instance allows, run your own: it is a Python backend and a Next.js frontend.`,
+    docsLink: REPO_URL,
+    docsLabel: 'View the source on GitHub',
+    external: true,
+    stats: [
+      { num: LICENSE_SPDX, label: 'License' },
+      { num: 'PRs', label: 'Welcome' },
+      { num: '₹0', label: 'To use or self-host' },
+    ],
+    readout: {
+      title: 'git.log',
+      log: [
+        'license: apache-2.0 · free to fork',
+        'baselines pinned · k5 / r1 / hayabusa',
+        'issues + pull requests welcome',
+      ],
+      value: '100',
+      unit: '%',
+      valueLabel: 'of the engine is public source',
+      bars: [
+        { label: 'physics', pct: 100 },
+        { label: 'catalog', pct: 100 },
+        { label: 'website', pct: 100 },
       ],
     },
   },
@@ -313,8 +349,8 @@ export default function FeaturesPage() {
       <PageHero
         kicker="15 submodels · capability index"
         badge="Full feature list"
-        title={<>Everything inside <span className="text-gradient-orange">MotoQuant Pro</span></>}
-        sub="Six capability areas — from first-principles physics through to an open REST API and your saved garage. Every layer is built on the same validated simulation engine."
+        title={<>Everything inside <span className="text-gradient-orange">MotoQuant</span></>}
+        sub="Seven capability areas — from first-principles physics through to an open REST API, your saved garage and the open-source code underneath. Every layer is built on the same validated simulation engine."
         stats={[
           { value: 15, label: 'Sub-models' },
           { value: 593, label: 'Parts' },
@@ -370,6 +406,9 @@ export default function FeaturesPage() {
                     </div>
                     <a
                       href={feature.docsLink}
+                      {...(feature.external
+                        ? { target: '_blank', rel: 'noopener noreferrer' }
+                        : {})}
                       className="inline-flex items-center gap-1.5 mt-4 text-sm text-accent font-mono hover:text-accent-bright transition-colors"
                     >
                       {feature.docsLabel} <ArrowRight size={14} />

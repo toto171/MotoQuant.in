@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MotoQuant Pro — web-scrape data application patch (2026-07-13).
+MotoQuant — web-scrape data application patch (2026-07-13).
 
 Applies the July-10, 2026 full-catalog web-scrape findings
 (``reports/scrape_2026_07_10/{parts,tires}_web_data.json`` — a 51-agent

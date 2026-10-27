@@ -30,12 +30,12 @@ Write ONE production-ready blog post (1,500–2,500 words) for `web/app/blog/<sl
 - Use ₹ for prices (not $), km/h not mph (Indian audience)
 - End with a CTA pointing at `motoquant.in/simulator`
 - Include `<StructuredData type="article" ...>` block at top of file (mirror existing posts)
-- Internal links: 2+ to other blog posts, 1+ to /bikes catalog, 1+ to /pricing
+- Internal links: 2+ to other blog posts, 1+ to /bikes catalog, 1+ to /simulator with a prefilled config, and 1 to the GitHub repo (https://github.com/da25mem5s02-debug/MotoQuant_v1 — MotoQuant is free & open source). NEVER link /pricing or /refunds (retired 2026-10-23, ADR-0006) and never mention paid tiers, plans, prices for MotoQuant itself, or "free during beta".
 
 ## Validation gates
 
 - `npx prettier --check web/app/blog/<slug>/page.js`
-- Vite build doesn't break: visually verify no JSX errors
+- `make web-build` (Next.js production build — what Vercel runs) stays green
 - Frontmatter / metadata exports match other posts' shape
 
 ## Deliverable

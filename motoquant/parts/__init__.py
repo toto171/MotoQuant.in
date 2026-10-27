@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Parts Compatibility Engine
-===========================================
+MotoQuant — Parts Compatibility Engine
+======================================
 Manages bike-specific fitment rules for performance parts.
 """
 

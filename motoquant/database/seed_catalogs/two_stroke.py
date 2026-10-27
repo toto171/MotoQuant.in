@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Two-Stroke Specific Parts Catalog
-==================================================
+MotoQuant — Two-Stroke Specific Parts Catalog
+=============================================
 Seeds ~40 two-stroke-specific parts across 7 sub-categories:
   - Expansion chambers (pipes): FMF / DEP / Tyga / Jolly Moto / JL / Arrow (10 parts)
   - Reed valves: VForce 3/4, Boyesen RAD Valve, Moto Tassinari (6 parts)

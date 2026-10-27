@@ -1,4 +1,4 @@
-# Render Blueprint for MotoQuant Pro API
+# Render Blueprint for the MotoQuant API (free, open source — Apache-2.0)
 # https://render.com/docs/blueprint-spec
 #
 # Free-tier deployment plan (May 18, 2026):
@@ -40,49 +40,66 @@ services:
         - requirements-api.txt
         - requirements-api.lock
         - Dockerfile
+        - .dockerignore
         - docker-entrypoint.sh
         - render.yaml
+        # The Rust physics core is compiled into the image (Dockerfile stage 1).
+        - rust/Cargo.toml
+        - rust/Cargo.lock
+        - rust/motoquant-core/**
     envVars:
       - key: MOTOQUANT_DB
-        # FREE TIER (current): baked image copy — wiped on every deploy.
-        # PAID TIER (account durability): repoint to the persistent disk below
-        # and uncomment the `disk:` block. docker-entrypoint.sh seeds the disk
-        # from the image copy on first boot, then preserves it across deploys.
+        # FREE HOSTING PLAN (current): baked image copy — wiped on every
+        # deploy, so optional accounts and saved runs reset with it.
+        # DURABLE: repoint to the persistent disk below and uncomment the
+        # `disk:` block (needs a paid Render plan). docker-entrypoint.sh seeds
+        # the disk from the image copy on first boot, then preserves it.
         #   value: /data/motoquant.db   # <- uncomment WITH the disk block
         value: /app/motoquant.db
       - key: PYTHON_VERSION
         value: "3.11"
+      # Physics engine: auto = the Rust core baked into the image when it
+      # loads, else the Python reference (same numbers, ~50x slower). Set to
+      # `python` here or in the dashboard as a no-rebuild kill switch;
+      # /api/health -> engine shows what is live. docs/RUST_CORE.md.
+      - key: MOTOQUANT_ENGINE
+        value: auto
+      # Render's edge is exactly one appending proxy: rate limits key on the
+      # client IP it reports, never on a spoofable leftmost X-Forwarded-For.
+      # (Auto mode also picks 1 on Render; this pins it explicitly.)
+      - key: MOTOQUANT_TRUSTED_PROXY_HOPS
+        value: "1"
       # Optional: surface FastAPI / uvicorn logs at INFO level
       - key: UVICORN_LOG_LEVEL
         value: info
-      # Freemium beta: tier gates pass everyone through (auth still attaches
-      # users for attribution). Flip to "true" at commercial rollout once
-      # Razorpay/Stripe keys + plan/price ids are set below (dashboard).
-      - key: MOTOQUANT_BILLING_ENFORCE
-        value: "false"
-      # Payments go live by adding (Render dashboard, never in git):
-      #   RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET / RAZORPAY_WEBHOOK_SECRET
-      #   PLAN_ID_{PRO|STUDIO}_{MONTHLY|YEARLY}        (Razorpay plan ids)
-      #   STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET
-      #   STRIPE_PRICE_{PRO|STUDIO}_{MONTHLY|YEARLY}   (Stripe price ids)
-      #   JWT_SECRET (32+ random bytes) — REQUIRED before real accounts
-      #   SMTP_HOST/PORT/USER/PASS/FROM or RESEND_API_KEY (magic-link email)
-      # NOTE: secrets (GEMINI_API_KEY, GROQ_API_KEY, SENTRY_DSN, JWT_SECRET,
-      # RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, etc.) are set manually in the
-      # Render dashboard under Environment -> Add Environment Variable so they
-      # never land in git. The keys listed in requirements-api.txt comments
-      # are all optional — the API serves the simulator and catalog endpoints
-      # without any of them.
+      # Everything is free and anonymous; there is no billing configuration.
+      # Optional settings (Render dashboard, never in git — see
+      # docs/SELF_HOSTING.md for the full list):
+      #   JWT_SECRET (32+ random bytes) — keeps optional sign-ins alive across
+      #     restarts. Unset on a deployed host, the API signs with an
+      #     EPHEMERAL per-process secret (secure, but sessions reset on every
+      #     restart) — it never falls back to the public dev default.
+      #   RESEND_API_KEY + SMTP_FROM, or SMTP_HOST/PORT/USER/PASS/FROM —
+      #     magic-link email (password sign-in works without either).
+      #   GROQ_API_KEY / GEMINI_API_KEY / ... + LLM_PROVIDER — the chat agent.
+      #   MOTOQUANT_CHAT_DAILY_LIMIT — per-IP chat turns per day, the bill
+      #     fuse on whoever pays for the LLM key (default 200; 0 disables).
+      #   SENTRY_DSN — error tracking.
+      #   POSTHOG_API_KEY — OPT-IN server-side usage telemetry; nothing is
+      #     sent anywhere unless this is set.
+      # Secrets are set manually in the Render dashboard under Environment ->
+      # Add Environment Variable so they never land in git. All of them are
+      # optional — the API serves the simulator and catalog without any.
       # Chat-agent web lookup (optional): SEARCH_PROVIDER=brave|serper +
       # SEARCH_API_KEY upgrade the agent's web_search tool from the free
       # DuckDuckGo HTML fallback to a proper search API. MOTOQUANT_WEB_TOOLS=0
       # turns the agent's web access off entirely.
     # ──────────────────────────────────────────────────────────────────────
-    # ACCOUNT DURABILITY (paid plan only — Render disks are unavailable on the
-    # free tier). When upgrading off free, uncomment this block AND repoint
+    # ACCOUNT + SAVED-RUN DURABILITY (Render disks need a paid hosting plan —
+    # they are unavailable on the free one). Uncomment this block AND repoint
     # MOTOQUANT_DB to /data/motoquant.db above. First boot copies the seeded
-    # catalog onto the disk; thereafter users / saved runs / subscriptions
-    # persist across deploys. See docs/PAYMENTS_SETUP.md Step 0.
+    # catalog onto the disk; thereafter optional accounts and saved runs
+    # persist across deploys. See docs/SELF_HOSTING.md.
     # disk:
     #   name: motoquant-data
     #   mountPath: /data

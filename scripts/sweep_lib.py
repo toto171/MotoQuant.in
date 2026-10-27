@@ -13,9 +13,18 @@ Two intentionally distinct year policies coexist and are both preserved:
   filter; a spec with no in-range benchmark gets no match at all
   (conservative-no-match, pinned by
   ``tests/test_validation.py::TestProductionMatcherSpecificity``).
-* ``bind_benchmark_for_record`` (sweep_with_clusters policy) — prefers an
-  in-range benchmark year but falls back to the group's first entry when
-  none is in range, so cluster summaries keep older-generation targets.
+* ``bind_benchmark_for_record`` (sweep_with_clusters policy). Two binding
+  rules, selected with ``policy=``:
+
+  - ``"epoch"`` (default since the 2026-10 data epoch): among a group's
+    IN-RANGE entries the highest-weight one wins (ties: first listed); an
+    out-of-range fallback binds ONLY through the explicit same-platform
+    allowlist ``SAME_PLATFORM_FALLBACKS`` (catalog model -> the benchmark
+    model + year it may borrow). Every other out-of-year bike is unmatched.
+  - ``"legacy"``: the pre-epoch rule (first in-range entry wins; with none in
+    range, the group's FIRST entry binds whatever its year/generation). This
+    reproduces the published 2026-08-08 headline (276 matched) and is kept so
+    a metric change can always be reported under both rules.
 """
 
 from __future__ import annotations
@@ -23,6 +32,7 @@ from __future__ import annotations
 import re
 
 __all__ = [
+    "SAME_PLATFORM_FALLBACKS",
     "wb_match",
     "model_specificity_score",
     "best_benchmark_match",
@@ -97,18 +107,88 @@ def build_bench_map(benchmarks) -> dict:
     return bench_map
 
 
-def bind_benchmark_for_record(manufacturer, model, year_from, year_to, bench_map):
-    """sweep_with_clusters binding policy: scan every benchmark group that
-    passes manufacturer + word-boundary model filters, prefer entries whose
-    year falls inside [year_from, year_to] (falling back to the group's
-    first entry otherwise), and pick the most-specific model pattern.
-    In-range matches always beat out-of-range fallbacks regardless of
-    specificity. Returns ``(tgt_et, tgt_trap, src)`` or ``None``.
+# Explicit same-platform out-of-year fallbacks (2026-10 data epoch). Key:
+# (manufacturer, catalog model) lower-case; value: the (benchmark model,
+# benchmark year) pairs the catalog bike may borrow when it has no in-range
+# benchmark. "Same platform" = same engine (rated output within ~5 %) AND same
+# frame generation — a trim/variant or emissions update, not a new machine.
+# Reviewed 2026-10 over the 25 out-of-year fallbacks the legacy rule made;
+# DELIBERATELY NOT LISTED (different machine -> now unmatched): KTM 390 Duke
+# Gen3 2024 and Duke 390 Gen1 2013-16 (vs the 2019 Gen2 test), Panigale V4
+# 2025 (new chassis generation), Panigale V2 2025 (890 cc vs the 955 cc 2022
+# test), R 12 nineT 2024 (new frame vs the 2014 R nineT), Indian 101 Scout
+# 2025 (1250 engine vs the 2015 1133), Rocket 3 Storm R 2024 (182 PS vs the
+# 167 PS 2020 R), GSX-R 600 / GSX-R 750 L1 2011+ (new generation vs the K6 /
+# K8 tests), Speed Triple 1050 2011-15 (new frame vs the 2005 test).
+SAME_PLATFORM_FALLBACKS: dict[tuple[str, str], frozenset] = {
+    # Same R155 VVA engine + Deltabox frame as the 2019 Indonesian MT-15.
+    ("yamaha", "mt-15 v2"): frozenset({("mt-15", 2019)}),
+    # 2019 launch bike == the 2020-24 entry (BS4 -> BS6 retune, 47 hp both).
+    ("royal enfield", "interceptor 650"): frozenset({("interceptor 650", 2019)}),
+    # SC82 2024 update: same 217.5 PS, same chassis family.
+    ("honda", "cbr1000rr-r fireblade sp"): frozenset({("cbr1000rr-r", 2020)}),
+    # Factory / Extrema = lighter-trim RS 660 (same 659 cc twin, same frame).
+    ("aprilia", "rs 660 factory"): frozenset({("rs 660", 2021)}),
+    ("aprilia", "rs 660 extrema"): frozenset({("rs 660", 2021)}),
+    # Z H2 SE = Z H2 with Showa Skyhook + Brembo Stylema (same 998 cc SC).
+    ("kawasaki", "z h2 se"): frozenset({("z h2", 2020)}),
+    # The 25th Anniversary is a Gen3 (2021+) Hayabusa — borrow the 2021 Gen3
+    # row, NOT the 2008 Gen2 row the legacy first-entry fallback picked.
+    ("suzuki", "hayabusa 25th anniversary"): frozenset({("hayabusa", 2021)}),
+    # Halcyon is a Classic 350 trim; the Goan is the Classic-350-based bobber
+    # (same J-series 349 cc + frame). The bound row is DERIVED (w 0.1).
+    ("royal enfield", "classic 350 halcyon"): frozenset({("classic 350", 2021)}),
+    ("royal enfield", "goan classic 350"): frozenset({("classic 350", 2021)}),
+    # Same 1099 cc V4 + chassis family as the 2021 RSV4 1100 Factory.
+    ("aprilia", "rsv4 1100 factory fw1a"): frozenset({("rsv4 factory", 2021)}),
+    # 2022 H2 SX update: same 200 PS supercharged 998 cc, same frame.
+    ("kawasaki", "ninja h2 sx se+"): frozenset({("ninja h2 sx", 2018)}),
+    # 2021 CP2 Euro-5 update (73.4 vs 74.8 PS), same frame; SP = trim.
+    ("yamaha", "mt-07 sp"): frozenset({("mt-07", 2018)}),
+    # 2022 CP4 update (166 vs 160 PS, +3.8 %), same frame; SP = trim.
+    ("yamaha", "mt-10 sp"): frozenset({("mt-10", 2016)}),
+    # E-Clutch = CBR650R + Honda E-Clutch actuator (same engine/frame).
+    ("honda", "cbr650r e-clutch"): frozenset({("cbr650r", 2019)}),
+    # Assen = Brutale 1000 RR special edition (same 998 cc I4, same frame).
+    ("mv agusta", "brutale 1000 rr assen"): frozenset({("brutale 1000 rr", 2019)}),
+}
+
+
+def _strip_year_suffix(model: str) -> str:
+    """'GSX-R 600 (2011-2024)' -> 'gsx-r 600' (lower-case)."""
+    return re.sub(r"\s*\(\d{4}(?:-\d{4})?\)\s*$", "", model or "").strip().lower()
+
+
+def bind_benchmark_for_record(
+    manufacturer,
+    model,
+    year_from,
+    year_to,
+    bench_map,
+    *,
+    policy: str = "epoch",
+    with_meta: bool = False,
+    weight_fn=None,
+):
+    """Bind a catalog record to one benchmark (see the module docstring for
+    the two ``policy`` rules).
+
+    Candidate groups pass manufacturer + word-boundary model filters; an
+    in-range binding always beats an out-of-range fallback, then the
+    most-specific benchmark model pattern wins. Returns
+    ``(tgt_et, tgt_trap, src)`` — or, with ``with_meta=True``,
+    ``(tgt_et, tgt_trap, src, bench_year, in_range)`` — or ``None``.
     """
+    if policy not in ("epoch", "legacy"):
+        raise ValueError(f"unknown binding policy {policy!r}")
+    wfn = weight_fn or source_weight
     m_lo = (manufacturer or "").lower()
     mod_lo = (model or "").lower()
     yf = year_from or 0
     yt = year_to or yf
+    allowed = SAME_PLATFORM_FALLBACKS.get(
+        (m_lo, _strip_year_suffix(model)), frozenset()
+    )
 
     best_match = None
     best_score = -1
@@ -116,14 +196,24 @@ def bind_benchmark_for_record(manufacturer, model, year_from, year_to, bench_map
     for (bm, bmod), entries in bench_map.items():
         if not (wb_match(bm, m_lo) and wb_match(bmod, mod_lo)):
             continue
-        in_range_entry = None
-        for byear, tgt_et, tgt_trap, src in entries:
-            if yf <= byear <= yt or (not yt and yf == byear):
-                in_range_entry = (tgt_et, tgt_trap, src)
-                break
-        fallback_entry = (entries[0][1], entries[0][2], entries[0][3])
-        chosen_entry = in_range_entry if in_range_entry is not None else fallback_entry
-        entry_in_range = in_range_entry is not None
+        in_range = [e for e in entries if yf <= e[0] <= yt or (not yt and yf == e[0])]
+        if in_range:
+            if policy == "legacy":
+                pick = in_range[0]
+            else:  # highest weight wins; max() keeps the first on ties
+                pick = max(in_range, key=lambda e: wfn(e[3]))
+            entry_in_range = True
+        elif policy == "legacy":
+            pick = entries[0]
+            entry_in_range = False
+        else:
+            fb = [e for e in entries if (bmod, e[0]) in allowed]
+            if not fb:
+                continue
+            pick = max(fb, key=lambda e: wfn(e[3]))
+            entry_in_range = False
+        byear, tgt_et, tgt_trap, src = pick
+        chosen_entry = (tgt_et, tgt_trap, src, byear, entry_in_range)
         score = model_specificity_score(bmod)
 
         if entry_in_range and not best_in_range:
@@ -133,7 +223,9 @@ def bind_benchmark_for_record(manufacturer, model, year_from, year_to, bench_map
         elif entry_in_range == best_in_range and score > best_score:
             best_match = chosen_entry
             best_score = score
-    return best_match
+    if best_match is None:
+        return None
+    return best_match if with_meta else best_match[:3]
 
 
 def find_spec_for_benchmark(mfr: str, model: str, year: int, specs):
@@ -167,41 +259,46 @@ def find_spec_for_benchmark(mfr: str, model: str, year: int, specs):
 
 # ── Canonical benchmark source-quality classifier ───────────────────────────
 # Single source of truth shared by phys_weighted_sweep (which produces the
-# PUBLISHED authoritative sweep, e.g. reports/acc_final_2026_07_03.json quoted
-# sitewide) and benchmark_sweep. Weight semantics are exactly
-# phys_weighted_sweep.source_weight's April-30 policy — preserved bit-for-bit
-# for every source string in the live BENCHMARKS corpus (proven by
-# tests/test_sweep_source_weight.py):
+# PUBLISHED authoritative sweep) and benchmark_sweep:
 #
 #     instrumented 1.0 / magazine 0.7 / aggregator 0.5 / forum 0.3 / DERIVED 0.1
 #     unknown -> 0.5 (aggregator-tier)
 #
-# Consolidation note (roadmap A4-27): this replaced an earlier divergent
-# sweep_lib heuristic that scored 'motostatz' as instrumented (1.0) and used a
-# 0.4 default. MotoStatz is an aggregator database that curates Dragy uploads,
-# not a first-party instrumented lab, so the bare 'motostatz' token is
-# aggregator-tier 0.5; the near-universal 'MotoStatz (Dragy, ... instrumented)'
-# rows carry the 'dragy'/'instrumented' token and score 1.0 at the instrumented
-# tier above. The old 'estimated' -> 0.1 keyword was intentionally NOT folded
-# in: it would reclassify the 'MotorBikeCatalog ... (estimated)' aggregator rows
-# from 0.5 to 0.1 and shift the published headline. 'community'/'logged' (forum
-# tier) and 'vbox' (instrumented tier) WERE folded in — verified to change no
-# live source's weight.
-def source_quality(src: str) -> tuple[float, str]:
-    """Return ``(weight, label)`` for a benchmark source string.
+# 2026-10 data-epoch changes (headline reported under both old and new rules
+# — see tests/test_epoch_data_benchmarks.py for the pinned strings):
+#
+# * ESTIMATES: a source that says "estimate"/"estimated" is an estimate, not a
+#   measurement, whatever outlet it cites — weight 0.1 (derived tier). Before,
+#   'MotorBikeCatalog (estimated)' stayed 0.5 and the ZX-4RR prose "low-12s"
+#   row scored 0.7 because 'Cycle World' appeared inside its citation string.
+# * PLATFORM SUBSTITUTION: a row whose timed bike is a sibling/platform-mate
+#   ("... platform ...", "... baseline ...") is indirect evidence for this
+#   catalog bike — capped at 0.5 (aggregator tier) even when the sibling run
+#   was instrumented (e.g. 'MotoStatz (Dragy, RC 390 platform; Gen3 399cc)').
+# * SECOND-HAND CONSUMER NEWS: 'Consumer-News' (hyphenated) is the corpus's
+#   label for a Motorcycle Consumer News figure quoted second-hand (primary
+#   article not located) — explicitly magazine tier 0.7. It used to land there
+#   only because the hyphen missed the 'consumer news' token by accident.
+#
+# History (roadmap A4-27): bare 'motostatz' is aggregator-tier 0.5; the
+# 'MotoStatz (Dragy, ... instrumented)' rows carry the 'dragy'/'instrumented'
+# token and score 1.0. 'community'/'logged' (forum) and 'vbox' (instrumented)
+# were folded in without changing any live source's weight.
+_ESTIMATE_TOKENS = ("estimate",)  # matches estimate / estimated / estimates
+_SUBSTITUTION_TOKENS = ("platform", "baseline")
+_SUBSTITUTION_CAP = 0.5
 
-    Ordering matters: heuristically-derived and owner-timeslip signals are
-    checked before instrumented, so a 'DERIVED (... VBox ...)' row scores 0.1
-    rather than being promoted by its 'vbox' token.
-    """
-    s = (src or "").lower()
-    # 1. Heuristically-derived (0-100 x multiplier, ProfessCars estimates, ...)
-    if "derived" in s or "0-100" in s:
-        return (0.1, "derived")
-    # 2. Owner timeslip / forum claim — better than derived but not lab
+
+def _base_tier(s: str) -> tuple[float, str]:
+    """Outlet tier of a lower-cased source string (no estimate/substitution
+    handling)."""
+    # Owner timeslip / forum claim — better than derived but not lab
     if any(k in s for k in ("forum", "timeslip", "hdforums", "community", "logged")):
         return (0.3, "forum_or_timeslip")
-    # 3. Instrumented lab test (timing strip / Dragy / VBox / named test rigs)
+    # Second-hand Consumer News citation (see header) — magazine tier.
+    if "consumer-news" in s:
+        return (0.7, "magazine")
+    # Instrumented lab test (timing strip / Dragy / VBox / named test rigs)
     if any(
         k in s
         for k in (
@@ -216,7 +313,7 @@ def source_quality(src: str) -> tuple[float, str]:
         )
     ):
         return (1.0, "instrumented")
-    # 4. Aggregator database
+    # Aggregator database
     if any(
         k in s
         for k in (
@@ -229,16 +326,77 @@ def source_quality(src: str) -> tuple[float, str]:
         )
     ):
         return (0.5, "aggregator")
-    # 5. Magazine road test (no explicit timing-strip)
+    # Magazine road test (no explicit timing-strip)
     if any(k in s for k in ("cycle world", "sport rider", "motorcyclist", "magazine")):
         return (0.7, "magazine")
     return (0.5, "unknown")  # unknown -> aggregator-tier
+
+
+def source_quality(src: str) -> tuple[float, str]:
+    """Return ``(weight, label)`` for a benchmark source string.
+
+    Ordering matters: derived/estimate signals are checked first (a
+    'DERIVED (... VBox ...)' row scores 0.1, not 1.0 via its 'vbox' token),
+    then forum/timeslip, then the outlet tiers; a platform/baseline
+    substitution finally caps the weight at 0.5.
+    """
+    s = (src or "").lower()
+    # 1. Heuristically-derived (0-100 x multiplier, ProfessCars estimates, ...)
+    if "derived" in s or "0-100" in s:
+        return (0.1, "derived")
+    # 2. Explicit estimate (prose / aggregator estimate) — not a measurement
+    if any(k in s for k in _ESTIMATE_TOKENS):
+        return (0.1, "estimate")
+    w, label = _base_tier(s)
+    # 3. Platform / baseline substitution — indirect evidence for this bike
+    if w > _SUBSTITUTION_CAP and any(k in s for k in _SUBSTITUTION_TOKENS):
+        return (_SUBSTITUTION_CAP, "platform_substitution")
+    return (w, label)
+
+
+def source_quality_legacy(src: str) -> tuple[float, str]:
+    """The pre-2026-10 classifier, verbatim — kept ONLY so the headline can
+    be reported under both the old and the new weighting rules."""
+    s = (src or "").lower()
+    if "derived" in s or "0-100" in s:
+        return (0.1, "derived")
+    if any(k in s for k in ("forum", "timeslip", "hdforums", "community", "logged")):
+        return (0.3, "forum_or_timeslip")
+    if any(
+        k in s
+        for k in (
+            "timing-strip",
+            "instrumented",
+            "dragy",
+            "vbox",
+            "consumer news",
+            "mcn",
+            "don canet",
+            "carlsbad",
+        )
+    ):
+        return (1.0, "instrumented")
+    if any(
+        k in s
+        for k in (
+            "fastestlaps",
+            "motorbikecatalog",
+            "motorbike catalog",
+            "accelerationtimes",
+            "bikewale",
+            "motostatz",
+        )
+    ):
+        return (0.5, "aggregator")
+    if any(k in s for k in ("cycle world", "sport rider", "motorcyclist", "magazine")):
+        return (0.7, "magazine")
+    return (0.5, "unknown")
 
 
 def source_weight(src: str) -> float:
     """Canonical scalar source weight — ``source_quality(src)[0]``.
 
     This is the function phys_weighted_sweep imports; it produces the published
-    authoritative sweep, so its output must not drift.
+    authoritative sweep.
     """
     return source_quality(src)[0]

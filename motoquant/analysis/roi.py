@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Parts ROI Engine
-=================================
+MotoQuant — Parts ROI Engine
+============================
 Quantifies the return-on-investment of each performance part in the catalog
 relative to a baseline simulation.
 
@@ -18,9 +18,10 @@ Build optimizer
 ET gain achievable within a budget.  For small part lists (≤ 20 parts)
 and large budgets, greedy and DP give the same answer; DP is exact.
 
-Parts are applied *incrementally* (cheapest-first within the DP) so that
-interaction effects (e.g. a chain upgrade with a sprocket upgrade) are
-captured.
+The selected build is then applied in a canonical order (NA parts
+cheapest-first, forced induction last — ``apply_order_ids``) and re-scored as a
+whole by ``refine_build``, so interaction effects (sprocket pairs, absolute
+overrides erasing each other, power parts after a boost kit) are captured.
 
 Usage
 -----
@@ -38,14 +39,25 @@ Usage
 from __future__ import annotations
 
 import copy
+import json
 import logging
 import math
 import re
 import warnings
 from dataclasses import dataclass
 
+import numpy as np
+
+from .. import engine_select
 from ..models import BikeConfig
-from ..physics import MotoQuantEngine
+
+# Candidate-discovery cap for every optimizer / recommender pass. The catalog
+# holds ~600 parts and some bikes have 205 compatible ones, so the old
+# limit=200 (applied after the brand-ordered compatibility filter) silently
+# dropped the alphabetically-last parts (ZEX nitrous, Öhlins suspension...) from
+# every build. A plain integer, not None: an unfiltered search binds it into
+# SQL ``LIMIT ?`` and SQLite rejects NULL there.
+CANDIDATE_LIMIT = 100_000
 
 
 def json_safe(obj):
@@ -179,10 +191,46 @@ EXCLUSIVE_CATEGORIES: frozenset[str] = frozenset(
 # slot on the bike, so they share one knapsack group with their sibling —
 # a build can't run a lockup AND a street clutch kit, nor an air shifter AND
 # a quickshifter (the air shifter replaces the shift actuator entirely).
+# Nitrous shares the forced-induction slot with turbo/SC kits: both write the
+# single forced_induction.boost_type scalar, so whichever is applied last
+# silently erases the other (a ₹95k nitrous kit "selected" next to a
+# supercharger contributed exactly 0.000 s — October 2026 audit).
 _EXCLUSIVE_CATEGORY_ALIASES: dict[str, str] = {
     "lockup_clutch": "clutch_kit",
     "air_shifter": "quickshifter",
+    "nitrous": "boost_kit",
 }
+
+# Categories whose parts flip the engine to forced induction. They are
+# applied AFTER every naturally-aspirated part. The old
+# bridge.apply_part_to_config only scaled the dyno curve for NA power mods
+# while the engine was still NA, so a PCVI applied after a turbo kit added
+# 0 hp (turbo+PCVI == turbo alone). The bridge now decides curve scaling per
+# part, so builds are order-independent; this order is kept as the single
+# deterministic convention every consumer shares (applied_part_ids).
+_BOOST_CATEGORIES: frozenset[str] = frozenset({"boost_kit", "nitrous"})
+
+
+def _apply_order(parts: list[PartROIResult]) -> list[PartROIResult]:
+    """Canonical order to apply a selected build: NA parts first, then boost.
+
+    Within each tier parts go cheapest-first (the historical price-ascending
+    order). Every consumer that materialises a build — find_best_build,
+    optimize_build, the outlaw pipeline — must use this order so the bike that
+    is priced is the bike that is tuned and verified.
+    """
+    return sorted(
+        parts,
+        key=lambda r: (
+            1 if (r.category or "").lower() in _BOOST_CATEGORIES else 0,
+            r.price_inr or 0.0,
+        ),
+    )
+
+
+def apply_order_ids(parts: list[PartROIResult]) -> list[int]:
+    """Part ids of ``parts`` in the canonical application order."""
+    return [r.part_id for r in _apply_order(parts)]
 
 
 def _bucket_weight(price_inr: float, bucket: int = 100) -> int:
@@ -237,7 +285,46 @@ def _sprocket_positions(parts_repo, part_ids) -> dict[int, str]:
         m = _SPROCKET_POS_RE.search(str(part.get("model_name") or ""))
         if m:
             out[pid] = m.group(1).lower()
+            continue
+        # Last resort: the part's own override says which sprocket it swaps.
+        pos = _sprocket_position_from_paths(part)
+        if pos:
+            out[pid] = pos
     return out
+
+
+def _json_field(part: dict, key: str) -> dict:
+    """A part row's JSON-object column as a dict ({} when absent/malformed)."""
+    raw = part.get(key) if isinstance(part, dict) else None
+    if isinstance(raw, str):
+        try:
+            raw = json.loads(raw)
+        except (ValueError, TypeError):
+            return {}
+    return raw if isinstance(raw, dict) else {}
+
+
+def _written_paths(part: dict) -> tuple[set[str], set[str]]:
+    """(absolute-override paths, every path) a part row writes."""
+    overrides = set(_json_field(part, "param_overrides"))
+    written = (
+        overrides
+        | set(_json_field(part, "param_deltas"))
+        | set(_json_field(part, "param_multipliers"))
+    )
+    return overrides, written
+
+
+def _sprocket_position_from_paths(part: dict) -> str | None:
+    """'front'/'rear' from which sprocket-teeth path the part writes."""
+    _, written = _written_paths(part)
+    front = "drivetrain.front_sprocket" in written
+    rear = "drivetrain.rear_sprocket" in written
+    if front and not rear:
+        return "front"
+    if rear and not front:
+        return "rear"
+    return None
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -405,6 +492,236 @@ def _brake_susp_slots(parts_repo, part_ids) -> dict[int, str]:
     return out
 
 
+# ─────────────────────────────────────────────────────────────────
+# Physical-slot classification for the knapsack (October 2026)
+# ─────────────────────────────────────────────────────────────────
+#
+# ``_brake_susp_slot`` above is the conservative pure classifier (it returns
+# None whenever it cannot place a part). ``part_slot`` layers the catalog
+# realities the knapsack needs on top of it, because "None -> freely
+# stackable" let the no-limit outlaw build buy 6 complete fairing kits,
+# 13 fuel-system parts (4 "Advanced Fuel System" units, two injector sets, a
+# standalone ECU, three fuel controllers, two pumps), 3 caliper kits and
+# 7 pad sets (October 2026 audit). The rules:
+#
+#   * functional slot first — a part whose overrides only drive the shift
+#     actuator IS a quickshifter whatever its category (HealTech's QS module
+#     is filed under 'ecu' and stacked with a real QS, the later absolute
+#     override erasing the better shift time);
+#   * a part that writes forced_induction.boost_type / wheelie.wheelie_bar /
+#     chassis.swingarm_extension_mm owns that single scalar slot;
+#   * brakes: an aftermarket brake part with no stated axle is a FRONT part
+#     (performance calipers, radial masters, wave rotors and race pads are
+#     front-axle items); a front+rear set occupies the front slot;
+#   * suspension: a coilover kit is the rear shock, a lowering kit/linkage
+#     shares the lowering_kit slot, spring kits are fork springs;
+#   * fuel_system / bodywork: one part per functional slot (fuel controller,
+#     injectors, pump, regulator, carb/jetting...; fairing set, screen...).
+
+# Paths that only drive the shift actuator (plus incidental mass).
+_SHIFT_ACTUATOR_PATHS = frozenset(
+    {
+        "drivetrain.quickshifter",
+        "drivetrain.air_shifter",
+        "drivetrain.total_shift_time_ms",
+        "drivetrain.shift_cut_duration_ms",
+        "drivetrain.post_shift_retard_ms",
+    }
+)
+_INCIDENTAL_PATHS = frozenset({"chassis.dry_mass_kg"})
+
+# One physical scalar = one slot: two parts writing these cannot coexist.
+_SCALAR_SLOT_PATHS: dict[str, str] = {
+    "forced_induction.boost_type": "boost_kit",
+    "wheelie.wheelie_bar": "wheelie_bar",
+    "chassis.swingarm_extension_mm": "swingarm_ext",
+}
+
+_FUEL_TYPE_SLOT: dict[str, str] = {
+    "fuel_controller": "controller",
+    "fuel_management": "controller",
+    "tuning_computer": "controller",
+    "fuel_map_ecu": "controller",
+    "fuel_quickshift": "controller",
+    "piggyback_fuel": "controller",
+    "fuel_injector": "injector",
+    "injector": "injector",
+    "in_tank": "pump",
+    "fuel_pump": "pump",
+    "pump": "pump",
+    "regulator": "regulator",
+    "fuel_regulator": "regulator",
+    "fuel_rail": "rail",
+    "fuel_line": "line",
+    "surge_tank": "surge_tank",
+    "jet_kit": "carb",
+    "carburetor": "carb",
+    "carburetor_set": "carb",
+}
+_FUEL_NAME_SLOTS: tuple[tuple[re.Pattern, str], ...] = (
+    (re.compile(r"\binjectors?\b|\bID\d{3,4}", re.IGNORECASE), "injector"),
+    (re.compile(r"\bregulator\b", re.IGNORECASE), "regulator"),
+    (re.compile(r"\bsurge\b", re.IGNORECASE), "surge_tank"),
+    (re.compile(r"\bpump\b", re.IGNORECASE), "pump"),
+    (re.compile(r"\brail\b", re.IGNORECASE), "rail"),
+    (re.compile(r"\b(jet|carb|carburett?or)s?\b", re.IGNORECASE), "carb"),
+    (re.compile(r"\bfuel\s+line\b", re.IGNORECASE), "line"),
+    (
+        re.compile(
+            r"\b(fuel\s+(system|management|controller|map)|controller|"
+            r"standalone|infinity)\b",
+            re.IGNORECASE,
+        ),
+        "controller",
+    ),
+)
+
+_BODY_TYPE_SLOT: dict[str, str] = {
+    "fairing": "fairing",
+    "fairing_kit": "fairing",
+    "windscreen": "windscreen",
+    "screen": "windscreen",
+    "clip_on": "clip_ons",
+    "clip_ons": "clip_ons",
+    "rearsets": "rearsets",
+    "winglets": "winglets",
+    "mirror_delete": "mirror_delete",
+    "skid_plate": "skid_plate",
+    "frame_sliders": "frame_sliders",
+}
+_BODY_NAME_SLOTS: tuple[tuple[re.Pattern, str], ...] = (
+    (re.compile(r"\bfairings?\b", re.IGNORECASE), "fairing"),
+    (re.compile(r"\b(wind)?screen\b", re.IGNORECASE), "windscreen"),
+    (re.compile(r"\bclip[- ]?ons?\b", re.IGNORECASE), "clip_ons"),
+    (re.compile(r"\brear\s*sets?\b", re.IGNORECASE), "rearsets"),
+    (re.compile(r"\bwinglets?\b", re.IGNORECASE), "winglets"),
+    (re.compile(r"\bmirror\b", re.IGNORECASE), "mirror_delete"),
+    (re.compile(r"\bskid\s*plate\b", re.IGNORECASE), "skid_plate"),
+    (re.compile(r"\b(frame\s+)?sliders?\b", re.IGNORECASE), "frame_sliders"),
+)
+
+_SUSP_FALLBACK_SLOT: dict[str, str] = {
+    "coilover": "suspension:shock",
+    "spring_kit": "suspension:fork",
+    "spring": "suspension:fork",
+    "lowering_kit": "lowering_kit",
+    "lowering_linkage": "lowering_kit",
+}
+_LOWERING_NAME_RE = re.compile(r"\blowering\b", re.IGNORECASE)
+_COILOVER_NAME_RE = re.compile(r"\bcoil[- ]?over\b", re.IGNORECASE)
+
+
+def _first_name_slot(name: str, table) -> str | None:
+    for pattern, slot in table:
+        if pattern.search(name):
+            return slot
+    return None
+
+
+def part_slot(part: dict) -> str | None:
+    """Physical-slot key for a part row, or None (= freely stackable).
+
+    Returns a key such as ``'sprocket:rear'``, ``'brakes:pad:front'``,
+    ``'fuel_system:injector'``, ``'bodywork:fairing'`` or an exclusive
+    category name (``'quickshifter'``, ``'boost_kit'``...) when the part's
+    function puts it in that slot. Never raises.
+    """
+    if not isinstance(part, dict):
+        return None
+    try:
+        cat = str(part.get("category_name") or "").lower()
+        name = str(part.get("model_name") or "")
+        specs = _json_field(part, "specifications")
+        stype = str(specs.get("type") or "").lower()
+        overrides, written = _written_paths(part)
+
+        # 1. single-scalar slots (the scalar can hold only one part's value)
+        for path, slot in _SCALAR_SLOT_PATHS.items():
+            if path in overrides:
+                return slot
+
+        # 2. functional shift-actuator slot, whatever the filing category
+        shift = written & _SHIFT_ACTUATOR_PATHS
+        if shift and written <= (_SHIFT_ACTUATOR_PATHS | _INCIDENTAL_PATHS):
+            return "quickshifter"
+
+        if cat == "sprocket":
+            pos = specs.get("position")
+            if pos not in ("front", "rear"):
+                m = _SPROCKET_POS_RE.search(name)
+                pos = m.group(1).lower() if m else _sprocket_position_from_paths(part)
+            return f"sprocket:{pos}" if pos in ("front", "rear") else None
+
+        if cat == "brakes":
+            slot = _brake_susp_slot(cat, specs, name)
+            if slot is None:
+                # Subtype known but no stated axle -> front-axle part.
+                subtype = _BRAKE_SUBTYPE.get(stype)
+                if subtype is None:
+                    m = _BRAKE_SUBTYPE_NAME_RE.search(name)
+                    subtype = _BRAKE_NAME_SUBTYPE.get(m.group(1).lower()) if m else None
+                if subtype is None:
+                    return None
+                slot = f"brakes:{subtype}:front"
+            # A combined front+rear set occupies the front slot; a
+            # rotor-and-pads kit is the rotor upgrade.
+            slot = slot.replace(":front_rear", ":front")
+            return slot.replace("brakes:rotor_and_pads:", "brakes:rotor:")
+
+        if cat == "suspension":
+            slot = _brake_susp_slot(cat, specs, name)
+            if slot is not None:
+                return slot
+            if stype in _SUSP_FALLBACK_SLOT:
+                return _SUSP_FALLBACK_SLOT[stype]
+            if _LOWERING_NAME_RE.search(name):
+                return "lowering_kit"
+            if _COILOVER_NAME_RE.search(name):
+                return "suspension:shock"
+            return None
+
+        if cat == "fuel_system":
+            sub = _FUEL_TYPE_SLOT.get(stype) or _first_name_slot(name, _FUEL_NAME_SLOTS)
+            if sub is None and {"flow_cc_min"} & set(specs):
+                sub = "injector"
+            return f"fuel_system:{sub}" if sub else None
+
+        if cat == "bodywork":
+            sub = _BODY_TYPE_SLOT.get(stype) or _first_name_slot(name, _BODY_NAME_SLOTS)
+            return f"bodywork:{sub}" if sub else None
+    except Exception:  # noqa: BLE001 — classification must never break a build
+        logging.getLogger(__name__).debug("part_slot failed", exc_info=True)
+    return None
+
+
+def part_slots(parts) -> dict[int, str]:
+    """``part_slot`` over an iterable of part rows -> {part_id: slot}."""
+    out: dict[int, str] = {}
+    for p in parts or ():
+        if not isinstance(p, dict) or p.get("id") is None:
+            continue
+        slot = part_slot(p)
+        if slot:
+            out[p["id"]] = slot
+    return out
+
+
+def _part_slots_from_repo(parts_repo, part_ids) -> dict[int, str]:
+    """``part_slots`` for ids looked up through ``parts_repo.get``."""
+    getter = getattr(parts_repo, "get", None)
+    if getter is None:
+        return {}
+    rows = []
+    for pid in part_ids:
+        try:
+            row = getter(pid)
+        except Exception:  # noqa: BLE001 — unknown id: just skip it
+            continue
+        if isinstance(row, dict):
+            rows.append({**row, "id": row.get("id", pid)})
+    return part_slots(rows)
+
+
 def _knapsack_group_key(
     r: PartROIResult,
     position_of: dict[int, str] | None = None,
@@ -412,27 +729,35 @@ def _knapsack_group_key(
 ):
     """Exclusivity group for the multiple-choice knapsack.
 
-    - exclusive categories -> one shared group per category;
     - sprockets -> one group per position (front/rear) when known;
-    - brakes / suspension -> one group per physical slot (front pad, rear
-      shock, fork, ...) when known, via ``slot_of``;
+    - any part with a physical slot in ``slot_of`` (see ``part_slot``:
+      brake/suspension slots, fuel-system and bodywork slots, a quickshifter
+      filed under another category...) -> one group per slot;
+    - exclusive categories -> one shared group per category (nitrous shares
+      the forced-induction group with turbo/SC kits);
     - everything else (incl. unclassifiable brake/suspension parts) -> its own
       singleton group (plain 0/1 item, freely selectable).
     """
     cat = (r.category or "").lower()
+    slot = (slot_of or {}).get(r.part_id)
     if cat == "sprocket":
         pos = (position_of or {}).get(r.part_id)
         if pos in ("front", "rear"):
             return f"sprocket:{pos}"
-        return ("__solo__", r.part_id)
-    if cat in ("brakes", "suspension"):
-        slot = (slot_of or {}).get(r.part_id)
-        if slot:
+        if slot and slot.startswith("sprocket:"):
             return slot
+        return ("__solo__", r.part_id)
+    if slot:
+        return _EXCLUSIVE_CATEGORY_ALIASES.get(slot, slot)
+    if cat in ("brakes", "suspension"):
         return ("__solo__", r.part_id)
     if cat in EXCLUSIVE_CATEGORIES:
         return _EXCLUSIVE_CATEGORY_ALIASES.get(cat, cat)
     return ("__solo__", r.part_id)
+
+
+_KNAPSACK_BUCKET_INR = 100
+_KNAPSACK_SCALE = 1_000  # ms / (mm/s) precision for the integer DP
 
 
 def _grouped_knapsack(
@@ -444,23 +769,34 @@ def _grouped_knapsack(
     """Multiple-choice 0/1 knapsack: maximise sum(gain) subject to
     sum(price) <= budget and at most one part per exclusivity group.
     Free parts weigh 0 buckets, so they are picked whenever gain > 0
-    (including at budget 0) while still honouring group exclusivity."""
-    BUCKET = 100
-    SCALE = 1_000  # ms / (mm/s) precision for integer DP
+    (including at budget 0) while still honouring group exclusivity.
+
+    Implementation (October 2026): a NumPy DP over ₹100 buckets with one
+    back-pointer array per group, replacing the pure-Python DP that copied a
+    choice list per bucket per group (~80 s of GIL-held CPU and ~47 MB at the
+    outlaw ₹5M budget, up to 4 runs per request). Picks are IDENTICAL to the
+    legacy algorithm — same item values/weights, same group order, same
+    strict-improvement tie-breaking (first item in group order wins a tie),
+    same returned order (group order); tests/test_fixwave_analysis_knapsack.py
+    pins it against a verbatim copy of the old implementation.
+
+    Exact fast path: when the budget covers the heaviest affordable positive
+    item of EVERY group at once, the DP optimum is simply each group's
+    highest-value item (first on ties) — no DP needed.
+    """
+    BUCKET = _KNAPSACK_BUCKET_INR
+    SCALE = _KNAPSACK_SCALE
     W = int(budget_inr // BUCKET) if budget_inr > 0 else 0
 
     groups: dict = {}
     for r in candidates:
         groups.setdefault(group_key(r), []).append(r)
 
-    dp = [0] * (W + 1)
-    choice: list[list] = [[] for _ in range(W + 1)]
-
-    # Each group is a "choose at most one" block: reading from the pre-group
-    # dp for every item in the group enforces mutual exclusivity within it.
+    # (part, value, weight) per group, keeping exactly the items the legacy DP
+    # considered (it skipped non-positive values and parts heavier than W).
+    blocks: list[list[tuple[PartROIResult, int, int]]] = []
     for items in groups.values():
-        new_dp = dp[:]
-        new_choice = [c[:] for c in choice]
+        block = []
         for r in items:
             v = int(round(gain(r) * SCALE))
             if v <= 0:
@@ -468,21 +804,59 @@ def _grouped_knapsack(
             w = _bucket_weight(r.price_inr, BUCKET)
             if w > W:
                 continue
-            for cap in range(W, w - 1, -1):
-                cand = dp[cap - w] + v
-                if cand > new_dp[cap]:
-                    new_dp[cap] = cand
-                    new_choice[cap] = choice[cap - w] + [r]
-        dp = new_dp
-        choice = new_choice
+            block.append((r, v, w))
+        if block:
+            blocks.append(block)
+    if not blocks:
+        return []
 
-    return choice[W]
+    if sum(max(w for _r, _v, w in b) for b in blocks) <= W:
+        picks = []
+        for b in blocks:
+            best = b[0]
+            for item in b[1:]:
+                if item[1] > best[1]:
+                    best = item
+            picks.append(best[0])
+        return picks
+
+    dp = np.zeros(W + 1, dtype=np.int64)
+    back: list[np.ndarray] = []
+    for b in blocks:
+        new_dp = dp.copy()
+        choice = np.full(W + 1, -1, dtype=np.int32)
+        for idx, (_r, v, w) in enumerate(b):
+            # cand[k] is the value at capacity w+k from the PRE-group dp, so
+            # each group contributes at most one item (MCKP exclusivity).
+            cand = dp[: W + 1 - w] + v
+            tgt = new_dp[w:]
+            better = cand > tgt
+            if better.any():
+                tgt[better] = cand[better]
+                choice[w:][better] = idx
+        dp = new_dp
+        back.append(choice)
+
+    picks = []
+    cap = W
+    for b, choice in zip(reversed(blocks), reversed(back)):
+        idx = int(choice[cap])
+        if idx >= 0:
+            r, _v, w = b[idx]
+            picks.append(r)
+            cap -= w
+    picks.reverse()
+    return picks
 
 
 def _run_et(config: BikeConfig) -> tuple[float, float]:
-    """Run a quick simulation and return (ET_s, trap_speed_ms)."""
-    engine = MotoQuantEngine(config)
-    result = engine.run()
+    """Run a full physics simulation and return (ET_s, trap_speed_ms).
+
+    Routed through ``engine_select.make_engine`` so the Rust core is used when
+    it is active (bit-identical results, ~60x faster); the Python reference
+    engine otherwise.
+    """
+    result = engine_select.make_engine(config).run()
     return result.time_quarter, result.speed_quarter
 
 
@@ -509,6 +883,188 @@ def _roi_metrics(
     cost_per_tenth = price_inr / (delta_et_s * 10)
 
     return roi_score, cost_per_tenth
+
+
+def noise_floored_metrics(
+    price_inr: float, delta_et_s: float, min_delta_et_ms: float = 5.0
+) -> tuple[float, float]:
+    """``_roi_metrics`` after the same noise floor ``compute_parts_roi`` uses
+    (a gain below ``min_delta_et_ms`` scores like no gain)."""
+    effective = delta_et_s if delta_et_s * 1000 >= min_delta_et_ms else 0.0
+    return _roi_metrics(price_inr, effective)
+
+
+def _objective_gain(objective: str):
+    """Positive-is-better per-part gain for the knapsack objective."""
+    if objective == "max_trap":
+        return lambda r: r.delta_trap_ms
+    return lambda r: r.delta_et_s
+
+
+def passes_noise_floor(gain_value: float, min_delta_et_ms: float) -> bool:
+    """True when a part's gain clears the selection noise floor.
+
+    The floor is expressed in thousandths of the objective unit (ms of ET for
+    min_et, mm/s of trap for max_trap). Until October 2026 the floor only
+    zeroed ``roi_score``: the knapsack still bought parts below it (e.g.
+    ₹11,990 brake lines for 1.5 ms in no-limit outlaw builds).
+    """
+    return gain_value * 1000.0 >= min_delta_et_ms and gain_value > 0
+
+
+def score_build(
+    base_config: BikeConfig, parts: list[PartROIResult], parts_repo, et_fn
+) -> tuple[float, float]:
+    """Score ``parts`` applied together to ``base_config`` (canonical order)."""
+    ids = apply_order_ids(parts)
+    if not ids:
+        return et_fn(base_config)
+    cfg = parts_repo.apply_multiple(ids, copy.deepcopy(base_config))
+    return et_fn(cfg)
+
+
+@dataclass
+class BuildRefinement:
+    """Outcome of ``refine_build`` (all numbers from the supplied scorer)."""
+
+    selected: list[PartROIResult]
+    et_s: float
+    trap_ms: float
+    sims: int
+    gearing_changed: bool
+    dropped: list[PartROIResult]
+
+
+def _is_sprocket_key(key) -> bool:
+    return isinstance(key, str) and key.startswith("sprocket:")
+
+
+def refine_build(
+    base_config: BikeConfig,
+    selected: list[PartROIResult],
+    pool: list[PartROIResult],
+    budget_inr: float,
+    parts_repo,
+    et_fn,
+    *,
+    objective: str = "min_et",
+    group_key=None,
+    top_k: int = 4,
+    max_drop_rounds: int = 4,
+    on_sim=None,
+) -> BuildRefinement:
+    """Re-check a knapsack pick on the COMBINED build with real scores.
+
+    The knapsack adds per-part gains measured on the STOCK bike, which is
+    wrong for interacting parts. Two passes fix the failures the October 2026
+    audit found:
+
+    1. Gearing — front and rear sprockets were picked independently (each
+       ~-0.11 s alone) and together gave 15/50 (+39% final drive): the
+       ₹25.6 L outlaw build verified 0.72 s SLOWER than its own turbo alone.
+       The sprocket slot(s) are re-chosen jointly on top of the rest of the
+       build: none / one front / one rear / a front+rear pair, from the top
+       ``top_k`` sprockets per position (by individual gain), within budget.
+    2. Drop-one — any selected part whose removal improves the combined
+       objective is removed (greedy, best removal first, up to
+       ``max_drop_rounds``), so a build can never be worse than a subset of
+       itself (e.g. a QS-module override that erases a better quickshifter).
+    """
+    group_key = group_key or (lambda r: _knapsack_group_key(r))
+    cache: dict = {}
+    sims = [0]
+
+    def value(et: float, trap: float) -> float:
+        return trap if objective == "max_trap" else -et
+
+    tol = 1e-3 if objective == "max_trap" else 1e-4
+
+    def score(parts: list[PartROIResult]) -> tuple[float, float]:
+        key = tuple(sorted(r.part_id for r in parts))
+        if key not in cache:
+            cache[key] = score_build(base_config, parts, parts_repo, et_fn)
+            sims[0] += 1
+            if on_sim is not None:
+                on_sim()
+        return cache[key]
+
+    current = list(selected)
+    cur_et, cur_trap = score(current)
+    gearing_changed = False
+
+    # ── 1. joint gearing choice ─────────────────────────────────────────
+    spr_pool = [r for r in pool if _is_sprocket_key(group_key(r)) and r.is_compatible]
+    if spr_pool:
+        gain = _objective_gain(objective)
+        rest = [r for r in current if not _is_sprocket_key(group_key(r))]
+        room = budget_inr - sum(r.price_inr or 0.0 for r in rest)
+        cur_spr = [r for r in current if _is_sprocket_key(group_key(r))]
+
+        def top(position: str) -> list[PartROIResult]:
+            cands = [
+                r
+                for r in spr_pool
+                if group_key(r) == f"sprocket:{position}"
+                and (r.price_inr or 0.0) <= room
+            ]
+            cands.sort(key=lambda r: -gain(r))
+            out = cands[:top_k]
+            for r in cur_spr:
+                if group_key(r) == f"sprocket:{position}" and r not in out:
+                    out.append(r)
+            return out
+
+        fronts, rears = top("front"), top("rear")
+        options: list[tuple[PartROIResult, ...]] = [()]
+        options += [(f,) for f in fronts] + [(r,) for r in rears]
+        options += [
+            (f, r)
+            for f in fronts
+            for r in rears
+            if (f.price_inr or 0.0) + (r.price_inr or 0.0) <= room
+        ]
+        best_parts, best_val = current, value(cur_et, cur_trap)
+        best_score = (cur_et, cur_trap)
+        for opt in options:
+            parts = rest + list(opt)
+            et_o, trap_o = score(parts)
+            if value(et_o, trap_o) > best_val + tol:
+                best_parts, best_val, best_score = (
+                    parts,
+                    value(et_o, trap_o),
+                    (et_o, trap_o),
+                )
+        if best_parts is not current:
+            gearing_changed = {r.part_id for r in best_parts} != {
+                r.part_id for r in current
+            }
+            current = list(best_parts)
+            cur_et, cur_trap = best_score
+
+    # ── 2. drop-one ─────────────────────────────────────────────────────
+    dropped: list[PartROIResult] = []
+    for _round in range(max(0, max_drop_rounds)):
+        if not current:
+            break
+        best_idx, best_val, best_score = None, value(cur_et, cur_trap) + tol, None
+        for i in range(len(current)):
+            trial = current[:i] + current[i + 1 :]
+            et_t, trap_t = score(trial)
+            if value(et_t, trap_t) > best_val:
+                best_idx, best_val, best_score = i, value(et_t, trap_t), (et_t, trap_t)
+        if best_idx is None:
+            break
+        dropped.append(current.pop(best_idx))
+        cur_et, cur_trap = best_score
+
+    return BuildRefinement(
+        selected=current,
+        et_s=cur_et,
+        trap_ms=cur_trap,
+        sims=sims[0],
+        gearing_changed=gearing_changed,
+        dropped=dropped,
+    )
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -736,8 +1292,10 @@ def find_best_build(
     """
     Find the combination of parts that maximises ET improvement within a budget.
 
-    Uses an exact 0/1 knapsack DP with budget discretised to ₹100 buckets.
-    This is exact for sets up to ~200 parts and budgets up to ₹5 lakh.
+    Uses an exact multiple-choice knapsack DP (budget in ₹100 buckets, one
+    part per physical slot — see ``part_slot``), then re-scores the combined
+    build with ``refine_build`` (joint gearing choice + drop-one), so the
+    reported ``modified_et_s`` is the scorer's verdict on the exact part list.
 
     Parameters
     ----------
@@ -764,18 +1322,14 @@ def find_best_build(
     BuildROIResult with selected parts, combined ET, and cost summary.
     """
     _et = et_fn if et_fn is not None else _run_et
-    gain_of = (
-        (lambda r: r.delta_trap_ms)
-        if objective == "max_trap"
-        else (lambda r: r.delta_et_s)
-    )
+    gain_of = _objective_gain(objective)
 
-    # Discover candidate part IDs
+    # Discover candidate part IDs (no 200-row cap — see CANDIDATE_LIMIT).
     if part_ids is None:
         raw = parts_repo.search(
             category=category_filter,
             bike_model_id=bike_model_id,
-            limit=200,
+            limit=CANDIDATE_LIMIT,
         )
         part_ids = [p["id"] for p in raw]
 
@@ -796,13 +1350,13 @@ def find_best_build(
             et_fn=et_fn,
         )
 
-    # Filter to parts that improve the objective, fit the budget, and are
-    # actually compatible (is_compatible now reflects the production fitment
+    # Filter to parts that clear the noise floor, fit the budget, and are
+    # actually compatible (is_compatible reflects the production fitment
     # engine; incompatible parts are counted, never built).
     candidates = [
         r
         for r in individual
-        if (allow_negative_parts or gain_of(r) >= 0)
+        if (allow_negative_parts or passes_noise_floor(gain_of(r), min_delta_et_ms))
         and r.price_inr <= budget_inr
         and r.is_compatible
     ]
@@ -811,8 +1365,8 @@ def find_best_build(
     n_incompat = sum(1 for r in individual if not r.is_compatible)
     n_no_gain = sum(1 for r in individual if gain_of(r) <= 0)
 
+    base_et, base_trap = _et(base_config)
     if not candidates:
-        base_et, base_trap = _et(base_config)
         _empty = BuildROIResult(
             selected_parts=[],
             total_cost_inr=0.0,
@@ -827,40 +1381,41 @@ def find_best_build(
         )
         return (_empty, individual) if return_individual else _empty
 
-    # ── Multiple-choice knapsack with category exclusivity ────────────
-    # The pre-June-2026 plain 0/1 DP could stack two exhausts / four air
-    # filters (unbuildable) and floor-divided prices into buckets, letting
-    # the "optimal" build exceed the stated budget by up to ₹99 per part.
-    # _grouped_knapsack enforces at-most-one part per exclusive category
-    # (and per sprocket position), rounds weights UP, and handles free
-    # parts (weight 0) uniformly — including at budget ₹0.
+    # ── Multiple-choice knapsack with physical-slot exclusivity ───────
+    # _grouped_knapsack enforces at-most-one part per exclusive category,
+    # sprocket position and physical slot (part_slot), rounds weights UP so
+    # the budget can never be exceeded, and handles free parts uniformly.
     _cand_ids = [r.part_id for r in candidates]
     position_of = _sprocket_positions(parts_repo, _cand_ids)
-    slot_of = _brake_susp_slots(parts_repo, _cand_ids)
-    selected = _grouped_knapsack(
-        candidates,
-        budget_inr,
-        gain_of,
-        lambda r: _knapsack_group_key(r, position_of, slot_of),
-    )
+    pool = [r for r in individual if r.is_compatible and r.price_inr <= budget_inr]
+    slot_of = _part_slots_from_repo(parts_repo, [r.part_id for r in pool])
 
-    # ── Incremental simulation of selected build ──────────────────────
-    # Apply parts in price-ascending order (smaller parts first so
-    # they influence subsequent parts' interaction context accurately).
-    selected_sorted = sorted(selected, key=lambda r: r.price_inr)
-    build_config = copy.deepcopy(base_config)
-    selected_ids = [r.part_id for r in selected_sorted]
+    def group_key(r):
+        return _knapsack_group_key(r, position_of, slot_of)
 
+    selected = _grouped_knapsack(candidates, budget_inr, gain_of, group_key)
+
+    # ── Combined build: joint gearing + drop-one, then the final score ─
+    # The knapsack adds stock-bike gains; refine_build re-scores the actual
+    # combined build so interacting parts (sprocket pairs, overrides that
+    # erase each other) can't make it worse than a subset of itself.
     try:
-        build_config = parts_repo.apply_multiple(selected_ids, build_config)
-        build_et, build_trap = _et(build_config)
-    except Exception as exc:
-        warnings.warn(
-            f"find_best_build: combined sim failed ({exc}); falling back to stock"
+        refined = refine_build(
+            base_config,
+            selected,
+            pool,
+            budget_inr,
+            parts_repo,
+            _et,
+            objective=objective,
+            group_key=group_key,
         )
-        build_et, build_trap = _et(base_config)
+        selected = refined.selected
+        build_et, build_trap = refined.et_s, refined.trap_ms
+    except Exception as exc:  # noqa: BLE001 — report stock, never a fiction
+        warnings.warn(f"find_best_build: combined sim failed ({exc}); reporting stock")
+        selected, build_et, build_trap = [], base_et, base_trap
 
-    base_et, base_trap = _et(base_config)
     total_cost = sum(r.price_inr for r in selected)
 
     # Re-fetch ROI results in the sorted order for the output

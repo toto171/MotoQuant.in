@@ -206,26 +206,41 @@ class TestValidateSpec:
         assert result.is_valid  # warning only
         assert any("rear_tire_size" in w for w in result.warnings)
 
-    def test_power_kw_auto_converts(self):
-        # 520 is out of HP bounds [5, 500], but 520 * 0.7457 ≈ 387 HP is valid
-        # → validator should auto-convert with a warning (not an error)
+    def test_out_of_bounds_high_power_is_error_not_converted(self):
+        # 520 is above the HP bound. A value entered in kW reads LOWER than
+        # its hp equivalent, so a too-HIGH number cannot be kW: it must be an
+        # error, not "converted" by the hp->kW factor (the old behaviour, which
+        # also accepted the result). October 2026 audit.
         spec = _make_spec()
         spec.peak_power_hp = 520.0
         result = validate_spec(spec)
-        assert result.is_valid  # converted to ~387 HP, still valid
-        assert any("kW" in w for w in result.warnings)
+        assert not result.is_valid
+        assert any("peak_power_hp" in e for e in result.errors)
+        assert spec.peak_power_hp == 520.0  # untouched
 
-    def test_unit_conversion_kw_to_hp(self):
-        # 150 kW = 201 HP — validator should auto-convert
-        spec = _make_spec(peak_power_hp=150.0)
-        # 150 is within HP bounds so no conversion triggered; test kW value at edge
-        # Force an out-of-range HP value that's in-range as kW * 0.7457
-        spec = _make_spec()
-        spec.peak_power_hp = 520.0  # out of [5, 500] as HP
-        # 520 * 0.7457 = 387.8 → valid HP, so should convert
+    def test_unit_conversion_kw_to_hp_low_side(self):
+        # 4 "hp" is below the [5, 500] bound; read as kW it is 5.4 hp (in
+        # bounds) -> converted upward with a warning.
+        spec = _make_spec(peak_power_hp=4.0, displacement_cc=50.0, bore_mm=None)
         result = validate_spec(spec)
         assert any("kW" in w for w in result.warnings)
-        assert spec.peak_power_hp == pytest.approx(520 * 0.7457, rel=1e-4)
+        assert spec.peak_power_hp == pytest.approx(4.0 * 1.341, rel=1e-6)
+        assert result.corrected_fields["peak_power_hp"] == pytest.approx(5.364)
+
+    def test_out_of_bounds_high_torque_is_error_not_inflated(self):
+        # 450 Nm is above the bound; the old branch multiplied it by 1.356
+        # (610 Nm) and still reported the spec valid.
+        spec = _make_spec(peak_torque_nm=450.0)
+        result = validate_spec(spec)
+        assert not result.is_valid
+        assert spec.peak_torque_nm == 450.0
+
+    def test_mass_in_lbs_converts(self):
+        # 900 "kg" is above the bound; as lbs it is 408 kg (in bounds).
+        spec = _make_spec(dry_mass_kg=900.0, wet_mass_kg=None)
+        result = validate_spec(spec)
+        assert result.is_valid
+        assert spec.dry_mass_kg == pytest.approx(900.0 * 0.4536)
 
     def test_bore_stroke_displacement_mismatch_warning(self):
         # bore=73.4, stroke=59, cyl=4 → ~999cc, set displacement wrong
@@ -235,36 +250,41 @@ class TestValidateSpec:
         assert any("Bore" in w for w in result.warnings)
 
     def test_torque_power_inconsistency_warning(self, good_spec):
-        # Power 178HP at 12000 RPM → ~141 Nm expected, we set 200 Nm → 42% off
-        good_spec.peak_torque_nm = 200.0
+        # 178 HP at 12000 RPM -> ~106 Nm at the power peak; a 140 Nm peak at
+        # 8000 RPM is >30% off that (warning) but physically possible
+        # (140 Nm @ 8000 = 157 HP < 178 HP).
+        good_spec.peak_torque_nm = 140.0
+        good_spec.peak_torque_rpm = 8000
         result = validate_spec(good_spec)
         assert result.is_valid
         assert any("Torque inconsistency" in w for w in result.warnings)
 
-    def test_cd_autofill_from_category(self):
+    def test_torque_peak_out_powering_power_peak_is_error(self, good_spec):
+        # 200 Nm @ 10000 RPM is 280 HP at the torque peak vs a rated 178 HP:
+        # no torque curve can do that. This used to validate (one soft
+        # warning); October 2026 audit.
+        good_spec.peak_torque_nm = 200.0
+        result = validate_spec(good_spec)
+        assert not result.is_valid
+        assert any("Physically inconsistent" in e for e in result.errors)
+
+    def test_missing_cd_is_reported_not_written(self):
+        # validate_spec must not mutate the spec with car-like defaults: the
+        # importer's category aero owns the default (October 2026 audit).
         spec = _make_spec(category="cruiser")
         spec.cd = None
         spec.frontal_area_m2 = None
-        validate_spec(spec)
-        assert spec.cd == pytest.approx(0.50, rel=0.01)
-        assert spec.frontal_area_m2 is not None
-
-    def test_gear_ratios_default_6speed(self):
-        spec = _make_spec(gear_ratios=None, gears=6)
-        validate_spec(spec)
-        assert spec.gear_ratios is not None
-        assert len(spec.gear_ratios) == 6
-
-    def test_gear_ratios_default_5speed(self):
-        spec = _make_spec(gear_ratios=None, gears=5)
-        validate_spec(spec)
-        assert len(spec.gear_ratios) == 5
-
-    def test_corrected_fields_populated(self):
-        spec = _make_spec(category="naked")
-        spec.cd = None
         result = validate_spec(spec)
-        assert "cd" in result.corrected_fields
+        assert spec.cd is None and spec.frontal_area_m2 is None
+        assert "cd" in result.defaulted_fields
+        assert "cd" not in result.corrected_fields
+
+    def test_missing_gear_ratios_are_reported_not_written(self):
+        for gears in (5, 6):
+            spec = _make_spec(gear_ratios=None, gears=gears)
+            result = validate_spec(spec)
+            assert spec.gear_ratios is None
+            assert "gear_ratios" in result.defaulted_fields
 
 
 # ────────────────────────────────────────────────────────────
@@ -470,44 +490,25 @@ class TestSubBuilders:
         assert aero.cd == pytest.approx(0.30)
 
     def test_aero_cd_from_category_default(self):
-        """Default Cd from CATEGORY_AERO passes through for non-sport
-        categories. April 24 PM update: sport-class spec.cd undergoes
-        tuck-Cd normalization (× 0.55, floor 0.30) because the
-        rider_dynamics submodel treats spec.cd as the rider-tuck value
-        and applies a 1.18× multiplier for the upright launch position.
-        See `_build_aero_from_spec` docstring for the physics derivation.
-        """
+        """A spec without Cd takes its CATEGORY_AERO default unchanged, for
+        every category. (The sport-only x0.55 "tuck normalisation" was
+        removed in the 2026-10 epoch: catalog Cd is on the same scale as
+        the defaults.py references — see `_build_aero_from_spec`.)"""
         for cat, vals in CATEGORY_AERO.items():
-            spec = _make_spec(category=cat)
+            spec = _make_spec(category=cat, displacement_cc=999.0)
             spec.cd = None
             spec.frontal_area_m2 = None
             aero = _build_aero_from_spec(spec)
-            if cat == "sport":
-                # Sport: upright default 0.65 → tuck 0.65 × 0.55 = 0.358
-                # (clipped to floor 0.30).
-                assert aero.cd == pytest.approx(max(0.30, vals["cd"] * 0.55), abs=0.01)
-            else:
-                # Naked / cruiser / adventure / touring / scooter: no
-                # tuck normalization (riders sit upright by design).
-                assert aero.cd == pytest.approx(vals["cd"])
+            assert aero.cd == pytest.approx(vals["cd"])
 
-    def test_aero_cd_tuck_normalization_for_small_sport(self):
-        """spec.cd values populated as upright (e.g. R15 V3 0.56) are
-        normalized down to the tuck regime (× 0.55) for sport-class
-        bikes — corrects the small-cc launch-phase double-inflation.
-        """
-        spec = _make_spec(
-            category="sport", displacement_cc=155.0, cylinders=1, cd=0.56
-        )  # R15-V3-shape upright Cd
-        aero = _build_aero_from_spec(spec)
-        # 0.56 × 0.55 = 0.308 (above floor 0.30)
-        assert 0.30 <= aero.cd <= 0.35
-
-        # Legitimate tuck Cds (e.g. K5 0.32) should NOT be altered
-        spec_k5 = _make_spec(
-            category="sport", displacement_cc=999.0, cylinders=4, cd=0.32
-        )
-        assert _build_aero_from_spec(spec_k5).cd == pytest.approx(0.32)
+    def test_aero_cd_spec_value_used_verbatim(self):
+        """A curated spec Cd passes through unscaled, small sport bikes
+        included (an R15-shape 0.56 was rescaled to ~0.31 before)."""
+        for cc, cyl, cd in ((155.0, 1, 0.56), (999.0, 4, 0.64), (999.0, 4, 0.32)):
+            spec = _make_spec(
+                category="sport", displacement_cc=cc, cylinders=cyl, cd=cd
+            )
+            assert _build_aero_from_spec(spec).cd == pytest.approx(cd)
 
 
 # ────────────────────────────────────────────────────────────

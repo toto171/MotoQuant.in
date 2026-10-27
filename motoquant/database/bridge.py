@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — BikeConfig ↔ Database Bridge
-============================================
+MotoQuant — BikeConfig ↔ Database Bridge
+========================================
 Lossless conversion between the in-memory dataclass hierarchy (BikeConfig)
 and the relational database representation.
 
@@ -20,6 +20,10 @@ from typing_extensions import TypedDict  # py<3.12-safe with pydantic
 
 from ..config_io import dataclass_to_dict, dyno_from_dict
 from ..models import (
+    BOOST_N2O,
+    BOOST_SC_CENTRIFUGAL,
+    BOOST_SC_ROOTS,
+    BOOST_TURBO,
     AeroParams,
     BikeConfig,
     BrakingParams,
@@ -340,7 +344,23 @@ def apply_part_to_config(config: BikeConfig, part_row: dict) -> BikeConfig:
 
     Forced-induction parts (turbo, SC, N2O) set forced_induction.* params
     directly. The physics model then applies the boost multiplier on top of the
-    base dyno torque — no dyno scaling needed or applied for those.
+    base dyno torque — no dyno scaling needed or applied for those. Whether a
+    part is forced-induction is decided from the PART (does it write
+    forced_induction.*?), never from the config's current boost state, so an
+    exhaust scales the curve whether it is applied before or after a turbo.
+    A forced-induction part that carries an hp delta, or that sets a boost
+    type with zero boost / a zero nitrous shot, emits a warning.
+
+    2-stroke expansion chambers (``engine.tuned_rpm`` overrides) on a config
+    with a dyno curve reshape the curve around the pipe's resonance (see
+    ``_reshape_curve_for_pipe``). The 2T flags ``expansion_chamber`` /
+    ``reed_valve`` / ``powervalve`` only shape the SYNTHETIC 2T curve, so on a
+    curve-carrying config (every catalog bike) they are informational; their
+    gain must come through peak_power_hp deltas/multipliers.
+
+    A part that switches ``staging.two_step`` on without its own
+    ``staging.launch_rpm`` holds at the bike's peak-torque rpm instead of the
+    8000 rpm dataclass default.
 
     Path validation
     ---------------
@@ -358,8 +378,11 @@ def apply_part_to_config(config: BikeConfig, part_row: dict) -> BikeConfig:
     new_config = copy.deepcopy(config)
     part_name = part_row.get("model_name", "unknown part")
 
-    # Snapshot power before any changes (for dyno curve scaling)
+    # Snapshot power / launch mode before any changes (for dyno curve scaling
+    # and the two-step hold-rpm fill below).
     old_peak_hp = new_config.engine.peak_power_hp
+    old_peak_tq = new_config.engine.peak_torque_nm
+    old_two_step = bool(new_config.staging.two_step)
 
     def _set_nested(obj, path: str, value) -> bool:
         """Set a nested attribute via dotted path. Returns False if path is invalid."""
@@ -426,20 +449,84 @@ def apply_part_to_config(config: BikeConfig, part_row: dict) -> BikeConfig:
                 f"invalid multiplier path '{path}'. Skipped."
             )
 
-    # ── Dyno curve scaling for NA power mods ─────────────────────────────────
-    # If this part changed engine.peak_power_hp AND the config has a dyno curve
-    # AND the engine is still naturally aspirated, scale the dyno curve torque
-    # array by the same ratio so the physics engine sees the power delta.
+    def _warn(msg: str) -> None:
+        msg = f"apply_part_to_config [{part_name}]: {msg}"
+        _log.warning(msg)
+        warnings.warn(msg)
+
+    touched = set(overrides) | set(deltas) | set(multipliers)
+
+    # ── Dyno curve scaling for power mods — decided PER PART ──────────────────
+    # If this part changed engine.peak_power_hp AND the config has a dyno curve,
+    # scale the curve's torque array by the same ratio so the physics engine
+    # sees the power delta (every production config carries a baked curve, so
+    # peak_power_hp alone is a display field there).
     #
-    # Forced-induction parts (turbo/SC/N2O) set forced_induction.boost_type ≠ NA,
-    # so is_boosted → True after overrides are applied. Those parts must NOT also
-    # change peak_power_hp — the boost model handles the torque increase directly.
+    # The rule is keyed on whether THIS PART is a forced-induction part (it
+    # writes forced_induction.*), not on the config's boost state after the
+    # overrides. The old `is_na` gate made two classes of part dead:
+    #   * turbo/SC kits whose gain was encoded as a peak_power_hp delta (the
+    #     curve was never scaled and target_boost_bar stayed 0, so a '+180 hp'
+    #     twin-turbo delivered zero power), and
+    #   * any NA power part (exhaust, ECU) applied AFTER a boost part — the
+    #     build's ET depended on the order the parts were applied in.
+    # A forced-induction part gets its power from the boost model
+    # (target_boost_bar / n2o_*), so an hp delta on one is ignored and flagged.
     new_peak_hp = new_config.engine.peak_power_hp
     hp_changed = abs(new_peak_hp - old_peak_hp) > 0.05
     has_dyno = new_config.engine.dyno_curve is not None
-    is_na = not new_config.forced_induction.is_boosted
+    part_is_fi = any(p.startswith("forced_induction.") for p in touched)
+    reshapes_pipe = (
+        "engine.tuned_rpm" in overrides
+        and has_dyno
+        and new_config.engine.stroke_type == 2
+    )
 
-    if hp_changed and has_dyno and is_na and old_peak_hp > 1.0:
+    if part_is_fi:
+        fi = new_config.forced_induction
+        if hp_changed and has_dyno:
+            # Ignored, and reverted: leaving the inflated peak_power_hp in
+            # place would also shrink the curve-scaling ratio of every NA
+            # part applied after this one (order-dependent builds again).
+            _warn(
+                "forced-induction part carries an engine.peak_power_hp change; "
+                "the boost model supplies its power, so the change is ignored "
+                "(encode the gain as target_boost_bar / n2o_* instead)."
+            )
+            new_config.engine.peak_power_hp = old_peak_hp
+            new_config.engine.peak_torque_nm = old_peak_tq
+        if fi.boost_type == BOOST_N2O and fi.n2o_hp_per_stage * fi.n2o_stages <= 0:
+            _warn(
+                "nitrous part delivers 0 hp "
+                f"(n2o_hp_per_stage={fi.n2o_hp_per_stage}, "
+                f"n2o_stages={fi.n2o_stages})."
+            )
+        elif fi.boost_type in _PRESSURE_BOOST_TYPES and fi.target_boost_bar <= 0:
+            _warn(
+                f"boost_type={fi.boost_type!r} with target_boost_bar="
+                f"{fi.target_boost_bar} delivers no boost."
+            )
+    elif reshapes_pipe:
+        # Expansion chamber on a 2-stroke whose torque comes from a baked dyno
+        # curve. get_torque() never reads tuned_rpm when a curve is present, so
+        # overriding it alone only moved the 2T launch-floor clamp in the slip
+        # phase — pinning the engine at the pipe's rpm without moving any
+        # torque, which made 'upgrades' up to 0.7 s SLOWER. Apply the pipe as
+        # the curve change it is instead: a resonance-weighted torque gain
+        # centred on the pipe's tuned rpm, sized so the curve's peak power
+        # rises by the part's hp ratio, then point tuned_rpm at the reshaped
+        # curve's actual torque peak (which is what tuned_rpm means on a
+        # stock 2T config).
+        ratio = new_peak_hp / old_peak_hp if old_peak_hp > 1.0 else 1.0
+        dc, tuned = _reshape_curve_for_pipe(
+            new_config.engine.dyno_curve,
+            pipe_rpm=float(overrides["engine.tuned_rpm"]),
+            power_ratio=ratio,
+            redline_rpm=new_config.engine.redline_rpm,
+        )
+        new_config.engine.dyno_curve = dc
+        new_config.engine.tuned_rpm = tuned
+    elif hp_changed and has_dyno and old_peak_hp > 1.0:
         ratio = new_peak_hp / old_peak_hp
         dc = new_config.engine.dyno_curve
         new_config.engine.dyno_curve = DynoCurve(
@@ -448,7 +535,77 @@ def apply_part_to_config(config: BikeConfig, part_row: dict) -> BikeConfig:
             is_at_wheel=dc.is_at_wheel,
         )
 
+    # ── Two-step enabled without a hold rpm ──────────────────────────────────
+    # staging.launch_rpm on a config that never had a two-step is the
+    # dataclass default (8000), not per-bike data. A part that switches the
+    # two-step on without declaring its own hold rpm (e.g. a piggyback with
+    # 'launch control') used to launch every compatible bike at 8000 rpm —
+    # past redline on big twins (Thruxton 1200 R: +1.8 s). Hold at the rpm the
+    # bike already launches at without a two-step (peak-torque rpm, clamped
+    # to the engine's idle..redline window).
+    if (
+        new_config.staging.two_step
+        and not old_two_step
+        and "staging.launch_rpm" not in touched
+    ):
+        eng = new_config.engine
+        new_config.staging.launch_rpm = float(
+            min(max(eng.peak_torque_rpm, eng.idle_rpm), eng.redline_rpm)
+        )
+
     return new_config
+
+
+# Boost types whose power comes from target_boost_bar.
+_PRESSURE_BOOST_TYPES = frozenset({BOOST_TURBO, BOOST_SC_ROOTS, BOOST_SC_CENTRIFUGAL})
+
+# A bolt-on pipe moves a 2-stroke's resonance by at most this fraction of the
+# stock curve's resonance; the reshape is a Gaussian of this relative width.
+_PIPE_MAX_SHIFT = 0.15
+_PIPE_SIGMA_FRAC = 0.20
+
+
+def _reshape_curve_for_pipe(
+    dc: DynoCurve,
+    pipe_rpm: float,
+    power_ratio: float,
+    redline_rpm: float,
+) -> tuple[DynoCurve, float]:
+    """Apply an expansion-chamber part to a baked 2-stroke dyno curve.
+
+    Multiplies the torque by ``1 + k * w(rpm)`` where ``w`` is a Gaussian
+    centred on the pipe's tuned rpm (clamped to within ``_PIPE_MAX_SHIFT`` of
+    the stock curve's resonance and below redline), with ``k`` chosen so the
+    curve's peak power rises by ``power_ratio``. Ratios at or below 1 fall back
+    to a uniform scale (a pipe that loses power has no resonance to add).
+
+    Returns the new curve and its torque-peak rpm (the new ``tuned_rpm``,
+    capped at redline).
+    """
+    rpm = np.asarray(dc.rpm, dtype=float)
+    torque = np.asarray(dc.torque_nm, dtype=float)
+    if power_ratio <= 1.0:
+        new_t = torque * power_ratio
+    else:
+        stock_res = float(rpm[int(np.argmax(torque))])
+        hi = min(stock_res * (1.0 + _PIPE_MAX_SHIFT), 0.97 * redline_rpm)
+        lo = min(stock_res * (1.0 - _PIPE_MAX_SHIFT), hi)
+        centre = min(max(pipe_rpm, lo), hi)
+        w = np.exp(-0.5 * ((rpm - centre) / (_PIPE_SIGMA_FRAC * centre)) ** 2)
+        power = torque * rpm
+        target = float(power.max()) * power_ratio
+        k_lo, k_hi = 0.0, 1.0
+        while float((power * (1.0 + k_hi * w)).max()) < target and k_hi < 1e3:
+            k_hi *= 2.0
+        for _ in range(60):
+            k = 0.5 * (k_lo + k_hi)
+            if float((power * (1.0 + k * w)).max()) < target:
+                k_lo = k
+            else:
+                k_hi = k
+        new_t = torque * (1.0 + k_hi * w)
+    tuned = float(min(rpm[int(np.argmax(new_t))], redline_rpm))
+    return DynoCurve(rpm=rpm.copy(), torque_nm=new_t, is_at_wheel=dc.is_at_wheel), tuned
 
 
 def compute_data_completeness(config: BikeConfig) -> float:

@@ -34,6 +34,8 @@ from motoquant.llm.agent import (  # noqa: E402
     BUILD_TIERS,
     FULL_SIM_BUDGET,
     HEAVY_OP_BUDGET,
+    HEAVY_OP_SIM_COST,
+    OUTLAW_SIM_COST,
     _clip_history,
     resolve_build_tier,
     run_agent_chat,
@@ -409,19 +411,43 @@ class TestAgentLoop(unittest.TestCase):
         ]
         self.assertEqual(len(errs), 2)
 
-    def test_meter_quota_blocks_sims(self):
+    def test_heavy_op_reports_its_nominal_sim_count(self):
+        """A heavy op runs ~18 RK4 sims, so sims_run must not report it as
+        one (reporting only — the per-turn fuse is HEAVY_OP_BUDGET)."""
         client, _ = _scripted_client(
-            [[("run_simulation", {"bike_id": 11})], "quota message relayed"]
+            [[("autotune_setup", {"bike_id": 999999})], "done"]
         )
-        res = run_agent_chat(
-            "sim it",
-            _get_db(),
-            client=client,
-            meter_cb=lambda n: False,
+        res = run_agent_chat("tune it", _get_db(), client=client)
+        self.assertEqual(res.sims_run, HEAVY_OP_SIM_COST)
+        self.assertGreater(HEAVY_OP_SIM_COST, 1)
+
+    def test_outlaw_build_reports_double(self):
+        """stage_4 composes an optimizer pass AND an autotune pass."""
+        client, _ = _scripted_client(
+            [
+                [("optimize_build", {"bike_id": 999999, "build_tier": "stage_4"})],
+                "done",
+            ]
         )
-        self.assertEqual(res.sims_run, 0)
-        self.assertFalse(res.tool_trace[0]["ok"])
-        self.assertIn("quota", res.tool_trace[0]["error"])
+        res = run_agent_chat("outlaw it", _get_db(), client=client)
+        self.assertEqual(res.sims_run, OUTLAW_SIM_COST)
+        self.assertEqual(OUTLAW_SIM_COST, 2 * HEAVY_OP_SIM_COST)
+
+    def test_no_tool_is_paywalled(self):
+        """Open-source pivot: the optimizer and autotune used to be gated
+        behind a pro tier. No tool result may ever carry an upgrade error."""
+        client, _ = _scripted_client(
+            [
+                [
+                    ("optimize_build", {"bike_id": 999999}),
+                    ("autotune_setup", {"bike_id": 999999}),
+                ],
+                "done",
+            ]
+        )
+        res = run_agent_chat("build + tune", _get_db(), client=client)
+        for t in res.tool_trace:
+            self.assertNotIn("upgrade", json.dumps(t).lower(), t)
 
     def test_rate_limit_is_typed(self):
         def boom(kind, kwargs):

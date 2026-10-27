@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — BikeSpec Dataclass
-===================================
+MotoQuant — BikeSpec Dataclass
+==============================
 Intermediate representation between raw scraped data and BikeConfig.
 Carries provenance (source URL, scrape timestamp) and per-field confidence.
 """
@@ -119,6 +119,9 @@ class ValidationResult:
     warnings: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
     corrected_fields: dict[str, Any] = field(default_factory=dict)
+    # Fields left None that the importer will default itself (validate_spec
+    # never writes defaults into the spec — see its docstring).
+    defaulted_fields: dict[str, Any] = field(default_factory=dict)
     overall_confidence: float = 0.0
 
     def __str__(self):

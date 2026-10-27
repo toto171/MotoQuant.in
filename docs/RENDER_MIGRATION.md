@@ -1,4 +1,10 @@
-# Migrate MotoQuant Pro API: Railway → Render (free tier)
+# Migrate MotoQuant API: Railway → Render (free tier)
+
+> **Historical runbook (May 2026).** The cutover is done; production runs on
+> Render. For how to deploy or self-host MotoQuant today, including every
+> environment variable, see [SELF_HOSTING.md](SELF_HOSTING.md). Some steps
+> below mention files and services that no longer exist (Railway, the
+> desktop app).
 
 **Goal:** drop hosting cost to $0/mo for the 3-4 month runway while MotoQuant
 gets users. Keep the Vercel frontend on `motoquant.in` untouched; only swap the
@@ -56,8 +62,8 @@ Render is dashboard-driven. There is nothing to install on your machine.
 ### Setting optional secrets
 
 If/when you want chat (`GEMINI_API_KEY`, `GROQ_API_KEY`), error tracking
-(`SENTRY_DSN`), or auth (`JWT_SECRET`, `RAZORPAY_KEY_ID`,
-`RAZORPAY_KEY_SECRET`), add them in the Render dashboard:
+(`SENTRY_DSN`), or optional accounts (`JWT_SECRET`, plus an email transport;
+see [SELF_HOSTING.md](SELF_HOSTING.md)), add them in the Render dashboard:
 
 `motoquant-api` → **Environment** → **Add Environment Variable**
 
@@ -197,14 +203,14 @@ the worker, `/api/bikes` and `/api/simulate/*` share that warm worker).
 In order of effort (low → high):
 
 1. **Render Starter ($7/mo)** — same dashboard, no sleep, persistent disk.
-   One-click upgrade from the free plan once revenue covers it.
+   One-click upgrade from the free plan once usage justifies it.
 2. **Fly.io pay-as-you-go (~$1.50-2/mo)** — slightly cheaper than Render
    Starter, no sleep, requires Docker (already have one) + `flyctl` install.
 3. **Oracle Cloud Always Free** — 4× ARM Ampere cores + 24 GB RAM forever
    free. Strictly better resources than any paid tier on this list. Costs
    1-2 hours of setup time (provision VM, install Docker, set up Caddy for
-   TLS, point DNS). Worth doing once MotoQuant has paid users and the $5/mo
-   feels worth retiring permanently rather than just deferring.
+   TLS, point DNS). Worth doing once real usage makes cold starts and the
+   ephemeral DB unacceptable.
 
 The migration path from Render to any of these is identical to this one:
 deploy to the new platform, flip `vercel.json`, suspend the old one. The

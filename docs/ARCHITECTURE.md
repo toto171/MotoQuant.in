@@ -47,7 +47,7 @@ flowchart TD
     SR --> API["api.py (FastAPI)"]
     REPOS --> API
     subgraph AppLayer["Application layer"]
-        AUTH["auth / payments /<br/>subscriptions / usage / ratelimit"]
+        AUTH["auth (optional accounts)<br/>ratelimit (abuse fuses)"]
         JOBS["jobs.py<br/>async progress"]
         ANALYSIS["analysis/<br/>roi, optimizer, surrogate"]
         LLM["llm/<br/>agentic chat"]
@@ -88,7 +88,10 @@ flowchart TD
    the 15 sub-models in `submodels/` and integrates the state vector with
    fixed-step RK4 at 1 ms. Per-cluster tuning knobs come from
    `category_profiles.py`. Output is a `SimResult` (ET, trap speed, splits,
-   full timeseries).
+   full timeseries). Production code does not construct the engine directly:
+   it calls `engine_select.make_engine(cfg)`, which returns the bit-identical
+   Rust core (`native.NativeEngine`, a `MotoQuantEngine` subclass) when it is
+   installed and current, else the Python engine (ADR-0007).
 
 5. **The DB is a cache of specs + configs, not the source of truth.**
    `database/seed.py` (+ `seed_catalogs/`) writes the catalog into
@@ -129,13 +132,16 @@ flowchart TD
 | `motoquant/scraper/fetcher.py` | `PoliteFetcher` — dev-only Scrapling-backed scraping (cache → robots.txt → rate limit → tier escalation). Soft-imported; **not** a production dependency | `PoliteFetcher.fetch()` |
 | `motoquant/api.py` | FastAPI app + all HTTP routes | grep `@app.` |
 | `motoquant/run.py` | CLI (`python -m motoquant.run <subcommand>`) | `main()` |
-| `motoquant/auth.py` | Magic-link + password auth, JWT, `require_tier()` | bottom (endpoints) |
-| `motoquant/payments.py` `subscriptions.py` | Stripe/Razorpay checkout + webhooks, license keys | webhook handlers |
-| `motoquant/usage.py` `ratelimit.py` | Free-tier sim metering, per-IP rate limiting | `usage.py` |
+| `motoquant/auth.py` | Optional accounts: magic-link + password sign-in, JWT sessions, `get_current_user()` / `get_optional_user()` | bottom (endpoints) |
+| `motoquant/ratelimit.py` | Per-IP fixed-window rate limits on every compute-heavy route + the daily chat cap (abuse/LLM-bill fuses; everything is free, so these replace quotas) | `rate_limit()` |
 | `motoquant/jobs.py` | In-memory async job registry (progress + cancel) | `create_job()` |
 | `motoquant/observability.py` | Sentry wiring (env-gated, no-op without DSN) | top of file |
+| `motoquant/keepwarm.py` | In-app self-ping that keeps a free-tier host awake during the day | `start_keepwarm()` |
+| `motoquant/mcp_server.py` | Stdlib-only stdio MCP server exposing sims/catalog/what-ifs as tools (`docs/MCP.md`) | `main()` |
+| `motoquant/engine_select.py` | The ONE place that picks the integrator for every production simulation: `make_engine(cfg)` → Rust core or `MotoQuantEngine`, per `MOTOQUANT_ENGINE` (`auto` / `python` kill switch / `native`); reported by `/api/health` | `make_engine()` |
+| `motoquant/native.py` + `rust/` | Rust physics core (PyO3 extension + wasm32 browser engine), bit-identical to `physics.py`, which stays the reference. Python resolves the config (`resolve_engine`), Rust integrates; schema-versioned + source-fingerprinted (stale builds are refused). `docs/RUST_CORE.md`, ADR-0007 | `available()`, `resolve_engine()` |
 | `web/` | Next.js frontend (app router, components, `lib/api.js`) | `web/app/page.js` |
-| `tests/` | pytest suite (~4,400 tests) | `conftest.py` |
+| `tests/` | pytest suite (thousands of tests; `make test-fast` for the quick subset) | `conftest.py` |
 | `scripts/` | Sweeps, reseed, patches, audits, autonomous-ops orchestration | `reseed_configs_from_specs.py` |
 
 ---
@@ -148,7 +154,8 @@ flowchart TD
 | Tune physics accuracy | `category_profiles.py` (per-cluster knobs) or `submodels/` | **must not** move K5/R1/Hayabusa baselines; regenerate the surrogate |
 | Add an API route | `api.py` | add a test in `tests/test_api.py`; for slow work use `jobs.py` |
 | Add a part / tire | `database/seed_catalogs/`, then reseed | tighten fitment rules; `tests/test_catalog_integration.py` guards leaks |
-| Change auth/billing | `auth.py`, `payments.py`, `subscriptions.py` | `MOTOQUANT_BILLING_ENFORCE` gates enforcement |
+| Change optional accounts | `auth.py`, `database/users_repo.py` | accounts must stay optional: every sim/analysis route works anonymously (ADR-0006) |
+| Add a compute-heavy route | `api.py` + `rate_limit(...)` dependency | everything is free, so a per-IP fuse is the only protection; test it (`tests/test_public_route_fuses.py`) |
 | Add a chat capability | `llm/agent.py` (tools), `llm/runner.py` | budget/iteration caps live in the executor |
 
 ---
@@ -175,15 +182,20 @@ print(m.MotoQuantEngine(m.gsxr1000_k5()).run().time_quarter, \
 
 ---
 
-## 6. Deployment topology (July 2026)
+## 6. Deployment topology (October 2026)
 
 - **API**: FastAPI on **Render** free tier (`motoquant-api.onrender.com`),
-  Docker via `render.yaml`. Cold-start-guarded by `keepwarm.py` + a GitHub
+  Docker via `render.yaml`. The Dockerfile's first stage compiles the Rust
+  physics core wheel; `/api/health` → `engine` shows which integrator is live. Cold-start-guarded by `keepwarm.py` + a GitHub
   Actions keep-alive cron. Migration runbook: `docs/RENDER_MIGRATION.md`.
-- **Web**: Next.js on **Vercel** (`motoquant.in`); reaches the API via the
-  `NEXT_PUBLIC_API_URL` env var + an `/api/*` rewrite.
-- **DB**: `motoquant.db` is tracked in git and ships inside the Docker image
-  (so a deploy currently wipes user accounts until the Render persistent-disk
-  flip — see the onboarding "known gaps" list).
-- **Desktop app**: DISCONTINUED (July 2026). The `desktop/` scaffold remains
-  in-tree for reference only; no binaries are built.
+- **Web**: Next.js on **Vercel** (`motoquant.in`). The browser calls
+  same-origin `/api/*`, which is rewritten to the API (`web/next.config.js` +
+  the root `vercel.json`). `NEXT_PUBLIC_API_URL` is only for local dev
+  (`make web-dev`).
+- **DB**: `motoquant.db` is tracked in git and ships inside the Docker image,
+  so a deploy wipes optional accounts and saved runs unless the DB lives on a
+  persistent disk ([SELF_HOSTING.md](SELF_HOSTING.md) §3d).
+- **Self-hosting**: the same stack runs on any Docker host; see
+  [SELF_HOSTING.md](SELF_HOSTING.md).
+- **Desktop app**: discontinued (July 2026, ADR-0005); the `desktop/`
+  scaffold was deleted 2026-10-23.

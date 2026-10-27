@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MotoQuant Pro — Parts fitment data patch (2026-06-11 part-picker audit).
+MotoQuant — Parts fitment data patch (2026-06-11 part-picker audit).
 
 FOLDED 2026-07-04: the CONTENT fixes below (A Hayabusa manufacturer, C KTM390/
 Husq401 I1, D VMAX categories, E Duke390 window, F supersport/commuter category

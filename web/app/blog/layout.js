@@ -9,7 +9,8 @@ const TITLE = "MotoQuant Blog — Motorcycle Drag Racing Physics, Tuning & Bike 
 const DESCRIPTION = "Long-form deep dives on motorcycle drag racing physics, India-specific venue tuning, and bike-by-bike quarter-mile breakdowns from the MotoQuant engine.";
 
 export const metadata = {
-  title: TITLE,
+  // absolute: TITLE already carries the brand — skip the '%s · MotoQuant' template
+  title: { absolute: TITLE },
   description: DESCRIPTION,
   alternates: { canonical: '/blog' },
   keywords: [

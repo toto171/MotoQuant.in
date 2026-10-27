@@ -11,3 +11,7 @@ The one rule you must never break: the three reference bikes (GSX-R 1000 K5
 
 Before opening a PR: `make check` then `make test`. Full details in AGENTS.md,
 recurring pitfalls in `docs/KNOWN_TRAPS.md`.
+
+MotoQuant is free and open source (Apache-2.0, `docs/adr/0006-open-source-pivot.md`):
+never add paywalls, tier gates, usage quotas or licence keys. Protect
+expensive routes with a per-IP `rate_limit(...)` fuse instead.

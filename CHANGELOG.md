@@ -4,6 +4,71 @@ Notable changes, newest first. This is the human-readable milestone history;
 the exhaustive session-by-session log lives in `CLAUDE.md` (top entry = latest)
 and `reports/`. Format loosely follows [Keep a Changelog](https://keepachangelog.com).
 
+## 2026-10-23 — Open-source pivot
+
+**Monetization is scrapped. MotoQuant is free and open source under the
+Apache License 2.0** ([ADR-0006](docs/adr/0006-open-source-pivot.md)).
+Copyright 2026 Hritwik Mudhai and the MotoQuant contributors. Source:
+<https://github.com/da25mem5s02-debug/MotoQuant_v1>. No payment was ever
+taken; the billing switch was never enabled.
+
+### Added
+- `LICENSE` (Apache-2.0, unmodified), `NOTICE` (copyright; third-party
+  trademarks; cited benchmark figures; public-source catalog specs),
+  `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1), `SECURITY.md` (private
+  reporting via GitHub Security Advisories).
+- `docs/SELF_HOSTING.md`: run the API + web locally, on Render/Vercel or
+  any Docker host. Covers `JWT_SECRET`, `MOTOQUANT_DB` on a persistent disk,
+  the magic-link email transport, LLM keys for chat, backups, and optional
+  Sentry/PostHog. Migrated from the payments runbook's still-relevant steps.
+- `docs/adr/0006-open-source-pivot.md`; `docs/archive/` for retired
+  documents.
+- Abuse fuses where the sim quota had been the only protection: per-IP rate
+  limits on `/api/simulate/distance`, `/api/simulate/compare` and
+  `/api/jobs/compare`, plus a per-IP daily chat cap
+  (`MOTOQUANT_CHAT_DAILY_LIMIT`, default 200; `0` disables) as an LLM-bill
+  fuse.
+- `scripts/patch_2026_10_23_drop_monetization.py` (idempotent).
+
+### Removed
+- Payments (Razorpay/Stripe checkout and webhooks), subscriptions, license
+  keys, `require_tier` / `MOTOQUANT_BILLING_ENFORCE` tier gating, 402
+  `upgrade_required` / `upgrade_url`, the `X-Sims-Remaining` free-tier sim
+  quota (`usage.py`), and the chat agent's "pro tools" gate.
+- Dead billing schema from the shipped `motoquant.db`: tables
+  `subscriptions`, `license_keys`, `payment_events`, `sim_usage`, and columns
+  `users.tier` / `razorpay_customer_id` / `stripe_customer_id`. Older DBs
+  that still carry `users.tier` keep working.
+- Web: `/pricing` and `/refunds` (now permanent redirects), `TierBadge` /
+  `UpgradeCTA`, every Pro/Studio price and every "free during beta" claim.
+  `/contact` was rewritten as a community page.
+- The scrapped `desktop/` tree and the retired desktop `release.yml`
+  workflow.
+
+### Changed
+- Brand "MotoQuant Pro" → **"MotoQuant"** on user-facing surfaces, docs, API
+  titles and CLI help. Historical entries below are left as written.
+- JWT secret policy re-keyed off billing: a deployed host (`RENDER` /
+  `RENDER_EXTERNAL_URL` / `MOTOQUANT_DEPLOYED=1`) with no `JWT_SECRET` signs
+  with an ephemeral per-process random secret and warns loudly (sessions
+  reset on restart). It never uses the public default and never refuses to
+  boot.
+- `ratelimit.py` eviction now expires each key on its own window. A 60 s
+  bucket could previously evict the daily chat counters.
+- PostHog forwarding is documented as opt-in: off unless the operator sets
+  `POSTHOG_API_KEY`.
+- Archived to `docs/archive/`: the payments runbook, commercial-launch plan,
+  team-scaling plan, SEO growth plan, monetisation-plan PDF, unsent B2B
+  outreach drafts, desktop install/release docs, and old root hand-off notes
+  (`NEXT_SESSION.md`, `DISPATCH_2026-04-24.md`,
+  `DISPATCH_ws-physics-smallcc-2t.md`).
+
+### Kept (not monetization)
+Optional accounts (magic link + password, sessions, `/api/me/runs` garage,
+run attribution), the leaderboard and rate-limited anonymous saves, per-IP
+rate limiting, part INR prices and ROI cost-per-tenth, `budget_inr`, chat
+per-turn budgets, build stages, and env-gated Sentry.
+
 ## [PR #116] — 2026-07-19 — Scrapling dev-side scraping toolkit
 
 Dev-only scraping toolkit; **nothing in it writes `motoquant.db`** — scraped

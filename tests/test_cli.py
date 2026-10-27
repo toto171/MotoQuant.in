@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — CLI Integration Tests
-======================================
+MotoQuant — CLI Integration Tests
+=================================
 Tests for both Phase 1 (legacy) and Phase 2 (subcommand) CLI paths.
 Uses in-process function calls with captured stdout to avoid subprocess
 filesystem limitations (WAL mode incompatibility on mounted volumes).
@@ -749,8 +749,11 @@ class TestLegacyMode:
     def test_quiet_mode(self):
         """--quiet should suppress output."""
         _, out = capture_output(legacy_main, ["--bike", "k5", "--quiet"])
-        # Quiet mode should have minimal output (no banner, no splits table)
-        assert "MotoQuant Pro" not in out
+        # Quiet mode should have minimal output (no banner, no splits table).
+        # Pin the banner's own text (print_banner) so this can't go vacuous.
+        assert "Motorcycle Drag Racing Simulation Engine" not in out
+        _, loud = capture_output(legacy_main, ["--bike", "k5"])
+        assert "Motorcycle Drag Racing Simulation Engine" in loud
 
 
 # ═══════════════════════════════════════════

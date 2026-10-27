@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Thin-Brand Exhaust Depth (July 2026)
-=====================================================
+MotoQuant — Thin-Brand Exhaust Depth (July 2026)
+================================================
 Seeds 12 REAL exhaust systems for the four thinnest exhaust brands in the
 catalog (pre-seed coverage: MV Agusta 0, CFMoto 0, QJ Motor 0, Moto Guzzi 1,
 Triumph 5 — mostly cruiser generics):

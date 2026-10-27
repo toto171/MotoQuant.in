@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Catalog Integration Tests
-==========================================
+MotoQuant — Catalog Integration Tests
+=====================================
 End-to-end tests that seed the full catalog, import all known bikes, and
 verify bike-specific compatibility properties:
 

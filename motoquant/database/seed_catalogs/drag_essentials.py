@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Drag Essentials Catalog (July 2026)
-====================================================
+MotoQuant — Drag Essentials Catalog (July 2026)
+===============================================
 Seeds the three most-requested real-world drag-prep part families that the
 catalog was missing entirely, plus a V2-cruiser nitrous family and verified
 Trask M8 turbo kits.
@@ -782,12 +782,19 @@ def seed_drag_essentials(db) -> int:
                     "tuner": "ThunderMax ECM included",
                     "msrp_usd": 7600,
                 },
+                # The gain comes from the boost model (target_boost_bar = this
+                # kit's own 8 psi). It used to be encoded as peak_power_hp /
+                # peak_torque_nm deltas with no target_boost_bar; the bridge
+                # discards hp deltas on forced-induction parts, so the kit made
+                # zero boost (2026-10-24 fix wave). Same for the Tornado below.
                 "param_deltas": {
-                    "engine.peak_power_hp": 75,
-                    "engine.peak_torque_nm": 90,
                     "chassis.dry_mass_kg": 12.0,
                 },
-                "param_overrides": {"forced_induction.boost_type": "turbo"},
+                "param_overrides": {
+                    "forced_induction.boost_type": "turbo",
+                    "forced_induction.target_boost_bar": 0.552,  # 8 psi
+                    "forced_induction.turbo_spool_time_s": 0.55,
+                },
                 "fitment_rules": {
                     "tier": "family",
                     "match": {
@@ -823,11 +830,13 @@ def seed_drag_essentials(db) -> int:
                     "price_estimated": True,
                 },
                 "param_deltas": {
-                    "engine.peak_power_hp": 55,
-                    "engine.peak_torque_nm": 70,
                     "chassis.dry_mass_kg": 11.0,
                 },
-                "param_overrides": {"forced_induction.boost_type": "turbo"},
+                "param_overrides": {
+                    "forced_induction.boost_type": "turbo",
+                    "forced_induction.target_boost_bar": 0.414,  # 6 psi
+                    "forced_induction.turbo_spool_time_s": 0.55,
+                },
                 "fitment_rules": {
                     "tier": "family",
                     "match": {

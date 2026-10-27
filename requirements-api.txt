@@ -1,4 +1,4 @@
-# MotoQuant Pro -- API server dependencies (production)
+# MotoQuant -- API server dependencies (production)
 # Install with: pip install -r requirements-api.txt
 #
 # Every dependency carries an upper bound (next major) so a surprise major
@@ -28,10 +28,10 @@ python-multipart>=0.0.18,<1.0
 # Database
 # (sqlite3 is stdlib -- no extra package needed)
 
-# Auth and subscriptions (commercial launch)
+# Optional accounts (sign-in to keep saved runs in a personal garage).
+# No payment SDKs: MotoQuant is free and open source (2026-10-23 pivot).
 PyJWT>=2.8,<3
 email-validator>=2.0.0,<3
-razorpay>=1.4.0,<3
 
 # NL chat layer (POST /api/chat, `motoquant chat`).
 # The LLMClient supports multiple providers selected via the LLM_PROVIDER
@@ -44,9 +44,10 @@ razorpay>=1.4.0,<3
 anthropic>=0.34.0,<1.0
 openai>=1.40.0,<3
 
-# Chat-agent web lookup (motoquant/llm/webtools.py). requests already ships
-# transitively via the razorpay SDK — pinned here explicitly so a dependency
-# bump can never silently remove the agent's web_search/web_fetch tools.
+# Chat-agent web lookup (motoquant/llm/webtools.py). requests is a DIRECT
+# dependency (it used to arrive transitively via the now-removed razorpay SDK)
+# so no dependency change can ever silently remove the agent's
+# web_search/web_fetch tools.
 # Optional env: SEARCH_PROVIDER=brave|serper + SEARCH_API_KEY for a paid
 # search API; without a key the DuckDuckGo HTML fallback is used.
 # MOTOQUANT_WEB_TOOLS=0 disables web tools entirely.
@@ -56,7 +57,7 @@ requests>=2.32.4,<3
 
 # Optional production observability — error tracking + performance traces.
 # Soft-dep: motoquant.observability.init_sentry() no-ops if SENTRY_DSN env
-# var is not set. Enable on Railway by setting SENTRY_DSN to your project's
+# var is not set. Enable on Render by setting SENTRY_DSN to your project's
 # DSN URL (https://...sentry.io/...).
 # Floor 2.11.0: CVE-2024-40647 (env-var exposure, fixed 2.8.0) + the
 # `disabled_integrations` init kwarg used by motoquant/observability.py

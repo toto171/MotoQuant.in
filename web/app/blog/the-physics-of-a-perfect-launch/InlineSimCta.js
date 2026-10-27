@@ -13,7 +13,8 @@
 //
 // Default = A. Flag = ?variant=B. Same canonical URL, same h1, same meta —
 // SEO-safe. data-exp/data-variant on the wrapper for analytics attribution.
-// EXP-001 is on landing-hero, EXP-002 on /pricing, EXP-003 on /simulator —
+// EXP-001 is on landing-hero, EXP-002 on /pricing (retired Oct 2026),
+// EXP-003 on /simulator —
 // no page conflict.
 
 import Link from 'next/link';

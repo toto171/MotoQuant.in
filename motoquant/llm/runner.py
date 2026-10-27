@@ -19,7 +19,6 @@ ChatResult — no printing or HTTP coupling lives in this module.
 
 from __future__ import annotations
 
-import logging
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
@@ -28,7 +27,7 @@ import numpy as np
 from typing_extensions import TypedDict  # py<3.12-safe with pydantic
 
 from ..constants import MS_TO_KMH, MS_TO_MPH
-from ..physics import MotoQuantEngine
+from ..engine_select import make_engine
 from .client import LLMClient, LLMNotConfiguredError, LLMRateLimitError
 from .parse_query import ParsedSimRequest, parse_query
 from .summarize import summarize_result
@@ -284,47 +283,6 @@ class ChatResult:
 # ───────────────────────────────────────────────────────────────────
 
 
-# ── Free-tier sim metering ────────────────────────────────────────────────
-# The classic pipeline is client-selectable (mode="classic") and runs REAL
-# RK4 sims: 1 for simulate/explain, 2 for compare, up to 15 for rank and up
-# to 25 for choose_bike. None of it was metered — docs/CHAT_AGENT.md claimed
-# chat sims were, but the meter only ever fired in agent mode (2026-07-25
-# audit §3.5). Each dispatch path now RESERVES its planned batch up front,
-# mirroring how the agent's AgentContext.spend_sims works, so the block
-# decision happens before the CPU is spent rather than after.
-_QUOTA_ERROR_DETAIL = (
-    "Your free daily simulation quota is used up. Upgrade for unlimited "
-    "runs, or try again tomorrow."
-)
-
-
-def _reserve_sims(meter_cb: Any, n: int) -> bool:
-    """Charge ``n`` full sims to the caller. False == over quota, do not run.
-
-    The callback owns the record-always / block-only-when-enforced policy
-    (see api._make_chat_meter). A missing callback — the CLI, tests, any
-    library caller — always allows, so nothing outside the HTTP surface
-    changes behaviour.
-    """
-    if meter_cb is None or n <= 0:
-        return True
-    try:
-        return bool(meter_cb(n))
-    except Exception:  # noqa: BLE001 — metering must never break chat
-        # Fail-open is deliberate; invisible is not — api._meter_sims logs
-        # the identical failure, and a silently dead meter is unbilled load.
-        logging.getLogger(__name__).warning(
-            "chat sim metering failed — allowing the run", exc_info=True
-        )
-        return True
-
-
-def _quota_exceeded(result: ChatResult) -> ChatResult:
-    result.error = "quota_exceeded"
-    result.error_detail = _QUOTA_ERROR_DETAIL
-    return result
-
-
 def _resolve_venue_env(db: MotoQuantDB, parsed: ParsedSimRequest) -> Any:
     """Build an EnvironmentParams for `parsed.venue_id` if set, else None.
 
@@ -353,13 +311,12 @@ def run_chat_pipeline(
     client: LLMClient | None = None,
     run_summary: bool = True,
     suggestion_limit: int = 5,
-    meter_cb: Any = None,
 ) -> ChatResult:
     """End-to-end: parse → resolve → dispatch on intent → summarize.
 
-    ``meter_cb(n) -> bool`` charges n full sims to the caller's free-tier
-    quota and reports whether they may run (see ``_reserve_sims``). Omit it
-    — as the CLI does — for unmetered local use.
+    Sim cost per call is bounded by each path's batch cap (1 for
+    simulate/explain, 2 for compare, ≤15 for rank, ≤25 for choose_bike);
+    the API layer rate-limits callers.
     """
     result = ChatResult(raw_query=query)
 
@@ -397,13 +354,9 @@ def run_chat_pipeline(
     if intent == "smalltalk":
         return _run_smalltalk(parsed, client, result, db=db)
     if intent == "explain":
-        return _run_explain(
-            parsed, db, client, result, run_summary=run_summary, meter_cb=meter_cb
-        )
+        return _run_explain(parsed, db, client, result, run_summary=run_summary)
     if intent == "rank":
-        return _run_rank(
-            parsed, db, client, result, run_summary=run_summary, meter_cb=meter_cb
-        )
+        return _run_rank(parsed, db, client, result, run_summary=run_summary)
     if intent == "compare":
         return _run_compare(
             parsed,
@@ -412,7 +365,6 @@ def run_chat_pipeline(
             result,
             run_summary=run_summary,
             suggestion_limit=suggestion_limit,
-            meter_cb=meter_cb,
         )
     if intent == "recommend":
         # No sims on this path — parts selection is catalog + fitment only.
@@ -431,7 +383,6 @@ def run_chat_pipeline(
             client,
             result,
             run_summary=run_summary,
-            meter_cb=meter_cb,
         )
     # default → simulate
     return _run_simulate(
@@ -441,7 +392,6 @@ def run_chat_pipeline(
         result,
         run_summary=run_summary,
         suggestion_limit=suggestion_limit,
-        meter_cb=meter_cb,
     )
 
 
@@ -458,7 +408,6 @@ def _run_simulate(
     *,
     run_summary: bool,
     suggestion_limit: int,
-    meter_cb: Any = None,
 ) -> ChatResult:
     if parsed.bike_id is None:
         result.error = "bike_not_found"
@@ -469,9 +418,6 @@ def _run_simulate(
             db, parsed.bike_name, limit=suggestion_limit
         )
         return result
-
-    if not _reserve_sims(meter_cb, 1):
-        return _quota_exceeded(result)
 
     sim_dict = _run_one_sim(parsed.bike_id, parsed, db)
     if isinstance(sim_dict, str):
@@ -503,7 +449,6 @@ def _run_compare(
     *,
     run_summary: bool,
     suggestion_limit: int,
-    meter_cb: Any = None,
 ) -> ChatResult:
     # Need both bikes resolved
     missing = []
@@ -528,9 +473,6 @@ def _run_compare(
             if r.get("id") and not (r["id"] in seen or seen.add(r["id"]))
         ][:suggestion_limit]
         return result
-
-    if not _reserve_sims(meter_cb, 2):  # head-to-head = two full RK4 runs
-        return _quota_exceeded(result)
 
     sim_a = _run_one_sim(parsed.bike_id, parsed, db)
     sim_b = _run_one_sim(parsed.bike_b_id, parsed, db)
@@ -590,14 +532,14 @@ def _run_rank(
     result: ChatResult,
     *,
     run_summary: bool,
-    meter_cb: Any = None,
 ) -> ChatResult:
     """Catalog filter + actual sims on top candidates.
 
     1. Parse query for displacement/category/'stock'/'modded' keywords.
     2. Fetch matching catalog rows.
     3. Take top-N by power-to-weight (rough first cut).
-    4. RUN REAL SIMS on those N bikes via MotoQuantEngine — venue-aware.
+    4. RUN REAL SIMS on those N bikes (engine_select.make_engine — the Rust
+       core when available, else MotoQuantEngine) — venue-aware.
     5. Sort by sim ET ascending; return top 10 with sim numbers.
 
     This is slower than a pure-DB query (~80-150ms per sim × 12-15 candidates
@@ -670,13 +612,6 @@ def _run_rank(
         rows.sort(key=_ptw, reverse=True)
         top_pool = rows[:15]  # candidates we will actually simulate
 
-        # Reserve the whole planned batch before burning any CPU. Like the
-        # agent's rank_bikes tool, this charges the plan rather than the
-        # outcome — a candidate whose config is missing falls back to a
-        # stored ET without a sim, so the reservation can slightly overcount.
-        if not _reserve_sims(meter_cb, len(top_pool)):
-            return _quota_exceeded(result)
-
         # ── Run real sims on each candidate ──
         env = _resolve_venue_env(db, parsed)
 
@@ -704,7 +639,7 @@ def _run_rank(
                 _apply_env_overrides(config, parsed)
                 _apply_archetype(config, parsed, db)
                 _apply_power_boost(config, parsed)
-                engine = MotoQuantEngine(config)
+                engine = make_engine(config)
                 sim = engine.run()
                 sim_rows.append(
                     {
@@ -1056,7 +991,6 @@ def _run_explain(
     result: ChatResult,
     *,
     run_summary: bool,
-    meter_cb: Any = None,
 ) -> ChatResult:
     """Answer a tuning/physics question with optional sim grounding.
 
@@ -1064,10 +998,7 @@ def _run_explain(
     grounding for the explanation. Otherwise rely purely on the LLM.
     """
     sim_for_context: SimDict | None = None
-    # The sim here is OPTIONAL grounding, so an exhausted quota degrades to
-    # an ungrounded explanation instead of failing the whole answer — unlike
-    # the simulate/compare/rank paths, where the sim IS the answer.
-    if parsed.bike_id is not None and _reserve_sims(meter_cb, 1):
+    if parsed.bike_id is not None:
         sim = _run_one_sim(parsed.bike_id, parsed, db)
         if isinstance(sim, dict):
             sim_for_context = sim
@@ -1119,7 +1050,8 @@ def _run_smalltalk(
         except Exception:  # noqa: BLE001
             pass
     msg = (
-        "MotoQuant Pro: I'm a motorcycle drag-racing simulator. Ask me things "
+        "MotoQuant: I'm a free, open-source motorcycle drag-racing simulator. "
+        "Ask me things "
         "like 'how fast is a Hayabusa', 'compare K5 vs R1', 'what's the fastest "
         f"300cc bike', or 'best mods for R15 V4 under 30k'. I can simulate any "
         f"of {bikes} bikes across {venues} venues with real physics."
@@ -1161,7 +1093,7 @@ def _run_one_sim(
     _apply_power_boost(config, parsed)
 
     try:
-        engine = MotoQuantEngine(config)
+        engine = make_engine(config)
         sim = engine.run()
     except Exception as e:  # noqa: BLE001
         return f"MotoQuantEngine.run: {type(e).__name__}: {e}"
@@ -1707,7 +1639,7 @@ def _choose_bike_candidate_query(parsed, db):
     return sql, params
 
 
-def _run_choose_bike(parsed, db, client, result, *, run_summary, meter_cb=None):
+def _run_choose_bike(parsed, db, client, result, *, run_summary):
     """Pick best bike for target_class + venue + budget."""
     sql, params = _choose_bike_candidate_query(parsed, db)
     try:
@@ -1727,10 +1659,7 @@ def _run_choose_bike(parsed, db, client, result, *, run_summary, meter_cb=None):
         )
         return result
 
-    candidates = rows[:25]
-    # The heaviest classic path: up to 25 full RK4 runs on one chat turn.
-    if not _reserve_sims(meter_cb, len(candidates)):
-        return _quota_exceeded(result)
+    candidates = rows[:25]  # the heaviest classic path: ≤25 full RK4 runs
 
     sim_rows = []
     for r in candidates:
@@ -1745,7 +1674,7 @@ def _run_choose_bike(parsed, db, client, result, *, run_summary, meter_cb=None):
             _apply_env_overrides(cfg, parsed)
             _apply_archetype(cfg, parsed, db)
             _apply_power_boost(cfg, parsed)
-            engine = MotoQuantEngine(cfg)
+            engine = make_engine(cfg)
             sim = engine.run()
             sim_rows.append(
                 {

@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Validation Test Suite
-=====================================
+MotoQuant — Validation Test Suite
+=================================
 Regression tests ensuring simulation accuracy against published benchmarks.
 
 Run with:  python -m pytest tests/ -v

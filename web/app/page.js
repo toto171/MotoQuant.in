@@ -37,6 +37,7 @@ import StageDots from '../components/StageDots';
 import { Reveal, Stagger, StaggerItem } from '../components/Reveal';
 import SimulatorWidget from '../components/SimulatorWidget';
 import ScoreboardDigits, { ScoreboardCounter } from '../components/ScoreboardDigits';
+import { LICENSE_SPDX, REPO_URL } from '../lib/site';
 
 // ─── Validation: only the four clusters where the data is good ────────
 // Per the 8 August 2026 weighted sweep (reports/acc_final_2026_08_08.json,
@@ -154,28 +155,28 @@ const INDIA_CARDS = [
 // ─── FAQ — copy mirrors app/StructuredData.js faqSchema() ─────────────
 const FAQ_ITEMS = [
   {
-    q: 'What is MotoQuant Pro?',
-    a: 'MotoQuant Pro is a physics-based motorcycle quarter-mile drag racing simulator. It predicts ET, trap speed, and split times for 541 production bikes using 15 independent physics sub-models and validated aero, tire, and dyno data.',
+    q: 'What is MotoQuant?',
+    a: 'MotoQuant is a free, open-source, physics-based motorcycle quarter-mile drag racing simulator. It predicts ET, trap speed, and split times for 541 production bikes using 15 independent physics sub-models and validated aero, tire, and dyno data.',
   },
   {
     q: 'How accurate is the quarter-mile prediction?',
-    a: 'MotoQuant Pro is validated against published magazine tests and Dragy runs: Suzuki GSX-R1000 K5 simulates 9.93s against a real 9.97s; Yamaha YZF-R1 simulates 10.14s against 10.3s; Suzuki Hayabusa simulates 10.36s (real range 10.1–10.7s). The August 2026 sweep covers 250 source-quality-weighted benchmarks (276 matched to catalog bikes) with a weighted mean bias of +0.007s; 138 of 276 land within ±0.20s of the published timeslip.',
+    a: 'MotoQuant is validated against published magazine tests and Dragy runs: Suzuki GSX-R1000 K5 simulates 9.93s against a real 9.97s; Yamaha YZF-R1 simulates 10.14s against 10.3s; Suzuki Hayabusa simulates 10.36s (real range 10.1–10.7s). The August 2026 sweep covers 250 source-quality-weighted benchmarks (276 matched to catalog bikes) with a weighted mean bias of +0.007s; 138 of 276 land within ±0.20s of the published timeslip.',
   },
   {
     q: 'Which bikes are supported?',
     a: 'The catalog covers 541 bikes across 25+ manufacturers: Suzuki, Yamaha, Honda, Kawasaki, BMW, Ducati, Aprilia, KTM, Triumph, Royal Enfield, Bajaj, TVS, Hero, Harley-Davidson, Indian Motorcycle, CFMoto, Benelli, Husqvarna, MV Agusta, Moto Guzzi, Buell, and more. Includes Indian 200–400cc commuters (Pulsar N125, NS200, NS400Z, Apache RTR, R15 V4), SE Asia underbones, 400cc inline-fours (Kawasaki Ninja ZX-4R, ZX-4RR), retro flagships (Yamaha XSR900 GP), and 20 two-stroke drag bikes (RD350, RX100, RGV250, H2 Mach IV).',
   },
   {
-    q: 'Is MotoQuant Pro free?',
-    a: 'MotoQuant Pro is free during the open beta — create a free account and every Pro and Studio feature is unlocked, including saved runs, the build optimizer, and calibration uploads. At commercial launch, paid tiers begin at Pro ₹499/month and Studio ₹1,999/month; registered users get advance notice by email before billing starts.',
+    q: 'Is MotoQuant free?',
+    a: 'Yes — MotoQuant is free and open source under the Apache License 2.0. There are no paid tiers, subscriptions or feature gates: the simulator, build optimizer, ECU autotune, chat assistant and Dragy/dyno calibration are free for everyone. An optional free account saves your runs to a garage and the leaderboard, and the full source code is on GitHub, so you can audit the physics or run your own copy.',
   },
   {
-    q: 'Can I use MotoQuant Pro for Indian drag strips?',
-    a: 'Yes — MotoQuant Pro was built for the Indian drag racing community. The venue database covers Aamby Valley (Pune), Madras Motor Race Track (Chennai), Buddh International Circuit (Greater Noida), Kari Motor Speedway (Coimbatore), and Hyderabad, plus seven international venues. Parts pricing is in INR with GST and import duty already factored in.',
+    q: 'Can I use MotoQuant for Indian drag strips?',
+    a: 'Yes — MotoQuant was built for the Indian drag racing community. The venue database covers Aamby Valley (Pune), Madras Motor Race Track (Chennai), Buddh International Circuit (Greater Noida), Kari Motor Speedway (Coimbatore), and Hyderabad, plus seven international venues. Parts pricing is in INR with GST and import duty already factored in.',
   },
   {
     q: 'Can I upload my own Dragy or dyno data?',
-    a: 'Yes. MotoQuant Pro imports Dragy GPS logs (CSV or VBO) and DynoJet/MoTeC dyno sheets with SAE J1349 atmospheric correction, then overlays your real run against the simulation — ET, trap speed and split-by-split residuals for your specific bike.',
+    a: 'Yes. MotoQuant imports Dragy GPS logs (CSV or VBO) and DynoJet/MoTeC dyno sheets with SAE J1349 atmospheric correction, then overlays your real run against the simulation — ET, trap speed and split-by-split residuals for your specific bike.',
   },
 ];
 
@@ -629,13 +630,25 @@ function CtaBand() {
         </Reveal>
         <Reveal delay={0.1}>
           <p className="mt-5 text-lg text-white/65">
-            Pick a bike. Pick a strip. We&rsquo;ll run the physics — free during beta.
+            Pick a bike. Pick a strip. We&rsquo;ll run the physics — free and open
+            source, no account needed.
           </p>
         </Reveal>
         <Reveal delay={0.2}>
-          <Link href="/simulator" className="btn-primary mt-8">
-            Run your first sim
-          </Link>
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link href="/simulator" className="btn-primary">
+              Run your first sim
+            </Link>
+            <a
+              href={REPO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-ghost"
+            >
+              Read the source on GitHub
+            </a>
+          </div>
+          <p className="mt-4 label-mono">{LICENSE_SPDX} · every line of the physics is public</p>
         </Reveal>
       </div>
     </section>
@@ -685,7 +698,7 @@ function HomePageInner() {
             <div>
               <div className="flex items-center gap-3">
                 <StageDots animate />
-                <span className="label-mono">Physics-based · Free during beta</span>
+                <span className="label-mono">Physics-based · Free &amp; open source</span>
               </div>
 
               <h1 className="mt-6 font-display font-bold text-4xl md:text-6xl tracking-tight text-white">

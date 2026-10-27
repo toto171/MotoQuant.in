@@ -1,4 +1,4 @@
-# Observability — Sentry error tracking
+# Observability — Sentry error tracking (+ opt-in PostHog)
 
 MotoQuant ships an **env-gated** Sentry integration for the FastAPI backend.
 It is wired and ready, but **does nothing until you supply a DSN** — local dev
@@ -71,6 +71,22 @@ could add browser + edge error tracking later via
 with its own `SENTRY_DSN` (and `NEXT_PUBLIC_SENTRY_DSN`) set in the **Vercel**
 dashboard. That work lives in `web/` and is out of scope here — flagged so it is
 not forgotten.
+
+## Usage telemetry — PostHog forwarding is opt-in
+
+The web app sends anonymous usage beacons (`web/lib/telemetry.js`: an event
+label, numeric/categorical props, a per-tab random session id, the path and
+the user agent; no user id, email, IP correlation or free-text input) to
+`POST /api/telemetry/event`. That route is rate-limited and size-capped.
+
+| `POSTHOG_API_KEY` | Result |
+|---|---|
+| unset (default; every self-hosted copy) | Events are written to the API's own log (`TELEMETRY event=…`) **and sent nowhere else.** |
+| set | Each event is also forwarded server-side to PostHog (`POSTHOG_HOST`, default the EU cloud), through a bounded worker pool that drops events under backpressure. The browser never talks to PostHog directly and no cookies are set. |
+
+This is a decision for whoever operates a deployment. MotoQuant itself
+collects nothing for anyone else. If you enable it on a public instance, say
+so in your privacy policy.
 
 ## Verifying locally
 

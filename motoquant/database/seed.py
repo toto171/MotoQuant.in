@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Database Seeder
-===============================
+MotoQuant — Database Seeder
+===========================
 Migrate Phase 1 hardcoded defaults into the database.
 
 Seeds:
@@ -10,6 +10,8 @@ Seeds:
   - Sample performance parts (Indian market)
   - Provenance records for all seeded data
 """
+
+from contextlib import contextmanager
 
 from ..defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 from .connection import MotoQuantDB
@@ -6331,6 +6333,9 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_overrides": {
                 "forced_induction.boost_type": "n2o",
                 "forced_induction.n2o_hp_per_stage": 35.0,
+                # n2o_stages defaults to 0 => hp_add = shot * 0. Without it
+                # this kit delivered zero nitrous (2026-10-24 fix wave).
+                "forced_induction.n2o_stages": 1,
             },
             "fitment_rules": {
                 "tier": "family",
@@ -6995,6 +7000,9 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_overrides": {
                 "forced_induction.boost_type": "n2o",
                 "forced_induction.n2o_hp_per_stage": 50.0,
+                # n2o_stages defaults to 0 => hp_add = shot * 0. Without it
+                # this kit delivered zero nitrous (2026-10-24 fix wave).
+                "forced_induction.n2o_stages": 1,
             },
             "fitment_rules": {
                 "tier": "family",
@@ -7018,6 +7026,9 @@ def seed_parts_catalog(db: MotoQuantDB) -> int:
             "param_overrides": {
                 "forced_induction.boost_type": "n2o",
                 "forced_induction.n2o_hp_per_stage": 15.0,
+                # n2o_stages defaults to 0 => hp_add = shot * 0. Without it
+                # this kit delivered zero nitrous (2026-10-24 fix wave).
+                "forced_induction.n2o_stages": 1,
             },
             "fitment_rules": {
                 "tier": "family",
@@ -9178,9 +9189,26 @@ def pick_oem_tire(db: MotoQuantDB, position: str, size_str: str) -> dict | None:
     return None
 
 
-def seed_bike_tire_fitments(db: MotoQuantDB) -> int:
+def _has_oem_fitment(db: MotoQuantDB, bike_model_id: int, position: str) -> bool:
+    return (
+        db._conn.execute(
+            """SELECT 1 FROM bike_tire_fitments
+               WHERE bike_model_id = ? AND position = ? AND fitment_type = 'oem'
+               LIMIT 1""",
+            (bike_model_id, position),
+        ).fetchone()
+        is not None
+    )
+
+
+def seed_bike_tire_fitments(db: MotoQuantDB, preserve_existing: bool = False) -> int:
     """
     Link bikes to tires based on OEM fitments extracted from bike configs.
+
+    ``preserve_existing=True`` (what ``seed_all`` uses) only fills
+    (bike, position) slots that have no OEM fitment yet: an existing OEM row is
+    curated data (scripts/patch_2026_08_08_fitment_integrity.py decided those
+    slots) and a re-seed must not supersede it with a fresh pick.
 
     For each bike in the database with a tire_params config:
     1. Extracts front_size and rear_size from the bike_config's tire_params JSON
@@ -9235,6 +9263,8 @@ def seed_bike_tire_fitments(db: MotoQuantDB) -> int:
             ]:
                 if not size_str:
                     continue
+                if preserve_existing and _has_oem_fitment(db, bike_model_id, position):
+                    continue
 
                 matched_tire = pick_oem_tire(db, position, size_str)
 
@@ -9266,16 +9296,53 @@ def seed_bike_tire_fitments(db: MotoQuantDB) -> int:
     return count
 
 
-def seed_all(db: MotoQuantDB) -> dict:
+@contextmanager
+def _protect_existing_rows(db: MotoQuantDB):
+    """Freeze every parts / tire_models row that exists before the seed runs.
+
+    Rows inserted during this seed keep the normal upsert semantics (so a fresh
+    seed behaves exactly as before, including notation-twin tire merges); rows
+    that were already there are left untouched.
+    """
+    parts_max = db._conn.execute("SELECT COALESCE(MAX(id), 0) FROM parts").fetchone()[0]
+    tires_max = db._conn.execute(
+        "SELECT COALESCE(MAX(id), 0) FROM tire_models"
+    ).fetchone()[0]
+    db.parts.protect_ids_upto = parts_max
+    db.tires.protect_ids_upto = tires_max
+    try:
+        yield
+    finally:
+        db.parts.protect_ids_upto = None
+        db.tires.protect_ids_upto = None
+
+
+def seed_all(db: MotoQuantDB, overwrite_existing: bool = False) -> dict:
     """
     Master seeding function: initialise all reference data in order.
     Returns a summary dict of rows inserted.
+
+    Non-destructive on a populated catalog (October 2026 audit): `db seed` /
+    `make db` on the shipped motoquant.db used to overwrite 468 curated part
+    rows (prices, names, availability, fitment rules), 38 tires, supersede 32
+    curated OEM fitments and mint 3 phantom reference-config versions —
+    reverting patch data no seed source carries. Existing parts/tires and OEM
+    fitment slots are now preserved and only MISSING rows are added; the
+    config guard in BikeRepository.create_config compares semantically.
+    Pass ``overwrite_existing=True`` to force the old seed-source-wins upsert.
 
     NOTE: `seed_bike_tire_fitments(db)` only links bikes that exist at seed
     time (the 3 reference bikes). Callers that also run `import_batch(...)`
     afterwards should re-run `seed_bike_tire_fitments(db)` once all bikes are
     present — otherwise fitments will only cover reference bikes.
     """
+    if overwrite_existing:
+        return _seed_all(db, preserve_existing=False)
+    with _protect_existing_rows(db):
+        return _seed_all(db, preserve_existing=True)
+
+
+def _seed_all(db: MotoQuantDB, preserve_existing: bool) -> dict:
     from .seed_catalogs.adv_cruiser_exhausts import seed_adv_cruiser_exhausts
     from .seed_catalogs.drag_essentials import seed_drag_essentials
     from .seed_catalogs.drag_prep_specialty import seed_drag_prep_specialty
@@ -9305,7 +9372,7 @@ def seed_all(db: MotoQuantDB) -> dict:
     # Trask M8 turbo kits, and exhaust depth for Triumph/MV/Guzzi/CFMoto.
     n_parts += seed_drag_essentials(db)
     n_parts += seed_euro_brand_exhausts(db)
-    n_fitments = seed_bike_tire_fitments(db)
+    n_fitments = seed_bike_tire_fitments(db, preserve_existing=preserve_existing)
     # Recommended/drag_prep fitments (Apr 27, 2026): adds upgrade-tier fitments
     # beyond OEM with on-the-fly tire creation when referenced models are missing.
     rec_stats = seed_recommended_fitments(db)

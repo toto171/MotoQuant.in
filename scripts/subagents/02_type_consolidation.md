@@ -1,22 +1,22 @@
 # Subagent 2: TYPE CONSOLIDATION
 
-You are SUBAGENT 2: TYPE CONSOLIDATION for the MotoQuant Pro codebase. Read CLAUDE.md first.
+You are SUBAGENT 2: TYPE CONSOLIDATION for the MotoQuant codebase. Read CLAUDE.md first.
 
 ## Context
 
-Mixed-language project. Python physics core uses `dataclass`, `pydantic.BaseModel`, plus plain `dict`. Desktop frontend (`desktop/src/types/api.ts`) mirrors Pydantic models for the FastAPI endpoints. Web frontend (`web/components/`) has its own ad-hoc types.
+Mixed-language project. Python physics core uses `dataclass`, `pydantic.BaseModel`, plus plain `dict`. The web frontend (`web/lib/api.js`, `web/components/`) consumes the FastAPI JSON shapes with ad-hoc types. The optional Rust core (`rust/motoquant-core/src/config.rs`) has a serde schema that must mirror `motoquant/native.py`'s resolved config.
 
 ## Your job — scan for
 
 - Type definitions duplicated across files (e.g., `BikeConfig` Python dataclass vs `BikeDetail` TS interface vs `BikeSummary` JSON shape)
 - Pydantic models that have been quietly diverged from the dataclass they shadow
-- TypeScript interfaces in desktop that don't match the actual API response shape (drift)
+- Web client code that reads fields the API response no longer has (drift)
 - Pydantic models in `motoquant/api.py` that should reuse `motoquant/models.py` types
 
 ## Where to focus first
 
 1. `motoquant/models.py` (dataclasses) vs `motoquant/api.py` (Pydantic for HTTP) — these often go out of sync
-2. `desktop/src/types/api.ts` vs Python Pydantic models
+2. `motoquant/native.py` resolved-config keys vs `rust/motoquant-core/src/config.rs`
 3. `web/components/*.js` typeof shapes vs the API client
 4. `motoquant/scraper/spec.py` (BikeSpec) vs `motoquant/models.py` (BikeConfig) — they overlap
 

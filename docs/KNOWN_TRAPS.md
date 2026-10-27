@@ -104,7 +104,7 @@ in the July-17 run. Kept as a trap because the misreading is easy to reintroduce
 `api.py` keeps a module-level `sqlite3` connection (`check_same_thread=False`)
 reused by FastAPI request threads *and* `jobs.py` daemon workers. Reads are fine
 on the single-worker Render deploy, but concurrent **writes** (save-run, suggest,
-usage metering, auth session, subscription upsert) can interleave. This is the
+auth session, magic-link consume) can interleave. This is the
 #1 thing to fix before scaling to multiple workers — a per-thread/pooled
 connection. (Deferred; documented in the roadmap.)
 

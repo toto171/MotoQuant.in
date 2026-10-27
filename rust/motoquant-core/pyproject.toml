@@ -1,0 +1,22 @@
+# Python packaging for the Rust core's PyO3 extension module.
+#
+# Kept INSIDE rust/motoquant-core/ on purpose: without it maturin walks up to
+# the repo-root pyproject.toml and builds a wheel named "motoquant" — installing
+# that would clobber the real (pure-Python) motoquant package.
+#
+#   make native        # builds + installs this wheel (see Makefile)
+[build-system]
+requires = ["maturin>=1.5,<2"]
+build-backend = "maturin"
+
+[project]
+name = "motoquant-core"
+version = "0.1.0"
+description = "Bit-parity Rust accelerator for the MotoQuant physics engine (optional; Python remains the reference)."
+requires-python = ">=3.9"
+classifiers = ["Programming Language :: Rust", "Programming Language :: Python :: Implementation :: CPython"]
+
+[tool.maturin]
+features = ["python"]
+module-name = "motoquant_core"
+bindings = "pyo3"

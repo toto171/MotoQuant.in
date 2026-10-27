@@ -2,6 +2,7 @@ import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 import StructuredData, { articleSchema } from '../../StructuredData';
+import { REPO_URL } from '../../../lib/site';
 
 const SLUG = 'ktm-890-duke-r-quarter-mile-india';
 const TITLE = 'KTM 890 Duke R Quarter-Mile in India: 11.07s on the Grey Market';
@@ -395,13 +396,15 @@ export default function PostPage() {
             </li>
             <li>
               ·{' '}
-              <Link
-                href="/pricing"
+              <a
+                href={REPO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-brand-accent hover:text-brand-orange transition-colors"
               >
-                MotoQuant Pricing
-              </Link>{' '}
-              — Free for street tuners; Pro for shops and racing teams.
+                MotoQuant on GitHub
+              </a>{' '}
+              — free and open source: audit the physics behind every number in this post, or run it yourself.
             </li>
           </ul>
         </div>

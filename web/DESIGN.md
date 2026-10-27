@@ -60,7 +60,8 @@ typography, whitespace, and three signal colors used with discipline.
    positive = slower = `signal-foul` red. Trap-speed deltas: positive =
    faster = green.
 9. **Honesty**: no fabricated testimonials, ratings, or numbers. DERIVED
-   benchmarks stay flagged. "Free during beta" stays accurate.
+   benchmarks stay flagged. "Free & open source" stays accurate (Oct 2026:
+   no plans, tiers or prices anywhere on the site).
 
 ## 2. Tokens
 
@@ -73,7 +74,7 @@ accent:  DEFAULT #FF5E1F (Signal — THE brand color)  bright #FF8F57 (hover)
          deep #CC4000 (borders/pressed)
 signal:  go #22C55E (success / faster / PB)   stage #F59E0B (running /
          warning / ESTIMATED)                 foul #EF4444 (error / slower)
-mint:    #00FFB2 (PRO/Studio tier chips ONLY)
+mint:    #00FFB2 (secondary accent/meta — sparing; was the retired tier chip)
 ```
 
 Text: headings `text-white`, body `text-white/65`, hints `text-white/40`.
@@ -83,7 +84,7 @@ Text on accent fills: `text-asphalt-0` (near-black). Legacy aliases:
 
 Color discipline (the kit rule): **orange is reserved for the moving
 part(s)** — the primary action, live data, at most one accent detail per
-viewport. Signal colors ONLY carry meaning (status, delta, tier), never
+viewport. Signal colors ONLY carry meaning (status, delta), never
 decoration. Everything static is white or ink.
 
 ### 2.2 Type
@@ -138,7 +139,7 @@ New v4 classes:
   leaderboard detail.
 - `.chip` — `inline-flex h-6 items-center rounded px-2 font-mono text-[10px]
   uppercase tracking-[0.2em]` + tint variants (`.chip-go/.chip-stage/
-  .chip-foul/.chip-volt/.chip-mint`).
+  .chip-foul/.chip-volt`). (`.chip-mint` was removed Oct 2026 with the tier badge.)
 - `.delta-down` / `.delta-up` — mono delta chips (down=green=faster ET,
   up=red=slower).
 - `.centerline` — horizontal dashed divider with a center gap (the strip's
@@ -166,8 +167,8 @@ use these two instead of inventing new ornaments.
 ## 5. Shared components — keep-API list (re-skin internals ONLY)
 
 `Reveal/Stagger/StaggerItem/Counter`, `ActionButton`, `SimProgress`,
-`Skeleton*`, `BikePicker`, `LocationPicker`, `CommandPalette`, `TierBadge`
-(+`UpgradeCTA`), `SuggestBikeForm`, `AuthProvider`, `ChatPanel`,
+`Skeleton*`, `BikePicker`, `LocationPicker`, `CommandPalette`,
+`SuggestBikeForm`, `AuthProvider`, `ChatPanel`,
 `BuildOptimizer`, `EcuAutotune`, `SimulatorWidget` (KEEP the
 `bikeIdMap` catalog-ID self-heal), `AccuracyExplorer`, `SiteNav`,
 `SiteFooter`, `MobileToolBar`, `PageHero`, `CodeComment`,
@@ -203,14 +204,15 @@ logic; `app/api/wake/route.js`; `next.config.js`; `vercel.json` crons.
 - **SiteNav** (fixed, `bg-asphalt-0/85 backdrop-blur`): brand lockup =
   GaugeMark + "MotoQuant" wordmark in Space Grotesk 700 (`font-display`,
   Moto white / Quant orange — per §4). Links:
-  Simulator · Optimize · Autotune · Bikes · Leaderboard · Pricing ·
-  Resources ▾ (Validation, Docs, Blog, Whitepaper, Features, About). ⌘K
+  Simulator · Optimize · Autotune · Bikes · Leaderboard · Source (GitHub,
+  external) · Resources ▾ (Validation, Docs, Blog, Whitepaper, Features, About). ⌘K
   search button, auth chip, volt CTA "Run a sim". Keep the 1024-1126px
   width fixes (collapse CTA label, hide ⌘K hint in lg..xl band). Mobile:
   drawer + MobileToolBar (5 tools, safe-area).
 - **SiteFooter**: 4 columns (Product/Data/Company/Legal), baselines line
   (`K5 9.9331s · R1 10.1436s · Hayabusa 10.3633s` — always the CURRENT
-  pinned references, §1.2), "Built in India" + beta note. Quiet — no glow.
+  pinned references, §1.2), "Built in India · Free & open source", the
+  Apache-2.0 license line + GitHub link. Quiet — no glow.
 - **template.js**: unchanged concept (opacity fade only); drop the HudFrame
   mount if one exists there.
 
@@ -218,7 +220,7 @@ logic; `app/api/wake/route.js`; `next.config.js`; `vercel.json` crons.
 
 - **`/` Landing** (full rewrite, ~½ current length): ① Hero — left:
   StageDots eyebrow, H1 "KNOW YOUR TIME BEFORE YOU STAGE", one-line sub
-  (physics sim · 541 bikes · Indian strips · free during beta), CTAs
+  (physics sim · 541 bikes · Indian strips · free & open source), CTAs
   [Run a sim → /simulator] [Browse 541 bikes → /bikes]; right (lg+):
   live `SimulatorWidget` in a `.card`. Backdrop: single static
   radial volt tint ≤6% + vertical centerline — no canvas, no boot, no
@@ -254,9 +256,10 @@ logic; `app/api/wake/route.js`; `next.config.js`; `vercel.json` crons.
   split rows (60ft/330/⅛/1000ft/¼), trap, share button. WhatsApp-first.
 - **`/validation`**: PageHero + re-skinned AccuracyExplorer (volt/signal
   palette swap inside the SVGs; same data + a11y tables).
-- **`/login` `/account` `/pricing`**: same flows/endpoints/states;
-  cleaner single-card auth, account as stacked cards (Garage table mono),
-  pricing matrix with mint tier chips; beta ribbon logic kept.
+- **`/login` `/account`**: same flows/endpoints/states; cleaner
+  single-card auth, account as stacked cards (Profile, Garage table mono,
+  Security). (`/pricing` and `/refunds` were removed Oct 2026 — monetization
+  scrapped; both 308 via next.config.js redirects.)
 - **Content pages** (`/features /about /whitepaper /docs/* /blog /terms
   /privacy`): inherit new shell + PageHero automatically; light copy/skin
   pass only. Blog POST bodies untouched (audit tokens live there).

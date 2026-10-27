@@ -7,10 +7,10 @@ hosted in ``scripts/sweep_lib``. These tests pin:
 
 * the canonical weight for representative source strings,
 * that ``phys_weighted_sweep`` now shares the exact same implementation, and
-* zero headline drift — the canonical scalar weight reproduces the OLD
+* no unintended drift — the canonical scalar weight reproduces the OLD
   ``phys_weighted_sweep.source_weight`` for every source string in the live
-  ``BENCHMARKS`` corpus (the published authoritative sweep,
-  ``reports/acc_final_2026_07_03.json``, was produced with that logic).
+  ``BENCHMARKS`` corpus except the 14 the 2026-10 epoch reclassified on
+  purpose (``EPOCH_REWEIGHTED``).
 """
 
 from __future__ import annotations
@@ -94,10 +94,10 @@ class TestCanonicalWeights(unittest.TestCase):
         self.assertEqual(source_weight("Some Random Blog 2024"), 0.5)
         self.assertEqual(source_quality("Some Random Blog 2024"), (0.5, "unknown"))
 
-    def test_estimated_not_folded_as_derived(self):
-        # 'estimated' MUST NOT demote aggregator rows to derived (would drift
-        # the published headline).
-        self.assertEqual(source_weight("MotorBikeCatalog 1998 (estimated)"), 0.5)
+    def test_estimated_scores_as_estimate(self):
+        # 2026-10 epoch: an '(estimated)' figure is an estimate whatever site
+        # hosts it, so it carries the derived/estimate weight (was 0.5).
+        self.assertEqual(source_weight("MotorBikeCatalog 1998 (estimated)"), 0.1)
 
 
 class TestSharedImplementation(unittest.TestCase):
@@ -128,20 +128,43 @@ class TestSharedImplementation(unittest.TestCase):
             self.assertEqual(pw.source_weight(probe), source_weight(probe), probe)
 
 
+# The 2026-10 epoch reclassified exactly these corpus sources on purpose
+# (estimates -> 0.1; a figure measured on a sibling platform and bound to this
+# bike -> capped at 0.5). Any OTHER weight change is unintended drift.
+EPOCH_REWEIGHTED = {
+    "Corner Speed 2026 prose estimate (low-12s @ 110 mph; Cycle-World-dyno-referenced, not a timed run)": (
+        0.5,
+        0.1,
+    ),
+    "Cycle World (F3 800 platform 10.5s; RR up-spec 147hp)": (0.7, 0.5),
+    "Duke 390 baseline (Motorcycle Consumer News, RC adds ~\u22120.15s for fairing)": (
+        1.0,
+        0.5,
+    ),
+    "GSX-S1000 platform 10.6s (Sport Rider); GT sport-tourer, 150hp I4": (0.7, 0.5),
+    "MotoStatz (Dragy, 890 LC8c platform; SMT heavier supermoto-tourer)": (1.0, 0.5),
+    "MotoStatz (Dragy, Multistrada V4 1158 platform; RS lighter)": (1.0, 0.5),
+    "MotoStatz (Dragy, RC 390 platform; Gen3 399cc engine)": (1.0, 0.5),
+    "MotoStatz (Dragy, Street Triple 765 RS platform; R ~10hp down)": (1.0, 0.5),
+    "MotoStatz (Dragy, Streetfighter V4 1103 platform, 149 mph trap)": (1.0, 0.5),
+    "MotoStatz (Dragy, Tuono 660 platform, 120 mph trap)": (1.0, 0.5),
+    "MotoStatz 2022 (Dragy, XSR900 CP3 platform, 125.5 mph trap)": (1.0, 0.5),
+    "MotoStatz 2022 (Dragy, Z650 platform, 105 mph trap)": (1.0, 0.5),
+    "MotorBikeCatalog (estimated 1991 MC21)": (0.5, 0.1),
+    "MotorBikeCatalog 1998 (estimated)": (0.5, 0.1),
+}
+
+
 class TestZeroHeadlineDrift(unittest.TestCase):
-    def test_no_drift_vs_published_logic(self):
+    def test_only_the_epoch_reclassification_drifts(self):
         srcs = {row[5] for row in BENCHMARKS}
         self.assertGreater(len(srcs), 100)  # sanity: the corpus is populated
-        mismatches = [
-            (s, _old_phys_weighted_source_weight(s), source_weight(s))
+        mismatches = {
+            s: (_old_phys_weighted_source_weight(s), source_weight(s))
             for s in srcs
             if _old_phys_weighted_source_weight(s) != source_weight(s)
-        ]
-        self.assertEqual(
-            mismatches,
-            [],
-            f"Headline drift on {len(mismatches)} source(s): {mismatches[:5]}",
-        )
+        }
+        self.assertEqual(mismatches, EPOCH_REWEIGHTED)
 
 
 if __name__ == "__main__":

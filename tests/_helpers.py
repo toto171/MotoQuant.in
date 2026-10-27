@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Shared test helpers
-=====================================
+MotoQuant — Shared test helpers
+===============================
 Common fixtures used across multiple test modules.
 
 Why this exists

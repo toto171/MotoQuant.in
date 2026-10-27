@@ -1,6 +1,10 @@
 # ADR-0003: The RK4 hot loop stays plain Python — no Numba/JIT
 
-**Status:** Accepted — **do not re-litigate without new measurements**
+**Status:** Accepted — **do not re-litigate without new measurements**.
+**Superseded in part by [ADR-0007](0007-rust-physics-core.md) (2026-10-24):**
+the re-open criteria below were met by a bit-identical Rust port of the loop,
+which now serves production simulations. The rejection of *Numba* itself
+still stands; "the loop stays plain Python" no longer does.
 **Date:** 2026-07-03 (documented 2026-07-06)
 **Deciders:** Hritwik Mudhai + maintaining agents
 

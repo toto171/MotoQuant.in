@@ -29,7 +29,7 @@ For each agent that ran in the last 7 days:
 
 - Has Claude shipped a new model / tool / SDK feature this week? (ask `claude-feature-monitor` to scan)
 - If yes, propose how to exploit it. Migrate model routing. Add a new agent. Replace a brittle script.
-- If no Claude updates this week: scan for new Python/JS libs that materially help (tighter test runners, better SQLite drivers, new Tauri features).
+- If no Claude updates this week: scan for new Python/JS libs that materially help (tighter test runners, better SQLite drivers, Next.js/Rust tooling).
 
 ### Layer 4 — Kaizen meta
 
@@ -54,7 +54,7 @@ For each agent that ran in the last 7 days:
 | Add a new agent | — | INBOX |
 | Change the scoring formula | — | INBOX |
 | Change KPI targets | — | INBOX |
-| Change user-facing copy / pricing / branding | — | INBOX |
+| Change user-facing copy / branding / licensing | — | INBOX |
 
 ## Don't
 

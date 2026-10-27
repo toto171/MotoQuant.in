@@ -97,7 +97,7 @@ python -m motoquant.mcp_server --local --selftest
 | Needs | Python stdlib only | `requirements-api.txt` + the DB |
 | Latency | ~0.3 s warm, **up to ~50 s on a cold start** | ~50 ms–2 s |
 | `gearing_impact` | catalog sprockets only (see below) | any tooth count |
-| Free-tier sim quota | counts against it | not metered |
+| Rate limits | the hosted API's per-IP fuses apply (HTTP 429 when tripped) | none |
 
 The hosted backend runs on Render's **free tier**, which sleeps after 15
 minutes of inactivity. The first call after a nap can take ~50 s while the
@@ -248,5 +248,6 @@ and will happily over-claim on your behalf.
   internals (cams, big-bore) — "stage 3" is approximated with bolt-on power
   adders.
 * Simulations assume a competent launch. There is no rider-skill knob.
-* The hosted free tier meters anonymous sims; heavy interactive use should run
-  local mode.
+* The hosted API is free but rate-limited per IP; heavy interactive or
+  batch use should run local mode (or your own self-hosted instance, see
+  [SELF_HOSTING.md](SELF_HOSTING.md)).

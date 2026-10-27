@@ -89,7 +89,7 @@ export const metadata = {
         url: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'MotoQuant Pro Simulator — live quarter-mile drag simulation for 541 motorcycles',
+        alt: 'MotoQuant Simulator — live quarter-mile drag simulation for 541 motorcycles',
       },
     ],
   },
@@ -121,7 +121,7 @@ function webApplicationSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
-    name: 'MotoQuant Pro Quarter-Mile Simulator',
+    name: 'MotoQuant Quarter-Mile Simulator',
     url: `${SITE_URL}/simulator`,
     applicationCategory: 'AutomotiveApplication',
     operatingSystem: 'Any (web browser)',

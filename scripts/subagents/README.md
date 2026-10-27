@@ -1,6 +1,6 @@
 # Cleanup subagents
 
-Seven specialized read-only subagents that scan the codebase for specific classes of cruft. Adapted from the "Wize AI" multi-subagent pattern, tuned for the MotoQuant Pro codebase (Python physics core + TypeScript desktop + Next.js web).
+Seven specialized read-only subagents that scan the codebase for specific classes of cruft. Adapted from the "Wize AI" multi-subagent pattern, tuned for the MotoQuant codebase (Python physics core + Next.js web + optional Rust core).
 
 ## What's here
 

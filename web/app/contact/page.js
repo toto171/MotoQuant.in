@@ -1,161 +1,161 @@
 /**
- * MotoQuant Pro — Contact
- * Created: August 10, 2026 (commercial-launch readiness)
+ * MotoQuant — Contact & community
  *
- * Exists to satisfy the payment-provider website checklist (Razorpay
- * requires a reachable contact surface carrying the operating entity's
- * name, address and phone) AND to be the honest support page it looks
- * like. Email is the real channel — there is no ticket queue.
- *
- * ─────────────────────────────────────────────────────────────────────
- * OPERATOR: fill BUSINESS below with the EXACT values registered on the
- * Razorpay account. They must match — the activation review cross-checks
- * the website against the KYC record. Fields left as null simply do not
- * render (a missing address is recoverable; a wrong one fails review and
- * looks like fraud).
- * ─────────────────────────────────────────────────────────────────────
+ * Rewritten October 2026 when MotoQuant became free and open source
+ * (Apache-2.0). It used to be the payment-provider checklist page
+ * (business/KYC block, billing + refund + grievance copy); nothing is sold
+ * any more, so it is now the honest "how to reach the project" page:
+ * GitHub issues for bugs and data corrections, discussions for questions
+ * and ideas, a private channel for security reports, and email for
+ * everything else. The route is kept (footer + sitemap + backlinks).
  */
 
 import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
 import PageHero from "../../components/PageHero";
-
-const BUSINESS = {
-  // Legal name on the PAN the Razorpay account settles to.
-  legalName: null, // e.g. "Arya Desai"
-  tradeName: "MotoQuant Pro",
-  // Registered/operating address, one array entry per line.
-  addressLines: null, // e.g. ["Flat 4, Some Building", "Narhe", "Pune, Maharashtra 411041"]
-  phone: null, // e.g. "+91 98765 43210"
-  email: "motoquant@gmail.com",
-  // Sole proprietorship, not GST-registered (turnover below the ₹20 lakh
-  // services threshold). See /refunds and /terms §3.
-  entityType: "Sole proprietorship (unregistered)",
-};
+import {
+  CONTACT_EMAIL,
+  CONTRIBUTING_URL,
+  DISCUSSIONS_URL,
+  ISSUES_URL,
+  LICENSE_NAME,
+  LICENSE_URL,
+  REPO_URL,
+  SECURITY_URL,
+} from "../../lib/site";
 
 export const metadata = {
-  title: "Contact — MotoQuant Pro",
+  title: "Contact & community",
+  description:
+    "Reach the MotoQuant project: GitHub issues for bugs and data corrections, discussions for questions and ideas, private security reports, and email.",
   alternates: { canonical: "https://motoquant.in/contact" },
 };
 
-export default function ContactPage() {
-  const hasAddress = Array.isArray(BUSINESS.addressLines) && BUSINESS.addressLines.length > 0;
+const linkCls = "text-accent hover:text-accent-bright transition-colors";
 
+function Ext({ href, children, className = linkCls }) {
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+      {children}
+    </a>
+  );
+}
+
+export default function ContactPage() {
   return (
     <div className="min-h-screen bg-asphalt-0 text-white">
       <SiteNav />
 
       <PageHero
-        kicker="support · billing · business details"
-        badge="Contact"
-        title="Contact us"
-        sub="One inbox, answered by a founder. No contact form, no ticket queue."
+        kicker="issues · discussions · security · email"
+        badge="Community"
+        title="Contact & community"
+        sub="MotoQuant is a free, open-source project. The fastest way to get something fixed is in the open, on GitHub."
         className="pb-8 md:pb-10"
       >
-        <p className="label-mono">Typical reply · within 2 business days</p>
+        <p className="label-mono">Maintained by volunteers · no ticket queue, no SLA</p>
       </PageHero>
 
       <main id="main" className="pt-10 pb-20 px-4 sm:px-6">
         <div className="mx-auto max-w-3xl">
-          <Section title="Email us">
+          <Section title="Found a bug or a wrong number?">
             <p>
-              Support, billing questions, refund requests, bug reports and B2B
-              enquiries all go to the same address. It reaches a founder directly.
+              Open an issue on GitHub. Simulator crashes, a page that won&rsquo;t
+              load, a bike whose specs are wrong, a part that fits a bike it
+              shouldn&rsquo;t, a sim result that looks physically off &mdash; all of it
+              belongs in the issue tracker, where anyone can see it, reproduce
+              it and fix it.
+            </p>
+            <p>
+              <Ext href={ISSUES_URL}>Open an issue on GitHub &rarr;</Ext>
+            </p>
+            <p className="text-white/45">
+              For a sim result, include the bike, venue, rider weight and any
+              parts you selected (the simulator&rsquo;s Share link captures all of
+              it). For a spec correction, include a source &mdash; a service manual,
+              a magazine test, or an instrumented timeslip.
+            </p>
+          </Section>
+
+          <Section title="Questions, ideas and timeslips">
+            <p>
+              Ask how something works, propose a feature, or share a real
+              Dragy/RaceBox run so we can validate the physics against it in
+              GitHub Discussions. Instrumented runs from Indian strips are the
+              single most valuable thing you can contribute &mdash; every one makes
+              the model more accurate for everyone.
+            </p>
+            <p>
+              <Ext href={DISCUSSIONS_URL}>Join the discussion &rarr;</Ext>
+            </p>
+          </Section>
+
+          <Section title="Contribute code or data">
+            <p>
+              The whole project &mdash; physics engine, bike catalog, website and
+              API &mdash; is on GitHub under the{" "}
+              <Ext href={LICENSE_URL}>{LICENSE_NAME}</Ext>. Fork it, run it
+              yourself, send a pull request.
+            </p>
+            <ul className="space-y-1.5">
+              <li>
+                <Ext href={REPO_URL}>Source repository</Ext>
+              </li>
+              <li>
+                <Ext href={CONTRIBUTING_URL}>Contributing guide</Ext>
+              </li>
+            </ul>
+          </Section>
+
+          <Section title="Security issues">
+            <p>
+              Please don&rsquo;t open a public issue for a vulnerability. Email{" "}
+              <a href={`mailto:${CONTACT_EMAIL}?subject=Security`} className="font-mono text-white/80 hover:text-white transition-colors">
+                {CONTACT_EMAIL}
+              </a>{" "}
+              with &ldquo;Security&rdquo; in the subject line, or use the
+              repository&rsquo;s <Ext href={SECURITY_URL}>Security</Ext> tab to
+              report it privately. We&rsquo;ll acknowledge it and coordinate a fix
+              before anything is disclosed.
+            </p>
+          </Section>
+
+          <Section title="Everything else">
+            <p>
+              Press, collaboration, data partnerships, or a question about your
+              account and saved runs:
             </p>
             <p>
               <a
-                href={`mailto:${BUSINESS.email}`}
+                href={`mailto:${CONTACT_EMAIL}`}
                 className="font-mono text-accent hover:text-accent-bright transition-colors"
               >
-                {BUSINESS.email}
+                {CONTACT_EMAIL}
               </a>
             </p>
             <p className="text-white/45">
-              For refund requests, please include the email address on your
-              account and the approximate date of payment — see our{" "}
-              <a href="/refunds" className="text-accent hover:text-accent-bright transition-colors">
-                Refund &amp; Cancellation Policy
+              To delete your account and saved runs, email from the address on
+              the account and we&rsquo;ll remove them &mdash; see the{" "}
+              <a href="/privacy" className={linkCls}>
+                Privacy Policy
               </a>
               .
             </p>
           </Section>
 
-          <Section title="Business details">
-            <dl className="space-y-3">
-              <Row label="Service">{BUSINESS.tradeName}</Row>
-              {BUSINESS.legalName ? (
-                <Row label="Operated by">{BUSINESS.legalName}</Row>
-              ) : null}
-              <Row label="Entity type">{BUSINESS.entityType}</Row>
-              {hasAddress ? (
-                <Row label="Address">
-                  <span className="not-italic">
-                    {BUSINESS.addressLines.map((line) => (
-                      <span key={line} className="block">
-                        {line}
-                      </span>
-                    ))}
-                  </span>
-                </Row>
-              ) : null}
-              {BUSINESS.phone ? (
-                <Row label="Phone">
-                  <a
-                    href={`tel:${BUSINESS.phone.replace(/[^+\d]/g, "")}`}
-                    className="font-mono text-white/80 hover:text-white transition-colors"
-                  >
-                    {BUSINESS.phone}
-                  </a>
-                </Row>
-              ) : null}
-              <Row label="Email">
-                <a
-                  href={`mailto:${BUSINESS.email}`}
-                  className="font-mono text-white/80 hover:text-white transition-colors"
-                >
-                  {BUSINESS.email}
-                </a>
-              </Row>
-              <Row label="Jurisdiction">Pune, Maharashtra, India</Row>
-            </dl>
-          </Section>
-
-          <Section title="Grievance redressal">
-            <p>
-              If you are unhappy with how a support or billing issue was handled,
-              write to{" "}
-              <a
-                href={`mailto:${BUSINESS.email}`}
-                className="font-mono text-white/80 hover:text-white transition-colors"
-              >
-                {BUSINESS.email}
-              </a>{" "}
-              with &ldquo;Grievance&rdquo; in the subject line. We acknowledge within
-              48 hours and aim to resolve within 15 days, consistent with Indian
-              consumer-protection practice.
-            </p>
-            <p className="text-white/45">
-              Payment disputes may also be raised directly with the payment
-              processor that handled the transaction (Razorpay for Indian
-              payments) through their own grievance channels.
-            </p>
-          </Section>
-
           <div className="card mt-8 p-5 md:p-6 text-sm text-white/45">
-            <p>{BUSINESS.tradeName} · Pune, Maharashtra, India</p>
+            <p>MotoQuant · built in Pune, Maharashtra, India · free &amp; open source</p>
             <div className="mt-4 flex flex-wrap gap-4">
-              <a href="/terms" className="text-accent hover:text-accent-bright transition-colors">
+              <a href="/terms" className={linkCls}>
                 Terms
               </a>
-              <a href="/privacy" className="text-accent hover:text-accent-bright transition-colors">
+              <a href="/privacy" className={linkCls}>
                 Privacy
               </a>
-              <a href="/refunds" className="text-accent hover:text-accent-bright transition-colors">
-                Refunds
+              <a href="/about" className={linkCls}>
+                About
               </a>
-              <a href="/pricing" className="text-accent hover:text-accent-bright transition-colors">
-                Pricing
-              </a>
+              <Ext href={REPO_URL}>GitHub</Ext>
             </div>
           </div>
         </div>
@@ -173,14 +173,5 @@ function Section({ title, children }) {
       </h2>
       <div className="space-y-3 text-white/65 text-sm leading-relaxed">{children}</div>
     </section>
-  );
-}
-
-function Row({ label, children }) {
-  return (
-    <div className="grid gap-1 sm:grid-cols-[10rem_1fr] sm:gap-4">
-      <dt className="label-mono pt-0.5">{label}</dt>
-      <dd className="text-white/70">{children}</dd>
-    </div>
   );
 }

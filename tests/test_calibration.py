@@ -88,7 +88,8 @@ class TestSAECorrection(unittest.TestCase):
         The physics is not ambiguous: hot air is less dense, so the engine makes
         LESS power on the dyno, and correcting that run to standard 25 °C must
         scale it UP. A 190 hp run measured at 40 °C / 99 kPa was reported as
-        185.4 hp; SAE requires 194.7 hp.
+        185.4 hp; SAE J1349 (with its 1.18/−0.18 mechanical-efficiency terms,
+        added 2026-10-24) requires 195.6 hp.
         """
         from motoquant.calibration.dyno import sae_j1349_correction_factor
 
@@ -98,15 +99,18 @@ class TestSAECorrection(unittest.TestCase):
 
         self.assertLess(cf_0, cf_25, "cold air makes more power → correct DOWN")
         self.assertGreater(cf_40, cf_25, "hot air makes less power → correct UP")
-        self.assertAlmostEqual(cf_40, 1.0248, delta=0.002)
-        self.assertAlmostEqual(cf_0, 0.9572, delta=0.002)
+        # 1.18·√(313.15/298.15) − 0.18 and 1.18·√(273.15/298.15) − 0.18
+        self.assertAlmostEqual(cf_40, 1.0293, delta=0.0005)
+        self.assertAlmostEqual(cf_0, 0.9494, delta=0.0005)
 
     def test_temperature_term_matches_the_documented_formula(self):
-        """Pin the exact ratio direction against dyno.py's own docstring.
+        """Pin the exact J1349 closed form against dyno.py's own docstring.
 
-        With pressure held at the reference, CF reduces to sqrt(Tm / Tref).
-        Asserting the closed form makes a future re-inversion fail loudly
-        rather than merely shifting a monotonicity relation.
+        With pressure held at the reference, CF reduces to
+        1.18·sqrt(Tm / Tref) − 0.18. Asserting the closed form makes a future
+        re-inversion — or a regression to the friction-free sqrt(Tm/Tref)
+        form, which overstates every deviation by 18% — fail loudly rather
+        than merely shifting a monotonicity relation.
         """
         import math
 
@@ -118,8 +122,8 @@ class TestSAECorrection(unittest.TestCase):
 
         for temp_c in (0.0, 15.0, 25.0, 35.0, 45.0):
             cf = sae_j1349_correction_factor(temp_c, SAE_REF_PRESSURE_KPA, 0.0)
-            expected = math.sqrt((temp_c + 273.15) / SAE_REF_TEMP_K)
-            self.assertAlmostEqual(cf, expected, places=6, msg=f"at {temp_c} C")
+            expected = 1.18 * math.sqrt((temp_c + 273.15) / SAE_REF_TEMP_K) - 0.18
+            self.assertAlmostEqual(cf, expected, places=9, msg=f"at {temp_c} C")
 
     def test_high_altitude_cf_greater_than_one(self):
         """High altitude (low pressure) → engine makes less power → CF > 1 to correct up."""

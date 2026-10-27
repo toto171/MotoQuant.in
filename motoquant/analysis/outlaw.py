@@ -6,6 +6,8 @@ drag build, in the order that matters physically:
 
   1. TIRES    — best drag_prep rear fitment (highest mu_peak) applied first,
                 because optimal parts/gearing shift once launch grip changes.
+                Its price is deducted from the parts budget and included in
+                total_cost_inr (itemised as tire_cost_inr / parts_cost_inr).
   2. PARTS    — build_optimizer.optimize_build with profile "full_race"
                 (which whitelists every real category in the catalog:
                 exhaust/ECU/boost/nitrous/wheelie bar/swingarm ext/...).
@@ -95,7 +97,7 @@ def optimize_outlaw(
     """
     import copy
 
-    from ..physics import MotoQuantEngine
+    from ..engine_select import make_engine
     from .build_optimizer import optimize_build
     from .ecu_autotune import autotune
 
@@ -109,12 +111,19 @@ def optimize_outlaw(
     if progress_cb:
         progress_cb(0.01, "Baseline run")
 
-    baseline = MotoQuantEngine(copy.deepcopy(config)).run()
+    baseline = make_engine(copy.deepcopy(config)).run()
     baseline_et = float(baseline.time_quarter)
     baseline_trap_kmh = float(baseline.speed_quarter) * 3.6
 
     # ── Stage 1: drag rubber ────────────────────────────────────────────
+    # The tyre is a purchase like any part: its price comes out of the parts
+    # budget and is reported in total_cost_inr (the old pipeline spent the
+    # full budget on parts AND fitted a ₹41,400 slick, overrunning a ₹60k
+    # budget by 67% while reporting ₹58,700). A tyre that alone exceeds the
+    # user's budget is skipped.
     tire_stage: dict[str, Any] = {"applied": False}
+    tire_cost = 0.0
+    budget_limited = not (budget_inr is None or budget_inr <= 0)
     if tire_repo is not None and bike_model_id is not None:
         if progress_cb:
             progress_cb(0.02, "Selecting drag rubber")
@@ -122,7 +131,18 @@ def optimize_outlaw(
         if best is not None:
             stock_mu = float(config.tires.mu_peak)
             new_mu = float(best["mu_peak"])
-            if new_mu > stock_mu:
+            price = float(best.get("price_inr") or 0.0)
+            if new_mu > stock_mu and budget_limited and price > resolved_budget:
+                tire_stage = {
+                    "applied": False,
+                    "note": (
+                        f"best drag tyre (₹{price:,.0f}) exceeds the "
+                        f"₹{resolved_budget:,.0f} budget — kept stock rubber"
+                    ),
+                    "price_inr": price,
+                }
+            elif new_mu > stock_mu:
+                tire_cost = price
                 config.tires.mu_peak = new_mu
                 tire_stage = {
                     "applied": True,
@@ -145,9 +165,10 @@ def optimize_outlaw(
             }
 
     # ── Stage 2: parts knapsack (full_race = every category eligible) ──
+    parts_budget = max(0.0, resolved_budget - tire_cost)
     build = optimize_build(
         config,
-        resolved_budget,
+        parts_budget,
         parts_repo,
         goal=goal,
         profile="full_race",
@@ -158,7 +179,12 @@ def optimize_outlaw(
         progress_cb=_span(progress_cb, 0.05, 0.68),
     )
     build_dict = build.to_dict()
-    selected_ids = [p["part_id"] for p in build_dict.get("parts", [])]
+    # Apply in the order the optimizer verified (NA parts before boost),
+    # NOT display order — re-applying display order flipped the final
+    # boost_type and autotuned a different bike from the one priced.
+    selected_ids = list(build_dict.get("applied_part_ids") or []) or [
+        p["part_id"] for p in build_dict.get("parts", [])
+    ]
 
     # ── Stage 3: apply build + autotune the modified bike ──────────────
     if progress_cb:
@@ -204,7 +230,12 @@ def optimize_outlaw(
             "total_delta_s": (
                 round(float(final_et) - baseline_et, 4) if final_et else None
             ),
-            "total_cost_inr": build_dict.get("total_cost_inr"),
+            "parts_budget_inr": parts_budget,
+            "parts_cost_inr": build_dict.get("total_cost_inr"),
+            "tire_cost_inr": tire_cost,
+            "total_cost_inr": round(
+                float(build_dict.get("total_cost_inr") or 0.0) + tire_cost, 2
+            ),
             "notes": [
                 "Stage order: drag rubber → parts (full_race knapsack) → gearing/"
                 "launch autotune on the modified bike → combined verification sim.",

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 import StructuredData, { articleSchema } from '../../StructuredData';
+import { REPO_URL } from '../../../lib/site';
 
 const SLUG = 'indian-drag-strip-elevation-comparison';
 const TITLE = 'Indian Drag Strips Ranked by Elevation: How Altitude Flips Quarter-Mile Order';
@@ -398,10 +399,15 @@ export default function PostPage() {
             </li>
             <li>
               ·{' '}
-              <Link href="/pricing" className="text-brand-accent hover:text-brand-orange transition-colors">
-                MotoQuant Pricing
-              </Link>{' '}
-              — Free for street tuners; Pro Studio for shops and racing teams.
+              <a
+                href={REPO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-accent hover:text-brand-orange transition-colors"
+              >
+                MotoQuant on GitHub
+              </a>{' '}
+              — free and open source: audit the physics behind every number in this post, or run it yourself.
             </li>
           </ul>
         </div>

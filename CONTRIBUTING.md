@@ -1,27 +1,50 @@
-# Contributing to MotoQuant Pro
+# Contributing to MotoQuant
 
-Welcome. This guide gets you from a fresh clone to a green test suite in under 10 minutes, then covers the day-to-day workflow.
+Welcome, and thank you. MotoQuant is free and open source under the
+[Apache License 2.0](LICENSE). Contributions of every size are welcome:
+fixes, features, docs, and especially **data** (instrumented quarter-mile
+runs, dyno sheets, service-manual gear ratios, missing bikes).
 
-If you're a new collaborator joining for the first time, also read `ONBOARDING.md` — it has the current project state, the "what to pick up first" list, and the Kaizen/token-budget rules the project runs by.
+This guide gets you from a fresh clone to a green test suite in under 10 minutes, then covers the day-to-day workflow.
+
+Read **[AGENTS.md](AGENTS.md)** first. It is the one-page working contract
+(the prime directive and the non-negotiable rules), and it applies to humans
+and AI tools alike. Then read [docs/ONBOARDING.md](docs/ONBOARDING.md) for the
+current project state and a list of good first issues. Please follow the
+[Code of Conduct](CODE_OF_CONDUCT.md).
+
+## 0. Licensing of contributions
+
+- Contributions are licensed under the project's **Apache License 2.0**.
+  This is "inbound = outbound", as Section 5 of the License describes: by
+  submitting a pull request you agree that your contribution is licensed
+  under the same terms. There is no CLA. A DCO sign-off (`git commit -s`) is
+  welcome but not required.
+- Only submit work you have the right to license. Do not paste code from
+  projects with incompatible licences. For data, every spec, price or
+  benchmark must come from a citable public source and carry its source
+  label; we never accept fabricated numbers.
+- New source files don't need a per-file licence header. The repo-root
+  `LICENSE` and `NOTICE` cover them.
 
 ---
 
 ## 1. Repository
 
 - **GitHub:** https://github.com/da25mem5s02-debug/MotoQuant_v1
-  - Planned move: once the GitHub Organization `motoquant-labs` is created (see `docs/TEAM_SCALING.md`), the repo transfers to `github.com/motoquant-labs/motoquant`. Update your remote with `git remote set-url origin <new-url>` after the transfer.
 - **Package name:** `motoquant` (formerly `dragsim` — do not reintroduce that string anywhere)
 - **Python:** 3.10 or newer (tested on 3.10, 3.11, 3.12)
-- **Primary DB:** SQLite (`motoquant.db`) — Supabase PostgreSQL is deferred to Phase 6
+- **Primary DB:** SQLite (`motoquant.db`). It stays until a real scaling trigger ([ADR-0004](docs/adr/0004-sqlite-until-scale.md)).
 
 ---
 
 ## 2. One-time setup
 
 ```bash
-# 1. Clone
-git clone https://github.com/da25mem5s02-debug/MotoQuant_v1.git
+# 1. Fork on GitHub (or clone directly if you have write access)
+git clone https://github.com/<you>/MotoQuant_v1.git
 cd MotoQuant_v1
+git remote add upstream https://github.com/da25mem5s02-debug/MotoQuant_v1.git
 
 # 2. Virtual environment (recommended)
 python -m venv .venv
@@ -46,7 +69,7 @@ python -m pytest tests/test_validation.py tests/test_scraper.py \
 python -m pytest tests/ -q
 ```
 
-If those are green, you're set.
+If those are green, you're set. (`make install && make check` does the same in one go.)
 
 The committed `motoquant.db` in the repo root is the production seeded DB. Do not run migrations against it during dev — always use a `/tmp/` path like above, or `:memory:` for tests.
 
@@ -63,7 +86,7 @@ python -m motoquant.run sim --bike-id 1 --venue-id 1
 python -m motoquant.run analysis recommend --bike-id 1 --budget 150000
 ```
 
-Full subcommand list is in `CLAUDE.md` → "CLI subcommands available".
+Every subcommand has `--help` (`python -m motoquant.run <subcommand> --help`).
 
 ### 3b. Web frontend (the primary product UI)
 
@@ -72,17 +95,14 @@ cd web && npm install && npm run dev     # http://localhost:3000
 ```
 
 Point it at a local API with `NEXT_PUBLIC_API_URL=http://localhost:8000` (else it
-proxies to the production Render API). Before committing anything under `web/`,
-run `npx next build` — it is exactly what Vercel runs and catches the
-App-Router prerender class of failure (see `web/CONTRIBUTING.md`).
+proxies to the production Render API); `make web-dev` does this for you. Before
+committing anything under `web/`, run `make web-build` (= `npx next build`). It
+is exactly what Vercel runs and catches the App-Router prerender class of
+failure (see `web/CONTRIBUTING.md`).
 
-The desktop app lives in `desktop/` (Tauri 2 + React; hosted-only client):
-`cd desktop && npm install && npx tsc --noEmit && npx vitest run` for the
-JS-side checks. The Rust shell needs a local cargo toolchain (see
-`desktop/RELEASE.md`).
-
-The legacy Streamlit UI (`app.py`) has been removed. The web app (`web/`)
-and the desktop app (`desktop/`) are the supported user interfaces.
+The web app (`web/`) is the supported user interface. The legacy Streamlit UI
+(`app.py`) and the discontinued desktop app (`desktop/`, ADR-0005) have both
+been removed.
 
 ### 3c. FastAPI web server
 
@@ -144,8 +164,8 @@ Conventions:
 We use a simple trunk-based flow. `main` is always deployable (tests green, API boots, CLI smoke test passes).
 
 ```bash
-# 1. Start from updated main
-git checkout main && git pull
+# 1. Start from an up-to-date main (fork: sync from upstream)
+git checkout main && git pull upstream main     # or `git pull` if you cloned directly
 
 # 2. Branch
 git checkout -b feature/<short-name>        # e.g. feature/pinn-surrogate
@@ -159,19 +179,22 @@ git add <files>
 git commit -m "Short imperative subject line"
 # Longer body if the why is non-obvious.
 
-# 4. Push + open PR on GitHub
+# 4. Push to your fork + open a PR against da25mem5s02-debug/MotoQuant_v1:main
 git push -u origin feature/<short-name>
 ```
+
+Open PRs as **draft** until `make check` and `make test` are green, and fill in the
+PR template (it has the baseline-delta table for physics-adjacent changes).
 
 **PR requirements (strict — enforced by branch protection on `main`):**
 - Tests pass locally (`python -m pytest tests/ -q`).
 - Ruff clean (`ruff check . && ruff format --check .`).
-- CI workflow green on the PR (pytest + ruff + desktop tsc/vite build + web Next.js build).
+- CI workflow green on the PR (pytest + ruff + baseline gate; the Next.js build for `web/` changes).
 - **At least one approving review** from someone other than the PR author.
 - For files owned via `.github/CODEOWNERS` (physics, schema, calibration, API, infra): the listed **CODEOWNER's approval is required** — GitHub will auto-request it.
 - For physics changes: include the benchmark ET deltas in the PR description (template has a table for this).
-- For schema changes: include the migration path (even if manual) and update `CLAUDE.md` → "Current State" section.
-- **No self-merge.** Even the repo owner goes through review on anything touching a CODEOWNER-protected path.
+- For schema changes: include the migration path. Existing DBs must keep working; ship an idempotent `scripts/patch_*.py` for the shipped `motoquant.db`. Update `docs/ARCHITECTURE.md` if the data model's shape changed.
+- **No self-merge.** Even maintainers go through review on anything touching a CODEOWNER-protected path.
 - `main` is protected: no direct pushes, no force-push, no deletion.
 - Once merged, a successful CI run on `main` triggers the Vercel production deploy (`.github/workflows/deploy.yml`). A red CI never reaches Vercel.
 
@@ -184,7 +207,7 @@ git push -u origin feature/<short-name>
 
 ## 7. The Kaizen rule (read this before you PR)
 
-Lifted from `CLAUDE.md`: *every time you touch a file, leave it better than you found it.* Before marking a task complete, scan the files you modified for:
+*Every time you touch a file, leave it better than you found it.* Before marking a task complete, scan the files you modified for:
 
 1. Silent failure modes (swallowed exceptions, helpers that accept invalid paths without logging).
 2. Data ↔ model mismatch (parameter paths in seed/DB/config that don't match dataclass fields).
@@ -204,7 +227,8 @@ This is not optional. The current clean state of the codebase is the result of a
 - Run `git add -A` / `git add .` — **ever**. Stage explicit file lists; the working tree routinely carries unrelated WIP and generated artifacts.
 - Force-push to `main`. Use `feature/*` branches and PRs.
 - Rename the package away from `motoquant`. The 2026 rename from `dragsim` is final.
-- Replace SQLite with PostgreSQL before Phase 6. The WAL-fallback code is load-bearing on Windows / mounted FS.
+- Replace SQLite with PostgreSQL without a real scaling trigger ([ADR-0004](docs/adr/0004-sqlite-until-scale.md)). The WAL-fallback code is load-bearing on Windows / mounted FS.
+- Reintroduce paywalls, tier gates, usage quotas or licence keys. MotoQuant is free ([ADR-0006](docs/adr/0006-open-source-pivot.md)). Protect expensive routes with per-IP rate limits instead (`motoquant/ratelimit.py`).
 - Add BeautifulSoup / lxml to the scraper — `motoquant/scraper/bikez.py` is stdlib-only by design.
 - Introduce `requirements.txt` separate from `requirements-api.txt` without discussing first. One dependency file avoids drift.
 
@@ -212,22 +236,23 @@ This is not optional. The current clean state of the codebase is the result of a
 
 ## 9. Where to ask questions
 
-- GitHub Issues on the repo (preferred — leaves a trail).
-- Direct message to the other co-owner for quick synchronous stuff.
-- `CLAUDE.md` is the always-current project status document — check it first before asking "is X done yet?"
+- GitHub Issues for bugs, data corrections and scoped work (they leave a trail).
+- GitHub Discussions for questions and ideas.
+- Before asking "is X done yet?", check `CHANGELOG.md` and `docs/ROADMAP.md`. (`CLAUDE.md` holds the exhaustive session log if you need to dig.)
+- Security issues: report privately, see [SECURITY.md](SECURITY.md).
 
 ---
 
 ## 10. Release / deploy
 
-Live since April 2026; backend migrated Railway → Render on May 31, 2026:
-- Render (API): `motoquant-api.onrender.com` — Docker deploy via `render.yaml` (free tier, Singapore).
-- Vercel (web): `motoquant.in` — `vercel.json` + the `/api/*` rewrite in `web/next.config.js` point at Render.
-- Domain: `motoquant.in` (primary), `motoquant.app` (reserve).
+The public instance is live: the API on Render (`motoquant-api.onrender.com`,
+Docker via `render.yaml`) and the web app on Vercel (`motoquant.in`, with the
+`/api/*` rewrite in `web/next.config.js` + `vercel.json` pointing at Render).
 
-Merging to `main` IS the production deploy: Render rebuilds the API when the
-diff touches `motoquant/**`, `motoquant.db`, `requirements-api.txt`, `Dockerfile`
-or `render.yaml` (the `buildFilter` — web-only merges do not restart the API),
-and Vercel deploys the frontend on every merge. See `docs/RENDER_MIGRATION.md`
-for the runbook + rollback. Do not touch hosting settings without coordinating —
-we only have one set of credentials.
+Merging to `main` IS the production deploy of the public instance. Render
+rebuilds the API when the diff touches `motoquant/**`, `motoquant.db`, `requirements-api.txt`, `Dockerfile`
+or `render.yaml` (the `buildFilter`; web-only merges do not restart the API),
+and Vercel deploys the frontend on every merge. Hosting accounts belong to the
+maintainers, so contributors never need credentials. To run your own copy,
+follow [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md). The historical Railway →
+Render runbook is `docs/RENDER_MIGRATION.md`.

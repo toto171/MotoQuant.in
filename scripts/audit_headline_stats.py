@@ -276,7 +276,9 @@ PATTERNS = [
         "bikes-page schema numberOfItems",
     ),
     (
-        "web/app/bikes/[id]/layout.js",
+        # Brackets escaped: Path.glob reads a bare "[id]" as a character
+        # class, so this target silently matched NOTHING for months.
+        "web/app/bikes/[[]id]/layout.js",
         r"(\d{2,4})\s*(?:bikes?|motorcycles?)\b",
         "all_known_bikes",
         "bikes-id layout",
@@ -385,12 +387,6 @@ PATTERNS = [
         r"num:\s*'(\d{2,4})'\s*,\s*label:\s*'Catalog bikes'",
         "all_known_bikes",
         "whitepaper catalog bikes num",
-    ),
-    (
-        "web/app/pricing/page.js",
-        r"Bike catalog \((\d{2,4}) bikes?\)",
-        "all_known_bikes",
-        "pricing tier description",
     ),
     # Blog posts (per-post)
     (
@@ -558,18 +554,6 @@ PATTERNS = [
         r"split for (\d{2,4}) bikes",
         "all_known_bikes",
         "simulator description bikes",
-    ),
-    (
-        "web/app/pricing/layout.js",
-        r"covers (\d{2,4}) bikes",
-        "all_known_bikes",
-        "pricing meta description bikes",
-    ),
-    (
-        "web/app/pricing/page.js",
-        r"Tire library \((\d{2,4}) tires\)",
-        "tires_db",
-        "pricing tier tire-library count",
     ),
     (
         "web/app/docs/getting-started/page.js",

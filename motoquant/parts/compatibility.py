@@ -1,17 +1,70 @@
 """
-MotoQuant Pro — Part Fitment Compatibility Engine
-==================================================
+MotoQuant — Part Fitment Compatibility Engine
+=============================================
 Determines whether a performance part fits a given motorcycle,
 using tiered fitment rules (exact, family, category, universal).
 """
 
 import json
 import logging
+import re
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
 _logger = logging.getLogger(__name__)
+
+# ── Factory forced induction ──────────────────────────────────────────────────
+# The supercharged Kawasaki H2 platform (Ninja H2/H2R/H2 SX, Z H2, Bimota Tesi
+# H2) carries its factory supercharger BAKED INTO an NA-flagged dyno curve, and
+# the forced-induction model is a single boost_type scalar per config. A turbo,
+# supercharger or nitrous kit on these bikes therefore either double-counts
+# boost or flips the config to a second, conflicting aspiration — and no such
+# bolt-on exists for a factory-blown engine. Rule-level fitment (category +
+# displacement) matched them anyway (H2 + HKS turbo, H2R + C-1 supercharger;
+# October 2026 audit). Matched on the platform names, NOT a bare "H2": the
+# 1972 750 H2 Mach IV is a naturally aspirated 2-stroke.
+_FACTORY_BOOSTED_MODEL_RE = re.compile(r"\b(?:ninja|z|tesi)\s*h2", re.IGNORECASE)
+
+# Part categories that add forced induction (in addition to any part whose
+# parameters write forced_induction.*).
+_FORCED_INDUCTION_CATEGORIES = frozenset(
+    {"boost_kit", "nitrous", "turbo", "supercharger"}
+)
+
+
+def is_factory_boosted(bike_row: dict) -> bool:
+    """True for a bike whose engine is supercharged/turbocharged from the factory.
+
+    Honours an explicit ``factory_forced_induction`` field when the row carries
+    one; otherwise recognises the catalog's factory-supercharged platforms by
+    model name.
+    """
+    explicit = bike_row.get("factory_forced_induction")
+    if explicit is not None:
+        return bool(explicit)
+    name = bike_row.get("model_name") or ""
+    return bool(_FACTORY_BOOSTED_MODEL_RE.search(name))
+
+
+def is_forced_induction_part(part_row: dict) -> bool:
+    """True for a turbo / supercharger / nitrous part."""
+    cat = part_row.get("category_name") or part_row.get("category")
+    if cat in _FORCED_INDUCTION_CATEGORIES:
+        return True
+    for col in ("param_overrides", "param_deltas", "param_multipliers"):
+        raw = part_row.get(col)
+        if not raw:
+            continue
+        try:
+            params = json.loads(raw) if isinstance(raw, str) else raw
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if isinstance(params, dict) and any(
+            str(k).startswith("forced_induction.") for k in params
+        ):
+            return True
+    return False
 
 
 class FitmentTier(str, Enum):
@@ -160,6 +213,13 @@ def is_compatible(part_row: dict, bike_row: dict) -> tuple[bool, str]:
         (compatible: bool, reason: str)
     """
     bike_id = bike_row.get("id")
+
+    # ───────────────────────────────────────────────────
+    # ASPIRATION: no forced-induction bolt-on for a factory-boosted engine.
+    # Checked before every tier (universal included).
+    # ───────────────────────────────────────────────────
+    if is_factory_boosted(bike_row) and is_forced_induction_part(part_row):
+        return False, "bike has factory forced induction"
 
     # ───────────────────────────────────────────────────
     # LEGACY FALLBACK: fitment_rules is NULL

@@ -12,7 +12,7 @@ Twelve specialised agents that the master scheduler dispatches for routine work.
 | `marketing-content.md` | A4 | Mon/Fri (default) — drafts a blog post |
 | `seo-keyword.md` | A5 | Mon (default) — surfaces keyword opportunities + on-page tweaks |
 | `competitive-intel.md` | A6 | Tue (default) — refreshes data/competitive_landscape.md + market_signals.json |
-| `product-prioritisation.md` | A7 | Thu (default) — re-ranks Phase 6/7 carry-forward |
+| `product-prioritisation.md` | A7 | Thu (default) — re-ranks the open docs/ROADMAP.md items |
 | `customer-support.md` | A8 | Thu (default) — triages bike_suggestions, drafts responses |
 | `technical-debt-pass.md` | A9 | Wed/Sat alternating — narrow refactor PR |
 | `performance-monitor.md` | A10 | Sun (default) — Lighthouse + Railway latency drift report |

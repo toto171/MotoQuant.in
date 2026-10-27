@@ -17,11 +17,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Menu, Search, X } from 'lucide-react';
+import { ChevronDown, Code2, Menu, Search, X } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import CommandPalette from './CommandPalette';
 import GaugeMark from './GaugeMark';
 import MobileToolBar from './MobileToolBar';
+import { REPO_URL } from '../lib/site';
 
 const TOOL_LINKS = [
   { href: '/simulator',   label: 'Simulator' },
@@ -39,7 +40,9 @@ const RESOURCE_LINKS = [
   { href: '/about',                label: 'About' },
 ];
 
-const PRICING_LINK = { href: '/pricing', label: 'Pricing' };
+// MotoQuant is free and open source — the slot the old Pricing link held
+// now points at the code. External link, so it renders as a plain <a>.
+const SOURCE_LINK = { href: REPO_URL, label: 'Source' };
 
 function isActive(pathname, link) {
   if (!pathname) return false;
@@ -136,7 +139,7 @@ export default function SiteNav() {
           </span>
         </Link>
 
-        {/* gap-4 until xl: at 1024-1100px the full cluster (5 tools + Pricing
+        {/* gap-4 until xl: at 1024-1100px the full cluster (5 tools + Source
             + Resources + search + auth + CTA) was overflowing the viewport by
             ~60px and clipping the CTA (field-reported). */}
         <nav className="hidden lg:flex gap-4 xl:gap-6 items-center text-sm font-mono">
@@ -146,12 +149,19 @@ export default function SiteNav() {
             </Link>
           ))}
           <span aria-hidden="true" className="h-4 w-px bg-white/15" />
-          <Link
-            href={PRICING_LINK.href}
-            className={linkCls(isActive(pathname, PRICING_LINK))}
+          <a
+            href={SOURCE_LINK.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="MotoQuant is open source — view the code on GitHub"
+            className={`${linkCls(false)} inline-flex items-center gap-1.5`}
           >
-            {PRICING_LINK.label}
-          </Link>
+            {/* icon only at xl+: the lg..xl band is width-critical (see the
+                gap-4 note above); "Source" alone is narrower than the old
+                "Pricing" label it replaced. */}
+            <Code2 size={14} aria-hidden="true" className="hidden xl:block" />
+            {SOURCE_LINK.label}
+          </a>
           <div className="relative" ref={resRef}>
             <button
               type="button"
@@ -226,11 +236,6 @@ export default function SiteNav() {
               <span className="text-xs font-mono text-white/70 max-w-[9rem] truncate">
                 {user?.email?.split('@')[0]}
               </span>
-              {user?.tier && user.tier !== 'free' && (
-                <span className="text-[9px] font-mono uppercase tracking-wider text-mint">
-                  {user.tier}
-                </span>
-              )}
             </Link>
           ) : (
             <Link
@@ -284,7 +289,7 @@ export default function SiteNav() {
                 </Link>
               ))}
               <span className="label-mono px-4 pt-3 pb-1.5">Resources</span>
-              {[...RESOURCE_LINKS, PRICING_LINK].map((link) => (
+              {RESOURCE_LINKS.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -293,6 +298,16 @@ export default function SiteNav() {
                   {link.label}
                 </Link>
               ))}
+              <a
+                href={SOURCE_LINK.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${drawerLinkCls(false)} inline-flex items-center gap-2`}
+              >
+                <Code2 size={14} aria-hidden="true" />
+                Source on GitHub
+                <span className="label-mono ml-auto">open source</span>
+              </a>
               <div className="my-1 border-t border-white/10" />
               <Link
                 href={isAuthenticated ? '/account' : '/login'}

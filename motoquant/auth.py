@@ -1,20 +1,35 @@
 """
-MotoQuant Pro — Auth Module
-============================
-Passwordless magic-link login + JWT access/refresh token management.
+MotoQuant — Optional Accounts
+=============================
+Magic-link + password sign-in and JWT access/refresh token management.
+
+Accounts are OPTIONAL and free. Every simulation and analysis route works
+anonymously; signing in only attributes saved runs to a personal garage
+(GET /api/me/runs). There are no tiers, plans or paid features.
 
 Endpoints
 ---------
-POST /api/auth/magic-link   Request magic-link email
-POST /api/auth/verify       Exchange magic-link token → JWT pair
-POST /api/auth/refresh      Access token from valid refresh token
-POST /api/auth/logout       Revoke refresh session
-GET  /api/auth/me           Current user info
+POST /api/auth/magic-link       Request magic-link email
+POST /api/auth/verify           Exchange magic-link token → JWT pair
+POST /api/auth/register         Create an account with email + password
+POST /api/auth/login            Email + password sign-in
+POST /api/auth/password/change  Set or change the account password
+POST /api/auth/refresh          Access token from valid refresh token
+POST /api/auth/logout           Revoke refresh session
+GET  /api/auth/me               Current user info
 
-FastAPI dependency
-------------------
-    require_tier("pro")     — 402 if authenticated but wrong tier
+FastAPI dependencies
+--------------------
     get_current_user()      — 401 if unauthenticated
+    get_optional_user()     — the user dict, or None (never raises)
+
+JWT signing secret
+------------------
+Set JWT_SECRET to 32+ random bytes on any real deployment. Without it, a
+deployed host (RENDER / RENDER_EXTERNAL_URL / MOTOQUANT_DEPLOYED=1) signs with
+an EPHEMERAL per-process random secret and logs a loud warning — tokens stay
+unforgeable but every sign-in is reset on restart. Local dev and tests keep
+the documented public dev default. See docs/SELF_HOSTING.md.
 
 Email backends (env-var driven)
 --------------------------------
@@ -72,7 +87,9 @@ except ImportError:  # pragma: no cover
 
 # ─── Config from env ──────────────────────────────────────────────────────────
 
-JWT_SECRET = os.environ.get("JWT_SECRET", "dev-insecure-secret-change-me")
+# The public dev default. NEVER used to sign on a deployed host — see
+# _resolve_jwt_secret() below, which replaces it with an ephemeral secret.
+DEV_DEFAULT_JWT_SECRET = "dev-insecure-secret-change-me"
 JWT_ALGORITHM = os.environ.get("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_TTL_S = 15 * 60  # 15 minutes
 REFRESH_TOKEN_TTL_S = 30 * 24 * 3600  # 30 days
@@ -86,9 +103,9 @@ def _resolve_email_backend() -> str:
     This is DERIVED, not opt-in, because the opt-in version shipped broken:
     MOTOQUANT_EMAIL_BACKEND defaulted to "stdout" and the send guard read
     ``if EMAIL_BACKEND == "stdout" or not SMTP_HOST``, so the first clause
-    short-circuited true no matter what. An operator who followed
-    docs/PAYMENTS_SETUP.md exactly (set SMTP_HOST/PORT/USER/PASS/FROM, which
-    is all that doc ever mentioned) still sent zero email — while the API
+    short-circuited true no matter what. An operator who followed the setup
+    doc exactly (set SMTP_HOST/PORT/USER/PASS/FROM, which is all it ever
+    mentioned) still sent zero email — while the API
     cheerfully answered "Sign-in link sent. Check your inbox." Configuring a
     provider is now sufficient on its own.
 
@@ -106,45 +123,70 @@ def _resolve_email_backend() -> str:
 
 EMAIL_BACKEND = _resolve_email_backend()
 
-# "Am I running on the deployed host?" Render always sets these. Used to make
-# sure the dev-convenience magic-link echo NEVER fires in production (see
-# request_magic_link) — echoing the token in the HTTP response on a prod box
-# without SMTP configured is an account-takeover vector.
-IN_DEPLOYED_ENV = bool(
-    os.environ.get("RENDER") or os.environ.get("RENDER_EXTERNAL_URL")
-)
+
+def _is_deployed_env() -> bool:
+    """Is this process running on a deployed host (not local dev/tests)?
+
+    Render always sets RENDER / RENDER_EXTERNAL_URL. Self-hosters on any other
+    platform set MOTOQUANT_DEPLOYED=1. Used to make sure (a) the dev-convenience
+    magic-link echo NEVER fires in production (see request_magic_link) —
+    echoing the token in the HTTP response on a prod box without email
+    configured is an account-takeover vector — and (b) the public dev JWT
+    secret is never used to sign there (see _resolve_jwt_secret).
+    """
+    return bool(
+        os.environ.get("RENDER")
+        or os.environ.get("RENDER_EXTERNAL_URL")
+        or os.environ.get("MOTOQUANT_DEPLOYED", "").strip().lower()
+        in ("1", "true", "yes", "on")
+    )
+
+
+IN_DEPLOYED_ENV = _is_deployed_env()
 
 # Rate-limit: one magic link per email per 60 s
 MAGIC_LINK_COOLDOWN_S = 60
 
-# ─── Billing enforcement (freemium-beta switch) ───────────────────────────────
-# When FALSE (the default — open-beta posture), require_tier() lets every
-# request through: authenticated users are attached for attribution, anonymous
-# users get an empty dict. Tier checks only bite when MOTOQUANT_BILLING_ENFORCE
-# is truthy — flip it in the Render dashboard at commercial rollout.
-# Tests patch motoquant.auth.BILLING_ENFORCE directly (read at request time).
-BILLING_ENFORCE = os.environ.get(
-    "MOTOQUANT_BILLING_ENFORCE", "false"
-).strip().lower() in ("1", "true", "yes", "on")
 
-# Guard against shipping the public default JWT secret. When billing is
-# enforced (real commercial mode), forgeable tokens = free paid upgrades and
-# cross-account reads, so refuse to start rather than sign with a known key.
-# During the open beta (BILLING_ENFORCE off) auth is advisory, so we only warn
-# loudly — hard-failing here would take down the live beta if the operator
-# hasn't set JWT_SECRET yet (it's a documented pre-commercial TODO).
-_JWT_SECRET_IS_DEFAULT = JWT_SECRET == "dev-insecure-secret-change-me"
-if _JWT_SECRET_IS_DEFAULT:
-    if BILLING_ENFORCE:
-        raise RuntimeError(
-            "JWT_SECRET is the public default while MOTOQUANT_BILLING_ENFORCE is on. "
-            "Set JWT_SECRET to 32+ random bytes before enabling billing — the default "
-            "lets anyone forge access tokens and upgrade themselves for free."
+def _resolve_jwt_secret() -> tuple[str, bool]:
+    """Pick the JWT signing secret. Returns (secret, is_ephemeral).
+
+    Policy (open-source pivot, 2026-10-23 — replaces the old guard that was
+    keyed on the deleted billing switch):
+
+    * JWT_SECRET set to anything other than the public default → use it.
+    * Deployed host with no real JWT_SECRET → generate an EPHEMERAL
+      per-process random secret and log a loud warning. Signing with the
+      public default there would let anyone forge an access token for any
+      account. The ephemeral secret keeps tokens unforgeable at the cost of
+      resetting every sign-in on restart. Never hard-fails: accounts are an
+      optional feature and must not be able to take the simulator down.
+      (Safe because prod runs ONE uvicorn worker — docker-entrypoint.sh — so
+      every request sees the same in-process secret.)
+    * Local dev / tests (not deployed) → the documented public dev default,
+      with a warning, so tokens survive dev-server reloads.
+    """
+    configured = os.environ.get("JWT_SECRET", "")
+    if configured.strip() and configured != DEV_DEFAULT_JWT_SECRET:
+        return configured, False
+    if _is_deployed_env():
+        log.warning(
+            "JWT_SECRET is %s on a deployed host — signing with an EPHEMERAL "
+            "per-process random secret instead of the public dev default. "
+            "Tokens are unforgeable, but EVERY SIGN-IN IS RESET WHENEVER THE "
+            "PROCESS RESTARTS. Set JWT_SECRET to 32+ random bytes to keep "
+            "sessions across restarts (docs/SELF_HOSTING.md).",
+            "unset" if not configured.strip() else "the public dev default",
         )
+        return secrets.token_hex(32), True
     log.warning(
-        "JWT_SECRET is the insecure public default — acceptable only for dev/test. "
-        "Set a real JWT_SECRET before any real deployment; tokens are forgeable."
+        "JWT_SECRET is the insecure public dev default — acceptable only for "
+        "local dev/test. Set a real JWT_SECRET before any deployment."
     )
+    return DEV_DEFAULT_JWT_SECRET, False
+
+
+JWT_SECRET, JWT_SECRET_IS_EPHEMERAL = _resolve_jwt_secret()
 
 # Same class of foot-gun as the JWT default: silent in dev, invisible in prod
 # until a user reports that the sign-in email never arrived. Warn at boot so
@@ -153,7 +195,7 @@ if EMAIL_BACKEND == "stdout" and IN_DEPLOYED_ENV:
     log.warning(
         "No email backend configured on a deployed host (neither RESEND_API_KEY "
         "nor SMTP_HOST is set) — magic-link sign-in will return 503. Password "
-        "sign-in is unaffected. See docs/PAYMENTS_SETUP.md Step 1."
+        "sign-in is unaffected. See docs/SELF_HOSTING.md (email transport)."
     )
 
 # Password auth — stdlib scrypt (RFC 7914), zero external hashing deps.
@@ -196,7 +238,6 @@ class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
-    tier: str
 
 
 class RefreshRequest(BaseModel):
@@ -221,22 +262,18 @@ class ChangePasswordRequest(BaseModel):
 class MeResponse(BaseModel):
     id: int
     email: str
-    tier: str
     is_active: bool
     email_verified: bool = False
     has_password: bool = False
-    subscription_status: str | None = None
-    license_keys: list[dict] = []
 
 
 # ─── JWT helpers ──────────────────────────────────────────────────────────────
 
 
-def _make_access_token(user_id: int, email: str, tier: str, jti: str) -> str:
+def _make_access_token(user_id: int, email: str, jti: str) -> str:
     payload = {
         "sub": str(user_id),
         "email": email,
-        "tier": tier,
         "jti": jti,
         "type": "access",
         "exp": datetime.now(timezone.utc) + timedelta(seconds=ACCESS_TOKEN_TTL_S),
@@ -298,7 +335,7 @@ def _issue_token_pair(user: dict, conn: sqlite3.Connection) -> dict:
     """Create a session row and return the access + refresh token strings."""
     jti = str(uuid.uuid4())
     _users.create_session(conn, user["id"], jti)
-    access = _make_access_token(user["id"], user["email"], user["tier"], jti)
+    access = _make_access_token(user["id"], user["email"], jti)
     refresh = _make_refresh_token(user["id"], jti)
     return {"access_token": access, "refresh_token": refresh}
 
@@ -411,7 +448,7 @@ def _magic_link_html(link: str) -> str:
     return f"""
     <html><body>
     <p>Hi,</p>
-    <p>Click the button below to sign in to <strong>MotoQuant Pro</strong>.
+    <p>Click the button below to sign in to <strong>MotoQuant</strong>.
     This link expires in 10 minutes.</p>
     <p><a href="{link}"
           style="background:#f97316;color:#fff;padding:12px 24px;border-radius:6px;
@@ -420,7 +457,7 @@ def _magic_link_html(link: str) -> str:
     </a></p>
     <p>If you didn't request this, you can safely ignore this email.</p>
     <p style="color:#888;font-size:12px;">
-       MotoQuant Pro — The physics of faster.<br>
+       MotoQuant — The physics of faster. Free and open source.<br>
        motoquant.in
     </p>
     </body></html>
@@ -451,8 +488,8 @@ def _send_via_smtp(email: str, subject: str, html: str) -> None:
 def _send_via_resend(email: str, subject: str, html: str) -> None:
     """POST one transactional email to the Resend API.
 
-    stdlib urllib rather than the `resend` SDK, matching how payments.py
-    drives Stripe — no new production dependency for one HTTP call.
+    stdlib urllib rather than the `resend` SDK — no new production
+    dependency for one HTTP call.
     """
     payload = json.dumps(
         {"from": _from_address(), "to": [email], "subject": subject, "html": html}
@@ -543,7 +580,6 @@ def get_current_user(
     """
     FastAPI dependency. Extracts and validates the Bearer JWT.
     Raises 401 if missing or invalid.
-    Does NOT check tier — use require_tier() for that.
     """
     if not credentials:
         raise HTTPException(401, "Authentication required")
@@ -573,7 +609,8 @@ def get_optional_user(
     """
     FastAPI dependency. Like get_current_user but NEVER raises — returns the
     user dict when a valid Bearer token is present, None otherwise. Used for
-    attribution on routes that stay open during the freemium beta.
+    optional attribution on routes that accept anonymous callers (e.g.
+    POST /api/simulate/save).
     """
     if not credentials:
         return None
@@ -596,43 +633,6 @@ def get_optional_user(
         conn.close()
 
 
-def require_tier(minimum_tier: str):
-    """
-    FastAPI dependency factory.
-    Usage: Depends(require_tier("pro"))
-
-    Freemium-beta behaviour (BILLING_ENFORCE falsy — the default): every
-    request passes. Authenticated users are returned for attribution;
-    anonymous requests get an empty dict.
-
-    Enforced behaviour (MOTOQUANT_BILLING_ENFORCE truthy): 401 when
-    unauthenticated; 402 Payment Required (not 401) when authenticated but
-    on a lower tier — lets the client show an upgrade CTA rather than a
-    generic "not authorised" message.
-    """
-    tier_rank = {"free": 0, "pro": 1, "studio": 2}
-    required_rank = tier_rank[minimum_tier]
-
-    def _dep(user: dict | None = Depends(get_optional_user)) -> dict:
-        if not BILLING_ENFORCE:
-            return user or {}
-        if user is None:
-            raise HTTPException(401, "Authentication required")
-        if tier_rank.get(user.get("tier", "free"), 0) < required_rank:
-            raise HTTPException(
-                402,
-                detail={
-                    "error": "upgrade_required",
-                    "required_tier": minimum_tier,
-                    "current_tier": user.get("tier", "free"),
-                    "upgrade_url": f"{MOTOQUANT_BASE_URL}/pricing",
-                },
-            )
-        return user
-
-    return _dep
-
-
 # ─── Endpoints ────────────────────────────────────────────────────────────────
 #
 # Per-IP rate limits on the credential-burning routes (2026-07-25 audit). The
@@ -646,8 +646,8 @@ def require_tier(minimum_tier: str):
 #
 # Deliberately NOT limited: /me, /refresh and /logout. They are cheap, and a
 # signed-in client polls them — throttling those would break the UI without
-# closing an abuse channel. Limits follow the existing house convention
-# (license-key/validate is 10/60 s).
+# closing an abuse channel. Limits follow the house convention for
+# credential-burning routes (~10/60 s).
 _rl_login = rate_limit("auth_login", 10, 60.0)
 _rl_register = rate_limit("auth_register", 5, 60.0)
 _rl_magic = rate_limit("auth_magic_link", 5, 60.0)
@@ -683,7 +683,7 @@ def request_magic_link(body: MagicLinkRequest) -> MagicLinkResponse:
     resp = MagicLinkResponse(message="Sign-in link sent. Check your inbox.")
     # Echo the token ONLY in a genuine local dev/test run — never on a deployed
     # host. Previously this also fired whenever SMTP_HOST was unset, so a prod
-    # box with email not-yet-configured (the beta state) returned the sign-in
+    # box with email not yet configured returned the sign-in
     # token straight to any caller: request a link for any address, read the
     # token back, verify it → full account takeover with no inbox access.
     if EMAIL_BACKEND == "stdout" and not IN_DEPLOYED_ENV:
@@ -714,7 +714,6 @@ def verify_magic_link(body: VerifyRequest) -> TokenResponse:
     return TokenResponse(
         access_token=tokens["access_token"],
         refresh_token=tokens["refresh_token"],
-        tier=user["tier"],
     )
 
 
@@ -744,7 +743,6 @@ def refresh_access_token(body: RefreshRequest) -> TokenResponse:
     return TokenResponse(
         access_token=tokens["access_token"],
         refresh_token=tokens["refresh_token"],
-        tier=user["tier"],
     )
 
 
@@ -763,25 +761,13 @@ def logout(user: dict = Depends(get_current_user)) -> dict:
 
 @router.get("/me", response_model=MeResponse)
 def me(user: dict = Depends(get_current_user)) -> MeResponse:
-    """Return authenticated user details + subscription status + license keys."""
-    from .database import subscriptions_repo as _subs
-
-    conn = _get_conn()
-    try:
-        sub = _subs.get_active_subscription(conn, user["id"])
-        keys = _subs.list_license_keys(conn, user["id"])
-    finally:
-        conn.close()
-
+    """Return the authenticated user's account details."""
     return MeResponse(
         id=user["id"],
         email=user["email"],
-        tier=user["tier"],
         is_active=bool(user["is_active"]),
         email_verified=bool(user.get("email_verified", 0)),
         has_password=bool(user.get("password_hash")),
-        subscription_status=sub["status"] if sub else None,
-        license_keys=keys,
     )
 
 
@@ -798,8 +784,8 @@ def register(body: RegisterRequest) -> TokenResponse:
     """
     Create an account with email + password and sign in immediately.
 
-    Email ownership is NOT verified at registration (open-beta posture) —
-    the email_verified flag flips to 1 the first time a magic link for the
+    Email ownership is NOT verified at registration — the email_verified
+    flag flips to 1 the first time a magic link for the
     address is consumed. Existing accounts (including passwordless
     magic-link accounts) are never overwritten — 409.
     """
@@ -823,7 +809,6 @@ def register(body: RegisterRequest) -> TokenResponse:
     return TokenResponse(
         access_token=tokens["access_token"],
         refresh_token=tokens["refresh_token"],
-        tier=user["tier"],
     )
 
 
@@ -864,7 +849,6 @@ def password_login(body: PasswordLoginRequest) -> TokenResponse:
     return TokenResponse(
         access_token=tokens["access_token"],
         refresh_token=tokens["refresh_token"],
-        tier=user["tier"],
     )
 
 

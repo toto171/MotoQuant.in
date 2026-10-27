@@ -4,21 +4,29 @@
 //   - Who runs the site (Organization)
 //   - What the site is (WebSite + SearchAction)
 //   - What the product is (SoftwareApplication, free, browser-based)
+//   - Where its source lives (SoftwareSourceCode — Apache-2.0 on GitHub)
 //   - What questions it answers (FAQPage — rich-result eligible)
 //
 // Each helper returns a plain object; use <StructuredData data={...} /> to render.
 // We intentionally keep all URLs absolute (https://motoquant.in/...) because Google
 // treats absolute @id values as canonical and collapses duplicates across crawls.
 
+import { LICENSE_SPDX, REPO_URL } from '../lib/site';
+
 export const SITE_URL = 'https://motoquant.in';
+
+// Canonical license URL for schema.org `license` (expects a URL/CreativeWork).
+const LICENSE_SCHEMA_URL = 'https://www.apache.org/licenses/LICENSE-2.0';
 
 export function organizationSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     '@id': `${SITE_URL}/#organization`,
-    name: 'MotoQuant Pro',
-    alternateName: ['MotoQuant', 'MotoQuant Pro Simulator'],
+    name: 'MotoQuant',
+    // "MotoQuant Pro" is the pre-October-2026 name; listed only so search
+    // engines connect old links/mentions to the same entity.
+    alternateName: ['MotoQuant Simulator', 'MotoQuant Pro'],
     url: SITE_URL,
     logo: {
       '@type': 'ImageObject',
@@ -27,20 +35,20 @@ export function organizationSchema() {
       height: 512,
     },
     description:
-      'First-principles physics engine for motorcycle quarter-mile drag racing. Predict ET, compare builds, and quantify parts ROI for 541+ bikes.',
+      'Free, open-source (Apache-2.0) first-principles physics engine for motorcycle quarter-mile drag racing. Predict ET, compare builds, and quantify parts ROI for 541+ bikes.',
     foundingDate: '2025-11-01',
     founder: [
       { '@type': 'Person', name: 'Arya Desai' },
       { '@type': 'Person', name: 'Ritwik Singh' },
       { '@type': 'Person', name: 'Sahil Shetye' },
     ],
-    sameAs: [
-      'https://twitter.com/motoquant',
-      'https://github.com/motoquant',
-    ],
+    // Only identities we actually control. (The old twitter.com/motoquant and
+    // github.com/motoquant entries were never verified as ours.)
+    sameAs: [REPO_URL],
     contactPoint: {
       '@type': 'ContactPoint',
-      contactType: 'customer support',
+      contactType: 'technical support',
+      url: `${SITE_URL}/contact`,
       email: 'motoquant@gmail.com',
       areaServed: ['IN', 'MY', 'TH', 'ID', 'PH', 'AE', 'US', 'GB'],
       availableLanguage: ['English'],
@@ -55,9 +63,9 @@ export function websiteSchema() {
     '@type': 'WebSite',
     '@id': `${SITE_URL}/#website`,
     url: SITE_URL,
-    name: 'MotoQuant Pro',
+    name: 'MotoQuant',
     description:
-      'Motorcycle drag racing quarter-mile simulator — ET prediction, build optimization, parts ROI.',
+      'Free, open-source motorcycle drag racing quarter-mile simulator — ET prediction, build optimization, parts ROI.',
     inLanguage: 'en-IN',
     publisher: { '@id': `${SITE_URL}/#organization` },
     potentialAction: {
@@ -76,8 +84,8 @@ export function softwareApplicationSchema() {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     '@id': `${SITE_URL}/#software`,
-    name: 'MotoQuant Pro',
-    alternateName: 'MotoQuant Pro Quarter-Mile Simulator',
+    name: 'MotoQuant',
+    alternateName: 'MotoQuant Quarter-Mile Simulator',
     applicationCategory: ['AutomotiveApplication', 'SimulationApplication'],
     applicationSubCategory: 'Motorcycle Drag Racing Simulator',
     operatingSystem: 'Web, Windows, macOS, Linux',
@@ -88,6 +96,10 @@ export function softwareApplicationSchema() {
       'Physics-based quarter-mile drag racing simulator for motorcycles. 15-submodel engine (engine, drivetrain, clutch, chain, tires, aero, weight-transfer, rider dynamics, staging, environmental, braking, wheelie, parasitic, rolling resistance, forced induction) covering 541 bikes, 593 parts, 254 tires, 20 venues. Validated to K5 GSX-R1000 9.93s, YZF-R1 10.14s, Hayabusa 10.36s.',
     publisher: { '@id': `${SITE_URL}/#organization` },
     author: { '@id': `${SITE_URL}/#organization` },
+    // Free and open source: no paid tiers. A zero-price Offer is the
+    // documented way to mark a SoftwareApplication free for rich results.
+    isAccessibleForFree: true,
+    license: LICENSE_SCHEMA_URL,
     offers: {
       '@type': 'Offer',
       price: '0',
@@ -96,6 +108,7 @@ export function softwareApplicationSchema() {
       url: `${SITE_URL}/simulator`,
     },
     featureList: [
+      `Free and open source (${LICENSE_SPDX})`,
       'Quarter-mile ET prediction to ±0.2s',
       '541 motorcycles with individual aero + dyno curves',
       '593-part catalog with cost-per-tenth ROI analysis',
@@ -109,6 +122,24 @@ export function softwareApplicationSchema() {
   };
 }
 
+// ─── Source code — the project is open source (Apache-2.0) ─────────────
+export function softwareSourceCodeSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareSourceCode',
+    '@id': `${SITE_URL}/#source`,
+    name: 'MotoQuant',
+    description:
+      'Source code of MotoQuant: the RK4 motorcycle drag-racing physics engine, bike/parts/tire catalog, FastAPI backend and Next.js website.',
+    codeRepository: REPO_URL,
+    license: LICENSE_SCHEMA_URL,
+    programmingLanguage: ['Python', 'JavaScript', 'Rust'],
+    isAccessibleForFree: true,
+    author: { '@id': `${SITE_URL}/#organization` },
+    targetProduct: { '@id': `${SITE_URL}/#software` },
+  };
+}
+
 export function faqSchema() {
   return {
     '@context': 'https://schema.org',
@@ -117,11 +148,11 @@ export function faqSchema() {
     mainEntity: [
       {
         '@type': 'Question',
-        name: 'What is MotoQuant Pro?',
+        name: 'What is MotoQuant?',
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'MotoQuant Pro is a physics-based motorcycle quarter-mile drag racing simulator. It predicts ET, trap speed, and split times for 541 production bikes using 15 independent physics sub-models and validated aero, tire, and dyno data.',
+            'MotoQuant is a free, open-source, physics-based motorcycle quarter-mile drag racing simulator. It predicts ET, trap speed, and split times for 541 production bikes using 15 independent physics sub-models and validated aero, tire, and dyno data.',
         },
       },
       {
@@ -130,7 +161,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'MotoQuant Pro is validated against published magazine tests and Dragy runs: Suzuki GSX-R1000 K5 simulates 9.93s against a real 9.97s; Yamaha YZF-R1 simulates 10.14s against 10.3s; Suzuki Hayabusa simulates 10.36s (real range 10.1–10.7s). The August 2026 sweep covers 250 source-quality-weighted benchmarks (276 matched to catalog bikes) with a weighted mean bias of +0.007s; 138 of 276 land within ±0.20s of the published timeslip.',
+            'MotoQuant is validated against published magazine tests and Dragy runs: Suzuki GSX-R1000 K5 simulates 9.93s against a real 9.97s; Yamaha YZF-R1 simulates 10.14s against 10.3s; Suzuki Hayabusa simulates 10.36s (real range 10.1–10.7s). The August 2026 sweep covers 250 source-quality-weighted benchmarks (276 matched to catalog bikes) with a weighted mean bias of +0.007s; 138 of 276 land within ±0.20s of the published timeslip.',
         },
       },
       {
@@ -144,20 +175,20 @@ export function faqSchema() {
       },
       {
         '@type': 'Question',
-        name: 'Is MotoQuant Pro free?',
+        name: 'Is MotoQuant free?',
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'MotoQuant Pro is free during the open beta — create a free account and every Pro and Studio feature is unlocked, including saved runs, the build optimizer, and calibration uploads. At commercial launch, paid tiers begin at Pro ₹499/month and Studio ₹1,999/month; registered users get advance notice by email before billing starts.',
+            'Yes — MotoQuant is free and open source under the Apache License 2.0. There are no paid tiers, subscriptions or feature gates: the simulator, build optimizer, ECU autotune, chat assistant and Dragy/dyno calibration are free for everyone. An optional free account saves your runs to a garage and the leaderboard, and the full source code is on GitHub, so you can audit the physics or run your own copy.',
         },
       },
       {
         '@type': 'Question',
-        name: 'Can I use MotoQuant Pro for Indian drag strips?',
+        name: 'Can I use MotoQuant for Indian drag strips?',
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'Yes — MotoQuant Pro was built for the Indian drag racing community. The venue database covers Aamby Valley (Pune), Madras Motor Race Track (Chennai), Buddh International Circuit (Greater Noida), Kari Motor Speedway (Coimbatore — the Coimbatore strip hosted drag events in the late 1990s before the permanent circuit was built), and Hyderabad, plus seven international venues. Parts pricing is in INR with GST and import duty already factored in.',
+            'Yes — MotoQuant was built for the Indian drag racing community. The venue database covers Aamby Valley (Pune), Madras Motor Race Track (Chennai), Buddh International Circuit (Greater Noida), Kari Motor Speedway (Coimbatore — the Coimbatore strip hosted drag events in the late 1990s before the permanent circuit was built), and Hyderabad, plus seven international venues. Parts pricing is in INR with GST and import duty already factored in.',
         },
       },
       {
@@ -175,7 +206,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'Yes. MotoQuant Pro imports Dragy GPS logs (CSV or VBO) and DynoJet/MoTeC dyno sheets with SAE J1349 atmospheric correction, then overlays your real run against the simulation — ET, trap speed and split-by-split residuals for your specific bike.',
+            'Yes. MotoQuant imports Dragy GPS logs (CSV or VBO) and DynoJet/MoTeC dyno sheets with SAE J1349 atmospheric correction, then overlays your real run against the simulation — ET, trap speed and split-by-split residuals for your specific bike.',
         },
       },
     ],
@@ -201,7 +232,7 @@ export function articleSchema({ title, description, slug, datePublished, dateMod
     },
     publisher: {
       '@type': 'Organization',
-      name: 'MotoQuant Pro',
+      name: 'MotoQuant',
       url: SITE_URL,
     },
     mainEntityOfPage: {

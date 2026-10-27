@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Sobol Sensitivity Analysis
-==========================================
+MotoQuant — Sobol Sensitivity Analysis
+======================================
 Global sensitivity analysis (GSA) for the quarter-mile simulation.
 
 Identifies which bike/setup parameters drive the most variance in
@@ -50,8 +50,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from .. import engine_select
 from ..models import BikeConfig
-from ..physics import MotoQuantEngine
 
 # ─────────────────────────────────────────────────────────────────
 # Parameter specification
@@ -82,6 +82,13 @@ class SobolParamSpec:
 # Ten parameters that physically dominate drag-strip ET variance.
 # Bounds are deliberately wide to capture the full operating envelope
 # of road-legal and light-prep motorcycles.
+#
+# Bike-geometry parameters (Cd, frontal area, rolling radius) are RELATIVE to
+# the bike's own nominal value (October 2026): the old absolute windows
+# (Cd 0.55-0.95, area 0.38-0.62 m², radius 0.28-0.33 m) excluded the nominal
+# Cd of 36% of catalog bikes (catalog Cd spans 0.30-0.92), so for those bikes
+# every sample used a Cd the bike never has and the indices described a
+# different machine than base_et_s.
 DEFAULT_PARAM_BOUNDS: dict[str, SobolParamSpec] = {
     "peak_power": SobolParamSpec(
         path="engine.peak_power_hp",
@@ -99,17 +106,17 @@ DEFAULT_PARAM_BOUNDS: dict[str, SobolParamSpec] = {
     ),
     "aero_cd": SobolParamSpec(
         path="aero.cd",
-        low=0.55,
-        high=0.95,
-        kind="absolute",
-        description="Drag coefficient Cd",
+        low=0.85,
+        high=1.15,
+        kind="relative",
+        description="Drag coefficient Cd (±15% of nominal)",
     ),
     "frontal_area": SobolParamSpec(
         path="aero.frontal_area_m2",
-        low=0.38,
-        high=0.62,
-        kind="absolute",
-        description="Frontal area (m²)",
+        low=0.85,
+        high=1.15,
+        kind="relative",
+        description="Frontal area (±15% of nominal)",
     ),
     "tire_mu": SobolParamSpec(
         path="tires.mu_peak",
@@ -120,10 +127,10 @@ DEFAULT_PARAM_BOUNDS: dict[str, SobolParamSpec] = {
     ),
     "rolling_radius": SobolParamSpec(
         path="tires.rear_rolling_radius_m",
-        low=0.280,
-        high=0.330,
-        kind="absolute",
-        description="Rear rolling radius (m)",
+        low=0.95,
+        high=1.05,
+        kind="relative",
+        description="Rear rolling radius (±5% of nominal)",
     ),
     "reaction_time": SobolParamSpec(
         path="staging.reaction_time_ms",
@@ -322,7 +329,7 @@ def _apply_sample_row(
 def _run_et(config: BikeConfig) -> float:
     """Run a simulation and return quarter-mile ET in seconds."""
     try:
-        engine = MotoQuantEngine(config)
+        engine = engine_select.make_engine(config)
         result = engine.run()
         return result.time_quarter
     except Exception as exc:

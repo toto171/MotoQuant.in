@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * MotoQuant Pro — Signup Page
- * ============================
+ * MotoQuant — Signup Page
+ * ========================
  * Signup = login (register tab opens via ?signup=1).
  * Redirect stub only — the interim frame renders the IGNITION v5 label
  * voice via the shared CodeComment primitive (StageDots + mono label).

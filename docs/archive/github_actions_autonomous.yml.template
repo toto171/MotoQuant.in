@@ -1,0 +1,169 @@
+# Archived 2026-10-23: internal ops — parked autonomous-session workflow template; not part of MotoQuant.
+# ─── PARKED — NOT ACTIVE ──────────────────────────────────────────────
+# This is a TEMPLATE for a GitHub Actions workflow. It is parked at this
+# path (docs/, not .github/workflows/) because:
+#   1. The current setup is local-only (WSL2 + cron + Claude Max).
+#   2. Activating GH Actions requires an Anthropic API key (which the user
+#      explicitly declined for cost reasons).
+#   3. Pushing changes to .github/workflows/ requires a PAT with workflow
+#      scope, which the current PAT does not have.
+#
+# To activate later:
+#   1. Generate a new PAT with both `contents:write` AND `workflow` scopes.
+#   2. Add ANTHROPIC_API_KEY + PRIMARY_PAT as GitHub Secrets in repo settings.
+#   3. Move this file: mv docs/github_actions_autonomous.yml.template
+#      .github/workflows/autonomous_daily.yml
+#   4. Push.
+# ──────────────────────────────────────────────────────────────────────
+
+name: Autonomous Session
+
+# Hourly cron firing the autonomous Claude Code wrapper.
+#
+# Reality: hourly = 24 sessions/day × ~30 min each ≈ 720 GH-Actions minutes/day,
+# which exceeds the 2000 min/mo free tier on private repos by 19,600 min/mo
+# (~$157/mo at $0.008/min overage). Plus API cost (~$15-40/day on Sonnet 4.6).
+# Use this aggressively for the first 1-2 weeks; let the self-review agent
+# propose throttling once you see what actually produces value.
+#
+# To pause without disabling the workflow:
+#   echo "paused" > /tmp/.motoquant-secrets/paused.flag   (in the runner)
+# Or comment out the schedule below.
+#
+# To run manually: Actions tab → "Autonomous Session" → "Run workflow"
+#
+# Required GitHub Secrets:
+#   ANTHROPIC_API_KEY    — from console.anthropic.com (Path A)
+#                          OR leave empty and use claude login (Path B)
+#   PRIMARY_PAT          — your fine-grained GitHub PAT for push
+#                          (same one in ~/.motoquant-secrets/git-creds.env)
+
+on:
+  schedule:
+    # Every hour at :00. Adjust this expression to throttle:
+    #   - "0 */2 * * *"   = every 2 hours (12 sessions/day)
+    #   - "0 */6 * * *"   = every 6 hours (4 sessions/day)
+    #   - "0 0 * * *"     = once daily at midnight UTC (5:30 AM IST)
+    #   - "0 0,12 * * *"  = twice daily (midnight + noon UTC)
+    - cron: "0 * * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Run mode"
+        required: false
+        type: choice
+        options:
+          - normal
+          - dry-run
+          - catchup
+        default: normal
+
+concurrency:
+  # Prevents overlapping sessions if a previous run is still in flight.
+  # Combined with the file-mutex in preflight, this is double safety.
+  group: autonomous-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  autonomous:
+    name: One autonomous session
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write   # push commits
+    timeout-minutes: 90  # hard cap; postflight should be way faster
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          # Need full history for git operations + push
+          fetch-depth: 0
+          # The default GITHUB_TOKEN works for push within the same workflow,
+          # but our scripts use PRIMARY_PAT to match the autonomous-ops contract.
+          token: ${{ secrets.PRIMARY_PAT || secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-api.txt
+
+      - name: Install Python deps (motoquant + tests)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-api.txt
+          pip install -e .
+          pip install pytest
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Claude Code CLI
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          claude --version
+
+      - name: Configure git identity
+        run: |
+          git config user.name "Arya Desai"
+          git config user.email "da25mem5s02@student.nitw.ac.in"
+
+      - name: Bootstrap secrets (no interactive prompt)
+        env:
+          PRIMARY_PAT: ${{ secrets.PRIMARY_PAT }}
+        run: |
+          mkdir -p "$HOME/.motoquant-secrets"
+          chmod 700 "$HOME/.motoquant-secrets"
+          cat > "$HOME/.motoquant-secrets/git-creds.env" <<EOF
+          PRIMARY_PAT="${PRIMARY_PAT}"
+          PRIMARY_ROTATED="$(date -Iseconds)"
+          PRIMARY_EXPIRES="never"
+          BACKUP_PAT=""
+          EOF
+          chmod 600 "$HOME/.motoquant-secrets/git-creds.env"
+
+      - name: Verify baseline (smoke check before spending API tokens)
+        run: |
+          python3 -c "
+          import motoquant
+          from motoquant import MotoQuantEngine
+          for n, c, t in [('K5', motoquant.gsxr1000_k5(), 10.0334),
+                          ('R1', motoquant.yzfr1_4c8(), 10.2859),
+                          ('Busa', motoquant.hayabusa_gen1(), 10.4712)]:
+              et = MotoQuantEngine(c).run().time_quarter
+              assert abs(et - t) < 0.005, f'{n} drift: {et} vs {t}'
+              print(f'  {n}: {et:.4f}s OK')
+          "
+
+      - name: Run autonomous session
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          MODE: ${{ github.event.inputs.mode || 'normal' }}
+        run: |
+          # Translate workflow_dispatch mode into START.sh args
+          ARGS=""
+          if [ "$MODE" = "dry-run" ]; then ARGS="--dry-run"; fi
+          if [ "$MODE" = "catchup" ]; then ARGS="--catchup"; fi
+          bash scripts/run_autonomous_session.sh $ARGS
+
+      - name: Upload session log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: session-log-${{ github.run_id }}
+          path: logs/autonomous_*.log
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Commit + push DISPATCH_OUTBOX update if any
+        if: always()
+        run: |
+          # postflight inside the wrapper already commits + pushes via PAT,
+          # but if claude crashed before postflight, ensure OUTBOX changes still land.
+          if [ -n "$(git status --porcelain DISPATCH_OUTBOX.md 2>/dev/null)" ]; then
+            git add DISPATCH_OUTBOX.md
+            git commit -m "chore(dispatch): outbox update from runner ${{ github.run_id }} [skip ci]" || true
+            git push origin HEAD:main || echo "(push failed — postflight will retry next run)"
+          fi

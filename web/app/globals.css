@@ -210,9 +210,6 @@ body {
   .chip-foul {
     @apply border-signal-foul/35 bg-signal-foul/[0.08] text-signal-foul;
   }
-  .chip-mint {
-    @apply border-mint/35 bg-mint/[0.08] text-mint;
-  }
 
   /* ── v4: Delta chips — ET sign convention: negative = faster = green ── */
   .delta-down {

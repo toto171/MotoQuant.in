@@ -3,6 +3,7 @@ import SiteNav from '../../../components/SiteNav';
 import SiteFooter from '../../../components/SiteFooter';
 import StructuredData, { articleSchema } from '../../StructuredData';
 import InlineSimCta from './InlineSimCta';
+import { REPO_URL } from '../../../lib/site';
 
 const SLUG = 'hayabusa-vs-zx-14r-which-is-faster';
 const TITLE = 'Hayabusa vs ZX-14R: Quarter-Mile Drag Race Physics (India)';
@@ -382,10 +383,15 @@ export default function PostPage() {
             </li>
             <li>
               ·{' '}
-              <Link href="/pricing" className="text-brand-accent hover:text-brand-orange transition-colors">
-                MotoQuant Pricing
-              </Link>{' '}
-              — Free for street tuners; Pro for shops and racing teams.
+              <a
+                href={REPO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-accent hover:text-brand-orange transition-colors"
+              >
+                MotoQuant on GitHub
+              </a>{' '}
+              — free and open source: audit the physics behind every number in this post, or run it yourself.
             </li>
           </ul>
         </div>

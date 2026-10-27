@@ -1,8 +1,21 @@
 # Client-Side Compute — using the rider's hardware to scale
 
-> Written 2026-08-11 (commercial-launch readiness). Operator directive: move
-> quick sims — and eventually main sims — onto the user's device so the
-> 0.5-CPU Render instance stops being the scaling bottleneck.
+> Written 2026-08-11. Operator directive: move quick sims, and eventually
+> main sims, onto the user's device so the 0.5-CPU Render instance stops
+> being the scaling bottleneck.
+>
+> **Updated 2026-10-23 ([ADR-0006](adr/0006-open-source-pivot.md)):**
+> MotoQuant is free and open source, so nothing is kept server-side to
+> protect a paid tier any more; the "pro-gated" rows below are superseded.
+> A Rust core compiled to wasm32 now provides exact full sims in the browser
+> at ~94 KB gzip ([RUST_CORE.md](RUST_CORE.md)), which changes the Tier 2
+> picture below.
+>
+> **Updated 2026-10-24 ([ADR-0007](adr/0007-rust-physics-core.md)):** the
+> Pyodide plan for Tier 2 is **retired**. Its harness
+> (`e2e/pyodide-mainsim-parity.mjs`) and manual workflow
+> (`.github/workflows/pyodide-parity.yml`) were deleted. They had never been
+> run. The Rust wasm32 engine replaces them, with parity proven in CI.
 
 ## What runs where (the contract)
 
@@ -10,8 +23,8 @@
 |---|---|---|
 | Live/quick estimates (slider drags) | **Browser** — `web/lib/surrogate.js` | Shipped 2026-08-11. Zero server cost, ~0.01 ms, proven equal to the server surrogate to <1e-9 s |
 | Exact quarter-mile (splits, timeseries) | **Server** (RK4) | The authoritative number; the Run button |
-| Full sims in-browser (future) | **Browser** — Pyodide/WASM, gated on CI proof | See "Main sims" below |
-| Build Optimizer / Autotune / Outlaw | **Server only, pro-gated** | The paid product — never shipped to the client |
+| Full sims in-browser (future) | **Browser** — the Rust wasm32 core (`web/lib/engine.js`); parity proven, UI not wired yet | See "Tier 2" below |
+| Build Optimizer / Autotune / Outlaw | **Server, free for everyone** (no tier gate since 2026-10-23) | They orchestrate hundreds of sims plus the knapsack/ROI machinery, so they stay server-side for practical reasons. They are now *candidates* for client-side execution like everything else; there is no paid product to protect |
 | Leaderboard saves | **Server only** | Estimated results can never be saved (enforced in the simulator page) |
 
 ## Tier 1 — the in-browser surrogate (SHIPPED)
@@ -43,8 +56,8 @@ Honesty rules baked into the UI:
   documented accuracy (±0.11 s typical vs the physics — see
   `artifacts/surrogate/README.md`)
 - "Save this run" is never offered on an estimated result
-- the funnel event stream tags `engine: 'client-surrogate' | 'server'` so
-  conversion and load-shift are both measurable
+- the (opt-in) telemetry event stream tags `engine: 'client-surrogate' |
+  'server'` so load shift is measurable
 
 **REGEN CONTRACT (extends the standing surrogate contract):** the web export
 is a cache of the surrogate, which is a cache of the physics. After ANY
@@ -53,50 +66,69 @@ the same session. The two JSON files carry the npz's sha256 and the JS
 refuses a mismatched pair, so a forgotten regen degrades to server-only
 (slow, correct) rather than serving stale numbers.
 
-## Tier 2 — main sims in the browser (HARNESS SHIPPED, UI GATED ON PROOF)
+## Tier 2 — main sims in the browser (ENGINE + PARITY SHIPPED, UI NOT WIRED)
 
-The full RK4 engine's import surface is numpy + stdlib only (verified by
-blocking every other import and reproducing all three pinned baselines to
-<5e-11 s). That makes the **unmodified Python engine** runnable in the
-browser via Pyodide — no JS port, no second implementation, no baseline
-drift risk from a rewrite.
+Exact full simulations in the browser use the **Rust core compiled to
+wasm32** (`web/public/engine/motoquant_core.wasm`, ~274 KB raw / ~94 KB gzip,
+loaded by `web/lib/engine.js`). It is the same source that serves the API on
+the server (ADR-0007), so the browser and the server run one integrator. The
+port covers only the integrator: the browser receives a *resolved* config,
+and Python has already applied every policy decision (category profile,
+venue, parts, tire scaling).
 
-Two open questions gate the UI work, and both are answered by
-`e2e/pyodide-mainsim-parity.mjs` (manual-trigger workflow
-`.github/workflows/pyodide-parity.yml`):
+**Proof, not hope.** `node web/scripts/engine-parity.mjs` runs the REAL
+`engine.js` (fetch shim → instantiate → schema check → simulate → decode)
+against Python-reference fixtures. It **fails** on drift beyond 1e-9 s in ET,
+trap or any split, and on any change in sample count, loop step count, final
+`dt` or the `finished` flag. Status 2026-10-24:
 
-1. **Numerics.** WASM float64 arithmetic is IEEE-exact but libm
-   transcendentals can differ by 1 ulp from glibc. The harness runs the three
-   pinned references inside WASM and asserts the same 1e-9 s tolerance
-   `scripts/check_baselines.py` uses. The Claude sandbox cannot reach the
-   Pyodide CDN (numpy wasm wheel), so the proof runs on Actions where egress
-   is open — trigger it from the Actions tab.
-2. **Speed.** Native full sim is ~320-380 ms; interpreted-Python-on-WASM is
-   expected 3-10× slower. The harness reports wall-clock per sim so the UX
-   call (acceptable for an explicit "run locally" action?) is made on real
-   numbers.
+- 53/53 committed fixture cases are exact;
+- 1,082/1,082 catalog runs (every bike, fixed + adaptive,
+  `scripts/gen_engine_web.py --full-catalog`) are exact;
+- force-type channels show 1-ULP noise from Rust's pure libm, absorbed by the
+  integrator (RUST_CORE.md, "wasm32 parity").
 
-If the harness passes: wire a lazy-loaded "run locally" path for the FREE
-full-sim action (payload ~15 MB, cached; worth it for offline + zero server).
-If it drifts: record the deltas here and stop — an "exact" number that
-disagrees with the server by more than the baseline tolerance must not ship.
+The CI job `.github/workflows/native.yml` runs the committed-fixture check on
+every relevant change.
+
+Pyodide was the previous plan: the unmodified Python engine on WebAssembly.
+It was rejected on the numbers. Its payload is ~15 MB against 94 KB, and its
+expected speed was 3–10× *slower* than native Python, against ~30–80×
+*faster* for the Rust engine.
+
+What is still missing before a "run locally" button ships:
+
+1. A resolved-config route (`GET /api/resolve?bike_id=&venue_id=&parts=` →
+   `native.resolved_json(native.resolve_config(cfg))`, ~5–9 KB, cacheable per
+   selection).
+2. Simulator wiring, labelled "exact — computed on your device", with a
+   server fallback when the wasm fails to load (`loadEngine()` evicts a failed
+   load, so a retry re-fetches).
 
 What client full sims deliberately do NOT change:
 - **Leaderboard integrity** — saved runs stay server-authoritative. (Note:
   `/api/simulate/save` currently trusts the client-supplied ET — a documented,
   rate-limited beta posture. Client-side sims neither worsen nor fix that;
   the fix is server-side recomputation at save time, tracked separately.)
-- **The paid tier** — Optimizer/Autotune/Outlaw orchestrate hundreds of sims
-  plus the knapsack/ROI machinery server-side and stay pro-gated. Shipping
-  the engine for single free sims does not ship the analysis product.
+- ~~**The paid tier** — Optimizer/Autotune/Outlaw stay pro-gated~~ —
+  *superseded 2026-10-23 (ADR-0006).* There is no paid tier. The whole
+  engine and analysis layer are open source, so moving more of them to the
+  client is purely an engineering trade-off (payload, speed, parity proof).
 
 ## Rejected alternatives (do not re-litigate without new facts)
 
 - **JS/Dart port of the RK4 engine** — a second implementation of 15
   submodels that must track the bit-identical baseline contract forever;
   every divergence is a credibility bug on the site's accuracy claims.
+  *(2026-10-23: the Rust core answers this objection with a different
+  design. Only the integrator is ported, all policy stays in Python, and
+  drift is caught mechanically by parity gates. See
+  [RUST_CORE.md](RUST_CORE.md). A hand-written JS port is still rejected.)*
 - **A mobile app for local compute** — reverses ADR-0005 (hosted-only)
   for a distribution bet that a PWA + this client-compute stack covers.
 - **numpy-shim to run the engine on Pyodide-core without the CDN** — a
   hand-rolled mini-numpy with exact-float64 semantics is precisely the
   silent-numerical-drift risk this architecture exists to avoid.
+- **Pyodide for full sims** — retired 2026-10-24 (ADR-0007): ~15 MB and
+  seconds per sim, versus the Rust wasm engine's ~94 KB and milliseconds
+  with CI-proven parity.

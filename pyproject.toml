@@ -1,24 +1,40 @@
 [project]
 name = "motoquant"
 version = "4.0.0"
-description = "The physics of faster — First-principles motorcycle quarter-mile simulation & optimization"
+description = "The physics of faster — free, open-source first-principles motorcycle quarter-mile simulation & optimization"
 authors = [{name = "Hritwik Mudhai", email = "dhisetu@gmail.com"}]
 requires-python = ">=3.10"
+# PEP 639 SPDX expression (+ the file it refers to). Needs setuptools>=77,
+# pinned in [build-system] below; deliberately NO "License ::" classifier —
+# PEP 639 forbids combining the two.
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+readme = "README.md"
+keywords = ["motorcycle", "drag racing", "physics", "simulation", "quarter mile"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+
+[project.urls]
+Homepage = "https://www.motoquant.in"
+Source = "https://github.com/da25mem5s02-debug/MotoQuant_v1"
+Issues = "https://github.com/da25mem5s02-debug/MotoQuant_v1/issues"
 
 [project.scripts]
 # Stdio MCP server exposing the sim API as tools (docs/MCP.md).
 motoquant-mcp = "motoquant.mcp_server:main"
 
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 # Flat layout: repo root holds several top-level dirs (motoquant, tests,
-# scripts, web, desktop, ...). Without an explicit find directive, setuptools
+# scripts, web, rust, ...). Without an explicit find directive, setuptools
 # auto-discovery aborts with "Multiple top-level packages discovered", which
-# breaks `pip install -e .` in the desktop sidecar CI build. Restrict the
-# installed distribution to the motoquant package and its subpackages.
+# breaks `pip install -e .` (CI and `make install`). Restrict the installed
+# distribution to the motoquant package and its subpackages.
 include = ["motoquant*"]
 
 [tool.ruff]

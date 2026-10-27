@@ -4,11 +4,12 @@
 
 import StructuredData, { SITE_URL } from '../StructuredData';
 
-const TITLE = "Sign In — MotoQuant Pro";
-const DESCRIPTION = "Sign into your MotoQuant Pro account with magic-link email auth.";
+const TITLE = "Sign In — MotoQuant";
+const DESCRIPTION = "Sign in to your free MotoQuant account with a password or a magic-link email.";
 
 export const metadata = {
-  title: TITLE,
+  // absolute: TITLE already carries the brand — skip the '%s · MotoQuant' template
+  title: { absolute: TITLE },
   description: DESCRIPTION,
   alternates: { canonical: '/login' },
   keywords: ["motoquant login", "drag simulator account"],

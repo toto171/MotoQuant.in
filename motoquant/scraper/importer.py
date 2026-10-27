@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Spec Importer
-=============================
+MotoQuant — Spec Importer
+=========================
 Converts validated BikeSpec → BikeConfig and upserts into MotoQuantDB.
 
 Mapping strategy:
@@ -18,6 +18,9 @@ import logging
 
 from ..defaults import gsxr1000_k5  # used to get default sub-configs
 from ..models import (
+    DRIVE_BELT,
+    DRIVE_CHAIN,
+    DRIVE_SHAFT,
     AeroParams,
     BikeConfig,
     ChassisParams,
@@ -314,7 +317,14 @@ def _infer_cylinder_config(spec: "BikeSpec") -> str | None:
 _BELT_DRIVE_MAKES = {"Indian", "Indian Motorcycle", "Victory"}
 # Harley-Davidson is belt drive EXCEPT for Bajaj-built single-cylinder X440 (chain)
 # and Buell uses belt.
-_HD_CHAIN_MODELS = {"X440"}
+_HD_CHAIN_MODELS = {
+    "X440",
+    # Pan America 1250 — CHAIN final drive, 19/48 (Harley-Davidson 2022
+    # RA1250 official spec sheet, h-dmediakit.com: "Final Drive: Chain,
+    # 19/48 ratio"; Cycle World "Why does Harley-Davidson's ADV bike have
+    # chain final drive"). Was belt-by-make until 2026-10.
+    "Pan America",
+}
 # Indian Motorcycle is belt drive EXCEPT the chain-drive FTR family.
 _INDIAN_CHAIN_MODELS = {"FTR"}
 
@@ -329,6 +339,8 @@ _BMW_SHAFT_MODELS = {
     "R1200",
     "R nineT",
     "R 12",  # 2024+ R 12 / R 12 nineT — shaft, not covered by "R nineT" token
+    "R 18",  # 2020+ R 18 cruiser boxer — shaft (its spec carries the 0/0
+    #   sentinel; the heuristic missed it and inferred a 530 chain)
     "K 1600",
     "K1600",
     "K 1300",
@@ -338,19 +350,36 @@ _BMW_SHAFT_MODELS = {
 # July 6, 2026: "V100" added (Mandello — shaft; audit fix class A)
 _MG_SHAFT_MODELS = {"V7", "V9", "V85", "V100", "California", "Griso", "Stelvio"}
 
-# Individual chain-drive-excluded models from chain-drive makes (edge cases)
-_NON_CHAIN_MODELS = {
-    "VMAX",  # Yamaha VMAX 1700 — shaft drive
-    "Gold Wing",  # Honda Gold Wing — shaft drive
-    "1125R",  # Buell 1125R — belt drive
-    "CB1100",  # Honda CB1100 — shaft drive (the retro 4)
+# Individual non-chain models from chain-drive makes (edge cases), mapped to
+# their final-drive type. The importer stamps this onto
+# DrivetrainParams.drive_type (2026-10 data epoch), so a wrong entry here is a
+# physics error, not just a parts-fitment one — keep every entry cited.
+_NON_CHAIN_MODEL_DRIVE: dict[str, str] = {
+    "VMAX": DRIVE_SHAFT,  # Yamaha VMAX 1200 + 1700 — shaft (Yamaha 2009 VMAX
+    #   launch spec "Final Drive: Shaft"; 1985 V-Max shaft per CW 1985)
+    "Gold Wing": DRIVE_SHAFT,  # Honda Gold Wing — shaft drive
+    "1125R": DRIVE_BELT,  # Buell 1125R — belt drive
     # July 6, 2026 (audit fix class A — these reseeded with phantom chain
     # pitches and matched sprocket/chain parts they can't physically take):
-    "Rocket 3",  # Triumph Rocket 3 — shaft drive
-    "FJR1300",  # Yamaha FJR1300 — shaft drive
-    "Tiger 1200",  # Triumph Tiger 1200 — shaft drive
-    "Aerox",  # Yamaha Aerox 155 — CVT belt scooter, no chain final drive
+    "Rocket 3": DRIVE_SHAFT,  # Triumph Rocket 3 — shaft drive
+    "FJR1300": DRIVE_SHAFT,  # Yamaha FJR1300 — shaft drive
+    "Tiger 1200": DRIVE_SHAFT,  # Triumph Tiger 1200 — shaft drive
+    # CVT belt scooters: no chain final drive. models.py has no CVT drive
+    # type, so they map to DRIVE_BELT (rubber V-belt variator; the chain
+    # slack dead-zone does not apply). A CVT efficiency model is a physics
+    # item — DrivetrainParams.chain_efficiency still sets their eta.
+    "Aerox": DRIVE_BELT,  # Yamaha Aerox 155 — CVT
+    "NTorq": DRIVE_BELT,  # TVS NTorq 125 — CVT
+    # 2026-10 epoch additions (each was a drive-type hole in the heuristic):
+    "Super Tenere": DRIVE_SHAFT,  # Yamaha XT1200Z — shaft (secondary
+    "XT1200Z": DRIVE_SHAFT,  #   reduction 2.987, Yamaha owner's manual p.100)
 }
+# Back-compat name (pre-epoch callers/tests): the set of non-chain tokens.
+# NOTE: "CB1100" was REMOVED (2026-10): the Honda CB1100 is CHAIN drive —
+# #530 O-ring chain, 18/39 (Ultimate Motorcycling 2013 CB1100 spec list;
+# powersports.com listing) — not the shaft drive this list claimed.
+_NON_CHAIN_MODELS = set(_NON_CHAIN_MODEL_DRIVE)
+
 # Models with explicit 530 pitch (mostly 1300cc+ drag platforms, older litre sport)
 _530_PITCH_MODELS = {"Hayabusa", "ZX-14R", "ZZR1400", "ZRX1200"}
 # Models with explicit 428 pitch (SE Asia cubs / underbones / <150cc)
@@ -430,6 +459,9 @@ _SHAFT_BELT_FINAL_DRIVE: list[tuple[str, float]] = [
     #   (Buell forums / OEM 145T belt listings).
     ("chief", 2.2),  # VERIFIED: Indian publishes final drive 2.2:1 belt for
     #   the 2022+ Chief family (indianmotorcycle.com spec sheet).
+    ("pursuit", 2.379),  # VERIFIED (2026-10): Indian Pursuit (Challenger
+    #   platform, PowerPlus 108) belt final drive 2.379:1
+    #   (indianmotorcycle.in 2024 Pursuit Dark Horse spec; motorcycle.com 2.38).
     # Moto Guzzi shaft
     ("v85", 3.29),  # ESTIMATED (effective): V85 TT service manual gives bevel
     #   8/33 = 4.125 and primary 18/23 = 1.277 (real total secondary 5.27).
@@ -472,52 +504,104 @@ def _shaft_belt_final_drive(spec: "BikeSpec") -> float:
     )
 
 
-def _infer_chain_pitch(spec: "BikeSpec") -> str | None:
-    """
-    Infer the standard chain pitch code (428 / 520 / 525 / 530) from a BikeSpec.
+# Standard chain pitch codes the curated specs carry. 420/428 are the 1/2"
+# (12.7 mm) pitch small-cc chains, 520/525/530/532 the 5/8" (15.875 mm) ones —
+# the codes differ in roller width, not pitch.
+_CHAIN_PITCH_CODES = {"420", "428", "520", "525", "530", "532"}
+_DRIVE_WORDS = {"chain": DRIVE_CHAIN, "belt": DRIVE_BELT, "shaft": DRIVE_SHAFT}
 
-    Returns None for belt or shaft drive bikes, and for bikes with unknown
-    displacement. Chain pitch is needed by the parts compatibility engine so
-    sprocket/chain fitment rules can target the correct bikes.
 
-    Rules (coarse but accurate for drag-relevant catalogs):
-      • Belt/shaft drive makes → None (Harley, Indian, BMW boxer, Moto Guzzi)
-      • Explicit model hits (Hayabusa/ZX-14R → "530"; SE Asia 150s → "428")
-      • ≤165cc → "428" (most Indian/SE Asia small-cc)
-      • 166–499cc → "520"
-      • 500–999cc → "520" (modern sport) / "525" (older litre)
-      • 1000–1299cc → "525"
-      • ≥1300cc → "530"
+def _spec_declared_drive_type(spec: "BikeSpec") -> str | None:
+    """Final-drive type stated by the curated spec, or None when it is silent.
+
+    ``spec.final_drive`` ("chain"/"belt"/"shaft") wins; otherwise the
+    ``spec.chain_pitch`` field, which the catalog uses both for pitch codes
+    ("520" ⇒ chain) and for the drive word ("belt"/"shaft").
     """
+    fd = (spec.final_drive or "").strip().lower()
+    if fd in _DRIVE_WORDS:
+        return _DRIVE_WORDS[fd]
+    if fd == "cvt":
+        return DRIVE_BELT
+    cp = (spec.chain_pitch or "").strip().lower()
+    if cp in _DRIVE_WORDS:
+        return _DRIVE_WORDS[cp]
+    if cp in _CHAIN_PITCH_CODES:
+        return DRIVE_CHAIN
+    return None
+
+
+def _heuristic_drive_type(spec: "BikeSpec") -> str:
+    """Manufacturer/model heuristic for the final-drive type (used only when
+    the spec does not declare one). Belt: Harley-Davidson / Buell / Indian /
+    Victory (minus their chain exceptions); shaft: BMW boxer + K-series, Moto
+    Guzzi V-twins; per-model exceptions in ``_NON_CHAIN_MODEL_DRIVE``; chain
+    otherwise."""
     make = (spec.manufacturer or "").strip()
     model = spec.model_name or ""
-    cc = spec.displacement_cc
-
-    # Belt / shaft drive exclusions
     if make in _BELT_DRIVE_MAKES:
-        # Chain-drive exceptions within belt-drive makes: the Indian FTR
-        # 1200 family is chain final drive (flat-track lineage), unlike
-        # every other Indian model (July 6, 2026).
         if not any(tok in model for tok in _INDIAN_CHAIN_MODELS):
-            return None
+            return DRIVE_BELT
     if make == "Harley-Davidson":
-        # Harley is belt drive except chain-drive exceptions (Bajaj-built X440)
         if not any(tok in model for tok in _HD_CHAIN_MODELS):
-            return None
+            return DRIVE_BELT
     if make == "Buell":
-        return None  # Buell is belt drive
+        return DRIVE_BELT
     if make == "BMW":
         for tok in _BMW_SHAFT_MODELS:
             if tok in model:
-                return None
-        # BMW chain-drive fleet (S1000/F/G/M series) falls through to disp rules
+                return DRIVE_SHAFT
     if make == "Moto Guzzi":
         for tok in _MG_SHAFT_MODELS:
             if tok in model:
-                return None
-    for tok in _NON_CHAIN_MODELS:
+                return DRIVE_SHAFT
+    for tok, drive in _NON_CHAIN_MODEL_DRIVE.items():
         if tok in model:
-            return None
+            return drive
+    return DRIVE_CHAIN
+
+
+def _infer_drive_type(spec: "BikeSpec") -> str:
+    """Final-drive type for a spec: the curated declaration
+    (:func:`_spec_declared_drive_type`) when present, else the
+    manufacturer/model heuristic.
+
+    2026-10 data epoch: before this the importer never set
+    ``DrivetrainParams.drive_type``, so every belt/shaft/CVT bike simulated
+    with chain efficiency and the chain-slack launch dead-zone, and the spec's
+    ``final_drive`` / ``chain_pitch`` declarations were discarded.
+    """
+    return _spec_declared_drive_type(spec) or _heuristic_drive_type(spec)
+
+
+def _infer_chain_pitch(spec: "BikeSpec") -> str | None:
+    """
+    Standard chain pitch code (420 / 428 / 520 / 525 / 530 / 532) for a
+    BikeSpec, or None for belt/shaft/CVT drive and unknown displacement.
+
+    Precedence (2026-10 data epoch):
+      1. A non-chain final drive (declared or heuristic) → None.
+      2. A pitch code the curated spec declares (``spec.chain_pitch``) is
+         used verbatim — the curated value beats the displacement heuristic.
+      3. Heuristic (coarse but accurate for drag-relevant catalogs):
+         • Explicit model hits (Hayabusa/ZX-14R → "530"; SE Asia 150s → "428")
+         • ≤165cc → "428" (most Indian/SE Asia small-cc)
+         • 166–499cc → "520"
+         • 500–999cc → "520" (modern sport) / "525" (older litre)
+         • 1000–1299cc → "525"
+         • ≥1300cc → "530"
+
+    Chain pitch feeds the parts-compatibility engine (sprocket/chain fitment
+    rules); it has no physics consumer.
+    """
+    if _infer_drive_type(spec) != DRIVE_CHAIN:
+        return None
+    declared = (spec.chain_pitch or "").strip()
+    if declared in _CHAIN_PITCH_CODES:
+        return declared
+
+    model = spec.model_name or ""
+    cc = spec.displacement_cc
 
     # Explicit model overrides
     for tok in _530_PITCH_MODELS:
@@ -548,6 +632,48 @@ def _infer_chain_pitch(spec: "BikeSpec") -> str | None:
 # ────────────────────────────────────────────────────────
 # Synthetic torque curve builder
 # ────────────────────────────────────────────────────────
+
+
+# Library (measured chassis-dyno) curve plausibility gate — 2026-10 data
+# epoch. An at-wheel curve's peak power divided by a clean chain driveline's
+# efficiency (primary 0.99 × gear mesh 0.985 × chain 0.97 = 0.946, the sim's
+# own DrivetrainParams default) is the crank power it implies. When that
+# exceeds the spec's rated crank power by more than this factor the curve
+# belongs to a different engine/tune (a cross-generation ±3-year lookup
+# fallback) or is a crank figure mislabelled as at-wheel, and is rejected in
+# favour of the synthetic path. At 2026-10 it rejects: Ninja ZX-10R 2004
+# (Gen1 table 189 whp vs 175 hp claim → 1.14), GSX-R 1000 2003 (K5 table via
+# the ±3-year fallback → 1.10), GSX-S1000 2021 (158 whp vs 152 hp → 1.10).
+_LIBRARY_CURVE_MAX_IMPLIED_RATIO = 1.10
+_CLEAN_CHAIN_ETA = 0.99 * 0.985 * 0.97
+
+
+def _library_curve_plausible(curve, spec: "BikeSpec") -> bool:
+    """True if a library dyno curve is consistent with the spec's rated power
+    (see ``_LIBRARY_CURVE_MAX_IMPLIED_RATIO``)."""
+    if not spec.peak_power_hp:
+        return True
+    import numpy as np
+
+    rpm = np.asarray(curve.rpm, dtype=float)
+    tq = np.asarray(curve.torque_nm, dtype=float)
+    peak_hp = float((tq * rpm * 2.0 * np.pi / 60.0 / 745.7).max())
+    implied_crank_hp = peak_hp / _CLEAN_CHAIN_ETA if curve.is_at_wheel else peak_hp
+    ratio = implied_crank_hp / float(spec.peak_power_hp)
+    if ratio > _LIBRARY_CURVE_MAX_IMPLIED_RATIO:
+        logger.info(
+            "Library dyno curve rejected for %s %s %s: implies %.0f crank hp vs "
+            "rated %.0f (%.2fx > %.2fx); using the synthetic curve",
+            spec.manufacturer,
+            spec.model_name,
+            spec.year_from,
+            implied_crank_hp,
+            spec.peak_power_hp,
+            ratio,
+            _LIBRARY_CURVE_MAX_IMPLIED_RATIO,
+        )
+        return False
+    return True
 
 
 def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
@@ -667,6 +793,8 @@ def _build_engine_from_spec(spec: BikeSpec) -> EngineParams:
         year=spec.year_from,
         model_code=spec.model_code,
     )
+    if dyno is not None and not _library_curve_plausible(dyno, spec):
+        dyno = None  # fall through to the synthetic path (logged)
 
     # If no known curve found, generate a synthetic one based on peak power/torque.
     #
@@ -854,13 +982,18 @@ def _build_drivetrain_from_spec(
         rear = rear or base.rear_sprocket
         final_drive_ratio = float(rear) / float(front)
 
+    # Final-drive type (2026-10 data epoch): the spec's declaration
+    # (final_drive / chain_pitch "belt"|"shaft"|pitch code) wins, else the
+    # manufacturer/model heuristic. Feeds DrivetrainParams.drivetrain_efficiency()
+    # (shaft → shaft_efficiency) and the chain-slack launch dead-zone
+    # (submodels/chain.py, chain only). Before this every catalog bike ran as
+    # a chain bike.
+    drive_type = _infer_drive_type(spec)
     pitch = _infer_chain_pitch(spec)
-    # Pitch in mm: 428 = 12.7, 520 = 15.875, 525 = 15.875, 530 = 15.875.
-    # Only the nominal roller width differs materially for mass/drag — map to
-    # the most common mm values so sim consumers that read chain_pitch_mm stay
-    # accurate. Use 12.7 for 428, 15.875 for 520/525/530 (the differences are
-    # roller width, not pitch).
-    chain_pitch_mm = 12.7 if pitch == "428" else base.chain_pitch_mm
+    # Pitch in mm: 420/428 = 12.7 (1/2"), 520/525/530/532 = 15.875 (5/8") —
+    # the codes within a pitch differ in roller width, not pitch. No physics
+    # consumer reads chain_pitch_mm today.
+    chain_pitch_mm = 12.7 if pitch in ("420", "428") else base.chain_pitch_mm
 
     # Naked bikes across 500-700cc have thinner chains and efficiency losses
     # similar to small-cc despite larger displacement
@@ -877,6 +1010,7 @@ def _build_drivetrain_from_spec(
         rear_sprocket=int(rear),
         chain_pitch_mm=chain_pitch_mm,
         chain_pitch=pitch,
+        drive_type=drive_type,
         chain_links=base.chain_links,
         primary_ratio=float(primary),
         chain_efficiency=chain_eff,
@@ -989,76 +1123,61 @@ def _build_tires_from_spec(spec: BikeSpec) -> TireParams:
 def _build_aero_from_spec(spec: BikeSpec) -> AeroParams:
     """Build AeroParams from spec or category defaults.
 
-    Critical convention: ``spec.cd`` is the **rider-tuck Cd** (the value the
-    bike+rider system presents during a high-speed run with the rider
-    tucked behind the fairing, knees against the tank, chin on the tank).
-    The rider_dynamics submodel multiplies by 1.18× for the upright launch
-    position and interpolates back down to ``spec.cd`` over
-    ``tuck_transition_time_s``.
+    Cd convention (2026-10 data epoch — the SAME scale as the hand-curated
+    references in ``motoquant/defaults.py``):
 
-    Reference tuck Cds in the catalog (all faired sport bikes):
-      Suzuki GSX-R 1000 K5     0.32
-      Yamaha YZF-R1 (4C8)      0.33
-      Suzuki Hayabusa Gen1     0.31
-      Kawasaki ZX-10R modern   0.34
+      ``spec.cd`` × ``spec.frontal_area_m2`` is the drag area of the
+      BIKE + RIDER system with the rider in the normal riding tuck, i.e. the
+      ``AeroParams.cd`` / ``frontal_area_m2`` pair consumed as-is by
+      ``AeroParams.cd_a_effective`` (``rider_position`` = ``RIDER_TUCK``
+      applies no modifier). The rider model
+      (``submodels/rider_dynamics.RiderDynamicsModel.cd_a``) then inflates it
+      ×1.18 for the upright launch stance and eases back to it over
+      ``RiderParams.tuck_transition_time_s``.
 
-    These match published wind-tunnel data for full-fairing sport bikes
-    in tuck position. Cd is dominated by fairing GEOMETRY, not engine
-    displacement — a properly-faired R15 in the same rider position has
-    Cd around 0.40 (slightly higher than K5 because rider is closer to
-    the size of the bike, exposing more of their back to the airstream).
+    Reference values on this scale (defaults.py, used verbatim by the
+    pinned baselines):
 
-    Pre-April-24 the sub-500cc ``sport`` defaults here were `cd=0.72` —
-    that's an UPRIGHT Cd. Combined with the rider_dynamics 1.18× upright
-    multiplier, the launch-phase effective Cd was 0.85, ~2.6× what a
-    K5-class bike sees. This single error contributed about 1-1.5 s to
-    the small-cc-class ET bias (validated by perturbation: scaling Cd
-    by 0.5 on R15 V3 dropped ET by 0.33 s in earlier sensitivity sweep,
-    and the proper tuck value is roughly 0.55× the upright spec value).
+      Suzuki GSX-R 1000 K5   cd 0.70 × A 0.45 m² = CdA 0.315 m²
+      Yamaha YZF-R1 4C8      cd 0.72 × A 0.44 m² = CdA 0.317 m²
+      Suzuki Hayabusa Gen1   cd 0.62 × A 0.50 m² = CdA 0.310 m²
 
-    Fix: enforce a tuck-Cd ceiling of 0.45 for sport-class bikes
-    regardless of displacement. The sub-500cc default drops from 0.72
-    (upright) to 0.42 (tuck). Per-spec values from known_bikes.py that
-    look like upright Cds (>0.45 for sport class) are normalized down to
-    the tuck range using a 0.55× scale factor (calibrated from the
-    upright/tuck ratio measured on K5-class bikes).
+    The curated catalog specs are already on this scale (faired sport
+    median cd 0.64 / A 0.45 m² across ALL_KNOWN_BIKES), so they are used
+    verbatim.
+
+    History — the removed ×0.55 "tuck normalisation": from April 24, 2026
+    until this epoch, every ``category == "sport"`` spec with cd > 0.45 was
+    rescaled ``cd = max(0.30, cd × 0.55)`` (192 catalog specs, 135 of the 276
+    benchmark-matched rows). Its premise was that the references carry a "tuck Cd of
+    0.32/0.33/0.31" — but those numbers are the references' Cd·A in m²
+    (0.315/0.317/0.310 above), not their Cd. The rescale therefore gave the
+    catalog faired bikes about HALF the drag area of the references they are
+    validated alongside (CdA ≈ 0.15-0.17 m² vs ≈ 0.31 m²): the corpus-wide
+    +13.8 km/h trap-speed and +24.3 km/h top-speed overshoot of the
+    2026-08-08 sweep concentrated in exactly those bikes (CdA < 0.17 bucket
+    trap bias +19.0 km/h, n=99, vs +8.1 km/h for CdA ≥ 0.30, n=125). The
+    sub-500 cc faired-sport default (cd 0.42) that was derived from the same
+    premise is removed with it; such specs now take the category default.
+    Naked/cruiser/adventure values were never rescaled and are unchanged.
+    Measured on the HEAD physics: those 192 bikes' mean CdA 0.160 → 0.292 m²,
+    ET +0.24 s, trap −9.3 km/h; top-speed sweep mean|Δ| 28.1 → 16.8 km/h.
     """
     aero_defaults = CATEGORY_AERO.get(spec.category, CATEGORY_AERO["sport"])
     base = gsxr1000_k5().aero
     cc = spec.displacement_cc or 1000
 
-    # Small-cc sub-gate: tighter sport-tuck Cd for sub-500cc faired bikes.
-    # Naked bikes don't have a fairing to tuck behind — keep their drag
-    # numbers as-is (sitting upright is their physical reality regardless
-    # of what the rider does).
-    if cc < 500:
-        if spec.category == "naked":
-            aero_defaults = {
-                "cd": 0.86,
-                "frontal_area_m2": 0.55,
-                "wheelie_tendency": 0.8,
-            }
-        elif spec.category == "sport":
-            # Tuck Cd for a faired small-cc sport bike — slightly higher
-            # than K5's 0.32 because the smaller fairing leaves more of
-            # the rider exposed.
-            aero_defaults = {
-                "cd": 0.42,
-                "frontal_area_m2": 0.46,
-                "wheelie_tendency": 1.2,
-            }
+    # Sub-500cc naked default: no fairing to tuck behind, so the rider's
+    # upright torso dominates. (Only reached when a spec carries no cd —
+    # every curated ALL_KNOWN_BIKES entry does.)
+    if cc < 500 and spec.category == "naked":
+        aero_defaults = {
+            "cd": 0.86,
+            "frontal_area_m2": 0.55,
+            "wheelie_tendency": 0.8,
+        }
 
     cd = spec.cd if spec.cd is not None else aero_defaults["cd"]
-
-    # Tuck-Cd normalization for sport-class bikes: spec.cd values from
-    # the known_bikes catalog were inadvertently populated with upright
-    # values for several sub-500cc sport bikes (R15 V3 0.56, RC 390
-    # 0.68, etc.). Normalize them back to the tuck regime so the rider-
-    # dynamics 1.18× upright multiplier doesn't double-inflate drag
-    # during the launch phase.
-    if spec.category == "sport" and cd > 0.45:
-        cd_normalized = max(0.30, cd * 0.55)
-        cd = cd_normalized
 
     return AeroParams(
         cd=cd,

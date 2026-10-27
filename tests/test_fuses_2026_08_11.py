@@ -8,6 +8,9 @@ What is pinned here (each test fails if its production fix is reverted):
    - /api/simulate (+ jobs)     bucket "simulate"         30/60s SHARED
    - /api/simulate/top-speed (+ jobs)  bucket "topspeed"  30/60s SHARED
    - /api/calibrate/dragy + /dyno      bucket "calibrate_upload" 6/60s SHARED
+   - /api/simulate/distance     bucket "distance"         10/60s (added in the
+     2026-10-23 open-source pivot: the retired sim-quota meter had been its
+     ONLY fuse, and it is the heaviest sim route — up to 300 s of sim time)
    The job routes deliberately share their sync twin's bucket (the web
    client falls back between the two — a split bucket would double the
    effective limit), so the tests drive BOTH routes against ONE window.
@@ -36,14 +39,13 @@ import unittest
 from motoquant import ratelimit
 
 # ---------------------------------------------------------------------------
-# Isolated DB -- the metered routes exercised here (/api/simulate,
+# Isolated DB -- the routes exercised here (/api/simulate,
 # /api/simulate/top-speed, /api/simulate/distance, /api/simulate/compare and
-# the /api/jobs twins) carry ``Depends(_meter_full_sim)``, which records a
-# sim_usage row via connect(). connect() falls back to the repo's tracked
-# motoquant.db when MOTOQUANT_DB is unset -- so without this redirect the
-# module would write free-tier metering residue into the SHIPPED catalog
-# (the exact failure test_hardening_2026_07_13.py documents: three such rows
-# were once committed on main). Same pattern as that module / test_api.py.
+# the /api/jobs twins) run through the real app, and connect() falls back to
+# the repo's tracked motoquant.db when MOTOQUANT_DB is unset -- so any
+# route-level writer would leave residue in the SHIPPED catalog (the retired
+# sim-quota meter once committed three such rows on main this way). Same
+# pattern as test_hardening_2026_07_13.py / test_api.py.
 # ---------------------------------------------------------------------------
 _tmp_db_file = tempfile.NamedTemporaryFile(
     prefix="motoquant_fuses_test_", suffix=".db", delete=False
@@ -219,10 +221,39 @@ class TestFullSimSharedBuckets(_FuseTestBase):
         self.assert_rate_limited(self.client.post("/api/jobs/topspeed", json=_UNKNOWN))
 
 
+class TestDistanceFuse(_FuseTestBase):
+    """/api/simulate/distance runs up to 20 km / 300 s of sim time per call.
+    Its only protection used to be the sim-quota meter; it now has its own,
+    tighter bucket ("distance", 10/60s). No job twin exists to share with."""
+
+    _BODY = {"bike_preset": "no_such_preset", "distance_m": 1609.344}
+
+    def test_eleventh_call_is_429(self):
+        for i in range(10):
+            r = self.client.post("/api/simulate/distance", json=self._BODY)
+            self.assert_validates_as_unknown_preset_404(r)
+            self.assertNotEqual(r.status_code, 429, f"fuse tripped early at {i + 1}")
+        detail = self.assert_rate_limited(
+            self.client.post("/api/simulate/distance", json=self._BODY)
+        )
+        self.assertIn("distance", detail["message"])
+        self.assertTrue(
+            any(k.startswith("distance:") for k in ratelimit._WINDOWS),
+            f"no distance bucket in limiter table: {list(ratelimit._WINDOWS)}",
+        )
+
+    def test_bucket_is_not_shared_with_topspeed(self):
+        """A dedicated bucket: draining distance must not fuse top-speed."""
+        for _ in range(11):
+            self.client.post("/api/simulate/distance", json=self._BODY)
+        r = self.client.post("/api/simulate/top-speed", json=_UNKNOWN)
+        self.assert_validates_as_unknown_preset_404(r)
+
+
 class TestCalibrateUploadFuse(_FuseTestBase):
-    """Both calibration uploads parse up to 25 MB in memory and the studio
-    tier gate is inert during beta — bucket "calibrate_upload", 6/60s,
-    SHARED so alternating dragy/dyno doesn't double the effective limit."""
+    """Both calibration uploads are anonymous and parse up to 25 MB in
+    memory — bucket "calibrate_upload", 6/60s, SHARED so alternating
+    dragy/dyno doesn't double the effective limit."""
 
     def _dragy(self):
         return self.client.post(

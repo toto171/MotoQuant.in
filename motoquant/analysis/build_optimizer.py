@@ -1,15 +1,23 @@
 """
-MotoQuant Pro — Build Optimizer
-===============================
+MotoQuant — Build Optimizer
+===========================
 Product-facing parts-build optimizer (Track B).
 
 Given a bike + budget (₹) + goal, return the best parts combination with
-per-part ROI and the predicted ET / trap delta.  It is *surrogate-accelerated*:
-candidate builds are scored through a fast surrogate model when one is
-available and the candidate sits inside the surrogate's training envelope;
-otherwise it transparently falls back to the full RK4 physics sim, so the
-optimizer always returns a correct answer regardless of whether a surrogate
-pickle is present on the backend.
+per-part ROI and the predicted ET / trap delta.
+
+Scoring (October 2026):
+  * Rust core active (``engine_select.native_active()``) — every candidate is
+    scored with the full physics sim (exact, ~5 ms/sim) and any surrogate is
+    ignored; ``scoring_stats["surrogate_skipped"]`` says so.
+  * Python engine only — candidates are scored through the surrogate when one
+    is loaded and the config sits inside its training envelope AND carries no
+    change the 26 features cannot see (feature-blind / boosted configs are
+    full-simmed); the selected parts are then re-verified with full sims.
+  * Either way the REPORTED build (optimized ET/trap, delta, cost-per-tenth)
+    is a full physics sim of the exact part list, applied in
+    ``applied_part_ids`` order (NA parts before boost), after a joint gearing
+    re-choice and a drop-one pass (``roi.refine_build``).
 
 Consolidation (not reinvention)
 -------------------------------
@@ -35,7 +43,6 @@ Public API
 
 from __future__ import annotations
 
-import copy
 import logging
 import time
 import warnings
@@ -43,6 +50,7 @@ from dataclasses import asdict, dataclass, field
 
 import numpy as np
 
+from .. import engine_select
 from ..models import BikeConfig
 from .recommendations import (
     EXCLUSIVE_GROUPS,
@@ -54,13 +62,20 @@ from .recommendations import (
     _find_next_upgrade,
 )
 from .roi import (
+    CANDIDATE_LIMIT,
     PartROIResult,
-    _brake_susp_slot,
     _grouped_knapsack,
     _knapsack_group_key,
+    _objective_gain,
     _run_et,
+    apply_order_ids,
     compute_parts_roi,
+    noise_floored_metrics,
+    part_slots,
+    passes_noise_floor,
     rank_categories,
+    refine_build,
+    score_build,
 )
 
 __all__ = [
@@ -167,9 +182,23 @@ def _blind_relevant_signature(config) -> tuple:
         getattr(ch, "cog_height_mm", None),
         getattr(ch, "wheelbase_mm", None),
         getattr(eng, "engine_inertia_kgm2", None),
-        # dyno-curve SHAPE (a reshape at constant peaks is feature-invisible)
-        None if curve is None else tuple(np.round(curve.torque_nm, 6).tolist()),
+        # dyno-curve SHAPE (a reshape at constant peaks is feature-invisible).
+        # Normalised by the curve's peak so a uniform scale — what every NA
+        # power part does, and what the peak-torque/power features already
+        # see — is NOT a blind change; only a genuine reshape is.
+        _curve_shape(curve),
     )
+
+
+def _curve_shape(curve) -> tuple | None:
+    """Peak-normalised torque-curve shape (None without a curve)."""
+    if curve is None:
+        return None
+    torque = np.asarray(curve.torque_nm, dtype=float)
+    peak = float(np.max(np.abs(torque))) if torque.size else 0.0
+    if peak <= 0.0:
+        return tuple(np.round(torque, 6).tolist())
+    return tuple(np.round(torque / peak, 6).tolist())
 
 
 class SurrogatePredictor:
@@ -194,12 +223,13 @@ class SurrogatePredictor:
         self.n_feature_blind = 0
         # Feature vector + blind-signature of the FIRST scored config
         # (optimize_build / ROI scorers always evaluate the stock baseline
-        # first). A later config with bit-identical features carries a
-        # modification the surrogate cannot see; if its blind-signature also
-        # moved, the change is ET-relevant (quickshifter, clutch, nitrous,
-        # swingarm...) and is full-simmed instead of being silently scored as
-        # zero-gain. Blind AND signature-identical configs (brake pads, fork
-        # internals, chain links...) keep the surrogate's honest zero.
+        # first). Any later config whose blind-signature moved carries an
+        # ET-relevant change the surrogate cannot see (quickshifter, clutch,
+        # nitrous, swingarm, a reshaped curve...) — whether or not its visible
+        # features also moved — and is full-simmed instead of being scored as
+        # if the blind change did not exist. Configs whose blind-signature is
+        # unchanged (mass, power scaling, gearing, brake pads...) stay on the
+        # surrogate.
         self._ref_fvec = None
         self._ref_sig = None
         # True-frame anchor: the first scored config (the stock baseline) is
@@ -236,21 +266,29 @@ class SurrogatePredictor:
             if first_call:
                 self._ref_fvec = fvec.copy()
                 self._ref_sig = _blind_relevant_signature(config)
-            elif self.allow_fallback and np.array_equal(fvec, self._ref_fvec):
+            elif self.allow_fallback:
+                # ANY config whose feature-invisible fields moved is full-
+                # simmed — not only configs whose feature vector is bit-
+                # identical to stock. A model-specific quickshifter changes
+                # the shift time (blind) AND adds 0.15 kg (visible); the old
+                # bit-identical gate sent it to the surrogate, which scored a
+                # real -0.05 s part as +0.001 s, so it was never selected
+                # (October 2026 audit: 39 such parts).
                 sig = _blind_relevant_signature(config)
                 if sig != self._ref_sig:
                     self.n_feature_blind += 1
                     try:
-                        cached = self._blind_cache.get(sig)
+                        key = (sig, fvec.tobytes())
+                        cached = self._blind_cache.get(key)
                     except TypeError:  # unhashable corner — just sim it
                         cached = None
-                        sig = None
+                        key = None
                     if cached is not None:
                         return cached
                     self.n_fallback += 1
                     out = _run_et(config)
-                    if sig is not None:
-                        self._blind_cache[sig] = out
+                    if key is not None:
+                        self._blind_cache[key] = out
                     return out
             ok, _violations = _check_envelope(fvec, self.surrogate)
             # Forced induction is INVISIBLE to the feature vector: boost/nitrous
@@ -398,6 +436,10 @@ class OptimizedBuild:
     parts_skipped_no_gain: int = 0
     scoring_method: str = "full_sim"
     scoring_stats: dict = field(default_factory=dict)
+    # Part ids in the order they were APPLIED to build the verified bike (NA
+    # parts first, then boost — roi._apply_order). Consumers that rebuild the
+    # bike (the outlaw pipeline) must apply in this order, not display order.
+    applied_part_ids: list = field(default_factory=list)
 
     def summary(self) -> str:
         verb = "ET" if self.goal == "min_et" else "trap"
@@ -432,27 +474,30 @@ def _select_build(
     allow_negative: bool = False,
     position_of: dict[int, str] | None = None,
     slot_of: dict[int, str] | None = None,
+    min_delta_et_ms: float = 5.0,
 ) -> list[PartROIResult]:
     """
     Pick the affordable subset maximising the goal metric, with at most one
     part from each exclusive category (see roi.EXCLUSIVE_CATEGORIES), at most
     one sprocket per position when ``position_of`` maps part_id ->
-    'front'/'rear', and at most one brake/suspension part per physical slot
-    when ``slot_of`` maps part_id -> a slot key (e.g. 'brakes:pad:front',
-    'suspension:fork'). Complementary slots (front + rear pads, fork + shock)
-    stay independently selectable. Free parts (price 0) cost no budget.
+    'front'/'rear', and at most one part per physical slot when ``slot_of``
+    maps part_id -> a slot key (roi.part_slot: 'brakes:pad:front',
+    'suspension:fork', 'fuel_system:injector', 'bodywork:fairing', ...).
+    Complementary slots (front + rear pads, fork + shock) stay independently
+    selectable. Free parts (price 0) cost no budget. Parts whose gain is below
+    the ``min_delta_et_ms`` noise floor (thousandths of the objective unit)
+    are never bought.
     Delegates to roi._grouped_knapsack, which rounds bucket weights UP so the
     selected build can never exceed the stated budget (the old floor division
     let every part under-weigh by up to ₹99 — sub-₹100 parts were free).
     """
-    gain = (
-        (lambda r: r.delta_trap_ms) if goal == "max_trap" else (lambda r: r.delta_et_s)
-    )
+    gain = _objective_gain(goal)
 
     candidates = [
         r
         for r in individual
-        if (allow_negative or gain(r) > 0) and r.price_inr <= budget_inr
+        if (allow_negative or passes_noise_floor(gain(r), min_delta_et_ms))
+        and r.price_inr <= budget_inr
     ]
     if not candidates:
         return []
@@ -490,7 +535,14 @@ def _next_upgrade_to_dict(nu: NextUpgrade | None) -> dict | None:
 
 
 def _empty_build(
-    base_config, base_et_s, base_trap_ms, goal, budget_inr, profile_value, predictor
+    base_config,
+    base_et_s,
+    base_trap_ms,
+    goal,
+    budget_inr,
+    profile_value,
+    predictor,
+    extra_stats=None,
 ) -> OptimizedBuild:
     kmh = round(base_trap_ms * 3.6, 2)
     return OptimizedBuild(
@@ -508,7 +560,7 @@ def _empty_build(
         budget_used_pct=0.0,
         cost_per_tenth_inr=None,
         scoring_method=predictor.method,
-        scoring_stats=predictor.stats(),
+        scoring_stats={**predictor.stats(), **(extra_stats or {})},
     )
 
 
@@ -527,6 +579,7 @@ def optimize_build(
     use_live_pricing: bool = False,
     db_conn=None,
     progress_cb=None,
+    full_physics: bool | None = None,
 ) -> OptimizedBuild:
     """
     Find the best on-budget parts build for ``base_config``.
@@ -536,33 +589,73 @@ def optimize_build(
     bike_model_id   DB bike_models.id — drives real compatibility filtering.
     surrogate       Optional loaded surrogate; None -> full-sim scoring (always correct).
     max_candidates  Cap the candidate pool (handy for fast tests / latency bounds).
+    full_physics    Score every candidate with the full physics sim and ignore
+                    ``surrogate``. ``None`` (default) = automatic: on when the
+                    Rust core is active (exact results at ~5 ms/sim make the
+                    surrogate pointless), off on the Python-only engine where
+                    the surrogate keeps big catalogs tractable.
+
+    Whatever scored the candidates, the reported build (optimized ET/trap,
+    delta, cost-per-tenth) always comes from a full physics sim of the exact
+    part list, applied in ``applied_part_ids`` order, after a joint gearing
+    re-choice and a drop-one pass (roi.refine_build). ``scoring_stats`` says
+    which engine ran and whether the surrogate was skipped.
     """
     goal = goal if goal in VALID_GOALS else "min_et"
     profile_enum = _coerce_profile(profile)
+
+    native = engine_select.native_active()
+    engine_name = "native" if native else "python"
+    if full_physics is None:
+        full_physics = native
+    extra_stats: dict = {"engine": engine_name, "final_build": "full_sim"}
+    if full_physics and surrogate is not None:
+        extra_stats["surrogate_skipped"] = (
+            f"{engine_name} engine active — every candidate scored with exact physics"
+            if native
+            else "full physics requested — every candidate scored with exact physics"
+        )
+        surrogate = None
     predictor = make_predictor(surrogate, surrogate_source)
 
-    # Base run (warm-up + absolute trap so we can report km/h).
+    n_final_sims = [0]
+
+    def full_et(cfg: BikeConfig) -> tuple[float, float]:
+        n_final_sims[0] += 1
+        out = _run_et(cfg)
+        if not native:
+            # The Python engine holds the GIL through these back-to-back
+            # verification sims; yield so the /api/jobs status poll can
+            # respond on a 0.5-CPU host (the browser declared "connection
+            # lost" at 97% otherwise — QC 2026-06-13). The Rust core releases
+            # the GIL, so no yield is needed there.
+            time.sleep(0.02)
+        return out
+
+    # Base run (warm-up + absolute trap so we can report km/h). With a
+    # surrogate the predictor's first call is the full-sim anchor, so the
+    # baseline is real physics either way.
     base_et_s, base_trap_ms = predictor(base_config)
     if progress_cb is not None:
         progress_cb(0.02, "Baseline run")
 
-    # Compatible, profile-filtered candidate parts.
-    all_parts = parts_repo.search(bike_model_id=bike_model_id, limit=200)
+    # Compatible, profile-filtered candidate parts (no 200-row cap).
+    all_parts = parts_repo.search(bike_model_id=bike_model_id, limit=CANDIDATE_LIMIT)
     filtered = _filter_parts_by_profile(all_parts, profile_enum)
     candidate_ids = [p["id"] for p in filtered]
     if max_candidates is not None:
         candidate_ids = candidate_ids[:max_candidates]
     if progress_cb is not None and candidate_ids:
-        # Tick the bar once per scorer call: per-part ROI + combined build
-        # (+ headroom for the next-upgrade probe). Capped below 1.0 — the
-        # jobs layer snaps to 100% on completion.
+        # Tick the bar once per scorer call (per-part ROI). Capped below the
+        # verification/refinement band — the jobs layer snaps to 100% on
+        # completion.
         _total = len(candidate_ids) + 2
         _done = [0]
 
         def _on_predict():
             _done[0] += 1
             progress_cb(
-                min(0.97, 0.02 + 0.95 * _done[0] / _total),
+                min(0.90, 0.02 + 0.88 * _done[0] / _total),
                 "Scoring candidate parts",
             )
 
@@ -576,6 +669,7 @@ def optimize_build(
             budget_inr,
             profile_enum.value,
             predictor,
+            extra_stats,
         )
 
     # Per-part ROI through the (surrogate-agnostic) scorer.  Candidates are
@@ -589,37 +683,58 @@ def optimize_build(
         et_fn=predictor,
     )
 
-    gain = (
-        (lambda r: r.delta_trap_ms) if goal == "max_trap" else (lambda r: r.delta_et_s)
-    )
-    # Position map so the knapsack can hold one front AND one rear sprocket
-    # but never two of the same position; slot map so it can hold complementary
-    # brake/suspension parts (front + rear pads, fork + shock) but never two
-    # parts fighting for the same physical slot.
-    position_of: dict[int, str] = {}
-    slot_of: dict[int, str] = {}
-    for p in filtered:
-        cat_name = p.get("category_name")
-        if cat_name not in ("sprocket", "brakes", "suspension"):
-            continue
-        specs = p.get("specifications")
-        if isinstance(specs, str):
-            try:
-                import json as _json
+    gain = _objective_gain(goal)
+    # Physical-slot map (roi.part_slot) so the knapsack holds one front AND one
+    # rear sprocket, complementary brake/suspension parts, one part per
+    # fuel-system / bodywork slot — never two parts fighting for one slot.
+    rows_by_id = {p["id"]: p for p in filtered}
+    slot_of = part_slots(rows_by_id[i] for i in candidate_ids if i in rows_by_id)
+    position_of = {
+        pid: slot.split(":", 1)[1]
+        for pid, slot in slot_of.items()
+        if slot.startswith("sprocket:")
+    }
 
-                specs = _json.loads(specs)
-            except (ValueError, TypeError):
-                specs = None
-        if cat_name == "sprocket":
-            if isinstance(specs, dict) and specs.get("position") in ("front", "rear"):
-                position_of[p["id"]] = specs["position"]
-        else:
-            slot = _brake_susp_slot(cat_name, specs, p.get("model_name"))
-            if slot:
-                slot_of[p["id"]] = slot
+    def group_key(r: PartROIResult):
+        return _knapsack_group_key(r, position_of, slot_of)
+
     selected = _select_build(
         individual, float(budget_inr), goal, position_of=position_of, slot_of=slot_of
     )
+
+    roi_by_id = {r.part_id: r for r in individual}
+    verified: dict[int, tuple[float, float]] = {}
+    surrogate_mode = predictor.surrogate is not None and predictor.allow_fallback
+
+    def _verify(pids, lo: float, hi: float, stage: str) -> int:
+        """Full-sim each part's individual delta and write it back (with
+        ROI metrics recomputed from the verified delta)."""
+        n = 0
+        total = max(1, len(pids))
+        for i, pid in enumerate(pids):
+            if progress_cb is not None:
+                progress_cb(min(0.99, lo + (hi - lo) * i / total), stage)
+            r = roi_by_id.get(pid)
+            if r is None or pid in verified:
+                continue
+            try:
+                part_cfg = parts_repo.apply_multiple([pid], base_config)
+                part_et, part_trap = full_et(part_cfg)
+                d_et, d_trap = base_et_s - part_et, part_trap - base_trap_ms
+                n += 1
+            except Exception:  # noqa: BLE001 — keep the surrogate score
+                d_et, d_trap = r.delta_et_s, r.delta_trap_ms
+            verified[pid] = (d_et, d_trap)
+            r.delta_et_s = round(d_et, 4)
+            r.delta_trap_ms = round(d_trap, 4)
+            r.modified_et_s = base_et_s - r.delta_et_s
+            # The ROI numbers must follow the verified delta (they used to
+            # keep the surrogate's: cost-per-tenth ₹40,780 next to a delta
+            # that implied ₹21,065 — October 2026 audit).
+            r.roi_score, r.cost_per_tenth_inr = noise_floored_metrics(
+                r.price_inr, r.delta_et_s
+            )
+        return n
 
     # Surrogate-scored runs: re-verify the SELECTED parts with the full sim
     # and re-select until the pick stabilises (≤3 rounds). Surrogate delta
@@ -628,46 +743,14 @@ def optimize_build(
     # real gain out of it; simming just the winners (10-20 sims) pins every
     # part that actually spends budget to its true physics delta.
     n_verify_sims = 0
-    if predictor.surrogate is not None and predictor.allow_fallback and selected:
-        verified: dict[int, tuple[float, float]] = {}
-        base_true_et, base_true_trap = base_et_s, base_trap_ms
-        roi_by_id = {r.part_id: r for r in individual}
+    if surrogate_mode and selected:
         for _round in range(3):
             todo = [r.part_id for r in selected if r.part_id not in verified]
             if not todo:
                 break
-            # Tick PER verification sim, not once per round. On the free
-            # tier these full sims run back-to-back for tens of seconds; the
-            # old single 0.97 tick froze the job state while the CPU-bound
-            # worker starved the /api/jobs poll handler, so the browser wrongly
-            # declared "connection lost" at 97% (QC 2026-06-13). Frequent ticks
-            # + a CPU yield keep polls alive and animate a real 95->99% bar.
-            _vtotal = max(1, len(todo))
-            for _vi, pid in enumerate(todo):
-                if progress_cb is not None:
-                    progress_cb(
-                        min(0.99, 0.95 + 0.04 * _vi / _vtotal),
-                        "Verifying selected parts (full sim)",
-                    )
-                try:
-                    part_cfg = parts_repo.apply_multiple([pid], base_config)
-                    part_et, part_trap = _run_et(part_cfg)
-                    verified[pid] = (
-                        base_true_et - part_et,
-                        part_trap - base_true_trap,
-                    )
-                    n_verify_sims += 1
-                except Exception:  # noqa: BLE001 — keep the surrogate score
-                    verified[pid] = (
-                        roi_by_id[pid].delta_et_s,
-                        roi_by_id[pid].delta_trap_ms,
-                    )
-                time.sleep(0.02)  # yield CPU so the job-status poll can respond
-            for pid, (d_et, d_trap) in verified.items():
-                r = roi_by_id.get(pid)
-                if r is not None:
-                    r.delta_et_s = round(d_et, 4)
-                    r.delta_trap_ms = round(d_trap, 4)
+            n_verify_sims += _verify(
+                todo, 0.90, 0.95, "Verifying selected parts (full sim)"
+            )
             reselected = _select_build(
                 individual,
                 float(budget_inr),
@@ -680,25 +763,49 @@ def optimize_build(
                 break
             selected = reselected
 
-    if progress_cb is not None:
-        progress_cb(0.98, "Verifying combined build")
+    # Combined build — ALWAYS the full physics sim of the exact part list
+    # (the surrogate cannot see quickshifters, chains or clutch kits; scoring
+    # the combined build through it under-reported a real -0.324 s build as
+    # -0.180 s). refine_build re-chooses gearing jointly and drops any part
+    # whose removal makes the build faster.
+    _ref_done = [0]
 
-    # Combined sim of the selected build (captures part interactions).
-    build_cfg = copy.deepcopy(base_config)
-    ordered_for_apply = sorted(selected, key=lambda r: r.price_inr)
-    if ordered_for_apply:
-        try:
-            build_cfg = parts_repo.apply_multiple(
-                [r.part_id for r in ordered_for_apply], build_cfg
+    def _on_ref_sim():
+        _ref_done[0] += 1
+        if progress_cb is not None:
+            progress_cb(
+                min(0.99, 0.95 + 0.04 * (1.0 - 1.0 / (1.0 + _ref_done[0] / 10.0))),
+                "Verifying combined build (full sim)",
             )
-            combined_et, combined_trap_ms = predictor(build_cfg)
-        except Exception as exc:
-            warnings.warn(
-                f"optimize_build: combined sim failed ({exc}); reporting stock"
-            )
-            selected, combined_et, combined_trap_ms = [], base_et_s, base_trap_ms
-    else:
-        combined_et, combined_trap_ms = base_et_s, base_trap_ms
+
+    pool = [r for r in individual if r.price_inr <= float(budget_inr)]
+    refinement = None
+    try:
+        refinement = refine_build(
+            base_config,
+            selected,
+            pool,
+            float(budget_inr),
+            parts_repo,
+            full_et,
+            objective=goal,
+            group_key=group_key,
+            on_sim=_on_ref_sim,
+        )
+        selected = refinement.selected
+        combined_et, combined_trap_ms = refinement.et_s, refinement.trap_ms
+    except Exception as exc:  # noqa: BLE001 — report stock, never a fiction
+        warnings.warn(f"optimize_build: combined sim failed ({exc}); reporting stock")
+        selected, combined_et, combined_trap_ms = [], base_et_s, base_trap_ms
+
+    if surrogate_mode and selected:
+        # Parts the gearing re-choice brought in get their full-sim delta too.
+        n_verify_sims += _verify(
+            [r.part_id for r in selected if r.part_id not in verified],
+            0.98,
+            0.99,
+            "Verifying selected parts (full sim)",
+        )
 
     total_cost = sum(r.price_inr for r in selected)
     # Public convention (July 6, 2026): delta_et_s = optimized - base, so an
@@ -722,8 +829,27 @@ def optimize_build(
     cat_priority = rank_categories(individual)
     next_up = None
     if include_next_upgrade:
-        selected_ids = {r.part_id for r in selected}
-        next_up = _next_upgrade_to_dict(_find_next_upgrade(selected_ids, individual))
+        build_parts = list(selected)
+
+        def _marginal(r: PartROIResult) -> float:
+            et, _trap = score_build(base_config, build_parts + [r], parts_repo, full_et)
+            return combined_et - et
+
+        next_up = _next_upgrade_to_dict(
+            _find_next_upgrade(
+                {r.part_id for r in selected},
+                individual,
+                group_key=group_key,
+                occupied_groups={group_key(r) for r in selected},
+                marginal_fn=_marginal,
+            )
+        )
+
+    stats = {**predictor.stats(), **extra_stats, "verify_sims": n_verify_sims}
+    stats["final_sims"] = n_final_sims[0]
+    if refinement is not None:
+        stats["gearing_rechosen"] = refinement.gearing_changed
+        stats["dropped_part_ids"] = [r.part_id for r in refinement.dropped]
 
     return OptimizedBuild(
         bike_name=base_config.name,
@@ -750,5 +876,6 @@ def optimize_build(
         parts_skipped_incompatible=0,  # candidate pool is compatibility-filtered upstream
         parts_skipped_no_gain=sum(1 for r in individual if gain(r) <= 0),
         scoring_method=predictor.method,
-        scoring_stats={**predictor.stats(), "verify_sims": n_verify_sims},
+        scoring_stats=stats,
+        applied_part_ids=apply_order_ids(selected),
     )

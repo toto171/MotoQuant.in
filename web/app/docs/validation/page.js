@@ -4,7 +4,7 @@ import CodeComment from '../../../components/CodeComment';
 
 export const metadata = {
   title: 'Validation Data',
-  description: 'MotoQuant Pro accuracy report — 250 benchmarks (276 matched) against published Cycle World, Sport Rider, MotoStatz, MCN, and BikeWale timeslips. Weighted bias +0.007s, weighted mean absolute error 0.263s, top-10 mean error ±0.007s. Per-cluster bias across the cylinder-aware 12-cluster taxonomy and the open small-cc + 2-stroke calibration gaps. Reference baselines: K5 9.9331s, R1 10.1436s, Hayabusa 10.3633s — Δ ±0.0000 since July 13, 2026.',
+  description: 'MotoQuant accuracy report — 250 benchmarks (276 matched) against published Cycle World, Sport Rider, MotoStatz, MCN, and BikeWale timeslips. Weighted bias +0.007s, weighted mean absolute error 0.263s, top-10 mean error ±0.007s. Per-cluster bias across the cylinder-aware 12-cluster taxonomy and the open small-cc + 2-stroke calibration gaps. Reference baselines: K5 9.9331s, R1 10.1436s, Hayabusa 10.3633s — Δ ±0.0000 since July 13, 2026.',
   alternates: { canonical: 'https://motoquant.in/docs/validation' },
   keywords: [
     'motorcycle simulator accuracy',

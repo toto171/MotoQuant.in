@@ -21,6 +21,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import {
   ArrowRight,
   BookOpen,
+  Code2,
   Gauge,
   Search,
   Trophy,
@@ -28,6 +29,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { API_URL } from '@/lib/api';
+import { REPO_URL } from '@/lib/site';
 
 const ACTIONS = [
   { label: 'Run the simulator', href: '/simulator', kw: 'sim simulate quarter mile et run race', icon: Gauge, group: 'Tools' },
@@ -35,15 +37,16 @@ const ACTIONS = [
   { label: 'ECU autotune setup', href: '/autotune', kw: 'tune gearing launch rpm tyre pressure conditions ecu', icon: Zap, group: 'Tools' },
   { label: 'Browse the bike catalog', href: '/bikes', kw: 'bikes motorcycles catalog database specs', icon: Search, group: 'Tools' },
   { label: 'Leaderboard', href: '/leaderboard', kw: 'top runs fastest board ranking times', icon: Trophy, group: 'Tools' },
-  { label: 'Pricing & plans', href: '/pricing', kw: 'price pro studio subscribe beta free cost', icon: ArrowRight, group: 'Pages' },
+  { label: 'Source code on GitHub', href: REPO_URL, external: true, kw: 'github source code open source repo license apache contribute free', icon: Code2, group: 'Pages' },
   { label: 'Docs — getting started', href: '/docs/getting-started', kw: 'documentation guide help how to start', icon: BookOpen, group: 'Pages' },
   { label: 'Docs — physics engine', href: '/docs/physics', kw: 'rk4 submodels engine model documentation', icon: BookOpen, group: 'Pages' },
   { label: 'Docs — validation data', href: '/docs/validation', kw: 'accuracy benchmarks validation error', icon: BookOpen, group: 'Pages' },
   { label: 'Features', href: '/features', kw: 'what can it do capabilities overview', icon: ArrowRight, group: 'Pages' },
   { label: 'Whitepaper', href: '/whitepaper', kw: 'paper methodology research physics', icon: BookOpen, group: 'Pages' },
   { label: 'Blog', href: '/blog', kw: 'articles posts guides comparisons', icon: BookOpen, group: 'Pages' },
-  { label: 'About MotoQuant', href: '/about', kw: 'company founders story contact', icon: ArrowRight, group: 'Pages' },
-  { label: 'Your account', href: '/account', kw: 'profile garage license keys subscription sign', icon: ArrowRight, group: 'Pages' },
+  { label: 'About MotoQuant', href: '/about', kw: 'project founders story open source', icon: ArrowRight, group: 'Pages' },
+  { label: 'Contact & community', href: '/contact', kw: 'contact email issues discussions bug report help community security', icon: ArrowRight, group: 'Pages' },
+  { label: 'Your account', href: '/account', kw: 'profile garage saved runs password sign', icon: ArrowRight, group: 'Pages' },
 ];
 
 function matchActions(q) {
@@ -142,6 +145,7 @@ export default function CommandPalette({ open, onClose }) {
       sub: a.group,
       icon: a.icon,
       href: a.href,
+      external: !!a.external,
     }));
     for (const b of bikes) {
       const name = `${b.manufacturer} ${b.model}`.trim();
@@ -175,6 +179,10 @@ export default function CommandPalette({ open, onClose }) {
     (row) => {
       if (!row) return;
       onClose();
+      if (row.external) {
+        window.open(row.href, '_blank', 'noopener,noreferrer');
+        return;
+      }
       router.push(row.href);
     },
     [onClose, router]

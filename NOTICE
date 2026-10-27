@@ -1,0 +1,38 @@
+MotoQuant
+Copyright 2026 Hritwik Mudhai and the MotoQuant contributors
+
+This product is licensed under the Apache License, Version 2.0 (see the
+LICENSE file). Source: https://github.com/da25mem5s02-debug/MotoQuant_v1
+
+-------------------------------------------------------------------------------
+Trademarks
+-------------------------------------------------------------------------------
+Motorcycle, tire, parts, venue and company names used in this repository and
+on motoquant.in (for example Suzuki, Yamaha, Kawasaki, Honda, Ducati, KTM,
+Royal Enfield, Bajaj, TVS, BMW, Aprilia, Triumph, Harley-Davidson, Akrapovic,
+Brembo, Ohlins, Michelin, Pirelli, Dragy and many others) are trademarks of
+their respective owners. They are used only to identify the products being
+modelled. Their use does not imply any affiliation with or endorsement by the
+trademark owners. The Apache License does not grant permission to use these
+trade names or marks (see Section 6 of the License).
+
+-------------------------------------------------------------------------------
+Benchmark figures
+-------------------------------------------------------------------------------
+The real-world quarter-mile, trap-speed and top-speed figures that MotoQuant
+validates against are cited facts taken from the published sources named
+alongside each record: magazine road tests, instrumented GPS/timing-system
+tests, timeslips and published aggregators. They remain attributable to
+those sources. MotoQuant claims no ownership of them, and each record keeps
+its source label so it can be checked.
+
+-------------------------------------------------------------------------------
+Catalog data
+-------------------------------------------------------------------------------
+Bike, tire and parts specifications in the catalog (motoquant.db and
+motoquant/scraper/known_bikes*.py) were compiled from publicly available
+manufacturer data: published specifications, owner's and service manuals,
+and press kits. Retail part prices were compiled from public retailer
+listings. Values that were estimated or derived, not published, are marked
+as such in the source files. Manufacturers may revise their figures;
+corrections are welcome via GitHub issues.

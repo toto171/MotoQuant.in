@@ -26,7 +26,7 @@
 // Single-variable test: presence of the end-of-page CTA. Copy + href fixed
 // on variant B; control renders a hidden span placeholder so DOM is
 // pre-experiment-equivalent. No conflict with other live experiments
-// (EXP-001 landing, EXP-002+005 /pricing, EXP-003 /simulator, EXP-004
+// (EXP-001 landing, EXP-002+005 /pricing [retired Oct 2026], EXP-003 /simulator, EXP-004
 // /blog/the-physics-of-a-perfect-launch post body, EXP-006 /blog index,
 // EXP-007 /login, EXP-008 /features bottom, EXP-009 /bikes catalog,
 // EXP-010 /blog/pulsar-ns200-vs-apache-rtr-200... post body, EXP-011

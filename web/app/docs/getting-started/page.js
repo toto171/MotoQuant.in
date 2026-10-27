@@ -2,10 +2,11 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import CodeComment from '../../../components/CodeComment';
 import RunSimCta from './RunSimCta';
+import { LICENSE_SPDX, REPO_URL } from '../../../lib/site';
 
 export const metadata = {
   title: 'Getting Started — Run Your First Motorcycle Quarter-Mile Simulation',
-  description: 'Step-by-step guide to running your first motorcycle quarter-mile drag simulation in MotoQuant Pro — pick from 541 bikes, choose Aamby Valley or MMRT or BIC as your venue, dial in rider weight + power delta + mass, and interpret the ET, 60-foot, and trap speed output. No physics PhD required.',
+  description: 'Step-by-step guide to running your first motorcycle quarter-mile drag simulation in MotoQuant — pick from 541 bikes, choose Aamby Valley or MMRT or BIC as your venue, dial in rider weight + power delta + mass, and interpret the ET, 60-foot, and trap speed output. No physics PhD required.',
   keywords: [
     'motoquant getting started',
     'how to use motorcycle drag simulator',
@@ -34,7 +35,7 @@ function Step({ n, title, children }) {
 
 function Code({ children }) {
   return (
-    <code className="block bg-black/50 border border-brand-orange/15 rounded-lg px-4 py-3 font-mono text-xs text-brand-accent my-3 overflow-x-auto">
+    <code className="block whitespace-pre bg-black/50 border border-brand-orange/15 rounded-lg px-4 py-3 font-mono text-xs text-brand-accent my-3 overflow-x-auto">
       {children}
     </code>
   );
@@ -94,7 +95,7 @@ export default function GettingStartedPage() {
       <section className="mb-14">
         <h2 className="font-display font-bold text-2xl text-white mb-6">Option B — REST API</h2>
         <p className="text-white/70 text-sm leading-relaxed mb-6">
-          The API is public and CORS-open. No authentication for basic simulation (rate-limited to 60 req/min per IP).
+          The API is public and CORS-open. No authentication and no API keys — simulation endpoints are rate-limited per IP (30 sims a minute) so the free hosted instance stays fair. For heavier use, run your own copy (Option C).
         </p>
         <Step n="1" title="Quick sim">
           <Code>{`POST https://motoquant-api.onrender.com/api/simulate/quick
@@ -123,6 +124,35 @@ Content-Type: application/json
         <Step n="3" title="Interactive docs">
           <p>Full OpenAPI interactive docs (try-it-now) are available at:</p>
           <Code>https://motoquant-api.onrender.com/docs</Code>
+        </Step>
+      </section>
+
+      {/* Self-host */}
+      <section className="mb-14">
+        <h2 className="font-display font-bold text-2xl text-white mb-6">Option C — Run your own copy</h2>
+        <p className="text-white/70 text-sm leading-relaxed mb-6">
+          MotoQuant is free and open source ({LICENSE_SPDX}). The physics engine, catalog database,
+          API and this website all live in{' '}
+          <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className="text-brand-accent hover:text-brand-orange transition-colors font-mono">
+            one GitHub repository
+          </a>
+          . The simulator needs no API keys — the seeded catalog ships with the code.
+        </p>
+        <Step n="1" title="Clone and install">
+          <Code>{`git clone ${REPO_URL}.git
+cd MotoQuant_v1
+make install        # Python deps + the motoquant package`}
+          </Code>
+        </Step>
+        <Step n="2" title="Start the API and the website">
+          <Code>{`make api            # FastAPI on http://localhost:8000
+make web-install    # once: Next.js dependencies
+make web-dev        # website on http://localhost:3000 (second terminal)`}
+          </Code>
+          <p>
+            Optional extras (the chat assistant&apos;s LLM key, live weather, magic-link email) are
+            configured with environment variables — see the repository&apos;s README and docs.
+          </p>
         </Step>
       </section>
 

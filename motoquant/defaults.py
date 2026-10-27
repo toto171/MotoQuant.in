@@ -1,12 +1,13 @@
 """
-MotoQuant Pro — Default Bike Configurations
-==========================================
+MotoQuant — Default Bike Configurations
+=======================================
 Real-world specifications for the three reference platforms.
 All data from manufacturer service manuals and published dyno results.
 """
 
 import numpy as np
 
+from .category_profiles import CATEGORY_REFERENCE_LITRE_195P
 from .models import (
     BOOST_NA,
     CLUTCH_LOCKUP,
@@ -35,15 +36,22 @@ from .models import (
 )
 
 # Crank-mode recalibration for synthetic CRANK curves (2026-08-08 epoch).
-# See the comment above its application inside _synthetic_torque_curve (the
-# 2-stroke builder applies the same factor). Module-level so tuning scripts
-# can sweep it; treat the committed value as calibrated against the weighted
-# benchmark corpus, not hand-picked. Honest decomposition: wheel dynos
-# support ~1.00-1.03 of pure claim-conservatism, so the remainder absorbs
-# effects the model deliberately does not yet carry — magazine ETs' 1-ft
-# rollout convention and pro-rider launches (staging rollout is epoch-gated;
-# when it is wired, re-tune this DOWN in the same pass).
-_CRANK_MODE_RECAL = 1.08
+# See the comment above its application inside _synthetic_torque_curve.
+# Module-level so tuning scripts can sweep it.
+#
+# 2026-10 physics epoch: 4-stroke 1.08 -> 1.00. The 8 % uplift had absorbed
+# effects the model did not carry — the magazine 1-ft rollout timing
+# convention (now physics.run(rollout_m=constants.ROLLOUT_M)) and launch
+# fudges — while inflating the top end: trap speed ran +13.8 km/h high across
+# the weighted corpus (+18.4 on sport bikes) and top speed +24 km/h. A
+# synthetic curve built from the manufacturer's crank claim now delivers
+# exactly that claim (x the small-cc ladder rungs below) at the crank.
+_CRANK_MODE_RECAL = 1.00
+# 2-strokes keep the calibrated 1.08 as a SEPARATE constant: every benchmarked
+# 2T is a vintage/race machine whose quoted output is a period claim, and the
+# corpus-tuned 2T curves degrade badly at 1.00 (RZV500R trap -29 -> -62 km/h,
+# NSR250R -16 -> -26.5; accuracy brief 2026-10-23). Re-tune it separately.
+_CRANK_MODE_RECAL_2T = 1.08
 
 # The small-cc claim-to-truth ladder rungs (see the Apr-27-2026 comment block
 # inside _synthetic_torque_curve). Promoted to module constants 2026-08-08 so
@@ -91,7 +99,8 @@ def _synthetic_torque_curve(
     torque = np.zeros_like(rpms)
 
     # Torque required at peak power RPM to match rated HP
-    if peak_power_hp is not None and peak_power_rpm is not None:
+    peak_power_rpm_given = peak_power_hp is not None and peak_power_rpm is not None
+    if peak_power_rpm_given:
         T_at_peak_power = peak_power_hp * 745.7 / (peak_power_rpm * 2.0 * np.pi / 60.0)
     else:
         # Fallback: assume peak power at 90% of redline, ~85% of peak torque
@@ -165,6 +174,20 @@ def _synthetic_torque_curve(
             T = max(0.0, T)
         torque[i] = T
 
+    # 2026-10 epoch: rated-power cap. The post-peak-power falloff starts with
+    # zero slope (frac_rl**1.5), so power kept RISING past peak_power_rpm on
+    # 405 of 485 catalog synthetic curves — by 16 % on the 33 bikes in the
+    # 50-70 Nm plateau band (MT-07 74 hp rated -> 92.8 hp at redline;
+    # Interceptor 650 47.2 -> 62.2), 3-5 % on ~200 more (audit 2026-10-23).
+    # The rated figure is by definition the curve's maximum: clamp
+    # T(rpm) <= P_rated / omega everywhere (same expression as
+    # T_at_peak_power, so the clamp is exact at peak_power_rpm). Applied
+    # BEFORE the ladder / recal multipliers, so the final curve never exceeds
+    # rated_power x ladder x recal. Only when a rated power is given.
+    if peak_power_hp is not None and peak_power_rpm_given:
+        P_cap_T = peak_power_hp * 745.7 / (rpms * 2.0 * np.pi / 60.0)
+        torque = np.minimum(torque, P_cap_T)
+
     torque = np.clip(torque, 0.0, peak_torque_nm * 1.05)
 
     # Apr 27, 2026: small-cc 4T calibration factor.
@@ -231,10 +254,11 @@ def _synthetic_torque_curve(
     # decisions. What stays structurally honest regardless: chain/parasitic
     # parts are live, per-bike eta differences are real (a shaft bike now
     # pays ~8 % more loss than a chain bike instead of zero), and
-    # parasitic_mult reaches the whole catalog. When staging rollout (epoch-
-    # gated) is wired, re-tune this DOWN in the same pass.
+    # parasitic_mult reaches the whole catalog. 2026-10 epoch: staging
+    # rollout is now wired, and this was re-tuned DOWN to 1.00 in the same
+    # pass (see _CRANK_MODE_RECAL).
     # References are untouched by construction: they build at-wheel curves,
-    # so this branch cannot reach them (ADR-0002 pins hold bit-identical).
+    # so this branch cannot reach them.
     if not is_at_wheel:
         torque *= _CRANK_MODE_RECAL
 
@@ -386,9 +410,11 @@ def _synthetic_2stroke_torque_curve(
 
     # 2026-08-08 epoch: same crank-mode recalibration as the 4T builder —
     # restores the calibrated wheel-power level under crank semantics so the
-    # 2T rungs above keep their documented meanings. See _CRANK_MODE_RECAL.
+    # 2T rungs above keep their documented meanings. 2026-10 epoch: the 2T
+    # value is now its own constant (_CRANK_MODE_RECAL_2T, kept at 1.08)
+    # while the 4T recal dropped to 1.00.
     if not is_at_wheel:
-        torque *= _CRANK_MODE_RECAL
+        torque *= _CRANK_MODE_RECAL_2T
 
     return DynoCurve(rpm=rpms, torque_nm=torque, is_at_wheel=is_at_wheel)
 
@@ -410,7 +436,7 @@ def gsxr1000_k5() -> BikeConfig:
 
     return BikeConfig(
         name="Suzuki GSX-R 1000 K5/K6",
-        category_tag="litre_sport_195p",
+        category_tag=CATEGORY_REFERENCE_LITRE_195P,
         chassis=ChassisParams(
             dry_mass_kg=166.0,  # Dry weight
             rider_mass_kg=75.0,
@@ -573,7 +599,7 @@ def yzfr1_4c8() -> BikeConfig:
 
     return BikeConfig(
         name="Yamaha YZF-R1 4C8",
-        category_tag="litre_sport_195p",
+        category_tag=CATEGORY_REFERENCE_LITRE_195P,
         chassis=ChassisParams(
             dry_mass_kg=177.0,
             rider_mass_kg=75.0,
@@ -693,7 +719,7 @@ def hayabusa_gen1() -> BikeConfig:
 
     return BikeConfig(
         name="Suzuki Hayabusa GSX1300R Gen1",
-        category_tag="litre_sport_195p",
+        category_tag=CATEGORY_REFERENCE_LITRE_195P,
         chassis=ChassisParams(
             dry_mass_kg=215.0,  # Heavier than litre bikes
             rider_mass_kg=75.0,

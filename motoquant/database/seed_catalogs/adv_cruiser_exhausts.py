@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Adventure & Cruiser Exhaust Catalog Expansion
-==============================================================
+MotoQuant — Adventure & Cruiser Exhaust Catalog Expansion
+=========================================================
 Seeds 27 bike-specific exhaust parts filling 22 large-displacement ADV/cruiser
 bikes that were missing exhaust options in the main parts catalog.
 

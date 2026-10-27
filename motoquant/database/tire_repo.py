@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Tire Repository
-===============================
+MotoQuant — Tire Repository
+===========================
 CRUD for the tire library — the most sim-critical component database.
 
 Pacejka coefficients, thermal models, and friction data are the #1 driver
@@ -17,6 +17,11 @@ class TireRepository:
 
     def __init__(self, conn: sqlite3.Connection):
         self._conn = conn
+        # Rows with id <= this watermark are never overwritten by create().
+        # Set by seed_all() while it re-seeds a populated catalog, so curated
+        # patch data (availability flags, prices, size notation) survives a
+        # `db seed` on the shipped DB. None = no protection.
+        self.protect_ids_upto: int | None = None
 
     # ────────────────────────────────────────────
     # Tire Manufacturers
@@ -64,12 +69,16 @@ class TireRepository:
         size_designation: str,
         compound_type: str = "sport",
         position: str = "rear",
+        update_existing: bool = True,
         **kwargs,
     ) -> int:
         """
         Create a tire model entry.
 
         All Pacejka, friction, thermal, and physical params passed as kwargs.
+        An existing row for the same (manufacturer, model, physical size) is
+        updated in place unless ``update_existing`` is False or the row is
+        protected by ``protect_ids_upto`` — then it is returned untouched.
         """
         mfr_id = self.get_or_create_manufacturer(manufacturer_name)
 
@@ -132,6 +141,11 @@ class TireRepository:
                 break
         if existing:
             tire_id = existing["id"] if hasattr(existing, "keys") else existing[0]
+            protected = (
+                self.protect_ids_upto is not None and tire_id <= self.protect_ids_upto
+            )
+            if not update_existing or protected:
+                return tire_id
             set_cols = [c for c in cols if c not in ("manufacturer_id",)]
             set_vals = [v for c, v in zip(cols, vals) if c not in ("manufacturer_id",)]
             assignments = ", ".join(f"{c} = ?" for c in set_cols)

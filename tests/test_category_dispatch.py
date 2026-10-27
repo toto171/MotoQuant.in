@@ -26,6 +26,7 @@ from motoquant.category_profiles import (
     CATEGORY_ENTRY_150_200,
     CATEGORY_LITRE_SPORT_195P,
     CATEGORY_LITRE_SPORT_600_1000,
+    CATEGORY_REFERENCE_LITRE_195P,
     CATEGORY_TWO_STROKE,
     CATEGORY_UNKNOWN,
     derive_category_tag,
@@ -265,10 +266,12 @@ class TestImporterAutoTags:
 
 class TestEngineProfileWiring:
     def test_engine_resolves_profile_from_cfg(self):
+        # The defaults.py references carry the frozen reference profile
+        # (2026-10 epoch) so catalog retunes can't move the pins.
         cfg = gsxr1000_k5()
         eng = MotoQuantEngine(cfg)
         assert eng._profile is not None
-        assert eng._profile.name == CATEGORY_LITRE_SPORT_195P
+        assert eng._profile.name == CATEGORY_REFERENCE_LITRE_195P
 
     def test_engine_auto_derives_when_tag_missing(self):
         cfg = gsxr1000_k5()

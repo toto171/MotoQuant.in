@@ -1,6 +1,6 @@
 """
-MotoQuant Pro — Auto-Calibration Loop
-========================================
+MotoQuant — Auto-Calibration Loop
+=================================
 Fit physics parameters (aero.cd, tires.mu_peak, and optionally others)
 from real GPS run data (DragRunData) by minimising the overlay cost function.
 
@@ -8,8 +8,11 @@ Algorithm
 ---------
 Uses scipy.optimize.differential_evolution (global, derivative-free) for the
 first coarse pass, followed by scipy.optimize.minimize(method='Nelder-Mead')
-for local refinement.  Total wall time is ~5–30 s depending on parameter count
-and the simulation's RK4 integration cost.
+for local refinement.  Both stages honour each spec's declared ``bounds``
+(the refinement is bounded Nelder-Mead; a start point outside the bounds is
+clipped onto them). Total wall time is ~5–30 s depending on parameter count
+and the simulation's RK4 integration cost. Simulations run on the engine
+``motoquant.engine_select`` picks (the Rust core when available).
 
 Typical use
 -----------
@@ -21,7 +24,7 @@ Typical use
 
     print(result)
     optimised_config = result.apply(config)     # returns modified BikeConfig copy
-    new_sim = MotoQuantEngine(optimised_config).run()
+    new_sim = engine_select.make_engine(optimised_config).run(rollout_m=0.0)
 
 Parameter specification
 -----------------------
@@ -36,10 +39,17 @@ Predefined presets are available:
     PRESET_AERO_TIRE  : fit cd + mu_peak  (default, recommended)
     PRESET_AERO_ONLY  : fit cd only       (when tire data is trusted)
     PRESET_TIRE_ONLY  : fit mu_peak only  (when aero is well characterised)
-    PRESET_FULL       : cd + mu_peak + engine.drivetrain_efficiency
+    PRESET_FULL       : cd + mu_peak + drivetrain.chain_efficiency
+
+Every ``path`` must name a real numeric dataclass field (validated before
+any simulation runs); an unknown path raises CalibrationError instead of
+being written as a phantom attribute nothing reads.
 """
 
 import copy
+import dataclasses
+import logging
+import math
 import time
 from dataclasses import dataclass, field
 
@@ -52,10 +62,12 @@ try:
 except ImportError:
     _SCIPY_AVAILABLE = False
 
+from .. import engine_select
 from ..models import BikeConfig
-from ..physics import MotoQuantEngine
 from .dragy import DragRunData
 from .overlay import RunComparison, compare_runs, compute_cost
+
+log = logging.getLogger(__name__)
 
 # ─── Error ────────────────────────────────────────────────────────────────
 
@@ -79,10 +91,16 @@ PRESET_TIRE_ONLY: list[dict] = [
     {"path": "tires.mu_peak", "bounds": (1.0, 1.8), "initial": None},
 ]
 
+# drivetrain.chain_efficiency: DrivetrainParams has no 'efficiency' field
+# (overall efficiency is the drivetrain_efficiency() product of the primary /
+# per-mesh / chain terms), so the old 'drivetrain.efficiency' path crashed
+# every PRESET_FULL run with AttributeError. Note the chain term is only
+# weakly live on bikes whose dyno curve is measured AT THE WHEEL (the K5
+# reference among them) — see the core audit's at-wheel-efficiency finding.
 PRESET_FULL: list[dict] = [
     {"path": "aero.cd", "bounds": (0.45, 0.95), "initial": None},
     {"path": "tires.mu_peak", "bounds": (1.0, 1.8), "initial": None},
-    {"path": "drivetrain.efficiency", "bounds": (0.82, 0.97), "initial": None},
+    {"path": "drivetrain.chain_efficiency", "bounds": (0.90, 0.99), "initial": None},
 ]
 
 
@@ -161,22 +179,92 @@ class CalibrationResult:
 # ─── Parameter injection helpers ──────────────────────────────────────────
 
 
+def _resolve_param(config: BikeConfig, path: str) -> tuple[object, str]:
+    """(owner object, field name) for a dotted path, validating every segment.
+
+    Each segment must be a declared dataclass field of the object it is
+    looked up on. A bare setattr() used to accept ANY path: a typo (or
+    PRESET_FULL's old 'drivetrain.efficiency') was written as a phantom
+    attribute the physics never reads, so the fit "succeeded" on a dead knob.
+    """
+    parts = path.split(".") if isinstance(path, str) else []
+    if len(parts) < 2 or not all(parts):
+        raise CalibrationError(
+            f"parameter path {path!r} must be dotted, e.g. 'aero.cd'"
+        )
+    obj: object = config
+    for i, part in enumerate(parts):
+        if not dataclasses.is_dataclass(obj) or part not in {
+            f.name for f in dataclasses.fields(obj)
+        }:
+            raise CalibrationError(
+                f"unknown parameter path {path!r}: {type(obj).__name__} has no "
+                f"field {part!r}"
+            )
+        if i < len(parts) - 1:
+            obj = getattr(obj, part)
+    return obj, parts[-1]
+
+
 def _get_param(config: BikeConfig, path: str) -> float:
     """Get a value from BikeConfig via dotted path, e.g. 'aero.cd'."""
-    parts = path.split(".")
-    obj = config
-    for part in parts:
-        obj = getattr(obj, part)
-    return float(obj)
+    obj, name = _resolve_param(config, path)
+    value = getattr(obj, name)
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise CalibrationError(
+            f"parameter {path!r} is not numeric (value {value!r}); only float "
+            "fields can be calibrated"
+        )
+    return float(value)
 
 
 def _set_param(config: BikeConfig, path: str, value: float) -> None:
     """Set a value in BikeConfig via dotted path, e.g. 'aero.cd' = 0.65."""
-    parts = path.split(".")
-    obj = config
-    for part in parts[:-1]:
-        obj = getattr(obj, part)
-    setattr(obj, parts[-1], float(value))
+    obj, name = _resolve_param(config, path)
+    setattr(obj, name, float(value))
+
+
+def _prepare_specs(
+    config: BikeConfig, params_to_fit: list[dict]
+) -> tuple[np.ndarray, list[tuple[float, float]], dict[str, float]]:
+    """Validate specs; return (x0 clipped into bounds, bounds, initial_params)."""
+    x0: list[float] = []
+    bounds: list[tuple[float, float]] = []
+    initial_params: dict[str, float] = {}
+    for spec in params_to_fit:
+        path = spec["path"]
+        current = _get_param(config, path)  # validates the path up front
+        try:
+            lo, hi = (float(b) for b in spec["bounds"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise CalibrationError(
+                f"spec {path!r} needs bounds=(low, high): {exc}"
+            ) from exc
+        if not (math.isfinite(lo) and math.isfinite(hi) and lo < hi):
+            raise CalibrationError(f"spec {path!r} has invalid bounds ({lo}, {hi})")
+        init = spec.get("initial")
+        start = current if init is None else float(init)
+        if not lo <= start <= hi:
+            clipped = min(max(start, lo), hi)
+            log.info(
+                "calibrate: start %s=%g is outside bounds (%g, %g); starting from %g",
+                path,
+                start,
+                lo,
+                hi,
+                clipped,
+            )
+            start = clipped
+        x0.append(start)
+        bounds.append((lo, hi))
+        initial_params[path] = current
+    return np.array(x0), bounds, initial_params
+
+
+def _clip_to_bounds(x: np.ndarray, bounds: list[tuple[float, float]]) -> np.ndarray:
+    lo = np.array([b[0] for b in bounds])
+    hi = np.array([b[1] for b in bounds])
+    return np.clip(np.asarray(x, dtype=float), lo, hi)
 
 
 # ─── Objective function ───────────────────────────────────────────────────
@@ -200,6 +288,7 @@ class _Objective:
         self._specs = param_specs
         self._weights = weights or {}
         self.n_evals = 0
+        self.n_crashes = 0
 
     def __call__(self, x: np.ndarray) -> float:
         self.n_evals += 1
@@ -208,9 +297,20 @@ class _Objective:
             _set_param(cfg, spec["path"], float(x[i]))
 
         try:
-            engine = MotoQuantEngine(cfg)
-            sim = engine.run()
-        except Exception:
+            # rollout_m=0.0: the GPS/ECU parsers time a real run from its
+            # first-motion frame (no 1-ft rollout), so the sim must use the
+            # same convention or every fit absorbs a ~0.3 s timing offset.
+            sim = engine_select.make_engine(cfg).run(rollout_m=0.0)
+        except Exception as exc:
+            self.n_crashes += 1
+            if self.n_crashes == 1:
+                log.warning(
+                    "calibrate: simulation failed at %s (%s: %s); penalising "
+                    "such points",
+                    {s["path"]: float(v) for s, v in zip(self._specs, x)},
+                    type(exc).__name__,
+                    exc,
+                )
             return 1e6  # penalise crashes
 
         if sim.time_quarter <= 0 or sim.speed_quarter <= 0:
@@ -270,19 +370,8 @@ def calibrate(
     if not params_to_fit:
         raise CalibrationError("params_to_fit is empty — nothing to optimise.")
 
-    # Collect initial values and bounds
-    initial_values = []
-    bounds = []
-    initial_params = {}
-    for spec in params_to_fit:
-        path = spec["path"]
-        bnd = spec["bounds"]
-        init = spec.get("initial") or _get_param(config, path)
-        initial_values.append(float(init))
-        bounds.append(bnd)
-        initial_params[path] = float(_get_param(config, path))
-
-    x0 = np.array(initial_values)
+    # Collect initial values and bounds (validates every path first)
+    x0, bounds, initial_params = _prepare_specs(config, params_to_fit)
 
     obj = _Objective(config, real_run, params_to_fit, cost_weights)
 
@@ -320,13 +409,18 @@ def calibrate(
     # ── Phase 2: local refinement (Nelder-Mead) ───────────────────────────
     if verbose:
         print("  Nelder-Mead refinement...")
+    # Bounded Nelder-Mead (scipy >= 1.7): the refinement used to run
+    # unbounded, so it walked straight out of the declared bounds (a K5 fit
+    # returned cd 0.30 for bounds (0.45, 0.95)) and noisy GPS data could
+    # yield negative/absurd values that apply() wrote into the config.
     nm_result = minimize(
         obj,
-        x_best,
+        _clip_to_bounds(x_best, bounds),
         method="Nelder-Mead",
+        bounds=bounds,
         options={"maxiter": local_maxiter, "xatol": 1e-5, "fatol": 1e-7, "disp": False},
     )
-    x_final = nm_result.x
+    x_final = _clip_to_bounds(nm_result.x, bounds)
     final_cost = float(nm_result.fun)
 
     wall_time = time.time() - t_start
@@ -340,7 +434,7 @@ def calibrate(
     cfg_fitted = copy.deepcopy(config)
     for path, value in fitted_params.items():
         _set_param(cfg_fitted, path, value)
-    sim_fitted = MotoQuantEngine(cfg_fitted).run()
+    sim_fitted = engine_select.make_engine(cfg_fitted).run(rollout_m=0.0)
     final_comparison = compare_runs(real_run, sim_fitted)
 
     converged = nm_result.success or (final_cost < initial_cost)
@@ -380,15 +474,9 @@ def calibrate_multi_run(
     if params_to_fit is None:
         params_to_fit = PRESET_AERO_TIRE
 
-    initial_params = {}
-    x0 = []
-    bounds = []
-    for spec in params_to_fit:
-        path = spec["path"]
-        init = spec.get("initial") or _get_param(config, path)
-        x0.append(float(init))
-        bounds.append(spec["bounds"])
-        initial_params[path] = float(_get_param(config, path))
+    if not params_to_fit:
+        raise CalibrationError("params_to_fit is empty — nothing to optimise.")
+    x0, bounds, initial_params = _prepare_specs(config, params_to_fit)
 
     objs = [_Objective(config, run, params_to_fit, cost_weights) for run in runs]
     n_evals = [0]
@@ -398,7 +486,7 @@ def calibrate_multi_run(
         costs = [o(x) for o in objs]
         return float(np.mean(costs))
 
-    initial_cost = combined_obj(np.array(x0))
+    initial_cost = combined_obj(x0)
     t_start = time.time()
 
     de_result = differential_evolution(
@@ -406,12 +494,13 @@ def calibrate_multi_run(
     )
     nm_result = minimize(
         combined_obj,
-        de_result.x,
+        _clip_to_bounds(de_result.x, bounds),
         method="Nelder-Mead",
+        bounds=bounds,
         options={"maxiter": 200, "xatol": 1e-5, "fatol": 1e-7},
     )
 
-    x_final = nm_result.x
+    x_final = _clip_to_bounds(nm_result.x, bounds)
     final_cost = float(nm_result.fun)
     fitted_params = {
         spec["path"]: float(x_final[i]) for i, spec in enumerate(params_to_fit)
@@ -424,7 +513,7 @@ def calibrate_multi_run(
     cfg_fitted = copy.deepcopy(config)
     for path, value in fitted_params.items():
         _set_param(cfg_fitted, path, value)
-    sim_fitted = MotoQuantEngine(cfg_fitted).run()
+    sim_fitted = engine_select.make_engine(cfg_fitted).run(rollout_m=0.0)
     final_comparison = compare_runs(best, sim_fitted)
 
     return CalibrationResult(

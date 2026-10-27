@@ -150,8 +150,10 @@ def run_sweep(out_path):
 
     # Attach benchmarks — score-and-pick (Option 2 from DISPATCH_INBOX
     # 2026-05-25): for each catalog row, pick the *most-specific* in-range
-    # benchmark (out-of-range fallback). Logic lives in
-    # sweep_lib.bind_benchmark_for_record, shared with the other drivers.
+    # benchmark. Logic lives in sweep_lib.bind_benchmark_for_record, shared
+    # with the other drivers; since the 2026-10 data epoch it runs the
+    # "epoch" policy (highest-weight in-range entry; out-of-year fallbacks
+    # only via sweep_lib.SAME_PLATFORM_FALLBACKS).
     bench_map = build_bench_map(BENCHMARKS)
 
     for rec in results:

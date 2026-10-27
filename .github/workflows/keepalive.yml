@@ -21,6 +21,11 @@ permissions:
 # To disable temporarily without deleting the file: comment out the
 # `schedule:` block. Manual runs via `workflow_dispatch` always remain
 # available from the Actions tab.
+#
+# OPT-IN (open-source repo): the job is a NO-OP unless the repository
+# variable RENDER_API_URL is set (Settings -> Secrets and variables ->
+# Actions -> Variables), e.g. https://motoquant-api.onrender.com. A fork, or
+# any copy of this repo, therefore never pings someone else's deployment.
 
 on:
   # SCHEDULE PAUSED (July 14, 2026, operator decision): the account crossed
@@ -49,14 +54,17 @@ concurrency:
 
 jobs:
   ping:
+    # Opt-in: skipped (green, zero minutes) unless this repo configures its
+    # own service URL. There is deliberately no hard-coded default.
+    if: ${{ vars.RENDER_API_URL != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 12    # 4 retries x 150s curl + gaps; cold start can take minutes
     steps:
       - name: Ping /api/health
         env:
-          # Override in repo Settings -> Secrets and variables -> Actions ->
-          # Variables -> RENDER_API_URL if your service URL differs.
-          RENDER_API_URL: ${{ vars.RENDER_API_URL || 'https://motoquant-api.onrender.com' }}
+          # Repo Settings -> Secrets and variables -> Actions -> Variables ->
+          # RENDER_API_URL (the deployment this repo owns).
+          RENDER_API_URL: ${{ vars.RENDER_API_URL }}
         # Retry loop (2026-06-06): GitHub throttles */14 crons to every 1-8 h
         # in practice, so most pings land on a COLD service, and free-tier
         # cold starts routinely exceed the old single 90 s curl window. That

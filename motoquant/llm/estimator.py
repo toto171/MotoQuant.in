@@ -9,7 +9,7 @@ physics, and returns a clearly-labelled ESTIMATED result:
     bounds + unit auto-correction; hard errors reject) →
     importer.spec_to_bike_config (pure in-memory: Tier-1/Tier-2 gearing,
     category aero/parasitic defaults, synthetic torque curve) →
-    MotoQuantEngine.run / run_top_speed.
+    engine_select.make_engine(config).run / run_top_speed.
 
 The result carries the validator's confidence score and every assumption the
 pipeline made, so the agent can present the number honestly ("estimated, not
@@ -165,10 +165,12 @@ def simulate_estimated_bike(
         config.rider.mass_kg = float(rider_mass_kg)
         config.chassis.rider_mass_kg = float(rider_mass_kg)
 
-    from ..physics import MotoQuantEngine
+    # engine_select picks the Rust core when it is available (same numbers,
+    # ~50x faster), else the Python reference engine.
+    from ..engine_select import make_engine
 
     try:
-        engine = MotoQuantEngine(config)
+        engine = make_engine(config)
         sim = engine.run()
     except Exception as e:  # noqa: BLE001
         return {"error": f"simulation failed: {type(e).__name__}: {e}"}
