@@ -36,3 +36,10 @@ and press kits. Retail part prices were compiled from public retailer
 listings. Values that were estimated or derived, not published, are marked
 as such in the source files. Manufacturers may revise their figures;
 corrections are welcome via GitHub issues.
+
+-------------------------------------------------------------------------------
+Third-party assets
+-------------------------------------------------------------------------------
+- Barlow Condensed font subsets (web/scripts/fonts/): SIL Open Font License
+  1.1, Copyright 2017 The Barlow Project Authors. See
+  web/scripts/fonts/OFL.txt.
