@@ -64,7 +64,7 @@ maintainers). To report something that needs privacy, use the private
 reporting channel described in [SECURITY.md](SECURITY.md) (GitHub's "Report a
 vulnerability" form on the repository's Security tab works for conduct
 reports too). For anything that does not need privacy, open an issue on
-[GitHub](https://github.com/da25mem5s02-debug/MotoQuant_v1/issues).
+[GitHub](https://github.com/toto171/MotoQuant.in/issues).
 All complaints will be reviewed and investigated promptly and fairly.
 
 All community leaders are obligated to respect the privacy and security of the

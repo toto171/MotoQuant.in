@@ -174,7 +174,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'MotoQuant is open source under the Apache License 2.0 — the complete engine, catalog, tests and validation reports are published at github.com/da25mem5s02-debug/MotoQuant_v1, so every claim in this post can be checked against the code that produces it. Every simulation MotoQuant runs is also reproducible. Given the same BikeConfig and Race environment, you get the same ET to four decimals every time. The state vector is exposed in the timeseries output, so you can plot RPM, gear, slip ratio, drive force, and aero drag against time and see exactly what the simulator did. When the prediction disagrees with reality, the timeseries tells you whether it is a launch problem, a gearing problem, an aero problem, or something else.',
+    text: 'MotoQuant is open source under the Apache License 2.0 — the complete engine, catalog, tests and validation reports are published at github.com/toto171/MotoQuant.in, so every claim in this post can be checked against the code that produces it. Every simulation MotoQuant runs is also reproducible. Given the same BikeConfig and Race environment, you get the same ET to four decimals every time. The state vector is exposed in the timeseries output, so you can plot RPM, gear, slip ratio, drive force, and aero drag against time and see exactly what the simulator did. When the prediction disagrees with reality, the timeseries tells you whether it is a launch problem, a gearing problem, an aero problem, or something else.',
   },
   {
     type: 'p',

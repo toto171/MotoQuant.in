@@ -19,7 +19,7 @@
 
 set -euo pipefail
 
-REPO="da25mem5s02-debug/MotoQuant_v1"
+REPO="toto171/MotoQuant.in"
 
 # ─── Preflight ────────────────────────────────────────────────────────
 command -v gh >/dev/null 2>&1 || { echo "✗ gh CLI not found. Install from https://cli.github.com/"; exit 1; }

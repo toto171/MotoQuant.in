@@ -137,7 +137,7 @@ maintainers and are never committed. To run your own instance, see
 
 ## 9. First-week checklist
 
-- [ ] Fork (or clone) the repo: <https://github.com/da25mem5s02-debug/MotoQuant_v1>.
+- [ ] Fork (or clone) the repo: <https://github.com/toto171/MotoQuant.in>.
 - [ ] Get the test suite green locally (`CONTRIBUTING.md` §2 — use the focused subset first, the full run takes ~30 min).
 - [ ] Run a sim: `python -m motoquant.run sim --bike-id 1 --venue-id 1` → the K5 at Aamby Valley (≈ 10.1 s; the 9.9331 s pin is the sea-level reference config, `make baselines`).
 - [ ] Boot the API (`make api`) and the web app (`make web-install && make web-dev`), and click through the simulator and the chat.

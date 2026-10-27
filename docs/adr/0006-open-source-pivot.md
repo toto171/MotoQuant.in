@@ -45,7 +45,7 @@ Everything is free. There are no tiers, quotas, plans, prices or licence keys.
   public-source catalog specs.
 - Inbound contributions are accepted under the same licence (Apache-2.0 §5),
   as `CONTRIBUTING.md` states.
-- Canonical source: <https://github.com/da25mem5s02-debug/MotoQuant_v1>.
+- Canonical source: <https://github.com/toto171/MotoQuant.in>.
 - Brand: "MotoQuant Pro" → **"MotoQuant"** on every user-facing surface, doc,
   API title and CLI help. "Pro" read as a paid tier. Historical records
   (`CHANGELOG.md` entries, `reports/`, the `CLAUDE.md` history chain) are not

@@ -36,7 +36,7 @@
 
 set -euo pipefail
 
-readonly REPO_URL="https://github.com/da25mem5s02-debug/MotoQuant_v1.git"
+readonly REPO_URL="https://github.com/toto171/MotoQuant.in.git"
 readonly FUSE_MOUNT="/sessions/sharp-confident-cerf/mnt/Vehicle Dynamics"
 readonly MUTEX_FILE="/tmp/motoquant-session.lock"
 readonly RENDER_HEALTH="https://motoquant-api.onrender.com/api/health"

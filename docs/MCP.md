@@ -67,10 +67,10 @@ runtime, so a bare `pip install -e . --no-deps` is enough.
 {
   "mcpServers": {
     "motoquant": {
-      "command": "/path/to/MotoQuant_v1/.venv/bin/python",
+      "command": "/path/to/MotoQuant.in/.venv/bin/python",
       "args": ["-m", "motoquant.mcp_server", "--local"],
       "env": {
-        "MOTOQUANT_DB": "/path/to/MotoQuant_v1/motoquant.db"
+        "MOTOQUANT_DB": "/path/to/MotoQuant.in/motoquant.db"
       }
     }
   }

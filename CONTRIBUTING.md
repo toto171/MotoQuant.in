@@ -31,7 +31,7 @@ current project state and a list of good first issues. Please follow the
 
 ## 1. Repository
 
-- **GitHub:** https://github.com/da25mem5s02-debug/MotoQuant_v1
+- **GitHub:** https://github.com/toto171/MotoQuant.in
 - **Package name:** `motoquant` (formerly `dragsim` — do not reintroduce that string anywhere)
 - **Python:** 3.10 or newer (tested on 3.10, 3.11, 3.12)
 - **Primary DB:** SQLite (`motoquant.db`). It stays until a real scaling trigger ([ADR-0004](docs/adr/0004-sqlite-until-scale.md)).
@@ -42,9 +42,9 @@ current project state and a list of good first issues. Please follow the
 
 ```bash
 # 1. Fork on GitHub (or clone directly if you have write access)
-git clone https://github.com/<you>/MotoQuant_v1.git
-cd MotoQuant_v1
-git remote add upstream https://github.com/da25mem5s02-debug/MotoQuant_v1.git
+git clone https://github.com/<you>/MotoQuant.in.git
+cd MotoQuant.in
+git remote add upstream https://github.com/toto171/MotoQuant.in.git
 
 # 2. Virtual environment (recommended)
 python -m venv .venv
@@ -179,7 +179,7 @@ git add <files>
 git commit -m "Short imperative subject line"
 # Longer body if the why is non-obvious.
 
-# 4. Push to your fork + open a PR against da25mem5s02-debug/MotoQuant_v1:main
+# 4. Push to your fork + open a PR against toto171/MotoQuant.in:main
 git push -u origin feature/<short-name>
 ```
 

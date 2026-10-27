@@ -47,9 +47,9 @@ Render is dashboard-driven. There is nothing to install on your machine.
 
 1. Push this branch to GitHub on `main`. Render watches `main` for changes.
 2. Open https://dashboard.render.com → sign up with the **same GitHub
-   account** that owns `da25mem5s02-debug/MotoQuant_v1`.
+   account** that owns `toto171/MotoQuant.in`.
 3. **New +** → **Blueprint** → **Connect a repository** →
-   pick `da25mem5s02-debug/MotoQuant_v1`.
+   pick `toto171/MotoQuant.in`.
 4. Render reads `render.yaml`, shows a one-screen summary
    (`motoquant-api`, Docker, Free plan, Singapore region, healthcheck
    `/api/health`). Click **Apply**.

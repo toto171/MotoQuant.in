@@ -140,7 +140,7 @@ Content-Type: application/json
         </p>
         <Step n="1" title="Clone and install">
           <Code>{`git clone ${REPO_URL}.git
-cd MotoQuant_v1
+cd MotoQuant.in
 make install        # Python deps + the motoquant package`}
           </Code>
         </Step>

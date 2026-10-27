@@ -19,9 +19,9 @@ update to the latest `main`.
 Report it privately with **GitHub Security Advisories**:
 
 1. Go to the repository's **Security** tab:
-   <https://github.com/da25mem5s02-debug/MotoQuant_v1/security>
+   <https://github.com/toto171/MotoQuant.in/security>
 2. Choose **Report a vulnerability** (or open
-   <https://github.com/da25mem5s02-debug/MotoQuant_v1/security/advisories/new>).
+   <https://github.com/toto171/MotoQuant.in/security/advisories/new>).
 3. Describe the issue, how to reproduce it, and the impact you expect. A
    minimal proof of concept helps. Please do not include real user data.
 

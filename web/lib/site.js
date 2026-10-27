@@ -8,7 +8,7 @@
  * no checkout and no license keys. Keep copy consistent with that.
  */
 
-export const REPO_URL = 'https://github.com/da25mem5s02-debug/MotoQuant_v1';
+export const REPO_URL = 'https://github.com/toto171/MotoQuant.in';
 export const ISSUES_URL = `${REPO_URL}/issues`;
 export const DISCUSSIONS_URL = `${REPO_URL}/discussions`;
 export const SECURITY_URL = `${REPO_URL}/security`;

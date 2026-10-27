@@ -21,8 +21,8 @@ Requirements: Python 3.10+ (CI and the Docker image use 3.11) and Node 18+ for
 the web frontend.
 
 ```bash
-git clone https://github.com/da25mem5s02-debug/MotoQuant_v1.git
-cd MotoQuant_v1
+git clone https://github.com/toto171/MotoQuant.in.git
+cd MotoQuant.in
 
 make install      # runtime + dev deps, editable motoquant package
 make check        # lint + format + baseline gate + fast tests (~3 min)

@@ -9,7 +9,7 @@ and `reports/`. Format loosely follows [Keep a Changelog](https://keepachangelog
 **Monetization is scrapped. MotoQuant is free and open source under the
 Apache License 2.0** ([ADR-0006](docs/adr/0006-open-source-pivot.md)).
 Copyright 2026 Hritwik Mudhai and the MotoQuant contributors. Source:
-<https://github.com/da25mem5s02-debug/MotoQuant_v1>. No payment was ever
+<https://github.com/toto171/MotoQuant.in>. No payment was ever
 taken; the billing switch was never enabled.
 
 ### Added

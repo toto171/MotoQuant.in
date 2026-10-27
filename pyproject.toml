@@ -18,8 +18,8 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://www.motoquant.in"
-Source = "https://github.com/da25mem5s02-debug/MotoQuant_v1"
-Issues = "https://github.com/da25mem5s02-debug/MotoQuant_v1/issues"
+Source = "https://github.com/toto171/MotoQuant.in"
+Issues = "https://github.com/toto171/MotoQuant.in/issues"
 
 [project.scripts]
 # Stdio MCP server exposing the sim API as tools (docs/MCP.md).

@@ -3,7 +3,7 @@
 > *The physics of faster.* A free, open-source motorcycle drag-racing simulator.
 
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![CI](https://github.com/da25mem5s02-debug/MotoQuant_v1/actions/workflows/ci.yml/badge.svg)](https://github.com/da25mem5s02-debug/MotoQuant_v1/actions/workflows/ci.yml)
+[![CI](https://github.com/toto171/MotoQuant.in/actions/workflows/ci.yml/badge.svg)](https://github.com/toto171/MotoQuant.in/actions/workflows/ci.yml)
 [![Web](https://img.shields.io/badge/web-motoquant.in-orange)](https://www.motoquant.in)
 
 MotoQuant predicts a motorcycle's quarter-mile ET, trap speed and top speed
@@ -53,7 +53,7 @@ Three reference bikes are pinned bit-identical and gated in CI:
 **GSX-R 1000 K5 → 9.9331 s**, **YZF-R1 4C8 → 10.1436 s**,
 **Hayabusa Gen1 → 10.3633 s** (see [docs/INVARIANTS.md](docs/INVARIANTS.md) I1).
 Every benchmark keeps its source label. If you have an instrumented run that
-disagrees, please [file it](https://github.com/da25mem5s02-debug/MotoQuant_v1/issues/new/choose);
+disagrees, please [file it](https://github.com/toto171/MotoQuant.in/issues/new/choose);
 that is the fastest way to make the model better.
 
 ## Quick start
@@ -61,8 +61,8 @@ that is the fastest way to make the model better.
 Requirements: Python 3.10+ and, for the web app, Node 18+.
 
 ```bash
-git clone https://github.com/da25mem5s02-debug/MotoQuant_v1.git
-cd MotoQuant_v1
+git clone https://github.com/toto171/MotoQuant.in.git
+cd MotoQuant.in
 
 make install          # deps + editable motoquant package
 make check            # lint + format + baseline gate + fast tests (~3 min)

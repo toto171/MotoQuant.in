@@ -90,7 +90,7 @@ def _throttled_fetch(
             # It used to be motoquant.in/pricing-bot — a page that never
             # existed. The open-source repo documents exactly what this does.
             "Mozilla/5.0 (compatible; MotoQuantPricingBot/1.0; "
-            "+https://github.com/da25mem5s02-debug/MotoQuant_v1)"
+            "+https://github.com/toto171/MotoQuant.in)"
         ),
         "Accept": "text/html,application/xhtml+xml;q=0.9",
         "Accept-Language": "en-IN,en;q=0.8",

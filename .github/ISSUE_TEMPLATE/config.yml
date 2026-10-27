@@ -1,11 +1,11 @@
 blank_issues_enabled: false
 contact_links:
   - name: Ask a question
-    url: https://github.com/da25mem5s02-debug/MotoQuant_v1/discussions
+    url: https://github.com/toto171/MotoQuant.in/discussions
     about: For open-ended questions and design discussions, use GitHub Discussions instead of an issue.
   - name: Report a security vulnerability (privately)
-    url: https://github.com/da25mem5s02-debug/MotoQuant_v1/security/advisories/new
+    url: https://github.com/toto171/MotoQuant.in/security/advisories/new
     about: Please do not open a public issue for security problems — see SECURITY.md.
   - name: Read the onboarding doc
-    url: https://github.com/da25mem5s02-debug/MotoQuant_v1/blob/main/docs/ONBOARDING.md
+    url: https://github.com/toto171/MotoQuant.in/blob/main/docs/ONBOARDING.md
     about: New contributor? Start here (then AGENTS.md and CONTRIBUTING.md).

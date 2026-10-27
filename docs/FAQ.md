@@ -6,7 +6,7 @@
 MotoQuant is a free, open-source, physics-based quarter-mile drag racing simulator for motorcycles. It uses first-principles aerodynamics, tire physics (Pacejka slip characteristics), drivetrain dynamics, and engine modeling to predict your bike's quarter-mile ET (elapsed time) and trap speed. The simulator lets you test modifications—power increases, gear ratios, tire swaps, weight reduction—and see their impact on performance *before* spending money at the tuner or parts shop.
 
 ### Is it free? Is it open source?
-Yes to both. Everything (the simulator, parts ROI, build optimizer, autotune, Dragy/dyno calibration, chat) is free, with no paid tiers, no quotas and no license keys. The code is open source under the **Apache License 2.0**: <https://github.com/da25mem5s02-debug/MotoQuant_v1>. You can use the hosted site at motoquant.in or run your own copy ([SELF_HOSTING.md](SELF_HOSTING.md)). An account is optional and only keeps your saved runs in a personal garage.
+Yes to both. Everything (the simulator, parts ROI, build optimizer, autotune, Dragy/dyno calibration, chat) is free, with no paid tiers, no quotas and no license keys. The code is open source under the **Apache License 2.0**: <https://github.com/toto171/MotoQuant.in>. You can use the hosted site at motoquant.in or run your own copy ([SELF_HOSTING.md](SELF_HOSTING.md)). An account is optional and only keeps your saved runs in a personal garage.
 
 ### Who should use it?
 - **Drag racers** — predict ET gains from mods, plan builds within budget constraints
@@ -274,7 +274,7 @@ CLI: `python -m motoquant.run sim --bike-id 1 --part-ids 10,20,30 --json > resul
 ## Support & Feedback
 
 ### How do I report a bug?
-Open a [GitHub issue](https://github.com/da25mem5s02-debug/MotoQuant_v1/issues/new/choose) with the bug-report template, and include:
+Open a [GitHub issue](https://github.com/toto171/MotoQuant.in/issues/new/choose) with the bug-report template, and include:
 - Your bike model (make, year)
 - Modifications you applied
 - The unexpected result
@@ -290,7 +290,7 @@ Yes. Open a GitHub issue with the **bike data** template and include the make, m
 Please do. Instrumented runs (Dragy, VBOX, Racelogic, timeslips with conditions) are the single most valuable contribution, because small-cc accuracy is limited by data rather than by the model. Use the **calibration data** issue template.
 
 ### Is there a community or forum?
-GitHub is the community hub: [issues](https://github.com/da25mem5s02-debug/MotoQuant_v1/issues) for bugs and data corrections, and [discussions](https://github.com/da25mem5s02-debug/MotoQuant_v1/discussions) for questions and ideas. Please follow the [Code of Conduct](../CODE_OF_CONDUCT.md).
+GitHub is the community hub: [issues](https://github.com/toto171/MotoQuant.in/issues) for bugs and data corrections, and [discussions](https://github.com/toto171/MotoQuant.in/discussions) for questions and ideas. Please follow the [Code of Conduct](../CODE_OF_CONDUCT.md).
 
 ### What's your roadmap?
 - **Done:** physics engine, catalog, calibration pipeline, public leaderboard, AI build optimization and chat, MCP server.
@@ -325,4 +325,4 @@ Yes — simulation runs are your own unless you explicitly submit to the public 
 ---
 
 **Last updated:** October 2026  
-**Questions?** Open a [GitHub discussion](https://github.com/da25mem5s02-debug/MotoQuant_v1/discussions) or visit motoquant.in
+**Questions?** Open a [GitHub discussion](https://github.com/toto171/MotoQuant.in/discussions) or visit motoquant.in

@@ -152,7 +152,7 @@ const SECTIONS = [
     n: '7',
     title: 'Reproducibility',
     body: [
-      'MotoQuant is free and open source under the Apache License 2.0, and the complete source is published at github.com/da25mem5s02-debug/MotoQuant_v1 — so it is open to external audit by construction. The simulator code, all sub-model coefficients, the 541-bike catalog, the 593-part library, and every venue\'s seasonal weather profile are inspectable, forkable and re-runnable. Every parts ROI calculation is deterministic given the bike configuration and venue conditions. The repository contains:',
+      'MotoQuant is free and open source under the Apache License 2.0, and the complete source is published at github.com/toto171/MotoQuant.in — so it is open to external audit by construction. The simulator code, all sub-model coefficients, the 541-bike catalog, the 593-part library, and every venue\'s seasonal weather profile are inspectable, forkable and re-runnable. Every parts ROI calculation is deterministic given the bike configuration and venue conditions. The repository contains:',
     ],
     list: {
       title: '',
@@ -194,7 +194,7 @@ const SECTIONS = [
     body: [
       'If you reference this whitepaper or use MotoQuant outputs in your own analysis, please cite as:',
     ],
-    citation: 'Singh, R. & Desai, A. (2026). MotoQuant: A first-principles drag-racing physics engine for motorcycles. Pune, India. https://motoquant.in/whitepaper — source: https://github.com/da25mem5s02-debug/MotoQuant_v1 (Apache-2.0)',
+    citation: 'Singh, R. & Desai, A. (2026). MotoQuant: A first-principles drag-racing physics engine for motorcycles. Pune, India. https://motoquant.in/whitepaper — source: https://github.com/toto171/MotoQuant.in (Apache-2.0)',
   },
 ];
 
