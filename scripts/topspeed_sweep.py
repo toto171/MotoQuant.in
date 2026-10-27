@@ -1,7 +1,8 @@
 """
 topspeed_sweep.py
 ==================
-Runs MotoQuantEngine.run_top_speed() across every ALL_KNOWN_BIKES spec and
+Runs run_top_speed() (on motoquant.engine_select.make_engine — the Rust core
+when built and current) across every ALL_KNOWN_BIKES spec and
 scores the results against a curated list of published top-speed benchmarks
 (factory claims + derestricted magazine tests).
 
@@ -34,7 +35,7 @@ from pathlib import Path
 # accidentally match "Duke 390 Adventure".
 from sweep_lib import wb_match as _model_match  # type: ignore
 
-from motoquant import MotoQuantEngine
+from motoquant.engine_select import engine_class, make_engine
 from motoquant.scraper.importer import spec_to_bike_config
 from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
 
@@ -166,7 +167,7 @@ BENCHMARKS.extend(_WORLD_TS)
 def _sim_spec(spec) -> dict:
     """Run top-speed sim on one spec, return a JSON-friendly dict."""
     cfg = spec_to_bike_config(spec)
-    ts = MotoQuantEngine(cfg).run_top_speed(max_time=90.0)
+    ts = make_engine(cfg).run_top_speed(max_time=90.0)
     return {
         "manufacturer": spec.manufacturer,
         "model": spec.model_name,
@@ -234,6 +235,7 @@ def run_sweep(verbose: bool = True) -> dict:
 
     summary = {
         "date": _dt.date.today().isoformat(),
+        "engine": engine_class().__name__,
         "n_bikes_simmed": len(results),
         "n_fails": fails,
         "plateau_count": sum(1 for r in results if r["reached_plateau"]),

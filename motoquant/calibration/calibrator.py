@@ -24,7 +24,7 @@ Typical use
 
     print(result)
     optimised_config = result.apply(config)     # returns modified BikeConfig copy
-    new_sim = engine_select.make_engine(optimised_config).run()
+    new_sim = engine_select.make_engine(optimised_config).run(rollout_m=0.0)
 
 Parameter specification
 -----------------------
@@ -297,7 +297,10 @@ class _Objective:
             _set_param(cfg, spec["path"], float(x[i]))
 
         try:
-            sim = engine_select.make_engine(cfg).run()
+            # rollout_m=0.0: the GPS/ECU parsers time a real run from its
+            # first-motion frame (no 1-ft rollout), so the sim must use the
+            # same convention or every fit absorbs a ~0.3 s timing offset.
+            sim = engine_select.make_engine(cfg).run(rollout_m=0.0)
         except Exception as exc:
             self.n_crashes += 1
             if self.n_crashes == 1:
@@ -431,7 +434,7 @@ def calibrate(
     cfg_fitted = copy.deepcopy(config)
     for path, value in fitted_params.items():
         _set_param(cfg_fitted, path, value)
-    sim_fitted = engine_select.make_engine(cfg_fitted).run()
+    sim_fitted = engine_select.make_engine(cfg_fitted).run(rollout_m=0.0)
     final_comparison = compare_runs(real_run, sim_fitted)
 
     converged = nm_result.success or (final_cost < initial_cost)
@@ -510,7 +513,7 @@ def calibrate_multi_run(
     cfg_fitted = copy.deepcopy(config)
     for path, value in fitted_params.items():
         _set_param(cfg_fitted, path, value)
-    sim_fitted = engine_select.make_engine(cfg_fitted).run()
+    sim_fitted = engine_select.make_engine(cfg_fitted).run(rollout_m=0.0)
     final_comparison = compare_runs(best, sim_fitted)
 
     return CalibrationResult(

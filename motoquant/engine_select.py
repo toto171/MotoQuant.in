@@ -33,7 +33,7 @@ from __future__ import annotations
 import logging
 import os
 
-from .constants import QUARTER_MILE_M
+from .constants import QUARTER_MILE_M, ROLLOUT_M
 from .models import BikeConfig
 from .physics import MotoQuantEngine, SimResult
 
@@ -118,13 +118,16 @@ def run_quarter(
     *,
     dt: float = 0.001,
     progress_cb=None,
+    rollout_m: float = ROLLOUT_M,
 ) -> SimResult:
-    """Convenience: build the selected engine and run it."""
+    """Convenience: build the selected engine and run it (splits timed with
+    the drag-strip ``rollout_m`` convention; 0.0 = from first motion)."""
     return make_engine(config, dt=dt).run(
         distance=distance,
         max_time=max_time,
         use_adaptive_dt=use_adaptive_dt,
         progress_cb=progress_cb,
+        rollout_m=rollout_m,
     )
 
 

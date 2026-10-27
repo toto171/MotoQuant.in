@@ -33,6 +33,7 @@ from motoquant.models import DrivetrainParams
 from motoquant.scraper.importer import spec_to_bike_config
 from motoquant.scraper.known_bikes import (
     KAWASAKI_Z1000_2014,
+    KAWASAKI_ZX14R_2012,
     SUZUKI_GSXR1000_L7,
 )
 from motoquant.scraper.spec import BikeSpec
@@ -159,11 +160,14 @@ class TestPhysicsClamp(unittest.TestCase):
     """The sim must plateau at ≈ the limiter, and only above it."""
 
     def test_topspeed_caps_at_limiter(self):
-        # GSX-R 1000 L7 (299-limited fleet): unlimited it runs to its
-        # aero-limited ~338 km/h — the exact July-13 finding. Reverting the
-        # physics clamp, the importer threading, or the annotation all make
-        # the limited run blow past 301 and fail here.
-        cfg = _limited_config()
+        # ZX-14R (299-limited fleet): unlimited it runs to its aero limit
+        # well past 299. (The GSX-R 1000 L7 was the July-13 subject; since
+        # the 2026-10 epoch gave faired catalog bikes their real drag area it
+        # only reaches ~304 km/h unlimited — too close to the limiter.)
+        # Reverting the physics clamp, the importer threading, or the
+        # annotation all make the limited run blow past 301 and fail here.
+        cfg = spec_to_bike_config(KAWASAKI_ZX14R_2012)
+        self.assertEqual(cfg.drivetrain.speed_limiter_kmh, 299.0)
         ts = MotoQuantEngine(cfg).run_top_speed()
         self.assertLessEqual(abs(ts.terminal_velocity_kmh - 299.0), 2.0)
         self.assertTrue(ts.reached_plateau)
@@ -173,7 +177,7 @@ class TestPhysicsClamp(unittest.TestCase):
         ts_unl = MotoQuantEngine(stripped).run_top_speed()
         self.assertGreater(
             ts_unl.terminal_velocity_kmh,
-            320.0,
+            310.0,
             "unlimited run should overshoot — otherwise this bike no longer "
             "exercises the limiter and the test needs a faster subject",
         )

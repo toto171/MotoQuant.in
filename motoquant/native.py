@@ -41,7 +41,7 @@ from pathlib import Path
 
 import numpy as np
 
-from .constants import QUARTER_MILE_M, RADS_TO_RPM, RPM_TO_RADS, G
+from .constants import QUARTER_MILE_M, RADS_TO_RPM, ROLLOUT_M, RPM_TO_RADS, G
 from .models import CLUTCH_SLIDER, DRIVE_CHAIN, BikeConfig
 from .physics import MotoQuantEngine, SimResult
 
@@ -49,8 +49,13 @@ log = logging.getLogger(__name__)
 
 #: Resolved-config schema version — must equal the Rust crate's SCHEMA_VERSION.
 #: 1 = initial; 2 = ``mass.m_total_cfg`` (Python re-reads
-#: ``cfg.chassis.total_mass_kg`` every step from step 1 on).
-SCHEMA_VERSION = 2
+#: ``cfg.chassis.total_mass_kg`` every step from step 1 on); 3 = the 2026-10
+#: physics epoch (``rollout_m`` run parameter + start-beam-relative splits,
+#: slip-phase effective mass, soft-cut rev limiter, continuous slip ratio,
+#: intercooler-less charge-temp penalty, energy-consistent launch floor — the
+#: resolved dict's shape is unchanged; the bump keeps a pre-epoch extension /
+#: wasm from ever pairing with a post-epoch resolver or fixture).
+SCHEMA_VERSION = 3
 
 #: The crate whose sources the extension's ``SOURCE_FINGERPRINT`` hashes.
 CRATE_DIR = Path(__file__).resolve().parent.parent / "rust" / "motoquant-core"
@@ -369,6 +374,11 @@ def resolve_engine(eng: MotoQuantEngine, *, exp_impl: str | None = None) -> dict
                 "native resolve drifted from DrivetrainModel.effective_mass — "
                 "update motoquant/native.py (and bump SCHEMA_VERSION)"
             )
+    if m0 + m_rot_rear + m_rot_front != eng._drivetrain.effective_mass_slipping(m0):
+        raise AssertionError(
+            "native resolve drifted from DrivetrainModel.effective_mass_slipping — "
+            "update motoquant/native.py + engine.rs (and bump SCHEMA_VERSION)"
+        )
     wt, wh = eng._wt, eng._wheelie
     if (wt.L, wt.h, wt.L_f) != (wh.L, wh.h, wh.L_f):
         raise AssertionError("weight-transfer / wheelie geometry diverged")
@@ -528,9 +538,9 @@ def resolved_json(resolved: dict) -> str:
 # ═══════════════════════════════════════════
 
 
-def _to_simresult(out: dict) -> SimResult:
+def _to_simresult(out: dict, rollout_m: float) -> SimResult:
     if "channels" not in out:
-        res = SimResult(dt=out["dt"])
+        res = SimResult(dt=out["dt"], rollout_m=rollout_m)
         for k in _SPLIT_FIELDS:
             setattr(res, k, out["splits"][k])
         res.finished_quarter = bool(out["splits"]["finished_quarter"])
@@ -543,7 +553,9 @@ def _to_simresult(out: dict) -> SimResult:
         for name, attr in _FLOAT_CHANNELS
     }
     kwargs["gear"] = np.frombuffer(out["gear"], dtype="<i8").astype(int)
-    res = SimResult(dt=out["dt"], **kwargs)
+    # Splits are recomputed by Python's own SimResult.extract_splits() on the
+    # native channels, under the same rollout convention the run used.
+    res = SimResult(dt=out["dt"], rollout_m=rollout_m, **kwargs)
     res.extract_splits()
     return res
 
@@ -555,19 +567,25 @@ def run_resolved(
     use_adaptive_dt: bool = False,
     *,
     channels: bool = True,
+    rollout_m: float = ROLLOUT_M,
 ) -> SimResult:
     """Integrate an already-resolved config (dict or JSON string)."""
     mc = _require_core()
     payload = resolved if isinstance(resolved, str) else resolved_json(resolved)
     out = mc.simulate(
-        payload, float(distance), float(max_time), bool(use_adaptive_dt), channels
+        payload,
+        float(distance),
+        float(max_time),
+        bool(use_adaptive_dt),
+        channels,
+        float(rollout_m),
     )
     if out["nan_break"]:
         log.error(
             "NaN/inf in native physics state — simulation stopped early "
             "(mirrors MotoQuantEngine.run)."
         )
-    return _to_simresult(out)
+    return _to_simresult(out, float(rollout_m))
 
 
 class NativeEngine(MotoQuantEngine):
@@ -589,10 +607,17 @@ class NativeEngine(MotoQuantEngine):
         use_adaptive_dt: bool = False,
         progress_cb=None,
         progress_every_steps: int = 250,
+        rollout_m: float = ROLLOUT_M,
     ) -> SimResult:
         if progress_cb is not None:
             progress_cb(0.0)
-        res = run_resolved(resolve_engine(self), distance, max_time, use_adaptive_dt)
+        res = run_resolved(
+            resolve_engine(self),
+            distance,
+            max_time,
+            use_adaptive_dt,
+            rollout_m=rollout_m,
+        )
         # MotoQuantEngine.run: "Restore original mass for engine reuse".
         self.m_total = self.cfg.chassis.total_mass_kg
         if progress_cb is not None:
@@ -607,10 +632,14 @@ def run_native(
     use_adaptive_dt: bool = False,
     *,
     dt: float = 0.001,
+    rollout_m: float = ROLLOUT_M,
 ) -> SimResult:
     """Native equivalent of ``MotoQuantEngine(cfg, dt).run(...)``."""
     return NativeEngine(cfg, dt=dt).run(
-        distance=distance, max_time=max_time, use_adaptive_dt=use_adaptive_dt
+        distance=distance,
+        max_time=max_time,
+        use_adaptive_dt=use_adaptive_dt,
+        rollout_m=rollout_m,
     )
 
 
@@ -632,8 +661,11 @@ def summary_native(
     use_adaptive_dt: bool = False,
     *,
     dt: float = 0.001,
+    rollout_m: float = ROLLOUT_M,
 ) -> dict:
-    """Splits only (no channel arrays) — the fastest path for sweeps."""
+    """Splits only (no channel arrays) — the fastest path for sweeps.
+    Splits follow the start-beam convention (``rollout_m``; the dict carries
+    it as ``splits["rollout_m"]``)."""
     mc = _require_core()
     out = mc.simulate(
         resolved_json(resolve_config(cfg, dt=dt)),
@@ -641,6 +673,7 @@ def summary_native(
         float(max_time),
         bool(use_adaptive_dt),
         False,
+        float(rollout_m),
     )
     d = dict(out["splits"])
     d["dt"] = out["dt"]

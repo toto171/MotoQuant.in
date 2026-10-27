@@ -32,13 +32,11 @@ to redline at ~500 RPM intervals. The shapes reflect realistic engine architectu
     (MT-10)
     Typical: sharp rise 3-8k, sustained peak 8-10k
 
-  - Supercharged: linear boost buildup throughout range
-    (Kawasaki H2)
-    Typical: 170+ Nm from 2k, plateau 4-10k, slight decay at rev limit
+  - Supercharged (Kawasaki H2): curve REMOVED 2026-10 (fabricated, ~1.8x
+    the measured wheel torque) — the H2 uses the synthetic path.
 
 ACCURACY IMPACT:
   • 600cc bikes: fixes ±0.5-1.0s error from synthetic curves
-  • Supercharged (H2): captures flat torque → better acceleration
   • Peaky engines: correct powerband shape → realistic shift points
 
 All curves are at the wheel (chassis dyno), including drivetrain losses (~5-7% from crank).
@@ -1059,69 +1057,16 @@ def dyno_ducati_1199_panigale() -> DynoCurve:
 # ═════════════════════════════════════════════════════════
 
 
-def dyno_kawasaki_h2() -> DynoCurve:
-    """
-    Kawasaki Ninja H2 (2015+) / H2 SX / H2 Carbon
-    Published: 231 HP @ 11000 RPM, 238 Nm @ 7000 RPM (at wheel?! Claimed, may be crank)
-    Supercharged 1.0L inline-4 with belt-drive centrifugal SC.
-    Massive torque throughout: extremely flat curve, instant response.
-    """
-    rpm = np.array(
-        [
-            1500,
-            2000,
-            2500,
-            3000,
-            3500,
-            4000,
-            4500,
-            5000,
-            5500,
-            6000,
-            6500,
-            7000,
-            7500,
-            8000,
-            8500,
-            9000,
-            9500,
-            10000,
-            10500,
-            11000,
-            11500,
-        ],
-        dtype=float,
-    )
-
-    # Supercharged = linear boost buildup, flat curve from 3k to peak
-    torque = np.array(
-        [
-            140,
-            170,
-            190,
-            210,
-            225,
-            235,
-            240,
-            242,
-            243,
-            243,
-            242,
-            240,
-            238,
-            235,
-            230,
-            225,
-            218,
-            210,
-            200,
-            188,
-            175,
-        ],
-        dtype=float,
-    )
-
-    return DynoCurve(rpm=rpm, torque_nm=torque, is_at_wheel=True)
+# 2026-10 data epoch: ``dyno_kawasaki_h2()`` was DELETED. Its table (243 Nm
+# flat from 4,500 rpm, 295 hp peak, flagged at-wheel) had no source and was
+# ~1.8x the real wheel torque: Cycle World's 2015 Ninja H2 rear-wheel dyno
+# measured 189.8 hp / 123.7 Nm (91.2 lb-ft) (cycleworld.com, Nov 11 2015,
+# "Kawasaki Ninja H2 ... dyno run video and performance chart"; Wikipedia
+# "Kawasaki Ninja H2" rear-wheel figures), against Kawasaki's 133.5 Nm @
+# 10,500 rpm crank claim. Simulated, it trapped the H2 at 282 km/h against
+# Cycle World's 152.01 mph (244.6 km/h). With no published point-by-point
+# curve available, the H2 now takes the documented synthetic path from its
+# rated figures, like every other catalog bike without a measured curve.
 
 
 # ═════════════════════════════════════════════════════════
@@ -1791,7 +1736,8 @@ KNOWN_DYNO_CURVES = {
     ("kawasaki", "ninja zx-10r", 2008, 2010, "Gen3"): dyno_kawasaki_zx10r_gen3,
     ("kawasaki", "ninja zx-14r", 2006, 2011, None): dyno_kawasaki_zx14r,
     ("kawasaki", "ninja zx-6r", 2003, 2004, "636"): dyno_kawasaki_zx6r_636,
-    ("kawasaki", "ninja h2", 2015, 2024, None): dyno_kawasaki_h2,
+    # ("kawasaki", "ninja h2", ...): REMOVED 2026-10 — fabricated table, see
+    # the note above the middle-weight section.
     # Honda
     ("honda", "cbr1000rr", 2008, 2012, "SC59"): dyno_honda_cbr1000rr_sc59,
     ("honda", "cbr600rr", 2003, 2017, None): dyno_honda_cbr600rr,

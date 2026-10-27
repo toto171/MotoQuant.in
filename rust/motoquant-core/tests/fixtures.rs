@@ -7,7 +7,7 @@
 //! engine calls the same C `pow`/`sin` as CPython, so ET/trap/splits are
 //! asserted EXACTLY equal there.
 
-use motoquant_core::{simulate, ErrorKind, ResolvedConfig, MAX_SAMPLES};
+use motoquant_core::{simulate, ErrorKind, ResolvedConfig, MAX_SAMPLES, ROLLOUT_M};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -22,6 +22,8 @@ struct Req {
     distance: f64,
     max_time: f64,
     adaptive: bool,
+    /// Schema 3 (2026-10 epoch): the rollout the Python reference ran with.
+    rollout_m: f64,
 }
 
 #[derive(Deserialize)]
@@ -61,7 +63,8 @@ fn native_matches_python_fixtures() {
     let exact = cfg!(all(target_os = "linux", target_env = "gnu"));
     let mut worst = 0.0f64;
     for c in &fx.cases {
-        let (out, sp) = simulate(&c.config, c.request.distance, c.request.max_time, c.request.adaptive)
+        let r = &c.request;
+        let (out, sp) = simulate(&c.config, r.distance, r.max_time, r.adaptive, r.rollout_m)
             .unwrap_or_else(|e| panic!("{}: {e}", c.label));
         let e = &c.expected;
         let d_et = (sp.time_quarter - e.time_quarter).abs();
@@ -74,6 +77,7 @@ fn native_matches_python_fixtures() {
             assert_eq!(out.steps, e.steps, "{}: step count", c.label);
             assert_eq!(out.dt, e.dt, "{}: final dt", c.label);
             for (got, want, what) in [
+                (sp.rollout_m, r.rollout_m, "rollout"),
                 (sp.time_60ft, e.time_60ft, "60ft"),
                 (sp.time_330ft, e.time_330ft, "330ft"),
                 (sp.time_eighth, e.time_eighth, "1/8"),
@@ -96,7 +100,16 @@ fn k5() -> ResolvedConfig {
 }
 
 fn kind_of(cfg: &ResolvedConfig, distance: f64, max_time: f64, adaptive: bool) -> Option<ErrorKind> {
-    simulate(cfg, distance, max_time, adaptive).err().map(|e| e.kind)
+    simulate(cfg, distance, max_time, adaptive, ROLLOUT_M).err().map(|e| e.kind)
+}
+
+fn run(
+    cfg: &ResolvedConfig,
+    distance: f64,
+    max_time: f64,
+    adaptive: bool,
+) -> Result<(motoquant_core::RunOutput, motoquant_core::Splits), motoquant_core::SimError> {
+    simulate(cfg, distance, max_time, adaptive, ROLLOUT_M)
 }
 
 /// Python sizes its output with `np.zeros(int(max_time / dt) + 1)`; every
@@ -110,10 +123,26 @@ fn sizing_errors_mirror_python_classes() {
     assert_eq!(kind_of(&cfg, 402.336, f64::NEG_INFINITY, false), Some(ErrorKind::Overflow));
     assert_eq!(kind_of(&cfg, 402.336, -1.0, false), Some(ErrorKind::Value));
     // int(-1.5) + 1 == 0 -> np.zeros(0) is fine in Python: empty result.
-    let (out, _) = simulate(&cfg, 402.336, -0.0015, false).expect("n_max == 0 is valid");
+    let (out, _) = run(&cfg, 402.336, -0.0015, false).expect("n_max == 0 is valid");
     assert!(out.ch.is_empty());
-    // distance <= 0: Python's UnboundLocalError becomes a clear ValueError.
-    assert_eq!(kind_of(&cfg, 0.0, 26.0, false), Some(ErrorKind::Value));
+    // distance + rollout <= 0: Python's UnboundLocalError becomes a clear
+    // ValueError (with the default 1-ft rollout, distance 0 is a valid run
+    // to the start beam).
+    assert_eq!(
+        simulate(&cfg, 0.0, 26.0, false, 0.0).err().map(|e| e.kind),
+        Some(ErrorKind::Value)
+    );
+    assert_eq!(kind_of(&cfg, -ROLLOUT_M, 26.0, false), Some(ErrorKind::Value));
+    let (_, sp) = run(&cfg, 0.0, 26.0, false).expect("distance 0 runs to the beam");
+    assert!(!sp.finished_quarter);
+    // run(rollout_m=...) validation mirrors Python's ValueError.
+    for bad in [-0.1, f64::NAN, f64::INFINITY] {
+        assert_eq!(
+            simulate(&cfg, 402.336, 26.0, false, bad).err().map(|e| e.kind),
+            Some(ErrorKind::Value),
+            "rollout {bad}"
+        );
+    }
     let mut zero_dt = cfg.clone();
     zero_dt.dt = 0.0;
     assert_eq!(kind_of(&zero_dt, 402.336, 26.0, false), Some(ErrorKind::ZeroDivision));
@@ -123,12 +152,12 @@ fn sizing_errors_mirror_python_classes() {
 fn huge_runs_hit_the_sample_cap_not_the_allocator() {
     let cfg = k5();
     // A huge max_time is fine when the bike finishes: buffers grow lazily.
-    let (out, sp) = simulate(&cfg, 402.336, 1e13, false).expect("finishing run");
+    let (out, sp) = run(&cfg, 402.336, 1e13, false).expect("finishing run");
     assert!(sp.finished_quarter && out.ch.len() < 20_000);
     // A run that would store more than MAX_SAMPLES samples is refused.
-    let e = simulate(&cfg, 1e12, 1e9, false).expect_err("must hit the cap");
+    let e = run(&cfg, 1e12, 1e9, false).expect_err("must hit the cap");
     assert_eq!(e.kind, ErrorKind::Memory, "{e}");
-    let e = simulate(&cfg, 1e12, 1e9, true).expect_err("adaptive must hit the cap");
+    let e = run(&cfg, 1e12, 1e9, true).expect_err("adaptive must hit the cap");
     assert_eq!(e.kind, ErrorKind::Memory, "{e}");
     assert!(MAX_SAMPLES >= 240_001, "cap below the API's longest run");
 }
@@ -137,10 +166,26 @@ fn huge_runs_hit_the_sample_cap_not_the_allocator() {
 fn live_config_mass_is_used_from_step_one() {
     // Schema 2: m_total0 feeds step 0 only; later steps use m_total_cfg.
     let base = k5();
-    let (a, _) = simulate(&base, 402.336, 26.0, false).unwrap();
+    let (a, _) = run(&base, 402.336, 26.0, false).unwrap();
     let mut heavier = base.clone();
     heavier.mass.m_total_cfg += 20.0;
-    let (b, _) = simulate(&heavier, 402.336, 26.0, false).unwrap();
+    let (b, _) = run(&heavier, 402.336, 26.0, false).unwrap();
     assert_eq!(a.ch.v[1].to_bits(), b.ch.v[1].to_bits(), "step 0 must use m_total0");
     assert!(b.ch.t.len() > a.ch.t.len(), "a heavier bike must be slower");
+}
+
+#[test]
+fn rollout_zero_is_timed_from_first_motion() {
+    // rollout 0: the splits are read straight off the from-rest trajectory;
+    // rollout 1 ft: ET = t(x = r + D) - t(x = r) on the SAME trajectory
+    // (the integration itself is identical up to the extra 1 ft).
+    let cfg = k5();
+    let (a, sa) = simulate(&cfg, 402.336, 26.0, false, 0.0).unwrap();
+    let (b, sb) = simulate(&cfg, 402.336, 26.0, false, ROLLOUT_M).unwrap();
+    let n = a.ch.len().min(b.ch.len());
+    assert_eq!(a.ch.x[..n - 1], b.ch.x[..n - 1], "same trajectory");
+    assert!(sb.time_quarter < sa.time_quarter - 0.1, "rollout shortens ET");
+    assert!((sb.speed_quarter - sa.speed_quarter).abs() < 0.1, "trap ~unchanged");
+    assert_eq!(sa.rollout_m, 0.0);
+    assert_eq!(sb.rollout_m, ROLLOUT_M);
 }

@@ -80,19 +80,27 @@ class TestNoSpecMutation:
 
 
 class TestPowerTorqueConsistency:
-    def test_r9_class_inconsistency_is_flagged_and_costs_confidence(self):
+    @staticmethod
+    def _old_r9():
+        """The R9 as it was curated before the 2026-10 epoch fixed it: 93 Nm
+        at 11500 rpm implies ~150 hp against the 117 hp rating."""
         spec = copy.deepcopy(_find("Yamaha", "YZF-R9"))
+        spec.peak_power_rpm, spec.peak_torque_rpm = 12500, 11500
+        return spec
+
+    def test_r9_class_inconsistency_is_flagged_and_costs_confidence(self):
+        spec = self._old_r9()
         result = validate_spec(spec)
         assert result.is_valid  # curated spec: confidence-gated, not rejected
         assert any(w.startswith(INCONSISTENT_TAG) for w in result.warnings)
-        fixed = copy.deepcopy(spec)
-        fixed.peak_power_rpm, fixed.peak_torque_rpm = 10000, 7000  # real R9
+        fixed = copy.deepcopy(_find("Yamaha", "YZF-R9"))  # real R9: 10000/7000
+        assert (fixed.peak_power_rpm, fixed.peak_torque_rpm) == (10000, 7000)
         fixed_result = validate_spec(fixed)
         assert not any(w.startswith(INCONSISTENT_TAG) for w in fixed_result.warnings)
         assert score_spec(spec, result) < score_spec(fixed, fixed_result) - 0.05
 
     def test_gross_inconsistency_is_an_error(self):
-        spec = copy.deepcopy(_find("Yamaha", "YZF-R9"))
+        spec = self._old_r9()
         spec.peak_torque_nm = 160.0  # 160 Nm @ 11500 = 258 hp vs 117 hp rated
         result = validate_spec(spec)
         assert not result.is_valid

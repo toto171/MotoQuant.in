@@ -490,44 +490,25 @@ class TestSubBuilders:
         assert aero.cd == pytest.approx(0.30)
 
     def test_aero_cd_from_category_default(self):
-        """Default Cd from CATEGORY_AERO passes through for non-sport
-        categories. April 24 PM update: sport-class spec.cd undergoes
-        tuck-Cd normalization (× 0.55, floor 0.30) because the
-        rider_dynamics submodel treats spec.cd as the rider-tuck value
-        and applies a 1.18× multiplier for the upright launch position.
-        See `_build_aero_from_spec` docstring for the physics derivation.
-        """
+        """A spec without Cd takes its CATEGORY_AERO default unchanged, for
+        every category. (The sport-only x0.55 "tuck normalisation" was
+        removed in the 2026-10 epoch: catalog Cd is on the same scale as
+        the defaults.py references — see `_build_aero_from_spec`.)"""
         for cat, vals in CATEGORY_AERO.items():
-            spec = _make_spec(category=cat)
+            spec = _make_spec(category=cat, displacement_cc=999.0)
             spec.cd = None
             spec.frontal_area_m2 = None
             aero = _build_aero_from_spec(spec)
-            if cat == "sport":
-                # Sport: upright default 0.65 → tuck 0.65 × 0.55 = 0.358
-                # (clipped to floor 0.30).
-                assert aero.cd == pytest.approx(max(0.30, vals["cd"] * 0.55), abs=0.01)
-            else:
-                # Naked / cruiser / adventure / touring / scooter: no
-                # tuck normalization (riders sit upright by design).
-                assert aero.cd == pytest.approx(vals["cd"])
+            assert aero.cd == pytest.approx(vals["cd"])
 
-    def test_aero_cd_tuck_normalization_for_small_sport(self):
-        """spec.cd values populated as upright (e.g. R15 V3 0.56) are
-        normalized down to the tuck regime (× 0.55) for sport-class
-        bikes — corrects the small-cc launch-phase double-inflation.
-        """
-        spec = _make_spec(
-            category="sport", displacement_cc=155.0, cylinders=1, cd=0.56
-        )  # R15-V3-shape upright Cd
-        aero = _build_aero_from_spec(spec)
-        # 0.56 × 0.55 = 0.308 (above floor 0.30)
-        assert 0.30 <= aero.cd <= 0.35
-
-        # Legitimate tuck Cds (e.g. K5 0.32) should NOT be altered
-        spec_k5 = _make_spec(
-            category="sport", displacement_cc=999.0, cylinders=4, cd=0.32
-        )
-        assert _build_aero_from_spec(spec_k5).cd == pytest.approx(0.32)
+    def test_aero_cd_spec_value_used_verbatim(self):
+        """A curated spec Cd passes through unscaled, small sport bikes
+        included (an R15-shape 0.56 was rescaled to ~0.31 before)."""
+        for cc, cyl, cd in ((155.0, 1, 0.56), (999.0, 4, 0.64), (999.0, 4, 0.32)):
+            spec = _make_spec(
+                category="sport", displacement_cc=cc, cylinders=cyl, cd=cd
+            )
+            assert _build_aero_from_spec(spec).cd == pytest.approx(cd)
 
 
 # ────────────────────────────────────────────────────────────

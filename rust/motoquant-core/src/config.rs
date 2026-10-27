@@ -19,8 +19,14 @@ use crate::error::SimError;
 /// Resolved-config schema version. Must equal `native.SCHEMA_VERSION`.
 ///
 /// History: 1 = initial (2026-10-23); 2 = `mass.m_total_cfg` (the live
-/// `chassis.total_mass_kg` Python re-reads from step 1 onward).
-pub const SCHEMA_VERSION: u32 = 2;
+/// `chassis.total_mass_kg` Python re-reads from step 1 onward); 3 = the
+/// 2026-10 physics epoch (no resolved-config shape change, but the run
+/// contract changed: a `rollout_m` run parameter with start-beam-relative
+/// splits, slip-phase effective mass, soft-cut rev limiter, continuous slip
+/// ratio, intercooler-less charge-temp penalty, energy-consistent launch
+/// floor — bumped so a pre-epoch engine/wasm can never be paired with a
+/// post-epoch resolver or fixture).
+pub const SCHEMA_VERSION: u32 = 3;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -44,7 +50,8 @@ pub struct Mass {
     pub fuel_consumption_gs: f64,
     /// `MotoQuantEngine.F_gradient` (frozen at the initial mass, as in Python).
     pub f_gradient: f64,
-    /// Effective-mass terms per gear: `(I_e + I_basket)·(i_total/r_w)²`.
+    /// Effective-mass terms per gear: `(I_e + I_basket)·(i_total/r_w)²` —
+    /// added only once the clutch locks (2026-10 epoch).
     pub m_rot_engine: Vec<f64>,
     pub m_rot_rear: f64,
     pub m_rot_front: f64,
@@ -105,7 +112,8 @@ pub struct ForcedInduction {
     pub boost_type: BoostType,
     pub target_boost_bar: f64,
     pub turbo_spool_time_s: f64,
-    /// `intercooler_type != "none"`.
+    /// `intercooler_type != "none"` (false → eta_ic 0, the full charge-temp
+    /// penalty, 2026-10 epoch).
     pub intercooler: bool,
     pub intercooler_effectiveness: f64,
     pub n2o_hp_per_stage: f64,

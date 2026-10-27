@@ -23,7 +23,7 @@ pub mod splits;
 pub use config::{ResolvedConfig, SCHEMA_VERSION};
 pub use engine::{Engine, RunOutput, MAX_SAMPLES};
 pub use error::{ErrorKind, SimError};
-pub use splits::Splits;
+pub use splits::{Splits, ROLLOUT_M};
 
 // `SOURCE_FINGERPRINT: u64` — FNV-1a 64 of this crate's sources, stamped by
 // build.rs. native.py compares it with the checkout to detect a stale build.
@@ -37,16 +37,18 @@ pub fn source_fingerprint_hex() -> String {
 use serde::Deserialize;
 
 /// Parse a resolved config and run it. `distance` / `max_time` /
-/// `use_adaptive_dt` mirror `MotoQuantEngine.run()`.
+/// `use_adaptive_dt` / `rollout_m` mirror `MotoQuantEngine.run()` (pass
+/// [`ROLLOUT_M`] for the drag-strip default, 0.0 for "from first motion").
 pub fn simulate(
     cfg: &ResolvedConfig,
     distance: f64,
     max_time: f64,
     use_adaptive_dt: bool,
+    rollout_m: f64,
 ) -> Result<(RunOutput, Splits), SimError> {
     let eng = Engine::new(cfg)?;
-    let out = eng.run(distance, max_time, use_adaptive_dt)?;
-    let sp = splits::extract_splits(&out.ch.t, &out.ch.x, &out.ch.v);
+    let out = eng.run(distance, max_time, use_adaptive_dt, rollout_m)?;
+    let sp = splits::extract_splits(&out.ch.t, &out.ch.x, &out.ch.v, rollout_m);
     Ok((out, sp))
 }
 
@@ -63,6 +65,9 @@ struct Request {
     adaptive: bool,
     #[serde(default = "default_true")]
     channels: bool,
+    /// Drag-strip rollout (m); defaults to constants.ROLLOUT_M (1 ft).
+    #[serde(default = "default_rollout")]
+    rollout_m: f64,
 }
 
 fn default_distance() -> f64 {
@@ -73,6 +78,9 @@ fn default_max_time() -> f64 {
 }
 fn default_true() -> bool {
     true
+}
+fn default_rollout() -> f64 {
+    splits::ROLLOUT_M
 }
 
 /// Binary result layout (little-endian), shared by the wasm ABI and
@@ -102,7 +110,7 @@ fn run_request(input: &[u8]) -> Result<Vec<u8>, SimError> {
     let req: Request =
         serde_json::from_slice(input).map_err(|e| SimError::value(format!("request: {e}")))?;
     req.config.validate()?;
-    let (out, sp) = simulate(&req.config, req.distance, req.max_time, req.adaptive)?;
+    let (out, sp) = simulate(&req.config, req.distance, req.max_time, req.adaptive, req.rollout_m)?;
     let n = out.ch.len();
     let names: Vec<&str> = if req.channels {
         engine::FLOAT_CHANNELS.to_vec()
@@ -251,9 +259,10 @@ mod python {
 
     /// Run one simulation. Returns a dict: dt, steps, nan_break, n, splits
     /// (dict), channels (dict name -> little-endian float64 bytes) and gear
-    /// (int64 bytes). The GIL is released while integrating.
+    /// (int64 bytes). The GIL is released while integrating. `rollout_m`
+    /// mirrors `MotoQuantEngine.run(rollout_m=...)` (default 1 ft).
     #[pyfunction]
-    #[pyo3(signature = (config_json, distance, max_time, adaptive, channels=true))]
+    #[pyo3(signature = (config_json, distance, max_time, adaptive, channels=true, rollout_m=crate::splits::ROLLOUT_M))]
     fn simulate<'py>(
         py: Python<'py>,
         config_json: &str,
@@ -261,11 +270,12 @@ mod python {
         max_time: f64,
         adaptive: bool,
         channels: bool,
+        rollout_m: f64,
     ) -> PyResult<Bound<'py, PyDict>> {
         let owned = config_json.to_owned();
         let res = py.allow_threads(move || -> Result<_, SimError> {
             let cfg = ResolvedConfig::from_json(&owned)?;
-            crate::simulate(&cfg, distance, max_time, adaptive)
+            crate::simulate(&cfg, distance, max_time, adaptive, rollout_m)
         });
         let (out, sp) = res.map_err(to_py)?;
         let d = PyDict::new(py);
@@ -287,6 +297,7 @@ mod python {
         s.set_item("finished_quarter", sp.finished_quarter)?;
         s.set_item("max_distance_m", sp.max_distance_m)?;
         s.set_item("elapsed_time_s", sp.elapsed_time_s)?;
+        s.set_item("rollout_m", sp.rollout_m)?;
         d.set_item("splits", s)?;
         if channels {
             let cd = PyDict::new(py);

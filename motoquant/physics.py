@@ -26,6 +26,7 @@ from .constants import (
     ONE_MILE_M,
     QUARTER_MILE_M,
     RADS_TO_RPM,
+    ROLLOUT_M,
     RPM_TO_RADS,
     SIXTY_FOOT_M,
     THOUSAND_FT_M,
@@ -131,14 +132,57 @@ class SimResult:
     finished_quarter: bool = (
         False  # True if bike reached QUARTER_MILE_M within simulation
     )
-    max_distance_m: float = 0.0  # Furthest distance reached (m)
-    elapsed_time_s: float = 0.0  # Time elapsed at end of simulation (s)
+    # Distance past the START BEAM (m): x[-1] - rollout_m (>= 0).
+    max_distance_m: float = 0.0
+    # Raw simulation clock at the last sample (s since launch from rest) —
+    # NOT rollout-adjusted; it is the sim-time budget the run consumed.
+    elapsed_time_s: float = 0.0
+
+    # Drag-strip timing convention (2026-10 epoch, constants.ROLLOUT_M). The
+    # channels (t, x, v, …) are integrated from REST (t=0, x=0); every split
+    # is timed from the start beam, which the bike clears after rollout_m of
+    # travel: time_D = t(x = rollout_m + D) - t(x = rollout_m), speed_D =
+    # v(x = rollout_m + D). 0.0 reproduces the "from first motion" convention
+    # (and the pre-epoch splits) exactly.
+    rollout_m: float = 0.0
+
+    def time_speed_at(self, dist: float):
+        """(t, v) at ABSOLUTE position ``dist`` (m from rest) by linear
+        interpolation on the position channel (NumPy ``searchsorted`` left
+        semantics, mirrored in rust/motoquant-core/src/splits.rs), or None
+        when the run never reached it."""
+        idx = np.searchsorted(self.x, dist)
+        if idx < len(self.t):
+            if idx > 0 and self.x[idx] != self.x[idx - 1]:
+                frac = (dist - self.x[idx - 1]) / (self.x[idx] - self.x[idx - 1])
+                return (
+                    self.t[idx - 1] + frac * (self.t[idx] - self.t[idx - 1]),
+                    self.v[idx - 1] + frac * (self.v[idx] - self.v[idx - 1]),
+                )
+            return self.t[idx], self.v[idx]
+        return None
+
+    def split_at(self, dist: float):
+        """(elapsed time from the start beam, speed) after ``dist`` metres of
+        TIMED distance (i.e. at absolute x = rollout_m + dist), or None when
+        the run never got there. The timing convention every split uses."""
+        r = self.rollout_m
+        t0 = 0.0
+        if r > 0.0:
+            beam = self.time_speed_at(r)
+            if beam is None:
+                return None
+            t0 = beam[0]
+        hit = self.time_speed_at(r + dist)
+        if hit is None:
+            return None
+        return hit[0] - t0, hit[1]
 
     def extract_splits(self):
         """Extract split times from position array. Track completion status."""
-        # Record max distance and elapsed time
+        # Record max distance (past the start beam) and elapsed sim time
         if len(self.x) > 0:
-            self.max_distance_m = float(self.x[-1])
+            self.max_distance_m = max(0.0, float(self.x[-1]) - self.rollout_m)
         if len(self.t) > 0:
             self.elapsed_time_s = float(self.t[-1])
 
@@ -150,23 +194,10 @@ class SimResult:
             (QUARTER_MILE_M, "time_quarter", "speed_quarter"),
         ]
         for dist, t_attr, s_attr in splits:
-            idx = np.searchsorted(self.x, dist)
-            if idx < len(self.t):
-                if idx > 0 and self.x[idx] != self.x[idx - 1]:
-                    frac = (dist - self.x[idx - 1]) / (self.x[idx] - self.x[idx - 1])
-                    setattr(
-                        self,
-                        t_attr,
-                        self.t[idx - 1] + frac * (self.t[idx] - self.t[idx - 1]),
-                    )
-                    setattr(
-                        self,
-                        s_attr,
-                        self.v[idx - 1] + frac * (self.v[idx] - self.v[idx - 1]),
-                    )
-                else:
-                    setattr(self, t_attr, self.t[idx])
-                    setattr(self, s_attr, self.v[idx])
+            hit = self.split_at(dist)
+            if hit is not None:
+                setattr(self, t_attr, hit[0])
+                setattr(self, s_attr, hit[1])
 
         # Mark as finished if quarter-mile ET was actually set (not left at default 0.0)
         self.finished_quarter = self.time_quarter > 0.0
@@ -395,6 +426,7 @@ class MotoQuantEngine:
         use_adaptive_dt: bool = False,
         progress_cb=None,
         progress_every_steps: int = 250,
+        rollout_m: float = ROLLOUT_M,
     ) -> SimResult:
         """
         Run the quarter-mile simulation.
@@ -418,13 +450,34 @@ class MotoQuantEngine:
         progress_every_steps : int
             Step interval between ``progress_cb`` calls (default 250, ~4 Hz
             of simulated time at the fixed 1 ms timestep).
+        rollout_m : float
+            Drag-strip rollout (m) — distance travelled from rest before the
+            start beam starts the clock (default ``constants.ROLLOUT_M`` =
+            1 ft, the convention behind every published ET). The integration
+            still starts at rest; the run continues to x = rollout_m +
+            distance and every split is t(x = rollout_m + D) - t(x =
+            rollout_m). 0.0 = timed from first motion (pre-epoch behaviour).
 
         Returns
         -------
-        SimResult with all time-domain channels and split times.
+        SimResult with all time-domain channels (from rest) and split times
+        (from the start beam).
         """
+        if not (rollout_m >= 0.0) or rollout_m == float("inf"):
+            raise ValueError(f"rollout_m must be finite and >= 0 (got {rollout_m!r})")
         dt = self.dt
         cfg = self.cfg
+        # The finish line sits rollout_m + distance from the rest position.
+        # rollout_m == 0.0 → x_end == distance exactly (IEEE x + 0.0 == x).
+        x_end = distance + rollout_m
+        if x_end <= 0.0:
+            # The loop would never run and the final-state block would read
+            # unbound loop locals (UnboundLocalError). Same check and message
+            # as the Rust core.
+            raise ValueError(
+                f"distance + rollout_m must be > 0 (got {distance} + {rollout_m}): "
+                "the loop never ran"
+            )
 
         # Adaptive step-size bounds
         _dt_min = 0.0005  # 0.5 ms — used during clutch slip / shifting
@@ -528,7 +581,7 @@ class MotoQuantEngine:
         step = 0
         t = 0.0
 
-        while x < distance and t < max_time and step < n_max - 1:
+        while x < x_end and t < max_time and step < n_max - 1:
             # ── Step-budget growth (adaptive mode only) ──────────────────
             # n_max was sized from the constructor dt, but adaptive mode can
             # halve dt to _dt_min — a run dominated by clutch slip/shifting
@@ -563,7 +616,7 @@ class MotoQuantEngine:
 
             # ── Progress reporting (UI only — no effect on the physics) ──
             if progress_cb is not None and step % progress_every_steps == 0:
-                progress_cb(min(1.0, max(x / distance, t / max_time)))
+                progress_cb(min(1.0, max(x / x_end, t / max_time)))
 
             # ── Current RPM and wheel speed ──
             omega_w = v / max(
@@ -729,6 +782,7 @@ class MotoQuantEngine:
                     I_e = I_e_local
                     T_net_engine = T_e_crank - T_transmitted
                     d_omega_e = T_net_engine / max(I_e, 0.001)
+                    omega_prev = omega_e
                     omega_e += d_omega_e * dt
                     # Apr 27, 2026: during launch slip on low-power bikes, prevent
                     # engine RPM from dropping below peak_torque_rpm. Without this,
@@ -749,7 +803,32 @@ class MotoQuantEngine:
                             )
                         floor_omega = floor_rpm * RPM_TO_RADS
                         if omega_e < floor_omega:
-                            omega_e = floor_omega
+                            # 2026-10 epoch: ENERGY-CONSISTENT floor. The old
+                            # clamp reset omega_e to the floor after the
+                            # over-clutch extra had already pulled it below,
+                            # so that extra torque was delivered every step
+                            # from nothing (no flywheel energy was ever
+                            # spent — up to +100% "free" launch torque;
+                            # audit 2026-10-23). A rider holding the engine
+                            # at the floor can only pass on what the engine
+                            # makes there plus the flywheel energy it gives
+                            # up on the way down: the transmitted torque is
+                            # the value that lands omega_e exactly on the
+                            # floor (angular-momentum balance over the step).
+                            # Below the floor (e.g. a launch that starts
+                            # under it) the clutch opens and the engine revs
+                            # up on its own torque.
+                            T_floor = (
+                                T_e_crank
+                                + (omega_prev - floor_omega) * max(I_e, 0.001) / dt
+                            )
+                            if T_floor >= 0.0:
+                                T_transmitted = T_floor
+                                omega_e = floor_omega
+                            else:
+                                T_transmitted = 0.0
+                                omega_e = omega_prev + T_e_crank / max(I_e, 0.001) * dt
+                            T_e = T_transmitted
                     # min/max is value-identical to the former np.clip here
                     # (np.clip == minimum(hi, maximum(x, lo)); no arithmetic,
                     # so no float divergence) and skips the numpy scalar
@@ -779,7 +858,15 @@ class MotoQuantEngine:
                 cd_a_t = _cd_a_floor
 
             # ── Weight transfer (iterative) ──
-            m_eff = self.effective_mass(gear)
+            # 2026-10 epoch: while the clutch slips the engine + basket are
+            # integrated separately (omega_e above), so they are NOT part of
+            # the vehicle's effective mass — counting them here as well was a
+            # phantom ~53-74 kg in first gear on the references for the whole
+            # launch (audit 2026-10-23). They rejoin once the clutch locks.
+            if clutch_locked:
+                m_eff = self.effective_mass(gear)
+            else:
+                m_eff = self._drivetrain.effective_mass_slipping(self.m_total)
             # Rider-dynamic Cd*A drag for this timestep. (A dead
             # `F_aero = self.aero_drag(v)` call sat here until July 3, 2026 —
             # its result was immediately overwritten by the line below, so
@@ -811,8 +898,14 @@ class MotoQuantEngine:
                     N_f, N_r = self.weight_transfer(a_cap, v, t)
                     F_max_tire = self.tire_max_force(N_r, T_tire, v)
                     F_cap = min(F_demand, F_max_tire)
+                # 2026-10 epoch: continuous at the traction limit. Below the
+                # limit slip = 0.05·F/F_max (→ 0.05 at the limit, the model's
+                # slip at peak force); the excess branch used to restart from
+                # 0 — a spinning tyre read LESS slip (and generated less
+                # friction heat) than a gripping one. Now it starts at 0.05
+                # and grows with the excess demand, capped at 0.3 as before.
                 slip_ratio = min(
-                    0.3, (F_demand - F_max_tire) / max(F_max_tire, 1.0) * 0.1
+                    0.3, 0.05 + (F_demand - F_max_tire) / max(F_max_tire, 1.0) * 0.1
                 )
                 F_drive = F_cap
             else:
@@ -962,7 +1055,7 @@ class MotoQuantEngine:
             step += 1
 
         # Store final state (the step that crossed the finish line)
-        if step < n_max and x >= distance:
+        if step < n_max and x >= x_end:
             out_t[step] = t
             out_x[step] = x
             out_v[step] = v
@@ -1009,6 +1102,7 @@ class MotoQuantEngine:
             P_boost=out_Pboost[:step],
             power_kw=out_power[:step],
             r_eff=out_reff[:step],
+            rollout_m=rollout_m,
         )
         result.extract_splits()
         # Restore original mass for engine reuse
@@ -1026,6 +1120,7 @@ class MotoQuantEngine:
         plateau_accel: float = TOPSPEED_PLATEAU_ACCEL,
         plateau_window_s: float = TOPSPEED_PLATEAU_WINDOW_S,
         progress_cb=None,
+        rollout_m: float = ROLLOUT_M,
     ) -> "TopSpeedResult":
         """
         Run simulation until terminal velocity is reached.
@@ -1035,13 +1130,17 @@ class MotoQuantEngine:
         ``max_time`` and ``max_distance`` to catch degenerate cases.
 
         Returns a TopSpeedResult with terminal velocity, time/distance to
-        reach it, and the full trajectory for plotting.
+        reach it, and the full trajectory for plotting. Time / distance to
+        terminal are measured from REST; the standing-distance ``lsr_splits``
+        use the same start-beam timing convention as run()'s splits
+        (``rollout_m``; see SimResult.split_at).
         """
         sim = self.run(
             distance=max_distance,
             max_time=max_time,
             use_adaptive_dt=True,
             progress_cb=progress_cb,
+            rollout_m=rollout_m,
         )
 
         # Convert |a| (in g) back to m/s^2
@@ -1098,13 +1197,11 @@ class MotoQuantEngine:
             ("one_mile", ONE_MILE_M),
             ("two_mile", 3218.688),
         ]:
-            idx = int(np.searchsorted(sim.x, d))
-            if 0 < idx < len(sim.t):
-                # Linear interpolation
-                frac = (d - sim.x[idx - 1]) / max(1e-9, sim.x[idx] - sim.x[idx - 1])
-                t_at = sim.t[idx - 1] + frac * (sim.t[idx] - sim.t[idx - 1])
-                v_at = sim.v[idx - 1] + frac * (sim.v[idx] - sim.v[idx - 1])
-                lsr_splits[label] = {"time_s": float(t_at), "speed_ms": float(v_at)}
+            # Same start-beam convention (and interpolation) as run()'s splits,
+            # so lsr_splits["quarter_mile"] agrees with SimResult.time_quarter.
+            hit = sim.split_at(d)
+            if hit is not None:
+                lsr_splits[label] = {"time_s": float(hit[0]), "speed_ms": float(hit[1])}
 
         return TopSpeedResult(
             terminal_velocity_ms=terminal_v,
@@ -1122,13 +1219,21 @@ class MotoQuantEngine:
         self,
         distance_m: float,
         max_time: float = TOPSPEED_MAX_TIME_S,
+        rollout_m: float = ROLLOUT_M,
     ) -> SimResult:
         """
         Run simulation to an arbitrary target distance — used for LSR
         events: standing mile (1609 m), standing km (1000 m), 1/2 mile (804 m),
-        Bonneville short course (3218 m), etc.
+        Bonneville short course (3218 m), etc. The run ends at the finish
+        line x = rollout_m + distance_m; read the timed result with
+        ``SimResult.split_at(distance_m)``.
         """
-        return self.run(distance=distance_m, max_time=max_time, use_adaptive_dt=True)
+        return self.run(
+            distance=distance_m,
+            max_time=max_time,
+            use_adaptive_dt=True,
+            rollout_m=rollout_m,
+        )
 
 
 @dataclass

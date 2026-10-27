@@ -47,6 +47,7 @@ import numpy as np  # noqa: E402
 
 import motoquant as mq  # noqa: E402
 from motoquant import native  # noqa: E402
+from motoquant.constants import ROLLOUT_M  # noqa: E402
 from motoquant.physics import MotoQuantEngine  # noqa: E402
 
 RUST = ROOT / "rust"
@@ -256,9 +257,16 @@ def _digest(arr) -> str:
 
 
 def _python_case(
-    label: str, cfg, *, adaptive=False, distance=None, max_time=None, dt=0.001
+    label: str,
+    cfg,
+    *,
+    adaptive=False,
+    distance=None,
+    max_time=None,
+    dt=0.001,
+    rollout_m=ROLLOUT_M,
 ) -> dict:
-    kw = {"use_adaptive_dt": adaptive}
+    kw = {"use_adaptive_dt": adaptive, "rollout_m": rollout_m}
     if distance is not None:
         kw["distance"] = distance
     if max_time is not None:
@@ -267,15 +275,18 @@ def _python_case(
     resolved = native.resolve_config(copy.deepcopy(cfg), dt=dt)
     dist = float(kw.get("distance", 402.336))
     # Python does not expose its step counter: every loop iteration stores one
-    # sample, and the finish-line crossing stores one more (x >= distance).
+    # sample, and the finish-line crossing stores one more (x >= x_end, the
+    # finish line rollout_m + distance from rest).
+    x_end = dist + float(rollout_m)
     n = int(len(r.t))
-    steps = n - 1 if n and float(r.x[-1]) >= dist else n
+    steps = n - 1 if n and float(r.x[-1]) >= x_end else n
     return {
         "label": label,
         "request": {
             "distance": float(kw.get("distance", 402.336)),
             "max_time": float(kw.get("max_time", 26.0)),
             "adaptive": bool(adaptive),
+            "rollout_m": float(rollout_m),
         },
         "config": resolved,
         "expected": {
@@ -356,6 +367,13 @@ def select_cases() -> list[tuple]:
         ("busa parabolic (no dyno)", mut(engine__dyno_curve=None), {}),
         ("busa downhill 3% wheelie bar", mut(environment__track_gradient_pct=-3.0, wheelie__wheelie_bar=True), {}),
         ("busa 1000m adaptive", busa, {"adaptive": True, "distance": 1000.0, "max_time": 60.0}),
+        # 2026-10 physics epoch. web/scripts/engine-parity.mjs forwards
+        # request.rollout_m, so the rollout-0 case is compared like any other.
+        ("busa rollout 0 (from first motion)", busa, {"rollout_m": 0.0}),
+        ("busa turbo 1.5bar weak clutch", mut(forced_induction__boost_type="turbo", forced_induction__target_boost_bar=1.5,
+                                              clutch__spring_preload_n=400.0), {}),
+        ("busa over-clutch launch above floor", mut(category_tag="other", staging__two_step=True,
+                                                    staging__launch_rpm=9500.0), {}),
     ]  # fmt: skip
     return out
 

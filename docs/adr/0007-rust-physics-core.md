@@ -135,9 +135,9 @@ mechanically, before review. These gates enforce that:
    match today's Python ETs or `resolve_config` output.
 5. **Same exception classes.** For the same input, native raises what Python
    raises (`ValueError` / `OverflowError` / `ZeroDivisionError` /
-   `MemoryError`). There is one documented, intentional difference:
-   `distance <= 0` gives a clear `ValueError` where Python hits an accidental
-   `UnboundLocalError`.
+   `MemoryError`). (Until the 2026-10 epoch `distance <= 0` was the one
+   documented difference: Python hit an accidental `UnboundLocalError`. Python
+   now raises the same `ValueError`.)
 
 **Rule for contributors:** a change to `MotoQuantEngine.run()` or to any
 sub-model method it calls must port the same change to `engine.rs` in the

@@ -187,13 +187,13 @@ def test_boosted_and_two_stroke_paths():
 @needs_native
 def test_degenerate_inputs_raise_like_python():
     cfg = mq.gsxr1000_k5()
-    with pytest.raises(UnboundLocalError):
-        MotoQuantEngine(cfg).run(distance=0.0)
-    # The native path rejects distance=0 up front with a clear ValueError
-    # instead of reproducing Python's accidental UnboundLocalError
-    # (documented in docs/RUST_CORE.md, "Error behaviour").
-    with pytest.raises(ValueError):
-        native.run_native(cfg, distance=0.0)
+    # Nothing to integrate (finish line at the rest position): both engines
+    # raise the same ValueError. With the default 1-ft rollout distance=0 is
+    # a valid run that ends at the start beam (ET 0).
+    for eng in (MotoQuantEngine(cfg).run, lambda **kw: native.run_native(cfg, **kw)):
+        with pytest.raises(ValueError, match="the loop never ran"):
+            eng(distance=0.0, rollout_m=0.0)
+        assert float(eng(distance=0.0).time_quarter) == 0.0
     # Output sizing `np.zeros(int(max_time / dt) + 1)`: same class as Python.
     for kw, exc in (
         ({"max_time": -1.0}, ValueError),

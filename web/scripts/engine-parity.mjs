@@ -99,6 +99,7 @@ for (const c of fixture.cases) {
     distance: c.request.distance,
     maxTime: c.request.max_time,
     adaptive: c.request.adaptive,
+    rolloutM: c.request.rollout_m,
   });
   simMs += r.elapsedMs;
   const e = c.expected;

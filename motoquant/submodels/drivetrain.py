@@ -42,6 +42,27 @@ class DrivetrainModel:
         m_rot_front = tire.front_inertia_kgm2 / r_f**2
         return m_total + m_rot_engine + m_rot_rear + m_rot_front
 
+    def effective_mass_slipping(self, m_total: float) -> float:
+        """Effective mass (kg) while the clutch SLIPS: wheels only.
+
+        2026-10 physics epoch. During clutch slip the engine + clutch basket
+        are a separate rotating body: run() integrates omega_e on its own
+        (d_omega_e = T_net / I_e), and only the clutch torque reaches the
+        gearbox. Adding (I_e + I_basket)·(i_total / r_w)² to the vehicle's
+        mass as well counted that inertia twice — a phantom 53 kg on the K5
+        in first gear (74 kg on the Hayabusa) for the whole ~3 s slip phase
+        (reports/audit_core_2026_10_23_partial.md). The engine term rejoins
+        the vehicle the moment the clutch locks (effective_mass()).
+        Float order mirrors effective_mass() minus the engine term
+        (rust/motoquant-core/src/engine.rs effective_mass_slipping).
+        """
+        tire = self.cfg.tires
+        r_w = tire.rear_rolling_radius_m
+        m_rot_rear = tire.rear_inertia_kgm2 / r_w**2
+        r_f = tire.front_rolling_radius_m or r_w
+        m_rot_front = tire.front_inertia_kgm2 / r_f**2
+        return m_total + m_rot_rear + m_rot_front
+
     def engine_rpm_from_speed(self, v: float, gear: int, r_eff: float) -> float:
         """Engine RPM derived from vehicle speed (clutch locked)."""
         if r_eff <= 0:

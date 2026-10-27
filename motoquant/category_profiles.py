@@ -43,6 +43,16 @@ CATEGORY_TWO_STROKE = "two_stroke"
 CATEGORY_CRUISER_1300P = "cruiser_1300p"
 CATEGORY_OTHER = "other"
 CATEGORY_UNKNOWN = "unknown"  # fallback for pre-April-30 saved configs
+# Frozen reference profile (2026-10 physics epoch). The three hand-curated
+# reference bikes in defaults.py (K5 / R1 4C8 / Hayabusa Gen1) used to share
+# litre_sport_195p with ~30 catalog bikes, so ANY catalog retune of that
+# cluster silently moved the pinned baselines (ADR-0002). They now carry this
+# dedicated tag, cloned from litre_sport_195p's knob values as of the epoch
+# start; catalog tuning of litre_sport_195p is therefore pin-safe, and this
+# profile is tuned ONLY against the references' own published figures
+# (K5 9.97 s Sport Rider; R1 4C8 / Hayabusa Gen1 per tests/test_validation.py).
+# derive_category_tag() never returns it — it is assigned explicitly.
+CATEGORY_REFERENCE_LITRE_195P = "reference_litre_195p"
 
 ALL_CATEGORIES = (
     CATEGORY_LITRE_SPORT_195P,
@@ -58,6 +68,7 @@ ALL_CATEGORIES = (
     CATEGORY_CRUISER_1300P,
     CATEGORY_OTHER,
     CATEGORY_UNKNOWN,
+    CATEGORY_REFERENCE_LITRE_195P,
 )
 
 
@@ -509,6 +520,21 @@ _PROFILES: dict[str, CategoryProfile] = {
         parasitic_mult=1.0,
         notes="Catch-all: ADV, touring, scooter, unknown.",
     ),
+    CATEGORY_REFERENCE_LITRE_195P: CategoryProfile(
+        name=CATEGORY_REFERENCE_LITRE_195P,
+        # Clone of litre_sport_195p as of the 2026-10 epoch start (every knob
+        # value identical, so this step is bit-identical for the references).
+        # Tune ONLY against the references' published figures — never as part
+        # of a catalog cluster grid (scripts/tune_cluster_knobs.py has no
+        # cluster mapped to this tag).
+        over_clutch_factor=0.0,
+        max_engine_decel_rads2=0.0,
+        launch_floor_factor=0.0,
+        mu_peak_override=None,
+        mu_peak_scale=1.08,
+        parasitic_mult=1.0,
+        notes="Frozen profile for the 3 pinned reference bikes (defaults.py).",
+    ),
     CATEGORY_UNKNOWN: CategoryProfile(
         name=CATEGORY_UNKNOWN,
         # Pre-April-30 fallback. Reproduces legacy hard-coded behaviour
@@ -574,7 +600,15 @@ def derive_category_tag(
         return CATEGORY_SPORT_TWIN_600_1300
     if cylinders and cylinders >= 4 and cc and cc < 500 and cat in ("sport", "naked"):
         return CATEGORY_SMALL_I4_SCREAMER
-    if cylinders == 1 and cc and 300 <= cc < 500:
+    # 2026-10 epoch: ALL 4T singles >=300 cc route here (was 300-500 only).
+    # The 650-700 cc singles (KTM 690 Duke R / 690 SMC R, Husqvarna 701
+    # Supermoto / Vitpilen 701, Ducati Hypermotard 698 Mono, BSA Gold Star
+    # 650, KLR 650) used to fall through to litre_sport_600_1000 (an I4
+    # supersport launch profile) or mid_twin_500_700 — a single's launch is
+    # a single's launch whatever its displacement (one big torque pulse per
+    # two revs, short wheelbase, power-limited not traction-limited). The
+    # cluster name is kept for DB/tag compatibility.
+    if cylinders == 1 and cc and cc >= 300:
         return CATEGORY_SINGLE_300_500
 
     if cat in ("sport", "naked") and peak_power_hp and peak_power_hp >= 195:
@@ -611,6 +645,7 @@ __all__ = [
     "CATEGORY_CRUISER_1300P",
     "CATEGORY_OTHER",
     "CATEGORY_UNKNOWN",
+    "CATEGORY_REFERENCE_LITRE_195P",
     "get_profile",
     "derive_category_tag",
 ]

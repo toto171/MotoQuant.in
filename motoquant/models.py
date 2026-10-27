@@ -265,10 +265,13 @@ class EngineParams:
         factor = math.exp(-1.5 * x * x)
         factor = max(baseline, factor)
 
-        # Rev-limiter cliff above redline (already handled in engine sub-model
-        # but we also clamp here for direct callers)
-        if rpm > self.redline_rpm * 1.02:
-            return 0.0
+        # 2026-10 epoch: the rev-limiter cliff that used to sit here (torque 0
+        # above 1.02 x redline) was REMOVED. The limiter is modelled once, in
+        # EngineModel.torque (soft cut, constants.REV_LIMITER_CUT_FACTOR) —
+        # dyno-curve configs never had a cliff in get_torque, and a second
+        # hard cut here re-created the slip-phase zero-torque freeze for
+        # curve-less 2T configs. Direct callers (optimal_shift_rpm, the N2O
+        # multiplier) only evaluate at or below redline / under the limiter.
         return self.peak_torque_nm * factor
 
 
@@ -327,7 +330,10 @@ class DrivetrainParams:
     primary_efficiency: float = 0.99  # Primary gear mesh
     trans_efficiency_per_mesh: float = 0.985  # Per gear pair
     chain_efficiency: float = 0.97  # Chain/belt efficiency
-    shaft_efficiency: float = 0.85  # If shaft drive
+    # Shaft final drive: two bevel meshes (~0.97-0.98 each) plus the U-joint /
+    # spline (~0.98) give ~0.93. The old 0.85 made every shaft bike ~0.3 s
+    # slower than its benchmark (Oct 2026 epoch, data-agent attribution).
+    shaft_efficiency: float = 0.93
     gear_oil_viscosity_cst: float = 12.0  # Gear oil @ 100C
     clutch_type: str = CLUTCH_LOCKUP  # Clutch type
     clutch_engage_rpm: float = 6000.0  # Engagement RPM

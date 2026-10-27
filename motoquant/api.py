@@ -1592,14 +1592,17 @@ def simulate_distance(req: DistanceRunRequest) -> DistanceResultDict:
             "(check mass / power / distance inputs).",
         )
 
-    # Terminal/trap values at the target distance
-    import numpy as np
-
-    target_idx = int(np.searchsorted(sim.x, req.distance_m))
-    if target_idx >= len(sim.t):
-        target_idx = len(sim.t) - 1
-    trap_time = float(sim.t[target_idx])
-    trap_v = float(sim.v[target_idx])
+    # Terminal/trap values at the target distance, timed from the start beam
+    # with the same rollout convention as every other split (2026-10 epoch,
+    # SimResult.split_at). A run that never got there (time cap) reports its
+    # last sample, as before.
+    hit = sim.split_at(req.distance_m)
+    if hit is not None:
+        trap_time = float(hit[0])
+        trap_v = float(hit[1])
+    else:
+        trap_time = float(sim.t[-1])
+        trap_v = float(sim.v[-1])
 
     result: DistanceResultDict = {
         "distance_m": req.distance_m,
@@ -2291,7 +2294,11 @@ async def upload_dragy(
             )
             # Full RK4 run takes seconds on prod hardware — keep it off
             # the event loop.
-            sim = await asyncio.to_thread(engine_select.make_engine(cfg).run)
+            # rollout_m=0.0: the Dragy parser times the real run from its
+            # first-motion frame, so the overlay sim uses the same convention.
+            sim = await asyncio.to_thread(
+                engine_select.make_engine(cfg).run, rollout_m=0.0
+            )
             from .calibration.overlay import compare_runs
 
             comparison = compare_runs(best, sim)

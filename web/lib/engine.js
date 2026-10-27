@@ -25,12 +25,18 @@
  *   const r = await simulate(resolvedConfig, { adaptive: false });
  *   r.et, r.trap, r.splits, r.channels.v, r.gear
  *
+ * Timing (schema 3, 2026-10 physics epoch): channels are integrated from rest
+ * (t = 0, x = 0); splits/ET/trap are timed from the start beam after
+ * `rolloutM` (default 1 ft) of travel, exactly like MotoQuantEngine.run().
+ *
  * Errors: a failed simulation throws an Error whose `.kind` mirrors the
  * Python exception class the reference engine raises ('value' | 'memory' |
  * 'overflow' | 'zero_division').
  */
 
-export const ENGINE_SCHEMA = 2;
+export const ENGINE_SCHEMA = 3;
+/** 1 ft — the drag-strip rollout every published ET uses (2026-10 epoch). */
+export const ROLLOUT_M = 0.3048;
 const DEFAULT_URL = '/engine/motoquant_core.wasm';
 
 // One cache entry per wasm URL: url -> Promise<{ exports, url }>. Keyed by
@@ -122,12 +128,15 @@ function decodeResult(exports, ptr) {
 /**
  * Run one simulation.
  *
- * @param {object} resolvedConfig  motoquant/native.py resolve_config() output (schema 2)
+ * @param {object} resolvedConfig  motoquant/native.py resolve_config() output (schema 3)
  * @param {object} [opts]
  * @param {number} [opts.distance=402.336]  metres
  * @param {number} [opts.maxTime=26]        seconds
  * @param {boolean} [opts.adaptive=false]   adaptive-dt integration
  * @param {boolean} [opts.channels=true]    return per-step channels (else splits only)
+ * @param {number}  [opts.rolloutM=0.3048]  drag-strip rollout (m): splits are timed from the
+ *                                          start beam, t(x = rollout + d) - t(x = rollout);
+ *                                          0 = from first motion (motoquant/constants.py ROLLOUT_M)
  * @param {string}  [opts.url]              wasm URL (default /engine/motoquant_core.wasm)
  * @returns {Promise<{et:number, trap:number, trapKmh:number, finished:boolean,
  *   splits:object, dt:number, steps:number, n:number, nanBreak:boolean,
@@ -145,6 +154,7 @@ function simulateSync(exports, resolvedConfig, opts) {
     max_time: opts.maxTime ?? 26.0,
     adaptive: !!opts.adaptive,
     channels: opts.channels ?? true,
+    rollout_m: opts.rolloutM ?? ROLLOUT_M,
   });
   const bytes = new TextEncoder().encode(req);
   const t0 = typeof performance !== 'undefined' ? performance.now() : Date.now();

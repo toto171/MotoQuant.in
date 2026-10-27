@@ -184,11 +184,13 @@ transcendental functions. Concretely:
    | `int(q) + 1 == 0` (e.g. `max_time = -0.0015`) | empty result | empty result |
    | `dt == 0` | `ZeroDivisionError` | `ZeroDivisionError` |
    | zero wheelbase / CoG height | `ZeroDivisionError` on the first step | `ZeroDivisionError` at resolve |
-   | **`distance <= 0`** | `UnboundLocalError` (accidental: the loop's locals are never bound) | **`ValueError` with a clear message** (intentional, the one documented difference) |
+   | `distance + rollout_m <= 0` (nothing to integrate) | `ValueError` | `ValueError` (same message) |
    | oversized run | `MemoryError` from `np.zeros` | `MemoryError` past `MAX_SAMPLES`, see Limitations |
 
-   The parity sweep treats only the `distance <= 0` pair as equivalent
-   (`EXC_EQUIV`). Any other class mismatch fails it.
+   Every row raises the same class on both engines, and the parity sweep
+   fails on any mismatch (`EXC_EQUIV` is empty since the 2026-10 epoch made
+   Python reject an empty run with a `ValueError` instead of an accidental
+   `UnboundLocalError`).
 
 The per-step work is also *de-duplicated without changing a bit*. In a
 traction-limited step, Python recomputes the tire thermal factor,

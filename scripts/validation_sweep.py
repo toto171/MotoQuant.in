@@ -557,7 +557,10 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         2013,
         10.70,
         216,
-        "MotorBikeCatalog / MotoStatz aggregate (~10.70 @ 134 mph); the SR 10.32 timing-strip run is a pro-rider outlier vs mainstream instrumented data",
+        # 2026-10 epoch: relabelled. The 10.70 target IS the aggregator figure
+        # (0.5); the old label scored 1.0 only because its explanatory text
+        # contained "timing-strip" / "instrumented".
+        "MotorBikeCatalog / MotoStatz aggregate (~10.70 @ 134 mph; Sport Rider's 10.32 strip run set aside as a pro-rider outlier)",
     ),
     # BMW R nineT (1170 cc boxer-twin retro, 2014-2020) — Cycle World
     # December 2014 comparison test (R nineT vs CB1100 vs Indian Scout vs
@@ -2370,7 +2373,11 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         2023,
         12.00,
         177,
-        "Corner Speed 2026 (Cycle World dyno-referenced, low-12s @ 110 mph)",
+        # 2026-10 epoch: relabelled as what it is — a prose ESTIMATE ("low-12s",
+        # no timed run), so sweep_lib.source_quality scores it 0.1. The old
+        # label scored 0.7 (not the intended 0.5) because "Cycle World" in the
+        # citation string tripped the magazine tier.
+        "Corner Speed 2026 prose estimate (low-12s @ 110 mph; Cycle-World-dyno-referenced, not a timed run)",
     ),
     # Kawasaki ZX-6R 636 (636cc I4 supersport, 2024-2025) — MotoStatz Dragy
     # instrumented: 10.74s @ 134 mph (216 km/h). Same Dragy methodology as the
@@ -3142,13 +3149,19 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         162.5,
         "Motorcycle Consumer-News data quoted by zeroto60times (magazine)",
     ),
+    # 2026-10 epoch: REBOUND from "RZV500R (Japan)" to "RD500LC". Cycle
+    # magazine tested the North-American RZ500 — the 88 PS export engine in
+    # the steel frame, i.e. the RD500LC specification (87 hp spec entry) — not
+    # the 64 PS Japan-domestic aluminium-frame RZV500R it was bound to (188 km/h
+    # needs ~85+ hp). Largest weighted residual of the 2026-08-08 sweep
+    # (+1.634 s, w 0.7) was this mis-binding.
     (
         "Yamaha",
-        "RZV500R (Japan)",
+        "RD500LC",
         1985,
         11.77,
         188.3,
-        "Cycle magazine 1984-85 (via Hagerty retrospective)",
+        "Cycle magazine 1984-85 (via Hagerty retrospective; US-market RZ500 = RD500LC export spec)",
     ),
     (
         "Kawasaki",

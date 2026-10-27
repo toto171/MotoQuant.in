@@ -213,8 +213,14 @@ pub struct Engine<'a> {
     rads_to_rpm: f64,
     half_rho: f64,
     idle_half: f64,
-    redline_102: f64,
+    /// `eng.redline_rpm * REV_LIMITER_CUT_FACTOR` (constants.py, 1.04).
+    redline_cut: f64,
+    /// `rpm_cut - eng.redline_rpm` (the soft-cut taper width).
+    taper_width: f64,
 }
+
+/// constants.REV_LIMITER_CUT_FACTOR — full ignition cut at this × redline.
+pub const REV_LIMITER_CUT_FACTOR: f64 = 1.04;
 
 impl<'a> Engine<'a> {
     pub fn new(c: &'a ResolvedConfig) -> Result<Engine<'a>, SimError> {
@@ -228,9 +234,12 @@ impl<'a> Engine<'a> {
             rads_to_rpm: c.constants.rads_to_rpm,
             // `_half_rho = 0.5 * self.rho`
             half_rho: 0.5 * c.env.rho,
-            // EngineModel.torque: `eng.idle_rpm * 0.5`, `eng.redline_rpm * 1.02`
+            // EngineModel.torque: `eng.idle_rpm * 0.5`,
+            // `rpm_cut = eng.redline_rpm * REV_LIMITER_CUT_FACTOR`,
+            // `(rpm_cut - eng.redline_rpm)`.
             idle_half: c.engine.idle_rpm * 0.5,
-            redline_102: c.engine.redline_rpm * 1.02,
+            redline_cut: c.engine.redline_rpm * REV_LIMITER_CUT_FACTOR,
+            taper_width: c.engine.redline_rpm * REV_LIMITER_CUT_FACTOR - c.engine.redline_rpm,
         })
     }
 
@@ -253,7 +262,9 @@ impl<'a> Engine<'a> {
             }
             Curve::TwoStroke {
                 idle_rpm,
-                redline_rpm,
+                // 2026-10 epoch: unused — the 2T rev-limiter cliff moved out
+                // of the curve into engine_torque's soft cut.
+                redline_rpm: _,
                 tuned_rpm,
                 cylinders,
                 displacement_cc,
@@ -284,9 +295,8 @@ impl<'a> Engine<'a> {
                 // math.exp(-1.5 * x * x)
                 let mut factor = fmath::exp_libm(-1.5 * x * x);
                 factor = py_max(baseline, factor);
-                if rpm > redline_rpm * 1.02 {
-                    return 0.0;
-                }
+                // 2026-10 epoch: no rev-limiter cliff here any more — the
+                // limiter lives only in engine_torque (soft cut).
                 peak_torque_nm * factor
             }
         }
@@ -299,7 +309,9 @@ impl<'a> Engine<'a> {
         if rpm < self.idle_half {
             return 0.0;
         }
-        if rpm > self.redline_102 {
+        // Soft-cut rev limiter (2026-10 epoch): full cut at/above rpm_cut,
+        // linear taper between redline and rpm_cut.
+        if rpm >= self.redline_cut {
             return 0.0;
         }
         let mut t_base = self.get_torque(rpm);
@@ -312,6 +324,9 @@ impl<'a> Engine<'a> {
             t_corr *= 0.97;
         } else if temp > 100.0 {
             t_corr *= 0.99;
+        }
+        if rpm > e.redline_rpm {
+            t_corr *= (self.redline_cut - rpm) / self.taper_width;
         }
         t_corr
     }
@@ -355,11 +370,11 @@ impl<'a> Engine<'a> {
                     p_atm = 101325.0;
                 }
                 let mut boost_ratio = 1.0 + p_boost / p_atm;
-                if fi.intercooler {
-                    let eta_ic = fi.intercooler_effectiveness;
-                    let temp_penalty = 1.0 - 0.02 * (1.0 - eta_ic) * (p_boost / 100000.0);
-                    boost_ratio *= py_max(0.90, temp_penalty);
-                }
+                // 2026-10 epoch: charge-temp penalty always applies; no
+                // intercooler == eta_ic 0 (the full penalty).
+                let eta_ic = if fi.intercooler { fi.intercooler_effectiveness } else { 0.0 };
+                let temp_penalty = 1.0 - 0.02 * (1.0 - eta_ic) * (p_boost / 100000.0);
+                boost_ratio *= py_max(0.90, temp_penalty);
                 boost_ratio
             }
             BoostType::ScRoots | BoostType::ScCentrifugal => {
@@ -580,6 +595,14 @@ impl<'a> Engine<'a> {
         m_total + m.m_rot_engine[gear] + m.m_rot_rear + m.m_rot_front
     }
 
+    /// `DrivetrainModel.effective_mass_slipping` (2026-10 epoch): wheels only
+    /// while the clutch slips — the engine + basket are integrated separately.
+    #[inline]
+    fn effective_mass_slipping(&self, m_total: f64) -> f64 {
+        let m = &self.c.mass;
+        m_total + m.m_rot_rear + m.m_rot_front
+    }
+
     #[inline]
     fn chain_torque_modifier(&self, t_wheel: f64, v: f64, t: f64) -> f64 {
         if !self.c.drivetrain.chain {
@@ -592,8 +615,24 @@ impl<'a> Engine<'a> {
         t_wheel
     }
 
-    /// `MotoQuantEngine.run(distance, max_time, use_adaptive_dt)`.
-    pub fn run(&self, distance: f64, max_time: f64, use_adaptive_dt: bool) -> Result<RunOutput, SimError> {
+    /// `MotoQuantEngine.run(distance, max_time, use_adaptive_dt, rollout_m=...)`.
+    ///
+    /// The run integrates from rest to the finish line at
+    /// `x = rollout_m + distance` (drag-strip timing convention, see
+    /// constants.ROLLOUT_M); splits are taken by [`crate::splits`].
+    pub fn run(
+        &self,
+        distance: f64,
+        max_time: f64,
+        use_adaptive_dt: bool,
+        rollout_m: f64,
+    ) -> Result<RunOutput, SimError> {
+        // Python: `if not (rollout_m >= 0.0) or rollout_m == float("inf")`.
+        if !(rollout_m >= 0.0) || rollout_m == f64::INFINITY {
+            return Err(SimError::value(format!(
+                "rollout_m must be finite and >= 0 (got {rollout_m})"
+            )));
+        }
         let c = self.c;
         let g_const = self.g;
         let rpm_to_rads = self.rpm_to_rads;
@@ -602,6 +641,8 @@ impl<'a> Engine<'a> {
 
         let dt_min = 0.0005;
         let dt_max = 0.005;
+        // `x_end = distance + rollout_m` (== distance exactly when rollout is 0).
+        let x_end = distance + rollout_m;
 
         let shift_rpms = &c.drivetrain.shift_rpms;
         let overall = &c.drivetrain.overall_ratios;
@@ -686,7 +727,7 @@ impl<'a> Engine<'a> {
         let mut f_rr = 0.0;
         let mut ran_once = false;
 
-        while x < distance && t < max_time && step < n_max - 1 {
+        while x < x_end && t < max_time && step < n_max - 1 {
             ran_once = true;
             // Step-budget growth (adaptive mode only).
             if use_adaptive_dt && step >= n_max - 2 {
@@ -800,10 +841,22 @@ impl<'a> Engine<'a> {
                     let i_e = i_e_local;
                     let t_net_engine = t_e_crank - t_transmitted;
                     let d_omega_e = t_net_engine / py_max(i_e, 0.001);
+                    let omega_prev = omega_e;
                     omega_e += d_omega_e * dt;
+                    let mut t_transmitted = t_transmitted;
                     if let Some(floor_omega) = c.launch.floor_omega {
                         if omega_e < floor_omega {
-                            omega_e = floor_omega;
+                            // 2026-10 epoch: energy-consistent floor (physics.py).
+                            let t_floor =
+                                t_e_crank + (omega_prev - floor_omega) * py_max(i_e, 0.001) / dt;
+                            if t_floor >= 0.0 {
+                                t_transmitted = t_floor;
+                                omega_e = floor_omega;
+                            } else {
+                                t_transmitted = 0.0;
+                                omega_e = omega_prev + t_e_crank / py_max(i_e, 0.001) * dt;
+                            }
+                            t_e = t_transmitted;
                         }
                     }
                     omega_e = py_min(py_max(omega_e, idle_omega), redline_omega_clip);
@@ -826,7 +879,12 @@ impl<'a> Engine<'a> {
             }
 
             // ── Weight transfer ──
-            let m_eff = self.effective_mass(gear, m_total);
+            // 2026-10 epoch: engine + basket inertia only once the clutch locks.
+            let m_eff = if clutch_locked {
+                self.effective_mass(gear, m_total)
+            } else {
+                self.effective_mass_slipping(m_total)
+            };
             let v_rel = v + v_wind;
             f_aero = half_rho * fmath::sq(py_max(0.0, v_rel)) * cd_a_t;
             f_rr = self.rolling_resistance(v, t_tire, m_total);
@@ -848,7 +906,9 @@ impl<'a> Engine<'a> {
                     f_max_tire = self.tire_max_force(n_r, t_tire);
                     f_cap = py_min(f_demand, f_max_tire);
                 }
-                slip_ratio = py_min(0.3, (f_demand - f_max_tire) / py_max(f_max_tire, 1.0) * 0.1);
+                // 2026-10 epoch: continuous at the traction limit.
+                slip_ratio =
+                    py_min(0.3, 0.05 + (f_demand - f_max_tire) / py_max(f_max_tire, 1.0) * 0.1);
                 f_drive = f_cap;
             } else {
                 slip_ratio = f_drive.abs() / py_max(f_max_tire, 1.0) * 0.05;
@@ -977,12 +1037,13 @@ impl<'a> Engine<'a> {
         }
 
         // Final state (the step that crossed the finish line).
-        if step < n_max && x >= distance {
+        if step < n_max && x >= x_end {
             if !ran_once {
                 // Python reads loop locals (a_net, rpm, …) here that were
                 // never bound → UnboundLocalError. Mirror it as an error.
                 return Err(SimError::value(format!(
-                    "distance must be > 0 (got {distance}): the loop never ran"
+                    "distance + rollout_m must be > 0 (got {distance} + {rollout_m}): \
+                     the loop never ran"
                 )));
             }
             if ch.len() == room {

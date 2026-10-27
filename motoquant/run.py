@@ -441,7 +441,8 @@ def archive_run(db, config_id, venue_id, weather_id, result, parts_ids=None):
         time_1000ft_s=result.time_1000ft,
         sim_version=__version__,
         dt_s=result.dt,
-        distance_m=result.x[-1] if len(result.x) > 0 else 0,
+        # Timed distance (past the start beam; == x[-1] when rollout_m is 0).
+        distance_m=result.max_distance_m if len(result.x) > 0 else 0,
         split_times={
             "time_60ft": result.time_60ft,
             "time_330ft": result.time_330ft,
@@ -1998,7 +1999,9 @@ def cmd_calibrate(args):
         else:
             cfg = gsxr1000_k5()
 
-        sim = engine_select.make_engine(cfg).run()
+        # rollout_m=0.0: GPS runs are timed from first motion (see
+        # calibration/calibrator.py), so the overlay uses the same convention.
+        sim = engine_select.make_engine(cfg).run(rollout_m=0.0)
         cmp = compare_runs(real, sim)
         if args.output_json:
             out = cmp.to_dict()

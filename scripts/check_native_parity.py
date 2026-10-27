@@ -154,11 +154,11 @@ def _patch_profile(eng, patch):
 
 
 # Documented exception-class differences (docs/RUST_CORE.md, "Error
-# behaviour"): Python's run(distance <= 0) fails by accident — the final-store
-# block reads loop locals that were never bound (UnboundLocalError) — while
-# the native core refuses the input up front with a ValueError. Every other
-# error must raise the SAME class on both engines.
-EXC_EQUIV = {("UnboundLocalError", "ValueError")}
+# behaviour"). Empty since the 2026-10 epoch: Python's run() now rejects
+# distance + rollout_m <= 0 with the same ValueError as the native core (it
+# used to hit an accidental UnboundLocalError). Every error must raise the
+# SAME class on both engines.
+EXC_EQUIV: set[tuple[str, str]] = set()
 
 
 def _exc_class(exc: str | None) -> str | None:
@@ -586,6 +586,55 @@ def build_stress_cases(catalog: list[tuple[str, dict]]) -> list[dict]:
         },
     )
 
+    # ── 2026-10 physics epoch: rollout timing, limiter, floor, intercooler ──
+    for vname, kw in {
+        "rollout 0 (from first motion)": {"rollout_m": 0.0},
+        "rollout 350mm": {"rollout_m": 0.35},
+        "rollout 3m": {"rollout_m": 3.0},
+        "rollout -0.1 (both ValueError)": {"rollout_m": -0.1},
+        "rollout NaN (both ValueError)": {"rollout_m": float("nan")},
+        "rollout inf (both ValueError)": {"rollout_m": float("inf")},
+    }.items():
+        both(f"busa: {vname}", copy.deepcopy(busa), kwargs=kw)
+    add(
+        "busa: top speed rollout 0",
+        copy.deepcopy(busa),
+        "topspeed",
+        kwargs={"rollout_m": 0.0},
+    )
+    # Boost torque above the (faded) clutch capacity: the slip phase runs into
+    # the 1.02 x redline clip, which used to freeze at zero drive (soft cut).
+    both(
+        "busa: turbo 1.5bar weak clutch (slip clip, soft limiter)",
+        _mut(
+            busa,
+            _set(
+                {
+                    "forced_induction.boost_type": "turbo",
+                    "forced_induction.target_boost_bar": 1.5,
+                    "forced_induction.intercooler_type": "none",
+                    "clutch.spring_preload_n": 400.0,
+                }
+            ),
+        ),
+    )
+    # Top-gear rev limiter (soft cut, no chatter): very short final drive.
+    k5_short = _mut(k5, _set({"drivetrain.rear_sprocket": 70}))
+    add("k5: 70T rear top speed (top-gear limiter)", k5_short, "topspeed")
+    both("k5: 70T rear quarter", k5_short)
+    # Energy-consistent launch floor with flywheel energy available: launch
+    # above the floor so the over-clutch extra is genuinely spent.
+    both(
+        "busa: over-clutch + launch_rpm_factor above floor",
+        copy.deepcopy(busa),
+        profile_patch={
+            "over_clutch_factor": 0.5,
+            "max_engine_decel_rads2": 2000.0,
+            "launch_floor_factor": 0.8,
+            "launch_rpm_factor": 0.75,
+        },
+    )
+
     # ── dt / horizon variants ──
     add("busa: dt 0.5ms", copy.deepcopy(busa), "fixed", dt=0.0005)
     add("busa: dt 2ms", copy.deepcopy(busa), "fixed", dt=0.002)
@@ -603,7 +652,18 @@ def build_stress_cases(catalog: list[tuple[str, dict]]) -> list[dict]:
         "topspeed",
         kwargs={"plateau_accel": 0.2, "plateau_window_s": 0.5, "max_time": 60.0},
     )
-    both("busa: distance 0 (both raise)", copy.deepcopy(busa), kwargs={"distance": 0.0})
+    # 2026-10 epoch: with the default 1-ft rollout, distance 0 is a valid run
+    # to the start beam; rollout 0 + distance 0 still raises on both engines.
+    both(
+        "busa: distance 0 (runs to the beam)",
+        copy.deepcopy(busa),
+        kwargs={"distance": 0.0},
+    )
+    both(
+        "busa: distance 0, rollout 0 (both raise)",
+        copy.deepcopy(busa),
+        kwargs={"distance": 0.0, "rollout_m": 0.0},
+    )
     # Output sizing `np.zeros(int(max_time / dt) + 1)` — error classes mirrored.
     both(
         "busa: max_time -1 (both raise)", copy.deepcopy(busa), kwargs={"max_time": -1.0}
