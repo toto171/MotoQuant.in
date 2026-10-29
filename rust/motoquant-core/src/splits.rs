@@ -1,10 +1,11 @@
 //! `SimResult.extract_splits()` (physics.py) — split times/speeds by linear
 //! interpolation on the position channel, NumPy `searchsorted` semantics.
 //!
-//! 2026-10 epoch: splits are timed from the start beam, which the bike
-//! clears after `rollout_m` of travel from rest:
-//! `time_D = t(x = rollout_m + D) - t(x = rollout_m)`, `speed_D = v(x =
-//! rollout_m + D)`; `max_distance_m` is measured past the beam.
+//! 2026-10 epoch (round 2, schema 4): distances are measured from the rest
+//! position at the start line and the clock starts at the start beam, which
+//! the bike clears after `rollout_m` of travel:
+//! `time_D = t(x = D) - t(x = rollout_m)`, `speed_D = v(x = D)` for
+//! `D > rollout_m`; `max_distance_m` is `x[-1]`.
 
 use crate::interp::searchsorted_left;
 
@@ -53,14 +54,18 @@ fn time_speed_at(x: &[f64], t: &[f64], v: &[f64], dist: f64) -> Option<(f64, f64
     }
 }
 
-/// `SimResult.split_at(dist)` — (time from the start beam, speed) after
-/// `dist` metres of TIMED distance, i.e. at absolute `rollout_m + dist`.
+/// `SimResult.split_at(dist)` — (time from the start beam, speed) at
+/// absolute position `dist`; None when not reached or `dist <= rollout_m`.
 fn split_at(x: &[f64], t: &[f64], v: &[f64], rollout_m: f64, dist: f64) -> Option<(f64, f64)> {
+    // Python: `if not (dist > r): return None`.
+    if !(dist > rollout_m) {
+        return None;
+    }
     let mut t0 = 0.0;
     if rollout_m > 0.0 {
         t0 = time_speed_at(x, t, v, rollout_m)?.0;
     }
-    let (ta, va) = time_speed_at(x, t, v, rollout_m + dist)?;
+    let (ta, va) = time_speed_at(x, t, v, dist)?;
     Some((ta - t0, va))
 }
 
@@ -71,9 +76,8 @@ pub fn extract_splits(t: &[f64], x: &[f64], v: &[f64], rollout_m: f64) -> Splits
         ..Splits::default()
     };
     if let Some(&xl) = x.last() {
-        // `max(0.0, float(self.x[-1]) - self.rollout_m)`
-        let d = xl - rollout_m;
-        s.max_distance_m = if d > 0.0 { d } else { 0.0 };
+        // `float(self.x[-1])` (schema 4).
+        s.max_distance_m = xl;
     }
     if let Some(&tl) = t.last() {
         s.elapsed_time_s = tl;

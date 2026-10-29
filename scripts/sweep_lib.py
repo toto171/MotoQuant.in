@@ -41,6 +41,15 @@ __all__ = [
     "find_spec_for_benchmark",
     "source_quality",
     "source_weight",
+    "ROLLOUT_1FT_M",
+    "TIMING_ROLLOUT_1FT",
+    "TIMING_FIRST_MOTION",
+    "TIMING_ROLLOUT_M",
+    "SIM_ET_KEY",
+    "timing_convention",
+    "timing_convention_meta",
+    "rollout_m_for_source",
+    "sim_et_for_convention",
 ]
 
 _SPLIT_RE = re.compile(r"[\s\-\.]+")
@@ -400,3 +409,164 @@ def source_weight(src: str) -> float:
     authoritative sweep.
     """
     return source_quality(src)[0]
+
+
+# ── Per-source timing convention (2026-10 epoch, round 2) ──────────────────
+# A published quarter-mile ET is timed under one of two conventions, and the
+# sim must be scored under the SAME one (``MotoQuantEngine.run(rollout_m=)``):
+#
+# * ``rollout_1ft`` — the North-American drag-strip convention. Strip timing
+#   starts when the front tyre leaves the staging/start beam, ~1 ft after the
+#   bike is at rest, so the first foot of travel is not timed. Cycle World
+#   documented its own practice in "Jockeying for Numbers" (June 1983): the
+#   clocks are "triggered by light beams at each end of the strip ... the
+#   bike's front wheel moves out of the light beam and the clocks are
+#   activated" (https://magazine.cycleworld.com/article/1983/6/1/jockeying-for-numbers).
+#   GPS meters reproduce it by subtracting the time to cover the first foot
+#   ("1-ft rollout", https://en.wikipedia.org/wiki/Rollout_(drag_racing);
+#   the first foot is worth "as much as 0.3 second").
+# * ``first_motion`` — timed from the first detected movement. This is the
+#   DEFAULT of Racelogic GPS meters: "The PerformanceBox normally takes the
+#   start of a performance run at the point at which the vehicle moves, but
+#   at drag strips the vehicle starts 1 foot behind the timing start line" —
+#   the 1-ft rollout is an opt-in menu setting (Racelogic PerformanceBox
+#   manual p.15, https://www.manualslib.com/manual/1213324/Racelogic-Performancebox.html;
+#   Racelogic support "One Foot Rollout": the meter "starts timing when it
+#   first detects speed"). The corpus' Indonesian 402 m tests (Otomotif /
+#   Otomotifnet / OtoRider / TMCBlog / GridOto) all name a Racelogic device
+#   (Performance Box, V-Box Sport) and none documents enabling the rollout
+#   option, and the rollout convention is North-American — so they are
+#   scored from first motion.
+#
+# Dragy (MotoStatz's device — https://motostatz.com/how-we-test-motorcycles/)
+# reports distance ETs (1/8, 1/4 mile) with the 1-ft rollout applied: owner
+# reports comparing Dragy with track timeslips agree to ~0.01 s on the ET
+# and state that rollout is applied to the distance figures but not to
+# 0-60 (Corvette Forum "0-60 and Dragy"; Tesla Motors Club "Dragy GPS
+# times"). Dragy publishes no official statement, so these rows carry the
+# ``device_default_reported`` basis rather than ``documented``.
+#
+# The default stays ``rollout_1ft`` when nothing is documented; the basis
+# string says why every row got its convention (see
+# tests/test_epoch2_data_timing.py for the pinned per-row table and the
+# list of rows whose convention could not be established).
+
+#: 1 ft in metres (exact by definition) — equals motoquant.constants.ROLLOUT_M
+#: (pinned by tests/test_epoch2_data_timing.py); kept local so the tuner can
+#: load this module by file path without importing the motoquant package.
+ROLLOUT_1FT_M = 0.3048
+
+TIMING_ROLLOUT_1FT = "rollout_1ft"
+TIMING_FIRST_MOTION = "first_motion"
+
+#: convention -> ``rollout_m`` to pass to ``run()`` when scoring the row.
+TIMING_ROLLOUT_M = {TIMING_ROLLOUT_1FT: ROLLOUT_1FT_M, TIMING_FIRST_MOTION: 0.0}
+
+#: convention -> the swept-record key that holds the sim ET timed under it
+#: (``sim_et`` is the default-rollout run every sweep already stores; a
+#: driver that also runs ``rollout_m=0.0`` stores it as
+#: ``sim_et_first_motion``).
+SIM_ET_KEY = {
+    TIMING_ROLLOUT_1FT: "sim_et",
+    TIMING_FIRST_MOTION: "sim_et_first_motion",
+}
+
+# Explicit label statements win over every outlet rule.
+_FIRST_MOTION_LABEL_TOKENS = (
+    "first motion",
+    "first-motion",
+    "from first movement",
+    "no rollout",
+    "rollout off",
+    "without rollout",
+)
+_ROLLOUT_LABEL_TOKENS = (
+    "1-ft rollout",
+    "1 ft rollout",
+    "1ft rollout",
+    "one-foot rollout",
+    "one foot rollout",
+    "with rollout",
+)
+# Timed at a drag strip: beam timing starts after the staging rollout.
+_STRIP_TOKENS = (
+    "timing-strip",
+    "timeslip",
+    "dragstrip",
+    "drag strip",
+    "drag-strip",
+    "carlsbad",
+    "infineon",
+    "silver dollar",
+)
+# Racelogic meters (first motion unless the 1-ft option is enabled).
+_RACELOGIC_TOKENS = ("racelogic", "race logic", "vbox", "v-box", "performance box")
+# Outlets whose runs are documented as Racelogic tests in Indonesia.
+_INDONESIA_TOKENS = ("indonesia", "otomotif", "otorider", "tmcblog", "gridoto")
+# Dragy (directly, or MotoStatz, whose methodology page names Dragy).
+_DRAGY_TOKENS = ("dragy", "motostatz")
+# North-American magazines (rollout is the N.A. publication convention).
+_NA_MAGAZINE_TOKENS = (
+    "cycle world",
+    "sport rider",
+    "motorcyclist",
+    "consumer news",
+    "consumer-news",
+    "rider magazine",
+    "cycle magazine",
+)
+
+
+def timing_convention_meta(src: str) -> tuple[str, str]:
+    """Return ``(convention, basis)`` for a benchmark source label.
+
+    ``basis`` records the evidence behind the call:
+
+    * ``label`` — the source label states the convention explicitly;
+    * ``strip_beam`` — a drag-strip timing-light / timeslip figure;
+    * ``device_default`` — a Racelogic test from an Indonesian outlet with no
+      documented rollout setting (device default = first motion);
+    * ``device_default_reported`` — a Dragy figure (rollout applied to
+      distance ETs per owner reports, no official statement);
+    * ``na_magazine`` — a North-American magazine test (the N.A. convention);
+    * ``derived`` — a DERIVED / estimated figure: no timed run exists, so the
+      convention is moot and the default applies;
+    * ``undocumented`` — none of the above; default ``rollout_1ft``.
+    """
+    s = (src or "").lower()
+    if any(k in s for k in _FIRST_MOTION_LABEL_TOKENS):
+        return (TIMING_FIRST_MOTION, "label")
+    if any(k in s for k in _ROLLOUT_LABEL_TOKENS):
+        return (TIMING_ROLLOUT_1FT, "label")
+    if source_quality(src)[1] in ("derived", "estimate"):
+        return (TIMING_ROLLOUT_1FT, "derived")
+    if any(k in s for k in _STRIP_TOKENS):
+        return (TIMING_ROLLOUT_1FT, "strip_beam")
+    if any(k in s for k in _RACELOGIC_TOKENS) and any(
+        k in s for k in _INDONESIA_TOKENS
+    ):
+        return (TIMING_FIRST_MOTION, "device_default")
+    if any(k in s for k in _DRAGY_TOKENS):
+        return (TIMING_ROLLOUT_1FT, "device_default_reported")
+    if any(k in s for k in _NA_MAGAZINE_TOKENS):
+        return (TIMING_ROLLOUT_1FT, "na_magazine")
+    return (TIMING_ROLLOUT_1FT, "undocumented")
+
+
+def timing_convention(src: str) -> str:
+    """``rollout_1ft`` or ``first_motion`` for a benchmark source label."""
+    return timing_convention_meta(src)[0]
+
+
+def rollout_m_for_source(src: str) -> float:
+    """The ``rollout_m`` to run the sim with when scoring against ``src``
+    (0.3048 for ``rollout_1ft``, 0.0 for ``first_motion``)."""
+    return TIMING_ROLLOUT_M[timing_convention(src)]
+
+
+def sim_et_for_convention(rec: dict, src: str):
+    """The swept record's sim ET timed under ``src``'s convention, or
+    ``None`` when the record lacks that run (a first-motion row on a sweep
+    that only ran the default rollout). Never silently substitutes the
+    other convention's ET."""
+    return rec.get(SIM_ET_KEY[timing_convention(src)])

@@ -88,8 +88,14 @@ class ChassisParams:
     fuel_consumption_gs: float = 8.0  # g/s at WOT (decreasing mass)
     wheelbase_mm: float = 1405.0  # Stock wheelbase
     swingarm_extension_mm: float = 0.0  # Extension beyond stock
-    cog_height_mm: float = 550.0  # Combined bike+rider CoG height
-    front_weight_pct: float = 0.52  # Static front weight % (with rider)
+    # Bike CoG height: dry mass + fluids, NO rider (2026-10 epoch round 2 —
+    # the rider is composed on top in submodels/cog.py; the catalog's
+    # 530-620 mm values only make sense as bike-only heights).
+    cog_height_mm: float = 550.0
+    # Static front-wheel load share. The rider's seated CoG is taken at the
+    # bike's fore-aft CoG position (submodels/cog.py), so this holds with
+    # or without the rider and for any rider mass.
+    front_weight_pct: float = 0.52
     rake_deg: float = 24.0  # Steering head angle
     trail_mm: float = 100.0  # Trail
     seat_height_mm: float = 810.0  # Seat height
@@ -108,13 +114,15 @@ class ChassisParams:
 
     @property
     def L_f(self) -> float:
-        """Distance from front axle to CoG (m)."""
-        return self.wheelbase_m * (1 - self.front_weight_pct)
+        """Distance from front axle to CoG (m). A swingarm extension moves
+        only the rear axle, so this uses the stock wheelbase."""
+        return self.wheelbase_mm / 1000.0 * (1 - self.front_weight_pct)
 
     @property
     def L_r(self) -> float:
-        """Distance from rear axle to CoG (m)."""
-        return self.wheelbase_m * self.front_weight_pct
+        """Distance from rear axle to CoG (m): the stock share plus the full
+        swingarm extension."""
+        return self.wheelbase_m - self.L_f
 
 
 # ═══════════════════════════════════════════
@@ -635,9 +643,15 @@ class WheelieParams:
 class RiderParams:
     """Rider body dynamics."""
 
+    # Not read by the physics: the rider mass the loop uses is
+    # ChassisParams.rider_mass_kg.
     mass_kg: float = 75.0  # With gear
-    height_cm: float = 175.0  # Rider height
-    cog_height_seated_mm: float = 700.0  # Rider CoG when seated
+    # Stature — LIVE since the 2026-10 epoch round 2: scales the rider's CoG
+    # height above the seat (constants.RIDER_COG_ABOVE_SEAT_PER_STATURE).
+    height_cm: float = 175.0
+    # Not read by the physics (submodels/cog.py composes the rider CoG from
+    # seat height, sag and stature instead).
+    cog_height_seated_mm: float = 700.0
     launch_forward_shift_mm: float = 80.0  # Forward lean at launch
     tuck_transition_time_s: float = 2.0  # Time to go from launch to tuck
     gear_mass_kg: float = 5.0  # Helmet, suit, boots
@@ -696,17 +710,16 @@ class StagingParams:
     """Staging procedure and launch setup."""
 
     staging_type: str = STAGING_SHALLOW
-    rollout_distance_mm: float = 350.0  # Distance before clock starts
+    # (2026-10 epoch round 2: the never-read ``rollout_distance_mm`` field and
+    # its ``rollout_m`` property were REMOVED — there is exactly one rollout
+    # convention, run(rollout_m=constants.ROLLOUT_M). Old saved configs that
+    # still carry the key load fine: bridge/config_io drop unknown fields.)
     launch_rpm: float = 8000.0  # Two-step hold RPM
     prespool_boost_bar: float = 0.0  # Boost at staging
     reaction_time_ms: float = 300.0  # Human RT
     vehicle_response_ms: float = 50.0  # ECU + fuel + ignition lag
     tree_type: str = "pro"  # pro (0.400s) / sportsman (0.500s)
     two_step: bool = False  # Two-step rev limiter
-
-    @property
-    def rollout_m(self) -> float:
-        return self.rollout_distance_mm / 1000.0
 
 
 # ═══════════════════════════════════════════

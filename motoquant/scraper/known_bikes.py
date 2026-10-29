@@ -3963,33 +3963,39 @@ KAWASAKI_NINJA_400_2018 = spec_from_dict(
         "stroke_mm": 80.0,
         "compression_ratio": 10.8,
         "cylinders": 2,
-        "peak_power_hp": 44.8,  # 44.8 hp at wheel (Cycle World dyno, US spec)
+        # 2026-10 epoch round 2: catalog power is the RATED (crank) figure —
+        # the importer applies drivetrain losses itself — so the old 44.8 hp
+        # rear-wheel dyno figure double-counted them. Kawasaki Canada /
+        # North-American spec: 36 kW {49 PS} @ 10,000, 38 N.m @ 8,000
+        # (https://www.totalmotorcycle.com/motorcycles/2018/2018-kawasaki-ninja-400abs-krt-review;
+        # the EU A2 version is 33.4 kW {45 PS}). MotoStatz (US) tested the
+        # North-American bike.
+        "peak_power_hp": 48.3,
         "peak_power_rpm": 10000,
-        "peak_torque_nm": 38.5,  # 38.5 Nm at 8000 rpm (service manual / dyno)
+        "peak_torque_nm": 38.0,
         "peak_torque_rpm": 8000,
         "fuel_system": "fi",
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        # Kawasaki Ninja 400 2018 service manual — DIFFERENT from Ninja 300
-        # Previous entry erroneously used Ninja 300 gear data
-        "gear_ratios": [
-            2.846,
-            2.071,
-            1.700,
-            1.441,
-            1.241,
-            1.107,
-        ],  # internal ratios (SM p. 3-33)
-        "primary_ratio": 2.073,  # crank → main shaft: 85/41 ≈ 2.073 (EX400 SM p. 3-33)
-        # NOTE: was 3.082 (Ninja 300 value — copy-paste error). Fix already in
-        # gear_ratios.py since Apr-22 but spec field was blocking the lookup
-        # (non-null spec.primary_ratio short-circuits lu_primary in importer.py:638).
-        "front_sprocket": 15,  # OEM: 15T (was 17 — Ninja 300 data)
-        "rear_sprocket": 46,  # OEM: 46T (was 43 — Ninja 300 data)
+        # 2026-10 epoch round 2: the previous "service manual p. 3-33"
+        # cassette [2.846, 2.071, 1.700, 1.441, 1.241, 1.107], primary 2.073
+        # (85/41) and 15/46 sprockets contradict Kawasaki's published Ninja
+        # 400 data (Canadian + European spec, same gearing): primary 2.219
+        # (71/32); 1st 2.929 (41/14) 2nd 2.056 (37/18) 3rd 1.619 (34/21) 4th
+        # 1.333 (32/24) 5th 1.154 (30/26) 6th 1.037 (28/27); final 2.929
+        # (41/14); wheelbase 1,370 mm; curb 166 kg (Canada) / 172-174 kg (EU,
+        # ABS) — https://www.totalmotorcycle.com/motorcycles/2018/2018-kawasaki-ninja-400abs-krt-review
+        "gear_ratios": [2.929, 2.056, 1.619, 1.333, 1.154, 1.037],
+        "primary_ratio": 2.219,
+        "front_sprocket": 14,
+        "rear_sprocket": 41,
         "chain_pitch": "520",
-        "dry_mass_kg": 168.0,
-        "wheelbase_mm": 1345.0,
+        # Was 168 kg "dry" (above the 166 kg curb). Dry ~= curb 166 - full
+        # 14 L tank x 0.74 kg/L (10.4) = 155.6 kg; oil + coolant ignored
+        # (not published; the importer adds its own fluid payload).
+        "dry_mass_kg": 155.6,
+        "wheelbase_mm": 1370.0,
         "front_tire_size": "110/70R17",
         "rear_tire_size": "150/60R17",  # corrected from 140/70R17
         "cd": 0.69,
@@ -7624,11 +7630,20 @@ HONDA_CB500F_2019 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
+        # 2026-10 epoch round 2: gearing UNVERIFIED (open) — this cassette
+        # and the importer's Tier-2 primary (1.85) give an overall 1st of
+        # ~13.9:1, while the CBR500R Tier-1 entry (same 471 cc twin and
+        # gearbox family) gives ~18.2:1; no primary source located.
         "gear_ratios": [2.750, 1.857, 1.444, 1.200, 1.035, 0.925],
         "front_sprocket": 15,
         "rear_sprocket": 41,
         "chain_pitch": "520",
-        "dry_mass_kg": 189.0,
+        # Was 189 kg = Honda's KERB mass entered as dry (Padgett's 21YM spec:
+        # kerb 189 kg, fuel 17.1 L inc. reserve —
+        # https://www.padgettsmotorcycles.com/honda/21ym-honda-cb500f/), then
+        # the importer added its own 12.2 kg fluid payload on top. Dry ~=
+        # 189 - 17.1 L x 0.74 kg/L (12.7) = 176.3 kg (oil + coolant ignored).
+        "dry_mass_kg": 176.3,
         "wheelbase_mm": 1410.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "160/60ZR17",
@@ -9348,19 +9363,30 @@ KTM_690_DUKE_2012 = spec_from_dict(
         "stroke_mm": 84.5,
         "compression_ratio": 13.1,
         "cylinders": 1,
-        "peak_power_hp": 75.0,
-        "peak_power_rpm": 8000,
-        "peak_torque_nm": 72.0,
-        "peak_torque_rpm": 6500,
+        # 2026-10 epoch round 2: KTM data for the 690 cc (102 x 84.5) Duke R
+        # (motorcyclespecs 2012 + 2013 690 Duke R —
+        # https://www.motorcyclespecs.co.za/model/ktm/ktm_690%20r%20duke%2012.htm,
+        # https://www.motorcyclespecs.co.za/model/ktm/ktm_690_duke%20r%2013.htm):
+        # 52.2 kW (70 hp) @ 7,500, 69.8 Nm @ 6,550 (was 75 hp @ 8,000 / 72 Nm
+        # — the 2016+ 693 cc engine's figures); primary 36:79; gears 14:35,
+        # 16:28, 21:28, 21:23, 23:22, 23:20; final 16:40; "weight without
+        # fuel approx. 149.5 kg". The old cassette [2.833, 1.937, 1.500,
+        # 1.227, 1.043, 0.912] had no source and no primary was set (the
+        # importer used the Tier-2 1.85).
+        "peak_power_hp": 70.0,
+        "peak_power_rpm": 7500,
+        "peak_torque_nm": 69.8,
+        "peak_torque_rpm": 6550,
         "fuel_system": "fi",
         "cooling": "liquid",
         "valve_config": "sohc",
         "gears": 6,
-        "gear_ratios": [2.833, 1.937, 1.500, 1.227, 1.043, 0.912],
+        "gear_ratios": [2.500, 1.750, 1.333, 1.095, 0.957, 0.870],
+        "primary_ratio": 2.194,
         "front_sprocket": 16,
         "rear_sprocket": 40,
         "chain_pitch": "520",
-        "dry_mass_kg": 150.0,
+        "dry_mass_kg": 149.5,
         "wheelbase_mm": 1466.0,
         "front_tire_size": "120/70ZR17",
         "rear_tire_size": "160/60ZR17",
@@ -9535,7 +9561,12 @@ HUSQVARNA_VITPILEN_701_2018 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "sohc",
         "gears": 6,
+        # 2026-10 epoch round 2: cassette UNVERIFIED (open). Primary 36:79 =
+        # 2.194 (2018 Vitpilen 701 spec, Bikesales AU listings —
+        # https://www.bikesales.com.au/bikes/details/2018-husqvarna-vitpilen-701/SSE-AD-19489692);
+        # none was set, so the importer used the Tier-2 1.85.
         "gear_ratios": [2.833, 1.937, 1.500, 1.227, 1.043, 0.912],
+        "primary_ratio": 2.194,
         "front_sprocket": 16,
         "rear_sprocket": 40,
         "chain_pitch": "520",
@@ -9827,7 +9858,15 @@ HONDA_CBR250RR_2017 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 38,
         "chain_pitch": "520",
-        "dry_mass_kg": 165.0,
+        # 2026-10 epoch round 2: was 165 kg = Honda's CURB mass for the
+        # standard 2017 type (168 kg ABS; Honda global newsroom 2017-08-11 —
+        # https://global.honda/en/newsroom/worldnews/2017/2170811CBR250RR.html)
+        # entered as dry. Tank 14.5 L (AHM / Indomoto launch spec). Dry ~=
+        # 165 - 14.5 L x 0.74 kg/L (10.7) = 154.3 kg (oil + coolant ignored).
+        # OPEN (not verified): the 42 hp rating looks like the 2020+ 41 PS
+        # update while the bound benchmark is a 2017 bike; the primary comes
+        # from a Tier-1 entry (1.9) that cites no source.
+        "dry_mass_kg": 154.3,
         "wheelbase_mm": 1389.0,
         "front_tire_size": "110/70-17",
         "rear_tire_size": "140/70-17",
@@ -10027,9 +10066,14 @@ YAMAHA_R25_2014 = spec_from_dict(
         "stroke_mm": 44.1,
         "compression_ratio": 11.6,
         "cylinders": 2,
+        # 2026-10 epoch round 2: Yamaha Indonesia launch spec (detikOto
+        # 2014-05-20 — https://oto.detik.com/motor/d-2586754/intip-spesifikasi-motor-sport-yamaha-r25):
+        # 26.5 kW (36 PS) @ 12,000; 22.6 N.m @ 10,000 (was 22.1); berat isi
+        # (curb) 166 kg; tank 14.3 L. Gearing UNVERIFIED (open): no primary
+        # is published, so the importer uses the Tier-2 1.9.
         "peak_power_hp": 35.5,
         "peak_power_rpm": 12000,
-        "peak_torque_nm": 22.1,
+        "peak_torque_nm": 22.6,
         "peak_torque_rpm": 10000,
         "fuel_system": "fi",
         "cooling": "liquid",
@@ -10039,7 +10083,10 @@ YAMAHA_R25_2014 = spec_from_dict(
         "front_sprocket": 14,
         "rear_sprocket": 43,
         "chain_pitch": "520",
-        "dry_mass_kg": 166.0,
+        # Was 166 kg = the CURB mass entered as dry (the importer then adds
+        # its own fluid payload). Dry ~= 166 - 14.3 L x 0.74 kg/L (10.6) =
+        # 155.4 kg (oil + coolant ignored).
+        "dry_mass_kg": 155.4,
         "wheelbase_mm": 1380.0,
         "front_tire_size": "110/70-17",
         "rear_tire_size": "140/70-17",
@@ -10071,11 +10118,29 @@ KAWASAKI_ZX25R_2020 = spec_from_dict(
         "cooling": "liquid",
         "valve_config": "dohc",
         "gears": 6,
-        "gear_ratios": [2.600, 1.950, 1.611, 1.400, 1.238, 1.107],
+        # 2026-10 epoch round 2 (data audit): the old cassette [2.600, 1.950,
+        # 1.611, 1.400, 1.238, 1.107] matched no Kawasaki document and the
+        # spec carried no primary, so the importer fell back to the Tier-2
+        # 600 cc-sport primary 1.9 (real 2.900) — overall 1st was 16.9:1 vs
+        # the real 29.1:1 (first gear ran to ~118 km/h). Kawasaki Thailand
+        # official spec (https://www.kawasaki.co.th/en/motorcycle/ninjazx25r):
+        # 1st 2.929 (41/14) 2nd 2.056 (37/18) 3rd 1.619 (34/21) 4th 1.333
+        # (32/24) 5th 1.154 (30/26) 6th 1.037 (28/27), primary 2.900 (87/30);
+        # Motor-Fan (JP) spec repeats 41/14, 37/18, 28/27. Final 48/14 =
+        # 3.429 for the Indonesian/global bike (motorcyclespecs.co.za 2022
+        # ZX-25R; the Thai/JDM sheet's 50/14 is a market variant).
+        "gear_ratios": [2.929, 2.056, 1.619, 1.333, 1.154, 1.037],
+        "primary_ratio": 2.900,
         "front_sprocket": 14,
         "rear_sprocket": 48,
         "chain_pitch": "520",
-        "dry_mass_kg": 183.0,
+        # Kawasaki publishes curb mass only: 182 kg for the Indonesian ABS/SE
+        # unit (Autocar India / Rushlane launch specs; motorcyclespecs 180 kg
+        # base / 182 kg SE). The old 183 kg "dry" entry exceeded the curb
+        # mass and the importer then added its own 10.2 kg fluid payload on
+        # top. Dry ~= curb 182 - full 15 L tank x 0.74 kg/L (11.1) = 170.9 kg
+        # (oil + coolant ignored, as for the other round-2 curb conversions).
+        "dry_mass_kg": 170.9,
         "wheelbase_mm": 1380.0,
         "front_tire_size": "110/70-17",
         "rear_tire_size": "150/60-17",
@@ -10149,6 +10214,9 @@ YAMAHA_RD350_1974 = spec_from_dict(
         "cylinders": 2,
         "peak_power_hp": 39.0,
         "peak_power_rpm": 7500,
+        # Torque left as-is (unsourced, open): motorcyclespecs' 24.1 lb-ft /
+        # 32.6 Nm @ 7,000 cannot be adopted — it is inconsistent with the
+        # same page's 39 hp @ 7,500 (needs >= 37 Nm at 7,500 rpm).
         "peak_torque_nm": 36.0,
         "peak_torque_rpm": 6500,
         "fuel_system": "carb",
@@ -10161,10 +10229,23 @@ YAMAHA_RD350_1974 = spec_from_dict(
         "powervalve": False,
         "gears": 6,
         "gear_ratios": [2.461, 1.555, 1.190, 0.961, 0.821, 0.740],
+        # 2026-10 epoch round 2: no primary was set, so the importer used the
+        # Tier-2 600 cc-sport primary 1.9 -> overall 1st 10.8:1. The period
+        # road-test data (motorcyclespecs RD350 '73, same URL) gives OVERALL
+        # ratios 1st 19.86, 2nd 12.74, 3rd 9.45, 4th 7.46, 5th 6.37:1. With
+        # this cassette and 37/16 final, primary = 19.86 / (2.461 x 37/16) =
+        # 3.490 reproduces the published 1st exactly and 2nd-5th within ~4 %
+        # (12.55 / 9.60 / 7.76 / 6.63), so the cassette is consistent and only
+        # the primary was wrong. Derived, not a published primary figure.
+        "primary_ratio": 3.490,
         "front_sprocket": 16,
         "rear_sprocket": 37,
         "chain_pitch": "520",
-        "dry_mass_kg": 155.0,
+        # Was 155 kg = the published WET mass (155 kg / 342 lb wet —
+        # Wikipedia RD350 (McDiarmid 1998) and motorcyclespecs) entered as
+        # dry. Dry ~= 155 - 15.5 L tank x 0.74 kg/L (11.5) = 143.5 kg (oils
+        # ignored); Rajdoot RD350 dry 143 kg corroborates.
+        "dry_mass_kg": 143.5,
         "wheelbase_mm": 1320.0,
         "front_tire_size": "90/90-18",
         "rear_tire_size": "110/80-18",
@@ -10240,9 +10321,22 @@ YAMAHA_RD500LC_1984 = spec_from_dict(
         "reed_valve": True,
         "powervalve": True,  # YPVS on all four cylinders
         "gears": 6,
-        "gear_ratios": [2.571, 1.777, 1.333, 1.111, 0.961, 0.851],
-        "front_sprocket": 16,
-        "rear_sprocket": 40,
+        # 2026-10 epoch round 2: the old cassette [2.571, 1.777, 1.333, 1.111,
+        # 0.961, 0.851] + 16/40 + Tier-2 primary 1.9 gave overall 6th 4.0:1 —
+        # peak power (9,500) at ~290 km/h vs the published 238 km/h top
+        # speed. Gearbox per motorcyclespecs / moto-data RD500LC-RZV500-RZ500
+        # spec (https://www.motorcyclespecs.co.za/model/yamaha/yamaha_rd500lc.htm):
+        # 1st 2.250 2nd 1.685 3rd 1.363 4th 1.166 5th 1.043 6th 0.960.
+        # Primary 69/31 (2.226) and 15/38 sprockets per the motorbikespecs.net
+        # RD500 entry (chassis 47X; cited from its search-index text — the
+        # page itself returned 503). Physical cross-check: overall 6th =
+        # 2.226 x 0.960 x 38/15 = 5.41:1 puts the published 238 km/h at
+        # ~10,300 rpm, just past the 9,500 power peak, as a road bike is
+        # geared.
+        "gear_ratios": [2.250, 1.685, 1.363, 1.166, 1.043, 0.960],
+        "primary_ratio": 2.226,
+        "front_sprocket": 15,
+        "rear_sprocket": 38,
         "chain_pitch": "530",
         "dry_mass_kg": 180.0,
         "wheelbase_mm": 1375.0,
@@ -10641,6 +10735,16 @@ KAWASAKI_H2_MACH_IV_1973 = spec_from_dict(
         "powervalve": False,
         "gears": 5,
         "gear_ratios": [2.352, 1.631, 1.210, 0.961, 0.791],
+        # 2026-10 epoch round 2: no primary was set (Tier-2 1.9 -> overall
+        # 1st 11.6:1, 5th 3.9:1). Period road-test OVERALL ratios
+        # (motorcyclespecs H2 750 Mach IV —
+        # https://www.motorcyclespecs.co.za/model/kawasaki/kawasaki_h2.htm):
+        # 1st 12.75 2nd 8.64 3rd 6.53 4th 5.42 5th 4.76:1. primary = 12.75 /
+        # (2.352 x 39/15) = 2.085 reproduces 1st-3rd within 2.5 % (12.75 /
+        # 8.84 / 6.56); 4th / 5th stay 4 % / 10 % taller than published (5.21
+        # / 4.29) — the cassette's top two ratios are unverified (open).
+        # Derived, not a published primary figure.
+        "primary_ratio": 2.085,
         "front_sprocket": 15,
         "rear_sprocket": 39,
         "chain_pitch": "530",

@@ -58,6 +58,7 @@ from pydantic import BaseModel, Field
 from typing_extensions import TypedDict
 
 from . import engine_select
+from .constants import ROLLOUT_M
 from .defaults import gsxr1000_k5, hayabusa_gen1, yzfr1_4c8
 from .models import BikeConfig
 from .ratelimit import rate_limit
@@ -1526,8 +1527,10 @@ class DistanceRunRequest(BaseModel):
 
     bike_id: int | None = None
     bike_preset: str | None = None
+    # gt=ROLLOUT_M: the run is timed from the start beam, 1 ft from rest, so
+    # a target at/before it has no timed distance (run() raises ValueError).
     distance_m: float = Field(
-        ..., gt=0, le=20000, description="Target distance in meters"
+        ..., gt=ROLLOUT_M, le=20000, description="Target distance in meters"
     )
     power_boost_pct: float = Field(0.0, ge=-50.0, le=200.0)
     mass_delta_kg: float = Field(0.0, ge=-100.0, le=200.0)

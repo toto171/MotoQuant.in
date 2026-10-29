@@ -25,8 +25,11 @@ use crate::error::SimError;
 /// splits, slip-phase effective mass, soft-cut rev limiter, continuous slip
 /// ratio, intercooler-less charge-temp penalty, energy-consistent launch
 /// floor — bumped so a pre-epoch engine/wasm can never be paired with a
-/// post-epoch resolver or fixture).
-pub const SCHEMA_VERSION: u32 = 3;
+/// post-epoch resolver or fixture); 4 = the epoch's round 2 (`chassis` is the
+/// combined bike + rider CoG and gains `rider_shift_frac`; `tire` gains the
+/// heat-balance terms `heat_partition` / `conv_area_m2`; the finish line moved
+/// from `rollout_m + distance` to `distance`).
+pub const SCHEMA_VERSION: u32 = 4;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -188,6 +191,11 @@ pub struct Tire {
     pub tread_mass_kg: f64,
     pub specific_heat_rubber: f64,
     pub t_tire_launch: f64,
+    /// Blok share of the contact-patch slip heat entering the tread
+    /// (`TireModel.heat_partition`, schema 4).
+    pub heat_partition: f64,
+    /// Convectively cooled tread-band area, m² (`TireModel.conv_area_m2`).
+    pub conv_area_m2: f64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -223,10 +231,16 @@ pub struct Rider {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Chassis {
+    /// Schema 4: the COMBINED bike + rider centre of mass
+    /// (motoquant/submodels/cog.py) — wheelbase incl. swingarm extension,
+    /// system CoG height, front axle -> system CoG.
     pub wheelbase_m: f64,
     pub cog_height_m: f64,
     pub l_f: f64,
     pub anti_squat_frac: f64,
+    /// m_rider / m_total: the share of the rider's body shift
+    /// (`RiderParams.cog_offset`) the system CoG sees.
+    pub rider_shift_frac: f64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

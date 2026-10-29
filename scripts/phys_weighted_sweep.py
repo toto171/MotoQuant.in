@@ -10,6 +10,15 @@ Simulations run on ``motoquant.engine_select.make_engine`` — the Rust core
 when it is built and current (bit-identical to the Python reference, ~50x
 faster), the Python reference otherwise.
 
+Timing convention (2026-10 epoch, round 2): every benchmark row is scored
+against the sim ET timed the way that row was timed
+(``sweep_lib.timing_convention``) — the default run is timed from the 1-ft
+rollout (strip / N.A.-magazine / Dragy rows), and each bike is ALSO run with
+``rollout_m=0.0`` (``sim_et_first_motion``) for the rows timed from first
+motion (Indonesian Racelogic tests). Chunk files written before round 2 carry
+no first-motion run; such rows fall back to ``sim_et`` and are COUNTED
+(``n_timing_fallback``), exactly like scripts/gen_accuracy_viz_data.py.
+
 Two rule sets are reported (2026-10 data epoch):
 
 * ``epoch`` (the headline): epoch binding (highest-weight in-range entry;
@@ -47,8 +56,10 @@ from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
 from scripts.sweep_lib import (
     bind_benchmark_for_record,
     build_bench_map,
+    sim_et_for_convention,
     source_quality_legacy,
     source_weight,  # noqa: F401  (canonical classifier; re-exported)
+    timing_convention,
 )
 from scripts.sweep_with_clusters import cluster_for
 from scripts.validation_sweep import BENCHMARKS
@@ -119,6 +130,11 @@ def run_chunk(state_dir, chunk_size):
             r = make_engine(cfg).run(use_adaptive_dt=False, max_time=26.0)
             fin = bool(r.finished_quarter)
             t60 = getattr(r, "time_60ft", None)
+            # the same run timed from first motion (rows timed that way)
+            r0 = make_engine(cfg).run(
+                use_adaptive_dt=False, max_time=26.0, rollout_m=0.0
+            )
+            fin0 = bool(r0.finished_quarter)
             rows.append(
                 {
                     "i": i,
@@ -135,6 +151,10 @@ def run_chunk(state_dir, chunk_size):
                     "sim_et": float(r.time_quarter) if fin else None,
                     "sim_trap_kmh": float(r.speed_quarter * 3.6) if fin else None,
                     "sim_t60": float(t60) if fin and t60 is not None else None,
+                    "sim_et_first_motion": float(r0.time_quarter) if fin0 else None,
+                    "sim_t60_first_motion": (
+                        float(r0.time_60ft) if fin0 and r0.time_60ft > 0 else None
+                    ),
                 }
             )
         except Exception as exc:
@@ -183,9 +203,25 @@ def trap_wstats(items):
     }
 
 
-def score_rows(rows, rules=HEADLINE_RULES):
-    """Bind + score swept rows under one rule set."""
+def scored_sim_et(rec, src, timing="row"):
+    """``(sim_et, fell_back)`` — the record's sim ET under the row's timing
+    convention (``timing="row"``) or always the default 1-ft run
+    (``timing="1ft"``). A first-motion row on a record without the
+    rollout-0 run falls back to ``sim_et`` with ``fell_back=True``."""
+    if timing == "1ft":
+        return rec["sim_et"], False
+    et = sim_et_for_convention(rec, src)
+    if et is None:
+        return rec["sim_et"], timing_convention(src) != "rollout_1ft"
+    return et, False
+
+
+def score_rows(rows, rules=HEADLINE_RULES, timing="row"):
+    """Bind + score swept rows under one rule set (``timing``: "row" = each
+    benchmark row's own convention, "1ft" = everything at the 1-ft
+    rollout)."""
     bm = _bench_map()
+    n_fallback = 0
     by_cluster: dict = {}
     trap_by_cluster: dict = {}
     overall = []
@@ -197,6 +233,8 @@ def score_rows(rows, rules=HEADLINE_RULES):
         if hit is None:
             continue
         te, tt, src, w = hit
+        sim_et, fell_back = scored_sim_et(rec, src, timing)
+        n_fallback += fell_back
         cl = cluster_for(
             rec["manufacturer"],
             rec["model"],
@@ -206,7 +244,7 @@ def score_rows(rows, rules=HEADLINE_RULES):
             rec["category"],
             cylinders=rec.get("cylinders"),
         )
-        d = rec["sim_et"] - te
+        d = sim_et - te
         by_cluster.setdefault(cl, []).append((d, w, src))
         overall.append((d, w))
         if tt and rec.get("sim_trap_kmh") is not None:
@@ -215,6 +253,8 @@ def score_rows(rows, rules=HEADLINE_RULES):
             trap_overall.append((dt, w))
     return {
         "binding_policy": RULES[rules][0],
+        "timing": timing,
+        "n_timing_fallback": n_fallback,
         "clusters": {cl: wstats(items) for cl, items in sorted(by_cluster.items())},
         "overall": wstats(overall),
         "trap_clusters": {
@@ -252,6 +292,7 @@ def report(state_dir, out_json):
         "trap_clusters": head["trap_clusters"],
         "trap_overall": head["trap_overall"],
         "by_rules": {name: score_rows(rows, name) for name in RULES},
+        "timing_uniform_1ft": score_rows(rows, HEADLINE_RULES, timing="1ft"),
     }
     Path(out_json).write_text(json.dumps(out, indent=1))
     print(

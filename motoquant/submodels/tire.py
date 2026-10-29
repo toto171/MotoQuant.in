@@ -5,9 +5,46 @@ Pacejka Magic Formula + thermal grip + load sensitivity +
 pressure-from-temperature + centrifugal growth + track prep.
 """
 
+import math
+import re
+
 import numpy as np
 
+from ..constants import (
+    CONV_H_COEFF,
+    CONV_H_EXP,
+    CONV_H_STILL_AIR,
+    DEFAULT_TREAD_WIDTH_M,
+    ROAD_THERMAL_EFFUSIVITY,
+    TREAD_RUBBER_DENSITY_KGM3,
+)
 from ..models import BikeConfig
+
+_METRIC_WIDTH_RE = re.compile(r"^\s*(\d{2,3})\s*/")
+_INCH_WIDTH_RE = re.compile(r"^\s*(\d+(?:\.\d+)?)\s*-")
+
+
+def tread_section_width_m(size: str | None) -> float:
+    """Section width (m) from a tyre size string: metric ``190/50-17`` /
+    ``180/55ZR17`` (mm) or inch bias-ply ``3.50-18`` (in). Unparseable →
+    ``constants.DEFAULT_TREAD_WIDTH_M``."""
+    if size:
+        m = _METRIC_WIDTH_RE.match(str(size))
+        if m:
+            return float(m.group(1)) / 1000.0
+        m = _INCH_WIDTH_RE.match(str(size))
+        if m and float(m.group(1)) < 10.0:
+            return float(m.group(1)) * 0.0254
+    return DEFAULT_TREAD_WIDTH_M
+
+
+def tread_heat_partition(thermal_conductivity: float, specific_heat: float) -> float:
+    """Blok heat-partition share of contact-patch friction heat that enters
+    the tread (constants.py): e_tread / (e_tread + e_road)."""
+    e_tread = math.sqrt(
+        max(0.0, thermal_conductivity * TREAD_RUBBER_DENSITY_KGM3 * specific_heat)
+    )
+    return e_tread / (e_tread + ROAD_THERMAL_EFFUSIVITY)
 
 
 class TireModel:
@@ -17,6 +54,17 @@ class TireModel:
         self.cfg = cfg
         self.mu_prep = mu_prep
         self.T_tire_ref_K = T_tire_ref_K
+        tire = cfg.tires
+        # Heat balance geometry / partition (2026-10 epoch round 2).
+        self.heat_partition = tread_heat_partition(
+            tire.thermal_conductivity, tire.specific_heat_rubber
+        )
+        self.conv_area_m2 = (
+            2.0
+            * math.pi
+            * tire.rear_rolling_radius_m
+            * tread_section_width_m(tire.rear_size)
+        )
 
     def friction_coeff(self, N_rear: float, T_tire: float, v: float) -> float:
         """
@@ -63,14 +111,32 @@ class TireModel:
         return F
 
     def thermal_rate(
-        self, F_x: float, v: float, slip_ratio: float, T_tire: float, T_ambient: float
+        self,
+        F_x: float,
+        v: float,
+        slip_ratio: float,
+        T_tire: float,
+        T_ambient: float,
+        Q_rolling: float = 0.0,
     ) -> float:
         """dT_tire/dt -- rate of temperature change of the tire surface (C/s).
 
         Heat balance:
-          Q_friction = |F_x| × |v_slip|            (slip generates heat)
-          Q_conv     = h × A × (T_tire − T_air)    (forced convection, speed-dep)
-          Q_cond     = k × A × (T_tire − T_road) / Δx   (conduction to road)
+          Q_in   = beta × |F_x| × |v_slip|     (slip heat; Blok partition
+                                               beta into the tread, the rest
+                                               goes into the road)
+                 + Q_rolling                   (the rear tyre's share of the
+                                               rolling-resistance work: the
+                                               hysteresis that IS rolling
+                                               resistance ends up as tyre heat)
+          Q_conv = h(v) × A_tread × (T_tire − T_air)
+                   (McAdams forced convection over the tread band)
+          Q_cond = k × A × (T_tire − T_road) / Δx   (conduction to road)
+
+        2026-10 epoch round 2: the tread used to receive ALL the slip heat
+        and shed it through h = 10 + 0.5 v over a fixed 0.15 m², so a
+        bike holding speed for 30 s (top-speed mode) ran its tyre to
+        400-570 °C. See constants.py (TYRE HEAT BALANCE) for the sources.
 
         Kaizen fix (April 2026): the old formula computed
         ``k × A × (T_tire − (T_tire − 5.0)) / 0.005`` which simplifies to a
@@ -81,10 +147,9 @@ class TireModel:
         """
         tire = self.cfg.tires
         v_slip = abs(v * slip_ratio)
-        Q_friction = abs(F_x) * v_slip
-        h_conv = 10.0 + 0.5 * v
-        A_surface = 0.15
-        Q_conv = h_conv * A_surface * (T_tire - T_ambient)
+        Q_friction = self.heat_partition * (abs(F_x) * v_slip)
+        h_conv = max(CONV_H_STILL_AIR, CONV_H_COEFF * abs(v) ** CONV_H_EXP)
+        Q_conv = h_conv * self.conv_area_m2 * (T_tire - T_ambient)
         # Road-surface temperature proxy.  If the config carries an explicit
         # track_temp_c on env, use it; otherwise fall back to ambient+5.
         env = getattr(self.cfg, "environment", None)
@@ -98,7 +163,7 @@ class TireModel:
             * (T_tire - T_road)
             / 0.005
         )
-        dT = (Q_friction - Q_conv - Q_cond) / max(
+        dT = (Q_friction + Q_rolling - Q_conv - Q_cond) / max(
             1.0, tire.tread_mass_kg * tire.specific_heat_rubber
         )
         return dT

@@ -8137,8 +8137,15 @@ HUSQVARNA_701_SUPERMOTO_2016 = spec_from_dict(
         "valve_config": "sohc",  # pre-2017 LC4 — SOHC
         "gears": 6,
         # Husqvarna 2016 LC4 cassette per Husky service manual
-        # (matches KTM 2012-2017 Duke R, NOT the 2019+ LC4 cassette)
+        # 2026-10 epoch round 2: the "(matches KTM 2012-2017 Duke R)" claim
+        # was false — the 690 Duke R box is 14:35 / 16:28 / 21:28 / 21:23 /
+        # 23:22 / 23:20 (motorcyclespecs); this cassette is UNVERIFIED (open).
+        # Primary 36:79 = 2.194 — the 693 cc LC4's primary (Husqvarna
+        # Vitpilen 701 spec, Bikesales AU listing —
+        # https://www.bikesales.com.au/bikes/details/2018-husqvarna-vitpilen-701/SSE-AD-19489692);
+        # none was set, so the importer used the Tier-2 1.85.
         "gear_ratios": [2.833, 1.937, 1.500, 1.227, 1.043, 0.912],
+        "primary_ratio": 2.194,
         "front_sprocket": 16,  # F16/R42 520 — Husqvarna
         # chose taller front sprocket
         # than KTM SMC R (F15) for

@@ -11,7 +11,10 @@ Binding + weights delegate to scripts/sweep_lib (bind_benchmark_for_record,
 the ONE binding implementation). ``MQ_RULES=epoch`` (default, the 2026-10
 headline rules) or ``MQ_RULES=legacy`` (pre-epoch binding + classifier)
 selects the rule set. Simulations use motoquant.engine_select.make_engine
-(the Rust core when built and current — bit-identical, ~50x faster).
+(the Rust core when built and current — bit-identical, ~50x faster). Each
+row is simmed under its benchmark's timing convention
+(``sweep_lib.rollout_m_for_source``: 1-ft rollout, or 0.0 for rows timed
+from first motion).
 
 For the joint ET + trap retune with cross-validation see
 scripts/tune_epoch_2026_10_24.py; this script stays the quick per-cluster
@@ -47,7 +50,10 @@ from motoquant.engine_select import make_engine  # noqa: E402
 from motoquant.scraper.importer import spec_to_bike_config  # noqa: E402
 from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES  # noqa: E402
 from scripts.phys_weighted_sweep import RULES, _bench_map  # noqa: E402
-from scripts.sweep_lib import bind_benchmark_for_record  # noqa: E402
+from scripts.sweep_lib import (  # noqa: E402
+    bind_benchmark_for_record,
+    rollout_m_for_source,
+)
 from scripts.sweep_with_clusters import cluster_for  # noqa: E402
 
 # Map sweep-cluster labels (dashes) -> category_tag (underscores)
@@ -112,6 +118,7 @@ def build_matches(rules=None):
                 "target_trap": tt,
                 "weight": wfn(src),
                 "source": src,
+                "rollout_m": rollout_m_for_source(src),
             }
         )
     return matches
@@ -127,12 +134,13 @@ def _apply_overrides(overrides_by_tag):
 
 
 def _sim_one(args):
-    i, overrides_by_tag = args
+    i, rollout_m, overrides_by_tag = args
     _apply_overrides(overrides_by_tag)
     spec = ALL_KNOWN_BIKES[i]
     try:
         cfg = spec_to_bike_config(spec)
-        r = make_engine(cfg).run(use_adaptive_dt=False, max_time=26.0)
+        kw = {} if rollout_m is None else {"rollout_m": rollout_m}
+        r = make_engine(cfg).run(use_adaptive_dt=False, max_time=26.0, **kw)
         if not r.finished_quarter:
             return (i, None)
         return (i, (float(r.time_quarter), float(r.speed_quarter * 3.6)))
@@ -140,9 +148,12 @@ def _sim_one(args):
         return (i, None)
 
 
-def sim_batch(indices, overrides_by_tag=None, procs=4):
+def sim_batch(indices, overrides_by_tag=None, procs=4, rollouts=None):
+    """{i: (et, trap) | None}; ``rollouts`` maps i -> rollout_m (the row's
+    timing convention; default = the engine's 1-ft rollout)."""
     overrides_by_tag = overrides_by_tag or {}
-    args = [(i, overrides_by_tag) for i in indices]
+    rollouts = rollouts or {}
+    args = [(i, rollouts.get(i), overrides_by_tag) for i in indices]
     with mp.Pool(procs) as pool:
         return dict(pool.map(_sim_one, args))
 
@@ -186,7 +197,9 @@ def _scored(m, res):
 
 def cmd_baseline(out_json):
     matches = build_matches()
-    ets = sim_batch([m["i"] for m in matches])
+    ets = sim_batch(
+        [m["i"] for m in matches], rollouts={m["i"]: m["rollout_m"] for m in matches}
+    )
     rows = []
     for m in matches:
         res = ets.get(m["i"])
@@ -219,7 +232,11 @@ def cmd_grid(cluster, grid_json, out_json=None):
         return
     results = []
     for cand in grid:
-        ets = sim_batch([m["i"] for m in matches], {tag: cand})
+        ets = sim_batch(
+            [m["i"] for m in matches],
+            {tag: cand},
+            rollouts={m["i"]: m["rollout_m"] for m in matches},
+        )
         rows = []
         for m in matches:
             res = ets.get(m["i"])

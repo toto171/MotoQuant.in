@@ -276,8 +276,8 @@ def _python_case(
     dist = float(kw.get("distance", 402.336))
     # Python does not expose its step counter: every loop iteration stores one
     # sample, and the finish-line crossing stores one more (x >= x_end, the
-    # finish line rollout_m + distance from rest).
-    x_end = dist + float(rollout_m)
+    # finish line `distance` from rest — schema 4, 2026-10 epoch round 2).
+    x_end = dist
     n = int(len(r.t))
     steps = n - 1 if n and float(r.x[-1]) >= x_end else n
     return {

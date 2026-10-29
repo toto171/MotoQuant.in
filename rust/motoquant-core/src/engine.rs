@@ -13,7 +13,7 @@
 //!   property is re-derived here.
 
 use crate::config::{BoostType, Curve, ResolvedConfig};
-use crate::error::SimError;
+use crate::error::{py_float_repr, SimError};
 use crate::fmath::{self, ExpImpl};
 
 /// Hard ceiling on stored samples per run (~70 simulated minutes at 1 ms;
@@ -221,6 +221,12 @@ pub struct Engine<'a> {
 
 /// constants.REV_LIMITER_CUT_FACTOR — full ignition cut at this × redline.
 pub const REV_LIMITER_CUT_FACTOR: f64 = 1.04;
+
+// constants.py TYRE HEAT BALANCE — McAdams forced convection
+// h = max(5.7, 7.2 |v|^0.78) W/(m² K) (2026-10 epoch round 2).
+pub const CONV_H_STILL_AIR: f64 = 5.7;
+pub const CONV_H_COEFF: f64 = 7.2;
+pub const CONV_H_EXP: f64 = 0.78;
 
 impl<'a> Engine<'a> {
     pub fn new(c: &'a ResolvedConfig) -> Result<Engine<'a>, SimError> {
@@ -472,21 +478,30 @@ impl<'a> Engine<'a> {
     }
 
     #[inline]
-    pub fn tire_thermal_rate(&self, f_x: f64, v: f64, slip_ratio: f64, t_tire: f64) -> f64 {
+    pub fn tire_thermal_rate(
+        &self,
+        f_x: f64,
+        v: f64,
+        slip_ratio: f64,
+        t_tire: f64,
+        q_rolling: f64,
+    ) -> f64 {
         let tr = &self.c.tire;
         let t_ambient = self.c.env.ambient_temp_c;
         let v_slip = (v * slip_ratio).abs();
-        let q_friction = f_x.abs() * v_slip;
-        let h_conv = 10.0 + 0.5 * v;
-        let a_surface = 0.15;
-        let q_conv = h_conv * a_surface * (t_tire - t_ambient);
+        // 2026-10 epoch round 2: Blok partition of the slip heat into the
+        // tread; McAdams convection over the tread band.
+        let q_friction = tr.heat_partition * (f_x.abs() * v_slip);
+        let h_conv = py_max(CONV_H_STILL_AIR, CONV_H_COEFF * fmath::pow(v.abs(), CONV_H_EXP));
+        let q_conv = h_conv * tr.conv_area_m2 * (t_tire - t_ambient);
         let t_road = match self.c.env.t_road {
             Some(tr_) => tr_,
             None => t_ambient + 5.0,
         };
         let q_cond =
             tr.thermal_conductivity * (tr.contact_patch_cm2 * 1e-4) * (t_tire - t_road) / 0.005;
-        (q_friction - q_conv - q_cond) / py_max(1.0, tr.tread_mass_kg * tr.specific_heat_rubber)
+        (q_friction + q_rolling - q_conv - q_cond)
+            / py_max(1.0, tr.tread_mass_kg * tr.specific_heat_rubber)
     }
 
     // ── submodels/rolling_resistance.py ───────────────────────────────────
@@ -531,17 +546,19 @@ impl<'a> Engine<'a> {
     }
 
     // ── submodels/weight_transfer.py ──────────────────────────────────────
+    // Schema 4: system (bike + rider) CoG; the rider's body shift is scaled
+    // by its mass share; drag adds its pitch moment F_aero·h.
     #[inline]
-    pub fn weight_transfer(&self, accel: f64, v: f64, t: f64, m_total: f64) -> (f64, f64) {
+    pub fn weight_transfer(&self, accel: f64, v: f64, t: f64, m_total: f64, f_aero: f64) -> (f64, f64) {
         let ch = &self.c.chassis;
         let h = ch.cog_height_m;
         let l = ch.wheelbase_m;
-        let rider_offset = self.rider_cog_offset(t);
+        let rider_offset = self.rider_cog_offset(t) * ch.rider_shift_frac;
         let l_f_eff = ch.l_f - rider_offset;
         let l_r_eff = l - l_f_eff;
         let n_f_static = m_total * self.g * l_r_eff / l;
         let n_r_static = m_total * self.g * l_f_eff / l;
-        let mut delta_n = m_total * accel * h / l;
+        let mut delta_n = (m_total * accel * h + f_aero * h) / l;
         let anti_squat_boost = 1.0 + (ch.anti_squat_frac - 1.0) * 0.15;
         delta_n *= anti_squat_boost;
         let f_lift = self.aero_lift(v);
@@ -552,17 +569,19 @@ impl<'a> Engine<'a> {
 
     // ── submodels/wheelie.py ──────────────────────────────────────────────
     #[inline]
-    pub fn max_accel_before_wheelie(&self, v: f64, t: f64, m_total: f64) -> f64 {
+    pub fn max_accel_before_wheelie(&self, v: f64, t: f64, m_total: f64, f_aero: f64) -> f64 {
         let ch = &self.c.chassis;
         let l = ch.wheelbase_m;
         let h = ch.cog_height_m;
-        let rider_offset = self.rider_cog_offset(t);
+        let rider_offset = self.rider_cog_offset(t) * ch.rider_shift_frac;
         let l_f_eff = ch.l_f - rider_offset;
         let l_r_eff = l - l_f_eff;
         let mut a_wheelie = self.g * l_r_eff / h;
         let f_lift = self.aero_lift(v);
         if m_total > 0.0 {
             a_wheelie -= f_lift * 0.4 / (m_total * h / l);
+            // Drag pitch moment (centre of pressure at the CoG height).
+            a_wheelie -= f_aero / m_total;
         }
         if !self.c.wheelie.counter_rotating {
             a_wheelie *= 0.985;
@@ -617,9 +636,9 @@ impl<'a> Engine<'a> {
 
     /// `MotoQuantEngine.run(distance, max_time, use_adaptive_dt, rollout_m=...)`.
     ///
-    /// The run integrates from rest to the finish line at
-    /// `x = rollout_m + distance` (drag-strip timing convention, see
-    /// constants.ROLLOUT_M); splits are taken by [`crate::splits`].
+    /// The run integrates from rest at the start line to the finish line at
+    /// `x = distance` (> `rollout_m`); splits are timed from the start beam
+    /// at `x = rollout_m` by [`crate::splits`] (constants.ROLLOUT_M).
     pub fn run(
         &self,
         distance: f64,
@@ -630,7 +649,16 @@ impl<'a> Engine<'a> {
         // Python: `if not (rollout_m >= 0.0) or rollout_m == float("inf")`.
         if !(rollout_m >= 0.0) || rollout_m == f64::INFINITY {
             return Err(SimError::value(format!(
-                "rollout_m must be finite and >= 0 (got {rollout_m})"
+                "rollout_m must be finite and >= 0 (got {})",
+                py_float_repr(rollout_m)
+            )));
+        }
+        // Python: `if not (distance > rollout_m)` (also rejects NaN).
+        if !(distance > rollout_m) {
+            return Err(SimError::value(format!(
+                "distance must be > rollout_m (got distance={}, rollout_m={})",
+                py_float_repr(distance),
+                py_float_repr(rollout_m)
             )));
         }
         let c = self.c;
@@ -641,8 +669,8 @@ impl<'a> Engine<'a> {
 
         let dt_min = 0.0005;
         let dt_max = 0.005;
-        // `x_end = distance + rollout_m` (== distance exactly when rollout is 0).
-        let x_end = distance + rollout_m;
+        // Schema 4 (epoch round 2): the finish line is `distance` from rest.
+        let x_end = distance;
 
         let shift_rpms = &c.drivetrain.shift_rpms;
         let overall = &c.drivetrain.overall_ratios;
@@ -888,8 +916,15 @@ impl<'a> Engine<'a> {
             let v_rel = v + v_wind;
             f_aero = half_rho * fmath::sq(py_max(0.0, v_rel)) * cd_a_t;
             f_rr = self.rolling_resistance(v, t_tire, m_total);
+
+            // ── Wheelie limit (schema 4: before the load transfer) ──
+            let a_wheelie = self.max_accel_before_wheelie(v, t, m_total, f_aero);
+            if (f_drive - f_aero - f_rr) / m_eff > a_wheelie {
+                f_drive = a_wheelie * m_eff + f_aero + f_rr;
+            }
+
             let a_est = (f_drive - f_aero - f_rr) / m_eff;
-            let (nf0, nr0) = self.weight_transfer(a_est, v, t, m_total);
+            let (nf0, nr0) = self.weight_transfer(a_est, v, t, m_total, f_aero);
             n_f = nf0;
             n_r = nr0;
 
@@ -900,7 +935,7 @@ impl<'a> Engine<'a> {
                 let mut f_cap = f_max_tire;
                 for _ in 0..2 {
                     let a_cap = (f_cap - f_aero - f_rr) / m_eff;
-                    let (a, b) = self.weight_transfer(a_cap, v, t, m_total);
+                    let (a, b) = self.weight_transfer(a_cap, v, t, m_total, f_aero);
                     n_f = a;
                     n_r = b;
                     f_max_tire = self.tire_max_force(n_r, t_tire);
@@ -912,13 +947,6 @@ impl<'a> Engine<'a> {
                 f_drive = f_cap;
             } else {
                 slip_ratio = f_drive.abs() / py_max(f_max_tire, 1.0) * 0.05;
-            }
-
-            // ── Wheelie limit ──
-            let a_wheelie = self.max_accel_before_wheelie(v, t, m_total);
-            let a_accel = (f_drive - f_aero - f_rr) / m_eff;
-            if a_accel > a_wheelie {
-                f_drive = a_wheelie * m_eff + f_aero + f_rr;
             }
 
             // ── Net acceleration ──
@@ -933,7 +961,10 @@ impl<'a> Engine<'a> {
             }
 
             // ── Tire thermal update ──
-            let d_t_tire = self.tire_thermal_rate(f_drive, v, slip_ratio, t_tire);
+            // Schema 4: + the rear tyre's load share of the rolling-loss work.
+            let n_sum = n_f + n_r;
+            let q_roll = if n_sum > 0.0 { f_rr * v * (n_r / n_sum) } else { 0.0 };
+            let d_t_tire = self.tire_thermal_rate(f_drive, v, slip_ratio, t_tire, q_roll);
             t_tire += d_t_tire * dt;
 
             // ── Boost dynamics ──
@@ -1036,16 +1067,11 @@ impl<'a> Engine<'a> {
             step += 1;
         }
 
-        // Final state (the step that crossed the finish line).
+        // Final state (the step that crossed the finish line). x_end =
+        // distance > rollout_m >= 0 = x at step 0, so this only follows a
+        // loop that ran.
         if step < n_max && x >= x_end {
-            if !ran_once {
-                // Python reads loop locals (a_net, rpm, …) here that were
-                // never bound → UnboundLocalError. Mirror it as an error.
-                return Err(SimError::value(format!(
-                    "distance + rollout_m must be > 0 (got {distance} + {rollout_m}): \
-                     the loop never ran"
-                )));
-            }
+            debug_assert!(ran_once);
             if ch.len() == room {
                 if room >= MAX_SAMPLES {
                     return Err(over_cap());

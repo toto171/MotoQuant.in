@@ -25,16 +25,19 @@
  *   const r = await simulate(resolvedConfig, { adaptive: false });
  *   r.et, r.trap, r.splits, r.channels.v, r.gear
  *
- * Timing (schema 3, 2026-10 physics epoch): channels are integrated from rest
- * (t = 0, x = 0); splits/ET/trap are timed from the start beam after
- * `rolloutM` (default 1 ft) of travel, exactly like MotoQuantEngine.run().
+ * Timing (schema 4, 2026-10 physics epoch round 2): channels are integrated
+ * from rest at the start line (t = 0, x = 0); the finish line is at
+ * x = distance and splits/ET/trap are timed from the start beam, which the
+ * bike clears after `rolloutM` (default 1 ft) of travel:
+ * t(x = d) - t(x = rolloutM), exactly like MotoQuantEngine.run(). distance
+ * must exceed rolloutM (a 'value' error otherwise, NaN included).
  *
  * Errors: a failed simulation throws an Error whose `.kind` mirrors the
  * Python exception class the reference engine raises ('value' | 'memory' |
  * 'overflow' | 'zero_division').
  */
 
-export const ENGINE_SCHEMA = 3;
+export const ENGINE_SCHEMA = 4;
 /** 1 ft — the drag-strip rollout every published ET uses (2026-10 epoch). */
 export const ROLLOUT_M = 0.3048;
 const DEFAULT_URL = '/engine/motoquant_core.wasm';
@@ -128,14 +131,15 @@ function decodeResult(exports, ptr) {
 /**
  * Run one simulation.
  *
- * @param {object} resolvedConfig  motoquant/native.py resolve_config() output (schema 3)
+ * @param {object} resolvedConfig  motoquant/native.py resolve_config() output (schema 4)
  * @param {object} [opts]
  * @param {number} [opts.distance=402.336]  metres
  * @param {number} [opts.maxTime=26]        seconds
  * @param {boolean} [opts.adaptive=false]   adaptive-dt integration
  * @param {boolean} [opts.channels=true]    return per-step channels (else splits only)
  * @param {number}  [opts.rolloutM=0.3048]  drag-strip rollout (m): splits are timed from the
- *                                          start beam, t(x = rollout + d) - t(x = rollout);
+ *                                          start beam, t(x = d) - t(x = rollout), with d
+ *                                          measured from rest (finish at x = distance);
  *                                          0 = from first motion (motoquant/constants.py ROLLOUT_M)
  * @param {string}  [opts.url]              wasm URL (default /engine/motoquant_core.wasm)
  * @returns {Promise<{et:number, trap:number, trapKmh:number, finished:boolean,

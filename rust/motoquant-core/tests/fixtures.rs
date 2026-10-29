@@ -22,7 +22,7 @@ struct Req {
     distance: f64,
     max_time: f64,
     adaptive: bool,
-    /// Schema 3 (2026-10 epoch): the rollout the Python reference ran with.
+    /// Schema 3+ (2026-10 epoch): the rollout the Python reference ran with.
     rollout_m: f64,
 }
 
@@ -125,16 +125,21 @@ fn sizing_errors_mirror_python_classes() {
     // int(-1.5) + 1 == 0 -> np.zeros(0) is fine in Python: empty result.
     let (out, _) = run(&cfg, 402.336, -0.0015, false).expect("n_max == 0 is valid");
     assert!(out.ch.is_empty());
-    // distance + rollout <= 0: Python's UnboundLocalError becomes a clear
-    // ValueError (with the default 1-ft rollout, distance 0 is a valid run
-    // to the start beam).
+    // Schema 4 (epoch round 2): the finish line must lie beyond the start
+    // beam — distance <= rollout_m (NaN included) is Python's ValueError,
+    // with the same message.
     assert_eq!(
         simulate(&cfg, 0.0, 26.0, false, 0.0).err().map(|e| e.kind),
         Some(ErrorKind::Value)
     );
-    assert_eq!(kind_of(&cfg, -ROLLOUT_M, 26.0, false), Some(ErrorKind::Value));
-    let (_, sp) = run(&cfg, 0.0, 26.0, false).expect("distance 0 runs to the beam");
-    assert!(!sp.finished_quarter);
+    for bad in [0.0, -ROLLOUT_M, ROLLOUT_M, f64::NAN] {
+        let e = run(&cfg, bad, 26.0, false).expect_err("distance <= rollout");
+        assert_eq!(e.kind, ErrorKind::Value, "distance {bad}");
+    }
+    let e = run(&cfg, f64::NAN, 26.0, false).unwrap_err();
+    assert_eq!(e.msg, "distance must be > rollout_m (got distance=nan, rollout_m=0.3048)");
+    let (out, sp) = run(&cfg, 0.31, 26.0, false).expect("just past the beam");
+    assert!(!sp.finished_quarter && *out.ch.x.last().unwrap() >= 0.31);
     // run(rollout_m=...) validation mirrors Python's ValueError.
     for bad in [-0.1, f64::NAN, f64::INFINITY] {
         assert_eq!(
@@ -176,16 +181,17 @@ fn live_config_mass_is_used_from_step_one() {
 
 #[test]
 fn rollout_zero_is_timed_from_first_motion() {
-    // rollout 0: the splits are read straight off the from-rest trajectory;
-    // rollout 1 ft: ET = t(x = r + D) - t(x = r) on the SAME trajectory
-    // (the integration itself is identical up to the extra 1 ft).
+    // Schema 4: the rollout only moves the clock's start, never the track —
+    // both runs integrate the IDENTICAL trajectory to the finish at x = D;
+    // rollout 1 ft times it t(D) - t(r), rollout 0 from first motion.
     let cfg = k5();
     let (a, sa) = simulate(&cfg, 402.336, 26.0, false, 0.0).unwrap();
     let (b, sb) = simulate(&cfg, 402.336, 26.0, false, ROLLOUT_M).unwrap();
-    let n = a.ch.len().min(b.ch.len());
-    assert_eq!(a.ch.x[..n - 1], b.ch.x[..n - 1], "same trajectory");
+    assert_eq!(a.ch.x, b.ch.x, "same trajectory");
+    assert_eq!(a.ch.t, b.ch.t, "same clock");
     assert!(sb.time_quarter < sa.time_quarter - 0.1, "rollout shortens ET");
-    assert!((sb.speed_quarter - sa.speed_quarter).abs() < 0.1, "trap ~unchanged");
+    assert_eq!(sb.speed_quarter.to_bits(), sa.speed_quarter.to_bits(), "same trap");
+    assert_eq!(sa.max_distance_m.to_bits(), sb.max_distance_m.to_bits());
     assert_eq!(sa.rollout_m, 0.0);
     assert_eq!(sb.rollout_m, ROLLOUT_M);
 }

@@ -185,7 +185,22 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     ),
     ("MV Agusta", "Brutale 1000 RR", 2019, 10.15, 240, "Cycle World 2019"),
     # 2-stroke benchmarks (Cycle World / historical drag tests / magazine)
-    ("Yamaha", "RD350", 1973, 14.00, 146, "Cycle World 1973"),
+    # 2026-10 epoch round 2: the old row (14.00 @ 146, "Cycle World 1973")
+    # could not be located — neither Cycle World RD350 road test in the
+    # archive (Feb 1973, Jan 1974) carries a quarter-mile figure in its text.
+    # The figure Cycle World itself published is 14.3 s @ 89.8 mph (144.5
+    # km/h), "RD Days", Cycle World July 1993 (period RD350 test data;
+    # https://magazine.cycleworld.com/article/1993/7/1/rd-days). Other period
+    # figures bracket it: Cycle 14.12 @ 93.2 mph, Motorcyclist 1973 14.48 @
+    # 89.8 mph ("admittedly rough-running" bike; motorcyclespecs RD350 '73).
+    (
+        "Yamaha",
+        "RD350",
+        1973,
+        14.30,
+        144.5,
+        "Cycle World 1993 'RD Days' (period RD350 test, 14.3s @ 89.8 mph)",
+    ),
     ("Yamaha", "RD400", 1976, 14.18, 147, "Cycle World 1979 (RD400F Daytona)"),
     # RG500 AUDIT 2026-07-06: the old row (11.60 @ 180, "Cycle World 1985")
     # could not be corroborated anywhere — no published 1985-86 test shows
@@ -314,6 +329,12 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
     # so trap ~108 est. (not published). Largest DERIVED-optimism correction
     # of the 2026-07-17 batch (+3.8s); confirms INBOX:164's ">18.0s".
     # Indonesian MT-15 = Indian MT-15 V1/V2 platform (155 VVA, 18.4 PS).
+    # 2026-10 round 2: label names the device — the OtoRider article states
+    # the runs used a "Race Logic Performance Box" (92 RON fuel, dry road), so
+    # the row is scored from first motion (Racelogic default, see
+    # sweep_lib.timing_convention_meta). The conflict with the MotoStatz R15
+    # 17.62 s row (same R155 engine) is NOT explained by timing convention
+    # alone (~0.35 s of the ~2 s gap) and stays open.
     # URL: https://otorider.com/berita/2020/data-akselerasi-yamaha-xsr-155-lebih-kencang-daripada-mt-15-datbiecht15
     (
         "Yamaha",
@@ -321,7 +342,7 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         2019,
         19.60,
         108,
-        "OtoRider GPS-instrumented 402m test (Indonesia)",
+        "OtoRider Racelogic Performance Box instrumented 402m test (Indonesia)",
     ),
     # R3 source upgrade 2026-07-17 (scrape-consumption honesty batch):
     # FastestLaps carried the same 14.0s; the primary source is MotoStatz's own
@@ -2868,20 +2889,24 @@ BENCHMARKS: list[tuple[str, str, int, float, float, str]] = [
         "DERIVED (0-60mph 3.7s FastestLaps; 62hp 2T V-twin, NSR250/RS250 cluster)",
     ),
     # Kawasaki Ninja ZX-25R (Indonesia, 249.8cc I4 sport, 2020-2026) —
-    # INSTRUMENTED 2026-07-17 (was DERIVED 13.80 @ 160): TMCBlog/Otomotif
-    # Racelogic 402m test of the stock Indonesian press unit (~sea level):
-    # 0-60 2.5s / 0-100 5.4s / 201m 9.0s / 402m 14.1s @ 153.6 km/h; GPS top
-    # 183 (speedo 192). GridOto's separate CBR250RR comparo independently
-    # repeats 14.1s. Grows the small_i4_screamer benchmark base beyond its
-    # documented n=2 single-knob fit.
-    # URL: https://tmcblog.com/2020/07/17/test-akselerasi-kawasaki-ninja-zx-25r-paling-ngacir-se-250-cc/
+    # INSTRUMENTED 2026-07-17 (was DERIVED 13.80 @ 160): Otomotifnet Racelogic
+    # test ride of the stock Indonesian press unit: 402m 14.1s @ 153.6 km/h;
+    # Racelogic top 183 (speedo 192) on a ~1.5 km track. GridOto's ZX-25R vs
+    # CBR250RR comparo repeats 14.1s (0-201m 9.0s, 0-100 km/h 5.4s).
+    # 2026-10 round 2 CITATION FIX: the URL this row used to cite (TMCBlog
+    # 2020-07-17) carries NO 402m figure — its Sentul T4-T5 runs stop at 0-60
+    # (3.47s) and 0-100 km/h (6.23s); the 14.1s figure is Otomotifnet's.
+    # Unresolved: a third Indonesian Racelogic test (OtoRider) is reported in
+    # search indexes at 16.3s/402m; its page could not be fetched to verify.
+    # URL: https://otomotifnet.gridoto.com/read/232302520/test-ride-lengkap-kawasaki-ninja-zx-25r-sensasi-mengendarai-51-ps
+    # URL: https://www.gridoto.com/read/224073694/zx-25r-kalah-ini-data-adu-akselerasi-ninja-zx-25r-dan-cbr250rr
     (
         "Kawasaki",
         "Ninja ZX-25R",
         2020,
         14.10,
         153.6,
-        "TMCBlog/Otomotif Racelogic instrumented 402m test (Indonesia)",
+        "Otomotifnet Racelogic instrumented 402m test ride (Indonesia; GridOto comparo repeats 14.1s)",
     ),
     # Honda CB 300R (286cc single naked, 2019-2024) — DERIVED (0.1). rushlane
     # 0-100 km/h 6.2s; MotorBikeCatalog QM estimate ~15.1s. 30hp single.

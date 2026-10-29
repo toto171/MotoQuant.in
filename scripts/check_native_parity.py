@@ -154,10 +154,9 @@ def _patch_profile(eng, patch):
 
 
 # Documented exception-class differences (docs/RUST_CORE.md, "Error
-# behaviour"). Empty since the 2026-10 epoch: Python's run() now rejects
-# distance + rollout_m <= 0 with the same ValueError as the native core (it
-# used to hit an accidental UnboundLocalError). Every error must raise the
-# SAME class on both engines.
+# behaviour"). Empty since the 2026-10 epoch: Python's run() rejects
+# distance <= rollout_m (NaN included) with the same ValueError and message
+# as the native core. Every error must raise the SAME class on both engines.
 EXC_EQUIV: set[tuple[str, str]] = set()
 
 
@@ -652,17 +651,43 @@ def build_stress_cases(catalog: list[tuple[str, dict]]) -> list[dict]:
         "topspeed",
         kwargs={"plateau_accel": 0.2, "plateau_window_s": 0.5, "max_time": 60.0},
     )
-    # 2026-10 epoch: with the default 1-ft rollout, distance 0 is a valid run
-    # to the start beam; rollout 0 + distance 0 still raises on both engines.
-    both(
-        "busa: distance 0 (runs to the beam)",
-        copy.deepcopy(busa),
-        kwargs={"distance": 0.0},
-    )
-    both(
-        "busa: distance 0, rollout 0 (both raise)",
-        copy.deepcopy(busa),
-        kwargs={"distance": 0.0, "rollout_m": 0.0},
+    # 2026-10 epoch round 2: the finish line is `distance` from rest and must
+    # lie beyond the start beam — distance <= rollout_m (and NaN) raise the
+    # same ValueError on both engines; just past the beam is a valid run.
+    for vname, kw in {
+        "distance 0 (both ValueError)": {"distance": 0.0},
+        "distance 0, rollout 0 (both ValueError)": {"distance": 0.0, "rollout_m": 0.0},
+        "distance == rollout (both ValueError)": {"distance": 0.3048},
+        "distance NaN (both ValueError)": {"distance": float("nan")},
+        "distance -5 (both ValueError)": {"distance": -5.0},
+        "distance 0.31 (just past the beam)": {"distance": 0.31},
+        "distance 1 m, rollout 0": {"distance": 1.0, "rollout_m": 0.0},
+    }.items():
+        both(f"busa: {vname}", copy.deepcopy(busa), kwargs=kw)
+    # ── 2026-10 epoch round 2: system CoG (rider mass / stature / seat /
+    #    swingarm), drag pitch moment, tyre heat balance ──
+    for vname, edits in {
+        "rider 110kg": {"chassis.rider_mass_kg": 110.0},
+        "rider stature 195cm": {"rider.height_cm": 195.0},
+        "seat 760mm, sag 45mm": {
+            "chassis.seat_height_mm": 760.0,
+            "suspension.static_sag_mm": 45.0,
+        },
+        "cog +55mm": {"chassis.cog_height_mm": 585.0},
+        "swingarm +6in": {"chassis.swingarm_extension_mm": 152.4},
+        "no launch lean": {"rider.launch_forward_shift_mm": 0.0},
+        "inch tyre size 4.00-18": {"tires.rear_size": "4.00-18"},
+        "unparsed tyre size": {"tires.rear_size": "slick"},
+        "tyre k 0.3 cp 1800": {
+            "tires.thermal_conductivity": 0.3,
+            "tires.specific_heat_rubber": 1800.0,
+        },
+    }.items():
+        both(f"busa: {vname}", _mut(busa, _set(edits)))
+    add(
+        "busa: low grip top speed (heat balance)",
+        _mut(busa, _set({"tires.mu_peak": 0.9})),
+        "topspeed",
     )
     # Output sizing `np.zeros(int(max_time / dt) + 1)` — error classes mirrored.
     both(

@@ -58,12 +58,33 @@ def test_run_uses_slipping_mass_until_lock_then_full_mass():
     assert abs(_used_mass(r, i) - full) < 0.5
 
 
-def test_lighter_bike_has_a_quicker_60ft():
-    """Mass-sign sanity the audit found broken: with the phantom slip-phase
-    mass, -10 kg on the K5 made the 60 ft SLOWER (+5 ms)."""
+def test_lighter_bike_is_quicker_over_the_quarter_mile():
+    """Mass-sign sanity the audit found broken (with the phantom slip-phase
+    mass, -10 kg on the K5 made the run SLOWER).
+
+    Epoch round 2: this used to assert a quicker 60 ft too. That is not a
+    physical invariant once the launch is wheelie-limited at the composed
+    bike + rider CoG (submodels/cog.py): the 60 ft then depends on the CoG
+    height, not the mass, and dry mass removed at the bike's own (low) CoG
+    RAISES the system CoG — a lighter bike wheelies sooner (why drag racers
+    ballast). The quarter-mile sign holds: the run is power-limited above
+    first gear."""
     base = motoquant.MotoQuantEngine(gsxr1000_k5()).run()
     light = gsxr1000_k5()
     light.chassis.dry_mass_kg -= 10.0
+    heavy = gsxr1000_k5()
+    heavy.chassis.dry_mass_kg += 10.0
+    r_light = motoquant.MotoQuantEngine(light).run()
+    r_heavy = motoquant.MotoQuantEngine(heavy).run()
+    assert r_light.time_quarter < base.time_quarter < r_heavy.time_quarter
+
+
+def test_lighter_rider_has_a_quicker_60ft():
+    """Mass removed from the RIDER (the high mass) lowers the system CoG and
+    the mass together, so the 60 ft sign is unambiguous: quicker."""
+    base = motoquant.MotoQuantEngine(gsxr1000_k5()).run()
+    light = gsxr1000_k5()
+    light.chassis.rider_mass_kg -= 10.0
     r = motoquant.MotoQuantEngine(light).run()
     assert r.time_60ft < base.time_60ft
     assert r.time_quarter < base.time_quarter

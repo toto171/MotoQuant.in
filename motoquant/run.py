@@ -441,7 +441,7 @@ def archive_run(db, config_id, venue_id, weather_id, result, parts_ids=None):
         time_1000ft_s=result.time_1000ft,
         sim_version=__version__,
         dt_s=result.dt,
-        # Timed distance (past the start beam; == x[-1] when rollout_m is 0).
+        # Distance covered from the start position (x[-1]; epoch round 2).
         distance_m=result.max_distance_m if len(result.x) > 0 else 0,
         split_times={
             "time_60ft": result.time_60ft,

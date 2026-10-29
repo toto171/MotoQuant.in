@@ -568,7 +568,6 @@ def gsxr1000_k5() -> BikeConfig:
         parasitic=ParasiticParams(alternator_present=True),
         staging=StagingParams(
             staging_type=STAGING_SHALLOW,
-            rollout_distance_mm=350,
             launch_rpm=8000,
             two_step=False,
         ),

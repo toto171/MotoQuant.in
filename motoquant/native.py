@@ -54,8 +54,12 @@ log = logging.getLogger(__name__)
 #: slip-phase effective mass, soft-cut rev limiter, continuous slip ratio,
 #: intercooler-less charge-temp penalty, energy-consistent launch floor — the
 #: resolved dict's shape is unchanged; the bump keeps a pre-epoch extension /
-#: wasm from ever pairing with a post-epoch resolver or fixture).
-SCHEMA_VERSION = 3
+#: wasm from ever pairing with a post-epoch resolver or fixture); 4 = the
+#: epoch's round 2 (``chassis`` is the combined bike + rider CoG and gains
+#: ``rider_shift_frac``; ``tire`` gains ``heat_partition`` / ``conv_area_m2``;
+#: wheelie cap before the load transfer, drag pitch moment, rolling-loss tyre
+#: heat; the finish line moved from ``rollout_m + distance`` to ``distance``).
+SCHEMA_VERSION = 4
 
 #: The crate whose sources the extension's ``SOURCE_FINGERPRINT`` hashes.
 CRATE_DIR = Path(__file__).resolve().parent.parent / "rust" / "motoquant-core"
@@ -380,7 +384,12 @@ def resolve_engine(eng: MotoQuantEngine, *, exp_impl: str | None = None) -> dict
             "update motoquant/native.py + engine.rs (and bump SCHEMA_VERSION)"
         )
     wt, wh = eng._wt, eng._wheelie
-    if (wt.L, wt.h, wt.L_f) != (wh.L, wh.h, wh.L_f):
+    if (wt.L, wt.h, wt.L_f, wt.rider_shift_frac) != (
+        wh.L,
+        wh.h,
+        wh.L_f,
+        wh.rider_shift_frac,
+    ):
         raise AssertionError("weight-transfer / wheelie geometry diverged")
     if wt.L == 0 or wt.h == 0:
         # Python divides by these with plain floats on the first step and
@@ -476,6 +485,8 @@ def resolve_engine(eng: MotoQuantEngine, *, exp_impl: str | None = None) -> dict
             "tread_mass_kg": _f(tire_t.tread_mass_kg),
             "specific_heat_rubber": _f(tire_t.specific_heat_rubber),
             "t_tire_launch": _f(eng.T_tire_launch),
+            "heat_partition": _f(eng._tire.heat_partition),
+            "conv_area_m2": _f(eng._tire.conv_area_m2),
         },
         "env": {
             "rho": _f(eng.rho),
@@ -502,6 +513,7 @@ def resolve_engine(eng: MotoQuantEngine, *, exp_impl: str | None = None) -> dict
             "cog_height_m": _f(wt.h),
             "l_f": _f(wt.L_f),
             "anti_squat_frac": _f(wt.anti_squat_frac),
+            "rider_shift_frac": _f(wt.rider_shift_frac),
         },
         "wheelie": {
             "counter_rotating": bool(e.counter_rotating),
