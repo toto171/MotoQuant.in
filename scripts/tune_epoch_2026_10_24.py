@@ -3,45 +3,60 @@
 
 The 2026-10 epoch (ADR-0002) changed the physics (no double-counted slip
 inertia, soft-cut limiter, continuous slip ratio, 1-ft rollout timing,
-energy-consistent launch floor, 4T crank recal 1.00 + rated-power cap) and the
-catalog data (no sport Cd x0.55, real drive types, corrected specs, epoch
-benchmark binding). This script re-centres the per-cluster CategoryProfile
-knobs against a JOINT objective and measures the result honestly.
+energy-consistent launch floor, 4T crank recal 1.00 + rated-power cap, shaft
+efficiency 0.93) and the catalog data (no sport Cd x0.55, real drive types,
+corrected specs, epoch benchmark binding + weights). This script re-centres
+the per-cluster CategoryProfile knobs against a JOINT objective, fits the
+frozen reference profile separately, and measures the result honestly.
 
 All simulation goes through ``motoquant.engine_select.make_engine`` (the Rust
 core when available — bit-identical to the Python reference, ~50x faster).
 
 Subcommands
 -----------
-measure --out JSON [--root PATH] [--policy epoch|legacy|both] [--no-topspeed]
-    Weighted ET + trap sweep (same binding/weights as the published sweep,
-    rules taken from THIS checkout's scripts/sweep_lib.py), the top-speed
+measure --out JSON [--root PATH] [--policy epoch|legacy|both] [--thetas JSON]
+        [--no-topspeed]
+    Weighted ET + trap sweep (binding + weights from THIS checkout's
+    scripts/sweep_lib.py, under the epoch and/or legacy rules), the top-speed
     sweep (scripts/topspeed_sweep.py matching) and the three references.
-    ``--root`` points at another checkout (e.g. a ``git worktree`` of HEAD)
-    whose physics + catalog + benchmark corpus are measured instead — the
-    binding RULES always come from this checkout, so rule and model changes
-    can be separated.
+    ``--root`` measures another checkout's physics + catalog + benchmark
+    corpus (e.g. a ``git worktree`` of HEAD, or a hybrid tree) — the binding
+    RULES always come from this checkout, so rule and model changes can be
+    separated. ``--thetas`` applies knob overrides ({tag: {knob: value}}, or a
+    ``tune`` output) before measuring, so a candidate retune can be scored
+    without editing motoquant/category_profiles.py.
 
-tune --out JSON [--lam 0.01] [--folds 5] [--procs 4]
+tune --out JSON [--lam 0.01] [--folds 5] [--policy epoch]
     Per-cluster joint retune with grouped k-fold cross-validation and a
-    one-standard-error preference for neutral knobs (see ``tune_cluster``).
+    one-standard-error preference for the simplest (most neutral) knob set;
+    thin clusters inherit a documented donor or stay neutral (see
+    ``THIN_DONORS``).
 
 refs --out JSON
     Fit the frozen ``reference_litre_195p`` profile to the references'
     published figures (separate from the catalog fit).
 
+report --out JSON --inputs NAME=PATH ...
+    Assemble reports/acc_epoch_2026_10_24.json from the measure/tune/refs
+    outputs (see ``cmd_report``).
+
 Objective (per cluster)::
 
-    J = w|d|_ET  +  lam * w|d|_trap        (s;  trap in km/h, lam in s per km/h)
+    J = w|d|_ET  +  lam * w|d|_trap        (s; trap in km/h, lam in s per km/h)
 
 with the corpus source weights (instrumented 1.0 / magazine 0.7 / aggregator
-0.5 / forum 0.3 / derived-estimate 0.1). ``lam = 0.01`` s per km/h: the
-corpus residual scales are ~0.26 s (ET) vs ~15 km/h (trap) — a noise-ratio
-of ~0.017 s/km/h — and published trap figures carry extra measurement
-convention noise (66-ft speed-trap average vs instantaneous finish speed,
-mph/km/h transcription) that ET does not, so the trap term is weighted at
-~0.6x its residual-scale ratio: it breaks ties in the directions ET cannot
-see without overriding the ET headline.
+0.5 / forum 0.3 / derived-estimate 0.1). ``lam = 0.01`` s per km/h, i.e. a
+1 km/h trap error costs as much as a 0.01 s ET error. Justification: what the
+two terms can be trusted to resolve. Published ET figures from different
+outlets for the same bike typically agree to ~0.1-0.2 s, published traps to
+~5-10 km/h (66-ft speed-trap average vs instantaneous finish speed, GPS vs
+light beams, mph/km/h transcription) — a noise ratio of ~0.02 s per km/h; the
+corpus residual scales (ET ~0.26 s vs trap ~15 km/h at HEAD) give ~0.017.
+Weighting trap at ~half its noise-equivalent lets it break ties in the
+directions ET cannot see (top end vs launch) without overriding the ET
+headline. The launch knobs tuned here barely move trap, so the selection is
+insensitive to lam over 0-0.03 (``tune --lam`` sensitivity runs are recorded
+in the report).
 """
 
 from __future__ import annotations
@@ -78,8 +93,9 @@ KNOBS = (
     "cd_floor",
 )
 
-#: Physically neutral value of every knob (no rider model, rated rubber,
-#: modelled parasitics, no floor, launch at the StagingModel default).
+#: Physically neutral value of every knob: rated rubber, modelled
+#: parasitics, no over-clutching, no launch floor, launch at the
+#: StagingModel default (peak-torque rpm; the importer's pipe rpm for 2T).
 NEUTRAL = {
     "over_clutch_factor": 0.0,
     "max_engine_decel_rads2": 0.0,
@@ -91,8 +107,10 @@ NEUTRAL = {
     "cd_floor": 0.25,
 }
 
-# category_tag -> report cluster label (dashes), mirrors
-# scripts/sweep_with_clusters.TAG_TO_CLUSTER.
+# category_tag -> report cluster label (dashes); mirrors
+# scripts/sweep_with_clusters.TAG_TO_CLUSTER (pinned equal by
+# tests/test_epoch_tune_scripts.py). Kept local because --root must import
+# motoquant from the measured tree, not from this checkout.
 TAG_TO_CLUSTER = {
     "two_stroke": "two-stroke",
     "cruiser_1300p": "cruiser-1300+",
@@ -106,6 +124,7 @@ TAG_TO_CLUSTER = {
     "entry_200_300": "entry-200-300",
     "entry_150_200": "entry-150-200",
     "other": "other",
+    "unknown": "other",
 }
 
 MAX_TIME_S = 26.0
@@ -126,7 +145,7 @@ RULES = _load_module("_epoch_rules_sweep_lib", HERE / "sweep_lib.py")
 
 
 def weight_fn(policy: str):
-    """Source weight function of a rule set."""
+    """Scalar source-weight function of a rule set."""
     if policy == "legacy":
         return lambda s: RULES.source_quality_legacy(s)[0]
     return RULES.source_weight
@@ -160,7 +179,9 @@ def setup_root(root: Path | None) -> None:
         def engine_class():
             return _E
 
-    vs = _load_module("_epoch_root_validation_sweep", root / "scripts/validation_sweep.py")
+    vs = _load_module(
+        "_epoch_root_validation_sweep", root / "scripts/validation_sweep.py"
+    )
     ts = _load_module("_epoch_root_topspeed_sweep", root / "scripts/topspeed_sweep.py")
     CTX.update(
         root=root,
@@ -181,7 +202,12 @@ def setup_root(root: Path | None) -> None:
 
 
 def cfg_for(i: int):
-    """Cached BikeConfig of catalog spec ``i`` (None if the importer raises)."""
+    """Cached BikeConfig of catalog spec ``i`` (None if the importer raises).
+
+    Safe to cache: profile knobs are looked up when an engine is constructed
+    (never baked into the config) and engines do not mutate their config
+    (verified on 77 catalog configs: pickled bytes identical after run() +
+    run_top_speed())."""
     cfgs = CTX["cfgs"]
     if i not in cfgs:
         try:
@@ -200,6 +226,18 @@ def set_knobs(tag: str, knobs: dict | None) -> None:
         if not hasattr(prof, k):
             raise KeyError(f"unknown knob {k!r} on profile {tag}")
         setattr(prof, k, v)
+
+
+def load_thetas(path: str | None) -> dict:
+    """{tag: {knob: value}} from a plain mapping or a ``tune`` output."""
+    if not path:
+        return {}
+    d = json.loads(Path(path).read_text())
+    if "clusters" in d and isinstance(d["clusters"], dict):
+        return {tag: c["theta"] for tag, c in d["clusters"].items()}
+    if "thetas" in d:
+        return d["thetas"]
+    return d
 
 
 def sim_quarter(cfg) -> tuple:
@@ -247,7 +285,9 @@ def pool_map(fn, items, procs: int):
 
 
 def bind_rows(policy: str) -> list[dict]:
-    """One row per catalog bike bound to an ET benchmark under ``policy``."""
+    """One row per catalog bike bound to an ET benchmark under ``policy``
+    (``sweep_lib.bind_benchmark_for_record`` — the ONE binding
+    implementation; the rule set's own source weights)."""
     cp = CTX["cp"]
     wfn = weight_fn(policy)
     bench_map = RULES.build_bench_map(CTX["benchmarks"])
@@ -342,22 +382,20 @@ def wstats(rows: list[dict]) -> dict:
 
 def trap_stats(rows: list[dict]) -> dict:
     """Trap weighted stats (km/h) over rows that carry a trap target."""
-    rows = [
-        r for r in rows if r.get("sim_trap") is not None and r.get("target_trap")
-    ]
+    rows = [r for r in rows if r.get("sim_trap") is not None and r.get("target_trap")]
     if not rows:
         return {"n": 0}
     W = sum(r["weight"] for r in rows) or 1e-9
     d = [r["sim_trap"] - r["target_trap"] for r in rows]
     return {
         "n": len(rows),
-        "w_mean_abs_kmh": round(sum(abs(x) * r["weight"] for x, r in zip(d, rows)) / W, 2),
+        "w_mean_abs_kmh": round(
+            sum(abs(x) * r["weight"] for x, r in zip(d, rows)) / W, 2
+        ),
         "w_bias_kmh": round(sum(x * r["weight"] for x, r in zip(d, rows)) / W, 2),
         "raw_mean_abs_kmh": round(statistics.mean(abs(x) for x in d), 2),
         "w_bias_pct": round(
-            100
-            * sum(x / r["target_trap"] * r["weight"] for x, r in zip(d, rows))
-            / W,
+            100 * sum(x / r["target_trap"] * r["weight"] for x, r in zip(d, rows)) / W,
             2,
         ),
     }
@@ -365,7 +403,17 @@ def trap_stats(rows: list[dict]) -> dict:
 
 def within_bands(rows: list[dict]) -> dict:
     d = [abs(r["sim_et"] - r["target_et"]) for r in rows if r.get("sim_et") is not None]
-    return {f"within_{b:.2f}s": sum(1 for x in d if x <= b) for b in (0.05, 0.10, 0.20, 0.50, 1.00)}
+    return {
+        f"within_{b:.2f}s": sum(1 for x in d if x <= b)
+        for b in (0.05, 0.10, 0.20, 0.50, 1.00)
+    }
+
+
+def t60_stats(rows: list[dict]) -> dict:
+    t = [r["sim_t60"] for r in rows if r.get("sim_t60")]
+    if not t:
+        return {}
+    return {"mean_s": round(statistics.mean(t), 3), "min_s": round(min(t), 3)}
 
 
 def ts_summary(scored: list[dict]) -> dict:
@@ -399,15 +447,17 @@ def run_refs() -> dict:
 
 
 def summarise(rows: list[dict]) -> dict:
-    by = {}
+    by: dict = {}
     for r in rows:
         by.setdefault(r["cluster"], []).append(r)
     return {
         "overall": wstats(rows),
         "trap_overall": trap_stats(rows),
+        "t60": t60_stats(rows),
         "bands": within_bands(rows),
         "clusters": {
-            cl: {**wstats(v), "trap": trap_stats(v)} for cl, v in sorted(by.items())
+            cl: {**wstats(v), "trap": trap_stats(v), "t60": t60_stats(v)}
+            for cl, v in sorted(by.items())
         },
         "by_weight": {
             str(w): wstats([r for r in rows if r["weight"] == w])
@@ -416,12 +466,15 @@ def summarise(rows: list[dict]) -> dict:
     }
 
 
-def measure(policies, procs: int, topspeed: bool = True) -> dict:
+def measure(policies, procs: int, topspeed: bool = True, thetas=None) -> dict:
+    for tag, th in (thetas or {}).items():
+        set_knobs(tag, th)
     out = {
         "root": str(CTX["root"]),
         "motoquant_path": str(Path(sys.modules["motoquant"].__file__).parent),
         "engine": CTX["engine_name"],
         "n_bikes_catalog": len(CTX["specs"]),
+        "thetas_applied": thetas or {},
         "references": run_refs(),
     }
     bound = {p: bind_rows(p) for p in policies}
@@ -457,52 +510,95 @@ def measure(policies, procs: int, topspeed: bool = True) -> dict:
 def cmd_measure(args) -> None:
     setup_root(args.root)
     policies = ["epoch", "legacy"] if args.policy == "both" else [args.policy]
-    res = measure(policies, args.procs, topspeed=not args.no_topspeed)
+    res = measure(
+        policies,
+        args.procs,
+        topspeed=not args.no_topspeed,
+        thetas=load_thetas(args.thetas),
+    )
     Path(args.out).write_text(json.dumps(res, indent=1))
     brief = {
         "engine": res["engine"],
         "references": {k: v["et_s"] for k, v in res["references"].items()},
     }
     for p in policies:
-        brief[p] = {
-            "overall": res[p]["overall"],
-            "trap": res[p]["trap_overall"],
-        }
+        brief[p] = {"overall": res[p]["overall"], "trap": res[p]["trap_overall"]}
     if "topspeed" in res:
         brief["topspeed"] = res["topspeed"]["summary"]
     print(json.dumps(brief, indent=1))
 
 
 # ── Tuning ──────────────────────────────────────────────────────────────────
+#
+# Search bounds are PHYSICAL, not just numerical:
+#   mu_peak_scale 0.80-1.20 — effective launch grip within +/-20 % of the
+#       importer's rated rubber. < 1 encodes a launch that does not reach
+#       the tyre's peak (wheelie/clutch modulation by a test rider; the sim's
+#       wheelie limit does not bind — CLAUDE.md 2026-07-03 finding); > 1 a
+#       prepped surface or rubber better than the importer's class default.
+#   mu_peak_override 1.00-1.40 — a cluster-wide rubber class (discards the
+#       per-bike rated rubber, so it counts double in ``complexity``).
+#   launch_rpm_factor — None (StagingModel default: peak-torque rpm; the
+#       importer's pipe rpm for 2T) or a fraction of redline: 4T 0.45-0.80
+#       (real clutch-dump rpm; the importer's own EngineParams.launch_rpm is
+#       0.55 x redline for >=400 cc but is dead because two_step=False), 2T
+#       0.85-0.95 (on the pipe).
+#   launch_floor_factor 0 / 0.85 / 1.0 x peak-torque (2T: tuned) rpm.
+#   (over_clutch_factor, max_engine_decel_rads2) searched JOINTLY — the
+#       extra back-torque is min(headroom * oc, decel * I_e), so either at
+#       zero makes the other inert. Since the epoch's energy-consistent floor
+#       they only act when launch rpm sits above the floor.
+#   parasitic_mult 0.7-1.3 — +/-30 % on the modelled parasitic power.
 
-#: Coarse search grids (mu_peak_scale is pattern-refined to 0.005 afterwards).
-GRIDS = {
-    "mu_peak_scale": [round(0.60 + 0.04 * k, 3) for k in range(21)],
-    "launch_rpm_factor": [None, 0.5, 0.6, 0.7, 0.8, 0.9],
-    "launch_floor_factor": [0.0, 0.7, 0.85, 1.0],
-    # (over_clutch_factor, max_engine_decel_rads2) searched JOINTLY: the
-    # extra back-torque is min(headroom * oc, decel * I_e), so either one at
-    # zero makes the other inert and a 1-D search could never leave (0, 0).
+MU_GRID = [round(0.80 + 0.02 * k, 2) for k in range(21)]
+GRIDS_4T = {
+    "mu_peak_scale": MU_GRID,
+    "mu_peak_override": [round(1.00 + 0.02 * k, 2) for k in range(21)],
+    "launch_rpm_factor": [None, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80],
+    "launch_floor_factor": [0.0, 0.85, 1.0],
     "over_clutch": [(0.0, 0.0)]
     + [(oc, de) for oc in (0.2, 0.4, 0.6) for de in (100.0, 400.0, 1600.0)],
-    "parasitic_mult": [round(0.5 + 0.1 * k, 2) for k in range(11)],
+    "parasitic_mult": [round(0.7 + 0.1 * k, 1) for k in range(7)],
 }
+GRIDS_2T = {**GRIDS_4T, "launch_rpm_factor": [None, 0.85, 0.90, 0.95]}
+MU_REFINE_STEP = 0.01
 
 LAUNCH = ("launch_rpm_factor", "launch_floor_factor", "over_clutch")
 
-#: name -> (fitted knobs, start point, warm-start family)
+#: family -> (fitted knobs, warm-start family). All fits start from NEUTRAL.
 FAMILIES = {
-    "neutral": ((), "neutral", None),
-    "current": ((), "current", None),
-    "grip": (("mu_peak_scale",), "neutral", None),
-    "current+grip": (("mu_peak_scale",), "current", None),
-    "grip+launch": (("mu_peak_scale", *LAUNCH), "neutral", "grip"),
-    "full": (("mu_peak_scale", *LAUNCH, "parasitic_mult"), "neutral", "grip+launch"),
+    "neutral": ((), None),
+    "grip": (("mu_peak_scale",), None),
+    "rubber": (("mu_peak_override",), None),
+    "launch": (("launch_rpm_factor",), None),
+    "grip+lr": (("mu_peak_scale", "launch_rpm_factor"), "grip"),
+    "grip+launch": (("mu_peak_scale", *LAUNCH), "grip+lr"),
+    "full": (("mu_peak_scale", *LAUNCH, "parasitic_mult"), "grip+launch"),
 }
-FAMILY_ORDER = ("neutral", "current", "grip", "current+grip", "grip+launch", "full")
+FAMILY_ORDER = tuple(FAMILIES)
+#: Report-only family: the checked-in (pre-epoch-tuned) knobs. Never
+#: selectable — selecting it would mean not retuning at all.
+REPORT_ONLY = ("current",)
 
-MIN_FIT_ROWS = 8  # thinner clusters keep neutral knobs (not fitted)
+MIN_FIT_ROWS = 8  # thinner clusters are not fitted (see THIN_DONORS)
+MIN_FIT_GROUPS = 6  # ... nor clusters with fewer distinct benchmark rows
 EPS_S = 0.001  # objective improvements below this are noise -> prefer neutral
+
+#: Thin clusters (n < MIN_FIT_ROWS rows or < MIN_FIT_GROUPS benchmark rows):
+#: tag -> donor tag whose SELECTED knobs they share, or None = neutral.
+#: cruiser_1300p <- other: heavy, torque-rich road bikes (VMAX / Rocket 3 /
+#:     muscle cruisers vs the big standards and tourers in "other") launch
+#:     the same way; the 2026-06-11 calibration kept the two identical for
+#:     that reason (category_profiles.py cruiser note).
+#: small_i4_screamer -> neutral: n=2 (ZX-25R / ZX-4RR, the latter a 0.1-
+#:     weight prose estimate); every knob is inert on its power-limited
+#:     launch (ET bias moves < 0.11 s across mu 0.80-1.05 and launch rpm
+#:     0.6-0.9) — there is nothing to share and nothing to fit.
+THIN_DONORS = {"cruiser_1300p": "other", "small_i4_screamer": None}
+
+
+def grids_for(tag: str) -> dict:
+    return GRIDS_2T if tag == "two_stroke" else GRIDS_4T
 
 
 def _get(theta: dict, k: str):
@@ -528,20 +624,23 @@ def _ndist(k: str, v) -> float:
     if v is None:
         return 0.0 if n is None else 1.0
     if n is None:
-        return 1.0 + abs(v - 0.7)
+        # launch_rpm_factor: closest to the importer's documented 0.55;
+        # mu_peak_override: closest to the 1.40 sport class default.
+        return 1.0 + abs(v - (0.55 if k == "launch_rpm_factor" else 1.40))
     return abs(v - n)
 
 
-def complexity(theta: dict) -> int:
-    """Number of non-neutral (live-meaning) knobs in ``theta``."""
-    c = 0
+def complexity(theta: dict) -> float:
+    """Number of non-neutral (live-meaning) knobs in ``theta``; a cluster-wide
+    mu override counts double (it discards per-bike rated rubber)."""
+    c = 0.0
     c += theta["mu_peak_scale"] != 1.0
-    c += theta["mu_peak_override"] is not None
+    c += 2 * (theta["mu_peak_override"] is not None)
     c += bool(theta["over_clutch_factor"] and theta["max_engine_decel_rads2"])
     c += bool(theta["launch_floor_factor"])
     c += theta["launch_rpm_factor"] is not None
     c += theta["parasitic_mult"] != 1.0
-    return int(c)
+    return c
 
 
 def neutral_theta(tag: str) -> dict:
@@ -613,31 +712,38 @@ class ClusterEval:
         return self.parts(theta, idx)["J"]
 
 
-def refine_mu(ev: ClusterEval, cur: dict, idx, eps: float) -> dict:
-    """Pattern search on mu_peak_scale (steps 0.02 / 0.01 / 0.005); a move
-    that does not beat the incumbent by eps/4 goes toward 1.0 or not at all."""
-    for step in (0.02, 0.01, 0.005):
-        for _ in range(40):
-            c = cur["mu_peak_scale"]
-            cands = [c, round(c - step, 4), round(c + step, 4)]
-            scored = [(ev.J(_with(cur, "mu_peak_scale", v), idx), v) for v in cands]
-            jb = min(s for s, _ in scored)
-            ok = [v for s, v in scored if s <= jb + eps / 4]
-            v = min(ok, key=lambda v: (abs(v - 1.0), v))
-            if v == c:
-                break
-            cur = _with(cur, "mu_peak_scale", v)
+def refine_mu(ev: ClusterEval, cur: dict, k: str, idx, eps: float) -> dict:
+    """Pattern search on a grip knob at MU_REFINE_STEP; a move that does not
+    beat the incumbent by eps/4 goes toward neutrality or not at all."""
+    if cur[k] is None:
+        return cur
+    centre = 1.0 if k == "mu_peak_scale" else 1.40
+    lo, hi = (0.80, 1.20) if k == "mu_peak_scale" else (1.00, 1.40)
+    step = MU_REFINE_STEP
+    for _ in range(40):
+        c = cur[k]
+        cands = [c] + [
+            round(v, 4) for v in (c - step, c + step) if lo - 1e-9 <= v <= hi + 1e-9
+        ]
+        scored = [(ev.J(_with(cur, k, v), idx), v) for v in cands]
+        jb = min(s for s, _ in scored)
+        ok = [v for s, v in scored if s <= jb + eps / 4]
+        v = min(ok, key=lambda v: (abs(v - centre), v))
+        if v == c:
+            break
+        cur = _with(cur, k, v)
     return cur
 
 
-def cd_fit(ev: ClusterEval, start: dict, fit, idx, eps: float = EPS_S, max_pass: int = 4) -> dict:
+def cd_fit(ev, start: dict, fit, idx, grids: dict, eps: float = EPS_S, passes=4):
     """Coordinate descent over the coarse grids; within ``eps`` of the best
-    value the most-neutral one wins (honesty over fit)."""
+    value the most-neutral one wins (honesty over fit). Grip knobs are then
+    pattern-refined."""
     cur = dict(start)
-    for _ in range(max_pass):
+    for _ in range(passes):
         changed = False
         for k in fit:
-            vals = list(GRIDS[k])
+            vals = list(grids[k])
             if _get(cur, k) not in vals:
                 vals.append(_get(cur, k))
             scored = [(ev.J(_with(cur, k, v), idx), v) for v in vals]
@@ -649,8 +755,9 @@ def cd_fit(ev: ClusterEval, start: dict, fit, idx, eps: float = EPS_S, max_pass:
                 changed = True
         if not changed:
             break
-    if "mu_peak_scale" in fit:
-        cur = refine_mu(ev, cur, idx, eps)
+    for k in ("mu_peak_scale", "mu_peak_override"):
+        if k in fit:
+            cur = refine_mu(ev, cur, k, idx, eps)
     return cur
 
 
@@ -662,37 +769,51 @@ def make_folds(rows: list[dict], k: int, seed: int = 20261024) -> list[list[int]
     rnd.shuffle(keys)
     k = max(2, min(k, len(keys)))
     fold_of = {key: n % k for n, key in enumerate(keys)}
-    return [[j for j, r in enumerate(rows) if fold_of[r["bench_key"]] == f] for f in range(k)]
+    return [
+        [j for j, r in enumerate(rows) if fold_of[r["bench_key"]] == f]
+        for f in range(k)
+    ]
 
 
 def _clean(theta: dict) -> dict:
     return {k: theta[k] for k in KNOBS}
 
 
+def _r(d: dict) -> dict:
+    return {k: round(v, 4) for k, v in d.items()}
+
+
 def tune_cluster(args) -> dict:
     tag, rows, lam, k = args
     t0 = time.time()
     ev = ClusterEval(tag, rows, lam)
+    grids = grids_for(tag)
     all_idx = list(range(len(rows)))
-    starts = {"neutral": neutral_theta(tag), "current": current_theta(tag)}
-    out = {"tag": tag, "n_rows": len(rows), "families": {}}
-    thin = len(rows) < MIN_FIT_ROWS
+    base = neutral_theta(tag)
+    n_groups = len({r["bench_key"] for r in rows})
+    thin = len(rows) < MIN_FIT_ROWS or n_groups < MIN_FIT_GROUPS
+    out = {"tag": tag, "n_rows": len(rows), "n_groups": n_groups, "families": {}}
+    cur = current_theta(tag)
+    out["families"]["current"] = {
+        "theta": _clean(cur),
+        "complexity": complexity(cur),
+        "insample": _r(ev.parts(cur, all_idx)),
+        "report_only": True,
+    }
     folds = make_folds(rows, k)
-    out["n_groups"] = len({r["bench_key"] for r in rows})
     out["k"] = len(folds)
     fold_fits: dict = {}
     full_fits: dict = {}
     for fam in FAMILY_ORDER:
-        fit, start_name, warm = FAMILIES[fam]
-        base = starts[start_name]
-        # full-data fit (for thin clusters: in-sample information only)
-        th_full = cd_fit(ev, full_fits.get(warm, base), fit, all_idx) if fit else base
+        fit, warm = FAMILIES[fam]
+        th_full = (
+            cd_fit(ev, full_fits.get(warm, base), fit, all_idx, grids) if fit else base
+        )
         full_fits[fam] = th_full
-        ins = ev.parts(th_full, all_idx)
         rec = {
             "theta": _clean(th_full),
             "complexity": complexity(th_full),
-            "insample": {kk: round(v, 4) for kk, v in ins.items()},
+            "insample": _r(ev.parts(th_full, all_idx)),
         }
         if not thin:
             oof = [None] * len(rows)
@@ -702,7 +823,7 @@ def tune_cluster(args) -> dict:
                 tset = set(test)
                 train = [j for j in all_idx if j not in tset]
                 if fit:
-                    th = cd_fit(ev, fold_fits.get((warm, f), base), fit, train)
+                    th = cd_fit(ev, fold_fits.get((warm, f), base), fit, train, grids)
                 else:
                     th = base
                 fold_fits[(fam, f)] = th
@@ -710,22 +831,30 @@ def tune_cluster(args) -> dict:
                 res = ev.res(th)
                 for j in test:
                     oof[j] = res[j]
-                fold_J.append(objective_parts([rows[j] for j in test], [res[j] for j in test], lam)["J"])
-            cvp = objective_parts(rows, oof, lam)
-            rec["cv"] = {kk: round(v, 4) for kk, v in cvp.items()}
+                fold_J.append(
+                    objective_parts(
+                        [rows[j] for j in test], [res[j] for j in test], lam
+                    )["J"]
+                )
+            rec["cv"] = _r(objective_parts(rows, oof, lam))
             rec["cv_fold_J"] = [round(x, 4) for x in fold_J]
-            rec["cv_se"] = round(statistics.stdev(fold_J) / math.sqrt(len(fold_J)), 4) if len(fold_J) > 1 else 0.0
+            rec["cv_se"] = (
+                round(statistics.stdev(fold_J) / math.sqrt(len(fold_J)), 4)
+                if len(fold_J) > 1
+                else 0.0
+            )
             rec["fold_thetas"] = fts
-            rec["oof"] = [
-                (o[0] if o[0] is None else round(o[0], 4), o[1] if o[1] is None else round(o[1], 2))
-                for o in oof
-            ]
         out["families"][fam] = rec
     # ── selection ────────────────────────────────────────────────────────
     fams = out["families"]
     if thin:
-        out["selected"] = "neutral"
-        out["selection_rule"] = f"n_rows {len(rows)} < {MIN_FIT_ROWS}: not fitted (neutral knobs)"
+        out["selected"] = "thin"
+        out["selection_rule"] = (
+            f"thin cluster (n_rows {len(rows)}, n_groups {n_groups}; need >= "
+            f"{MIN_FIT_ROWS} rows and >= {MIN_FIT_GROUPS} benchmark rows): "
+            "not fitted — donor knobs or neutral (THIN_DONORS)"
+        )
+        out["theta"] = None  # resolved by cmd_tune from THIN_DONORS
     else:
         best = min(FAMILY_ORDER, key=lambda f: fams[f]["cv"]["J"])
         thr = fams[best]["cv"]["J"] + fams[best]["cv_se"]
@@ -733,19 +862,14 @@ def tune_cluster(args) -> dict:
         sel = min(elig, key=lambda f: (fams[f]["complexity"], fams[f]["cv"]["J"]))
         out["selected"] = sel
         out["selection_rule"] = (
-            f"1-SE: best CV '{best}' J={fams[best]['cv']['J']:.4f} + SE {fams[best]['cv_se']:.4f}"
-            f" -> simplest eligible of {elig}"
+            f"1-SE: best CV '{best}' J={fams[best]['cv']['J']:.4f} + SE "
+            f"{fams[best]['cv_se']:.4f} -> simplest eligible of {elig}"
         )
-    out["theta"] = fams[out["selected"]]["theta"]
+        out["theta"] = fams[sel]["theta"]
     out["n_evals"] = ev.n_evals
     out["n_sims"] = ev.n_evals * len(rows)
     out["wall_s"] = round(time.time() - t0, 1)
     return out
-
-
-def apply_thetas(thetas: dict) -> None:
-    for tag, th in thetas.items():
-        set_knobs(tag, th)
 
 
 def cmd_tune(args) -> None:
@@ -757,7 +881,11 @@ def cmd_tune(args) -> None:
     for r in rows:
         by_tag.setdefault(r["tag"], []).append(r)
     jobs = sorted(by_tag.items(), key=lambda kv: -len(kv[1]))
-    jobs = [(tag, rs, args.lam, args.folds) for tag, rs in jobs if not args.only or tag in args.only]
+    jobs = [
+        (tag, rs, args.lam, args.folds)
+        for tag, rs in jobs
+        if not args.only or tag in args.only
+    ]
     t0 = time.time()
     if args.procs > 1:
         with mp.get_context("fork").Pool(args.procs) as pool:
@@ -765,81 +893,411 @@ def cmd_tune(args) -> None:
     else:
         results = [tune_cluster(j) for j in jobs]
     results.sort(key=lambda r: -r["n_rows"])
+    res_by = {r["tag"]: r for r in results}
+    # thin clusters: donor's selected knobs, or neutral
+    for r in results:
+        if r["theta"] is not None:
+            continue
+        donor = THIN_DONORS.get(r["tag"])
+        if donor and donor in res_by and res_by[donor]["theta"] is not None:
+            th = dict(res_by[donor]["theta"])
+            th["cd_floor"] = neutral_theta(r["tag"])["cd_floor"]
+            r["theta"] = th
+            r["donor"] = donor
+        else:
+            r["theta"] = _clean(neutral_theta(r["tag"]))
+            r["donor"] = None
+        ev = ClusterEval(r["tag"], by_tag[r["tag"]], args.lam)
+        r["thin_insample"] = _r(ev.parts(r["theta"], list(range(r["n_rows"]))))
     out = {
         "policy": args.policy,
         "lam_s_per_kmh": args.lam,
         "folds": args.folds,
         "min_fit_rows": MIN_FIT_ROWS,
+        "min_fit_groups": MIN_FIT_GROUPS,
         "eps_s": EPS_S,
-        "grids": dict(GRIDS),
+        "thin_donors": THIN_DONORS,
+        "grids_4t": GRIDS_4T,
+        "grids_2t": GRIDS_2T,
+        "mu_refine_step": MU_REFINE_STEP,
         "wall_s": round(time.time() - t0, 1),
-        "clusters": {r["tag"]: r for r in results},
+        "clusters": res_by,
     }
     Path(args.out).write_text(json.dumps(out, indent=1))
     for r in results:
         f = r["families"]
-        line = f"{r['tag']:22} n={r['n_rows']:3} sel={r['selected']:13} "
-        for fam in FAMILY_ORDER:
-            cv = f[fam].get("cv", {}).get("J")
-            line += f"{fam}={cv if cv is not None else f[fam]['insample']['J']:.3f} "
+        line = f"{r['tag']:22} n={r['n_rows']:3} g={r['n_groups']:3} sel={r['selected']:12} "
+        for fam in ("current", *FAMILY_ORDER):
+            v = f[fam].get("cv", {}).get("J", f[fam]["insample"]["J"])
+            line += f"{fam}={v:.3f} "
         print(line, flush=True)
-        print("   theta:", {k: v for k, v in r["theta"].items() if v != NEUTRAL[k]}, f"({r['wall_s']}s, {r['n_evals']} evals)")
+        print(
+            "   theta:",
+            {k: v for k, v in r["theta"].items() if v != NEUTRAL[k]},
+            f"donor={r.get('donor')!r}" if "donor" in r else "",
+            f"({r['wall_s']}s, {r['n_evals']} evals)",
+        )
 
 
 # ── Frozen reference profile ────────────────────────────────────────────────
 
 REF_TAG = "reference_litre_195p"
-#: label -> (published ET s, published trap km/h, weight, source)
+#: label -> (published ET s, published trap km/h, ET tolerance s, source).
+#: The tolerances are the references' documented acceptance bands in
+#: tests/test_validation.py (K5 +/-0.10 s of 9.97; R1 +/-0.20 s of 10.3;
+#: Hayabusa 10.1-10.7 s owner/magazine range -> centre 10.40 +/- 0.30).
 REF_TARGETS = {
-    "K5": (9.97, 233.0, 1.0, "Sport Rider GSX-R1000 K5 test (tests/test_validation.py)"),
-    "R1": (10.30, 238.0, 0.7, "Sport Rider 2004 YZF-R1 (benchmark corpus row)"),
+    "K5": (
+        9.97,
+        233.0,
+        0.10,
+        "Sport Rider GSX-R1000 K5 test (tests/test_validation.py)",
+    ),
+    "R1": (10.30, 238.0, 0.20, "Sport Rider 2004 YZF-R1 (tests/test_validation.py)"),
     "Hayabusa": (
         10.40,
         235.0,
-        0.5,
-        "stock Gen1 owner/magazine range 10.2-10.5 s, midpoint (test_validation)",
+        0.30,
+        "stock Gen1 owner/magazine range 10.1-10.7 s (tests/test_validation.py)",
     ),
 }
+#: K5 60-ft realistic band (tests/test_validation.py::test_k5_sixty_foot).
+K5_T60_BAND = (1.8, 2.1)
+#: Candidate launch rpm fractions. None = StagingModel default (peak-torque
+#: rpm, the physically neutral value); 0.615 = the curated K5
+#: staging.launch_rpm (8000 / 13000 redline; R1 7500/12500 = 0.60, Hayabusa
+#: 7000/11000 = 0.636) that two_step=False leaves dead; 0.55 = the importer's
+#: >=400 cc EngineParams.launch_rpm convention.
+REF_LR = [None, 0.55, 0.60, 0.615, 0.65, 0.70]
+REF_MU = [round(0.85 + 0.001 * k, 3) for k in range(251)]  # 0.850-1.100
+#: "Flat" band on the minimax objective (normalised units; 0.05 = 5 ms on
+#: K5): within it the neutral launch rpm (None) wins, then the curated one.
+REF_FLAT = 0.05
 
 
-def ref_scan(mus) -> list[dict]:
-    out = []
-    for mu in mus:
-        set_knobs(REF_TAG, {"mu_peak_scale": mu})
-        row = {"mu_peak_scale": mu}
+def ref_eval(theta: dict) -> dict:
+    set_knobs(REF_TAG, theta)
+    try:
+        row = {k: theta[k] for k in theta}
         A = W = 0.0
+        worst = 0.0
         for label, fn in CTX["refs"].items():
             et, trap, t60 = sim_quarter(fn())
-            te, _tt, w, _src = REF_TARGETS[label]
+            te, _tt, tol, _src = REF_TARGETS[label]
             row[label] = {"et_s": et, "trap_kmh": trap, "t60_s": t60}
-            A += w * abs(et - te)
-            W += w
-        row["w_mean_abs"] = A / W
-        out.append(row)
-    set_knobs(REF_TAG, None)
-    return out
+            A += abs(et - te) / tol
+            W += 1.0
+            worst = max(worst, abs(et - te) / tol)
+        row["max_norm_miss"] = worst
+        row["mean_norm_miss"] = A / W
+        row["all_within_tol"] = worst <= 1.0
+        row["k5_t60_ok"] = K5_T60_BAND[0] < row["K5"]["t60_s"] < K5_T60_BAND[1]
+        row["order_ok"] = (
+            row["K5"]["et_s"] < row["R1"]["et_s"] < row["Hayabusa"]["et_s"]
+        )
+    finally:
+        set_knobs(REF_TAG, None)
+    return row
 
 
 def cmd_refs(args) -> None:
+    """Minimax fit: minimise the largest tolerance-normalised ET miss
+    max_i |ET_i - pub_i| / tol_i over mu_peak_scale x launch_rpm_factor (a
+    Chebyshev fit — each figure counts in units of its own documented
+    uncertainty, so the instrumented K5 figure is held 2-3x tighter than the
+    R1 magazine figure and the Hayabusa owner range). Within REF_FLAT of the
+    optimum the neutral launch rpm wins (honesty over fit)."""
     setup_root(None)
-    mus = [round(0.70 + 0.005 * k, 3) for k in range(int((1.12 - 0.70) / 0.005) + 1)]
-    scan = ref_scan(mus)
-    best = min(scan, key=lambda r: (round(r["w_mean_abs"], 6), abs(r["mu_peak_scale"] - 1.0)))
-    per_bike = {}
-    for label in REF_TARGETS:
-        te = REF_TARGETS[label][0]
-        b = min(scan, key=lambda r: abs(r[label]["et_s"] - te))
-        per_bike[label] = {"mu_for_exact_match": b["mu_peak_scale"], "et_s": b[label]["et_s"]}
+    scan = [
+        ref_eval({"mu_peak_scale": mu, "launch_rpm_factor": lr})
+        for lr in REF_LR
+        for mu in REF_MU
+    ]
+    best_by_lr = {}
+    for lr in REF_LR:
+        cand = [r for r in scan if r["launch_rpm_factor"] == lr]
+        best_by_lr[str(lr)] = min(
+            cand, key=lambda r: (r["max_norm_miss"], abs(r["mu_peak_scale"] - 1.0))
+        )
+    m_star = min(v["max_norm_miss"] for v in best_by_lr.values())
+    flat = [v for v in best_by_lr.values() if v["max_norm_miss"] <= m_star + REF_FLAT]
+    best = min(
+        flat,
+        key=lambda r: (
+            r["launch_rpm_factor"] is not None,
+            abs((r["launch_rpm_factor"] or 0.615) - 0.615),
+            r["max_norm_miss"],
+        ),
+    )
+    current = ref_eval(
+        {
+            "mu_peak_scale": CTX["base_knobs"][REF_TAG]["mu_peak_scale"],
+            "launch_rpm_factor": CTX["base_knobs"][REF_TAG]["launch_rpm_factor"],
+        }
+    )
     out = {
         "tag": REF_TAG,
-        "targets": {k: {"et_s": v[0], "trap_kmh": v[1], "weight": v[2], "source": v[3]} for k, v in REF_TARGETS.items()},
-        "objective": "sum(w*|ET_sim - ET_pub|)/sum(w), mu_peak_scale only (1 knob, 3 targets)",
+        "targets": {
+            k: {"et_s": v[0], "trap_kmh": v[1], "tol_s": v[2], "source": v[3]}
+            for k, v in REF_TARGETS.items()
+        },
+        "k5_t60_band_s": K5_T60_BAND,
+        "objective": (
+            "minimax: min over (mu_peak_scale, launch_rpm_factor) of "
+            "max_i |ET_i - pub_i| / tol_i (tol = tests/test_validation.py "
+            "bands); within REF_FLAT of the optimum the neutral launch rpm "
+            "(None) wins, then the curated 0.615"
+        ),
+        "flat_band": REF_FLAT,
+        "current": current,
         "best": best,
-        "per_bike_mu_for_exact_match": per_bike,
-        "scan": scan,
+        "best_by_launch_rpm_factor": best_by_lr,
     }
     Path(args.out).write_text(json.dumps(out, indent=1))
-    print(json.dumps({"best": best, "per_bike": per_bike}, indent=1))
+    print(
+        json.dumps(
+            {
+                "current": current,
+                "best": best,
+                "best_by_lr": {
+                    k: (v["mu_peak_scale"], round(v["max_norm_miss"], 3))
+                    for k, v in best_by_lr.items()
+                },
+            },
+            indent=1,
+        )
+    )
+
+
+# ── Report assembly ─────────────────────────────────────────────────────────
+
+
+def _headline(m: dict, policy: str) -> dict:
+    p = m.get(policy)
+    if not p:
+        return {}
+    return {
+        "overall": p["overall"],
+        "trap": p["trap_overall"],
+        "t60": p.get("t60"),
+        "bands": p["bands"],
+    }
+
+
+def _clusters(m: dict, policy: str) -> dict:
+    return {
+        cl: {
+            k: v[k]
+            for k in ("n", "w_sum", "w_mean_abs", "w_bias", "raw_mean_abs")
+            if k in v
+        }
+        | {"trap": v.get("trap"), "t60": v.get("t60")}
+        for cl, v in m[policy]["clusters"].items()
+    }
+
+
+def cmd_report(args) -> None:
+    """Assemble the epoch accuracy report from named measure/tune/refs
+    outputs: head, dataepoch, physepoch, untuned, tuned (measure), tune,
+    refs, plus optional lam_* (tune) and conservative_* (measure)."""
+    inp = {}
+    for kv in args.inputs:
+        name, path = kv.split("=", 1)
+        inp[name] = json.loads(Path(path).read_text())
+    tuned = inp["tuned"]
+    out = {
+        "_doc": (
+            "2026-10 physics + data epoch, retuned (scripts/tune_epoch_2026_10_24.py). "
+            "Top-level 'references'/'n_bikes_swept'/'clusters'/'overall' keep the "
+            "reports/acc_final_2026_08_08.json shape and use the EPOCH rules "
+            "(epoch binding + epoch source weights); 'by_rules' carries both rule "
+            "sets. Trap in km/h (sim - published), 60 ft in s."
+        ),
+        "references": {k: v["et_s"] for k, v in tuned["references"].items()},
+        "references_full": tuned["references"],
+        "n_bikes_swept": tuned["n_bikes_catalog"],
+        "engine": tuned["engine"],
+        "rules": "epoch",
+        "clusters": {
+            cl: {
+                k: v[k]
+                for k in ("n", "w_sum", "w_mean_abs", "w_bias", "raw_mean_abs")
+                if k in v
+            }
+            for cl, v in tuned["epoch"]["clusters"].items()
+        },
+        "overall": tuned["epoch"]["overall"],
+        "trap_overall": tuned["epoch"]["trap_overall"],
+        "trap_clusters": {
+            cl: v.get("trap") for cl, v in tuned["epoch"]["clusters"].items()
+        },
+        "t60_clusters": {
+            cl: v.get("t60") for cl, v in tuned["epoch"]["clusters"].items()
+        },
+        "bands": tuned["epoch"]["bands"],
+        "by_weight": tuned["epoch"]["by_weight"],
+        "by_rules": {
+            p: {**_headline(tuned, p), "clusters": _clusters(tuned, p)}
+            for p in ("epoch", "legacy")
+        },
+        "topspeed": tuned["topspeed"]["summary"],
+        "topspeed_scored": tuned["topspeed"]["scored"],
+    }
+    # ── old vs new + decomposition ──────────────────────────────────────
+    stages = [
+        ("head", "pre-epoch 0bd0ea2: physics + data + knobs as published 2026-08-08"),
+        (
+            "dataepoch",
+            "pre-epoch physics (0bd0ea2, shaft_efficiency 0.85) + epoch data",
+        ),
+        (
+            "physepoch",
+            "epoch physics (+shaft 0.93) + pre-epoch data (0bd0ea2), knobs untuned",
+        ),
+        ("untuned", "epoch physics + epoch data, knobs untuned"),
+        ("tuned", "epoch physics + epoch data + epoch knobs (this report)"),
+    ]
+    comp = {}
+    for name, desc in stages:
+        if name not in inp:
+            continue
+        m = inp[name]
+        comp[name] = {
+            "desc": desc,
+            "engine": m["engine"],
+            "references": {k: v["et_s"] for k, v in m["references"].items()},
+            "epoch_rules": _headline(m, "epoch"),
+            "legacy_rules": _headline(m, "legacy"),
+            "topspeed": m.get("topspeed", {}).get("summary"),
+        }
+    out["old_vs_new"] = comp
+
+    def wd(name, pol):
+        return inp[name][pol]["overall"]["w_mean_abs"]
+
+    def wb(name, pol):
+        return inp[name][pol]["overall"]["w_bias"]
+
+    dec = {}
+    if all(n in inp for n in ("head", "untuned", "tuned")):
+        dec["rule_change_on_head_model"] = {
+            "w_mean_abs": round(wd("head", "epoch") - wd("head", "legacy"), 4),
+            "w_bias": round(wb("head", "epoch") - wb("head", "legacy"), 4),
+            "note": "same HEAD model, epoch vs legacy binding + weights (metric change)",
+        }
+        for pol in ("legacy", "epoch"):
+            d = {
+                "model_change_untuned": round(wd("untuned", pol) - wd("head", pol), 4),
+                "retune": round(wd("tuned", pol) - wd("untuned", pol), 4),
+                "total_model_change": round(wd("tuned", pol) - wd("head", pol), 4),
+            }
+            if "dataepoch" in inp and "physepoch" in inp:
+                d["data_only"] = round(wd("dataepoch", pol) - wd("head", pol), 4)
+                d["physics_only"] = round(wd("physepoch", pol) - wd("head", pol), 4)
+                d["data_x_physics_interaction"] = round(
+                    wd("untuned", pol)
+                    - wd("dataepoch", pol)
+                    - wd("physepoch", pol)
+                    + wd("head", pol),
+                    4,
+                )
+            dec[f"model_change_under_{pol}_rules_w_mean_abs"] = d
+        dec["headline_published_to_new"] = {
+            "from": "HEAD, legacy rules (published 2026-08-08: 0.2629)",
+            "to": "tuned, epoch rules",
+            "w_mean_abs": round(wd("tuned", "epoch") - wd("head", "legacy"), 4),
+            "of_which_rules": round(wd("head", "epoch") - wd("head", "legacy"), 4),
+            "of_which_model": round(wd("tuned", "epoch") - wd("head", "epoch"), 4),
+        }
+    out["decomposition"] = dec
+    # ── tuning record ───────────────────────────────────────────────────
+    tune = inp.get("tune")
+    if tune:
+        out["tuning"] = {
+            "policy": tune["policy"],
+            "lam_s_per_kmh": tune["lam_s_per_kmh"],
+            "folds": tune["folds"],
+            "min_fit_rows": tune["min_fit_rows"],
+            "min_fit_groups": tune["min_fit_groups"],
+            "thin_donors": tune["thin_donors"],
+            "grids_4t": tune["grids_4t"],
+            "grids_2t": tune["grids_2t"],
+            "clusters": {
+                tag: {
+                    "n_rows": c["n_rows"],
+                    "n_groups": c["n_groups"],
+                    "selected": c["selected"],
+                    "selection_rule": c["selection_rule"],
+                    "donor": c.get("donor"),
+                    "theta": c["theta"],
+                    "cv": {
+                        f: {
+                            "J": v.get("cv", {}).get("J"),
+                            "et_w_mean_abs": v.get("cv", {}).get("et_w_mean_abs"),
+                            "et_w_bias": v.get("cv", {}).get("et_w_bias"),
+                            "se": v.get("cv_se"),
+                            "insample_J": v["insample"]["J"],
+                            "complexity": v["complexity"],
+                            "theta": {
+                                k: x for k, x in v["theta"].items() if x != NEUTRAL[k]
+                            },
+                        }
+                        for f, v in c["families"].items()
+                    },
+                }
+                for tag, c in tune["clusters"].items()
+            },
+        }
+    lam_runs = {k: v for k, v in inp.items() if k.startswith("lam_")}
+    if lam_runs:
+        out["lambda_sensitivity"] = {
+            k: {
+                "lam_s_per_kmh": v["lam_s_per_kmh"],
+                "selected": {
+                    tag: {
+                        "family": c["selected"],
+                        "theta": {
+                            kk: x for kk, x in c["theta"].items() if x != NEUTRAL[kk]
+                        },
+                    }
+                    for tag, c in v["clusters"].items()
+                },
+            }
+            for k, v in lam_runs.items()
+        }
+    if "refs" in inp:
+        r = inp["refs"]
+        out["reference_fit"] = {
+            k: r[k]
+            for k in (
+                "tag",
+                "targets",
+                "k5_t60_band_s",
+                "objective",
+                "flat_band",
+                "current",
+                "best",
+                "best_by_launch_rpm_factor",
+            )
+        }
+    cons = {k: v for k, v in inp.items() if k.startswith("conservative_")}
+    if cons:
+        out["conservative_alternatives"] = {
+            k: {
+                "root": v["root"],
+                "engine": v["engine"],
+                "thetas_applied": v.get("thetas_applied"),
+                "epoch_rules": _headline(v, "epoch"),
+                "legacy_rules": _headline(v, "legacy"),
+                "topspeed": v.get("topspeed", {}).get("summary"),
+                "references": {kk: vv["et_s"] for kk, vv in v["references"].items()},
+            }
+            for k, v in cons.items()
+        }
+    if args.notes:
+        out["notes"] = json.loads(Path(args.notes).read_text())
+    Path(args.out).write_text(json.dumps(out, indent=1))
+    print(f"wrote {args.out}")
 
 
 def main(argv=None) -> int:
@@ -849,6 +1307,7 @@ def main(argv=None) -> int:
     m.add_argument("--out", required=True)
     m.add_argument("--root", default=None)
     m.add_argument("--policy", default="both", choices=("epoch", "legacy", "both"))
+    m.add_argument("--thetas", default=None)
     m.add_argument("--procs", type=int, default=min(4, os.cpu_count() or 1))
     m.add_argument("--no-topspeed", action="store_true")
     m.set_defaults(fn=cmd_measure)
@@ -863,6 +1322,11 @@ def main(argv=None) -> int:
     rf = sub.add_parser("refs")
     rf.add_argument("--out", required=True)
     rf.set_defaults(fn=cmd_refs)
+    rp = sub.add_parser("report")
+    rp.add_argument("--out", required=True)
+    rp.add_argument("--inputs", nargs="+", required=True, help="NAME=PATH ...")
+    rp.add_argument("--notes", default=None, help="JSON file merged in as 'notes'")
+    rp.set_defaults(fn=cmd_report)
     args = ap.parse_args(argv)
     args.fn(args)
     return 0
