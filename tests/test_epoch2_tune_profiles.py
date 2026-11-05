@@ -1,13 +1,13 @@
-"""2026-10 epoch, ROUND 2 retune — CategoryProfile knob values, the 599 cc
-supersport routing fix, physical bounds, the mass-monotonicity gate and
-production-path liveness.
+"""2026-10 epoch, ROUND 2 — the 599 cc supersport routing fix, the physical
+bounds, the mass-monotonicity gate and the litre traction audit, checked on
+the SHIPPED profiles.
 
-The values were selected by scripts/tune_epoch2_2026_10_29.py (joint
-ET + 0.01 x trap objective, per-row timing convention, grouped 5-fold CV,
-one-standard-error rule toward neutral, HARD mass-monotonicity gate) and are
-recorded in reports/acc_epoch2_2026_10_29.json. Changing any of them is a
-deliberate recalibration: re-run the tune, regenerate the report, and update
-``ROUND2_KNOBS`` here (tests/test_epoch2_tune_report.py pins report == code).
+Round 2's knob VALUES were superseded by round 3 (reports/acc_epoch3_2026_11_03.json,
+scripts/tune_epoch3_2026_11_03.py); the knob pins, their liveness checks and
+round 3's bounds live in tests/test_epoch3_tune_profiles.py. What stays here
+is everything round 2 established that must still hold: the routing, and the
+HARD dry-mass gate (zero inversions, zero tolerance) on the bikes that were
+mass-inverted under neutral knobs.
 """
 
 from __future__ import annotations
@@ -26,97 +26,6 @@ from motoquant.scraper.importer import spec_to_bike_config
 from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
 
 ROOT = Path(__file__).resolve().parent.parent
-
-_NEUTRAL = {
-    "over_clutch_factor": 0.0,
-    "max_engine_decel_rads2": 0.0,
-    "launch_floor_factor": 0.0,
-    "mu_peak_override": None,
-    "mu_peak_scale": 1.0,
-    "parasitic_mult": 1.0,
-    "launch_rpm_factor": None,
-    "cd_floor": 0.25,
-}
-
-#: tag -> the knobs that differ from _NEUTRAL (everything else neutral).
-ROUND2_KNOBS = {
-    cp.CATEGORY_LITRE_SPORT_195P: {"mu_peak_scale": 1.05, "launch_rpm_factor": 0.475},
-    cp.CATEGORY_LITRE_SPORT_600_1000: {
-        "mu_peak_scale": 0.95,
-        "launch_rpm_factor": 0.50,
-    },
-    cp.CATEGORY_SPORT_TWIN_600_1300: {
-        "mu_peak_scale": 0.95,
-        "launch_rpm_factor": 0.475,
-    },
-    cp.CATEGORY_OTHER: {"mu_peak_scale": 0.95},
-    cp.CATEGORY_CRUISER_1300P: {},  # thin; donor "other" rejected (worse)
-    cp.CATEGORY_MID_TWIN_500_700: {},  # thin after the routing fix: neutral
-    cp.CATEGORY_SMALL_I4_SCREAMER: {},
-    cp.CATEGORY_SINGLE_300_500: {},
-    cp.CATEGORY_MID_TWIN_300_500: {},
-    cp.CATEGORY_ENTRY_200_300: {},
-    cp.CATEGORY_ENTRY_150_200: {},
-    cp.CATEGORY_TWO_STROKE: {},
-    cp.CATEGORY_REFERENCE_LITRE_195P: {
-        "mu_peak_scale": 0.95,
-        "launch_rpm_factor": 0.45,
-    },
-    cp.CATEGORY_UNKNOWN: {},  # back-compat anchor, untouched
-}
-
-#: The physical search bounds of the round-2 retune.
-MU_BOUNDS = (0.95, 1.15)
-LR_BOUNDS = (0.45, 0.75)
-
-
-@pytest.mark.parametrize("tag", sorted(ROUND2_KNOBS))
-def test_round2_knob_values(tag):
-    prof = cp.get_profile(tag)
-    assert prof.name == tag
-    want = {**_NEUTRAL, **ROUND2_KNOBS[tag]}
-    got = {k: getattr(prof, k) for k in want}
-    assert got == want, tag
-
-
-def test_every_registered_profile_is_pinned():
-    assert set(cp._PROFILES) == set(ROUND2_KNOBS)
-
-
-@pytest.mark.parametrize("tag", sorted(ROUND2_KNOBS))
-def test_knobs_inside_the_physical_bounds(tag):
-    """Grip within -5/+15 % of rated rubber; launch rpm None or 0.45-0.75 x
-    redline; no class rubber override and no over-clutch / launch-floor /
-    parasitic fudge anywhere (none is live in round 2)."""
-    p = cp.get_profile(tag)
-    assert MU_BOUNDS[0] <= p.mu_peak_scale <= MU_BOUNDS[1]
-    assert p.launch_rpm_factor is None or (
-        LR_BOUNDS[0] <= p.launch_rpm_factor <= LR_BOUNDS[1]
-    )
-    assert p.mu_peak_override is None
-    assert p.over_clutch_factor == 0.0 and p.max_engine_decel_rads2 == 0.0
-    assert p.launch_floor_factor == 0.0
-    assert p.parasitic_mult == 1.0
-    assert p.cd_floor == 0.25
-
-
-def test_two_stroke_launches_on_its_pipe():
-    assert cp.get_profile(cp.CATEGORY_TWO_STROKE).launch_rpm_factor is None
-
-
-def test_thin_clusters_run_neutral():
-    """cruiser_1300p (n=4), mid_twin_500_700 (n=7 after the routing fix) and
-    small_i4_screamer (n=2) are too thin to fit. The cruiser's pre-registered
-    donor ('other', grip 0.95) was rejected because it makes the cruiser rows
-    worse than neutral (report tuning record 'donor_rejected')."""
-    for tag in (
-        cp.CATEGORY_CRUISER_1300P,
-        cp.CATEGORY_MID_TWIN_500_700,
-        cp.CATEGORY_SMALL_I4_SCREAMER,
-    ):
-        p = cp.get_profile(tag)
-        assert {k: getattr(p, k) for k in _NEUTRAL} == _NEUTRAL, tag
-
 
 # ── routing: the 599 cc supersports leave mid_twin_500_700 ──────────────────
 
@@ -200,7 +109,7 @@ def test_catalog_membership_change_is_exactly_the_599_supersports():
     assert {s.manufacturer for s in moved} == {"Honda", "Kawasaki", "Suzuki", "Yamaha"}
 
 
-# ── production-path liveness of the armed knobs ─────────────────────────────
+# ── helpers ─────────────────────────────────────────────────────────────────
 
 
 def _spec(mfr, model, year=None):
@@ -217,69 +126,6 @@ def _spec(mfr, model, year=None):
 
 def _et(cfg):
     return make_engine(cfg).run(max_time=26.0).time_quarter
-
-
-def _with(tag, **knobs):
-    prof = cp._PROFILES[tag]
-    saved = {k: getattr(prof, k) for k in knobs}
-    for k, v in knobs.items():
-        setattr(prof, k, v)
-    return prof, saved
-
-
-def _restore(prof, saved):
-    for k, v in saved.items():
-        setattr(prof, k, v)
-
-
-@pytest.mark.parametrize(
-    "tag,mfr,model,knob,neutral,min_gain",
-    [
-        # the 0.50 x redline clutch dump costs the CBR1000RR ~0.16 s
-        (
-            cp.CATEGORY_LITRE_SPORT_600_1000,
-            "Honda",
-            "CBR1000RR",
-            "launch_rpm_factor",
-            None,
-            0.10,
-        ),
-        # ... and the 1199 Panigale ~0.24 s at 0.475
-        (
-            cp.CATEGORY_SPORT_TWIN_600_1300,
-            "Ducati",
-            "1199 Panigale",
-            "launch_rpm_factor",
-            None,
-            0.15,
-        ),
-        # the heavy ADV bikes' 1st-gear launch is traction-limited: grip 0.95
-        # costs the R 1250 GS ~0.25 s
-        (cp.CATEGORY_OTHER, "BMW", "R 1250 GS", "mu_peak_scale", 1.0, 0.15),
-    ],
-)
-def test_round2_knob_is_live_on_the_catalog_path(
-    tag, mfr, model, knob, neutral, min_gain
-):
-    cfg = spec_to_bike_config(_spec(mfr, model))
-    assert cfg.category_tag == tag
-    armed = _et(cfg)
-    prof, saved = _with(tag, **{knob: neutral})
-    try:
-        unarmed = _et(cfg)
-    finally:
-        _restore(prof, saved)
-    assert armed - unarmed > min_gain  # the knob slows the bike
-
-
-def test_reference_launch_rpm_is_live():
-    armed = _et(gsxr1000_k5())
-    prof, saved = _with(cp.CATEGORY_REFERENCE_LITRE_195P, launch_rpm_factor=None)
-    try:
-        unarmed = _et(gsxr1000_k5())
-    finally:
-        _restore(prof, saved)
-    assert armed - unarmed > 0.2
 
 
 # ── the HARD mass-monotonicity gate ─────────────────────────────────────────
@@ -317,9 +163,25 @@ def _monotone(cfg):
 @pytest.mark.parametrize(
     "mfr,model,year",
     [
-        # the two bikes that were mass-inverted under NEUTRAL knobs (2nd-gear
-        # wheelie threshold) — the selected knob sets make both monotone
-        ("BMW", "HP4 Race", None),
+        # the two bikes that are mass-inverted under NEUTRAL knobs (2nd-gear
+        # wheelie threshold / traction). Round 3 selected sport_twin_600_1300
+        # over the gate-feasible points, so the 1199 Panigale is monotone.
+        # For litre_sport_195p the OWNER DECISION of 2026-11-05 shipped the
+        # CV choice (wheelie_margin 0.69, 'alt_litre195_margin') over the
+        # gate escape, ACCEPTING the HP4 Race inversion (-10 kg 9.8 ms
+        # slower; it inverts at neutral too) — bounded, not hidden, by
+        # tests/test_epoch3_tune_profiles.py::
+        # test_litre195_accepted_mass_inversions_stay_small.
+        pytest.param(
+            "BMW",
+            "HP4 Race",
+            None,
+            marks=pytest.mark.xfail(
+                strict=True,
+                reason="accepted residual of the owner-chosen litre_sport_195p "
+                "knobs (2026-11-05): -10 kg 9.8 ms slower",
+            ),
+        ),
         ("Ducati", "1199 Panigale", None),
         ("Honda", "CBR1000RR", None),
         ("Kawasaki", "Ninja ZX-10R", 2021),
@@ -338,12 +200,19 @@ def test_selected_knobs_keep_bikes_mass_monotone(mfr, model, year):
 )
 def test_whole_catalog_mass_monotone():
     """scripts/check_mass_monotonicity.py's catalog probe (spec path, +-10 kg)
-    reports ZERO inversions with the shipped knobs."""
+    reports no inversions with the shipped knobs EXCEPT the two accepted with
+    the owner's litre_sport_195p choice of 2026-11-05 (HP4 Race 9.8 ms,
+    Panigale V4R 2.5 ms; reports/acc_epoch3_2026_11_03.json
+    tuning.clusters.litre_sport_195p.owner_decision)."""
     mono = _mono()
-    rows = mono.probe_catalog(neutral=False, workers=1, with_fractions=False)
+    rows = mono.probe_catalog(
+        neutral=False, workers=1, with_fractions=False, probes=("dry",)
+    )
     summ = mono.summarize_catalog(rows)
     assert summ["errors"] == 0
-    assert summ["inversions"] == 0, [r["name"] for r in rows if r.get("inversions")]
+    inverted = {r["name"] for r in rows if r.get("inversions")}
+    assert inverted == {"BMW HP4 Race", "Ducati Panigale V4R"}, inverted
+    assert summ["inversions"] == 2
 
 
 @pytest.mark.parametrize(

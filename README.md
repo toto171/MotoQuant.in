@@ -44,14 +44,15 @@ Everything here (engine, catalog, web app, chat agent) is free under the
 
 **Validated against 250 published benchmarks** (magazine road tests,
 instrumented GPS/timing-system runs and timeslips), weighted by source
-quality. Across the **276 matched runs** the weighted mean |Δ| is
-**0.263 s** and the weighted mean bias is **+0.007 s**
-(`reports/acc_final_2026_08_08.json`). The full residual breakdown is on
+quality. Across the **266 matched runs** the weighted mean |Δ| is
+**0.249 s** and the weighted mean bias is **+0.022 s**, each run scored under
+its own timing convention (1-ft beam rollout or first motion)
+(`reports/acc_final_2026_11_05.json`). The full residual breakdown is on
 [motoquant.in/validation](https://www.motoquant.in/validation).
 
 Three reference bikes are pinned bit-identical and gated in CI:
-**GSX-R 1000 K5 → 9.9331 s**, **YZF-R1 4C8 → 10.1436 s**,
-**Hayabusa Gen1 → 10.3633 s** (see [docs/INVARIANTS.md](docs/INVARIANTS.md) I1).
+**GSX-R 1000 K5 → 10.0436 s**, **YZF-R1 4C8 → 10.1092 s**,
+**Hayabusa Gen1 → 10.1100 s** (see [docs/INVARIANTS.md](docs/INVARIANTS.md) I1).
 Every benchmark keeps its source label. If you have an instrumented run that
 disagrees, please [file it](https://github.com/toto171/MotoQuant.in/issues/new/choose);
 that is the fastest way to make the model better.

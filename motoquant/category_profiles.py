@@ -139,6 +139,25 @@ class CategoryProfile:
     # clamp(redline × factor, idle, redline). None in every profile today.
     launch_rpm_factor: float | None = None
 
+    # ── Launch wheelie margin ──────────────────────────────────────────
+    # 2026-11 epoch round 3. Fraction of the combined bike + rider wheelie
+    # ceiling (submodels/wheelie.py) the rider HOLDS over the launch — from
+    # rest to the 60-ft line (constants.SIXTY_FOOT_M). Riding exactly on the
+    # balance point is not what a test rider does: throttle / clutch are
+    # modulated to keep the front tyre down with a safety margin, so the
+    # launch acceleration sits below the ceiling (magazine 60 ft times of
+    # ~1.9 s from the beam imply ~0.8 g mean against a ~1.1 g ceiling).
+    # Past the 60-ft mark the bike is ridden to its own ceiling; a step
+    # whose drive force is already below margin x ceiling is untouched
+    # (power-limited running never changes). Applying it to all of 1st
+    # gear (to 140-180 km/h on a litre bike) was measured and rejected:
+    # it leaves the 60 ft ~0.1 s quicker than the magazines at the
+    # ET-centring margin and makes the pass nearly mass-insensitive (the
+    # ceiling rises with low-mounted mass, 37 dry-mass inversions vs 3
+    # neutral-physics ones; reports/acc_epoch3_2026_11_03.json).
+    # Physical range 0.65-1.0; 1.0 = bit-identical no-op.
+    wheelie_margin: float = 1.0
+
     # ── Free-form notes (debugging / docs) ─────────────────────────────
     notes: str = ""
 
@@ -185,6 +204,19 @@ class CategoryProfile:
 # (scripts/check_mass_monotonicity.py). No class rubber override, no
 # over-clutch / floor / parasitic knob is used. Values marked "round 1" in
 # the comments below are history.
+#
+# 2026-10 EPOCH, ROUND 3 (reports/acc_epoch3_2026_11_03.json,
+# scripts/tune_epoch3_2026_11_03.py). Round 2 was rejected on ET: with
+# neutral knobs the wheelie-limited launch ran ~0.3 s quick on nearly every
+# high-power bike (a near-uniform offset), and round 2's launch_rpm_factor
+# turned that into per-bike scatter. Round 3 adds ONE physical knob,
+# wheelie_margin (the share of the wheelie ceiling the rider holds from rest
+# to the 60-ft line), and re-selects every cluster FROM NEUTRAL over
+# mu_peak_scale 0.97-1.10 x wheelie_margin 0.65-1.00 with launch_rpm_factor
+# retired as a bias corrector (it survives only in the "margin+lr" family /
+# the gate escape, under the 1-SE rule), the same joint objective, grouped
+# 5-fold CV, 1-SE rule and HARD dry-mass monotonicity gate. Values marked
+# "round 2" in the comments below are history.
 
 _PROFILES: dict[str, CategoryProfile] = {
     CATEGORY_LITRE_SPORT_195P: CategoryProfile(
@@ -229,9 +261,30 @@ _PROFILES: dict[str, CategoryProfile] = {
         # rollout; neutral 1.59). The unconstrained choice would have
         # scored w|d| 0.33 but leaves the HP4 inverted and traction-limited
         # above 2nd gear (report 'conservative_alternatives').
-        mu_peak_scale=1.05,
+        # 2026-10 epoch ROUND 3: the CV choice is wheelie_margin 0.69 at
+        # rated rubber (CV J 0.251 +- 0.026; cluster w|d| 0.17 / bias -0.01)
+        # but it leaves the BMW HP4 Race (-10 kg 9.8 ms slower: 215 hp on
+        # 146 kg is wheelie-limited in 2nd gear when lighter, and the lower
+        # system CoG of the heavier bike raises its ceiling) and the
+        # Panigale V4R (2.5 ms) mass-inverted — and the HP4 inverts at
+        # NEUTRAL already. No (grip x margin) or (margin x launch rpm) grid
+        # point is inversion-free, and NO point of the whole (grip x margin
+        # x launch rpm) box passes the sea-level probe (the HP4's sea-level
+        # dry-mass step is >= 12 ms inverted everywhere, 16.9 ms at
+        # neutral), so the hard dry-mass gate alone decided: the gate
+        # ESCAPE (62 of 6084 box points dry-feasible, all at a 0.45-0.475 x
+        # redline clutch dump) selected by CV + 1-SE: grip 1.05, margin
+        # 0.97, clutch dump 0.475 x redline (cluster w|d| 0.44). OWNER
+        # DECISION (2026-11-05): ship the margin-0.69 CV choice instead
+        # ('alt_litre195_margin'): the clutch-dump escape re-introduced the
+        # per-bike launch-rpm scatter (residual SD 0.53 vs 0.21) to clear
+        # ms-level inversions on two bikes. Accepted, documented residuals:
+        # HP4 Race -10 kg 9.8 ms slower, Panigale V4R 2.5 ms (wheelie-ballast
+        # physics: the lighter bike's higher system CoG lowers its ceiling).
+        mu_peak_scale=1.0,
         parasitic_mult=1.0,
-        launch_rpm_factor=0.475,  # 2026-10 epoch round 2, see mu note
+        launch_rpm_factor=None,  # 2026-10 epoch round 3: retired
+        wheelie_margin=0.69,  # 2026-10 epoch round 3 (CV choice)
         notes="Litre superbikes ≥195hp. Best-data cluster.",
     ),
     CATEGORY_LITRE_SPORT_600_1000: CategoryProfile(
@@ -256,12 +309,20 @@ _PROFILES: dict[str, CategoryProfile] = {
         # catalog bike of the cluster mass-monotone (min +-10 kg step
         # +8.8 ms). Cluster w|d| 0.25 / bias -0.09 (neutral 0.46 / -0.45);
         # mean 60 ft 1.75 s (neutral 1.64).
-        mu_peak_scale=0.95,
+        # 2026-10 epoch ROUND 3: selected the launch wheelie margin 0.72 at
+        # rated rubber (CV J 0.203 +- 0.022; neutral 0.513, grip-only 0.492,
+        # margin + launch rpm 0.199 within 1 SE): the rider holds 72 % of the
+        # wheelie ceiling to the 60-ft line. Every catalog bike of the
+        # cluster mass-monotone (min +-10 kg step +6.1 ms). Cluster w|d|
+        # 0.146 / bias -0.016 (neutral 0.458 / -0.450); mean 60 ft 1.89 s
+        # (neutral 1.64). Round 2's grip 0.95 / clutch dump 0.50 retired.
+        mu_peak_scale=1.0,
         over_clutch_factor=0.0,
         max_engine_decel_rads2=0.0,
         launch_floor_factor=0.0,
         parasitic_mult=1.0,
-        launch_rpm_factor=0.50,  # 2026-10 epoch round 2
+        launch_rpm_factor=None,  # 2026-10 epoch round 3: retired
+        wheelie_margin=0.72,  # 2026-10 epoch round 3
         notes="600-1000cc sport (R6, CBR600RR, ZX-6R, GSX-R 600 K6).",
     ),
     CATEGORY_SPORT_TWIN_600_1300: CategoryProfile(
@@ -306,9 +367,20 @@ _PROFILES: dict[str, CategoryProfile] = {
         # neutral-knob mass inversion of the 1199 Panigale (2nd-gear
         # wheelie threshold). Cluster w|d| 0.26 / bias -0.04 (neutral
         # 0.45 / -0.40); mean 60 ft 1.83 s (neutral 1.68).
-        mu_peak_scale=0.95,  # 2026-10 epoch round 2 (round 1: 0.91)
+        # 2026-10 epoch ROUND 3: the unconstrained CV choice (margin 0.72,
+        # CV J 0.301) leaves the 1199 Panigale mass-inverted (as neutral
+        # does: traction-limited in 1st/2nd gear, -10 kg 9.7 ms slower;
+        # 13 ms at sea level). Selected by CV + 1-SE over the 149 gate-
+        # feasible grid points (round-3 gate: dry mass + rider mass + sea
+        # level): 'margin+lr' — margin 0.75 with a clutch dump at 0.50 x
+        # redline (~5.8k on an 11.5k V2; big twins launch below their torque
+        # peak) at rated rubber (constrained CV J 0.293 +- 0.034). Cluster
+        # w|d| 0.210 / bias -0.004 (neutral 0.449 / -0.403); mean 60 ft
+        # 1.88 s.
+        mu_peak_scale=1.0,  # 2026-10 epoch round 3 (round 2: 0.95)
         parasitic_mult=1.0,
-        launch_rpm_factor=0.475,  # 2026-10 epoch round 2
+        launch_rpm_factor=0.50,  # 2026-10 epoch round 3 (gate-constrained)
+        wheelie_margin=0.75,  # 2026-10 epoch round 3
         notes="Sport/naked twins 600-1300cc (848 EVO, RS 660, MT-07, 1125R).",
     ),
     CATEGORY_SMALL_I4_SCREAMER: CategoryProfile(
@@ -608,6 +680,13 @@ _PROFILES: dict[str, CategoryProfile] = {
         # corpus while preserving each bike's relative rubber
         # (scripts/tune_cluster_knobs.py grids, session 2026-07-13).
         mu_peak_scale=1.0,  # 2026-10 epoch retune: neutral
+        # 2026-10 epoch ROUND 3: selected the launch wheelie margin 0.66
+        # (CV J 0.449 +- 0.090; neutral 0.566 outside 1 SE): the light
+        # 70-95 hp racing 2Ts (RG500, NSR/RGV250, RD500LC) are the bikes it
+        # moves — the vintage air-cooled singles/twins never reach the
+        # capped ceiling. Cluster w|d| 0.34 / bias +0.26 (neutral 0.48 /
+        # -0.05); the 2T launch stays on its pipe (launch_rpm_factor None).
+        wheelie_margin=0.66,  # 2026-10 epoch round 3
         # 2026-10 epoch retune: 1.0 — the importer already zeroes the 2T
         # valvetrain loss and sets the premix oil pump; a further x0.10
         # was a fudge (ET effect ~0.02 s).
@@ -675,7 +754,19 @@ _PROFILES: dict[str, CategoryProfile] = {
         # catalog bikes. Cluster w|d| 0.33 / bias +0.01 (neutral 0.39 /
         # -0.16). Pre-registered donor for cruiser_1300p (rejected there —
         # see that profile).
-        mu_peak_scale=0.95,
+        # 2026-10 epoch ROUND 3: the unconstrained CV choice (margin 0.76,
+        # CV J 0.393 +- 0.043; dry-mass monotone) leaves RIDER-mass
+        # inversions far above wheelie-ballast size — Ninja H2 SX SE+ 66 ms,
+        # KTM 1290 Super Adventure R 18 ms (2nd-gear traction-limited: a
+        # heavier rider loads the rear tyre; the KTM inverts at neutral
+        # too). Selected by CV + 1-SE over the 220 gate-feasible grid points
+        # (dry + rider + sea-level probes): margin 0.66 at rated rubber
+        # (constrained CV J 0.438 +- 0.042; grip+margin 1.07 / 0.73 = 0.402
+        # is within 1 SE, so the simpler set wins). Cluster w|d| 0.367 /
+        # bias +0.154 (neutral 0.385 / -0.162); mean 60 ft 1.95 s. The
+        # margin-0.76 alternative is reported ('conservative_alternatives').
+        mu_peak_scale=1.0,  # 2026-10 epoch round 3 (round 2: 0.95)
+        wheelie_margin=0.66,  # 2026-10 epoch round 3 (gate-constrained)
         # Catch-all for ADV / touring / scooter / unknown. Conservative
         # mid-tier over-clutching, generous tuck timing.
         # 2026-06-11 calibration: the 15 benchmarked "other" bikes (heavy
@@ -733,9 +824,20 @@ _PROFILES: dict[str, CategoryProfile] = {
         # their bands); traps 238.5 / 230.8 / 230.7 km/h; K5 60 ft 1.724 s
         # (1-ft rollout) / 1.998 s from first motion. All three references
         # mass-monotone over -20..+20 kg.
-        mu_peak_scale=0.95,
+        # ROUND 3 (reports/acc_epoch3_2026_11_03.json 'reference_fit'): the
+        # same minimax fit over (mu_peak_scale 0.97-1.10, wheelie_margin
+        # 0.65-1.00), launch_rpm_factor None. Optimum margin 0.71-0.72 (flat
+        # in grip); the most neutral point of the flat band: rated rubber,
+        # margin 0.72 — K5 10.0436 (band 9.87-10.07), R1 10.1092 (10.10-
+        # 10.50), Hayabusa 10.1100 (10.10-10.70): all three inside their
+        # bands (max normalised miss 0.967; the bands bind at the R1 /
+        # Hayabusa low edges and the K5 high edge together — the references'
+        # relative order is a physics/data limit). K5 60 ft 1.896 s from the
+        # beam / 2.184 s from first motion. Mass-monotone -20..+20 kg.
+        mu_peak_scale=1.0,  # 2026-10 epoch round 3 (round 2: 0.95)
         parasitic_mult=1.0,
-        launch_rpm_factor=0.45,  # 2026-10 epoch round 2
+        launch_rpm_factor=None,  # 2026-10 epoch round 3 (round 2: 0.45)
+        wheelie_margin=0.72,  # 2026-10 epoch round 3
         notes="Frozen profile for the 3 pinned reference bikes (defaults.py).",
     ),
     CATEGORY_UNKNOWN: CategoryProfile(

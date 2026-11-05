@@ -1,5 +1,12 @@
-"""2026-10 epoch, ROUND 2 — reports/acc_epoch2_2026_10_29.json agrees with the
-code that is checked in.
+"""2026-10 epoch, ROUND 2 — reports/acc_epoch2_2026_10_29.json is internally
+consistent and REPRODUCIBLE on the current code.
+
+Round 2 was superseded by round 3 (reports/acc_epoch3_2026_11_03.json,
+tests/test_epoch3_tune_report.py pins THAT report against the shipped
+profiles). Round 3 only ADDED a knob (``CategoryProfile.wheelie_margin``,
+1.0 = bit-identical no-op), so applying the round-2 knob sets with
+wheelie_margin 1.0 must still reproduce this report exactly — which is what
+the checks below now do (``_round2_profiles``).
 
 * the report keeps the reports/acc_final_2026_08_08.json headline shape
   (references / n_bikes_swept / clusters / overall) plus trap, 60 ft, top
@@ -8,9 +15,8 @@ code that is checked in.
   decomposition;
 * the old-vs-new chain starts at the EXACT published 2026-08-08 metric
   (HEAD labels, legacy binding + weights: 276 / 0.2629 / +0.0073);
-* every tuned knob set in the report is exactly what
-  motoquant/category_profiles.py ships, and the reference fit is the shipped
-  reference profile;
+* every tuned knob set in the report is a complete round-2 knob set and the
+  reference fit is the report's reference theta;
 * the references simulate to the report's pinned ETs and the gate recorded
   zero inversions;
 * (native engine, or MOTOQUANT_SLOW_TESTS=1) a full re-measure reproduces the
@@ -19,6 +25,8 @@ code that is checked in.
 
 from __future__ import annotations
 
+import contextlib
+import dataclasses
 import importlib.util
 import json
 import os
@@ -46,6 +54,28 @@ _KNOBS = (
 @pytest.fixture(scope="module")
 def report():
     return json.loads(REPORT.read_text())
+
+
+@contextlib.contextmanager
+def _round2_profiles(report):
+    """Every profile at the report's round-2 knobs, wheelie_margin 1.0."""
+    saved = dict(cp._PROFILES)
+    thetas = {t: r["theta"] for t, r in report["tuning"]["clusters"].items()}
+    best = report["reference_fit"]["best"]
+    try:
+        for tag, prof in saved.items():
+            th = thetas.get(tag, {})
+            kw = {k: th[k] for k in _KNOBS if k in th}
+            if tag == cp.CATEGORY_REFERENCE_LITRE_195P:
+                kw.update(
+                    mu_peak_scale=best["mu_peak_scale"],
+                    launch_rpm_factor=best["launch_rpm_factor"],
+                )
+            cp._PROFILES[tag] = dataclasses.replace(prof, **kw, wheelie_margin=1.0)
+        yield
+    finally:
+        cp._PROFILES.clear()
+        cp._PROFILES.update(saved)
 
 
 def _tuner():
@@ -104,34 +134,36 @@ def test_chain_starts_at_the_published_metric(report):
     assert acc["value"] == c["w_mean_abs"]
 
 
-def test_report_knobs_are_the_shipped_knobs(report):
+def test_report_knobs_are_complete_round2_knob_sets(report):
     clusters = report["tuning"]["clusters"]
     assert clusters
     for tag, rec in clusters.items():
-        prof = cp.get_profile(tag)
-        assert prof.name == tag
-        shipped = {k: getattr(prof, k) for k in _KNOBS}
-        assert shipped == rec["theta"], tag
+        assert tag in cp._PROFILES, tag
+        assert set(rec["theta"]) == set(_KNOBS), tag
 
 
-def test_report_reference_fit_is_the_shipped_reference_profile(report):
+def test_report_reference_fit_is_inside_round2_bounds(report):
     best = report["reference_fit"]["best"]
-    prof = cp.get_profile(cp.CATEGORY_REFERENCE_LITRE_195P)
-    assert prof.mu_peak_scale == best["mu_peak_scale"]
-    assert prof.launch_rpm_factor == best["launch_rpm_factor"]
+    assert 0.95 <= best["mu_peak_scale"] <= 1.15
+    assert best["launch_rpm_factor"] is None or (
+        0.45 <= best["launch_rpm_factor"] <= 0.75
+    )
     assert best["order_ok"]
     assert all(v["monotone"] for v in best["mass_gate"].values())
 
 
 def test_references_simulate_to_the_report(report):
-    for label, fn in (
-        ("K5", gsxr1000_k5),
-        ("R1", yzfr1_4c8),
-        ("Hayabusa", hayabusa_gen1),
-    ):
-        et = engine_select.make_engine(fn()).run(max_time=26.0).time_quarter
-        assert float(et) == report["references_full"][label]["et_s_full"], label
-        assert round(float(et), 4) == report["references"][label]
+    """Round-2 reference knobs + wheelie_margin 1.0 = the round-2 ETs, bit
+    for bit (round 3's knob is a no-op at 1.0)."""
+    with _round2_profiles(report):
+        for label, fn in (
+            ("K5", gsxr1000_k5),
+            ("R1", yzfr1_4c8),
+            ("Hayabusa", hayabusa_gen1),
+        ):
+            et = engine_select.make_engine(fn()).run(max_time=26.0).time_quarter
+            assert float(et) == report["references_full"][label]["et_s_full"], label
+            assert round(float(et), 4) == report["references"][label]
 
 
 def test_report_gate_is_clean(report):
@@ -162,13 +194,14 @@ def test_full_remeasure_reproduces_the_report(report):
     te2 = _tuner()
     te2.TE.setup_root(None)
     head_dump = None  # (c) needs the HEAD corpus dump — compare (a) and (b)
-    res = te2.measure(
-        {k: v for k, v in te2.SCORINGS.items() if v[0] == "current"},
-        procs=1,
-        head=head_dump,
-        topspeed=True,
-        gate=True,
-    )
+    with _round2_profiles(report):
+        res = te2.measure(
+            {k: v for k, v in te2.SCORINGS.items() if v[0] == "current"},
+            procs=1,
+            head=head_dump,
+            topspeed=True,
+            gate=True,
+        )
     for name in ("a_epoch_current_row", "a_epoch_current_1ft", "b_legacy_current_row"):
         h = report["headline"][name]
         assert res["scorings"][name]["overall"] == h["overall"], name

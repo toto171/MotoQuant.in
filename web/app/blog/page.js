@@ -340,7 +340,7 @@ const POSTS = [
     ],
     title: "Hayabusa Quarter-Mile Physics: What Limits the 9.6",
     excerpt:
-      "MotoQuant locks the Hayabusa Gen1 at 10.3633s — a reference baseline preserved across every physics commit since July 13, 2026. A drag-prepped Hayabusa runs 9.5-9.7s. The seven tenths between are not engine power. They are traction, geometry, gearing, and air — broken down with a stage-by-stage Indian cost-per-tenth table.",
+      "MotoQuant locks the Hayabusa Gen1 at 10.1100s — a reference baseline pinned bit-identical since the November 2026 accuracy epoch. A drag-prepped Hayabusa runs 9.5-9.7s. The seven tenths between are not engine power. They are traction, geometry, gearing, and air — broken down with a stage-by-stage Indian cost-per-tenth table.",
   },
   {
     slug: "aprilia-tuono-660-factory-quarter-mile-physics",

@@ -24,7 +24,7 @@ const FEATURES = [
 
 Pacejka tire model with thermal evolution, so grip changes as the tyre heats. Aerodynamic drag with a per-bike Cd×A (0.308–0.68 m²) — no two bikes share the same number. Gear shifting and clutch engagement dynamics including slipper clutch behaviour. Forced induction — turbo lag, supercharger mechanical loss, nitrous injection windows. Engine inertia and parasitic losses (alternator, oil pump, water pump, valvetrain).
 
-The adaptive-dt solver is especially useful for identifying the precise clutch engagement window that produces the minimum 60-ft time. Reference baselines — GSX-R 1000 K5 at 9.933s, R1 at 10.144s, Hayabusa Gen1 at 10.363s — are pinned bit-identical on every code change and validated against the August 2026 weighted benchmark corpus (250 published tests, weighted mean |Δ| 0.263s).`,
+The adaptive-dt solver is especially useful for identifying the precise clutch engagement window that produces the minimum 60-ft time. Reference baselines — GSX-R 1000 K5 at 10.044s, R1 at 10.109s, Hayabusa Gen1 at 10.110s — are pinned bit-identical on every code change and validated against the November 2026 weighted benchmark corpus (250 published tests, 266 matched, weighted mean |Δ| 0.249s).`,
     docsLink: '/docs/physics',
     docsLabel: 'Read the physics whitepaper',
     stats: [
@@ -39,7 +39,7 @@ The adaptive-dt solver is especially useful for identifying the precise clutch e
         'pacejka thermal · aero midpoint re-eval',
         'baseline lock: k5 / r1 / hayabusa Δ 0.0000',
       ],
-      value: '9.9331',
+      value: '10.0436',
       unit: 's',
       valueLabel: 'gsx-r 1000 k5 · reference et',
       bars: [
@@ -278,7 +278,7 @@ Spotted a wrong spec, a part that fits the wrong bike, or a result that looks ph
       timeslip surface + ruled log lines + one big mono figure + static
       readout bars. Zero new deps, zero network cost.
       HONESTY: these are illustrative compositions (the headline figures
-      are real — e.g. the K5 9.9331s reference ET — but the bars and log
+      are real — e.g. the K5 10.0436s reference ET — but the bars and log
       lines are staged), so the panel says so instead of claiming "live". ── */
 function FeatureReadout({ readout }) {
   return (

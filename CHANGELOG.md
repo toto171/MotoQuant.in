@@ -4,6 +4,84 @@ Notable changes, newest first. This is the human-readable milestone history;
 the exhaustive session-by-session log lives in `CLAUDE.md` (top entry = latest)
 and `reports/`. Format loosely follows [Keep a Changelog](https://keepachangelog.com).
 
+## 2026-11-05 — Accuracy epoch (2026-10/11)
+
+A deliberate physics epoch under [ADR-0002](docs/adr/0002-pinned-reference-baselines.md):
+the pinned reference ETs move, with the full weighted sweep as evidence
+(`reports/acc_final_2026_11_05.json`; tuning record
+`reports/acc_epoch3_2026_11_03.json`). Builds on the 2026-10-23 open-source
+pivot and the Rust physics core (`rust/motoquant-core`,
+[ADR-0007](docs/adr/0007-rust-physics-core.md)) — the core is bit-identical
+to the Python reference (1,959/1,959 parity cases, worst |ΔET| 0,
+`reports/native_parity_2026-11-05.json`; wasm 59/59 fixture + 1,082/1,082
+every-bike runs) and now serves the sweep, tuner and surrogate regen.
+
+### Fixed — data
+- `scripts/patch_2026_11_05_reference_rows.py` refreshes the three reference
+  bikes' DB rows (ids 1-3) from `defaults.py`, so `db seed` no longer mints a
+  new config version for each of them. It is the last step of the re-seed chain.
+
+### Changed — physics (three rounds)
+- **Round 1** (2026-10-24) retuned the knobs on the first epoch physics and
+  was **rejected**: it left catalog bikes dry-mass-inverted (a lighter bike
+  ran a slower ET).
+- **Round 2** (2026-10-29) changed the launch physics: the wheelie limit uses
+  the **combined bike + rider centre of mass** (rider shift included), the
+  **aerodynamic drag pitch moment** enters the load transfer, the tyre runs a
+  **heat balance** (rolling-loss heating, partition, convection), and the
+  strip **rollout geometry** sets the timing: every split is now clocked from
+  the 1-ft stage beam, ET = t(402.336 m) − t(0.3048 m) (the convention of
+  timeslips, N.A. magazine tests and Dragy; first-motion-timed benchmark rows
+  are scored against a first-motion sim). The finish line is `distance`, and
+  `distance <= rollout_m` / a non-finite rollout now raise `ValueError` on
+  both engines. 599 cc I4 supersports route with the 600-1000 class.
+  Physics verified; its retune was not accepted on ET.
+- **Round 3** (2026-11-03) added one physical knob,
+  `CategoryProfile.wheelie_margin` — the share of the wheelie ceiling the
+  rider holds from rest to the 60-ft line (resolved-config schema 5; 1.0 =
+  bit-identical no-op) — and re-selected every cluster from neutral (grouped
+  5-fold CV, 1-SE rule, hard dry-mass gate). Class grip correctors are
+  retired: every cluster runs rated rubber. `litre_sport_195p` ships the CV
+  choice (margin 0.69) by **owner decision 2026-11-05** instead of the
+  tuner's gate escape (clutch dump 0.475 × redline), accepting two ms-level
+  dry-mass inversions.
+
+### Results (`reports/acc_final_2026_11_05.json`)
+- Epoch headline (250 benchmarks, 266 matched, per-row timing): weighted
+  mean |ΔET| **0.2493 s**, bias **+0.0225 s**; 72 within ±0.10 s, 133 within
+  ±0.20 s. Trap bias **+3.43 km/h** (|Δ| 6.08 km/h; was +13.8 km/h). Top
+  speed (83 matched) mean |Δ| **12.9 km/h**, bias +7.0 km/h (was 28.1 /
+  +24.3).
+- The exact 2026-08-08 published metric (HEAD labels, legacy rules) on the
+  new model: **0.2639 s** / bias +0.0292 s vs the published 0.2629 / +0.0073.
+- New pins: **K5 10.0436 s, R1 10.1092 s, Hayabusa 10.1100 s** (were 9.9331 /
+  10.1436 / 10.3633). K5 60 ft 1.896 s from the beam (2.184 s from first
+  motion).
+
+### Known residuals (documented, not fixed)
+- Accepted dry-mass inversions (−10 kg slower): BMW HP4 Race 9.8 ms, Ducati
+  Panigale V4R 2.5 ms (+10 kg also 1.0 ms quicker). At sea level 10
+  litre-class bikes invert dry mass, the HP4 Race by 22 ms (it inverts at
+  neutral knobs too: wheelie-ballast physics).
+- The reference spread is compressed: K5 +0.07 s slow, R1 −0.19 s and
+  Hayabusa −0.24/−0.29 s quick vs their published figures, and R1 vs
+  Hayabusa are 0.8 ms apart (≈ 0.1 s in reality).
+- Class bias beyond ±0.25 s on entry 200-300 (+0.27), singles 300-500
+  (−0.27) and two-strokes (+0.26); 150-200 entry spread stays wide.
+- Litre bikes are nearly mass-insensitive at launch: median 1.2 ms/kg
+  (`litre_sport_195p`) and 4.3 ms/kg (600-1000), vs ~25 ms/kg for 150-200 cc.
+
+### Regenerated
+- `motoquant.db` reseed chain (idempotent on a second pass; 541 models;
+  reference rows tagged `reference_litre_195p`), regression golden (fast +
+  541-bike slow tier), surrogate **v2.7** (9,142 rows; holdout ET MAE 69.8 ms,
+  RMSE 107.0 ms, R² 0.9989 — v2.6 was 110.5 / 174.9 / 0.9962) + web export,
+  wasm engine fixtures, `/validation` data, sitewide accuracy copy and the OG
+  card.
+
+### Moved
+- The repository is now <https://github.com/toto171/MotoQuant.in>.
+
 ## 2026-10-23 — Open-source pivot
 
 **Monetization is scrapped. MotoQuant is free and open source under the

@@ -68,6 +68,6 @@ headline numbers in `SKILL.md`.
 | `CategoryProfile` | The knob set attached to a cluster: over-clutch factor, engine-decel limit, launch floor, grip scale. |
 | `mu_peak` | Peak tire friction coefficient. Rear-tire only — drive traction is rear physics. |
 | Pacejka B/C/D/E | Magic-formula tire coefficients; `D` is essentially peak grip. |
-| Pinned baselines | GSX-R 1000 K5 **9.9331 s**, YZF-R1 4C8 **10.1436 s**, Hayabusa Gen1 **10.3633 s** — bit-identical, CI-gated. Any change that moves them is a regression unless deliberately re-based with a full benchmark sweep. |
+| Pinned baselines | GSX-R 1000 K5 **10.0436 s**, YZF-R1 4C8 **10.1092 s**, Hayabusa Gen1 **10.1100 s** — bit-identical, CI-gated. Any change that moves them is a regression unless deliberately re-based with a full benchmark sweep. |
 | Surrogate | A trained numpy model that approximates the simulator for fast search inside the build optimizer. It is a *cache of the physics*, regenerated whenever the physics changes. |
-| Weighted benchmark sweep | The accuracy measurement: every catalog bike simulated against published real-world ETs, each weighted by source quality (instrumented 1.0 → derived 0.1). Current: **277 matched, weighted mean \|error\| 0.2721 s, bias −0.0047 s**. |
+| Weighted benchmark sweep | The accuracy measurement: every catalog bike simulated against published real-world ETs, each weighted by source quality (instrumented 1.0 → derived 0.1). Current (2026-11-05): **266 matched, weighted mean \|error\| 0.2493 s, bias +0.0225 s** (`reports/acc_final_2026_11_05.json`). |

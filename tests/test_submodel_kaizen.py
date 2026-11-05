@@ -226,27 +226,27 @@ class TestReferenceBaselinesIntact(unittest.TestCase):
         r = motoquant.MotoQuantEngine(motoquant.gsxr1000_k5()).run()
         self.assertAlmostEqual(
             r.time_quarter,
-            9.93,
+            10.04,
             delta=0.05,
-            msg=f"K5 drifted: {r.time_quarter:.3f}s vs 9.93s target",
+            msg=f"K5 drifted: {r.time_quarter:.3f}s vs 10.04s target",
         )
 
     def test_r1_baseline(self):
         r = motoquant.MotoQuantEngine(motoquant.yzfr1_4c8()).run()
         self.assertAlmostEqual(
             r.time_quarter,
-            10.14,
+            10.11,
             delta=0.05,
-            msg=f"R1 drifted: {r.time_quarter:.3f}s vs 10.14s target",
+            msg=f"R1 drifted: {r.time_quarter:.3f}s vs 10.11s target",
         )
 
     def test_hayabusa_baseline(self):
         r = motoquant.MotoQuantEngine(motoquant.hayabusa_gen1()).run()
         self.assertAlmostEqual(
             r.time_quarter,
-            10.36,
+            10.11,
             delta=0.05,
-            msg=f"Hayabusa drifted: {r.time_quarter:.3f}s vs 10.36s target",
+            msg=f"Hayabusa drifted: {r.time_quarter:.3f}s vs 10.11s target",
         )
 
 

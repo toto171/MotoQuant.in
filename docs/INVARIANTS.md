@@ -8,9 +8,12 @@ invariant deliberately, change its enforcement and this doc in the same PR.
 
 ## I1 — Reference baselines are bit-identical
 
-**What.** `GSX-R 1000 K5 = 9.9331 s`, `YZF-R1 4C8 = 10.1436 s`,
-`Hayabusa Gen1 = 10.3633 s` (full precision in `scripts/check_baselines.py`).
-Refactors must produce Δ = 0.0000.
+**What.** `GSX-R 1000 K5 = 10.0436 s`, `YZF-R1 4C8 = 10.1092 s`,
+`Hayabusa Gen1 = 10.1100 s` (full precision in `scripts/check_baselines.py`).
+Refactors must produce Δ = 0.0000. Re-pinned 2026-11-05 by the deliberate
+2026-10/11 accuracy epoch (previous pins 9.9331 / 10.1436 / 10.3633;
+evidence `reports/acc_final_2026_11_05.json`). Since that epoch ET is timed
+from the 1-ft beam rollout: ET = t(402.336 m) − t(0.3048 m).
 
 **Why.** These three are the only hand-curated, human-validated configs. They
 are the fixed point the whole physics model is trusted against. If a "harmless"

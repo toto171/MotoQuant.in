@@ -505,7 +505,13 @@ class TestCalibratorEndToEnd(unittest.TestCase):
         from motoquant.physics import MotoQuantEngine
 
         cls.truth_cfg = gsxr1000_k5()
-        truth_sim = MotoQuantEngine(cls.truth_cfg).run()
+        # rollout_m=0.0: a parsed GPS run is framed from first motion and the
+        # calibrator simulates with rollout_m=0.0 to match (calibrator.py).
+        # Since the 2026-10 epoch the default run() is timed from the 1-ft
+        # beam, so the ET/trap fallbacks below would otherwise mix a
+        # beam-timed ET (~0.29 s shorter on the K5) into a first-motion
+        # trace and the "truth" could never be recovered.
+        truth_sim = MotoQuantEngine(cls.truth_cfg).run(rollout_m=0.0)
 
         # Build a synthetic DragRunData from the truth sim (10 Hz down-sample)
         # sim dt=1ms, so every 100th sample = 100ms = 10 Hz

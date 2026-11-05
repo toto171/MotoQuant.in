@@ -67,7 +67,7 @@ class TestLaunchSweep:
 
     def test_sweep_candidates_actually_differ(self):
         # The K5 reference has no two-step either: every candidate used to
-        # simulate the exact same 9.9331 s.
+        # simulate the exact same 10.0436 s.
         cfg = gsxr1000_k5()
         assert cfg.staging.two_step is False
         res = autotune(cfg, gear_span=1, launch_steps=6)

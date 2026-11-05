@@ -41,7 +41,7 @@ typography, whitespace, and three signal colors used with discipline.
    bikes · 254 tires · 593 parts · 20 venues · 4393 tests · 15 sub-models ·
    250 benchmarks (276 matched) · 75 within ±0.10s · 138 within ±0.20s ·
    ±0.007s top-10 · +0.007s bias ·
-   K5 9.9331s / R1 10.1436s / Hayabusa 10.3633s**. Do NOT invent or alter
+   K5 10.0436s / R1 10.1092s / Hayabusa 10.1100s**. Do NOT invent or alter
    counts — reuse existing constants. Landing TOP10 == docs/validation.
 3. **Palette bans**: no `gray-*`, no raw Tailwind `orange-N`/`lime-N`, no
    inline hex backgrounds in components. Use `asphalt-*`, `accent`,
@@ -210,7 +210,7 @@ logic; `app/api/wake/route.js`; `next.config.js`; `vercel.json` crons.
   width fixes (collapse CTA label, hide ⌘K hint in lg..xl band). Mobile:
   drawer + MobileToolBar (5 tools, safe-area).
 - **SiteFooter**: 4 columns (Product/Data/Company/Legal), baselines line
-  (`K5 9.9331s · R1 10.1436s · Hayabusa 10.3633s` — always the CURRENT
+  (`K5 10.0436s · R1 10.1092s · Hayabusa 10.1100s` — always the CURRENT
   pinned references, §1.2), "Built in India · Free & open source", the
   Apache-2.0 license line + GitHub link. Quiet — no glow.
 - **template.js**: unchanged concept (opacity fade only); drop the HudFrame

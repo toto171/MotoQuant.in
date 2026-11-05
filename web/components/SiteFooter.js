@@ -122,13 +122,13 @@ export default function SiteFooter() {
             . Not affiliated with any motorcycle manufacturer.
           </p>
           <p className="flex flex-wrap gap-x-4 gap-y-1">
-            <span>K5 · 9.9331s</span>
+            <span>K5 · 10.0436s</span>
             <span className="text-white/20">·</span>
-            <span>R1 · 10.1436s</span>
+            <span>R1 · 10.1092s</span>
             <span className="text-white/20">·</span>
-            <span>Hayabusa · 10.3633s</span>
+            <span>Hayabusa · 10.1100s</span>
             <span className="text-white/20">·</span>
-            <span>±0.0000 since Jul 13, 2026</span>
+            <span>±0.0000 since Nov 5, 2026</span>
           </p>
         </div>
       </div>

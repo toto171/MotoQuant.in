@@ -19,7 +19,7 @@ After that, get the test suite green locally (see `CONTRIBUTING.md` §2) and you
 
 ## 1. What MotoQuant is (in one paragraph)
 
-A first-principles physics engine for predicting and optimising motorcycle quarter-mile drag racing times, aimed first at the Indian drag racing community (Aamby Valley, MMRT, BIC, Kari, Hyderabad) and now expanding to the international market (US/EU/JP/CN drag scenes). It's a Python package with a CLI, a FastAPI backend (live on Render), a Next.js web frontend (live at motoquant.in), and an agentic AI chat that can run the whole product (sims, comparisons, the build optimizer, outlaw-class builds, web lookup, estimated sims for unknown bikes). Under the hood: 15 physics sub-models integrated with RK4 at 1 ms, validated against 250 published benchmarks (276 matched runs, weighted mean |Δ| ≈ 0.26 s and bias +0.007 s corpus-wide). It is free and open source under Apache-2.0 with no paid tiers ([ADR-0006](adr/0006-open-source-pivot.md)), and you can run your own copy ([SELF_HOSTING.md](SELF_HOSTING.md)).
+A first-principles physics engine for predicting and optimising motorcycle quarter-mile drag racing times, aimed first at the Indian drag racing community (Aamby Valley, MMRT, BIC, Kari, Hyderabad) and now expanding to the international market (US/EU/JP/CN drag scenes). It's a Python package with a CLI, a FastAPI backend (live on Render), a Next.js web frontend (live at motoquant.in), and an agentic AI chat that can run the whole product (sims, comparisons, the build optimizer, outlaw-class builds, web lookup, estimated sims for unknown bikes). Under the hood: 15 physics sub-models integrated with RK4 at 1 ms, validated against 250 published benchmarks (266 matched runs, weighted mean |Δ| ≈ 0.25 s and bias +0.02 s corpus-wide). It is free and open source under Apache-2.0 with no paid tiers ([ADR-0006](adr/0006-open-source-pivot.md)), and you can run your own copy ([SELF_HOSTING.md](SELF_HOSTING.md)).
 
 **Tagline:** *"The physics of faster."*
 
@@ -35,8 +35,8 @@ A first-principles physics engine for predicting and optimising motorcycle quart
 | Tires | 254 (incl. drag radials/slicks + cruiser rubber), 1,783 fitments |
 | Parts | 593 across 19 categories (incl. lowering kits, air shifters, lockup clutches) |
 | Venues | 20 (India + international drag strips) |
-| Benchmarks | 250 ET rows + 86 top-speed rows; weighted sweep 276 matched, |Δ| 0.263 s, bias +0.007 s |
-| Reference baselines | K5 9.9331 / R1 10.1436 / Hayabusa 10.3633 — pinned **bit-identical**, CI-gated |
+| Benchmarks | 250 ET rows + 86 top-speed rows; weighted sweep 266 matched, |Δ| 0.249 s, bias +0.022 s (`reports/acc_final_2026_11_05.json`) |
+| Reference baselines | K5 10.0436 / R1 10.1092 / Hayabusa 10.1100 — pinned **bit-identical**, CI-gated |
 | Chat AI | multi-step tool-calling agent (`motoquant/llm/agent.py`, `docs/CHAT_AGENT.md`) |
 | Deployed | API: Render free tier (`motoquant-api.onrender.com`); web: Vercel (`motoquant.in`); both auto-deploy from `main`. Self-hosting: `docs/SELF_HOSTING.md` |
 | Optional | Rust physics core, bit-identical to the Python reference (`docs/RUST_CORE.md`) |
@@ -91,7 +91,7 @@ These will cause a PR to be rejected even if the code works.
 2. **SQLite stays until a real scaling trigger** ([ADR-0004](adr/0004-sqlite-until-scale.md)). The WAL-fallback in `motoquant/database/connection.py` is load-bearing.
 3. **CLI tests call handlers directly, not subprocesses.** See `tests/test_cli.py`.
 4. **Scraper is stdlib-only.** No BeautifulSoup/lxml.
-5. **Physics baselines are pinned bit-identical**: K5 9.9331 / R1 10.1436 / Hayabusa 10.3633. If you touch `physics.py`, `submodels/*`, `defaults.py`, or the importer, run the baseline check + `tests/test_regression_snapshot.py` and put the deltas in your PR (template has the table). "±0.0000 at 4 decimals" is the expectation; anything else needs a full weighted-sweep justification.
+5. **Physics baselines are pinned bit-identical**: K5 10.0436 / R1 10.1092 / Hayabusa 10.1100. If you touch `physics.py`, `submodels/*`, `defaults.py`, or the importer, run the baseline check + `tests/test_regression_snapshot.py` and put the deltas in your PR (template has the table). "±0.0000 at 4 decimals" is the expectation; anything else needs a full weighted-sweep justification.
 6. **After any `spec_to_bike_config` change, reseed the DB** (`scripts/reseed_configs_from_specs.py`) — otherwise `/api/simulate?bike_id=N` silently diverges from the spec path. Then regenerate the surrogate (standing contract).
 7. **After any catalog change, run `python scripts/audit_headline_stats.py --fix`** — the site's stat tiles/OG cards must match the DB.
 8. **Never `git add -A`.** Stage explicit file lists; the tree often carries unrelated WIP.
@@ -139,7 +139,7 @@ maintainers and are never committed. To run your own instance, see
 
 - [ ] Fork (or clone) the repo: <https://github.com/toto171/MotoQuant.in>.
 - [ ] Get the test suite green locally (`CONTRIBUTING.md` §2 — use the focused subset first, the full run takes ~30 min).
-- [ ] Run a sim: `python -m motoquant.run sim --bike-id 1 --venue-id 1` → the K5 at Aamby Valley (≈ 10.1 s; the 9.9331 s pin is the sea-level reference config, `make baselines`).
+- [ ] Run a sim: `python -m motoquant.run sim --bike-id 1 --venue-id 1` → the K5 at Aamby Valley (≈ 10.1 s; the 10.0436 s pin is the sea-level reference config, `make baselines`).
 - [ ] Boot the API (`make api`) and the web app (`make web-install && make web-dev`), and click through the simulator and the chat.
 - [ ] Read `AGENTS.md` and the top of `CHANGELOG.md`.
 - [ ] Pick one §4 good-first-issue, scope it as a GitHub Issue, then ship a PR — however small. Proving the workflow end-to-end on day one beats a big first contribution.

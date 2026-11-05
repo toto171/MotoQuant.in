@@ -584,6 +584,10 @@ class MotoQuantEngine:
         _top_gear_idx = cfg.drivetrain.num_gears - 1
         _shift_time_s = cfg.drivetrain.total_shift_time_ms / 1000.0
         _cd_a_floor = self._cd_a_floor
+        # 2026-11 epoch round 3: the profile's launch wheelie margin
+        # (CategoryProfile.wheelie_margin; 1.0 = the bit-identical no-op,
+        # the multiply is skipped entirely).
+        _wheelie_margin = self._profile.wheelie_margin
         # Factory speed limiter (July 17, 2026): converted to m/s once, out of
         # the hot loop. None (and a defensive 0/negative) = unrestricted — the
         # unlimited path pays only an `is not None` check per clamp site and
@@ -928,6 +932,14 @@ class MotoQuantEngine:
             # traction cap was evaluated at the UNcapped demand's load
             # transfer: a rear load above the whole bike's weight.)
             a_wheelie = self.max_accel_before_wheelie(v, t, F_aero)
+            # 2026-11 epoch round 3: over the LAUNCH — from rest to the
+            # 60-ft line — the rider holds only ``wheelie_margin`` of the
+            # ceiling (throttle / clutch modulation keeping the front down).
+            # Past the 60-ft mark the bike is ridden to its own ceiling; a
+            # step already below the capped ceiling (power-limited) is
+            # untouched.
+            if _wheelie_margin != 1.0 and x < SIXTY_FOOT_M:
+                a_wheelie = a_wheelie * _wheelie_margin
             if (F_drive - F_aero - F_rr) / m_eff > a_wheelie:
                 F_drive = a_wheelie * m_eff + F_aero + F_rr
 

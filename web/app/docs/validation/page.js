@@ -4,7 +4,7 @@ import CodeComment from '../../../components/CodeComment';
 
 export const metadata = {
   title: 'Validation Data',
-  description: 'MotoQuant accuracy report — 250 benchmarks (276 matched) against published Cycle World, Sport Rider, MotoStatz, MCN, and BikeWale timeslips. Weighted bias +0.007s, weighted mean absolute error 0.263s, top-10 mean error ±0.007s. Per-cluster bias across the cylinder-aware 12-cluster taxonomy and the open small-cc + 2-stroke calibration gaps. Reference baselines: K5 9.9331s, R1 10.1436s, Hayabusa 10.3633s — Δ ±0.0000 since July 13, 2026.',
+  description: 'MotoQuant accuracy report — 250 benchmarks (266 matched) against published Cycle World, Sport Rider, MotoStatz, MCN, and BikeWale timeslips. Weighted bias +0.022s, weighted mean absolute error 0.249s, top-10 mean error ±0.006s. Per-cluster bias across the cylinder-aware 12-cluster taxonomy and the open small-cc, entry and 2-stroke calibration gaps. Reference baselines: K5 10.0436s, R1 10.1092s, Hayabusa 10.1100s — re-pinned by the November 2026 accuracy epoch.',
   alternates: { canonical: 'https://motoquant.in/docs/validation' },
   keywords: [
     'motorcycle simulator accuracy',
@@ -20,41 +20,41 @@ export const metadata = {
   ],
 };
 
-// Top-10 cleanest validated runs, 8 August 2026 sweep
-// (reports/acc_final_2026_08_08.json — 10 smallest |Δ| across the matched
-//  corpus, mean ±0.007s. Every row is instrumented or magazine data — no
-//  DERIVED estimate reaches the top 10 in this sweep.)
+// Top-10 cleanest validated runs, 5 November 2026 sweep
+// (reports/acc_final_2026_11_05.json / web/app/validation/accuracy_data.json —
+//  10 smallest |Δ| among NON-derived rows, mean ±0.006s. DERIVED estimates
+//  are excluded from the showcase. MUST equal the landing-page TOP10.)
 const TOP10 = [
-  { rank: 1, name: "Kawasaki ZRX1200R", year: 2001, cc: "1164cc I4", target: 10.85, sim: 10.8487, delta: -0.001, source: "Cycle World 2001" },
-  { rank: 2, name: "Honda CBR650R E-Clutch", year: 2024, cc: "649cc I4", target: 11.45, sim: 11.4521, delta: 0.002, source: "MotoStatz (instrumented)" },
-  { rank: 3, name: "BMW S 1000 RR", year: 2015, cc: "999cc I4", target: 9.90, sim: 9.9038, delta: 0.004, source: "Cycle World 2015" },
-  { rank: 4, name: "Triumph Rocket 3 Storm R", year: 2024, cc: "2458cc I3", target: 10.56, sim: 10.5541, delta: -0.006, source: "Cycle World (tuned pass)" },
-  { rank: 5, name: "Honda CBR250RR (Indonesia)", year: 2017, cc: "250cc I2", target: 14.60, sim: 14.6060, delta: 0.006, source: "VBox 2017 (instrumented)" },
-  { rank: 6, name: "MV Agusta Brutale 1000 RR Assen", year: 2024, cc: "998cc I4", target: 10.15, sim: 10.1430, delta: -0.007, source: "Cycle World" },
-  { rank: 7, name: "Yamaha MT-10 SP", year: 2022, cc: "998cc I4", target: 10.35, sim: 10.3405, delta: -0.010, source: "Cycle World" },
-  { rank: 8, name: "Ducati 1098", year: 2007, cc: "1099cc V2", target: 10.40, sim: 10.4100, delta: 0.010, source: "Cycle World 2007" },
-  { rank: 9, name: "Kawasaki Z H2 SE", year: 2024, cc: "998cc I4", target: 9.95, sim: 9.9631, delta: 0.013, source: "Cycle World" },
-  { rank: 10, name: "Kawasaki Ninja ZX-10R", year: 2011, cc: "998cc I4", target: 10.08, sim: 10.0933, delta: 0.013, source: "Sport Rider 7/11" },
+  { rank: 1, name: "Kawasaki Ninja ZX-10R", year: 2011, cc: "998cc I4", target: 10.08, sim: 10.0786, delta: -0.001, source: "Sport Rider 7/11" },
+  { rank: 2, name: "Aprilia RS 660 Factory", year: 2025, cc: "659cc I2", target: 11.24, sim: 11.2439, delta: 0.004, source: "MotoStatz (Dragy, instrumented)" },
+  { rank: 3, name: "Yamaha FZ6 Fazer", year: 2004, cc: "600cc I4", target: 11.53, sim: 11.5347, delta: 0.005, source: "Cycle World 2004" },
+  { rank: 4, name: "BMW M1000RR", year: 2021, cc: "999cc I4", target: 9.80, sim: 9.8051, delta: 0.005, source: "Cycle World 2021" },
+  { rank: 5, name: "BMW S 1000 RR", year: 2019, cc: "999cc I4", target: 9.85, sim: 9.8446, delta: -0.005, source: "Cycle World 2019" },
+  { rank: 6, name: "Yamaha RD350", year: 1973, cc: "347cc I2 2T", target: 14.30, sim: 14.3058, delta: 0.006, source: "Cycle World (period test)" },
+  { rank: 7, name: "Yamaha VMAX 1700", year: 2009, cc: "1679cc V4", target: 10.30, sim: 10.3063, delta: 0.006, source: "Cycle World 2009" },
+  { rank: 8, name: "Suzuki SV650X", year: 2018, cc: "645cc V2", target: 12.10, sim: 12.1075, delta: 0.007, source: "motorcyclespecs.com (aggregator)" },
+  { rank: 9, name: "Triumph Speed Triple 1050", year: 2005, cc: "1050cc I3", target: 11.01, sim: 11.0190, delta: 0.009, source: "Sport Rider 2005" },
+  { rank: 10, name: "Yamaha MT-10", year: 2016, cc: "998cc I4", target: 10.35, sim: 10.3610, delta: 0.011, source: "Cycle World 2016" },
 ];
 
-// Per-cluster weighted bias + weighted |Δ|, 8 August 2026 sweep
-// (reports/acc_final_2026_08_08.json clusters — cylinder-aware 12-cluster
+// Per-cluster weighted bias + weighted |Δ|, 5 November 2026 sweep
+// (reports/acc_final_2026_11_05.json clusters, epoch rules — cylinder-aware 12-cluster
 // taxonomy: twins/singles/small-I4s are split out from the old
 // displacement-only buckets). Bias is weighted; N in note.
 // Badge rule: "Closed" = weighted |bias| ≤ 0.05s AND weighted |Δ| ≤ 0.30s.
 const CLUSTERS = [
-  { name: '600–1000cc sport (I4/triple)', bias: '−0.009s', status: 'closed', note: 'N=72 · weighted |Δ| 0.175s — largest cluster, centred' },
-  { name: 'Sport twins 600–1300cc', bias: '+0.006s', status: 'closed', note: 'N=48 · weighted |Δ| 0.246s — second-largest cluster, centred' },
-  { name: 'Litre sport ≥195 hp', bias: '+0.027s', status: 'closed', note: 'N=30 · weighted |Δ| 0.147s — tightest |Δ| in the corpus' },
-  { name: '500–700cc twin', bias: '+0.001s', status: 'closed', note: 'N=17 · weighted |Δ| 0.145s — instrumented Sport Rider era; one row fell out of the match set this sweep (18 → 17)' },
-  { name: '200–300cc entry', bias: '−0.018s', status: 'closed', note: 'N=14 · weighted |Δ| 0.231s — bias centred; the unweighted |Δ| of 0.513s still reflects derived-benchmark spread' },
-  { name: 'Cruiser 1300+', bias: '+0.036s', status: 'closed', note: 'N=5 · weighted |Δ| 0.209s — thin set; muscle-bike slip-launch' },
-  { name: 'Singles 300–500cc', bias: '+0.030s', status: 'open', note: 'N=16 · weighted |Δ| 0.509s — bias centred but spread is wide (unweighted |Δ| 1.327s); derived-benchmark uncertainty' },
-  { name: '300–500cc twin', bias: '−0.038s', status: 'open', note: 'N=8 · weighted |Δ| 0.361s — derived-data uncertainty' },
-  { name: '150–200cc entry', bias: '−0.011s', status: 'open', note: 'N=13 · weighted |Δ| 0.702s — bias closed from −0.402s in July, but the per-bike spread against the instrumented Racelogic rows stays wide' },
-  { name: 'Small-cc I4 screamers', bias: '+0.134s', status: 'open', note: 'N=2 · weighted |Δ| 0.962s — re-centred from −0.976s in July, but a two-bike cluster is far too thin to call closed' },
-  { name: '2-stroke vintage', bias: '+0.077s', status: 'open', note: 'N=9 · weighted |Δ| 0.642s — off-pipe/on-pipe transition' },
-  { name: 'Other', bias: '+0.019s', status: 'open', note: 'N=42 · weighted |Δ| 0.324s — mixed heavy ADV/tourer bucket' },
+  { name: '600–1000cc sport (I4/triple)', bias: '−0.016s', status: 'closed', note: 'N=76 · weighted |Δ| 0.146s — largest cluster, centred' },
+  { name: 'Sport twins 600–1300cc', bias: '−0.004s', status: 'closed', note: 'N=46 · weighted |Δ| 0.210s — second-largest cluster, centred' },
+  { name: 'Litre sport ≥195 hp', bias: '−0.007s', status: 'closed', note: 'N=29 · weighted |Δ| 0.168s — centred; two accepted ms-level dry-mass inversions (HP4 Race, Panigale V4R)' },
+  { name: 'Cruiser 1300+', bias: '+0.034s', status: 'closed', note: 'N=4 · weighted |Δ| 0.220s — thin set; muscle-bike slip-launch' },
+  { name: '500–700cc twin', bias: '+0.144s', status: 'open', note: 'N=7 · weighted |Δ| 0.206s — slow bias at rated rubber (the 2026-07/08 x1.14 class grip corrector is retired)' },
+  { name: '200–300cc entry', bias: '+0.265s', status: 'open', note: 'N=14 · weighted |Δ| 0.325s — slow bias; the unweighted |Δ| of 0.646s reflects derived-benchmark spread' },
+  { name: 'Singles 300–500cc', bias: '−0.265s', status: 'open', note: 'N=17 · weighted |Δ| 0.620s — quick bias and wide spread (unweighted |Δ| 1.339s); derived-benchmark uncertainty' },
+  { name: '300–500cc twin', bias: '+0.189s', status: 'open', note: 'N=8 · weighted |Δ| 0.355s — derived-data uncertainty' },
+  { name: '150–200cc entry', bias: '−0.106s', status: 'open', note: 'N=13 · weighted |Δ| 0.651s — per-bike spread against the instrumented Racelogic rows stays wide' },
+  { name: 'Small-cc I4 screamers', bias: '−0.195s', status: 'open', note: 'N=2 · weighted |Δ| 0.270s — a two-bike cluster is far too thin to call closed' },
+  { name: '2-stroke vintage', bias: '+0.259s', status: 'open', note: 'N=9 · weighted |Δ| 0.339s — slow bias; off-pipe/on-pipe transition' },
+  { name: 'Other', bias: '+0.154s', status: 'open', note: 'N=41 · weighted |Δ| 0.367s — mixed heavy ADV/tourer bucket, runs slow' },
 ];
 
 export default function ValidationPage() {
@@ -62,10 +62,10 @@ export default function ValidationPage() {
     <article>
       <header className="mb-12">
         <CodeComment className="mb-3">validation · 250 benchmarks</CodeComment>
-        <h1 className="font-display font-bold text-4xl text-white mb-4 tracking-tight">Benchmark Results — August 2026</h1>
+        <h1 className="font-display font-bold text-4xl text-white mb-4 tracking-tight">Benchmark Results — November 2026</h1>
         <p className="text-white/60 text-base leading-relaxed">
-          Source-quality-weighted sweep results across 250 published benchmarks (276 matched to a catalog bike).
-          Metrics, per-cluster bias, and methodology. Last updated 8 August 2026.
+          Source-quality-weighted sweep results across 250 published benchmarks (266 matched to a catalog bike
+          under the epoch binding). Metrics, per-cluster bias, and methodology. Last updated 5 November 2026.
         </p>
         <Link
           href="/validation"
@@ -78,13 +78,13 @@ export default function ValidationPage() {
 
       {/* Headline stats */}
       <section className="mb-14">
-        <h2 className="font-display font-bold text-2xl text-white mb-6">Aggregate Metrics (276 matched benchmarks)</h2>
+        <h2 className="font-display font-bold text-2xl text-white mb-6">Aggregate Metrics (266 matched benchmarks)</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
           {[
-            { num: '0.263s', label: 'Weighted |Δ|' },
-            { num: '0.200s', label: 'Median |Δ|' },
-            { num: '+0.007s', label: 'Weighted bias (sim − real)' },
-            { num: '±0.007s', label: 'Top-10 mean error' },
+            { num: '0.249s', label: 'Weighted |Δ|' },
+            { num: '0.199s', label: 'Median |Δ|' },
+            { num: '+0.022s', label: 'Weighted bias (sim − real)' },
+            { num: '±0.006s', label: 'Top-10 mean error' },
           ].map((s, i) => (
             <div key={i} className="card p-4 border-brand-orange/20 text-center">
               <div className="font-display font-bold text-xl text-brand-orange tabular-nums">{s.num}</div>
@@ -94,13 +94,13 @@ export default function ValidationPage() {
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { num: '75', label: 'Within ±0.10s' },
-            { num: '138', label: 'Within ±0.20s' },
-            { num: '224', label: 'Within ±0.50s' },
-            { num: '256', label: 'Within ±1.00s' },
+            { num: '72', label: 'Within ±0.10s' },
+            { num: '133', label: 'Within ±0.20s' },
+            { num: '222', label: 'Within ±0.50s' },
+            { num: '248', label: 'Within ±1.00s' },
           ].map((s, i) => (
             <div key={i} className="card p-4 text-center">
-              <div className="font-display font-bold text-xl text-white tabular-nums">{s.num}<span className="text-white/40 text-sm">/276</span></div>
+              <div className="font-display font-bold text-xl text-white tabular-nums">{s.num}<span className="text-white/40 text-sm">/266</span></div>
               <div className="font-mono text-[10px] text-white/50 uppercase tracking-wide mt-1">{s.label}</div>
             </div>
           ))}
@@ -122,9 +122,9 @@ export default function ValidationPage() {
             <div className="text-right">Δ</div>
           </div>
           {[
-            { name: 'GSX-R 1000 K5 (2005)', target: 9.970, sim: 9.933, delta: -0.037 },
-            { name: 'YZF-R1 4C8 (2007)', target: 10.300, sim: 10.144, delta: -0.156 },
-            { name: 'Hayabusa Gen1 (1999)', target: 10.350, sim: 10.363, delta: +0.013 },
+            { name: 'GSX-R 1000 K5 (2005)', target: 9.970, sim: 10.044, delta: +0.074 },
+            { name: 'YZF-R1 4C8 (2007)', target: 10.300, sim: 10.109, delta: -0.191 },
+            { name: 'Hayabusa Gen1 (1999)', target: 10.350, sim: 10.110, delta: -0.240 },
           ].map((b, i) => (
             <div key={i} className="grid grid-cols-[1fr_120px_120px_120px] gap-4 px-5 py-3 border-b border-white/[0.04] last:border-0">
               <div className="font-display font-semibold text-white text-sm">{b.name}</div>
@@ -142,9 +142,9 @@ export default function ValidationPage() {
       <section className="mb-14">
         <h2 className="font-display font-bold text-2xl text-white mb-4">Top 10 Most Accurate Bikes</h2>
         <p className="text-white/60 text-sm mb-6">
-          The 10 smallest residuals across the matched corpus — top-10 mean absolute error ±0.007s.
-          Sources: Cycle World, Sport Rider, MCN, Motorcycle Consumer News. One row (rank 3) is a
-          DERIVED estimate and is flagged as such.
+          The 10 smallest residuals among the non-derived matched rows — top-10 mean absolute error ±0.006s.
+          Sources: Cycle World, Sport Rider, MotoStatz and one aggregator figure. DERIVED estimates are
+          excluded from this showcase.
           Conditions: race fuel, professional rider, ideal strip.
         </p>
         <div className="card border-brand-orange/20 overflow-hidden">
@@ -235,6 +235,12 @@ export default function ValidationPage() {
             Sport Rider, MCN, Motorcyclist, and BikeWale. Indian community strip records from MotoStatz, Facebook
             drag groups, and drag event published results. All benchmarks use professional rider / race fuel / ideal
             strip conditions unless explicitly noted.
+          </p>
+          <p>
+            <strong className="text-white">Timing convention:</strong> Since the November 2026 accuracy epoch every
+            elapsed time is clocked from the 1-ft stage-beam rollout — ET = t(402.336 m) − t(0.3048 m) — the way
+            strip timeslips, North American magazine tests and Dragy runs are timed. Benchmark rows timed from first
+            motion (the Indonesian Racelogic tests) are scored against a sim timed from first motion.
           </p>
           <p>
             <strong className="text-white">Simulation conditions:</strong> All simulations run at ISA sea-level

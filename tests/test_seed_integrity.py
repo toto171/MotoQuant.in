@@ -278,6 +278,13 @@ class TestFreshSeedCoverage:
             _enrich_bike_row_for_fitment(seeded_db._conn, d)
             if not any(is_compatible(p, d)[0] for p in exhausts):
                 missing.append(f"{d['manufacturer']} {d['model_name']}")
+        # The five 125 cc bikes whose real final drive (520 / 420 chain, CVT)
+        # the 2026-10 importer now infers have no genuine exhaust yet — a
+        # documented catalog gap, see
+        # tests/test_catalog_integration.py::KNOWN_EXHAUST_GAPS.
+        from tests.test_catalog_integration import KNOWN_EXHAUST_GAPS
+
+        missing = [m for m in missing if m not in KNOWN_EXHAUST_GAPS]
         assert not missing, (
             f"{len(missing)} bikes have zero exhaust options: {missing[:5]}"
         )

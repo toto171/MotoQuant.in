@@ -37,7 +37,7 @@
  * 'overflow' | 'zero_division').
  */
 
-export const ENGINE_SCHEMA = 4;
+export const ENGINE_SCHEMA = 5;
 /** 1 ft — the drag-strip rollout every published ET uses (2026-10 epoch). */
 export const ROLLOUT_M = 0.3048;
 const DEFAULT_URL = '/engine/motoquant_core.wasm';
@@ -131,7 +131,7 @@ function decodeResult(exports, ptr) {
 /**
  * Run one simulation.
  *
- * @param {object} resolvedConfig  motoquant/native.py resolve_config() output (schema 4)
+ * @param {object} resolvedConfig  motoquant/native.py resolve_config() output (schema 5)
  * @param {object} [opts]
  * @param {number} [opts.distance=402.336]  metres
  * @param {number} [opts.maxTime=26]        seconds

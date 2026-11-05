@@ -183,8 +183,10 @@ class TestDeriveCategoryTag:
         assert tag == "litre_sport_600_1000"
 
     def test_600_supersport_i4_unaffected_by_v2(self):
-        # 599cc I4 supersports keep their pre-v2 routing (mid_twin_500_700
-        # hosts the 600-I4 launch calibration; screamer branch is <500cc).
+        # 599cc I4 supersports are not caught by the v2 screamer branch
+        # (<500cc). Since the 2026-10 epoch (round 2 routing fix) they route
+        # with the 600-1000 supersport class instead of mid_twin_500_700
+        # (tests/test_epoch2_tune_profiles.py pins the whole 599 cc set).
         tag = derive_category_tag(
             manufacturer="Yamaha",
             model_name="YZF-R6",
@@ -194,7 +196,7 @@ class TestDeriveCategoryTag:
             category="sport",
             cylinders=4,
         )
-        assert tag == "mid_twin_500_700"
+        assert tag == "litre_sport_600_1000"
 
     def test_muscle_naked_routed_to_cruiser(self):
         # VMAX 1700 / B-King / Rocket 3 are catalog-tagged sport/naked for
@@ -297,9 +299,9 @@ class TestReferenceBaselinesPreserved:
     @pytest.mark.parametrize(
         "factory,expected_et",
         [
-            (gsxr1000_k5, 9.9331),
-            (yzfr1_4c8, 10.1436),
-            (hayabusa_gen1, 10.3633),
+            (gsxr1000_k5, 10.0436),
+            (yzfr1_4c8, 10.1092),
+            (hayabusa_gen1, 10.1100),
         ],
     )
     def test_reference_et_within_1ms(self, factory, expected_et):

@@ -1,6 +1,7 @@
 # Rust physics core — `rust/motoquant-core`
 
-> Written 2026-10-23; updated 2026-10-24 (schema 2, production wiring).
+> Written 2026-10-23; updated 2026-10-24 (schema 2, production wiring) and
+> 2026-11-05 (schema 5, the 2026-10/11 accuracy epoch's final physics + knobs).
 > Status: **bit-parity proven on the full catalog; serves every production
 > simulation when installed** (selected by `motoquant/engine_select.py`,
 > decision record [ADR-0007](adr/0007-rust-physics-core.md)).
@@ -13,18 +14,21 @@
 | | Python reference | Rust native (PyO3) | Rust wasm32 (browser) |
 |---|---|---|---|
 | Quarter-mile, fixed dt | 430–650 ms/sim | **8.5 ms** (loop) / 13.6 ms end to end (busy host); 5.1 / 8.9 ms on a quiet one | ~5–16 ms/sim under node 22, host-dependent |
-| Parity vs Python | — | **bit-identical**: every channel, every step, all 541 catalog bikes (fixed + adaptive + top speed) + 262 stress variants, 1,894/1,894 cases | ET / trap / every split / sample count / loop step count / final dt **identical** on all 53 fixture cases and all 1,082 catalog runs; position, velocity, rpm and temperature channels bit-identical; force-type channels carry 1-ULP noise (see below) |
-| Size | — | 0.96 MB abi3 `.so` | **274 KB raw / 94 KB gzip** |
+| Parity vs Python | — | **bit-identical**: every channel, every step, all 541 catalog bikes (fixed + adaptive + top speed) + 327 stress variants, 1,959/1,959 cases (1,936 bit-identical on every channel; the other 23 raise the same exception on both engines) | ET / trap / every split / sample count / loop step count / final dt **identical** on all 59 fixture cases and all 1,082 every-bike catalog runs (2026-11-05, schema 5); position, velocity and rpm channels bit-identical; force-type channels (and, since the round-2 tyre heat balance, `T_tire` on 25 of 1,082 runs) carry 1-ULP noise (see below) |
+| Size | — | 0.96 MB abi3 `.so` | **285 KB raw / 99 KB gzip** (284,637 B / 99,402 B, schema 5) |
 
-Numbers: `make native-parity` (full sweep, 2026-10-24, host Xeon AVX-512,
-Python 3.13, NumPy 2.4.6, rustc 1.97) and `node web/scripts/engine-parity.mjs`
-(`make wasm`). The 2026-10-23 sweep is kept as
-`reports/native_parity_2026-10-23.json`.
+Numbers: `make native-parity` (full sweep, 2026-11-05 —
+`reports/native_parity_2026-11-05.json`; host x86_64, Python 3.13.16, NumPy
+2.4.6, `exp_impl=svml_ha`, `exact=True`) and `node web/scripts/engine-parity.mjs`
+(`make wasm`). Earlier sweeps are kept as `reports/native_parity_2026-10-23.json`
+… `_2026-11-03.json`. Speed on that host (serial bench, 23 bikes): Python
+332 ms/sim fixed dt vs native 7.9 ms end to end / 4.6 ms in Rust (42× / 72×);
+adaptive 226 vs 5.6 / 3.0 ms.
 
 ## Architecture: "Python resolves, Rust integrates"
 
 ```
-BikeConfig ──► MotoQuantEngine(cfg)  ──►  native.resolve_engine(eng)  ──► JSON (schema 2)
+BikeConfig ──► MotoQuantEngine(cfg)  ──►  native.resolve_engine(eng)  ──► JSON (schema 5)
  (Python)       _precompute()               every value run() reads,          │
                 _init_submodels()           AFTER category dispatch,          ▼
                 category profile            env corrections, tire mu    rust/motoquant-core
@@ -184,11 +188,13 @@ transcendental functions. Concretely:
    | `int(q) + 1 == 0` (e.g. `max_time = -0.0015`) | empty result | empty result |
    | `dt == 0` | `ZeroDivisionError` | `ZeroDivisionError` |
    | zero wheelbase / CoG height | `ZeroDivisionError` on the first step | `ZeroDivisionError` at resolve |
-   | `distance + rollout_m <= 0` (nothing to integrate) | `ValueError` | `ValueError` (same message) |
+   | `distance <= rollout_m` — incl. `distance = 0`, the default 1-ft rollout with `distance ≤ 0.3048`, and `distance` NaN (nothing past the beam to time) | `ValueError` | `ValueError` (same message) |
+   | `rollout_m` NaN, negative or ±inf | `ValueError` | `ValueError` (same message) |
    | oversized run | `MemoryError` from `np.zeros` | `MemoryError` past `MAX_SAMPLES`, see Limitations |
 
-   Every row raises the same class on both engines, and the parity sweep
-   fails on any mismatch (`EXC_EQUIV` is empty since the 2026-10 epoch made
+   Every row raises the same class on both engines (verified 2026-11-05; the
+   `max_time` messages differ only in a native suffix naming `max_time` /
+   `dt`), and the parity sweep fails on any mismatch (`EXC_EQUIV` is empty since the 2026-10 epoch made
    Python reject an empty run with a `ValueError` instead of an accidental
    `UnboundLocalError`).
 
@@ -198,7 +204,7 @@ pressure-grip factor, aero lift and rider CoG offset on every one of up to
 three friction / weight-transfer calls, with identical arguments. Rust
 evaluates each once per step: same expression, same inputs, same doubles.
 
-## Parity results (2026-10-24, schema 2)
+## Parity results (2026-11-05, schema 5)
 
 `make native-parity` (= `scripts/check_native_parity.py`, which now defaults
 to the full top-speed sweep; `--topspeed-sample N` subsamples it). Each case
@@ -213,7 +219,7 @@ r_eff. It also compares sample counts, the final `dt` and every split.
 | catalog — every current `bike_config`, fixed dt, via `db_row_to_config` | 541 | 541 | 0 |
 | adaptive dt — every catalog bike | 541 | 541 | 0 |
 | top speed (`run_top_speed`, adaptive, plateau + LSR splits) — every catalog bike | 541 | 541 | 0 |
-| stress (below) | 262 | 253 (+9 both-raise) | 0 |
+| stress (below) | 327 | 304 (+23 both-raise) | 0 |
 
 The stress variants cover:
 
@@ -249,7 +255,8 @@ The stress variants cover:
   - every error path: `distance = 0`, `max_time` −1 / NaN / inf / −0.0015,
     `dt = 0`.
 
-**Target met: worst |ΔET| = 0 s (≤ 1e-9 required) across 1,894 cases.** The 9
+**Target met: worst |ΔET| = 0 s (≤ 1e-9 required) across 1,959 cases**
+(2026-11-05, schema 5; 2026-10-24 schema 2: 1,894 cases). The 23
 non-bit-identical cases are the ones where both engines raise the same
 class, so there are no channels to compare. There is no residual to
 root-cause on this host.
@@ -257,7 +264,7 @@ root-cause on this host.
 ### wasm32 (browser) parity
 
 `make wasm` → `node web/scripts/engine-parity.mjs` runs the real `engine.js`
-against the committed 53-case fixture. `scripts/gen_engine_web.py
+against the committed 59-case fixture (53 before the 2026-10 epoch). `scripts/gen_engine_web.py
 --full-catalog PATH` writes an every-bike fixture (fixed + adaptive, 1,082
 runs) for the same harness. The harness **fails** on any of these:
 
@@ -268,11 +275,18 @@ runs) for the same harness. The harness **fails** on any of these:
 Results:
 
 * ET, trap speed, **every split**, `finished`, sample count, loop step count
-  and final `dt` are **identical** on all 53 fixture cases, and on all 1,082
-  catalog runs (re-checked 2026-10-24 with the schema-2 wasm; mean 15 ms/sim
-  with channels on the busy host).
-* The integrated state channels (t, x, v, rpm, gear, T_tire, T_clutch,
-  P_boost, r_eff) are bit-identical everywhere.
+  and final `dt` are **identical** on all 59 fixture cases (re-checked
+  2026-11-05 with the schema-5 wasm: worst |ΔET| 0, worst |Δtrap| 0, mean
+  11 ms/sim), and on all 1,082
+  catalog runs (re-checked 2026-11-05 with the schema-5 wasm: 1,082/1,082 ok,
+  worst |ΔET| 0, worst |Δtrap| 0, worst split 0, mean 6.9 ms/sim; schema 2 on
+  2026-10-24: mean 15 ms/sim on a busier host).
+* The integrated state channels (t, x, v, rpm, gear, T_clutch, P_boost,
+  r_eff) are bit-identical everywhere. `T_tire` was too until schema 4; the
+  round-2 tyre heat balance feeds force-type terms (rolling loss, slip
+  power) into the thermal ODE, so on 25 of the 1,082 catalog runs the tyre
+  temperature now carries the same 1-ULP noise (2026-11-05) — the times are
+  still identical.
 * The force-type channels (F_drag, F_rr, N_front/N_rear, slip, traction %,
   a, F_drive, power) differ by **1 ULP at a small fraction of steps** (for
   example, 27 of 9,935 F_drag samples on the K5).
@@ -322,7 +336,7 @@ AVX-512 NumPy host bit for bit.
 ```bash
 make native               # maturin build --release --locked (abi3 wheel) + pip install
 make native-test          # cargo test + pytest gate; FAILS if the build is missing/stale
-make native-parity        # FULL sweep (1,894 cases, ~10 min on 4 cores) → reports/native_parity_<date>.json
+make native-parity        # FULL sweep (1,959 cases, ~4 min on 4 cores) → reports/native_parity_<date>.json
 make native-parity-quick  # CI slice (refs + 40 bikes + stress slice), no report
 make wasm                 # cargo build wasm32 + copy + manifest + fixtures + node parity
 ```
@@ -365,7 +379,7 @@ libm).
 - `--build-arg MOTOQUANT_NATIVE=0` produces a pure-Python image.
 - Verified 2026-10-24 by building and booting both variants. `/api/health`
   reports `engine: native` and `engine: python`
-  (`fallback_reason: unavailable`) respectively, and K5 = 9.9331 s from both.
+  (`fallback_reason: unavailable`) respectively, and K5 = 10.0436 s from both.
 
 The browser needs a *resolved* config. Today the fixtures carry them. The
 production path is a server route that returns
@@ -390,7 +404,17 @@ refuses it (`available()` is False on a mismatch), and so does the wasm
 loader. A stale extension is refused by `auto`.
 
 Schema history: **1** was the initial schema (2026-10-23). **2** added
-`mass.m_total_cfg` (2026-10-24).
+`mass.m_total_cfg` (2026-10-24). **3** = the 2026-10 physics epoch (no
+resolved-dict shape change; the run contract gained the `rollout_m` run
+parameter with beam-relative splits — ET = t(D) − t(0.3048 m) by default —
+slip-phase effective mass, soft-cut limiter, continuous slip ratio). **4** =
+epoch round 2 (`chassis` is the combined bike + rider CoG with
+`rider_shift_frac`; `tire.heat_partition` / `tire.conv_area_m2`; drag pitch
+moment; the finish line is `distance`, not `rollout_m + distance`). **5** =
+epoch round 3 (`wheelie.margin` / `wheelie.margin_window_m` —
+`CategoryProfile.wheelie_margin`, held from rest to the 60-ft line; 1.0 is
+a bit-identical no-op). The authoritative history comments live next to
+`SCHEMA_VERSION` in `motoquant/native.py` and `config.rs`.
 
 ## Limitations (honest list)
 

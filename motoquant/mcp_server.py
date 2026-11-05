@@ -67,10 +67,11 @@ INSTRUCTIONS = (
     "MotoQuant simulates motorcycle quarter-mile drag runs from first "
     "principles (RK4 over 15 physics sub-models), not from lookup tables. "
     "Pick a bike with search_bikes (or a bike_preset), then simulate. "
-    "ET is elapsed time over 402.3 m; trap speed is the speed crossing that "
-    "line; the 60-foot split is the launch-quality number. All et_delta_s "
+    "ET is elapsed time over 402.3 m timed from the 1-ft beam rollout; trap "
+    "speed is the speed crossing that line; the 60-foot split is the "
+    "launch-quality number. All et_delta_s "
     "values are after-minus-before, so negative means faster. Published "
-    "accuracy: weighted mean |error| ~0.27 s across 277 matched real-world "
+    "accuracy: weighted mean |error| ~0.25 s across 266 matched real-world "
     "benchmarks — good for ranking builds and what-ifs, not for claiming a "
     "specific bike will run an exact ET."
 )
@@ -518,7 +519,7 @@ def _t_simulate_top_speed(backend: Any, args: dict) -> dict:
         "reached_plateau": res.get("reached_plateau"),
         "note": (
             "Unrestricted unless the bike carries a factory speed limiter. "
-            "Top-speed accuracy is weaker than ET accuracy (fleet bias ~+25 km/h)."
+            "Top-speed accuracy is weaker than ET accuracy (mean |error| ~13 km/h, fleet bias ~+7 km/h)."
         ),
     }
 

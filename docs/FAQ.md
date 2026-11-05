@@ -15,7 +15,7 @@ Yes to both. Everything (the simulator, parts ROI, build optimizer, autotune, Dr
 - **Students** — learn motorcycle physics with a working model
 
 ### Is it accurate?
-MotoQuant is validated against **250 published benchmarks** (magazine road tests, instrumented GPS runs, timeslips), weighted by source quality. Across 276 matched runs the weighted mean error is about **0.26 s** and the mean bias **+0.007 s**. Reference bikes track closely: GSX-R 1000 K5 9.93 s simulated vs 9.97 s real, Hayabusa Gen1 10.36 s vs a 10.1–10.7 s real range. Small-cc bikes are less certain because few instrumented benchmarks exist for them. For bikes not in the library, results are estimates; use them to guide decisions, not as law. The full breakdown is at motoquant.in/validation.
+MotoQuant is validated against **250 published benchmarks** (magazine road tests, instrumented GPS runs, timeslips), weighted by source quality. Across 266 matched runs the weighted mean error is about **0.25 s** and the mean bias **+0.02 s**. Reference bikes: GSX-R 1000 K5 10.04 s simulated vs 9.97 s real, YZF-R1 10.11 s vs 10.3 s, Hayabusa Gen1 10.11 s vs a 10.1–10.7 s real range. Small-cc bikes are less certain because few instrumented benchmarks exist for them. For bikes not in the library, results are estimates; use them to guide decisions, not as law. The full breakdown is at motoquant.in/validation.
 
 ### Where does the simulator run?
 - **Web simulator** on motoquant.in — enter your bike and mods, get ET in ~50 ms

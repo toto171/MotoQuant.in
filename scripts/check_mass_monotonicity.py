@@ -17,7 +17,12 @@ it is built and current, else the Python reference; the two are bit-identical):
   and trap at each step, flagged when ET is not strictly increasing;
 * every ``ALL_KNOWN_BIKES`` spec via ``spec_to_bike_config`` at -10 / 0 /
   +10 kg dry mass — an inversion is ``ET(+10) < ET(0) - tol`` or
-  ``ET(-10) > ET(0) + tol`` (tol 1e-4 s);
+  ``ET(-10) > ET(0) + tol`` (tol 1e-4 s). This is the HARD gate (exit code);
+* (2026-11 epoch round 3) the same +-10 kg probe on the RIDER mass, and both
+  probes again at sea level / 15 C (``SEA_LEVEL_ENV``) — reported per probe
+  (``--strict`` makes them fail the exit code too). A rider-mass step moves
+  the system CoG, so a wheelie-limited launch can gain from extra low
+  "ballast"; such cases are listed with their ET step;
 * per-gear limiter fractions on the stock run: the share of integration steps
   in each gear that are traction-limited (``traction_pct`` == 100, the rear
   tyre's force cap binds) and wheelie-limited (the net acceleration sits on
@@ -57,6 +62,19 @@ import numpy as np  # noqa: E402
 TOL_S = 1e-4
 REF_DELTAS = (-20.0, -10.0, 0.0, 10.0, 20.0)
 CATALOG_DELTA = 10.0
+#: The second environment every catalog bike is probed in (round 3): sea
+#: level, 15 C — denser air than the default Aamby Valley (679 m, 22 C), so
+#: more power and a longer wheelie-limited launch.
+SEA_LEVEL_ENV = {"altitude_m": 0.0, "ambient_temp_c": 15.0}
+#: Probe name -> (environment override or None, mass field). "dry" at the
+#: default environment is the hard gate.
+PROBES = {
+    "dry": (None, "dry_mass_kg"),
+    "rider": (None, "rider_mass_kg"),
+    "sea_dry": (SEA_LEVEL_ENV, "dry_mass_kg"),
+    "sea_rider": (SEA_LEVEL_ENV, "rider_mass_kg"),
+}
+ALL_PROBES = tuple(PROBES)
 REFERENCES = {
     "K5": "gsxr1000_k5",
     "R1": "yzfr1_4c8",
@@ -76,6 +94,7 @@ def _neutral(p):
         over_clutch_factor=0.0,
         max_engine_decel_rads2=0.0,
         launch_floor_factor=0.0,
+        wheelie_margin=1.0,
     )
 
 
@@ -108,12 +127,29 @@ def _with_dry_mass(cfg, delta_kg: float):
     return c
 
 
+def _with_mass(cfg, field: str, delta_kg: float):
+    c = copy.deepcopy(cfg)
+    setattr(c.chassis, field, getattr(c.chassis, field) + delta_kg)
+    return c
+
+
+def _with_env(cfg, env: dict | None):
+    if not env:
+        return cfg
+    c = copy.deepcopy(cfg)
+    for k, v in env.items():
+        setattr(c.environment, k, v)
+    return c
+
+
 def limiter_fractions(eng, sim) -> dict:
     """Per-gear share of steps that are traction-limited / wheelie-limited.
 
     traction-limited: the rear tyre's force cap binds (traction_pct == 100).
     wheelie-limited: the net acceleration equals the wheelie ceiling (within
-    1e-3 m/s^2; the ceiling is re-evaluated with the engine's own method).
+    1e-3 m/s^2; the ceiling is re-evaluated with the engine's own method and,
+    in 1st gear, scaled by the profile's ``wheelie_margin`` exactly as the
+    run loop does).
     """
     from motoquant.constants import G
 
@@ -124,6 +160,7 @@ def limiter_fractions(eng, sim) -> dict:
     a_ms2 = sim.a * G
     gears = np.asarray(sim.gear)
     trac = np.asarray(sim.traction_pct) >= 100.0 - 1e-9
+    margin = getattr(getattr(eng, "_profile", None), "wheelie_margin", 1.0)
     wl = np.zeros(n, dtype=bool)
     for i in range(n):
         if trac[i]:
@@ -131,6 +168,8 @@ def limiter_fractions(eng, sim) -> dict:
         aw = eng.max_accel_before_wheelie(
             float(sim.v[i]), float(sim.t[i]), float(sim.F_drag[i])
         )
+        if gears[i] == 1 and margin != 1.0:
+            aw = aw * margin
         wl[i] = abs(a_ms2[i] - aw) < 1e-3
     for g in sorted({int(x) for x in gears}):
         m = gears == g
@@ -188,15 +227,46 @@ def probe_references(deltas=REF_DELTAS, with_fractions: bool = True) -> dict:
             a is not None and b is not None and b > a + TOL_S
             for a, b in zip(ets, ets[1:])
         )
-        out[label] = {"rows": rows, "monotone": monotone}
+        extra = {}
+        for probe in ("rider", "sea_dry", "sea_rider"):
+            env, field = PROBES[probe]
+            cfg_e = _with_env(base, env)
+            pe = [
+                run_one(_with_mass(cfg_e, field, dm))["et"]
+                for dm in (-CATALOG_DELTA, 0.0, CATALOG_DELTA)
+            ]
+            extra[probe] = {
+                "et_minus10": pe[0],
+                "et": pe[1],
+                "et_plus10": pe[2],
+                "monotone": all(
+                    a is not None and b is not None and b > a + TOL_S
+                    for a, b in zip(pe, pe[1:])
+                ),
+            }
+        out[label] = {"rows": rows, "monotone": monotone, "probes": extra}
     return out
 
 
 # ── catalog ────────────────────────────────────────────────────────────────
 
 
+def _probe_kinds(base, plus, minus, label: str) -> list[str]:
+    inv = []
+    if base is not None and plus is not None and plus < base - TOL_S:
+        inv.append(f"+10kg{label} faster")
+    if base is not None and minus is not None and minus > base + TOL_S:
+        inv.append(f"-10kg{label} slower")
+    return inv
+
+
 def _catalog_worker(args):
-    idx, neutral, with_fractions = args
+    """``(idx, neutral, with_fractions[, probes])`` -> one catalog row.
+
+    ``probes`` (default: the dry-mass gate only) is any subset of
+    :data:`PROBES`; the CLI runs them all."""
+    idx, neutral, with_fractions = args[:3]
+    probes = tuple(args[3]) if len(args) > 3 and args[3] else ("dry",)
     from motoquant.category_profiles import get_profile  # noqa: F401
     from motoquant.scraper.importer import spec_to_bike_config
     from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
@@ -208,6 +278,18 @@ def _catalog_worker(args):
             base = run_one(cfg, with_fractions=with_fractions)
             plus = run_one(_with_dry_mass(cfg, CATALOG_DELTA))
             minus = run_one(_with_dry_mass(cfg, -CATALOG_DELTA))
+            extra = {}
+            for probe in probes:
+                if probe == "dry":
+                    continue
+                env, field = PROBES[probe]
+                cfg_e = _with_env(cfg, env)
+                b = base["et"] if env is None else run_one(cfg_e)["et"]
+                extra[probe] = (
+                    b,
+                    run_one(_with_mass(cfg_e, field, CATALOG_DELTA))["et"],
+                    run_one(_with_mass(cfg_e, field, -CATALOG_DELTA))["et"],
+                )
         except Exception as exc:  # report, never hide
             return {
                 "i": idx,
@@ -227,14 +309,14 @@ def _catalog_worker(args):
     }
     if with_fractions:
         row["limiters"] = base.get("limiters")
-    inv = []
-    if base["et"] is not None and plus["et"] is not None:
-        if plus["et"] < base["et"] - TOL_S:
-            inv.append("+10kg faster")
-    if base["et"] is not None and minus["et"] is not None:
-        if minus["et"] > base["et"] + TOL_S:
-            inv.append("-10kg slower")
-    row["inversions"] = inv
+    row["inversions"] = _probe_kinds(base["et"], plus["et"], minus["et"], "")
+    for probe, (b, pl, mi) in extra.items():
+        row[f"probe_{probe}"] = {
+            "et": b,
+            "et_plus": pl,
+            "et_minus": mi,
+            "inversions": _probe_kinds(b, pl, mi, f" {probe}"),
+        }
     return row
 
 
@@ -243,11 +325,12 @@ def probe_catalog(
     workers: int | None = None,
     limit: int | None = None,
     with_fractions: bool = True,
+    probes=ALL_PROBES,
 ) -> list[dict]:
     from motoquant.scraper.known_bikes import ALL_KNOWN_BIKES
 
     n = len(ALL_KNOWN_BIKES) if limit is None else min(limit, len(ALL_KNOWN_BIKES))
-    jobs = [(i, neutral, with_fractions) for i in range(n)]
+    jobs = [(i, neutral, with_fractions, tuple(probes)) for i in range(n)]
     workers = workers or os.cpu_count() or 1
     if workers <= 1:
         return [_catalog_worker(j) for j in jobs]
@@ -267,9 +350,44 @@ def summarize_catalog(rows: list[dict]) -> dict:
         for r in rows
         if r.get("limiters") and "all" in r["limiters"]
     ]
+    probes = {}
+    for probe in PROBES:
+        if probe == "dry":
+            continue
+        key = f"probe_{probe}"
+        have = [r for r in rows if key in r]
+        if not have:
+            continue
+        bad = [r for r in have if r[key]["inversions"]]
+        probes[probe] = {
+            "n": len(have),
+            "inversions": len(bad),
+            "inverted": [
+                {
+                    "name": r["name"],
+                    "cluster": r["cluster"],
+                    "kind": r[key]["inversions"],
+                    "et": r[key]["et"],
+                    "et_plus10": r[key]["et_plus"],
+                    "et_minus10": r[key]["et_minus"],
+                    # size of the inversion (s): how much quicker the
+                    # heavier / slower the lighter bike runs
+                    "size_s": max(
+                        (r[key]["et"] - r[key]["et_plus"])
+                        if r[key]["et_plus"] is not None and r[key]["et"] is not None
+                        else 0.0,
+                        (r[key]["et_minus"] - r[key]["et"])
+                        if r[key]["et_minus"] is not None and r[key]["et"] is not None
+                        else 0.0,
+                    ),
+                }
+                for r in bad
+            ],
+        }
     return {
         "n": len(rows),
         "errors": len(errors),
+        "probes": probes,
         "inversions": len(inv),
         "inversions_plus": sum(1 for r in inv if "+10kg faster" in r["inversions"]),
         "inversions_minus": sum(1 for r in inv if "-10kg slower" in r["inversions"]),
@@ -302,6 +420,16 @@ def main(argv=None) -> int:
     ap.add_argument("--json", default=None, help="write the full result here")
     ap.add_argument("--report-only", action="store_true", help="always exit 0")
     ap.add_argument(
+        "--strict",
+        action="store_true",
+        help="rider-mass and sea-level inversions also fail the exit code",
+    )
+    ap.add_argument(
+        "--dry-only",
+        action="store_true",
+        help="catalog: the dry-mass gate only (skip the rider / sea-level probes)",
+    )
+    ap.add_argument(
         "--no-fractions", action="store_true", help="skip limiter fractions"
     )
     args = ap.parse_args(argv)
@@ -316,7 +444,11 @@ def main(argv=None) -> int:
     print(f"engine={result['engine']}  knobs={'neutral' if args.neutral else 'tuned'}")
     for label, block in refs.items():
         tag = "monotone" if block["monotone"] else "INVERTED"
-        print(f"  {label:9s} [{tag}]")
+        extra = "  ".join(
+            f"{k} {'ok' if v['monotone'] else 'INVERTED'}"
+            for k, v in block.get("probes", {}).items()
+        )
+        print(f"  {label:9s} [{tag}]  {extra}")
         for r in block["rows"]:
             print(
                 f"    dry {r['dry_mass_kg']:6.1f} kg  ET {_fmt(r['et'])}  "
@@ -333,12 +465,19 @@ def main(argv=None) -> int:
             print("    limiters (traction/wheelie step share): " + "  ".join(parts))
 
     bad = sum(0 if b["monotone"] else 1 for b in refs.values())
+    if args.strict:
+        bad += sum(
+            0 if v["monotone"] else 1
+            for b in refs.values()
+            for v in b.get("probes", {}).values()
+        )
     if not args.refs_only:
         rows = probe_catalog(
             neutral=args.neutral,
             workers=args.workers,
             limit=args.limit,
             with_fractions=not args.no_fractions,
+            probes=("dry",) if args.dry_only else ALL_PROBES,
         )
         summ = summarize_catalog(rows)
         result["catalog"] = rows
@@ -365,7 +504,16 @@ def main(argv=None) -> int:
                     f"ET {_fmt(r['et'])} +10 {_fmt(r['et_plus'])} -10 {_fmt(r['et_minus'])}"
                     f"  ({', '.join(r['inversions'])})"
                 )
+        for probe, ps in summ["probes"].items():
+            print(f"  probe {probe:9s}: {ps['inversions']} inversions / {ps['n']}")
+            for x in ps["inverted"]:
+                print(
+                    f"    INV {x['name']:<43s} {x['cluster']:<22s} "
+                    f"step {x['size_s'] * 1000:.2f} ms ({', '.join(x['kind'])})"
+                )
         bad += summ["inversions"]
+        if args.strict:
+            bad += sum(ps["inversions"] for ps in summ["probes"].values())
 
     if args.json:
         with open(args.json, "w") as fh:

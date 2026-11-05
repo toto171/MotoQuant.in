@@ -142,15 +142,15 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'We maintain a list of 250 published drag-strip benchmarks (276 matched to a catalog bike) — sourced from Cycle World, Sport Rider, MCN, Motorcycle Consumer News, MotorcycleDaily, MotoStatz, FastestLaps, and Indian Autos Mag where the magazine published the actual instrumented timeslip. For each benchmark, we run the simulator at the test-day environmental conditions and compare predicted ET against measured ET. Each source is weighted by quality (instrumented timeslip 1.0, magazine 0.7, aggregator 0.5, derived 0.1) and the delta gets bucketed by class on a cylinder-aware 12-cluster taxonomy (litre-sport-195+, litre-sport-600-1000, sport-twin-600-1300, singles-300-500, entry-150-200, two-stroke, etc.) so we can see where the physics is honest and where it has systematic bias.',
+    text: 'We maintain a list of 250 published drag-strip benchmarks (266 matched to a catalog bike) — sourced from Cycle World, Sport Rider, MCN, Motorcycle Consumer News, MotorcycleDaily, MotoStatz, FastestLaps, and Indian Autos Mag where the magazine published the actual instrumented timeslip. For each benchmark, we run the simulator at the test-day environmental conditions and compare predicted ET against measured ET. Each source is weighted by quality (instrumented timeslip 1.0, magazine 0.7, aggregator 0.5, derived 0.1) and the delta gets bucketed by class on a cylinder-aware 12-cluster taxonomy (litre-sport-195+, litre-sport-600-1000, sport-twin-600-1300, singles-300-500, entry-150-200, two-stroke, etc.) so we can see where the physics is honest and where it has systematic bias.',
   },
   {
     type: 'p',
-    text: 'Three reference baselines are protected absolutely: GSX-R 1000 K5 (9.9331 s), YZF-R1 4C8 (10.1436 s), and Hayabusa Gen1 (10.3633 s). Every code change must preserve these to four decimals. They are the regression test that catches "improvements" that secretly broke the engine.',
+    text: 'Three reference baselines are protected absolutely: GSX-R 1000 K5 (10.0436 s), YZF-R1 4C8 (10.1092 s), and Hayabusa Gen1 (10.1100 s). Every code change must preserve these to four decimals. They are the regression test that catches "improvements" that secretly broke the engine.',
   },
   {
     type: 'p',
-    text: 'Current state across 276 matched benchmarks (August 2026 sweep): overall source-quality-weighted mean absolute error is 0.263 seconds, weighted bias is essentially zero (+0.007 s — meaning the simulator is no longer systematically optimistic or pessimistic). Across the ten cleanest validated runs the mean absolute error is ±0.007 s, and 138 of the 276 benchmarks fall within ±0.20 s. The 195+ hp class is the tightest at 0.147 s weighted |Δ|. The small-cc and 2-stroke clusters have higher variance, partly because their published benchmarks are themselves uncertain (most Indian small-cc ETs are estimated from 0–100 km/h times rather than measured timeslips).',
+    text: 'Current state across 266 matched benchmarks (November 2026 sweep, each row scored under its own timing convention — 1-ft beam rollout or first motion): overall source-quality-weighted mean absolute error is 0.249 seconds and weighted bias is close to zero (+0.022 s). Across the ten cleanest non-derived runs the mean absolute error is ±0.006 s, and 133 of the 266 benchmarks fall within ±0.20 s. The 600–1000 sport class is the tightest at 0.146 s weighted |Δ|, with the 195+ hp class at 0.168 s. The small-cc and 2-stroke clusters have higher variance, partly because their published benchmarks are themselves uncertain (most Indian small-cc ETs are estimated from 0–100 km/h times rather than measured timeslips).',
   },
   {
     type: 'h2',
@@ -284,9 +284,9 @@ export default function Page() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
-                ['GSX-R 1000 K5', '9.9331'],
-                ['YZF-R1 4C8', '10.1436'],
-                ['Hayabusa Gen1', '10.3633'],
+                ['GSX-R 1000 K5', '10.0436'],
+                ['YZF-R1 4C8', '10.1092'],
+                ['Hayabusa Gen1', '10.1100'],
               ].map(([bike, et]) => (
                 <div key={bike}>
                   <div className="flex items-end gap-1">
@@ -298,7 +298,7 @@ export default function Page() {
               ))}
             </div>
             <p className="text-white/40 text-xs mt-4">
-              All claims about cluster bias, mean absolute error, and within-tolerance fractions in this post reflect the August 2026 sweep against 250 published benchmarks (276 matched).
+              All claims about cluster bias, mean absolute error, and within-tolerance fractions in this post reflect the November 2026 sweep against 250 published benchmarks (266 matched).
             </p>
           </div>
         </footer>

@@ -42,6 +42,10 @@ const CONTENT = [
     text: 'MMRT at Sriperumbudur sits 78 metres above sea level. Aamby Valley sits at 679 metres. Run the same stock Hayabusa Gen 1 down both strips in November and the simulator gives you 10.262 s at MMRT and 10.471 s at Aamby — a 0.21 second swing from venue alone. But Aamby beats MMRT at the trap by 4.6 km/h. That order flips for a 200cc commuter, where MMRT wins on every metric. Pick the wrong strip and you spend money chasing tenths the venue is silently taking back.',
   },
   {
+    type: 'p',
+    text: 'Editor\'s note (November 2026): the November 2026 accuracy epoch re-pinned the reference baselines (Hayabusa Gen1 10.1100 s, was 10.3633 s; K5 10.0436 s; R1 10.1092 s) and moved every catalog simulation. Reference figures below are updated; the other simulated ETs, traps and deltas in this post predate that epoch and have not been re-simulated — re-run them in the simulator for current numbers.',
+  },
+  {
     type: 'h2',
     text: 'Five Strips, Five Elevations, One Country',
   },
@@ -90,7 +94,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'Start with the bike that anchors the simulator. The Hayabusa Gen 1 is one of three reference baselines that every MotoQuant build holds to four decimal places: 10.3633 s at the reference Aamby Valley November condition (679 m, 22 °C, 40 percent RH). That number is locked. The other four Indian venues run the same engine through the same drivetrain into the same tyres, with only the environmental block changed. Here is what falls out.',
+    text: 'Start with the bike that anchors the simulator. The Hayabusa Gen 1 is one of three reference baselines that every MotoQuant build holds to four decimal places: 10.1100 s at its sea-level reference condition. That number is locked. The other four Indian venues run the same engine through the same drivetrain into the same tyres, with only the environmental block changed. Here is what falls out.',
   },
   {
     type: 'table',
@@ -200,7 +204,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Hayabusa numbers are anchored to a baseline that was re-pinned on July 13, 2026 as part of a physics-recalibration epoch — 10.3633 s at Aamby Valley November conditions. The K5 GSX-R 1000 holds 9.9331 s at the same reference. The R1 4C8 holds 10.1436 s. These are not predictions, they are validation pins; the simulator is required to produce them to four decimal places on every code change, and the regression suite fails if they drift by more than a millisecond. Re-running each of them across the other four Indian venues changes only the environment block, which means the venue-deltas in the tables above are first-principles outputs of the environmental sub-model rather than fitted offsets.',
+    text: 'The Hayabusa numbers are anchored to a baseline that was re-pinned on November 5, 2026 as part of a deliberate accuracy epoch — 10.1100 s at the sea-level reference condition. The K5 GSX-R 1000 holds 10.0436 s at the same reference. The R1 4C8 holds 10.1092 s. These are not predictions, they are validation pins; the simulator is required to produce them to four decimal places on every code change, and the regression suite fails if they drift by more than a millisecond. Re-running each of them across the other four Indian venues changes only the environment block, which means the venue-deltas in the tables above are first-principles outputs of the environmental sub-model rather than fitted offsets.',
   },
   {
     type: 'p',

@@ -55,9 +55,9 @@ CHANNELS = (
     "power_kw", "r_eff",
 )  # fmt: skip
 REFS = {
-    "gsxr1000_k5": 9.933056382451884,
-    "yzfr1_4c8": 10.143589715692835,
-    "hayabusa_gen1": 10.363345081274984,
+    "gsxr1000_k5": 10.043600805570911,
+    "yzfr1_4c8": 10.10920982866053,
+    "hayabusa_gen1": 10.110001443831809,
 }
 
 
@@ -187,13 +187,31 @@ def test_boosted_and_two_stroke_paths():
 @needs_native
 def test_degenerate_inputs_raise_like_python():
     cfg = mq.gsxr1000_k5()
-    # Nothing to integrate (finish line at the rest position): both engines
-    # raise the same ValueError. With the default 1-ft rollout distance=0 is
-    # a valid run that ends at the start beam (ET 0).
-    for eng in (MotoQuantEngine(cfg).run, lambda **kw: native.run_native(cfg, **kw)):
-        with pytest.raises(ValueError, match="the loop never ran"):
-            eng(distance=0.0, rollout_m=0.0)
-        assert float(eng(distance=0.0).time_quarter) == 0.0
+    # Nothing past the start beam to time: since the 2026-10 epoch (round 2)
+    # the finish line must lie beyond the rollout (distance > rollout_m) and
+    # the rollout must be finite and >= 0. Both engines raise the SAME
+    # ValueError with the SAME message — including distance=0 under the
+    # default 1-ft rollout (pre-round-2 that was a 0-s "run") and NaN, which
+    # fails every comparison.
+    bad = (
+        {"distance": 0.0, "rollout_m": 0.0},
+        {"distance": 0.0},
+        {"distance": 0.3048},
+        {"distance": float("nan")},
+        {"rollout_m": float("nan")},
+        {"rollout_m": -1.0},
+        {"rollout_m": float("inf")},
+    )
+    for kw in bad:
+        msgs = []
+        for eng in (
+            MotoQuantEngine(cfg).run,
+            lambda **k: native.run_native(cfg, **k),
+        ):
+            with pytest.raises(ValueError, match="rollout_m") as ei:
+                eng(**kw)
+            msgs.append(str(ei.value))
+        assert msgs[0] == msgs[1], (kw, msgs)
     # Output sizing `np.zeros(int(max_time / dt) + 1)`: same class as Python.
     for kw, exc in (
         ({"max_time": -1.0}, ValueError),

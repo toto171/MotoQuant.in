@@ -698,6 +698,8 @@ impl<'a> Engine<'a> {
         let redline_omega_clip = c.launch.redline_omega_clip;
         let t_clutch_cap = c.clutch.t_cap;
         let top_gear_idx = overall.len() - 1;
+        let wheelie_margin = c.wheelie.margin;
+        let wheelie_margin_window = c.wheelie.margin_window_m;
         let shift_time_s = c.drivetrain.shift_time_s;
         let cd_a_floor = c.aero.cd_a_floor;
         let v_limiter = c.drivetrain.v_limiter;
@@ -918,7 +920,12 @@ impl<'a> Engine<'a> {
             f_rr = self.rolling_resistance(v, t_tire, m_total);
 
             // ── Wheelie limit (schema 4: before the load transfer) ──
-            let a_wheelie = self.max_accel_before_wheelie(v, t, m_total, f_aero);
+            let mut a_wheelie = self.max_accel_before_wheelie(v, t, m_total, f_aero);
+            // schema 5: the rider holds `wheelie.margin` of the ceiling over
+            // the launch (rest to the 60-ft line); 1.0 skips it.
+            if wheelie_margin != 1.0 && x < wheelie_margin_window {
+                a_wheelie *= wheelie_margin;
+            }
             if (f_drive - f_aero - f_rr) / m_eff > a_wheelie {
                 f_drive = a_wheelie * m_eff + f_aero + f_rr;
             }

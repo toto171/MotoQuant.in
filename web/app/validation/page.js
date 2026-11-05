@@ -36,7 +36,7 @@ export default function ValidationPage() {
               How <span className="text-gradient-orange">honest</span> is the physics?
             </>
           }
-          sub="276 benchmarks matched to catalog bikes, cross-checked against published Cycle World, Sport Rider, MCN and MotoStatz timeslips. Weighted mean absolute error 0.26s, bias +0.007s, and the three reference baselines preserved to four decimals since July 13, 2026."
+          sub="266 benchmarks matched to catalog bikes, cross-checked against published Cycle World, Sport Rider, MCN and MotoStatz timeslips. Weighted mean absolute error 0.25s, bias +0.02s, and the three reference baselines pinned to four decimals (re-pinned by the November 2026 accuracy epoch)."
         >
           <Reveal y={14} duration={0.6} delay={0.22}>
             <div className="mt-2 flex flex-wrap gap-x-10 gap-y-4">
@@ -49,7 +49,7 @@ export default function ValidationPage() {
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-end gap-1">
                   <span className="mb-0.5 font-mono text-sm text-white/50" aria-hidden="true">±</span>
-                  <ScoreboardDigits value="0.007" h={28} label="±0.007s" />
+                  <ScoreboardDigits value="0.006" h={28} label="±0.006s" />
                   <span className="mb-0.5 font-mono text-xs text-white/40" aria-hidden="true">s</span>
                 </div>
                 <span className="label-mono">TOP-10 MEAN |Δ|</span>

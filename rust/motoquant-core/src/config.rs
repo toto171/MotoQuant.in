@@ -28,8 +28,11 @@ use crate::error::SimError;
 /// post-epoch resolver or fixture); 4 = the epoch's round 2 (`chassis` is the
 /// combined bike + rider CoG and gains `rider_shift_frac`; `tire` gains the
 /// heat-balance terms `heat_partition` / `conv_area_m2`; the finish line moved
-/// from `rollout_m + distance` to `distance`).
-pub const SCHEMA_VERSION: u32 = 4;
+/// from `rollout_m + distance` to `distance`); 5 = the epoch's round 3
+/// (`wheelie.margin` / `wheelie.margin_window_m`: the fraction of the wheelie
+/// ceiling the rider holds from rest to the 60-ft line —
+/// `CategoryProfile.wheelie_margin`, 1.0 = no-op).
+pub const SCHEMA_VERSION: u32 = 5;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -249,6 +252,11 @@ pub struct Wheelie {
     pub counter_rotating: bool,
     pub wheelie_bar: bool,
     pub bar_length_mm: f64,
+    /// Schema 5: fraction of the ceiling held over the launch (1.0 = no-op)
+    pub margin: f64,
+    /// Schema 5: the launch window — the margin applies while x < this (m
+    /// from rest; the 60-ft line).
+    pub margin_window_m: f64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

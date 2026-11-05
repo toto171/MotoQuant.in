@@ -41,7 +41,7 @@ from motoquant.scraper.validator import score_spec, validate_spec
 
 # Mirrors scripts/check_baselines.py (the CI drift gate) — the limiter's
 # None path must leave the pinned reference bit-identical.
-K5_PINNED_ET_S = 9.9330563825
+K5_PINNED_ET_S = 10.0436008056
 BASELINE_TOL_S = 1e-9
 
 

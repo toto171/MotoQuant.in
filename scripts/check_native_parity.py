@@ -585,6 +585,34 @@ def build_stress_cases(catalog: list[tuple[str, dict]]) -> list[dict]:
         },
     )
 
+    # ── 2026-11 epoch round 3: 1st-gear launch wheelie margin ──
+    for wm in (0.65, 0.8, 0.95):
+        both(
+            f"busa: profile wheelie_margin={wm}",
+            copy.deepcopy(busa),
+            profile_patch={"wheelie_margin": wm},
+        )
+    both(
+        "busa: wheelie_margin 0.7 + wheelie bar",
+        _mut(busa, _set({"wheelie.wheelie_bar": True, "wheelie.bar_length_mm": 600.0})),
+        profile_patch={"wheelie_margin": 0.7},
+    )
+    both(
+        "busa: wheelie_margin 0.75 + launch_rpm_factor 0.5 + mu 1.05",
+        copy.deepcopy(busa),
+        profile_patch={
+            "wheelie_margin": 0.75,
+            "launch_rpm_factor": 0.5,
+            "mu_peak_scale": 1.05,
+        },
+    )
+    if "small" in bases:
+        both(
+            "small: profile wheelie_margin=0.65",
+            copy.deepcopy(bases["small"][1]),
+            profile_patch={"wheelie_margin": 0.65},
+        )
+
     # ── 2026-10 physics epoch: rollout timing, limiter, floor, intercooler ──
     for vname, kw in {
         "rollout 0 (from first motion)": {"rollout_m": 0.0},

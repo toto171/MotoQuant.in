@@ -41,7 +41,14 @@ from pathlib import Path
 
 import numpy as np
 
-from .constants import QUARTER_MILE_M, RADS_TO_RPM, ROLLOUT_M, RPM_TO_RADS, G
+from .constants import (
+    QUARTER_MILE_M,
+    RADS_TO_RPM,
+    ROLLOUT_M,
+    RPM_TO_RADS,
+    SIXTY_FOOT_M,
+    G,
+)
 from .models import CLUTCH_SLIDER, DRIVE_CHAIN, BikeConfig
 from .physics import MotoQuantEngine, SimResult
 
@@ -58,8 +65,11 @@ log = logging.getLogger(__name__)
 #: epoch's round 2 (``chassis`` is the combined bike + rider CoG and gains
 #: ``rider_shift_frac``; ``tire`` gains ``heat_partition`` / ``conv_area_m2``;
 #: wheelie cap before the load transfer, drag pitch moment, rolling-loss tyre
-#: heat; the finish line moved from ``rollout_m + distance`` to ``distance``).
-SCHEMA_VERSION = 4
+#: heat; the finish line moved from ``rollout_m + distance`` to ``distance``);
+#: 5 = the epoch's round 3 (``wheelie`` gains ``margin`` / ``margin_window_m``
+#: — the profile's launch wheelie margin, CategoryProfile.wheelie_margin, held
+#: from rest to the 60-ft line).
+SCHEMA_VERSION = 5
 
 #: The crate whose sources the extension's ``SOURCE_FINGERPRINT`` hashes.
 CRATE_DIR = Path(__file__).resolve().parent.parent / "rust" / "motoquant-core"
@@ -519,6 +529,10 @@ def resolve_engine(eng: MotoQuantEngine, *, exp_impl: str | None = None) -> dict
             "counter_rotating": bool(e.counter_rotating),
             "wheelie_bar": bool(c.wheelie.wheelie_bar),
             "bar_length_mm": _f(c.wheelie.bar_length_mm),
+            # schema 5: launch wheelie margin, held from rest to the 60-ft
+            # line (CategoryProfile.wheelie_margin; 1.0 = no-op).
+            "margin": _f(prof.wheelie_margin),
+            "margin_window_m": _f(SIXTY_FOOT_M),
         },
         "parasitic": {
             "alternator_present": bool(par.alternator_present),

@@ -78,7 +78,7 @@ over HTTP:
 import motoquant
 
 et = motoquant.MotoQuantEngine(motoquant.gsxr1000_k5()).run().time_quarter
-# → 9.9330563825, pinned bit-identical
+# → 10.0436008056, pinned bit-identical
 ```
 
 ```bash
@@ -103,8 +103,8 @@ MOTOQUANT_MCP_LOCAL=1 python -m motoquant.mcp_server
 
 - **`AGENTS.md` first**, then `docs/ARCHITECTURE.md`. `CLAUDE.md` is a long
   session changelog — skim only its top entry.
-- **The three pinned baselines are load-bearing.** K5 9.9331 / R1 10.1436 /
-  Hayabusa 10.3633, bit-identical. After touching `physics.py`,
+- **The three pinned baselines are load-bearing.** K5 10.0436 / R1 10.1092 /
+  Hayabusa 10.1100, bit-identical. After touching `physics.py`,
   `submodels/*`, `defaults.py`, `category_profiles.py` or
   `scraper/importer.py`, run `make baselines`.
 - `make check` (fast gate) → `make test` (full suite) before any PR.

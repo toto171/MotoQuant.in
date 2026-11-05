@@ -7,15 +7,15 @@
 //                below this slot, byte-identical across arms).
 // B (variant)  = one glass card injected between the Methodology section and
 //                the terminal Next nav, with copy that grounds the just-read
-//                ±0.007s top-10 mean error + Δ ±0.0000 baseline drift into a
+//                ±0.006s top-10 mean error + Δ ±0.0000 baseline drift into a
 //                first-run promise:
 //                  "Run your bike through the same engine →"
-//                  "541 bikes pre-loaded. Same RK4 integrator. Same ±0.007s
+//                  "541 bikes pre-loaded. Same RK4 integrator. Same ±0.006s
 //                  top-10 mean error. No signup."
 //
 // Hypothesis: visitors who reach the bottom of /docs/validation have just
 // absorbed 277-benchmark accuracy data, per-cluster bias breakdown, three
-// reference baselines (K5 / R1 / Hayabusa, Δ ±0.0000 since Jul 13), and the
+// reference baselines (K5 / R1 / Hayabusa, Δ ±0.0000 since Nov 5), and the
 // honest "known limitations" disclosure on small-cc and 2T residual bias.
 // They sit at peak technical credibility — every objection a skeptical Indian
 // drag-scene reader could raise has been preemptively addressed on this page.
@@ -65,14 +65,14 @@ function CtaCard() {
               Run your bike through the same engine →
             </div>
             <div className="text-sm text-white/65 leading-relaxed">
-              541 bikes pre-loaded. Same RK4 integrator. Same ±0.007s top-10
+              541 bikes pre-loaded. Same RK4 integrator. Same ±0.006s top-10
               mean error. No signup.
             </div>
           </div>
           <div className="shrink-0 hidden sm:flex flex-col items-end font-mono text-[10px] text-white/40 uppercase tracking-widest">
-            <span>K5 · 9.9331s</span>
-            <span>R1 · 10.1436s</span>
-            <span>Busa · 10.3633s</span>
+            <span>K5 · 10.0436s</span>
+            <span>R1 · 10.1092s</span>
+            <span>Busa · 10.1100s</span>
           </div>
         </div>
       </Link>

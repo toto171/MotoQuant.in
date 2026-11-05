@@ -46,6 +46,10 @@ const CONTENT = [
     text: 'MotoQuant simulates the 2018-2023 Kawasaki Ninja H2 SX at 10.222 seconds with a 250.8 km/h trap under Aamby Valley November conditions. That ET puts a 238 kg sport-touring bike with hard luggage mounts ahead of the simulator’s stock Hayabusa Gen 1 reference and within two tenths of a stock ZX-14R. The trap speed is higher than either of them. The whole story of the H2 SX on a quarter mile is what a centrifugal supercharger does to a tourer that everyone assumes is heavy and soft.',
   },
   {
+    type: 'p',
+    text: 'Editor\'s note (November 2026): the November 2026 accuracy epoch re-pinned the reference baselines (Hayabusa Gen1 10.1100 s, was 10.3633 s; K5 10.0436 s; R1 10.1092 s) and moved every catalog simulation. Reference figures below are updated; the other simulated ETs, traps and deltas in this post predate that epoch and have not been re-simulated — re-run them in the simulator for current numbers.',
+  },
+  {
     type: 'h2',
     text: 'What the Ninja H2 SX Actually Is',
   },
@@ -91,7 +95,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The Indian gray-market drag scene has three obvious flagships in the litre-plus class: the Suzuki Hayabusa (Gen 1 reference pinned in the simulator at 10.3633 s), the Kawasaki ZX-14R, and now the Ninja H2 SX. They are not the same bike. The Hayabusa is naturally aspirated, 197 hp, 220 kg dry. The ZX-14R is naturally aspirated, 197 hp, 218 kg dry. The H2 SX is supercharged, 200 hp, 238 kg dry. The interesting question is what each of those decisions costs at the strip.',
+    text: 'The Indian gray-market drag scene has three obvious flagships in the litre-plus class: the Suzuki Hayabusa (Gen 1 reference pinned in the simulator at 10.1100 s), the Kawasaki ZX-14R, and now the Ninja H2 SX. They are not the same bike. The Hayabusa is naturally aspirated, 197 hp, 220 kg dry. The ZX-14R is naturally aspirated, 197 hp, 218 kg dry. The H2 SX is supercharged, 200 hp, 238 kg dry. The interesting question is what each of those decisions costs at the strip.',
   },
   {
     type: 'table',
@@ -99,7 +103,7 @@ const CONTENT = [
       ['Bike', 'Sim ET', 'Trap', 'Dry mass', 'Peak hp', 'Forced induction'],
       ['Kawasaki Ninja H2 SX (2018-2023)', '10.222 s', '250.8 km/h', '238 kg', '200', 'Supercharger (0.6 bar)'],
       ['Kawasaki ZX-14R (2012-2020)', '~10.05 s', '~244 km/h', '218 kg', '197', 'NA'],
-      ['Suzuki Hayabusa Gen 1', '10.3633 s', '~239 km/h', '220 kg', '197', 'NA'],
+      ['Suzuki Hayabusa Gen 1', '10.1100 s', '~232 km/h', '220 kg', '197', 'NA'],
       ['Suzuki Hayabusa Gen 3 (2021+)', '~10.40 s', '~244 km/h', '212 kg', '188', 'NA'],
       ['Kawasaki Ninja H2 (road)', '~9.95 s', '~256 km/h', '214 kg', '231', 'Supercharger (0.7 bar)'],
     ],

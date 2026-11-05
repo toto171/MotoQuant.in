@@ -4,11 +4,16 @@
 
 | Name                                | What it is                                          | Size    |
 |-------------------------------------|-----------------------------------------------------|---------|
-| `surrogate_numpy.npz`               | **v2.6 SHIPPED MODEL** — numpy MLP served in prod   | 54 KB   |
+| `surrogate_numpy.npz`               | **v2.7 SHIPPED MODEL** — numpy MLP served in prod   | 54 KB   |
+| `motoquant_surrogate_v2_7.npz`      | v2.7 training dataset (9,142 rows × 26 features)    | 658 KB  |
+| `surrogate_numpy_v2_6.npz.bak`      | v2.6 numpy MLP — rollback copy                      | 54 KB   |
 | `motoquant_surrogate_v2_6.npz`      | v2.6 training dataset (9,124 rows × 26 features)    | 660 KB  |
-| `surrogate_numpy_v2_5.npz.bak`      | v2.5 numpy MLP — rollback copy                      | 87 KB   |
-| `motoquant_surrogate_v2_5.npz`      | v2.5 training dataset (9,124 rows × 26 features)    | 660 KB  |
 | `motoquant_surrogate_v1_1k5.npz`    | v1 training dataset (K5 Sobol, 1.5k samples — the historically cited original K5 envelope) | 128 KB  |
+
+> **Pruned 2026-11-05:** the v2.5 model rollback copy
+> (`surrogate_numpy_v2_5.npz.bak`) and v2.5 training dataset
+> (`motoquant_surrogate_v2_5.npz`) were deleted to keep rollback depth at one
+> version (v2.6).
 
 > **Pruned 2026-08-11:** the v2.1–v2.4 training datasets
 > (`motoquant_surrogate_v2_8k5.npz`, `_v2_2.npz`, `_v2_3.npz`, `_v2_4.npz`)
@@ -16,6 +21,40 @@
 > `_v2_1` … `_v2_4.npz.bak`) were deleted — ~3 MB of superseded artifacts
 > with zero code references. Rollback depth is one version (v2.5); anything
 > older is regenerable from the recipe notes below.
+
+## v2.7 (November 5, 2026) — 2026-10/11 accuracy-epoch regen
+
+Regen trigger: the 2026-10/11 accuracy epoch (ADR-0002): combined bike +
+rider CoG wheelie limit, drag pitch moment, tyre heat balance, 1-ft rollout
+timing (ET = t(402.336 m) − t(0.3048 m)), the round-3 `wheelie_margin`
+knob and every cluster re-selected from neutral; full reseed chain re-run
+(reference rows now tagged `reference_litre_195p`). Pinned references moved
+9.9331 / 10.1436 / 10.3633 → 10.0436 / 10.1092 / 10.1100 s. Standing
+contract unchanged: **a surrogate is a cache of the physics — regenerate
+after any reseed/retune, in the same session.**
+
+FULL regeneration, same recipe (fresh `plan`: 541 bikes → 9,142 tasks,
+cluster-stratified, 149 perturb bases / 25 eval bikes; 9,142/9,142 valid
+rows — 516 stock + 25 stock_eval + 25 mod_eval + 8,576 perturb; hidden
+128,64 · epochs 600 · restarts 3). Labels were simulated with
+`motoquant.engine_select.make_engine` — the Rust core (bit-identical to the
+Python reference on this host, `native.host_math()["exact"]`), 29 s wall for
+all 9,142 sims on 4 cores (`scripts/surrogate_v2_gen.py` now uses
+`make_engine`).
+
+| Metric (ET)            | v2.6                  | v2.7                   |
+|------------------------|-----------------------|------------------------|
+| Holdout MAE            | 110.5 ms (n=1,361)    | **69.8 ms** (n=1,363)  |
+| Holdout RMSE           | 174.9 ms              | **107.0 ms**           |
+| Holdout R²             | 0.9962                | **0.9989**             |
+| trap MAE               | 1.67 km/h             | **1.02 km/h**          |
+
+The epoch's launch model (wheelie-limited, margin-held to 60 ft) is a
+smoother function of the 26 features than the July/August traction-limited
+launch with per-cluster grip correctors, and the round-3 knobs set rated
+rubber (mu_peak_scale 1.0) everywhere, so the category-blind schema fits it
+better. Reference sanity (surrogate − physics): K5 +0.033 / R1 +0.007 /
+Hayabusa +0.017 s.
 
 ## v2.6 (August 8, 2026) — crank-semantics epoch regen
 

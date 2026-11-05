@@ -7,6 +7,7 @@ Run with:  python -m pytest tests/ -v
 """
 
 import numpy as np
+import pytest
 
 from motoquant.config_io import (
     config_from_dict,
@@ -55,19 +56,24 @@ class TestQuarterMileValidation:
     def test_r1_quarter_mile_et(self):
         """R1 ET within ±0.10s of published ~10.3s."""
         r = self._run(yzfr1_4c8())
-        # July 13, 2026 epoch: the litre_sport_195p cluster is corpus-centered
-        # (bias +0.038 over 30 matched rows); the R1 individually carries a
-        # -0.16s residual against its 10.3s magazine figure while K5 and
-        # Hayabusa track within 0.04s of theirs. Tolerance widened 0.10->0.20
-        # for this one reference; the bit-identical drift pin lives in
-        # scripts/check_baselines.py, not here.
+        # July 13, 2026 epoch: the R1 carried a -0.16s residual against its
+        # 10.3s magazine figure; tolerance widened 0.10->0.20 for this one
+        # reference. 2026-11 epoch: the residual is now -0.19s (10.109s) —
+        # still inside the 0.20s band, but only just; it is a documented
+        # known residual (the epoch compresses the reference spread: K5
+        # +0.07s slow, R1 -0.19s and Hayabusa -0.29s quick vs published).
+        # The bit-identical drift pin lives in scripts/check_baselines.py.
         assert abs(r.time_quarter - 10.3) < 0.20, (
             f"R1 ET {r.time_quarter:.3f}s deviates >0.20s from 10.3s"
         )
 
     def test_busa_quarter_mile_et(self):
-        """Busa ET within typical owner range (10.2-10.5s)."""
+        """Busa ET within typical owner range (10.2-10.5s; test band 10.1-10.7s)."""
         r = self._run(hayabusa_gen1())
+        # 2026-11 epoch: the Hayabusa sims 10.110s — inside the long-standing
+        # 10.1-10.7s test band by 10 ms but ~0.29s quicker than the ~10.4s
+        # owner figure: a documented known residual (wheelie-limited launch on
+        # the reference config), NOT hidden by widening the band.
         assert 10.1 < r.time_quarter < 10.7, (
             f"Busa ET {r.time_quarter:.3f}s outside typical stock range 10.1-10.7s"
         )
@@ -81,14 +87,41 @@ class TestQuarterMileValidation:
         )
 
     def test_k5_sixty_foot(self):
-        """K5 60-ft time within realistic range (1.8-2.1s)."""
+        """K5 60-ft time within realistic range (1.8-2.1s), timed FROM THE BEAM.
+
+        Timing convention (2026-11 accuracy epoch): every split is
+        t(x = D) - t(x = rollout_m) with the 1-ft stage-beam rollout
+        (ROLLOUT_M = 0.3048 m), i.e. the clock starts when the bike rolls out
+        of the beam — the convention of magazine / timeslip 60-ft figures.
+        Pre-epoch there was NO rollout, so this 1.8-2.1 s band used to be
+        checked against a first-motion 60 ft. The band is unchanged and is now
+        applied to the quantity the published figures actually measure (K5
+        from-beam ~1.90 s). The first-motion 60 ft (~2.18 s) is longer by the
+        rollout dead time and is checked separately for plausibility, not
+        against the published band.
+        """
         r = self._run(gsxr1000_k5())
+        assert r.rollout_m == pytest.approx(0.3048)
         assert 1.8 < r.time_60ft < 2.1, (
-            f"K5 60-ft {r.time_60ft:.3f}s outside realistic range"
+            f"K5 from-beam 60-ft {r.time_60ft:.3f}s outside realistic range"
+        )
+        first_motion = MotoQuantEngine(gsxr1000_k5(), dt=0.001).run(
+            distance=QUARTER_MILE_M, max_time=15.0, rollout_m=0.0
+        )
+        dead_time = first_motion.time_60ft - r.time_60ft
+        # Rolling the first foot from rest takes a couple of tenths.
+        assert 0.15 < dead_time < 0.45, (
+            f"rollout dead time {dead_time:.3f}s implausible "
+            f"(first-motion 60 ft {first_motion.time_60ft:.3f}s)"
         )
 
     def test_relative_order(self):
-        """K5 should be faster than R1, which should be faster than Busa (stock launch)."""
+        """K5 should be faster than R1, which should be faster than Busa (stock launch).
+
+        2026-11 epoch: the order still holds but R1 vs Busa is separated by
+        only ~0.8 ms (10.1092 vs 10.1100 s) against ~0.1 s in reality — the
+        compressed reference spread is a documented known residual.
+        """
         r_k5 = self._run(gsxr1000_k5())
         r_r1 = self._run(yzfr1_4c8())
         r_busa = self._run(hayabusa_gen1())

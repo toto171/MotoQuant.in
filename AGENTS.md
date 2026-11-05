@@ -18,7 +18,7 @@ license keys, and none may be reintroduced
 Three reference bikes are pinned **bit-identical** and CI-gated:
 
 ```
-GSX-R 1000 K5 → 9.9331 s   YZF-R1 4C8 → 10.1436 s   Hayabusa Gen1 → 10.3633 s
+GSX-R 1000 K5 → 10.0436 s   YZF-R1 4C8 → 10.1092 s   Hayabusa Gen1 → 10.1100 s
 ```
 
 Any change that moves them by even 1e-9 s is a regression — no matter how

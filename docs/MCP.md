@@ -215,7 +215,7 @@ network: handshake, `tools/list` schema validation, `tools/call` in local mode
 against a **temp copy** of `motoquant.db`, both `gearing_impact` paths (the
 HTTP one served by a loopback stub), and every malformed-input branch. The
 gearing test asserts that setup A at the K5's stock 17/42 reproduces the pinned
-`9.9331 s` baseline — proof the sprocket override rides the production config
+`10.0436 s` baseline — proof the sprocket override rides the production config
 builder rather than a parallel implementation.
 
 ```bash
@@ -237,13 +237,13 @@ and will happily over-claim on your behalf.
 
 ## Honest limits
 
-* Accuracy is **weighted mean |error| ≈ 0.26 s over 276 matched benchmarks**
-  (`reports/acc_final_2026_08_08.json`). Good for ranking builds and answering
+* Accuracy is **weighted mean |error| ≈ 0.25 s over 266 matched benchmarks**
+  (`reports/acc_final_2026_11_05.json`). Good for ranking builds and answering
   what-ifs; not a promise that a given bike will run an exact ET.
 * Top-speed predictions are weaker than ET: over 83 matched top-speed
-  benchmarks the mean |error| is ~28 km/h and the fleet still carries a
-  ~+24 km/h bias after the speed-limiter and gearing passes
-  (`reports/sweep_topspeed_2026-08-08.json`).
+  benchmarks the mean |error| is ~13 km/h with a ~+7 km/h (sim fast) bias
+  after the 2026-10/11 accuracy epoch (`reports/acc_final_2026_11_05.json`
+  `topspeed`).
 * The parts catalog is Indian-market priced (INR) and does not cover engine
   internals (cams, big-bore) — "stage 3" is approximated with bolt-on power
   adders.
