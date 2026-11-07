@@ -347,6 +347,48 @@ def test_summary_path_matches_full_run():
 
 FIXTURES = ROOT / "rust" / "fixtures" / "engine_parity.json"
 
+# np.exp on a float64 takes one of two host-dependent paths (docs/RUST_CORE.md,
+# "Bit-parity is host-relative"): Intel SVML __svml_exp8_ha on AVX512_SKX CPUs
+# with an SVML-linked NumPy, and the C library exp elsewhere. GitHub's runners
+# come in both kinds. Known answers where the two paths disagree, as float hex
+# (x, svml_ha, libm); each libm value is the correctly rounded exp(x).
+_EXP_KNOWN_ANSWERS = (
+    ("-0x1.50b0f27bb2fecp-2", "0x1.7087ea9860aa5p-1", "0x1.7087ea9860aa6p-1"),
+    ("-0x1.5eb851eb851ecp-2", "0x1.6b8437d84abc0p-1", "0x1.6b8437d84abc1p-1"),
+    ("-0x1.cef34d6a161e5p-2", "0x1.45c7df928bb4dp-1", "0x1.45c7df928bb4ep-1"),
+    ("-0x1.7ac710cb295eap+0", "0x1.d26374fdf082cp-3", "0x1.d26374fdf082dp-3"),
+)
+
+
+def _host_exp_impl() -> str | None:
+    """The np.exp path this host takes ("svml_ha" or "libm"), without the extension."""
+    got = [
+        float(np.exp(np.float64(float.fromhex(x)))) for x, _, _ in _EXP_KNOWN_ANSWERS
+    ]
+    for col, impl in ((1, "svml_ha"), (2, "libm")):
+        if got == [float.fromhex(row[col]) for row in _EXP_KNOWN_ANSWERS]:
+            return impl
+    return None
+
+
+def _beyond_one_ulp(got, want, path=""):
+    """Paths where ``got`` differs from ``want``: floats by more than 1 ULP, else any change."""
+    if isinstance(got, dict) and isinstance(want, dict):
+        if got.keys() != want.keys():
+            return [f"{path} (keys)"]
+        return [p for k in got for p in _beyond_one_ulp(got[k], want[k], f"{path}.{k}")]
+    if isinstance(got, list) and isinstance(want, list):
+        if len(got) != len(want):
+            return [f"{path} (length)"]
+        return [
+            p
+            for i, (g, w) in enumerate(zip(got, want))
+            for p in _beyond_one_ulp(g, w, f"{path}[{i}]")
+        ]
+    if isinstance(got, float) and isinstance(want, float):
+        return [] if abs(got - want) <= math.ulp(max(abs(got), abs(want))) else [path]
+    return [] if got == want else [path]
+
 
 @pytest.mark.skipif(not FIXTURES.exists(), reason="engine fixtures not generated")
 @pytest.mark.parametrize("factory", sorted(REFS))
@@ -356,6 +398,12 @@ def test_engine_fixtures_are_fresh(factory):
     If this fails, the physics (or resolve schema) changed: port the change to
     rust/motoquant-core, then `make wasm` (regenerates the fixtures + the
     committed wasm) — see docs/RUST_CORE.md, regen contract.
+
+    The resolved config is compared exactly when this host's np.exp takes the
+    fixture host's path. On the other path the synthetic torque curve (built
+    with np.exp) can differ by 1 ULP, so float leaves may differ by 1 ULP and
+    nothing more. Regenerating the fixtures would only move the failure to the
+    other kind of host.
     """
     fx = json.loads(FIXTURES.read_text())
     case = next(c for c in fx["cases"] if c["label"] == factory)
@@ -365,10 +413,30 @@ def test_engine_fixtures_are_fresh(factory):
     resolved = native.resolve_config(
         getattr(mq, factory)(), exp_impl=case["config"]["exp_impl"]
     )
-    assert json.loads(native.resolved_json(resolved)) == case["config"], (
+    got = json.loads(native.resolved_json(resolved))
+    drift = (
         "resolve_config output drifted from the committed fixture — "
         "schema change? bump SCHEMA_VERSION + `make wasm`"
     )
+    fixture_impl = fx["host"]["exp_impl"]
+    host_impl = _host_exp_impl()
+    if host_impl == fixture_impl:
+        assert got == case["config"], drift
+    else:
+        bad = _beyond_one_ulp(got, case["config"])
+        assert not bad, (
+            f"{drift} (np.exp path here: {host_impl}, fixture host: {fixture_impl}; "
+            f"beyond 1 ULP: {bad[:5]})"
+        )
+
+
+@needs_native
+def test_exp_probe_matches_host_math():
+    """The known-answer np.exp probe above agrees with the extension's own probe."""
+    info = native.host_math()
+    if not (info["np_exp_matches_svml_ha"] or info["np_exp_matches_libm"]):
+        pytest.skip("np.exp takes neither known path on this host")
+    assert _host_exp_impl() == info["exp_impl"], info
 
 
 def _gen_engine_web():
