@@ -199,7 +199,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The free tier covers unlimited stock-tune simulations. Pro unlocks the full parts-ROI engine, the cluster-bias-aware Dragy calibrator, and the build optimiser that solves the 0/1 knapsack of "best ET under ₹X budget" exactly. The Fast Track Racing 11.342 second pass is not on the free tier — but the path from a stock 13.30 to a realistic 12.55 absolutely is, and that is the gap that matters to most Duke 390 owners.',
+    text: 'MotoQuant is free and open source, and it includes the full parts-ROI engine and the build optimiser that solves the 0/1 knapsack of "best ET under ₹X budget" exactly. The Fast Track Racing 11.342 second pass is out of reach for a stock-plus-bolt-ons build — but the path from a stock 13.30 to a realistic 12.55 absolutely is, and that is the gap that matters to most Duke 390 owners.',
   },
 ];
 
@@ -391,10 +391,10 @@ export default function PostPage() {
             </li>
             <li>
               ·{' '}
-              <Link href="/pricing" className="text-brand-accent hover:text-brand-orange transition-colors">
-                Pricing
-              </Link>{' '}
-              — free tier covers stock-tune Duke 390 simulations; Pro unlocks the parts-ROI engine, the Dragy calibrator, and the build optimiser.
+              <a href="https://github.com/toto171/MotoQuant.in" target="_blank" rel="noopener noreferrer" className="text-brand-accent hover:text-brand-orange transition-colors">
+                MotoQuant on GitHub
+              </a>{' '}
+              — free and open source under the MIT License.
             </li>
           </ul>
         </div>

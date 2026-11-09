@@ -27,6 +27,16 @@ const nextConfig = {
     ];
   },
 
+  // ─── Permanent redirects for removed pages ─────────────────────────────
+  // MotoQuant is free and open source: the pricing and refunds pages are
+  // gone, so old links land on the home page instead of a 404.
+  async redirects() {
+    return [
+      { source: '/pricing', destination: '/', permanent: true },
+      { source: '/refunds', destination: '/', permanent: true },
+    ];
+  },
+
   // ─── Cache headers for /public assets ──────────────────────────────────
   // /surrogate/{model,bikes}.json (~330 KB pair, fetched by lib/surrogate.js
   // on every simulator boot) only change on a surrogate regen, so an hour of

@@ -4,8 +4,8 @@
 
 import StructuredData, { SITE_URL } from '../StructuredData';
 
-const TITLE = "Account — Manage Your MotoQuant Subscription";
-const DESCRIPTION = "Manage your subscription tier, license keys, and account settings.";
+const TITLE = "Account — Your MotoQuant Garage";
+const DESCRIPTION = "Your saved runs and account settings.";
 
 export const metadata = {
   title: TITLE,

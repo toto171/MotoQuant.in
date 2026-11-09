@@ -17,8 +17,8 @@ export function organizationSchema() {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     '@id': `${SITE_URL}/#organization`,
-    name: 'MotoQuant Pro',
-    alternateName: ['MotoQuant', 'MotoQuant Pro Simulator'],
+    name: 'MotoQuant',
+    alternateName: ['MotoQuant', 'MotoQuant Simulator'],
     url: SITE_URL,
     logo: {
       '@type': 'ImageObject',
@@ -36,7 +36,7 @@ export function organizationSchema() {
     ],
     sameAs: [
       'https://twitter.com/motoquant',
-      'https://github.com/motoquant',
+      'https://github.com/toto171/MotoQuant.in',
     ],
     contactPoint: {
       '@type': 'ContactPoint',
@@ -55,7 +55,7 @@ export function websiteSchema() {
     '@type': 'WebSite',
     '@id': `${SITE_URL}/#website`,
     url: SITE_URL,
-    name: 'MotoQuant Pro',
+    name: 'MotoQuant',
     description:
       'Motorcycle drag racing quarter-mile simulator — ET prediction, build optimization, parts ROI.',
     inLanguage: 'en-IN',
@@ -76,11 +76,13 @@ export function softwareApplicationSchema() {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     '@id': `${SITE_URL}/#software`,
-    name: 'MotoQuant Pro',
-    alternateName: 'MotoQuant Pro Quarter-Mile Simulator',
+    name: 'MotoQuant',
+    alternateName: 'MotoQuant Quarter-Mile Simulator',
     applicationCategory: ['AutomotiveApplication', 'SimulationApplication'],
     applicationSubCategory: 'Motorcycle Drag Racing Simulator',
-    operatingSystem: 'Web, Windows, macOS, Linux',
+    operatingSystem: 'Web',
+    isAccessibleForFree: true,
+    license: 'https://opensource.org/licenses/MIT',
     url: SITE_URL,
     downloadUrl: `${SITE_URL}/simulator`,
     softwareVersion: '1.0',
@@ -117,11 +119,11 @@ export function faqSchema() {
     mainEntity: [
       {
         '@type': 'Question',
-        name: 'What is MotoQuant Pro?',
+        name: 'What is MotoQuant?',
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'MotoQuant Pro is a physics-based motorcycle quarter-mile drag racing simulator. It predicts ET, trap speed, and split times for 541 production bikes using 15 independent physics sub-models and validated aero, tire, and dyno data.',
+            'MotoQuant is a physics-based motorcycle quarter-mile drag racing simulator. It predicts ET, trap speed, and split times for 541 production bikes using 15 independent physics sub-models and validated aero, tire, and dyno data.',
         },
       },
       {
@@ -130,7 +132,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'MotoQuant Pro is validated against published magazine tests and Dragy runs: Suzuki GSX-R1000 K5 simulates 9.93s against a real 9.97s; Yamaha YZF-R1 simulates 10.14s against 10.3s; Suzuki Hayabusa simulates 10.36s (real range 10.1–10.7s). The August 2026 sweep covers 250 source-quality-weighted benchmarks (276 matched to catalog bikes) with a weighted mean bias of +0.007s; 138 of 276 land within ±0.20s of the published timeslip.',
+            'MotoQuant is validated against published magazine tests and Dragy runs: Suzuki GSX-R1000 K5 simulates 9.93s against a real 9.97s; Yamaha YZF-R1 simulates 10.14s against 10.3s; Suzuki Hayabusa simulates 10.36s (real range 10.1–10.7s). The August 2026 sweep covers 250 source-quality-weighted benchmarks (276 matched to catalog bikes) with a weighted mean bias of +0.007s; 138 of 276 land within ±0.20s of the published timeslip.',
         },
       },
       {
@@ -144,20 +146,20 @@ export function faqSchema() {
       },
       {
         '@type': 'Question',
-        name: 'Is MotoQuant Pro free?',
+        name: 'Is MotoQuant free?',
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'MotoQuant Pro is free during the open beta — create a free account and every Pro and Studio feature is unlocked, including saved runs, the build optimizer, and calibration uploads. At commercial launch, paid tiers begin at Pro ₹499/month and Studio ₹1,999/month; registered users get advance notice by email before billing starts.',
+            'MotoQuant is free and open source under the MIT License. You do not need an account to run simulations; an optional free account just lets you save runs to a personal garage. motoquant.in is a free public instance of the open-source project, and you can also run it yourself from the GitHub repository.',
         },
       },
       {
         '@type': 'Question',
-        name: 'Can I use MotoQuant Pro for Indian drag strips?',
+        name: 'Can I use MotoQuant for Indian drag strips?',
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'Yes — MotoQuant Pro was built for the Indian drag racing community. The venue database covers Aamby Valley (Pune), Madras Motor Race Track (Chennai), Buddh International Circuit (Greater Noida), Kari Motor Speedway (Coimbatore — the Coimbatore strip hosted drag events in the late 1990s before the permanent circuit was built), and Hyderabad, plus seven international venues. Parts pricing is in INR with GST and import duty already factored in.',
+            'Yes — MotoQuant was built for the Indian drag racing community. The venue database covers Aamby Valley (Pune), Madras Motor Race Track (Chennai), Buddh International Circuit (Greater Noida), Kari Motor Speedway (Coimbatore — the Coimbatore strip hosted drag events in the late 1990s before the permanent circuit was built), and Hyderabad, plus seven international venues. Parts pricing is in INR with GST and import duty already factored in.',
         },
       },
       {
@@ -175,7 +177,7 @@ export function faqSchema() {
         acceptedAnswer: {
           '@type': 'Answer',
           text:
-            'Yes. MotoQuant Pro imports Dragy GPS logs (CSV or VBO) and DynoJet/MoTeC dyno sheets with SAE J1349 atmospheric correction, then overlays your real run against the simulation — ET, trap speed and split-by-split residuals for your specific bike.',
+            'Yes. MotoQuant imports Dragy GPS logs (CSV or VBO) and DynoJet/MoTeC dyno sheets with SAE J1349 atmospheric correction, then overlays your real run against the simulation — ET, trap speed and split-by-split residuals for your specific bike.',
         },
       },
     ],
@@ -201,7 +203,7 @@ export function articleSchema({ title, description, slug, datePublished, dateMod
     },
     publisher: {
       '@type': 'Organization',
-      name: 'MotoQuant Pro',
+      name: 'MotoQuant',
       url: SITE_URL,
     },
     mainEntityOfPage: {

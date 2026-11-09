@@ -398,10 +398,10 @@ export default function PostPage() {
             </li>
             <li>
               ·{' '}
-              <Link href="/pricing" className="text-brand-accent hover:text-brand-orange transition-colors">
-                MotoQuant Pricing
-              </Link>{' '}
-              — Free for street tuners; Pro Studio for shops and racing teams.
+              <a href="https://github.com/toto171/MotoQuant.in" target="_blank" rel="noopener noreferrer" className="text-brand-accent hover:text-brand-orange transition-colors">
+                MotoQuant on GitHub
+              </a>{' '}
+              — free and open source under the MIT License.
             </li>
           </ul>
         </div>

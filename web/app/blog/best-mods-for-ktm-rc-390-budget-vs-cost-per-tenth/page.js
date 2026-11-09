@@ -240,7 +240,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'For everything that did make the ladder, the MotoQuant simulator at motoquant.in lets you build the exact ladder with your specific bike year, rider weight, home strip, and parts catalogue selection. The Pro tier surfaces the cost-per-tenth ranking on every part-toggle, lets you sweep ambient conditions, and folds in a Dragy timeslip from your own runs to tighten the prediction beyond the current ±0.4-second cluster bias band.',
+    text: 'For everything that did make the ladder, the MotoQuant simulator at motoquant.in lets you build the exact ladder with your specific bike year, rider weight, home strip, and parts catalogue selection. The simulator surfaces the cost-per-tenth ranking on every part-toggle, lets you sweep ambient conditions, and folds in a Dragy timeslip from your own runs to tighten the prediction beyond the current ±0.4-second cluster bias band.',
   },
   {
     type: 'callout',
@@ -256,7 +256,7 @@ const CONTENT = [
   },
   {
     type: 'p',
-    text: 'The MotoQuant simulator at motoquant.in/simulator runs the same physics that produced every ET in this post against any of the 593 parts in the catalog, on any of the 20 seeded venues, with sweeps over rider weight, ambient temperature, density altitude, and tire compound. The Pro tier surfaces parts-ROI rankings (cost-per-tenth, ET delta, trap delta, compatibility warning) directly on the build page, and the Dragy upload calibrates the simulator against your own timeslips. Start with the stock RC 390 and Tier 1 — that is the answer for 80 percent of owners and it costs under ₹10,000 to verify.',
+    text: 'The MotoQuant simulator at motoquant.in/simulator runs the same physics that produced every ET in this post against any of the 593 parts in the catalog, on any of the 20 seeded venues, with sweeps over rider weight, ambient temperature, density altitude, and tire compound. The simulator surfaces parts-ROI rankings (cost-per-tenth, ET delta, trap delta, compatibility warning) directly on the build page, and the Dragy upload calibrates the simulator against your own timeslips. Start with the stock RC 390 and Tier 1 — that is the answer for 80 percent of owners and it costs under ₹10,000 to verify.',
   },
 ];
 
@@ -375,7 +375,7 @@ export default function PostPage() {
           <div className="flex-1">
             <div className="font-display font-bold text-white mb-1">Build your own RC 390 ladder</div>
             <div className="text-white/60 text-sm">
-              Sweep rider weight, density altitude, sprocket choice, ECU re-flash, exhaust, tire compound, and any of the 593 parts in the catalog. Cost-per-tenth ranks appear on every part toggle in the Pro tier.
+              Sweep rider weight, density altitude, sprocket choice, ECU re-flash, exhaust, tire compound, and any of the 593 parts in the catalog. Cost-per-tenth ranks appear on every part toggle in the simulator.
             </div>
           </div>
           {/* GROWTH_EXP_019 — CTA button copy A/B test; see ./EndOfArticleCta.js */}
@@ -455,10 +455,10 @@ export default function PostPage() {
             </li>
             <li>
               ·{' '}
-              <Link href="/pricing" className="text-brand-accent hover:text-brand-orange transition-colors">
-                Pricing
-              </Link>{' '}
-              — free tier covers stock-tune sims; Pro unlocks the cost-per-tenth ROI engine and Dragy timeslip calibration against your own runs.
+              <a href="https://github.com/toto171/MotoQuant.in" target="_blank" rel="noopener noreferrer" className="text-brand-accent hover:text-brand-orange transition-colors">
+                MotoQuant on GitHub
+              </a>{' '}
+              — free and open source under the MIT License.
             </li>
           </ul>
         </div>

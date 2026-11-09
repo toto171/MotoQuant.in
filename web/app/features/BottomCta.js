@@ -10,13 +10,13 @@ function BottomCtaInner() {
   const variant = params.get('variant') === 'B' ? 'B' : 'A';
 
   // EXP-008: features bottom-CTA copy.
-  // Variant A (control): "Try it free" — generic.
+  // Variant A (control): "Run a sim" — generic.
   // Variant B: outcome + time-bound proof on the CTA itself.
-  const primaryLabel = variant === 'B' ? 'Run a sim — 15 seconds, no signup' : 'Try it free';
+  const primaryLabel = variant === 'B' ? 'Run a sim — 15 seconds, no signup' : 'Run a sim';
   const subhead =
     variant === 'B'
       ? 'Pick a bike, hit go. Real physics in your browser — no install, no account.'
-      : 'Free in the browser. No account required to start.';
+      : 'Free and open source. No account required.';
 
   return (
     <div
@@ -38,9 +38,14 @@ function BottomCtaInner() {
         >
           <Zap size={18} /> {primaryLabel}
         </Link>
-        <Link href="/pricing" className="btn-ghost">
-          See pricing
-        </Link>
+        <a
+          href="https://github.com/toto171/MotoQuant.in"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-ghost"
+        >
+          View on GitHub
+        </a>
       </div>
     </div>
   );
@@ -55,15 +60,20 @@ export default function BottomCta() {
             Ready to run your <span className="text-accent">first sim</span>?
           </h2>
           <p className="text-white/65 mb-10 text-lg">
-            Free in the browser. No account required to start.
+            Free and open source. No account required.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/simulator" className="btn-primary">
-              <Zap size={18} /> Try it free
+              <Zap size={18} /> Run a sim
             </Link>
-            <Link href="/pricing" className="btn-ghost">
-              See pricing
-            </Link>
+            <a
+              href="https://github.com/toto171/MotoQuant.in"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-ghost"
+            >
+              View on GitHub
+            </a>
           </div>
         </div>
       }

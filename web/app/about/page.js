@@ -34,8 +34,8 @@ const ROADMAP = [
   {
     phase: 'Phase 6',
     status: 'in-progress',
-    label: 'Commercial launch + AI layer',
-    desc: 'Accounts + freemium tiers live (free during open beta). Razorpay + Stripe payment rails wired. Conversational AI tuning shipped. PPO launch control next.',
+    label: 'Open source + AI layer',
+    desc: 'MotoQuant is open source under the MIT License, with a free public instance at motoquant.in. Optional accounts for saved runs. Conversational AI tuning shipped. PPO launch control next.',
   },
 ];
 
@@ -220,7 +220,7 @@ export default function AboutPage() {
             <div>
               <h2 className="font-display font-bold text-3xl tracking-tight mb-4 text-white">Get in touch</h2>
               <p className="text-white/65 text-sm leading-relaxed mb-6">
-                Whether you&apos;re a tuning shop interested in the Pro plan, a racer who found a bug, or just want to talk drag racing — reach out.
+                Whether you&apos;re a tuning shop curious about the project, a racer who found a bug, or just want to talk drag racing — reach out.
               </p>
               <div className="space-y-3">
                 <div>
@@ -234,9 +234,9 @@ export default function AboutPage() {
                   <span className="font-mono text-white/70 text-sm">Pune, Maharashtra, India</span>
                 </div>
                 <div>
-                  <div className="label-mono mb-1">Pro licensing</div>
-                  <a href="mailto:motoquant@gmail.com?subject=MotoQuant%20Pro%20Licensing" className="font-mono text-white/80 hover:text-white transition-colors text-sm">
-                    Request a quote →
+                  <div className="label-mono mb-1">Source code</div>
+                  <a href="https://github.com/toto171/MotoQuant.in" target="_blank" rel="noopener noreferrer" className="font-mono text-white/80 hover:text-white transition-colors text-sm">
+                    github.com/toto171/MotoQuant.in →
                   </a>
                 </div>
               </div>

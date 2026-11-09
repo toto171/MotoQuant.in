@@ -1,15 +1,17 @@
 /**
- * MotoQuant Pro — Terms of Service
- * Last updated: July 2, 2026 (§2 corrected: password + magic-link sign-in;
- * IGNITION v5 typographic skin)
+ * MotoQuant — Terms of Service
+ * Last updated: November 9, 2026 — rewritten for the open-source (MIT)
+ * release: no plans, payments, refunds or license keys.
  */
 
 import SiteNav from "../../components/SiteNav";
 import SiteFooter from "../../components/SiteFooter";
 import PageHero from "../../components/PageHero";
 
+const REPO_URL = "https://github.com/toto171/MotoQuant.in";
+
 export const metadata = {
-  title: "Terms of Service — MotoQuant Pro",
+  title: "Terms of Service — MotoQuant",
   alternates: { canonical: "https://motoquant.in/terms" },
 };
 
@@ -22,161 +24,123 @@ export default function TermsPage() {
         kicker="legal · terms of service · pune jurisdiction"
         badge="Legal"
         title="Terms of Service"
-        sub="The agreement governing your access to and use of MotoQuant Pro."
+        sub="Plain terms for a free, hosted instance of open-source software."
         className="pb-8 md:pb-10"
       >
-        <p className="label-mono">Last updated · 2 July 2026</p>
+        <p className="label-mono">Last updated &middot; 9 November 2026</p>
       </PageHero>
 
       <main id="main" className="pt-10 pb-20 px-4 sm:px-6">
         <div className="mx-auto max-w-3xl">
         <p className="text-white/65 text-sm leading-relaxed">
-          These Terms of Service ("Terms") govern your access to and use of MotoQuant Pro
-          ("MotoQuant", "we", "us"), a motorcycle drag-racing physics simulation platform
-          operated from Pune, India. By creating an account or using the service, you agree
-          to these Terms.
+          MotoQuant (&ldquo;MotoQuant&rdquo;) is free, open-source software for
+          simulating motorcycle drag-racing quarter-mile times. The site at motoquant.in is a
+          free, public instance of that project, run from Pune, India. By using it you agree
+          to these short terms.
         </p>
 
-        <Section title="1. Description of service">
+        <Section title="1. Open source and free">
           <p>
-            MotoQuant Pro provides first-principles physics simulations for motorcycle
-            quarter-mile drag racing, parts ROI analysis, and associated tools. The service
-            is available via a web application at motoquant.in and a REST API.
-          </p>
-          <p>
-            <strong>Disclaimer: </strong>Simulations are for informational and analytical
-            purposes only. Predicted quarter-mile elapsed times and trap speeds are estimates
-            based on physical models and publicly available specifications. Do not rely on
-            predicted ET for race strategy in any life-safety context. Real-world performance
-            is affected by many factors outside the simulation model.
+            The MotoQuant software is released under the{" "}
+            <a href={`${REPO_URL}/blob/main/LICENSE`} target="_blank" rel="noopener noreferrer" className="text-accent hover:text-accent-bright transition-colors">MIT License</a>.
+            The source code is at{" "}
+            <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className="text-accent hover:text-accent-bright transition-colors">github.com/toto171/MotoQuant.in</a>.
+            Your rights to the code are whatever that license grants. Using this hosted
+            instance is free: there are no paid plans, no subscriptions and no license keys.
           </p>
         </Section>
 
-        <Section title="2. Accounts and authentication">
+        <Section title="2. Simulations are estimates, not advice">
           <p>
-            You must provide a valid email address to create an account. You can sign in
-            with a password — which we store only as a salted scrypt hash, never in
-            plaintext — or with a passwordless magic-link email. You are responsible for
-            keeping your email account and any password you set secure, as they control
-            access to MotoQuant Pro.
+            Predicted elapsed times, trap speeds and parts-ROI figures are estimates produced
+            by physical models and publicly available specifications. They are for
+            informational and analytical purposes only and are not safety, engineering or
+            tuning advice. Real-world performance depends on many factors the model does not
+            capture.
           </p>
           <p>
-            You must be at least 18 years old to create a paid account. By subscribing
-            you confirm that you are 18 or over.
-          </p>
-        </Section>
-
-        <Section title="3. Subscription plans and billing">
-          <p>
-            MotoQuant Pro offers three tiers: Free, Pro (₹499/mo or ₹4,999/yr), and
-            Studio (₹1,999/mo or ₹19,990/yr). MotoQuant Pro is operated by an
-            unregistered sole proprietorship with turnover below the ₹20 lakh GST
-            registration threshold for services, so <strong>no GST is charged</strong> —
-            the listed price is the total amount payable. You receive a payment
-            receipt from the payment processor. Should we become GST-registered in
-            future, we will give notice before GST begins to apply, and it will apply
-            only to payments made after that date.
-          </p>
-          <p>
-            <strong>Open beta: </strong>while MotoQuant Pro is in open beta, all Pro and
-            Studio features are provided free of charge to all registered accounts. We
-            will give registered users advance notice by email before paid billing
-            begins. Beta access does not create an entitlement to free access after
-            commercial launch.
-          </p>
-          <p>
-            Payments are processed by Razorpay (India — UPI, cards, net banking,
-            wallets) and Stripe (international cards). By subscribing you agree to the
-            processor's payment terms in addition to these Terms. Subscriptions
-            auto-renew unless cancelled before the end of the billing period.
-          </p>
-          <p>
-            <strong>7-day refund policy: </strong>If you are not satisfied within 7 calendar
-            days of your first payment, contact us at motoquant@gmail.com for a full refund.
-            Refunds are not available after the 7-day window or for renewals. Full terms,
-            including how cancellations and failed payments are handled, are set out in our{" "}
-            <a href="/refunds" className="text-accent hover:text-accent-bright transition-colors">Refund &amp; Cancellation Policy</a>.
+            Do not make safety-critical decisions from a prediction. Race only at sanctioned
+            venues, with appropriate safety gear and supervision, and follow the law where you
+            ride.
           </p>
         </Section>
 
-        <Section title="4. License keys">
+        <Section title="3. No warranty">
           <p>
-            Pro subscribers may generate 1 license key; Studio subscribers may generate
-            up to 5 keys. License keys are personal and non-transferable, and bind to a
-            single device.
+            The service and the software are provided &ldquo;as is&rdquo;, without warranty
+            of any kind, express or implied, including accuracy, fitness for a particular
+            purpose and availability. The hosted instance may be slow, change, or go offline
+            at any time. To the maximum extent permitted by law, the maintainers are not liable
+            for any damages arising from use of, or inability to use, the service or software.
+          </p>
+        </Section>
+
+        <Section title="4. Optional accounts">
+          <p>
+            You do not need an account to run simulations. An optional account lets you save
+            runs to a personal garage and share timeslip links. Creating one requires a valid
+            email address. You can sign in with a password, which we store only as a salted
+            scrypt hash and never in plaintext, or with a passwordless magic-link email. You
+            are responsible for keeping your email account and any password you set secure.
           </p>
           <p>
-            On subscription cancellation or expiry, license keys are invalidated within
-            24 hours of the next validation check.
+            You may request account deletion at any time by emailing{" "}
+            <a href="mailto:motoquant@gmail.com" className="font-mono text-white/80 hover:text-white transition-colors">motoquant@gmail.com</a>.
           </p>
         </Section>
 
         <Section title="5. Acceptable use">
-          <p>You may not:</p>
+          <p>Please do not:</p>
           <ul className="text-white/65 list-disc pl-5 space-y-1">
-            <li>Reverse-engineer, decompile, or extract the physics model code</li>
-            <li>Use the API at volumes exceeding fair-use limits (contact us for high-volume B2B arrangements)</li>
-            <li>Share subscription credentials or license keys with third parties</li>
+            <li>Abuse or scrape the hosted service in a way that degrades it for others, or try to circumvent its rate limits</li>
+            <li>Probe for or exploit security vulnerabilities (report them via GitHub instead)</li>
             <li>Use the service for any unlawful purpose under Indian law or the law of your jurisdiction</li>
-            <li>Attempt to circumvent tier gating or rate-limit mechanisms</li>
           </ul>
+          <p>
+            If you need heavy or automated use, run your own copy &mdash; that is what the
+            MIT License is for. We may rate-limit or block usage that harms the service.
+          </p>
         </Section>
 
         <Section title="6. Data you submit">
           <p>
-            We collect your email address, simulation runs, build configurations, and any
-            files you voluntarily upload (Dragy GPS logs, dyno CSVs). This data is
-            used to provide and improve the service. See our Privacy Policy for details.
-          </p>
-          <p>
-            <strong>Right to delete: </strong>You may request account deletion at any time
-            by emailing motoquant@gmail.com. We will soft-delete your account within 7
-            business days and permanently purge all personal data within 30 days.
+            Runs you save, builds you share, and files you voluntarily upload (Dragy GPS logs,
+            dyno CSVs) are used to provide the service. Shared timeslip links are viewable by
+            anyone who has the link. See our{" "}
+            <a href="/privacy" className="text-accent hover:text-accent-bright transition-colors">Privacy Policy</a>{" "}
+            for details.
           </p>
         </Section>
 
-        <Section title="7. Intellectual property">
+        <Section title="7. Third-party data">
           <p>
-            All physics models, software code, and data compilations in MotoQuant Pro are
-            the intellectual property of MotoQuant Pro and are protected under applicable
-            copyright and trade-secret law. Manufacturer specifications used in the bike
-            catalog are publicly available data and remain the property of their respective
-            manufacturers.
+            Manufacturer specifications and published test results used in the bike catalog
+            and validation set are publicly available data and remain the property of their
+            respective owners. MotoQuant is not affiliated with any motorcycle manufacturer.
           </p>
         </Section>
 
-        <Section title="8. Limitation of liability">
+        <Section title="8. Governing law">
           <p>
-            To the maximum extent permitted by applicable law, MotoQuant Pro shall not be
-            liable for any indirect, incidental, special, consequential, or exemplary
-            damages arising from use of or inability to use the service. Our total aggregate
-            liability to you shall not exceed the amount paid by you in the 12 months
-            preceding the claim.
+            These terms are governed by the laws of India. Any disputes are subject to the
+            exclusive jurisdiction of the courts in Pune, Maharashtra, India.
           </p>
         </Section>
 
-        <Section title="9. Governing law">
+        <Section title="9. Changes">
           <p>
-            These Terms are governed by the laws of India. Any disputes shall be subject
-            to the exclusive jurisdiction of the courts in Pune, Maharashtra, India.
-          </p>
-        </Section>
-
-        <Section title="10. Changes to terms">
-          <p>
-            We may update these Terms with 14 days' notice via email to registered users.
-            Continued use after the notice period constitutes acceptance of the updated Terms.
+            We may update these terms; the date at the top shows the latest revision.
+            Continued use after a change means you accept the updated terms.
           </p>
         </Section>
 
         <div className="card mt-8 p-5 md:p-6 text-sm text-white/45">
-          <p>MotoQuant Pro · Pune, Maharashtra, India</p>
+          <p>MotoQuant &middot; Pune, Maharashtra, India</p>
           <p>Contact: <a href="mailto:motoquant@gmail.com" className="font-mono text-white/80 hover:text-white transition-colors">motoquant@gmail.com</a></p>
           <div className="mt-4 flex flex-wrap gap-4">
             <a href="/privacy" className="text-accent hover:text-accent-bright transition-colors">Privacy Policy</a>
-            <a href="/refunds" className="text-accent hover:text-accent-bright transition-colors">Refunds</a>
             <a href="/contact" className="text-accent hover:text-accent-bright transition-colors">Contact</a>
-            <a href="/pricing" className="text-accent hover:text-accent-bright transition-colors">Pricing</a>
+            <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className="text-accent hover:text-accent-bright transition-colors">GitHub</a>
           </div>
         </div>
         </div>

@@ -39,7 +39,7 @@ const RESOURCE_LINKS = [
   { href: '/about',                label: 'About' },
 ];
 
-const PRICING_LINK = { href: '/pricing', label: 'Pricing' };
+const GITHUB_URL = 'https://github.com/toto171/MotoQuant.in';
 
 function isActive(pathname, link) {
   if (!pathname) return false;
@@ -136,7 +136,7 @@ export default function SiteNav() {
           </span>
         </Link>
 
-        {/* gap-4 until xl: at 1024-1100px the full cluster (5 tools + Pricing
+        {/* gap-4 until xl: at 1024-1100px the full cluster (5 tools + GitHub
             + Resources + search + auth + CTA) was overflowing the viewport by
             ~60px and clipping the CTA (field-reported). */}
         <nav className="hidden lg:flex gap-4 xl:gap-6 items-center text-sm font-mono">
@@ -146,12 +146,14 @@ export default function SiteNav() {
             </Link>
           ))}
           <span aria-hidden="true" className="h-4 w-px bg-white/15" />
-          <Link
-            href={PRICING_LINK.href}
-            className={linkCls(isActive(pathname, PRICING_LINK))}
+          <a
+            href={GITHUB_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-white/60 hover:text-white transition-colors duration-200"
           >
-            {PRICING_LINK.label}
-          </Link>
+            GitHub
+          </a>
           <div className="relative" ref={resRef}>
             <button
               type="button"
@@ -226,11 +228,6 @@ export default function SiteNav() {
               <span className="text-xs font-mono text-white/70 max-w-[9rem] truncate">
                 {user?.email?.split('@')[0]}
               </span>
-              {user?.tier && user.tier !== 'free' && (
-                <span className="text-[9px] font-mono uppercase tracking-wider text-mint">
-                  {user.tier}
-                </span>
-              )}
             </Link>
           ) : (
             <Link
@@ -284,7 +281,7 @@ export default function SiteNav() {
                 </Link>
               ))}
               <span className="label-mono px-4 pt-3 pb-1.5">Resources</span>
-              {[...RESOURCE_LINKS, PRICING_LINK].map((link) => (
+              {RESOURCE_LINKS.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -293,6 +290,14 @@ export default function SiteNav() {
                   {link.label}
                 </Link>
               ))}
+              <a
+                href={GITHUB_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={drawerLinkCls(false)}
+              >
+                GitHub
+              </a>
               <div className="my-1 border-t border-white/10" />
               <Link
                 href={isAuthenticated ? '/account' : '/login'}

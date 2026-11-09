@@ -1,4 +1,4 @@
-# Contributing to MotoQuant Pro web/
+# Contributing to MotoQuant web/
 
 Quick guide to the gotchas that have bitten us repeatedly. Read this before opening a PR that touches `web/**`.
 

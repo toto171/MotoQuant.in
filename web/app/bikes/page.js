@@ -182,7 +182,7 @@ export default function BikesPage() {
         title={<>Every bike. <span className="text-gradient-orange">Real physics.</span></>}
         sub={
           <>
-            541 bikes modelled in MotoQuant Pro — Hayabusa, ZX-14R, R15 V4,
+            541 bikes modelled in MotoQuant — Hayabusa, ZX-14R, R15 V4,
             Yamaha MT-15 V1, KTM Duke 390, Pulsar NS200, Pulsar 125 Neon,
             Pulsar N250, Apache RTR, Interceptor 650, Yezdi Roadster, Hero
             Glamour 125, CFMoto 800NK, GSX-R600 K8 and the full Indian +

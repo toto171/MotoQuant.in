@@ -4,8 +4,8 @@
 
 import StructuredData, { SITE_URL } from '../StructuredData';
 
-const TITLE = "Create Account — MotoQuant Pro";
-const DESCRIPTION = "Create your MotoQuant Pro account in seconds with magic-link email auth.";
+const TITLE = "Create Account — MotoQuant";
+const DESCRIPTION = "Create an optional MotoQuant account to save your runs. Free and open source; no account is needed to simulate.";
 
 export const metadata = {
   title: TITLE,

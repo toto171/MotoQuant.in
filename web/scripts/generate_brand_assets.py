@@ -410,7 +410,7 @@ def render_og_image(path: Path) -> None:
 # Web manifest
 # ----------------------------------------------------------------------------
 WEBMANIFEST = """{
-  "name": "MotoQuant Pro",
+  "name": "MotoQuant",
   "short_name": "MotoQuant",
   "description": "First-principles physics simulation for quarter-mile drag racing.",
   "icons": [

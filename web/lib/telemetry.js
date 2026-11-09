@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * MotoQuant Pro — Anonymous client telemetry.
+ * MotoQuant — Anonymous client telemetry.
  * =============================================
  * Goal: catch bugs and usage signals from real users without storing PII.
  *

@@ -1,6 +1,7 @@
 /**
- * MotoQuant Pro — Privacy Policy
- * Last updated: April 24, 2026
+ * MotoQuant — Privacy Policy
+ * Last updated: November 9, 2026 — open-source release: payment, subscription and
+ * license-key data removed (none is collected).
  */
 
 import SiteNav from "../../components/SiteNav";
@@ -8,7 +9,7 @@ import SiteFooter from "../../components/SiteFooter";
 import PageHero from "../../components/PageHero";
 
 export const metadata = {
-  title: "Privacy Policy — MotoQuant Pro",
+  title: "Privacy Policy — MotoQuant",
   alternates: { canonical: "https://motoquant.in/privacy" },
 };
 
@@ -24,27 +25,27 @@ export default function PrivacyPage() {
         sub="What we collect, how we use it, and the rights you keep."
         className="pb-8 md:pb-10"
       >
-        <p className="label-mono">Last updated · 24 April 2026</p>
+        <p className="label-mono">Last updated &middot; 9 November 2026</p>
       </PageHero>
 
       <main id="main" className="pt-10 pb-20 px-4 sm:px-6">
         <div className="mx-auto max-w-3xl">
         <p className="text-white/65 text-sm leading-relaxed">
-          MotoQuant Pro ("we", "us") is committed to protecting your personal data.
+          MotoQuant ("we", "us") is free, open-source software, and motoquant.in is a free
+          public instance of it. Accounts are optional, and we collect as little as we can.
           This policy describes what data we collect, how we use it, and your rights
           under applicable Indian data protection principles and the Information
           Technology Act, 2000.
         </p>
 
         <Section title="1. Data we collect">
-          <Row label="Email address">Required to create an account and deliver sign-in links. Stored in our database indefinitely until you request deletion.</Row>
+          <Row label="Email address">Only if you create an optional account: used to deliver sign-in links. Stored in our database indefinitely until you request deletion.</Row>
           <Row label="Password (optional)">If you choose password sign-in, we store only a salted scrypt hash — we cannot read your password. Magic-link sign-in requires no password at all.</Row>
-          <Row label="Payment details">Handled entirely by our payment processors — Razorpay (India) and Stripe (international). Card, UPI and bank details never touch MotoQuant servers; we store only your subscription id, plan, and billing status.</Row>
-          <Row label="Simulation runs">ET, trap speed, venue, build configuration. Stored to power the leaderboard and your run history. Not sold to third parties.</Row>
+          <Row label="Simulation runs">ET, trap speed, venue, build configuration. Stored when you choose to save a run, to power the leaderboard, shared timeslip links and your garage. Not sold to third parties.</Row>
           <Row label="Build configurations">Parts combinations and bike selections you save. Used to provide the service.</Row>
-          <Row label="Dragy / dyno uploads">(Studio tier only) Dragy GPS logs and dyno CSV files you upload for calibration. Stored temporarily during processing and then deleted within 24 hours unless you explicitly save them.</Row>
-          <Row label="Device ID">(License keys) An opaque device fingerprint used to bind a license key to a single device. Not shared externally.</Row>
-          <Row label="Usage metadata">Request timestamps, endpoints called, error logs. Used for debugging and service improvement. Not sold.</Row>
+          <Row label="Dragy / dyno uploads">Dragy GPS logs and dyno CSV files you upload for calibration. Stored temporarily during processing and then deleted within 24 hours unless you explicitly save them.</Row>
+          <Row label="Usage metadata">Request timestamps, endpoints called, error logs, and your IP address (used for per-IP rate limiting and abuse prevention). Used for debugging and service improvement. Not sold.</Row>
+          <Row label="Anonymous telemetry">A small set of anonymous events (for example &ldquo;simulation run&rdquo; or a JavaScript error) with the page path, browser user-agent, viewport size and a random per-page-load session id. It carries no email, account id or free-text input, and is used to catch bugs and see which features get used.</Row>
         </Section>
 
         <Section title="2. Data residency">
@@ -58,23 +59,17 @@ export default function PrivacyPage() {
 
         <Section title="3. Cookies and tracking">
           <p className="text-white/65 text-sm leading-relaxed">
-            We use <strong>session cookies only</strong> — a single JWT-backed session identifier
-            stored in sessionStorage (not localStorage or a cookie) to maintain your login state.
-            We do <strong>not</strong> set analytics cookies, advertising cookies, or any
-            third-party tracking cookies without your explicit consent.
-          </p>
-          <p className="text-white/65 text-sm leading-relaxed mt-2">
-            If we add analytics in the future, we will prompt you for consent before setting any
-            non-essential cookies in compliance with applicable privacy law.
+            If you sign in, a session token is kept in your browser&rsquo;s sessionStorage (not
+            localStorage or a cookie) to maintain your login state. We do <strong>not</strong>{" "}
+            set analytics cookies, advertising cookies, or any third-party tracking cookies.
           </p>
         </Section>
 
         <Section title="4. How we use your data">
           <ul className="list-disc pl-5 space-y-1 text-white/65 text-sm">
             <li>Authenticate you and maintain your session</li>
-            <li>Deliver subscription-gated features based on your tier</li>
-            <li>Process payments via Razorpay (email shared with Razorpay for invoicing)</li>
-            <li>Send transactional emails (sign-in links, subscription receipts)</li>
+            <li>Save and show your runs in your garage, and render shared timeslip links</li>
+            <li>Send transactional emails (sign-in links)</li>
             <li>Improve the physics model and catalog accuracy using anonymised run data</li>
             <li>Debug errors and maintain service reliability</li>
           </ul>
@@ -88,7 +83,6 @@ export default function PrivacyPage() {
             We share data only with:
           </p>
           <ul className="list-disc pl-5 space-y-1 text-white/65 text-sm mt-2">
-            <li><strong>Razorpay</strong> — payment processor. Your email and billing information are shared to process subscriptions and issue payment receipts. Governed by Razorpay's privacy policy.</li>
             <li><strong>Render / Vercel</strong> — infrastructure providers hosting our servers. Data is subject to their data-processing terms.</li>
           </ul>
         </Section>
@@ -109,17 +103,15 @@ export default function PrivacyPage() {
         <Section title="7. Data retention">
           <p className="text-white/65 text-sm leading-relaxed">
             Active accounts and their data are retained for the lifetime of the account.
-            Inactive free-tier accounts with no activity for 24 months may be soft-deleted
-            after 60 days' notice. Paid-account data is retained for 2 years after subscription
-            cancellation for billing record purposes.
+            Inactive accounts with no activity for 24 months may be soft-deleted
+            after 60 days' notice.
           </p>
         </Section>
 
         <Section title="8. Security">
           <p className="text-white/65 text-sm leading-relaxed">
             We use industry-standard practices: HTTPS everywhere, JWT tokens with short
-            (15-minute) access lifetimes, rotating refresh tokens, license keys stored
-            as SHA-256 hashes (never in plaintext), and database access restricted to
+            (15-minute) access lifetimes, rotating refresh tokens, and database access restricted to
             server-side code. Passwords are never stored in plaintext — only salted
             scrypt hashes.
           </p>
@@ -134,11 +126,11 @@ export default function PrivacyPage() {
         </Section>
 
         <div className="card mt-8 p-5 md:p-6 text-sm text-white/55">
-          <p>MotoQuant Pro · Pune, Maharashtra, India</p>
+          <p>MotoQuant · Pune, Maharashtra, India</p>
           <p>Contact: <a href="mailto:motoquant@gmail.com" className="font-mono text-white/65 hover:text-white transition-colors">motoquant@gmail.com</a></p>
           <div className="mt-4 flex gap-4">
             <a href="/terms" className="text-accent hover:text-accent-bright transition-colors">Terms of Service</a>
-            <a href="/pricing" className="text-accent hover:text-accent-bright transition-colors">Pricing</a>
+            <a href="/contact" className="text-accent hover:text-accent-bright transition-colors">Contact</a>
           </div>
         </div>
         </div>

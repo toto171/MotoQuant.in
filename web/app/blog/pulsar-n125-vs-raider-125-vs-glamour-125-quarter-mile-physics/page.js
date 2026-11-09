@@ -430,13 +430,11 @@ export default function PostPage() {
             </li>
             <li>
               ·{" "}
-              <Link
-                href="/pricing"
-                className="text-brand-accent hover:text-brand-orange transition-colors"
-              >
-                MotoQuant Pricing
-              </Link>{" "}
-              — free tier covers stock-tune sims on every bike; Pro adds full parts-ROI and Dragy timeslip calibration.
+              <a href="https://github.com/toto171/MotoQuant.in" target="_blank" rel="noopener noreferrer"
+                className="text-brand-accent hover:text-brand-orange transition-colors">
+                MotoQuant on GitHub
+              </a>{" "}
+              — free and open source under the MIT License.
             </li>
           </ul>
         </div>

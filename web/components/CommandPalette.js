@@ -35,7 +35,7 @@ const ACTIONS = [
   { label: 'ECU autotune setup', href: '/autotune', kw: 'tune gearing launch rpm tyre pressure conditions ecu', icon: Zap, group: 'Tools' },
   { label: 'Browse the bike catalog', href: '/bikes', kw: 'bikes motorcycles catalog database specs', icon: Search, group: 'Tools' },
   { label: 'Leaderboard', href: '/leaderboard', kw: 'top runs fastest board ranking times', icon: Trophy, group: 'Tools' },
-  { label: 'Pricing & plans', href: '/pricing', kw: 'price pro studio subscribe beta free cost', icon: ArrowRight, group: 'Pages' },
+  { label: 'Source code on GitHub', href: 'https://github.com/toto171/MotoQuant.in', kw: 'github open source mit license code repo contribute', icon: ArrowRight, group: 'Pages' },
   { label: 'Docs — getting started', href: '/docs/getting-started', kw: 'documentation guide help how to start', icon: BookOpen, group: 'Pages' },
   { label: 'Docs — physics engine', href: '/docs/physics', kw: 'rk4 submodels engine model documentation', icon: BookOpen, group: 'Pages' },
   { label: 'Docs — validation data', href: '/docs/validation', kw: 'accuracy benchmarks validation error', icon: BookOpen, group: 'Pages' },
@@ -43,7 +43,7 @@ const ACTIONS = [
   { label: 'Whitepaper', href: '/whitepaper', kw: 'paper methodology research physics', icon: BookOpen, group: 'Pages' },
   { label: 'Blog', href: '/blog', kw: 'articles posts guides comparisons', icon: BookOpen, group: 'Pages' },
   { label: 'About MotoQuant', href: '/about', kw: 'company founders story contact', icon: ArrowRight, group: 'Pages' },
-  { label: 'Your account', href: '/account', kw: 'profile garage license keys subscription sign', icon: ArrowRight, group: 'Pages' },
+  { label: 'Your account', href: '/account', kw: 'profile garage saved runs sign in', icon: ArrowRight, group: 'Pages' },
 ];
 
 function matchActions(q) {
@@ -175,6 +175,10 @@ export default function CommandPalette({ open, onClose }) {
     (row) => {
       if (!row) return;
       onClose();
+      if (/^https?:\/\//.test(row.href)) {
+        window.open(row.href, '_blank', 'noopener,noreferrer');
+        return;
+      }
       router.push(row.href);
     },
     [onClose, router]

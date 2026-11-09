@@ -175,7 +175,7 @@ POST /api/calibrate/dyno — upload a dyno CSV and get the corrected torque curv
 GET /api/bikes — paginated catalog with manufacturer/category filters.
 GET /api/venues — all 20 venues with 12-month seasonal weather data.
 
-Interactive docs at /docs (FastAPI's automatic OpenAPI UI). No authentication for basic simulation — rate-limited to 60 requests/minute per IP. Authenticated API keys (email to request) unlock higher limits and private run storage.`,
+Interactive docs at /docs (FastAPI's automatic OpenAPI UI). No authentication for basic simulation — rate-limited to 60 requests/minute per IP. The hosted instance is rate-limited per IP; the whole project is open source (MIT), so you can also run the API yourself with no limits.`,
     docsLink: '/docs/getting-started',
     docsLabel: 'API reference',
     stats: [
@@ -205,16 +205,16 @@ Interactive docs at /docs (FastAPI's automatic OpenAPI UI). No authentication fo
     icon: UserCircle2,
     label: '06 / Accounts & Garage',
     title: <>Your <span className="text-accent">garage</span>, saved</>,
-    subtitle: 'Free accounts. Saved runs. Shareable builds. Every Pro feature unlocked during the open beta.',
+    subtitle: 'Free accounts. Saved runs. Shareable builds. Everything is free and open source.',
     body: `Create a free account with an email + password (or a passwordless magic link) and your simulator work stops being throwaway: every run you save lands in My Garage on your account page — bike, build, ET, trap speed, venue, date.
 
 Found a setup worth bragging about? Hit Share on the simulator and send a link that reopens your exact bike, venue and tuning sliders on any device.
 
-While MotoQuant is in open beta, everything in the Pro and Studio tiers — unlimited sims, the build optimiser, ECU autotune, Dragy/dyno imports — is unlocked free for every account. Paid plans only begin at commercial launch, with advance notice.`,
+Accounts are optional and only exist to save your runs. MotoQuant is free and open source under the MIT License — unlimited sims, the build optimiser, ECU autotune and Dragy/dyno imports are available to everyone, and you can read or run the code yourself on GitHub.`,
     docsLink: '/login?signup=1',
     docsLabel: 'Create a free account',
     stats: [
-      { num: '₹0', label: 'During open beta' },
+      { num: 'MIT', label: 'Open source license' },
       { num: '25+', label: 'Runs in your garage' },
       { num: '1-tap', label: 'Build sharing' },
     ],
@@ -223,7 +223,7 @@ While MotoQuant is in open beta, everything in the Pro and Studio tiers — unli
       log: [
         'run saved → my garage',
         'share link armed · ?bike&venue&rider',
-        'open beta: pro tier unlocked',
+        'open source · mit licensed',
       ],
       value: '9.62',
       unit: 's',
@@ -313,7 +313,7 @@ export default function FeaturesPage() {
       <PageHero
         kicker="15 submodels · capability index"
         badge="Full feature list"
-        title={<>Everything inside <span className="text-gradient-orange">MotoQuant Pro</span></>}
+        title={<>Everything inside <span className="text-gradient-orange">MotoQuant</span></>}
         sub="Six capability areas — from first-principles physics through to an open REST API and your saved garage. Every layer is built on the same validated simulation engine."
         stats={[
           { value: 15, label: 'Sub-models' },

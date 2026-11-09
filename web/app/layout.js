@@ -62,12 +62,12 @@ const DESCRIPTION =
 export const metadata = {
   title: {
     default:
-      'MotoQuant Pro — Motorcycle Quarter-Mile Drag Racing Simulator | ET Predictor & Build Optimizer',
-    template: '%s · MotoQuant Pro',
+      'MotoQuant — Motorcycle Quarter-Mile Drag Racing Simulator | ET Predictor & Build Optimizer',
+    template: '%s · MotoQuant',
   },
   description: DESCRIPTION,
   metadataBase: new URL(SITE_URL),
-  applicationName: 'MotoQuant Pro',
+  applicationName: 'MotoQuant',
   manifest: '/site.webmanifest',
   alternates: {
     canonical: '/',
@@ -79,17 +79,17 @@ export const metadata = {
   },
   openGraph: {
     title:
-      'MotoQuant Pro — Motorcycle Quarter-Mile Drag Racing Simulator',
+      'MotoQuant — Motorcycle Quarter-Mile Drag Racing Simulator',
     description: DESCRIPTION,
     url: SITE_URL,
-    siteName: 'MotoQuant Pro',
+    siteName: 'MotoQuant',
     images: [
       {
         url: `${SITE_URL}/og-image.png`,
         secureUrl: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'MotoQuant Pro — quarter-mile drag racing simulator covering 541 motorcycles, 593 parts, 254 tires, 20 venues',
+        alt: 'MotoQuant — quarter-mile drag racing simulator covering 541 motorcycles, 593 parts, 254 tires, 20 venues',
         type: 'image/png',
       },
     ],
@@ -100,12 +100,12 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title:
-      'MotoQuant Pro — Motorcycle Quarter-Mile Drag Racing Simulator',
+      'MotoQuant — Motorcycle Quarter-Mile Drag Racing Simulator',
     description: DESCRIPTION,
     images: [
       {
         url: `${SITE_URL}/og-image.png`,
-        alt: 'MotoQuant Pro — quarter-mile drag racing simulator covering 541 motorcycles, 593 parts, 254 tires, 20 venues',
+        alt: 'MotoQuant — quarter-mile drag racing simulator covering 541 motorcycles, 593 parts, 254 tires, 20 venues',
       },
     ],
     site: '@motoquant',
@@ -114,7 +114,6 @@ export const metadata = {
   keywords: [
     // Brand
     'motoquant',
-    'motoquant pro',
     'motoquant simulator',
     // Primary category
     'motorcycle drag racing simulator',
@@ -189,7 +188,7 @@ export const metadata = {
   ],
   authors: [{ name: 'Ritwik Singh', url: SITE_URL }],
   creator: 'Ritwik Singh',
-  publisher: 'MotoQuant Pro',
+  publisher: 'MotoQuant',
   category: 'Automotive Simulation',
   classification: 'Motorcycle Racing Simulation Software',
   robots: {

@@ -7,9 +7,9 @@ import ScoreboardDigits from '../../components/ScoreboardDigits';
 import TerminalCtaVariant from './TerminalCtaVariant';
 
 export const metadata = {
-  title: 'Whitepaper — MotoQuant Pro Physics Engine (Pacejka Tire Model + RK4)',
+  title: 'Whitepaper — MotoQuant Physics Engine (Pacejka Tire Model + RK4)',
   description:
-    'MotoQuant Pro whitepaper: a free Pacejka tire-model motorcycle quarter-mile calculator built on 15 sub-models and RK4 integration at 1 ms, validated against 250 source-quality-weighted benchmarks across a cylinder-aware 12-cluster taxonomy. Reference baselines K5 / R1 / Hayabusa accurate to four decimals across every commit.',
+    'MotoQuant whitepaper: a free Pacejka tire-model motorcycle quarter-mile calculator built on 15 sub-models and RK4 integration at 1 ms, validated against 250 source-quality-weighted benchmarks across a cylinder-aware 12-cluster taxonomy. Reference baselines K5 / R1 / Hayabusa accurate to four decimals across every commit.',
   alternates: { canonical: 'https://motoquant.in/whitepaper' },
   keywords: [
     'motoquant whitepaper',
@@ -22,7 +22,7 @@ export const metadata = {
     'motorcycle drag racing physics paper',
   ],
   openGraph: {
-    title: 'MotoQuant Pro — Physics Engine Whitepaper (Pacejka + RK4)',
+    title: 'MotoQuant — Physics Engine Whitepaper (Pacejka + RK4)',
     description:
       '15 sub-models. RK4 at 1 ms. Pacejka tire model. 12-cluster cylinder-aware taxonomy. Source-quality weighted validation. Reference baselines accurate to four decimals.',
     url: 'https://motoquant.in/whitepaper',
@@ -30,7 +30,7 @@ export const metadata = {
   },
 };
 
-const ABSTRACT = `MotoQuant Pro is a first-principles physics engine for predicting motorcycle quarter-mile drag-racing elapsed times. The model couples 15 independent sub-models — engine torque (Willans friction), Pacejka tire grip with thermal evolution, gear-shift and clutch slip dynamics, weight transfer and rider centre-of-gravity shift, aerodynamic drag with per-bike Cd × A, environmental conditions (density altitude, surface μ, ambient temp), and parasitic loss budget — through a fixed-step fourth-order Runge–Kutta integrator running at one-millisecond resolution. As of the August 2026 sweep we validate against 250 source-quality-weighted published quarter-mile benchmarks (276 matched) across a cylinder-aware 12-cluster taxonomy. Overall weighted bias is +0.007 s; weighted mean absolute error is 0.263 s. Within instrumented-magazine-data clusters (litre-sport ≥195 hp), weighted bias is +0.027 s and |Δ| is 0.147 s; across the ten cleanest validated runs the mean absolute error is ±0.007 s. Three reference baselines — GSX-R 1000 K5, YZF-R1 4C8, and Suzuki Hayabusa Gen1 — are preserved exactly to the fourth decimal place across every code change since July 13, 2026.`;
+const ABSTRACT = `MotoQuant is a first-principles physics engine for predicting motorcycle quarter-mile drag-racing elapsed times. The model couples 15 independent sub-models — engine torque (Willans friction), Pacejka tire grip with thermal evolution, gear-shift and clutch slip dynamics, weight transfer and rider centre-of-gravity shift, aerodynamic drag with per-bike Cd × A, environmental conditions (density altitude, surface μ, ambient temp), and parasitic loss budget — through a fixed-step fourth-order Runge–Kutta integrator running at one-millisecond resolution. As of the August 2026 sweep we validate against 250 source-quality-weighted published quarter-mile benchmarks (276 matched) across a cylinder-aware 12-cluster taxonomy. Overall weighted bias is +0.007 s; weighted mean absolute error is 0.263 s. Within instrumented-magazine-data clusters (litre-sport ≥195 hp), weighted bias is +0.027 s and |Δ| is 0.147 s; across the ten cleanest validated runs the mean absolute error is ±0.007 s. Three reference baselines — GSX-R 1000 K5, YZF-R1 4C8, and Suzuki Hayabusa Gen1 — are preserved exactly to the fourth decimal place across every code change since July 13, 2026.`;
 
 const SECTIONS = [
   {
@@ -39,7 +39,7 @@ const SECTIONS = [
     title: 'Introduction',
     body: [
       'Motorcycle drag racing in India has grown rapidly across Aamby Valley (Lonavala, Maharashtra), MMRT Chennai, the Buddh International Circuit, Kari Motor Speedway (Coimbatore), and the Hyderabad strips. The community has outgrown the available tooling: spreadsheet calculators that treat power-to-weight as the sole input, regression-based estimators trained on limited international data, and per-bike rules of thumb that fail to generalise across mass, aero, gearing, traction, and venue conditions.',
-      'MotoQuant Pro is built to fill that gap. We aim for an open, audit-able simulator whose every coefficient traces back to a physical measurement — not a fitted curve. This whitepaper documents the architecture, validation methodology, and the honest residual error budget against which we benchmark every release.',
+      'MotoQuant is built to fill that gap. We aim for an open, audit-able simulator whose every coefficient traces back to a physical measurement — not a fitted curve. This whitepaper documents the architecture, validation methodology, and the honest residual error budget against which we benchmark every release.',
     ],
   },
   {
@@ -151,7 +151,7 @@ const SECTIONS = [
     n: '7',
     title: 'Reproducibility',
     body: [
-      'MotoQuant Pro is open to external audit. The simulator code, all sub-model coefficients, the 541-bike catalog, the 593-part library, and every venue\'s seasonal weather profile are inspectable. Every parts ROI calculation is deterministic given the bike configuration and venue conditions. We publish:',
+      'MotoQuant is open to external audit. The simulator code, all sub-model coefficients, the 541-bike catalog, the 593-part library, and every venue\'s seasonal weather profile are inspectable. Every parts ROI calculation is deterministic given the bike configuration and venue conditions. We publish:',
     ],
     list: {
       title: '',
@@ -190,9 +190,9 @@ const SECTIONS = [
     n: '10',
     title: 'Citation',
     body: [
-      'If you reference this whitepaper or use MotoQuant Pro outputs in your own analysis, please cite as:',
+      'If you reference this whitepaper or use MotoQuant outputs in your own analysis, please cite as:',
     ],
-    citation: 'Singh, R. & Desai, A. (2026). MotoQuant Pro: A first-principles drag-racing physics engine for motorcycles. Pune, India. https://motoquant.in/whitepaper',
+    citation: 'Singh, R. & Desai, A. (2026). MotoQuant: A first-principles drag-racing physics engine for motorcycles. Pune, India. https://motoquant.in/whitepaper',
   },
 ];
 
@@ -308,13 +308,13 @@ export default function WhitepaperPage() {
               Whitepaper · Version 1.0 · April 30, 2026 · validation data: August 2026 sweep
             </div>
             <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-white mb-6">
-              MotoQuant Pro:<br />A first-principles drag-racing <span className="text-accent">physics engine</span> for motorcycles
+              MotoQuant:<br />A first-principles drag-racing <span className="text-accent">physics engine</span> for motorcycles
             </h1>
             <p className="text-white/65 text-base mb-2">
               Ritwik Singh &nbsp;·&nbsp; Arya Desai
             </p>
             <p className="text-white/40 text-sm font-mono">
-              MotoQuant Pro &middot; Pune, India &middot;{' '}
+              MotoQuant &middot; Pune, India &middot;{' '}
               <a href="mailto:motoquant@gmail.com" className="text-white/70 hover:text-white transition-colors">
                 motoquant@gmail.com
               </a>
